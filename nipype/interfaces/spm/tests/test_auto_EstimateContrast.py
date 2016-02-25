@@ -11,9 +11,6 @@ def test_EstimateContrast_inputs():
     ),
     group_contrast=dict(xor=['use_derivs'],
     ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     matlab_cmd=dict(),
     mfile=dict(usedefault=True,
     ),
@@ -32,7 +29,7 @@ def test_EstimateContrast_inputs():
     usedefault=True,
     ),
     )
-    inputs = EstimateContrast.input_spec()
+    inputs = EstimateContrast._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -46,7 +43,7 @@ def test_EstimateContrast_outputs():
     spmT_images=dict(),
     spm_mat_file=dict(),
     )
-    outputs = EstimateContrast.output_spec()
+    outputs = EstimateContrast._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

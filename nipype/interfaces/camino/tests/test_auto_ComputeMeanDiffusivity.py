@@ -6,12 +6,6 @@ from ..dti import ComputeMeanDiffusivity
 def test_ComputeMeanDiffusivity_inputs():
     input_map = dict(args=dict(argstr='%s',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     in_file=dict(argstr='< %s',
     mandatory=True,
     position=1,
@@ -29,10 +23,8 @@ def test_ComputeMeanDiffusivity_inputs():
     scheme_file=dict(argstr='%s',
     position=2,
     ),
-    terminal_output=dict(nohash=True,
-    ),
     )
-    inputs = ComputeMeanDiffusivity.input_spec()
+    inputs = ComputeMeanDiffusivity._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -42,7 +34,7 @@ def test_ComputeMeanDiffusivity_inputs():
 def test_ComputeMeanDiffusivity_outputs():
     output_map = dict(md=dict(),
     )
-    outputs = ComputeMeanDiffusivity.output_spec()
+    outputs = ComputeMeanDiffusivity._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

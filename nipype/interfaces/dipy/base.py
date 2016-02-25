@@ -3,7 +3,7 @@
 import os.path as op
 import numpy as np
 from nipype.interfaces.base import (traits, File, isdefined,
-                                    BaseInterface, BaseInterfaceInputSpec)
+                                    BaseInterface, BaseInputSpec)
 from ... import logging
 
 IFLOGGER = logging.getLogger('interface')
@@ -41,7 +41,7 @@ class DipyBaseInterface(BaseInterface):
         super(DipyBaseInterface, self).__init__(**inputs)
 
 
-class DipyBaseInterfaceInputSpec(BaseInterfaceInputSpec):
+class DipyBaseInputSpec(BaseInputSpec):
     in_file = File(exists=True, mandatory=True, desc=('input diffusion data'))
     in_bval = File(exists=True, mandatory=True, desc=('input b-values table'))
     in_bvec = File(exists=True, mandatory=True, desc=('input b-vectors table'))
@@ -54,7 +54,7 @@ class DipyDiffusionInterface(DipyBaseInterface):
     """
     A base interface for py:mod:`dipy` computations
     """
-    input_spec = DipyBaseInterfaceInputSpec
+    _input_spec = DipyBaseInputSpec
 
     def _get_gradient_table(self):
         bval = np.loadtxt(self.inputs.in_bval)

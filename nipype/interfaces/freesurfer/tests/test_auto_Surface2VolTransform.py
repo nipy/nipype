@@ -6,14 +6,8 @@ from ..utils import Surface2VolTransform
 def test_Surface2VolTransform_inputs():
     input_map = dict(args=dict(argstr='%s',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
     hemi=dict(argstr='--hemi %s',
     mandatory=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
     ),
     mkmask=dict(argstr='--mkmask',
     xor=['source_file'],
@@ -38,8 +32,6 @@ def test_Surface2VolTransform_inputs():
     ),
     template_file=dict(argstr='--template %s',
     ),
-    terminal_output=dict(nohash=True,
-    ),
     transformed_file=dict(argstr='--outvol %s',
     hash_files=False,
     name_source=['source_file'],
@@ -51,7 +43,7 @@ def test_Surface2VolTransform_inputs():
     name_template='%s_asVol_vertex.nii',
     ),
     )
-    inputs = Surface2VolTransform.input_spec()
+    inputs = Surface2VolTransform._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -62,7 +54,7 @@ def test_Surface2VolTransform_outputs():
     output_map = dict(transformed_file=dict(),
     vertexvol_file=dict(),
     )
-    outputs = Surface2VolTransform.output_spec()
+    outputs = Surface2VolTransform._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

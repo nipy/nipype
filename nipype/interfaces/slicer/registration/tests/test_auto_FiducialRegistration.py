@@ -6,13 +6,7 @@ from ..specialized import FiducialRegistration
 def test_FiducialRegistration_inputs():
     input_map = dict(args=dict(argstr='%s',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
     fixedLandmarks=dict(argstr='--fixedLandmarks %s...',
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
     ),
     movingLandmarks=dict(argstr='--movingLandmarks %s...',
     ),
@@ -23,12 +17,10 @@ def test_FiducialRegistration_inputs():
     saveTransform=dict(argstr='--saveTransform %s',
     hash_files=False,
     ),
-    terminal_output=dict(nohash=True,
-    ),
     transformType=dict(argstr='--transformType %s',
     ),
     )
-    inputs = FiducialRegistration.input_spec()
+    inputs = FiducialRegistration._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -38,7 +30,7 @@ def test_FiducialRegistration_inputs():
 def test_FiducialRegistration_outputs():
     output_map = dict(saveTransform=dict(),
     )
-    outputs = FiducialRegistration.output_spec()
+    outputs = FiducialRegistration._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

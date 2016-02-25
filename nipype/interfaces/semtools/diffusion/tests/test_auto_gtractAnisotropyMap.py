@@ -8,12 +8,6 @@ def test_gtractAnisotropyMap_inputs():
     ),
     args=dict(argstr='%s',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     inputTensorVolume=dict(argstr='--inputTensorVolume %s',
     ),
     numberOfThreads=dict(argstr='--numberOfThreads %d',
@@ -21,10 +15,8 @@ def test_gtractAnisotropyMap_inputs():
     outputVolume=dict(argstr='--outputVolume %s',
     hash_files=False,
     ),
-    terminal_output=dict(nohash=True,
-    ),
     )
-    inputs = gtractAnisotropyMap.input_spec()
+    inputs = gtractAnisotropyMap._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -34,7 +26,7 @@ def test_gtractAnisotropyMap_inputs():
 def test_gtractAnisotropyMap_outputs():
     output_map = dict(outputVolume=dict(),
     )
-    outputs = gtractAnisotropyMap.output_spec()
+    outputs = gtractAnisotropyMap._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

@@ -18,9 +18,6 @@ def test_Normalize12_inputs():
     mandatory=True,
     xor=['image_to_align', 'tpm'],
     ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     image_to_align=dict(copyfile=True,
     field='subj.vol',
     mandatory=True,
@@ -53,7 +50,7 @@ def test_Normalize12_inputs():
     write_voxel_sizes=dict(field='woptions.vox',
     ),
     )
-    inputs = Normalize12.input_spec()
+    inputs = Normalize12._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -65,7 +62,7 @@ def test_Normalize12_outputs():
     normalized_files=dict(),
     normalized_image=dict(),
     )
-    outputs = Normalize12.output_spec()
+    outputs = Normalize12._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

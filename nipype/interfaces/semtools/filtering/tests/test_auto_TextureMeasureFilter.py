@@ -8,12 +8,6 @@ def test_TextureMeasureFilter_inputs():
     ),
     distance=dict(argstr='--distance %d',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     inputMaskVolume=dict(argstr='--inputMaskVolume %s',
     ),
     inputVolume=dict(argstr='--inputVolume %s',
@@ -23,10 +17,8 @@ def test_TextureMeasureFilter_inputs():
     outputFilename=dict(argstr='--outputFilename %s',
     hash_files=False,
     ),
-    terminal_output=dict(nohash=True,
-    ),
     )
-    inputs = TextureMeasureFilter.input_spec()
+    inputs = TextureMeasureFilter._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -36,7 +28,7 @@ def test_TextureMeasureFilter_inputs():
 def test_TextureMeasureFilter_outputs():
     output_map = dict(outputFilename=dict(),
     )
-    outputs = TextureMeasureFilter.output_spec()
+    outputs = TextureMeasureFilter._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

@@ -6,12 +6,6 @@ from ..developer import JistLaminarVolumetricLayering
 def test_JistLaminarVolumetricLayering_inputs():
     input_map = dict(args=dict(argstr='%s',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     inInner=dict(argstr='--inInner %s',
     ),
     inLayering=dict(argstr='--inLayering %s',
@@ -45,8 +39,6 @@ def test_JistLaminarVolumetricLayering_inputs():
     outLayer=dict(argstr='--outLayer %s',
     hash_files=False,
     ),
-    terminal_output=dict(nohash=True,
-    ),
     xDefaultMem=dict(argstr='-xDefaultMem %d',
     ),
     xMaxProcess=dict(argstr='-xMaxProcess %d',
@@ -55,7 +47,7 @@ def test_JistLaminarVolumetricLayering_inputs():
     xPrefExt=dict(argstr='--xPrefExt %s',
     ),
     )
-    inputs = JistLaminarVolumetricLayering.input_spec()
+    inputs = JistLaminarVolumetricLayering._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -67,7 +59,7 @@ def test_JistLaminarVolumetricLayering_outputs():
     outDiscrete=dict(),
     outLayer=dict(),
     )
-    outputs = JistLaminarVolumetricLayering.output_spec()
+    outputs = JistLaminarVolumetricLayering._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

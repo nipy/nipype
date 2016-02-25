@@ -20,17 +20,11 @@ def test_FSL2Scheme_inputs():
     diffusiontime=dict(argstr='-diffusiontime %f',
     units='NA',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
     flipx=dict(argstr='-flipx',
     ),
     flipy=dict(argstr='-flipy',
     ),
     flipz=dict(argstr='-flipz',
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
     ),
     interleave=dict(argstr='-interleave',
     ),
@@ -38,15 +32,13 @@ def test_FSL2Scheme_inputs():
     units='NA',
     ),
     out_file=dict(argstr='> %s',
-    genfile=True,
     position=-1,
-    ),
-    terminal_output=dict(nohash=True,
+    usedefault=True,
     ),
     usegradmod=dict(argstr='-usegradmod',
     ),
     )
-    inputs = FSL2Scheme.input_spec()
+    inputs = FSL2Scheme._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -56,7 +48,7 @@ def test_FSL2Scheme_inputs():
 def test_FSL2Scheme_outputs():
     output_map = dict(scheme=dict(),
     )
-    outputs = FSL2Scheme.output_spec()
+    outputs = FSL2Scheme._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

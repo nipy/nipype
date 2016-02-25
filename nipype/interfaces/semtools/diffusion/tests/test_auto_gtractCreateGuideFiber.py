@@ -6,12 +6,6 @@ from ..gtract import gtractCreateGuideFiber
 def test_gtractCreateGuideFiber_inputs():
     input_map = dict(args=dict(argstr='%s',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     inputFiber=dict(argstr='--inputFiber %s',
     ),
     numberOfPoints=dict(argstr='--numberOfPoints %d',
@@ -21,12 +15,10 @@ def test_gtractCreateGuideFiber_inputs():
     outputFiber=dict(argstr='--outputFiber %s',
     hash_files=False,
     ),
-    terminal_output=dict(nohash=True,
-    ),
     writeXMLPolyDataFile=dict(argstr='--writeXMLPolyDataFile ',
     ),
     )
-    inputs = gtractCreateGuideFiber.input_spec()
+    inputs = gtractCreateGuideFiber._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -36,7 +28,7 @@ def test_gtractCreateGuideFiber_inputs():
 def test_gtractCreateGuideFiber_outputs():
     output_map = dict(outputFiber=dict(),
     )
-    outputs = gtractCreateGuideFiber.output_spec()
+    outputs = gtractCreateGuideFiber._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

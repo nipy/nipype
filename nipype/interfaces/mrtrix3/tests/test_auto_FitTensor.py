@@ -8,15 +8,9 @@ def test_FitTensor_inputs():
     ),
     bval_scale=dict(argstr='-bvalue_scaling %s',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
     grad_file=dict(argstr='-grad %s',
     ),
     grad_fsl=dict(argstr='-fslgrad %s %s',
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
     ),
     in_bval=dict(),
     in_bvec=dict(argstr='-fslgrad %s %s',
@@ -39,10 +33,8 @@ def test_FitTensor_inputs():
     ),
     reg_term=dict(argstr='-regularisation %f',
     ),
-    terminal_output=dict(nohash=True,
-    ),
     )
-    inputs = FitTensor.input_spec()
+    inputs = FitTensor._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -52,7 +44,7 @@ def test_FitTensor_inputs():
 def test_FitTensor_outputs():
     output_map = dict(out_file=dict(),
     )
-    outputs = FitTensor.output_spec()
+    outputs = FitTensor._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

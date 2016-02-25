@@ -39,18 +39,16 @@ class AverageAffineTransform(ANTSCommand):
     'AverageAffineTransform 3 MYtemplatewarp.mat trans.mat func_to_struct.mat'
     """
     _cmd = 'AverageAffineTransform'
-    input_spec = AverageAffineTransformInputSpec
-    output_spec = AverageAffineTransformOutputSpec
+    _input_spec = AverageAffineTransformInputSpec
+    _output_spec = AverageAffineTransformOutputSpec
 
     def _format_arg(self, opt, spec, val):
         return super(AverageAffineTransform, self)._format_arg(opt, spec, val)
 
-    def _list_outputs(self):
-        outputs = self._outputs().get()
-        outputs['affine_transform'] = os.path.abspath(
+    def _post_run(self):
+        self.outputs.affine_transform = os.path.abspath(
             self.inputs.output_affine_transform)
-        return outputs
-
+        
 
 class AverageImagesInputSpec(ANTSCommandInputSpec):
     dimension = traits.Enum(3, 2, argstr='%d', mandatory=True,
@@ -81,18 +79,16 @@ class AverageImages(ANTSCommand):
     'AverageImages 3 average.nii.gz 1 rc1s1.nii rc1s1.nii'
     """
     _cmd = 'AverageImages'
-    input_spec = AverageImagesInputSpec
-    output_spec = AverageImagesOutputSpec
+    _input_spec = AverageImagesInputSpec
+    _output_spec = AverageImagesOutputSpec
 
     def _format_arg(self, opt, spec, val):
         return super(AverageImages, self)._format_arg(opt, spec, val)
 
-    def _list_outputs(self):
-        outputs = self._outputs().get()
-        outputs['output_average_image'] = os.path.realpath(
+    def _post_run(self):
+        self.outputs.output_average_image = os.path.realpath(
             self.inputs.output_average_image)
-        return outputs
-
+        
 
 class MultiplyImagesInputSpec(ANTSCommandInputSpec):
     dimension = traits.Enum(3, 2, argstr='%d', usedefault=False, mandatory=True, position=0,
@@ -122,18 +118,16 @@ class MultiplyImages(ANTSCommand):
     'MultiplyImages 3 moving2.nii 0.25 out.nii'
     """
     _cmd = 'MultiplyImages'
-    input_spec = MultiplyImagesInputSpec
-    output_spec = MultiplyImagesOutputSpec
+    _input_spec = MultiplyImagesInputSpec
+    _output_spec = MultiplyImagesOutputSpec
 
     def _format_arg(self, opt, spec, val):
         return super(MultiplyImages, self)._format_arg(opt, spec, val)
 
-    def _list_outputs(self):
-        outputs = self._outputs().get()
-        outputs['output_product_image'] = os.path.abspath(
+    def _post_run(self):
+        self.outputs.output_product_image = os.path.abspath(
             self.inputs.output_product_image)
-        return outputs
-
+        
 
 class JacobianDeterminantInputSpec(ANTSCommandInputSpec):
     dimension = traits.Enum(3, 2, argstr='%d', usedefault=False, mandatory=True,
@@ -175,8 +169,8 @@ class JacobianDeterminant(ANTSCommand):
     """
 
     _cmd = 'ANTSJacobian'
-    input_spec = JacobianDeterminantInputSpec
-    output_spec = JacobianDeterminantOutputSpec
+    _input_spec = JacobianDeterminantInputSpec
+    _output_spec = JacobianDeterminantOutputSpec
 
     def _gen_filename(self, name):
         if name == 'output_prefix':
@@ -187,12 +181,11 @@ class JacobianDeterminant(ANTSCommand):
             return output
         return None
 
-    def _list_outputs(self):
-        outputs = self._outputs().get()
+    def _post_run(self):
         if self.inputs.use_log == 1:
-            outputs['jacobian_image'] = os.path.abspath(
+            self.outputs.jacobian_image = os.path.abspath(
                 self._gen_filename('output_prefix') + 'logjacobian.nii.gz')
         else:
-            outputs['jacobian_image'] = os.path.abspath(
+            self.outputs.jacobian_image = os.path.abspath(
                 self._gen_filename('output_prefix') + 'jacobian.nii.gz')
-        return outputs
+        

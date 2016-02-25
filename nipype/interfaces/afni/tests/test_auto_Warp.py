@@ -8,13 +8,7 @@ def test_Warp_inputs():
     ),
     deoblique=dict(argstr='-deoblique',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
     gridset=dict(argstr='-gridset %s',
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
     ),
     in_file=dict(argstr='%s',
     copyfile=False,
@@ -29,19 +23,18 @@ def test_Warp_inputs():
     ),
     newgrid=dict(argstr='-newgrid %f',
     ),
-    out_file=dict(argstr='-prefix %s',
-    name_source='in_file',
-    name_template='%s_warp',
+    out_file=dict(),
+    output_type=dict(usedefault=True,
     ),
-    outputtype=dict(),
-    terminal_output=dict(nohash=True,
+    prefix=dict(argstr='-prefix %s',
+    keep_extension=False,
     ),
     tta2mni=dict(argstr='-tta2mni',
     ),
     zpad=dict(argstr='-zpad %d',
     ),
     )
-    inputs = Warp.input_spec()
+    inputs = Warp._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -51,7 +44,7 @@ def test_Warp_inputs():
 def test_Warp_outputs():
     output_map = dict(out_file=dict(),
     )
-    outputs = Warp.output_spec()
+    outputs = Warp._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

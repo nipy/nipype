@@ -27,9 +27,6 @@ def test_TwoSampleTTestDesign_inputs():
     group2_files=dict(field='des.t2.scans2',
     mandatory=True,
     ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     matlab_cmd=dict(),
     mfile=dict(usedefault=True,
     ),
@@ -56,7 +53,7 @@ def test_TwoSampleTTestDesign_inputs():
     usedefault=True,
     ),
     )
-    inputs = TwoSampleTTestDesign.input_spec()
+    inputs = TwoSampleTTestDesign._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -66,7 +63,7 @@ def test_TwoSampleTTestDesign_inputs():
 def test_TwoSampleTTestDesign_outputs():
     output_map = dict(spm_mat_file=dict(),
     )
-    outputs = TwoSampleTTestDesign.output_spec()
+    outputs = TwoSampleTTestDesign._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

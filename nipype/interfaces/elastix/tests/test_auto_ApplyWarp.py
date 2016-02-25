@@ -6,12 +6,6 @@ from ..registration import ApplyWarp
 def test_ApplyWarp_inputs():
     input_map = dict(args=dict(argstr='%s',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     moving_image=dict(argstr='-in %s',
     mandatory=True,
     ),
@@ -22,13 +16,11 @@ def test_ApplyWarp_inputs():
     mandatory=True,
     usedefault=True,
     ),
-    terminal_output=dict(nohash=True,
-    ),
     transform_file=dict(argstr='-tp %s',
     mandatory=True,
     ),
     )
-    inputs = ApplyWarp.input_spec()
+    inputs = ApplyWarp._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -38,7 +30,7 @@ def test_ApplyWarp_inputs():
 def test_ApplyWarp_outputs():
     output_map = dict(warped_file=dict(),
     )
-    outputs = ApplyWarp.output_spec()
+    outputs = ApplyWarp._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

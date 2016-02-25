@@ -13,7 +13,7 @@ import os.path as op
 import numpy as np
 
 from ..base import (CommandLineInputSpec, CommandLine, BaseInterface,
-                    BaseInterfaceInputSpec, traits, File, TraitedSpec,
+                    BaseInputSpec, traits, File, TraitedSpec,
                     Directory, InputMultiPath, OutputMultiPath, isdefined)
 from ...utils.filemanip import split_filename
 from ... import logging
@@ -72,18 +72,17 @@ class DWI2SphericalHarmonicsImage(CommandLine):
     >>> dwi2SH.run()                                    # doctest: +SKIP
     """
     _cmd = 'dwi2SH'
-    input_spec = DWI2SphericalHarmonicsImageInputSpec
-    output_spec = DWI2SphericalHarmonicsImageOutputSpec
+    _input_spec = DWI2SphericalHarmonicsImageInputSpec
+    _output_spec = DWI2SphericalHarmonicsImageOutputSpec
 
-    def _list_outputs(self):
-        outputs = self.output_spec().get()
-        outputs['spherical_harmonics_image'] = self.inputs.out_filename
-        if not isdefined(outputs['spherical_harmonics_image']):
-            outputs['spherical_harmonics_image'] = op.abspath(self._gen_outfilename())
+    def _post_run(self):
+        
+        self.outputs.spherical_harmonics_image = self.inputs.out_filename
+        if not isdefined(self.outputs.spherical_harmonics_image):
+            self.outputs.spherical_harmonics_image = op.abspath(self._gen_outfilename())
         else:
-            outputs['spherical_harmonics_image'] = op.abspath(outputs['spherical_harmonics_image'])
-        return outputs
-
+            self.outputs.spherical_harmonics_image = op.abspath(self.outputs.spherical_harmonics_image)
+        
     def _gen_filename(self, name):
         if name is 'out_filename':
             return self._gen_outfilename()
@@ -155,18 +154,17 @@ class ConstrainedSphericalDeconvolution(CommandLine):
     """
 
     _cmd = 'csdeconv'
-    input_spec = ConstrainedSphericalDeconvolutionInputSpec
-    output_spec = ConstrainedSphericalDeconvolutionOutputSpec
+    _input_spec = ConstrainedSphericalDeconvolutionInputSpec
+    _output_spec = ConstrainedSphericalDeconvolutionOutputSpec
 
-    def _list_outputs(self):
-        outputs = self.output_spec().get()
-        outputs['spherical_harmonics_image'] = self.inputs.out_filename
-        if not isdefined(outputs['spherical_harmonics_image']):
-            outputs['spherical_harmonics_image'] = op.abspath(self._gen_outfilename())
+    def _post_run(self):
+        
+        self.outputs.spherical_harmonics_image = self.inputs.out_filename
+        if not isdefined(self.outputs.spherical_harmonics_image):
+            self.outputs.spherical_harmonics_image = op.abspath(self._gen_outfilename())
         else:
-            outputs['spherical_harmonics_image'] = op.abspath(outputs['spherical_harmonics_image'])
-        return outputs
-
+            self.outputs.spherical_harmonics_image = op.abspath(self.outputs.spherical_harmonics_image)
+        
     def _gen_filename(self, name):
         if name is 'out_filename':
             return self._gen_outfilename()
@@ -209,18 +207,17 @@ class EstimateResponseForSH(CommandLine):
     >>> estresp.run()                                   # doctest: +SKIP
     """
     _cmd = 'estimate_response'
-    input_spec = EstimateResponseForSHInputSpec
-    output_spec = EstimateResponseForSHOutputSpec
+    _input_spec = EstimateResponseForSHInputSpec
+    _output_spec = EstimateResponseForSHOutputSpec
 
-    def _list_outputs(self):
-        outputs = self.output_spec().get()
-        outputs['response'] = self.inputs.out_filename
-        if not isdefined(outputs['response']):
-            outputs['response'] = op.abspath(self._gen_outfilename())
+    def _post_run(self):
+        
+        self.outputs.response = self.inputs.out_filename
+        if not isdefined(self.outputs.response):
+            self.outputs.response = op.abspath(self._gen_outfilename())
         else:
-            outputs['response'] = op.abspath(outputs['response'])
-        return outputs
-
+            self.outputs.response = op.abspath(self.outputs.response)
+        
     def _gen_filename(self, name):
         if name is 'out_filename':
             return self._gen_outfilename()
@@ -289,18 +286,17 @@ class FSL2MRTrix(BaseInterface):
     >>> fsl2mrtrix.inputs.invert_y = True
     >>> fsl2mrtrix.run()                                # doctest: +SKIP
     """
-    input_spec = FSL2MRTrixInputSpec
-    output_spec = FSL2MRTrixOutputSpec
+    _input_spec = FSL2MRTrixInputSpec
+    _output_spec = FSL2MRTrixOutputSpec
 
     def _run_interface(self, runtime):
         encoding = concat_files(self.inputs.bvec_file, self.inputs.bval_file, self.inputs.invert_x, self.inputs.invert_y, self.inputs.invert_z)
         return runtime
 
-    def _list_outputs(self):
-        outputs = self.output_spec().get()
-        outputs['encoding_file'] = op.abspath(self._gen_filename('out_encoding_file'))
-        return outputs
-
+    def _post_run(self):
+        
+        self.outputs.encoding_file = op.abspath(self._gen_filename('out_encoding_file'))
+        
     def _gen_filename(self, name):
         if name is 'out_encoding_file':
             return self._gen_outfilename()
@@ -343,8 +339,8 @@ class GenerateDirections(CommandLine):
     """
 
     _cmd = 'gendir'
-    input_spec = GenerateDirectionsInputSpec
-    output_spec = GenerateDirectionsOutputSpec
+    _input_spec = GenerateDirectionsInputSpec
+    _output_spec = GenerateDirectionsOutputSpec
 
 
 class FindShPeaksInputSpec(CommandLineInputSpec):
@@ -383,8 +379,8 @@ class FindShPeaks(CommandLine):
     """
 
     _cmd = 'find_SH_peaks'
-    input_spec = FindShPeaksInputSpec
-    output_spec = FindShPeaksOutputSpec
+    _input_spec = FindShPeaksInputSpec
+    _output_spec = FindShPeaksOutputSpec
 
 
 class Directions2AmplitudeInputSpec(CommandLineInputSpec):
@@ -419,5 +415,5 @@ class Directions2Amplitude(CommandLine):
     """
 
     _cmd = 'dir2amp'
-    input_spec = Directions2AmplitudeInputSpec
-    output_spec = Directions2AmplitudeOutputSpec
+    _input_spec = Directions2AmplitudeInputSpec
+    _output_spec = Directions2AmplitudeOutputSpec

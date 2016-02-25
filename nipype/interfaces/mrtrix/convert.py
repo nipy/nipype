@@ -19,7 +19,7 @@ import numpy as np
 from nibabel.trackvis import HeaderError
 from nibabel.volumeutils import native_code
 
-from ..base import (TraitedSpec, BaseInterface, BaseInterfaceInputSpec,
+from ..base import (TraitedSpec, BaseInterface, BaseInputSpec,
                     File, isdefined, traits)
 from ...utils.filemanip import split_filename
 from ...utils.misc import package_check
@@ -177,8 +177,8 @@ class MRTrix2TrackVis(BaseInterface):
     >>> tck2trk.inputs.image_file = 'diffusion.nii'
     >>> tck2trk.run()                                   # doctest: +SKIP
     """
-    input_spec = MRTrix2TrackVisInputSpec
-    output_spec = MRTrix2TrackVisOutputSpec
+    _input_spec = MRTrix2TrackVisInputSpec
+    _output_spec = MRTrix2TrackVisOutputSpec
 
     def _run_interface(self, runtime):
         dx, dy, dz = get_data_dims(self.inputs.image_file)
@@ -239,11 +239,9 @@ class MRTrix2TrackVis(BaseInterface):
             iflogger.info(trk_header)
         return runtime
 
-    def _list_outputs(self):
-        outputs = self._outputs().get()
-        outputs['out_file'] = op.abspath(self.inputs.out_filename)
-        return outputs
-
+    def _post_run(self):
+        self.outputs.out_file = op.abspath(self.inputs.out_filename)
+        
     def _gen_filename(self, name):
         if name is 'out_filename':
             return self._gen_outfilename()

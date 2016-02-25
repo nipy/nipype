@@ -21,13 +21,7 @@ def test_ResampleDTIVolume_inputs():
     direction_matrix=dict(argstr='--direction_matrix %s',
     sep=',',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
     hfieldtype=dict(argstr='--hfieldtype %s',
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
     ),
     image_center=dict(argstr='--image_center %s',
     ),
@@ -58,8 +52,6 @@ def test_ResampleDTIVolume_inputs():
     ),
     spline_order=dict(argstr='--spline_order %d',
     ),
-    terminal_output=dict(nohash=True,
-    ),
     transform=dict(argstr='--transform %s',
     ),
     transform_matrix=dict(argstr='--transform_matrix %s',
@@ -74,7 +66,7 @@ def test_ResampleDTIVolume_inputs():
     window_function=dict(argstr='--window_function %s',
     ),
     )
-    inputs = ResampleDTIVolume.input_spec()
+    inputs = ResampleDTIVolume._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -85,7 +77,7 @@ def test_ResampleDTIVolume_outputs():
     output_map = dict(outputVolume=dict(position=-1,
     ),
     )
-    outputs = ResampleDTIVolume.output_spec()
+    outputs = ResampleDTIVolume._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

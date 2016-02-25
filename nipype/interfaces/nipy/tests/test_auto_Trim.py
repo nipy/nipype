@@ -8,16 +8,13 @@ def test_Trim_inputs():
     ),
     end_index=dict(usedefault=True,
     ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     in_file=dict(mandatory=True,
     ),
     out_file=dict(),
     suffix=dict(usedefault=True,
     ),
     )
-    inputs = Trim.input_spec()
+    inputs = Trim._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -27,7 +24,7 @@ def test_Trim_inputs():
 def test_Trim_outputs():
     output_map = dict(out_file=dict(),
     )
-    outputs = Trim.output_spec()
+    outputs = Trim._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

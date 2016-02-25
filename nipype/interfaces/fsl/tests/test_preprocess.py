@@ -224,7 +224,7 @@ def test_flirt():
     _, tmpfile = tempfile.mkstemp(suffix='.nii', dir=tmpdir)
     # Loop over all inputs, set a reasonable value and make sure the
     # cmdline is updated correctly.
-    for key, trait_spec in sorted(fsl.FLIRT.input_spec().traits().items()):
+    for key, trait_spec in sorted(fsl.FLIRT._input_spec().traits().items()):
         # Skip mandatory inputs and the trait methods
         if key in ('trait_added', 'trait_modified', 'in_file', 'reference',
                    'environ', 'output_type', 'out_file', 'out_matrix_file',

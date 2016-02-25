@@ -6,9 +6,6 @@ from ..nbs import NetworkBasedStatistic
 def test_NetworkBasedStatistic_inputs():
     input_map = dict(edge_key=dict(usedefault=True,
     ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     in_group1=dict(mandatory=True,
     ),
     in_group2=dict(mandatory=True,
@@ -23,7 +20,7 @@ def test_NetworkBasedStatistic_inputs():
     threshold=dict(usedefault=True,
     ),
     )
-    inputs = NetworkBasedStatistic.input_spec()
+    inputs = NetworkBasedStatistic._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -35,7 +32,7 @@ def test_NetworkBasedStatistic_outputs():
     nbs_pval_network=dict(),
     network_files=dict(),
     )
-    outputs = NetworkBasedStatistic.output_spec()
+    outputs = NetworkBasedStatistic._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

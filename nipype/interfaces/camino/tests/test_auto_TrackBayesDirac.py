@@ -24,17 +24,11 @@ def test_TrackBayesDirac_inputs():
     ),
     datamodel=dict(argstr='-datamodel %s',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
     extpriordatatype=dict(argstr='-extpriordatatype %s',
     ),
     extpriorfile=dict(argstr='-extpriorfile %s',
     ),
     gzip=dict(argstr='-gzip',
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
     ),
     in_file=dict(argstr='-inputfile %s',
     position=1,
@@ -79,8 +73,6 @@ def test_TrackBayesDirac_inputs():
     stepsize=dict(argstr='-stepsize %f',
     requires=['tracker'],
     ),
-    terminal_output=dict(nohash=True,
-    ),
     tracker=dict(argstr='-tracker %s',
     usedefault=True,
     ),
@@ -88,7 +80,7 @@ def test_TrackBayesDirac_inputs():
     units='mm',
     ),
     )
-    inputs = TrackBayesDirac.input_spec()
+    inputs = TrackBayesDirac._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -98,7 +90,7 @@ def test_TrackBayesDirac_inputs():
 def test_TrackBayesDirac_outputs():
     output_map = dict(tracked=dict(),
     )
-    outputs = TrackBayesDirac.output_spec()
+    outputs = TrackBayesDirac._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

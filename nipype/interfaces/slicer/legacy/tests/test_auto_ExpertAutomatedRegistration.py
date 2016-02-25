@@ -16,9 +16,6 @@ def test_ExpertAutomatedRegistration_inputs():
     ),
     controlPointSpacing=dict(argstr='--controlPointSpacing %d',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
     expectedOffset=dict(argstr='--expectedOffset %f',
     ),
     expectedRotation=dict(argstr='--expectedRotation %f',
@@ -33,9 +30,6 @@ def test_ExpertAutomatedRegistration_inputs():
     fixedImageMask=dict(argstr='--fixedImageMask %s',
     ),
     fixedLandmarks=dict(argstr='--fixedLandmarks %s...',
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
     ),
     initialization=dict(argstr='--initialization %s',
     ),
@@ -70,12 +64,10 @@ def test_ExpertAutomatedRegistration_inputs():
     saveTransform=dict(argstr='--saveTransform %s',
     hash_files=False,
     ),
-    terminal_output=dict(nohash=True,
-    ),
     verbosityLevel=dict(argstr='--verbosityLevel %s',
     ),
     )
-    inputs = ExpertAutomatedRegistration.input_spec()
+    inputs = ExpertAutomatedRegistration._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -86,7 +78,7 @@ def test_ExpertAutomatedRegistration_outputs():
     output_map = dict(resampledImage=dict(),
     saveTransform=dict(),
     )
-    outputs = ExpertAutomatedRegistration.output_spec()
+    outputs = ExpertAutomatedRegistration._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

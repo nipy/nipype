@@ -6,12 +6,6 @@ from ..developer import MedicAlgorithmSPECTRE2010
 def test_MedicAlgorithmSPECTRE2010_inputs():
     input_map = dict(args=dict(argstr='%s',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     inApply=dict(argstr='--inApply %s',
     ),
     inAtlas=dict(argstr='--inAtlas %s',
@@ -109,8 +103,6 @@ def test_MedicAlgorithmSPECTRE2010_inputs():
     outd0=dict(argstr='--outd0 %s',
     hash_files=False,
     ),
-    terminal_output=dict(nohash=True,
-    ),
     xDefaultMem=dict(argstr='-xDefaultMem %d',
     ),
     xMaxProcess=dict(argstr='-xMaxProcess %d',
@@ -119,7 +111,7 @@ def test_MedicAlgorithmSPECTRE2010_inputs():
     xPrefExt=dict(argstr='--xPrefExt %s',
     ),
     )
-    inputs = MedicAlgorithmSPECTRE2010.input_spec()
+    inputs = MedicAlgorithmSPECTRE2010._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -137,7 +129,7 @@ def test_MedicAlgorithmSPECTRE2010_outputs():
     outStripped=dict(),
     outd0=dict(),
     )
-    outputs = MedicAlgorithmSPECTRE2010.output_spec()
+    outputs = MedicAlgorithmSPECTRE2010._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

@@ -6,16 +6,13 @@ from ..nx import AverageNetworks
 def test_AverageNetworks_inputs():
     input_map = dict(group_id=dict(usedefault=True,
     ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     in_files=dict(mandatory=True,
     ),
     out_gexf_groupavg=dict(),
     out_gpickled_groupavg=dict(),
     resolution_network_file=dict(),
     )
-    inputs = AverageNetworks.input_spec()
+    inputs = AverageNetworks._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -27,7 +24,7 @@ def test_AverageNetworks_outputs():
     gpickled_groupavg=dict(),
     matlab_groupavgs=dict(),
     )
-    outputs = AverageNetworks.output_spec()
+    outputs = AverageNetworks._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

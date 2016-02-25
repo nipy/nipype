@@ -10,12 +10,6 @@ def test_Split_inputs():
     mandatory=True,
     position=2,
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     in_file=dict(argstr='%s',
     mandatory=True,
     position=0,
@@ -23,11 +17,10 @@ def test_Split_inputs():
     out_base_name=dict(argstr='%s',
     position=1,
     ),
-    output_type=dict(),
-    terminal_output=dict(nohash=True,
+    output_type=dict(usedefault=True,
     ),
     )
-    inputs = Split.input_spec()
+    inputs = Split._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -37,7 +30,7 @@ def test_Split_inputs():
 def test_Split_outputs():
     output_map = dict(out_files=dict(),
     )
-    outputs = Split.output_spec()
+    outputs = Split._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

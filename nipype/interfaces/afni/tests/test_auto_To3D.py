@@ -10,31 +10,25 @@ def test_To3D_inputs():
     ),
     datatype=dict(argstr='-datum %s',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
     filetype=dict(argstr='-%s',
     ),
     funcparams=dict(argstr='-time:zt %s alt+z2',
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
     ),
     in_folder=dict(argstr='%s/*.dcm',
     mandatory=True,
     position=-1,
     ),
-    out_file=dict(argstr='-prefix %s',
-    name_source=['in_folder'],
-    name_template='%s',
+    out_file=dict(keep_extension=False,
     ),
-    outputtype=dict(),
+    output_type=dict(usedefault=True,
+    ),
+    prefix=dict(argstr='-prefix %s',
+    usedefault='true',
+    ),
     skipoutliers=dict(argstr='-skip_outliers',
     ),
-    terminal_output=dict(nohash=True,
-    ),
     )
-    inputs = To3D.input_spec()
+    inputs = To3D._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -44,7 +38,7 @@ def test_To3D_inputs():
 def test_To3D_outputs():
     output_map = dict(out_file=dict(),
     )
-    outputs = To3D.output_spec()
+    outputs = To3D._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

@@ -6,15 +6,9 @@ from ..fibertrack import fibertrack
 def test_fibertrack_inputs():
     input_map = dict(args=dict(argstr='%s',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
     forbidden_label=dict(argstr='--forbidden_label %d',
     ),
     force=dict(argstr='--force ',
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
     ),
     input_roi_file=dict(argstr='--input_roi_file %s',
     ),
@@ -35,14 +29,12 @@ def test_fibertrack_inputs():
     ),
     target_label=dict(argstr='--target_label %d',
     ),
-    terminal_output=dict(nohash=True,
-    ),
     verbose=dict(argstr='--verbose ',
     ),
     whole_brain=dict(argstr='--whole_brain ',
     ),
     )
-    inputs = fibertrack.input_spec()
+    inputs = fibertrack._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -52,7 +44,7 @@ def test_fibertrack_inputs():
 def test_fibertrack_outputs():
     output_map = dict(output_fiber_file=dict(),
     )
-    outputs = fibertrack.output_spec()
+    outputs = fibertrack._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

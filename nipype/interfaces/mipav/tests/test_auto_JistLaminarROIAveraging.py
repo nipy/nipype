@@ -6,12 +6,6 @@ from ..developer import JistLaminarROIAveraging
 def test_JistLaminarROIAveraging_inputs():
     input_map = dict(args=dict(argstr='%s',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     inIntensity=dict(argstr='--inIntensity %s',
     ),
     inMask=dict(argstr='--inMask %s',
@@ -25,8 +19,6 @@ def test_JistLaminarROIAveraging_inputs():
     outROI3=dict(argstr='--outROI3 %s',
     hash_files=False,
     ),
-    terminal_output=dict(nohash=True,
-    ),
     xDefaultMem=dict(argstr='-xDefaultMem %d',
     ),
     xMaxProcess=dict(argstr='-xMaxProcess %d',
@@ -35,7 +27,7 @@ def test_JistLaminarROIAveraging_inputs():
     xPrefExt=dict(argstr='--xPrefExt %s',
     ),
     )
-    inputs = JistLaminarROIAveraging.input_spec()
+    inputs = JistLaminarROIAveraging._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -45,7 +37,7 @@ def test_JistLaminarROIAveraging_inputs():
 def test_JistLaminarROIAveraging_outputs():
     output_map = dict(outROI3=dict(),
     )
-    outputs = JistLaminarROIAveraging.output_spec()
+    outputs = JistLaminarROIAveraging._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

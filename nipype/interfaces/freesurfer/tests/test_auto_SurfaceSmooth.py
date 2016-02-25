@@ -9,17 +9,11 @@ def test_SurfaceSmooth_inputs():
     cortex=dict(argstr='--cortex',
     usedefault=True,
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
     fwhm=dict(argstr='--fwhm %.4f',
     xor=['smooth_iters'],
     ),
     hemi=dict(argstr='--hemi %s',
     mandatory=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
     ),
     in_file=dict(argstr='--sval %s',
     mandatory=True,
@@ -36,10 +30,8 @@ def test_SurfaceSmooth_inputs():
     mandatory=True,
     ),
     subjects_dir=dict(),
-    terminal_output=dict(nohash=True,
-    ),
     )
-    inputs = SurfaceSmooth.input_spec()
+    inputs = SurfaceSmooth._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -49,7 +41,7 @@ def test_SurfaceSmooth_inputs():
 def test_SurfaceSmooth_outputs():
     output_map = dict(out_file=dict(),
     )
-    outputs = SurfaceSmooth.output_spec()
+    outputs = SurfaceSmooth._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

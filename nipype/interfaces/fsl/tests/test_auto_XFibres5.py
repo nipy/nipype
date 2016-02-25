@@ -25,9 +25,7 @@ def test_XFibres5_inputs():
     dwi=dict(argstr='--data=%s',
     mandatory=True,
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
+    dyads=dict(),
     f0_ard=dict(argstr='--f0 --ardf0',
     xor=['f0_noard', 'f0_ard', 'all_ard'],
     ),
@@ -37,18 +35,23 @@ def test_XFibres5_inputs():
     force_dir=dict(argstr='--forcedir',
     usedefault=True,
     ),
+    fsamples=dict(),
     fudge=dict(argstr='--fudge=%d',
     ),
     gradnonlin=dict(argstr='--gradnonlin=%s',
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
     ),
     logdir=dict(argstr='--logdir=%s',
     usedefault=True,
     ),
     mask=dict(argstr='--mask=%s',
     mandatory=True,
+    ),
+    mean_S0samples=dict(keep_extension=False,
+    ),
+    mean_dsamples=dict(keep_extension=False,
+    ),
+    mean_fsamples=dict(),
+    mean_tausamples=dict(keep_extension=False,
     ),
     model=dict(argstr='--model=%d',
     ),
@@ -67,19 +70,21 @@ def test_XFibres5_inputs():
     non_linear=dict(argstr='--nonlinear',
     xor=('no_spat', 'non_linear', 'cnlinear'),
     ),
-    output_type=dict(),
+    output_type=dict(usedefault=True,
+    ),
+    phsamples=dict(),
     rician=dict(argstr='--rician',
+    usedefault=True,
     ),
     sample_every=dict(argstr='--sampleevery=%d',
     ),
     seed=dict(argstr='--seed=%d',
     ),
-    terminal_output=dict(nohash=True,
-    ),
+    thsamples=dict(),
     update_proposal_every=dict(argstr='--updateproposalevery=%d',
     ),
     )
-    inputs = XFibres5.input_spec()
+    inputs = XFibres5._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -96,7 +101,7 @@ def test_XFibres5_outputs():
     phsamples=dict(),
     thsamples=dict(),
     )
-    outputs = XFibres5.output_spec()
+    outputs = XFibres5._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

@@ -11,12 +11,6 @@ def test_BRAINSAlignMSP_inputs():
     ),
     args=dict(argstr='%s',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     inputVolume=dict(argstr='--inputVolume %s',
     ),
     interpolationMode=dict(argstr='--interpolationMode %s',
@@ -33,8 +27,6 @@ def test_BRAINSAlignMSP_inputs():
     resultsDir=dict(argstr='--resultsDir %s',
     hash_files=False,
     ),
-    terminal_output=dict(nohash=True,
-    ),
     trimRescaledIntensities=dict(argstr='--trimRescaledIntensities %f',
     ),
     verbose=dict(argstr='--verbose ',
@@ -42,7 +34,7 @@ def test_BRAINSAlignMSP_inputs():
     writedebuggingImagesLevel=dict(argstr='--writedebuggingImagesLevel %d',
     ),
     )
-    inputs = BRAINSAlignMSP.input_spec()
+    inputs = BRAINSAlignMSP._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -53,7 +45,7 @@ def test_BRAINSAlignMSP_outputs():
     output_map = dict(OutputresampleMSP=dict(),
     resultsDir=dict(),
     )
-    outputs = BRAINSAlignMSP.output_spec()
+    outputs = BRAINSAlignMSP._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

@@ -10,9 +10,6 @@ def test_FilterRegressor_inputs():
     mandatory=True,
     position=3,
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
     filter_all=dict(argstr="-f '%s'",
     mandatory=True,
     position=4,
@@ -23,9 +20,6 @@ def test_FilterRegressor_inputs():
     position=4,
     xor=['filter_all'],
     ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     in_file=dict(argstr='-i %s',
     mandatory=True,
     position=1,
@@ -33,19 +27,18 @@ def test_FilterRegressor_inputs():
     mask=dict(argstr='-m %s',
     ),
     out_file=dict(argstr='-o %s',
-    genfile=True,
     hash_files=False,
     position=2,
+    template='{in_file}_regfilt{output_type_}',
     ),
     out_vnscales=dict(argstr='--out_vnscales',
     ),
-    output_type=dict(),
-    terminal_output=dict(nohash=True,
+    output_type=dict(usedefault=True,
     ),
     var_norm=dict(argstr='--vn',
     ),
     )
-    inputs = FilterRegressor.input_spec()
+    inputs = FilterRegressor._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -55,7 +48,7 @@ def test_FilterRegressor_inputs():
 def test_FilterRegressor_outputs():
     output_map = dict(out_file=dict(),
     )
-    outputs = FilterRegressor.output_spec()
+    outputs = FilterRegressor._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

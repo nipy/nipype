@@ -12,9 +12,6 @@ def test_SpecifyModel_inputs():
     ),
     high_pass_filter_cutoff=dict(mandatory=True,
     ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     input_units=dict(mandatory=True,
     ),
     outlier_files=dict(copyfile=False,
@@ -27,7 +24,7 @@ def test_SpecifyModel_inputs():
     time_repetition=dict(mandatory=True,
     ),
     )
-    inputs = SpecifyModel.input_spec()
+    inputs = SpecifyModel._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -37,7 +34,7 @@ def test_SpecifyModel_inputs():
 def test_SpecifyModel_outputs():
     output_map = dict(session_info=dict(),
     )
-    outputs = SpecifyModel.output_spec()
+    outputs = SpecifyModel._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

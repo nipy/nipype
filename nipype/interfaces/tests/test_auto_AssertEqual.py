@@ -4,17 +4,22 @@ from ..utility import AssertEqual
 
 
 def test_AssertEqual_inputs():
-    input_map = dict(ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
-    volume1=dict(mandatory=True,
+    input_map = dict(volume1=dict(mandatory=True,
     ),
     volume2=dict(mandatory=True,
     ),
     )
-    inputs = AssertEqual.input_spec()
+    inputs = AssertEqual._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
             yield assert_equal, getattr(inputs.traits()[key], metakey), value
 
+
+def test_AssertEqual_outputs():
+    output_map = dict()
+    outputs = AssertEqual._output_spec()
+
+    for key, metadata in list(output_map.items()):
+        for metakey, value in list(metadata.items()):
+            yield assert_equal, getattr(outputs.traits()[key], metakey), value

@@ -44,8 +44,8 @@ contributor: Casey Goodlett
 
 """
 
-    input_spec = scalartransformInputSpec
-    output_spec = scalartransformOutputSpec
+    _input_spec = scalartransformInputSpec
+    _output_spec = scalartransformOutputSpec
     _cmd = " scalartransform "
     _outputs_filenames = {'output_image': 'output_image.nii', 'transformation': 'transformation'}
     _redirect_x = False

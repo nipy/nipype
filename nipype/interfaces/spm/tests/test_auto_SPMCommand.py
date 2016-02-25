@@ -4,10 +4,7 @@ from ..base import SPMCommand
 
 
 def test_SPMCommand_inputs():
-    input_map = dict(ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
-    matlab_cmd=dict(),
+    input_map = dict(matlab_cmd=dict(),
     mfile=dict(usedefault=True,
     ),
     paths=dict(),
@@ -16,9 +13,17 @@ def test_SPMCommand_inputs():
     usedefault=True,
     ),
     )
-    inputs = SPMCommand.input_spec()
+    inputs = SPMCommand._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
             yield assert_equal, getattr(inputs.traits()[key], metakey), value
 
+
+def test_SPMCommand_outputs():
+    output_map = dict()
+    outputs = SPMCommand._output_spec()
+
+    for key, metadata in list(output_map.items()):
+        for metakey, value in list(metadata.items()):
+            yield assert_equal, getattr(outputs.traits()[key], metakey), value

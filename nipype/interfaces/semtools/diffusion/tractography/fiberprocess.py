@@ -56,8 +56,8 @@ contributor: Casey Goodlett
 
 """
 
-    input_spec = fiberprocessInputSpec
-    output_spec = fiberprocessOutputSpec
+    _input_spec = fiberprocessInputSpec
+    _output_spec = fiberprocessOutputSpec
     _cmd = " fiberprocess "
     _outputs_filenames = {'fiber_output': 'fiber_output.vtk', 'voxelize': 'voxelize.nii'}
     _redirect_x = False

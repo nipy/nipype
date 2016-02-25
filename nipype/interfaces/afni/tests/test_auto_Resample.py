@@ -6,12 +6,6 @@ from ..preprocess import Resample
 def test_Resample_inputs():
     input_map = dict(args=dict(argstr='%s',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     in_file=dict(argstr='-inset %s',
     copyfile=False,
     mandatory=True,
@@ -21,19 +15,19 @@ def test_Resample_inputs():
     ),
     orientation=dict(argstr='-orient %s',
     ),
-    out_file=dict(argstr='-prefix %s',
-    name_source='in_file',
-    name_template='%s_resample',
+    out_file=dict(keep_extension=False,
     ),
-    outputtype=dict(),
+    output_type=dict(usedefault=True,
+    ),
+    prefix=dict(argstr='-prefix %s',
+    keep_extension=False,
+    ),
     resample_mode=dict(argstr='-rmode %s',
-    ),
-    terminal_output=dict(nohash=True,
     ),
     voxel_size=dict(argstr='-dxyz %f %f %f',
     ),
     )
-    inputs = Resample.input_spec()
+    inputs = Resample._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -43,7 +37,7 @@ def test_Resample_inputs():
 def test_Resample_outputs():
     output_map = dict(out_file=dict(),
     )
-    outputs = Resample.output_spec()
+    outputs = Resample._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

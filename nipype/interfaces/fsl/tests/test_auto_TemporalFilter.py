@@ -6,14 +6,8 @@ from ..maths import TemporalFilter
 def test_TemporalFilter_inputs():
     input_map = dict(args=dict(argstr='%s',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
     highpass_sigma=dict(argstr='-bptf %.6f',
     position=4,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
     usedefault=True,
     ),
     in_file=dict(argstr='%s',
@@ -29,20 +23,19 @@ def test_TemporalFilter_inputs():
     ),
     nan2zeros=dict(argstr='-nan',
     position=3,
+    usedefault=True,
     ),
     out_file=dict(argstr='%s',
-    genfile=True,
     hash_files=False,
     position=-2,
     ),
     output_datatype=dict(argstr='-odt %s',
     position=-1,
     ),
-    output_type=dict(),
-    terminal_output=dict(nohash=True,
+    output_type=dict(usedefault=True,
     ),
     )
-    inputs = TemporalFilter.input_spec()
+    inputs = TemporalFilter._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -52,7 +45,7 @@ def test_TemporalFilter_inputs():
 def test_TemporalFilter_outputs():
     output_map = dict(out_file=dict(),
     )
-    outputs = TemporalFilter.output_spec()
+    outputs = TemporalFilter._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

@@ -16,18 +16,12 @@ def test_Label2Vol_inputs():
     ),
     args=dict(argstr='%s',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
     fill_thresh=dict(argstr='--fillthresh %.f',
     ),
     hemi=dict(argstr='--hemi %s',
     ),
     identity=dict(argstr='--identity',
     xor=('reg_file', 'reg_header', 'identity'),
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
     ),
     invert_mtx=dict(argstr='--invertmtx',
     ),
@@ -66,13 +60,11 @@ def test_Label2Vol_inputs():
     template_file=dict(argstr='--temp %s',
     mandatory=True,
     ),
-    terminal_output=dict(nohash=True,
-    ),
     vol_label_file=dict(argstr='--o %s',
     genfile=True,
     ),
     )
-    inputs = Label2Vol.input_spec()
+    inputs = Label2Vol._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -82,7 +74,7 @@ def test_Label2Vol_inputs():
 def test_Label2Vol_outputs():
     output_map = dict(vol_label_file=dict(),
     )
-    outputs = Label2Vol.output_spec()
+    outputs = Label2Vol._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

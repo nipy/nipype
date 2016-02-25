@@ -36,8 +36,7 @@ from ...external.six import string_types
 from ...utils.filemanip import (fname_presuffix, FileNotFoundError,
                                 filename_to_list, get_related_files)
 from ...utils.misc import create_function_from_source, str2bool
-from ...interfaces.base import (CommandLine, isdefined, Undefined,
-                                InterfaceResult)
+from ...interfaces.base import CommandLine, InterfaceResult, isdefined, Undefined
 from ...interfaces.utility import IdentityInterface
 from ...utils.provenance import ProvStore, pm, nipype_ns, get_id
 
@@ -1159,7 +1158,6 @@ def clean_working_directory(outputs, cwd, inputs, needed_outputs, config,
     for key in outputs.copyable_trait_names():
         if key not in outputs_to_keep:
             setattr(outputs, key, Undefined)
-    return outputs
 
 
 def merge_dict(d1, d2, merge=lambda x, y: y):

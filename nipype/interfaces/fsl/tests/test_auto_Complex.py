@@ -21,9 +21,7 @@ def test_Complex_inputs():
     xor=['real_polar', 'real_cartesian', 'complex_cartesian', 'complex_polar', 'complex_split', 'complex_merge', 'start_vol', 'end_vol'],
     ),
     complex_out_file=dict(argstr='%s',
-    genfile=True,
     position=-3,
-    xor=['complex_out_file', 'magnitude_out_file', 'phase_out_file', 'real_out_file', 'imaginary_out_file', 'real_polar', 'real_cartesian'],
     ),
     complex_polar=dict(argstr='-complexpolar',
     position=1,
@@ -36,36 +34,25 @@ def test_Complex_inputs():
     end_vol=dict(argstr='%d',
     position=-1,
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     imaginary_in_file=dict(argstr='%s',
     position=3,
     ),
     imaginary_out_file=dict(argstr='%s',
-    genfile=True,
     position=-3,
-    xor=['complex_out_file', 'magnitude_out_file', 'phase_out_file', 'real_polar', 'complex_cartesian', 'complex_polar', 'complex_split', 'complex_merge'],
     ),
     magnitude_in_file=dict(argstr='%s',
     position=2,
     ),
     magnitude_out_file=dict(argstr='%s',
-    genfile=True,
     position=-4,
-    xor=['complex_out_file', 'real_out_file', 'imaginary_out_file', 'real_cartesian', 'complex_cartesian', 'complex_polar', 'complex_split', 'complex_merge'],
     ),
-    output_type=dict(),
+    output_type=dict(usedefault=True,
+    ),
     phase_in_file=dict(argstr='%s',
     position=3,
     ),
     phase_out_file=dict(argstr='%s',
-    genfile=True,
     position=-3,
-    xor=['complex_out_file', 'real_out_file', 'imaginary_out_file', 'real_cartesian', 'complex_cartesian', 'complex_polar', 'complex_split', 'complex_merge'],
     ),
     real_cartesian=dict(argstr='-realcartesian',
     position=1,
@@ -75,9 +62,7 @@ def test_Complex_inputs():
     position=2,
     ),
     real_out_file=dict(argstr='%s',
-    genfile=True,
     position=-4,
-    xor=['complex_out_file', 'magnitude_out_file', 'phase_out_file', 'real_polar', 'complex_cartesian', 'complex_polar', 'complex_split', 'complex_merge'],
     ),
     real_polar=dict(argstr='-realpolar',
     position=1,
@@ -86,10 +71,8 @@ def test_Complex_inputs():
     start_vol=dict(argstr='%d',
     position=-2,
     ),
-    terminal_output=dict(nohash=True,
-    ),
     )
-    inputs = Complex.input_spec()
+    inputs = Complex._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -103,7 +86,7 @@ def test_Complex_outputs():
     phase_out_file=dict(),
     real_out_file=dict(),
     )
-    outputs = Complex.output_spec()
+    outputs = Complex._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

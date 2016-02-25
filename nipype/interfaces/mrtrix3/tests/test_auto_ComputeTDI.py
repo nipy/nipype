@@ -14,13 +14,7 @@ def test_ComputeTDI_inputs():
     ),
     ends_only=dict(argstr='-ends_only',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
     fwhm_tck=dict(argstr='-fwhm_tck %f',
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
     ),
     in_file=dict(argstr='%s',
     mandatory=True,
@@ -49,8 +43,6 @@ def test_ComputeTDI_inputs():
     ),
     tck_weights=dict(argstr='-tck_weights_in %s',
     ),
-    terminal_output=dict(nohash=True,
-    ),
     upsample=dict(argstr='-upsample %d',
     ),
     use_dec=dict(argstr='-dec',
@@ -59,7 +51,7 @@ def test_ComputeTDI_inputs():
     sep=',',
     ),
     )
-    inputs = ComputeTDI.input_spec()
+    inputs = ComputeTDI._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -69,7 +61,7 @@ def test_ComputeTDI_inputs():
 def test_ComputeTDI_outputs():
     output_map = dict(out_file=dict(),
     )
-    outputs = ComputeTDI.output_spec()
+    outputs = ComputeTDI._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

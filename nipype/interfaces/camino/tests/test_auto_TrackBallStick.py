@@ -18,13 +18,7 @@ def test_TrackBallStick_inputs():
     data_dims=dict(argstr='-datadims %s',
     units='voxels',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
     gzip=dict(argstr='-gzip',
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
     ),
     in_file=dict(argstr='-inputfile %s',
     position=1,
@@ -59,8 +53,6 @@ def test_TrackBallStick_inputs():
     stepsize=dict(argstr='-stepsize %f',
     requires=['tracker'],
     ),
-    terminal_output=dict(nohash=True,
-    ),
     tracker=dict(argstr='-tracker %s',
     usedefault=True,
     ),
@@ -68,7 +60,7 @@ def test_TrackBallStick_inputs():
     units='mm',
     ),
     )
-    inputs = TrackBallStick.input_spec()
+    inputs = TrackBallStick._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -78,7 +70,7 @@ def test_TrackBallStick_inputs():
 def test_TrackBallStick_outputs():
     output_map = dict(tracked=dict(),
     )
-    outputs = TrackBallStick.output_spec()
+    outputs = TrackBallStick._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

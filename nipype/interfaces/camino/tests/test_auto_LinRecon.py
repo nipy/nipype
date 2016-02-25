@@ -8,12 +8,6 @@ def test_LinRecon_inputs():
     ),
     bgmask=dict(argstr='-bgmask %s',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     in_file=dict(argstr='%s',
     mandatory=True,
     position=1,
@@ -23,8 +17,8 @@ def test_LinRecon_inputs():
     normalize=dict(argstr='-normalize',
     ),
     out_file=dict(argstr='> %s',
-    genfile=True,
     position=-1,
+    usedefault=True,
     ),
     qball_mat=dict(argstr='%s',
     mandatory=True,
@@ -34,10 +28,8 @@ def test_LinRecon_inputs():
     mandatory=True,
     position=2,
     ),
-    terminal_output=dict(nohash=True,
-    ),
     )
-    inputs = LinRecon.input_spec()
+    inputs = LinRecon._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -47,7 +39,7 @@ def test_LinRecon_inputs():
 def test_LinRecon_outputs():
     output_map = dict(recon_data=dict(),
     )
-    outputs = LinRecon.output_spec()
+    outputs = LinRecon._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

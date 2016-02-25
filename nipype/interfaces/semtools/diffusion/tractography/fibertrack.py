@@ -56,8 +56,8 @@ acknowledgements: Hans Johnson(1,3,4); Kent Williams(1); (1=University of Iowa D
 
 """
 
-    input_spec = fibertrackInputSpec
-    output_spec = fibertrackOutputSpec
+    _input_spec = fibertrackInputSpec
+    _output_spec = fibertrackOutputSpec
     _cmd = " fibertrack "
     _outputs_filenames = {'output_fiber_file': 'output_fiber_file.vtk'}
     _redirect_x = False

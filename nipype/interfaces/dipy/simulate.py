@@ -14,14 +14,14 @@ from builtins import range
 
 import nibabel as nb
 
-from ..base import (traits, TraitedSpec, BaseInterfaceInputSpec,
+from ..base import (traits, TraitedSpec, BaseInputSpec,
                     File, InputMultiPath, isdefined)
 from .base import DipyBaseInterface
 from ... import logging
 IFLOGGER = logging.getLogger('interface')
 
 
-class SimulateMultiTensorInputSpec(BaseInterfaceInputSpec):
+class SimulateMultiTensorInputSpec(BaseInputSpec):
     in_dirs = InputMultiPath(File(exists=True), mandatory=True,
                              desc='list of fibers (principal directions)')
     in_frac = InputMultiPath(File(exists=True), mandatory=True,
@@ -86,8 +86,8 @@ class SimulateMultiTensor(DipyBaseInterface):
     >>> sim.inputs.in_bval = 'bvals'
     >>> sim.run()                                   # doctest: +SKIP
     """
-    input_spec = SimulateMultiTensorInputSpec
-    output_spec = SimulateMultiTensorOutputSpec
+    _input_spec = SimulateMultiTensorInputSpec
+    _output_spec = SimulateMultiTensorOutputSpec
 
     def _run_interface(self, runtime):
         from dipy.core.gradients import gradient_table
@@ -246,15 +246,13 @@ class SimulateMultiTensor(DipyBaseInterface):
 
         return runtime
 
-    def _list_outputs(self):
-        outputs = self._outputs().get()
-        outputs['out_file'] = op.abspath(self.inputs.out_file)
-        outputs['out_mask'] = op.abspath(self.inputs.out_mask)
-        outputs['out_bvec'] = op.abspath(self.inputs.out_bvec)
-        outputs['out_bval'] = op.abspath(self.inputs.out_bval)
+    def _post_run(self):
+        self.outputs.out_file = op.abspath(self.inputs.out_file)
+        self.outputs.out_mask = op.abspath(self.inputs.out_mask)
+        self.outputs.out_bvec = op.abspath(self.inputs.out_bvec)
+        self.outputs.out_bval = op.abspath(self.inputs.out_bval)
 
-        return outputs
-
+        
 
 def _compute_voxel(args):
     """

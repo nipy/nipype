@@ -6,7 +6,11 @@ from ..segmentation import N4BiasFieldCorrection
 def test_N4BiasFieldCorrection_inputs():
     input_map = dict(args=dict(argstr='%s',
     ),
-    bias_image=dict(hash_files=False,
+    bias_image=dict(argstr='%s',
+    hash_files=False,
+    keep_extension=True,
+    name_source='input_image',
+    name_template='%s_bias',
     ),
     bspline_fitting_distance=dict(argstr='--bspline-fitting %s',
     ),
@@ -15,12 +19,6 @@ def test_N4BiasFieldCorrection_inputs():
     convergence_threshold=dict(requires=['n_iterations'],
     ),
     dimension=dict(argstr='-d %d',
-    usedefault=True,
-    ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
     usedefault=True,
     ),
     input_image=dict(argstr='--input-image %s',
@@ -34,8 +32,10 @@ def test_N4BiasFieldCorrection_inputs():
     usedefault=True,
     ),
     output_image=dict(argstr='--output %s',
-    genfile=True,
     hash_files=False,
+    keep_extension=True,
+    name_source='input_image',
+    name_template='%s_corrected',
     ),
     save_bias=dict(mandatory=True,
     usedefault=True,
@@ -43,12 +43,10 @@ def test_N4BiasFieldCorrection_inputs():
     ),
     shrink_factor=dict(argstr='--shrink-factor %d',
     ),
-    terminal_output=dict(nohash=True,
-    ),
     weight_image=dict(argstr='--weight-image %s',
     ),
     )
-    inputs = N4BiasFieldCorrection.input_spec()
+    inputs = N4BiasFieldCorrection._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -59,7 +57,7 @@ def test_N4BiasFieldCorrection_outputs():
     output_map = dict(bias_image=dict(),
     output_image=dict(),
     )
-    outputs = N4BiasFieldCorrection.output_spec()
+    outputs = N4BiasFieldCorrection._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

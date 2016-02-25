@@ -25,9 +25,6 @@ def test_dtiprocess_inputs():
     ),
     dti_image=dict(argstr='--dti_image %s',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
     fa_gradient_output=dict(argstr='--fa_gradient_output %s',
     hash_files=False,
     ),
@@ -43,9 +40,6 @@ def test_dtiprocess_inputs():
     hash_files=False,
     ),
     hField=dict(argstr='--hField ',
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
     ),
     interpolation=dict(argstr='--interpolation %s',
     ),
@@ -83,12 +77,10 @@ def test_dtiprocess_inputs():
     ),
     sigma=dict(argstr='--sigma %f',
     ),
-    terminal_output=dict(nohash=True,
-    ),
     verbose=dict(argstr='--verbose ',
     ),
     )
-    inputs = dtiprocess.input_spec()
+    inputs = dtiprocess._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -112,7 +104,7 @@ def test_dtiprocess_outputs():
     principal_eigenvector_output=dict(),
     rot_output=dict(),
     )
-    outputs = dtiprocess.output_spec()
+    outputs = dtiprocess._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

@@ -6,12 +6,6 @@ from ..utils import ApplyMask
 def test_ApplyMask_inputs():
     input_map = dict(args=dict(argstr='%s',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     in_file=dict(argstr='%s',
     mandatory=True,
     position=-3,
@@ -29,8 +23,6 @@ def test_ApplyMask_inputs():
     position=-1,
     ),
     subjects_dir=dict(),
-    terminal_output=dict(nohash=True,
-    ),
     use_abs=dict(argstr='-abs',
     ),
     xfm_file=dict(argstr='-xform %s',
@@ -40,7 +32,7 @@ def test_ApplyMask_inputs():
     xfm_target=dict(argstr='-lta_dst %s',
     ),
     )
-    inputs = ApplyMask.input_spec()
+    inputs = ApplyMask._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -50,7 +42,7 @@ def test_ApplyMask_inputs():
 def test_ApplyMask_outputs():
     output_map = dict(out_file=dict(),
     )
-    outputs = ApplyMask.output_spec()
+    outputs = ApplyMask._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

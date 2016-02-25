@@ -64,18 +64,17 @@ class MRConvert(CommandLine):
     """
 
     _cmd = 'mrconvert'
-    input_spec = MRConvertInputSpec
-    output_spec = MRConvertOutputSpec
+    _input_spec = MRConvertInputSpec
+    _output_spec = MRConvertOutputSpec
 
-    def _list_outputs(self):
-        outputs = self.output_spec().get()
-        outputs['converted'] = self.inputs.out_filename
-        if not isdefined(outputs['converted']):
-            outputs['converted'] = op.abspath(self._gen_outfilename())
+    def _post_run(self):
+        
+        self.outputs.converted = self.inputs.out_filename
+        if not isdefined(self.outputs.converted):
+            self.outputs.converted = op.abspath(self._gen_outfilename())
         else:
-            outputs['converted'] = op.abspath(outputs['converted'])
-        return outputs
-
+            self.outputs.converted = op.abspath(self.outputs.converted)
+        
     def _gen_filename(self, name):
         if name is 'out_filename':
             return self._gen_outfilename()
@@ -147,8 +146,8 @@ class DWI2Tensor(CommandLine):
     """
 
     _cmd = 'dwi2tensor'
-    input_spec = DWI2TensorInputSpec
-    output_spec = DWI2TensorOutputSpec
+    _input_spec = DWI2TensorInputSpec
+    _output_spec = DWI2TensorOutputSpec
 
 
 class Tensor2VectorInputSpec(CommandLineInputSpec):
@@ -177,18 +176,17 @@ class Tensor2Vector(CommandLine):
     """
 
     _cmd = 'tensor2vector'
-    input_spec = Tensor2VectorInputSpec
-    output_spec = Tensor2VectorOutputSpec
+    _input_spec = Tensor2VectorInputSpec
+    _output_spec = Tensor2VectorOutputSpec
 
-    def _list_outputs(self):
-        outputs = self.output_spec().get()
-        outputs['vector'] = self.inputs.out_filename
-        if not isdefined(outputs['vector']):
-            outputs['vector'] = op.abspath(self._gen_outfilename())
+    def _post_run(self):
+        
+        self.outputs.vector = self.inputs.out_filename
+        if not isdefined(self.outputs.vector):
+            self.outputs.vector = op.abspath(self._gen_outfilename())
         else:
-            outputs['vector'] = op.abspath(outputs['vector'])
-        return outputs
-
+            self.outputs.vector = op.abspath(self.outputs.vector)
+        
     def _gen_filename(self, name):
         if name is 'out_filename':
             return self._gen_outfilename()
@@ -226,18 +224,17 @@ class Tensor2FractionalAnisotropy(CommandLine):
     """
 
     _cmd = 'tensor2FA'
-    input_spec = Tensor2FractionalAnisotropyInputSpec
-    output_spec = Tensor2FractionalAnisotropyOutputSpec
+    _input_spec = Tensor2FractionalAnisotropyInputSpec
+    _output_spec = Tensor2FractionalAnisotropyOutputSpec
 
-    def _list_outputs(self):
-        outputs = self.output_spec().get()
-        outputs['FA'] = self.inputs.out_filename
-        if not isdefined(outputs['FA']):
-            outputs['FA'] = op.abspath(self._gen_outfilename())
+    def _post_run(self):
+        
+        self.outputs.FA = self.inputs.out_filename
+        if not isdefined(self.outputs.FA):
+            self.outputs.FA = op.abspath(self._gen_outfilename())
         else:
-            outputs['FA'] = op.abspath(outputs['FA'])
-        return outputs
-
+            self.outputs.FA = op.abspath(self.outputs.FA)
+        
     def _gen_filename(self, name):
         if name is 'out_filename':
             return self._gen_outfilename()
@@ -275,18 +272,17 @@ class Tensor2ApparentDiffusion(CommandLine):
     """
 
     _cmd = 'tensor2ADC'
-    input_spec = Tensor2ApparentDiffusionInputSpec
-    output_spec = Tensor2ApparentDiffusionOutputSpec
+    _input_spec = Tensor2ApparentDiffusionInputSpec
+    _output_spec = Tensor2ApparentDiffusionOutputSpec
 
-    def _list_outputs(self):
-        outputs = self.output_spec().get()
-        outputs['ADC'] = self.inputs.out_filename
-        if not isdefined(outputs['ADC']):
-            outputs['ADC'] = op.abspath(self._gen_outfilename())
+    def _post_run(self):
+        
+        self.outputs.ADC = self.inputs.out_filename
+        if not isdefined(self.outputs.ADC):
+            self.outputs.ADC = op.abspath(self._gen_outfilename())
         else:
-            outputs['ADC'] = op.abspath(outputs['ADC'])
-        return outputs
-
+            self.outputs.ADC = op.abspath(self.outputs.ADC)
+        
     def _gen_filename(self, name):
         if name is 'out_filename':
             return self._gen_outfilename()
@@ -325,18 +321,17 @@ class MRMultiply(CommandLine):
     """
 
     _cmd = 'mrmult'
-    input_spec = MRMultiplyInputSpec
-    output_spec = MRMultiplyOutputSpec
+    _input_spec = MRMultiplyInputSpec
+    _output_spec = MRMultiplyOutputSpec
 
-    def _list_outputs(self):
-        outputs = self.output_spec().get()
-        outputs['out_file'] = self.inputs.out_filename
-        if not isdefined(outputs['out_file']):
-            outputs['out_file'] = op.abspath(self._gen_outfilename())
+    def _post_run(self):
+        
+        self.outputs.out_file = self.inputs.out_filename
+        if not isdefined(self.outputs.out_file):
+            self.outputs.out_file = op.abspath(self._gen_outfilename())
         else:
-            outputs['out_file'] = op.abspath(outputs['out_file'])
-        return outputs
-
+            self.outputs.out_file = op.abspath(self.outputs.out_file)
+        
     def _gen_filename(self, name):
         if name is 'out_filename':
             return self._gen_outfilename()
@@ -374,10 +369,10 @@ class MRTrixViewer(CommandLine):
     """
 
     _cmd = 'mrview'
-    input_spec = MRTrixViewerInputSpec
-    output_spec = MRTrixViewerOutputSpec
+    _input_spec = MRTrixViewerInputSpec
+    _output_spec = MRTrixViewerOutputSpec
 
-    def _list_outputs(self):
+    def _post_run(self):
         return
 
 
@@ -404,10 +399,10 @@ class MRTrixInfo(CommandLine):
     """
 
     _cmd = 'mrinfo'
-    input_spec = MRTrixInfoInputSpec
-    output_spec = MRTrixInfoOutputSpec
+    _input_spec = MRTrixInfoInputSpec
+    _output_spec = MRTrixInfoOutputSpec
 
-    def _list_outputs(self):
+    def _post_run(self):
         return
 
 
@@ -439,14 +434,13 @@ class GenerateWhiteMatterMask(CommandLine):
     """
 
     _cmd = 'gen_WM_mask'
-    input_spec = GenerateWhiteMatterMaskInputSpec
-    output_spec = GenerateWhiteMatterMaskOutputSpec
+    _input_spec = GenerateWhiteMatterMaskInputSpec
+    _output_spec = GenerateWhiteMatterMaskOutputSpec
 
-    def _list_outputs(self):
-        outputs = self.output_spec().get()
-        outputs['WMprobabilitymap'] = op.abspath(self._gen_outfilename())
-        return outputs
-
+    def _post_run(self):
+        
+        self.outputs.WMprobabilitymap = op.abspath(self._gen_outfilename())
+        
     def _gen_filename(self, name):
         if name is 'out_WMProb_filename':
             return self._gen_outfilename()
@@ -485,18 +479,17 @@ class Erode(CommandLine):
     >>> erode.run()                                     # doctest: +SKIP
     """
     _cmd = 'erode'
-    input_spec = ErodeInputSpec
-    output_spec = ErodeOutputSpec
+    _input_spec = ErodeInputSpec
+    _output_spec = ErodeOutputSpec
 
-    def _list_outputs(self):
-        outputs = self.output_spec().get()
-        outputs['out_file'] = self.inputs.out_filename
-        if not isdefined(outputs['out_file']):
-            outputs['out_file'] = op.abspath(self._gen_outfilename())
+    def _post_run(self):
+        
+        self.outputs.out_file = self.inputs.out_filename
+        if not isdefined(self.outputs.out_file):
+            self.outputs.out_file = op.abspath(self._gen_outfilename())
         else:
-            outputs['out_file'] = op.abspath(outputs['out_file'])
-        return outputs
-
+            self.outputs.out_file = op.abspath(self.outputs.out_file)
+        
     def _gen_filename(self, name):
         if name is 'out_filename':
             return self._gen_outfilename()
@@ -543,18 +536,17 @@ class Threshold(CommandLine):
     """
 
     _cmd = 'threshold'
-    input_spec = ThresholdInputSpec
-    output_spec = ThresholdOutputSpec
+    _input_spec = ThresholdInputSpec
+    _output_spec = ThresholdOutputSpec
 
-    def _list_outputs(self):
-        outputs = self.output_spec().get()
-        outputs['out_file'] = self.inputs.out_filename
-        if not isdefined(outputs['out_file']):
-            outputs['out_file'] = op.abspath(self._gen_outfilename())
+    def _post_run(self):
+        
+        self.outputs.out_file = self.inputs.out_filename
+        if not isdefined(self.outputs.out_file):
+            self.outputs.out_file = op.abspath(self._gen_outfilename())
         else:
-            outputs['out_file'] = op.abspath(outputs['out_file'])
-        return outputs
-
+            self.outputs.out_file = op.abspath(self.outputs.out_file)
+        
     def _gen_filename(self, name):
         if name is 'out_filename':
             return self._gen_outfilename()
@@ -592,18 +584,17 @@ class MedianFilter3D(CommandLine):
     """
 
     _cmd = 'median3D'
-    input_spec = MedianFilter3DInputSpec
-    output_spec = MedianFilter3DOutputSpec
+    _input_spec = MedianFilter3DInputSpec
+    _output_spec = MedianFilter3DOutputSpec
 
-    def _list_outputs(self):
-        outputs = self.output_spec().get()
-        outputs['out_file'] = self.inputs.out_filename
-        if not isdefined(outputs['out_file']):
-            outputs['out_file'] = op.abspath(self._gen_outfilename())
+    def _post_run(self):
+        
+        self.outputs.out_file = self.inputs.out_filename
+        if not isdefined(self.outputs.out_file):
+            self.outputs.out_file = op.abspath(self._gen_outfilename())
         else:
-            outputs['out_file'] = op.abspath(outputs['out_file'])
-        return outputs
-
+            self.outputs.out_file = op.abspath(self.outputs.out_file)
+        
     def _gen_filename(self, name):
         if name is 'out_filename':
             return self._gen_outfilename()
@@ -650,18 +641,17 @@ class MRTransform(CommandLine):
     """
 
     _cmd = 'mrtransform'
-    input_spec = MRTransformInputSpec
-    output_spec = MRTransformOutputSpec
+    _input_spec = MRTransformInputSpec
+    _output_spec = MRTransformOutputSpec
 
-    def _list_outputs(self):
-        outputs = self.output_spec().get()
-        outputs['out_file'] = self.inputs.out_filename
-        if not isdefined(outputs['out_file']):
-            outputs['out_file'] = op.abspath(self._gen_outfilename())
+    def _post_run(self):
+        
+        self.outputs.out_file = self.inputs.out_filename
+        if not isdefined(self.outputs.out_file):
+            self.outputs.out_file = op.abspath(self._gen_outfilename())
         else:
-            outputs['out_file'] = op.abspath(outputs['out_file'])
-        return outputs
-
+            self.outputs.out_file = op.abspath(self.outputs.out_file)
+        
     def _gen_filename(self, name):
         if name is 'out_filename':
             return self._gen_outfilename()

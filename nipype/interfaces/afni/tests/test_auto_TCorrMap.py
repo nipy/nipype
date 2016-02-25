@@ -33,18 +33,12 @@ def test_TCorrMap_inputs():
     correlation_maps_masked=dict(argstr='-CorrMask %s',
     name_source='in_file',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
     expr=dict(),
     histogram=dict(argstr='-Hist %d %s',
     name_source='in_file',
     suffix='_hist',
     ),
     histogram_bin_numbers=dict(),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     in_file=dict(argstr='-input %s',
     copyfile=False,
     mandatory=True,
@@ -55,11 +49,8 @@ def test_TCorrMap_inputs():
     name_source='in_file',
     suffix='_mean',
     ),
-    out_file=dict(argstr='-prefix %s',
-    name_source=['in_file'],
-    name_template='%s_afni',
+    output_type=dict(usedefault=True,
     ),
-    outputtype=dict(),
     pmean=dict(argstr='-Pmean %s',
     name_source='in_file',
     suffix='_pmean',
@@ -83,8 +74,6 @@ def test_TCorrMap_inputs():
     suffix='_sexpr',
     xor=('average_expr', 'average_expr_nonzero', 'sum_expr'),
     ),
-    terminal_output=dict(nohash=True,
-    ),
     thresholds=dict(),
     var_absolute_threshold=dict(argstr='-VarThresh %f %f %f %s',
     name_source='in_file',
@@ -101,7 +90,7 @@ def test_TCorrMap_inputs():
     suffix='_zmean',
     ),
     )
-    inputs = TCorrMap.input_spec()
+    inputs = TCorrMap._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -123,7 +112,7 @@ def test_TCorrMap_outputs():
     var_absolute_threshold_normalize=dict(),
     zmean=dict(),
     )
-    outputs = TCorrMap.output_spec()
+    outputs = TCorrMap._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

@@ -25,14 +25,8 @@ def test_dtiestim_inputs():
     ),
     dwi_image=dict(argstr='--dwi_image %s',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
     idwi=dict(argstr='--idwi %s',
     hash_files=False,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
     ),
     method=dict(argstr='--method %s',
     ),
@@ -47,8 +41,6 @@ def test_dtiestim_inputs():
     tensor_output=dict(argstr='--tensor_output %s',
     hash_files=False,
     ),
-    terminal_output=dict(nohash=True,
-    ),
     threshold=dict(argstr='--threshold %d',
     ),
     verbose=dict(argstr='--verbose ',
@@ -56,7 +48,7 @@ def test_dtiestim_inputs():
     weight_iterations=dict(argstr='--weight_iterations %d',
     ),
     )
-    inputs = dtiestim.input_spec()
+    inputs = dtiestim._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -69,7 +61,7 @@ def test_dtiestim_outputs():
     idwi=dict(),
     tensor_output=dict(),
     )
-    outputs = dtiestim.output_spec()
+    outputs = dtiestim._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

@@ -16,7 +16,7 @@ def test_DcmStack_inputs():
     out_format=dict(),
     out_path=dict(),
     )
-    inputs = DcmStack.input_spec()
+    inputs = DcmStack._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -26,7 +26,7 @@ def test_DcmStack_inputs():
 def test_DcmStack_outputs():
     output_map = dict(out_file=dict(),
     )
-    outputs = DcmStack.output_spec()
+    outputs = DcmStack._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

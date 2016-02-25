@@ -21,9 +21,6 @@ def test_Dcm2nii_inputs():
     date_in_filename=dict(argstr='-d',
     usedefault=True,
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
     events_in_filename=dict(argstr='-e',
     usedefault=True,
     ),
@@ -33,14 +30,11 @@ def test_Dcm2nii_inputs():
     id_in_filename=dict(argstr='-i',
     usedefault=True,
     ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     nii_output=dict(argstr='-n',
     usedefault=True,
     ),
     output_dir=dict(argstr='-o %s',
-    genfile=True,
+    usedefault=True,
     ),
     protocol_in_filename=dict(argstr='-p',
     usedefault=True,
@@ -67,10 +61,8 @@ def test_Dcm2nii_inputs():
     spm_analyze=dict(argstr='-s',
     xor=['nii_output'],
     ),
-    terminal_output=dict(nohash=True,
-    ),
     )
-    inputs = Dcm2nii.input_spec()
+    inputs = Dcm2nii._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -84,7 +76,7 @@ def test_Dcm2nii_outputs():
     reoriented_and_cropped_files=dict(),
     reoriented_files=dict(),
     )
-    outputs = Dcm2nii.output_spec()
+    outputs = Dcm2nii._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

@@ -28,8 +28,8 @@ contributor: Ali Ghayoor
 
 """
 
-    input_spec = LandmarksCompareInputSpec
-    output_spec = LandmarksCompareOutputSpec
+    _input_spec = LandmarksCompareInputSpec
+    _output_spec = LandmarksCompareOutputSpec
     _cmd = " LandmarksCompare "
     _outputs_filenames = {}
     _redirect_x = False

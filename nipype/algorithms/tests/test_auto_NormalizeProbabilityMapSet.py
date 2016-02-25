@@ -6,8 +6,9 @@ from ..misc import NormalizeProbabilityMapSet
 def test_NormalizeProbabilityMapSet_inputs():
     input_map = dict(in_files=dict(),
     in_mask=dict(),
+    out_files=dict(),
     )
-    inputs = NormalizeProbabilityMapSet.input_spec()
+    inputs = NormalizeProbabilityMapSet._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -17,7 +18,7 @@ def test_NormalizeProbabilityMapSet_inputs():
 def test_NormalizeProbabilityMapSet_outputs():
     output_map = dict(out_files=dict(),
     )
-    outputs = NormalizeProbabilityMapSet.output_spec()
+    outputs = NormalizeProbabilityMapSet._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

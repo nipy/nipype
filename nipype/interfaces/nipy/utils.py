@@ -22,10 +22,10 @@ else:
     from nipy.algorithms.registration.affine import Affine
 
 from ..base import (TraitedSpec, BaseInterface, traits,
-                    BaseInterfaceInputSpec, File, isdefined)
+                    BaseInputSpec, File, isdefined)
 
 
-class SimilarityInputSpec(BaseInterfaceInputSpec):
+class SimilarityInputSpec(BaseInputSpec):
     volume1 = File(exists=True, desc="3D volume", mandatory=True)
     volume2 = File(exists=True, desc="3D volume", mandatory=True)
     mask1 = File(exists=True, desc="3D volume")
@@ -66,8 +66,8 @@ class Similarity(BaseInterface):
     >>> res = similarity.run() # doctest: +SKIP
     """
 
-    input_spec = SimilarityInputSpec
-    output_spec = SimilarityOutputSpec
+    _input_spec = SimilarityInputSpec
+    _output_spec = SimilarityOutputSpec
 
     def __init__(self, **inputs):
         warnings.warn(("This interface is deprecated since 0.10.0."
@@ -99,7 +99,6 @@ class Similarity(BaseInterface):
 
         return runtime
 
-    def _list_outputs(self):
-        outputs = self._outputs().get()
-        outputs['similarity'] = self._similarity
-        return outputs
+    def _post_run(self):
+        self.outputs.similarity = self._similarity
+        

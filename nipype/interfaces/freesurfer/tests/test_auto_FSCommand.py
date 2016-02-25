@@ -6,19 +6,19 @@ from ..base import FSCommand
 def test_FSCommand_inputs():
     input_map = dict(args=dict(argstr='%s',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     subjects_dir=dict(),
-    terminal_output=dict(nohash=True,
-    ),
     )
-    inputs = FSCommand.input_spec()
+    inputs = FSCommand._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
             yield assert_equal, getattr(inputs.traits()[key], metakey), value
 
+
+def test_FSCommand_outputs():
+    output_map = dict()
+    outputs = FSCommand._output_spec()
+
+    for key, metadata in list(output_map.items()):
+        for metakey, value in list(metadata.items()):
+            yield assert_equal, getattr(outputs.traits()[key], metakey), value

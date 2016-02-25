@@ -42,8 +42,8 @@ acknowledgements: This work is part of the National Alliance for Medical Image C
 
 """
 
-    input_spec = GrayscaleGrindPeakImageFilterInputSpec
-    output_spec = GrayscaleGrindPeakImageFilterOutputSpec
+    _input_spec = GrayscaleGrindPeakImageFilterInputSpec
+    _output_spec = GrayscaleGrindPeakImageFilterOutputSpec
     _cmd = "GrayscaleGrindPeakImageFilter "
     _outputs_filenames = {'outputVolume': 'outputVolume.nii'}
 
@@ -82,7 +82,7 @@ acknowledgements: This work is part of the National Alliance for Medical Image C
 
 """
 
-    input_spec = GrayscaleFillHoleImageFilterInputSpec
-    output_spec = GrayscaleFillHoleImageFilterOutputSpec
+    _input_spec = GrayscaleFillHoleImageFilterInputSpec
+    _output_spec = GrayscaleFillHoleImageFilterOutputSpec
     _cmd = "GrayscaleFillHoleImageFilter "
     _outputs_filenames = {'outputVolume': 'outputVolume.nii'}

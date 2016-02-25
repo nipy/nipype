@@ -6,9 +6,6 @@ from ..preprocess import ApplyVolTransform
 def test_ApplyVolTransform_inputs():
     input_map = dict(args=dict(argstr='%s',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
     fs_target=dict(argstr='--fstarg',
     mandatory=True,
     requires=['reg_file'],
@@ -17,9 +14,6 @@ def test_ApplyVolTransform_inputs():
     fsl_reg_file=dict(argstr='--fsl %s',
     mandatory=True,
     xor=('reg_file', 'fsl_reg_file', 'xfm_reg_file', 'reg_header', 'subject'),
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
     ),
     interp=dict(argstr='--interp %s',
     ),
@@ -62,8 +56,6 @@ def test_ApplyVolTransform_inputs():
     mandatory=True,
     xor=('target_file', 'tal', 'fs_target'),
     ),
-    terminal_output=dict(nohash=True,
-    ),
     transformed_file=dict(argstr='--o %s',
     genfile=True,
     ),
@@ -72,7 +64,7 @@ def test_ApplyVolTransform_inputs():
     xor=('reg_file', 'fsl_reg_file', 'xfm_reg_file', 'reg_header', 'subject'),
     ),
     )
-    inputs = ApplyVolTransform.input_spec()
+    inputs = ApplyVolTransform._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -82,7 +74,7 @@ def test_ApplyVolTransform_inputs():
 def test_ApplyVolTransform_outputs():
     output_map = dict(transformed_file=dict(),
     )
-    outputs = ApplyVolTransform.output_spec()
+    outputs = ApplyVolTransform._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

@@ -6,21 +6,14 @@ from ..model import FEAT
 def test_FEAT_inputs():
     input_map = dict(args=dict(argstr='%s',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
     fsf_file=dict(argstr='%s',
     mandatory=True,
     position=0,
     ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
-    output_type=dict(),
-    terminal_output=dict(nohash=True,
+    output_type=dict(usedefault=True,
     ),
     )
-    inputs = FEAT.input_spec()
+    inputs = FEAT._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -30,7 +23,7 @@ def test_FEAT_inputs():
 def test_FEAT_outputs():
     output_map = dict(feat_dir=dict(),
     )
-    outputs = FEAT.output_spec()
+    outputs = FEAT._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

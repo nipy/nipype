@@ -6,9 +6,6 @@ from ..utils import Analyze2nii
 def test_Analyze2nii_inputs():
     input_map = dict(analyze_file=dict(mandatory=True,
     ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     matlab_cmd=dict(),
     mfile=dict(usedefault=True,
     ),
@@ -18,7 +15,7 @@ def test_Analyze2nii_inputs():
     usedefault=True,
     ),
     )
-    inputs = Analyze2nii.input_spec()
+    inputs = Analyze2nii._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -26,10 +23,7 @@ def test_Analyze2nii_inputs():
 
 
 def test_Analyze2nii_outputs():
-    output_map = dict(ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
-    matlab_cmd=dict(),
+    output_map = dict(matlab_cmd=dict(),
     mfile=dict(usedefault=True,
     ),
     nifti_file=dict(),
@@ -39,7 +33,7 @@ def test_Analyze2nii_outputs():
     usedefault=True,
     ),
     )
-    outputs = Analyze2nii.output_spec()
+    outputs = Analyze2nii._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

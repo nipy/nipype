@@ -6,12 +6,6 @@ from ..connectivity import Conmat
 def test_Conmat_inputs():
     input_map = dict(args=dict(argstr='%s',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     in_file=dict(argstr='-inputfile %s',
     mandatory=True,
     ),
@@ -26,8 +20,6 @@ def test_Conmat_inputs():
     ),
     targetname_file=dict(argstr='-targetnamefile %s',
     ),
-    terminal_output=dict(nohash=True,
-    ),
     tract_prop=dict(argstr='-tractstat %s',
     units='NA',
     xor=['tract_stat'],
@@ -38,7 +30,7 @@ def test_Conmat_inputs():
     xor=['tract_prop'],
     ),
     )
-    inputs = Conmat.input_spec()
+    inputs = Conmat._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -49,7 +41,7 @@ def test_Conmat_outputs():
     output_map = dict(conmat_sc=dict(),
     conmat_ts=dict(),
     )
-    outputs = Conmat.output_spec()
+    outputs = Conmat._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

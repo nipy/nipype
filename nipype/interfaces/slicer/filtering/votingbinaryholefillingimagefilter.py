@@ -36,7 +36,7 @@ acknowledgements: This command module was derived from Insight/Examples/Filterin
 
 """
 
-    input_spec = VotingBinaryHoleFillingImageFilterInputSpec
-    output_spec = VotingBinaryHoleFillingImageFilterOutputSpec
+    _input_spec = VotingBinaryHoleFillingImageFilterInputSpec
+    _output_spec = VotingBinaryHoleFillingImageFilterOutputSpec
     _cmd = "VotingBinaryHoleFillingImageFilter "
     _outputs_filenames = {'outputVolume': 'outputVolume.nii'}

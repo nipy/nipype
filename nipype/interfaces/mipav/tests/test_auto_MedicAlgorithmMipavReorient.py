@@ -6,12 +6,6 @@ from ..developer import MedicAlgorithmMipavReorient
 def test_MedicAlgorithmMipavReorient_inputs():
     input_map = dict(args=dict(argstr='%s',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     inInterpolation=dict(argstr='--inInterpolation %s',
     ),
     inNew=dict(argstr='--inNew %s',
@@ -36,8 +30,6 @@ def test_MedicAlgorithmMipavReorient_inputs():
     outReoriented=dict(argstr='--outReoriented %s',
     sep=';',
     ),
-    terminal_output=dict(nohash=True,
-    ),
     xDefaultMem=dict(argstr='-xDefaultMem %d',
     ),
     xMaxProcess=dict(argstr='-xMaxProcess %d',
@@ -46,7 +38,7 @@ def test_MedicAlgorithmMipavReorient_inputs():
     xPrefExt=dict(argstr='--xPrefExt %s',
     ),
     )
-    inputs = MedicAlgorithmMipavReorient.input_spec()
+    inputs = MedicAlgorithmMipavReorient._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -55,7 +47,7 @@ def test_MedicAlgorithmMipavReorient_inputs():
 
 def test_MedicAlgorithmMipavReorient_outputs():
     output_map = dict()
-    outputs = MedicAlgorithmMipavReorient.output_spec()
+    outputs = MedicAlgorithmMipavReorient._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

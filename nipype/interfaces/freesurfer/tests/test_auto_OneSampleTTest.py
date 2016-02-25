@@ -29,9 +29,6 @@ def test_OneSampleTTest_inputs():
     diag=dict(),
     diag_cluster=dict(argstr='--diag-cluster',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
     fixed_fx_dof=dict(argstr='--ffxdof %d',
     xor=['fixed_fx_dof_file'],
     ),
@@ -51,9 +48,6 @@ def test_OneSampleTTest_inputs():
     genfile=True,
     ),
     hemi=dict(),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     in_file=dict(argstr='--y %s',
     copyfile=False,
     mandatory=True,
@@ -117,8 +111,6 @@ def test_OneSampleTTest_inputs():
     ),
     synth=dict(argstr='--synth',
     ),
-    terminal_output=dict(nohash=True,
-    ),
     uniform=dict(argstr='--uniform %f %f',
     ),
     var_fwhm=dict(argstr='--var-fwhm %f',
@@ -137,7 +129,7 @@ def test_OneSampleTTest_inputs():
     xor=('weight_file', 'weight_inv', 'weight_sqrt'),
     ),
     )
-    inputs = OneSampleTTest.input_spec()
+    inputs = OneSampleTTest._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -163,7 +155,7 @@ def test_OneSampleTTest_outputs():
     spatial_eigenvectors=dict(),
     svd_stats_file=dict(),
     )
-    outputs = OneSampleTTest.output_spec()
+    outputs = OneSampleTTest._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

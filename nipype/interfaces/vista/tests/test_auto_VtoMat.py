@@ -6,12 +6,6 @@ from ..vista import VtoMat
 def test_VtoMat_inputs():
     input_map = dict(args=dict(argstr='%s',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     in_file=dict(argstr='-in %s',
     mandatory=True,
     position=1,
@@ -23,10 +17,8 @@ def test_VtoMat_inputs():
     name_template='%s.mat',
     position=-1,
     ),
-    terminal_output=dict(nohash=True,
-    ),
     )
-    inputs = VtoMat.input_spec()
+    inputs = VtoMat._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -36,7 +28,7 @@ def test_VtoMat_inputs():
 def test_VtoMat_outputs():
     output_map = dict(out_file=dict(),
     )
-    outputs = VtoMat.output_spec()
+    outputs = VtoMat._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

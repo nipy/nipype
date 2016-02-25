@@ -6,12 +6,6 @@ from ..brains import ImageRegionPlotter
 def test_ImageRegionPlotter_inputs():
     input_map = dict(args=dict(argstr='%s',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     inputBinaryROIVolume=dict(argstr='--inputBinaryROIVolume %s',
     ),
     inputLabelVolume=dict(argstr='--inputLabelVolume %s',
@@ -24,8 +18,6 @@ def test_ImageRegionPlotter_inputs():
     ),
     outputJointHistogramData=dict(argstr='--outputJointHistogramData %s',
     ),
-    terminal_output=dict(nohash=True,
-    ),
     useIntensityForHistogram=dict(argstr='--useIntensityForHistogram ',
     ),
     useROIAUTO=dict(argstr='--useROIAUTO ',
@@ -33,7 +25,7 @@ def test_ImageRegionPlotter_inputs():
     verbose=dict(argstr='--verbose ',
     ),
     )
-    inputs = ImageRegionPlotter.input_spec()
+    inputs = ImageRegionPlotter._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -42,7 +34,7 @@ def test_ImageRegionPlotter_inputs():
 
 def test_ImageRegionPlotter_outputs():
     output_map = dict()
-    outputs = ImageRegionPlotter.output_spec()
+    outputs = ImageRegionPlotter._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

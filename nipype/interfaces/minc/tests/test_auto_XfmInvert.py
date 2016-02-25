@@ -9,12 +9,6 @@ def test_XfmInvert_inputs():
     clobber=dict(argstr='-clobber',
     usedefault=True,
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     input_file=dict(argstr='%s',
     mandatory=True,
     position=-2,
@@ -23,12 +17,10 @@ def test_XfmInvert_inputs():
     genfile=True,
     position=-1,
     ),
-    terminal_output=dict(nohash=True,
-    ),
     verbose=dict(argstr='-verbose',
     ),
     )
-    inputs = XfmInvert.input_spec()
+    inputs = XfmInvert._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -39,7 +31,7 @@ def test_XfmInvert_outputs():
     output_map = dict(output_file=dict(),
     output_grid=dict(),
     )
-    outputs = XfmInvert.output_spec()
+    outputs = XfmInvert._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

@@ -32,7 +32,7 @@ class Dcm2niiInputSpec(CommandLineInputSpec):
     gzip_output = traits.Bool(False, argstr='-g', usedefault=True)
     id_in_filename = traits.Bool(False, argstr='-i', usedefault=True)
     nii_output = traits.Bool(True, argstr='-n', usedefault=True)
-    output_dir = Directory(exists=True, argstr='-o %s', genfile=True)
+    output_dir = Directory('.', exists=True, argstr='-o %s', usedefault=True)
     protocol_in_filename = traits.Bool(True, argstr='-p', usedefault=True)
     reorient = traits.Bool(argstr='-r')
     spm_analyze = traits.Bool(argstr='-s', xor=['nii_output'])
@@ -63,8 +63,8 @@ class Dcm2nii(CommandLine):
     'dcm2nii -a y -c y -b config.ini -v y -d y -e y -g y -i n -n y -o . -p y -x n -f n functional_1.dcm'
     """
 
-    input_spec = Dcm2niiInputSpec
-    output_spec = Dcm2niiOutputSpec
+    _input_spec = Dcm2niiInputSpec
+    _output_spec = Dcm2niiOutputSpec
     _cmd = 'dcm2nii'
 
     def _format_arg(self, opt, spec, val):
@@ -159,15 +159,14 @@ class Dcm2nii(CommandLine):
             skip = False
         return files, reoriented_files, reoriented_and_cropped_files, bvecs, bvals
 
-    def _list_outputs(self):
-        outputs = self.output_spec().get()
-        outputs['converted_files'] = self.output_files
-        outputs['reoriented_files'] = self.reoriented_files
-        outputs['reoriented_and_cropped_files'] = self.reoriented_and_cropped_files
-        outputs['bvecs'] = self.bvecs
-        outputs['bvals'] = self.bvals
-        return outputs
-
+    def _post_run(self):
+        
+        self.outputs.converted_files = self.output_files
+        self.outputs.reoriented_files = self.reoriented_files
+        self.outputs.reoriented_and_cropped_files = self.reoriented_and_cropped_files
+        self.outputs.bvecs = self.bvecs
+        self.outputs.bvals = self.bvals
+        
     def _gen_filename(self, name):
         if name == 'output_dir':
             return os.getcwd()

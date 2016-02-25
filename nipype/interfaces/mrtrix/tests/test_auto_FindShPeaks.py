@@ -14,12 +14,6 @@ def test_FindShPeaks_inputs():
     ),
     display_info=dict(argstr='-info',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     in_file=dict(argstr='%s',
     mandatory=True,
     position=-3,
@@ -42,10 +36,8 @@ def test_FindShPeaks_inputs():
     ),
     quiet_display=dict(argstr='-quiet',
     ),
-    terminal_output=dict(nohash=True,
-    ),
     )
-    inputs = FindShPeaks.input_spec()
+    inputs = FindShPeaks._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -55,7 +47,7 @@ def test_FindShPeaks_inputs():
 def test_FindShPeaks_outputs():
     output_map = dict(out_file=dict(),
     )
-    outputs = FindShPeaks.output_spec()
+    outputs = FindShPeaks._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

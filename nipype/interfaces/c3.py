@@ -39,8 +39,8 @@ class C3dAffineTool(SEMLikeCommandLine):
     >>> c3.cmdline
     'c3d_affine_tool -src cmatrix.mat -fsl2ras -oitk affine.txt'
     """
-    input_spec = C3dAffineToolInputSpec
-    output_spec = C3dAffineToolOutputSpec
+    _input_spec = C3dAffineToolInputSpec
+    _output_spec = C3dAffineToolOutputSpec
 
     _cmd = 'c3d_affine_tool'
     _outputs_filenames = {'itk_transform': 'affine.txt'}

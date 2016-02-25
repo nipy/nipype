@@ -16,18 +16,10 @@ def test_ImageLabelCombine_inputs():
     ),
     args=dict(argstr='%s',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
     first_overwrites=dict(argstr='--first_overwrites ',
     ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
-    terminal_output=dict(nohash=True,
-    ),
     )
-    inputs = ImageLabelCombine.input_spec()
+    inputs = ImageLabelCombine._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -38,7 +30,7 @@ def test_ImageLabelCombine_outputs():
     output_map = dict(OutputLabelMap=dict(position=-1,
     ),
     )
-    outputs = ImageLabelCombine.output_spec()
+    outputs = ImageLabelCombine._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

@@ -10,15 +10,9 @@ def test_DTLUTGen_inputs():
     ),
     bingham=dict(argstr='-bingham',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
     frange=dict(argstr='-frange %s',
     position=1,
     units='NA',
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
     ),
     inversion=dict(argstr='-inversion %d',
     units='NA',
@@ -28,8 +22,8 @@ def test_DTLUTGen_inputs():
     units='NA',
     ),
     out_file=dict(argstr='> %s',
-    genfile=True,
     position=-1,
+    usedefault=True,
     ),
     samples=dict(argstr='-samples %d',
     units='NA',
@@ -44,15 +38,13 @@ def test_DTLUTGen_inputs():
     step=dict(argstr='-step %f',
     units='NA',
     ),
-    terminal_output=dict(nohash=True,
-    ),
     trace=dict(argstr='-trace %G',
     units='NA',
     ),
     watson=dict(argstr='-watson',
     ),
     )
-    inputs = DTLUTGen.input_spec()
+    inputs = DTLUTGen._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -62,7 +54,7 @@ def test_DTLUTGen_inputs():
 def test_DTLUTGen_outputs():
     output_map = dict(dtLUT=dict(),
     )
-    outputs = DTLUTGen.output_spec()
+    outputs = DTLUTGen._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

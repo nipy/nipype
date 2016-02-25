@@ -8,15 +8,9 @@ def test_EstimateFOD_inputs():
     ),
     bval_scale=dict(argstr='-bvalue_scaling %s',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
     grad_file=dict(argstr='-grad %s',
     ),
     grad_fsl=dict(argstr='-fslgrad %s %s',
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
     ),
     in_bval=dict(),
     in_bvec=dict(argstr='-fslgrad %s %s',
@@ -52,12 +46,10 @@ def test_EstimateFOD_inputs():
     shell=dict(argstr='-shell %s',
     sep=',',
     ),
-    terminal_output=dict(nohash=True,
-    ),
     thres=dict(argstr='-threshold %f',
     ),
     )
-    inputs = EstimateFOD.input_spec()
+    inputs = EstimateFOD._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -67,7 +59,7 @@ def test_EstimateFOD_inputs():
 def test_EstimateFOD_outputs():
     output_map = dict(out_file=dict(),
     )
-    outputs = EstimateFOD.output_spec()
+    outputs = EstimateFOD._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

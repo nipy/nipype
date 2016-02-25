@@ -6,41 +6,36 @@ from ..utils import PlotTimeSeries
 def test_PlotTimeSeries_inputs():
     input_map = dict(args=dict(argstr='%s',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     in_file=dict(argstr='%s',
     mandatory=True,
     position=1,
+    sep=',',
     ),
-    labels=dict(argstr='%s',
+    labels=dict(argstr='-a %s',
+    sep=',',
     ),
     legend_file=dict(argstr='--legend=%s',
     ),
     out_file=dict(argstr='-o %s',
-    genfile=True,
     hash_files=False,
+    template='{in_file}.png',
     ),
-    output_type=dict(),
+    output_type=dict(usedefault=True,
+    ),
     plot_finish=dict(argstr='--finish=%d',
-    xor=('plot_range',),
+    xor=['plot_range'],
     ),
-    plot_range=dict(argstr='%s',
-    xor=('plot_start', 'plot_finish'),
+    plot_range=dict(argstr='--start=%d --finish=%d',
+    xor=['plot_start', 'plot_finish'],
     ),
-    plot_size=dict(argstr='%s',
+    plot_size=dict(argstr='-h %d -w %d',
     ),
     plot_start=dict(argstr='--start=%d',
-    xor=('plot_range',),
+    xor=['plot_range'],
     ),
     sci_notation=dict(argstr='--sci',
     ),
-    terminal_output=dict(nohash=True,
-    ),
-    title=dict(argstr='%s',
+    title=dict(argstr="-t '%s'",
     ),
     x_precision=dict(argstr='--precision=%d',
     ),
@@ -48,16 +43,16 @@ def test_PlotTimeSeries_inputs():
     usedefault=True,
     ),
     y_max=dict(argstr='--ymax=%.2f',
-    xor=('y_range',),
+    xor=['y_range'],
     ),
     y_min=dict(argstr='--ymin=%.2f',
-    xor=('y_range',),
+    xor=['y_range'],
     ),
-    y_range=dict(argstr='%s',
-    xor=('y_min', 'y_max'),
+    y_range=dict(argstr='--ymin=%.2f --ymax=%.2f',
+    xor=['y_min', 'y_max'],
     ),
     )
-    inputs = PlotTimeSeries.input_spec()
+    inputs = PlotTimeSeries._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -67,7 +62,7 @@ def test_PlotTimeSeries_inputs():
 def test_PlotTimeSeries_outputs():
     output_map = dict(out_file=dict(),
     )
-    outputs = PlotTimeSeries.output_spec()
+    outputs = PlotTimeSeries._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

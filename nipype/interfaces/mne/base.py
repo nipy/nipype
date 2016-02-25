@@ -60,8 +60,8 @@ class WatershedBEM(FSCommand):
    """
 
     _cmd = 'mne_watershed_bem'
-    input_spec = WatershedBEMInputSpec
-    output_spec = WatershedBEMOutputSpec
+    _input_spec = WatershedBEMInputSpec
+    _output_spec = WatershedBEMOutputSpec
     _additional_metadata = ['loc', 'altkey']
 
     def _get_files(self, path, key, dirval, altkey=None):
@@ -73,8 +73,8 @@ class WatershedBEM(FSCommand):
         globpattern = op.join(keydir, ''.join((globprefix, key, globsuffix)))
         return glob.glob(globpattern)
 
-    def _list_outputs(self):
-        outputs = self.output_spec().get()
+    def _post_run(self):
+
         subjects_dir = self.inputs.subjects_dir
         subject_path = op.join(subjects_dir, self.inputs.subject_id)
         output_traits = self._outputs()
@@ -94,8 +94,8 @@ class WatershedBEM(FSCommand):
                         out_files = op.abspath(value_list)
                     else:
                         raise TypeError
-                    outputs[k] = out_files
+                    setattr(self.outputs, k, out_files)
                     if not k.rfind('surface') == -1:
                         mesh_paths.append(out_files)
-        outputs['mesh_files'] = mesh_paths
-        return outputs
+        self.outputs.mesh_files = mesh_paths
+

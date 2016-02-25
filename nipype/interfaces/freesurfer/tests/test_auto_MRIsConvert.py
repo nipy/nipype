@@ -10,13 +10,7 @@ def test_MRIsConvert_inputs():
     ),
     dataarray_num=dict(argstr='--da_num %d',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
     functional_file=dict(argstr='-f %s',
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
     ),
     in_file=dict(argstr='%s',
     mandatory=True,
@@ -30,10 +24,12 @@ def test_MRIsConvert_inputs():
     ),
     origname=dict(argstr='-o %s',
     ),
-    out_datatype=dict(xor=['out_file'],
+    out_datatype=dict(mandatory=True,
+    xor=['out_file'],
     ),
     out_file=dict(argstr='%s',
     genfile=True,
+    mandatory=True,
     position=-1,
     xor=['out_datatype'],
     ),
@@ -50,14 +46,12 @@ def test_MRIsConvert_inputs():
     subjects_dir=dict(),
     talairachxfm_subjid=dict(argstr='-t %s',
     ),
-    terminal_output=dict(nohash=True,
-    ),
     vertex=dict(argstr='-v',
     ),
     xyz_ascii=dict(argstr='-a',
     ),
     )
-    inputs = MRIsConvert.input_spec()
+    inputs = MRIsConvert._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -67,7 +61,7 @@ def test_MRIsConvert_inputs():
 def test_MRIsConvert_outputs():
     output_map = dict(converted=dict(),
     )
-    outputs = MRIsConvert.output_spec()
+    outputs = MRIsConvert._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

@@ -6,9 +6,6 @@ from ..reconstruction import CSD
 def test_CSD_inputs():
     input_map = dict(b0_thres=dict(usedefault=True,
     ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     in_bval=dict(mandatory=True,
     ),
     in_bvec=dict(mandatory=True,
@@ -26,7 +23,7 @@ def test_CSD_inputs():
     usedefault=True,
     ),
     )
-    inputs = CSD.input_spec()
+    inputs = CSD._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -37,7 +34,7 @@ def test_CSD_outputs():
     output_map = dict(model=dict(),
     out_fods=dict(),
     )
-    outputs = CSD.output_spec()
+    outputs = CSD._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

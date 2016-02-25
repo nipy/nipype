@@ -8,12 +8,6 @@ def test_DWIToDTIEstimation_inputs():
     ),
     enumeration=dict(argstr='--enumeration %s',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     inputVolume=dict(argstr='%s',
     position=-3,
     ),
@@ -29,10 +23,8 @@ def test_DWIToDTIEstimation_inputs():
     ),
     shiftNeg=dict(argstr='--shiftNeg ',
     ),
-    terminal_output=dict(nohash=True,
-    ),
     )
-    inputs = DWIToDTIEstimation.input_spec()
+    inputs = DWIToDTIEstimation._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -45,7 +37,7 @@ def test_DWIToDTIEstimation_outputs():
     outputTensor=dict(position=-2,
     ),
     )
-    outputs = DWIToDTIEstimation.output_spec()
+    outputs = DWIToDTIEstimation._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

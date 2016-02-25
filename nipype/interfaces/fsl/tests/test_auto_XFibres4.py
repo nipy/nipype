@@ -22,18 +22,12 @@ def test_XFibres4_inputs():
     dwi=dict(argstr='--data=%s',
     mandatory=True,
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
     force_dir=dict(argstr='--forcedir',
     usedefault=True,
     ),
     fudge=dict(argstr='--fudge=%d',
     ),
     gradnonlin=dict(argstr='--gradnonlin=%s',
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
     ),
     logdir=dict(argstr='--logdir=%s',
     usedefault=True,
@@ -56,17 +50,16 @@ def test_XFibres4_inputs():
     non_linear=dict(argstr='--nonlinear',
     xor=('no_spat', 'non_linear'),
     ),
-    output_type=dict(),
+    output_type=dict(usedefault=True,
+    ),
     sample_every=dict(argstr='--sampleevery=%d',
     ),
     seed=dict(argstr='--seed=%d',
     ),
-    terminal_output=dict(nohash=True,
-    ),
     update_proposal_every=dict(argstr='--updateproposalevery=%d',
     ),
     )
-    inputs = XFibres4.input_spec()
+    inputs = XFibres4._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -82,7 +75,7 @@ def test_XFibres4_outputs():
     phsamples=dict(),
     thsamples=dict(),
     )
-    outputs = XFibres4.output_spec()
+    outputs = XFibres4._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

@@ -53,13 +53,12 @@ class BrainMask(CommandLine):
     """
 
     _cmd = 'dwi2mask'
-    input_spec = BrainMaskInputSpec
-    output_spec = BrainMaskOutputSpec
+    _input_spec = BrainMaskInputSpec
+    _output_spec = BrainMaskOutputSpec
 
-    def _list_outputs(self):
-        outputs = self.output_spec().get()
-        outputs['out_file'] = op.abspath(self.inputs.out_file)
-        return outputs
+    def _post_run(self):
+
+        self.outputs.out_file = op.abspath(self.inputs.out_file)
 
 
 class Mesh2PVEInputSpec(CommandLineInputSpec):
@@ -100,13 +99,12 @@ class Mesh2PVE(CommandLine):
     """
 
     _cmd = 'mesh2pve'
-    input_spec = Mesh2PVEInputSpec
-    output_spec = Mesh2PVEOutputSpec
+    _input_spec = Mesh2PVEInputSpec
+    _output_spec = Mesh2PVEOutputSpec
 
-    def _list_outputs(self):
-        outputs = self.output_spec().get()
-        outputs['out_file'] = op.abspath(self.inputs.out_file)
-        return outputs
+    def _post_run(self):
+
+        self.outputs.out_file = op.abspath(self.inputs.out_file)
 
 
 class Generate5ttInputSpec(CommandLineInputSpec):
@@ -147,13 +145,12 @@ class Generate5tt(CommandLine):
     """
 
     _cmd = '5ttgen'
-    input_spec = Generate5ttInputSpec
-    output_spec = Generate5ttOutputSpec
+    _input_spec = Generate5ttInputSpec
+    _output_spec = Generate5ttOutputSpec
 
-    def _list_outputs(self):
-        outputs = self.output_spec().get()
-        outputs['out_file'] = op.abspath(self.inputs.out_file)
-        return outputs
+    def _post_run(self):
+
+        self.outputs.out_file = op.abspath(self.inputs.out_file)
 
 
 class TensorMetricsInputSpec(CommandLineInputSpec):
@@ -204,17 +201,14 @@ class TensorMetrics(CommandLine):
     """
 
     _cmd = 'tensor2metric'
-    input_spec = TensorMetricsInputSpec
-    output_spec = TensorMetricsOutputSpec
+    _input_spec = TensorMetricsInputSpec
+    _output_spec = TensorMetricsOutputSpec
 
-    def _list_outputs(self):
-        outputs = self.output_spec().get()
-
+    def _post_run(self):
         for k in list(outputs.keys()):
             if isdefined(getattr(self.inputs, k)):
-                outputs[k] = op.abspath(getattr(self.inputs, k))
+                setattr(self.outputs, k, op.abspath(getattr(self.inputs, k)))
 
-        return outputs
 
 
 class ComputeTDIInputSpec(CommandLineInputSpec):
@@ -344,13 +338,12 @@ class ComputeTDI(MRTrix3Base):
     """
 
     _cmd = 'tckmap'
-    input_spec = ComputeTDIInputSpec
-    output_spec = ComputeTDIOutputSpec
+    _input_spec = ComputeTDIInputSpec
+    _output_spec = ComputeTDIOutputSpec
 
-    def _list_outputs(self):
-        outputs = self.output_spec().get()
-        outputs['out_file'] = op.abspath(self.inputs.out_file)
-        return outputs
+    def _post_run(self):
+
+        self.outputs.out_file = op.abspath(self.inputs.out_file)
 
 
 class TCK2VTKInputSpec(CommandLineInputSpec):
@@ -395,10 +388,10 @@ class TCK2VTK(MRTrix3Base):
     """
 
     _cmd = 'tck2vtk'
-    input_spec = TCK2VTKInputSpec
-    output_spec = TCK2VTKOutputSpec
+    _input_spec = TCK2VTKInputSpec
+    _output_spec = TCK2VTKOutputSpec
 
-    def _list_outputs(self):
-        outputs = self.output_spec().get()
-        outputs['out_file'] = op.abspath(self.inputs.out_file)
-        return outputs
+    def _post_run(self):
+
+        self.outputs.out_file = op.abspath(self.inputs.out_file)
+

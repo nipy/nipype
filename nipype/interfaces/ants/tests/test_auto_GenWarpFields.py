@@ -12,13 +12,7 @@ def test_GenWarpFields_inputs():
     position=1,
     usedefault=True,
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
     force_proceed=dict(argstr='-f 1',
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
     ),
     input_image=dict(argstr='-i %s',
     copyfile=False,
@@ -43,13 +37,11 @@ def test_GenWarpFields_inputs():
     ),
     similarity_metric=dict(argstr='-s %s',
     ),
-    terminal_output=dict(nohash=True,
-    ),
     transformation_model=dict(argstr='-t %s',
     usedefault=True,
     ),
     )
-    inputs = GenWarpFields.input_spec()
+    inputs = GenWarpFields._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -63,7 +55,7 @@ def test_GenWarpFields_outputs():
     output_file=dict(),
     warp_field=dict(),
     )
-    outputs = GenWarpFields.output_spec()
+    outputs = GenWarpFields._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

@@ -10,12 +10,6 @@ def test_BRAINSClipInferior_inputs():
     ),
     args=dict(argstr='%s',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     inputVolume=dict(argstr='--inputVolume %s',
     ),
     numberOfThreads=dict(argstr='--numberOfThreads %d',
@@ -23,10 +17,8 @@ def test_BRAINSClipInferior_inputs():
     outputVolume=dict(argstr='--outputVolume %s',
     hash_files=False,
     ),
-    terminal_output=dict(nohash=True,
-    ),
     )
-    inputs = BRAINSClipInferior.input_spec()
+    inputs = BRAINSClipInferior._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -36,7 +28,7 @@ def test_BRAINSClipInferior_inputs():
 def test_BRAINSClipInferior_outputs():
     output_map = dict(outputVolume=dict(),
     )
-    outputs = BRAINSClipInferior.output_spec()
+    outputs = BRAINSClipInferior._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

@@ -6,12 +6,6 @@ from ..maths import MultiImageMaths
 def test_MultiImageMaths_inputs():
     input_map = dict(args=dict(argstr='%s',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     in_file=dict(argstr='%s',
     mandatory=True,
     position=2,
@@ -21,6 +15,7 @@ def test_MultiImageMaths_inputs():
     ),
     nan2zeros=dict(argstr='-nan',
     position=3,
+    usedefault=True,
     ),
     op_string=dict(argstr='%s',
     mandatory=True,
@@ -29,18 +24,16 @@ def test_MultiImageMaths_inputs():
     operand_files=dict(mandatory=True,
     ),
     out_file=dict(argstr='%s',
-    genfile=True,
     hash_files=False,
     position=-2,
     ),
     output_datatype=dict(argstr='-odt %s',
     position=-1,
     ),
-    output_type=dict(),
-    terminal_output=dict(nohash=True,
+    output_type=dict(usedefault=True,
     ),
     )
-    inputs = MultiImageMaths.input_spec()
+    inputs = MultiImageMaths._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -50,7 +43,7 @@ def test_MultiImageMaths_inputs():
 def test_MultiImageMaths_outputs():
     output_map = dict(out_file=dict(),
     )
-    outputs = MultiImageMaths.output_spec()
+    outputs = MultiImageMaths._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

@@ -239,8 +239,8 @@ class Extract(StdOutCommandLine):
     >>> extract.run() # doctest: +SKIP
     """
 
-    input_spec = ExtractInputSpec
-    output_spec = ExtractOutputSpec
+    _input_spec = ExtractInputSpec
+    _output_spec = ExtractOutputSpec
     _cmd = 'mincextract'
 
 
@@ -344,8 +344,8 @@ class ToRaw(StdOutCommandLine):
     >>> toraw.run() # doctest: +SKIP
     """
 
-    input_spec = ToRawInputSpec
-    output_spec = ToRawOutputSpec
+    _input_spec = ToRawInputSpec
+    _output_spec = ToRawOutputSpec
     _cmd = 'minctoraw'
 
 
@@ -419,8 +419,8 @@ class Convert(CommandLine):
     >>> c.run() # doctest: +SKIP
     """
 
-    input_spec = ConvertInputSpec
-    output_spec = ConvertOutputSpec
+    _input_spec = ConvertInputSpec
+    _output_spec = ConvertOutputSpec
     _cmd = 'mincconvert'
 
 
@@ -470,8 +470,8 @@ class Copy(CommandLine):
     with caution.
     """
 
-    input_spec = CopyInputSpec
-    output_spec = CopyOutputSpec
+    _input_spec = CopyInputSpec
+    _output_spec = CopyOutputSpec
     _cmd = 'minccopy'
 
 
@@ -550,8 +550,8 @@ class ToEcat(CommandLine):
 
     """
 
-    input_spec = ToEcatInputSpec
-    output_spec = ToEcatOutputSpec
+    _input_spec = ToEcatInputSpec
+    _output_spec = ToEcatOutputSpec
     _cmd = 'minctoecat'
 
 
@@ -644,8 +644,8 @@ class Dump(StdOutCommandLine):
 
     """
 
-    input_spec = DumpInputSpec
-    output_spec = DumpOutputSpec
+    _input_spec = DumpInputSpec
+    _output_spec = DumpOutputSpec
     _cmd = 'mincdump'
 
     def _format_arg(self, name, spec, value):
@@ -855,8 +855,8 @@ class Average(CommandLine):
 
     """
 
-    input_spec = AverageInputSpec
-    output_spec = AverageOutputSpec
+    _input_spec = AverageInputSpec
+    _output_spec = AverageOutputSpec
     _cmd = 'mincaverage'
 
 
@@ -908,8 +908,8 @@ class Blob(CommandLine):
     >>> blob.run() # doctest: +SKIP
     """
 
-    input_spec = BlobInputSpec
-    output_spec = BlobOutputSpec
+    _input_spec = BlobInputSpec
+    _output_spec = BlobOutputSpec
     _cmd = 'mincblob'
 
 
@@ -1123,8 +1123,8 @@ class Calc(CommandLine):
     >>> calc.run() # doctest: +SKIP
     """
 
-    input_spec = CalcInputSpec
-    output_spec = CalcOutputSpec
+    _input_spec = CalcInputSpec
+    _output_spec = CalcOutputSpec
     _cmd = 'minccalc'
 
 
@@ -1206,8 +1206,8 @@ class BBox(StdOutCommandLine):
     >>> bbox.run() # doctest: +SKIP
     """
 
-    input_spec = BBoxInputSpec
-    output_spec = BBoxOutputSpec
+    _input_spec = BBoxInputSpec
+    _output_spec = BBoxOutputSpec
     _cmd = 'mincbbox'
 
 
@@ -1369,8 +1369,8 @@ class Beast(CommandLine):
     >>> beast .run() # doctest: +SKIP
     """
 
-    input_spec = BeastInputSpec
-    output_spec = BeastOutputSpec
+    _input_spec = BeastInputSpec
+    _output_spec = BeastOutputSpec
     _cmd = 'mincbeast'
 
 
@@ -1536,8 +1536,8 @@ class Pik(CommandLine):
 
     """
 
-    input_spec = PikInputSpec
-    output_spec = PikOutputSpec
+    _input_spec = PikInputSpec
+    _output_spec = PikOutputSpec
     _cmd = 'mincpik'
 
     def _format_arg(self, name, spec, value):
@@ -1675,8 +1675,8 @@ class Blur(StdOutCommandLine):
     /tmp/out_6_dy.mnc, /tmp/out_6_dz.mnc and /tmp/out_6_dxyz.mnc.
     """
 
-    input_spec = BlurInputSpec
-    output_spec = BlurOutputSpec
+    _input_spec = BlurInputSpec
+    _output_spec = BlurOutputSpec
     _cmd = 'mincblur'
 
     def _gen_output_base(self):
@@ -1697,24 +1697,23 @@ class Blur(StdOutCommandLine):
             # '_bluroutput'
             return output_base
 
-    def _list_outputs(self):
-        outputs = self.output_spec().get()
+    def _post_run(self):
+        
 
         output_file_base = self._gen_output_base()
 
-        outputs['output_file'] = output_file_base + '_blur.mnc'
+        self.outputs.output_file = output_file_base + '_blur.mnc'
 
         if isdefined(self.inputs.gradient):
-            outputs['gradient_dxyz'] = output_file_base + '_dxyz.mnc'
+            self.outputs.gradient_dxyz = output_file_base + '_dxyz.mnc'
 
         if isdefined(self.inputs.partial):
-            outputs['partial_dx'] = output_file_base + '_dx.mnc'
-            outputs['partial_dy'] = output_file_base + '_dy.mnc'
-            outputs['partial_dz'] = output_file_base + '_dz.mnc'
-            outputs['partial_dxyz'] = output_file_base + '_dxyz.mnc'
+            self.outputs.partial_dx = output_file_base + '_dx.mnc'
+            self.outputs.partial_dy = output_file_base + '_dy.mnc'
+            self.outputs.partial_dz = output_file_base + '_dz.mnc'
+            self.outputs.partial_dxyz = output_file_base + '_dxyz.mnc'
 
-        return outputs
-
+        
     @property
     def cmdline(self):
         output_file_base = self.inputs.output_file_base
@@ -1968,7 +1967,7 @@ class MathInputSpec(CommandLineInputSpec):
         'segment',
         'nsegment',
         'isnan',
-        'isnan']  # FIXME enforce this in _parse_inputs and check for other members
+        'isnan']  # FIXME enforce this in parse_args and check for other members
 
     invert = traits.Either(
         traits.Float(),
@@ -2070,14 +2069,14 @@ class Math(StdOutCommandLine):
     >>> gt.run() # doctest: +SKIP
     """
 
-    input_spec = MathInputSpec
-    output_spec = MathOutputSpec
+    _input_spec = MathInputSpec
+    _output_spec = MathOutputSpec
     _cmd = 'mincmath'
 
     def _format_arg(self, name, spec, value):
         assert value is not None
 
-        if name in self.input_spec.bool_or_const_traits:
+        if name in self._input_spec.bool_or_const_traits:
             # t is unused, what was I trying to do with it?
             # t = self.inputs.__getattribute__(name)
 
@@ -2094,13 +2093,13 @@ class Math(StdOutCommandLine):
 
         return super(Math, self)._format_arg(name, spec, value)
 
-    def _parse_inputs(self):
+    def parse_args(self):
         """A number of the command line options expect precisely one or two files.
         """
 
         nr_input_files = len(self.inputs.input_files)
 
-        for n in self.input_spec.bool_or_const_traits:
+        for n in self._input_spec.bool_or_const_traits:
             t = self.inputs.__getattribute__(n)
 
             if isdefined(t):
@@ -2119,7 +2118,7 @@ class Math(StdOutCommandLine):
                         'Argument should be a bool or const, but got: %s' %
                         t)
 
-        for n in self.input_spec.single_volume_traits:
+        for n in self._input_spec.single_volume_traits:
             t = self.inputs.__getattribute__(n)
 
             if isdefined(t):
@@ -2128,7 +2127,7 @@ class Math(StdOutCommandLine):
                         'Due to the %s option we expected 1 file but input_files is of length %d' %
                         (n, nr_input_files,))
 
-        for n in self.input_spec.two_volume_traits:
+        for n in self._input_spec.two_volume_traits:
             t = self.inputs.__getattribute__(n)
 
             if isdefined(t):
@@ -2137,7 +2136,7 @@ class Math(StdOutCommandLine):
                         'Due to the %s option we expected 2 files but input_files is of length %d' %
                         (n, nr_input_files,))
 
-        for n in self.input_spec.n_volume_traits:
+        for n in self._input_spec.n_volume_traits:
             t = self.inputs.__getattribute__(n)
 
             if isdefined(t):
@@ -2146,7 +2145,7 @@ class Math(StdOutCommandLine):
                         'Due to the %s option we expected at least one file but input_files is of length %d' %
                         (n, nr_input_files,))
 
-        return super(Math, self)._parse_inputs()
+        return super(Math, self).parse_args()
 
 
 class ResampleInputSpec(CommandLineInputSpec):
@@ -2545,8 +2544,8 @@ class Resample(StdOutCommandLine):
 
     """
 
-    input_spec = ResampleInputSpec
-    output_spec = ResampleOutputSpec
+    _input_spec = ResampleInputSpec
+    _output_spec = ResampleOutputSpec
     _cmd = 'mincresample'
 
 
@@ -2659,8 +2658,8 @@ class Norm(CommandLine):
     >>> n.run() # doctest: +SKIP
     """
 
-    input_spec = NormInputSpec
-    output_spec = NormOutputSpec
+    _input_spec = NormInputSpec
+    _output_spec = NormOutputSpec
     _cmd = 'mincnorm'
 
 
@@ -2756,8 +2755,8 @@ class Volcentre(CommandLine):
     >>> vc.run() # doctest: +SKIP
     """
 
-    input_spec = VolcentreInputSpec
-    output_spec = VolcentreOutputSpec
+    _input_spec = VolcentreInputSpec
+    _output_spec = VolcentreOutputSpec
     _cmd = 'volcentre'
 
 
@@ -2847,8 +2846,8 @@ class Volpad(CommandLine):
     >>> vp.run() # doctest: +SKIP
     """
 
-    input_spec = VolpadInputSpec
-    output_spec = VolpadOutputSpec
+    _input_spec = VolpadInputSpec
+    _output_spec = VolpadOutputSpec
     _cmd = 'volpad'
 
 
@@ -2909,8 +2908,8 @@ class Voliso(CommandLine):
     >>> viso.run() # doctest: +SKIP
     """
 
-    input_spec = VolisoInputSpec
-    output_spec = VolisoOutputSpec
+    _input_spec = VolisoInputSpec
+    _output_spec = VolisoOutputSpec
     _cmd = 'voliso'
 
 
@@ -2968,16 +2967,15 @@ class Gennlxfm(CommandLine):
 
     """
 
-    input_spec = GennlxfmInputSpec
-    output_spec = GennlxfmOutputSpec
+    _input_spec = GennlxfmInputSpec
+    _output_spec = GennlxfmOutputSpec
     _cmd = 'gennlxfm'
 
-    def _list_outputs(self):
+    def _post_run(self):
         outputs = super(Gennlxfm, self)._list_outputs()
-        outputs['output_grid'] = re.sub(
-            '.(nlxfm|xfm)$', '_grid_0.mnc', outputs['output_file'])
-        return outputs
-
+        self.outputs.output_grid = re.sub(
+            '.(nlxfm|xfm)$', '_grid_0.mnc', self.outputs.output_file)
+        
 
 class XfmConcatInputSpec(CommandLineInputSpec):
     input_files = InputMultiPath(
@@ -3032,23 +3030,22 @@ class XfmConcat(CommandLine):
     >>> conc.run() # doctest: +SKIP
     """
 
-    input_spec = XfmConcatInputSpec
-    output_spec = XfmConcatOutputSpec
+    _input_spec = XfmConcatInputSpec
+    _output_spec = XfmConcatOutputSpec
     _cmd = 'xfmconcat'
 
-    def _list_outputs(self):
+    def _post_run(self):
         outputs = super(XfmConcat, self)._list_outputs()
 
-        if os.path.exists(outputs['output_file']):
-            if 'grid' in open(outputs['output_file'], 'r').read():
-                outputs['output_grids'] = glob.glob(
+        if os.path.exists(self.outputs.output_file):
+            if 'grid' in open(self.outputs.output_file, 'r').read():
+                self.outputs.output_grids = glob.glob(
                     re.sub(
                         '.(nlxfm|xfm)$',
                         '_grid_*.mnc',
-                        outputs['output_file']))
+                        self.outputs.output_file))
 
-        return outputs
-
+        
 
 class BestLinRegInputSpec(CommandLineInputSpec):
     source = File(
@@ -3129,8 +3126,8 @@ class BestLinReg(CommandLine):
     >>> linreg.run() # doctest: +SKIP
     """
 
-    input_spec = BestLinRegInputSpec
-    output_spec = BestLinRegOutputSpec
+    _input_spec = BestLinRegInputSpec
+    _output_spec = BestLinRegOutputSpec
     _cmd = 'bestlinreg'
 
 
@@ -3216,8 +3213,8 @@ class NlpFit(CommandLine):
     >>> nlpfit.run() # doctest: +SKIP
     """
 
-    input_spec = NlpFitInputSpec
-    output_spec = NlpFitOutputSpec
+    _input_spec = NlpFitInputSpec
+    _output_spec = NlpFitOutputSpec
     _cmd = 'nlpfit'
 
     def _gen_filename(self, name):
@@ -3232,18 +3229,17 @@ class NlpFit(CommandLine):
         else:
             raise NotImplemented
 
-    def _list_outputs(self):
-        outputs = self.output_spec().get()
-        outputs['output_xfm'] = os.path.abspath(
+    def _post_run(self):
+        
+        self.outputs.output_xfm = os.path.abspath(
             self._gen_filename('output_xfm'))
 
-        assert os.path.exists(outputs['output_xfm'])
-        if 'grid' in open(outputs['output_xfm'], 'r').read():
-            outputs['output_grid'] = re.sub(
-                '.(nlxfm|xfm)$', '_grid_0.mnc', outputs['output_xfm'])
+        assert os.path.exists(self.outputs.output_xfm)
+        if 'grid' in open(self.outputs.output_xfm, 'r').read():
+            self.outputs.output_grid = re.sub(
+                '.(nlxfm|xfm)$', '_grid_0.mnc', self.outputs.output_xfm)
 
-        return outputs
-
+        
 
 class XfmAvgInputSpec(CommandLineInputSpec):
     input_files = InputMultiPath(
@@ -3318,8 +3314,8 @@ class XfmAvg(CommandLine):
     >>> xfmavg.run() # doctest: +SKIP
     """
 
-    input_spec = XfmAvgInputSpec
-    output_spec = XfmAvgOutputSpec
+    _input_spec = XfmAvgInputSpec
+    _output_spec = XfmAvgOutputSpec
     _cmd = 'xfmavg'
 
     def _gen_filename(self, name):
@@ -3337,17 +3333,16 @@ class XfmAvg(CommandLine):
     def _gen_outfilename(self):
         return self._gen_filename('output_file')
 
-    def _list_outputs(self):
-        outputs = self.output_spec().get()
-        outputs['output_file'] = os.path.abspath(self._gen_outfilename())
+    def _post_run(self):
+        
+        self.outputs.output_file = os.path.abspath(self._gen_outfilename())
 
-        assert os.path.exists(outputs['output_file'])
-        if 'grid' in open(outputs['output_file'], 'r').read():
-            outputs['output_grid'] = re.sub(
-                '.(nlxfm|xfm)$', '_grid_0.mnc', outputs['output_file'])
+        assert os.path.exists(self.outputs.output_file)
+        if 'grid' in open(self.outputs.output_file, 'r').read():
+            self.outputs.output_grid = re.sub(
+                '.(nlxfm|xfm)$', '_grid_0.mnc', self.outputs.output_file)
 
-        return outputs
-
+        
 
 class XfmInvertInputSpec(CommandLineInputSpec):
     input_file = traits.File(
@@ -3392,8 +3387,8 @@ class XfmInvert(CommandLine):
     >>> invert.run() # doctest: +SKIP
     """
 
-    input_spec = XfmInvertInputSpec
-    output_spec = XfmInvertOutputSpec
+    _input_spec = XfmInvertInputSpec
+    _output_spec = XfmInvertOutputSpec
     _cmd = 'xfminvert'
 
     def _gen_filename(self, name):
@@ -3411,17 +3406,16 @@ class XfmInvert(CommandLine):
     def _gen_outfilename(self):
         return self._gen_filename('output_file')
 
-    def _list_outputs(self):
-        outputs = self.output_spec().get()
-        outputs['output_file'] = os.path.abspath(self._gen_outfilename())
+    def _post_run(self):
+        
+        self.outputs.output_file = os.path.abspath(self._gen_outfilename())
 
-        assert os.path.exists(outputs['output_file'])
-        if 'grid' in open(outputs['output_file'], 'r').read():
-            outputs['output_grid'] = re.sub(
-                '.(nlxfm|xfm)$', '_grid_0.mnc', outputs['output_file'])
+        assert os.path.exists(self.outputs.output_file)
+        if 'grid' in open(self.outputs.output_file, 'r').read():
+            self.outputs.output_grid = re.sub(
+                '.(nlxfm|xfm)$', '_grid_0.mnc', self.outputs.output_file)
 
-        return outputs
-
+        
 
 class BigAverageInputSpec(CommandLineInputSpec):
     input_files = InputMultiPath(
@@ -3512,8 +3506,8 @@ class BigAverage(CommandLine):
     >>> average.run() # doctest: +SKIP
     """
 
-    input_spec = BigAverageInputSpec
-    output_spec = BigAverageOutputSpec
+    _input_spec = BigAverageInputSpec
+    _output_spec = BigAverageOutputSpec
     _cmd = 'mincbigaverage'
 
 
@@ -3572,8 +3566,8 @@ class Reshape(CommandLine):
 
     """
 
-    input_spec = ReshapeInputSpec
-    output_spec = ReshapeOutputSpec
+    _input_spec = ReshapeInputSpec
+    _output_spec = ReshapeOutputSpec
     _cmd = 'mincreshape'
 
 
@@ -3669,17 +3663,17 @@ class VolSymm(CommandLine):
 
     """
 
-    input_spec = VolSymmInputSpec
-    output_spec = VolSymmOutputSpec
+    _input_spec = VolSymmInputSpec
+    _output_spec = VolSymmOutputSpec
     _cmd = 'volsymm'
 
-    def _list_outputs(self):
+    def _post_run(self):
         outputs = super(VolSymm, self)._list_outputs()
 
         # Have to manually check for the grid files.
-        if os.path.exists(outputs['trans_file']):
-            if 'grid' in open(outputs['trans_file'], 'r').read():
-                outputs['output_grid'] = re.sub(
-                    '.(nlxfm|xfm)$', '_grid_0.mnc', outputs['trans_file'])
+        if os.path.exists(self.outputs.trans_file):
+            if 'grid' in open(self.outputs.trans_file, 'r').read():
+                self.outputs.output_grid = re.sub(
+                    '.(nlxfm|xfm)$', '_grid_0.mnc', self.outputs.trans_file)
 
-        return outputs
+        

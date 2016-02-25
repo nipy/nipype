@@ -10,12 +10,6 @@ def test_Shredder_inputs():
     position=2,
     units='NA',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     in_file=dict(argstr='< %s',
     mandatory=True,
     position=-2,
@@ -25,17 +19,15 @@ def test_Shredder_inputs():
     units='NA',
     ),
     out_file=dict(argstr='> %s',
-    genfile=True,
     position=-1,
+    usedefault=True,
     ),
     space=dict(argstr='%d',
     position=3,
     units='NA',
     ),
-    terminal_output=dict(nohash=True,
-    ),
     )
-    inputs = Shredder.input_spec()
+    inputs = Shredder._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -45,7 +37,7 @@ def test_Shredder_inputs():
 def test_Shredder_outputs():
     output_map = dict(shredded=dict(),
     )
-    outputs = Shredder.output_spec()
+    outputs = Shredder._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

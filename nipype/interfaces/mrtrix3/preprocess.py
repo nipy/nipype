@@ -102,17 +102,16 @@ class ResponseSD(MRTrix3Base):
     """
 
     _cmd = 'dwi2response'
-    input_spec = ResponseSDInputSpec
-    output_spec = ResponseSDOutputSpec
+    _input_spec = ResponseSDInputSpec
+    _output_spec = ResponseSDOutputSpec
 
-    def _list_outputs(self):
-        outputs = self.output_spec().get()
-        outputs['out_file'] = op.abspath(self.inputs.out_file)
+    def _post_run(self):
+        
+        self.outputs.out_file = op.abspath(self.inputs.out_file)
 
         if isdefined(self.inputs.out_sf):
-            outputs['out_sf'] = op.abspath(self.inputs.out_sf)
-        return outputs
-
+            self.outputs.out_sf = op.abspath(self.inputs.out_sf)
+        
 
 class ACTPrepareFSLInputSpec(CommandLineInputSpec):
     in_file = File(exists=True, argstr='%s', mandatory=True, position=-2,
@@ -145,14 +144,13 @@ class ACTPrepareFSL(CommandLine):
     """
 
     _cmd = 'act_anat_prepare_fsl'
-    input_spec = ACTPrepareFSLInputSpec
-    output_spec = ACTPrepareFSLOutputSpec
+    _input_spec = ACTPrepareFSLInputSpec
+    _output_spec = ACTPrepareFSLOutputSpec
 
-    def _list_outputs(self):
-        outputs = self.output_spec().get()
-        outputs['out_file'] = op.abspath(self.inputs.out_file)
-        return outputs
-
+    def _post_run(self):
+        
+        self.outputs.out_file = op.abspath(self.inputs.out_file)
+        
 
 class ReplaceFSwithFIRSTInputSpec(CommandLineInputSpec):
     in_file = File(exists=True, argstr='%s', mandatory=True, position=-4,
@@ -192,10 +190,10 @@ mrtrix3_labelconfig.txt aparc+first.mif'
     """
 
     _cmd = 'fs_parc_replace_sgm_first'
-    input_spec = ReplaceFSwithFIRSTInputSpec
-    output_spec = ReplaceFSwithFIRSTOutputSpec
+    _input_spec = ReplaceFSwithFIRSTInputSpec
+    _output_spec = ReplaceFSwithFIRSTOutputSpec
 
-    def _list_outputs(self):
-        outputs = self.output_spec().get()
-        outputs['out_file'] = op.abspath(self.inputs.out_file)
-        return outputs
+    def _post_run(self):
+        
+        self.outputs.out_file = op.abspath(self.inputs.out_file)
+        

@@ -77,7 +77,7 @@ class MatlabCommand(CommandLine):
     _default_matlab_cmd = None
     _default_mfile = None
     _default_paths = None
-    input_spec = MatlabInputSpec
+    _input_spec = MatlabInputSpec
 
     def __init__(self, matlab_cmd=None, **inputs):
         """initializes interface to matlab

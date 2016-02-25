@@ -14,7 +14,7 @@ import string
 import warnings
 import networkx as nx
 
-from nipype.interfaces.base import (BaseInterface, BaseInterfaceInputSpec, traits,
+from nipype.interfaces.base import (BaseInterface, BaseInputSpec, traits,
                                     File, TraitedSpec, InputMultiPath, isdefined)
 from nipype.utils.filemanip import split_filename
 from nipype.utils.misc import package_check
@@ -28,7 +28,7 @@ else:
     import cfflib as cf
 
 
-class CFFConverterInputSpec(BaseInterfaceInputSpec):
+class CFFConverterInputSpec(BaseInputSpec):
     graphml_networks = InputMultiPath(File(exists=True), desc='list of graphML networks')
     gpickled_networks = InputMultiPath(File(exists=True), desc='list of gpickled Networkx graphs')
 
@@ -75,8 +75,8 @@ class CFFConverter(BaseInterface):
     >>> cvt.run()                 # doctest: +SKIP
     """
 
-    input_spec = CFFConverterInputSpec
-    output_spec = CFFConverterOutputSpec
+    _input_spec = CFFConverterInputSpec
+    _output_spec = CFFConverterOutputSpec
 
     def _run_interface(self, runtime):
         a = cf.connectome()
@@ -197,16 +197,14 @@ class CFFConverter(BaseInterface):
 
         return runtime
 
-    def _list_outputs(self):
-        outputs = self._outputs().get()
+    def _post_run(self):
         _, name, ext = split_filename(self.inputs.out_file)
         if not ext == '.cff':
             ext = '.cff'
-        outputs['connectome_file'] = op.abspath(name + ext)
-        return outputs
+        self.outputs.connectome_file = op.abspath(name + ext)
+        
 
-
-class MergeCNetworksInputSpec(BaseInterfaceInputSpec):
+class MergeCNetworksInputSpec(BaseInputSpec):
     in_files = InputMultiPath(File(exists=True), mandatory=True, desc='List of CFF files to extract networks from')
     out_file = File('merged_network_connectome.cff', usedefault=True, desc='Output CFF file with all the networks added')
 
@@ -227,8 +225,8 @@ class MergeCNetworks(BaseInterface):
     >>> mrg.run()                  # doctest: +SKIP
 
     """
-    input_spec = MergeCNetworksInputSpec
-    output_spec = MergeCNetworksOutputSpec
+    _input_spec = MergeCNetworksInputSpec
+    _output_spec = MergeCNetworksOutputSpec
 
     def _run_interface(self, runtime):
         extracted_networks = []
@@ -259,10 +257,9 @@ class MergeCNetworks(BaseInterface):
 
         return runtime
 
-    def _list_outputs(self):
-        outputs = self._outputs().get()
+    def _post_run(self):
         _, name, ext = split_filename(self.inputs.out_file)
         if not ext == '.cff':
             ext = '.cff'
-        outputs['connectome_file'] = op.abspath(name + ext)
-        return outputs
+        self.outputs.connectome_file = op.abspath(name + ext)
+        

@@ -8,12 +8,6 @@ def test_ApplyTransformsToPoints_inputs():
     ),
     dimension=dict(argstr='--dimensionality %d',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     input_file=dict(argstr='--input %s',
     mandatory=True,
     ),
@@ -26,13 +20,11 @@ def test_ApplyTransformsToPoints_inputs():
     name_source=['input_file'],
     name_template='%s_transformed.csv',
     ),
-    terminal_output=dict(nohash=True,
-    ),
     transforms=dict(argstr='%s',
     mandatory=True,
     ),
     )
-    inputs = ApplyTransformsToPoints.input_spec()
+    inputs = ApplyTransformsToPoints._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -42,7 +34,7 @@ def test_ApplyTransformsToPoints_inputs():
 def test_ApplyTransformsToPoints_outputs():
     output_map = dict(output_file=dict(),
     )
-    outputs = ApplyTransformsToPoints.output_spec()
+    outputs = ApplyTransformsToPoints._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

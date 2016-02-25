@@ -11,16 +11,10 @@ def test_ConvertXFM_inputs():
     requires=['in_file2'],
     xor=['invert_xfm', 'concat_xfm', 'fix_scale_skew'],
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
     fix_scale_skew=dict(argstr='-fixscaleskew',
     position=-3,
     requires=['in_file2'],
     xor=['invert_xfm', 'concat_xfm', 'fix_scale_skew'],
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
     ),
     in_file=dict(argstr='%s',
     mandatory=True,
@@ -33,16 +27,19 @@ def test_ConvertXFM_inputs():
     position=-3,
     xor=['invert_xfm', 'concat_xfm', 'fix_scale_skew'],
     ),
+    operation=dict(argstr='-%s',
+    mandatory=True,
+    position=-3,
+    usedefault=True,
+    ),
     out_file=dict(argstr='-omat %s',
-    genfile=True,
     hash_files=False,
     position=1,
     ),
-    output_type=dict(),
-    terminal_output=dict(nohash=True,
+    output_type=dict(usedefault=True,
     ),
     )
-    inputs = ConvertXFM.input_spec()
+    inputs = ConvertXFM._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -52,7 +49,7 @@ def test_ConvertXFM_inputs():
 def test_ConvertXFM_outputs():
     output_map = dict(out_file=dict(),
     )
-    outputs = ConvertXFM.output_spec()
+    outputs = ConvertXFM._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

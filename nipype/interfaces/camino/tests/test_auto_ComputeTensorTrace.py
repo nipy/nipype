@@ -6,12 +6,6 @@ from ..dti import ComputeTensorTrace
 def test_ComputeTensorTrace_inputs():
     input_map = dict(args=dict(argstr='%s',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     in_file=dict(argstr='< %s',
     mandatory=True,
     position=1,
@@ -21,18 +15,16 @@ def test_ComputeTensorTrace_inputs():
     inputmodel=dict(argstr='-inputmodel %s',
     ),
     out_file=dict(argstr='> %s',
-    genfile=True,
     position=-1,
+    usedefault=True,
     ),
     outputdatatype=dict(argstr='-outputdatatype %s',
     ),
     scheme_file=dict(argstr='%s',
     position=2,
     ),
-    terminal_output=dict(nohash=True,
-    ),
     )
-    inputs = ComputeTensorTrace.input_spec()
+    inputs = ComputeTensorTrace._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -42,7 +34,7 @@ def test_ComputeTensorTrace_inputs():
 def test_ComputeTensorTrace_outputs():
     output_map = dict(trace=dict(),
     )
-    outputs = ComputeTensorTrace.output_spec()
+    outputs = ComputeTensorTrace._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

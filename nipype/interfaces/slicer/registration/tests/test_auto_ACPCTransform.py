@@ -10,21 +10,13 @@ def test_ACPCTransform_inputs():
     ),
     debugSwitch=dict(argstr='--debugSwitch ',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     midline=dict(argstr='--midline %s...',
     ),
     outputTransform=dict(argstr='--outputTransform %s',
     hash_files=False,
     ),
-    terminal_output=dict(nohash=True,
-    ),
     )
-    inputs = ACPCTransform.input_spec()
+    inputs = ACPCTransform._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -34,7 +26,7 @@ def test_ACPCTransform_inputs():
 def test_ACPCTransform_outputs():
     output_map = dict(outputTransform=dict(),
     )
-    outputs = ACPCTransform.output_spec()
+    outputs = ACPCTransform._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

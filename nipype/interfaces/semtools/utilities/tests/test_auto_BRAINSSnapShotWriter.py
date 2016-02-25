@@ -6,12 +6,6 @@ from ..brains import BRAINSSnapShotWriter
 def test_BRAINSSnapShotWriter_inputs():
     input_map = dict(args=dict(argstr='%s',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     inputBinaryVolumes=dict(argstr='--inputBinaryVolumes %s...',
     ),
     inputPlaneDirection=dict(argstr='--inputPlaneDirection %s',
@@ -31,10 +25,8 @@ def test_BRAINSSnapShotWriter_inputs():
     outputFilename=dict(argstr='--outputFilename %s',
     hash_files=False,
     ),
-    terminal_output=dict(nohash=True,
-    ),
     )
-    inputs = BRAINSSnapShotWriter.input_spec()
+    inputs = BRAINSSnapShotWriter._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -44,7 +36,7 @@ def test_BRAINSSnapShotWriter_inputs():
 def test_BRAINSSnapShotWriter_outputs():
     output_map = dict(outputFilename=dict(),
     )
-    outputs = BRAINSSnapShotWriter.output_spec()
+    outputs = BRAINSSnapShotWriter._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

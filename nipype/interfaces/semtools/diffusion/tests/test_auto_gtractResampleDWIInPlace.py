@@ -8,12 +8,6 @@ def test_gtractResampleDWIInPlace_inputs():
     ),
     debugLevel=dict(argstr='--debugLevel %d',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     imageOutputSize=dict(argstr='--imageOutputSize %s',
     sep=',',
     ),
@@ -31,12 +25,10 @@ def test_gtractResampleDWIInPlace_inputs():
     ),
     referenceVolume=dict(argstr='--referenceVolume %s',
     ),
-    terminal_output=dict(nohash=True,
-    ),
     warpDWITransform=dict(argstr='--warpDWITransform %s',
     ),
     )
-    inputs = gtractResampleDWIInPlace.input_spec()
+    inputs = gtractResampleDWIInPlace._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -47,7 +39,7 @@ def test_gtractResampleDWIInPlace_outputs():
     output_map = dict(outputResampledB0=dict(),
     outputVolume=dict(),
     )
-    outputs = gtractResampleDWIInPlace.output_spec()
+    outputs = gtractResampleDWIInPlace._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

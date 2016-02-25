@@ -16,15 +16,9 @@ def test_BSplineDeformableRegistration_inputs():
     ),
     default=dict(argstr='--default %d',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
     gridSize=dict(argstr='--gridSize %d',
     ),
     histogrambins=dict(argstr='--histogrambins %d',
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
     ),
     initialtransform=dict(argstr='--initialtransform %s',
     ),
@@ -43,10 +37,8 @@ def test_BSplineDeformableRegistration_inputs():
     ),
     spatialsamples=dict(argstr='--spatialsamples %d',
     ),
-    terminal_output=dict(nohash=True,
-    ),
     )
-    inputs = BSplineDeformableRegistration.input_spec()
+    inputs = BSplineDeformableRegistration._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -58,7 +50,7 @@ def test_BSplineDeformableRegistration_outputs():
     outputwarp=dict(),
     resampledmovingfilename=dict(),
     )
-    outputs = BSplineDeformableRegistration.output_spec()
+    outputs = BSplineDeformableRegistration._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

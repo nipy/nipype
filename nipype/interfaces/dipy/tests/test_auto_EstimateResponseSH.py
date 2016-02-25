@@ -11,9 +11,6 @@ def test_EstimateResponseSH_inputs():
     ),
     fa_thresh=dict(usedefault=True,
     ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     in_bval=dict(mandatory=True,
     ),
     in_bvec=dict(mandatory=True,
@@ -34,7 +31,7 @@ def test_EstimateResponseSH_inputs():
     roi_radius=dict(usedefault=True,
     ),
     )
-    inputs = EstimateResponseSH.input_spec()
+    inputs = EstimateResponseSH._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -45,7 +42,7 @@ def test_EstimateResponseSH_outputs():
     output_map = dict(out_mask=dict(),
     response=dict(),
     )
-    outputs = EstimateResponseSH.output_spec()
+    outputs = EstimateResponseSH._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

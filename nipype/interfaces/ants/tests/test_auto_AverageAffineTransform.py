@@ -11,12 +11,6 @@ def test_AverageAffineTransform_inputs():
     position=0,
     usedefault=False,
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     num_threads=dict(nohash=True,
     usedefault=True,
     ),
@@ -24,14 +18,12 @@ def test_AverageAffineTransform_inputs():
     mandatory=True,
     position=1,
     ),
-    terminal_output=dict(nohash=True,
-    ),
     transforms=dict(argstr='%s',
     mandatory=True,
     position=3,
     ),
     )
-    inputs = AverageAffineTransform.input_spec()
+    inputs = AverageAffineTransform._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -41,7 +33,7 @@ def test_AverageAffineTransform_inputs():
 def test_AverageAffineTransform_outputs():
     output_map = dict(affine_transform=dict(),
     )
-    outputs = AverageAffineTransform.output_spec()
+    outputs = AverageAffineTransform._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

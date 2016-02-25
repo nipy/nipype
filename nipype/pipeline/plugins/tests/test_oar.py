@@ -17,18 +17,16 @@ class OutputSpec(nib.TraitedSpec):
 
 
 class TestInterface(nib.BaseInterface):
-    input_spec = InputSpec
-    output_spec = OutputSpec
+    _input_spec = InputSpec
+    _output_spec = OutputSpec
 
     def _run_interface(self, runtime):
         runtime.returncode = 0
         return runtime
 
-    def _list_outputs(self):
-        outputs = self._outputs().get()
-        outputs['output1'] = [1, self.inputs.input1]
-        return outputs
-
+    def _post_run(self):
+        self.outputs.output1 = [1, self.inputs.input1]
+        
 
 @skipif(True)
 def test_run_oar():

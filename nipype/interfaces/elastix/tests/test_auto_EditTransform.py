@@ -4,10 +4,7 @@ from ..utils import EditTransform
 
 
 def test_EditTransform_inputs():
-    input_map = dict(ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
-    interpolation=dict(argstr='FinalBSplineInterpolationOrder',
+    input_map = dict(interpolation=dict(argstr='FinalBSplineInterpolationOrder',
     usedefault=True,
     ),
     output_file=dict(),
@@ -19,7 +16,7 @@ def test_EditTransform_inputs():
     transform_file=dict(mandatory=True,
     ),
     )
-    inputs = EditTransform.input_spec()
+    inputs = EditTransform._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -29,7 +26,7 @@ def test_EditTransform_inputs():
 def test_EditTransform_outputs():
     output_map = dict(output_file=dict(),
     )
-    outputs = EditTransform.output_spec()
+    outputs = EditTransform._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

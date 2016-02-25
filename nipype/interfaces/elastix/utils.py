@@ -10,13 +10,13 @@ transform files (to configure warpings)
 import os.path as op
 import re
 
-from ..base import (BaseInterface, BaseInterfaceInputSpec, isdefined,
+from ..base import (BaseInterface, BaseInputSpec, isdefined,
                     TraitedSpec, File, traits, InputMultiPath)
 from ... import logging
 logger = logging.getLogger('interface')
 
 
-class EditTransformInputSpec(BaseInterfaceInputSpec):
+class EditTransformInputSpec(BaseInputSpec):
     transform_file = File(exists=True, mandatory=True,
                           desc='transform-parameter file, only 1')
     reference_image = File(exists=True,
@@ -56,8 +56,8 @@ class EditTransform(BaseInterface):
 
     """
 
-    input_spec = EditTransformInputSpec
-    output_spec = EditTransformOutputSpec
+    _input_spec = EditTransformInputSpec
+    _output_spec = EditTransformOutputSpec
     _out_file = ''
     _pattern = '\((?P<entry>%s\s\"?)([-\.\s\w]+)(\"?\))'
 
@@ -130,11 +130,10 @@ class EditTransform(BaseInterface):
 
         return runtime
 
-    def _list_outputs(self):
-        outputs = self.output_spec().get()
-        outputs['output_file'] = getattr(self, '_out_file')
-        return outputs
-
+    def _post_run(self):
+        
+        self.outputs.output_file = getattr(self, '_out_file')
+        
     def _get_outfile(self):
         val = getattr(self, '_out_file')
         if val is not None and val != '':

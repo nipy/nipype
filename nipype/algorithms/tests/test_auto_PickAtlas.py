@@ -10,14 +10,15 @@ def test_PickAtlas_inputs():
     ),
     hemi=dict(usedefault=True,
     ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     labels=dict(mandatory=True,
     ),
-    output_file=dict(),
+    mask_file=dict(ns='atlas',
+    ),
+    output_file=dict(deprecated=True,
+    new_name='mask_file',
+    ),
     )
-    inputs = PickAtlas.input_spec()
+    inputs = PickAtlas._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -27,7 +28,7 @@ def test_PickAtlas_inputs():
 def test_PickAtlas_outputs():
     output_map = dict(mask_file=dict(),
     )
-    outputs = PickAtlas.output_spec()
+    outputs = PickAtlas._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

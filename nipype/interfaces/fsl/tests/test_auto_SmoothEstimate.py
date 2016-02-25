@@ -10,26 +10,19 @@ def test_SmoothEstimate_inputs():
     mandatory=True,
     xor=['zstat_file'],
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     mask_file=dict(argstr='--mask=%s',
     mandatory=True,
     ),
-    output_type=dict(),
+    output_type=dict(usedefault=True,
+    ),
     residual_fit_file=dict(argstr='--res=%s',
     requires=['dof'],
-    ),
-    terminal_output=dict(nohash=True,
     ),
     zstat_file=dict(argstr='--zstat=%s',
     xor=['dof'],
     ),
     )
-    inputs = SmoothEstimate.input_spec()
+    inputs = SmoothEstimate._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -41,7 +34,7 @@ def test_SmoothEstimate_outputs():
     resels=dict(),
     volume=dict(),
     )
-    outputs = SmoothEstimate.output_spec()
+    outputs = SmoothEstimate._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

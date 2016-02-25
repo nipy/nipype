@@ -12,12 +12,6 @@ def test_MCFLIRT_inputs():
     ),
     dof=dict(argstr='-dof %d',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     in_file=dict(argstr='-in %s',
     mandatory=True,
     position=0,
@@ -29,10 +23,10 @@ def test_MCFLIRT_inputs():
     mean_vol=dict(argstr='-meanvol',
     ),
     out_file=dict(argstr='-out %s',
-    genfile=True,
     hash_files=False,
     ),
-    output_type=dict(),
+    output_type=dict(usedefault=True,
+    ),
     ref_file=dict(argstr='-reffile %s',
     ),
     ref_vol=dict(argstr='-refvol %d',
@@ -53,14 +47,12 @@ def test_MCFLIRT_inputs():
     ),
     stats_imgs=dict(argstr='-stats',
     ),
-    terminal_output=dict(nohash=True,
-    ),
     use_contour=dict(argstr='-edge',
     ),
     use_gradient=dict(argstr='-gdt',
     ),
     )
-    inputs = MCFLIRT.input_spec()
+    inputs = MCFLIRT._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -76,7 +68,7 @@ def test_MCFLIRT_outputs():
     std_img=dict(),
     variance_img=dict(),
     )
-    outputs = MCFLIRT.output_spec()
+    outputs = MCFLIRT._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

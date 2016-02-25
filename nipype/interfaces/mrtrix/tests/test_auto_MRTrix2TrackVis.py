@@ -13,7 +13,7 @@ def test_MRTrix2TrackVis_inputs():
     ),
     registration_image_file=dict(),
     )
-    inputs = MRTrix2TrackVis.input_spec()
+    inputs = MRTrix2TrackVis._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -23,7 +23,7 @@ def test_MRTrix2TrackVis_inputs():
 def test_MRTrix2TrackVis_outputs():
     output_map = dict(out_file=dict(),
     )
-    outputs = MRTrix2TrackVis.output_spec()
+    outputs = MRTrix2TrackVis._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

@@ -6,18 +6,12 @@ from ..preprocess import SynthesizeFLASH
 def test_SynthesizeFLASH_inputs():
     input_map = dict(args=dict(argstr='%s',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
     fixed_weighting=dict(argstr='-w',
     position=1,
     ),
     flip_angle=dict(argstr='%.2f',
     mandatory=True,
     position=3,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
     ),
     out_file=dict(argstr='%s',
     genfile=True,
@@ -35,14 +29,12 @@ def test_SynthesizeFLASH_inputs():
     mandatory=True,
     position=4,
     ),
-    terminal_output=dict(nohash=True,
-    ),
     tr=dict(argstr='%.2f',
     mandatory=True,
     position=2,
     ),
     )
-    inputs = SynthesizeFLASH.input_spec()
+    inputs = SynthesizeFLASH._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -52,7 +44,7 @@ def test_SynthesizeFLASH_inputs():
 def test_SynthesizeFLASH_outputs():
     output_map = dict(out_file=dict(),
     )
-    outputs = SynthesizeFLASH.output_spec()
+    outputs = SynthesizeFLASH._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

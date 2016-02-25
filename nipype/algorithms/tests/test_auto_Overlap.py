@@ -7,9 +7,6 @@ def test_Overlap_inputs():
     input_map = dict(bg_overlap=dict(mandatory=True,
     usedefault=True,
     ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     mask_volume=dict(),
     out_file=dict(usedefault=True,
     ),
@@ -23,7 +20,7 @@ def test_Overlap_inputs():
     weighting=dict(usedefault=True,
     ),
     )
-    inputs = Overlap.input_spec()
+    inputs = Overlap._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -40,7 +37,7 @@ def test_Overlap_outputs():
     roi_voldiff=dict(),
     volume_difference=dict(),
     )
-    outputs = Overlap.output_spec()
+    outputs = Overlap._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

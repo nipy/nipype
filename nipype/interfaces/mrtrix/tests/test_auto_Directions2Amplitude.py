@@ -10,12 +10,6 @@ def test_Directions2Amplitude_inputs():
     ),
     display_info=dict(argstr='-info',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     in_file=dict(argstr='%s',
     mandatory=True,
     position=-2,
@@ -36,10 +30,8 @@ def test_Directions2Amplitude_inputs():
     ),
     quiet_display=dict(argstr='-quiet',
     ),
-    terminal_output=dict(nohash=True,
-    ),
     )
-    inputs = Directions2Amplitude.input_spec()
+    inputs = Directions2Amplitude._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -49,7 +41,7 @@ def test_Directions2Amplitude_inputs():
 def test_Directions2Amplitude_outputs():
     output_map = dict(out_file=dict(),
     )
-    outputs = Directions2Amplitude.output_spec()
+    outputs = Directions2Amplitude._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

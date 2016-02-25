@@ -10,19 +10,13 @@ def test_ExtractROI_inputs():
     position=2,
     xor=['x_min', 'x_size', 'y_min', 'y_size', 'z_min', 'z_size', 't_min', 't_size'],
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     in_file=dict(argstr='%s',
     mandatory=True,
     position=0,
     ),
-    output_type=dict(),
+    output_type=dict(usedefault=True,
+    ),
     roi_file=dict(argstr='%s',
-    genfile=True,
     hash_files=False,
     position=1,
     ),
@@ -31,8 +25,6 @@ def test_ExtractROI_inputs():
     ),
     t_size=dict(argstr='%d',
     position=9,
-    ),
-    terminal_output=dict(nohash=True,
     ),
     x_min=dict(argstr='%d',
     position=2,
@@ -53,7 +45,7 @@ def test_ExtractROI_inputs():
     position=7,
     ),
     )
-    inputs = ExtractROI.input_spec()
+    inputs = ExtractROI._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -63,7 +55,7 @@ def test_ExtractROI_inputs():
 def test_ExtractROI_outputs():
     output_map = dict(roi_file=dict(),
     )
-    outputs = ExtractROI.output_spec()
+    outputs = ExtractROI._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

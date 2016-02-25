@@ -6,28 +6,20 @@ from ..convert import Image2Voxel
 def test_Image2Voxel_inputs():
     input_map = dict(args=dict(argstr='%s',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     in_file=dict(argstr='-4dimage %s',
     mandatory=True,
     position=1,
     ),
     out_file=dict(argstr='> %s',
-    genfile=True,
     position=-1,
+    usedefault=True,
     ),
     out_type=dict(argstr='-outputdatatype %s',
     position=2,
     usedefault=True,
     ),
-    terminal_output=dict(nohash=True,
-    ),
     )
-    inputs = Image2Voxel.input_spec()
+    inputs = Image2Voxel._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -37,7 +29,7 @@ def test_Image2Voxel_inputs():
 def test_Image2Voxel_outputs():
     output_map = dict(voxel_order=dict(),
     )
-    outputs = Image2Voxel.output_spec()
+    outputs = Image2Voxel._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

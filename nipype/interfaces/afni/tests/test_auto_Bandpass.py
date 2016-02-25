@@ -12,15 +12,9 @@ def test_Bandpass_inputs():
     ),
     despike=dict(argstr='-despike',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
     highpass=dict(argstr='%f',
     mandatory=True,
     position=-3,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
     ),
     in_file=dict(argstr='%s',
     copyfile=False,
@@ -54,13 +48,12 @@ def test_Bandpass_inputs():
     name_template='%s_bp',
     position=1,
     ),
-    outputtype=dict(),
-    terminal_output=dict(nohash=True,
+    output_type=dict(usedefault=True,
     ),
     tr=dict(argstr='-dt %f',
     ),
     )
-    inputs = Bandpass.input_spec()
+    inputs = Bandpass._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -70,7 +63,7 @@ def test_Bandpass_inputs():
 def test_Bandpass_outputs():
     output_map = dict(out_file=dict(),
     )
-    outputs = Bandpass.output_spec()
+    outputs = Bandpass._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

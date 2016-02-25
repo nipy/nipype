@@ -10,16 +10,10 @@ def test_gtractCoRegAnatomy_inputs():
     ),
     convergence=dict(argstr='--convergence %f',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
     gradientTolerance=dict(argstr='--gradientTolerance %f',
     ),
     gridSize=dict(argstr='--gridSize %s',
     sep=',',
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
     ),
     inputAnatomicalVolume=dict(argstr='--inputAnatomicalVolume %s',
     ),
@@ -50,8 +44,6 @@ def test_gtractCoRegAnatomy_inputs():
     ),
     spatialScale=dict(argstr='--spatialScale %d',
     ),
-    terminal_output=dict(nohash=True,
-    ),
     transformType=dict(argstr='--transformType %s',
     ),
     translationScale=dict(argstr='--translationScale %f',
@@ -65,7 +57,7 @@ def test_gtractCoRegAnatomy_inputs():
     vectorIndex=dict(argstr='--vectorIndex %d',
     ),
     )
-    inputs = gtractCoRegAnatomy.input_spec()
+    inputs = gtractCoRegAnatomy._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -75,7 +67,7 @@ def test_gtractCoRegAnatomy_inputs():
 def test_gtractCoRegAnatomy_outputs():
     output_map = dict(outputTransformName=dict(),
     )
-    outputs = gtractCoRegAnatomy.output_spec()
+    outputs = gtractCoRegAnatomy._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

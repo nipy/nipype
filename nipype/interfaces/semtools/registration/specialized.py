@@ -80,8 +80,8 @@ acknowledgements: The development of this tool was supported by funding from gra
 
 """
 
-    input_spec = VBRAINSDemonWarpInputSpec
-    output_spec = VBRAINSDemonWarpOutputSpec
+    _input_spec = VBRAINSDemonWarpInputSpec
+    _output_spec = VBRAINSDemonWarpOutputSpec
     _cmd = " VBRAINSDemonWarp "
     _outputs_filenames = {'outputVolume': 'outputVolume.nii', 'outputCheckerboardVolume': 'outputCheckerboardVolume.nii', 'outputDisplacementFieldVolume': 'outputDisplacementFieldVolume.nrrd'}
     _redirect_x = False
@@ -158,8 +158,8 @@ acknowledgements: The development of this tool was supported by funding from gra
 
 """
 
-    input_spec = BRAINSDemonWarpInputSpec
-    output_spec = BRAINSDemonWarpOutputSpec
+    _input_spec = BRAINSDemonWarpInputSpec
+    _output_spec = BRAINSDemonWarpOutputSpec
     _cmd = " BRAINSDemonWarp "
     _outputs_filenames = {'outputVolume': 'outputVolume.nii', 'outputCheckerboardVolume': 'outputCheckerboardVolume.nii', 'outputDisplacementFieldVolume': 'outputDisplacementFieldVolume.nrrd'}
     _redirect_x = False
@@ -197,8 +197,8 @@ acknowledgements: This work is part of the National Alliance for Medical Image C
 
 """
 
-    input_spec = BRAINSTransformFromFiducialsInputSpec
-    output_spec = BRAINSTransformFromFiducialsOutputSpec
+    _input_spec = BRAINSTransformFromFiducialsInputSpec
+    _output_spec = BRAINSTransformFromFiducialsOutputSpec
     _cmd = " BRAINSTransformFromFiducials "
     _outputs_filenames = {'saveTransform': 'saveTransform.h5'}
     _redirect_x = False

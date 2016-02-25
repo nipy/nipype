@@ -9,12 +9,6 @@ def test_XfmConcat_inputs():
     clobber=dict(argstr='-clobber',
     usedefault=True,
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     input_files=dict(argstr='%s',
     exists=True,
     mandatory=True,
@@ -29,12 +23,10 @@ def test_XfmConcat_inputs():
     name_template='%s_xfmconcat.xfm',
     position=-1,
     ),
-    terminal_output=dict(nohash=True,
-    ),
     verbose=dict(argstr='-verbose',
     ),
     )
-    inputs = XfmConcat.input_spec()
+    inputs = XfmConcat._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -46,7 +38,7 @@ def test_XfmConcat_outputs():
     output_grids=dict(exists=True,
     ),
     )
-    outputs = XfmConcat.output_spec()
+    outputs = XfmConcat._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

@@ -12,14 +12,8 @@ def test_BRAINSCreateLabelMapFromProbabilityMaps_inputs():
     dirtyLabelVolume=dict(argstr='--dirtyLabelVolume %s',
     hash_files=False,
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
     foregroundPriors=dict(argstr='--foregroundPriors %s',
     sep=',',
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
     ),
     inclusionThreshold=dict(argstr='--inclusionThreshold %f',
     ),
@@ -30,10 +24,8 @@ def test_BRAINSCreateLabelMapFromProbabilityMaps_inputs():
     priorLabelCodes=dict(argstr='--priorLabelCodes %s',
     sep=',',
     ),
-    terminal_output=dict(nohash=True,
-    ),
     )
-    inputs = BRAINSCreateLabelMapFromProbabilityMaps.input_spec()
+    inputs = BRAINSCreateLabelMapFromProbabilityMaps._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -44,7 +36,7 @@ def test_BRAINSCreateLabelMapFromProbabilityMaps_outputs():
     output_map = dict(cleanLabelVolume=dict(),
     dirtyLabelVolume=dict(),
     )
-    outputs = BRAINSCreateLabelMapFromProbabilityMaps.output_spec()
+    outputs = BRAINSCreateLabelMapFromProbabilityMaps._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

@@ -12,14 +12,8 @@ def test_gtractTensor_inputs():
     ),
     backgroundSuppressingThreshold=dict(argstr='--backgroundSuppressingThreshold %d',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
     ignoreIndex=dict(argstr='--ignoreIndex %s',
     sep=',',
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
     ),
     inputVolume=dict(argstr='--inputVolume %s',
     ),
@@ -39,10 +33,8 @@ def test_gtractTensor_inputs():
     ),
     size=dict(argstr='--size %f',
     ),
-    terminal_output=dict(nohash=True,
-    ),
     )
-    inputs = gtractTensor.input_spec()
+    inputs = gtractTensor._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -52,7 +44,7 @@ def test_gtractTensor_inputs():
 def test_gtractTensor_outputs():
     output_map = dict(outputVolume=dict(),
     )
-    outputs = gtractTensor.output_spec()
+    outputs = gtractTensor._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

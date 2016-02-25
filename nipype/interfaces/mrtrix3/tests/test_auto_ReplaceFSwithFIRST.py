@@ -6,12 +6,6 @@ from ..preprocess import ReplaceFSwithFIRST
 def test_ReplaceFSwithFIRST_inputs():
     input_map = dict(args=dict(argstr='%s',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     in_config=dict(argstr='%s',
     position=-2,
     ),
@@ -28,10 +22,8 @@ def test_ReplaceFSwithFIRST_inputs():
     position=-1,
     usedefault=True,
     ),
-    terminal_output=dict(nohash=True,
-    ),
     )
-    inputs = ReplaceFSwithFIRST.input_spec()
+    inputs = ReplaceFSwithFIRST._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -41,7 +33,7 @@ def test_ReplaceFSwithFIRST_inputs():
 def test_ReplaceFSwithFIRST_outputs():
     output_map = dict(out_file=dict(),
     )
-    outputs = ReplaceFSwithFIRST.output_spec()
+    outputs = ReplaceFSwithFIRST._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

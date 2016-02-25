@@ -6,12 +6,6 @@ from ..gtract import gtractResampleFibers
 def test_gtractResampleFibers_inputs():
     input_map = dict(args=dict(argstr='%s',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     inputForwardDeformationFieldVolume=dict(argstr='--inputForwardDeformationFieldVolume %s',
     ),
     inputReverseDeformationFieldVolume=dict(argstr='--inputReverseDeformationFieldVolume %s',
@@ -23,12 +17,10 @@ def test_gtractResampleFibers_inputs():
     outputTract=dict(argstr='--outputTract %s',
     hash_files=False,
     ),
-    terminal_output=dict(nohash=True,
-    ),
     writeXMLPolyDataFile=dict(argstr='--writeXMLPolyDataFile ',
     ),
     )
-    inputs = gtractResampleFibers.input_spec()
+    inputs = gtractResampleFibers._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -38,7 +30,7 @@ def test_gtractResampleFibers_inputs():
 def test_gtractResampleFibers_outputs():
     output_map = dict(outputTract=dict(),
     )
-    outputs = gtractResampleFibers.output_spec()
+    outputs = gtractResampleFibers._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

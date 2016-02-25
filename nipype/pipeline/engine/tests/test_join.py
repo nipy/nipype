@@ -24,17 +24,15 @@ class PickFirstOutSpec(nib.TraitedSpec):
 
 
 class PickFirst(nib.BaseInterface):
-    input_spec = PickFirstSpec
-    output_spec = PickFirstOutSpec
+    _input_spec = PickFirstSpec
+    _output_spec = PickFirstOutSpec
 
     def _run_interface(self, runtime):
         runtime.returncode = 0
         return runtime
 
-    def _list_outputs(self):
-        outputs = self._outputs().get()
-        outputs['output1'] = self.inputs.in_files[0]
-        return outputs
+    def _post_run(self):
+        self.outputs.output1 = self.inputs.in_files[0]
 
 
 class IncrementInputSpec(nib.TraitedSpec):
@@ -47,17 +45,15 @@ class IncrementOutputSpec(nib.TraitedSpec):
 
 
 class IncrementInterface(nib.BaseInterface):
-    input_spec = IncrementInputSpec
-    output_spec = IncrementOutputSpec
+    _input_spec = IncrementInputSpec
+    _output_spec = IncrementOutputSpec
 
     def _run_interface(self, runtime):
         runtime.returncode = 0
         return runtime
 
-    def _list_outputs(self):
-        outputs = self._outputs().get()
-        outputs['output1'] = self.inputs.input1 + self.inputs.inc
-        return outputs
+    def _post_run(self):
+        self.outputs.output1 = self.inputs.input1 + self.inputs.inc
 
 _sums = []
 
@@ -74,22 +70,20 @@ class SumOutputSpec(nib.TraitedSpec):
 
 
 class SumInterface(nib.BaseInterface):
-    input_spec = SumInputSpec
-    output_spec = SumOutputSpec
+    _input_spec = SumInputSpec
+    _output_spec = SumOutputSpec
 
     def _run_interface(self, runtime):
         runtime.returncode = 0
         return runtime
 
-    def _list_outputs(self):
+    def _post_run(self):
         global _sum
         global _sum_operands
-        outputs = self._outputs().get()
-        outputs['operands'] = self.inputs.input1
-        _sum_operands.append(outputs['operands'])
-        outputs['output1'] = sum(self.inputs.input1)
-        _sums.append(outputs['output1'])
-        return outputs
+        self.outputs.operands = self.inputs.input1
+        _sum_operands.append(self.outputs.operands)
+        self.outputs.output1 = sum(self.inputs.input1)
+        _sums.append(self.outputs.output1)
 
 
 _set_len = None
@@ -105,18 +99,16 @@ class SetOutputSpec(nib.TraitedSpec):
 
 
 class SetInterface(nib.BaseInterface):
-    input_spec = SetInputSpec
-    output_spec = SetOutputSpec
+    _input_spec = SetInputSpec
+    _output_spec = SetOutputSpec
 
     def _run_interface(self, runtime):
         runtime.returncode = 0
         return runtime
 
-    def _list_outputs(self):
+    def _post_run(self):
         global _set_len
-        outputs = self._outputs().get()
-        _set_len = outputs['output1'] = len(self.inputs.input1)
-        return outputs
+                _set_len = self.outputs.output1 = len(self.inputs.input1)
 
 
 _products = []
@@ -133,19 +125,17 @@ class ProductOutputSpec(nib.TraitedSpec):
 
 
 class ProductInterface(nib.BaseInterface):
-    input_spec = ProductInputSpec
-    output_spec = ProductOutputSpec
+    _input_spec = ProductInputSpec
+    _output_spec = ProductOutputSpec
 
     def _run_interface(self, runtime):
         runtime.returncode = 0
         return runtime
 
-    def _list_outputs(self):
+    def _post_run(self):
         global _products
-        outputs = self._outputs().get()
-        outputs['output1'] = self.inputs.input1 * self.inputs.input2
-        _products.append(outputs['output1'])
-        return outputs
+                self.outputs.output1 = self.inputs.input1 * self.inputs.input2
+        _products.append(self.outputs.output1)
 
 
 def test_join_expansion():

@@ -7,9 +7,6 @@ def test_Parcellate_inputs():
     input_map = dict(dilation=dict(usedefault=True,
     ),
     freesurfer_dir=dict(),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     out_roi_file=dict(genfile=True,
     ),
     parcellation_name=dict(usedefault=True,
@@ -18,7 +15,7 @@ def test_Parcellate_inputs():
     ),
     subjects_dir=dict(),
     )
-    inputs = Parcellate.input_spec()
+    inputs = Parcellate._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -35,7 +32,7 @@ def test_Parcellate_outputs():
     roiv_file=dict(),
     white_matter_mask_file=dict(),
     )
-    outputs = Parcellate.output_spec()
+    outputs = Parcellate._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

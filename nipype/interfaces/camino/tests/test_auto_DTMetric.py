@@ -11,12 +11,6 @@ def test_DTMetric_inputs():
     eigen_data=dict(argstr='-inputfile %s',
     mandatory=True,
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     inputdatatype=dict(argstr='-inputdatatype %s',
     usedefault=True,
     ),
@@ -29,10 +23,8 @@ def test_DTMetric_inputs():
     outputfile=dict(argstr='-outputfile %s',
     genfile=True,
     ),
-    terminal_output=dict(nohash=True,
-    ),
     )
-    inputs = DTMetric.input_spec()
+    inputs = DTMetric._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -42,7 +34,7 @@ def test_DTMetric_inputs():
 def test_DTMetric_outputs():
     output_map = dict(metric_stats=dict(),
     )
-    outputs = DTMetric.output_spec()
+    outputs = DTMetric._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

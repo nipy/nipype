@@ -8,12 +8,6 @@ def test_MS_LDA_inputs():
     ),
     conform=dict(argstr='-conform',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     images=dict(argstr='%s',
     copyfile=False,
     mandatory=True,
@@ -30,8 +24,6 @@ def test_MS_LDA_inputs():
     shift=dict(argstr='-shift %d',
     ),
     subjects_dir=dict(),
-    terminal_output=dict(nohash=True,
-    ),
     use_weights=dict(argstr='-W',
     ),
     vol_synth_file=dict(argstr='-synth %s',
@@ -41,7 +33,7 @@ def test_MS_LDA_inputs():
     mandatory=True,
     ),
     )
-    inputs = MS_LDA.input_spec()
+    inputs = MS_LDA._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -52,7 +44,7 @@ def test_MS_LDA_outputs():
     output_map = dict(vol_synth_file=dict(),
     weight_file=dict(),
     )
-    outputs = MS_LDA.output_spec()
+    outputs = MS_LDA._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

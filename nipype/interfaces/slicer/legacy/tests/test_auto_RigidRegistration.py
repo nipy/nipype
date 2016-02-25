@@ -12,15 +12,9 @@ def test_RigidRegistration_inputs():
     ),
     args=dict(argstr='%s',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
     fixedsmoothingfactor=dict(argstr='--fixedsmoothingfactor %d',
     ),
     histogrambins=dict(argstr='--histogrambins %d',
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
     ),
     initialtransform=dict(argstr='--initialtransform %s',
     ),
@@ -40,14 +34,12 @@ def test_RigidRegistration_inputs():
     ),
     spatialsamples=dict(argstr='--spatialsamples %d',
     ),
-    terminal_output=dict(nohash=True,
-    ),
     testingmode=dict(argstr='--testingmode ',
     ),
     translationscale=dict(argstr='--translationscale %f',
     ),
     )
-    inputs = RigidRegistration.input_spec()
+    inputs = RigidRegistration._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -58,7 +50,7 @@ def test_RigidRegistration_outputs():
     output_map = dict(outputtransform=dict(),
     resampledmovingfilename=dict(),
     )
-    outputs = RigidRegistration.output_spec()
+    outputs = RigidRegistration._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

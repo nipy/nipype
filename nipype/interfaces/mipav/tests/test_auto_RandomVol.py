@@ -6,12 +6,6 @@ from ..developer import RandomVol
 def test_RandomVol_inputs():
     input_map = dict(args=dict(argstr='%s',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     inField=dict(argstr='--inField %s',
     ),
     inLambda=dict(argstr='--inLambda %f',
@@ -35,8 +29,6 @@ def test_RandomVol_inputs():
     outRand1=dict(argstr='--outRand1 %s',
     hash_files=False,
     ),
-    terminal_output=dict(nohash=True,
-    ),
     xDefaultMem=dict(argstr='-xDefaultMem %d',
     ),
     xMaxProcess=dict(argstr='-xMaxProcess %d',
@@ -45,7 +37,7 @@ def test_RandomVol_inputs():
     xPrefExt=dict(argstr='--xPrefExt %s',
     ),
     )
-    inputs = RandomVol.input_spec()
+    inputs = RandomVol._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -55,7 +47,7 @@ def test_RandomVol_inputs():
 def test_RandomVol_outputs():
     output_map = dict(outRand1=dict(),
     )
-    outputs = RandomVol.output_spec()
+    outputs = RandomVol._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

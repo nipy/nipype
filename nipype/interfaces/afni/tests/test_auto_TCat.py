@@ -6,12 +6,6 @@ from ..preprocess import TCat
 def test_TCat_inputs():
     input_map = dict(args=dict(argstr='%s',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     in_files=dict(argstr=' %s',
     copyfile=False,
     mandatory=True,
@@ -21,14 +15,13 @@ def test_TCat_inputs():
     name_source='in_files',
     name_template='%s_tcat',
     ),
-    outputtype=dict(),
+    output_type=dict(usedefault=True,
+    ),
     rlt=dict(argstr='-rlt%s',
     position=1,
     ),
-    terminal_output=dict(nohash=True,
-    ),
     )
-    inputs = TCat.input_spec()
+    inputs = TCat._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -38,7 +31,7 @@ def test_TCat_inputs():
 def test_TCat_outputs():
     output_map = dict(out_file=dict(),
     )
-    outputs = TCat.output_spec()
+    outputs = TCat._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

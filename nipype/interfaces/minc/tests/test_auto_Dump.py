@@ -15,14 +15,8 @@ def test_Dump_inputs():
     coordinate_data=dict(argstr='-c',
     xor=('coordinate_data', 'header_data'),
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
     header_data=dict(argstr='-h',
     xor=('coordinate_data', 'header_data'),
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
     ),
     input_file=dict(argstr='%s',
     mandatory=True,
@@ -34,8 +28,8 @@ def test_Dump_inputs():
     netcdf_name=dict(argstr='-n %s',
     ),
     out_file=dict(argstr='> %s',
-    genfile=True,
     position=-1,
+    usedefault=True,
     ),
     output_file=dict(hash_files=False,
     keep_extension=False,
@@ -45,13 +39,11 @@ def test_Dump_inputs():
     ),
     precision=dict(argstr='%s',
     ),
-    terminal_output=dict(nohash=True,
-    ),
     variables=dict(argstr='-v %s',
     sep=',',
     ),
     )
-    inputs = Dump.input_spec()
+    inputs = Dump._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -61,7 +53,7 @@ def test_Dump_inputs():
 def test_Dump_outputs():
     output_map = dict(output_file=dict(),
     )
-    outputs = Dump.output_spec()
+    outputs = Dump._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

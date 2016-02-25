@@ -24,9 +24,6 @@ def test_BEDPOSTX4_inputs():
     ),
     dwi=dict(mandatory=True,
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
     fibres=dict(argstr='-n %d',
     ),
     force_dir=dict(argstr='--forcedir',
@@ -35,9 +32,6 @@ def test_BEDPOSTX4_inputs():
     fudge=dict(argstr='--fudge=%d',
     ),
     gradnonlin=dict(argstr='--gradnonlin=%s',
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
     ),
     jumps=dict(argstr='-j %d',
     ),
@@ -65,21 +59,20 @@ def test_BEDPOSTX4_inputs():
     non_linear=dict(argstr='--nonlinear',
     xor=('no_spat', 'non_linear'),
     ),
-    output_type=dict(),
+    output_type=dict(usedefault=True,
+    ),
     sample_every=dict(argstr='--sampleevery=%d',
     ),
     sampling=dict(argstr='-s %d',
     ),
     seed=dict(argstr='--seed=%d',
     ),
-    terminal_output=dict(nohash=True,
-    ),
     update_proposal_every=dict(argstr='--updateproposalevery=%d',
     ),
     weight=dict(argstr='-w %.2f',
     ),
     )
-    inputs = BEDPOSTX4.input_spec()
+    inputs = BEDPOSTX4._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -97,7 +90,7 @@ def test_BEDPOSTX4_outputs():
     merged_thsamples=dict(),
     xfms_directory=dict(),
     )
-    outputs = BEDPOSTX4.output_spec()
+    outputs = BEDPOSTX4._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

@@ -24,13 +24,7 @@ def test_DTIFit_inputs():
     mandatory=True,
     position=0,
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
     gradnonlin=dict(argstr='--gradnonlin=%s',
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
     ),
     little_bit=dict(argstr='--littlebit',
     ),
@@ -50,15 +44,37 @@ def test_DTIFit_inputs():
     ),
     min_z=dict(argstr='-z %d',
     ),
-    output_type=dict(),
+    out_fa=dict(keep_extension=False,
+    ),
+    out_l1=dict(keep_extension=False,
+    ),
+    out_l2=dict(keep_extension=False,
+    ),
+    out_l3=dict(keep_extension=False,
+    ),
+    out_md=dict(keep_extension=False,
+    ),
+    out_mo=dict(keep_extension=False,
+    ),
+    out_s0=dict(keep_extension=False,
+    ),
+    out_v1=dict(keep_extension=False,
+    ),
+    out_v2=dict(keep_extension=False,
+    ),
+    out_v3=dict(keep_extension=False,
+    ),
+    output_type=dict(usedefault=True,
+    ),
     save_tensor=dict(argstr='--save_tensor',
+    usedefault=True,
     ),
     sse=dict(argstr='--sse',
     ),
-    terminal_output=dict(nohash=True,
+    tensor=dict(keep_extension=False,
     ),
     )
-    inputs = DTIFit.input_spec()
+    inputs = DTIFit._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -66,19 +82,19 @@ def test_DTIFit_inputs():
 
 
 def test_DTIFit_outputs():
-    output_map = dict(FA=dict(),
-    L1=dict(),
-    L2=dict(),
-    L3=dict(),
-    MD=dict(),
-    MO=dict(),
-    S0=dict(),
-    V1=dict(),
-    V2=dict(),
-    V3=dict(),
+    output_map = dict(out_fa=dict(),
+    out_l1=dict(),
+    out_l2=dict(),
+    out_l3=dict(),
+    out_md=dict(),
+    out_mo=dict(),
+    out_s0=dict(),
+    out_v1=dict(),
+    out_v2=dict(),
+    out_v3=dict(),
     tensor=dict(),
     )
-    outputs = DTIFit.output_spec()
+    outputs = DTIFit._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

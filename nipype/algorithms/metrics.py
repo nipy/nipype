@@ -1,6 +1,6 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
-'''
+"""
 Image assessment algorithms. Typical overlap and error computation
 measures to evaluate results from other processing units.
 
@@ -10,7 +10,7 @@ measures to evaluate results from other processing units.
     >>> datadir = os.path.realpath(os.path.join(filepath, '../testing/data'))
     >>> os.chdir(datadir)
 
-'''
+"""
 from __future__ import division
 from builtins import zip
 from builtins import range
@@ -27,13 +27,13 @@ from scipy.ndimage.measurements import center_of_mass, label
 from .. import logging
 from ..utils.misc import package_check
 
-from ..interfaces.base import (BaseInterface, traits, TraitedSpec, File,
-                               InputMultiPath,
-                               BaseInterfaceInputSpec, isdefined)
+from ..interfaces.base import (traits, File, GenFile, isdefined, BaseInputSpec,
+                               TraitedSpec, InputMultiPath, BaseInterface)
+
 iflogger = logging.getLogger('interface')
 
 
-class DistanceInputSpec(BaseInterfaceInputSpec):
+class DistanceInputSpec(BaseInputSpec):
     volume1 = File(exists=True, mandatory=True,
                    desc="Has to have the same dimensions as volume2.")
     volume2 = File(
@@ -67,8 +67,8 @@ class DistanceOutputSpec(TraitedSpec):
 class Distance(BaseInterface):
     """Calculates distance between two volumes.
     """
-    input_spec = DistanceInputSpec
-    output_spec = DistanceOutputSpec
+    _input_spec = DistanceInputSpec
+    _output_spec = DistanceOutputSpec
 
     _hist_filename = "hist.pdf"
 
@@ -186,34 +186,30 @@ class Distance(BaseInterface):
         nii2 = nb.load(self.inputs.volume2, mmap=False)
 
         if self.inputs.method == "eucl_min":
-            self._distance, self._point1, self._point2 = self._eucl_min(
+            _distance, _point1, _point2 = self._eucl_min(
                 nii1, nii2)
 
         elif self.inputs.method == "eucl_cog":
-            self._distance = self._eucl_cog(nii1, nii2)
+            _distance = self._eucl_cog(nii1, nii2)
 
         elif self.inputs.method == "eucl_mean":
-            self._distance = self._eucl_mean(nii1, nii2)
+            _distance = self._eucl_mean(nii1, nii2)
 
         elif self.inputs.method == "eucl_wmean":
-            self._distance = self._eucl_mean(nii1, nii2, weighted=True)
+            _distance = self._eucl_mean(nii1, nii2, weighted=True)
         elif self.inputs.method == "eucl_max":
-            self._distance = self._eucl_max(nii1, nii2)
+            _distance = self._eucl_max(nii1, nii2)
 
+        self.outputs.distance = _distance
+        if self.inputs.method == "eucl_min":
+            self.outputs.point1 = _point1
+            self.outputs.point2 = _point2
+        elif self.inputs.method in ["eucl_mean", "eucl_wmean"]:
+            self.outputs.histogram = os.path.abspath(self._hist_filename)
         return runtime
 
-    def _list_outputs(self):
-        outputs = self._outputs().get()
-        outputs['distance'] = self._distance
-        if self.inputs.method == "eucl_min":
-            outputs['point1'] = self._point1
-            outputs['point2'] = self._point2
-        elif self.inputs.method in ["eucl_mean", "eucl_wmean"]:
-            outputs['histogram'] = os.path.abspath(self._hist_filename)
-        return outputs
 
-
-class OverlapInputSpec(BaseInterfaceInputSpec):
+class OverlapInputSpec(BaseInputSpec):
     volume1 = File(exists=True, mandatory=True,
                    desc='Has to have the same dimensions as volume2.')
     volume2 = File(exists=True, mandatory=True,
@@ -268,8 +264,8 @@ class Overlap(BaseInterface):
     >>> res = overlap.run() # doctest: +SKIP
 
     """
-    input_spec = OverlapInputSpec
-    output_spec = OverlapOutputSpec
+    _input_spec = OverlapInputSpec
+    _output_spec = OverlapOutputSpec
 
     def _bool_vec_dissimilarity(self, booldata1, booldata2, method):
         methods = {'dice': dice, 'jaccard': jaccard}
@@ -317,9 +313,9 @@ class Overlap(BaseInterface):
             volumes1.append(scale * len(data1[data1 == l]))
             volumes2.append(scale * len(data2[data2 == l]))
 
-        results = dict(jaccard=[], dice=[])
-        results['jaccard'] = np.array(res)
-        results['dice'] = 2.0 * results['jaccard'] / (results['jaccard'] + 1.0)
+        _ove_rois = dict(jaccard=[], dice=[])
+        _ove_rois['jaccard'] = np.array(res)
+        _ove_rois['dice'] = 2.0 * _ove_rois['jaccard'] / (_ove_rois['jaccard'] + 1.0)
 
         weights = np.ones((len(volumes1),), dtype=np.float32)
         if self.inputs.weighting != 'none':
@@ -334,32 +330,24 @@ class Overlap(BaseInterface):
         nb.save(nb.Nifti1Image(both_data, nii1.affine, nii1.header),
                 self.inputs.out_file)
 
-        self._labels = labels
-        self._ove_rois = results
-        self._vol_rois = (np.array(volumes1) -
+        _vol_rois = (np.array(volumes1) -
                           np.array(volumes2)) / np.array(volumes1)
 
-        self._dice = round(np.sum(weights * results['dice']), 5)
-        self._jaccard = round(np.sum(weights * results['jaccard']), 5)
-        self._volume = np.sum(weights * self._vol_rois)
-
+        _dice = round(np.sum(weights * _ove_rois['dice']), 5)
+        _jaccard = round(np.sum(weights * _ove_rois['jaccard']), 5)
+        _volume = np.sum(weights * _vol_rois)
+        self.outputs.labels = labels
+        self.outputs.jaccard = _jaccard
+        self.outputs.dice = _dice
+        self.outputs.volume_difference = _volume
+        self.outputs.roi_ji = _ove_rois['jaccard'].tolist()
+        self.outputs.roi_di = _ove_rois['dice'].tolist()
+        self.outputs.roi_voldiff = _vol_rois.tolist()
+        self.outputs.diff_file = os.path.abspath(self.inputs.out_file)
         return runtime
 
-    def _list_outputs(self):
-        outputs = self._outputs().get()
-        outputs['labels'] = self._labels
-        outputs['jaccard'] = self._jaccard
-        outputs['dice'] = self._dice
-        outputs['volume_difference'] = self._volume
 
-        outputs['roi_ji'] = self._ove_rois['jaccard'].tolist()
-        outputs['roi_di'] = self._ove_rois['dice'].tolist()
-        outputs['roi_voldiff'] = self._vol_rois.tolist()
-        outputs['diff_file'] = os.path.abspath(self.inputs.out_file)
-        return outputs
-
-
-class FuzzyOverlapInputSpec(BaseInterfaceInputSpec):
+class FuzzyOverlapInputSpec(BaseInputSpec):
     in_ref = InputMultiPath(File(exists=True), mandatory=True,
                             desc='Reference image. Requires the same dimensions as in_tst.')
     in_tst = InputMultiPath(File(exists=True), mandatory=True,
@@ -402,8 +390,8 @@ class FuzzyOverlap(BaseInterface):
     >>> res = overlap.run() # doctest: +SKIP
     """
 
-    input_spec = FuzzyOverlapInputSpec
-    output_spec = FuzzyOverlapOutputSpec
+    _input_spec = FuzzyOverlapInputSpec
+    _output_spec = FuzzyOverlapOutputSpec
 
     def _run_interface(self, runtime):
         ncomp = len(self.inputs.in_ref)
@@ -422,7 +410,7 @@ class FuzzyOverlap(BaseInterface):
         # img_ref[:][msk>0] = img_ref[:][msk>0] / (np.sum( img_ref, axis=0 ))[msk>0]
         # img_tst[tst_msk>0] = img_tst[tst_msk>0] / np.sum( img_tst, axis=0 )[tst_msk>0]
 
-        self._jaccards = []
+        _jaccards = []
         volumes = []
 
         diff_im = np.zeros(img_ref.shape)
@@ -431,11 +419,11 @@ class FuzzyOverlap(BaseInterface):
             num = np.minimum(ref_comp, tst_comp)
             ddr = np.maximum(ref_comp, tst_comp)
             diff_comp[ddr > 0] += 1.0 - (num[ddr > 0] / ddr[ddr > 0])
-            self._jaccards.append(np.sum(num) / np.sum(ddr))
+            _jaccards.append(np.sum(num) / np.sum(ddr))
             volumes.append(np.sum(ref_comp))
 
-        self._dices = 2.0 * (np.array(self._jaccards) /
-                             (np.array(self._jaccards) + 1.0))
+        _dices = 2.0 * (np.array(_jaccards) /
+                             (np.array(_jaccards) + 1.0))
 
         if self.inputs.weighting != "none":
             weights = 1.0 / np.array(volumes)
@@ -444,8 +432,8 @@ class FuzzyOverlap(BaseInterface):
 
         weights = weights / np.sum(weights)
 
-        setattr(self, '_jaccard', np.sum(weights * self._jaccards))
-        setattr(self, '_dice', np.sum(weights * self._dices))
+        setattr(self, '_jaccard', np.sum(weights * _jaccards))
+        setattr(self, '_dice', np.sum(weights * _dices))
 
         diff = np.zeros(diff_im[0].shape)
 
@@ -457,20 +445,16 @@ class FuzzyOverlap(BaseInterface):
                                nb.load(self.inputs.in_ref[0]).header),
                 self.inputs.out_file)
 
+        for method in ("dice", "jaccard"):
+            setattr(self.outputs, method, getattr(self, '_' + method))
+        # self.outputs.volume_difference = _volume
+        self.outputs.diff_file = os.path.abspath(self.inputs.out_file)
+        self.outputs.class_fji = np.array(_jaccards).astype(float).tolist()
+        self.outputs.class_fdi = _dices.astype(float).tolist()
         return runtime
 
-    def _list_outputs(self):
-        outputs = self._outputs().get()
-        for method in ("dice", "jaccard"):
-            outputs[method] = getattr(self, '_' + method)
-        # outputs['volume_difference'] = self._volume
-        outputs['diff_file'] = os.path.abspath(self.inputs.out_file)
-        outputs['class_fji'] = np.array(self._jaccards).astype(float).tolist()
-        outputs['class_fdi'] = self._dices.astype(float).tolist()
-        return outputs
 
-
-class ErrorMapInputSpec(BaseInterfaceInputSpec):
+class ErrorMapInputSpec(BaseInputSpec):
     in_ref = File(exists=True, mandatory=True,
                   desc="Reference image. Requires the same dimensions as in_tst.")
     in_tst = File(exists=True, mandatory=True,
@@ -479,7 +463,8 @@ class ErrorMapInputSpec(BaseInterfaceInputSpec):
     metric = traits.Enum("sqeuclidean", "euclidean",
                          desc='error map metric (as implemented in scipy cdist)',
                          usedefault=True, mandatory=True)
-    out_map = File(desc="Name for the output file")
+    out_map = GenFile(template='{in_tst}_errormap', keep_extension=True,
+                      desc="Name for the output file")
 
 
 class ErrorMapOutputSpec(TraitedSpec):
@@ -498,8 +483,8 @@ class ErrorMap(BaseInterface):
     >>> errormap.inputs.in_tst = 'cont2.nii'
     >>> res = errormap.run() # doctest: +SKIP
     """
-    input_spec = ErrorMapInputSpec
-    output_spec = ErrorMapOutputSpec
+    _input_spec = ErrorMapInputSpec
+    _output_spec = ErrorMapOutputSpec
     _out_file = ''
 
     def _run_interface(self, runtime):
@@ -547,7 +532,7 @@ class ErrorMap(BaseInterface):
         errvectorexp[msk_idxs] = errvector
 
         # Get averaged error
-        self._distance = np.average(errvector)  # Only average the masked voxels
+        _distance = np.average(errvector)  # Only average the masked voxels
 
         errmap = errvectorexp.reshape(mapshape)
 
@@ -555,29 +540,13 @@ class ErrorMap(BaseInterface):
         hdr.set_data_dtype(np.float32)
         hdr['data_type'] = 16
         hdr.set_data_shape(mapshape)
-
-        if not isdefined(self.inputs.out_map):
-            fname, ext = op.splitext(op.basename(self.inputs.in_tst))
-            if ext == '.gz':
-                fname, ext2 = op.splitext(fname)
-                ext = ext2 + ext
-            self._out_file = op.abspath(fname + "_errmap" + ext)
-        else:
-            self._out_file = self.inputs.out_map
-
         nb.Nifti1Image(errmap.astype(np.float32), nii_ref.affine,
-                       hdr).to_filename(self._out_file)
-
+                       hdr).to_filename(self.inputs.out_map)
+        self.outputs.distance = _distance
         return runtime
 
-    def _list_outputs(self):
-        outputs = self.output_spec().get()
-        outputs['out_map'] = self._out_file
-        outputs['distance'] = self._distance
-        return outputs
 
-
-class SimilarityInputSpec(BaseInterfaceInputSpec):
+class SimilarityInputSpec(BaseInputSpec):
     volume1 = File(exists=True, desc="3D/4D volume", mandatory=True)
     volume2 = File(exists=True, desc="3D/4D volume", mandatory=True)
     mask1 = File(exists=True, desc="3D volume")
@@ -619,8 +588,8 @@ class Similarity(BaseInterface):
     >>> res = similarity.run() # doctest: +SKIP
     """
 
-    input_spec = SimilarityInputSpec
-    output_spec = SimilarityOutputSpec
+    _input_spec = SimilarityInputSpec
+    _output_spec = SimilarityOutputSpec
     _have_nipy = True
 
     def __init__(self, **inputs):
@@ -662,7 +631,7 @@ class Similarity(BaseInterface):
         else:
             mask2 = None
 
-        self._similarity = []
+        _similarity = []
 
         for ts1, ts2 in zip(vols1, vols2):
             histreg = HistogramRegistration(from_img=ts1,
@@ -670,11 +639,8 @@ class Similarity(BaseInterface):
                                             similarity=self.inputs.metric,
                                             from_mask=mask1,
                                             to_mask=mask2)
-            self._similarity.append(histreg.eval(Affine()))
+            _similarity.append(histreg.eval(Affine()))
 
+        self.outputs.similarity = _similarity
         return runtime
 
-    def _list_outputs(self):
-        outputs = self._outputs().get()
-        outputs['similarity'] = self._similarity
-        return outputs

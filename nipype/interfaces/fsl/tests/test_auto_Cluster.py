@@ -12,14 +12,8 @@ def test_Cluster_inputs():
     ),
     dlh=dict(argstr='--dlh=%.10f',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
     find_min=dict(),
     fractional=dict(),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     in_file=dict(argstr='--in=%s',
     mandatory=True,
     ),
@@ -30,6 +24,7 @@ def test_Cluster_inputs():
     ),
     out_index_file=dict(argstr='--oindex=%s',
     hash_files=False,
+    output_name='index_file',
     ),
     out_localmax_txt_file=dict(argstr='--olmax=%s',
     hash_files=False,
@@ -52,15 +47,30 @@ def test_Cluster_inputs():
     out_threshold_file=dict(argstr='--othresh=%s',
     hash_files=False,
     ),
-    output_type=dict(),
+    output_type=dict(usedefault=True,
+    ),
     peak_distance=dict(argstr='--peakdist=%.10f',
     ),
     pthreshold=dict(argstr='--pthresh=%.10f',
     requires=['dlh', 'volume'],
     ),
-    std_space_file=dict(argstr='--stdvol=%s',
+    save_index_file=dict(usedefault=True,
     ),
-    terminal_output=dict(nohash=True,
+    save_localmax_txt_file=dict(usedefault=True,
+    ),
+    save_localmax_vol_file=dict(usedefault=True,
+    ),
+    save_max_file=dict(usedefault=True,
+    ),
+    save_mean_file=dict(usedefault=True,
+    ),
+    save_pval_file=dict(usedefault=True,
+    ),
+    save_size_file=dict(usedefault=True,
+    ),
+    save_threshold_file=dict(usedefault=True,
+    ),
+    std_space_file=dict(argstr='--stdvol=%s',
     ),
     threshold=dict(argstr='--thresh=%.10f',
     mandatory=True,
@@ -73,7 +83,7 @@ def test_Cluster_inputs():
     xfm_file=dict(argstr='--xfm=%s',
     ),
     )
-    inputs = Cluster.input_spec()
+    inputs = Cluster._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -82,15 +92,15 @@ def test_Cluster_inputs():
 
 def test_Cluster_outputs():
     output_map = dict(index_file=dict(),
-    localmax_txt_file=dict(),
-    localmax_vol_file=dict(),
-    max_file=dict(),
-    mean_file=dict(),
-    pval_file=dict(),
-    size_file=dict(),
-    threshold_file=dict(),
+    out_localmax_txt_file=dict(),
+    out_localmax_vol_file=dict(),
+    out_max_file=dict(),
+    out_mean_file=dict(),
+    out_pval_file=dict(),
+    out_size_file=dict(),
+    out_threshold_file=dict(),
     )
-    outputs = Cluster.output_spec()
+    outputs = Cluster._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

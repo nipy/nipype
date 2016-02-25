@@ -6,12 +6,6 @@ from ..utils import Generate5tt
 def test_Generate5tt_inputs():
     input_map = dict(args=dict(argstr='%s',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     in_fast=dict(argstr='%s',
     mandatory=True,
     position=-3,
@@ -24,10 +18,8 @@ def test_Generate5tt_inputs():
     position=-1,
     usedefault=True,
     ),
-    terminal_output=dict(nohash=True,
-    ),
     )
-    inputs = Generate5tt.input_spec()
+    inputs = Generate5tt._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -37,7 +29,7 @@ def test_Generate5tt_inputs():
 def test_Generate5tt_outputs():
     output_map = dict(out_file=dict(),
     )
-    outputs = Generate5tt.output_spec()
+    outputs = Generate5tt._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

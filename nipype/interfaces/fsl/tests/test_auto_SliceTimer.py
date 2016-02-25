@@ -10,13 +10,7 @@ def test_SliceTimer_inputs():
     ),
     custom_timings=dict(argstr='--tcustom=%s',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
     global_shift=dict(argstr='--tglobal',
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
     ),
     in_file=dict(argstr='--in=%s',
     mandatory=True,
@@ -30,15 +24,14 @@ def test_SliceTimer_inputs():
     genfile=True,
     hash_files=False,
     ),
-    output_type=dict(),
-    slice_direction=dict(argstr='--direction=%d',
+    output_type=dict(usedefault=True,
     ),
-    terminal_output=dict(nohash=True,
+    slice_direction=dict(argstr='--direction=%d',
     ),
     time_repetition=dict(argstr='--repeat=%f',
     ),
     )
-    inputs = SliceTimer.input_spec()
+    inputs = SliceTimer._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -48,7 +41,7 @@ def test_SliceTimer_inputs():
 def test_SliceTimer_outputs():
     output_map = dict(slice_time_corrected_file=dict(),
     )
-    outputs = SliceTimer.output_spec()
+    outputs = SliceTimer._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

@@ -33,11 +33,17 @@ class ANTSCommandInputSpec(CommandLineInputSpec):
                              nohash=True, desc="Number of ITK threads to use")
 
 
+    @staticmethod
+    def _format_xarray(val):
+        """ Convenience method for converting input arrays [1,2,3] to commandline format '1x2x3' """
+        return 'x'.join([str(x) for x in val])
+
+
 class ANTSCommand(CommandLine):
     """Base class for ANTS interfaces
     """
 
-    input_spec = ANTSCommandInputSpec
+    _input_spec = ANTSCommandInputSpec
     _num_threads = LOCAL_DEFAULT_NUMBER_OF_THREADS
 
     def __init__(self, **inputs):
@@ -61,18 +67,13 @@ class ANTSCommand(CommandLine):
         # (i.e. respect SGE $NSLOTS or environmental variables of threads, or
         # user environmental settings)
         if (self.inputs.num_threads == -1):
-            if (ALT_ITKv4_THREAD_LIMIT_VARIABLE in self.inputs.environ):
-                del self.inputs.environ[ALT_ITKv4_THREAD_LIMIT_VARIABLE]
-            if (PREFERED_ITKv4_THREAD_LIMIT_VARIABLE in self.inputs.environ):
-                del self.inputs.environ[PREFERED_ITKv4_THREAD_LIMIT_VARIABLE]
+            if (ALT_ITKv4_THREAD_LIMIT_VARIABLE in self.environ):
+                del self.environ[ALT_ITKv4_THREAD_LIMIT_VARIABLE]
+            if (PREFERED_ITKv4_THREAD_LIMIT_VARIABLE in self.environ):
+                del self.environ[PREFERED_ITKv4_THREAD_LIMIT_VARIABLE]
         else:
-            self.inputs.environ.update({PREFERED_ITKv4_THREAD_LIMIT_VARIABLE:
+            self.environ.update({PREFERED_ITKv4_THREAD_LIMIT_VARIABLE:
                                         '%s' % self.inputs.num_threads})
-
-    @staticmethod
-    def _format_xarray(val):
-        """ Convenience method for converting input arrays [1,2,3] to commandline format '1x2x3' """
-        return 'x'.join([str(x) for x in val])
 
     @classmethod
     def set_default_num_threads(cls, num_threads):

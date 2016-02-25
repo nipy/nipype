@@ -16,14 +16,8 @@ def test_EMSegmentCommandLine_inputs():
     ),
     dontWriteResults=dict(argstr='--dontWriteResults ',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
     generateEmptyMRMLSceneAndQuit=dict(argstr='--generateEmptyMRMLSceneAndQuit %s',
     hash_files=False,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
     ),
     intermediateResultsDirectory=dict(argstr='--intermediateResultsDirectory %s',
     ),
@@ -55,12 +49,10 @@ def test_EMSegmentCommandLine_inputs():
     ),
     taskPreProcessingSetting=dict(argstr='--taskPreProcessingSetting %s',
     ),
-    terminal_output=dict(nohash=True,
-    ),
     verbose=dict(argstr='--verbose ',
     ),
     )
-    inputs = EMSegmentCommandLine.input_spec()
+    inputs = EMSegmentCommandLine._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -72,7 +64,7 @@ def test_EMSegmentCommandLine_outputs():
     resultMRMLSceneFileName=dict(),
     resultVolumeFileName=dict(),
     )
-    outputs = EMSegmentCommandLine.output_spec()
+    outputs = EMSegmentCommandLine._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

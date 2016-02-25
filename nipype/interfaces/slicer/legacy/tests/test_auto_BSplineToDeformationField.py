@@ -9,20 +9,12 @@ def test_BSplineToDeformationField_inputs():
     defImage=dict(argstr='--defImage %s',
     hash_files=False,
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     refImage=dict(argstr='--refImage %s',
-    ),
-    terminal_output=dict(nohash=True,
     ),
     tfm=dict(argstr='--tfm %s',
     ),
     )
-    inputs = BSplineToDeformationField.input_spec()
+    inputs = BSplineToDeformationField._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -32,7 +24,7 @@ def test_BSplineToDeformationField_inputs():
 def test_BSplineToDeformationField_outputs():
     output_map = dict(defImage=dict(),
     )
-    outputs = BSplineToDeformationField.output_spec()
+    outputs = BSplineToDeformationField._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

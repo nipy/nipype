@@ -4,17 +4,14 @@ from ..utility import Split
 
 
 def test_Split_inputs():
-    input_map = dict(ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
-    inlist=dict(mandatory=True,
+    input_map = dict(inlist=dict(mandatory=True,
     ),
     splits=dict(mandatory=True,
     ),
     squeeze=dict(usedefault=True,
     ),
     )
-    inputs = Split.input_spec()
+    inputs = Split._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -23,7 +20,7 @@ def test_Split_inputs():
 
 def test_Split_outputs():
     output_map = dict()
-    outputs = Split.output_spec()
+    outputs = Split._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

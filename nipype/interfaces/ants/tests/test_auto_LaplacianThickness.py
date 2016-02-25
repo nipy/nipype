@@ -9,12 +9,6 @@ def test_LaplacianThickness_inputs():
     dT=dict(argstr='dT=%d',
     position=6,
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     input_gm=dict(argstr='%s',
     copyfile=True,
     mandatory=True,
@@ -45,10 +39,8 @@ def test_LaplacianThickness_inputs():
     sulcus_prior=dict(argstr='use-sulcus-prior',
     position=7,
     ),
-    terminal_output=dict(nohash=True,
-    ),
     )
-    inputs = LaplacianThickness.input_spec()
+    inputs = LaplacianThickness._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -58,7 +50,7 @@ def test_LaplacianThickness_inputs():
 def test_LaplacianThickness_outputs():
     output_map = dict(output_image=dict(),
     )
-    outputs = LaplacianThickness.output_spec()
+    outputs = LaplacianThickness._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

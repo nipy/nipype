@@ -13,12 +13,6 @@ def test_Retroicor_inputs():
     hash_files=False,
     position=-6,
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     in_file=dict(argstr='%s',
     copyfile=False,
     mandatory=True,
@@ -31,7 +25,8 @@ def test_Retroicor_inputs():
     mandatory=True,
     position=1,
     ),
-    outputtype=dict(),
+    output_type=dict(usedefault=True,
+    ),
     resp=dict(argstr='-resp %s',
     position=-3,
     ),
@@ -39,13 +34,11 @@ def test_Retroicor_inputs():
     hash_files=False,
     position=-7,
     ),
-    terminal_output=dict(nohash=True,
-    ),
     threshold=dict(argstr='-threshold %d',
     position=-4,
     ),
     )
-    inputs = Retroicor.input_spec()
+    inputs = Retroicor._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -55,7 +48,7 @@ def test_Retroicor_inputs():
 def test_Retroicor_outputs():
     output_map = dict(out_file=dict(),
     )
-    outputs = Retroicor.output_spec()
+    outputs = Retroicor._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

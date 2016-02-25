@@ -8,9 +8,17 @@ def test_BaseInterface_inputs():
     usedefault=True,
     ),
     )
-    inputs = BaseInterface.input_spec()
+    inputs = BaseInterface._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
             yield assert_equal, getattr(inputs.traits()[key], metakey), value
 
+
+def test_BaseInterface_outputs():
+    output_map = dict()
+    outputs = BaseInterface._output_spec()
+
+    for key, metadata in list(output_map.items()):
+        for metakey, value in list(metadata.items()):
+            yield assert_equal, getattr(outputs.traits()[key], metakey), value

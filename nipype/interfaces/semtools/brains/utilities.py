@@ -40,8 +40,8 @@ contributor: University of Iowa Department of Psychiatry, http:://www.psychiatry
 
 """
 
-    input_spec = HistogramMatchingFilterInputSpec
-    output_spec = HistogramMatchingFilterOutputSpec
+    _input_spec = HistogramMatchingFilterInputSpec
+    _output_spec = HistogramMatchingFilterOutputSpec
     _cmd = " HistogramMatchingFilter "
     _outputs_filenames = {'outputVolume': 'outputVolume.nii'}
     _redirect_x = False

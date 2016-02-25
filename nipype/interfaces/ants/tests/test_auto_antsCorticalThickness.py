@@ -24,13 +24,7 @@ def test_antsCorticalThickness_inputs():
     dimension=dict(argstr='-d %d',
     usedefault=True,
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
     extraction_registration_mask=dict(argstr='-f %s',
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
     ),
     image_suffix=dict(argstr='-s %s',
     usedefault=True,
@@ -61,14 +55,12 @@ def test_antsCorticalThickness_inputs():
     t1_registration_template=dict(argstr='-t %s',
     mandatory=True,
     ),
-    terminal_output=dict(nohash=True,
-    ),
     use_floatingpoint_precision=dict(argstr='-j %d',
     ),
     use_random_seeding=dict(argstr='-u %d',
     ),
     )
-    inputs = antsCorticalThickness.input_spec()
+    inputs = antsCorticalThickness._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -89,7 +81,7 @@ def test_antsCorticalThickness_outputs():
     TemplateToSubject0Warp=dict(),
     TemplateToSubject1GenericAffine=dict(),
     )
-    outputs = antsCorticalThickness.output_spec()
+    outputs = antsCorticalThickness._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

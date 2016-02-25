@@ -7,7 +7,7 @@ import warnings
 import numpy as np
 import networkx as nx
 
-from ..base import (BaseInterface, BaseInterfaceInputSpec, traits,
+from ..base import (BaseInterface, BaseInputSpec, traits,
                     File, TraitedSpec, InputMultiPath,
                     OutputMultiPath, isdefined)
 from ...utils.misc import package_check
@@ -36,7 +36,7 @@ def ntwks_to_matrices(in_files, edge_key):
     return matrix
 
 
-class NetworkBasedStatisticInputSpec(BaseInterfaceInputSpec):
+class NetworkBasedStatisticInputSpec(BaseInputSpec):
     in_group1 = InputMultiPath(File(exists=True), mandatory=True, desc='Networks for the first group of subjects')
     in_group2 = InputMultiPath(File(exists=True), mandatory=True, desc='Networks for the second group of subjects')
     node_position_network = File(desc='An optional network used to position the nodes for the output networks')
@@ -72,8 +72,8 @@ class NetworkBasedStatistic(BaseInterface):
     >>> nbs.inputs.in_group2 = ['pat1.pck', 'pat2.pck'] # doctest: +SKIP
     >>> nbs.run()                 # doctest: +SKIP
     """
-    input_spec = NetworkBasedStatisticInputSpec
-    output_spec = NetworkBasedStatisticOutputSpec
+    _input_spec = NetworkBasedStatisticInputSpec
+    _output_spec = NetworkBasedStatisticOutputSpec
 
     def _run_interface(self, runtime):
         THRESH = self.inputs.threshold
@@ -127,8 +127,8 @@ class NetworkBasedStatistic(BaseInterface):
         iflogger.info('Saving output p-value network as {out}'.format(out=pval_path))
         return runtime
 
-    def _list_outputs(self):
-        outputs = self.output_spec().get()
+    def _post_run(self):
+        
 
         THRESH = self.inputs.threshold
         K = self.inputs.number_of_permutations
@@ -138,10 +138,9 @@ class NetworkBasedStatistic(BaseInterface):
         path = op.abspath('NBS_Result_' + details)
         pval_path = op.abspath('NBS_P_vals_' + details)
 
-        outputs['nbs_network'] = path
-        outputs['nbs_pval_network'] = pval_path
-        outputs['network_files'] = [path, pval_path]
-        return outputs
-
+        self.outputs.nbs_network = path
+        self.outputs.nbs_pval_network = pval_path
+        self.outputs.network_files = [path, pval_path]
+        
     def _gen_outfilename(self, name, ext):
         return name + '.' + ext

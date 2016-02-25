@@ -11,15 +11,9 @@ def test_VolSymm_inputs():
     ),
     config_file=dict(argstr='-config_file %s',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
     fit_linear=dict(argstr='-linear',
     ),
     fit_nonlinear=dict(argstr='-nonlinear',
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
     ),
     input_file=dict(argstr='%s',
     mandatory=True,
@@ -34,8 +28,6 @@ def test_VolSymm_inputs():
     name_source=['input_file'],
     name_template='%s_vol_symm.mnc',
     position=-1,
-    ),
-    terminal_output=dict(nohash=True,
     ),
     trans_file=dict(argstr='%s',
     genfile=True,
@@ -54,7 +46,7 @@ def test_VolSymm_inputs():
     z=dict(argstr='-z',
     ),
     )
-    inputs = VolSymm.input_spec()
+    inputs = VolSymm._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -66,7 +58,7 @@ def test_VolSymm_outputs():
     output_grid=dict(),
     trans_file=dict(),
     )
-    outputs = VolSymm.output_spec()
+    outputs = VolSymm._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

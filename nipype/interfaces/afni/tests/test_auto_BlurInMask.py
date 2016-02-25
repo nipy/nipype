@@ -8,16 +8,10 @@ def test_BlurInMask_inputs():
     ),
     automask=dict(argstr='-automask',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
     float_out=dict(argstr='-float',
     ),
     fwhm=dict(argstr='-FWHM %f',
     mandatory=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
     ),
     in_file=dict(argstr='-input %s',
     copyfile=False,
@@ -31,18 +25,17 @@ def test_BlurInMask_inputs():
     options=dict(argstr='%s',
     position=2,
     ),
-    out_file=dict(argstr='-prefix %s',
-    name_source='in_file',
-    name_template='%s_blur',
-    position=-1,
+    out_file=dict(keep_extension=False,
     ),
-    outputtype=dict(),
+    output_type=dict(usedefault=True,
+    ),
+    prefix=dict(argstr='-prefix %s',
+    keep_extension=False,
+    ),
     preserve=dict(argstr='-preserve',
     ),
-    terminal_output=dict(nohash=True,
-    ),
     )
-    inputs = BlurInMask.input_spec()
+    inputs = BlurInMask._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -52,7 +45,7 @@ def test_BlurInMask_inputs():
 def test_BlurInMask_outputs():
     output_map = dict(out_file=dict(),
     )
-    outputs = BlurInMask.output_spec()
+    outputs = BlurInMask._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

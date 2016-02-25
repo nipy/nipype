@@ -4,10 +4,7 @@ from ..utils import CalcCoregAffine
 
 
 def test_CalcCoregAffine_inputs():
-    input_map = dict(ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
-    invmat=dict(),
+    input_map = dict(invmat=dict(),
     mat=dict(),
     matlab_cmd=dict(),
     mfile=dict(usedefault=True,
@@ -23,7 +20,7 @@ def test_CalcCoregAffine_inputs():
     usedefault=True,
     ),
     )
-    inputs = CalcCoregAffine.input_spec()
+    inputs = CalcCoregAffine._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -34,7 +31,7 @@ def test_CalcCoregAffine_outputs():
     output_map = dict(invmat=dict(),
     mat=dict(),
     )
-    outputs = CalcCoregAffine.output_spec()
+    outputs = CalcCoregAffine._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

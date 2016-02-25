@@ -16,14 +16,8 @@ def test_Pik_inputs():
     ),
     depth=dict(argstr='--depth %s',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
     horizontal_triplanar_view=dict(argstr='--horizontal',
     xor=('vertical_triplanar_view', 'horizontal_triplanar_view'),
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
     ),
     image_range=dict(argstr='--image_range %s %s',
     xor=('image_range', 'auto_range'),
@@ -65,8 +59,6 @@ def test_Pik_inputs():
     ),
     start=dict(argstr='--slice %s',
     ),
-    terminal_output=dict(nohash=True,
-    ),
     tile_size=dict(argstr='--tilesize %s',
     ),
     title=dict(argstr='%s',
@@ -82,7 +74,7 @@ def test_Pik_inputs():
     width=dict(argstr='--width %s',
     ),
     )
-    inputs = Pik.input_spec()
+    inputs = Pik._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -92,7 +84,7 @@ def test_Pik_inputs():
 def test_Pik_outputs():
     output_map = dict(output_file=dict(),
     )
-    outputs = Pik.output_spec()
+    outputs = Pik._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

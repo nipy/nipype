@@ -6,12 +6,6 @@ from ..connectivity import BuildConnectome
 def test_BuildConnectome_inputs():
     input_map = dict(args=dict(argstr='%s',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     in_file=dict(argstr='%s',
     mandatory=True,
     position=-3,
@@ -41,14 +35,12 @@ def test_BuildConnectome_inputs():
     ),
     search_reverse=dict(argstr='-assignment_reverse_search %f',
     ),
-    terminal_output=dict(nohash=True,
-    ),
     vox_lookup=dict(argstr='-assignment_voxel_lookup',
     ),
     zero_diagonal=dict(argstr='-zero_diagonal',
     ),
     )
-    inputs = BuildConnectome.input_spec()
+    inputs = BuildConnectome._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -58,7 +50,7 @@ def test_BuildConnectome_inputs():
 def test_BuildConnectome_outputs():
     output_map = dict(out_file=dict(),
     )
-    outputs = BuildConnectome.output_spec()
+    outputs = BuildConnectome._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

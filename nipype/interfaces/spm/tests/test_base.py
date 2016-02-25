@@ -63,7 +63,7 @@ if not save_time:
 
 def test_use_mfile():
     class TestClass(spm.SPMCommand):
-        input_spec = spm.SPMCommandInputSpec
+        _input_spec = spm.SPMCommandInputSpec
     dc = TestClass()  # dc = derived_class
     yield assert_true, dc.inputs.mfile
 
@@ -100,7 +100,7 @@ def test_find_mlab_cmd_defaults():
 @skipif(no_spm, "SPM not found")
 def test_cmd_update():
     class TestClass(spm.SPMCommand):
-        input_spec = spm.SPMCommandInputSpec
+        _input_spec = spm.SPMCommandInputSpec
     dc = TestClass()  # dc = derived_class
     dc.inputs.matlab_cmd = 'foo'
     yield assert_equal, dc.mlab._cmd, 'foo'
@@ -110,7 +110,7 @@ def test_cmd_update2():
     class TestClass(spm.SPMCommand):
         _jobtype = 'jobtype'
         _jobname = 'jobname'
-        input_spec = spm.SPMCommandInputSpec
+        _input_spec = spm.SPMCommandInputSpec
     dc = TestClass()  # dc = derived_class
     yield assert_equal, dc.jobtype, 'jobtype'
     yield assert_equal, dc.jobname, 'jobname'
@@ -118,7 +118,7 @@ def test_cmd_update2():
 
 def test_reformat_dict_for_savemat():
     class TestClass(spm.SPMCommand):
-        input_spec = spm.SPMCommandInputSpec
+        _input_spec = spm.SPMCommandInputSpec
     dc = TestClass()  # dc = derived_class
     out = dc._reformat_dict_for_savemat({'a': {'b': {'c': []}}})
     yield assert_equal, out, [{'a': [{'b': [{'c': []}]}]}]
@@ -126,7 +126,7 @@ def test_reformat_dict_for_savemat():
 
 def test_generate_job():
     class TestClass(spm.SPMCommand):
-        input_spec = spm.SPMCommandInputSpec
+        _input_spec = spm.SPMCommandInputSpec
     dc = TestClass()  # dc = derived_class
     out = dc._generate_job()
     yield assert_equal, out, ''
@@ -158,15 +158,15 @@ def test_bool():
         test_in = include_intercept = traits.Bool(field='testfield')
 
     class TestClass(spm.SPMCommand):
-        input_spec = TestClassInputSpec
+        _input_spec = TestClassInputSpec
         _jobtype = 'jobtype'
         _jobname = 'jobname'
     dc = TestClass()  # dc = derived_class
     dc.inputs.test_in = True
-    out = dc._make_matlab_command(dc._parse_inputs())
+    out = dc._make_matlab_command(dc.parse_args())
     yield assert_equal, out.find('jobs{1}.spm.jobtype.jobname.testfield = 1;') > 0, 1
     dc.inputs.use_v8struct = False
-    out = dc._make_matlab_command(dc._parse_inputs())
+    out = dc._make_matlab_command(dc.parse_args())
     yield assert_equal, out.find('jobs{1}.jobtype{1}.jobname{1}.testfield = 1;') > 0, 1
 
 
@@ -174,7 +174,7 @@ def test_make_matlab_command():
     class TestClass(spm.SPMCommand):
         _jobtype = 'jobtype'
         _jobname = 'jobname'
-        input_spec = spm.SPMCommandInputSpec
+        _input_spec = spm.SPMCommandInputSpec
     dc = TestClass()  # dc = derived_class
     filelist, outdir, cwd = create_files_in_directory()
     contents = {'contents': [1, 2, 3, 4]}

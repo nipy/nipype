@@ -6,12 +6,6 @@ from ..developer import JistBrainPartialVolumeFilter
 def test_JistBrainPartialVolumeFilter_inputs():
     input_map = dict(args=dict(argstr='%s',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     inInput=dict(argstr='--inInput %s',
     ),
     inPV=dict(argstr='--inPV %s',
@@ -23,8 +17,6 @@ def test_JistBrainPartialVolumeFilter_inputs():
     outPartial=dict(argstr='--outPartial %s',
     hash_files=False,
     ),
-    terminal_output=dict(nohash=True,
-    ),
     xDefaultMem=dict(argstr='-xDefaultMem %d',
     ),
     xMaxProcess=dict(argstr='-xMaxProcess %d',
@@ -33,7 +25,7 @@ def test_JistBrainPartialVolumeFilter_inputs():
     xPrefExt=dict(argstr='--xPrefExt %s',
     ),
     )
-    inputs = JistBrainPartialVolumeFilter.input_spec()
+    inputs = JistBrainPartialVolumeFilter._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -43,7 +35,7 @@ def test_JistBrainPartialVolumeFilter_inputs():
 def test_JistBrainPartialVolumeFilter_outputs():
     output_map = dict(outPartial=dict(),
     )
-    outputs = JistBrainPartialVolumeFilter.output_spec()
+    outputs = JistBrainPartialVolumeFilter._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

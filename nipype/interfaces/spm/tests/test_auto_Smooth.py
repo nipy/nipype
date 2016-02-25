@@ -8,9 +8,6 @@ def test_Smooth_inputs():
     ),
     fwhm=dict(field='fwhm',
     ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     implicit_masking=dict(field='im',
     ),
     in_files=dict(copyfile=False,
@@ -29,7 +26,7 @@ def test_Smooth_inputs():
     usedefault=True,
     ),
     )
-    inputs = Smooth.input_spec()
+    inputs = Smooth._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -39,7 +36,7 @@ def test_Smooth_inputs():
 def test_Smooth_outputs():
     output_map = dict(smoothed_files=dict(),
     )
-    outputs = Smooth.output_spec()
+    outputs = Smooth._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

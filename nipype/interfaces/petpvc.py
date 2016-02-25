@@ -158,21 +158,20 @@ class PETPVC(CommandLine):
     >>> pvc.inputs.fwhm_z = 2.0
     >>> outs = pvc.run() #doctest: +SKIP
     """
-    input_spec = PETPVCInputSpec
-    output_spec = PETPVCOutputSpec
+    _input_spec = PETPVCInputSpec
+    _output_spec = PETPVCOutputSpec
     _cmd = 'petpvc'
 
-    def _list_outputs(self):
-        outputs = self.output_spec().get()
-        outputs['out_file'] = self.inputs.out_file
-        if not isdefined(outputs['out_file']):
+    def _post_run(self):
+        
+        self.outputs.out_file = self.inputs.out_file
+        if not isdefined(self.outputs.out_file):
             method_name = self.inputs.pvc.lower()
-            outputs['out_file'] = self._gen_fname(self.inputs.in_file,
+            self.outputs.out_file = self._gen_fname(self.inputs.in_file,
                                                   suffix='_{}_pvc'.format(method_name))
 
-        outputs['out_file'] = os.path.abspath(outputs['out_file'])
-        return outputs
-
+        self.outputs.out_file = os.path.abspath(self.outputs.out_file)
+        
     def _gen_fname(self, basename, cwd=None, suffix=None, change_ext=True,
                    ext='.nii.gz'):
         """Generate a filename based on the given parameters.
@@ -220,5 +219,5 @@ class PETPVC(CommandLine):
 
     def _gen_filename(self, name):
         if name == 'out_file':
-            return self._list_outputs()['out_file']
+            return self.outputs.out_file
         return None

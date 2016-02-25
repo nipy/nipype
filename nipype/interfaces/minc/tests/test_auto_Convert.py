@@ -14,12 +14,6 @@ def test_Convert_inputs():
     ),
     compression=dict(argstr='-compress %s',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     input_file=dict(argstr='%s',
     mandatory=True,
     position=-2,
@@ -33,12 +27,10 @@ def test_Convert_inputs():
     ),
     template=dict(argstr='-template',
     ),
-    terminal_output=dict(nohash=True,
-    ),
     two=dict(argstr='-2',
     ),
     )
-    inputs = Convert.input_spec()
+    inputs = Convert._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -48,7 +40,7 @@ def test_Convert_inputs():
 def test_Convert_outputs():
     output_map = dict(output_file=dict(),
     )
-    outputs = Convert.output_spec()
+    outputs = Convert._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

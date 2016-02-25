@@ -8,12 +8,6 @@ def test_VtkStreamlines_inputs():
     ),
     colourorient=dict(argstr='-colourorient',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     in_file=dict(argstr=' < %s',
     mandatory=True,
     position=-2,
@@ -26,8 +20,8 @@ def test_VtkStreamlines_inputs():
     interpolatescalars=dict(argstr='-interpolatescalars',
     ),
     out_file=dict(argstr='> %s',
-    genfile=True,
     position=-1,
+    usedefault=True,
     ),
     scalar_file=dict(argstr='-scalarfile %s',
     position=3,
@@ -38,14 +32,12 @@ def test_VtkStreamlines_inputs():
     target_file=dict(argstr='-targetfile %s',
     position=2,
     ),
-    terminal_output=dict(nohash=True,
-    ),
     voxeldims=dict(argstr='-voxeldims %s',
     position=4,
     units='mm',
     ),
     )
-    inputs = VtkStreamlines.input_spec()
+    inputs = VtkStreamlines._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -55,7 +47,7 @@ def test_VtkStreamlines_inputs():
 def test_VtkStreamlines_outputs():
     output_map = dict(vtk=dict(),
     )
-    outputs = VtkStreamlines.output_spec()
+    outputs = VtkStreamlines._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

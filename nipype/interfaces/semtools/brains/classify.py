@@ -44,8 +44,8 @@ acknowledgements: Funding for this work was provided by NIH/NINDS award NS050568
 
 """
 
-    input_spec = BRAINSPosteriorToContinuousClassInputSpec
-    output_spec = BRAINSPosteriorToContinuousClassOutputSpec
+    _input_spec = BRAINSPosteriorToContinuousClassInputSpec
+    _output_spec = BRAINSPosteriorToContinuousClassOutputSpec
     _cmd = " BRAINSPosteriorToContinuousClass "
     _outputs_filenames = {'outputVolume': 'outputVolume'}
     _redirect_x = False

@@ -45,7 +45,7 @@ acknowledgements: The development of this tool was supported by funding from gra
 
 """
 
-    input_spec = BRAINSResampleInputSpec
-    output_spec = BRAINSResampleOutputSpec
+    _input_spec = BRAINSResampleInputSpec
+    _output_spec = BRAINSResampleOutputSpec
     _cmd = "BRAINSResample "
     _outputs_filenames = {'outputVolume': 'outputVolume.nii'}

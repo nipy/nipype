@@ -4,10 +4,7 @@ from ..utils import Similarity
 
 
 def test_Similarity_inputs():
-    input_map = dict(ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
-    mask1=dict(),
+    input_map = dict(mask1=dict(),
     mask2=dict(),
     metric=dict(usedefault=True,
     ),
@@ -16,7 +13,7 @@ def test_Similarity_inputs():
     volume2=dict(mandatory=True,
     ),
     )
-    inputs = Similarity.input_spec()
+    inputs = Similarity._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -26,7 +23,7 @@ def test_Similarity_inputs():
 def test_Similarity_outputs():
     output_map = dict(similarity=dict(),
     )
-    outputs = Similarity.output_spec()
+    outputs = Similarity._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

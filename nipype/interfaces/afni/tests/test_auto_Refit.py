@@ -7,11 +7,6 @@ def test_Refit_inputs():
     input_map = dict(args=dict(argstr='%s',
     ),
     deoblique=dict(argstr='-deoblique',
-    ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
     usedefault=True,
     ),
     in_file=dict(argstr='%s',
@@ -19,9 +14,10 @@ def test_Refit_inputs():
     mandatory=True,
     position=-1,
     ),
-    space=dict(argstr='-space %s',
+    out_file=dict(),
+    output_type=dict(usedefault=True,
     ),
-    terminal_output=dict(nohash=True,
+    space=dict(argstr='-space %s',
     ),
     xdel=dict(argstr='-xdel %f',
     ),
@@ -36,7 +32,7 @@ def test_Refit_inputs():
     zorigin=dict(argstr='-zorigin %s',
     ),
     )
-    inputs = Refit.input_spec()
+    inputs = Refit._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -46,7 +42,7 @@ def test_Refit_inputs():
 def test_Refit_outputs():
     output_map = dict(out_file=dict(),
     )
-    outputs = Refit.output_spec()
+    outputs = Refit._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

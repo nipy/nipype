@@ -9,29 +9,21 @@ def test_CopyGeom_inputs():
     dest_file=dict(argstr='%s',
     copyfile=True,
     mandatory=True,
-    name_source='dest_file',
-    name_template='%s',
     output_name='out_file',
     position=1,
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
     ignore_dims=dict(argstr='-d',
-    position='-1',
-    ),
-    ignore_exception=dict(nohash=True,
+    position=-1,
     usedefault=True,
     ),
     in_file=dict(argstr='%s',
     mandatory=True,
     position=0,
     ),
-    output_type=dict(),
-    terminal_output=dict(nohash=True,
+    output_type=dict(usedefault=True,
     ),
     )
-    inputs = CopyGeom.input_spec()
+    inputs = CopyGeom._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -41,7 +33,7 @@ def test_CopyGeom_inputs():
 def test_CopyGeom_outputs():
     output_map = dict(out_file=dict(),
     )
-    outputs = CopyGeom.output_spec()
+    outputs = CopyGeom._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

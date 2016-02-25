@@ -13,18 +13,10 @@ def test_CastScalarVolume_inputs():
     ),
     args=dict(argstr='%s',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
-    terminal_output=dict(nohash=True,
-    ),
     type=dict(argstr='--type %s',
     ),
     )
-    inputs = CastScalarVolume.input_spec()
+    inputs = CastScalarVolume._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -35,7 +27,7 @@ def test_CastScalarVolume_outputs():
     output_map = dict(OutputVolume=dict(position=-1,
     ),
     )
-    outputs = CastScalarVolume.output_spec()
+    outputs = CastScalarVolume._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

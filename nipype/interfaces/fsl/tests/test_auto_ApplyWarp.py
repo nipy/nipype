@@ -11,13 +11,7 @@ def test_ApplyWarp_inputs():
     ),
     datatype=dict(argstr='--datatype=%s',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
     field_file=dict(argstr='--warp=%s',
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
     ),
     in_file=dict(argstr='--in=%s',
     mandatory=True,
@@ -33,7 +27,8 @@ def test_ApplyWarp_inputs():
     hash_files=False,
     position=2,
     ),
-    output_type=dict(),
+    output_type=dict(usedefault=True,
+    ),
     postmat=dict(argstr='--postmat=%s',
     ),
     premat=dict(argstr='--premat=%s',
@@ -50,10 +45,8 @@ def test_ApplyWarp_inputs():
     ),
     supersample=dict(argstr='--super',
     ),
-    terminal_output=dict(nohash=True,
-    ),
     )
-    inputs = ApplyWarp.input_spec()
+    inputs = ApplyWarp._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -63,7 +56,7 @@ def test_ApplyWarp_inputs():
 def test_ApplyWarp_outputs():
     output_map = dict(out_file=dict(),
     )
-    outputs = ApplyWarp.output_spec()
+    outputs = ApplyWarp._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

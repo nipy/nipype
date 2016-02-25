@@ -22,9 +22,6 @@ def test_BRAINSABC_inputs():
     ),
     defaultSuffix=dict(argstr='--defaultSuffix %s',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
     filterIteration=dict(argstr='--filterIteration %d',
     ),
     filterMethod=dict(argstr='--filterMethod %s',
@@ -33,9 +30,6 @@ def test_BRAINSABC_inputs():
     ),
     gridSize=dict(argstr='--gridSize %s',
     sep=',',
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
     ),
     implicitOutputs=dict(argstr='--implicitOutputs %s...',
     hash_files=False,
@@ -84,14 +78,12 @@ def test_BRAINSABC_inputs():
     ),
     subjectIntermodeTransformType=dict(argstr='--subjectIntermodeTransformType %s',
     ),
-    terminal_output=dict(nohash=True,
-    ),
     useKNN=dict(argstr='--useKNN ',
     ),
     writeLess=dict(argstr='--writeLess ',
     ),
     )
-    inputs = BRAINSABC.input_spec()
+    inputs = BRAINSABC._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -108,7 +100,7 @@ def test_BRAINSABC_outputs():
     outputVolumes=dict(),
     saveState=dict(),
     )
-    outputs = BRAINSABC.output_spec()
+    outputs = BRAINSABC._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

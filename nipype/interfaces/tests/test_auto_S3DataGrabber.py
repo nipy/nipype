@@ -10,9 +10,6 @@ def test_S3DataGrabber_inputs():
     ),
     bucket_path=dict(usedefault=True,
     ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     local_directory=dict(),
     raise_on_empty=dict(usedefault=True,
     ),
@@ -24,7 +21,7 @@ def test_S3DataGrabber_inputs():
     ),
     template_args=dict(),
     )
-    inputs = S3DataGrabber.input_spec()
+    inputs = S3DataGrabber._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -33,7 +30,7 @@ def test_S3DataGrabber_inputs():
 
 def test_S3DataGrabber_outputs():
     output_map = dict()
-    outputs = S3DataGrabber.output_spec()
+    outputs = S3DataGrabber._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

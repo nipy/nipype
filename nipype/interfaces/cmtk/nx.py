@@ -19,7 +19,7 @@ import numpy as np
 import networkx as nx
 import scipy.io as sio
 
-from ..base import (BaseInterface, BaseInterfaceInputSpec, traits, File,
+from ..base import (BaseInterface, BaseInputSpec, traits, File,
                     TraitedSpec, InputMultiPath, OutputMultiPath, isdefined)
 from ...utils.filemanip import split_filename
 from ...utils.misc import package_check
@@ -343,7 +343,7 @@ def add_edge_data(edge_array, ntwk, above=0, below=0):
     return edge_ntwk
 
 
-class NetworkXMetricsInputSpec(BaseInterfaceInputSpec):
+class NetworkXMetricsInputSpec(BaseInputSpec):
     in_file = File(exists=True, mandatory=True, desc='Input network')
     out_k_core = File('k_core', usedefault=True, desc='Computed k-core network stored as a NetworkX pickle.')
     out_k_shell = File('k_shell', usedefault=True, desc='Computed k-shell network stored as a NetworkX pickle.')
@@ -384,8 +384,8 @@ class NetworkXMetrics(BaseInterface):
     >>> nxmetrics.inputs.in_file = 'subj1.pck'
     >>> nxmetrics.run()                 # doctest: +SKIP
     """
-    input_spec = NetworkXMetricsInputSpec
-    output_spec = NetworkXMetricsOutputSpec
+    _input_spec = NetworkXMetricsInputSpec
+    _output_spec = NetworkXMetricsOutputSpec
 
     def _run_interface(self, runtime):
         global gpickled, nodentwks, edgentwks, kntwks, matlab
@@ -482,28 +482,27 @@ class NetworkXMetrics(BaseInterface):
             dicts.append(out_file)
         return runtime
 
-    def _list_outputs(self):
-        outputs = self.output_spec().get()
-        outputs["k_core"] = op.abspath(self._gen_outfilename(self.inputs.out_k_core, 'pck'))
-        outputs["k_shell"] = op.abspath(self._gen_outfilename(self.inputs.out_k_shell, 'pck'))
-        outputs["k_crust"] = op.abspath(self._gen_outfilename(self.inputs.out_k_crust, 'pck'))
-        outputs["gpickled_network_files"] = gpickled
-        outputs["k_networks"] = kntwks
-        outputs["node_measure_networks"] = nodentwks
-        outputs["edge_measure_networks"] = edgentwks
-        outputs["matlab_dict_measures"] = dicts
-        outputs["global_measures_matlab"] = op.abspath(self._gen_outfilename('globalmetrics', 'mat'))
-        outputs["node_measures_matlab"] = op.abspath(self._gen_outfilename('nodemetrics', 'mat'))
-        outputs["edge_measures_matlab"] = op.abspath(self._gen_outfilename('edgemetrics', 'mat'))
-        outputs["matlab_matrix_files"] = [outputs["global_measures_matlab"], outputs["node_measures_matlab"], outputs["edge_measures_matlab"]]
-        outputs["pickled_extra_measures"] = op.abspath(self._gen_outfilename(self.inputs.out_pickled_extra_measures, 'pck'))
-        return outputs
-
+    def _post_run(self):
+        
+        self.outputs.k_core = op.abspath(self._gen_outfilename(self.inputs.out_k_core, 'pck'))
+        self.outputs.k_shell = op.abspath(self._gen_outfilename(self.inputs.out_k_shell, 'pck'))
+        self.outputs.k_crust = op.abspath(self._gen_outfilename(self.inputs.out_k_crust, 'pck'))
+        self.outputs.gpickled_network_files = gpickled
+        self.outputs.k_networks = kntwks
+        self.outputs.node_measure_networks = nodentwks
+        self.outputs.edge_measure_networks = edgentwks
+        self.outputs.matlab_dict_measures = dicts
+        self.outputs.global_measures_matlab = op.abspath(self._gen_outfilename('globalmetrics', 'mat'))
+        self.outputs.node_measures_matlab = op.abspath(self._gen_outfilename('nodemetrics', 'mat'))
+        self.outputs.edge_measures_matlab = op.abspath(self._gen_outfilename('edgemetrics', 'mat'))
+        self.outputs.matlab_matrix_files = [self.outputs.global_measures_matlab, self.outputs.node_measures_matlab, self.outputs.edge_measures_matlab]
+        self.outputs.pickled_extra_measures = op.abspath(self._gen_outfilename(self.inputs.out_pickled_extra_measures, 'pck'))
+        
     def _gen_outfilename(self, name, ext):
         return name + '.' + ext
 
 
-class AverageNetworksInputSpec(BaseInterfaceInputSpec):
+class AverageNetworksInputSpec(BaseInputSpec):
     in_files = InputMultiPath(File(exists=True), mandatory=True, desc='Networks for a group of subjects')
     resolution_network_file = File(exists=True, desc='Parcellation files from Connectome Mapping Toolkit. This is not necessary'
                                    ', but if included, the interface will output the statistical maps as networkx graphs.')
@@ -534,8 +533,8 @@ class AverageNetworks(BaseInterface):
     >>> avg.run()                 # doctest: +SKIP
 
     """
-    input_spec = AverageNetworksInputSpec
-    output_spec = AverageNetworksOutputSpec
+    _input_spec = AverageNetworksInputSpec
+    _output_spec = AverageNetworksOutputSpec
 
     def _run_interface(self, runtime):
         if isdefined(self.inputs.resolution_network_file):
@@ -547,20 +546,19 @@ class AverageNetworks(BaseInterface):
         network_name, matlab_network_list = average_networks(self.inputs.in_files, ntwk_res_file, self.inputs.group_id)
         return runtime
 
-    def _list_outputs(self):
-        outputs = self.output_spec().get()
+    def _post_run(self):
+        
         if not isdefined(self.inputs.out_gpickled_groupavg):
-            outputs["gpickled_groupavg"] = op.abspath(self._gen_outfilename(self.inputs.group_id + '_average', 'pck'))
+            self.outputs.gpickled_groupavg = op.abspath(self._gen_outfilename(self.inputs.group_id + '_average', 'pck'))
         else:
-            outputs["gpickled_groupavg"] = op.abspath(self.inputs.out_gpickled_groupavg)
+            self.outputs.gpickled_groupavg = op.abspath(self.inputs.out_gpickled_groupavg)
 
         if not isdefined(self.inputs.out_gexf_groupavg):
-            outputs["gexf_groupavg"] = op.abspath(self._gen_outfilename(self.inputs.group_id + '_average', 'gexf'))
+            self.outputs.gexf_groupavg = op.abspath(self._gen_outfilename(self.inputs.group_id + '_average', 'gexf'))
         else:
-            outputs["gexf_groupavg"] = op.abspath(self.inputs.out_gexf_groupavg)
+            self.outputs.gexf_groupavg = op.abspath(self.inputs.out_gexf_groupavg)
 
-        outputs["matlab_groupavgs"] = matlab_network_list
-        return outputs
-
+        self.outputs.matlab_groupavgs = matlab_network_list
+        
     def _gen_outfilename(self, name, ext):
         return name + '.' + ext

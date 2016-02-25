@@ -8,12 +8,6 @@ def test_BRAINSConstellationModeler_inputs():
     ),
     args=dict(argstr='%s',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     inputTrainingList=dict(argstr='--inputTrainingList %s',
     ),
     mspQualityLevel=dict(argstr='--mspQualityLevel %d',
@@ -35,8 +29,6 @@ def test_BRAINSConstellationModeler_inputs():
     ),
     saveOptimizedLandmarks=dict(argstr='--saveOptimizedLandmarks ',
     ),
-    terminal_output=dict(nohash=True,
-    ),
     trimRescaledIntensities=dict(argstr='--trimRescaledIntensities %f',
     ),
     verbose=dict(argstr='--verbose ',
@@ -44,7 +36,7 @@ def test_BRAINSConstellationModeler_inputs():
     writedebuggingImagesLevel=dict(argstr='--writedebuggingImagesLevel %d',
     ),
     )
-    inputs = BRAINSConstellationModeler.input_spec()
+    inputs = BRAINSConstellationModeler._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -55,7 +47,7 @@ def test_BRAINSConstellationModeler_outputs():
     output_map = dict(outputModel=dict(),
     resultsDir=dict(),
     )
-    outputs = BRAINSConstellationModeler.output_spec()
+    outputs = BRAINSConstellationModeler._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

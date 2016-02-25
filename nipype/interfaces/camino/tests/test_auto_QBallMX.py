@@ -9,18 +9,12 @@ def test_QBallMX_inputs():
     basistype=dict(argstr='-basistype %s',
     usedefault=True,
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     order=dict(argstr='-order %d',
     units='NA',
     ),
     out_file=dict(argstr='> %s',
-    genfile=True,
     position=-1,
+    usedefault=True,
     ),
     rbfpointset=dict(argstr='-rbfpointset %d',
     units='NA',
@@ -34,10 +28,8 @@ def test_QBallMX_inputs():
     smoothingsigma=dict(argstr='-smoothingsigma %f',
     units='NA',
     ),
-    terminal_output=dict(nohash=True,
-    ),
     )
-    inputs = QBallMX.input_spec()
+    inputs = QBallMX._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -47,7 +39,7 @@ def test_QBallMX_inputs():
 def test_QBallMX_outputs():
     output_map = dict(qmat=dict(),
     )
-    outputs = QBallMX.output_spec()
+    outputs = QBallMX._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

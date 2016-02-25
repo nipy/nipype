@@ -20,17 +20,11 @@ def test_Allineate_inputs():
     ),
     cost=dict(argstr='-cost %s',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
     epi=dict(argstr='-EPI',
     ),
     final_interpolation=dict(argstr='-final %s',
     ),
     fine_blur=dict(argstr='-fineblur %f',
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
     ),
     in_file=dict(argstr='-source %s',
     copyfile=False,
@@ -64,7 +58,8 @@ def test_Allineate_inputs():
     ),
     out_file=dict(argstr='-prefix %s',
     genfile=True,
-    name_source='%s_allineate',
+    name_source='in_file',
+    name_template='%s_allineate',
     position=-2,
     ),
     out_matrix=dict(argstr='-1Dmatrix_save %s',
@@ -73,7 +68,8 @@ def test_Allineate_inputs():
     ),
     out_weight_file=dict(argstr='-wtprefix %s',
     ),
-    outputtype=dict(),
+    output_type=dict(usedefault=True,
+    ),
     reference=dict(argstr='-base %s',
     ),
     replacebase=dict(argstr='-replacebase',
@@ -83,8 +79,6 @@ def test_Allineate_inputs():
     source_automask=dict(argstr='-source_automask+%d',
     ),
     source_mask=dict(argstr='-source_mask %s',
-    ),
-    terminal_output=dict(nohash=True,
     ),
     two_best=dict(argstr='-twobest %d',
     ),
@@ -105,7 +99,7 @@ def test_Allineate_inputs():
     zclip=dict(argstr='-zclip',
     ),
     )
-    inputs = Allineate.input_spec()
+    inputs = Allineate._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -116,7 +110,7 @@ def test_Allineate_outputs():
     output_map = dict(matrix=dict(),
     out_file=dict(),
     )
-    outputs = Allineate.output_spec()
+    outputs = Allineate._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

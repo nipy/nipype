@@ -6,12 +6,6 @@ from ..dti import MakeDyadicVectors
 def test_MakeDyadicVectors_inputs():
     input_map = dict(args=dict(argstr='%s',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     mask=dict(argstr='%s',
     position=2,
     ),
@@ -20,7 +14,8 @@ def test_MakeDyadicVectors_inputs():
     position=3,
     usedefault=True,
     ),
-    output_type=dict(),
+    output_type=dict(usedefault=True,
+    ),
     perc=dict(argstr='%f',
     position=4,
     ),
@@ -28,14 +23,12 @@ def test_MakeDyadicVectors_inputs():
     mandatory=True,
     position=1,
     ),
-    terminal_output=dict(nohash=True,
-    ),
     theta_vol=dict(argstr='%s',
     mandatory=True,
     position=0,
     ),
     )
-    inputs = MakeDyadicVectors.input_spec()
+    inputs = MakeDyadicVectors._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -46,7 +39,7 @@ def test_MakeDyadicVectors_outputs():
     output_map = dict(dispersion=dict(),
     dyads=dict(),
     )
-    outputs = MakeDyadicVectors.output_spec()
+    outputs = MakeDyadicVectors._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

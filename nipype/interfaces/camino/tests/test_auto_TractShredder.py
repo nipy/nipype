@@ -10,12 +10,6 @@ def test_TractShredder_inputs():
     position=2,
     units='NA',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     in_file=dict(argstr='< %s',
     mandatory=True,
     position=-2,
@@ -25,17 +19,15 @@ def test_TractShredder_inputs():
     units='NA',
     ),
     out_file=dict(argstr='> %s',
-    genfile=True,
     position=-1,
+    usedefault=True,
     ),
     space=dict(argstr='%d',
     position=3,
     units='NA',
     ),
-    terminal_output=dict(nohash=True,
-    ),
     )
-    inputs = TractShredder.input_spec()
+    inputs = TractShredder._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -45,7 +37,7 @@ def test_TractShredder_inputs():
 def test_TractShredder_outputs():
     output_map = dict(shredded=dict(),
     )
-    outputs = TractShredder.output_spec()
+    outputs = TractShredder._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

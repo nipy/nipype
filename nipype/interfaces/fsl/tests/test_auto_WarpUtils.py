@@ -6,31 +6,22 @@ from ..utils import WarpUtils
 def test_WarpUtils_inputs():
     input_map = dict(args=dict(argstr='%s',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     in_file=dict(argstr='--in=%s',
     mandatory=True,
     ),
     knot_space=dict(argstr='--knotspace=%d,%d,%d',
     ),
     out_file=dict(argstr='--out=%s',
-    name_source=['in_file'],
-    output_name='out_file',
     position=-1,
     ),
     out_format=dict(argstr='--outformat=%s',
     ),
     out_jacobian=dict(argstr='--jac=%s',
     ),
-    output_type=dict(),
+    output_type=dict(usedefault=True,
+    ),
     reference=dict(argstr='--ref=%s',
     mandatory=True,
-    ),
-    terminal_output=dict(nohash=True,
     ),
     warp_resolution=dict(argstr='--warpres=%0.4f,%0.4f,%0.4f',
     ),
@@ -40,7 +31,7 @@ def test_WarpUtils_inputs():
     usedefault=True,
     ),
     )
-    inputs = WarpUtils.input_spec()
+    inputs = WarpUtils._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -51,7 +42,7 @@ def test_WarpUtils_outputs():
     output_map = dict(out_file=dict(),
     out_jacobian=dict(),
     )
-    outputs = WarpUtils.output_spec()
+    outputs = WarpUtils._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

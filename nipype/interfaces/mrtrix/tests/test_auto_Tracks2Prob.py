@@ -9,14 +9,8 @@ def test_Tracks2Prob_inputs():
     colour=dict(argstr='-colour',
     position=3,
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
     fraction=dict(argstr='-fraction',
     position=3,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
     ),
     in_file=dict(argstr='%s',
     mandatory=True,
@@ -36,14 +30,12 @@ def test_Tracks2Prob_inputs():
     template_file=dict(argstr='-template %s',
     position=1,
     ),
-    terminal_output=dict(nohash=True,
-    ),
     voxel_dims=dict(argstr='-vox %s',
     position=2,
     sep=',',
     ),
     )
-    inputs = Tracks2Prob.input_spec()
+    inputs = Tracks2Prob._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -53,7 +45,7 @@ def test_Tracks2Prob_inputs():
 def test_Tracks2Prob_outputs():
     output_map = dict(tract_image=dict(),
     )
-    outputs = Tracks2Prob.output_spec()
+    outputs = Tracks2Prob._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

@@ -187,9 +187,9 @@ def test_datasink():
 
 # Make dummy input file
 def _make_dummy_input():
-    '''
+    """
     Function to create a dummy file
-    '''
+    """
 
     # Import packages
     import tempfile
@@ -210,10 +210,10 @@ def _make_dummy_input():
 # Test datasink writes to s3 properly
 @skipif(noboto3 or not fakes3)
 def test_datasink_to_s3():
-    '''
+    """
     This function tests to see if the S3 functionality of a DataSink
     works properly
-    '''
+    """
 
     # Import packages
     import hashlib
@@ -272,10 +272,10 @@ def test_datasink_to_s3():
 # Test AWS creds read from env vars
 @skipif(noboto3 or not fakes3)
 def test_aws_keys_from_env():
-    '''
+    """
     Function to ensure the DataSink can successfully read in AWS
     credentials from the environment variables
-    '''
+    """
 
     # Import packages
     import os
@@ -300,10 +300,10 @@ def test_aws_keys_from_env():
 
 # Test the local copy attribute
 def test_datasink_localcopy():
-    '''
+    """
     Function to validate DataSink will make local copy via local_copy
     attribute
-    '''
+    """
 
     # Import packages
     import hashlib

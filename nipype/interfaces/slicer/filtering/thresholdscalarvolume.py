@@ -37,7 +37,7 @@ acknowledgements: This work is part of the National Alliance for Medical Image C
 
 """
 
-    input_spec = ThresholdScalarVolumeInputSpec
-    output_spec = ThresholdScalarVolumeOutputSpec
+    _input_spec = ThresholdScalarVolumeInputSpec
+    _output_spec = ThresholdScalarVolumeOutputSpec
     _cmd = "ThresholdScalarVolume "
     _outputs_filenames = {'OutputVolume': 'OutputVolume.nii'}

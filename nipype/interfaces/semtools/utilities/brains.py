@@ -44,8 +44,8 @@ description: Train up a model for BRAINSConstellationDetector
 
 """
 
-    input_spec = BRAINSConstellationModelerInputSpec
-    output_spec = BRAINSConstellationModelerOutputSpec
+    _input_spec = BRAINSConstellationModelerInputSpec
+    _output_spec = BRAINSConstellationModelerOutputSpec
     _cmd = " BRAINSConstellationModeler "
     _outputs_filenames = {'outputModel': 'outputModel.mdl', 'resultsDir': 'resultsDir'}
     _redirect_x = False
@@ -72,8 +72,8 @@ description: Train up a list of Weights for the Landmarks in BRAINSConstellation
 
 """
 
-    input_spec = landmarksConstellationWeightsInputSpec
-    output_spec = landmarksConstellationWeightsOutputSpec
+    _input_spec = landmarksConstellationWeightsInputSpec
+    _output_spec = landmarksConstellationWeightsOutputSpec
     _cmd = " landmarksConstellationWeights "
     _outputs_filenames = {'outputWeightsList': 'outputWeightsList.wts'}
     _redirect_x = False
@@ -108,8 +108,8 @@ documentation-url: http://www.nitrc.org/projects/art/
 
 """
 
-    input_spec = BRAINSTrimForegroundInDirectionInputSpec
-    output_spec = BRAINSTrimForegroundInDirectionOutputSpec
+    _input_spec = BRAINSTrimForegroundInDirectionInputSpec
+    _output_spec = BRAINSTrimForegroundInDirectionOutputSpec
     _cmd = " BRAINSTrimForegroundInDirection "
     _outputs_filenames = {'outputVolume': 'outputVolume.nii'}
     _redirect_x = False
@@ -144,8 +144,8 @@ documentation-url: http://www.nitrc.org/projects/brainscdetector/
 
 """
 
-    input_spec = BRAINSLmkTransformInputSpec
-    output_spec = BRAINSLmkTransformOutputSpec
+    _input_spec = BRAINSLmkTransformInputSpec
+    _output_spec = BRAINSLmkTransformOutputSpec
     _cmd = " BRAINSLmkTransform "
     _outputs_filenames = {'outputResampledVolume': 'outputResampledVolume.nii', 'outputAffineTransform': 'outputAffineTransform.h5'}
     _redirect_x = False
@@ -196,8 +196,8 @@ acknowledgements: This work was developed by the University of Iowa Departments 
 
 """
 
-    input_spec = BRAINSMushInputSpec
-    output_spec = BRAINSMushOutputSpec
+    _input_spec = BRAINSMushInputSpec
+    _output_spec = BRAINSMushOutputSpec
     _cmd = " BRAINSMush "
     _outputs_filenames = {'outputMask': 'outputMask.nii.gz', 'outputWeightsFile': 'outputWeightsFile.txt', 'outputVolume': 'outputVolume.nii.gz'}
     _redirect_x = False
@@ -235,8 +235,8 @@ contributor: Hans J. Johnson,Kent Williams, Ali Ghayoor
 
 """
 
-    input_spec = BRAINSTransformConvertInputSpec
-    output_spec = BRAINSTransformConvertOutputSpec
+    _input_spec = BRAINSTransformConvertInputSpec
+    _output_spec = BRAINSTransformConvertOutputSpec
     _cmd = " BRAINSTransformConvert "
     _outputs_filenames = {'displacementVolume': 'displacementVolume.nii', 'outputTransform': 'outputTransform.mat'}
     _redirect_x = False
@@ -263,8 +263,8 @@ contributor: Ali Ghayoor
 
 """
 
-    input_spec = landmarksConstellationAlignerInputSpec
-    output_spec = landmarksConstellationAlignerOutputSpec
+    _input_spec = landmarksConstellationAlignerInputSpec
+    _output_spec = landmarksConstellationAlignerOutputSpec
     _cmd = " landmarksConstellationAligner "
     _outputs_filenames = {'outputLandmarksPaired': 'outputLandmarksPaired'}
     _redirect_x = False
@@ -293,8 +293,8 @@ documentation-url: http://www.nitrc.org/projects/brainscdetector/
 
 """
 
-    input_spec = BRAINSEyeDetectorInputSpec
-    output_spec = BRAINSEyeDetectorOutputSpec
+    _input_spec = BRAINSEyeDetectorInputSpec
+    _output_spec = BRAINSEyeDetectorOutputSpec
     _cmd = " BRAINSEyeDetector "
     _outputs_filenames = {'outputVolume': 'outputVolume.nii'}
     _redirect_x = False
@@ -323,8 +323,8 @@ documentation-url: http://www.nitrc.org/projects/brainscdetector/
 
 """
 
-    input_spec = BRAINSLinearModelerEPCAInputSpec
-    output_spec = BRAINSLinearModelerEPCAOutputSpec
+    _input_spec = BRAINSLinearModelerEPCAInputSpec
+    _output_spec = BRAINSLinearModelerEPCAOutputSpec
     _cmd = " BRAINSLinearModelerEPCA "
     _outputs_filenames = {}
     _redirect_x = False
@@ -361,8 +361,8 @@ acknowledgements: This work is part of the National Alliance for Medical Image C
 
 """
 
-    input_spec = BRAINSInitializedControlPointsInputSpec
-    output_spec = BRAINSInitializedControlPointsOutputSpec
+    _input_spec = BRAINSInitializedControlPointsInputSpec
+    _output_spec = BRAINSInitializedControlPointsOutputSpec
     _cmd = " BRAINSInitializedControlPoints "
     _outputs_filenames = {'outputVolume': 'outputVolume.nii'}
     _redirect_x = False
@@ -391,8 +391,8 @@ contributor: Eun Young Kim
 
 """
 
-    input_spec = CleanUpOverlapLabelsInputSpec
-    output_spec = CleanUpOverlapLabelsOutputSpec
+    _input_spec = CleanUpOverlapLabelsInputSpec
+    _output_spec = CleanUpOverlapLabelsOutputSpec
     _cmd = " CleanUpOverlapLabels "
     _outputs_filenames = {'outputBinaryVolumes': 'outputBinaryVolumes.nii'}
     _redirect_x = False
@@ -423,8 +423,8 @@ version: 1.0
 
 """
 
-    input_spec = BRAINSClipInferiorInputSpec
-    output_spec = BRAINSClipInferiorOutputSpec
+    _input_spec = BRAINSClipInferiorInputSpec
+    _output_spec = BRAINSClipInferiorOutputSpec
     _cmd = " BRAINSClipInferior "
     _outputs_filenames = {'outputVolume': 'outputVolume.nii'}
     _redirect_x = False
@@ -454,8 +454,8 @@ contributor: University of Iowa Department of Psychiatry, http:://www.psychiatry
 
 """
 
-    input_spec = GenerateLabelMapFromProbabilityMapInputSpec
-    output_spec = GenerateLabelMapFromProbabilityMapOutputSpec
+    _input_spec = GenerateLabelMapFromProbabilityMapInputSpec
+    _output_spec = GenerateLabelMapFromProbabilityMapOutputSpec
     _cmd = " GenerateLabelMapFromProbabilityMap "
     _outputs_filenames = {'outputLabelVolume': 'outputLabelVolume.nii.gz'}
     _redirect_x = False
@@ -493,8 +493,8 @@ description: Resample an image into ACPC alignement ACPCDetect
 
 """
 
-    input_spec = BRAINSAlignMSPInputSpec
-    output_spec = BRAINSAlignMSPOutputSpec
+    _input_spec = BRAINSAlignMSPInputSpec
+    _output_spec = BRAINSAlignMSPOutputSpec
     _cmd = " BRAINSAlignMSP "
     _outputs_filenames = {'OutputresampleMSP': 'OutputresampleMSP.nii', 'resultsDir': 'resultsDir'}
     _redirect_x = False
@@ -527,8 +527,8 @@ contributor: Eunyoung Regina Kim
 
 """
 
-    input_spec = BRAINSLandmarkInitializerInputSpec
-    output_spec = BRAINSLandmarkInitializerOutputSpec
+    _input_spec = BRAINSLandmarkInitializerInputSpec
+    _output_spec = BRAINSLandmarkInitializerOutputSpec
     _cmd = " BRAINSLandmarkInitializer "
     _outputs_filenames = {'outputTransformFilename': 'outputTransformFilename'}
     _redirect_x = False
@@ -555,8 +555,8 @@ contributor: Ali Ghayoor
 
 """
 
-    input_spec = insertMidACPCpointInputSpec
-    output_spec = insertMidACPCpointOutputSpec
+    _input_spec = insertMidACPCpointInputSpec
+    _output_spec = insertMidACPCpointOutputSpec
     _cmd = " insertMidACPCpoint "
     _outputs_filenames = {'outputLandmarkFile': 'outputLandmarkFile'}
     _redirect_x = False
@@ -592,8 +592,8 @@ contributor: Eunyoung Regina Kim
 
 """
 
-    input_spec = BRAINSSnapShotWriterInputSpec
-    output_spec = BRAINSSnapShotWriterOutputSpec
+    _input_spec = BRAINSSnapShotWriterInputSpec
+    _output_spec = BRAINSSnapShotWriterOutputSpec
     _cmd = " BRAINSSnapShotWriter "
     _outputs_filenames = {'outputFilename': 'outputFilename'}
     _redirect_x = False
@@ -626,8 +626,8 @@ contributor: University of Iowa Department of Psychiatry, http:://www.psychiatry
 
 """
 
-    input_spec = JointHistogramInputSpec
-    output_spec = JointHistogramOutputSpec
+    _input_spec = JointHistogramInputSpec
+    _output_spec = JointHistogramOutputSpec
     _cmd = " JointHistogram "
     _outputs_filenames = {}
     _redirect_x = False
@@ -659,8 +659,8 @@ contributor: Hans Johnson
 
 """
 
-    input_spec = ShuffleVectorsModuleInputSpec
-    output_spec = ShuffleVectorsModuleOutputSpec
+    _input_spec = ShuffleVectorsModuleInputSpec
+    _output_spec = ShuffleVectorsModuleOutputSpec
     _cmd = " ShuffleVectorsModule "
     _outputs_filenames = {'outputVectorFileBaseName': 'outputVectorFileBaseName'}
     _redirect_x = False
@@ -696,8 +696,8 @@ contributor: University of Iowa Department of Psychiatry, http:://www.psychiatry
 
 """
 
-    input_spec = ImageRegionPlotterInputSpec
-    output_spec = ImageRegionPlotterOutputSpec
+    _input_spec = ImageRegionPlotterInputSpec
+    _output_spec = ImageRegionPlotterOutputSpec
     _cmd = " ImageRegionPlotter "
     _outputs_filenames = {}
     _redirect_x = False
@@ -727,8 +727,8 @@ description: Convert a collection of fcsv files to a HDF5 format file
 
 """
 
-    input_spec = fcsv_to_hdf5InputSpec
-    output_spec = fcsv_to_hdf5OutputSpec
+    _input_spec = fcsv_to_hdf5InputSpec
+    _output_spec = fcsv_to_hdf5OutputSpec
     _cmd = " fcsv_to_hdf5 "
     _outputs_filenames = {'modelFile': 'modelFile', 'landmarksInformationFile': 'landmarksInformationFile.h5'}
     _redirect_x = False
@@ -780,8 +780,8 @@ acknowledgements: Hans Johnson(1,3,4); Kent Williams(1);  (1=University of Iowa 
 
 """
 
-    input_spec = FindCenterOfBrainInputSpec
-    output_spec = FindCenterOfBrainOutputSpec
+    _input_spec = FindCenterOfBrainInputSpec
+    _output_spec = FindCenterOfBrainOutputSpec
     _cmd = " FindCenterOfBrain "
     _outputs_filenames = {'debugClippedImageMask': 'debugClippedImageMask.nii', 'debugTrimmedImage': 'debugTrimmedImage.nii', 'debugDistanceImage': 'debugDistanceImage.nii',
                           'debugGridImage': 'debugGridImage.nii', 'clippedImageMask': 'clippedImageMask.nii', 'debugAfterGridComputationsForegroundImage': 'debugAfterGridComputationsForegroundImage.nii'}

@@ -21,22 +21,14 @@ def test_PETStandardUptakeValueComputation_inputs():
     csvFile=dict(argstr='--csvFile %s',
     hash_files=False,
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     labelMap=dict(argstr='--labelMap %s',
     ),
     petDICOMPath=dict(argstr='--petDICOMPath %s',
     ),
     petVolume=dict(argstr='--petVolume %s',
     ),
-    terminal_output=dict(nohash=True,
-    ),
     )
-    inputs = PETStandardUptakeValueComputation.input_spec()
+    inputs = PETStandardUptakeValueComputation._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -46,7 +38,7 @@ def test_PETStandardUptakeValueComputation_inputs():
 def test_PETStandardUptakeValueComputation_outputs():
     output_map = dict(csvFile=dict(),
     )
-    outputs = PETStandardUptakeValueComputation.output_spec()
+    outputs = PETStandardUptakeValueComputation._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

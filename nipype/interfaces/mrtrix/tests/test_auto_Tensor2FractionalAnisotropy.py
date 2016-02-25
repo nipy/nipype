@@ -9,12 +9,6 @@ def test_Tensor2FractionalAnisotropy_inputs():
     debug=dict(argstr='-debug',
     position=1,
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     in_file=dict(argstr='%s',
     mandatory=True,
     position=-2,
@@ -26,10 +20,8 @@ def test_Tensor2FractionalAnisotropy_inputs():
     quiet=dict(argstr='-quiet',
     position=1,
     ),
-    terminal_output=dict(nohash=True,
-    ),
     )
-    inputs = Tensor2FractionalAnisotropy.input_spec()
+    inputs = Tensor2FractionalAnisotropy._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -39,7 +31,7 @@ def test_Tensor2FractionalAnisotropy_inputs():
 def test_Tensor2FractionalAnisotropy_outputs():
     output_map = dict(FA=dict(),
     )
-    outputs = Tensor2FractionalAnisotropy.output_spec()
+    outputs = Tensor2FractionalAnisotropy._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

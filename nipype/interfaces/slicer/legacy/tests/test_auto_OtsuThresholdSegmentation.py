@@ -8,13 +8,7 @@ def test_OtsuThresholdSegmentation_inputs():
     ),
     brightObjects=dict(argstr='--brightObjects ',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
     faceConnected=dict(argstr='--faceConnected ',
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
     ),
     inputVolume=dict(argstr='%s',
     position=-2,
@@ -27,10 +21,8 @@ def test_OtsuThresholdSegmentation_inputs():
     hash_files=False,
     position=-1,
     ),
-    terminal_output=dict(nohash=True,
-    ),
     )
-    inputs = OtsuThresholdSegmentation.input_spec()
+    inputs = OtsuThresholdSegmentation._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -41,7 +33,7 @@ def test_OtsuThresholdSegmentation_outputs():
     output_map = dict(outputVolume=dict(position=-1,
     ),
     )
-    outputs = OtsuThresholdSegmentation.output_spec()
+    outputs = OtsuThresholdSegmentation._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

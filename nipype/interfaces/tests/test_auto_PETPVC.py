@@ -11,9 +11,6 @@ def test_PETPVC_inputs():
     debug=dict(argstr='-d',
     usedefault=True,
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
     fwhm_x=dict(argstr='-x %.4f',
     mandatory=True,
     ),
@@ -22,9 +19,6 @@ def test_PETPVC_inputs():
     ),
     fwhm_z=dict(argstr='-z %.4f',
     mandatory=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
     ),
     in_file=dict(argstr='-i %s',
     mandatory=True,
@@ -45,10 +39,8 @@ def test_PETPVC_inputs():
     ),
     stop_crit=dict(argstr='-a %.4f',
     ),
-    terminal_output=dict(nohash=True,
-    ),
     )
-    inputs = PETPVC.input_spec()
+    inputs = PETPVC._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -58,7 +50,7 @@ def test_PETPVC_inputs():
 def test_PETPVC_outputs():
     output_map = dict(out_file=dict(),
     )
-    outputs = PETPVC.output_spec()
+    outputs = PETPVC._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

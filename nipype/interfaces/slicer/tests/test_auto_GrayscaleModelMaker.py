@@ -15,12 +15,6 @@ def test_GrayscaleModelMaker_inputs():
     ),
     decimate=dict(argstr='--decimate %f',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     name=dict(argstr='--name %s',
     ),
     pointnormals=dict(argstr='--pointnormals ',
@@ -29,12 +23,10 @@ def test_GrayscaleModelMaker_inputs():
     ),
     splitnormals=dict(argstr='--splitnormals ',
     ),
-    terminal_output=dict(nohash=True,
-    ),
     threshold=dict(argstr='--threshold %f',
     ),
     )
-    inputs = GrayscaleModelMaker.input_spec()
+    inputs = GrayscaleModelMaker._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -45,7 +37,7 @@ def test_GrayscaleModelMaker_outputs():
     output_map = dict(OutputGeometry=dict(position=-1,
     ),
     )
-    outputs = GrayscaleModelMaker.output_spec()
+    outputs = GrayscaleModelMaker._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

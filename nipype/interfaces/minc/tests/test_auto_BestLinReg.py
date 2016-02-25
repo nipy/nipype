@@ -9,12 +9,6 @@ def test_BestLinReg_inputs():
     clobber=dict(argstr='-clobber',
     usedefault=True,
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     output_mnc=dict(argstr='%s',
     genfile=True,
     hash_files=False,
@@ -39,12 +33,10 @@ def test_BestLinReg_inputs():
     mandatory=True,
     position=-3,
     ),
-    terminal_output=dict(nohash=True,
-    ),
     verbose=dict(argstr='-verbose',
     ),
     )
-    inputs = BestLinReg.input_spec()
+    inputs = BestLinReg._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -55,7 +47,7 @@ def test_BestLinReg_outputs():
     output_map = dict(output_mnc=dict(),
     output_xfm=dict(),
     )
-    outputs = BestLinReg.output_spec()
+    outputs = BestLinReg._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

@@ -6,12 +6,6 @@ from ..developer import JistLaminarProfileGeometry
 def test_JistLaminarProfileGeometry_inputs():
     input_map = dict(args=dict(argstr='%s',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     inProfile=dict(argstr='--inProfile %s',
     ),
     incomputed=dict(argstr='--incomputed %s',
@@ -27,8 +21,6 @@ def test_JistLaminarProfileGeometry_inputs():
     outResult=dict(argstr='--outResult %s',
     hash_files=False,
     ),
-    terminal_output=dict(nohash=True,
-    ),
     xDefaultMem=dict(argstr='-xDefaultMem %d',
     ),
     xMaxProcess=dict(argstr='-xMaxProcess %d',
@@ -37,7 +29,7 @@ def test_JistLaminarProfileGeometry_inputs():
     xPrefExt=dict(argstr='--xPrefExt %s',
     ),
     )
-    inputs = JistLaminarProfileGeometry.input_spec()
+    inputs = JistLaminarProfileGeometry._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -47,7 +39,7 @@ def test_JistLaminarProfileGeometry_inputs():
 def test_JistLaminarProfileGeometry_outputs():
     output_map = dict(outResult=dict(),
     )
-    outputs = JistLaminarProfileGeometry.output_spec()
+    outputs = JistLaminarProfileGeometry._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

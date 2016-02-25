@@ -13,21 +13,13 @@ def test_ResampleScalarVolume_inputs():
     ),
     args=dict(argstr='%s',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     interpolation=dict(argstr='--interpolation %s',
     ),
     spacing=dict(argstr='--spacing %s',
     sep=',',
     ),
-    terminal_output=dict(nohash=True,
-    ),
     )
-    inputs = ResampleScalarVolume.input_spec()
+    inputs = ResampleScalarVolume._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -38,7 +30,7 @@ def test_ResampleScalarVolume_outputs():
     output_map = dict(OutputVolume=dict(position=-1,
     ),
     )
-    outputs = ResampleScalarVolume.output_spec()
+    outputs = ResampleScalarVolume._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

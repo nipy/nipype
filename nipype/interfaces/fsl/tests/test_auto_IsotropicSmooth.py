@@ -6,16 +6,10 @@ from ..maths import IsotropicSmooth
 def test_IsotropicSmooth_inputs():
     input_map = dict(args=dict(argstr='%s',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
     fwhm=dict(argstr='-s %.5f',
     mandatory=True,
     position=4,
     xor=['sigma'],
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
     ),
     in_file=dict(argstr='%s',
     mandatory=True,
@@ -26,25 +20,24 @@ def test_IsotropicSmooth_inputs():
     ),
     nan2zeros=dict(argstr='-nan',
     position=3,
+    usedefault=True,
     ),
     out_file=dict(argstr='%s',
-    genfile=True,
     hash_files=False,
     position=-2,
     ),
     output_datatype=dict(argstr='-odt %s',
     position=-1,
     ),
-    output_type=dict(),
+    output_type=dict(usedefault=True,
+    ),
     sigma=dict(argstr='-s %.5f',
     mandatory=True,
     position=4,
     xor=['fwhm'],
     ),
-    terminal_output=dict(nohash=True,
-    ),
     )
-    inputs = IsotropicSmooth.input_spec()
+    inputs = IsotropicSmooth._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -54,7 +47,7 @@ def test_IsotropicSmooth_inputs():
 def test_IsotropicSmooth_outputs():
     output_map = dict(out_file=dict(),
     )
-    outputs = IsotropicSmooth.output_spec()
+    outputs = IsotropicSmooth._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

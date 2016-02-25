@@ -6,17 +6,9 @@ from ..dynamic_slicer import SlicerCommandLine
 def test_SlicerCommandLine_inputs():
     input_map = dict(args=dict(argstr='%s',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     module=dict(),
-    terminal_output=dict(nohash=True,
-    ),
     )
-    inputs = SlicerCommandLine.input_spec()
+    inputs = SlicerCommandLine._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -25,7 +17,7 @@ def test_SlicerCommandLine_inputs():
 
 def test_SlicerCommandLine_outputs():
     output_map = dict()
-    outputs = SlicerCommandLine.output_spec()
+    outputs = SlicerCommandLine._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

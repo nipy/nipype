@@ -69,8 +69,8 @@ acknowledgements: The development of this module was supported by NIH grants R01
 
 """
 
-    input_spec = UKFTractographyInputSpec
-    output_spec = UKFTractographyOutputSpec
+    _input_spec = UKFTractographyInputSpec
+    _output_spec = UKFTractographyOutputSpec
     _cmd = " UKFTractography "
     _outputs_filenames = {'tracts': 'tracts.vtp', 'tractsWithSecondTensor': 'tractsWithSecondTensor.vtp'}
     _redirect_x = False

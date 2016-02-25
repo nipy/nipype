@@ -70,14 +70,13 @@ class Camino2Trackvis(CommandLine):
     """
 
     _cmd = 'camino_to_trackvis'
-    input_spec = Camino2TrackvisInputSpec
-    output_spec = Camino2TrackvisOutputSpec
+    _input_spec = Camino2TrackvisInputSpec
+    _output_spec = Camino2TrackvisOutputSpec
 
-    def _list_outputs(self):
-        outputs = self.output_spec().get()
-        outputs['trackvis'] = os.path.abspath(self._gen_outfilename())
-        return outputs
-
+    def _post_run(self):
+        
+        self.outputs.trackvis = os.path.abspath(self._gen_outfilename())
+        
     def _gen_filename(self, name):
         if name is 'out_file':
             return self._gen_outfilename()
@@ -121,14 +120,13 @@ class Trackvis2CaminoOutputSpec(TraitedSpec):
 
 class Trackvis2Camino(CommandLine):
     _cmd = 'trackvis_to_camino'
-    input_spec = Trackvis2CaminoInputSpec
-    output_spec = Trackvis2CaminoOutputSpec
+    _input_spec = Trackvis2CaminoInputSpec
+    _output_spec = Trackvis2CaminoOutputSpec
 
-    def _list_outputs(self):
-        outputs = self.output_spec().get()
-        outputs['camino'] = os.path.abspath(self._gen_outfilename())
-        return outputs
-
+    def _post_run(self):
+        
+        self.outputs.camino = os.path.abspath(self._gen_outfilename())
+        
     def _gen_filename(self, name):
         if name is 'out_file':
             return self._gen_outfilename()

@@ -13,12 +13,6 @@ def test_SVMTrain_inputs():
     ),
     censor=dict(argstr='-censor %s',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     in_file=dict(argstr='-trainvol %s',
     copyfile=False,
     mandatory=True,
@@ -45,8 +39,7 @@ def test_SVMTrain_inputs():
     name_template='%s_vectors',
     suffix='_bucket',
     ),
-    outputtype=dict(),
-    terminal_output=dict(nohash=True,
+    output_type=dict(usedefault=True,
     ),
     trainlabels=dict(argstr='-trainlabels %s',
     ),
@@ -56,7 +49,7 @@ def test_SVMTrain_inputs():
     w_out=dict(argstr='-wout',
     ),
     )
-    inputs = SVMTrain.input_spec()
+    inputs = SVMTrain._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -68,7 +61,7 @@ def test_SVMTrain_outputs():
     model=dict(),
     out_file=dict(),
     )
-    outputs = SVMTrain.output_spec()
+    outputs = SVMTrain._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

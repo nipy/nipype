@@ -21,13 +21,7 @@ def test_JointFusion_inputs():
     position=0,
     usedefault=True,
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
     exclusion_region=dict(argstr='-x %s',
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
     ),
     method=dict(argstr='-m %s',
     usedefault=True,
@@ -56,8 +50,6 @@ def test_JointFusion_inputs():
     target_image=dict(argstr='-tg %s...',
     mandatory=True,
     ),
-    terminal_output=dict(nohash=True,
-    ),
     warped_intensity_images=dict(argstr='-g %s...',
     mandatory=True,
     ),
@@ -65,7 +57,7 @@ def test_JointFusion_inputs():
     mandatory=True,
     ),
     )
-    inputs = JointFusion.input_spec()
+    inputs = JointFusion._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -75,7 +67,7 @@ def test_JointFusion_inputs():
 def test_JointFusion_outputs():
     output_map = dict(output_label_image=dict(),
     )
-    outputs = JointFusion.output_spec()
+    outputs = JointFusion._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

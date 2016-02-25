@@ -19,9 +19,6 @@ def test_MultipleRegressionDesign_inputs():
     ),
     global_normalization=dict(field='globalm.glonorm',
     ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     in_files=dict(field='des.mreg.scans',
     mandatory=True,
     ),
@@ -54,7 +51,7 @@ def test_MultipleRegressionDesign_inputs():
     user_covariates=dict(field='des.mreg.mcov',
     ),
     )
-    inputs = MultipleRegressionDesign.input_spec()
+    inputs = MultipleRegressionDesign._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -64,7 +61,7 @@ def test_MultipleRegressionDesign_inputs():
 def test_MultipleRegressionDesign_outputs():
     output_map = dict(spm_mat_file=dict(),
     )
-    outputs = MultipleRegressionDesign.output_spec()
+    outputs = MultipleRegressionDesign._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

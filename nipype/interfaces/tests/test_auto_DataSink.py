@@ -13,9 +13,6 @@ def test_DataSink_inputs():
     container=dict(),
     creds_path=dict(),
     encrypt_bucket_keys=dict(),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     local_copy=dict(),
     parameterization=dict(usedefault=True,
     ),
@@ -25,7 +22,7 @@ def test_DataSink_inputs():
     strip_dir=dict(),
     substitutions=dict(),
     )
-    inputs = DataSink.input_spec()
+    inputs = DataSink._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -35,7 +32,7 @@ def test_DataSink_inputs():
 def test_DataSink_outputs():
     output_map = dict(out_file=dict(),
     )
-    outputs = DataSink.output_spec()
+    outputs = DataSink._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

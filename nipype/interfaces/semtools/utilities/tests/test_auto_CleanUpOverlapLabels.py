@@ -6,21 +6,13 @@ from ..brains import CleanUpOverlapLabels
 def test_CleanUpOverlapLabels_inputs():
     input_map = dict(args=dict(argstr='%s',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     inputBinaryVolumes=dict(argstr='--inputBinaryVolumes %s...',
     ),
     outputBinaryVolumes=dict(argstr='--outputBinaryVolumes %s...',
     hash_files=False,
     ),
-    terminal_output=dict(nohash=True,
-    ),
     )
-    inputs = CleanUpOverlapLabels.input_spec()
+    inputs = CleanUpOverlapLabels._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -30,7 +22,7 @@ def test_CleanUpOverlapLabels_inputs():
 def test_CleanUpOverlapLabels_outputs():
     output_map = dict(outputBinaryVolumes=dict(),
     )
-    outputs = CleanUpOverlapLabels.output_spec()
+    outputs = CleanUpOverlapLabels._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

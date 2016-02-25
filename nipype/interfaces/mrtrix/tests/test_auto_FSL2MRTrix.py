@@ -17,7 +17,7 @@ def test_FSL2MRTrix_inputs():
     out_encoding_file=dict(genfile=True,
     ),
     )
-    inputs = FSL2MRTrix.input_spec()
+    inputs = FSL2MRTrix._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -27,7 +27,7 @@ def test_FSL2MRTrix_inputs():
 def test_FSL2MRTrix_outputs():
     output_map = dict(encoding_file=dict(),
     )
-    outputs = FSL2MRTrix.output_spec()
+    outputs = FSL2MRTrix._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

@@ -19,9 +19,6 @@ def test_OneSampleTTestDesign_inputs():
     ),
     global_normalization=dict(field='globalm.glonorm',
     ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     in_files=dict(field='des.t1.scans',
     mandatory=True,
     ),
@@ -49,7 +46,7 @@ def test_OneSampleTTestDesign_inputs():
     usedefault=True,
     ),
     )
-    inputs = OneSampleTTestDesign.input_spec()
+    inputs = OneSampleTTestDesign._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -59,7 +56,7 @@ def test_OneSampleTTestDesign_inputs():
 def test_OneSampleTTestDesign_outputs():
     output_map = dict(spm_mat_file=dict(),
     )
-    outputs = OneSampleTTestDesign.output_spec()
+    outputs = OneSampleTTestDesign._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

@@ -6,9 +6,6 @@ from ..tensors import DTI
 def test_DTI_inputs():
     input_map = dict(b0_thres=dict(usedefault=True,
     ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     in_bval=dict(mandatory=True,
     ),
     in_bvec=dict(mandatory=True,
@@ -18,7 +15,7 @@ def test_DTI_inputs():
     mask_file=dict(),
     out_prefix=dict(),
     )
-    inputs = DTI.input_spec()
+    inputs = DTI._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -28,7 +25,7 @@ def test_DTI_inputs():
 def test_DTI_outputs():
     output_map = dict(out_file=dict(),
     )
-    outputs = DTI.output_spec()
+    outputs = DTI._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

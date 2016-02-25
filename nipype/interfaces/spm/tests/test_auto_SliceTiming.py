@@ -4,10 +4,7 @@ from ..preprocess import SliceTiming
 
 
 def test_SliceTiming_inputs():
-    input_map = dict(ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
-    in_files=dict(copyfile=False,
+    input_map = dict(in_files=dict(copyfile=False,
     field='scans',
     mandatory=True,
     ),
@@ -38,7 +35,7 @@ def test_SliceTiming_inputs():
     usedefault=True,
     ),
     )
-    inputs = SliceTiming.input_spec()
+    inputs = SliceTiming._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -48,7 +45,7 @@ def test_SliceTiming_inputs():
 def test_SliceTiming_outputs():
     output_map = dict(timecorrected_files=dict(),
     )
-    outputs = SliceTiming.output_spec()
+    outputs = SliceTiming._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

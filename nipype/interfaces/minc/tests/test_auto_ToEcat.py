@@ -6,9 +6,6 @@ from ..minc import ToEcat
 def test_ToEcat_inputs():
     input_map = dict(args=dict(argstr='%s',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
     ignore_acquisition_variable=dict(argstr='-ignore_acquisition_variable',
     ),
     ignore_ecat_acquisition_variable=dict(argstr='-ignore_ecat_acquisition_variable',
@@ -16,9 +13,6 @@ def test_ToEcat_inputs():
     ignore_ecat_main=dict(argstr='-ignore_ecat_main',
     ),
     ignore_ecat_subheader_variable=dict(argstr='-ignore_ecat_subheader_variable',
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
     ),
     ignore_patient_variable=dict(argstr='-ignore_patient_variable',
     ),
@@ -39,12 +33,10 @@ def test_ToEcat_inputs():
     name_template='%s_to_ecat.v',
     position=-1,
     ),
-    terminal_output=dict(nohash=True,
-    ),
     voxels_as_integers=dict(argstr='-label',
     ),
     )
-    inputs = ToEcat.input_spec()
+    inputs = ToEcat._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -54,7 +46,7 @@ def test_ToEcat_inputs():
 def test_ToEcat_outputs():
     output_map = dict(output_file=dict(),
     )
-    outputs = ToEcat.output_spec()
+    outputs = ToEcat._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

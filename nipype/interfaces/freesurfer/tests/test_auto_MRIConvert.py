@@ -34,9 +34,6 @@ def test_MRIConvert_inputs():
     ),
     drop_n=dict(argstr='--ndrop %d',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
     fill_parcellation=dict(argstr='--fill_parcellation',
     ),
     force_ras=dict(argstr='--force_ras_good',
@@ -46,9 +43,6 @@ def test_MRIConvert_inputs():
     frame_subsample=dict(argstr='--fsubsample %d %d %d',
     ),
     fwhm=dict(argstr='--fwhm %f',
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
     ),
     in_center=dict(argstr='--in_center %s',
     ),
@@ -168,8 +162,6 @@ def test_MRIConvert_inputs():
     template_info=dict(),
     template_type=dict(argstr='--template_type %s',
     ),
-    terminal_output=dict(nohash=True,
-    ),
     ti=dict(argstr='-ti %d',
     ),
     tr=dict(argstr='-tr %d',
@@ -183,7 +175,7 @@ def test_MRIConvert_inputs():
     zero_outlines=dict(argstr='--zero_outlines',
     ),
     )
-    inputs = MRIConvert.input_spec()
+    inputs = MRIConvert._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -193,7 +185,7 @@ def test_MRIConvert_inputs():
 def test_MRIConvert_outputs():
     output_map = dict(out_file=dict(),
     )
-    outputs = MRIConvert.output_spec()
+    outputs = MRIConvert._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

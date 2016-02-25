@@ -27,7 +27,6 @@ except ImportError:
 from copy import deepcopy
 import re
 import numpy as np
-from ...interfaces.traits_extension import traits, Undefined
 from ...interfaces.base import DynamicTraitedSpec
 from ...utils.filemanip import loadpkl, savepkl
 

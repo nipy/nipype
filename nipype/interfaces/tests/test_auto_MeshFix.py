@@ -20,9 +20,6 @@ def test_MeshFix_inputs():
     ),
     dont_clean=dict(argstr='--no-clean',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
     epsilon_angle=dict(argstr='-a %f',
     ),
     finetuning_distance=dict(argstr='%f',
@@ -37,9 +34,6 @@ def test_MeshFix_inputs():
     ),
     finetuning_substeps=dict(argstr='%d',
     requires=['finetuning_distance'],
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
     ),
     in_file1=dict(argstr='%s',
     mandatory=True,
@@ -78,8 +72,6 @@ def test_MeshFix_inputs():
     ),
     set_intersections_to_one=dict(argstr='--intersect',
     ),
-    terminal_output=dict(nohash=True,
-    ),
     uniform_remeshing_steps=dict(argstr='-u %d',
     requires=['uniform_remeshing_vertices'],
     ),
@@ -89,7 +81,7 @@ def test_MeshFix_inputs():
     x_shift=dict(argstr='--smooth %d',
     ),
     )
-    inputs = MeshFix.input_spec()
+    inputs = MeshFix._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -99,7 +91,7 @@ def test_MeshFix_inputs():
 def test_MeshFix_outputs():
     output_map = dict(mesh_file=dict(),
     )
-    outputs = MeshFix.output_spec()
+    outputs = MeshFix._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

@@ -21,9 +21,6 @@ def test_BRAINSFit_inputs():
     ),
     debugLevel=dict(argstr='--debugLevel %d',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
     failureExitCode=dict(argstr='--failureExitCode %d',
     ),
     fixedBinaryVolume=dict(argstr='--fixedBinaryVolume %s',
@@ -37,9 +34,6 @@ def test_BRAINSFit_inputs():
     gui=dict(argstr='--gui ',
     ),
     histogramMatch=dict(argstr='--histogramMatch ',
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
     ),
     initialTransform=dict(argstr='--initialTransform %s',
     ),
@@ -130,8 +124,6 @@ def test_BRAINSFit_inputs():
     strippedOutputTransform=dict(argstr='--strippedOutputTransform %s',
     hash_files=False,
     ),
-    terminal_output=dict(nohash=True,
-    ),
     transformType=dict(argstr='--transformType %s',
     sep=',',
     ),
@@ -158,7 +150,7 @@ def test_BRAINSFit_inputs():
     writeTransformOnFailure=dict(argstr='--writeTransformOnFailure ',
     ),
     )
-    inputs = BRAINSFit.input_spec()
+    inputs = BRAINSFit._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -175,7 +167,7 @@ def test_BRAINSFit_outputs():
     outputVolume=dict(),
     strippedOutputTransform=dict(),
     )
-    outputs = BRAINSFit.output_spec()
+    outputs = BRAINSFit._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

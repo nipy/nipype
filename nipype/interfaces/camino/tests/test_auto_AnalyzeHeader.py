@@ -17,14 +17,8 @@ def test_AnalyzeHeader_inputs():
     ),
     description=dict(argstr='-description %s',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
     greylevels=dict(argstr='-gl %s',
     units='NA',
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
     ),
     in_file=dict(argstr='< %s',
     mandatory=True,
@@ -44,8 +38,8 @@ def test_AnalyzeHeader_inputs():
     units='NA',
     ),
     out_file=dict(argstr='> %s',
-    genfile=True,
     position=-1,
+    usedefault=True,
     ),
     picoseed=dict(argstr='-picoseed %s',
     units='mm',
@@ -74,13 +68,11 @@ def test_AnalyzeHeader_inputs():
     scheme_file=dict(argstr='%s',
     position=2,
     ),
-    terminal_output=dict(nohash=True,
-    ),
     voxel_dims=dict(argstr='-voxeldims %s',
     units='mm',
     ),
     )
-    inputs = AnalyzeHeader.input_spec()
+    inputs = AnalyzeHeader._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -90,7 +82,7 @@ def test_AnalyzeHeader_inputs():
 def test_AnalyzeHeader_outputs():
     output_map = dict(header=dict(),
     )
-    outputs = AnalyzeHeader.output_spec()
+    outputs = AnalyzeHeader._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

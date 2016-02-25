@@ -12,9 +12,6 @@ def test_SpecifySparseModel_inputs():
     ),
     high_pass_filter_cutoff=dict(mandatory=True,
     ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     input_units=dict(mandatory=True,
     ),
     model_hrf=dict(),
@@ -22,11 +19,14 @@ def test_SpecifySparseModel_inputs():
     ),
     realignment_parameters=dict(copyfile=False,
     ),
-    save_plot=dict(),
+    save_plot=dict(usedefault=True,
+    ),
     scale_regressors=dict(usedefault=True,
     ),
     scan_onset=dict(usedefault=True,
     ),
+    sparse_png_file=dict(),
+    sparse_svg_file=dict(),
     stimuli_as_impulses=dict(usedefault=True,
     ),
     subject_info=dict(mandatory=True,
@@ -41,7 +41,7 @@ def test_SpecifySparseModel_inputs():
     volumes_in_cluster=dict(usedefault=True,
     ),
     )
-    inputs = SpecifySparseModel.input_spec()
+    inputs = SpecifySparseModel._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -53,7 +53,7 @@ def test_SpecifySparseModel_outputs():
     sparse_png_file=dict(),
     sparse_svg_file=dict(),
     )
-    outputs = SpecifySparseModel.output_spec()
+    outputs = SpecifySparseModel._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

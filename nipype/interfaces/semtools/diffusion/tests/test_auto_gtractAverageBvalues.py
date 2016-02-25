@@ -10,12 +10,6 @@ def test_gtractAverageBvalues_inputs():
     ),
     directionsTolerance=dict(argstr='--directionsTolerance %f',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     inputVolume=dict(argstr='--inputVolume %s',
     ),
     numberOfThreads=dict(argstr='--numberOfThreads %d',
@@ -23,10 +17,8 @@ def test_gtractAverageBvalues_inputs():
     outputVolume=dict(argstr='--outputVolume %s',
     hash_files=False,
     ),
-    terminal_output=dict(nohash=True,
-    ),
     )
-    inputs = gtractAverageBvalues.input_spec()
+    inputs = gtractAverageBvalues._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -36,7 +28,7 @@ def test_gtractAverageBvalues_inputs():
 def test_gtractAverageBvalues_outputs():
     output_map = dict(outputVolume=dict(),
     )
-    outputs = gtractAverageBvalues.output_spec()
+    outputs = gtractAverageBvalues._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

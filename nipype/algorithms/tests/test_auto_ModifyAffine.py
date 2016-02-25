@@ -4,15 +4,13 @@ from ..misc import ModifyAffine
 
 
 def test_ModifyAffine_inputs():
-    input_map = dict(ignore_exception=dict(nohash=True,
-    usedefault=True,
+    input_map = dict(transformation_matrix=dict(usedefault=True,
     ),
-    transformation_matrix=dict(usedefault=True,
-    ),
+    transformed_volumes=dict(),
     volumes=dict(mandatory=True,
     ),
     )
-    inputs = ModifyAffine.input_spec()
+    inputs = ModifyAffine._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -22,7 +20,7 @@ def test_ModifyAffine_inputs():
 def test_ModifyAffine_outputs():
     output_map = dict(transformed_volumes=dict(),
     )
-    outputs = ModifyAffine.output_spec()
+    outputs = ModifyAffine._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

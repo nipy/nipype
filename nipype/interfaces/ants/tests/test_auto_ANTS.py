@@ -14,15 +14,9 @@ def test_ANTS_inputs():
     position=1,
     usedefault=False,
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
     fixed_image=dict(mandatory=True,
     ),
     gradient_step_length=dict(requires=['transformation_model'],
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
     ),
     metric=dict(mandatory=True,
     ),
@@ -65,8 +59,6 @@ def test_ANTS_inputs():
     ),
     symmetry_type=dict(requires=['delta_time'],
     ),
-    terminal_output=dict(nohash=True,
-    ),
     transformation_model=dict(argstr='%s',
     mandatory=True,
     ),
@@ -74,7 +66,7 @@ def test_ANTS_inputs():
     usedefault=True,
     ),
     )
-    inputs = ANTS.input_spec()
+    inputs = ANTS._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -82,13 +74,22 @@ def test_ANTS_inputs():
 
 
 def test_ANTS_outputs():
-    output_map = dict(affine_transform=dict(),
-    inverse_warp_transform=dict(),
+    output_map = dict(affine_transform=dict(keep_extension=False,
+    name_source='output_transform_prefix',
+    name_template='%sAffine.txt',
+    ),
+    inverse_warp_transform=dict(keep_extension=False,
+    name_source='output_transform_prefix',
+    name_template='%sInverseWarp.nii.gz',
+    ),
     metaheader=dict(),
     metaheader_raw=dict(),
-    warp_transform=dict(),
+    warp_transform=dict(keep_extension=False,
+    name_source='output_transform_prefix',
+    name_template='%sWarp.nii.gz',
+    ),
     )
-    outputs = ANTS.output_spec()
+    outputs = ANTS._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

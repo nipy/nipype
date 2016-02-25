@@ -13,12 +13,6 @@ def test_Volcentre_inputs():
     ),
     com=dict(argstr='-com',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     input_file=dict(argstr='%s',
     mandatory=True,
     position=-2,
@@ -30,14 +24,12 @@ def test_Volcentre_inputs():
     name_template='%s_volcentre.mnc',
     position=-1,
     ),
-    terminal_output=dict(nohash=True,
-    ),
     verbose=dict(argstr='-verbose',
     ),
     zero_dircos=dict(argstr='-zero_dircos',
     ),
     )
-    inputs = Volcentre.input_spec()
+    inputs = Volcentre._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -47,7 +39,7 @@ def test_Volcentre_inputs():
 def test_Volcentre_outputs():
     output_map = dict(output_file=dict(),
     )
-    outputs = Volcentre.output_spec()
+    outputs = Volcentre._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

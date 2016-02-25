@@ -6,32 +6,26 @@ from ..utils import PlotMotionParams
 def test_PlotMotionParams_inputs():
     input_map = dict(args=dict(argstr='%s',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
-    in_file=dict(argstr='%s',
+    in_file=dict(argstr='-i %s',
     mandatory=True,
     position=1,
+    sep=',',
     ),
     in_source=dict(mandatory=True,
     ),
     out_file=dict(argstr='-o %s',
-    genfile=True,
     hash_files=False,
+    template='{in_file}_{plot_type[:5]}.png',
     ),
-    output_type=dict(),
-    plot_size=dict(argstr='%s',
+    output_type=dict(usedefault=True,
+    ),
+    plot_size=dict(argstr='-h %d -w %d',
     ),
     plot_type=dict(argstr='%s',
     mandatory=True,
     ),
-    terminal_output=dict(nohash=True,
-    ),
     )
-    inputs = PlotMotionParams.input_spec()
+    inputs = PlotMotionParams._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -41,7 +35,7 @@ def test_PlotMotionParams_inputs():
 def test_PlotMotionParams_outputs():
     output_map = dict(out_file=dict(),
     )
-    outputs = PlotMotionParams.output_spec()
+    outputs = PlotMotionParams._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

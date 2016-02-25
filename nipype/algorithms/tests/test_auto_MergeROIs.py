@@ -8,7 +8,7 @@ def test_MergeROIs_inputs():
     in_index=dict(),
     in_reference=dict(),
     )
-    inputs = MergeROIs.input_spec()
+    inputs = MergeROIs._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -18,7 +18,7 @@ def test_MergeROIs_inputs():
 def test_MergeROIs_outputs():
     output_map = dict(merged_file=dict(),
     )
-    outputs = MergeROIs.output_spec()
+    outputs = MergeROIs._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

@@ -29,8 +29,8 @@ contributor: Ali Ghayoor
 
 """
 
-    input_spec = SphericalCoordinateGenerationInputSpec
-    output_spec = SphericalCoordinateGenerationOutputSpec
+    _input_spec = SphericalCoordinateGenerationInputSpec
+    _output_spec = SphericalCoordinateGenerationOutputSpec
     _cmd = " SphericalCoordinateGeneration "
     _outputs_filenames = {}
     _redirect_x = False

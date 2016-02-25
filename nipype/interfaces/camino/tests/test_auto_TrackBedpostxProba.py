@@ -21,13 +21,7 @@ def test_TrackBedpostxProba_inputs():
     data_dims=dict(argstr='-datadims %s',
     units='voxels',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
     gzip=dict(argstr='-gzip',
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
     ),
     in_file=dict(argstr='-inputfile %s',
     position=1,
@@ -68,8 +62,6 @@ def test_TrackBedpostxProba_inputs():
     stepsize=dict(argstr='-stepsize %f',
     requires=['tracker'],
     ),
-    terminal_output=dict(nohash=True,
-    ),
     tracker=dict(argstr='-tracker %s',
     usedefault=True,
     ),
@@ -77,7 +69,7 @@ def test_TrackBedpostxProba_inputs():
     units='mm',
     ),
     )
-    inputs = TrackBedpostxProba.input_spec()
+    inputs = TrackBedpostxProba._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -87,7 +79,7 @@ def test_TrackBedpostxProba_inputs():
 def test_TrackBedpostxProba_outputs():
     output_map = dict(tracked=dict(),
     )
-    outputs = TrackBedpostxProba.output_spec()
+    outputs = TrackBedpostxProba._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

@@ -22,9 +22,6 @@ def test_Segment_inputs():
     ),
     gm_output_type=dict(field='output.GM',
     ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     mask_image=dict(field='opts.msk',
     ),
     matlab_cmd=dict(),
@@ -48,7 +45,7 @@ def test_Segment_inputs():
     wm_output_type=dict(field='output.WM',
     ),
     )
-    inputs = Segment.input_spec()
+    inputs = Segment._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -72,7 +69,7 @@ def test_Segment_outputs():
     normalized_wm_image=dict(),
     transformation_mat=dict(),
     )
-    outputs = Segment.output_spec()
+    outputs = Segment._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

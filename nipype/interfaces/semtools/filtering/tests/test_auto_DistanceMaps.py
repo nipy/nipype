@@ -6,12 +6,6 @@ from ..featuredetection import DistanceMaps
 def test_DistanceMaps_inputs():
     input_map = dict(args=dict(argstr='%s',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     inputLabelVolume=dict(argstr='--inputLabelVolume %s',
     ),
     inputMaskVolume=dict(argstr='--inputMaskVolume %s',
@@ -21,10 +15,8 @@ def test_DistanceMaps_inputs():
     outputVolume=dict(argstr='--outputVolume %s',
     hash_files=False,
     ),
-    terminal_output=dict(nohash=True,
-    ),
     )
-    inputs = DistanceMaps.input_spec()
+    inputs = DistanceMaps._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -34,7 +26,7 @@ def test_DistanceMaps_inputs():
 def test_DistanceMaps_outputs():
     output_map = dict(outputVolume=dict(),
     )
-    outputs = DistanceMaps.output_spec()
+    outputs = DistanceMaps._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

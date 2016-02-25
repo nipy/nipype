@@ -6,12 +6,6 @@ from ..maths import SpatialFilter
 def test_SpatialFilter_inputs():
     input_map = dict(args=dict(argstr='%s',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     in_file=dict(argstr='%s',
     mandatory=True,
     position=2,
@@ -32,24 +26,23 @@ def test_SpatialFilter_inputs():
     ),
     nan2zeros=dict(argstr='-nan',
     position=3,
+    usedefault=True,
     ),
     operation=dict(argstr='-f%s',
     mandatory=True,
     position=6,
     ),
     out_file=dict(argstr='%s',
-    genfile=True,
     hash_files=False,
     position=-2,
     ),
     output_datatype=dict(argstr='-odt %s',
     position=-1,
     ),
-    output_type=dict(),
-    terminal_output=dict(nohash=True,
+    output_type=dict(usedefault=True,
     ),
     )
-    inputs = SpatialFilter.input_spec()
+    inputs = SpatialFilter._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -59,7 +52,7 @@ def test_SpatialFilter_inputs():
 def test_SpatialFilter_outputs():
     output_map = dict(out_file=dict(),
     )
-    outputs = SpatialFilter.output_spec()
+    outputs = SpatialFilter._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

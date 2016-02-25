@@ -14,12 +14,6 @@ def test_ODFTracker_inputs():
     ),
     dsi=dict(argstr='-dsi',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     image_orientation_vectors=dict(argstr='-iop %f',
     ),
     input_data_prefix=dict(argstr='%s',
@@ -68,12 +62,10 @@ def test_ODFTracker_inputs():
     ),
     swap_zx=dict(argstr='-szx',
     ),
-    terminal_output=dict(nohash=True,
-    ),
     voxel_order=dict(argstr='-vorder %s',
     ),
     )
-    inputs = ODFTracker.input_spec()
+    inputs = ODFTracker._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -83,7 +75,7 @@ def test_ODFTracker_inputs():
 def test_ODFTracker_outputs():
     output_map = dict(track_file=dict(),
     )
-    outputs = ODFTracker.output_spec()
+    outputs = ODFTracker._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

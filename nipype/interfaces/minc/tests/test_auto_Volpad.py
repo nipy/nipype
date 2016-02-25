@@ -15,12 +15,6 @@ def test_Volpad_inputs():
     ),
     distance=dict(argstr='-distance %s',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     input_file=dict(argstr='%s',
     mandatory=True,
     position=-2,
@@ -36,12 +30,10 @@ def test_Volpad_inputs():
     ),
     smooth_distance=dict(argstr='-smooth_distance %s',
     ),
-    terminal_output=dict(nohash=True,
-    ),
     verbose=dict(argstr='-verbose',
     ),
     )
-    inputs = Volpad.input_spec()
+    inputs = Volpad._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -51,7 +43,7 @@ def test_Volpad_inputs():
 def test_Volpad_outputs():
     output_map = dict(output_file=dict(),
     )
-    outputs = Volpad.output_spec()
+    outputs = Volpad._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

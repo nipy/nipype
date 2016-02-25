@@ -13,9 +13,6 @@ def test_DiffusionTensorStreamlineTrack_inputs():
     ),
     do_not_precompute=dict(argstr='-noprecomputed',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
     exclude_file=dict(argstr='-exclude %s',
     xor=['exclude_file', 'exclude_spec'],
     ),
@@ -28,9 +25,6 @@ def test_DiffusionTensorStreamlineTrack_inputs():
     gradient_encoding_file=dict(argstr='-grad %s',
     mandatory=True,
     position=-2,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
     ),
     in_file=dict(argstr='%s',
     mandatory=True,
@@ -97,12 +91,10 @@ def test_DiffusionTensorStreamlineTrack_inputs():
     ),
     stop=dict(argstr='-stop',
     ),
-    terminal_output=dict(nohash=True,
-    ),
     unidirectional=dict(argstr='-unidirectional',
     ),
     )
-    inputs = DiffusionTensorStreamlineTrack.input_spec()
+    inputs = DiffusionTensorStreamlineTrack._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -112,7 +104,7 @@ def test_DiffusionTensorStreamlineTrack_inputs():
 def test_DiffusionTensorStreamlineTrack_outputs():
     output_map = dict(tracked=dict(),
     )
-    outputs = DiffusionTensorStreamlineTrack.output_spec()
+    outputs = DiffusionTensorStreamlineTrack._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

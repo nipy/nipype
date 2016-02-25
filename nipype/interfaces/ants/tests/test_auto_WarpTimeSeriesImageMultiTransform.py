@@ -10,12 +10,6 @@ def test_WarpTimeSeriesImageMultiTransform_inputs():
     position=1,
     usedefault=True,
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     input_image=dict(argstr='%s',
     copyfile=True,
     mandatory=True,
@@ -25,14 +19,18 @@ def test_WarpTimeSeriesImageMultiTransform_inputs():
     usedefault=True,
     ),
     out_postfix=dict(argstr='%s',
-    usedefault=True,
+    deprecated=True,
+    new_name='output_image',
+    ),
+    output_image=dict(argstr='%s',
+    keep_extension=True,
+    name_source='input_image',
+    name_template='%s_wtsimt',
     ),
     reference_image=dict(argstr='-R %s',
     xor=['tightest_box'],
     ),
     reslice_by_header=dict(argstr='--reslice-by-header',
-    ),
-    terminal_output=dict(nohash=True,
     ),
     tightest_box=dict(argstr='--tightest-bounding-box',
     xor=['reference_image'],
@@ -46,7 +44,7 @@ def test_WarpTimeSeriesImageMultiTransform_inputs():
     use_nearest=dict(argstr='--use-NN',
     ),
     )
-    inputs = WarpTimeSeriesImageMultiTransform.input_spec()
+    inputs = WarpTimeSeriesImageMultiTransform._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -56,7 +54,7 @@ def test_WarpTimeSeriesImageMultiTransform_inputs():
 def test_WarpTimeSeriesImageMultiTransform_outputs():
     output_map = dict(output_image=dict(),
     )
-    outputs = WarpTimeSeriesImageMultiTransform.output_spec()
+    outputs = WarpTimeSeriesImageMultiTransform._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

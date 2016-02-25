@@ -58,8 +58,8 @@ class HARDIMatOutputSpec(TraitedSpec):
 class HARDIMat(CommandLine):
     """Use hardi_mat to calculate a reconstruction matrix from a gradient table
     """
-    input_spec = HARDIMatInputSpec
-    output_spec = HARDIMatOutputSpec
+    _input_spec = HARDIMatInputSpec
+    _output_spec = HARDIMatOutputSpec
 
     _cmd = 'hardi_mat'
 
@@ -85,11 +85,10 @@ class HARDIMat(CommandLine):
             return super(HARDIMat, self)._format_arg("bvecs", spec, new_val)
         return super(HARDIMat, self)._format_arg(name, spec, value)
 
-    def _list_outputs(self):
-        outputs = self.output_spec().get()
-        outputs['out_file'] = os.path.abspath(self.inputs.out_file)
-        return outputs
-
+    def _post_run(self):
+        
+        self.outputs.out_file = os.path.abspath(self.inputs.out_file)
+        
 
 class ODFReconInputSpec(CommandLineInputSpec):
     DWI = File(desc='Input raw data', argstr='%s', exists=True, mandatory=True, position=1)
@@ -133,25 +132,24 @@ class ODFRecon(CommandLine):
     """Use odf_recon to generate tensors and other maps
     """
 
-    input_spec = ODFReconInputSpec
-    output_spec = ODFReconOutputSpec
+    _input_spec = ODFReconInputSpec
+    _output_spec = ODFReconOutputSpec
 
     _cmd = 'odf_recon'
 
-    def _list_outputs(self):
+    def _post_run(self):
         out_prefix = self.inputs.out_prefix
         output_type = self.inputs.output_type
 
-        outputs = self.output_spec().get()
-        outputs['B0'] = os.path.abspath(fname_presuffix("", prefix=out_prefix, suffix='_b0.' + output_type))
-        outputs['DWI'] = os.path.abspath(fname_presuffix("", prefix=out_prefix, suffix='_dwi.' + output_type))
-        outputs['max'] = os.path.abspath(fname_presuffix("", prefix=out_prefix, suffix='_max.' + output_type))
-        outputs['ODF'] = os.path.abspath(fname_presuffix("", prefix=out_prefix, suffix='_odf.' + output_type))
+        
+        self.outputs.B0 = os.path.abspath(fname_presuffix("", prefix=out_prefix, suffix='_b0.' + output_type))
+        self.outputs.DWI = os.path.abspath(fname_presuffix("", prefix=out_prefix, suffix='_dwi.' + output_type))
+        self.outputs.max = os.path.abspath(fname_presuffix("", prefix=out_prefix, suffix='_max.' + output_type))
+        self.outputs.ODF = os.path.abspath(fname_presuffix("", prefix=out_prefix, suffix='_odf.' + output_type))
         if isdefined(self.inputs.output_entropy):
-            outputs['entropy'] = os.path.abspath(fname_presuffix("", prefix=out_prefix, suffix='_entropy.' + output_type))
+            self.outputs.entropy = os.path.abspath(fname_presuffix("", prefix=out_prefix, suffix='_entropy.' + output_type))
 
-        return outputs
-
+        
 
 class ODFTrackerInputSpec(CommandLineInputSpec):
     max = File(exists=True, mandatory=True)
@@ -215,8 +213,8 @@ class ODFTracker(CommandLine):
     """Use odf_tracker to generate track file
     """
 
-    input_spec = ODFTrackerInputSpec
-    output_spec = ODFTrackerOutputSpec
+    _input_spec = ODFTrackerInputSpec
+    _output_spec = ODFTrackerOutputSpec
 
     _cmd = 'odf_tracker'
 
@@ -229,7 +227,7 @@ class ODFTracker(CommandLine):
 
         return super(ODFTracker, self)._run_interface(runtime)
 
-    def _list_outputs(self):
-        outputs = self.output_spec().get()
-        outputs['track_file'] = os.path.abspath(self.inputs.out_file)
-        return outputs
+    def _post_run(self):
+        
+        self.outputs.track_file = os.path.abspath(self.inputs.out_file)
+        

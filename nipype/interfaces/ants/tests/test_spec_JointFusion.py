@@ -47,7 +47,7 @@ def test_JointFusion_radius():
     for attr in ['patch_radius', 'search_radius']:
         for x in range(5):
             set_radius(attr, x, x + 1, x**x)
-            yield assert_equal, at._format_arg(attr, None, getattr(at.inputs, attr))[4:], '{0}x{1}x{2}'.format(x, x + 1, x**x)
+            yield assert_equal, at.inputs._format_arg(attr, None, getattr(at.inputs, attr))[4:], '{0}x{1}x{2}'.format(x, x + 1, x**x)
 
 
 def test_JointFusion_cmd():
@@ -75,4 +75,4 @@ def test_JointFusion_cmd():
                                                             segmentation_images[1])
     yield assert_equal, at.cmdline, expected_command
     # setting intensity or labels with unequal lengths raises error
-    yield assert_raises, AssertionError, at._format_arg, 'warped_intensity_images', InputMultiPath, warped_intensity_images + [example_data('im3.nii')]
+    yield assert_raises, AssertionError, at.inputs._format_arg, 'warped_intensity_images', InputMultiPath, warped_intensity_images + [example_data('im3.nii')]

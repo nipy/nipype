@@ -22,9 +22,6 @@ def test_BRAINSConstellationDetector_inputs():
     ),
     debug=dict(argstr='--debug ',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
     forceACPoint=dict(argstr='--forceACPoint %s',
     sep=',',
     ),
@@ -40,9 +37,6 @@ def test_BRAINSConstellationDetector_inputs():
     sep=',',
     ),
     houghEyeDetectorMode=dict(argstr='--houghEyeDetectorMode %d',
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
     ),
     inputLandmarksEMSP=dict(argstr='--inputLandmarksEMSP %s',
     ),
@@ -98,8 +92,6 @@ def test_BRAINSConstellationDetector_inputs():
     ),
     rpc=dict(argstr='--rpc %f',
     ),
-    terminal_output=dict(nohash=True,
-    ),
     trimRescaledIntensities=dict(argstr='--trimRescaledIntensities %f',
     ),
     verbose=dict(argstr='--verbose ',
@@ -110,7 +102,7 @@ def test_BRAINSConstellationDetector_inputs():
     writedebuggingImagesLevel=dict(argstr='--writedebuggingImagesLevel %d',
     ),
     )
-    inputs = BRAINSConstellationDetector.input_spec()
+    inputs = BRAINSConstellationDetector._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -129,7 +121,7 @@ def test_BRAINSConstellationDetector_outputs():
     resultsDir=dict(),
     writeBranded2DImage=dict(),
     )
-    outputs = BRAINSConstellationDetector.output_spec()
+    outputs = BRAINSConstellationDetector._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

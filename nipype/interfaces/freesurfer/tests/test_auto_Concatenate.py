@@ -13,13 +13,7 @@ def test_Concatenate_inputs():
     concatenated_file=dict(argstr='--o %s',
     genfile=True,
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
     gmean=dict(argstr='--gmean %d',
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
     ),
     in_files=dict(argstr='--i %s...',
     mandatory=True,
@@ -47,12 +41,10 @@ def test_Concatenate_inputs():
     stats=dict(argstr='--%s',
     ),
     subjects_dir=dict(),
-    terminal_output=dict(nohash=True,
-    ),
     vote=dict(argstr='--vote',
     ),
     )
-    inputs = Concatenate.input_spec()
+    inputs = Concatenate._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -62,7 +54,7 @@ def test_Concatenate_inputs():
 def test_Concatenate_outputs():
     output_map = dict(concatenated_file=dict(),
     )
-    outputs = Concatenate.output_spec()
+    outputs = Concatenate._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

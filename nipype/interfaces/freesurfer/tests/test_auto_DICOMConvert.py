@@ -11,13 +11,7 @@ def test_DICOMConvert_inputs():
     dicom_dir=dict(mandatory=True,
     ),
     dicom_info=dict(),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
     file_mapping=dict(),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     ignore_single_slice=dict(requires=['dicom_info'],
     ),
     out_type=dict(usedefault=True,
@@ -28,12 +22,18 @@ def test_DICOMConvert_inputs():
     ),
     subject_id=dict(),
     subjects_dir=dict(),
-    terminal_output=dict(nohash=True,
-    ),
     )
-    inputs = DICOMConvert.input_spec()
+    inputs = DICOMConvert._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
             yield assert_equal, getattr(inputs.traits()[key], metakey), value
 
+
+def test_DICOMConvert_outputs():
+    output_map = dict()
+    outputs = DICOMConvert._output_spec()
+
+    for key, metadata in list(output_map.items()):
+        for metakey, value in list(metadata.items()):
+            yield assert_equal, getattr(outputs.traits()[key], metakey), value

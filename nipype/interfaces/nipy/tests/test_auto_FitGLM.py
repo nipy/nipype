@@ -10,9 +10,6 @@ def test_FitGLM_inputs():
     ),
     hrf_model=dict(usedefault=True,
     ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     mask=dict(),
     method=dict(usedefault=True,
     ),
@@ -27,7 +24,7 @@ def test_FitGLM_inputs():
     session_info=dict(mandatory=True,
     ),
     )
-    inputs = FitGLM.input_spec()
+    inputs = FitGLM._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -45,7 +42,7 @@ def test_FitGLM_outputs():
     residuals=dict(),
     s2=dict(),
     )
-    outputs = FitGLM.output_spec()
+    outputs = FitGLM._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

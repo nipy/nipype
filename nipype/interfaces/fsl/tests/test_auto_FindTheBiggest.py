@@ -6,12 +6,6 @@ from ..dti import FindTheBiggest
 def test_FindTheBiggest_inputs():
     input_map = dict(args=dict(argstr='%s',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     in_files=dict(argstr='%s',
     mandatory=True,
     position=0,
@@ -21,11 +15,10 @@ def test_FindTheBiggest_inputs():
     hash_files=False,
     position=2,
     ),
-    output_type=dict(),
-    terminal_output=dict(nohash=True,
+    output_type=dict(usedefault=True,
     ),
     )
-    inputs = FindTheBiggest.input_spec()
+    inputs = FindTheBiggest._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -36,7 +29,7 @@ def test_FindTheBiggest_outputs():
     output_map = dict(out_file=dict(argstr='%s',
     ),
     )
-    outputs = FindTheBiggest.output_spec()
+    outputs = FindTheBiggest._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

@@ -238,8 +238,8 @@ class Tractography(MRTrix3Base):
     """
 
     _cmd = 'tckgen'
-    input_spec = TractographyInputSpec
-    output_spec = TractographyOutputSpec
+    _input_spec = TractographyInputSpec
+    _output_spec = TractographyOutputSpec
 
     def _format_arg(self, name, trait_spec, value):
         if 'roi_' in name and isinstance(value, tuple):
@@ -248,7 +248,7 @@ class Tractography(MRTrix3Base):
 
         return super(Tractography, self)._format_arg(name, trait_spec, value)
 
-    def _list_outputs(self):
-        outputs = self.output_spec().get()
-        outputs['out_file'] = op.abspath(self.inputs.out_file)
-        return outputs
+    def _post_run(self):
+        
+        self.outputs.out_file = op.abspath(self.inputs.out_file)
+        

@@ -10,15 +10,9 @@ def test_ResponseSD_inputs():
     ),
     disp_mult=dict(argstr='-dispersion_multiplier %f',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
     grad_file=dict(argstr='-grad %s',
     ),
     grad_fsl=dict(argstr='-fslgrad %s %s',
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
     ),
     in_bval=dict(),
     in_bvec=dict(argstr='-fslgrad %s %s',
@@ -50,14 +44,12 @@ def test_ResponseSD_inputs():
     shell=dict(argstr='-shell %s',
     sep=',',
     ),
-    terminal_output=dict(nohash=True,
-    ),
     test_all=dict(argstr='-test_all',
     ),
     vol_ratio=dict(argstr='-volume_ratio %f',
     ),
     )
-    inputs = ResponseSD.input_spec()
+    inputs = ResponseSD._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -68,7 +60,7 @@ def test_ResponseSD_outputs():
     output_map = dict(out_file=dict(),
     out_sf=dict(),
     )
-    outputs = ResponseSD.output_spec()
+    outputs = ResponseSD._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

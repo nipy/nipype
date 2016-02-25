@@ -8,20 +8,12 @@ def test_DWISimpleCompare_inputs():
     ),
     checkDWIData=dict(argstr='--checkDWIData ',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     inputVolume1=dict(argstr='--inputVolume1 %s',
     ),
     inputVolume2=dict(argstr='--inputVolume2 %s',
     ),
-    terminal_output=dict(nohash=True,
-    ),
     )
-    inputs = DWISimpleCompare.input_spec()
+    inputs = DWISimpleCompare._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -30,7 +22,7 @@ def test_DWISimpleCompare_inputs():
 
 def test_DWISimpleCompare_outputs():
     output_map = dict()
-    outputs = DWISimpleCompare.output_spec()
+    outputs = DWISimpleCompare._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

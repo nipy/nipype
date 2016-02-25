@@ -101,14 +101,13 @@ class BuildConnectome(MRTrix3Base):
     """
 
     _cmd = 'tck2connectome'
-    input_spec = BuildConnectomeInputSpec
-    output_spec = BuildConnectomeOutputSpec
+    _input_spec = BuildConnectomeInputSpec
+    _output_spec = BuildConnectomeOutputSpec
 
-    def _list_outputs(self):
-        outputs = self.output_spec().get()
-        outputs['out_file'] = op.abspath(self.inputs.out_file)
-        return outputs
-
+    def _post_run(self):
+        
+        self.outputs.out_file = op.abspath(self.inputs.out_file)
+        
 
 class LabelConfigInputSpec(CommandLineInputSpec):
     in_file = File(exists=True, argstr='%s', mandatory=True, position=-3,
@@ -160,10 +159,10 @@ class LabelConfig(MRTrix3Base):
     """
 
     _cmd = 'labelconfig'
-    input_spec = LabelConfigInputSpec
-    output_spec = LabelConfigOutputSpec
+    _input_spec = LabelConfigInputSpec
+    _output_spec = LabelConfigOutputSpec
 
-    def _parse_inputs(self, skip=None):
+    def parse_args(self, skip=None):
         if skip is None:
             skip = []
 
@@ -179,9 +178,9 @@ class LabelConfig(MRTrix3Base):
                 path, 'src/dwi/tractography/connectomics/'
                       'example_configs/fs_default.txt')
 
-        return super(LabelConfig, self)._parse_inputs(skip=skip)
+        return super(LabelConfig, self).parse_args(skip=skip)
 
-    def _list_outputs(self):
-        outputs = self.output_spec().get()
-        outputs['out_file'] = op.abspath(self.inputs.out_file)
-        return outputs
+    def _post_run(self):
+        
+        self.outputs.out_file = op.abspath(self.inputs.out_file)
+        

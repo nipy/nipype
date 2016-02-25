@@ -6,12 +6,6 @@ from ..maths import UnaryMaths
 def test_UnaryMaths_inputs():
     input_map = dict(args=dict(argstr='%s',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     in_file=dict(argstr='%s',
     mandatory=True,
     position=2,
@@ -21,24 +15,23 @@ def test_UnaryMaths_inputs():
     ),
     nan2zeros=dict(argstr='-nan',
     position=3,
+    usedefault=True,
     ),
     operation=dict(argstr='-%s',
     mandatory=True,
     position=4,
     ),
     out_file=dict(argstr='%s',
-    genfile=True,
     hash_files=False,
     position=-2,
     ),
     output_datatype=dict(argstr='-odt %s',
     position=-1,
     ),
-    output_type=dict(),
-    terminal_output=dict(nohash=True,
+    output_type=dict(usedefault=True,
     ),
     )
-    inputs = UnaryMaths.input_spec()
+    inputs = UnaryMaths._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -48,7 +41,7 @@ def test_UnaryMaths_inputs():
 def test_UnaryMaths_outputs():
     output_map = dict(out_file=dict(),
     )
-    outputs = UnaryMaths.output_spec()
+    outputs = UnaryMaths._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

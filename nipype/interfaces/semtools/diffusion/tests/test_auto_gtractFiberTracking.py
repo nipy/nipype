@@ -14,13 +14,7 @@ def test_gtractFiberTracking_inputs():
     ),
     endingSeedsLabel=dict(argstr='--endingSeedsLabel %d',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
     guidedCurvatureThreshold=dict(argstr='--guidedCurvatureThreshold %f',
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
     ),
     inputAnisotropyVolume=dict(argstr='--inputAnisotropyVolume %s',
     ),
@@ -57,8 +51,6 @@ def test_gtractFiberTracking_inputs():
     ),
     tendG=dict(argstr='--tendG %f',
     ),
-    terminal_output=dict(nohash=True,
-    ),
     trackingMethod=dict(argstr='--trackingMethod %s',
     ),
     trackingThreshold=dict(argstr='--trackingThreshold %f',
@@ -72,7 +64,7 @@ def test_gtractFiberTracking_inputs():
     writeXMLPolyDataFile=dict(argstr='--writeXMLPolyDataFile ',
     ),
     )
-    inputs = gtractFiberTracking.input_spec()
+    inputs = gtractFiberTracking._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -82,7 +74,7 @@ def test_gtractFiberTracking_inputs():
 def test_gtractFiberTracking_outputs():
     output_map = dict(outputTract=dict(),
     )
-    outputs = gtractFiberTracking.output_spec()
+    outputs = gtractFiberTracking._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

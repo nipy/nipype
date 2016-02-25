@@ -13,9 +13,6 @@ def test_SimulateMultiTensor_inputs():
     diff_sf=dict(usedefault=True,
     ),
     gradients=dict(),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     in_bval=dict(),
     in_bvec=dict(),
     in_dirs=dict(mandatory=True,
@@ -40,7 +37,7 @@ def test_SimulateMultiTensor_inputs():
     snr=dict(usedefault=True,
     ),
     )
-    inputs = SimulateMultiTensor.input_spec()
+    inputs = SimulateMultiTensor._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -53,7 +50,7 @@ def test_SimulateMultiTensor_outputs():
     out_file=dict(),
     out_mask=dict(),
     )
-    outputs = SimulateMultiTensor.output_spec()
+    outputs = SimulateMultiTensor._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

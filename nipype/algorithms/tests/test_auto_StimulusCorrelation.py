@@ -6,17 +6,15 @@ from ..rapidart import StimulusCorrelation
 def test_StimulusCorrelation_inputs():
     input_map = dict(concatenated_design=dict(mandatory=True,
     ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     intensity_values=dict(mandatory=True,
     ),
     realignment_parameters=dict(mandatory=True,
     ),
     spm_mat_file=dict(mandatory=True,
     ),
+    stimcorr_files=dict(),
     )
-    inputs = StimulusCorrelation.input_spec()
+    inputs = StimulusCorrelation._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -26,7 +24,7 @@ def test_StimulusCorrelation_inputs():
 def test_StimulusCorrelation_outputs():
     output_map = dict(stimcorr_files=dict(),
     )
-    outputs = StimulusCorrelation.output_spec()
+    outputs = StimulusCorrelation._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

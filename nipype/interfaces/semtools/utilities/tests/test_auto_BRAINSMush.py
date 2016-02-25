@@ -16,12 +16,6 @@ def test_BRAINSMush_inputs():
     ),
     desiredVariance=dict(argstr='--desiredVariance %f',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     inputFirstVolume=dict(argstr='--inputFirstVolume %s',
     ),
     inputMaskVolume=dict(argstr='--inputMaskVolume %s',
@@ -46,14 +40,12 @@ def test_BRAINSMush_inputs():
     seed=dict(argstr='--seed %s',
     sep=',',
     ),
-    terminal_output=dict(nohash=True,
-    ),
     upperThresholdFactor=dict(argstr='--upperThresholdFactor %f',
     ),
     upperThresholdFactorPre=dict(argstr='--upperThresholdFactorPre %f',
     ),
     )
-    inputs = BRAINSMush.input_spec()
+    inputs = BRAINSMush._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -65,7 +57,7 @@ def test_BRAINSMush_outputs():
     outputVolume=dict(),
     outputWeightsFile=dict(),
     )
-    outputs = BRAINSMush.output_spec()
+    outputs = BRAINSMush._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

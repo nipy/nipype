@@ -6,12 +6,6 @@ from ..diffusion import DiffusionWeightedVolumeMasking
 def test_DiffusionWeightedVolumeMasking_inputs():
     input_map = dict(args=dict(argstr='%s',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     inputVolume=dict(argstr='%s',
     position=-4,
     ),
@@ -23,14 +17,12 @@ def test_DiffusionWeightedVolumeMasking_inputs():
     ),
     removeislands=dict(argstr='--removeislands ',
     ),
-    terminal_output=dict(nohash=True,
-    ),
     thresholdMask=dict(argstr='%s',
     hash_files=False,
     position=-1,
     ),
     )
-    inputs = DiffusionWeightedVolumeMasking.input_spec()
+    inputs = DiffusionWeightedVolumeMasking._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -43,7 +35,7 @@ def test_DiffusionWeightedVolumeMasking_outputs():
     thresholdMask=dict(position=-1,
     ),
     )
-    outputs = DiffusionWeightedVolumeMasking.output_spec()
+    outputs = DiffusionWeightedVolumeMasking._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

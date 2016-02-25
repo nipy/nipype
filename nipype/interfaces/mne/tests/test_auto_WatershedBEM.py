@@ -8,12 +8,6 @@ def test_WatershedBEM_inputs():
     ),
     atlas_mode=dict(argstr='--atlas',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     overwrite=dict(argstr='--overwrite',
     usedefault=True,
     ),
@@ -23,13 +17,11 @@ def test_WatershedBEM_inputs():
     subjects_dir=dict(mandatory=True,
     usedefault=True,
     ),
-    terminal_output=dict(nohash=True,
-    ),
     volume=dict(argstr='--volume %s',
     usedefault=True,
     ),
     )
-    inputs = WatershedBEM.input_spec()
+    inputs = WatershedBEM._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -53,7 +45,7 @@ def test_WatershedBEM_outputs():
     outer_skull_surface=dict(loc='bem/watershed',
     ),
     )
-    outputs = WatershedBEM.output_spec()
+    outputs = WatershedBEM._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

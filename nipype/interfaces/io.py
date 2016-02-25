@@ -34,11 +34,9 @@ import tempfile
 from warnings import warn
 
 import sqlite3
-
-from .base import (TraitedSpec, traits, File, Directory,
-                   BaseInterface, InputMultiPath, isdefined,
-                   OutputMultiPath, DynamicTraitedSpec,
-                   Undefined, BaseInterfaceInputSpec)
+from .base import (traits, Undefined, File, Directory, isdefined, InputMultiPath,
+                   OutputMultiPath, TraitedSpec, DynamicTraitedSpec,
+                   BaseInputSpec, BaseInterface)
 from .. import config
 from ..external.six import string_types
 from ..utils.filemanip import (copyfile, list_to_filename,
@@ -89,7 +87,7 @@ def copytree(src, dst, use_hardlink=False):
             if os.path.isdir(srcname):
                 copytree(srcname, dstname, use_hardlink)
             else:
-                copyfile(srcname, dstname, True, hashmethod='content',
+                copyfile(srcname, dstname, True, hash_method='content',
                          use_hardlink=use_hardlink)
         except (IOError, os.error) as why:
             errors.append((srcname, dstname, str(why)))
@@ -124,7 +122,7 @@ class IOBase(BaseInterface):
     def _run_interface(self, runtime):
         return runtime
 
-    def _list_outputs(self):
+    def _post_run(self):
         raise NotImplementedError
 
     def _outputs(self):
@@ -136,14 +134,14 @@ class IOBase(BaseInterface):
 
 # Class to track percentage of S3 file upload
 class ProgressPercentage(object):
-    '''
+    """
     Callable class instsance (via __call__ method) that displays
     upload percentage of a file to S3
-    '''
+    """
 
     def __init__(self, filename):
-        '''
-        '''
+        """
+        """
 
         # Import packages
         import threading
@@ -155,8 +153,8 @@ class ProgressPercentage(object):
         self._lock = threading.Lock()
 
     def __call__(self, bytes_amount):
-        '''
-        '''
+        """
+        """
 
         # Import packages
         import sys
@@ -177,9 +175,9 @@ class ProgressPercentage(object):
 
 
 # DataSink inputs
-class DataSinkInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
-    '''
-    '''
+class DataSinkInputSpec(DynamicTraitedSpec, BaseInputSpec):
+    """
+    """
 
     # Init inputspec data attributes
     base_directory = Directory(
@@ -300,8 +298,8 @@ class DataSink(IOBase):
     """
 
     # Give obj .inputs and .outputs
-    input_spec = DataSinkInputSpec
-    output_spec = DataSinkOutputSpec
+    _input_spec = DataSinkInputSpec
+    _output_spec = DataSinkOutputSpec
 
     # Initialization method to set up datasink
     def __init__(self, infields=None, force_run=True, **kwargs):
@@ -372,7 +370,7 @@ class DataSink(IOBase):
 
     # Check for s3 in base directory
     def _check_s3_base_dir(self):
-        '''
+        """
         Method to see if the datasink's base directory specifies an
         S3 bucket path; if it does, it parses the path for the bucket
         name in the form 's3://bucket_name/...' and returns it
@@ -388,7 +386,7 @@ class DataSink(IOBase):
         bucket_name : string
             name of the S3 bucket to connect to; if the base directory
             is not a valid S3 path, defaults to '<N/A>'
-        '''
+        """
 
         # Init variables
         s3_str = 's3://'
@@ -419,7 +417,7 @@ class DataSink(IOBase):
 
     # Function to return AWS secure environment variables
     def _return_aws_keys(self):
-        '''
+        """
         Method to return AWS access key id and secret access key using
         credentials found in a local file.
 
@@ -434,7 +432,7 @@ class DataSink(IOBase):
             string of the AWS access key ID
         aws_secret_access_key : string
             string of the AWS secret access key
-        '''
+        """
 
         # Import packages
         import os
@@ -474,7 +472,7 @@ class DataSink(IOBase):
 
     # Fetch bucket object
     def _fetch_bucket(self, bucket_name):
-        '''
+        """
         Method to return a bucket object which can be used to interact
         with an AWS S3 bucket using credentials found in a local file.
 
@@ -490,7 +488,7 @@ class DataSink(IOBase):
         bucket : boto3.resources.factory.s3.Bucket
             boto3 s3 Bucket object which is used to interact with files
             in an S3 bucket on AWS
-        '''
+        """
 
         # Import packages
         import logging
@@ -567,9 +565,9 @@ class DataSink(IOBase):
 
     # Send up to S3 method
     def _upload_to_s3(self, bucket, src, dst):
-        '''
+        """
         Method to upload outputs to S3 bucket instead of on local disk
-        '''
+        """
 
         # Import packages
         import hashlib
@@ -636,13 +634,13 @@ class DataSink(IOBase):
                                Callback=ProgressPercentage(src_f))
 
     # List outputs, main run routine
-    def _list_outputs(self):
+    def _post_run(self):
         """Execute this module.
         """
 
         # Init variables
         iflogger = logging.getLogger('interface')
-        outputs = self.output_spec().get()
+
         out_files = []
         # Use hardlink
         use_hardlink = str2bool(config.get('execution', 'try_hard_link_datasink'))
@@ -752,7 +750,7 @@ class DataSink(IOBase):
                     # If src is a file, copy it to dst
                     if os.path.isfile(src):
                         iflogger.debug('copyfile: %s %s' % (src, dst))
-                        copyfile(src, dst, copy=True, hashmethod='content',
+                        copyfile(src, dst, copy=True, hash_method='content',
                                  use_hardlink=use_hardlink)
                         out_files.append(dst)
                     # If src is a directory, copy entire contents to dst dir
@@ -765,12 +763,10 @@ class DataSink(IOBase):
                         out_files.append(dst)
 
         # Return outputs dictionary
-        outputs['out_file'] = out_files
-
-        return outputs
+        self.outputs.out_file = out_files
 
 
-class S3DataGrabberInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
+class S3DataGrabberInputSpec(DynamicTraitedSpec, BaseInputSpec):
     anon = traits.Bool(False, usedefault=True,
                        desc='Use anonymous connection to s3.  If this is set to True, boto may print' +
                             ' a urlopen error, but this does not prevent data from being downloaded.')
@@ -808,8 +804,8 @@ class S3DataGrabber(IOBase):
         glob-style found in the original DataGrabber.
 
     """
-    input_spec = S3DataGrabberInputSpec
-    output_spec = DynamicTraitedSpec
+    _input_spec = S3DataGrabberInputSpec
+    _output_spec = DynamicTraitedSpec
     _always_run = True
 
     def __init__(self, infields=None, outfields=None, **kwargs):
@@ -861,7 +857,7 @@ class S3DataGrabber(IOBase):
         """
         return add_traits(base, self.inputs.template_args.keys())
 
-    def _list_outputs(self):
+    def _post_run(self):
         # infields are mandatory, however I could not figure out how to set 'mandatory' flag dynamically
         # hence manual check
         if self._infields:
@@ -880,7 +876,7 @@ class S3DataGrabber(IOBase):
 
         # keys are outfields, args are template args for the outfield
         for key, args in self.inputs.template_args.items():
-            outputs[key] = []
+            setattr(self.outputs, key, [])
             template = self.inputs.template
             if hasattr(self.inputs, 'field_template') and \
                     isdefined(self.inputs.field_template) and \
@@ -903,7 +899,7 @@ class S3DataGrabber(IOBase):
                 else:
                     if self.inputs.sort_filelist:
                         filelist = human_order_sorted(filelist)
-                    outputs[key] = list_to_filename(filelist)
+                    setattr(self.outputs, key, list_to_filename(filelist))
             for argnum, arglist in enumerate(args):
                 maxlen = 1
                 for arg in arglist:
@@ -940,17 +936,17 @@ class S3DataGrabber(IOBase):
                             raise IOError(msg)
                         else:
                             warn(msg)
-                        outputs[key].append(None)
+                        getattr(self.outputs, key).append(None)
                     else:
                         if self.inputs.sort_filelist:
                             outfiles = human_order_sorted(outfiles)
-                        outputs[key].append(list_to_filename(outfiles))
-            if any([val is None for val in outputs[key]]):
-                outputs[key] = []
-            if len(outputs[key]) == 0:
-                outputs[key] = None
-            elif len(outputs[key]) == 1:
-                outputs[key] = outputs[key][0]
+                        getattr(self.outputs, key).append(list_to_filename(outfiles))
+            if any([val is None for val in getattr(self.outputs, key)]):
+                setattr(self.outputs, key, [])
+            if len(getattr(self.outputs, key)) == 0:
+                setattr(self.outputs, key, None)
+            elif len(getattr(self.outputs, key)) == 1:
+                setattr(self.outputs, key, getattr(self.outputs, key)[0])
         # Outputs are currently stored as locations on S3.
         # We must convert to the local location specified
         # and download the files.
@@ -960,13 +956,15 @@ class S3DataGrabber(IOBase):
             #tuple, numpy array) and we iterate through each of its
             #values. If it doesn't, it's string-like (string,
             #unicode), and we convert that value directly.
+
+            cur_value = getattr(self.outputs, key)
             if hasattr(val,'__iter__'):
                 for i,path in enumerate(val):
-                    outputs[key][i] = self.s3tolocal(path, bkt)
+                    cur_value[i] = self.s3tolocal(path, bkt)
             else:
-                outputs[key] = self.s3tolocal(val, bkt)
+                cur_value[i] = self.s3tolocal(val, bkt)
+            setattr(self.outputs, key, cur_value)
 
-        return outputs
 
     # Takes an s3 address and downloads the file to a local
     # directory, returning the local path.
@@ -989,7 +987,7 @@ class S3DataGrabber(IOBase):
         return localpath
 
 
-class DataGrabberInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
+class DataGrabberInputSpec(DynamicTraitedSpec, BaseInputSpec):
     base_directory = Directory(exists=True,
                                desc='Path to the base directory consisting of subject data.')
     raise_on_empty = traits.Bool(True, usedefault=True,
@@ -1054,8 +1052,8 @@ class DataGrabber(IOBase):
         >>> dg.inputs.template_args['struct'] = [['sid']]
 
     """
-    input_spec = DataGrabberInputSpec
-    output_spec = DynamicTraitedSpec
+    _input_spec = DataGrabberInputSpec
+    _output_spec = DynamicTraitedSpec
     _always_run = True
 
     def __init__(self, infields=None, outfields=None, **kwargs):
@@ -1106,7 +1104,7 @@ class DataGrabber(IOBase):
         """
         return add_traits(base, list(self.inputs.template_args.keys()))
 
-    def _list_outputs(self):
+    def _post_run(self):
         # infields are mandatory, however I could not figure out how to set 'mandatory' flag dynamically
         # hence manual check
         if self._infields:
@@ -1119,7 +1117,7 @@ class DataGrabber(IOBase):
 
         outputs = {}
         for key, args in list(self.inputs.template_args.items()):
-            outputs[key] = []
+            setattr(self.outputs, key, [])
             template = self.inputs.template
             if hasattr(self.inputs, 'field_template') and \
                     isdefined(self.inputs.field_template) and \
@@ -1142,7 +1140,7 @@ class DataGrabber(IOBase):
                 else:
                     if self.inputs.sort_filelist:
                         filelist = human_order_sorted(filelist)
-                    outputs[key] = list_to_filename(filelist)
+                    setattr(self.outputs, key, list_to_filename(filelist))
             for argnum, arglist in enumerate(args):
                 maxlen = 1
                 for arg in arglist:
@@ -1176,21 +1174,20 @@ class DataGrabber(IOBase):
                             raise IOError(msg)
                         else:
                             warn(msg)
-                        outputs[key].append(None)
+                        getattr(self.outputs, key).append(None)
                     else:
                         if self.inputs.sort_filelist:
                             outfiles = human_order_sorted(outfiles)
-                        outputs[key].append(list_to_filename(outfiles))
-            if any([val is None for val in outputs[key]]):
-                outputs[key] = []
-            if len(outputs[key]) == 0:
-                outputs[key] = None
-            elif len(outputs[key]) == 1:
-                outputs[key] = outputs[key][0]
-        return outputs
+                        getattr(self.outputs, key).append(list_to_filename(outfiles))
+            if any([val is None for val in getattr(self.outputs, key)]):
+                setattr(self.outputs, key, [])
+            if len(getattr(self.outputs, key)) == 0:
+                setattr(self.outputs, key, None)
+            elif len(getattr(self.outputs, key)) == 1:
+                setattr(self.outputs, key, getattr(self.outputs, key)[0])
 
 
-class SelectFilesInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
+class SelectFilesInputSpec(DynamicTraitedSpec, BaseInputSpec):
 
     base_directory = Directory(exists=True,
                                desc="Root path common to templates.")
@@ -1237,8 +1234,8 @@ class SelectFiles(IOBase):
     >>> dg.inputs.run = [2, 4]
 
     """
-    input_spec = SelectFilesInputSpec
-    output_spec = DynamicTraitedSpec
+    _input_spec = SelectFilesInputSpec
+    _output_spec = DynamicTraitedSpec
     _always_run = True
 
     def __init__(self, templates, **kwargs):
@@ -1281,7 +1278,7 @@ class SelectFiles(IOBase):
         """Add the dynamic output fields"""
         return add_traits(base, list(self._templates.keys()))
 
-    def _list_outputs(self):
+    def _post_run(self):
         """Find the files and expose them as interface outputs."""
         outputs = {}
         info = dict([(k, v) for k, v in list(self.inputs.__dict__.items())
@@ -1329,12 +1326,10 @@ class SelectFiles(IOBase):
             if field not in force_lists:
                 filelist = list_to_filename(filelist)
 
-            outputs[field] = filelist
-
-        return outputs
+            setattr(self.outputs, field, filelist)
 
 
-class DataFinderInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
+class DataFinderInputSpec(DynamicTraitedSpec, BaseInputSpec):
     root_paths = traits.Either(traits.List(),
                                traits.Str(),
                                mandatory=True,)
@@ -1390,8 +1385,8 @@ class DataFinder(IOBase):
 
     """
 
-    input_spec = DataFinderInputSpec
-    output_spec = DynamicTraitedSpec
+    _input_spec = DataFinderInputSpec
+    _output_spec = DynamicTraitedSpec
     _always_run = True
 
     def _match_path(self, target_path):
@@ -1473,15 +1468,11 @@ class DataFinder(IOBase):
         if not self.result:
             raise RuntimeError("Regular expression did not match any files!")
 
+        self.outputs.update(self.result)
         return runtime
 
-    def _list_outputs(self):
-        outputs = self._outputs().get()
-        outputs.update(self.result)
-        return outputs
 
-
-class FSSourceInputSpec(BaseInterfaceInputSpec):
+class FSSourceInputSpec(BaseInputSpec):
     subjects_dir = Directory(mandatory=True,
                              desc='Freesurfer subjects directory.')
     subject_id = traits.Str(mandatory=True,
@@ -1585,8 +1576,8 @@ class FreeSurferSource(IOBase):
     >>> res = fs.run() # doctest: +SKIP
 
     """
-    input_spec = FSSourceInputSpec
-    output_spec = FSSourceOutputSpec
+    _input_spec = FSSourceInputSpec
+    _output_spec = FSSourceOutputSpec
     _always_run = True
     _additional_metadata = ['loc', 'altkey']
 
@@ -1611,7 +1602,7 @@ class FreeSurferSource(IOBase):
             keydir, ''.join((globprefix, key, globsuffix)))
         return [os.path.abspath(f) for f in glob.glob(globpattern)]
 
-    def _list_outputs(self):
+    def _post_run(self):
         subjects_dir = self.inputs.subjects_dir
         subject_path = os.path.join(subjects_dir, self.inputs.subject_id)
         output_traits = self._outputs()
@@ -1621,11 +1612,10 @@ class FreeSurferSource(IOBase):
                                   output_traits.traits()[k].loc,
                                   output_traits.traits()[k].altkey)
             if val:
-                outputs[k] = list_to_filename(val)
-        return outputs
+                setattr(self.outputs, k, list_to_filename(val))
 
 
-class XNATSourceInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
+class XNATSourceInputSpec(DynamicTraitedSpec, BaseInputSpec):
 
     query_template = traits.Str(
         mandatory=True,
@@ -1686,8 +1676,8 @@ class XNATSource(IOBase):
 
 
     """
-    input_spec = XNATSourceInputSpec
-    output_spec = DynamicTraitedSpec
+    _input_spec = XNATSourceInputSpec
+    _output_spec = DynamicTraitedSpec
 
     def __init__(self, infields=None, outfields=None, **kwargs):
         """
@@ -1734,7 +1724,7 @@ class XNATSource(IOBase):
         """
         return add_traits(base, list(self.inputs.query_template_args.keys()))
 
-    def _list_outputs(self):
+    def _post_run(self):
         # infields are mandatory, however I could not figure out
         # how to set 'mandatory' flag dynamically, hence manual check
 
@@ -1761,7 +1751,7 @@ class XNATSource(IOBase):
 
         outputs = {}
         for key, args in list(self.inputs.query_template_args.items()):
-            outputs[key] = []
+            setattr(self.outputs, key, [])
             template = self.inputs.query_template
             if hasattr(self.inputs, 'field_template') and \
                     isdefined(self.inputs.field_template) and \
@@ -1773,11 +1763,11 @@ class XNATSource(IOBase):
                     raise IOError('Template %s returned no files'
                                   % template
                                   )
-                outputs[key] = list_to_filename(
+                setattr(self.outputs, key, list_to_filename(
                     [str(file_object.get())
                      for file_object in file_objects
                      if file_object.exists()
-                     ])
+                     ]))
             for argnum, arglist in enumerate(args):
                 maxlen = 1
                 for arg in arglist:
@@ -1831,15 +1821,14 @@ class XNATSource(IOBase):
                              ]
                         )
 
-                    outputs[key].insert(i, outfiles)
-            if len(outputs[key]) == 0:
-                outputs[key] = None
-            elif len(outputs[key]) == 1:
-                outputs[key] = outputs[key][0]
-        return outputs
+                    getattr(self.outputs, key).insert(i, outfiles)
+            if len(getattr(self.outputs, key)) == 0:
+                setattr(self.outputs, key, None)
+            elif len(getattr(self.outputs, key)) == 1:
+                setattr(self.outputs, key, getattr(self.outputs, key)[0])
 
 
-class XNATSinkInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
+class XNATSinkInputSpec(DynamicTraitedSpec, BaseInputSpec):
 
     _outputs = traits.Dict(traits.Str, value={}, usedefault=True)
 
@@ -1893,9 +1882,9 @@ class XNATSink(IOBase):
         list of nifti files and provides a set of structured output
         fields.
     """
-    input_spec = XNATSinkInputSpec
+    _input_spec = XNATSinkInputSpec
 
-    def _list_outputs(self):
+    def _post_run(self):
         """Execute this module.
         """
 
@@ -2066,7 +2055,7 @@ def push_provenance():
     pass
 
 
-class SQLiteSinkInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
+class SQLiteSinkInputSpec(DynamicTraitedSpec, BaseInputSpec):
     database_file = File(exists=True, mandatory=True)
     table_name = traits.Str(mandatory=True)
 
@@ -2090,7 +2079,7 @@ class SQLiteSink(IOBase):
         >>> sql.run() # doctest: +SKIP
 
     """
-    input_spec = SQLiteSinkInputSpec
+    _input_spec = SQLiteSinkInputSpec
 
     def __init__(self, input_names, **inputs):
 
@@ -2099,7 +2088,7 @@ class SQLiteSink(IOBase):
         self._input_names = filename_to_list(input_names)
         add_traits(self.inputs, [name for name in self._input_names])
 
-    def _list_outputs(self):
+    def _post_run(self):
         """Execute this module.
         """
         conn = sqlite3.connect(self.inputs.database_file,
@@ -2114,7 +2103,7 @@ class SQLiteSink(IOBase):
         return None
 
 
-class MySQLSinkInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
+class MySQLSinkInputSpec(DynamicTraitedSpec, BaseInputSpec):
     host = traits.Str('localhost', mandatory=True,
                       requires=['username', 'password'],
                       xor=['config'], usedefault=True)
@@ -2143,7 +2132,7 @@ class MySQLSink(IOBase):
         >>> sql.run() # doctest: +SKIP
 
     """
-    input_spec = MySQLSinkInputSpec
+    _input_spec = MySQLSinkInputSpec
 
     def __init__(self, input_names, **inputs):
 
@@ -2152,7 +2141,7 @@ class MySQLSink(IOBase):
         self._input_names = filename_to_list(input_names)
         add_traits(self.inputs, [name for name in self._input_names])
 
-    def _list_outputs(self):
+    def _post_run(self):
         """Execute this module.
         """
         import MySQLdb
@@ -2249,8 +2238,8 @@ class SSHDataGrabber(DataGrabber):
         >>> dg.inputs.template_args['struct'] = [['sid']]
 
     """
-    input_spec = SSHDataGrabberInputSpec
-    output_spec = DynamicTraitedSpec
+    _input_spec = SSHDataGrabberInputSpec
+    _output_spec = DynamicTraitedSpec
     _always_run = False
 
     def __init__(self, infields=None, outfields=None, **kwargs):
@@ -2293,7 +2282,7 @@ class SSHDataGrabber(DataGrabber):
         ):
             self.inputs.template += '$'
 
-    def _list_outputs(self):
+    def _post_run(self):
         try:
             paramiko
         except NameError:
@@ -2316,7 +2305,7 @@ class SSHDataGrabber(DataGrabber):
 
         outputs = {}
         for key, args in list(self.inputs.template_args.items()):
-            outputs[key] = []
+            setattr(self.outputs, key, [])
             template = self.inputs.template
             if hasattr(self.inputs, 'field_template') and \
                     isdefined(self.inputs.field_template) and \
@@ -2344,7 +2333,7 @@ class SSHDataGrabber(DataGrabber):
                 else:
                     if self.inputs.sort_filelist:
                         filelist = human_order_sorted(filelist)
-                    outputs[key] = list_to_filename(filelist)
+                    setattr(self.outputs, key, list_to_filename(filelist))
                 if self.inputs.download_files:
                     for f in filelist:
                         sftp.get(f, f)
@@ -2393,28 +2382,26 @@ class SSHDataGrabber(DataGrabber):
                             raise IOError(msg)
                         else:
                             warn(msg)
-                        outputs[key].append(None)
+                        getattr(self.outputs, key).append(None)
                     else:
                         if self.inputs.sort_filelist:
                             outfiles = human_order_sorted(outfiles)
-                        outputs[key].append(list_to_filename(outfiles))
+                        getattr(self.outputs, key).append(list_to_filename(outfiles))
                         if self.inputs.download_files:
                             for f in outfiles:
                                 try:
                                     sftp.get(os.path.join(filledtemplate_dir, f), f)
                                 except IOError:
                                     iflogger.info('remote file %s not found' % f)
-            if any([val is None for val in outputs[key]]):
-                outputs[key] = []
-            if len(outputs[key]) == 0:
-                outputs[key] = None
-            elif len(outputs[key]) == 1:
-                outputs[key] = outputs[key][0]
+            if any([val is None for val in getattr(self.outputs, key)]):
+                setattr(self.outputs, key, [])
+            if len(getattr(self.outputs, key)) == 0:
+                setattr(self.outputs, key, None)
+            elif len(getattr(self.outputs, key)) == 1:
+                setattr(self.outputs, key, getattr(self.outputs, key)[0])
 
         for k, v in list(outputs.items()):
-            outputs[k] = os.path.join(os.getcwd(), v)
-
-        return outputs
+            setattr(self.outputs, k, os.path.join(os.getcwd(), v))
 
     def _get_ssh_client(self):
         config = paramiko.SSHConfig()
@@ -2435,7 +2422,7 @@ class SSHDataGrabber(DataGrabber):
         return client
 
 
-class JSONFileGrabberInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
+class JSONFileGrabberInputSpec(DynamicTraitedSpec, BaseInputSpec):
     in_file = File(exists=True, desc='JSON source file')
     defaults = traits.Dict(desc=('JSON dictionary that sets default output'
                                  'values, overridden by values found in in_file'))
@@ -2464,11 +2451,11 @@ class JSONFileGrabber(IOBase):
 
 
     """
-    input_spec = JSONFileGrabberInputSpec
-    output_spec = DynamicTraitedSpec
+    _input_spec = JSONFileGrabberInputSpec
+    _output_spec = DynamicTraitedSpec
     _always_run = True
 
-    def _list_outputs(self):
+    def _post_run(self):
         import simplejson
 
         outputs = {}
@@ -2480,18 +2467,16 @@ class JSONFileGrabber(IOBase):
                 raise RuntimeError('JSON input has no dictionary structure')
 
             for key, value in data.items():
-                outputs[key] = value
+                setattr(self.outputs, key, value)
 
         if isdefined(self.inputs.defaults):
             defaults = self.inputs.defaults
             for key, value in defaults.items():
                 if key not in list(outputs.keys()):
-                    outputs[key] = value
-
-        return outputs
+                    setattr(self.outputs, key, value)
 
 
-class JSONFileSinkInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
+class JSONFileSinkInputSpec(DynamicTraitedSpec, BaseInputSpec):
     out_file = File(desc='JSON sink file')
     in_dict = traits.Dict(value={}, usedefault=True,
                           desc='input JSON dictionary')
@@ -2541,8 +2526,8 @@ class JSONFileSink(IOBase):
         >>> dictsink.run() # doctest: +SKIP
 
     """
-    input_spec = JSONFileSinkInputSpec
-    output_spec = JSONFileSinkOutputSpec
+    _input_spec = JSONFileSinkInputSpec
+    _output_spec = JSONFileSinkOutputSpec
 
     def __init__(self, infields=[], force_run=True, **inputs):
         super(JSONFileSink, self).__init__(**inputs)
@@ -2570,7 +2555,7 @@ class JSONFileSink(IOBase):
 
         return name, val
 
-    def _list_outputs(self):
+    def _post_run(self):
         import simplejson
         import os.path as op
 
@@ -2590,6 +2575,5 @@ class JSONFileSink(IOBase):
 
         with open(out_file, 'w') as f:
             simplejson.dump(out_dict, f)
-        outputs = self.output_spec().get()
-        outputs['out_file'] = out_file
-        return outputs
+
+        self.outputs.out_file = out_file

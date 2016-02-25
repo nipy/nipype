@@ -40,9 +40,6 @@ def test_FLIRT_inputs():
     echospacing=dict(argstr='-echospacing %f',
     min_ver='5.0.0',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
     fieldmap=dict(argstr='-fieldmap %s',
     min_ver='5.0.0',
     ),
@@ -53,9 +50,6 @@ def test_FLIRT_inputs():
     units='degrees',
     ),
     force_scaling=dict(argstr='-forcescaling',
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
     ),
     in_file=dict(argstr='-in %s',
     mandatory=True,
@@ -96,7 +90,8 @@ def test_FLIRT_inputs():
     name_template='%s_flirt.mat',
     position=3,
     ),
-    output_type=dict(),
+    output_type=dict(usedefault=True,
+    ),
     padding_size=dict(argstr='-paddingsize %d',
     units='voxels',
     ),
@@ -128,8 +123,6 @@ def test_FLIRT_inputs():
     ),
     sinc_window=dict(argstr='-sincwindow %s',
     ),
-    terminal_output=dict(nohash=True,
-    ),
     uses_qform=dict(argstr='-usesqform',
     ),
     verbose=dict(argstr='-verbose %d',
@@ -144,7 +137,7 @@ def test_FLIRT_inputs():
     min_ver='5.0.0',
     ),
     )
-    inputs = FLIRT.input_spec()
+    inputs = FLIRT._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -156,7 +149,7 @@ def test_FLIRT_outputs():
     out_log=dict(),
     out_matrix_file=dict(),
     )
-    outputs = FLIRT.output_spec()
+    outputs = FLIRT._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

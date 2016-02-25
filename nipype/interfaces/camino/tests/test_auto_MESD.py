@@ -8,14 +8,8 @@ def test_MESD_inputs():
     ),
     bgmask=dict(argstr='-bgmask %s',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
     fastmesd=dict(argstr='-fastmesd',
     requires=['mepointset'],
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
     ),
     in_file=dict(argstr='-inputfile %s',
     mandatory=True,
@@ -36,16 +30,14 @@ def test_MESD_inputs():
     units='NA',
     ),
     out_file=dict(argstr='> %s',
-    genfile=True,
     position=-1,
+    usedefault=True,
     ),
     scheme_file=dict(argstr='-schemefile %s',
     mandatory=True,
     ),
-    terminal_output=dict(nohash=True,
-    ),
     )
-    inputs = MESD.input_spec()
+    inputs = MESD._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -55,7 +47,7 @@ def test_MESD_inputs():
 def test_MESD_outputs():
     output_map = dict(mesd_data=dict(),
     )
-    outputs = MESD.output_spec()
+    outputs = MESD._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

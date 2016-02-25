@@ -23,13 +23,7 @@ def test_TrackBootstrap_inputs():
     data_dims=dict(argstr='-datadims %s',
     units='voxels',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
     gzip=dict(argstr='-gzip',
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
     ),
     in_file=dict(argstr='-inputfile %s',
     position=1,
@@ -72,8 +66,6 @@ def test_TrackBootstrap_inputs():
     stepsize=dict(argstr='-stepsize %f',
     requires=['tracker'],
     ),
-    terminal_output=dict(nohash=True,
-    ),
     tracker=dict(argstr='-tracker %s',
     usedefault=True,
     ),
@@ -81,7 +73,7 @@ def test_TrackBootstrap_inputs():
     units='mm',
     ),
     )
-    inputs = TrackBootstrap.input_spec()
+    inputs = TrackBootstrap._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -91,7 +83,7 @@ def test_TrackBootstrap_inputs():
 def test_TrackBootstrap_outputs():
     output_map = dict(tracked=dict(),
     )
-    outputs = TrackBootstrap.output_spec()
+    outputs = TrackBootstrap._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

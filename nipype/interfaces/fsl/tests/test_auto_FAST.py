@@ -6,18 +6,13 @@ from ..preprocess import FAST
 def test_FAST_inputs():
     input_map = dict(args=dict(argstr='%s',
     ),
+    bias_field=dict(),
     bias_iters=dict(argstr='-I %d',
     ),
     bias_lowpass=dict(argstr='-l %d',
     units='mm',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
     hyper=dict(argstr='-H %.2f',
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
     ),
     img_type=dict(argstr='-t %d',
     ),
@@ -36,35 +31,44 @@ def test_FAST_inputs():
     ),
     mixel_smooth=dict(argstr='-R %.2f',
     ),
+    mixeltype=dict(),
     no_bias=dict(argstr='-N',
     ),
     no_pve=dict(argstr='--nopve',
     ),
     number_classes=dict(argstr='-n %d',
+    usedefault=True,
     ),
     other_priors=dict(argstr='-A %s',
     ),
     out_basename=dict(argstr='-o %s',
+    keep_extension=False,
     ),
     output_biascorrected=dict(argstr='-B',
     ),
     output_biasfield=dict(argstr='-b',
     ),
-    output_type=dict(),
+    output_type=dict(usedefault=True,
+    ),
+    partial_volume_files=dict(),
+    partial_volume_map=dict(),
     probability_maps=dict(argstr='-p',
     ),
+    probability_maps_files=dict(output_name='probability_maps',
+    ),
+    restored_image=dict(),
     segment_iters=dict(argstr='-W %d',
     ),
     segments=dict(argstr='-g',
     ),
-    terminal_output=dict(nohash=True,
-    ),
+    tissue_class_files=dict(),
+    tissue_class_map=dict(),
     use_priors=dict(argstr='-P',
     ),
     verbose=dict(argstr='-v',
     ),
     )
-    inputs = FAST.input_spec()
+    inputs = FAST._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -81,7 +85,7 @@ def test_FAST_outputs():
     tissue_class_files=dict(),
     tissue_class_map=dict(),
     )
-    outputs = FAST.output_spec()
+    outputs = FAST._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

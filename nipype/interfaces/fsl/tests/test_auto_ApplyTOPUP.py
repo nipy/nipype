@@ -11,12 +11,6 @@ def test_ApplyTOPUP_inputs():
     encoding_file=dict(argstr='--datain=%s',
     mandatory=True,
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     in_files=dict(argstr='--imain=%s',
     mandatory=True,
     sep=',',
@@ -37,14 +31,11 @@ def test_ApplyTOPUP_inputs():
     method=dict(argstr='--method=%s',
     ),
     out_corrected=dict(argstr='--out=%s',
-    name_source=['in_files'],
-    name_template='%s_corrected',
     ),
-    output_type=dict(),
-    terminal_output=dict(nohash=True,
+    output_type=dict(usedefault=True,
     ),
     )
-    inputs = ApplyTOPUP.input_spec()
+    inputs = ApplyTOPUP._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -54,7 +45,7 @@ def test_ApplyTOPUP_inputs():
 def test_ApplyTOPUP_outputs():
     output_map = dict(out_corrected=dict(),
     )
-    outputs = ApplyTOPUP.output_spec()
+    outputs = ApplyTOPUP._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

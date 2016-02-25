@@ -11,12 +11,6 @@ def test_JacobianDeterminant_inputs():
     position=0,
     usedefault=False,
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     norm_by_total=dict(argstr='%d',
     position=5,
     ),
@@ -35,8 +29,6 @@ def test_JacobianDeterminant_inputs():
     template_mask=dict(argstr='%s',
     position=4,
     ),
-    terminal_output=dict(nohash=True,
-    ),
     use_log=dict(argstr='%d',
     position=3,
     ),
@@ -45,7 +37,7 @@ def test_JacobianDeterminant_inputs():
     position=1,
     ),
     )
-    inputs = JacobianDeterminant.input_spec()
+    inputs = JacobianDeterminant._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -55,7 +47,7 @@ def test_JacobianDeterminant_inputs():
 def test_JacobianDeterminant_outputs():
     output_map = dict(jacobian_image=dict(),
     )
-    outputs = JacobianDeterminant.output_spec()
+    outputs = JacobianDeterminant._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

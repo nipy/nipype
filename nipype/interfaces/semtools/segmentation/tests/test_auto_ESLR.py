@@ -8,13 +8,7 @@ def test_ESLR_inputs():
     ),
     closingSize=dict(argstr='--closingSize %d',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
     high=dict(argstr='--high %d',
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
     ),
     inputVolume=dict(argstr='--inputVolume %s',
     ),
@@ -31,10 +25,8 @@ def test_ESLR_inputs():
     ),
     safetySize=dict(argstr='--safetySize %d',
     ),
-    terminal_output=dict(nohash=True,
-    ),
     )
-    inputs = ESLR.input_spec()
+    inputs = ESLR._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -44,7 +36,7 @@ def test_ESLR_inputs():
 def test_ESLR_outputs():
     output_map = dict(outputVolume=dict(),
     )
-    outputs = ESLR.output_spec()
+    outputs = ESLR._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

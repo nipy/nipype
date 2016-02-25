@@ -9,12 +9,6 @@ def test_MedianFilter3D_inputs():
     debug=dict(argstr='-debug',
     position=1,
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     in_file=dict(argstr='%s',
     mandatory=True,
     position=-2,
@@ -26,10 +20,8 @@ def test_MedianFilter3D_inputs():
     quiet=dict(argstr='-quiet',
     position=1,
     ),
-    terminal_output=dict(nohash=True,
-    ),
     )
-    inputs = MedianFilter3D.input_spec()
+    inputs = MedianFilter3D._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -39,7 +31,7 @@ def test_MedianFilter3D_inputs():
 def test_MedianFilter3D_outputs():
     output_map = dict(out_file=dict(),
     )
-    outputs = MedianFilter3D.output_spec()
+    outputs = MedianFilter3D._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

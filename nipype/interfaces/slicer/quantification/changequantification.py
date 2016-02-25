@@ -43,7 +43,7 @@ acknowledgements:
 
 """
 
-    input_spec = IntensityDifferenceMetricInputSpec
-    output_spec = IntensityDifferenceMetricOutputSpec
+    _input_spec = IntensityDifferenceMetricInputSpec
+    _output_spec = IntensityDifferenceMetricOutputSpec
     _cmd = "IntensityDifferenceMetric "
     _outputs_filenames = {'outputVolume': 'outputVolume.nii', 'reportFileName': 'reportFileName'}

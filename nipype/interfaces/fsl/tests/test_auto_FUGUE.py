@@ -16,9 +16,6 @@ def test_FUGUE_inputs():
     ),
     dwell_to_asym_ratio=dict(argstr='--dwelltoasym=%.10f',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
     fmap_in_file=dict(argstr='--loadfmap=%s',
     ),
     fmap_out_file=dict(argstr='--savefmap=%s',
@@ -33,9 +30,6 @@ def test_FUGUE_inputs():
     icorr_only=dict(argstr='--icorronly',
     requires=['unwarped_file'],
     ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     in_file=dict(argstr='--in=%s',
     ),
     mask_file=dict(argstr='--mask=%s',
@@ -48,7 +42,8 @@ def test_FUGUE_inputs():
     ),
     nokspace=dict(argstr='--nokspace',
     ),
-    output_type=dict(),
+    output_type=dict(usedefault=True,
+    ),
     pava=dict(argstr='--pava',
     ),
     phase_conjugate=dict(argstr='--phaseconj',
@@ -57,9 +52,11 @@ def test_FUGUE_inputs():
     ),
     poly_order=dict(argstr='--poly=%d',
     ),
-    save_fmap=dict(xor=['save_unmasked_fmap'],
+    save_fmap=dict(usedefault=True,
+    xor=['save_unmasked_fmap'],
     ),
-    save_shift=dict(xor=['save_unmasked_shift'],
+    save_shift=dict(usedefault=True,
+    xor=['save_unmasked_shift'],
     ),
     save_unmasked_fmap=dict(argstr='--unmaskfmap',
     xor=['save_fmap'],
@@ -75,8 +72,6 @@ def test_FUGUE_inputs():
     ),
     smooth3d=dict(argstr='--smooth3=%.2f',
     ),
-    terminal_output=dict(nohash=True,
-    ),
     unwarp_direction=dict(argstr='--unwarpdir=%s',
     ),
     unwarped_file=dict(argstr='--unwarp=%s',
@@ -88,7 +83,7 @@ def test_FUGUE_inputs():
     xor=['unwarped_file'],
     ),
     )
-    inputs = FUGUE.input_spec()
+    inputs = FUGUE._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -101,7 +96,7 @@ def test_FUGUE_outputs():
     unwarped_file=dict(),
     warped_file=dict(),
     )
-    outputs = FUGUE.output_spec()
+    outputs = FUGUE._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

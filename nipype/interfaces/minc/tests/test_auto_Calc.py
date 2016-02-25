@@ -17,9 +17,6 @@ def test_Calc_inputs():
     ),
     debug=dict(argstr='-debug',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
     eval_width=dict(argstr='-eval_width %s',
     usedefault=False,
     ),
@@ -62,9 +59,6 @@ def test_Calc_inputs():
     format_unsigned=dict(argstr='-unsigned',
     xor=('format_filetype', 'format_byte', 'format_short', 'format_int', 'format_long', 'format_float', 'format_double', 'format_signed', 'format_unsigned'),
     ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     ignore_nan=dict(argstr='-ignore_nan',
     ),
     input_files=dict(argstr='%s',
@@ -104,8 +98,6 @@ def test_Calc_inputs():
     quiet=dict(argstr='-quiet',
     xor=('verbose', 'quiet'),
     ),
-    terminal_output=dict(nohash=True,
-    ),
     two=dict(argstr='-2',
     ),
     verbose=dict(argstr='-verbose',
@@ -114,7 +106,7 @@ def test_Calc_inputs():
     voxel_range=dict(argstr='-range %d %d',
     ),
     )
-    inputs = Calc.input_spec()
+    inputs = Calc._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -124,7 +116,7 @@ def test_Calc_inputs():
 def test_Calc_outputs():
     output_map = dict(output_file=dict(),
     )
-    outputs = Calc.output_spec()
+    outputs = Calc._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

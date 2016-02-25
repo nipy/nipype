@@ -13,12 +13,6 @@ def test_XfmAvg_inputs():
     clobber=dict(argstr='-clobber',
     usedefault=True,
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     ignore_linear=dict(argstr='-ignore_linear',
     ),
     ignore_nonlinear=dict(argstr='-ignore_nonline',
@@ -34,12 +28,10 @@ def test_XfmAvg_inputs():
     genfile=True,
     position=-1,
     ),
-    terminal_output=dict(nohash=True,
-    ),
     verbose=dict(argstr='-verbose',
     ),
     )
-    inputs = XfmAvg.input_spec()
+    inputs = XfmAvg._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -50,7 +42,7 @@ def test_XfmAvg_outputs():
     output_map = dict(output_file=dict(),
     output_grid=dict(),
     )
-    outputs = XfmAvg.output_spec()
+    outputs = XfmAvg._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

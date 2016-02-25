@@ -8,12 +8,6 @@ def test_gtractCostFastMarching_inputs():
     ),
     args=dict(argstr='%s',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     inputAnisotropyVolume=dict(argstr='--inputAnisotropyVolume %s',
     ),
     inputStartingSeedsLabelMapVolume=dict(argstr='--inputStartingSeedsLabelMapVolume %s',
@@ -34,10 +28,8 @@ def test_gtractCostFastMarching_inputs():
     ),
     stoppingValue=dict(argstr='--stoppingValue %f',
     ),
-    terminal_output=dict(nohash=True,
-    ),
     )
-    inputs = gtractCostFastMarching.input_spec()
+    inputs = gtractCostFastMarching._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -48,7 +40,7 @@ def test_gtractCostFastMarching_outputs():
     output_map = dict(outputCostVolume=dict(),
     outputSpeedVolume=dict(),
     )
-    outputs = gtractCostFastMarching.output_spec()
+    outputs = gtractCostFastMarching._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

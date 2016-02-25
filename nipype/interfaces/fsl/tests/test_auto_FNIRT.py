@@ -28,18 +28,12 @@ def test_FNIRT_inputs():
     ),
     derive_from_ref=dict(argstr='--refderiv',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
     field_file=dict(argstr='--fout=%s',
     hash_files=False,
     ),
     fieldcoeff_file=dict(argstr='--cout=%s',
     ),
     hessian_precision=dict(argstr='--numprec=%s',
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
     ),
     in_file=dict(argstr='--in=%s',
     mandatory=True,
@@ -77,7 +71,8 @@ def test_FNIRT_inputs():
     out_intensitymap_file=dict(argstr='--intout=%s',
     hash_files=False,
     ),
-    output_type=dict(),
+    output_type=dict(usedefault=True,
+    ),
     ref_file=dict(argstr='--ref=%s',
     mandatory=True,
     ),
@@ -113,8 +108,6 @@ def test_FNIRT_inputs():
     subsampling_scheme=dict(argstr='--subsamp=%s',
     sep=',',
     ),
-    terminal_output=dict(nohash=True,
-    ),
     warp_resolution=dict(argstr='--warpres=%d,%d,%d',
     ),
     warped_file=dict(argstr='--iout=%s',
@@ -122,7 +115,7 @@ def test_FNIRT_inputs():
     hash_files=False,
     ),
     )
-    inputs = FNIRT.input_spec()
+    inputs = FNIRT._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -138,7 +131,7 @@ def test_FNIRT_outputs():
     out_intensitymap_file=dict(),
     warped_file=dict(),
     )
-    outputs = FNIRT.output_spec()
+    outputs = FNIRT._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

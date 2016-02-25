@@ -11,9 +11,6 @@ def test_Coregister_inputs():
     ),
     fwhm=dict(field='eoptions.fwhm',
     ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     jobtype=dict(usedefault=True,
     ),
     matlab_cmd=dict(),
@@ -46,7 +43,7 @@ def test_Coregister_inputs():
     write_wrap=dict(field='roptions.wrap',
     ),
     )
-    inputs = Coregister.input_spec()
+    inputs = Coregister._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -57,7 +54,7 @@ def test_Coregister_outputs():
     output_map = dict(coregistered_files=dict(),
     coregistered_source=dict(),
     )
-    outputs = Coregister.output_spec()
+    outputs = Coregister._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

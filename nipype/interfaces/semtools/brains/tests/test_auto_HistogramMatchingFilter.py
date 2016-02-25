@@ -6,13 +6,7 @@ from ..utilities import HistogramMatchingFilter
 def test_HistogramMatchingFilter_inputs():
     input_map = dict(args=dict(argstr='%s',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
     histogramAlgorithm=dict(argstr='--histogramAlgorithm %s',
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
     ),
     inputBinaryVolume=dict(argstr='--inputBinaryVolume %s',
     ),
@@ -29,14 +23,12 @@ def test_HistogramMatchingFilter_inputs():
     ),
     referenceVolume=dict(argstr='--referenceVolume %s',
     ),
-    terminal_output=dict(nohash=True,
-    ),
     verbose=dict(argstr='--verbose ',
     ),
     writeHistogram=dict(argstr='--writeHistogram %s',
     ),
     )
-    inputs = HistogramMatchingFilter.input_spec()
+    inputs = HistogramMatchingFilter._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -46,7 +38,7 @@ def test_HistogramMatchingFilter_inputs():
 def test_HistogramMatchingFilter_outputs():
     output_map = dict(outputVolume=dict(),
     )
-    outputs = HistogramMatchingFilter.output_spec()
+    outputs = HistogramMatchingFilter._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

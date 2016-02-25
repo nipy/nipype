@@ -16,12 +16,6 @@ def test_Norm_inputs():
     max=100,
     min=0,
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     input_file=dict(argstr='%s',
     mandatory=True,
     position=-2,
@@ -46,8 +40,6 @@ def test_Norm_inputs():
     name_source=['input_file'],
     name_template='%s_norm_threshold_mask.mnc',
     ),
-    terminal_output=dict(nohash=True,
-    ),
     threshold=dict(argstr='-threshold',
     ),
     threshold_blur=dict(argstr='-threshold_blur %s',
@@ -61,7 +53,7 @@ def test_Norm_inputs():
     upper=dict(argstr='-upper %s',
     ),
     )
-    inputs = Norm.input_spec()
+    inputs = Norm._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -72,7 +64,7 @@ def test_Norm_outputs():
     output_map = dict(output_file=dict(),
     output_threshold_mask=dict(),
     )
-    outputs = Norm.output_spec()
+    outputs = Norm._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

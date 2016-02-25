@@ -10,9 +10,6 @@ def test_RobustRegister_inputs():
     mandatory=True,
     xor=['outlier_sens'],
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
     est_int_scale=dict(argstr='--iscale',
     ),
     force_double=dict(argstr='--doubleprec',
@@ -30,9 +27,6 @@ def test_RobustRegister_inputs():
     half_weights=dict(argstr='--halfweights %s',
     ),
     high_iterations=dict(argstr='--highit %d',
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
     ),
     in_xfm_file=dict(argstr='--transform',
     ),
@@ -72,8 +66,6 @@ def test_RobustRegister_inputs():
     target_file=dict(argstr='--dst %s',
     mandatory=True,
     ),
-    terminal_output=dict(nohash=True,
-    ),
     trans_only=dict(argstr='--transonly',
     ),
     weights_file=dict(argstr='--weights %s',
@@ -81,7 +73,7 @@ def test_RobustRegister_inputs():
     write_vo2vox=dict(argstr='--vox2vox',
     ),
     )
-    inputs = RobustRegister.input_spec()
+    inputs = RobustRegister._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -98,7 +90,7 @@ def test_RobustRegister_outputs():
     registered_file=dict(),
     weights_file=dict(),
     )
-    outputs = RobustRegister.output_spec()
+    outputs = RobustRegister._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

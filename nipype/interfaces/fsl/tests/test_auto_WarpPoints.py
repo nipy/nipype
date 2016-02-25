@@ -15,12 +15,6 @@ def test_WarpPoints_inputs():
     dest_file=dict(argstr='-dest %s',
     mandatory=True,
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     in_coords=dict(argstr='%s',
     mandatory=True,
     position=-1,
@@ -32,8 +26,6 @@ def test_WarpPoints_inputs():
     src_file=dict(argstr='-src %s',
     mandatory=True,
     ),
-    terminal_output=dict(nohash=True,
-    ),
     warp_file=dict(argstr='-warp %s',
     xor=['xfm_file'],
     ),
@@ -41,7 +33,7 @@ def test_WarpPoints_inputs():
     xor=['warp_file'],
     ),
     )
-    inputs = WarpPoints.input_spec()
+    inputs = WarpPoints._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -51,7 +43,7 @@ def test_WarpPoints_inputs():
 def test_WarpPoints_outputs():
     output_map = dict(out_file=dict(),
     )
-    outputs = WarpPoints.output_spec()
+    outputs = WarpPoints._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

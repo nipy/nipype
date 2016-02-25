@@ -21,10 +21,11 @@ from builtins import zip
 
 from .. import logging
 from ..external.six import string_types
-from ..interfaces.base import (BaseInterface, traits, TraitedSpec, File,
-                               BaseInterfaceInputSpec)
+from ..interfaces.base import (traits, File, GenFile, BaseInterface, BaseInputSpec,
+                               TraitedSpec)
 from ..interfaces.vtkbase import tvtk
 from ..interfaces import vtkbase as VTKInfo
+
 IFLOGGER = logging.getLogger('interface')
 
 
@@ -39,16 +40,15 @@ class TVTKBaseInterface(BaseInterface):
         super(TVTKBaseInterface, self).__init__(**inputs)
 
 
-class WarpPointsInputSpec(BaseInterfaceInputSpec):
+class WarpPointsInputSpec(BaseInputSpec):
     points = File(exists=True, mandatory=True,
                   desc='file containing the point set')
     warp = File(exists=True, mandatory=True,
                 desc='dense deformation field to be applied')
     interp = traits.Enum('cubic', 'nearest', 'linear', usedefault=True,
                          mandatory=True, desc='interpolation')
-    out_points = File(name_source='points', name_template='%s_warped',
-                      output_name='out_points', keep_extension=True,
-                      desc='the warped point set')
+    out_points = GenFile(template='{points}_warped', keep_extension=True,
+                         desc='the warped point set')
 
 
 class WarpPointsOutputSpec(TraitedSpec):
@@ -72,22 +72,8 @@ class WarpPoints(TVTKBaseInterface):
         res = wp.run()
 
     """
-    input_spec = WarpPointsInputSpec
-    output_spec = WarpPointsOutputSpec
-
-    def _gen_fname(self, in_file, suffix='generated', ext=None):
-        fname, fext = op.splitext(op.basename(in_file))
-
-        if fext == '.gz':
-            fname, fext2 = op.splitext(fname)
-            fext = fext2 + fext
-
-        if ext is None:
-            ext = fext
-
-        if ext[0] == '.':
-            ext = ext[1:]
-        return op.abspath('%s_%s.%s' % (fname, suffix, ext))
+    _input_spec = WarpPointsInputSpec
+    _output_spec = WarpPointsOutputSpec
 
     def _run_interface(self, runtime):
         import nibabel as nb
@@ -122,19 +108,14 @@ class WarpPoints(TVTKBaseInterface):
         newpoints = [p + d for p, d in zip(points, disps)]
         mesh.points = newpoints
         w = tvtk.PolyDataWriter()
+
         VTKInfo.configure_input_data(w, mesh)
-        w.file_name = self._gen_fname(self.inputs.points, suffix='warped', ext='.vtk')
+        w.file_name = self.inputs.out_points
         w.write()
         return runtime
 
-    def _list_outputs(self):
-        outputs = self._outputs().get()
-        outputs['out_points'] = self._gen_fname(self.inputs.points, suffix='warped',
-                                                ext='.vtk')
-        return outputs
 
-
-class ComputeMeshWarpInputSpec(BaseInterfaceInputSpec):
+class ComputeMeshWarpInputSpec(BaseInputSpec):
     surface1 = File(exists=True, mandatory=True,
                     desc=('Reference surface (vtk format) to which compute '
                           'distance.'))
@@ -184,8 +165,8 @@ class ComputeMeshWarp(TVTKBaseInterface):
 
     """
 
-    input_spec = ComputeMeshWarpInputSpec
-    output_spec = ComputeMeshWarpOutputSpec
+    _input_spec = ComputeMeshWarpInputSpec
+    _output_spec = ComputeMeshWarpOutputSpec
 
     def _triangle_area(self, A, B, C):
         A = np.array(A)
@@ -248,18 +229,15 @@ class ComputeMeshWarp(TVTKBaseInterface):
         VTKInfo.configure_input_data(writer, out_mesh)
         writer.write()
 
-        self._distance = np.average(errvector, weights=weights)
+        _distance = np.average(errvector, weights=weights)
+
+        self.outputs.out_file = op.abspath(self.inputs.out_file)
+        self.outputs.out_warp = op.abspath(self.inputs.out_warp)
+        self.outputs.distance = _distance
         return runtime
 
-    def _list_outputs(self):
-        outputs = self._outputs().get()
-        outputs['out_file'] = op.abspath(self.inputs.out_file)
-        outputs['out_warp'] = op.abspath(self.inputs.out_warp)
-        outputs['distance'] = self._distance
-        return outputs
 
-
-class MeshWarpMathsInputSpec(BaseInterfaceInputSpec):
+class MeshWarpMathsInputSpec(BaseInputSpec):
     in_surf = File(exists=True, mandatory=True,
                    desc=('Input surface in vtk format, with associated warp '
                          'field as point data (ie. from ComputeMeshWarp'))
@@ -273,18 +251,16 @@ class MeshWarpMathsInputSpec(BaseInterfaceInputSpec):
     operation = traits.Enum('sum', 'sub', 'mul', 'div', usedefault=True,
                             desc='operation to be performed')
 
-    out_warp = File('warp_maths.vtk', usedefault=True,
-                    desc='vtk file based on in_surf and warpings mapping it '
-                    'to out_file')
-    out_file = File('warped_surf.vtk', usedefault=True,
+    out_warp = GenFile(template='{in_surf}_warping', keep_extension=True,
+                       desc='vtk file based on in_surf and warpings mapping it to out_file')
+    out_file = File(template='{in_surf}_warped', keep_extension=True,
                     desc='vtk with surface warped')
 
 
 class MeshWarpMathsOutputSpec(TraitedSpec):
     out_warp = File(exists=True, desc=('vtk file with the vertex-wise '
                                        'mapping of surface1 to surface2'))
-    out_file = File(exists=True,
-                    desc='vtk with surface warped')
+    out_file = File(exists=True, desc='vtk with surface warped')
 
 
 class MeshWarpMaths(TVTKBaseInterface):
@@ -309,8 +285,8 @@ class MeshWarpMaths(TVTKBaseInterface):
 
     """
 
-    input_spec = MeshWarpMathsInputSpec
-    output_spec = MeshWarpMathsOutputSpec
+    _input_spec = MeshWarpMathsInputSpec
+    _output_spec = MeshWarpMathsOutputSpec
 
     def _run_interface(self, runtime):
         r1 = tvtk.PolyDataReader(file_name=self.inputs.in_surf)
@@ -369,12 +345,6 @@ class MeshWarpMaths(TVTKBaseInterface):
         VTKInfo.configure_input_data(writer, vtk1)
         writer.write()
         return runtime
-
-    def _list_outputs(self):
-        outputs = self._outputs().get()
-        outputs['out_file'] = op.abspath(self.inputs.out_file)
-        outputs['out_warp'] = op.abspath(self.inputs.out_warp)
-        return outputs
 
 
 class P2PDistance(ComputeMeshWarp):

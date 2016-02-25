@@ -12,12 +12,6 @@ def test_DWI2Tensor_inputs():
     encoding_file=dict(argstr='-grad %s',
     position=2,
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     ignore_slice_by_volume=dict(argstr='-ignoreslices %s',
     position=2,
     sep=' ',
@@ -39,10 +33,8 @@ def test_DWI2Tensor_inputs():
     quiet=dict(argstr='-quiet',
     position=1,
     ),
-    terminal_output=dict(nohash=True,
-    ),
     )
-    inputs = DWI2Tensor.input_spec()
+    inputs = DWI2Tensor._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -52,7 +44,7 @@ def test_DWI2Tensor_inputs():
 def test_DWI2Tensor_outputs():
     output_map = dict(tensor=dict(),
     )
-    outputs = DWI2Tensor.output_spec()
+    outputs = DWI2Tensor._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

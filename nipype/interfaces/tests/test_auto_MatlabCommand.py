@@ -6,12 +6,6 @@ from ..matlab import MatlabCommand
 def test_MatlabCommand_inputs():
     input_map = dict(args=dict(argstr='%s',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     logfile=dict(argstr='-logfile %s',
     ),
     mfile=dict(usedefault=True,
@@ -38,15 +32,21 @@ def test_MatlabCommand_inputs():
     single_comp_thread=dict(argstr='-singleCompThread',
     nohash=True,
     ),
-    terminal_output=dict(nohash=True,
-    ),
     uses_mcr=dict(nohash=True,
     xor=['nodesktop', 'nosplash', 'single_comp_thread'],
     ),
     )
-    inputs = MatlabCommand.input_spec()
+    inputs = MatlabCommand._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
             yield assert_equal, getattr(inputs.traits()[key], metakey), value
 
+
+def test_MatlabCommand_outputs():
+    output_map = dict()
+    outputs = MatlabCommand._output_spec()
+
+    for key, metadata in list(output_map.items()):
+        for metakey, value in list(metadata.items()):
+            yield assert_equal, getattr(outputs.traits()[key], metakey), value

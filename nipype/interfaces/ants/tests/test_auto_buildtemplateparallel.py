@@ -12,13 +12,7 @@ def test_buildtemplateparallel_inputs():
     position=1,
     usedefault=True,
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
     gradient_step_size=dict(argstr='-g %f',
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
     ),
     in_files=dict(argstr='%s',
     mandatory=True,
@@ -46,14 +40,12 @@ def test_buildtemplateparallel_inputs():
     ),
     similarity_metric=dict(argstr='-s %s',
     ),
-    terminal_output=dict(nohash=True,
-    ),
     transformation_model=dict(argstr='-t %s',
     usedefault=True,
     ),
     use_first_as_target=dict(),
     )
-    inputs = buildtemplateparallel.input_spec()
+    inputs = buildtemplateparallel._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -65,7 +57,7 @@ def test_buildtemplateparallel_outputs():
     subject_outfiles=dict(),
     template_files=dict(),
     )
-    outputs = buildtemplateparallel.output_spec()
+    outputs = buildtemplateparallel._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

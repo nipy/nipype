@@ -10,15 +10,9 @@ def test_gtractCoregBvalues_inputs():
     ),
     eddyCurrentCorrection=dict(argstr='--eddyCurrentCorrection ',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
     fixedVolume=dict(argstr='--fixedVolume %s',
     ),
     fixedVolumeIndex=dict(argstr='--fixedVolumeIndex %d',
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
     ),
     maximumStepSize=dict(argstr='--maximumStepSize %f',
     ),
@@ -46,10 +40,8 @@ def test_gtractCoregBvalues_inputs():
     ),
     spatialScale=dict(argstr='--spatialScale %f',
     ),
-    terminal_output=dict(nohash=True,
-    ),
     )
-    inputs = gtractCoregBvalues.input_spec()
+    inputs = gtractCoregBvalues._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -60,7 +52,7 @@ def test_gtractCoregBvalues_outputs():
     output_map = dict(outputTransform=dict(),
     outputVolume=dict(),
     )
-    outputs = gtractCoregBvalues.output_spec()
+    outputs = gtractCoregBvalues._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

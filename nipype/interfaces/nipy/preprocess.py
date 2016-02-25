@@ -27,11 +27,11 @@ else:
     nipy_version = nipy.__version__
 
 from ..base import (TraitedSpec, BaseInterface, traits,
-                    BaseInterfaceInputSpec, isdefined, File,
+                    BaseInputSpec, isdefined, File,
                     InputMultiPath, OutputMultiPath)
 
 
-class ComputeMaskInputSpec(BaseInterfaceInputSpec):
+class ComputeMaskInputSpec(BaseInputSpec):
     mean_volume = File(exists=True, mandatory=True,
                        desc="mean EPI image, used to compute the threshold for the mask")
     reference_volume = File(exists=True,
@@ -47,14 +47,14 @@ class ComputeMaskOutputSpec(TraitedSpec):
 
 
 class ComputeMask(BaseInterface):
-    input_spec = ComputeMaskInputSpec
-    output_spec = ComputeMaskOutputSpec
+    _input_spec = ComputeMaskInputSpec
+    _output_spec = ComputeMaskOutputSpec
 
     def _run_interface(self, runtime):
         from nipy.labs.mask import compute_mask
         args = {}
         for key in [k for k, _ in list(self.inputs.items())
-                    if k not in BaseInterfaceInputSpec().trait_names()]:
+                    if k not in BaseInputSpec().trait_names()]:
             value = getattr(self.inputs, key)
             if isdefined(value):
                 if key in ['mean_volume', 'reference_volume']:
@@ -70,13 +70,11 @@ class ComputeMask(BaseInterface):
 
         return runtime
 
-    def _list_outputs(self):
-        outputs = self._outputs().get()
-        outputs["brain_mask"] = self._brain_mask_path
-        return outputs
+    def _post_run(self):
+        self.outputs.brain_mask = self._brain_mask_path
+        
 
-
-class FmriRealign4dInputSpec(BaseInterfaceInputSpec):
+class FmriRealign4dInputSpec(BaseInputSpec):
 
     in_file = InputMultiPath(File(exists=True),
                              mandatory=True,
@@ -142,8 +140,8 @@ class FmriRealign4d(BaseInterface):
 
     """
 
-    input_spec = FmriRealign4dInputSpec
-    output_spec = FmriRealign4dOutputSpec
+    _input_spec = FmriRealign4dInputSpec
+    _output_spec = FmriRealign4dOutputSpec
     keywords = ['slice timing', 'motion correction']
 
     def _run_interface(self, runtime):
@@ -190,14 +188,12 @@ class FmriRealign4d(BaseInterface):
 
         return runtime
 
-    def _list_outputs(self):
-        outputs = self._outputs().get()
-        outputs['out_file'] = self._out_file_path
-        outputs['par_file'] = self._par_file_path
-        return outputs
+    def _post_run(self):
+        self.outputs.out_file = self._out_file_path
+        self.outputs.par_file = self._par_file_path
+        
 
-
-class SpaceTimeRealignerInputSpec(BaseInterfaceInputSpec):
+class SpaceTimeRealignerInputSpec(BaseInputSpec):
 
     in_file = InputMultiPath(File(exists=True),
                              mandatory=True, min_ver='0.4.0.dev',
@@ -271,8 +267,8 @@ class SpaceTimeRealigner(BaseInterface):
 
     """
 
-    input_spec = SpaceTimeRealignerInputSpec
-    output_spec = SpaceTimeRealignerOutputSpec
+    _input_spec = SpaceTimeRealignerInputSpec
+    _output_spec = SpaceTimeRealignerOutputSpec
     keywords = ['slice timing', 'motion correction']
 
     @property
@@ -321,14 +317,12 @@ class SpaceTimeRealigner(BaseInterface):
 
         return runtime
 
-    def _list_outputs(self):
-        outputs = self._outputs().get()
-        outputs['out_file'] = self._out_file_path
-        outputs['par_file'] = self._par_file_path
-        return outputs
+    def _post_run(self):
+        self.outputs.out_file = self._out_file_path
+        self.outputs.par_file = self._par_file_path
+        
 
-
-class TrimInputSpec(BaseInterfaceInputSpec):
+class TrimInputSpec(BaseInputSpec):
     in_file = File(
         exists=True, mandatory=True,
         desc="EPI image to trim")
@@ -361,11 +355,11 @@ class Trim(BaseInterface):
 
     """
 
-    input_spec = TrimInputSpec
-    output_spec = TrimOutputSpec
+    _input_spec = TrimInputSpec
+    _output_spec = TrimOutputSpec
 
     def _run_interface(self, runtime):
-        out_file = self._list_outputs()['out_file']
+        out_file = self.outputs.out_file
         nii = nb.load(self.inputs.in_file)
         if self.inputs.end_index == 0:
             s = slice(self.inputs.begin_index, nii.shape[3])
@@ -375,13 +369,13 @@ class Trim(BaseInterface):
         nb.save(nii2, out_file)
         return runtime
 
-    def _list_outputs(self):
-        outputs = self.output_spec().get()
-        outputs['out_file'] = self.inputs.out_file
-        if not isdefined(outputs['out_file']):
-            outputs['out_file'] = fname_presuffix(
+    def _post_run(self):
+        
+        self.outputs.out_file = self.inputs.out_file
+        if not isdefined(self.outputs.out_file):
+            self.outputs.out_file = fname_presuffix(
                 self.inputs.in_file,
                 newpath=os.getcwd(),
                 suffix=self.inputs.suffix)
-        outputs['out_file'] = os.path.abspath(outputs['out_file'])
-        return outputs
+        self.outputs.out_file = os.path.abspath(self.outputs.out_file)
+        

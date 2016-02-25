@@ -6,12 +6,6 @@ from ..developer import JistBrainMp2rageDuraEstimation
 def test_JistBrainMp2rageDuraEstimation_inputs():
     input_map = dict(args=dict(argstr='%s',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     inDistance=dict(argstr='--inDistance %f',
     ),
     inSecond=dict(argstr='--inSecond %s',
@@ -25,8 +19,6 @@ def test_JistBrainMp2rageDuraEstimation_inputs():
     outDura=dict(argstr='--outDura %s',
     hash_files=False,
     ),
-    terminal_output=dict(nohash=True,
-    ),
     xDefaultMem=dict(argstr='-xDefaultMem %d',
     ),
     xMaxProcess=dict(argstr='-xMaxProcess %d',
@@ -35,7 +27,7 @@ def test_JistBrainMp2rageDuraEstimation_inputs():
     xPrefExt=dict(argstr='--xPrefExt %s',
     ),
     )
-    inputs = JistBrainMp2rageDuraEstimation.input_spec()
+    inputs = JistBrainMp2rageDuraEstimation._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -45,7 +37,7 @@ def test_JistBrainMp2rageDuraEstimation_inputs():
 def test_JistBrainMp2rageDuraEstimation_outputs():
     output_map = dict(outDura=dict(),
     )
-    outputs = JistBrainMp2rageDuraEstimation.output_spec()
+    outputs = JistBrainMp2rageDuraEstimation._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

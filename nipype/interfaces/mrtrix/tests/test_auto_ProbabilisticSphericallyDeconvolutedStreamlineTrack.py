@@ -13,9 +13,6 @@ def test_ProbabilisticSphericallyDeconvolutedStreamlineTrack_inputs():
     ),
     do_not_precompute=dict(argstr='-noprecomputed',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
     exclude_file=dict(argstr='-exclude %s',
     xor=['exclude_file', 'exclude_spec'],
     ),
@@ -24,9 +21,6 @@ def test_ProbabilisticSphericallyDeconvolutedStreamlineTrack_inputs():
     sep=',',
     units='mm',
     xor=['exclude_file', 'exclude_spec'],
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
     ),
     in_file=dict(argstr='%s',
     mandatory=True,
@@ -95,12 +89,10 @@ def test_ProbabilisticSphericallyDeconvolutedStreamlineTrack_inputs():
     ),
     stop=dict(argstr='-stop',
     ),
-    terminal_output=dict(nohash=True,
-    ),
     unidirectional=dict(argstr='-unidirectional',
     ),
     )
-    inputs = ProbabilisticSphericallyDeconvolutedStreamlineTrack.input_spec()
+    inputs = ProbabilisticSphericallyDeconvolutedStreamlineTrack._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -110,7 +102,7 @@ def test_ProbabilisticSphericallyDeconvolutedStreamlineTrack_inputs():
 def test_ProbabilisticSphericallyDeconvolutedStreamlineTrack_outputs():
     output_map = dict(tracked=dict(),
     )
-    outputs = ProbabilisticSphericallyDeconvolutedStreamlineTrack.output_spec()
+    outputs = ProbabilisticSphericallyDeconvolutedStreamlineTrack._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

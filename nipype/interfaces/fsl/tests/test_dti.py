@@ -476,7 +476,7 @@ def test_distancemap():
     mapper.inputs.in_file = "a.nii"
 
     # It should
-    yield assert_equal, mapper.cmdline, "distancemap --out=%s --in=a.nii" % os.path.join(newdir, "a_dstmap.nii")
+    yield assert_equal, mapper.cmdline, "distancemap --in=a.nii --out=a_dstmap.nii"
 
     # And we should be able to write out a maxima map
     mapper.inputs.local_max_file = True

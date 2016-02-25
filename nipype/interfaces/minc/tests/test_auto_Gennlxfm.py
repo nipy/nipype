@@ -9,13 +9,7 @@ def test_Gennlxfm_inputs():
     clobber=dict(argstr='-clobber',
     usedefault=True,
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
     ident=dict(argstr='-ident',
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
     ),
     like=dict(argstr='-like %s',
     ),
@@ -28,12 +22,10 @@ def test_Gennlxfm_inputs():
     ),
     step=dict(argstr='-step %s',
     ),
-    terminal_output=dict(nohash=True,
-    ),
     verbose=dict(argstr='-verbose',
     ),
     )
-    inputs = Gennlxfm.input_spec()
+    inputs = Gennlxfm._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -44,7 +36,7 @@ def test_Gennlxfm_outputs():
     output_map = dict(output_file=dict(),
     output_grid=dict(),
     )
-    outputs = Gennlxfm.output_spec()
+    outputs = Gennlxfm._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

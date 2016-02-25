@@ -1,13 +1,13 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
-'''
+"""
 Created on 20 Apr 2010
 
 logging options : INFO, DEBUG
 hash_method : content, timestamp
 
 @author: Chris Filo Gorgolewski
-'''
+"""
 from future import standard_library
 standard_library.install_aliases()
 from builtins import object
@@ -121,8 +121,8 @@ class NipypeConfig(object):
         """
         self._config.set('logging', 'log_directory', log_dir)
 
-    def get(self, section, option):
-        return self._config.get(section, option)
+    def get(self, section, option, default=None):
+        return self._config.get(section, option, default)
 
     def set(self, section, option, value):
         if isinstance(value, bool):

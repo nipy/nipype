@@ -6,12 +6,6 @@ from ..diffusion import DTIimport
 def test_DTIimport_inputs():
     input_map = dict(args=dict(argstr='%s',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     inputFile=dict(argstr='%s',
     position=-2,
     ),
@@ -19,12 +13,10 @@ def test_DTIimport_inputs():
     hash_files=False,
     position=-1,
     ),
-    terminal_output=dict(nohash=True,
-    ),
     testingmode=dict(argstr='--testingmode ',
     ),
     )
-    inputs = DTIimport.input_spec()
+    inputs = DTIimport._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -35,7 +27,7 @@ def test_DTIimport_outputs():
     output_map = dict(outputTensor=dict(position=-1,
     ),
     )
-    outputs = DTIimport.output_spec()
+    outputs = DTIimport._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

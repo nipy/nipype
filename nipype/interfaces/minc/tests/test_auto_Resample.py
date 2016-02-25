@@ -15,9 +15,6 @@ def test_Resample_inputs():
     dircos=dict(argstr='-dircos %s %s %s',
     xor=('nelements', 'nelements_x_y_or_z'),
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
     fill=dict(argstr='-fill',
     xor=('nofill', 'fill'),
     ),
@@ -50,9 +47,6 @@ def test_Resample_inputs():
     ),
     half_width_sinc_window=dict(argstr='-width %s',
     requires=['sinc_interpolation'],
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
     ),
     input_file=dict(argstr='%s',
     mandatory=True,
@@ -117,8 +111,6 @@ def test_Resample_inputs():
     xor=('nelements', 'nelements_x_y_or_z'),
     ),
     talairach=dict(argstr='-talairach',
-    ),
-    terminal_output=dict(nohash=True,
     ),
     transformation=dict(argstr='-transformation %s',
     ),
@@ -187,7 +179,7 @@ def test_Resample_inputs():
     xor=('step', 'step_x_y_or_z'),
     ),
     )
-    inputs = Resample.input_spec()
+    inputs = Resample._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -197,7 +189,7 @@ def test_Resample_inputs():
 def test_Resample_outputs():
     output_map = dict(output_file=dict(),
     )
-    outputs = Resample.output_spec()
+    outputs = Resample._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

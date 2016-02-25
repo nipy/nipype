@@ -6,12 +6,6 @@ from ..brains import BRAINSInitializedControlPoints
 def test_BRAINSInitializedControlPoints_inputs():
     input_map = dict(args=dict(argstr='%s',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     inputVolume=dict(argstr='--inputVolume %s',
     ),
     numberOfThreads=dict(argstr='--numberOfThreads %d',
@@ -27,10 +21,8 @@ def test_BRAINSInitializedControlPoints_inputs():
     splineGridSize=dict(argstr='--splineGridSize %s',
     sep=',',
     ),
-    terminal_output=dict(nohash=True,
-    ),
     )
-    inputs = BRAINSInitializedControlPoints.input_spec()
+    inputs = BRAINSInitializedControlPoints._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -40,7 +32,7 @@ def test_BRAINSInitializedControlPoints_inputs():
 def test_BRAINSInitializedControlPoints_outputs():
     output_map = dict(outputVolume=dict(),
     )
-    outputs = BRAINSInitializedControlPoints.output_spec()
+    outputs = BRAINSInitializedControlPoints._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

@@ -15,9 +15,6 @@ def test_DARTELNorm2MNI_inputs():
     ),
     fwhm=dict(field='mni_norm.fwhm',
     ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     matlab_cmd=dict(),
     mfile=dict(usedefault=True,
     ),
@@ -35,7 +32,7 @@ def test_DARTELNorm2MNI_inputs():
     voxel_size=dict(field='mni_norm.vox',
     ),
     )
-    inputs = DARTELNorm2MNI.input_spec()
+    inputs = DARTELNorm2MNI._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -46,7 +43,7 @@ def test_DARTELNorm2MNI_outputs():
     output_map = dict(normalization_parameter_file=dict(),
     normalized_files=dict(),
     )
-    outputs = DARTELNorm2MNI.output_spec()
+    outputs = DARTELNorm2MNI._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

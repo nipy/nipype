@@ -6,12 +6,6 @@ from ..developer import JistLaminarProfileSampling
 def test_JistLaminarProfileSampling_inputs():
     input_map = dict(args=dict(argstr='%s',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     inCortex=dict(argstr='--inCortex %s',
     ),
     inIntensity=dict(argstr='--inIntensity %s',
@@ -26,8 +20,6 @@ def test_JistLaminarProfileSampling_inputs():
     outProfilemapped=dict(argstr='--outProfilemapped %s',
     hash_files=False,
     ),
-    terminal_output=dict(nohash=True,
-    ),
     xDefaultMem=dict(argstr='-xDefaultMem %d',
     ),
     xMaxProcess=dict(argstr='-xMaxProcess %d',
@@ -36,7 +28,7 @@ def test_JistLaminarProfileSampling_inputs():
     xPrefExt=dict(argstr='--xPrefExt %s',
     ),
     )
-    inputs = JistLaminarProfileSampling.input_spec()
+    inputs = JistLaminarProfileSampling._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -47,7 +39,7 @@ def test_JistLaminarProfileSampling_outputs():
     output_map = dict(outProfile2=dict(),
     outProfilemapped=dict(),
     )
-    outputs = JistLaminarProfileSampling.output_spec()
+    outputs = JistLaminarProfileSampling._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

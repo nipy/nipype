@@ -8,12 +8,6 @@ def test_ImageMeants_inputs():
     ),
     eig=dict(argstr='--eig',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     in_file=dict(argstr='-i %s',
     mandatory=True,
     position=0,
@@ -26,22 +20,20 @@ def test_ImageMeants_inputs():
     usedefault=True,
     ),
     out_file=dict(argstr='-o %s',
-    genfile=True,
     hash_files=False,
     ),
-    output_type=dict(),
+    output_type=dict(usedefault=True,
+    ),
     show_all=dict(argstr='--showall',
     ),
     spatial_coord=dict(argstr='-c %s',
-    ),
-    terminal_output=dict(nohash=True,
     ),
     transpose=dict(argstr='--transpose',
     ),
     use_mm=dict(argstr='--usemm',
     ),
     )
-    inputs = ImageMeants.input_spec()
+    inputs = ImageMeants._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -51,7 +43,7 @@ def test_ImageMeants_inputs():
 def test_ImageMeants_outputs():
     output_map = dict(out_file=dict(),
     )
-    outputs = ImageMeants.output_spec()
+    outputs = ImageMeants._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

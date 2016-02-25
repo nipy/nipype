@@ -20,9 +20,6 @@ def test_ProbTrackX2_inputs():
     ),
     distthresh3=dict(argstr='--distthresh3=%.3f',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
     fibst=dict(argstr='--fibst=%d',
     ),
     fopd=dict(argstr='--fopd=%s',
@@ -31,9 +28,6 @@ def test_ProbTrackX2_inputs():
     usedefault=True,
     ),
     fsamples=dict(mandatory=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
     ),
     inv_xfm=dict(argstr='--invxfm=%s',
     ),
@@ -75,7 +69,8 @@ def test_ProbTrackX2_inputs():
     out_dir=dict(argstr='--dir=%s',
     genfile=True,
     ),
-    output_type=dict(),
+    output_type=dict(usedefault=True,
+    ),
     phsamples=dict(mandatory=True,
     ),
     rand_fib=dict(argstr='--randfib=%d',
@@ -109,8 +104,6 @@ def test_ProbTrackX2_inputs():
     ),
     target_masks=dict(argstr='--targetmasks=%s',
     ),
-    terminal_output=dict(nohash=True,
-    ),
     thsamples=dict(mandatory=True,
     ),
     use_anisotropy=dict(argstr='--usef',
@@ -126,7 +119,7 @@ def test_ProbTrackX2_inputs():
     xfm=dict(argstr='--xfm=%s',
     ),
     )
-    inputs = ProbTrackX2.input_spec()
+    inputs = ProbTrackX2._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -145,7 +138,7 @@ def test_ProbTrackX2_outputs():
     targets=dict(),
     way_total=dict(),
     )
-    outputs = ProbTrackX2.output_spec()
+    outputs = ProbTrackX2._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

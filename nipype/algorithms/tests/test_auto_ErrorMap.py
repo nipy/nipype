@@ -4,10 +4,7 @@ from ..metrics import ErrorMap
 
 
 def test_ErrorMap_inputs():
-    input_map = dict(ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
-    in_ref=dict(mandatory=True,
+    input_map = dict(in_ref=dict(mandatory=True,
     ),
     in_tst=dict(mandatory=True,
     ),
@@ -15,9 +12,10 @@ def test_ErrorMap_inputs():
     metric=dict(mandatory=True,
     usedefault=True,
     ),
-    out_map=dict(),
+    out_map=dict(keep_extension=True,
+    ),
     )
-    inputs = ErrorMap.input_spec()
+    inputs = ErrorMap._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -28,7 +26,7 @@ def test_ErrorMap_outputs():
     output_map = dict(distance=dict(),
     out_map=dict(),
     )
-    outputs = ErrorMap.output_spec()
+    outputs = ErrorMap._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

@@ -20,12 +20,6 @@ def test_GLM_inputs():
     ),
     dof=dict(argstr='--dof=%d',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     in_file=dict(argstr='-i %s',
     mandatory=True,
     position=1,
@@ -60,13 +54,12 @@ def test_GLM_inputs():
     ),
     out_z_name=dict(argstr='--out_z=%s',
     ),
-    output_type=dict(),
-    terminal_output=dict(nohash=True,
+    output_type=dict(usedefault=True,
     ),
     var_norm=dict(argstr='--vn',
     ),
     )
-    inputs = GLM.input_spec()
+    inputs = GLM._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -87,7 +80,7 @@ def test_GLM_outputs():
     out_vnscales=dict(),
     out_z=dict(),
     )
-    outputs = GLM.output_spec()
+    outputs = GLM._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

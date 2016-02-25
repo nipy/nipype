@@ -20,12 +20,6 @@ def test_ConvertScalarImageToRGB_inputs():
     position=0,
     usedefault=True,
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     input_image=dict(argstr='%s',
     mandatory=True,
     position=1,
@@ -57,10 +51,8 @@ def test_ConvertScalarImageToRGB_inputs():
     position=2,
     usedefault=True,
     ),
-    terminal_output=dict(nohash=True,
-    ),
     )
-    inputs = ConvertScalarImageToRGB.input_spec()
+    inputs = ConvertScalarImageToRGB._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -70,7 +62,7 @@ def test_ConvertScalarImageToRGB_inputs():
 def test_ConvertScalarImageToRGB_outputs():
     output_map = dict(output_image=dict(),
     )
-    outputs = ConvertScalarImageToRGB.output_spec()
+    outputs = ConvertScalarImageToRGB._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

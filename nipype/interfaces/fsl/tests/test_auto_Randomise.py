@@ -19,9 +19,6 @@ def test_Randomise_inputs():
     design_mat=dict(argstr='-d %s',
     position=2,
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
     f_c_thresh=dict(argstr='-F %.2f',
     ),
     f_cm_thresh=dict(argstr='-S %.2f',
@@ -29,9 +26,6 @@ def test_Randomise_inputs():
     f_only=dict(argstr='--f_only',
     ),
     fcon=dict(argstr='-f %s',
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
     ),
     in_file=dict(argstr='-i %s',
     mandatory=True,
@@ -43,7 +37,8 @@ def test_Randomise_inputs():
     ),
     one_sample_group_mean=dict(argstr='-1',
     ),
-    output_type=dict(),
+    output_type=dict(usedefault=True,
+    ),
     p_vec_n_dist_files=dict(argstr='-P',
     ),
     raw_stats_imgs=dict(argstr='-R',
@@ -56,8 +51,6 @@ def test_Randomise_inputs():
     ),
     tcon=dict(argstr='-t %s',
     position=3,
-    ),
-    terminal_output=dict(nohash=True,
     ),
     tfce=dict(argstr='-T',
     ),
@@ -76,7 +69,7 @@ def test_Randomise_inputs():
     x_block_labels=dict(argstr='-e %s',
     ),
     )
-    inputs = Randomise.input_spec()
+    inputs = Randomise._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -91,7 +84,7 @@ def test_Randomise_outputs():
     t_p_files=dict(),
     tstat_files=dict(),
     )
-    outputs = Randomise.output_spec()
+    outputs = Randomise._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

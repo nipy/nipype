@@ -12,15 +12,9 @@ def test_AffineRegistration_inputs():
     ),
     args=dict(argstr='%s',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
     fixedsmoothingfactor=dict(argstr='--fixedsmoothingfactor %d',
     ),
     histogrambins=dict(argstr='--histogrambins %d',
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
     ),
     initialtransform=dict(argstr='--initialtransform %s',
     ),
@@ -36,12 +30,10 @@ def test_AffineRegistration_inputs():
     ),
     spatialsamples=dict(argstr='--spatialsamples %d',
     ),
-    terminal_output=dict(nohash=True,
-    ),
     translationscale=dict(argstr='--translationscale %f',
     ),
     )
-    inputs = AffineRegistration.input_spec()
+    inputs = AffineRegistration._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -52,7 +44,7 @@ def test_AffineRegistration_outputs():
     output_map = dict(outputtransform=dict(),
     resampledmovingfilename=dict(),
     )
-    outputs = AffineRegistration.output_spec()
+    outputs = AffineRegistration._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

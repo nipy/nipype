@@ -11,7 +11,7 @@ def test_CopyMeta_inputs():
     src_file=dict(mandatory=True,
     ),
     )
-    inputs = CopyMeta.input_spec()
+    inputs = CopyMeta._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -21,7 +21,7 @@ def test_CopyMeta_inputs():
 def test_CopyMeta_outputs():
     output_map = dict(dest_file=dict(),
     )
-    outputs = CopyMeta.output_spec()
+    outputs = CopyMeta._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

@@ -15,7 +15,7 @@ def test_MergeCSVFiles_inputs():
     ),
     row_headings=dict(),
     )
-    inputs = MergeCSVFiles.input_spec()
+    inputs = MergeCSVFiles._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -25,7 +25,7 @@ def test_MergeCSVFiles_inputs():
 def test_MergeCSVFiles_outputs():
     output_map = dict(csv_file=dict(),
     )
-    outputs = MergeCSVFiles.output_spec()
+    outputs = MergeCSVFiles._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

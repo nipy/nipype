@@ -9,7 +9,7 @@ def test_CalculateNormalizedMoments_inputs():
     timeseries_file=dict(mandatory=True,
     ),
     )
-    inputs = CalculateNormalizedMoments.input_spec()
+    inputs = CalculateNormalizedMoments._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -19,7 +19,7 @@ def test_CalculateNormalizedMoments_inputs():
 def test_CalculateNormalizedMoments_outputs():
     output_map = dict(moments=dict(),
     )
-    outputs = CalculateNormalizedMoments.output_spec()
+    outputs = CalculateNormalizedMoments._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

@@ -9,7 +9,7 @@ def test_CSVReader_inputs():
     in_file=dict(mandatory=True,
     ),
     )
-    inputs = CSVReader.input_spec()
+    inputs = CSVReader._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -18,7 +18,7 @@ def test_CSVReader_inputs():
 
 def test_CSVReader_outputs():
     output_map = dict()
-    outputs = CSVReader.output_spec()
+    outputs = CSVReader._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

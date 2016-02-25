@@ -4,10 +4,7 @@ from ..misc import FuzzyOverlap
 
 
 def test_FuzzyOverlap_inputs():
-    input_map = dict(ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
-    in_ref=dict(mandatory=True,
+    input_map = dict(in_ref=dict(mandatory=True,
     ),
     in_tst=dict(mandatory=True,
     ),
@@ -16,7 +13,7 @@ def test_FuzzyOverlap_inputs():
     weighting=dict(usedefault=True,
     ),
     )
-    inputs = FuzzyOverlap.input_spec()
+    inputs = FuzzyOverlap._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -30,7 +27,7 @@ def test_FuzzyOverlap_outputs():
     diff_file=dict(),
     jaccard=dict(),
     )
-    outputs = FuzzyOverlap.output_spec()
+    outputs = FuzzyOverlap._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

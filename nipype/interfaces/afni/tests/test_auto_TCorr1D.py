@@ -6,25 +6,21 @@ from ..preprocess import TCorr1D
 def test_TCorr1D_inputs():
     input_map = dict(args=dict(argstr='%s',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     ktaub=dict(argstr=' -ktaub',
     position=1,
     xor=['pearson', 'spearman', 'quadrant'],
     ),
-    out_file=dict(argstr='-prefix %s',
-    keep_extension=True,
-    name_source='xset',
-    name_template='%s_correlation.nii.gz',
+    out_file=dict(keep_extension=False,
+    name_template='{prefix}{output_type_}',
     ),
-    outputtype=dict(),
+    output_type=dict(usedefault=True,
+    ),
     pearson=dict(argstr=' -pearson',
     position=1,
     xor=['spearman', 'quadrant', 'ktaub'],
+    ),
+    prefix=dict(argstr='-prefix %s',
+    keep_extension=False,
     ),
     quadrant=dict(argstr=' -quadrant',
     position=1,
@@ -34,19 +30,17 @@ def test_TCorr1D_inputs():
     position=1,
     xor=['pearson', 'quadrant', 'ktaub'],
     ),
-    terminal_output=dict(nohash=True,
-    ),
-    xset=dict(argstr=' %s',
+    xset=dict(argstr='%s',
     copyfile=False,
     mandatory=True,
     position=-2,
     ),
-    y_1d=dict(argstr=' %s',
+    y_1d=dict(argstr='%s',
     mandatory=True,
     position=-1,
     ),
     )
-    inputs = TCorr1D.input_spec()
+    inputs = TCorr1D._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -56,7 +50,7 @@ def test_TCorr1D_inputs():
 def test_TCorr1D_outputs():
     output_map = dict(out_file=dict(),
     )
-    outputs = TCorr1D.output_spec()
+    outputs = TCorr1D._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

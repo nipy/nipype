@@ -6,12 +6,6 @@ from ..preprocess import SkullStrip
 def test_SkullStrip_inputs():
     input_map = dict(args=dict(argstr='%s',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     in_file=dict(argstr='-input %s',
     copyfile=False,
     mandatory=True,
@@ -21,11 +15,10 @@ def test_SkullStrip_inputs():
     name_source='in_file',
     name_template='%s_skullstrip',
     ),
-    outputtype=dict(),
-    terminal_output=dict(nohash=True,
+    output_type=dict(usedefault=True,
     ),
     )
-    inputs = SkullStrip.input_spec()
+    inputs = SkullStrip._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -35,7 +28,7 @@ def test_SkullStrip_inputs():
 def test_SkullStrip_outputs():
     output_map = dict(out_file=dict(),
     )
-    outputs = SkullStrip.output_spec()
+    outputs = SkullStrip._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

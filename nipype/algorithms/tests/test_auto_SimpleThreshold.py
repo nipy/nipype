@@ -4,15 +4,13 @@ from ..misc import SimpleThreshold
 
 
 def test_SimpleThreshold_inputs():
-    input_map = dict(ignore_exception=dict(nohash=True,
-    usedefault=True,
+    input_map = dict(threshold=dict(mandatory=True,
     ),
-    threshold=dict(mandatory=True,
-    ),
+    thresholded_volumes=dict(),
     volumes=dict(mandatory=True,
     ),
     )
-    inputs = SimpleThreshold.input_spec()
+    inputs = SimpleThreshold._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -22,7 +20,7 @@ def test_SimpleThreshold_inputs():
 def test_SimpleThreshold_outputs():
     output_map = dict(thresholded_volumes=dict(),
     )
-    outputs = SimpleThreshold.output_spec()
+    outputs = SimpleThreshold._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

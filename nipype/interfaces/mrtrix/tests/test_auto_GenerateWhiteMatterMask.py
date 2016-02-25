@@ -14,12 +14,6 @@ def test_GenerateWhiteMatterMask_inputs():
     mandatory=True,
     position=1,
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     in_file=dict(argstr='%s',
     mandatory=True,
     position=-3,
@@ -30,10 +24,8 @@ def test_GenerateWhiteMatterMask_inputs():
     genfile=True,
     position=-1,
     ),
-    terminal_output=dict(nohash=True,
-    ),
     )
-    inputs = GenerateWhiteMatterMask.input_spec()
+    inputs = GenerateWhiteMatterMask._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -43,7 +35,7 @@ def test_GenerateWhiteMatterMask_inputs():
 def test_GenerateWhiteMatterMask_outputs():
     output_map = dict(WMprobabilitymap=dict(),
     )
-    outputs = GenerateWhiteMatterMask.output_spec()
+    outputs = GenerateWhiteMatterMask._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

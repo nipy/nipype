@@ -18,15 +18,9 @@ def test_ProcStreamlines_inputs():
     ),
     endpointfile=dict(argstr='-endpointfile %s',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
     exclusionfile=dict(argstr='-exclusionfile %s',
     ),
     gzip=dict(argstr='-gzip',
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
     ),
     in_file=dict(argstr='-inputfile %s',
     mandatory=True,
@@ -53,8 +47,8 @@ def test_ProcStreamlines_inputs():
     noresample=dict(argstr='-noresample',
     ),
     out_file=dict(argstr='> %s',
-    genfile=True,
     position=-1,
+    usedefault=True,
     ),
     outputacm=dict(argstr='-outputacm',
     requires=['outputroot', 'seedfile'],
@@ -88,8 +82,6 @@ def test_ProcStreamlines_inputs():
     ),
     targetfile=dict(argstr='-targetfile %s',
     ),
-    terminal_output=dict(nohash=True,
-    ),
     truncateinexclusion=dict(argstr='-truncateinexclusion',
     ),
     truncateloops=dict(argstr='-truncateloops',
@@ -100,7 +92,7 @@ def test_ProcStreamlines_inputs():
     waypointfile=dict(argstr='-waypointfile %s',
     ),
     )
-    inputs = ProcStreamlines.input_spec()
+    inputs = ProcStreamlines._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -111,7 +103,7 @@ def test_ProcStreamlines_outputs():
     output_map = dict(outputroot_files=dict(),
     proc=dict(),
     )
-    outputs = ProcStreamlines.output_spec()
+    outputs = ProcStreamlines._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

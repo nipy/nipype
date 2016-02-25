@@ -16,18 +16,12 @@ def test_SurfaceSnapshots_inputs():
     ),
     demean_overlay=dict(argstr='-zm',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
     hemi=dict(argstr='%s',
     mandatory=True,
     position=2,
     ),
     identity_reg=dict(argstr='-overlay-reg-identity',
     xor=['overlay_reg', 'identity_reg', 'mni152_reg'],
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
     ),
     invert_overlay=dict(argstr='-invphaseflag 1',
     ),
@@ -88,12 +82,10 @@ def test_SurfaceSnapshots_inputs():
     tcl_script=dict(argstr='%s',
     genfile=True,
     ),
-    terminal_output=dict(nohash=True,
-    ),
     truncate_overlay=dict(argstr='-truncphaseflag 1',
     ),
     )
-    inputs = SurfaceSnapshots.input_spec()
+    inputs = SurfaceSnapshots._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -103,7 +95,7 @@ def test_SurfaceSnapshots_inputs():
 def test_SurfaceSnapshots_outputs():
     output_map = dict(snapshots=dict(),
     )
-    outputs = SurfaceSnapshots.output_spec()
+    outputs = SurfaceSnapshots._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

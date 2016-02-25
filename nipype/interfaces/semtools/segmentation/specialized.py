@@ -49,8 +49,8 @@ contributor: Vince Magnotta, Hans Johnson, Greg Harris, Kent Williams, Eunyoung 
 
 """
 
-    input_spec = BRAINSCutInputSpec
-    output_spec = BRAINSCutOutputSpec
+    _input_spec = BRAINSCutInputSpec
+    _output_spec = BRAINSCutOutputSpec
     _cmd = " BRAINSCut "
     _outputs_filenames = {}
     _redirect_x = False
@@ -94,8 +94,8 @@ acknowledgements: Hans Johnson(1,3,4); Kent Williams(1); Gregory Harris(1), Vinc
 
 """
 
-    input_spec = BRAINSROIAutoInputSpec
-    output_spec = BRAINSROIAutoOutputSpec
+    _input_spec = BRAINSROIAutoInputSpec
+    _output_spec = BRAINSROIAutoOutputSpec
     _cmd = " BRAINSROIAuto "
     _outputs_filenames = {'outputVolume': 'outputVolume.nii', 'outputROIMaskVolume': 'outputROIMaskVolume.nii'}
     _redirect_x = False
@@ -185,8 +185,8 @@ documentation-url: http://www.nitrc.org/projects/brainscdetector/
 
 """
 
-    input_spec = BRAINSConstellationDetectorInputSpec
-    output_spec = BRAINSConstellationDetectorOutputSpec
+    _input_spec = BRAINSConstellationDetectorInputSpec
+    _output_spec = BRAINSConstellationDetectorOutputSpec
     _cmd = " BRAINSConstellationDetector "
     _outputs_filenames = {'outputVolume': 'outputVolume.nii.gz', 'outputMRML': 'outputMRML.mrml', 'resultsDir': 'resultsDir', 'outputResampledVolume': 'outputResampledVolume.nii.gz', 'outputTransform': 'outputTransform.h5', 'writeBranded2DImage': 'writeBranded2DImage.png',
                           'outputLandmarksInACPCAlignedSpace': 'outputLandmarksInACPCAlignedSpace.fcsv', 'outputLandmarksInInputSpace': 'outputLandmarksInInputSpace.fcsv', 'outputUntransformedClippedVolume': 'outputUntransformedClippedVolume.nii.gz', 'outputVerificationScript': 'outputVerificationScript.sh'}
@@ -218,8 +218,8 @@ description: Given A list of Probability Maps, generate a LabelMap.
 
 """
 
-    input_spec = BRAINSCreateLabelMapFromProbabilityMapsInputSpec
-    output_spec = BRAINSCreateLabelMapFromProbabilityMapsOutputSpec
+    _input_spec = BRAINSCreateLabelMapFromProbabilityMapsInputSpec
+    _output_spec = BRAINSCreateLabelMapFromProbabilityMapsOutputSpec
     _cmd = " BRAINSCreateLabelMapFromProbabilityMaps "
     _outputs_filenames = {'dirtyLabelVolume': 'dirtyLabelVolume.nii', 'cleanLabelVolume': 'cleanLabelVolume.nii'}
     _redirect_x = False
@@ -253,8 +253,8 @@ documentation-url: http://www.nitrc.org/projects/brainscdetector/
 
 """
 
-    input_spec = BinaryMaskEditorBasedOnLandmarksInputSpec
-    output_spec = BinaryMaskEditorBasedOnLandmarksOutputSpec
+    _input_spec = BinaryMaskEditorBasedOnLandmarksInputSpec
+    _output_spec = BinaryMaskEditorBasedOnLandmarksOutputSpec
     _cmd = " BinaryMaskEditorBasedOnLandmarks "
     _outputs_filenames = {'outputBinaryVolume': 'outputBinaryVolume.nii'}
     _redirect_x = False
@@ -286,8 +286,8 @@ description: given a list of label map images, create a representative/average l
 
 """
 
-    input_spec = BRAINSMultiSTAPLEInputSpec
-    output_spec = BRAINSMultiSTAPLEOutputSpec
+    _input_spec = BRAINSMultiSTAPLEInputSpec
+    _output_spec = BRAINSMultiSTAPLEOutputSpec
     _cmd = " BRAINSMultiSTAPLE "
     _outputs_filenames = {'outputMultiSTAPLE': 'outputMultiSTAPLE.nii', 'outputConfusionMatrix': 'outputConfusionMatrixh5|mat|txt'}
     _redirect_x = False
@@ -352,8 +352,8 @@ description: Atlas-based tissue segmentation method.  This is an algorithmic ext
 
 """
 
-    input_spec = BRAINSABCInputSpec
-    output_spec = BRAINSABCOutputSpec
+    _input_spec = BRAINSABCInputSpec
+    _output_spec = BRAINSABCOutputSpec
     _cmd = " BRAINSABC "
     _outputs_filenames = {'saveState': 'saveState.h5', 'outputLabels': 'outputLabels.nii.gz', 'atlasToSubjectTransform': 'atlasToSubjectTransform.h5', 'atlasToSubjectInitialTransform': 'atlasToSubjectInitialTransform.h5',
                           'outputDirtyLabels': 'outputDirtyLabels.nii.gz', 'outputVolumes': 'outputVolumes.nii.gz', 'outputDir': 'outputDir', 'implicitOutputs': 'implicitOutputs.nii.gz'}
@@ -386,8 +386,8 @@ description: From a range of label map values, extract the largest contiguous re
 
 """
 
-    input_spec = ESLRInputSpec
-    output_spec = ESLROutputSpec
+    _input_spec = ESLRInputSpec
+    _output_spec = ESLROutputSpec
     _cmd = " ESLR "
     _outputs_filenames = {'outputVolume': 'outputVolume.nii.gz'}
     _redirect_x = False

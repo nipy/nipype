@@ -5,9 +5,6 @@ from ..tracks import TrackDensityMap
 
 def test_TrackDensityMap_inputs():
     input_map = dict(data_dims=dict(),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     in_file=dict(mandatory=True,
     ),
     out_filename=dict(usedefault=True,
@@ -17,7 +14,7 @@ def test_TrackDensityMap_inputs():
     reference=dict(),
     voxel_dims=dict(),
     )
-    inputs = TrackDensityMap.input_spec()
+    inputs = TrackDensityMap._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -27,7 +24,7 @@ def test_TrackDensityMap_inputs():
 def test_TrackDensityMap_outputs():
     output_map = dict(out_file=dict(),
     )
-    outputs = TrackDensityMap.output_spec()
+    outputs = TrackDensityMap._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

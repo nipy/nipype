@@ -6,12 +6,6 @@ from ..dti import ComputeEigensystem
 def test_ComputeEigensystem_inputs():
     input_map = dict(args=dict(argstr='%s',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     in_file=dict(argstr='< %s',
     mandatory=True,
     position=1,
@@ -24,16 +18,14 @@ def test_ComputeEigensystem_inputs():
     maxcomponents=dict(argstr='-maxcomponents %d',
     ),
     out_file=dict(argstr='> %s',
-    genfile=True,
     position=-1,
+    usedefault=True,
     ),
     outputdatatype=dict(argstr='-outputdatatype %s',
     usedefault=True,
     ),
-    terminal_output=dict(nohash=True,
-    ),
     )
-    inputs = ComputeEigensystem.input_spec()
+    inputs = ComputeEigensystem._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -43,7 +35,7 @@ def test_ComputeEigensystem_inputs():
 def test_ComputeEigensystem_outputs():
     output_map = dict(eigen=dict(),
     )
-    outputs = ComputeEigensystem.output_spec()
+    outputs = ComputeEigensystem._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

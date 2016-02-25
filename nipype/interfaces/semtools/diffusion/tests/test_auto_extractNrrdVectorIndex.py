@@ -6,12 +6,6 @@ from ..gtract import extractNrrdVectorIndex
 def test_extractNrrdVectorIndex_inputs():
     input_map = dict(args=dict(argstr='%s',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     inputVolume=dict(argstr='--inputVolume %s',
     ),
     numberOfThreads=dict(argstr='--numberOfThreads %d',
@@ -21,12 +15,10 @@ def test_extractNrrdVectorIndex_inputs():
     ),
     setImageOrientation=dict(argstr='--setImageOrientation %s',
     ),
-    terminal_output=dict(nohash=True,
-    ),
     vectorIndex=dict(argstr='--vectorIndex %d',
     ),
     )
-    inputs = extractNrrdVectorIndex.input_spec()
+    inputs = extractNrrdVectorIndex._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -36,7 +28,7 @@ def test_extractNrrdVectorIndex_inputs():
 def test_extractNrrdVectorIndex_outputs():
     output_map = dict(outputVolume=dict(),
     )
-    outputs = extractNrrdVectorIndex.output_spec()
+    outputs = extractNrrdVectorIndex._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

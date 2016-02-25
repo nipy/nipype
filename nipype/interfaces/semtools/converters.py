@@ -39,8 +39,8 @@ acknowledgements: This work is part of the National Alliance for Medical Image C
 
 """
 
-    input_spec = DWISimpleCompareInputSpec
-    output_spec = DWISimpleCompareOutputSpec
+    _input_spec = DWISimpleCompareInputSpec
+    _output_spec = DWISimpleCompareOutputSpec
     _cmd = " DWISimpleCompare "
     _outputs_filenames = {}
     _redirect_x = False
@@ -75,8 +75,8 @@ acknowledgements: This work is part of the National Alliance for Medical Image C
 
 """
 
-    input_spec = DWICompareInputSpec
-    output_spec = DWICompareOutputSpec
+    _input_spec = DWICompareInputSpec
+    _output_spec = DWICompareOutputSpec
     _cmd = " DWICompare "
     _outputs_filenames = {}
     _redirect_x = False

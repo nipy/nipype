@@ -6,12 +6,6 @@ from ..connectivity import LabelConfig
 def test_LabelConfig_inputs():
     input_map = dict(args=dict(argstr='%s',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     in_config=dict(argstr='%s',
     position=-2,
     ),
@@ -37,10 +31,8 @@ def test_LabelConfig_inputs():
     ),
     spine=dict(argstr='-spine %s',
     ),
-    terminal_output=dict(nohash=True,
-    ),
     )
-    inputs = LabelConfig.input_spec()
+    inputs = LabelConfig._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -50,7 +42,7 @@ def test_LabelConfig_inputs():
 def test_LabelConfig_outputs():
     output_map = dict(out_file=dict(),
     )
-    outputs = LabelConfig.output_spec()
+    outputs = LabelConfig._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

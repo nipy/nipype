@@ -15,23 +15,19 @@ def test_Binarize_inputs():
     bin_val_not=dict(argstr='--binvalnot %d',
     ),
     binary_file=dict(argstr='--o %s',
-    genfile=True,
+    keep_extension=True,
+    name_source='in_file',
+    name_template='_bin',
     ),
     count_file=dict(argstr='--count %s',
     ),
     dilate=dict(argstr='--dilate %d',
-    ),
-    environ=dict(nohash=True,
-    usedefault=True,
     ),
     erode=dict(argstr='--erode  %d',
     ),
     erode2d=dict(argstr='--erode2d %d',
     ),
     frame_no=dict(argstr='--frame %s',
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
     ),
     in_file=dict(argstr='--i %s',
     copyfile=False,
@@ -60,8 +56,6 @@ def test_Binarize_inputs():
     rmin=dict(argstr='--rmin %f',
     ),
     subjects_dir=dict(),
-    terminal_output=dict(nohash=True,
-    ),
     ventricles=dict(argstr='--ventricles',
     ),
     wm=dict(argstr='--wm',
@@ -74,7 +68,7 @@ def test_Binarize_inputs():
     zero_slice_edge=dict(argstr='--zero-slice-edges',
     ),
     )
-    inputs = Binarize.input_spec()
+    inputs = Binarize._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -85,7 +79,7 @@ def test_Binarize_outputs():
     output_map = dict(binary_file=dict(),
     count_file=dict(),
     )
-    outputs = Binarize.output_spec()
+    outputs = Binarize._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

@@ -10,12 +10,6 @@ def test_MRIMarchingCubes_inputs():
     position=-1,
     usedefault=True,
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     in_file=dict(argstr='%s',
     mandatory=True,
     position=1,
@@ -29,10 +23,8 @@ def test_MRIMarchingCubes_inputs():
     position=-2,
     ),
     subjects_dir=dict(),
-    terminal_output=dict(nohash=True,
-    ),
     )
-    inputs = MRIMarchingCubes.input_spec()
+    inputs = MRIMarchingCubes._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -42,7 +34,7 @@ def test_MRIMarchingCubes_inputs():
 def test_MRIMarchingCubes_outputs():
     output_map = dict(surface=dict(),
     )
-    outputs = MRIMarchingCubes.output_spec()
+    outputs = MRIMarchingCubes._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

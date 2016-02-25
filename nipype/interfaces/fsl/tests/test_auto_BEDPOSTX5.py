@@ -22,9 +22,8 @@ def test_BEDPOSTX5_inputs():
     ),
     dwi=dict(mandatory=True,
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
+    dyads=dict(),
+    dyads_dispersion=dict(),
     f0_ard=dict(argstr='--f0 --ardf0',
     xor=['f0_noard', 'f0_ard', 'all_ard'],
     ),
@@ -34,16 +33,21 @@ def test_BEDPOSTX5_inputs():
     force_dir=dict(argstr='--forcedir',
     usedefault=True,
     ),
+    fsamples=dict(),
     fudge=dict(argstr='-w %d',
     ),
     gradnonlin=dict(argstr='-g',
     ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     logdir=dict(argstr='--logdir=%s',
     ),
     mask=dict(mandatory=True,
+    ),
+    mean_S0samples=dict(keep_extension=False,
+    ),
+    mean_dsamples=dict(keep_extension=False,
+    ),
+    mean_fsamples=dict(),
+    mean_tausamples=dict(keep_extension=False,
     ),
     model=dict(argstr='-model %d',
     ),
@@ -67,20 +71,22 @@ def test_BEDPOSTX5_inputs():
     position=1,
     usedefault=True,
     ),
-    output_type=dict(),
+    output_type=dict(usedefault=True,
+    ),
+    phsamples=dict(),
     rician=dict(argstr='--rician',
+    usedefault=True,
     ),
     sample_every=dict(argstr='-s %d',
     ),
     seed=dict(argstr='--seed=%d',
     ),
-    terminal_output=dict(nohash=True,
-    ),
+    thsamples=dict(),
     update_proposal_every=dict(argstr='--updateproposalevery=%d',
     ),
     use_gpu=dict(),
     )
-    inputs = BEDPOSTX5.input_spec()
+    inputs = BEDPOSTX5._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -90,16 +96,15 @@ def test_BEDPOSTX5_inputs():
 def test_BEDPOSTX5_outputs():
     output_map = dict(dyads=dict(),
     dyads_dispersion=dict(),
+    fsamples=dict(),
     mean_S0samples=dict(),
     mean_dsamples=dict(),
     mean_fsamples=dict(),
-    mean_phsamples=dict(),
-    mean_thsamples=dict(),
-    merged_fsamples=dict(),
-    merged_phsamples=dict(),
-    merged_thsamples=dict(),
+    mean_tausamples=dict(),
+    phsamples=dict(),
+    thsamples=dict(),
     )
-    outputs = BEDPOSTX5.output_spec()
+    outputs = BEDPOSTX5._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

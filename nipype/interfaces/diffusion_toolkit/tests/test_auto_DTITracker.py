@@ -10,12 +10,6 @@ def test_DTITracker_inputs():
     ),
     args=dict(argstr='%s',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     input_data_prefix=dict(argstr='%s',
     position=0,
     usedefault=True,
@@ -58,12 +52,10 @@ def test_DTITracker_inputs():
     swap_zx=dict(argstr='-szx',
     ),
     tensor_file=dict(),
-    terminal_output=dict(nohash=True,
-    ),
     tracking_method=dict(argstr='-%s',
     ),
     )
-    inputs = DTITracker.input_spec()
+    inputs = DTITracker._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -74,7 +66,7 @@ def test_DTITracker_outputs():
     output_map = dict(mask_file=dict(),
     track_file=dict(),
     )
-    outputs = DTITracker.output_spec()
+    outputs = DTITracker._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

@@ -21,13 +21,7 @@ def test_BrainExtraction_inputs():
     dimension=dict(argstr='-d %d',
     usedefault=True,
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
     extraction_registration_mask=dict(argstr='-f %s',
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
     ),
     image_suffix=dict(argstr='-s %s',
     usedefault=True,
@@ -40,14 +34,12 @@ def test_BrainExtraction_inputs():
     out_prefix=dict(argstr='-o %s',
     usedefault=True,
     ),
-    terminal_output=dict(nohash=True,
-    ),
     use_floatingpoint_precision=dict(argstr='-q %d',
     ),
     use_random_seeding=dict(argstr='-u %d',
     ),
     )
-    inputs = BrainExtraction.input_spec()
+    inputs = BrainExtraction._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -58,7 +50,7 @@ def test_BrainExtraction_outputs():
     output_map = dict(BrainExtractionBrain=dict(),
     BrainExtractionMask=dict(),
     )
-    outputs = BrainExtraction.output_spec()
+    outputs = BrainExtraction._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

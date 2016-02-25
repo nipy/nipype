@@ -6,12 +6,6 @@ from ..histogrammatching import HistogramMatching
 def test_HistogramMatching_inputs():
     input_map = dict(args=dict(argstr='%s',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     inputVolume=dict(argstr='%s',
     position=-3,
     ),
@@ -26,12 +20,10 @@ def test_HistogramMatching_inputs():
     referenceVolume=dict(argstr='%s',
     position=-2,
     ),
-    terminal_output=dict(nohash=True,
-    ),
     threshold=dict(argstr='--threshold ',
     ),
     )
-    inputs = HistogramMatching.input_spec()
+    inputs = HistogramMatching._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -42,7 +34,7 @@ def test_HistogramMatching_outputs():
     output_map = dict(outputVolume=dict(position=-1,
     ),
     )
-    outputs = HistogramMatching.output_spec()
+    outputs = HistogramMatching._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

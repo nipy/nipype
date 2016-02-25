@@ -4,32 +4,36 @@ from ..model import SMM
 
 
 def test_SMM_inputs():
-    input_map = dict(args=dict(argstr='%s',
+    input_map = dict(activation_p_map=dict(hash_files=False,
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
+    args=dict(argstr='%s',
     ),
-    ignore_exception=dict(nohash=True,
+    deactivation_p_map=dict(hash_files=False,
+    ),
+    logdir=dict(argstr='--ld=%s',
+    mandatory=True,
+    position=0,
     usedefault=True,
     ),
     mask=dict(argstr='--mask="%s"',
     copyfile=False,
     mandatory=True,
-    position=1,
+    position=2,
     ),
     no_deactivation_class=dict(argstr='--zfstatmode',
     position=2,
     ),
-    output_type=dict(),
+    null_p_map=dict(hash_files=False,
+    ),
+    output_type=dict(usedefault=True,
+    ),
     spatial_data_file=dict(argstr='--sdf="%s"',
     copyfile=False,
     mandatory=True,
-    position=0,
-    ),
-    terminal_output=dict(nohash=True,
+    position=1,
     ),
     )
-    inputs = SMM.input_spec()
+    inputs = SMM._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -41,7 +45,7 @@ def test_SMM_outputs():
     deactivation_p_map=dict(),
     null_p_map=dict(),
     )
-    outputs = SMM.output_spec()
+    outputs = SMM._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

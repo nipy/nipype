@@ -14,9 +14,6 @@ def test_VBRAINSDemonWarp_inputs():
     checkerboardPatternSubdivisions=dict(argstr='--checkerboardPatternSubdivisions %s',
     sep=',',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
     fixedBinaryVolume=dict(argstr='--fixedBinaryVolume %s',
     ),
     fixedVolume=dict(argstr='--fixedVolume %s...',
@@ -26,9 +23,6 @@ def test_VBRAINSDemonWarp_inputs():
     gui=dict(argstr='--gui ',
     ),
     histogramMatch=dict(argstr='--histogramMatch ',
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
     ),
     initializeWithDisplacementField=dict(argstr='--initializeWithDisplacementField %s',
     ),
@@ -96,8 +90,6 @@ def test_VBRAINSDemonWarp_inputs():
     ),
     smoothDisplacementFieldSigma=dict(argstr='--smoothDisplacementFieldSigma %f',
     ),
-    terminal_output=dict(nohash=True,
-    ),
     upFieldSmoothing=dict(argstr='--upFieldSmoothing %f',
     ),
     upperThresholdForBOBF=dict(argstr='--upperThresholdForBOBF %d',
@@ -108,7 +100,7 @@ def test_VBRAINSDemonWarp_inputs():
     sep=',',
     ),
     )
-    inputs = VBRAINSDemonWarp.input_spec()
+    inputs = VBRAINSDemonWarp._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -120,7 +112,7 @@ def test_VBRAINSDemonWarp_outputs():
     outputDisplacementFieldVolume=dict(),
     outputVolume=dict(),
     )
-    outputs = VBRAINSDemonWarp.output_spec()
+    outputs = VBRAINSDemonWarp._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

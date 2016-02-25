@@ -29,9 +29,10 @@ import numpy as np
 from scipy.special import gammaln
 
 from ..external.six import string_types
-from ..interfaces.base import (BaseInterface, TraitedSpec, InputMultiPath,
-                               traits, File, Bunch, BaseInterfaceInputSpec,
-                               isdefined)
+
+from ..interfaces.base import (traits, File, isdefined, Undefined, BaseInputSpec,
+                               TraitedSpec, InputMultiPath, BaseInterface, Bunch)
+
 from ..utils.filemanip import filename_to_list
 from .. import config, logging
 iflogger = logging.getLogger('interface')
@@ -175,7 +176,7 @@ def gen_info(run_event_files):
     return info
 
 
-class SpecifyModelInputSpec(BaseInterfaceInputSpec):
+class SpecifyModelInputSpec(BaseInputSpec):
     subject_info = InputMultiPath(Bunch, mandatory=True, xor=['subject_info',
                                                               'event_files'],
                                   desc=("Bunch or List(Bunch) subject specific condition information. "
@@ -280,8 +281,8 @@ class SpecifyModel(BaseInterface):
     >>> s.inputs.subject_info = info
 
     """
-    input_spec = SpecifyModelInputSpec
-    output_spec = SpecifyModelOutputSpec
+    _input_spec = SpecifyModelInputSpec
+    _output_spec = SpecifyModelOutputSpec
 
     def _generate_standard_design(self, infolist,
                                   functional_runs=None,
@@ -406,15 +407,10 @@ class SpecifyModel(BaseInterface):
         """
         self._sessioninfo = None
         self._generate_design()
-        return runtime
-
-    def _list_outputs(self):
-        outputs = self._outputs().get()
         if not hasattr(self, '_sessinfo'):
             self._generate_design()
-        outputs['session_info'] = self._sessinfo
-
-        return outputs
+        self.outputs.session_info = self._sessinfo
+        return runtime
 
 
 class SpecifySPMModelInputSpec(SpecifyModelInputSpec):
@@ -450,7 +446,7 @@ class SpecifySPMModel(SpecifyModel):
 
     """
 
-    input_spec = SpecifySPMModelInputSpec
+    _input_spec = SpecifySPMModelInputSpec
 
     def _concatenate_info(self, infolist):
         nscans = []
@@ -571,11 +567,12 @@ class SpecifySparseModelInputSpec(SpecifyModelInputSpec):
                                      desc="Create a temporal derivative in addition to regular regressor")
     scale_regressors = traits.Bool(True, desc="Scale regressors by the peak",
                                    usedefault=True)
-    scan_onset = traits.Float(0.0,
-                              desc="Start of scanning relative to onset of run in secs",
+    scan_onset = traits.Float(0.0, desc="Start of scanning relative to onset of run in secs",
                               usedefault=True)
-    save_plot = traits.Bool(desc=('save plot of sparse design calculation '
-                                  '(Requires matplotlib)'))
+    save_plot = traits.Bool(False, usedefault=True, desc='save plot of sparse design '
+                                                         'calculation (Requires matplotlib)')
+    sparse_png_file = File('sparse.png', desc='PNG file showing sparse design')
+    sparse_svg_file = File('sparse.svg', desc='SVG file showing sparse design')
 
 
 class SpecifySparseModelOutputSpec(SpecifyModelOutputSpec):
@@ -611,8 +608,8 @@ class SpecifySparseModel(SpecifyModel):
     >>> s.inputs.subject_info = info
 
     """
-    input_spec = SpecifySparseModelInputSpec
-    output_spec = SpecifySparseModelOutputSpec
+    _input_spec = SpecifySparseModelInputSpec
+    _output_spec = SpecifySparseModelOutputSpec
 
     def _gen_regress(self, i_onsets, i_durations, i_amplitudes, nscans):
         """Generates a regressor for a sparse/clustered-sparse acquisition
@@ -802,12 +799,9 @@ class SpecifySparseModel(SpecifyModel):
         sparselist = self._generate_clustered_design(infolist)
         super(SpecifySparseModel, self)._generate_design(infolist=sparselist)
 
-    def _list_outputs(self):
-        outputs = self._outputs().get()
-        if not hasattr(self, '_sessinfo'):
-            self._generate_design()
-        outputs['session_info'] = self._sessinfo
-        if isdefined(self.inputs.save_plot) and self.inputs.save_plot:
-            outputs['sparse_png_file'] = os.path.join(os.getcwd(), 'sparse.png')
-            outputs['sparse_svg_file'] = os.path.join(os.getcwd(), 'sparse.svg')
-        return outputs
+    def _post_run(self):
+        super(SpecifySparseModel,self)._post_run()
+        # Unset non-used variables
+        if not self.inputs.save_plot:
+            self.outputs.sparse_png_file = Undefined
+            self.outputs.sparse_svg_file = Undefined

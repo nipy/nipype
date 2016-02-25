@@ -17,10 +17,8 @@ def test_Slicer_inputs():
     dither_edges=dict(argstr='-t',
     position=7,
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
+    hide_orientation=dict(argstr='-u',
+    position=9,
     usedefault=True,
     ),
     image_edges=dict(argstr='%s',
@@ -37,6 +35,7 @@ def test_Slicer_inputs():
     position=5,
     ),
     label_slices=dict(argstr='-L',
+    mandatory=True,
     position=3,
     usedefault=True,
     ),
@@ -48,11 +47,11 @@ def test_Slicer_inputs():
     position=8,
     ),
     out_file=dict(argstr='%s',
-    genfile=True,
     hash_files=False,
     position=-1,
     ),
-    output_type=dict(),
+    output_type=dict(usedefault=True,
+    ),
     sample_axial=dict(argstr='-S %d',
     position=10,
     requires=['image_width'],
@@ -61,9 +60,9 @@ def test_Slicer_inputs():
     scaling=dict(argstr='-s %f',
     position=0,
     ),
-    show_orientation=dict(argstr='%s',
+    show_orientation=dict(deprecated=True,
+    new_name='hide_orientation',
     position=9,
-    usedefault=True,
     ),
     single_slice=dict(argstr='-%s',
     position=10,
@@ -73,13 +72,11 @@ def test_Slicer_inputs():
     slice_number=dict(argstr='-%d',
     position=11,
     ),
-    terminal_output=dict(nohash=True,
-    ),
     threshold_edges=dict(argstr='-e %.3f',
     position=6,
     ),
     )
-    inputs = Slicer.input_spec()
+    inputs = Slicer._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -89,7 +86,7 @@ def test_Slicer_inputs():
 def test_Slicer_outputs():
     output_map = dict(out_file=dict(),
     )
-    outputs = Slicer.output_spec()
+    outputs = Slicer._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

@@ -6,12 +6,6 @@ from ..developer import JistBrainMgdmSegmentation
 def test_JistBrainMgdmSegmentation_inputs():
     input_map = dict(args=dict(argstr='%s',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     inAdjust=dict(argstr='--inAdjust %s',
     ),
     inAtlas=dict(argstr='--inAtlas %s',
@@ -58,8 +52,6 @@ def test_JistBrainMgdmSegmentation_inputs():
     outSegmented=dict(argstr='--outSegmented %s',
     hash_files=False,
     ),
-    terminal_output=dict(nohash=True,
-    ),
     xDefaultMem=dict(argstr='-xDefaultMem %d',
     ),
     xMaxProcess=dict(argstr='-xMaxProcess %d',
@@ -68,7 +60,7 @@ def test_JistBrainMgdmSegmentation_inputs():
     xPrefExt=dict(argstr='--xPrefExt %s',
     ),
     )
-    inputs = JistBrainMgdmSegmentation.input_spec()
+    inputs = JistBrainMgdmSegmentation._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -81,7 +73,7 @@ def test_JistBrainMgdmSegmentation_outputs():
     outPosterior3=dict(),
     outSegmented=dict(),
     )
-    outputs = JistBrainMgdmSegmentation.output_spec()
+    outputs = JistBrainMgdmSegmentation._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

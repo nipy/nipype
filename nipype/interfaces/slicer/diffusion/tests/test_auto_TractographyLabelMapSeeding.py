@@ -15,12 +15,6 @@ def test_TractographyLabelMapSeeding_inputs():
     ),
     clthreshold=dict(argstr='--clthreshold %f',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     inputroi=dict(argstr='--inputroi %s',
     ),
     integrationsteplength=dict(argstr='--integrationsteplength %f',
@@ -46,14 +40,12 @@ def test_TractographyLabelMapSeeding_inputs():
     ),
     stoppingvalue=dict(argstr='--stoppingvalue %f',
     ),
-    terminal_output=dict(nohash=True,
-    ),
     useindexspace=dict(argstr='--useindexspace ',
     ),
     writetofile=dict(argstr='--writetofile ',
     ),
     )
-    inputs = TractographyLabelMapSeeding.input_spec()
+    inputs = TractographyLabelMapSeeding._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -65,7 +57,7 @@ def test_TractographyLabelMapSeeding_outputs():
     ),
     outputdirectory=dict(),
     )
-    outputs = TractographyLabelMapSeeding.output_spec()
+    outputs = TractographyLabelMapSeeding._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

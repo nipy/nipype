@@ -19,7 +19,7 @@ import tempfile
 from ...utils.misc import package_check
 
 from ..base import (TraitedSpec, File, Undefined, traits,
-                    BaseInterface, isdefined, BaseInterfaceInputSpec)
+                    BaseInterface, isdefined, BaseInputSpec)
 
 from ...utils.filemanip import fname_presuffix
 
@@ -34,7 +34,7 @@ else:
     import nitime.viz as viz
 
 
-class CoherenceAnalyzerInputSpec(BaseInterfaceInputSpec):
+class CoherenceAnalyzerInputSpec(BaseInputSpec):
 
     # Input either csv file, or time-series object and use _xor_inputs to
     # discriminate
@@ -96,8 +96,8 @@ class CoherenceAnalyzerOutputSpec(TraitedSpec):
 
 class CoherenceAnalyzer(BaseInterface):
 
-    input_spec = CoherenceAnalyzerInputSpec
-    output_spec = CoherenceAnalyzerOutputSpec
+    _input_spec = CoherenceAnalyzerInputSpec
+    _output_spec = CoherenceAnalyzerOutputSpec
 
     def _read_csv(self):
         """
@@ -167,8 +167,8 @@ class CoherenceAnalyzer(BaseInterface):
         return runtime
 
     # Rewrite _list_outputs (look at BET)
-    def _list_outputs(self):
-        outputs = self.output_spec().get()
+    def _post_run(self):
+        
 
         # if isdefined(self.inputs.output_csv_file):
 
@@ -176,8 +176,8 @@ class CoherenceAnalyzer(BaseInterface):
         # file name + path)
 
         # Always defined (the arrays):
-        outputs['coherence_array'] = self.coherence
-        outputs['timedelay_array'] = self.delay
+        self.outputs.coherence_array = self.coherence
+        self.outputs.timedelay_array = self.delay
 
         # Conditional
         if isdefined(self.inputs.output_csv_file) and hasattr(self, 'coherence'):
@@ -185,18 +185,17 @@ class CoherenceAnalyzer(BaseInterface):
             # coherence values to this file "coherence_csv" and makes the
             # time_delay csv file??
             self._make_output_files()
-            outputs['coherence_csv'] = fname_presuffix(self.inputs.output_csv_file, suffix='_coherence')
+            self.outputs.coherence_csv = fname_presuffix(self.inputs.output_csv_file, suffix='_coherence')
 
-            outputs['timedelay_csv'] = fname_presuffix(self.inputs.output_csv_file, suffix='_delay')
+            self.outputs.timedelay_csv = fname_presuffix(self.inputs.output_csv_file, suffix='_delay')
 
         if isdefined(self.inputs.output_figure_file) and hasattr(self,
                                                                  'coherence'):
             self._make_output_figures()
-            outputs['coherence_fig'] = fname_presuffix(self.inputs.output_figure_file, suffix='_coherence')
-            outputs['timedelay_fig'] = fname_presuffix(self.inputs.output_figure_file, suffix='_delay')
+            self.outputs.coherence_fig = fname_presuffix(self.inputs.output_figure_file, suffix='_coherence')
+            self.outputs.timedelay_fig = fname_presuffix(self.inputs.output_figure_file, suffix='_delay')
 
-        return outputs
-
+        
     def _make_output_files(self):
         """
         Generate the output csv files.

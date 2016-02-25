@@ -16,15 +16,9 @@ def test_Beast_inputs():
     ),
     configuration_file=dict(argstr='-configuration %s',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
     fill_holes=dict(argstr='-fill',
     ),
     flip_images=dict(argstr='-flip',
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
     ),
     input_file=dict(argstr='%s',
     mandatory=True,
@@ -58,14 +52,12 @@ def test_Beast_inputs():
     ),
     smoothness_factor_beta=dict(argstr='-beta %s',
     ),
-    terminal_output=dict(nohash=True,
-    ),
     threshold_patch_selection=dict(argstr='-threshold %s',
     ),
     voxel_size=dict(argstr='-voxel_size %s',
     ),
     )
-    inputs = Beast.input_spec()
+    inputs = Beast._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -75,7 +67,7 @@ def test_Beast_inputs():
 def test_Beast_outputs():
     output_map = dict(output_file=dict(),
     )
-    outputs = Beast.output_spec()
+    outputs = Beast._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

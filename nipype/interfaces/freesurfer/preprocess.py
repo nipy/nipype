@@ -63,14 +63,13 @@ class ParseDICOMDir(FSCommand):
    """
 
     _cmd = 'mri_parse_sdcmdir'
-    input_spec = ParseDICOMDirInputSpec
-    output_spec = ParseDICOMDirOutputSpec
+    _input_spec = ParseDICOMDirInputSpec
+    _output_spec = ParseDICOMDirOutputSpec
 
-    def _list_outputs(self):
-        outputs = self.output_spec().get()
+    def _post_run(self):
+
         if isdefined(self.inputs.dicom_info_file):
-            outputs['dicom_info_file'] = os.path.join(os.getcwd(), self.inputs.dicom_info_file)
-        return outputs
+            self.outputs.dicom_info_file = os.path.join(os.getcwd(), self.inputs.dicom_info_file)
 
 
 class UnpackSDICOMDirInputSpec(FSTraitedSpec):
@@ -125,7 +124,7 @@ class UnpackSDICOMDir(FSCommand):
     'unpacksdcmdir -generic -targ . -run 5 mprage nii struct -src .'
     """
     _cmd = 'unpacksdcmdir'
-    input_spec = UnpackSDICOMDirInputSpec
+    _input_spec = UnpackSDICOMDirInputSpec
 
 
 class MRIConvertInputSpec(FSTraitedSpec):
@@ -346,8 +345,8 @@ class MRIConvert(FSCommand):
 
     """
     _cmd = 'mri_convert'
-    input_spec = MRIConvertInputSpec
-    output_spec = MRIConvertOutputSpec
+    _input_spec = MRIConvertInputSpec
+    _output_spec = MRIConvertOutputSpec
 
     filemap = dict(cor='cor', mgh='mgh', mgz='mgz', minc='mnc',
                    afni='brik', brik='brik', bshort='bshort',
@@ -374,8 +373,8 @@ class MRIConvert(FSCommand):
                                       use_ext=False)
         return os.path.abspath(outfile)
 
-    def _list_outputs(self):
-        outputs = self.output_spec().get()
+    def _post_run(self):
+
         outfile = self._get_outfilename()
         if isdefined(self.inputs.split) and self.inputs.split:
             size = load(self.inputs.in_file).shape
@@ -411,8 +410,7 @@ class MRIConvert(FSCommand):
                     outfiles.append(fname_presuffix(outfile,
                                                     suffix='%03d' % (i + 1)))
                 outfile = outfiles
-        outputs['out_file'] = outfile
-        return outputs
+        self.outputs.out_file = outfile
 
     def _gen_filename(self, name):
         if name == 'out_file':
@@ -455,7 +453,7 @@ class DICOMConvert(FSCommand):
 
     """
     _cmd = 'mri_convert'
-    input_spec = DICOMConvertInputSpec
+    _input_spec = DICOMConvertInputSpec
 
     def _get_dicomfiles(self):
         """validate fsl bet options
@@ -573,8 +571,8 @@ class Resample(FSCommand):
     """
 
     _cmd = 'mri_convert'
-    input_spec = ResampleInputSpec
-    output_spec = ResampleOutputSpec
+    _input_spec = ResampleInputSpec
+    _output_spec = ResampleOutputSpec
 
     def _get_outfilename(self):
         if isdefined(self.inputs.resampled_file):
@@ -585,10 +583,9 @@ class Resample(FSCommand):
                                       suffix='_resample')
         return outfile
 
-    def _list_outputs(self):
-        outputs = self.output_spec().get()
-        outputs['resampled_file'] = self._get_outfilename()
-        return outputs
+    def _post_run(self):
+
+        self.outputs.resampled_file = self._get_outfilename()
 
     def _gen_filename(self, name):
         if name == 'resampled_file':
@@ -619,7 +616,7 @@ class ReconAllInputSpec(CommandLineInputSpec):
     flags = traits.Str(argstr='%s', desc='additional parameters')
 
 
-class ReconAllIOutputSpec(FreeSurferSource.output_spec):
+class ReconAllIOutputSpec(FreeSurferSource._output_spec):
     subjects_dir = Directory(exists=True, desc='Freesurfer subjects directory.')
     subject_id = traits.Str(desc='Subject name for whom to retrieve data')
 
@@ -644,8 +641,8 @@ class ReconAll(CommandLine):
 
     _cmd = 'recon-all'
     _additional_metadata = ['loc', 'altkey']
-    input_spec = ReconAllInputSpec
-    output_spec = ReconAllIOutputSpec
+    _input_spec = ReconAllInputSpec
+    _output_spec = ReconAllIOutputSpec
     _can_resume = True
 
     _steps = [
@@ -736,7 +733,7 @@ class ReconAll(CommandLine):
             return self._gen_subjects_dir()
         return None
 
-    def _list_outputs(self):
+    def _post_run(self):
         """
         See io.FreeSurferSource.outputs for the list of outputs returned
         """
@@ -750,14 +747,12 @@ class ReconAll(CommandLine):
         else:
             hemi = 'both'
 
-        outputs = self._outputs().get()
 
         outputs.update(FreeSurferSource(subject_id=self.inputs.subject_id,
                                         subjects_dir=subjects_dir,
                                         hemi=hemi)._list_outputs())
-        outputs['subject_id'] = self.inputs.subject_id
-        outputs['subjects_dir'] = subjects_dir
-        return outputs
+        self.outputs.subject_id = self.inputs.subject_id
+        self.outputs.subjects_dir = subjects_dir
 
     def _is_resuming(self):
         subjects_dir = self.inputs.subjects_dir
@@ -865,28 +860,28 @@ class BBRegister(FSCommand):
     """
 
     _cmd = 'bbregister'
-    input_spec = BBRegisterInputSpec
-    output_spec = BBRegisterOutputSpec
+    _input_spec = BBRegisterInputSpec
+    _output_spec = BBRegisterOutputSpec
 
-    def _list_outputs(self):
+    def _post_run(self):
 
-        outputs = self.output_spec().get()
+
         _in = self.inputs
 
         if isdefined(_in.out_reg_file):
-            outputs['out_reg_file'] = op.abspath(_in.out_reg_file)
+            self.outputs.out_reg_file = op.abspath(_in.out_reg_file)
         elif _in.source_file:
             suffix = '_bbreg_%s.dat' % _in.subject_id
-            outputs['out_reg_file'] = fname_presuffix(_in.source_file,
+            self.outputs.out_reg_file = fname_presuffix(_in.source_file,
                                                       suffix=suffix,
                                                       use_ext=False)
 
         if isdefined(_in.registered_file):
             if isinstance(_in.registered_file, bool):
-                outputs['registered_file'] = fname_presuffix(_in.source_file,
+                self.outputs.registered_file = fname_presuffix(_in.source_file,
                                                              suffix='_bbreg')
             else:
-                outputs['registered_file'] = op.abspath(_in.registered_file)
+                self.outputs.registered_file = op.abspath(_in.registered_file)
 
         if isdefined(_in.out_fsl_file):
             if isinstance(_in.out_fsl_file, bool):
@@ -894,18 +889,17 @@ class BBRegister(FSCommand):
                 out_fsl_file = fname_presuffix(_in.source_file,
                                                suffix=suffix,
                                                use_ext=False)
-                outputs['out_fsl_file'] = out_fsl_file
+                self.outputs.out_fsl_file = out_fsl_file
             else:
-                outputs['out_fsl_file'] = op.abspath(_in.out_fsl_file)
+                self.outputs.out_fsl_file = op.abspath(_in.out_fsl_file)
 
-        outputs['min_cost_file'] = outputs['out_reg_file'] + '.mincost'
-        return outputs
+        self.outputs.min_cost_file = self.outputs.out_reg_file + '.mincost'
 
     def _format_arg(self, name, spec, value):
 
         if name in ['registered_file', 'out_fsl_file']:
             if isinstance(value, bool):
-                fname = self._list_outputs()[name]
+                fname = getattr(self.outputs, name)
             else:
                 fname = value
             return spec.argstr % fname
@@ -914,7 +908,7 @@ class BBRegister(FSCommand):
     def _gen_filename(self, name):
 
         if name == 'out_reg_file':
-            return self._list_outputs()[name]
+            return getattr(self.outputs, name)
         return None
 
 
@@ -999,8 +993,8 @@ class ApplyVolTransform(FSCommand):
     """
 
     _cmd = 'mri_vol2vol'
-    input_spec = ApplyVolTransformInputSpec
-    output_spec = ApplyVolTransformOutputSpec
+    _input_spec = ApplyVolTransformInputSpec
+    _output_spec = ApplyVolTransformOutputSpec
 
     def _get_outfile(self):
         outfile = self.inputs.transformed_file
@@ -1017,10 +1011,9 @@ class ApplyVolTransform(FSCommand):
                                       suffix='_warped')
         return outfile
 
-    def _list_outputs(self):
-        outputs = self.output_spec().get()
-        outputs['transformed_file'] = os.path.abspath(self._get_outfile())
-        return outputs
+    def _post_run(self):
+
+        self.outputs.transformed_file = os.path.abspath(self._get_outfile())
 
     def _gen_filename(self, name):
         if name == 'transformed_file':
@@ -1079,21 +1072,20 @@ class Smooth(FSCommand):
     """
 
     _cmd = 'mris_volsmooth'
-    input_spec = SmoothInputSpec
-    output_spec = SmoothOutputSpec
+    _input_spec = SmoothInputSpec
+    _output_spec = SmoothOutputSpec
 
-    def _list_outputs(self):
-        outputs = self.output_spec().get()
+    def _post_run(self):
+
         outfile = self.inputs.smoothed_file
         if not isdefined(outfile):
             outfile = self._gen_fname(self.inputs.in_file,
                                       suffix='_smooth')
-        outputs['smoothed_file'] = outfile
-        return outputs
+        self.outputs.smoothed_file = outfile
 
     def _gen_filename(self, name):
         if name == 'smoothed_file':
-            return self._list_outputs()[name]
+            return getattr(self.outputs, name)
         return None
 
 
@@ -1189,25 +1181,25 @@ class RobustRegister(FSCommand):
     """
 
     _cmd = 'mri_robust_register'
-    input_spec = RobustRegisterInputSpec
-    output_spec = RobustRegisterOutputSpec
+    _input_spec = RobustRegisterInputSpec
+    _output_spec = RobustRegisterOutputSpec
 
     def _format_arg(self, name, spec, value):
         for option in ["registered_file", "weights_file", "half_source", "half_targ",
                        "half_weights", "half_source_xfm", "half_targ_xfm"]:
             if name == option:
                 if isinstance(value, bool):
-                    fname = self._list_outputs()[name]
+                    fname = getattr(self.outputs, name)
                 else:
                     fname = value
                 return spec.argstr % fname
         return super(RobustRegister, self)._format_arg(name, spec, value)
 
-    def _list_outputs(self):
-        outputs = self.output_spec().get()
-        outputs['out_reg_file'] = self.inputs.out_reg_file
+    def _post_run(self):
+
+        self.outputs.out_reg_file = self.inputs.out_reg_file
         if not isdefined(self.inputs.out_reg_file) and self.inputs.source_file:
-            outputs['out_reg_file'] = fname_presuffix(self.inputs.source_file,
+            self.outputs.out_reg_file = fname_presuffix(self.inputs.source_file,
                                                       suffix='_robustreg.lta', use_ext=False)
         prefices = dict(src=self.inputs.source_file, trg=self.inputs.target_file)
         suffices = dict(registered_file=("src", "_robustreg", True),
@@ -1221,17 +1213,16 @@ class RobustRegister(FSCommand):
             value = getattr(self.inputs, name)
             if isdefined(value):
                 if isinstance(value, bool):
-                    outputs[name] = fname_presuffix(prefices[sufftup[0]],
+                    setattr(self.outputs, name, fname_presuffix(prefices[sufftup[0]],
                                                     suffix=sufftup[1],
                                                     newpath=os.getcwd(),
-                                                    use_ext=sufftup[2])
+                                                    use_ext=sufftup[2]))
                 else:
-                    outputs[name] = value
-        return outputs
+                    setattr(self.outputs, name, value)
 
     def _gen_filename(self, name):
         if name == 'out_reg_file':
-            return self._list_outputs()[name]
+            return getattr(self.outputs, name)
         return None
 
 
@@ -1269,8 +1260,8 @@ class FitMSParams(FSCommand):
 
     """
     _cmd = "mri_ms_fitparms"
-    input_spec = FitMSParamsInputSpec
-    output_spec = FitMSParamsOutputSpec
+    _input_spec = FitMSParamsInputSpec
+    _output_spec = FitMSParamsOutputSpec
 
     def _format_arg(self, name, spec, value):
         if name == "in_files":
@@ -1288,16 +1279,15 @@ class FitMSParams(FSCommand):
             return cmd
         return super(FitMSParams, self)._format_arg(name, spec, value)
 
-    def _list_outputs(self):
-        outputs = self.output_spec().get()
+    def _post_run(self):
+
         if not isdefined(self.inputs.out_dir):
             out_dir = self._gen_filename("out_dir")
         else:
             out_dir = self.inputs.out_dir
-        outputs["t1_image"] = os.path.join(out_dir, "T1.mgz")
-        outputs["pd_image"] = os.path.join(out_dir, "PD.mgz")
-        outputs["t2star_image"] = os.path.join(out_dir, "T2star.mgz")
-        return outputs
+        self.outputs.t1_image = os.path.join(out_dir, "T1.mgz")
+        self.outputs.pd_image = os.path.join(out_dir, "PD.mgz")
+        self.outputs.t2star_image = os.path.join(out_dir, "T2star.mgz")
 
     def _gen_filename(self, name):
         if name == "out_dir":
@@ -1342,19 +1332,18 @@ class SynthesizeFLASH(FSCommand):
 
     """
     _cmd = "mri_synthesize"
-    input_spec = SynthesizeFLASHInputSpec
-    output_spec = SynthesizeFLASHOutputSpec
+    _input_spec = SynthesizeFLASHInputSpec
+    _output_spec = SynthesizeFLASHOutputSpec
 
-    def _list_outputs(self):
-        outputs = self.output_spec().get()
+    def _post_run(self):
+
         if isdefined(self.inputs.out_file):
-            outputs["out_file"] = self.inputs.out_file
+            self.outputs.out_file = self.inputs.out_file
         else:
-            outputs["out_file"] = self._gen_fname("synth-flash_%02d.mgz" % self.inputs.flip_angle,
+            self.outputs.out_file = self._gen_fname("synth-flash_%02d.mgz" % self.inputs.flip_angle,
                                                   suffix="")
-        return outputs
 
     def _gen_filename(self, name):
         if name == "out_file":
-            return self._list_outputs()["out_file"]
+            return self.outputs.out_file
         return None

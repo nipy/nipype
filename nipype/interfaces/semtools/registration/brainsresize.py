@@ -39,8 +39,8 @@ acknowledgements: The development of this tool was supported by funding from gra
 
 """
 
-    input_spec = BRAINSResizeInputSpec
-    output_spec = BRAINSResizeOutputSpec
+    _input_spec = BRAINSResizeInputSpec
+    _output_spec = BRAINSResizeOutputSpec
     _cmd = " BRAINSResize "
     _outputs_filenames = {'outputVolume': 'outputVolume.nii'}
     _redirect_x = False

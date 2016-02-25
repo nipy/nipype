@@ -20,15 +20,9 @@ def test_MELODIC_inputs():
     ),
     dim_est=dict(argstr='--dimest=%s',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
     epsilon=dict(argstr='--eps=%f',
     ),
     epsilonS=dict(argstr='--epsS=%f',
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
     ),
     in_files=dict(argstr='-i %s',
     mandatory=True,
@@ -74,7 +68,8 @@ def test_MELODIC_inputs():
     ),
     out_white=dict(argstr='--Owhite',
     ),
-    output_type=dict(),
+    output_type=dict(usedefault=True,
+    ),
     pbsc=dict(argstr='--pbsc',
     ),
     rem_cmp=dict(argstr='-f %d',
@@ -99,8 +94,6 @@ def test_MELODIC_inputs():
     ),
     t_des=dict(argstr='--Tdes=%s',
     ),
-    terminal_output=dict(nohash=True,
-    ),
     tr_sec=dict(argstr='--tr=%f',
     ),
     update_mask=dict(argstr='--update_mask',
@@ -108,7 +101,7 @@ def test_MELODIC_inputs():
     var_norm=dict(argstr='--vn',
     ),
     )
-    inputs = MELODIC.input_spec()
+    inputs = MELODIC._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -119,7 +112,7 @@ def test_MELODIC_outputs():
     output_map = dict(out_dir=dict(),
     report_dir=dict(),
     )
-    outputs = MELODIC.output_spec()
+    outputs = MELODIC._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

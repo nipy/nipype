@@ -6,12 +6,6 @@ from ..developer import MedicAlgorithmN3
 def test_MedicAlgorithmN3_inputs():
     input_map = dict(args=dict(argstr='%s',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     inAutomatic=dict(argstr='--inAutomatic %s',
     ),
     inEnd=dict(argstr='--inEnd %f',
@@ -38,8 +32,6 @@ def test_MedicAlgorithmN3_inputs():
     outInhomogeneity2=dict(argstr='--outInhomogeneity2 %s',
     hash_files=False,
     ),
-    terminal_output=dict(nohash=True,
-    ),
     xDefaultMem=dict(argstr='-xDefaultMem %d',
     ),
     xMaxProcess=dict(argstr='-xMaxProcess %d',
@@ -48,7 +40,7 @@ def test_MedicAlgorithmN3_inputs():
     xPrefExt=dict(argstr='--xPrefExt %s',
     ),
     )
-    inputs = MedicAlgorithmN3.input_spec()
+    inputs = MedicAlgorithmN3._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -59,7 +51,7 @@ def test_MedicAlgorithmN3_outputs():
     output_map = dict(outInhomogeneity=dict(),
     outInhomogeneity2=dict(),
     )
-    outputs = MedicAlgorithmN3.output_spec()
+    outputs = MedicAlgorithmN3._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

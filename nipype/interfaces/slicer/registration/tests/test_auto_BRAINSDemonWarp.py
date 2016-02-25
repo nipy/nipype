@@ -14,9 +14,6 @@ def test_BRAINSDemonWarp_inputs():
     checkerboardPatternSubdivisions=dict(argstr='--checkerboardPatternSubdivisions %s',
     sep=',',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
     fixedBinaryVolume=dict(argstr='--fixedBinaryVolume %s',
     ),
     fixedVolume=dict(argstr='--fixedVolume %s',
@@ -26,9 +23,6 @@ def test_BRAINSDemonWarp_inputs():
     gui=dict(argstr='--gui ',
     ),
     histogramMatch=dict(argstr='--histogramMatch ',
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
     ),
     initializeWithDisplacementField=dict(argstr='--initializeWithDisplacementField %s',
     ),
@@ -96,8 +90,6 @@ def test_BRAINSDemonWarp_inputs():
     ),
     smoothDisplacementFieldSigma=dict(argstr='--smoothDisplacementFieldSigma %f',
     ),
-    terminal_output=dict(nohash=True,
-    ),
     upFieldSmoothing=dict(argstr='--upFieldSmoothing %f',
     ),
     upperThresholdForBOBF=dict(argstr='--upperThresholdForBOBF %d',
@@ -105,7 +97,7 @@ def test_BRAINSDemonWarp_inputs():
     use_vanilla_dem=dict(argstr='--use_vanilla_dem ',
     ),
     )
-    inputs = BRAINSDemonWarp.input_spec()
+    inputs = BRAINSDemonWarp._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -117,7 +109,7 @@ def test_BRAINSDemonWarp_outputs():
     outputDisplacementFieldVolume=dict(),
     outputVolume=dict(),
     )
-    outputs = BRAINSDemonWarp.output_spec()
+    outputs = BRAINSDemonWarp._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

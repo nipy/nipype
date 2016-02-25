@@ -6,12 +6,6 @@ from ..featuredetection import CannyEdge
 def test_CannyEdge_inputs():
     input_map = dict(args=dict(argstr='%s',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     inputVolume=dict(argstr='--inputVolume %s',
     ),
     lowerThreshold=dict(argstr='--lowerThreshold %f',
@@ -19,14 +13,12 @@ def test_CannyEdge_inputs():
     outputVolume=dict(argstr='--outputVolume %s',
     hash_files=False,
     ),
-    terminal_output=dict(nohash=True,
-    ),
     upperThreshold=dict(argstr='--upperThreshold %f',
     ),
     variance=dict(argstr='--variance %f',
     ),
     )
-    inputs = CannyEdge.input_spec()
+    inputs = CannyEdge._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -36,7 +28,7 @@ def test_CannyEdge_inputs():
 def test_CannyEdge_outputs():
     output_map = dict(outputVolume=dict(),
     )
-    outputs = CannyEdge.output_spec()
+    outputs = CannyEdge._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

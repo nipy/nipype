@@ -30,17 +30,11 @@ def test_FindCenterOfBrain_inputs():
     debugTrimmedImage=dict(argstr='--debugTrimmedImage %s',
     hash_files=False,
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
     generateDebugImages=dict(argstr='--generateDebugImages ',
     ),
     headSizeEstimate=dict(argstr='--headSizeEstimate %f',
     ),
     headSizeLimit=dict(argstr='--headSizeLimit %f',
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
     ),
     imageMask=dict(argstr='--imageMask %s',
     ),
@@ -50,10 +44,8 @@ def test_FindCenterOfBrain_inputs():
     ),
     otsuPercentileThreshold=dict(argstr='--otsuPercentileThreshold %f',
     ),
-    terminal_output=dict(nohash=True,
-    ),
     )
-    inputs = FindCenterOfBrain.input_spec()
+    inputs = FindCenterOfBrain._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -68,7 +60,7 @@ def test_FindCenterOfBrain_outputs():
     debugGridImage=dict(),
     debugTrimmedImage=dict(),
     )
-    outputs = FindCenterOfBrain.output_spec()
+    outputs = FindCenterOfBrain._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

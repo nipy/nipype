@@ -25,9 +25,6 @@ def test_Average_inputs():
     ),
     debug=dict(argstr='-debug',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
     filelist=dict(argstr='-filelist %s',
     mandatory=True,
     xor=('input_files', 'filelist'),
@@ -58,9 +55,6 @@ def test_Average_inputs():
     ),
     format_unsigned=dict(argstr='-unsigned',
     xor=('format_filetype', 'format_byte', 'format_short', 'format_int', 'format_long', 'format_float', 'format_double', 'format_signed', 'format_unsigned'),
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
     ),
     input_files=dict(argstr='%s',
     exists=True,
@@ -95,8 +89,6 @@ def test_Average_inputs():
     ),
     sdfile=dict(argstr='-sdfile %s',
     ),
-    terminal_output=dict(nohash=True,
-    ),
     two=dict(argstr='-2',
     ),
     verbose=dict(argstr='-verbose',
@@ -111,7 +103,7 @@ def test_Average_inputs():
     requires=('avgdim',),
     ),
     )
-    inputs = Average.input_spec()
+    inputs = Average._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -121,7 +113,7 @@ def test_Average_inputs():
 def test_Average_outputs():
     output_map = dict(output_file=dict(),
     )
-    outputs = Average.output_spec()
+    outputs = Average._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

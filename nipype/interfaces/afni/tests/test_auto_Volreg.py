@@ -11,39 +11,25 @@ def test_Volreg_inputs():
     ),
     copyorigin=dict(argstr='-twodup',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     in_file=dict(argstr='%s',
     copyfile=False,
     mandatory=True,
     position=-1,
     ),
     md1d_file=dict(argstr='-maxdisp1D %s',
-    keep_extension=True,
-    name_source='in_file',
-    name_template='%s_md.1D',
+    keep_extension=False,
     position=-4,
     ),
     oned_file=dict(argstr='-1Dfile %s',
-    keep_extension=True,
-    name_source='in_file',
-    name_template='%s.1D',
+    keep_extension=False,
     ),
     oned_matrix_save=dict(argstr='-1Dmatrix_save %s',
-    keep_extension=True,
-    name_source='in_file',
-    name_template='%s.aff12.1D',
+    keep_extension=False,
     ),
-    out_file=dict(argstr='-prefix %s',
-    name_source='in_file',
-    name_template='%s_volreg',
+    out_file=dict(),
+    output_type=dict(usedefault=True,
     ),
-    outputtype=dict(),
-    terminal_output=dict(nohash=True,
+    prefix=dict(argstr='-prefix %s',
     ),
     timeshift=dict(argstr='-tshift 0',
     ),
@@ -53,7 +39,7 @@ def test_Volreg_inputs():
     position=-5,
     ),
     )
-    inputs = Volreg.input_spec()
+    inputs = Volreg._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -66,7 +52,7 @@ def test_Volreg_outputs():
     oned_matrix_save=dict(),
     out_file=dict(),
     )
-    outputs = Volreg.output_spec()
+    outputs = Volreg._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

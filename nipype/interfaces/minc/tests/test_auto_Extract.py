@@ -9,9 +9,6 @@ def test_Extract_inputs():
     count=dict(argstr='-count %s',
     sep=',',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
     flip_any_direction=dict(argstr='-any_direction',
     xor=('flip_positive_direction', 'flip_negative_direction', 'flip_any_direction'),
     ),
@@ -48,9 +45,6 @@ def test_Extract_inputs():
     flip_z_positive=dict(argstr='+zdirection',
     xor=('flip_z_positive', 'flip_z_negative', 'flip_z_any'),
     ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     image_maximum=dict(argstr='-image_maximum %s',
     ),
     image_minimum=dict(argstr='-image_minimum %s',
@@ -68,8 +62,8 @@ def test_Extract_inputs():
     xor=('normalize', 'nonormalize'),
     ),
     out_file=dict(argstr='> %s',
-    genfile=True,
     position=-1,
+    usedefault=True,
     ),
     output_file=dict(hash_files=False,
     keep_extension=False,
@@ -79,8 +73,6 @@ def test_Extract_inputs():
     ),
     start=dict(argstr='-start %s',
     sep=',',
-    ),
-    terminal_output=dict(nohash=True,
     ),
     write_ascii=dict(argstr='-ascii',
     xor=('write_ascii', 'write_ascii', 'write_byte', 'write_short', 'write_int', 'write_long', 'write_float', 'write_double', 'write_signed', 'write_unsigned'),
@@ -112,7 +104,7 @@ def test_Extract_inputs():
     xor=('write_signed', 'write_unsigned'),
     ),
     )
-    inputs = Extract.input_spec()
+    inputs = Extract._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -122,7 +114,7 @@ def test_Extract_inputs():
 def test_Extract_outputs():
     output_map = dict(output_file=dict(),
     )
-    outputs = Extract.output_spec()
+    outputs = Extract._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

@@ -15,22 +15,14 @@ def test_ExtractSkeleton_inputs():
     ),
     dontPrune=dict(argstr='--dontPrune ',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     numPoints=dict(argstr='--numPoints %d',
     ),
     pointsFile=dict(argstr='--pointsFile %s',
     ),
-    terminal_output=dict(nohash=True,
-    ),
     type=dict(argstr='--type %s',
     ),
     )
-    inputs = ExtractSkeleton.input_spec()
+    inputs = ExtractSkeleton._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -41,7 +33,7 @@ def test_ExtractSkeleton_outputs():
     output_map = dict(OutputImageFileName=dict(position=-1,
     ),
     )
-    outputs = ExtractSkeleton.output_spec()
+    outputs = ExtractSkeleton._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

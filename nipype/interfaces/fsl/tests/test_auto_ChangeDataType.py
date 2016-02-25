@@ -6,12 +6,6 @@ from ..maths import ChangeDataType
 def test_ChangeDataType_inputs():
     input_map = dict(args=dict(argstr='%s',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     in_file=dict(argstr='%s',
     mandatory=True,
     position=2,
@@ -21,9 +15,9 @@ def test_ChangeDataType_inputs():
     ),
     nan2zeros=dict(argstr='-nan',
     position=3,
+    usedefault=True,
     ),
     out_file=dict(argstr='%s',
-    genfile=True,
     hash_files=False,
     position=-2,
     ),
@@ -31,11 +25,10 @@ def test_ChangeDataType_inputs():
     mandatory=True,
     position=-1,
     ),
-    output_type=dict(),
-    terminal_output=dict(nohash=True,
+    output_type=dict(usedefault=True,
     ),
     )
-    inputs = ChangeDataType.input_spec()
+    inputs = ChangeDataType._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -45,7 +38,7 @@ def test_ChangeDataType_inputs():
 def test_ChangeDataType_outputs():
     output_map = dict(out_file=dict(),
     )
-    outputs = ChangeDataType.output_spec()
+    outputs = ChangeDataType._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

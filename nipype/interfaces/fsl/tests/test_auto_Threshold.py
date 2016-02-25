@@ -8,12 +8,6 @@ def test_Threshold_inputs():
     ),
     direction=dict(usedefault=True,
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     in_file=dict(argstr='%s',
     mandatory=True,
     position=2,
@@ -23,17 +17,16 @@ def test_Threshold_inputs():
     ),
     nan2zeros=dict(argstr='-nan',
     position=3,
+    usedefault=True,
     ),
     out_file=dict(argstr='%s',
-    genfile=True,
     hash_files=False,
     position=-2,
     ),
     output_datatype=dict(argstr='-odt %s',
     position=-1,
     ),
-    output_type=dict(),
-    terminal_output=dict(nohash=True,
+    output_type=dict(usedefault=True,
     ),
     thresh=dict(argstr='%s',
     mandatory=True,
@@ -43,7 +36,7 @@ def test_Threshold_inputs():
     ),
     use_robust_range=dict(),
     )
-    inputs = Threshold.input_spec()
+    inputs = Threshold._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -53,7 +46,7 @@ def test_Threshold_inputs():
 def test_Threshold_outputs():
     output_map = dict(out_file=dict(),
     )
-    outputs = Threshold.output_spec()
+    outputs = Threshold._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

@@ -7,9 +7,6 @@ def test_Level1Design_inputs():
     input_map = dict(bases=dict(mandatory=True,
     ),
     contrasts=dict(),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     interscan_interval=dict(mandatory=True,
     ),
     model_serial_correlations=dict(mandatory=True,
@@ -17,7 +14,7 @@ def test_Level1Design_inputs():
     session_info=dict(mandatory=True,
     ),
     )
-    inputs = Level1Design.input_spec()
+    inputs = Level1Design._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -28,7 +25,7 @@ def test_Level1Design_outputs():
     output_map = dict(ev_files=dict(),
     fsf_files=dict(),
     )
-    outputs = Level1Design.output_spec()
+    outputs = Level1Design._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

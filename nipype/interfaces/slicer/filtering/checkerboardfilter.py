@@ -34,7 +34,7 @@ acknowledgements: This work is part of the National Alliance for Medical Image C
 
 """
 
-    input_spec = CheckerBoardFilterInputSpec
-    output_spec = CheckerBoardFilterOutputSpec
+    _input_spec = CheckerBoardFilterInputSpec
+    _output_spec = CheckerBoardFilterOutputSpec
     _cmd = "CheckerBoardFilter "
     _outputs_filenames = {'outputVolume': 'outputVolume.nii'}

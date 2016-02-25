@@ -6,12 +6,6 @@ from ..utils import TCK2VTK
 def test_TCK2VTK_inputs():
     input_map = dict(args=dict(argstr='%s',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     in_file=dict(argstr='%s',
     mandatory=True,
     position=-2,
@@ -25,12 +19,10 @@ def test_TCK2VTK_inputs():
     ),
     reference=dict(argstr='-image %s',
     ),
-    terminal_output=dict(nohash=True,
-    ),
     voxel=dict(argstr='-image %s',
     ),
     )
-    inputs = TCK2VTK.input_spec()
+    inputs = TCK2VTK._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -40,7 +32,7 @@ def test_TCK2VTK_inputs():
 def test_TCK2VTK_outputs():
     output_map = dict(out_file=dict(),
     )
-    outputs = TCK2VTK.output_spec()
+    outputs = TCK2VTK._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

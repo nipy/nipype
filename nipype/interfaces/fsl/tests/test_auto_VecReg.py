@@ -8,12 +8,6 @@ def test_VecReg_inputs():
     ),
     args=dict(argstr='%s',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     in_file=dict(argstr='-i %s',
     mandatory=True,
     ),
@@ -25,7 +19,8 @@ def test_VecReg_inputs():
     genfile=True,
     hash_files=False,
     ),
-    output_type=dict(),
+    output_type=dict(usedefault=True,
+    ),
     ref_mask=dict(argstr='--refmask=%s',
     ),
     ref_vol=dict(argstr='-r %s',
@@ -35,12 +30,10 @@ def test_VecReg_inputs():
     ),
     rotation_warp=dict(argstr='--rotwarp=%s',
     ),
-    terminal_output=dict(nohash=True,
-    ),
     warp_field=dict(argstr='-w %s',
     ),
     )
-    inputs = VecReg.input_spec()
+    inputs = VecReg._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -50,7 +43,7 @@ def test_VecReg_inputs():
 def test_VecReg_outputs():
     output_map = dict(out_file=dict(),
     )
-    outputs = VecReg.output_spec()
+    outputs = VecReg._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

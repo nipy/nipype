@@ -6,12 +6,6 @@ from ..preprocess import Autobox
 def test_Autobox_inputs():
     input_map = dict(args=dict(argstr='%s',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     in_file=dict(argstr='-input %s',
     copyfile=False,
     mandatory=True,
@@ -21,13 +15,12 @@ def test_Autobox_inputs():
     out_file=dict(argstr='-prefix %s',
     name_source='in_file',
     ),
-    outputtype=dict(),
+    output_type=dict(usedefault=True,
+    ),
     padding=dict(argstr='-npad %d',
     ),
-    terminal_output=dict(nohash=True,
-    ),
     )
-    inputs = Autobox.input_spec()
+    inputs = Autobox._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -43,7 +36,7 @@ def test_Autobox_outputs():
     z_max=dict(),
     z_min=dict(),
     )
-    outputs = Autobox.output_spec()
+    outputs = Autobox._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

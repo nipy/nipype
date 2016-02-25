@@ -6,15 +6,9 @@ from ..convert import DT2NIfTI
 def test_DT2NIfTI_inputs():
     input_map = dict(args=dict(argstr='%s',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
     header_file=dict(argstr='-header %s',
     mandatory=True,
     position=3,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
     ),
     in_file=dict(argstr='-inputfile %s',
     mandatory=True,
@@ -24,10 +18,8 @@ def test_DT2NIfTI_inputs():
     genfile=True,
     position=2,
     ),
-    terminal_output=dict(nohash=True,
-    ),
     )
-    inputs = DT2NIfTI.input_spec()
+    inputs = DT2NIfTI._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -39,7 +31,7 @@ def test_DT2NIfTI_outputs():
     exitcode=dict(),
     lns0=dict(),
     )
-    outputs = DT2NIfTI.output_spec()
+    outputs = DT2NIfTI._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

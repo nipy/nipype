@@ -62,20 +62,19 @@ class Registration(CommandLine):
     """
 
     _cmd = 'elastix'
-    input_spec = RegistrationInputSpec
-    output_spec = RegistrationOutputSpec
+    _input_spec = RegistrationInputSpec
+    _output_spec = RegistrationOutputSpec
 
-    def _list_outputs(self):
-        outputs = self._outputs().get()
-
+    def _post_run(self):
+        
         out_dir = op.abspath(self.inputs.output_path)
 
         opts = ['WriteResultImage', 'ResultImageFormat']
         regex = re.compile(r'^\((\w+)\s(.+)\)$')
 
-        outputs['transform'] = []
-        outputs['warped_files'] = []
-        outputs['warped_files_flags'] = []
+        self.outputs.transform = []
+        self.outputs.warped_files = []
+        self.outputs.warped_files_flags = []
 
         for i, params in enumerate(self.inputs.parameters):
             config = {}
@@ -89,7 +88,7 @@ class Registration(CommandLine):
                             value = self._cast(m.group(2).strip())
                             config[m.group(1).strip()] = value
 
-            outputs['transform'].append(op.join(out_dir,
+            self.outputs.transform.append(op.join(out_dir,
                                                 'TransformParameters.%01d.txt' % i))
 
             warped_file = None
@@ -97,14 +96,13 @@ class Registration(CommandLine):
                 warped_file = op.join(out_dir,
                                       'result.%01d.%s' % (i, config['ResultImageFormat']))
 
-            outputs['warped_files'].append(warped_file)
-            outputs['warped_files_flags'].append(config['WriteResultImage'])
+            self.outputs.warped_files.append(warped_file)
+            self.outputs.warped_files_flags.append(config['WriteResultImage'])
 
-        if outputs['warped_files_flags'][-1]:
-            outputs['warped_file'] = outputs['warped_files'][-1]
+        if self.outputs.warped_files_flags[-1]:
+            self.outputs.warped_file = self.outputs.warped_files[-1]
 
-        return outputs
-
+        
     def _cast(self, val):
         if val.startswith('"') and val.endswith('"'):
             if val == '"true"':
@@ -154,15 +152,13 @@ class ApplyWarp(CommandLine):
     """
 
     _cmd = 'transformix'
-    input_spec = ApplyWarpInputSpec
-    output_spec = ApplyWarpOutputSpec
+    _input_spec = ApplyWarpInputSpec
+    _output_spec = ApplyWarpOutputSpec
 
-    def _list_outputs(self):
-        outputs = self._outputs().get()
+    def _post_run(self):
         out_dir = op.abspath(self.inputs.output_path)
-        outputs['warped_file'] = op.join(out_dir, 'result.nii.gz')
-        return outputs
-
+        self.outputs.warped_file = op.join(out_dir, 'result.nii.gz')
+        
 
 class AnalyzeWarpInputSpec(ElastixBaseInputSpec):
     transform_file = File(exists=True, mandatory=True, argstr='-tp %s',
@@ -194,17 +190,15 @@ class AnalyzeWarp(CommandLine):
     """
 
     _cmd = 'transformix -def all -jac all -jacmat all'
-    input_spec = AnalyzeWarpInputSpec
-    output_spec = AnalyzeWarpOutputSpec
+    _input_spec = AnalyzeWarpInputSpec
+    _output_spec = AnalyzeWarpOutputSpec
 
-    def _list_outputs(self):
-        outputs = self._outputs().get()
+    def _post_run(self):
         out_dir = op.abspath(self.inputs.output_path)
-        outputs['disp_field'] = op.join(out_dir, 'deformationField.nii.gz')
-        outputs['jacdet_map'] = op.join(out_dir, 'spatialJacobian.nii.gz')
-        outputs['jacmat_map'] = op.join(out_dir, 'fullSpatialJacobian.nii.gz')
-        return outputs
-
+        self.outputs.disp_field = op.join(out_dir, 'deformationField.nii.gz')
+        self.outputs.jacdet_map = op.join(out_dir, 'spatialJacobian.nii.gz')
+        self.outputs.jacmat_map = op.join(out_dir, 'fullSpatialJacobian.nii.gz')
+        
 
 class PointsWarpInputSpec(ElastixBaseInputSpec):
     points_file = File(exists=True, argstr='-def %s', mandatory=True,
@@ -235,14 +229,13 @@ class PointsWarp(CommandLine):
     """
 
     _cmd = 'transformix'
-    input_spec = PointsWarpInputSpec
-    output_spec = PointsWarpOutputSpec
+    _input_spec = PointsWarpInputSpec
+    _output_spec = PointsWarpOutputSpec
 
-    def _list_outputs(self):
-        outputs = self._outputs().get()
+    def _post_run(self):
         out_dir = op.abspath(self.inputs.output_path)
 
         fname, ext = op.splitext(op.basename(self.inputs.points_file))
 
-        outputs['warped_file'] = op.join(out_dir, 'outputpoints%s' % ext)
-        return outputs
+        self.outputs.warped_file = op.join(out_dir, 'outputpoints%s' % ext)
+        

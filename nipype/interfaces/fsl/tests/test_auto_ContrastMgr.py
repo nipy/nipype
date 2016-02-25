@@ -15,15 +15,10 @@ def test_ContrastMgr_inputs():
     copyfile=False,
     mandatory=True,
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
     fcon_file=dict(argstr='-f %s',
     ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
+    output_type=dict(usedefault=True,
     ),
-    output_type=dict(),
     param_estimates=dict(argstr='',
     copyfile=False,
     mandatory=True,
@@ -39,10 +34,8 @@ def test_ContrastMgr_inputs():
     mandatory=True,
     position=-1,
     ),
-    terminal_output=dict(nohash=True,
-    ),
     )
-    inputs = ContrastMgr.input_spec()
+    inputs = ContrastMgr._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -58,7 +51,7 @@ def test_ContrastMgr_outputs():
     zfstats=dict(),
     zstats=dict(),
     )
-    outputs = ContrastMgr.output_spec()
+    outputs = ContrastMgr._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

@@ -15,15 +15,9 @@ def test_ReconAll_inputs():
     position=0,
     usedefault=True,
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
     flags=dict(argstr='%s',
     ),
     hemi=dict(argstr='-hemi %s',
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
     ),
     openmp=dict(argstr='-openmp %d',
     ),
@@ -34,13 +28,11 @@ def test_ReconAll_inputs():
     genfile=True,
     hash_files=False,
     ),
-    terminal_output=dict(nohash=True,
-    ),
     use_T2=dict(argstr='-T2pial',
     min_ver='5.3.0',
     ),
     )
-    inputs = ReconAll.input_spec()
+    inputs = ReconAll._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -127,7 +119,7 @@ def test_ReconAll_outputs():
     loc='stats',
     ),
     )
-    outputs = ReconAll.output_spec()
+    outputs = ReconAll._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

@@ -7,9 +7,6 @@ def test_ApplyDeformations_inputs():
     input_map = dict(deformation_field=dict(field='comp{1}.def',
     mandatory=True,
     ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     in_files=dict(field='fnames',
     mandatory=True,
     ),
@@ -27,7 +24,7 @@ def test_ApplyDeformations_inputs():
     usedefault=True,
     ),
     )
-    inputs = ApplyDeformations.input_spec()
+    inputs = ApplyDeformations._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -37,7 +34,7 @@ def test_ApplyDeformations_inputs():
 def test_ApplyDeformations_outputs():
     output_map = dict(out_files=dict(),
     )
-    outputs = ApplyDeformations.output_spec()
+    outputs = ApplyDeformations._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

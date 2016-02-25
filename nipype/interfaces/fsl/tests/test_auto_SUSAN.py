@@ -14,15 +14,9 @@ def test_SUSAN_inputs():
     position=4,
     usedefault=True,
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
     fwhm=dict(argstr='%.10f',
     mandatory=True,
     position=3,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
     ),
     in_file=dict(argstr='%s',
     mandatory=True,
@@ -33,8 +27,7 @@ def test_SUSAN_inputs():
     hash_files=False,
     position=-1,
     ),
-    output_type=dict(),
-    terminal_output=dict(nohash=True,
+    output_type=dict(usedefault=True,
     ),
     usans=dict(argstr='',
     position=6,
@@ -45,7 +38,7 @@ def test_SUSAN_inputs():
     usedefault=True,
     ),
     )
-    inputs = SUSAN.input_spec()
+    inputs = SUSAN._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -55,7 +48,7 @@ def test_SUSAN_inputs():
 def test_SUSAN_outputs():
     output_map = dict(smoothed_file=dict(),
     )
-    outputs = SUSAN.output_spec()
+    outputs = SUSAN._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

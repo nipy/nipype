@@ -6,12 +6,6 @@ from ..calib import SFPICOCalibData
 def test_SFPICOCalibData_inputs():
     input_map = dict(args=dict(argstr='%s',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     info_file=dict(argstr='-infooutputfile %s',
     genfile=True,
     hash_files=False,
@@ -24,8 +18,8 @@ def test_SFPICOCalibData_inputs():
     units='NA',
     ),
     out_file=dict(argstr='> %s',
-    genfile=True,
     position=-1,
+    usedefault=True,
     ),
     scheme_file=dict(argstr='-schemefile %s',
     mandatory=True,
@@ -35,8 +29,6 @@ def test_SFPICOCalibData_inputs():
     ),
     snr=dict(argstr='-snr %f',
     units='NA',
-    ),
-    terminal_output=dict(nohash=True,
     ),
     trace=dict(argstr='-trace %f',
     units='NA',
@@ -60,7 +52,7 @@ def test_SFPICOCalibData_inputs():
     units='NA',
     ),
     )
-    inputs = SFPICOCalibData.input_spec()
+    inputs = SFPICOCalibData._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -71,7 +63,7 @@ def test_SFPICOCalibData_outputs():
     output_map = dict(PICOCalib=dict(),
     calib_info=dict(),
     )
-    outputs = SFPICOCalibData.output_spec()
+    outputs = SFPICOCalibData._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

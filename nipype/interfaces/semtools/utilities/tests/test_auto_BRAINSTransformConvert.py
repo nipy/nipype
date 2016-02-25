@@ -9,12 +9,6 @@ def test_BRAINSTransformConvert_inputs():
     displacementVolume=dict(argstr='--displacementVolume %s',
     hash_files=False,
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     inputTransform=dict(argstr='--inputTransform %s',
     ),
     outputPrecisionType=dict(argstr='--outputPrecisionType %s',
@@ -26,10 +20,8 @@ def test_BRAINSTransformConvert_inputs():
     ),
     referenceVolume=dict(argstr='--referenceVolume %s',
     ),
-    terminal_output=dict(nohash=True,
-    ),
     )
-    inputs = BRAINSTransformConvert.input_spec()
+    inputs = BRAINSTransformConvert._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -40,7 +32,7 @@ def test_BRAINSTransformConvert_outputs():
     output_map = dict(displacementVolume=dict(),
     outputTransform=dict(),
     )
-    outputs = BRAINSTransformConvert.output_spec()
+    outputs = BRAINSTransformConvert._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

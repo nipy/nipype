@@ -10,14 +10,8 @@ def test_BRAINSResample_inputs():
     ),
     deformationVolume=dict(argstr='--deformationVolume %s',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
     gridSpacing=dict(argstr='--gridSpacing %s',
     sep=',',
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
     ),
     inputVolume=dict(argstr='--inputVolume %s',
     ),
@@ -34,12 +28,10 @@ def test_BRAINSResample_inputs():
     ),
     referenceVolume=dict(argstr='--referenceVolume %s',
     ),
-    terminal_output=dict(nohash=True,
-    ),
     warpTransform=dict(argstr='--warpTransform %s',
     ),
     )
-    inputs = BRAINSResample.input_spec()
+    inputs = BRAINSResample._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -49,7 +41,7 @@ def test_BRAINSResample_inputs():
 def test_BRAINSResample_outputs():
     output_map = dict(outputVolume=dict(),
     )
-    outputs = BRAINSResample.output_spec()
+    outputs = BRAINSResample._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

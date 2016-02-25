@@ -36,7 +36,7 @@ acknowledgements: The original implementation of this method was provided by ETH
 
 """
 
-    input_spec = ExtractSkeletonInputSpec
-    output_spec = ExtractSkeletonOutputSpec
+    _input_spec = ExtractSkeletonInputSpec
+    _output_spec = ExtractSkeletonOutputSpec
     _cmd = "ExtractSkeleton "
     _outputs_filenames = {'OutputImageFileName': 'OutputImageFileName.nii'}

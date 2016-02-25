@@ -6,12 +6,6 @@ from ..registration import PointsWarp
 def test_PointsWarp_inputs():
     input_map = dict(args=dict(argstr='%s',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     num_threads=dict(argstr='-threads %01d',
     nohash=True,
     ),
@@ -22,13 +16,11 @@ def test_PointsWarp_inputs():
     points_file=dict(argstr='-def %s',
     mandatory=True,
     ),
-    terminal_output=dict(nohash=True,
-    ),
     transform_file=dict(argstr='-tp %s',
     mandatory=True,
     ),
     )
-    inputs = PointsWarp.input_spec()
+    inputs = PointsWarp._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -38,7 +30,7 @@ def test_PointsWarp_inputs():
 def test_PointsWarp_outputs():
     output_map = dict(warped_file=dict(),
     )
-    outputs = PointsWarp.output_spec()
+    outputs = PointsWarp._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

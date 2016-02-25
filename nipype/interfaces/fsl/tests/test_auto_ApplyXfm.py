@@ -41,9 +41,6 @@ def test_ApplyXfm_inputs():
     echospacing=dict(argstr='-echospacing %f',
     min_ver='5.0.0',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
     fieldmap=dict(argstr='-fieldmap %s',
     min_ver='5.0.0',
     ),
@@ -54,9 +51,6 @@ def test_ApplyXfm_inputs():
     units='degrees',
     ),
     force_scaling=dict(argstr='-forcescaling',
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
     ),
     in_file=dict(argstr='-in %s',
     mandatory=True,
@@ -97,7 +91,8 @@ def test_ApplyXfm_inputs():
     name_template='%s_flirt.mat',
     position=3,
     ),
-    output_type=dict(),
+    output_type=dict(usedefault=True,
+    ),
     padding_size=dict(argstr='-paddingsize %d',
     units='voxels',
     ),
@@ -129,8 +124,6 @@ def test_ApplyXfm_inputs():
     ),
     sinc_window=dict(argstr='-sincwindow %s',
     ),
-    terminal_output=dict(nohash=True,
-    ),
     uses_qform=dict(argstr='-usesqform',
     ),
     verbose=dict(argstr='-verbose %d',
@@ -145,7 +138,7 @@ def test_ApplyXfm_inputs():
     min_ver='5.0.0',
     ),
     )
-    inputs = ApplyXfm.input_spec()
+    inputs = ApplyXfm._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -157,7 +150,7 @@ def test_ApplyXfm_outputs():
     out_log=dict(),
     out_matrix_file=dict(),
     )
-    outputs = ApplyXfm.output_spec()
+    outputs = ApplyXfm._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

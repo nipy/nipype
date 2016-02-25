@@ -9,12 +9,6 @@ def test_SFPeaks_inputs():
     density=dict(argstr='-density %d',
     units='NA',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     in_file=dict(argstr='-inputfile %s',
     mandatory=True,
     ),
@@ -33,8 +27,8 @@ def test_SFPeaks_inputs():
     units='NA',
     ),
     out_file=dict(argstr='> %s',
-    genfile=True,
     position=-1,
+    usedefault=True,
     ),
     pdthresh=dict(argstr='-pdthresh %f',
     units='NA',
@@ -53,10 +47,8 @@ def test_SFPeaks_inputs():
     stdsfrommean=dict(argstr='-stdsfrommean %f',
     units='NA',
     ),
-    terminal_output=dict(nohash=True,
-    ),
     )
-    inputs = SFPeaks.input_spec()
+    inputs = SFPeaks._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -66,7 +58,7 @@ def test_SFPeaks_inputs():
 def test_SFPeaks_outputs():
     output_map = dict(peaks=dict(),
     )
-    outputs = SFPeaks.output_spec()
+    outputs = SFPeaks._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

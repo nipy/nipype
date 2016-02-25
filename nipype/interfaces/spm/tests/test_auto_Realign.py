@@ -6,9 +6,6 @@ from ..preprocess import Realign
 def test_Realign_inputs():
     input_map = dict(fwhm=dict(field='eoptions.fwhm',
     ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     in_files=dict(copyfile=True,
     field='data',
     mandatory=True,
@@ -50,7 +47,7 @@ def test_Realign_inputs():
     write_wrap=dict(field='roptions.wrap',
     ),
     )
-    inputs = Realign.input_spec()
+    inputs = Realign._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -63,7 +60,7 @@ def test_Realign_outputs():
     realigned_files=dict(),
     realignment_parameters=dict(),
     )
-    outputs = Realign.output_spec()
+    outputs = Realign._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

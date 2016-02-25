@@ -6,9 +6,6 @@ from ..preprocess import MRConvert
 def test_MRConvert_inputs():
     input_map = dict(args=dict(argstr='%s',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
     extension=dict(position=2,
     usedefault=True,
     ),
@@ -18,9 +15,6 @@ def test_MRConvert_inputs():
     extract_at_coordinate=dict(argstr='%s',
     position=2,
     sep=',',
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
     ),
     in_file=dict(argstr='%s',
     mandatory=True,
@@ -50,14 +44,12 @@ def test_MRConvert_inputs():
     position=3,
     units='mm',
     ),
-    terminal_output=dict(nohash=True,
-    ),
     voxel_dims=dict(argstr='-vox %s',
     position=3,
     sep=',',
     ),
     )
-    inputs = MRConvert.input_spec()
+    inputs = MRConvert._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -67,7 +59,7 @@ def test_MRConvert_inputs():
 def test_MRConvert_outputs():
     output_map = dict(converted=dict(),
     )
-    outputs = MRConvert.output_spec()
+    outputs = MRConvert._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

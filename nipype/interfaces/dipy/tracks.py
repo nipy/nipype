@@ -11,14 +11,14 @@ import numpy as np
 import nibabel as nb
 import nibabel.trackvis as nbt
 
-from ..base import (TraitedSpec, BaseInterfaceInputSpec,
+from ..base import (TraitedSpec, BaseInputSpec,
                     File, isdefined, traits)
 from .base import DipyBaseInterface
 from ... import logging
 IFLOGGER = logging.getLogger('interface')
 
 
-class TrackDensityMapInputSpec(BaseInterfaceInputSpec):
+class TrackDensityMapInputSpec(BaseInputSpec):
     in_file = File(exists=True, mandatory=True,
                    desc='The input TrackVis track file')
     reference = File(exists=True,
@@ -53,8 +53,8 @@ class TrackDensityMap(DipyBaseInterface):
     >>> trk2tdi.run()                                   # doctest: +SKIP
 
     """
-    input_spec = TrackDensityMapInputSpec
-    output_spec = TrackDensityMapOutputSpec
+    _input_spec = TrackDensityMapInputSpec
+    _output_spec = TrackDensityMapOutputSpec
 
     def _run_interface(self, runtime):
         from numpy import min_scalar_type
@@ -97,13 +97,11 @@ class TrackDensityMap(DipyBaseInterface):
 
         return runtime
 
-    def _list_outputs(self):
-        outputs = self._outputs().get()
-        outputs['out_file'] = op.abspath(self.inputs.out_filename)
-        return outputs
+    def _post_run(self):
+        self.outputs.out_file = op.abspath(self.inputs.out_filename)
+        
 
-
-class StreamlineTractographyInputSpec(BaseInterfaceInputSpec):
+class StreamlineTractographyInputSpec(BaseInputSpec):
     in_file = File(exists=True, mandatory=True, desc=('input diffusion data'))
     in_model = File(exists=True, desc=('input f/d-ODF model extracted from.'))
     tracking_mask = File(exists=True,
@@ -157,8 +155,8 @@ class StreamlineTractography(DipyBaseInterface):
     >>> track.inputs.tracking_mask = 'dilated_wm_mask.nii'
     >>> res = track.run() # doctest: +SKIP
     """
-    input_spec = StreamlineTractographyInputSpec
-    output_spec = StreamlineTractographyOutputSpec
+    _input_spec = StreamlineTractographyInputSpec
+    _output_spec = StreamlineTractographyOutputSpec
 
     def _run_interface(self, runtime):
         from dipy.reconst.peaks import peaks_from_model
@@ -272,8 +270,7 @@ class StreamlineTractography(DipyBaseInterface):
         trkfilev.to_file(self._gen_filename('tracked', ext='.trk'))
         return runtime
 
-    def _list_outputs(self):
-        outputs = self._outputs().get()
+    def _post_run(self):
         outputs['tracks'] = self._gen_filename('tracked', ext='.trk')
         outputs['gfa'] = self._gen_filename('gfa')
         if self._save_peaks:
@@ -285,8 +282,7 @@ class StreamlineTractography(DipyBaseInterface):
                 outputs['out_seeds'] = self._gen_filename('seeds',
                                                           ext='.txt')
 
-        return outputs
-
+        
     def _gen_filename(self, name, ext=None):
         fname, fext = op.splitext(op.basename(self.inputs.in_file))
         if fext == '.gz':

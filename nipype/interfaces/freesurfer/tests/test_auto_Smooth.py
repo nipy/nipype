@@ -6,12 +6,6 @@ from ..preprocess import Smooth
 def test_Smooth_inputs():
     input_map = dict(args=dict(argstr='%s',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     in_file=dict(argstr='--i %s',
     mandatory=True,
     ),
@@ -37,12 +31,10 @@ def test_Smooth_inputs():
     requires=['reg_file'],
     xor=['num_iters'],
     ),
-    terminal_output=dict(nohash=True,
-    ),
     vol_fwhm=dict(argstr='--vol-fwhm %f',
     ),
     )
-    inputs = Smooth.input_spec()
+    inputs = Smooth._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -52,7 +44,7 @@ def test_Smooth_inputs():
 def test_Smooth_outputs():
     output_map = dict(smoothed_file=dict(),
     )
-    outputs = Smooth.output_spec()
+    outputs = Smooth._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

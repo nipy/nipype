@@ -12,17 +12,11 @@ def test_SmoothTessellation_inputs():
     ),
     disable_estimates=dict(argstr='-nw',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
     gaussian_curvature_norm_steps=dict(argstr='%d ',
     position=4,
     ),
     gaussian_curvature_smoothing_steps=dict(argstr='%d',
     position=5,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
     ),
     in_file=dict(argstr='%s',
     mandatory=True,
@@ -45,15 +39,13 @@ def test_SmoothTessellation_inputs():
     snapshot_writing_iterations=dict(argstr='-w %d',
     ),
     subjects_dir=dict(),
-    terminal_output=dict(nohash=True,
-    ),
     use_gaussian_curvature_smoothing=dict(argstr='-g',
     position=3,
     ),
     use_momentum=dict(argstr='-m',
     ),
     )
-    inputs = SmoothTessellation.input_spec()
+    inputs = SmoothTessellation._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -63,7 +55,7 @@ def test_SmoothTessellation_inputs():
 def test_SmoothTessellation_outputs():
     output_map = dict(surface=dict(),
     )
-    outputs = SmoothTessellation.output_spec()
+    outputs = SmoothTessellation._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

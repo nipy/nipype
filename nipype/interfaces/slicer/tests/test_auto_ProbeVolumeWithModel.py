@@ -16,16 +16,8 @@ def test_ProbeVolumeWithModel_inputs():
     ),
     args=dict(argstr='%s',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
-    terminal_output=dict(nohash=True,
-    ),
     )
-    inputs = ProbeVolumeWithModel.input_spec()
+    inputs = ProbeVolumeWithModel._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -36,7 +28,7 @@ def test_ProbeVolumeWithModel_outputs():
     output_map = dict(OutputModel=dict(position=-1,
     ),
     )
-    outputs = ProbeVolumeWithModel.output_spec()
+    outputs = ProbeVolumeWithModel._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

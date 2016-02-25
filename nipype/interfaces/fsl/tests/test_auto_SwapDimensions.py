@@ -6,28 +6,20 @@ from ..utils import SwapDimensions
 def test_SwapDimensions_inputs():
     input_map = dict(args=dict(argstr='%s',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     in_file=dict(argstr='%s',
     mandatory=True,
-    position='1',
+    position=1,
     ),
     new_dims=dict(argstr='%s %s %s',
     mandatory=True,
     ),
     out_file=dict(argstr='%s',
-    genfile=True,
     hash_files=False,
     ),
-    output_type=dict(),
-    terminal_output=dict(nohash=True,
+    output_type=dict(usedefault=True,
     ),
     )
-    inputs = SwapDimensions.input_spec()
+    inputs = SwapDimensions._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -37,7 +29,7 @@ def test_SwapDimensions_inputs():
 def test_SwapDimensions_outputs():
     output_map = dict(out_file=dict(),
     )
-    outputs = SwapDimensions.output_spec()
+    outputs = SwapDimensions._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

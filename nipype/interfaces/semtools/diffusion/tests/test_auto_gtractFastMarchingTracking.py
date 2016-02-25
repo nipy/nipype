@@ -8,12 +8,6 @@ def test_gtractFastMarchingTracking_inputs():
     ),
     costStepSize=dict(argstr='--costStepSize %f',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     inputAnisotropyVolume=dict(argstr='--inputAnisotropyVolume %s',
     ),
     inputCostVolume=dict(argstr='--inputCostVolume %s',
@@ -37,14 +31,12 @@ def test_gtractFastMarchingTracking_inputs():
     ),
     startingSeedsLabel=dict(argstr='--startingSeedsLabel %d',
     ),
-    terminal_output=dict(nohash=True,
-    ),
     trackingThreshold=dict(argstr='--trackingThreshold %f',
     ),
     writeXMLPolyDataFile=dict(argstr='--writeXMLPolyDataFile ',
     ),
     )
-    inputs = gtractFastMarchingTracking.input_spec()
+    inputs = gtractFastMarchingTracking._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -54,7 +46,7 @@ def test_gtractFastMarchingTracking_inputs():
 def test_gtractFastMarchingTracking_outputs():
     output_map = dict(outputTract=dict(),
     )
-    outputs = gtractFastMarchingTracking.output_spec()
+    outputs = gtractFastMarchingTracking._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

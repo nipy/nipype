@@ -9,13 +9,13 @@ import numpy as np
 import nibabel as nb
 
 from nipype.interfaces.base import TraitedSpec, File, traits, isdefined
-from .base import DipyDiffusionInterface, DipyBaseInterfaceInputSpec
+from .base import DipyDiffusionInterface, DipyBaseInputSpec
 
 from nipype import logging
 IFLOGGER = logging.getLogger('interface')
 
 
-class RESTOREInputSpec(DipyBaseInterfaceInputSpec):
+class RESTOREInputSpec(DipyBaseInputSpec):
     in_mask = File(exists=True, desc=('input mask in which compute tensors'))
     noise_mask = File(
         exists=True, desc=('input mask in which compute noise variance'))
@@ -60,8 +60,8 @@ class RESTORE(DipyDiffusionInterface):
 
 
     """
-    input_spec = RESTOREInputSpec
-    output_spec = RESTOREOutputSpec
+    _input_spec = RESTOREInputSpec
+    _output_spec = RESTOREOutputSpec
 
     def _run_interface(self, runtime):
         from scipy.special import gamma
@@ -144,14 +144,12 @@ class RESTORE(DipyDiffusionInterface):
 
         return runtime
 
-    def _list_outputs(self):
-        outputs = self._outputs().get()
+    def _post_run(self):
         for k in outputs.keys():
             outputs[k] = self._gen_filename(k)
-        return outputs
+        
 
-
-class EstimateResponseSHInputSpec(DipyBaseInterfaceInputSpec):
+class EstimateResponseSHInputSpec(DipyBaseInputSpec):
     in_evals = File(
         exists=True, mandatory=True, desc=('input eigenvalues file'))
     in_mask = File(
@@ -197,8 +195,8 @@ class EstimateResponseSH(DipyDiffusionInterface):
 
 
     """
-    input_spec = EstimateResponseSHInputSpec
-    output_spec = EstimateResponseSHOutputSpec
+    _input_spec = EstimateResponseSHInputSpec
+    _output_spec = EstimateResponseSHOutputSpec
 
     def _run_interface(self, runtime):
         from dipy.core.gradients import GradientTable
@@ -266,14 +264,12 @@ class EstimateResponseSH(DipyDiffusionInterface):
             None).to_filename(op.abspath(self.inputs.out_mask))
         return runtime
 
-    def _list_outputs(self):
-        outputs = self._outputs().get()
+    def _post_run(self):
         outputs['response'] = op.abspath(self.inputs.response)
         outputs['out_mask'] = op.abspath(self.inputs.out_mask)
-        return outputs
+        
 
-
-class CSDInputSpec(DipyBaseInterfaceInputSpec):
+class CSDInputSpec(DipyBaseInputSpec):
     in_mask = File(exists=True, desc=('input mask in which compute tensors'))
     response = File(exists=True, desc=('single fiber estimated response'))
     sh_order = traits.Int(8, exists=True, usedefault=True,
@@ -310,8 +306,8 @@ class CSD(DipyDiffusionInterface):
     >>> csd.inputs.in_bvec = 'bvecs'
     >>> res = csd.run() # doctest: +SKIP
     """
-    input_spec = CSDInputSpec
-    output_spec = CSDOutputSpec
+    _input_spec = CSDInputSpec
+    _output_spec = CSDOutputSpec
 
     def _run_interface(self, runtime):
         from dipy.reconst.csdeconv import ConstrainedSphericalDeconvModel
@@ -360,9 +356,8 @@ class CSD(DipyDiffusionInterface):
 
         return runtime
 
-    def _list_outputs(self):
-        outputs = self._outputs().get()
+    def _post_run(self):
         outputs['model'] = self._gen_filename('csdmodel', ext='.pklz')
         if self.inputs.save_fods:
             outputs['out_fods'] = self._gen_filename('fods')
-        return outputs
+        

@@ -9,12 +9,6 @@ def test_Trackvis2Camino_inputs():
     ),
     args=dict(argstr='%s',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     in_file=dict(argstr='-i %s',
     mandatory=True,
     position=1,
@@ -23,10 +17,8 @@ def test_Trackvis2Camino_inputs():
     genfile=True,
     position=2,
     ),
-    terminal_output=dict(nohash=True,
-    ),
     )
-    inputs = Trackvis2Camino.input_spec()
+    inputs = Trackvis2Camino._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -36,7 +28,7 @@ def test_Trackvis2Camino_inputs():
 def test_Trackvis2Camino_outputs():
     output_map = dict(camino=dict(),
     )
-    outputs = Trackvis2Camino.output_spec()
+    outputs = Trackvis2Camino._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

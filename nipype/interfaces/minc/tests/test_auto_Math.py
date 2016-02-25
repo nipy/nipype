@@ -37,9 +37,6 @@ def test_Math_inputs():
     ),
     dimension=dict(argstr='-dimension %s',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
     exp=dict(argstr='-exp -const2 %s %s',
     ),
     filelist=dict(argstr='-filelist %s',
@@ -72,9 +69,6 @@ def test_Math_inputs():
     ),
     format_unsigned=dict(argstr='-unsigned',
     xor=('format_filetype', 'format_byte', 'format_short', 'format_int', 'format_long', 'format_float', 'format_double', 'format_signed', 'format_unsigned'),
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
     ),
     ignore_nan=dict(argstr='-ignore_nan',
     ),
@@ -135,8 +129,6 @@ def test_Math_inputs():
     ),
     square=dict(argstr='-square',
     ),
-    terminal_output=dict(nohash=True,
-    ),
     test_eq=dict(argstr='-eq',
     ),
     test_ge=dict(argstr='-ge',
@@ -154,7 +146,7 @@ def test_Math_inputs():
     voxel_range=dict(argstr='-range %d %d',
     ),
     )
-    inputs = Math.input_spec()
+    inputs = Math._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -164,7 +156,7 @@ def test_Math_inputs():
 def test_Math_outputs():
     output_map = dict(output_file=dict(),
     )
-    outputs = Math.output_spec()
+    outputs = Math._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

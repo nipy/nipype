@@ -1,6 +1,6 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
-'''
+"""
 Miscellaneous algorithms
 
     Change directory to provide relative paths for doctests
@@ -9,7 +9,7 @@ Miscellaneous algorithms
     >>> datadir = os.path.realpath(os.path.join(filepath, '../testing/data'))
     >>> os.chdir(datadir)
 
-'''
+"""
 from __future__ import print_function
 from __future__ import absolute_import
 from __future__ import division
@@ -28,39 +28,36 @@ import scipy.io as sio
 import itertools
 import scipy.stats as stats
 
-from nipype import logging
-
-import warnings
-
 from . import metrics as nam
-from ..interfaces.base import (BaseInterface, traits, TraitedSpec, File,
-                               InputMultiPath, OutputMultiPath,
-                               BaseInterfaceInputSpec, isdefined,
-                               DynamicTraitedSpec, Undefined)
-from nipype.utils.filemanip import fname_presuffix, split_filename
-iflogger = logging.getLogger('interface')
+from ..utils.filemanip import fname_presuffix, split_filename
+from ..interfaces.base import (traits, File, GenFile, GenMultiFile, isdefined, Undefined,
+                               BaseInputSpec, TraitedSpec, InputMultiPath,
+                               OutputMultiPath, DynamicTraitedSpec, BaseInterface)
 
 
-class PickAtlasInputSpec(BaseInterfaceInputSpec):
+from .. import logging
+IFLOGGER = logging.getLogger('interface')
+
+
+class PickAtlasInputSpec(BaseInputSpec):
     atlas = File(exists=True, desc="Location of the atlas that will be used.",
                  mandatory=True)
     labels = traits.Either(
         traits.Int, traits.List(traits.Int),
         desc=("Labels of regions that will be included in the mask. Must be\
         compatible with the atlas used."),
-        mandatory=True
-    )
+        mandatory=True)
     hemi = traits.Enum(
         'both', 'left', 'right',
         desc="Restrict the mask to only one hemisphere: left or right",
-        usedefault=True
-    )
+        usedefault=True)
     dilation_size = traits.Int(
         usedefault=True,
-        desc="Defines how much the mask will be dilated (expanded in 3D)."
-    )
-    output_file = File(desc="Where to store the output mask.")
-
+        desc="Defines how much the mask will be dilated (expanded in 3D).")
+    output_file = File(deprecated=True, new_name='mask_file',
+                       desc="Where to store the output mask.")
+    mask_file = GenFile(ns='atlas', template='%s_mask',
+                        desc="Where to store the output mask.")
 
 class PickAtlasOutputSpec(TraitedSpec):
     mask_file = File(exists=True, desc="output mask file")
@@ -71,13 +68,12 @@ class PickAtlas(BaseInterface):
     and left right masking (assuming the atlas is properly aligned).
     """
 
-    input_spec = PickAtlasInputSpec
-    output_spec = PickAtlasOutputSpec
+    _input_spec = PickAtlasInputSpec
+    _output_spec = PickAtlasOutputSpec
 
     def _run_interface(self, runtime):
         nim = self._get_brodmann_area()
-        nb.save(nim, self._gen_output_filename())
-
+        nb.save(nim, self.inputs.out_mask)
         return runtime
 
     def _gen_output_filename(self):
@@ -113,35 +109,28 @@ class PickAtlas(BaseInterface):
 
         return nb.Nifti1Image(newdata, nii.affine, nii.header)
 
-    def _list_outputs(self):
-        outputs = self._outputs().get()
-        outputs['mask_file'] = self._gen_output_filename()
-        return outputs
 
-
-class SimpleThresholdInputSpec(BaseInterfaceInputSpec):
-    volumes = InputMultiPath(
-        File(exists=True), desc='volumes to be thresholded', mandatory=True)
-    threshold = traits.Float(
-        desc='volumes to be thresholdedeverything below this value will be set\
-        to zero',
-        mandatory=True
-    )
+class SimpleThresholdInputSpec(BaseInputSpec):
+    volumes = InputMultiPath(File(exists=True), mandatory=True,
+                             desc='volumes to be thresholded')
+    threshold = traits.Float(mandatory=True, desc='volumes to be thresholdedeverything below '
+                                                  'this value will be set to zero')
+    thresholded_volumes = GenMultiFile(template='{volumes}_thresholded', keep_extension=True,
+                                       desc="thresholded volumes")
 
 
 class SimpleThresholdOutputSpec(TraitedSpec):
-    thresholded_volumes = OutputMultiPath(
-        File(exists=True), desc="thresholded volumes")
+    thresholded_volumes = OutputMultiPath(File(exists=True), desc="thresholded volumes")
 
 
 class SimpleThreshold(BaseInterface):
     """Applies a threshold to input volumes
     """
-    input_spec = SimpleThresholdInputSpec
-    output_spec = SimpleThresholdOutputSpec
+    _input_spec = SimpleThresholdInputSpec
+    _output_spec = SimpleThresholdOutputSpec
 
     def _run_interface(self, runtime):
-        for fname in self.inputs.volumes:
+        for fname, out_name in zip(self.inputs.volumes, self.inputs.thresholded_volumes):
             img = nb.load(fname)
             data = np.array(img.get_data())
 
@@ -151,92 +140,60 @@ class SimpleThreshold(BaseInterface):
             thresholded_map[active_map] = data[active_map]
 
             new_img = nb.Nifti1Image(thresholded_map, img.affine, img.header)
-            _, base, _ = split_filename(fname)
-            nb.save(new_img, base + '_thresholded.nii')
+            nb.save(new_img, out_name)
 
         return runtime
 
-    def _list_outputs(self):
-        outputs = self._outputs().get()
-        outputs["thresholded_volumes"] = []
-        for fname in self.inputs.volumes:
-            _, base, _ = split_filename(fname)
-            outputs["thresholded_volumes"].append(
-                os.path.abspath(base + '_thresholded.nii'))
-        return outputs
 
-
-class ModifyAffineInputSpec(BaseInterfaceInputSpec):
+class ModifyAffineInputSpec(BaseInputSpec):
     volumes = InputMultiPath(
-        File(exists=True),
-        desc='volumes which affine matrices will be modified',
-        mandatory=True
-    )
+        File(exists=True), mandatory=True,
+        desc='volumes which affine matrices will be modified')
     transformation_matrix = traits.Array(
-        value=np.eye(4),
-        shape=(4, 4),
-        desc="transformation matrix that will be left multiplied by the\
-        affine matrix",
-        usedefault=True
-    )
+        value=np.eye(4), shape=(4, 4), usedefault=True,
+        desc='transformation matrix that will be left multiplied by the affine matrix')
+    transformed_volumes = GenMultiFile(template='{volumes}_transformed', keep_extension=True,
+                                       desc='output transformed files')
 
 
 class ModifyAffineOutputSpec(TraitedSpec):
-    transformed_volumes = OutputMultiPath(File(exist=True))
+    transformed_volumes = OutputMultiPath(File(exist=True), desc='output transformed files')
 
 
 class ModifyAffine(BaseInterface):
     """Left multiplies the affine matrix with a specified values. Saves the volume
     as a nifti file.
     """
-    input_spec = ModifyAffineInputSpec
-    output_spec = ModifyAffineOutputSpec
-
-    def _gen_output_filename(self, name):
-        _, base, _ = split_filename(name)
-        return os.path.abspath(base + "_transformed.nii")
+    _input_spec = ModifyAffineInputSpec
+    _output_spec = ModifyAffineOutputSpec
 
     def _run_interface(self, runtime):
-        for fname in self.inputs.volumes:
+        for fname, out_name in zip(self.inputs.volumes, self.inputs.transformed_volumes):
             img = nb.load(fname)
-
             affine = img.affine
             affine = np.dot(self.inputs.transformation_matrix, affine)
-
-            nb.save(nb.Nifti1Image(img.get_data(), affine, img.header),
-                    self._gen_output_filename(fname))
-
+            nb.save(nb.Nifti1Image(img.get_data(), affine, img.header), out_name)
         return runtime
 
-    def _list_outputs(self):
-        outputs = self._outputs().get()
-        outputs['transformed_volumes'] = []
-        for fname in self.inputs.volumes:
-            outputs['transformed_volumes'].append(
-                self._gen_output_filename(fname))
-        return outputs
 
-
-class CreateNiftiInputSpec(BaseInterfaceInputSpec):
+class CreateNiftiInputSpec(BaseInputSpec):
     data_file = File(exists=True, mandatory=True, desc="ANALYZE img file")
     header_file = File(
         exists=True, mandatory=True, desc="corresponding ANALYZE hdr file")
     affine = traits.Array(desc="affine transformation array")
+    nifti_file = GenFile(ns='data_file', template='%s_nifti.nii',
+                         keep_extension=False, desc='output nifti file')
 
 
 class CreateNiftiOutputSpec(TraitedSpec):
-    nifti_file = File(exists=True)
+    nifti_file = File(exists=True, desc='output nifti file')
 
 
 class CreateNifti(BaseInterface):
     """Creates a nifti volume
     """
-    input_spec = CreateNiftiInputSpec
-    output_spec = CreateNiftiOutputSpec
-
-    def _gen_output_file_name(self):
-        _, base, _ = split_filename(self.inputs.data_file)
-        return os.path.abspath(base + ".nii")
+    _input_spec = CreateNiftiInputSpec
+    _output_spec = CreateNiftiOutputSpec
 
     def _run_interface(self, runtime):
         hdr = nb.AnalyzeHeader.from_fileobj(
@@ -249,28 +206,23 @@ class CreateNifti(BaseInterface):
 
         data = hdr.data_from_fileobj(open(self.inputs.data_file, 'rb'))
         img = nb.Nifti1Image(data, affine, hdr)
-        nb.save(img, self._gen_output_file_name())
-
+        nb.save(img, self.inputs.nifti_file)
         return runtime
 
-    def _list_outputs(self):
-        outputs = self._outputs().get()
-        outputs['nifti_file'] = self._gen_output_file_name()
-        return outputs
 
-
-class TSNRInputSpec(BaseInterfaceInputSpec):
+class TSNRInputSpec(BaseInputSpec):
     in_file = InputMultiPath(File(exists=True), mandatory=True,
                              desc='realigned 4D file or a list of 3D files')
     regress_poly = traits.Range(low=1, desc='Remove polynomials')
-    tsnr_file = File('tsnr.nii.gz', usedefault=True, hash_files=False,
-                     desc='output tSNR file')
-    mean_file = File('mean.nii.gz', usedefault=True, hash_files=False,
-                     desc='output mean file')
-    stddev_file = File('stdev.nii.gz', usedefault=True, hash_files=False,
-                       desc='output tSNR file')
-    detrended_file = File('detrend.nii.gz', usedefault=True, hash_files=False,
-                          desc='input file after detrending')
+    tsnr_file = GenFile(ns='in_file', template='%s_tsnr',
+                        hash_files=False, desc='output tSNR file')
+    mean_file = GenFile(ns='in_file', template='%s_mean',
+                        hash_files=False, desc='output mean file')
+    stddev_file = GenFile(ns='in_file', template='%s_stdev',
+                          hash_files=False, desc='output std deviation file')
+    detrended_file = GenFile(
+        ns='in_file', template='%s_detrend', hash_files=False,
+        desc='input file after detrending')
 
 
 class TSNROutputSpec(TraitedSpec):
@@ -293,8 +245,8 @@ class TSNR(BaseInterface):
     >>> res = tsnr.run() # doctest: +SKIP
 
     """
-    input_spec = TSNRInputSpec
-    output_spec = TSNROutputSpec
+    _input_spec = TSNRInputSpec
+    _output_spec = TSNROutputSpec
 
     def _run_interface(self, runtime):
         img = nb.load(self.inputs.in_file[0])
@@ -333,19 +285,13 @@ class TSNR(BaseInterface):
         nb.save(img, op.abspath(self.inputs.mean_file))
         img = nb.Nifti1Image(stddevimg, img.get_affine(), header)
         nb.save(img, op.abspath(self.inputs.stddev_file))
+
+        if not isdefined(self.inputs.regress_poly):
+            self.outputs.detrended_file = Undefined
         return runtime
 
-    def _list_outputs(self):
-        outputs = self._outputs().get()
-        for k in ['tsnr_file', 'mean_file', 'stddev_file']:
-            outputs[k] = op.abspath(getattr(self.inputs, k))
 
-        if isdefined(self.inputs.regress_poly):
-            outputs['detrended_file'] = op.abspath(self.inputs.detrended_file)
-        return outputs
-
-
-class GunzipInputSpec(BaseInterfaceInputSpec):
+class GunzipInputSpec(BaseInputSpec):
     in_file = File(exists=True, mandatory=True)
 
 
@@ -354,51 +300,25 @@ class GunzipOutputSpec(TraitedSpec):
 
 
 class Gunzip(BaseInterface):
-    """Gunzip wrapper
-    """
-    input_spec = GunzipInputSpec
-    output_spec = GunzipOutputSpec
-
-    def _gen_output_file_name(self):
-        _, base, ext = split_filename(self.inputs.in_file)
-        if ext[-2:].lower() == ".gz":
-            ext = ext[:-3]
-        return os.path.abspath(base + ext[:-3])
+    """Gunzip wrapper"""
+    _input_spec = GunzipInputSpec
+    _output_spec = GunzipOutputSpec
 
     def _run_interface(self, runtime):
         import gzip
-        in_file = gzip.open(self.inputs.in_file, 'rb')
-        out_file = open(self._gen_output_file_name(), 'wb')
-        out_file.write(in_file.read())
-        out_file.close()
-        in_file.close()
+
+        _, fname, ext = split_filename(self.inputs.in_file)
+        out_file = fname + ext
+        if not ext.endswith('.gz'):
+            IFLOGGER.warn('File does not have .gz extension.')
+        else:
+            out_file = out_file[:-3]
+
+        with gzip.open(self.inputs.in_file, 'rb') as in_file:
+            with open(out_file, 'wb') as ofile:
+                ofile.write(in_file.read())
+        self.outputs.out_file = out_file
         return runtime
-
-    def _list_outputs(self):
-        outputs = self._outputs().get()
-        outputs['out_file'] = self._gen_output_file_name()
-        return outputs
-
-
-def replaceext(in_list, ext):
-    out_list = list()
-    for filename in in_list:
-        path, name, _ = split_filename(op.abspath(filename))
-        out_name = op.join(path, name) + ext
-        out_list.append(out_name)
-    return out_list
-
-
-def matlab2csv(in_array, name, reshape):
-    output_array = np.asarray(in_array)
-    if reshape:
-        if len(np.shape(output_array)) > 1:
-            output_array = np.reshape(output_array, (
-                np.shape(output_array)[0] * np.shape(output_array)[1], 1))
-            iflogger.info(np.shape(output_array))
-    output_name = op.abspath(name + '.csv')
-    np.savetxt(output_name, output_array, delimiter=',')
-    return output_name
 
 
 class Matlab2CSVInputSpec(TraitedSpec):
@@ -432,8 +352,8 @@ class Matlab2CSV(BaseInterface):
     >>> mat2csv.inputs.in_file = 'cmatrix.mat'
     >>> mat2csv.run() # doctest: +SKIP
     """
-    input_spec = Matlab2CSVInputSpec
-    output_spec = Matlab2CSVOutputSpec
+    _input_spec = Matlab2CSVInputSpec
+    _output_spec = Matlab2CSVOutputSpec
 
     def _run_interface(self, runtime):
         in_dict = sio.loadmat(op.abspath(self.inputs.in_file))
@@ -449,14 +369,14 @@ class Matlab2CSV(BaseInterface):
                 if isinstance(in_dict[key][0], np.ndarray):
                     saved_variables.append(key)
                 else:
-                    iflogger.info('One of the keys in the input file, {k}, is not a Numpy array'.format(k=key))
+                    IFLOGGER.info('One of the keys in the input file, {k}, is not a Numpy array'.format(k=key))
 
         if len(saved_variables) > 1:
-            iflogger.info(
+            IFLOGGER.info(
                 '{N} variables found:'.format(N=len(saved_variables)))
-            iflogger.info(saved_variables)
+            IFLOGGER.info(saved_variables)
             for variable in saved_variables:
-                iflogger.info(
+                IFLOGGER.info(
                     '...Converting {var} - type {ty} - to\
                     CSV'.format(var=variable, ty=type(in_dict[variable]))
                 )
@@ -465,17 +385,18 @@ class Matlab2CSV(BaseInterface):
         elif len(saved_variables) == 1:
             _, name, _ = split_filename(self.inputs.in_file)
             variable = saved_variables[0]
-            iflogger.info('Single variable found {var}, type {ty}:'.format(
+            IFLOGGER.info('Single variable found {var}, type {ty}:'.format(
                 var=variable, ty=type(in_dict[variable])))
-            iflogger.info('...Converting {var} to CSV from {f}'.format(
+            IFLOGGER.info('...Converting {var} to CSV from {f}'.format(
                 var=variable, f=self.inputs.in_file))
             matlab2csv(in_dict[variable], name, self.inputs.reshape_matrix)
         else:
-            iflogger.error('No values in the MATLAB file?!')
+            IFLOGGER.error('No values in the MATLAB file?!')
         return runtime
 
-    def _list_outputs(self):
-        outputs = self.output_spec().get()
+    def _post_run(self):
+        super(Matlab2CSV, self)._post_run()
+
         in_dict = sio.loadmat(op.abspath(self.inputs.in_file))
         saved_variables = list()
         for key in list(in_dict.keys()):
@@ -483,104 +404,16 @@ class Matlab2CSV(BaseInterface):
                 if isinstance(in_dict[key][0], np.ndarray):
                     saved_variables.append(key)
                 else:
-                    iflogger.error('One of the keys in the input file, {k}, is\
+                    IFLOGGER.error('One of the keys in the input file, {k}, is\
                                    not a Numpy array'.format(k=key))
 
         if len(saved_variables) > 1:
-            outputs['csv_files'] = replaceext(saved_variables, '.csv')
+            self.outputs.csv_files = replaceext(saved_variables, '.csv')
         elif len(saved_variables) == 1:
             _, name, ext = split_filename(self.inputs.in_file)
-            outputs['csv_files'] = op.abspath(name + '.csv')
+            self.outputs.csv_files = op.abspath(name + '.csv')
         else:
-            iflogger.error('No values in the MATLAB file?!')
-        return outputs
-
-
-def merge_csvs(in_list):
-    for idx, in_file in enumerate(in_list):
-        try:
-            in_array = np.loadtxt(in_file, delimiter=',')
-        except ValueError as ex:
-            try:
-                in_array = np.loadtxt(in_file, delimiter=',', skiprows=1)
-            except ValueError as ex:
-                first = open(in_file, 'r')
-                header_line = first.readline()
-                header_list = header_line.split(',')
-                n_cols = len(header_list)
-                try:
-                    in_array = np.loadtxt(
-                        in_file, delimiter=',', skiprows=1,
-                        usecols=list(range(1, n_cols))
-                    )
-                except ValueError as ex:
-                    in_array = np.loadtxt(
-                        in_file, delimiter=',', skiprows=1, usecols=list(range(1, n_cols - 1)))
-        if idx == 0:
-            out_array = in_array
-        else:
-            out_array = np.dstack((out_array, in_array))
-    out_array = np.squeeze(out_array)
-    iflogger.info('Final output array shape:')
-    iflogger.info(np.shape(out_array))
-    return out_array
-
-
-def remove_identical_paths(in_files):
-    import os.path as op
-    from ..utils.filemanip import split_filename
-    if len(in_files) > 1:
-        out_names = list()
-        commonprefix = op.commonprefix(in_files)
-        lastslash = commonprefix.rfind('/')
-        commonpath = commonprefix[0:(lastslash + 1)]
-        for fileidx, in_file in enumerate(in_files):
-            path, name, ext = split_filename(in_file)
-            in_file = op.join(path, name)
-            name = in_file.replace(commonpath, '')
-            name = name.replace('_subject_id_', '')
-            out_names.append(name)
-    else:
-        path, name, ext = split_filename(in_files[0])
-        out_names = [name]
-    return out_names
-
-
-def maketypelist(rowheadings, shape, extraheadingBool, extraheading):
-    typelist = []
-    if rowheadings:
-        typelist.append(('heading', 'a40'))
-    if len(shape) > 1:
-        for idx in range(1, (min(shape) + 1)):
-            typelist.append((str(idx), float))
-    else:
-        for idx in range(1, (shape[0] + 1)):
-            typelist.append((str(idx), float))
-    if extraheadingBool:
-        typelist.append((extraheading, 'a40'))
-    iflogger.info(typelist)
-    return typelist
-
-
-def makefmtlist(output_array, typelist, rowheadingsBool,
-                shape, extraheadingBool):
-    fmtlist = []
-    if rowheadingsBool:
-        fmtlist.append('%s')
-    if len(shape) > 1:
-        output = np.zeros(max(shape), typelist)
-        for idx in range(1, min(shape) + 1):
-            output[str(idx)] = output_array[:, idx - 1]
-            fmtlist.append('%f')
-    else:
-        output = np.zeros(1, typelist)
-        for idx in range(1, len(output_array) + 1):
-            output[str(idx)] = output_array[idx - 1]
-            fmtlist.append('%f')
-    if extraheadingBool:
-        fmtlist.append('%s')
-    fmt = ','.join(fmtlist)
-    return fmt, output
+            IFLOGGER.error('No values in the MATLAB file?!')
 
 
 class MergeCSVFilesInputSpec(TraitedSpec):
@@ -627,8 +460,8 @@ class MergeCSVFiles(BaseInterface):
     >>> mat2csv.inputs.column_headings = ['degree','clustering']
     >>> mat2csv.run() # doctest: +SKIP
     """
-    input_spec = MergeCSVFilesInputSpec
-    output_spec = MergeCSVFilesOutputSpec
+    _input_spec = MergeCSVFilesInputSpec
+    _output_spec = MergeCSVFilesOutputSpec
 
     def _run_interface(self, runtime):
         extraheadingBool = False
@@ -638,41 +471,41 @@ class MergeCSVFiles(BaseInterface):
         This block defines the column headings.
         """
         if isdefined(self.inputs.column_headings):
-            iflogger.info('Column headings have been provided:')
+            IFLOGGER.info('Column headings have been provided:')
             headings = self.inputs.column_headings
         else:
-            iflogger.info(
+            IFLOGGER.info(
                 'Column headings not provided! Pulled from input filenames:')
             headings = remove_identical_paths(self.inputs.in_files)
 
         if isdefined(self.inputs.extra_field):
             if isdefined(self.inputs.extra_column_heading):
                 extraheading = self.inputs.extra_column_heading
-                iflogger.info('Extra column heading provided: {col}'.format(
+                IFLOGGER.info('Extra column heading provided: {col}'.format(
                     col=extraheading))
             else:
                 extraheading = 'type'
-                iflogger.info(
+                IFLOGGER.info(
                     'Extra column heading was not defined. Using "type"')
             headings.append(extraheading)
             extraheadingBool = True
 
         if len(self.inputs.in_files) == 1:
-            iflogger.warn('Only one file input!')
+            IFLOGGER.warn('Only one file input!')
 
         if isdefined(self.inputs.row_headings):
-            iflogger.info('Row headings have been provided. Adding "labels"\
+            IFLOGGER.info('Row headings have been provided. Adding "labels"\
                           column header.')
             prefix = '"{p}","'.format(p=self.inputs.row_heading_title)
             csv_headings = prefix + '","'.join(itertools.chain(
                 headings)) + '"\n'
             rowheadingsBool = True
         else:
-            iflogger.info('Row headings have not been provided.')
+            IFLOGGER.info('Row headings have not been provided.')
             csv_headings = '"' + '","'.join(itertools.chain(headings)) + '"\n'
 
-        iflogger.info('Final Headings:')
-        iflogger.info(csv_headings)
+        IFLOGGER.info('Final Headings:')
+        IFLOGGER.info(csv_headings)
 
         """
         Next we merge the arrays and define the output text file
@@ -710,29 +543,20 @@ class MergeCSVFiles(BaseInterface):
                 mx = 1
             for idx in range(0, mx):
                 extrafieldlist.append(self.inputs.extra_field)
-            iflogger.info(len(extrafieldlist))
+            IFLOGGER.info(len(extrafieldlist))
             output[extraheading] = extrafieldlist
-        iflogger.info(output)
-        iflogger.info(fmt)
+        IFLOGGER.info(output)
+        IFLOGGER.info(fmt)
         np.savetxt(file_handle, output, fmt, delimiter=',')
         file_handle.close()
         return runtime
-
-    def _list_outputs(self):
-        outputs = self.output_spec().get()
-        _, name, ext = split_filename(self.inputs.out_file)
-        if not ext == '.csv':
-            ext = '.csv'
-        out_file = op.abspath(name + ext)
-        outputs['csv_file'] = out_file
-        return outputs
 
 
 class AddCSVColumnInputSpec(TraitedSpec):
     in_file = File(exists=True, mandatory=True,
                    desc='Input comma-separated value (CSV) files')
-    out_file = File('extra_heading.csv', usedefault=True,
-                    desc='Output filename for merged CSV file')
+    out_file = GenFile(ns='in_file', template='%s_col_added', output_name='csv_file',
+                       desc='Output filename for merged CSV file')
     extra_column_heading = traits.Str(
         desc='New heading to add for the added field.')
     extra_field = traits.Str(
@@ -757,41 +581,25 @@ class AddCSVColumn(BaseInterface):
     >>> addcol.inputs.extra_field = 'male'
     >>> addcol.run() # doctest: +SKIP
     """
-    input_spec = AddCSVColumnInputSpec
-    output_spec = AddCSVColumnOutputSpec
+    _input_spec = AddCSVColumnInputSpec
+    _output_spec = AddCSVColumnOutputSpec
 
     def _run_interface(self, runtime):
-        in_file = open(self.inputs.in_file, 'r')
-        _, name, ext = split_filename(self.inputs.out_file)
-        if not ext == '.csv':
-            ext = '.csv'
-        out_file = op.abspath(name + ext)
-
-        out_file = open(out_file, 'w')
-        firstline = in_file.readline()
-        firstline = firstline.replace('\n', '')
-        new_firstline = firstline + ',"' + \
-            self.inputs.extra_column_heading + '"\n'
-        out_file.write(new_firstline)
-        for line in in_file:
-            new_line = line.replace('\n', '')
-            new_line = new_line + ',' + self.inputs.extra_field + '\n'
-            out_file.write(new_line)
+        with open(self.inputs.in_file, 'r') as in_file:
+            firstline = in_file.readline()
+            firstline = firstline.replace('\n', '')
+            new_firstline = firstline + ',"' + self.inputs.extra_column_heading + '"\n'
+            with open(self.inputs.out_file, 'w') as out_file:
+                out_file.write(new_firstline)
+                for line in in_file:
+                    new_line = line.replace('\n', '')
+                    new_line = new_line + ',' + self.inputs.extra_field + '\n'
+                    out_file.write(new_line)
         return runtime
 
-    def _list_outputs(self):
-        outputs = self.output_spec().get()
-        _, name, ext = split_filename(self.inputs.out_file)
-        if not ext == '.csv':
-            ext = '.csv'
-        out_file = op.abspath(name + ext)
-        outputs['csv_file'] = out_file
-        return outputs
 
-
-class AddCSVRowInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
-    in_file = traits.File(mandatory=True,
-                          desc='Input comma-separated value (CSV) files')
+class AddCSVRowInputSpec(DynamicTraitedSpec, BaseInputSpec):
+    in_file = File(mandatory=True, desc='Input comma-separated value (CSV) files')
     _outputs = traits.Dict(traits.Any, value={}, usedefault=True)
 
     def __setattr__(self, key, value):
@@ -801,7 +609,7 @@ class AddCSVRowInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
             self._outputs[key] = value
         else:
             if key in self._outputs:
-                self._outputs[key] = value
+                self.outputs[key] = value
             super(AddCSVRowInputSpec, self).__setattr__(key, value)
 
 
@@ -834,8 +642,8 @@ class AddCSVRow(BaseInterface):
     >>> addrow.inputs.list_of_values = [ 0.4, 0.7, 0.3 ]
     >>> addrow.run() # doctest: +SKIP
     """
-    input_spec = AddCSVRowInputSpec
-    output_spec = AddCSVRowOutputSpec
+    _input_spec = AddCSVRowInputSpec
+    _output_spec = AddCSVRowOutputSpec
 
     def __init__(self, infields=None, force_run=True, **kwargs):
         super(AddCSVRow, self).__init__(**kwargs)
@@ -865,9 +673,8 @@ class AddCSVRow(BaseInterface):
             import lockfile as pl
             self._have_lock = True
         except ImportError:
-            from warnings import warn
-            warn(('Python module lockfile was not found: AddCSVRow will not be'
-                  ' thread-safe in multi-processor execution'))
+            IFLOGGER.warn('Python module lockfile was not found: AddCSVRow will not be'
+                          ' thread-safe in multi-processor execution')
 
         input_dict = {}
         for key, val in list(self.inputs._outputs.items()):
@@ -906,12 +713,8 @@ class AddCSVRow(BaseInterface):
         #         df = pd.concat([formerdf, df], ignore_index=True)
         #         df.to_csv(fh)
 
+        self.outputs.csv_file = op.abspath(self.inputs.in_file)
         return runtime
-
-    def _list_outputs(self):
-        outputs = self.output_spec().get()
-        outputs['csv_file'] = self.inputs.in_file
-        return outputs
 
     def _outputs(self):
         return self._add_output_traits(super(AddCSVRow, self)._outputs())
@@ -922,13 +725,10 @@ class AddCSVRow(BaseInterface):
 
 class CalculateNormalizedMomentsInputSpec(TraitedSpec):
     timeseries_file = File(
-        exists=True, mandatory=True,
-        desc='Text file with timeseries in columns and timepoints in rows,\
-        whitespace separated')
-    moment = traits.Int(
-        mandatory=True,
-        desc="Define which moment should be calculated, 3 for skewness, 4 for\
-        kurtosis.")
+        exists=True, mandatory=True, desc='Text file with timeseries in columns and timepoints'
+                                          ' in rows, whitespace separated')
+    moment = traits.Int(mandatory=True, desc='Define which moment should be calculated, 3 for '
+                                             'skewness, 4 for kurtosis.')
 
 
 class CalculateNormalizedMomentsOutputSpec(TraitedSpec):
@@ -947,49 +747,28 @@ class CalculateNormalizedMoments(BaseInterface):
     >>> skew.inputs.timeseries_file = 'timeseries.txt'
     >>> skew.run() # doctest: +SKIP
     """
-    input_spec = CalculateNormalizedMomentsInputSpec
-    output_spec = CalculateNormalizedMomentsOutputSpec
+    _input_spec = CalculateNormalizedMomentsInputSpec
+    _output_spec = CalculateNormalizedMomentsOutputSpec
 
     def _run_interface(self, runtime):
-
-        self._moments = calc_moments(
+        self.outputs.skewness = calc_moments(
             self.inputs.timeseries_file, self.inputs.moment)
         return runtime
-
-    def _list_outputs(self):
-        outputs = self.output_spec().get()
-        outputs['skewness'] = self._moments
-        return outputs
-
-
-def calc_moments(timeseries_file, moment):
-    """Returns nth moment (3 for skewness, 4 for kurtosis) of timeseries
-    (list of values; one per timeseries).
-
-    Keyword arguments:
-    timeseries_file -- text file with white space separated timepoints in rows
-
-    """
-    timeseries = np.genfromtxt(timeseries_file)
-
-    m2 = stats.moment(timeseries, 2, axis=0)
-    m3 = stats.moment(timeseries, moment, axis=0)
-    zero = (m2 == 0)
-    return np.where(zero, 0, m3 / m2 ** (moment / 2.0))
 
 
 class AddNoiseInputSpec(TraitedSpec):
     in_file = File(exists=True, mandatory=True,
                    desc='input image that will be corrupted with noise')
-    in_mask = File(exists=True, desc=('input mask, voxels outside this mask '
-                                      'will be considered background'))
+    in_mask = File(exists=True, desc='input mask, voxels outside this mask '
+                                     'will be considered background')
     snr = traits.Float(10.0, desc='desired output SNR in dB', usedefault=True)
     dist = traits.Enum('normal', 'rician', usedefault=True, mandatory=True,
-                       desc=('desired noise distribution'))
+                       desc='desired noise distribution')
     bg_dist = traits.Enum('normal', 'rayleigh', usedefault=True, mandatory=True,
-                          desc=('desired noise distribution, currently '
-                                'only normal is implemented'))
-    out_file = File(desc='desired output filename')
+                          desc='desired noise distribution, currently '
+                               'only normal is implemented')
+    out_file = GenFile(ns=['in_file', 'snr'], template='%s_SNR%.02f',
+                    keep_extension=True, desc='desired output filename')
 
 
 class AddNoiseOutputSpec(TraitedSpec):
@@ -1011,8 +790,8 @@ class AddNoise(BaseInterface):
     >>> noise.run() # doctest: +SKIP
 
     """
-    input_spec = AddNoiseInputSpec
-    output_spec = AddNoiseOutputSpec
+    _input_spec = AddNoiseInputSpec
+    _output_spec = AddNoiseOutputSpec
 
     def _run_interface(self, runtime):
         in_image = nb.load(self.inputs.in_file)
@@ -1027,22 +806,8 @@ class AddNoise(BaseInterface):
         result = self.gen_noise(in_data, mask=in_mask, snr_db=snr,
                                 dist=self.inputs.dist, bg_dist=self.inputs.bg_dist)
         res_im = nb.Nifti1Image(result, in_image.affine, in_image.header)
-        res_im.to_filename(self._gen_output_filename())
+        res_im.to_filename(self.inputs.out_file)
         return runtime
-
-    def _gen_output_filename(self):
-        if not isdefined(self.inputs.out_file):
-            _, base, ext = split_filename(self.inputs.in_file)
-            out_file = os.path.abspath('%s_SNR%03.2f%s' % (base, self.inputs.snr, ext))
-        else:
-            out_file = self.inputs.out_file
-
-        return out_file
-
-    def _list_outputs(self):
-        outputs = self.output_spec().get()
-        outputs['out_file'] = self._gen_output_filename()
-        return outputs
 
     def gen_noise(self, image, mask=None, snr_db=10.0, dist='normal', bg_dist='normal'):
         """
@@ -1091,13 +856,13 @@ class AddNoise(BaseInterface):
 class NormalizeProbabilityMapSetInputSpec(TraitedSpec):
     in_files = InputMultiPath(File(exists=True, mandatory=True,
                                    desc='The tpms to be normalized'))
-    in_mask = File(exists=True,
-                   desc='Masked voxels must sum up 1.0, 0.0 otherwise.')
+    out_files = GenMultiFile(template='{in_files}_norm', keep_extension=True,
+                             desc="normalized maps")
+    in_mask = File(exists=True, desc='Masked voxels must sum up 1.0, 0.0 otherwise.')
 
 
 class NormalizeProbabilityMapSetOutputSpec(TraitedSpec):
-    out_files = OutputMultiPath(File(exists=True),
-                                desc="normalized maps")
+    out_files = OutputMultiPath(File(exists=True), desc="normalized maps")
 
 
 class NormalizeProbabilityMapSet(BaseInterface):
@@ -1117,8 +882,8 @@ class NormalizeProbabilityMapSet(BaseInterface):
     >>> normalize.inputs.in_mask = 'tpms_msk.nii.gz'
     >>> normalize.run() # doctest: +SKIP
     """
-    input_spec = NormalizeProbabilityMapSetInputSpec
-    output_spec = NormalizeProbabilityMapSetOutputSpec
+    _input_spec = NormalizeProbabilityMapSetInputSpec
+    _output_spec = NormalizeProbabilityMapSetOutputSpec
 
     def _run_interface(self, runtime):
         mask = None
@@ -1126,14 +891,8 @@ class NormalizeProbabilityMapSet(BaseInterface):
         if isdefined(self.inputs.in_mask):
             mask = self.inputs.in_mask
 
-        self._out_filenames = normalize_tpms(self.inputs.in_files, mask)
+        normalize_tpms(self.inputs.in_files, mask, self.inputs.out_files)
         return runtime
-
-    def _list_outputs(self):
-        outputs = self.output_spec().get()
-        outputs['out_files'] = self._out_filenames
-        return outputs
-
 
 class SplitROIsInputSpec(TraitedSpec):
     in_file = File(exists=True, mandatory=True,
@@ -1163,31 +922,24 @@ class SplitROIs(BaseInterface):
     >>> rois.run() # doctest: +SKIP
 
     """
-    input_spec = SplitROIsInputSpec
-    output_spec = SplitROIsOutputSpec
+    _input_spec = SplitROIsInputSpec
+    _output_spec = SplitROIsOutputSpec
 
     def _run_interface(self, runtime):
         mask = None
         roisize = None
-        self._outnames = {}
 
         if isdefined(self.inputs.in_mask):
             mask = self.inputs.in_mask
         if isdefined(self.inputs.roi_size):
             roisize = self.inputs.roi_size
 
-        res = split_rois(self.inputs.in_file,
-                         mask, roisize)
-        self._outnames['out_files'] = res[0]
-        self._outnames['out_masks'] = res[1]
-        self._outnames['out_index'] = res[2]
-        return runtime
+        res = split_rois(self.inputs.in_file, mask, roisize)
+        self.outputs.out_files = res[0]
+        self.outputs.out_masks = res[1]
+        self.outputs.out_index = res[2]
 
-    def _list_outputs(self):
-        outputs = self.output_spec().get()
-        for k, v in self._outnames.items():
-            outputs[k] = v
-        return outputs
+        return runtime
 
 
 class MergeROIsInputSpec(TraitedSpec):
@@ -1218,21 +970,138 @@ class MergeROIs(BaseInterface):
     >>> rois.run() # doctest: +SKIP
 
     """
-    input_spec = MergeROIsInputSpec
-    output_spec = MergeROIsOutputSpec
+    _input_spec = MergeROIsInputSpec
+    _output_spec = MergeROIsOutputSpec
 
     def _run_interface(self, runtime):
-        res = merge_rois(self.inputs.in_files,
-                         self.inputs.in_index,
-                         self.inputs.in_reference)
-        self._merged = res
+        self.outputs.merged_file = merge_rois(
+            self.inputs.in_files, self.inputs.in_index, self.inputs.in_reference)
         return runtime
 
-    def _list_outputs(self):
-        outputs = self.output_spec().get()
-        outputs['merged_file'] = self._merged
-        return outputs
 
+# Helper functions ------------------------------------------------------
+
+def replaceext(in_list, ext):
+    out_list = list()
+    for filename in in_list:
+        path, name, _ = split_filename(op.abspath(filename))
+        out_name = op.join(path, name) + ext
+        out_list.append(out_name)
+    return out_list
+
+
+def matlab2csv(in_array, name, reshape):
+    output_array = np.asarray(in_array)
+    if reshape:
+        if len(np.shape(output_array)) > 1:
+            output_array = np.reshape(output_array, (
+                np.shape(output_array)[0] * np.shape(output_array)[1], 1))
+            IFLOGGER.info(np.shape(output_array))
+    output_name = op.abspath(name + '.csv')
+    np.savetxt(output_name, output_array, delimiter=',')
+    return output_name
+
+def merge_csvs(in_list):
+    for idx, in_file in enumerate(in_list):
+        try:
+            in_array = np.loadtxt(in_file, delimiter=',')
+        except ValueError as ex:
+            try:
+                in_array = np.loadtxt(in_file, delimiter=',', skiprows=1)
+            except ValueError as ex:
+                first = open(in_file, 'r')
+                header_line = first.readline()
+                header_list = header_line.split(',')
+                n_cols = len(header_list)
+                try:
+                    in_array = np.loadtxt(
+                        in_file, delimiter=',', skiprows=1,
+                        usecols=list(range(1, n_cols))
+                    )
+                except ValueError as ex:
+                    in_array = np.loadtxt(
+                        in_file, delimiter=',', skiprows=1, usecols=list(range(1, n_cols - 1)))
+        if idx == 0:
+            out_array = in_array
+        else:
+            out_array = np.dstack((out_array, in_array))
+    out_array = np.squeeze(out_array)
+    IFLOGGER.info('Final output array shape:')
+    IFLOGGER.info(np.shape(out_array))
+    return out_array
+
+
+def remove_identical_paths(in_files):
+    import os.path as op
+    from ..utils.filemanip import split_filename
+    if len(in_files) > 1:
+        out_names = list()
+        commonprefix = op.commonprefix(in_files)
+        lastslash = commonprefix.rfind('/')
+        commonpath = commonprefix[0:(lastslash + 1)]
+        for fileidx, in_file in enumerate(in_files):
+            path, name, ext = split_filename(in_file)
+            in_file = op.join(path, name)
+            name = in_file.replace(commonpath, '')
+            name = name.replace('_subject_id_', '')
+            out_names.append(name)
+    else:
+        path, name, ext = split_filename(in_files[0])
+        out_names = [name]
+    return out_names
+
+
+def maketypelist(rowheadings, shape, extraheadingBool, extraheading):
+    typelist = []
+    if rowheadings:
+        typelist.append(('heading', 'a40'))
+    if len(shape) > 1:
+        for idx in range(1, (min(shape) + 1)):
+            typelist.append((str(idx), float))
+    else:
+        for idx in range(1, (shape[0] + 1)):
+            typelist.append((str(idx), float))
+    if extraheadingBool:
+        typelist.append((extraheading, 'a40'))
+    IFLOGGER.info(typelist)
+    return typelist
+
+
+def makefmtlist(output_array, typelist, rowheadingsBool,
+                shape, extraheadingBool):
+    fmtlist = []
+    if rowheadingsBool:
+        fmtlist.append('%s')
+    if len(shape) > 1:
+        output = np.zeros(max(shape), typelist)
+        for idx in range(1, min(shape) + 1):
+            output[str(idx)] = output_array[:, idx - 1]
+            fmtlist.append('%f')
+    else:
+        output = np.zeros(1, typelist)
+        for idx in range(1, len(output_array) + 1):
+            output[str(idx)] = output_array[idx - 1]
+            fmtlist.append('%f')
+    if extraheadingBool:
+        fmtlist.append('%s')
+    fmt = ','.join(fmtlist)
+    return fmt, output
+
+
+def calc_moments(timeseries_file, moment):
+    """Returns nth moment (3 for skewness, 4 for kurtosis) of timeseries
+    (list of values; one per timeseries).
+
+    Keyword arguments:
+    timeseries_file -- text file with white space separated timepoints in rows
+
+    """
+    timeseries = np.genfromtxt(timeseries_file)
+
+    m2 = stats.moment(timeseries, 2, axis=0)
+    m3 = stats.moment(timeseries, moment, axis=0)
+    zero = (m2 == 0)
+    return np.where(zero, 0, m3 / m2 ** (moment / 2.0))
 
 def normalize_tpms(in_files, in_mask=None, out_files=[]):
     """
@@ -1369,8 +1238,7 @@ def split_rois(in_file, mask=None, roishape=None):
     return out_files, out_mask, out_idxs
 
 
-def merge_rois(in_files, in_idxs, in_ref,
-               dtype=None, out_file=None):
+def merge_rois(in_files, in_idxs, in_ref, dtype=None, out_file=None):
     """
     Re-builds an image resulting from a parallelized processing
     """
@@ -1389,7 +1257,7 @@ def merge_rois(in_files, in_idxs, in_ref,
     # to avoid memory errors
     if op.splitext(in_ref)[1] == '.gz':
         try:
-            iflogger.info('uncompress %i' % in_ref)
+            IFLOGGER.info('uncompress %i' % in_ref)
             sp.check_call(['gunzip', in_ref], stdout=sp.PIPE, shell=True)
             in_ref = op.splitext(in_ref)[0]
         except:
@@ -1468,10 +1336,9 @@ class Distance(nam.Distance):
        Use :py:class:`nipype.algorithms.metrics.Distance` instead.
     """
     def __init__(self, **inputs):
-        super(nam.Distance, self).__init__(**inputs)
-        warnings.warn(("This interface has been deprecated since 0.10.0,"
-                       " please use nipype.algorithms.metrics.Distance"),
-                      DeprecationWarning)
+        super(Distance, self).__init__(**inputs)
+        IFLOGGER.warn("This interface has been deprecated since 0.10.0,"
+                      " please use nipype.algorithms.metrics.Distance")
 
 
 class Overlap(nam.Overlap):
@@ -1481,10 +1348,9 @@ class Overlap(nam.Overlap):
        Use :py:class:`nipype.algorithms.metrics.Overlap` instead.
     """
     def __init__(self, **inputs):
-        super(nam.Overlap, self).__init__(**inputs)
-        warnings.warn(("This interface has been deprecated since 0.10.0,"
-                       " please use nipype.algorithms.metrics.Overlap"),
-                      DeprecationWarning)
+        super(Overlap, self).__init__(**inputs)
+        IFLOGGER.warn("This interface has been deprecated since 0.10.0,"
+                      " please use nipype.algorithms.metrics.Overlap")
 
 
 class FuzzyOverlap(nam.FuzzyOverlap):
@@ -1495,7 +1361,6 @@ class FuzzyOverlap(nam.FuzzyOverlap):
        Use :py:class:`nipype.algorithms.metrics.FuzzyOverlap` instead.
     """
     def __init__(self, **inputs):
-        super(nam.FuzzyOverlap, self).__init__(**inputs)
-        warnings.warn(("This interface has been deprecated since 0.10.0,"
-                       " please use nipype.algorithms.metrics.FuzzyOverlap"),
-                      DeprecationWarning)
+        super(FuzzyOverlap, self).__init__(**inputs)
+        IFLOGGER.warn("This interface has been deprecated since 0.10.0,"
+                      " please use nipype.algorithms.metrics.FuzzyOverlap")

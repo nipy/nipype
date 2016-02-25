@@ -25,19 +25,22 @@ See the docstrings of the individual classes for examples.
 
 """
 
-from builtins import object
-
-from glob import glob
 import os
-import warnings
+from glob import glob
+from builtins import object
+from ..base import traits, CommandLine, CommandLineInputSpec
+from ... import logging
 
-from ...utils.filemanip import fname_presuffix, split_filename, copyfile
-from ..base import (traits, isdefined,
-                    CommandLine, CommandLineInputSpec, TraitedSpec,
-                    File, Directory, InputMultiPath, OutputMultiPath)
+IFLOGGER = logging.getLogger('interface')
 
-warn = warnings.warn
+FSLDIR = os.getenv('FSLDIR')
+if FSLDIR is None:
+    IFLOGGER.warn('FSLDIR environment variable is not set')
 
+FSLOUTPUTTYPE = os.getenv('FSLOUTPUTTYPE')
+if FSLOUTPUTTYPE is None:
+    IFLOGGER.warn('FSLOUTPUTTYPE environment variable is not set, using NIFTI')
+    FSLOUTPUTTYPE = 'NIFTI'
 
 class Info(object):
     """Handle fsl output type and version information.
@@ -70,60 +73,19 @@ class Info(object):
         """
         # find which fsl being used....and get version from
         # /path/to/fsl/etc/fslversion
-        try:
-            basedir = os.environ['FSLDIR']
-        except KeyError:
-            return None
-        out = open('%s/etc/fslversion' % (basedir)).read()
-        return out.strip('\n')
-
-    @classmethod
-    def output_type_to_ext(cls, output_type):
-        """Get the file extension for the given output type.
-
-        Parameters
-        ----------
-        output_type : {'NIFTI', 'NIFTI_GZ', 'NIFTI_PAIR', 'NIFTI_PAIR_GZ'}
-            String specifying the output type.
-
-        Returns
-        -------
-        extension : str
-            The file extension for the output type.
-        """
-
-        try:
-            return cls.ftypes[output_type]
-        except KeyError:
-            msg = 'Invalid FSLOUTPUTTYPE: ', output_type
-            raise KeyError(msg)
-
-    @classmethod
-    def output_type(cls):
-        """Get the global FSL output file type FSLOUTPUTTYPE.
-
-        This returns the value of the environment variable
-        FSLOUTPUTTYPE.  An exception is raised if it is not defined.
-
-        Returns
-        -------
-        fsl_ftype : string
-            Represents the current environment setting of FSLOUTPUTTYPE
-        """
-        try:
-            return os.environ['FSLOUTPUTTYPE']
-        except KeyError:
-            warnings.warn(('FSL environment variables not set. setting output '
-                           'type to NIFTI'))
-            return 'NIFTI'
+        out = None
+        if FSLDIR is not None:
+            with open('%s/etc/fslversion' % FSLDIR, 'r') as vfile:
+                out = vfile.read().strip('\n')
+        return out
 
     @staticmethod
     def standard_image(img_name=None):
-        '''Grab an image from the standard location.
+        """Grab an image from the standard location.
 
         Returns a list of standard images if called without arguments.
 
-        Could be made more fancy to allow for more relocatability'''
+        Could be made more fancy to allow for more relocatability"""
         try:
             fsldir = os.environ['FSLDIR']
         except KeyError:
@@ -142,126 +104,46 @@ class FSLCommandInputSpec(CommandLineInputSpec):
     All command support specifying FSLOUTPUTTYPE dynamically
     via output_type.
 
-    Example
-    -------
-    fsl.ExtractRoi(tmin=42, tsize=1, output_type='NIFTI')
-    """
-    output_type = traits.Enum('NIFTI', list(Info.ftypes.keys()),
-                              desc='FSL output type')
+    Example::
 
+      fsl.ExtractRoi(tmin=42, tsize=1, output_type='NIFTI')
 
-class FSLCommand(CommandLine):
-    """Base support for FSL commands.
 
     """
+    output_type = traits.Trait(FSLOUTPUTTYPE, Info.ftypes, usedefault=True,
+                               desc='FSL output type')
 
-    input_spec = FSLCommandInputSpec
-    _output_type = None
+    # This is the easiest way to manage both synchronized
+    def _output_type_changed(self, new):
+        self.environ.update({'FSLOUTPUTTYPE': new})
+
+class FSLCommand(CommandLine):  # pylint: disable=W0223
+    """Base support for FSL commands."""
+
+    _input_spec = FSLCommandInputSpec
 
     def __init__(self, **inputs):
         super(FSLCommand, self).__init__(**inputs)
-        self.inputs.on_trait_change(self._output_update, 'output_type')
-
-        if self._output_type is None:
-            self._output_type = Info.output_type()
-
-        if not isdefined(self.inputs.output_type):
-            self.inputs.output_type = self._output_type
-        else:
-            self._output_update()
-
-    def _output_update(self):
-        self._output_type = self.inputs.output_type
-        self.inputs.environ.update({'FSLOUTPUTTYPE': self.inputs.output_type})
-
-    @classmethod
-    def set_default_output_type(cls, output_type):
-        """Set the default output type for FSL classes.
-
-        This method is used to set the default output type for all fSL
-        subclasses.  However, setting this will not update the output
-        type for any existing instances.  For these, assign the
-        <instance>.inputs.output_type.
-        """
-
-        if output_type in Info.ftypes:
-            cls._output_type = output_type
-        else:
-            raise AttributeError('Invalid FSL output_type: %s' % output_type)
+        self.inputs.output_type = FSLOUTPUTTYPE
+        self.environ.update({'FSLOUTPUTTYPE': FSLOUTPUTTYPE})
 
     @property
     def version(self):
         return Info.version()
-
-    def _gen_fname(self, basename, cwd=None, suffix=None, change_ext=True,
-                   ext=None):
-        """Generate a filename based on the given parameters.
-
-        The filename will take the form: cwd/basename<suffix><ext>.
-        If change_ext is True, it will use the extentions specified in
-        <instance>intputs.output_type.
-
-        Parameters
-        ----------
-        basename : str
-            Filename to base the new filename on.
-        cwd : str
-            Path to prefix to the new filename. (default is os.getcwd())
-        suffix : str
-            Suffix to add to the `basename`.  (defaults is '' )
-        change_ext : bool
-            Flag to change the filename extension to the FSL output type.
-            (default True)
-
-        Returns
-        -------
-        fname : str
-            New filename based on given parameters.
-
-        """
-
-        if basename == '':
-            msg = 'Unable to generate filename for command %s. ' % self.cmd
-            msg += 'basename is not set!'
-            raise ValueError(msg)
-        if cwd is None:
-            cwd = os.getcwd()
-        if ext is None:
-            ext = Info.output_type_to_ext(self.inputs.output_type)
-        if change_ext:
-            if suffix:
-                suffix = ''.join((suffix, ext))
-            else:
-                suffix = ext
-        if suffix is None:
-            suffix = ''
-        fname = fname_presuffix(basename, suffix=suffix,
-                                use_ext=False, newpath=cwd)
-        return fname
-
-    def _overload_extension(self, value, name=None):
-        return value + Info.output_type_to_ext(self.inputs.output_type)
-
-
-def check_fsl():
-    ver = Info.version()
-    if ver:
-        return 0
-    else:
-        return 1
 
 
 def no_fsl():
     """Checks if FSL is NOT installed
     used with skipif to skip tests that will
     fail if FSL is not installed"""
+    return Info.version() is None
 
-    if Info.version() is None:
-        return True
-    else:
-        return False
-
+def check_fsl():
+    """Same as the previous. One of these should disappear """
+    return Info.version() is not None
 
 def no_fsl_course_data():
     """check if fsl_course data is present"""
-    return not ('FSL_COURSE_DATA' in os.environ and os.path.isdir(os.path.abspath(os.environ['FSL_COURSE_DATA'])))
+    if os.getenv('FSL_COURSE_DATA') is None:
+        return False
+    return os.path.isdir(os.path.abspath(os.getenv('FSL_COURSE_DATA')))

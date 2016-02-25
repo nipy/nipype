@@ -12,12 +12,6 @@ def test_NlpFit_inputs():
     config_file=dict(argstr='-config_file %s',
     mandatory=True,
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     init_xfm=dict(argstr='-init_xfm %s',
     mandatory=True,
     ),
@@ -37,12 +31,10 @@ def test_NlpFit_inputs():
     mandatory=True,
     position=-2,
     ),
-    terminal_output=dict(nohash=True,
-    ),
     verbose=dict(argstr='-verbose',
     ),
     )
-    inputs = NlpFit.input_spec()
+    inputs = NlpFit._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -53,7 +45,7 @@ def test_NlpFit_outputs():
     output_map = dict(output_grid=dict(),
     output_xfm=dict(),
     )
-    outputs = NlpFit.output_spec()
+    outputs = NlpFit._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

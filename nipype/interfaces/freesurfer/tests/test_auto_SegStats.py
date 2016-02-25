@@ -27,9 +27,6 @@ def test_SegStats_inputs():
     default_color_table=dict(argstr='--ctab-default',
     xor=('color_table_file', 'default_color_table', 'gca_color_table'),
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
     etiv=dict(argstr='--etiv',
     ),
     etiv_only=dict(),
@@ -41,9 +38,6 @@ def test_SegStats_inputs():
     ),
     gca_color_table=dict(argstr='--ctab-gca %s',
     xor=('color_table_file', 'default_color_table', 'gca_color_table'),
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
     ),
     in_file=dict(argstr='--i %s',
     ),
@@ -80,14 +74,12 @@ def test_SegStats_inputs():
     mandatory=True,
     xor=('segmentation_file', 'annot', 'surf_label'),
     ),
-    terminal_output=dict(nohash=True,
-    ),
     vox=dict(argstr='--vox %s',
     ),
     wm_vol_from_surf=dict(argstr='--surf-wm-vol',
     ),
     )
-    inputs = SegStats.input_spec()
+    inputs = SegStats._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -100,7 +92,7 @@ def test_SegStats_outputs():
     sf_avg_file=dict(),
     summary_file=dict(),
     )
-    outputs = SegStats.output_spec()
+    outputs = SegStats._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

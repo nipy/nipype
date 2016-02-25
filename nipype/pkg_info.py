@@ -14,7 +14,7 @@ COMMIT_INFO_FNAME = 'COMMIT_INFO.txt'
 
 
 def pkg_commit_hash(pkg_path):
-    ''' Get short form of commit hash given directory `pkg_path`
+    """ Get short form of commit hash given directory `pkg_path`
 
     There should be a file called 'COMMIT_INFO.txt' in `pkg_path`.  This is a
     file in INI file format, with at least one section: ``commit hash``, and two
@@ -42,7 +42,7 @@ def pkg_commit_hash(pkg_path):
        Where we got the hash from - description
     hash_str : str
        short form of hash
-    '''
+    """
     # Try and get commit from written commit text file
     pth = os.path.join(pkg_path, COMMIT_INFO_FNAME)
     if not os.path.isfile(pth):
@@ -67,7 +67,7 @@ def pkg_commit_hash(pkg_path):
 
 
 def get_pkg_info(pkg_path):
-    ''' Return dict describing the context of this package
+    """ Return dict describing the context of this package
 
     Parameters
     ----------
@@ -78,7 +78,7 @@ def get_pkg_info(pkg_path):
     -------
     context : dict
        with named parameters of interest
-    '''
+    """
     src, hsh = pkg_commit_hash(pkg_path)
     import networkx
     import nibabel

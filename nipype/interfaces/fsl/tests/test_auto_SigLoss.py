@@ -8,27 +8,20 @@ def test_SigLoss_inputs():
     ),
     echo_time=dict(argstr='--te=%f',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     in_file=dict(argstr='-i %s',
     mandatory=True,
     ),
     mask_file=dict(argstr='-m %s',
     ),
     out_file=dict(argstr='-s %s',
-    genfile=True,
+    hash_files=False,
     ),
-    output_type=dict(),
+    output_type=dict(usedefault=True,
+    ),
     slice_direction=dict(argstr='-d %s',
     ),
-    terminal_output=dict(nohash=True,
-    ),
     )
-    inputs = SigLoss.input_spec()
+    inputs = SigLoss._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -38,7 +31,7 @@ def test_SigLoss_inputs():
 def test_SigLoss_outputs():
     output_map = dict(out_file=dict(),
     )
-    outputs = SigLoss.output_spec()
+    outputs = SigLoss._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

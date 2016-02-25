@@ -13,9 +13,6 @@ def test_SampleToSurface_inputs():
     cortex_mask=dict(argstr='--cortex',
     xor=['mask_label'],
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
     fix_tk_reg=dict(argstr='--fixtkreg',
     ),
     float2int_method=dict(argstr='--float2int %s',
@@ -31,9 +28,6 @@ def test_SampleToSurface_inputs():
     ),
     ico_order=dict(argstr='--icoorder %d',
     requires=['target_subject'],
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
     ),
     interp_method=dict(argstr='--interp %s',
     ),
@@ -99,12 +93,10 @@ def test_SampleToSurface_inputs():
     ),
     target_subject=dict(argstr='--trgsubject %s',
     ),
-    terminal_output=dict(nohash=True,
-    ),
     vox_file=dict(argstr='--nvox %s',
     ),
     )
-    inputs = SampleToSurface.input_spec()
+    inputs = SampleToSurface._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -116,7 +108,7 @@ def test_SampleToSurface_outputs():
     out_file=dict(),
     vox_file=dict(),
     )
-    outputs = SampleToSurface.output_spec()
+    outputs = SampleToSurface._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

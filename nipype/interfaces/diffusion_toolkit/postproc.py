@@ -45,16 +45,15 @@ class SplineFilter(CommandLine):
     >>> filt.inputs.step_length = 0.5
     >>> filt.run()                                 # doctest: +SKIP
     """
-    input_spec = SplineFilterInputSpec
-    output_spec = SplineFilterOutputSpec
+    _input_spec = SplineFilterInputSpec
+    _output_spec = SplineFilterOutputSpec
 
     _cmd = "spline_filter"
 
-    def _list_outputs(self):
-        outputs = self.output_spec().get()
-        outputs['smoothed_track_file'] = os.path.abspath(self.inputs.output_file)
-        return outputs
-
+    def _post_run(self):
+        
+        self.outputs.smoothed_track_file = os.path.abspath(self.inputs.output_file)
+        
 
 class TrackMergeInputSpec(CommandLineInputSpec):
     track_files = InputMultiPath(File(exists=True), desc="file containing tracks to be filtered", position=0, argstr="%s...", mandatory=True)
@@ -85,12 +84,12 @@ class TrackMerge(CommandLine):
     >>> mrg.inputs.track_files = ['track1.trk','track2.trk']
     >>> mrg.run()                                 # doctest: +SKIP
     """
-    input_spec = TrackMergeInputSpec
-    output_spec = TrackMergeOutputSpec
+    _input_spec = TrackMergeInputSpec
+    _output_spec = TrackMergeOutputSpec
 
     _cmd = "track_merge"
 
-    def _list_outputs(self):
-        outputs = self.output_spec().get()
-        outputs['track_file'] = os.path.abspath(self.inputs.output_file)
-        return outputs
+    def _post_run(self):
+        
+        self.outputs.track_file = os.path.abspath(self.inputs.output_file)
+        

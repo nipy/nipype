@@ -6,26 +6,20 @@ from ..preprocess import AFNItoNIFTI
 def test_AFNItoNIFTI_inputs():
     input_map = dict(args=dict(argstr='%s',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     in_file=dict(argstr='%s',
     copyfile=False,
     mandatory=True,
     position=-1,
     ),
     out_file=dict(argstr='-prefix %s',
+    keep_extension=False,
     name_source='in_file',
     name_template='%s.nii',
     ),
-    outputtype=dict(),
-    terminal_output=dict(nohash=True,
+    output_type=dict(usedefault=True,
     ),
     )
-    inputs = AFNItoNIFTI.input_spec()
+    inputs = AFNItoNIFTI._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -35,7 +29,7 @@ def test_AFNItoNIFTI_inputs():
 def test_AFNItoNIFTI_outputs():
     output_map = dict(out_file=dict(),
     )
-    outputs = AFNItoNIFTI.output_spec()
+    outputs = AFNItoNIFTI._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

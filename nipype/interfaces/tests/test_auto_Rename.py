@@ -13,7 +13,7 @@ def test_Rename_inputs():
     use_fullpath=dict(usedefault=True,
     ),
     )
-    inputs = Rename.input_spec()
+    inputs = Rename._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -23,7 +23,7 @@ def test_Rename_inputs():
 def test_Rename_outputs():
     output_map = dict(out_file=dict(),
     )
-    outputs = Rename.output_spec()
+    outputs = Rename._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

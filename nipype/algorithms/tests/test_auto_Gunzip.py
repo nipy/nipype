@@ -4,13 +4,14 @@ from ..misc import Gunzip
 
 
 def test_Gunzip_inputs():
-    input_map = dict(ignore_exception=dict(nohash=True,
-    usedefault=True,
+    input_map = dict(in_file=dict(mandatory=True,
     ),
-    in_file=dict(mandatory=True,
+    out_file=dict(keep_extension=False,
+    name_remove='.gz',
+    ns='in_file',
     ),
     )
-    inputs = Gunzip.input_spec()
+    inputs = Gunzip._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -20,7 +21,7 @@ def test_Gunzip_inputs():
 def test_Gunzip_outputs():
     output_map = dict(out_file=dict(),
     )
-    outputs = Gunzip.output_spec()
+    outputs = Gunzip._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

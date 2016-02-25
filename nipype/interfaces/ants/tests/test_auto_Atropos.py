@@ -11,13 +11,7 @@ def test_Atropos_inputs():
     dimension=dict(argstr='--image-dimensionality %d',
     usedefault=True,
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
     icm_use_synchronous_update=dict(argstr='%s',
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
     ),
     initialization=dict(argstr='%s',
     mandatory=True,
@@ -44,20 +38,21 @@ def test_Atropos_inputs():
     ),
     number_of_tissue_classes=dict(mandatory=True,
     ),
-    out_classified_image_name=dict(argstr='%s',
-    genfile=True,
+    out_classified_image_name=dict(argstr='--output [%s]',
     hash_files=False,
-    ),
-    output_posteriors_name_template=dict(usedefault=True,
+    keep_extension=True,
+    name_source='intensity_images',
+    name_template='%s_labeled',
     ),
     posterior_formulation=dict(argstr='%s',
+    ),
+    posteriors=dict(usedefault=True,
     ),
     prior_probability_images=dict(),
     prior_probability_threshold=dict(requires=['prior_weighting'],
     ),
     prior_weighting=dict(),
-    save_posteriors=dict(),
-    terminal_output=dict(nohash=True,
+    save_posteriors=dict(usedefault=True,
     ),
     use_mixture_model_proportions=dict(requires=['posterior_formulation'],
     ),
@@ -65,7 +60,7 @@ def test_Atropos_inputs():
     usedefault=True,
     ),
     )
-    inputs = Atropos.input_spec()
+    inputs = Atropos._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -76,7 +71,7 @@ def test_Atropos_outputs():
     output_map = dict(classified_image=dict(),
     posteriors=dict(),
     )
-    outputs = Atropos.output_spec()
+    outputs = Atropos._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

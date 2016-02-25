@@ -6,13 +6,7 @@ from ..preprocess import TShift
 def test_TShift_inputs():
     input_map = dict(args=dict(argstr='%s',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
     ignore=dict(argstr='-ignore %s',
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
     ),
     in_file=dict(argstr='%s',
     copyfile=False,
@@ -21,16 +15,15 @@ def test_TShift_inputs():
     ),
     interp=dict(argstr='-%s',
     ),
-    out_file=dict(argstr='-prefix %s',
-    name_source='in_file',
-    name_template='%s_tshift',
+    out_file=dict(),
+    output_type=dict(usedefault=True,
     ),
-    outputtype=dict(),
+    prefix=dict(argstr='-prefix %s',
+    keep_extension=False,
+    ),
     rlt=dict(argstr='-rlt',
     ),
     rltplus=dict(argstr='-rlt+',
-    ),
-    terminal_output=dict(nohash=True,
     ),
     tpattern=dict(argstr='-tpattern %s',
     ),
@@ -43,7 +36,7 @@ def test_TShift_inputs():
     xor=['tslice'],
     ),
     )
-    inputs = TShift.input_spec()
+    inputs = TShift._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -53,7 +46,7 @@ def test_TShift_inputs():
 def test_TShift_outputs():
     output_map = dict(out_file=dict(),
     )
-    outputs = TShift.output_spec()
+    outputs = TShift._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

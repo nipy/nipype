@@ -8,12 +8,6 @@ def test_MotionOutliers_inputs():
     ),
     dummy=dict(argstr='--dummy=%d',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     in_file=dict(argstr='-i %s',
     mandatory=True,
     ),
@@ -25,29 +19,19 @@ def test_MotionOutliers_inputs():
     ),
     out_file=dict(argstr='-o %s',
     hash_files=False,
-    keep_extension=True,
-    name_source='in_file',
-    name_template='%s_outliers.txt',
     ),
     out_metric_plot=dict(argstr='-p %s',
     hash_files=False,
-    keep_extension=True,
-    name_source='in_file',
-    name_template='%s_metrics.png',
     ),
     out_metric_values=dict(argstr='-s %s',
     hash_files=False,
-    keep_extension=True,
-    name_source='in_file',
-    name_template='%s_metrics.txt',
     ),
-    output_type=dict(),
-    terminal_output=dict(nohash=True,
+    output_type=dict(usedefault=True,
     ),
     threshold=dict(argstr='--thresh=%g',
     ),
     )
-    inputs = MotionOutliers.input_spec()
+    inputs = MotionOutliers._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -59,7 +43,7 @@ def test_MotionOutliers_outputs():
     out_metric_plot=dict(),
     out_metric_values=dict(),
     )
-    outputs = MotionOutliers.output_spec()
+    outputs = MotionOutliers._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

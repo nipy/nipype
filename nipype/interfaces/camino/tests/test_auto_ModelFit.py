@@ -12,15 +12,9 @@ def test_ModelFit_inputs():
     ),
     cfthresh=dict(argstr='-csfthresh %G',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
     fixedbvalue=dict(argstr='-fixedbvalue %s',
     ),
     fixedmodq=dict(argstr='-fixedmod %s',
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
     ),
     in_file=dict(argstr='-inputfile %s',
     mandatory=True,
@@ -33,8 +27,8 @@ def test_ModelFit_inputs():
     noisemap=dict(argstr='-noisemap %s',
     ),
     out_file=dict(argstr='> %s',
-    genfile=True,
     position=-1,
+    usedefault=True,
     ),
     outlier=dict(argstr='-outliermap %s',
     ),
@@ -49,10 +43,8 @@ def test_ModelFit_inputs():
     ),
     tau=dict(argstr='-tau %G',
     ),
-    terminal_output=dict(nohash=True,
-    ),
     )
-    inputs = ModelFit.input_spec()
+    inputs = ModelFit._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -62,7 +54,7 @@ def test_ModelFit_inputs():
 def test_ModelFit_outputs():
     output_map = dict(fitted_data=dict(),
     )
-    outputs = ModelFit.output_spec()
+    outputs = ModelFit._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

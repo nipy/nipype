@@ -28,7 +28,7 @@ class InterfaceChecker(object):
                  module_skip_patterns=None,
                  class_skip_patterns=None
                  ):
-        ''' Initialize package for parsing
+        """ Initialize package for parsing
 
         Parameters
         ----------
@@ -55,7 +55,7 @@ class InterfaceChecker(object):
             Sequence of strings giving classes to be excluded
             Default is: None
 
-        '''
+        """
         if package_skip_patterns is None:
             package_skip_patterns = ['\\.tests$']
         if module_skip_patterns is None:
@@ -117,14 +117,14 @@ class InterfaceChecker(object):
         return path
 
     def _path2uri(self, dirpath):
-        ''' Convert directory path to uri '''
+        """ Convert directory path to uri """
         relpath = dirpath.replace(self.root_path, self.package_name)
         if relpath.startswith(os.path.sep):
             relpath = relpath[1:]
         return relpath.replace(os.path.sep, '.')
 
     def _parse_module(self, uri):
-        ''' Parse module defined in *uri* '''
+        """ Parse module defined in *uri* """
         filename = self._uri2path(uri)
         if filename is None:
             # nothing that we could handle here.
@@ -135,7 +135,7 @@ class InterfaceChecker(object):
         return functions, classes
 
     def _parse_lines(self, linesource, module):
-        ''' Parse lines of text for functions and classes '''
+        """ Parse lines of text for functions and classes """
         functions = []
         classes = []
         for line in linesource:
@@ -214,7 +214,7 @@ class InterfaceChecker(object):
                            '']
                     cmd.append('\ndef test_%s_inputs():' % c)
                     input_fields = ''
-                    for traitname, trait in sorted(classinst.input_spec().traits(transient=None).items()):
+                    for traitname, trait in sorted(classinst._input_spec().traits(transient=None).items()):
                         input_fields += '%s=dict(' % traitname
                         for key, value in sorted(trait.__dict__.items()):
                             if key in in_built or key == 'desc':
@@ -229,7 +229,7 @@ class InterfaceChecker(object):
                                 input_fields += "%s=%s,\n    " % (key, value)
                         input_fields += '),\n    '
                     cmd += ['    input_map = dict(%s)' % input_fields]
-                    cmd += ['    inputs = %s.input_spec()' % c]
+                    cmd += ['    inputs = %s._input_spec()' % c]
                     cmd += ["""
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -238,7 +238,7 @@ class InterfaceChecker(object):
             else:
                 print('%s has nonautotest' % c)
 
-            for traitname, trait in sorted(classinst.input_spec().traits(transient=None).items()):
+            for traitname, trait in sorted(classinst._input_spec().traits(transient=None).items()):
                 for key in sorted(trait.__dict__):
                     if key in in_built:
                         continue
@@ -251,14 +251,14 @@ class InterfaceChecker(object):
                     if key == 'mandatory' and trait.mandatory is not None and not trait.mandatory:
                         bad_specs.append([uri, c, 'Inputs', traitname, 'mandatory=False'])
 
-            if not classinst.output_spec:
+            if not classinst._output_spec:
                 continue
 
             if not os.path.exists(nonautotest):
                 with open(testfile, 'at') as fp:
                     cmd = ['\ndef test_%s_outputs():' % c]
                     input_fields = ''
-                    for traitname, trait in sorted(classinst.output_spec().traits(transient=None).items()):
+                    for traitname, trait in sorted(classinst._output_spec().traits(transient=None).items()):
                         input_fields += '%s=dict(' % traitname
                         for key, value in sorted(trait.__dict__.items()):
                             if key in in_built or key == 'desc':
@@ -273,14 +273,14 @@ class InterfaceChecker(object):
                                 input_fields += "%s=%s,\n    " % (key, value)
                         input_fields += '),\n    '
                     cmd += ['    output_map = dict(%s)' % input_fields]
-                    cmd += ['    outputs = %s.output_spec()' % c]
+                    cmd += ['    outputs = %s._output_spec()' % c]
                     cmd += ["""
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):
             yield assert_equal, getattr(outputs.traits()[key], metakey), value"""]
                     fp.writelines('\n'.join(cmd) + '\n')
 
-            for traitname, trait in sorted(classinst.output_spec().traits(transient=None).items()):
+            for traitname, trait in sorted(classinst._output_spec().traits(transient=None).items()):
                 for key in sorted(trait.__dict__):
                     if key in in_built:
                         continue
@@ -293,7 +293,7 @@ class InterfaceChecker(object):
         return bad_specs
 
     def _survives_exclude(self, matchstr, match_type):
-        ''' Returns True if *matchstr* does not match patterns
+        """ Returns True if *matchstr* does not match patterns
 
         ``self.package_name`` removed from front of string if present
 
@@ -312,7 +312,7 @@ class InterfaceChecker(object):
         >>> dw.module_skip_patterns.append('^\\.badmod$')
         >>> dw._survives_exclude('sphinx.badmod', 'module')
         False
-        '''
+        """
         if match_type == 'module':
             patterns = self.module_skip_patterns
         elif match_type == 'package':
@@ -336,7 +336,7 @@ class InterfaceChecker(object):
         return True
 
     def discover_modules(self):
-        ''' Return module sequence discovered from ``self.package_name``
+        """ Return module sequence discovered from ``self.package_name``
 
 
         Parameters
@@ -350,7 +350,7 @@ class InterfaceChecker(object):
 
         Examples
         --------
-        '''
+        """
         modules = [self.package_name]
         # raw directory parsing
         for dirpath, dirnames, filenames in os.walk(self.root_path):

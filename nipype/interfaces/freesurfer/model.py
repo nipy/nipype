@@ -94,22 +94,21 @@ class MRISPreproc(FSCommand):
     """
 
     _cmd = 'mris_preproc'
-    input_spec = MRISPreprocInputSpec
-    output_spec = MRISPreprocOutputSpec
+    _input_spec = MRISPreprocInputSpec
+    _output_spec = MRISPreprocOutputSpec
 
-    def _list_outputs(self):
-        outputs = self.output_spec().get()
+    def _post_run(self):
+
         outfile = self.inputs.out_file
-        outputs['out_file'] = outfile
+        self.outputs.out_file = outfile
         if not isdefined(outfile):
-            outputs['out_file'] = os.path.join(os.getcwd(),
+            self.outputs.out_file = os.path.join(os.getcwd(),
                                                'concat_%s_%s.mgz' % (self.inputs.hemi,
                                                                      self.inputs.target))
-        return outputs
 
     def _gen_filename(self, name):
         if name == 'out_file':
-            return self._list_outputs()[name]
+            return getattr(self.outputs, name)
         return None
 
 
@@ -268,8 +267,8 @@ class GLMFit(FSCommand):
     """
 
     _cmd = 'mri_glmfit'
-    input_spec = GLMFitInputSpec
-    output_spec = GLMFitOutputSpec
+    _input_spec = GLMFitInputSpec
+    _output_spec = GLMFitOutputSpec
 
     def _format_arg(self, name, spec, value):
         if name == "surf":
@@ -277,27 +276,27 @@ class GLMFit(FSCommand):
             return spec.argstr % (_si.subject_id, _si.hemi, _si.surf_geo)
         return super(GLMFit, self)._format_arg(name, spec, value)
 
-    def _list_outputs(self):
-        outputs = self.output_spec().get()
+    def _post_run(self):
+
         # Get the top-level output directory
         if not isdefined(self.inputs.glm_dir):
             glmdir = os.getcwd()
         else:
             glmdir = os.path.abspath(self.inputs.glm_dir)
-        outputs["glm_dir"] = glmdir
+        self.outputs.glm_dir = glmdir
 
         # Assign the output files that always get created
-        outputs["beta_file"] = os.path.join(glmdir, "beta.mgh")
-        outputs["error_var_file"] = os.path.join(glmdir, "rvar.mgh")
-        outputs["error_stddev_file"] = os.path.join(glmdir, "rstd.mgh")
-        outputs["mask_file"] = os.path.join(glmdir, "mask.mgh")
-        outputs["fwhm_file"] = os.path.join(glmdir, "fwhm.dat")
-        outputs["dof_file"] = os.path.join(glmdir, "dof.dat")
+        self.outputs.beta_file = os.path.join(glmdir, "beta.mgh")
+        self.outputs.error_var_file = os.path.join(glmdir, "rvar.mgh")
+        self.outputs.error_stddev_file = os.path.join(glmdir, "rstd.mgh")
+        self.outputs.mask_file = os.path.join(glmdir, "mask.mgh")
+        self.outputs.fwhm_file = os.path.join(glmdir, "fwhm.dat")
+        self.outputs.dof_file = os.path.join(glmdir, "dof.dat")
         # Assign the conditional outputs
         if isdefined(self.inputs.save_residual) and self.inputs.save_residual:
-            outputs["error_file"] = os.path.join(glmdir, "eres.mgh")
+            self.outputs.error_file = os.path.join(glmdir, "eres.mgh")
         if isdefined(self.inputs.save_estimate) and self.inputs.save_estimate:
-            outputs["estimate_file"] = os.path.join(glmdir, "yhat.mgh")
+            self.outputs.estimate_file = os.path.join(glmdir, "yhat.mgh")
 
         # Get the contrast directory name(s)
         if isdefined(self.inputs.contrast):
@@ -311,20 +310,19 @@ class GLMFit(FSCommand):
             contrasts = ["osgm"]
 
         # Add in the contrast images
-        outputs["sig_file"] = [os.path.join(glmdir, c, "sig.mgh") for c in contrasts]
-        outputs["ftest_file"] = [os.path.join(glmdir, c, "F.mgh") for c in contrasts]
-        outputs["gamma_file"] = [os.path.join(glmdir, c, "gamma.mgh") for c in contrasts]
-        outputs["gamma_var_file"] = [os.path.join(glmdir, c, "gammavar.mgh") for c in contrasts]
+        self.outputs.sig_file = [os.path.join(glmdir, c, "sig.mgh") for c in contrasts]
+        self.outputs.ftest_file = [os.path.join(glmdir, c, "F.mgh") for c in contrasts]
+        self.outputs.gamma_file = [os.path.join(glmdir, c, "gamma.mgh") for c in contrasts]
+        self.outputs.gamma_var_file = [os.path.join(glmdir, c, "gammavar.mgh") for c in contrasts]
 
         # Add in the PCA results, if relevant
         if isdefined(self.inputs.pca) and self.inputs.pca:
             pcadir = os.path.join(glmdir, "pca-eres")
-            outputs["spatial_eigenvectors"] = os.path.join(pcadir, "v.mgh")
-            outputs["frame_eigenvectors"] = os.path.join(pcadir, "u.mtx")
-            outputs["singluar_values"] = os.path.join(pcadir, "sdiag.mat")
-            outputs["svd_stats_file"] = os.path.join(pcadir, "stats.dat")
+            self.outputs.spatial_eigenvectors = os.path.join(pcadir, "v.mgh")
+            self.outputs.frame_eigenvectors = os.path.join(pcadir, "u.mtx")
+            self.outputs.singluar_values = os.path.join(pcadir, "sdiag.mat")
+            self.outputs.svd_stats_file = os.path.join(pcadir, "stats.dat")
 
-        return outputs
 
     def _gen_filename(self, name):
         if name == 'glm_dir':
@@ -357,9 +355,10 @@ class BinarizeInputSpec(FSTraitedSpec):
     ventricles = traits.Bool(argstr='--ventricles',
                              desc='set match vals those for aseg ventricles+choroid (not 4th)')
     wm_ven_csf = traits.Bool(argstr='--wm+vcsf', xor=['min', 'max'],
-                             desc='WM and ventricular CSF, including choroid (not 4th)')
-    binary_file = File(argstr='--o %s', genfile=True,
-                       desc='binary output volume')
+          desc='WM and ventricular CSF, including choroid (not 4th)')
+    binary_file = File(
+        argstr='--o %s', name_source='in_file', name_template='_bin',
+        keep_extension=True, desc='binary output volume')
     out_type = traits.Enum('nii', 'nii.gz', 'mgz', argstr='',
                            desc='output file type')
     count_file = traits.Either(traits.Bool, File,
@@ -406,18 +405,18 @@ class Binarize(FSCommand):
     Examples
     --------
 
-    >>> binvol = Binarize(in_file='structural.nii', min=10, binary_file='foo_out.nii')
+    >>> binvol = Binarize(in_file='structural.nii', min=10)
     >>> binvol.cmdline
-    'mri_binarize --o foo_out.nii --i structural.nii --min 10.000000'
+    'mri_binarize --o structural_bin.nii --i structural.nii --min 10.000000'
 
    """
 
     _cmd = 'mri_binarize'
-    input_spec = BinarizeInputSpec
-    output_spec = BinarizeOutputSpec
+    _input_spec = BinarizeInputSpec
+    _output_spec = BinarizeOutputSpec
 
-    def _list_outputs(self):
-        outputs = self.output_spec().get()
+    def _post_run(self):
+
         outfile = self.inputs.binary_file
         if not isdefined(outfile):
             if isdefined(self.inputs.out_type):
@@ -430,23 +429,22 @@ class Binarize(FSCommand):
                 outfile = fname_presuffix(self.inputs.in_file,
                                           newpath=os.getcwd(),
                                           suffix='_thresh')
-        outputs['binary_file'] = os.path.abspath(outfile)
+        self.outputs.binary_file = os.path.abspath(outfile)
         value = self.inputs.count_file
         if isdefined(value):
             if isinstance(value, bool):
                 if value:
-                    outputs['count_file'] = fname_presuffix(self.inputs.in_file,
+                    self.outputs.count_file = fname_presuffix(self.inputs.in_file,
                                                             suffix='_count.txt',
                                                             newpath=os.getcwd(),
                                                             use_ext=False)
             else:
-                outputs['count_file'] = value
-        return outputs
+                self.outputs.count_file = value
 
     def _format_arg(self, name, spec, value):
         if name == 'count_file':
             if isinstance(value, bool):
-                fname = self._list_outputs()[name]
+                fname = getattr(self.outputs, name)
             else:
                 fname = value
             return spec.argstr % fname
@@ -456,7 +454,7 @@ class Binarize(FSCommand):
 
     def _gen_filename(self, name):
         if name == 'binary_file':
-            return self._list_outputs()[name]
+            return getattr(self.outputs, name)
         return None
 
 
@@ -522,21 +520,20 @@ class Concatenate(FSCommand):
     """
 
     _cmd = 'mri_concat'
-    input_spec = ConcatenateInputSpec
-    output_spec = ConcatenateOutputSpec
+    _input_spec = ConcatenateInputSpec
+    _output_spec = ConcatenateOutputSpec
 
-    def _list_outputs(self):
-        outputs = self.output_spec().get()
+    def _post_run(self):
+
         if not isdefined(self.inputs.concatenated_file):
-            outputs['concatenated_file'] = os.path.join(os.getcwd(),
+            self.outputs.concatenated_file = os.path.join(os.getcwd(),
                                                         'concat_output.nii.gz')
         else:
-            outputs['concatenated_file'] = self.inputs.concatenated_file
-        return outputs
+            self.outputs.concatenated_file = self.inputs.concatenated_file
 
     def _gen_filename(self, name):
         if name == 'concatenated_file':
-            return self._list_outputs()[name]
+            return getattr(self.outputs, name)
         return None
 
 
@@ -630,15 +627,15 @@ class SegStats(FSCommand):
     """
 
     _cmd = 'mri_segstats'
-    input_spec = SegStatsInputSpec
-    output_spec = SegStatsOutputSpec
+    _input_spec = SegStatsInputSpec
+    _output_spec = SegStatsOutputSpec
 
-    def _list_outputs(self):
-        outputs = self.output_spec().get()
+    def _post_run(self):
+
         if isdefined(self.inputs.summary_file):
-            outputs['summary_file'] = os.path.abspath(self.inputs.summary_file)
+            self.outputs.summary_file = os.path.abspath(self.inputs.summary_file)
         else:
-            outputs['summary_file'] = os.path.join(os.getcwd(), 'summary.stats')
+            self.outputs.summary_file = os.path.join(os.getcwd(), 'summary.stats')
         suffices = dict(avgwf_txt_file='_avgwf.txt', avgwf_file='_avgwf.nii.gz',
                         sf_avg_file='sfavg.txt')
         if isdefined(self.inputs.segmentation_file):
@@ -651,17 +648,16 @@ class SegStats(FSCommand):
             value = getattr(self.inputs, name)
             if isdefined(value):
                 if isinstance(value, bool):
-                    outputs[name] = fname_presuffix(src, suffix=suffix,
+                    setattr(self.outputs, name, fname_presuffix(src, suffix=suffix,
                                                     newpath=os.getcwd(),
-                                                    use_ext=False)
+                                                    use_ext=False))
                 else:
-                    outputs[name] = os.path.abspath(value)
-        return outputs
+                    setattr(self.outputs, name, os.path.abspath(value))
 
     def _format_arg(self, name, spec, value):
         if name in ['avgwf_txt_file', 'avgwf_file', 'sf_avg_file']:
             if isinstance(value, bool):
-                fname = self._list_outputs()[name]
+                fname = getattr(self.outputs, name)
             else:
                 fname = value
             return spec.argstr % fname
@@ -669,7 +665,7 @@ class SegStats(FSCommand):
 
     def _gen_filename(self, name):
         if name == 'summary_file':
-            return self._list_outputs()[name]
+            return getattr(self.outputs, name)
         return None
 
 
@@ -749,11 +745,11 @@ class Label2Vol(FSCommand):
    """
 
     _cmd = 'mri_label2vol'
-    input_spec = Label2VolInputSpec
-    output_spec = Label2VolOutputSpec
+    _input_spec = Label2VolInputSpec
+    _output_spec = Label2VolOutputSpec
 
-    def _list_outputs(self):
-        outputs = self.output_spec().get()
+    def _post_run(self):
+
         outfile = self.inputs.vol_label_file
         if not isdefined(outfile):
             for key in ['label_file', 'annot_file', 'seg_file']:
@@ -767,12 +763,11 @@ class Label2Vol(FSCommand):
             outfile = fname_presuffix(src, suffix='_vol.nii.gz',
                                       newpath=os.getcwd(),
                                       use_ext=False)
-        outputs['vol_label_file'] = outfile
-        return outputs
+        self.outputs.vol_label_file = outfile
 
     def _gen_filename(self, name):
         if name == 'vol_label_file':
-            return self._list_outputs()[name]
+            return getattr(self.outputs, name)
         return None
 
 
@@ -827,18 +822,16 @@ class MS_LDA(FSCommand):
     """
 
     _cmd = 'mri_ms_LDA'
-    input_spec = MS_LDAInputSpec
-    output_spec = MS_LDAOutputSpec
+    _input_spec = MS_LDAInputSpec
+    _output_spec = MS_LDAOutputSpec
 
-    def _list_outputs(self):
-        outputs = self._outputs().get()
+    def _post_run(self):
         if isdefined(self.inputs.output_synth):
-            outputs['vol_synth_file'] = os.path.abspath(self.inputs.output_synth)
+            self.outputs.vol_synth_file = os.path.abspath(self.inputs.output_synth)
         else:
-            outputs['vol_synth_file'] = os.path.abspath(self.inputs.vol_synth_file)
+            self.outputs.vol_synth_file = os.path.abspath(self.inputs.vol_synth_file)
         if not isdefined(self.inputs.use_weights) or self.inputs.use_weights is False:
-            outputs['weight_file'] = os.path.abspath(self.inputs.weight_file)
-        return outputs
+            self.outputs.weight_file = os.path.abspath(self.inputs.weight_file)
 
     def _verify_weights_file_exists(self):
         if not os.path.exists(os.path.abspath(self.inputs.weight_file)):

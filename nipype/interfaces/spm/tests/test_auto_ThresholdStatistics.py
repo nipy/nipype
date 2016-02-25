@@ -10,9 +10,6 @@ def test_ThresholdStatistics_inputs():
     ),
     height_threshold=dict(mandatory=True,
     ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     matlab_cmd=dict(),
     mfile=dict(usedefault=True,
     ),
@@ -28,7 +25,7 @@ def test_ThresholdStatistics_inputs():
     usedefault=True,
     ),
     )
-    inputs = ThresholdStatistics.input_spec()
+    inputs = ThresholdStatistics._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -43,7 +40,7 @@ def test_ThresholdStatistics_outputs():
     voxelwise_P_RF=dict(),
     voxelwise_P_uncor=dict(),
     )
-    outputs = ThresholdStatistics.output_spec()
+    outputs = ThresholdStatistics._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

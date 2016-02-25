@@ -16,15 +16,9 @@ def test_UKFTractography_inputs():
     ),
     dwiFile=dict(argstr='--dwiFile %s',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
     freeWater=dict(argstr='--freeWater ',
     ),
     fullTensorModel=dict(argstr='--fullTensorModel ',
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
     ),
     labels=dict(argstr='--labels %s',
     sep=',',
@@ -71,8 +65,6 @@ def test_UKFTractography_inputs():
     ),
     storeGlyphs=dict(argstr='--storeGlyphs ',
     ),
-    terminal_output=dict(nohash=True,
-    ),
     tracts=dict(argstr='--tracts %s',
     hash_files=False,
     ),
@@ -84,7 +76,7 @@ def test_UKFTractography_inputs():
     writeUncompressedTracts=dict(argstr='--writeUncompressedTracts ',
     ),
     )
-    inputs = UKFTractography.input_spec()
+    inputs = UKFTractography._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -95,7 +87,7 @@ def test_UKFTractography_outputs():
     output_map = dict(tracts=dict(),
     tractsWithSecondTensor=dict(),
     )
-    outputs = UKFTractography.output_spec()
+    outputs = UKFTractography._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

@@ -11,12 +11,6 @@ def test_PrepareFieldmap_inputs():
     position=-2,
     usedefault=True,
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     in_magnitude=dict(argstr='%s',
     mandatory=True,
     position=3,
@@ -32,15 +26,14 @@ def test_PrepareFieldmap_inputs():
     out_fieldmap=dict(argstr='%s',
     position=4,
     ),
-    output_type=dict(),
+    output_type=dict(usedefault=True,
+    ),
     scanner=dict(argstr='%s',
     position=1,
     usedefault=True,
     ),
-    terminal_output=dict(nohash=True,
-    ),
     )
-    inputs = PrepareFieldmap.input_spec()
+    inputs = PrepareFieldmap._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -50,7 +43,7 @@ def test_PrepareFieldmap_inputs():
 def test_PrepareFieldmap_outputs():
     output_map = dict(out_fieldmap=dict(),
     )
-    outputs = PrepareFieldmap.output_spec()
+    outputs = PrepareFieldmap._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

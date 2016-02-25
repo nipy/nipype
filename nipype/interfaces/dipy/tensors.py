@@ -8,13 +8,13 @@
 import nibabel as nb
 
 from ..base import TraitedSpec, File, isdefined
-from .base import DipyDiffusionInterface, DipyBaseInterfaceInputSpec
+from .base import DipyDiffusionInterface, DipyBaseInputSpec
 
 from ... import logging
 IFLOGGER = logging.getLogger('interface')
 
 
-class DTIInputSpec(DipyBaseInterfaceInputSpec):
+class DTIInputSpec(DipyBaseInputSpec):
     mask_file = File(exists=True,
                      desc='An optional white matter mask')
 
@@ -37,8 +37,8 @@ class DTI(DipyDiffusionInterface):
     >>> dti.inputs.in_bval = 'bvals'
     >>> dti.run()                                   # doctest: +SKIP
     """
-    input_spec = DTIInputSpec
-    output_spec = DTIOutputSpec
+    _input_spec = DTIInputSpec
+    _output_spec = DTIOutputSpec
 
     def _run_interface(self, runtime):
         from dipy.reconst import dti
@@ -62,13 +62,11 @@ class DTI(DipyDiffusionInterface):
         IFLOGGER.info('DTI parameters image saved as {i}'.format(i=out_file))
         return runtime
 
-    def _list_outputs(self):
-        outputs = self._outputs().get()
-        outputs['out_file'] = self._gen_filename('dti')
-        return outputs
+    def _post_run(self):
+        self.outputs.out_file = self._gen_filename('dti')
+        
 
-
-class TensorModeInputSpec(DipyBaseInterfaceInputSpec):
+class TensorModeInputSpec(DipyBaseInputSpec):
     mask_file = File(exists=True,
                      desc='An optional white matter mask')
 
@@ -100,8 +98,8 @@ class TensorMode(DipyDiffusionInterface):
     >>> mode.inputs.in_bval = 'bvals'
     >>> mode.run()                                   # doctest: +SKIP
     """
-    input_spec = TensorModeInputSpec
-    output_spec = TensorModeOutputSpec
+    _input_spec = TensorModeInputSpec
+    _output_spec = TensorModeOutputSpec
 
     def _run_interface(self, runtime):
         from dipy.reconst import dti
@@ -132,7 +130,6 @@ class TensorMode(DipyDiffusionInterface):
         IFLOGGER.info('Tensor mode image saved as {i}'.format(i=out_file))
         return runtime
 
-    def _list_outputs(self):
-        outputs = self._outputs().get()
-        outputs['out_file'] = self._gen_filename('mode')
-        return outputs
+    def _post_run(self):
+        self.outputs.out_file = self._gen_filename('mode')
+        

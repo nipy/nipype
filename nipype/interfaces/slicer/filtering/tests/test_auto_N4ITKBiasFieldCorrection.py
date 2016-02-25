@@ -10,14 +10,8 @@ def test_N4ITKBiasFieldCorrection_inputs():
     ),
     convergencethreshold=dict(argstr='--convergencethreshold %f',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
     histogramsharpening=dict(argstr='--histogramsharpening %s',
     sep=',',
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
     ),
     inputimage=dict(argstr='--inputimage %s',
     ),
@@ -39,12 +33,10 @@ def test_N4ITKBiasFieldCorrection_inputs():
     ),
     splinedistance=dict(argstr='--splinedistance %f',
     ),
-    terminal_output=dict(nohash=True,
-    ),
     weightimage=dict(argstr='--weightimage %s',
     ),
     )
-    inputs = N4ITKBiasFieldCorrection.input_spec()
+    inputs = N4ITKBiasFieldCorrection._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -55,7 +47,7 @@ def test_N4ITKBiasFieldCorrection_outputs():
     output_map = dict(outputbiasfield=dict(),
     outputimage=dict(),
     )
-    outputs = N4ITKBiasFieldCorrection.output_spec()
+    outputs = N4ITKBiasFieldCorrection._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

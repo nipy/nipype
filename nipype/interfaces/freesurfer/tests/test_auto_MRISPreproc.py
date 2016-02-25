@@ -6,9 +6,6 @@ from ..model import MRISPreproc
 def test_MRISPreproc_inputs():
     input_map = dict(args=dict(argstr='%s',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
     fsgd_file=dict(argstr='--fsgd %s',
     xor=('subjects', 'fsgd_file', 'subject_file'),
     ),
@@ -20,9 +17,6 @@ def test_MRISPreproc_inputs():
     ),
     hemi=dict(argstr='--hemi %s',
     mandatory=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
     ),
     num_iters=dict(argstr='--niters %d',
     xor=['fwhm'],
@@ -60,12 +54,10 @@ def test_MRISPreproc_inputs():
     target=dict(argstr='--target %s',
     mandatory=True,
     ),
-    terminal_output=dict(nohash=True,
-    ),
     vol_measure_file=dict(argstr='--iv %s %s...',
     ),
     )
-    inputs = MRISPreproc.input_spec()
+    inputs = MRISPreproc._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -75,7 +67,7 @@ def test_MRISPreproc_inputs():
 def test_MRISPreproc_outputs():
     output_map = dict(out_file=dict(),
     )
-    outputs = MRISPreproc.output_spec()
+    outputs = MRISPreproc._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

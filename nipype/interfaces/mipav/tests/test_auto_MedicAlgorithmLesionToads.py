@@ -6,12 +6,6 @@ from ..developer import MedicAlgorithmLesionToads
 def test_MedicAlgorithmLesionToads_inputs():
     input_map = dict(args=dict(argstr='%s',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     inAtlas=dict(argstr='--inAtlas %s',
     ),
     inAtlas2=dict(argstr='--inAtlas2 %s',
@@ -83,8 +77,6 @@ def test_MedicAlgorithmLesionToads_inputs():
     outWM=dict(argstr='--outWM %s',
     hash_files=False,
     ),
-    terminal_output=dict(nohash=True,
-    ),
     xDefaultMem=dict(argstr='-xDefaultMem %d',
     ),
     xMaxProcess=dict(argstr='-xMaxProcess %d',
@@ -93,7 +85,7 @@ def test_MedicAlgorithmLesionToads_inputs():
     xPrefExt=dict(argstr='--xPrefExt %s',
     ),
     )
-    inputs = MedicAlgorithmLesionToads.input_spec()
+    inputs = MedicAlgorithmLesionToads._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -111,7 +103,7 @@ def test_MedicAlgorithmLesionToads_outputs():
     outSulcal=dict(),
     outWM=dict(),
     )
-    outputs = MedicAlgorithmLesionToads.output_spec()
+    outputs = MedicAlgorithmLesionToads._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

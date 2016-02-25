@@ -4,10 +4,7 @@ from ..utils import Reslice
 
 
 def test_Reslice_inputs():
-    input_map = dict(ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
-    in_file=dict(mandatory=True,
+    input_map = dict(in_file=dict(mandatory=True,
     ),
     interp=dict(usedefault=True,
     ),
@@ -23,7 +20,7 @@ def test_Reslice_inputs():
     usedefault=True,
     ),
     )
-    inputs = Reslice.input_spec()
+    inputs = Reslice._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -33,7 +30,7 @@ def test_Reslice_inputs():
 def test_Reslice_outputs():
     output_map = dict(out_file=dict(),
     )
-    outputs = Reslice.output_spec()
+    outputs = Reslice._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

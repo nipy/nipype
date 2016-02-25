@@ -8,12 +8,6 @@ def test_DTIFit_inputs():
     ),
     bgmask=dict(argstr='-bgmask %s',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     in_file=dict(argstr='%s',
     mandatory=True,
     position=1,
@@ -22,17 +16,15 @@ def test_DTIFit_inputs():
     position=3,
     ),
     out_file=dict(argstr='> %s',
-    genfile=True,
     position=-1,
+    usedefault=True,
     ),
     scheme_file=dict(argstr='%s',
     mandatory=True,
     position=2,
     ),
-    terminal_output=dict(nohash=True,
-    ),
     )
-    inputs = DTIFit.input_spec()
+    inputs = DTIFit._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -42,7 +34,7 @@ def test_DTIFit_inputs():
 def test_DTIFit_outputs():
     output_map = dict(tensor_fitted=dict(),
     )
-    outputs = DTIFit.output_spec()
+    outputs = DTIFit._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

@@ -9,14 +9,8 @@ def test_MRTransform_inputs():
     debug=dict(argstr='-debug',
     position=1,
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
     flip_x=dict(argstr='-flipx',
     position=1,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
     ),
     in_files=dict(argstr='%s',
     mandatory=True,
@@ -41,13 +35,11 @@ def test_MRTransform_inputs():
     template_image=dict(argstr='-template %s',
     position=1,
     ),
-    terminal_output=dict(nohash=True,
-    ),
     transformation_file=dict(argstr='-transform %s',
     position=1,
     ),
     )
-    inputs = MRTransform.input_spec()
+    inputs = MRTransform._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -57,7 +49,7 @@ def test_MRTransform_inputs():
 def test_MRTransform_outputs():
     output_map = dict(out_file=dict(),
     )
-    outputs = MRTransform.output_spec()
+    outputs = MRTransform._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

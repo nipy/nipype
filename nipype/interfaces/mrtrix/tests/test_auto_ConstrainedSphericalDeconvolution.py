@@ -14,14 +14,8 @@ def test_ConstrainedSphericalDeconvolution_inputs():
     encoding_file=dict(argstr='-grad %s',
     position=1,
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
     filter_file=dict(argstr='-filter %s',
     position=-2,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
     ),
     in_file=dict(argstr='%s',
     mandatory=True,
@@ -47,12 +41,10 @@ def test_ConstrainedSphericalDeconvolution_inputs():
     mandatory=True,
     position=-2,
     ),
-    terminal_output=dict(nohash=True,
-    ),
     threshold_value=dict(argstr='-threshold %s',
     ),
     )
-    inputs = ConstrainedSphericalDeconvolution.input_spec()
+    inputs = ConstrainedSphericalDeconvolution._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -62,7 +54,7 @@ def test_ConstrainedSphericalDeconvolution_inputs():
 def test_ConstrainedSphericalDeconvolution_outputs():
     output_map = dict(spherical_harmonics_image=dict(),
     )
-    outputs = ConstrainedSphericalDeconvolution.output_spec()
+    outputs = ConstrainedSphericalDeconvolution._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

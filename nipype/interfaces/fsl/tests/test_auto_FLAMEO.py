@@ -19,15 +19,9 @@ def test_FLAMEO_inputs():
     ),
     dof_var_cope_file=dict(argstr='--dofvarcopefile=%s',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
     f_con_file=dict(argstr='--fcontrastsfile=%s',
     ),
     fix_mean=dict(argstr='--fixmean',
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
     ),
     infer_outliers=dict(argstr='--inferoutliers',
     ),
@@ -43,7 +37,8 @@ def test_FLAMEO_inputs():
     ),
     outlier_iter=dict(argstr='--ioni=%d',
     ),
-    output_type=dict(),
+    output_type=dict(usedefault=True,
+    ),
     run_mode=dict(argstr='--runmode=%s',
     mandatory=True,
     ),
@@ -54,12 +49,10 @@ def test_FLAMEO_inputs():
     t_con_file=dict(argstr='--tcontrastsfile=%s',
     mandatory=True,
     ),
-    terminal_output=dict(nohash=True,
-    ),
     var_cope_file=dict(argstr='--varcopefile=%s',
     ),
     )
-    inputs = FLAMEO.input_spec()
+    inputs = FLAMEO._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -80,7 +73,7 @@ def test_FLAMEO_outputs():
     zfstats=dict(),
     zstats=dict(),
     )
-    outputs = FLAMEO.output_spec()
+    outputs = FLAMEO._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

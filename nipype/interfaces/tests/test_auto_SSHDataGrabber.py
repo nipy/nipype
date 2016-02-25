@@ -10,9 +10,6 @@ def test_SSHDataGrabber_inputs():
     ),
     hostname=dict(mandatory=True,
     ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     password=dict(),
     raise_on_empty=dict(usedefault=True,
     ),
@@ -27,7 +24,7 @@ def test_SSHDataGrabber_inputs():
     ),
     username=dict(),
     )
-    inputs = SSHDataGrabber.input_spec()
+    inputs = SSHDataGrabber._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -36,7 +33,7 @@ def test_SSHDataGrabber_inputs():
 
 def test_SSHDataGrabber_outputs():
     output_map = dict()
-    outputs = SSHDataGrabber.output_spec()
+    outputs = SSHDataGrabber._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

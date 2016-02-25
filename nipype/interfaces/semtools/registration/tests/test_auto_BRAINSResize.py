@@ -6,12 +6,6 @@ from ..brainsresize import BRAINSResize
 def test_BRAINSResize_inputs():
     input_map = dict(args=dict(argstr='%s',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     inputVolume=dict(argstr='--inputVolume %s',
     ),
     outputVolume=dict(argstr='--outputVolume %s',
@@ -21,10 +15,8 @@ def test_BRAINSResize_inputs():
     ),
     scaleFactor=dict(argstr='--scaleFactor %f',
     ),
-    terminal_output=dict(nohash=True,
-    ),
     )
-    inputs = BRAINSResize.input_spec()
+    inputs = BRAINSResize._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -34,7 +26,7 @@ def test_BRAINSResize_inputs():
 def test_BRAINSResize_outputs():
     output_map = dict(outputVolume=dict(),
     )
-    outputs = BRAINSResize.output_spec()
+    outputs = BRAINSResize._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

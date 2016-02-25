@@ -6,12 +6,6 @@ from ..brains import fcsv_to_hdf5
 def test_fcsv_to_hdf5_inputs():
     input_map = dict(args=dict(argstr='%s',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     landmarkGlobPattern=dict(argstr='--landmarkGlobPattern %s',
     ),
     landmarkTypesList=dict(argstr='--landmarkTypesList %s',
@@ -24,12 +18,10 @@ def test_fcsv_to_hdf5_inputs():
     ),
     numberOfThreads=dict(argstr='--numberOfThreads %d',
     ),
-    terminal_output=dict(nohash=True,
-    ),
     versionID=dict(argstr='--versionID %s',
     ),
     )
-    inputs = fcsv_to_hdf5.input_spec()
+    inputs = fcsv_to_hdf5._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -40,7 +32,7 @@ def test_fcsv_to_hdf5_outputs():
     output_map = dict(landmarksInformationFile=dict(),
     modelFile=dict(),
     )
-    outputs = fcsv_to_hdf5.output_spec()
+    outputs = fcsv_to_hdf5._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

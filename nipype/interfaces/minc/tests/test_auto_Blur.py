@@ -11,9 +11,6 @@ def test_Blur_inputs():
     ),
     dimensions=dict(argstr='-dimensions %s',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
     fwhm=dict(argstr='-fwhm %s',
     mandatory=True,
     xor=('fwhm', 'fwhm3d', 'standard_dev'),
@@ -26,9 +23,6 @@ def test_Blur_inputs():
     xor=('gaussian', 'rect'),
     ),
     gradient=dict(argstr='-gradient',
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
     ),
     input_file=dict(argstr='%s',
     mandatory=True,
@@ -48,10 +42,8 @@ def test_Blur_inputs():
     mandatory=True,
     xor=('fwhm', 'fwhm3d', 'standard_dev'),
     ),
-    terminal_output=dict(nohash=True,
-    ),
     )
-    inputs = Blur.input_spec()
+    inputs = Blur._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -66,7 +58,7 @@ def test_Blur_outputs():
     partial_dy=dict(),
     partial_dz=dict(),
     )
-    outputs = Blur.output_spec()
+    outputs = Blur._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

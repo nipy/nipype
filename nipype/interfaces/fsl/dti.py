@@ -6,8 +6,8 @@ was written to work with FSL version 4.1.4.
 
     Change directory to provide relative paths for doctests
     >>> import os
-    >>> filepath = os.path.dirname( os.path.realpath( __file__ ) )
-    >>> datadir = os.path.realpath(os.path.join(filepath, '../../testing/data'))
+    >>> filepath = op.dirname( op.realpath( __file__ ) )
+    >>> datadir = op.realpath(op.join(filepath, '../../testing/data'))
     >>> os.chdir(datadir)
 
 """
@@ -15,22 +15,23 @@ was written to work with FSL version 4.1.4.
 from builtins import range
 
 import os
+import os.path as op
 import shutil
-import warnings
 
 from ... import LooseVersion
-from ..base import (TraitedSpec, isdefined, File, Directory,
-                    InputMultiPath, OutputMultiPath, traits)
+from ..base import (TraitedSpec, isdefined, File, GenFile, GenMultiFile, Directory,
+                    InputMultiPath, OutputMultiPath, traits, Undefined)
 from ..fsl.base import (FSLCommand, FSLCommandInputSpec, Info)
 from ...utils.filemanip import fname_presuffix, split_filename, copyfile
 
-warn = warnings.warn
+from ... import logging
+IFLOGGER = logging.getLogger('interface')
 
 
 class DTIFitInputSpec(FSLCommandInputSpec):
     dwi = File(exists=True, desc='diffusion weighted image data file',
                argstr='-k %s', position=0, mandatory=True)
-    base_name = traits.Str("dtifit_", desc='base_name that all output files will start with',
+    base_name = traits.Str('dtifit_', desc='base_name that all output files will start with',
                            argstr='-o %s', position=1, usedefault=True)
     mask = File(exists=True, desc='bet binary mask file',
                 argstr='-m %s', position=2, mandatory=True)
@@ -44,7 +45,7 @@ class DTIFitInputSpec(FSLCommandInputSpec):
     max_y = traits.Int(argstr='-Y %d', desc='max y')
     min_x = traits.Int(argstr='-x %d', desc='min x')
     max_x = traits.Int(argstr='-X %d', desc='max x')
-    save_tensor = traits.Bool(desc='save the elements of the tensor',
+    save_tensor = traits.Bool(False, usedefault=True, desc='save the elements of the tensor',
                               argstr='--save_tensor')
     sse = traits.Bool(desc='output sum of squared errors', argstr='--sse')
     cni = File(exists=True, desc='input counfound regressors', argstr='--cni=%s')
@@ -53,20 +54,43 @@ class DTIFitInputSpec(FSLCommandInputSpec):
     gradnonlin = File(exists=True, argstr='--gradnonlin=%s',
                       desc='gradient non linearities')
 
+    # Auto-generated outputs
+    out_v1 = GenFile(template='{base_name}V1{output_type_}',
+                     keep_extension=False, desc='1st eigenvector')
+    out_v2 = GenFile(template='{base_name}V2{output_type_}',
+                     keep_extension=False, desc='2nd eigenvector')
+    out_v3 = GenFile(template='{base_name}V3{output_type_}',
+                     keep_extension=False, desc='3rd eigenvector')
+    out_l1 = GenFile(template='{base_name}L1{output_type_}',
+                     keep_extension=False, desc='1st eigenvalue')
+    out_l2 = GenFile(template='{base_name}L2{output_type_}',
+                     keep_extension=False, desc='2nd eigenvalue')
+    out_l3 = GenFile(template='{base_name}L3{output_type_}',
+                     keep_extension=False, desc='3rd eigenvalue')
+    out_md = GenFile(template='{base_name}MD{output_type_}',
+                     keep_extension=False, desc='mean diffusivity')
+    out_fa = GenFile(template='{base_name}FA{output_type_}',
+                     keep_extension=False, desc='fractional anisotropy')
+    out_mo = GenFile(template='{base_name}MO{output_type_}',
+                     keep_extension=False, desc='mode of anisotropy')
+    out_s0 = GenFile(template='{base_name}S0{output_type_}',
+                     keep_extension=False, desc='raw T2 signal with no diffusion weighting')
+    tensor = GenFile(template='{base_name}tensor{output_type_}',
+                     keep_extension=False, desc='path/name of file with the 4D tensor volume')
+
 
 class DTIFitOutputSpec(TraitedSpec):
-    V1 = File(exists=True, desc='path/name of file with the 1st eigenvector')
-    V2 = File(exists=True, desc='path/name of file with the 2nd eigenvector')
-    V3 = File(exists=True, desc='path/name of file with the 3rd eigenvector')
-    L1 = File(exists=True, desc='path/name of file with the 1st eigenvalue')
-    L2 = File(exists=True, desc='path/name of file with the 2nd eigenvalue')
-    L3 = File(exists=True, desc='path/name of file with the 3rd eigenvalue')
-    MD = File(exists=True, desc='path/name of file with the mean diffusivity')
-    FA = File(exists=True, desc='path/name of file with the fractional anisotropy')
-    MO = File(exists=True, desc='path/name of file with the mode of anisotropy')
-    S0 = File(exists=True, desc='path/name of file with the raw T2 signal with no ' +
-                                'diffusion weighting')
-    tensor = File(exists=True, desc='path/name of file with the 4D tensor volume')
+    out_v1 = File(exists=True, desc='1st eigenvector')
+    out_v2 = File(exists=True, desc='2nd eigenvector')
+    out_v3 = File(exists=True, desc='3rd eigenvector')
+    out_l1 = File(exists=True, desc='1st eigenvalue')
+    out_l2 = File(exists=True, desc='2nd eigenvalue')
+    out_l3 = File(exists=True, desc='3rd eigenvalue')
+    out_md = File(exists=True, desc='mean diffusivity')
+    out_fa = File(exists=True, desc='fractional anisotropy')
+    out_mo = File(exists=True, desc='mode of anisotropy')
+    out_s0 = File(exists=True, desc='raw T2 signal with no diffusion weighting')
+    tensor = File(desc='path/name of file with the 4D tensor volume')
 
 
 class DTIFit(FSLCommand):
@@ -89,17 +113,12 @@ class DTIFit(FSLCommand):
     """
 
     _cmd = 'dtifit'
-    input_spec = DTIFitInputSpec
-    output_spec = DTIFitOutputSpec
+    _input_spec = DTIFitInputSpec
+    _output_spec = DTIFitOutputSpec
 
-    def _list_outputs(self):
-        outputs = self.output_spec().get()
-        for k in list(outputs.keys()):
-            if k not in ('outputtype', 'environ', 'args'):
-                if k != 'tensor' or (isdefined(self.inputs.save_tensor) and
-                                     self.inputs.save_tensor):
-                    outputs[k] = self._gen_fname(self.inputs.base_name, suffix='_' + k)
-        return outputs
+    def _post_run(self):
+        if not self.inputs.save_tensor:
+            self.outputs.tensor = Undefined
 
 
 class FSLXCommandInputSpec(FSLCommandInputSpec):
@@ -114,7 +133,7 @@ class FSLXCommandInputSpec(FSLCommandInputSpec):
 
     logdir = Directory('.', argstr='--logdir=%s', usedefault=True)
     n_fibres = traits.Range(
-        usedefault=True, low=1, default=2, argstr='--nfibres=%d',
+        usedefault=True, low=1, value=2, argstr='--nfibres=%d',
         desc=('Maximum number of fibres to fit in each voxel'), mandatory=True)
     model = traits.Enum(1, 2, 3, argstr='--model=%d',
                         desc=('use monoexponential (1, default, required for '
@@ -154,7 +173,7 @@ class FSLXCommandInputSpec(FSLCommandInputSpec):
     cnlinear = traits.Bool(argstr='--cnonlinear', xor=_xor_inputs2,
                            desc=('Initialise with constrained nonlinear '
                                  'fitting'))
-    rician = traits.Bool(argstr='--rician', desc=('use Rician noise modeling'))
+    rician = traits.Bool(False, usedefault=True, argstr='--rician', desc='use Rician noise modeling')
 
     _xor_inputs3 = ['f0_noard', 'f0_ard']
     f0_noard = traits.Bool(argstr='--f0', xor=_xor_inputs3,
@@ -167,75 +186,54 @@ class FSLXCommandInputSpec(FSLCommandInputSpec):
                             desc=('use the actual directory name given '
                                   '(do not add + to make a new directory)'))
 
+    mean_dsamples = GenFile(template='mean_dsamples{output_type_}', keep_extension=False,
+                            desc='Mean of distribution on diffusivity d')
+    mean_S0samples = GenFile(template='mean_S0samples{output_type_}', keep_extension=False,
+                             desc='Mean of distribution on T2w baseline signal intensity S0')
+    mean_tausamples = GenFile(template='mean_tausamples{output_type_}', keep_extension=False,
+                             desc='Mean of distribution on tau samples (only with rician noise)')
+    dyads = GenMultiFile(template='dyads{n_fibres:d}{output_type_}', range_source='n_fibres+1',
+                         keep_extension=False, desc='Mean of PDD distribution in vector form.')
+    fsamples = GenMultiFile(template='f{n_fibres:d}samples{output_type_}', range_source='n_fibres+1',
+                            keep_extension=False, desc='Samples from the distribution on f anisotropy')
+    mean_fsamples = GenMultiFile(template='mean_f{n_fibres:d}samples{output_type_}', range_source='n_fibres+1',
+                                 keep_extension=False, desc='Mean of distribution on f anisotropy')
+    phsamples = GenMultiFile(template='ph{n_fibres:d}samples{output_type_}', range_source='n_fibres+1',
+                             keep_extension=False, desc='phi samples, per fiber')
+    thsamples = GenMultiFile(template='th{n_fibres:d}samples{output_type_}', range_source='n_fibres+1',
+                             keep_extension=False, desc='theta samples, per fiber')
+
 
 class FSLXCommandOutputSpec(TraitedSpec):
-    dyads = OutputMultiPath(File(exists=True), desc=('Mean of PDD distribution'
-                                                     ' in vector form.'))
-    fsamples = OutputMultiPath(File(exists=True), desc=('Samples from the '
-                                                        'distribution on f anisotropy'))
     mean_dsamples = File(exists=True, desc='Mean of distribution on diffusivity d')
-    mean_fsamples = OutputMultiPath(File(exists=True), desc=('Mean of '
-                                                             'distribution on f anisotropy'))
-    mean_S0samples = File(exists=True, desc=('Mean of distribution on T2w'
-                                             'baseline signal intensity S0'))
-    mean_tausamples = File(exists=True, desc=('Mean of distribution on '
-                                              'tau samples (only with rician noise)'))
-    phsamples = OutputMultiPath(File(exists=True), desc=('phi samples, per fiber'))
-    thsamples = OutputMultiPath(File(exists=True), desc=('theta samples, per fiber'))
+    mean_S0samples = File(
+        exists=True, desc='Mean of distribution on T2w baseline signal intensity S0')
+    mean_tausamples = File(
+        exists=True, desc='Mean of distribution on tau samples (only with rician noise)')
+    dyads = OutputMultiPath(File(exists=True), desc='Mean of PDD distribution in vector form.')
+    fsamples = OutputMultiPath(File(exists=True),
+                               desc='Samples from the distribution on f anisotropy')
+    mean_fsamples = OutputMultiPath(File(exists=True),
+                                    desc='Mean of distribution on f anisotropy')
+    phsamples = OutputMultiPath(File(exists=True), desc='phi samples, per fiber')
+    thsamples = OutputMultiPath(File(exists=True), desc='theta samples, per fiber')
 
 
 class FSLXCommand(FSLCommand):
     """
     Base support for ``xfibres`` and ``bedpostx``
     """
-    input_spec = FSLXCommandInputSpec
-    output_spec = FSLXCommandOutputSpec
+    _input_spec = FSLXCommandInputSpec
+    _output_spec = FSLXCommandOutputSpec
 
     def _run_interface(self, runtime):
-        self._out_dir = os.getcwd()
         runtime = super(FSLXCommand, self)._run_interface(runtime)
         if runtime.stderr:
             self.raise_exception(runtime)
+
+        if not self.inputs.rician:
+            self.outputs.mean_tausamples = Undefined
         return runtime
-
-    def _list_outputs(self, out_dir=None):
-        outputs = self.output_spec().get()
-        n_fibres = self.inputs.n_fibres
-        if not out_dir:
-            if isdefined(self.inputs.logdir):
-                out_dir = os.path.abspath(self.inputs.logdir)
-            else:
-                out_dir = os.path.abspath('logdir')
-
-        multi_out = ['dyads', 'fsamples', 'mean_fsamples',
-                     'phsamples', 'thsamples']
-        single_out = ['mean_dsamples', 'mean_S0samples']
-
-        for k in single_out:
-            outputs[k] = self._gen_fname(k, cwd=out_dir)
-
-        if isdefined(self.inputs.rician) and self.inputs.rician:
-            outputs['mean_tausamples'] = self._gen_fname('mean_tausamples',
-                                                         cwd=out_dir)
-
-        for k in multi_out:
-            outputs[k] = []
-
-        for i in range(1, n_fibres + 1):
-            outputs['fsamples'].append(self._gen_fname('f%dsamples' % i,
-                                                       cwd=out_dir))
-            outputs['mean_fsamples'].append(self._gen_fname(('mean_f%d'
-                                                             'samples') % i, cwd=out_dir))
-
-        for i in range(1, n_fibres + 1):
-            outputs['dyads'].append(self._gen_fname('dyads%d' % i,
-                                                    cwd=out_dir))
-            outputs['phsamples'].append(self._gen_fname('ph%dsamples' % i,
-                                                        cwd=out_dir))
-            outputs['thsamples'].append(self._gen_fname('th%dsamples' % i,
-                                                        cwd=out_dir))
-
-        return outputs
 
 
 class BEDPOSTX5InputSpec(FSLXCommandInputSpec):
@@ -267,27 +265,13 @@ class BEDPOSTX5InputSpec(FSLXCommandInputSpec):
                                                        'nonlinearities, default off'))
     use_gpu = traits.Bool(False, desc='Use the GPU version of bedpostx')
 
+    # Add dyads dispersion
+    dyads_dispersion = GenMultiFile(
+        template='{n_fibres:d}{output_type_}', keep_extension=False, range_source='n_fibres+1',
+        desc='Dispersion')
 
-class BEDPOSTX5OutputSpec(TraitedSpec):
-    mean_dsamples = File(exists=True, desc='Mean of distribution on diffusivity d')
-    mean_fsamples = OutputMultiPath(File(exists=True), desc=('Mean of '
-                                                             'distribution on f anisotropy'))
-    mean_S0samples = File(exists=True, desc=('Mean of distribution on T2w'
-                                             'baseline signal intensity S0'))
-    mean_phsamples = OutputMultiPath(File(exists=True), desc=('Mean of '
-                                                              'distribution on phi'))
-    mean_thsamples = OutputMultiPath(File(exists=True), desc=('Mean of '
-                                                              'distribution on theta'))
-    merged_thsamples = OutputMultiPath(File(exists=True), desc=('Samples from '
-                                                                'the distribution on theta'))
-    merged_phsamples = OutputMultiPath(File(exists=True), desc=('Samples from '
-                                                                'the distribution on phi'))
-    merged_fsamples = OutputMultiPath(File(exists=True),
-                                      desc=('Samples from the distribution on '
-                                            'anisotropic volume fraction'))
-    dyads = OutputMultiPath(File(exists=True), desc=('Mean of PDD distribution'
-                                                     ' in vector form.'))
-    dyads_dispersion = OutputMultiPath(File(exists=True), desc=('Dispersion'))
+class BEDPOSTX5OutputSpec(FSLXCommandOutputSpec):
+    dyads_dispersion = OutputMultiPath(File(exists=True), desc='Dispersion')
 
 
 class BEDPOSTX5(FSLXCommand):
@@ -310,7 +294,7 @@ class BEDPOSTX5(FSLXCommand):
 
     >>> from nipype.interfaces import fsl
     >>> bedp = fsl.BEDPOSTX5(bvecs='bvecs', bvals='bvals', dwi='diffusion.nii',
-    ...                     mask='mask.nii', n_fibres=1)
+    ...                      mask='mask.nii', n_fibres=1)
     >>> bedp.cmdline
     'bedpostx bedpostx --forcedir -n 1'
 
@@ -318,8 +302,8 @@ class BEDPOSTX5(FSLXCommand):
 
     _cmd = 'bedpostx'
     _default_cmd = _cmd
-    input_spec = BEDPOSTX5InputSpec
-    output_spec = BEDPOSTX5OutputSpec
+    _input_spec = BEDPOSTX5InputSpec
+    _output_spec = BEDPOSTX5OutputSpec
     _can_resume = True
 
     def __init__(self, **inputs):
@@ -334,62 +318,25 @@ class BEDPOSTX5(FSLXCommand):
 
     def _run_interface(self, runtime):
 
-        subjectdir = os.path.abspath(self.inputs.out_dir)
-        if not os.path.exists(subjectdir):
+        subjectdir = op.abspath(self.inputs.out_dir)
+        if not op.exists(subjectdir):
             os.makedirs(subjectdir)
         _, _, ext = split_filename(self.inputs.mask)
         copyfile(self.inputs.mask,
-                 os.path.join(subjectdir,
+                 op.join(subjectdir,
                               'nodif_brain_mask' + ext))
         _, _, ext = split_filename(self.inputs.dwi)
         copyfile(self.inputs.dwi,
-                 os.path.join(subjectdir, 'data' + ext))
+                 op.join(subjectdir, 'data' + ext))
         copyfile(self.inputs.bvals,
-                 os.path.join(subjectdir, 'bvals'))
+                 op.join(subjectdir, 'bvals'))
         copyfile(self.inputs.bvecs,
-                 os.path.join(subjectdir, 'bvecs'))
+                 op.join(subjectdir, 'bvecs'))
 
         retval = super(BEDPOSTX5, self)._run_interface(runtime)
 
         self._out_dir = subjectdir + '.bedpostX'
         return retval
-
-    def _list_outputs(self):
-        outputs = self.output_spec().get()
-        n_fibres = self.inputs.n_fibres
-
-        multi_out = ['merged_thsamples', 'merged_fsamples',
-                     'merged_phsamples', 'mean_phsamples',
-                     'mean_thsamples', 'mean_fsamples',
-                     'dyads_dispersion', 'dyads']
-
-        single_out = ['mean_dsamples', 'mean_S0samples']
-
-        for k in single_out:
-            outputs[k] = self._gen_fname(k, cwd=self._out_dir)
-
-        for k in multi_out:
-            outputs[k] = []
-
-        for i in range(1, n_fibres + 1):
-            outputs['merged_thsamples'].append(self._gen_fname('merged_th%dsamples' % i,
-                                                               cwd=self._out_dir))
-            outputs['merged_fsamples'].append(self._gen_fname('merged_f%dsamples' % i,
-                                                              cwd=self._out_dir))
-            outputs['merged_phsamples'].append(self._gen_fname('merged_ph%dsamples' % i,
-                                                               cwd=self._out_dir))
-
-            outputs['mean_thsamples'].append(self._gen_fname('mean_th%dsamples' % i,
-                                                             cwd=self._out_dir))
-            outputs['mean_phsamples'].append(self._gen_fname('mean_ph%dsamples' % i,
-                                                             cwd=self._out_dir))
-            outputs['mean_fsamples'].append(self._gen_fname('mean_f%dsamples' % i,
-                                                            cwd=self._out_dir))
-            outputs['dyads'].append(self._gen_fname('dyads%d' % i,
-                                                    cwd=self._out_dir))
-            outputs['dyads_dispersion'].append(self._gen_fname('dyads%d_dispersion' % i,
-                                                               cwd=self._out_dir))
-        return outputs
 
 
 class XFibres5InputSpec(FSLXCommandInputSpec):
@@ -403,8 +350,8 @@ class XFibres5(FSLXCommand):
     parameters
     """
     _cmd = 'xfibres'
-    input_spec = XFibres5InputSpec
-    output_spec = FSLXCommandOutputSpec
+    _input_spec = XFibres5InputSpec
+    _output_spec = FSLXCommandOutputSpec
 
 
 class XFibres4InputSpec(FSLCommandInputSpec):
@@ -413,7 +360,7 @@ class XFibres4InputSpec(FSLCommandInputSpec):
     gradnonlin = File(exists=True, argstr="--gradnonlin=%s")
     bvecs = File(exists=True, argstr="--bvecs=%s", mandatory=True)
     bvals = File(exists=True, argstr="--bvals=%s", mandatory=True)
-    logdir = Directory("logdir", argstr="--logdir=%s", usedefault=True)
+    logdir = Directory('logdir', argstr="--logdir=%s", usedefault=True)
     n_fibres = traits.Range(low=1, argstr="--nfibres=%d",
                             desc="Maximum nukmber of fibres to fit in each voxel")
     fudge = traits.Int(argstr="--fudge=%d",
@@ -466,40 +413,36 @@ class XFibres4(FSLCommand):
 
 
     """
-    _cmd = "xfibres"
-    input_spec = XFibres4InputSpec
-    output_spec = XFibres4OutputSpec
+    _cmd = 'xfibres'
+    _input_spec = XFibres4InputSpec
+    _output_spec = XFibres4OutputSpec
 
     def __init__(self, **inputs):
-        warnings.warn(('Deprecated: Please use XFIBERS5 instead. This '
-                       'interface will be removed in version 0.11.'),
-                      DeprecationWarning)
+        IFLOGGER.warn('Deprecated: Please use XFIBERS5 instead. This '
+                      'interface will be removed in version 0.11.')
         super(XFibres4, self).__init__(**inputs)
 
-    def _list_outputs(self):
-        outputs = self.output_spec().get()
-        outputs["mean_dsamples"] = self._gen_fname("mean_dsamples",
-                                                   cwd=self.inputs.logdir)
-        outputs["mean_S0samples"] = self._gen_fname("mean_S0samples",
-                                                    cwd=self.inputs.logdir)
-        outputs["dyads"] = []
-        outputs["fsamples"] = []
-        outputs["mean_fsamples"] = []
-        outputs["phsamples"] = []
-        outputs["thsamples"] = []
+    def _post_run(self):
+        self.outputs.mean_dsamples = self._gen_fname('mean_dsamples',
+                                                   self.inputs.logdir)
+        self.outputs.mean_S0samples = self._gen_fname('mean_S0samples',
+                                                    self.inputs.logdir)
+        self.outputs.dyads = []
+        self.outputs.fsamples = []
+        self.outputs.mean_fsamples = []
+        self.outputs.phsamples = []
+        self.outputs.thsamples = []
         for i in range(1, self.inputs.n_fibres + 1):
-            outputs["dyads"].append(self._gen_fname("dyads%d" % i,
-                                                    cwd=self.inputs.logdir))
-            outputs["fsamples"].append(self._gen_fname("f%dsamples" % i,
-                                                       cwd=self.inputs.logdir))
-            outputs["mean_fsamples"].append(self._gen_fname("mean_f%dsamples" % i,
-                                                            cwd=self.inputs.logdir))
-            outputs["phsamples"].append(self._gen_fname("ph%dsamples" % i,
-                                                        cwd=self.inputs.logdir))
-            outputs["thsamples"].append(self._gen_fname("th%dsamples" % i,
-                                                        cwd=self.inputs.logdir))
-
-        return outputs
+            self.outputs.dyads.append(self._gen_fname('dyads%d' % i,
+                                                    self.inputs.logdir))
+            self.outputs.fsamples.append(self._gen_fname('f%dsamples' % i,
+                                                       self.inputs.logdir))
+            self.outputs.mean_fsamples.append(self._gen_fname('mean_f%dsamples' % i,
+                                                            self.inputs.logdir))
+            self.outputs.phsamples.append(self._gen_fname('ph%dsamples' % i,
+                                                        self.inputs.logdir))
+            self.outputs.thsamples.append(self._gen_fname('th%dsamples' % i,
+                                                        self.inputs.logdir))
 
 
 class BEDPOSTX4InputSpec(XFibres4InputSpec):
@@ -572,37 +515,37 @@ bvals='bvals', dwi='diffusion.nii', mask='mask.nii', fibres=1)
     """
 
     _cmd = 'bedpostx'
-    input_spec = BEDPOSTX4InputSpec
-    output_spec = BEDPOSTX4OutputSpec
+    _input_spec = BEDPOSTX4InputSpec
+    _output_spec = BEDPOSTX4OutputSpec
     _can_resume = True
 
     def __init__(self, **inputs):
-        warnings.warn(('Deprecated: Please use BEDPOSTX5 or '
-                       'create_bedpostx_pipeline instead. This interface will '
-                       'be removed in version 0.11.'), DeprecationWarning)
+        IFLOGGER.warn('Deprecated: Please use BEDPOSTX5 or '
+                      'create_bedpostx_pipeline instead. This interface will '
+                      'be removed in version 0.11.')
         super(BEDPOSTX4, self).__init__(**inputs)
 
     def _get_bedpostx_dir(self):
-        return os.path.join(os.getcwd(), self.inputs.bpx_directory)
+        return op.join(os.getcwd(), self.inputs.bpx_directory)
 
     def _run_interface(self, runtime, correct_return_codes=[0]):
 
         # create the subject specific bpx_directory
         bpx_directory = self._get_bedpostx_dir()
-        if not os.path.exists(bpx_directory):
+        if not op.exists(bpx_directory):
             os.makedirs(bpx_directory)
 
             _, _, ext = split_filename(self.inputs.mask)
             shutil.copyfile(self.inputs.mask,
-                            os.path.join(self.inputs.bpx_directory,
+                            op.join(self.inputs.bpx_directory,
                                          'nodif_brain_mask' + ext))
             _, _, ext = split_filename(self.inputs.dwi)
             shutil.copyfile(self.inputs.dwi,
-                            os.path.join(self.inputs.bpx_directory, 'data' + ext))
+                            op.join(self.inputs.bpx_directory, 'data' + ext))
             shutil.copyfile(self.inputs.bvals,
-                            os.path.join(self.inputs.bpx_directory, 'bvals'))
+                            op.join(self.inputs.bpx_directory, 'bvals'))
             shutil.copyfile(self.inputs.bvecs,
-                            os.path.join(self.inputs.bpx_directory, 'bvecs'))
+                            op.join(self.inputs.bpx_directory, 'bvecs'))
 
         runtime = super(BEDPOSTX4, self)._run_interface(runtime,
                                                         correct_return_codes)
@@ -610,44 +553,35 @@ bvals='bvals', dwi='diffusion.nii', mask='mask.nii', fibres=1)
             self.raise_exception(runtime)
         return runtime
 
-    def _list_outputs(self):
-        outputs = self.output_spec().get()
-        bpx_directory = self._get_bedpostx_dir()
-        outputs['bpx_out_directory'] = os.path.join(bpx_directory + '.bedpostX')
-        outputs['xfms_directory'] = os.path.join(bpx_directory + '.bedpostX',
-                                                 'xfms')
+    def _post_run(self):
+        bpx_out_dir = op.abspath(self._get_bedpostx_dir() + '.bedpostX')
+        self.outputs.bpx_out_directory = bpx_out_dir
+        self.outputs.xfms_directory = op.join(bpx_out_dir, 'xfms')
 
-        for k in list(outputs.keys()):
-            if k not in ('outputtype', 'environ', 'args', 'bpx_out_directory',
+        for k, _ in list(self.outputs.items()):
+            if k in ('outputtype', 'environ', 'args', 'bpx_out_directory',
                          'xfms_directory'):
-                outputs[k] = []
+                continue
+            setattr(self.outputs, k, [])
 
-        for n in range(self.inputs.fibres):
-            outputs['merged_thsamples'].append(self._gen_fname(
-                'merged_th' + repr(n + 1) + 'samples',
-                suffix='', cwd=outputs['bpx_out_directory']))
-            outputs['merged_phsamples'].append(self._gen_fname(
-                'merged_ph' + repr(n + 1) + 'samples',
-                suffix='', cwd=outputs['bpx_out_directory']))
-            outputs['merged_fsamples'].append(self._gen_fname(
-                'merged_f' + repr(n + 1) + 'samples',
-                suffix='', cwd=outputs['bpx_out_directory']))
-            outputs['mean_thsamples'].append(self._gen_fname(
-                'mean_th' + repr(n + 1) + 'samples',
-                suffix='', cwd=outputs['bpx_out_directory']))
-            outputs['mean_phsamples'].append(self._gen_fname(
-                'mean_ph' + repr(n + 1) + 'samples',
-                suffix='', cwd=outputs['bpx_out_directory']))
-            outputs['mean_fsamples'].append(self._gen_fname(
-                'mean_f' + repr(n + 1) + 'samples',
-                suffix='', cwd=outputs['bpx_out_directory']))
-            outputs['dyads'].append(self._gen_fname(
-                'dyads' + repr(n + 1),
-                suffix='', cwd=outputs['bpx_out_directory']))
-        return outputs
+        for i in [repr(n + 1) for n in range(self.inputs.fibres)]:
+            self.outputs.merged_thsamples.append(
+                self._gen_fname('merged_th' + repr(i + 1) + 'samples', bpx_out_dir))
 
+            self.outputs.merged_phsamples.append(self._gen_fname(
+                'merged_ph' + repr(i + 1) + 'samples', bpx_out_dir), suffix='')
+            self.outputs.merged_fsamples.append(self._gen_fname(
+                'merged_f' + repr(i + 1) + 'samples', bpx_out_dir), suffix='')
+            self.outputs.mean_thsamples.append(self._gen_fname(
+                'mean_th' + repr(i + 1) + 'samples', bpx_out_dir), suffix='')
+            self.outputs.mean_phsamples.append(self._gen_fname(
+                'mean_ph' + repr(i + 1) + 'samples', bpx_out_dir), suffix='')
+            self.outputs.mean_fsamples.append(self._gen_fname(
+                'mean_f' + repr(i + 1) + 'samples', bpx_out_dir), suffix='')
+            self.outputs.dyads.append(self._gen_fname(
+                'dyads' + repr(i + 1), bpx_out_dir), suffix='')
 
-if (Info.version() and LooseVersion(Info.version()) >= LooseVersion('5.0.0')):
+if Info.version() and (LooseVersion(Info.version()) >= LooseVersion('5.0.0')):
     CurrentXFibres = XFibres5
     CurrentBEDPOST = BEDPOSTX5
 else:
@@ -667,7 +601,7 @@ class ProbTrackXBaseInputSpec(FSLCommandInputSpec):
     thsamples = InputMultiPath(File(exists=True), mandatory=True)
     phsamples = InputMultiPath(File(exists=True), mandatory=True)
     fsamples = InputMultiPath(File(exists=True), mandatory=True)
-    samples_base_name = traits.Str("merged", desc='the rootname/base_name for samples files',
+    samples_base_name = traits.Str('merged', desc='the rootname/base_name for samples files',
                                    argstr='--samples=%s', usedefault=True)
     mask = File(exists=True, desc='bet binary mask file in diffusion space',
                 argstr='-m %s', mandatory=True)
@@ -732,9 +666,26 @@ class ProbTrackXBaseInputSpec(FSLCommandInputSpec):
                           "Level 2 is required to output particle files.",
                           argstr="--verbose=%d")
 
+    def _format_arg(self, name, spec=None, value=None):
+        if spec is None:
+            spec = self.traits()[name]
+
+        if value is None:
+            value = getattr(self, name)
+
+        if name == 'target_masks' and isdefined(value):
+            fname = 'targets.txt'
+            return super(ProbTrackXBaseInputSpec, self)._format_arg(name, spec, [fname])
+        elif name == 'seed' and isinstance(value, list):
+            fname = 'seeds.txt'
+            return super(ProbTrackXBaseInputSpec, self)._format_arg(name, spec, fname)
+        else:
+            return super(ProbTrackXBaseInputSpec, self)._format_arg(name, spec, value)
+
+
 
 class ProbTrackXInputSpec(ProbTrackXBaseInputSpec):
-    mode = traits.Enum("simple", "two_mask_symm", "seedmask",
+    mode = traits.Enum('simple', 'two_mask_symm', 'seedmask',
                        desc='options: simple (single seed voxel), seedmask (mask of seed voxels), ' +
                             'twomask_symm (two bet binary masks) ',
                        argstr='--mode=%s', genfile=True)
@@ -776,35 +727,35 @@ class ProbTrackX(FSLCommand):
     """
 
     _cmd = 'probtrackx'
-    input_spec = ProbTrackXInputSpec
-    output_spec = ProbTrackXOutputSpec
+    _input_spec = ProbTrackXInputSpec
+    _output_spec = ProbTrackXOutputSpec
 
     def __init__(self, **inputs):
-        warnings.warn("Deprecated: Please use create_bedpostx_pipeline instead", DeprecationWarning)
-        return super(ProbTrackX, self).__init__(**inputs)
+        IFLOGGER.warn('Deprecated: Please use create_bedpostx_pipeline instead')
+        super(ProbTrackX, self).__init__(**inputs)
 
     def _run_interface(self, runtime):
         for i in range(1, len(self.inputs.thsamples) + 1):
             _, _, ext = split_filename(self.inputs.thsamples[i - 1])
             copyfile(self.inputs.thsamples[i - 1],
-                     self.inputs.samples_base_name + "_th%dsamples" % i + ext,
+                     self.inputs.samples_base_name + '_th%dsamples' % i + ext,
                      copy=False)
             _, _, ext = split_filename(self.inputs.thsamples[i - 1])
             copyfile(self.inputs.phsamples[i - 1],
-                     self.inputs.samples_base_name + "_ph%dsamples" % i + ext,
+                     self.inputs.samples_base_name + '_ph%dsamples' % i + ext,
                      copy=False)
             _, _, ext = split_filename(self.inputs.thsamples[i - 1])
             copyfile(self.inputs.fsamples[i - 1],
-                     self.inputs.samples_base_name + "_f%dsamples" % i + ext,
+                     self.inputs.samples_base_name + '_f%dsamples' % i + ext,
                      copy=False)
 
         if isdefined(self.inputs.target_masks):
-            f = open("targets.txt", "w")
+            f = open('targets.txt', 'w')
             for target in self.inputs.target_masks:
                 f.write("%s\n" % target)
             f.close()
         if isinstance(self.inputs.seed, list):
-            f = open("seeds.txt", "w")
+            f = open('seeds.txt', 'w')
             for seed in self.inputs.seed:
                 if isinstance(seed, list):
                     f.write("%s\n" % (" ".join([str(s) for s in seed])))
@@ -817,59 +768,48 @@ class ProbTrackX(FSLCommand):
             self.raise_exception(runtime)
         return runtime
 
-    def _format_arg(self, name, spec, value):
-        if name == 'target_masks' and isdefined(value):
-            fname = "targets.txt"
-            return super(ProbTrackX, self)._format_arg(name, spec, [fname])
-        elif name == 'seed' and isinstance(value, list):
-            fname = "seeds.txt"
-            return super(ProbTrackX, self)._format_arg(name, spec, fname)
-        else:
-            return super(ProbTrackX, self)._format_arg(name, spec, value)
 
-    def _list_outputs(self):
-        outputs = self.output_spec().get()
+    def _post_run(self):
         if not isdefined(self.inputs.out_dir):
-            out_dir = self._gen_filename("out_dir")
+            out_dir = self._gen_filename('out_dir')
         else:
             out_dir = self.inputs.out_dir
 
-        outputs['log'] = os.path.abspath(os.path.join(out_dir, 'probtrackx.log'))
-        # utputs['way_total'] = os.path.abspath(os.path.join(out_dir, 'waytotal'))
+        self.outputs.log = op.abspath(op.join(out_dir, 'probtrackx.log'))
+        # utputs['way_total'] = op.abspath(op.join(out_dir, 'waytotal'))
         if isdefined(self.inputs.opd is True):
             if isinstance(self.inputs.seed, list) and isinstance(self.inputs.seed[0], list):
-                outputs['fdt_paths'] = []
+                self.outputs.fdt_paths = []
                 for seed in self.inputs.seed:
-                    outputs['fdt_paths'].append(
-                        os.path.abspath(
-                            self._gen_fname("fdt_paths_%s" % ("_".join([str(s) for s in seed])),
-                                            cwd=out_dir, suffix='')))
+                    self.outputs.fdt_paths.append(
+                        op.abspath(
+                            self._gen_fname('fdt_paths_%s' % ('_'.join([str(s) for s in seed])),
+                                            out_dir, suffix='')))
             else:
-                outputs['fdt_paths'] = os.path.abspath(self._gen_fname("fdt_paths",
-                                                                       cwd=out_dir, suffix=''))
+                self.outputs.fdt_paths = op.abspath(self._gen_fname('fdt_paths',
+                                                                       out_dir, suffix=''))
 
         # handle seeds-to-target output files
         if isdefined(self.inputs.target_masks):
-            outputs['targets'] = []
+            self.outputs.targets = []
             for target in self.inputs.target_masks:
-                outputs['targets'].append(os.path.abspath(
-                    self._gen_fname('seeds_to_' + os.path.split(target)[1],
-                                    cwd=out_dir,
+                self.outputs.targets.append(op.abspath(
+                    self._gen_fname('seeds_to_' + op.split(target)[1],
+                                    out_dir,
                                     suffix='')))
         if isdefined(self.inputs.verbose) and self.inputs.verbose == 2:
-            outputs['particle_files'] = [os.path.abspath(
-                os.path.join(out_dir, 'particle%d' % i))
+            self.outputs.particle_files = [op.abspath(
+                op.join(out_dir, 'particle%d' % i))
                 for i in range(self.inputs.n_samples)]
-        return outputs
 
     def _gen_filename(self, name):
-        if name == "out_dir":
+        if name == 'out_dir':
             return os.getcwd()
-        elif name == "mode":
+        elif name == 'mode':
             if isinstance(self.inputs.seed, list) and isinstance(self.inputs.seed[0], list):
-                return "simple"
+                return 'simple'
             else:
-                return "seedmask"
+                return 'seedmask'
 
 
 class ProbTrackX2InputSpec(ProbTrackXBaseInputSpec):
@@ -877,8 +817,8 @@ class ProbTrackX2InputSpec(ProbTrackXBaseInputSpec):
                          usedefault=False, argstr='--simple')
     fopd = File(exists=True, desc='Other mask for binning tract distribution',
                 argstr='--fopd=%s')
-    waycond = traits.Enum("OR", "AND", argstr='--waycond=%s',
-                          desc='Waypoint condition. Either "AND" (default) or "OR"')
+    waycond = traits.Enum('OR', 'AND', argstr='--waycond=%s',
+                          desc='Waypoint condition. Either \'AND\' (default) or \'OR\'')
     wayorder = traits.Bool(desc='Reject streamlines that do not hit waypoints in given order. ' +
                            'Only valid if waycond=AND', argstr='--wayorder')
     onewaycondition = traits.Bool(desc='Apply waypoint conditions to each half tract separately',
@@ -905,9 +845,9 @@ class ProbTrackX2InputSpec(ProbTrackXBaseInputSpec):
     colmask4 = File(exists=True, desc='Mask for columns of matrix4 (default=seed mask)',
                     argstr='--colmask4=%s')
     target4 = File(exists=True, desc='Brain mask in DTI space', argstr='--target4=%s')
-    meshspace = traits.Enum("caret", "freesurfer", "first", "vox", argstr='--meshspace=%s',
-                            desc='Mesh reference space - either "caret" (default) or ' +
-                            '"freesurfer" or "first" or "vox"')
+    meshspace = traits.Enum('caret', 'freesurfer', 'first', 'vox', argstr='--meshspace=%s',
+                            desc='Mesh reference space - either \'caret\' (default) or ' +
+                            '\'freesurfer\' or \'first\' or \'vox\'')
 
 
 class ProbTrackX2OutputSpec(ProbTrackXOutputSpec):
@@ -938,11 +878,11 @@ class ProbTrackX2(ProbTrackX):
     'probtrackx2 --forcedir -m nodif_brain_mask.nii.gz --nsamples=3 --nsteps=10 --opd --dir=. --samples=merged --seed=seed_source.nii.gz'
     """
     _cmd = 'probtrackx2'
-    input_spec = ProbTrackX2InputSpec
-    output_spec = ProbTrackX2OutputSpec
+    _input_spec = ProbTrackX2InputSpec
+    _output_spec = ProbTrackX2OutputSpec
 
-    def _list_outputs(self):
-        outputs = super(ProbTrackX2, self)._list_outputs()
+    def _post_run(self):
+        outputs = super(ProbTrackX2, self)._post_run()
 
         if not isdefined(self.inputs.out_dir):
             out_dir = os.getcwd()
@@ -950,17 +890,16 @@ class ProbTrackX2(ProbTrackX):
             out_dir = self.inputs.out_dir
 
         if isdefined(self.inputs.omatrix1):
-            outputs['network_matrix'] = os.path.abspath(os.path.join(out_dir, 'fdt_network_matrix'))
-            outputs['matrix1_dot'] = os.path.abspath(os.path.join(out_dir, 'fdt_matrix1.dot'))
+            self.outputs.network_matrix = op.abspath(op.join(out_dir, 'fdt_network_matrix'))
+            self.outputs.matrix1_dot = op.abspath(op.join(out_dir, 'fdt_matrix1.dot'))
 
         if isdefined(self.inputs.omatrix2):
-            outputs['lookup_tractspace'] = \
-                os.path.abspath(os.path.join(out_dir, 'lookup_tractspace_fdt_matrix2.nii.gz'))
-            outputs['matrix2_dot'] = os.path.abspath(os.path.join(out_dir, 'fdt_matrix2.dot'))
+            self.outputs.lookup_tractspace = \
+                op.abspath(op.join(out_dir, 'lookup_tractspace_fdt_matrix2.nii.gz'))
+            self.outputs.matrix2_dot = op.abspath(op.join(out_dir, 'fdt_matrix2.dot'))
 
         if isdefined(self.inputs.omatrix3):
-            outputs['matrix3_dot'] = os.path.abspath(os.path.join(out_dir, 'fdt_matrix3.dot'))
-        return outputs
+            self.outputs.matrix3_dot = op.abspath(op.join(out_dir, 'fdt_matrix3.dot'))
 
 
 class VecRegInputSpec(FSLCommandInputSpec):
@@ -980,7 +919,7 @@ class VecRegInputSpec(FSLCommandInputSpec):
     rotation_warp = File(exists=True, argstr='--rotwarp=%s',
                          desc='filename for secondary warp field' +
                          'if set, this will be used for the rotation of the vector/tensor field')
-    interpolation = traits.Enum("nearestneighbour", "trilinear", "sinc", "spline",
+    interpolation = traits.Enum('nearestneighbour', 'trilinear', 'sinc', 'spline',
                                 argstr='--interp=%s',
                                 desc='interpolation method : ' +
                                      'nearestneighbour, trilinear (default), sinc or spline')
@@ -1012,29 +951,27 @@ class VecReg(FSLCommand):
     """
 
     _cmd = 'vecreg'
-    input_spec = VecRegInputSpec
-    output_spec = VecRegOutputSpec
+    _input_spec = VecRegInputSpec
+    _output_spec = VecRegOutputSpec
 
     def _run_interface(self, runtime):
         if not isdefined(self.inputs.out_file):
-            pth, base_name = os.path.split(self.inputs.in_file)
-            self.inputs.out_file = self._gen_fname(base_name, cwd=os.path.abspath(pth),
+            pth, base_name = op.split(self.inputs.in_file)
+            self.inputs.out_file = self._gen_fname(base_name, op.abspath(pth),
                                                    suffix='_vreg')
         return super(VecReg, self)._run_interface(runtime)
 
-    def _list_outputs(self):
-        outputs = self.output_spec().get()
-        outputs['out_file'] = self.inputs.out_file
-        if not isdefined(outputs['out_file']) and isdefined(self.inputs.in_file):
-            pth, base_name = os.path.split(self.inputs.in_file)
-            outputs['out_file'] = self._gen_fname(base_name, cwd=os.path.abspath(pth),
+    def _post_run(self):
+        self.outputs.out_file = self.inputs.out_file
+        if not isdefined(self.outputs.out_file) and isdefined(self.inputs.in_file):
+            pth, base_name = op.split(self.inputs.in_file)
+            self.outputs.out_file = self._gen_fname(base_name, op.abspath(pth),
                                                   suffix='_vreg')
-        outputs['out_file'] = os.path.abspath(outputs['out_file'])
-        return outputs
+        self.outputs.out_file = op.abspath(self.outputs.out_file)
 
     def _gen_filename(self, name):
         if name is 'out_file':
-            return self._list_outputs()[name]
+            return self._post_run()[name]
         else:
             return None
 
@@ -1069,18 +1006,16 @@ class ProjThresh(FSLCommand):
     """
 
     _cmd = 'proj_thresh'
-    input_spec = ProjThreshInputSpec
-    output_spec = ProjThreshOuputSpec
+    _input_spec = ProjThreshInputSpec
+    _output_spec = ProjThreshOuputSpec
 
-    def _list_outputs(self):
-        outputs = self.output_spec().get()
-        outputs['out_files'] = []
+    def _post_run(self):
+        self.outputs.out_files = []
         for name in self.inputs.in_files:
-            cwd, base_name = os.path.split(name)
-            outputs['out_files'].append(self._gen_fname(base_name, cwd=cwd,
+            cwd, base_name = op.split(name)
+            self.outputs.out_files.append(self._gen_fname(base_name, cwd,
                                                         suffix='_proj_seg_thr_' +
                                                                repr(self.inputs.threshold)))
-        return outputs
 
 
 class FindTheBiggestInputSpec(FSLCommandInputSpec):
@@ -1113,25 +1048,23 @@ class FindTheBiggest(FSLCommand):
 
     """
     _cmd = 'find_the_biggest'
-    input_spec = FindTheBiggestInputSpec
-    output_spec = FindTheBiggestOutputSpec
+    _input_spec = FindTheBiggestInputSpec
+    _output_spec = FindTheBiggestOutputSpec
 
     def _run_interface(self, runtime):
         if not isdefined(self.inputs.out_file):
             self.inputs.out_file = self._gen_fname('biggestSegmentation', suffix='')
         return super(FindTheBiggest, self)._run_interface(runtime)
 
-    def _list_outputs(self):
-        outputs = self.output_spec().get()
-        outputs['out_file'] = self.inputs.out_file
-        if not isdefined(outputs['out_file']):
-            outputs['out_file'] = self._gen_fname('biggestSegmentation', suffix='')
-        outputs['out_file'] = os.path.abspath(outputs['out_file'])
-        return outputs
+    def _post_run(self):
+        self.outputs.out_file = self.inputs.out_file
+        if not isdefined(self.outputs.out_file):
+            self.outputs.out_file = self._gen_fname('biggestSegmentation', suffix='')
+        self.outputs.out_file = op.abspath(self.outputs.out_file)
 
     def _gen_filename(self, name):
         if name is 'out_file':
-            return self._list_outputs()[name]
+            return self._post_run()[name]
         else:
             return None
 
@@ -1140,15 +1073,15 @@ class TractSkeletonInputSpec(FSLCommandInputSpec):
 
     in_file = File(exists=True, mandatory=True, argstr="-i %s",
                    desc="input image (typcially mean FA volume)")
-    _proj_inputs = ["threshold", "distance_map", "data_file"]
+    _proj_inputs = ['threshold', 'distance_map', 'data_file']
     project_data = traits.Bool(argstr="-p %.3f %s %s %s %s", requires=_proj_inputs,
                                desc="project data onto skeleton")
     threshold = traits.Float(desc="skeleton threshold value")
     distance_map = File(exists=True, desc="distance map image")
-    search_mask_file = File(exists=True, xor=["use_cingulum_mask"],
+    search_mask_file = File(exists=True, xor=['use_cingulum_mask'],
                             desc="mask in which to use alternate search rule")
     use_cingulum_mask = traits.Bool(True, usedefault=True,
-                                    xor=["search_mask_file"],
+                                    xor=['search_mask_file'],
                                     desc="perform alternate search using built-in cingulum mask")
     data_file = File(exists=True, desc="4D data to project onto skeleton (usually FA)")
     alt_data_file = File(exists=True, argstr="-a %s", desc="4D non-FA data to project onto skeleton")
@@ -1179,62 +1112,59 @@ class TractSkeleton(FSLCommand):
 
     >>> import nipype.interfaces.fsl as fsl
     >>> skeletor = fsl.TractSkeleton()
-    >>> skeletor.inputs.in_file = "all_FA.nii.gz"
+    >>> skeletor.inputs.in_file = 'all_FA.nii.gz'
     >>> skeletor.inputs.skeleton_file = True
     >>> skeletor.run() # doctest: +SKIP
 
     """
 
-    _cmd = "tbss_skeleton"
-    input_spec = TractSkeletonInputSpec
-    output_spec = TractSkeletonOutputSpec
+    _cmd = 'tbss_skeleton'
+    _input_spec = TractSkeletonInputSpec
+    _output_spec = TractSkeletonOutputSpec
 
     def _format_arg(self, name, spec, value):
-        if name == "project_data":
+        if name == 'project_data':
             if isdefined(value) and value:
                 _si = self.inputs
                 if isdefined(_si.use_cingulum_mask) and _si.use_cingulum_mask:
-                    mask_file = Info.standard_image("LowerCingulum_1mm.nii.gz")
+                    mask_file = Info.standard_image('LowerCingulum_1mm.nii.gz')
                 else:
                     mask_file = _si.search_mask_file
                 if not isdefined(_si.projected_data):
-                    proj_file = self._list_outputs()["projected_data"]
+                    proj_file = self.outputs.projected_data
                 else:
                     proj_file = _si.projected_data
                 return spec.argstr % (_si.threshold, _si.distance_map, mask_file, _si.data_file, proj_file)
-        elif name == "skeleton_file":
+        elif name == 'skeleton_file':
             if isinstance(value, bool):
-                return spec.argstr % self._list_outputs()["skeleton_file"]
+                return spec.argstr % self.outputs.skeleton_file
             else:
                 return spec.argstr % value
         return super(TractSkeleton, self)._format_arg(name, spec, value)
 
-    def _list_outputs(self):
-        outputs = self.output_spec().get()
+    def _post_run(self):
         _si = self.inputs
         if isdefined(_si.project_data) and _si.project_data:
             proj_data = _si.projected_data
-            outputs["projected_data"] = proj_data
+            self.outputs.projected_data = proj_data
             if not isdefined(proj_data):
                 stem = _si.data_file
                 if isdefined(_si.alt_data_file):
                     stem = _si.alt_data_file
-                outputs["projected_data"] = fname_presuffix(stem,
-                                                            suffix="_skeletonised",
+                self.outputs.projected_data = fname_presuffix(stem,
+                                                            suffix='_skeletonised',
                                                             newpath=os.getcwd(),
                                                             use_ext=True)
         if isdefined(_si.skeleton_file) and _si.skeleton_file:
-            outputs["skeleton_file"] = _si.skeleton_file
+            self.outputs.skeleton_file = _si.skeleton_file
             if isinstance(_si.skeleton_file, bool):
-                outputs["skeleton_file"] = fname_presuffix(_si.in_file,
-                                                           suffix="_skeleton",
+                self.outputs.skeleton_file = fname_presuffix(_si.in_file,
+                                                           suffix='_skeleton',
                                                            newpath=os.getcwd(),
                                                            use_ext=True)
-        return outputs
 
 
 class DistanceMapInputSpec(FSLCommandInputSpec):
-
     in_file = File(exists=True, mandatory=True, argstr="--in=%s",
                    desc="image to calculate distance values for")
     mask_file = File(exists=True, argstr="--mask=%s",
@@ -1242,7 +1172,15 @@ class DistanceMapInputSpec(FSLCommandInputSpec):
     invert_input = traits.Bool(argstr="--invert", desc="invert input image")
     local_max_file = traits.Either(traits.Bool, File, argstr="--localmax=%s",
                                    desc="write an image of the local maxima", hash_files=False)
-    distance_map = File(genfile=True, argstr="--out=%s", desc="distance map to write", hash_files=False)
+    distance_map = GenFile(template='{in_file}_dstmap{output_type_}', argstr="--out=%s",
+                           hash_files=False, desc="distance map to write")
+
+
+    def _format_arg(self, name, spec, value):
+        if name == 'local_max_file':
+            if isinstance(value, bool):
+                return spec.argstr % self.outputs.local_max_file
+        return super(DistanceMap, self)._format_arg(name, spec, value)
 
 
 class DistanceMapOutputSpec(TraitedSpec):
@@ -1259,56 +1197,48 @@ class DistanceMap(FSLCommand):
 
     >>> import nipype.interfaces.fsl as fsl
     >>> mapper = fsl.DistanceMap()
-    >>> mapper.inputs.in_file = "skeleton_mask.nii.gz"
+    >>> mapper.inputs.in_file = 'skeleton_mask.nii.gz'
     >>> mapper.run() # doctest: +SKIP
 
     """
 
-    _cmd = "distancemap"
-    input_spec = DistanceMapInputSpec
-    output_spec = DistanceMapOutputSpec
+    _cmd = 'distancemap'
+    _input_spec = DistanceMapInputSpec
+    _output_spec = DistanceMapOutputSpec
 
-    def _format_arg(self, name, spec, value):
-        if name == "local_max_file":
-            if isinstance(value, bool):
-                return spec.argstr % self._list_outputs()["local_max_file"]
-        return super(DistanceMap, self)._format_arg(name, spec, value)
-
-    def _list_outputs(self):
-        outputs = self.output_spec().get()
+    def _post_run(self):
         _si = self.inputs
-        outputs["distance_map"] = _si.distance_map
+        self.outputs.distance_map = _si.distance_map
         if not isdefined(_si.distance_map):
-            outputs["distance_map"] = fname_presuffix(_si.in_file,
-                                                      suffix="_dstmap",
+            self.outputs.distance_map = fname_presuffix(_si.in_file,
+                                                      suffix='_dstmap',
                                                       use_ext=True,
                                                       newpath=os.getcwd())
-        outputs["distance_map"] = os.path.abspath(outputs["distance_map"])
+        self.outputs.distance_map = op.abspath(self.outputs.distance_map)
         if isdefined(_si.local_max_file):
-            outputs["local_max_file"] = _si.local_max_file
+            self.outputs.local_max_file = _si.local_max_file
             if isinstance(_si.local_max_file, bool):
-                outputs["local_max_file"] = fname_presuffix(_si.in_file,
-                                                            suffix="_lclmax",
+                self.outputs.local_max_file = fname_presuffix(_si.in_file,
+                                                            suffix='_lclmax',
                                                             use_ext=True,
                                                             newpath=os.getcwd())
-            outputs["local_max_file"] = os.path.abspath(outputs["local_max_file"])
-        return outputs
+            self.outputs.local_max_file = op.abspath(self.outputs.local_max_file)
 
     def _gen_filename(self, name):
-        if name == "distance_map":
-            return self._list_outputs()["distance_map"]
+        if name == 'distance_map':
+            return self.outputs.distance_map
         return None
 
 
 class MakeDyadicVectorsInputSpec(FSLCommandInputSpec):
-    theta_vol = File(exists=True, mandatory=True, position=0, argstr="%s")
-    phi_vol = File(exists=True, mandatory=True, position=1, argstr="%s")
-    mask = File(exists=True, position=2, argstr="%s")
-    output = File("dyads", position=3, usedefault=True, argstr="%s", hash_files=False)
+    theta_vol = File(exists=True, mandatory=True, position=0, argstr='%s')
+    phi_vol = File(exists=True, mandatory=True, position=1, argstr='%s')
+    mask = File(exists=True, position=2, argstr='%s')
+    output = File('dyads', position=3, usedefault=True, argstr='%s', hash_files=False)
     perc = traits.Float(desc="the {perc}% angle of the output cone of \
 uncertainty (output will be in degrees)",
                         position=4,
-                        argstr="%f")
+                        argstr='%f')
 
 
 class MakeDyadicVectorsOutputSpec(TraitedSpec):
@@ -1320,14 +1250,12 @@ class MakeDyadicVectors(FSLCommand):
     """Create vector volume representing mean principal diffusion direction
     and its uncertainty (dispersion)"""
 
-    _cmd = "make_dyadic_vectors"
-    input_spec = MakeDyadicVectorsInputSpec
-    output_spec = MakeDyadicVectorsOutputSpec
+    _cmd = 'make_dyadic_vectors'
+    _input_spec = MakeDyadicVectorsInputSpec
+    _output_spec = MakeDyadicVectorsOutputSpec
 
-    def _list_outputs(self):
-        outputs = self.output_spec().get()
-        outputs["dyads"] = self._gen_fname(self.inputs.output)
-        outputs["dispersion"] = self._gen_fname(self.inputs.output,
-                                                suffix="_dispersion")
+    def _post_run(self):
+        self.outputs.dyads = self._gen_fname(self.inputs.output)
+        self.outputs.dispersion = self._gen_fname(self.inputs.output,
+                                                suffix='_dispersion')
 
-        return outputs

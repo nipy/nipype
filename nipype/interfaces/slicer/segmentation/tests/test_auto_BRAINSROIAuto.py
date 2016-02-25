@@ -10,12 +10,6 @@ def test_BRAINSROIAuto_inputs():
     ),
     closingSize=dict(argstr='--closingSize %f',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     inputVolume=dict(argstr='--inputVolume %s',
     ),
     numberOfThreads=dict(argstr='--numberOfThreads %d',
@@ -30,12 +24,10 @@ def test_BRAINSROIAuto_inputs():
     ),
     outputVolumePixelType=dict(argstr='--outputVolumePixelType %s',
     ),
-    terminal_output=dict(nohash=True,
-    ),
     thresholdCorrectionFactor=dict(argstr='--thresholdCorrectionFactor %f',
     ),
     )
-    inputs = BRAINSROIAuto.input_spec()
+    inputs = BRAINSROIAuto._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -46,7 +38,7 @@ def test_BRAINSROIAuto_outputs():
     output_map = dict(outputClippedVolumeROI=dict(),
     outputROIMaskVolume=dict(),
     )
-    outputs = BRAINSROIAuto.output_spec()
+    outputs = BRAINSROIAuto._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

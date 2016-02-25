@@ -9,16 +9,8 @@ def test_InvWarp_inputs():
     ),
     args=dict(argstr='%s',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     inverse_warp=dict(argstr='--out=%s',
     hash_files=False,
-    name_source=['warp'],
-    name_template='%s_inverse',
     ),
     jacobian_max=dict(argstr='--jmax=%f',
     ),
@@ -28,7 +20,8 @@ def test_InvWarp_inputs():
     ),
     noconstraint=dict(argstr='--noconstraint',
     ),
-    output_type=dict(),
+    output_type=dict(usedefault=True,
+    ),
     reference=dict(argstr='--ref=%s',
     mandatory=True,
     ),
@@ -37,13 +30,11 @@ def test_InvWarp_inputs():
     relative=dict(argstr='--rel',
     xor=['absolute'],
     ),
-    terminal_output=dict(nohash=True,
-    ),
     warp=dict(argstr='--warp=%s',
     mandatory=True,
     ),
     )
-    inputs = InvWarp.input_spec()
+    inputs = InvWarp._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -53,7 +44,7 @@ def test_InvWarp_inputs():
 def test_InvWarp_outputs():
     output_map = dict(inverse_warp=dict(),
     )
-    outputs = InvWarp.output_spec()
+    outputs = InvWarp._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

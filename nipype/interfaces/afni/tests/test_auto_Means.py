@@ -8,12 +8,6 @@ def test_Means_inputs():
     ),
     count=dict(argstr='-count',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     in_file_a=dict(argstr='%s',
     mandatory=True,
     position=0,
@@ -31,7 +25,8 @@ def test_Means_inputs():
     name_source='in_file_a',
     name_template='%s_mean',
     ),
-    outputtype=dict(),
+    output_type=dict(usedefault=True,
+    ),
     scale=dict(argstr='-%sscale',
     ),
     sqr=dict(argstr='-sqr',
@@ -40,10 +35,8 @@ def test_Means_inputs():
     ),
     summ=dict(argstr='-sum',
     ),
-    terminal_output=dict(nohash=True,
-    ),
     )
-    inputs = Means.input_spec()
+    inputs = Means._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -53,7 +46,7 @@ def test_Means_inputs():
 def test_Means_outputs():
     output_map = dict(out_file=dict(),
     )
-    outputs = Means.output_spec()
+    outputs = Means._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

@@ -17,12 +17,6 @@ def test_DTIRecon_inputs():
     bvecs=dict(argstr='-gm %s',
     mandatory=True,
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     image_orientation_vectors=dict(argstr='-iop %f',
     ),
     n_averages=dict(argstr='-nex %s',
@@ -36,10 +30,8 @@ def test_DTIRecon_inputs():
     output_type=dict(argstr='-ot %s',
     usedefault=True,
     ),
-    terminal_output=dict(nohash=True,
-    ),
     )
-    inputs = DTIRecon.input_spec()
+    inputs = DTIRecon._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -60,7 +52,7 @@ def test_DTIRecon_outputs():
     exp=dict(),
     tensor=dict(),
     )
-    outputs = DTIRecon.output_spec()
+    outputs = DTIRecon._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

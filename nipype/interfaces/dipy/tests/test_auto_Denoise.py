@@ -16,7 +16,7 @@ def test_Denoise_inputs():
     signal_mask=dict(),
     snr=dict(),
     )
-    inputs = Denoise.input_spec()
+    inputs = Denoise._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -26,7 +26,7 @@ def test_Denoise_inputs():
 def test_Denoise_outputs():
     output_map = dict(out_file=dict(),
     )
-    outputs = Denoise.output_spec()
+    outputs = Denoise._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

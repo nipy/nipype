@@ -23,9 +23,6 @@ def test_PairedTTestDesign_inputs():
     ),
     grand_mean_scaling=dict(field='des.pt.gmsca',
     ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     matlab_cmd=dict(),
     mfile=dict(usedefault=True,
     ),
@@ -53,7 +50,7 @@ def test_PairedTTestDesign_inputs():
     usedefault=True,
     ),
     )
-    inputs = PairedTTestDesign.input_spec()
+    inputs = PairedTTestDesign._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -63,7 +60,7 @@ def test_PairedTTestDesign_inputs():
 def test_PairedTTestDesign_outputs():
     output_map = dict(spm_mat_file=dict(),
     )
-    outputs = PairedTTestDesign.output_spec()
+    outputs = PairedTTestDesign._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

@@ -26,14 +26,8 @@ def test_FWHMx_inputs():
     usedefault=True,
     xor=['demed'],
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
     geom=dict(argstr='-geom',
     xor=['arith'],
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
     ),
     in_file=dict(argstr='-input %s',
     mandatory=True,
@@ -47,21 +41,15 @@ def test_FWHMx_inputs():
     ),
     out_file=dict(argstr='> %s',
     keep_extension=False,
-    name_source='in_file',
-    name_template='%s_fwhmx.out',
     position=-1,
     ),
     out_subbricks=dict(argstr='-out %s',
     keep_extension=False,
-    name_source='in_file',
-    name_template='%s_subbricks.out',
-    ),
-    terminal_output=dict(nohash=True,
     ),
     unif=dict(argstr='-unif',
     ),
     )
-    inputs = FWHMx.input_spec()
+    inputs = FWHMx._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -76,7 +64,7 @@ def test_FWHMx_outputs():
     out_file=dict(),
     out_subbricks=dict(),
     )
-    outputs = FWHMx.output_spec()
+    outputs = FWHMx._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

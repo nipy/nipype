@@ -9,16 +9,11 @@ def test_DenoiseImage_inputs():
     dimension=dict(argstr='-d %d',
     usedefault=False,
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     input_image=dict(argstr='-i %s',
     mandatory=True,
     ),
-    noise_image=dict(hash_files=False,
+    noise_image=dict(argstr='%s',
+    hash_files=False,
     keep_extension=True,
     name_source=['input_image'],
     name_template='%s_noise',
@@ -42,12 +37,10 @@ def test_DenoiseImage_inputs():
     shrink_factor=dict(argstr='-s %s',
     usedefault=True,
     ),
-    terminal_output=dict(nohash=True,
-    ),
     verbose=dict(argstr='-v',
     ),
     )
-    inputs = DenoiseImage.input_spec()
+    inputs = DenoiseImage._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -58,7 +51,7 @@ def test_DenoiseImage_outputs():
     output_map = dict(noise_image=dict(),
     output_image=dict(),
     )
-    outputs = DenoiseImage.output_spec()
+    outputs = DenoiseImage._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

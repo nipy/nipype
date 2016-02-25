@@ -9,12 +9,6 @@ def test_BigAverage_inputs():
     clobber=dict(argstr='--clobber',
     usedefault=True,
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     input_files=dict(argstr='%s',
     exists=True,
     mandatory=True,
@@ -37,14 +31,12 @@ def test_BigAverage_inputs():
     name_source=['input_files'],
     name_template='%s_bigaverage_stdev.mnc',
     ),
-    terminal_output=dict(nohash=True,
-    ),
     tmpdir=dict(argstr='-tmpdir %s',
     ),
     verbose=dict(argstr='--verbose',
     ),
     )
-    inputs = BigAverage.input_spec()
+    inputs = BigAverage._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -55,7 +47,7 @@ def test_BigAverage_outputs():
     output_map = dict(output_file=dict(),
     sd_file=dict(),
     )
-    outputs = BigAverage.output_spec()
+    outputs = BigAverage._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

@@ -8,12 +8,6 @@ def test_landmarksConstellationWeights_inputs():
     ),
     args=dict(argstr='%s',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     inputTemplateModel=dict(argstr='--inputTemplateModel %s',
     ),
     inputTrainingList=dict(argstr='--inputTrainingList %s',
@@ -21,10 +15,8 @@ def test_landmarksConstellationWeights_inputs():
     outputWeightsList=dict(argstr='--outputWeightsList %s',
     hash_files=False,
     ),
-    terminal_output=dict(nohash=True,
-    ),
     )
-    inputs = landmarksConstellationWeights.input_spec()
+    inputs = landmarksConstellationWeights._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -34,7 +26,7 @@ def test_landmarksConstellationWeights_inputs():
 def test_landmarksConstellationWeights_outputs():
     output_map = dict(outputWeightsList=dict(),
     )
-    outputs = landmarksConstellationWeights.output_spec()
+    outputs = landmarksConstellationWeights._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

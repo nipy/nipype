@@ -6,12 +6,6 @@ from ..utils import MRITessellate
 def test_MRITessellate_inputs():
     input_map = dict(args=dict(argstr='%s',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     in_file=dict(argstr='%s',
     mandatory=True,
     position=-3,
@@ -25,14 +19,12 @@ def test_MRITessellate_inputs():
     position=-1,
     ),
     subjects_dir=dict(),
-    terminal_output=dict(nohash=True,
-    ),
     tesselate_all_voxels=dict(argstr='-a',
     ),
     use_real_RAS_coordinates=dict(argstr='-n',
     ),
     )
-    inputs = MRITessellate.input_spec()
+    inputs = MRITessellate._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -42,7 +34,7 @@ def test_MRITessellate_inputs():
 def test_MRITessellate_outputs():
     output_map = dict(surface=dict(),
     )
-    outputs = MRITessellate.output_spec()
+    outputs = MRITessellate._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):
