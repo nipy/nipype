@@ -2402,7 +2402,7 @@ class OutlierCountInputSpec(AFNICommandInputSpec):
                            desc='use Legendre polynomials')
     out_file = File(
         name_template='%s_outliers', name_source=['in_file'], argstr='> %s',
-        usedefault=True, keep_extension=False, position=-1, desc='capture standard output')
+        keep_extension=False, position=-1, desc='capture standard output')
 
 
 class OutlierCountOutputSpec(AFNICommandOutputSpec):
@@ -2477,7 +2477,7 @@ class QualityIndexInputSpec(AFNICommandInputSpec):
                            desc='write out the median + 3.5 MAD of outlier'
                                 ' count with each timepoint')
     out_file = File(
-        name_template='%s_tqual', name_source=['in_file'], argstr='> %s', usedefault=True,
+        name_template='%s_tqual', name_source=['in_file'], argstr='> %s',
         keep_extension=False, position=-1, desc='capture standard output')
 
 
