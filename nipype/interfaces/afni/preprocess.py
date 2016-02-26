@@ -1588,6 +1588,95 @@ class ClipLevel(AFNICommandBase):
         return outputs
 
 
+class MaskToolInputSpec(AFNICommandInputSpec):
+    in_file = File(desc='input file or files to 3dmask_tool',
+                   argstr='-input %s',
+                   position=-1,
+                   mandatory=True,
+                   exists=True,
+                   copyfile=False)
+
+    out_file = File(name_template="%s_mask", desc='output image file name',
+                    argstr='-prefix %s', name_source="in_file")
+
+    count = traits.Bool(desc='Instead of created a binary 0/1 mask dataset, '+
+                             'create one with. counts of voxel overlap, i.e '+
+                             'each voxel will contain the number of masks ' +
+                             'that it is set in.',
+                        argstr='-count',
+                        position=2)
+
+    datum = traits.Enum('byte','short','float',
+                        argstr='-datum %s',
+                        desc='specify data type for output. Valid types are '+
+                             '\'byte\', \'short\' and \'float\'.')
+
+    dilate_inputs = traits.Str(desc='Use this option to dilate and/or erode '+
+                                    'datasets as they are read. ex. ' +
+                                    '\'5 -5\' to dilate and erode 5 times',
+                               argstr='-dilate_inputs %s')
+
+    dilate_results = traits.Str(desc='dilate and/or erode combined mask at ' +
+                                     'the given levels.',
+                                argstr='-dilate_results %s')
+
+    frac = traits.Float(desc='When combining masks (across datasets and ' +
+                             'sub-bricks), use this option to restrict the ' +
+                             'result to a certain fraction of the set of ' +
+                             'volumes',
+                        argstr='-frac %s')
+
+    inter = traits.Bool(desc='intersection, this means -frac 1.0',
+                        argstr='-inter')
+
+    union = traits.Bool(desc='union, this means -frac 0',
+                        argstr='-union')
+
+    fill_holes = traits.Bool(desc='This option can be used to fill holes ' +
+                                  'in the resulting mask, i.e. after all ' +
+                                  'other processing has been done.',
+                             argstr='-fill_holes')
+
+    fill_dirs = traits.Str(desc='fill holes only in the given directions. ' +
+                                'This option is for use with -fill holes. ' +
+                                'should be a single string that specifies ' +
+                                '1-3 of the axes using {x,y,z} labels (i.e. '+
+                                'dataset axis order), or using the labels ' +
+                                'in {R,L,A,P,I,S}.',
+                           argstr='-fill_dirs %s',
+                           requires=['fill_holes'])
+
+
+class MaskToolOutputSpec(TraitedSpec):
+    out_file = File(desc='mask file',
+                    exists=True)
+
+
+class MaskTool(AFNICommand):
+    """3dmask_tool - for combining/dilating/eroding/filling masks
+
+    For complete details, see the `3dmask_tool Documentation.
+    <https://afni.nimh.nih.gov/pub../pub/dist/doc/program_help/3dmask_tool.html>`_
+
+    Examples
+    ========
+
+    >>> from nipype.interfaces import afni as afni
+    >>> automask = afni.Automask()
+    >>> automask.inputs.in_file = 'functional.nii'
+    >>> automask.inputs.dilate = 1
+    >>> automask.inputs.outputtype = "NIFTI"
+    >>> automask.cmdline #doctest: +ELLIPSIS
+    '3dAutomask -apply_prefix functional_masked.nii -dilate 1 -prefix functional_mask.nii functional.nii'
+    >>> res = automask.run() # doctest: +SKIP
+
+    """
+
+    _cmd = '3dmask_tool'
+    input_spec = MaskToolInputSpec
+    output_spec = MaskToolOutputSpec
+
+
 class SegInputSpec(CommandLineInputSpec):
     in_file = File(desc='ANAT is the volume to segment',
                    argstr='-anat %s',
@@ -1646,9 +1735,7 @@ class Seg(AFNICommandBase):
     >>> seg = preprocess.Seg()
     >>> seg.inputs.in_file = 'structural.nii'
     >>> seg.inputs.mask = 'AUTO'
-    >>> res = seg.run()
-    '3drefit -deoblique structural.nii'
-    >>> res = refit.run() # doctest: +SKIP
+    >>> res = seg.run() # doctest: +SKIP
 
     """
 
