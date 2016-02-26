@@ -2457,7 +2457,7 @@ class OutlierCount(AFNICommand):
 
 class QualityIndexInputSpec(AFNICommandInputSpec):
     in_file = File(argstr='%s', mandatory=True, exists=True, position=-2, desc='input dataset')
-    mask = File(exists=True, argstr='-mask %s',
+    mask = File(exists=True, argstr='-mask %s', xor=['autoclip', 'automask'],
                 desc='compute correlation only across masked voxels')
     spearman = traits.Bool(False, usedefault=True, argstr='-spearman',
                            desc='Quality index is 1 minus the Spearman (rank) '
@@ -2467,9 +2467,9 @@ class QualityIndexInputSpec(AFNICommandInputSpec):
                            desc='Similar to -spearman, but using 1 minus the '
                                 'quadrant correlation coefficient as the '
                                 'quality index.')
-    autoclip = traits.Bool(False, usedefault=True, argstr='-autoclip',
+    autoclip = traits.Bool(False, usedefault=True, argstr='-autoclip', xor=['mask'],
                            desc='clip off small voxels')
-    automask = traits.Bool(False, usedefault=True, argstr='-automask',
+    automask = traits.Bool(False, usedefault=True, argstr='-automask', xor=['mask'],
                            desc='clip off small voxels')
     clip = traits.Float(argstr='-clip %f', desc='clip off values below')
 
