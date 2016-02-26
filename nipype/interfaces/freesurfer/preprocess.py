@@ -1875,7 +1875,8 @@ class SegmentCCInputSpec(FSTraitedSpec):
                     desc="Filename to write aseg including CC")
     out_rotation = File(argstr="-lta %s", mandatory=True, exists=False,
                         desc="Global filepath for writing rotation lta")
-    subject_id = traits.String(argstr="%s", mandatory=True, position=-1,
+    subject_id = traits.String('subject_id', argstr="%s", mandatory=True, 
+                               position=-1, usedefault=True,
                                desc="Subject name")
 
 
@@ -1934,6 +1935,8 @@ class SegmentCC(FSCommand):
             fspath = os.path.join(subj_dir, 'mri', basename)
             if not os.path.isfile(fspath):
                 # if the file path doesn't exist, copy the file
+                if not os.path.isdir(os.path.dirname(fspath)):
+                    os.makedirs(os.path.dirname(fspath))
                 shutil.copy(value, fspath)
         if name in ["in_file", "in_norm", "out_file"]:
             # mri_cc can't use abspaths just the basename
@@ -1972,7 +1975,9 @@ class SegmentCC(FSCommand):
                 else:
                     out_tmp = None
                 # move the file to correct location
-                if os.path.isfile(out_tmp) and out_tmp:
+                if out_tmp and os.path.isfile(out_tmp):
+                    if not os.path.isdir(os.path.dirname(out_tmp)):
+                        os.makedirs(os.path.dirname(out_tmp)):
                     shutil.move(out_tmp, out_file)
         return super(SegmentCC, self).aggregate_outputs(**inputs)
 
