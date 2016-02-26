@@ -1914,11 +1914,30 @@ class SegmentCC(FSCommand):
     input_spec = SegmentCCInputSpec
     output_spec = SegmentCCOutputSpec
 
-    # remove absolute filepath names for in_file because mri_cc will look for the file in
-    # <SUBJECTS_DIR>/<subject_id>/<filename>
+    # mri_cc does not take absolute paths and will look for the 
+    # input files in  <SUBJECTS_DIR>/<subject_id>/mri/<basename>
+    # So, if the files are not there, they will be copied to that
+    # location
     def _format_arg(self, name, spec, value):
-        if name in ["in_file", "out_file"]:
-            return spec.argstr % os.path.basename(value)
+        if name in ["in_file", "in_norm"]:
+            if isdefined(self.inputs.subjects_dir):
+                subjects_dir = self.inputs.subjects_dir
+            else:
+                # If no subjects directory has been set, use cwd
+                subjects_dir = os.getcwd()
+
+            # subj_dir is set to the directory for that subject_id
+            subj_dir = os.path.join(subjects_dir,
+                                    self.inputs.subject_id)
+            # Get the file path the mri_cc will use
+            basename = os.path.basename(value)
+            fspath = os.path.join(subj_dir, 'mri', basename)
+            if not os.path.isfile(fspath):
+                # if the file path doesn't exist, copy the file
+                shutil.copy(value, fspath)
+        if name in ["in_file", "in_norm", "out_file"]:
+            # mri_cc can't use abspaths just the basename
+            return spec.argstr % basename
         return super(SegmentCC, self)._format_arg(name, spec, value)
 
     def _list_outputs(self):
@@ -1926,6 +1945,36 @@ class SegmentCC(FSCommand):
         outputs['out_file'] = os.path.abspath(self.inputs.out_file)
         outputs['out_rotation'] = os.path.abspath(self.inputs.out_rotation)
         return outputs
+
+    def aggregate_outputs(self, **inputs):
+        # it is necessary to find the output files and move 
+        # them to the correct loacation
+        predicted_outputs = self._list_outputs()
+        for name in ['out_file', 'out_rotation']:
+            out_file = predicted_outputs[name]
+            if not os.path.isfile(out_file):
+                out_base = os.path.basename(out_file)
+                if isdefined(self.inputs.subjects_dir):
+                    subj_dir = os.path.join(self.inputs.subjects_dir,
+                                            self.inputs.subject_id)
+                else:
+                    subj_dir = os.path.join(os.getcwd(),
+                                            self.inputs.subjec_id)
+                if name == 'out_file':
+                    out_tmp = os.path.join(subj_dir, 
+                                           'mri',
+                                           out_base)
+                elif name == 'out_rotation':
+                    out_tmp = os.path.join(subj_dir,
+                                           'mri', 
+                                           'transforms',
+                                           out_base)
+                else:
+                    out_tmp = None
+                # move the file to correct location
+                if os.path.isfile(out_tmp) and out_tmp:
+                    shutil.move(out_tmp, out_file)
+        return super(SegmentCC, self).aggregate_outputs(**inputs)
 
 
 class SegmentWMInputSpec(FSTraitedSpec):
