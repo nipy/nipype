@@ -2372,3 +2372,145 @@ class FWHMx(AFNICommandBase):
 
         outputs['fwhm'] = tuple(sout)
         return outputs
+
+
+class OutlierCountInputSpec(AFNICommandInputSpec):
+    in_file = File(argstr='%s', mandatory=True, exists=True, position=-2, desc='input dataset')
+    mask = File(exists=True, argstr='-mask %s', xor=['autoclip', 'automask'],
+                desc='only count voxels within the given mask')
+    qthr = traits.Range(value=1e-3, low=0.0, high=1.0, argstr='-qthr %.5f',
+                        desc='indicate a value for q to compute alpha')
+
+    autoclip = traits.Bool(False, usedefault=True, argstr='-autoclip', xor=['in_file'],
+                           desc='clip off small voxels')
+    automask = traits.Bool(False, usedefault=True, argstr='-automask', xor=['in_file'],
+                           desc='clip off small voxels')
+
+    fraction = traits.Bool(False, usedefault=True, argstr='-fraction',
+                           desc='write out the fraction of masked voxels'
+                                ' which are outliers at each timepoint')
+    interval = traits.Bool(False, usedefault=True, argstr='-range',
+                           desc='write out the median + 3.5 MAD of outlier'
+                                ' count with each timepoint')
+    save_outliers = traits.Bool(False, usedefault=True, desc='enables out_file option')
+    outliers_file = File(name_template="%s_outliers", argstr='-save %s', name_source=["in_file"],
+                         keep_extension=True, desc='output image file name')
+
+    polort = traits.Int(argstr='-polort %d',
+                        desc='detrend each voxel timeseries with polynomials')
+    legendre = traits.Bool(False, usedefault=True, argstr='-legendre',
+                           desc='use Legendre polynomials')
+    out_file = File(name_template='%s_outliers', name_source=['in_file'], argstr='> %s',
+                    keep_extension=False, position=-1, desc='capture standard output')
+
+
+class OutlierCountOutputSpec(AFNICommandOutputSpec):
+    outliers_file = File(exists=True, desc='output image file name')
+    outliers = traits.List(traits.Float,
+                           desc='parse standard output to get the count of outliers')
+
+
+class OutlierCount(AFNICommand):
+    """Create a 3D dataset from 2D image files using AFNI to3d command
+
+    For complete details, see the `to3d Documentation
+    <http://afni.nimh.nih.gov/pub/dist/doc/program_help/to3d.html>`_
+
+    Examples
+    ========
+
+    >>> from nipype.interfaces import afni
+    >>> toutcount = afni.OutlierCount()
+    >>> toutcount.inputs.in_file = 'functional.nii'
+    >>> toutcount.cmdline #doctest: +ELLIPSIS
+    '3dToutcount functional.nii > functional_outliers'
+    >>> res = toutcount.run() #doctest: +SKIP
+
+   """
+
+    _cmd = '3dToutcount'
+    input_spec = OutlierCountInputSpec
+    output_spec = OutlierCountOutputSpec
+
+    def _parse_inputs(self, skip=None):
+        if skip is None:
+            skip = []
+
+        if not self.inputs.save_outliers:
+            skip += ['outliers_file']
+        return super(OutlierCount, self)._parse_inputs(skip)
+
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        outputs['outliers_file'] = (Undefined if not self.inputs.save_outliers
+                                    else self.inputs.outliers_file)
+
+
+        with open(self.inputs.out_file, 'r') as fout:
+            lines = fout.readlines()
+            # remove general information and warnings
+            outputs['outliers'] = [float(l)
+                                   for l in lines if re.match("[0-9]+$", l.strip())]
+        return outputs
+
+
+class QualityIndexInputSpec(AFNICommandInputSpec):
+    in_file = File(argstr='%s', mandatory=True, exists=True, position=-2, desc='input dataset')
+    mask = File(exists=True, argstr='-mask %s',
+                desc='compute correlation only across masked voxels')
+    spearman = traits.Bool(False, usedefault=True, argstr='-spearman',
+                           desc='Quality index is 1 minus the Spearman (rank) '
+                                'correlation coefficient of each sub-brick '
+                                'with the median sub-brick. (default)')
+    quadrant = traits.Bool(False, usedefault=True, argstr='-quadrant',
+                           desc='Similar to -spearman, but using 1 minus the '
+                                'quadrant correlation coefficient as the '
+                                'quality index.')
+    autoclip = traits.Bool(False, usedefault=True, argstr='-autoclip',
+                           desc='clip off small voxels')
+    automask = traits.Bool(False, usedefault=True, argstr='-automask',
+                           desc='clip off small voxels')
+    clip = traits.Float(argstr='-clip %f', desc='clip off values below')
+
+    interval = traits.Bool(False, usedefault=True, argstr='-range',
+                           desc='write out the median + 3.5 MAD of outlier'
+                                ' count with each timepoint')
+    out_file = File(name_template='%s_tqual', name_source=['in_file'], argstr='> %s',
+                    keep_extension=False, position=-1, desc='capture standard output')
+
+
+class QualityIndexOutputSpec(AFNICommandOutputSpec):
+    qi_value = traits.List(traits.Float, desc='output quality index')
+
+
+class QualityIndex(AFNICommand):
+    """Create a 3D dataset from 2D image files using AFNI to3d command
+
+    For complete details, see the `to3d Documentation
+    <http://afni.nimh.nih.gov/pub/dist/doc/program_help/to3d.html>`_
+
+    Examples
+    ========
+
+    >>> from nipype.interfaces import afni
+    >>> tqual = afni.QualityIndex()
+    >>> tqual.inputs.in_file = 'functional.nii'
+    >>> tqual.cmdline #doctest: +ELLIPSIS
+    '3dTqual functional.nii > functional_tqual'
+    >>> res = tqual.run() #doctest: +SKIP
+
+   """
+
+    _cmd = '3dTqual'
+    input_spec = QualityIndexInputSpec
+    output_spec = QualityIndexOutputSpec
+
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        with open(self.inputs.out_file, 'r') as fout:
+            lines = fout.readlines()
+            # remove general information
+            lines = [l for l in lines if l[:2] != "++"]
+            # remove general information and warnings
+            outputs['qi_value'] = [float(l.strip()) for l in lines]
+        return outputs
