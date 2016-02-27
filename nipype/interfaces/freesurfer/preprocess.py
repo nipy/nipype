@@ -1493,8 +1493,9 @@ class WatershedSkullStripInputSpec(FSTraitedSpec):
     # required
     in_file = File(argstr="%s", exists=True, mandatory=True,
                    position=-2, desc="input volume")
-    out_file = File(argstr="%s", exists=False, mandatory=True,
-                    position=-1, genfile=True, desc="output volume")
+    out_file = File('brainmask.auto.mgz', argstr="%s", exists=False, 
+                    mandatory=True, position=-1, usedefault=True,
+                    desc="output volume")
     # optional
     t1 = traits.Bool(
         argstr="-T1", desc="specify T1 input volume (T1 grey value = 110)")
@@ -1505,7 +1506,7 @@ class WatershedSkullStripInputSpec(FSTraitedSpec):
 
 
 class WatershedSkullStripOutputSpec(TraitedSpec):
-    brain_vol = File(exists=False, desc="skull stripped brain volume")
+    out_file = File(exists=False, desc="skull stripped brain volume")
 
 
 class WatershedSkullStrip(FSCommand):
@@ -1537,17 +1538,9 @@ class WatershedSkullStrip(FSCommand):
     input_spec = WatershedSkullStripInputSpec
     output_spec = WatershedSkullStripOutputSpec
 
-    def _gen_filename(self, name):
-        if name == 'out_file':
-            return self._list_outputs()[name]
-        return None
-
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        if isdefined(self.inputs.out_file):
-            outputs['brain_vol'] = os.path.abspath(self.inputs.out_file)
-        else:
-            outputs['brain_vol'] = 'brainmask.auto.mgz'
+        outputs['out_file'] = os.path.abspath(self.inputs.out_file)
         return outputs
 
 
@@ -1926,6 +1919,7 @@ class SegmentCC(FSCommand):
             else:
                 # If no subjects directory has been set, use cwd
                 subjects_dir = os.getcwd()
+                self.inputs.subjects_dir = subjects_dir
 
             # subj_dir is set to the directory for that subject_id
             subj_dir = os.path.join(subjects_dir,
@@ -1977,7 +1971,7 @@ class SegmentCC(FSCommand):
                 # move the file to correct location
                 if out_tmp and os.path.isfile(out_tmp):
                     if not os.path.isdir(os.path.dirname(out_tmp)):
-                        os.makedirs(os.path.dirname(out_tmp)):
+                        os.makedirs(os.path.dirname(out_tmp))
                     shutil.move(out_tmp, out_file)
         return super(SegmentCC, self).aggregate_outputs(**inputs)
 
