@@ -1881,18 +1881,19 @@ class MakeSurfaces(FSCommand):
     cortical thickness, and a surface file which approximates layer IV of
     the cortical sheet.
 
-    Examples                                                                                                                                                                                                          ========
+    Examples
+
     >>> from nipype.interfaces.freesurfer import MakeSurfaces
     >>> makesurfaces = MakeSurfaces()
     >>> makesurfaces.inputs.hemisphere = 'lh'
     >>> makesurfaces.inputs.subject_id = '10335'
-    >>> makesurfaces.inputs.in_orig = './surf/lh.orig' # doctest: +SKIP
-    >>> makesurfaces.inputs.in_wm = './mri/wm.mgz' # doctest: +SKIP
-    >>> makesurfaces.inputs.in_filled = './mri/filled.mgz' # doctest: +SKIP
-    >>> makesurfaces.inputs.in_label = './label/lh.aparc.annot' # doctest: +SKIP
-    >>> makesurfaces.inputs.in_T1 = './mri/T1.mgz' # doctest: +SKIP
-    >>> makesurfaces.inputs.orig_pial = './surf/lh.pial' # doctest: +SKIP
-    >>> makesurfaces.cmdline # doctest: +SKIP
+    >>> makesurfaces.inputs.in_orig = 'lh.pial'
+    >>> makesurfaces.inputs.in_wm = 'wm.mgz'
+    >>> makesurfaces.inputs.in_filled = 'norm.mgz'
+    >>> makesurfaces.inputs.in_label = 'aparc+aseg.nii'
+    >>> makesurfaces.inputs.in_T1 = 'T1.mgz'
+    >>> makesurfaces.inputs.orig_pial = 'lh.pial'
+    >>> makesurfaces.cmdline
     'mris_make_surfaces -T1 T1.mgz -orig_pial pial 10335 lh'
     """
 
