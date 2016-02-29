@@ -16,6 +16,7 @@ __docformat__ = 'restructuredtext'
 import os
 import os.path as op
 from glob import glob
+import shutil
 
 import numpy as np
 from nibabel import load

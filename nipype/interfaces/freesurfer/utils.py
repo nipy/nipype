@@ -14,6 +14,7 @@ __docformat__ = 'restructuredtext'
 
 import os
 import re
+import shutil
 
 from ..freesurfer.base import (FSCommand, FSTraitedSpec,
                                FSScriptCommand, FSScriptOutputSpec,
@@ -1616,9 +1617,11 @@ class MRIsInflate(FSCommand):
 class SphereInputSpec(FSTraitedSpecOpenMP):
     in_file = File(argstr="%s", position=-2, mandatory=True, exists=True,
                    desc="Input file for Sphere")
-    # optional
-    out_file = File(argstr="%s", position=-1, mandatory=False, exists=False, genfile=True,
+    out_file = File(argstr="%s", position=-1, mandatory=True, exists=False,
+                    name_source=['in_file'], hash_files=False,
+                    name_template='%.sphere',
                     desc="Output file for Sphere")
+    # optional
     seed = traits.Int(argstr="-seed %d", mandatory=False,
                       desc="Seed for setting random number generator")
     magic = traits.Bool(argstr="-q", mandatory=False,
@@ -1634,34 +1637,22 @@ class Sphere(FSCommandOpenMP):
     """
     This program will add a template into an average surface
 
-    Examples                                                                                                                                                                                                          ========
+    Examples                          
+    ========
     >>> from nipype.interfaces.freesurfer import Sphere
     >>> sphere = Sphere()
-    >>> sphere.inputs.in_file = 'lh.inflated.nofix' # doctest: +SKIP
-    >>> sphere.inputs.out_file = 'lh.qsphere.nofix' # doctest: +SKIP
+    >>> sphere.inputs.in_file = 'lh.white'
     >>> sphere.inputs.magic = True
-    >>> sphere.cmdline # doctest: +SKIP
-    'mris_sphere -q lh.inflated.nofix lh.qsphere.nofix'
+    >>> sphere.cmdline
+    'mris_sphere -q lh.white lh.sphere'
     """
     _cmd = 'mris_sphere'
     input_spec = SphereInputSpec
     output_spec = SphereOutputSpec
 
-    def _gen_filename(self, name):
-        if name == 'out_file':
-            return self._list_outputs()[name]
-        return None
-
     def _list_outputs(self):
         outputs = self._outputs().get()
-        if isdefined(self.inputs.out_file):
-            outputs["out_file"] = os.path.abspath(self.inputs.out_file)
-        else:
-            # save file with hemisphere label and to same directoyr as input
-            head, tail = os.path.split(self.inputs.in_file)
-            hemisphere = tail.split('.')[0]
-            basename = hemisphere + '.sphere'
-            outputs["out_file"] = os.path.join(head, basename)
+        outputs["out_file"] = os.path.abspath(self.inputs.out_file)
         return outputs
 
 
@@ -1860,6 +1851,10 @@ class MakeSurfacesInputSpec(FSTraitedSpec):
         argstr="-max %.1f", desc="No documentation (used for longitudinal processing)")
     longitudinal = traits.Bool(
         argstr="-long", desc="No documentation (used for longitudinal processing)")
+    copy_inputs = traits.Bool(mandatory=False,
+                              desc="If running as a node, set this to True." +
+                              "This will copy the input files to the noed " +
+                              "directory.")
 
 
 class MakeSurfacesOutputSpec(TraitedSpec):
@@ -1901,11 +1896,46 @@ class MakeSurfaces(FSCommand):
     input_spec = MakeSurfacesInputSpec
     output_spec = MakeSurfacesOutputSpec
 
+    def _copy2subjdir(self, in_file, folder=None, basename=None):
+        subjects_dir = self.inputs.subjects_dir
+        subject_id = self.inputs.subject_id
+        if basename == None:
+            basename = os.path.basename(in_file)
+        if folder != None:
+            out_dir = os.path.join(subjects_dir, subject_id, folder)
+        else:
+            out_dir = os.path.join(subjects_dir, subject_id)
+        if not os.path.isdir(out_dir):
+            os.makedirs(out_dir)
+        out_file = os.path.join(out_dir, basename)
+        shutil.copy(in_file, out_file)
+        
     def _format_arg(self, name, spec, value):
+        if self.inputs.copy_inputs:
+            cwd = os.path.getcwd()
+            if self.inputs.subjects_dir != cwd:
+                self.inputs.subjects_dir = cwd
+            if name in ['in_T1', 'in_aseg', 'in_wm', 'in_filled']:
+                if name in ['in_wm']:
+                    # this is the basename that the will used implicitly
+                    basename = 'wm.mgz'
+                elif name in ['in_filled']:
+                    # this is the basename that the will used implicitly
+                    basename = 'filled.mgz'
+                else:
+                    basename = os.path.basename(value)
+                folder = 'mri'
+            elif name in ['orig_white', 'orig_pial', 'in_orig']:
+                folder = 'surf'
+            elif name in ['in_label']:
+                basename = '{0}.aparc.annot'.format(self.inputs.hemisphere)
+                folder = 'label'
+            self.copy2subjdir(value, basename=basename, folder=folder)
+            
         if name in ['in_T1', 'in_aseg']:
             # These inputs do not take full paths as inputs or even basenames
             basename = os.path.basename(value)
-            # whent he -mgz flag is specified, it assumes the mgz extension
+            # whent the -mgz flag is specified, it assumes the mgz extension
             if self.inputs.mgz:
                 prefix = basename.rstrip('.mgz')
             else:
@@ -1918,8 +1948,10 @@ class MakeSurfaces(FSCommand):
             return spec.argstr % suffix
         elif name == 'in_orig':
             if value.endswith('lh.orig') or value.endswith('rh.orig'):
+                # {lh,rh}.orig inputs are not sepcified on command line
                 return
             else:
+                # if the input orig file is different than lh.orig or rh.orig
                 # these inputs do take full file paths or even basenames
                 basename = os.path.basename(value)
                 suffix = basename.split('.')[1]
@@ -1928,7 +1960,7 @@ class MakeSurfaces(FSCommand):
 
     def _list_outputs(self):
         outputs = self._outputs().get()
-        # Outputs are saved in the toward the surf directory
+        # Outputs are saved in the surf directory
         dest_dir = os.path.join(self.inputs.subjects_dir,
                                 self.inputs.subject_id, 'surf')
         # labels are saved in the label directory
@@ -1973,7 +2005,8 @@ class CurvatureInputSpec(FSTraitedSpec):
                        desc="Save curvature files (will only generate screen output without this option)")
     distances = traits.Tuple(traits.Int, traits.Int, argstr="-distances %d %d",
                              desc="Undocumented input integer distances")
-
+    copy_input = traits.Bool(desc="Copy input file to current directory")
+    
 
 class CurvatureOutputSpec(TraitedSpec):
     out_mean = File(exists=False, desc="Mean curvature output file")
@@ -1989,20 +2022,32 @@ class Curvature(FSCommand):
     Examples                                                                                                                                                                                                          ========
     >>> from nipype.interfaces.freesurfer import Curvature
     >>> curv = Curvature()
-    >>> curv.inputs.in_file = 'lh.white' # doctest: +SKIP
+    >>> curv.inputs.in_file = 'lh.pial'
     >>> curv.inputs.save = True
-    >>> curv.cmdline # doctest: +SKIP
-    'mris_curvature -w lh.white'
+    >>> curv.cmdline
+    'mris_curvature -w lh.pial'
     """
 
     _cmd = 'mris_curvature'
     input_spec = CurvatureInputSpec
     output_spec = CurvatureOutputSpec
 
+    def _format_arg(self, name, spec, value):
+        if self.inputs.copy_input:
+            if name == 'in_file':
+                basename = os.path.basename(value)
+                shutil.copy(value, basename)
+                return spec.argstr % basename
+        return super(Curvature, self)._format_arg(name, spec, value)
+    
     def _list_outputs(self):
         outputs = self._outputs().get()
-        outputs["out_mean"] = os.path.abspath(self.inputs.in_file) + '.H'
-        outputs["out_gauss"] = os.path.abspath(self.inputs.in_file) + '.K'
+        if self.inputs.copy_input:
+            in_file = os.path.basename(self.inputs.in_file)
+        else:
+            in_file = self.inputs.in_file
+        outputs["out_mean"] = os.path.abspath(in_file) + '.H'
+        outputs["out_gauss"] = os.path.abspath(in_file) + '.K'
         return outputs
 
 
