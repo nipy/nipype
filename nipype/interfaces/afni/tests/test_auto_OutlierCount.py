@@ -47,7 +47,6 @@ def test_OutlierCount_inputs():
     name_source=['in_file'],
     name_template='%s_outliers',
     ),
-    outputtype=dict(),
     polort=dict(argstr='-polort %d',
     ),
     qthr=dict(argstr='-qthr %.5f',
@@ -65,8 +64,12 @@ def test_OutlierCount_inputs():
 
 
 def test_OutlierCount_outputs():
-    output_map = dict(out_file=dict(),
-    outliers=dict(),
+    output_map = dict(out_file=dict(argstr='> %s',
+    keep_extension=False,
+    name_source=['in_file'],
+    name_template='%s_tqual',
+    position=-1,
+    ),
     outliers_file=dict(),
     )
     outputs = OutlierCount.output_spec()

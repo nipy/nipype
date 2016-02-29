@@ -8,9 +8,11 @@ def test_QualityIndex_inputs():
     ),
     autoclip=dict(argstr='-autoclip',
     usedefault=True,
+    xor=['mask'],
     ),
     automask=dict(argstr='-automask',
     usedefault=True,
+    xor=['mask'],
     ),
     clip=dict(argstr='-clip %f',
     ),
@@ -28,6 +30,7 @@ def test_QualityIndex_inputs():
     usedefault=True,
     ),
     mask=dict(argstr='-mask %s',
+    xor=['autoclip', 'automask'],
     ),
     out_file=dict(argstr='> %s',
     keep_extension=False,
@@ -35,7 +38,6 @@ def test_QualityIndex_inputs():
     name_template='%s_tqual',
     position=-1,
     ),
-    outputtype=dict(),
     quadrant=dict(argstr='-quadrant',
     usedefault=True,
     ),
@@ -54,7 +56,6 @@ def test_QualityIndex_inputs():
 
 def test_QualityIndex_outputs():
     output_map = dict(out_file=dict(),
-    qi_value=dict(),
     )
     outputs = QualityIndex.output_spec()
 

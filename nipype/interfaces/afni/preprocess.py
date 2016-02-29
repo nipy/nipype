@@ -16,8 +16,7 @@ import numpy as np
 
 from .base import (AFNICommandBase, AFNICommand, AFNICommandInputSpec, AFNICommandOutputSpec,
                    Info, no_afni)
-from ..base import CommandLineInputSpec
-from ..base import (Directory, TraitedSpec,
+from ..base import (CommandLineInputSpec, CommandLine, Directory, TraitedSpec,
                     traits, isdefined, File, InputMultiPath, Undefined)
 from ...external.six import string_types
 from ...utils.filemanip import (load_json, save_json, split_filename)
@@ -2374,7 +2373,7 @@ class FWHMx(AFNICommandBase):
         return outputs
 
 
-class OutlierCountInputSpec(AFNICommandInputSpec):
+class OutlierCountInputSpec(CommandLineInputSpec):
     in_file = File(argstr='%s', mandatory=True, exists=True, position=-2, desc='input dataset')
     mask = File(exists=True, argstr='-mask %s', xor=['autoclip', 'automask'],
                 desc='only count voxels within the given mask')
@@ -2405,13 +2404,14 @@ class OutlierCountInputSpec(AFNICommandInputSpec):
         keep_extension=False, position=-1, desc='capture standard output')
 
 
-class OutlierCountOutputSpec(AFNICommandOutputSpec):
+class OutlierCountOutputSpec(TraitedSpec):
     outliers_file = File(exists=True, desc='output image file name')
-    outliers = traits.List(traits.Float,
-                           desc='parse standard output to get the count of outliers')
+    out_file = File(
+        name_template='%s_tqual', name_source=['in_file'], argstr='> %s',
+        keep_extension=False, position=-1, desc='capture standard output')
 
 
-class OutlierCount(AFNICommand):
+class OutlierCount(CommandLine):
     """Create a 3D dataset from 2D image files using AFNI to3d command
 
     For complete details, see the `to3d Documentation
@@ -2441,21 +2441,8 @@ class OutlierCount(AFNICommand):
             skip += ['outliers_file']
         return super(OutlierCount, self)._parse_inputs(skip)
 
-    def _list_outputs(self):
-        outputs = self.output_spec().get()
-        outputs['outliers_file'] = (Undefined if not self.inputs.save_outliers
-                                    else self.inputs.outliers_file)
 
-
-        with open(self.inputs.out_file, 'r') as fout:
-            lines = fout.readlines()
-            # remove general information and warnings
-            outputs['outliers'] = [float(l)
-                                   for l in lines if re.match("[0-9]+$", l.strip())]
-        return outputs
-
-
-class QualityIndexInputSpec(AFNICommandInputSpec):
+class QualityIndexInputSpec(CommandLineInputSpec):
     in_file = File(argstr='%s', mandatory=True, exists=True, position=-2, desc='input dataset')
     mask = File(exists=True, argstr='-mask %s', xor=['autoclip', 'automask'],
                 desc='compute correlation only across masked voxels')
@@ -2481,11 +2468,11 @@ class QualityIndexInputSpec(AFNICommandInputSpec):
         keep_extension=False, position=-1, desc='capture standard output')
 
 
-class QualityIndexOutputSpec(AFNICommandOutputSpec):
-    qi_value = traits.List(traits.Float, desc='output quality index')
+class QualityIndexOutputSpec(TraitedSpec):
+    out_file = File(desc='file containing the caputured standard output')
 
 
-class QualityIndex(AFNICommand):
+class QualityIndex(CommandLine):
     """Create a 3D dataset from 2D image files using AFNI to3d command
 
     For complete details, see the `to3d Documentation
@@ -2506,13 +2493,3 @@ class QualityIndex(AFNICommand):
     _cmd = '3dTqual'
     input_spec = QualityIndexInputSpec
     output_spec = QualityIndexOutputSpec
-
-    def _list_outputs(self):
-        outputs = self.output_spec().get()
-        with open(self.inputs.out_file, 'r') as fout:
-            lines = fout.readlines()
-            # remove general information
-            lines = [l for l in lines if l[:2] != "++"]
-            # remove general information and warnings
-            outputs['qi_value'] = [float(l.strip()) for l in lines]
-        return outputs
