@@ -2392,8 +2392,9 @@ class OutlierCountInputSpec(CommandLineInputSpec):
                            desc='write out the median + 3.5 MAD of outlier'
                                 ' count with each timepoint')
     save_outliers = traits.Bool(False, usedefault=True, desc='enables out_file option')
-    outliers_file = File(name_template="%s_outliers", argstr='-save %s', name_source=["in_file"],
-                         keep_extension=True, desc='output image file name')
+    outliers_file = File(
+        name_template="%s_outliers", argstr='-save %s', name_source=["in_file"],
+        output_name='out_outliers', keep_extension=True, desc='output image file name')
 
     polort = traits.Int(argstr='-polort %d',
                         desc='detrend each voxel timeseries with polynomials')
@@ -2405,7 +2406,7 @@ class OutlierCountInputSpec(CommandLineInputSpec):
 
 
 class OutlierCountOutputSpec(TraitedSpec):
-    outliers_file = File(exists=True, desc='output image file name')
+    out_outliers = File(exists=True, desc='output image file name')
     out_file = File(
         name_template='%s_tqual', name_source=['in_file'], argstr='> %s',
         keep_extension=False, position=-1, desc='capture standard output')
@@ -2440,6 +2441,11 @@ class OutlierCount(CommandLine):
         if not self.inputs.save_outliers:
             skip += ['outliers_file']
         return super(OutlierCount, self)._parse_inputs(skip)
+
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        if self.inputs.save_outliers:
+            outputs['out_outliers'] = op.abspath(self.inputs.outliers_file)
 
 
 class QualityIndexInputSpec(CommandLineInputSpec):
