@@ -1450,9 +1450,8 @@ class TalairachAVI(FSCommand):
 
     def _list_outputs(self):
         outputs = self._outputs().get()
-        outputs['out_file'] = self.inputs.out_file
-        outputs['out_log'] = os.path.join(os.path.dirname(
-            self.inputs.out_file), 'talairach_avi.log')
+        outputs['out_file'] = os.path.abspath(self.inputs.out_file)
+        outputs['out_log'] = os.path.abspath('talairach_avi.log')
         outputs['out_txt'] = os.path.join(os.path.dirname(
             self.inputs.out_file), 'talsrcimg_to_' + str(self.inputs.atlas) + 't4_vox2vox.txt')
         return outputs
@@ -1673,8 +1672,14 @@ class FixTopologyInputSpec(FSTraitedSpec):
                        desc="Undocumented input file <hemisphere>.inflated")
     hemisphere = traits.String(position=-1, argstr="%s", mandatory=True,
                                desc="Hemisphere being processed")
-    subject_id = traits.String(position=-2, argstr="%s", mandatory=True,
+    subject_id = traits.String('subject_id', position=-2, argstr="%s",
+                               mandatory=True, usedefault=True,
                                desc="Subject being processed")
+    copy_inputs = traits.Bool(mandatory=True,
+                              desc="If running as a node, set this to True " +
+                              "otherwise, the topology fixing will be done " + 
+                              "in place.")
+
     # optional
     seed = traits.Int(argstr="-seed %d", mandatory=False,
                       desc="Seed for setting random number generator")
@@ -1715,10 +1720,34 @@ class FixTopology(FSCommand):
     output_spec = FixTopologyOutputSpec
 
     def _format_arg(self, name, spec, value):
+        if self.inputs.copy_inputs:
+            if name in ['in_orig', 'in_inflated', 'sphere']:
+                cwd = os.getcwd()
+                # Set subjects_dir to cwd
+                self.inputs.subjects_dir = cwd
+                surf_dir = os.path.join(cwd,
+                                        self.inputs.subject_id,
+                                        'surf')
+                if not os.path.isdir(surf_dir):
+                    os.makedirs(surf_dir)
+
+                if name == 'in_orig':
+                    tmp_file = os.path.join(surf_dir,
+                                            '{0}.orig'.format(self.inputs.hemisphere))
+                    # set in_orig to the copied orig file
+                    self.input.in_orig = tmp_file
+                if name == 'in_inflated':
+                    tmp_file = os.path.join(surf_dir,
+                                            '{0}.inflated'.format(self.inputs.hemisphere))
+                if name == 'sphere':
+                    basename = os.path.basename(value)
+                    tmp_file = os.path.join(surf_dir, basename)
+                # copy the input file to the temp surf directory
+                shutil.copy(value, tmp_file)
         if name == 'sphere':
             # get the basename and take out the hemisphere
             suffix = os.path.basename(value).split('.', 1)[1]
-            return spec.argstr % suffix
+            return spec.argstr % suffix                
         return super(FixTopology, self)._format_arg(name, spec, value)
 
     def _list_outputs(self):
