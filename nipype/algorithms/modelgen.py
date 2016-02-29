@@ -195,6 +195,8 @@ class SpecifyModelInputSpec(BaseInterfaceInputSpec):
                                             desc='Realignment parameters returned '
                                                  'by motion correction algorithm',
                                             copyfile=False)
+    parameter_source = traits.Enum("SPM", "FSL", "AFNI", "NiPy", "FSFAST",
+                                   desc="Source of motion parameters")
     outlier_files = InputMultiPath(File(exists=True),
                                    desc='Files containing scan outlier indices '
                                         'that should be tossed',
@@ -389,11 +391,16 @@ None])
     def _generate_design(self, infolist=None):
         """Generate design specification for a typical fmri paradigm
         """
+        par_selection = slice(6)
+        if isdefined(self.inputs.parameter_source):
+            source = self.inputs.parameter_source
+            if source == 'FSFAST':
+                par_selection = slice(1, 7)
         realignment_parameters = []
         if isdefined(self.inputs.realignment_parameters):
             for parfile in self.inputs.realignment_parameters:
-                realignment_parameters.append(np.loadtxt(parfile))
-
+                realignment_parameters.append(
+                    np.loadtxt(parfile)[:, par_selection])
         outliers = []
         if isdefined(self.inputs.outlier_files):
             for filename in self.inputs.outlier_files:
