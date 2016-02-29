@@ -17,8 +17,10 @@ from nipype.interfaces.base import (
     Directory,
     InputMultiPath,
     traits,
-    File
+    File,
+    isdefined
 )
+
 import os
 
 class FIXInputSpec(CommandLineInputSpec):
@@ -26,8 +28,7 @@ class FIXInputSpec(CommandLineInputSpec):
                               desc='Melodic output directories',
                               argstr='%s', position=-1)
 
-    mel_ica = InputMultiPath(Directory(exists=True), copyfile=False,
-                              desc='Melodic output directory or directories',
+    mel_ica = Directory(exists=True, copyfile=False, desc='Melodic output directory or directories',
                               argstr='%s', position=1)
 
 
@@ -36,29 +37,32 @@ class FIXInputSpec(CommandLineInputSpec):
     
     # /usr/local/fix/fix -f <mel.ica>
     extract_features = traits.Bool(desc='Extract features (for later training and/or classifying)',
-                                   argstr='-f', xor=_xor_inputs, requires=['mel_ica'])
+                                   argstr='-f', xor=_xor_inputs, requires=['mel_ica'], position=0)
 
     # /usr/local/fix/fix -c <mel.ica> <training.RData> <thresh>
     classify = traits.Bool(desc='Classify ICA components using a specific training dataset (<thresh> is in the range 0-100, typically 5-20)',
-                                   argstr='-c', xor=_xor_inputs, requires=['mel_ica', 'trained_wts_file', 'thresh'])
+                                   argstr='-c', xor=_xor_inputs, requires=['mel_ica', 'trained_wts_file', 'thresh'], position=0)
 
     # /usr/local/fix/fix -a <mel.ica/fix4melview_TRAIN_thr.txt>  [-m [-h <highpass>]]  [-A]  [-x <confound>] [-x <confound2>] etc.
     apply_cleanup = traits.Bool(desc='Apply cleanup, using artefacts listed in the .txt file',
-                                   argstr='-a', xor=_xor_inputs, requires=['artifacts_list_file']) # todo, optional args, required inputs
+                                   argstr='-a', xor=_xor_inputs, requires=['artifacts_list_file'], position=0) 
 
     # /usr/local/fix/fix -t <Training> [-l]  <Melodic1.ica> <Melodic2.ica>
     train = traits.Bool(desc='Train the classifier based on your own FEAT/MELODIC output directory',
-                                   argstr='-t', xor=_xor_inputs, requires=['trained_wts_file', 'mel_ica'], position=0) # todo, optional args
+                                   argstr='-t', xor=_xor_inputs, requires=['trained_wts_filestem', 'mel_icas'], position=0) # todo, optional args
 
+    # /usr/local/fix/fix -C <training.RData> <output> <mel1.ica> <mel2.ica> ...
     test_accuracy = traits.Bool(desc='Test the accuracy of an existing training dataset on a set of hand-labelled subjects',
                                    argstr='-C', xor=_xor_inputs)
 
 
+
     # shared args for different modes
-    artifacts_list_file = File(desc='Text file listing which ICs are artifacts; can be the output from classification or can be created manually', argstr='%s')  
+    artifacts_list_file = File(desc='Text file listing which ICs are artifacts; can be the output from classification or can be created manually', argstr='%s', position=1)  
 
-    trained_wts_file = File(desc='trained-weights file', argstr='%s', position=1)  
+    trained_wts_filestem = traits.Str(desc='trained-weights file', argstr='%s', position=1)  
 
+    trained_wts_file = File(desc='trained-weights file', argstr='%s', position=2)  
 
 
 
@@ -67,31 +71,30 @@ class FIXInputSpec(CommandLineInputSpec):
                             desc='full leave-one-out test with classifier training', position=2)
     
     # args for classify
-
-    thresh = traits.Int(argstr='%d', requires=['classify'], desc='cleanup motion confounds')
+    thresh = traits.Int(argstr='%d', requires=['classify'], desc='cleanup motion confounds', position=-1)
 
 
     # for apply_cleanup
-
-    _xor_cleanup = ('cleanup_motion', 'highpass_filter')
+    _xor_cleanup = ('cleanup_motion', 'highpass')
 
     cleanup_motion = traits.Bool(argstr='-m', requires=['apply_cleanup'],
-                                 desc='cleanup motion confounds, looks for design.fsf for highpass filter cut-off', xor=_xor_cleanup)
+                                 desc='cleanup motion confounds, looks for design.fsf for highpass filter cut-off', 
+                                 xor=_xor_cleanup, position=2)
 
     highpass = traits.Float(argstr='-m -h %f', requires=['apply_cleanup'],
-                            desc='cleanup motion confounds', value=100, xor=_xor_cleanup)
+                            desc='cleanup motion confounds', value=100, xor=_xor_cleanup, position=2)
 
     aggressive = traits.Bool(argstr='-A', requires=['apply_cleanup'],
-                             desc='Apply aggressive (full variance) cleanup, instead of the default less-aggressive (unique variance) cleanup.')
+                             desc='Apply aggressive (full variance) cleanup, instead of the default less-aggressive (unique variance) cleanup.', position=3)
 
     confound_file = traits.File(argstr='-x %s', requires=['apply_cleanup'],
-                             desc='Include additional confound file.')
+                                desc='Include additional confound file.', position=4)
 
     confound_file_1 = traits.File(argstr='-x %s', requires=['apply_cleanup'],
-                             desc='Include additional confound file.')
+                                  desc='Include additional confound file.', position=5)
 
     confound_file_2 = traits.File(argstr='-x %s', requires=['apply_cleanup'],
-                             desc='Include additional confound file.')
+                                  desc='Include additional confound file.', position=6)
 
     
 
