@@ -232,21 +232,22 @@ class EMRegister(FSCommandOpenMP):
 class RegisterInputSpec(FSTraitedSpec):
     # required
     in_surf = File(argstr="%s", exists=True, mandatory=True, position=-3,
+                   copyfile=True,
                    desc="Surface to register, often {hemi}.sphere")
     target = File(argstr="%s", exists=True, mandatory=True, position=-2,
-                  desc="The data to register to. In normal recon-all usage, this is a template file for average surface.")
-    in_smoothwm = File(exists=True, mandatory=True,
+                  desc="The data to register to. In normal recon-all usage, " +
+                  "this is a template file for average surface.")
+    in_smoothwm = File(exists=True, mandatory=True, copyfile=True,
+                       requires=['curv'],
                        desc="Undocumented mandatory input file ${SUBJECTS_DIR}/surf/{hemisphere}.smoothwm ")
-    in_sulc = File(exists=True, mandatory=True,
+    in_sulc = File(exists=True, mandatory=True, copyfile=True,
                    desc="Undocumented mandatory input file ${SUBJECTS_DIR}/surf/{hemisphere}.sulc ")
-    out_file = File(argstr="%s", exists=False, position=-1, mandatory=True,
-                    name_source=['in_surf'], hash_files=False, keep_extension=False,
-                    name_template="%s.reg",
+    out_file = File(argstr="%s", exists=False, position=-1,
+                    mandatory=True, genfile=True,
                     desc="Output surface file to capture registration")
-
     # optional
-    curv = File(argstr="-curv", mandatory=False, exists=True,
-                desc="Use smoothwm curvature for final alignment")
+    curv = traits.Bool(argstr="-curv",
+                       desc="Use smoothwm curvature for final alignment")
 
 
 class RegisterOutputSpec(TraitedSpec):
@@ -278,16 +279,25 @@ class Register(FSCommand):
             return spec.argstr
         return super(Register, self)._format_arg(opt, spec, val)
 
+    def _gen_filename(self, name):
+        if name == 'out_file':
+            return self._list_outputs()[name]
+        return None
+    
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        outputs['out_file'] = os.path.abspath(self.inputs.out_file)
+        if isdefined(self.inputs.out_file):
+            outputs['out_file'] = os.path.abspath(self.inputs.out_file)
+        else:
+            outputs['out_file'] = os.path.abspath(self.inputs.in_surf) + '.reg'
         return outputs
 
 
 class PaintInputSpec(FSTraitedSpec):
     # required
     in_surf = File(argstr="%s", exists=True, mandatory=True, position=-2,
-                   desc="Surface file with grid (vertices) onto which the template data is to be sampled or 'painted'")
+                   desc="Surface file with grid (vertices) onto which the " +
+                   "template data is to be sampled or 'painted'")
     template = File(argstr="%s", exists=True, mandatory=True, position=-3,
                     desc="Template file")
     # optional
