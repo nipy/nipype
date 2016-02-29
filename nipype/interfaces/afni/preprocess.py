@@ -2446,6 +2446,8 @@ class OutlierCount(CommandLine):
         outputs = self.output_spec().get()
         if self.inputs.save_outliers:
             outputs['out_outliers'] = op.abspath(self.inputs.outliers_file)
+        outputs['out_file'] = op.abspath(self.inputs.out_file)
+        return outputs
 
 
 class QualityIndexInputSpec(CommandLineInputSpec):
