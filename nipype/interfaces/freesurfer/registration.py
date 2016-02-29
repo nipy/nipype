@@ -239,11 +239,14 @@ class RegisterInputSpec(FSTraitedSpec):
                        desc="Undocumented mandatory input file ${SUBJECTS_DIR}/surf/{hemisphere}.smoothwm ")
     in_sulc = File(exists=True, mandatory=True,
                    desc="Undocumented mandatory input file ${SUBJECTS_DIR}/surf/{hemisphere}.sulc ")
+    out_file = File(argstr="%s", exists=False, position=-1, mandatory=True,
+                    name_source=['in_surf'], hash_files=False, keep_extension=False,
+                    name_template="%s.reg",
+                    desc="Output surface file to capture registration")
+
     # optional
     curv = File(argstr="-curv", mandatory=False, exists=True,
                 desc="Use smoothwm curvature for final alignment")
-    out_file = File(argstr="%s", exists=False, position=-1, genfile=True,
-                    desc="Output surface file to capture registration")
 
 
 class RegisterOutputSpec(TraitedSpec):
@@ -262,9 +265,8 @@ class Register(FSCommand):
     >>> register.inputs.in_smoothwm = 'lh.pial'
     >>> register.inputs.in_sulc = 'lh.pial'
     >>> register.inputs.target = 'aseg.mgz'
-    >>> register.inputs.out_file = 'lh.sphere.reg'
     >>> register.cmdline
-    'mris_register lh.pial aseg.mgz lh.sphere.reg'
+    'mris_register lh.pial aseg.mgz lh.pial.reg'
     """
 
     _cmd = 'mris_register'
@@ -276,17 +278,9 @@ class Register(FSCommand):
             return spec.argstr
         return super(Register, self)._format_arg(opt, spec, val)
 
-    def _gen_filename(self, name):
-        if name == 'out_file':
-            return self._list_outputs()[name]
-        return None
-
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        if isdefined(self.inputs.out_file):
-            outputs['out_file'] = os.path.abspath(self.inputs.out_file)
-        else:
-            outputs['out_file'] = os.path.abspath(self.inputs.in_surf) + '.reg'
+        outputs['out_file'] = os.path.abspath(self.inputs.out_file)
         return outputs
 
 
