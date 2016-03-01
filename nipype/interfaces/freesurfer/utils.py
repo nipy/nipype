@@ -1929,6 +1929,7 @@ class MakeSurfaces(FSCommand):
                 folder = 'mri'
             elif name in ['orig_white', 'orig_pial', 'in_orig']:
                 folder = 'surf'
+                basename = os.path.basename(value)
             elif name in ['in_label']:
                 basename = '{0}.aparc.annot'.format(self.inputs.hemisphere)
                 folder = 'label'
@@ -2261,13 +2262,19 @@ class VolumeMaskInputSpec(FSTraitedSpec):
                     desc="Implicit input left white matter surface")
     rh_white = File(mandatory=True, exists=True,
                     desc="Implicit input right white matter surface")
-    subject_id = traits.String(position=-1, argstr="%s", mandatory=True,
+    subject_id = traits.String('subject_id', usedefault=True,
+                               position=-1, argstr="%s", mandatory=True,
                                desc="Subject being processed")
     # optional
     in_aseg = File(argstr="--aseg_name %s", mandatory=False, exists=True,
                    desc="Input aseg file for VolumeMask")
     save_ribbon = traits.Bool(argstr="--save_ribbon", mandatory=False,
-                              desc="option to save just the ribbon for the hemispheres in the format ?h.ribbon.mgz")
+                              desc="option to save just the ribbon for the " +
+                              "hemispheres in the format ?h.ribbon.mgz")
+    copy_inputs = traits.Bool(mandatory=False,
+                              desc="If running as a node, set this to True." +
+                              "This will copy the implicit input files to the " +
+                              "node directory.")
 
 
 class VolumeMaskOutputSpec(TraitedSpec):
@@ -2286,20 +2293,21 @@ class VolumeMask(FSCommand):
     [lh|rh].[white|pial] and labels voxels based on the
     signed-distance function from the surface.
 
-    Examples                                                                                                                                                                                                          ========
+    Examples
+    ========
     >>> from nipype.interfaces.freesurfer import VolumeMask
     >>> volmask = VolumeMask()
     >>> volmask.inputs.left_whitelabel = 2
     >>> volmask.inputs.left_ribbonlabel = 3
     >>> volmask.inputs.right_whitelabel = 41
     >>> volmask.inputs.right_ribbonlabel = 42
-    >>> volmask.inputs.lh_pial = 'lh.pial' # doctest: +SKIP
-    >>> volmask.inputs.rh_pial = 'rh.pial' # doctest: +SKIP
-    >>> volmask.inputs.lh_white = 'lh.white' # doctest: +SKIP
-    >>> volmask.inputs.rh_white = 'rh.white' # doctest: +SKIP
+    >>> volmask.inputs.lh_pial = 'lh.pial'
+    >>> volmask.inputs.rh_pial = 'rh.pial'
+    >>> volmask.inputs.lh_white = 'lh.pial'
+    >>> volmask.inputs.rh_white = 'rh.pial'
     >>> volmask.inputs.subject_id = '10335'
     >>> volmask.inputs.save_ribbon = True
-    >>> volmask.cmdline # doctest: +SKIP
+    >>> volmask.cmdline 
     'mris_volmask --label_left_ribbon 3 --label_left_white 2 --label_right_ribbon 42 --label_right_white 41 --save_ribbon 10335'
     """
 
@@ -2307,11 +2315,35 @@ class VolumeMask(FSCommand):
     input_spec = VolumeMaskInputSpec
     output_spec = VolumeMaskOutputSpec
 
+    def _copy2subjdir(self, in_file, folder=None, basename=None):
+        subjects_dir = self.inputs.subjects_dir
+        subject_id = self.inputs.subject_id
+        if basename == None:
+            basename = os.path.basename(in_file)
+        if folder != None:
+            out_dir = os.path.join(subjects_dir, subject_id, folder)
+        else:
+            out_dir = os.path.join(subjects_dir, subject_id)
+        if not os.path.isdir(out_dir):
+            os.makedirs(out_dir)
+        out_file = os.path.join(out_dir, basename)
+        shutil.copy(in_file, out_file)
+    
     def _format_arg(self, name, spec, value):
+        if self.inputs.copy_inputs:
+            cwd = os.path.getcwd()
+            if self.inputs.subjects_dir != cwd:
+                self.inputs.subjects_dir = cwd
+            if name in ['lh_pial', 'rh_pial', 'lh_white', 'rh_white']:
+                folder = 'surf'
+                basename = name.replace('_', '.')
+            if name in ['in_aseg']:
+                folder = 'mri'
+                basename = os.path.basename(value)
+            self.copy2subjdir(value, basename=basename, folder=folder)
         if name == 'in_aseg':
             return spec.argstr % os.path.basename(value).rstrip('.mgz')
-        else:
-            return super(VolumeMask, self)._format_arg(name, spec, value)
+        return super(VolumeMask, self)._format_arg(name, spec, value)
 
     def _list_outputs(self):
         outputs = self._outputs().get()
