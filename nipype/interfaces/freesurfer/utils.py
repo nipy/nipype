@@ -2153,7 +2153,7 @@ class JacobianInputSpec(FSTraitedSpec):
     # optional
     out_file = File(argstr="%s", exists=False, position=-1,
                     name_source=['in_origsurf'], hash_files=False,
-                    name_template='%s.jacobian_white', keep_extension=False,
+                    name_template='%s.jacobian', keep_extension=False,
                     desc="Output Jacobian of the surface mapping")
 
 
@@ -2173,7 +2173,7 @@ class Jacobian(FSCommand):
     >>> jacobian.inputs.in_origsurf = 'lh.pial'
     >>> jacobian.inputs.in_mappedsurf = 'lh.pial'
     >>> jacobian.cmdline
-    'mris_jacobian lh.pial lh.pial lh.jacobian_white'
+    'mris_jacobian lh.pial lh.pial lh.jacobian'
     """
 
     _cmd = 'mris_jacobian'
