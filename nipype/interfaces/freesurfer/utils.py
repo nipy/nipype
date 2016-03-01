@@ -2194,6 +2194,9 @@ class MRIsCalcInputSpec(FSTraitedSpec):
                     desc="Input file 1")
     action = traits.String(argstr="%s", position=-2, mandatory=True,
                            desc="Action to perform on input file(s)")
+    out_file = File(argstr="-o %s", mandatory=False,
+                    desc="Output file after calculation")
+
     # optional
     in_file2 = File(argstr="%s", exists=True, position=-1, mandatory=False,
                     xor=['in_float', 'in_int'], desc="Input file 2")
@@ -2201,8 +2204,6 @@ class MRIsCalcInputSpec(FSTraitedSpec):
                             xor=['in_file2', 'in_int'], desc="Input float")
     in_int = traits.Int(argstr="%d", position=-1, mandatory=False,
                         xor=['in_file2', 'in_float'], desc="Input integer")
-    out_file = File(argstr="-o %s", mandatory=False, genfile=True,
-                    desc="Output file after calculation")
 
 
 class MRIsCalcOutputSpec(TraitedSpec):
@@ -2237,29 +2238,9 @@ class MRIsCalc(FSCommand):
     input_spec = MRIsCalcInputSpec
     output_spec = MRIsCalcOutputSpec
 
-    def _format_arg(self, name, spec, value):
-        if name == 'out_file':
-            return spec.argstr % self._list_outputs()[name]
-        else:
-            return super(MRIsCalc, self)._format_arg(name, spec, value)
-
     def _list_outputs(self):
         outputs = self._outputs().get()
-        if isdefined(self.inputs.out_file):
-            if os.path.isabs(self.inputs.out_file):
-                outputs['out_file'] = self.inputs.out_file
-            else:
-                basename = os.path.basename(self.inputs.out_file)
-                prefix = os.path.basename(self.inputs.in_file1).split('.')[0]
-                if prefix in ['lh', 'rh']:
-                    # add hemisphere label to output
-                    basename = prefix + '.' + basename
-                # Write output to same directory as input
-                dirname = os.path.dirname(self.inputs.in_file1)
-                outputs['out_file'] = os.path.join(dirname, basename)
-        else:
-            # if the output file is not predefined
-            outputs['out_file'] = str(self.inputs.in_file1) + '.' + str(self.inputs.action)
+        outputs['out_file'] = self.inputs.out_file
         return outputs
 
 
