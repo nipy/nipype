@@ -1788,25 +1788,33 @@ class CALabel(FSCommandOpenMP):
 
 class MRIsCALabelInputSpec(FSTraitedSpecOpenMP):
     # required
-    subject_id = traits.String(
-        argstr="%s", position=-5, mandatory=True, desc="Subject name or ID")
-    hemisphere = traits.String(
-        argstr="%s", position=-4, mandatory=True, desc="Hemisphere ('lh' or 'rh')")
+    subject_id = traits.String('subject_id', argstr="%s", position=-5,
+                               usedefault=True, mandatory=True,
+                               desc="Subject name or ID")
+    hemisphere = traits.Enum('lh', 'rh',
+                             argstr="%s", position=-4, mandatory=True,
+                             desc="Hemisphere ('lh' or 'rh')")
     canonsurf = File(argstr="%s", position=-3, mandatory=True, exists=True,
                      desc="Input canonical surface file")
     classifier = File(argstr="%s", position=-2, mandatory=True, exists=True,
                       desc="Classifier array input file")
     smoothwm = File(mandatory=True, exists=True,
                     desc="Undocumented input {hemisphere}.smoothwm must exist in the subjects directory")
-    # optional
-    out_file = File(argstr="%s", position=-1, exists=False, mandatory=False, genfile=True,
+    out_file = File(argstr="%s", position=-1, exists=False, mandatory=False,
+                    name_source=['hemisphere'], keep_extension=True,
+                    hash_files=False, name_template="%s.aparc.annot",
                     desc="Annotated surface output file")
+    # optional
     label = traits.File(argstr="-l %s", mandatory=False, exists=True,
                         desc="Undocumented flag. Autorecon3 uses ../label/{hemisphere}.cortex.label as input file")
     aseg = traits.File(argstr="-aseg %s", mandatory=False, exists=True,
                        desc="Undocumented flag. Autorecon3 uses ../mri/aseg.presurf.mgz as input file")
     seed = traits.Int(argstr="-seed %d", mandatory=False,
                       desc="")
+    copy_smoothwm = traits.Bool(desc="Copies smoothwm to node directory " +
+                                "and creates a temp subjects_directory. " +
+                                "Use this when smoothwm is not in the " +
+                                "subjects_directory.")
 
 
 class MRIsCALabelOutputSpec(TraitedSpec):
@@ -1834,29 +1842,16 @@ class MRIsCALabel(FSCommandOpenMP):
     >>> ca_label.inputs.canonsurf = "lh.pial"
     >>> ca_label.inputs.classifier = "im1.nii" # in pracice, use .gcs extension
     >>> ca_label.inputs.smoothwm = "lh.pial"
-    >>> ca_label.inputs.out_file = "aparc.annot"
     >>> ca_label.cmdline
-    'mris_ca_label test lh lh.pial im1.nii aparc.annot'
+    'mris_ca_label test lh lh.pial im1.nii lh.aparc.annot'
     """
     _cmd = "mris_ca_label"
     input_spec = MRIsCALabelInputSpec
     output_spec = MRIsCALabelOutputSpec
 
-    def _gen_filename(self, name):
-        if name == 'out_file':
-            return self._list_outputs()[name]
-        return None
-
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        if isdefined(self.inputs.out_file):
-            outputs['out_file'] = os.path.abspath(self.inputs.out_file)
-        else:
-            head = os.path.join(self.inputs.subjects_dir,
-                                self.inputs.subject_id, 'label')
-            hemisphere = str(self.inputs.hemisphere)
-            filename = hemisphere + '.aparc.annot'
-            outputs['out_file'] = os.path.join(head, filename)
+        outputs['out_file'] = os.path.abspath(self.inputs.out_file)
         return outputs
 
 
