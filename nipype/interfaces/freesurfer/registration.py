@@ -305,8 +305,11 @@ class PaintInputSpec(FSTraitedSpec):
         mandatory=False, desc="Frame number of the input template")
     averages = traits.Int(argstr="-a %d", mandatory=False,
                           desc="Average curvature patterns")
-    out_file = File(argstr="%s", exists=False, position=-1, genfile=True,
-                    desc="File containing a surface-worth of per-vertex values, saved in 'curvature' format.")
+    out_file = File(argstr="%s", exists=False, position=-1,
+                    name_template="%s.avg_curv", hash_files=False,
+                    name_source=['in_surf'], keep_extension=False,
+                    desc="File containing a surface-worth of per-vertex values, " +
+                    "saved in 'curvature' format.")
 
 
 class PaintOutputSpec(TraitedSpec):
@@ -344,18 +347,7 @@ class Paint(FSCommand):
                 return spec.argstr % (val + '#' + str(self.inputs.template_param))
         return super(Paint, self)._format_arg(opt, spec, val)
 
-    def _gen_filename(self, name):
-        if name == 'out_file':
-            return self._list_outputs()[name]
-        return None
-
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        if isdefined(self.inputs.out_file):
-            outputs['out_file'] = os.path.abspath(self.inputs.out_file)
-        else:
-            head, tail = os.path.split(self.inputs.in_surf)
-            hemisphere = tail.split('.')[0]
-            filename = hemisphere + '.avg_curv'
-            outputs['out_file'] = os.path.join(head, filename)
+        outputs['out_file'] = os.path.abspath(self.inputs.out_file)
         return outputs
