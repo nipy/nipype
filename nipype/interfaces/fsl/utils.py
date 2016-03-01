@@ -2017,6 +2017,47 @@ class WarpPointsToStd(WarpPoints):
     _cmd = 'img2stdcoord'
 
 
+class WarpPointsFromStdInputSpec(WarpPointsBaseInputSpec):
+    img_file = File(exists=True, argstr='-img %s', mandatory=True,
+                    desc='filename of a destination image')
+    std_file = File(exists=True, argstr='-std %s', mandatory=True,
+                    desc='filename of the image in standard space')
+    transform = File(exists=True, argstr='-xfm %s',
+                     desc='filename of pre-warp affine transform '
+                          '(e.g. example_func2highres.mat)')
+
+
+class WarpPointsFromStd(WarpPoints):
+    """
+    Use FSL `std2imgcoord <http://fsl.fmrib.ox.ac.uk/fsl/fsl-4.1.9/flirt/overview.html>`_
+    to transform point sets to standard space coordinates. Accepts plain text files and
+    vtk files.
+
+    .. Note:: transformation of TrackVis trk files is not yet implemented
+
+
+    Examples
+    --------
+
+    >>> from nipype.interfaces.fsl import WarpPointsFromStd
+    >>> warppoints = WarpPointsFromStd()
+    >>> warppoints.inputs.in_coords = 'surf.txt'
+    >>> warppoints.inputs.img_file = 'T1.nii'
+    >>> warppoints.inputs.std_file = 'mni.nii'
+    >>> warppoints.inputs.warp_file = 'warpfield.nii'
+    >>> warppoints.inputs.coord_mm = True
+    >>> warppoints.cmdline # doctest: +ELLIPSIS
+    'std2imgcoord -mm -img T1.nii -std mni.nii -warp warpfield.nii surf.txt'
+    >>> res = warppoints.run() # doctest: +SKIP
+
+
+    """
+
+    input_spec = WarpPointsFromStdInputSpec
+    output_spec = WarpPointsOutputSpec
+    _cmd = 'std2imgcoord'
+
+
 class MotionOutliersInputSpec(FSLCommandInputSpec):
     in_file = File(
         exists=True, mandatory=True, desc="unfiltered 4D image", argstr="-i %s")
