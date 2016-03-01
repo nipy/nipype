@@ -1813,9 +1813,11 @@ class RemoveIntersection(FSCommand):
 
 class MakeSurfacesInputSpec(FSTraitedSpec):
     # required
-    hemisphere = traits.String(position=-1, argstr="%s", mandatory=True,
-                               desc="Hemisphere being processed")
-    subject_id = traits.String(position=-2, argstr="%s", mandatory=True,
+    hemisphere = traits.Enum('lh', 'rh',
+                             position=-1, argstr="%s", mandatory=True,
+                             desc="Hemisphere being processed")
+    subject_id = traits.String('subject_id', usedefault=True,
+                               position=-2, argstr="%s", mandatory=True,
                                desc="Subject being processed")
     # implicit
     in_orig = File(exists=True, mandatory=True, argstr='-orig %s',
@@ -1853,7 +1855,7 @@ class MakeSurfacesInputSpec(FSTraitedSpec):
         argstr="-long", desc="No documentation (used for longitudinal processing)")
     copy_inputs = traits.Bool(mandatory=False,
                               desc="If running as a node, set this to True." +
-                              "This will copy the input files to the noed " +
+                              "This will copy the input files to the node " +
                               "directory.")
 
 
