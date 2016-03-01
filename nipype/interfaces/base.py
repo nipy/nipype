@@ -1292,7 +1292,7 @@ def run_command(runtime, output=None, timeout=0.01, redirect_x=False):
         runtime_profile = True
     except ImportError as exc:
         logger.info('Unable to import packages needed for runtime profiling. '\
-                    'Turning off runtime profiler.\nError: %s' % exc)
+                    'Turning off runtime profiler. Reason: %s' % exc)
         runtime_profile = False
 
     # Init variables
