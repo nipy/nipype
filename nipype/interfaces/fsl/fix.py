@@ -1,13 +1,10 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
-"""The fix module provides classes for interfacing with the `FSL FIX
-<http://fsl.fmrib.ox.ac.uk/fsl/fslwiki/FIX/index.html>`_ command line tools.  
+"""
+The fix module provides classes for interfacing with the `FSL FIX
+<http://fsl.fmrib.ox.ac.uk/fsl/fslwiki/FIX/index.html>` command line tools.  
+
 This was written to work with FSL version v5.0
-    Change directory to provide relative paths for doctests
-    >>> import os
-    >>> filepath = os.path.dirname( os.path.realpath( __file__ ) )
-    >>> datadir = os.path.realpath(os.path.join(filepath, '../../testing/data'))
-    >>> os.chdir(datadir)
 """
 
 from nipype.interfaces.base import (
@@ -24,7 +21,7 @@ from nipype.interfaces.base import (
 import os
 
 class FIXInputSpec(CommandLineInputSpec):
-    mel_icas = InputMultiPath(Directory(exists=True), copyfile=False,
+    hand_labels_noise = InputMultiPath(File(exists=True), copyfile=False,
                               desc='Melodic output directories',
                               argstr='%s', position=-1)
 
@@ -49,7 +46,7 @@ class FIXInputSpec(CommandLineInputSpec):
 
     # /usr/local/fix/fix -t <Training> [-l]  <Melodic1.ica> <Melodic2.ica>
     train = traits.Bool(desc='Train the classifier based on your own FEAT/MELODIC output directory',
-                                   argstr='-t', xor=_xor_inputs, requires=['trained_wts_filestem', 'mel_icas'], position=0) # todo, optional args
+                                   argstr='-t', xor=_xor_inputs, requires=['trained_wts_filestem', 'hand_labels_noise'], position=0) # todo, optional args
 
     # /usr/local/fix/fix -C <training.RData> <output> <mel1.ica> <mel2.ica> ...
     test_accuracy = traits.Bool(desc='Test the accuracy of an existing training dataset on a set of hand-labelled subjects',
@@ -60,7 +57,7 @@ class FIXInputSpec(CommandLineInputSpec):
     # shared args for different modes
     artifacts_list_file = File(desc='Text file listing which ICs are artifacts; can be the output from classification or can be created manually', argstr='%s', position=1)  
 
-    trained_wts_filestem = traits.Str(desc='trained-weights file', argstr='%s', position=1)  
+    trained_wts_filestem = traits.Str(desc='trained-weights filestem, used for trained_wts_file and output directories', argstr='%s', position=1)  
 
     trained_wts_file = File(desc='trained-weights file', argstr='%s', position=2)  
 
@@ -99,16 +96,43 @@ class FIXInputSpec(CommandLineInputSpec):
     
 
 class FIXOutputSpec(TraitedSpec):
-    output_file = File(desc = "Zip file", exists = True)
+    trained_wts_file = File(desc='Trained-weights file')
+    artifacts_list_file = File(desc='Melodic output directories')
+    cleaned_functional_file = File(desc='Cleaned session data')
+
 
 class FIX(CommandLine):
     input_spec = FIXInputSpec
     output_spec = FIXOutputSpec
     cmd = '/usr/local/fix/fix'
 
+    def _format_arg(self, name, spec, value):
+        if name == 'hand_labels_noise':
+            mel_icas = ''
+            for item in value:
+                path, filename = os.path.split(item)
+                mel_icas += path + " "
+            return spec.argstr % mel_icas
+        return super(FIX, self)._format_arg(name, spec, value)
+
+
     def _list_outputs(self):
             outputs = self.output_spec().get()
+            if isdefined(self.inputs.train):
+                outputs['trained_wts_file'] = self.inputs.trained_wts_filestem + '.RData'
+            elif isdefined(self.inputs.classify):
+                outputs['artifacts_list_file'] = self._gen_artifacts_list_file(self.inputs.mel_ica, self.inputs.thresh)
+            elif isdefined(self.inputs.apply_cleanup):
+                outputs['cleaned_functional_file'] = self._get_cleaned_functional_filename(self.inputs.artifacts_list_file)
             return outputs
+
+    def _gen_artifacts_list_file(self, mel_ica, thresh):
+        return os.path.join(mel_ica, 'fix4melview_core_shell_thr' + str(thresh) + '.txt')
+
+    def _get_cleaned_functional_filename(self, artifacts_list_filename):
+        artifacts_list_file = file(artifacts_list_filename, 'r')
+        functional_filename, extension = artifacts_list_file.readline().split('.')
+        return(functional_filename + '_cleaned.nii.gz')
 
 if __name__ == '__main__':
 
