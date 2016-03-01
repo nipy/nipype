@@ -2151,7 +2151,9 @@ class JacobianInputSpec(FSTraitedSpec):
     in_mappedsurf = File(argstr="%s", position=-2, mandatory=True, exists=True,
                          desc="Mapped surface")
     # optional
-    out_file = File(argstr="%s", exists=False, position=-1, genfile=True,
+    out_file = File(argstr="%s", exists=False, position=-1,
+                    name_source=['in_origsurf'], hash_files=False,
+                    name_template='%s.jacobian_white', keep_extension=False,
                     desc="Output Jacobian of the surface mapping")
 
 
@@ -2178,20 +2180,9 @@ class Jacobian(FSCommand):
     input_spec = JacobianInputSpec
     output_spec = JacobianOutputSpec
 
-    def _gen_filename(self, name):
-        if name == 'out_file':
-            return self._list_outputs()[name]
-        return None
-
     def _list_outputs(self):
         outputs = self._outputs().get()
-        if isdefined(self.inputs.out_file):
-            outputs['out_file'] = os.path.abspath(self.inputs.out_file)
-        else:
-            head, tail = os.path.split(self.inputs.in_origsurf)
-            hemisphere = tail.split('.')[0]
-            filename = hemisphere + '.jacobian_white'
-            outputs['out_file'] = os.path.join(head, filename)
+        outputs['out_file'] = os.path.abspath(self.inputs.out_file)
         return outputs
 
 
