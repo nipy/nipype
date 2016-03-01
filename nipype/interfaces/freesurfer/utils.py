@@ -2194,7 +2194,7 @@ class MRIsCalcInputSpec(FSTraitedSpec):
                     desc="Input file 1")
     action = traits.String(argstr="%s", position=-2, mandatory=True,
                            desc="Action to perform on input file(s)")
-    out_file = File(argstr="-o %s", mandatory=False,
+    out_file = File(argstr="-o %s", mandatory=True,
                     desc="Output file after calculation")
 
     # optional
