@@ -2166,14 +2166,14 @@ class Jacobian(FSCommand):
     """
     This program computes the Jacobian of a surface mapping.
 
-    Examples                                                                                                                                                                                                          ========
+    Examples
+    ========
     >>> from nipype.interfaces.freesurfer import Jacobian
     >>> jacobian = Jacobian()
-    >>> jacobian.inputs.in_origsurf = 'lh.white' # doctest: +SKIP
-    >>> jacobian.inputs.in_mappedsurf = 'lh.sphere.reg' # doctest: +SKIP
-    >>> jacobian.inputs.out_file = 'lh.jacobian_white'
-    >>> jacobian.cmdline # doctest: +SKIP
-    'mris_jacobian lh.white lh.sphere.reg lh.jacobian_white'
+    >>> jacobian.inputs.in_origsurf = 'lh.pial'
+    >>> jacobian.inputs.in_mappedsurf = 'lh.pial'
+    >>> jacobian.cmdline
+    'mris_jacobian lh.pial lh.pial lh.jacobian_white'
     """
 
     _cmd = 'mris_jacobian'
