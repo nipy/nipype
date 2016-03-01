@@ -1849,6 +1849,20 @@ class MRIsCALabel(FSCommandOpenMP):
     input_spec = MRIsCALabelInputSpec
     output_spec = MRIsCALabelOutputSpec
 
+    def _format_arg(self, name, spec, value):
+        if name == 'smoothwm' and self.inputs.copy_smoothwm:
+            # copy the smoothwm to the node directory and
+            # make a temporary subjects_dir where the
+            # freesurfer executable will look for it
+            cwd = os.getcwd()
+            self.inputs.subjects_dir = cwd
+            smoothwm_dest = os.path.join(cwd,
+                                         self.inputs.subject_id,
+                                         'surf',
+                                         self.inputs.hemisphere +
+                                         '.smoothwm')
+            shutil.copy(value, smoothwm_dest)
+        return super(MRIsCALabel, self)._format_arg(name, spec, value)
     def _list_outputs(self):
         outputs = self.output_spec().get()
         outputs['out_file'] = os.path.abspath(self.inputs.out_file)
