@@ -55,10 +55,16 @@ def test_split(tmpdir, args, expected):
 @pytest.mark.parametrize("args, kwargs, in_lists, expected", [
         ([3], {}, [0, [1, 2], [3, 4, 5]], [0, 1, 2, 3, 4, 5]),
         ([], {}, None, None),
+        ([], {}, [0, [1, 2], [3, 4, 5]], [0, 1, 2, 3, 4, 5]),
         ([3], {'axis': 'hstack'}, [[0], [1, 2], [3, 4, 5]], [[0, 1, 3]]),
         ([3], {'axis': 'hstack'}, [[0, 1], [2, 3], [4, 5]],
          [[0, 2, 4], [1, 3, 5]]),
         ([3], {'axis': 'hstack'}, [[0, 1], [2, 3], [4, 5]],
+         [[0, 2, 4], [1, 3, 5]]),
+        # Note: Merge(0, axis='hstack') would error on run, prior to
+        # in_lists implementation
+        ([0], {'axis': 'hstack'}, [[0], [1, 2], [3, 4, 5]], [[0, 1, 3]]),
+        ([0], {'axis': 'hstack'}, [[0, 1], [2, 3], [4, 5]],
          [[0, 2, 4], [1, 3, 5]]),
         ])
 def test_merge(tmpdir, args, kwargs, in_lists, expected):
@@ -67,11 +73,14 @@ def test_merge(tmpdir, args, kwargs, in_lists, expected):
     node = pe.Node(utility.Merge(*args, **kwargs), name='merge')
 
     numinputs = args[0] if args else 0
-    for i in range(1, numinputs + 1):
-        setattr(node.inputs, 'in{:d}'.format(i), in_lists[i - 1])
+    if numinputs == 0 and in_lists:
+        node.inputs.in_lists = in_lists
+    else:
+        for i in range(1, numinputs + 1):
+            setattr(node.inputs, 'in{:d}'.format(i), in_lists[i - 1])
 
     res = node.run()
-    if numinputs == 0:
+    if numinputs == 0 and in_lists is None:
         assert not isdefined(res.outputs.out)
     else:
         assert res.outputs.out == expected

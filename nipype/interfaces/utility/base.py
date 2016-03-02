@@ -128,24 +128,38 @@ class Merge(IOBase):
     def __init__(self, numinputs=0, **inputs):
         super(Merge, self).__init__(**inputs)
         self._numinputs = numinputs
-        add_traits(self.inputs, ['in%d' % (i + 1) for i in range(numinputs)])
+        if numinputs > 0:
+            input_names = ['in%d' % (i + 1) for i in range(numinputs)]
+        elif numinputs == 0:
+            input_names = ['in_lists']
+        else:
+            input_names = []
+        add_traits(self.inputs, input_names)
 
     def _list_outputs(self):
         outputs = self._outputs().get()
         out = []
-        if self.inputs.axis == 'vstack':
-            for idx in range(self._numinputs):
-                value = getattr(self.inputs, 'in%d' % (idx + 1))
-                if isdefined(value):
-                    if isinstance(value, list) and not self.inputs.no_flatten:
-                        out.extend(value)
-                    else:
-                        out.append(value)
+
+        if self._numinputs == 0:
+            values = getattr(self.inputs, 'in_lists')
+            if not isdefined(values):
+                return outputs
         else:
-            for i in range(len(filename_to_list(self.inputs.in1))):
+            getval = lambda idx: getattr(self.inputs, 'in%d' % (idx + 1))
+            values = [getval(idx) for idx in range(self._numinputs)
+                      if isdefined(getval(idx))]
+
+        if self.inputs.axis == 'vstack':
+            for value in values:
+                if isinstance(value, list) and not self.inputs.no_flatten:
+                    out.extend(value)
+                else:
+                    out.append(value)
+        else:
+            for i in range(len(filename_to_list(values[0]))):
                 out.insert(i, [])
-                for j in range(self._numinputs):
-                    out[i].append(filename_to_list(getattr(self.inputs, 'in%d' % (j + 1)))[i])
+                for value in values:
+                    out[i].append(filename_to_list(value)[i])
         if out:
             outputs['out'] = out
         return outputs
