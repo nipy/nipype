@@ -1944,6 +1944,7 @@ class SegmentCC(FSCommand):
                 shutil.copy(value, fspath)
         if name in ["in_file", "in_norm", "out_file"]:
             # mri_cc can't use abspaths just the basename
+            basename = os.path.basename(value)
             return spec.argstr % basename
         return super(SegmentCC, self)._format_arg(name, spec, value)
 
