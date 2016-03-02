@@ -24,7 +24,7 @@ def test_function(tmpdir):
     def increment_array(in_array):
         return in_array + 1
 
-    f2 = pe.MapNode(utility.Function(input_names=['in_array'], output_names=['out_array'], function=increment_array), name='increment_array', iterfield=['in_array'])
+    f2 = pe.MapNode(utility.Function(function=increment_array), name='increment_array', iterfield=['in_array'])
 
     wf.connect(f1, 'random_array', f2, 'in_array')
     wf.run()

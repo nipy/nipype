@@ -58,8 +58,8 @@ class Function(IOBase):
     input_spec = FunctionInputSpec
     output_spec = DynamicTraitedSpec
 
-    def __init__(self, input_names, output_names, function=None, imports=None,
-                 **inputs):
+    def __init__(self, input_names=None, output_names='out', function=None,
+                 imports=None, **inputs):
         """
 
         Parameters
@@ -88,10 +88,18 @@ class Function(IOBase):
                     raise Exception('Interface Function does not accept '
                                     'function objects defined interactively '
                                     'in a python session')
-            elif isinstance(function, (str, bytes)):
+                else:
+                    if inputs is None:
+                        fninfo = function.func_code
+            elif isinstance(function, string_types):
                 self.inputs.function_str = function
+                if inputs is None:
+                    fninfo = create_function_from_source(
+                        function, imports).func_code
             else:
                 raise Exception('Unknown type of function')
+            if inputs is None:
+                inputs = fninfo.co_varnames[:fninfo.co_argcount]
         self.inputs.on_trait_change(self._set_function_string,
                                     'function_str')
         self._input_names = filename_to_list(input_names)
@@ -106,10 +114,18 @@ class Function(IOBase):
         if name == 'function_str':
             if hasattr(new, '__call__'):
                 function_source = getsource(new)
-            elif isinstance(new, (str, bytes)):
+                fninfo = new.func_code
+            elif isinstance(new, string_types):
                 function_source = new
+                fninfo = create_function_from_source(
+                    new, self.imports).func_code
             self.inputs.trait_set(trait_change_notify=False,
                                   **{'%s' % name: function_source})
+            # Update input traits
+            input_names = fninfo.co_varnames[:fninfo.co_argcount]
+            new_names = set(input_names) - set(self._input_names)
+            add_traits(self.inputs, list(new_names))
+            self._input_names = new_names
 
     def _add_output_traits(self, base):
         undefined_traits = {}
