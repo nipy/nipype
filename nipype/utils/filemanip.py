@@ -42,7 +42,9 @@ def nipype_hardlink_wrapper(raw_src, raw_dst):
     If the hardlink fails, then fall back to using
     a standard copy.
     """
-    src = os.path.normpath(raw_src)
+    # Use realpath to avoid hardlinking symlinks
+    src = os.path.realpath(raw_src)
+    # Use normpath, in case destination is a symlink
     dst = os.path.normpath(raw_dst)
     del raw_src
     del raw_dst
