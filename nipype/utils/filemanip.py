@@ -285,12 +285,15 @@ def copyfile(originalfile, newfile, copy=False, create_new=False,
         matofile = originalfile[:-4] + ".mat"
         if os.path.exists(matofile):
             matnfile = newfile[:-4] + ".mat"
-            copyfile(matofile, matnfile, copy)
-        copyfile(hdrofile, hdrnfile, copy)
+            copyfile(matofile, matnfile, copy, create_new, hashmethod,
+                     use_hardlink)
+        copyfile(hdrofile, hdrnfile, copy, create_new, hashmethod,
+                 use_hardlink)
     elif originalfile.endswith(".BRIK"):
         hdrofile = originalfile[:-5] + ".HEAD"
         hdrnfile = newfile[:-5] + ".HEAD"
-        copyfile(hdrofile, hdrnfile, copy)
+        copyfile(hdrofile, hdrnfile, copy, create_new, hashmethod,
+                 use_hardlink)
 
     return newfile
 
