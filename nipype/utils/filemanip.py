@@ -259,7 +259,11 @@ def copyfile(originalfile, newfile, copy=False, create_new=False,
             if newhash != orighash:
                 os.unlink(newfile)
         if (newhash is None) or (newhash != orighash):
-            os.symlink(originalfile, newfile)
+            try:
+                os.symlink(originalfile, newfile)
+            except OSError:
+                return copyfile(originalfile, newfile, True, create_new,
+                                hashmethod, use_hardlink)
     else:
         if newhash:
             if hashmethod == 'timestamp':
