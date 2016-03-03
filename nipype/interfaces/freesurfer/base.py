@@ -204,6 +204,8 @@ class FSCommandOpenMP(FSCommand):
         self.inputs.on_trait_change(self._num_threads_update, 'num_threads')
         if not self._num_threads:
             self._num_threads = os.environ.get('OMP_NUM_THREADS', None)
+            if not self._num_threads:
+                self._num_threads = os.environ.get('NSLOTS', None)
         if not isdefined(self.inputs.num_threads) and self._num_threads:
             self.inputs.num_threads = int(self._num_threads)
         self._num_threads_update()
