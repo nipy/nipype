@@ -1494,7 +1494,7 @@ class WatershedSkullStripInputSpec(FSTraitedSpec):
     # required
     in_file = File(argstr="%s", exists=True, mandatory=True,
                    position=-2, desc="input volume")
-    out_file = File('brainmask.auto.mgz', argstr="%s", exists=False, 
+    out_file = File('brainmask.auto.mgz', argstr="%s", exists=False,
                     mandatory=True, position=-1, usedefault=True,
                     desc="output volume")
     # optional
@@ -1878,7 +1878,7 @@ class SegmentCCInputSpec(FSTraitedSpec):
                     desc="Filename to write aseg including CC")
     out_rotation = File(argstr="-lta %s", mandatory=True, exists=False,
                         desc="Global filepath for writing rotation lta")
-    subject_id = traits.String('subject_id', argstr="%s", mandatory=True, 
+    subject_id = traits.String('subject_id', argstr="%s", mandatory=True,
                                position=-1, usedefault=True,
                                desc="Subject name")
 
@@ -1918,7 +1918,7 @@ class SegmentCC(FSCommand):
     input_spec = SegmentCCInputSpec
     output_spec = SegmentCCOutputSpec
 
-    # mri_cc does not take absolute paths and will look for the 
+    # mri_cc does not take absolute paths and will look for the
     # input files in  <SUBJECTS_DIR>/<subject_id>/mri/<basename>
     # So, if the files are not there, they will be copied to that
     # location
@@ -1955,7 +1955,7 @@ class SegmentCC(FSCommand):
         return outputs
 
     def aggregate_outputs(self, **inputs):
-        # it is necessary to find the output files and move 
+        # it is necessary to find the output files and move
         # them to the correct loacation
         predicted_outputs = self._list_outputs()
         for name in ['out_file', 'out_rotation']:
@@ -1969,12 +1969,12 @@ class SegmentCC(FSCommand):
                     subj_dir = os.path.join(os.getcwd(),
                                             self.inputs.subjec_id)
                 if name == 'out_file':
-                    out_tmp = os.path.join(subj_dir, 
+                    out_tmp = os.path.join(subj_dir,
                                            'mri',
                                            out_base)
                 elif name == 'out_rotation':
                     out_tmp = os.path.join(subj_dir,
-                                           'mri', 
+                                           'mri',
                                            'transforms',
                                            out_base)
                 else:

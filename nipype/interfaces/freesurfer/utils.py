@@ -1637,7 +1637,7 @@ class Sphere(FSCommandOpenMP):
     """
     This program will add a template into an average surface
 
-    Examples                          
+    Examples
     ========
     >>> from nipype.interfaces.freesurfer import Sphere
     >>> sphere = Sphere()
@@ -1668,7 +1668,7 @@ class FixTopologyInputSpec(FSTraitedSpec):
                                desc="Subject being processed")
     copy_inputs = traits.Bool(mandatory=True,
                               desc="If running as a node, set this to True " +
-                              "otherwise, the topology fixing will be done " + 
+                              "otherwise, the topology fixing will be done " +
                               "in place.")
 
     # optional
@@ -1738,7 +1738,7 @@ class FixTopology(FSCommand):
         if name == 'sphere':
             # get the basename and take out the hemisphere
             suffix = os.path.basename(value).split('.', 1)[1]
-            return spec.argstr % suffix                
+            return spec.argstr % suffix
         return super(FixTopology, self)._format_arg(name, spec, value)
 
     def _list_outputs(self):
@@ -1911,7 +1911,7 @@ class MakeSurfaces(FSCommand):
             os.makedirs(out_dir)
         out_file = os.path.join(out_dir, basename)
         shutil.copy(in_file, out_file)
-        
+
     def _format_arg(self, name, spec, value):
         if self.inputs.copy_inputs:
             cwd = os.path.getcwd()
@@ -1934,7 +1934,7 @@ class MakeSurfaces(FSCommand):
                 basename = '{0}.aparc.annot'.format(self.inputs.hemisphere)
                 folder = 'label'
             self.copy2subjdir(value, basename=basename, folder=folder)
-            
+
         if name in ['in_T1', 'in_aseg']:
             # These inputs do not take full paths as inputs or even basenames
             basename = os.path.basename(value)
@@ -2009,7 +2009,7 @@ class CurvatureInputSpec(FSTraitedSpec):
     distances = traits.Tuple(traits.Int, traits.Int, argstr="-distances %d %d",
                              desc="Undocumented input integer distances")
     copy_input = traits.Bool(desc="Copy input file to current directory")
-    
+
 
 class CurvatureOutputSpec(TraitedSpec):
     out_mean = File(exists=False, desc="Mean curvature output file")
@@ -2042,7 +2042,7 @@ class Curvature(FSCommand):
                 shutil.copy(value, basename)
                 return spec.argstr % basename
         return super(Curvature, self)._format_arg(name, spec, value)
-    
+
     def _list_outputs(self):
         outputs = self._outputs().get()
         if self.inputs.copy_input:
@@ -2307,7 +2307,7 @@ class VolumeMask(FSCommand):
     >>> volmask.inputs.rh_white = 'lh.pial'
     >>> volmask.inputs.subject_id = '10335'
     >>> volmask.inputs.save_ribbon = True
-    >>> volmask.cmdline 
+    >>> volmask.cmdline
     'mris_volmask --label_left_ribbon 3 --label_left_white 2 --label_right_ribbon 42 --label_right_white 41 --save_ribbon 10335'
     """
 
@@ -2328,7 +2328,7 @@ class VolumeMask(FSCommand):
             os.makedirs(out_dir)
         out_file = os.path.join(out_dir, basename)
         shutil.copy(in_file, out_file)
-    
+
     def _format_arg(self, name, spec, value):
         if self.inputs.copy_inputs:
             cwd = os.path.getcwd()

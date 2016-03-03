@@ -283,7 +283,7 @@ class Register(FSCommand):
         if name == 'out_file':
             return self._list_outputs()[name]
         return None
-    
+
     def _list_outputs(self):
         outputs = self.output_spec().get()
         if isdefined(self.inputs.out_file):
