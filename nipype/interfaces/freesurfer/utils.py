@@ -1617,10 +1617,10 @@ class MRIsInflate(FSCommand):
 class SphereInputSpec(FSTraitedSpecOpenMP):
     in_file = File(argstr="%s", position=-2, mandatory=True, exists=True,
                    desc="Input file for Sphere")
-    out_file = File(argstr="%s", position=-1, mandatory=True, exists=False,
+    out_file = File(argstr="%s", position=-1, exists=False,
                     name_source=['in_file'], hash_files=False,
-                    name_template='%.sphere',
-                    desc="Output file for Sphere")
+                    name_template='%s.sphere',
+                    Desc="Output file for Sphere")
     # optional
     seed = traits.Int(argstr="-seed %d", mandatory=False,
                       desc="Seed for setting random number generator")
@@ -1641,10 +1641,10 @@ class Sphere(FSCommandOpenMP):
     ========
     >>> from nipype.interfaces.freesurfer import Sphere
     >>> sphere = Sphere()
-    >>> sphere.inputs.in_file = 'lh.white'
+    >>> sphere.inputs.in_file = 'lh.pial'
     >>> sphere.inputs.magic = True
     >>> sphere.cmdline
-    'mris_sphere -q lh.white lh.sphere'
+    'mris_sphere -q lh.pial lh.sphere'
     """
     _cmd = 'mris_sphere'
     input_spec = SphereInputSpec
@@ -1891,7 +1891,7 @@ class MakeSurfaces(FSCommand):
     >>> makesurfaces.inputs.in_T1 = 'T1.mgz'
     >>> makesurfaces.inputs.orig_pial = 'lh.pial'
     >>> makesurfaces.cmdline
-    'mris_make_surfaces -T1 T1.mgz -orig_pial pial 10335 lh'
+    'mris_make_surfaces -T1 T1.mgz -orig pial -orig_pial pial 10335 lh'
     """
 
     _cmd = 'mris_make_surfaces'
@@ -2302,9 +2302,9 @@ class VolumeMask(FSCommand):
     >>> volmask.inputs.right_whitelabel = 41
     >>> volmask.inputs.right_ribbonlabel = 42
     >>> volmask.inputs.lh_pial = 'lh.pial'
-    >>> volmask.inputs.rh_pial = 'rh.pial'
+    >>> volmask.inputs.rh_pial = 'lh.pial'
     >>> volmask.inputs.lh_white = 'lh.pial'
-    >>> volmask.inputs.rh_white = 'rh.pial'
+    >>> volmask.inputs.rh_white = 'lh.pial'
     >>> volmask.inputs.subject_id = '10335'
     >>> volmask.inputs.save_ribbon = True
     >>> volmask.cmdline 
@@ -2423,7 +2423,7 @@ class ParcellationStats(FSCommand):
     >>> parcstats.inputs.aseg = './../mri/aseg.presurf.mgz' # doctest: +SKIP
     >>> parcstats.inputs.ribbon = './../mri/ribbon.mgz' # doctest: +SKIP
     >>> parcstats.inputs.lh_pial = 'lh.pial' # doctest: +SKIP
-    >>> parcstats.inputs.rh_pial = 'rh.pial' # doctest: +SKIP
+    >>> parcstats.inputs.rh_pial = 'lh.pial' # doctest: +SKIP
     >>> parcstats.inputs.lh_white = 'lh.white' # doctest: +SKIP
     >>> parcstats.inputs.rh_white = 'rh.white' # doctest: +SKIP
     >>> parcstats.inputs.thickness = 'lh.thickness' # doctest: +SKIP
@@ -2698,7 +2698,7 @@ class Aparc2Aseg(FSCommand):
     >>> aparc2aseg.inputs.lh_white = 'lh.white' # doctest: +SKIP
     >>> aparc2aseg.inputs.rh_white = 'rh.white' # doctest: +SKIP
     >>> aparc2aseg.inputs.lh_pial = 'lh.pial' # doctest: +SKIP
-    >>> aparc2aseg.inputs.rh_pial = 'rh.pial' # doctest: +SKIP
+    >>> aparc2aseg.inputs.rh_pial = 'lh.pial' # doctest: +SKIP
     >>> aparc2aseg.inputs.lh_ribbon = '../mri/lh.ribbon.mgz' # doctest: +SKIP
     >>> aparc2aseg.inputs.rh_ribbon = '../mri/rh.ribbon.mgz' # doctest: +SKIP
     >>> aparc2aseg.inputs.ribbon = '../mri/ribbon.mgz' # doctest: +SKIP

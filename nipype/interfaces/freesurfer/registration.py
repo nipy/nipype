@@ -237,17 +237,15 @@ class RegisterInputSpec(FSTraitedSpec):
     target = File(argstr="%s", exists=True, mandatory=True, position=-2,
                   desc="The data to register to. In normal recon-all usage, " +
                   "this is a template file for average surface.")
-    in_smoothwm = File(exists=True, mandatory=True, copyfile=True,
-                       requires=['curv'],
-                       desc="Undocumented mandatory input file ${SUBJECTS_DIR}/surf/{hemisphere}.smoothwm ")
     in_sulc = File(exists=True, mandatory=True, copyfile=True,
                    desc="Undocumented mandatory input file ${SUBJECTS_DIR}/surf/{hemisphere}.sulc ")
-    out_file = File(argstr="%s", exists=False, position=-1,
-                    mandatory=True, genfile=True,
+    out_file = File(argstr="%s", exists=False, position=-1, genfile=True,
                     desc="Output surface file to capture registration")
     # optional
-    curv = traits.Bool(argstr="-curv",
+    curv = traits.Bool(argstr="-curv", requires=['in_smoothwm'],
                        desc="Use smoothwm curvature for final alignment")
+    in_smoothwm = File(exists=True, copyfile=True,
+                       desc="Undocumented input file ${SUBJECTS_DIR}/surf/{hemisphere}.smoothwm ")
 
 
 class RegisterOutputSpec(TraitedSpec):
@@ -266,8 +264,10 @@ class Register(FSCommand):
     >>> register.inputs.in_smoothwm = 'lh.pial'
     >>> register.inputs.in_sulc = 'lh.pial'
     >>> register.inputs.target = 'aseg.mgz'
+    >>> register.inputs.out_file = 'lh.pial.reg'
+    >>> register.inputs.curv = True
     >>> register.cmdline
-    'mris_register lh.pial aseg.mgz lh.pial.reg'
+    'mris_register -curv lh.pial aseg.mgz lh.pial.reg'
     """
 
     _cmd = 'mris_register'
