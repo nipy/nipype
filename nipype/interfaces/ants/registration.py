@@ -975,3 +975,89 @@ class Registration(ANTSCommand):
         if len(self.inputs.save_state):
             outputs['save_state'] = os.path.abspath(self.inputs.save_state)
         return outputs
+
+
+
+
+
+class RegistrationSynQuickInputSpec(ANTSCommandInputSpec):
+    dimension = traits.Enum(3, 2, argstr='-d %d',
+                            usedefault=True, desc='image dimension (2 or 3)')
+    fixed_image = InputMultiPath(File(exists=True), mandatory=True, argstr='-f %s',
+                                 desc='Fixed image or source image or reference image')
+    moving_image = InputMultiPath(File(exists=True), mandatory=True, argstr='-m %s',
+                                  desc='Moving image or target image')
+    output_prefix = traits.Str("transform", usedefault=True, argstr='-o %s',
+                               desc="A prefix that is prepended to all output files")
+
+    # todo ANTSCommandInputSpec already has this, but I can't figure out how to set it without defining it again
+    num_threads = traits.Int(default_value=1, desc='Number of threads (default = 1)', argstr='-n %d')
+
+    transform_type = traits.Enum('s', 't', 'r', 'a', 'sr', 'b', 'br', argstr='-t %s',
+                                 desc='transform type\n\
+                                 t:  translation\
+                                 r:  rigid \n\
+                                 a:  rigid + affine\n\
+                                 s:  rigid + affine + deformable syn (default)\
+                                 sr: rigid + deformable syn\
+                                 b:  rigid + affine + deformable b-spline syn\n\
+                                 br: rigid + deformable b-spline syn',
+                                 usedefault=True)
+
+    use_histogram_matching = traits.Bool(default=False, argstr='-j %s',
+                                         desc='use histogram matching')
+    histogram_bins = traits.Int(default_value=32, argstr='-r %d',
+                                desc='histogram bins for mutual information in SyN stage \
+                                 (default = 32)')
+    spline_distance = traits.Int(default_value=26, argstr='-s %d',
+                                 desc='spline distance for deformable B-spline SyN transform \
+                                 (default = 26)')
+    precision_type = traits.Enum('double', 'float', argstr='-p %s',
+                                 desc='precision type (default = double)', usedefault=True)
+
+
+class RegistrationSynQuickOutputSpec(TraitedSpec):
+    warped_image = File(exists=True, desc="Warped image")
+    inverse_warped_image = File(exists=True, desc="Inverse warped image")
+    out_matrix = File(exists=True, desc='Affine matrix')
+    forward_warp_field = File(exists=True, desc='Forward warp field')
+    inverse_warp_field = File(exists=True, desc='Inverse warp field')
+
+
+class RegistrationSynQuick(ANTSCommand):
+    """
+    Examples
+    --------
+
+    """
+    # todo examples
+
+    _cmd = 'antsRegistrationSynQuick.sh'
+    input_spec = RegistrationSynQuickInputSpec
+    output_spec = RegistrationSynQuickOutputSpec
+
+    def _format_arg(self, name, spec, value):
+        if name == 'use_histogram_matching':
+            if isdefined(self.inputs.use_histogram_matching):
+                return spec.argstr % {False: '0', True: '1'}[value]
+
+        elif name == 'precision_type':
+            if isdefined(self.inputs.precision_type):
+                return spec.argstr % {'float': 'f', 'double': 'd'}[value]
+        return super(RegistrationSynQuick, self)._format_arg(name, spec, value)
+
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        outputs['warped_image'] = os.path.abspath(self.inputs.output_prefix + 'Warped.nii.gz')
+        outputs['inverse_warped_image'] = os.path.abspath(
+            self.inputs.output_prefix + 'InverseWarped.nii.gz')
+        outputs['out_matrix'] = os.path.abspath(self.inputs.output_prefix + '0GenericAffine.mat')
+
+        # todo in the case of linear transformation-only there won't be fields. is there a more elegant way to specify that?
+        if self.inputs.transform_type not in ('t', 'r', 'a'):
+            outputs['forward_warp_field'] = os.path.abspath(
+                self.inputs.output_prefix + '1Warp.nii.gz')
+            outputs['inverse_warp_field'] = os.path.abspath(
+                self.inputs.output_prefix + '1InverseWarp.nii.gz')
+        return outputs
+
