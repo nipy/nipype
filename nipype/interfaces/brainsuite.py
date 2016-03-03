@@ -11,7 +11,7 @@ from nipype.interfaces.base import(
 )
 
 
-class bseInputSpec(CommandLineInputSpec):
+class BseInputSpec(CommandLineInputSpec):
 
     inputMRIFile = File(exists=True, mandatory=True, argstr='-i %s',
                         desc='input MRI volume', position=0)
@@ -55,7 +55,7 @@ class bseInputSpec(CommandLineInputSpec):
     timer = traits.Bool(desc='show timing', argstr='--timer')
 
 
-class bseOutputSpec(TraitedSpec):
+class BseOutputSpec(TraitedSpec):
     outputMRIVolume = File(desc='path/name of brain-masked MRI volume')
     outputMaskFile = File(desc='path/name of smooth brain mask')
     outputDiffusionFilter = File(desc='path/name of diffusion filter output')
@@ -64,9 +64,9 @@ class bseOutputSpec(TraitedSpec):
     outputCortexFile = File(desc='path/name of cortex file')
 
 
-class bse(CommandLine):
-    input_spec = bseInputSpec
-    output_spec = bseOutputSpec
+class Bse(CommandLine):
+    input_spec = BseInputSpec
+    output_spec = BseOutputSpec
     _cmd = 'bse'
 
     def _gen_filename(self, name):
@@ -88,16 +88,16 @@ class bse(CommandLine):
         return l_outputs(self)
 
 
-class bfcInputSpec(CommandLineInputSpec):
+class BfcInputSpec(CommandLineInputSpec):
     inputMRIFile = File(exists=True, mandatory=True,
                         desc='input skull-stripped MRI volume',
                         argstr='-i %s', position=0)
+    inputMaskFile = File(desc='mask file', argstr='-m %s', hash_files=False)
     outputMRIVolume = File(mandatory=False,
                            desc='output bias-corrected MRI volume.'
                                 'If unspecified, output file name'
                                 'will be auto generated.', argstr='-o %s',
                            position=1, hash_files=False, genfile=True)
-    outputMaskFile = File(desc='mask file', argstr='-m %s', hash_files=False)
     outputBiasField = File(desc='save bias field estimate',
                            argstr='--bias %s', hash_files=False)
     outputMaskedBiasField = File(desc='save bias field estimate (masked)',
@@ -157,17 +157,16 @@ class bfcInputSpec(CommandLineInputSpec):
     timer = traits.Bool(desc='display timing information', argstr='--timer')
 
 
-class bfcOutputSpec(TraitedSpec):
+class BfcOutputSpec(TraitedSpec):
     outputMRIVolume = File(desc='path/name of output file')
-    outputMaskFile = File(desc='path/name of mask output file')
     outputBiasField = File(desc='path/name of bias field output file')
     outputMaskedBiasField = File(desc='path/name of masked bias field output')
     correctionScheduleFile = File(desc='path/name of schedule file')
 
 
-class bfc(CommandLine):
-    input_spec = bfcInputSpec
-    output_spec = bfcOutputSpec
+class Bfc(CommandLine):
+    input_spec = BfcInputSpec
+    output_spec = BfcOutputSpec
     _cmd = 'bfc'
 
     def _gen_filename(self, name):
@@ -191,13 +190,13 @@ class bfc(CommandLine):
         if name == 'intermediate_file_type':
             return spec.argstr % {"analyze": "--analyze", "nifti": "--nifti", "gzippedAnalyze": "--analyzegz", "gzippedNifti": "--niftigz"}[value]
 
-        return super(bfc, self)._format_arg(name, spec, value)
+        return super(Bfc, self)._format_arg(name, spec, value)
 
     def _list_outputs(self):
         return l_outputs(self)
 
 
-class pvcInputSpec(CommandLineInputSpec):
+class PvcInputSpec(CommandLineInputSpec):
     inputMRIFile = File(mandatory=True, desc='MRI file', argstr='-i %s')
     inputMaskFile = File(desc='brain mask file', argstr='-m %s')
     outputLabelFile = File(
@@ -211,14 +210,14 @@ class pvcInputSpec(CommandLineInputSpec):
     timer = traits.Bool(desc='time processing', argstr='--timer')
 
 
-class pvcOutputSpec(TraitedSpec):
+class PvcOutputSpec(TraitedSpec):
     outputLabelFile = File(desc='path/name of label file')
     outputTissueFractionFile = File(desc='path/name of tissue fraction file')
 
 
-class pvc(CommandLine):
-    input_spec = pvcInputSpec
-    output_spec = pvcOutputSpec
+class Pvc(CommandLine):
+    input_spec = PvcInputSpec
+    output_spec = PvcOutputSpec
     _cmd = 'pvc'
 
     def _gen_filename(self, name):
@@ -240,7 +239,7 @@ class pvc(CommandLine):
         return l_outputs(self)
 
 
-class cerebroInputSpec(CommandLineInputSpec):
+class CerebroInputSpec(CommandLineInputSpec):
     inputMRIFile = File(
         mandatory=True, desc='input 3D MRI volume', argstr='-i %s')
     inputAtlasMRIFile = File(
@@ -274,16 +273,16 @@ class cerebroInputSpec(CommandLineInputSpec):
         desc='create a temporary directory within this directory', argstr='--tempdirbase %s')
 
 
-class cerebroOutputSpec(TraitedSpec):
+class CerebroOutputSpec(TraitedSpec):
     outputCerebrumMaskFile = File(desc='path/name of cerebrum mask file')
     outputLabelMaskFile = File(desc='path/name of label mask file')
     outputAffineTransformFile = File(desc='path/name of affine transform file')
     outputWarpTransformFile = File(desc='path/name of warp transform file')
 
 
-class cerebro(CommandLine):
-    input_spec = cerebroInputSpec
-    output_spec = cerebroOutputSpec
+class Cerebro(CommandLine):
+    input_spec = CerebroInputSpec
+    output_spec = CerebroOutputSpec
     _cmd = 'cerebro'
 
     def _gen_filename(self, name):
@@ -306,7 +305,7 @@ class cerebro(CommandLine):
         return l_outputs(self)
 
 
-class cortexInputSpec(CommandLineInputSpec):
+class CortexInputSpec(CommandLineInputSpec):
     inputHemisphereLabelFile = File(
         mandatory=True, desc='hemisphere / lobe label volume', argstr='-h %s')
     outputCerebrumMask = File(
@@ -325,13 +324,13 @@ class cortexInputSpec(CommandLineInputSpec):
     timer = traits.Bool(desc='timing function', argstr='--timer')
 
 
-class cortexOutputSpec(TraitedSpec):
+class CortexOutputSpec(TraitedSpec):
     outputCerebrumMask = File(desc='path/name of cerebrum mask')
 
 
-class cortex(CommandLine):
-    input_spec = cortexInputSpec
-    output_spec = cortexOutputSpec
+class Cortex(CommandLine):
+    input_spec = CortexInputSpec
+    output_spec = CortexOutputSpec
     _cmd = 'cortex'
 
     def _gen_filename(self, name):
@@ -350,7 +349,7 @@ class cortex(CommandLine):
         return l_outputs(self)
 
 
-class scrubmaskInputSpec(CommandLineInputSpec):
+class ScrubmaskInputSpec(CommandLineInputSpec):
     inputMaskFile = File(
         mandatory=True, desc='input structure mask file', argstr='-i %s')
     outputMaskFile = File(
@@ -364,13 +363,13 @@ class scrubmaskInputSpec(CommandLineInputSpec):
     timer = traits.Bool(desc='timing function', argstr='--timer')
 
 
-class scrubmaskOutputSpec(TraitedSpec):
+class ScrubmaskOutputSpec(TraitedSpec):
     outputMaskFile = File(desc='path/name of mask file')
 
 
-class scrubmask(CommandLine):
-    input_spec = scrubmaskInputSpec
-    output_spec = scrubmaskOutputSpec
+class Scrubmask(CommandLine):
+    input_spec = ScrubmaskInputSpec
+    output_spec = ScrubmaskOutputSpec
     _cmd = 'scrubmask'
 
     def _gen_filename(self, name):
@@ -388,7 +387,7 @@ class scrubmask(CommandLine):
         return l_outputs(self)
 
 
-class tcaInputSpec(CommandLineInputSpec):
+class TcaInputSpec(CommandLineInputSpec):
     inputMaskFile = File(
         mandatory=True, desc='input mask volume', argstr='-i %s')
     outputMaskFile = File(
@@ -403,13 +402,13 @@ class tcaInputSpec(CommandLineInputSpec):
     timer = traits.Bool(desc='timing function', argstr='--timer')
 
 
-class tcaOutputSpec(TraitedSpec):
+class TcaOutputSpec(TraitedSpec):
     outputMaskFile = File(desc='path/name of mask file')
 
 
-class tca(CommandLine):
-    input_spec = tcaInputSpec
-    output_spec = tcaOutputSpec
+class Tca(CommandLine):
+    input_spec = TcaInputSpec
+    output_spec = TcaOutputSpec
     _cmd = 'tca'
 
     def _gen_filename(self, name):
@@ -428,7 +427,7 @@ class tca(CommandLine):
         return l_outputs(self)
 
 
-class dewispInputSpec(CommandLineInputSpec):
+class DewispInputSpec(CommandLineInputSpec):
     inputMaskFile = File(mandatory=True, desc='input file', argstr='-i %s')
     outputMaskFile = File(
         mandatory=False, desc='output file. If unspecified, output file name will be auto generated.', argstr='-o %s', genfile=True)
@@ -439,13 +438,13 @@ class dewispInputSpec(CommandLineInputSpec):
     timer = traits.Bool(desc='time processing', argstr='--timer')
 
 
-class dewispOutputSpec(TraitedSpec):
+class DewispOutputSpec(TraitedSpec):
     outputMaskFile = File(desc='path/name of mask file')
 
 
-class dewisp(CommandLine):
-    input_spec = dewispInputSpec
-    output_spec = dewispOutputSpec
+class Dewisp(CommandLine):
+    input_spec = DewispInputSpec
+    output_spec = DewispOutputSpec
     _cmd = 'dewisp'
 
     def _gen_filename(self, name):
@@ -464,7 +463,7 @@ class dewisp(CommandLine):
         return l_outputs(self)
 
 
-class dfsInputSpec(CommandLineInputSpec):
+class DfsInputSpec(CommandLineInputSpec):
     inputVolumeFile = File(
         mandatory=True, desc='input 3D volume', argstr='-i %s')
     outputSurfaceFile = File(
@@ -494,13 +493,13 @@ class dfsInputSpec(CommandLineInputSpec):
     timer = traits.Bool(desc='timing function', argstr='--timer')
 
 
-class dfsOutputSpec(TraitedSpec):
+class DfsOutputSpec(TraitedSpec):
     outputSurfaceFile = File(desc='path/name of surface file')
 
 
-class dfs(CommandLine):
-    input_spec = dfsInputSpec
-    output_spec = dfsOutputSpec
+class Dfs(CommandLine):
+    input_spec = DfsInputSpec
+    output_spec = DfsOutputSpec
     _cmd = 'dfs'
 
     def _format_arg(self, name, spec, value):
@@ -509,7 +508,7 @@ class dfs(CommandLine):
         if name == 'specialTessellation':
             threshold = self.inputs.tessellationThreshold
             return spec.argstr % {"greater_than": ''.join(("-gt %f" % threshold)), "less_than": ''.join(("-lt %f" % threshold)), "equal_to": ''.join(("-eq %f" % threshold))}[value]
-        return super(dfs, self)._format_arg(name, spec, value)
+        return super(Dfs, self)._format_arg(name, spec, value)
 
     def _gen_filename(self, name):
         exec('is_user_defined = isdefined(self.inputs.' + name + ')')
@@ -527,7 +526,7 @@ class dfs(CommandLine):
         return l_outputs(self)
 
 
-class pialmeshInputSpec(CommandLineInputSpec):
+class PialmeshInputSpec(CommandLineInputSpec):
     inputSurfaceFile = File(mandatory=True, desc='input file', argstr='-i %s')
     outputSurfaceFile = File(
         mandatory=False, desc='output file. If unspecified, output file name will be auto generated.', argstr='-o %s', genfile=True)
@@ -555,7 +554,7 @@ class pialmeshInputSpec(CommandLineInputSpec):
     laplacianSmoothing = traits.Float(
         0.025, usedefault=True, desc='apply Laplacian smoothing', argstr='--smooth %f')
     timer = traits.Bool(desc='show timing', argstr='--timer')
-    recomputNormals = traits.Bool(
+    recomputeNormals = traits.Bool(
         desc='recompute normals at each iteration', argstr='--norm')
     normalSmoother = traits.Float(
         0.2, usedefault=True, desc='strength of normal smoother.', argstr='--nc %f')
@@ -563,13 +562,13 @@ class pialmeshInputSpec(CommandLineInputSpec):
         desc='strength of tangential smoother.', argstr='--tc %f')
 
 
-class pialmeshOutputSpec(TraitedSpec):
+class PialmeshOutputSpec(TraitedSpec):
     outputSurfaceFile = File(desc='path/name of surface file')
 
 
-class pialmesh(CommandLine):
-    input_spec = pialmeshInputSpec
-    output_spec = pialmeshOutputSpec
+class Pialmesh(CommandLine):
+    input_spec = PialmeshInputSpec
+    output_spec = PialmeshOutputSpec
     _cmd = 'pialmesh'
 
     def _gen_filename(self, name):
@@ -588,7 +587,7 @@ class pialmesh(CommandLine):
         return l_outputs(self)
 
 
-class skullfinderInputSpec(CommandLineInputSpec):
+class SkullfinderInputSpec(CommandLineInputSpec):
     inputMRIFile = File(mandatory=True, desc='input file', argstr='-i %s')
     inputMaskFile = File(
         mandatory=True, desc='A brain mask file, 8-bit image (0=non-brain, 255=brain)', argstr='-m %s')
@@ -615,13 +614,13 @@ class skullfinderInputSpec(CommandLineInputSpec):
         desc='perform a final opening operation on the scalp mask', argstr='--finalOpening')
 
 
-class skullfinderOutputSpec(TraitedSpec):
+class SkullfinderOutputSpec(TraitedSpec):
     outputLabelFile = File(desc='path/name of label file')
 
 
-class skullfinder(CommandLine):
-    input_spec = skullfinderInputSpec
-    output_spec = skullfinderOutputSpec
+class Skullfinder(CommandLine):
+    input_spec = SkullfinderInputSpec
+    output_spec = SkullfinderOutputSpec
     _cmd = 'skullfinder'
 
     def _gen_filename(self, name):
@@ -640,7 +639,7 @@ class skullfinder(CommandLine):
         return l_outputs(self)
 
 
-class hemisplitInputSpec(CommandLineInputSpec):
+class HemisplitInputSpec(CommandLineInputSpec):
     inputSurfaceFile = File(
         mandatory=True, desc='input surface', argstr='-i %s')
     inputHemisphereLabelFile = File(
@@ -659,16 +658,16 @@ class hemisplitInputSpec(CommandLineInputSpec):
     timer = traits.Bool(desc='timing function', argstr='--timer')
 
 
-class hemisplitOutputSpec(TraitedSpec):
+class HemisplitOutputSpec(TraitedSpec):
     outputLeftHemisphere = File(desc='path/name of left hemisphere')
     outputRightHemisphere = File(desc='path/name of right hemisphere')
     outputLeftPialHemisphere = File(desc='path/name of left pial hemisphere')
     outputRightPialHemisphere = File(desc='path/name of right pial hemisphere')
 
 
-class hemisplit(CommandLine):
-    input_spec = hemisplitInputSpec
-    output_spec = hemisplitOutputSpec
+class Hemisplit(CommandLine):
+    input_spec = HemisplitInputSpec
+    output_spec = HemisplitOutputSpec
     _cmd = 'hemisplit'
 
     def _gen_filename(self, name):
