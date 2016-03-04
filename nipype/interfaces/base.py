@@ -1206,8 +1206,8 @@ def run_command(runtime, output=None, timeout=0.01, redirect_x=False):
     if output == 'file':
         errfile = os.path.join(runtime.cwd, 'stderr.nipype')
         outfile = os.path.join(runtime.cwd, 'stdout.nipype')
-        stderr = open(errfile, 'wt')  # t=='text'===default
-        stdout = open(outfile, 'wt')
+        stderr = open(errfile, 'wb')  # t=='text'===default
+        stdout = open(outfile, 'wb')
 
         proc = subprocess.Popen(cmdline,
                                 stdout=stdout,
@@ -1257,16 +1257,8 @@ def run_command(runtime, output=None, timeout=0.01, redirect_x=False):
         result['merged'] = [r[1] for r in temp]
     if output == 'allatonce':
         stdout, stderr = proc.communicate()
-        if isinstance(stdout, bytes):
-            try:
-                stdout = stdout.decode(locale.getdefaultlocale()[1])
-            except UnicodeDecodeError:
-                stdout = stdout.decode("ISO-8859-1")
-        if isinstance(stderr, bytes):
-            try:
-                stderr = stderr.decode(locale.getdefaultlocale()[1])
-            except UnicodeDecodeError:
-                stderr = stderr.decode("ISO-8859-1")
+        stdout = stdout.decode(locale.getdefaultlocale()[1])
+        stderr = stderr.decode(locale.getdefaultlocale()[1])
         result['stdout'] = stdout.split('\n')
         result['stderr'] = stderr.split('\n')
         result['merged'] = ''
@@ -1274,16 +1266,16 @@ def run_command(runtime, output=None, timeout=0.01, redirect_x=False):
         ret_code = proc.wait()
         stderr.flush()
         stdout.flush()
-        result['stdout'] = [line.strip() for line in open(outfile).readlines()]
-        result['stderr'] = [line.strip() for line in open(errfile).readlines()]
+        result['stdout'] = [line.decode(locale.getdefaultlocale()[1]).strip() for line in open(outfile, 'rb').readlines()]
+        result['stderr'] = [line.decode(locale.getdefaultlocale()[1]).strip() for line in open(errfile, 'rb').readlines()]
         result['merged'] = ''
     if output == 'none':
         proc.communicate()
         result['stdout'] = []
         result['stderr'] = []
         result['merged'] = ''
-    runtime.stderr = text_type('\n'.join(result['stderr']))
-    runtime.stdout = text_type('\n'.join(result['stdout']))
+    runtime.stderr = '\n'.join(result['stderr'])
+    runtime.stdout = '\n'.join(result['stdout'])
     runtime.merged = result['merged']
     runtime.returncode = proc.returncode
     return runtime
