@@ -48,7 +48,7 @@ from ..utils.misc import is_container, trim, str2bool
 from ..utils.provenance import write_provenance
 from .. import config, logging, LooseVersion
 from .. import __version__
-from ..external.six import string_types
+from ..external.six import string_types, text_type
 
 nipype_version = LooseVersion(__version__)
 
@@ -1268,8 +1268,8 @@ def run_command(runtime, output=None, timeout=0.01, redirect_x=False):
             except UnicodeDecodeError:
                 stderr = stderr.decode("ISO-8859-1")
 
-        result['stdout'] = stdout.split('\n')
-        result['stderr'] = stderr.split('\n')
+        result['stdout'] = text_type(stdout).split(text_type('\n'))
+        result['stderr'] = text_type(stderr).split(text_type('\n'))
         result['merged'] = ''
     if output == 'file':
         ret_code = proc.wait()
@@ -1283,8 +1283,8 @@ def run_command(runtime, output=None, timeout=0.01, redirect_x=False):
         result['stdout'] = []
         result['stderr'] = []
         result['merged'] = ''
-    runtime.stderr = '\n'.join(result['stderr'])
-    runtime.stdout = '\n'.join(result['stdout'])
+    runtime.stderr = text_type('\n').join(result['stderr'])
+    runtime.stdout = text_type('\n').join(result['stdout'])
     runtime.merged = result['merged']
     runtime.returncode = proc.returncode
     return runtime
