@@ -2017,17 +2017,29 @@ class WarpPointsToStd(WarpPoints):
     _cmd = 'img2stdcoord'
 
 
-class WarpPointsFromStdInputSpec(WarpPointsBaseInputSpec):
+class WarpPointsFromStdInputSpec(CommandLineInputSpec):
     img_file = File(exists=True, argstr='-img %s', mandatory=True,
                     desc='filename of a destination image')
     std_file = File(exists=True, argstr='-std %s', mandatory=True,
                     desc='filename of the image in standard space')
-    transform = File(exists=True, argstr='-xfm %s',
-                     desc='filename of pre-warp affine transform '
-                          '(e.g. example_func2highres.mat)')
+    in_coords = File(exists=True, position=-2, argstr='%s', mandatory=True,
+                     desc='filename of file containing coordinates')
+    xfm_file = File(exists=True, argstr='-xfm %s', xor=['warp_file'],
+                    desc='filename of affine transform (e.g. source2dest.mat)')
+    warp_file = File(exists=True, argstr='-warp %s', xor=['xfm_file'],
+                     desc='filename of warpfield (e.g. '
+                     'intermediate2dest_warp.nii.gz)')
+    coord_vox = traits.Bool(True, argstr='-vox', xor=['coord_mm'],
+                            desc='all coordinates in voxels - default')
+    coord_mm = traits.Bool(False, argstr='-mm', xor=['coord_vox'],
+                           desc='all coordinates in mm')
+
+    out_file = File(name_source='in_coords', argstr='> %s', position=-1,
+                    name_template='%s_warped', output_name='out_file',
+                    desc='output file name')
 
 
-class WarpPointsFromStd(WarpPoints):
+class WarpPointsFromStd(CommandLine):
     """
     Use FSL `std2imgcoord <http://fsl.fmrib.ox.ac.uk/fsl/fsl-4.1.9/flirt/overview.html>`_
     to transform point sets to standard space coordinates. Accepts plain text files and
