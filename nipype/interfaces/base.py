@@ -19,6 +19,7 @@ from configparser import NoOptionError
 from copy import deepcopy
 import datetime
 import errno
+import locale
 import os
 import re
 import platform
@@ -1258,17 +1259,17 @@ def run_command(runtime, output=None, timeout=0.01, redirect_x=False):
         stdout, stderr = proc.communicate()
         if stdout and isinstance(stdout, bytes):
             try:
-                stdout = stdout.decode()
+                stdout = stdout.decode(locale.getdefaultlocale()[1])
             except UnicodeDecodeError:
                 stdout = stdout.decode("ISO-8859-1")
         if stderr and isinstance(stderr, bytes):
             try:
-                stderr = stderr.decode()
+                stderr = stderr.decode(locale.getdefaultlocale()[1])
             except UnicodeDecodeError:
                 stderr = stderr.decode("ISO-8859-1")
 
-        result['stdout'] = str(stdout).split('\n')
-        result['stderr'] = str(stderr).split('\n')
+        result['stdout'] = stdout.split('\n')
+        result['stderr'] = stderr.split('\n')
         result['merged'] = ''
     if output == 'file':
         ret_code = proc.wait()
