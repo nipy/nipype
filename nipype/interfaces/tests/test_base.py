@@ -14,7 +14,7 @@ from nipype.testing import (assert_equal, assert_not_equal, assert_raises,
                             skipif)
 import nipype.interfaces.base as nib
 from nipype.utils.filemanip import split_filename
-from nipype.interfaces.base import Undefined, config
+from nipype.interfaces.base import Undefined, config, text_type
 from traits.testing.nose_tools import skip
 import traits.api as traits
 
@@ -655,7 +655,7 @@ def test_CommandLine_output():
     ci = nib.CommandLine(command='ls -l')
     ci.inputs.terminal_output = 'allatonce'
     res = ci.run()
-    yield assert_equal, res.runtime.merged, ''
+    yield assert_equal, text_type(res.runtime.merged), text_type('')
     yield assert_true, name in res.runtime.stdout
     ci = nib.CommandLine(command='ls -l')
     ci.inputs.terminal_output = 'file'
@@ -665,7 +665,7 @@ def test_CommandLine_output():
     ci = nib.CommandLine(command='ls -l')
     ci.inputs.terminal_output = 'none'
     res = ci.run()
-    yield assert_equal, res.runtime.stdout, ''
+    yield assert_equal, text_type(res.runtime.stdout), text_type('')
     ci = nib.CommandLine(command='ls -l')
     res = ci.run()
     yield assert_true, 'stdout.nipype' in res.runtime.stdout
