@@ -1257,19 +1257,18 @@ def run_command(runtime, output=None, timeout=0.01, redirect_x=False):
         result['merged'] = [r[1] for r in temp]
     if output == 'allatonce':
         stdout, stderr = proc.communicate()
-        if stdout and isinstance(stdout, bytes):
+        if isinstance(stdout, bytes):
             try:
                 stdout = stdout.decode(locale.getdefaultlocale()[1])
             except UnicodeDecodeError:
                 stdout = stdout.decode("ISO-8859-1")
-        if stderr and isinstance(stderr, bytes):
+        if isinstance(stderr, bytes):
             try:
                 stderr = stderr.decode(locale.getdefaultlocale()[1])
             except UnicodeDecodeError:
                 stderr = stderr.decode("ISO-8859-1")
-
-        result['stdout'] = text_type(stdout).split(text_type('\n'))
-        result['stderr'] = text_type(stderr).split(text_type('\n'))
+        result['stdout'] = stdout.split('\n')
+        result['stderr'] = stderr.split('\n')
         result['merged'] = ''
     if output == 'file':
         ret_code = proc.wait()
@@ -1283,8 +1282,8 @@ def run_command(runtime, output=None, timeout=0.01, redirect_x=False):
         result['stdout'] = []
         result['stderr'] = []
         result['merged'] = ''
-    runtime.stderr = text_type('\n').join(result['stderr'])
-    runtime.stdout = text_type('\n').join(result['stdout'])
+    runtime.stderr = text_type('\n'.join(result['stderr']))
+    runtime.stdout = text_type('\n'.join(result['stdout']))
     runtime.merged = result['merged']
     runtime.returncode = proc.returncode
     return runtime
