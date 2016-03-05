@@ -34,6 +34,7 @@ before_install:
   echo 'include_dirs = /usr/include:/usr/include/X11' >> $HOME/.numpy-site.cfg;
   fi
 install:
+- sudo apt-get install fusefat
 - conda update --yes conda
 - conda create -n testenv --yes pip python=$TRAVIS_PYTHON_VERSION
 - source activate testenv
