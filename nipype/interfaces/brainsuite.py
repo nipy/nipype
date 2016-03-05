@@ -70,18 +70,13 @@ class Bse(CommandLine):
     _cmd = 'bse'
 
     def _gen_filename(self, name):
-        exec('is_user_defined = isdefined(self.inputs.' + name + ')')
-
-        if is_user_defined:
-            exec("toReturn = os.path.abspath(self.inputs." + name + ")")
-
-            return toReturn
+        inputs = self.inputs.get()
+        if isdefined(inputs[name]):
+            return os.path.abspath(inputs[name])
 
         if name == 'outputMRIVolume':
-            myExtension = '.nii.gz'
-            return ''.join((os.getcwd(), '/',
-                            getFileName(self.inputs.inputMRIFile),
-                            "___", self._cmd, 'Output_', name, myExtension))
+            return getFileName(self, self.inputs.inputMRIFile, name, '.nii.gz')
+
         return None
 
     def _list_outputs(self):
@@ -170,15 +165,12 @@ class Bfc(CommandLine):
     _cmd = 'bfc'
 
     def _gen_filename(self, name):
-        exec('is_user_defined = isdefined(self.inputs.' + name + ')')
-
-        if is_user_defined:
-            exec("toReturn = os.path.abspath(self.inputs." + name + ")")
-            return toReturn
+        inputs = self.inputs.get()
+        if isdefined(inputs[name]):
+            return os.path.abspath(inputs[name])
 
         if name == 'outputMRIVolume':
-            myExtension = '.nii.gz'
-            return ''.join((os.getcwd(), '/',  getFileName(self.inputs.inputMRIFile), "___", self._cmd, 'Output_', name, myExtension))
+            return getFileName(self, self.inputs.inputMRIFile, name, '.nii.gz')
 
         return None
 
@@ -221,17 +213,12 @@ class Pvc(CommandLine):
     _cmd = 'pvc'
 
     def _gen_filename(self, name):
-        exec('is_user_defined = isdefined(self.inputs.' + name + ')')
-        if is_user_defined:
-            exec("toReturn = os.path.abspath(self.inputs." + name + ")")
-            return toReturn
+        inputs = self.inputs.get()
+        if isdefined(inputs[name]):
+            return os.path.abspath(inputs[name])
 
-        if name == 'outputLabelFile':
-            myExtension = '.nii.gz'
-            return ''.join((os.getcwd(), '/', self._cmd, 'Output_', name, myExtension))
-        if name == 'outputTissueFractionFile':
-            myExtension = '.nii.gz'
-            return ''.join((os.getcwd(), '/', getFileName(self.inputs.inputMRIFile), "___", self._cmd, 'Output_', name, myExtension))
+        if name == 'outputLabelFile' or name == 'outputTissueFractionFile':
+            return getFileName(self, self.inputs.inputMRIFile, name, '.nii.gz')
 
         return None
 
@@ -286,18 +273,12 @@ class Cerebro(CommandLine):
     _cmd = 'cerebro'
 
     def _gen_filename(self, name):
-        exec('is_user_defined = isdefined(self.inputs.' + name + ')')
+        inputs = self.inputs.get()
+        if isdefined(inputs[name]):
+            return os.path.abspath(inputs[name])
 
-        if is_user_defined:
-            exec("toReturn = os.path.abspath(self.inputs." + name + ")")
-            return toReturn
-
-        if name == 'outputCerebrumMaskFile':
-            myExtension = '.nii.gz'
-            return ''.join((os.getcwd(), '/', getFileName(self.inputs.inputMRIFile), "___", self._cmd, 'Output_', name, myExtension))
-        if name == 'outputLabelMaskFile':
-            myExtension = '.nii.gz'
-            return ''.join((os.getcwd(), '/', getFileName(self.inputs.inputMRIFile), "___", self._cmd, 'Output_', name, myExtension))
+        if name == 'outputCerebrumMaskFile' or name == 'outputLabelMaskFile':
+            return getFileName(self, self.inputs.inputMRIFile, name, '.nii.gz')
 
         return None
 
@@ -334,15 +315,12 @@ class Cortex(CommandLine):
     _cmd = 'cortex'
 
     def _gen_filename(self, name):
-        exec('is_user_defined = isdefined(self.inputs.' + name + ')')
-        if is_user_defined:
-            exec("toReturn = os.path.abspath(self.inputs." + name + ")")
-            return toReturn
+        inputs = self.inputs.get()
+        if isdefined(inputs[name]):
+            return os.path.abspath(inputs[name])
 
         if name == 'outputCerebrumMask':
-            myExtension = '.nii.gz'
-            return ''.join((os.getcwd(), '/', getFileName(self.inputs.inputHemisphereLabelFile), "___", self._cmd, 'Output_', name, myExtension))
-
+            return getFileName(self, self.inputs.inputHemisphereLabelFile, name, '.nii.gz')
         return None
 
     def _list_outputs(self):
@@ -373,14 +351,14 @@ class Scrubmask(CommandLine):
     _cmd = 'scrubmask'
 
     def _gen_filename(self, name):
-        exec('is_user_defined = isdefined(self.inputs.' + name + ')')
-        if is_user_defined:
-            exec("toReturn = os.path.abspath(self.inputs." + name + ")")
-            return toReturn
+        inputs = self.inputs.get()
+        if isdefined(inputs[name]):
+            return os.path.abspath(inputs[name])
 
         if name == 'outputMaskFile':
-            myExtension = '.nii.gz'
-            return ''.join((os.getcwd(), '/', getFileName(self.inputs.inputMaskFile), "___", self._cmd, 'Output_', name, myExtension))
+            return getFileName(self, self.inputs.inputMaskFile, name, '.nii.gz')
+            
+            
         return None
 
     def _list_outputs(self):
@@ -412,14 +390,12 @@ class Tca(CommandLine):
     _cmd = 'tca'
 
     def _gen_filename(self, name):
-        exec('is_user_defined = isdefined(self.inputs.' + name + ')')
-        if is_user_defined:
-            exec("toReturn = os.path.abspath(self.inputs." + name + ")")
-            return toReturn
+        inputs = self.inputs.get()
+        if isdefined(inputs[name]):
+            return os.path.abspath(inputs[name])
 
         if name == 'outputMaskFile':
-            myExtension = '.nii.gz'
-            return ''.join((os.getcwd(), '/', getFileName(self.inputs.inputMaskFile), "___", self._cmd, 'Output_', name, myExtension))
+            return getFileName(self, self.inputs.inputMaskFile, name, '.nii.gz')
 
         return None
 
@@ -448,14 +424,12 @@ class Dewisp(CommandLine):
     _cmd = 'dewisp'
 
     def _gen_filename(self, name):
-        exec('is_user_defined = isdefined(self.inputs.' + name + ')')
-        if is_user_defined:
-            exec("toReturn = os.path.abspath(self.inputs." + name + ")")
-            return toReturn
+        inputs = self.inputs.get()
+        if isdefined(inputs[name]):
+            return os.path.abspath(inputs[name])
 
         if name == 'outputMaskFile':
-            myExtension = '.nii.gz'
-            return ''.join((os.getcwd(), '/', getFileName(self.inputs.inputMaskFile), "___", self._cmd, 'Output_', name, myExtension))
+            return getFileName(self, self.inputs.inputMaskFile, name, '.nii.gz')
 
         return None
 
@@ -511,14 +485,12 @@ class Dfs(CommandLine):
         return super(Dfs, self)._format_arg(name, spec, value)
 
     def _gen_filename(self, name):
-        exec('is_user_defined = isdefined(self.inputs.' + name + ')')
-        if is_user_defined:
-            exec("toReturn = os.path.abspath(self.inputs." + name + ")")
-            return toReturn
+        inputs = self.inputs.get()
+        if isdefined(inputs[name]):
+            return os.path.abspath(inputs[name])
 
         if name == 'outputSurfaceFile':
-            myExtension = '.dfs'
-            return ''.join((os.getcwd(), '/', getFileName(self.inputs.inputVolumeFile), "___", self._cmd, 'Output_', name, myExtension))
+            return getFileName(self, self.inputs.inputVolumeFile, name, '.dfs')
 
         return None
 
@@ -572,14 +544,12 @@ class Pialmesh(CommandLine):
     _cmd = 'pialmesh'
 
     def _gen_filename(self, name):
-        exec('is_user_defined = isdefined(self.inputs.' + name + ')')
-        if is_user_defined:
-            exec("toReturn = os.path.abspath(self.inputs." + name + ")")
-            return toReturn
+        inputs = self.inputs.get()
+        if isdefined(inputs[name]):
+            return os.path.abspath(inputs[name])
 
         if name == 'outputSurfaceFile':
-            myExtension = '.dfs'
-            return ''.join((os.getcwd(), '/', getFileName(self.inputs.inputSurfaceFile), "___", self._cmd, 'Output_', name, myExtension))
+            return getFileName(self, self.inputs.inputSurfaceFile, name, '.dfs')
 
         return None
 
@@ -624,14 +594,12 @@ class Skullfinder(CommandLine):
     _cmd = 'skullfinder'
 
     def _gen_filename(self, name):
-        exec('is_user_defined = isdefined(self.inputs.' + name + ')')
-        if is_user_defined:
-            exec("toReturn = os.path.abspath(self.inputs." + name + ")")
-            return toReturn
+        inputs = self.inputs.get()
+        if isdefined(inputs[name]):
+            return os.path.abspath(inputs[name])
 
         if name == 'outputLabelFile':
-            myExtension = '.nii.gz'
-            return ''.join((os.getcwd(), '/', getFileName(self.inputs.inputMRIFile), "___", self._cmd, 'Output_', name, myExtension))
+            return getFileName(self, self.inputs.inputMRIFile, name, '.nii.gz')
 
         return None
 
@@ -671,42 +639,31 @@ class Hemisplit(CommandLine):
     _cmd = 'hemisplit'
 
     def _gen_filename(self, name):
-        exec('is_user_defined = isdefined(self.inputs.' + name + ')')
-        if is_user_defined:
-            exec("toReturn = os.path.abspath(self.inputs." + name + ")")
-            return toReturn
+        inputs = self.inputs.get()
+        if isdefined(inputs[name]):
+            return os.path.abspath(inputs[name])
 
-        if name == 'outputLeftHemisphere':
-            myExtension = '.dfs'
-            return ''.join((os.getcwd(), '/', getFileName(self.inputs.inputSurfaceFile), "___", self._cmd, 'Output_', name, myExtension))
-        if name == 'outputRightHemisphere':
-            myExtension = '.dfs'
-            return ''.join((os.getcwd(), '/', getFileName(self.inputs.inputSurfaceFile), "___", self._cmd, 'Output_', name, myExtension))
-        if name == 'outputLeftPialHemisphere':
-            myExtension = '.dfs'
-            return ''.join((os.getcwd(), '/', getFileName(self.inputs.inputSurfaceFile), "___", self._cmd, 'Output_', name, myExtension))
-        if name == 'outputRightPialHemisphere':
-            myExtension = '.dfs'
-            return ''.join((os.getcwd(), '/', getFileName(self.inputs.inputSurfaceFile), "___", self._cmd, 'Output_', name, myExtension))
+
+        if (name == 'outputLeftHemisphere'
+            or name == 'outputRightHemisphere'
+            or name == 'outputLeftPialHemisphere'
+            or name == 'outputRightPialHemisphere'):
+            return getFileName(self, self.inputs.inputSurfaceFile, name, '.dfs')
 
         return None
 
     def _list_outputs(self):
         return l_outputs(self)
 
-
-# removes directory of a pathway to a file, removes extension, returns file name
-# up to first occurence of three consecutive underscore characters (if any)
-# ex: /home/abc/testData___bseOutput_output_file.nii.gz --> testData
-def getFileName(string):
-    underscoreRegex = regex.compile("[_]{3}")
+# used to generate file names for outputs
+# removes pathway and extension of inputName, returns concatenation of]
+# inputName, command, name, and extension
+def getFileName(self, inputName, name, extension):
+    fullInput = os.path.basename(inputName)
     dotRegex = regex.compile("[^.]+")
-    slashRegex = regex.compile("[^/]+")
-    arr = underscoreRegex.split(string)
-    arr2 = dotRegex.findall(arr[0])
-    arr3 = slashRegex.findall(arr2[0])
-    return arr3[len(arr3) - 1]
-
+    inputNoExtension = dotRegex.findall(fullInput)[0]
+    return os.path.abspath(
+        ''.join((inputNoExtension, '_', self._cmd, '_', name, extension)))
 
 def l_outputs(self):
     outputs = self.output_spec().get()
