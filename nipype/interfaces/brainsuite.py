@@ -13,14 +13,12 @@ from nipype.interfaces.base import(
 
 class BseInputSpec(CommandLineInputSpec):
 
-    inputMRIFile = File(exists=True, mandatory=True, argstr='-i %s',
-                        desc='input MRI volume', position=0)
-    outputMRIVolume = File(mandatory=False,
-                           desc='output brain-masked MRI volume. If'
+    inputMRIFile = File(mandatory=True, argstr='-i %s',
+                        desc='input MRI volume')
+    outputMRIVolume = File(desc='output brain-masked MRI volume. If'
                                 'unspecified, output file name will be auto'
                                 'generated.',
-                           argstr='-o %s', position=1, hash_files=False,
-                           genfile=True)
+                           argstr='-o %s', hash_files=False, genfile=True)
     diffusionConstant = traits.Float(25, usedefault=True,
                                      desc='diffusion constant', argstr='-d %f')
     diffusionIterations = traits.Int(3, usedefault=True,
@@ -36,7 +34,7 @@ class BseInputSpec(CommandLineInputSpec):
                                   desc='dilate final mask', argstr='-p')
     trim = traits.Bool(True, usedefault=True, desc='trim brainstem',
                        argstr='--trim')
-    outputMaskFile = File(mandatory=False, desc='save smooth brain mask',
+    outputMaskFile = File(desc='save smooth brain mask',
                           argstr='--mask %s', hash_files=False)
     outputDiffusionFilter = File(desc='diffusion filter output',
                                  argstr='--adf %s', hash_files=False)
@@ -84,15 +82,13 @@ class Bse(CommandLine):
 
 
 class BfcInputSpec(CommandLineInputSpec):
-    inputMRIFile = File(exists=True, mandatory=True,
-                        desc='input skull-stripped MRI volume',
-                        argstr='-i %s', position=0)
+    inputMRIFile = File(mandatory=True,
+                        desc='input skull-stripped MRI volume', argstr='-i %s')
     inputMaskFile = File(desc='mask file', argstr='-m %s', hash_files=False)
-    outputMRIVolume = File(mandatory=False,
-                           desc='output bias-corrected MRI volume.'
+    outputMRIVolume = File(desc='output bias-corrected MRI volume.'
                                 'If unspecified, output file name'
                                 'will be auto generated.', argstr='-o %s',
-                           position=1, hash_files=False, genfile=True)
+                           hash_files=False, genfile=True)
     outputBiasField = File(desc='save bias field estimate',
                            argstr='--bias %s', hash_files=False)
     outputMaskedBiasField = File(desc='save bias field estimate (masked)',
@@ -191,10 +187,8 @@ class Bfc(CommandLine):
 class PvcInputSpec(CommandLineInputSpec):
     inputMRIFile = File(mandatory=True, desc='MRI file', argstr='-i %s')
     inputMaskFile = File(desc='brain mask file', argstr='-m %s')
-    outputLabelFile = File(
-        mandatory=False, desc='output label file. If unspecified, output file name will be auto generated.', argstr='-o %s', genfile=True)
-    outputTissueFractionFile = File(
-        mandatory=False, desc='output tissue fraction file', argstr='-f %s', genfile=True)
+    outputLabelFile = File(desc='output label file. If unspecified, output file name will be auto generated.', argstr='-o %s', genfile=True)
+    outputTissueFractionFile = File(desc='output tissue fraction file', argstr='-f %s', genfile=True)
     spatialPrior = traits.Float(desc='spatial prior strength', argstr='-l %f')
     verbosity = traits.Int(desc='verbosity level (0 = silent)', argstr='-v %d')
     threeClassFlag = traits.Bool(
@@ -234,10 +228,10 @@ class CerebroInputSpec(CommandLineInputSpec):
     inputAtlasLabelFile = File(
         mandatory=True, desc='atlas labeling', argstr='--atlaslabels %s')
     inputBrainMaskFile = File(desc='brain mask file', argstr='-m %s')
-    outputCerebrumMaskFile = File(
-        mandatory=False, desc='output cerebrum mask volume. If unspecified, output file name will be auto generated.', argstr='-o %s', genfile=True)
-    outputLabelMaskFile = File(
-        mandatory=False, desc='output labeled hemisphere/cerebrum volume. If unspecified, output file name will be auto generated.', argstr='-l %s', genfile=True)
+    outputCerebrumMaskFile = File(desc='output cerebrum mask volume. If unspecified, output file name will be auto generated.', 
+                                  argstr='-o %s', genfile=True)
+    outputLabelMaskFile = File(desc='output labeled hemisphere/cerebrum volume. If unspecified, output file name will be auto generated.', 
+                               argstr='-l %s', genfile=True)
     costFunction = traits.Int(2, usedefault=True, desc='0,1,2', argstr='-c %d')
     useCentroids = traits.Bool(
         desc='use centroids of data to initialize position', argstr='--centroids')
@@ -290,7 +284,7 @@ class CortexInputSpec(CommandLineInputSpec):
     inputHemisphereLabelFile = File(
         mandatory=True, desc='hemisphere / lobe label volume', argstr='-h %s')
     outputCerebrumMask = File(
-        mandatory=False, desc='output structure mask. If unspecified, output file name will be auto generated.', argstr='-o %s', genfile=True)
+        desc='output structure mask. If unspecified, output file name will be auto generated.', argstr='-o %s', genfile=True)
     inputTissueFractionFile = File(
         mandatory=True, desc='tissue fraction file (32-bit float)', argstr='-f %s')
     tissueFractionThreshold = traits.Float(
@@ -331,7 +325,7 @@ class ScrubmaskInputSpec(CommandLineInputSpec):
     inputMaskFile = File(
         mandatory=True, desc='input structure mask file', argstr='-i %s')
     outputMaskFile = File(
-        mandatory=False, desc='output structure mask file. If unspecified, output file name will be auto generated.', argstr='-o %s', genfile=True)
+        desc='output structure mask file. If unspecified, output file name will be auto generated.', argstr='-o %s', genfile=True)
     backgroundFillThreshold = traits.Int(
         2, usedefault=True, desc='background fill threshold', argstr='-b %d')
     foregroundTrimThreshold = traits.Int(
@@ -369,7 +363,7 @@ class TcaInputSpec(CommandLineInputSpec):
     inputMaskFile = File(
         mandatory=True, desc='input mask volume', argstr='-i %s')
     outputMaskFile = File(
-        mandatory=False, desc='output mask volume. If unspecified, output file name will be auto generated.', argstr='-o %s', genfile=True)
+        desc='output mask volume. If unspecified, output file name will be auto generated.', argstr='-o %s', genfile=True)
     minCorrectionSize = traits.Int(
         2500, usedefault=True, desc='maximum correction size', argstr='-m %d')
     maxCorrectionSize = traits.Int(
@@ -406,7 +400,7 @@ class Tca(CommandLine):
 class DewispInputSpec(CommandLineInputSpec):
     inputMaskFile = File(mandatory=True, desc='input file', argstr='-i %s')
     outputMaskFile = File(
-        mandatory=False, desc='output file. If unspecified, output file name will be auto generated.', argstr='-o %s', genfile=True)
+        desc='output file. If unspecified, output file name will be auto generated.', argstr='-o %s', genfile=True)
     verbosity = traits.Int(desc='verbosity', argstr='-v %d')
     sizeThreshold = traits.Int(desc='size threshold', argstr='-t %d')
     maximumIterations = traits.Int(
@@ -441,7 +435,7 @@ class DfsInputSpec(CommandLineInputSpec):
     inputVolumeFile = File(
         mandatory=True, desc='input 3D volume', argstr='-i %s')
     outputSurfaceFile = File(
-        mandatory=False, desc='output surface mesh file. If unspecified, output file name will be auto generated.', argstr='-o %s', genfile=True)
+        desc='output surface mesh file. If unspecified, output file name will be auto generated.', argstr='-o %s', genfile=True)
     inputShadingVolume = File(
         desc='shade surface model with data from image volume', argstr='-c %s')
     smoothingIterations = traits.Int(
@@ -501,7 +495,7 @@ class Dfs(CommandLine):
 class PialmeshInputSpec(CommandLineInputSpec):
     inputSurfaceFile = File(mandatory=True, desc='input file', argstr='-i %s')
     outputSurfaceFile = File(
-        mandatory=False, desc='output file. If unspecified, output file name will be auto generated.', argstr='-o %s', genfile=True)
+        desc='output file. If unspecified, output file name will be auto generated.', argstr='-o %s', genfile=True)
     verbosity = traits.Int(desc='verbosity', argstr='-v %d')
     inputTissueFractionFile = File(
         mandatory=True, desc='floating point (32) tissue fraction image', argstr='-f %s')
@@ -562,7 +556,7 @@ class SkullfinderInputSpec(CommandLineInputSpec):
     inputMaskFile = File(
         mandatory=True, desc='A brain mask file, 8-bit image (0=non-brain, 255=brain)', argstr='-m %s')
     outputLabelFile = File(
-        mandatory=False, desc='output file. If unspecified, output file name will be auto generated.', argstr='-o %s', genfile=True)
+        desc='output file. If unspecified, output file name will be auto generated.', argstr='-o %s', genfile=True)
     verbosity = traits.Int(desc='verbosity', argstr='-v %d')
     lowerThreshold = traits.Int(
         desc='Lower threshold for segmentation', argstr='-l %d')
@@ -613,15 +607,15 @@ class HemisplitInputSpec(CommandLineInputSpec):
     inputHemisphereLabelFile = File(
         mandatory=True, desc='input hemisphere label volume', argstr='-l %s')
     outputLeftHemisphere = File(
-        mandatory=False, desc='output surface file, left hemisphere. If unspecified, output file name will be auto generated.', argstr='--left %s', genfile=True)
+        desc='output surface file, left hemisphere. If unspecified, output file name will be auto generated.', argstr='--left %s', genfile=True)
     outputRightHemisphere = File(
-        mandatory=False, desc='output surface file, right hemisphere. If unspecified, output file name will be auto generated.', argstr='--right %s', genfile=True)
+        desc='output surface file, right hemisphere. If unspecified, output file name will be auto generated.', argstr='--right %s', genfile=True)
     pialSurfaceFile = File(
         desc='pial surface file -- must have same geometry as input surface', argstr='-p %s')
     outputLeftPialHemisphere = File(
-        mandatory=False, desc='output pial surface file, left hemisphere. If unspecified, output file name will be auto generated.', argstr='-pl %s', genfile=True)
+        desc='output pial surface file, left hemisphere. If unspecified, output file name will be auto generated.', argstr='-pl %s', genfile=True)
     outputRightPialHemisphere = File(
-        mandatory=False, desc='output pial surface file, right hemisphere. If unspecified, output file name will be auto generated.', argstr='-pr %s', genfile=True)
+        desc='output pial surface file, right hemisphere. If unspecified, output file name will be auto generated.', argstr='-pr %s', genfile=True)
     verbosity = traits.Int(desc='verbosity (0 = silent)', argstr='-v %d')
     timer = traits.Bool(desc='timing function', argstr='--timer')
 
