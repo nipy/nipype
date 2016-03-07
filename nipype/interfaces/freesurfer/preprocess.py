@@ -1725,7 +1725,7 @@ class CALabelInputSpec(FSTraitedSpecOpenMP):
     #required
     in_file = File(argstr="%s", position=-4, mandatory=True,
                    exists=True, desc="Input volume for CALabel")
-    out_file = File(argstr="%s", position=-1, mandatory=True, exists=False, genfile=True,
+    out_file = File(argstr="%s", position=-1, mandatory=True, exists=False,
                     desc="Output file for CALabel")
     transform = File(argstr="%s", position=-3, mandatory=True,
                      exists=True, desc="Input transform for CALabel")
@@ -1774,11 +1774,6 @@ class CALabel(FSCommandOpenMP):
     _cmd = "mri_ca_label"
     input_spec = CALabelInputSpec
     output_spec = CALabelOutputSpec
-
-    def _gen_fname(self, name):
-        if name == 'out_file':
-            return os.path.abspath('aseg.auto_noCCseg.mgz')
-        return None
 
     def _list_outputs(self):
         outputs = self.output_spec().get()

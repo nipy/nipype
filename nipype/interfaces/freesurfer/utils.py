@@ -2358,10 +2358,13 @@ class VolumeMask(FSCommand):
 
 class ParcellationStatsInputSpec(FSTraitedSpec):
     # required
-    subject_id = traits.String(position=-3, argstr="%s", mandatory=True,
+    subject_id = traits.String('subject_id', usedefault=True,
+                               position=-3, argstr="%s", mandatory=True,
                                desc="Subject being processed")
-    hemisphere = traits.String(position=-2, argstr="%s", mandatory=True,
-                               desc="Hemisphere being processed")
+    hemisphere = traits.Enum('lh', 'rh',
+                             position=-2, argstr="%s", mandatory=True,
+                             desc="Hemisphere being processed")
+    # implicit
     wm = File(mandatory=True, exists=True,
               desc="Input file must be <subject_id>/mri/wm.mgz")
     lh_white = File(mandatory=True, exists=True,
@@ -2399,12 +2402,16 @@ class ParcellationStatsInputSpec(FSTraitedSpec):
                             requires=['tabular_output'], desc="Table output to tablefile")
     out_color = traits.File(argstr="-c %s", mandatory=False, exists=False, genfile=True, xor=['in_label'],
                             desc="Output annotation files's colortable to text file")
+    copy_inputs = traits.Bool(mandatory=False,
+                              desc="If running as a node, set this to True." +
+                              "This will copy the input files to the node " +
+                              "directory.")
 
 
 class ParcellationStatsOutputSpec(TraitedSpec):
     out_table = File(exists=False, desc="Table output to tablefile")
-    out_color = File(
-        exists=False, desc="Output annotation files's colortable to text file")
+    out_color = File(exists=False,
+                     desc="Output annotation files's colortable to text file")
 
 
 class ParcellationStats(FSCommand):
@@ -2437,6 +2444,47 @@ class ParcellationStats(FSCommand):
     _cmd = 'mris_anatomical_stats'
     input_spec = ParcellationStatsInputSpec
     output_spec = ParcellationStatsOutputSpec
+
+    def _copy2subjdir(self, in_file, folder=None, basename=None):
+        subjects_dir = self.inputs.subjects_dir
+        subject_id = self.inputs.subject_id
+        if basename == None:
+            basename = os.path.basename(in_file)
+        if folder != None:
+            out_dir = os.path.join(subjects_dir, subject_id, folder)
+        else:
+            out_dir = os.path.join(subjects_dir, subject_id)
+        if not os.path.isdir(out_dir):
+            os.makedirs(out_dir)
+        out_file = os.path.join(out_dir, basename)
+        shutil.copy(in_file, out_file)
+
+    def _format_arg(self, name, spec, value):
+        if self.inputs.copy_inputs:
+            cwd = os.path.getcwd()
+            if self.inputs.subjects_dir != cwd:
+                self.inputs.subjects_dir = cwd
+            if name in ['lh_white', 'rh_white', 'lh_pial', 'rh_pial']:
+                folder = 'surf'
+                basename = name.replace('_', '.')
+            elif name in ['wm', 'transform', 'brainmask', 'aseg', 'ribbon']:
+                folder = 'mri'
+                if name == 'wm':
+                    basename = 'wm.mgz'
+                elif name == 'transform':
+                    basename = 'talairach.xfm'
+                    folder = os.path.join(folder, 'transforms')
+                elif name == 'brainmask':
+                    basename = 'brainmask.mgz'
+                elif name == 'aseg':
+                    basename = 'aseg.presurf.mgz'
+                elif name == 'ribbon':
+                    basename = 'ribbon.mgz'
+            elif name == 'thickness':
+                folder = 'surf'
+                basename = self.inputs.hemisphere + '.thickness'
+            self.copy2subjdir(value, basename=basename, folder=folder)
+        return super(ParcellationStats, self)._format_arg(name, spec, value)
 
     def _gen_filename(self, name):
         if name in ['out_table', 'out_color']:
@@ -2499,8 +2547,12 @@ class ParcellationStats(FSCommand):
 
 class ContrastInputSpec(FSTraitedSpec):
     # required
-    subject_id = traits.String(
-        argstr="--s %s", mandatory=True, desc="Subject being processed")
+    subject_id = traits.String('subject_id', argstr="--s %s",  usedefault=True,
+                               mandatory=True, desc="Subject being processed")
+    hemisphere = traits.Enum('lh', 'rh',
+                             argstr="--%s-only", mandatory=True,
+                             desc="Hemisphere being processed")
+    # implicit
     thickness = File(mandatory=True, exists=True,
                      desc="Input file must be <subject_id>/surf/?h.thickness")
     white = File(mandatory=True, exists=True,
@@ -2513,15 +2565,19 @@ class ContrastInputSpec(FSTraitedSpec):
                 desc="Implicit input file mri/orig.mgz")
     rawavg = File(exists=True, mandatory=True,
                   desc="Implicit input file mri/rawavg.mgz")
-    hemisphere = traits.Enum('lh', 'rh',
-        argstr="%s", mandatory=True, desc="Hemisphere being processed")
+    copy_inputs = traits.Bool(mandatory=False,
+                              desc="If running as a node, set this to True." +
+                              "This will copy the input files to the node " +
+                              "directory.")
 
 
 class ContrastOutputSpec(TraitedSpec):
-    out_contrast = File(
-        exists=False, desc="Output contrast file from Contrast")
-    out_stats = File(exists=False, desc="Output stats file from Contrast")
-    out_log = File(exists=True, desc="Output log from Contrast")
+    out_contrast = File(exists=False, 
+                        desc="Output contrast file from Contrast")
+    out_stats = File(exists=False, 
+                     desc="Output stats file from Contrast")
+    out_log = File(exists=True, 
+                   desc="Output log from Contrast")
 
 
 class Contrast(FSCommand):
@@ -2547,27 +2603,48 @@ class Contrast(FSCommand):
     input_spec = ContrastInputSpec
     output_spec = ContrastOutputSpec
 
-    def _format_arg(self, name, spec, value):
-        if name == 'hemisphere':
-            flag = '--' + str(self.inputs.hemisphere) + '-only'
-            return spec.argstr % flag
+    def _copy2subjdir(self, in_file, folder=None, basename=None):
+        subjects_dir = self.inputs.subjects_dir
+        subject_id = self.inputs.subject_id
+        if basename == None:
+            basename = os.path.basename(in_file)
+        if folder != None:
+            out_dir = os.path.join(subjects_dir, subject_id, folder)
         else:
-            return super(Contrast, self)._format_arg(name, spec, value)
+            out_dir = os.path.join(subjects_dir, subject_id)
+        if not os.path.isdir(out_dir):
+            os.makedirs(out_dir)
+        out_file = os.path.join(out_dir, basename)
+        shutil.copy(in_file, out_file)
+
+    def _format_arg(self, name, spec, value):
+        if self.inputs.copy_inputs:
+            cwd = os.path.getcwd()
+            if self.inputs.subjects_dir != cwd:
+                self.inputs.subjects_dir = cwd
+            if name in ['annotation', 'cortex']:
+                folder = 'label'
+                if name == 'annotation':
+                    basename = self.inputs.hemisphere + 'aparc.annot'
+                elif name == 'cortex':
+                    basename = self.inputs.hemisphere + 'cortex.label'
+            elif name in ['orig', 'rawavg']:
+                folder = 'mri'
+                basename = name + '.mgz'
+            elif name in ['thickness', 'white']:
+                folder = 'surf'
+                basename = self.inputs.hemisphere + '.' + name
+            self.copy2subjdir(value, basename=basename, folder=folder)
+        return super(Contrast, self)._format_arg(name, spec, value)
 
     def _list_outputs(self):
         outputs = self._outputs().get()
         subject_dir = os.path.join(
             self.inputs.subjects_dir, self.inputs.subject_id)
-        if isdefined(self.inputs.hemisphere):
-            outputs["out_contrast"] = os.path.join(
-                subject_dir, 'surf', str(self.inputs.hemisphere) + '.w-g.pct.mgh')
-            outputs["out_stats"] = os.path.join(
-                subject_dir, 'stats', str(self.inputs.hemisphere) + '.w-g.pct.stats')
-        else:
-            outputs["out_contrast"] = os.path.join(
-                subject_dir, 'surf', 'w-g.pct.mgh')
-            outputs["out_stats"] = os.path.join(
-                subject_dir, 'stats', 'w-g.pct.stats')
+        outputs["out_contrast"] = os.path.join(
+            subject_dir, 'surf', str(self.inputs.hemisphere) + '.w-g.pct.mgh')
+        outputs["out_stats"] = os.path.join(
+            subject_dir, 'stats', str(self.inputs.hemisphere) + '.w-g.pct.stats')
         outputs["out_log"] = os.path.join(
             subject_dir, 'scripts', 'pctsurfcon.log')
         return outputs
