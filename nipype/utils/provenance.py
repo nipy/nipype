@@ -1,7 +1,12 @@
-from cPickle import dumps
-import json
+from future import standard_library
+standard_library.install_aliases()
+from builtins import object, str
+
+from copy import deepcopy
+from pickle import dumps
+import simplejson
 import os
-import pwd
+import getpass
 from socket import getfqdn
 from uuid import uuid1
 
@@ -11,10 +16,8 @@ try:
 except ImportError:
     from ordereddict import OrderedDict
 
-try:
-    import prov.model as pm
-except ImportError:
-    from ..external import provcopy as pm
+import prov.model as pm
+from ..external.six import string_types, text_type
 
 from .. import get_info
 from .filemanip import (md5, hashlib, hash_infile)
@@ -30,11 +33,13 @@ crypto = pm.Namespace("crypto",
                        "cryptographicHashFunctions/"))
 get_id = lambda: niiri[uuid1().hex]
 
+
 def get_attr_id(attr, skip=None):
     dictwithhash, hashval = get_hashval(attr, skip=skip)
     return niiri[hashval]
 
 max_text_len = 1024000
+
 
 def get_hashval(inputdict, skip=None):
     """Return a dictionary of our items with hashes for each file.
@@ -63,7 +68,7 @@ def get_hashval(inputdict, skip=None):
     for key in inputdict:
         if skip is not None and key in skip:
             continue
-        keys[key.get_uri()] = key
+        keys[key.uri] = key
     for key in sorted(keys):
         val = inputdict[keys[key]]
         outname = key
@@ -72,13 +77,15 @@ def get_hashval(inputdict, skip=None):
                 val = val.decode()
         except AttributeError:
             pass
-        if isinstance(val, pm.QName):
-            val = val.get_uri()
+        if isinstance(val, pm.QualifiedName):
+            val = val.uri
         if isinstance(val, pm.Literal):
-            val = val.get_value()
+            val = val.value
         dict_nofilename[outname] = _get_sorteddict(val)
         dict_withhash[outname] = _get_sorteddict(val, True)
-    return (dict_withhash, md5(str(dict_nofilename)).hexdigest())
+        sorted_dict = str(sorted(dict_nofilename.items()))
+    return (dict_withhash, md5(sorted_dict.encode()).hexdigest())
+
 
 def _get_sorteddict(object, dictwithhash=False):
     if isinstance(object, dict):
@@ -94,7 +101,7 @@ def _get_sorteddict(object, dictwithhash=False):
         if isinstance(object, tuple):
             out = tuple(out)
     else:
-        if isinstance(object, str) and os.path.isfile(object):
+        if isinstance(object, string_types) and os.path.isfile(object):
             hash = hash_infile(object)
             if dictwithhash:
                 out = (object, hash)
@@ -117,7 +124,7 @@ def safe_encode(x, as_literal=True):
         else:
             return value
     try:
-        if isinstance(x, (str, unicode)):
+        if isinstance(x, (str, string_types)):
             if os.path.exists(x):
                 value = 'file://%s%s' % (getfqdn(), x)
                 if not as_literal:
@@ -133,48 +140,51 @@ def safe_encode(x, as_literal=True):
                     value = x
                 if not as_literal:
                     return value
-                return pm.Literal(value, pm.XSD['string'])
-        if isinstance(x, (int,)):
+                if isinstance(value, str):
+                    return pm.Literal(value, pm.XSD['string'])
+                else:
+                    return pm.Literal(text_type(value, 'utf-8'), pm.XSD['string'])
+        if isinstance(x, int):
             if not as_literal:
                 return x
             return pm.Literal(int(x), pm.XSD['integer'])
-        if isinstance(x, (float,)):
+        if isinstance(x, float):
             if not as_literal:
                 return x
             return pm.Literal(x, pm.XSD['float'])
         if isinstance(x, dict):
             outdict = {}
-            for key, value in x.items():
+            for key, value in list(x.items()):
                 encoded_value = safe_encode(value, as_literal=False)
-                if isinstance(encoded_value, (pm.Literal,)):
+                if isinstance(encoded_value, pm.Literal):
                     outdict[key] = encoded_value.json_representation()
                 else:
                     outdict[key] = encoded_value
             if not as_literal:
-                return json.dumps(outdict)
-            return pm.Literal(json.dumps(outdict), pm.XSD['string'])
+                return simplejson.dumps(outdict)
+            return pm.Literal(simplejson.dumps(outdict), pm.XSD['string'])
         if isinstance(x, list):
             try:
                 nptype = np.array(x).dtype
                 if nptype == np.dtype(object):
                     raise ValueError('dtype object')
-            except ValueError, e:
+            except ValueError as e:
                 outlist = []
                 for value in x:
                     encoded_value = safe_encode(value, as_literal=False)
-                    if isinstance(encoded_value, (pm.Literal,)):
+                    if isinstance(encoded_value, pm.Literal):
                         outlist.append(encoded_value.json_representation())
                     else:
                         outlist.append(encoded_value)
             else:
                 outlist = x
             if not as_literal:
-                return json.dumps(outlist)
-            return pm.Literal(json.dumps(outlist), pm.XSD['string'])
+                return simplejson.dumps(outlist)
+            return pm.Literal(simplejson.dumps(outlist), pm.XSD['string'])
         if not as_literal:
             return dumps(x)
         return pm.Literal(dumps(x), nipype_ns['pickle'])
-    except TypeError, e:
+    except TypeError as e:
         iflogger.info(e)
         value = "Could not encode: " + str(e)
         if not as_literal:
@@ -197,15 +207,15 @@ def prov_encode(graph, value, create_container=True):
                     entities.append(item_entity)
                     if isinstance(item, list):
                         continue
-                    if not isinstance(item_entity.get_value()[0], basestring):
+                    if not isinstance(list(item_entity.value)[0], string_types):
                         raise ValueError('Not a string literal')
-                    if 'file://' not in item_entity.get_value()[0]:
+                    if 'file://' not in list(item_entity.value)[0]:
                         raise ValueError('No file found')
                 id = get_id()
                 entity = graph.collection(identifier=id)
                 for item_entity in entities:
                     graph.hadMember(id, item_entity)
-            except ValueError, e:
+            except ValueError as e:
                 iflogger.debug(e)
                 entity = prov_encode(graph, value, create_container=False)
         else:
@@ -213,7 +223,7 @@ def prov_encode(graph, value, create_container=True):
     else:
         encoded_literal = safe_encode(value)
         attr = {pm.PROV['value']: encoded_literal}
-        if isinstance(value, basestring) and os.path.exists(value):
+        if isinstance(value, string_types) and os.path.exists(value):
             attr.update({pm.PROV['location']: encoded_literal})
             if not os.path.isdir(value):
                 sha512 = hash_infile(value, crypto=hashlib.sha512)
@@ -238,56 +248,53 @@ def write_provenance(results, filename='provenance', format='turtle'):
 class ProvStore(object):
 
     def __init__(self):
-        self.g = pm.ProvBundle(identifier=get_id())
+        self.g = pm.ProvDocument()
         self.g.add_namespace(foaf)
         self.g.add_namespace(dcterms)
         self.g.add_namespace(nipype_ns)
         self.g.add_namespace(niiri)
 
-    def add_results(self, results):
-        if results.provenance:
-            try:
-                self.g.add_bundle(results.provenance)
-            except pm.ProvException:
-                self.g.add_bundle(results.provenance, get_id())
+    def add_results(self, results, keep_provenance=False):
+        if keep_provenance and results.provenance:
+            self.g = deepcopy(results.provenance)
             return self.g
         runtime = results.runtime
         interface = results.interface
         inputs = results.inputs
         outputs = results.outputs
         classname = interface.__name__
+        modulepath = "{0}.{1}".format(interface.__module__, interface.__name__)
+        activitytype = ''.join([i.capitalize() for i in modulepath.split('.')])
 
         a0_attrs = {nipype_ns['module']: interface.__module__,
                     nipype_ns["interface"]: classname,
+                    pm.PROV["type"]: nipype_ns[activitytype],
                     pm.PROV["label"]: classname,
                     nipype_ns['duration']: safe_encode(runtime.duration),
-                    nipype_ns['working_directory']: safe_encode(runtime.cwd),
-                    nipype_ns['return_code']: safe_encode(runtime.returncode),
+                    nipype_ns['workingDirectory']: safe_encode(runtime.cwd),
+                    nipype_ns['returnCode']: safe_encode(runtime.returncode),
                     nipype_ns['platform']: safe_encode(runtime.platform),
                     nipype_ns['version']: safe_encode(runtime.version),
                     }
-        try:
-            a0_attrs[foaf["host"]] = pm.URIRef(runtime.hostname)
-        except AttributeError:
-            a0_attrs[foaf["host"]] = pm.Literal(runtime.hostname,
-                                                pm.XSD['anyURI'])
+        a0_attrs[foaf["host"]] = pm.Literal(runtime.hostname,
+                                            pm.XSD['anyURI'])
 
         try:
             a0_attrs.update({nipype_ns['command']: safe_encode(runtime.cmdline)})
-            a0_attrs.update({nipype_ns['command_path']:
-                                 safe_encode(runtime.command_path)})
+            a0_attrs.update({nipype_ns['commandPath']:
+                             safe_encode(runtime.command_path)})
             a0_attrs.update({nipype_ns['dependencies']:
-                                 safe_encode(runtime.dependencies)})
+                             safe_encode(runtime.dependencies)})
         except AttributeError:
             pass
         a0 = self.g.activity(get_id(), runtime.startTime, runtime.endTime,
-                        a0_attrs)
+                             a0_attrs)
         # environment
         id = get_id()
         env_collection = self.g.collection(id)
-        env_collection.add_extra_attributes({pm.PROV['type']:
-                                                 nipype_ns['environment'],
-                                             pm.PROV['label']: "Environment"})
+        env_collection.add_attributes({pm.PROV['type']:
+                                           nipype_ns['Environment'],
+                                       pm.PROV['label']: "Environment"})
         self.g.used(a0, id)
         # write environment entities
         for idx, (key, val) in enumerate(sorted(runtime.environ.items())):
@@ -299,7 +306,7 @@ class ProvStore(object):
                            'MKL_NUM_THREADS', 'OMP_NUM_THREADS']:
                 continue
             in_attr = {pm.PROV["label"]: key,
-                       nipype_ns["environment_variable"]: key,
+                       nipype_ns["environmentVariable"]: key,
                        pm.PROV["value"]: safe_encode(val)}
             id = get_attr_id(in_attr)
             self.g.entity(id, in_attr)
@@ -308,15 +315,15 @@ class ProvStore(object):
         if inputs:
             id = get_id()
             input_collection = self.g.collection(id)
-            input_collection.add_extra_attributes({pm.PROV['type']:
-                                                       nipype_ns['inputs'],
-                                                   pm.PROV['label']: "Inputs"})
+            input_collection.add_attributes({pm.PROV['type']:
+                                                 nipype_ns['Inputs'],
+                                             pm.PROV['label']: "Inputs"})
             # write input entities
             for idx, (key, val) in enumerate(sorted(inputs.items())):
-                in_entity = prov_encode(self.g, val).get_identifier()
+                in_entity = prov_encode(self.g, val).identifier
                 self.g.hadMember(input_collection, in_entity)
                 used_attr = {pm.PROV["label"]: key,
-                             nipype_ns["in_port"]: key}
+                             nipype_ns["inPort"]: key}
                 self.g.used(activity=a0, entity=in_entity,
                             other_attributes=used_attr)
         # write output entities
@@ -325,26 +332,26 @@ class ProvStore(object):
             output_collection = self.g.collection(id)
             if not isinstance(outputs, dict):
                 outputs = outputs.get_traitsfree()
-            output_collection.add_extra_attributes({pm.PROV['type']:
-                                                        nipype_ns['outputs'],
-                                                    pm.PROV['label']:
-                                                        "Outputs"})
+            output_collection.add_attributes({pm.PROV['type']:
+                                                  nipype_ns['Outputs'],
+                                              pm.PROV['label']:
+                                                  "Outputs"})
             self.g.wasGeneratedBy(output_collection, a0)
             # write output entities
             for idx, (key, val) in enumerate(sorted(outputs.items())):
-                out_entity = prov_encode(self.g, val).get_identifier()
+                out_entity = prov_encode(self.g, val).identifier
                 self.g.hadMember(output_collection, out_entity)
                 gen_attr = {pm.PROV["label"]: key,
-                            nipype_ns["out_port"]: key}
+                            nipype_ns["outPort"]: key}
                 self.g.generation(out_entity, activity=a0,
                                   other_attributes=gen_attr)
         # write runtime entities
         id = get_id()
         runtime_collection = self.g.collection(id)
-        runtime_collection.add_extra_attributes({pm.PROV['type']:
-                                                     nipype_ns['runtime'],
-                                                 pm.PROV['label']:
-                                                     "RuntimeInfo"})
+        runtime_collection.add_attributes({pm.PROV['type']:
+                                               nipype_ns['Runtime'],
+                                           pm.PROV['label']:
+                                               "RuntimeInfo"})
         self.g.wasGeneratedBy(runtime_collection, a0)
         for key, value in sorted(runtime.items()):
             if not value:
@@ -359,32 +366,24 @@ class ProvStore(object):
 
         # create agents
         user_attr = {pm.PROV["type"]: pm.PROV["Person"],
-                     pm.PROV["label"]: pwd.getpwuid(os.geteuid()).pw_name,
-                     foaf["name"]:
-                         safe_encode(pwd.getpwuid(os.geteuid()).pw_name)}
+                     pm.PROV["label"]: getpass.getuser(),
+                     foaf["name"]: safe_encode(getpass.getuser())}
         user_agent = self.g.agent(get_attr_id(user_attr), user_attr)
         agent_attr = {pm.PROV["type"]: pm.PROV["SoftwareAgent"],
                       pm.PROV["label"]: "Nipype",
                       foaf["name"]: safe_encode("Nipype")}
-        for key, value in get_info().items():
+        for key, value in list(get_info().items()):
             agent_attr.update({nipype_ns[key]: safe_encode(value)})
         software_agent = self.g.agent(get_attr_id(agent_attr), agent_attr)
         self.g.wasAssociatedWith(a0, user_agent, None, None,
-                            {pm.PROV["hadRole"]: nipype_ns["LoggedInUser"]})
+                                 {pm.PROV["hadRole"]: nipype_ns["LoggedInUser"]})
         self.g.wasAssociatedWith(a0, software_agent)
         return self.g
 
-    def write_provenance(self, filename='provenance', format='turtle'):
-        try:
-            if format in ['turtle', 'all']:
-                self.g.rdf().serialize(filename + '.ttl', format='turtle')
-        except (ImportError, NameError):
-            format = 'all'
-        finally:
-            if format in ['provn', 'all']:
-                with open(filename + '.provn', 'wt') as fp:
-                    fp.writelines(self.g.get_provn())
-            if format in ['json', 'all']:
-                with open(filename + '.json', 'wt') as fp:
-                    pm.json.dump(self.g, fp, cls=pm.ProvBundle.JSONEncoder)
+    def write_provenance(self, filename='provenance', format='all'):
+        if format in ['provn', 'all']:
+            with open(filename + '.provn', 'wt') as fp:
+                fp.writelines(self.g.get_provn())
+        if format in ['json', 'all']:
+            g.serialize(filename + '.json', format='json')
         return self.g

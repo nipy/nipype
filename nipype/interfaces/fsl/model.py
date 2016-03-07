@@ -11,6 +11,9 @@ was written to work with FSL version 4.1.4.
     >>> os.chdir(datadir)
 """
 
+from __future__ import print_function
+from builtins import range
+
 import os
 from glob import glob
 import warnings
@@ -23,14 +26,13 @@ from nibabel import load
 from ... import LooseVersion
 from .base import (FSLCommand, FSLCommandInputSpec, Info)
 from ..base import (load_template, File, traits, isdefined,
-                                    TraitedSpec, BaseInterface, Directory,
-                                    InputMultiPath, OutputMultiPath,
-                                    BaseInterfaceInputSpec)
+                    TraitedSpec, BaseInterface, Directory,
+                    InputMultiPath, OutputMultiPath,
+                    BaseInterfaceInputSpec)
 from ...utils.filemanip import (list_to_filename, filename_to_list)
 from ...utils.misc import human_order_sorted
 
 warn = warnings.warn
-warnings.filterwarnings('always', category=UserWarning)
 
 
 class Level1DesignInputSpec(BaseInterfaceInputSpec):
@@ -66,19 +68,19 @@ this option for FILMGLS by setting autocorr_noestimate to True", mandatory=True)
                                    traits.List(
                                        traits.Either(traits.Tuple(traits.Str,
                                                                   traits.Enum(
-                                                                  'T'),
+                                                                      'T'),
                                                                   traits.List(
-                                                                  traits.Str),
+                                                                      traits.Str),
                                                                   traits.List(
                                                                       traits.Float)),
                                                      traits.Tuple(
                                                      traits.Str,
                                                      traits.Enum(
-                                                     'T'),
+                                                         'T'),
                                                      traits.List(
-                                                     traits.Str),
+                                                         traits.Str),
                                                      traits.List(
-                                                     traits.Float),
+                                                         traits.Float),
                                                      traits.List(
                                                          traits.Float)))))),
         desc="List of contrasts with each contrast being a list of the form - \
@@ -223,7 +225,7 @@ class Level1Design(BaseInterface):
                 if con[1] == 'F':
                     ftest_idx.append(j)
                     for c in con[2]:
-                        if c[0] not in con_map.keys():
+                        if c[0] not in list(con_map.keys()):
                             con_map[c[0]] = []
                         con_map[c[0]].append(j)
                 else:
@@ -250,13 +252,16 @@ class Level1Design(BaseInterface):
                                                               element=count,
                                                               ctype=ctype, val=val)
                         ev_txt += "\n"
-                    if con[0] in con_map.keys():
-                        for fconidx in con_map[con[0]]:
-                            ev_txt += contrast_ftest_element.substitute(
-                                cnum=ftest_idx.index(fconidx) + 1,
-                                element=tidx,
-                                ctype=ctype,
-                                val=1)
+
+                    for fconidx in ftest_idx:
+                        fval=0
+                        if con[0] in con_map.keys() and fconidx in con_map[con[0]]:
+                            fval=1
+                        ev_txt += contrast_ftest_element.substitute(
+                            cnum=ftest_idx.index(fconidx) + 1,
+                            element=tidx,
+                            ctype=ctype,
+                            val=fval)
                         ev_txt += "\n"
 
             # add contrast mask info
@@ -292,7 +297,7 @@ class Level1Design(BaseInterface):
             prewhiten = int(self.inputs.model_serial_correlations)
         usetd = 0
         no_bases = False
-        basis_key = self.inputs.bases.keys()[0]
+        basis_key = list(self.inputs.bases.keys())[0]
         if basis_key in ['dgamma', 'gamma']:
             usetd = int(self.inputs.bases[basis_key]['derivs'])
         if basis_key == 'none':
@@ -316,7 +321,7 @@ class Level1Design(BaseInterface):
                                                       self.inputs.contrasts,
                                                       no_bases, do_tempfilter)
             nim = load(func_files[i])
-            (_, _, _, timepoints) = nim.get_shape()
+            (_, _, _, timepoints) = nim.shape
             fsf_txt = fsf_header.substitute(run_num=i,
                                             interscan_interval=self.inputs.interscan_interval,
                                             num_vols=timepoints,
@@ -344,7 +349,7 @@ class Level1Design(BaseInterface):
         outputs['fsf_files'] = []
         outputs['ev_files'] = []
         usetd = 0
-        basis_key = self.inputs.bases.keys()[0]
+        basis_key = list(self.inputs.bases.keys())[0]
         if basis_key in ['dgamma', 'gamma']:
             usetd = int(self.inputs.bases[basis_key]['derivs'])
         for runno, runinfo in enumerate(self._format_session_info(self.inputs.session_info)):
@@ -385,17 +390,17 @@ class FEAT(FSLCommand):
     def _list_outputs(self):
         outputs = self._outputs().get()
         is_ica = False
-        outputs['feat_dir']=None
+        outputs['feat_dir'] = None
         with open(self.inputs.fsf_file, 'rt') as fp:
             text = fp.read()
             if "set fmri(inmelodic) 1" in text:
                 is_ica = True
             for line in text.split('\n'):
-                if line.find("set fmri(outputdir)")>-1:
+                if line.find("set fmri(outputdir)") > -1:
                     try:
-                        outputdir_spec=line.split('"')[-2]
+                        outputdir_spec = line.split('"')[-2]
                         if os.path.exists(outputdir_spec):
-                           outputs['feat_dir']=outputdir_spec
+                            outputs['feat_dir'] = outputdir_spec
 
                     except:
                         pass
@@ -404,7 +409,7 @@ class FEAT(FSLCommand):
                 outputs['feat_dir'] = glob(os.path.join(os.getcwd(), '*ica'))[0]
             else:
                 outputs['feat_dir'] = glob(os.path.join(os.getcwd(), '*feat'))[0]
-        print 'Outputs from FEATmodel:',outputs
+        print('Outputs from FEATmodel:', outputs)
         return outputs
 
 
@@ -489,7 +494,7 @@ class FILMGLSInputSpec(FSLCommandInputSpec):
     mask_size = traits.Int(argstr='-ms %d',
                            desc="susan mask size")
     brightness_threshold = traits.Range(low=0, argstr='-epith %d',
-                                      desc='susan brightness threshold, otherwise it is estimated')
+                                        desc='susan brightness threshold, otherwise it is estimated')
     full_data = traits.Bool(argstr='-v', desc='output full data')
     _estimate_xor = ['autocorr_estimate_only', 'fit_armodel', 'tukey_window',
                      'multitaper_product', 'use_pava', 'autocorr_noestimate']
@@ -511,6 +516,7 @@ class FILMGLSInputSpec(FSLCommandInputSpec):
     results_dir = Directory('results', argstr='-rn %s', usedefault=True,
                             desc='directory to store results in')
 
+
 class FILMGLSInputSpec505(FSLCommandInputSpec):
     in_file = File(exists=True, mandatory=True, position=-3,
                    argstr='--in=%s', desc='input data file')
@@ -522,8 +528,8 @@ class FILMGLSInputSpec505(FSLCommandInputSpec):
                                   desc='Smooth auto corr estimates')
     mask_size = traits.Int(argstr='--ms=%d', desc="susan mask size")
     brightness_threshold = traits.Range(low=0, argstr='--epith=%d',
-                                      desc=('susan brightness threshold, '
-                                            'otherwise it is estimated'))
+                                        desc=('susan brightness threshold, '
+                                              'otherwise it is estimated'))
     full_data = traits.Bool(argstr='-v', desc='output full data')
     _estimate_xor = ['autocorr_estimate_only', 'fit_armodel', 'tukey_window',
                      'multitaper_product', 'use_pava', 'autocorr_noestimate']
@@ -549,6 +555,21 @@ class FILMGLSInputSpec505(FSLCommandInputSpec):
                             desc='directory to store results in')
 
 
+class FILMGLSInputSpec507(FILMGLSInputSpec505):
+    threshold = traits.Float(default=-1000., argstr='--thr=%f',
+                             position=-1, usedefault=True,
+                             desc='threshold')
+    tcon_file = File(exists=True, argstr='--con=%s',
+                     desc='contrast file containing T-contrasts')
+    fcon_file = File(exists=True, argstr='--fcon=%s',
+                     desc='contrast file containing F-contrasts')
+    mode = traits.Enum('volumetric', 'surface', argstr="--mode=%s",
+                       desc="Type of analysis to be done")
+    surface = File(exists=True, argstr="--in2=%s",
+                   desc=("input surface for autocorr smoothing in "
+                         "surface-based analyses"))
+
+
 class FILMGLSOutputSpec(TraitedSpec):
     param_estimates = OutputMultiPath(File(exists=True),
                                       desc='Parameter estimates for each column of the design matrix')
@@ -561,8 +582,38 @@ class FILMGLSOutputSpec(TraitedSpec):
                             desc='directory storing model estimation output')
     corrections = File(exists=True,
                        desc='statistical corrections used within FILM modelling')
+    thresholdac = File(exists=True,
+                       desc='The FILM autocorrelation parameters')
     logfile = File(exists=True,
                    desc='FILM run logfile')
+
+
+class FILMGLSOutputSpec507(TraitedSpec):
+    param_estimates = OutputMultiPath(File(exists=True),
+                                      desc='Parameter estimates for each column of the design matrix')
+    residual4d = File(exists=True,
+                      desc='Model fit residual mean-squared error for each time point')
+    dof_file = File(exists=True, desc='degrees of freedom')
+    sigmasquareds = File(
+        exists=True, desc='summary of residuals, See Woolrich, et. al., 2001')
+    results_dir = Directory(exists=True,
+                            desc='directory storing model estimation output')
+    thresholdac = File(exists=True,
+                       desc='The FILM autocorrelation parameters')
+    logfile = File(exists=True,
+                   desc='FILM run logfile')
+    copes = OutputMultiPath(File(exists=True),
+                            desc='Contrast estimates for each contrast')
+    varcopes = OutputMultiPath(File(exists=True),
+                               desc='Variance estimates for each contrast')
+    zstats = OutputMultiPath(File(exists=True),
+                             desc='z-stat file for each contrast')
+    tstats = OutputMultiPath(File(exists=True),
+                             desc='t-stat file for each contrast')
+    fstats = OutputMultiPath(File(exists=True),
+                             desc='f-stat file for each contrast')
+    zfstats = OutputMultiPath(File(exists=True),
+                              desc='z-stat file for each F contrast')
 
 
 class FILMGLS(FSLCommand):
@@ -597,11 +648,16 @@ threshold=10, results_dir='stats')
 
     _cmd = 'film_gls'
 
-    if Info.version() and LooseVersion(Info.version()) > LooseVersion('5.0.4'):
+    if Info.version() and LooseVersion(Info.version()) > LooseVersion('5.0.6'):
+        input_spec = FILMGLSInputSpec507
+    elif Info.version() and LooseVersion(Info.version()) > LooseVersion('5.0.4'):
         input_spec = FILMGLSInputSpec505
     else:
         input_spec = FILMGLSInputSpec
-    output_spec = FILMGLSOutputSpec
+    if Info.version() and LooseVersion(Info.version()) > LooseVersion('5.0.6'):
+        output_spec = FILMGLSOutputSpec507
+    else:
+        output_spec = FILMGLSOutputSpec
 
     def _get_pe_files(self, cwd):
         files = None
@@ -618,6 +674,25 @@ threshold=10, results_dir='stats')
             fp.close()
         return files
 
+    def _get_numcons(self):
+        numtcons = 0
+        numfcons = 0
+        if isdefined(self.inputs.tcon_file):
+            fp = open(self.inputs.tcon_file, 'rt')
+            for line in fp.readlines():
+                if line.startswith('/NumContrasts'):
+                    numtcons = int(line.split()[-1])
+                    break
+            fp.close()
+        if isdefined(self.inputs.fcon_file):
+            fp = open(self.inputs.fcon_file, 'rt')
+            for line in fp.readlines():
+                if line.startswith('/NumContrasts'):
+                    numfcons = int(line.split()[-1])
+                    break
+            fp.close()
+        return numtcons, numfcons
+
     def _list_outputs(self):
         outputs = self._outputs().get()
         cwd = os.getcwd()
@@ -630,11 +705,50 @@ threshold=10, results_dir='stats')
         outputs['dof_file'] = os.path.join(results_dir, 'dof')
         outputs['sigmasquareds'] = self._gen_fname('sigmasquareds.nii',
                                                    cwd=results_dir)
-        outputs['corrections'] = self._gen_fname('corrections.nii',
+        outputs['thresholdac'] = self._gen_fname('threshac1.nii',
                                                  cwd=results_dir)
+        if Info.version() and LooseVersion(Info.version()) < LooseVersion('5.0.7'):
+            outputs['corrections'] = self._gen_fname('corrections.nii',
+                                                     cwd=results_dir)
         outputs['logfile'] = self._gen_fname('logfile',
                                              change_ext=False,
                                              cwd=results_dir)
+
+        if Info.version() and LooseVersion(Info.version()) > LooseVersion('5.0.6'):
+            pth = results_dir
+            numtcons, numfcons = self._get_numcons()
+            base_contrast = 1
+            copes = []
+            varcopes = []
+            zstats = []
+            tstats = []
+            neffs = []
+            for i in range(numtcons):
+                copes.append(self._gen_fname('cope%d.nii' % (base_contrast + i),
+                                             cwd=pth))
+                varcopes.append(
+                    self._gen_fname('varcope%d.nii' % (base_contrast + i),
+                                    cwd=pth))
+                zstats.append(self._gen_fname('zstat%d.nii' % (base_contrast + i),
+                                              cwd=pth))
+                tstats.append(self._gen_fname('tstat%d.nii' % (base_contrast + i),
+                                              cwd=pth))
+            if copes:
+                outputs['copes'] = copes
+                outputs['varcopes'] = varcopes
+                outputs['zstats'] = zstats
+                outputs['tstats'] = tstats
+            fstats = []
+            zfstats = []
+            for i in range(numfcons):
+                fstats.append(self._gen_fname('fstat%d.nii' % (base_contrast + i),
+                                              cwd=pth))
+                zfstats.append(
+                    self._gen_fname('zfstat%d.nii' % (base_contrast + i),
+                                    cwd=pth))
+            if fstats:
+                outputs['fstats'] = fstats
+                outputs['zfstats'] = zfstats
         return outputs
 
 
@@ -875,7 +989,7 @@ class ContrastMgrInputSpec(FSLCommandInputSpec):
                          copyfile=False, mandatory=True,
                          desc='summary of residuals, See Woolrich, et. al., 2001')
     contrast_num = traits.Range(low=1, argstr='-cope',
-                              desc='contrast number to start labeling copes from')
+                                desc='contrast number to start labeling copes from')
     suffix = traits.Str(argstr='-suffix %s',
                         desc='suffix to put on the end of the cope filename before the contrast number, default is nothing')
 
@@ -1062,7 +1176,7 @@ class L2Model(BaseInterface):
 
     def _list_outputs(self):
         outputs = self._outputs().get()
-        for field in outputs.keys():
+        for field in list(outputs.keys()):
             outputs[field] = os.path.join(os.getcwd(),
                                           field.replace('_', '.'))
         return outputs
@@ -1209,7 +1323,7 @@ class MultipleRegressDesign(BaseInterface):
                'design.grp': grp_txt}
 
         # write design files
-        for key, val in txt.items():
+        for key, val in list(txt.items()):
             if ('fts' in key) and (nfcons == 0):
                 continue
             filename = key.replace('_', '.')
@@ -1222,7 +1336,7 @@ class MultipleRegressDesign(BaseInterface):
     def _list_outputs(self):
         outputs = self._outputs().get()
         nfcons = sum([1 for con in self.inputs.contrasts if con[1] == 'F'])
-        for field in outputs.keys():
+        for field in list(outputs.keys()):
             if ('fts' in field) and (nfcons == 0):
                 continue
             outputs[field] = os.path.join(os.getcwd(),
@@ -1376,6 +1490,8 @@ class MELODIC(FSLCommand):
     >>> melodic_setup.inputs.s_des = 'subjectDesign.mat'
     >>> melodic_setup.inputs.s_con = 'subjectDesign.con'
     >>> melodic_setup.inputs.out_dir = 'groupICA.out'
+    >>> melodic_setup.cmdline
+    'melodic -i functional.nii,functional2.nii,functional3.nii -a tica --bgthreshold=10.000000 --mmthresh=0.500000 --nobet -o groupICA.out --Ostats --Scon=subjectDesign.con --Sdes=subjectDesign.mat --Tcon=timeDesign.con --Tdes=timeDesign.mat --tr=1.500000'
     >>> melodic_setup.run() # doctest: +SKIP
 
 
@@ -1545,7 +1661,7 @@ class Cluster(FSLCommand):
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        for key, suffix in self.filemap.items():
+        for key, suffix in list(self.filemap.items()):
             outkey = key[4:]
             inval = getattr(self.inputs, key)
             if isdefined(inval):
@@ -1562,7 +1678,7 @@ class Cluster(FSLCommand):
         return outputs
 
     def _format_arg(self, name, spec, value):
-        if name in self.filemap.keys():
+        if name in list(self.filemap.keys()):
             if isinstance(value, bool):
                 fname = self._list_outputs()[name[4:]]
             else:
@@ -1705,31 +1821,30 @@ class GLMInputSpec(FSLCommandInputSpec):
     in_file = File(exists=True, argstr='-i %s', mandatory=True, position=1,
                    desc='input file name (text matrix or 3D/4D image file)')
     out_file = File(name_template="%s_glm", argstr='-o %s', position=3,
-                    desc=('filename for GLM parameter estimates'
-                          + ' (GLM betas)'),
+                    desc=('filename for GLM parameter estimates' +
+                          ' (GLM betas)'),
                     name_source="in_file", keep_extension=True)
     design = File(exists=True, argstr='-d %s', mandatory=True, position=2,
-                  desc=('file name of the GLM design matrix (text time'
-                        + ' courses for temporal regression or an image'
-                        + ' file for spatial regression)'))
-    contrasts = File(exists=True, argstr='-c %s', desc=('matrix of t-statics'
-                                                        + ' contrasts'))
-    mask = File(exists=True, argstr='-m %s', desc=('mask image file name if'
-                                                   + ' input is image'))
-    dof = traits.Int(argstr='--dof=%d', desc=('set degrees of freedom'
-                                              + ' explicitly'))
-    des_norm = traits.Bool(argstr='--des_norm', desc=('switch on normalization'
-                                                      + ' of the design matrix'
-                                                      + ' columns to unit std'
-                                                      + ' deviation'))
+                  desc=('file name of the GLM design matrix (text time' +
+                        ' courses for temporal regression or an image' +
+                        ' file for spatial regression)'))
+    contrasts = File(exists=True, argstr='-c %s', desc=('matrix of t-statics' +
+                                                        ' contrasts'))
+    mask = File(exists=True, argstr='-m %s', desc=('mask image file name if' +
+                                                   ' input is image'))
+    dof = traits.Int(argstr='--dof=%d', desc=('set degrees of freedom' +
+                                              ' explicitly'))
+    des_norm = traits.Bool(argstr='--des_norm',
+                           desc=('switch on normalization of the design' +
+                                 ' matrix columns to unit std deviation'))
     dat_norm = traits.Bool(argstr='--dat_norm', desc=('switch on normalization'
-                                                      + ' of the data time'
-                                                      + ' series to unit std'
-                                                      + ' deviation'))
-    var_norm = traits.Bool(argstr='--vn', desc=('perform MELODIC variance-'
-                                                + 'normalisation on data'))
-    demean = traits.Bool(argstr='--demean', desc=('switch on demeaining of '
-                                                  + ' design and data'))
+                                                      ' of the data time' +
+                                                      ' series to unit std' +
+                                                      ' deviation'))
+    var_norm = traits.Bool(argstr='--vn', desc=('perform MELODIC variance-' +
+                                                'normalisation on data'))
+    demean = traits.Bool(argstr='--demean', desc=('switch on demeaining of ' +
+                                                  ' design and data'))
     out_cope = File(argstr='--out_cope=%s',
                     desc='output file name for COPE (either as txt or image')
     out_z_name = File(argstr='--out_z=%s',
@@ -1738,8 +1853,8 @@ class GLMInputSpec(FSLCommandInputSpec):
                       desc='output file name for t-stats (either as txt or image')
 
     out_p_name = File(argstr='--out_p=%s',
-                      desc=('output file name for p-values of Z-stats (either as'
-                            + ' text file or image)'))
+                      desc=('output file name for p-values of Z-stats (either as' +
+                            ' text file or image)'))
     out_f_name = File(argstr='--out_f=%s',
                       desc='output file name for F-value of full model fit')
     out_pf_name = File(argstr='--out_pf=%s',
@@ -1750,13 +1865,13 @@ class GLMInputSpec(FSLCommandInputSpec):
                           desc='output file name for variance of COPEs')
 
     out_sigsq_name = File(argstr='--out_sigsq=%s',
-                          desc=('output file name for residual noise variance'
-                                + ' sigma-square'))
+                          desc=('output file name for residual noise variance' +
+                                ' sigma-square'))
     out_data_name = File(argstr='--out_data=%s',
                          desc='output file name for pre-processed data')
     out_vnscales_name = File(argstr='--out_vnscales=%s',
-                             desc=('output file name for scaling factors for variance'
-                                   + ' normalisation'))
+                             desc=('output file name for scaling factors for variance' +
+                                   ' normalisation'))
 
 
 class GLMOutputSpec(TraitedSpec):
@@ -1848,4 +1963,3 @@ class GLM(FSLCommand):
                 self.inputs.out_vnscales_name)
 
         return outputs
-

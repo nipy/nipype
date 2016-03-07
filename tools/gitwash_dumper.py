@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 ''' Checkout gitwash repo into directory and do search replace on name '''
+from __future__ import print_function
 
 import os
 from os.path import join as pjoin
@@ -72,14 +73,14 @@ def copy_replace(replace_pairs,
                  out_path,
                  cp_globs=('*',),
                  rep_globs=('*',),
-                 renames = ()):
+                 renames=()):
     out_fnames = cp_files(repo_path, cp_globs, out_path)
     renames = [(re.compile(in_exp), out_exp) for in_exp, out_exp in renames]
     fnames = []
     for rep_glob in rep_globs:
         fnames += fnmatch.filter(out_fnames, rep_glob)
     if verbose:
-        print '\n'.join(fnames)
+        print('\n'.join(fnames))
     for fname in fnames:
         filename_search_replace(replace_pairs, fname, False)
         for in_exp, out_exp in renames:
@@ -115,8 +116,8 @@ def make_link_targets(proj_name,
     .. _`proj_name` mailing list: url
     """
     link_contents = open(known_link_fname, 'rt').readlines()
-    have_url = not url is None
-    have_ml_url = not ml_url is None
+    have_url = url is not None
+    have_ml_url = ml_url is not None
     have_gh_url = None
     for line in link_contents:
         if not have_url:
@@ -135,12 +136,12 @@ def make_link_targets(proj_name,
         raise RuntimeError('Need command line or known project '
                            'and / or mailing list URLs')
     lines = []
-    if not url is None:
+    if url is not None:
         lines.append('.. _%s: %s\n' % (proj_name, url))
     if not have_gh_url:
         gh_url = 'http://github.com/%s/%s\n' % (user_name, repo_name)
         lines.append('.. _`%s github`: %s\n' % (proj_name, gh_url))
-    if not ml_url is None:
+    if ml_url is not None:
         lines.append('.. _`%s mailing list`: %s\n' % (proj_name, ml_url))
     if len(lines) == 0:
         # Nothing to do

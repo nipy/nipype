@@ -2,7 +2,7 @@
    and name substitutions.  It may be included in many files,
    therefore it should only contain link targets and name
    substitutions.  Try grepping for "^\.\. _" to find plausible
-   candidates for this list.  
+   candidates for this list.
 
 .. NOTE: reST targets are
    __not_case_sensitive__, so only one target definition is needed for
@@ -46,7 +46,7 @@
 .. _pylint: http://www.logilab.org/project/pylint
 .. _pyflakes: http://divmod.org/trac/wiki/DivmodPyflakes
 .. _virtualenv: http://pypi.python.org/pypi/virtualenv
-.. _git: http://git.or.cz/
+.. _git: https://git-scm.com/
 .. _flymake: http://flymake.sourceforge.net/
 .. _rope: http://rope.sourceforge.net/
 .. _pymacs: http://pymacs.progiciels-bpi.ca/pymacs.html
@@ -60,21 +60,21 @@
 .. _`python coverage tester`: http://nedbatchelder.com/code/modules/coverage.html
 
 .. Other python projects
-.. _numpy: http://www.scipy.org/NumPy
+.. _numpy: http://www.numpy.org/
 .. _scipy: http://www.scipy.org
-.. _ipython: http://ipython.scipy.org
-.. _`ipython manual`: http://ipython.scipy.org/doc/manual/html
-.. _matplotlib: http://matplotlib.sourceforge.net
+.. _ipython: https://ipython.org
+.. _`ipython manual`: https://ipython.readthedocs.org/en/stable/
+.. _matplotlib: http://matplotlib.org/
 .. _ETS: http://code.enthought.com/projects/tool-suite.php
 .. _`Enthought Tool Suite`: http://code.enthought.com/projects/tool-suite.php
 .. _python: http://www.python.org
 .. _mayavi: http://mayavi.sourceforge.net/
-.. _sympy: http://code.google.com/p/sympy/
-.. _networkx: http://networkx.lanl.gov/
-.. _pythonxy: http://www.pythonxy.com/
+.. _sympy: http://www.sympy.org/
+.. _networkx: https://networkx.github.io/
+.. _pythonxy: https://python-xy.github.io/
 .. _EPD: http://www.enthought.com/products/epd.php
 .. _Traits: http://code.enthought.com/projects/traits/
-.. _Anaconda: https://store.continuum.io/cshop/anaconda/
+.. _Anaconda: https://www.continuum.io/downloads
 .. _Canopy: https://www.enthought.com/products/canopy/
 
 .. Python imaging projects
@@ -86,6 +86,7 @@
 .. _matlab: http://www.mathworks.com
 .. _spm: http://www.fil.ion.ucl.ac.uk/spm
 .. _eeglab: http://sccn.ucsd.edu/eeglab
+.. _ANTS: http://stnava.github.io/ANTs/
 .. _AFNI: http://afni.nimh.nih.gov/afni
 .. _FSL: http://www.fmrib.ox.ac.uk/fsl
 .. _FreeSurfer: http://surfer.nmr.mgh.harvard.edu

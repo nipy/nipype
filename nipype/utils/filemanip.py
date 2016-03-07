@@ -4,20 +4,24 @@
 
 """
 
-import cPickle
-from glob import glob
+from future import standard_library
+standard_library.install_aliases()
+
+import pickle
 import gzip
 import hashlib
 from hashlib import md5
-import json
+import simplejson
 import os
 import re
 import shutil
 
 import numpy as np
 
-from ..interfaces.traits_extension import isdefined
 from .misc import is_container
+from .config import mkdir_p
+from ..external.six import string_types
+from ..interfaces.traits_extension import isdefined
 
 from .. import logging, config
 fmlogger = logging.getLogger("filemanip")
@@ -25,6 +29,31 @@ fmlogger = logging.getLogger("filemanip")
 
 class FileNotFoundError(Exception):
     pass
+
+
+def nipype_hardlink_wrapper(raw_src, raw_dst):
+    """Attempt to use hard link instead of file copy.
+    The intent is to avoid unnnecessary duplication
+    of large files when using a DataSink.
+    Hard links are not supported on all file systems
+    or os environments, and will not succeed if the
+    src and dst are not on the same physical hardware
+    partition.
+    If the hardlink fails, then fall back to using
+    a standard copy.
+    """
+    # Use realpath to avoid hardlinking symlinks
+    src = os.path.realpath(raw_src)
+    # Use normpath, in case destination is a symlink
+    dst = os.path.normpath(raw_dst)
+    del raw_src
+    del raw_dst
+    if src != dst and os.path.exists(dst):
+        os.unlink(dst)  # First remove destination
+    try:
+        os.link(src, dst)  # Reference same inode to avoid duplication
+    except:
+        shutil.copyfile(src, dst)  # Fall back to traditional copy
 
 
 def split_filename(fname):
@@ -61,10 +90,8 @@ def split_filename(fname):
 
     special_extensions = [".nii.gz", ".tar.gz"]
 
-    if fname and fname.endswith(os.path.sep):
-        fname = fname[:-1]
-
-    pth, fname = os.path.split(fname)
+    pth = os.path.dirname(fname)
+    fname = os.path.basename(fname)
 
     ext = None
     for special_ext in special_extensions:
@@ -150,13 +177,12 @@ def hash_infile(afile, chunk_len=8192, crypto=hashlib.md5):
     hex = None
     if os.path.isfile(afile):
         crypto_obj = crypto()
-        fp = file(afile, 'rb')
-        while True:
-            data = fp.read(chunk_len)
-            if not data:
-                break
-            crypto_obj.update(data)
-        fp.close()
+        with open(afile, 'rb') as fp:
+            while True:
+                data = fp.read(chunk_len)
+                if not data:
+                    break
+                crypto_obj.update(data)
         hex = crypto_obj.hexdigest()
     return hex
 
@@ -167,14 +193,14 @@ def hash_timestamp(afile):
     if os.path.isfile(afile):
         md5obj = md5()
         stat = os.stat(afile)
-        md5obj.update(str(stat.st_size))
-        md5obj.update(str(stat.st_mtime))
+        md5obj.update(str(stat.st_size).encode())
+        md5obj.update(str(stat.st_mtime).encode())
         md5hex = md5obj.hexdigest()
     return md5hex
 
 
 def copyfile(originalfile, newfile, copy=False, create_new=False,
-             hashmethod=None):
+             hashmethod=None, use_hardlink=False):
     """Copy or symlink ``originalfile`` to ``newfile``.
 
     Parameters
@@ -202,7 +228,7 @@ def copyfile(originalfile, newfile, copy=False, create_new=False,
             s = re.search('_c[0-9]{4,4}$', fname)
             i = 0
             if s:
-                i = int(s.group()[2:])+1
+                i = int(s.group()[2:]) + 1
                 fname = fname[:-6] + "_c%04d" % i
             else:
                 fname += "_c%04d" % i
@@ -218,8 +244,8 @@ def copyfile(originalfile, newfile, copy=False, create_new=False,
             newhash = hash_infile(newfile)
         fmlogger.debug("File: %s already exists,%s, copy:%d"
                        % (newfile, newhash, copy))
-    #the following seems unnecessary
-    #if os.name is 'posix' and copy:
+    # the following seems unnecessary
+    # if os.name is 'posix' and copy:
     #    if os.path.lexists(newfile) and os.path.islink(newfile):
     #        os.unlink(newfile)
     #        newhash = None
@@ -242,9 +268,13 @@ def copyfile(originalfile, newfile, copy=False, create_new=False,
                 orighash = hash_infile(originalfile)
         if (newhash is None) or (newhash != orighash):
             try:
-                fmlogger.debug("Copying File: %s->%s" % (newfile, originalfile))
-                shutil.copyfile(originalfile, newfile)
-            except shutil.Error, e:
+                fmlogger.debug("Copying File: %s->%s" %
+                               (newfile, originalfile))
+                if use_hardlink:
+                    nipype_hardlink_wrapper(originalfile, newfile)
+                else:
+                    shutil.copyfile(originalfile, newfile)
+            except shutil.Error as e:
                 fmlogger.warn(e.message)
         else:
             fmlogger.debug("File: %s already exists, not overwriting, copy:%d"
@@ -255,12 +285,15 @@ def copyfile(originalfile, newfile, copy=False, create_new=False,
         matofile = originalfile[:-4] + ".mat"
         if os.path.exists(matofile):
             matnfile = newfile[:-4] + ".mat"
-            copyfile(matofile, matnfile, copy)
-        copyfile(hdrofile, hdrnfile, copy)
+            copyfile(matofile, matnfile, copy, create_new, hashmethod,
+                     use_hardlink)
+        copyfile(hdrofile, hdrnfile, copy, create_new, hashmethod,
+                 use_hardlink)
     elif originalfile.endswith(".BRIK"):
-        hdrofile = originalfile[:-4] + ".HEAD"
-        hdrnfile = newfile[:-4] + ".HEAD"
-        copyfile(hdrofile, hdrnfile, copy)
+        hdrofile = originalfile[:-5] + ".HEAD"
+        hdrnfile = newfile[:-5] + ".HEAD"
+        copyfile(hdrofile, hdrnfile, copy, create_new, hashmethod,
+                 use_hardlink)
 
     return newfile
 
@@ -322,7 +355,7 @@ def copyfiles(filelist, dest, copy=False, create_new=False):
 def filename_to_list(filename):
     """Returns a list given either a string or a list
     """
-    if isinstance(filename, (str, unicode)):
+    if isinstance(filename, (str, string_types)):
         return [filename]
     elif isinstance(filename, list):
         return filename
@@ -354,9 +387,8 @@ def save_json(filename, data):
 
     """
 
-    fp = file(filename, 'w')
-    json.dump(data, fp, sort_keys=True, indent=4)
-    fp.close()
+    with open(filename, 'w') as fp:
+        simplejson.dump(data, fp, sort_keys=True, indent=4)
 
 
 def load_json(filename):
@@ -373,10 +405,10 @@ def load_json(filename):
 
     """
 
-    fp = file(filename, 'r')
-    data = json.load(fp)
-    fp.close()
+    with open(filename, 'r') as fp:
+        data = simplejson.load(fp)
     return data
+
 
 def loadcrash(infile, *args):
     if '.pkl' in infile:
@@ -394,6 +426,7 @@ def loadcrash(infile, *args):
     else:
         raise ValueError('Only pickled crashfiles are supported')
 
+
 def loadpkl(infile):
     """Load a zipped or plain cPickled file
     """
@@ -401,7 +434,7 @@ def loadpkl(infile):
         pkl_file = gzip.open(infile, 'rb')
     else:
         pkl_file = open(infile)
-    return cPickle.load(pkl_file)
+    return pickle.load(pkl_file)
 
 
 def savepkl(filename, record):
@@ -409,7 +442,7 @@ def savepkl(filename, record):
         pkl_file = gzip.open(filename, 'wb')
     else:
         pkl_file = open(filename, 'wb')
-    cPickle.dump(record, pkl_file)
+    pickle.dump(record, pkl_file)
     pkl_file.close()
 
 rst_levels = ['=', '-', '~', '+']
@@ -424,11 +457,11 @@ def write_rst_list(items, prefix=''):
     out = []
     for item in items:
         out.append(prefix + ' ' + str(item))
-    return '\n'.join(out)+'\n\n'
+    return '\n'.join(out) + '\n\n'
 
 
 def write_rst_dict(info, prefix=''):
     out = []
     for key, value in sorted(info.items()):
         out.append(prefix + '* ' + key + ' : ' + str(value))
-    return '\n'.join(out)+'\n\n'
+    return '\n'.join(out) + '\n\n'

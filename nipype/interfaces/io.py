@@ -17,6 +17,11 @@
     >>> os.chdir(datadir)
 
 """
+
+from builtins import zip
+from builtins import filter
+from builtins import range
+
 import glob
 import fnmatch
 import string
@@ -29,7 +34,19 @@ import tempfile
 from warnings import warn
 
 import sqlite3
-from nipype.utils.misc import human_order_sorted
+
+from .base import (TraitedSpec, traits, File, Directory,
+                   BaseInterface, InputMultiPath, isdefined,
+                   OutputMultiPath, DynamicTraitedSpec,
+                   Undefined, BaseInterfaceInputSpec)
+from .. import config
+from ..external.six import string_types
+from ..utils.filemanip import (copyfile, list_to_filename,
+                               filename_to_list)
+from ..utils.misc import human_order_sorted
+from ..utils.misc import str2bool
+from .. import logging
+iflogger = logging.getLogger('interface')
 
 try:
     import pyxnat
@@ -41,18 +58,14 @@ try:
 except:
     pass
 
-from nipype.interfaces.base import (TraitedSpec, traits, File, Directory,
-                                    BaseInterface, InputMultiPath, isdefined,
-                                    OutputMultiPath, DynamicTraitedSpec,
-                                    Undefined, BaseInterfaceInputSpec)
-from nipype.utils.filemanip import (copyfile, list_to_filename,
-                                    filename_to_list)
-
-from .. import logging
-iflogger = logging.getLogger('interface')
+try:
+    import boto
+    from boto.s3.connection import S3Connection, OrdinaryCallingFormat
+except:
+    pass
 
 
-def copytree(src, dst):
+def copytree(src, dst, use_hardlink=False):
     """Recursively copy a directory tree using
     nipype.utils.filemanip.copyfile()
 
@@ -63,7 +76,7 @@ def copytree(src, dst):
     names = os.listdir(src)
     try:
         os.makedirs(dst)
-    except OSError, why:
+    except OSError as why:
         if 'File exists' in why:
             pass
         else:
@@ -74,14 +87,15 @@ def copytree(src, dst):
         dstname = os.path.join(dst, name)
         try:
             if os.path.isdir(srcname):
-                copytree(srcname, dstname)
+                copytree(srcname, dstname, use_hardlink)
             else:
-                copyfile(srcname, dstname, True, hashmethod='content')
-        except (IOError, os.error), why:
+                copyfile(srcname, dstname, True, hashmethod='content',
+                         use_hardlink=use_hardlink)
+        except (IOError, os.error) as why:
             errors.append((srcname, dstname, str(why)))
         # catch the Error from the recursive copytree so that we can
         # continue with other files
-        except Exception, err:
+        except Exception as err:
             errors.extend(err.args[0])
     if errors:
         raise Exception(errors)
@@ -120,7 +134,54 @@ class IOBase(BaseInterface):
         return base
 
 
+# Class to track percentage of S3 file upload
+class ProgressPercentage(object):
+    '''
+    Callable class instsance (via __call__ method) that displays
+    upload percentage of a file to S3
+    '''
+
+    def __init__(self, filename):
+        '''
+        '''
+
+        # Import packages
+        import threading
+
+        # Initialize data attributes
+        self._filename = filename
+        self._size = float(os.path.getsize(filename))
+        self._seen_so_far = 0
+        self._lock = threading.Lock()
+
+    def __call__(self, bytes_amount):
+        '''
+        '''
+
+        # Import packages
+        import sys
+
+        # With the lock on, print upload status
+        with self._lock:
+            self._seen_so_far += bytes_amount
+            if self._size != 0:
+                percentage = (self._seen_so_far / self._size) * 100
+            else:
+                percentage = 0
+            progress_str = '%d / %d (%.2f%%)\r'\
+                           % (self._seen_so_far, self._size, percentage)
+
+            # Write to stdout
+            sys.stdout.write(progress_str)
+            sys.stdout.flush()
+
+
+# DataSink inputs
 class DataSinkInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
+    '''
+    '''
+
+    # Init inputspec data attributes
     base_directory = Directory(
         desc='Path to the base directory for storing data.')
     container = traits.Str(
@@ -132,17 +193,32 @@ class DataSinkInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
                                    desc=('List of 2-tuples reflecting string '
                                          'to substitute and string to replace '
                                          'it with'))
-    regexp_substitutions = InputMultiPath(traits.Tuple(traits.Str, traits.Str),
-                                          desc=('List of 2-tuples reflecting a pair '
-                                                'of a Python regexp pattern and a '
-                                                'replacement string. Invoked after '
-                                                'string `substitutions`'))
+    regexp_substitutions = \
+        InputMultiPath(traits.Tuple(traits.Str, traits.Str),
+                       desc=('List of 2-tuples reflecting a pair of a '\
+                             'Python regexp pattern and a replacement '\
+                             'string. Invoked after string `substitutions`'))
 
     _outputs = traits.Dict(traits.Str, value={}, usedefault=True)
     remove_dest_dir = traits.Bool(False, usedefault=True,
                                   desc='remove dest directory when copying dirs')
 
+    # AWS S3 data attributes
+    creds_path = traits.Str(desc='Filepath to AWS credentials file for S3 bucket '\
+                                 'access; if not specified, the credentials will '\
+                                 'be taken from the AWS_ACCESS_KEY_ID and '\
+                                 'AWS_SECRET_ACCESS_KEY environment variables')
+    encrypt_bucket_keys = traits.Bool(desc='Flag indicating whether to use S3 '\
+                                        'server-side AES-256 encryption')
+    # Set this if user wishes to override the bucket with their own
+    bucket = traits.Generic(mandatory=False,
+                            desc='Boto3 S3 bucket for manual override of bucket')
+    # Set this if user wishes to have local copy of files as well
+    local_copy = traits.Str(desc='Copy files locally as well as to S3 bucket')
+
+    # Set call-able inputs attributes
     def __setattr__(self, key, value):
+
         if key not in self.copyable_trait_names():
             if not isdefined(value):
                 super(DataSinkInputSpec, self).__setattr__(key, value)
@@ -153,11 +229,14 @@ class DataSinkInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
             super(DataSinkInputSpec, self).__setattr__(key, value)
 
 
+# DataSink outputs
 class DataSinkOutputSpec(TraitedSpec):
 
+    # Init out file
     out_file = traits.Any(desc='datasink output')
 
 
+# Custom DataSink class
 class DataSink(IOBase):
     """ Generic datasink module to store structured outputs
 
@@ -205,7 +284,7 @@ class DataSink(IOBase):
         >>> ds.inputs.structural = 'structural.nii'
         >>> setattr(ds.inputs, 'contrasts.@con', ['cont1.nii', 'cont2.nii'])
         >>> setattr(ds.inputs, 'contrasts.alt', ['cont1a.nii', 'cont2a.nii'])
-        >>> ds.run() # doctest: +SKIP
+        >>> ds.run()  # doctest: +SKIP
 
         To use DataSink in a MapNode, its inputs have to be defined at the
         time the interface is created.
@@ -216,12 +295,15 @@ class DataSink(IOBase):
         >>> ds.inputs.structural = 'structural.nii'
         >>> setattr(ds.inputs, 'contrasts.@con', ['cont1.nii', 'cont2.nii'])
         >>> setattr(ds.inputs, 'contrasts.alt', ['cont1a.nii', 'cont2a.nii'])
-        >>> ds.run() # doctest: +SKIP
+        >>> ds.run()  # doctest: +SKIP
 
     """
+
+    # Give obj .inputs and .outputs
     input_spec = DataSinkInputSpec
     output_spec = DataSinkOutputSpec
 
+    # Initialization method to set up datasink
     def __init__(self, infields=None, force_run=True, **kwargs):
         """
         Parameters
@@ -243,9 +325,10 @@ class DataSink(IOBase):
         if force_run:
             self._always_run = True
 
+    # Get destination paths
     def _get_dst(self, src):
-        ## If path is directory with trailing os.path.sep,
-        ## then remove that for a more robust behavior
+        # If path is directory with trailing os.path.sep,
+        # then remove that for a more robust behavior
         src = src.rstrip(os.path.sep)
         path, fname = os.path.split(src)
         if self.inputs.parameterization:
@@ -266,6 +349,7 @@ class DataSink(IOBase):
             dst = dst[1:]
         return dst
 
+    # Substitute paths in substitutions dictionary parameter
     def _substitute(self, pathstr):
         pathstr_ = pathstr
         if isdefined(self.inputs.substitutions):
@@ -286,84 +370,626 @@ class DataSink(IOBase):
             iflogger.info('sub: %s -> %s' % (pathstr_, pathstr))
         return pathstr
 
+    # Check for s3 in base directory
+    def _check_s3_base_dir(self):
+        '''
+        Method to see if the datasink's base directory specifies an
+        S3 bucket path; if it does, it parses the path for the bucket
+        name in the form 's3://bucket_name/...' and returns it
+
+        Parameters
+        ----------
+
+        Returns
+        -------
+        s3_flag : boolean
+            flag indicating whether the base_directory contained an
+            S3 bucket path
+        bucket_name : string
+            name of the S3 bucket to connect to; if the base directory
+            is not a valid S3 path, defaults to '<N/A>'
+        '''
+
+        # Init variables
+        s3_str = 's3://'
+        bucket_name = '<N/A>'
+        base_directory = self.inputs.base_directory
+
+        if not isdefined(base_directory):
+            s3_flag = False
+            return s3_flag, bucket_name
+
+        # Explicitly lower-case the "s3"
+        if base_directory.lower().startswith(s3_str):
+            base_dir_sp = base_directory.split('/')
+            base_dir_sp[0] = base_dir_sp[0].lower()
+            base_directory = '/'.join(base_dir_sp)
+
+        # Check if 's3://' in base dir
+        if base_directory.startswith(s3_str):
+            # Expects bucket name to be 's3://bucket_name/base_dir/..'
+            bucket_name = base_directory.split(s3_str)[1].split('/')[0]
+            s3_flag = True
+        # Otherwise it's just a normal datasink
+        else:
+            s3_flag = False
+
+        # Return s3_flag
+        return s3_flag, bucket_name
+
+    # Function to return AWS secure environment variables
+    def _return_aws_keys(self):
+        '''
+        Method to return AWS access key id and secret access key using
+        credentials found in a local file.
+
+        Parameters
+        ----------
+        self : nipype.interfaces.io.DataSink
+            self for instance method
+
+        Returns
+        -------
+        aws_access_key_id : string
+            string of the AWS access key ID
+        aws_secret_access_key : string
+            string of the AWS secret access key
+        '''
+
+        # Import packages
+        import os
+
+        # Init variables
+        creds_path = self.inputs.creds_path
+
+        # Check if creds exist
+        if creds_path and os.path.exists(creds_path):
+            with open(creds_path, 'r') as creds_in:
+                # Grab csv rows
+                row1 = creds_in.readline()
+                row2 = creds_in.readline()
+
+            # Are they root or user keys
+            if 'User Name' in row1:
+                # And split out for keys
+                aws_access_key_id = row2.split(',')[1]
+                aws_secret_access_key = row2.split(',')[2]
+            elif 'AWSAccessKeyId' in row1:
+                # And split out for keys
+                aws_access_key_id = row1.split('=')[1]
+                aws_secret_access_key = row2.split('=')[1]
+            else:
+                err_msg = 'Credentials file not recognized, check file is correct'
+                raise Exception(err_msg)
+
+            # Strip any carriage return/line feeds
+            aws_access_key_id = aws_access_key_id.replace('\r', '').replace('\n', '')
+            aws_secret_access_key = aws_secret_access_key.replace('\r', '').replace('\n', '')
+        else:
+            aws_access_key_id = os.getenv('AWS_ACCESS_KEY_ID')
+            aws_secret_access_key = os.getenv('AWS_SECRET_ACCESS_KEY')
+
+        # Return keys
+        return aws_access_key_id, aws_secret_access_key
+
+    # Fetch bucket object
+    def _fetch_bucket(self, bucket_name):
+        '''
+        Method to return a bucket object which can be used to interact
+        with an AWS S3 bucket using credentials found in a local file.
+
+        Parameters
+        ----------
+        self : nipype.interfaces.io.DataSink
+            self for instance method
+        bucket_name : string
+            string corresponding to the name of the bucket on S3
+
+        Returns
+        -------
+        bucket : boto3.resources.factory.s3.Bucket
+            boto3 s3 Bucket object which is used to interact with files
+            in an S3 bucket on AWS
+        '''
+
+        # Import packages
+        import logging
+
+        try:
+            import boto3
+            import botocore
+        except ImportError as exc:
+            err_msg = 'Boto3 package is not installed - install boto3 and '\
+                      'try again.'
+            raise Exception(err_msg)
+
+        # Init variables
+        creds_path = self.inputs.creds_path
+        iflogger = logging.getLogger('interface')
+
+        # Get AWS credentials
+        try:
+            aws_access_key_id, aws_secret_access_key = \
+                self._return_aws_keys()
+        except Exception as exc:
+            err_msg = 'There was a problem extracting the AWS credentials '\
+                      'from the credentials file provided: %s. Error:\n%s'\
+                      % (creds_path, exc)
+            raise Exception(err_msg)
+
+        # Try and get AWS credentials if a creds_path is specified
+        if aws_access_key_id and aws_secret_access_key:
+            # Init connection
+            iflogger.info('Connecting to S3 bucket: %s with credentials...'\
+                          % bucket_name)
+            # Use individual session for each instance of DataSink
+            # Better when datasinks are being used in multi-threading, see:
+            # http://boto3.readthedocs.org/en/latest/guide/resources.html#multithreading
+            session = boto3.session.Session(aws_access_key_id=aws_access_key_id,
+                                            aws_secret_access_key=aws_secret_access_key)
+            s3_resource = session.resource('s3', use_ssl=True)
+
+        # Otherwise, connect anonymously
+        else:
+            iflogger.info('Connecting to AWS: %s anonymously...'\
+                          % bucket_name)
+            session = boto3.session.Session()
+            s3_resource = session.resource('s3', use_ssl=True)
+            s3_resource.meta.client.meta.events.register('choose-signer.s3.*',
+                                                         botocore.handlers.disable_signing)
+
+        # Explicitly declare a secure SSL connection for bucket object
+        bucket = s3_resource.Bucket(bucket_name)
+
+        # And try fetch the bucket with the name argument
+        try:
+            s3_resource.meta.client.head_bucket(Bucket=bucket_name)
+        except botocore.exceptions.ClientError as exc:
+            error_code = int(exc.response['Error']['Code'])
+            if error_code == 403:
+                err_msg = 'Access to bucket: %s is denied; check credentials'\
+                          % bucket_name
+                raise Exception(err_msg)
+            elif error_code == 404:
+                err_msg = 'Bucket: %s does not exist; check spelling and try '\
+                          'again' % bucket_name
+                raise Exception(err_msg)
+            else:
+                err_msg = 'Unable to connect to bucket: %s. Error message:\n%s'\
+                          % (bucket_name, exc)
+        except Exception as exc:
+            err_msg = 'Unable to connect to bucket: %s. Error message:\n%s'\
+                      % (bucket_name, exc)
+            raise Exception(err_msg)
+
+        # Return the bucket
+        return bucket
+
+    # Send up to S3 method
+    def _upload_to_s3(self, bucket, src, dst):
+        '''
+        Method to upload outputs to S3 bucket instead of on local disk
+        '''
+
+        # Import packages
+        import hashlib
+        import logging
+        import os
+
+        from botocore.exceptions import ClientError
+
+        # Init variables
+        iflogger = logging.getLogger('interface')
+        s3_str = 's3://'
+        s3_prefix = s3_str + bucket.name
+
+        # Explicitly lower-case the "s3"
+        if dst.lower().startswith(s3_str):
+            dst_sp = dst.split('/')
+            dst_sp[0] = dst_sp[0].lower()
+            dst = '/'.join(dst_sp)
+
+        # If src is a directory, collect files (this assumes dst is a dir too)
+        if os.path.isdir(src):
+            src_files = []
+            for root, dirs, files in os.walk(src):
+                src_files.extend([os.path.join(root, fil) for fil in files])
+            # Make the dst files have the dst folder as base dir
+            dst_files = [os.path.join(dst, src_f.split(src)[1]) \
+                         for src_f in src_files]
+        else:
+            src_files = [src]
+            dst_files = [dst]
+
+        # Iterate over src and copy to dst
+        for src_idx, src_f in enumerate(src_files):
+            # Get destination filename/keyname
+            dst_f = dst_files[src_idx]
+            dst_k = dst_f.replace(s3_prefix, '').lstrip('/')
+
+            # See if same file is already up there
+            try:
+                dst_obj = bucket.Object(key=dst_k)
+                dst_md5 = dst_obj.e_tag.strip('"')
+
+                # See if same file is already there
+                src_read = open(src_f, 'rb').read()
+                src_md5 = hashlib.md5(src_read).hexdigest()
+                # Move to next loop iteration
+                if dst_md5 == src_md5:
+                    iflogger.info('File %s already exists on S3, skipping...' % dst_f)
+                    continue
+                else:
+                    iflogger.info('Overwriting previous S3 file...')
+
+            except ClientError:
+                iflogger.info('New file to S3')
+
+            # Copy file up to S3 (either encrypted or not)
+            iflogger.info('Uploading %s to S3 bucket, %s, as %s...'\
+                          % (src_f, bucket.name, dst_f))
+            if self.inputs.encrypt_bucket_keys:
+                extra_args = {'ServerSideEncryption' : 'AES256'}
+            else:
+                extra_args = {}
+            bucket.upload_file(src_f, dst_k, ExtraArgs=extra_args,
+                               Callback=ProgressPercentage(src_f))
+
+    # List outputs, main run routine
     def _list_outputs(self):
         """Execute this module.
         """
+
+        # Init variables
+        iflogger = logging.getLogger('interface')
         outputs = self.output_spec().get()
         out_files = []
-        outdir = self.inputs.base_directory
-        if not isdefined(outdir):
-            outdir = '.'
-        outdir = os.path.abspath(outdir)
+        # Use hardlink
+        use_hardlink = str2bool(config.get('execution', 'try_hard_link_datasink'))
+
+        # Set local output directory if specified
+        if isdefined(self.inputs.local_copy):
+            outdir = self.inputs.local_copy
+        else:
+            outdir = self.inputs.base_directory
+            # If base directory isn't given, assume current directory
+            if not isdefined(outdir):
+                outdir = '.'
+
+        # Check if base directory reflects S3 bucket upload
+        s3_flag, bucket_name = self._check_s3_base_dir()
+        if s3_flag:
+            s3dir = self.inputs.base_directory
+            # If user overrides bucket object, use that
+            if self.inputs.bucket:
+                bucket = self.inputs.bucket
+            # Otherwise fetch bucket object using name
+            else:
+                try:
+                    bucket = self._fetch_bucket(bucket_name)
+                # If encountering an exception during bucket access, set output
+                # base directory to a local folder
+                except Exception as exc:
+                    s3dir = '<N/A>'
+                    if not isdefined(self.inputs.local_copy):
+                        local_out_exception = os.path.join(os.path.expanduser('~'),
+                                                           's3_datasink_' + bucket_name)
+                        outdir = local_out_exception
+                    # Log local copying directory
+                    iflogger.info('Access to S3 failed! Storing outputs locally at: '\
+                                  '%s\nError: %s' %(outdir, exc))
+        else:
+            s3dir = '<N/A>'
+
+        # If container input is given, append that to outdir
         if isdefined(self.inputs.container):
             outdir = os.path.join(outdir, self.inputs.container)
-        if not os.path.exists(outdir):
-            try:
-                os.makedirs(outdir)
-            except OSError, inst:
-                if 'File exists' in inst:
-                    pass
-                else:
-                    raise(inst)
+            s3dir = os.path.join(s3dir, self.inputs.container)
+
+        # If sinking to local folder
+        if outdir != s3dir:
+            outdir = os.path.abspath(outdir)
+            # Create the directory if it doesn't exist
+            if not os.path.exists(outdir):
+                try:
+                    os.makedirs(outdir)
+                except OSError as inst:
+                    if 'File exists' in inst:
+                        pass
+                    else:
+                        raise(inst)
+
+        # Iterate through outputs attributes {key : path(s)}
         for key, files in self.inputs._outputs.items():
             if not isdefined(files):
                 continue
             iflogger.debug("key: %s files: %s" % (key, str(files)))
             files = filename_to_list(files)
             tempoutdir = outdir
+            if s3_flag:
+                s3tempoutdir = s3dir
             for d in key.split('.'):
                 if d[0] == '@':
                     continue
                 tempoutdir = os.path.join(tempoutdir, d)
+                if s3_flag:
+                    s3tempoutdir = os.path.join(s3tempoutdir, d)
 
             # flattening list
             if isinstance(files, list):
                 if isinstance(files[0], list):
                     files = [item for sublist in files for item in sublist]
 
+            # Iterate through passed-in source files
             for src in filename_to_list(files):
+                # Format src and dst files
                 src = os.path.abspath(src)
-                if os.path.isfile(src):
-                    dst = self._get_dst(src)
-                    dst = os.path.join(tempoutdir, dst)
-                    dst = self._substitute(dst)
-                    path, _ = os.path.split(dst)
+                if not os.path.isfile(src):
+                    src = os.path.join(src, '')
+                dst = self._get_dst(src)
+                if s3_flag:
+                    s3dst = os.path.join(s3tempoutdir, dst)
+                    s3dst = self._substitute(s3dst)
+                dst = os.path.join(tempoutdir, dst)
+                dst = self._substitute(dst)
+                path, _ = os.path.split(dst)
+
+                # If we're uploading to S3
+                if s3_flag:
+                    self._upload_to_s3(bucket, src, s3dst)
+                    out_files.append(s3dst)
+                # Otherwise, copy locally src -> dst
+                if not s3_flag or isdefined(self.inputs.local_copy):
+                    # Create output directory if it doesnt exist
                     if not os.path.exists(path):
                         try:
                             os.makedirs(path)
-                        except OSError, inst:
+                        except OSError as inst:
                             if 'File exists' in inst:
                                 pass
                             else:
                                 raise(inst)
-                    iflogger.debug("copyfile: %s %s" % (src, dst))
-                    copyfile(src, dst, copy=True, hashmethod='content')
-                    out_files.append(dst)
-                elif os.path.isdir(src):
-                    dst = self._get_dst(os.path.join(src, ''))
-                    dst = os.path.join(tempoutdir, dst)
-                    dst = self._substitute(dst)
-                    path, _ = os.path.split(dst)
-                    if not os.path.exists(path):
-                        try:
-                            os.makedirs(path)
-                        except OSError, inst:
-                            if 'File exists' in inst:
-                                pass
-                            else:
-                                raise(inst)
-                    if os.path.exists(dst) and self.inputs.remove_dest_dir:
-                        iflogger.debug("removing: %s" % dst)
-                        shutil.rmtree(dst)
-                    iflogger.debug("copydir: %s %s" % (src, dst))
-                    copytree(src, dst)
-                    out_files.append(dst)
+                    # If src is a file, copy it to dst
+                    if os.path.isfile(src):
+                        iflogger.debug('copyfile: %s %s' % (src, dst))
+                        copyfile(src, dst, copy=True, hashmethod='content',
+                                 use_hardlink=use_hardlink)
+                        out_files.append(dst)
+                    # If src is a directory, copy entire contents to dst dir
+                    elif os.path.isdir(src):
+                        if os.path.exists(dst) and self.inputs.remove_dest_dir:
+                            iflogger.debug('removing: %s' % dst)
+                            shutil.rmtree(dst)
+                        iflogger.debug('copydir: %s %s' % (src, dst))
+                        copytree(src, dst)
+                        out_files.append(dst)
+
+        # Return outputs dictionary
         outputs['out_file'] = out_files
 
         return outputs
 
 
-class DataGrabberInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):  # InterfaceInputSpec):
+class S3DataGrabberInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
+    anon = traits.Bool(False, usedefault=True,
+                       desc='Use anonymous connection to s3.  If this is set to True, boto may print' +
+                            ' a urlopen error, but this does not prevent data from being downloaded.')
+    region = traits.Str('us-east-1', usedefault=True,
+                        desc='Region of s3 bucket')
+    bucket = traits.Str(mandatory=True,
+                        desc='Amazon S3 bucket where your data is stored')
+    bucket_path = traits.Str('', usedefault=True,
+                             desc='Location within your bucket for subject data.')
+    local_directory = Directory(exists=True,
+                                desc='Path to the local directory for subject data to be downloaded '
+                                'and accessed. Should be on HDFS for Spark jobs.')
+    raise_on_empty = traits.Bool(True, usedefault=True,
+                                 desc='Generate exception if list is empty for a given field')
+    sort_filelist = traits.Bool(mandatory=True,
+                                desc='Sort the filelist that matches the template')
+    template = traits.Str(mandatory=True,
+                          desc='Layout used to get files. Relative to bucket_path if defined.'
+                               'Uses regex rather than glob style formatting.')
+    template_args = traits.Dict(key_trait=traits.Str,
+                                value_trait=traits.List(traits.List),
+                                desc='Information to plug into template')
+
+
+class S3DataGrabber(IOBase):
+    """ Generic datagrabber module that wraps around glob in an
+        intelligent way for neuroimaging tasks to grab files from
+        Amazon S3
+
+        Works exactly like DataGrabber, except, you must specify an
+        S3 "bucket" and "bucket_path" to search for your data and a
+        "local_directory" to store the data. "local_directory"
+        should be a location on HDFS for Spark jobs. Additionally,
+        "template" uses regex style formatting, rather than the
+        glob-style found in the original DataGrabber.
+
+    """
+    input_spec = S3DataGrabberInputSpec
+    output_spec = DynamicTraitedSpec
+    _always_run = True
+
+    def __init__(self, infields=None, outfields=None, **kwargs):
+        """
+        Parameters
+        ----------
+        infields : list of str
+            Indicates the input fields to be dynamically created
+
+        outfields: list of str
+            Indicates output fields to be dynamically created
+
+        See class examples for usage
+
+        """
+        if not outfields:
+            outfields = ['outfiles']
+        super(S3DataGrabber, self).__init__(**kwargs)
+        undefined_traits = {}
+        # used for mandatory inputs check
+        self._infields = infields
+        self._outfields = outfields
+        if infields:
+            for key in infields:
+                self.inputs.add_trait(key, traits.Any)
+                undefined_traits[key] = Undefined
+        # add ability to insert field specific templates
+        self.inputs.add_trait('field_template',
+                              traits.Dict(traits.Enum(outfields),
+                                          desc="arguments that fit into template"))
+        undefined_traits['field_template'] = Undefined
+        if not isdefined(self.inputs.template_args):
+            self.inputs.template_args = {}
+        for key in outfields:
+            if key not in self.inputs.template_args:
+                if infields:
+                    self.inputs.template_args[key] = [infields]
+                else:
+                    self.inputs.template_args[key] = []
+
+        self.inputs.trait_set(trait_change_notify=False, **undefined_traits)
+
+    def _add_output_traits(self, base):
+        """
+        S3 specific: Downloads relevant files to a local folder specified
+
+        Using traits.Any instead out OutputMultiPath till add_trait bug
+        is fixed.
+        """
+        return add_traits(base, self.inputs.template_args.keys())
+
+    def _list_outputs(self):
+        # infields are mandatory, however I could not figure out how to set 'mandatory' flag dynamically
+        # hence manual check
+        if self._infields:
+            for key in self._infields:
+                value = getattr(self.inputs, key)
+                if not isdefined(value):
+                    msg = "%s requires a value for input '%s' because it was listed in 'infields'" % \
+                        (self.__class__.__name__, key)
+                    raise ValueError(msg)
+
+        outputs = {}
+        # get list of all files in s3 bucket
+        conn = boto.connect_s3(anon=self.inputs.anon)
+        bkt = conn.get_bucket(self.inputs.bucket)
+        bkt_files = list(k.key for k in bkt.list())
+
+        # keys are outfields, args are template args for the outfield
+        for key, args in self.inputs.template_args.items():
+            outputs[key] = []
+            template = self.inputs.template
+            if hasattr(self.inputs, 'field_template') and \
+                    isdefined(self.inputs.field_template) and \
+                    key in self.inputs.field_template:
+                template = self.inputs.field_template[key]  # template override for multiple outfields
+            if isdefined(self.inputs.bucket_path):
+                template = os.path.join(self.inputs.bucket_path, template)
+            if not args:
+                filelist = []
+                for fname in bkt_files:
+                    if re.match(template, fname):
+                        filelist.append(fname)
+                if len(filelist) == 0:
+                    msg = 'Output key: %s Template: %s returned no files' % (
+                        key, template)
+                    if self.inputs.raise_on_empty:
+                        raise IOError(msg)
+                    else:
+                        warn(msg)
+                else:
+                    if self.inputs.sort_filelist:
+                        filelist = human_order_sorted(filelist)
+                    outputs[key] = list_to_filename(filelist)
+            for argnum, arglist in enumerate(args):
+                maxlen = 1
+                for arg in arglist:
+                    if isinstance(arg, string_types) and hasattr(self.inputs, arg):
+                        arg = getattr(self.inputs, arg)
+                    if isinstance(arg, list):
+                        if (maxlen > 1) and (len(arg) != maxlen):
+                            raise ValueError('incompatible number of arguments for %s' % key)
+                        if len(arg) > maxlen:
+                            maxlen = len(arg)
+                outfiles = []
+                for i in range(maxlen):
+                    argtuple = []
+                    for arg in arglist:
+                        if isinstance(arg, string_types) and hasattr(self.inputs, arg):
+                            arg = getattr(self.inputs, arg)
+                        if isinstance(arg, list):
+                            argtuple.append(arg[i])
+                        else:
+                            argtuple.append(arg)
+                    filledtemplate = template
+                    if argtuple:
+                        try:
+                            filledtemplate = template % tuple(argtuple)
+                        except TypeError as e:
+                            raise TypeError(e.message + ": Template %s failed to convert with args %s" % (template, str(tuple(argtuple))))
+                    outfiles = []
+                    for fname in bkt_files:
+                        if re.match(filledtemplate, fname):
+                            outfiles.append(fname)
+                    if len(outfiles) == 0:
+                        msg = 'Output key: %s Template: %s returned no files' % (key, filledtemplate)
+                        if self.inputs.raise_on_empty:
+                            raise IOError(msg)
+                        else:
+                            warn(msg)
+                        outputs[key].append(None)
+                    else:
+                        if self.inputs.sort_filelist:
+                            outfiles = human_order_sorted(outfiles)
+                        outputs[key].append(list_to_filename(outfiles))
+            if any([val is None for val in outputs[key]]):
+                outputs[key] = []
+            if len(outputs[key]) == 0:
+                outputs[key] = None
+            elif len(outputs[key]) == 1:
+                outputs[key] = outputs[key][0]
+        # Outputs are currently stored as locations on S3.
+        # We must convert to the local location specified
+        # and download the files.
+        for key,val in outputs.iteritems():
+            #This will basically be either list-like or string-like:
+            #if it has the __iter__ attribute, it's list-like (list,
+            #tuple, numpy array) and we iterate through each of its
+            #values. If it doesn't, it's string-like (string,
+            #unicode), and we convert that value directly.
+            if hasattr(val,'__iter__'):
+                for i,path in enumerate(val):
+                    outputs[key][i] = self.s3tolocal(path, bkt)
+            else:
+                outputs[key] = self.s3tolocal(val, bkt)
+
+        return outputs
+
+    # Takes an s3 address and downloads the file to a local
+    # directory, returning the local path.
+    def s3tolocal(self, s3path, bkt):
+        # path formatting
+        if not os.path.split(self.inputs.local_directory)[1] == '':
+            self.inputs.local_directory += '/'
+        if not os.path.split(self.inputs.bucket_path)[1] == '':
+            self.inputs.bucket_path += '/'
+        if self.inputs.template[0] == '/':
+            self.inputs.template = self.inputs.template[1:]
+
+        localpath = s3path.replace(self.inputs.bucket_path, self.inputs.local_directory)
+        localdir = os.path.split(localpath)[0]
+        if not os.path.exists(localdir):
+            os.makedirs(localdir)
+        k = boto.s3.key.Key(bkt)
+        k.key = s3path
+        k.get_contents_to_filename(localpath)
+        return localpath
+
+
+class DataGrabberInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
     base_directory = Directory(exists=True,
                                desc='Path to the base directory consisting of subject data.')
     raise_on_empty = traits.Bool(True, usedefault=True,
@@ -464,7 +1090,7 @@ class DataGrabber(IOBase):
         if not isdefined(self.inputs.template_args):
             self.inputs.template_args = {}
         for key in outfields:
-            if not key in self.inputs.template_args:
+            if key not in self.inputs.template_args:
                 if infields:
                     self.inputs.template_args[key] = [infields]
                 else:
@@ -478,7 +1104,7 @@ class DataGrabber(IOBase):
         Using traits.Any instead out OutputMultiPath till add_trait bug
         is fixed.
         """
-        return add_traits(base, self.inputs.template_args.keys())
+        return add_traits(base, list(self.inputs.template_args.keys()))
 
     def _list_outputs(self):
         # infields are mandatory, however I could not figure out how to set 'mandatory' flag dynamically
@@ -492,7 +1118,7 @@ class DataGrabber(IOBase):
                     raise ValueError(msg)
 
         outputs = {}
-        for key, args in self.inputs.template_args.items():
+        for key, args in list(self.inputs.template_args.items()):
             outputs[key] = []
             template = self.inputs.template
             if hasattr(self.inputs, 'field_template') and \
@@ -520,7 +1146,7 @@ class DataGrabber(IOBase):
             for argnum, arglist in enumerate(args):
                 maxlen = 1
                 for arg in arglist:
-                    if isinstance(arg, str) and hasattr(self.inputs, arg):
+                    if isinstance(arg, string_types) and hasattr(self.inputs, arg):
                         arg = getattr(self.inputs, arg)
                     if isinstance(arg, list):
                         if (maxlen > 1) and (len(arg) != maxlen):
@@ -531,7 +1157,7 @@ class DataGrabber(IOBase):
                 for i in range(maxlen):
                     argtuple = []
                     for arg in arglist:
-                        if isinstance(arg, str) and hasattr(self.inputs, arg):
+                        if isinstance(arg, string_types) and hasattr(self.inputs, arg):
                             arg = getattr(self.inputs, arg)
                         if isinstance(arg, list):
                             argtuple.append(arg[i])
@@ -567,17 +1193,17 @@ class DataGrabber(IOBase):
 class SelectFilesInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
 
     base_directory = Directory(exists=True,
-        desc="Root path common to templates.")
+                               desc="Root path common to templates.")
     sort_filelist = traits.Bool(True, usedefault=True,
-        desc="When matching mutliple files, return them in sorted order.")
+                                desc="When matching mutliple files, return them in sorted order.")
     raise_on_empty = traits.Bool(True, usedefault=True,
-        desc="Raise an exception if a template pattern matches no files.")
+                                 desc="Raise an exception if a template pattern matches no files.")
     force_lists = traits.Either(traits.Bool(), traits.List(traits.Str()),
-        default=False, usedefault=True,
-        desc=("Whether to return outputs as a list even when only one file "
-              "matches the template. Either a boolean that applies to all "
-              "output fields or a list of output field names to coerce to "
-              " a list"))
+                                default=False, usedefault=True,
+                                desc=("Whether to return outputs as a list even when only one file "
+                                      "matches the template. Either a boolean that applies to all "
+                                      "output fields or a list of output field names to coerce to "
+                                      " a list"))
 
 
 class SelectFiles(IOBase):
@@ -594,12 +1220,13 @@ class SelectFiles(IOBase):
     Examples
     --------
 
+    >>> import pprint
     >>> from nipype import SelectFiles, Node
     >>> templates={"T1": "{subject_id}/struct/T1.nii",
     ...            "epi": "{subject_id}/func/f[0, 1].nii"}
     >>> dg = Node(SelectFiles(templates), "selectfiles")
     >>> dg.inputs.subject_id = "subj1"
-    >>> dg.outputs.get()
+    >>> pprint.pprint(dg.outputs.get())  # doctest: +NORMALIZE_WHITESPACE
     {'T1': <undefined>, 'epi': <undefined>}
 
     The same thing with dynamic grabbing of specific files:
@@ -634,7 +1261,7 @@ class SelectFiles(IOBase):
 
         # Infer the infields and outfields from the template
         infields = []
-        for name, template in templates.iteritems():
+        for name, template in templates.items():
             for _, field_name, _, _ in string.Formatter().parse(template):
                 if field_name is not None and field_name not in infields:
                     infields.append(field_name)
@@ -652,12 +1279,12 @@ class SelectFiles(IOBase):
 
     def _add_output_traits(self, base):
         """Add the dynamic output fields"""
-        return add_traits(base, self._templates.keys())
+        return add_traits(base, list(self._templates.keys()))
 
     def _list_outputs(self):
         """Find the files and expose them as interface outputs."""
         outputs = {}
-        info = dict([(k, v) for k, v in self.inputs.__dict__.items()
+        info = dict([(k, v) for k, v in list(self.inputs.__dict__.items())
                      if k in self._infields])
 
         force_lists = self.inputs.force_lists
@@ -672,7 +1299,7 @@ class SelectFiles(IOBase):
                    "'templates'.") % (plural, bad_fields, verb)
             raise ValueError(msg)
 
-        for field, template in self._templates.iteritems():
+        for field, template in self._templates.items():
 
             # Build the full template path
             if isdefined(self.inputs.base_directory):
@@ -688,7 +1315,7 @@ class SelectFiles(IOBase):
             # Handle the case where nothing matched
             if not filelist:
                 msg = "No files were found matching %s template: %s" % (
-                    field, template)
+                    field, filled_template)
                 if self.inputs.raise_on_empty:
                     raise IOError(msg)
                 else:
@@ -714,10 +1341,10 @@ class DataFinderInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
     match_regex = traits.Str('(.+)',
                              usedefault=True,
                              desc=("Regular expression for matching "
-                             "paths."))
+                                   "paths."))
     ignore_regexes = traits.List(desc=("List of regular expressions, "
-                                 "if any match the path it will be "
-                                 "ignored.")
+                                       "if any match the path it will be "
+                                       "ignored.")
                                  )
     max_depth = traits.Int(desc="The maximum depth to search beneath "
                            "the root_paths")
@@ -745,17 +1372,17 @@ class DataFinder(IOBase):
     >>> df.inputs.root_paths = '.'
     >>> df.inputs.match_regex = '.+/(?P<series_dir>.+(qT1|ep2d_fid_T1).+)/(?P<basename>.+)\.nii.gz'
     >>> result = df.run() # doctest: +SKIP
-    >>> print result.outputs.out_paths # doctest: +SKIP
+    >>> result.outputs.out_paths  # doctest: +SKIP
     ['./027-ep2d_fid_T1_Gd4/acquisition.nii.gz',
      './018-ep2d_fid_T1_Gd2/acquisition.nii.gz',
      './016-ep2d_fid_T1_Gd1/acquisition.nii.gz',
      './013-ep2d_fid_T1_pre/acquisition.nii.gz']
-    >>> print result.outputs.series_dir # doctest: +SKIP
+    >>> result.outputs.series_dir  # doctest: +SKIP
     ['027-ep2d_fid_T1_Gd4',
      '018-ep2d_fid_T1_Gd2',
      '016-ep2d_fid_T1_Gd1',
      '013-ep2d_fid_T1_pre']
-    >>> print result.outputs.basename # doctest: +SKIP
+    >>> result.outputs.basename  # doctest: +SKIP
     ['acquisition',
      'acquisition'
      'acquisition',
@@ -768,25 +1395,25 @@ class DataFinder(IOBase):
     _always_run = True
 
     def _match_path(self, target_path):
-        #Check if we should ignore the path
+        # Check if we should ignore the path
         for ignore_re in self.ignore_regexes:
             if ignore_re.search(target_path):
                 return
-        #Check if we can match the path
+        # Check if we can match the path
         match = self.match_regex.search(target_path)
-        if not match is None:
+        if match is not None:
             match_dict = match.groupdict()
             if self.result is None:
                 self.result = {'out_paths': []}
-                for key in match_dict.keys():
+                for key in list(match_dict.keys()):
                     self.result[key] = []
             self.result['out_paths'].append(target_path)
-            for key, val in match_dict.iteritems():
+            for key, val in match_dict.items():
                 self.result[key].append(val)
 
     def _run_interface(self, runtime):
-        #Prepare some of the inputs
-        if isinstance(self.inputs.root_paths, str):
+        # Prepare some of the inputs
+        if isinstance(self.inputs.root_paths, string_types):
             self.inputs.root_paths = [self.inputs.root_paths]
         self.match_regex = re.compile(self.inputs.match_regex)
         if self.inputs.max_depth is Undefined:
@@ -805,24 +1432,24 @@ class DataFinder(IOBase):
                  for regex in self.inputs.ignore_regexes]
         self.result = None
         for root_path in self.inputs.root_paths:
-            #Handle tilda/env variables and remove extra seperators
+            # Handle tilda/env variables and remove extra seperators
             root_path = os.path.normpath(os.path.expandvars(os.path.expanduser(root_path)))
-            #Check if the root_path is a file
+            # Check if the root_path is a file
             if os.path.isfile(root_path):
                 if min_depth == 0:
                     self._match_path(root_path)
                 continue
-            #Walk through directory structure checking paths
+            # Walk through directory structure checking paths
             for curr_dir, sub_dirs, files in os.walk(root_path):
-                #Determine the current depth from the root_path
+                # Determine the current depth from the root_path
                 curr_depth = (curr_dir.count(os.sep) -
                               root_path.count(os.sep))
-                #If the max path depth has been reached, clear sub_dirs
-                #and files
+                # If the max path depth has been reached, clear sub_dirs
+                # and files
                 if max_depth is not None and curr_depth >= max_depth:
                     sub_dirs[:] = []
                     files = []
-                #Test the path for the curr_dir and all files
+                # Test the path for the curr_dir and all files
                 if curr_depth >= min_depth:
                     self._match_path(curr_dir)
                 if curr_depth >= (min_depth - 1):
@@ -830,17 +1457,16 @@ class DataFinder(IOBase):
                         full_path = os.path.join(curr_dir, infile)
                         self._match_path(full_path)
         if (self.inputs.unpack_single and
-            len(self.result['out_paths']) == 1
-            ):
-            for key, vals in self.result.iteritems():
+                len(self.result['out_paths']) == 1):
+            for key, vals in self.result.items():
                 self.result[key] = vals[0]
         else:
-            #sort all keys acording to out_paths
-            for key in self.result.keys():
+            # sort all keys acording to out_paths
+            for key in list(self.result.keys()):
                 if key == "out_paths":
                     continue
-                sort_tuples = human_order_sorted(zip(self.result["out_paths"],
-                                                     self.result[key]))
+                sort_tuples = human_order_sorted(list(zip(self.result["out_paths"],
+                                                          self.result[key])))
                 self.result[key] = [x for (_, x) in sort_tuples]
             self.result["out_paths"] = human_order_sorted(self.result["out_paths"])
 
@@ -983,14 +1609,14 @@ class FreeSurferSource(IOBase):
             key = altkey
         globpattern = os.path.join(
             keydir, ''.join((globprefix, key, globsuffix)))
-        return glob.glob(globpattern)
+        return [os.path.abspath(f) for f in glob.glob(globpattern)]
 
     def _list_outputs(self):
         subjects_dir = self.inputs.subjects_dir
         subject_path = os.path.join(subjects_dir, self.inputs.subject_id)
         output_traits = self._outputs()
         outputs = output_traits.get()
-        for k in outputs.keys():
+        for k in list(outputs.keys()):
             val = self._get_files(subject_path, k,
                                   output_traits.traits()[k].loc,
                                   output_traits.traits()[k].altkey)
@@ -1093,7 +1719,7 @@ class XNATSource(IOBase):
                             desc="arguments that fit into query_template")
             )
             undefined_traits['field_template'] = Undefined
-            #self.inputs.remove_trait('query_template_args')
+            # self.inputs.remove_trait('query_template_args')
             outdict = {}
             for key in outfields:
                 outdict[key] = []
@@ -1106,7 +1732,7 @@ class XNATSource(IOBase):
         Using traits.Any instead out OutputMultiPath till add_trait bug
         is fixed.
         """
-        return add_traits(base, self.inputs.query_template_args.keys())
+        return add_traits(base, list(self.inputs.query_template_args.keys()))
 
     def _list_outputs(self):
         # infields are mandatory, however I could not figure out
@@ -1129,12 +1755,12 @@ class XNATSource(IOBase):
                 if not isdefined(value):
                     msg = ("%s requires a value for input '%s' "
                            "because it was listed in 'infields'" %
-                          (self.__class__.__name__, key)
+                           (self.__class__.__name__, key)
                            )
                     raise ValueError(msg)
 
         outputs = {}
-        for key, args in self.inputs.query_template_args.items():
+        for key, args in list(self.inputs.query_template_args.items()):
             outputs[key] = []
             template = self.inputs.query_template
             if hasattr(self.inputs, 'field_template') and \
@@ -1155,7 +1781,7 @@ class XNATSource(IOBase):
             for argnum, arglist in enumerate(args):
                 maxlen = 1
                 for arg in arglist:
-                    if isinstance(arg, str) and hasattr(self.inputs, arg):
+                    if isinstance(arg, string_types) and hasattr(self.inputs, arg):
                         arg = getattr(self.inputs, arg)
                     if isinstance(arg, list):
                         if (maxlen > 1) and (len(arg) != maxlen):
@@ -1168,7 +1794,7 @@ class XNATSource(IOBase):
                 for i in range(maxlen):
                     argtuple = []
                     for arg in arglist:
-                        if isinstance(arg, str) and \
+                        if isinstance(arg, string_types) and \
                                 hasattr(self.inputs, arg):
                             arg = getattr(self.inputs, arg)
                         if isinstance(arg, list):
@@ -1249,11 +1875,11 @@ class XNATSinkInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
     )
 
     share = traits.Bool(False,
-        desc=('Option to share the subjects from the original project'
-              'instead of creating new ones when possible - the created '
-              'experiments are then shared back to the original project'
-              ),
-        usedefault=True)
+                        desc=('Option to share the subjects from the original project'
+                              'instead of creating new ones when possible - the created '
+                              'experiments are then shared back to the original project'
+                              ),
+                        usedefault=True)
 
     def __setattr__(self, key, value):
         if key not in self.copyable_trait_names():
@@ -1332,7 +1958,7 @@ class XNATSink(IOBase):
             uri_template_args['reconstruction_id'] = quote_id(self.inputs.reconstruction_id)
 
         # gather outputs and upload them
-        for key, files in self.inputs._outputs.items():
+        for key, files in list(self.inputs._outputs.items()):
 
             for name in filename_to_list(files):
 
@@ -1363,7 +1989,7 @@ def push_file(self, xnat, file_name, out_key, uri_template_args):
                 if part.startswith('_') and len(part.split('_')) % 2
                 ]
 
-    keymap = dict(zip(val_list[1::2], val_list[2::2]))
+    keymap = dict(list(zip(val_list[1::2], val_list[2::2])))
 
     _label = []
     for key, val in sorted(keymap.items()):
@@ -1410,7 +2036,7 @@ def push_file(self, xnat, file_name, out_key, uri_template_args):
     )
 
     # unquote values before uploading
-    for key in uri_template_args.keys():
+    for key in list(uri_template_args.keys()):
         uri_template_args[key] = unquote_id(uri_template_args[key])
 
     # upload file
@@ -1547,21 +2173,19 @@ class MySQLSink(IOBase):
         c.close()
         return None
 
+
 class SSHDataGrabberInputSpec(DataGrabberInputSpec):
-    hostname = traits.Str(mandatory=True,
-                               desc='Server hostname.')
-    username = traits.Str(mandatory=False,
-                                desc='Server username.')
-    password = traits.Password(mandatory=False,
-                                desc='Server password.')
+    hostname = traits.Str(mandatory=True, desc='Server hostname.')
+    username = traits.Str(desc='Server username.')
+    password = traits.Password(desc='Server password.')
     download_files = traits.Bool(True, usedefault=True,
-                                    desc='If false it will return the file names without downloading them')
+                                 desc='If false it will return the file names without downloading them')
     base_directory = traits.Str(mandatory=True,
-                               desc='Path to the base directory consisting of subject data.')
+                                desc='Path to the base directory consisting of subject data.')
     template_expression = traits.Enum(['fnmatch', 'regexp'], usedefault=True,
-                            desc='Use either fnmatch or regexp to express templates')
+                                      desc='Use either fnmatch or regexp to express templates')
     ssh_log_to_file = traits.Str('', usedefault=True,
-                            desc='If set SSH commands will be logged to the given file')
+                                 desc='If set SSH commands will be logged to the given file')
 
 
 class SSHDataGrabber(DataGrabber):
@@ -1646,7 +2270,7 @@ class SSHDataGrabber(DataGrabber):
             paramiko
         except NameError:
             warn(
-                "The library parmiko needs to be installed"
+                "The library paramiko needs to be installed"
                 " for this module to run."
             )
         if not outfields:
@@ -1669,13 +2293,12 @@ class SSHDataGrabber(DataGrabber):
         ):
             self.inputs.template += '$'
 
-
     def _list_outputs(self):
         try:
             paramiko
         except NameError:
             raise ImportError(
-                "The library parmiko needs to be installed"
+                "The library paramiko needs to be installed"
                 " for this module to run."
             )
 
@@ -1692,7 +2315,7 @@ class SSHDataGrabber(DataGrabber):
                     raise ValueError(msg)
 
         outputs = {}
-        for key, args in self.inputs.template_args.items():
+        for key, args in list(self.inputs.template_args.items()):
             outputs[key] = []
             template = self.inputs.template
             if hasattr(self.inputs, 'field_template') and \
@@ -1708,7 +2331,7 @@ class SSHDataGrabber(DataGrabber):
                     filelist = fnmatch.filter(filelist, template)
                 elif self.inputs.template_expression == 'regexp':
                     regexp = re.compile(template)
-                    filelist = filter(regexp.match, filelist)
+                    filelist = list(filter(regexp.match, filelist))
                 else:
                     raise ValueError('template_expression value invalid')
                 if len(filelist) == 0:
@@ -1728,7 +2351,7 @@ class SSHDataGrabber(DataGrabber):
             for argnum, arglist in enumerate(args):
                 maxlen = 1
                 for arg in arglist:
-                    if isinstance(arg, str) and hasattr(self.inputs, arg):
+                    if isinstance(arg, string_types) and hasattr(self.inputs, arg):
                         arg = getattr(self.inputs, arg)
                     if isinstance(arg, list):
                         if (maxlen > 1) and (len(arg) != maxlen):
@@ -1739,7 +2362,7 @@ class SSHDataGrabber(DataGrabber):
                 for i in range(maxlen):
                     argtuple = []
                     for arg in arglist:
-                        if isinstance(arg, str) and hasattr(self.inputs, arg):
+                        if isinstance(arg, string_types) and hasattr(self.inputs, arg):
                             arg = getattr(self.inputs, arg)
                         if isinstance(arg, list):
                             argtuple.append(arg[i])
@@ -1761,7 +2384,7 @@ class SSHDataGrabber(DataGrabber):
                         outfiles = fnmatch.filter(filelist, filledtemplate_base)
                     elif self.inputs.template_expression == 'regexp':
                         regexp = re.compile(filledtemplate_base)
-                        outfiles = filter(regexp.match, filelist)
+                        outfiles = list(filter(regexp.match, filelist))
                     else:
                         raise ValueError('template_expression value invalid')
                     if len(outfiles) == 0:
@@ -1777,13 +2400,20 @@ class SSHDataGrabber(DataGrabber):
                         outputs[key].append(list_to_filename(outfiles))
                         if self.inputs.download_files:
                             for f in outfiles:
-                                sftp.get(os.path.join(filledtemplate_dir, f), f)
+                                try:
+                                    sftp.get(os.path.join(filledtemplate_dir, f), f)
+                                except IOError:
+                                    iflogger.info('remote file %s not found' % f)
             if any([val is None for val in outputs[key]]):
                 outputs[key] = []
             if len(outputs[key]) == 0:
                 outputs[key] = None
             elif len(outputs[key]) == 1:
                 outputs[key] = outputs[key][0]
+
+        for k, v in list(outputs.items()):
+            outputs[k] = os.path.join(os.getcwd(), v)
+
         return outputs
 
     def _get_ssh_client(self):
@@ -1803,3 +2433,163 @@ class SSHDataGrabber(DataGrabber):
         client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
         client.connect(host['hostname'], username=host['user'], sock=proxy)
         return client
+
+
+class JSONFileGrabberInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
+    in_file = File(exists=True, desc='JSON source file')
+    defaults = traits.Dict(desc=('JSON dictionary that sets default output'
+                                 'values, overridden by values found in in_file'))
+
+
+class JSONFileGrabber(IOBase):
+
+    """
+    Datagrabber interface that loads a json file and generates an output for
+    every first-level object
+
+    Example
+    -------
+
+    >>> import pprint
+    >>> from nipype.interfaces.io import JSONFileGrabber
+    >>> jsonSource = JSONFileGrabber()
+    >>> jsonSource.inputs.defaults = {'param1': 'overrideMe', 'param3': 1.0}
+    >>> res = jsonSource.run()
+    >>> pprint.pprint(res.outputs.get())
+    {'param1': 'overrideMe', 'param3': 1.0}
+    >>> jsonSource.inputs.in_file = 'jsongrabber.txt'
+    >>> res = jsonSource.run()
+    >>> pprint.pprint(res.outputs.get())  # doctest: +NORMALIZE_WHITESPACE
+    {'param1': 'exampleStr', 'param2': 4, 'param3': 1.0}
+
+
+    """
+    input_spec = JSONFileGrabberInputSpec
+    output_spec = DynamicTraitedSpec
+    _always_run = True
+
+    def _list_outputs(self):
+        import simplejson
+
+        outputs = {}
+        if isdefined(self.inputs.in_file):
+            with open(self.inputs.in_file, 'r') as f:
+                data = simplejson.load(f)
+
+            if not isinstance(data, dict):
+                raise RuntimeError('JSON input has no dictionary structure')
+
+            for key, value in data.items():
+                outputs[key] = value
+
+        if isdefined(self.inputs.defaults):
+            defaults = self.inputs.defaults
+            for key, value in defaults.items():
+                if key not in list(outputs.keys()):
+                    outputs[key] = value
+
+        return outputs
+
+
+class JSONFileSinkInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
+    out_file = File(desc='JSON sink file')
+    in_dict = traits.Dict(value={}, usedefault=True,
+                          desc='input JSON dictionary')
+    _outputs = traits.Dict(value={}, usedefault=True)
+
+    def __setattr__(self, key, value):
+        if key not in self.copyable_trait_names():
+            if not isdefined(value):
+                super(JSONFileSinkInputSpec, self).__setattr__(key, value)
+            self._outputs[key] = value
+        else:
+            if key in self._outputs:
+                self._outputs[key] = value
+            super(JSONFileSinkInputSpec, self).__setattr__(key, value)
+
+
+class JSONFileSinkOutputSpec(TraitedSpec):
+    out_file = File(desc='JSON sink file')
+
+
+class JSONFileSink(IOBase):
+
+    """
+    Very simple frontend for storing values into a JSON file.
+    Entries already existing in in_dict will be overridden by matching
+    entries dynamically added as inputs.
+
+        .. warning::
+
+            This is not a thread-safe node because it can write to a common
+            shared location. It will not complain when it overwrites a file.
+
+        Examples
+        --------
+
+        >>> jsonsink = JSONFileSink(input_names=['subject_id',
+        ...                         'some_measurement'])
+        >>> jsonsink.inputs.subject_id = 's1'
+        >>> jsonsink.inputs.some_measurement = 11.4
+        >>> jsonsink.run() # doctest: +SKIP
+
+        Using a dictionary as input:
+
+        >>> dictsink = JSONFileSink()
+        >>> dictsink.inputs.in_dict = {'subject_id': 's1',
+        ...                            'some_measurement': 11.4}
+        >>> dictsink.run() # doctest: +SKIP
+
+    """
+    input_spec = JSONFileSinkInputSpec
+    output_spec = JSONFileSinkOutputSpec
+
+    def __init__(self, infields=[], force_run=True, **inputs):
+        super(JSONFileSink, self).__init__(**inputs)
+        self._input_names = infields
+
+        undefined_traits = {}
+        for key in infields:
+            self.inputs.add_trait(key, traits.Any)
+            self.inputs._outputs[key] = Undefined
+            undefined_traits[key] = Undefined
+        self.inputs.trait_set(trait_change_notify=False, **undefined_traits)
+
+        if force_run:
+            self._always_run = True
+
+    def _process_name(self, name, val):
+        if '.' in name:
+            newkeys = name.split('.')
+            name = newkeys.pop(0)
+            nested_dict = {newkeys.pop(): val}
+
+            for nk in reversed(newkeys):
+                nested_dict = {nk: nested_dict}
+            val = nested_dict
+
+        return name, val
+
+    def _list_outputs(self):
+        import simplejson
+        import os.path as op
+
+        if not isdefined(self.inputs.out_file):
+            out_file = op.abspath('datasink.json')
+        else:
+            out_file = op.abspath(self.inputs.out_file)
+
+        out_dict = self.inputs.in_dict
+
+        # Overwrite in_dict entries automatically
+        for key, val in list(self.inputs._outputs.items()):
+            if not isdefined(val) or key == 'trait_added':
+                continue
+            key, val = self._process_name(key, val)
+            out_dict[key] = val
+
+        with open(out_file, 'w') as f:
+            simplejson.dump(out_dict, f)
+        outputs = self.output_spec().get()
+        outputs['out_file'] = out_file
+        return outputs

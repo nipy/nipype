@@ -9,8 +9,8 @@ This page covers the necessary steps to install Nipype.
 Download
 --------
 
-Release 0.9.2: [`zip <https://github.com/nipy/nipype/archive/0.9.2.zip>`__ `tar.gz
-<https://github.com/nipy/nipype/archive/0.9.1.tar.gz>`__]
+Release 0.10.0: [`zip <https://github.com/nipy/nipype/archive/0.10.0.zip>`__ `tar.gz
+<https://github.com/nipy/nipype/archive/0.10.0.tar.gz>`__]
 
 Development: [`zip <http://github.com/nipy/nipype/zipball/master>`__ `tar.gz
 <http://github.com/nipy/nipype/tarball/master>`__]
@@ -107,7 +107,7 @@ recommendations.
 Must Have
 ~~~~~~~~~
 
-Python_ 2.6 - 2.7
+Python_ 2.7
 
 Nibabel_ 1.0 - 1.4
   Neuroimaging file i/o library
@@ -160,10 +160,10 @@ matlab_
   2008a or later
 
 SPM_
-  SPM5/8
+  SPM5 or later
 
 FreeSurfer_
-  FreeSurfer version 4 and higher
+  FreeSurfer v4.0.0 or later
 
 AFNI_
   2009_12_31_1431 or later

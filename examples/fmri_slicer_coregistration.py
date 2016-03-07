@@ -7,14 +7,14 @@ fMRI: Coregistration - Slicer, BRAINS
 =====================================
 
 This is currently not working and will raise an exception in release 0.3. It
-will be fixed in a later release.
+will be fixed in a later release::
 
     python fmri_slicer_coregistration.py
 
 """
-#raise RuntimeWarning, 'Slicer not fully implmented'
-from nipype.interfaces.slicer import BRAINSFit, BRAINSResample
 
+# raise RuntimeWarning, 'Slicer not fully implmented'
+from nipype.interfaces.slicer import BRAINSFit, BRAINSResample
 
 
 """Import necessary modules from nipype."""
@@ -63,7 +63,7 @@ data_dir = os.path.abspath('data')
 subject_list = ['s1', 's3']
 # Map field names to individual subject runs.
 info = dict(func=[['subject_id', 'f3']],
-            struct=[['subject_id','struct']])
+            struct=[['subject_id', 'struct']])
 
 infosource = pe.Node(interface=util.IdentityInterface(fields=['subject_id']),
                      name="infosource")
@@ -92,7 +92,7 @@ functionality.
 
 datasource = pe.Node(interface=nio.DataGrabber(infields=['subject_id'],
                                                outfields=['func', 'struct']),
-                     name = 'datasource')
+                     name='datasource')
 datasource.inputs.base_directory = data_dir
 datasource.inputs.template = '%s/%s.nii'
 datasource.inputs.template_args = info
@@ -110,11 +110,11 @@ pipeline = pe.Workflow(name="pipeline")
 pipeline.base_dir = os.path.abspath('slicer_tutorial/workingdir')
 
 pipeline.connect([(infosource, datasource, [('subject_id', 'subject_id')]),
-                  (datasource,coregister,[('func','movingVolume')]),
-                  (datasource,coregister,[('struct','fixedVolume')]),
-                  (coregister,reslice,[('outputTransform', 'warpTransform')]),
-                  (datasource,reslice,[('func','inputVolume')]),
-                  (datasource,reslice,[('struct','referenceVolume')])
+                  (datasource, coregister, [('func', 'movingVolume')]),
+                  (datasource, coregister, [('struct', 'fixedVolume')]),
+                  (coregister, reslice, [('outputTransform', 'warpTransform')]),
+                  (datasource, reslice, [('func', 'inputVolume')]),
+                  (datasource, reslice, [('struct', 'referenceVolume')])
                   ])
 
 if __name__ == '__main__':

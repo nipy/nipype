@@ -3,6 +3,8 @@ modules are selected from the hardcoded list below and generated code is placed
 in the cli_modules.py file (and imported in __init__.py). For this to work
 correctly you must have your CLI executabes in $PATH"""
 
+from __future__ import print_function
+
 import xml.dom.minidom
 import subprocess
 import os
@@ -10,6 +12,8 @@ from shutil import rmtree
 
 import keyword
 python_keywords = keyword.kwlist  # If c++ SEM module uses one of these key words as a command line parameter, we need to modify variable
+
+from ...external.six import string_types
 
 
 def force_to_valid_python_variable_name(old_name):
@@ -46,8 +50,8 @@ import os\n\n\n"""
 
 def crawl_code_struct(code_struct, package_dir):
     subpackages = []
-    for k, v in code_struct.iteritems():
-        if isinstance(v, str) or isinstance(v, unicode):
+    for k, v in code_struct.items():
+        if isinstance(v, str) or isinstance(v, string_types):
             module_name = k.lower()
             class_name = k
             class_code = v
@@ -56,8 +60,8 @@ def crawl_code_struct(code_struct, package_dir):
         else:
             l1 = {}
             l2 = {}
-            for key in v.keys():
-                if (isinstance(v[key], str) or isinstance(v[key], unicode)):
+            for key in list(v.keys()):
+                if (isinstance(v[key], str) or isinstance(v[key], string_types)):
                     l1[key] = v[key]
                 else:
                     l2[key] = v[key]
@@ -73,13 +77,13 @@ def crawl_code_struct(code_struct, package_dir):
                 os.mkdir(new_pkg_dir)
                 crawl_code_struct(v, new_pkg_dir)
                 if l1:
-                    for ik, iv in l1.iteritems():
+                    for ik, iv in l1.items():
                         crawl_code_struct({ik: {ik: iv}}, new_pkg_dir)
             elif l1:
                 v = l1
                 module_name = k.lower()
                 add_class_to_package(
-                    v.values(), v.keys(), module_name, package_dir)
+                    list(v.values()), list(v.keys()), module_name, package_dir)
         if subpackages:
             f = open(os.path.join(package_dir, "setup.py"), 'w')
             f.write("""# emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
@@ -100,7 +104,7 @@ if __name__ == '__main__':
             f.close()
 
 
-def generate_all_classes(modules_list=[], launcher=[]):
+def generate_all_classes(modules_list=[], launcher=[], redirect_x=False, mipav_hacks=False):
     """ modules_list contains all the SEM compliant tools that should have wrappers created for them.
         launcher containtains the command line prefix wrapper arugments needed to prepare
         a proper environment for each of the modules.
@@ -110,7 +114,7 @@ def generate_all_classes(modules_list=[], launcher=[]):
         print("=" * 80)
         print("Generating Definition for module {0}".format(module))
         print("^" * 80)
-        package, code = generate_class(module, launcher)
+        package, code, module = generate_class(module, launcher, redirect_x=redirect_x, mipav_hacks=mipav_hacks)
         cur_package = all_code
         module_name = package.strip().split(" ")[0].split(".")[-1]
         for package in package.strip().split(" ")[0].split(".")[:-1]:
@@ -125,13 +129,17 @@ def generate_all_classes(modules_list=[], launcher=[]):
     crawl_code_struct(all_code, os.getcwd())
 
 
-def generate_class(module, launcher):
-    dom = grab_xml(module, launcher)
+def generate_class(module, launcher, strip_module_name_prefix=True, redirect_x=False, mipav_hacks=False):
+    dom = grab_xml(module, launcher, mipav_hacks=mipav_hacks)
+    if strip_module_name_prefix:
+        module_name = module.split(".")[-1]
+    else:
+        module_name = module
     inputTraits = []
     outputTraits = []
     outputs_filenames = {}
 
-    #self._outputs_nodes = []
+    # self._outputs_nodes = []
 
     class_string = "\"\"\""
 
@@ -139,11 +147,10 @@ def generate_class(module, launcher):
                      'documentation-url', 'license', 'contributor',
                      'acknowledgements']:
         el = dom.getElementsByTagName(desc_str)
-        if el and el[0].firstChild:
-            class_string += desc_str + ": " + el[
-                0].firstChild.nodeValue + "\n\n"
+        if el and el[0].firstChild and el[0].firstChild.nodeValue.strip():
+            class_string += desc_str + ": " + el[0].firstChild.nodeValue.strip() + "\n\n"
         if desc_str == 'category':
-            category = el[0].firstChild.nodeValue
+            category = el[0].firstChild.nodeValue.strip()
     class_string += "\"\"\""
 
     for paramGroup in dom.getElementsByTagName("parameters"):
@@ -159,13 +166,13 @@ def generate_class(module, launcher):
 
             longFlagNode = param.getElementsByTagName('longflag')
             if longFlagNode:
-                ## Prefer to use longFlag as name if it is given, rather than the parameter name
+                # Prefer to use longFlag as name if it is given, rather than the parameter name
                 longFlagName = longFlagNode[0].firstChild.nodeValue
-                ## SEM automatically strips prefixed "--" or "-" from from xml before processing
-                ##     we need to replicate that behavior here The following
-                ##     two nodes in xml have the same behavior in the program
-                ##     <longflag>--test</longflag>
-                ##     <longflag>test</longflag>
+                # SEM automatically strips prefixed "--" or "-" from from xml before processing
+                # we need to replicate that behavior here The following
+                # two nodes in xml have the same behavior in the program
+                # <longflag>--test</longflag>
+                # <longflag>test</longflag>
                 longFlagName = longFlagName.lstrip(" -").rstrip(" ")
                 name = longFlagName
                 name = force_to_valid_python_variable_name(name)
@@ -212,7 +219,7 @@ def generate_class(module, launcher):
 
             if param.nodeName.endswith('-enumeration'):
                 type = "traits.Enum"
-                values = ['"%s"' % el.firstChild.nodeValue for el in param.getElementsByTagName('element')]
+                values = ['"%s"' % str(el.firstChild.nodeValue).replace('"', '') for el in param.getElementsByTagName('element')]
             elif param.nodeName.endswith('-vector'):
                 type = "InputMultiPath"
                 if param.nodeName in ['file', 'directory', 'image', 'geometry', 'transform', 'table']:
@@ -220,7 +227,10 @@ def generate_class(module, launcher):
                               param.nodeName.replace('-vector', '')]]
                 else:
                     values = [typesDict[param.nodeName.replace('-vector', '')]]
-                traitsParams["sep"] = ','
+                if mipav_hacks is True:
+                    traitsParams["sep"] = ";"
+                else:
+                    traitsParams["sep"] = ','
             elif param.getAttribute('multiple') == "true":
                 type = "InputMultiPath"
                 if param.nodeName in ['file', 'directory', 'image', 'geometry', 'transform', 'table']:
@@ -244,7 +254,7 @@ def generate_class(module, launcher):
                         "%s = traits.Either(traits.Bool, %s(%s), %s)" % (name,
                                                                          type,
                                                                          parse_values(
-                                                                         values).replace("exists=True", ""),
+                                                                             values).replace("exists=True", ""),
                                                                          parse_params(traitsParams)))
                     traitsParams["exists"] = True
                     traitsParams.pop("argstr")
@@ -263,11 +273,19 @@ def generate_class(module, launcher):
                 inputTraits.append("%s = %s(%s%s)" % (name, type, parse_values(
                     values), parse_params(traitsParams)))
 
-    input_spec_code = "class " + module + "InputSpec(CommandLineInputSpec):\n"
+    if mipav_hacks:
+        blacklisted_inputs = ["maxMemoryUsage"]
+        inputTraits = [trait for trait in inputTraits if trait.split()[0] not in blacklisted_inputs]
+
+        compulsory_inputs = ['xDefaultMem = traits.Int(desc="Set default maximum heap size", argstr="-xDefaultMem %d")',
+                             'xMaxProcess = traits.Int(1, desc="Set default maximum number of processes.", argstr="-xMaxProcess %d", usedefault=True)']
+        inputTraits += compulsory_inputs
+
+    input_spec_code = "class " + module_name + "InputSpec(CommandLineInputSpec):\n"
     for trait in inputTraits:
         input_spec_code += "    " + trait + "\n"
 
-    output_spec_code = "class " + module + "OutputSpec(TraitedSpec):\n"
+    output_spec_code = "class " + module_name + "OutputSpec(TraitedSpec):\n"
     if not outputTraits:
         output_spec_code += "    pass\n"
     else:
@@ -276,34 +294,61 @@ def generate_class(module, launcher):
 
     output_filenames_code = "_outputs_filenames = {"
     output_filenames_code += ",".join(["'%s':'%s'" % (
-        key, value) for key, value in outputs_filenames.iteritems()])
+        key, value) for key, value in outputs_filenames.items()])
     output_filenames_code += "}"
 
     input_spec_code += "\n\n"
     output_spec_code += "\n\n"
 
-    template = """class %name%(SEMLikeCommandLine):
+    template = """class %module_name%(SEMLikeCommandLine):
     %class_str%
 
-    input_spec = %name%InputSpec
-    output_spec = %name%OutputSpec
+    input_spec = %module_name%InputSpec
+    output_spec = %module_name%OutputSpec
     _cmd = "%launcher% %name% "
     %output_filenames_code%\n"""
+    template += "    _redirect_x = {0}\n".format(str(redirect_x))
 
-    main_class = template.replace('%class_str%', class_string).replace("%name%", module).replace("%output_filenames_code%", output_filenames_code).replace("%launcher%", " ".join(launcher))
+    main_class = template.replace('%class_str%', class_string).replace("%module_name%", module_name).replace("%name%", module).replace("%output_filenames_code%", output_filenames_code).replace("%launcher%", " ".join(launcher))
 
-    return category, input_spec_code + output_spec_code + main_class
+    return category, input_spec_code + output_spec_code + main_class, module_name
 
 
-def grab_xml(module, launcher):
-#        cmd = CommandLine(command = "Slicer3", args="--launch %s --xml"%module)
-#        ret = cmd.run()
+def grab_xml(module, launcher, mipav_hacks=False):
+    #        cmd = CommandLine(command = "Slicer3", args="--launch %s --xml"%module)
+    #        ret = cmd.run()
     command_list = launcher[:]  # force copy to preserve original
     command_list.extend([module, "--xml"])
     final_command = " ".join(command_list)
     xmlReturnValue = subprocess.Popen(
         final_command, stdout=subprocess.PIPE, shell=True).communicate()[0]
-    return xml.dom.minidom.parseString(xmlReturnValue)
+    if mipav_hacks:
+        # workaround for a jist bug https://www.nitrc.org/tracker/index.php?func=detail&aid=7234&group_id=228&atid=942
+        new_xml = ""
+        replace_closing_tag = False
+        for line in xmlReturnValue.splitlines():
+            if line.strip() == "<file collection: semi-colon delimited list>":
+                new_xml += "<file-vector>\n"
+                replace_closing_tag = True
+            elif replace_closing_tag and line.strip() == "</file>":
+                new_xml += "</file-vector>\n"
+                replace_closing_tag = False
+            else:
+                new_xml += line + "\n"
+
+        xmlReturnValue = new_xml
+
+        # workaround for a JIST bug https://www.nitrc.org/tracker/index.php?func=detail&aid=7233&group_id=228&atid=942
+        if xmlReturnValue.strip().endswith("XML"):
+            xmlReturnValue = xmlReturnValue.strip()[:-3]
+        if xmlReturnValue.strip().startswith("Error: Unable to set default atlas"):
+            xmlReturnValue = xmlReturnValue.strip()[len("Error: Unable to set default atlas"):]
+    try:
+        dom = xml.dom.minidom.parseString(xmlReturnValue.strip())
+    except Exception as e:
+        print(xmlReturnValue.strip())
+        raise e
+    return dom
 #        if ret.runtime.returncode == 0:
 #            return xml.dom.minidom.parseString(ret.runtime.stdout)
 #        else:
@@ -312,8 +357,8 @@ def grab_xml(module, launcher):
 
 def parse_params(params):
     list = []
-    for key, value in params.iteritems():
-        if isinstance(value, str) or isinstance(value, unicode):
+    for key, value in params.items():
+        if isinstance(value, string_types):
             list.append('%s="%s"' % (key, value.replace('"', "'")))
         else:
             list.append('%s=%s' % (key, value))
@@ -333,8 +378,8 @@ def parse_values(values):
 def gen_filename_from_param(param, base):
     fileExtensions = param.getAttribute("fileExtensions")
     if fileExtensions:
-        ## It is possible that multiple file extensions can be specified in a
-        ## comma separated list,  This will extract just the first extension
+        # It is possible that multiple file extensions can be specified in a
+        # comma separated list,  This will extract just the first extension
         firstFileExtension = fileExtensions.split(',')[0]
         ext = firstFileExtension
     else:
@@ -343,14 +388,14 @@ def gen_filename_from_param(param, base):
     return base + ext
 
 if __name__ == "__main__":
-    ## NOTE:  For now either the launcher needs to be found on the default path, or
-    ##        every tool in the modules list must be found on the default path
-    ##        AND calling the module with --xml must be supported and compliant.
+    # NOTE:  For now either the launcher needs to be found on the default path, or
+    # every tool in the modules list must be found on the default path
+    # AND calling the module with --xml must be supported and compliant.
     modules_list = ['MedianImageFilter',
                     'CheckerBoardFilter',
                     'EMSegmentCommandLine',
                     'GrayscaleFillHoleImageFilter',
-                    #'CreateDICOMSeries', #missing channel
+                    # 'CreateDICOMSeries', #missing channel
                     'TractographyLabelMapSeeding',
                     'IntensityDifferenceMetric',
                     'DWIToDTIEstimation',
@@ -409,9 +454,9 @@ if __name__ == "__main__":
                     'EMSegmentTransformToNewFormat',
                     'BSplineToDeformationField']
 
-    ## SlicerExecutionModel compliant tools that are usually statically built, and don't need the Slicer3 --launcher
-    generate_all_classes(modules_list=modules_list,launcher=[])
-    ## Tools compliant with SlicerExecutionModel called from the Slicer environment (for shared lib compatibility)
-    #launcher = ['/home/raid3/gorgolewski/software/slicer/Slicer', '--launch']
-    #generate_all_classes(modules_list=modules_list, launcher=launcher)
-    #generate_all_classes(modules_list=['BRAINSABC'], launcher=[] )
+    # SlicerExecutionModel compliant tools that are usually statically built, and don't need the Slicer3 --launcher
+    generate_all_classes(modules_list=modules_list, launcher=[])
+    # Tools compliant with SlicerExecutionModel called from the Slicer environment (for shared lib compatibility)
+    # launcher = ['/home/raid3/gorgolewski/software/slicer/Slicer', '--launch']
+    # generate_all_classes(modules_list=modules_list, launcher=launcher)
+    # generate_all_classes(modules_list=['BRAINSABC'], launcher=[] )
