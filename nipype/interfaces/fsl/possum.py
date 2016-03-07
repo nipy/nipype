@@ -2,11 +2,6 @@
 # -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
-#
-# @Author: oesteban - code@oscaresteban.es
-# @Date:   2014-07-03 15:27:53
-# @Last Modified by:   oesteban
-# @Last Modified time: 2014-07-03 17:05:47
 """
 The possum module provides classes for interfacing with `POSSUM
 <http://fsl.fmrib.ox.ac.uk/fsl/fslwiki/POSSUM>`_ command line tools.
@@ -22,14 +17,8 @@ Please, check out the link for pertinent citations using POSSUM.
 
 """
 
-import os
-import shutil
-import warnings
-
-from nipype.interfaces.fsl.base import FSLCommand, FSLCommandInputSpec, Info
-from nipype.interfaces.base import (TraitedSpec, isdefined, File, Directory,
-                                    InputMultiPath, OutputMultiPath, traits)
-from nipype.utils.filemanip import fname_presuffix, split_filename, copyfile
+from .base import FSLCommand, FSLCommandInputSpec
+from ..base import TraitedSpec, File, traits
 
 
 class B0CalcInputSpec(FSLCommandInputSpec):
@@ -54,9 +43,10 @@ class B0CalcInputSpec(FSLCommandInputSpec):
     z_b0 = traits.Float(1.0, argstr='--b0=%0.2f', desc=('Value for zeroth-order b0 field '
                         '(z-component), in Tesla'), xor=['xyz_b0'])
 
-    xyz_b0 = traits.Tuple(traits.Float, traits.Float, traits.Float,
-                      argstr='--b0x=%0.2f --b0y=%0.2f --b0=%0.2f', xor=['x_b0','y_b0','z_b0'],
-                      desc='Zeroth-order B0 field in Tesla')
+    xyz_b0 = traits.Tuple(
+        traits.Float, traits.Float, traits.Float,
+        argstr='--b0x=%0.2f --b0y=%0.2f --b0=%0.2f', xor=['x_b0','y_b0','z_b0'],
+        desc='Zeroth-order B0 field in Tesla')
 
     delta = traits.Float(-9.45e-6, argstr='-d %e', desc='Delta value (chi_tissue - chi_air)')
     chi_air = traits.Float(4.0e-7, argstr='--chi0=%e', desc='susceptibility of air')
