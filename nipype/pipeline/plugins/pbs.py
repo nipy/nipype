@@ -7,7 +7,7 @@ import subprocess
 
 from .base import (SGELikeBatchManagerBase, logger, iflogger, logging)
 
-from nipype.interfaces.base import CommandLine
+from ...interfaces.base import CommandLine, text_type
 
 
 class PBSPlugin(SGELikeBatchManagerBase):
@@ -87,6 +87,8 @@ class PBSPlugin(SGELikeBatchManagerBase):
         iflogger.setLevel(logging.getLevelName('CRITICAL'))
         tries = 0
         while True:
+            result = cmd.run()
+            '''
             try:
                 result = cmd.run()
             except Exception as e:
@@ -97,9 +99,10 @@ class PBSPlugin(SGELikeBatchManagerBase):
                     iflogger.setLevel(oldlevel)
                     raise RuntimeError('\n'.join((('Could not submit pbs task'
                                                    ' for node %s') % node._id,
-                                                  str(e))))
+                                                  text_type(e))))
             else:
                 break
+            '''
         iflogger.setLevel(oldlevel)
         # retrieve pbs taskid
         taskid = result.runtime.stdout.split('.')[0]

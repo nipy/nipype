@@ -1164,7 +1164,7 @@ class Stream(object):
     def _read(self, drain):
         "Read from the file descriptor"
         fd = self.fileno()
-        buf = os.read(fd, 4096).decode()
+        buf = os.read(fd, 4096).decode(locale.getdefaultlocale()[1])
         if not buf and not self._buf:
             return None
         if '\n' not in buf:
