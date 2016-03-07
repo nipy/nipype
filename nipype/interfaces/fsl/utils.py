@@ -2042,10 +2042,7 @@ class WarpPointsFromStdInputSpec(CommandLineInputSpec):
 class WarpPointsFromStd(CommandLine):
     """
     Use FSL `std2imgcoord <http://fsl.fmrib.ox.ac.uk/fsl/fsl-4.1.9/flirt/overview.html>`_
-    to transform point sets to standard space coordinates. Accepts plain text files and
-    vtk files.
-
-    .. Note:: transformation of TrackVis trk files is not yet implemented
+    to transform point sets to standard space coordinates. Accepts plain text .
 
 
     Examples

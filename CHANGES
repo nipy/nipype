@@ -1,6 +1,7 @@
 Next release
 ============
 
+* ENH: Simple interface to FSL std2imgcoords (https://github.com/nipy/nipype/pull/1398)
 * FIX: Prevent crash when tvtk is loaded - ETS_TOOLKIT=null (https://github.com/nipy/nipype/pull/973)
 * ENH: New interfaces in dipy: RESTORE, EstimateResponseSH, CSD and StreamlineTractography
        (https://github.com/nipy/nipype/pull/1090)
