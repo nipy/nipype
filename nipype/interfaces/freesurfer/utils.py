@@ -2652,16 +2652,18 @@ class Contrast(FSCommand):
 
 class RelabelHypointensitiesInputSpec(FSTraitedSpec):
     # required
-    lh_white = File(mandatory=True, exists=True,
-                    desc="Input file must be <subject_id>/surf/lh.white")
-    rh_white = File(mandatory=True, exists=True,
-                    desc="Input file must be <subject_id>/surf/rh.white")
+    lh_white = File(mandatory=True, exists=True, copyfile=True,
+                    desc="Implicit input file must be lh.white")
+    rh_white = File(mandatory=True, exists=True, copyfile=True,
+                    desc="Implicit input file must be rh.white")
     aseg = File(argstr="%s", position=-3, mandatory=True, exists=True,
                 desc="Input aseg file")
-    # optional
-    surf_directory = traits.Directory(argstr="%s", position=-2, exists=True, mandatory=False, genfile=True,
+    surf_directory = traits.Directory('.', argstr="%s", position=-2, exists=True,
+                                      mandatory=False, usedefault=True,
                                       desc="Directory containing lh.white and rh.white")
-    out_file = File(argstr="%s", position=-1, exists=False, mandatory=False, genfile=True,
+    out_file = File(argstr="%s", position=-1, exists=False,
+                    name_source=['aseg'], name_template='%s.hypos.mgz',
+                    hash_files=False, keep_extension=False,
                     desc="Output aseg file")
 
 
@@ -2674,32 +2676,25 @@ class RelabelHypointensities(FSCommand):
     """
     Relabel Hypointensities
 
-    Examples                                                                                                                                                                                                          ========
+    Examples
+    ========
     >>> from nipype.interfaces.freesurfer import RelabelHypointensities
     >>> relabelhypos = RelabelHypointensities()
-    >>> relabelhypos.inputs.lh_white = '../surf/lh.white' # doctest: +SKIP
-    >>> relabelhypos.inputs.rh_white = '../surf/rh.white' # doctest: +SKIP
-    >>> relabelhypos.inputs.surf_directory = '../surf' # doctest: +SKIP
-    >>> relabelhypos.inputs.aseg = 'aseg.presurf.mgz' # doctest: +SKIP
-    >>> relabelhypos.inputs.out_file = 'aseg.presurf.hypos.mgz' # doctest: +SKIP
-    >>> relabelhypos.cmdline # doctest: +SKIP
-    'mri_relabel_hypointensities aseg.presurf.mgz ../surf aseg.presurf.hypos.mgz'
+    >>> relabelhypos.inputs.lh_white = 'lh.pial'
+    >>> relabelhypos.inputs.rh_white = 'lh.pial'
+    >>> relabelhypos.inputs.surf_directory = '.'
+    >>> relabelhypos.inputs.aseg = 'aseg.mgz'
+    >>> relabelhypos.cmdline
+    'mri_relabel_hypointensities aseg.mgz . aseg.hypos.mgz'
     """
 
     _cmd = 'mri_relabel_hypointensities'
     input_spec = RelabelHypointensitiesInputSpec
     output_spec = RelabelHypointensitiesOutputSpec
 
-    def _gen_filename(self, name):
-        if name == 'surf_directory':
-            return os.path.dirname(self.inputs.lh_white)
-        elif name == 'out_file':
-            return self._list_outputs()[name]
-        return None
-
     def _list_outputs(self):
         outputs = self._outputs().get()
-        outputs["out_file"] = str(self.inputs.aseg).rstrip('mgz') + 'hypos.mgz'
+        outputs["out_file"] = os.path.abspath(self.inputs.out_file)
         return outputs
 
 
