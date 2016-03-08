@@ -31,6 +31,7 @@ from ..base import (TraitedSpec, File, traits,
                     CommandLineInputSpec, isdefined)
 from ...utils.filemanip import fname_presuffix
 from ... import logging
+from ..freesurfer.utils import copy2subjdir
 iflogger = logging.getLogger('interface')
 
 
@@ -1869,13 +1870,19 @@ class SegmentCCInputSpec(FSTraitedSpec):
                    desc="Input aseg file to read from subjects directory")
     in_norm = File(mandatory=True, exists=True,
                    desc="Required undocumented input {subject}/mri/norm.mgz")
-    out_file = File(argstr="-o %s", mandatory=True, exists=False,
+    out_file = File(argstr="-o %s", exists=False,
+                    name_source=['in_file'], name_template='%s.auto.mgz',
+                    hash_files=False, keep_extension=False,
                     desc="Filename to write aseg including CC")
     out_rotation = File(argstr="-lta %s", mandatory=True, exists=False,
                         desc="Global filepath for writing rotation lta")
     subject_id = traits.String('subject_id', argstr="%s", mandatory=True,
                                position=-1, usedefault=True,
                                desc="Subject name")
+    copy_inputs = traits.Bool(mandatory=False,
+                              desc="If running as a node, set this to True." +
+                              "This will copy the input files to the node " +
+                              "directory.")
 
 
 class SegmentCCOutputSpec(TraitedSpec):
@@ -1902,7 +1909,6 @@ class SegmentCC(FSCommand):
     >>> SegmentCC_node = freesurfer.SegmentCC()
     >>> SegmentCC_node.inputs.in_file = "aseg.mgz"
     >>> SegmentCC_node.inputs.in_norm = "norm.mgz"
-    >>> SegmentCC_node.inputs.out_file = "aseg.auto.mgz"
     >>> SegmentCC_node.inputs.out_rotation = "cc.lta"
     >>> SegmentCC_node.inputs.subject_id = "test"
     >>> SegmentCC_node.cmdline
@@ -1918,25 +1924,6 @@ class SegmentCC(FSCommand):
     # So, if the files are not there, they will be copied to that
     # location
     def _format_arg(self, name, spec, value):
-        if name in ["in_file", "in_norm"]:
-            if isdefined(self.inputs.subjects_dir):
-                subjects_dir = self.inputs.subjects_dir
-            else:
-                # If no subjects directory has been set, use cwd
-                subjects_dir = os.getcwd()
-                self.inputs.subjects_dir = subjects_dir
-
-            # subj_dir is set to the directory for that subject_id
-            subj_dir = os.path.join(subjects_dir,
-                                    self.inputs.subject_id)
-            # Get the file path the mri_cc will use
-            basename = os.path.basename(value)
-            fspath = os.path.join(subj_dir, 'mri', basename)
-            if not os.path.isfile(fspath):
-                # if the file path doesn't exist, copy the file
-                if not os.path.isdir(os.path.dirname(fspath)):
-                    os.makedirs(os.path.dirname(fspath))
-                shutil.copy(value, fspath)
         if name in ["in_file", "in_norm", "out_file"]:
             # mri_cc can't use abspaths just the basename
             basename = os.path.basename(value)
@@ -1949,7 +1936,16 @@ class SegmentCC(FSCommand):
         outputs['out_rotation'] = os.path.abspath(self.inputs.out_rotation)
         return outputs
 
-    def aggregate_outputs(self, **inputs):
+    def run(self, **inputs):
+        if self.inputs.copy_inputs:
+            self.inputs.subjects_dir = os.getcwd()
+            if 'subjects_dir' in inputs:
+                inputs['subjects_dir'] = self.inputs.subjects_dir
+            for originalfile in [self.inputs.in_file, self.inputs.in_norm]:
+                copy2subjdir(self, originalfile, folder='mri')
+        return super(SegmentCC, self).run(**inputs)
+    
+    def aggregate_outputs(self, runtime=None, needed_outputs=None):
         # it is necessary to find the output files and move
         # them to the correct loacation
         predicted_outputs = self._list_outputs()
@@ -1962,7 +1958,7 @@ class SegmentCC(FSCommand):
                                             self.inputs.subject_id)
                 else:
                     subj_dir = os.path.join(os.getcwd(),
-                                            self.inputs.subjec_id)
+                                            self.inputs.subject_id)
                 if name == 'out_file':
                     out_tmp = os.path.join(subj_dir,
                                            'mri',
@@ -1979,7 +1975,7 @@ class SegmentCC(FSCommand):
                     if not os.path.isdir(os.path.dirname(out_tmp)):
                         os.makedirs(os.path.dirname(out_tmp))
                     shutil.move(out_tmp, out_file)
-        return super(SegmentCC, self).aggregate_outputs(**inputs)
+        return super(SegmentCC, self).aggregate_outputs(runtime, needed_outputs)
 
 
 class SegmentWMInputSpec(FSTraitedSpec):

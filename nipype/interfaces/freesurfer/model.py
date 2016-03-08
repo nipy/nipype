@@ -18,7 +18,7 @@ from ..freesurfer.base import FSCommand, FSTraitedSpec
 from ..base import (TraitedSpec, File, traits, InputMultiPath,
                     OutputMultiPath, Directory, isdefined)
 from ...utils.filemanip import fname_presuffix, split_filename
-
+from ..freesurfer.utils import copy2subjdir
 
 class MRISPreprocInputSpec(FSTraitedSpec):
     out_file = File(argstr='--out %s', genfile=True,
@@ -118,21 +118,23 @@ class MRISPreprocReconAllInputSpec(MRISPreprocInputSpec):
                              xor=('surf_measure',
                                   'surf_measure_file', 'surf_area'),
                              desc='file necessary for surfmeas')
-    surfreg_file = File(
-        argstr="--surfreg %s", desc="Input surface registration file")
-    subject_id = traits.String(argstr='--s %s',
-                               xor=(
-                                   'subjects', 'fsgd_file', 'subject_file', 'subject_id'),
+    surfreg_file = File(argstr="--surfreg %s",
+                        desc="Input surface registration file")
+    subject_id = traits.String('subject_id', argstr='--s %s', usedefault=True,
+                               xor=('subjects', 'fsgd_file',
+                                    'subject_file', 'subject_id'),
                                desc='subject from who measures are calculated')
-
-
+    copy_inputs = traits.Bool(desc="If running as a node, set this to True " +
+                              "otherwise, this will copy some inputs to the " +
+                              "node directory.")
+    target_dir = traits.Directory(desc="target directory (will be symlinked if not in subjects_dir)")
+    
 class MRISPreprocReconAll(MRISPreproc):
 
     """Extends MRISPreproc to allow it to be used in a recon-all workflow
 
     Examples
-    --------
-
+    ========
     >>> preproc = MRISPreprocReconAll()
     >>> preproc.inputs.target = 'fsaverage'
     >>> preproc.inputs.hemi = 'lh'
@@ -141,23 +143,36 @@ class MRISPreprocReconAll(MRISPreproc):
     >>> preproc.inputs.out_file = 'concatenated_file.mgz'
     >>> preproc.cmdline
     'mris_preproc --hemi lh --out concatenated_file.mgz --target fsaverage --iv cont1.nii register.dat --iv cont1a.nii register.dat'
-
     """
 
     input_spec = MRISPreprocReconAllInputSpec
 
-    def _verify_file_location(self, filepath, name):
-        head, tail = os.path.split(filepath)
-        surf_dir = os.path.join(
-            self.inputs.subjects_dir, self.inputs.subject_id, 'surf')
-        if head != surf_dir:
-            raise traits.TraitError(
-                "MRIS_PreprocReconAll: {0} must be located in subjects_dir/subject_id/surf\
-                instead a file location of {1} was given".format(name, filepath))
+    def run(self, **inputs):
+        if self.inputs.copy_inputs:
+            self.inputs.subjects_dir = os.getcwd()
+            if 'subjects_dir' in inputs:
+                inputs['subjects_dir'] = self.inputs.subjects_dir
+            if isdefined(self.inputs.surf_dir):
+                folder = self.inputs.surf_dir
+            else:
+                folder = 'surf'
+            copy2subjdir(self, self.inputs.surfreg_file, folder)
+            copy2subjdir(self, self.inputs.surf_measure_file, folder)
 
+            # find the target directory mri_preproc will look for
+            if isdefined(self.inputs.target_dir):
+                t_dir = os.path.join(self.inputs.subjects_dir,
+                                     self.inputs.target_dir)
+                if not os.path.isdir(t_dir):
+                    # symlink to where mris_preproc will look
+                    os.symlink(target_dir, t_dir)
+            
+        return super(MRISPreprocReconAll, self).run(**inputs)
+        
     def _format_arg(self, name, spec, value):
         if name in ("surfreg_file", "surf_measure_file"):
-            self._verify_file_location(value, name)
+            basename = os.path.basename(value)
+            # mris_preproc looks for these files in the surf dir
             return spec.argstr % os.path.basename(value).lstrip('rh.').lstrip('lh.')
         return super(MRISPreprocReconAll, self)._format_arg(name, spec, value)
 
@@ -731,8 +746,7 @@ class SegStats(FSCommand):
                 fname = value
             return spec.argstr % fname
         elif name == 'in_intensity':
-            intensity_name = os.path.basename(
-                self.inputs.in_intensity).replace('.mgz', '')
+            intensity_name = os.path.basename(self.inputs.in_intensity).replace('.mgz', '')
             return spec.argstr % (value, intensity_name)
         return super(SegStats, self)._format_arg(name, spec, value)
 
@@ -746,6 +760,7 @@ class SegStatsReconAllInputSpec(SegStatsInputSpec):
     # recon-all input requirements
     subject_id = traits.String(argstr="--subject %s", mandatory=True,
                                desc="Subject id being processed")
+    # implicit
     ribbon = traits.File(mandatory=True, exists=True,
                          desc="Input file mri/ribbon.mgz")
     presurf_seg = File(mandatory=True, exists=True,
@@ -764,15 +779,20 @@ class SegStatsReconAllInputSpec(SegStatsInputSpec):
                    desc="Input file must be <subject_id>/surf/lh.pial")
     rh_pial = File(mandatory=True, exists=True,
                    desc="Input file must be <subject_id>/surf/rh.pial")
+    copy_inputs = traits.Bool(desc="If running as a node, set this to True " +
+                              "otherwise, this will copy the implicit inputs " +
+                              "to the node directory.")
 
+    
 class SegStatsReconAll(SegStats):
 
     """
-    This class inherits SegStats to and modifies it for use in a recon-all workflow.
-    This implementation mandates implicit inputs that SegStats does make mandatory
-    and to ensure backwards compatability of SegStats, this class was created.
+    This class inherits SegStats and modifies it for use in a recon-all workflow.
+    This implementation mandates implicit inputs that SegStats. 
+    To ensure backwards compatability of SegStats, this class was created.
 
-    Examples                                                                                                                                                                                                          ========
+    Examples
+    ========
     >>> from nipype.interfaces.freesurfer import SegStatsReconAll
     >>> segstatsreconall = SegStatsReconAll()
     >>> segstatsreconall.inputs.annot = ('PWS04', 'lh', 'aparc')
@@ -805,36 +825,45 @@ class SegStatsReconAll(SegStats):
     input_spec = SegStatsReconAllInputSpec
     output_spec = SegStatsOutputSpec
 
-    def _list_outputs(self):
-        outputs = self.output_spec().get()
-        if isdefined(self.inputs.summary_file):
-            outputs['summary_file'] = os.path.abspath(self.inputs.summary_file)
-        elif isdefined(self.inputs.segmentation_file) and isdefined(self.inputs.subjects_dir):
-            basename = os.path.basename(
-                self.inputs.segmentation_file).replace('.mgz', '.stats')
-            outputs['summary_file'] = os.path.join(
-                self.inputs.subjects_dir, self.inputs.subject_id, 'stats', basename)
+    def _copy2subjdir(self, in_file, folder=None, basename=None):
+        subjects_dir = self.inputs.subjects_dir
+        subject_id = self.inputs.subject_id
+        if basename == None:
+            basename = os.path.basename(in_file)
+        if folder != None:
+            out_dir = os.path.join(subjects_dir, subject_id, folder)
         else:
-            outputs['summary_file'] = os.path.join(
-                os.getcwd(), 'summary.stats')
-        suffices = dict(avgwf_txt_file='_avgwf.txt', avgwf_file='_avgwf.nii.gz',
-                        sf_avg_file='sfavg.txt')
-        if isdefined(self.inputs.segmentation_file):
-            _, src = os.path.split(self.inputs.segmentation_file)
-        if isdefined(self.inputs.annot):
-            src = '_'.join(self.inputs.annot)
-        if isdefined(self.inputs.surf_label):
-            src = '_'.join(self.inputs.surf_label)
-        for name, suffix in suffices.items():
-            value = getattr(self.inputs, name)
-            if isdefined(value):
-                if isinstance(value, bool):
-                    outputs[name] = fname_presuffix(src, suffix=suffix,
-                                                    newpath=os.getcwd(),
-                                                    use_ext=False)
-                else:
-                    outputs[name] = os.path.abspath(value)
-        return outputs
+            out_dir = os.path.join(subjects_dir, subject_id)
+        if not os.path.isdir(out_dir):
+            os.makedirs(out_dir)
+        out_file = os.path.join(out_dir, basename)
+        shutil.copy(in_file, out_file)
+
+    def _format_arg(self, name, spec, value):
+        if self.inputs.copy_inputs:
+            cwd = os.getcwd()
+            if self.inputs.subjects_dir != cwd:
+                self.inputs.subjects_dir = cwd
+            folder = None
+            basename = None
+            if name in ['lh_orig_nofix', 'rh_orig_nofix',
+                        'lh_white', 'rh_white', 'lh_pial',
+                        'rh_pial']:
+                folder = 'surf'
+                basename = name.replace('_', '.')
+            elif name in ['ribbon', 'presuf_seg', 'transform', 'in_intensity']:
+                folder = 'mri'
+                if name == 'ribbon':
+                    basename = 'ribbon.mgz'
+                elif name == 'presurf_seg':
+                    basename = 'aseg.presurf.mgz'
+                elif name == 'transform':
+                    basename = 'talairach.xfm'
+                elif name == 'in_intensity':
+                    basename = os.path.basename(value)
+            if folder and basename:
+                self.copy2subjdir(value, basename=basename, folder=folder)
+        return super(SegStats, self)._format_arg(name, spec, value)
 
 
 class Label2VolInputSpec(FSTraitedSpec):
@@ -1024,25 +1053,31 @@ class MS_LDA(FSCommand):
 class Label2LabelInputSpec(FSTraitedSpec):
     hemisphere = traits.String(argstr="--hemi %s", mandatory=True,
                                desc="Input hemisphere")
-    subject_id = traits.String(argstr="--trgsubject %s", mandatory=True,
+    subject_id = traits.String('subject_id', usedefault=True,
+                               argstr="--trgsubject %s", mandatory=True,
                                desc="Target subject")
-    label = traits.String(mandatory=True, desc="Input label name")
     sphere_reg = File(mandatory=True, exists=True,
                       desc="Implicit input <hemisphere>.sphere.reg")
     white = File(mandatory=True, exists=True,
                  desc="Implicit input <hemisphere>.white")
-    # optional
-    source_subject = traits.String(argstr="--srcsubject %s", mandatory=False, genfile=True,
-                                   desc="Source subject")
-    source_label = File(argstr="--srclabel %s", mandatory=False, genfile=True, exists=True,
+    source_sphere_reg = File(mandatory=True, exists=True,
+                             desc="Implicit input <hemisphere>.sphere.reg")
+    source_label = File(argstr="--srclabel %s", mandatory=True, exists=True,
                         desc="Source label")
+
+    # optional
+    source_subject = traits.Directory(argstr="--srcsubject %s", mandatory=True,
+                                      desc="Source subject directory")
     target_label = File(argstr="--trglabel %s", mandatory=False, genfile=True,
                         desc="Source label")
     registration_method = traits.String(argstr="--regmethod %s", mandatory=False, genfile=True,
-                                        desc="Target subject")
-    threshold = traits.Bool(
-        mandatory=False, desc="Specifies whether source label should be the threshold label")
-
+                                        desc="Registration method")
+    threshold = traits.Bool(mandatory=False,
+                            desc="Specifies whether source label should be the threshold label")
+    copy_inputs = traits.Bool(mandatory=False,
+                              desc="If running as a node, set this to True." +
+                              "This will copy the input files to the node " +
+                              "directory.")
 
 class Label2LabelOutputSpec(TraitedSpec):
     out_file = File(exists=True, desc='Output label')

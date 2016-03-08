@@ -34,6 +34,27 @@ filetypes = ['cor', 'mgh', 'mgz', 'minc', 'analyze',
              'nifti1', 'nii', 'niigz']
 
 
+def copy2subjdir(cls, in_file, folder=None, basename=None):
+    if isdefined(cls.inputs.subjects_dir):
+        subjects_dir = cls.inputs.subjects_dir
+    else:
+        subjects_dir = os.getcwd()
+    if isdefined(cls.inputs.subject_id):
+        subject_id = cls.inputs.subject_id
+    else:
+        subject_id = 'subject_id'
+    if basename == None:
+        basename = os.path.basename(in_file)
+    if folder != None:
+        out_dir = os.path.join(subjects_dir, subject_id, folder)
+    else:
+        out_dir = os.path.join(subjects_dir, subject_id)
+    if not os.path.isdir(out_dir):
+        os.makedirs(out_dir)
+    out_file = os.path.join(out_dir, basename)
+    shutil.copy(in_file, out_file)
+
+
 class SampleToSurfaceInputSpec(FSTraitedSpec):
 
     source_file = File(exists=True, mandatory=True, argstr="--mov %s",
@@ -1072,7 +1093,8 @@ class SmoothTessellationInputSpec(FSTraitedSpec):
     """
 
     in_file = File(exists=True, mandatory=True, argstr='%s',
-                   position=-2, desc='Input volume to tesselate voxels from.')
+                   position=-2, copyfile=True,
+                   desc='Input volume to tesselate voxels from.')
     curvature_averaging_iterations = traits.Int(argstr='-a %d', desc='Number of curvature averaging iterations (default=10)')
     smoothing_iterations = traits.Int(argstr='-n %d', desc='Number of smoothing iterations (default=10)')
     snapshot_writing_iterations = traits.Int(argstr='-w %d', desc='Write snapshot every "n" iterations')
@@ -1568,15 +1590,17 @@ class MRIFill(FSCommand):
 
 
 class MRIsInflateInputSpec(FSTraitedSpec):
-    in_file = File(argstr="%s", position=-2, mandatory=True, exists=True,
+    in_file = File(argstr="%s", position=-2, mandatory=True,
+                   exists=True, copyfile=True,
                    desc="Input file for MRIsInflate")
-    out_file = File(argstr="%s", position=-1, mandatory=True, exists=False,
+    out_file = File(argstr="%s", position=-1, exists=False,
+                    name_source=['in_file'], name_template="%s.inflated",
+                    hash_files=False, keep_extension=True,
                     desc="Output file for MRIsInflate")
     # optional
     out_sulc = File(mandatory=False, exists=False,
                     xor=['no_save_sulc'],
-                    desc="Future filename of the sulc file. Location is \
-                    {SUBJECTS_DIR}/{SUBJID}/surf/<hemisphere>.sulc")
+                    desc="Output sulc file")
     no_save_sulc = traits.Bool(argstr='-no-save-sulc', mandatory=False,
                                xor=['out_sulc'],
                                desc="Do not save sulc file as output")
@@ -1591,14 +1615,14 @@ class MRIsInflate(FSCommand):
     """
     This program will inflate a cortical surface.
 
-    Examples                                                                                                                                                                                                          ========
+    Examples
+    ========
     >>> from nipype.interfaces.freesurfer import MRIsInflate
     >>> inflate = MRIsInflate()
-    >>> inflate.inputs.in_file = 'lh.smoothwm.nofix' # doctest: +SKIP
-    >>> inflate.inputs.out_file = 'lh.inflated.nofix' # doctest: +SKIP
+    >>> inflate.inputs.in_file = 'lh.pial'
     >>> inflate.inputs.no_save_sulc = True
     >>> inflate.cmdline # doctest: +SKIP
-    'mris_inflate -no-save-sulc lh.smoothwm.nofix lh.inflated.nofix'
+    'mris_inflate -no-save-sulc lh.pial lh.inflated'
     """
 
     _cmd = 'mris_inflate'
@@ -1615,7 +1639,8 @@ class MRIsInflate(FSCommand):
 
 
 class SphereInputSpec(FSTraitedSpecOpenMP):
-    in_file = File(argstr="%s", position=-2, mandatory=True, exists=True,
+    in_file = File(argstr="%s", position=-2, copyfile=True,
+                   mandatory=True, exists=True,
                    desc="Input file for Sphere")
     out_file = File(argstr="%s", position=-1, exists=False,
                     name_source=['in_file'], hash_files=False,
@@ -1625,8 +1650,9 @@ class SphereInputSpec(FSTraitedSpecOpenMP):
     seed = traits.Int(argstr="-seed %d", mandatory=False,
                       desc="Seed for setting random number generator")
     magic = traits.Bool(argstr="-q", mandatory=False,
-                        desc="Magic. No documentation. Direct questions to analysis-bugs@nmr.mgh.harvard.edu")
-    in_smoothwm = File(mandatory=False, exists=True,
+                        requires=['in_smoothwm'],
+                        desc="No documentation. Direct questions to analysis-bugs@nmr.mgh.harvard.edu")
+    in_smoothwm = File(mandatory=False, exists=True, copyfile=True,
                        desc="Input surface required when -q flag is not selected")
 
 
@@ -1642,9 +1668,8 @@ class Sphere(FSCommandOpenMP):
     >>> from nipype.interfaces.freesurfer import Sphere
     >>> sphere = Sphere()
     >>> sphere.inputs.in_file = 'lh.pial'
-    >>> sphere.inputs.magic = True
     >>> sphere.cmdline
-    'mris_sphere -q lh.pial lh.sphere'
+    'mris_sphere lh.pial lh.sphere'
     """
     _cmd = 'mris_sphere'
     input_spec = SphereInputSpec
@@ -1661,6 +1686,10 @@ class FixTopologyInputSpec(FSTraitedSpec):
                    desc="Undocumented input file <hemisphere>.orig")
     in_inflated = File(exists=True, mandatory=True,
                        desc="Undocumented input file <hemisphere>.inflated")
+    in_brain = File(exists=True, mandatory=True,
+                    desc="Implicit input brain.mgz")
+    in_wm = File(exists=True, mandatory=True,
+                 desc="Implicit input wm.mgz")
     hemisphere = traits.String(position=-1, argstr="%s", mandatory=True,
                                desc="Hemisphere being processed")
     subject_id = traits.String('subject_id', position=-2, argstr="%s",
@@ -1692,7 +1721,8 @@ class FixTopology(FSCommand):
     of the cortex from a previously generated approximation of the
     cortical surface, thus guaranteeing a topologically correct surface.
 
-    Examples                                                                                                                                                                                                          ========
+    Examples
+    ========
     >>> from nipype.interfaces.freesurfer import FixTopology
     >>> ft = FixTopology()
     >>> ft.inputs.in_orig = 'lh.orig' # doctest: +SKIP
@@ -1710,31 +1740,26 @@ class FixTopology(FSCommand):
     input_spec = FixTopologyInputSpec
     output_spec = FixTopologyOutputSpec
 
-    def _format_arg(self, name, spec, value):
+    def run(self, **inputs):
         if self.inputs.copy_inputs:
-            if name in ['in_orig', 'in_inflated', 'sphere']:
-                cwd = os.getcwd()
-                # Set subjects_dir to cwd
-                self.inputs.subjects_dir = cwd
-                surf_dir = os.path.join(cwd,
-                                        self.inputs.subject_id,
-                                        'surf')
-                if not os.path.isdir(surf_dir):
-                    os.makedirs(surf_dir)
-
-                if name == 'in_orig':
-                    tmp_file = os.path.join(surf_dir,
-                                            '{0}.orig'.format(self.inputs.hemisphere))
-                    # set in_orig to the copied orig file
-                    self.input.in_orig = tmp_file
-                if name == 'in_inflated':
-                    tmp_file = os.path.join(surf_dir,
-                                            '{0}.inflated'.format(self.inputs.hemisphere))
-                if name == 'sphere':
-                    basename = os.path.basename(value)
-                    tmp_file = os.path.join(surf_dir, basename)
-                # copy the input file to the temp surf directory
-                shutil.copy(value, tmp_file)
+            self.inputs.subjects_dir = os.getcwd()
+            if 'subjects_dir' in inputs:
+                inputs['subjects_dir'] = self.inputs.subjects_dir
+            hemi = self.inputs.hemisphere
+            copy2subjdir(self, self.inputs.sphere, folder='surf')
+            copy2subjdir(self, self.inputs.in_orig,
+                         folder='surf',
+                         basename='{0}.orig'.format(hemi))
+            copy2subjdir(self, self.inputs.in_inflated,
+                         folder='surf',
+                         basename='{0}.inflated'.format(hemi))
+            copy2subjdir(self, self.inputs.in_brain,
+                         folder='mri', basename='brain.mgz')
+            copy2subjdir(self, self.inputs.in_wm,
+                         folder='mri', basename='wm.mgz')
+        return super(FixTopology, self).run(**inputs)
+    
+    def _format_arg(self, name, spec, value):
         if name == 'sphere':
             # get the basename and take out the hemisphere
             suffix = os.path.basename(value).split('.', 1)[1]
@@ -1763,9 +1788,9 @@ class EulerNumber(FSCommand):
     Examples                                                                                                                                                                                                          ========
     >>> from nipype.interfaces.freesurfer import EulerNumber
     >>> ft = EulerNumber()
-    >>> ft.inputs.in_file = 'lh.orig' # doctest: +SKIP
-    >>> ft.cmdline # doctest: +SKIP
-    'mris_euler_number lh.orig'
+    >>> ft.inputs.in_file = 'lh.pial
+    >>> ft.cmdline
+    'mris_euler_number lh.pial'
     """
     _cmd = 'mris_euler_number'
     input_spec = EulerNumberInputSpec
@@ -1778,9 +1803,12 @@ class EulerNumber(FSCommand):
 
 
 class RemoveIntersectionInputSpec(FSTraitedSpec):
-    in_file = File(argstr="%s", position=-2, mandatory=True, exists=True,
+    in_file = File(argstr="%s", position=-2, mandatory=True,
+                   exists=True, copyfile=True,
                    desc="Input file for RemoveIntersection")
-    out_file = File(argstr="%s", position=-1, mandatory=True, exists=False,
+    out_file = File(argstr="%s", position=-1, exists=False,
+                    name_source=['in_file'], name_template='%s',
+                    hash_files=False, keep_extension=True,
                     desc="Output file for RemoveIntersection")
 
 
@@ -1792,13 +1820,13 @@ class RemoveIntersection(FSCommand):
     """
     This program removes the intersection of the given MRI
 
-    Examples                                                                                                                                                                                                          ========
+    Examples
+    ========
     >>> from nipype.interfaces.freesurfer import RemoveIntersection
     >>> ri = RemoveIntersection()
-    >>> ri.inputs.in_file = 'lh.orig' # doctest: +SKIP
-    >>> ri.inputs.out_file = 'lh.orig' # doctest: +SKIP
-    >>> ri.cmdline # doctest: +SKIP
-    'mris_remove_intersection lh.orig lh.orig'
+    >>> ri.inputs.in_file = 'lh.pial'
+    >>> ri.cmdline
+    'mris_remove_intersection lh.pial lh.pial'
     """
 
     _cmd = 'mris_remove_intersection'
@@ -1826,9 +1854,9 @@ class MakeSurfacesInputSpec(FSTraitedSpec):
                  desc="Implicit input file wm.mgz")
     in_filled = File(exists=True, mandatory=True,
                      desc="Implicit input file filled.mgz")
+    # optional
     in_label = File(exists=True, mandatory=False, xor=['noaparc'],
                     desc="Implicit input label/<hemisphere>.aparc.annot")
-    # optional
     orig_white = File(argstr="-orig_white %s", exists=True, mandatory=False,
                       desc="Specify a white surface to start with")
     orig_pial = File(argstr="-orig_pial %s", exists=True, mandatory=False, requires=['in_label'],
@@ -1898,43 +1926,31 @@ class MakeSurfaces(FSCommand):
     input_spec = MakeSurfacesInputSpec
     output_spec = MakeSurfacesOutputSpec
 
-    def _copy2subjdir(self, in_file, folder=None, basename=None):
-        subjects_dir = self.inputs.subjects_dir
-        subject_id = self.inputs.subject_id
-        if basename == None:
-            basename = os.path.basename(in_file)
-        if folder != None:
-            out_dir = os.path.join(subjects_dir, subject_id, folder)
-        else:
-            out_dir = os.path.join(subjects_dir, subject_id)
-        if not os.path.isdir(out_dir):
-            os.makedirs(out_dir)
-        out_file = os.path.join(out_dir, basename)
-        shutil.copy(in_file, out_file)
-
-    def _format_arg(self, name, spec, value):
+    def run(self, **inputs):
         if self.inputs.copy_inputs:
-            cwd = os.path.getcwd()
-            if self.inputs.subjects_dir != cwd:
-                self.inputs.subjects_dir = cwd
-            if name in ['in_T1', 'in_aseg', 'in_wm', 'in_filled']:
-                if name in ['in_wm']:
-                    # this is the basename that the will used implicitly
-                    basename = 'wm.mgz'
-                elif name in ['in_filled']:
-                    # this is the basename that the will used implicitly
-                    basename = 'filled.mgz'
-                else:
-                    basename = os.path.basename(value)
-                folder = 'mri'
-            elif name in ['orig_white', 'orig_pial', 'in_orig']:
-                folder = 'surf'
-                basename = os.path.basename(value)
-            elif name in ['in_label']:
-                basename = '{0}.aparc.annot'.format(self.inputs.hemisphere)
-                folder = 'label'
-            self.copy2subjdir(value, basename=basename, folder=folder)
+            self.inputs.subjects_dir = os.getcwd()
+            if 'subjects_dir' in inputs:
+                inputs['subjects_dir'] = self.inputs.subjects_dir
+            copy2subjdir(self, self.inputs.in_wm,
+                         folder='mri', basename='wm.mgz')
+            copy2subjdir(self, self.inputs.in_filled,
+                         folder='mri', basename='filled.mgz')
+            for originalfile in [self.inputs.in_aseg,
+                                 self.inputs.in_T1]:
+                if isdefined(originalfile):
+                    copy2subjdir(self, originalfile, folder='mri')
+            for originalfile in [self.inputs.orig_white,
+                                 self.inputs.orig_pial,
+                                 self.inputs.in_orig]:
+                if isdefined(originalfile):
+                    copy2subjdir(self, originalfile, folder='surf')
+            if isdefined(self.inputs.in_label):
+                copy2subjdir(self, self.inputs.in_label, 'label',
+                             '{0}.aparc.annot'.format(self.inputs.hemisphere))
+        return super(MakeSurfaces, self).run(**inputs)
 
+        
+    def _format_arg(self, name, spec, value):
         if name in ['in_T1', 'in_aseg']:
             # These inputs do not take full paths as inputs or even basenames
             basename = os.path.basename(value)
@@ -1977,7 +1993,8 @@ class MakeSurfaces(FSCommand):
             dest_dir, str(self.inputs.hemisphere) + '.curv')
         outputs["out_area"] = os.path.join(
             dest_dir, str(self.inputs.hemisphere) + '.area')
-        # Something determines when a pial surface and thickness file is generated, but documentation doesn't say what
+        # Something determines when a pial surface and thickness file is generated
+        # but documentation doesn't say what.
         # The orig_pial flag is just a guess
         if isdefined(self.inputs.orig_pial):
             outputs["out_curv"] = outputs["out_curv"] + ".pial"
@@ -2315,32 +2332,19 @@ class VolumeMask(FSCommand):
     input_spec = VolumeMaskInputSpec
     output_spec = VolumeMaskOutputSpec
 
-    def _copy2subjdir(self, in_file, folder=None, basename=None):
-        subjects_dir = self.inputs.subjects_dir
-        subject_id = self.inputs.subject_id
-        if basename == None:
-            basename = os.path.basename(in_file)
-        if folder != None:
-            out_dir = os.path.join(subjects_dir, subject_id, folder)
-        else:
-            out_dir = os.path.join(subjects_dir, subject_id)
-        if not os.path.isdir(out_dir):
-            os.makedirs(out_dir)
-        out_file = os.path.join(out_dir, basename)
-        shutil.copy(in_file, out_file)
-
-    def _format_arg(self, name, spec, value):
+    def run(self, **inputs):
         if self.inputs.copy_inputs:
-            cwd = os.path.getcwd()
-            if self.inputs.subjects_dir != cwd:
-                self.inputs.subjects_dir = cwd
-            if name in ['lh_pial', 'rh_pial', 'lh_white', 'rh_white']:
-                folder = 'surf'
-                basename = name.replace('_', '.')
-            if name in ['in_aseg']:
-                folder = 'mri'
-                basename = os.path.basename(value)
-            self.copy2subjdir(value, basename=basename, folder=folder)
+            self.inputs.subjects_dir = os.getcwd()
+            if 'subjects_dir' in inputs:
+                inputs['subjects_dir'] = self.inputs.subjects_dir
+            copy2subjdir(self, self.inputs.lh_pial, 'surf', 'lh.pial')
+            copy2subjdir(self, self.inputs.rh_pial, 'surf', 'rh.pial')
+            copy2subjdir(self, self.inputs.lh_white, 'surf', 'lh.white')
+            copy2subjdir(self, self.inputs.rh_white, 'surf', 'rh.white')
+            copy2subjdir(self, self.inputs.in_aseg, 'mri')
+        return super(VolumeMask, self).run(**inputs)
+        
+    def _format_arg(self, name, spec, value):
         if name == 'in_aseg':
             return spec.argstr % os.path.basename(value).rstrip('.mgz')
         return super(VolumeMask, self)._format_arg(name, spec, value)
@@ -2445,46 +2449,25 @@ class ParcellationStats(FSCommand):
     input_spec = ParcellationStatsInputSpec
     output_spec = ParcellationStatsOutputSpec
 
-    def _copy2subjdir(self, in_file, folder=None, basename=None):
-        subjects_dir = self.inputs.subjects_dir
-        subject_id = self.inputs.subject_id
-        if basename == None:
-            basename = os.path.basename(in_file)
-        if folder != None:
-            out_dir = os.path.join(subjects_dir, subject_id, folder)
-        else:
-            out_dir = os.path.join(subjects_dir, subject_id)
-        if not os.path.isdir(out_dir):
-            os.makedirs(out_dir)
-        out_file = os.path.join(out_dir, basename)
-        shutil.copy(in_file, out_file)
-
-    def _format_arg(self, name, spec, value):
+    def run(self, **inputs):
         if self.inputs.copy_inputs:
-            cwd = os.path.getcwd()
-            if self.inputs.subjects_dir != cwd:
-                self.inputs.subjects_dir = cwd
-            if name in ['lh_white', 'rh_white', 'lh_pial', 'rh_pial']:
-                folder = 'surf'
-                basename = name.replace('_', '.')
-            elif name in ['wm', 'transform', 'brainmask', 'aseg', 'ribbon']:
-                folder = 'mri'
-                if name == 'wm':
-                    basename = 'wm.mgz'
-                elif name == 'transform':
-                    basename = 'talairach.xfm'
-                    folder = os.path.join(folder, 'transforms')
-                elif name == 'brainmask':
-                    basename = 'brainmask.mgz'
-                elif name == 'aseg':
-                    basename = 'aseg.presurf.mgz'
-                elif name == 'ribbon':
-                    basename = 'ribbon.mgz'
-            elif name == 'thickness':
-                folder = 'surf'
-                basename = self.inputs.hemisphere + '.thickness'
-            self.copy2subjdir(value, basename=basename, folder=folder)
-        return super(ParcellationStats, self)._format_arg(name, spec, value)
+            self.inputs.subjects_dir = os.getcwd()
+            if 'subjects_dir' in inputs:
+                inputs['subjects_dir'] = self.inputs.subjects_dir
+            copy2subjdir(self, self.inputs.lh_white, 'surf', 'lh.white')
+            copy2subjdir(self, self.inputs.lh_pial, 'surf', 'lh.pial')
+            copy2subjdir(self, self.inputs.rh_white, 'surf', 'rh.white')
+            copy2subjdir(self, self.inputs.rh_pial, 'surf', 'rh.pial')
+            copy2subjdir(self, self.inputs.wm, 'mri', 'wm.mgz')
+            copy2subjdir(self, self.inputs.transform,
+                         os.path.join('mri', 'transforms'),
+                         'talairach.xfm')
+            copy2subjdir(self, self.inputs.brainmask, 'mri', 'brainmask.mgz')
+            copy2subjdir(self, self.inputs.aseg, 'mri', 'aseg.presurf.mgz')
+            copy2subjdir(self, self.inputs.ribbon, 'mri', 'ribbon.mgz')
+            copy2subjdir(self, self.inputs.thickness, 'surf',
+                         '{0}.thickness'.format(self.inputs.hemisphere))
+        return super(ParcellationStats, self).run(**inputs)
 
     def _gen_filename(self, name):
         if name in ['out_table', 'out_color']:
@@ -2584,7 +2567,8 @@ class Contrast(FSCommand):
     """
     Compute surface-wise gray/white contrast
 
-    Examples                                                                                                                                                                                                          ========
+    Examples
+    ========
     >>> from nipype.interfaces.freesurfer import Contrast
     >>> contrast = Contrast()
     >>> contrast.inputs.subject_id = '10335'
@@ -2603,40 +2587,24 @@ class Contrast(FSCommand):
     input_spec = ContrastInputSpec
     output_spec = ContrastOutputSpec
 
-    def _copy2subjdir(self, in_file, folder=None, basename=None):
-        subjects_dir = self.inputs.subjects_dir
-        subject_id = self.inputs.subject_id
-        if basename == None:
-            basename = os.path.basename(in_file)
-        if folder != None:
-            out_dir = os.path.join(subjects_dir, subject_id, folder)
-        else:
-            out_dir = os.path.join(subjects_dir, subject_id)
-        if not os.path.isdir(out_dir):
-            os.makedirs(out_dir)
-        out_file = os.path.join(out_dir, basename)
-        shutil.copy(in_file, out_file)
-
-    def _format_arg(self, name, spec, value):
+    def run(self, **inputs):
         if self.inputs.copy_inputs:
-            cwd = os.path.getcwd()
-            if self.inputs.subjects_dir != cwd:
-                self.inputs.subjects_dir = cwd
-            if name in ['annotation', 'cortex']:
-                folder = 'label'
-                if name == 'annotation':
-                    basename = self.inputs.hemisphere + 'aparc.annot'
-                elif name == 'cortex':
-                    basename = self.inputs.hemisphere + 'cortex.label'
-            elif name in ['orig', 'rawavg']:
-                folder = 'mri'
-                basename = name + '.mgz'
-            elif name in ['thickness', 'white']:
-                folder = 'surf'
-                basename = self.inputs.hemisphere + '.' + name
-            self.copy2subjdir(value, basename=basename, folder=folder)
-        return super(Contrast, self)._format_arg(name, spec, value)
-
+            self.inputs.subjects_dir = os.getcwd()
+            if 'subjects_dir' in inputs:
+                inputs['subjects_dir'] = self.inputs.subjects_dir
+            hemi = self.inputs.hemisphere
+            copy2subjdir(self, self.inputs.annotation, 'label',
+                         '{0}.aparc.annot'.format(hemi))
+            copy2subjdir(self, self.inputs.cortex, 'label',
+                         '{0}.cortex.label'.format(hemi))
+            copy2subjdir(self, self.inputs.white, 'surf',
+                         '{0}.white'.format(hemi))
+            copy2subjdir(self, self.inputs.thickness, 'surf',
+                         '{0}.thickness'.format(hemi))
+            copy2subjdir(self, self.inputs.orig, 'mri', 'orig.mgz')
+            copy2subjdir(self, self.inputs.rawavg, 'mri', 'rawavg.mgz')
+        return super(Contrast, self).run(**inputs)
+    
     def _list_outputs(self):
         outputs = self._outputs().get()
         subject_dir = os.path.join(
@@ -2793,46 +2761,27 @@ class Aparc2Aseg(FSCommand):
     input_spec = Aparc2AsegInputSpec
     output_spec = Aparc2AsegOutputSpec
 
-    def _copy2subjdir(self, in_file, folder=None, basename=None):
-        subjects_dir = self.inputs.subjects_dir
-        subject_id = self.inputs.subject_id
-        if basename == None:
-            basename = os.path.basename(in_file)
-        if folder != None:
-            out_dir = os.path.join(subjects_dir, subject_id, folder)
-        else:
-            out_dir = os.path.join(subjects_dir, subject_id)
-        if not os.path.isdir(out_dir):
-            os.makedirs(out_dir)
-        out_file = os.path.join(out_dir, basename)
-        shutil.copy(in_file, out_file)
-
-    def _format_arg(self, name, spec, value):
-        # copy inputs
+    def run(self, **inputs):
         if self.inputs.copy_inputs:
-            cwd = os.path.getcwd()
-            if self.inputs.subjects_dir != cwd:
-                self.inputs.subjects_dir = cwd
-            if name in ['lh_white', 'rh_white', 'lh_pial',
-                        'rh_pial', 'lh_ribbon', 'rh_ribbon']:
-                basename = name.replace('_', '.')
-                if name in ['lh_ribbon', 'rh_ribbon']:
-                    folder = 'mri'
-                    basename = basename + '.mgz'
-                else:
-                    folder = 'surf'
-            elif name in ['lh_annotation', 'rh_annotation']:
-                basename = '{0}.aparc.annot'.forma(name.split('_')[0])
-                folder = 'label'
-            elif name == 'ribbon':
-                folder = 'mri'
-                basename = 'ribbon.mgz'
-            elif name == 'aseg':
-                folder = 'mri'
-                basename = os.path.basename(value).replace('.mgz', '')
-            self.copy2subjdir(value, basename=basename, folder=folder)
+            self.inputs.subjects_dir = os.getcwd()
+            if 'subjects_dir' in inputs:
+                inputs['subjects_dir'] = self.inputs.subjects_dir
+            hemi = self.inputs.hemisphere
+            copy2subjdir(self, self.inputs.lh_white, 'surf', 'lh.white')
+            copy2subjdir(self, self.inputs.lh_pial, 'surf', 'lh.pial')
+            copy2subjdir(self, self.inputs.rh_white, 'surf', 'rh.white')
+            copy2subjdir(self, self.inputs.rh_pial, 'surf', 'rh.pial')
+            copy2subjdir(self, self.inputs.lh_ribbon, 'mri', 'lh.ribbon.mgz')
+            copy2subjdir(self, self.inputs.rh_ribbon, 'mri', 'rh.ribbon.mgz')
+            copy2subjdir(self, self.inputs.ribbon, 'mri', 'ribbon.mgz')
+            copy2subjdir(self, self.inputs.aseg, 'mri')
+            copy2subjdir(self, self.inputs.lh_annotation, 'label', 'lh.aparc.annot')
+            copy2subjdir(self, self.inputs.rh_annotation, 'label', 'rh.aparc.annot')
+
+        return super(Aparc2Aseg, self).run(**inputs)
         
-        elif name == 'aseg':
+    def _format_arg(self, name, spec, value):
+        if name == 'aseg':
             # aseg does not take a full filename
             return spec.argstr % os.path.basename(value).replace('.mgz', '')
         elif name == 'out_file':
@@ -2850,7 +2799,7 @@ class Apas2AsegInputSpec(FSTraitedSpec):
     # required
     in_file = File(argstr="--i %s", mandatory=True, exists=True,
                    desc="Input aparc+aseg.mgz")
-    out_file = File(argstr="--o %s", mandatory=True, exists=True,
+    out_file = File(argstr="--o %s", mandatory=True,
                     desc="Output aseg file")
 
 
