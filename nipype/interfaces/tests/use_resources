@@ -21,7 +21,7 @@ def use_gb_ram(num_gb):
 
     # Spin CPU
     ctr = 0
-    while ctr < 100e6:
+    while ctr < 10e6:
         ctr+= 1
 
     # Clear memory
@@ -34,6 +34,7 @@ if __name__ == '__main__':
 
     # Import packages
     import argparse
+    from threading import Thread
     from multiprocessing import Process
 
     # Init argparser
@@ -61,3 +62,6 @@ if __name__ == '__main__':
     print 'Using %.3f GB of memory over %d processors...' % (num_gb, num_procs)
     for proc in proc_list:
         proc.start()
+
+    for proc in proc_list:
+        proc.join()

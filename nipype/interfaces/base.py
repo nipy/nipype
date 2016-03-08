@@ -1205,7 +1205,7 @@ class Stream(object):
 
 
 # Get number of threads for process
-def _get_num_threads(proc):
+def _get_num_threads(proc, log_flg=False):
     """Function to get the number of threads a process is using
 
     Parameters
@@ -1221,12 +1221,26 @@ def _get_num_threads(proc):
 
     # Import packages
     import psutil
+    import logging
 
     # Init variables
     num_threads = proc.num_threads()
+    if log_flg:
+        from CPAC.utils.utils import setup_logger
+        logger = setup_logger('memory_profiler', '/home/dclark/memory_profiler.log',
+                              logging.INFO, to_screen=False)
+
     try:
         num_children = len(proc.children())
+        if log_flg:
+            logger.debug('len(proc.children()): %d' % num_children)
+            logger.debug('proc.id: %s' % str(proc.pid))
         for child in proc.children():
+            if log_flg:
+                logger.debug('child.pid: %d' % child.pid)
+                logger.debug('child.threads(): %s' % str(child.threads()))
+                logger.debug('child.num_threads(): %d' % child.num_threads())
+                logger.debug('len(child.children()): %d' % len(child.children()))
             num_threads = max(num_threads, num_children,
                               child.num_threads(), len(child.children()))
     except psutil.NoSuchProcess:
@@ -1237,19 +1251,17 @@ def _get_num_threads(proc):
 
 
 # Get max resources used for process
-def _get_max_resources_used(proc, mem_mb, num_threads, poll=False):
+def get_max_resources_used(pid, mem_mb, num_threads, log_flg=False):
     """Function to get the RAM and threads usage of a process
 
     Paramters
     ---------
-    proc : subprocess.Popen instance
-        the process to profile
+    pid : integer
+        the process ID of process to profile
     mem_mb : float
         the high memory watermark so far during process execution (in MB)
     num_threads: int
         the high thread watermark so far during process execution
-    poll : boolean
-        whether to poll the process or not
 
     Returns
     -------
@@ -1264,10 +1276,8 @@ def _get_max_resources_used(proc, mem_mb, num_threads, poll=False):
     import psutil
 
     try:
-        mem_mb = max(mem_mb, _get_memory(proc.pid, include_children=True))
-        num_threads = max(num_threads, _get_num_threads(psutil.Process(proc.pid)))
-        if poll:
-            proc.poll()
+        mem_mb = max(mem_mb, _get_memory(pid, include_children=True, log_flg=log_flg))
+        num_threads = max(num_threads, _get_num_threads(psutil.Process(pid), log_flg=log_flg))
     except Exception as exc:
         iflogger.info('Could not get resources used by process. Error: %s'\
                       % exc)
@@ -1331,6 +1341,7 @@ def run_command(runtime, output=None, timeout=0.01, redirect_x=False):
     # Init variables for memory profiling
     mem_mb = -1
     num_threads = -1
+    interval = .5
 
     if output == 'stream':
         streams = [Stream('stdout', proc.stdout), Stream('stderr', proc.stderr)]
@@ -1350,9 +1361,10 @@ def run_command(runtime, output=None, timeout=0.01, redirect_x=False):
         while proc.returncode is None:
             if runtime_profile:
                 mem_mb, num_threads = \
-                    _get_max_resources_used(proc, mem_mb, num_threads)
+                    get_max_resources_used(proc.pid, mem_mb, num_threads)
             proc.poll()
             _process()
+            time.sleep(interval)
         _process(drain=1)
 
         # collect results, merge and return
@@ -1369,7 +1381,9 @@ def run_command(runtime, output=None, timeout=0.01, redirect_x=False):
         if runtime_profile:
             while proc.returncode is None:
                 mem_mb, num_threads = \
-                    _get_max_resources_used(proc, mem_mb, num_threads, poll=True)
+                    get_max_resources_used(proc.pid, mem_mb, num_threads)
+                proc.poll()
+                time.sleep(interval)
         stdout, stderr = proc.communicate()
         if stdout and isinstance(stdout, bytes):
             try:
@@ -1389,7 +1403,9 @@ def run_command(runtime, output=None, timeout=0.01, redirect_x=False):
         if runtime_profile:
             while proc.returncode is None:
                 mem_mb, num_threads = \
-                    _get_max_resources_used(proc, mem_mb, num_threads, poll=True)
+                    get_max_resources_used(proc.pid, mem_mb, num_threads)
+                proc.poll()
+                time.sleep(interval)
         ret_code = proc.wait()
         stderr.flush()
         stdout.flush()
@@ -1400,7 +1416,9 @@ def run_command(runtime, output=None, timeout=0.01, redirect_x=False):
         if runtime_profile:
             while proc.returncode is None:
                 mem_mb, num_threads = \
-                    _get_max_resources_used(proc, mem_mb, num_threads, poll=True)
+                    get_max_resources_used(proc.pid, mem_mb, num_threads)
+                proc.poll()
+                time.sleep(interval)
         proc.communicate()
         result['stdout'] = []
         result['stderr'] = []
