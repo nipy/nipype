@@ -87,8 +87,6 @@ class PBSPlugin(SGELikeBatchManagerBase):
         iflogger.setLevel(logging.getLevelName('CRITICAL'))
         tries = 0
         while True:
-            result = cmd.run()
-            '''
             try:
                 result = cmd.run()
             except Exception as e:
@@ -102,7 +100,6 @@ class PBSPlugin(SGELikeBatchManagerBase):
                                                   text_type(e))))
             else:
                 break
-            '''
         iflogger.setLevel(oldlevel)
         # retrieve pbs taskid
         taskid = result.runtime.stdout.split('.')[0]

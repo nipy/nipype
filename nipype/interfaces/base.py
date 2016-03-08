@@ -1150,6 +1150,9 @@ class Stream(object):
         self._buf = ''
         self._rows = []
         self._lastidx = 0
+        self.default_encoding = locale.getdefaultlocale()[1]
+        if self.default_encoding is None:
+            self.default_encoding = 'UTF-8'
 
     def fileno(self):
         "Pass-through for file descriptor."
@@ -1161,10 +1164,10 @@ class Stream(object):
             if not drain:
                 break
 
-    def _read(self, drain):
+    def _read(self, drain, encoding):
         "Read from the file descriptor"
         fd = self.fileno()
-        buf = os.read(fd, 4096).decode(locale.getdefaultlocale()[1])
+        buf = os.read(fd, 4096).decode(self.default_encoding)
         if not buf and not self._buf:
             return None
         if '\n' not in buf:
@@ -1203,6 +1206,9 @@ def run_command(runtime, output=None, timeout=0.01, redirect_x=False):
             raise RuntimeError('Xvfb was not found, X redirection aborted')
         cmdline = 'xvfb-run -a ' + cmdline
 
+    default_encoding = locale.getdefaultlocale()[1]
+    if default_encoding is None:
+        default_encoding = 'UTF-8'
     if output == 'file':
         errfile = os.path.join(runtime.cwd, 'stderr.nipype')
         outfile = os.path.join(runtime.cwd, 'stdout.nipype')
@@ -1257,8 +1263,8 @@ def run_command(runtime, output=None, timeout=0.01, redirect_x=False):
         result['merged'] = [r[1] for r in temp]
     if output == 'allatonce':
         stdout, stderr = proc.communicate()
-        stdout = stdout.decode(locale.getdefaultlocale()[1])
-        stderr = stderr.decode(locale.getdefaultlocale()[1])
+        stdout = stdout.decode(default_encoding)
+        stderr = stderr.decode(default_encoding)
         result['stdout'] = stdout.split('\n')
         result['stderr'] = stderr.split('\n')
         result['merged'] = ''
@@ -1266,8 +1272,8 @@ def run_command(runtime, output=None, timeout=0.01, redirect_x=False):
         ret_code = proc.wait()
         stderr.flush()
         stdout.flush()
-        result['stdout'] = [line.decode(locale.getdefaultlocale()[1]).strip() for line in open(outfile, 'rb').readlines()]
-        result['stderr'] = [line.decode(locale.getdefaultlocale()[1]).strip() for line in open(errfile, 'rb').readlines()]
+        result['stdout'] = [line.decode(default_encoding).strip() for line in open(outfile, 'rb').readlines()]
+        result['stderr'] = [line.decode(default_encoding).strip() for line in open(errfile, 'rb').readlines()]
         result['merged'] = ''
     if output == 'none':
         proc.communicate()
