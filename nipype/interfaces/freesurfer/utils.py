@@ -34,15 +34,16 @@ filetypes = ['cor', 'mgh', 'mgz', 'minc', 'analyze',
              'nifti1', 'nii', 'niigz']
 
 
-def copy2subjdir(cls, in_file, folder=None, basename=None):
+def copy2subjdir(cls, in_file, folder=None, basename=None, subject_id=None):
     if isdefined(cls.inputs.subjects_dir):
         subjects_dir = cls.inputs.subjects_dir
     else:
         subjects_dir = os.getcwd()
-    if isdefined(cls.inputs.subject_id):
-        subject_id = cls.inputs.subject_id
-    else:
-        subject_id = 'subject_id'
+    if not subject_id:
+        if isdefined(cls.inputs.subject_id):
+            subject_id = cls.inputs.subject_id
+        else:
+            subject_id = 'subject_id'
     if basename == None:
         basename = os.path.basename(in_file)
     if folder != None:
@@ -2074,16 +2075,19 @@ class Curvature(FSCommand):
 class CurvatureStatsInputSpec(FSTraitedSpec):
     surface = File(argstr="-F %s", mandatory=False, exists=True,
                    desc="Specify surface file for CurvatureStats")
-    in_curv = File(argstr="curv", position=-2, mandatory=True, exists=True,
-                   desc="Input file for CurvatureStats")
-    in_sulc = File(argstr="sulc", position=-1, mandatory=True, exists=True,
-                   desc="Input file for CurvatureStats")
-    hemisphere = traits.String(position=-3, argstr="%s", mandatory=True,
-                               desc="Hemisphere being processed")
-    subject_id = traits.String(position=-4, argstr="%s", mandatory=True,
+    curvfile1 = File(argstr="%s", position=-2, mandatory=True, exists=True,
+                     desc="Input file for CurvatureStats")
+    curvfile2 = File(argstr="%s", position=-1, mandatory=True, exists=True,
+                     desc="Input file for CurvatureStats")
+    hemisphere = traits.Enum('lh', 'rh',
+                             position=-3, argstr="%s", mandatory=True,
+                             desc="Hemisphere being processed")
+    subject_id = traits.String('subject_id', usedefault=True,
+                               position=-4, argstr="%s", mandatory=True,
                                desc="Subject being processed")
-    out_file = File(argstr="-o %s", mandatory=False, exists=False, genfile=True,
-                    desc="Output curvature stats file")
+    out_file = File(argstr="-o %s", exists=False,
+                    name_source=['hemisphere'], name_template='%s.curv.stats',
+                    hash_files=False, desc="Output curvature stats file")
     # optional
     min_max = traits.Bool(argstr="-m", mandatory=False,
                           desc="Output min / max information for the processed curvature.")
@@ -2091,6 +2095,10 @@ class CurvatureStatsInputSpec(FSTraitedSpec):
                          desc="Triggers a series of derived curvature values")
     write = traits.Bool(argstr="--writeCurvatureFiles", mandatory=False,
                         desc="Write curvature files")
+    copy_inputs = traits.Bool(mandatory=False,
+                              desc="If running as a node, set this to True." +
+                              "This will copy the input files to the node " +
+                              "directory.")
 
 
 class CurvatureStatsOutputSpec(TraitedSpec):
@@ -2120,49 +2128,47 @@ class CurvatureStats(FSCommand):
     curvatures that result from the above calculations can be
     saved to a series of text and binary-curvature files.
 
-    Examples                                                                                                                                                                                                          ========
+    Examples
+    ========
     >>> from nipype.interfaces.freesurfer import CurvatureStats
     >>> curvstats = CurvatureStats()
     >>> curvstats.inputs.hemisphere = 'lh'
     >>> curvstats.inputs.subject_id = '10335'
-    >>> curvstats.inputs.in_curv = 'lh.curv' # doctest: +SKIP
-    >>> curvstats.inputs.in_sulc = 'lh.sulc' # doctest: +SKIP
-    >>> curvstats.inputs.surface = 'lh.smoothwm' # doctest: +SKIP
+    >>> curvstats.inputs.in_curv = 'lh.pial'
+    >>> curvstats.inputs.in_sulc = 'lh.pial'
+    >>> curvstats.inputs.surface = 'lh.pial'
     >>> curvstats.inputs.out_file = 'lh.curv.stats'
     >>> curvstats.inputs.values = True
     >>> curvstats.inputs.min_max = True
     >>> curvstats.inputs.write = True
-    >>> curvstats.cmdline # doctest: +SKIP
-    'mris_curvature_stats -m -o lh.curv.stats -F smoothwm -G --writeCurvatureFiles 10335 lh curv sulc'
+    >>> curvstats.cmdline
+    'mris_curvature_stats -m -o lh.curv.stats -F pial -G --writeCurvatureFiles 10335 lh pial pial'
     """
 
     _cmd = 'mris_curvature_stats'
     input_spec = CurvatureStatsInputSpec
     output_spec = CurvatureStatsOutputSpec
 
-    def _gen_filename(self, name):
-        if name == 'out_file':
-            return self._list_outputs()[name]
-        return None
-
     def _format_arg(self, name, spec, value):
-        if name == 'surface':
+        if name in ['surface', 'curvfile1', 'curvfile2']:
             prefix = os.path.basename(value).split('.')[1]
             return spec.argstr % prefix
-        elif name in ['in_curv', 'in_sulc']:
-            return spec.argstr
-        else:
-            return super(CurvatureStats, self)._format_arg(name, spec, value)
+        return super(CurvatureStats, self)._format_arg(name, spec, value)
 
     def _list_outputs(self):
         outputs = self._outputs().get()
-        if not isdefined(self.inputs.out_file):
-            outputs["out_file"] = os.path.join(
-                self.inputs.subjects_dir, self.inputs.subject_id, 'stats', str(self.inputs.hemisphere) + '.curv.stats')
-        else:
-            outputs["out_file"] = os.path.abspath(self.inputs.out_file)
+        outputs["out_file"] = os.path.abspath(self.inputs.out_file)
         return outputs
 
+    def run(**inputs):
+        if self.inputs.copy_inputs:
+            self.inputs.subjects_dir = os.getcwd()
+            if 'subjects_dir' in inputs:
+                inputs['subjects_dir'] = self.inputs.subjects_dir
+            copy2subjdir(self, self.inputs.surface, 'surf')
+            copy2subjdir(self, self.inputs.curvfile1, 'surf')
+            copy2subjdir(self, self.inputs.curvfile2, 'surf')
+        return super(CurvatureStats, self).run(**inputs)
 
 class JacobianInputSpec(FSTraitedSpec):
     # required

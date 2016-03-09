@@ -125,9 +125,10 @@ class MRISPreprocReconAllInputSpec(MRISPreprocInputSpec):
                                     'subject_file', 'subject_id'),
                                desc='subject from who measures are calculated')
     copy_inputs = traits.Bool(desc="If running as a node, set this to True " +
-                              "otherwise, this will copy some inputs to the " +
+                              "this will copy some implicit inputs to the " +
                               "node directory.")
     target_dir = traits.Directory(desc="target directory (will be symlinked if not in subjects_dir)")
+
     
 class MRISPreprocReconAll(MRISPreproc):
 
@@ -1051,7 +1052,7 @@ class MS_LDA(FSCommand):
 
 
 class Label2LabelInputSpec(FSTraitedSpec):
-    hemisphere = traits.String(argstr="--hemi %s", mandatory=True,
+    hemisphere = traits.Enum('lh', 'rh', argstr="--hemi %s", mandatory=True,
                                desc="Input hemisphere")
     subject_id = traits.String('subject_id', usedefault=True,
                                argstr="--trgsubject %s", mandatory=True,
@@ -1064,16 +1065,15 @@ class Label2LabelInputSpec(FSTraitedSpec):
                              desc="Implicit input <hemisphere>.sphere.reg")
     source_label = File(argstr="--srclabel %s", mandatory=True, exists=True,
                         desc="Source label")
-
+    source_subject = traits.String(argstr="--srcsubject %s", mandatory=True,
+                                   desc="Source subject name")
     # optional
-    source_subject = traits.Directory(argstr="--srcsubject %s", mandatory=True,
-                                      desc="Source subject directory")
-    target_label = File(argstr="--trglabel %s", mandatory=False, genfile=True,
-                        desc="Source label")
-    registration_method = traits.String(argstr="--regmethod %s", mandatory=False, genfile=True,
-                                        desc="Registration method")
-    threshold = traits.Bool(mandatory=False,
-                            desc="Specifies whether source label should be the threshold label")
+    out_file = File(argstr="--trglabel %s", mandatory=False,
+                    name_source=['source_label'], name_template='%s_converted',
+                    hash_files=False, keep_extension=True,
+                    desc="Target label")
+    registration_method = traits.Enum('surface', 'volume', usedefault=True,
+                                        argstr="--regmethod %s", desc="Registration method")
     copy_inputs = traits.Bool(mandatory=False,
                               desc="If running as a node, set this to True." +
                               "This will copy the input files to the node " +
@@ -1101,13 +1101,13 @@ class Label2Label(FSCommand):
     >>> l2l = Label2Label()
     >>> l2l.inputs.hemisphere = 'lh'
     >>> l2l.inputs.subject_id = '10335'
-    >>> l2l.inputs.label = 'fsaverage'
+    >>> l2l.inputs.source_subject = 'fsaverage'
     >>> l2l.inputs.sphere_reg = 'lh.pial'
+    >>> l2l.inputs.source_sphere_reg = 'lh.pial'
     >>> l2l.inputs.white = 'lh.pial'
-    >>> l2l.inputs.source_label = 'aseg.mgz'
-    >>> l2l.inputs.target_label = 'lh.aparc.label'
+    >>> l2l.inputs.source_label = 'lh-pial.stl'
     >>> l2l.cmdline
-    'mri_label2label --hemi lh --regmethod surface --srclabel aseg.mgz --srcsubject fsaverage --trgsubject 10335 --trglabel lh.aparc.label'
+    'mri_label2label --hemi lh --trglabel lh-pial_converted.stl --regmethod surface --srclabel lh-pial.stl --srcsubject fsaverage --trgsubject 10335'
     """
 
     _cmd = 'mri_label2label'
@@ -1116,52 +1116,23 @@ class Label2Label(FSCommand):
 
     def _list_outputs(self):
         outputs = self._outputs().get()
-        if isdefined(self.inputs.target_label):
-            outputs['out_file'] = self.inputs.target_label
-        else:
-            out_dir = os.path.join(
-                self.inputs.subjects_dir, self.inputs.subject_id, 'label')
-            if self.inputs.threshold:
-                basename = str(self.inputs.hemisphere) + '.' + \
-                    self.inputs.label + '_exvivo.thresh.label'
-            else:
-                basename = str(self.inputs.hemisphere) + '.' + str(self.inputs.label) + '_exvivo.label'
-            outputs['out_file'] = os.path.join(out_dir, basename)
+        outputs['out_file'] = self.inputs.out_file
         return outputs
 
-    def _gen_filename(self, name):
-        # deterimine source subject
-        if not isdefined(self.inputs.source_subject):
-            # by default, the source subject is 'fsaverage'
-            src_subject = 'fsaverage'
-        else:
-            src_subject = self.inputs.source_subject
-        # if generating the source subject string
-        if name == 'source_subject':
-            return src_subject
-        # if generating the source label
-        elif name == 'source_label':
-            # source label will be locaed in the source subject directory
-            fsaverage = os.path.join(self.inputs.subjects_dir, src_subject)
-            # if this directory doesn't exist, we need to create it
-            if not os.path.isdir(fsaverage):
-                fs_home = os.path.abspath(os.environ.get('FREESURFER_HOME'))
-                fsaverage_home = os.path.join(fs_home, 'subjects', 'fsaverage')
-                # Create a symlink
-                os.symlink(fsaverage_home, fsaverage)
-            # input label will be different depending on the whether it is a
-            # threshold or not
-            if self.inputs.threshold:
-                basename = str(self.inputs.hemisphere) + '.' + str(self.inputs.label) + '_exvivo.thresh.label'
-            else:
-                basename = str(self.inputs.hemisphere) + '.' + str(self.inputs.label) + '_exvivo.label'
-            return os.path.join(fsaverage, 'label', basename)
-        elif name == 'target_label':
-            return self._list_outputs()['out_file']
-        elif name == 'registration_method':
-            return 'surface'
-        else:
-            return None
+    def run(self, **inputs):
+        if self.inputs.copy_inputs:
+            self.inputs.subjects_dir = os.getcwd()
+            if 'subjects_dir' in inputs:
+                inputs['subjects_dir'] = self.inputs.subjects_dir
+            hemi = self.inputs.hemisphere
+            copy2subjdir(self, self.inputs.sphere_reg, 'surf',
+                         '{0}.sphere.reg'.format(hemi))
+            copy2subjdir(self, self.inputs.white, 'surf',
+                         '{0}.white'.format(hemi))
+            copy2subjdir(self, self.inputs.source_sphere_reg, 'surf',
+                         '{0}.sphere.reg'.format(hemi),
+                         subject_id=self.inputs.source_subject)
+        return super(Label2Label, self).run(**inputs)
 
 
 class Label2AnnotInputSpec(FSTraitedSpec):
