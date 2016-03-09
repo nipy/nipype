@@ -1249,9 +1249,57 @@ def _get_num_threads(proc, log_flg=False):
     # Return the number of threads found
     return num_threads
 
+def _get_num_ram_mb(pid, pyfunc=False):
+    """Function to get the RAM usage of a process and its children
+
+    Parameters
+    ----------
+    pid : integer
+        the PID of the process to get RAM usage of
+    pyfunc : boolean (optional); default=False
+        a flag to indicate if the process is a python function;
+        when Pythons are multithreaded via multiprocess or threading,
+        children functions include their own memory + parents. if this
+        is set, the parent memory will removed from children memories
+
+    Reference: http://ftp.dev411.com/t/python/python-list/095thexx8g/multiprocessing-forking-memory-usage
+
+    Returns
+    -------
+    mem_mb : float
+        the memory RAM in MB utilized by the process PID
+    """
+
+    # Import packages
+    import psutil
+
+    # Init variables
+    _MB = 1024.0**2
+
+    # Try block to protect against any dying processes in the interim
+    try:
+        # Init parent
+        parent = psutil.Process(pid)
+        # Get memory of parent
+        parent_mem = parent.memory_info().rss
+        mem_mb = parent_mem/_MB
+
+        # Iterate through child processes
+        for child in parent.children(recursive=True):
+            child_mem = child.memory_info().rss
+            if pyfunc:
+                child_mem -= parent_mem
+            mem_mb += child_mem/_MB
+
+    # Catch if process dies, return gracefully
+    except psutil.NoSuchProcess:
+        pass
+
+    # Return memory
+    return mem_mb
 
 # Get max resources used for process
-def get_max_resources_used(pid, mem_mb, num_threads, log_flg=False):
+def get_max_resources_used(pid, mem_mb, num_threads, pyfunc=False, log_flg=False):
     """Function to get the RAM and threads usage of a process
 
     Paramters
@@ -1276,7 +1324,8 @@ def get_max_resources_used(pid, mem_mb, num_threads, log_flg=False):
     import psutil
 
     try:
-        mem_mb = max(mem_mb, _get_memory(pid, include_children=True, log_flg=log_flg))
+        #mem_mb = max(mem_mb, _get_memory(pid, include_children=True, log_flg=log_flg))
+        mem_mb = max(mem_mb, _get_num_ram_mb(pid, pyfunc=pyfunc))
         num_threads = max(num_threads, _get_num_threads(psutil.Process(pid), log_flg=log_flg))
     except Exception as exc:
         iflogger.info('Could not get resources used by process. Error: %s'\

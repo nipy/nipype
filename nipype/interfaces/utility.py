@@ -496,7 +496,7 @@ class Function(IOBase):
             proc.start()
             while proc.is_alive():
                 mem_mb, num_threads = \
-                    get_max_resources_used(proc.pid, mem_mb, num_threads, log_flg=log_flg)
+                    get_max_resources_used(proc.pid, mem_mb, num_threads, pyfunc=True, log_flg=log_flg)
    
             # Get result from process queue
             out = queue.get()

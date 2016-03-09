@@ -101,7 +101,7 @@ def use_resources(num_procs, num_gb):
     print 'Using %.3f GB of memory over %d processors...' % (num_gb, num_procs)
     for idx, proc in enumerate(proc_list):
         proc.start()
-        logger.debug('Starting PID: %d' % proc.pid)
+        #logger.debug('Starting PID: %d' % proc.pid)
 
     for proc in proc_list:
         proc.join()
@@ -137,11 +137,71 @@ class RuntimeProfilerTestCase(unittest.TestCase):
 
         # Init parameters
         # Input RAM GB to occupy
-        self.num_gb= .75
+        self.num_gb= 4
         # Input number of processors
         self.num_procs = 1
         # Acceptable percent error for memory profiled against input
         self.mem_err_percent = 5
+
+    # ! Only used for benchmarking the profiler over a range of
+    # ! processors and RAM usage
+    # ! Requires a LOT of RAM and PROCS to be tested
+    def _collect_range_runtime_stats(self):
+        '''
+        Function to collect a range of runtime stats
+        '''
+
+        # Import packages
+        import json
+        import numpy as np
+        import pandas as pd
+
+        # Init variables
+        num_procs_range = 8
+        ram_gb_range = 10.0
+        ram_gb_step = 0.25
+        dict_list = []
+
+        # Iterate through all combos
+        for num_procs in np.arange(1, num_procs_range+1, 1):
+            for num_gb in np.arange(0.25, ram_gb_range+ram_gb_step, ram_gb_step):
+                # Cmd-level
+                cmd_fin_str = self._run_cmdline_workflow(num_gb, num_procs)
+                cmd_node_stats = json.loads(cmd_fin_str)
+                cmd_runtime_procs = int(cmd_node_stats['runtime_threads'])
+                cmd_runtime_gb = float(cmd_node_stats['runtime_memory_gb'])
+
+                # Func-level
+                func_fin_str = self._run_function_workflow(num_gb, num_procs)
+                func_node_stats = json.loads(func_fin_str)
+                func_runtime_procs = int(func_node_stats['runtime_threads'])
+                func_runtime_gb = float(func_node_stats['runtime_memory_gb'])
+
+                # Calc errors
+                cmd_procs_err = cmd_runtime_procs - num_procs
+                cmd_gb_err = cmd_runtime_gb - num_gb
+                func_procs_err = func_runtime_procs - num_procs
+                func_gb_err = func_runtime_gb - num_gb
+
+                # Node dictionary
+                results_dict = {'input_procs' : num_procs,
+                                'input_gb' : num_gb,
+                                'cmd_runtime_procs' : cmd_runtime_procs,
+                                'cmd_runtime_gb' : cmd_runtime_gb,
+                                'func_runtime_procs' : func_runtime_procs,
+                                'func_runtime_gb' : func_runtime_gb,
+                                'cmd_procs_err' : cmd_procs_err,
+                                'cmd_gb_err' : cmd_gb_err,
+                                'func_procs_err' : func_procs_err,
+                                'func_gb_err' : func_gb_err}
+                # Append to list
+                dict_list.append(results_dict)
+
+        # Create dataframe
+        runtime_results_df = pd.DataFrame(dict_list)
+
+        # Return dataframe
+        return runtime_results_df
 
     # Test node
     def _run_cmdline_workflow(self, num_gb, num_procs):
@@ -370,69 +430,6 @@ class RuntimeProfilerTestCase(unittest.TestCase):
         # Assert runtime stats are what was input
         self.assertLessEqual(runtime_gb_err, allowed_gb_err, msg=mem_err)
         self.assertEqual(num_procs, runtime_procs, msg=procs_err)
-
-    # Collect stats for range of num_threads and memory amount
-    def _collect_range_runtime_stats(self):
-        '''
-        Function to collect a range of runtime stats
-        '''
-
-        # Import packages
-        import json
-        import numpy as np
-        import pandas as pd
-
-        # Init variables
-        num_procs_range = 8
-        ram_gb_range = 10.0
-        ram_gb_step = 0.25
-        dict_list = []
-
-        # Iterate through all combos
-        for num_procs in np.arange(1, num_procs_range+1, 1):
-            for num_gb in np.arange(0.25, ram_gb_range+ram_gb_step, ram_gb_step):
-                # Cmd-level
-                cmd_fin_str = self._run_cmdline_workflow(num_gb, num_procs)
-                cmd_node_stats = json.loads(cmd_fin_str)
-                cmd_runtime_procs = int(cmd_node_stats['runtime_threads'])
-                cmd_runtime_gb = float(cmd_node_stats['runtime_memory_gb'])
-
-                # Func-level
-                func_fin_str = self._run_function_workflow(num_gb, num_procs)
-                func_node_stats = json.loads(func_fin_str)
-                func_runtime_procs = int(func_node_stats['runtime_threads'])
-                func_runtime_gb = float(func_node_stats['runtime_memory_gb'])
-
-                # Calc errors
-                cmd_procs_err = cmd_runtime_procs - num_procs
-                cmd_gb_err = cmd_runtime_gb - num_gb
-                func_procs_err = func_runtime_procs - num_procs
-                func_gb_err = func_runtime_gb - num_gb
-
-                # Node dictionary
-                results_dict = {'input_procs' : num_procs,
-                                'input_gb' : num_gb,
-                                'cmd_runtime_procs' : cmd_runtime_procs,
-                                'cmd_runtime_gb' : cmd_runtime_gb,
-                                'func_runtime_procs' : func_runtime_procs,
-                                'func_runtime_gb' : func_runtime_gb,
-                                'cmd_procs_err' : cmd_procs_err,
-                                'cmd_gb_err' : cmd_gb_err,
-                                'func_procs_err' : func_procs_err,
-                                'func_gb_err' : func_gb_err}
-                # Append to list
-                dict_list.append(results_dict)
-
-        # Create dataframe
-        runtime_results_df = pd.DataFrame(dict_list)
-
-        # Return dataframe
-        return runtime_results_df
-
-    def test_write_df_to_csv(self):
-        df = self._collect_range_runtime_stats()
-        df.to_csv('/home/dclark/runtime_results.csv')
-        #self.assertEqual(1, 1)
 
 
 # Command-line run-able unittest module
