@@ -63,6 +63,23 @@ class BseOutputSpec(TraitedSpec):
 
 
 class Bse(CommandLine):
+    """
+    brain surface extractor (BSE)
+    This program performs automated skull and scalp removal on T1-weighted MRI volumes.
+    
+    http://brainsuite.org/processing/surfaceextraction/bse/
+    
+    Examples
+    --------
+    
+    >>> from nipype.interfaces import brainsuite
+    >>> from nipype.testing import example_data
+    >>> bse = brainsuite.Bse()
+    >>> bse.inputs.inputMRIFile = example_data('structural.nii')
+    >>> results = bse.run() #doctest: +SKIP
+    
+    """
+
     input_spec = BseInputSpec
     output_spec = BseOutputSpec
     _cmd = 'bse'
@@ -156,6 +173,25 @@ class BfcOutputSpec(TraitedSpec):
 
 
 class Bfc(CommandLine):
+    """
+    bias field corrector (BFC)
+    This program corrects gain variation in T1-weighted MRI.
+
+    http://brainsuite.org/processing/surfaceextraction/bfc/
+    
+    Examples
+    --------
+    
+    >>> from nipype.interfaces import brainsuite
+    >>> from nipype.testing import example_data
+    >>> bfc = brainsuite.Bfc()
+    >>> bfc.inputs.inputMRIFile = example_data('structural.nii')
+    >>> bfc.inputs.inputMaskFile = example_data('mask.nii')
+    >>> results = bfc.run() #doctest: +SKIP
+    
+    """
+
+
     input_spec = BfcInputSpec
     output_spec = BfcOutputSpec
     _cmd = 'bfc'
@@ -202,6 +238,25 @@ class PvcOutputSpec(TraitedSpec):
 
 
 class Pvc(CommandLine):
+    """
+    partial volume classifier (PVC) tool.
+    This program performs voxel-wise tissue classification T1-weighted MRI.
+    Image should be skull-stripped and bias-corrected before tissue classification.
+    
+    http://brainsuite.org/processing/surfaceextraction/pvc/
+    
+    Examples
+    --------
+    
+    >>> from nipype.interfaces import brainsuite
+    >>> from nipype.testing import example_data
+    >>> pvc = brainsuite.Pvc()
+    >>> pvc.inputs.inputMRIFile = example_data('structural.nii')
+    >>> pvc.inputs.inputMaskFile = example_data('mask.nii')
+    >>> results = pvc.run() #doctest: +SKIP
+    
+    """
+
     input_spec = PvcInputSpec
     output_spec = PvcOutputSpec
     _cmd = 'pvc'
@@ -262,6 +317,28 @@ class CerebroOutputSpec(TraitedSpec):
 
 
 class Cerebro(CommandLine):
+    """
+    Cerebrum/cerebellum labeling tool
+    This program performs automated labeling of cerebellum and cerebrum in T1 MRI.
+    Input MRI should be skull-stripped or a brain-only mask should be provided.
+
+
+    http://brainsuite.org/processing/surfaceextraction/cerebrum/
+
+    Examples
+    --------
+
+    >>> from nipype.interfaces import brainsuite
+    >>> from nipype.testing import example_data
+    >>> cerebro = brainsuite.Cerebro()
+    >>> cerebro.inputs.inputMRIFile = example_data('structural.nii')
+    >>> cerebro.inputs.inputAtlasMRIFile = 'atlasMRIVolume.img'
+    >>> cerebro.inputs.inputAtlasLabelFile = 'atlasLabels.img'
+    >>> cerebro.inputs.inputBrainMaskFile = example_data('mask.nii')
+    >>> results = cerebro.run() #doctest: +SKIP
+    
+    """
+    
     input_spec = CerebroInputSpec
     output_spec = CerebroOutputSpec
     _cmd = 'cerebro'
@@ -304,6 +381,25 @@ class CortexOutputSpec(TraitedSpec):
 
 
 class Cortex(CommandLine):
+    """
+    cortex extractor
+    This program produces a cortical mask using tissue fraction estimates
+    and a co-registered cerebellum/hemisphere mask.
+
+    http://brainsuite.org/processing/surfaceextraction/cortex/
+
+    Examples
+    --------
+
+    >>> from nipype.interfaces import brainsuite
+    >>> from nipype.testing import example_data
+    >>> cortex = brainsuite.Cortex()
+    >>> cortex.inputs.inputHemisphereLabelFile = example_data('mask.nii')
+    >>> cortex.inputs.inputTissueFractionFile = example_data('tissues.nii.gz')
+    >>> results = cortex.run() #doctest: +SKIP
+    
+    """
+
     input_spec = CortexInputSpec
     output_spec = CortexOutputSpec
     _cmd = 'cortex'
@@ -340,6 +436,23 @@ class ScrubmaskOutputSpec(TraitedSpec):
 
 
 class Scrubmask(CommandLine):
+    """
+    ScrubMask tool
+    scrubmask filters binary masks to trim loosely connected voxels that may
+    result from segmentation errors and produce bumps on tessellated surfaces.
+
+    http://brainsuite.org/processing/surfaceextraction/scrubmask/
+
+    Examples
+    --------
+
+    >>> from nipype.interfaces import brainsuite
+    >>> from nipype.testing import example_data
+    >>> scrubmask = brainsuite.Scrubmask()
+    >>> scrubmask.inputs.inputMaskFile = example_data('mask.nii')
+    >>> results = scrubmask.run() #doctest: +SKIP
+    
+    """
     input_spec = ScrubmaskInputSpec
     output_spec = ScrubmaskOutputSpec
     _cmd = 'scrubmask'
@@ -379,6 +492,21 @@ class TcaOutputSpec(TraitedSpec):
 
 
 class Tca(CommandLine):
+    """
+    topological correction algorithm (TCA)
+    This program removes topological handles from a binary object.
+
+    http://brainsuite.org/processing/surfaceextraction/tca/
+    
+    Examples
+    --------
+    >>> from nipype.interfaces import brainsuite
+    >>> from nipype.testing import example_data
+    >>> tca = brainsuite.Tca()
+    >>> tca.inputs.inputMaskFile = example_data('mask.nii')
+    >>> results = tca.run() #doctest: +SKIP
+        
+    """
     input_spec = TcaInputSpec
     output_spec = TcaOutputSpec
     _cmd = 'tca'
@@ -413,6 +541,28 @@ class DewispOutputSpec(TraitedSpec):
 
 
 class Dewisp(CommandLine):
+    """
+    dewisp
+    removes wispy tendril structures from cortex model binary masks.
+    It does so based on graph theoretic analysis of connected components,
+    similar to TCA. Each branch of the structure graph is analyzed to determine
+    pinch points that indicate a likely error in segmentation that attaches noise
+    to the image. The pinch threshold determines how many voxels the cross-section
+    can be before it is considered part of the image.
+
+    http://brainsuite.org/processing/surfaceextraction/dewisp/
+    
+    Examples
+    --------
+
+    >>> from nipype.interfaces import brainsuite
+    >>> from nipype.testing import example_data
+    >>> dewisp = brainsuite.Dewisp()
+    >>> dewisp.inputs.inputMaskFile = example_data('mask.nii')
+    >>> results = dewisp.run() #doctest: +SKIP
+    
+    """
+    
     input_spec = DewispInputSpec
     output_spec = DewispOutputSpec
     _cmd = 'dewisp'
@@ -466,6 +616,23 @@ class DfsOutputSpec(TraitedSpec):
 
 
 class Dfs(CommandLine):
+    """
+    Surface Generator
+    Generates mesh surfaces using an isosurface algorithm.
+
+    http://brainsuite.org/processing/surfaceextraction/inner-cortical-surface/
+
+    Examples
+    --------
+
+    >>> from nipype.interfaces import brainsuite
+    >>> from nipype.testing import example_data
+    >>> dfs = brainsuite.Dfs()
+    >>> dfs.inputs.inputVolumeFile = example_data('structural.nii')
+    >>> results = dfs.run() #doctest: +SKIP
+
+    """
+
     input_spec = DfsInputSpec
     output_spec = DfsOutputSpec
     _cmd = 'dfs'
@@ -533,6 +700,25 @@ class PialmeshOutputSpec(TraitedSpec):
 
 
 class Pialmesh(CommandLine):
+    """
+    pialmesh
+    computes a pial surface model using an inner WM/GM mesh and a tissue fraction map.
+    
+    http://brainsuite.org/processing/surfaceextraction/pial/
+    
+    Examples
+    --------
+
+    >>> from nipype.interfaces import brainsuite
+    >>> from nipype.testing import example_data
+    >>> pialmesh = brainsuite.Pialmesh()
+    >>> pialmesh.inputs.inputSurfaceFile = 'input_mesh.dfs'
+    >>> pialmesh.inputs.inputTissueFractionFile = 'frac_file.nii.gz'
+    >>> pialmesh.inputs.inputMaskFile = example_data('mask.nii')
+    >>> results = pialmesh.run() #doctest: +SKIP
+    
+    """
+    
     input_spec = PialmeshInputSpec
     output_spec = PialmeshOutputSpec
     _cmd = 'pialmesh'
@@ -583,6 +769,20 @@ class SkullfinderOutputSpec(TraitedSpec):
 
 
 class Skullfinder(CommandLine):
+    """
+    Skull and scalp segmentation algorithm.
+    
+    Examples
+    --------
+    
+    >>> from nipype.interfaces import brainsuite
+    >>> from nipype.testing import example_data
+    >>> skullfinder = brainsuite.Skullfinder()
+    >>> skullfinder.inputs.inputMRIFile = example_data('structural.nii')
+    >>> skullfinder.inputs.inputMaskFile = example_data('mask.nii')
+    >>> results = skullfinder.run() #doctest: +SKIP
+    
+    """
     input_spec = SkullfinderInputSpec
     output_spec = SkullfinderOutputSpec
     _cmd = 'skullfinder'
@@ -628,6 +828,25 @@ class HemisplitOutputSpec(TraitedSpec):
 
 
 class Hemisplit(CommandLine):
+    """
+    Hemisphere splitter
+    Splits a surface object into two separate surfaces given an input label volume.
+    Each vertex is labeled left or right based on the labels being odd (left) or even (right).
+    The largest contour on the split surface is then found and used as the separation between left and right.
+
+    Examples
+    --------
+    
+    >>> from nipype.interfaces import brainsuite
+    >>> from nipype.testing import example_data
+    >>> hemisplit = brainsuite.Hemisplit()
+    >>> hemisplit.inputs.inputSurfaceFile = 'input_surf.dfs'
+    >>> hemisplit.inputs.inputHemisphereLabelFile = 'label.nii'
+    >>> hemisplit.inputs.pialSurfaceFile = 'pial.dfs'
+    >>> results = hemisplit.run() #doctest: +SKIP    
+    
+    """
+
     input_spec = HemisplitInputSpec
     output_spec = HemisplitOutputSpec
     _cmd = 'hemisplit'
