@@ -1400,7 +1400,7 @@ def run_command(runtime, output=None, timeout=0.01, redirect_x=False):
                     get_max_resources_used(proc.pid, mem_mb, num_threads)
             proc.poll()
             _process()
-            time.sleep(interval)
+            #time.sleep(interval)
         _process(drain=1)
 
         # collect results, merge and return
@@ -1419,7 +1419,7 @@ def run_command(runtime, output=None, timeout=0.01, redirect_x=False):
                 mem_mb, num_threads = \
                     get_max_resources_used(proc.pid, mem_mb, num_threads)
                 proc.poll()
-                time.sleep(interval)
+                #time.sleep(interval)
         stdout, stderr = proc.communicate()
         if stdout and isinstance(stdout, bytes):
             try:
@@ -1441,7 +1441,7 @@ def run_command(runtime, output=None, timeout=0.01, redirect_x=False):
                 mem_mb, num_threads = \
                     get_max_resources_used(proc.pid, mem_mb, num_threads)
                 proc.poll()
-                time.sleep(interval)
+                #time.sleep(interval)
         ret_code = proc.wait()
         stderr.flush()
         stdout.flush()
@@ -1454,7 +1454,7 @@ def run_command(runtime, output=None, timeout=0.01, redirect_x=False):
                 mem_mb, num_threads = \
                     get_max_resources_used(proc.pid, mem_mb, num_threads)
                 proc.poll()
-                time.sleep(interval)
+                #time.sleep(interval)
         proc.communicate()
         result['stdout'] = []
         result['stderr'] = []
