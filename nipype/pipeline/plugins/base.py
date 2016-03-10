@@ -21,10 +21,11 @@ import numpy as np
 import scipy.sparse as ssp
 
 
-from ..utils import (nx, dfs_preorder, topological_sort)
-from ..engine import (MapNode, str2bool)
+from ...utils.filemanip import savepkl, loadpkl
+from ...utils.misc import str2bool
+from ..engine.utils import (nx, dfs_preorder, topological_sort)
+from ..engine import MapNode
 
-from nipype.utils.filemanip import savepkl, loadpkl
 
 from ... import logging
 logger = logging.getLogger('workflow')
@@ -362,7 +363,7 @@ class DistributedPluginBase(PluginBase):
                     self.proc_done[jobid] = True
                     self.proc_pending[jobid] = True
                     # Send job to task manager and add to pending tasks
-                    logger.info('Executing: %s ID: %d' %
+                    logger.info('Submitting: %s ID: %d' %
                                 (self.procs[jobid]._id, jobid))
                     if self._status_callback:
                         self._status_callback(self.procs[jobid], 'start')
@@ -404,7 +405,7 @@ class DistributedPluginBase(PluginBase):
                                 self.proc_pending[jobid] = False
                             else:
                                 self.pending_tasks.insert(0, (tid, jobid))
-                    logger.info('Finished executing: %s ID: %d' %
+                    logger.info('Finished submitting: %s ID: %d' %
                                 (self.procs[jobid]._id, jobid))
             else:
                 break

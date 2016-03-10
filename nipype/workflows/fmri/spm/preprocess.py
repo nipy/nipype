@@ -10,7 +10,8 @@ from ....pipeline import engine as pe
 from ....interfaces.matlab import no_matlab
 from ...smri.freesurfer.utils import create_getmask_flow
 
-logger = pe.logger
+from .... import logging
+logger = logging.getLogger('workflow')
 
 
 def create_spm_preproc(name='preproc'):

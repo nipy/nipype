@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """Utility routines for workflow graphs
@@ -30,16 +32,16 @@ package_check('networkx', '1.3')
 
 import networkx as nx
 
-from ..external.six import string_types
-from ..utils.filemanip import (fname_presuffix, FileNotFoundError,
-                               filename_to_list, get_related_files)
-from ..utils.misc import create_function_from_source, str2bool
-from ..interfaces.base import (CommandLine, isdefined, Undefined,
-                               InterfaceResult)
-from ..interfaces.utility import IdentityInterface
-from ..utils.provenance import ProvStore, pm, nipype_ns, get_id
+from ...external.six import string_types
+from ...utils.filemanip import (fname_presuffix, FileNotFoundError,
+                                filename_to_list, get_related_files)
+from ...utils.misc import create_function_from_source, str2bool
+from ...interfaces.base import (CommandLine, isdefined, Undefined,
+                                InterfaceResult)
+from ...interfaces.utility import IdentityInterface
+from ...utils.provenance import ProvStore, pm, nipype_ns, get_id
 
-from .. import logging, config
+from ... import logging, config
 logger = logging.getLogger('workflow')
 
 try:
@@ -81,6 +83,75 @@ except ImportError:
         if not rel_list:
             return os.curdir
         return op.join(*rel_list)
+
+
+def _write_inputs(node):
+    lines = []
+    nodename = node.fullname.replace('.', '_')
+    for key, _ in list(node.inputs.items()):
+        val = getattr(node.inputs, key)
+        if isdefined(val):
+            if type(val) == str:
+                try:
+                    func = create_function_from_source(val)
+                except RuntimeError as e:
+                    lines.append("%s.inputs.%s = '%s'" % (nodename, key, val))
+                else:
+                    funcname = [name for name in func.__globals__
+                                if name != '__builtins__'][0]
+                    lines.append(pickle.loads(val))
+                    if funcname == nodename:
+                        lines[-1] = lines[-1].replace(' %s(' % funcname,
+                                                      ' %s_1(' % funcname)
+                        funcname = '%s_1' % funcname
+                    lines.append('from nipype.utils.misc import getsource')
+                    lines.append("%s.inputs.%s = getsource(%s)" % (nodename,
+                                                                   key,
+                                                                   funcname))
+            else:
+                lines.append('%s.inputs.%s = %s' % (nodename, key, val))
+    return lines
+
+
+def format_node(node, format='python', include_config=False):
+    """Format a node in a given output syntax."""
+    lines = []
+    name = node.fullname.replace('.', '_')
+    if format == 'python':
+        klass = node._interface
+        importline = 'from %s import %s' % (klass.__module__,
+                                            klass.__class__.__name__)
+        comment = '# Node: %s' % node.fullname
+        spec = inspect.signature(node._interface.__init__)
+        args = spec.args[1:]
+        if args:
+            filled_args = []
+            for arg in args:
+                if hasattr(node._interface, '_%s' % arg):
+                    filled_args.append('%s=%s' % (arg, getattr(node._interface,
+                                                               '_%s' % arg)))
+            args = ', '.join(filled_args)
+        else:
+            args = ''
+        klass_name = klass.__class__.__name__
+        if isinstance(node, MapNode):
+            nodedef = '%s = MapNode(%s(%s), iterfield=%s, name="%s")' \
+                      % (name, klass_name, args, node.iterfield, name)
+        else:
+            nodedef = '%s = Node(%s(%s), name="%s")' \
+                      % (name, klass_name, args, name)
+        lines = [importline, comment, nodedef]
+
+        if include_config:
+            lines = [importline, "from collections import OrderedDict",
+                     comment, nodedef]
+            lines.append('%s.config = %s' % (name, node.config))
+
+        if node.iterables is not None:
+            lines.append('%s.iterables = %s' % (name, node.iterables))
+        lines.extend(_write_inputs(node))
+
+    return lines
 
 
 def modify_paths(object, relative=True, basedir=None):
@@ -290,7 +361,7 @@ def walk(children, level=0, path=None, usename=True):
 
     Examples
     --------
-    >>> from nipype.pipeline.utils import walk
+    >>> from nipype.pipeline.engine.utils import walk
     >>> iterables = [('a', lambda: [1, 2]), ('b', lambda: [3, 4])]
     >>> [val['a'] for val in walk(iterables)]
     [1, 1, 2, 2]
@@ -325,7 +396,7 @@ def synchronize_iterables(iterables):
 
     Examples
     --------
-    >>> from nipype.pipeline.utils import synchronize_iterables
+    >>> from nipype.pipeline.engine.utils import synchronize_iterables
     >>> iterables = dict(a=lambda: [1, 2], b=lambda: [3, 4])
     >>> synced = synchronize_iterables(iterables)
     >>> synced == [{'a': 1, 'b': 3}, {'a': 2, 'b': 4}]
@@ -950,7 +1021,7 @@ def export_graph(graph_in, base_dir=None, show=False, use_execgraph=False,
                                suffix='.dot',
                                use_ext=False,
                                newpath=base_dir)
-    nx.write_dot(pklgraph, outfname)
+    nx.drawing.nx_pydot.write_dot(pklgraph, outfname)
     logger.info('Creating dot file: %s' % outfname)
     cmd = 'dot -T%s -O %s' % (format, outfname)
     res = CommandLine(cmd, terminal_output='allatonce').run()

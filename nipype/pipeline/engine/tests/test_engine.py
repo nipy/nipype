@@ -12,9 +12,9 @@ from tempfile import mkdtemp
 
 import networkx as nx
 
-from nipype.testing import (assert_raises, assert_equal, assert_true, assert_false)
-import nipype.interfaces.base as nib
-import nipype.pipeline.engine as pe
+from ....testing import (assert_raises, assert_equal, assert_true, assert_false)
+from ... import engine as pe
+from ....interfaces import base as nib
 
 
 class InputSpec(nib.TraitedSpec):
@@ -540,7 +540,8 @@ def test_mapnode_nested():
     try:
         n2.run()
     except Exception as e:
-        pe.logger.info('Exception: %s' % str(e))
+        from nipype.pipeline.engine.base import logger
+        logger.info('Exception: %s' % str(e))
         error_raised = True
     yield assert_true, error_raised
 
@@ -585,7 +586,8 @@ def test_node_hash():
     try:
         w1.run(plugin=RaiseError())
     except Exception as e:
-        pe.logger.info('Exception: %s' % str(e))
+        from nipype.pipeline.engine.base import logger
+        logger.info('Exception: %s' % str(e))
         error_raised = True
     yield assert_true, error_raised
     # yield assert_true, 'Submit called' in e
@@ -599,7 +601,8 @@ def test_node_hash():
     try:
         w1.run(plugin=RaiseError())
     except Exception as e:
-        pe.logger.info('Exception: %s' % str(e))
+        from nipype.pipeline.engine.base import logger
+        logger.info('Exception: %s' % str(e))
         error_raised = True
     yield assert_false, error_raised
     os.chdir(cwd)
@@ -637,7 +640,8 @@ def test_old_config():
     try:
         w1.run(plugin='Linear')
     except Exception as e:
-        pe.logger.info('Exception: %s' % str(e))
+        from nipype.pipeline.engine.base import logger
+        logger.info('Exception: %s' % str(e))
         error_raised = True
     yield assert_false, error_raised
     os.chdir(cwd)
@@ -721,7 +725,8 @@ def test_serial_input():
     try:
         w1.run(plugin='MultiProc')
     except Exception as e:
-        pe.logger.info('Exception: %s' % str(e))
+        from nipype.pipeline.engine.base import logger
+        logger.info('Exception: %s' % str(e))
         error_raised = True
     yield assert_false, error_raised
 
@@ -734,7 +739,8 @@ def test_serial_input():
     try:
         w1.run(plugin='MultiProc')
     except Exception as e:
-        pe.logger.info('Exception: %s' % str(e))
+        from nipype.pipeline.engine.base import logger
+        logger.info('Exception: %s' % str(e))
         error_raised = True
     yield assert_false, error_raised
 

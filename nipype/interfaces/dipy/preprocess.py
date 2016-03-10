@@ -1,31 +1,20 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-"""Change directory to provide relative paths for doctests
+"""
+Change directory to provide relative paths for doctests
    >>> import os
    >>> filepath = os.path.dirname( os.path.realpath( __file__ ) )
    >>> datadir = os.path.realpath(os.path.join(filepath, '../../testing/data'))
    >>> os.chdir(datadir)
 """
 import os.path as op
-import warnings
-
 import nibabel as nb
 import numpy as np
 
-from ..base import (traits, TraitedSpec, BaseInterface, File, isdefined)
-from ...utils.filemanip import split_filename
-from ...utils.misc import package_check
+from ..base import (traits, TraitedSpec, File, isdefined)
+from .base import DipyBaseInterface
 from ... import logging
-iflogger = logging.getLogger('interface')
-
-have_dipy = True
-try:
-    package_check('dipy', version='0.6.0')
-except Exception as e:
-    have_dipy = False
-else:
-    from dipy.align.aniso2iso import resample
-    from dipy.core.gradients import GradientTable
+IFLOGGER = logging.getLogger('interface')
 
 
 class ResampleInputSpec(TraitedSpec):
@@ -36,15 +25,17 @@ class ResampleInputSpec(TraitedSpec):
                                   ' is set, then isotropic regridding will '
                                   'be performed, with spacing equal to the '
                                   'smallest current zoom.'))
-    interp = traits.Int(1, mandatory=True, usedefault=True, desc=('order of '
-                        'the interpolator (0 = nearest, 1 = linear, etc.'))
+    interp = traits.Int(
+        1, mandatory=True, usedefault=True,
+        desc=('order of the interpolator (0 = nearest, 1 = linear, etc.'))
 
 
 class ResampleOutputSpec(TraitedSpec):
     out_file = File(exists=True)
 
 
-class Resample(BaseInterface):
+class Resample(DipyBaseInterface):
+
     """
     An interface to reslicing diffusion datasets.
     See
@@ -72,7 +63,7 @@ class Resample(BaseInterface):
         resample_proxy(self.inputs.in_file, order=order,
                        new_zooms=vox_size, out_file=out_file)
 
-        iflogger.info('Resliced image saved as {i}'.format(i=out_file))
+        IFLOGGER.info('Resliced image saved as {i}'.format(i=out_file))
         return runtime
 
     def _list_outputs(self):
@@ -95,17 +86,21 @@ class DenoiseInputSpec(TraitedSpec):
     noise_model = traits.Enum('rician', 'gaussian', mandatory=True,
                               usedefault=True,
                               desc=('noise distribution model'))
+    signal_mask = File(desc=('mask in which the mean signal '
+                             'will be computed'), exists=True)
     noise_mask = File(desc=('mask in which the standard deviation of noise '
                             'will be computed'), exists=True)
     patch_radius = traits.Int(1, desc='patch radius')
     block_radius = traits.Int(5, desc='block_radius')
+    snr = traits.Float(desc='manually set an SNR')
 
 
 class DenoiseOutputSpec(TraitedSpec):
     out_file = File(exists=True)
 
 
-class Denoise(BaseInterface):
+class Denoise(DipyBaseInterface):
+
     """
     An interface to denoising diffusion datasets [Coupe2008]_.
     See
@@ -143,16 +138,24 @@ class Denoise(BaseInterface):
         if isdefined(self.inputs.block_radius):
             settings['block_radius'] = self.inputs.block_radius
 
+        snr = None
+        if isdefined(self.inputs.snr):
+            snr = self.inputs.snr
+
+        signal_mask = None
+        if isdefined(self.inputs.signal_mask):
+            signal_mask = nb.load(self.inputs.signal_mask).get_data()
         noise_mask = None
-        if isdefined(self.inputs.in_mask):
+        if isdefined(self.inputs.noise_mask):
             noise_mask = nb.load(self.inputs.noise_mask).get_data()
 
-        _, s = nlmeans_proxy(self.inputs.in_file,
-                             settings,
-                             noise_mask=noise_mask,
+        _, s = nlmeans_proxy(self.inputs.in_file, settings,
+                             snr=snr,
+                             smask=signal_mask,
+                             nmask=noise_mask,
                              out_file=out_file)
-        iflogger.info(('Denoised image saved as {i}, estimated '
-                      'sigma={s}').format(i=out_file, s=s))
+        IFLOGGER.info(('Denoised image saved as {i}, estimated '
+                       'SNR={s}').format(i=out_file, s=str(s)))
         return runtime
 
     def _list_outputs(self):
@@ -172,6 +175,7 @@ def resample_proxy(in_file, order=3, new_zooms=None, out_file=None):
     """
     Performs regridding of an image to set isotropic voxel sizes using dipy.
     """
+    from dipy.align.reslice import reslice
 
     if out_file is None:
         fname, fext = op.splitext(op.basename(in_file))
@@ -193,7 +197,7 @@ def resample_proxy(in_file, order=3, new_zooms=None, out_file=None):
     if np.all(im_zooms == new_zooms):
         return in_file
 
-    data2, affine2 = resample(data, affine, im_zooms, new_zooms, order=order)
+    data2, affine2 = reslice(data, affine, im_zooms, new_zooms, order=order)
     tmp_zooms = np.array(hdr.get_zooms())
     tmp_zooms[:3] = new_zooms[0]
     hdr.set_zooms(tuple(tmp_zooms))
@@ -205,12 +209,16 @@ def resample_proxy(in_file, order=3, new_zooms=None, out_file=None):
 
 
 def nlmeans_proxy(in_file, settings,
-                  noise_mask=None, out_file=None):
+                  snr=None,
+                  smask=None,
+                  nmask=None,
+                  out_file=None):
     """
     Uses non-local means to denoise 4D datasets
     """
-    package_check('dipy', version='0.8.0.dev')
     from dipy.denoise.nlmeans import nlmeans
+    from scipy.ndimage.morphology import binary_erosion
+    from scipy import ndimage
 
     if out_file is None:
         fname, fext = op.splitext(op.basename(in_file))
@@ -224,13 +232,69 @@ def nlmeans_proxy(in_file, settings,
     data = img.get_data()
     aff = img.affine
 
-    nmask = data[..., 0] > 80
-    if noise_mask is not None:
-        nmask = noise_mask > 0
+    if data.ndim < 4:
+        data = data[..., np.newaxis]
 
-    sigma = np.std(data[nmask == 1])
-    den = nlmeans(data, sigma, **settings)
+    data = np.nan_to_num(data)
+
+    if data.max() < 1.0e-4:
+        raise RuntimeError('There is no signal in the image')
+
+    df = 1.0
+    if data.max() < 1000.0:
+        df = 1000. / data.max()
+        data *= df
+
+    b0 = data[..., 0]
+
+    if smask is None:
+        smask = np.zeros_like(b0)
+        smask[b0 > np.percentile(b0, 85.)] = 1
+
+    smask = binary_erosion(
+        smask.astype(np.uint8), iterations=2).astype(np.uint8)
+
+    if nmask is None:
+        nmask = np.ones_like(b0, dtype=np.uint8)
+        bmask = settings['mask']
+        if bmask is None:
+            bmask = np.zeros_like(b0)
+            bmask[b0 > np.percentile(b0[b0 > 0], 10)] = 1
+            label_im, nb_labels = ndimage.label(bmask)
+            sizes = ndimage.sum(bmask, label_im, range(nb_labels + 1))
+            maxidx = np.argmax(sizes)
+            bmask = np.zeros_like(b0, dtype=np.uint8)
+            bmask[label_im == maxidx] = 1
+        nmask[bmask > 0] = 0
+    else:
+        nmask = np.squeeze(nmask)
+        nmask[nmask > 0.0] = 1
+        nmask[nmask < 1] = 0
+        nmask = nmask.astype(bool)
+
+    nmask = binary_erosion(nmask, iterations=1).astype(np.uint8)
+
+    den = np.zeros_like(data)
+
+    est_snr = True
+    if snr is not None:
+        snr = [snr] * data.shape[-1]
+        est_snr = False
+    else:
+        snr = []
+
+    for i in range(data.shape[-1]):
+        d = data[..., i]
+        if est_snr:
+            s = np.mean(d[smask > 0])
+            n = np.std(d[nmask > 0])
+            snr.append(s / n)
+
+        den[..., i] = nlmeans(d, snr[i], **settings)
+
+    den = np.squeeze(den)
+    den /= df
 
     nb.Nifti1Image(den.astype(hdr.get_data_dtype()), aff,
                    hdr).to_filename(out_file)
-    return out_file, sigma
+    return out_file, snr

@@ -7,7 +7,7 @@ import subprocess
 
 from .base import (SGELikeBatchManagerBase, logger, iflogger, logging)
 
-from nipype.interfaces.base import CommandLine
+from ...interfaces.base import CommandLine, text_type
 
 
 class PBSPlugin(SGELikeBatchManagerBase):
@@ -52,7 +52,7 @@ class PBSPlugin(SGELikeBatchManagerBase):
         return errmsg not in e
 
     def _submit_batchtask(self, scriptfile, node):
-        cmd = CommandLine('qsub', environ=os.environ.data,
+        cmd = CommandLine('qsub', environ=dict(os.environ),
                           terminal_output='allatonce')
         path = os.path.dirname(scriptfile)
         qsubargs = ''
@@ -69,11 +69,11 @@ class PBSPlugin(SGELikeBatchManagerBase):
         if '-e' not in qsubargs:
             qsubargs = '%s -e %s' % (qsubargs, path)
         if node._hierarchy:
-            jobname = '.'.join((os.environ.data['LOGNAME'],
+            jobname = '.'.join((dict(os.environ)['LOGNAME'],
                                 node._hierarchy,
                                 node._id))
         else:
-            jobname = '.'.join((os.environ.data['LOGNAME'],
+            jobname = '.'.join((dict(os.environ)['LOGNAME'],
                                 node._id))
         jobnameitems = jobname.split('.')
         jobnameitems.reverse()
@@ -97,7 +97,7 @@ class PBSPlugin(SGELikeBatchManagerBase):
                     iflogger.setLevel(oldlevel)
                     raise RuntimeError('\n'.join((('Could not submit pbs task'
                                                    ' for node %s') % node._id,
-                                                  str(e))))
+                                                  text_type(e))))
             else:
                 break
         iflogger.setLevel(oldlevel)

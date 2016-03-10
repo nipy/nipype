@@ -7,7 +7,7 @@ from shutil import rmtree
 from nose.tools import assert_equal
 
 from .. import Memory
-from ...pipeline.tests.test_engine import TestInterface
+from ...pipeline.engine.tests.test_engine import TestInterface
 
 from ... import config
 config.set_default_config()

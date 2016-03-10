@@ -132,6 +132,41 @@ def test_copyfiles():
     os.unlink(new_hdr2)
 
 
+def test_linkchain():
+    if os.name is not 'posix':
+        return
+    orig_img, orig_hdr = _temp_analyze_files()
+    pth, fname = os.path.split(orig_img)
+    new_img1 = os.path.join(pth, 'newfile1.img')
+    new_hdr1 = os.path.join(pth, 'newfile1.hdr')
+    new_img2 = os.path.join(pth, 'newfile2.img')
+    new_hdr2 = os.path.join(pth, 'newfile2.hdr')
+    new_img3 = os.path.join(pth, 'newfile3.img')
+    new_hdr3 = os.path.join(pth, 'newfile3.hdr')
+    copyfile(orig_img, new_img1)
+    yield assert_true, os.path.islink(new_img1)
+    yield assert_true, os.path.islink(new_hdr1)
+    copyfile(new_img1, new_img2, copy=True)
+    yield assert_false, os.path.islink(new_img2)
+    yield assert_false, os.path.islink(new_hdr2)
+    yield assert_false, os.path.samefile(orig_img, new_img2)
+    yield assert_false, os.path.samefile(orig_hdr, new_hdr2)
+    copyfile(new_img1, new_img3, copy=True, use_hardlink=True)
+    yield assert_false, os.path.islink(new_img3)
+    yield assert_false, os.path.islink(new_hdr3)
+    yield assert_true, os.path.samefile(orig_img, new_img3)
+    yield assert_true, os.path.samefile(orig_hdr, new_hdr3)
+    os.unlink(new_img1)
+    os.unlink(new_hdr1)
+    os.unlink(new_img2)
+    os.unlink(new_hdr2)
+    os.unlink(new_img3)
+    os.unlink(new_hdr3)
+    # final cleanup
+    os.unlink(orig_img)
+    os.unlink(orig_hdr)
+
+
 def test_filename_to_list():
     x = filename_to_list('foo.nii')
     yield assert_equal, x, ['foo.nii']

@@ -58,7 +58,7 @@ class CondorPlugin(SGELikeBatchManagerBase):
         return False
 
     def _submit_batchtask(self, scriptfile, node):
-        cmd = CommandLine('condor_qsub', environ=os.environ.data,
+        cmd = CommandLine('condor_qsub', environ=dict(os.environ),
                           terminal_output='allatonce')
         path = os.path.dirname(scriptfile)
         qsubargs = ''
@@ -77,11 +77,11 @@ class CondorPlugin(SGELikeBatchManagerBase):
         if '-e' not in qsubargs:
             qsubargs = '%s -e %s' % (qsubargs, path)
         if node._hierarchy:
-            jobname = '.'.join((os.environ.data['LOGNAME'],
+            jobname = '.'.join((dict(os.environ)['LOGNAME'],
                                 node._hierarchy,
                                 node._id))
         else:
-            jobname = '.'.join((os.environ.data['LOGNAME'],
+            jobname = '.'.join((dict(os.environ)['LOGNAME'],
                                 node._id))
         jobnameitems = jobname.split('.')
         jobnameitems.reverse()
