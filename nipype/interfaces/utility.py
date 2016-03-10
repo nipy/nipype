@@ -466,7 +466,6 @@ class Function(IOBase):
 
         # Runtime profiler on if dependecies available
         try:
-            import memory_profiler
             import psutil
             from nipype.interfaces.base import get_max_resources_used
             import multiprocessing
@@ -483,37 +482,24 @@ class Function(IOBase):
             queue = multiprocessing.Queue()
             proc = multiprocessing.Process(target=_function_handle_wrapper,
                                            args=(queue,), kwargs=args)
-   
+
             # Init memory and threads before profiling
             mem_mb = -1
             num_threads = -1
-#             if function_handle.__name__ == 'use_resources':
-#                 log_flg = True
-#             else:
-#                 log_flg = False
-            log_flg = False
+
             # Start process and profile while it's alive
             proc.start()
             while proc.is_alive():
                 mem_mb, num_threads = \
-                    get_max_resources_used(proc.pid, mem_mb, num_threads, pyfunc=True, log_flg=log_flg)
-   
+                    get_max_resources_used(proc.pid, mem_mb, num_threads,
+                                           pyfunc=True)
+
             # Get result from process queue
             out = queue.get()
             # If it is an exception, raise it
             if isinstance(out, Exception):
                 raise out
 
-#             proc = (function_handle, (), args)
-#             num_threads = 1
-#             print 'function_handle: ', function_handle.__name__
-#             if function_handle.__name__ == 'use_resources':
-#                 log_flg = True
-#             else:
-#                 log_flg = False
-#             mem_mb, out = \
-#                 memory_profiler.memory_usage(proc, include_children=True, max_usage=True, retval=True, log_flg=log_flg)
-#             mem_mb = mem_mb[0]
             # Function ran successfully, populate runtime stats
             setattr(runtime, 'runtime_memory_gb', mem_mb/1024.0)
             setattr(runtime, 'runtime_threads', num_threads)

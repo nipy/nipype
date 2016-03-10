@@ -1205,8 +1205,9 @@ class Stream(object):
 
 
 # Get number of threads for process
-def _get_num_threads(proc, log_flg=False):
+def _get_num_threads(proc):
     """Function to get the number of threads a process is using
+    NOTE: If 
 
     Parameters
     ----------
@@ -1221,35 +1222,23 @@ def _get_num_threads(proc, log_flg=False):
 
     # Import packages
     import psutil
-    import logging
 
     # Init variables
     num_threads = proc.num_threads()
-    if log_flg:
-        from CPAC.utils.utils import setup_logger
-        logger = setup_logger('memory_profiler', '/home/dclark/memory_profiler.log',
-                              logging.INFO, to_screen=False)
 
+    # Iterate through child processes and get number of their threads
     try:
-        num_children = len(proc.children())
-        if log_flg:
-            logger.debug('len(proc.children()): %d' % num_children)
-            logger.debug('proc.id: %s' % str(proc.pid))
-        for child in proc.children():
-            if log_flg:
-                logger.debug('child.pid: %d' % child.pid)
-                logger.debug('child.threads(): %s' % str(child.threads()))
-                logger.debug('child.num_threads(): %d' % child.num_threads())
-                logger.debug('len(child.children()): %d' % len(child.children()))
-            num_threads = max(num_threads, num_children,
-                              child.num_threads(), len(child.children()))
+        for child in proc.children(recursive=True):
+            num_threads += child.num_threads()
     except psutil.NoSuchProcess:
         pass
 
-    # Return the number of threads found
+    # Return number of threads found
     return num_threads
 
-def _get_num_ram_mb(pid, pyfunc=False):
+
+# Get ram usage of process
+def _get_ram_mb(pid, pyfunc=False):
     """Function to get the RAM usage of a process and its children
 
     Parameters
@@ -1298,8 +1287,9 @@ def _get_num_ram_mb(pid, pyfunc=False):
     # Return memory
     return mem_mb
 
+
 # Get max resources used for process
-def get_max_resources_used(pid, mem_mb, num_threads, pyfunc=False, log_flg=False):
+def get_max_resources_used(pid, mem_mb, num_threads, pyfunc=False):
     """Function to get the RAM and threads usage of a process
 
     Paramters
@@ -1320,13 +1310,11 @@ def get_max_resources_used(pid, mem_mb, num_threads, pyfunc=False, log_flg=False
     """
 
     # Import packages
-    from memory_profiler import _get_memory
     import psutil
 
     try:
-        #mem_mb = max(mem_mb, _get_memory(pid, include_children=True, log_flg=log_flg))
-        mem_mb = max(mem_mb, _get_num_ram_mb(pid, pyfunc=pyfunc))
-        num_threads = max(num_threads, _get_num_threads(psutil.Process(pid), log_flg=log_flg))
+        mem_mb = max(mem_mb, _get_ram_mb(pid, pyfunc=pyfunc))
+        num_threads = max(num_threads, _get_num_threads(psutil.Process(pid)))
     except Exception as exc:
         iflogger.info('Could not get resources used by process. Error: %s'\
                       % exc)
@@ -1346,7 +1334,6 @@ def run_command(runtime, output=None, timeout=0.01, redirect_x=False):
 
     # Default to profiling the runtime
     try:
-        import memory_profiler
         import psutil
         runtime_profile = True
     except ImportError as exc:

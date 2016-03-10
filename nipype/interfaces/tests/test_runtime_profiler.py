@@ -12,7 +12,6 @@ from nipype.interfaces.base import traits, CommandLine, CommandLineInputSpec
 
 try:
     import psutil
-    import memory_profiler
     run_profiler = True
     skip_profile_msg = 'Run profiler tests'
 except ImportError as exc:
@@ -28,9 +27,9 @@ class UseResourcesInputSpec(CommandLineInputSpec):
 
     # Init attributes
     num_gb = traits.Float(desc='Number of GB of RAM to use',
-                          argstr = "-g %f")
+                          argstr='-g %f')
     num_procs = traits.Int(desc='Number of processors to use',
-                          argstr = "-p %d")
+                          argstr='-p %d')
 
 
 # UseResources interface
@@ -78,30 +77,21 @@ def use_resources(num_procs, num_gb):
         del gb_str
 
     # Import packages
-    import logging
-    from multiprocessing import Process
-
     from threading import Thread
 
     # Init variables
     num_gb = float(num_gb)
-    # Init variables
-    #num_threads = proc.num_threads()
-    from CPAC.utils.utils import setup_logger
+
     # Build proc list
     proc_list = []
     for idx in range(num_procs):
-        #proc = Thread(target=_use_gb_ram, args=(num_gb/num_procs,), name=str(idx))
-        proc = Process(target=_use_gb_ram, args=(num_gb/num_procs,), name=str(idx))
+        proc = Thread(target=_use_gb_ram, args=(num_gb/num_procs,), name=str(idx))
         proc_list.append(proc)
 
-    logger = setup_logger('memory_profiler', '/home/dclark/memory_profiler.log',
-                          logging.DEBUG, to_screen=False)
     # Run multi-threaded
-    print 'Using %.3f GB of memory over %d processors...' % (num_gb, num_procs)
+    print 'Using %.3f GB of memory over %d sub-threads...' % (num_gb, num_procs)
     for idx, proc in enumerate(proc_list):
         proc.start()
-        #logger.debug('Starting PID: %d' % proc.pid)
 
     for proc in proc_list:
         proc.join()
@@ -137,9 +127,9 @@ class RuntimeProfilerTestCase(unittest.TestCase):
 
         # Init parameters
         # Input RAM GB to occupy
-        self.num_gb= 4
-        # Input number of processors
-        self.num_procs = 1
+        self.num_gb = 6
+        # Input number of sub-threads (not including parent threads)
+        self.num_threads = 7
         # Acceptable percent error for memory profiled against input
         self.mem_err_percent = 5
 
@@ -367,30 +357,33 @@ class RuntimeProfilerTestCase(unittest.TestCase):
 
         # Init variables
         num_gb = self.num_gb
-        num_procs = self.num_procs
+        num_threads = self.num_threads
 
         # Run workflow and get stats
-        finish_str = self._run_cmdline_workflow(num_gb, num_procs)
+        finish_str = self._run_cmdline_workflow(num_gb, num_threads)
         # Get runtime stats as dictionary
         node_stats = json.loads(finish_str)
 
         # Read out runtime stats
         runtime_gb = float(node_stats['runtime_memory_gb'])
-        runtime_procs = int(node_stats['runtime_threads'])
+        runtime_threads = int(node_stats['runtime_threads'])
 
         # Get margin of error for RAM GB
         allowed_gb_err = (self.mem_err_percent/100.0)*num_gb
         runtime_gb_err = np.abs(runtime_gb-num_gb)
+        # Runtime threads should reflect shell-cmd thread, Python parent thread
+        # and Python sub-threads = 1 + 1 + num_threads
+        expected_runtime_threads = 1 + 1 + num_threads
 
         # Error message formatting
         mem_err = 'Input memory: %f is not within %.1f%% of runtime '\
                   'memory: %f' % (num_gb, self.mem_err_percent, runtime_gb)
-        procs_err = 'Input procs: %d is not equal to runtime procs: %d' \
-                    % (num_procs, runtime_procs)
+        procs_err = 'Input threads: %d is not equal to runtime threads: %d' \
+                    % (expected_runtime_threads, runtime_threads)
 
         # Assert runtime stats are what was input
         self.assertLessEqual(runtime_gb_err, allowed_gb_err, msg=mem_err)
-        self.assertEqual(num_procs, runtime_procs, msg=procs_err)
+        self.assertEqual(expected_runtime_threads, runtime_threads, msg=procs_err)
 
     # Test resources were used as expected
     @unittest.skipIf(run_profiler == False, skip_profile_msg)
@@ -406,30 +399,33 @@ class RuntimeProfilerTestCase(unittest.TestCase):
 
         # Init variables
         num_gb = self.num_gb
-        num_procs = self.num_procs
+        num_threads = self.num_threads
 
         # Run workflow and get stats
-        finish_str = self._run_function_workflow(num_gb, num_procs)
+        finish_str = self._run_function_workflow(num_gb, num_threads)
         # Get runtime stats as dictionary
         node_stats = json.loads(finish_str)
 
         # Read out runtime stats
         runtime_gb = float(node_stats['runtime_memory_gb'])
-        runtime_procs = int(node_stats['runtime_threads'])
+        runtime_threads = int(node_stats['runtime_threads'])
 
         # Get margin of error for RAM GB
         allowed_gb_err = (self.mem_err_percent/100.0)*num_gb
         runtime_gb_err = np.abs(runtime_gb-num_gb)
+        # Runtime threads should reflect Python parent thread
+        # and Python sub-threads = 1 + num_threads
+        expected_runtime_threads = 1 + num_threads
 
         # Error message formatting
         mem_err = 'Input memory: %f is not within %.1f%% of runtime '\
                   'memory: %f' % (num_gb, self.mem_err_percent, runtime_gb)
         procs_err = 'Input procs: %d is not equal to runtime procs: %d' \
-                    % (num_procs, runtime_procs)
+                    % (expected_runtime_threads, runtime_threads)
 
         # Assert runtime stats are what was input
         self.assertLessEqual(runtime_gb_err, allowed_gb_err, msg=mem_err)
-        self.assertEqual(num_procs, runtime_procs, msg=procs_err)
+        self.assertEqual(expected_runtime_threads, runtime_threads, msg=procs_err)
 
 
 # Command-line run-able unittest module

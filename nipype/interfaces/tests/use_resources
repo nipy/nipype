@@ -35,7 +35,6 @@ if __name__ == '__main__':
     # Import packages
     import argparse
     from threading import Thread
-    from multiprocessing import Process
 
     # Init argparser
     parser = argparse.ArgumentParser(description=__doc__)
@@ -56,10 +55,10 @@ if __name__ == '__main__':
     # Build proc list
     proc_list = []
     for idx in range(num_procs):
-        proc_list.append(Process(target=use_gb_ram, args=(num_gb/num_procs,)))
+        proc_list.append(Thread(target=use_gb_ram, args=(num_gb/num_procs,)))
 
     # Run multi-threaded
-    print 'Using %.3f GB of memory over %d processors...' % (num_gb, num_procs)
+    print 'Using %.3f GB of memory over %d sub-threads...' % (num_gb, num_procs)
     for proc in proc_list:
         proc.start()
 
