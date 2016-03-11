@@ -154,16 +154,20 @@ class RuntimeProfilerTestCase(unittest.TestCase):
         # Iterate through all combos
         for num_gb in np.arange(0.25, ram_gb_range+ram_gb_step, ram_gb_step):
             # Cmd-level
-            cmd_fin_str = self._run_cmdline_workflow(num_gb, num_threads)
+            cmd_start_str, cmd_fin_str = self._run_cmdline_workflow(num_gb, num_threads)
+            cmd_start_ts = json.loads(cmd_start_str)['start']
             cmd_node_stats = json.loads(cmd_fin_str)
             cmd_runtime_threads = int(cmd_node_stats['runtime_threads'])
             cmd_runtime_gb = float(cmd_node_stats['runtime_memory_gb'])
+            cmd_finish_ts = cmd_node_stats['finish']
 
             # Func-level
-            func_fin_str = self._run_function_workflow(num_gb, num_threads)
+            func_start_str, func_fin_str = self._run_function_workflow(num_gb, num_threads)
+            func_start_ts = json.loads(func_start_str)['start']
             func_node_stats = json.loads(func_fin_str)
             func_runtime_threads = int(func_node_stats['runtime_threads'])
             func_runtime_gb = float(func_node_stats['runtime_memory_gb'])
+            func_finish_ts = func_node_stats['finish']
 
             # Calc errors
             cmd_threads_err = cmd_runtime_threads - num_threads
@@ -181,7 +185,11 @@ class RuntimeProfilerTestCase(unittest.TestCase):
                             'cmd_threads_err' : cmd_threads_err,
                             'cmd_gb_err' : cmd_gb_err,
                             'func_threads_err' : func_threads_err,
-                            'func_gb_err' : func_gb_err}
+                            'func_gb_err' : func_gb_err,
+                            'cmd_start_ts' : cmd_start_ts,
+                            'cmd_finish_ts' : cmd_finish_ts,
+                            'func_start_ts' : func_start_ts,
+                            'func_finish_ts' : func_finish_ts}
             # Append to list
             dict_list.append(results_dict)
 
@@ -262,13 +270,14 @@ class RuntimeProfilerTestCase(unittest.TestCase):
         wf.run(plugin='MultiProc', plugin_args=plugin_args)
 
         # Get runtime stats from log file
+        start_str = open(log_file, 'r').readlines()[0].rstrip('\n')
         finish_str = open(log_file, 'r').readlines()[1].rstrip('\n')
 
         # Delete wf base dir
         shutil.rmtree(base_dir)
 
         # Return runtime stats
-        return finish_str
+        return start_str, finish_str
 
     # Test node
     def _run_function_workflow(self, num_gb, num_threads):
@@ -339,13 +348,14 @@ class RuntimeProfilerTestCase(unittest.TestCase):
         wf.run(plugin='MultiProc', plugin_args=plugin_args)
 
         # Get runtime stats from log file
+        start_str = open(log_file, 'r').readlines()[0].rstrip('\n')
         finish_str = open(log_file, 'r').readlines()[1].rstrip('\n')
 
         # Delete wf base dir
         shutil.rmtree(base_dir)
 
         # Return runtime stats
-        return finish_str
+        return start_str, finish_str
 
     # Test resources were used as expected in cmdline interface
     @unittest.skipIf(run_profiler == False, skip_profile_msg)
@@ -364,7 +374,7 @@ class RuntimeProfilerTestCase(unittest.TestCase):
         num_threads = self.num_threads
 
         # Run workflow and get stats
-        finish_str = self._run_cmdline_workflow(num_gb, num_threads)
+        start_str, finish_str = self._run_cmdline_workflow(num_gb, num_threads)
         # Get runtime stats as dictionary
         node_stats = json.loads(finish_str)
 
@@ -406,7 +416,7 @@ class RuntimeProfilerTestCase(unittest.TestCase):
         num_threads = self.num_threads
 
         # Run workflow and get stats
-        finish_str = self._run_function_workflow(num_gb, num_threads)
+        start_str, finish_str = self._run_function_workflow(num_gb, num_threads)
         # Get runtime stats as dictionary
         node_stats = json.loads(finish_str)
 
