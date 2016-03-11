@@ -53,7 +53,8 @@ def copy2subjdir(cls, in_file, folder=None, basename=None, subject_id=None):
     if not os.path.isdir(out_dir):
         os.makedirs(out_dir)
     out_file = os.path.join(out_dir, basename)
-    shutil.copy(in_file, out_file)
+    if not os.path.isfile(out_file):
+        shutil.copy(in_file, out_file)
 
 
 class SampleToSurfaceInputSpec(FSTraitedSpec):
@@ -1948,6 +1949,10 @@ class MakeSurfaces(FSCommand):
             if isdefined(self.inputs.in_label):
                 copy2subjdir(self, self.inputs.in_label, 'label',
                              '{0}.aparc.annot'.format(self.inputs.hemisphere))
+            else:
+                os.makedirs(os.path.join(self.inputs.subjects_dir,
+                                         self.inputs.subject_id,
+                                         'label'))
         return super(MakeSurfaces, self).run(**inputs)
 
         
@@ -2160,7 +2165,7 @@ class CurvatureStats(FSCommand):
         outputs["out_file"] = os.path.abspath(self.inputs.out_file)
         return outputs
 
-    def run(**inputs):
+    def run(self, **inputs):
         if self.inputs.copy_inputs:
             self.inputs.subjects_dir = os.getcwd()
             if 'subjects_dir' in inputs:

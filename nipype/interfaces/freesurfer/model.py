@@ -118,16 +118,20 @@ class MRISPreprocReconAllInputSpec(MRISPreprocInputSpec):
                              xor=('surf_measure',
                                   'surf_measure_file', 'surf_area'),
                              desc='file necessary for surfmeas')
-    surfreg_file = File(argstr="--surfreg %s",
-                        desc="Input surface registration file")
+    surfreg_files = InputMultiPath(File(exists=True), argstr="--surfreg%s",
+                                    requires=['lh_surfreg_target', 'rh_surfreg_target'],
+                                    desc="lh and rh input surface registration files")
+    lh_surfreg_target = File(desc="Implicit target surface registration file",
+                             requires=['surfreg_files'])
+    rh_surfreg_target = File(desc="Implicit target surface registration file",
+                             requires=['surfreg_files'])
     subject_id = traits.String('subject_id', argstr='--s %s', usedefault=True,
                                xor=('subjects', 'fsgd_file',
                                     'subject_file', 'subject_id'),
-                               desc='subject from who measures are calculated')
+                               desc='subject from whom measures are calculated')
     copy_inputs = traits.Bool(desc="If running as a node, set this to True " +
                               "this will copy some implicit inputs to the " +
                               "node directory.")
-    target_dir = traits.Directory(desc="target directory (will be symlinked if not in subjects_dir)")
 
     
 class MRISPreprocReconAll(MRISPreproc):
@@ -157,23 +161,31 @@ class MRISPreprocReconAll(MRISPreproc):
                 folder = self.inputs.surf_dir
             else:
                 folder = 'surf'
-            copy2subjdir(self, self.inputs.surfreg_file, folder)
-            copy2subjdir(self, self.inputs.surf_measure_file, folder)
+            if isdefined(self.inputs.surfreg_files):
+                for surfreg in self.inputs.surfreg_files:
+                    basename = os.path.basename(surfreg)
+                    copy2subjdir(self, surfreg, folder, basename)                                        
+                    if basename.startswith('lh.'):
+                        copy2subjdir(self, self.inputs.lh_surfreg_target,
+                                     folder, basename,
+                                     subject_id=self.inputs.target)
+                    else:
+                        copy2subjdir(self, self.inputs.rh_surfreg_target,
+                                     folder, basename,
+                                     subject_id=self.inputs.target)
 
-            # find the target directory mri_preproc will look for
-            if isdefined(self.inputs.target_dir):
-                t_dir = os.path.join(self.inputs.subjects_dir,
-                                     self.inputs.target_dir)
-                if not os.path.isdir(t_dir):
-                    # symlink to where mris_preproc will look
-                    os.symlink(target_dir, t_dir)
-            
+            if isdefined(self.inputs.surf_measure_file):
+                copy2subjdir(self, self.inputs.surf_measure_file, folder)
+
         return super(MRISPreprocReconAll, self).run(**inputs)
         
     def _format_arg(self, name, spec, value):
-        if name in ("surfreg_file", "surf_measure_file"):
+        # mris_preproc looks for these files in the surf dir
+        if name  == 'surf_reg_files':
+            basename = os.path.basename(value[0])
+            return spec.argstr % os.path.basename(value).lstrip('rh.').lstrip('lh.')
+        if name  == "surf_measure_file":
             basename = os.path.basename(value)
-            # mris_preproc looks for these files in the surf dir
             return spec.argstr % os.path.basename(value).lstrip('rh.').lstrip('lh.')
         return super(MRISPreprocReconAll, self)._format_arg(name, spec, value)
 
@@ -1063,6 +1075,8 @@ class Label2LabelInputSpec(FSTraitedSpec):
                  desc="Implicit input <hemisphere>.white")
     source_sphere_reg = File(mandatory=True, exists=True,
                              desc="Implicit input <hemisphere>.sphere.reg")
+    source_white = File(mandatory=True, exists=True,
+                        desc="Implicit input <hemisphere>.white")
     source_label = File(argstr="--srclabel %s", mandatory=True, exists=True,
                         desc="Source label")
     source_subject = traits.String(argstr="--srcsubject %s", mandatory=True,
@@ -1116,7 +1130,10 @@ class Label2Label(FSCommand):
 
     def _list_outputs(self):
         outputs = self._outputs().get()
-        outputs['out_file'] = self.inputs.out_file
+        outputs['out_file'] = os.path.join(self.inputs.subjects_dir,
+                                           self.inputs.subject_id,
+                                           'label',
+                                           self.inputs.out_file)
         return outputs
 
     def run(self, **inputs):
@@ -1132,19 +1149,33 @@ class Label2Label(FSCommand):
             copy2subjdir(self, self.inputs.source_sphere_reg, 'surf',
                          '{0}.sphere.reg'.format(hemi),
                          subject_id=self.inputs.source_subject)
+            copy2subjdir(self, self.inputs.source_white, 'surf',
+                         '{0}.white'.format(hemi),
+                         subject_id=self.inputs.source_subject)
+
+        # label dir must exist in order for output file to be written
+        label_dir = os.path.join(self.inputs.subjects_dir,
+                                 self.inputs.subject_id,
+                                 'label')
+        if not os.path.isdir(label_dir):
+            os.makedirs(label_dir)
+
         return super(Label2Label, self).run(**inputs)
 
 
 class Label2AnnotInputSpec(FSTraitedSpec):
     # required
-    hemisphere = traits.String(argstr="--hemi %s", mandatory=True,
-                               desc="Input hemisphere")
-    subject_id = traits.String(argstr="--s %s", mandatory=True,
+    hemisphere = traits.Enum('lh', 'rh',
+                             argstr="--hemi %s", mandatory=True,
+                             desc="Input hemisphere")
+    subject_id = traits.String('subject_id', usedefault=True,
+                               argstr="--s %s", mandatory=True,
                                desc="Subject name/ID")
     in_labels = traits.List(argstr="--l %s...", mandatory=True,
                             desc="List of input label files")
     out_annot = traits.String(argstr="--a %s", mandatory=True,
                               desc="Name of the annotation to create")
+    orig = File(exists=True, desc="implicit {hemisphere}.orig")
     # optional
     keep_max = traits.Bool(argstr="--maxstatwinner", mandatory=False,
                            desc="Keep label with highest 'stat' value")
@@ -1152,6 +1183,7 @@ class Label2AnnotInputSpec(FSTraitedSpec):
                               desc="Turn off overlap and stat override messages")
     color_table = File(argstr="--ctab %s", mandatory=False, exists=True,
                        desc="File that defines the structure names, their indices, and their color")
+    copy_inputs = traits.Bool(desc="copy implicit inputs and create a temp subjects_dir")
 
 
 class Label2AnnotOutputSpec(TraitedSpec):
@@ -1178,13 +1210,14 @@ class Label2Annot(FSCommand):
     input_spec = Label2AnnotInputSpec
     output_spec = Label2AnnotOutputSpec
 
-    def _format_arg(self, name, spec, value):
-        if name == 'out_annot':
-            # this program will crash if the output annotation file already exists
-            # To prevent this, the file is deleted prior to running.
-            if os.path.isfile(self._list_outputs()['out_file']):
-                os.remove(self._list_outputs()['out_file'])
-        return super(Label2Annot, self)._format_arg(name, spec, value)
+    def run(self, **inputs):
+        if self.inputs.copy_inputs:
+            self.inputs.subjects_dir = os.getcwd()
+            if 'subjects_dir' in inputs:
+                inputs['subjects_dir'] = self.inputs.subjects_dir
+            copy2subjdir(self, self.inputs.orig, 'surf',
+                         '{0}.orig'.format(self.inputs.hemisphere))
+        return super(Label2Annot, self).run(**inputs)
 
     def _list_outputs(self):
         outputs = self._outputs().get()

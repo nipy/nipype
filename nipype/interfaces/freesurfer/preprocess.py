@@ -1795,7 +1795,11 @@ class MRIsCALabelInputSpec(FSTraitedSpecOpenMP):
     classifier = File(argstr="%s", position=-2, mandatory=True, exists=True,
                       desc="Classifier array input file")
     smoothwm = File(mandatory=True, exists=True,
-                    desc="Undocumented input {hemisphere}.smoothwm must exist in the subjects directory")
+                    desc="implicit input {hemisphere}.smoothwm")
+    curv = File(mandatory=True, exists=True,
+                desc="implicit input {hemisphere}.curv")
+    sulc = File(mandatory=True, exists=True,
+                desc="implicit input {hemisphere}.sulc")
     out_file = File(argstr="%s", position=-1, exists=False, mandatory=False,
                     name_source=['hemisphere'], keep_extension=True,
                     hash_files=False, name_template="%s.aparc.annot",
@@ -1807,10 +1811,9 @@ class MRIsCALabelInputSpec(FSTraitedSpecOpenMP):
                        desc="Undocumented flag. Autorecon3 uses ../mri/aseg.presurf.mgz as input file")
     seed = traits.Int(argstr="-seed %d", mandatory=False,
                       desc="")
-    copy_smoothwm = traits.Bool(desc="Copies smoothwm to node directory " +
-                                "and creates a temp subjects_directory. " +
-                                "Use this when smoothwm is not in the " +
-                                "subjects_directory.")
+    copy_inputs = traits.Bool(desc="Copies implicit inputs to node directory " +
+                              "and creates a temp subjects_directory. " +
+                              "Use this when running as a node")
 
 
 class MRIsCALabelOutputSpec(TraitedSpec):
@@ -1836,6 +1839,8 @@ class MRIsCALabel(FSCommandOpenMP):
     >>> ca_label.inputs.subject_id = "test"
     >>> ca_label.inputs.hemisphere = "lh"
     >>> ca_label.inputs.canonsurf = "lh.pial"
+    >>> ca_label.inputs.curv = "lh.pial"
+    >>> ca_label.inputs.sulc = "lh.pial"
     >>> ca_label.inputs.classifier = "im1.nii" # in pracice, use .gcs extension
     >>> ca_label.inputs.smoothwm = "lh.pial"
     >>> ca_label.cmdline
@@ -1845,23 +1850,37 @@ class MRIsCALabel(FSCommandOpenMP):
     input_spec = MRIsCALabelInputSpec
     output_spec = MRIsCALabelOutputSpec
 
-    def _format_arg(self, name, spec, value):
-        if name == 'smoothwm' and self.inputs.copy_smoothwm:
-            # copy the smoothwm to the node directory and
-            # make a temporary subjects_dir where the
-            # freesurfer executable will look for it
-            cwd = os.getcwd()
-            self.inputs.subjects_dir = cwd
-            smoothwm_dest = os.path.join(cwd,
-                                         self.inputs.subject_id,
-                                         'surf',
-                                         self.inputs.hemisphere +
-                                         '.smoothwm')
-            shutil.copy(value, smoothwm_dest)
-        return super(MRIsCALabel, self)._format_arg(name, spec, value)
+    def run(self, **inputs):
+        if self.inputs.copy_inputs:
+            self.inputs.subjects_dir = os.getcwd()
+            if 'subjects_dir' in inputs:
+                inputs['subjects_dir'] = self.inputs.subjects_dir
+            copy2subjdir(self, self.inputs.canonsurf, folder='surf')
+            copy2subjdir(self, self.inputs.smoothwm,
+                         folder='surf',
+                         basename='{0}.smoothwm'.format(self.inputs.hemisphere))
+            copy2subjdir(self, self.inputs.curv,
+                         folder='surf',
+                         basename='{0}.curv'.format(self.inputs.hemisphere))
+            copy2subjdir(self, self.inputs.sulc,
+                         folder='surf',
+                         basename='{0}.sulc'.format(self.inputs.hemisphere))
+
+        # The label directory must exist in order for an output to be written
+        label_dir = os.path.join(self.inputs.subjects_dir,
+                                 self.inputs.subject_id,
+                                 'label')
+        if not os.path.isdir(label_dir):
+            os.makedirs(label_dir)
+            
+        return super(MRIsCALabel, self).run(**inputs)
+    
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        outputs['out_file'] = os.path.abspath(self.inputs.out_file)
+        out_basename = os.path.basename(self.inputs.out_file)
+        outputs['out_file'] = os.path.join(self.inputs.subjects_dir,
+                                           self.inputs.subject_id,
+                                           'label', out_basename)
         return outputs
 
 
