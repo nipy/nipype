@@ -166,7 +166,7 @@ class RuntimeProfilerTestCase(unittest.TestCase):
             func_runtime_gb = float(func_node_stats['runtime_memory_gb'])
 
             # Calc errors
-            cmd_threads_err = cmd_threads_threads - num_threads
+            cmd_threads_err = cmd_runtime_threads - num_threads
             cmd_gb_err = cmd_runtime_gb - num_gb
             func_threads_err = func_runtime_threads - num_threads
             func_gb_err = func_runtime_gb - num_gb
@@ -178,9 +178,9 @@ class RuntimeProfilerTestCase(unittest.TestCase):
                             'cmd_runtime_gb' : cmd_runtime_gb,
                             'func_runtime_threads' : func_runtime_threads,
                             'func_runtime_gb' : func_runtime_gb,
-                            'cmd_thread_err' : cmd_thread_err,
+                            'cmd_threads_err' : cmd_threads_err,
                             'cmd_gb_err' : cmd_gb_err,
-                            'func_thread_err' : func_thread_err,
+                            'func_threads_err' : func_threads_err,
                             'func_gb_err' : func_gb_err}
             # Append to list
             dict_list.append(results_dict)
@@ -191,11 +191,11 @@ class RuntimeProfilerTestCase(unittest.TestCase):
         # Return dataframe
         return runtime_results_df
 
-    def tiest_collect_range(self):
-        num_threads = 1
-        df = self._collect_range_suntime_stats(num_threads)
+    def test_collect_range(self):
+        num_threads = 8
+        df = self._collect_range_runtime_stats(num_threads)
 
-        df.to_csv('/root/%d_thread_df.csv')
+        df.to_csv('/root/%d_thread_df.csv' % num_threads)
 
     # Test node
     def _run_cmdline_workflow(self, num_gb, num_threads):
@@ -349,7 +349,7 @@ class RuntimeProfilerTestCase(unittest.TestCase):
 
     # Test resources were used as expected in cmdline interface
     @unittest.skipIf(run_profiler == False, skip_profile_msg)
-    def test_cmdline_profiling(self):
+    def tiest_cmdline_profiling(self):
         '''
         Test runtime profiler correctly records workflow RAM/CPUs consumption
         from a cmdline function
@@ -391,7 +391,7 @@ class RuntimeProfilerTestCase(unittest.TestCase):
 
     # Test resources were used as expected
     @unittest.skipIf(run_profiler == False, skip_profile_msg)
-    def test_function_profiling(self):
+    def tiest_function_profiling(self):
         '''
         Test runtime profiler correctly records workflow RAM/CPUs consumption
         from a python function
