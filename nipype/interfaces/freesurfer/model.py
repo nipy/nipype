@@ -72,7 +72,7 @@ class MRISPreprocInputSpec(FSTraitedSpec):
 
 
 class MRISPreprocOutputSpec(TraitedSpec):
-    out_file = File(exists=True, desc='preprocessed output file')
+    out_file = File(desc='preprocessed output file')
 
 
 class MRISPreproc(FSCommand):
@@ -118,7 +118,7 @@ class MRISPreprocReconAllInputSpec(MRISPreprocInputSpec):
                              xor=('surf_measure',
                                   'surf_measure_file', 'surf_area'),
                              desc='file necessary for surfmeas')
-    surfreg_files = InputMultiPath(File(exists=True), argstr="--surfreg%s",
+    surfreg_files = InputMultiPath(File(exists=True), argstr="--surfreg %s",
                                     requires=['lh_surfreg_target', 'rh_surfreg_target'],
                                     desc="lh and rh input surface registration files")
     lh_surfreg_target = File(desc="Implicit target surface registration file",
@@ -135,7 +135,6 @@ class MRISPreprocReconAllInputSpec(MRISPreprocInputSpec):
 
     
 class MRISPreprocReconAll(MRISPreproc):
-
     """Extends MRISPreproc to allow it to be used in a recon-all workflow
 
     Examples
@@ -181,12 +180,12 @@ class MRISPreprocReconAll(MRISPreproc):
         
     def _format_arg(self, name, spec, value):
         # mris_preproc looks for these files in the surf dir
-        if name  == 'surf_reg_files':
+        if name  == 'surfreg_files':
             basename = os.path.basename(value[0])
-            return spec.argstr % os.path.basename(value).lstrip('rh.').lstrip('lh.')
+            return spec.argstr % basename.lstrip('rh.').lstrip('lh.')
         if name  == "surf_measure_file":
             basename = os.path.basename(value)
-            return spec.argstr % os.path.basename(value).lstrip('rh.').lstrip('lh.')
+            return spec.argstr % basename.lstrip('rh.').lstrip('lh.')
         return super(MRISPreprocReconAll, self)._format_arg(name, spec, value)
 
 
@@ -207,7 +206,7 @@ class GLMFitInputSpec(FSTraitedSpec):
     one_sample = traits.Bool(argstr='--osgm',
                              xor=('one_sample', 'fsgd', 'design', 'contrast'),
                              desc='construct X and C as a one-sample group mean')
-    no_contrast_sok = traits.Bool(argstr='--no-contrasts-ok',
+    no_contrast_ok = traits.Bool(argstr='--no-contrasts-ok',
                                   desc='do not fail if no contrasts specified')
     per_voxel_reg = InputMultiPath(File(exists=True), argstr='--pvr %s...',
                                    desc='per-voxel regressors')
@@ -629,7 +628,7 @@ class SegStatsInputSpec(FSTraitedSpec):
                               argstr='--slabel %s %s %s', xor=_xor_inputs,
                               mandatory=True,
                               desc='subject hemi label : use surface label')
-    summary_file = File(argstr='--sum %s', genfile=True,
+    summary_file = File(argstr='--sum %s', genfile=True, position=-1,
                         desc='Segmentation stats summary table file')
     partial_volume_file = File(exists=True, argstr='--pv %s',
                                desc='Compensate for partial voluming')
@@ -761,6 +760,9 @@ class SegStats(FSCommand):
         elif name == 'in_intensity':
             intensity_name = os.path.basename(self.inputs.in_intensity).replace('.mgz', '')
             return spec.argstr % (value, intensity_name)
+        if name in ('summary_file', 'avgwf_text_file'):
+            if not os.path.isabs(value):
+                value = os.path.join('.', value)
         return super(SegStats, self)._format_arg(name, spec, value)
 
     def _gen_filename(self, name):
@@ -771,7 +773,8 @@ class SegStats(FSCommand):
 
 class SegStatsReconAllInputSpec(SegStatsInputSpec):
     # recon-all input requirements
-    subject_id = traits.String(argstr="--subject %s", mandatory=True,
+    subject_id = traits.String('subject_id', usedefault=True,
+                               argstr="--subject %s", mandatory=True,
                                desc="Subject id being processed")
     # implicit
     ribbon = traits.File(mandatory=True, exists=True,
@@ -838,47 +841,41 @@ class SegStatsReconAll(SegStats):
     input_spec = SegStatsReconAllInputSpec
     output_spec = SegStatsOutputSpec
 
-    def _copy2subjdir(self, in_file, folder=None, basename=None):
-        subjects_dir = self.inputs.subjects_dir
-        subject_id = self.inputs.subject_id
-        if basename == None:
-            basename = os.path.basename(in_file)
-        if folder != None:
-            out_dir = os.path.join(subjects_dir, subject_id, folder)
-        else:
-            out_dir = os.path.join(subjects_dir, subject_id)
-        if not os.path.isdir(out_dir):
-            os.makedirs(out_dir)
-        out_file = os.path.join(out_dir, basename)
-        shutil.copy(in_file, out_file)
-
     def _format_arg(self, name, spec, value):
+        if name == 'brainmask_file':
+            if self.inputs.copy_inputs:
+                copy2subjdir(self, value, 'mri')
+            return spec.argstr % os.path.basename(value)
+        return super(SegStatsReconAll, self)._format_arg(name, spec, value)
+
+    def run(self, **inputs):
         if self.inputs.copy_inputs:
-            cwd = os.getcwd()
-            if self.inputs.subjects_dir != cwd:
-                self.inputs.subjects_dir = cwd
-            folder = None
-            basename = None
-            if name in ['lh_orig_nofix', 'rh_orig_nofix',
-                        'lh_white', 'rh_white', 'lh_pial',
-                        'rh_pial']:
-                folder = 'surf'
-                basename = name.replace('_', '.')
-            elif name in ['ribbon', 'presuf_seg', 'transform', 'in_intensity']:
-                folder = 'mri'
-                if name == 'ribbon':
-                    basename = 'ribbon.mgz'
-                elif name == 'presurf_seg':
-                    basename = 'aseg.presurf.mgz'
-                elif name == 'transform':
-                    basename = 'talairach.xfm'
-                elif name == 'in_intensity':
-                    basename = os.path.basename(value)
-            if folder and basename:
-                self.copy2subjdir(value, basename=basename, folder=folder)
-        return super(SegStats, self)._format_arg(name, spec, value)
+            self.inputs.subjects_dir = os.getcwd()
+            if 'subjects_dir' in inputs:
+                inputs['subjects_dir'] = self.inputs.subjects_dir
+            copy2subjdir(self, self.inputs.lh_orig_nofix,
+                         'surf', 'lh.orig.nofix')
+            copy2subjdir(self, self.inputs.rh_orig_nofix,
+                         'surf', 'rh.orig.nofix')
+            copy2subjdir(self, self.inputs.lh_white,
+                         'surf', 'lh.white')
+            copy2subjdir(self, self.inputs.rh_white,
+                         'Surf', 'Rh.White')
+            copy2subjdir(self, self.inputs.lh_pial,
+                         'surf', 'lh.pial')
+            copy2subjdir(self, self.inputs.rh_pial,
+                         'surf', 'rh.pial')
+            copy2subjdir(self, self.inputs.ribbon,
+                         'mri', 'ribbon.mgz')
+            copy2subjdir(self, self.inputs.presurf_seg,
+                         'mri', 'aseg.presurf.mgz')
+            copy2subjdir(self, self.inputs.transform,
+                         os.path.join('mri', 'transforms'),
+                         'talairach.xfm')
+            copy2subjdir(self, self.inputs.in_intensity, 'mri')
+        return super(SegStatsReconAll, self).run(**inputs)
 
-
+                
 class Label2VolInputSpec(FSTraitedSpec):
     label_file = InputMultiPath(File(exists=True), argstr='--label %s...',
                                 xor=('label_file', 'annot_file', 'seg_file', 'aparc_aseg'),
@@ -1175,7 +1172,8 @@ class Label2AnnotInputSpec(FSTraitedSpec):
                             desc="List of input label files")
     out_annot = traits.String(argstr="--a %s", mandatory=True,
                               desc="Name of the annotation to create")
-    orig = File(exists=True, desc="implicit {hemisphere}.orig")
+    orig = File(exists=True, mandatory=True,
+                desc="implicit {hemisphere}.orig")
     # optional
     keep_max = traits.Bool(argstr="--maxstatwinner", mandatory=False,
                            desc="Keep label with highest 'stat' value")
@@ -1215,8 +1213,15 @@ class Label2Annot(FSCommand):
             self.inputs.subjects_dir = os.getcwd()
             if 'subjects_dir' in inputs:
                 inputs['subjects_dir'] = self.inputs.subjects_dir
-            copy2subjdir(self, self.inputs.orig, 'surf',
-                         '{0}.orig'.format(self.inputs.hemisphere))
+            copy2subjdir(self, self.inputs.orig,
+                         folder='surf',
+                         basename='{0}.orig'.format(self.inputs.hemisphere))
+        # label dir must exist in order for output file to be written
+        label_dir = os.path.join(self.inputs.subjects_dir,
+                                 self.inputs.subject_id,
+                                 'label')
+        if not os.path.isdir(label_dir):
+            os.makedirs(label_dir)
         return super(Label2Annot, self).run(**inputs)
 
     def _list_outputs(self):

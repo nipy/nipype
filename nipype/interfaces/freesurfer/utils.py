@@ -57,6 +57,14 @@ def copy2subjdir(cls, in_file, folder=None, basename=None, subject_id=None):
         shutil.copy(in_file, out_file)
 
 
+def createoutputdirs(outputs):
+    """create an output directories. If not created, some freesurfer interfaces fail"""
+    for output in outputs.itervalues():
+        dirname = os.path.dirname(output)
+        if not os.path.isdir(dirname):
+            os.makedirs(dirname)
+        
+
 class SampleToSurfaceInputSpec(FSTraitedSpec):
 
     source_file = File(exists=True, mandatory=True, argstr="--mov %s",
@@ -2252,7 +2260,8 @@ class MRIsCalc(FSCommand):
     to a float number, which is then processed according to <ACTION>.Note:
     <file1> and <file2> should typically be generated on the same subject.
 
-    Examples                                                                                                                                                                                                          ========
+    Examples
+    ========
     >>> from nipype.interfaces.freesurfer import MRIsCalc
     >>> example = MRIsCalc()
     >>> example.inputs.in_file1 = 'lh.area' # doctest: +SKIP
@@ -2269,7 +2278,7 @@ class MRIsCalc(FSCommand):
 
     def _list_outputs(self):
         outputs = self._outputs().get()
-        outputs['out_file'] = self.inputs.out_file
+        outputs['out_file'] = os.path.abspath(self.inputs.out_file)
         return outputs
 
 
@@ -2478,6 +2487,7 @@ class ParcellationStats(FSCommand):
             copy2subjdir(self, self.inputs.ribbon, 'mri', 'ribbon.mgz')
             copy2subjdir(self, self.inputs.thickness, 'surf',
                          '{0}.thickness'.format(self.inputs.hemisphere))
+        createoutputdirs(self._list_outputs())
         return super(ParcellationStats, self).run(**inputs)
 
     def _gen_filename(self, name):
@@ -2614,6 +2624,8 @@ class Contrast(FSCommand):
                          '{0}.thickness'.format(hemi))
             copy2subjdir(self, self.inputs.orig, 'mri', 'orig.mgz')
             copy2subjdir(self, self.inputs.rawavg, 'mri', 'rawavg.mgz')
+        # need to create output directories
+        createoutputdirs(self._list_outputs())
         return super(Contrast, self).run(**inputs)
     
     def _list_outputs(self):
@@ -2777,7 +2789,6 @@ class Aparc2Aseg(FSCommand):
             self.inputs.subjects_dir = os.getcwd()
             if 'subjects_dir' in inputs:
                 inputs['subjects_dir'] = self.inputs.subjects_dir
-            hemi = self.inputs.hemisphere
             copy2subjdir(self, self.inputs.lh_white, 'surf', 'lh.white')
             copy2subjdir(self, self.inputs.lh_pial, 'surf', 'lh.pial')
             copy2subjdir(self, self.inputs.rh_white, 'surf', 'rh.white')
@@ -2786,8 +2797,8 @@ class Aparc2Aseg(FSCommand):
             copy2subjdir(self, self.inputs.rh_ribbon, 'mri', 'rh.ribbon.mgz')
             copy2subjdir(self, self.inputs.ribbon, 'mri', 'ribbon.mgz')
             copy2subjdir(self, self.inputs.aseg, 'mri')
-            copy2subjdir(self, self.inputs.lh_annotation, 'label', 'lh.aparc.annot')
-            copy2subjdir(self, self.inputs.rh_annotation, 'label', 'rh.aparc.annot')
+            copy2subjdir(self, self.inputs.lh_annotation, 'label')
+            copy2subjdir(self, self.inputs.rh_annotation, 'label')
 
         return super(Aparc2Aseg, self).run(**inputs)
         
