@@ -140,5 +140,6 @@ REQUIRES = ["nibabel>=%s" % NIBABEL_MIN_VERSION,
             "nose>=%s" % NOSE_MIN_VERSION,
             "future>=%s" % FUTURE_MIN_VERSION,
             "simplejson>=%s" % SIMPLEJSON_MIN_VERSION,
-            "prov>=%s" % PROV_MIN_VERSION]
+            "prov>=%s" % PROV_MIN_VERSION,
+            "xvfbwrapper"]
 STATUS = 'stable'

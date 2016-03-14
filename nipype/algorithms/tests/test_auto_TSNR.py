@@ -4,12 +4,24 @@ from ..misc import TSNR
 
 
 def test_TSNR_inputs():
-    input_map = dict(ignore_exception=dict(nohash=True,
+    input_map = dict(detrended_file=dict(hash_files=False,
+    usedefault=True,
+    ),
+    ignore_exception=dict(nohash=True,
     usedefault=True,
     ),
     in_file=dict(mandatory=True,
     ),
+    mean_file=dict(hash_files=False,
+    usedefault=True,
+    ),
     regress_poly=dict(),
+    stddev_file=dict(hash_files=False,
+    usedefault=True,
+    ),
+    tsnr_file=dict(hash_files=False,
+    usedefault=True,
+    ),
     )
     inputs = TSNR.input_spec()
 

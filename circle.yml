@@ -1,83 +1,77 @@
 dependencies:
   cache_directories:
+    - "~/.apt-cache"
     - "~/examples/data"
     - "~/examples/fsdata"
-    - "~/examples/feeds"
     - "~/mcr"
     - "~/spm12"
-    - "~/fsl"
     - "~/examples/fsl_course_data"
+  pre:
+    # Let CircleCI cache the apt archive
+    - sudo rm -rf /var/cache/apt/archives && sudo ln -s ~/.apt-cache /var/cache/apt/archives && mkdir -p ~/.apt-cache/partial
+    - bash <(wget -q -O- http://neuro.debian.net/_files/neurodebian-travis.sh)
   override:
+    # Install apt packages
+    - sudo apt-get install -y fsl-core fsl-atlases fsl-mni152-templates fsl-feeds afni swig python-vtk xvfb
+    - echo 'source /etc/fsl/fsl.sh' >> $HOME/.profile
+    - echo 'source /etc/afni/afni.sh' >> $HOME/.profile
+    - mkdir -p ~/examples/ && ln -sf /usr/share/fsl-feeds/ ~/examples/feeds
+    # Enable system-wide vtk
+    - ln -sf /usr/lib/pymodules/python2.7/vtk ~/virtualenvs/venv-system/lib/python2.7/site-packages/
+    # Set up python environment
     - pip install --upgrade pip
     - pip install -e .
-    - pip install matplotlib sphinx ipython boto
+    - pip install matplotlib sphinx ipython boto coverage dipy
+    # Add tvtk
+    - pip install http://effbot.org/downloads/Imaging-1.1.7.tar.gz
+    - pip install -e git+https://github.com/enthought/etsdevtools.git#egg=etsdevtools
+    - pip install -e git+https://github.com/enthought/blockcanvas.git#egg=blockcanvas
+    - pip install -e git+https://github.com/enthought/etsproxy.git#egg=etsproxy
+    - pip install -e git+https://github.com/enthought/ets.git#egg=ets
     - gem install fakes3
-    - if [[ ! -d ~/fsl ]]; then wget "http://fsl.fmrib.ox.ac.uk/fsldownloads/fsl-5.0.9-centos6_64.tar.gz"; tar zxvf fsl-5.0.9-centos6_64.tar.gz; mv fsl ~/fsl; fi
-    - if [[ ! -d ~/examples/data ]]; then wget "http://tcpdiag.dl.sourceforge.net/project/nipy/nipype/nipype-0.2/nipype-tutorial.tar.bz2"; tar jxvf nipype-tutorial.tar.bz2; mkdir ~/examples; mv nipype-tutorial/* ~/examples/; fi
-    # we download this manually because CircleCI does not cache apt
-    - if [[ ! -d ~/examples/feeds ]]; then wget "http://fsl.fmrib.ox.ac.uk/fsldownloads/fsl-5.0.9-feeds.tar.gz"; tar zxvf fsl-5.0.9-feeds.tar.gz; mv feeds ~/examples/; fi
-    - if [[ ! -d ~/examples/fsl_course_data ]]; then wget -c "http://fsl.fmrib.ox.ac.uk/fslcourse/fdt1.tar.gz" ; wget -c "http://fsl.fmrib.ox.ac.uk/fslcourse/fdt2.tar.gz"; wget -c "http://fsl.fmrib.ox.ac.uk/fslcourse/tbss.tar.gz"; mkdir ~/examples/fsl_course_data; tar zxvf fdt1.tar.gz -C ~/examples/fsl_course_data; tar zxvf fdt2.tar.gz -C ~/examples/fsl_course_data; tar zxvf tbss.tar.gz -C ~/examples/fsl_course_data; fi
+    - if [[ ! -d ~/examples/data ]]; then wget "https://dl.dropbox.com/s/jzgq2nupxyz36bp/nipype-tutorial.tar.bz2" && tar jxvf nipype-tutorial.tar.bz2 && mv nipype-tutorial/* ~/examples/; fi
+    - if [[ ! -d ~/examples/fsl_course_data ]]; then wget -c "http://fsl.fmrib.ox.ac.uk/fslcourse/fdt1.tar.gz" && wget -c "http://fsl.fmrib.ox.ac.uk/fslcourse/fdt2.tar.gz" && wget -c "http://fsl.fmrib.ox.ac.uk/fslcourse/tbss.tar.gz" && mkdir ~/examples/fsl_course_data && tar zxvf fdt1.tar.gz -C ~/examples/fsl_course_data && tar zxvf fdt2.tar.gz -C ~/examples/fsl_course_data && tar zxvf tbss.tar.gz -C ~/examples/fsl_course_data; fi
     - bash ~/nipype/tools/install_spm_mcr.sh
-    - mkdir -p ~/.nipype && echo "[logging]" > ~/.nipype/nipype.cfg && echo "workflow_level = DEBUG" >> ~/.nipype/nipype.cfg && echo "interface_level = DEBUG" >> ~/.nipype/nipype.cfg && echo "filemanip_level = DEBUG" >> ~/.nipype/nipype.cfg
+    - mkdir -p ~/.nipype && echo '[logging]' > ~/.nipype/nipype.cfg && echo 'workflow_level = DEBUG' >> ~/.nipype/nipype.cfg && echo 'interface_level = DEBUG' >> ~/.nipype/nipype.cfg && echo 'filemanip_level = DEBUG' >> ~/.nipype/nipype.cfg
+machine:
+  environment:
+    FSLOUTPUTTYPE: NIFTI_GZ
 test:
   override:
-    - nosetests --with-doctest --logging-level=DEBUG --verbosity=3:
+    - mkdir -p ${CIRCLE_TEST_REPORTS}/nose
+    - source $HOME/.profile; nosetests --with-doctest --xunit-file="${CIRCLE_TEST_REPORTS}/nose/${CIRCLE_PROJECT_REPONAME}.xml" -c ./.noserc --logging-level=DEBUG --verbosity=3:
         environment:
           SPMMCRCMD: "$HOME/spm12/run_spm12.sh $HOME/mcr/v85/ script"
           FORCE_SPMMCR: 1
           FSL_COURSE_DATA: "$HOME/examples/fsl_course_data"
-          FSLDIR: "$HOME/fsl/"
-          PATH: "$HOME/fsl/bin:$PATH"
-          LD_LIBRARY_PATH: "$HOME/fsl/lib"
-          FSLOUTPUTTYPE: "NIFTI_GZ"
         timeout: 2600
     - set -o pipefail && cd doc && make html 2>&1 | tee ~/log.txt
     - cat ~/log.txt && if grep -q "ERROR" ~/log.txt; then false; else true; fi
-    - python ~/nipype/tools/run_examples.py test_spm Linear workflow3d workflow4d:
+    - source $HOME/.profile; python ~/nipype/tools/run_examples.py test_spm Linear workflow3d workflow4d:
         pwd: ../examples
         environment:
           SPMMCRCMD: "$HOME/spm12/run_spm12.sh $HOME/mcr/v85/ script"
           FORCE_SPMMCR: 1
-          FSLDIR: "$HOME/fsl/"
-          PATH: "$HOME/fsl/bin:$PATH"
-          LD_LIBRARY_PATH: "$HOME/fsl/lib"
-          FSLOUTPUTTYPE: "NIFTI_GZ"
         timeout: 1600
-    - python ~/nipype/tools/run_examples.py fmri_fsl_feeds Linear l1pipeline:
+    - source $HOME/.profile; python ~/nipype/tools/run_examples.py fmri_fsl_feeds Linear l1pipeline:
         pwd: ../examples
-        environment:
-          FSLDIR: "$HOME/fsl/"
-          PATH: "$HOME/fsl/bin:$PATH"
-          LD_LIBRARY_PATH: "$HOME/fsl/lib"
-          FSLOUTPUTTYPE: "NIFTI_GZ"
-    - python ~/nipype/tools/run_examples.py fmri_spm_dartel Linear level1 l2pipeline:
+    - source $HOME/.profile; python ~/nipype/tools/run_examples.py fmri_spm_dartel Linear level1 l2pipeline:
         pwd: ../examples
         environment:
           SPMMCRCMD: "$HOME/spm12/run_spm12.sh $HOME/mcr/v85/ script"
           FORCE_SPMMCR: 1
-          FSLDIR: "$HOME/fsl/"
-          PATH: "$HOME/fsl/bin:$PATH"
-          LD_LIBRARY_PATH: "$HOME/fsl/lib"
-          FSLOUTPUTTYPE: "NIFTI_GZ"
         timeout: 1600
-    - python ~/nipype/tools/run_examples.py fmri_fsl_reuse Linear level1_workflow:
+    - source $HOME/.profile; python ~/nipype/tools/run_examples.py fmri_fsl_reuse Linear level1_workflow:
         pwd: ../examples
-        environment:
-          FSLDIR: "$HOME/fsl/"
-          PATH: "$HOME/fsl/bin:$PATH"
-          LD_LIBRARY_PATH: "$HOME/fsl/lib"
-          FSLOUTPUTTYPE: "NIFTI_GZ"
-    - python ~/nipype/tools/run_examples.py fmri_spm_nested Linear level1 l2pipeline:
+    - source $HOME/.profile; python ~/nipype/tools/run_examples.py fmri_spm_nested Linear level1 l2pipeline:
         pwd: ../examples
         environment:
           SPMMCRCMD: "$HOME/spm12/run_spm12.sh $HOME/mcr/v85/ script"
           FORCE_SPMMCR: 1
-          FSLDIR: "$HOME/fsl/"
-          PATH: "$HOME/fsl/bin:$PATH"
-          LD_LIBRARY_PATH: "$HOME/fsl/lib"
-          FSLOUTPUTTYPE: "NIFTI_GZ"
 
 general:
   artifacts:
     - "doc/_build/html"
     - "~/log.txt"
+    - "nosetests.xml"
+    - "coverage.xml"
