@@ -492,7 +492,9 @@ class ApplyMaskInputSpec(FSTraitedSpec):
                    desc="input image (will be masked)")
     mask_file = File(exists=True, mandatory=True, position=-2, argstr="%s",
                      desc="image defining mask space")
-    out_file = File(genfile=True, position=-1, argstr="%s",
+    out_file = File(name_source=['in_file'], name_template='%s_masked',
+                    hash_files=True, keep_extension=True,
+                    position=-1, argstr="%s",
                     desc="final image to write")
     xfm_file = File(exists=True, argstr="-xform %s",
                     desc="LTA-format transformation matrix to align mask with input")
@@ -527,20 +529,8 @@ class ApplyMask(FSCommand):
 
     def _list_outputs(self):
         outputs = self._outputs().get()
-        outputs["out_file"] = self.inputs.out_file
-        if not isdefined(outputs["out_file"]):
-            outputs["out_file"] = fname_presuffix(self.inputs.in_file,
-                                                  suffix="_masked",
-                                                  newpath=os.getcwd(),
-                                                  use_ext=True)
-        else:
-            outputs["out_file"] = os.path.abspath(outputs["out_file"])
+        outputs["out_file"] = os.path.abspath(self.inputs.out_file)
         return outputs
-
-    def _gen_filename(self, name):
-        if name == "out_file":
-            return self._list_outputs()[name]
-        return None
 
 
 class SurfaceSnapshotsInputSpec(FSTraitedSpec):
@@ -1523,8 +1513,10 @@ class TalairachQC(FSScriptCommand):
 class RemoveNeckInputSpec(FSTraitedSpec):
     in_file = File(argstr="%s", exisits=True, madatory=True,
                    position=-4, desc="Input file for RemoveNeck")
-    out_file = File(argstr="%s", exists=False, mandatory=True,
-                    genfile=True, position=-1, desc="Output file for RemoveNeck")
+    out_file = File(argstr="%s", exists=False,
+                    name_source=['in_file'], name_template="%s_noneck",
+                    hash_files=False, keep_extension=True,
+                    position=-1, desc="Output file for RemoveNeck")
     transform = File(argstr="%s", exists=True, mandatory=True,
                      position=-3, desc="Input transform file for RemoveNeck")
     template = File(argstr="%s", exists=True, mandatory=True,
@@ -1546,10 +1538,9 @@ class RemoveNeck(FSCommand):
 
     >>> from nipype.interfaces.freesurfer import TalairachQC
     >>> remove_neck = RemoveNeck()
-
-    >>> remove_neck.inputs.in_file = 'nu.mgz' # doctest: +SKIP
-    >>> remove_neck.inputs.out_file = 'nu_noneck.mgz' # doctest: +SKIP
-    >>> remove_neck.run() # doctest: +SKIP
+    >>> remove_neck.inputs.in_file = 'norm.mgz'
+    >>> remove_neck.cmdline
+    'mri_remove_neck norm.mgz norm_noneck.mgz'
     """
     _cmd = "mri_remove_neck"
     input_spec = RemoveNeckInputSpec

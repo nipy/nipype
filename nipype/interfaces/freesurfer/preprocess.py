@@ -1550,8 +1550,10 @@ class NormalizeInputSpec(FSTraitedSpec):
     # required
     in_file = File(argstr='%s', exists=True, mandatory=True,
                    position=-2, desc="The input file for Normalize")
-    out_file = File(argstr='%s', mandatory=True, position=-1,
-                    genfile=True, desc="The output file for Normalize")
+    out_file = File(argstr='%s', position=-1,
+                    name_source=['in_file'], name_template='%s_norm',
+                    hash_files=False, keep_extension=True,
+                    desc="The output file for Normalize")
     # optional
     gradient = traits.Int(1, argstr="-g %d", usedefault=False,
                           desc="use max intensity/mm gradient g (default=1)")
@@ -1578,19 +1580,13 @@ class Normalize(FSCommand):
     >>> from nipype.interfaces import freesurfer
     >>> normalize = freesurfer.Normalize()
     >>> normalize.inputs.in_file = "T1.mgz"
-    >>> normalize.inputs.out_file = "out.mgz"
     >>> normalize.inputs.gradient = 1
     >>> normalize.cmdline
-    'mri_normalize -g 1 T1.mgz out.mgz'
+    'mri_normalize -g 1 T1.mgz T1_norm.mgz'
     """
     _cmd = "mri_normalize"
     input_spec = NormalizeInputSpec
     output_spec = NormalizeOutputSpec
-
-    def _gen_fname(self, name):
-        if name == 'out_file':
-            return os.path.abspath('T1.mgz')
-        return None
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
@@ -1601,8 +1597,10 @@ class Normalize(FSCommand):
 class CANormalizeInputSpec(FSTraitedSpec):
     in_file = File(argstr='%s', exists=True, mandatory=True,
                    position=-4, desc="The input file for CANormalize")
-    out_file = File(argstr='%s', mandatory=True, position=-1,
-                    genfile=True, desc="The output file for CANormalize")
+    out_file = File(argstr='%s', position=-1,
+                    name_source=['in_file'], name_template='%s_norm',
+                    hash_files=False, keep_extension=True,
+                    desc="The output file for CANormalize")
     atlas = File(argstr='%s', exists=True, mandatory=True,
                  position=-3, desc="The atlas file in gca format")
     transform = File(argstr='%s', exists=True, mandatory=True,
@@ -1633,20 +1631,14 @@ class CANormalize(FSCommand):
     >>> from nipype.interfaces import freesurfer
     >>> ca_normalize = freesurfer.CANormalize()
     >>> ca_normalize.inputs.in_file = "T1.mgz"
-    >>> ca_normalize.inputs.out_file = "norm.mgz"
     >>> ca_normalize.inputs.atlas = "atlas.nii.gz" # in practice use .gca atlases
     >>> ca_normalize.inputs.transform = "trans.mat" # in practice use .lta transforms
     >>> ca_normalize.cmdline
-    'mri_ca_normalize T1.mgz atlas.nii.gz trans.mat norm.mgz'
+    'mri_ca_normalize T1.mgz atlas.nii.gz trans.mat T1_norm.mgz'
     """
     _cmd = "mri_ca_normalize"
     input_spec = CANormalizeInputSpec
     output_spec = CANormalizeOutputSpec
-
-    def _gen_fname(self, name):
-        if name == 'out_file':
-            return os.path.abspath('norm.mgz')
-        return None
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
@@ -1800,7 +1792,7 @@ class MRIsCALabelInputSpec(FSTraitedSpecOpenMP):
                 desc="implicit input {hemisphere}.curv")
     sulc = File(mandatory=True, exists=True,
                 desc="implicit input {hemisphere}.sulc")
-    out_file = File(argstr="%s", position=-1, exists=False, mandatory=False,
+    out_file = File(argstr="%s", position=-1, exists=False,
                     name_source=['hemisphere'], keep_extension=True,
                     hash_files=False, name_template="%s.aparc.annot",
                     desc="Annotated surface output file")
@@ -2084,9 +2076,10 @@ class ConcatenateLTAInputSpec(FSTraitedSpec):
                    desc="maps some src1 to dst1")
     in_lta2 = File(exists=True, mandatory=True, argstr='%s', position=-2,
                    desc="maps dst1(src2) to dst2")
-    out_file = File(exists=False, mandatory=True, genfile=True, position=-1,
-                    argstr='%s',
-                     desc="the combined LTA maps: src1 to dst2 = LTA2*LTA1")
+    out_file = File(exists=False, position=-1, argstr='%s',
+                    name_source=['in_lta1'], name_template='%s-long',
+                    hash_files=False, keep_extension=True,
+                    desc="the combined LTA maps: src1 to dst2 = LTA2*LTA1")
 
 
 class ConcatenateLTAOutputSpec(TraitedSpec):
@@ -2104,9 +2097,8 @@ class ConcatenateLTA(FSCommand):
     >>> conc_lta = ConcatenateLTA()
     >>> conc_lta.inputs.in_lta1 = 'trans.mat'
     >>> conc_lta.inputs.in_lta2 = 'trans.mat'
-    >>> conc_lta.inputs.out_file = 'out.lta'
     >>> conc_lta.cmdline
-    'mri_concatenate_lta trans.mat trans.mat out.lta'
+    'mri_concatenate_lta trans.mat trans.mat trans-long.mat'
     """
 
     _cmd = 'mri_concatenate_lta'
@@ -2115,15 +2107,5 @@ class ConcatenateLTA(FSCommand):
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        if isdefined(self.inputs.out_file):
-            outputs['out_file'] = os.path.abspath(
-                self.inputs.out_file)
-        else:
-            outputs['out_file'] = os.path.abspath(
-                self.inputs.out_file).replace('.lta', '-long.lta')
+        outputs['out_file'] = os.path.abspath(self.inputs.out_file)
         return outputs
-
-    def _gen_filename(self, name):
-        if name == 'out_file':
-            return self._list_outputs()[name]
-        return None

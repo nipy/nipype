@@ -27,8 +27,9 @@ class RobustTemplateInputSpec(FSTraitedSpec):
     # required
     in_files = InputMultiPath(File(exists=True), mandatory=True, argstr='--mov %s',
                              desc='input movable volumes to be aligned to common mean/median template')
-    out_file = File('mri_robust_template_out.mgz', mandatory=True, usedefault=True, argstr='--template %s',
-                           desc='output template volume (final mean/median image)')
+    out_file = File('mri_robust_template_out.mgz', mandatory=True,
+                    usedefault=True, argstr='--template %s',
+                    desc='output template volume (final mean/median image)')
     auto_detect_sensitivity = traits.Bool(argstr='--satit', xor=['outlier_sensitivity'], mandatory=True,
                                           desc='auto-detect good sensitivity (recommended for head or full brain scans)')
     outlier_sensitivity = traits.Float(argstr='--sat %.4f', xor=['auto_detect_sensitivity'], mandatory=True,
@@ -160,11 +161,12 @@ class FuseSegmentations(FSCommand):
     >>> fuse = FuseSegmentations()
     >>> fuse.inputs.subject_id = 'tp.long.A.template'
     >>> fuse.inputs.timepoints = ['tp1', 'tp2']
-    >>> fuse.inputs.out_file = 'tp.long.A.template/mri/aseg.fused.mgz' #doctest: +SKIP
-    >>> fuse.inputs.in_segmentations = ['tp1/mri/aseg.presurf.mgz', 'tp1/mri/aseg.presurf.mgz'] #doctest: +SKIP
-    >>> fuse.inputs.in_segmentations_noCC = ['tp1/mri/aseg.auto_noCCseg.mgz', 'tp1/mri/aseg.auto_noCCseg.mgz'] #doctest: +SKIP
-    >>> fuse.inputs.in_norms = ['tp1/mri/norm.mgz', 'tp1/mri/norm.mgz', 'tp.long.A.template/mri/norm.mgz'] #doctest: +SKIP
-    >>> fuse.cmdline #doctest: +SKIP
+    >>> fuse.inputs.out_file = 'aseg.fused.mgz' 
+    >>> fuse.inputs.in_segmentations = ['aseg.mgz', 'aseg.mgz']
+    >>> fuse.inputs.in_segmentations_noCC = ['aseg.mgz', 'aseg.mgz']
+    >>> fuse.inputs.in_norms = ['norm.mgz', 'norm.mgz', 'norm.mgz']
+    >>> fuse.cmdline
+    'mri_fuse_segmentations -n norm.mgz -a aseg.mgz -c aseg.mgz tp.long.A.template tp1 tp2'
     """
 
     _cmd = 'mri_fuse_segmentations'

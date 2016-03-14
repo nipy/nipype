@@ -113,7 +113,8 @@ class RegisterAVItoTalairachInputSpec(FSTraitedSpec):
                   position=1, desc="The target file")
     vox2vox = File(argstr='%s', exists=True, mandatory=True,
                    position=2, desc="The vox2vox file")
-    out_file = File(argstr='%s', mandatory=False, genfile=True,
+    out_file = File('talairach.auto.xfm', usedfault=True,
+                    argstr='%s', mandatory=False,                    
                     position=3, desc="The transform output")
 
 
@@ -158,18 +159,9 @@ class RegisterAVItoTalairach(FSScriptCommand):
     input_spec = RegisterAVItoTalairachInputSpec
     output_spec = RegisterAVItoTalairachOutputSpec
 
-    def _gen_filename(self, name):
-        if name == 'out_file':
-            return self._list_outputs()[name]
-        return None
-
     def _list_outputs(self):
-        outputs = super(RegisterAVItoTalairach, self)._list_outputs()
-        # outputs = self.output_spec().get()
-        if isdefined(self.inputs.out_file):
-            outputs['out_file'] = os.path.abspath(self.inputs.out_file)
-        else:
-            outputs['out_file'] = 'talairach.auto.xfm'
+        outputs = self.output_spec().get()
+        outputs['out_file'] = os.path.abspath(self.inputs.out_file)
         return outputs
 
 
@@ -179,8 +171,10 @@ class EMRegisterInputSpec(FSTraitedSpecOpenMP):
                    position=-3, desc="in brain volume")
     template = File(argstr="%s", exists=True, mandatory=True,
                     position=-2, desc="template gca")
-    out_file = File(argstr="%s", exists=False, mandatory=True,
-                    position=-1, genfile=True, desc="output transform")
+    out_file = File(argstr="%s", exists=False,
+                    name_source=['in_file'], name_template="%s_transform.lta",
+                    hash_files=False, keep_extension=False,
+                    position=-1,  desc="output transform")
     # optional
     skull = traits.Bool(
         argstr="-skull", desc="align to atlas containing skull (uns=5)")
@@ -205,27 +199,19 @@ class EMRegister(FSCommandOpenMP):
     >>> register = EMRegister()
     >>> register.inputs.in_file = 'norm.mgz'
     >>> register.inputs.template = 'aseg.mgz'
-    >>> register.inputs.out_file = 'talairach_with_skull.lta'
+    >>> register.inputs.out_file = 'norm_transform.lta'
     >>> register.inputs.skull = True
     >>> register.inputs.nbrspacing = 9
     >>> register.cmdline
-    'mri_em_register -uns 9 -skull norm.mgz aseg.mgz talairach_with_skull.lta'
+    'mri_em_register -uns 9 -skull norm.mgz aseg.mgz norm_transform.lta'
     """
     _cmd = 'mri_em_register'
     input_spec = EMRegisterInputSpec
     output_spec = EMRegisterOutputSpec
 
-    def _gen_filename(self, name):
-        if name == 'out_file':
-            return self._list_outputs()[name]
-        return None
-
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        if isdefined(self.inputs.out_file):
-            outputs['out_file'] = os.path.abspath(self.inputs.out_file)
-        else:
-            outputs['out_file'] = 'talairach_with_skull.lta'
+        outputs['out_file'] = os.path.abspath(self.inputs.out_file)
         return outputs
 
 
