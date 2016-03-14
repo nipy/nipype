@@ -161,7 +161,7 @@ class FuseSegmentations(FSCommand):
     >>> fuse = FuseSegmentations()
     >>> fuse.inputs.subject_id = 'tp.long.A.template'
     >>> fuse.inputs.timepoints = ['tp1', 'tp2']
-    >>> fuse.inputs.out_file = 'aseg.fused.mgz' 
+    >>> fuse.inputs.out_file = 'aseg.fused.mgz'
     >>> fuse.inputs.in_segmentations = ['aseg.mgz', 'aseg.mgz']
     >>> fuse.inputs.in_segmentations_noCC = ['aseg.mgz', 'aseg.mgz']
     >>> fuse.inputs.in_norms = ['norm.mgz', 'norm.mgz', 'norm.mgz']

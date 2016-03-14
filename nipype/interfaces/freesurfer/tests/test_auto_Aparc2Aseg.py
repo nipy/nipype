@@ -4,10 +4,14 @@ from ..utils import Aparc2Aseg
 
 
 def test_Aparc2Aseg_inputs():
-    input_map = dict(args=dict(argstr='%s',
+    input_map = dict(a2009s=dict(argstr='--a2009s',
+    ),
+    args=dict(argstr='%s',
     ),
     aseg=dict(argstr='--aseg %s',
     mandatory=False,
+    ),
+    copy_inputs=dict(mandatory=False,
     ),
     ctxseg=dict(argstr='--ctxseg %s',
     mandatory=False,
@@ -24,8 +28,7 @@ def test_Aparc2Aseg_inputs():
     label_wm=dict(argstr='--labelwm',
     mandatory=False,
     ),
-    lh_annotation=dict(argstr='%s',
-    mandatory=True,
+    lh_annotation=dict(mandatory=True,
     ),
     lh_pial=dict(mandatory=True,
     ),
@@ -34,8 +37,7 @@ def test_Aparc2Aseg_inputs():
     lh_white=dict(mandatory=True,
     ),
     out_file=dict(argstr='--o %s',
-    genfile=True,
-    mandatory=False,
+    mandatory=True,
     ),
     rh_annotation=dict(mandatory=True,
     ),
@@ -52,6 +54,7 @@ def test_Aparc2Aseg_inputs():
     ),
     subject_id=dict(argstr='--s %s',
     mandatory=True,
+    usedefault=True,
     ),
     subjects_dir=dict(),
     terminal_output=dict(nohash=True,
@@ -69,7 +72,6 @@ def test_Aparc2Aseg_inputs():
 
 def test_Aparc2Aseg_outputs():
     output_map = dict(out_file=dict(argstr='%s',
-    mandatory=False,
     ),
     )
     outputs = Aparc2Aseg.output_spec()

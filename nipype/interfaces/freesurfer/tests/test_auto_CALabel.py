@@ -34,7 +34,6 @@ def test_CALabel_inputs():
     ),
     num_threads=dict(),
     out_file=dict(argstr='%s',
-    genfile=True,
     mandatory=True,
     position=-1,
     ),

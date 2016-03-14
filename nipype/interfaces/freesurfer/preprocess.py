@@ -1864,9 +1864,9 @@ class MRIsCALabel(FSCommandOpenMP):
                                  'label')
         if not os.path.isdir(label_dir):
             os.makedirs(label_dir)
-            
+
         return super(MRIsCALabel, self).run(**inputs)
-    
+
     def _list_outputs(self):
         outputs = self.output_spec().get()
         out_basename = os.path.basename(self.inputs.out_file)
@@ -1955,7 +1955,7 @@ class SegmentCC(FSCommand):
             for originalfile in [self.inputs.in_file, self.inputs.in_norm]:
                 copy2subjdir(self, originalfile, folder='mri')
         return super(SegmentCC, self).run(**inputs)
-    
+
     def aggregate_outputs(self, runtime=None, needed_outputs=None):
         # it is necessary to find the output files and move
         # them to the correct loacation

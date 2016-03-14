@@ -6,6 +6,8 @@ from ..utils import MakeSurfaces
 def test_MakeSurfaces_inputs():
     input_map = dict(args=dict(argstr='%s',
     ),
+    copy_inputs=dict(mandatory=False,
+    ),
     environ=dict(nohash=True,
     usedefault=True,
     ),
@@ -59,6 +61,7 @@ def test_MakeSurfaces_inputs():
     subject_id=dict(argstr='%s',
     mandatory=True,
     position=-2,
+    usedefault=True,
     ),
     subjects_dir=dict(),
     terminal_output=dict(nohash=True,

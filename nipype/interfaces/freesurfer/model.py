@@ -133,7 +133,7 @@ class MRISPreprocReconAllInputSpec(MRISPreprocInputSpec):
                               "this will copy some implicit inputs to the " +
                               "node directory.")
 
-    
+
 class MRISPreprocReconAll(MRISPreproc):
     """Extends MRISPreproc to allow it to be used in a recon-all workflow
 
@@ -146,7 +146,7 @@ class MRISPreprocReconAll(MRISPreproc):
                                            ('cont1a.nii', 'register.dat')]
     >>> preproc.inputs.out_file = 'concatenated_file.mgz'
     >>> preproc.cmdline
-    'mris_preproc --hemi lh --out concatenated_file.mgz --target fsaverage --iv cont1.nii register.dat --iv cont1a.nii register.dat'
+    'mris_preproc --hemi lh --out concatenated_file.mgz --s subject_id --target fsaverage --iv cont1.nii register.dat --iv cont1a.nii register.dat'
     """
 
     input_spec = MRISPreprocReconAllInputSpec
@@ -163,7 +163,7 @@ class MRISPreprocReconAll(MRISPreproc):
             if isdefined(self.inputs.surfreg_files):
                 for surfreg in self.inputs.surfreg_files:
                     basename = os.path.basename(surfreg)
-                    copy2subjdir(self, surfreg, folder, basename)                                        
+                    copy2subjdir(self, surfreg, folder, basename)
                     if basename.startswith('lh.'):
                         copy2subjdir(self, self.inputs.lh_surfreg_target,
                                      folder, basename,
@@ -177,7 +177,7 @@ class MRISPreprocReconAll(MRISPreproc):
                 copy2subjdir(self, self.inputs.surf_measure_file, folder)
 
         return super(MRISPreprocReconAll, self).run(**inputs)
-        
+
     def _format_arg(self, name, spec, value):
         # mris_preproc looks for these files in the surf dir
         if name  == 'surfreg_files':
@@ -714,8 +714,8 @@ class SegStats(FSCommand):
     >>> ss.inputs.annot = ('PWS04', 'lh', 'aparc')
     >>> ss.inputs.in_file = 'functional.nii'
     >>> ss.inputs.subjects_dir = '.'
-    >>> ss.inputs.avgwf_txt_file = './avgwf.txt'
-    >>> ss.inputs.summary_file = './summary.stats'
+    >>> ss.inputs.avgwf_txt_file = 'avgwf.txt'
+    >>> ss.inputs.summary_file = 'summary.stats'
     >>> ss.cmdline
     'mri_segstats --annot PWS04 lh aparc --avgwf ./avgwf.txt --i functional.nii --sum ./summary.stats'
 
@@ -751,6 +751,9 @@ class SegStats(FSCommand):
         return outputs
 
     def _format_arg(self, name, spec, value):
+        if name in ('summary_file', 'avgwf_txt_file'):
+            if not os.path.isabs(value):
+                value = os.path.join('.', value)
         if name in ['avgwf_txt_file', 'avgwf_file', 'sf_avg_file']:
             if isinstance(value, bool):
                 fname = self._list_outputs()[name]
@@ -760,9 +763,6 @@ class SegStats(FSCommand):
         elif name == 'in_intensity':
             intensity_name = os.path.basename(self.inputs.in_intensity).replace('.mgz', '')
             return spec.argstr % (value, intensity_name)
-        if name in ('summary_file', 'avgwf_text_file'):
-            if not os.path.isabs(value):
-                value = os.path.join('.', value)
         return super(SegStats, self)._format_arg(name, spec, value)
 
     def _gen_filename(self, name):
@@ -799,12 +799,12 @@ class SegStatsReconAllInputSpec(SegStatsInputSpec):
                               "otherwise, this will copy the implicit inputs " +
                               "to the node directory.")
 
-    
+
 class SegStatsReconAll(SegStats):
 
     """
     This class inherits SegStats and modifies it for use in a recon-all workflow.
-    This implementation mandates implicit inputs that SegStats. 
+    This implementation mandates implicit inputs that SegStats.
     To ensure backwards compatability of SegStats, this class was created.
 
     Examples
@@ -812,8 +812,8 @@ class SegStatsReconAll(SegStats):
     >>> from nipype.interfaces.freesurfer import SegStatsReconAll
     >>> segstatsreconall = SegStatsReconAll()
     >>> segstatsreconall.inputs.annot = ('PWS04', 'lh', 'aparc')
-    >>> segstatsreconall.inputs.avgwf_txt_file = './avgwf.txt'
-    >>> segstatsreconall.inputs.summary_file = './summary.stats'
+    >>> segstatsreconall.inputs.avgwf_txt_file = 'avgwf.txt'
+    >>> segstatsreconall.inputs.summary_file = 'summary.stats'
     >>> segstatsreconall.inputs.subject_id = '10335'
     >>> segstatsreconall.inputs.ribbon = 'wm.mgz'
     >>> segstatsreconall.inputs.transform = 'trans.mat'
@@ -836,7 +836,7 @@ class SegStatsReconAll(SegStats):
     >>> segstatsreconall.inputs.euler = True
     >>> segstatsreconall.inputs.exclude_id = 0
     >>> segstatsreconall.cmdline
-    'mri_segstats --annot PWS04 lh aparc --avgwf ./avgwf.txt --brain-vol-from-seg --surf-ctx-vol --empty --etiv --euler --excl-ctxgmwm --excludeid 0 --subcortgray --subject 10335 --sum ./summary.stats --supratent --totalgray --surf-wm-vol'
+    'mri_segstats --annot PWS04 lh aparc --avgwf ./avgwf.txt --brain-vol-from-seg --surf-ctx-vol --empty --etiv --euler --excl-ctxgmwm --excludeid 0 --subcortgray --subject 10335 --supratent --totalgray --surf-wm-vol --sum ./summary.stats'
     """
     input_spec = SegStatsReconAllInputSpec
     output_spec = SegStatsOutputSpec
@@ -875,7 +875,7 @@ class SegStatsReconAll(SegStats):
             copy2subjdir(self, self.inputs.in_intensity, 'mri')
         return super(SegStatsReconAll, self).run(**inputs)
 
-                
+
 class Label2VolInputSpec(FSTraitedSpec):
     label_file = InputMultiPath(File(exists=True), argstr='--label %s...',
                                 xor=('label_file', 'annot_file', 'seg_file', 'aparc_aseg'),
@@ -1112,11 +1112,12 @@ class Label2Label(FSCommand):
     >>> l2l = Label2Label()
     >>> l2l.inputs.hemisphere = 'lh'
     >>> l2l.inputs.subject_id = '10335'
-    >>> l2l.inputs.source_subject = 'fsaverage'
     >>> l2l.inputs.sphere_reg = 'lh.pial'
-    >>> l2l.inputs.source_sphere_reg = 'lh.pial'
     >>> l2l.inputs.white = 'lh.pial'
+    >>> l2l.inputs.source_subject = 'fsaverage'
     >>> l2l.inputs.source_label = 'lh-pial.stl'
+    >>> l2l.inputs.source_white = 'lh.pial'
+    >>> l2l.inputs.source_sphere_reg = 'lh.pial'
     >>> l2l.cmdline
     'mri_label2label --hemi lh --trglabel lh-pial_converted.stl --regmethod surface --srclabel lh-pial.stl --srcsubject fsaverage --trgsubject 10335'
     """
@@ -1199,6 +1200,7 @@ class Label2Annot(FSCommand):
     >>> l2a.inputs.hemisphere = 'lh'
     >>> l2a.inputs.subject_id = '10335'
     >>> l2a.inputs.in_labels = ['lh.aparc.label']
+    >>> l2a.inputs.orig = 'lh.pial'
     >>> l2a.inputs.out_annot = 'test'
     >>> l2a.cmdline
     'mris_label2annot --hemi lh --l lh.aparc.label --a test --s 10335'

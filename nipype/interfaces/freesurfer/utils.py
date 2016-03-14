@@ -63,7 +63,7 @@ def createoutputdirs(outputs):
         dirname = os.path.dirname(output)
         if not os.path.isdir(dirname):
             os.makedirs(dirname)
-        
+
 
 class SampleToSurfaceInputSpec(FSTraitedSpec):
 
@@ -1539,8 +1539,10 @@ class RemoveNeck(FSCommand):
     >>> from nipype.interfaces.freesurfer import TalairachQC
     >>> remove_neck = RemoveNeck()
     >>> remove_neck.inputs.in_file = 'norm.mgz'
+    >>> remove_neck.inputs.transform = 'trans.mat'
+    >>> remove_neck.inputs.template = 'trans.mat'
     >>> remove_neck.cmdline
-    'mri_remove_neck norm.mgz norm_noneck.mgz'
+    'mri_remove_neck norm.mgz trans.mat trans.mat norm_noneck.mgz'
     """
     _cmd = "mri_remove_neck"
     input_spec = RemoveNeckInputSpec
@@ -1769,7 +1771,7 @@ class FixTopology(FSCommand):
             copy2subjdir(self, self.inputs.in_wm,
                          folder='mri', basename='wm.mgz')
         return super(FixTopology, self).run(**inputs)
-    
+
     def _format_arg(self, name, spec, value):
         if name == 'sphere':
             # get the basename and take out the hemisphere
@@ -1800,7 +1802,7 @@ class EulerNumber(FSCommand):
     ========
     >>> from nipype.interfaces.freesurfer import EulerNumber
     >>> ft = EulerNumber()
-    >>> ft.inputs.in_file = 'lh.pial
+    >>> ft.inputs.in_file = 'lh.pial'
     >>> ft.cmdline
     'mris_euler_number lh.pial'
     """
@@ -1965,7 +1967,7 @@ class MakeSurfaces(FSCommand):
                                          'label'))
         return super(MakeSurfaces, self).run(**inputs)
 
-        
+
     def _format_arg(self, name, spec, value):
         if name in ['in_T1', 'in_aseg']:
             # These inputs do not take full paths as inputs or even basenames
@@ -2149,16 +2151,15 @@ class CurvatureStats(FSCommand):
     >>> from nipype.interfaces.freesurfer import CurvatureStats
     >>> curvstats = CurvatureStats()
     >>> curvstats.inputs.hemisphere = 'lh'
-    >>> curvstats.inputs.subject_id = '10335'
-    >>> curvstats.inputs.in_curv = 'lh.pial'
-    >>> curvstats.inputs.in_sulc = 'lh.pial'
+    >>> curvstats.inputs.curvfile1 = 'lh.pial'
+    >>> curvstats.inputs.curvfile2 = 'lh.pial'
     >>> curvstats.inputs.surface = 'lh.pial'
     >>> curvstats.inputs.out_file = 'lh.curv.stats'
     >>> curvstats.inputs.values = True
     >>> curvstats.inputs.min_max = True
     >>> curvstats.inputs.write = True
     >>> curvstats.cmdline
-    'mris_curvature_stats -m -o lh.curv.stats -F pial -G --writeCurvatureFiles 10335 lh pial pial'
+    'mris_curvature_stats -m -o lh.curv.stats -F pial -G --writeCurvatureFiles subject_id lh pial pial'
     """
 
     _cmd = 'mris_curvature_stats'
@@ -2366,7 +2367,7 @@ class VolumeMask(FSCommand):
             copy2subjdir(self, self.inputs.rh_white, 'surf', 'rh.white')
             copy2subjdir(self, self.inputs.in_aseg, 'mri')
         return super(VolumeMask, self).run(**inputs)
-        
+
     def _format_arg(self, name, spec, value):
         if name == 'in_aseg':
             return spec.argstr % os.path.basename(value).rstrip('.mgz')
@@ -2580,11 +2581,11 @@ class ContrastInputSpec(FSTraitedSpec):
 
 
 class ContrastOutputSpec(TraitedSpec):
-    out_contrast = File(exists=False, 
+    out_contrast = File(exists=False,
                         desc="Output contrast file from Contrast")
-    out_stats = File(exists=False, 
+    out_stats = File(exists=False,
                      desc="Output stats file from Contrast")
-    out_log = File(exists=True, 
+    out_log = File(exists=True,
                    desc="Output log from Contrast")
 
 
@@ -2631,7 +2632,7 @@ class Contrast(FSCommand):
         # need to create output directories
         createoutputdirs(self._list_outputs())
         return super(Contrast, self).run(**inputs)
-    
+
     def _list_outputs(self):
         outputs = self._outputs().get()
         subject_dir = os.path.join(
@@ -2769,7 +2770,7 @@ class Aparc2Aseg(FSCommand):
     >>> from nipype.interfaces.freesurfer import Aparc2Aseg
     >>> aparc2aseg = Aparc2Aseg()
     >>> aparc2aseg.inputs.lh_white = 'lh.pial'
-    >>> aparc2aseg.inputs.rh_white = 'rh.pial'
+    >>> aparc2aseg.inputs.rh_white = 'lh.pial'
     >>> aparc2aseg.inputs.lh_pial = 'lh.pial'
     >>> aparc2aseg.inputs.rh_pial = 'lh.pial'
     >>> aparc2aseg.inputs.lh_ribbon = 'label.mgz'
@@ -2805,7 +2806,7 @@ class Aparc2Aseg(FSCommand):
             copy2subjdir(self, self.inputs.rh_annotation, 'label')
 
         return super(Aparc2Aseg, self).run(**inputs)
-        
+
     def _format_arg(self, name, spec, value):
         if name == 'aseg':
             # aseg does not take a full filename
@@ -2845,7 +2846,7 @@ class Apas2Aseg(FSCommand):
     ========
     >>> from nipype.interfaces.freesurfer import Apas2Aseg
     >>> apas2aseg = Apas2Aseg()
-    >>> apas2aseg.inputs.in_file = 'aseg.mgz' 
+    >>> apas2aseg.inputs.in_file = 'aseg.mgz'
     >>> apas2aseg.inputs.out_file = 'output.mgz'
     >>> apas2aseg.cmdline
     'apas2aseg --i aseg.mgz --o output.mgz'

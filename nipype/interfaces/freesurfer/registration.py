@@ -114,7 +114,7 @@ class RegisterAVItoTalairachInputSpec(FSTraitedSpec):
     vox2vox = File(argstr='%s', exists=True, mandatory=True,
                    position=2, desc="The vox2vox file")
     out_file = File('talairach.auto.xfm', usedfault=True,
-                    argstr='%s', mandatory=False,                    
+                    argstr='%s', mandatory=False,
                     position=3, desc="The transform output")
 
 

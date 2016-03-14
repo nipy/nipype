@@ -6,6 +6,8 @@ from ..utils import VolumeMask
 def test_VolumeMask_inputs():
     input_map = dict(args=dict(argstr='%s',
     ),
+    copy_inputs=dict(mandatory=False,
+    ),
     environ=dict(nohash=True,
     usedefault=True,
     ),
@@ -41,6 +43,7 @@ def test_VolumeMask_inputs():
     subject_id=dict(argstr='%s',
     mandatory=True,
     position=-1,
+    usedefault=True,
     ),
     subjects_dir=dict(),
     terminal_output=dict(nohash=True,

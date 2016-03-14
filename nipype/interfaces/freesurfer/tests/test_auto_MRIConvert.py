@@ -164,6 +164,7 @@ def test_MRIConvert_inputs():
     ),
     subject_name=dict(argstr='--subject_name %s',
     ),
+    subjects_dir=dict(),
     te=dict(argstr='-te %d',
     ),
     template_info=dict(),

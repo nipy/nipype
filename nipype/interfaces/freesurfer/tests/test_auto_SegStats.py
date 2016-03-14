@@ -91,6 +91,7 @@ def test_SegStats_inputs():
     subjects_dir=dict(),
     summary_file=dict(argstr='--sum %s',
     genfile=True,
+    position=-1,
     ),
     supratent=dict(argstr='--supratent',
     ),

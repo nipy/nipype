@@ -9,6 +9,7 @@ def test_Curvature_inputs():
     averages=dict(argstr='-a %d',
     mandatory=False,
     ),
+    copy_input=dict(),
     distances=dict(argstr='-distances %d %d',
     ),
     environ=dict(nohash=True,

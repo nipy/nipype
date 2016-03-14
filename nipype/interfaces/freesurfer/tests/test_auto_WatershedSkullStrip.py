@@ -20,9 +20,9 @@ def test_WatershedSkullStrip_inputs():
     position=-2,
     ),
     out_file=dict(argstr='%s',
-    genfile=True,
     mandatory=True,
     position=-1,
+    usedefault=True,
     ),
     subjects_dir=dict(),
     t1=dict(argstr='-T1',
@@ -41,7 +41,7 @@ def test_WatershedSkullStrip_inputs():
 
 
 def test_WatershedSkullStrip_outputs():
-    output_map = dict(brain_vol=dict(),
+    output_map = dict(out_file=dict(),
     )
     outputs = WatershedSkullStrip.output_spec()
 

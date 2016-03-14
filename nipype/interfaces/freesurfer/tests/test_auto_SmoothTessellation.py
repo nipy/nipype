@@ -21,6 +21,7 @@ def test_SmoothTessellation_inputs():
     usedefault=True,
     ),
     in_file=dict(argstr='%s',
+    copyfile=True,
     mandatory=True,
     position=-2,
     ),
