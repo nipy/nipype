@@ -1589,7 +1589,8 @@ class MRIFill(FSCommand):
     This program creates hemispheric cutting planes and fills white matter
     with specific values for subsequent surface tesselation.
 
-    Examples                                                                                                                                                                                                          ========
+    Examples
+    ========
     >>> from nipype.interfaces.freesurfer import MRIFill
     >>> fill = MRIFill()
     >>> fill.inputs.in_file = 'wm.mgz' # doctest: +SKIP
@@ -1804,7 +1805,8 @@ class EulerNumber(FSCommand):
     """
     This program computes EulerNumber for a cortical surface
 
-    Examples                                                                                                                                                                                                          ========
+    Examples
+    ========
     >>> from nipype.interfaces.freesurfer import EulerNumber
     >>> ft = EulerNumber()
     >>> ft.inputs.in_file = 'lh.pial
@@ -1926,7 +1928,7 @@ class MakeSurfaces(FSCommand):
     the cortical sheet.
 
     Examples
-
+    ========
     >>> from nipype.interfaces.freesurfer import MakeSurfaces
     >>> makesurfaces = MakeSurfaces()
     >>> makesurfaces.inputs.hemisphere = 'lh'
@@ -2062,7 +2064,8 @@ class Curvature(FSCommand):
     surface. It will create two new files <hemi>.<surface>.H and
     <hemi>.<surface>.K with the mean and Gaussian curvature respectively.
 
-    Examples                                                                                                                                                                                                          ========
+    Examples
+    ========
     >>> from nipype.interfaces.freesurfer import Curvature
     >>> curv = Curvature()
     >>> curv.inputs.in_file = 'lh.pial'
@@ -2451,7 +2454,8 @@ class ParcellationStats(FSCommand):
     """
     This program computes a number of anatomical properties.
 
-    Examples                                                                                                                                                                                                          ========
+    Examples
+    ========
     >>> from nipype.interfaces.freesurfer import ParcellationStats
     >>> import os
     >>> parcstats = ParcellationStats()
