@@ -63,15 +63,15 @@ def use_resources(num_threads, num_gb):
         '''
         Function to consume GB of memory
         '''
-    
+
         # Eat 1 GB of memory for 1 second
         gb_str = ' ' * int(num_gb*1024.0**3)
-    
+
         # Spin CPU
         ctr = 0
         while ctr < 50e6:
             ctr += 1
-    
+
         # Clear memory
         del ctr
         del gb_str
@@ -198,12 +198,6 @@ class RuntimeProfilerTestCase(unittest.TestCase):
 
         # Return dataframe
         return runtime_results_df
-
-    def test_collect_range(self):
-        num_threads = 8
-        df = self._collect_range_runtime_stats(num_threads)
-
-        df.to_csv('/root/%d_thread_df.csv' % num_threads)
 
     # Test node
     def _run_cmdline_workflow(self, num_gb, num_threads):
@@ -359,7 +353,7 @@ class RuntimeProfilerTestCase(unittest.TestCase):
 
     # Test resources were used as expected in cmdline interface
     @unittest.skipIf(run_profiler == False, skip_profile_msg)
-    def tiest_cmdline_profiling(self):
+    def test_cmdline_profiling(self):
         '''
         Test runtime profiler correctly records workflow RAM/CPUs consumption
         from a cmdline function
@@ -401,7 +395,7 @@ class RuntimeProfilerTestCase(unittest.TestCase):
 
     # Test resources were used as expected
     @unittest.skipIf(run_profiler == False, skip_profile_msg)
-    def tiest_function_profiling(self):
+    def test_function_profiling(self):
         '''
         Test runtime profiler correctly records workflow RAM/CPUs consumption
         from a python function
