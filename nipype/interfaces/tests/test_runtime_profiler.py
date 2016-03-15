@@ -134,7 +134,7 @@ class RuntimeProfilerTestCase(unittest.TestCase):
         self.mem_err_percent = 5
 
     # ! Only used for benchmarking the profiler over a range of
-    # ! RAM usage
+    # ! RAM usage and number of threads
     # ! Requires a LOT of RAM to be tested
     def _collect_range_runtime_stats(self, num_threads):
         '''

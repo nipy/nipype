@@ -145,8 +145,8 @@ class MultiProcPlugin(DistributedPluginBase):
                 non_daemon = plugin_args['non_daemon']
             if 'n_procs' in self.plugin_args:
                 self.processors = self.plugin_args['n_procs']
-            if 'memory' in self.plugin_args:
-                self.memory = self.plugin_args['memory']
+            if 'memory_gb' in self.plugin_args:
+                self.memory_gb = self.plugin_args['memory_gb']
         # Instantiate different thread pools for non-daemon processes
         if non_daemon:
             # run the execution using the non-daemon pool subclass
