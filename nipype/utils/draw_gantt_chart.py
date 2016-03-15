@@ -102,10 +102,10 @@ def calculate_resources(events, resource):
     for event in events:
         all_res = 0
         if event['type'] == "start":
-            all_res =+ int(float(event[resource]))
+            all_res += int(float(event[resource]))
             current_time = event['start'];
         elif event['type'] == "finish":
-            all_res+ int(float(event[resource]))
+            all_res+= int(float(event[resource]))
             current_time = event['finish'];
 
         res[current_time] = all_res
@@ -136,15 +136,18 @@ def draw_lines(start, total_duration, minute_scale, scale):
     return result
 
 
-def draw_nodes(start, nodes, cores, scale, colors):
+def draw_nodes(start, nodes, cores, minute_scale, space_between_minutes, colors):
     result = ''
     end_times = [datetime.datetime(start.year, start.month, start.day, start.hour, start.minute, start.second) for x in range(cores)]
+
+    scale = float(space_between_minutes/float(minute_scale))
+    space_between_minutes = float(space_between_minutes/scale)
 
     for node in nodes:
         node_start = node['start']
         node_finish = node['finish']
-        offset = ((node_start - start).total_seconds() / 60) * scale + 220
-        scale_duration = (node['duration'] / 60) * scale
+        offset = ((node_start - start).total_seconds() / 60) * scale * space_between_minutes + 220
+        scale_duration = (node['duration'] / 60) * scale * space_between_minutes
         if scale_duration < 5:
             scale_duration = 5
 
@@ -159,11 +162,15 @@ def draw_nodes(start, nodes, cores, scale, colors):
                                                  node_finish.hour,
                                                  node_finish.minute,
                                                  node_finish.second)
-                #end_times[j]+=  datetime.timedelta(microseconds=node_finish.microsecond)
+
                 break
         color = random.choice(colors)  
-        new_node = "<div class='node' style=' left:" + str(left) + "px;top: " + str(offset) + "px;height:" + str(scale_duration) + "px; background-color: " + color  + " 'title='" + node['name'] +'\nduration: ' + str(node['duration']/60) + '\nstart: ' + node['start'].strftime("%Y-%m-%d %H:%M:%S") + '\nend: ' + node['finish'].strftime("%Y-%m-%d %H:%M:%S") + "'></div>";
+        n_start = node['start'].strftime("%Y-%m-%d %H:%M:%S")
+        n_finish = node['finish'].strftime("%Y-%m-%d %H:%M:%S")
+        n_dur = node['duration']/60
+        new_node = "<div class='node' style='left:%spx;top:%spx;height:%spx;background-color:%s;'title='%s\nduration:%s\nstart:%s\nend:%s'></div>"%(left, offset, scale_duration, color, node['name'], n_dur, n_start, n_finish)
         result += new_node
+
     return result
 
 def draw_thread_bar(threads,space_between_minutes, minute_scale):
@@ -281,9 +288,12 @@ def generate_gantt_chart(logfile, cores, minute_scale=10,
 
     html_string += '<p>Start: '+ result[0]['start'].strftime("%Y-%m-%d %H:%M:%S") +'</p>'
     html_string += '<p>Finish: '+ last_node['finish'].strftime("%Y-%m-%d %H:%M:%S") +'</p>'
-    html_string += '<p>Duration: '+ str(duration/60) +' minutes</p>'
+    html_string += '<p>Duration: '+ "{0:.2f}".format(duration/60) +' minutes</p>'
     html_string += '<p>Nodes: '+str(len(result))+'</p>'
     html_string += '<p>Cores: '+str(cores)+'</p>'
+
+    html_string += draw_lines(start, duration, minute_scale, space_between_minutes)
+    html_string += draw_nodes(start, result, cores, minute_scale,space_between_minutes, colors)
 
     result = log_to_events(logfile)
     threads = calculate_resources(result, 'num_threads')
