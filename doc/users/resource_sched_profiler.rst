@@ -115,4 +115,20 @@ throughput.
 Visualizing Pipeline Resources
 ==============================
 Nipype provides the ability to visualize the workflow execution based on the
-runtimes and system resources each node takes.
+runtimes and system resources each node takes. It does this using the log file
+generated from the callback logger after workflow execution - as shown above.
+
+::
+	from nipype.pipeline.plugins.callback_log import log_nodes_cb
+	args_dict = {'n_procs' : 4, 'memory_gb' : 6,
+	             'status_callback' : log_nodes_cb}
+	workflow.run(plugin='MultiProc', plugin_args=args_dict)
+	
+	# ...workflow finishes and writes callback log to '/home/user/run_stats.log'
+	
+	from nipype.utils.draw_gantt_chart import generate_gantt_chart
+	generate_gantt_chart('/home/user/run_stats.log', cores=4)
+    # ...creates gantt chart in '/home/user/run_stats.log.html'
+
+The `generate_gantt_chart`` function will create an html file that can be viewed
+in a browser.
