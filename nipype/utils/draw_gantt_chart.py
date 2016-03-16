@@ -5,49 +5,117 @@ callback_log.log_nodes_cb()
 """
 
 # Import packages
+# Import packages
 import json
 from dateutil import parser
 import datetime
 import random
+import pandas as pd
+import dateutil
+from collections import OrderedDict
 
 
-def log_to_json(logfile):
-    result = []
+def log_to_events(logfile):
+    events = []
+    with open(logfile, 'r') as content:
+        #read file separating each line
+        content = content.read()
+        lines = content.split('\n')
+
+        for l in lines:
+            event = None
+            try:
+                event = json.loads(l)
+            except Exception, e:
+                pass
+
+            if not event: continue
+
+            if 'start' in event:
+                event['type'] = 'start'
+                event['time'] = event['start']
+            else:
+                event['type'] = 'finish'
+                event['time'] = event['finish']
+
+            events.append(event)
+    return events
+
+def log_to_dict(logfile):
+
+    #keep track of important vars
+    nodes = [] #all the parsed nodes
+    unifinished_nodes = [] #all start nodes that dont have a finish yet
+
     with open(logfile, 'r') as content:
 
         #read file separating each line
         content = content.read()
         lines = content.split('\n')
-        l = []
-        for i in lines:
+
+        for l in lines:
+            #try to parse each line and transform in a json dict.
+            #if the line has a bad format, just skip
+            node = None
             try:
-                y = json.loads(i)
-                l.append(y)
-            except Exception:
+                node = json.loads(l)
+            except Exception, e:
                 pass
 
-        lines = l
-
-        last_node = [ x for x in lines if x.has_key('finish')][-1]
-
-        for i, line in enumerate(lines):
-            #get first start it finds
-            if not line.has_key('start'):
+            if not node: 
                 continue
 
-            #fint the end node for that start
-            for j in range(i+1, len(lines)):
-                if lines[j].has_key('finish'):
-                    if lines[j]['id'] == line['id'] and \
-                       lines[j]['name'] == line['name']:
-                        line['finish'] = lines[j]['finish']
-                        line['duration'] = (parser.parse(line['finish']) - \
-                                            parser.parse(line['start'])).total_seconds()
-                        result.append(line)
+            #if it is a start node, add to unifinished nodes
+            if 'start' in node:
+                node['start'] = parser.parse(node['start'])
+                unifinished_nodes.append(node)
+
+            #if it is end node, look in uninished nodes for matching start
+            #remove from unifinished list and add to node list
+            elif 'finish' in node:
+                node['finish'] = parser.parse(node['finish'])
+                #because most nodes are small, we look backwards in the unfinished list
+                for s in range(len(unifinished_nodes)):
+                    aux = unifinished_nodes[s]
+                    #found the end for node start, copy over info
+                    if aux['id'] == node['id'] and aux['name'] == node['name'] and aux['start'] < node['finish']:
+                        node['start'] = aux['start']
+                        node['duration'] = (node['finish'] - node['start']).total_seconds()
+
+                        unifinished_nodes.remove(aux)
+                        nodes.append(node)
                         break
 
-    return result, last_node
+        #finished parsing
+        #assume nodes without finish didn't finish running.
+        #set their finish to last node run
+        last_node = nodes[-1]
+        for n in unifinished_nodes:
+            n['finish'] = last_node['finish']
+            n['duration'] = (n['finish'] - n['start']).total_seconds()
+            nodes.append(n)
 
+        return nodes, last_node
+
+def calculate_resources(events, resource):
+    res = OrderedDict()
+    for event in events:
+        all_res = 0
+        if event['type'] == "start":
+            all_res += int(float(event[resource]))
+            current_time = event['start'];
+        elif event['type'] == "finish":
+            all_res+= int(float(event[resource]))
+            current_time = event['finish'];
+
+        res[current_time] = all_res
+
+    timestamps = [dateutil.parser.parse(ts) for ts in res.keys()]
+    time_series = pd.Series(res.values(), timestamps)
+    interp_seq = pd.date_range(time_series.index[0], time_series.index[-1], freq='S')
+    interp_time_series = time_series.reindex(interp_seq)
+    interp_time_series = interp_time_series.fillna(method='ffill')
+    return interp_time_series
 
 #total duration in seconds
 def draw_lines(start, total_duration, minute_scale, scale):
@@ -68,15 +136,18 @@ def draw_lines(start, total_duration, minute_scale, scale):
     return result
 
 
-def draw_nodes(start, nodes, cores, scale, colors):
+def draw_nodes(start, nodes, cores, minute_scale, space_between_minutes, colors):
     result = ''
     end_times = [datetime.datetime(start.year, start.month, start.day, start.hour, start.minute, start.second) for x in range(cores)]
 
+    scale = float(space_between_minutes/float(minute_scale))
+    space_between_minutes = float(space_between_minutes/scale)
+
     for node in nodes:
-        node_start = parser.parse(node['start'])
-        node_finish = parser.parse(node['finish'])
-        offset = ((node_start - start).total_seconds() / 60) * scale + 220
-        scale_duration = (node['duration'] / 60) * scale
+        node_start = node['start']
+        node_finish = node['finish']
+        offset = ((node_start - start).total_seconds() / 60) * scale * space_between_minutes + 220
+        scale_duration = (node['duration'] / 60) * scale * space_between_minutes
         if scale_duration < 5:
             scale_duration = 5
 
@@ -91,90 +162,40 @@ def draw_nodes(start, nodes, cores, scale, colors):
                                                  node_finish.hour,
                                                  node_finish.minute,
                                                  node_finish.second)
-                #end_times[j]+=  datetime.timedelta(microseconds=node_finish.microsecond)
-                break
 
-        color = random.choice(colors)
-        new_node = "<div class='node' style=' left:" + str(left) + \
-                   "px;top: " + str(offset) + "px;height:" + \
-                   str(scale_duration) + "px; background-color: " + color + \
-                   " 'title='" + node['name'] +'\nduration: ' + \
-                   str(node['duration']/60) + '\nstart: ' + node['start'] + \
-                   '\nend: ' + node['finish'] + "'></div>";
+                break
+        color = random.choice(colors)  
+        n_start = node['start'].strftime("%Y-%m-%d %H:%M:%S")
+        n_finish = node['finish'].strftime("%Y-%m-%d %H:%M:%S")
+        n_dur = node['duration']/60
+        new_node = "<div class='node' style='left:%spx;top:%spx;height:%spx;background-color:%s;'title='%s\nduration:%s\nstart:%s\nend:%s'></div>"%(left, offset, scale_duration, color, node['name'], n_dur, n_start, n_finish)
         result += new_node
+
     return result
 
-
-def draw_thread_bar(start, total_duration, nodes, space_between_minutes, minute_scale):
+def draw_thread_bar(threads,space_between_minutes, minute_scale):
     result = "<p class='time' style='top:198px;left:900px;'>Threads</p>"
 
-    total = total_duration/60
-    thread = [0 for x in range(total)]
-
-    now = start
-
-    #calculate nuber of threads in every second
-    for i in range(total):
-        node_start = None
-        node_finish = None
-
-        for j in range(i, len(nodes)):
-            node_start = parser.parse(nodes[j]['start'])
-            node_finish = parser.parse(nodes[j]['finish'])
-
-            if node_start <= now and node_finish >= now:
-                thread[i] += nodes[j]['num_threads']
-            if node_start > now:
-                break
-        now += datetime.timedelta(minutes=1)
-
-
-    #draw thread bar
     scale = float(space_between_minutes/float(minute_scale))
-
-    for i in range(len(thread)):
-        width = thread[i] * 10
-        t = (i*scale*minute_scale) + 220
-        bar = "<div class='bar' style='height:" + str(space_between_minutes) + \
-              "px;width:" + str(width) + "px;left:900px;top:"+str(t)+"px'></div>"
+    space_between_minutes = float(space_between_minutes/60.0)
+    for i in range(len(threads)):
+        width = threads[i] * 10
+        t = (float(i*scale*minute_scale)/60.0) + 220
+        bar = "<div class='bar' style='height:"+ str(space_between_minutes) + "px;width:"+ str(width) +"px;left:900px;top:"+str(t)+"px'></div>"
         result += bar
 
     return result
 
-
-def draw_memory_bar(start, total_duration, nodes,
-                    space_between_minutes, minute_scale):
+def draw_memory_bar(memory, space_between_minutes, minute_scale):
     result = "<p class='time' style='top:198px;left:1200px;'>Memory</p>"
 
-    total = total_duration/60
-    memory = [0 for x in range(total)]
-
-    now = start
-
-    #calculate nuber of threads in every second
-    for i in range(total):
-        node_start = None
-        node_finish = None
-
-        for j in range(i, len(nodes)):
-            node_start = parser.parse(nodes[j]['start'])
-            node_finish = parser.parse(nodes[j]['finish'])
-
-            if node_start <= now and node_finish >= now:
-                memory[i] += nodes[j]['estimated_memory_gb']
-            if node_start > now:
-                break
-        now += datetime.timedelta(minutes=1)
-
-
-    #draw thread bar
     scale = float(space_between_minutes/float(minute_scale))
+    space_between_minutes = float(space_between_minutes/60.0)
 
     for i in range(len(memory)):
         width = memory[i] * 10
-        t = (i*scale*minute_scale) + 220
-        bar = "<div class='bar' style='height:" + str(space_between_minutes) + \
-              "px;width:" + str(width) + "px;left:1200px;top:"+str(t)+"px'></div>"
+        t = (float(i*scale*minute_scale)/60.0) + 220
+        bar = "<div class='bar' style='height:"+ str(space_between_minutes) + "px;width:"+ str(width) +"px;left:1200px;top:"+str(t)+"px'></div>"
         result += bar
 
     return result
@@ -207,7 +228,7 @@ def generate_gantt_chart(logfile, cores, minute_scale=10,
     # generate_gantt_chart('callback.log', 8)
     '''
 
-    result, last_node = log_to_json(logfile)
+    result, last_node = log_to_dict(logfile)
     scale = space_between_minutes 
 
     #add the html header
@@ -262,24 +283,25 @@ def generate_gantt_chart(logfile, cores, minute_scale=10,
 
 
     #create the header of the report with useful information
-    start = parser.parse(result[0]['start'])
-    duration = int((parser.parse(last_node['finish']) - start).total_seconds())
+    start = result[0]['start']
+    duration = (last_node['finish'] - start).total_seconds()
 
-    html_string += '<p>Start: '+ result[0]['start'] +'</p>'
-    html_string += '<p>Finish: '+ last_node['finish'] +'</p>'
-    html_string += '<p>Duration: '+ str(duration/60) +' minutes</p>'
+    html_string += '<p>Start: '+ result[0]['start'].strftime("%Y-%m-%d %H:%M:%S") +'</p>'
+    html_string += '<p>Finish: '+ last_node['finish'].strftime("%Y-%m-%d %H:%M:%S") +'</p>'
+    html_string += '<p>Duration: '+ "{0:.2f}".format(duration/60) +' minutes</p>'
     html_string += '<p>Nodes: '+str(len(result))+'</p>'
     html_string += '<p>Cores: '+str(cores)+'</p>'
 
+    html_string += draw_lines(start, duration, minute_scale, space_between_minutes)
+    html_string += draw_nodes(start, result, cores, minute_scale,space_between_minutes, colors)
 
-    #draw lines
-    html_string += draw_lines(start, duration, minute_scale, scale)
+    result = log_to_events(logfile)
+    threads = calculate_resources(result, 'num_threads')
+    html_string += draw_thread_bar(threads, space_between_minutes, minute_scale)
 
-    #draw nodes
-    html_string += draw_nodes(start, result, cores, scale, colors)
+    memory = calculate_resources(result, 'estimated_memory_gb')
+    html_string += draw_memory_bar(memory, space_between_minutes, minute_scale)
 
-    #html_string += draw_thread_bar(start, duration, result, space_between_minutes, minute_scale)
-    #html_string += draw_memory_bar(start, duration, result, space_between_minutes, minute_scale)
 
     #finish html
     html_string+= '''
