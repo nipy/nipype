@@ -610,7 +610,7 @@ class LFCDInputSpec(CentralityInputSpec):
 
 class LFCD(AFNICommand):
     """Performs degree centrality on a dataset using a given maskfile
-    via 3dLFCD
+    via the 3dLFCD command
 
     For complete details, see the `3dLFCD Documentation.
     <http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dLFCD.html>
