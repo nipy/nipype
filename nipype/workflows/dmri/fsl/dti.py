@@ -143,7 +143,7 @@ def bedpostx_parallel(name='bedpostx_parallel',
     >>> from nipype.workflows.dmri.fsl.dti import bedpostx_parallel
     >>> params = dict(n_fibres = 2, fudge = 1, burn_in = 1000,
     ...               n_jumps = 1250, sample_every = 25)
-    >>> bpwf = bedpostx_parallel('nipype_bedpostx_parallel', params)
+    >>> bpwf = bedpostx_parallel('nipype_bedpostx_parallel', params=params)
     >>> bpwf.inputs.inputnode.dwi = 'diffusion.nii'
     >>> bpwf.inputs.inputnode.mask = 'mask.nii'
     >>> bpwf.inputs.inputnode.bvecs = 'bvecs'
