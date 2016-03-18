@@ -1370,8 +1370,8 @@ class MNIBiasCorrectionInputSpec(FSTraitedSpec):
     # mandatory
     in_file = File(exists=True, mandatory=True, argstr="--i %s",
                    desc="input volume. Input can be any format accepted by mri_convert.")
-    out_file = File(mandatory=False, argstr="--o %s", name_source=['in_file'], name_template='%s_output',
-                    hash_files=False, keep_extension=True,
+    out_file = File(argstr="--o %s", name_source=['in_file'],
+                    name_template='%s_output', hash_files=False, keep_extension=True,
                     desc="output volume. Output can be any format accepted by mri_convert. " +
                     "If the output format is COR, then the directory must exist.")
     # optional
@@ -1383,19 +1383,19 @@ class MNIBiasCorrectionInputSpec(FSTraitedSpec):
                                      desc="Passes Np as argument of the -iterations flag of nu_correct. This is different " +
                                      "than the --n flag above. Default is not to pass nu_correct the -iterations flag.")
     distance = traits.Int(argstr="--distance %d", desc="N3 -distance option")
-    no_rescale = traits.Bool(False, argstr="--no-rescale",
+    no_rescale = traits.Bool(argstr="--no-rescale",
                              desc="do not rescale so that global mean of output == input global mean")
-    mask = File(exists=True, mandatory=False, argstr="--mask %s",
+    mask = File(exists=True, argstr="--mask %s",
                 desc="brainmask volume. Input can be any format accepted by mri_convert.")
-    transform = File(exists=True, mandatory=False, argstr="--uchar %s",
+    transform = File(exists=True, argstr="--uchar %s",
                      desc="tal.xfm. Use mri_make_uchar instead of conforming")
-    stop = traits.Float(argstr="--stop %f", mandatory=False,
+    stop = traits.Float(argstr="--stop %f",
                         desc="Convergence threshold below which iteration stops (suggest 0.01 to 0.0001)")
-    shrink = traits.Int(argstr="--shrink %d", mandatory=False,
+    shrink = traits.Int(argstr="--shrink %d",
                         desc="Shrink parameter for finer sampling (default is 4)")
 
 class MNIBiasCorrectionOutputSpec(TraitedSpec):
-    out_file = File(exists=True, desc="output volume")
+    out_file = File(desc="output volume")
 
 
 class MNIBiasCorrection(FSCommand):
@@ -1413,12 +1413,11 @@ class MNIBiasCorrection(FSCommand):
     >>> from nipype.interfaces.freesurfer import MNIBiasCorrection
     >>> correct = MNIBiasCorrection()
     >>> correct.inputs.in_file = "norm.mgz"
-    >>> correct.inputs.out_file = "out.mgz"
     >>> correct.inputs.iterations = 6
     >>> correct.inputs.protocol_iterations = 1000
     >>> correct.inputs.distance = 50
     >>> correct.cmdline
-    'mri_nu_correct.mni --distance 50 --i norm.mgz --n 6 --o out.mgz --proto-iters 1000'
+    'mri_nu_correct.mni --distance 50 --i norm.mgz --n 6 --o out_output.mgz --proto-iters 1000'
 
     References:
     ----------
@@ -1430,60 +1429,6 @@ class MNIBiasCorrection(FSCommand):
     _cmd = "mri_nu_correct.mni"
     input_spec = MNIBiasCorrectionInputSpec
     output_spec = MNIBiasCorrectionOutputSpec
-
-    def _filename_from_source(self, name, chain=None):
-        if chain is None:
-            chain = []
-
-        trait_spec = self.inputs.trait(name)
-        retval = getattr(self.inputs, name)
-
-        if not isdefined(retval) or "%s" in retval:
-            if not trait_spec.name_source:
-                return retval
-            if isdefined(retval) and "%s" in retval:
-                name_template = retval
-            else:
-                name_template = trait_spec.name_template
-            if not name_template:
-                name_template = "%s_generated"
-
-            ns = trait_spec.name_source
-            while isinstance(ns, list):
-                if len(ns) > 1:
-                    iflogger.warn('Only one name_source per trait is allowed')
-                ns = ns[0]
-
-            if not isinstance(ns, six.string_types):
-                raise ValueError(('name_source of \'%s\' trait sould be an '
-                                  'input trait name') % name)
-
-            if isdefined(getattr(self.inputs, ns)):
-                name_source = ns
-                source = getattr(self.inputs, name_source)
-                while isinstance(source, list):
-                    source = source[0]
-
-                # special treatment for files
-                try:
-                    _, base, ext = split_filename(source)  # get file extension
-                except AttributeError:
-                    base = source
-            else:
-                if name in chain:
-                    raise NipypeInterfaceError(
-                        'Mutually pointing name_sources')
-
-                chain.append(name)
-                base = self._filename_from_source(ns, chain)
-
-            chain = None
-            retval = name_template % base
-            if trait_spec.keep_extension and ext:
-                return retval + ext
-            return self._overload_extension(retval, name)
-
-        return retval
 
     def _list_outputs(self):
         outputs = self._outputs().get()
