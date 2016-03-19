@@ -6,81 +6,8 @@
    >>> filepath = os.path.dirname( os.path.realpath( __file__ ) )
    >>> datadir = os.path.realpath(os.path.join(filepath, '../testing/data'))
    >>> os.chdir(datadir)
-
-Nipype interface for PETPVC.
-
-PETPVC is a software from the Nuclear Medicine Department
-of the UCL University Hospital, London, UK.
-
-Its source code is here: https://github.com/UCL/PETPVC
-
-The methods that it implement are explained here:
-K. Erlandsson, I. Buvat, P. H. Pretorius, B. A. Thomas, and B. F. Hutton,
-"A review of partial volume correction techniques for emission tomography
-and their applications in neurology, cardiology and oncology," Phys. Med.
-Biol., vol. 57, no. 21, p. R119, 2012.
-
-There is a publication waiting to be accepted for this software tool.
-
-
-Its command line help shows this:
-
-   -i --input < filename >
-      = PET image file
-   -o --output < filename >
-      = Output file
-   [ -m --mask < filename > ]
-      = Mask image file
-   -p --pvc < keyword >
-      = Desired PVC method
-   -x < X >
-      = The full-width at half maximum in mm along x-axis
-   -y < Y >
-      = The full-width at half maximum in mm along y-axis
-   -z < Z >
-      = The full-width at half maximum in mm along z-axis
-   [ -d --debug ]
-      = Prints debug information
-   [ -n --iter [ Val ] ]
-      = Number of iterations
-        With: Val (Default = 10)
-   [ -k [ Val ] ]
-      = Number of deconvolution iterations
-        With: Val (Default = 10)
-   [ -a --alpha [ aval ] ]
-      = Alpha value
-        With: aval (Default = 1.5)
-   [ -s --stop [ stopval ] ]
-      = Stopping criterion
-        With: stopval (Default = 0.01)
-
-----------------------------------------------
-Technique - keyword
-
-Geometric transfer matrix - "GTM"
-Labbe approach - "LABBE"
-Richardson-Lucy - "RL"
-Van-Cittert - "VC"
-Region-based voxel-wise correction - "RBV"
-RBV with Labbe - "LABBE+RBV"
-RBV with Van-Cittert - "RBV+VC"
-RBV with Richardson-Lucy - "RBV+RL"
-RBV with Labbe and Van-Cittert - "LABBE+RBV+VC"
-RBV with Labbe and Richardson-Lucy- "LABBE+RBV+RL"
-Multi-target correction - "MTC"
-MTC with Labbe - "LABBE+MTC"
-MTC with Van-Cittert - "MTC+VC"
-MTC with Richardson-Lucy - "MTC+RL"
-MTC with Labbe and Van-Cittert - "LABBE+MTC+VC"
-MTC with Labbe and Richardson-Lucy- "LABBE+MTC+RL"
-Iterative Yang - "IY"
-Iterative Yang with Van-Cittert - "IY+VC"
-Iterative Yang with Richardson-Lucy - "IY+RL"
-Muller Gartner - "MG"
-Muller Gartner with Van-Cittert - "MG+VC"
-Muller Gartner with Richardson-Lucy - "MG+RL"
-
 """
+
 from __future__ import print_function
 from __future__ import division
 
@@ -143,6 +70,76 @@ class PETPVCOutputSpec(TraitedSpec):
 
 class PETPVC(CommandLine):
     """ Use PETPVC for partial volume correction of PET images.
+
+    PETPVC is a software from the Nuclear Medicine Department
+    of the UCL University Hospital, London, UK.
+
+    Its source code is here: https://github.com/UCL/PETPVC
+
+    The methods that it implement are explained here:
+    K. Erlandsson, I. Buvat, P. H. Pretorius, B. A. Thomas, and B. F. Hutton,
+    "A review of partial volume correction techniques for emission tomography
+    and their applications in neurology, cardiology and oncology," Phys. Med.
+    Biol., vol. 57, no. 21, p. R119, 2012.
+
+    There is a publication waiting to be accepted for this software tool.
+
+    Its command line help shows this:
+
+       -i --input < filename >
+          = PET image file
+       -o --output < filename >
+          = Output file
+       [ -m --mask < filename > ]
+          = Mask image file
+       -p --pvc < keyword >
+          = Desired PVC method
+       -x < X >
+          = The full-width at half maximum in mm along x-axis
+       -y < Y >
+          = The full-width at half maximum in mm along y-axis
+       -z < Z >
+          = The full-width at half maximum in mm along z-axis
+       [ -d --debug ]
+          = Prints debug information
+       [ -n --iter [ Val ] ]
+          = Number of iterations
+            With: Val (Default = 10)
+       [ -k [ Val ] ]
+          = Number of deconvolution iterations
+            With: Val (Default = 10)
+       [ -a --alpha [ aval ] ]
+          = Alpha value
+            With: aval (Default = 1.5)
+       [ -s --stop [ stopval ] ]
+          = Stopping criterion
+            With: stopval (Default = 0.01)
+
+    ----------------------------------------------
+    Technique - keyword
+
+    Geometric transfer matrix - "GTM"
+    Labbe approach - "LABBE"
+    Richardson-Lucy - "RL"
+    Van-Cittert - "VC"
+    Region-based voxel-wise correction - "RBV"
+    RBV with Labbe - "LABBE+RBV"
+    RBV with Van-Cittert - "RBV+VC"
+    RBV with Richardson-Lucy - "RBV+RL"
+    RBV with Labbe and Van-Cittert - "LABBE+RBV+VC"
+    RBV with Labbe and Richardson-Lucy- "LABBE+RBV+RL"
+    Multi-target correction - "MTC"
+    MTC with Labbe - "LABBE+MTC"
+    MTC with Van-Cittert - "MTC+VC"
+    MTC with Richardson-Lucy - "MTC+RL"
+    MTC with Labbe and Van-Cittert - "LABBE+MTC+VC"
+    MTC with Labbe and Richardson-Lucy- "LABBE+MTC+RL"
+    Iterative Yang - "IY"
+    Iterative Yang with Van-Cittert - "IY+VC"
+    Iterative Yang with Richardson-Lucy - "IY+RL"
+    Muller Gartner - "MG"
+    Muller Gartner with Van-Cittert - "MG+VC"
+    Muller Gartner with Richardson-Lucy - "MG+RL"
 
     Examples
     --------
