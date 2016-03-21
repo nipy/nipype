@@ -2015,6 +2015,7 @@ class WarpPointsToStd(WarpPoints):
     input_spec = WarpPointsToStdInputSpec
     output_spec = WarpPointsOutputSpec
     _cmd = 'img2stdcoord'
+    _terminal_output = 'file'
 
 
 class WarpPointsFromStdInputSpec(CommandLineInputSpec):
@@ -2034,15 +2035,12 @@ class WarpPointsFromStdInputSpec(CommandLineInputSpec):
     coord_mm = traits.Bool(False, argstr='-mm', xor=['coord_vox'],
                            desc='all coordinates in mm')
 
-    out_file = File(name_source='in_coords', argstr='> %s', position=-1,
-                    name_template='%s_warped', output_name='out_file',
-                    desc='output file name')
-
 
 class WarpPointsFromStd(CommandLine):
     """
     Use FSL `std2imgcoord <http://fsl.fmrib.ox.ac.uk/fsl/fsl-4.1.9/flirt/overview.html>`_
-    to transform point sets to standard space coordinates. Accepts plain text .
+    to transform point sets to standard space coordinates. Accepts plain text coordinates
+    files.
 
 
     Examples
@@ -2065,6 +2063,15 @@ class WarpPointsFromStd(CommandLine):
     input_spec = WarpPointsFromStdInputSpec
     output_spec = WarpPointsOutputSpec
     _cmd = 'std2imgcoord'
+
+    def _run_interface(self, runtime):
+        runtime = super(WarpPointsFromStd, self)._run_interface(runtime)
+        self._out_file = runtime.stdout
+
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        outputs['out_file'] = self._out_file
+        return outputs
 
 
 class MotionOutliersInputSpec(FSLCommandInputSpec):
