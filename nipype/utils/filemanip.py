@@ -42,7 +42,9 @@ def nipype_hardlink_wrapper(raw_src, raw_dst):
     If the hardlink fails, then fall back to using
     a standard copy.
     """
-    src = os.path.normpath(raw_src)
+    # Use realpath to avoid hardlinking symlinks
+    src = os.path.realpath(raw_src)
+    # Use normpath, in case destination is a symlink
     dst = os.path.normpath(raw_dst)
     del raw_src
     del raw_dst
@@ -283,12 +285,15 @@ def copyfile(originalfile, newfile, copy=False, create_new=False,
         matofile = originalfile[:-4] + ".mat"
         if os.path.exists(matofile):
             matnfile = newfile[:-4] + ".mat"
-            copyfile(matofile, matnfile, copy)
-        copyfile(hdrofile, hdrnfile, copy)
+            copyfile(matofile, matnfile, copy, create_new, hashmethod,
+                     use_hardlink)
+        copyfile(hdrofile, hdrnfile, copy, create_new, hashmethod,
+                 use_hardlink)
     elif originalfile.endswith(".BRIK"):
         hdrofile = originalfile[:-5] + ".HEAD"
         hdrnfile = newfile[:-5] + ".HEAD"
-        copyfile(hdrofile, hdrnfile, copy)
+        copyfile(hdrofile, hdrnfile, copy, create_new, hashmethod,
+                 use_hardlink)
 
     return newfile
 
