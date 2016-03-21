@@ -1417,7 +1417,7 @@ class MNIBiasCorrection(FSCommand):
     >>> correct.inputs.protocol_iterations = 1000
     >>> correct.inputs.distance = 50
     >>> correct.cmdline
-    'mri_nu_correct.mni --distance 50 --i norm.mgz --n 6 --o out_output.mgz --proto-iters 1000'
+    'mri_nu_correct.mni --distance 50 --i norm.mgz --n 6 --o norm_output.mgz --proto-iters 1000'
 
     References:
     ----------
