@@ -73,3 +73,23 @@ def create_skullstripped_recon_flow(name="skullstripped_recon_all"):
     wf.connect(autorecon_resume, "subjects_dir", outputnode, "subjects_dir")
     wf.connect(autorecon_resume, "subject_id", outputnode, "subject_id")
     return wf
+
+def create_reconall_workflow(name="ReconAll"):
+
+    reconall = pe.Workflow(name=name)
+    
+    inputnode = pe.Node(niu.IdentityInterface(fields=['subject_id',
+                                                      'subjects_dir',
+                                                      'T1_files',
+                                                      'cache_dir',
+                                                      'T2_file',
+                                                      'FLAIR_file',
+                                                      'num_threads']),
+                        name='inputspec')
+    
+    # create workflows
+    ar1_wf, ar1_outputs = create_AutoRecon1(longitudinal=False, cw256=False, field_strength='1.5T', custom_atlas=None, )
+    ar2_wf, ar2_outputs = create_AutoRecon2(config)
+    ar3_wf, ar3_outputs = create_AutoRecon3(config)
+
+    
