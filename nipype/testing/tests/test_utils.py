@@ -3,10 +3,17 @@
 """Test testing utilities
 """
 
+import os
+import warnings
 from nipype.testing.utils import TempFATFS
 from nose.tools import assert_true
 
 
 def test_tempfatfs():
-    with TempFATFS() as tmpdir:
-        yield assert_true, tmpdir is not None
+    try:
+        fatfs = TempFATFS()
+    except IOError:
+        warnings.warn("Cannot mount FAT filesystems with FUSE")
+    else:
+        with fatfs as tmpdir:
+            yield assert_true, os.path.exists(tmpdir)
