@@ -6,37 +6,38 @@ import nipype.pipeline.engine as pe  # pypeline engine
 from nipype.interfaces.freesurfer import *
 from utils import copy_file, copy_files, awkfile
 
-def VerifyInputs(T1sList):
-    ##TODO Make this its own node
-    ##TODO Convert .mgz files to .nii.gz
-    ##TODO Check the FOV
+def checkT1s(T1_files, cw256=False):
     """Verify size outside of pipeline processing"""
-    print "Verifying input T1 size"
-    try:
-        import SimpleITK as sitk
-        T1Length = len(T1sList)
-        extension = None
-        for i_extension in ['.mgz', '.nii', 'nii.gz']:
-            if T1sList[0].endswith(i_extension):
-                extension = i_extension
-        if T1Length == 0:
-            print("ERROR: No T1's Given")
-            sys.exit(-1)
-        elif T1Length > 1 and extension in ['.nii', '.nii.gz']:
-            firstSize = sitk.ReadImage(T1sList[0]).GetSize()
-            for otherFilename in T1sList[1:]:
-                if firstSize != sitk.ReadImage(otherFilename).GetSize():
-                    print("ERROR: T1s not the same size can not process {0} {1} together".format(
-                        T1sList[0], otherFilename))
-                    sys.exit(-1)
-        elif extension == None:
-            print "ERROR: Input files must be have '.mgz', '.nii', or '.nii.gz' extension"
-            sys.exit(-1)
-    except OSError as exc:  # Python >2.5
-        print "ERROR: Could not verify input file sizes using SimpleITK"
-        print exc
+    print("Verifying input T1 size")
+    import SimpleITK as sitk
+    import os
+    if len(T1_files) == 0:
+        print("ERROR: No T1's Given")
         sys.exit(-1)
-    return T1sList
+    for i, t1 in enumerate(T1_files):
+        if t1.endswith(".mgz"):
+            # convert input fs files to NIFTI
+            convert = MRIConvert()
+            convert.inputs.in_file = t1
+            convert.inputs.out_file = os.path.abspath(os.path.basename(t1).replace('.mgz', '.nii.gz'))
+            convert.run()
+            T1_files[i] = convert.inputs.out_file
+    size = None
+    for t1 in T1_files:
+        img = sitk.ReadImage(t1)
+        if not size:
+            size = img.GetSize()
+        elif size != img.GetSize():
+            print("ERROR: T1s not the same size. Cannot process {0} {1} together".format(T1_files[0],
+                                                                                         otherFilename))
+            sys.exit(-1)
+    # check if cw256 is set to crop the images
+    if not cw256:
+        for dim in size:
+            if dim > 256:
+                print("Setting MRI Convert to crop images to 256 FOV")
+    
+    return T1_files, cw256
 
 def create_preproc_filenames(in_T1s):
     # Create output filenames
@@ -53,18 +54,31 @@ def create_preproc_filenames(in_T1s):
         inputvols.append(file_num + '.mgz')
     return inputvols, iscaleout, ltaout
 
-def create_AutoRecon1(config):
-    # AutoRecon1
-    # Workflow
-    ar1_wf = pe.Workflow(name='AutoRecon1')
+def create_AutoRecon1(name="AutoRecon1", longitudinal=False, use_T2=False, use_FLAIR=False, config):
+    """Creates the AutoRecon1 workflow in nipype.
 
-    if not config['longitudinal']:
+    Inputs::
+           inputspec.T1_files : T1 files (mandatory)
+           inputspec.T2_file : T2 file (optional)
+           inputspec.FLAIR_file : FLAIR file (optional)
+
+    Outpus::
+           
+    """
+    ar1_wf = pe.Workflow(name=name)
+
+    if not longitudinal:
         # single session processing
         inputSpec = pe.Node(interface=IdentityInterface(
-            fields=['in_t1s', 'in_t2', 'in_flair']),
+            fields=['T1_files', 'T2_file', 'in_flair']),
                              run_without_submitting=True,
                              name='inputspec')
-        inputSpec.inputs.in_t1s = VerifyInputs(config['in_T1s'])
+
+        verify_inputs = pe.Node(Function(infields=["T1_files"],
+                                         outfields=["T1_files"],
+                                         checkT1s)
+                                name="Check_T1s"),
+                                
 
         origvols, iscaleout, ltaout = create_preproc_filenames(config['in_T1s'])
 
@@ -75,22 +89,22 @@ def create_AutoRecon1(config):
                                           name="T1_prep")
         T1_image_preparation.inputs.out_file = origvols
 
-        ar1_wf.connect([(inputSpec, T1_image_preparation, [('in_t1s', 'in_file')]),
+        ar1_wf.connect([(inputSpec, T1_image_preparation, [('T1_files', 'in_file')]),
                         ])
 
         # T2 image preparation
-        if config['in_T2'] != None:
+        if use_T2:
             # Create T2raw.mgz
             # mri_convert
-            inputSpec.inputs.in_t2 = config['in_T2']
+            inputSpec.inputs.T2_file = config['in_T2']
             T2_convert = pe.Node(MRIConvert(), name="T2_convert")
             T2_convert.inputs.out_file = 'T2raw.mgz'
             T2_convert.inputs.no_scale = True
-            ar1_wf.connect([(inputSpec, T2_convert, [('in_t2', 'in_file')]),
+            ar1_wf.connect([(inputSpec, T2_convert, [('T2_file', 'in_file')]),
                             ]) 
 
         # FLAIR image preparation
-        if config['in_FLAIR'] != None:
+        if use_FLAIR:
             # Create FLAIRraw.mgz
             # mri_convert
             inputSpec.inputs.in_flair = config['in_FLAIR']
@@ -102,7 +116,7 @@ def create_AutoRecon1(config):
     else:
         # longitudinal inputs
         inputSpec = pe.Node(interface=IdentityInterface(
-            fields=['in_t1s',
+            fields=['T1_files',
                     'iscales',
                     'ltas',
                     'subj_to_template_lta',
@@ -168,7 +182,7 @@ def create_AutoRecon1(config):
         if config['longitudinal']:
             # if running longitudinally
             ar1_wf.connect([(concatenate_lta, create_template, [('out_file', 'initial_transforms')]),
-                            (inputSpec, create_template, [('in_t1s', 'in_files')]),
+                            (inputSpec, create_template, [('T1_files', 'in_files')]),
                             (copy_iscales, create_template, [('out_file','in_intensity_scales')]),
                         ])
         else:
