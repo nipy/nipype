@@ -59,14 +59,23 @@ class TempFATFS(object):
         mkfs_args = ['mkfs.vfat', vfatfile]
         mount_args = ['fusefat', '-o', 'rw+', '-f', vfatfile, self.vfatmount]
 
-        subprocess.check_call(args=mkfs_args, stdout=self.dev_null,
-                              stderr=self.dev_null)
-        self.fusefat = subprocess.Popen(args=mount_args, stdout=self.dev_null,
-                                        stderr=self.dev_null)
+        try:
+            subprocess.check_call(args=mkfs_args, stdout=self.dev_null,
+                                  stderr=self.dev_null)
+        except subprocess.CalledProcessError:
+            raise IOError("mkfs.vfat failed")
+
+        try:
+            self.fusefat = subprocess.Popen(args=mount_args,
+                                            stdout=self.dev_null,
+                                            stderr=self.dev_null)
+        except OSError:
+            raise IOError("fusefat is not installed")
+
         time.sleep(self.delay)
 
         if self.fusefat.poll() is not None:
-            raise IOError("fatfuse terminated too soon")
+            raise IOError("fusefat terminated too soon")
 
         open(self.canary, 'wb').close()
 
