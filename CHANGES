@@ -1,6 +1,7 @@
 Next release
 ============
 
+* ENH: New interface to b0calc of FSL-POSSUM (https://github.com/nipy/nipype/pull/1399)
 * FIX: Clean up byte/unicode issues using subprocess (https://github.com/nipy/nipype/pull/1394)
 * FIX: Prevent crash when tvtk is loaded - ETS_TOOLKIT=null (https://github.com/nipy/nipype/pull/973)
 * ENH: New interfaces in dipy: RESTORE, EstimateResponseSH, CSD and StreamlineTractography
