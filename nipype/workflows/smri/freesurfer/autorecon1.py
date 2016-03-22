@@ -11,6 +11,7 @@ def checkT1s(T1_files, cw256=False):
     print("Verifying input T1 size")
     import SimpleITK as sitk
     import os
+    import sys
     if len(T1_files) == 0:
         print("ERROR: No T1's Given")
         sys.exit(-1)
@@ -36,8 +37,9 @@ def checkT1s(T1_files, cw256=False):
         for dim in size:
             if dim > 256:
                 print("Setting MRI Convert to crop images to 256 FOV")
-    
-    return T1_files, cw256
+                cw256 = True
+    origvols, iscaleout, ltaout = create_preproc_filenames(T1_files)
+    return T1_files, cw256, origvol_names, 
 
 def create_preproc_filenames(in_T1s):
     # Create output filenames
@@ -61,6 +63,7 @@ def create_AutoRecon1(name="AutoRecon1", longitudinal=False, use_T2=False, use_F
            inputspec.T1_files : T1 files (mandatory)
            inputspec.T2_file : T2 file (optional)
            inputspec.FLAIR_file : FLAIR file (optional)
+           inputspec.cw256 : Conform inputs to 256 FOV (optional)
 
     Outpus::
            
@@ -69,18 +72,19 @@ def create_AutoRecon1(name="AutoRecon1", longitudinal=False, use_T2=False, use_F
 
     if not longitudinal:
         # single session processing
-        inputSpec = pe.Node(interface=IdentityInterface(
-            fields=['T1_files', 'T2_file', 'in_flair']),
+        inputspec = pe.Node(interface=IdentityInterface(
+            fields=['T1_files', 'T2_file', 'in_flair', 'cw256']),
                              run_without_submitting=True,
                              name='inputspec')
 
-        verify_inputs = pe.Node(Function(infields=["T1_files"],
-                                         outfields=["T1_files"],
+        verify_inputs = pe.Node(Function(infields=["T1_files", "cw256"],
+                                         outfields=["T1_files", "cw256"],
                                          checkT1s)
                                 name="Check_T1s"),
-                                
+        ar1_wf.conncet([(inputspec, verify_inputs, [('T1_files', 'T1_files'),
+                                                    ('cw256', 'cw256')])])
 
-        origvols, iscaleout, ltaout = create_preproc_filenames(config['in_T1s'])
+
 
         # T1 image preparation
         # For all T1's mri_convert ${InputVol} ${out_file}
@@ -89,33 +93,33 @@ def create_AutoRecon1(name="AutoRecon1", longitudinal=False, use_T2=False, use_F
                                           name="T1_prep")
         T1_image_preparation.inputs.out_file = origvols
 
-        ar1_wf.connect([(inputSpec, T1_image_preparation, [('T1_files', 'in_file')]),
+        ar1_wf.connect([(inputspec, T1_image_preparation, [('T1_files', 'in_file')]),
                         ])
 
         # T2 image preparation
         if use_T2:
             # Create T2raw.mgz
             # mri_convert
-            inputSpec.inputs.T2_file = config['in_T2']
+            inputspec.inputs.T2_file = config['in_T2']
             T2_convert = pe.Node(MRIConvert(), name="T2_convert")
             T2_convert.inputs.out_file = 'T2raw.mgz'
             T2_convert.inputs.no_scale = True
-            ar1_wf.connect([(inputSpec, T2_convert, [('T2_file', 'in_file')]),
+            ar1_wf.connect([(inputspec, T2_convert, [('T2_file', 'in_file')]),
                             ]) 
 
         # FLAIR image preparation
         if use_FLAIR:
             # Create FLAIRraw.mgz
             # mri_convert
-            inputSpec.inputs.in_flair = config['in_FLAIR']
+            inputspec.inputs.in_flair = config['in_FLAIR']
             FLAIR_convert = pe.Node(MRIConvert(), name="FLAIR_convert")
             FLAIR_convert.inputs.out_file = 'FLAIRraw.mgz'
             FLAIR_convert.inputs.no_scale = True
-            ar1_wf.connect([(inputSpec, FLAIR_convert, [('in_flair', 'in_file')]),
+            ar1_wf.connect([(inputspec, FLAIR_convert, [('in_flair', 'in_file')]),
                             ])
     else:
         # longitudinal inputs
-        inputSpec = pe.Node(interface=IdentityInterface(
+        inputspec = pe.Node(interface=IdentityInterface(
             fields=['T1_files',
                     'iscales',
                     'ltas',
@@ -132,7 +136,7 @@ def create_AutoRecon1(name="AutoRecon1", longitudinal=False, use_T2=False, use_F
                                         copy_file),
                                iterfield=['in_file', 'out_file'],
                                name='Copy_ltas')
-        ar1_wf.connect([(inputSpec, copy_ltas, [('ltas', 'in_file')])])
+        ar1_wf.connect([(inputspec, copy_ltas, [('ltas', 'in_file')])])
         copy_ltas.inputs.out_file = in_ltas
 
         copy_iscales = pe.MapNode(Function(['in_file', 'out_file'],
@@ -140,13 +144,13 @@ def create_AutoRecon1(name="AutoRecon1", longitudinal=False, use_T2=False, use_F
                                            copy_file),
                                   iterfield=['in_file', 'out_file'],
                                   name='Copy_iscales')
-        ar1_wf.connect([(inputSpec, copy_iscales, [('iscales', 'in_file')])])
+        ar1_wf.connect([(inputspec, copy_iscales, [('iscales', 'in_file')])])
         copy_iscales.inputs.out_file = in_iscales
 
         concatenate_lta = pe.MapNode(ConcatenateLTA(), iterfield=['in_file'],
                                      name="Concatenate_ltas")
         ar1_wf.connect([(copy_ltas, concatenate_lta, [('out_file', 'in_file')]),
-                        (inputSpec, concatenate_lta, [('subj_to_template_lta', 'subj_to_base')])])
+                        (inputspec, concatenate_lta, [('subj_to_template_lta', 'subj_to_base')])])
 
     
     # Motion Correction
@@ -182,7 +186,7 @@ def create_AutoRecon1(name="AutoRecon1", longitudinal=False, use_T2=False, use_F
         if config['longitudinal']:
             # if running longitudinally
             ar1_wf.connect([(concatenate_lta, create_template, [('out_file', 'initial_transforms')]),
-                            (inputSpec, create_template, [('T1_files', 'in_files')]),
+                            (inputspec, create_template, [('T1_files', 'in_files')]),
                             (copy_iscales, create_template, [('out_file','in_intensity_scales')]),
                         ])
         else:
@@ -221,7 +225,7 @@ def create_AutoRecon1(name="AutoRecon1", longitudinal=False, use_T2=False, use_F
     bias_correction = pe.Node(MNIBiasCorrection(), name="Bias_correction")
     bias_correction.inputs.iterations = 1
     bias_correction.inputs.protocol_iterations = 1000
-    if config['field_strength'] == '3T':
+    if field_strength == '3T':
         # 3T params from Zheng, Chee, Zagorodnov 2009 NeuroImage paper
         # "Improvement of brain segmentation accuracy by optimizing
         # non-uniformity correction using N3"
@@ -252,7 +256,7 @@ def create_AutoRecon1(name="AutoRecon1", longitudinal=False, use_T2=False, use_F
                                     name='Copy_Template_Transform')
         talairach_avi.inputs.out_file = 'talairach.auto.xfm'
 
-        ar1_wf.connect([(inputSpec, talairach_avi, [('template_talairach_xfm', 'in_file')])])
+        ar1_wf.connect([(inputspec, talairach_avi, [('template_talairach_xfm', 'in_file')])])
     else:
         # single session processing
         talairach_avi = pe.Node(TalairachAVI(), name="Compute_Transform")
@@ -349,7 +353,7 @@ def create_AutoRecon1(name="AutoRecon1", longitudinal=False, use_T2=False, use_F
                                           name='Copy_Template_Brainmask')
         copy_template_brainmask.inputs.out_file = 'brainmask_{0}.mgz'.format(config['long_template'])
         
-        ar1_wf.connect([(inputSpec, copy_template_brainmask, [('template_brainmask', 'in_file')])])
+        ar1_wf.connect([(inputspec, copy_template_brainmask, [('template_brainmask', 'in_file')])])
 
         mask1 = pe.Node(ApplyMask(), name="ApplyMask1")
         mask1.inputs.keep_mask_deletion_edits = True
