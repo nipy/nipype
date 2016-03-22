@@ -843,8 +843,6 @@ class SegStatsReconAll(SegStats):
 
     def _format_arg(self, name, spec, value):
         if name == 'brainmask_file':
-            if self.inputs.copy_inputs:
-                copy2subjdir(self, value, 'mri')
             return spec.argstr % os.path.basename(value)
         return super(SegStatsReconAll, self)._format_arg(name, spec, value)
 
@@ -873,6 +871,8 @@ class SegStatsReconAll(SegStats):
                          os.path.join('mri', 'transforms'),
                          'talairach.xfm')
             copy2subjdir(self, self.inputs.in_intensity, 'mri')
+            if isdefined(self.inputs.brainmask_file):
+                copy2subjdir(self, self.inputs.brainmask_file, 'mri')
         return super(SegStatsReconAll, self).run(**inputs)
 
 
