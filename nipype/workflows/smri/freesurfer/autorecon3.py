@@ -7,11 +7,11 @@ from ba_maps import create_ba_maps_wf
 from utils import createsrcsubj
 from nipype.interfaces.io import DataGrabber
 
-def create_AutoRecon3(config):
+def create_AutoRecon3(name="AutoRecon3", qcache=False, plugin_args=None):
     
     # AutoRecon3
     # Workflow
-    ar3_wf = pe.Workflow(name="AutoRecon3")
+    ar3_wf = pe.Workflow(name=name)
 
     # Input Node
     inputspec = pe.Node(IdentityInterface(fields=['lh_inflated',
@@ -34,10 +34,6 @@ def create_AutoRecon3(config):
                                                   'rh_area',
                                                   'lh_curv',
                                                   'rh_curv',
-                                                  'lh_atlas',
-                                                  'rh_atlas',
-                                                  'lh_classifier',
-                                                  'rh_classifier',
                                                   'lh_orig_nofix',
                                                   'rh_orig_nofix',
                                                   'aseg_presurf',
@@ -48,13 +44,22 @@ def create_AutoRecon3(config):
                                                   'transform',
                                                   'orig_mgz',
                                                   'rawavg',
-                                                  'norm']),
+                                                  'norm',
+                                                  'lh_atlas',
+                                                  'rh_atlas',
+                                                  'lh_classifier1',
+                                                  'rh_classifier1',
+                                                  'lh_classifier2',
+                                                  'rh_classifier2',
+                                                  'lh_classifier3',
+                                                  'rh_classifier3',
+                                                  'lookup_table',
+                                                  'wm_lookup_table',
+                                                  'src_subject_id',
+                                                  'src_subject_dir',
+                                                  'color_table']),
                          name='inputspec')
 
-    inputspec.inputs.lh_atlas = config['lh_atlas']
-    inputspec.inputs.lh_classifier = config['lh_classifier']
-    inputspec.inputs.rh_atlas = config['rh_atlas']
-    inputspec.inputs.rh_classifier = config['rh_classifier']
 
     ar3_lh_wf1 = pe.Workflow(name="AutoRecon3_Left_1")
     ar3_rh_wf1 = pe.Workflow(name="AutoRecon3_Right_1")
@@ -86,12 +91,11 @@ def create_AutoRecon3(config):
         ar3_sphere = pe.Node(Sphere(), name="Spherical_Inflation")
         ar3_sphere.inputs.seed = 1234
         ar3_sphere.inputs.out_file = '{0}.sphere'.format(hemisphere)
-        if config['openmp'] != None:
-            ar3_sphere.inputs.num_threads = config['openmp']
-            if config['plugin_args'] != None:
-                ar3_sphere.plugin_args = config['plugin_args']
+        if plugin_args:
+            ar3_sphere.plugin_args = plugin_args
         hemi_wf.connect([(hemi_inputspec1, ar3_sphere, [('inflated', 'in_file'),
-                                                        ('smoothwm', 'in_smoothwm')])])
+                                                        ('smoothwm', 'in_smoothwm'),
+                                                        ('num_threads', 'num_threads')])])
 
         # Ipsilateral Surface Registation (Spherical Morph)
 
@@ -144,21 +148,16 @@ def create_AutoRecon3(config):
         ar3_parcellation.inputs.hemisphere = hemisphere
         ar3_parcellation.inputs.copy_inputs = True
         ar3_parcellation.inputs.out_file = "{0}.aparc.annot".format(hemisphere)        
-
-        if config['openmp'] != None:
-            ar3_parcellation.inputs.num_threads = config['openmp']
-            if config['plugin_args'] != None:
-                ar3_parcellation.plugin_args = config['plugin_args']
+        if plugin_args:
+            ar3_parcellation.plugin_args = plugin_args
         hemi_wf.connect([(hemi_inputspec1, ar3_parcellation, [('smoothwm', 'smoothwm'),
                                                               ('cortex_label', 'label'),
                                                               ('aseg_presurf',  'aseg'),
                                                               ('classifier', 'classifier'),
                                                               ('curv', 'curv'),
                                                               ('sulc', 'sulc'),
-                                                          ]),
-                         
-                         (ar3_surfreg, ar3_parcellation, [('out_file', 'canonsurf')])
-                               ])
+                                                              ('num_threads', 'num_threads')]),
+                         (ar3_surfreg, ar3_parcellation, [('out_file', 'canonsurf')])])
 
         # Pial Surface
 
@@ -224,7 +223,7 @@ def create_AutoRecon3(config):
                                                 ('wm', 'inputspec.wm'),
                                                 ('filled', 'inputspec.filled'),
                                                 ('{0}_atlas'.format(hemisphere), 'inputspec.atlas'),
-                                                ('{0}_classifier'.format(hemisphere),
+                                                ('{0}_classifier1'.format(hemisphere),
                                                  'inputspec.classifier')
                                                 ])
                         ])
@@ -309,6 +308,8 @@ def create_AutoRecon3(config):
                         'rawavg',
                         'curv',
                         'sulc',
+                        'classifier2',
+                        'classifier3',
                         ]
                         
         hemi_inputspec2 = pe.Node(IdentityInterface(fields=hemi_inputs2),
@@ -382,8 +383,6 @@ def create_AutoRecon3(config):
         # Cortical Parcellation 2
         cortical_parcellation_2 = pe.Node(MRIsCALabel(),
                                           name="Cortical_Parcellation_{0}_2".format(hemisphere))
-        cortical_parcellation_2.inputs.classifier = config['{0}_classifier2'.format(hemisphere)]
-                                                                 
         cortical_parcellation_2.inputs.out_file = '{0}.aparc.a2009s.annot'.format(hemisphere)
         cortical_parcellation_2.inputs.seed = 1234
         cortical_parcellation_2.inputs.copy_inputs = True
@@ -395,8 +394,7 @@ def create_AutoRecon3(config):
                                                                      ('sphere_reg', 'canonsurf'),
                                                                      ('curv', 'curv'),
                                                                      ('sulc', 'sulc'),
-                                                                 ]),
-                         ])
+                                                                     ('classifier2', 'classifier')])])
 
         # Parcellation Statistics 2
         parcellation_stats_white_2 = parcellation_stats_white.clone(
@@ -423,7 +421,6 @@ def create_AutoRecon3(config):
         # Cortical Parcellation 3
         cortical_parcellation_3 = pe.Node(MRIsCALabel(),
                                           name="Cortical_Parcellation_{0}_3".format(hemisphere))
-        cortical_parcellation_3.inputs.classifier = config['{0}_classifier3'.format(hemisphere)]
         cortical_parcellation_3.inputs.out_file = '{0}.aparc.DKTatlas40.annot'.format(hemisphere)
         cortical_parcellation_3.inputs.hemisphere = hemisphere
         cortical_parcellation_3.inputs.seed = 1234
@@ -434,8 +431,7 @@ def create_AutoRecon3(config):
                                                                      ('sphere_reg', 'canonsurf'),
                                                                      ('curv', 'curv'),
                                                                      ('sulc', 'sulc'),
-                                                                 ])
-                         ])
+                                                                     ('classifier3', 'classifier')])])
 
         # Parcellation Statistics 3
         parcellation_stats_white_3 = parcellation_stats_white.clone(
@@ -516,7 +512,9 @@ def create_AutoRecon3(config):
                                               ('rawavg', 'inputspec.rawavg'),
                                               ('{0}_curv'.format(hemisphere), 'inputspec.curv'),
                                               ('{0}_sulc'.format(hemisphere), 'inputspec.sulc'),
-                                               ]),
+                                              ('{0}_classifier2'.format(hemisphere), 'classifier2'),
+                                              ('{0}_classifier3'.format(hemisphere), 'classifier3'),
+                                           ]),
                         (ar3_lh_wf1, hemiwf2, [('outputspec.pial', 'inputspec.lh_pial')]),
                         (ar3_rh_wf1, hemiwf2, [('outputspec.pial', 'inputspec.rh_pial')]),
                         (hemiwf1, hemiwf2, [('outputspec.thickness_pial', 'inputspec.thickness'),
@@ -594,7 +592,6 @@ def create_AutoRecon3(config):
     """
 
     segstats = pe.Node(SegStatsReconAll(), name="Segmentation_Statistics")
-    segstats.inputs.color_table_file = config['LookUpTable']
     segstats.inputs.empty = True
     segstats.inputs.brain_vol = 'brain-vol-from-seg'
     segstats.inputs.exclude_ctx_gm_wm = True
@@ -620,6 +617,7 @@ def create_AutoRecon3(config):
                                            ('brainmask', 'brainmask_file'),
                                            ('lh_orig_nofix', 'lh_orig_nofix'),
                                            ('rh_orig_nofix', 'rh_orig_nofix'),
+                                           ('lookup_table', 'color_table_file'),
                                           ]),
                     (volume_mask, segstats, [('out_ribbon', 'ribbon')]),
                     (ar3_lh_wf1, segstats, [('outputspec.pial', 'lh_pial'),
@@ -662,7 +660,6 @@ def create_AutoRecon3(config):
     # White Matter Segmentation Stats
 
     wm_segstats = pe.Node(SegStatsReconAll(), name="WM_Segmentation_Statistics")
-    wm_segstats.inputs.color_table_file = config['WMLookUpTable']
     wm_segstats.inputs.intensity_units = "MR"
     wm_segstats.inputs.wm_vol_from_surf = True
     wm_segstats.inputs.etiv = True
@@ -682,6 +679,7 @@ def create_AutoRecon3(config):
                                                'lh_orig_nofix'),
                                               ('rh_orig_nofix',
                                                'rh_orig_nofix'),
+                                              ('wm_lookup_table', 'color_table_file'),
                                              ]),
                     (volume_mask, wm_segstats, [('out_ribbon', 'ribbon')]),
                     (ar3_lh_wf1, wm_segstats, [('outputspec.pial', 'lh_pial'),
@@ -691,7 +689,7 @@ def create_AutoRecon3(config):
                     ])
 
     # add brodman area maps to the workflow
-    ba_WF = create_ba_maps_wf(config)
+    ba_WF = create_ba_maps_wf()
     
     ar3_wf.connect([(ar3_lh_wf1, ba_WF, [('outputspec.sphere_reg', 'inputspec.lh_sphere_reg'),
                                          ('outputspec.thickness_pial', 'inputspec.lh_thickness'),
@@ -709,15 +707,17 @@ def create_AutoRecon3(config):
                                         ('wm', 'inputspec.wm'),
                                         ('lh_orig', 'inputspec.lh_orig'),
                                         ('rh_orig', 'inputspec.rh_orig'),
+                                        ('src_subject_dir', 'inputspec.src_subject_dir'),
+                                        ('src_subject_id', 'inputspec.src_subject_id'),
+                                        ('color_table', 'color_table'),
                                     ]),
                     (volume_mask, ba_WF, [('out_ribbon', 'inputspec.ribbon')])
                 ])
 
-    if config['qcache']:
+    if qcache:
         source_inputs = ['lh_sphere_reg', 'rh_sphere_reg']
         source_subject = pe.Node(DataGrabber(outfields=source_inputs),
                                  name="{0}_srcsubject".format(hemisphere))
-        source_subject.inputs.base_directory = config['source_subject']
         source_subject.inputs.template = '*'
         source_subject.inputs.sort_filelist = False
         source_subject.inputs.field_template = dict(lh_sphere_reg='surf/lh.sphere.reg',
@@ -843,7 +843,8 @@ def create_AutoRecon3(config):
                         (ar3_rh_wf2, qcache_wf, [('outputspec.wg_pct_mgh', 'inputspec.rh_wg_pct_mgh')]),
                     ])
         for source_file in source_inputs:
-            ar3_wf.connect([(source_subject, qcache_wf, [(source_file, 'inputspec.source_' + source_file)])])
+            ar3_wf.connect([(inputspec, source_subject, [('source_subject_dir', 'base_directory')]),
+                            (source_subject, qcache_wf, [(source_file, 'inputspec.source_' + source_file)])])
         # end qcache workflow
 
 
@@ -861,7 +862,7 @@ def create_AutoRecon3(config):
     for output in hemi_outputs1 + hemi_outputs2:
         for hemi in ('lh_', 'rh_'):
             ar3_outputs.append(hemi + output)
-    if config['qcache']:
+    if qcache:
         ar3_outputs.extend(qcache_outputs)
     outputspec = pe.Node(IdentityInterface(fields=ar3_outputs),
                          name="outputspec")
@@ -889,7 +890,7 @@ def create_AutoRecon3(config):
             ar3_wf.connect([(lhwf, outputspec, [('outputspec.' + output, 'lh_' + output)]),
                             (rhwf, outputspec, [('outputspec.' + output, 'rh_' + output)])])
 
-    if config['qcache']:
+    if qcache:
         for output in qcache_outputs:
             ar3_wf.connect([(qcache_wf, outputspec, [('outputspec.' + output, output)])])
         

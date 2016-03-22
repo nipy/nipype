@@ -10,43 +10,41 @@ def copy_ltas(in_file, subjects_dir, subject_id, long_template):
     out_file = copy_file(in_file, os.path.basename(in_file).replace(long_template, subject_id))
     return out_file
 
-def create_AutoRecon2(config):
+def create_AutoRecon2(name="AutoRecon2", longitudinal=False,
+                      field_strength="1.5T", plugin_args=None):
     # AutoRecon2
     # Workflow
-    ar2_wf = pe.Workflow(name="AutoRecon2")
+    ar2_wf = pe.Workflow(name=name)
+
+    inputspec = pe.Node(IdentityInterface(fields=['orig',
+                                                  'brainmask',
+                                                  'transform',
+                                                  'subject_id',
+                                                  'template_talairach_lta',
+                                                  'template_talairach_m3z',
+                                                  'template_label_intensities',
+                                                  'template_aseg',
+                                                  'subj_to_template_lta',
+                                                  'alltps_to_template_ltas',
+                                                  'template_lh_white',
+                                                  'template_rh_white',
+                                                  'template_lh_pial',
+                                                  'template_rh_pial',
+                                                  'init_wm',
+                                                  'timepoints',
+                                                  'alltps_segs',
+                                                  'alltps_segs_noCC',
+                                                  'alltps_norms',
+                                                  'num_threads',
+                                                  'reg_template',
+                                                  'reg_template_withskull']),
+                        run_without_submitting=True,
+                        name='inputspec')
 
     # Input node
-    if config['longitudinal']:
-        inputSpec = pe.Node(IdentityInterface(fields=['orig',
-                                                      'brainmask',
-                                                      'transform',
-                                                      'subject_id',
-                                                      'template_talairach_lta',
-                                                      'template_talairach_m3z',
-                                                      'template_label_intensities',
-                                                      'template_aseg',
-                                                      'subj_to_template_lta',
-                                                      'alltps_to_template_ltas',
-                                                      'template_lh_white',
-                                                      'template_rh_white',
-                                                      'template_lh_pial',
-                                                      'template_rh_pial',
-                                                      'init_wm',
-                                                      'timepoints',
-                                                      'alltps_segs',
-                                                      'alltps_segs_noCC',
-                                                      'alltps_norms']),
-                            run_without_submitting=True,
-                            name='inputspec')
-        inputSpec.inputs.timepoints = config['timepoints']
-        
-    else:
-        # if running single session
-        inputSpec = pe.Node(IdentityInterface(fields=['orig',
-                                                      'brainmask',
-                                                      'transform']),
-                            run_without_submitting=True,
-                            name='inputspec')
+    if longitudinal:
+        # TODO: Work on longitudinal workflow
+        inputspec.inputs.timepoints = config['timepoints']
         
 
     # NU Intensity Correction
@@ -61,13 +59,14 @@ def create_AutoRecon2(config):
     intensity_correction.inputs.protocol_iterations = 1000
     intensity_correction.inputs.stop = 0.0001
     intensity_correction.inputs.shrink = 2
-    if config['field_strength'] == '3T':
+    if field_strength == '3T':
         intensity_correction.inputs.distance = 50
     else:
+        # default for 1.5T scans
         intensity_correction.inputs.distance = 200
 
     intensity_correction.inputs.out_file = 'nu.mgz'
-    ar2_wf.connect([(inputSpec, intensity_correction, [('orig', 'in_file'),
+    ar2_wf.connect([(inputspec, intensity_correction, [('orig', 'in_file'),
                                                         ('brainmask', 'mask'),
                                                         ('transform', 'transform')
                                                         ])
@@ -78,7 +77,7 @@ def create_AutoRecon2(config):
     add_to_header_nu.inputs.out_file = 'nu.mgz'
     ar2_wf.connect([(intensity_correction, add_to_header_nu, [('out_file', 'in_file'),
                                                               ]),
-                    (inputSpec, add_to_header_nu,
+                    (inputspec, add_to_header_nu,
                      [('transform', 'transform')])
                     ])
 
@@ -87,29 +86,25 @@ def create_AutoRecon2(config):
     Computes the transform to align the mri/nu.mgz volume to the default GCA 
     atlas found in FREESURFER_HOME/average (see -gca flag for more info).
     """
-    if config['longitudinal']:
+    if longitudinal:
         align_transform = pe.Node(Function(['in_file', 'out_file'],
                                    ['out_file'],
                                    copy_file),
                           name='Copy_Talairach_lta')
         align_transform.inputs.out_file = 'talairach.lta'
 
-        ar2_wf.connect([(inputSpec, align_transform, [('template_talairach_lta', 
+        ar2_wf.connect([(inputspec, align_transform, [('template_talairach_lta', 
                                                        'in_file')])])
-        
     else:
         align_transform = pe.Node(EMRegister(), name="Align_Transform")
-        align_transform.inputs.template = config['registration_template']
         align_transform.inputs.out_file = 'talairach.lta'
         align_transform.inputs.nbrspacing = 3
-        if config['openmp'] != None:
-            align_transform.inputs.num_threads = config['openmp']
-        if config['plugin_args'] != None:
-            align_transform.plugin_args = config['plugin_args']
-        ar2_wf.connect([(inputSpec, align_transform, [('brainmask', 'mask')]),
-                        (add_to_header_nu, align_transform,
-                         [('out_file', 'in_file')])
-                        ])
+        if plugin_args:
+            align_transform.plugin_args = plugin_args
+        ar2_wf.connect([(inputspec, align_transform, [('brainmask', 'mask'),
+                                                      ('reg_template', 'template'),
+                                                      ('num_threads', 'num_threads')]),
+                        (add_to_header_nu, align_transform, [('out_file', 'in_file')])])
 
     # CA Normalize
     """
@@ -119,21 +114,21 @@ def create_AutoRecon2(config):
     """
     ca_normalize = pe.Node(CANormalize(), name='CA_Normalize')
     ca_normalize.inputs.out_file = 'norm.mgz'
-    ca_normalize.inputs.atlas = config['registration_template']
-    if config['longitudinal']:
+    if not longitudinal:
+        ca_normalize.inputs.control_points = 'ctrl_pts.mgz'
+    else:
         copy_template_aseg = pe.Node(Function(['in_file', 'out_file'],
                                               ['out_file'],
                                               copy_file),
                                      name='Copy_Template_Aseg')
         copy_template_aseg.inputs.out_file = 'aseg_{0}.mgz'.format(config['long_template'])
 
-        ar1_wf.connect([(inputSpec, copy_template, [('template_aseg', 'in_file')]),
+        ar1_wf.connect([(inputspec, copy_template, [('template_aseg', 'in_file')]),
                         (copy_template, ca_normalize, [('out_file', 'long_file')])])
-    else:
-        ca_normalize.inputs.control_points = 'ctrl_pts.mgz'
 
     ar2_wf.connect([(align_transform, ca_normalize, [('out_file', 'transform')]),
-                    (inputSpec, ca_normalize, [('brainmask', 'mask')]),
+                    (inputspec, ca_normalize, [('brainmask', 'mask'),
+                                               ('reg_template', 'template')]),
                     (add_to_header_nu, ca_normalize, [('out_file', 'in_file')])])
 
     # CA Register
@@ -141,23 +136,19 @@ def create_AutoRecon2(config):
     ca_register = pe.Node(CARegister(), name='CA_Register')
     ca_register.inputs.align = 'after'
     ca_register.inputs.no_big_ventricles = True
-    ca_register.inputs.template = config['registration_template']
     ca_register.inputs.out_file = 'talairach.m3z'
-    if config['openmp'] != None:
-        ca_register.inputs.num_threads = config['openmp']
-    if config['plugin_args'] != None:
-        ca_register.plugin_args = config['plugin_args']
-
+    if plugin_args:
+        ca_register.plugin_args = plugin_args
     ar2_wf.connect([(ca_normalize, ca_register, [('out_file', 'in_file')]),
-                    (inputSpec, ca_register, [('brainmask', 'mask')]),
-                    ])
-    
-    if config['longitudinal']:
+                    (inputspec, ca_register, [('brainmask', 'mask'),
+                                              ('num_threads', 'num_threads'),
+                                              ('reg_template', 'template')])])
+    if not longitudinal:
+        ar2_wf.connect([(align_transform, ca_register, [('out_file', 'transform')])])
+    else:
         ca_register.inputs.levels = 2
         ca_register.inputs.A = 1
         ar2_wf.connect([(ar1_inputs, ca_register, [('template_talairach_m3z', 'l_files')])])
-    else:
-        ar2_wf.connect([(align_transform, ca_register, [('out_file', 'transform')])])
     
     # Remove Neck
     """
@@ -167,11 +158,9 @@ def create_AutoRecon2(config):
     remove_neck = pe.Node(RemoveNeck(), name='Remove_Neck')
     remove_neck.inputs.radius = 25
     remove_neck.inputs.out_file = 'nu_noneck.mgz'
-    remove_neck.inputs.template = config['registration_template']
-    
     ar2_wf.connect([(ca_register, remove_neck, [('out_file', 'transform')]),
-                    (add_to_header_nu, remove_neck, [('out_file', 'in_file')])
-                    ])
+                    (add_to_header_nu, remove_neck, [('out_file', 'in_file')]),
+                    (inputspec, remove_neck, [('reg_template', 'template')]))])
 
     # SkullLTA (EM Registration, with Skull)
     # Computes transform to align volume mri/nu_noneck.mgz with GCA volume
@@ -179,19 +168,16 @@ def create_AutoRecon2(config):
     em_reg_withskull = pe.Node(EMRegister(), name='EM_Register_withSkull')
     em_reg_withskull.inputs.skull = True
     em_reg_withskull.inputs.out_file = 'talairach_with_skull_2.lta'
-    em_reg_withskull.inputs.template = config['registration_template']
-    
-    if config['openmp'] != None:
-        em_reg_withskull.inputs.num_threads = config['openmp']
-    if config['plugin_args'] != None:
-        em_reg_withskull.plugin_args = config['plugin_args']
+    if plugin_args:
+        em_reg_withskull.plugin_args = plugin_args
     ar2_wf.connect([(align_transform, em_reg_withskull, [('out_file', 'transform')]),
-                    (remove_neck, em_reg_withskull, [('out_file', 'in_file')])
-                    ])
+                    (remove_neck, em_reg_withskull, [('out_file', 'in_file')]),
+                    (inputspec, em_reg_withskull, [('num_threads', 'num_threads'),
+                                                   ('reg_template_withskull', 'template')])])
 
     # SubCort Seg (CA Label)
     # Labels subcortical structures, based in GCA model.
-    if config['longitudinal']:
+    if longitudinal:
         copy_long_ltas = pe.MapNode(Function(['in_file',
                                               'subjects_dir',
                                               'subject_id',
@@ -200,20 +186,20 @@ def create_AutoRecon2(config):
                                              copy_ltas),
                                     iterfield=['in_file'],
                                     name='Copy_long_ltas')
-        ar2_wf.connect([(inputSpec, copy_long_ltas, [('alltps_to_template_ltas', 'in_file'),
+        ar2_wf.connect([(inputspec, copy_long_ltas, [('alltps_to_template_ltas', 'in_file'),
                                                       ('subjects_dir', 'subjects_dir'),
                                                       ('subject_id', 'subject_id')])])
         copy_long_ltas.inputs.long_template = config['long_template']
 
         merge_norms = pe.Node(Merge(2), name="Merge_Norms")
 
-        ar2_wf.connect([(inputSpec, merge_norms, [('alltps_norms', 'in1')]),
+        ar2_wf.connect([(inputspec, merge_norms, [('alltps_norms', 'in1')]),
                         (ca_normalize, merge_norms, [('out_file', 'in2')])])
                                                    
         
         fuse_segmentations = pe.Node(FuseSegmentations(), name="Fuse_Segmentations")
 
-        ar2_wf.connect([(inputSpec, fuse_segmentations, [('timepoints', 'timepoints'),
+        ar2_wf.connect([(inputspec, fuse_segmentations, [('timepoints', 'timepoints'),
                                                           ('alltps_segs', 'in_segmentations'),
                                                           ('alltps_segs_noCC', 'in_segmentations_noCC'),
                                                           ('subject_id', 'subject_id')]),
@@ -225,20 +211,16 @@ def create_AutoRecon2(config):
     ca_label.inputs.prior = 0.5
     ca_label.inputs.align = True
     ca_label.inputs.out_file = 'aseg.auto_noCCseg.mgz'
-    ca_label.inputs.template = config['registration_template']
-    
-    if config['openmp'] != None:
-        ca_label.inputs.num_threads = config['openmp']
-    if config['plugin_args'] != None:
-        ca_label.plugin_args = config['plugin_args']
-        
+    if plugin_args:
+        ca_label.plugin_args = plugin_args
     ar2_wf.connect([(ca_normalize, ca_label, [('out_file', 'in_file')]),
-                    (ca_register, ca_label, [('out_file', 'transform')])
-                    ])
+                    (ca_register, ca_label, [('out_file', 'transform')]),
+                    (inputspec, ca_label, [('num_threads', 'num_threads'),
+                                           ('reg_template', 'template')])])
     
-    if config['longitudinal']:
+    if longitudinal:
         ar2_wf.connect([(fuse_segmentations, ca_label, [('out_file', 'in_vol')]),
-                        (inputSpec, ca_label, [('template_label_intensities', 'intensities')])])
+                        (inputspec, ca_label, [('template_label_intensities', 'intensities')])])
 
     # mri_cc - segments the corpus callosum into five separate labels in the
     # subcortical segmentation volume 'aseg.mgz'
@@ -269,7 +251,7 @@ def create_AutoRecon2(config):
     normalization2 = pe.Node(Normalize(), name="Normalization2")
     normalization2.inputs.out_file = 'brain.mgz'
     ar2_wf.connect([(copy_cc, normalization2, [('out_file', 'segmentation')]),
-                    (inputSpec, normalization2, [('brainmask', 'mask')]),
+                    (inputspec, normalization2, [('brainmask', 'mask')]),
                     (ca_normalize, normalization2, [('out_file', 'in_file')])
                     ])
 
@@ -281,7 +263,7 @@ def create_AutoRecon2(config):
     mri_mask.inputs.out_file = 'brain.finalsurfs.mgz'
 
     ar2_wf.connect([(normalization2, mri_mask, [('out_file', 'in_file')]),
-                    (inputSpec, mri_mask, [('brainmask', 'mask_file')])
+                    (inputspec, mri_mask, [('brainmask', 'mask_file')])
                     ])
 
     # WM Segmentation
@@ -312,13 +294,13 @@ def create_AutoRecon2(config):
                     (ca_normalize, pretess, [('out_file', 'in_norm')])
                     ])
 
-    if config['longitudinal']:
+    if longitudinal:
         transfer_init_wm = pe.Node(ApplyMask(), name="Transfer_Initial_WM")
         transfer_init_wm.inputs.transfer = 255
         transfer_init_wm.inputs.keep_mask_deletion_edits = True
         transfer_init_wm.inputs.out_file = 'wm.mgz'
         ar2_wf.connect([(pretess, transfer_init_wm, [('out_file', 'in_file')]),
-                        (inputSpec, transfer_init_wm, [('init_wm', 'mask_file'),
+                        (inputspec, transfer_init_wm, [('init_wm', 'mask_file'),
                                                         ('subj_to_template_lta', 'xfm_file')])])
         # changing the pretess variable so that the rest of the connections still work!!!
         pretess = transfer_init_wm
@@ -360,7 +342,7 @@ def create_AutoRecon2(config):
                                                            'brain']),
                                  name="inputspec")
             
-        if config['longitudinal']:
+        if longitudinal:
             # Make White Surf
             # Copy files from longitudinal base
             copy_template_white = pe.Node(Function(['in_file', 'out_file'],
@@ -490,12 +472,10 @@ def create_AutoRecon2(config):
             qsphere.inputs.seed = 1234
             qsphere.inputs.magic = True
             qsphere.inputs.out_file = '{0}.qsphere.nofix'.format(hemisphere)
-            if config['openmp'] != None:
-                qsphere.inputs.num_threads = config['openmp']
-            if config['plugin_args'] != None:
-                qsphere.plugin_args = config['plugin_args']
+            if plugin_args:
+                qsphere.plugin_args = plugin_args
             hemi_wf.connect([(inflate1, qsphere, [('out_file', 'in_file')]),
-                         ])
+                             (inputspec, qsphere, [('num_threads', 'num_threads')])])
 
             # Automatic Topology Fixer
             """
@@ -613,8 +593,8 @@ def create_AutoRecon2(config):
                          (inflate2, curvature_stats, [('out_sulc', 'curvfile2')]),
                          ])
 
-        if config['longitudinal']:
-            ar2_wf.connect([(inputSpec, hemi_wf, [('template_{0}_white'.format(hemisphere),
+        if longitudinal:
+            ar2_wf.connect([(inputspec, hemi_wf, [('template_{0}_white'.format(hemisphere),
                                                     'Copy_Template_White.in_file'),
                                                    ('template_{0}_white'.format(hemisphere),
                                                     'Copy_Template_Orig_White.in_file'),

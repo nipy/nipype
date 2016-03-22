@@ -6,7 +6,7 @@ from nipype.interfaces.freesurfer import *
 from nipype.interfaces.io import DataGrabber
 from nipype.interfaces.utility import Merge
 
-def create_ba_maps_wf(config):
+def create_ba_maps_wf():
     # Brodmann Area Maps (BA Maps) and Hinds V1 Atlas
     inputs = ['lh_sphere_reg',
               'rh_sphere_reg',
@@ -22,7 +22,10 @@ def create_ba_maps_wf(config):
               'brainmask',
               'aseg',
               'ribbon',
-              'wm']
+              'wm',
+              'src_subject_id',
+              'src_subject_dir',
+              'color_table']
     
     inputSpec = pe.Node(IdentityInterface(fields=inputs),
                         name="inputspec")
@@ -63,11 +66,11 @@ def create_ba_maps_wf(config):
             source_fields = labels + ['sphere_reg', 'white']
             source_subject = pe.Node(DataGrabber(outfields=source_fields),
                                      name=node_name + "_srcsubject")
-            source_subject.inputs.base_directory = config['source_subject']
             source_subject.inputs.template = '*'
             source_subject.inputs.sort_filelist = False
             source_subject.inputs.field_template = field_template
-
+            ba_WF.connect([(inputspec, source_subject, [('src_subject_dir', 'base_directory')])])
+            
             merge_labels = pe.Node(Merge(len(labels)),
                                    name=node_name + "_Merge")
             for i,label in enumerate(labels):
@@ -77,17 +80,15 @@ def create_ba_maps_wf(config):
                               iterfield=['source_label', 'out_file'])
             node.inputs.hemisphere = hemisphere
             node.inputs.out_file = out_files
-            node.inputs.source_subject = config['src_subject_id']
             node.inputs.copy_inputs = True
             
             ba_WF.connect([(merge_labels, node, [('out', 'source_label')]),
                            (source_subject, node, [('sphere_reg', 'source_sphere_reg'),
-                                                   ('white', 'source_white')])])
+                                                   ('white', 'source_white')]),
+                           (inputspec, node, [('source_subject_id', 'source_subject')])])
             
             label2annot = pe.Node(Label2Annot(), name=node_name + '_2_Annot')
             label2annot.inputs.hemisphere = hemisphere
-            label2annot.inputs.color_table = os.path.join(
-                config['fs_home'], 'average', 'colortable_BA.txt')
             label2annot.inputs.verbose_off = True
             label2annot.inputs.keep_max = True
             label2annot.inputs.copy_inputs = True
@@ -131,7 +132,8 @@ def create_ba_maps_wf(config):
                                                     ('brainmask', 'brainmask'),
                                                     ('aseg', 'aseg'),
                                                     ('wm', 'wm'),
-                                                    ('ribbon', 'ribbon')])])
+                                                    ('ribbon', 'ribbon'),
+                                                    ('color_table', 'color_table')])])
 
 
     return ba_WF
