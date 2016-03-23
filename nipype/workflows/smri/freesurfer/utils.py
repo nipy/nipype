@@ -383,12 +383,12 @@ def copy_files(in_files, out_files):
     import shutil
     import sys
     if len(in_files) != len(out_files):
-        print "ERROR: Length of input files must be identical to the length of \
-        outrput files to be copied"
+        print("ERROR: Length of input files must be identical to the length of " +
+              "outrput files to be copied")
         sys.exit(-1)
     for i, in_file in enumerate(in_files):
         out_file = out_files[i]
-        print "copying %s to %s" % (in_file, out_file)
+        print("copying {0} to {1}".format(in_file, out_file))
         shutil.copy(in_file, out_file)
     return out_files
 
@@ -405,7 +405,7 @@ def copy_file(in_file, out_file=None):
         in_file = in_file[0]
     out_file = os.path.abspath(out_file)
     in_file = os.path.abspath(in_file)
-    print "copying %s to %s" % (in_file, out_file)
+    print("copying {0} to {1}".format(in_file, out_file))
     shutil.copy(in_file, out_file)
     return out_file
 
