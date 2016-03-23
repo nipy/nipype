@@ -62,42 +62,6 @@ like ``nipype-x.y.tar.gz``, then unpack the tarball, change into the
 
 **Note:** Depending on permissions you may need to use ``sudo``.
 
-Testing the install
--------------------
-
-The best way to test the install is to run the test suite.  If you have
-nose_ installed, then do the following::
-
-    python -c "import nipype; nipype.test()"
-
-you can also test with nosetests::
-
-    nosetests --with-doctest /software/nipy-repo/masternipype/nipype
-    --exclude=external --exclude=testing
-
-All tests should pass (unless you're missing a dependency). If SUBJECTS_DIR
-variable is not set some FreeSurfer related tests will fail. If any tests
-fail, please report them on our `bug tracker
-<http://github.com/nipy/nipype/issues>`_.
-
-On Debian systems, set the following environment variable before running
-tests::
-
-       export MATLABCMD=$pathtomatlabdir/bin/$platform/MATLAB
-
-where, $pathtomatlabdir is the path to your matlab installation and
-$platform is the directory referring to x86 or x64 installations
-(typically glnxa64 on 64-bit installations).
-
-Avoiding any MATLAB calls from testing
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-On unix systems, set an empty environment variable::
-
-    export NIPYPE_NO_MATLAB=
-
-This will skip any tests that require matlab.
-
 Dependencies
 ------------
 
