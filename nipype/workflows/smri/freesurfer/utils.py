@@ -448,7 +448,7 @@ def getdefaultconfig():
             '{0}.average.curvature.filled.buckner40.tif'.format(hemi))
         config['{0}_classifier'.format(hemi)] = os.path.join(
             config['fs_home'], 'average',
-            'rh.curvature.buckner40.filled.desikan_killiany.2010-03-25.gcs'.format(hemi))
+            '{0}.curvature.buckner40.filled.desikan_killiany.2010-03-25.gcs'.format(hemi))
         config['{0}_classifier2'.format(hemi)] = os.path.join(
             config['fs_home'], 'average',
             '{0}.destrieux.simple.2009-07-29.gcs'.format(hemi))

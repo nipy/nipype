@@ -467,7 +467,7 @@ def create_AutoRecon3(name="AutoRecon3", qcache=False, plugin_args=None):
         hemiwf2.connect([(hemi_inputspec2, contrast, [('orig_mgz', 'orig'),
                                                       ('rawavg', 'rawavg'),
                                                       ('{0}_white'.format(hemisphere), 'white'),
-                                                      ('cortex_label'.format(hemisphere), 'cortex'),
+                                                      ('cortex_label', 'cortex'),
                                                       ('aparc_annot', 'annotation'),
                                                       ('thickness', 'thickness'),
                                                       ]),

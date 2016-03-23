@@ -345,7 +345,7 @@ def create_AutoRecon1(name="AutoRecon1", longitudinal=False, field_strength='1.5
             """
             import subprocess
             import os
-            command = ['awk', '-f', awk_file, log_file]
+            command = ['awk', '-f', in_file, log_file]
             print(''.join(command))
             subprocess.call(command)
             log_file = os.path.abspath(log_file)
@@ -405,7 +405,6 @@ def create_AutoRecon1(name="AutoRecon1", longitudinal=False, field_strength='1.5
                                                    ['out_file'],
                                                    copy_file),
                                           name='Copy_Template_Brainmask')
-        #TODO: Change this to inputspec
         copy_template_brainmask.inputs.out_file = 'brainmask_{0}.mgz'.format(config['long_template'])
         
         ar1_wf.connect([(inputspec, copy_template_brainmask, [('template_brainmask', 'in_file')])])
