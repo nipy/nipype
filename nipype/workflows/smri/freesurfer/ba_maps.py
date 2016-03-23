@@ -27,7 +27,7 @@ def create_ba_maps_wf():
               'src_subject_dir',
               'color_table']
     
-    inputSpec = pe.Node(IdentityInterface(fields=inputs),
+    inputspec = pe.Node(IdentityInterface(fields=inputs),
                         name="inputspec")
 
     ba_WF = pe.Workflow(name="Brodmann_Area_Maps")
@@ -85,7 +85,7 @@ def create_ba_maps_wf():
             ba_WF.connect([(merge_labels, node, [('out', 'source_label')]),
                            (source_subject, node, [('sphere_reg', 'source_sphere_reg'),
                                                    ('white', 'source_white')]),
-                           (inputspec, node, [('source_subject_id', 'source_subject')])])
+                           (inputspec, node, [('src_subject_id', 'source_subject')])])
             
             label2annot = pe.Node(Label2Annot(), name=node_name + '_2_Annot')
             label2annot.inputs.hemisphere = hemisphere
@@ -114,15 +114,16 @@ def create_ba_maps_wf():
                                                           '{0}_table'.format(hemisphere))])])
 
 
-            ba_WF.connect([(inputSpec, node, [('{0}_sphere_reg'.format(hemisphere),
+            ba_WF.connect([(inputspec, node, [('{0}_sphere_reg'.format(hemisphere),
                                                'sphere_reg'),
                                               ('{0}_white'.format(hemisphere), 'white'),
                                               ]),
                            (node, label2annot, [('out_file', 'in_labels')]),
-                           (inputSpec, label2annot, [('{0}_orig'.format(hemisphere), 'orig')]),
+                           (inputspec, label2annot, [('{0}_orig'.format(hemisphere), 'orig'),
+                                                     ('color_table', 'color_table')]),
                            (label2annot, stats_node,
                             [('out_file', 'in_annotation')]),
-                           (inputSpec, stats_node, [('{0}_thickness'.format(hemisphere), 
+                           (inputspec, stats_node, [('{0}_thickness'.format(hemisphere), 
                                                      'thickness'),
                                                     ('lh_white', 'lh_white'),
                                                     ('rh_white', 'rh_white'),
@@ -132,8 +133,7 @@ def create_ba_maps_wf():
                                                     ('brainmask', 'brainmask'),
                                                     ('aseg', 'aseg'),
                                                     ('wm', 'wm'),
-                                                    ('ribbon', 'ribbon'),
-                                                    ('color_table', 'color_table')])])
+                                                    ('ribbon', 'ribbon')])])
 
 
     return ba_WF

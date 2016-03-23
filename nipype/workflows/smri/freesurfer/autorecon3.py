@@ -57,7 +57,8 @@ def create_AutoRecon3(name="AutoRecon3", qcache=False, plugin_args=None):
                                                   'wm_lookup_table',
                                                   'src_subject_id',
                                                   'src_subject_dir',
-                                                  'color_table']),
+                                                  'color_table',
+                                                  'num_threads']),
                          name='inputspec')
 
 
@@ -78,7 +79,8 @@ def create_AutoRecon3(name="AutoRecon3", qcache=False, plugin_args=None):
                                                             'area',
                                                             'curv',
                                                             'classifier',
-                                                            'atlas']),
+                                                            'atlas',
+                                                            'num_threads']),
                                   name="inputspec")
 
         # Spherical Inflation
@@ -207,24 +209,25 @@ def create_AutoRecon3(name="AutoRecon3", qcache=False, plugin_args=None):
 
         # Connect the inputs
         ar3_wf.connect([(inputspec, hemi_wf, [('{0}_inflated'.format(hemisphere), 'inputspec.inflated'),
-                                                ('{0}_smoothwm'.format(hemisphere),
-                                                 'inputspec.smoothwm'),
-                                                ('{0}_white'.format(hemisphere), 'inputspec.white'),
-                                                ('{0}_cortex_label'.format(hemisphere),
-                                                 'inputspec.cortex_label'),
-                                                ('{0}_orig'.format(hemisphere), 'inputspec.orig'),
-                                                ('{0}_sulc'.format(hemisphere), 'inputspec.sulc'),
-                                                ('{0}_area'.format(hemisphere), 'inputspec.area'),
-                                                ('{0}_curv'.format(hemisphere), 'inputspec.curv'),
-                                                ('aseg_presurf',
-                                                 'inputspec.aseg_presurf'),
-                                                ('brain_finalsurfs',
-                                                 'inputspec.brain_finalsurfs'),
-                                                ('wm', 'inputspec.wm'),
-                                                ('filled', 'inputspec.filled'),
-                                                ('{0}_atlas'.format(hemisphere), 'inputspec.atlas'),
-                                                ('{0}_classifier1'.format(hemisphere),
-                                                 'inputspec.classifier')
+                                              ('{0}_smoothwm'.format(hemisphere),
+                                               'inputspec.smoothwm'),
+                                              ('{0}_white'.format(hemisphere), 'inputspec.white'),
+                                              ('{0}_cortex_label'.format(hemisphere),
+                                               'inputspec.cortex_label'),
+                                              ('{0}_orig'.format(hemisphere), 'inputspec.orig'),
+                                              ('{0}_sulc'.format(hemisphere), 'inputspec.sulc'),
+                                              ('{0}_area'.format(hemisphere), 'inputspec.area'),
+                                              ('{0}_curv'.format(hemisphere), 'inputspec.curv'),
+                                              ('aseg_presurf',
+                                               'inputspec.aseg_presurf'),
+                                              ('brain_finalsurfs',
+                                               'inputspec.brain_finalsurfs'),
+                                              ('wm', 'inputspec.wm'),
+                                              ('filled', 'inputspec.filled'),
+                                              ('{0}_atlas'.format(hemisphere), 'inputspec.atlas'),
+                                              ('{0}_classifier1'.format(hemisphere),
+                                               'inputspec.classifier'),
+                                              ('num_threads', 'inputspec.num_threads')
                                                 ])
                         ])
 
@@ -512,8 +515,8 @@ def create_AutoRecon3(name="AutoRecon3", qcache=False, plugin_args=None):
                                               ('rawavg', 'inputspec.rawavg'),
                                               ('{0}_curv'.format(hemisphere), 'inputspec.curv'),
                                               ('{0}_sulc'.format(hemisphere), 'inputspec.sulc'),
-                                              ('{0}_classifier2'.format(hemisphere), 'classifier2'),
-                                              ('{0}_classifier3'.format(hemisphere), 'classifier3'),
+                                              ('{0}_classifier2'.format(hemisphere), 'inputspec.classifier2'),
+                                              ('{0}_classifier3'.format(hemisphere), 'inputspec.classifier3'),
                                            ]),
                         (ar3_lh_wf1, hemiwf2, [('outputspec.pial', 'inputspec.lh_pial')]),
                         (ar3_rh_wf1, hemiwf2, [('outputspec.pial', 'inputspec.rh_pial')]),
@@ -709,7 +712,7 @@ def create_AutoRecon3(name="AutoRecon3", qcache=False, plugin_args=None):
                                         ('rh_orig', 'inputspec.rh_orig'),
                                         ('src_subject_dir', 'inputspec.src_subject_dir'),
                                         ('src_subject_id', 'inputspec.src_subject_id'),
-                                        ('color_table', 'color_table'),
+                                        ('color_table', 'inputspec.color_table'),
                                     ]),
                     (volume_mask, ba_WF, [('out_ribbon', 'inputspec.ribbon')])
                 ])

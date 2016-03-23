@@ -144,7 +144,7 @@ def create_reconall_workflow(name="ReconAll", plugin_args=None):
     # connect inputs for AutoRecon1
     reconall.connect([(inputspec, ar1_wf, [('T1_files', 'inputspec.T1_files'),
                                            ('T2_file', 'inputspec.T2_file'),
-                                           ('FLAIR_file' 'inputspec.FLAIR_file'),
+                                           ('FLAIR_file', 'inputspec.FLAIR_file'),
                                            ('num_threads', 'inputspec.num_threads'),
                                            ('cw256', 'inputspec.cw256'),
                                            ('reg_template_withskull', 'inputspec.reg_template_withskull')])])
@@ -152,28 +152,28 @@ def create_reconall_workflow(name="ReconAll", plugin_args=None):
     # create AutoRecon2
     ar2_wf, ar2_outputs = create_AutoRecon2(plugin_args=plugin_args)
     # connect inputs for AutoRecon2
-    reconall.connect([(inputspec, ar2_wf, [('num_threads', 'num_threads'),
-                                           ('reg_template', 'reg_template'),
-                                           ('reg_template_withskull', 'reg_template_withskull')]),
+    reconall.connect([(inputspec, ar2_wf, [('num_threads', 'inputspec.num_threads'),
+                                           ('reg_template', 'inputspec.reg_template'),
+                                           ('reg_template_withskull', 'inputspec.reg_template_withskull')]),
                       (ar1_wf, ar2_wf, [('outputspec.brainmask', 'inputspec.brainmask'),
                                         ('outputspec.talairach', 'inputspec.transform'),
                                         ('outputspec.orig', 'inputspec.orig')])])
     # create AutoRecon3
     ar3_wf, ar3_outputs = create_AutoRecon3(plugin_args=plugin_args)
     # connect inputs for AutoRecon3
-    reconall.connect([(inputspec, ar3_wf, [('lh_atlas', 'lh_atlas'),
-                                           ('rh_atlas', 'rh_atlas'),
+    reconall.connect([(inputspec, ar3_wf, [('lh_atlas', 'inputspec.lh_atlas'),
+                                           ('rh_atlas', 'inputspec.rh_atlas'),
                                            ('lh_classifier1', 'inputspec.lh_classifier1'),
                                            ('rh_classifier1', 'inputspec.rh_classifier1'),
                                            ('lh_classifier2', 'inputspec.lh_classifier2'),
                                            ('rh_classifier2', 'inputspec.rh_classifier2'),
                                            ('lh_classifier3', 'inputspec.lh_classifier3'),
                                            ('rh_classifier3', 'inputspec.rh_classifier3'),
-                                           ('lookup_table', 'lookup_table'),
-                                           ('wm_lookup_table', 'wm_lookup_table'),
-                                           ('src_subject_dir', 'src_subject_dir')
-                                           ('src_subject_id', 'src_subject_id'),
-                                           ('color_table', 'color_table')])
+                                           ('lookup_table', 'inputspec.lookup_table'),
+                                           ('wm_lookup_table', 'inputspec.wm_lookup_table'),
+                                           ('src_subject_dir', 'inputspec.src_subject_dir'),
+                                           ('src_subject_id', 'inputspec.src_subject_id'),
+                                           ('color_table', 'inputspec.color_table')]),
                       (ar1_wf, ar3_wf, [('outputspec.brainmask', 'inputspec.brainmask'),
                                         ('outputspec.talairach', 'inputspec.transform'),
                                         ('outputspec.orig', 'inputspec.orig_mgz'),
@@ -226,10 +226,11 @@ def create_reconall_workflow(name="ReconAll", plugin_args=None):
 
     # get the filepath to where the transform will be datasinked
     def getDSTransformPath(subjects_dir, subject_id):
+        import os
         transform = os.path.join(subjects_dir, subject_id, 'mri', 'transforms',
                                   'talairach.xfm')
         return transform
-    dstransform = pe.Node(Function(['subjects_dir', 'subject_id'],
+    dstransform = pe.Node(niu.Function(['subjects_dir', 'subject_id'],
                                    ['transform'],
                                    getDSTransformPath),
                           name="PreDataSink_GetTransformPath")
@@ -239,42 +240,26 @@ def create_reconall_workflow(name="ReconAll", plugin_args=None):
     predatasink_orig = pe.Node(AddXFormToHeader(), name="PreDataSink_Orig")
     predatasink_orig.inputs.copy_name = True
     predatasink_orig.inputs.out_file = 'orig.mgz'
-    predatasink_orig.inputs.transform = datasinked_transform
     reconall.connect([(outputspec, predatasink_orig, [('orig', 'in_file')]),
                       (dstransform, predatasink_orig, [('transform', 'transform')])])
     predatasink_orig_nu = pe.Node(AddXFormToHeader(), name="PreDataSink_Orig_Nu")
     predatasink_orig_nu.inputs.copy_name = True
     predatasink_orig_nu.inputs.out_file = 'orig_nu.mgz'
-    predatasink_orig_nu.inputs.transform = datasinked_transform
     reconall.connect([(outputspec, predatasink_orig_nu, [('orig_nu', 'in_file')]),
                       (dstransform, predatasink_orig_nu, [('transform', 'transform')])])
     predatasink_nu = pe.Node(AddXFormToHeader(), name="PreDataSink_Nu")
     predatasink_nu.inputs.copy_name = True
     predatasink_nu.inputs.out_file = 'nu.mgz'
-    predatasink_nu.inputs.transform = datasinked_transform
     reconall.connect([(outputspec, predatasink_nu, [('nu', 'in_file')]),
                       (dstransform, predatasink_nu, [('transform', 'transform')])])
 
     
     # Datasink outputs
     datasink = pe.Node(DataSink(), name="DataSink")
-
-    # substitutions
-    def getsubs(in_files):
-        subs = list()
-        for i in range(len(in_files)):
-            subs.append(("_T1_prep{0}".format(i), ""))
-        return subs
-
-    subs = pe.Node(Function(['in_files'],
-                            ['subs'],
-                            getsubs),
-                   name="DataSinkSubstitutions")
+    datasink.inputs.parameterization = False
     
-    reconall.connect([(inputspec, subs, [('T1_files', 'in_files')])),
-                      (subs, datasink, [('subs', 'substitutions')]),
-                      (inputspec, datasink, [('subjects_dir', 'base_directory'),
-                                             ('subject_id', 'container')])
+    reconall.connect([(inputspec, datasink, [('subjects_dir', 'base_directory'),
+                                             ('subject_id', 'container')])])
 
     # assign datasink inputs
     reconall.connect([(predatasink_orig, datasink, [('out_file', 'mri.@orig')]),
@@ -404,9 +389,9 @@ def create_reconall_workflow(name="ReconAll", plugin_args=None):
                       ])
 
     #### Workflow additions go here
-    if config['recoding_file']:
+    if defaultconfig['recoding_file']:
         from utils import create_recoding_wf
-        recode = create_recoding_wf(config['recoding_file'])
+        recode = create_recoding_wf(defaultconfig['recoding_file'])
         reconall.connect([(ar3_wf, recode, [('outputspec.aseg', 'inputspec.labelmap')]),
                           (recode, outputspec, [('outputspec.recodedlabelmap', 'recoded_labelmap')])])
         

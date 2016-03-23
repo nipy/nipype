@@ -434,8 +434,8 @@ def getdefaultconfig():
                'recoding_file' : None,
                'src_subject_id' : 'fsaverage'}
 
-    config['source_subject_dir'] = os.path.join(config['fs_home'], 'subjects',
-                                                config['src_subject_id'])
+    config['src_subject_dir'] = os.path.join(config['fs_home'], 'subjects',
+                                             config['src_subject_id'])
     config['awk_file'] = os.path.join(config['fs_home'], 'bin',
                                       'extract_talairach_avi_QA.awk')
     config['registration_template'] = os.path.join(config['fs_home'], 'average',

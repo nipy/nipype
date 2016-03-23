@@ -4,13 +4,16 @@ import nipype
 from nipype.interfaces.utility import Function,IdentityInterface
 import nipype.pipeline.engine as pe  # pypeline engine
 from nipype.interfaces.freesurfer import *
-from utils import copy_file, copy_files, awkfile
+from utils import copy_file, copy_files
 
 def checkT1s(T1_files, cw256=False):
     """Verifying size of inputs and setting workflow parameters"""
     import SimpleITK as sitk
     import os
     import sys
+    # check that the files are in a list
+    if not type(T1_files) == list:
+        T1_files = [T1_files]
     if len(T1_files) == 0:
         print("ERROR: No T1's Given")
         sys.exit(-1)
@@ -66,20 +69,20 @@ def create_AutoRecon1(name="AutoRecon1", longitudinal=False, field_strength='1.5
     ar1_wf = pe.Workflow(name=name)
     inputspec = pe.Node(interface=IdentityInterface(fields=['T1_files',
                                                             'T2_file',
-                                                            'in_flair',
+                                                            'FLAIR_file',
                                                             'cw256',
                                                             'num_threads',
-                                                            'skulltemplate']),
+                                                            'reg_template_withskull']),
                         run_without_submitting=True,
                         name='inputspec')
 
     if not longitudinal:
         # single session processing
-        verify_inputs = pe.Node(Function(infields=["T1_files", "cw256"],
-                                         outfields=["T1_files", "cw256", "resample_type", "origvol_names"],
-                                         checkT1s)
-                                name="Check_T1s"),
-        ar1_wf.conncet([(inputspec, verify_inputs, [('T1_files', 'T1_files'),
+        verify_inputs = pe.Node(Function(["T1_files", "cw256"],
+                                         ["T1_files", "cw256", "resample_type", "origvol_names"],
+                                         checkT1s),
+                                name="Check_T1s")
+        ar1_wf.connect([(inputspec, verify_inputs, [('T1_files', 'T1_files'),
                                                     ('cw256', 'cw256')])])
 
 
@@ -93,11 +96,11 @@ def create_AutoRecon1(name="AutoRecon1", longitudinal=False, field_strength='1.5
                                                                ('origvol_names', 'out_file')]),
                         ])
 
-        def convert_modalities(in_file, out_file):
+        def convert_modalities(in_file=None, out_file=None):
             """Returns an undefined output if the in_file is not defined"""
-            from nipype.interfaces.base import isdefined
             from nipype.interfaces.freesurfer import MRIConvert
-            if isdefined(in_file):
+            import os
+            if in_file:
                 convert = MRIConvert()
                 convert.inputs.in_file = in_file
                 convert.inputs.out_file = out_file
@@ -116,9 +119,9 @@ def create_AutoRecon1(name="AutoRecon1", longitudinal=False, field_strength='1.5
         FLAIR_convert = pe.Node(Function(['in_file', 'out_file'],
                                          ['out_file'],
                                          convert_modalities),
-                                name="T2_Convert")
+                                name="FLAIR_Convert")
         FLAIR_convert.inputs.out_file = 'FLAIRraw.mgz'
-        ar1_wf.connect([(inputspec, FLAIR_convert, [('in_flair', 'in_file')])])        
+        ar1_wf.connect([(inputspec, FLAIR_convert, [('FLAIR_file', 'in_file')])])        
     else:
         # longitudinal inputs
         inputspec = pe.Node(interface=IdentityInterface(fields=['T1_files',
@@ -144,7 +147,7 @@ def create_AutoRecon1(name="AutoRecon1", longitudinal=False, field_strength='1.5
             return iscale_names, lta_names
 
         filenames = pe.Node(Function(['T1_files'],
-                                     ['iscale_names', 'lta_names']
+                                     ['iscale_names', 'lta_names'],
                                      output_names),
                             name="Longitudinal_Filenames")
         ar1_wf.connect([(inputspec, filenames, [('T1_files', 'T1_files')])])
@@ -180,11 +183,13 @@ def create_AutoRecon1(name="AutoRecon1", longitudinal=False, field_strength='1.5
     """
 
     def createTemplate(in_files, out_file):
-        if len(in_files) == 1 and not longitudinal:
-            print("WARNING: only one run found. This is OK, but motion correction" +
-                  "cannot be performed on one run, so I'll copy the run to rawavg" +
+        import os
+        import shutil
+        if len(in_files) == 1:
+            print("WARNING: only one run found. This is OK, but motion correction " +
+                  "cannot be performed on one run, so I'll copy the run to rawavg " +
                   "and continue.")
-            copy_file(in_files[0], out_file)
+            shutil.copyfile(in_files[0], out_file)
             intensity_scales = None
             transforms = None
         else:
@@ -193,6 +198,7 @@ def create_AutoRecon1(name="AutoRecon1", longitudinal=False, field_strength='1.5
             intensity_scales = [os.path.basename(f.replace('.mgz', '-iscale.txt')) for f in in_files]
             transforms = [os.path.basename(f.replace('.mgz', '.lta')) for f in in_files]
             robtemp = RobustTemplate()
+            robtemp.inputs.in_files = in_files
             robtemp.inputs.average_metric = 'median'
             robtemp.inputs.out_file = out_file
             robtemp.inputs.no_iteration = True
@@ -385,7 +391,7 @@ def create_AutoRecon1(name="AutoRecon1", longitudinal=False, field_strength='1.5
             
         ar1_wf.connect([(add_xform_to_orig_nu, mri_em_register, [('out_file', 'in_file')]),
                         (inputspec, mri_em_register, [('num_threads', 'num_threads'),
-                                                      ('skulltemplate', 'template')])])
+                                                      ('reg_template_withskull', 'template')])])
 
         brainmask = pe.Node(WatershedSkullStrip(),
                             name='Watershed_Skull_Strip')
@@ -393,7 +399,7 @@ def create_AutoRecon1(name="AutoRecon1", longitudinal=False, field_strength='1.5
         brainmask.inputs.out_file = 'brainmask.auto.mgz'
         ar1_wf.connect([(mri_normalize, brainmask, [('out_file', 'in_file')]),
                         (mri_em_register, brainmask, [('out_file', 'transform')]),
-                        (inputspec, brainmask, [('skulltemplate', 'brain_atlas')])])
+                        (inputspec, brainmask, [('reg_template_withskull', 'brain_atlas')])])
     else:
         copy_template_brainmask = pe.Node(Function(['in_file', 'out_file'],
                                                    ['out_file'],

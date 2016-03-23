@@ -128,7 +128,7 @@ def create_AutoRecon2(name="AutoRecon2", longitudinal=False,
 
     ar2_wf.connect([(align_transform, ca_normalize, [('out_file', 'transform')]),
                     (inputspec, ca_normalize, [('brainmask', 'mask'),
-                                               ('reg_template', 'template')]),
+                                               ('reg_template', 'atlas')]),
                     (add_to_header_nu, ca_normalize, [('out_file', 'in_file')])])
 
     # CA Register
@@ -160,7 +160,7 @@ def create_AutoRecon2(name="AutoRecon2", longitudinal=False,
     remove_neck.inputs.out_file = 'nu_noneck.mgz'
     ar2_wf.connect([(ca_register, remove_neck, [('out_file', 'transform')]),
                     (add_to_header_nu, remove_neck, [('out_file', 'in_file')]),
-                    (inputspec, remove_neck, [('reg_template', 'template')]))])
+                    (inputspec, remove_neck, [('reg_template', 'template')])])
 
     # SkullLTA (EM Registration, with Skull)
     # Computes transform to align volume mri/nu_noneck.mgz with GCA volume
@@ -339,7 +339,8 @@ def create_AutoRecon2(name="AutoRecon2", longitudinal=False,
                                                            'aseg',
                                                            't1',
                                                            'wm',
-                                                           'brain']),
+                                                           'brain',
+                                                           'num_threads']),
                                  name="inputspec")
             
         if longitudinal:
@@ -475,7 +476,7 @@ def create_AutoRecon2(name="AutoRecon2", longitudinal=False,
             if plugin_args:
                 qsphere.plugin_args = plugin_args
             hemi_wf.connect([(inflate1, qsphere, [('out_file', 'in_file')]),
-                             (inputspec, qsphere, [('num_threads', 'num_threads')])])
+                             (hemi_inputspec, qsphere, [('num_threads', 'num_threads')])])
 
             # Automatic Topology Fixer
             """
@@ -607,7 +608,8 @@ def create_AutoRecon2(name="AutoRecon2", longitudinal=False,
                         (copy_cc, hemi_wf, [('out_file', 'inputspec.aseg')]),
                         (mri_mask, hemi_wf, [('out_file', 'inputspec.t1')]),
                         (pretess, hemi_wf, [('out_file', 'inputspec.wm')]),
-                        (normalization2, hemi_wf, [('out_file', 'inputspec.brain')])])
+                        (normalization2, hemi_wf, [('out_file', 'inputspec.brain')]),
+                        (inputspec, hemi_wf, [('num_threads', 'inputspec.num_threads')])])
 
         # Outputs for hemisphere workflow
         hemi_outputs=['orig_nofix',
