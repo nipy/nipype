@@ -424,10 +424,10 @@ def main(**extra_args):
           # python -- duplicating things into MANIFEST.in but this is admittedly
           # only a workaround to get things started -- not a solution
           package_data={'nipype':
-                        [pjoin('testing', 'data', '*'),
-                         pjoin('testing', 'data', 'dicomdir', '*'),
+                        [pjoin('testing', 'data', 'dicomdir', '*'),
                          pjoin('testing', 'data', 'bedpostxout', '*'),
                          pjoin('testing', 'data', 'tbss_dir', '*'),
+                         pjoin('testing', 'data', '*'),
                          pjoin('workflows', 'data', '*'),
                          pjoin('pipeline', 'engine', 'report_template.html'),
                          pjoin('external', 'd3.js'),
