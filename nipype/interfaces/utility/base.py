@@ -156,10 +156,8 @@ class Merge(IOBase):
                 else:
                     out.append(value)
         else:
-            for i in range(len(filename_to_list(values[0]))):
-                out.insert(i, [])
-                for value in values:
-                    out[i].append(filename_to_list(value)[i])
+            lists = [filename_to_list(val) for val in values]
+            out = [[val[i] for val in lists] for i in range(len(lists[0]))]
         if out:
             outputs['out'] = out
         return outputs
