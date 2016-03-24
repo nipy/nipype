@@ -2,7 +2,7 @@
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """Top-level namespace for freesurfer."""
 
-from .base import Info, FSCommand
+from .base import Info, FSCommand, no_freesurfer
 from .preprocess import (ParseDICOMDir, UnpackSDICOMDir, MRIConvert, Resample,
                          ReconAll, BBRegister, ApplyVolTransform, Smooth,
                          DICOMConvert, RobustRegister, FitMSParams,

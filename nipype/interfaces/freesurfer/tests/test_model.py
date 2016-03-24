@@ -7,10 +7,11 @@ import shutil
 import numpy as np
 import nibabel as nib
 
-from nipype.testing import assert_equal
-from nipype.interfaces.freesurfer import model
+from nipype.testing import assert_equal, skipif
+from nipype.interfaces.freesurfer import model, no_freesurfer
 
 
+@skipif(no_freesurfer)
 def test_concatenate():
     tmp_dir = tempfile.mkdtemp()
     cwd = os.getcwd()
