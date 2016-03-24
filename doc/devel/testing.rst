@@ -31,4 +31,6 @@ On unix systems, set an empty environment variable::
 
     export NIPYPE_NO_MATLAB=
 
-This will skip any tests that require matlab.
+This will skip any tests that require MATLAB.
+
+.. include:: ../links_names.txt
