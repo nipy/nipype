@@ -100,18 +100,20 @@ def log_to_dict(logfile):
 def calculate_resources(events, resource):
     res = OrderedDict()
     for event in events:
-        all_res = 0
+        all_res = 0.0
         if event['type'] == "start":
-            all_res += int(float(event[resource]))
+            if resource in event and event[resource] != 'Unkown':
+                all_res += float(event[resource])
             current_time = event['start'];
         elif event['type'] == "finish":
-            all_res+= int(float(event[resource]))
+            if resource in event and event[resource] != 'Unkown':
+                all_res+= float(event[resource])
             current_time = event['finish'];
-
         res[current_time] = all_res
 
     timestamps = [dateutil.parser.parse(ts) for ts in res.keys()]
-    time_series = pd.Series(res.values(), timestamps)
+    time_series = pd.Series(data=res.values(), index=timestamps)
+    #TODO: pandas is removing all data values somewhere here
     interp_seq = pd.date_range(time_series.index[0], time_series.index[-1], freq='S')
     interp_time_series = time_series.reindex(interp_seq)
     interp_time_series = interp_time_series.fillna(method='ffill')
@@ -164,7 +166,9 @@ def draw_nodes(start, nodes, cores, minute_scale, space_between_minutes, colors)
                                                  node_finish.second)
 
                 break
-        color = random.choice(colors)  
+        color = random.choice(colors) 
+        if 'error' in node:
+            color = 'red'
         n_start = node['start'].strftime("%Y-%m-%d %H:%M:%S")
         n_finish = node['finish'].strftime("%Y-%m-%d %H:%M:%S")
         n_dur = node['duration']/60
@@ -173,12 +177,14 @@ def draw_nodes(start, nodes, cores, minute_scale, space_between_minutes, colors)
 
     return result
 
-def draw_thread_bar(threads,space_between_minutes, minute_scale):
+def draw_thread_bar(threads,space_between_minutes, minute_scale, color):
     result = "<p class='time' style='top:198px;left:900px;'>Threads</p>"
 
     scale = float(space_between_minutes/float(minute_scale))
     space_between_minutes = float(space_between_minutes/60.0)
+
     for i in range(len(threads)):
+        #print threads[i]
         width = threads[i] * 10
         t = (float(i*scale*minute_scale)/60.0) + 220
         bar = "<div class='bar' style='height:"+ str(space_between_minutes) + "px;width:"+ str(width) +"px;left:900px;top:"+str(t)+"px'></div>"
@@ -186,7 +192,7 @@ def draw_thread_bar(threads,space_between_minutes, minute_scale):
 
     return result
 
-def draw_memory_bar(memory, space_between_minutes, minute_scale):
+def draw_memory_bar(memory, space_between_minutes, minute_scale, color):
     result = "<p class='time' style='top:198px;left:1200px;'>Memory</p>"
 
     scale = float(space_between_minutes/float(minute_scale))
@@ -195,7 +201,7 @@ def draw_memory_bar(memory, space_between_minutes, minute_scale):
     for i in range(len(memory)):
         width = memory[i] * 10
         t = (float(i*scale*minute_scale)/60.0) + 220
-        bar = "<div class='bar' style='height:"+ str(space_between_minutes) + "px;width:"+ str(width) +"px;left:1200px;top:"+str(t)+"px'></div>"
+        bar = "<div class='bar' style='background-color:"+color+";height:"+ str(space_between_minutes) + "px;width:"+ str(width) +"px;left:1200px;top:"+str(t)+"px'></div>"
         result += bar
 
     return result
@@ -265,8 +271,8 @@ def generate_gantt_chart(logfile, cores, minute_scale=10,
 
             .bar{
                 position: absolute;
-                background-color: #80E680;
                 height: 1px;
+                opacity: 0.7;
             }
 
             .dot{
@@ -296,11 +302,19 @@ def generate_gantt_chart(logfile, cores, minute_scale=10,
     html_string += draw_nodes(start, result, cores, minute_scale,space_between_minutes, colors)
 
     result = log_to_events(logfile)
-    threads = calculate_resources(result, 'num_threads')
-    html_string += draw_thread_bar(threads, space_between_minutes, minute_scale)
 
-    memory = calculate_resources(result, 'estimated_memory_gb')
-    html_string += draw_memory_bar(memory, space_between_minutes, minute_scale)
+    #threads_estimated = calculate_resources(result, 'num_threads')
+    #html_string += draw_thread_bar(threads_estimated, space_between_minutes, minute_scale, '#90BBD7')
+    
+    #threads_real = calculate_resources(result, 'runtime_threads')
+    #html_string += draw_thread_bar(threads_real, space_between_minutes, minute_scale, '#03969D')
+
+
+    #memory_estimated = calculate_resources(result, 'estimated_memory_gb')
+    #html_string += draw_memory_bar(memory_estimated, space_between_minutes, minute_scale, '#90BBD7')
+
+    memory_real = calculate_resources(result, 'runtime_memory_gb')
+    html_string += draw_memory_bar(memory_real, space_between_minutes, minute_scale, '#03969D')
 
 
     #finish html
@@ -312,3 +326,6 @@ def generate_gantt_chart(logfile, cores, minute_scale=10,
     html_file = open(logfile +'.html', 'wb')
     html_file.write(html_string)
     html_file.close()
+
+
+generate_gantt_chart('/home/caroline/Downloads/callback_0051472.log',8)
