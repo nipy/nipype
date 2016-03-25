@@ -12,5 +12,6 @@ from .preprocess import (To3D, Refit, Resample, TStat, Automask, Volreg, Merge,
                          LFCD, Copy, Fourier, Allineate, Maskave, SkullStrip, TCat,
                          Fim, BlurInMask, Autobox, TCorrMap, Bandpass, Retroicor,
                          TCorrelate, TCorr1D, BrickStat, ROIStats, AutoTcorrelate,
-                         AFNItoNIFTI, Eval, Means, Hist, FWHMx)
+                         AFNItoNIFTI, Eval, Means, Hist, FWHMx, OutlierCount,
+                         QualityIndex)
 from .svm import (SVMTest, SVMTrain)
