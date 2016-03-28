@@ -55,7 +55,7 @@ def copy2subjdir(cls, in_file, folder=None, basename=None, subject_id=None):
     out_file = os.path.join(out_dir, basename)
     if not os.path.isfile(out_file):
         shutil.copy(in_file, out_file)
-
+    return out_file
 
 def createoutputdirs(outputs):
     """create an output directories. If not created, some freesurfer interfaces fail"""
@@ -1569,13 +1569,12 @@ class MRIFillInputSpec(FSTraitedSpec):
                         desc="Input segmentation file for MRIFill")
     transform = File(argstr="-xform %s", mandatory=False, exists=True,
                      desc="Input transform file for MRIFill")
-    log_file = File(argstr="-a %s", mandatory=False, exists=False,
-                    desc="Input segmentation file for MRIFill")
+    log_file = File(argstr="-a %s", desc="Output log file for MRIFill")
 
 
 class MRIFillOutputSpec(TraitedSpec):
     out_file = File(exists=False, desc="Output file from MRIFill")
-
+    log_file = File(desc="Output log file from MRIFill")
 
 class MRIFill(FSCommand):
     """
@@ -1599,6 +1598,8 @@ class MRIFill(FSCommand):
     def _list_outputs(self):
         outputs = self._outputs().get()
         outputs["out_file"] = os.path.abspath(self.inputs.out_file)
+        if isdefined(self.inputs.log_file):
+            outputs["log_file"] = os.path.abspath(self.inputs.log_file)
         return outputs
 
 
@@ -1760,9 +1761,11 @@ class FixTopology(FSCommand):
                 inputs['subjects_dir'] = self.inputs.subjects_dir
             hemi = self.inputs.hemisphere
             copy2subjdir(self, self.inputs.sphere, folder='surf')
-            copy2subjdir(self, self.inputs.in_orig,
-                         folder='surf',
-                         basename='{0}.orig'.format(hemi))
+            # the orig file is edited in place
+            self.inputs.in_orig = copy2subjdir(self,
+                                               self.inputs.in_orig,
+                                               folder='surf',
+                                               basename='{0}.orig'.format(hemi))
             copy2subjdir(self, self.inputs.in_inflated,
                          folder='surf',
                          basename='{0}.inflated'.format(hemi))
