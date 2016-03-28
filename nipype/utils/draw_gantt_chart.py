@@ -10,34 +10,73 @@ from dateutil import parser
 import datetime
 import random
 import pandas as pd
-import dateutil
 from collections import OrderedDict
 
 
-def log_to_events(logfile):
-    events = []
-    with open(logfile, 'r') as content:
-        #read file separating each line
-        content = content.read()
-        lines = content.split('\n')
+def create_event_dict(start_time, nodes_list):
+    '''
+    Function to generate a dictionary of event (start/finish) nodes
+    from the nodes list
 
-        for l in lines:
-            event = None
-            try:
-                event = json.loads(l)
-            except Exception, e:
-                pass
+    Parameters
+    ----------
+    start_time : datetime.datetime
+        a datetime object of the pipeline start time
+    nodes_list : list
+        a list of the node dictionaries that were run in the pipeline
 
-            if not event: continue
+    Returns
+    -------
+    events : dictionary
+        a dictionary where the key is the timedelta from the start of
+        the pipeline execution to the value node it accompanies
+    '''
 
-            if 'start' in event:
-                event['type'] = 'start'
-                event['time'] = event['start']
-            else:
-                event['type'] = 'finish'
-                event['time'] = event['finish']
+    # Import packages
+    import copy
 
-            events.append(event)
+    events = {}
+    for node in nodes_list:
+        # Format node fields
+        try:
+            estimated_threads = float(node['num_threads'])
+        except:
+            estimated_threads = 1
+        try:
+            estimated_memory_gb = float(node['estimated_memory_gb'])
+        except:
+            estimated_memory_gb = 1.0
+        try:
+            runtime_threads = float(node['runtime_threads'])
+        except:
+            runtime_threads = 0
+        try:
+            runtime_memory_gb = float(node['runtime_memory_gb'])
+        except:
+            runtime_memory_gb = 0.0
+
+        # Init and format event-based nodes 
+        node['estimated_threads'] =  estimated_threads
+        node['estimated_memory_gb'] =  estimated_memory_gb
+        node['runtime_threads'] =  runtime_threads
+        node['runtime_memory_gb'] =  runtime_memory_gb
+        start_node = node
+        finish_node = copy.deepcopy(node)
+        start_node['event'] = 'start'
+        finish_node['event'] = 'finish'
+
+        # Get dictionary key
+        start_delta = (node['start'] - start_time).total_seconds()
+        finish_delta = (node['finish'] - start_time).total_seconds()
+
+        # Populate dictionary
+        if events.has_key(start_delta) or events.has_key(finish_delta):
+            err_msg = 'Event logged twice or events started at exact same time!'
+            raise KeyError(err_msg)
+        events[start_delta] = start_node
+        events[finish_delta] = finish_node
+
+    # Return events dictionary
     return events
 
 
@@ -65,7 +104,6 @@ def log_to_dict(logfile):
     unifinished_nodes = [] #all start nodes that dont have a finish yet
 
     with open(logfile, 'r') as content:
-
         #read file separating each line
         content = content.read()
         lines = content.split('\n')
@@ -98,7 +136,8 @@ def log_to_dict(logfile):
                     if aux['id'] == node['id'] and aux['name'] == node['name'] \
                        and aux['start'] < node['finish']:
                         node['start'] = aux['start']
-                        node['duration'] = (node['finish'] - node['start']).total_seconds()
+                        node['duration'] = \
+                            (node['finish'] - node['start']).total_seconds()
 
                         unifinished_nodes.remove(aux)
                         nodes_list.append(node)
@@ -113,29 +152,54 @@ def log_to_dict(logfile):
             n['duration'] = (n['finish'] - n['start']).total_seconds()
             nodes_list.append(n)
 
+        # Return list of nodes
         return nodes_list
 
 
-def calculate_resources(events, resource):
+def calculate_resource_timeseries(events, resource):
+    '''
+    Given as event dictionary, calculate the resources used
+    as a timeseries
+
+    Parameters
+    ----------
+    events : dictionary
+        a dictionary of event-based node dictionaries of the workflow
+        execution statistics
+    resource : string
+        the resource of interest to return the time-series of;
+        e.g. 'runtime_memory_gb', 'estimated_threads', etc
+
+    Returns
+    -------
+    time_series : pandas Series
+        a pandas Series object that contains timestamps as the indices
+        and the resource amount as values
+    '''
+
+    # Init variables
     res = OrderedDict()
-    for event in events:
-        all_res = 0.0
-        if event['type'] == "start":
+    all_res = 0.0
+
+    # Iterate through the events
+    for tdelta, event in sorted(events.items()):
+        if event['event'] == "start":
             if resource in event and event[resource] != 'Unkown':
                 all_res += float(event[resource])
             current_time = event['start'];
-        elif event['type'] == "finish":
+        elif event['event'] == "finish":
             if resource in event and event[resource] != 'Unkown':
-                all_res += float(event[resource])
+                all_res -= float(event[resource])
             current_time = event['finish'];
         res[current_time] = all_res
 
-    timestamps = [dateutil.parser.parse(ts) for ts in res.keys()]
-    time_series = pd.Series(data=res.values(), index=timestamps)
-    #TODO: pandas is removing all data values somewhere here
-    #interp_seq = pd.date_range(time_series.index[0], time_series.index[-1], freq='U')
-    #interp_time_series = time_series.reindex(interp_seq)
-    #interp_time_series = interp_time_series.fillna(method='ffill')
+    # Formulate the pandas timeseries
+    time_series = pd.Series(data=res.values(), index=res.keys())
+    # Downsample where there is only value-diff
+    ts_diff = time_series.diff()
+    time_series = time_series[ts_diff!=0]
+
+    # Return the new time series
     return time_series
 
 
@@ -186,7 +250,8 @@ def draw_lines(start, total_duration, minute_scale, scale):
     return result
 
 
-def draw_nodes(start, nodes_list, cores, minute_scale, space_between_minutes, colors):
+def draw_nodes(start, nodes_list, cores, minute_scale, space_between_minutes,
+               colors):
     '''
     Function to return the html-string of the node drawings for the
     gantt chart
@@ -269,8 +334,8 @@ def draw_nodes(start, nodes_list, cores, minute_scale, space_between_minutes, co
                      'node_finish' : node_finish.strftime("%Y-%m-%d %H:%M:%S")}
         # Create new node string
         new_node = "<div class='node' style='left:%(left)spx;top:%(offset)spx;"\
-                   "height:%(scale_duration)spx;background-color:%(color)s;"\
-                   "'title='%(node_name)s\nduration:%(node_dur)s\n"\
+                   "height:%(scale_duration)spx;background-color:%(color)s;'"\
+                   "title='%(node_name)s\nduration:%(node_dur)s\n"\
                    "start:%(node_start)s\nend:%(node_finish)s'></div>" % \
                    node_dict
 
@@ -280,49 +345,79 @@ def draw_nodes(start, nodes_list, cores, minute_scale, space_between_minutes, co
     # Return html string for nodes
     return result
 
+# def draw_thread_bar(threads,space_between_minutes, minute_scale, color):
+#     result = "<p class='time' style='top:198px;left:900px;'>Threads</p>"
+# 
+#     scale = float(space_between_minutes/float(minute_scale))
+#     space_between_minutes = float(space_between_minutes/60.0)
+# 
+#     for i in range(len(threads)):
+#         #print threads[i]
+#         width = threads[i] * 10
+#         t = (float(i*scale*minute_scale)/60.0) + 220
+#         bar = "<div class='bar' style='height:"+ str(space_between_minutes) + "px;width:"+ str(width) +"px;left:900px;top:"+str(t)+"px'></div>"
+#         result += bar
+# 
+#     return result
 
-def draw_thread_bar(threads,space_between_minutes, minute_scale, color):
-    result = "<p class='time' style='top:198px;left:900px;'>Threads</p>"
-
-    scale = float(space_between_minutes/float(minute_scale))
-    space_between_minutes = float(space_between_minutes/60.0)
-
-    for i in range(len(threads)):
-        #print threads[i]
-        width = threads[i] * 10
-        t = (float(i*scale*minute_scale)/60.0) + 220
-        bar = "<div class='bar' style='height:"+ str(space_between_minutes) + "px;width:"+ str(width) +"px;left:900px;top:"+str(t)+"px'></div>"
-        result += bar
-
-    return result
-
-
-def draw_memory_bar(nodes_list, space_between_minutes, minute_scale, color,
-                    mem_key='runtime_memory_gb'):
+def draw_resource_bar(start_time, finish_time, time_series, space_between_minutes,
+                      minute_scale, color, left, resource):
     '''
     '''
 
-    # Init variables
     # Memory header
-    result = "<p class='time' style='top:198px;left:1200px;'>Memory</p>"
-    # 
+    result = "<p class='time' style='top:198px;left:%dpx;'>%s</p>" \
+             % (left, resource)
+    # Image scaling factors
     scale = float(space_between_minutes/float(minute_scale))
     space_between_minutes = float(space_between_minutes/scale)
 
-    for idx, node in enumerate(nodes_list):
-        try:
-            memory = float(node[mem_key])
-        except:
-            memory = 0
+    # Iterate through time series
+    ts_len = len(time_series)
+    for idx, (ts_start, amount) in enumerate(time_series.iteritems()):
+        if idx < ts_len-1:
+            ts_end = time_series.index[idx+1]
+        else:
+            ts_end = finish_time
+        # Calculate offset from start at top
+        offset = ((ts_start-start_time).total_seconds() / 60.0) * scale * \
+                 space_between_minutes + 220
+        # Scale duration
+        duration_mins = (ts_end-ts_start).total_seconds() / 60.0
+        height = duration_mins * scale * \
+                 space_between_minutes
+        if height < 5:
+            height = 5
+        height -= 2
 
-        height = (node['duration'] / 60) * scale * space_between_minutes
-        width = memory * 20
-        t = (float(idx*scale*minute_scale)/60.0) + 220
-        bar = "<div class='bar' style='background-color:"+color+";height:"+ \
-        str(height) + "px;width:"+ str(width) +\
-        "px;left:1200px;top:"+str(t)+"px'></div>"
-        result += bar
+        # Bar width is proportional to resource amount
+        width = amount * 20
 
+        if resource.lower() == 'memory':
+            label = '%.3f GB' % amount
+        else:
+            label = '%d threads' % amount
+
+        # Setup dictionary for bar html string insertion
+        bar_dict = {'color' : color,
+                    'height' : height,
+                    'width' : width,
+                    'offset': offset,
+                    'left' : left,
+                    'label' : label,
+                    'duration' : duration_mins,
+                    'start' : ts_start.strftime('%Y-%m-%d %H:%M:%S'),
+                    'finish' : ts_end.strftime('%Y-%m-%d %H:%M:%S')}
+
+        bar_html = "<div class='bar' style='background-color:%(color)s;"\
+                   "height:%(height).3fpx;width:%(width).3fpx;"\
+                   "left:%(left)dpx; top:%(offset).3fpx;'"\
+                   "title='%(label)s\nduration:%(duration).3f\n"\
+                   "start:%(start)s\nend:%(finish)s'></div>"
+        # Add another bar to html line
+        result += bar_html % bar_dict
+
+    # Return bar-formatted html string
     return result
 
 
@@ -379,9 +474,6 @@ def generate_gantt_chart(logfile, cores, minute_scale=10,
     # generate_gantt_chart('callback.log', 8)
     '''
 
-    nodes_list = log_to_dict(logfile)
-    scale = space_between_minutes
-
     #add the html header
     html_string = '''<!DOCTYPE html>
     <head>
@@ -432,39 +524,47 @@ def generate_gantt_chart(logfile, cores, minute_scale=10,
     <body>
         <div id="content">'''
 
+    # Read in json-log to get list of node dicts
+    nodes_list = log_to_dict(logfile)
 
-    #create the header of the report with useful information
+    # Create the header of the report with useful information
     start_node = nodes_list[0]
     last_node = nodes_list[-1]
     duration = (last_node['finish'] - start_node['start']).total_seconds()
 
-    #summary strings of workflow at top
+    # Get events based dictionary of node run stats
+    events = create_event_dict(start_node['start'], nodes_list)
+
+    # Summary strings of workflow at top
     html_string += '<p>Start: ' + start_node['start'].strftime("%Y-%m-%d %H:%M:%S") + '</p>'
     html_string += '<p>Finish: ' + last_node['finish'].strftime("%Y-%m-%d %H:%M:%S") + '</p>'
     html_string += '<p>Duration: ' + "{0:.2f}".format(duration/60) + ' minutes</p>'
     html_string += '<p>Nodes: ' + str(len(nodes_list))+'</p>'
     html_string += '<p>Cores: ' + str(cores) + '</p>'
 
+    # Draw nipype nodes Gantt chart and runtimes
     html_string += draw_lines(start_node['start'], duration, minute_scale,
                               space_between_minutes)
     html_string += draw_nodes(start_node['start'], nodes_list, cores, minute_scale,
                               space_between_minutes, colors)
 
-    result = log_to_events(logfile)
+    # Get memory timeseries
+    estimated_mem_ts = calculate_resource_timeseries(events, 'estimated_memory_gb')
+    runtime_mem_ts = calculate_resource_timeseries(events, 'runtime_memory_gb')
+    # Plot gantt chart
+    html_string += draw_resource_bar(start_node['start'], last_node['finish'], estimated_mem_ts,
+                                     space_between_minutes, minute_scale, '#90BBD7', 1200, 'Memory')
+    html_string += draw_resource_bar(start_node['start'], last_node['finish'], runtime_mem_ts,
+                                     space_between_minutes, minute_scale, '#03969D', 1200, 'Memory')
 
-    #threads_estimated = calculate_resources(result, 'num_threads')
-    #html_string += draw_thread_bar(threads_estimated, space_between_minutes, minute_scale, '#90BBD7')
-    
-    #threads_real = calculate_resources(result, 'runtime_threads')
-    #html_string += draw_thread_bar(threads_real, space_between_minutes, minute_scale, '#03969D')
-
-
-    #memory_estimated = calculate_resources(result, 'estimated_memory_gb')
-    #html_string += draw_memory_bar(memory_estimated, space_between_minutes, minute_scale, '#90BBD7')
-
-    memory_real = calculate_resources(result, 'runtime_memory_gb')
-    html_string += draw_memory_bar(nodes_list, space_between_minutes, minute_scale, '#03969D')
-
+    # Get threads timeseries
+    estimated_threads_ts = calculate_resource_timeseries(events, 'estimated_threads')
+    runtime_threads_ts = calculate_resource_timeseries(events, 'runtime_threads')
+    # Plot gantt chart
+    html_string += draw_resource_bar(start_node['start'], last_node['finish'], estimated_threads_ts,
+                                     space_between_minutes, minute_scale, '#90BBD7', 600, 'Threads')
+    html_string += draw_resource_bar(start_node['start'], last_node['finish'], runtime_threads_ts,
+                                     space_between_minutes, minute_scale, '#03969D', 600, 'Threads')
 
     #finish html
     html_string+= '''
@@ -472,6 +572,6 @@ def generate_gantt_chart(logfile, cores, minute_scale=10,
     </body>'''
 
     #save file
-    html_file = open(logfile +'.html', 'wb')
+    html_file = open(logfile + '.html', 'wb')
     html_file.write(html_string)
     html_file.close()
