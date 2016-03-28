@@ -2437,6 +2437,8 @@ class ParcellationStatsInputSpec(FSTraitedSpec):
                               desc="If running as a node, set this to True." +
                               "This will copy the input files to the node " +
                               "directory.")
+    th3 = traits.Bool(argstr="-th3",
+                      desc="turns on new vertex-wise volume calc for mris_anat_stats")
 
 
 class ParcellationStatsOutputSpec(TraitedSpec):
