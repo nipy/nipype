@@ -24,6 +24,7 @@ from nipype.interfaces.utility import IdentityInterface
 """
 Assign the tutorial directory
 """
+
 tutorial_dir = os.path.abspath('smri_fsreconall_tutorial')
 if not os.path.isdir(tutorial_dir):
     os.mkdir(tutorial_dir)

@@ -7,7 +7,8 @@ from .ba_maps import create_ba_maps_wf
 from .utils import createsrcsubj
 from nipype.interfaces.io import DataGrabber
 
-def create_AutoRecon3(name="AutoRecon3", qcache=False, plugin_args=None):
+def create_AutoRecon3(name="AutoRecon3", qcache=False, plugin_args=None,
+                      th3=True):
     
     # AutoRecon3
     # Workflow
@@ -252,7 +253,8 @@ def create_AutoRecon3(name="AutoRecon3", qcache=False, plugin_args=None):
                          (ar3_divide, hemi_outputspec1, [('out_file', 'area_mid')]),
                          (ar3_volume, hemi_outputspec1, [('out_file', 'volume')]),
                          (ar3_parcellation, hemi_outputspec1, [('out_file', 'aparc_annot')]),
-                         (ar3_paint, hemi_outputspec1, [('out_file', 'jacobian_white')]),
+                         (ar3_jacobian, hemi_outputspec1, [('out_file', 'jacobian_white')]),
+                         (ar3_paint, hemi_outputspec1, [('out_file', 'avg_curv')]),
                          (ar3_surfreg, hemi_outputspec1, [('out_file', 'sphere_reg')]),
                          (ar3_sphere, hemi_outputspec1, [('out_file', 'sphere')])
                            ])
@@ -335,6 +337,7 @@ def create_AutoRecon3(name="AutoRecon3", qcache=False, plugin_args=None):
         parcellation_stats_white = pe.Node(
             ParcellationStats(), name="Parcellation_Stats_{0}_White".format(hemisphere) )
         parcellation_stats_white.inputs.mgz = True
+        parcellation_stats_white.inputs.th3 = th3
         parcellation_stats_white.inputs.tabular_output = True
         parcellation_stats_white.inputs.surface = 'white'
         parcellation_stats_white.inputs.hemisphere = hemisphere
@@ -360,6 +363,7 @@ def create_AutoRecon3(name="AutoRecon3", qcache=False, plugin_args=None):
         parcellation_stats_pial = pe.Node(ParcellationStats(),
                                           name="Parcellation_Stats_{0}_Pial".format(hemisphere))
         parcellation_stats_pial.inputs.mgz = True
+        parcellation_stats_pial.inputs.th3 = th3
         parcellation_stats_pial.inputs.tabular_output = True
         parcellation_stats_pial.inputs.surface = 'pial'
         parcellation_stats_pial.inputs.hemisphere = hemisphere
@@ -492,11 +496,16 @@ def create_AutoRecon3(name="AutoRecon3", qcache=False, plugin_args=None):
         hemiwf2.connect([(contrast, hemi_outputspec2, [('out_contrast', 'wg_pct_mgh'),
                                                        ('out_stats', 'wg_pct_stats'),
                                                        ('out_log', 'pctsurfcon_log')]),
-                         (parcellation_stats_white_3, hemi_outputspec2, [('out_color', 'aparc_DKTatlas40_ctab'),
-                                                                         ('out_table', 'aparc_DKTatlas40_stats')]),
-                         (cortical_parcellation_3, hemi_outputspec2, [('out_file', 'aparc_DKTatlas40_annot')]),
-                         (parcellation_stats_white_2, hemi_outputspec2, [('out_color', 'aparc_a2009s_ctab'),
-                                                                         ('out_table', 'aparc_a2009s_stats')]),
+                         (parcellation_stats_white_3, hemi_outputspec2, [('out_color',
+                                                                          'aparc_DKTatlas40_annot_ctab'),
+                                                                         ('out_table',
+                                                                          'aparc_DKTatlas40_annot_stats')]),
+                         (cortical_parcellation_3, hemi_outputspec2, [('out_file',
+                                                                       'aparc_DKTatlas40_annot')]),
+                         (parcellation_stats_white_2, hemi_outputspec2, [('out_color',
+                                                                          'aparc_a2009s_annot_ctab'),
+                                                                         ('out_table',
+                                                                          'aparc_a2009s_annot_stats')]),
                          (cortical_parcellation_2, hemi_outputspec2, [('out_file', 'aparc_a2009s_annot')]),
                          (parcellation_stats_white, hemi_outputspec2, [('out_color', 'aparc_annot_ctab'),
                                                                        ('out_table', 'aparc_stats')]),
@@ -692,7 +701,7 @@ def create_AutoRecon3(name="AutoRecon3", qcache=False, plugin_args=None):
                     ])
 
     # add brodman area maps to the workflow
-    ba_WF = create_ba_maps_wf()
+    ba_WF = create_ba_maps_wf(th3=th3)
     
     ar3_wf.connect([(ar3_lh_wf1, ba_WF, [('outputspec.sphere_reg', 'inputspec.lh_sphere_reg'),
                                          ('outputspec.thickness_pial', 'inputspec.lh_thickness'),

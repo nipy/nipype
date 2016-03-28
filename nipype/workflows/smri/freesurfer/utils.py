@@ -432,7 +432,8 @@ def getdefaultconfig():
                'qcache' : False,
                'queue' : None,
                'recoding_file' : None,
-               'src_subject_id' : 'fsaverage'}
+               'src_subject_id' : 'fsaverage',
+               'th3' : True}
 
     config['src_subject_dir'] = os.path.join(config['fs_home'], 'subjects',
                                              config['src_subject_id'])

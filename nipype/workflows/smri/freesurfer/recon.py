@@ -131,6 +131,7 @@ def create_reconall_workflow(name="ReconAll", plugin_args=None):
     inputspec.inputs.rh_classifier1 = defaultconfig['rh_classifier']
     inputspec.inputs.lh_classifier2 = defaultconfig['lh_classifier2']
     inputspec.inputs.rh_classifier2 = defaultconfig['rh_classifier2']
+    inputspec.inputs.lh_classifier3 = defaultconfig['lh_classifier3']
     inputspec.inputs.rh_classifier3 = defaultconfig['rh_classifier3']
     inputspec.inputs.src_subject_id = defaultconfig['src_subject_id']
     inputspec.inputs.src_subject_dir = defaultconfig['src_subject_dir']
@@ -159,7 +160,7 @@ def create_reconall_workflow(name="ReconAll", plugin_args=None):
                                         ('outputspec.talairach', 'inputspec.transform'),
                                         ('outputspec.orig', 'inputspec.orig')])])
     # create AutoRecon3
-    ar3_wf, ar3_outputs = create_AutoRecon3(plugin_args=plugin_args)
+    ar3_wf, ar3_outputs = create_AutoRecon3(plugin_args=plugin_args, th3=defaultconfig['th3'])
     # connect inputs for AutoRecon3
     reconall.connect([(inputspec, ar3_wf, [('lh_atlas', 'inputspec.lh_atlas'),
                                            ('rh_atlas', 'inputspec.rh_atlas'),
@@ -301,7 +302,6 @@ def create_reconall_workflow(name="ReconAll", plugin_args=None):
                                               ('lh_curv', 'surf.@lh_curv'),
                                               ('lh_area', 'surf.@lh_area'),
                                               ('lh_cortex', 'surf.@lh_cortex'),
-                                              ('lh_thickness', 'surf.@lh_thickness'),
                                               ('lh_smoothwm', 'surf.@lh_smoothwm'),
                                               ('lh_sulc', 'surf.@lh_sulc'),
                                               ('lh_inflated', 'surf.@lh_inflated'),
@@ -319,7 +319,6 @@ def create_reconall_workflow(name="ReconAll", plugin_args=None):
                                               ('rh_curv', 'surf.@rh_curv'),
                                               ('rh_area', 'surf.@rh_area'),
                                               ('rh_cortex', 'surf.@rh_cortex'),
-                                              ('rh_thickness', 'surf.@rh_thickness'),
                                               ('rh_smoothwm', 'surf.@rh_smoothwm'),
                                               ('rh_sulc', 'surf.@rh_sulc'),
                                               ('rh_inflated', 'surf.@rh_inflated'),
@@ -369,16 +368,26 @@ def create_reconall_workflow(name="ReconAll", plugin_args=None):
                                               ('rh_aparc_pial_stats', 'stats.@rh_aparc_pial_stats'),
                                               ('lh_aparc_a2009s_annot', 'label.@lh_aparc_a2009s_annot'),
                                               ('rh_aparc_a2009s_annot', 'label.@rh_aparc_a2009s_annot'),
-                                              ('lh_aparc_a2009s_annot_ctab', 'label.@lh_aparc_a2009s_annot_ctab'),
-                                              ('rh_aparc_a2009s_annot_ctab', 'label.@rh_aparc_a2009s_annot_ctab'),
-                                              ('lh_aparc_a2009s_annot_stats', 'stats.@lh_aparc_a2009s_annot_stats'),
-                                              ('rh_aparc_a2009s_annot_stats', 'stats.@rh_aparc_a2009s_annot_stats'),
-                                              ('lh_aparc_DKTatlas40_annot', 'label.@lh_aparc_DKTatlas40_annot'),
-                                              ('rh_aparc_DKTatlas40_annot', 'label.@rh_aparc_DKTatlas40_annot'),
-                                              ('lh_aparc_DKTatlas40_annot_ctab', 'label.@lh_aparc_DKTatlas40_annot_ctab'),
-                                              ('rh_aparc_DKTatlas40_annot_ctab', 'label.@rh_aparc_DKTatlas40_annot_ctab'),
-                                              ('lh_aparc_DKTatlas40_annot_stats', 'stats.@lh_aparc_DKTatlas40_annot_stats'),
-                                              ('rh_aparc_DKTatlas40_annot_stats', 'stats.@rh_aparc_DKTatlas40_annot_stats'),
+                                              ('lh_aparc_a2009s_annot_ctab',
+                                               'label.@lh_aparc_a2009s_annot_ctab'),
+                                              ('rh_aparc_a2009s_annot_ctab',
+                                               'label.@rh_aparc_a2009s_annot_ctab'),
+                                              ('lh_aparc_a2009s_annot_stats',
+                                               'stats.@lh_aparc_a2009s_annot_stats'),
+                                              ('rh_aparc_a2009s_annot_stats',
+                                               'stats.@rh_aparc_a2009s_annot_stats'),
+                                              ('lh_aparc_DKTatlas40_annot',
+                                               'label.@lh_aparc_DKTatlas40_annot'),
+                                              ('rh_aparc_DKTatlas40_annot',
+                                               'label.@rh_aparc_DKTatlas40_annot'),
+                                              ('lh_aparc_DKTatlas40_annot_ctab',
+                                               'label.@lh_aparc_DKTatlas40_annot_ctab'),
+                                              ('rh_aparc_DKTatlas40_annot_ctab',
+                                               'label.@rh_aparc_DKTatlas40_annot_ctab'),
+                                              ('lh_aparc_DKTatlas40_annot_stats',
+                                               'stats.@lh_aparc_DKTatlas40_annot_stats'),
+                                              ('rh_aparc_DKTatlas40_annot_stats',
+                                               'stats.@rh_aparc_DKTatlas40_annot_stats'),
                                               ('lh_wg_pct_mgh', 'surf.@lh_wg_pct_mgh'),
                                               ('rh_wg_pct_mgh', 'surf.@rh_wg_pct_mgh'),
                                               ('lh_wg_pct_stats', 'stats.@lh_wg_pct_stats'),

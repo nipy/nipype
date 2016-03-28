@@ -6,7 +6,7 @@ from nipype.interfaces.freesurfer import *
 from nipype.interfaces.io import DataGrabber
 from nipype.interfaces.utility import Merge
 
-def create_ba_maps_wf():
+def create_ba_maps_wf(name="Brodmann_Area_Maps", th3=True):
     # Brodmann Area Maps (BA Maps) and Hinds V1 Atlas
     inputs = ['lh_sphere_reg',
               'rh_sphere_reg',
@@ -30,7 +30,7 @@ def create_ba_maps_wf():
     inputspec = pe.Node(IdentityInterface(fields=inputs),
                         name="inputspec")
 
-    ba_WF = pe.Workflow(name="Brodmann_Area_Maps")
+    ba_WF = pe.Workflow(name=name)
         
     outputSpec = pe.Node(IdentityInterface(fields=['lh_table',
                                                    'lh_color',
@@ -96,6 +96,7 @@ def create_ba_maps_wf():
             stats_node = pe.Node(ParcellationStats(), name=node_name + '_Stats')
             stats_node.inputs.hemisphere = hemisphere
             stats_node.inputs.mgz = True
+            stats_node.inputs.th3 = th3
             stats_node.inputs.surface = 'white'
             stats_node.inputs.tabular_output = True
             stats_node.inputs.copy_inputs = True
