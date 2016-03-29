@@ -637,7 +637,7 @@ def create_AutoRecon2(name="AutoRecon2", longitudinal=False,
 
         hemi_wf.connect([(extract_main_component, hemi_outputspec, [('out_file', 'orig_nofix')]),
                          (inflate1, hemi_outputspec, [('out_file', 'inflated_nofix')]),
-                         (smooth1, hemi_outputspec, [('out_file', 'smoothwm_nofix')]),
+                         (smooth1, hemi_outputspec, [('surface', 'smoothwm_nofix')]),
                          (qsphere, hemi_outputspec, [('out_file', 'qsphere_nofix')]),
                          (remove_intersection, hemi_outputspec, [('out_file', 'orig')]),
                          (make_surfaces, hemi_outputspec, [('out_white', 'white'),

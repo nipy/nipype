@@ -2416,6 +2416,8 @@ class ParcellationStatsInputSpec(FSTraitedSpec):
                 desc="Input file must be <subject_id>/mri/aseg.presurf.mgz")
     ribbon = File(mandatory=True, exists=True,
                   desc="Input file must be <subject_id>/mri/ribbon.mgz")
+    cortex_label = File(exists=True,
+                        desc="implicit input file {hemi}.cortex.label")
     # optional
     surface = traits.String(position=-1, argstr="%s", mandatory=False,
                             desc="Input surface (e.g. 'white')")
@@ -2437,7 +2439,7 @@ class ParcellationStatsInputSpec(FSTraitedSpec):
                               desc="If running as a node, set this to True." +
                               "This will copy the input files to the node " +
                               "directory.")
-    th3 = traits.Bool(argstr="-th3",
+    th3 = traits.Bool(argstr="-th3", requires=["cortex_label"],
                       desc="turns on new vertex-wise volume calc for mris_anat_stats")
 
 
@@ -2497,6 +2499,10 @@ class ParcellationStats(FSCommand):
             copy2subjdir(self, self.inputs.ribbon, 'mri', 'ribbon.mgz')
             copy2subjdir(self, self.inputs.thickness, 'surf',
                          '{0}.thickness'.format(self.inputs.hemisphere))
+            if isdefined(self.inputs.cortex_label):
+                copy2subjdir(
+                    self, self.inputs.cortex_label, 'label',
+                    '{0}.cortex.label'.format(self.inputs.hemisphere))
         createoutputdirs(self._list_outputs())
         return super(ParcellationStats, self).run(**inputs)
 

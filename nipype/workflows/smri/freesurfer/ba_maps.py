@@ -19,6 +19,8 @@ def create_ba_maps_wf(name="Brodmann_Area_Maps", th3=True):
               'transform',
               'lh_thickness',
               'rh_thickness',
+              'lh_cortex_label',
+              'rh_cortex_label',
               'brainmask',
               'aseg',
               'ribbon',
@@ -31,15 +33,17 @@ def create_ba_maps_wf(name="Brodmann_Area_Maps", th3=True):
                         name="inputspec")
 
     ba_WF = pe.Workflow(name=name)
-        
-    outputSpec = pe.Node(IdentityInterface(fields=['lh_table',
-                                                   'lh_color',
-                                                   'lh_thresh_table',
-                                                   'lh_thresh_color',
-                                                   'rh_table',
-                                                   'rh_color',
-                                                   'rh_thresh_table',
-                                                   'rh_thresh_color']),
+
+    ba_outputs = ['lh_table',
+                  'lh_color',
+                  'lh_thresh_table',
+                  'lh_thresh_color',
+                  'rh_table',
+                  'rh_color',
+                  'rh_thresh_table',
+                  'rh_thresh_color']
+    
+    outputSpec = pe.Node(IdentityInterface(fields=ba_outputs),
                          name="outputspec")
 
     labels = ["BA1", "BA2", "BA3a", "BA3b", "BA4a", "BA4p", "BA6",
@@ -126,6 +130,8 @@ def create_ba_maps_wf(name="Brodmann_Area_Maps", th3=True):
                             [('out_file', 'in_annotation')]),
                            (inputspec, stats_node, [('{0}_thickness'.format(hemisphere), 
                                                      'thickness'),
+                                                    ('{0}_cortex_label'.format(hemisphere), 
+                                                     'cortex_label'),
                                                     ('lh_white', 'lh_white'),
                                                     ('rh_white', 'rh_white'),
                                                     ('lh_pial', 'lh_pial'),
@@ -137,4 +143,4 @@ def create_ba_maps_wf(name="Brodmann_Area_Maps", th3=True):
                                                     ('ribbon', 'ribbon')])])
 
 
-    return ba_WF
+    return ba_WF, ba_outputs

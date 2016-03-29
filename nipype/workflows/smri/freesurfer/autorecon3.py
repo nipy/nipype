@@ -352,6 +352,7 @@ def create_AutoRecon3(name="AutoRecon3", qcache=False, plugin_args=None,
                                                                       ('brainmask', 'brainmask'),
                                                                       ('aseg_presurf', 'aseg'),
                                                                       ('cortex_label', 'in_cortex'),
+                                                                      ('cortex_label', 'cortex_label'),
                                                                       ('lh_pial', 'lh_pial'),
                                                                       ('rh_pial', 'rh_pial'),
                                                                       ('thickness', 'thickness'),
@@ -378,6 +379,7 @@ def create_AutoRecon3(name="AutoRecon3", qcache=False, plugin_args=None,
                                                                     ('transform', 'transform'),
                                                                     ('brainmask', 'brainmask'),
                                                                     ('aseg_presurf', 'aseg'),
+                                                                    ('cortex_label', 'cortex_label'),
                                                                     ('cortex_label', 'in_cortex'),
                                                                     ('lh_pial', 'lh_pial'),
                                                                     ('rh_pial', 'rh_pial'),
@@ -415,6 +417,7 @@ def create_AutoRecon3(name="AutoRecon3", qcache=False, plugin_args=None,
                                                                         ('transform', 'transform'),
                                                                         ('brainmask', 'brainmask'),
                                                                         ('aseg_presurf', 'aseg'),
+                                                                        ('cortex_label', 'cortex_label'),
                                                                         ('cortex_label', 'in_cortex'),
                                                                         ('lh_pial', 'lh_pial'),
                                                                         ('rh_pial', 'rh_pial'),
@@ -453,6 +456,7 @@ def create_AutoRecon3(name="AutoRecon3", qcache=False, plugin_args=None,
                                                                         ('transform', 'transform'),
                                                                         ('brainmask', 'brainmask'),
                                                                         ('aseg_presurf', 'aseg'),
+                                                                        ('cortex_label', 'cortex_label'),
                                                                         ('cortex_label', 'in_cortex'),
                                                                         ('lh_pial', 'lh_pial'),
                                                                         ('rh_pial', 'rh_pial'),
@@ -701,7 +705,7 @@ def create_AutoRecon3(name="AutoRecon3", qcache=False, plugin_args=None,
                     ])
 
     # add brodman area maps to the workflow
-    ba_WF = create_ba_maps_wf(th3=th3)
+    ba_WF, ba_outputs = create_ba_maps_wf(th3=th3)
     
     ar3_wf.connect([(ar3_lh_wf1, ba_WF, [('outputspec.sphere_reg', 'inputspec.lh_sphere_reg'),
                                          ('outputspec.thickness_pial', 'inputspec.lh_thickness'),
@@ -719,6 +723,8 @@ def create_AutoRecon3(name="AutoRecon3", qcache=False, plugin_args=None,
                                         ('wm', 'inputspec.wm'),
                                         ('lh_orig', 'inputspec.lh_orig'),
                                         ('rh_orig', 'inputspec.rh_orig'),
+                                        ('lh_cortex_label', 'inputspec.lh_cortex_label'),
+                                        ('rh_cortex_label', 'inputspec.rh_cortex_label'),
                                         ('src_subject_dir', 'inputspec.src_subject_dir'),
                                         ('src_subject_id', 'inputspec.src_subject_id'),
                                         ('color_table', 'inputspec.color_table'),
@@ -876,6 +882,9 @@ def create_AutoRecon3(name="AutoRecon3", qcache=False, plugin_args=None,
             ar3_outputs.append(hemi + output)
     if qcache:
         ar3_outputs.extend(qcache_outputs)
+
+    ar3_outputs.extend(ba_outputs)
+    
     outputspec = pe.Node(IdentityInterface(fields=ar3_outputs),
                          name="outputspec")
     
@@ -902,6 +911,9 @@ def create_AutoRecon3(name="AutoRecon3", qcache=False, plugin_args=None,
             ar3_wf.connect([(lhwf, outputspec, [('outputspec.' + output, 'lh_' + output)]),
                             (rhwf, outputspec, [('outputspec.' + output, 'rh_' + output)])])
 
+    for output in ba_outputs:
+        ar3_wf.connect([(ba_WF, outputspec, [('outputspec.' + output, output)])])
+        
     if qcache:
         for output in qcache_outputs:
             ar3_wf.connect([(qcache_wf, outputspec, [('outputspec.' + output, output)])])
