@@ -28,7 +28,7 @@ def create_ba_maps_wf(name="Brodmann_Area_Maps", th3=True):
               'src_subject_id',
               'src_subject_dir',
               'color_table']
-    
+
     inputspec = pe.Node(IdentityInterface(fields=inputs),
                         name="inputspec")
 
@@ -42,7 +42,7 @@ def create_ba_maps_wf(name="Brodmann_Area_Maps", th3=True):
                   'rh_color',
                   'rh_thresh_table',
                   'rh_thresh_color']
-    
+
     outputSpec = pe.Node(IdentityInterface(fields=ba_outputs),
                          name="outputspec")
 
@@ -74,7 +74,7 @@ def create_ba_maps_wf(name="Brodmann_Area_Maps", th3=True):
             source_subject.inputs.sort_filelist = False
             source_subject.inputs.field_template = field_template
             ba_WF.connect([(inputspec, source_subject, [('src_subject_dir', 'base_directory')])])
-            
+
             merge_labels = pe.Node(Merge(len(labels)),
                                    name=node_name + "_Merge")
             for i,label in enumerate(labels):
@@ -85,12 +85,12 @@ def create_ba_maps_wf(name="Brodmann_Area_Maps", th3=True):
             node.inputs.hemisphere = hemisphere
             node.inputs.out_file = out_files
             node.inputs.copy_inputs = True
-            
+
             ba_WF.connect([(merge_labels, node, [('out', 'source_label')]),
                            (source_subject, node, [('sphere_reg', 'source_sphere_reg'),
                                                    ('white', 'source_white')]),
                            (inputspec, node, [('src_subject_id', 'source_subject')])])
-            
+
             label2annot = pe.Node(Label2Annot(), name=node_name + '_2_Annot')
             label2annot.inputs.hemisphere = hemisphere
             label2annot.inputs.verbose_off = True
@@ -107,15 +107,15 @@ def create_ba_maps_wf(name="Brodmann_Area_Maps", th3=True):
 
             if threshold:
                 label2annot.inputs.out_annot = "BA_exvivo.thresh"
-                ba_WF.connect([(stats_node, outputSpec, [('out_color', 
+                ba_WF.connect([(stats_node, outputSpec, [('out_color',
                                                           '{0}_thresh_color'.format(hemisphere)),
-                                                         ('out_table', 
+                                                         ('out_table',
                                                           '{0}_thresh_table'.format(hemisphere))])])
             else:
                 label2annot.inputs.out_annot = "BA_exvivo"
-                ba_WF.connect([(stats_node, outputSpec, [('out_color', 
+                ba_WF.connect([(stats_node, outputSpec, [('out_color',
                                                           '{0}_color'.format(hemisphere)),
-                                                         ('out_table', 
+                                                         ('out_table',
                                                           '{0}_table'.format(hemisphere))])])
 
 
@@ -128,9 +128,9 @@ def create_ba_maps_wf(name="Brodmann_Area_Maps", th3=True):
                                                      ('color_table', 'color_table')]),
                            (label2annot, stats_node,
                             [('out_file', 'in_annotation')]),
-                           (inputspec, stats_node, [('{0}_thickness'.format(hemisphere), 
+                           (inputspec, stats_node, [('{0}_thickness'.format(hemisphere),
                                                      'thickness'),
-                                                    ('{0}_cortex_label'.format(hemisphere), 
+                                                    ('{0}_cortex_label'.format(hemisphere),
                                                      'cortex_label'),
                                                     ('lh_white', 'lh_white'),
                                                     ('rh_white', 'rh_white'),

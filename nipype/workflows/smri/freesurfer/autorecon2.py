@@ -45,11 +45,11 @@ def create_AutoRecon2(name="AutoRecon2", longitudinal=False,
     if longitudinal:
         # TODO: Work on longitudinal workflow
         inputspec.inputs.timepoints = config['timepoints']
-        
+
 
     # NU Intensity Correction
     """
-    Non-parametric Non-uniform intensity Normalization (N3), corrects for 
+    Non-parametric Non-uniform intensity Normalization (N3), corrects for
     intensity non-uniformity in MR data, making relatively few assumptions about
     the data. This runs the MINC tool 'nu_correct'.
     """
@@ -83,7 +83,7 @@ def create_AutoRecon2(name="AutoRecon2", longitudinal=False,
 
     # EM Registration
     """
-    Computes the transform to align the mri/nu.mgz volume to the default GCA 
+    Computes the transform to align the mri/nu.mgz volume to the default GCA
     atlas found in FREESURFER_HOME/average (see -gca flag for more info).
     """
     if longitudinal:
@@ -93,7 +93,7 @@ def create_AutoRecon2(name="AutoRecon2", longitudinal=False,
                           name='Copy_Talairach_lta')
         align_transform.inputs.out_file = 'talairach.lta'
 
-        ar2_wf.connect([(inputspec, align_transform, [('template_talairach_lta', 
+        ar2_wf.connect([(inputspec, align_transform, [('template_talairach_lta',
                                                        'in_file')])])
     else:
         align_transform = pe.Node(EMRegister(), name="Align_Transform")
@@ -109,7 +109,7 @@ def create_AutoRecon2(name="AutoRecon2", longitudinal=False,
     # CA Normalize
     """
     Further normalization, based on GCA model. The normalization is based on an
-    estimate of the most certain segmentation voxels, which it then uses to 
+    estimate of the most certain segmentation voxels, which it then uses to
     estimate the bias field/scalings. Creates mri/norm.mgz.
     """
     ca_normalize = pe.Node(CANormalize(), name='CA_Normalize')
@@ -149,7 +149,7 @@ def create_AutoRecon2(name="AutoRecon2", longitudinal=False,
         ca_register.inputs.levels = 2
         ca_register.inputs.A = 1
         ar2_wf.connect([(ar1_inputs, ca_register, [('template_talairach_m3z', 'l_files')])])
-    
+
     # Remove Neck
     """
     The neck region is removed from the NU-corrected volume mri/nu.mgz. Makes use
@@ -195,8 +195,8 @@ def create_AutoRecon2(name="AutoRecon2", longitudinal=False,
 
         ar2_wf.connect([(inputspec, merge_norms, [('alltps_norms', 'in1')]),
                         (ca_normalize, merge_norms, [('out_file', 'in2')])])
-                                                   
-        
+
+
         fuse_segmentations = pe.Node(FuseSegmentations(), name="Fuse_Segmentations")
 
         ar2_wf.connect([(inputspec, fuse_segmentations, [('timepoints', 'timepoints'),
@@ -205,7 +205,7 @@ def create_AutoRecon2(name="AutoRecon2", longitudinal=False,
                                                           ('subject_id', 'subject_id')]),
                         (merge_norms, fuse_segmentations, [('out', 'in_norms')])])
         fuse_segmentations.inputs.out_file = 'aseg.fused.mgz'
-        
+
     ca_label = pe.Node(CALabel(), name='CA_Label')
     ca_label.inputs.relabel_unlikely = (9, .3)
     ca_label.inputs.prior = 0.5
@@ -217,7 +217,7 @@ def create_AutoRecon2(name="AutoRecon2", longitudinal=False,
                     (ca_register, ca_label, [('out_file', 'transform')]),
                     (inputspec, ca_label, [('num_threads', 'num_threads'),
                                            ('reg_template', 'template')])])
-    
+
     if longitudinal:
         ar2_wf.connect([(fuse_segmentations, ca_label, [('out_file', 'in_vol')]),
                         (inputspec, ca_label, [('template_label_intensities', 'intensities')])])
@@ -244,8 +244,8 @@ def create_AutoRecon2(name="AutoRecon2", longitudinal=False,
     # Normalization2
     """
     Performs a second (major) intensity correction using only the brain volume a
-    s the input (so that it has to be done after the skull strip). Intensity 
-    normalization works better when the skull has been removed. Creates a new 
+    s the input (so that it has to be done after the skull strip). Intensity
+    normalization works better when the skull has been removed. Creates a new
     brain.mgz volume. The -autorecon2-cp stage begins here.
     """
     normalization2 = pe.Node(Normalize(), name="Normalization2")
@@ -268,7 +268,7 @@ def create_AutoRecon2(name="AutoRecon2", longitudinal=False,
 
     # WM Segmentation
     """
-    Attempts to separate white matter from everything else. The input is 
+    Attempts to separate white matter from everything else. The input is
     mri/brain.mgz, and the output is mri/wm.mgz. Uses intensity, neighborhood,
     and smoothness constraints. This is the volume that is edited when manually
     fixing defects. Calls mri_segment, mri_edit_wm_with_aseg, and mri_pretess.
@@ -304,11 +304,11 @@ def create_AutoRecon2(name="AutoRecon2", longitudinal=False,
                                                         ('subj_to_template_lta', 'xfm_file')])])
         # changing the pretess variable so that the rest of the connections still work!!!
         pretess = transfer_init_wm
-        
+
     # Fill
-    """ This creates the subcortical mass from which the orig surface is created. 
-    The mid brain is cut from the cerebrum, and the hemispheres are cut from each 
-    other. The left hemisphere is binarized to 255. The right hemisphere is binarized 
+    """ This creates the subcortical mass from which the orig surface is created.
+    The mid brain is cut from the cerebrum, and the hemispheres are cut from each
+    other. The left hemisphere is binarized to 255. The right hemisphere is binarized
     to 127. The input is mri/wm.mgz and the output is mri/filled.mgz. Calls mri_fill.
     """
 
@@ -333,7 +333,7 @@ def create_AutoRecon2(name="AutoRecon2", longitudinal=False,
         else:
             label = 127
             hemi_wf = ar2_rh
-        
+
         hemi_inputspec = pe.Node(IdentityInterface(fields=['norm',
                                                            'filled',
                                                            'aseg',
@@ -342,7 +342,7 @@ def create_AutoRecon2(name="AutoRecon2", longitudinal=False,
                                                            'brain',
                                                            'num_threads']),
                                  name="inputspec")
-            
+
         if longitudinal:
             # Make White Surf
             # Copy files from longitudinal base
@@ -352,14 +352,14 @@ def create_AutoRecon2(name="AutoRecon2", longitudinal=False,
                                           name='Copy_Template_White')
             copy_template_white.inputs.out_file = '{0}.orig'.format(hemisphere)
 
-            
+
             copy_template_orig_white = pe.Node(Function(['in_file', 'out_file'],
                                                    ['out_file'],
                                                    copy_file),
                                           name='Copy_Template_Orig_White')
             copy_template_orig_white.inputs.out_file = '{0}.orig_white'.format(hemisphere)
 
-            
+
             copy_template_orig_pial = pe.Node(Function(['in_file', 'out_file'],
                                                    ['out_file'],
                                                    copy_file),
@@ -367,7 +367,7 @@ def create_AutoRecon2(name="AutoRecon2", longitudinal=False,
             copy_template_orig_pial.inputs.out_file = '{0}.orig_pial'.format(hemisphere)
 
             # White
-            
+
             # This function implicitly calls other inputs based on the subject_id
             # wf attempts to make sure files are data sinked to the correct
             # folders before calling
@@ -379,27 +379,27 @@ def create_AutoRecon2(name="AutoRecon2", longitudinal=False,
             make_surfaces.inputs.maximum = 3.5
             make_surfaces.inputs.longitudinal = True
             make_surfaces.inputs.copy_inputs = True
-            
+
             hemi_wf.connect([(copy_template_orig_white, make_surfaces, [('out_file', 'orig_white')]),
                              (copy_template_white, make_surfaces, [('out_file', 'in_orig')])])
-            
+
         else:
             # If running single session
             # Tessellate by hemisphere
             """
             This is the step where the orig surface (ie, surf/?h.orig.nofix) is created.
-            The surface is created by covering the filled hemisphere with triangles. 
-            Runs mri_pretess to create a connected WM volume (neighboring voxels must 
-            have faces in common) and then mri_tessellate to create the surface. The 
+            The surface is created by covering the filled hemisphere with triangles.
+            Runs mri_pretess to create a connected WM volume (neighboring voxels must
+            have faces in common) and then mri_tessellate to create the surface. The
             places where the points of the triangles meet are called vertices. Creates
             the file surf/?h.orig.nofix Note: the topology fixer will create the surface
-            ?h.orig. Finally mris_extract_main_component will remove small surface 
+            ?h.orig. Finally mris_extract_main_component will remove small surface
             components, not connected to the main body.
             """
             pretess2 = pe.Node(MRIPretess(), name='Pretess2')
             pretess2.inputs.out_file = 'filled-pretess{0}.mgz'.format(label)
             pretess2.inputs.label = label
-            
+
             hemi_wf.connect([(hemi_inputspec, pretess2, [('norm', 'in_norm'),
                                                          ('filled', 'in_filled')])])
 
@@ -408,13 +408,13 @@ def create_AutoRecon2(name="AutoRecon2", longitudinal=False,
             tesselate.inputs.label_value = label
             hemi_wf.connect([(pretess2, tesselate, [('out_file', 'in_file')])])
 
-            
+
             extract_main_component = pe.Node(
                 ExtractMainComponent(), name="Extract_Main_Component")
             extract_main_component.inputs.out_file = "{0}.orig.nofix".format(hemisphere)
             hemi_wf.connect([(tesselate, extract_main_component, [('surface', 'in_file')])])
 
-            
+
             copy_orig = pe.Node(Function(['in_file', 'out_file'],
                                          ['out_file'],
                                          copy_file),
@@ -425,8 +425,8 @@ def create_AutoRecon2(name="AutoRecon2", longitudinal=False,
             # Orig Surface Smoothing 1
             """
             After tesselation, the orig surface is very jagged because each triangle is
-            on the edge of a voxel face and so are at right angles to each other. The 
-            vertex positions are adjusted slightly here to reduce the angle. This is 
+            on the edge of a voxel face and so are at right angles to each other. The
+            vertex positions are adjusted slightly here to reduce the angle. This is
             only necessary for the inflation processes. Creates surf/?h.smoothwm(.nofix).
             Calls mris_smooth. Smooth1 is the step just after tessellation.
             """
@@ -463,9 +463,9 @@ def create_AutoRecon2(name="AutoRecon2", longitudinal=False,
 
             # Sphere
             """
-            This is the initial step of automatic topology fixing. It is a 
+            This is the initial step of automatic topology fixing. It is a
             quasi-homeomorphic spherical transformation of the inflated surface designed
-            to localize topological defects for the subsequent automatic topology fixer. 
+            to localize topological defects for the subsequent automatic topology fixer.
             Calls mris_sphere.
             """
 
@@ -480,10 +480,10 @@ def create_AutoRecon2(name="AutoRecon2", longitudinal=False,
 
             # Automatic Topology Fixer
             """
-            Finds topological defects (ie, holes in a filled hemisphere) using 
-            surf/?h.qsphere.nofix, and changes the orig surface (surf/?h.orig.nofix) to 
+            Finds topological defects (ie, holes in a filled hemisphere) using
+            surf/?h.qsphere.nofix, and changes the orig surface (surf/?h.orig.nofix) to
             remove the defects. Changes the number of vertices. All the defects will be
-            removed, but the user should check the orig surface in the volume to make 
+            removed, but the user should check the orig surface in the volume to make
             sure that it looks appropriate.
 
             This mris_fix_topology does not take in the {lh,rh}.orig file, but instead takes in the
@@ -516,7 +516,7 @@ def create_AutoRecon2(name="AutoRecon2", longitudinal=False,
             hemi_wf.connect([(euler_number, remove_intersection, [('out_file', 'in_file')])])
 
             # White
-            
+
             # This function implicitly calls other inputs based on the subject_id
             # need to make sure files are data sinked to the correct folders before
             # calling
@@ -533,7 +533,7 @@ def create_AutoRecon2(name="AutoRecon2", longitudinal=False,
                                                               ('wm', 'in_wm')])])
             # end of non-longitudinal specific steps
 
-            
+
         # Orig Surface Smoothing 2
         """
         After tesselation, the orig surface is very jagged because each triangle is on
@@ -565,7 +565,7 @@ def create_AutoRecon2(name="AutoRecon2", longitudinal=False,
 
         # Compute Curvature
         """No documentation on this step"""
-        
+
         curvature1 = pe.Node(Curvature(), name="Curvature1")
         curvature1.inputs.save = True
         curvature1.inputs.copy_input = True
@@ -653,9 +653,9 @@ def create_AutoRecon2(name="AutoRecon2", longitudinal=False,
                          (curvature2, hemi_outputspec, [('out_mean', 'inflated_H'),
                                                         ('out_gauss', 'inflated_K')]),
                          (curvature_stats, hemi_outputspec, [('out_file', 'curv_stats')])])
-                         
-                         
-        
+
+
+
     outputs = ['nu',
                'tal_lta',
                'norm',
@@ -705,5 +705,5 @@ def create_AutoRecon2(name="AutoRecon2", longitudinal=False,
             output = "{0}_".format(hemi) + field
             ar2_wf.connect([(hemi_wf, outputspec, [("outputspec." + field, output)])])
 
-    
+
     return ar2_wf, outputs

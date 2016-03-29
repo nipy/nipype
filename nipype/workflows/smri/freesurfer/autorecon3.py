@@ -9,7 +9,7 @@ from nipype.interfaces.io import DataGrabber
 
 def create_AutoRecon3(name="AutoRecon3", qcache=False, plugin_args=None,
                       th3=True):
-    
+
     # AutoRecon3
     # Workflow
     ar3_wf = pe.Workflow(name=name)
@@ -150,7 +150,7 @@ def create_AutoRecon3(name="AutoRecon3", qcache=False, plugin_args=None,
         ar3_parcellation.inputs.seed = 1234
         ar3_parcellation.inputs.hemisphere = hemisphere
         ar3_parcellation.inputs.copy_inputs = True
-        ar3_parcellation.inputs.out_file = "{0}.aparc.annot".format(hemisphere)        
+        ar3_parcellation.inputs.out_file = "{0}.aparc.annot".format(hemisphere)
         if plugin_args:
             ar3_parcellation.plugin_args = plugin_args
         hemi_wf.connect([(hemi_inputspec1, ar3_parcellation, [('smoothwm', 'smoothwm'),
@@ -273,7 +273,7 @@ def create_AutoRecon3(name="AutoRecon3", qcache=False, plugin_args=None,
     volume_mask.inputs.save_ribbon = True
     volume_mask.inputs.copy_inputs = True
 
-    
+
     ar3_wf.connect([(inputspec, volume_mask, [('aseg_presurf', 'in_aseg'),
                                               ('lh_white', 'lh_white'),
                                               ('rh_white', 'rh_white'),
@@ -294,7 +294,7 @@ def create_AutoRecon3(name="AutoRecon3", qcache=False, plugin_args=None,
             opp_hemi = 'lh'
             opp_wf = ar3_lh_wf2
             hemiwf1 = ar3_rh_wf1
-        
+
         hemi_inputs2 = ['wm',
                         'lh_white',
                         'rh_white',
@@ -316,10 +316,10 @@ def create_AutoRecon3(name="AutoRecon3", qcache=False, plugin_args=None,
                         'classifier2',
                         'classifier3',
                         ]
-                        
+
         hemi_inputspec2 = pe.Node(IdentityInterface(fields=hemi_inputs2),
                                   name="inputspec")
-        
+
         # Parcellation Statistics
         """
         Runs mris_anatomical_stats to create a summary table of cortical parcellation statistics for each structure, including
@@ -360,7 +360,7 @@ def create_AutoRecon3(name="AutoRecon3", qcache=False, plugin_args=None,
                                                                       ('ribbon', 'ribbon'),
                                                                       ]),
                          ])
-        
+
         parcellation_stats_pial = pe.Node(ParcellationStats(),
                                           name="Parcellation_Stats_{0}_Pial".format(hemisphere))
         parcellation_stats_pial.inputs.mgz = True
@@ -427,7 +427,7 @@ def create_AutoRecon3(name="AutoRecon3", qcache=False, plugin_args=None,
                          (cortical_parcellation_2, parcellation_stats_white_2,
                           [('out_file', 'in_annotation')])
                          ])
-        
+
         # Cortical Parcellation 3
         cortical_parcellation_3 = pe.Node(MRIsCALabel(),
                                           name="Cortical_Parcellation_{0}_3".format(hemisphere))
@@ -480,7 +480,7 @@ def create_AutoRecon3(name="AutoRecon3", qcache=False, plugin_args=None,
                                                       ('thickness', 'thickness'),
                                                       ]),
                         ])
-        
+
         hemi_outputs2 = ['aparc_annot_ctab',
                          'aparc_stats',
                          'aparc_pial_stats',
@@ -553,7 +553,7 @@ def create_AutoRecon3(name="AutoRecon3", qcache=False, plugin_args=None,
     # Adds information from the ribbon into the aseg.mgz (volume parcellation).
     aparc_2_aseg = pe.Node(Aparc2Aseg(), name="Aparc2Aseg")
     aparc_2_aseg.inputs.volmask = True
-    aparc_2_aseg.inputs.copy_inputs = True    
+    aparc_2_aseg.inputs.copy_inputs = True
     aparc_2_aseg.inputs.out_file = "aparc+aseg.mgz"
     ar3_wf.connect([(inputspec, aparc_2_aseg, [('lh_white', 'lh_white'),
                                                 ('rh_white', 'rh_white'),
@@ -576,7 +576,7 @@ def create_AutoRecon3(name="AutoRecon3", qcache=False, plugin_args=None,
     aparc_2_aseg_2009 = pe.Node(Aparc2Aseg(), name="Aparc2Aseg_2009")
     aparc_2_aseg_2009.inputs.volmask = True
     aparc_2_aseg_2009.inputs.a2009s = True
-    aparc_2_aseg_2009.inputs.copy_inputs = True    
+    aparc_2_aseg_2009.inputs.copy_inputs = True
     aparc_2_aseg_2009.inputs.out_file = "aparc.a2009s+aseg.mgz"
     ar3_wf.connect([(inputspec, aparc_2_aseg_2009, [('lh_white', 'lh_white'),
                                                      ('rh_white', 'rh_white'),
@@ -603,7 +603,7 @@ def create_AutoRecon3(name="AutoRecon3", qcache=False, plugin_args=None,
 
     # Segmentation Stats
     """
-    Computes statistics on the segmented subcortical structures found in 
+    Computes statistics on the segmented subcortical structures found in
     mri/aseg.mgz. Writes output to file stats/aseg.stats.
     """
 
@@ -622,7 +622,7 @@ def create_AutoRecon3(name="AutoRecon3", qcache=False, plugin_args=None,
     segstats.inputs.intensity_units = "MR"
     segstats.inputs.summary_file = 'aseg.stats'
     segstats.inputs.copy_inputs = True
-    
+
     ar3_wf.connect([(apas_2_aseg, segstats, [('out_file', 'segmentation_file')]),
                     (inputspec, segstats, [('lh_white', 'lh_white'),
                                            ('rh_white', 'rh_white'),
@@ -653,7 +653,7 @@ def create_AutoRecon3(name="AutoRecon3", qcache=False, plugin_args=None,
     wm_parcellation.inputs.rip_unknown = True
     wm_parcellation.inputs.copy_inputs = True
     wm_parcellation.inputs.out_file = "wmparc.mgz"
-    
+
     ar3_wf.connect([(inputspec, wm_parcellation, [('lh_white', 'lh_white'),
                                                    ('rh_white', 'rh_white'),
                                                    ]),
@@ -706,7 +706,7 @@ def create_AutoRecon3(name="AutoRecon3", qcache=False, plugin_args=None,
 
     # add brodman area maps to the workflow
     ba_WF, ba_outputs = create_ba_maps_wf(th3=th3)
-    
+
     ar3_wf.connect([(ar3_lh_wf1, ba_WF, [('outputspec.sphere_reg', 'inputspec.lh_sphere_reg'),
                                          ('outputspec.thickness_pial', 'inputspec.lh_thickness'),
                                          ('outputspec.pial', 'inputspec.lh_pial'),
@@ -740,7 +740,7 @@ def create_AutoRecon3(name="AutoRecon3", qcache=False, plugin_args=None,
         source_subject.inputs.sort_filelist = False
         source_subject.inputs.field_template = dict(lh_sphere_reg='surf/lh.sphere.reg',
                                                     rh_sphere_reg='surf/rh.sphere.reg')
-                
+
 
         qcache_wf = pe.Workflow("QCache")
 
@@ -764,7 +764,7 @@ def create_AutoRecon3(name="AutoRecon3", qcache=False, plugin_args=None,
             qcache_config[hemisphere] = dict()
             for meas_name in measurements:
                 qcache_config[hemisphere][meas_name] = dict()
-                
+
                 if meas_name == 'thickness':
                     meas_file = hemisphere + '_' + meas_name + '_pial'
                 else:
@@ -793,7 +793,7 @@ def create_AutoRecon3(name="AutoRecon3", qcache=False, plugin_args=None,
                                                                                  out=smooth_out,
                                                                                  out_name=smooth_out_name)
                     qcache_outputs.append(smooth_out_name)
-                    
+
             qcache_inputs.append(hemisphere + '_sphere_reg')
 
         qcache_inputspec = pe.Node(IdentityInterface(fields=qcache_inputs),
@@ -801,7 +801,7 @@ def create_AutoRecon3(name="AutoRecon3", qcache=False, plugin_args=None,
 
         qcache_outputspec = pe.Node(IdentityInterface(fields=qcache_outputs),
                                    name="outputspec")
-        
+
         for hemi in qcache_config.iterkeys():
             for meas_config in qcache_config[hemi].itervalues():
                 preprocess = pe.Node(MRISPreprocReconAll(),
@@ -884,10 +884,10 @@ def create_AutoRecon3(name="AutoRecon3", qcache=False, plugin_args=None,
         ar3_outputs.extend(qcache_outputs)
 
     ar3_outputs.extend(ba_outputs)
-    
+
     outputspec = pe.Node(IdentityInterface(fields=ar3_outputs),
                          name="outputspec")
-    
+
     ar3_wf.connect([(apas_2_aseg, outputspec, [('out_file', 'aseg')]),
                     (wm_parcellation, outputspec, [('out_file', 'wmparc')]),
                     (wm_segstats, outputspec, [('summary_file', 'wmparc_stats')]),
@@ -913,10 +913,10 @@ def create_AutoRecon3(name="AutoRecon3", qcache=False, plugin_args=None,
 
     for output in ba_outputs:
         ar3_wf.connect([(ba_WF, outputspec, [('outputspec.' + output, output)])])
-        
+
     if qcache:
         for output in qcache_outputs:
             ar3_wf.connect([(qcache_wf, outputspec, [('outputspec.' + output, output)])])
-        
+
     return ar3_wf, ar3_outputs
 

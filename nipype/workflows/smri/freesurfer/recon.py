@@ -90,10 +90,10 @@ def create_reconall_workflow(name="ReconAll", plugin_args=None):
            inputspec.num_threads: Number of threads on nodes that utilize OpenMP (default=1)
            plugin_args : Dictionary of plugin args to set to nodes that utilize OpenMP (optional)
     Outpus::
-           
+
     """
     reconall = pe.Workflow(name=name)
-    
+
     inputspec = pe.Node(niu.IdentityInterface(fields=['subject_id',
                                                       'subjects_dir',
                                                       'T1_files',
@@ -138,7 +138,7 @@ def create_reconall_workflow(name="ReconAll", plugin_args=None):
     inputspec.inputs.color_table = defaultconfig['AvgColorTable']
     inputspec.inputs.lookup_table = defaultconfig['LookUpTable']
     inputspec.inputs.wm_lookup_table = defaultconfig['WMLookUpTable']
-    
+
     # create AutoRecon1
     ar1_wf, ar1_outputs = create_AutoRecon1(plugin_args=plugin_args,
                                             awk_file=defaultconfig['awk_file'])
@@ -254,11 +254,11 @@ def create_reconall_workflow(name="ReconAll", plugin_args=None):
     reconall.connect([(outputspec, predatasink_nu, [('nu', 'in_file')]),
                       (dstransform, predatasink_nu, [('transform', 'transform')])])
 
-    
+
     # Datasink outputs
     datasink = pe.Node(DataSink(), name="DataSink")
     datasink.inputs.parameterization = False
-    
+
     reconall.connect([(inputspec, datasink, [('subjects_dir', 'base_directory'),
                                              ('subject_id', 'container')])])
 
@@ -411,10 +411,10 @@ def create_reconall_workflow(name="ReconAll", plugin_args=None):
         recode = create_recoding_wf(defaultconfig['recoding_file'])
         reconall.connect([(ar3_wf, recode, [('outputspec.aseg', 'inputspec.labelmap')]),
                           (recode, outputspec, [('outputspec.recodedlabelmap', 'recoded_labelmap')])])
-        
-        
+
+
     return reconall
 
 
 
-    
+

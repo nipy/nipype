@@ -39,17 +39,17 @@ class RobustTemplateInputSpec(FSTraitedSpec):
     transform_outputs = InputMultiPath(File(exists=False),
                                        argstr='--lta %s',
                                        desc='output xforms to template (for each input)')
-    intensity_scaling = traits.Bool(default_value=False, 
-                                    argstr='--iscale', 
+    intensity_scaling = traits.Bool(default_value=False,
+                                    argstr='--iscale',
                                     desc='allow also intensity scaling (default off)')
     scaled_intensity_outputs = InputMultiPath(File(exists=False),
                                               argstr='--iscaleout %s',
                                               desc='final intensity scales (will activate --iscale)')
-    subsample_threshold = traits.Int(argstr='--subsample %d', 
+    subsample_threshold = traits.Int(argstr='--subsample %d',
                                      desc='subsample if dim > # on all axes (default no subs.)')
     average_metric = traits.Enum('median', 'mean', argstr='--average %d',
                                  desc='construct template from: 0 Mean, 1 Median (default)')
-    initial_timepoint = traits.Int(argstr='--inittp %d', 
+    initial_timepoint = traits.Int(argstr='--inittp %d',
                                    desc='use TP# for spacial init (default random), 0: no init')
     fixed_timepoint = traits.Bool(default_value=False, argstr='--fixtp',
                                   desc='map everthing to init TP# (init TP is not resampled)')

@@ -17,7 +17,6 @@ def test_MRIFill_inputs():
     position=-2,
     ),
     log_file=dict(argstr='-a %s',
-    mandatory=False,
     ),
     out_file=dict(argstr='%s',
     mandatory=True,
@@ -41,7 +40,8 @@ def test_MRIFill_inputs():
 
 
 def test_MRIFill_outputs():
-    output_map = dict(out_file=dict(),
+    output_map = dict(log_file=dict(),
+    out_file=dict(),
     )
     outputs = MRIFill.output_spec()
 

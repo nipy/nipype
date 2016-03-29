@@ -5,7 +5,7 @@ sMRI: FreeSurfer
 ================
 
 This script, smri_fsreconall.py, demonstrates the ability to use the
-reconall nipype workflow with a set of subjects and then make an average 
+reconall nipype workflow with a set of subjects and then make an average
 subject::
 
     python smri_fsreconall.py
@@ -74,14 +74,5 @@ recon_all.inputs.inputspec.subjects_dir = subjects_dir
 
 wf.connect(datasource, 'struct', recon_all, 'inputspec.T1_files')
 wf.connect(inputspec, 'subject_id', recon_all, 'inputspec.subject_id')
-
-"""
-Make average subject
-"""
-
-#average = pe.Node(interface=MakeAverageSubject(), name="average")
-#average.inputs.subjects_dir = subjects_dir
-
-#wf.connect(recon_all, 'outputspec.subject_id', average, 'subjects_ids')
 
 wf.run("MultiProc", plugin_args={'n_procs': 4})

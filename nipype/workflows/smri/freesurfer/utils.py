@@ -377,7 +377,7 @@ def create_tessellation_flow(name='tessellate', out_format='stl'):
 
 def copy_files(in_files, out_files):
     """
-    Create a function to copy a file that can be modified by a following node 
+    Create a function to copy a file that can be modified by a following node
     without changing the original file
     """
     import shutil
@@ -394,7 +394,7 @@ def copy_files(in_files, out_files):
 
 def copy_file(in_file, out_file=None):
     """
-    Create a function to copy a file that can be modified by a following node 
+    Create a function to copy a file that can be modified by a following node
     without changing the original file.
     """
     import os
@@ -419,7 +419,7 @@ def mkdir_p(path):
             pass
         else:
             raise
-        
+
 def getdefaultconfig():
     config = { 'custom_atlas' : None,
                'cw256' : False,
@@ -472,7 +472,7 @@ def checkenv():
     if fs_home == None:
         print("ERROR: please set FREESURFER_HOME before running the workflow")
     elif not os.path.isdir(fs_home):
-        print("ERROR: FREESURFER_HOME must be set to a valid directory before " + 
+        print("ERROR: FREESURFER_HOME must be set to a valid directory before " +
         "running this workflow")
     elif os.path.join(fs_home, 'bin') not in path.replace('//','/'):
         print(path)
@@ -485,7 +485,7 @@ def checkenv():
             print("Please ensure that FREESURFER_HOME is set to a valid fs " +
             "directory and source the necessary SetUpFreeSurfer.sh script before running " +
             "this workflow")
-    else:        
+    else:
         return fs_home
     sys.exit(2)
 
@@ -535,7 +535,7 @@ def recodeLabelMap(in_file, out_file, recode_file):
     RECODE_TABLE = list()
     for line in reader:
         RECODE_TABLE.append((int(line[label_keys[0]]), int(line[label_keys[1]])))
-        
+
     def minimizeSizeOfImage(outlabels):
         """This function will find the largest integer value in the labelmap, and
         cast the image to the smallest possible integer size so that no loss of data
@@ -553,7 +553,7 @@ def recodeLabelMap(in_file, out_file, recode_file):
         elif imgMax < (2**64)-1:
             outlabels = sitk.Cast( outlabels, sitk.sitkUInt64 )
         return outlabels
-    
+
     LabelImage=sitk.Cast(sitk.ReadImage(in_file), sitk.sitkUInt32)
     for (old, new) in RECODE_TABLE:
         LabelImage = sitk.Cast((LabelImage == old), sitk.sitkUInt32)*(new - old)+LabelImage
@@ -567,7 +567,7 @@ def create_recoding_wf(in_file, out_file=None):
     wf = nipype.Workflow(name="RecodeLabels")
 
     inputspec = nipype.pipeline.Node(nipype.IdentityInterface(['labelmap',
-                                                               'recode_file']), 
+                                                               'recode_file']),
                                      name="inputspec")
     inputspec.inputs.recode_file = in_file
 
@@ -582,7 +582,7 @@ def create_recoding_wf(in_file, out_file=None):
                                           'out_file',
                                           'recode_file'],
                                          ['out_file'],
-                                         recodeLabelMap), 
+                                         recodeLabelMap),
                          name = "RecodeLabelMap")
     if out_file == None:
         recode.inputs.out_file = 'recodedlabelmap.nii'
@@ -600,12 +600,12 @@ def create_recoding_wf(in_file, out_file=None):
 
     outputspec = nipype.Node(nipype.IdentityInterface(['recodedlabelmap']), name="outputspec")
 
-    wf.connect([(center_labelmap, outputspec, [('out_file', 'recodedlabelmap')])])    
+    wf.connect([(center_labelmap, outputspec, [('out_file', 'recodedlabelmap')])])
     return wf
 
 def createsrcsubj(source_directory):
     """
-    Returns a node that acts as the datasource for a source subject such as 
+    Returns a node that acts as the datasource for a source subject such as
     'fsaverage'
     """
     outfields = ['lh_BA1_exvivo',
@@ -731,14 +731,14 @@ def source_long_files_workflow(name="Source_Longitudinal_Files"):
     This should only be used when the files are not in a prexisting workflow"""
 
     wf = Workflow(name=name)
-    
+
     inputspec = Node(IdentityInterface(fields=['subject_id',
                                                'subjects_dir',
                                                'timepoints']),
                      name="inputspec")
 
     # TODO: Create outputspec
-    
+
     # grab files from the initial single session run
     grab_inittp_files = pe.Node(nio.DataGrabber(), name="Grab_Initial_Files",
                                 infields=['subject_id'],
@@ -748,7 +748,7 @@ def source_long_files_workflow(name="Source_Longitudinal_Files"):
     grab_inittp_files.inputs.field_template = dict(inputvols='%s/mri/orig/0*.mgz',
                                                    iscales='%s/mri/orig/0*-iscale.txt',
                                                    ltas='%s/mri/orig/0*.lta')
-        
+
     grab_inittp_files.inputs.template_args = dict(inputvols=[['subject_id']],
                                                   iscales=[['subject_id']],
                                                   ltas=[['subject_id']])
@@ -767,7 +767,7 @@ def source_long_files_workflow(name="Source_Longitudinal_Files"):
         tp_data_source = pe.Node(FreeSurferSource(), name="{0}_DataSource".format(tp))
         tp_data_source.inputs.subject_id = tp
         tp_data_source.inputs.subjects_dir = config['subjects_dir']
-        
+
         tp_data_grabber = pe.Node(nio.DataGrabber(), name="{0}_DataGrabber".format(tp),
                                   infields=['tp', 'long_tempate'],
                                   outfileds=['subj_to_template_lta', 'seg_noCC', 'seg_presurf'])
@@ -782,7 +782,7 @@ def source_long_files_workflow(name="Source_Longitudinal_Files"):
             subj_to_template_lta=[['long_template', 'tp', 'long_template']],
             seg_noCC=[['tp']],
             seg_presurf=[['tp']])
-                        
+
         wf.connect([(tp_data_source, merge_norms, [('norm',
                                                           'in{0}'.format(i))]),
                           (tp_data_grabber, merge_segs, [('seg_presurf',
@@ -804,7 +804,7 @@ def source_long_files_workflow(name="Source_Longitudinal_Files"):
                       (merge_template_ltas, outputspec, [('out', 'inputspec.alltps_to_template_ltas')]),
                       (merge_segs_noCC, outputspec, [('out', 'inputspec.alltps_segs_noCC')])])
 
-                        
+
 
     # datasource files from the template run
     ds_template_files = pe.Node(FreeSurferSource(), name="Datasource_Template_Files")
@@ -813,7 +813,7 @@ def source_long_files_workflow(name="Source_Longitudinal_Files"):
 
     wf.connect([(ds_template_files, ar1_wf, [('brainmask', 'inputspec.template_brainmask')]),
                       (ds_template_files, outputspec, [('aseg', 'inputspec.template_aseg')])])
-    
+
     # grab files from template run
     grab_template_files = pe.Node(nio.DataGrabber(), name="Grab_Template_Files",
                                   infields=['subject_id', 'long_template'],
@@ -838,7 +838,7 @@ def source_long_files_workflow(name="Source_Longitudinal_Files"):
         template_rh_white='%s/surf/rh.white',
         template_lh_pial='%s/surf/lh.pial',
         template_rh_pial='%s/surf/rh.pial')
-    
+
     grab_template_files.inputs.template_args = dict(
         template_talairach_xfm=[['long_template']],
         template_talairach_lta=[['long_template']],

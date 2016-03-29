@@ -64,7 +64,7 @@ def create_AutoRecon1(name="AutoRecon1", longitudinal=False, field_strength='1.5
            inputspec.cw256 : Conform inputs to 256 FOV (optional)
            inputspec.num_threads: Number of threads to use with EM Register (default=1)
     Outpus::
-           
+
     """
     ar1_wf = pe.Workflow(name=name)
     inputspec = pe.Node(interface=IdentityInterface(fields=['T1_files',
@@ -114,14 +114,14 @@ def create_AutoRecon1(name="AutoRecon1", longitudinal=False, field_strength='1.5
                                       convert_modalities),
                              name="T2_Convert")
         T2_convert.inputs.out_file = 'T2raw.mgz'
-        ar1_wf.connect([(inputspec, T2_convert, [('T2_file', 'in_file')])]) 
+        ar1_wf.connect([(inputspec, T2_convert, [('T2_file', 'in_file')])])
 
         FLAIR_convert = pe.Node(Function(['in_file', 'out_file'],
                                          ['out_file'],
                                          convert_modalities),
                                 name="FLAIR_Convert")
         FLAIR_convert.inputs.out_file = 'FLAIRraw.mgz'
-        ar1_wf.connect([(inputspec, FLAIR_convert, [('FLAIR_file', 'in_file')])])        
+        ar1_wf.connect([(inputspec, FLAIR_convert, [('FLAIR_file', 'in_file')])])
     else:
         # longitudinal inputs
         inputspec = pe.Node(interface=IdentityInterface(fields=['T1_files',
@@ -151,7 +151,7 @@ def create_AutoRecon1(name="AutoRecon1", longitudinal=False, field_strength='1.5
                                      output_names),
                             name="Longitudinal_Filenames")
         ar1_wf.connect([(inputspec, filenames, [('T1_files', 'T1_files')])])
-        
+
         copy_ltas = pe.MapNode(Function(['in_file', 'out_file'],
                                         ['out_file'],
                                         copy_file),
@@ -173,7 +173,7 @@ def create_AutoRecon1(name="AutoRecon1", longitudinal=False, field_strength='1.5
         ar1_wf.connect([(copy_ltas, concatenate_lta, [('out_file', 'in_file')]),
                         (inputspec, concatenate_lta, [('subj_to_template_lta', 'subj_to_base')])])
 
-    
+
     # Motion Correction
     """
     When there are multiple source volumes, this step will correct for small
@@ -215,7 +215,7 @@ def create_AutoRecon1(name="AutoRecon1", longitudinal=False, field_strength='1.5
             out_file = robtemp.outputs.out_file
         out_file = os.path.abspath(out_file)
         return out_file, intensity_scales, transforms
-    
+
     if not longitudinal:
         create_template = pe.Node(Function(['in_files', 'out_file'],
                                            ['out_file', 'intensity_scales', 'transforms'],
@@ -238,10 +238,10 @@ def create_AutoRecon1(name="AutoRecon1", longitudinal=False, field_strength='1.5
     if not longitudinal:
         conform_template.inputs.conform = True
         ar1_wf.connect([(verify_inputs, conform_template, [('cw256', 'cw256'),
-                                                           ('resample_type', 'resample_type')])]) 
+                                                           ('resample_type', 'resample_type')])])
     else:
         conform_template.inputs.out_datatype = 'uchar'
-            
+
     ar1_wf.connect([(create_template, conform_template, [('out_file', 'in_file')])])
 
     # Talairach
@@ -258,7 +258,7 @@ def create_AutoRecon1(name="AutoRecon1", longitudinal=False, field_strength='1.5
         # 3T params from Zheng, Chee, Zagorodnov 2009 NeuroImage paper
         # "Improvement of brain segmentation accuracy by optimizing
         # non-uniformity correction using N3"
-        # namely specifying iterations, proto-iters and distance: 
+        # namely specifying iterations, proto-iters and distance:
         bias_correction.inputs.distance = 50
     else:
         # 1.5T default
@@ -294,7 +294,7 @@ def create_AutoRecon1(name="AutoRecon1", longitudinal=False, field_strength='1.5
         talairach_avi.inputs.out_file = 'talairach.auto.xfm'
 
         ar1_wf.connect([(inputspec, talairach_avi, [('template_talairach_xfm', 'in_file')])])
-        
+
     copy_transform = pe.Node(Function(['in_file', 'out_file'],
                                       ['out_file'],
                                       copy_file),
@@ -328,7 +328,7 @@ def create_AutoRecon1(name="AutoRecon1", longitudinal=False, field_strength='1.5
                     (copy_transform, add_xform_to_orig_nu, [('out_file', 'transform')])])
 
 
-        
+
     # check the alignment of the talairach
     # TODO: Figure out how to read output from this node.
     check_alignment = pe.Node(CheckTalairachAlignment(),
@@ -356,7 +356,7 @@ def create_AutoRecon1(name="AutoRecon1", longitudinal=False, field_strength='1.5
                                        awkfile),
                               name='Awk')
         awk_logfile.inputs.in_file = awk_file
-                                       
+
         ar1_wf.connect([(talairach_avi, awk_logfile, [('out_log', 'log_file')])])
 
         # TODO datasink the output from TalirachQC...not sure how to do this
@@ -376,19 +376,19 @@ def create_AutoRecon1(name="AutoRecon1", longitudinal=False, field_strength='1.5
                     (copy_transform, mri_normalize,
                      [('out_file', 'transform')]),
                     ])
-    
+
     # Skull Strip
     """
-    Removes the skull from mri/T1.mgz and stores the result in 
+    Removes the skull from mri/T1.mgz and stores the result in
     mri/brainmask.auto.mgz and mri/brainmask.mgz. Runs the mri_watershed program.
     """
-    if not longitudinal:    
+    if not longitudinal:
         mri_em_register = pe.Node(EMRegister(), name="EM_Register")
         mri_em_register.inputs.out_file = 'talairach_with_skull.lta'
         mri_em_register.inputs.skull = True
         if plugin_args:
             mri_em_register.plugin_args = plugin_args
-            
+
         ar1_wf.connect([(add_xform_to_orig_nu, mri_em_register, [('out_file', 'in_file')]),
                         (inputspec, mri_em_register, [('num_threads', 'num_threads'),
                                                       ('reg_template_withskull', 'template')])])
@@ -406,13 +406,13 @@ def create_AutoRecon1(name="AutoRecon1", longitudinal=False, field_strength='1.5
                                                    copy_file),
                                           name='Copy_Template_Brainmask')
         copy_template_brainmask.inputs.out_file = 'brainmask_{0}.mgz'.format(config['long_template'])
-        
+
         ar1_wf.connect([(inputspec, copy_template_brainmask, [('template_brainmask', 'in_file')])])
 
         mask1 = pe.Node(ApplyMask(), name="ApplyMask1")
         mask1.inputs.keep_mask_deletion_edits = True
         mask1.inputs.out_file = 'brainmask.auto.mgz'
-        
+
         ar1_wf.connect([(mri_normalize, mask1, [('out_file', 'in_file')]),
                         (copy_template_brainmask, mask1, [('out_file', 'mask_file')])])
 
@@ -423,7 +423,7 @@ def create_AutoRecon1(name="AutoRecon1", longitudinal=False, field_strength='1.5
 
         ar1_wf.connect([(mask1, brainmask, [('out_file', 'in_file')]),
                         (copy_template_brainmask, brainmask, [('out_file', 'mask_file')])])
-                        
+
     copy_brainmask = pe.Node(Function(['in_file', 'out_file'],
                                       ['out_file'],
                                       copy_file),
@@ -458,10 +458,10 @@ def create_AutoRecon1(name="AutoRecon1", longitudinal=False, field_strength='1.5
                     (copy_transform, outputspec, [('out_file', 'talairach')]),
                     (mri_normalize, outputspec, [('out_file', 't1')]),
                     (brainmask, outputspec, [('out_file', 'brainmask_auto')]),
-                    (copy_brainmask, outputspec, [('out_file', 'brainmask')]),                    
+                    (copy_brainmask, outputspec, [('out_file', 'brainmask')]),
                     ])
 
-    
+
     if not longitudinal:
         ar1_wf.connect([(mri_em_register, outputspec, [('out_file', 'talskull')]),
                         ])
