@@ -159,6 +159,7 @@ def create_reconall_workflow(name="ReconAll", plugin_args=None,
                 return arg
             else:
                 return default
+        defaultconfig = getdefaultconfig()
         # set the default template and classifier files
         reg_template = checkarg(reg_template, defaultconfig['registration_template'])
         reg_template_withskull = checkarg(reg_template_withskull,
@@ -193,11 +194,11 @@ def create_reconall_workflow(name="ReconAll", plugin_args=None,
               'rh_classifier2',
               'lh_classifier3',
               'rh_classifier3',
-              'lookup_table',
-              'wm_lookup_table',
               'src_subject_id',
               'src_subject_dir',
               'color_table',
+              'lookup_table',
+              'wm_lookup_table',
               'awk_file']
     
     config_node = pe.Node(niu.Function(params,
