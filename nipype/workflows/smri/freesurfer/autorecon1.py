@@ -54,7 +54,7 @@ def checkT1s(T1_files, cw256=False):
     return T1_files, cw256, resample_type, origvol_names
 
 def create_AutoRecon1(name="AutoRecon1", longitudinal=False, field_strength='1.5T',
-                      custom_atlas=None, awk_file=None, plugin_args=None):
+                      custom_atlas=None, plugin_args=None):
     """Creates the AutoRecon1 workflow in nipype.
 
     Inputs::
@@ -72,7 +72,8 @@ def create_AutoRecon1(name="AutoRecon1", longitudinal=False, field_strength='1.5
                                                             'FLAIR_file',
                                                             'cw256',
                                                             'num_threads',
-                                                            'reg_template_withskull']),
+                                                            'reg_template_withskull',
+                                                            'awk_file']),
                         run_without_submitting=True,
                         name='inputspec')
 
@@ -337,7 +338,7 @@ def create_AutoRecon1(name="AutoRecon1", longitudinal=False, field_strength='1.5
     ar1_wf.connect([(copy_transform, check_alignment, [('out_file', 'in_file')]),
                     ])
 
-    if not longitudinal and awk_file:
+    if not longitudinal:
         def awkfile(in_file, log_file):
             """
             This method uses 'awk' which must be installed prior to running the workflow and is not a
@@ -355,9 +356,9 @@ def create_AutoRecon1(name="AutoRecon1", longitudinal=False, field_strength='1.5
                                        ['log_file'],
                                        awkfile),
                               name='Awk')
-        awk_logfile.inputs.in_file = awk_file
 
-        ar1_wf.connect([(talairach_avi, awk_logfile, [('out_log', 'log_file')])])
+        ar1_wf.connect([(talairach_avi, awk_logfile, [('out_log', 'log_file')]),
+                        (inputspec, awk_logfile, [('awk_file', 'in_file')])])
 
         # TODO datasink the output from TalirachQC...not sure how to do this
         tal_qc = pe.Node(TalairachQC(), name="Detect_Aligment_Failures")

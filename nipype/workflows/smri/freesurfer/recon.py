@@ -79,10 +79,24 @@ def create_skullstripped_recon_flow(name="skullstripped_recon_all"):
     wf.connect(autorecon_resume, "subject_id", outputnode, "subject_id")
     return wf
 
-def create_reconall_workflow(name="ReconAll", plugin_args=None):
+def create_reconall_workflow(name="ReconAll", plugin_args=None,
+                             recoding_file=None):
     """Creates the ReconAll workflow in nipype.
+    
+    Example
+    -------
+    >>> from nipype.workflows.smri.freesurfer import create_skullstripped_recon_flow
+    >>> import nipype.interfaces.freesurfer as fs
+    >>> recon_all = create_skullstripped_recon_flow()
+    >>> recon_all.inputs.inputspec.subject_id = 'subj1'
+    >>> recon_all.inputs.inputspec.subjects_dir = '.'
+    >>> recon_all.inputs.inputspec.T1_files = 'T1.nii.gz'
+    >>> recon_flow.run()  # doctest: +SKIP
+
 
     Inputs::
+           inputspec.subjects_dir : subjects directory (mandatory)
+           inputspec.subject_id : name of subject (mandatory)
            inputspec.T1_files : T1 files (mandatory)
            inputspec.T2_file : T2 file (optional)
            inputspec.FLAIR_file : FLAIR file (optional)
@@ -90,6 +104,7 @@ def create_reconall_workflow(name="ReconAll", plugin_args=None):
            inputspec.num_threads: Number of threads on nodes that utilize OpenMP (default=1)
            plugin_args : Dictionary of plugin args to set to nodes that utilize OpenMP (optional)
     Outpus::
+           postdatasink_outputspec.subject_id : name of the datasinked output folder in the subjects directory
 
     """
     reconall = pe.Workflow(name=name)
@@ -115,66 +130,122 @@ def create_reconall_workflow(name="ReconAll", plugin_args=None):
                                                       'wm_lookup_table',
                                                       'src_subject_id',
                                                       'src_subject_dir',
-                                                      'color_table']),
+                                                      'color_table',
+                                                      'awk_file']),
                         run_without_submitting=True,
                         name='inputspec')
 
-    # get the default configurations
-    defaultconfig = getdefaultconfig()
+    def setconfig(reg_template=None,
+                  reg_template_withskull=None,
+                  lh_atlas=None,
+                  rh_atlas=None,
+                  lh_classifier1=None,
+                  rh_classifier1=None,
+                  lh_classifier2=None,
+                  rh_classifier2=None,
+                  lh_classifier3=None,
+                  rh_classifier3=None,
+                  src_subject_id=None,
+                  src_subject_dir=None,
+                  color_table=None,
+                  lookup_table=None,
+                  wm_lookup_table=None,
+                  awk_file=None):
+        """Set optional configurations to the default"""
+        from nipype.workflows.smri.freesurfer.utils import getdefaultconfig
+        def checkarg(arg, default):
+            """Returns the value if defined; otherwise default"""
+            if arg:
+                return arg
+            else:
+                return default
+        # set the default template and classifier files
+        reg_template = checkarg(reg_template, defaultconfig['registration_template'])
+        reg_template_withskull = checkarg(reg_template_withskull,
+                                          defaultconfig['registration_template_withskull'])
+        lh_atlas = checkarg(lh_atlas, defaultconfig['lh_atlas'])
+        rh_atlas = checkarg(rh_atlas, defaultconfig['rh_atlas'])
+        lh_classifier1 = checkarg(lh_classifier1, defaultconfig['lh_classifier'])
+        rh_classifier1 = checkarg(rh_classifier1, defaultconfig['rh_classifier'])
+        lh_classifier2 = checkarg(lh_classifier2, defaultconfig['lh_classifier2'])
+        rh_classifier2 = checkarg(rh_classifier2, defaultconfig['rh_classifier2'])
+        lh_classifier3 = checkarg(lh_classifier3, defaultconfig['lh_classifier3'])
+        rh_classifier3 = checkarg(rh_classifier3, defaultconfig['rh_classifier3'])
+        src_subject_id = checkarg(src_subject_id, defaultconfig['src_subject_id'])
+        src_subject_dir = checkarg(src_subject_dir, defaultconfig['src_subject_dir'])
+        color_table = checkarg(color_table, defaultconfig['AvgColorTable'])
+        lookup_table = checkarg(lookup_table, defaultconfig['LookUpTable'])
+        wm_lookup_table = checkarg(wm_lookup_table, defaultconfig['WMLookUpTable'])
+        awk_file = checkarg(awk_file, defaultconfig['awk_file'])
+        return reg_template, reg_template_withskull, lh_atlas, rh_atlas, \
+            lh_classifier1, rh_classifier1, lh_classifier2, rh_classifier2, \
+            lh_classifier3, rh_classifier3, src_subject_id, src_subject_dir, \
+            color_table, lookup_table, wm_lookup_table, awk_file
 
-    # set the default template and classifier files
-    inputspec.inputs.reg_template = defaultconfig['registration_template']
-    inputspec.inputs.reg_template_withskull = defaultconfig['registration_template_withskull']
-    inputspec.inputs.lh_atlas = defaultconfig['lh_atlas']
-    inputspec.inputs.rh_atlas = defaultconfig['rh_atlas']
-    inputspec.inputs.lh_classifier1 = defaultconfig['lh_classifier']
-    inputspec.inputs.rh_classifier1 = defaultconfig['rh_classifier']
-    inputspec.inputs.lh_classifier2 = defaultconfig['lh_classifier2']
-    inputspec.inputs.rh_classifier2 = defaultconfig['rh_classifier2']
-    inputspec.inputs.lh_classifier3 = defaultconfig['lh_classifier3']
-    inputspec.inputs.rh_classifier3 = defaultconfig['rh_classifier3']
-    inputspec.inputs.src_subject_id = defaultconfig['src_subject_id']
-    inputspec.inputs.src_subject_dir = defaultconfig['src_subject_dir']
-    inputspec.inputs.color_table = defaultconfig['AvgColorTable']
-    inputspec.inputs.lookup_table = defaultconfig['LookUpTable']
-    inputspec.inputs.wm_lookup_table = defaultconfig['WMLookUpTable']
+    # list of params to check
+    params = ['reg_template',
+              'reg_template_withskull',
+              'lh_atlas',
+              'rh_atlas',
+              'lh_classifier1',
+              'rh_classifier1',
+              'lh_classifier2',
+              'rh_classifier2',
+              'lh_classifier3',
+              'rh_classifier3',
+              'lookup_table',
+              'wm_lookup_table',
+              'src_subject_id',
+              'src_subject_dir',
+              'color_table',
+              'awk_file']
+    
+    config_node = pe.Node(niu.Function(params,
+                                       params,
+                                       setconfig),
+                          name="config")
+
+    for param in params:
+        reconall.connect(inputspec, param, config_node, param)
 
     # create AutoRecon1
-    ar1_wf, ar1_outputs = create_AutoRecon1(plugin_args=plugin_args,
-                                            awk_file=defaultconfig['awk_file'])
+    ar1_wf, ar1_outputs = create_AutoRecon1(plugin_args=plugin_args)
     # connect inputs for AutoRecon1
     reconall.connect([(inputspec, ar1_wf, [('T1_files', 'inputspec.T1_files'),
                                            ('T2_file', 'inputspec.T2_file'),
                                            ('FLAIR_file', 'inputspec.FLAIR_file'),
                                            ('num_threads', 'inputspec.num_threads'),
-                                           ('cw256', 'inputspec.cw256'),
-                                           ('reg_template_withskull', 'inputspec.reg_template_withskull')])])
+                                           ('cw256', 'inputspec.cw256')]),
+                      (config_node, ar1_wf, [('reg_template_withskull',
+                                              'inputspec.reg_template_withskull'),
+                                             ('awk_file', 'inputspec.awk_file')])])
 
     # create AutoRecon2
     ar2_wf, ar2_outputs = create_AutoRecon2(plugin_args=plugin_args)
     # connect inputs for AutoRecon2
-    reconall.connect([(inputspec, ar2_wf, [('num_threads', 'inputspec.num_threads'),
-                                           ('reg_template', 'inputspec.reg_template'),
-                                           ('reg_template_withskull', 'inputspec.reg_template_withskull')]),
+    reconall.connect([(inputspec, ar2_wf, [('num_threads', 'inputspec.num_threads')]),
+                      (config_node, ar2_wf, [('reg_template_withskull',
+                                              'inputspec.reg_template_withskull'),
+                                             ('reg_template', 'inputspec.reg_template')]),
                       (ar1_wf, ar2_wf, [('outputspec.brainmask', 'inputspec.brainmask'),
                                         ('outputspec.talairach', 'inputspec.transform'),
                                         ('outputspec.orig', 'inputspec.orig')])])
     # create AutoRecon3
-    ar3_wf, ar3_outputs = create_AutoRecon3(plugin_args=plugin_args, th3=defaultconfig['th3'])
+    ar3_wf, ar3_outputs = create_AutoRecon3(plugin_args=plugin_args, th3=True)
     # connect inputs for AutoRecon3
-    reconall.connect([(inputspec, ar3_wf, [('lh_atlas', 'inputspec.lh_atlas'),
-                                           ('rh_atlas', 'inputspec.rh_atlas'),
-                                           ('lh_classifier1', 'inputspec.lh_classifier1'),
-                                           ('rh_classifier1', 'inputspec.rh_classifier1'),
-                                           ('lh_classifier2', 'inputspec.lh_classifier2'),
-                                           ('rh_classifier2', 'inputspec.rh_classifier2'),
-                                           ('lh_classifier3', 'inputspec.lh_classifier3'),
-                                           ('rh_classifier3', 'inputspec.rh_classifier3'),
-                                           ('lookup_table', 'inputspec.lookup_table'),
-                                           ('wm_lookup_table', 'inputspec.wm_lookup_table'),
-                                           ('src_subject_dir', 'inputspec.src_subject_dir'),
-                                           ('src_subject_id', 'inputspec.src_subject_id'),
-                                           ('color_table', 'inputspec.color_table')]),
+    reconall.connect([(config_node, ar3_wf, [('lh_atlas', 'inputspec.lh_atlas'),
+                                             ('rh_atlas', 'inputspec.rh_atlas'),
+                                             ('lh_classifier1', 'inputspec.lh_classifier1'),
+                                             ('rh_classifier1', 'inputspec.rh_classifier1'),
+                                             ('lh_classifier2', 'inputspec.lh_classifier2'),
+                                             ('rh_classifier2', 'inputspec.rh_classifier2'),
+                                             ('lh_classifier3', 'inputspec.lh_classifier3'),
+                                             ('rh_classifier3', 'inputspec.rh_classifier3'),
+                                             ('lookup_table', 'inputspec.lookup_table'),
+                                             ('wm_lookup_table', 'inputspec.wm_lookup_table'),
+                                             ('src_subject_dir', 'inputspec.src_subject_dir'),
+                                             ('src_subject_id', 'inputspec.src_subject_id'),
+                                             ('color_table', 'inputspec.color_table')]),
                       (ar1_wf, ar3_wf, [('outputspec.brainmask', 'inputspec.brainmask'),
                                         ('outputspec.talairach', 'inputspec.transform'),
                                         ('outputspec.orig', 'inputspec.orig_mgz'),
@@ -209,7 +280,7 @@ def create_reconall_workflow(name="ReconAll", plugin_args=None):
                                              'inputspec.{0}_white_K'.format(hemi))])])
 
 
-            # Add more outputs to outputspec
+    # Add more outputs to outputspec
     outputs = ar1_outputs + ar2_outputs + ar3_outputs
     outputspec = pe.Node(niu.IdentityInterface(fields=outputs, mandatory_inputs=True),
                          name="outputspec")
@@ -401,14 +472,48 @@ def create_reconall_workflow(name="ReconAll", plugin_args=None):
                                               ('rh_table', 'label.@rh_table'),
                                               ('rh_color', 'label.@rh_color'),
                                               ('rh_thresh_table', 'label.@rh_thresh_table'),
-                                              ('rh_thresh_color', 'label.@rh_thresh_color')
+                                              ('rh_thresh_color', 'label.@rh_thresh_color'),
+                                              ('lh_BAMaps_labels', 'label.@lh_BAMaps_labels'),
+                                              ('lh_thresh_BAMaps_labels', 'label.@lh_thresh_BAMaps_labels'),
+                                              ('rh_BAMaps_labels', 'label.@rh_BAMaps_labels'),
+                                              ('rh_thresh_BAMaps_labels', 'label.@rh_thresh_BAMaps_labels'),
+                                              ('lh_BAMaps_annotation',
+                                               'label.@lh_BAMaps_annotation'),
+                                              ('lh_thresh_BAMaps_annotation',
+                                               'label.@lh_thresh_BAMaps_annotation'),
+                                              ('rh_BAMaps_annotation',
+                                               'label.@rh_BAMaps_annotation'),
+                                              ('rh_thresh_BAMaps_annotation',
+                                               'label.@rh_thresh_BAMaps_annotation'),
                                           ]),
                       ])
 
+    # compeltion node
+    # since recon-all outputs so many files a completion node is added
+    # that will output the subject_id once the workflow has completed
+    def completemethod(datasinked_files, subject_id):
+        print("recon-all has finished executing for subject: {0}".format(subject_id))
+        return subject_id
+
+    completion = pe.Node(niu.Function(['datasinked_files', 'subject_id'],
+                                      ['subject_id'],
+                                      completemethod),
+                         name="Completion")
+
+    # create a special identity interface for outputing the subject_id
+
+    postds_outputspec = pe.Node(niu.IdentityInterface(['subject_id']),
+                                name="postdatasink_outputspec")
+
+    reconall.connect([(datasink, completion, [('out_file', 'datasinked_files')]),
+                      (inputspec, completion, [('subject_id', 'subject_id')]),
+                      (completion, postds_outputspec, [('subject_id', 'subject_id')])])
+                                      
+
     #### Workflow additions go here
-    if defaultconfig['recoding_file']:
+    if recoding_file:
         from utils import create_recoding_wf
-        recode = create_recoding_wf(defaultconfig['recoding_file'])
+        recode = create_recoding_wf(recoding_file)
         reconall.connect([(ar3_wf, recode, [('outputspec.aseg', 'inputspec.labelmap')]),
                           (recode, outputspec, [('outputspec.recodedlabelmap', 'recoded_labelmap')])])
 

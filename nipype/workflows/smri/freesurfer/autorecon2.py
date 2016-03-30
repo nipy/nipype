@@ -697,7 +697,7 @@ def create_AutoRecon2(name="AutoRecon2", longitudinal=False,
                     (edit_wm, outputspec, [('out_file', 'wm_aseg')]),
                     (pretess, outputspec, [('out_file', 'wm')]),
                     (fill, outputspec, [('out_file', 'filled'),
-                                        ('log_file', 'ponscc.cut.log')]),
+                                        ('log_file', 'ponscc_log')]),
                     ])
 
     for hemi, hemi_wf in [('lh', ar2_lh),  ('rh', ar2_rh)]:
