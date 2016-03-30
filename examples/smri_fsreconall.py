@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """
 ================
-sMRI: FreeSurfer
+sMRI: FSReconAll
 ================
 
 This script, smri_fsreconall.py, demonstrates the ability to use the
@@ -74,5 +74,17 @@ recon_all.inputs.inputspec.subjects_dir = subjects_dir
 
 wf.connect(datasource, 'struct', recon_all, 'inputspec.T1_files')
 wf.connect(inputspec, 'subject_id', recon_all, 'inputspec.subject_id')
+
+"""
+Make average subject
+"""
+
+average = pe.JoinNode(interface=MakeAverageSubject(),
+                      joinsource="inputspec",
+                      joinfield="subjects_ids",
+                      name="average")
+average.inputs.subjects_dir = subjects_dir
+
+wf.connect(recon_all, 'postdatasink_outputspec.subject_id', average, 'subjects_ids')
 
 wf.run("MultiProc", plugin_args={'n_procs': 4})
