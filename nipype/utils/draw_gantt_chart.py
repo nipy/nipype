@@ -236,7 +236,7 @@ def draw_lines(start, total_duration, minute_scale, scale):
     # Iterate through the lines and create html line markers string
     for line in range(num_lines):
         # Line object
-        new_line = "<hr class='line' width='100%%' style='top:%dpx;'>" % next_line
+        new_line = "<hr class='line' width='98%%' style='top:%dpx;'>" % next_line
         result += new_line
         # Time digits
         time = "<p class='time' style='top:%dpx;'> %02d:%02d </p>" % \
@@ -344,21 +344,6 @@ def draw_nodes(start, nodes_list, cores, minute_scale, space_between_minutes,
 
     # Return html string for nodes
     return result
-
-# def draw_thread_bar(threads,space_between_minutes, minute_scale, color):
-#     result = "<p class='time' style='top:198px;left:900px;'>Threads</p>"
-# 
-#     scale = float(space_between_minutes/float(minute_scale))
-#     space_between_minutes = float(space_between_minutes/60.0)
-# 
-#     for i in range(len(threads)):
-#         #print threads[i]
-#         width = threads[i] * 10
-#         t = (float(i*scale*minute_scale)/60.0) + 220
-#         bar = "<div class='bar' style='height:"+ str(space_between_minutes) + "px;width:"+ str(width) +"px;left:900px;top:"+str(t)+"px'></div>"
-#         result += bar
-# 
-#     return result
 
 def draw_resource_bar(start_time, finish_time, time_series, space_between_minutes,
                       minute_scale, color, left, resource):
@@ -479,7 +464,7 @@ def generate_gantt_chart(logfile, cores, minute_scale=10,
     <head>
         <style>
             #content{
-                width:100%;
+                width:99%;
                 height:100%;
                 position:absolute;
             }
@@ -518,11 +503,28 @@ def generate_gantt_chart(logfile, cores, minute_scale=10,
                 height: 1px;
                 background-color: red;
             }
+            .label {
+                width:20px;
+                height:20px;
+                opacity: 0.7;
+                display: inline-block;
+            }
         </style>
     </head>
 
     <body>
-        <div id="content">'''
+        <div id="content">
+            <div style="display:inline-block;">
+    '''
+
+    close_header = '''
+    </div>
+    <div style="display:inline-block;margin-left:60px;vertical-align: top;">
+        <p><span><div class="label" style="background-color:#03969D;"></div> Estimated Resource</span></p>
+        <p><span><div class="label" style="background-color:#90BBD7;"></div> Actual Resource</span></p>
+        <p><span><div class="label" style="background-color:#f00;"></div> Failed Node</span></p>
+    </div>
+    '''
 
     # Read in json-log to get list of node dicts
     nodes_list = log_to_dict(logfile)
@@ -541,7 +543,7 @@ def generate_gantt_chart(logfile, cores, minute_scale=10,
     html_string += '<p>Duration: ' + "{0:.2f}".format(duration/60) + ' minutes</p>'
     html_string += '<p>Nodes: ' + str(len(nodes_list))+'</p>'
     html_string += '<p>Cores: ' + str(cores) + '</p>'
-
+    html_string += close_header
     # Draw nipype nodes Gantt chart and runtimes
     html_string += draw_lines(start_node['start'], duration, minute_scale,
                               space_between_minutes)
@@ -552,19 +554,20 @@ def generate_gantt_chart(logfile, cores, minute_scale=10,
     estimated_mem_ts = calculate_resource_timeseries(events, 'estimated_memory_gb')
     runtime_mem_ts = calculate_resource_timeseries(events, 'runtime_memory_gb')
     # Plot gantt chart
+    resource_offset = 120 + 30*cores
     html_string += draw_resource_bar(start_node['start'], last_node['finish'], estimated_mem_ts,
-                                     space_between_minutes, minute_scale, '#90BBD7', 1200, 'Memory')
+                                     space_between_minutes, minute_scale, '#90BBD7', resource_offset*2+120, 'Memory')
     html_string += draw_resource_bar(start_node['start'], last_node['finish'], runtime_mem_ts,
-                                     space_between_minutes, minute_scale, '#03969D', 1200, 'Memory')
+                                     space_between_minutes, minute_scale, '#03969D', resource_offset*2+120, 'Memory')
 
     # Get threads timeseries
     estimated_threads_ts = calculate_resource_timeseries(events, 'estimated_threads')
     runtime_threads_ts = calculate_resource_timeseries(events, 'runtime_threads')
     # Plot gantt chart
     html_string += draw_resource_bar(start_node['start'], last_node['finish'], estimated_threads_ts,
-                                     space_between_minutes, minute_scale, '#90BBD7', 600, 'Threads')
+                                     space_between_minutes, minute_scale, '#90BBD7', resource_offset, 'Threads')
     html_string += draw_resource_bar(start_node['start'], last_node['finish'], runtime_threads_ts,
-                                     space_between_minutes, minute_scale, '#03969D', 600, 'Threads')
+                                     space_between_minutes, minute_scale, '#03969D', resource_offset, 'Threads')
 
     #finish html
     html_string+= '''
