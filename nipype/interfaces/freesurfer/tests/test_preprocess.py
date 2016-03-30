@@ -5,16 +5,8 @@ from shutil import rmtree
 import nibabel as nif
 import numpy as np
 from tempfile import mkdtemp
-from nipype.testing import (assert_equal, assert_false, assert_true,
-                            assert_raises, skipif)
+from nipype.testing import assert_equal, assert_raises, skipif
 import nipype.interfaces.freesurfer as freesurfer
-
-
-def no_freesurfer():
-    if freesurfer.Info().version is None:
-        return True
-    else:
-        return False
 
 
 def create_files_in_directory():
@@ -38,7 +30,7 @@ def clean_directory(outdir, old_wd):
     os.chdir(old_wd)
 
 
-@skipif(no_freesurfer)
+@skipif(freesurfer.no_freesurfer)
 def test_robustregister():
     filelist, outdir, cwd = create_files_in_directory()
 
@@ -66,7 +58,7 @@ def test_robustregister():
     clean_directory(outdir, cwd)
 
 
-@skipif(no_freesurfer)
+@skipif(freesurfer.no_freesurfer)
 def test_fitmsparams():
     filelist, outdir, cwd = create_files_in_directory()
 
@@ -91,7 +83,7 @@ def test_fitmsparams():
     clean_directory(outdir, cwd)
 
 
-@skipif(no_freesurfer)
+@skipif(freesurfer.no_freesurfer)
 def test_synthesizeflash():
     filelist, outdir, cwd = create_files_in_directory()
 

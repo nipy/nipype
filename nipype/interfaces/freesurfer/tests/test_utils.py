@@ -15,13 +15,6 @@ from nipype.interfaces.base import TraitError
 import nipype.interfaces.freesurfer as fs
 
 
-def no_freesurfer():
-    if fs.Info().version is None:
-        return True
-    else:
-        return False
-
-
 def create_files_in_directory():
     outdir = os.path.realpath(mkdtemp())
     cwd = os.getcwd()
@@ -60,7 +53,7 @@ def clean_directory(outdir, old_wd):
     os.chdir(old_wd)
 
 
-@skipif(no_freesurfer)
+@skipif(fs.no_freesurfer)
 def test_sample2surf():
 
     s2s = fs.SampleToSurface()
@@ -104,7 +97,7 @@ def test_sample2surf():
     clean_directory(cwd, oldwd)
 
 
-@skipif(no_freesurfer)
+@skipif(fs.no_freesurfer)
 def test_surfsmooth():
 
     smooth = fs.SurfaceSmooth()
@@ -139,7 +132,7 @@ def test_surfsmooth():
     clean_directory(cwd, oldwd)
 
 
-@skipif(no_freesurfer)
+@skipif(fs.no_freesurfer)
 def test_surfxfm():
 
     xfm = fs.SurfaceTransform()
@@ -173,7 +166,7 @@ def test_surfxfm():
     clean_directory(cwd, oldwd)
 
 
-@skipif(no_freesurfer)
+@skipif(fs.no_freesurfer)
 def test_surfshots():
 
     fotos = fs.SurfaceSnapshots()
