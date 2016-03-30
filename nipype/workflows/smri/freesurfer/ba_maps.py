@@ -36,14 +36,22 @@ def create_ba_maps_wf(name="Brodmann_Area_Maps", th3=True):
 
     ba_outputs = ['lh_table',
                   'lh_color',
+                  'lh_BAMaps_labels',
+                  'lh_BAMaps_annotation',
                   'lh_thresh_table',
                   'lh_thresh_color',
+                  'lh_thresh_BAMaps_labels',
+                  'lh_thresh_BAMaps_annotation',
                   'rh_table',
                   'rh_color',
+                  'rh_BAMaps_labels',
+                  'rh_BAMaps_annotation',
                   'rh_thresh_table',
-                  'rh_thresh_color']
+                  'rh_thresh_color',
+                  'rh_thresh_BAMaps_labels',
+                  'rh_thresh_BAMaps_annotation']
 
-    outputSpec = pe.Node(IdentityInterface(fields=ba_outputs),
+    outputspec = pe.Node(IdentityInterface(fields=ba_outputs),
                          name="outputspec")
 
     labels = ["BA1", "BA2", "BA3a", "BA3b", "BA4a", "BA4p", "BA6",
@@ -107,16 +115,24 @@ def create_ba_maps_wf(name="Brodmann_Area_Maps", th3=True):
 
             if threshold:
                 label2annot.inputs.out_annot = "BA_exvivo.thresh"
-                ba_WF.connect([(stats_node, outputSpec, [('out_color',
+                ba_WF.connect([(stats_node, outputspec, [('out_color',
                                                           '{0}_thresh_color'.format(hemisphere)),
                                                          ('out_table',
-                                                          '{0}_thresh_table'.format(hemisphere))])])
+                                                          '{0}_thresh_table'.format(hemisphere))]),
+                               (label2annot, outputspec,
+                                [('out_file', '{0}_thresh_BAMaps_annotation'.format(hemisphere))]),
+                               (node, outputspec,
+                                [('out_file', '{0}_thresh_BAMaps_labels'.format(hemisphere))])])
             else:
                 label2annot.inputs.out_annot = "BA_exvivo"
-                ba_WF.connect([(stats_node, outputSpec, [('out_color',
+                ba_WF.connect([(stats_node, outputspec, [('out_color',
                                                           '{0}_color'.format(hemisphere)),
                                                          ('out_table',
-                                                          '{0}_table'.format(hemisphere))])])
+                                                          '{0}_table'.format(hemisphere))]),
+                               (label2annot, outputspec,
+                                [('out_file', '{0}_BAMaps_annotation'.format(hemisphere))]),
+                               (node, outputspec, [('out_file',
+                                                    '{0}_BAMaps_labels'.format(hemisphere))])])
 
 
             ba_WF.connect([(inputspec, node, [('{0}_sphere_reg'.format(hemisphere),
