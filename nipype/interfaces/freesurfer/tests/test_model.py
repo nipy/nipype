@@ -9,6 +9,7 @@ import nibabel as nib
 
 from nipype.testing import assert_equal, skipif
 from nipype.interfaces.freesurfer import model, no_freesurfer
+import nipype.pipeline.engine as pe
 
 
 @skipif(no_freesurfer)
@@ -16,8 +17,8 @@ def test_concatenate():
     tmp_dir = tempfile.mkdtemp()
     cwd = os.getcwd()
     os.chdir(tmp_dir)
-    in1 = 'cont1.nii'
-    in2 = 'cont2.nii'
+    in1 = os.path.join(tmp_dir, 'cont1.nii')
+    in2 = os.path.join(tmp_dir, 'cont2.nii')
     out = 'bar.nii'
 
     data1 = np.zeros((3, 3, 3, 1), dtype=np.float32)
@@ -39,6 +40,17 @@ def test_concatenate():
     yield (assert_equal, res.outputs.concatenated_file,
            os.path.join(tmp_dir, out))
     yield (assert_equal, nib.load(out).get_data(), out_data)
+
+    # Test in workflow
+    wf = pe.Workflow('test_concatenate', base_dir=tmp_dir)
+    concat = pe.Node(model.Concatenate(in_files=[in1, in2],
+                                       concatenated_file=out),
+                     name='concat')
+    wf.add_nodes([concat])
+    wf.run()
+    yield (assert_equal, nib.load(os.path.join(tmp_dir, 'test_concatenate',
+                                               'concat', out)).get_data(),
+           out_data)
 
     # Test a simple statistic
     res = model.Concatenate(in_files=[in1, in2], concatenated_file=out,
