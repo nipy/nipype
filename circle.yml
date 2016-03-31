@@ -12,7 +12,7 @@ dependencies:
     - bash <(wget -q -O- http://neuro.debian.net/_files/neurodebian-travis.sh)
   override:
     # Install apt packages
-    - sudo apt-get install -y fsl-core fsl-atlases fsl-mni152-templates fsl-feeds afni swig python-vtk xvfb
+    - sudo apt-get install -y fsl-core fsl-atlases fsl-mni152-templates fsl-feeds afni swig python-vtk xvfb fusefat
     - echo 'source /etc/fsl/fsl.sh' >> $HOME/.profile
     - echo 'source /etc/afni/afni.sh' >> $HOME/.profile
     - mkdir -p ~/examples/ && ln -sf /usr/share/fsl-feeds/ ~/examples/feeds

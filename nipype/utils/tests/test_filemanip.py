@@ -4,8 +4,9 @@ from builtins import open
 
 import os
 from tempfile import mkstemp, mkdtemp
+import warnings
 
-from nipype.testing import assert_equal, assert_true, assert_false
+from nipype.testing import assert_equal, assert_true, assert_false, TempFATFS
 from nipype.utils.filemanip import (save_json, load_json,
                                     fname_presuffix, fnames_presuffix,
                                     hash_rename, check_forhash,
@@ -165,6 +166,37 @@ def test_linkchain():
     # final cleanup
     os.unlink(orig_img)
     os.unlink(orig_hdr)
+
+
+def test_copyfallback():
+    if os.name is not 'posix':
+        return
+    orig_img, orig_hdr = _temp_analyze_files()
+    pth, imgname = os.path.split(orig_img)
+    pth, hdrname = os.path.split(orig_hdr)
+    try:
+        fatfs = TempFATFS()
+    except IOError:
+        warnings.warn('Fuse mount failed. copyfile fallback tests skipped.')
+    else:
+        with fatfs as fatdir:
+            tgt_img = os.path.join(fatdir, imgname)
+            tgt_hdr = os.path.join(fatdir, hdrname)
+            for copy in (True, False):
+                for use_hardlink in (True, False):
+                    copyfile(orig_img, tgt_img, copy=copy,
+                             use_hardlink=use_hardlink)
+                    yield assert_true, os.path.exists(tgt_img)
+                    yield assert_true, os.path.exists(tgt_hdr)
+                    yield assert_false, os.path.islink(tgt_img)
+                    yield assert_false, os.path.islink(tgt_hdr)
+                    yield assert_false, os.path.samefile(orig_img, tgt_img)
+                    yield assert_false, os.path.samefile(orig_hdr, tgt_hdr)
+                    os.unlink(tgt_img)
+                    os.unlink(tgt_hdr)
+    finally:
+        os.unlink(orig_img)
+        os.unlink(orig_hdr)
 
 
 def test_filename_to_list():
