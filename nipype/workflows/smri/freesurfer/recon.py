@@ -159,7 +159,7 @@ def create_reconall_workflow(name="ReconAll", plugin_args=None,
                 return arg
             else:
                 return default
-        defaultconfig = getdefaultconfig()
+        defaultconfig = getdefaultconfig(exitonfail=True)
         # set the default template and classifier files
         reg_template = checkarg(reg_template, defaultconfig['registration_template'])
         reg_template_withskull = checkarg(reg_template_withskull,

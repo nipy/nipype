@@ -420,11 +420,11 @@ def mkdir_p(path):
         else:
             raise
 
-def getdefaultconfig():
+def getdefaultconfig(exitonfail=False):
     config = { 'custom_atlas' : None,
                'cw256' : False,
                'field_strength' : '1.5T',
-               'fs_home' : checkenv(),
+               'fs_home' : checkenv(exitonfail),
                'longitudinal' : False,
                'long_base' : None,
                'openmp' : None,
@@ -463,31 +463,35 @@ def getdefaultconfig():
     return config
 
 
-def checkenv():
-    import sys
+def checkenv(exitonfail=False):
     """Check for the necessary FS environment variables"""
+    import sys
     fs_home = os.environ.get('FREESURFER_HOME')
     path = os.environ.get('PATH')
     print("FREESURFER_HOME: {0}".format(fs_home))
     if fs_home == None:
-        print("ERROR: please set FREESURFER_HOME before running the workflow")
+        msg = "please set FREESURFER_HOME before running the workflow"
     elif not os.path.isdir(fs_home):
-        print("ERROR: FREESURFER_HOME must be set to a valid directory before " +
-        "running this workflow")
+        msg = "FREESURFER_HOME must be set to a valid directory before running this workflow"
     elif os.path.join(fs_home, 'bin') not in path.replace('//','/'):
         print(path)
-        print("ERROR: Could not find necessary executable in path")
+        msg = "Could not find necessary executable in path"
         setupscript = os.path.join(fs_home, 'SetUpFreeSurfer.sh')
         if os.path.isfile(setupscript):
             print("Please source the setup script before running the workflow:" +
-            "\nsource {0}".format(setupscript))
+                  "\nsource {0}".format(setupscript))
         else:
             print("Please ensure that FREESURFER_HOME is set to a valid fs " +
             "directory and source the necessary SetUpFreeSurfer.sh script before running " +
             "this workflow")
     else:
         return fs_home
-    sys.exit(2)
+
+    if exitonfail:
+        print("ERROR: " + msg)
+        sys.exit(2)
+    else:
+        print("Warning: " + msg)
 
 def center_volume(in_file):
     import SimpleITK as sitk
