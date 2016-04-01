@@ -15,11 +15,11 @@ import simplejson
 import os
 import re
 import shutil
+import posixpath
 
 import numpy as np
 
 from .misc import is_container
-from .config import mkdir_p
 from ..external.six import string_types
 from ..interfaces.traits_extension import isdefined
 
@@ -29,31 +29,6 @@ fmlogger = logging.getLogger("filemanip")
 
 class FileNotFoundError(Exception):
     pass
-
-
-def nipype_hardlink_wrapper(raw_src, raw_dst):
-    """Attempt to use hard link instead of file copy.
-    The intent is to avoid unnnecessary duplication
-    of large files when using a DataSink.
-    Hard links are not supported on all file systems
-    or os environments, and will not succeed if the
-    src and dst are not on the same physical hardware
-    partition.
-    If the hardlink fails, then fall back to using
-    a standard copy.
-    """
-    # Use realpath to avoid hardlinking symlinks
-    src = os.path.realpath(raw_src)
-    # Use normpath, in case destination is a symlink
-    dst = os.path.normpath(raw_dst)
-    del raw_src
-    del raw_dst
-    if src != dst and os.path.exists(dst):
-        os.unlink(dst)  # First remove destination
-    try:
-        os.link(src, dst)  # Reference same inode to avoid duplication
-    except:
-        shutil.copyfile(src, dst)  # Fall back to traditional copy
 
 
 def split_filename(fname):
@@ -201,7 +176,13 @@ def hash_timestamp(afile):
 
 def copyfile(originalfile, newfile, copy=False, create_new=False,
              hashmethod=None, use_hardlink=False):
-    """Copy or symlink ``originalfile`` to ``newfile``.
+    """Copy or link ``originalfile`` to ``newfile``.
+
+    If ``use_hardlink`` is True, and the file can be hard-linked, then a
+    link is created, instead of copying the file.
+
+    If a hard link is not created and ``copy`` is False, then a symbolic
+    link is created.
 
     Parameters
     ----------
@@ -212,6 +193,9 @@ def copyfile(originalfile, newfile, copy=False, create_new=False,
     copy : Bool
         specifies whether to copy or symlink files
         (default=False) but only for POSIX systems
+    use_hardlink : Bool
+        specifies whether to hard-link files, when able
+        (Default=False), taking precedence over copy
 
     Returns
     -------
@@ -237,63 +221,87 @@ def copyfile(originalfile, newfile, copy=False, create_new=False,
     if hashmethod is None:
         hashmethod = config.get('execution', 'hash_method').lower()
 
-    elif os.path.exists(newfile):
-        if hashmethod == 'timestamp':
-            newhash = hash_timestamp(newfile)
-        elif hashmethod == 'content':
-            newhash = hash_infile(newfile)
-        fmlogger.debug("File: %s already exists,%s, copy:%d"
-                       % (newfile, newhash, copy))
-    # the following seems unnecessary
-    # if os.name is 'posix' and copy:
-    #    if os.path.lexists(newfile) and os.path.islink(newfile):
-    #        os.unlink(newfile)
-    #        newhash = None
-    if os.name is 'posix' and not copy:
-        if os.path.lexists(newfile):
-            if hashmethod == 'timestamp':
-                orighash = hash_timestamp(originalfile)
-            elif hashmethod == 'content':
-                orighash = hash_infile(originalfile)
-            fmlogger.debug('Original hash: %s, %s' % (originalfile, orighash))
-            if newhash != orighash:
-                os.unlink(newfile)
-        if (newhash is None) or (newhash != orighash):
-            os.symlink(originalfile, newfile)
-    else:
-        if newhash:
-            if hashmethod == 'timestamp':
-                orighash = hash_timestamp(originalfile)
-            elif hashmethod == 'content':
-                orighash = hash_infile(originalfile)
-        if (newhash is None) or (newhash != orighash):
-            try:
-                fmlogger.debug("Copying File: %s->%s" %
-                               (newfile, originalfile))
-                if use_hardlink:
-                    nipype_hardlink_wrapper(originalfile, newfile)
-                else:
-                    shutil.copyfile(originalfile, newfile)
-            except shutil.Error as e:
-                fmlogger.warn(e.message)
+    # Existing file
+    # -------------
+    # Options:
+    #   symlink
+    #       to originalfile             (keep if not (use_hardlink or copy))
+    #       to other file               (unlink)
+    #   regular file
+    #       hard link to originalfile   (keep)
+    #       copy of file (same hash)    (keep)
+    #       different file (diff hash)  (unlink)
+    keep = False
+    if os.path.lexists(newfile):
+        if os.path.islink(newfile):
+            if all(os.path.readlink(newfile) == originalfile, not use_hardlink,
+                   not copy):
+                keep = True
+        elif posixpath.samefile(newfile, originalfile):
+            keep = True
         else:
+            if hashmethod == 'timestamp':
+                hashfn = hash_timestamp
+            elif hashmethod == 'content':
+                hashfn = hash_infile
+            newhash = hashfn(newfile)
+            fmlogger.debug("File: %s already exists,%s, copy:%d" %
+                           (newfile, newhash, copy))
+            orighash = hashfn(originalfile)
+            keep = newhash == orighash
+        if keep:
             fmlogger.debug("File: %s already exists, not overwriting, copy:%d"
                            % (newfile, copy))
+        else:
+            os.unlink(newfile)
+
+    # New file
+    # --------
+    # use_hardlink & can_hardlink => hardlink
+    # ~hardlink & ~copy & can_symlink => symlink
+    # ~hardlink & ~symlink => copy
+    if not keep and use_hardlink:
+        try:
+            fmlogger.debug("Linking File: %s->%s" % (newfile, originalfile))
+            # Use realpath to avoid hardlinking symlinks
+            os.link(os.path.realpath(originalfile), newfile)
+        except OSError:
+            use_hardlink = False  # Disable hardlink for associated files
+        else:
+            keep = True
+
+    if not keep and not copy and os.name == 'posix':
+        try:
+            fmlogger.debug("Symlinking File: %s->%s" % (newfile, originalfile))
+            os.symlink(originalfile, newfile)
+        except OSError:
+            copy = True  # Disable symlink for associated files
+        else:
+            keep = True
+
+    if not keep:
+        try:
+            fmlogger.debug("Copying File: %s->%s" % (newfile, originalfile))
+            shutil.copyfile(originalfile, newfile)
+        except shutil.Error as e:
+            fmlogger.warn(e.message)
+
+    # Associated files
     if originalfile.endswith(".img"):
         hdrofile = originalfile[:-4] + ".hdr"
         hdrnfile = newfile[:-4] + ".hdr"
         matofile = originalfile[:-4] + ".mat"
         if os.path.exists(matofile):
             matnfile = newfile[:-4] + ".mat"
-            copyfile(matofile, matnfile, copy, create_new, hashmethod,
-                     use_hardlink)
-        copyfile(hdrofile, hdrnfile, copy, create_new, hashmethod,
-                 use_hardlink)
+            copyfile(matofile, matnfile, copy, hashmethod=hashmethod,
+                     use_hardlink=use_hardlink)
+        copyfile(hdrofile, hdrnfile, copy, hashmethod=hashmethod,
+                 use_hardlink=use_hardlink)
     elif originalfile.endswith(".BRIK"):
         hdrofile = originalfile[:-5] + ".HEAD"
         hdrnfile = newfile[:-5] + ".HEAD"
-        copyfile(hdrofile, hdrnfile, copy, create_new, hashmethod,
-                 use_hardlink)
+        copyfile(hdrofile, hdrnfile, copy, hashmethod=hashmethod,
+                 use_hardlink=use_hardlink)
 
     return newfile
 
