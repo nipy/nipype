@@ -11,12 +11,13 @@ def copy_ltas(in_file, subjects_dir, subject_id, long_template):
     return out_file
 
 def create_AutoRecon2(name="AutoRecon2", longitudinal=False,
-                      field_strength="1.5T", plugin_args=None):
+                      plugin_args=None, fsvernum=5.3):
     # AutoRecon2
     # Workflow
     ar2_wf = pe.Workflow(name=name)
 
     inputspec = pe.Node(IdentityInterface(fields=['orig',
+                                                  'nu', # version < 6
                                                   'brainmask',
                                                   'transform',
                                                   'subject_id',
@@ -47,39 +48,38 @@ def create_AutoRecon2(name="AutoRecon2", longitudinal=False,
         inputspec.inputs.timepoints = config['timepoints']
 
 
-    # NU Intensity Correction
-    """
-    Non-parametric Non-uniform intensity Normalization (N3), corrects for
-    intensity non-uniformity in MR data, making relatively few assumptions about
-    the data. This runs the MINC tool 'nu_correct'.
-    """
-    intensity_correction = pe.Node(
-        MNIBiasCorrection(), name="Intensity_Correction")
-    intensity_correction.inputs.iterations = 1
-    intensity_correction.inputs.protocol_iterations = 1000
-    intensity_correction.inputs.stop = 0.0001
-    intensity_correction.inputs.shrink = 2
-    if field_strength == '3T':
-        intensity_correction.inputs.distance = 50
-    else:
-        # default for 1.5T scans
-        intensity_correction.inputs.distance = 200
-
-    intensity_correction.inputs.out_file = 'nu.mgz'
-    ar2_wf.connect([(inputspec, intensity_correction, [('orig', 'in_file'),
-                                                        ('brainmask', 'mask'),
-                                                        ('transform', 'transform')
-                                                        ])
-                    ])
-
-    add_to_header_nu = pe.Node(AddXFormToHeader(), name="Add_XForm_to_NU")
-    add_to_header_nu.inputs.copy_name = True
-    add_to_header_nu.inputs.out_file = 'nu.mgz'
-    ar2_wf.connect([(intensity_correction, add_to_header_nu, [('out_file', 'in_file'),
+    if fsvernum >= 6:
+        # NU Intensity Correction
+        """
+        Non-parametric Non-uniform intensity Normalization (N3), corrects for
+        intensity non-uniformity in MR data, making relatively few assumptions about
+        the data. This runs the MINC tool 'nu_correct'.
+        """
+        intensity_correction = pe.Node(
+            MNIBiasCorrection(), name="Intensity_Correction")
+        intensity_correction.inputs.out_file = 'nu.mgz'
+        ar2_wf.connect([(inputspec, intensity_correction, [('orig', 'in_file'),
+                                                           ('brainmask', 'mask'),
+                                                           ('transform', 'transform')])])
+        
+        # intensity correction parameters are more specific in 6+
+        intensity_correction.inputs.iterations = 1
+        intensity_correction.inputs.protocol_iterations = 1000
+        if stop:
+            intensity_correction.inputs.stop = stop
+        if shrink:
+            intensity_correction.inputs.shrink =  shrink
+        intensity_correction.inputs.distance = distance
+        
+        add_to_header_nu = pe.Node(AddXFormToHeader(), name="Add_XForm_to_NU")
+        add_to_header_nu.inputs.copy_name = True
+        add_to_header_nu.inputs.out_file = 'nu.mgz'
+        ar2_wf.connect([(intensity_correction, add_to_header_nu, [('out_file', 'in_file'),
                                                               ]),
-                    (inputspec, add_to_header_nu,
-                     [('transform', 'transform')])
+                        (inputspec, add_to_header_nu,
+                         [('transform', 'transform')])
                     ])
+
 
     # EM Registration
     """
@@ -103,8 +103,12 @@ def create_AutoRecon2(name="AutoRecon2", longitudinal=False,
             align_transform.plugin_args = plugin_args
         ar2_wf.connect([(inputspec, align_transform, [('brainmask', 'mask'),
                                                       ('reg_template', 'template'),
-                                                      ('num_threads', 'num_threads')]),
-                        (add_to_header_nu, align_transform, [('out_file', 'in_file')])])
+                                                      ('num_threads', 'num_threads')])])
+        if fsvernum >= 6:
+            ar2_wf.connect([(add_to_header_nu, align_transform, [('out_file', 'in_file')])])
+        else:
+            ar2_wf.connect([(inputspec, align_transform, [('nu', 'in_file')])])
+            
 
     # CA Normalize
     """
@@ -128,8 +132,12 @@ def create_AutoRecon2(name="AutoRecon2", longitudinal=False,
 
     ar2_wf.connect([(align_transform, ca_normalize, [('out_file', 'transform')]),
                     (inputspec, ca_normalize, [('brainmask', 'mask'),
-                                               ('reg_template', 'atlas')]),
-                    (add_to_header_nu, ca_normalize, [('out_file', 'in_file')])])
+                                               ('reg_template', 'atlas')])])
+    if fsvernum >= 6:
+        ar2_wf.connect([(add_to_header_nu, ca_normalize, [('out_file', 'in_file')])])
+    else:
+        ar2_wf.connect([(inputspec, ca_normalize, [('nu', 'in_file')])])
+
 
     # CA Register
     # Computes a nonlinear transform to align with GCA atlas.
@@ -159,8 +167,11 @@ def create_AutoRecon2(name="AutoRecon2", longitudinal=False,
     remove_neck.inputs.radius = 25
     remove_neck.inputs.out_file = 'nu_noneck.mgz'
     ar2_wf.connect([(ca_register, remove_neck, [('out_file', 'transform')]),
-                    (add_to_header_nu, remove_neck, [('out_file', 'in_file')]),
                     (inputspec, remove_neck, [('reg_template', 'template')])])
+    if fsvernum >= 6:
+        ar2_wf.connect([(add_to_header_nu, remove_neck, [('out_file', 'in_file')])])
+    else:
+        ar2_wf.connect([(inputspec, remove_neck, [('nu', 'in_file')])])
 
     # SkullLTA (EM Registration, with Skull)
     # Computes transform to align volume mri/nu_noneck.mgz with GCA volume
@@ -680,8 +691,14 @@ def create_AutoRecon2(name="AutoRecon2", longitudinal=False,
     outputspec = pe.Node(IdentityInterface(fields=outputs),
                          name="outputspec")
 
-    ar2_wf.connect([(add_to_header_nu, outputspec, [('out_file', 'nu')]),
-                    (align_transform, outputspec, [('out_file', 'tal_lta')]),
+    if fsvernum >= 6:
+        ar2_wf.connect([(add_to_header_nu, outputspec, [('out_file', 'nu')])])
+    else:
+        # add to outputspec to perserve datasinking
+        ar2_wf.connect([(inputspec, outputspec, [('nu', 'nu')])])
+
+    
+    ar2_wf.connect([(align_transform, outputspec, [('out_file', 'tal_lta')]),
                     (ca_normalize, outputspec, [('out_file', 'norm')]),
                     (ca_normalize, outputspec, [('control_points', 'ctrl_pts')]),
                     (ca_register, outputspec, [('out_file', 'tal_m3z')]),

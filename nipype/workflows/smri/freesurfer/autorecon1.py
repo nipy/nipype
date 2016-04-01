@@ -36,7 +36,8 @@ def checkT1s(T1_files, cw256=False):
     return T1_files, cw256, resample_type, origvol_names
 
 def create_AutoRecon1(name="AutoRecon1", longitudinal=False, distance=200,
-                      custom_atlas=None, plugin_args=None, shrink=2, stop=0.0001):
+                      custom_atlas=None, plugin_args=None, shrink=2, stop=0.0001,
+                      fsvernum=5.3):
     """Creates the AutoRecon1 workflow in nipype.
 
     Inputs::
@@ -239,14 +240,9 @@ def create_AutoRecon1(name="AutoRecon1", longitudinal=False, distance=200,
     bias_correction.inputs.protocol_iterations = 1000
     bias_correction.inputs.distance = distance
     if stop:
-        # per c.larsen, decrease convergence threshold (default is 0.001)
         bias_correction.inputs.stop = stop
     if shrink:
-        # per c.larsen, decrease shrink parameter: finer sampling (default is 4)
         bias_correction.inputs.shrink =  shrink
-    # add the mask, as per c.larsen, bias-field correction is known to work
-    # much better when the brain area is properly masked, in this case by
-    # brainmask.mgz.
     bias_correction.inputs.no_rescale = True
     bias_correction.inputs.out_file = 'orig_nu.mgz'
 
@@ -340,6 +336,28 @@ def create_AutoRecon1(name="AutoRecon1", longitudinal=False, distance=200,
         tal_qc = pe.Node(TalairachQC(), name="Detect_Aligment_Failures")
         ar1_wf.connect([(awk_logfile, tal_qc, [('log_file', 'log_file')])])
 
+
+    if fsvernum < 6:
+        # intensity correction is performed before normalization
+        intensity_correction = pe.Node(
+            MNIBiasCorrection(), name="Intensity_Correction")
+        intensity_correction.inputs.out_file = 'nu.mgz'
+        intensity_correction.inputs.iterations = 2
+        ar2_wf.connect([(inputspec, intensity_correction, [('orig', 'in_file'),
+                                                           ('brainmask', 'mask'),
+                                                           ('transform', 'transform')])])
+        
+
+        add_to_header_nu = pe.Node(AddXFormToHeader(), name="Add_XForm_to_NU")
+        add_to_header_nu.inputs.copy_name = True
+        add_to_header_nu.inputs.out_file = 'nu.mgz'
+        ar2_wf.connect([(intensity_correction, add_to_header_nu, [('out_file', 'in_file'),
+                                                              ]),
+                        (copy_transform, add_to_header_nu,
+                         [('out_file', 'transform')])
+                    ])
+
+        
     # Intensity Normalization
     # Performs intensity normalization of the orig volume and places the result in mri/T1.mgz.
     # Attempts to correct for fluctuations in intensity that would otherwise make intensity-based
@@ -349,10 +367,13 @@ def create_AutoRecon1(name="AutoRecon1", longitudinal=False, distance=200,
     mri_normalize = pe.Node(Normalize(), name="Normalize_T1")
     mri_normalize.inputs.gradient = 1
     mri_normalize.inputs.out_file = 'T1.mgz'
-    ar1_wf.connect([(add_xform_to_orig_nu, mri_normalize, [('out_file', 'in_file')]),
-                    (copy_transform, mri_normalize,
-                     [('out_file', 'transform')]),
-                    ])
+
+    if fsvernum < 6:
+        ar1_wf.connect([(add_to_header_nu, mri_normalize, [('out_file', 'in_file')])])        
+    else:
+        ar1_wf.connect([(add_xform_to_orig_nu, mri_normalize, [('out_file', 'in_file')])])
+
+    ar1_wf.connect([(copy_transform, mri_normalize, [('out_file', 'transform')])])
 
     # Skull Strip
     """
@@ -422,8 +443,14 @@ def create_AutoRecon1(name="AutoRecon1", longitudinal=False, distance=200,
                'brainmask_auto',
                'brainmask',
                'braintemplate']
-    outputspec = pe.Node(IdentityInterface(fields=outputs),
-                         name="outputspec")
+
+    if fsvernum < 6:
+        outputspec = pe.Node(IdentityInterface(fields=outputs + 'nu'),
+                             name="outputspec")
+        ar1_wf.connect([(add_to_header_nu, outputspec, [('out_file', 'nu')])])
+    else:
+        outputspec = pe.Node(IdentityInterface(fields=outputs),
+                             name="outputspec")
 
     ar1_wf.connect([(T1_image_preparation, outputspec, [('out_file', 'origvols')]),
                     (T2_convert, outputspec, [('out_file', 't2_raw')]),
