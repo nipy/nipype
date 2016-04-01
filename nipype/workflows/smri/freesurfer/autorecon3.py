@@ -8,7 +8,7 @@ from .utils import createsrcsubj
 from nipype.interfaces.io import DataGrabber
 
 def create_AutoRecon3(name="AutoRecon3", qcache=False, plugin_args=None,
-                      th3=True, exvivo=True):
+                      th3=True, exvivo=True, entorhinal=True):
 
     # AutoRecon3
     # Workflow
