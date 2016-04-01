@@ -137,7 +137,7 @@ def create_reconall_workflow(name="ReconAll", plugin_args=None,
 
     # check freesurfer version and set parameters
     fs_version_full = Info.version()
-    elif 'v6.0' in fs_version_full or 'dev' in fs_version_full:
+    if 'v6.0' in fs_version_full or 'dev' in fs_version_full:
         # assuming that dev is 6.0
         fs_version = 'v6.0'
         th3 = True
