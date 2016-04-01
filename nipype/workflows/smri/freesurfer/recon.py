@@ -233,7 +233,7 @@ def create_reconall_workflow(name="ReconAll", plugin_args=None,
               'wm_lookup_table',
               'awk_file']
     
-    config_node = pe.Node(niu.Function(params.append('rb_date'),
+    config_node = pe.Node(niu.Function(params + ['rb_date'],
                                        params,
                                        setconfig),
                           name="config")
