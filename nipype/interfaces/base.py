@@ -1225,14 +1225,16 @@ def _get_num_threads(proc):
 
     # Init variables
     num_threads = proc.num_threads()
-
+    alive_procs = 0
     # Iterate through child processes and get number of their threads
     try:
-        num_children = len(proc.children())
+        #num_children = len(proc.children())
         for child in proc.children(recursive=True):
-            #num_threads += child.num_threads()
-            num_threads = max(num_threads, num_children,
-                              child.num_threads(), len(child.children()))
+            if child.status() == psutil.STATUS_RUNNING:
+                alive_procs += 1
+                num_threads += max(alive_procs, child.num_threads()) #child.num_threads()
+            #num_threads = max(num_threads, num_children,
+            #                  child.num_threads(), len(child.children()))
     except psutil.NoSuchProcess:
         pass
 
