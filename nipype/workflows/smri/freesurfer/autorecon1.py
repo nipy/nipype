@@ -344,7 +344,7 @@ def create_AutoRecon1(name="AutoRecon1", longitudinal=False, distance=200,
         intensity_correction.inputs.out_file = 'nu.mgz'
         intensity_correction.inputs.iterations = 2
         ar1_wf.connect([(add_xform_to_orig, intensity_correction, [('out_file', 'in_file')]),
-                        (copy_transform, intensity_correction, [('transform', 'transform')])])
+                        (copy_transform, intensity_correction, [('out_file', 'transform')])])
         
 
         add_to_header_nu = pe.Node(AddXFormToHeader(), name="Add_XForm_to_NU")
