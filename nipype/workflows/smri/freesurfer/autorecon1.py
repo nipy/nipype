@@ -343,15 +343,14 @@ def create_AutoRecon1(name="AutoRecon1", longitudinal=False, distance=200,
             MNIBiasCorrection(), name="Intensity_Correction")
         intensity_correction.inputs.out_file = 'nu.mgz'
         intensity_correction.inputs.iterations = 2
-        ar2_wf.connect([(inputspec, intensity_correction, [('orig', 'in_file'),
-                                                           ('brainmask', 'mask'),
-                                                           ('transform', 'transform')])])
+        ar1_wf.connect([(add_xform_to_orig, intensity_correction, [('out_file', 'in_file')]),
+                        (copy_transform, intensity_correction, [('transform', 'transform')])])
         
 
         add_to_header_nu = pe.Node(AddXFormToHeader(), name="Add_XForm_to_NU")
         add_to_header_nu.inputs.copy_name = True
         add_to_header_nu.inputs.out_file = 'nu.mgz'
-        ar2_wf.connect([(intensity_correction, add_to_header_nu, [('out_file', 'in_file'),
+        ar1_wf.connect([(intensity_correction, add_to_header_nu, [('out_file', 'in_file'),
                                                               ]),
                         (copy_transform, add_to_header_nu,
                          [('out_file', 'transform')])
