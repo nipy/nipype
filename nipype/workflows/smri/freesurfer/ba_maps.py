@@ -6,7 +6,8 @@ from nipype.interfaces.freesurfer import *
 from nipype.interfaces.io import DataGrabber
 from nipype.interfaces.utility import Merge
 
-def create_ba_maps_wf(name="Brodmann_Area_Maps", th3=True, exvivo=True):
+def create_ba_maps_wf(name="Brodmann_Area_Maps", th3=True, exvivo=True,
+                      entorhinal=True):
     # Brodmann Area Maps (BA Maps) and Hinds V1 Atlas
     inputs = ['lh_sphere_reg',
               'rh_sphere_reg',
@@ -55,7 +56,9 @@ def create_ba_maps_wf(name="Brodmann_Area_Maps", th3=True, exvivo=True):
                          name="outputspec")
 
     labels = ["BA1", "BA2", "BA3a", "BA3b", "BA4a", "BA4p", "BA6",
-              "BA44", "BA45", "V1", "V2", "MT", "entorhinal", "perirhinal"]
+              "BA44", "BA45", "V1", "V2", "MT", "perirhinal"]
+    if entorhinal:
+        labels.append('entorhinal')
     for hemisphere in ['lh', 'rh']:
         for threshold in [True, False]:
             field_template = dict(sphere_reg='surf/{0}.sphere.reg'.format(hemisphere),

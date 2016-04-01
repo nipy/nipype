@@ -145,6 +145,7 @@ def create_reconall_workflow(name="ReconAll", plugin_args=None,
         distance = 200 # 3T should be 50
         stop = 0.0001
         exvivo = True
+        entorhinal = True
     else:
         # 5.3 is default
         if 'v5.3' in fs_version_full:
@@ -159,6 +160,7 @@ def create_reconall_workflow(name="ReconAll", plugin_args=None,
         distance = 50
         stop = None
         exvivo = False
+        entorhinal = False
 
     print("FreeSurfer Version: {0}".format(fs_version))
         
@@ -261,7 +263,7 @@ def create_reconall_workflow(name="ReconAll", plugin_args=None,
                                         ('outputspec.orig', 'inputspec.orig')])])
     # create AutoRecon3
     ar3_wf, ar3_outputs = create_AutoRecon3(plugin_args=plugin_args, th3=th3,
-                                            exvivo=exvivo)
+                                            exvivo=exvivo, entorhinal=entorhinal)
     # connect inputs for AutoRecon3
     reconall.connect([(config_node, ar3_wf, [('lh_atlas', 'inputspec.lh_atlas'),
                                              ('rh_atlas', 'inputspec.rh_atlas'),

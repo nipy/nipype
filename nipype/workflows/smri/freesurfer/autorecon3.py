@@ -705,7 +705,8 @@ def create_AutoRecon3(name="AutoRecon3", qcache=False, plugin_args=None,
                     ])
 
     # add brodman area maps to the workflow
-    ba_WF, ba_outputs = create_ba_maps_wf(th3=th3, exvivo=exvivo)
+    ba_WF, ba_outputs = create_ba_maps_wf(th3=th3, exvivo=exvivo,
+                                          entorhinal=entorhinal)
 
     ar3_wf.connect([(ar3_lh_wf1, ba_WF, [('outputspec.sphere_reg', 'inputspec.lh_sphere_reg'),
                                          ('outputspec.thickness_pial', 'inputspec.lh_thickness'),
