@@ -146,6 +146,7 @@ def create_reconall_workflow(name="ReconAll", plugin_args=None,
         stop = 0.0001
         exvivo = True
         entorhinal = True
+        rb_date = "2014-08-21"
     else:
         # 5.3 is default
         if 'v5.3' in fs_version_full:
@@ -161,6 +162,7 @@ def create_reconall_workflow(name="ReconAll", plugin_args=None,
         stop = None
         exvivo = False
         entorhinal = False
+        rb_date = "2008-03-26"
 
     print("FreeSurfer Version: {0}".format(fs_version))
         
@@ -179,7 +181,8 @@ def create_reconall_workflow(name="ReconAll", plugin_args=None,
                   color_table=None,
                   lookup_table=None,
                   wm_lookup_table=None,
-                  awk_file=None):
+                  awk_file=None,
+                  rb_date=rb_date):
         """Set optional configurations to the default"""
         from nipype.workflows.smri.freesurfer.utils import getdefaultconfig
         def checkarg(arg, default):
@@ -188,7 +191,7 @@ def create_reconall_workflow(name="ReconAll", plugin_args=None,
                 return arg
             else:
                 return default
-        defaultconfig = getdefaultconfig(exitonfail=True)
+        defaultconfig = getdefaultconfig(exitonfail=True, rb_date=rb_date)
         # set the default template and classifier files
         reg_template = checkarg(reg_template, defaultconfig['registration_template'])
         reg_template_withskull = checkarg(reg_template_withskull,
