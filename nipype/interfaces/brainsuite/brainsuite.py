@@ -371,7 +371,7 @@ class CortexInputSpec(CommandLineInputSpec):
     computeGCBoundary = traits.Bool(
         desc='compute GM/CSF boundary', argstr='-g')
     includeAllSubcorticalAreas = traits.Bool(
-        True, usedefault=True, esc='include all subcortical areas in WM mask', argstr='-a')
+        True, usedefault=True, desc='include all subcortical areas in WM mask', argstr='-a')
     verbosity = traits.Int(desc='verbosity level', argstr='-v %d')
     timer = traits.Bool(desc='timing function', argstr='--timer')
 
