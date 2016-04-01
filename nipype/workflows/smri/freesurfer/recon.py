@@ -143,6 +143,7 @@ def create_reconall_workflow(name="ReconAll", plugin_args=None,
         th3 = True
         shrink = 2
         distance = 200 # 3T should be 50
+        stop = 0.0001
         exvivo = True
     else:
         # 5.3 is default
@@ -155,9 +156,9 @@ def create_reconall_workflow(name="ReconAll", plugin_args=None,
                   "version of FreeSurfer")
         th3 = False
         shrink = None
-        exvivo = False
         distance = 50
         stop = None
+        exvivo = False
 
     print("FreeSurfer Version: {0}".format(fs_version))
         
@@ -236,7 +237,8 @@ def create_reconall_workflow(name="ReconAll", plugin_args=None,
         reconall.connect(inputspec, param, config_node, param)
 
     # create AutoRecon1
-    ar1_wf, ar1_outputs = create_AutoRecon1(plugin_args=plugin_args)
+    ar1_wf, ar1_outputs = create_AutoRecon1(plugin_args=plugin_args, stop=stop,
+                                            distance=distance, shrink=shrink)
     # connect inputs for AutoRecon1
     reconall.connect([(inputspec, ar1_wf, [('T1_files', 'inputspec.T1_files'),
                                            ('T2_file', 'inputspec.T2_file'),
