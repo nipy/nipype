@@ -139,7 +139,7 @@ def create_reconall_workflow(name="ReconAll", plugin_args=None,
     fs_version_full = Info.version()
     elif 'v6.0' in fs_version_full or 'dev' in fs_version_full:
         # assuming that dev is 6.0
-        fs_version = '6.0'
+        fs_version = 'v6.0'
         th3 = True
         shrink = 2
         distance = 200 # 3T should be 50
@@ -147,7 +147,7 @@ def create_reconall_workflow(name="ReconAll", plugin_args=None,
     else:
         # 5.3 is default
         if 'v5.3' in fs_version_full:
-            fs_version = '5.3'
+            fs_version = 'v5.3'
         else:
             fs_vesion = fs_version_full.split('-')[-1]
             print("Warning: Workflow may not work properly if FREESURFER_HOME " +
@@ -158,7 +158,9 @@ def create_reconall_workflow(name="ReconAll", plugin_args=None,
         exvivo = False
         distance = 50
         stop = None
-    
+
+    print("FreeSurfer Version: {0}".format(fs_version))
+        
     def setconfig(reg_template=None,
                   reg_template_withskull=None,
                   lh_atlas=None,
