@@ -67,6 +67,9 @@ def create_ba_maps_wf(name="Brodmann_Area_Maps", th3=True, exvivo=True,
             out_files = list()
             if threshold:
                 for label in labels:
+                    if label == 'perirhinal' and entorhinal:
+                        # versions < 6.0 do not use thresh.perirhinal
+                        continue
                     if exvivo:
                         out_file = '{0}.{1}_exvivo.thresh.label'.format(hemisphere, label)
                     else:
