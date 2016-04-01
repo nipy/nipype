@@ -444,7 +444,7 @@ def create_AutoRecon1(name="AutoRecon1", longitudinal=False, distance=200,
                'braintemplate']
 
     if fsvernum < 6:
-        outputspec = pe.Node(IdentityInterface(fields=outputs + 'nu'),
+        outputspec = pe.Node(IdentityInterface(fields=outputs + ['nu']),
                              name="outputspec")
         ar1_wf.connect([(add_to_header_nu, outputspec, [('out_file', 'nu')])])
     else:
