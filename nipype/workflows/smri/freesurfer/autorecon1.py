@@ -35,9 +35,8 @@ def checkT1s(T1_files, cw256=False):
     resample_type = 'cubic' if len(T1_files) > 1 else 'interpolate'
     return T1_files, cw256, resample_type, origvol_names
 
-
-def create_AutoRecon1(name="AutoRecon1", longitudinal=False, field_strength='1.5T',
-                      custom_atlas=None, plugin_args=None):
+def create_AutoRecon1(name="AutoRecon1", longitudinal=False, distance=200,
+                      custom_atlas=None, plugin_args=None, shrink=2):
     """Creates the AutoRecon1 workflow in nipype.
 
     Inputs::
@@ -238,19 +237,13 @@ def create_AutoRecon1(name="AutoRecon1", longitudinal=False, field_strength='1.5
     bias_correction = pe.Node(MNIBiasCorrection(), name="Bias_correction")
     bias_correction.inputs.iterations = 1
     bias_correction.inputs.protocol_iterations = 1000
-    if field_strength == '3T':
-        # 3T params from Zheng, Chee, Zagorodnov 2009 NeuroImage paper
-        # "Improvement of brain segmentation accuracy by optimizing
-        # non-uniformity correction using N3"
-        # namely specifying iterations, proto-iters and distance:
-        bias_correction.inputs.distance = 50
-    else:
-        # 1.5T default
-        bias_correction.inputs.distance = 200
-    # per c.larsen, decrease convergence threshold (default is 0.001)
-    bias_correction.inputs.stop = 0.0001
-    # per c.larsen, decrease shrink parameter: finer sampling (default is 4)
-    bias_correction.inputs.shrink =  2
+    bias_correction.inputs.distance = distance
+    if stop:
+        # per c.larsen, decrease convergence threshold (default is 0.001)
+        bias_correction.inputs.stop = stop
+    if shrink:
+        # per c.larsen, decrease shrink parameter: finer sampling (default is 4)
+        bias_correction.inputs.shrink =  shrink
     # add the mask, as per c.larsen, bias-field correction is known to work
     # much better when the brain area is properly masked, in this case by
     # brainmask.mgz.

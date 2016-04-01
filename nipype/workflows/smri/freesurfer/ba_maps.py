@@ -6,7 +6,7 @@ from nipype.interfaces.freesurfer import *
 from nipype.interfaces.io import DataGrabber
 from nipype.interfaces.utility import Merge
 
-def create_ba_maps_wf(name="Brodmann_Area_Maps", th3=True):
+def create_ba_maps_wf(name="Brodmann_Area_Maps", th3=True, exvivo=True):
     # Brodmann Area Maps (BA Maps) and Hinds V1 Atlas
     inputs = ['lh_sphere_reg',
               'rh_sphere_reg',
@@ -64,13 +64,20 @@ def create_ba_maps_wf(name="Brodmann_Area_Maps", th3=True):
             out_files = list()
             if threshold:
                 for label in labels:
-                    out_file = '{0}.{1}_exvivo.thresh.label'.format(hemisphere, label)
+                    if exvivo:
+                        out_file = '{0}.{1}_exvivo.thresh.label'.format(hemisphere, label)
+                    else:
+                        out_file = '{0}.{1}.thresh.label'.format(hemisphere, label)
                     out_files.append(out_file)
                     field_template[label] = 'label/' + out_file
                 node_name = 'BA_Maps_' + hemisphere + '_Tresh'
             else:
                 for label in labels:
-                    out_file = '{0}.{1}_exvivo.label'.format(hemisphere, label)
+                    if exvivo:
+                        out_file = '{0}.{1}_exvivo.label'.format(hemisphere, label)
+                    else:
+                        out_file = '{0}.{1}.label'.format(hemisphere, label)
+                        
                     out_files.append(out_file)
                     field_template[label] = 'label/' + out_file
                 node_name = 'BA_Maps_' + hemisphere

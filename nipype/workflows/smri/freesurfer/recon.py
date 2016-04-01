@@ -4,7 +4,7 @@ from ....interfaces import utility as niu
 from .autorecon1 import create_AutoRecon1
 from .autorecon2 import create_AutoRecon2
 from .autorecon3 import create_AutoRecon3
-from ....interfaces.freesurfer import AddXFormToHeader
+from ....interfaces.freesurfer import AddXFormToHeader, Info
 from ....interfaces.io import DataSink
 from .utils import getdefaultconfig
 
@@ -135,6 +135,30 @@ def create_reconall_workflow(name="ReconAll", plugin_args=None,
                         run_without_submitting=True,
                         name='inputspec')
 
+    # check freesurfer version and set parameters
+    fs_version_full = Info.version()
+    elif 'v6.0' in fs_version_full or 'dev' in fs_version_full:
+        # assuming that dev is 6.0
+        fs_version = '6.0'
+        th3 = True
+        shrink = 2
+        distance = 200 # 3T should be 50
+        exvivo = True
+    else:
+        # 5.3 is default
+        if 'v5.3' in fs_version_full:
+            fs_version = '5.3'
+        else:
+            fs_vesion = fs_version_full.split('-')[-1]
+            print("Warning: Workflow may not work properly if FREESURFER_HOME " +
+                  "environmental variable is not set or if you are using an older " +
+                  "version of FreeSurfer")
+        th3 = False
+        shrink = None
+        exvivo = False
+        distance = 50
+        stop = None
+    
     def setconfig(reg_template=None,
                   reg_template_withskull=None,
                   lh_atlas=None,
@@ -232,7 +256,8 @@ def create_reconall_workflow(name="ReconAll", plugin_args=None,
                                         ('outputspec.talairach', 'inputspec.transform'),
                                         ('outputspec.orig', 'inputspec.orig')])])
     # create AutoRecon3
-    ar3_wf, ar3_outputs = create_AutoRecon3(plugin_args=plugin_args, th3=True)
+    ar3_wf, ar3_outputs = create_AutoRecon3(plugin_args=plugin_args, th3=th3,
+                                            exvivo=exvivo)
     # connect inputs for AutoRecon3
     reconall.connect([(config_node, ar3_wf, [('lh_atlas', 'inputspec.lh_atlas'),
                                              ('rh_atlas', 'inputspec.rh_atlas'),
