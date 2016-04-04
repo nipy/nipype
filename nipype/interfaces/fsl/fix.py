@@ -161,9 +161,9 @@ class Training(CommandLine):
     def _list_outputs(self):
         outputs = self.output_spec().get()
         if isdefined(self.inputs.trained_wts_filestem):
-            outputs['trained_wts_file'] = os.path.join(mel_ica, self.inputs.trained_wts_filestem + '.RData')
+            outputs['trained_wts_file'] = os.path.abspath(self.inputs.trained_wts_filestem + '.RData')
         else:
-            outputs['trained_wts_file'] = os.path.join(mel_ica, 'trained_wts_file.RData')
+            outputs['trained_wts_file'] = os.path.abspath('trained_wts_file.RData')
         return outputs
 
 
