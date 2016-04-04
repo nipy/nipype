@@ -258,7 +258,6 @@ def create_reconall_workflow(name="ReconAll", plugin_args=None,
                       (config_node, ar1_wf, [('reg_template_withskull',
                                               'inputspec.reg_template_withskull'),
                                              ('awk_file', 'inputspec.awk_file')])])
-
     # create AutoRecon2
     ar2_wf, ar2_outputs = create_AutoRecon2(plugin_args=plugin_args, fsvernum=fsvernum)
     # connect inputs for AutoRecon2
@@ -269,6 +268,10 @@ def create_reconall_workflow(name="ReconAll", plugin_args=None,
                       (ar1_wf, ar2_wf, [('outputspec.brainmask', 'inputspec.brainmask'),
                                         ('outputspec.talairach', 'inputspec.transform'),
                                         ('outputspec.orig', 'inputspec.orig')])])
+
+    if fsvernum < 6:
+        reconall.connect([(ar1_wf, ar2_wf, [('outputspec.nu', 'inputspec.nu')])])
+
     # create AutoRecon3
     ar3_wf, ar3_outputs = create_AutoRecon3(plugin_args=plugin_args, th3=th3,
                                             exvivo=exvivo, entorhinal=entorhinal)
