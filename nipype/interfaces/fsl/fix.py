@@ -132,7 +132,7 @@ class FeatureExtractor(CommandLine):
     '''
     input_spec = FeatureExtractorInputSpec
     output_spec = FeatureExtractorOutputSpec
-    cmd = '/usr/local/fix/fix -f'
+    cmd = 'fix -f'
 
 
 
@@ -156,14 +156,14 @@ class Training(CommandLine):
     '''
     input_spec = TrainingInputSpec
     output_spec = TrainingOutputSpec
-    cmd = '/usr/local/fix/fix -t'
+    cmd = 'fix -t'
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
         if isdefined(self.inputs.trained_wts_filestem):
-            outputs['trained_wts_file'] = os.path.abspath(self.inputs.trained_wts_filestem + '.RData')
+            outputs['trained_wts_file'] = os.path.join(mel_ica, self.inputs.trained_wts_filestem + '.RData')
         else:
-            outputs['trained_wts_file'] = os.path.abspath('trained_wts_file.RData')
+            outputs['trained_wts_file'] = os.path.join(mel_ica, 'trained_wts_file.RData')
         return outputs
 
 
@@ -190,7 +190,7 @@ class AccuracyTester(CommandLine):
     '''
     input_spec = AccuracyTesterInputSpec
     output_spec = AccuracyTesterOutputSpec
-    cmd = '/usr/local/fix/fix -C'
+    cmd = 'fix -C'
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
@@ -222,7 +222,7 @@ class Classifier(CommandLine):
     '''
     input_spec = ClassifierInputSpec
     output_spec = ClassifierOutputSpec
-    cmd = '/usr/local/fix/fix -c'
+    cmd = 'fix -c'
 
     def _gen_artifacts_list_file(self, mel_ica, thresh):
         
@@ -276,7 +276,7 @@ class Cleaner(CommandLine):
     '''
     input_spec = CleanerInputSpec
     output_spec = CleanerOutputSpec
-    cmd = '/usr/local/fix/fix -a'
+    cmd = 'fix -a'
 
     def _get_cleaned_functional_filename(self, artifacts_list_filename):
         ''' extract the proper filename from the first line of the artifacts file '''
