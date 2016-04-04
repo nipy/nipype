@@ -231,7 +231,6 @@ class Classifier(CommandLine):
         filestem = 'fix4melview_' + trained_wts_filestem + '_thr'
 
         fname = os.path.join(mel_ica, filestem + str(thresh) + '.txt')
-        print fname 
         return fname
 
     def _list_outputs(self):
@@ -280,7 +279,7 @@ class Cleaner(CommandLine):
 
     def _get_cleaned_functional_filename(self, artifacts_list_filename):
         ''' extract the proper filename from the first line of the artifacts file '''
-        artifacts_list_file = file(artifacts_list_filename, 'r')
+        artifacts_list_file = open(artifacts_list_filename, 'r')
         functional_filename, extension = artifacts_list_file.readline().split('.')
         return(functional_filename + '_cleaned.nii.gz')
 
