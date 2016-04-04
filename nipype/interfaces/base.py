@@ -19,6 +19,7 @@ from configparser import NoOptionError
 from copy import deepcopy
 import datetime
 import errno
+import locale
 import os
 import re
 import platform
@@ -47,7 +48,7 @@ from ..utils.misc import is_container, trim, str2bool
 from ..utils.provenance import write_provenance
 from .. import config, logging, LooseVersion
 from .. import __version__
-from ..external.six import string_types
+from ..external.six import string_types, text_type
 
 nipype_version = LooseVersion(__version__)
 
@@ -1149,6 +1150,9 @@ class Stream(object):
         self._buf = ''
         self._rows = []
         self._lastidx = 0
+        self.default_encoding = locale.getdefaultlocale()[1]
+        if self.default_encoding is None:
+            self.default_encoding = 'UTF-8'
 
     def fileno(self):
         "Pass-through for file descriptor."
@@ -1163,7 +1167,7 @@ class Stream(object):
     def _read(self, drain):
         "Read from the file descriptor"
         fd = self.fileno()
-        buf = os.read(fd, 4096).decode()
+        buf = os.read(fd, 4096).decode(self.default_encoding)
         if not buf and not self._buf:
             return None
         if '\n' not in buf:
@@ -1202,11 +1206,14 @@ def run_command(runtime, output=None, timeout=0.01, redirect_x=False):
             raise RuntimeError('Xvfb was not found, X redirection aborted')
         cmdline = 'xvfb-run -a ' + cmdline
 
+    default_encoding = locale.getdefaultlocale()[1]
+    if default_encoding is None:
+        default_encoding = 'UTF-8'
     if output == 'file':
         errfile = os.path.join(runtime.cwd, 'stderr.nipype')
         outfile = os.path.join(runtime.cwd, 'stdout.nipype')
-        stderr = open(errfile, 'wt')  # t=='text'===default
-        stdout = open(outfile, 'wt')
+        stderr = open(errfile, 'wb')  # t=='text'===default
+        stdout = open(outfile, 'wb')
 
         proc = subprocess.Popen(cmdline,
                                 stdout=stdout,
@@ -1256,26 +1263,17 @@ def run_command(runtime, output=None, timeout=0.01, redirect_x=False):
         result['merged'] = [r[1] for r in temp]
     if output == 'allatonce':
         stdout, stderr = proc.communicate()
-        if stdout and isinstance(stdout, bytes):
-            try:
-                stdout = stdout.decode()
-            except UnicodeDecodeError:
-                stdout = stdout.decode("ISO-8859-1")
-        if stderr and isinstance(stderr, bytes):
-            try:
-                stderr = stderr.decode()
-            except UnicodeDecodeError:
-                stderr = stderr.decode("ISO-8859-1")
-
-        result['stdout'] = str(stdout).split('\n')
-        result['stderr'] = str(stderr).split('\n')
+        stdout = stdout.decode(default_encoding)
+        stderr = stderr.decode(default_encoding)
+        result['stdout'] = stdout.split('\n')
+        result['stderr'] = stderr.split('\n')
         result['merged'] = ''
     if output == 'file':
         ret_code = proc.wait()
         stderr.flush()
         stdout.flush()
-        result['stdout'] = [line.strip() for line in open(outfile).readlines()]
-        result['stderr'] = [line.strip() for line in open(errfile).readlines()]
+        result['stdout'] = [line.decode(default_encoding).strip() for line in open(outfile, 'rb').readlines()]
+        result['stderr'] = [line.decode(default_encoding).strip() for line in open(errfile, 'rb').readlines()]
         result['merged'] = ''
     if output == 'none':
         proc.communicate()
