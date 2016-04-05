@@ -80,7 +80,7 @@ class DTI(DipyDiffusionInterface):
 
         for metric in ["fa", "md", "rd", "ad"]:
             outputs["{}_file".format(metric)] = self._gen_filename(metric)
-        
+
         return outputs
 
 

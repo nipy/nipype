@@ -26,7 +26,11 @@ def test_DTI_inputs():
 
 
 def test_DTI_outputs():
-    output_map = dict(out_file=dict(),
+    output_map = dict(ad_file=dict(),
+    fa_file=dict(),
+    md_file=dict(),
+    out_file=dict(),
+    rd_file=dict(),
     )
     outputs = DTI.output_spec()
 
