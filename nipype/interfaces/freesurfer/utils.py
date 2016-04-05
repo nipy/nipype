@@ -35,21 +35,30 @@ filetypes = ['cor', 'mgh', 'mgz', 'minc', 'analyze',
 
 
 def copy2subjdir(cls, in_file, folder=None, basename=None, subject_id=None):
+    """Method to copy an input to the subjects directory"""
+    # check that the input is defined
+    if not isdefined(in_file):
+        return in_file
+    # check that subjects_dir is defined
     if isdefined(cls.inputs.subjects_dir):
         subjects_dir = cls.inputs.subjects_dir
     else:
-        subjects_dir = os.getcwd()
+        subjects_dir = os.getcwd() #if not use cwd
+    # check for subject_id
     if not subject_id:
         if isdefined(cls.inputs.subject_id):
             subject_id = cls.inputs.subject_id
         else:
-            subject_id = 'subject_id'
+            subject_id = 'subject_id' #default
+    # check for basename
     if basename == None:
         basename = os.path.basename(in_file)
+    # check which folder to put the file in
     if folder != None:
         out_dir = os.path.join(subjects_dir, subject_id, folder)
     else:
         out_dir = os.path.join(subjects_dir, subject_id)
+    # make the output folder if it does not exist
     if not os.path.isdir(out_dir):
         os.makedirs(out_dir)
     out_file = os.path.join(out_dir, basename)
@@ -58,7 +67,7 @@ def copy2subjdir(cls, in_file, folder=None, basename=None, subject_id=None):
     return out_file
 
 def createoutputdirs(outputs):
-    """create an output directories. If not created, some freesurfer interfaces fail"""
+    """create all output directories. If not created, some freesurfer interfaces fail"""
     for output in outputs.itervalues():
         dirname = os.path.dirname(output)
         if not os.path.isdir(dirname):
@@ -2301,11 +2310,16 @@ class VolumeMaskInputSpec(FSTraitedSpec):
                     desc="Implicit input left white matter surface")
     rh_white = File(mandatory=True, exists=True,
                     desc="Implicit input right white matter surface")
+    aseg = File(mandatory=True, exists=True,
+                xor=['in_aseg'], 
+                desc="Implicit aseg.mgz segmentation. " + 
+                "Specify a different aseg by using the 'in_aseg' input.")
     subject_id = traits.String('subject_id', usedefault=True,
                                position=-1, argstr="%s", mandatory=True,
                                desc="Subject being processed")
     # optional
-    in_aseg = File(argstr="--aseg_name %s", mandatory=False, exists=True,
+    in_aseg = File(argstr="--aseg_name %s", mandatory=False, 
+                   exists=True, xor=['aseg'],
                    desc="Input aseg file for VolumeMask")
     save_ribbon = traits.Bool(argstr="--save_ribbon", mandatory=False,
                               desc="option to save just the ribbon for the " +
@@ -2363,8 +2377,9 @@ class VolumeMask(FSCommand):
             copy2subjdir(self, self.inputs.rh_pial, 'surf', 'rh.pial')
             copy2subjdir(self, self.inputs.lh_white, 'surf', 'lh.white')
             copy2subjdir(self, self.inputs.rh_white, 'surf', 'rh.white')
-            if isdefined(self.inputs.in_aseg):
-                copy2subjdir(self, self.inputs.in_aseg, 'mri')
+            copy2subjdir(self, self.inputs.in_aseg, 'mri')
+            copy2subjdir(self, self.inputs.aseg, 'mri', 'aseg.mgz')
+            
         return super(VolumeMask, self).run(**inputs)
 
     def _format_arg(self, name, spec, value):
