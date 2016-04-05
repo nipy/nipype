@@ -21,6 +21,10 @@ class DTIInputSpec(DipyBaseInterfaceInputSpec):
 
 class DTIOutputSpec(TraitedSpec):
     out_file = File(exists=True)
+    fa_file = File(exists=True)
+    md_file = File(exists=True)
+    rd_file = File(exists=True)
+    ad_file = File(exists=True)
 
 
 class DTI(DipyDiffusionInterface):
@@ -55,16 +59,28 @@ class DTI(DipyDiffusionInterface):
         # Fit it
         tenmodel = dti.TensorModel(gtab)
         ten_fit = tenmodel.fit(data, mask)
-        lower_triangular = tenfit.lower_triangular()
+        lower_triangular = ten_fit.lower_triangular()
         img = nifti1_symmat(lower_triangular, affine)
         out_file = self._gen_filename('dti')
         nb.save(img, out_file)
         IFLOGGER.info('DTI parameters image saved as {i}'.format(i=out_file))
+
+        #FA MD RD and AD
+        for metric in ["fa", "md", "rd", "ad"]:
+            data = getattr(ten_fit,metric).astype("float32")
+            out_name = self._gen_filename(metric)
+            nb.Nifti1Image(data, affine).to_filename(out_name)
+            IFLOGGER.info('DTI {metric} image saved as {i}'.format(i=out_name, metric=metric))
+
         return runtime
 
     def _list_outputs(self):
         outputs = self._outputs().get()
         outputs['out_file'] = self._gen_filename('dti')
+
+        for metric in ["fa", "md", "rd", "ad"]:
+            outputs["{}_file".format(metric)] = self._gen_filename(metric)
+        
         return outputs
 
 
