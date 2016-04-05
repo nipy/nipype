@@ -2363,7 +2363,8 @@ class VolumeMask(FSCommand):
             copy2subjdir(self, self.inputs.rh_pial, 'surf', 'rh.pial')
             copy2subjdir(self, self.inputs.lh_white, 'surf', 'lh.white')
             copy2subjdir(self, self.inputs.rh_white, 'surf', 'rh.white')
-            copy2subjdir(self, self.inputs.in_aseg, 'mri')
+            if isdefined(self.inputs.in_aseg):
+                copy2subjdir(self, self.inputs.in_aseg, 'mri')
         return super(VolumeMask, self).run(**inputs)
 
     def _format_arg(self, name, spec, value):

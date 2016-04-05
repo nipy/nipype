@@ -8,7 +8,7 @@ from .utils import createsrcsubj
 from nipype.interfaces.io import DataGrabber
 
 def create_AutoRecon3(name="AutoRecon3", qcache=False, plugin_args=None,
-                      th3=True, exvivo=True, entorhinal=True):
+                      th3=True, exvivo=True, entorhinal=True, fsvernum=5.3):
 
     # AutoRecon3
     # Workflow
@@ -274,13 +274,14 @@ def create_AutoRecon3(name="AutoRecon3", qcache=False, plugin_args=None,
     volume_mask.inputs.copy_inputs = True
 
 
-    ar3_wf.connect([(inputspec, volume_mask, [('aseg_presurf', 'in_aseg'),
-                                              ('lh_white', 'lh_white'),
-                                              ('rh_white', 'rh_white'),
-                                               ]),
+    ar3_wf.connect([(inputspec, volume_mask, [('lh_white', 'lh_white'),
+                                              ('rh_white', 'rh_white')]),
                     (ar3_lh_wf1, volume_mask, [('outputspec.pial', 'lh_pial')]),
                     (ar3_rh_wf1, volume_mask, [('outputspec.pial', 'rh_pial')]),
                     ])
+
+    if fsvernum > 6:
+        ar3_wf.connect([(inputpsec, volume_mask, [('aseg_presurf', 'in_aseg')])])
 
     ar3_lh_wf2 = pe.Workflow(name="AutoRecon3_Left_2")
     ar3_rh_wf2 = pe.Workflow(name="AutoRecon3_Right_2")

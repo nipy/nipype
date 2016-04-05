@@ -274,7 +274,8 @@ def create_reconall_workflow(name="ReconAll", plugin_args=None,
 
     # create AutoRecon3
     ar3_wf, ar3_outputs = create_AutoRecon3(plugin_args=plugin_args, th3=th3,
-                                            exvivo=exvivo, entorhinal=entorhinal)
+                                            exvivo=exvivo, entorhinal=entorhinal,
+                                            fsvernum=fsvernum)
     # connect inputs for AutoRecon3
     reconall.connect([(config_node, ar3_wf, [('lh_atlas', 'inputspec.lh_atlas'),
                                              ('rh_atlas', 'inputspec.rh_atlas'),
