@@ -281,9 +281,9 @@ def create_AutoRecon3(name="AutoRecon3", qcache=False, plugin_args=None,
                     ])
 
     if fsvernum > 6:
-        ar3_wf.connect([(inputpsec, volume_mask, [('aseg_presurf', 'in_aseg')])])
+        ar3_wf.connect([(inputspec, volume_mask, [('aseg_presurf', 'in_aseg')])])
     else:
-        ar3_wf.connect([(inputpsec, volume_mask, [('aseg_presurf', 'aseg')])])
+        ar3_wf.connect([(inputspec, volume_mask, [('aseg_presurf', 'aseg')])])
 
     ar3_lh_wf2 = pe.Workflow(name="AutoRecon3_Left_2")
     ar3_rh_wf2 = pe.Workflow(name="AutoRecon3_Right_2")
