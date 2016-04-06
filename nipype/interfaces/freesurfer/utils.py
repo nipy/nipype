@@ -2310,7 +2310,7 @@ class VolumeMaskInputSpec(FSTraitedSpec):
                     desc="Implicit input left white matter surface")
     rh_white = File(mandatory=True, exists=True,
                     desc="Implicit input right white matter surface")
-    aseg = File(mandatory=True, exists=True,
+    aseg = File(exists=True,
                 xor=['in_aseg'], 
                 desc="Implicit aseg.mgz segmentation. " + 
                 "Specify a different aseg by using the 'in_aseg' input.")
