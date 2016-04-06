@@ -2742,6 +2742,8 @@ class Aparc2AsegInputSpec(FSTraitedSpec):
     rh_annotation = File(mandatory=True, exists=True,
                          desc="Input file must be <subject_id>/label/rh.aparc.annot")
     # optional
+    filled = File(exists=True,
+                  desc="Implicit input filled file. Only required with FS v5.3.")
     aseg = File(argstr="--aseg %s", mandatory=False, exists=True,
                 desc="Input aseg file")
     volmask = traits.Bool(argstr="--volmask", mandatory=False,
@@ -2824,6 +2826,7 @@ class Aparc2Aseg(FSCommand):
             copy2subjdir(self, self.inputs.rh_ribbon, 'mri', 'rh.ribbon.mgz')
             copy2subjdir(self, self.inputs.ribbon, 'mri', 'ribbon.mgz')
             copy2subjdir(self, self.inputs.aseg, 'mri')
+            copy2subjdir(self, self.inputs.filled, 'mri', 'filled.mgz')
             copy2subjdir(self, self.inputs.lh_annotation, 'label')
             copy2subjdir(self, self.inputs.rh_annotation, 'label')
 

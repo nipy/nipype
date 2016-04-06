@@ -685,6 +685,9 @@ def create_AutoRecon3(name="AutoRecon3", qcache=False, plugin_args=None,
                     (aparc_2_aseg, wm_parcellation, [('out_file', 'ctxseg')])
                     ])
 
+    if fsvernum < 6:
+        ar3_wf.connect([(inputspec, wm_parcellation, [('filled', 'filled')])])
+
     # White Matter Segmentation Stats
 
     wm_segstats = pe.Node(SegStatsReconAll(), name="WM_Segmentation_Statistics")
