@@ -725,9 +725,9 @@ def create_AutoRecon3(name="AutoRecon3", qcache=False, plugin_args=None,
                     ])
 
     if fsvernum > 6:
-        ar3_wf.connect(inputspec, 'aseg_presurf', segstats, 'presurf_seg')
+        ar3_wf.connect(inputspec, 'aseg_presurf', wm_segstats, 'presurf_seg')
     else:
-        ar3_wf.connect(inputspec, 'aseg_presurf', segstats, 'aseg')
+        ar3_wf.connect(inputspec, 'aseg_presurf', wm_segstats, 'aseg')
 
 
 
