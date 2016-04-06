@@ -65,7 +65,7 @@ def create_ba_maps_wf(name="Brodmann_Area_Maps", th3=True, exvivo=True,
                                   white='surf/{0}.white'.format(hemisphere))
 
             out_files = list()
-            source_fields = ['sphere_reg', 'white']
+            source_fields = list()
             if threshold:
                 for label in labels:
                     if label == 'perirhinal' and not entorhinal:
@@ -91,7 +91,7 @@ def create_ba_maps_wf(name="Brodmann_Area_Maps", th3=True, exvivo=True,
                     source_fields.append(label)
                 node_name = 'BA_Maps_' + hemisphere
 
-            source_subject = pe.Node(DataGrabber(outfields=source_fields),
+            source_subject = pe.Node(DataGrabber(outfields=source_fields + ['sphere_reg', 'white']),
                                      name=node_name + "_srcsubject")
             source_subject.inputs.template = '*'
             source_subject.inputs.sort_filelist = False
