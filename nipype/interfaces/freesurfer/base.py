@@ -117,10 +117,6 @@ class FSCommand(CommandLine):
     def set_default_subjects_dir(cls, subjects_dir):
         cls._subjects_dir = subjects_dir
 
-    @property
-    def version(self):
-        return Info.version()
-
     def run(self, **inputs):
         if 'subjects_dir' in inputs:
             self.inputs.subjects_dir = inputs['subjects_dir']
@@ -220,3 +216,14 @@ class FSCommandOpenMP(FSCommand):
             self.inputs.num_threads = inputs['num_threads']
         self._num_threads_update()
         return super(FSCommandOpenMP, self).run(**inputs)
+
+
+def no_freesurfer():
+    """Checks if FreeSurfer is NOT installed
+    used with skipif to skip tests that will
+    fail if FreeSurfer is not installed"""
+
+    if Info.version() is None:
+        return True
+    else:
+        return False

@@ -603,11 +603,11 @@ class Concatenate(FSCommand):
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        if not isdefined(self.inputs.concatenated_file):
-            outputs['concatenated_file'] = os.path.join(os.getcwd(),
-                                                        'concat_output.nii.gz')
-        else:
-            outputs['concatenated_file'] = self.inputs.concatenated_file
+
+        fname = self.inputs.concatenated_file
+        if not isdefined(fname):
+            fname = 'concat_output.nii.gz'
+        outputs['concatenated_file'] = os.path.join(os.getcwd(), fname)
         return outputs
 
     def _gen_filename(self, name):
