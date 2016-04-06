@@ -856,7 +856,7 @@ class EddyCorrect(FSLCommand):
         return super(EddyCorrect, self).__init__(**inputs)
 
     def _list_outputs(self):
-        outputs = super(fsl.EddyCorrect, self)._list_outputs()
+        outputs = super(EddyCorrect, self)._list_outputs()
         out_base = os.path.basename(outputs['eddy_corrected']).replace('.gz', '').replace('.nii', '')
         outputs['ecc_log'] = os.path.join(os.getcwd(), out_base + '.ecclog')
         return outputs
