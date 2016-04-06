@@ -826,6 +826,8 @@ class EddyCorrectInputSpec(FSLCommandInputSpec):
 class EddyCorrectOutputSpec(TraitedSpec):
     eddy_corrected = File(exists=True,
                           desc='path/name of 4D eddy corrected output file')
+    ecc_log = File(exists=True,
+                   desc='eddy correction transformation matrix log file')
 
 
 class EddyCorrect(FSLCommand):
@@ -853,8 +855,15 @@ class EddyCorrect(FSLCommand):
                        "instead"), DeprecationWarning)
         return super(EddyCorrect, self).__init__(**inputs)
 
+    def _list_outputs(self):
+        outputs = super(fsl.EddyCorrect, self)._list_outputs()
+        out_base = os.path.basename(outputs['eddy_corrected']).replace('.gz', '').replace('.nii', '')
+        outputs['ecc_log'] = os.path.join(os.getcwd(), out_base + '.ecclog')
+        return outputs
+
     def _run_interface(self, runtime):
         runtime = super(EddyCorrect, self)._run_interface(runtime)
         if runtime.stderr:
             self.raise_exception(runtime)
         return runtime
+
