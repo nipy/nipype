@@ -174,37 +174,6 @@ def test_surfxfm():
 
 
 @skipif(no_freesurfer)
-def test_applymask():
-    masker = fs.ApplyMask()
-
-    filelist, testdir, origdir = create_files_in_directory()
-
-    # Test underlying command
-    yield assert_equal, masker.cmd, "mri_mask"
-
-    # Test exception with mandatory args absent
-    yield assert_raises, ValueError, masker.run
-    for input in ["in_file", "mask_file"]:
-        indict = {input: filelist[0]}
-        willbreak = fs.ApplyMask(**indict)
-        yield assert_raises, ValueError, willbreak.run
-
-    # Now test a basic command line
-    masker.inputs.in_file = filelist[0]
-    masker.inputs.mask_file = filelist[1]
-    outfile = os.path.join(testdir, "a_masked.nii")
-    yield assert_equal, masker.cmdline, "mri_mask a.nii b.nii %s" % outfile
-    # Now test that optional inputs get formatted properly
-    masker.inputs.mask_thresh = 2
-    yield assert_equal, masker.cmdline, "mri_mask -T 2.0000 a.nii b.nii %s" % outfile
-    masker.inputs.use_abs = True
-    yield assert_equal, masker.cmdline, "mri_mask -T 2.0000 -abs a.nii b.nii %s" % outfile
-
-    # Now clean up
-    clean_directory(testdir, origdir)
-
-
-@skipif(no_freesurfer)
 def test_surfshots():
 
     fotos = fs.SurfaceSnapshots()

@@ -1,6 +1,6 @@
 Next release
 ============
-* ENH: Created interface for BrainSuite Cortical Surface Extraction command line tools (https://github.com/nipy/nipype/pull/1305)
+
 * FIX: job execution on systems/approaches where locale is undefined (https://github.com/nipy/nipype/pull/1401)
 * FIX: Clean up byte/unicode issues using subprocess (https://github.com/nipy/nipype/pull/1394)
 * FIX: Prevent crash when tvtk is loaded - ETS_TOOLKIT=null (https://github.com/nipy/nipype/pull/973)
@@ -26,6 +26,7 @@ Next release
 * FIX: Use realpath to determine hard link source (https://github.com/nipy/nipype/pull/1388)
 * FIX: Correct linking/copying fallback behavior (https://github.com/nipy/nipype/pull/1391)
 * ENH: Nipype workflow and interfaces for FreeSurfer's recon-all (https://github.com/nipy/nipype/pull/1326)
+=======
 
 Release 0.11.0 (September 15, 2015)
 ============
