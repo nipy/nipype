@@ -389,10 +389,6 @@ def main(**extra_args):
                     'nipype.pipeline.plugins',
                     'nipype.pipeline.plugins.tests',
                     'nipype.testing',
-                    'nipype.testing.data',
-                    'nipype.testing.data.bedpostxout',
-                    'nipype.testing.data.dicomdir',
-                    'nipype.testing.data.tbss_dir',
                     'nipype.utils',
                     'nipype.utils.tests',
                     'nipype.workflows',
@@ -424,11 +420,7 @@ def main(**extra_args):
           # python -- duplicating things into MANIFEST.in but this is admittedly
           # only a workaround to get things started -- not a solution
           package_data={'nipype':
-                        [pjoin('testing', 'data', '*'),
-                         pjoin('testing', 'data', 'dicomdir', '*'),
-                         pjoin('testing', 'data', 'bedpostxout', '*'),
-                         pjoin('testing', 'data', 'tbss_dir', '*'),
-                         pjoin('workflows', 'data', '*'),
+                        [pjoin('workflows', 'data', '*'),
                          pjoin('pipeline', 'engine', 'report_template.html'),
                          pjoin('external', 'd3.js'),
                          pjoin('interfaces', 'script_templates', '*'),

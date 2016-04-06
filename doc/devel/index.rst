@@ -14,6 +14,7 @@ conventions documented in the `NIPY Developers Guide
 .. toctree::
    :maxdepth: 2
 
+   testing
    writing_custom_interfaces
    gitwash/index
    architecture
