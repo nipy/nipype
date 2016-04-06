@@ -796,6 +796,8 @@ class SegStatsReconAllInputSpec(SegStatsInputSpec):
                    desc="Input file must be <subject_id>/surf/lh.pial")
     rh_pial = File(mandatory=True, exists=True,
                    desc="Input file must be <subject_id>/surf/rh.pial")
+    aseg = File(exists=True,
+                desc="Mandatory implicit input in 5.3")
     copy_inputs = traits.Bool(desc="If running as a node, set this to True " +
                               "otherwise, this will copy the implicit inputs " +
                               "to the node directory.")
@@ -868,6 +870,8 @@ class SegStatsReconAll(SegStats):
                          'mri', 'ribbon.mgz')
             copy2subjdir(self, self.inputs.presurf_seg,
                          'mri', 'aseg.presurf.mgz')
+            copy2subjdir(self, self.inputs.aseg,
+                         'mri', 'aseg.mgz')
             copy2subjdir(self, self.inputs.transform,
                          os.path.join('mri', 'transforms'),
                          'talairach.xfm')

@@ -638,7 +638,6 @@ def create_AutoRecon3(name="AutoRecon3", qcache=False, plugin_args=None,
     ar3_wf.connect([(apas_2_aseg, segstats, [('out_file', 'segmentation_file')]),
                     (inputspec, segstats, [('lh_white', 'lh_white'),
                                            ('rh_white', 'rh_white'),
-                                           ('aseg_presurf', 'presurf_seg'),
                                            ('transform', 'transform'),
                                            ('norm', 'in_intensity'),
                                            ('norm', 'partial_volume_file'),
@@ -653,6 +652,12 @@ def create_AutoRecon3(name="AutoRecon3", qcache=False, plugin_args=None,
                     (ar3_rh_wf1, segstats, [('outputspec.pial', 'rh_pial'),
                                            ]),
                     ])
+
+    if fsvernum > 6:
+        ar3_wf.connect(inputspec, 'aseg_presurf', segstats, 'presurf_seg')
+    else:
+        ar3_wf.connect(inputspec, 'aseg_presurf', segstats, 'aseg')
+
 
     # White Matter Parcellation
 
