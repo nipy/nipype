@@ -724,6 +724,13 @@ def create_AutoRecon3(name="AutoRecon3", qcache=False, plugin_args=None,
                                               ]),
                     ])
 
+    if fsvernum > 6:
+        ar3_wf.connect(inputspec, 'aseg_presurf', segstats, 'presurf_seg')
+    else:
+        ar3_wf.connect(inputspec, 'aseg_presurf', segstats, 'aseg')
+
+
+
     # add brodman area maps to the workflow
     ba_WF, ba_outputs = create_ba_maps_wf(th3=th3, exvivo=exvivo,
                                           entorhinal=entorhinal)
