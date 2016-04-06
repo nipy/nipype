@@ -6,6 +6,7 @@ from nipype.interfaces.freesurfer import *
 from .ba_maps import create_ba_maps_wf
 from .utils import createsrcsubj
 from nipype.interfaces.io import DataGrabber
+from .utils import copy_file
 
 def create_AutoRecon3(name="AutoRecon3", qcache=False, plugin_args=None,
                       th3=True, exvivo=True, entorhinal=True, fsvernum=5.3):
@@ -600,9 +601,17 @@ def create_AutoRecon3(name="AutoRecon3", qcache=False, plugin_args=None,
                     (relabel_hypos, aparc_2_aseg_2009, [('out_file', 'aseg')])
                     ])
 
-    apas_2_aseg = pe.Node(Apas2Aseg(), name="Apas_2_Aseg")
+    if fsvernum > 6:
+        apas_2_aseg = pe.Node(Apas2Aseg(), name="Apas_2_Aseg")
+    else:
+        apas_2_aseg = pe.Node(Function(['in_file', 'out_file'],
+                                       ['out_file'],
+                                       copy_file),
+                              name="Copy2Aseg")
+        
+    ar3_wf.connect([(aparc_2_aseg, apas_2_aseg, [('out_file', 'in_file')])])        
     apas_2_aseg.inputs.out_file = "aseg.mgz"
-    ar3_wf.connect([(aparc_2_aseg, apas_2_aseg, [('out_file', 'in_file')])])
+                                       
 
     # Segmentation Stats
     """
