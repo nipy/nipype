@@ -859,7 +859,7 @@ class SegStatsReconAll(SegStats):
             copy2subjdir(self, self.inputs.lh_white,
                          'surf', 'lh.white')
             copy2subjdir(self, self.inputs.rh_white,
-                         'Surf', 'Rh.White')
+                         'surf', 'rh.white')
             copy2subjdir(self, self.inputs.lh_pial,
                          'surf', 'lh.pial')
             copy2subjdir(self, self.inputs.rh_pial,
@@ -872,8 +872,7 @@ class SegStatsReconAll(SegStats):
                          os.path.join('mri', 'transforms'),
                          'talairach.xfm')
             copy2subjdir(self, self.inputs.in_intensity, 'mri')
-            if isdefined(self.inputs.brainmask_file):
-                copy2subjdir(self, self.inputs.brainmask_file, 'mri')
+            copy2subjdir(self, self.inputs.brainmask_file, 'mri')
         return super(SegStatsReconAll, self).run(**inputs)
 
 
