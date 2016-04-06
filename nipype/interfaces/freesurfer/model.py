@@ -780,7 +780,7 @@ class SegStatsReconAllInputSpec(SegStatsInputSpec):
     # implicit
     ribbon = traits.File(mandatory=True, exists=True,
                          desc="Input file mri/ribbon.mgz")
-    presurf_seg = File(mandatory=True, exists=True,
+    presurf_seg = File(exists=True,
                        desc="Input segmentation volume")
     transform = File(mandatory=True, exists=True,
                      desc="Input transform file")

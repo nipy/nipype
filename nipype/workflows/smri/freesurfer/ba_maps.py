@@ -103,7 +103,7 @@ def create_ba_maps_wf(name="Brodmann_Area_Maps", th3=True, exvivo=True,
             for i,label in enumerate(source_fields):
                 ba_WF.connect([(source_subject, merge_labels, [(label, 'in{0}'.format(i+1))])])
 
-            node = pe.MapNode(Label2Label(), name=node_name,
+            node = pe.MapNode(Label2Label(), name=node_name + '_Label2Label',
                               iterfield=['source_label', 'out_file'])
             node.inputs.hemisphere = hemisphere
             node.inputs.out_file = out_files
