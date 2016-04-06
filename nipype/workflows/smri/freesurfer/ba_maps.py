@@ -65,6 +65,7 @@ def create_ba_maps_wf(name="Brodmann_Area_Maps", th3=True, exvivo=True,
                                   white='surf/{0}.white'.format(hemisphere))
 
             out_files = list()
+            source_fields = ['sphere_reg', 'white']
             if threshold:
                 for label in labels:
                     if label == 'perirhinal' and not entorhinal:
@@ -76,7 +77,8 @@ def create_ba_maps_wf(name="Brodmann_Area_Maps", th3=True, exvivo=True,
                         out_file = '{0}.{1}.thresh.label'.format(hemisphere, label)
                     out_files.append(out_file)
                     field_template[label] = 'label/' + out_file
-                node_name = 'BA_Maps_' + hemisphere + '_Tresh'
+                    source_fields.append(label)
+                node_name = 'BA_Maps_' + hemisphere + '_Thresh'
             else:
                 for label in labels:
                     if exvivo:
@@ -86,9 +88,9 @@ def create_ba_maps_wf(name="Brodmann_Area_Maps", th3=True, exvivo=True,
                         
                     out_files.append(out_file)
                     field_template[label] = 'label/' + out_file
+                    source_fields.append(label)
                 node_name = 'BA_Maps_' + hemisphere
 
-            source_fields = labels + ['sphere_reg', 'white']
             source_subject = pe.Node(DataGrabber(outfields=source_fields),
                                      name=node_name + "_srcsubject")
             source_subject.inputs.template = '*'
@@ -96,7 +98,7 @@ def create_ba_maps_wf(name="Brodmann_Area_Maps", th3=True, exvivo=True,
             source_subject.inputs.field_template = field_template
             ba_WF.connect([(inputspec, source_subject, [('src_subject_dir', 'base_directory')])])
 
-            merge_labels = pe.Node(Merge(len(labels)),
+            merge_labels = pe.Node(Merge(len(out_files)),
                                    name=node_name + "_Merge")
             for i,label in enumerate(labels):
                 ba_WF.connect([(source_subject, merge_labels, [(label, 'in{0}'.format(i+1))])])
