@@ -165,6 +165,7 @@ class Smooth(FSLCommand):
     Setting the kernel width using sigma:
 
     >>> sm = Smooth()
+    >>> sm.inputs.output_type = 'NIFTI_GZ'
     >>> sm.inputs.in_file = 'functional2.nii'
     >>> sm.inputs.sigma = 8.0
     >>> sm.cmdline #doctest: +ELLIPSIS
@@ -173,6 +174,7 @@ class Smooth(FSLCommand):
     Setting the kernel width using fwhm:
 
     >>> sm = Smooth()
+    >>> sm.inputs.output_type = 'NIFTI_GZ'
     >>> sm.inputs.in_file = 'functional2.nii'
     >>> sm.inputs.fwhm = 8.0
     >>> sm.cmdline #doctest: +ELLIPSIS
@@ -182,6 +184,7 @@ class Smooth(FSLCommand):
 
     >>> from nipype.interfaces.fsl import Smooth
     >>> sm = Smooth()
+    >>> sm.inputs.output_type = 'NIFTI_GZ'
     >>> sm.inputs.in_file = 'functional2.nii'
     >>> sm.cmdline #doctest: +ELLIPSIS
     Traceback (most recent call last):
