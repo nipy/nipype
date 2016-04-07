@@ -386,8 +386,12 @@ def create_AutoRecon1(name="AutoRecon1", longitudinal=False, distance=200,
         if plugin_args:
             mri_em_register.plugin_args = plugin_args
 
-        ar1_wf.connect([(add_xform_to_orig_nu, mri_em_register, [('out_file', 'in_file')]),
-                        (inputspec, mri_em_register, [('num_threads', 'num_threads'),
+        if fsvernum < 6:
+            ar1_wf.connect(add_to_header_nu, 'out_file', mri_em_register, 'in_file')
+        else:
+            ar1_wf.connect(add_xform_to_orig_nu, 'out_file', mri_em_register, 'in_file')
+            
+        ar1_wf.connect([(inputspec, mri_em_register, [('num_threads', 'num_threads'),
                                                       ('reg_template_withskull', 'template')])])
 
         brainmask = pe.Node(WatershedSkullStrip(),
