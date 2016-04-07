@@ -828,7 +828,7 @@ class DenoiseImageInputSpec(ANTSCommandInputSpec):
 
 class DenoiseImageOutputSpec(TraitedSpec):
     output_image = File(exists=True)
-    noise_image = File(exists=True)
+    noise_image = File()
 
 
 class DenoiseImage(ANTSCommand):
