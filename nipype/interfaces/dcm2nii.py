@@ -139,11 +139,13 @@ class Dcm2nii(CommandLine):
                     else:
                         output_dir = self._gen_filename('output_dir')
                     val = os.path.join(output_dir, val)
-                    out_file = val
+                    if os.path.exists(val):
+                        out_file = val
 
                 if out_file:
-                    files.append(out_file)
-                    last_added_file = out_file
+                    if not out_file in files:
+                        files.append(out_file)
+                        last_added_file = out_file
                     continue
 
                 if line.startswith("Reorienting as "):
