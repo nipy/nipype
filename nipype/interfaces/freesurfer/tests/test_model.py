@@ -14,7 +14,7 @@ import nipype.pipeline.engine as pe
 
 @skipif(no_freesurfer)
 def test_concatenate():
-    tmp_dir = tempfile.mkdtemp()
+    tmp_dir = os.path.realpath(tempfile.mkdtemp())
     cwd = os.getcwd()
     os.chdir(tmp_dir)
     in1 = os.path.join(tmp_dir, 'cont1.nii')
