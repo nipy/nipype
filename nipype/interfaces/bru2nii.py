@@ -31,7 +31,7 @@ class Bru2(CommandLine):
 
 	>>> from nipype.interfaces.bru2nii import Bru2
 	>>> converter = Bru2()
-	>>> converter.inputs.input_dir = os.getcwd()
+	>>> converter.inputs.input_dir = brukerdir
 	>>> converter.cmdline
 	'Bru2 -o brukerdir'
 	"""
