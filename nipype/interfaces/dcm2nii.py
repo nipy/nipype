@@ -155,9 +155,11 @@ class Dcm2nii(CommandLine):
                 elif line.startswith("Cropping NIfTI/Analyze image "):
                     base, filename = os.path.split(line[len("Cropping NIfTI/Analyze image "):])
                     filename = "c" + filename
-                    reoriented_and_cropped_files.append(os.path.join(base, filename))
-                    skip = True
-                    continue
+                    if os.path.exists(os.path.join(base, filename)):
+                        reoriented_and_cropped_files.append(os.path.join(base, filename))
+                        skip = True
+                        continue
+                    
             skip = False
         return files, reoriented_files, reoriented_and_cropped_files, bvecs, bvals
 
