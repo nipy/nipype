@@ -33,7 +33,7 @@ class Bru2(CommandLine):
 	>>> converter = Bru2()
 	>>> converter.inputs.input_dir = "brukerdir"
 	>>> converter.cmdline
-	'Bru2 -o brukerdir'
+	'Bru2 -o /home/travis/build/nipy/nipype/nipype/testing/data/brukerdir brukerdir'
 	"""
 	input_spec = Bru2InputSpec
 	output_spec = Bru2OutputSpec
