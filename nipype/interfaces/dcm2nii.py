@@ -155,11 +155,12 @@ class Dcm2nii(CommandLine):
                 elif line.startswith("Cropping NIfTI/Analyze image "):
                     base, filename = os.path.split(line[len("Cropping NIfTI/Analyze image "):])
                     filename = "c" + filename
-                    if os.path.exists(os.path.join(base, filename)):
+                    if os.path.exists(os.path.join(base, filename)) or self.inputs.reorient_and_crop:
+                        # if reorient&crop is true but the file doesn't exist, this errors when setting outputs
                         reoriented_and_cropped_files.append(os.path.join(base, filename))
                         skip = True
                         continue
-                    
+                               
             skip = False
         return files, reoriented_files, reoriented_and_cropped_files, bvecs, bvals
 
