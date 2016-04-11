@@ -1984,7 +1984,7 @@ class MakeSurfaces(FSCommand):
             basename = os.path.basename(value)
             # whent the -mgz flag is specified, it assumes the mgz extension
             if self.inputs.mgz:
-                prefix = basename.rstrip('.mgz')
+                prefix = os.path.splitext(basename)[0]
             else:
                 prefix = basename
             if prefix == 'aseg':
