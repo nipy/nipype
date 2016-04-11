@@ -166,10 +166,18 @@ def create_AutoRecon3(name="AutoRecon3", qcache=False, plugin_args=None,
         # Pial Surface
 
         ar3_pial = pe.Node(MakeSurfaces(), name="Make_Pial_Surface")
-        ar3_pial.inputs.no_white = True
         ar3_pial.inputs.mgz = True
         ar3_pial.inputs.hemisphere = hemisphere
         ar3_pial.inputs.copy_inputs = True
+
+
+        if fsvernum < 6:
+            hemi_wf.connect(hemi_inputspec1, 'white', ar3_pial, 'in_white')
+            ar3_pial.inputs.white = 'NOWRITE'
+        else:
+            ar3_pial.inputs.no_white = True
+            hemi_wf.connect([(hemi_inputspec1, ar3_pial, [('white', 'orig_pial'),
+                                                          ('white', 'orig_white')])])
 
         hemi_wf.connect([(hemi_inputspec1, ar3_pial, [('wm', 'in_wm'),
                                                       ('orig', 'in_orig'),
@@ -603,13 +611,17 @@ def create_AutoRecon3(name="AutoRecon3", qcache=False, plugin_args=None,
 
     if fsvernum > 6:
         apas_2_aseg = pe.Node(Apas2Aseg(), name="Apas_2_Aseg")
+        ar3_wf.connect([(aparc_2_aseg, apas_2_aseg, [('out_file', 'in_file')])])        
     else:
-        apas_2_aseg = pe.Node(Function(['in_file', 'out_file'],
+        # aseg.mgz gets edited in place, so we'll copy and pass it to the
+        # outputspec once aparc_2_aseg has completed
+        def out_aseg(in_aparcaseg, in_aseg, out_file):
+            out_file = copy_file(in_aseg, out_file)
+            return out_file
+        apas_2_aseg = pe.Node(Function(['in_aparcaseg', 'in_aseg', 'out_file'],
                                        ['out_file'],
-                                       copy_file),
-                              name="Copy2Aseg")
-        
-    ar3_wf.connect([(aparc_2_aseg, apas_2_aseg, [('out_file', 'in_file')])])        
+                                       out_aseg),
+                              name="Aseg")
     apas_2_aseg.inputs.out_file = "aseg.mgz"
                                        
 

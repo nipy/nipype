@@ -156,8 +156,14 @@ def create_AutoRecon2(name="AutoRecon2", longitudinal=False,
     else:
         ca_register.inputs.levels = 2
         ca_register.inputs.A = 1
-        ar2_wf.connect([(ar1_inputs, ca_register, [('template_talairach_m3z', 'l_files')])])
+        ar2_wf.connect([(inputspec, ca_register, [('template_talairach_m3z', 'l_files')])])
 
+
+    if fsvernum < 6:
+        # 5.3 runs two ca_register steps
+        ca_register2 = pe.Node(CARegister(), name='CA_Register2')
+        ca_register2.inputs.invert_and_save = True
+        ar2_wf.connect(ca_register, 'out_file', ca_register2, '')
     # Remove Neck
     """
     The neck region is removed from the NU-corrected volume mri/nu.mgz. Makes use
@@ -248,7 +254,10 @@ def create_AutoRecon2(name="AutoRecon2", longitudinal=False,
                                ['out_file'],
                                copy_file),
                       name='Copy_CCSegmentation')
-    copy_cc.inputs.out_file = 'aseg.presurf.mgz'
+    if fsvernum > 6:
+        copy_cc.inputs.out_file = 'aseg.presurf.mgz'
+    else:
+        copy_cc.inputs.out_file = 'aseg.mgz'
 
     ar2_wf.connect([(segment_cc, copy_cc, [('out_file', 'in_file')])
                     ])

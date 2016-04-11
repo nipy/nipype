@@ -1902,6 +1902,8 @@ class MakeSurfacesInputSpec(FSTraitedSpec):
         argstr="-max %.1f", desc="No documentation (used for longitudinal processing)")
     longitudinal = traits.Bool(
         argstr="-long", desc="No documentation (used for longitudinal processing)")
+    white = traits.String(argstr="-white %s",
+                          desc="White surface name")
     copy_inputs = traits.Bool(mandatory=False,
                               desc="If running as a node, set this to True." +
                               "This will copy the input files to the node " +
@@ -1958,13 +1960,11 @@ class MakeSurfaces(FSCommand):
                          folder='mri', basename='filled.mgz')
             for originalfile in [self.inputs.in_aseg,
                                  self.inputs.in_T1]:
-                if isdefined(originalfile):
-                    copy2subjdir(self, originalfile, folder='mri')
+                copy2subjdir(self, originalfile, folder='mri')
             for originalfile in [self.inputs.orig_white,
                                  self.inputs.orig_pial,
                                  self.inputs.in_orig]:
-                if isdefined(originalfile):
-                    copy2subjdir(self, originalfile, folder='surf')
+                copy2subjdir(self, originalfile, folder='surf')
             if isdefined(self.inputs.in_label):
                 copy2subjdir(self, self.inputs.in_label, 'label',
                              '{0}.aparc.annot'.format(self.inputs.hemisphere))
@@ -1981,9 +1981,11 @@ class MakeSurfaces(FSCommand):
             basename = os.path.basename(value)
             # whent the -mgz flag is specified, it assumes the mgz extension
             if self.inputs.mgz:
-                prefix = basename.rstrip('.mgz')
+                prefix = value.rstrip('.mgz')
             else:
                 prefix = basename
+            if prefix == 'aseg':
+                return # aseg is already the default
             return spec.argstr % prefix
         elif name in ['orig_white', 'orig_pial']:
             # these inputs do take full file paths or even basenames
@@ -2038,7 +2040,7 @@ class MakeSurfaces(FSCommand):
 
 class CurvatureInputSpec(FSTraitedSpec):
     in_file = File(argstr="%s", position=-2, mandatory=True, exists=True,
-                   desc="Input file for Curvature")
+                   copyfile=True, desc="Input file for Curvature")
     # optional
     threshold = traits.Float(
         argstr="-thresh %.3f", mandatory=False, desc="Undocumented input threshold")
@@ -2082,7 +2084,6 @@ class Curvature(FSCommand):
         if self.inputs.copy_input:
             if name == 'in_file':
                 basename = os.path.basename(value)
-                shutil.copy(value, basename)
                 return spec.argstr % basename
         return super(Curvature, self)._format_arg(name, spec, value)
 
