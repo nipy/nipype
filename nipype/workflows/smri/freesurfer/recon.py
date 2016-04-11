@@ -82,7 +82,7 @@ def create_skullstripped_recon_flow(name="skullstripped_recon_all"):
 def create_reconall_workflow(name="ReconAll", plugin_args=None,
                              recoding_file=None):
     """Creates the ReconAll workflow in nipype.
-    
+
     Example
     -------
     >>> from nipype.workflows.smri.freesurfer import create_skullstripped_recon_flow
@@ -200,7 +200,7 @@ def create_reconall_workflow(name="ReconAll", plugin_args=None,
               'lookup_table',
               'wm_lookup_table',
               'awk_file']
-    
+
     config_node = pe.Node(niu.Function(params,
                                        params,
                                        setconfig),
@@ -509,7 +509,7 @@ def create_reconall_workflow(name="ReconAll", plugin_args=None,
     reconall.connect([(datasink, completion, [('out_file', 'datasinked_files')]),
                       (inputspec, completion, [('subject_id', 'subject_id')]),
                       (completion, postds_outputspec, [('subject_id', 'subject_id')])])
-                                      
+
 
     #### Workflow additions go here
     if recoding_file:
