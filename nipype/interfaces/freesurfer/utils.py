@@ -527,11 +527,6 @@ class ApplyMask(FSCommand):
     input_spec = ApplyMaskInputSpec
     output_spec = ApplyMaskOutputSpec
 
-    def _list_outputs(self):
-        outputs = self._outputs().get()
-        outputs["out_file"] = os.path.abspath(self.inputs.out_file)
-        return outputs
-
 
 class SurfaceSnapshotsInputSpec(FSTraitedSpec):
 
