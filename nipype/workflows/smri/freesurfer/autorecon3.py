@@ -172,8 +172,8 @@ def create_AutoRecon3(name="AutoRecon3", qcache=False, plugin_args=None,
 
 
         if fsvernum < 6:
-            hemi_wf.connect(hemi_inputspec1, 'white', ar3_pial, 'in_white')
             ar3_pial.inputs.white = 'NOWRITE'
+            hemi_wf.connect(hemi_inputspec1, 'white', ar3_pial, 'in_white')
         else:
             ar3_pial.inputs.no_white = True
             hemi_wf.connect([(hemi_inputspec1, ar3_pial, [('white', 'orig_pial'),
@@ -182,8 +182,6 @@ def create_AutoRecon3(name="AutoRecon3", qcache=False, plugin_args=None,
         hemi_wf.connect([(hemi_inputspec1, ar3_pial, [('wm', 'in_wm'),
                                                       ('orig', 'in_orig'),
                                                       ('filled', 'in_filled'),
-                                                      ('white', 'orig_pial'),
-                                                      ('white', 'orig_white'),
                                                       ('brain_finalsurfs', 'in_T1'),
                                                       ('aseg_presurf', 'in_aseg')]),
                          (ar3_parcellation, ar3_pial, [('out_file', 'in_label')])
