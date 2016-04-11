@@ -1876,6 +1876,7 @@ class MakeSurfacesInputSpec(FSTraitedSpec):
     in_filled = File(exists=True, mandatory=True,
                      desc="Implicit input file filled.mgz")
     # optional
+    in_white = File(exists=True, desc="Implicit input that is sometimes used")
     in_label = File(exists=True, mandatory=False, xor=['noaparc'],
                     desc="Implicit input label/<hemisphere>.aparc.annot")
     orig_white = File(argstr="-orig_white %s", exists=True, mandatory=False,
@@ -1958,6 +1959,8 @@ class MakeSurfaces(FSCommand):
                          folder='mri', basename='wm.mgz')
             copy2subjdir(self, self.inputs.in_filled,
                          folder='mri', basename='filled.mgz')
+            copy2subjdir(self, self.inputs.in_white,
+                         'surf', '{0}.white'.format(self.inputs.hemisphere))
             for originalfile in [self.inputs.in_aseg,
                                  self.inputs.in_T1]:
                 copy2subjdir(self, originalfile, folder='mri')
