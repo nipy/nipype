@@ -614,6 +614,7 @@ def create_AutoRecon3(name="AutoRecon3", qcache=False, plugin_args=None,
         # aseg.mgz gets edited in place, so we'll copy and pass it to the
         # outputspec once aparc_2_aseg has completed
         def out_aseg(in_aparcaseg, in_aseg, out_file):
+            from .utils import copy_file
             out_file = copy_file(in_aseg, out_file)
             return out_file
         apas_2_aseg = pe.Node(Function(['in_aparcaseg', 'in_aseg', 'out_file'],
