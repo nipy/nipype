@@ -2025,8 +2025,8 @@ class MakeSurfaces(FSCommand):
             dest_dir, str(self.inputs.hemisphere) + '.area')
         # Something determines when a pial surface and thickness file is generated
         # but documentation doesn't say what.
-        # The orig_pial flag is just a guess
-        if isdefined(self.inputs.orig_pial):
+        # The orig_pial input is just a guess
+        if isdefined(self.inputs.orig_pial) or self.inputs.white == 'NOWRITE':
             outputs["out_curv"] = outputs["out_curv"] + ".pial"
             outputs["out_area"] = outputs["out_area"] + ".pial"
             outputs["out_pial"] = os.path.join(
