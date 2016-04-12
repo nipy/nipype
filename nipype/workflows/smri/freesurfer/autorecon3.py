@@ -6,7 +6,6 @@ from nipype.interfaces.freesurfer import *
 from .ba_maps import create_ba_maps_wf
 from .utils import createsrcsubj
 from nipype.interfaces.io import DataGrabber
-from .utils import copy_file
 
 def create_AutoRecon3(name="AutoRecon3", qcache=False, plugin_args=None,
                       th3=True, exvivo=True, entorhinal=True, fsvernum=5.3):
@@ -615,6 +614,7 @@ def create_AutoRecon3(name="AutoRecon3", qcache=False, plugin_args=None,
         # outputspec once aparc_2_aseg has completed
         def out_aseg(in_aparcaseg, in_aseg, out_file):
             import shutil
+            import os
             out_file = os.path.abspath(out_file)
             shutil.copy(in_aseg, out_file)
             return out_file
