@@ -568,7 +568,7 @@ def recodeLabelMap(in_file, out_file, recode_file):
 
 
 def create_recoding_wf(in_file, out_file=None):
-    wf = nipype.Workflow(name="RecodeLabels")
+    wf = pe.Workflow(name="RecodeLabels")
 
     inputspec = nipype.pipeline.Node(nipype.IdentityInterface(['labelmap',
                                                                'recode_file']),
