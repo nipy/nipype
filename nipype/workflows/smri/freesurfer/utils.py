@@ -582,7 +582,7 @@ def create_recoding_wf(in_file, out_file=None):
     convert_labelmap.inputs.out_file = 'labelmap.nii'
     wf.connect([(inputspec, convert_labelmap, [('labelmap', 'in_file')])])
 
-    recode = nipype.Node(nipype.Function(['in_file',
+    recode = pe.Node(nipype.Function(['in_file',
                                           'out_file',
                                           'recode_file'],
                                          ['out_file'],
@@ -596,13 +596,13 @@ def create_recoding_wf(in_file, out_file=None):
     wf.connect([(convert_labelmap, recode, [('out_file', 'in_file')]),
                 (inputspec, recode, [('recode_file', 'recode_file')])])
 
-    center_labelmap = nipype.Node(nipype.Function(['in_file'], ['out_file'],
+    center_labelmap = pe.Node(nipype.Function(['in_file'], ['out_file'],
                                                   center_volume),
                                   name="CenterLabelMap")
 
     wf.connect([(recode, center_labelmap, [('out_file', 'in_file')])])
 
-    outputspec = nipype.Node(nipype.IdentityInterface(['recodedlabelmap']), name="outputspec")
+    outputspec = pe.Node(nipype.IdentityInterface(['recodedlabelmap']), name="outputspec")
 
     wf.connect([(center_labelmap, outputspec, [('out_file', 'recodedlabelmap')])])
     return wf
