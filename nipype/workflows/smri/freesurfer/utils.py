@@ -570,12 +570,12 @@ def recodeLabelMap(in_file, out_file, recode_file):
 def create_recoding_wf(in_file, out_file=None):
     wf = pe.Workflow(name="RecodeLabels")
 
-    inputspec = nipype.pipeline.Node(nipype.IdentityInterface(['labelmap',
-                                                               'recode_file']),
-                                     name="inputspec")
+    inputspec = pe.Node(niu.IdentityInterface(['labelmap',
+                                               'recode_file']),
+                        name="inputspec")
     inputspec.inputs.recode_file = in_file
 
-    convert_labelmap = nipype.pipeline.Node(fs.MRIConvert(), name="ConvertLabelMap")
+    convert_labelmap = pe.Node(fs.MRIConvert(), name="ConvertLabelMap")
     convert_labelmap.inputs.in_type = 'mgz'
     convert_labelmap.inputs.out_type = 'nii'
     convert_labelmap.inputs.out_orientation = 'RAS'
