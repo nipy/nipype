@@ -752,8 +752,9 @@ class SegStats(FSCommand):
 
     def _format_arg(self, name, spec, value):
         if name in ('summary_file', 'avgwf_txt_file'):
-            if not os.path.isabs(value):
-                value = os.path.join('.', value)
+            if not isinstance(value, bool):
+                if not os.path.isabs(value):
+                    value = os.path.join('.', value)
         if name in ['avgwf_txt_file', 'avgwf_file', 'sf_avg_file']:
             if isinstance(value, bool):
                 fname = self._list_outputs()[name]
