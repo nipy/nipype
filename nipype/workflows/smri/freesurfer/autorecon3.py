@@ -550,14 +550,6 @@ def create_AutoRecon3(name="AutoRecon3", qcache=False, plugin_args=None,
         #End hemisphere2 workflow
 
 
-    # Relabel Hypointensities
-    relabel_hypos = pe.Node(RelabelHypointensities(), name="Relabel_Hypointensities")
-    relabel_hypos.inputs.out_file = 'aseg.presurf.hypos.mgz'
-    ar3_wf.connect([(inputspec, relabel_hypos, [('aseg_presurf', 'aseg'),
-                                                ('lh_white', 'lh_white'),
-                                                ('rh_white', 'rh_white'),
-                                                ])])
-
     # APARC to ASEG
     # Adds information from the ribbon into the aseg.mgz (volume parcellation).
     aparc_2_aseg = pe.Node(Aparc2Aseg(), name="Aparc2Aseg")
@@ -578,9 +570,17 @@ def create_AutoRecon3(name="AutoRecon3", qcache=False, plugin_args=None,
                     (volume_mask, aparc_2_aseg, [('rh_ribbon', 'rh_ribbon'),
                                                  ('lh_ribbon', 'lh_ribbon'),
                                                  ('out_ribbon', 'ribbon'),
-                                                 ]),
-                    (relabel_hypos, aparc_2_aseg, [('out_file', 'aseg')])
-                    ])
+                                                 ])])
+    if fsvernum < 6:
+        ar3_wf.connect([(inputspec, aparc_2_aseg, [('aseg_presurf', 'aseg')])])
+    else:
+        # Relabel Hypointensities
+        relabel_hypos = pe.Node(RelabelHypointensities(), name="Relabel_Hypointensities")
+        relabel_hypos.inputs.out_file = 'aseg.presurf.hypos.mgz'
+        ar3_wf.connect([(inputspec, relabel_hypos, [('aseg_presurf', 'aseg'),
+                                                    ('lh_white', 'lh_white'),
+                                                    ('rh_white', 'rh_white')])])
+        ar3_wf.connect([(relabel_hypos, aparc_2_aseg, [('out_file', 'aseg')])])
 
     aparc_2_aseg_2009 = pe.Node(Aparc2Aseg(), name="Aparc2Aseg_2009")
     aparc_2_aseg_2009.inputs.volmask = True
@@ -601,14 +601,12 @@ def create_AutoRecon3(name="AutoRecon3", qcache=False, plugin_args=None,
                     (volume_mask, aparc_2_aseg_2009, [('rh_ribbon', 'rh_ribbon'),
                                                       ('lh_ribbon',
                                                        'lh_ribbon'),
-                                                      ('out_ribbon', 'ribbon'),
-                                                      ]),
-                    (relabel_hypos, aparc_2_aseg_2009, [('out_file', 'aseg')])
-                    ])
+                                                      ('out_ribbon', 'ribbon')])])
 
     if fsvernum > 6:
         apas_2_aseg = pe.Node(Apas2Aseg(), name="Apas_2_Aseg")
-        ar3_wf.connect([(aparc_2_aseg, apas_2_aseg, [('out_file', 'in_file')])])        
+        ar3_wf.connect([(aparc_2_aseg, apas_2_aseg, [('out_file', 'in_file')]),
+                        (relabel_hypos, aparc_2_aseg_2009, [('out_file', 'aseg')])])
     else:
         # aseg.mgz gets edited in place, so we'll copy and pass it to the
         # outputspec once aparc_2_aseg has completed
@@ -702,8 +700,7 @@ def create_AutoRecon3(name="AutoRecon3", qcache=False, plugin_args=None,
                                                     ('out_ribbon', 'ribbon'),
                                                     ]),
                     (apas_2_aseg, wm_parcellation, [('out_file', 'aseg')]),
-                    (aparc_2_aseg, wm_parcellation, [('out_file', 'ctxseg')])
-                    ])
+                    (aparc_2_aseg, wm_parcellation, [('out_file', 'ctxseg')])])
 
     if fsvernum < 6:
         ar3_wf.connect([(inputspec, wm_parcellation, [('filled', 'filled')])])
@@ -743,7 +740,6 @@ def create_AutoRecon3(name="AutoRecon3", qcache=False, plugin_args=None,
         ar3_wf.connect(inputspec, 'aseg_presurf', wm_segstats, 'presurf_seg')
     else:
         ar3_wf.connect(inputspec, 'aseg_presurf', wm_segstats, 'aseg')
-
 
 
     # add brodman area maps to the workflow
@@ -937,11 +933,12 @@ def create_AutoRecon3(name="AutoRecon3", qcache=False, plugin_args=None,
                     (segstats, outputspec, [('summary_file', 'aseg_stats')]),
                     (aparc_2_aseg_2009, outputspec, [('out_file', 'aparc_a2009s_aseg')]),
                     (aparc_2_aseg, outputspec, [('out_file', 'aparc_aseg')]),
-                    (relabel_hypos, outputspec, [('out_file', 'aseg_presurf_hypos')]),
                     (volume_mask, outputspec, [('out_ribbon', 'ribbon'),
                                                ('lh_ribbon', 'lh_ribbon'),
-                                               ('rh_ribbon', 'rh_ribbon')]),
-                ])
+                                               ('rh_ribbon', 'rh_ribbon')])])
+    if fsvernum < 6:
+        ar3_wf.connect([(relabel_hypos, outputspec, [('out_file', 'aseg_presurf_hypos')])])
+
 
     for i, outputs in enumerate([hemi_outputs1, hemi_outputs2]):
         if i == 0:

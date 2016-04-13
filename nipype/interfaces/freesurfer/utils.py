@@ -2839,7 +2839,12 @@ class Aparc2Aseg(FSCommand):
     def _format_arg(self, name, spec, value):
         if name == 'aseg':
             # aseg does not take a full filename
-            return spec.argstr % os.path.basename(value).replace('.mgz', '')
+            basename = os.path.basename(value).replace('.mgz', '')
+            if basename != 'aseg':
+                return spec.argstr % basename
+            else:
+                # aseg.mgz is the default
+                return
         elif name == 'out_file':
             return spec.argstr % os.path.abspath(value)
 
