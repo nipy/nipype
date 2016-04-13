@@ -61,7 +61,7 @@ def create_AutoRecon2(name="AutoRecon2", longitudinal=False,
         ar2_wf.connect([(inputspec, intensity_correction, [('orig', 'in_file'),
                                                            ('brainmask', 'mask'),
                                                            ('transform', 'transform')])])
-        
+
         # intensity correction parameters are more specific in 6+
         intensity_correction.inputs.iterations = 1
         intensity_correction.inputs.protocol_iterations = 1000
@@ -70,7 +70,7 @@ def create_AutoRecon2(name="AutoRecon2", longitudinal=False,
         if shrink:
             intensity_correction.inputs.shrink =  shrink
         intensity_correction.inputs.distance = distance
-        
+
         add_to_header_nu = pe.Node(AddXFormToHeader(), name="Add_XForm_to_NU")
         add_to_header_nu.inputs.copy_name = True
         add_to_header_nu.inputs.out_file = 'nu.mgz'
@@ -108,7 +108,7 @@ def create_AutoRecon2(name="AutoRecon2", longitudinal=False,
             ar2_wf.connect([(add_to_header_nu, align_transform, [('out_file', 'in_file')])])
         else:
             ar2_wf.connect([(inputspec, align_transform, [('nu', 'in_file')])])
-            
+
 
     # CA Normalize
     """
@@ -698,7 +698,7 @@ def create_AutoRecon2(name="AutoRecon2", longitudinal=False,
         # add to outputspec to perserve datasinking
         ar2_wf.connect([(inputspec, outputspec, [('nu', 'nu')])])
 
-    
+
     ar2_wf.connect([(align_transform, outputspec, [('out_file', 'tal_lta')]),
                     (ca_normalize, outputspec, [('out_file', 'norm')]),
                     (ca_normalize, outputspec, [('control_points', 'ctrl_pts')]),

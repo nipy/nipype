@@ -345,7 +345,7 @@ def create_AutoRecon1(name="AutoRecon1", longitudinal=False, distance=200,
         intensity_correction.inputs.iterations = 2
         ar1_wf.connect([(add_xform_to_orig, intensity_correction, [('out_file', 'in_file')]),
                         (copy_transform, intensity_correction, [('out_file', 'transform')])])
-        
+
 
         add_to_header_nu = pe.Node(AddXFormToHeader(), name="Add_XForm_to_NU")
         add_to_header_nu.inputs.copy_name = True
@@ -356,7 +356,7 @@ def create_AutoRecon1(name="AutoRecon1", longitudinal=False, distance=200,
                          [('out_file', 'transform')])
                     ])
 
-        
+
     # Intensity Normalization
     # Performs intensity normalization of the orig volume and places the result in mri/T1.mgz.
     # Attempts to correct for fluctuations in intensity that would otherwise make intensity-based
@@ -368,7 +368,7 @@ def create_AutoRecon1(name="AutoRecon1", longitudinal=False, distance=200,
     mri_normalize.inputs.out_file = 'T1.mgz'
 
     if fsvernum < 6:
-        ar1_wf.connect([(add_to_header_nu, mri_normalize, [('out_file', 'in_file')])])        
+        ar1_wf.connect([(add_to_header_nu, mri_normalize, [('out_file', 'in_file')])])
     else:
         ar1_wf.connect([(add_xform_to_orig_nu, mri_normalize, [('out_file', 'in_file')])])
 
@@ -390,7 +390,7 @@ def create_AutoRecon1(name="AutoRecon1", longitudinal=False, distance=200,
             ar1_wf.connect(add_to_header_nu, 'out_file', mri_em_register, 'in_file')
         else:
             ar1_wf.connect(add_xform_to_orig_nu, 'out_file', mri_em_register, 'in_file')
-            
+
         ar1_wf.connect([(inputspec, mri_em_register, [('num_threads', 'num_threads'),
                                                       ('reg_template_withskull', 'template')])])
 

@@ -2315,14 +2315,14 @@ class VolumeMaskInputSpec(FSTraitedSpec):
     rh_white = File(mandatory=True, exists=True,
                     desc="Implicit input right white matter surface")
     aseg = File(exists=True,
-                xor=['in_aseg'], 
-                desc="Implicit aseg.mgz segmentation. " + 
+                xor=['in_aseg'],
+                desc="Implicit aseg.mgz segmentation. " +
                 "Specify a different aseg by using the 'in_aseg' input.")
     subject_id = traits.String('subject_id', usedefault=True,
                                position=-1, argstr="%s", mandatory=True,
                                desc="Subject being processed")
     # optional
-    in_aseg = File(argstr="--aseg_name %s", mandatory=False, 
+    in_aseg = File(argstr="--aseg_name %s", mandatory=False,
                    exists=True, xor=['aseg'],
                    desc="Input aseg file for VolumeMask")
     save_ribbon = traits.Bool(argstr="--save_ribbon", mandatory=False,
@@ -2383,7 +2383,7 @@ class VolumeMask(FSCommand):
             copy2subjdir(self, self.inputs.rh_white, 'surf', 'rh.white')
             copy2subjdir(self, self.inputs.in_aseg, 'mri')
             copy2subjdir(self, self.inputs.aseg, 'mri', 'aseg.mgz')
-            
+
         return super(VolumeMask, self).run(**inputs)
 
     def _format_arg(self, name, spec, value):

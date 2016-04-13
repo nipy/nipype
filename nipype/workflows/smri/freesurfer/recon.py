@@ -167,7 +167,7 @@ def create_reconall_workflow(name="ReconAll", plugin_args=None,
         rb_date = "2008-03-26"
 
     print("FreeSurfer Version: {0}".format(fs_version))
-        
+
     def setconfig(reg_template=None,
                   reg_template_withskull=None,
                   lh_atlas=None,
@@ -234,14 +234,14 @@ def create_reconall_workflow(name="ReconAll", plugin_args=None,
               'lookup_table',
               'wm_lookup_table',
               'awk_file']
-    
+
     config_node = pe.Node(niu.Function(params + ['rb_date'],
                                        params,
                                        setconfig),
                           name="config")
 
     config_node.inputs.rb_date = rb_date
-    
+
     for param in params:
         reconall.connect(inputspec, param, config_node, param)
 

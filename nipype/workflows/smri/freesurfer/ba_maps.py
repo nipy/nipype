@@ -85,7 +85,7 @@ def create_ba_maps_wf(name="Brodmann_Area_Maps", th3=True, exvivo=True,
                         out_file = '{0}.{1}_exvivo.label'.format(hemisphere, label)
                     else:
                         out_file = '{0}.{1}.label'.format(hemisphere, label)
-                        
+
                     out_files.append(out_file)
                     field_template[label] = 'label/' + out_file
                     source_fields.append(label)

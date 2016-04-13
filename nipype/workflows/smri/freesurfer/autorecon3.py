@@ -621,10 +621,10 @@ def create_AutoRecon3(name="AutoRecon3", qcache=False, plugin_args=None,
                                        out_aseg),
                               name="Aseg")
         ar3_wf.connect([(aparc_2_aseg, apas_2_aseg, [('out_file', 'in_aparcaseg')]),
-                        (inputspec, apas_2_aseg, [('aseg_presurf', 'in_aseg')])])       
+                        (inputspec, apas_2_aseg, [('aseg_presurf', 'in_aseg')])])
 
     apas_2_aseg.inputs.out_file = "aseg.mgz"
-                                       
+
 
     # Segmentation Stats
     """
