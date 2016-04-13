@@ -248,10 +248,7 @@ def create_AutoRecon2(name="AutoRecon2", longitudinal=False,
                                ['out_file'],
                                copy_file),
                       name='Copy_CCSegmentation')
-    if fsvernum > 6:
-        copy_cc.inputs.out_file = 'aseg.presurf.mgz'
-    else:
-        copy_cc.inputs.out_file = 'aseg.mgz'
+    copy_cc.inputs.out_file = 'aseg.presurf.mgz'
 
     ar2_wf.connect([(segment_cc, copy_cc, [('out_file', 'in_file')])
                     ])
