@@ -6,52 +6,35 @@ import nipype.pipeline.engine as pe  # pypeline engine
 from nipype.interfaces.freesurfer import *
 from .utils import copy_file, copy_files
 
+
 def checkT1s(T1_files, cw256=False):
     """Verifying size of inputs and setting workflow parameters"""
-    import SimpleITK as sitk
-    import os
     import sys
-    # check that the files are in a list
-    if not type(T1_files) == list:
-        T1_files = [T1_files]
+    import nibabel as nib
+    from nipype.utils.filemanip import filename_to_list
+
+    T1_files = filename_to_list(T1_files)
     if len(T1_files) == 0:
         print("ERROR: No T1's Given")
         sys.exit(-1)
-    for i, t1 in enumerate(T1_files):
-        if t1.endswith(".mgz"):
-            # convert input fs files to NIFTI
-            convert = MRIConvert()
-            convert.inputs.in_file = t1
-            convert.inputs.out_file = os.path.abspath(os.path.basename(t1).replace('.mgz', '.nii.gz'))
-            convert.run()
-            T1_files[i] = convert.inputs.out_file
-    size = None
-    origvol_names = list()
-    for i, t1 in enumerate(T1_files):
-        # assign an input number
-        file_num = str(i + 1)
-        while len(file_num) < 3:
-            file_num = '0' + file_num
-        origvol_names.append("{0}.mgz".format(file_num))
-        # check the size of the image
-        img = sitk.ReadImage(t1)
-        if not size:
-            size = img.GetSize()
-        elif size != img.GetSize():
-            print("ERROR: T1s not the same size. Cannot process {0} {1} together".format(T1_files[0],
-                                                                                         otherFilename))
+
+    shape = nib.load(T1_files[0]).shape
+    for t1 in T1_files[1:]:
+        if nib.load(t1).shape != shape:
+            print("ERROR: T1s not the same size. Cannot process {0} and {1} "
+                  "together".format(T1_files[0], t1))
             sys.exit(-1)
+
+    origvol_names = ["{0:03d}.mgz".format(i + 1) for i in range(len(T1_files))]
+
     # check if cw256 is set to crop the images if size is larger than 256
-    if not cw256:
-        for dim in size:
-            if dim > 256:
-                print("Setting MRI Convert to crop images to 256 FOV")
-                cw256 = True
-    if len(T1_files) > 1:
-        resample_type = 'cubic'
-    else:
-        resample_type = 'interpolate'
+    if not cw256 and any(dim > 256 for dim in shape):
+        print("Setting MRI Convert to crop images to 256 FOV")
+        cw256 = True
+
+    resample_type = 'cubic' if len(T1_files) > 1 else 'interpolate'
     return T1_files, cw256, resample_type, origvol_names
+
 
 def create_AutoRecon1(name="AutoRecon1", longitudinal=False, field_strength='1.5T',
                       custom_atlas=None, plugin_args=None):
