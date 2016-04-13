@@ -12,7 +12,7 @@ def copy_ltas(in_file, subjects_dir, subject_id, long_template):
 
 def create_AutoRecon2(name="AutoRecon2", longitudinal=False,
                       plugin_args=None, fsvernum=5.3,
-                          stop=None, shrink=None):
+                      stop=None, shrink=None, distance=None):
     # AutoRecon2
     # Workflow
     ar2_wf = pe.Workflow(name=name)

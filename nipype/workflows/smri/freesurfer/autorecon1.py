@@ -35,7 +35,7 @@ def checkT1s(T1_files, cw256=False):
     resample_type = 'cubic' if len(T1_files) > 1 else 'interpolate'
     return T1_files, cw256, resample_type, origvol_names
 
-def create_AutoRecon1(name="AutoRecon1", longitudinal=False, distance=200,
+def create_AutoRecon1(name="AutoRecon1", longitudinal=False, distance=None,
                       custom_atlas=None, plugin_args=None, shrink=None, stop=None,
                       fsvernum=5.3):
     """Creates the AutoRecon1 workflow in nipype.
