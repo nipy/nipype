@@ -259,7 +259,8 @@ def create_reconall_workflow(name="ReconAll", plugin_args=None,
                                               'inputspec.reg_template_withskull'),
                                              ('awk_file', 'inputspec.awk_file')])])
     # create AutoRecon2
-    ar2_wf, ar2_outputs = create_AutoRecon2(plugin_args=plugin_args, fsvernum=fsvernum)
+    ar2_wf, ar2_outputs = create_AutoRecon2(plugin_args=plugin_args, fsvernum=fsvernum,
+                                            stop=stop, shrink=shrink)
     # connect inputs for AutoRecon2
     reconall.connect([(inputspec, ar2_wf, [('num_threads', 'inputspec.num_threads')]),
                       (config_node, ar2_wf, [('reg_template_withskull',
