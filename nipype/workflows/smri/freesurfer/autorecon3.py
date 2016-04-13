@@ -936,7 +936,7 @@ def create_AutoRecon3(name="AutoRecon3", qcache=False, plugin_args=None,
                     (volume_mask, outputspec, [('out_ribbon', 'ribbon'),
                                                ('lh_ribbon', 'lh_ribbon'),
                                                ('rh_ribbon', 'rh_ribbon')])])
-    if fsvernum < 6:
+    if fsvernum > 6:
         ar3_wf.connect([(relabel_hypos, outputspec, [('out_file', 'aseg_presurf_hypos')])])
 
 
