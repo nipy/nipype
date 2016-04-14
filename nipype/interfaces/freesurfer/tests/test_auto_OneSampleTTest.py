@@ -65,7 +65,7 @@ def test_OneSampleTTest_inputs():
     ),
     mask_file=dict(argstr='--mask %s',
     ),
-    no_contrast_sok=dict(argstr='--no-contrasts-ok',
+    no_contrast_ok=dict(argstr='--no-contrasts-ok',
     ),
     no_est_fwhm=dict(argstr='--no-est-fwhm',
     ),

@@ -66,18 +66,18 @@ class Bse(CommandLine):
     """
     brain surface extractor (BSE)
     This program performs automated skull and scalp removal on T1-weighted MRI volumes.
-    
+
     http://brainsuite.org/processing/surfaceextraction/bse/
-    
+
     Examples
     --------
-    
+
     >>> from nipype.interfaces import brainsuite
     >>> from nipype.testing import example_data
     >>> bse = brainsuite.Bse()
     >>> bse.inputs.inputMRIFile = example_data('structural.nii')
     >>> results = bse.run() #doctest: +SKIP
-    
+
     """
 
     input_spec = BseInputSpec
@@ -178,17 +178,17 @@ class Bfc(CommandLine):
     This program corrects gain variation in T1-weighted MRI.
 
     http://brainsuite.org/processing/surfaceextraction/bfc/
-    
+
     Examples
     --------
-    
+
     >>> from nipype.interfaces import brainsuite
     >>> from nipype.testing import example_data
     >>> bfc = brainsuite.Bfc()
     >>> bfc.inputs.inputMRIFile = example_data('structural.nii')
     >>> bfc.inputs.inputMaskFile = example_data('mask.nii')
     >>> results = bfc.run() #doctest: +SKIP
-    
+
     """
 
 
@@ -242,19 +242,19 @@ class Pvc(CommandLine):
     partial volume classifier (PVC) tool.
     This program performs voxel-wise tissue classification T1-weighted MRI.
     Image should be skull-stripped and bias-corrected before tissue classification.
-    
+
     http://brainsuite.org/processing/surfaceextraction/pvc/
-    
+
     Examples
     --------
-    
+
     >>> from nipype.interfaces import brainsuite
     >>> from nipype.testing import example_data
     >>> pvc = brainsuite.Pvc()
     >>> pvc.inputs.inputMRIFile = example_data('structural.nii')
     >>> pvc.inputs.inputMaskFile = example_data('mask.nii')
     >>> results = pvc.run() #doctest: +SKIP
-    
+
     """
 
     input_spec = PvcInputSpec
@@ -283,9 +283,9 @@ class CerebroInputSpec(CommandLineInputSpec):
     inputAtlasLabelFile = File(
         mandatory=True, desc='atlas labeling', argstr='--atlaslabels %s')
     inputBrainMaskFile = File(desc='brain mask file', argstr='-m %s')
-    outputCerebrumMaskFile = File(desc='output cerebrum mask volume. If unspecified, output file name will be auto generated.', 
+    outputCerebrumMaskFile = File(desc='output cerebrum mask volume. If unspecified, output file name will be auto generated.',
                                   argstr='-o %s', genfile=True)
-    outputLabelMaskFile = File(desc='output labeled hemisphere/cerebrum volume. If unspecified, output file name will be auto generated.', 
+    outputLabelMaskFile = File(desc='output labeled hemisphere/cerebrum volume. If unspecified, output file name will be auto generated.',
                                argstr='-l %s', genfile=True)
     costFunction = traits.Int(2, usedefault=True, desc='0,1,2', argstr='-c %d')
     useCentroids = traits.Bool(
@@ -336,9 +336,9 @@ class Cerebro(CommandLine):
     >>> cerebro.inputs.inputAtlasLabelFile = 'atlasLabels.img'
     >>> cerebro.inputs.inputBrainMaskFile = example_data('mask.nii')
     >>> results = cerebro.run() #doctest: +SKIP
-    
+
     """
-    
+
     input_spec = CerebroInputSpec
     output_spec = CerebroOutputSpec
     _cmd = 'cerebro'
@@ -371,7 +371,7 @@ class CortexInputSpec(CommandLineInputSpec):
     computeGCBoundary = traits.Bool(
         desc='compute GM/CSF boundary', argstr='-g')
     includeAllSubcorticalAreas = traits.Bool(
-        True, usedefault=True, esc='include all subcortical areas in WM mask', argstr='-a')
+        True, usedefault=True, desc='include all subcortical areas in WM mask', argstr='-a')
     verbosity = traits.Int(desc='verbosity level', argstr='-v %d')
     timer = traits.Bool(desc='timing function', argstr='--timer')
 
@@ -397,7 +397,7 @@ class Cortex(CommandLine):
     >>> cortex.inputs.inputHemisphereLabelFile = example_data('mask.nii')
     >>> cortex.inputs.inputTissueFractionFile = example_data('tissues.nii.gz')
     >>> results = cortex.run() #doctest: +SKIP
-    
+
     """
 
     input_spec = CortexInputSpec
@@ -451,7 +451,7 @@ class Scrubmask(CommandLine):
     >>> scrubmask = brainsuite.Scrubmask()
     >>> scrubmask.inputs.inputMaskFile = example_data('mask.nii')
     >>> results = scrubmask.run() #doctest: +SKIP
-    
+
     """
     input_spec = ScrubmaskInputSpec
     output_spec = ScrubmaskOutputSpec
@@ -464,8 +464,8 @@ class Scrubmask(CommandLine):
 
         if name == 'outputMaskFile':
             return getFileName(self, self.inputs.inputMaskFile, name, '.nii.gz')
-            
-            
+
+
         return None
 
     def _list_outputs(self):
@@ -497,7 +497,7 @@ class Tca(CommandLine):
     This program removes topological handles from a binary object.
 
     http://brainsuite.org/processing/surfaceextraction/tca/
-    
+
     Examples
     --------
     >>> from nipype.interfaces import brainsuite
@@ -505,7 +505,7 @@ class Tca(CommandLine):
     >>> tca = brainsuite.Tca()
     >>> tca.inputs.inputMaskFile = example_data('mask.nii')
     >>> results = tca.run() #doctest: +SKIP
-        
+
     """
     input_spec = TcaInputSpec
     output_spec = TcaOutputSpec
@@ -551,7 +551,7 @@ class Dewisp(CommandLine):
     can be before it is considered part of the image.
 
     http://brainsuite.org/processing/surfaceextraction/dewisp/
-    
+
     Examples
     --------
 
@@ -560,9 +560,9 @@ class Dewisp(CommandLine):
     >>> dewisp = brainsuite.Dewisp()
     >>> dewisp.inputs.inputMaskFile = example_data('mask.nii')
     >>> results = dewisp.run() #doctest: +SKIP
-    
+
     """
-    
+
     input_spec = DewispInputSpec
     output_spec = DewispOutputSpec
     _cmd = 'dewisp'
@@ -703,9 +703,9 @@ class Pialmesh(CommandLine):
     """
     pialmesh
     computes a pial surface model using an inner WM/GM mesh and a tissue fraction map.
-    
+
     http://brainsuite.org/processing/surfaceextraction/pial/
-    
+
     Examples
     --------
 
@@ -716,9 +716,9 @@ class Pialmesh(CommandLine):
     >>> pialmesh.inputs.inputTissueFractionFile = 'frac_file.nii.gz'
     >>> pialmesh.inputs.inputMaskFile = example_data('mask.nii')
     >>> results = pialmesh.run() #doctest: +SKIP
-    
+
     """
-    
+
     input_spec = PialmeshInputSpec
     output_spec = PialmeshOutputSpec
     _cmd = 'pialmesh'
@@ -771,17 +771,17 @@ class SkullfinderOutputSpec(TraitedSpec):
 class Skullfinder(CommandLine):
     """
     Skull and scalp segmentation algorithm.
-    
+
     Examples
     --------
-    
+
     >>> from nipype.interfaces import brainsuite
     >>> from nipype.testing import example_data
     >>> skullfinder = brainsuite.Skullfinder()
     >>> skullfinder.inputs.inputMRIFile = example_data('structural.nii')
     >>> skullfinder.inputs.inputMaskFile = example_data('mask.nii')
     >>> results = skullfinder.run() #doctest: +SKIP
-    
+
     """
     input_spec = SkullfinderInputSpec
     output_spec = SkullfinderOutputSpec
@@ -836,15 +836,15 @@ class Hemisplit(CommandLine):
 
     Examples
     --------
-    
+
     >>> from nipype.interfaces import brainsuite
     >>> from nipype.testing import example_data
     >>> hemisplit = brainsuite.Hemisplit()
     >>> hemisplit.inputs.inputSurfaceFile = 'input_surf.dfs'
     >>> hemisplit.inputs.inputHemisphereLabelFile = 'label.nii'
     >>> hemisplit.inputs.pialSurfaceFile = 'pial.dfs'
-    >>> results = hemisplit.run() #doctest: +SKIP    
-    
+    >>> results = hemisplit.run() #doctest: +SKIP
+
     """
 
     input_spec = HemisplitInputSpec
