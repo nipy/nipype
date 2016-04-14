@@ -286,7 +286,7 @@ def create_AutoRecon3(name="AutoRecon3", qcache=False, plugin_args=None,
                     (ar3_rh_wf1, volume_mask, [('outputspec.pial', 'rh_pial')]),
                     ])
 
-    if fsvernum > 6:
+    if fsvernum >= 6:
         ar3_wf.connect([(inputspec, volume_mask, [('aseg_presurf', 'in_aseg')])])
     else:
         ar3_wf.connect([(inputspec, volume_mask, [('aseg_presurf', 'aseg')])])
@@ -296,12 +296,8 @@ def create_AutoRecon3(name="AutoRecon3", qcache=False, plugin_args=None,
 
     for hemisphere, hemiwf2 in [('lh', ar3_lh_wf2),  ('rh', ar3_rh_wf2)]:
         if hemisphere == 'lh':
-            opp_hemi = 'rh'
-            opp_wf = ar3_rh_wf2
             hemiwf1 = ar3_lh_wf1
         else:
-            opp_hemi = 'lh'
-            opp_wf = ar3_lh_wf2
             hemiwf1 = ar3_rh_wf1
 
         hemi_inputs2 = ['wm',
@@ -603,7 +599,7 @@ def create_AutoRecon3(name="AutoRecon3", qcache=False, plugin_args=None,
                                                        'lh_ribbon'),
                                                       ('out_ribbon', 'ribbon')])])
 
-    if fsvernum > 6:
+    if fsvernum >= 6:
         apas_2_aseg = pe.Node(Apas2Aseg(), name="Apas_2_Aseg")
         ar3_wf.connect([(aparc_2_aseg, apas_2_aseg, [('out_file', 'in_file')]),
                         (relabel_hypos, aparc_2_aseg_2009, [('out_file', 'aseg')])])
@@ -667,7 +663,7 @@ def create_AutoRecon3(name="AutoRecon3", qcache=False, plugin_args=None,
                                            ]),
                     ])
 
-    if fsvernum > 6:
+    if fsvernum >= 6:
         ar3_wf.connect(inputspec, 'aseg_presurf', segstats, 'presurf_seg')
     else:
         ar3_wf.connect(inputspec, 'aseg_presurf', segstats, 'aseg')
@@ -737,7 +733,7 @@ def create_AutoRecon3(name="AutoRecon3", qcache=False, plugin_args=None,
                                               ]),
                     ])
 
-    if fsvernum > 6:
+    if fsvernum >= 6:
         ar3_wf.connect(inputspec, 'aseg_presurf', wm_segstats, 'presurf_seg')
     else:
         ar3_wf.connect(inputspec, 'aseg_presurf', wm_segstats, 'aseg')
@@ -937,7 +933,7 @@ def create_AutoRecon3(name="AutoRecon3", qcache=False, plugin_args=None,
                     (volume_mask, outputspec, [('out_ribbon', 'ribbon'),
                                                ('lh_ribbon', 'lh_ribbon'),
                                                ('rh_ribbon', 'rh_ribbon')])])
-    if fsvernum > 6:
+    if fsvernum >= 6:
         ar3_wf.connect([(relabel_hypos, outputspec, [('out_file', 'aseg_presurf_hypos')])])
 
 

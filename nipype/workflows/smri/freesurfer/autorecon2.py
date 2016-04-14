@@ -219,7 +219,7 @@ def create_AutoRecon2(name="AutoRecon2", longitudinal=False,
         fuse_segmentations.inputs.out_file = 'aseg.fused.mgz'
 
     ca_label = pe.Node(CALabel(), name='CA_Label')
-    if fsvernum > 6:
+    if fsvernum >= 6:
         ca_label.inputs.relabel_unlikely = (9, .3)
         ca_label.inputs.prior = 0.5
     ca_label.inputs.align = True
