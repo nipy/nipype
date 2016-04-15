@@ -184,7 +184,7 @@ class Dcm2nii(CommandLine):
 ## dcm2niix update
 
 class Dcm2niixInputSpec(CommandLineInputSpec):
-    source_names = InputMultiPath(File(exists=True), argstr="%s", position=-1, 
+    source_names = InputMultiPath(File(exists=True), argstr="%s", position=-1,
                                   copyfile=False, mandatory=True, xor=['source_dir'])
     source_dir = Directory(exists=True, argstr="%s", position=-1, mandatory=True,
                            xor=['source_names'])
@@ -223,9 +223,9 @@ class Dcm2niix(CommandLine):
 
     def _format_arg(self, opt, spec, val):
         if opt in ['bids_format', 'single_file', 'verbose']:
-            
+
             spec = deepcopy(spec)
-                
+
             if val:
                 spec.argstr += ' y'
             else:
@@ -259,7 +259,7 @@ class Dcm2niix(CommandLine):
                         output_dir = self.inputs.output_dir
                     else:
                         output_dir = self._gen_filename('output_dir')
-                    
+
                     out_file = os.path.abspath(os.path.join(output_dir, fname))
 
                     # extract bvals
@@ -271,7 +271,7 @@ class Dcm2niix(CommandLine):
                 # next scan will have bvals/bvecs
                 elif 'DTI gradient directions' in line:
                     find_b = True
-                        
+
                 else:
                     pass
 
