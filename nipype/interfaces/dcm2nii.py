@@ -192,6 +192,7 @@ class Dcm2niixInputSpec(CommandLineInputSpec):
     output_dir = Directory(exists=True, argstr='-o %s', genfile=True)
     bids_format = traits.Bool(True, argstr='-b', usedefault=True)
     compress = traits.Enum('i', ['y','i','n'], argstr='-z %s', usedefault=True)
+    merge_imgs = traits.Bool(False, argstr='-m', usedefault=True)
     single_file = traits.Bool(False, argstr='-s', usedefault=True)
     verbose = traits.Bool(False, argstr='-v', usedefault=True)
 
@@ -222,7 +223,7 @@ class Dcm2niix(CommandLine):
     _cmd = 'dcm2niix'
 
     def _format_arg(self, opt, spec, val):
-        if opt in ['bids_format', 'single_file', 'verbose']:
+        if opt in ['bids_format', 'merge_imgs', 'single_file', 'verbose']:
 
             spec = deepcopy(spec)
 
