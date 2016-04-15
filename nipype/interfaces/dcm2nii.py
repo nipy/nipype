@@ -180,3 +180,126 @@ class Dcm2nii(CommandLine):
             f.close()
             return config_file
         return None
+
+## dcm2niix update
+
+class Dcm2niixInputSpec(CommandLineInputSpec):
+    source_names = InputMultiPath(File(exists=True), argstr="%s", position=-1, 
+                                  copyfile=False, mandatory=True, xor=['source_dir'])
+    source_dir = Directory(exists=True, argstr="%s", position=-1, mandatory=True,
+                           xor=['source_names'])
+    out_filename = traits.Str('%q', argstr="-f %s", usedefault=True)
+    output_dir = Directory(exists=True, argstr='-o %s', genfile=True)
+    bids_format = traits.Bool(True, argstr='-b', usedefault=True)
+    compress = traits.Enum('i', ['y','i','n'], argstr='-z %s', usedefault=True)
+    single_file = traits.Bool(False, argstr='-s', usedefault=True)
+    verbose = traits.Bool(False, argstr='-v', usedefault=True)
+
+
+
+class Dcm2niixOutputSpec(TraitedSpec):
+    converted_files = OutputMultiPath(File(exists=True))
+    bvecs = OutputMultiPath(File(exists=True))
+    bvals = OutputMultiPath(File(exists=True))
+    bids = OutputMultiPath(File(exists=True))
+
+
+class Dcm2niix(CommandLine):
+    """Uses MRICRON's dcm2niix to convert dicom files
+    Examples
+    ========
+    >>> from nipype.interfaces.dcm2niix import Dcm2niix
+    >>> converter = Dcm2niix()
+    >>> converter.inputs.source_names = ['functional_1.dcm', 'functional_2.dcm']
+    >>> converter.inputs.compress = 'i'
+    >>> converter.inputs.output_dir = '.'
+    >>> converter.cmdline
+    'dcm2niix -b y -o my/output/dir -z y -s n functional_1.dcm'
+    """
+
+    input_spec = Dcm2niixInputSpec
+    output_spec = Dcm2niixOutputSpec
+    _cmd = 'dcm2niix'
+
+    def _format_arg(self, opt, spec, val):
+        if opt in ['bids_format', 'single_file', 'verbose']:
+            
+            spec = deepcopy(spec)
+                
+            if val:
+                spec.argstr += ' y'
+            else:
+                spec.argstr += ' n'
+                val = True
+        if opt == 'source_names':
+            return spec.argstr % val[0]
+        return super(Dcm2niix, self)._format_arg(opt, spec, val)
+
+    def _run_interface(self, runtime):
+        new_runtime = super(Dcm2niix, self)._run_interface(runtime)
+        (self.output_files,
+         self.bvecs, self.bvals, self.bids) = self._parse_stdout(new_runtime.stdout)
+        return new_runtime
+
+    def _parse_stdout(self, stdout):
+        files = []
+        bvecs = []
+        bvals = []
+        bids = []
+        skip = False
+        find_b = False
+
+        for line in stdout.split("\n"):
+            if not skip:
+                out_file = None
+                if line.startswith("Convert "): # output
+                    fname = str(re.search('\S+/\S+', line).group(0))
+
+                    if isdefined(self.inputs.output_dir):
+                        output_dir = self.inputs.output_dir
+                    else:
+                        output_dir = self._gen_filename('output_dir')
+                    
+                    out_file = os.path.abspath(os.path.join(output_dir, fname))
+
+                    # extract bvals
+                    if find_b:
+                        bvecs.append(out_file + ".bvec")
+                        bvals.append(out_file + ".bval")
+                        find_b = False
+
+                # next scan will have bvals/bvecs
+                elif 'DTI gradient directions' in line:
+                    find_b = True
+                        
+                else:
+                    pass
+
+                if out_file:
+                    files.append(out_file + ".nii.gz")
+
+                    if self.inputs.bids_format:
+                        bids.append(out_file + ".bids")
+
+                    continue
+
+            skip = False
+
+        # just return what was done
+        if not bids:
+            return files, bvecs, bvals
+        else:
+            return files, bvecs, bvals, bids
+
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        outputs['converted_files'] = self.output_files
+        outputs['bvecs'] = self.bvecs
+        outputs['bvals'] = self.bvals
+        outputs['bids'] = self.bids
+        return outputs
+
+    def _gen_filename(self, name):
+        if name == 'output_dir':
+            return os.getcwd()
+        return None
