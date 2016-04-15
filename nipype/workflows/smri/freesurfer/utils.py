@@ -493,20 +493,22 @@ def checkenv(exitonfail=False):
     else:
         print("Warning: " + msg)
 
+
 def center_volume(in_file):
-    import SimpleITK as sitk
     import os
-    img = sitk.ReadImage(in_file)
-    size = img.GetSize()
-    origin = img.GetOrigin()
-    new_origin = [0,0,0]
-    for i, xx in enumerate(origin):
-        new_origin[i] = float(size[i])/2
-        if xx < 0:
-            new_origin[i] = -new_origin[i]
-    img.SetOrigin(new_origin)
+    import numpy as np
+    import nibabel as nib
     out_file = os.path.abspath(os.path.basename(in_file))
-    sitk.WriteImage(img, out_file)
+
+    img = nib.load(in_file)
+    klass = img.__class__
+
+    affine = img.affine.copy()
+    origin = affine[:3, 3]
+    affine[:3, 3] = np.sign(origin) * np.asarray(img.shape, dtype=float) / 2
+
+    new_img = klass(img.get_data(), affine, img.header, extra=img.extra)
+    new_img.to_filename(out_file)
     return out_file
 
 
@@ -514,56 +516,46 @@ def recodeLabelMap(in_file, out_file, recode_file):
     """This function has been adapted from BRAINSTools and serves
     as a means to recode a label map based upon an input csv
     file."""
-    import SimpleITK as sitk
-    import os
-    import csv
     import sys
+    import os
+    import numpy as np
+    import nibabel as nib
 
-    # Convert csv to RECODE_TABLE
-    CSVFile = open(recode_file, 'rb')
-    reader = csv.reader(CSVFile)
-    header = reader.next()
-    n_cols = len(header)
-    if n_cols == 4:
-        # ignore label names
-        label_keys = (0, 2)
-    elif n_cols == 2:
-        # no label names present
-        label_keys = (0, 1)
-    else:
-        # csv does not match format requirements
-        print("ERROR: input csv file for label recoding does meet requirements")
+    # Extract label-label map from a CSV file
+    recode_data = np.loadtxt(recode_file, delimiter=',', skiprows=1,
+                             dtype='S20')
+    # Permit (and ignore) label names
+    if recode_data.shape[1] == 4:
+        recode_data = recode_data[:, (0, 2)]
+    if recode_data.shape[1] != 2:
+        print("ERROR: input csv file for label recoding does meet "
+              "requirements")
         sys.exit()
+    recode_table = dict(recode_data.astype(np.uint64))
+    mapper = lambda x: recode_table[x] if x in recode_table else x
 
-    # read csv file
-    RECODE_TABLE = list()
-    for line in reader:
-        RECODE_TABLE.append((int(line[label_keys[0]]), int(line[label_keys[1]])))
-
-    def minimizeSizeOfImage(outlabels):
-        """This function will find the largest integer value in the labelmap, and
-        cast the image to the smallest possible integer size so that no loss of data
-        results."""
-        measureFilt  = sitk.StatisticsImageFilter()
-        measureFilt.Execute(outlabels)
-        imgMin=measureFilt.GetMinimum()
-        imgMax=measureFilt.GetMaximum()
-        if imgMax < (2**8)-1:
-            outlabels = sitk.Cast( outlabels, sitk.sitkUInt8 )
-        elif imgMax < (2**16)-1:
-            outlabels = sitk.Cast( outlabels, sitk.sitkUInt16 )
-        elif imgMax < (2**32)-1:
-            outlabels = sitk.Cast( outlabels, sitk.sitkUInt32 )
-        elif imgMax < (2**64)-1:
-            outlabels = sitk.Cast( outlabels, sitk.sitkUInt64 )
-        return outlabels
-
-    LabelImage=sitk.Cast(sitk.ReadImage(in_file), sitk.sitkUInt32)
-    for (old, new) in RECODE_TABLE:
-        LabelImage = sitk.Cast((LabelImage == old), sitk.sitkUInt32)*(new - old)+LabelImage
-    LabelImage = minimizeSizeOfImage(LabelImage)
+    img = nib.load(in_file)
+    klass = img.__class__
     out_file = os.path.abspath(out_file)
-    sitk.WriteImage(LabelImage, out_file)
+
+    # Cast non-integer labels as unsigned, 32-bit integers
+    dtype = img.get_data_dtype()
+    if not np.issubdtype(img.get_data_dtype(), np.integer):
+        dtype = np.uint32
+    labels = np.asanyarray(img.get_data(), dtype=dtype)
+
+    # Choose smallest integer type to contain all outputted values
+    recode = np.vectorize(mapper, otypes=[np.uint64])
+    max_val = recode(np.unique(labels)).max()
+    for dtype in (np.uint8, np.uint16, np.uint32, np.uint64):
+        if max_val <= np.iinfo(dtype).max:
+            break
+    recode = np.vectorize(mapper, otypes=[dtype])
+
+    new_img = klass(recode(labels), img.affine, img.header, extra=img.extra)
+    new_img.set_data_dtype(dtype)  # Output type defined in header
+    new_img.to_filename(out_file)
+
     return out_file
 
 
