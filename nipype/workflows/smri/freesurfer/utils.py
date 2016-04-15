@@ -493,20 +493,22 @@ def checkenv(exitonfail=False):
     else:
         print("Warning: " + msg)
 
+
 def center_volume(in_file):
-    import SimpleITK as sitk
     import os
-    img = sitk.ReadImage(in_file)
-    size = img.GetSize()
-    origin = img.GetOrigin()
-    new_origin = [0,0,0]
-    for i, xx in enumerate(origin):
-        new_origin[i] = float(size[i])/2
-        if xx < 0:
-            new_origin[i] = -new_origin[i]
-    img.SetOrigin(new_origin)
+    import numpy as np
+    import nibabel as nib
     out_file = os.path.abspath(os.path.basename(in_file))
-    sitk.WriteImage(img, out_file)
+
+    img = nib.load(in_file)
+    klass = img.__class__
+
+    affine = img.affine.copy()
+    origin = affine[:3, 3]
+    affine[:3, 3] = np.sign(origin) * np.asarray(img.shape, dtype=float) / 2
+
+    new_img = klass(img.get_data(), affine, img.header, extra=img.extra)
+    new_img.to_filename(out_file)
     return out_file
 
 
