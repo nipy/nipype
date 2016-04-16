@@ -1,10 +1,7 @@
-import os
-import nipype
-from nipype.interfaces.utility import Function, IdentityInterface, Merge
+from nipype.interfaces.utility import IdentityInterface, Merge
 import nipype.pipeline.engine as pe  # pypeline engine
 from nipype.interfaces.freesurfer import *
 from .ba_maps import create_ba_maps_wf
-from .utils import createsrcsubj
 from nipype.interfaces.io import DataGrabber
 
 def create_AutoRecon3(name="AutoRecon3", qcache=False, plugin_args=None,

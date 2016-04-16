@@ -1,5 +1,3 @@
-import os
-import nipype
 from nipype.interfaces.utility import Function, IdentityInterface, Merge
 import nipype.pipeline.engine as pe  # pypeline engine
 from nipype.interfaces.freesurfer import *

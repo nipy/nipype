@@ -79,8 +79,7 @@ def create_skullstripped_recon_flow(name="skullstripped_recon_all"):
     wf.connect(autorecon_resume, "subject_id", outputnode, "subject_id")
     return wf
 
-def create_reconall_workflow(name="ReconAll", plugin_args=None,
-                             recoding_file=None):
+def create_reconall_workflow(name="ReconAll", plugin_args=None):
     """Creates the ReconAll workflow in nipype.
 
     Example
@@ -553,15 +552,6 @@ def create_reconall_workflow(name="ReconAll", plugin_args=None,
     reconall.connect([(datasink, completion, [('out_file', 'datasinked_files')]),
                       (inputspec, completion, [('subject_id', 'subject_id')]),
                       (completion, postds_outputspec, [('subject_id', 'subject_id')])])
-
-
-    #### Workflow additions go here
-    if recoding_file:
-        from utils import create_recoding_wf
-        recode = create_recoding_wf(recoding_file)
-        reconall.connect([(ar3_wf, recode, [('outputspec.aseg', 'inputspec.labelmap')]),
-                          (recode, outputspec, [('outputspec.recodedlabelmap', 'recoded_labelmap')])])
-
 
     return reconall
 
