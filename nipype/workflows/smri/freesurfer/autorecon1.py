@@ -1,10 +1,7 @@
-import sys
-import os
-import nipype
 from nipype.interfaces.utility import Function,IdentityInterface
 import nipype.pipeline.engine as pe  # pypeline engine
 from nipype.interfaces.freesurfer import *
-from .utils import copy_file, copy_files
+from .utils import copy_file
 
 
 def checkT1s(T1_files, cw256=False):
