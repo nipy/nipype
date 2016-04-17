@@ -19,6 +19,7 @@ def test_Aparc2Aseg_inputs():
     environ=dict(nohash=True,
     usedefault=True,
     ),
+    filled=dict(),
     hypo_wm=dict(argstr='--hypo-as-wm',
     mandatory=False,
     ),

@@ -420,7 +420,7 @@ def mkdir_p(path):
         else:
             raise
 
-def getdefaultconfig(exitonfail=False):
+def getdefaultconfig(exitonfail=False, rb_date="2014-08-21"):
     config = { 'custom_atlas' : None,
                'cw256' : False,
                'field_strength' : '1.5T',
@@ -440,9 +440,9 @@ def getdefaultconfig(exitonfail=False):
     config['awk_file'] = os.path.join(config['fs_home'], 'bin',
                                       'extract_talairach_avi_QA.awk')
     config['registration_template'] = os.path.join(config['fs_home'], 'average',
-                                                   'RB_all_2014-08-21.gca')
+                                                   'RB_all_{0}.gca'.format(rb_date))
     config['registration_template_withskull'] = os.path.join(config['fs_home'], 'average',
-                                                             'RB_all_withskull_2014-08-21.gca')
+                                                             'RB_all_withskull_{0}.gca'.format(rb_date))
     for hemi in ('lh', 'rh'):
         config['{0}_atlas'.format(hemi)] = os.path.join(
             config['fs_home'], 'average',

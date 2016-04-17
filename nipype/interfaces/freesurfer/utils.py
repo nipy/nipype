@@ -35,21 +35,30 @@ filetypes = ['cor', 'mgh', 'mgz', 'minc', 'analyze',
 
 
 def copy2subjdir(cls, in_file, folder=None, basename=None, subject_id=None):
+    """Method to copy an input to the subjects directory"""
+    # check that the input is defined
+    if not isdefined(in_file):
+        return in_file
+    # check that subjects_dir is defined
     if isdefined(cls.inputs.subjects_dir):
         subjects_dir = cls.inputs.subjects_dir
     else:
-        subjects_dir = os.getcwd()
+        subjects_dir = os.getcwd() #if not use cwd
+    # check for subject_id
     if not subject_id:
         if isdefined(cls.inputs.subject_id):
             subject_id = cls.inputs.subject_id
         else:
-            subject_id = 'subject_id'
+            subject_id = 'subject_id' #default
+    # check for basename
     if basename == None:
         basename = os.path.basename(in_file)
+    # check which folder to put the file in
     if folder != None:
         out_dir = os.path.join(subjects_dir, subject_id, folder)
     else:
         out_dir = os.path.join(subjects_dir, subject_id)
+    # make the output folder if it does not exist
     if not os.path.isdir(out_dir):
         os.makedirs(out_dir)
     out_file = os.path.join(out_dir, basename)
@@ -58,7 +67,7 @@ def copy2subjdir(cls, in_file, folder=None, basename=None, subject_id=None):
     return out_file
 
 def createoutputdirs(outputs):
-    """create an output directories. If not created, some freesurfer interfaces fail"""
+    """create all output directories. If not created, some freesurfer interfaces fail"""
     for output in outputs.itervalues():
         dirname = os.path.dirname(output)
         if not os.path.isdir(dirname):
@@ -1867,6 +1876,7 @@ class MakeSurfacesInputSpec(FSTraitedSpec):
     in_filled = File(exists=True, mandatory=True,
                      desc="Implicit input file filled.mgz")
     # optional
+    in_white = File(exists=True, desc="Implicit input that is sometimes used")
     in_label = File(exists=True, mandatory=False, xor=['noaparc'],
                     desc="Implicit input label/<hemisphere>.aparc.annot")
     orig_white = File(argstr="-orig_white %s", exists=True, mandatory=False,
@@ -1893,6 +1903,8 @@ class MakeSurfacesInputSpec(FSTraitedSpec):
         argstr="-max %.1f", desc="No documentation (used for longitudinal processing)")
     longitudinal = traits.Bool(
         argstr="-long", desc="No documentation (used for longitudinal processing)")
+    white = traits.String(argstr="-white %s",
+                          desc="White surface name")
     copy_inputs = traits.Bool(mandatory=False,
                               desc="If running as a node, set this to True." +
                               "This will copy the input files to the node " +
@@ -1947,15 +1959,15 @@ class MakeSurfaces(FSCommand):
                          folder='mri', basename='wm.mgz')
             copy2subjdir(self, self.inputs.in_filled,
                          folder='mri', basename='filled.mgz')
+            copy2subjdir(self, self.inputs.in_white,
+                         'surf', '{0}.white'.format(self.inputs.hemisphere))
             for originalfile in [self.inputs.in_aseg,
                                  self.inputs.in_T1]:
-                if isdefined(originalfile):
-                    copy2subjdir(self, originalfile, folder='mri')
+                copy2subjdir(self, originalfile, folder='mri')
             for originalfile in [self.inputs.orig_white,
                                  self.inputs.orig_pial,
                                  self.inputs.in_orig]:
-                if isdefined(originalfile):
-                    copy2subjdir(self, originalfile, folder='surf')
+                copy2subjdir(self, originalfile, folder='surf')
             if isdefined(self.inputs.in_label):
                 copy2subjdir(self, self.inputs.in_label, 'label',
                              '{0}.aparc.annot'.format(self.inputs.hemisphere))
@@ -1972,9 +1984,11 @@ class MakeSurfaces(FSCommand):
             basename = os.path.basename(value)
             # whent the -mgz flag is specified, it assumes the mgz extension
             if self.inputs.mgz:
-                prefix = basename.rstrip('.mgz')
+                prefix = os.path.splitext(basename)[0]
             else:
                 prefix = basename
+            if prefix == 'aseg':
+                return # aseg is already the default
             return spec.argstr % prefix
         elif name in ['orig_white', 'orig_pial']:
             # these inputs do take full file paths or even basenames
@@ -2011,8 +2025,8 @@ class MakeSurfaces(FSCommand):
             dest_dir, str(self.inputs.hemisphere) + '.area')
         # Something determines when a pial surface and thickness file is generated
         # but documentation doesn't say what.
-        # The orig_pial flag is just a guess
-        if isdefined(self.inputs.orig_pial):
+        # The orig_pial input is just a guess
+        if isdefined(self.inputs.orig_pial) or self.inputs.white == 'NOWRITE':
             outputs["out_curv"] = outputs["out_curv"] + ".pial"
             outputs["out_area"] = outputs["out_area"] + ".pial"
             outputs["out_pial"] = os.path.join(
@@ -2029,7 +2043,7 @@ class MakeSurfaces(FSCommand):
 
 class CurvatureInputSpec(FSTraitedSpec):
     in_file = File(argstr="%s", position=-2, mandatory=True, exists=True,
-                   desc="Input file for Curvature")
+                   copyfile=True, desc="Input file for Curvature")
     # optional
     threshold = traits.Float(
         argstr="-thresh %.3f", mandatory=False, desc="Undocumented input threshold")
@@ -2073,7 +2087,6 @@ class Curvature(FSCommand):
         if self.inputs.copy_input:
             if name == 'in_file':
                 basename = os.path.basename(value)
-                shutil.copy(value, basename)
                 return spec.argstr % basename
         return super(Curvature, self)._format_arg(name, spec, value)
 
@@ -2301,11 +2314,16 @@ class VolumeMaskInputSpec(FSTraitedSpec):
                     desc="Implicit input left white matter surface")
     rh_white = File(mandatory=True, exists=True,
                     desc="Implicit input right white matter surface")
+    aseg = File(exists=True,
+                xor=['in_aseg'],
+                desc="Implicit aseg.mgz segmentation. " +
+                "Specify a different aseg by using the 'in_aseg' input.")
     subject_id = traits.String('subject_id', usedefault=True,
                                position=-1, argstr="%s", mandatory=True,
                                desc="Subject being processed")
     # optional
-    in_aseg = File(argstr="--aseg_name %s", mandatory=False, exists=True,
+    in_aseg = File(argstr="--aseg_name %s", mandatory=False,
+                   exists=True, xor=['aseg'],
                    desc="Input aseg file for VolumeMask")
     save_ribbon = traits.Bool(argstr="--save_ribbon", mandatory=False,
                               desc="option to save just the ribbon for the " +
@@ -2364,6 +2382,8 @@ class VolumeMask(FSCommand):
             copy2subjdir(self, self.inputs.lh_white, 'surf', 'lh.white')
             copy2subjdir(self, self.inputs.rh_white, 'surf', 'rh.white')
             copy2subjdir(self, self.inputs.in_aseg, 'mri')
+            copy2subjdir(self, self.inputs.aseg, 'mri', 'aseg.mgz')
+
         return super(VolumeMask, self).run(**inputs)
 
     def _format_arg(self, name, spec, value):
@@ -2726,6 +2746,8 @@ class Aparc2AsegInputSpec(FSTraitedSpec):
     rh_annotation = File(mandatory=True, exists=True,
                          desc="Input file must be <subject_id>/label/rh.aparc.annot")
     # optional
+    filled = File(exists=True,
+                  desc="Implicit input filled file. Only required with FS v5.3.")
     aseg = File(argstr="--aseg %s", mandatory=False, exists=True,
                 desc="Input aseg file")
     volmask = traits.Bool(argstr="--volmask", mandatory=False,
@@ -2808,6 +2830,7 @@ class Aparc2Aseg(FSCommand):
             copy2subjdir(self, self.inputs.rh_ribbon, 'mri', 'rh.ribbon.mgz')
             copy2subjdir(self, self.inputs.ribbon, 'mri', 'ribbon.mgz')
             copy2subjdir(self, self.inputs.aseg, 'mri')
+            copy2subjdir(self, self.inputs.filled, 'mri', 'filled.mgz')
             copy2subjdir(self, self.inputs.lh_annotation, 'label')
             copy2subjdir(self, self.inputs.rh_annotation, 'label')
 
@@ -2816,7 +2839,8 @@ class Aparc2Aseg(FSCommand):
     def _format_arg(self, name, spec, value):
         if name == 'aseg':
             # aseg does not take a full filename
-            return spec.argstr % os.path.basename(value).replace('.mgz', '')
+            basename = os.path.basename(value).replace('.mgz', '')
+            return spec.argstr % basename
         elif name == 'out_file':
             return spec.argstr % os.path.abspath(value)
 

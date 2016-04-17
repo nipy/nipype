@@ -32,9 +32,9 @@ def checkT1s(T1_files, cw256=False):
     resample_type = 'cubic' if len(T1_files) > 1 else 'interpolate'
     return T1_files, cw256, resample_type, origvol_names
 
-
-def create_AutoRecon1(name="AutoRecon1", longitudinal=False, field_strength='1.5T',
-                      custom_atlas=None, plugin_args=None):
+def create_AutoRecon1(name="AutoRecon1", longitudinal=False, distance=None,
+                      custom_atlas=None, plugin_args=None, shrink=None, stop=None,
+                      fsvernum=5.3):
     """Creates the AutoRecon1 workflow in nipype.
 
     Inputs::
@@ -235,22 +235,11 @@ def create_AutoRecon1(name="AutoRecon1", longitudinal=False, field_strength='1.5
     bias_correction = pe.Node(MNIBiasCorrection(), name="Bias_correction")
     bias_correction.inputs.iterations = 1
     bias_correction.inputs.protocol_iterations = 1000
-    if field_strength == '3T':
-        # 3T params from Zheng, Chee, Zagorodnov 2009 NeuroImage paper
-        # "Improvement of brain segmentation accuracy by optimizing
-        # non-uniformity correction using N3"
-        # namely specifying iterations, proto-iters and distance:
-        bias_correction.inputs.distance = 50
-    else:
-        # 1.5T default
-        bias_correction.inputs.distance = 200
-    # per c.larsen, decrease convergence threshold (default is 0.001)
-    bias_correction.inputs.stop = 0.0001
-    # per c.larsen, decrease shrink parameter: finer sampling (default is 4)
-    bias_correction.inputs.shrink =  2
-    # add the mask, as per c.larsen, bias-field correction is known to work
-    # much better when the brain area is properly masked, in this case by
-    # brainmask.mgz.
+    bias_correction.inputs.distance = distance
+    if stop:
+        bias_correction.inputs.stop = stop
+    if shrink:
+        bias_correction.inputs.shrink =  shrink
     bias_correction.inputs.no_rescale = True
     bias_correction.inputs.out_file = 'orig_nu.mgz'
 
@@ -344,6 +333,27 @@ def create_AutoRecon1(name="AutoRecon1", longitudinal=False, field_strength='1.5
         tal_qc = pe.Node(TalairachQC(), name="Detect_Aligment_Failures")
         ar1_wf.connect([(awk_logfile, tal_qc, [('log_file', 'log_file')])])
 
+
+    if fsvernum < 6:
+        # intensity correction is performed before normalization
+        intensity_correction = pe.Node(
+            MNIBiasCorrection(), name="Intensity_Correction")
+        intensity_correction.inputs.out_file = 'nu.mgz'
+        intensity_correction.inputs.iterations = 2
+        ar1_wf.connect([(add_xform_to_orig, intensity_correction, [('out_file', 'in_file')]),
+                        (copy_transform, intensity_correction, [('out_file', 'transform')])])
+
+
+        add_to_header_nu = pe.Node(AddXFormToHeader(), name="Add_XForm_to_NU")
+        add_to_header_nu.inputs.copy_name = True
+        add_to_header_nu.inputs.out_file = 'nu.mgz'
+        ar1_wf.connect([(intensity_correction, add_to_header_nu, [('out_file', 'in_file'),
+                                                              ]),
+                        (copy_transform, add_to_header_nu,
+                         [('out_file', 'transform')])
+                    ])
+
+
     # Intensity Normalization
     # Performs intensity normalization of the orig volume and places the result in mri/T1.mgz.
     # Attempts to correct for fluctuations in intensity that would otherwise make intensity-based
@@ -353,10 +363,13 @@ def create_AutoRecon1(name="AutoRecon1", longitudinal=False, field_strength='1.5
     mri_normalize = pe.Node(Normalize(), name="Normalize_T1")
     mri_normalize.inputs.gradient = 1
     mri_normalize.inputs.out_file = 'T1.mgz'
-    ar1_wf.connect([(add_xform_to_orig_nu, mri_normalize, [('out_file', 'in_file')]),
-                    (copy_transform, mri_normalize,
-                     [('out_file', 'transform')]),
-                    ])
+
+    if fsvernum < 6:
+        ar1_wf.connect([(add_to_header_nu, mri_normalize, [('out_file', 'in_file')])])
+    else:
+        ar1_wf.connect([(add_xform_to_orig_nu, mri_normalize, [('out_file', 'in_file')])])
+
+    ar1_wf.connect([(copy_transform, mri_normalize, [('out_file', 'transform')])])
 
     # Skull Strip
     """
@@ -370,8 +383,12 @@ def create_AutoRecon1(name="AutoRecon1", longitudinal=False, field_strength='1.5
         if plugin_args:
             mri_em_register.plugin_args = plugin_args
 
-        ar1_wf.connect([(add_xform_to_orig_nu, mri_em_register, [('out_file', 'in_file')]),
-                        (inputspec, mri_em_register, [('num_threads', 'num_threads'),
+        if fsvernum < 6:
+            ar1_wf.connect(add_to_header_nu, 'out_file', mri_em_register, 'in_file')
+        else:
+            ar1_wf.connect(add_xform_to_orig_nu, 'out_file', mri_em_register, 'in_file')
+
+        ar1_wf.connect([(inputspec, mri_em_register, [('num_threads', 'num_threads'),
                                                       ('reg_template_withskull', 'template')])])
 
         brainmask = pe.Node(WatershedSkullStrip(),
@@ -426,8 +443,14 @@ def create_AutoRecon1(name="AutoRecon1", longitudinal=False, field_strength='1.5
                'brainmask_auto',
                'brainmask',
                'braintemplate']
-    outputspec = pe.Node(IdentityInterface(fields=outputs),
-                         name="outputspec")
+
+    if fsvernum < 6:
+        outputspec = pe.Node(IdentityInterface(fields=outputs + ['nu']),
+                             name="outputspec")
+        ar1_wf.connect([(add_to_header_nu, outputspec, [('out_file', 'nu')])])
+    else:
+        outputspec = pe.Node(IdentityInterface(fields=outputs),
+                             name="outputspec")
 
     ar1_wf.connect([(T1_image_preparation, outputspec, [('out_file', 'origvols')]),
                     (T2_convert, outputspec, [('out_file', 't2_raw')]),
