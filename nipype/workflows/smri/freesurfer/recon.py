@@ -4,7 +4,7 @@ from ....interfaces import utility as niu
 from .autorecon1 import create_AutoRecon1
 from .autorecon2 import create_AutoRecon2
 from .autorecon3 import create_AutoRecon3
-from ....interfaces.freesurfer import AddXFormToHeader
+from ....interfaces.freesurfer import AddXFormToHeader, Info
 from ....interfaces.io import DataSink
 from .utils import getdefaultconfig
 
@@ -79,8 +79,7 @@ def create_skullstripped_recon_flow(name="skullstripped_recon_all"):
     wf.connect(autorecon_resume, "subject_id", outputnode, "subject_id")
     return wf
 
-def create_reconall_workflow(name="ReconAll", plugin_args=None,
-                             recoding_file=None):
+def create_reconall_workflow(name="ReconAll", plugin_args=None):
     """Creates the ReconAll workflow in nipype.
 
     Example
@@ -135,6 +134,39 @@ def create_reconall_workflow(name="ReconAll", plugin_args=None,
                         run_without_submitting=True,
                         name='inputspec')
 
+    # check freesurfer version and set parameters
+    fs_version_full = Info.version()
+    if 'v6.0' in fs_version_full or 'dev' in fs_version_full:
+        # assuming that dev is 6.0
+        fsvernum = 6.0
+        fs_version = 'v6.0'
+        th3 = True
+        shrink = 2
+        distance = 200 # 3T should be 50
+        stop = 0.0001
+        exvivo = True
+        entorhinal = True
+        rb_date = "2014-08-21"
+    else:
+        # 5.3 is default
+        fsvernum = 5.3
+        if 'v5.3' in fs_version_full:
+            fs_version = 'v5.3'
+        else:
+            fs_vesion = fs_version_full.split('-')[-1]
+            print("Warning: Workflow may not work properly if FREESURFER_HOME " +
+                  "environmental variable is not set or if you are using an older " +
+                  "version of FreeSurfer")
+        th3 = False
+        shrink = None
+        distance = 50
+        stop = None
+        exvivo = False
+        entorhinal = False
+        rb_date = "2008-03-26"
+
+    print("FreeSurfer Version: {0}".format(fs_version))
+
     def setconfig(reg_template=None,
                   reg_template_withskull=None,
                   lh_atlas=None,
@@ -150,7 +182,8 @@ def create_reconall_workflow(name="ReconAll", plugin_args=None,
                   color_table=None,
                   lookup_table=None,
                   wm_lookup_table=None,
-                  awk_file=None):
+                  awk_file=None,
+                  rb_date=None):
         """Set optional configurations to the default"""
         from nipype.workflows.smri.freesurfer.utils import getdefaultconfig
         def checkarg(arg, default):
@@ -159,7 +192,7 @@ def create_reconall_workflow(name="ReconAll", plugin_args=None,
                 return arg
             else:
                 return default
-        defaultconfig = getdefaultconfig(exitonfail=True)
+        defaultconfig = getdefaultconfig(exitonfail=True, rb_date=rb_date)
         # set the default template and classifier files
         reg_template = checkarg(reg_template, defaultconfig['registration_template'])
         reg_template_withskull = checkarg(reg_template_withskull,
@@ -201,16 +234,20 @@ def create_reconall_workflow(name="ReconAll", plugin_args=None,
               'wm_lookup_table',
               'awk_file']
 
-    config_node = pe.Node(niu.Function(params,
+    config_node = pe.Node(niu.Function(params + ['rb_date'],
                                        params,
                                        setconfig),
                           name="config")
+
+    config_node.inputs.rb_date = rb_date
 
     for param in params:
         reconall.connect(inputspec, param, config_node, param)
 
     # create AutoRecon1
-    ar1_wf, ar1_outputs = create_AutoRecon1(plugin_args=plugin_args)
+    ar1_wf, ar1_outputs = create_AutoRecon1(plugin_args=plugin_args, stop=stop,
+                                            distance=distance, shrink=shrink,
+                                            fsvernum=fsvernum)
     # connect inputs for AutoRecon1
     reconall.connect([(inputspec, ar1_wf, [('T1_files', 'inputspec.T1_files'),
                                            ('T2_file', 'inputspec.T2_file'),
@@ -220,9 +257,9 @@ def create_reconall_workflow(name="ReconAll", plugin_args=None,
                       (config_node, ar1_wf, [('reg_template_withskull',
                                               'inputspec.reg_template_withskull'),
                                              ('awk_file', 'inputspec.awk_file')])])
-
     # create AutoRecon2
-    ar2_wf, ar2_outputs = create_AutoRecon2(plugin_args=plugin_args)
+    ar2_wf, ar2_outputs = create_AutoRecon2(plugin_args=plugin_args, fsvernum=fsvernum,
+                                            stop=stop, shrink=shrink, distance=distance)
     # connect inputs for AutoRecon2
     reconall.connect([(inputspec, ar2_wf, [('num_threads', 'inputspec.num_threads')]),
                       (config_node, ar2_wf, [('reg_template_withskull',
@@ -231,8 +268,14 @@ def create_reconall_workflow(name="ReconAll", plugin_args=None,
                       (ar1_wf, ar2_wf, [('outputspec.brainmask', 'inputspec.brainmask'),
                                         ('outputspec.talairach', 'inputspec.transform'),
                                         ('outputspec.orig', 'inputspec.orig')])])
+
+    if fsvernum < 6:
+        reconall.connect([(ar1_wf, ar2_wf, [('outputspec.nu', 'inputspec.nu')])])
+
     # create AutoRecon3
-    ar3_wf, ar3_outputs = create_AutoRecon3(plugin_args=plugin_args, th3=True)
+    ar3_wf, ar3_outputs = create_AutoRecon3(plugin_args=plugin_args, th3=th3,
+                                            exvivo=exvivo, entorhinal=entorhinal,
+                                            fsvernum=fsvernum)
     # connect inputs for AutoRecon3
     reconall.connect([(config_node, ar3_wf, [('lh_atlas', 'inputspec.lh_atlas'),
                                              ('rh_atlas', 'inputspec.rh_atlas'),
@@ -509,15 +552,6 @@ def create_reconall_workflow(name="ReconAll", plugin_args=None,
     reconall.connect([(datasink, completion, [('out_file', 'datasinked_files')]),
                       (inputspec, completion, [('subject_id', 'subject_id')]),
                       (completion, postds_outputspec, [('subject_id', 'subject_id')])])
-
-
-    #### Workflow additions go here
-    if recoding_file:
-        from utils import create_recoding_wf
-        recode = create_recoding_wf(recoding_file)
-        reconall.connect([(ar3_wf, recode, [('outputspec.aseg', 'inputspec.labelmap')]),
-                          (recode, outputspec, [('outputspec.recodedlabelmap', 'recoded_labelmap')])])
-
 
     return reconall
 

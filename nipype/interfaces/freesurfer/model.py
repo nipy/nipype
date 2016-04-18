@@ -752,8 +752,9 @@ class SegStats(FSCommand):
 
     def _format_arg(self, name, spec, value):
         if name in ('summary_file', 'avgwf_txt_file'):
-            if not os.path.isabs(value):
-                value = os.path.join('.', value)
+            if not isinstance(value, bool):
+                if not os.path.isabs(value):
+                    value = os.path.join('.', value)
         if name in ['avgwf_txt_file', 'avgwf_file', 'sf_avg_file']:
             if isinstance(value, bool):
                 fname = self._list_outputs()[name]
@@ -779,7 +780,7 @@ class SegStatsReconAllInputSpec(SegStatsInputSpec):
     # implicit
     ribbon = traits.File(mandatory=True, exists=True,
                          desc="Input file mri/ribbon.mgz")
-    presurf_seg = File(mandatory=True, exists=True,
+    presurf_seg = File(exists=True,
                        desc="Input segmentation volume")
     transform = File(mandatory=True, exists=True,
                      desc="Input transform file")
@@ -795,6 +796,8 @@ class SegStatsReconAllInputSpec(SegStatsInputSpec):
                    desc="Input file must be <subject_id>/surf/lh.pial")
     rh_pial = File(mandatory=True, exists=True,
                    desc="Input file must be <subject_id>/surf/rh.pial")
+    aseg = File(exists=True,
+                desc="Mandatory implicit input in 5.3")
     copy_inputs = traits.Bool(desc="If running as a node, set this to True " +
                               "otherwise, this will copy the implicit inputs " +
                               "to the node directory.")
@@ -858,7 +861,7 @@ class SegStatsReconAll(SegStats):
             copy2subjdir(self, self.inputs.lh_white,
                          'surf', 'lh.white')
             copy2subjdir(self, self.inputs.rh_white,
-                         'Surf', 'Rh.White')
+                         'surf', 'rh.white')
             copy2subjdir(self, self.inputs.lh_pial,
                          'surf', 'lh.pial')
             copy2subjdir(self, self.inputs.rh_pial,
@@ -867,12 +870,13 @@ class SegStatsReconAll(SegStats):
                          'mri', 'ribbon.mgz')
             copy2subjdir(self, self.inputs.presurf_seg,
                          'mri', 'aseg.presurf.mgz')
+            copy2subjdir(self, self.inputs.aseg,
+                         'mri', 'aseg.mgz')
             copy2subjdir(self, self.inputs.transform,
                          os.path.join('mri', 'transforms'),
                          'talairach.xfm')
             copy2subjdir(self, self.inputs.in_intensity, 'mri')
-            if isdefined(self.inputs.brainmask_file):
-                copy2subjdir(self, self.inputs.brainmask_file, 'mri')
+            copy2subjdir(self, self.inputs.brainmask_file, 'mri')
         return super(SegStatsReconAll, self).run(**inputs)
 
 

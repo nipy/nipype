@@ -6,6 +6,8 @@ from ..utils import VolumeMask
 def test_VolumeMask_inputs():
     input_map = dict(args=dict(argstr='%s',
     ),
+    aseg=dict(xor=['in_aseg'],
+    ),
     copy_inputs=dict(mandatory=False,
     ),
     environ=dict(nohash=True,
@@ -16,6 +18,7 @@ def test_VolumeMask_inputs():
     ),
     in_aseg=dict(argstr='--aseg_name %s',
     mandatory=False,
+    xor=['aseg'],
     ),
     left_ribbonlabel=dict(argstr='--label_left_ribbon %d',
     mandatory=True,
