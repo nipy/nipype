@@ -14,7 +14,7 @@ Citation
    Ghosh SS. (2011). Nipype: a flexible, lightweight and extensible neuroimaging
    data processing framework in Python. Front. Neuroimform. 5:13.
 
-   `Download`__
+   `Download Paper`__
 
    __ paper_
 
