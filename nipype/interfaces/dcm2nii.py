@@ -215,7 +215,7 @@ class Dcm2niix(CommandLine):
     >>> converter.inputs.compress = 'i'
     >>> converter.inputs.output_dir = '.'
     >>> converter.cmdline
-    'dcm2niix -b y -z i -m n -f %q -o . -s n functional_1.dcm'
+    'dcm2niix -b y -z i -m n -f %q -o . -s n -v n functional_1.dcm'
     """
 
     input_spec = Dcm2niixInputSpec
