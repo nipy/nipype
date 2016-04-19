@@ -181,7 +181,6 @@ class Dcm2nii(CommandLine):
             return config_file
         return None
 
-## dcm2niix update
 
 class Dcm2niixInputSpec(CommandLineInputSpec):
     source_names = InputMultiPath(File(exists=True), argstr="%s", position=-1,
@@ -195,7 +194,6 @@ class Dcm2niixInputSpec(CommandLineInputSpec):
     merge_imgs = traits.Bool(False, argstr='-m', usedefault=True)
     single_file = traits.Bool(False, argstr='-s', usedefault=True)
     verbose = traits.Bool(False, argstr='-v', usedefault=True)
-
 
 
 class Dcm2niixOutputSpec(TraitedSpec):
@@ -224,9 +222,7 @@ class Dcm2niix(CommandLine):
 
     def _format_arg(self, opt, spec, val):
         if opt in ['bids_format', 'merge_imgs', 'single_file', 'verbose']:
-
             spec = deepcopy(spec)
-
             if val:
                 spec.argstr += ' y'
             else:
@@ -249,43 +245,34 @@ class Dcm2niix(CommandLine):
         bids = []
         skip = False
         find_b = False
-
         for line in stdout.split("\n"):
             if not skip:
                 out_file = None
                 if line.startswith("Convert "): # output
                     fname = str(re.search('\S+/\S+', line).group(0))
-
                     if isdefined(self.inputs.output_dir):
                         output_dir = self.inputs.output_dir
                     else:
                         output_dir = self._gen_filename('output_dir')
 
                     out_file = os.path.abspath(os.path.join(output_dir, fname))
-
                     # extract bvals
                     if find_b:
                         bvecs.append(out_file + ".bvec")
                         bvals.append(out_file + ".bval")
                         find_b = False
-
                 # next scan will have bvals/bvecs
                 elif 'DTI gradient directions' in line:
                     find_b = True
-
                 else:
                     pass
-
                 if out_file:
                     files.append(out_file + ".nii.gz")
 
                     if self.inputs.bids_format:
                         bids.append(out_file + ".bids")
-
                     continue
-
             skip = False
-
         # just return what was done
         if not bids:
             return files, bvecs, bvals
