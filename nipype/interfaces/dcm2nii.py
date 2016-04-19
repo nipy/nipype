@@ -268,7 +268,6 @@ class Dcm2niix(CommandLine):
                     pass
                 if out_file:
                     files.append(out_file + ".nii.gz")
-
                     if self.inputs.bids_format:
                         bids.append(out_file + ".bids")
                     continue
