@@ -1,7 +1,6 @@
 Next release
 ============
 
-
 * ENH: Added dcm2niix interface (https://github.com/nipy/nipype/pull/1435)
 * ENH: Add nipype_crash_search command (https://github.com/nipy/nipype/pull/1422)
 * ENH: Created interface for BrainSuite Cortical Surface Extraction command line tools (https://github.com/nipy/nipype/pull/1305)
