@@ -86,8 +86,8 @@ def create_AutoRecon1(name="AutoRecon1", longitudinal=False, distance=None,
                 convert.inputs.in_file = in_file
                 convert.inputs.out_file = out_file
                 convert.inputs.no_scale = True
-                convert.run()
-                out_file = os.path.abspath(convert.outputs.out_file)
+                out = convert.run()
+                out_file = os.path.abspath(out.outputs.out_file)
             return out_file
 
         T2_convert = pe.Node(Function(['in_file', 'out_file'],
