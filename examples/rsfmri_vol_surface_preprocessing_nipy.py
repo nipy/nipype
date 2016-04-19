@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 """
-====================================
+=====================================
 rsfMRI: ANTS, FS, FSL, NiPy, aCompCor
-====================================
+=====================================
 
 
 A preprocessing workflow for Siemens resting state data.
