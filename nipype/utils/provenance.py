@@ -21,7 +21,7 @@ from ..external.six import string_types, text_type
 
 from .. import get_info
 from .filemanip import (md5, hashlib, hash_infile)
-from .. import logging
+from .. import logging, __version__
 iflogger = logging.getLogger('interface')
 
 foaf = pm.Namespace("foaf", "http://xmlns.com/foaf/0.1/")
@@ -185,7 +185,7 @@ def safe_encode(x, as_literal=True):
             return dumps(x)
         return pm.Literal(dumps(x), nipype_ns['pickle'])
     except TypeError as e:
-        iflogger.info(e)
+        iflogger.debug(e)
         value = "Could not encode: " + str(e)
         if not as_literal:
             return value
@@ -239,7 +239,7 @@ def prov_encode(graph, value, create_container=True):
     return entity
 
 
-def write_provenance(results, filename='provenance', format='turtle'):
+def write_provenance(results, filename='provenance', format='all'):
     ps = ProvStore()
     ps.add_results(results)
     return ps.write_provenance(filename=filename, format=format)
@@ -371,7 +371,8 @@ class ProvStore(object):
         user_agent = self.g.agent(get_attr_id(user_attr), user_attr)
         agent_attr = {pm.PROV["type"]: pm.PROV["SoftwareAgent"],
                       pm.PROV["label"]: "Nipype",
-                      foaf["name"]: safe_encode("Nipype")}
+                      foaf["name"]: safe_encode("Nipype"),
+                      nipype_ns["version"]: __version__}
         for key, value in list(get_info().items()):
             agent_attr.update({nipype_ns[key]: safe_encode(value)})
         software_agent = self.g.agent(get_attr_id(agent_attr), agent_attr)
@@ -384,6 +385,17 @@ class ProvStore(object):
         if format in ['provn', 'all']:
             with open(filename + '.provn', 'wt') as fp:
                 fp.writelines(self.g.get_provn())
-        if format in ['json', 'all']:
-            g.serialize(filename + '.json', format='json')
+        try:
+            if format in ['rdf', 'all']:
+                if len(self.g.bundles) == 0:
+                    rdf_format = 'turtle'
+                    ext = '.ttl'
+                else:
+                    rdf_format = 'trig'
+                    ext = '.trig'
+                self.g.serialize(filename + ext, format='rdf', rdf_format=rdf_format)
+            if format in ['jsonld']:
+                self.g.serialize(filename + '.jsonld', format='rdf', rdf_format='json-ld', indent=4)
+        except pm.serializers.DoNotExist:
+            pass
         return self.g

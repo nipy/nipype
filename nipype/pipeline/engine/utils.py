@@ -1269,11 +1269,7 @@ def write_workflow_prov(graph, filename=None, format='all'):
                           starter=processes[nodes.index(edgeinfo[0])])
 
     # write provenance
-    if format in ['provn', 'all']:
-        with open(filename + '.provn', 'wt') as fp:
-            fp.writelines(ps.g.get_provn())
-    if format in ['json', 'all']:
-        ps.g.serialize(filename + '.json', format='json')
+    ps.write_provenance(filename, format=format)
     return ps.g
 
 
