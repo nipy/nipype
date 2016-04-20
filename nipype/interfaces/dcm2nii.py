@@ -216,10 +216,9 @@ class Dcm2niix(CommandLine):
     >>> converter = Dcm2niix()
     >>> converter.inputs.source_names = ['functional_1.dcm', 'functional_2.dcm']
     >>> converter.inputs.compress = 'i'
-    >>> converter.inputs.single_file = True
     >>> converter.inputs.output_dir = '.'
     >>> converter.cmdline
-    'dcm2niix -b y -z i -m n -f %q -o . -s y -v n functional_1.dcm'
+    'dcm2niix -b y -z i -m n -f %t%p -o . -s n -v n functional_1.dcm'
     """
 
     input_spec = Dcm2niixInputSpec
@@ -260,7 +259,6 @@ class Dcm2niix(CommandLine):
                         output_dir = self.inputs.output_dir
                     else:
                         output_dir = self._gen_filename('output_dir')
-
                     out_file = os.path.abspath(os.path.join(output_dir, fname))
                     # extract bvals
                     if find_b:
