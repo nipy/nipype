@@ -49,7 +49,7 @@ class Dcm2niiOutputSpec(TraitedSpec):
 
 
 class Dcm2nii(CommandLine):
-    """Uses MRICRON's dcm2nii to convert dicom files
+    """Uses MRIcron's dcm2nii to convert dicom files
 
     Examples
     ========
