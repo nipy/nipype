@@ -209,10 +209,10 @@ class Dcm2niixOutputSpec(TraitedSpec):
 
 
 class Dcm2niix(CommandLine):
-    """Uses MRICRON's dcm2niix to convert dicom files
+    """Uses Chris Rorden's dcm2niix to convert dicom files
     Examples
     ========
-    >>> from nipype.interfaces.dcm2niix import Dcm2niix
+    >>> from nipype.interfaces.dcm2nii import Dcm2niix
     >>> converter = Dcm2niix()
     >>> converter.inputs.source_names = ['functional_1.dcm', 'functional_2.dcm']
     >>> converter.inputs.compress = 'i'
