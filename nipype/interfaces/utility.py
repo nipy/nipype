@@ -484,8 +484,8 @@ class Function(IOBase):
                                            args=(queue,), kwargs=args)
 
             # Init memory and threads before profiling
-            mem_mb = -1
-            num_threads = -1
+            mem_mb = 0
+            num_threads = 0
 
             # Start process and profile while it's alive
             proc.start()

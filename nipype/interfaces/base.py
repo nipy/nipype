@@ -1222,19 +1222,32 @@ def _get_num_threads(proc):
 
     # Import packages
     import psutil
+    import logging
 
     # Init variables
-    num_threads = proc.num_threads()
-    alive_procs = 0
+    cb_log = logging.getLogger('callback')
+    cb_log.propogate = False
+    cb_log.debug('proc pid: %d, parent pid: %d, name: %s, exe: %s, cmdline: %s, status: %s, num_threads: %d' \
+                 % (proc.pid, proc.ppid(), proc.name(), proc.exe(), proc.cmdline(), proc.status(), proc.num_threads()))
+    if proc.status() == psutil.STATUS_RUNNING:
+        num_threads = proc.num_threads()
+    else:
+        num_threads = 0
+    child_threads = 0
     # Iterate through child processes and get number of their threads
     try:
-        #num_children = len(proc.children())
         for child in proc.children(recursive=True):
             if child.status() == psutil.STATUS_RUNNING:
-                alive_procs += 1
-                num_threads += max(alive_procs, child.num_threads()) #child.num_threads()
+                # If leaf child process
+                if len(child.children()) == 0:
+                    child_threads += child.num_threads()
+                    #num_threads = max(num_threads, child.num_threads()) #child.num_threads()
+                cb_log.debug('child pid: %d, parent pid: %d, name: %s, exe: %s, cmdline: %s, status: %s, num_threads: %d' \
+                             % (proc.pid, proc.ppid(), proc.name(), proc.exe(), proc.cmdline(), proc.status(), child.num_threads()))
+
             #num_threads = max(num_threads, num_children,
             #                  child.num_threads(), len(child.children()))
+        num_threads = max(child_threads, num_threads)
     except psutil.NoSuchProcess:
         pass
 
@@ -1380,8 +1393,8 @@ def run_command(runtime, output=None, timeout=0.01, redirect_x=False):
     outfile = os.path.join(runtime.cwd, 'stdout.nipype')
 
     # Init variables for memory profiling
-    mem_mb = -1
-    num_threads = -1
+    mem_mb = 0
+    num_threads = 0
     interval = .5
 
     if output == 'stream':
@@ -1405,7 +1418,7 @@ def run_command(runtime, output=None, timeout=0.01, redirect_x=False):
                     get_max_resources_used(proc.pid, mem_mb, num_threads)
             proc.poll()
             _process()
-            #time.sleep(interval)
+            time.sleep(interval)
         _process(drain=1)
 
         # collect results, merge and return
@@ -1424,7 +1437,7 @@ def run_command(runtime, output=None, timeout=0.01, redirect_x=False):
                 mem_mb, num_threads = \
                     get_max_resources_used(proc.pid, mem_mb, num_threads)
                 proc.poll()
-                #time.sleep(interval)
+                time.sleep(interval)
         stdout, stderr = proc.communicate()
         if stdout and isinstance(stdout, bytes):
             try:
@@ -1446,7 +1459,7 @@ def run_command(runtime, output=None, timeout=0.01, redirect_x=False):
                 mem_mb, num_threads = \
                     get_max_resources_used(proc.pid, mem_mb, num_threads)
                 proc.poll()
-                #time.sleep(interval)
+                time.sleep(interval)
         ret_code = proc.wait()
         stderr.flush()
         stdout.flush()
@@ -1459,7 +1472,7 @@ def run_command(runtime, output=None, timeout=0.01, redirect_x=False):
                 mem_mb, num_threads = \
                     get_max_resources_used(proc.pid, mem_mb, num_threads)
                 proc.poll()
-                #time.sleep(interval)
+                time.sleep(interval)
         proc.communicate()
         result['stdout'] = []
         result['stderr'] = []

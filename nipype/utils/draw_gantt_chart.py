@@ -183,6 +183,8 @@ def calculate_resource_timeseries(events, resource):
 
     # Iterate through the events
     for tdelta, event in sorted(events.items()):
+        if tdelta > 70.7:
+            print 'hi'
         if event['event'] == "start":
             if resource in event and event[resource] != 'Unkown':
                 all_res += float(event[resource])
@@ -520,8 +522,8 @@ def generate_gantt_chart(logfile, cores, minute_scale=10,
     close_header = '''
     </div>
     <div style="display:inline-block;margin-left:60px;vertical-align: top;">
-        <p><span><div class="label" style="background-color:#03969D;"></div> Estimated Resource</span></p>
-        <p><span><div class="label" style="background-color:#90BBD7;"></div> Actual Resource</span></p>
+        <p><span><div class="label" style="background-color:#90BBD7;"></div> Estimated Resource</span></p>
+        <p><span><div class="label" style="background-color:#03969D;"></div> Actual Resource</span></p>
         <p><span><div class="label" style="background-color:#f00;"></div> Failed Node</span></p>
     </div>
     '''

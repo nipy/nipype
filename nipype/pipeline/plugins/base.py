@@ -223,6 +223,22 @@ class DistributedPluginBase(PluginBase):
     def run(self, graph, config, updatehash=False):
         """Executes a pre-defined pipeline using distributed approaches
         """
+        # Global watcher inits
+        from nipype.interfaces.base import get_max_resources_used
+        gpid = os.getpid()
+        num_threads = 0
+        memory_mb = 0
+        # Init logger
+        import logging as lg
+        gw_log = lg.getLogger('global_watcher')
+        gw_log.setLevel(lg.INFO)
+        formatter = lg.Formatter('%(asctime)s : %(message)s')
+    
+        # Write logs to file
+        file_handler = lg.FileHandler('/home/dclark/work-dir/gw.log')
+        file_handler.setFormatter(formatter)
+        gw_log.addHandler(file_handler)
+
         logger.info("Running in parallel.")
         self._config = config
         # Generate appropriate structures for worker-manager model
@@ -235,6 +251,11 @@ class DistributedPluginBase(PluginBase):
         notrun = []
         while np.any(self.proc_done == False) | \
                 np.any(self.proc_pending == True):
+
+            mem_mb, num_thr = get_max_resources_used(gpid, memory_mb, num_threads)
+            memory_mb = max(mem_mb, memory_mb)
+            num_threads = max(num_thr, num_threads)
+            gw_log.info('Memory GB usage: %.4f, Threads usage: %d' % (memory_mb/1024.0, num_threads))
             toappend = []
             # trigger callbacks for any pending results
             while self.pending_tasks:
@@ -266,6 +287,7 @@ class DistributedPluginBase(PluginBase):
             else:
                 logger.debug('Not submitting')
             self._wait()
+            
         self._remove_node_dirs()
         report_nodes_not_run(notrun)
 
