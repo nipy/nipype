@@ -1,12 +1,9 @@
 Next release
 ============
 
-<<<<<<< HEAD
 * ENH: Added dcm2niix interface (https://github.com/nipy/nipype/pull/1435)
-=======
 * ENH: Add nipype_crash_search command (https://github.com/nipy/nipype/pull/1422)
 * ENH: Created interface for BrainSuite Cortical Surface Extraction command line tools (https://github.com/nipy/nipype/pull/1305)
->>>>>>> c389d5d4c0f1eb5ff321de5553f815d1fb6fcc47
 * FIX: job execution on systems/approaches where locale is undefined (https://github.com/nipy/nipype/pull/1401)
 * FIX: Clean up byte/unicode issues using subprocess (https://github.com/nipy/nipype/pull/1394)
 * FIX: Prevent crash when tvtk is loaded - ETS_TOOLKIT=null (https://github.com/nipy/nipype/pull/973)
