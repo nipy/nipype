@@ -20,7 +20,6 @@ def test_Normalize_inputs():
     position=-2,
     ),
     mask=dict(argstr='-mask %s',
-    mandatory=False,
     ),
     out_file=dict(argstr='%s',
     hash_files=False,
@@ -30,13 +29,11 @@ def test_Normalize_inputs():
     position=-1,
     ),
     segmentation=dict(argstr='-aseg %s',
-    mandatory=False,
     ),
     subjects_dir=dict(),
     terminal_output=dict(nohash=True,
     ),
-    transform=dict(mandatory=False,
-    ),
+    transform=dict(),
     )
     inputs = Normalize.input_spec()
 

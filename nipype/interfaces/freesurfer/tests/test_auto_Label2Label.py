@@ -6,8 +6,7 @@ from ..model import Label2Label
 def test_Label2Label_inputs():
     input_map = dict(args=dict(argstr='%s',
     ),
-    copy_inputs=dict(mandatory=False,
-    ),
+    copy_inputs=dict(),
     environ=dict(nohash=True,
     usedefault=True,
     ),
@@ -20,7 +19,6 @@ def test_Label2Label_inputs():
     out_file=dict(argstr='--trglabel %s',
     hash_files=False,
     keep_extension=True,
-    mandatory=False,
     name_source=['source_label'],
     name_template='%s_converted',
     ),
