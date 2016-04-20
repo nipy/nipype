@@ -107,7 +107,7 @@ class Dcm2nii(CommandLine):
                 if line.startswith("Saving "):
                     out_file = line[len("Saving "):]
                 elif line.startswith("GZip..."):
-                    # for gzipped outpus files are not absolute
+                    # for gzipped output files are not absolute
                     fname = line[len("GZip..."):]
                     if len(files) and os.path.basename(files[-1]) == fname[:-3]:
                         # we are seeing a previously reported conversion
