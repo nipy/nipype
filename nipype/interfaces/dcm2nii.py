@@ -192,7 +192,7 @@ class Dcm2niixInputSpec(CommandLineInputSpec):
                                   copyfile=False, mandatory=True, xor=['source_dir'])
     source_dir = Directory(exists=True, argstr="%s", position=-1, mandatory=True,
                            xor=['source_names'])
-    out_filename = traits.Str('%q', argstr="-f %s", usedefault=True)
+    out_filename = traits.Str('%t%p', argstr="-f %s", usedefault=True)
     output_dir = Directory(exists=True, argstr='-o %s', genfile=True)
     bids_format = traits.Bool(True, argstr='-b', usedefault=True)
     compress = traits.Enum('i', ['y','i','n'], argstr='-z %s', usedefault=True)
@@ -216,9 +216,10 @@ class Dcm2niix(CommandLine):
     >>> converter = Dcm2niix()
     >>> converter.inputs.source_names = ['functional_1.dcm', 'functional_2.dcm']
     >>> converter.inputs.compress = 'i'
+    >>> converter.inputs.single_file = True
     >>> converter.inputs.output_dir = '.'
     >>> converter.cmdline
-    'dcm2niix -b y -z i -m n -f %q -o . -s n -v n functional_1.dcm'
+    'dcm2niix -b y -z i -m n -f %q -o . -s y -v n functional_1.dcm'
     """
 
     input_spec = Dcm2niixInputSpec
