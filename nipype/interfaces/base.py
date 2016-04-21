@@ -19,6 +19,7 @@ from configparser import NoOptionError
 from copy import deepcopy
 import datetime
 import errno
+import locale
 import os
 import re
 import platform
@@ -47,7 +48,7 @@ from ..utils.misc import is_container, trim, str2bool
 from ..utils.provenance import write_provenance
 from .. import config, logging, LooseVersion
 from .. import __version__
-from ..external.six import string_types
+from ..external.six import string_types, text_type
 
 nipype_version = LooseVersion(__version__)
 
@@ -753,6 +754,8 @@ class BaseInterface(Interface):
             raise Exception('No input_spec in class: %s' %
                             self.__class__.__name__)
         self.inputs = self.input_spec(**inputs)
+        self.estimated_memory = 1
+        self.num_threads = 1
 
     @classmethod
     def help(cls, returnhelp=False):
@@ -1149,6 +1152,9 @@ class Stream(object):
         self._buf = ''
         self._rows = []
         self._lastidx = 0
+        self.default_encoding = locale.getdefaultlocale()[1]
+        if self.default_encoding is None:
+            self.default_encoding = 'UTF-8'
 
     def fileno(self):
         "Pass-through for file descriptor."
@@ -1163,7 +1169,7 @@ class Stream(object):
     def _read(self, drain):
         "Read from the file descriptor"
         fd = self.fileno()
-        buf = os.read(fd, 4096).decode()
+        buf = os.read(fd, 4096).decode(self.default_encoding)
         if not buf and not self._buf:
             return None
         if '\n' not in buf:
@@ -1188,25 +1194,83 @@ class Stream(object):
         self._lastidx = len(self._rows)
 
 
+# Get number of threads for process
+def _get_num_threads(proc):
+    '''
+    '''
+
+    # Import packages
+    import psutil
+    import logging as lg
+
+    # Init variables
+    num_threads = proc.num_threads()
+    try:
+        num_children = len(proc.children())
+        for child in proc.children():
+            num_threads = max(num_threads, num_children,
+                              child.num_threads(), len(child.children()))
+    except psutil.NoSuchProcess:
+        pass
+
+    return num_threads
+
+
+# Get max resources used for process
+def _get_max_resources_used(proc, mem_mb, num_threads, poll=False):
+    '''
+    docstring
+    '''
+
+    # Import packages
+    from memory_profiler import _get_memory
+    import psutil
+
+    try:
+        mem_mb = max(mem_mb, _get_memory(proc.pid, include_children=True))
+        num_threads = max(num_threads, _get_num_threads(psutil.Process(proc.pid)))
+        if poll:
+            proc.poll()
+    except Exception as exc:
+        iflogger.info('Could not get resources used by process. Error: %s'\
+                      % exc)
+
+    # Return resources
+    return mem_mb, num_threads
+
+
 def run_command(runtime, output=None, timeout=0.01, redirect_x=False):
     """Run a command, read stdout and stderr, prefix with timestamp.
 
     The returned runtime contains a merged stdout+stderr log with timestamps
     """
-    PIPE = subprocess.PIPE
 
+    # Import packages
+    try:
+        import memory_profiler
+        import psutil
+        mem_prof = True
+    except:
+        mem_prof = False
+
+    # Init variables
+    PIPE = subprocess.PIPE
     cmdline = runtime.cmdline
+
     if redirect_x:
         exist_xvfb, _ = _exists_in_path('xvfb-run', runtime.environ)
         if not exist_xvfb:
             raise RuntimeError('Xvfb was not found, X redirection aborted')
         cmdline = 'xvfb-run -a ' + cmdline
 
+    default_encoding = locale.getdefaultlocale()[1]
+    if default_encoding is None:
+        default_encoding = 'UTF-8'
     if output == 'file':
         errfile = os.path.join(runtime.cwd, 'stderr.nipype')
         outfile = os.path.join(runtime.cwd, 'stdout.nipype')
-        stderr = open(errfile, 'wt')  # t=='text'===default
-        stdout = open(outfile, 'wt')
+        stderr = open(errfile, 'wb')  # t=='text'===default
+        stdout = open(outfile, 'wb')
 
         proc = subprocess.Popen(cmdline,
                                 stdout=stdout,
@@ -1224,6 +1288,12 @@ def run_command(runtime, output=None, timeout=0.01, redirect_x=False):
     result = {}
     errfile = os.path.join(runtime.cwd, 'stderr.nipype')
     outfile = os.path.join(runtime.cwd, 'stdout.nipype')
+
+    # Init variables for memory profiling
+    mem_mb = -1
+    num_threads = -1
+    interval = 1
+
     if output == 'stream':
         streams = [Stream('stdout', proc.stdout), Stream('stderr', proc.stderr)]
 
@@ -1239,8 +1309,10 @@ def run_command(runtime, output=None, timeout=0.01, redirect_x=False):
             else:
                 for stream in res[0]:
                     stream.read(drain)
-
         while proc.returncode is None:
+            if mem_prof:
+                mem_mb, num_threads = \
+                    _get_max_resources_used(proc, mem_mb, num_threads)
             proc.poll()
             _process()
         _process(drain=1)
@@ -1254,34 +1326,41 @@ def run_command(runtime, output=None, timeout=0.01, redirect_x=False):
             result[stream._name] = [r[2] for r in rows]
         temp.sort()
         result['merged'] = [r[1] for r in temp]
-    if output == 'allatonce':
-        stdout, stderr = proc.communicate()
-        if stdout and isinstance(stdout, bytes):
-            try:
-                stdout = stdout.decode()
-            except UnicodeDecodeError:
-                stdout = stdout.decode("ISO-8859-1")
-        if stderr and isinstance(stderr, bytes):
-            try:
-                stderr = stderr.decode()
-            except UnicodeDecodeError:
-                stderr = stderr.decode("ISO-8859-1")
 
-        result['stdout'] = str(stdout).split('\n')
-        result['stderr'] = str(stderr).split('\n')
+    if output == 'allatonce':
+        if mem_prof:
+            while proc.returncode is None:
+                mem_mb, num_threads = \
+                    _get_max_resources_used(proc, mem_mb, num_threads, poll=True)
+        stdout, stderr = proc.communicate()
+        stdout = stdout.decode(default_encoding)
+        stderr = stderr.decode(default_encoding)
+        result['stdout'] = stdout.split('\n')
+        result['stderr'] = stderr.split('\n')
         result['merged'] = ''
     if output == 'file':
+        if mem_prof:
+            while proc.returncode is None:
+                mem_mb, num_threads = \
+                    _get_max_resources_used(proc, mem_mb, num_threads, poll=True)
         ret_code = proc.wait()
         stderr.flush()
         stdout.flush()
-        result['stdout'] = [line.strip() for line in open(outfile).readlines()]
-        result['stderr'] = [line.strip() for line in open(errfile).readlines()]
+        result['stdout'] = [line.decode(default_encoding).strip() for line in open(outfile, 'rb').readlines()]
+        result['stderr'] = [line.decode(default_encoding).strip() for line in open(errfile, 'rb').readlines()]
         result['merged'] = ''
     if output == 'none':
+        if mem_prof:
+            while proc.returncode is None:
+                mem_mb, num_threads = \
+                    _get_max_resources_used(proc, mem_mb, num_threads, poll=True)
         proc.communicate()
         result['stdout'] = []
         result['stderr'] = []
         result['merged'] = ''
+
+    setattr(runtime, 'runtime_memory', mem_mb/1024.0)
+    setattr(runtime, 'runtime_threads', num_threads)
     runtime.stderr = '\n'.join(result['stderr'])
     runtime.stdout = '\n'.join(result['stdout'])
     runtime.merged = result['merged']

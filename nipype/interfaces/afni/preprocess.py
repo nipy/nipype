@@ -16,8 +16,7 @@ import numpy as np
 
 from .base import (AFNICommandBase, AFNICommand, AFNICommandInputSpec, AFNICommandOutputSpec,
                    Info, no_afni)
-from ..base import CommandLineInputSpec
-from ..base import (Directory, TraitedSpec,
+from ..base import (CommandLineInputSpec, CommandLine, Directory, TraitedSpec,
                     traits, isdefined, File, InputMultiPath, Undefined)
 from ...external.six import string_types
 from ...utils.filemanip import (load_json, save_json, split_filename)
@@ -505,6 +504,207 @@ class Despike(AFNICommand):
 
     _cmd = '3dDespike'
     input_spec = DespikeInputSpec
+    output_spec = AFNICommandOutputSpec
+
+
+class CentralityInputSpec(AFNICommandInputSpec):
+    """Common input spec class for all centrality-related commmands
+    """
+
+
+    mask = File(desc='mask file to mask input data',
+                   argstr="-mask %s",
+                   exists=True)
+
+    thresh = traits.Float(desc='threshold to exclude connections where corr <= thresh',
+                          argstr='-thresh %f')
+
+    polort = traits.Int(desc='', argstr='-polort %d')
+
+    autoclip = traits.Bool(desc='Clip off low-intensity regions in the dataset',
+                           argstr='-autoclip')
+
+    automask = traits.Bool(desc='Mask the dataset to target brain-only voxels',
+                           argstr='-automask')
+
+
+class DegreeCentralityInputSpec(CentralityInputSpec):
+    """DegreeCentrality inputspec
+    """
+
+    in_file = File(desc='input file to 3dDegreeCentrality',
+                   argstr='%s',
+                   position=-1,
+                   mandatory=True,
+                   exists=True,
+                   copyfile=False)
+
+    sparsity = traits.Float(desc='only take the top percent of connections',
+                            argstr='-sparsity %f')
+
+    oned_file = traits.Str(desc='output filepath to text dump of correlation matrix',
+                           argstr='-out1D %s', mandatory=False)
+
+
+class DegreeCentralityOutputSpec(AFNICommandOutputSpec):
+    """DegreeCentrality outputspec
+    """
+
+    oned_file = File(desc='The text output of the similarity matrix computed'\
+                          'after thresholding with one-dimensional and '\
+                          'ijk voxel indices, correlations, image extents, '\
+                          'and affine matrix')
+
+
+class DegreeCentrality(AFNICommand):
+    """Performs degree centrality on a dataset using a given maskfile
+    via 3dDegreeCentrality
+
+    For complete details, see the `3dDegreeCentrality Documentation.
+    <http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dDegreeCentrality.html>
+
+    Examples
+    ========
+
+    >>> from nipype.interfaces import afni as afni
+    >>> degree = afni.DegreeCentrality()
+    >>> degree.inputs.in_file = 'func_preproc.nii'
+    >>> degree.inputs.mask = 'mask.nii'
+    >>> degree.inputs.sparsity = 1 # keep the top one percent of connections
+    >>> degree.inputs.out_file = 'out.nii'
+    >>> degree.cmdline
+    '3dDegreeCentrality -sparsity 1 -mask mask.nii -prefix out.nii func_preproc.nii'
+    >>> res = degree.run() # doctest: +SKIP
+    """
+
+    _cmd = '3dDegreeCentrality'
+    input_spec = DegreeCentralityInputSpec
+    output_spec = DegreeCentralityOutputSpec
+
+    # Re-define generated inputs
+    def _list_outputs(self):
+        # Import packages
+        import os
+
+        # Update outputs dictionary if oned file is defined
+        outputs = super(DegreeCentrality, self)._list_outputs()
+        if self.inputs.oned_file:
+            outputs['oned_file'] = os.path.abspath(self.inputs.oned_file)
+
+        return outputs
+
+
+class ECMInputSpec(CentralityInputSpec):
+    """ECM inputspec
+    """
+
+    in_file = File(desc='input file to 3dECM',
+                   argstr='%s',
+                   position=-1,
+                   mandatory=True,
+                   exists=True,
+                   copyfile=False)
+
+    sparsity = traits.Float(desc='only take the top percent of connections',
+                            argstr='-sparsity %f')
+
+    full = traits.Bool(desc='Full power method; enables thresholding; '\
+                            'automatically selected if -thresh or -sparsity '\
+                            'are set',
+                       argstr='-full')
+
+    fecm = traits.Bool(desc='Fast centrality method; substantial speed '\
+                            'increase but cannot accomodate thresholding; '\
+                            'automatically selected if -thresh or -sparsity '\
+                            'are not set',
+                       argstr='-fecm')
+
+    shift = traits.Float(desc='shift correlation coefficients in similarity '\
+                              'matrix to enforce non-negativity, s >= 0.0; '\
+                              'default = 0.0 for -full, 1.0 for -fecm',
+                            argstr='-shift %f')
+
+    scale = traits.Float(desc='scale correlation coefficients in similarity '\
+                              'matrix to after shifting, x >= 0.0; '\
+                              'default = 1.0 for -full, 0.5 for -fecm',
+                            argstr='-scale %f')
+
+    eps = traits.Float(desc='sets the stopping criterion for the power '\
+                            'iteration; l2|v_old - v_new| < eps*|v_old|; '\
+                            'default = 0.001',
+                            argstr='-eps %f')
+
+    max_iter = traits.Int(desc='sets the maximum number of iterations to use '\
+                               'in the power iteration; default = 1000',
+                          argstr='-max_iter %d')
+
+    memory = traits.Float(desc='Limit memory consumption on system by setting '\
+                               'the amount of GB to limit the algorithm to; '\
+                               'default = 2GB',
+                          argstr='-memory %f')
+
+
+class ECM(AFNICommand):
+    """Performs degree centrality on a dataset using a given maskfile
+    via the 3dLFCD command
+
+    For complete details, see the `3dECM Documentation.
+    <http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dECM.html>
+
+    Examples
+    ========
+
+    >>> from nipype.interfaces import afni as afni
+    >>> ecm = afni.ECM()
+    >>> ecm.inputs.in_file = 'func_preproc.nii'
+    >>> ecm.inputs.mask = 'mask.nii'
+    >>> ecm.inputs.sparsity = 0.1 # keep top 0.1% of connections
+    >>> ecm.inputs.out_file = 'out.nii'
+    >>> ecm.cmdline
+    '3dECM -sparsity 0.1 -mask mask.nii -prefix out.nii func_preproc.nii'
+    >>> res = ecm.run() # doctest: +SKIP
+    """
+
+    _cmd = '3dECM'
+    input_spec = ECMInputSpec
+    output_spec = AFNICommandOutputSpec
+
+
+class LFCDInputSpec(CentralityInputSpec):
+    """LFCD inputspec
+    """
+
+    in_file = File(desc='input file to 3dLFCD',
+                   argstr='%s',
+                   position=-1,
+                   mandatory=True,
+                   exists=True,
+                   copyfile=False)
+
+
+class LFCD(AFNICommand):
+    """Performs degree centrality on a dataset using a given maskfile
+    via the 3dLFCD command
+
+    For complete details, see the `3dLFCD Documentation.
+    <http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dLFCD.html>
+
+    Examples
+    ========
+
+    >>> from nipype.interfaces import afni as afni
+    >>> lfcd = afni.LFCD()
+    >>> lfcd.inputs.in_file = 'func_preproc.nii'
+    >>> lfcd.inputs.mask = 'mask.nii'
+    >>> lfcd.inputs.thresh = 0.8 # keep all connections with corr >= 0.8
+    >>> lfcd.inputs.out_file = 'out.nii'
+    >>> lfcd.cmdline
+    '3dLFCD -thresh 0.8 -mask mask.nii -prefix out.nii func_preproc.nii'
+    >>> res = lfcd.run() # doctest: +SKIP
+    """
+
+    _cmd = '3dLFCD'
+    input_spec = LFCDInputSpec
     output_spec = AFNICommandOutputSpec
 
 
@@ -2616,3 +2816,133 @@ class FWHMx(AFNICommandBase):
 
         outputs['fwhm'] = tuple(sout)
         return outputs
+
+
+class OutlierCountInputSpec(CommandLineInputSpec):
+    in_file = File(argstr='%s', mandatory=True, exists=True, position=-2, desc='input dataset')
+    mask = File(exists=True, argstr='-mask %s', xor=['autoclip', 'automask'],
+                desc='only count voxels within the given mask')
+    qthr = traits.Range(value=1e-3, low=0.0, high=1.0, argstr='-qthr %.5f',
+                        desc='indicate a value for q to compute alpha')
+
+    autoclip = traits.Bool(False, usedefault=True, argstr='-autoclip', xor=['in_file'],
+                           desc='clip off small voxels')
+    automask = traits.Bool(False, usedefault=True, argstr='-automask', xor=['in_file'],
+                           desc='clip off small voxels')
+
+    fraction = traits.Bool(False, usedefault=True, argstr='-fraction',
+                           desc='write out the fraction of masked voxels'
+                                ' which are outliers at each timepoint')
+    interval = traits.Bool(False, usedefault=True, argstr='-range',
+                           desc='write out the median + 3.5 MAD of outlier'
+                                ' count with each timepoint')
+    save_outliers = traits.Bool(False, usedefault=True, desc='enables out_file option')
+    outliers_file = File(
+        name_template="%s_outliers", argstr='-save %s', name_source=["in_file"],
+        output_name='out_outliers', keep_extension=True, desc='output image file name')
+
+    polort = traits.Int(argstr='-polort %d',
+                        desc='detrend each voxel timeseries with polynomials')
+    legendre = traits.Bool(False, usedefault=True, argstr='-legendre',
+                           desc='use Legendre polynomials')
+    out_file = File(
+        name_template='%s_outliers', name_source=['in_file'], argstr='> %s',
+        keep_extension=False, position=-1, desc='capture standard output')
+
+
+class OutlierCountOutputSpec(TraitedSpec):
+    out_outliers = File(exists=True, desc='output image file name')
+    out_file = File(
+        name_template='%s_tqual', name_source=['in_file'], argstr='> %s',
+        keep_extension=False, position=-1, desc='capture standard output')
+
+
+class OutlierCount(CommandLine):
+    """Create a 3D dataset from 2D image files using AFNI to3d command
+
+    For complete details, see the `to3d Documentation
+    <http://afni.nimh.nih.gov/pub/dist/doc/program_help/to3d.html>`_
+
+    Examples
+    ========
+
+    >>> from nipype.interfaces import afni
+    >>> toutcount = afni.OutlierCount()
+    >>> toutcount.inputs.in_file = 'functional.nii'
+    >>> toutcount.cmdline #doctest: +ELLIPSIS
+    '3dToutcount functional.nii > functional_outliers'
+    >>> res = toutcount.run() #doctest: +SKIP
+
+   """
+
+    _cmd = '3dToutcount'
+    input_spec = OutlierCountInputSpec
+    output_spec = OutlierCountOutputSpec
+
+    def _parse_inputs(self, skip=None):
+        if skip is None:
+            skip = []
+
+        if not self.inputs.save_outliers:
+            skip += ['outliers_file']
+        return super(OutlierCount, self)._parse_inputs(skip)
+
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        if self.inputs.save_outliers:
+            outputs['out_outliers'] = op.abspath(self.inputs.outliers_file)
+        outputs['out_file'] = op.abspath(self.inputs.out_file)
+        return outputs
+
+
+class QualityIndexInputSpec(CommandLineInputSpec):
+    in_file = File(argstr='%s', mandatory=True, exists=True, position=-2, desc='input dataset')
+    mask = File(exists=True, argstr='-mask %s', xor=['autoclip', 'automask'],
+                desc='compute correlation only across masked voxels')
+    spearman = traits.Bool(False, usedefault=True, argstr='-spearman',
+                           desc='Quality index is 1 minus the Spearman (rank) '
+                                'correlation coefficient of each sub-brick '
+                                'with the median sub-brick. (default)')
+    quadrant = traits.Bool(False, usedefault=True, argstr='-quadrant',
+                           desc='Similar to -spearman, but using 1 minus the '
+                                'quadrant correlation coefficient as the '
+                                'quality index.')
+    autoclip = traits.Bool(False, usedefault=True, argstr='-autoclip', xor=['mask'],
+                           desc='clip off small voxels')
+    automask = traits.Bool(False, usedefault=True, argstr='-automask', xor=['mask'],
+                           desc='clip off small voxels')
+    clip = traits.Float(argstr='-clip %f', desc='clip off values below')
+
+    interval = traits.Bool(False, usedefault=True, argstr='-range',
+                           desc='write out the median + 3.5 MAD of outlier'
+                                ' count with each timepoint')
+    out_file = File(
+        name_template='%s_tqual', name_source=['in_file'], argstr='> %s',
+        keep_extension=False, position=-1, desc='capture standard output')
+
+
+class QualityIndexOutputSpec(TraitedSpec):
+    out_file = File(desc='file containing the caputured standard output')
+
+
+class QualityIndex(CommandLine):
+    """Create a 3D dataset from 2D image files using AFNI to3d command
+
+    For complete details, see the `to3d Documentation
+    <http://afni.nimh.nih.gov/pub/dist/doc/program_help/to3d.html>`_
+
+    Examples
+    ========
+
+    >>> from nipype.interfaces import afni
+    >>> tqual = afni.QualityIndex()
+    >>> tqual.inputs.in_file = 'functional.nii'
+    >>> tqual.cmdline #doctest: +ELLIPSIS
+    '3dTqual functional.nii > functional_tqual'
+    >>> res = tqual.run() #doctest: +SKIP
+
+   """
+
+    _cmd = '3dTqual'
+    input_spec = QualityIndexInputSpec
+    output_spec = QualityIndexOutputSpec

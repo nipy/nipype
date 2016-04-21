@@ -852,7 +852,7 @@ class MRIsConvert(FSCommand):
         if name == "out_file" and not os.path.isabs(value):
             value = os.path.abspath(value)
         return super(MRIsConvert, self)._format_arg(name, spec, value)
-    
+
     def _list_outputs(self):
         outputs = self.output_spec().get()
         outputs["converted"] = os.path.abspath(self._gen_outfilename())

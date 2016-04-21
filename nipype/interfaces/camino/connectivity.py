@@ -126,6 +126,7 @@ class Conmat(CommandLine):
     >>> conmat.inputs.in_file = 'tracts.Bdouble'
     >>> conmat.inputs.target_file = 'atlas.nii.gz'
     >>> conmat.inputs.scalar_file = 'fa.nii.gz'
+    >>> conmat.tract_stat         = 'mean'
     >>> conmat.run()        # doctest: +SKIP
     """
     _cmd = 'conmat'

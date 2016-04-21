@@ -214,7 +214,7 @@ def test_outputs_removal_wf():
 
     out_dir = mkdtemp()
 
-    for plugin in ('Linear',):  # , 'MultiProc'):
+    for plugin in ('Linear',):  # , 'ResourceMultiProc'):
         n1 = pe.Node(niu.Function(input_names=['arg1'],
                                   output_names=['out_file1', 'out_file2', 'dir'],
                                   function=test_function),

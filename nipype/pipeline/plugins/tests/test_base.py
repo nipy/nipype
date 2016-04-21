@@ -38,5 +38,5 @@ funkynode.inputs.arg1 = [1,2]
 wf.add_nodes([funkynode])
 wf.base_dir = '/tmp'
 
-wf.run(plugin='MultiProc')
+wf.run(plugin='ResourceMultiProc')
 '''

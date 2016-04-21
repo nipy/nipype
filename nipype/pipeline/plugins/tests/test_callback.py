@@ -26,7 +26,7 @@ class Status(object):
     def __init__(self):
         self.statuses = []
 
-    def callback(self, node, status):
+    def callback(self, node, status, result=None):
         self.statuses.append((node, status))
 
 
@@ -76,7 +76,7 @@ def test_callback_multiproc_normal():
     wf.add_nodes([f_node])
     wf.config['execution']['crashdump_dir'] = wf.base_dir
     wf.config['execution']['poll_sleep_duration'] = 2
-    wf.run(plugin='MultiProc', plugin_args={'status_callback': so.callback})
+    wf.run(plugin='ResourceMultiProc', plugin_args={'status_callback': so.callback})
     assert_equal(len(so.statuses), 2)
     for (n, s) in so.statuses:
         yield assert_equal, n.name, 'f_node'
@@ -93,9 +93,8 @@ def test_callback_multiproc_exception():
                      name='f_node')
     wf.add_nodes([f_node])
     wf.config['execution']['crashdump_dir'] = wf.base_dir
-    wf.config['execution']['poll_sleep_duration'] = 2
     try:
-        wf.run(plugin='MultiProc',
+        wf.run(plugin='ResourceMultiProc',
                plugin_args={'status_callback': so.callback})
     except:
         pass
