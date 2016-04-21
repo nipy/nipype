@@ -1350,6 +1350,10 @@ class Allineate(AFNICommand):
                                                      suffix=self.inputs.suffix)
         else:
             outputs['out_file'] = os.path.abspath(self.inputs.out_file)
+
+        if isdefined(self.inputs.out_matrix):
+            outputs['matrix'] = os.path.abspath(os.path.join(os.getcwd(),\
+                                         self.inputs.out_matrix +".aff12.1D"))
         return outputs
 
     def _gen_filename(self, name):
