@@ -1502,11 +1502,11 @@ class NormalizeInputSpec(FSTraitedSpec):
     # optional
     gradient = traits.Int(1, argstr="-g %d", usedefault=False,
                           desc="use max intensity/mm gradient g (default=1)")
-    mask = File(argstr="-mask %s", mandatory=False, exists=True,
+    mask = File(argstr="-mask %s",  exists=True,
                 desc="The input mask file for Normalize")
-    segmentation = File(argstr="-aseg %s", mandatory=False,
+    segmentation = File(argstr="-aseg %s",
                         exists=True, desc="The input segmentation for Normalize")
-    transform = File(exists=True, mandatory=False,
+    transform = File(exists=True,
                      desc="Tranform file from the header of the input file")
 
 
@@ -1551,9 +1551,9 @@ class CANormalizeInputSpec(FSTraitedSpec):
     transform = File(argstr='%s', exists=True, mandatory=True,
                      position=-2, desc="The tranform file in lta format")
     # optional
-    mask = File(argstr='-mask %s', exists=True, mandatory=False,
+    mask = File(argstr='-mask %s', exists=True,
                 desc="Specifies volume to use as mask")
-    control_points = File(argstr='-c %s', mandatory=False,
+    control_points = File(argstr='-c %s',
                           desc="File name for the output control points")
     long_file = File(argstr='-long %s',
                      desc='undocumented flag used in longitudinal processing')
@@ -1596,20 +1596,20 @@ class CARegisterInputSpec(FSTraitedSpecOpenMP):
     #required
     in_file = File(argstr='%s', exists=True, mandatory=True,
                    position=-3, desc="The input volume for CARegister")
-    out_file = File(argstr='%s', mandatory=False, position=-1,
+    out_file = File(argstr='%s',  position=-1,
                     genfile=True, desc="The output volume for CARegister")
-    template = File(argstr='%s', exists=True, mandatory=False,
+    template = File(argstr='%s', exists=True,
                     position=-2, desc="The template file in gca format")
     # optional
-    mask = File(argstr='-mask %s', exists=True, mandatory=False,
+    mask = File(argstr='-mask %s', exists=True,
                 desc="Specifies volume to use as mask")
-    invert_and_save = traits.Bool(argstr='-invert-and-save', mandatory=False, position=-4,
+    invert_and_save = traits.Bool(argstr='-invert-and-save',  position=-4,
                                   desc="Invert and save the .m3z multi-dimensional talaraich transform to x, y, and z .mgz files")
     no_big_ventricles = traits.Bool(
-        argstr='-nobigventricles', mandatory=False, desc="No big ventricles")
-    transform = File(argstr='-T %s', exists=True, mandatory=False,
+        argstr='-nobigventricles',  desc="No big ventricles")
+    transform = File(argstr='-T %s', exists=True,
                      desc="Specifies transform in lta format")
-    align = traits.String(argstr='-align-%s', mandatory=False,
+    align = traits.String(argstr='-align-%s',
                           desc="Specifies when to perform alignment")
     levels = traits.Int(
         argstr='-levels %d',
@@ -1675,17 +1675,18 @@ class CALabelInputSpec(FSTraitedSpecOpenMP):
     intensities = File(argstr="-r %s", exists=True,
                        desc="input label intensities file(used in longitudinal processing)")
     no_big_ventricles = traits.Bool(
-        argstr="-nobigventricles", mandatory=False, desc="No big ventricles")
-    align = traits.Bool(argstr="-align", mandatory=False, desc="Align CALabel")
+        argstr="-nobigventricles",  desc="No big ventricles")
+    align = traits.Bool(argstr="-align",  desc="Align CALabel")
     prior = traits.Float(argstr="-prior %.1f",
-                         mandatory=False, desc="Prior for CALabel")
+                          desc="Prior for CALabel")
     relabel_unlikely = traits.Tuple(traits.Int, traits.Float,
                                     argstr="-relabel_unlikely %d %.1f",
-                                    desc="Reclassify voxels at least some std devs from the mean using some size Gaussian window",
-                                    mandatory=False)
-    label = traits.File(argstr="-l %s", mandatory=False, exists=True,
+                                    desc=("Reclassify voxels at least some std"
+                                          " devs from the mean using some size"
+                                          " Gaussian window"))
+    label = traits.File(argstr="-l %s",  exists=True,
                         desc="Undocumented flag. Autorecon3 uses ../label/{hemisphere}.cortex.label as input file")
-    aseg = traits.File(argstr="-aseg %s", mandatory=False, exists=True,
+    aseg = traits.File(argstr="-aseg %s",  exists=True,
                        desc="Undocumented flag. Autorecon3 uses ../mri/aseg.presurf.mgz as input file")
 
 
@@ -1742,11 +1743,11 @@ class MRIsCALabelInputSpec(FSTraitedSpecOpenMP):
                     hash_files=False, name_template="%s.aparc.annot",
                     desc="Annotated surface output file")
     # optional
-    label = traits.File(argstr="-l %s", mandatory=False, exists=True,
+    label = traits.File(argstr="-l %s",  exists=True,
                         desc="Undocumented flag. Autorecon3 uses ../label/{hemisphere}.cortex.label as input file")
-    aseg = traits.File(argstr="-aseg %s", mandatory=False, exists=True,
+    aseg = traits.File(argstr="-aseg %s",  exists=True,
                        desc="Undocumented flag. Autorecon3 uses ../mri/aseg.presurf.mgz as input file")
-    seed = traits.Int(argstr="-seed %d", mandatory=False,
+    seed = traits.Int(argstr="-seed %d",
                       desc="")
     copy_inputs = traits.Bool(desc="Copies implicit inputs to node directory " +
                               "and creates a temp subjects_directory. " +
@@ -1835,8 +1836,7 @@ class SegmentCCInputSpec(FSTraitedSpec):
     subject_id = traits.String('subject_id', argstr="%s", mandatory=True,
                                position=-1, usedefault=True,
                                desc="Subject name")
-    copy_inputs = traits.Bool(mandatory=False,
-                              desc="If running as a node, set this to True." +
+    copy_inputs = traits.Bool(desc="If running as a node, set this to True." +
                               "This will copy the input files to the node " +
                               "directory.")
 
@@ -1979,10 +1979,10 @@ class EditWMwithAsegInputSpec(FSTraitedSpec):
                       desc="Input brain/T1 file")
     seg_file = File(argstr="%s", position=-2, mandatory=True, exists=True,
                     desc="Input presurf segmentation file")
-    out_file = File(argstr="%s", position=-1, mandtaory=True, exists=False,
+    out_file = File(argstr="%s", position=-1, mandatory=True, exists=False,
                     desc="File to be written as output")
     # optional
-    keep_in = traits.Bool(argstr="-keep-in", mandatory=False,
+    keep_in = traits.Bool(argstr="-keep-in",
                           desc="Keep edits as found in input volume")
 
 class EditWMwithAsegOutputSpec(TraitedSpec):

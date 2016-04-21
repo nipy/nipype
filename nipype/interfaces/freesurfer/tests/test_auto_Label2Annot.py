@@ -7,7 +7,6 @@ def test_Label2Annot_inputs():
     input_map = dict(args=dict(argstr='%s',
     ),
     color_table=dict(argstr='--ctab %s',
-    mandatory=False,
     ),
     copy_inputs=dict(),
     environ=dict(nohash=True,
@@ -23,7 +22,6 @@ def test_Label2Annot_inputs():
     mandatory=True,
     ),
     keep_max=dict(argstr='--maxstatwinner',
-    mandatory=False,
     ),
     orig=dict(mandatory=True,
     ),
@@ -38,7 +36,6 @@ def test_Label2Annot_inputs():
     terminal_output=dict(nohash=True,
     ),
     verbose_off=dict(argstr='--noverbose',
-    mandatory=False,
     ),
     )
     inputs = Label2Annot.input_spec()

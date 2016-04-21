@@ -1,4 +1,4 @@
-Next release
+Release 0.12.0-rc1 (April 20, 2016)
 ============
 
 * ENH: Added dcm2niix interface (https://github.com/nipy/nipype/pull/1435)

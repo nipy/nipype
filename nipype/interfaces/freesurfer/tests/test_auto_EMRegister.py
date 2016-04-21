@@ -17,10 +17,8 @@ def test_EMRegister_inputs():
     position=-3,
     ),
     mask=dict(argstr='-mask %s',
-    mandatory=False,
     ),
     nbrspacing=dict(argstr='-uns %d',
-    mandatory=False,
     ),
     num_threads=dict(),
     out_file=dict(argstr='%s',
@@ -40,7 +38,6 @@ def test_EMRegister_inputs():
     terminal_output=dict(nohash=True,
     ),
     transform=dict(argstr='-t %s',
-    mandatory=False,
     ),
     )
     inputs = EMRegister.input_spec()
