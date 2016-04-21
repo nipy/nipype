@@ -239,8 +239,12 @@ class Dcm2niix(CommandLine):
 
     def _run_interface(self, runtime):
         new_runtime = super(Dcm2niix, self)._run_interface(runtime)
-        (self.output_files,
-         self.bvecs, self.bvals, self.bids) = self._parse_stdout(new_runtime.stdout)
+        if self.inputs.bids_format:
+            (self.output_files, self.bvecs,
+             self.bvals, self.bids) = self._parse_stdout(new_runtime.stdout)
+        else:
+             (self.output_files, self.bvecs,
+             self.bvals) = self._parse_stdout(new_runtime.stdout)
         return new_runtime
 
     def _parse_stdout(self, stdout):
@@ -287,7 +291,8 @@ class Dcm2niix(CommandLine):
         outputs['converted_files'] = self.output_files
         outputs['bvecs'] = self.bvecs
         outputs['bvals'] = self.bvals
-        outputs['bids'] = self.bids
+        if self.inputs.bids_format:
+            outputs['bids'] = self.bids
         return outputs
 
     def _gen_filename(self, name):
