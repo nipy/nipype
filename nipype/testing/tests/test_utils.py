@@ -12,7 +12,7 @@ from nose.tools import assert_true
 def test_tempfatfs():
     try:
         fatfs = TempFATFS()
-    except IOError:
+    except (IOError, OSError):
         warnings.warn("Cannot mount FAT filesystems with FUSE")
     else:
         with fatfs as tmpdir:

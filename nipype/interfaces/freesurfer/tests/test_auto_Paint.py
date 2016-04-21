@@ -7,7 +7,6 @@ def test_Paint_inputs():
     input_map = dict(args=dict(argstr='%s',
     ),
     averages=dict(argstr='-a %d',
-    mandatory=False,
     ),
     environ=dict(nohash=True,
     usedefault=True,
@@ -31,8 +30,7 @@ def test_Paint_inputs():
     mandatory=True,
     position=-3,
     ),
-    template_param=dict(mandatory=False,
-    ),
+    template_param=dict(),
     terminal_output=dict(nohash=True,
     ),
     )

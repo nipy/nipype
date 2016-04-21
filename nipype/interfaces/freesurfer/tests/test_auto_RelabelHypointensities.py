@@ -31,7 +31,6 @@ def test_RelabelHypointensities_inputs():
     ),
     subjects_dir=dict(),
     surf_directory=dict(argstr='%s',
-    mandatory=False,
     position=-2,
     usedefault=True,
     ),
@@ -47,7 +46,6 @@ def test_RelabelHypointensities_inputs():
 
 def test_RelabelHypointensities_outputs():
     output_map = dict(out_file=dict(argstr='%s',
-    mandatory=False,
     ),
     )
     outputs = RelabelHypointensities.output_spec()

@@ -31,7 +31,6 @@ def test_Apas2Aseg_inputs():
 
 def test_Apas2Aseg_outputs():
     output_map = dict(out_file=dict(argstr='%s',
-    mandatory=False,
     ),
     )
     outputs = Apas2Aseg.output_spec()

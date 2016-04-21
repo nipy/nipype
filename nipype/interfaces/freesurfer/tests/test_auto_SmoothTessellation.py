@@ -36,7 +36,6 @@ def test_SmoothTessellation_inputs():
     position=-1,
     ),
     seed=dict(argstr='-seed %d',
-    mandatory=False,
     ),
     smoothing_iterations=dict(argstr='-n %d',
     ),

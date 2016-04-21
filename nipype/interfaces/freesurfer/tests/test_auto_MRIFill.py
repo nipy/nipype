@@ -23,13 +23,11 @@ def test_MRIFill_inputs():
     position=-1,
     ),
     segmentation=dict(argstr='-segmentation %s',
-    mandatory=False,
     ),
     subjects_dir=dict(),
     terminal_output=dict(nohash=True,
     ),
     transform=dict(argstr='-xform %s',
-    mandatory=False,
     ),
     )
     inputs = MRIFill.input_spec()
