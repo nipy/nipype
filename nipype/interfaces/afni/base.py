@@ -147,6 +147,10 @@ class AFNICommand(CommandLine):
         else:
             self._output_update()
 
+        # Update num threads estimate from OMP_NUM_THREADS env var
+        import os
+        self.num_threads = int(os.getenv('OMP_NUM_THREADS', 1))
+
     def _output_update(self):
         """ i think? updates class private attribute based on instance input
          in fsl also updates ENVIRON variable....not valid in afni

@@ -252,10 +252,8 @@ class DistributedPluginBase(PluginBase):
         while np.any(self.proc_done == False) | \
                 np.any(self.proc_pending == True):
 
-            mem_mb, num_thr = get_max_resources_used(gpid, memory_mb, num_threads)
-            memory_mb = max(mem_mb, memory_mb)
-            num_threads = max(num_thr, num_threads)
-            gw_log.info('Memory GB usage: %.4f, Threads usage: %d' % (memory_mb/1024.0, num_threads))
+            #memory_mb, num_threads = get_max_resources_used(gpid, memory_mb, num_threads, )
+            #gw_log.info('Memory GB usage: %.4f, Threads usage: %d' % (memory_mb/1024.0, num_threads))
             toappend = []
             # trigger callbacks for any pending results
             while self.pending_tasks:
