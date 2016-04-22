@@ -8,6 +8,7 @@ These features allows users to ensure high throughput of their data processing
 while also controlling the amount of computing resources a given workflow will
 use.
 
+
 Specifying Resources in the Node Interface
 ==========================================
 Each ``Node`` instance interface has two parameters that specify its expected
@@ -22,6 +23,7 @@ particular node is expected to use 8 threads and 2 GB of memory:
 
 If the resource parameters are never set, they default to being 1 thread and 1
 GB of RAM.
+
 
 Resource Scheduler
 ==================
@@ -43,28 +45,29 @@ for ``n_procs`` and ``memory_gb``, respectively.
 The plugin will then queue eligible nodes for execution based on their expected
 usage via the ``num_threads`` and ``estimated_memory_gb`` interface parameters.
 If the plugin sees that only 3 of its 4 processors and 4 GB of its 6 GB of RAM
-are being used, it will attempt to execute the next available node as long as
-its ``num_threads = 1`` and ``estimated_memory_gb  <= 2``. If this is not the
-case, it will continue to check every available node in the queue until it sees
-a node that meets these conditions or it waits for a executing node to finish to
-earn back the necessary resources. The priority of the queue is highest for
-nodes with the most ``estimated_memory_gb`` followed by nodes with the most
-expected ``num_threads``.
+are being used by running nodes, it will attempt to execute the next available
+node as long as its ``num_threads = 1`` and ``estimated_memory_gb  <= 2``. If
+this is not the case, it will continue to check every available node in the
+queue until it sees a node that meets these conditions, or it waits for an
+executing node to finish to earn back the necessary resources. The priority of
+the queue is highest for nodes with the most ``estimated_memory_gb`` followed
+by nodes with the most expected ``num_threads``.
+
 
 Runtime Profiler and using the Callback Log
 ===========================================
 It is not always easy to estimate the amount of resources a particular function
 or command uses. To help with this, Nipype provides some feedback about the
 system resources used by every node during workflow execution via the built-in
-runtime profiler. The runtime profiler is automatically enabled if the]
+runtime profiler. The runtime profiler is automatically enabled if the
 ``psutil`` Python package is installed and found on the system. If the package
 is not found, the workflow will run normally without the runtime profiler.
 
 The runtime profiler records the number of threads and the amount of memory (GB)
 used as ``runtime_threads`` and ``runtime_memory_gb`` in the Node's
-``result.runtime`` parameter. Since the node object is pickled and written to
+``result.runtime`` attribute. Since the node object is pickled and written to
 disk in its working directory, these values are available for analysis after
-node or workflow execution by parsing the pickle file contents in Python.
+node or workflow execution by manually parsing the pickle file contents.
 
 Nipype also provides a logging mechanism for saving node runtime statistics to
 a JSON-style log file via the ``log_nodes_cb`` logger function. This is enabled
@@ -88,7 +91,7 @@ configured.
 	handler = logging.FileHandler(callback_log_path)
 	logger.addHandler(handler)
 
-Finally, the workflow can be ran.
+Finally, the workflow can be run.
 
 ::
 	workflow.run(plugin='MultiProc', plugin_args=args_dict)
@@ -112,6 +115,7 @@ the user can change the node interface ``num_threads`` and
 ``estimated_memory_gb`` parameters to reflect this for a higher pipeline
 throughput.
 
+
 Visualizing Pipeline Resources
 ==============================
 Nipype provides the ability to visualize the workflow execution based on the
@@ -131,4 +135,9 @@ generated from the callback logger after workflow execution - as shown above.
     # ...creates gantt chart in '/home/user/run_stats.log.html'
 
 The `generate_gantt_chart`` function will create an html file that can be viewed
-in a browser.
+in a browser. Below is an example of the gantt chart displayed in a web browser.
+Note that when the cursor is hovered over any particular node bubble or resource
+bubble, some additional information is shown in a pop-up. 
+
+ * -  .. image:: images/gantt_chart.png
+         :width: 100 %
