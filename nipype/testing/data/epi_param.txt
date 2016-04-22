@@ -4,7 +4,7 @@
     "delta_te": 2.46e-3,
     "epi_factor": 128,
     "epi_lines": 57,
-    "epi_acc": 2,
+    "acc_factor": 2,
     "field_strength": 3.0,
     "field_axis": "z"
 }

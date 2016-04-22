@@ -298,10 +298,11 @@ a custom template::
 In addition to overall workflow configuration, you can use node level
 configuration for OAR::
 
-    node.plugin_args = {'oarsub_args': '-l "nodes=1/cores=3"'}
+    node.plugin_args = {'overwrite': True, 'oarsub_args': '-l "nodes=1/cores=3"'}
 
 this would apply only to the node and is useful in situations, where a
 particular node might use more resources than other nodes in a workflow.
+You need to set the 'overwrite' flag to bypass the general settings-template you defined for the other nodes.
 
 
 ``qsub`` emulation

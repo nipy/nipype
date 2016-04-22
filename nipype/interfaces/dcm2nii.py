@@ -49,7 +49,7 @@ class Dcm2niiOutputSpec(TraitedSpec):
 
 
 class Dcm2nii(CommandLine):
-    """Uses MRICRON's dcm2nii to convert dicom files
+    """Uses MRIcron's dcm2nii to convert dicom files
 
     Examples
     ========
@@ -107,7 +107,7 @@ class Dcm2nii(CommandLine):
                 if line.startswith("Saving "):
                     out_file = line[len("Saving "):]
                 elif line.startswith("GZip..."):
-                    # for gzipped outpus files are not absolute
+                    # for gzipped output files are not absolute
                     fname = line[len("GZip..."):]
                     if len(files) and os.path.basename(files[-1]) == fname[:-3]:
                         # we are seeing a previously reported conversion
@@ -139,11 +139,13 @@ class Dcm2nii(CommandLine):
                     else:
                         output_dir = self._gen_filename('output_dir')
                     val = os.path.join(output_dir, val)
-                    out_file = val
+                    if os.path.exists(val):
+                        out_file = val
 
                 if out_file:
-                    files.append(out_file)
-                    last_added_file = out_file
+                    if not out_file in files:
+                        files.append(out_file)
+                        last_added_file = out_file
                     continue
 
                 if line.startswith("Reorienting as "):
@@ -153,9 +155,12 @@ class Dcm2nii(CommandLine):
                 elif line.startswith("Cropping NIfTI/Analyze image "):
                     base, filename = os.path.split(line[len("Cropping NIfTI/Analyze image "):])
                     filename = "c" + filename
-                    reoriented_and_cropped_files.append(os.path.join(base, filename))
-                    skip = True
-                    continue
+                    if os.path.exists(os.path.join(base, filename)) or self.inputs.reorient_and_crop:
+                        # if reorient&crop is true but the file doesn't exist, this errors when setting outputs
+                        reoriented_and_cropped_files.append(os.path.join(base, filename))
+                        skip = True
+                        continue
+
             skip = False
         return files, reoriented_files, reoriented_and_cropped_files, bvecs, bvals
 

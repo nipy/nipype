@@ -60,7 +60,7 @@ class QJobInfo(object):
         return self._job_queue_state == "initializing"
 
     def is_zombie(self):
-        return self._job_queue_state == "zombie"
+        return self._job_queue_state == "zombie" or self._job_queue_state == "finished"
 
     def is_running(self):
         return self._job_queue_state == "running"

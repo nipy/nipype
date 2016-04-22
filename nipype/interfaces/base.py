@@ -19,6 +19,7 @@ from configparser import NoOptionError
 from copy import deepcopy
 import datetime
 import errno
+import locale
 import os
 import re
 import platform
@@ -47,7 +48,7 @@ from ..utils.misc import is_container, trim, str2bool
 from ..utils.provenance import write_provenance
 from .. import config, logging, LooseVersion
 from .. import __version__
-from ..external.six import string_types
+from ..external.six import string_types, text_type
 
 nipype_version = LooseVersion(__version__)
 
@@ -63,17 +64,6 @@ class NipypeInterfaceError(Exception):
 
     def __str__(self):
         return repr(self.value)
-
-
-def _unlock_display(ndisplay):
-    lockf = os.path.join('/tmp', '.X%d-lock' % ndisplay)
-    try:
-        os.remove(lockf)
-    except:
-        return False
-
-    return True
-
 
 def _exists_in_path(cmd, environ):
     '''
@@ -872,7 +862,7 @@ class BaseInterface(Interface):
         """
         helpstr = ['Outputs::', '']
         if cls.output_spec:
-            outputs = cls.output_spec()
+            outputs = cls.output_spec()  #pylint: disable=E1102
             for name, spec in sorted(outputs.traits(transient=None).items()):
                 helpstr += cls._get_trait_desc(outputs, name, spec)
         if len(helpstr) == 2:
@@ -884,7 +874,8 @@ class BaseInterface(Interface):
         """
         outputs = None
         if self.output_spec:
-            outputs = self.output_spec()
+            outputs = self.output_spec()  #pylint: disable=E1102
+
         return outputs
 
     @classmethod
@@ -989,7 +980,10 @@ class BaseInterface(Interface):
 
             vdisp = Xvfb(nolisten='tcp')
             vdisp.start()
-            vdisp_num = vdisp.vdisplay_num
+            try:
+                vdisp_num = vdisp.new_display
+            except AttributeError:  # outdated version of xvfbwrapper
+                vdisp_num = vdisp.vdisplay_num
 
             iflogger.info('Redirecting X to :%d' % vdisp_num)
             runtime.environ['DISPLAY'] = ':%d' % vdisp_num
@@ -997,14 +991,7 @@ class BaseInterface(Interface):
         runtime = self._run_interface(runtime)
 
         if self._redirect_x:
-            if sysdisplay is None:
-                os.unsetenv('DISPLAY')
-            else:
-                os.environ['DISPLAY'] = sysdisplay
-
-            iflogger.info('Freeing X :%d' % vdisp_num)
             vdisp.stop()
-            _unlock_display(vdisp_num)
 
         return runtime
 
@@ -1165,6 +1152,9 @@ class Stream(object):
         self._buf = ''
         self._rows = []
         self._lastidx = 0
+        self.default_encoding = locale.getdefaultlocale()[1]
+        if self.default_encoding is None:
+            self.default_encoding = 'UTF-8'
 
     def fileno(self):
         "Pass-through for file descriptor."
@@ -1179,7 +1169,7 @@ class Stream(object):
     def _read(self, drain):
         "Read from the file descriptor"
         fd = self.fileno()
-        buf = os.read(fd, 4096).decode()
+        buf = os.read(fd, 4096).decode(self.default_encoding)
         if not buf and not self._buf:
             return None
         if '\n' not in buf:
@@ -1361,11 +1351,14 @@ def run_command(runtime, output=None, timeout=0.01, redirect_x=False):
             raise RuntimeError('Xvfb was not found, X redirection aborted')
         cmdline = 'xvfb-run -a ' + cmdline
 
+    default_encoding = locale.getdefaultlocale()[1]
+    if default_encoding is None:
+        default_encoding = 'UTF-8'
     if output == 'file':
         errfile = os.path.join(runtime.cwd, 'stderr.nipype')
         outfile = os.path.join(runtime.cwd, 'stdout.nipype')
-        stderr = open(errfile, 'wt')  # t=='text'===default
-        stdout = open(outfile, 'wt')
+        stderr = open(errfile, 'wb')  # t=='text'===default
+        stdout = open(outfile, 'wb')
 
         proc = subprocess.Popen(cmdline,
                                 stdout=stdout,
@@ -1431,19 +1424,10 @@ def run_command(runtime, output=None, timeout=0.01, redirect_x=False):
                 proc.poll()
                 time.sleep(interval)
         stdout, stderr = proc.communicate()
-        if stdout and isinstance(stdout, bytes):
-            try:
-                stdout = stdout.decode()
-            except UnicodeDecodeError:
-                stdout = stdout.decode("ISO-8859-1")
-        if stderr and isinstance(stderr, bytes):
-            try:
-                stderr = stderr.decode()
-            except UnicodeDecodeError:
-                stderr = stderr.decode("ISO-8859-1")
-
-        result['stdout'] = str(stdout).split('\n')
-        result['stderr'] = str(stderr).split('\n')
+        stdout = stdout.decode(default_encoding)
+        stderr = stderr.decode(default_encoding)
+        result['stdout'] = stdout.split('\n')
+        result['stderr'] = stderr.split('\n')
         result['merged'] = ''
     if output == 'file':
         if runtime_profile:
@@ -1455,8 +1439,8 @@ def run_command(runtime, output=None, timeout=0.01, redirect_x=False):
         ret_code = proc.wait()
         stderr.flush()
         stdout.flush()
-        result['stdout'] = [line.strip() for line in open(outfile).readlines()]
-        result['stderr'] = [line.strip() for line in open(errfile).readlines()]
+        result['stdout'] = [line.decode(default_encoding).strip() for line in open(outfile, 'rb').readlines()]
+        result['stderr'] = [line.decode(default_encoding).strip() for line in open(errfile, 'rb').readlines()]
         result['merged'] = ''
     if output == 'none':
         if runtime_profile:
@@ -1641,8 +1625,8 @@ class CommandLine(BaseInterface):
 
     def version_from_command(self, flag='-v'):
         cmdname = self.cmd.split()[0]
-        if _exists_in_path(cmdname):
-            env = dict(os.environ)
+        env = dict(os.environ)
+        if _exists_in_path(cmdname, env):
             out_environ = self._get_environ()
             env.update(out_environ)
             proc = subprocess.Popen(' '.join((cmdname, flag)),
@@ -1804,7 +1788,7 @@ class CommandLine(BaseInterface):
         metadata = dict(name_source=lambda t: t is not None)
         traits = self.inputs.traits(**metadata)
         if traits:
-            outputs = self.output_spec().get()
+            outputs = self.output_spec().get()  #pylint: disable=E1102
             for name, trait_spec in traits.items():
                 out_name = name
                 if trait_spec.output_name is not None:
@@ -1922,7 +1906,7 @@ class SEMLikeCommandLine(CommandLine):
     """
 
     def _list_outputs(self):
-        outputs = self.output_spec().get()
+        outputs = self.output_spec().get()  #pylint: disable=E1102
         return self._outputs_from_inputs(outputs)
 
     def _outputs_from_inputs(self, outputs):

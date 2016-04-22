@@ -24,7 +24,6 @@ def test_XfmAvg_inputs():
     ignore_nonlinear=dict(argstr='-ignore_nonline',
     ),
     input_files=dict(argstr='%s',
-    exists=True,
     mandatory=True,
     position=-2,
     sep=' ',
