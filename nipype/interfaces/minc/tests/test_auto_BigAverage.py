@@ -16,7 +16,6 @@ def test_BigAverage_inputs():
     usedefault=True,
     ),
     input_files=dict(argstr='%s',
-    exists=True,
     mandatory=True,
     position=-2,
     sep=' ',

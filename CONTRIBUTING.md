@@ -19,7 +19,7 @@
 
 When opening a new Issue, please take the following steps:
 
-1. Search GitHub and/or [Neurostars](neurostars.org) for your issue to avoid duplicate reports.
+1. Search GitHub and/or [Neurostars](http://neurostars.org) for your issue to avoid duplicate reports.
    Keyword searches for your error messages are most helpful.
 2. If possible, try updating to master and reproducing your issue,
    because we may have already fixed it.

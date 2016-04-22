@@ -16,7 +16,6 @@ def test_XfmConcat_inputs():
     usedefault=True,
     ),
     input_files=dict(argstr='%s',
-    exists=True,
     mandatory=True,
     position=-2,
     sep=' ',
@@ -43,8 +42,7 @@ def test_XfmConcat_inputs():
 
 def test_XfmConcat_outputs():
     output_map = dict(output_file=dict(),
-    output_grids=dict(exists=True,
-    ),
+    output_grids=dict(),
     )
     outputs = XfmConcat.output_spec()
 
