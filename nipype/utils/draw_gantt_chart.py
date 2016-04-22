@@ -183,8 +183,6 @@ def calculate_resource_timeseries(events, resource):
 
     # Iterate through the events
     for tdelta, event in sorted(events.items()):
-        if tdelta > 80:
-            print 'hi'
         if event['event'] == "start":
             if resource in event and event[resource] != 'Unkown':
                 all_res += float(event[resource])

@@ -148,6 +148,7 @@ class AFNICommand(CommandLine):
             self._output_update()
 
         # Update num threads estimate from OMP_NUM_THREADS env var
+        # Default to 1 if not set
         import os
         self.num_threads = int(os.getenv('OMP_NUM_THREADS', 1))
 

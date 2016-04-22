@@ -212,11 +212,9 @@ class MultiProcPlugin(DistributedPluginBase):
         free_memory_gb = self.memory_gb - busy_memory_gb
         free_processors = self.processors - busy_processors
 
-
         # Check all jobs without dependency not run
         jobids = np.flatnonzero((self.proc_done == False) & \
                                 (self.depidx.sum(axis=0) == 0).__array__())
-
 
         # Sort jobs ready to run first by memory and then by number of threads
         # The most resource consuming jobs run first
