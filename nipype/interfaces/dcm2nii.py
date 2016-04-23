@@ -23,21 +23,35 @@ class Dcm2niiInputSpec(CommandLineInputSpec):
                                   copyfile=False, mandatory=True, xor=['source_dir'])
     source_dir = Directory(exists=True, argstr="%s", position=-1, mandatory=True,
                            xor=['source_names'])
-    anonymize = traits.Bool(True, argstr='-a', usedefault=True)
-    config_file = File(exists=True, argstr="-b %s", genfile=True)
-    collapse_folders = traits.Bool(True, argstr='-c', usedefault=True)
-    date_in_filename = traits.Bool(True, argstr='-d', usedefault=True)
-    events_in_filename = traits.Bool(True, argstr='-e', usedefault=True)
-    source_in_filename = traits.Bool(False, argstr='-f', usedefault=True)
-    gzip_output = traits.Bool(False, argstr='-g', usedefault=True)
-    id_in_filename = traits.Bool(False, argstr='-i', usedefault=True)
-    nii_output = traits.Bool(True, argstr='-n', usedefault=True)
-    output_dir = Directory(exists=True, argstr='-o %s', genfile=True)
-    protocol_in_filename = traits.Bool(True, argstr='-p', usedefault=True)
-    reorient = traits.Bool(argstr='-r')
-    spm_analyze = traits.Bool(argstr='-s', xor=['nii_output'])
-    convert_all_pars = traits.Bool(True, argstr='-v', usedefault=True)
-    reorient_and_crop = traits.Bool(False, argstr='-x', usedefault=True)
+    anonymize = traits.Bool(True, argstr='-a', usedefault=True,
+                            desc="Remove identifying information")
+    config_file = File(exists=True, argstr="-b %s", genfile=True,
+                       desc="Load settings from specified inifile")
+    collapse_folders = traits.Bool(True, argstr='-c', usedefault=True,
+                                   desc="Collapse input folders")
+    date_in_filename = traits.Bool(True, argstr='-d', usedefault=True,
+                                   desc="Date in filename")
+    events_in_filename = traits.Bool(True, argstr='-e', usedefault=True,
+                                     desc="Events (series/acq) in filename")
+    source_in_filename = traits.Bool(False, argstr='-f', usedefault=True,
+                                     desc="Source filename")
+    gzip_output = traits.Bool(False, argstr='-g', usedefault=True,
+                              desc="Gzip output (.gz)")
+    id_in_filename = traits.Bool(False, argstr='-i', usedefault=True,
+                                 desc="ID  in filename")
+    nii_output = traits.Bool(True, argstr='-n', usedefault=True,
+                             desc="Save as .nii - if no, create .hdr/.img pair")
+    output_dir = Directory(exists=True, argstr='-o %s', genfile=True,
+                           desc="Output dir - if unspecified, source directory is used")
+    protocol_in_filename = traits.Bool(True, argstr='-p', usedefault=True,
+                                       desc="Protocol in filename")
+    reorient = traits.Bool(argstr='-r', desc="Reorient image to nearest orthogonal")
+    spm_analyze = traits.Bool(argstr='-s', xor=['nii_output'],
+                              desc="SPM2/Analyze not SPM5/NIfTI")
+    convert_all_pars = traits.Bool(True, argstr='-v', usedefault=True,
+                                   desc="Convert every image in directory")
+    reorient_and_crop = traits.Bool(False, argstr='-x', usedefault=True,
+                                    desc="Reorient and crop 3D images")
 
 
 class Dcm2niiOutputSpec(TraitedSpec):
@@ -192,13 +206,20 @@ class Dcm2niixInputSpec(CommandLineInputSpec):
                                   copyfile=False, mandatory=True, xor=['source_dir'])
     source_dir = Directory(exists=True, argstr="%s", position=-1, mandatory=True,
                            xor=['source_names'])
-    out_filename = traits.Str('%t%p', argstr="-f %s", usedefault=True)
-    output_dir = Directory(exists=True, argstr='-o %s', genfile=True)
-    bids_format = traits.Bool(True, argstr='-b', usedefault=True)
-    compress = traits.Enum('i', ['y','i','n'], argstr='-z %s', usedefault=True)
-    merge_imgs = traits.Bool(False, argstr='-m', usedefault=True)
-    single_file = traits.Bool(False, argstr='-s', usedefault=True)
-    verbose = traits.Bool(False, argstr='-v', usedefault=True)
+    out_filename = traits.Str('%t%p', argstr="-f %s", usedefault=True,
+                              desc="Output filename")
+    output_dir = Directory(exists=True, argstr='-o %s', genfile=True,
+                           desc="Output directory")
+    bids_format = traits.Bool(True, argstr='-b', usedefault=True,
+                              desc="BIDS sidecar")
+    compress = traits.Enum('i', ['y','i','n'], argstr='-z %s', usedefault=True,
+                           desc="Gzip compress images - [y=pigz, i=internal, n=no]")
+    merge_imgs = traits.Bool(False, argstr='-m', usedefault=True,
+                             desc="merge 2D slices from same series")
+    single_file = traits.Bool(False, argstr='-s', usedefault=True,
+                              desc="Convert only one image")
+    verbose = traits.Bool(False, argstr='-v', usedefault=True,
+                          desc="Verbose output")
 
 
 class Dcm2niixOutputSpec(TraitedSpec):
