@@ -136,7 +136,7 @@ def create_reconall_workflow(name="ReconAll", plugin_args=None):
 
     # check freesurfer version and set parameters
     fs_version_full = Info.version()
-    if 'v6.0' in fs_version_full or 'dev' in fs_version_full:
+    if fs_version_full and 'v6.0' in fs_version_full or 'dev' in fs_version_full:
         # assuming that dev is 6.0
         fsvernum = 6.0
         fs_version = 'v6.0'
@@ -153,7 +153,10 @@ def create_reconall_workflow(name="ReconAll", plugin_args=None):
         if 'v5.3' in fs_version_full:
             fs_version = 'v5.3'
         else:
-            fs_vesion = fs_version_full.split('-')[-1]
+            if fs_version_full:
+                fs_version = fs_version_full.split('-')[-1]
+            else:
+                fs_version = 5.3 # assume version 5.3
             print("Warning: Workflow may not work properly if FREESURFER_HOME " +
                   "environmental variable is not set or if you are using an older " +
                   "version of FreeSurfer")
