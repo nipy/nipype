@@ -7,6 +7,7 @@ from .autorecon3 import create_AutoRecon3
 from ....interfaces.freesurfer import AddXFormToHeader, Info
 from ....interfaces.io import DataSink
 from .utils import getdefaultconfig
+from ....pipeline.engine.base import logger
 
 def create_skullstripped_recon_flow(name="skullstripped_recon_all"):
     """Performs recon-all on voulmes that are already skull stripped.
@@ -164,7 +165,7 @@ def create_reconall_workflow(name="ReconAll", plugin_args=None):
         entorhinal = False
         rb_date = "2008-03-26"
 
-    print("FreeSurfer Version: {0}".format(fs_version))
+    logger.info("FreeSurfer Version: {0}".format(fs_version))
 
     def setconfig(reg_template=None,
                   reg_template_withskull=None,
