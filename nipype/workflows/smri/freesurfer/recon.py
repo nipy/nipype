@@ -84,9 +84,8 @@ def create_reconall_workflow(name="ReconAll", plugin_args=None):
 
     Example
     -------
-    >>> from nipype.workflows.smri.freesurfer import create_skullstripped_recon_flow
-    >>> import nipype.interfaces.freesurfer as fs
-    >>> recon_all = create_skullstripped_recon_flow()
+    >>> from nipype.workflows.smri.freesurfer import create_reconall_workflow
+    >>> recon_all = create_reconall_flow()
     >>> recon_all.inputs.inputspec.subject_id = 'subj1'
     >>> recon_all.inputs.inputspec.subjects_dir = '.'
     >>> recon_all.inputs.inputspec.T1_files = 'T1.nii.gz'
