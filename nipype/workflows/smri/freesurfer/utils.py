@@ -10,6 +10,9 @@ from ....interfaces import utility as niu
 from ....algorithms import misc as misc
 from ....interfaces.utility import Function
 from ....workflows.misc.utils import region_list_from_volume, id_list_from_lookup_table
+import os
+
+
 
 
 def get_aparc_aseg(files):
@@ -371,3 +374,121 @@ def create_tessellation_flow(name='tessellate', out_format='stl'):
             (smoother, outputnode, [("mesh_file", "meshes")]),
         ])
     return tessflow
+
+def copy_files(in_files, out_files):
+    """
+    Create a function to copy a file that can be modified by a following node
+    without changing the original file
+    """
+    import shutil
+    import sys
+    if len(in_files) != len(out_files):
+        print("ERROR: Length of input files must be identical to the length of " +
+              "outrput files to be copied")
+        sys.exit(-1)
+    for i, in_file in enumerate(in_files):
+        out_file = out_files[i]
+        print("copying {0} to {1}".format(in_file, out_file))
+        shutil.copy(in_file, out_file)
+    return out_files
+
+def copy_file(in_file, out_file=None):
+    """
+    Create a function to copy a file that can be modified by a following node
+    without changing the original file.
+    """
+    import os
+    import shutil
+    if out_file == None:
+        out_file = os.path.join(os.getcwd(), os.path.basename(in_file))
+    if type(in_file) is list and len(in_file) == 1:
+        in_file = in_file[0]
+    out_file = os.path.abspath(out_file)
+    in_file = os.path.abspath(in_file)
+    print("copying {0} to {1}".format(in_file, out_file))
+    shutil.copy(in_file, out_file)
+    return out_file
+
+def mkdir_p(path):
+    import errno
+    import os
+    try:
+        os.makedirs(path)
+    except OSError as exc:  # Python >2.5
+        if exc.errno == errno.EEXIST and os.path.isdir(path):
+            pass
+        else:
+            raise
+
+def getdefaultconfig(exitonfail=False, rb_date="2014-08-21"):
+    config = { 'custom_atlas' : None,
+               'cw256' : False,
+               'field_strength' : '1.5T',
+               'fs_home' : checkenv(exitonfail),
+               'longitudinal' : False,
+               'long_base' : None,
+               'openmp' : None,
+               'plugin_args' : None,
+               'qcache' : False,
+               'queue' : None,
+               'recoding_file' : None,
+               'src_subject_id' : 'fsaverage',
+               'th3' : True}
+
+    config['src_subject_dir'] = os.path.join(config['fs_home'], 'subjects',
+                                             config['src_subject_id'])
+    config['awk_file'] = os.path.join(config['fs_home'], 'bin',
+                                      'extract_talairach_avi_QA.awk')
+    config['registration_template'] = os.path.join(config['fs_home'], 'average',
+                                                   'RB_all_{0}.gca'.format(rb_date))
+    config['registration_template_withskull'] = os.path.join(config['fs_home'], 'average',
+                                                             'RB_all_withskull_{0}.gca'.format(rb_date))
+    for hemi in ('lh', 'rh'):
+        config['{0}_atlas'.format(hemi)] = os.path.join(
+            config['fs_home'], 'average',
+            '{0}.average.curvature.filled.buckner40.tif'.format(hemi))
+        config['{0}_classifier'.format(hemi)] = os.path.join(
+            config['fs_home'], 'average',
+            '{0}.curvature.buckner40.filled.desikan_killiany.2010-03-25.gcs'.format(hemi))
+        config['{0}_classifier2'.format(hemi)] = os.path.join(
+            config['fs_home'], 'average',
+            '{0}.destrieux.simple.2009-07-29.gcs'.format(hemi))
+        config['{0}_classifier3'.format(hemi)] = os.path.join(
+            config['fs_home'], 'average',
+            '{0}.DKTatlas40.gcs'.format(hemi))
+    config['LookUpTable'] = os.path.join(config['fs_home'], 'ASegStatsLUT.txt')
+    config['WMLookUpTable'] = os.path.join(config['fs_home'], 'WMParcStatsLUT.txt')
+    config['AvgColorTable'] = os.path.join(config['fs_home'], 'average', 'colortable_BA.txt')
+
+    return config
+
+
+def checkenv(exitonfail=False):
+    """Check for the necessary FS environment variables"""
+    import sys
+    fs_home = os.environ.get('FREESURFER_HOME')
+    path = os.environ.get('PATH')
+    print("FREESURFER_HOME: {0}".format(fs_home))
+    if fs_home == None:
+        msg = "please set FREESURFER_HOME before running the workflow"
+    elif not os.path.isdir(fs_home):
+        msg = "FREESURFER_HOME must be set to a valid directory before running this workflow"
+    elif os.path.join(fs_home, 'bin') not in path.replace('//','/'):
+        print(path)
+        msg = "Could not find necessary executable in path"
+        setupscript = os.path.join(fs_home, 'SetUpFreeSurfer.sh')
+        if os.path.isfile(setupscript):
+            print("Please source the setup script before running the workflow:" +
+                  "\nsource {0}".format(setupscript))
+        else:
+            print("Please ensure that FREESURFER_HOME is set to a valid fs " +
+            "directory and source the necessary SetUpFreeSurfer.sh script before running " +
+            "this workflow")
+    else:
+        return fs_home
+
+    if exitonfail:
+        print("ERROR: " + msg)
+        sys.exit(2)
+    else:
+        print("Warning: " + msg)

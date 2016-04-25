@@ -1156,7 +1156,8 @@ class MapNode(Node):
                 if str2bool(self.config['execution']['stop_on_first_crash']):
                     self._result = node.result
                     raise
-            yield i, node, err
+            finally:
+                yield i, node, err
 
     def _collate_results(self, nodes):
         self._result = InterfaceResult(interface=[], runtime=[],

@@ -283,6 +283,10 @@ pkg_chk('dateutil', DATEUTIL_MIN_VERSION,
 
 
 def main(**extra_args):
+    thispath, _ = os.path.split(__file__)
+    testdatafiles = [pjoin('testing', 'data', val)
+                     for val in os.listdir(pjoin(thispath, 'nipype', 'testing', 'data'))
+                     if not os.path.isdir(pjoin(thispath, 'nipype', 'testing', 'data', val))]
     setup(name=NAME,
           maintainer=MAINTAINER,
           maintainer_email=MAINTAINER_EMAIL,
@@ -335,7 +339,9 @@ def main(**extra_args):
                     'nipype.interfaces.mne',
                     'nipype.interfaces.mne.tests',
                     'nipype.interfaces.mrtrix',
+                    'nipype.interfaces.mrtrix3',
                     'nipype.interfaces.mrtrix.tests',
+                    'nipype.interfaces.mrtrix3.tests',
                     'nipype.interfaces.nipy',
                     'nipype.interfaces.nipy.tests',
                     'nipype.interfaces.nitime',
@@ -422,7 +428,7 @@ def main(**extra_args):
           # python -- duplicating things into MANIFEST.in but this is admittedly
           # only a workaround to get things started -- not a solution
           package_data={'nipype':
-                        [pjoin('testing', 'data', '*'),
+                         testdatafiles + [
                          pjoin('testing', 'data', 'dicomdir', '*'),
                          pjoin('testing', 'data', 'bedpostxout', '*'),
                          pjoin('testing', 'data', 'tbss_dir', '*'),

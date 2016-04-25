@@ -145,8 +145,8 @@ class MultiProcPlugin(DistributedPluginBase):
                 non_daemon = plugin_args['non_daemon']
             if 'n_procs' in self.plugin_args:
                 self.processors = self.plugin_args['n_procs']
-            if 'memory' in self.plugin_args:
-                self.memory = self.plugin_args['memory']
+            if 'memory_gb' in self.plugin_args:
+                self.memory_gb = self.plugin_args['memory_gb']
         # Instantiate different thread pools for non-daemon processes
         if non_daemon:
             # run the execution using the non-daemon pool subclass
@@ -212,11 +212,9 @@ class MultiProcPlugin(DistributedPluginBase):
         free_memory_gb = self.memory_gb - busy_memory_gb
         free_processors = self.processors - busy_processors
 
-
         # Check all jobs without dependency not run
         jobids = np.flatnonzero((self.proc_done == False) & \
                                 (self.depidx.sum(axis=0) == 0).__array__())
-
 
         # Sort jobs ready to run first by memory and then by number of threads
         # The most resource consuming jobs run first

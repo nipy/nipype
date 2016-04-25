@@ -235,6 +235,7 @@ class DistributedPluginBase(PluginBase):
         notrun = []
         while np.any(self.proc_done == False) | \
                 np.any(self.proc_pending == True):
+
             toappend = []
             # trigger callbacks for any pending results
             while self.pending_tasks:
@@ -266,6 +267,7 @@ class DistributedPluginBase(PluginBase):
             else:
                 logger.debug('Not submitting')
             self._wait()
+            
         self._remove_node_dirs()
         report_nodes_not_run(notrun)
 
@@ -368,7 +370,7 @@ class DistributedPluginBase(PluginBase):
                     self.proc_done[jobid] = True
                     self.proc_pending[jobid] = True
                     # Send job to task manager and add to pending tasks
-                    logger.info('Executing: %s ID: %d' %
+                    logger.info('Submitting: %s ID: %d' %
                                 (self.procs[jobid]._id, jobid))
                     if self._status_callback:
                         self._status_callback(self.procs[jobid], 'start')
@@ -410,7 +412,7 @@ class DistributedPluginBase(PluginBase):
                                 self.proc_pending[jobid] = False
                             else:
                                 self.pending_tasks.insert(0, (tid, jobid))
-                    logger.info('Finished executing: %s ID: %d' %
+                    logger.info('Finished submitting: %s ID: %d' %
                                 (self.procs[jobid]._id, jobid))
             else:
                 break
