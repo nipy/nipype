@@ -127,9 +127,9 @@ class RuntimeProfilerTestCase(unittest.TestCase):
 
         # Init parameters
         # Input RAM GB to occupy
-        self.num_gb = 6
+        self.num_gb = 2
         # Input number of sub-threads (not including parent threads)
-        self.num_threads = 7
+        self.num_threads = 4
         # Acceptable percent error for memory profiled against input
         self.mem_err_percent = 5
 
@@ -379,9 +379,8 @@ class RuntimeProfilerTestCase(unittest.TestCase):
         # Get margin of error for RAM GB
         allowed_gb_err = (self.mem_err_percent/100.0)*num_gb
         runtime_gb_err = np.abs(runtime_gb-num_gb)
-        # Runtime threads should reflect shell-cmd thread, Python parent thread
-        # and Python sub-threads = 1 + 1 + num_threads
-        expected_runtime_threads = 1 + 1 + num_threads
+        # 
+        expected_runtime_threads = num_threads
 
         # Error message formatting
         mem_err = 'Input memory: %f is not within %.1f%% of runtime '\
@@ -421,9 +420,8 @@ class RuntimeProfilerTestCase(unittest.TestCase):
         # Get margin of error for RAM GB
         allowed_gb_err = (self.mem_err_percent/100.0)*num_gb
         runtime_gb_err = np.abs(runtime_gb-num_gb)
-        # Runtime threads should reflect Python parent thread
-        # and Python sub-threads = 1 + num_threads
-        expected_runtime_threads = 1 + num_threads
+        # 
+        expected_runtime_threads = num_threads
 
         # Error message formatting
         mem_err = 'Input memory: %f is not within %.1f%% of runtime '\

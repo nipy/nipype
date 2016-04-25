@@ -88,8 +88,8 @@ def find_metrics(nodes, last_node):
     from dateutil.parser import parse
     import datetime
 
-    start = parse(nodes[0]['start'])
-    total_duration = int((parse(last_node['finish']) - start).total_seconds())
+    start = nodes[0]['start']
+    total_duration = int((last_node['finish'] - start).total_seconds())
 
     total_memory = []
     total_threads = []
@@ -106,12 +106,12 @@ def find_metrics(nodes, last_node):
         x = now
 
         for j in range(start_index, len(nodes)):
-            node_start = parse(nodes[j]['start'])
-            node_finish = parse(nodes[j]['finish'])
+            node_start = nodes[j]['start']
+            node_finish = nodes[j]['finish']
 
             if node_start < x and node_finish > x:
-                total_memory[i] += nodes[j]['estimated_memory_gb']
-                total_threads[i] += nodes[j]['num_threads']
+                total_memory[i] += float(nodes[j]['estimated_memory_gb'])
+                total_threads[i] += int(nodes[j]['num_threads'])
                 start_index = j
 
             if node_start > x:
@@ -154,7 +154,8 @@ def test_do_not_use_more_memory_then_specified():
                           'status_callback': log_nodes_cb})
 
 
-    nodes, last_node = draw_gantt_chart.log_to_json(LOG_FILENAME)
+    nodes = draw_gantt_chart.log_to_dict(LOG_FILENAME)
+    last_node = nodes[-1]
     #usage in every second
     memory, threads = find_metrics(nodes, last_node)
 
@@ -210,7 +211,8 @@ def test_do_not_use_more_threads_then_specified():
     pipe.run(plugin='MultiProc', plugin_args={'n_procs': max_threads,
                                               'status_callback': log_nodes_cb})
 
-    nodes, last_node = draw_gantt_chart.log_to_json(LOG_FILENAME)
+    nodes = draw_gantt_chart.log_to_dict(LOG_FILENAME)
+    last_node = nodes[-1]
     #usage in every second
     memory, threads = find_metrics(nodes, last_node)
 
