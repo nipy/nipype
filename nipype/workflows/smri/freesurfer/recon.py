@@ -151,16 +151,17 @@ def create_reconall_workflow(name="ReconAll", plugin_args=None):
     else:
         # 5.3 is default
         fsvernum = 5.3
-        if 'v5.3' in fs_version_full:
-            fs_version = 'v5.3'
-        else:
-            if fs_version_full:
-                fs_version = fs_version_full.split('-')[-1]
+        if fs_version_full:
+            if 'v5.3' in fs_version_full:
+                fs_version = 'v5.3'
             else:
-                fs_version = 5.3 # assume version 5.3
-            print("Warning: Workflow may not work properly if FREESURFER_HOME " +
-                  "environmental variable is not set or if you are using an older " +
-                  "version of FreeSurfer")
+                fs_version = fs_version_full.split('-')[-1]
+                logger.info(("Warning: Workflow may not work properly if "
+                             "FREESURFER_HOME environmental variable is not "
+                             "set or if you are using an older version of "
+                             "FreeSurfer"))
+        else:
+            fs_version = 5.3 # assume version 5.3
         th3 = False
         shrink = None
         distance = 50
