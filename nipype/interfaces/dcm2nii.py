@@ -211,13 +211,13 @@ class Dcm2niixInputSpec(CommandLineInputSpec):
     output_dir = Directory(exists=True, argstr='-o %s', genfile=True,
                            desc="Output directory")
     bids_format = traits.Bool(True, argstr='-b', usedefault=True,
-                              desc="BIDS sidecar")
+                              desc="Create a BIDS sidecar file")
     compress = traits.Enum('i', ['y','i','n'], argstr='-z %s', usedefault=True,
                            desc="Gzip compress images - [y=pigz, i=internal, n=no]")
     merge_imgs = traits.Bool(False, argstr='-m', usedefault=True,
                              desc="merge 2D slices from same series")
     single_file = traits.Bool(False, argstr='-s', usedefault=True,
-                              desc="Convert only one image")
+                              desc="Convert only one image (filename as last input")
     verbose = traits.Bool(False, argstr='-v', usedefault=True,
                           desc="Verbose output")
 
