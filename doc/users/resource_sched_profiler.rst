@@ -60,8 +60,12 @@ It is not always easy to estimate the amount of resources a particular function
 or command uses. To help with this, Nipype provides some feedback about the
 system resources used by every node during workflow execution via the built-in
 runtime profiler. The runtime profiler is automatically enabled if the
-``psutil`` Python package is installed and found on the system. If the package
-is not found, the workflow will run normally without the runtime profiler.
+psutil_ Python package is installed and found on the system.
+
+..	_psutil: https://pythonhosted.org/psutil/
+
+If the package is not found, the workflow will run normally without the runtime
+profiler.
 
 The runtime profiler records the number of threads and the amount of memory (GB)
 used as ``runtime_threads`` and ``runtime_memory_gb`` in the Node's
@@ -121,6 +125,9 @@ Visualizing Pipeline Resources
 Nipype provides the ability to visualize the workflow execution based on the
 runtimes and system resources each node takes. It does this using the log file
 generated from the callback logger after workflow execution - as shown above.
+The pandas_ Python package is required to use this feature.
+
+.. _pandas: http://pandas.pydata.org/
 
 ::
 	from nipype.pipeline.plugins.callback_log import log_nodes_cb
