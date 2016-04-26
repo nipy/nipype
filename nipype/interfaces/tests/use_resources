@@ -21,7 +21,7 @@ def use_gb_ram(num_gb):
 
     # Spin CPU
     ctr = 0
-    while ctr < 10e6:
+    while ctr < 30e6:
         ctr+= 1
 
     # Clear memory

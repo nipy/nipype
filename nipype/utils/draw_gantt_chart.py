@@ -10,7 +10,7 @@ from dateutil import parser
 import datetime
 import random
 from collections import OrderedDict
-# Pandas    
+# Pandas
 try:
     import pandas as pd
 except ImportError:
