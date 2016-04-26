@@ -78,6 +78,7 @@ def use_resources(num_threads, num_gb):
 
     # Import packages
     from threading import Thread
+    from multiprocessing import Process
 
     # Init variables
     num_gb = float(num_gb)
@@ -85,11 +86,13 @@ def use_resources(num_threads, num_gb):
     # Build thread list
     thread_list = []
     for idx in range(num_threads):
-        thread = Thread(target=_use_gb_ram, args=(num_gb/num_threads,), name=str(idx))
+        thread = Thread(target=_use_gb_ram, args=(num_gb/num_threads,),
+                        name=str(idx))
         thread_list.append(thread)
 
     # Run multi-threaded
-    print 'Using %.3f GB of memory over %d sub-threads...' % (num_gb, num_threads)
+    print('Using %.3f GB of memory over %d sub-threads...' % \
+          (num_gb, num_threads))
     for idx, thread in enumerate(thread_list):
         thread.start()
 
@@ -127,11 +130,11 @@ class RuntimeProfilerTestCase(unittest.TestCase):
 
         # Init parameters
         # Input RAM GB to occupy
-        self.num_gb = 2
+        self.num_gb = 4
         # Input number of sub-threads (not including parent threads)
         self.num_threads = 4
         # Acceptable percent error for memory profiled against input
-        self.mem_err_percent = 5
+        self.mem_err_percent = 10
 
     # ! Only used for benchmarking the profiler over a range of
     # ! RAM usage and number of threads

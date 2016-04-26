@@ -117,7 +117,12 @@ Here it can be seen that the number of threads was underestimated while the
 amount of memory needed was overestimated. The next time this workflow is run
 the user can change the node interface ``num_threads`` and
 ``estimated_memory_gb`` parameters to reflect this for a higher pipeline
-throughput.
+throughput. Note, sometimes the "runtime_threads" value is higher than expected,
+particularly for multi-threaded applications. Tools can implement
+multi-threading in different ways under-the-hood; the profiler merely traverses
+the process tree to return all running threads associated with that process,
+some of which may include active thread-monitoring daemons or transient
+processes.
 
 
 Visualizing Pipeline Resources

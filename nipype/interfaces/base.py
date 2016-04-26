@@ -1216,16 +1216,34 @@ def _get_num_threads(proc):
     # If process is running
     if proc.status() == psutil.STATUS_RUNNING:
         num_threads = proc.num_threads()
+    elif proc.num_threads() > 1:
+        tprocs = [psutil.Process(thr.id) for thr in proc.threads()]
+        alive_tprocs = [tproc for tproc in tprocs if tproc.status() == psutil.STATUS_RUNNING]
+        num_threads = len(alive_tprocs)
     else:
-        num_threads = 0
+        num_threads = 1
 
     # Try-block for errors
     try:
         child_threads = 0
         # Iterate through child processes and get number of their threads
         for child in proc.children(recursive=True):
-            if child.status() == psutil.STATUS_RUNNING and len(child.children()) == 0:
-                child_threads += child.num_threads()
+            # Leaf process
+            if len(child.children()) == 0:
+                # If process is running, get its number of threads
+                if child.status() == psutil.STATUS_RUNNING:
+                    child_thr = child.num_threads()
+                # If its not necessarily running, but still multi-threaded
+                elif child.num_threads() > 1:
+                    # Cast each thread as a process and check for only running
+                    tprocs = [psutil.Process(thr.id) for thr in child.threads()]
+                    alive_tprocs = [tproc for tproc in tprocs if tproc.status() == psutil.STATUS_RUNNING]
+                    child_thr = len(alive_tprocs)
+                # Otherwise, no threads are running
+                else:
+                    child_thr = 0
+                # Increment child threads
+                child_threads += child_thr
     # Catch any NoSuchProcess errors
     except psutil.NoSuchProcess:
         pass

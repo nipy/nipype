@@ -9,9 +9,14 @@ import json
 from dateutil import parser
 import datetime
 import random
-import pandas as pd
 from collections import OrderedDict
-
+# Pandas    
+try:
+    import pandas as pd
+except ImportError:
+    print('Pandas not found; in order for full functionality of this module '\
+          'install the pandas package')
+    pass
 
 def create_event_dict(start_time, nodes_list):
     '''
