@@ -1,4 +1,4 @@
-from nipype.interfaces.utility import IdentityInterface, Merge
+from nipype.interfaces.utility import IdentityInterface, Merge, Function
 import nipype.pipeline.engine as pe  # pypeline engine
 from nipype.interfaces.freesurfer import *
 from .ba_maps import create_ba_maps_wf

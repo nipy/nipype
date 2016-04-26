@@ -7,6 +7,7 @@ from .autorecon3 import create_AutoRecon3
 from ....interfaces.freesurfer import AddXFormToHeader, Info
 from ....interfaces.io import DataSink
 from .utils import getdefaultconfig
+from ....pipeline.engine.base import logger
 
 def create_skullstripped_recon_flow(name="skullstripped_recon_all"):
     """Performs recon-all on voulmes that are already skull stripped.
@@ -84,9 +85,8 @@ def create_reconall_workflow(name="ReconAll", plugin_args=None):
 
     Example
     -------
-    >>> from nipype.workflows.smri.freesurfer import create_skullstripped_recon_flow
-    >>> import nipype.interfaces.freesurfer as fs
-    >>> recon_all = create_skullstripped_recon_flow()
+    >>> from nipype.workflows.smri.freesurfer import create_reconall_workflow
+    >>> recon_all = create_reconall_workflow()
     >>> recon_all.inputs.inputspec.subject_id = 'subj1'
     >>> recon_all.inputs.inputspec.subjects_dir = '.'
     >>> recon_all.inputs.inputspec.T1_files = 'T1.nii.gz'
@@ -105,6 +105,17 @@ def create_reconall_workflow(name="ReconAll", plugin_args=None):
     Outpus::
            postdatasink_outputspec.subject_id : name of the datasinked output folder in the subjects directory
 
+    Note:
+    The input subject_id is not passed to the commands in the workflow. Commands
+    that require subject_id are reading implicit inputs from 
+    {SUBJECTS_DIR}/{subject_id}. For those commands the subject_id is set to the
+    default value and SUBJECTS_DIR is set to the node directory. The implicit
+    inputs are then copied to the node directory in order to mimic a SUBJECTS_DIR
+    structure. For example, if the command implicitly reads in brainmask.mgz, the
+    interface would copy that input file to 
+    {node_dir}/{subject_id}/mri/brainmask.mgz and set SUBJECTS_DIR to node_dir. 
+    The workflow only uses the input subject_id to datasink the outputs to 
+    {subjects_dir}/{subject_id}.
     """
     reconall = pe.Workflow(name=name)
 
@@ -136,7 +147,8 @@ def create_reconall_workflow(name="ReconAll", plugin_args=None):
 
     # check freesurfer version and set parameters
     fs_version_full = Info.version()
-    if 'v6.0' in fs_version_full or 'dev' in fs_version_full:
+    if fs_version_full and ('v6.0' in fs_version_full or
+                                    'dev' in fs_version_full):
         # assuming that dev is 6.0
         fsvernum = 6.0
         fs_version = 'v6.0'
@@ -150,13 +162,17 @@ def create_reconall_workflow(name="ReconAll", plugin_args=None):
     else:
         # 5.3 is default
         fsvernum = 5.3
-        if 'v5.3' in fs_version_full:
-            fs_version = 'v5.3'
+        if fs_version_full:
+            if 'v5.3' in fs_version_full:
+                fs_version = 'v5.3'
+            else:
+                fs_version = fs_version_full.split('-')[-1]
+                logger.info(("Warning: Workflow may not work properly if "
+                             "FREESURFER_HOME environmental variable is not "
+                             "set or if you are using an older version of "
+                             "FreeSurfer"))
         else:
-            fs_vesion = fs_version_full.split('-')[-1]
-            print("Warning: Workflow may not work properly if FREESURFER_HOME " +
-                  "environmental variable is not set or if you are using an older " +
-                  "version of FreeSurfer")
+            fs_version = 5.3 # assume version 5.3
         th3 = False
         shrink = None
         distance = 50
@@ -165,7 +181,7 @@ def create_reconall_workflow(name="ReconAll", plugin_args=None):
         entorhinal = False
         rb_date = "2008-03-26"
 
-    print("FreeSurfer Version: {0}".format(fs_version))
+    logger.info("FreeSurfer Version: {0}".format(fs_version))
 
     def setconfig(reg_template=None,
                   reg_template_withskull=None,

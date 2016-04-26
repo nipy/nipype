@@ -20,7 +20,6 @@ def test_Sphere_inputs():
     in_smoothwm=dict(copyfile=True,
     ),
     magic=dict(argstr='-q',
-    requires=['in_smoothwm'],
     ),
     num_threads=dict(),
     out_file=dict(argstr='%s',
