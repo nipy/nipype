@@ -2627,7 +2627,7 @@ class FWHMxInputSpec(CommandLineInputSpec):
              'is not given, the program picks q=NT/30. -detrend disables -demed, and includes '
              '-unif.')
     demed = traits.Bool(
-        False, argstr='-demed', xorg=['detrend'],
+        False, argstr='-demed', xor=['detrend'],
         desc='If the input dataset has more than one sub-brick (e.g., has a time axis), then '
              'subtract the median of each voxel\'s time series before processing FWHM. This will '
              'tend to remove intrinsic spatial structure and leave behind the noise.')

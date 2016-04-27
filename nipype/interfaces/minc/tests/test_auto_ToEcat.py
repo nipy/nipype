@@ -34,7 +34,6 @@ def test_ToEcat_inputs():
     genfile=True,
     hash_files=False,
     keep_extension=False,
-    mandatory=False,
     name_source=['input_file'],
     name_template='%s_to_ecat.v',
     position=-1,

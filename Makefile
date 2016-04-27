@@ -66,7 +66,7 @@ test: clean test-code
 
 html:
 	@echo "building docs"
-	make -C doc clean html
+	make -C doc clean htmlonly
 
 specs:
 	@echo "Checking specs and autogenerating spec tests"

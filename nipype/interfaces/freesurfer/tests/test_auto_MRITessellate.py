@@ -20,7 +20,7 @@ def test_MRITessellate_inputs():
     mandatory=True,
     position=-2,
     ),
-    out_file=dict(argstr='./%s',
+    out_file=dict(argstr='%s',
     genfile=True,
     position=-1,
     ),

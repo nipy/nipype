@@ -79,7 +79,6 @@ def test_Math_inputs():
     ignore_nan=dict(argstr='-ignore_nan',
     ),
     input_files=dict(argstr='%s',
-    exists=True,
     mandatory=True,
     position=-2,
     sep=' ',
