@@ -88,7 +88,7 @@ Execution
 	When the DataSink is used to produce an orginized output file outside
 	of nipypes internal cache structure, a file system hard link will be
 	attempted first. A hard link allow multiple file paths to point to the
-	same physical storage location on disk if the condisions allow. By
+	same physical storage location on disk if the conditions allow. By
 	refering to the same physical file on disk (instead of copying files
 	byte-by-byte) we can avoid unnecessary data duplication.  If hard links
 	are not supported for the source or destination paths specified, then

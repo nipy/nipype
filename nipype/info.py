@@ -10,7 +10,7 @@ docs.  In setup.py in particular, we exec this file, so it cannot import nipy
 _version_major = 0
 _version_minor = 12
 _version_micro = 0
-_version_extra = '-dev'  # Remove -dev for release
+_version_extra = '-rc1'  # Remove -dev for release
 
 
 def get_nipype_gitversion():
@@ -61,6 +61,7 @@ CLASSIFIERS = ["Development Status :: 5 - Production/Stable",
                "Operating System :: POSIX :: Linux",
                "Programming Language :: Python :: 2.7",
                "Programming Language :: Python :: 3.4",
+               "Programming Language :: Python :: 3.5",
                "Topic :: Scientific/Engineering"]
 
 description = 'Neuroimaging in Python: Pipelines and Interfaces'

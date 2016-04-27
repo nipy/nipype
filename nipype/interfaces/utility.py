@@ -76,12 +76,7 @@ class IdentityInterface(IOBase):
         self.inputs.set(**inputs)
 
     def _add_output_traits(self, base):
-        undefined_traits = {}
-        for key in self._fields:
-            base.add_trait(key, traits.Any)
-            undefined_traits[key] = Undefined
-        base.trait_set(trait_change_notify=False, **undefined_traits)
-        return base
+        return add_traits(base, self._fields)
 
     def _list_outputs(self):
         # manual mandatory inputs check
