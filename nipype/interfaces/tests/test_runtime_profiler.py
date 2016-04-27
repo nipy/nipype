@@ -86,7 +86,7 @@ def use_resources(num_threads, num_gb):
     # Build thread list
     thread_list = []
     for idx in range(num_threads):
-        thread = Process(target=_use_gb_ram, args=(num_gb/num_threads,),
+        thread = Thread(target=_use_gb_ram, args=(num_gb/num_threads,),
                         name=str(idx))
         thread_list.append(thread)
 
@@ -130,11 +130,11 @@ class RuntimeProfilerTestCase(unittest.TestCase):
 
         # Init parameters
         # Input RAM GB to occupy
-        self.num_gb = 1.0
+        self.num_gb = 0.5
         # Input number of sub-threads (not including parent threads)
         self.num_threads = 2
         # Acceptable percent error for memory profiled against input
-        self.mem_err_percent = 25
+        self.mem_err_gb = 0.25
 
     # ! Only used for benchmarking the profiler over a range of
     # ! RAM usage and number of threads
@@ -380,14 +380,14 @@ class RuntimeProfilerTestCase(unittest.TestCase):
         runtime_threads = int(node_stats['runtime_threads'])
 
         # Get margin of error for RAM GB
-        allowed_gb_err = (self.mem_err_percent/100.0)*num_gb
+        allowed_gb_err = self.mem_err_gb
         runtime_gb_err = np.abs(runtime_gb-num_gb)
         # 
         expected_runtime_threads = num_threads
 
         # Error message formatting
-        mem_err = 'Input memory: %f is not within %.1f%% of runtime '\
-                  'memory: %f' % (num_gb, self.mem_err_percent, runtime_gb)
+        mem_err = 'Input memory: %f is not within %.3f GB of runtime '\
+                  'memory: %f' % (num_gb, self.mem_err_gb, runtime_gb)
         threads_err = 'Input threads: %d is not equal to runtime threads: %d' \
                     % (expected_runtime_threads, runtime_threads)
 
@@ -421,14 +421,14 @@ class RuntimeProfilerTestCase(unittest.TestCase):
         runtime_threads = int(node_stats['runtime_threads'])
 
         # Get margin of error for RAM GB
-        allowed_gb_err = (self.mem_err_percent/100.0)*num_gb
+        allowed_gb_err = self.mem_err_gb
         runtime_gb_err = np.abs(runtime_gb-num_gb)
         # 
         expected_runtime_threads = num_threads
 
         # Error message formatting
-        mem_err = 'Input memory: %f is not within %.1f%% of runtime '\
-                  'memory: %f' % (num_gb, self.mem_err_percent, runtime_gb)
+        mem_err = 'Input memory: %f is not within %.3f GB of runtime '\
+                  'memory: %f' % (num_gb, self.mem_err_gb, runtime_gb)
         threads_err = 'Input threads: %d is not equal to runtime threads: %d' \
                     % (expected_runtime_threads, runtime_threads)
 

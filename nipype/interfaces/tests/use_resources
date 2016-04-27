@@ -56,7 +56,7 @@ if __name__ == '__main__':
     # Build thread list
     thread_list = []
     for idx in range(num_threads):
-        thread_list.append(Process(target=use_gb_ram, args=(num_gb/num_threads,)))
+        thread_list.append(Thread(target=use_gb_ram, args=(num_gb/num_threads,)))
 
     # Run multi-threaded
     print('Using %.3f GB of memory over %d sub-threads...' % \
