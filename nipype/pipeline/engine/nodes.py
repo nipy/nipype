@@ -744,7 +744,7 @@ class Node(EngineBase):
             try:
                 rst_dict['runtime_memory_gb'] = self.result.runtime.runtime_memory_gb
                 rst_dict['runtime_threads'] = self.result.runtime.runtime_threads
-            except:
+            except AttributeError:
                 logger.info('Runtime memory and threads stats unavailable')
             if hasattr(self.result.runtime, 'cmdline'):
                 rst_dict['command'] = self.result.runtime.cmdline
