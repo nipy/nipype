@@ -41,8 +41,7 @@ sys.path.append(os.path.abspath('sphinxext'))
 
 # Add any Sphinx extension module names here, as strings. They can be extensions
 # coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
-extensions = ['readthedocs_ext.readthedocs',
-              'sphinx.ext.todo',
+extensions = ['sphinx.ext.todo',
               'sphinx.ext.pngmath',
               'sphinx.ext.inheritance_diagram',
               'sphinx.ext.graphviz',
@@ -56,6 +55,9 @@ extensions = ['readthedocs_ext.readthedocs',
               #'IPython.sphinxext.ipython_directive',
               #'IPython.sphinxext.ipython_console_highlighting'
               ]
+on_rtd = os.environ.get('READTHEDOCS') == 'True'
+if on_rtd:
+    extensions.append('readthedocs_ext.readthedocs')
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']

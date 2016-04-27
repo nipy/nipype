@@ -107,14 +107,14 @@ def create_reconall_workflow(name="ReconAll", plugin_args=None):
 
     Note:
     The input subject_id is not passed to the commands in the workflow. Commands
-    that require subject_id are reading implicit inputs from 
+    that require subject_id are reading implicit inputs from
     {SUBJECTS_DIR}/{subject_id}. For those commands the subject_id is set to the
     default value and SUBJECTS_DIR is set to the node directory. The implicit
     inputs are then copied to the node directory in order to mimic a SUBJECTS_DIR
     structure. For example, if the command implicitly reads in brainmask.mgz, the
-    interface would copy that input file to 
-    {node_dir}/{subject_id}/mri/brainmask.mgz and set SUBJECTS_DIR to node_dir. 
-    The workflow only uses the input subject_id to datasink the outputs to 
+    interface would copy that input file to
+    {node_dir}/{subject_id}/mri/brainmask.mgz and set SUBJECTS_DIR to node_dir.
+    The workflow only uses the input subject_id to datasink the outputs to
     {subjects_dir}/{subject_id}.
     """
     reconall = pe.Workflow(name=name)
