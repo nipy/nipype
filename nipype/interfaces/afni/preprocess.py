@@ -567,8 +567,8 @@ class DegreeCentrality(AFNICommand):
     ========
 
     >>> from nipype.interfaces import afni as afni
-    >>> degree = afni.DegreeCentrality()
-    >>> degree.inputs.in_file = 'func_preproc.nii'
+    >>> degree = afni.DegreeCentrality()           
+    >>> degree.inputs.in_file = 'functional.nii'
     >>> degree.inputs.mask = 'mask.nii'
     >>> degree.inputs.sparsity = 1 # keep the top one percent of connections
     >>> degree.inputs.out_file = 'out.nii'
@@ -656,7 +656,7 @@ class ECM(AFNICommand):
 
     >>> from nipype.interfaces import afni as afni
     >>> ecm = afni.ECM()
-    >>> ecm.inputs.in_file = 'func_preproc.nii'
+    >>> ecm.inputs.in_file = 'functional.nii'
     >>> ecm.inputs.mask = 'mask.nii'
     >>> ecm.inputs.sparsity = 0.1 # keep top 0.1% of connections
     >>> ecm.inputs.out_file = 'out.nii'
@@ -694,7 +694,7 @@ class LFCD(AFNICommand):
 
     >>> from nipype.interfaces import afni as afni
     >>> lfcd = afni.LFCD()
-    >>> lfcd.inputs.in_file = 'func_preproc.nii'
+    >>> lfcd.inputs.in_file = 'functional.nii'
     >>> lfcd.inputs.mask = 'mask.nii'
     >>> lfcd.inputs.thresh = 0.8 # keep all connections with corr >= 0.8
     >>> lfcd.inputs.out_file = 'out.nii'
