@@ -21,3 +21,7 @@ nipype/testing/data/von_errmap.nii.gz
 crash*.pklz
 .coverage
 htmlcov/
+__pycache__/
+*~
+.ipynb_checkpoints/
+.ruby-version

@@ -1668,7 +1668,6 @@ class SphereInputSpec(FSTraitedSpecOpenMP):
     seed = traits.Int(argstr="-seed %d",
                       desc="Seed for setting random number generator")
     magic = traits.Bool(argstr="-q",
-                        requires=['in_smoothwm'],
                         desc="No documentation. Direct questions to analysis-bugs@nmr.mgh.harvard.edu")
     in_smoothwm = File( exists=True, copyfile=True,
                        desc="Input surface required when -q flag is not selected")
