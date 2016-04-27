@@ -754,8 +754,6 @@ class BaseInterface(Interface):
             raise Exception('No input_spec in class: %s' %
                             self.__class__.__name__)
         self.inputs = self.input_spec(**inputs)
-        self.estimated_memory = 1
-        self.num_threads = 1
 
     @classmethod
     def help(cls, returnhelp=False):
@@ -1194,69 +1192,14 @@ class Stream(object):
         self._lastidx = len(self._rows)
 
 
-# Get number of threads for process
-def _get_num_threads(proc):
-    '''
-    '''
-
-    # Import packages
-    import psutil
-    import logging as lg
-
-    # Init variables
-    num_threads = proc.num_threads()
-    try:
-        num_children = len(proc.children())
-        for child in proc.children():
-            num_threads = max(num_threads, num_children,
-                              child.num_threads(), len(child.children()))
-    except psutil.NoSuchProcess:
-        pass
-
-    return num_threads
-
-
-# Get max resources used for process
-def _get_max_resources_used(proc, mem_mb, num_threads, poll=False):
-    '''
-    docstring
-    '''
-
-    # Import packages
-    from memory_profiler import _get_memory
-    import psutil
-
-    try:
-        mem_mb = max(mem_mb, _get_memory(proc.pid, include_children=True))
-        num_threads = max(num_threads, _get_num_threads(psutil.Process(proc.pid)))
-        if poll:
-            proc.poll()
-    except Exception as exc:
-        iflogger.info('Could not get resources used by process. Error: %s'\
-                      % exc)
-
-    # Return resources
-    return mem_mb, num_threads
-
-
 def run_command(runtime, output=None, timeout=0.01, redirect_x=False):
     """Run a command, read stdout and stderr, prefix with timestamp.
 
     The returned runtime contains a merged stdout+stderr log with timestamps
     """
-
-    # Import packages
-    try:
-        import memory_profiler
-        import psutil
-        mem_prof = True
-    except:
-        mem_prof = False
-
-    # Init variables
     PIPE = subprocess.PIPE
-    cmdline = runtime.cmdline
 
+    cmdline = runtime.cmdline
     if redirect_x:
         exist_xvfb, _ = _exists_in_path('xvfb-run', runtime.environ)
         if not exist_xvfb:
@@ -1288,12 +1231,6 @@ def run_command(runtime, output=None, timeout=0.01, redirect_x=False):
     result = {}
     errfile = os.path.join(runtime.cwd, 'stderr.nipype')
     outfile = os.path.join(runtime.cwd, 'stdout.nipype')
-
-    # Init variables for memory profiling
-    mem_mb = -1
-    num_threads = -1
-    interval = 1
-
     if output == 'stream':
         streams = [Stream('stdout', proc.stdout), Stream('stderr', proc.stderr)]
 
@@ -1309,10 +1246,8 @@ def run_command(runtime, output=None, timeout=0.01, redirect_x=False):
             else:
                 for stream in res[0]:
                     stream.read(drain)
+
         while proc.returncode is None:
-            if mem_prof:
-                mem_mb, num_threads = \
-                    _get_max_resources_used(proc, mem_mb, num_threads)
             proc.poll()
             _process()
         _process(drain=1)
@@ -1326,12 +1261,7 @@ def run_command(runtime, output=None, timeout=0.01, redirect_x=False):
             result[stream._name] = [r[2] for r in rows]
         temp.sort()
         result['merged'] = [r[1] for r in temp]
-
     if output == 'allatonce':
-        if mem_prof:
-            while proc.returncode is None:
-                mem_mb, num_threads = \
-                    _get_max_resources_used(proc, mem_mb, num_threads, poll=True)
         stdout, stderr = proc.communicate()
         stdout = stdout.decode(default_encoding)
         stderr = stderr.decode(default_encoding)
@@ -1339,10 +1269,6 @@ def run_command(runtime, output=None, timeout=0.01, redirect_x=False):
         result['stderr'] = stderr.split('\n')
         result['merged'] = ''
     if output == 'file':
-        if mem_prof:
-            while proc.returncode is None:
-                mem_mb, num_threads = \
-                    _get_max_resources_used(proc, mem_mb, num_threads, poll=True)
         ret_code = proc.wait()
         stderr.flush()
         stdout.flush()
@@ -1350,17 +1276,10 @@ def run_command(runtime, output=None, timeout=0.01, redirect_x=False):
         result['stderr'] = [line.decode(default_encoding).strip() for line in open(errfile, 'rb').readlines()]
         result['merged'] = ''
     if output == 'none':
-        if mem_prof:
-            while proc.returncode is None:
-                mem_mb, num_threads = \
-                    _get_max_resources_used(proc, mem_mb, num_threads, poll=True)
         proc.communicate()
         result['stdout'] = []
         result['stderr'] = []
         result['merged'] = ''
-
-    setattr(runtime, 'runtime_memory', mem_mb/1024.0)
-    setattr(runtime, 'runtime_threads', num_threads)
     runtime.stderr = '\n'.join(result['stderr'])
     runtime.stdout = '\n'.join(result['stdout'])
     runtime.merged = result['merged']

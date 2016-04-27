@@ -12,7 +12,7 @@ logger = logging.getLogger('interface')
 # -Using -1 gives primary responsibilty to ITKv4 to do the correct
 #  thread limitings.
 # -Using 1 takes a very conservative approach to avoid overloading
-#  the computer (when running ResourceMultiProc) by forcing everything to
+#  the computer (when running MultiProc) by forcing everything to
 #  single threaded.  This can be a severe penalty for registration
 #  performance.
 LOCAL_DEFAULT_NUMBER_OF_THREADS = 1
