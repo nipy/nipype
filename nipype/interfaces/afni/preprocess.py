@@ -573,7 +573,7 @@ class DegreeCentrality(AFNICommand):
     >>> degree.inputs.sparsity = 1 # keep the top one percent of connections
     >>> degree.inputs.out_file = 'out.nii'
     >>> degree.cmdline
-    '3dDegreeCentrality -sparsity 1 -mask mask.nii -prefix out.nii func_preproc.nii'
+    '3dDegreeCentrality -mask mask.nii -prefix out.nii -sparsity 1.000000 functional.nii'
     >>> res = degree.run() # doctest: +SKIP
     """
 
@@ -661,7 +661,7 @@ class ECM(AFNICommand):
     >>> ecm.inputs.sparsity = 0.1 # keep top 0.1% of connections
     >>> ecm.inputs.out_file = 'out.nii'
     >>> ecm.cmdline
-    '3dECM -sparsity 0.1 -mask mask.nii -prefix out.nii func_preproc.nii'
+    '3dECM -mask mask.nii -prefix out.nii -sparsity 0.100000 functional.nii'
     >>> res = ecm.run() # doctest: +SKIP
     """
 
@@ -699,7 +699,7 @@ class LFCD(AFNICommand):
     >>> lfcd.inputs.thresh = 0.8 # keep all connections with corr >= 0.8
     >>> lfcd.inputs.out_file = 'out.nii'
     >>> lfcd.cmdline
-    '3dLFCD -thresh 0.8 -mask mask.nii -prefix out.nii func_preproc.nii'
+    '3dLFCD -mask mask.nii -prefix out.nii -thresh 0.800000 functional.nii'
     >>> res = lfcd.run() # doctest: +SKIP
     """
 
