@@ -16,6 +16,7 @@ thread and memory usage: ``num_threads`` and ``estimated_memory_gb``. If a
 particular node is expected to use 8 threads and 2 GB of memory:
 
 ::
+
 	import nipype.pipeline.engine as pe
 	node = pe.Node()
 	node.interface.num_threads = 8
@@ -34,6 +35,7 @@ the workflow. The plugin utilizes the plugin arguments ``n_procs`` and
 workflow to using 4 cores and 6 GB of RAM:
 
 ::
+
 	args_dict = {'n_procs' : 4, 'memory_gb' : 6}
 	workflow.run(plugin='MultiProc', plugin_args=args_dict)
 
@@ -79,14 +81,15 @@ by setting the ``status_callback`` parameter to point to this function in the
 ``plugin_args`` when using the ``MultiProc`` plugin.
 
 ::
+
 	from nipype.pipeline.plugins.callback_log import log_nodes_cb
-	args_dict = {'n_procs' : 4, 'memory_gb' : 6,
-	             'status_callback' : log_nodes_cb}
+	args_dict = {'n_procs' : 4, 'memory_gb' : 6, 'status_callback' : log_nodes_cb}
 
 To set the filepath for the callback log the ``'callback'`` logger must be
 configured.
 
 ::
+
 	# Set path to log file
 	import logging
 	callback_log_path = '/home/user/run_stats.log'
@@ -98,6 +101,7 @@ configured.
 Finally, the workflow can be run.
 
 ::
+
 	workflow.run(plugin='MultiProc', plugin_args=args_dict)
 
 After the workflow finishes executing, the log file at
@@ -105,6 +109,7 @@ After the workflow finishes executing, the log file at
 example of what the contents would look like:
 
 ::
+
 	{"name":"resample_node","id":"resample_node",
 	 "start":"2016-03-11 21:43:41.682258",
 	 "estimated_memory_gb":2,"num_threads":1}
@@ -135,16 +140,16 @@ The pandas_ Python package is required to use this feature.
 .. _pandas: http://pandas.pydata.org/
 
 ::
+
 	from nipype.pipeline.plugins.callback_log import log_nodes_cb
-	args_dict = {'n_procs' : 4, 'memory_gb' : 6,
-	             'status_callback' : log_nodes_cb}
+	args_dict = {'n_procs' : 4, 'memory_gb' : 6, 'status_callback' : log_nodes_cb}
 	workflow.run(plugin='MultiProc', plugin_args=args_dict)
 	
 	# ...workflow finishes and writes callback log to '/home/user/run_stats.log'
 	
 	from nipype.utils.draw_gantt_chart import generate_gantt_chart
 	generate_gantt_chart('/home/user/run_stats.log', cores=4)
-    # ...creates gantt chart in '/home/user/run_stats.log.html'
+	# ...creates gantt chart in '/home/user/run_stats.log.html'
 
 The `generate_gantt_chart`` function will create an html file that can be viewed
 in a browser. Below is an example of the gantt chart displayed in a web browser.
