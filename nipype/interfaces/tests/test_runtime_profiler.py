@@ -130,7 +130,7 @@ class RuntimeProfilerTestCase(unittest.TestCase):
 
         # Init parameters
         # Input RAM GB to occupy
-        self.num_gb = 0.5
+        self.num_gb = 1.0
         # Input number of sub-threads (not including parent threads)
         self.num_threads = 2
         # Acceptable percent error for memory profiled against input

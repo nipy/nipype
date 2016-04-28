@@ -32,11 +32,11 @@ The ``MultiProc`` workflow plugin schedules node execution based on the
 resources used by the current running nodes and the total resources available to
 the workflow. The plugin utilizes the plugin arguments ``n_procs`` and
 ``memory_gb`` to set the maximum resources a workflow can utilize. To limit a
-workflow to using 4 cores and 6 GB of RAM:
+workflow to using 8 cores and 10 GB of RAM:
 
 ::
 
-	args_dict = {'n_procs' : 4, 'memory_gb' : 6}
+	args_dict = {'n_procs' : 8, 'memory_gb' : 10}
 	workflow.run(plugin='MultiProc', plugin_args=args_dict)
 
 If these values are not specifically set then the plugin will assume it can
@@ -46,9 +46,9 @@ for ``n_procs`` and ``memory_gb``, respectively.
 
 The plugin will then queue eligible nodes for execution based on their expected
 usage via the ``num_threads`` and ``estimated_memory_gb`` interface parameters.
-If the plugin sees that only 3 of its 4 processors and 4 GB of its 6 GB of RAM
+If the plugin sees that only 3 of its 8 processors and 4 GB of its 10 GB of RAM
 are being used by running nodes, it will attempt to execute the next available
-node as long as its ``num_threads = 1`` and ``estimated_memory_gb  <= 2``. If
+node as long as its ``num_threads <= 5`` and ``estimated_memory_gb  <= 6``. If
 this is not the case, it will continue to check every available node in the
 queue until it sees a node that meets these conditions, or it waits for an
 executing node to finish to earn back the necessary resources. The priority of
@@ -83,7 +83,7 @@ by setting the ``status_callback`` parameter to point to this function in the
 ::
 
 	from nipype.pipeline.plugins.callback_log import log_nodes_cb
-	args_dict = {'n_procs' : 4, 'memory_gb' : 6, 'status_callback' : log_nodes_cb}
+	args_dict = {'n_procs' : 8, 'memory_gb' : 10, 'status_callback' : log_nodes_cb}
 
 To set the filepath for the callback log the ``'callback'`` logger must be
 configured.
@@ -142,13 +142,13 @@ The pandas_ Python package is required to use this feature.
 ::
 
 	from nipype.pipeline.plugins.callback_log import log_nodes_cb
-	args_dict = {'n_procs' : 4, 'memory_gb' : 6, 'status_callback' : log_nodes_cb}
+	args_dict = {'n_procs' : 8, 'memory_gb' : 10, 'status_callback' : log_nodes_cb}
 	workflow.run(plugin='MultiProc', plugin_args=args_dict)
 	
 	# ...workflow finishes and writes callback log to '/home/user/run_stats.log'
 	
 	from nipype.utils.draw_gantt_chart import generate_gantt_chart
-	generate_gantt_chart('/home/user/run_stats.log', cores=4)
+	generate_gantt_chart('/home/user/run_stats.log', cores=8)
 	# ...creates gantt chart in '/home/user/run_stats.log.html'
 
 The `generate_gantt_chart`` function will create an html file that can be viewed
