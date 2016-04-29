@@ -124,8 +124,8 @@ class MultiProcPlugin(DistributedPluginBase):
     Currently supported options are:
 
     - non_daemon : boolean flag to execute as non-daemon processes
-    - num_threads: maximum number of threads to be executed in parallel
-    - estimated_memory_gb: maximum memory (in GB) that can be used at once.
+    - n_procs: maximum number of threads to be executed in parallel
+    - memory_gb: maximum memory (in GB) that can be used at once.
 
     """
 
@@ -180,11 +180,8 @@ class MultiProcPlugin(DistributedPluginBase):
 
     def _submit_job(self, node, updatehash=False):
         self._taskid += 1
-        try:
-            if node.inputs.terminal_output == 'stream':
-                node.inputs.terminal_output = 'allatonce'
-        except:
-            pass
+        if node.inputs.terminal_output == 'stream':
+            node.inputs.terminal_output = 'allatonce'
 
         self._taskresult[self._taskid] = \
             self.pool.apply_async(run_node,
@@ -282,8 +279,10 @@ class MultiProcPlugin(DistributedPluginBase):
                                  % self.procs[jobid])
                     try:
                         self.procs[jobid].run()
-                    except Exception:
-                        self._clean_queue(jobid, graph)
+                    except:
+                        etype, eval, etr = sys.exc_info()
+                        formatted_exc = format_exception(etype, eval, etr)
+                        logger.debug('Traceback:\n%s' % '\n'.join(formatted_exc))
                     self._task_finished_cb(jobid)
                     self._remove_node_dirs()
 

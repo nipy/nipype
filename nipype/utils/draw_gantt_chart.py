@@ -43,22 +43,10 @@ def create_event_dict(start_time, nodes_list):
     events = {}
     for node in nodes_list:
         # Format node fields
-        try:
-            estimated_threads = float(node['num_threads'])
-        except:
-            estimated_threads = 1
-        try:
-            estimated_memory_gb = float(node['estimated_memory_gb'])
-        except:
-            estimated_memory_gb = 1.0
-        try:
-            runtime_threads = float(node['runtime_threads'])
-        except:
-            runtime_threads = 0
-        try:
-            runtime_memory_gb = float(node['runtime_memory_gb'])
-        except:
-            runtime_memory_gb = 0.0
+        estimated_threads = int(node.get('num_threads'), 1)
+        estimated_memory_gb = float(node.get('estimated_memory_gb', 1.0))
+        runtime_threads = int(node.get('runtime_threads'), 0)
+        runtime_memory_gb = float(node.get('runtime_memory_gb', 0.0))
 
         # Init and format event-based nodes 
         node['estimated_threads'] =  estimated_threads
@@ -119,7 +107,7 @@ def log_to_dict(logfile):
             node = None
             try:
                 node = json.loads(l)
-            except Exception:
+            except ValueError:
                 pass
 
             if not node:
