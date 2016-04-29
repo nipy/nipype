@@ -5,10 +5,13 @@ sMRI: FSReconAll
 ================
 
 This script, smri_fsreconall.py, demonstrates the ability to use the
-reconall nipype workflow with a set of subjects and then make an average
-subject::
+create_reconall_workflow function to create a workflow and then run it on a
+set of subjects and then make an average subject::
 
     python smri_fsreconall.py
+
+For an example on how to call FreeSurfer's reconall script in Nipype
+see smri_freesurfer.py.
 
 Import necessary modules from nipype.
 """
