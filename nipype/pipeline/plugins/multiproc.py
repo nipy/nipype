@@ -137,7 +137,7 @@ class MultiProcPlugin(DistributedPluginBase):
         non_daemon = True
         self.plugin_args = plugin_args
         self.processors = cpu_count()
-        self.memory_gb = get_system_total_memory_gb()
+        self.memory_gb = get_system_total_memory_gb()*0.9 # 90% of system memory
 
         # Check plugin args
         if self.plugin_args:
