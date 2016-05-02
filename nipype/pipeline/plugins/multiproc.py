@@ -238,6 +238,9 @@ class MultiProcPlugin(DistributedPluginBase):
                     try:
                         num_subnodes = self.procs[jobid].num_subnodes()
                     except Exception:
+                        etype, eval, etr = sys.exc_info()
+                        traceback = format_exception(etype, eval, etr)
+                        report_crash(self.procs[jobid], traceback=traceback)
                         self._clean_queue(jobid, graph)
                         self.proc_pending[jobid] = False
                         continue
