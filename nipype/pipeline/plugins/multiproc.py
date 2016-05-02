@@ -272,6 +272,9 @@ class MultiProcPlugin(DistributedPluginBase):
                             self._remove_node_dirs()
                             continue
                     except Exception:
+                        etype, eval, etr = sys.exc_info()
+                        traceback = format_exception(etype, eval, etr)
+                        report_crash(self.procs[jobid], traceback=traceback)
                         self._clean_queue(jobid, graph)
                         self.proc_pending[jobid] = False
                         continue
@@ -282,10 +285,10 @@ class MultiProcPlugin(DistributedPluginBase):
                                  % self.procs[jobid])
                     try:
                         self.procs[jobid].run()
-                    except:
+                    except Exception:
                         etype, eval, etr = sys.exc_info()
-                        formatted_exc = format_exception(etype, eval, etr)
-                        logger.debug('Traceback:\n%s' % '\n'.join(formatted_exc))
+                        traceback = format_exception(etype, eval, etr)
+                        report_crash(self.procs[jobid], traceback=traceback)
                     self._task_finished_cb(jobid)
                     self._remove_node_dirs()
 
