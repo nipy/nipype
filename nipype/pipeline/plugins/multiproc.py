@@ -180,8 +180,9 @@ class MultiProcPlugin(DistributedPluginBase):
 
     def _submit_job(self, node, updatehash=False):
         self._taskid += 1
-        if node.inputs.terminal_output == 'stream':
-            node.inputs.terminal_output = 'allatonce'
+        if hasattr(node.inputs, 'terminal_output'):
+            if node.inputs.terminal_output == 'stream':
+                node.inputs.terminal_output = 'allatonce'
 
         self._taskresult[self._taskid] = \
             self.pool.apply_async(run_node,
