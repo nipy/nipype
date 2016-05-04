@@ -2,7 +2,6 @@
 settings in setup.py, the nipy top-level docstring, and for building the
 docs.  In setup.py in particular, we exec this file, so it cannot import nipy
 """
-from .due import due, Doi
 
 # nipy version information.  An empty _version_extra corresponds to a
 # full release.  '.dev' as a _version_extra string means this is a development
@@ -101,14 +100,6 @@ systems.
 * make your research easily reproducible
 * share your processing workflows with the community
 """
-
-# Use duecredit (duecredit.org) to provide a citation to relevant work to
-# be cited. This does nothing, unless the user has duecredit installed,
-# And calls this with duecredit (as in `python -m duecredit script.py`):
-due.cite(Doi("10.3389/fninf.2011.00013"),
-         description="A flexible, lightweight and extensible neuroimaging data"
-                     " processing framework in Python",
-         tags=["nipype"],)
 
 # versions
 NIBABEL_MIN_VERSION = '2.0.1'
