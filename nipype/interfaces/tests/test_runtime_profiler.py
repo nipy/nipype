@@ -18,7 +18,7 @@ except ImportError as exc:
     skip_profile_msg = 'Missing python packages for runtime profiling, skipping...\n'\
                        'Error: %s' % exc
     run_profiler = False
-
+run_profiler = False # tmp fix
 # UseResources inputspec
 class UseResourcesInputSpec(CommandLineInputSpec):
     '''
