@@ -113,6 +113,10 @@ def create_parallelfeat_preproc(name='featpreproc', highpass=True):
     >>> preproc.base_dir = '/tmp'
     >>> preproc.run() # doctest: +SKIP
     """
+    version = 0
+    if fsl.Info.version() and \
+            LooseVersion(fsl.Info.version()) > LooseVersion('5.0.6'):
+        version = 507
 
     featpreproc = pe.Workflow(name=name)
 
@@ -358,7 +362,26 @@ def create_parallelfeat_preproc(name='featpreproc', highpass=True):
                               name='highpass')
         featpreproc.connect(inputnode, ('highpass', highpass_operand), highpass, 'op_string')
         featpreproc.connect(meanscale, 'out_file', highpass, 'in_file')
-        featpreproc.connect(highpass, 'out_file', outputnode, 'highpassed_files')
+
+        if version < 507:
+            featpreproc.connect(highpass, 'out_file', outputnode, 'highpassed_files')
+        else:
+            """
+            Add back the mean removed by the highpass filter operation as of FSL 5.0.7
+            """
+            meanfunc4 = pe.MapNode(interface=fsl.ImageMaths(op_string='-Tmean',
+                                                            suffix='_mean'),
+                                   iterfield=['in_file'],
+                                   name='meanfunc4')
+
+            featpreproc.connect(meanscale, 'out_file', meanfunc4, 'in_file')
+            addmean = pe.MapNode(interface=fsl.BinaryMaths(operation='add'),
+                                 iterfield=['in_file', 'operand_file'],
+                                 name='addmean')
+            featpreproc.connect(highpass, 'out_file', addmean, 'in_file')
+            featpreproc.connect(meanfunc4, 'out_file', addmean, 'operand_file')
+            featpreproc.connect(addmean, 'out_file', outputnode, 'highpassed_files')
+
 
     """
     Generate a mean functional image from the first run
@@ -368,11 +391,8 @@ def create_parallelfeat_preproc(name='featpreproc', highpass=True):
                                                     suffix='_mean'),
                            iterfield=['in_file'],
                            name='meanfunc3')
-    if highpass:
-        featpreproc.connect(highpass, 'out_file', meanfunc3, 'in_file')
-    else:
-        featpreproc.connect(meanscale, 'out_file', meanfunc3, 'in_file')
 
+    featpreproc.connect(meanscale, 'out_file', meanfunc3, 'in_file')
     featpreproc.connect(meanfunc3, 'out_file', outputnode, 'mean')
 
     return featpreproc

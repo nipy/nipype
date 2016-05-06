@@ -6,8 +6,7 @@ from ..preprocess import SegmentCC
 def test_SegmentCC_inputs():
     input_map = dict(args=dict(argstr='%s',
     ),
-    copy_inputs=dict(mandatory=False,
-    ),
+    copy_inputs=dict(),
     environ=dict(nohash=True,
     usedefault=True,
     ),

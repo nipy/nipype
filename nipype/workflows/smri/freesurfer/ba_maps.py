@@ -6,7 +6,8 @@ from nipype.interfaces.freesurfer import *
 from nipype.interfaces.io import DataGrabber
 from nipype.interfaces.utility import Merge
 
-def create_ba_maps_wf(name="Brodmann_Area_Maps", th3=True):
+def create_ba_maps_wf(name="Brodmann_Area_Maps", th3=True, exvivo=True,
+                      entorhinal=True):
     # Brodmann Area Maps (BA Maps) and Hinds V1 Atlas
     inputs = ['lh_sphere_reg',
               'rh_sphere_reg',
@@ -55,40 +56,54 @@ def create_ba_maps_wf(name="Brodmann_Area_Maps", th3=True):
                          name="outputspec")
 
     labels = ["BA1", "BA2", "BA3a", "BA3b", "BA4a", "BA4p", "BA6",
-              "BA44", "BA45", "V1", "V2", "MT", "entorhinal", "perirhinal"]
+              "BA44", "BA45", "V1", "V2", "MT", "perirhinal"]
+    if entorhinal:
+        labels.insert(-1, 'entorhinal')
     for hemisphere in ['lh', 'rh']:
         for threshold in [True, False]:
             field_template = dict(sphere_reg='surf/{0}.sphere.reg'.format(hemisphere),
                                   white='surf/{0}.white'.format(hemisphere))
 
             out_files = list()
+            source_fields = list()
             if threshold:
                 for label in labels:
-                    out_file = '{0}.{1}_exvivo.thresh.label'.format(hemisphere, label)
+                    if label == 'perirhinal' and not entorhinal:
+                        # versions < 6.0 do not use thresh.perirhinal
+                        continue
+                    if exvivo:
+                        out_file = '{0}.{1}_exvivo.thresh.label'.format(hemisphere, label)
+                    else:
+                        out_file = '{0}.{1}.thresh.label'.format(hemisphere, label)
                     out_files.append(out_file)
                     field_template[label] = 'label/' + out_file
-                node_name = 'BA_Maps_' + hemisphere + '_Tresh'
+                    source_fields.append(label)
+                node_name = 'BA_Maps_' + hemisphere + '_Thresh'
             else:
                 for label in labels:
-                    out_file = '{0}.{1}_exvivo.label'.format(hemisphere, label)
+                    if exvivo:
+                        out_file = '{0}.{1}_exvivo.label'.format(hemisphere, label)
+                    else:
+                        out_file = '{0}.{1}.label'.format(hemisphere, label)
+
                     out_files.append(out_file)
                     field_template[label] = 'label/' + out_file
+                    source_fields.append(label)
                 node_name = 'BA_Maps_' + hemisphere
 
-            source_fields = labels + ['sphere_reg', 'white']
-            source_subject = pe.Node(DataGrabber(outfields=source_fields),
+            source_subject = pe.Node(DataGrabber(outfields=source_fields + ['sphere_reg', 'white']),
                                      name=node_name + "_srcsubject")
             source_subject.inputs.template = '*'
             source_subject.inputs.sort_filelist = False
             source_subject.inputs.field_template = field_template
             ba_WF.connect([(inputspec, source_subject, [('src_subject_dir', 'base_directory')])])
 
-            merge_labels = pe.Node(Merge(len(labels)),
+            merge_labels = pe.Node(Merge(len(out_files)),
                                    name=node_name + "_Merge")
-            for i,label in enumerate(labels):
+            for i,label in enumerate(source_fields):
                 ba_WF.connect([(source_subject, merge_labels, [(label, 'in{0}'.format(i+1))])])
 
-            node = pe.MapNode(Label2Label(), name=node_name,
+            node = pe.MapNode(Label2Label(), name=node_name + '_Label2Label',
                               iterfield=['source_label', 'out_file'])
             node.inputs.hemisphere = hemisphere
             node.inputs.out_file = out_files

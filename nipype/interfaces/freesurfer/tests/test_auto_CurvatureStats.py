@@ -6,8 +6,7 @@ from ..utils import CurvatureStats
 def test_CurvatureStats_inputs():
     input_map = dict(args=dict(argstr='%s',
     ),
-    copy_inputs=dict(mandatory=False,
-    ),
+    copy_inputs=dict(),
     curvfile1=dict(argstr='%s',
     mandatory=True,
     position=-2,
@@ -27,7 +26,6 @@ def test_CurvatureStats_inputs():
     usedefault=True,
     ),
     min_max=dict(argstr='-m',
-    mandatory=False,
     ),
     out_file=dict(argstr='-o %s',
     hash_files=False,
@@ -41,15 +39,12 @@ def test_CurvatureStats_inputs():
     ),
     subjects_dir=dict(),
     surface=dict(argstr='-F %s',
-    mandatory=False,
     ),
     terminal_output=dict(nohash=True,
     ),
     values=dict(argstr='-G',
-    mandatory=False,
     ),
     write=dict(argstr='--writeCurvatureFiles',
-    mandatory=False,
     ),
     )
     inputs = CurvatureStats.input_spec()

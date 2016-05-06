@@ -113,8 +113,8 @@ class RegisterAVItoTalairachInputSpec(FSTraitedSpec):
                   position=1, desc="The target file")
     vox2vox = File(argstr='%s', exists=True, mandatory=True,
                    position=2, desc="The vox2vox file")
-    out_file = File('talairach.auto.xfm', usedfault=True,
-                    argstr='%s', mandatory=False,
+    out_file = File('talairach.auto.xfm', usedefault=True,
+                    argstr='%s',
                     position=3, desc="The transform output")
 
 
@@ -179,10 +179,10 @@ class EMRegisterInputSpec(FSTraitedSpecOpenMP):
     skull = traits.Bool(
         argstr="-skull", desc="align to atlas containing skull (uns=5)")
     mask = File(argstr="-mask %s", exists=True,
-                mandatory=False, desc="use volume as a mask")
-    nbrspacing = traits.Int(argstr="-uns %d", mandatory=False,
+                 desc="use volume as a mask")
+    nbrspacing = traits.Int(argstr="-uns %d",
                             desc="align to atlas containing skull setting unknown_nbr_spacing = nbrspacing")
-    transform = File(argstr="-t %s", exists=True, mandatory=False,
+    transform = File(argstr="-t %s", exists=True,
                      desc="Previously computed transform")
 
 
@@ -287,9 +287,8 @@ class PaintInputSpec(FSTraitedSpec):
     template = File(argstr="%s", exists=True, mandatory=True, position=-3,
                     desc="Template file")
     # optional
-    template_param = traits.Int(
-        mandatory=False, desc="Frame number of the input template")
-    averages = traits.Int(argstr="-a %d", mandatory=False,
+    template_param = traits.Int(desc="Frame number of the input template")
+    averages = traits.Int(argstr="-a %d",
                           desc="Average curvature patterns")
     out_file = File(argstr="%s", exists=False, position=-1,
                     name_template="%s.avg_curv", hash_files=False,

@@ -20,7 +20,7 @@ def test_FWHMx_inputs():
     compat=dict(argstr='-compat',
     ),
     demed=dict(argstr='-demed',
-    xorg=['detrend'],
+    xor=['detrend'],
     ),
     detrend=dict(argstr='-detrend',
     usedefault=True,

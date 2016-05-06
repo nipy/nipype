@@ -19,11 +19,9 @@ def test_CSD_inputs():
     out_fods=dict(),
     out_prefix=dict(),
     response=dict(),
-    save_fods=dict(exists=True,
-    usedefault=True,
+    save_fods=dict(usedefault=True,
     ),
-    sh_order=dict(exists=True,
-    usedefault=True,
+    sh_order=dict(usedefault=True,
     ),
     )
     inputs = CSD.input_spec()

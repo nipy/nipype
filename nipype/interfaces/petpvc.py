@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """
@@ -115,31 +116,30 @@ class PETPVC(CommandLine):
           = Stopping criterion
             With: stopval (Default = 0.01)
 
-    ----------------------------------------------
     Technique - keyword
-
-    Geometric transfer matrix - "GTM"
-    Labbe approach - "LABBE"
-    Richardson-Lucy - "RL"
-    Van-Cittert - "VC"
-    Region-based voxel-wise correction - "RBV"
-    RBV with Labbe - "LABBE+RBV"
-    RBV with Van-Cittert - "RBV+VC"
-    RBV with Richardson-Lucy - "RBV+RL"
-    RBV with Labbe and Van-Cittert - "LABBE+RBV+VC"
-    RBV with Labbe and Richardson-Lucy- "LABBE+RBV+RL"
-    Multi-target correction - "MTC"
-    MTC with Labbe - "LABBE+MTC"
-    MTC with Van-Cittert - "MTC+VC"
-    MTC with Richardson-Lucy - "MTC+RL"
-    MTC with Labbe and Van-Cittert - "LABBE+MTC+VC"
-    MTC with Labbe and Richardson-Lucy- "LABBE+MTC+RL"
-    Iterative Yang - "IY"
-    Iterative Yang with Van-Cittert - "IY+VC"
-    Iterative Yang with Richardson-Lucy - "IY+RL"
-    Muller Gartner - "MG"
-    Muller Gartner with Van-Cittert - "MG+VC"
-    Muller Gartner with Richardson-Lucy - "MG+RL"
+    -------------------
+    - Geometric transfer matrix - "GTM"
+    - Labbe approach - "LABBE"
+    - Richardson-Lucy - "RL"
+    - Van-Cittert - "VC"
+    - Region-based voxel-wise correction - "RBV"
+    - RBV with Labbe - "LABBE+RBV"
+    - RBV with Van-Cittert - "RBV+VC"
+    - RBV with Richardson-Lucy - "RBV+RL"
+    - RBV with Labbe and Van-Cittert - "LABBE+RBV+VC"
+    - RBV with Labbe and Richardson-Lucy- "LABBE+RBV+RL"
+    - Multi-target correction - "MTC"
+    - MTC with Labbe - "LABBE+MTC"
+    - MTC with Van-Cittert - "MTC+VC"
+    - MTC with Richardson-Lucy - "MTC+RL"
+    - MTC with Labbe and Van-Cittert - "LABBE+MTC+VC"
+    - MTC with Labbe and Richardson-Lucy- "LABBE+MTC+RL"
+    - Iterative Yang - "IY"
+    - Iterative Yang with Van-Cittert - "IY+VC"
+    - Iterative Yang with Richardson-Lucy - "IY+RL"
+    - Muller Gartner - "MG"
+    - Muller Gartner with Van-Cittert - "MG+VC"
+    - Muller Gartner with Richardson-Lucy - "MG+RL"
 
     Examples
     --------

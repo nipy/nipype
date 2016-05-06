@@ -6,8 +6,8 @@ import os
 from tempfile import mkstemp, mkdtemp
 import warnings
 
-from nipype.testing import assert_equal, assert_true, assert_false, TempFATFS
-from nipype.utils.filemanip import (save_json, load_json,
+from ...testing import assert_equal, assert_true, assert_false, TempFATFS
+from ...utils.filemanip import (save_json, load_json,
                                     fname_presuffix, fnames_presuffix,
                                     hash_rename, check_forhash,
                                     copyfile, copyfiles,
@@ -176,7 +176,7 @@ def test_copyfallback():
     pth, hdrname = os.path.split(orig_hdr)
     try:
         fatfs = TempFATFS()
-    except IOError:
+    except (IOError, OSError):
         warnings.warn('Fuse mount failed. copyfile fallback tests skipped.')
     else:
         with fatfs as fatdir:

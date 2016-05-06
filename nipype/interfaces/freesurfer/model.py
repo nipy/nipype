@@ -654,7 +654,7 @@ class SegStatsInputSpec(FSTraitedSpec):
     wm_vol_from_surf = traits.Bool(argstr='--surf-wm-vol', desc='Compute wm volume from surf')
     cortex_vol_from_surf = traits.Bool(argstr='--surf-ctx-vol', desc='Compute cortex volume from surf')
     non_empty_only = traits.Bool(argstr='--nonempty', desc='Only report nonempty segmentations')
-    empty = traits.Bool(argstr="--empty", mandatory=False,
+    empty = traits.Bool(argstr="--empty",
                         desc="Report on segmentations listed in the color table")
     mask_file = File(exists=True, argstr='--mask %s',
                      desc='Mask volume (same size as seg')
@@ -690,7 +690,7 @@ class SegStatsInputSpec(FSTraitedSpec):
                              desc="Compute volume of total gray matter")
     euler = traits.Bool(argstr="--euler",
                         desc="Write out number of defect holes in orig.nofix based on the euler number")
-    in_intensity = File(argstr="--in %s --in-intensity-name %s", mandatory=False,
+    in_intensity = File(argstr="--in %s --in-intensity-name %s",
                         desc="Undocumented input norm.mgz file")
     intensity_units = traits.Enum('MR', argstr="--in-intensity-units %s",
                                   requires=["in_intensity"], desc="Intensity units")
@@ -780,7 +780,7 @@ class SegStatsReconAllInputSpec(SegStatsInputSpec):
     # implicit
     ribbon = traits.File(mandatory=True, exists=True,
                          desc="Input file mri/ribbon.mgz")
-    presurf_seg = File(mandatory=True, exists=True,
+    presurf_seg = File(exists=True,
                        desc="Input segmentation volume")
     transform = File(mandatory=True, exists=True,
                      desc="Input transform file")
@@ -796,6 +796,8 @@ class SegStatsReconAllInputSpec(SegStatsInputSpec):
                    desc="Input file must be <subject_id>/surf/lh.pial")
     rh_pial = File(mandatory=True, exists=True,
                    desc="Input file must be <subject_id>/surf/rh.pial")
+    aseg = File(exists=True,
+                desc="Mandatory implicit input in 5.3")
     copy_inputs = traits.Bool(desc="If running as a node, set this to True " +
                               "otherwise, this will copy the implicit inputs " +
                               "to the node directory.")
@@ -859,7 +861,7 @@ class SegStatsReconAll(SegStats):
             copy2subjdir(self, self.inputs.lh_white,
                          'surf', 'lh.white')
             copy2subjdir(self, self.inputs.rh_white,
-                         'Surf', 'Rh.White')
+                         'surf', 'rh.white')
             copy2subjdir(self, self.inputs.lh_pial,
                          'surf', 'lh.pial')
             copy2subjdir(self, self.inputs.rh_pial,
@@ -868,12 +870,13 @@ class SegStatsReconAll(SegStats):
                          'mri', 'ribbon.mgz')
             copy2subjdir(self, self.inputs.presurf_seg,
                          'mri', 'aseg.presurf.mgz')
+            copy2subjdir(self, self.inputs.aseg,
+                         'mri', 'aseg.mgz')
             copy2subjdir(self, self.inputs.transform,
                          os.path.join('mri', 'transforms'),
                          'talairach.xfm')
             copy2subjdir(self, self.inputs.in_intensity, 'mri')
-            if isdefined(self.inputs.brainmask_file):
-                copy2subjdir(self, self.inputs.brainmask_file, 'mri')
+            copy2subjdir(self, self.inputs.brainmask_file, 'mri')
         return super(SegStatsReconAll, self).run(**inputs)
 
 
@@ -1080,14 +1083,13 @@ class Label2LabelInputSpec(FSTraitedSpec):
     source_subject = traits.String(argstr="--srcsubject %s", mandatory=True,
                                    desc="Source subject name")
     # optional
-    out_file = File(argstr="--trglabel %s", mandatory=False,
+    out_file = File(argstr="--trglabel %s",
                     name_source=['source_label'], name_template='%s_converted',
                     hash_files=False, keep_extension=True,
                     desc="Target label")
     registration_method = traits.Enum('surface', 'volume', usedefault=True,
                                         argstr="--regmethod %s", desc="Registration method")
-    copy_inputs = traits.Bool(mandatory=False,
-                              desc="If running as a node, set this to True." +
+    copy_inputs = traits.Bool(desc="If running as a node, set this to True." +
                               "This will copy the input files to the node " +
                               "directory.")
 
@@ -1177,11 +1179,11 @@ class Label2AnnotInputSpec(FSTraitedSpec):
     orig = File(exists=True, mandatory=True,
                 desc="implicit {hemisphere}.orig")
     # optional
-    keep_max = traits.Bool(argstr="--maxstatwinner", mandatory=False,
+    keep_max = traits.Bool(argstr="--maxstatwinner",
                            desc="Keep label with highest 'stat' value")
-    verbose_off = traits.Bool(argstr="--noverbose", mandatory=False,
+    verbose_off = traits.Bool(argstr="--noverbose",
                               desc="Turn off overlap and stat override messages")
-    color_table = File(argstr="--ctab %s", mandatory=False, exists=True,
+    color_table = File(argstr="--ctab %s", exists=True,
                        desc="File that defines the structure names, their indices, and their color")
     copy_inputs = traits.Bool(desc="copy implicit inputs and create a temp subjects_dir")
 

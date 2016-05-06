@@ -35,21 +35,30 @@ filetypes = ['cor', 'mgh', 'mgz', 'minc', 'analyze',
 
 
 def copy2subjdir(cls, in_file, folder=None, basename=None, subject_id=None):
+    """Method to copy an input to the subjects directory"""
+    # check that the input is defined
+    if not isdefined(in_file):
+        return in_file
+    # check that subjects_dir is defined
     if isdefined(cls.inputs.subjects_dir):
         subjects_dir = cls.inputs.subjects_dir
     else:
-        subjects_dir = os.getcwd()
+        subjects_dir = os.getcwd() #if not use cwd
+    # check for subject_id
     if not subject_id:
         if isdefined(cls.inputs.subject_id):
             subject_id = cls.inputs.subject_id
         else:
-            subject_id = 'subject_id'
+            subject_id = 'subject_id' #default
+    # check for basename
     if basename == None:
         basename = os.path.basename(in_file)
+    # check which folder to put the file in
     if folder != None:
         out_dir = os.path.join(subjects_dir, subject_id, folder)
     else:
         out_dir = os.path.join(subjects_dir, subject_id)
+    # make the output folder if it does not exist
     if not os.path.isdir(out_dir):
         os.makedirs(out_dir)
     out_file = os.path.join(out_dir, basename)
@@ -58,7 +67,7 @@ def copy2subjdir(cls, in_file, folder=None, basename=None, subject_id=None):
     return out_file
 
 def createoutputdirs(outputs):
-    """create an output directories. If not created, some freesurfer interfaces fail"""
+    """create all output directories. If not created, some freesurfer interfaces fail"""
     for output in outputs.itervalues():
         dirname = os.path.dirname(output)
         if not os.path.isdir(dirname):
@@ -1114,7 +1123,7 @@ class SmoothTessellationInputSpec(FSTraitedSpec):
     out_file = File(argstr='%s', position=-1, genfile=True, desc='output filename or True to generate one')
     out_curvature_file = File(argstr='-c %s', desc='Write curvature to ?h.curvname (default "curv")')
     out_area_file = File(argstr='-b %s', desc='Write area to ?h.areaname (default "area")')
-    seed = traits.Int(argstr="-seed %d", mandatory=False,
+    seed = traits.Int(argstr="-seed %d",
                       desc="Seed for setting random number generator")
 
 
@@ -1506,7 +1515,7 @@ class TalairachQC(FSScriptCommand):
 
 
 class RemoveNeckInputSpec(FSTraitedSpec):
-    in_file = File(argstr="%s", exisits=True, madatory=True,
+    in_file = File(argstr="%s", exists=True, mandatory=True,
                    position=-4, desc="Input file for RemoveNeck")
     out_file = File(argstr="%s", exists=False,
                     name_source=['in_file'], name_template="%s_noneck",
@@ -1517,7 +1526,7 @@ class RemoveNeckInputSpec(FSTraitedSpec):
     template = File(argstr="%s", exists=True, mandatory=True,
                     position=-2, desc="Input template file for RemoveNeck")
     # optional
-    radius = traits.Int(argstr="-radius %d", mandatory=False, desc="Radius")
+    radius = traits.Int(argstr="-radius %d",  desc="Radius")
 
 
 class RemoveNeckOutputSpec(TraitedSpec):
@@ -1560,9 +1569,9 @@ class MRIFillInputSpec(FSTraitedSpec):
     out_file = File(argstr="%s", mandatory=True, exists=False, position=-1,
                     desc="Output filled volume file name for MRIFill")
     # optional
-    segmentation = File(argstr="-segmentation %s", mandatory=False, exists=True,
+    segmentation = File(argstr="-segmentation %s",  exists=True,
                         desc="Input segmentation file for MRIFill")
-    transform = File(argstr="-xform %s", mandatory=False, exists=True,
+    transform = File(argstr="-xform %s",  exists=True,
                      desc="Input transform file for MRIFill")
     log_file = File(argstr="-a %s", desc="Output log file for MRIFill")
 
@@ -1607,10 +1616,10 @@ class MRIsInflateInputSpec(FSTraitedSpec):
                     hash_files=False, keep_extension=True,
                     desc="Output file for MRIsInflate")
     # optional
-    out_sulc = File(mandatory=False, exists=False,
+    out_sulc = File( exists=False,
                     xor=['no_save_sulc'],
                     desc="Output sulc file")
-    no_save_sulc = traits.Bool(argstr='-no-save-sulc', mandatory=False,
+    no_save_sulc = traits.Bool(argstr='-no-save-sulc',
                                xor=['out_sulc'],
                                desc="Do not save sulc file as output")
 
@@ -1654,14 +1663,13 @@ class SphereInputSpec(FSTraitedSpecOpenMP):
     out_file = File(argstr="%s", position=-1, exists=False,
                     name_source=['in_file'], hash_files=False,
                     name_template='%s.sphere',
-                    Desc="Output file for Sphere")
+                    desc="Output file for Sphere")
     # optional
-    seed = traits.Int(argstr="-seed %d", mandatory=False,
+    seed = traits.Int(argstr="-seed %d",
                       desc="Seed for setting random number generator")
-    magic = traits.Bool(argstr="-q", mandatory=False,
-                        requires=['in_smoothwm'],
+    magic = traits.Bool(argstr="-q",
                         desc="No documentation. Direct questions to analysis-bugs@nmr.mgh.harvard.edu")
-    in_smoothwm = File(mandatory=False, exists=True, copyfile=True,
+    in_smoothwm = File( exists=True, copyfile=True,
                        desc="Input surface required when -q flag is not selected")
 
 
@@ -1710,13 +1718,13 @@ class FixTopologyInputSpec(FSTraitedSpec):
                               "in place.")
 
     # optional
-    seed = traits.Int(argstr="-seed %d", mandatory=False,
+    seed = traits.Int(argstr="-seed %d",
                       desc="Seed for setting random number generator")
-    ga = traits.Bool(argstr="-ga", mandatory=False,
+    ga = traits.Bool(argstr="-ga",
                      desc="No documentation. Direct questions to analysis-bugs@nmr.mgh.harvard.edu")
-    mgz = traits.Bool(argstr="-mgz", mandatory=False,
+    mgz = traits.Bool(argstr="-mgz",
                       desc="No documentation. Direct questions to analysis-bugs@nmr.mgh.harvard.edu")
-    sphere = traits.File(argstr="-sphere %s", mandatory=False,
+    sphere = traits.File(argstr="-sphere %s",
                          desc="Sphere input file")
 
 
@@ -1867,33 +1875,36 @@ class MakeSurfacesInputSpec(FSTraitedSpec):
     in_filled = File(exists=True, mandatory=True,
                      desc="Implicit input file filled.mgz")
     # optional
-    in_label = File(exists=True, mandatory=False, xor=['noaparc'],
+    in_white = File(exists=True, desc="Implicit input that is sometimes used")
+    in_label = File(exists=True,  xor=['noaparc'],
                     desc="Implicit input label/<hemisphere>.aparc.annot")
-    orig_white = File(argstr="-orig_white %s", exists=True, mandatory=False,
+    orig_white = File(argstr="-orig_white %s", exists=True,
                       desc="Specify a white surface to start with")
-    orig_pial = File(argstr="-orig_pial %s", exists=True, mandatory=False, requires=['in_label'],
+    orig_pial = File(argstr="-orig_pial %s", exists=True,  requires=['in_label'],
                      desc="Specify a pial surface to start with")
-    fix_mtl = traits.Bool(argstr="-fix_mtl", mandatory=False,
+    fix_mtl = traits.Bool(argstr="-fix_mtl",
                           desc="Undocumented flag")
-    no_white = traits.Bool(argstr="-nowhite", mandatory=False,
+    no_white = traits.Bool(argstr="-nowhite",
                            desc="Undocumented flag")
-    white_only = traits.Bool(argstr="-whiteonly", mandatory=False,
+    white_only = traits.Bool(argstr="-whiteonly",
                              desc="Undocumented flage")
     in_aseg = File(argstr="-aseg %s", exists=True,
-                   mandatory=False, desc="Input segmentation file")
-    in_T1 = File(argstr="-T1 %s", exists=True, mandatory=False,
+                    desc="Input segmentation file")
+    in_T1 = File(argstr="-T1 %s", exists=True,
                  desc="Input brain or T1 file")
     mgz = traits.Bool(
-        argstr="-mgz", mandatory=False,
+        argstr="-mgz",
         desc="No documentation. Direct questions to analysis-bugs@nmr.mgh.harvard.edu")
     noaparc = traits.Bool(
-        argstr="-noaparc", mandatory=False, xor=['in_label'],
+        argstr="-noaparc",  xor=['in_label'],
         desc="No documentation. Direct questions to analysis-bugs@nmr.mgh.harvard.edu")
     maximum = traits.Float(
         argstr="-max %.1f", desc="No documentation (used for longitudinal processing)")
     longitudinal = traits.Bool(
         argstr="-long", desc="No documentation (used for longitudinal processing)")
-    copy_inputs = traits.Bool(mandatory=False,
+    white = traits.String(argstr="-white %s",
+                          desc="White surface name")
+    copy_inputs = traits.Bool(
                               desc="If running as a node, set this to True." +
                               "This will copy the input files to the node " +
                               "directory.")
@@ -1947,15 +1958,15 @@ class MakeSurfaces(FSCommand):
                          folder='mri', basename='wm.mgz')
             copy2subjdir(self, self.inputs.in_filled,
                          folder='mri', basename='filled.mgz')
+            copy2subjdir(self, self.inputs.in_white,
+                         'surf', '{0}.white'.format(self.inputs.hemisphere))
             for originalfile in [self.inputs.in_aseg,
                                  self.inputs.in_T1]:
-                if isdefined(originalfile):
-                    copy2subjdir(self, originalfile, folder='mri')
+                copy2subjdir(self, originalfile, folder='mri')
             for originalfile in [self.inputs.orig_white,
                                  self.inputs.orig_pial,
                                  self.inputs.in_orig]:
-                if isdefined(originalfile):
-                    copy2subjdir(self, originalfile, folder='surf')
+                copy2subjdir(self, originalfile, folder='surf')
             if isdefined(self.inputs.in_label):
                 copy2subjdir(self, self.inputs.in_label, 'label',
                              '{0}.aparc.annot'.format(self.inputs.hemisphere))
@@ -1972,9 +1983,11 @@ class MakeSurfaces(FSCommand):
             basename = os.path.basename(value)
             # whent the -mgz flag is specified, it assumes the mgz extension
             if self.inputs.mgz:
-                prefix = basename.rstrip('.mgz')
+                prefix = os.path.splitext(basename)[0]
             else:
                 prefix = basename
+            if prefix == 'aseg':
+                return # aseg is already the default
             return spec.argstr % prefix
         elif name in ['orig_white', 'orig_pial']:
             # these inputs do take full file paths or even basenames
@@ -2011,8 +2024,8 @@ class MakeSurfaces(FSCommand):
             dest_dir, str(self.inputs.hemisphere) + '.area')
         # Something determines when a pial surface and thickness file is generated
         # but documentation doesn't say what.
-        # The orig_pial flag is just a guess
-        if isdefined(self.inputs.orig_pial):
+        # The orig_pial input is just a guess
+        if isdefined(self.inputs.orig_pial) or self.inputs.white == 'NOWRITE':
             outputs["out_curv"] = outputs["out_curv"] + ".pial"
             outputs["out_area"] = outputs["out_area"] + ".pial"
             outputs["out_pial"] = os.path.join(
@@ -2029,15 +2042,15 @@ class MakeSurfaces(FSCommand):
 
 class CurvatureInputSpec(FSTraitedSpec):
     in_file = File(argstr="%s", position=-2, mandatory=True, exists=True,
-                   desc="Input file for Curvature")
+                   copyfile=True, desc="Input file for Curvature")
     # optional
     threshold = traits.Float(
-        argstr="-thresh %.3f", mandatory=False, desc="Undocumented input threshold")
-    n = traits.Bool(argstr="-n", mandatory=False,
+        argstr="-thresh %.3f",  desc="Undocumented input threshold")
+    n = traits.Bool(argstr="-n",
                     desc="Undocumented boolean flag")
-    averages = traits.Int(argstr="-a %d", mandatory=False,
+    averages = traits.Int(argstr="-a %d",
                           desc="Perform this number iterative averages of curvature measure before saving")
-    save = traits.Bool(argstr="-w", mandatory=False,
+    save = traits.Bool(argstr="-w",
                        desc="Save curvature files (will only generate screen output without this option)")
     distances = traits.Tuple(traits.Int, traits.Int, argstr="-distances %d %d",
                              desc="Undocumented input integer distances")
@@ -2073,7 +2086,6 @@ class Curvature(FSCommand):
         if self.inputs.copy_input:
             if name == 'in_file':
                 basename = os.path.basename(value)
-                shutil.copy(value, basename)
                 return spec.argstr % basename
         return super(Curvature, self)._format_arg(name, spec, value)
 
@@ -2089,7 +2101,7 @@ class Curvature(FSCommand):
 
 
 class CurvatureStatsInputSpec(FSTraitedSpec):
-    surface = File(argstr="-F %s", mandatory=False, exists=True,
+    surface = File(argstr="-F %s",  exists=True,
                    desc="Specify surface file for CurvatureStats")
     curvfile1 = File(argstr="%s", position=-2, mandatory=True, exists=True,
                      desc="Input file for CurvatureStats")
@@ -2105,13 +2117,13 @@ class CurvatureStatsInputSpec(FSTraitedSpec):
                     name_source=['hemisphere'], name_template='%s.curv.stats',
                     hash_files=False, desc="Output curvature stats file")
     # optional
-    min_max = traits.Bool(argstr="-m", mandatory=False,
+    min_max = traits.Bool(argstr="-m",
                           desc="Output min / max information for the processed curvature.")
-    values = traits.Bool(argstr="-G", mandatory=False,
+    values = traits.Bool(argstr="-G",
                          desc="Triggers a series of derived curvature values")
-    write = traits.Bool(argstr="--writeCurvatureFiles", mandatory=False,
+    write = traits.Bool(argstr="--writeCurvatureFiles",
                         desc="Write curvature files")
-    copy_inputs = traits.Bool(mandatory=False,
+    copy_inputs = traits.Bool(
                               desc="If running as a node, set this to True." +
                               "This will copy the input files to the node " +
                               "directory.")
@@ -2237,11 +2249,11 @@ class MRIsCalcInputSpec(FSTraitedSpec):
                     desc="Output file after calculation")
 
     # optional
-    in_file2 = File(argstr="%s", exists=True, position=-1, mandatory=False,
+    in_file2 = File(argstr="%s", exists=True, position=-1,
                     xor=['in_float', 'in_int'], desc="Input file 2")
-    in_float = traits.Float(argstr="%f", position=-1, mandatory=False,
+    in_float = traits.Float(argstr="%f", position=-1,
                             xor=['in_file2', 'in_int'], desc="Input float")
-    in_int = traits.Int(argstr="%d", position=-1, mandatory=False,
+    in_int = traits.Int(argstr="%d", position=-1,
                         xor=['in_file2', 'in_float'], desc="Input integer")
 
 
@@ -2301,17 +2313,21 @@ class VolumeMaskInputSpec(FSTraitedSpec):
                     desc="Implicit input left white matter surface")
     rh_white = File(mandatory=True, exists=True,
                     desc="Implicit input right white matter surface")
+    aseg = File(exists=True,
+                xor=['in_aseg'],
+                desc="Implicit aseg.mgz segmentation. " +
+                "Specify a different aseg by using the 'in_aseg' input.")
     subject_id = traits.String('subject_id', usedefault=True,
                                position=-1, argstr="%s", mandatory=True,
                                desc="Subject being processed")
     # optional
-    in_aseg = File(argstr="--aseg_name %s", mandatory=False, exists=True,
+    in_aseg = File(argstr="--aseg_name %s",
+                   exists=True, xor=['aseg'],
                    desc="Input aseg file for VolumeMask")
-    save_ribbon = traits.Bool(argstr="--save_ribbon", mandatory=False,
+    save_ribbon = traits.Bool(argstr="--save_ribbon",
                               desc="option to save just the ribbon for the " +
                               "hemispheres in the format ?h.ribbon.mgz")
-    copy_inputs = traits.Bool(mandatory=False,
-                              desc="If running as a node, set this to True." +
+    copy_inputs = traits.Bool(desc="If running as a node, set this to True." +
                               "This will copy the implicit input files to the " +
                               "node directory.")
 
@@ -2364,6 +2380,8 @@ class VolumeMask(FSCommand):
             copy2subjdir(self, self.inputs.lh_white, 'surf', 'lh.white')
             copy2subjdir(self, self.inputs.rh_white, 'surf', 'rh.white')
             copy2subjdir(self, self.inputs.in_aseg, 'mri')
+            copy2subjdir(self, self.inputs.aseg, 'mri', 'aseg.mgz')
+
         return super(VolumeMask, self).run(**inputs)
 
     def _format_arg(self, name, spec, value):
@@ -2414,24 +2432,23 @@ class ParcellationStatsInputSpec(FSTraitedSpec):
     cortex_label = File(exists=True,
                         desc="implicit input file {hemi}.cortex.label")
     # optional
-    surface = traits.String(position=-1, argstr="%s", mandatory=False,
+    surface = traits.String(position=-1, argstr="%s",
                             desc="Input surface (e.g. 'white')")
-    mgz = traits.Bool(argstr="-mgz", mandatory=False,
+    mgz = traits.Bool(argstr="-mgz",
                       desc="Look for mgz files")
-    in_cortex = traits.File(argstr="-cortex %s", mandatory=False, exists=True,
+    in_cortex = traits.File(argstr="-cortex %s",  exists=True,
                             desc="Input cortex label")
-    in_annotation = traits.File(argstr="-a %s", mandatory=False, exists=True, xor=['in_label'],
+    in_annotation = traits.File(argstr="-a %s",  exists=True, xor=['in_label'],
                                 desc="compute properties for each label in the annotation file separately")
-    in_label = traits.File(argstr="-l %s", mandatory=False, exists=True, xor=['in_annotatoin', 'out_color'],
+    in_label = traits.File(argstr="-l %s",  exists=True, xor=['in_annotatoin', 'out_color'],
                            desc="limit calculations to specified label")
-    tabular_output = traits.Bool(argstr="-b", mandatory=False,
+    tabular_output = traits.Bool(argstr="-b",
                                  desc="Tabular output")
-    out_table = traits.File(argstr="-f %s", mandatory=False, exists=False, genfile=True,
+    out_table = traits.File(argstr="-f %s",  exists=False, genfile=True,
                             requires=['tabular_output'], desc="Table output to tablefile")
-    out_color = traits.File(argstr="-c %s", mandatory=False, exists=False, genfile=True, xor=['in_label'],
+    out_color = traits.File(argstr="-c %s",  exists=False, genfile=True, xor=['in_label'],
                             desc="Output annotation files's colortable to text file")
-    copy_inputs = traits.Bool(mandatory=False,
-                              desc="If running as a node, set this to True." +
+    copy_inputs = traits.Bool(desc="If running as a node, set this to True." +
                               "This will copy the input files to the node " +
                               "directory.")
     th3 = traits.Bool(argstr="-th3", requires=["cortex_label"],
@@ -2580,8 +2597,7 @@ class ContrastInputSpec(FSTraitedSpec):
                 desc="Implicit input file mri/orig.mgz")
     rawavg = File(exists=True, mandatory=True,
                   desc="Implicit input file mri/rawavg.mgz")
-    copy_inputs = traits.Bool(mandatory=False,
-                              desc="If running as a node, set this to True." +
+    copy_inputs = traits.Bool(desc="If running as a node, set this to True." +
                               "This will copy the input files to the node " +
                               "directory.")
 
@@ -2661,7 +2677,7 @@ class RelabelHypointensitiesInputSpec(FSTraitedSpec):
     aseg = File(argstr="%s", position=-3, mandatory=True, exists=True,
                 desc="Input aseg file")
     surf_directory = traits.Directory('.', argstr="%s", position=-2, exists=True,
-                                      mandatory=False, usedefault=True,
+                                       usedefault=True,
                                       desc="Directory containing lh.white and rh.white")
     out_file = File(argstr="%s", position=-1, exists=False,
                     name_source=['aseg'], name_template='%s.hypos.mgz',
@@ -2670,7 +2686,7 @@ class RelabelHypointensitiesInputSpec(FSTraitedSpec):
 
 
 class RelabelHypointensitiesOutputSpec(TraitedSpec):
-    out_file = File(argstr="%s", exists=False, mandatory=False,
+    out_file = File(argstr="%s", exists=False,
                     desc="Output aseg file")
 
 
@@ -2726,26 +2742,27 @@ class Aparc2AsegInputSpec(FSTraitedSpec):
     rh_annotation = File(mandatory=True, exists=True,
                          desc="Input file must be <subject_id>/label/rh.aparc.annot")
     # optional
-    aseg = File(argstr="--aseg %s", mandatory=False, exists=True,
+    filled = File(exists=True,
+                  desc="Implicit input filled file. Only required with FS v5.3.")
+    aseg = File(argstr="--aseg %s",  exists=True,
                 desc="Input aseg file")
-    volmask = traits.Bool(argstr="--volmask", mandatory=False,
+    volmask = traits.Bool(argstr="--volmask",
                           desc="Volume mask flag")
-    ctxseg = File(argstr="--ctxseg %s", mandatory=False, exists=True,
+    ctxseg = File(argstr="--ctxseg %s",  exists=True,
                   desc="")
-    label_wm = traits.Bool(argstr="--labelwm", mandatory=False,
+    label_wm = traits.Bool(argstr="--labelwm",
                            desc="""
                            For each voxel labeled as white matter in the aseg, re-assign
                            its label to be that of the closest cortical point if its
                            distance is less than dmaxctx
                            """)
-    hypo_wm = traits.Bool(argstr="--hypo-as-wm", mandatory=False,
+    hypo_wm = traits.Bool(argstr="--hypo-as-wm",
                           desc="Label hypointensities as WM")
-    rip_unknown = traits.Bool(argstr="--rip-unknown", mandatory=False,
+    rip_unknown = traits.Bool(argstr="--rip-unknown",
                               desc="Do not label WM based on 'unknown' corical label")
     a2009s = traits.Bool(argstr="--a2009s",
                          desc="Using the a2009s atlas")
-    copy_inputs = traits.Bool(mandatory=False,
-                              desc="If running as a node, set this to True." +
+    copy_inputs = traits.Bool(desc="If running as a node, set this to True." +
                               "This will copy the input files to the node " +
                               "directory.")
 
@@ -2808,6 +2825,7 @@ class Aparc2Aseg(FSCommand):
             copy2subjdir(self, self.inputs.rh_ribbon, 'mri', 'rh.ribbon.mgz')
             copy2subjdir(self, self.inputs.ribbon, 'mri', 'ribbon.mgz')
             copy2subjdir(self, self.inputs.aseg, 'mri')
+            copy2subjdir(self, self.inputs.filled, 'mri', 'filled.mgz')
             copy2subjdir(self, self.inputs.lh_annotation, 'label')
             copy2subjdir(self, self.inputs.rh_annotation, 'label')
 
@@ -2816,7 +2834,8 @@ class Aparc2Aseg(FSCommand):
     def _format_arg(self, name, spec, value):
         if name == 'aseg':
             # aseg does not take a full filename
-            return spec.argstr % os.path.basename(value).replace('.mgz', '')
+            basename = os.path.basename(value).replace('.mgz', '')
+            return spec.argstr % basename
         elif name == 'out_file':
             return spec.argstr % os.path.abspath(value)
 
@@ -2837,7 +2856,7 @@ class Apas2AsegInputSpec(FSTraitedSpec):
 
 
 class Apas2AsegOutputSpec(TraitedSpec):
-    out_file = File(argstr="%s", exists=False, mandatory=False,
+    out_file = File(argstr="%s", exists=False,
                     desc="Output aseg file")
 
 
