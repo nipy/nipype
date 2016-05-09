@@ -43,10 +43,10 @@ def create_event_dict(start_time, nodes_list):
     events = {}
     for node in nodes_list:
         # Format node fields
-        estimated_threads = int(node.get('num_threads'), 1)
-        estimated_memory_gb = float(node.get('estimated_memory_gb', 1.0))
-        runtime_threads = int(node.get('runtime_threads'), 0)
-        runtime_memory_gb = float(node.get('runtime_memory_gb', 0.0))
+        estimated_threads = node.get('num_threads', 1)
+        estimated_memory_gb = node.get('estimated_memory_gb', 1.0)
+        runtime_threads = node.get('runtime_threads', 0)
+        runtime_memory_gb = node.get('runtime_memory_gb', 0.0)
 
         # Init and format event-based nodes 
         node['estimated_threads'] =  estimated_threads
@@ -170,6 +170,9 @@ def calculate_resource_timeseries(events, resource):
         and the resource amount as values
     '''
 
+    # Import packages
+    import pandas as pd
+
     # Init variables
     res = OrderedDict()
     all_res = 0.0
@@ -177,11 +180,11 @@ def calculate_resource_timeseries(events, resource):
     # Iterate through the events
     for tdelta, event in sorted(events.items()):
         if event['event'] == "start":
-            if resource in event and event[resource] != 'Unkown':
+            if resource in event and event[resource] != 'Unknown':
                 all_res += float(event[resource])
             current_time = event['start'];
         elif event['event'] == "finish":
-            if resource in event and event[resource] != 'Unkown':
+            if resource in event and event[resource] != 'Unknown':
                 all_res -= float(event[resource])
             current_time = event['finish'];
         res[current_time] = all_res
