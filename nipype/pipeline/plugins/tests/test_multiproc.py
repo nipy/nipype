@@ -181,56 +181,56 @@ def find_metrics(nodes, last_node):
 #    os.remove(LOG_FILENAME)
 #
 #
-#def test_do_not_use_more_threads_then_specified():
-#    LOG_FILENAME = 'callback.log'
-#    my_logger = logging.getLogger('callback')
-#    my_logger.setLevel(logging.DEBUG)
-#
-#    # Add the log message handler to the logger
-#    handler = logging.FileHandler(LOG_FILENAME)
-#    my_logger.addHandler(handler)
-#
-#    max_threads = 10
-#    pipe = pe.Workflow(name='pipe')
-#    n1 = pe.Node(interface=TestInterfaceSingleNode(), name='n1')
-#    n2 = pe.Node(interface=TestInterfaceSingleNode(), name='n2')
-#    n3 = pe.Node(interface=TestInterfaceSingleNode(), name='n3')
-#    n4 = pe.Node(interface=TestInterfaceSingleNode(), name='n4')
-#
-#    n1.interface.num_threads = 1
-#    n2.interface.num_threads = 1
-#    n3.interface.num_threads = 10
-#    n4.interface.num_threads = 1
-#
-#    pipe.connect(n1, 'output1', n2, 'input1')
-#    pipe.connect(n1, 'output1', n3, 'input1')
-#    pipe.connect(n2, 'output1', n4, 'input1')
-#    pipe.connect(n3, 'output1', n4, 'input2')
-#    n1.inputs.input1 = 10
-#    pipe.config['execution']['poll_sleep_duration'] = 1
-#    pipe.run(plugin='MultiProc', plugin_args={'n_procs': max_threads,
-#                                              'status_callback': log_nodes_cb})
-#
-#    nodes = draw_gantt_chart.log_to_dict(LOG_FILENAME)
-#    last_node = nodes[-1]
-#    #usage in every second
-#    memory, threads = find_metrics(nodes, last_node)
-#
-#    result = True
-#    for t in threads:
-#        if t > max_threads:
-#            result = False
-#            break
-#
-#    yield assert_equal, result, True, "using more threads than specified"
-#
-#    max_memory = get_system_total_memory_gb()
-#    result = True
-#    for m in memory:
-#        if m > max_memory:
-#            result = False
-#            break
-#    yield assert_equal, result, True,\
-#          "using more memory than system has (memory is not specified by user)"
-#
-#    os.remove(LOG_FILENAME)
+def test_do_not_use_more_threads_then_specified():
+    LOG_FILENAME = 'callback.log'
+    my_logger = logging.getLogger('callback')
+    my_logger.setLevel(logging.DEBUG)
+
+    # Add the log message handler to the logger
+    handler = logging.FileHandler(LOG_FILENAME)
+    my_logger.addHandler(handler)
+
+    max_threads = 4
+    pipe = pe.Workflow(name='pipe')
+    n1 = pe.Node(interface=TestInterfaceSingleNode(), name='n1')
+    n2 = pe.Node(interface=TestInterfaceSingleNode(), name='n2')
+    n3 = pe.Node(interface=TestInterfaceSingleNode(), name='n3')
+    n4 = pe.Node(interface=TestInterfaceSingleNode(), name='n4')
+
+    n1.interface.num_threads = 1
+    n2.interface.num_threads = 1
+    n3.interface.num_threads = 4
+    n4.interface.num_threads = 1
+
+    pipe.connect(n1, 'output1', n2, 'input1')
+    pipe.connect(n1, 'output1', n3, 'input1')
+    pipe.connect(n2, 'output1', n4, 'input1')
+    pipe.connect(n3, 'output1', n4, 'input2')
+    n1.inputs.input1 = 4
+    pipe.config['execution']['poll_sleep_duration'] = 1
+    pipe.run(plugin='MultiProc', plugin_args={'n_procs': max_threads,
+                                              'status_callback': log_nodes_cb})
+
+    nodes = draw_gantt_chart.log_to_dict(LOG_FILENAME)
+    last_node = nodes[-1]
+    #usage in every second
+    memory, threads = find_metrics(nodes, last_node)
+
+    result = True
+    for t in threads:
+        if t > max_threads:
+            result = False
+            break
+
+    yield assert_equal, result, True, "using more threads than specified"
+
+    max_memory = get_system_total_memory_gb()
+    result = True
+    for m in memory:
+        if m > max_memory:
+            result = False
+            break
+    yield assert_equal, result, True,\
+          "using more memory than system has (memory is not specified by user)"
+
+    os.remove(LOG_FILENAME)
