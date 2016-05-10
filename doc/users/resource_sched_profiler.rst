@@ -151,7 +151,7 @@ The pandas_ Python package is required to use this feature.
 	generate_gantt_chart('/home/user/run_stats.log', cores=8)
 	# ...creates gantt chart in '/home/user/run_stats.log.html'
 
-The `generate_gantt_chart`` function will create an html file that can be viewed
+The ``generate_gantt_chart`` function will create an html file that can be viewed
 in a browser. Below is an example of the gantt chart displayed in a web browser.
 Note that when the cursor is hovered over any particular node bubble or resource
 bubble, some additional information is shown in a pop-up. 
