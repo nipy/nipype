@@ -81,7 +81,11 @@ def create_skullstripped_recon_flow(name="skullstripped_recon_all"):
     return wf
 
 def create_reconall_workflow(name="ReconAll", plugin_args=None):
-    """Creates the ReconAll workflow in nipype.
+    """Creates the ReconAll workflow in Nipype. This workflow is designed to
+    run the same commands as FreeSurfer's reconall script but with the added
+    features that a Nipype workflow provides. Before running this workflow, it
+    is necessary to have the FREESURFER_HOME environmental variable set to the
+    directory containing the version of FreeSurfer to be used in this workflow.
 
     Example
     -------

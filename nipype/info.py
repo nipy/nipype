@@ -56,7 +56,7 @@ __version__ = "%s.%s.%s%s" % (_version_major,
 CLASSIFIERS = ["Development Status :: 5 - Production/Stable",
                "Environment :: Console",
                "Intended Audience :: Science/Research",
-               "License :: OSI Approved :: BSD License",
+               "License :: OSI Approved :: Apache Software License",
                "Operating System :: MacOS :: MacOS X",
                "Operating System :: POSIX :: Linux",
                "Programming Language :: Python :: 2.7",
@@ -85,12 +85,12 @@ umbrella of NiPy_, is a Python project that provides a uniform interface
 to existing neuroimaging software and facilitates interaction between
 these packages within a single workflow. Nipype provides an environment
 that encourages interactive exploration of algorithms from different
-packages (e.g., ANTS, SPM, FSL, FreeSurfer, Camino, MRtrix, MNE, AFNI, BRAINS,
-Slicer), eases the design of workflows within and between packages, and
-reduces the learning curve necessary to use different packages. Nipype is
-creating a collaborative platform for neuroimaging software development
-in a high-level language and addressing limitations of existing pipeline
-systems.
+packages (e.g., AFNI, ANTS, BRAINS, BrainSuite, Camino, FreeSurfer, FSL, MNE,
+MRtrix, MNE, Nipy, Slicer, SPM), eases the design of workflows within and
+between packages, and reduces the learning curve necessary to use different
+packages. Nipype is creating a collaborative platform for neuroimaging software
+development in a high-level language and addressing limitations of existing
+pipeline systems.
 
 *Nipype* allows you to:
 
@@ -121,7 +121,7 @@ DESCRIPTION = description
 LONG_DESCRIPTION = long_description
 URL = "http://nipy.org/nipype"
 DOWNLOAD_URL = "http://github.com/nipy/nipype/archives/master"
-LICENSE = "BSD license"
+LICENSE = "Apache License, 2.0"
 CLASSIFIERS = CLASSIFIERS
 AUTHOR = "nipype developers"
 AUTHOR_EMAIL = "neuroimaging@python.org"
