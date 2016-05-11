@@ -18,7 +18,10 @@ from distutils.version import LooseVersion
 from .fixes.numpy.testing import nosetester
 from .refs import due
 
+<<<<<<< 5129557c96d5481bb93d64e157a0faf4caa729eb
 
+=======
+>>>>>>> fix merge
 try:
     import faulthandler
     faulthandler.enable()
