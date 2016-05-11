@@ -1949,14 +1949,16 @@ class Seg(AFNICommandBase):
 
     def aggregate_outputs(self, runtime=None, needed_outputs=None):
 
+        import glob
+
         outputs = self._outputs()
 
         if isdefined(self.inputs.prefix):
-            outfile = os.path.join(os.getcwd(), self.inputs.prefix, 'Classes+orig.BRIK')
+            outfile = os.path.join(os.getcwd(), self.inputs.prefix, 'Classes+*.BRIK')
         else:
-            outfile = os.path.join(os.getcwd(), 'Segsy', 'Classes+orig.BRIK')
+            outfile = os.path.join(os.getcwd(), 'Segsy', 'Classes+*.BRIK')
 
-        outputs.out_file = outfile
+        outputs.out_file = glob.glob(outfile)[0]
 
         return outputs
 
