@@ -1,6 +1,7 @@
 Release 0.12.0-rc1 (April 20, 2016)
 ============
 
+* ENH: ResourceMultiProc plugin to support resource allocation (https://github.com/nipy/nipype/pull/1372)
 * ENH: Added dcm2niix interface (https://github.com/nipy/nipype/pull/1435)
 * ENH: Add nipype_crash_search command (https://github.com/nipy/nipype/pull/1422)
 * ENH: Created interface for BrainSuite Cortical Surface Extraction command line tools (https://github.com/nipy/nipype/pull/1305)
