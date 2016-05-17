@@ -21,6 +21,10 @@ To check out the latest development version::
 
         git clone git://github.com/nipy/nipype.git
 
+or::
+
+        git clone https://github.com/nipy/nipype.git
+
 Install
 -------
 
