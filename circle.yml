@@ -69,6 +69,11 @@ test:
         environment:
           SPMMCRCMD: "$HOME/spm12/run_spm12.sh $HOME/mcr/v85/ script"
           FORCE_SPMMCR: 1
+    - source $HOME/.profile; python ~/nipype/tools/run_examples.py fmri_spm_nested MultiProc l2pipeline:
+        pwd: ../examples
+        environment:
+          SPMMCRCMD: "$HOME/spm12/run_spm12.sh $HOME/mcr/v85/ script"
+          FORCE_SPMMCR: 1
 
 general:
   artifacts:
@@ -76,3 +81,4 @@ general:
     - "~/log.txt"
     - "nosetests.xml"
     - "coverage.xml"
+    - "~/callback.log.html"
