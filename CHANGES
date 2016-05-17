@@ -31,6 +31,8 @@ Release 0.12.0-rc1 (April 20, 2016)
 * ENH: Nipype workflow and interfaces for FreeSurfer's recon-all (https://github.com/nipy/nipype/pull/1326)
 * FIX: Permit relative path for concatenated_file input to Concatenate() (https://github.com/nipy/nipype/pull/1411)
 * ENH: Makes ReconAll workflow backwards compatible with FreeSurfer 5.3.0 (https://github.com/nipy/nipype/pull/1434)
+* ENH: Added interfaces for AFNI 3dDegreeCentrality, 3dECM, 3dLFCD, 3dClipLevel, 3dmask_tool, and 3dSeg
+       (https://github.com/nipy/nipype/pull/1460)
 
 Release 0.11.0 (September 15, 2015)
 ============
