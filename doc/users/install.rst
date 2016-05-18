@@ -50,9 +50,8 @@ Mac OS X
 ~~~~~~~~
 
 The easiest way to get nipype running on Mac OS X is to install Anaconda_ or
-Canopy_ and then add nibabel and nipype by executing::
+Canopy_ and then add nipype by executing::
 
-	easy_install nibabel
 	easy_install nipype
 
 From source
@@ -62,7 +61,6 @@ If you downloaded the source distribution named something
 like ``nipype-x.y.tar.gz``, then unpack the tarball, change into the
 ``nipype-x.y`` directory and install nipype using::
 
-    easy_install nibabel
     pip install -r requirements.txt
     python setup.py install
 
@@ -113,13 +111,13 @@ recommendations.
 Must Have
 ~~~~~~~~~
 
-Nibabel_ 1.0 - 1.4
-  Neuroimaging file i/o library.
-
 .. note::
 
     Full distributions of Nipype, such as the ones in  Anaconda_ or Canopy_, provide
     the following packages automatically.
+
+Nibabel_ 1.0 - 1.4
+  Neuroimaging file i/o library.
 
 Python_ 2.7
 
