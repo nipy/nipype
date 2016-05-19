@@ -167,6 +167,7 @@ def create_AutoRecon1(name="AutoRecon1", longitudinal=False, distance=None,
         import os
         import shutil
         if len(in_files) == 1:
+            # if only 1 T1 scan given, no need to run RobustTemplate
             print("WARNING: only one run found. This is OK, but motion correction " +
                   "cannot be performed on one run, so I'll copy the run to rawavg " +
                   "and continue.")
@@ -175,7 +176,7 @@ def create_AutoRecon1(name="AutoRecon1", longitudinal=False, distance=None,
             transforms = None
         else:
             from nipype.interfaces.freesurfer import RobustTemplate
-            # if multiple T1 scans are given
+            # if multiple T1 scans are given run RobustTemplate
             intensity_scales = [os.path.basename(f.replace('.mgz', '-iscale.txt')) for f in in_files]
             transforms = [os.path.basename(f.replace('.mgz', '.lta')) for f in in_files]
             robtemp = RobustTemplate()
@@ -190,10 +191,11 @@ def create_AutoRecon1(name="AutoRecon1", longitudinal=False, distance=None,
             robtemp.inputs.transform_outputs = transforms
             robtemp.inputs.subsample_threshold = 200
             robtemp.inputs.intensity_scaling = True
-            robtemp.run()
-            intensity_scales = [os.path.abspath(f) for f in robtemp.outputs.scaled_intensity_outputs]
-            transforms = [os.path.abspath(f) for f in robtemp.outputs.transform_outputs]
-            out_file = robtemp.outputs.out_file
+            robtemp_result = robtemp.run()
+            # collect the outputs from RobustTemplate
+            out_file = robtemp_result.outputs.out_file
+            intensity_scales = [os.path.abspath(f) for f in robtemp_result.outputs.scaled_intensity_outputs]
+            transforms = [os.path.abspath(f) for f in robtemp_result.outputs.transform_outputs]
         out_file = os.path.abspath(out_file)
         return out_file, intensity_scales, transforms
 
