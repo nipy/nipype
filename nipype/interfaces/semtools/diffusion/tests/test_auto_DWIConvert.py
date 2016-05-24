@@ -51,6 +51,8 @@ def test_DWIConvert_inputs():
     ),
     writeProtocolGradientsFile=dict(argstr='--writeProtocolGradientsFile ',
     ),
+    allowLossyConversion=dict(argstr='--allowLossyConversion ',
+    ),
     )
     inputs = DWIConvert.input_spec()
 

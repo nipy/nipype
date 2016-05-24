@@ -244,6 +244,7 @@ class DWIConvertInputSpec(CommandLineInputSpec):
     outputDirectory = traits.Either(traits.Bool, Directory(), hash_files=False, desc="Directory holding the output NRRD file", argstr="--outputDirectory %s")
     gradientVectorFile = traits.Either(traits.Bool, File(), hash_files=False, desc="Text file giving gradient vectors", argstr="--gradientVectorFile %s")
     smallGradientThreshold = traits.Float(desc="If a gradient magnitude is greater than 0 and less than smallGradientThreshold, then DWIConvert will display an error message and quit, unless the useBMatrixGradientDirections option is set.", argstr="--smallGradientThreshold %f")
+    allowLossyConversion = traits.Bool(desc="The only supported output type is \'short\'. Conversion from images of a different type may cause data loss due to rounding or truncation. Use with caution!", argstr="--allowLossyConversion ")
 
 
 class DWIConvertOutputSpec(TraitedSpec):
