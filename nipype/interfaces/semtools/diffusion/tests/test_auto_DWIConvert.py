@@ -53,6 +53,8 @@ def test_DWIConvert_inputs():
     ),
     allowLossyConversion=dict(argstr='--allowLossyConversion ',
     ),
+    transposeInputBVectors=dict(argstr='--transposeInputBVectors ',
+    ),
     )
     inputs = DWIConvert.input_spec()
 
