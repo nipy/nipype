@@ -76,8 +76,14 @@ nose_ installed, then do the following::
 
 you can also test with nosetests::
 
-    nosetests --with-doctest /software/nipy-repo/masternipype/nipype
-    --exclude=external --exclude=testing
+    nosetests --with-doctest <installation filepath>/nipype  --exclude=external --exclude=testing
+
+A successful test run should complete in a few minutes and end with
+something like::
+
+    Ran 13053 tests in 126.618s
+
+    OK (SKIP=66)
 
 All tests should pass (unless you're missing a dependency). If SUBJECTS_DIR
 variable is not set some FreeSurfer related tests will fail. If any tests
@@ -89,9 +95,9 @@ tests::
 
        export MATLABCMD=$pathtomatlabdir/bin/$platform/MATLAB
 
-where, $pathtomatlabdir is the path to your matlab installation and
-$platform is the directory referring to x86 or x64 installations
-(typically glnxa64 on 64-bit installations).
+where ``$pathtomatlabdir`` is the path to your matlab installation and
+``$platform`` is the directory referring to x86 or x64 installations
+(typically ``glnxa64`` on 64-bit installations).
 
 Avoiding any MATLAB calls from testing
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -119,7 +125,7 @@ Must Have
 Nibabel_ 1.0 - 1.4
   Neuroimaging file i/o library.
 
-Python_ 2.7
+Python_ 2.7 or Python_ 3
 
 NetworkX_ 1.0 - 1.8
   Python package for working with complex networks.

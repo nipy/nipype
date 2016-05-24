@@ -15,8 +15,6 @@ sdist: zipdoc
 	python setup.py sdist
 	@echo "Done building source distribution."
 	# XXX copy documentation.zip to dist directory.
-	# XXX Somewhere the doc/_build directory is removed and causes
-	# this script to fail.
 
 egg: zipdoc
 	@echo "Building egg..."
@@ -45,7 +43,10 @@ clean-build:
 clean-ctags:
 	rm -f tags
 
-clean: clean-build clean-pyc clean-so clean-ctags
+clean-doc:
+	rm -rf doc/_build
+
+clean: clean-build clean-pyc clean-so clean-ctags clean-doc
 
 in: inplace # just a shortcut
 inplace:
