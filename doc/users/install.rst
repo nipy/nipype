@@ -21,6 +21,10 @@ To check out the latest development version::
 
         git clone git://github.com/nipy/nipype.git
 
+or::
+
+        git clone https://github.com/nipy/nipype.git
+
 Install
 -------
 
@@ -46,9 +50,8 @@ Mac OS X
 ~~~~~~~~
 
 The easiest way to get nipype running on Mac OS X is to install Anaconda_ or
-Canopy_ and then add nibabel and nipype by executing::
+Canopy_ and then add nipype by executing::
 
-	easy_install nibabel
 	easy_install nipype
 
 From source
@@ -58,6 +61,7 @@ If you downloaded the source distribution named something
 like ``nipype-x.y.tar.gz``, then unpack the tarball, change into the
 ``nipype-x.y`` directory and install nipype using::
 
+    pip install -r requirements.txt
     python setup.py install
 
 **Note:** Depending on permissions you may need to use ``sudo``.
@@ -107,10 +111,15 @@ recommendations.
 Must Have
 ~~~~~~~~~
 
-Python_ 2.7
+.. note::
+
+    Full distributions of Nipype, such as the ones in  Anaconda_ or Canopy_, provide
+    the following packages automatically.
 
 Nibabel_ 1.0 - 1.4
-  Neuroimaging file i/o library
+  Neuroimaging file i/o library.
+
+Python_ 2.7
 
 NetworkX_ 1.0 - 1.8
   Python package for working with complex networks.
@@ -124,10 +133,6 @@ Enthought_ Traits_ 4.0.0 - 4.3.0
 
 Dateutil 1.5 -
 
-.. note::
-
-    Full distributions such as Anaconda_ or Canopy_ provide the above packages,
-    except Nibabel_.
 
 Strong Recommendations
 ~~~~~~~~~~~~~~~~~~~~~~
@@ -140,18 +145,22 @@ Matplotlib_ 1.0 - 1.2
   Plotting library
 
 `RDFLib <http://rdflib.readthedocs.org/en/latest/>`_ 4.1
-RDFLibrary required for provenance export as RDF
+  RDFLibrary required for provenance export as RDF
 
 Sphinx_ 1.1
   Required for building the documentation
 
 `Graphviz <http://www.graphviz.org/>`_
-  Required for building the documentation
+  Required for building the documentation. The python wrapper package (``graphviz``)
+  and the program itself both need to be installed.
 
 Interface Dependencies
 ~~~~~~~~~~~~~~~~~~~~~~
 
-These are the software packages that nipype.interfaces wraps:
+You might not need some of the following packages, depending on what exactly you
+want to use nipype for. If you do need any of them, install nipype's wrapper package
+(``nipype.interfaces``), then install the programs separately onto your computer, just
+like you would install any other app.
 
 FSL_
   4.1.0 or later
