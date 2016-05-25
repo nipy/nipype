@@ -7,13 +7,15 @@ The possum module provides classes for interfacing with `POSSUM
 <http://fsl.fmrib.ox.ac.uk/fsl/fslwiki/POSSUM>`_ command line tools.
 Please, check out the link for pertinent citations using POSSUM.
 
-.. Note:: This was written to work with FSL version 5.0.6.
+  .. Note:: This was written to work with FSL version 5.0.6.
 
-    Change directory to provide relative paths for doctests
-    >>> import os
-    >>> filepath = os.path.dirname( os.path.realpath( __file__ ) )
-    >>> datadir = os.path.realpath(os.path.join(filepath, '../../testing/data'))
-    >>> os.chdir(datadir)
+  .. testsetup::
+
+    # Change directory to provide relative paths for doctests
+    import os
+    filepath = os.path.dirname( os.path.realpath( __file__ ) )
+    datadir = os.path.realpath(os.path.join(filepath, '../../testing/data'))
+    os.chdir(datadir)
 
 """
 
