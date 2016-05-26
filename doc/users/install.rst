@@ -83,10 +83,6 @@ or::
 
     nosetests --with-doctest nipype
 
-or::
-
-    nosetests --with-doctest nipype
-
 A successful test run should complete in a few minutes and end with
 something like::
 
