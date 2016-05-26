@@ -18,7 +18,7 @@ from ..freesurfer.base import FSCommand, FSTraitedSpec
 from ..base import (TraitedSpec, File, traits, InputMultiPath,
                     OutputMultiPath, Directory, isdefined)
 from ...utils.filemanip import fname_presuffix, split_filename
-
+from ..freesurfer.utils import copy2subjdir
 
 class MRISPreprocInputSpec(FSTraitedSpec):
     out_file = File(argstr='--out %s', genfile=True,
@@ -72,7 +72,7 @@ class MRISPreprocInputSpec(FSTraitedSpec):
 
 
 class MRISPreprocOutputSpec(TraitedSpec):
-    out_file = File(exists=True, desc='preprocessed output file')
+    out_file = File(desc='preprocessed output file')
 
 
 class MRISPreproc(FSCommand):
@@ -113,6 +113,82 @@ class MRISPreproc(FSCommand):
         return None
 
 
+class MRISPreprocReconAllInputSpec(MRISPreprocInputSpec):
+    surf_measure_file = File(exists=True, argstr='--meas %s',
+                             xor=('surf_measure',
+                                  'surf_measure_file', 'surf_area'),
+                             desc='file necessary for surfmeas')
+    surfreg_files = InputMultiPath(File(exists=True), argstr="--surfreg %s",
+                                    requires=['lh_surfreg_target', 'rh_surfreg_target'],
+                                    desc="lh and rh input surface registration files")
+    lh_surfreg_target = File(desc="Implicit target surface registration file",
+                             requires=['surfreg_files'])
+    rh_surfreg_target = File(desc="Implicit target surface registration file",
+                             requires=['surfreg_files'])
+    subject_id = traits.String('subject_id', argstr='--s %s', usedefault=True,
+                               xor=('subjects', 'fsgd_file',
+                                    'subject_file', 'subject_id'),
+                               desc='subject from whom measures are calculated')
+    copy_inputs = traits.Bool(desc="If running as a node, set this to True " +
+                              "this will copy some implicit inputs to the " +
+                              "node directory.")
+
+
+class MRISPreprocReconAll(MRISPreproc):
+    """Extends MRISPreproc to allow it to be used in a recon-all workflow
+
+    Examples
+    ========
+    >>> preproc = MRISPreprocReconAll()
+    >>> preproc.inputs.target = 'fsaverage'
+    >>> preproc.inputs.hemi = 'lh'
+    >>> preproc.inputs.vol_measure_file = [('cont1.nii', 'register.dat'), \
+                                           ('cont1a.nii', 'register.dat')]
+    >>> preproc.inputs.out_file = 'concatenated_file.mgz'
+    >>> preproc.cmdline
+    'mris_preproc --hemi lh --out concatenated_file.mgz --s subject_id --target fsaverage --iv cont1.nii register.dat --iv cont1a.nii register.dat'
+    """
+
+    input_spec = MRISPreprocReconAllInputSpec
+
+    def run(self, **inputs):
+        if self.inputs.copy_inputs:
+            self.inputs.subjects_dir = os.getcwd()
+            if 'subjects_dir' in inputs:
+                inputs['subjects_dir'] = self.inputs.subjects_dir
+            if isdefined(self.inputs.surf_dir):
+                folder = self.inputs.surf_dir
+            else:
+                folder = 'surf'
+            if isdefined(self.inputs.surfreg_files):
+                for surfreg in self.inputs.surfreg_files:
+                    basename = os.path.basename(surfreg)
+                    copy2subjdir(self, surfreg, folder, basename)
+                    if basename.startswith('lh.'):
+                        copy2subjdir(self, self.inputs.lh_surfreg_target,
+                                     folder, basename,
+                                     subject_id=self.inputs.target)
+                    else:
+                        copy2subjdir(self, self.inputs.rh_surfreg_target,
+                                     folder, basename,
+                                     subject_id=self.inputs.target)
+
+            if isdefined(self.inputs.surf_measure_file):
+                copy2subjdir(self, self.inputs.surf_measure_file, folder)
+
+        return super(MRISPreprocReconAll, self).run(**inputs)
+
+    def _format_arg(self, name, spec, value):
+        # mris_preproc looks for these files in the surf dir
+        if name  == 'surfreg_files':
+            basename = os.path.basename(value[0])
+            return spec.argstr % basename.lstrip('rh.').lstrip('lh.')
+        if name  == "surf_measure_file":
+            basename = os.path.basename(value)
+            return spec.argstr % basename.lstrip('rh.').lstrip('lh.')
+        return super(MRISPreprocReconAll, self)._format_arg(name, spec, value)
+
+
 class GLMFitInputSpec(FSTraitedSpec):
     glm_dir = traits.Str(argstr='--glmdir %s', desc='save outputs to dir',
                          genfile=True)
@@ -130,7 +206,7 @@ class GLMFitInputSpec(FSTraitedSpec):
     one_sample = traits.Bool(argstr='--osgm',
                              xor=('one_sample', 'fsgd', 'design', 'contrast'),
                              desc='construct X and C as a one-sample group mean')
-    no_contrast_sok = traits.Bool(argstr='--no-contrasts-ok',
+    no_contrast_ok = traits.Bool(argstr='--no-contrasts-ok',
                                   desc='do not fail if no contrasts specified')
     per_voxel_reg = InputMultiPath(File(exists=True), argstr='--pvr %s...',
                                    desc='per-voxel regressors')
@@ -527,11 +603,11 @@ class Concatenate(FSCommand):
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        if not isdefined(self.inputs.concatenated_file):
-            outputs['concatenated_file'] = os.path.join(os.getcwd(),
-                                                        'concat_output.nii.gz')
-        else:
-            outputs['concatenated_file'] = self.inputs.concatenated_file
+
+        fname = self.inputs.concatenated_file
+        if not isdefined(fname):
+            fname = 'concat_output.nii.gz'
+        outputs['concatenated_file'] = os.path.join(os.getcwd(), fname)
         return outputs
 
     def _gen_filename(self, name):
@@ -552,9 +628,9 @@ class SegStatsInputSpec(FSTraitedSpec):
                               argstr='--slabel %s %s %s', xor=_xor_inputs,
                               mandatory=True,
                               desc='subject hemi label : use surface label')
-    summary_file = File(argstr='--sum %s', genfile=True,
+    summary_file = File(argstr='--sum %s', genfile=True, position=-1,
                         desc='Segmentation stats summary table file')
-    partial_volume_file = File(exists=True, argstr='--pv %f',
+    partial_volume_file = File(exists=True, argstr='--pv %s',
                                desc='Compensate for partial voluming')
     in_file = File(exists=True, argstr='--i %s',
                    desc='Use the segmentation to report stats on this volume')
@@ -578,6 +654,8 @@ class SegStatsInputSpec(FSTraitedSpec):
     wm_vol_from_surf = traits.Bool(argstr='--surf-wm-vol', desc='Compute wm volume from surf')
     cortex_vol_from_surf = traits.Bool(argstr='--surf-ctx-vol', desc='Compute cortex volume from surf')
     non_empty_only = traits.Bool(argstr='--nonempty', desc='Only report nonempty segmentations')
+    empty = traits.Bool(argstr="--empty",
+                        desc="Report on segmentations listed in the color table")
     mask_file = File(exists=True, argstr='--mask %s',
                      desc='Mask volume (same size as seg')
     mask_thresh = traits.Float(argstr='--maskthresh %f',
@@ -589,8 +667,10 @@ class SegStatsInputSpec(FSTraitedSpec):
                             desc='Mask with this (0 based) frame of the mask volume')
     mask_invert = traits.Bool(argstr='--maskinvert', desc='Invert binarized mask volume')
     mask_erode = traits.Int(argstr='--maskerode %d', desc='Erode mask by some amount')
-    brain_vol = traits.Enum('brain-vol-from-seg', 'brainmask', '--%s',
+    brain_vol = traits.Enum('brain-vol-from-seg', 'brainmask', argstr='--%s',
                             desc='Compute brain volume either with ``brainmask`` or ``brain-vol-from-seg``')
+    brainmask_file = File(argstr="--brainmask %s", exists=True,
+                          desc="Load brain mask and compute the volume of the brain as the non-zero voxels in this volume")
     etiv = traits.Bool(argstr='--etiv', desc='Compute ICV from talairach transform')
     etiv_only = traits.Enum('etiv', 'old-etiv', '--%s-only',
                             desc='Compute etiv and exit.  Use ``etiv`` or ``old-etiv``')
@@ -602,6 +682,18 @@ class SegStatsInputSpec(FSTraitedSpec):
                                 desc='Save mean across space and time')
     vox = traits.List(traits.Int, argstr='--vox %s',
                       desc='Replace seg with all 0s except at C R S (three int inputs)')
+    supratent = traits.Bool(argstr="--supratent",
+                            desc="Undocumented input flag")
+    subcort_gm = traits.Bool(argstr="--subcortgray",
+                             desc="Compute volume of subcortical gray matter")
+    total_gray = traits.Bool(argstr="--totalgray",
+                             desc="Compute volume of total gray matter")
+    euler = traits.Bool(argstr="--euler",
+                        desc="Write out number of defect holes in orig.nofix based on the euler number")
+    in_intensity = File(argstr="--in %s --in-intensity-name %s",
+                        desc="Undocumented input norm.mgz file")
+    intensity_units = traits.Enum('MR', argstr="--in-intensity-units %s",
+                                  requires=["in_intensity"], desc="Intensity units")
 
 
 class SegStatsOutputSpec(TraitedSpec):
@@ -622,8 +714,8 @@ class SegStats(FSCommand):
     >>> ss.inputs.annot = ('PWS04', 'lh', 'aparc')
     >>> ss.inputs.in_file = 'functional.nii'
     >>> ss.inputs.subjects_dir = '.'
-    >>> ss.inputs.avgwf_txt_file = './avgwf.txt'
-    >>> ss.inputs.summary_file = './summary.stats'
+    >>> ss.inputs.avgwf_txt_file = 'avgwf.txt'
+    >>> ss.inputs.summary_file = 'summary.stats'
     >>> ss.cmdline
     'mri_segstats --annot PWS04 lh aparc --avgwf ./avgwf.txt --i functional.nii --sum ./summary.stats'
 
@@ -659,18 +751,133 @@ class SegStats(FSCommand):
         return outputs
 
     def _format_arg(self, name, spec, value):
+        if name in ('summary_file', 'avgwf_txt_file'):
+            if not isinstance(value, bool):
+                if not os.path.isabs(value):
+                    value = os.path.join('.', value)
         if name in ['avgwf_txt_file', 'avgwf_file', 'sf_avg_file']:
             if isinstance(value, bool):
                 fname = self._list_outputs()[name]
             else:
                 fname = value
             return spec.argstr % fname
+        elif name == 'in_intensity':
+            intensity_name = os.path.basename(self.inputs.in_intensity).replace('.mgz', '')
+            return spec.argstr % (value, intensity_name)
         return super(SegStats, self)._format_arg(name, spec, value)
 
     def _gen_filename(self, name):
         if name == 'summary_file':
             return self._list_outputs()[name]
         return None
+
+
+class SegStatsReconAllInputSpec(SegStatsInputSpec):
+    # recon-all input requirements
+    subject_id = traits.String('subject_id', usedefault=True,
+                               argstr="--subject %s", mandatory=True,
+                               desc="Subject id being processed")
+    # implicit
+    ribbon = traits.File(mandatory=True, exists=True,
+                         desc="Input file mri/ribbon.mgz")
+    presurf_seg = File(exists=True,
+                       desc="Input segmentation volume")
+    transform = File(mandatory=True, exists=True,
+                     desc="Input transform file")
+    lh_orig_nofix = File(mandatory=True, exists=True,
+                         desc="Input lh.orig.nofix")
+    rh_orig_nofix = File(mandatory=True, exists=True,
+                         desc="Input rh.orig.nofix")
+    lh_white = File(mandatory=True, exists=True,
+                    desc="Input file must be <subject_id>/surf/lh.white")
+    rh_white = File(mandatory=True, exists=True,
+                    desc="Input file must be <subject_id>/surf/rh.white")
+    lh_pial = File(mandatory=True, exists=True,
+                   desc="Input file must be <subject_id>/surf/lh.pial")
+    rh_pial = File(mandatory=True, exists=True,
+                   desc="Input file must be <subject_id>/surf/rh.pial")
+    aseg = File(exists=True,
+                desc="Mandatory implicit input in 5.3")
+    copy_inputs = traits.Bool(desc="If running as a node, set this to True " +
+                              "otherwise, this will copy the implicit inputs " +
+                              "to the node directory.")
+
+
+class SegStatsReconAll(SegStats):
+
+    """
+    This class inherits SegStats and modifies it for use in a recon-all workflow.
+    This implementation mandates implicit inputs that SegStats.
+    To ensure backwards compatability of SegStats, this class was created.
+
+    Examples
+    ========
+    >>> from nipype.interfaces.freesurfer import SegStatsReconAll
+    >>> segstatsreconall = SegStatsReconAll()
+    >>> segstatsreconall.inputs.annot = ('PWS04', 'lh', 'aparc')
+    >>> segstatsreconall.inputs.avgwf_txt_file = 'avgwf.txt'
+    >>> segstatsreconall.inputs.summary_file = 'summary.stats'
+    >>> segstatsreconall.inputs.subject_id = '10335'
+    >>> segstatsreconall.inputs.ribbon = 'wm.mgz'
+    >>> segstatsreconall.inputs.transform = 'trans.mat'
+    >>> segstatsreconall.inputs.presurf_seg = 'wm.mgz'
+    >>> segstatsreconall.inputs.lh_orig_nofix = 'lh.pial'
+    >>> segstatsreconall.inputs.rh_orig_nofix = 'lh.pial'
+    >>> segstatsreconall.inputs.lh_pial = 'lh.pial'
+    >>> segstatsreconall.inputs.rh_pial = 'lh.pial'
+    >>> segstatsreconall.inputs.lh_white = 'lh.pial'
+    >>> segstatsreconall.inputs.rh_white = 'lh.pial'
+    >>> segstatsreconall.inputs.empty = True
+    >>> segstatsreconall.inputs.brain_vol = 'brain-vol-from-seg'
+    >>> segstatsreconall.inputs.exclude_ctx_gm_wm = True
+    >>> segstatsreconall.inputs.supratent = True
+    >>> segstatsreconall.inputs.subcort_gm = True
+    >>> segstatsreconall.inputs.etiv = True
+    >>> segstatsreconall.inputs.wm_vol_from_surf = True
+    >>> segstatsreconall.inputs.cortex_vol_from_surf = True
+    >>> segstatsreconall.inputs.total_gray = True
+    >>> segstatsreconall.inputs.euler = True
+    >>> segstatsreconall.inputs.exclude_id = 0
+    >>> segstatsreconall.cmdline
+    'mri_segstats --annot PWS04 lh aparc --avgwf ./avgwf.txt --brain-vol-from-seg --surf-ctx-vol --empty --etiv --euler --excl-ctxgmwm --excludeid 0 --subcortgray --subject 10335 --supratent --totalgray --surf-wm-vol --sum ./summary.stats'
+    """
+    input_spec = SegStatsReconAllInputSpec
+    output_spec = SegStatsOutputSpec
+
+    def _format_arg(self, name, spec, value):
+        if name == 'brainmask_file':
+            return spec.argstr % os.path.basename(value)
+        return super(SegStatsReconAll, self)._format_arg(name, spec, value)
+
+    def run(self, **inputs):
+        if self.inputs.copy_inputs:
+            self.inputs.subjects_dir = os.getcwd()
+            if 'subjects_dir' in inputs:
+                inputs['subjects_dir'] = self.inputs.subjects_dir
+            copy2subjdir(self, self.inputs.lh_orig_nofix,
+                         'surf', 'lh.orig.nofix')
+            copy2subjdir(self, self.inputs.rh_orig_nofix,
+                         'surf', 'rh.orig.nofix')
+            copy2subjdir(self, self.inputs.lh_white,
+                         'surf', 'lh.white')
+            copy2subjdir(self, self.inputs.rh_white,
+                         'surf', 'rh.white')
+            copy2subjdir(self, self.inputs.lh_pial,
+                         'surf', 'lh.pial')
+            copy2subjdir(self, self.inputs.rh_pial,
+                         'surf', 'rh.pial')
+            copy2subjdir(self, self.inputs.ribbon,
+                         'mri', 'ribbon.mgz')
+            copy2subjdir(self, self.inputs.presurf_seg,
+                         'mri', 'aseg.presurf.mgz')
+            copy2subjdir(self, self.inputs.aseg,
+                         'mri', 'aseg.mgz')
+            copy2subjdir(self, self.inputs.transform,
+                         os.path.join('mri', 'transforms'),
+                         'talairach.xfm')
+            copy2subjdir(self, self.inputs.in_intensity, 'mri')
+            copy2subjdir(self, self.inputs.brainmask_file, 'mri')
+        return super(SegStatsReconAll, self).run(**inputs)
 
 
 class Label2VolInputSpec(FSTraitedSpec):
@@ -855,3 +1062,270 @@ class MS_LDA(FSCommand):
 
     def _gen_filename(self, name):
         pass
+
+
+class Label2LabelInputSpec(FSTraitedSpec):
+    hemisphere = traits.Enum('lh', 'rh', argstr="--hemi %s", mandatory=True,
+                               desc="Input hemisphere")
+    subject_id = traits.String('subject_id', usedefault=True,
+                               argstr="--trgsubject %s", mandatory=True,
+                               desc="Target subject")
+    sphere_reg = File(mandatory=True, exists=True,
+                      desc="Implicit input <hemisphere>.sphere.reg")
+    white = File(mandatory=True, exists=True,
+                 desc="Implicit input <hemisphere>.white")
+    source_sphere_reg = File(mandatory=True, exists=True,
+                             desc="Implicit input <hemisphere>.sphere.reg")
+    source_white = File(mandatory=True, exists=True,
+                        desc="Implicit input <hemisphere>.white")
+    source_label = File(argstr="--srclabel %s", mandatory=True, exists=True,
+                        desc="Source label")
+    source_subject = traits.String(argstr="--srcsubject %s", mandatory=True,
+                                   desc="Source subject name")
+    # optional
+    out_file = File(argstr="--trglabel %s",
+                    name_source=['source_label'], name_template='%s_converted',
+                    hash_files=False, keep_extension=True,
+                    desc="Target label")
+    registration_method = traits.Enum('surface', 'volume', usedefault=True,
+                                        argstr="--regmethod %s", desc="Registration method")
+    copy_inputs = traits.Bool(desc="If running as a node, set this to True." +
+                              "This will copy the input files to the node " +
+                              "directory.")
+
+class Label2LabelOutputSpec(TraitedSpec):
+    out_file = File(exists=True, desc='Output label')
+
+
+class Label2Label(FSCommand):
+    """
+    Converts a label in one subject's space to a label
+    in another subject's space using either talairach or spherical
+    as an intermediate registration space.
+
+    If a source mask is used, then the input label must have been
+    created from a surface (ie, the vertex numbers are valid). The
+    format can be anything supported by mri_convert or curv or paint.
+    Vertices in the source label that do not meet threshold in the
+    mask will be removed from the label.
+
+    Examples
+    --------
+    >>> from nipype.interfaces.freesurfer import Label2Label
+    >>> l2l = Label2Label()
+    >>> l2l.inputs.hemisphere = 'lh'
+    >>> l2l.inputs.subject_id = '10335'
+    >>> l2l.inputs.sphere_reg = 'lh.pial'
+    >>> l2l.inputs.white = 'lh.pial'
+    >>> l2l.inputs.source_subject = 'fsaverage'
+    >>> l2l.inputs.source_label = 'lh-pial.stl'
+    >>> l2l.inputs.source_white = 'lh.pial'
+    >>> l2l.inputs.source_sphere_reg = 'lh.pial'
+    >>> l2l.cmdline
+    'mri_label2label --hemi lh --trglabel lh-pial_converted.stl --regmethod surface --srclabel lh-pial.stl --srcsubject fsaverage --trgsubject 10335'
+    """
+
+    _cmd = 'mri_label2label'
+    input_spec = Label2LabelInputSpec
+    output_spec = Label2LabelOutputSpec
+
+    def _list_outputs(self):
+        outputs = self._outputs().get()
+        outputs['out_file'] = os.path.join(self.inputs.subjects_dir,
+                                           self.inputs.subject_id,
+                                           'label',
+                                           self.inputs.out_file)
+        return outputs
+
+    def run(self, **inputs):
+        if self.inputs.copy_inputs:
+            self.inputs.subjects_dir = os.getcwd()
+            if 'subjects_dir' in inputs:
+                inputs['subjects_dir'] = self.inputs.subjects_dir
+            hemi = self.inputs.hemisphere
+            copy2subjdir(self, self.inputs.sphere_reg, 'surf',
+                         '{0}.sphere.reg'.format(hemi))
+            copy2subjdir(self, self.inputs.white, 'surf',
+                         '{0}.white'.format(hemi))
+            copy2subjdir(self, self.inputs.source_sphere_reg, 'surf',
+                         '{0}.sphere.reg'.format(hemi),
+                         subject_id=self.inputs.source_subject)
+            copy2subjdir(self, self.inputs.source_white, 'surf',
+                         '{0}.white'.format(hemi),
+                         subject_id=self.inputs.source_subject)
+
+        # label dir must exist in order for output file to be written
+        label_dir = os.path.join(self.inputs.subjects_dir,
+                                 self.inputs.subject_id,
+                                 'label')
+        if not os.path.isdir(label_dir):
+            os.makedirs(label_dir)
+
+        return super(Label2Label, self).run(**inputs)
+
+
+class Label2AnnotInputSpec(FSTraitedSpec):
+    # required
+    hemisphere = traits.Enum('lh', 'rh',
+                             argstr="--hemi %s", mandatory=True,
+                             desc="Input hemisphere")
+    subject_id = traits.String('subject_id', usedefault=True,
+                               argstr="--s %s", mandatory=True,
+                               desc="Subject name/ID")
+    in_labels = traits.List(argstr="--l %s...", mandatory=True,
+                            desc="List of input label files")
+    out_annot = traits.String(argstr="--a %s", mandatory=True,
+                              desc="Name of the annotation to create")
+    orig = File(exists=True, mandatory=True,
+                desc="implicit {hemisphere}.orig")
+    # optional
+    keep_max = traits.Bool(argstr="--maxstatwinner",
+                           desc="Keep label with highest 'stat' value")
+    verbose_off = traits.Bool(argstr="--noverbose",
+                              desc="Turn off overlap and stat override messages")
+    color_table = File(argstr="--ctab %s", exists=True,
+                       desc="File that defines the structure names, their indices, and their color")
+    copy_inputs = traits.Bool(desc="copy implicit inputs and create a temp subjects_dir")
+
+
+class Label2AnnotOutputSpec(TraitedSpec):
+    out_file = File(exists=True, desc='Output annotation file')
+
+
+class Label2Annot(FSCommand):
+    """
+    Converts a set of surface labels to an annotation file
+
+    Examples
+    --------
+    >>> from nipype.interfaces.freesurfer import Label2Annot
+    >>> l2a = Label2Annot()
+    >>> l2a.inputs.hemisphere = 'lh'
+    >>> l2a.inputs.subject_id = '10335'
+    >>> l2a.inputs.in_labels = ['lh.aparc.label']
+    >>> l2a.inputs.orig = 'lh.pial'
+    >>> l2a.inputs.out_annot = 'test'
+    >>> l2a.cmdline
+    'mris_label2annot --hemi lh --l lh.aparc.label --a test --s 10335'
+    """
+
+    _cmd = 'mris_label2annot'
+    input_spec = Label2AnnotInputSpec
+    output_spec = Label2AnnotOutputSpec
+
+    def run(self, **inputs):
+        if self.inputs.copy_inputs:
+            self.inputs.subjects_dir = os.getcwd()
+            if 'subjects_dir' in inputs:
+                inputs['subjects_dir'] = self.inputs.subjects_dir
+            copy2subjdir(self, self.inputs.orig,
+                         folder='surf',
+                         basename='{0}.orig'.format(self.inputs.hemisphere))
+        # label dir must exist in order for output file to be written
+        label_dir = os.path.join(self.inputs.subjects_dir,
+                                 self.inputs.subject_id,
+                                 'label')
+        if not os.path.isdir(label_dir):
+            os.makedirs(label_dir)
+        return super(Label2Annot, self).run(**inputs)
+
+    def _list_outputs(self):
+        outputs = self._outputs().get()
+        outputs["out_file"] = os.path.join(str(self.inputs.subjects_dir),
+                                           str(self.inputs.subject_id),
+                                           'label',
+                                           str(self.inputs.hemisphere) + '.' + str(self.inputs.out_annot) + '.annot')
+        return outputs
+
+
+class SphericalAverageInputSpec(FSTraitedSpec):
+    out_file = File(argstr="%s", genfile=True, exists=False,
+                    position=-1, desc="Output filename")
+    in_average = traits.Directory(argstr="%s", exists=True, genfile=True,
+                                  position=-2, desc="Average subject")
+    in_surf = File(argstr="%s", mandatory=True, exists=True,
+                   position=-3, desc="Input surface file")
+    hemisphere = traits.Enum('lh', 'rh', argstr="%s", mandatory=True,
+                             position=-4, desc="Input hemisphere")
+    fname = traits.String(argstr="%s", mandatory=True, position=-5,
+                          desc="""Filename from the average subject directory.
+                          Example: to use rh.entorhinal.label as the input label
+                          filename, set fname to 'rh.entorhinal' and which to
+                          'label'. The program will then search for
+                          '{in_average}/label/rh.entorhinal.label'
+                          """)
+    which = traits.Enum('coords', 'label', 'vals', 'curv', 'area',
+                        argstr="%s", mandatory=True, position=-6, desc="No documentation")
+    subject_id = traits.String(
+        argstr="-o %s", mandatory=True, desc="Output subject id")
+    # optional
+    erode = traits.Int(argstr="-erode %d", desc="Undocumented")
+    in_orig = File(argstr="-orig %s", exists=True,
+                   desc="Original surface filename")
+    threshold = traits.Float(argstr="-t %.1f", desc="Undocumented")
+
+
+class SphericalAverageOutputSpec(TraitedSpec):
+    out_file = File(exists=False, desc='Output label')
+
+
+class SphericalAverage(FSCommand):
+    """
+    This program will add a template into an average surface.
+
+    Examples
+    --------
+    >>> from nipype.interfaces.freesurfer import SphericalAverage
+    >>> sphericalavg = SphericalAverage()
+    >>> sphericalavg.inputs.out_file = 'test.out'
+    >>> sphericalavg.inputs.in_average = '.'
+    >>> sphericalavg.inputs.in_surf = 'lh.pial'
+    >>> sphericalavg.inputs.hemisphere = 'lh'
+    >>> sphericalavg.inputs.fname = 'lh.entorhinal'
+    >>> sphericalavg.inputs.which = 'label'
+    >>> sphericalavg.inputs.subject_id = '10335'
+    >>> sphericalavg.inputs.erode = 2
+    >>> sphericalavg.inputs.threshold = 5
+    >>> sphericalavg.cmdline
+    'mris_spherical_average -erode 2 -o 10335 -t 5.0 label lh.entorhinal lh pial . test.out'
+    """
+
+    _cmd = 'mris_spherical_average'
+    input_spec = SphericalAverageInputSpec
+    output_spec = SphericalAverageOutputSpec
+
+    def _format_arg(self, name, spec, value):
+        if name == 'in_orig' or name == 'in_surf':
+            surf = os.path.basename(value)
+            for item in ['lh.', 'rh.']:
+                surf = surf.replace(item, '')
+            return spec.argstr % surf
+        return super(SphericalAverage, self)._format_arg(name, spec, value)
+
+    def _gen_filename(self, name):
+        if name == 'in_average':
+            avg_subject = str(self.inputs.hemisphere) + '.EC_average'
+            avg_directory = os.path.join(self.inputs.subjects_dir, avg_subject)
+            if not os.path.isdir(avg_directory):
+                fs_home = os.path.abspath(os.environ.get('FREESURFER_HOME'))
+                avg_home = os.path.join(fs_home, 'subjects', 'fsaverage')
+            return avg_subject
+        elif name == 'out_file':
+            return self._list_outputs()[name]
+        else:
+            return None
+
+    def _list_outputs(self):
+        outputs = self._outputs().get()
+        if isdefined(self.inputs.out_file):
+            outputs['out_file'] = os.path.abspath(self.inputs.out_file)
+        else:
+            out_dir = os.path.join(
+                self.inputs.subjects_dir, self.inputs.subject_id, 'label')
+            if isdefined(self.inputs.in_average):
+                basename = os.path.basename(self.inputs.in_average)
+                basename = basename.replace('_', '_exvivo_') + '.label'
+            else:
+                basename = str(self.inputs.hemisphere) + '.EC_exvivo_average.label'
+            outputs['out_file'] = os.path.join(out_dir, basename)
+        return outputs

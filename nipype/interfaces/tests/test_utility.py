@@ -63,7 +63,6 @@ def test_function():
     f2 = pe.MapNode(utility.Function(input_names=['in_array'], output_names=['out_array'], function=increment_array), name='increment_array', iterfield=['in_array'])
 
     wf.connect(f1, 'random_array', f2, 'in_array')
-
     wf.run()
 
     # Clean up
@@ -167,3 +166,57 @@ def test_csvReader():
                 yield assert_equal, out.outputs.column_1, ['hello', 'world', 'goodbye']
                 yield assert_equal, out.outputs.column_2, ['300.1', '5', '0.3']
         os.unlink(name)
+
+
+def test_aux_connect_function():
+    """ This tests excution nodes with multiple inputs and auxiliary
+    function inside the Workflow connect function.
+    """
+    tempdir = os.path.realpath(mkdtemp())
+    origdir = os.getcwd()
+    os.chdir(tempdir)
+
+    wf = pe.Workflow(name="test_workflow")
+
+    def _gen_tuple(size):
+        return [1, ] * size
+
+    def _sum_and_sub_mul(a, b, c):
+        return (a+b)*c, (a-b)*c
+
+    def _inc(x):
+        return x + 1
+
+    params = pe.Node(utility.IdentityInterface(fields=['size', 'num']), name='params')
+    params.inputs.num  = 42
+    params.inputs.size = 1
+
+    gen_tuple = pe.Node(utility.Function(input_names=['size'],
+                                         output_names=['tuple'],
+                                         function=_gen_tuple),
+                                         name='gen_tuple')
+
+    ssm = pe.Node(utility.Function(input_names=['a', 'b', 'c'],
+                                   output_names=['sum', 'sub'],
+                                   function=_sum_and_sub_mul),
+                                   name='sum_and_sub_mul')
+
+    split = pe.Node(utility.Split(splits=[1, 1],
+                                  squeeze=True),
+                    name='split')
+
+
+    wf.connect([
+                (params,    gen_tuple,  [(("size", _inc),   "size")]),
+                (params,    ssm,        [(("num", _inc),    "c")]),
+                (gen_tuple, split,      [("tuple",          "inlist")]),
+                (split,     ssm,        [(("out1", _inc),   "a"),
+                                         ("out2",           "b"),
+                                        ]),
+                ])
+
+    wf.run()
+
+    # Clean up
+    os.chdir(origdir)
+    shutil.rmtree(tempdir)

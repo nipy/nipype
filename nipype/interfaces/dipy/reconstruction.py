@@ -276,9 +276,9 @@ class EstimateResponseSH(DipyDiffusionInterface):
 class CSDInputSpec(DipyBaseInterfaceInputSpec):
     in_mask = File(exists=True, desc=('input mask in which compute tensors'))
     response = File(exists=True, desc=('single fiber estimated response'))
-    sh_order = traits.Int(8, exists=True, usedefault=True,
+    sh_order = traits.Int(8, usedefault=True,
                           desc=('maximal shperical harmonics order'))
-    save_fods = traits.Bool(True, exists=True, usedefault=True,
+    save_fods = traits.Bool(True, usedefault=True,
                             desc=('save fODFs in file'))
     out_fods = File(desc=('fODFs output file name'))
 

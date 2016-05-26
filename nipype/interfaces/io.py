@@ -211,8 +211,7 @@ class DataSinkInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
     encrypt_bucket_keys = traits.Bool(desc='Flag indicating whether to use S3 '\
                                         'server-side AES-256 encryption')
     # Set this if user wishes to override the bucket with their own
-    bucket = traits.Generic(mandatory=False,
-                            desc='Boto3 S3 bucket for manual override of bucket')
+    bucket = traits.Any(desc='Boto3 S3 bucket for manual override of bucket')
     # Set this if user wishes to have local copy of files as well
     local_copy = traits.Str(desc='Copy files locally as well as to S3 bucket')
 

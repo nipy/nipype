@@ -25,8 +25,7 @@ from .epi import (PrepareFieldmap, TOPUP, ApplyTOPUP, Eddy, EPIDeWarp,
 from .dti import (BEDPOSTX, XFibres, DTIFit,
                   ProbTrackX, ProbTrackX2,
                   VecReg, ProjThresh, FindTheBiggest, DistanceMap,
-                  TractSkeleton, MakeDyadicVectors, BEDPOSTX5, XFibres5,
-                  BEDPOSTX4, XFibres4)
+                  TractSkeleton, MakeDyadicVectors, BEDPOSTX5, XFibres5)
 from .maths import (ChangeDataType, Threshold, MeanImage, ApplyMask,
                     IsotropicSmooth, TemporalFilter, DilateImage, ErodeImage,
                     SpatialFilter, UnaryMaths, BinaryMaths, MultiImageMaths)

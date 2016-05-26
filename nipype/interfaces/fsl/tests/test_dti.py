@@ -47,35 +47,6 @@ def clean_directory(outdir, old_wd):
     os.chdir(old_wd)
 
 
-# test bedpostx
-@skipif(no_fsl)
-def test_oldbedpostx2():
-    filelist, outdir, cwd = create_files_in_directory()
-    bpx = fsl.BEDPOSTX()
-
-    # make sure command gets called
-    yield assert_equal, bpx.cmd, 'bedpostx'
-
-    # test raising error with mandatory args absent
-    yield assert_raises, ValueError, bpx.run
-
-    # .inputs based parameters setting
-    bpx2 = fsl.BEDPOSTX4()
-    bpx2.inputs.mask = example_data('mask.nii')
-    bpx2.inputs.dwi = example_data('diffusion.nii')
-    bpx2.inputs.bvals = example_data('bvals')
-    bpx2.inputs.bvecs = example_data('bvecs')
-    bpx2.inputs.fibres = 2
-    bpx2.inputs.weight = 0.3
-    bpx2.inputs.burn_period = 200
-    bpx2.inputs.jumps = 500
-    bpx2.inputs.sampling = 20
-    actualCmdline = sorted(bpx2.cmdline.split())
-    cmd = 'bedpostx bedpostx -b 200 -n 2 -j 500 -s 20 -w 0.30 --forcedir --logdir=logdir'
-    desiredCmdline = sorted(cmd.split())
-    yield assert_equal, actualCmdline, desiredCmdline
-
-
 # test dtifit
 @skipif(no_fsl)
 def test_dtifit2():
