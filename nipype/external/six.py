@@ -21,6 +21,7 @@
 # SOFTWARE.
 
 from __future__ import absolute_import
+from future.utils import raise_from
 
 import functools
 import itertools
@@ -186,8 +187,8 @@ class _SixMetaPathImporter(object):
     def __get_module(self, fullname):
         try:
             return self.known_modules[fullname]
-        except KeyError:
-            raise ImportError("This loader does not know module " + fullname)
+        except KeyError as e:
+            raise_from(ImportError("This loader does not know module " + fullname), e)
 
     def load_module(self, fullname):
         try:

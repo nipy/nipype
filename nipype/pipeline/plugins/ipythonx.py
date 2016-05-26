@@ -4,6 +4,7 @@
 """
 
 import sys
+from future.utils import raise_from
 
 IPython_not_loaded = False
 try:
@@ -36,16 +37,16 @@ class IPythonXPlugin(DistributedPluginBase):
             name = 'IPython.kernel.client'
             __import__(name)
             self.ipyclient = sys.modules[name]
-        except ImportError:
-            raise ImportError("Ipython kernel not found. Parallel execution "
-                              "will be unavailable")
+        except ImportError as e:
+            raise_from(ImportError("Ipython kernel not found. Parallel execution "
+                                   "will be unavailable"), e)
         try:
             self.taskclient = self.ipyclient.TaskClient()
         except Exception as e:
             if isinstance(e, ConnectionRefusedError):
-                raise Exception("No IPython clients found.")
+                raise_from(Exception("No IPython clients found."), e)
             if isinstance(e, ValueError):
-                raise Exception("Ipython kernel not installed")
+                raise_from(Exception("Ipython kernel not installed"), e)
         return super(IPythonXPlugin, self).run(graph, config, updatehash=updatehash)
 
     def _get_result(self, taskid):
