@@ -25,13 +25,14 @@ or::
 
         git clone https://github.com/nipy/nipype.git
 
+Check out the list of nipype's `current dependencies <https://github.com/nipy/nipype/blob/master/requirements.txt>`_.
+
 Install
 -------
 
 The installation process is similar to other Python packages.
 
-If you already have a Python environment setup that has the dependencies listed
-below, you can do::
+If you already have a Python environment set up, you can do::
 
 	easy_install nipype
 
@@ -78,6 +79,10 @@ you can also test with nosetests::
 
     nosetests --with-doctest <installation filepath>/nipype  --exclude=external --exclude=testing
 
+or::
+
+    nosetests --with-doctest nipype
+
 A successful test run should complete in a few minutes and end with
 something like::
 
@@ -108,37 +113,8 @@ On unix systems, set an empty environment variable::
 
 This will skip any tests that require matlab.
 
-Dependencies
+Recommended Software
 ------------
-
-Below is a list of required dependencies, along with additional software
-recommendations.
-
-Must Have
-~~~~~~~~~
-
-.. note::
-
-    Full distributions of Nipype, such as the ones in  Anaconda_ or Canopy_, provide
-    the following packages automatically.
-
-Nibabel_ 1.0 - 1.4
-  Neuroimaging file i/o library.
-
-Python_ 2.7 or Python_ 3
-
-NetworkX_ 1.0 - 1.8
-  Python package for working with complex networks.
-
-NumPy_ 1.3 - 1.7
-
-SciPy_ 0.7 - 0.12
-  Numpy and Scipy are high-level, optimized scientific computing libraries.
-
-Enthought_ Traits_ 4.0.0 - 4.3.0
-
-Dateutil 1.5 -
-
 
 Strong Recommendations
 ~~~~~~~~~~~~~~~~~~~~~~
