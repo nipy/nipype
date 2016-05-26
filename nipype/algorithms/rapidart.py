@@ -362,10 +362,7 @@ class ArtifactDetect(BaseInterface):
                 nim = funcs.concat_images(images)
 
         # compute global intensity signal
-        try:
-            (x, y, z, timepoints) = nim.shape
-        except ValueError as ve:
-            raise NipypeInterfaceError(ve, 'Check dimensions of input image; 4-D input required.')
+        (x, y, z, timepoints) = nim.shape
 
         data = nim.get_data()
         affine = nim.affine
