@@ -5,7 +5,6 @@
 
 from future import standard_library
 standard_library.install_aliases()
-from future.utils import raise_from
 
 from pickle import dumps
 
@@ -64,20 +63,19 @@ class IPythonPlugin(DistributedPluginBase):
             name = 'ipyparallel'
             __import__(name)
             self.iparallel = sys.modules[name]
-        except ImportError as e:
-            raise_from(ImportError("Ipython kernel not found. Parallel execution "
-                                   "will be unavailable"), e)
+        except ImportError:
+            raise ImportError("Ipython kernel not found. Parallel execution "
+                              "will be unavailable")
         try:
             self.taskclient = self.iparallel.Client()
         except Exception as e:
             if isinstance(e, TimeoutError):
-                raise_from(Exception("No IPython clients found."), e)
+                raise Exception("No IPython clients found.")
             if isinstance(e, IOError):
-                raise_from(Exception("ipcluster/ipcontroller has not been started"), e)
+                raise Exception("ipcluster/ipcontroller has not been started")
             if isinstance(e, ValueError):
-                raise_from(Exception("Ipython kernel not installed"), e)
-            else:
-                raise e
+                raise Exception("Ipython kernel not installed")
+            raise e
         return super(IPythonPlugin, self).run(graph, config, updatehash=updatehash)
 
     def _get_result(self, taskid):

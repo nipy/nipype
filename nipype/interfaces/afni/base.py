@@ -5,7 +5,6 @@
 import os
 from sys import platform
 from builtins import object
-from future.utils import raise_from
 
 from ... import logging
 from ...utils.filemanip import split_filename
@@ -83,9 +82,9 @@ class Info(object):
 
         try:
             return cls.ftypes[outputtype]
-        except KeyError as e:
+        except KeyError:
             msg = 'Invalid AFNIOUTPUTTYPE: ', outputtype
-            raise_from(KeyError(msg), e)
+            raise KeyError(msg)
 
     @classmethod
     def outputtype(cls):

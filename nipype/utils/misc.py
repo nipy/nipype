@@ -5,7 +5,6 @@
 
 from future import standard_library
 standard_library.install_aliases()
-from future.utils import raise_from
 from builtins import next
 from pickle import dumps, loads
 import inspect
@@ -91,14 +90,14 @@ def create_function_from_source(function_source, imports=None):
             import_keys = list(ns.keys())
         exec(function_source, ns)
 
-    except Exception as e:
-        msg = '\nError executing function:\n %s\n' % function_source
+    except Exception as msg:
+        msg = str(msg) + '\nError executing function:\n %s\n' % function_source
         msg += '\n'.join(["Functions in connection strings have to be standalone.",
                           "They cannot be declared either interactively or inside",
                           "another function or inline in the connect string. Any",
                           "imports should be done inside the function"
                           ])
-        raise_from(RuntimeError(msg), e)
+        raise RuntimeError(msg)
     ns_funcs = list(set(ns) - set(import_keys + ['__builtins__']))
     assert len(ns_funcs) == 1, "Function or inputs are ill-defined"
     funcname = ns_funcs[0]
@@ -200,14 +199,14 @@ def package_check(pkg_name, version=None, app=None, checker=LooseVersion,
         msg += ' with version >= %s' % (version,)
     try:
         mod = __import__(pkg_name)
-    except ImportError as e:
-        raise_from(exc_failed_import(msg), e)
+    except ImportError:
+        raise exc_failed_import(msg)
     if not version:
         return
     try:
         have_version = mod.__version__
-    except AttributeError as e:
-        raise_from(exc_failed_check('Cannot find version for %s' % pkg_name), e)
+    except AttributeError:
+        raise exc_failed_check('Cannot find version for %s' % pkg_name)
     if checker(have_version) < checker(version):
         raise exc_failed_check(msg)
 
