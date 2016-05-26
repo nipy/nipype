@@ -1,8 +1,4 @@
-asdf;alksjahgldhjgioae
-
-
 from __future__ import print_function
-from future.utils import raise_from
 
 import os.path as op
 
@@ -463,9 +459,9 @@ def create_average_networks_by_group_workflow(group_list, data_dir, subjects_dir
     try:
         l4infosource.inputs.group_id1 = list(group_list.keys())[0]
         l4infosource.inputs.group_id2 = list(group_list.keys())[1]
-    except IndexError as e:
+    except IndexError:
         print('The create_average_networks_by_group_workflow requires 2 groups')
-        raise_from(Exception(), e)
+        raise Exception
 
     l4info = dict(networks=[['group_id', '']], CMatrices=[['group_id', '']], fibmean=[['group_id', 'mean_fiber_length']],
                   fibdev=[['group_id', 'fiber_length_std']])
