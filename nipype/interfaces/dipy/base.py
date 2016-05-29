@@ -59,13 +59,8 @@ class DipyDiffusionInterface(DipyBaseInterface):
     def _get_gradient_table(self):
         bval = np.loadtxt(self.inputs.in_bval)
         bvec = np.loadtxt(self.inputs.in_bvec).T
-        try:
-            from dipy.data import GradientTable
-            gtab = GradientTable(bvec)
-            gtab.bvals = bval
-        except NameError:
-            from dipy.core.gradients import gradient_table
-            gtab = gradient_table(bval, bvec)
+        from dipy.core.gradients import gradient_table
+        gtab = gradient_table(bval, bvec)
 
         gtab.b0_threshold = self.inputs.b0_thres
         return gtab
