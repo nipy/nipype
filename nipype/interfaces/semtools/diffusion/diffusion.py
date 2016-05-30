@@ -244,6 +244,8 @@ class DWIConvertInputSpec(CommandLineInputSpec):
     outputDirectory = traits.Either(traits.Bool, Directory(), hash_files=False, desc="Directory holding the output NRRD file", argstr="--outputDirectory %s")
     gradientVectorFile = traits.Either(traits.Bool, File(), hash_files=False, desc="Text file giving gradient vectors", argstr="--gradientVectorFile %s")
     smallGradientThreshold = traits.Float(desc="If a gradient magnitude is greater than 0 and less than smallGradientThreshold, then DWIConvert will display an error message and quit, unless the useBMatrixGradientDirections option is set.", argstr="--smallGradientThreshold %f")
+    allowLossyConversion = traits.Bool(desc="The only supported output type is \'short\'. Conversion from images of a different type may cause data loss due to rounding or truncation. Use with caution!", argstr="--allowLossyConversion ")
+    transposeInputBVectors = traits.Bool(desc="FSL input BVectors are expected to be encoded in the input file as one vector per line. If it is not the case, use this option to transpose the file as it is read.", argstr="--transposeInputBVectors ")
 
 
 class DWIConvertOutputSpec(TraitedSpec):
