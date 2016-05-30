@@ -9,7 +9,7 @@ from ...interfaces.base import LooseVersion
 IPython_not_loaded = False
 try:
     from IPython import __version__ as IPyversion
-    if LooseVersion(IPyversion) < LooseVersion(0.11):
+    if LooseVersion(IPyversion) < LooseVersion('0.11'):
         from IPython.kernel.contexts import ConnectionRefusedError
 except ImportError:
     IPython_not_loaded = True
