@@ -5,11 +5,13 @@
 
 import sys
 
+from ...interfaces.base import LooseVersion
 IPython_not_loaded = False
 try:
     from IPython import __version__ as IPyversion
-    from IPython.kernel.contexts import ConnectionRefusedError
-except:
+    if LooseVersion(IPyversion) < LooseVersion(0.11):
+        from IPython.kernel.contexts import ConnectionRefusedError
+except ImportError:
     IPython_not_loaded = True
 
 
@@ -21,6 +23,12 @@ class IPythonXPlugin(DistributedPluginBase):
     """
 
     def __init__(self, plugin_args=None):
+        if LooseVersion(IPyversion) > LooseVersion('0.10.1'):
+            raise EnvironmentError(('The IPythonX plugin can only be used with'
+                                    ' older IPython versions. Please use the '
+                                    'IPython plugin instead.'
+                                    ))
+        DeprecationWarning('This plugin will be deprecated as of version 0.13')
         if IPython_not_loaded:
             raise ImportError('ipyparallel could not be imported')
         super(IPythonXPlugin, self).__init__(plugin_args=plugin_args)
