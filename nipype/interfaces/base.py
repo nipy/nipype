@@ -748,6 +748,7 @@ class BaseInterface(Interface):
     _version = None
     _additional_metadata = []
     _redirect_x = False
+    references_ = []
 
     def __init__(self, **inputs):
         if not self.input_spec:
@@ -770,11 +771,23 @@ class BaseInterface(Interface):
             docstring = ['']
 
         allhelp = '\n'.join(docstring + cls._inputs_help() + [''] +
-                            cls._outputs_help() + [''])
+                            cls._outputs_help() + [''] +
+                            cls._refs_help() + [''])
         if returnhelp:
             return allhelp
         else:
             print(allhelp)
+
+    @classmethod
+    def _refs_help(cls):
+        """ Prints interface references.
+        """
+        helpstr = ['References::']
+
+        for r in cls.references_:
+            helpstr += [repr(r['entry'])]
+
+        return helpstr
 
     @classmethod
     def _get_trait_desc(self, inputs, name, spec):
@@ -1000,6 +1013,13 @@ class BaseInterface(Interface):
         """
         raise NotImplementedError
 
+    def _duecredit_cite(self):
+        """ Add the interface references to the duecredit citations
+        """
+        for r in self._references:
+            r['path'] = self.__module__ # TODO: check if this is correct
+            due.cite(**r, path=self.__module__)
+
     def run(self, **inputs):
         """Execute this interface.
 
@@ -1019,6 +1039,8 @@ class BaseInterface(Interface):
         self._check_mandatory_inputs()
         self._check_version_requirements(self.inputs)
         interface = self.__class__
+        self._duecredit_cite()
+
         # initialize provenance tracking
         env = deepcopy(dict(os.environ))
         runtime = Bunch(cwd=os.getcwd(),
@@ -1197,7 +1219,7 @@ class Stream(object):
 # Get number of threads for process
 def _get_num_threads(proc):
     """Function to get the number of threads a process is using
-    NOTE: If 
+    NOTE: If
 
     Parameters
     ----------
