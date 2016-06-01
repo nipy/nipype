@@ -2459,7 +2459,7 @@ class JSONFileGrabber(IOBase):
     >>> jsonSource.inputs.in_file = 'jsongrabber.txt'
     >>> res = jsonSource.run()
     >>> pprint.pprint(res.outputs.get())  # doctest: +NORMALIZE_WHITESPACE
-    {'param1': 'exampleStr', 'param2': 4, 'param3': 1.0}
+    {'param1': u'exampleStr', 'param2': 4, 'param3': 1.0}
 
 
     """
