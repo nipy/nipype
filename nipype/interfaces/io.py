@@ -2458,8 +2458,8 @@ class JSONFileGrabber(IOBase):
     {'param1': 'overrideMe', 'param3': 1.0}
     >>> jsonSource.inputs.in_file = 'jsongrabber.txt'
     >>> res = jsonSource.run()
-    >>> pprint.pprint(res.outputs.get())  # doctest: +NORMALIZE_WHITESPACE
-    {'param1': u'exampleStr', 'param2': 4, 'param3': 1.0}
+    >>> pprint.pprint(res.outputs.get())  # doctest: +NORMALIZE_WHITESPACE, +ELLIPSIS
+    {'param1': ...'exampleStr', 'param2': 4, 'param3': 1.0}
 
 
     """
