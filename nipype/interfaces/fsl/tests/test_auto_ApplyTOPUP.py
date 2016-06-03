@@ -22,7 +22,6 @@ def test_ApplyTOPUP_inputs():
     sep=',',
     ),
     in_index=dict(argstr='--inindex=%s',
-    mandatory=True,
     sep=',',
     ),
     in_topup_fieldcoef=dict(argstr='--topup=%s',
