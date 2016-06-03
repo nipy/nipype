@@ -42,4 +42,4 @@ acknowledgements: This command module was derived from Insight/Examples (copyrig
     input_spec = SimpleRegionGrowingSegmentationInputSpec
     output_spec = SimpleRegionGrowingSegmentationOutputSpec
     _cmd = "SimpleRegionGrowingSegmentation "
-    _outputs_filenames = {'outputVolume':'outputVolume.nii'}
+    _outputs_filenames = {'outputVolume': 'outputVolume.nii'}

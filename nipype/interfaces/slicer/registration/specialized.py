@@ -39,7 +39,7 @@ acknowledgements: This work is part of the National Alliance for Medical Image C
     input_spec = ACPCTransformInputSpec
     output_spec = ACPCTransformOutputSpec
     _cmd = "ACPCTransform "
-    _outputs_filenames = {'outputTransform':'outputTransform.mat'}
+    _outputs_filenames = {'outputTransform': 'outputTransform.mat'}
 
 
 class FiducialRegistrationInputSpec(CommandLineInputSpec):
@@ -75,7 +75,7 @@ acknowledgements: This work is part of the National Alliance for Medical Image C
     input_spec = FiducialRegistrationInputSpec
     output_spec = FiducialRegistrationOutputSpec
     _cmd = "FiducialRegistration "
-    _outputs_filenames = {'saveTransform':'saveTransform.txt'}
+    _outputs_filenames = {'saveTransform': 'saveTransform.txt'}
 
 
 class VBRAINSDemonWarpInputSpec(CommandLineInputSpec):
@@ -153,7 +153,7 @@ acknowledgements: The development of this tool was supported by funding from gra
     input_spec = VBRAINSDemonWarpInputSpec
     output_spec = VBRAINSDemonWarpOutputSpec
     _cmd = "VBRAINSDemonWarp "
-    _outputs_filenames = {'outputVolume':'outputVolume.nii','outputCheckerboardVolume':'outputCheckerboardVolume.nii','outputDisplacementFieldVolume':'outputDisplacementFieldVolume.nrrd'}
+    _outputs_filenames = {'outputVolume': 'outputVolume.nii', 'outputCheckerboardVolume': 'outputCheckerboardVolume.nii', 'outputDisplacementFieldVolume': 'outputDisplacementFieldVolume.nrrd'}
 
 
 class BRAINSDemonWarpInputSpec(CommandLineInputSpec):
@@ -230,4 +230,4 @@ acknowledgements: The development of this tool was supported by funding from gra
     input_spec = BRAINSDemonWarpInputSpec
     output_spec = BRAINSDemonWarpOutputSpec
     _cmd = "BRAINSDemonWarp "
-    _outputs_filenames = {'outputVolume':'outputVolume.nii','outputCheckerboardVolume':'outputCheckerboardVolume.nii','outputDisplacementFieldVolume':'outputDisplacementFieldVolume.nrrd'}
+    _outputs_filenames = {'outputVolume': 'outputVolume.nii', 'outputCheckerboardVolume': 'outputCheckerboardVolume.nii', 'outputDisplacementFieldVolume': 'outputDisplacementFieldVolume.nrrd'}

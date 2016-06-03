@@ -36,4 +36,4 @@ acknowledgements: This work is funded by NIH grants R01 CA111288 and U01 CA15126
     input_spec = BSplineToDeformationFieldInputSpec
     output_spec = BSplineToDeformationFieldOutputSpec
     _cmd = "BSplineToDeformationField "
-    _outputs_filenames = {'defImage':'defImage.nii'}
+    _outputs_filenames = {'defImage': 'defImage.nii'}

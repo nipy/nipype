@@ -7,12 +7,15 @@ import nipype.interfaces.base as nib
 from nipype.testing import assert_equal, skipif
 import nipype.pipeline.engine as pe
 
+
 class InputSpec(nib.TraitedSpec):
     input1 = nib.traits.Int(desc='a random int')
     input2 = nib.traits.Int(desc='a random int')
 
+
 class OutputSpec(nib.TraitedSpec):
     output1 = nib.traits.List(nib.traits.Int, desc='outputs')
+
 
 class TestInterface(nib.BaseInterface):
     input_spec = InputSpec
@@ -27,6 +30,7 @@ class TestInterface(nib.BaseInterface):
         outputs['output1'] = [1, self.inputs.input1]
         return outputs
 
+
 @skipif(True)
 def test_run_pbsgraph():
     cur_dir = os.getcwd()
@@ -34,15 +38,15 @@ def test_run_pbsgraph():
     os.chdir(temp_dir)
 
     pipe = pe.Workflow(name='pipe')
-    mod1 = pe.Node(interface=TestInterface(),name='mod1')
+    mod1 = pe.Node(interface=TestInterface(), name='mod1')
     mod2 = pe.MapNode(interface=TestInterface(),
                       iterfield=['input1'],
                       name='mod2')
-    pipe.connect([(mod1,mod2,[('output1','input1')])])
+    pipe.connect([(mod1, mod2, [('output1', 'input1')])])
     pipe.base_dir = os.getcwd()
     mod1.inputs.input1 = 1
     execgraph = pipe.run(plugin="PBSGraph")
-    names = ['.'.join((node._hierarchy,node.name)) for node in execgraph.nodes()]
+    names = ['.'.join((node._hierarchy, node.name)) for node in execgraph.nodes()]
     node = execgraph.nodes()[names.index('pipe.mod1')]
     result = node.get_output('output1')
     yield assert_equal, result, [1, 1]

@@ -6,6 +6,7 @@ Paper: Smoothing comparison
 ===========================
 """
 
+from builtins import range
 
 import nipype.interfaces.io as nio           # Data i/o
 import nipype.interfaces.spm as spm          # spm
@@ -25,10 +26,10 @@ iter_fwhm = pe.Node(interface=util.IdentityInterface(fields=["fwhm"]),
 iter_fwhm.iterables = [('fwhm', [4, 8])]
 
 iter_smoothing_method = pe.Node(interface=util.IdentityInterface(fields=["smoothing_method"]),
-                    name="iter_smoothing_method")
-iter_smoothing_method.iterables = [('smoothing_method',['isotropic_voxel',
-                                           'anisotropic_voxel',
-                                           'isotropic_surface'])]
+                                name="iter_smoothing_method")
+iter_smoothing_method.iterables = [('smoothing_method', ['isotropic_voxel',
+                                                         'anisotropic_voxel',
+                                                         'isotropic_surface'])]
 
 realign = pe.Node(interface=spm.Realign(), name="realign")
 realign.inputs.register_to_mean = True
@@ -53,17 +54,16 @@ preprocessing.connect(compute_mask, "brain_mask", anisotropic_voxel_smooth,
                       'inputnode.mask_file')
 
 
+recon_all = pe.Node(interface=fs.ReconAll(), name="recon_all")
 
-recon_all = pe.Node(interface=fs.ReconAll(), name = "recon_all")
-
-surfregister = pe.Node(interface=fs.BBRegister(),name='surfregister')
+surfregister = pe.Node(interface=fs.BBRegister(), name='surfregister')
 surfregister.inputs.init = 'fsl'
 surfregister.inputs.contrast_type = 't2'
 preprocessing.connect(realign, 'mean_image', surfregister, 'source_file')
 preprocessing.connect(recon_all, 'subject_id', surfregister, 'subject_id')
 preprocessing.connect(recon_all, 'subjects_dir', surfregister, 'subjects_dir')
 
-isotropic_surface_smooth = pe.MapNode(interface=fs.Smooth(proj_frac_avg=(0,1,0.1)),
+isotropic_surface_smooth = pe.MapNode(interface=fs.Smooth(proj_frac_avg=(0, 1, 0.1)),
                                       iterfield=['in_file'],
                                       name="isotropic_surface_smooth")
 preprocessing.connect(surfregister, 'out_reg_file', isotropic_surface_smooth,
@@ -90,9 +90,10 @@ select_smoothed_files = pe.Node(interface=util.Select(),
 preprocessing.connect(merge_smoothed_files, 'out', select_smoothed_files,
                       'inlist')
 
+
 def chooseindex(roi):
-    return {'isotropic_voxel':range(0,4), 'anisotropic_voxel':range(4,8),
-            'isotropic_surface':range(8,12)}[roi]
+    return {'isotropic_voxel': list(range(0, 4)), 'anisotropic_voxel': list(range(4, 8)),
+            'isotropic_surface': list(range(8, 12))}[roi]
 
 preprocessing.connect(iter_smoothing_method, ("smoothing_method", chooseindex),
                       select_smoothed_files, 'index')
@@ -104,34 +105,34 @@ rename.inputs.parse_string = "(?P<orig>.*)"
 preprocessing.connect(select_smoothed_files, 'out', rename, 'in_file')
 
 specify_model = pe.Node(interface=model.SpecifyModel(), name="specify_model")
-specify_model.inputs.input_units             = 'secs'
-specify_model.inputs.time_repetition         = 3.
+specify_model.inputs.input_units = 'secs'
+specify_model.inputs.time_repetition = 3.
 specify_model.inputs.high_pass_filter_cutoff = 120
-specify_model.inputs.subject_info = [Bunch(conditions=['Task-Odd','Task-Even'],
-                                           onsets=[range(15,240,60),
-                                                   range(45,240,60)],
-                                           durations=[[15], [15]])]*4
+specify_model.inputs.subject_info = [Bunch(conditions=['Task-Odd', 'Task-Even'],
+                                           onsets=[list(range(15, 240, 60)),
+                                                   list(range(45, 240, 60))],
+                                           durations=[[15], [15]])] * 4
 
-level1design = pe.Node(interface=spm.Level1Design(), name= "level1design")
-level1design.inputs.bases = {'hrf':{'derivs': [0,0]}}
+level1design = pe.Node(interface=spm.Level1Design(), name="level1design")
+level1design.inputs.bases = {'hrf': {'derivs': [0, 0]}}
 level1design.inputs.timing_units = 'secs'
 level1design.inputs.interscan_interval = specify_model.inputs.time_repetition
 
 level1estimate = pe.Node(interface=spm.EstimateModel(), name="level1estimate")
-level1estimate.inputs.estimation_method = {'Classical' : 1}
+level1estimate.inputs.estimation_method = {'Classical': 1}
 
-contrastestimate = pe.Node(interface = spm.EstimateContrast(),
+contrastestimate = pe.Node(interface=spm.EstimateContrast(),
                            name="contrastestimate")
-contrastestimate.inputs.contrasts = [('Task>Baseline','T',
-                                      ['Task-Odd','Task-Even'],[0.5,0.5])]
+contrastestimate.inputs.contrasts = [('Task>Baseline', 'T',
+                                      ['Task-Odd', 'Task-Even'], [0.5, 0.5])]
 
 modelling = pe.Workflow(name="modelling")
 modelling.connect(specify_model, 'session_info', level1design, 'session_info')
 modelling.connect(level1design, 'spm_mat_file', level1estimate, 'spm_mat_file')
-modelling.connect(level1estimate,'spm_mat_file', contrastestimate,
+modelling.connect(level1estimate, 'spm_mat_file', contrastestimate,
                   'spm_mat_file')
-modelling.connect(level1estimate,'beta_images', contrastestimate,'beta_images')
-modelling.connect(level1estimate,'residual_image', contrastestimate,
+modelling.connect(level1estimate, 'beta_images', contrastestimate, 'beta_images')
+modelling.connect(level1estimate, 'residual_image', contrastestimate,
                   'residual_image')
 
 main_workflow = pe.Workflow(name="main_workflow")
@@ -145,12 +146,12 @@ main_workflow.connect(preprocessing, "compute_mask.brain_mask",
 
 datasource = pe.Node(interface=nio.DataGrabber(infields=['subject_id'],
                                                outfields=['func', 'struct']),
-                     name = 'datasource')
+                     name='datasource')
 datasource.inputs.base_directory = os.path.abspath('data')
 datasource.inputs.template = '%s/%s.nii'
 datasource.inputs.template_args = info = dict(func=[['subject_id',
-                                                     ['f3','f5','f7','f10']]],
-                                              struct=[['subject_id','struct']])
+                                                     ['f3', 'f5', 'f7', 'f10']]],
+                                              struct=[['subject_id', 'struct']])
 datasource.inputs.subject_id = 's1'
 datasource.inputs.sort_filelist = True
 

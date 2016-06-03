@@ -9,11 +9,12 @@ from nipype.testing import (assert_raises, assert_equal, assert_true,
                             assert_false, skipif)
 import nipype.pipeline.plugins.base as pb
 
+
 def test_scipy_sparse():
     foo = ssp.lil_matrix(np.eye(3, k=1))
     goo = foo.getrowview(0)
     goo[goo.nonzero()] = 0
-    yield assert_equal, foo[0,1], 0
+    yield assert_equal, foo[0, 1], 0
 
 '''
 Can use the following code to test that a mapnode crash continues successfully

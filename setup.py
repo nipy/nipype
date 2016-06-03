@@ -14,14 +14,14 @@ nibabel denoted by ## START - COPIED FROM NIBABEL and a corresponding ## END
 """Build helper."""
 
 import os
-from os.path import join as pjoin
 from glob import glob
 import sys
 from functools import partial
 
 # BEFORE importing distutils, remove MANIFEST. distutils doesn't properly
 # update it when the contents of directories change.
-if os.path.exists('MANIFEST'): os.remove('MANIFEST')
+if os.path.exists('MANIFEST'):
+    os.remove('MANIFEST')
 
 # For some commands, use setuptools.
 if len(set(('develop', 'bdist_egg', 'bdist_rpm', 'bdist', 'bdist_dumb',
@@ -36,7 +36,7 @@ from distutils.core import setup
 ''' Distutils / setuptools helpers from nibabel.nisext'''
 
 import os
-from os.path import join as pjoin, split as psplit, splitext
+from os.path import join as pjoin
 import sys
 PY3 = sys.version_info[0] >= 3
 if PY3:
@@ -50,9 +50,8 @@ except ImportError:
 
 from distutils.version import LooseVersion
 from distutils.command.build_py import build_py
-from distutils.command.install_scripts import install_scripts
-
 from distutils import log
+
 
 def get_comrec_build(pkg_dir, build_cmd=build_py):
     """ Return extended build command class for recording commit
@@ -173,7 +172,7 @@ def package_check(pkg_name, version=None,
        dependencies.  If dict fill key values ``install_requires`` and
        ``extras_require`` for non-optional and optional dependencies.
     '''
-    setuptools_mode = not setuptools_args is None
+    setuptools_mode = setuptools_args is not None
     optional_tf = bool(optional)
     if version_getter is None:
         def version_getter(pkg_name):
@@ -182,11 +181,11 @@ def package_check(pkg_name, version=None,
     if messages is None:
         messages = {}
     msgs = {
-         'missing': 'Cannot import package "%s" - is it installed?',
-         'missing opt': 'Missing optional package "%s"',
-         'opt suffix' : '; you may get run-time errors',
-         'version too old': 'You have version %s of package "%s"'
-                            ' but we need version >= %s', }
+        'missing': 'Cannot import package "%s" - is it installed?',
+        'missing opt': 'Missing optional package "%s"',
+        'opt suffix': '; you may get run-time errors',
+        'version too old': 'You have version %s of package "%s"'
+        ' but we need version >= %s', }
     msgs.update(messages)
     status, have_version = _package_status(pkg_name,
                                            version,
@@ -210,8 +209,8 @@ def package_check(pkg_name, version=None,
                                                           version))
         log.warn(msgs['version too old'] % (have_version,
                                             pkg_name,
-                                            version)
-                    + msgs['opt suffix'])
+                                            version) +
+                 msgs['opt suffix'])
         return
     # setuptools mode
     if optional_tf and not isinstance(optional, string_types):
@@ -220,13 +219,13 @@ def package_check(pkg_name, version=None,
     if version:
         dependency += '>=' + version
     if optional_tf:
-        if not 'extras_require' in setuptools_args:
+        if 'extras_require' not in setuptools_args:
             setuptools_args['extras_require'] = {}
         _add_append_key(setuptools_args['extras_require'],
                         optional,
                         dependency)
         return
-    #_add_append_key(setuptools_args, 'install_requires', dependency)
+    # add_append_key(setuptools_args, 'install_requires', dependency)
     return
 
 
@@ -257,11 +256,11 @@ if 'setuptools' in sys.modules:
         tests_require=['nose'],
         test_suite='nose.collector',
         zip_safe=False,
-        extras_require = dict(
+        extras_require=dict(
             doc='Sphinx>=0.3',
             test='nose>=0.10.1'),
     )
-    pkg_chk = partial(package_check, setuptools_args = extra_setuptools_args)
+    pkg_chk = partial(package_check, setuptools_args=extra_setuptools_args)
 else:
     extra_setuptools_args = {}
     pkg_chk = package_check
@@ -273,13 +272,21 @@ pkg_chk('numpy', NUMPY_MIN_VERSION)
 pkg_chk('scipy', SCIPY_MIN_VERSION)
 pkg_chk('traits', TRAITS_MIN_VERSION)
 pkg_chk('nose', NOSE_MIN_VERSION)
+pkg_chk('future', FUTURE_MIN_VERSION)
+pkg_chk('simplejson', SIMPLEJSON_MIN_VERSION)
+pkg_chk('prov', PROV_MIN_VERSION)
 custom_dateutil_messages = {'missing opt': ('Missing optional package "%s"'
                                             ' provided by package '
                                             '"python-dateutil"')}
 pkg_chk('dateutil', DATEUTIL_MIN_VERSION,
-        messages = custom_dateutil_messages)
+        messages=custom_dateutil_messages)
+
 
 def main(**extra_args):
+    thispath, _ = os.path.split(__file__)
+    testdatafiles = [pjoin('testing', 'data', val)
+                     for val in os.listdir(pjoin(thispath, 'nipype', 'testing', 'data'))
+                     if not os.path.isdir(pjoin(thispath, 'nipype', 'testing', 'data', val))]
     setup(name=NAME,
           maintainer=MAINTAINER,
           maintainer_email=MAINTAINER_EMAIL,
@@ -295,141 +302,146 @@ def main(**extra_args):
           version=VERSION,
           install_requires=REQUIRES,
           provides=PROVIDES,
-          packages     = [ 'nipype',
-                           'nipype.algorithms',
-                           'nipype.algorithms.tests',
-                           'nipype.caching',
-                           'nipype.caching.tests',
-                           'nipype.external',
-                           'nipype.fixes',
-                           'nipype.fixes.numpy',
-                           'nipype.fixes.numpy.testing',
-                           'nipype.interfaces',
-                           'nipype.interfaces.afni',
-                           'nipype.interfaces.afni.tests',
-                           'nipype.interfaces.ants',
-                           'nipype.interfaces.ants.tests',
-                           'nipype.interfaces.camino',
-                           'nipype.interfaces.camino.tests',
-                           'nipype.interfaces.camino2trackvis',
-                           'nipype.interfaces.camino2trackvis.tests',
-                           'nipype.interfaces.cmtk',
-                           'nipype.interfaces.cmtk.tests',
-                           'nipype.interfaces.diffusion_toolkit',
-                           'nipype.interfaces.diffusion_toolkit.tests',
-                           'nipype.interfaces.dipy',
-                           'nipype.interfaces.dipy.tests',
-                           'nipype.interfaces.elastix',
-                           'nipype.interfaces.elastix.tests',
-                           'nipype.interfaces.freesurfer',
-                           'nipype.interfaces.freesurfer.tests',
-                           'nipype.interfaces.fsl',
-                           'nipype.interfaces.fsl.tests',
-                           'nipype.interfaces.mipav',
-                           'nipype.interfaces.mipav.tests',
-                           'nipype.interfaces.mne',
-                           'nipype.interfaces.mne.tests',
-                           'nipype.interfaces.mrtrix',
-                           'nipype.interfaces.mrtrix.tests',
-                           'nipype.interfaces.nipy',
-                           'nipype.interfaces.nipy.tests',
-                           'nipype.interfaces.nitime',
-                           'nipype.interfaces.nitime.tests',
-                           'nipype.interfaces.script_templates',
-                           'nipype.interfaces.semtools',
-                           'nipype.interfaces.semtools.brains',
-                           'nipype.interfaces.semtools.brains.tests',
-                           'nipype.interfaces.semtools.diffusion',
-                           'nipype.interfaces.semtools.diffusion.tests',
-                           'nipype.interfaces.semtools.diffusion.tractography',
-                           'nipype.interfaces.semtools.diffusion.tractography.tests',
-                           'nipype.interfaces.semtools.filtering',
-                           'nipype.interfaces.semtools.filtering.tests',
-                           'nipype.interfaces.semtools.legacy',
-                           'nipype.interfaces.semtools.legacy.tests',
-                           'nipype.interfaces.semtools.registration',
-                           'nipype.interfaces.semtools.registration.tests',
-                           'nipype.interfaces.semtools.segmentation',
-                           'nipype.interfaces.semtools.segmentation.tests',
-                           'nipype.interfaces.semtools.testing',
-                           'nipype.interfaces.semtools.tests',
-                           'nipype.interfaces.semtools.utilities',
-                           'nipype.interfaces.semtools.utilities.tests',
-                           'nipype.interfaces.slicer',
-                           'nipype.interfaces.slicer.diffusion',
-                           'nipype.interfaces.slicer.diffusion.tests',
-                           'nipype.interfaces.slicer.filtering',
-                           'nipype.interfaces.slicer.filtering.tests',
-                           'nipype.interfaces.slicer.legacy',
-                           'nipype.interfaces.slicer.legacy.diffusion',
-                           'nipype.interfaces.slicer.legacy.diffusion.tests',
-                           'nipype.interfaces.slicer.legacy.tests',
-                           'nipype.interfaces.slicer.quantification',
-                           'nipype.interfaces.slicer.quantification.tests',
-                           'nipype.interfaces.slicer.registration',
-                           'nipype.interfaces.slicer.registration.tests',
-                           'nipype.interfaces.slicer.segmentation',
-                           'nipype.interfaces.slicer.segmentation.tests',
-                           'nipype.interfaces.slicer.tests',
-                           'nipype.interfaces.spm',
-                           'nipype.interfaces.spm.tests',
-                           'nipype.interfaces.tests',
-                           'nipype.interfaces.vista',
-                           'nipype.interfaces.vista.tests',
-                           'nipype.pipeline',
-                           'nipype.pipeline.plugins',
-                           'nipype.pipeline.plugins.tests',
-                           'nipype.pipeline.tests',
-                           'nipype.testing',
-                           'nipype.testing.data',
-                           'nipype.testing.data.bedpostxout',
-                           'nipype.testing.data.dicomdir',
-                           'nipype.testing.data.tbss_dir',
-                           'nipype.utils',
-                           'nipype.utils.tests',
-                           'nipype.workflows',
-                           'nipype.workflows.data',
-                           'nipype.workflows.dmri',
-                           'nipype.workflows.dmri.camino',
-                           'nipype.workflows.dmri.connectivity',
-                           'nipype.workflows.dmri.dipy',
-                           'nipype.workflows.dmri.fsl',
-                           'nipype.workflows.dmri.fsl.tests',
-                           'nipype.workflows.dmri.mrtrix',
-                           'nipype.workflows.fmri',
-                           'nipype.workflows.fmri.fsl',
-                           'nipype.workflows.fmri.fsl.tests',
-                           'nipype.workflows.fmri.spm',
-                           'nipype.workflows.fmri.spm.tests',
-                           'nipype.workflows.graph',
-                           'nipype.workflows.misc',
-                           'nipype.workflows.rsfmri',
-                           'nipype.workflows.rsfmri.fsl',
-                           'nipype.workflows.smri',
-                           'nipype.workflows.smri.ants',
-                           'nipype.workflows.smri.freesurfer',
-                           'nipype.workflows.warp'],
+          packages=['nipype',
+                    'nipype.algorithms',
+                    'nipype.algorithms.tests',
+                    'nipype.caching',
+                    'nipype.caching.tests',
+                    'nipype.external',
+                    'nipype.fixes',
+                    'nipype.fixes.numpy',
+                    'nipype.fixes.numpy.testing',
+                    'nipype.interfaces',
+                    'nipype.interfaces.afni',
+                    'nipype.interfaces.afni.tests',
+                    'nipype.interfaces.ants',
+                    'nipype.interfaces.ants.tests',
+                    'nipype.interfaces.camino',
+                    'nipype.interfaces.camino.tests',
+                    'nipype.interfaces.camino2trackvis',
+                    'nipype.interfaces.camino2trackvis.tests',
+                    'nipype.interfaces.cmtk',
+                    'nipype.interfaces.cmtk.tests',
+                    'nipype.interfaces.diffusion_toolkit',
+                    'nipype.interfaces.diffusion_toolkit.tests',
+                    'nipype.interfaces.dipy',
+                    'nipype.interfaces.dipy.tests',
+                    'nipype.interfaces.elastix',
+                    'nipype.interfaces.elastix.tests',
+                    'nipype.interfaces.freesurfer',
+                    'nipype.interfaces.freesurfer.tests',
+                    'nipype.interfaces.fsl',
+                    'nipype.interfaces.fsl.tests',
+                    'nipype.interfaces.minc',
+                    'nipype.interfaces.minc.tests',
+                    'nipype.interfaces.mipav',
+                    'nipype.interfaces.mipav.tests',
+                    'nipype.interfaces.mne',
+                    'nipype.interfaces.mne.tests',
+                    'nipype.interfaces.mrtrix',
+                    'nipype.interfaces.mrtrix3',
+                    'nipype.interfaces.mrtrix.tests',
+                    'nipype.interfaces.mrtrix3.tests',
+                    'nipype.interfaces.nipy',
+                    'nipype.interfaces.nipy.tests',
+                    'nipype.interfaces.nitime',
+                    'nipype.interfaces.nitime.tests',
+                    'nipype.interfaces.script_templates',
+                    'nipype.interfaces.semtools',
+                    'nipype.interfaces.semtools.brains',
+                    'nipype.interfaces.semtools.brains.tests',
+                    'nipype.interfaces.semtools.diffusion',
+                    'nipype.interfaces.semtools.diffusion.tests',
+                    'nipype.interfaces.semtools.diffusion.tractography',
+                    'nipype.interfaces.semtools.diffusion.tractography.tests',
+                    'nipype.interfaces.semtools.filtering',
+                    'nipype.interfaces.semtools.filtering.tests',
+                    'nipype.interfaces.semtools.legacy',
+                    'nipype.interfaces.semtools.legacy.tests',
+                    'nipype.interfaces.semtools.registration',
+                    'nipype.interfaces.semtools.registration.tests',
+                    'nipype.interfaces.semtools.segmentation',
+                    'nipype.interfaces.semtools.segmentation.tests',
+                    'nipype.interfaces.semtools.testing',
+                    'nipype.interfaces.semtools.tests',
+                    'nipype.interfaces.semtools.utilities',
+                    'nipype.interfaces.semtools.utilities.tests',
+                    'nipype.interfaces.slicer',
+                    'nipype.interfaces.slicer.diffusion',
+                    'nipype.interfaces.slicer.diffusion.tests',
+                    'nipype.interfaces.slicer.filtering',
+                    'nipype.interfaces.slicer.filtering.tests',
+                    'nipype.interfaces.slicer.legacy',
+                    'nipype.interfaces.slicer.legacy.diffusion',
+                    'nipype.interfaces.slicer.legacy.diffusion.tests',
+                    'nipype.interfaces.slicer.legacy.tests',
+                    'nipype.interfaces.slicer.quantification',
+                    'nipype.interfaces.slicer.quantification.tests',
+                    'nipype.interfaces.slicer.registration',
+                    'nipype.interfaces.slicer.registration.tests',
+                    'nipype.interfaces.slicer.segmentation',
+                    'nipype.interfaces.slicer.segmentation.tests',
+                    'nipype.interfaces.slicer.tests',
+                    'nipype.interfaces.spm',
+                    'nipype.interfaces.spm.tests',
+                    'nipype.interfaces.tests',
+                    'nipype.interfaces.vista',
+                    'nipype.interfaces.vista.tests',
+                    'nipype.pipeline',
+                    'nipype.pipeline.engine',
+                    'nipype.pipeline.engine.tests',
+                    'nipype.pipeline.plugins',
+                    'nipype.pipeline.plugins.tests',
+                    'nipype.testing',
+                    'nipype.testing.data',
+                    'nipype.testing.data.bedpostxout',
+                    'nipype.testing.data.dicomdir',
+                    'nipype.testing.data.tbss_dir',
+                    'nipype.utils',
+                    'nipype.utils.tests',
+                    'nipype.workflows',
+                    'nipype.workflows.data',
+                    'nipype.workflows.dmri',
+                    'nipype.workflows.dmri.camino',
+                    'nipype.workflows.dmri.connectivity',
+                    'nipype.workflows.dmri.dipy',
+                    'nipype.workflows.dmri.fsl',
+                    'nipype.workflows.dmri.fsl.tests',
+                    'nipype.workflows.dmri.mrtrix',
+                    'nipype.workflows.fmri',
+                    'nipype.workflows.fmri.fsl',
+                    'nipype.workflows.fmri.fsl.tests',
+                    'nipype.workflows.fmri.spm',
+                    'nipype.workflows.fmri.spm.tests',
+                    'nipype.workflows.graph',
+                    'nipype.workflows.misc',
+                    'nipype.workflows.rsfmri',
+                    'nipype.workflows.rsfmri.fsl',
+                    'nipype.workflows.smri',
+                    'nipype.workflows.smri.ants',
+                    'nipype.workflows.smri.freesurfer',
+                    'nipype.workflows.warp'],
           # The package_data spec has no effect for me (on python 2.6) -- even
           # changing to data_files doesn't get this stuff included in the source
           # distribution -- not sure if it has something to do with the magic
           # above, but distutils is surely the worst piece of code in all of
           # python -- duplicating things into MANIFEST.in but this is admittedly
           # only a workaround to get things started -- not a solution
-          package_data = {'nipype':
-                          [pjoin('testing', 'data', '*'),
-                           pjoin('testing', 'data', 'dicomdir', '*'),
-                           pjoin('testing', 'data', 'bedpostxout', '*'),
-                           pjoin('testing', 'data', 'tbss_dir', '*'),
-                           pjoin('workflows', 'data', '*'),
-                           pjoin('pipeline', 'report_template.html'),
-                           pjoin('external', 'd3.js'),
-                           pjoin('interfaces', 'script_templates', '*'),
-                           pjoin('interfaces', 'tests', 'realign_json.json')
-                          ]},
-          scripts      = glob('bin/*'),
-          cmdclass = cmdclass,
+          package_data={'nipype':
+                         testdatafiles + [
+                         pjoin('testing', 'data', 'dicomdir', '*'),
+                         pjoin('testing', 'data', 'bedpostxout', '*'),
+                         pjoin('testing', 'data', 'tbss_dir', '*'),
+                         pjoin('workflows', 'data', '*'),
+                         pjoin('pipeline', 'engine', 'report_template.html'),
+                         pjoin('external', 'd3.js'),
+                         pjoin('interfaces', 'script_templates', '*'),
+                         pjoin('interfaces', 'tests', 'realign_json.json')
+                         ]},
+          scripts=glob('bin/*'),
+          cmdclass=cmdclass,
           **extra_args
-         )
+          )
 
 if __name__ == "__main__":
     main(**extra_setuptools_args)

@@ -14,6 +14,7 @@ except:
 
 from .base import (GraphPluginBase, logger)
 
+
 class SomaFlowPlugin(GraphPluginBase):
     """Execute using Soma workflow
     """
@@ -31,7 +32,7 @@ class SomaFlowPlugin(GraphPluginBase):
             jobs.append(Job(command=[sys.executable,
                                      fname],
                             name=name))
-        for key, values in dependencies.items():
+        for key, values in list(dependencies.items()):
             for val in values:
                 soma_deps.append((jobs[val], jobs[key]))
 

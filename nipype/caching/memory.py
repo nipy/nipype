@@ -9,6 +9,9 @@ name-steps pipeline: getting back scope in command-line based programming.
    >>> os.chdir(datadir)
 """
 
+from __future__ import print_function
+from builtins import object
+
 import os
 import hashlib
 import pickle
@@ -16,12 +19,13 @@ import time
 import shutil
 import glob
 
-from nipype.interfaces.base import BaseInterface
-from nipype.pipeline.engine import Node
-from nipype.pipeline.utils import modify_paths
+from ..interfaces.base import BaseInterface
+from ..pipeline.engine import Node
+from ..pipeline.engine.utils import modify_paths
 
 ################################################################################
 # PipeFunc object: callable interface to nipype.interface objects
+
 
 class PipeFunc(object):
     """ Callable interface to nipype.interface objects
@@ -47,8 +51,8 @@ class PipeFunc(object):
                 An optional callable called each time after the function
                 is called.
         """
-        if not (isinstance(interface, type)
-                                and issubclass(interface, BaseInterface)):
+        if not (isinstance(interface, type) and
+                issubclass(interface, BaseInterface)):
             raise ValueError('the interface argument should be a nipype '
                              'interface class, but %s (type %s) was passed.' %
                              (interface, type(interface)))
@@ -58,7 +62,7 @@ class PipeFunc(object):
             raise ValueError('base_dir should be an existing directory')
         self.base_dir = base_dir
         doc = '%s\n%s' % (self.interface.__doc__,
-                            self.interface.help(returnhelp=True))
+                          self.interface.help(returnhelp=True))
         self.__doc__ = doc
         self.callback = callback
 
@@ -90,13 +94,14 @@ class PipeFunc(object):
 
     def __repr__(self):
         return '%s(%s.%s, base_dir=%s)' % (self.__class__.__name__,
-                           self.interface.__module__,
-                           self.interface.__name__,
-                           self.base_dir)
+                                           self.interface.__module__,
+                                           self.interface.__name__,
+                                           self.base_dir)
 
 ################################################################################
 # Memory manager: provide some tracking about what is computed when, to
 # be able to flush the disk
+
 
 def read_log(filename, run_dict=None):
     if run_dict is None:
@@ -130,7 +135,7 @@ def rm_all_but(base_dir, dirs_to_keep, warn=False):
         dir_name = os.path.join(base_dir, dir_name)
         if os.path.exists(dir_name):
             if warn:
-                print 'removing directory: %s' % dir_name
+                print('removing directory: %s' % dir_name)
             shutil.rmtree(dir_name)
 
 
@@ -222,7 +227,7 @@ class Memory(object):
         # immediately to avoid race conditions in parallel computing:
         # file appends are atomic
         open(os.path.join(base_dir, 'log.current'),
-            'a').write('%s/%s\n' % (dir_name, job_name))
+             'a').write('%s/%s\n' % (dir_name, job_name))
         t = time.localtime()
         year_dir = os.path.join(base_dir, 'log.%i' % t.tm_year)
         try:
@@ -235,7 +240,7 @@ class Memory(object):
         except OSError:
             "Dir exists"
         open(os.path.join(month_dir, '%02i.log' % t.tm_mday),
-            'a').write('%s/%s\n' % (dir_name, job_name))
+             'a').write('%s/%s\n' % (dir_name, job_name))
 
     def clear_previous_runs(self, warn=True):
         """ Remove all the cache that where not used in the latest run of
@@ -271,7 +276,7 @@ class Memory(object):
         year = year if year is not None else t.tm_year
         base_dir = self.base_dir
         cut_off_file = '%s/log.%i/%02i/%02i.log' % (base_dir,
-                    year, month, day)
+                                                    year, month, day)
         logs_to_flush = list()
         recent_runs = dict()
         for log_name in glob.glob('%s/log.*/*/*.log' % base_dir):
@@ -288,11 +293,10 @@ class Memory(object):
             input.
         """
         rm_all_but(self.base_dir, set(runs.keys()), warn=warn)
-        for dir_name, job_names in runs.iteritems():
+        for dir_name, job_names in runs.items():
             rm_all_but(os.path.join(self.base_dir, dir_name),
                        job_names, warn=warn)
 
     def __repr__(self):
         return '%s(base_dir=%s)' % (self.__class__.__name__,
-                           self.base_dir)
-
+                                    self.base_dir)

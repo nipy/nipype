@@ -59,7 +59,7 @@ import os.path as op                      # system functions
 import cmp
 from nipype.workflows.dmri.camino.group_connectivity import create_group_connectivity_pipeline
 from nipype.workflows.dmri.connectivity.group_connectivity import (create_merge_networks_by_group_workflow,
-create_merge_group_networks_workflow, create_average_networks_by_group_workflow)
+                                                                   create_merge_group_networks_workflow, create_average_networks_by_group_workflow)
 
 """
 Set the proper directories
@@ -126,7 +126,7 @@ using the NBS plugin in ConnectomeViewer.
 title = ''
 for idx, group_id in enumerate(group_list.keys()):
     title += group_id
-    if not idx == len(group_list.keys()) - 1:
+    if not idx == len(list(group_list.keys())) - 1:
         title += '-'
 
     info = dict(dwi=[['subject_id', 'dti']],

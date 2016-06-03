@@ -6,10 +6,12 @@
     >>> os.chdir(datadir)
 
 """
-from nipype.interfaces.base import (traits, TraitedSpec, File,
-                                    CommandLine, CommandLineInputSpec, isdefined)
-from nipype.utils.filemanip import split_filename
 import os
+
+from ..base import (traits, TraitedSpec, File,
+                    CommandLine, CommandLineInputSpec, isdefined)
+from ...utils.filemanip import split_filename
+
 
 class ConmatInputSpec(CommandLineInputSpec):
     in_file = File(exists=True, argstr='-inputfile %s', mandatory=True,
@@ -35,7 +37,7 @@ class ConmatInputSpec(CommandLineInputSpec):
 
     tract_stat = traits.Enum("mean", "min", "max", "sum", "median", "var", argstr='-tractstat %s', units='NA',
                              desc=("Tract statistic to use. See TractStats for other options."),
-                             requires=['scalar_file'],xor=['tract_prop'])
+                             requires=['scalar_file'], xor=['tract_prop'])
 
     tract_prop = traits.Enum("length", "endpointsep", argstr='-tractstat %s',
                              units='NA', xor=['tract_stat'],
@@ -43,12 +45,14 @@ class ConmatInputSpec(CommandLineInputSpec):
                                    'See TractStats for details.'))
 
     output_root = File(argstr='-outputroot %s', genfile=True,
-        desc=('filename root prepended onto the names of the output files. '
-              'The extension will be determined from the input.'))
+                       desc=('filename root prepended onto the names of the output files. '
+                             'The extension will be determined from the input.'))
+
 
 class ConmatOutputSpec(TraitedSpec):
     conmat_sc = File(exists=True, desc='Connectivity matrix in CSV file.')
     conmat_ts = File(desc='Tract statistics in CSV file.')
+
 
 class Conmat(CommandLine):
     """
@@ -122,11 +126,12 @@ class Conmat(CommandLine):
     >>> conmat.inputs.in_file = 'tracts.Bdouble'
     >>> conmat.inputs.target_file = 'atlas.nii.gz'
     >>> conmat.inputs.scalar_file = 'fa.nii.gz'
+    >>> conmat.tract_stat         = 'mean'
     >>> conmat.run()        # doctest: +SKIP
     """
     _cmd = 'conmat'
-    input_spec=ConmatInputSpec
-    output_spec=ConmatOutputSpec
+    input_spec = ConmatInputSpec
+    output_spec = ConmatOutputSpec
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
@@ -146,7 +151,6 @@ class Conmat(CommandLine):
 
     def _gen_filename(self, name):
         if name == 'output_root':
-            _, filename , _ = split_filename(self.inputs.in_file)
+            _, filename, _ = split_filename(self.inputs.in_file)
             filename = filename + "_"
         return filename
-

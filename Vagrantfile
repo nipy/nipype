@@ -20,19 +20,20 @@ $script = <<SCRIPT
 # qconf -aattr queue slots "2, [neuro=3]" main.q
 
 # install anaconda
-wget http://repo.continuum.io/miniconda/Miniconda-latest-Linux-x86_64.sh -O miniconda.sh
+wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh
 chmod +x miniconda.sh
 ./miniconda.sh -b
-echo "export PATH=$HOME/miniconda/bin:\\$PATH" >> .bashrc
+echo "export PATH=$HOME/miniconda3/bin:\\$PATH" >> .bashrc
 
 # install nipype dependencies
-$HOME/miniconda/bin/conda update --yes conda
-$HOME/miniconda/bin/conda install --yes pip numpy scipy nose traits networkx
-$HOME/miniconda/bin/conda install --yes dateutil ipython-notebook matplotlib
-$HOME/miniconda/bin/pip install nibabel --use-mirrors
-$HOME/miniconda/bin/pip install https://github.com/RDFLib/rdflib/archive/master.zip
-$HOME/miniconda/bin/pip install https://github.com/trungdong/prov/archive/rdf.zip
-$HOME/miniconda/bin/pip install https://github.com/nipy/nipype/archive/master.zip
+$HOME/miniconda3/bin/conda update --yes conda
+$HOME/miniconda3/bin/conda install --yes pip scipy nose networkx lxml future simplejson
+$HOME/miniconda3/bin/conda install --yes python-dateutil jupyter matplotlib
+$HOME/miniconda3/bin/pip install nibabel
+$HOME/miniconda3/bin/pip install prov
+$HOME/miniconda3/bin/pip install xvfbwrapper
+$HOME/miniconda3/bin/pip install traits
+$HOME/miniconda3/bin/pip install https://github.com/nipy/nipype/archive/master.zip
 SCRIPT
 
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|

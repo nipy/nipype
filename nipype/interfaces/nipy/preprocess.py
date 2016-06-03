@@ -19,7 +19,7 @@ from ...utils.filemanip import split_filename, fname_presuffix
 have_nipy = True
 try:
     package_check('nipy')
-except Exception, e:
+except Exception as e:
     have_nipy = False
 else:
     import nipy
@@ -53,7 +53,7 @@ class ComputeMask(BaseInterface):
     def _run_interface(self, runtime):
         from nipy.labs.mask import compute_mask
         args = {}
-        for key in [k for k, _ in self.inputs.items()
+        for key in [k for k, _ in list(self.inputs.items())
                     if k not in BaseInterfaceInputSpec().trait_names()]:
             value = getattr(self.inputs, key)
             if isdefined(value):
@@ -65,8 +65,8 @@ class ComputeMask(BaseInterface):
         brain_mask = compute_mask(**args)
         _, name, ext = split_filename(self.inputs.mean_volume)
         self._brain_mask_path = os.path.abspath("%s_mask.%s" % (name, ext))
-        nb.save(nb.Nifti1Image(brain_mask.astype(np.uint8),
-                nii.get_affine()), self._brain_mask_path)
+        nb.save(nb.Nifti1Image(brain_mask.astype(np.uint8), nii.affine),
+                self._brain_mask_path)
 
         return runtime
 
@@ -84,11 +84,11 @@ class FmriRealign4dInputSpec(BaseInterfaceInputSpec):
     tr = traits.Float(desc="TR in seconds",
                       mandatory=True)
     slice_order = traits.List(traits.Int(),
-            desc=('0 based slice order. This would be equivalent to entering'
-                  'np.argsort(spm_slice_order) for this field. This effects'
-                  'interleaved acquisition. This field will be deprecated in'
-                  'future Nipy releases and be replaced by actual slice'
-                  'acquisition times.'),
+                              desc=('0 based slice order. This would be equivalent to entering'
+                                    'np.argsort(spm_slice_order) for this field. This effects'
+                                    'interleaved acquisition. This field will be deprecated in'
+                                    'future Nipy releases and be replaced by actual slice'
+                                    'acquisition times.'),
                               requires=["time_interp"])
     tr_slices = traits.Float(desc="TR slices", requires=['time_interp'])
     start = traits.Float(0.0, usedefault=True,
@@ -129,7 +129,7 @@ class FmriRealign4d(BaseInterface):
     >>> realigner = FmriRealign4d()
     >>> realigner.inputs.in_file = ['functional.nii']
     >>> realigner.inputs.tr = 2
-    >>> realigner.inputs.slice_order = range(0,67)
+    >>> realigner.inputs.slice_order = list(range(0,67))
     >>> res = realigner.run() # doctest: +SKIP
 
     References
@@ -171,11 +171,11 @@ class FmriRealign4d(BaseInterface):
 
         for j, corr in enumerate(corr_run):
             self._out_file_path.append(os.path.abspath('corr_%s.nii.gz' %
-                                      (split_filename(self.inputs.in_file[j])[1])))
+                                                       (split_filename(self.inputs.in_file[j])[1])))
             save_image(corr, self._out_file_path[j])
 
             self._par_file_path.append(os.path.abspath('%s.par' %
-                                      (os.path.split(self.inputs.in_file[j])[1])))
+                                                       (os.path.split(self.inputs.in_file[j])[1])))
             mfile = open(self._par_file_path[j], 'w')
             motion = R._transforms[j]
             # nipy does not encode euler angles. return in original form of
@@ -256,7 +256,7 @@ class SpaceTimeRealigner(BaseInterface):
     >>> realigner = SpaceTimeRealigner()
     >>> realigner.inputs.in_file = ['functional.nii']
     >>> realigner.inputs.tr = 2
-    >>> realigner.inputs.slice_times = range(0, 3, 67)
+    >>> realigner.inputs.slice_times = list(range(0, 3, 67))
     >>> realigner.inputs.slice_info = 2
     >>> res = realigner.run() # doctest: +SKIP
 
@@ -302,11 +302,11 @@ class SpaceTimeRealigner(BaseInterface):
 
         for j, corr in enumerate(corr_run):
             self._out_file_path.append(os.path.abspath('corr_%s.nii.gz' %
-                                      (split_filename(self.inputs.in_file[j])[1])))
+                                                       (split_filename(self.inputs.in_file[j])[1])))
             save_image(corr, self._out_file_path[j])
 
             self._par_file_path.append(os.path.abspath('%s.par' %
-                                      (os.path.split(self.inputs.in_file[j])[1])))
+                                                       (os.path.split(self.inputs.in_file[j])[1])))
             mfile = open(self._par_file_path[j], 'w')
             motion = R._transforms[j]
             # nipy does not encode euler angles. return in original form of
@@ -371,10 +371,7 @@ class Trim(BaseInterface):
             s = slice(self.inputs.begin_index, nii.shape[3])
         else:
             s = slice(self.inputs.begin_index, self.inputs.end_index)
-        nii2 = nb.Nifti1Image(
-            nii.get_data()[..., s],
-            nii.get_affine(),
-            nii.get_header())
+        nii2 = nb.Nifti1Image(nii.get_data()[..., s], nii.affine, nii.header)
         nb.save(nii2, out_file)
         return runtime
 

@@ -11,16 +11,16 @@
     >>> os.chdir(datadir)
 
 """
+
+from __future__ import absolute_import
 import os
 import os.path as op
 
-from base import MRTrix3BaseInputSpec, MRTrix3Base
-from nipype.interfaces.base import (
-    CommandLineInputSpec, CommandLine, traits, TraitedSpec, File,
-    InputMultiPath)
-
-from nipype.utils.filemanip import split_filename
-from nipype.interfaces.traits_extension import isdefined
+from .base import MRTrix3BaseInputSpec, MRTrix3Base
+from ..base import (CommandLineInputSpec, CommandLine, traits, TraitedSpec,
+                    File, InputMultiPath)
+from ..traits_extension import isdefined
+from ...utils.filemanip import split_filename
 
 
 class BrainMaskInputSpec(MRTrix3BaseInputSpec):
@@ -210,7 +210,7 @@ class TensorMetrics(CommandLine):
     def _list_outputs(self):
         outputs = self.output_spec().get()
 
-        for k in outputs.keys():
+        for k in list(outputs.keys()):
             if isdefined(getattr(self.inputs, k)):
                 outputs[k] = op.abspath(getattr(self.inputs, k))
 

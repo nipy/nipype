@@ -9,31 +9,35 @@
    >>> os.chdir(datadir)
 
 """
+
+from builtins import range
 __docformat__ = 'restructuredtext'
 
 import os
 import os.path as op
 from glob import glob
-#import itertools
+import shutil
+
 import numpy as np
-
 from nibabel import load
-from nipype.utils.filemanip import fname_presuffix
-from nipype.interfaces.io import FreeSurferSource
 
-from nipype.interfaces.freesurfer.base import FSCommand, FSTraitedSpec
-from nipype.interfaces.base import (TraitedSpec, File, traits,
-                                    Directory, InputMultiPath,
-                                    OutputMultiPath, CommandLine,
-                                    CommandLineInputSpec, isdefined)
-
-
+from ..io import FreeSurferSource
+from ..freesurfer.base import (FSCommand, FSTraitedSpec,
+                               FSTraitedSpecOpenMP,
+                               FSCommandOpenMP)
+from ..base import (TraitedSpec, File, traits,
+                    Directory, InputMultiPath,
+                    OutputMultiPath, CommandLine,
+                    CommandLineInputSpec, isdefined)
+from ...utils.filemanip import fname_presuffix
 from ... import logging
+from ..freesurfer.utils import copy2subjdir
 iflogger = logging.getLogger('interface')
+
 
 class ParseDICOMDirInputSpec(FSTraitedSpec):
     dicom_dir = Directory(exists=True, argstr='--d %s', mandatory=True,
-                         desc='path to siemens dicom directory')
+                          desc='path to siemens dicom directory')
     dicom_info_file = File('dicominfo.txt', argstr='--o %s', usedefault=True,
                            desc='file to which results are written')
     sortbyrun = traits.Bool(argstr='--sortbyrun', desc='assign run numbers')
@@ -80,30 +84,30 @@ class UnpackSDICOMDirInputSpec(FSTraitedSpec):
     output_dir = Directory(argstr='-targ %s',
                            desc='top directory into which the files will be unpacked')
     run_info = traits.Tuple(traits.Int, traits.Str, traits.Str, traits.Str,
-                           mandatory=True,
-                           argstr='-run %d %s %s %s',
-                           xor=('run_info', 'config', 'seq_config'),
-        desc='runno subdir format name : spec unpacking rules on cmdline')
+                            mandatory=True,
+                            argstr='-run %d %s %s %s',
+                            xor=('run_info', 'config', 'seq_config'),
+                            desc='runno subdir format name : spec unpacking rules on cmdline')
     config = File(exists=True, argstr='-cfg %s',
                   mandatory=True,
                   xor=('run_info', 'config', 'seq_config'),
                   desc='specify unpacking rules in file')
     seq_config = File(exists=True, argstr='-seqcfg %s',
-                     mandatory=True,
-                     xor=('run_info', 'config', 'seq_config'),
-                     desc='specify unpacking rules based on sequence')
+                      mandatory=True,
+                      xor=('run_info', 'config', 'seq_config'),
+                      desc='specify unpacking rules based on sequence')
     dir_structure = traits.Enum('fsfast', 'generic', argstr='-%s',
                                 desc='unpack to specified directory structures')
     no_info_dump = traits.Bool(argstr='-noinfodump',
-                             desc='do not create infodump file')
+                               desc='do not create infodump file')
     scan_only = File(exists=True, argstr='-scanonly %s',
-                    desc='only scan the directory and put result in file')
+                     desc='only scan the directory and put result in file')
     log_file = File(exists=True, argstr='-log %s',
-                   desc='explicilty set log file')
+                    desc='explicilty set log file')
     spm_zeropad = traits.Int(argstr='-nspmzeropad %d',
-                            desc='set frame number zero padding width for SPM')
+                             desc='set frame number zero padding width for SPM')
     no_unpack_err = traits.Bool(argstr='-no-unpackerr',
-                              desc='do not try to unpack runs with errors')
+                                desc='do not try to unpack runs with errors')
 
 
 class UnpackSDICOMDir(FSCommand):
@@ -134,17 +138,17 @@ class MRIConvertInputSpec(FSTraitedSpec):
     no_write = traits.Bool(argstr='--no_write',
                            desc='do not write output')
     in_info = traits.Bool(argstr='--in_info',
-                         desc='display input info')
+                          desc='display input info')
     out_info = traits.Bool(argstr='--out_info',
-                          desc='display output info')
+                           desc='display output info')
     in_stats = traits.Bool(argstr='--in_stats',
-                          desc='display input stats')
+                           desc='display input stats')
     out_stats = traits.Bool(argstr='--out_stats',
-                           desc='display output stats')
+                            desc='display output stats')
     in_matrix = traits.Bool(argstr='--in_matrix',
-                           desc='display input matrix')
+                            desc='display input matrix')
     out_matrix = traits.Bool(argstr='--out_matrix',
-                            desc='display output matrix')
+                             desc='display output matrix')
     in_i_size = traits.Int(argstr='--in_i_size %d',
                            desc='input i size')
     in_j_size = traits.Int(argstr='--in_j_size %d',
@@ -152,24 +156,24 @@ class MRIConvertInputSpec(FSTraitedSpec):
     in_k_size = traits.Int(argstr='--in_k_size %d',
                            desc='input k size')
     force_ras = traits.Bool(argstr='--force_ras_good',
-                           desc='use default when orientation info absent')
+                            desc='use default when orientation info absent')
     in_i_dir = traits.Tuple(traits.Float, traits.Float, traits.Float,
-                           argstr='--in_i_direction %f %f %f',
-                           desc='<R direction> <A direction> <S direction>')
+                            argstr='--in_i_direction %f %f %f',
+                            desc='<R direction> <A direction> <S direction>')
     in_j_dir = traits.Tuple(traits.Float, traits.Float, traits.Float,
-                           argstr='--in_j_direction %f %f %f',
-                           desc='<R direction> <A direction> <S direction>')
+                            argstr='--in_j_direction %f %f %f',
+                            desc='<R direction> <A direction> <S direction>')
     in_k_dir = traits.Tuple(traits.Float, traits.Float, traits.Float,
-                           argstr='--in_k_direction %f %f %f',
-                           desc='<R direction> <A direction> <S direction>')
+                            argstr='--in_k_direction %f %f %f',
+                            desc='<R direction> <A direction> <S direction>')
     _orientations = ['LAI', 'LIA', 'ALI', 'AIL', 'ILA', 'IAL', 'LAS', 'LSA', 'ALS', 'ASL', 'SLA', 'SAL', 'LPI', 'LIP', 'PLI', 'PIL', 'ILP', 'IPL', 'LPS', 'LSP', 'PLS', 'PSL', 'SLP', 'SPL', 'RAI', 'RIA', 'ARI', 'AIR', 'IRA', 'IAR', 'RAS', 'RSA', 'ARS', 'ASR', 'SRA', 'SAR', 'RPI', 'RIP', 'PRI', 'PIR', 'IRP', 'IPR', 'RPS', 'RSP', 'PRS', 'PSR', 'SRP', 'SPR']
-    #_orientations = [comb for comb in itertools.chain(*[[''.join(c) for c in itertools.permutations(s)] for s in [a+b+c for a in 'LR' for b in 'AP' for c in 'IS']])]
+    # _orientations = [comb for comb in itertools.chain(*[[''.join(c) for c in itertools.permutations(s)] for s in [a+b+c for a in 'LR' for b in 'AP' for c in 'IS']])]
     in_orientation = traits.Enum(_orientations,
-                                argstr='--in_orientation %s',
-                                desc='specify the input orientation')
+                                 argstr='--in_orientation %s',
+                                 desc='specify the input orientation')
     in_center = traits.List(traits.Float, maxlen=3,
-                           argstr='--in_center %s',
-                           desc='<R coordinate> <A coordinate> <S coordinate>')
+                            argstr='--in_center %s',
+                            desc='<R coordinate> <A coordinate> <S coordinate>')
     sphinx = traits.Bool(argstr='--sphinx',
                          desc='change orientation info to sphinx')
     out_i_count = traits.Int(argstr='--out_i_count %d',
@@ -179,8 +183,8 @@ class MRIConvertInputSpec(FSTraitedSpec):
     out_k_count = traits.Int(argstr='--out_k_count %d',
                              desc='some count ?? in k direction')
     vox_size = traits.Tuple(traits.Float, traits.Float, traits.Float,
-                           argstr='-voxsize %f %f %f',
-                           desc='<size_x> <size_y> <size_z> specify the size (mm) - useful for upsampling or downsampling')
+                            argstr='-voxsize %f %f %f',
+                            desc='<size_x> <size_y> <size_z> specify the size (mm) - useful for upsampling or downsampling')
     out_i_size = traits.Int(argstr='--out_i_size %d',
                             desc='output i size')
     out_j_size = traits.Int(argstr='--out_j_size %d',
@@ -188,30 +192,30 @@ class MRIConvertInputSpec(FSTraitedSpec):
     out_k_size = traits.Int(argstr='--out_k_size %d',
                             desc='output k size')
     out_i_dir = traits.Tuple(traits.Float, traits.Float, traits.Float,
-                           argstr='--out_i_direction %f %f %f',
-                           desc='<R direction> <A direction> <S direction>')
+                             argstr='--out_i_direction %f %f %f',
+                             desc='<R direction> <A direction> <S direction>')
     out_j_dir = traits.Tuple(traits.Float, traits.Float, traits.Float,
-                           argstr='--out_j_direction %f %f %f',
-                           desc='<R direction> <A direction> <S direction>')
+                             argstr='--out_j_direction %f %f %f',
+                             desc='<R direction> <A direction> <S direction>')
     out_k_dir = traits.Tuple(traits.Float, traits.Float, traits.Float,
                              argstr='--out_k_direction %f %f %f',
                              desc='<R direction> <A direction> <S direction>')
     out_orientation = traits.Enum(_orientations,
-                                argstr='--out_orientation %s',
-                                desc='specify the output orientation')
+                                  argstr='--out_orientation %s',
+                                  desc='specify the output orientation')
     out_center = traits.Tuple(traits.Float, traits.Float, traits.Float,
-                           argstr='--out_center %f %f %f',
-                           desc='<R coordinate> <A coordinate> <S coordinate>')
+                              argstr='--out_center %f %f %f',
+                              desc='<R coordinate> <A coordinate> <S coordinate>')
     out_datatype = traits.Enum('uchar', 'short', 'int', 'float',
-                              argstr='--out_data_type %s',
-                              desc='output data type <uchar|short|int|float>')
+                               argstr='--out_data_type %s',
+                               desc='output data type <uchar|short|int|float>')
     resample_type = traits.Enum('interpolate', 'weighted', 'nearest', 'sinc', 'cubic',
-                               argstr='--resample_type %s',
-                               desc='<interpolate|weighted|nearest|sinc|cubic> (default is interpolate)')
+                                argstr='--resample_type %s',
+                                desc='<interpolate|weighted|nearest|sinc|cubic> (default is interpolate)')
     no_scale = traits.Bool(argstr='--no_scale 1',
-                          desc='dont rescale values for COR')
+                           desc='dont rescale values for COR')
     no_change = traits.Bool(argstr='--nochange',
-                           desc="don't change type of input to that of template")
+                            desc="don't change type of input to that of template")
     tr = traits.Int(argstr='-tr %d',
                     desc='TR in msec')
     te = traits.Int(argstr='-te %d',
@@ -219,30 +223,30 @@ class MRIConvertInputSpec(FSTraitedSpec):
     ti = traits.Int(argstr='-ti %d',
                     desc='TI in msec (note upper case flag)')
     autoalign_matrix = File(exists=True, argstr='--autoalign %s',
-                        desc='text file with autoalign matrix')
+                            desc='text file with autoalign matrix')
     unwarp_gradient = traits.Bool(argstr='--unwarp_gradient_nonlinearity',
-                                 desc='unwarp gradient nonlinearity')
+                                  desc='unwarp gradient nonlinearity')
     apply_transform = File(exists=True, argstr='--apply_transform %s',
-                    desc='apply xfm file')
+                           desc='apply xfm file')
     apply_inv_transform = File(exists=True, argstr='--apply_inverse_transform %s',
-                       desc='apply inverse transformation xfm file')
+                               desc='apply inverse transformation xfm file')
     devolve_transform = traits.Str(argstr='--devolvexfm %s',
-                            desc='subject id')
+                                   desc='subject id')
     crop_center = traits.Tuple(traits.Int, traits.Int, traits.Int,
-                              argstr='--crop %d %d %d',
-                              desc='<x> <y> <z> crop to 256 around center (x, y, z)')
+                               argstr='--crop %d %d %d',
+                               desc='<x> <y> <z> crop to 256 around center (x, y, z)')
     crop_size = traits.Tuple(traits.Int, traits.Int, traits.Int,
-                            argstr='--cropsize %d %d %d',
-                            desc='<dx> <dy> <dz> crop to size <dx, dy, dz>')
+                             argstr='--cropsize %d %d %d',
+                             desc='<dx> <dy> <dz> crop to size <dx, dy, dz>')
     cut_ends = traits.Int(argstr='--cutends %d',
-                         desc='remove ncut slices from the ends')
+                          desc='remove ncut slices from the ends')
     slice_crop = traits.Tuple(traits.Int, traits.Int,
-                             argstr='--slice-crop %d %d',
-                             desc='s_start s_end : keep slices s_start to s_end')
+                              argstr='--slice-crop %d %d',
+                              desc='s_start s_end : keep slices s_start to s_end')
     slice_reverse = traits.Bool(argstr='--slice-reverse',
-                               desc='reverse order of slices, update vox2ras')
+                                desc='reverse order of slices, update vox2ras')
     slice_bias = traits.Float(argstr='--slice-bias %f',
-                             desc='apply half-cosine bias field')
+                              desc='apply half-cosine bias field')
     fwhm = traits.Float(argstr='--fwhm %f',
                         desc='smooth input volume by fwhm mm')
     _filetypes = ['cor', 'mgh', 'mgz', 'minc', 'analyze',
@@ -251,38 +255,40 @@ class MRIConvertInputSpec(FSTraitedSpec):
                   'nifti1', 'nii', 'niigz']
     _infiletypes = ['ge', 'gelx', 'lx', 'ximg', 'siemens', 'dicom', 'siemens_dicom']
     in_type = traits.Enum(_filetypes + _infiletypes, argstr='--in_type %s',
-                        desc='input file type')
+                          desc='input file type')
     out_type = traits.Enum(_filetypes, argstr='--out_type %s',
-                        desc='output file type')
+                           desc='output file type')
     ascii = traits.Bool(argstr='--ascii',
                         desc='save output as ascii col>row>slice>frame')
     reorder = traits.Tuple(traits.Int, traits.Int, traits.Int,
                            argstr='--reorder %d %d %d',
                            desc='olddim1 olddim2 olddim3')
     invert_contrast = traits.Float(argstr='--invert_contrast %f',
-                                  desc='threshold for inversting contrast')
+                                   desc='threshold for inversting contrast')
     in_file = File(exists=True, mandatory=True,
-                  position=-2,
-                  argstr='--input_volume %s',
-                  desc='File to read/convert')
+                   position=-2,
+                   argstr='--input_volume %s',
+                   desc='File to read/convert')
     out_file = File(argstr='--output_volume %s',
-                   position=-1, genfile=True,
-                   desc='output filename or True to generate one')
+                    position=-1, genfile=True,
+                    desc='output filename or True to generate one')
     conform = traits.Bool(argstr='--conform',
-                          desc='conform to 256^3')
+                          desc='conform to 1mm voxel size in coronal slice direction with 256^3 or more')
     conform_min = traits.Bool(argstr='--conform_min',
-                             desc='conform to smallest size')
+                              desc='conform to smallest size')
     conform_size = traits.Float(argstr='--conform_size %s',
-                               desc='conform to size_in_mm')
+                                desc='conform to size_in_mm')
+    cw256 = traits.Bool(argstr='--cw256',
+                        desc='confrom to dimensions of 256^3')
     parse_only = traits.Bool(argstr='--parse_only',
                              desc='parse input only')
     subject_name = traits.Str(argstr='--subject_name %s',
                               desc='subject name ???')
     reslice_like = File(exists=True, argstr='--reslice_like %s',
-                       desc='reslice output to match file')
+                        desc='reslice output to match file')
     template_type = traits.Enum(_filetypes + _infiletypes,
-                               argstr='--template_type %s',
-                               desc='template file type')
+                                argstr='--template_type %s',
+                                desc='template file type')
     split = traits.Bool(argstr='--split',
                         desc='split output frames into separate output files.')
     frame = traits.Int(argstr='--frame %d',
@@ -290,38 +296,38 @@ class MRIConvertInputSpec(FSTraitedSpec):
     midframe = traits.Bool(argstr='--mid-frame',
                            desc='keep only the middle frame')
     skip_n = traits.Int(argstr='--nskip %d',
-                       desc='skip the first n frames')
+                        desc='skip the first n frames')
     drop_n = traits.Int(argstr='--ndrop %d',
-                       desc='drop the last n frames')
+                        desc='drop the last n frames')
     frame_subsample = traits.Tuple(traits.Int, traits.Int, traits.Int,
-                                  argstr='--fsubsample %d %d %d',
-                                  desc='start delta end : frame subsampling (end = -1 for end)')
+                                   argstr='--fsubsample %d %d %d',
+                                   desc='start delta end : frame subsampling (end = -1 for end)')
     in_scale = traits.Float(argstr='--scale %f',
-                         desc='input intensity scale factor')
+                            desc='input intensity scale factor')
     out_scale = traits.Float(argstr='--out-scale %d',
-                            desc='output intensity scale factor')
+                             desc='output intensity scale factor')
     in_like = File(exists=True, argstr='--in_like %s',
-                  desc='input looks like')
+                   desc='input looks like')
     fill_parcellation = traits.Bool(argstr='--fill_parcellation',
-                                   desc='fill parcellation')
+                                    desc='fill parcellation')
     smooth_parcellation = traits.Bool(argstr='--smooth_parcellation',
-                                     desc='smooth parcellation')
+                                      desc='smooth parcellation')
     zero_outlines = traits.Bool(argstr='--zero_outlines',
-                               desc='zero outlines')
+                                desc='zero outlines')
     color_file = File(exists=True, argstr='--color_file %s',
-                     desc='color file')
+                      desc='color file')
     no_translate = traits.Bool(argstr='--no_translate',
-                              desc='???')
+                               desc='???')
     status_file = File(argstr='--status %s',
-                      desc='status file for DICOM conversion')
+                       desc='status file for DICOM conversion')
     sdcm_list = File(exists=True, argstr='--sdcmlist %s',
-                    desc='list of DICOM files for conversion')
+                     desc='list of DICOM files for conversion')
     template_info = traits.Bool('--template_info',
-                               desc='dump info about template')
+                                desc='dump info about template')
     crop_gdf = traits.Bool(argstr='--crop_gdf',
                            desc='apply GDF cropping')
     zero_ge_z_offset = traits.Bool(argstr='--zero_ge_z_offset',
-                               desc='zero ge z offset ???')
+                                   desc='zero ge z offset ???')
 
 
 class MRIConvertOutputSpec(TraitedSpec):
@@ -378,7 +384,7 @@ class MRIConvert(FSCommand):
         outputs = self.output_spec().get()
         outfile = self._get_outfilename()
         if isdefined(self.inputs.split) and self.inputs.split:
-            size = load(self.inputs.in_file).get_shape()
+            size = load(self.inputs.in_file).shape
             if len(size) == 3:
                 tp = 1
             else:
@@ -398,7 +404,7 @@ class MRIConvert(FSCommand):
         if isdefined(self.inputs.out_type):
             if self.inputs.out_type in ['spm', 'analyze']:
                 # generate all outputs
-                size = load(self.inputs.in_file).get_shape()
+                size = load(self.inputs.in_file).shape
                 if len(size) == 3:
                     tp = 1
                 else:
@@ -422,24 +428,24 @@ class MRIConvert(FSCommand):
 
 class DICOMConvertInputSpec(FSTraitedSpec):
     dicom_dir = Directory(exists=True, mandatory=True,
-                         desc='dicom directory from which to convert dicom files')
+                          desc='dicom directory from which to convert dicom files')
     base_output_dir = Directory(mandatory=True,
-            desc='directory in which subject directories are created')
+                                desc='directory in which subject directories are created')
     subject_dir_template = traits.Str('S.%04d', usedefault=True,
-                          desc='template for subject directory name')
+                                      desc='template for subject directory name')
     subject_id = traits.Any(desc='subject identifier to insert into template')
     file_mapping = traits.List(traits.Tuple(traits.Str, traits.Str),
-               desc='defines the output fields of interface')
+                               desc='defines the output fields of interface')
     out_type = traits.Enum('niigz', MRIConvertInputSpec._filetypes,
                            usedefault=True,
-               desc='defines the type of output file produced')
+                           desc='defines the type of output file produced')
     dicom_info = File(exists=True,
-               desc='File containing summary information from mri_parse_sdcmdir')
+                      desc='File containing summary information from mri_parse_sdcmdir')
     seq_list = traits.List(traits.Str,
                            requires=['dicom_info'],
-               desc='list of pulse sequence names to be converted.')
+                           desc='list of pulse sequence names to be converted.')
     ignore_single_slice = traits.Bool(requires=['dicom_info'],
-               desc='ignore volumes containing a single slice')
+                                      desc='ignore volumes containing a single slice')
 
 
 class DICOMConvert(FSCommand):
@@ -509,12 +515,12 @@ class DICOMConvert(FSCommand):
             out_type = MRIConvert.filemap[self.inputs.out_type]
             outfile = os.path.join(outdir, '.'.join(('%s-%02d' % (fileparts[0],
                                                                   runno),
-                                                    out_type)))
+                                                     out_type)))
             filemap[runno] = (f, outfile)
         if self.inputs.dicom_info:
             files = [filemap[r] for r in self._get_runs()]
         else:
-            files = [filemap[r] for r in filemap.keys()]
+            files = [filemap[r] for r in list(filemap.keys())]
         return files
 
     @property
@@ -538,22 +544,22 @@ class DICOMConvert(FSCommand):
                 single_cmd = '%s %s %s' % (self.cmd, infile,
                                            os.path.join(outdir, outfile))
                 cmd.extend([single_cmd])
-        return  '; '.join(cmd)
+        return '; '.join(cmd)
 
 
 class ResampleInputSpec(FSTraitedSpec):
     in_file = File(exists=True, argstr='-i %s', mandatory=True,
-                  desc='file to resample', position=-2)
+                   desc='file to resample', position=-2)
     resampled_file = File(argstr='-o %s', desc='output filename', genfile=True,
                           position=-1)
     voxel_size = traits.Tuple(traits.Float, traits.Float, traits.Float,
-                       argstr='-vs %.2f %.2f %.2f', desc='triplet of output voxel sizes',
+                              argstr='-vs %.2f %.2f %.2f', desc='triplet of output voxel sizes',
                               mandatory=True)
 
 
 class ResampleOutputSpec(TraitedSpec):
     resampled_file = File(exists=True,
-                   desc='output filename')
+                          desc='output filename')
 
 
 class Resample(FSCommand):
@@ -609,7 +615,9 @@ class ReconAllInputSpec(CommandLineInputSpec):
     T1_files = InputMultiPath(File(exists=True), argstr='-i %s...',
                               desc='name of T1 file to process')
     T2_file = File(exists=True, argstr="-T2 %s", min_ver='5.3.0',
-                   desc='Use a T2 image to refine the cortical surface')
+                   desc='Convert T2 image to orig directory')
+    use_T2 = traits.Bool(argstr="-T2pial", min_ver='5.3.0',
+                         desc='Use converted T2 to refine the cortical surface')
     openmp = traits.Int(argstr="-openmp %d",
                         desc="Number of processors to use in parallel")
     subjects_dir = Directory(exists=True, argstr='-sd %s', hash_files=False,
@@ -646,9 +654,8 @@ class ReconAll(CommandLine):
     output_spec = ReconAllIOutputSpec
     _can_resume = True
 
-
     _steps = [
-        #autorecon1
+        # autorecon1
         ('motioncor', ['mri/rawavg.mgz', 'mri/orig.mgz']),
         ('talairach', ['mri/transforms/talairach.auto.xfm',
                        'mri/transforms/talairach.xfm']),
@@ -657,7 +664,7 @@ class ReconAll(CommandLine):
         ('skullstrip',
          ['mri/brainmask.auto.mgz',
           'mri/brainmask.mgz']),
-        #autorecon2
+        # autorecon2
         ('gcareg', ['mri/transforms/talairach.lta']),
         ('canorm', ['mri/norm.mgz']),
         ('careg', ['mri/transforms/talairach.m3z']),
@@ -696,7 +703,7 @@ class ReconAll(CommandLine):
           'surf/rh.inflated.H',
           'surf/lh.inflated.K',
           'surf/rh.inflated.K']),
-        #autorecon3
+        # autorecon3
         ('sphere', ['surf/lh.sphere', 'surf/rh.sphere']),
         ('surfreg', ['surf/lh.sphere.reg', 'surf/rh.sphere.reg']),
         ('jacobian_white', ['surf/lh.jacobian_white',
@@ -781,22 +788,22 @@ class ReconAll(CommandLine):
         subjects_dir = self.inputs.subjects_dir
         if not isdefined(subjects_dir):
             subjects_dir = self._gen_subjects_dir()
-        #cmd = cmd.replace(' -all ', ' -make all ')
+        # cmd = cmd.replace(' -all ', ' -make all ')
         iflogger.info('Overriding recon-all directive')
         flags = []
         directive = 'all'
         for idx, step in enumerate(self._steps):
             step, outfiles = step
             if all([os.path.exists(os.path.join(subjects_dir,
-                                                self.inputs.subject_id,f)) for
+                                                self.inputs.subject_id, f)) for
                     f in outfiles]):
-                flags.append('-no%s'%step)
+                flags.append('-no%s' % step)
                 if idx > 4:
                     directive = 'autorecon2'
                 elif idx > 23:
                     directive = 'autorecon3'
             else:
-                flags.append('-%s'%step)
+                flags.append('-%s' % step)
         cmd = cmd.replace(' -%s ' % self.inputs.directive, ' -%s ' % directive)
         cmd += ' ' + ' '.join(flags)
         iflogger.info('resume recon-all : %s' % cmd)
@@ -833,9 +840,9 @@ class BBRegisterInputSpec(FSTraitedSpec):
     epi_mask = traits.Bool(argstr="--epi-mask",
                            desc="mask out B0 regions in stages 1 and 2")
     out_fsl_file = traits.Either(traits.Bool, File, argstr="--fslmat %s",
-                   desc="write the transformation matrix in FSL FLIRT format")
+                                 desc="write the transformation matrix in FSL FLIRT format")
     registered_file = traits.Either(traits.Bool, File, argstr='--o %s',
-                      desc='output warped sourcefile either True or filename')
+                                    desc='output warped sourcefile either True or filename')
 
 
 class BBRegisterOutputSpec(TraitedSpec):
@@ -889,7 +896,7 @@ class BBRegister(FSCommand):
 
         if isdefined(_in.out_fsl_file):
             if isinstance(_in.out_fsl_file, bool):
-                suffix='_bbreg_%s.mat' % _in.subject_id
+                suffix = '_bbreg_%s.mat' % _in.subject_id
                 out_fsl_file = fname_presuffix(_in.source_file,
                                                suffix=suffix,
                                                use_ext=False)
@@ -919,35 +926,35 @@ class BBRegister(FSCommand):
 
 class ApplyVolTransformInputSpec(FSTraitedSpec):
     source_file = File(exists=True, argstr='--mov %s',
-                      copyfile=False, mandatory=True,
-                      desc='Input volume you wish to transform')
+                       copyfile=False, mandatory=True,
+                       desc='Input volume you wish to transform')
     transformed_file = File(desc='Output volume', argstr='--o %s', genfile=True)
     _targ_xor = ('target_file', 'tal', 'fs_target')
     target_file = File(exists=True, argstr='--targ %s', xor=_targ_xor,
-                      desc='Output template volume', mandatory=True)
+                       desc='Output template volume', mandatory=True)
     tal = traits.Bool(argstr='--tal', xor=_targ_xor, mandatory=True,
                       desc='map to a sub FOV of MNI305 (with --reg only)')
     tal_resolution = traits.Float(argstr="--talres %.10f",
                                   desc="Resolution to sample when using tal")
     fs_target = traits.Bool(argstr='--fstarg', xor=_targ_xor, mandatory=True,
-                         requires=['reg_file'],
-                         desc='use orig.mgz from subject in regfile as target')
+                            requires=['reg_file'],
+                            desc='use orig.mgz from subject in regfile as target')
     _reg_xor = ('reg_file', 'fsl_reg_file', 'xfm_reg_file', 'reg_header', 'subject')
     reg_file = File(exists=True, xor=_reg_xor, argstr='--reg %s',
                     mandatory=True,
                     desc='tkRAS-to-tkRAS matrix   (tkregister2 format)')
     fsl_reg_file = File(exists=True, xor=_reg_xor, argstr='--fsl %s',
-                   mandatory=True,
-                   desc='fslRAS-to-fslRAS matrix (FSL format)')
+                        mandatory=True,
+                        desc='fslRAS-to-fslRAS matrix (FSL format)')
     xfm_reg_file = File(exists=True, xor=_reg_xor, argstr='--xfm %s',
-                   mandatory=True,
-                   desc='ScannerRAS-to-ScannerRAS matrix (MNI format)')
+                        mandatory=True,
+                        desc='ScannerRAS-to-ScannerRAS matrix (MNI format)')
     reg_header = traits.Bool(xor=_reg_xor, argstr='--regheader',
-                   mandatory=True,
-                   desc='ScannerRAS-to-ScannerRAS matrix = identity')
+                             mandatory=True,
+                             desc='ScannerRAS-to-ScannerRAS matrix = identity')
     subject = traits.Str(xor=_reg_xor, argstr='--s %s',
-                   mandatory=True,
-                   desc='set matrix = identity and use subject for any templates')
+                         mandatory=True,
+                         desc='set matrix = identity and use subject for any templates')
     inverse = traits.Bool(desc='sample from target to source',
                           argstr='--inv')
     interp = traits.Enum('trilin', 'nearest', 'cubic', argstr='--interp %s',
@@ -974,6 +981,7 @@ class ApplyVolTransformInputSpec(FSTraitedSpec):
                                desc=('Compute and use the inverse of the '
                                      'non-linear morph to resample the input '
                                      'volume. To be used by --m3z.'))
+
 
 class ApplyVolTransformOutputSpec(TraitedSpec):
     transformed_file = File(exists=True, desc='Path to output file if used normally')
@@ -1003,8 +1011,8 @@ class ApplyVolTransform(FSCommand):
     def _get_outfile(self):
         outfile = self.inputs.transformed_file
         if not isdefined(outfile):
-            if self.inputs.inverse == True:
-                if self.inputs.fs_target == True:
+            if self.inputs.inverse is True:
+                if self.inputs.fs_target is True:
                     src = 'orig.mgz'
                 else:
                     src = self.inputs.target_file
@@ -1025,17 +1033,18 @@ class ApplyVolTransform(FSCommand):
             return self._get_outfile()
         return None
 
+
 class SmoothInputSpec(FSTraitedSpec):
     in_file = File(exists=True, desc='source volume',
-                     argstr='--i %s', mandatory=True)
+                   argstr='--i %s', mandatory=True)
     reg_file = File(desc='registers volume to surface anatomical ',
-                   argstr='--reg %s', mandatory=True,
-                   exists=True)
+                    argstr='--reg %s', mandatory=True,
+                    exists=True)
     smoothed_file = File(desc='output volume', argstr='--o %s', genfile=True)
     proj_frac_avg = traits.Tuple(traits.Float, traits.Float, traits.Float,
-                               xor=['proj_frac'],
-                              desc='average a long normal min max delta',
-                              argstr='--projfrac-avg %.2f %.2f %.2f')
+                                 xor=['proj_frac'],
+                                 desc='average a long normal min max delta',
+                                 argstr='--projfrac-avg %.2f %.2f %.2f')
     proj_frac = traits.Float(desc='project frac of thickness a long surface normal',
                              xor=['proj_frac_avg'],
                              argstr='--projfrac %s')
@@ -1043,8 +1052,8 @@ class SmoothInputSpec(FSTraitedSpec):
                                 mandatory=True, xor=['num_iters'],
                                 desc='surface FWHM in mm', argstr='--fwhm %f')
     num_iters = traits.Range(low=1, xor=['surface_fwhm'],
-                           mandatory=True, argstr='--niters %d',
-                           desc='number of iterations instead of fwhm')
+                             mandatory=True, argstr='--niters %d',
+                             desc='number of iterations instead of fwhm')
     vol_fwhm = traits.Range(low=0.0, argstr='--vol-fwhm %f',
                             desc='volume smoothing outside of surface')
 
@@ -1103,11 +1112,11 @@ class RobustRegisterInputSpec(FSTraitedSpec):
     out_reg_file = File(genfile=True, argstr='--lta %s',
                         desc='registration file to write')
     registered_file = traits.Either(traits.Bool, File, argstr='--warp %s',
-                      desc='registered image; either True or filename')
+                                    desc='registered image; either True or filename')
     weights_file = traits.Either(traits.Bool, File, argstr='--weights %s',
-                   desc='weights image to write; either True or filename')
+                                 desc='weights image to write; either True or filename')
     est_int_scale = traits.Bool(argstr='--iscale',
-                    desc='estimate intensity scale (recommended for unnormalized images)')
+                                desc='estimate intensity scale (recommended for unnormalized images)')
     trans_only = traits.Bool(argstr='--transonly',
                              desc='find 3 parameter translation only')
     in_xfm_file = File(exists=True, argstr='--transform',
@@ -1130,7 +1139,7 @@ class RobustRegisterInputSpec(FSTraitedSpec):
                                 desc='use least squares instead of robust estimator')
     no_init = traits.Bool(argstr='--noinit', desc='skip transform init')
     init_orient = traits.Bool(argstr='--initorient',
-                  desc='use moments for initial orient (recommended for stripped brains)')
+                              desc='use moments for initial orient (recommended for stripped brains)')
     max_iterations = traits.Int(argstr='--maxit %d',
                                 desc='maximum # of times on each resolution')
     high_iterations = traits.Int(argstr='--highit %d',
@@ -1138,7 +1147,7 @@ class RobustRegisterInputSpec(FSTraitedSpec):
     iteration_thresh = traits.Float(argstr='--epsit %.3f',
                                     desc='stop iterations when below threshold')
     subsample_thresh = traits.Int(argstr='--subsample %d',
-                       desc='subsample if dimension is above threshold size')
+                                  desc='subsample if dimension is above threshold size')
     outlier_limit = traits.Float(argstr='--wlimit %.3f',
                                  desc='set maximal outlier limit in satit')
     write_vo2vox = traits.Bool(argstr='--vox2vox',
@@ -1205,7 +1214,7 @@ class RobustRegister(FSCommand):
         outputs['out_reg_file'] = self.inputs.out_reg_file
         if not isdefined(self.inputs.out_reg_file) and self.inputs.source_file:
             outputs['out_reg_file'] = fname_presuffix(self.inputs.source_file,
-                                         suffix='_robustreg.lta', use_ext=False)
+                                                      suffix='_robustreg.lta', use_ext=False)
         prefices = dict(src=self.inputs.source_file, trg=self.inputs.target_file)
         suffices = dict(registered_file=("src", "_robustreg", True),
                         weights_file=("src", "_robustweights", True),
@@ -1214,7 +1223,7 @@ class RobustRegister(FSCommand):
                         half_weights=("src", "_halfweights", True),
                         half_source_xfm=("src", "_robustxfm.lta", False),
                         half_targ_xfm=("trg", "_robustxfm.lta", False))
-        for name, sufftup in suffices.items():
+        for name, sufftup in list(suffices.items()):
             value = getattr(self.inputs, name)
             if isdefined(value):
                 if isinstance(value, bool):
@@ -1242,7 +1251,7 @@ class FitMSParamsInputSpec(FSTraitedSpec):
     xfm_list = traits.List(File(exists=True),
                            desc="list of transform files to apply to each FLASH image")
     out_dir = Directory(argstr="%s", position=-1, genfile=True,
-                              desc="directory to store output in")
+                        desc="directory to store output in")
 
 
 class FitMSParamsOutputSpec(TraitedSpec):
@@ -1305,7 +1314,7 @@ class FitMSParams(FSCommand):
 class SynthesizeFLASHInputSpec(FSTraitedSpec):
 
     fixed_weighting = traits.Bool(position=1, argstr="-w",
-        desc="use a fixed weighting to generate optimal gray/white contrast")
+                                  desc="use a fixed weighting to generate optimal gray/white contrast")
     tr = traits.Float(mandatory=True, position=2, argstr="%.2f",
                       desc="repetition time (in msec)")
     flip_angle = traits.Float(mandatory=True, position=3, argstr="%.2f",
@@ -1348,10 +1357,700 @@ class SynthesizeFLASH(FSCommand):
             outputs["out_file"] = self.inputs.out_file
         else:
             outputs["out_file"] = self._gen_fname("synth-flash_%02d.mgz" % self.inputs.flip_angle,
-                                                   suffix="")
+                                                  suffix="")
         return outputs
 
     def _gen_filename(self, name):
         if name == "out_file":
             return self._list_outputs()["out_file"]
         return None
+
+
+class MNIBiasCorrectionInputSpec(FSTraitedSpec):
+    # mandatory
+    in_file = File(exists=True, mandatory=True, argstr="--i %s",
+                   desc="input volume. Input can be any format accepted by mri_convert.")
+    out_file = File(argstr="--o %s", name_source=['in_file'],
+                    name_template='%s_output', hash_files=False, keep_extension=True,
+                    desc="output volume. Output can be any format accepted by mri_convert. " +
+                    "If the output format is COR, then the directory must exist.")
+    # optional
+    iterations = traits.Int(4, argstr="--n %d",
+                            desc="Number of iterations to run nu_correct. Default is 4. This is the number of times " +
+                            "that nu_correct is repeated (ie, using the output from the previous run as the input for " +
+                            "the next). This is different than the -iterations option to nu_correct.")
+    protocol_iterations = traits.Int(argstr="--proto-iters %d",
+                                     desc="Passes Np as argument of the -iterations flag of nu_correct. This is different " +
+                                     "than the --n flag above. Default is not to pass nu_correct the -iterations flag.")
+    distance = traits.Int(argstr="--distance %d", desc="N3 -distance option")
+    no_rescale = traits.Bool(argstr="--no-rescale",
+                             desc="do not rescale so that global mean of output == input global mean")
+    mask = File(exists=True, argstr="--mask %s",
+                desc="brainmask volume. Input can be any format accepted by mri_convert.")
+    transform = File(exists=True, argstr="--uchar %s",
+                     desc="tal.xfm. Use mri_make_uchar instead of conforming")
+    stop = traits.Float(argstr="--stop %f",
+                        desc="Convergence threshold below which iteration stops (suggest 0.01 to 0.0001)")
+    shrink = traits.Int(argstr="--shrink %d",
+                        desc="Shrink parameter for finer sampling (default is 4)")
+
+class MNIBiasCorrectionOutputSpec(TraitedSpec):
+    out_file = File(desc="output volume")
+
+
+class MNIBiasCorrection(FSCommand):
+    """ Wrapper for nu_correct, a program from the Montreal Neurological Insitute (MNI)
+    used for correcting intensity non-uniformity (ie, bias fields). You must have the
+    MNI software installed on your system to run this. See [www.bic.mni.mcgill.ca/software/N3]
+    for more info.
+
+    mri_nu_correct.mni uses float internally instead of uchar. It also rescales the output so
+    that the global mean is the same as that of the input. These two changes are linked and
+    can be turned off with --no-float
+
+    Examples
+    --------
+    >>> from nipype.interfaces.freesurfer import MNIBiasCorrection
+    >>> correct = MNIBiasCorrection()
+    >>> correct.inputs.in_file = "norm.mgz"
+    >>> correct.inputs.iterations = 6
+    >>> correct.inputs.protocol_iterations = 1000
+    >>> correct.inputs.distance = 50
+    >>> correct.cmdline
+    'mri_nu_correct.mni --distance 50 --i norm.mgz --n 6 --o norm_output.mgz --proto-iters 1000'
+
+    References:
+    ----------
+    [http://freesurfer.net/fswiki/mri_nu_correct.mni]
+    [http://www.bic.mni.mcgill.ca/software/N3]
+    [https://github.com/BIC-MNI/N3]
+
+    """
+    _cmd = "mri_nu_correct.mni"
+    input_spec = MNIBiasCorrectionInputSpec
+    output_spec = MNIBiasCorrectionOutputSpec
+
+    def _list_outputs(self):
+        outputs = self._outputs().get()
+        outputs["out_file"] = os.path.abspath(self.inputs.out_file)
+        return outputs
+
+
+class WatershedSkullStripInputSpec(FSTraitedSpec):
+    # required
+    in_file = File(argstr="%s", exists=True, mandatory=True,
+                   position=-2, desc="input volume")
+    out_file = File('brainmask.auto.mgz', argstr="%s", exists=False,
+                    mandatory=True, position=-1, usedefault=True,
+                    desc="output volume")
+    # optional
+    t1 = traits.Bool(
+        argstr="-T1", desc="specify T1 input volume (T1 grey value = 110)")
+    brain_atlas = File(argstr="-brain_atlas %s",
+                       exists=True, position=-4, desc="")
+    transform = File(argstr="%s", exists=False,
+                     position=-3, desc="undocumented")
+
+
+class WatershedSkullStripOutputSpec(TraitedSpec):
+    out_file = File(exists=False, desc="skull stripped brain volume")
+
+
+class WatershedSkullStrip(FSCommand):
+    """ This program strips skull and other outer non-brain tissue and
+    produces the brain volume from T1 volume or the scanned volume.
+
+    The "watershed" segmentation algorithm was used to dertermine the
+    intensity values for white matter, grey matter, and CSF.
+    A force field was then used to fit a spherical surface to the brain.
+    The shape of the surface fit was then evaluated against a previously
+    derived template.
+
+    The default parameters are: -w 0.82 -b 0.32 -h 10 -seedpt -ta -wta
+
+    (Segonne 2004)
+
+    Examples
+    ========
+    >>> from nipype.interfaces.freesurfer import WatershedSkullStrip
+    >>> skullstrip = WatershedSkullStrip()
+    >>> skullstrip.inputs.in_file = "T1.mgz"
+    >>> skullstrip.inputs.t1 = True
+    >>> skullstrip.inputs.transform = "transforms/talairach_with_skull.lta"
+    >>> skullstrip.inputs.out_file = "brainmask.auto.mgz"
+    >>> skullstrip.cmdline
+    'mri_watershed -T1 transforms/talairach_with_skull.lta T1.mgz brainmask.auto.mgz'
+    """
+    _cmd = 'mri_watershed'
+    input_spec = WatershedSkullStripInputSpec
+    output_spec = WatershedSkullStripOutputSpec
+
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        outputs['out_file'] = os.path.abspath(self.inputs.out_file)
+        return outputs
+
+
+class NormalizeInputSpec(FSTraitedSpec):
+    # required
+    in_file = File(argstr='%s', exists=True, mandatory=True,
+                   position=-2, desc="The input file for Normalize")
+    out_file = File(argstr='%s', position=-1,
+                    name_source=['in_file'], name_template='%s_norm',
+                    hash_files=False, keep_extension=True,
+                    desc="The output file for Normalize")
+    # optional
+    gradient = traits.Int(1, argstr="-g %d", usedefault=False,
+                          desc="use max intensity/mm gradient g (default=1)")
+    mask = File(argstr="-mask %s",  exists=True,
+                desc="The input mask file for Normalize")
+    segmentation = File(argstr="-aseg %s",
+                        exists=True, desc="The input segmentation for Normalize")
+    transform = File(exists=True,
+                     desc="Tranform file from the header of the input file")
+
+
+class NormalizeOutputSpec(TraitedSpec):
+    out_file = traits.File(exists=False, desc="The output file for Normalize")
+
+
+class Normalize(FSCommand):
+    """
+    Normalize the white-matter, optionally based on control points. The
+    input volume is converted into a new volume where white matter image
+    values all range around 110.
+
+    Examples
+    ========
+    >>> from nipype.interfaces import freesurfer
+    >>> normalize = freesurfer.Normalize()
+    >>> normalize.inputs.in_file = "T1.mgz"
+    >>> normalize.inputs.gradient = 1
+    >>> normalize.cmdline
+    'mri_normalize -g 1 T1.mgz T1_norm.mgz'
+    """
+    _cmd = "mri_normalize"
+    input_spec = NormalizeInputSpec
+    output_spec = NormalizeOutputSpec
+
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        outputs['out_file'] = os.path.abspath(self.inputs.out_file)
+        return outputs
+
+
+class CANormalizeInputSpec(FSTraitedSpec):
+    in_file = File(argstr='%s', exists=True, mandatory=True,
+                   position=-4, desc="The input file for CANormalize")
+    out_file = File(argstr='%s', position=-1,
+                    name_source=['in_file'], name_template='%s_norm',
+                    hash_files=False, keep_extension=True,
+                    desc="The output file for CANormalize")
+    atlas = File(argstr='%s', exists=True, mandatory=True,
+                 position=-3, desc="The atlas file in gca format")
+    transform = File(argstr='%s', exists=True, mandatory=True,
+                     position=-2, desc="The tranform file in lta format")
+    # optional
+    mask = File(argstr='-mask %s', exists=True,
+                desc="Specifies volume to use as mask")
+    control_points = File(argstr='-c %s',
+                          desc="File name for the output control points")
+    long_file = File(argstr='-long %s',
+                     desc='undocumented flag used in longitudinal processing')
+
+class CANormalizeOutputSpec(TraitedSpec):
+    out_file = traits.File(exists=False, desc="The output file for Normalize")
+    control_points = File(
+        exists=False, desc="The output control points for Normalize")
+
+
+class CANormalize(FSCommand):
+    """This program creates a normalized volume using the brain volume and an
+    input gca file.
+
+    For complete details, see the `FS Documentation <http://surfer.nmr.mgh.harvard.edu/fswiki/mri_ca_normalize>`_
+
+    Examples
+    ========
+
+    >>> from nipype.interfaces import freesurfer
+    >>> ca_normalize = freesurfer.CANormalize()
+    >>> ca_normalize.inputs.in_file = "T1.mgz"
+    >>> ca_normalize.inputs.atlas = "atlas.nii.gz" # in practice use .gca atlases
+    >>> ca_normalize.inputs.transform = "trans.mat" # in practice use .lta transforms
+    >>> ca_normalize.cmdline
+    'mri_ca_normalize T1.mgz atlas.nii.gz trans.mat T1_norm.mgz'
+    """
+    _cmd = "mri_ca_normalize"
+    input_spec = CANormalizeInputSpec
+    output_spec = CANormalizeOutputSpec
+
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        outputs['out_file'] = os.path.abspath(self.inputs.out_file)
+        outputs['control_points'] = os.path.abspath(self.inputs.control_points)
+        return outputs
+
+
+class CARegisterInputSpec(FSTraitedSpecOpenMP):
+    #required
+    in_file = File(argstr='%s', exists=True, mandatory=True,
+                   position=-3, desc="The input volume for CARegister")
+    out_file = File(argstr='%s',  position=-1,
+                    genfile=True, desc="The output volume for CARegister")
+    template = File(argstr='%s', exists=True,
+                    position=-2, desc="The template file in gca format")
+    # optional
+    mask = File(argstr='-mask %s', exists=True,
+                desc="Specifies volume to use as mask")
+    invert_and_save = traits.Bool(argstr='-invert-and-save',  position=-4,
+                                  desc="Invert and save the .m3z multi-dimensional talaraich transform to x, y, and z .mgz files")
+    no_big_ventricles = traits.Bool(
+        argstr='-nobigventricles',  desc="No big ventricles")
+    transform = File(argstr='-T %s', exists=True,
+                     desc="Specifies transform in lta format")
+    align = traits.String(argstr='-align-%s',
+                          desc="Specifies when to perform alignment")
+    levels = traits.Int(
+        argstr='-levels %d',
+        desc="defines how many surrounding voxels will be used in interpolations, default is 6")
+    A = traits.Int(
+        argstr='-A %d', desc='undocumented flag used in longitudinal processing')
+    l_files = InputMultiPath(
+        File(exists=False), argstr='-l %s',
+        desc='undocumented flag used in longitudinal processing')
+
+
+class CARegisterOutputSpec(TraitedSpec):
+    out_file = traits.File(exists=False, desc="The output file for CARegister")
+
+
+class CARegister(FSCommandOpenMP):
+    """Generates a multi-dimensional talairach transform from a gca file and talairach.lta file
+
+    For complete details, see the `FS Documentation <http://surfer.nmr.mgh.harvard.edu/fswiki/mri_ca_register>`_
+
+    Examples
+    ========
+    >>> from nipype.interfaces import freesurfer
+    >>> ca_register = freesurfer.CARegister()
+    >>> ca_register.inputs.in_file = "norm.mgz"
+    >>> ca_register.inputs.out_file = "talairach.m3z"
+    >>> ca_register.cmdline
+    'mri_ca_register norm.mgz talairach.m3z'
+    """
+    _cmd = "mri_ca_register"
+    input_spec = CARegisterInputSpec
+    output_spec = CARegisterOutputSpec
+
+    def _format_arg(self, name, spec, value):
+        if name == "l_files" and len(value) == 1:
+            value.append('identity.nofile')
+        return super(CARegister, self)._format_arg(name, spec, value)
+
+    def _gen_fname(self, name):
+        if name == 'out_file':
+            return os.path.abspath('talairach.m3z')
+        return None
+
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        outputs['out_file'] = os.path.abspath(self.inputs.out_file)
+        return outputs
+
+
+class CALabelInputSpec(FSTraitedSpecOpenMP):
+    #required
+    in_file = File(argstr="%s", position=-4, mandatory=True,
+                   exists=True, desc="Input volume for CALabel")
+    out_file = File(argstr="%s", position=-1, mandatory=True, exists=False,
+                    desc="Output file for CALabel")
+    transform = File(argstr="%s", position=-3, mandatory=True,
+                     exists=True, desc="Input transform for CALabel")
+    template = File(argstr="%s", position=-2, mandatory=True,
+                    exists=True, desc="Input template for CALabel")
+    # optional
+    in_vol = File(argstr="-r %s", exists=True,
+                  desc="set input volume")
+    intensities = File(argstr="-r %s", exists=True,
+                       desc="input label intensities file(used in longitudinal processing)")
+    no_big_ventricles = traits.Bool(
+        argstr="-nobigventricles",  desc="No big ventricles")
+    align = traits.Bool(argstr="-align",  desc="Align CALabel")
+    prior = traits.Float(argstr="-prior %.1f",
+                          desc="Prior for CALabel")
+    relabel_unlikely = traits.Tuple(traits.Int, traits.Float,
+                                    argstr="-relabel_unlikely %d %.1f",
+                                    desc=("Reclassify voxels at least some std"
+                                          " devs from the mean using some size"
+                                          " Gaussian window"))
+    label = traits.File(argstr="-l %s",  exists=True,
+                        desc="Undocumented flag. Autorecon3 uses ../label/{hemisphere}.cortex.label as input file")
+    aseg = traits.File(argstr="-aseg %s",  exists=True,
+                       desc="Undocumented flag. Autorecon3 uses ../mri/aseg.presurf.mgz as input file")
+
+
+class CALabelOutputSpec(TraitedSpec):
+    out_file = File(exists=False, desc="Output volume from CALabel")
+
+
+class CALabel(FSCommandOpenMP):
+    """
+    For complete details, see the `FS Documentation <http://surfer.nmr.mgh.harvard.edu/fswiki/mri_ca_register>`_
+
+    Examples
+    ========
+
+    >>> from nipype.interfaces import freesurfer
+    >>> ca_label = freesurfer.CALabel()
+    >>> ca_label.inputs.in_file = "norm.mgz"
+    >>> ca_label.inputs.out_file = "out.mgz"
+    >>> ca_label.inputs.transform = "trans.mat"
+    >>> ca_label.inputs.template = "Template_6.nii" # in practice use .gcs extension
+    >>> ca_label.cmdline
+    'mri_ca_label norm.mgz trans.mat Template_6.nii out.mgz'
+    """
+    _cmd = "mri_ca_label"
+    input_spec = CALabelInputSpec
+    output_spec = CALabelOutputSpec
+
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        outputs['out_file'] = os.path.abspath(self.inputs.out_file)
+        return outputs
+
+
+class MRIsCALabelInputSpec(FSTraitedSpecOpenMP):
+    # required
+    subject_id = traits.String('subject_id', argstr="%s", position=-5,
+                               usedefault=True, mandatory=True,
+                               desc="Subject name or ID")
+    hemisphere = traits.Enum('lh', 'rh',
+                             argstr="%s", position=-4, mandatory=True,
+                             desc="Hemisphere ('lh' or 'rh')")
+    canonsurf = File(argstr="%s", position=-3, mandatory=True, exists=True,
+                     desc="Input canonical surface file")
+    classifier = File(argstr="%s", position=-2, mandatory=True, exists=True,
+                      desc="Classifier array input file")
+    smoothwm = File(mandatory=True, exists=True,
+                    desc="implicit input {hemisphere}.smoothwm")
+    curv = File(mandatory=True, exists=True,
+                desc="implicit input {hemisphere}.curv")
+    sulc = File(mandatory=True, exists=True,
+                desc="implicit input {hemisphere}.sulc")
+    out_file = File(argstr="%s", position=-1, exists=False,
+                    name_source=['hemisphere'], keep_extension=True,
+                    hash_files=False, name_template="%s.aparc.annot",
+                    desc="Annotated surface output file")
+    # optional
+    label = traits.File(argstr="-l %s",  exists=True,
+                        desc="Undocumented flag. Autorecon3 uses ../label/{hemisphere}.cortex.label as input file")
+    aseg = traits.File(argstr="-aseg %s",  exists=True,
+                       desc="Undocumented flag. Autorecon3 uses ../mri/aseg.presurf.mgz as input file")
+    seed = traits.Int(argstr="-seed %d",
+                      desc="")
+    copy_inputs = traits.Bool(desc="Copies implicit inputs to node directory " +
+                              "and creates a temp subjects_directory. " +
+                              "Use this when running as a node")
+
+
+class MRIsCALabelOutputSpec(TraitedSpec):
+    out_file = File(exists=False, desc="Output volume from MRIsCALabel")
+
+
+class MRIsCALabel(FSCommandOpenMP):
+    """
+    For a single subject, produces an annotation file, in which each
+    cortical surface vertex is assigned a neuroanatomical label.This
+    automatic procedure employs data from a previously-prepared atlas
+    file. An atlas file is created from a training set, capturing region
+    data manually drawn by neuroanatomists combined with statistics on
+    variability correlated to geometric information derived from the
+    cortical model (sulcus and curvature). Besides the atlases provided
+    with FreeSurfer, new ones can be prepared using mris_ca_train).
+
+    Examples
+    ========
+
+    >>> from nipype.interfaces import freesurfer
+    >>> ca_label = freesurfer.MRIsCALabel()
+    >>> ca_label.inputs.subject_id = "test"
+    >>> ca_label.inputs.hemisphere = "lh"
+    >>> ca_label.inputs.canonsurf = "lh.pial"
+    >>> ca_label.inputs.curv = "lh.pial"
+    >>> ca_label.inputs.sulc = "lh.pial"
+    >>> ca_label.inputs.classifier = "im1.nii" # in pracice, use .gcs extension
+    >>> ca_label.inputs.smoothwm = "lh.pial"
+    >>> ca_label.cmdline
+    'mris_ca_label test lh lh.pial im1.nii lh.aparc.annot'
+    """
+    _cmd = "mris_ca_label"
+    input_spec = MRIsCALabelInputSpec
+    output_spec = MRIsCALabelOutputSpec
+
+    def run(self, **inputs):
+        if self.inputs.copy_inputs:
+            self.inputs.subjects_dir = os.getcwd()
+            if 'subjects_dir' in inputs:
+                inputs['subjects_dir'] = self.inputs.subjects_dir
+            copy2subjdir(self, self.inputs.canonsurf, folder='surf')
+            copy2subjdir(self, self.inputs.smoothwm,
+                         folder='surf',
+                         basename='{0}.smoothwm'.format(self.inputs.hemisphere))
+            copy2subjdir(self, self.inputs.curv,
+                         folder='surf',
+                         basename='{0}.curv'.format(self.inputs.hemisphere))
+            copy2subjdir(self, self.inputs.sulc,
+                         folder='surf',
+                         basename='{0}.sulc'.format(self.inputs.hemisphere))
+
+        # The label directory must exist in order for an output to be written
+        label_dir = os.path.join(self.inputs.subjects_dir,
+                                 self.inputs.subject_id,
+                                 'label')
+        if not os.path.isdir(label_dir):
+            os.makedirs(label_dir)
+
+        return super(MRIsCALabel, self).run(**inputs)
+
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        out_basename = os.path.basename(self.inputs.out_file)
+        outputs['out_file'] = os.path.join(self.inputs.subjects_dir,
+                                           self.inputs.subject_id,
+                                           'label', out_basename)
+        return outputs
+
+
+class SegmentCCInputSpec(FSTraitedSpec):
+    in_file = File(argstr="-aseg %s", mandatory=True, exists=True,
+                   desc="Input aseg file to read from subjects directory")
+    in_norm = File(mandatory=True, exists=True,
+                   desc="Required undocumented input {subject}/mri/norm.mgz")
+    out_file = File(argstr="-o %s", exists=False,
+                    name_source=['in_file'], name_template='%s.auto.mgz',
+                    hash_files=False, keep_extension=False,
+                    desc="Filename to write aseg including CC")
+    out_rotation = File(argstr="-lta %s", mandatory=True, exists=False,
+                        desc="Global filepath for writing rotation lta")
+    subject_id = traits.String('subject_id', argstr="%s", mandatory=True,
+                               position=-1, usedefault=True,
+                               desc="Subject name")
+    copy_inputs = traits.Bool(desc="If running as a node, set this to True." +
+                              "This will copy the input files to the node " +
+                              "directory.")
+
+
+class SegmentCCOutputSpec(TraitedSpec):
+    out_file = File(exists=False,
+                    desc="Output segmentation uncluding corpus collosum")
+    out_rotation = File(exists=False,
+                        desc="Output lta rotation file")
+
+
+class SegmentCC(FSCommand):
+    """
+    This program segments the corpus callosum into five separate labels in
+    the subcortical segmentation volume 'aseg.mgz'. The divisions of the
+    cc are equally spaced in terms of distance along the primary
+    eigendirection (pretty much the long axis) of the cc. The lateral
+    extent can be changed with the -T <thickness> parameter, where
+    <thickness> is the distance off the midline (so -T 1 would result in
+    the who CC being 3mm thick). The default is 2 so it's 5mm thick. The
+    aseg.stats values should be volume.
+
+    Examples
+    ========
+    >>> from nipype.interfaces import freesurfer
+    >>> SegmentCC_node = freesurfer.SegmentCC()
+    >>> SegmentCC_node.inputs.in_file = "aseg.mgz"
+    >>> SegmentCC_node.inputs.in_norm = "norm.mgz"
+    >>> SegmentCC_node.inputs.out_rotation = "cc.lta"
+    >>> SegmentCC_node.inputs.subject_id = "test"
+    >>> SegmentCC_node.cmdline
+    'mri_cc -aseg aseg.mgz -o aseg.auto.mgz -lta cc.lta test'
+    """
+
+    _cmd = "mri_cc"
+    input_spec = SegmentCCInputSpec
+    output_spec = SegmentCCOutputSpec
+
+    # mri_cc does not take absolute paths and will look for the
+    # input files in  <SUBJECTS_DIR>/<subject_id>/mri/<basename>
+    # So, if the files are not there, they will be copied to that
+    # location
+    def _format_arg(self, name, spec, value):
+        if name in ["in_file", "in_norm", "out_file"]:
+            # mri_cc can't use abspaths just the basename
+            basename = os.path.basename(value)
+            return spec.argstr % basename
+        return super(SegmentCC, self)._format_arg(name, spec, value)
+
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        outputs['out_file'] = os.path.abspath(self.inputs.out_file)
+        outputs['out_rotation'] = os.path.abspath(self.inputs.out_rotation)
+        return outputs
+
+    def run(self, **inputs):
+        if self.inputs.copy_inputs:
+            self.inputs.subjects_dir = os.getcwd()
+            if 'subjects_dir' in inputs:
+                inputs['subjects_dir'] = self.inputs.subjects_dir
+            for originalfile in [self.inputs.in_file, self.inputs.in_norm]:
+                copy2subjdir(self, originalfile, folder='mri')
+        return super(SegmentCC, self).run(**inputs)
+
+    def aggregate_outputs(self, runtime=None, needed_outputs=None):
+        # it is necessary to find the output files and move
+        # them to the correct loacation
+        predicted_outputs = self._list_outputs()
+        for name in ['out_file', 'out_rotation']:
+            out_file = predicted_outputs[name]
+            if not os.path.isfile(out_file):
+                out_base = os.path.basename(out_file)
+                if isdefined(self.inputs.subjects_dir):
+                    subj_dir = os.path.join(self.inputs.subjects_dir,
+                                            self.inputs.subject_id)
+                else:
+                    subj_dir = os.path.join(os.getcwd(),
+                                            self.inputs.subject_id)
+                if name == 'out_file':
+                    out_tmp = os.path.join(subj_dir,
+                                           'mri',
+                                           out_base)
+                elif name == 'out_rotation':
+                    out_tmp = os.path.join(subj_dir,
+                                           'mri',
+                                           'transforms',
+                                           out_base)
+                else:
+                    out_tmp = None
+                # move the file to correct location
+                if out_tmp and os.path.isfile(out_tmp):
+                    if not os.path.isdir(os.path.dirname(out_tmp)):
+                        os.makedirs(os.path.dirname(out_tmp))
+                    shutil.move(out_tmp, out_file)
+        return super(SegmentCC, self).aggregate_outputs(runtime, needed_outputs)
+
+
+class SegmentWMInputSpec(FSTraitedSpec):
+    in_file = File(argstr="%s", exists=True, mandatory=True,
+                   position=-2, desc="Input file for SegmentWM")
+    out_file = File(argstr="%s", exists=False, mandatory=True,
+                    position=-1, desc="File to be written as output for SegmentWM")
+
+
+class SegmentWMOutputSpec(TraitedSpec):
+    out_file = File(exists=False, desc="Output white matter segmentation")
+
+
+class SegmentWM(FSCommand):
+    """
+    This program segments white matter from the input volume.  The input
+    volume should be normalized such that white matter voxels are
+    ~110-valued, and the volume is conformed to 256^3.
+
+
+    Examples
+    ========
+    >>> from nipype.interfaces import freesurfer
+    >>> SegmentWM_node = freesurfer.SegmentWM()
+    >>> SegmentWM_node.inputs.in_file = "norm.mgz"
+    >>> SegmentWM_node.inputs.out_file = "wm.seg.mgz"
+    >>> SegmentWM_node.cmdline
+    'mri_segment norm.mgz wm.seg.mgz'
+    """
+
+    _cmd = "mri_segment"
+    input_spec = SegmentWMInputSpec
+    output_spec = SegmentWMOutputSpec
+
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        outputs['out_file'] = os.path.abspath(self.inputs.out_file)
+        return outputs
+
+
+class EditWMwithAsegInputSpec(FSTraitedSpec):
+    in_file = File(argstr="%s", position=-4, mandatory=True, exists=True,
+                   desc="Input white matter segmentation file")
+    brain_file = File(argstr="%s", position=-3, mandatory=True, exists=True,
+                      desc="Input brain/T1 file")
+    seg_file = File(argstr="%s", position=-2, mandatory=True, exists=True,
+                    desc="Input presurf segmentation file")
+    out_file = File(argstr="%s", position=-1, mandatory=True, exists=False,
+                    desc="File to be written as output")
+    # optional
+    keep_in = traits.Bool(argstr="-keep-in",
+                          desc="Keep edits as found in input volume")
+
+class EditWMwithAsegOutputSpec(TraitedSpec):
+    out_file = File(exists=False, desc="Output edited WM file")
+
+
+class EditWMwithAseg(FSCommand):
+    """
+    Edits a wm file using a segmentation
+
+    Examples
+    ========
+    >>> from nipype.interfaces.freesurfer import EditWMwithAseg
+    >>> editwm = EditWMwithAseg()
+    >>> editwm.inputs.in_file = "T1.mgz"
+    >>> editwm.inputs.brain_file = "norm.mgz"
+    >>> editwm.inputs.seg_file = "aseg.mgz"
+    >>> editwm.inputs.out_file = "wm.asegedit.mgz"
+    >>> editwm.inputs.keep_in = True
+    >>> editwm.cmdline
+    'mri_edit_wm_with_aseg -keep-in T1.mgz norm.mgz aseg.mgz wm.asegedit.mgz'
+    """
+    _cmd = 'mri_edit_wm_with_aseg'
+    input_spec = EditWMwithAsegInputSpec
+    output_spec = EditWMwithAsegOutputSpec
+
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        outputs['out_file'] = os.path.abspath(self.inputs.out_file)
+        return outputs
+
+
+class ConcatenateLTAInputSpec(FSTraitedSpec):
+    # required
+    in_lta1 = File(exists=True, mandatory=True, argstr='%s', position=-3,
+                   desc="maps some src1 to dst1")
+    in_lta2 = File(exists=True, mandatory=True, argstr='%s', position=-2,
+                   desc="maps dst1(src2) to dst2")
+    out_file = File(exists=False, position=-1, argstr='%s',
+                    name_source=['in_lta1'], name_template='%s-long',
+                    hash_files=False, keep_extension=True,
+                    desc="the combined LTA maps: src1 to dst2 = LTA2*LTA1")
+
+
+class ConcatenateLTAOutputSpec(TraitedSpec):
+    out_file = File(
+        exists=False, desc='the combined LTA maps: src1 to dst2 = LTA2*LTA1')
+
+
+class ConcatenateLTA(FSCommand):
+    """concatenates two consecutive LTA transformations
+    into one overall transformation, Out = LTA2*LTA1
+
+    Examples
+    --------
+    >>> from nipype.interfaces.freesurfer import ConcatenateLTA
+    >>> conc_lta = ConcatenateLTA()
+    >>> conc_lta.inputs.in_lta1 = 'trans.mat'
+    >>> conc_lta.inputs.in_lta2 = 'trans.mat'
+    >>> conc_lta.cmdline
+    'mri_concatenate_lta trans.mat trans.mat trans-long.mat'
+    """
+
+    _cmd = 'mri_concatenate_lta'
+    input_spec = ConcatenateLTAInputSpec
+    output_spec = ConcatenateLTAOutputSpec
+
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        outputs['out_file'] = os.path.abspath(self.inputs.out_file)
+        return outputs

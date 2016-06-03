@@ -1,6 +1,6 @@
 """Utilities for writing code that runs on Python 2 and 3"""
 
-# Copyright (c) 2010-2014 Benjamin Peterson
+# Copyright (c) 2010-2015 Benjamin Peterson
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -23,12 +23,13 @@
 from __future__ import absolute_import
 
 import functools
+import itertools
 import operator
 import sys
 import types
 
 __author__ = "Benjamin Peterson <benjamin@python.org>"
-__version__ = "1.8.0"
+__version__ = "1.9.0"
 
 
 # Useful for very coarse version differentiation.
@@ -87,9 +88,13 @@ class _LazyDescr(object):
 
     def __get__(self, obj, tp):
         result = self._resolve()
-        setattr(obj, self.name, result) # Invokes __set__.
-        # This is a bit ugly, but it avoids running this again.
-        delattr(obj.__class__, self.name)
+        setattr(obj, self.name, result)  # Invokes __set__.
+        try:
+            # This is a bit ugly, but it avoids running this again by
+            # removing this descriptor.
+            delattr(obj.__class__, self.name)
+        except AttributeError:
+            pass
         return result
 
 
@@ -161,6 +166,7 @@ class _SixMetaPathImporter(object):
     This class implements a PEP302 finder and loader. It should be compatible
     with Python 2.5 and all existing versions of Python3
     """
+
     def __init__(self, six_module_name):
         self.name = six_module_name
         self.known_modules = {}
@@ -554,6 +560,12 @@ if PY3:
 
     def iterlists(d, **kw):
         return iter(d.lists(**kw))
+
+    viewkeys = operator.methodcaller("keys")
+
+    viewvalues = operator.methodcaller("values")
+
+    viewitems = operator.methodcaller("items")
 else:
     def iterkeys(d, **kw):
         return iter(d.iterkeys(**kw))
@@ -567,6 +579,12 @@ else:
     def iterlists(d, **kw):
         return iter(d.iterlists(**kw))
 
+    viewkeys = operator.methodcaller("viewkeys")
+
+    viewvalues = operator.methodcaller("viewvalues")
+
+    viewitems = operator.methodcaller("viewitems")
+
 _add_doc(iterkeys, "Return an iterator over the keys of a dictionary.")
 _add_doc(itervalues, "Return an iterator over the values of a dictionary.")
 _add_doc(iteritems,
@@ -578,6 +596,7 @@ _add_doc(iterlists,
 if PY3:
     def b(s):
         return s.encode("latin-1")
+
     def u(s):
         return s
     unichr = chr
@@ -593,29 +612,48 @@ if PY3:
     import io
     StringIO = io.StringIO
     BytesIO = io.BytesIO
+    _assertCountEqual = "assertCountEqual"
+    _assertRaisesRegex = "assertRaisesRegex"
+    _assertRegex = "assertRegex"
 else:
     def b(s):
         return s
     # Workaround for standalone backslash
+
     def u(s):
         return unicode(s.replace(r'\\', r'\\\\'), "unicode_escape")
     unichr = unichr
     int2byte = chr
+
     def byte2int(bs):
         return ord(bs[0])
+
     def indexbytes(buf, i):
         return ord(buf[i])
-    def iterbytes(buf):
-        return (ord(byte) for byte in buf)
+    iterbytes = functools.partial(itertools.imap, ord)
     import StringIO
     StringIO = BytesIO = StringIO.StringIO
+    _assertCountEqual = "assertItemsEqual"
+    _assertRaisesRegex = "assertRaisesRegexp"
+    _assertRegex = "assertRegexpMatches"
 _add_doc(b, """Byte literal""")
 _add_doc(u, """Text literal""")
 
 
+def assertCountEqual(self, *args, **kwargs):
+    return getattr(self, _assertCountEqual)(*args, **kwargs)
+
+
+def assertRaisesRegex(self, *args, **kwargs):
+    return getattr(self, _assertRaisesRegex)(*args, **kwargs)
+
+
+def assertRegex(self, *args, **kwargs):
+    return getattr(self, _assertRegex)(*args, **kwargs)
+
+
 if PY3:
     exec_ = getattr(moves.builtins, "exec")
-
 
     def reraise(tp, value, tb=None):
         if value is None:
@@ -637,10 +675,24 @@ else:
             _locs_ = _globs_
         exec("""exec _code_ in _globs_, _locs_""")
 
-
     exec_("""def reraise(tp, value, tb=None):
     raise tp, value, tb
 """)
+
+
+if sys.version_info[:2] == (3, 2):
+    exec_("""def raise_from(value, from_value):
+    if from_value is None:
+        raise value
+    raise value from from_value
+""")
+elif sys.version_info[:2] > (3, 2):
+    exec_("""def raise_from(value, from_value):
+    raise value from from_value
+""")
+else:
+    def raise_from(value, from_value):
+        raise value
 
 
 print_ = getattr(moves.builtins, "print", None)
@@ -650,13 +702,14 @@ if print_ is None:
         fp = kwargs.pop("file", sys.stdout)
         if fp is None:
             return
+
         def write(data):
             if not isinstance(data, basestring):
                 data = str(data)
             # If the file has an encoding, encode unicode with it.
             if (isinstance(fp, file) and
-                isinstance(data, unicode) and
-                fp.encoding is not None):
+                    isinstance(data, unicode) and
+                    fp.encoding is not None):
                 errors = getattr(fp, "errors", None)
                 if errors is None:
                     errors = "strict"
@@ -697,6 +750,15 @@ if print_ is None:
                 write(sep)
             write(arg)
         write(end)
+if sys.version_info[:2] < (3, 3):
+    _print = print_
+
+    def print_(*args, **kwargs):
+        fp = kwargs.get("file", sys.stdout)
+        flush = kwargs.pop("flush", False)
+        _print(*args, **kwargs)
+        if flush and fp is not None:
+            fp.flush()
 
 _add_doc(reraise, """Reraise an exception.""")
 
@@ -704,12 +766,13 @@ if sys.version_info[0:2] < (3, 4):
     def wraps(wrapped, assigned=functools.WRAPPER_ASSIGNMENTS,
               updated=functools.WRAPPER_UPDATES):
         def wrapper(f):
-            f = functools.wraps(wrapped)(f)
+            f = functools.wraps(wrapped, assigned, updated)(f)
             f.__wrapped__ = wrapped
             return f
         return wrapper
 else:
     wraps = functools.wraps
+
 
 def with_metaclass(meta, *bases):
     """Create a base class with a metaclass."""
@@ -737,6 +800,25 @@ def add_metaclass(metaclass):
         return metaclass(cls.__name__, cls.__bases__, orig_vars)
     return wrapper
 
+
+def python_2_unicode_compatible(klass):
+    """
+    A decorator that defines __unicode__ and __str__ methods under Python 2.
+    Under Python 3 it does nothing.
+
+    To support Python 2 and 3 with a single code base, define a __str__ method
+    returning text and apply this decorator to the class.
+    """
+    if PY2:
+        if '__str__' not in klass.__dict__:
+            raise ValueError("@python_2_unicode_compatible cannot be applied "
+                             "to %s because it doesn't define __str__()." %
+                             klass.__name__)
+        klass.__unicode__ = klass.__str__
+        klass.__str__ = lambda self: self.__unicode__().encode('utf-8')
+    return klass
+
+
 # Complete the moves implementation.
 # This code is at the end of this module to speed up module loading.
 # Turn this module into a package.
@@ -754,7 +836,7 @@ if sys.meta_path:
         # the six meta path importer, since the other six instance will have
         # inserted an importer with different class.
         if (type(importer).__name__ == "_SixMetaPathImporter" and
-            importer.name == __name__):
+                importer.name == __name__):
             del sys.meta_path[i]
             break
     del i, importer

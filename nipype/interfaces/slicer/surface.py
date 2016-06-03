@@ -36,7 +36,7 @@ acknowledgements: This work is part of the National Alliance for Medical Image C
     input_spec = MergeModelsInputSpec
     output_spec = MergeModelsOutputSpec
     _cmd = "MergeModels "
-    _outputs_filenames = {'ModelOutput':'ModelOutput.vtk'}
+    _outputs_filenames = {'ModelOutput': 'ModelOutput.vtk'}
 
 
 class ModelToLabelMapInputSpec(CommandLineInputSpec):
@@ -70,7 +70,7 @@ acknowledgements: This work is part of the National Alliance for Medical Image C
     input_spec = ModelToLabelMapInputSpec
     output_spec = ModelToLabelMapOutputSpec
     _cmd = "ModelToLabelMap "
-    _outputs_filenames = {'OutputVolume':'OutputVolume.nii'}
+    _outputs_filenames = {'OutputVolume': 'OutputVolume.nii'}
 
 
 class GrayscaleModelMakerInputSpec(CommandLineInputSpec):
@@ -110,7 +110,7 @@ acknowledgements: This work is part of the National Alliance for Medical Image C
     input_spec = GrayscaleModelMakerInputSpec
     output_spec = GrayscaleModelMakerOutputSpec
     _cmd = "GrayscaleModelMaker "
-    _outputs_filenames = {'OutputGeometry':'OutputGeometry.vtk'}
+    _outputs_filenames = {'OutputGeometry': 'OutputGeometry.vtk'}
 
 
 class ProbeVolumeWithModelInputSpec(CommandLineInputSpec):
@@ -143,7 +143,7 @@ acknowledgements: BWH, NCIGT/LMI
     input_spec = ProbeVolumeWithModelInputSpec
     output_spec = ProbeVolumeWithModelOutputSpec
     _cmd = "ProbeVolumeWithModel "
-    _outputs_filenames = {'OutputModel':'OutputModel.vtk'}
+    _outputs_filenames = {'OutputModel': 'OutputModel.vtk'}
 
 
 class LabelMapSmoothingInputSpec(CommandLineInputSpec):
@@ -179,7 +179,7 @@ acknowledgements: This work is part of the National Alliance for Medical Image C
     input_spec = LabelMapSmoothingInputSpec
     output_spec = LabelMapSmoothingOutputSpec
     _cmd = "LabelMapSmoothing "
-    _outputs_filenames = {'outputVolume':'outputVolume.nii'}
+    _outputs_filenames = {'outputVolume': 'outputVolume.nii'}
 
 
 class ModelMakerInputSpec(CommandLineInputSpec):
@@ -229,4 +229,4 @@ acknowledgements: This work is part of the National Alliance for Medical Image C
     input_spec = ModelMakerInputSpec
     output_spec = ModelMakerOutputSpec
     _cmd = "ModelMaker "
-    _outputs_filenames = {'modelSceneFile':'modelSceneFile.mrml'}
+    _outputs_filenames = {'modelSceneFile': 'modelSceneFile.mrml'}

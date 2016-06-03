@@ -8,20 +8,21 @@
 """
 import os
 
-from nipype.interfaces.base import (CommandLineInputSpec, CommandLine, traits,
-                                    TraitedSpec, File, StdOutCommandLine,
-                                    StdOutCommandLineInputSpec, isdefined)
-from nipype.utils.filemanip import split_filename
+from ..base import (CommandLineInputSpec, CommandLine, traits,
+                    TraitedSpec, File, StdOutCommandLine,
+                    StdOutCommandLineInputSpec, isdefined)
+from ...utils.filemanip import split_filename
+
 
 class QBallMXInputSpec(StdOutCommandLineInputSpec):
     basistype = traits.Enum('rbf', 'sh', argstr='-basistype %s',
-                             desc=('Basis function type. "rbf" to use radial basis functions '
+                            desc=('Basis function type. "rbf" to use radial basis functions '
                                   '"sh" to use spherical harmonics'), usedefault=True)
     scheme_file = File(exists=True, argstr='-schemefile %s', mandatory=True,
                        desc='Specifies the scheme file for the diffusion MRI data')
     order = traits.Int(argstr='-order %d', units='NA',
-                             desc=('Specific to sh. Maximum order of the spherical harmonic series. '
-                                   'Default is 4.'))
+                       desc=('Specific to sh. Maximum order of the spherical harmonic series. '
+                             'Default is 4.'))
     rbfpointset = traits.Int(argstr='-rbfpointset %d', units='NA',
                              desc=('Specific to rbf. Sets the number of radial basis functions to use. '
                                    'The value specified must be present in the Pointsets directory. '
@@ -33,8 +34,10 @@ class QBallMXInputSpec(StdOutCommandLineInputSpec):
                                   desc=('Specific to rbf. Sets the width of the smoothing basis functions. '
                                         'The default value is 0.1309 (7.5 degrees).'))
 
+
 class QBallMXOutputSpec(TraitedSpec):
     qmat = File(exists=True, desc='Q-Ball reconstruction matrix')
+
 
 class QBallMX(StdOutCommandLine):
     """
@@ -76,8 +79,8 @@ class QBallMX(StdOutCommandLine):
     >>> qballcoeffs.run()             # doctest: +SKIP
     """
     _cmd = 'qballmx'
-    input_spec=QBallMXInputSpec
-    output_spec=QBallMXOutputSpec
+    input_spec = QBallMXInputSpec
+    output_spec = QBallMXOutputSpec
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
@@ -85,9 +88,8 @@ class QBallMX(StdOutCommandLine):
         return outputs
 
     def _gen_outfilename(self):
-        _, name , _ = split_filename(self.inputs.scheme_file)
+        _, name, _ = split_filename(self.inputs.scheme_file)
         return name + '_qmat.Bdouble'
-
 
 
 class LinReconInputSpec(StdOutCommandLineInputSpec):
@@ -105,8 +107,10 @@ class LinReconInputSpec(StdOutCommandLineInputSpec):
                             'measurements themselves'))
     bgmask = File(exists=True, argstr='-bgmask %s', desc='background mask')
 
+
 class LinReconOutputSpec(TraitedSpec):
     recon_data = File(exists=True, desc='Transformed data')
+
 
 class LinRecon(StdOutCommandLine):
     """
@@ -152,8 +156,8 @@ class LinRecon(StdOutCommandLine):
     >>> qballcoeffs.run()         # doctest: +SKIP
     """
     _cmd = 'linrecon'
-    input_spec=LinReconInputSpec
-    output_spec=LinReconOutputSpec
+    input_spec = LinReconInputSpec
+    output_spec = LinReconOutputSpec
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
@@ -161,8 +165,9 @@ class LinRecon(StdOutCommandLine):
         return outputs
 
     def _gen_outfilename(self):
-        _, name , _ = split_filename(self.inputs.scheme_file)
+        _, name, _ = split_filename(self.inputs.scheme_file)
         return name + '_recondata.Bdouble'
+
 
 class MESDInputSpec(StdOutCommandLineInputSpec):
     in_file = File(exists=True, argstr='-inputfile %s', mandatory=True, position=1,
@@ -170,10 +175,10 @@ class MESDInputSpec(StdOutCommandLineInputSpec):
     inverter = traits.Enum('SPIKE', 'PAS', argstr='-filter %s', position=2, mandatory=True,
                            desc=('The inversion index specifies the type of inversion to perform on the data.'
                                  'The currently available choices are:'
-                                  'Inverter name  | Inverter parameters'
-                                  '---------------|------------------'
-                                  'SPIKE          | bd (b-value x diffusivity along the fibre.)'
-                                  'PAS            | r'))
+                                 'Inverter name  | Inverter parameters'
+                                 '---------------|------------------'
+                                 'SPIKE          | bd (b-value x diffusivity along the fibre.)'
+                                 'PAS            | r'))
     inverter_param = traits.Float(argstr='%f', units='NA', position=3, mandatory=True,
                                   desc=('Parameter associated with the inverter. Cf. inverter description for'
                                         'more information.'))
@@ -189,11 +194,13 @@ class MESDInputSpec(StdOutCommandLineInputSpec):
     bgmask = File(exists=True, argstr='-bgmask %s', desc='background mask')
     inputdatatype = traits.Enum('float', 'char', 'short', 'int', 'long', 'double', argstr='-inputdatatype %s',
                                 desc=('Specifies the data type of the input file: "char", "short", "int", "long",'
-                                     '"float" or "double". The input file must have BIG-ENDIAN ordering.'
-                                     'By default, the input type is "float".'))
+                                      '"float" or "double". The input file must have BIG-ENDIAN ordering.'
+                                      'By default, the input type is "float".'))
+
 
 class MESDOutputSpec(TraitedSpec):
     mesd_data = File(exists=True, desc='MESD data')
+
 
 class MESD(StdOutCommandLine):
     """
@@ -273,8 +280,8 @@ class MESD(StdOutCommandLine):
     >>> mesd.run()            # doctest: +SKIP
     """
     _cmd = 'mesd'
-    input_spec=MESDInputSpec
-    output_spec=MESDOutputSpec
+    input_spec = MESDInputSpec
+    output_spec = MESDOutputSpec
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
@@ -282,8 +289,9 @@ class MESD(StdOutCommandLine):
         return outputs
 
     def _gen_outfilename(self):
-        _, name , _ = split_filename(self.inputs.scheme_file)
+        _, name, _ = split_filename(self.inputs.scheme_file)
         return name + '_MESD.Bdouble'
+
 
 class SFPeaksInputSpec(StdOutCommandLineInputSpec):
     in_file = File(exists=True, argstr='-inputfile %s', mandatory=True,
@@ -309,10 +317,10 @@ class SFPeaksInputSpec(StdOutCommandLineInputSpec):
                                    'The default value is 246.'))
     mepointset = traits.Int(argstr='-mepointset %d', units='NA',
                             desc=('Use a set of directions other than those in the scheme file for the deconvolution '
-                                 'kernel. The number refers to the number of directions on the unit sphere. '
-                                 'For example, "mepointset = 54" uses the directions in "camino/PointSets/Elec054.txt" '
-                                 'Use this option only if you told MESD to use a custom set of directions with the same '
-                                 'option. Otherwise, specify the scheme file with the "schemefile" attribute.'))
+                                  'kernel. The number refers to the number of directions on the unit sphere. '
+                                  'For example, "mepointset = 54" uses the directions in "camino/PointSets/Elec054.txt" '
+                                  'Use this option only if you told MESD to use a custom set of directions with the same '
+                                  'option. Otherwise, specify the scheme file with the "schemefile" attribute.'))
     numpds = traits.Int(argstr='-numpds %d', units='NA',
                         desc='The largest number of peak directions to output in each voxel.')
     noconsistencycheck = traits.Bool(argstr='-noconsistencycheck',
@@ -332,11 +340,13 @@ class SFPeaksInputSpec(StdOutCommandLineInputSpec):
                             desc=('Base threshold on the actual peak direction strength divided by the mean of the '
                                   'function.  The default is 1.0 (the peak must be equal or greater than the mean).'))
     stdsfrommean = traits.Float(argstr='-stdsfrommean %f', units='NA',
-                            desc=('This is the number of standard deviations of the function to be added to the '
-                                 '"pdthresh" attribute in the peak directions pruning.'))
+                                desc=('This is the number of standard deviations of the function to be added to the '
+                                      '"pdthresh" attribute in the peak directions pruning.'))
+
 
 class SFPeaksOutputSpec(TraitedSpec):
     peaks = File(exists=True, desc='Peaks of the spherical functions.')
+
 
 class SFPeaks(StdOutCommandLine):
     """
@@ -417,8 +427,8 @@ class SFPeaks(StdOutCommandLine):
     >>> sf_peaks.run()          # doctest: +SKIP
     """
     _cmd = 'sfpeaks'
-    input_spec=SFPeaksInputSpec
-    output_spec=SFPeaksOutputSpec
+    input_spec = SFPeaksInputSpec
+    output_spec = SFPeaksOutputSpec
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
@@ -426,7 +436,5 @@ class SFPeaks(StdOutCommandLine):
         return outputs
 
     def _gen_outfilename(self):
-        _, name , _ = split_filename(self.inputs.in_file)
+        _, name, _ = split_filename(self.inputs.in_file)
         return name + '_peaks.Bdouble'
-
-

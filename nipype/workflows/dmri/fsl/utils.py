@@ -2,10 +2,15 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 
-import nipype.pipeline.engine as pe
-import nipype.interfaces.utility as niu
-from nipype.interfaces import fsl
-from nipype.interfaces import ants
+from __future__ import division
+from builtins import zip
+from builtins import next
+from builtins import range
+
+from ....pipeline import engine as pe
+from ....interfaces import utility as niu
+from ....interfaces import fsl
+from ....interfaces import ants
 
 
 def cleanup_edge_pipeline(name='Cleanup'):
@@ -19,9 +24,9 @@ def cleanup_edge_pipeline(name='Cleanup'):
                          name='outputnode')
 
     fugue = pe.Node(fsl.FUGUE(save_fmap=True, despike_2dfilter=True,
-                    despike_threshold=2.1), name='Despike')
-    erode = pe.Node(fsl.maths.MathsCommand(nan2zeros=True,
-                    args='-kernel 2D -ero'), name='MskErode')
+                              despike_threshold=2.1), name='Despike')
+    erode = pe.Node(fsl.maths.MathsCommand(
+        nan2zeros=True, args='-kernel 2D -ero'), name='MskErode')
     newmsk = pe.Node(fsl.MultiImageMaths(op_string='-sub %s -thr 0.5 -bin'),
                      name='NewMask')
     applymsk = pe.Node(fsl.ApplyMask(nan2zeros=True), name='ApplyMask')
@@ -31,18 +36,18 @@ def cleanup_edge_pipeline(name='Cleanup'):
 
     wf = pe.Workflow(name=name)
     wf.connect([
-        (inputnode,     fugue,      [('in_file', 'fmap_in_file'),
-                                     ('in_mask', 'mask_file')]),
-        (inputnode,     erode,      [('in_mask', 'in_file')]),
-        (inputnode,     newmsk,     [('in_mask', 'in_file')]),
-        (erode,         newmsk,     [('out_file', 'operand_files')]),
-        (fugue,         applymsk,   [('fmap_out_file', 'in_file')]),
-        (newmsk,        applymsk,   [('out_file', 'mask_file')]),
-        (erode,         join,       [('out_file', 'in1')]),
-        (applymsk,      join,       [('out_file', 'in2')]),
-        (inputnode,     addedge,    [('in_file', 'in_file')]),
-        (join,          addedge,    [('out', 'operand_files')]),
-        (addedge,       outputnode, [('out_file', 'out_file')])
+        (inputnode, fugue, [('in_file', 'fmap_in_file'),
+                            ('in_mask', 'mask_file')]),
+        (inputnode, erode, [('in_mask', 'in_file')]),
+        (inputnode, newmsk, [('in_mask', 'in_file')]),
+        (erode, newmsk, [('out_file', 'operand_files')]),
+        (fugue, applymsk, [('fmap_out_file', 'in_file')]),
+        (newmsk, applymsk, [('out_file', 'mask_file')]),
+        (erode, join, [('out_file', 'in1')]),
+        (applymsk, join, [('out_file', 'in2')]),
+        (inputnode, addedge, [('in_file', 'in_file')]),
+        (join, addedge, [('out', 'operand_files')]),
+        (addedge, outputnode, [('out_file', 'out_file')])
     ])
     return wf
 
@@ -51,27 +56,27 @@ def vsm2warp(name='Shiftmap2Warping'):
     """
     Converts a voxel shift map (vsm) to a displacements field (warp).
     """
-    inputnode = pe.Node(niu.IdentityInterface(fields=['in_vsm',
-                        'in_ref', 'scaling', 'enc_dir']), name='inputnode')
+    inputnode = pe.Node(niu.IdentityInterface(
+        fields=['in_vsm', 'in_ref', 'scaling', 'enc_dir']), name='inputnode')
     outputnode = pe.Node(niu.IdentityInterface(fields=['out_warp']),
                          name='outputnode')
-    fixhdr = pe.Node(niu.Function(input_names=['in_file', 'in_file_hdr'],
-                     output_names=['out_file'], function=copy_hdr),
-                     name='Fix_hdr')
+    fixhdr = pe.Node(niu.Function(
+        input_names=['in_file', 'in_file_hdr'], output_names=['out_file'],
+        function=copy_hdr), name='Fix_hdr')
     vsm = pe.Node(fsl.maths.BinaryMaths(operation='mul'), name='ScaleField')
     vsm2dfm = pe.Node(fsl.ConvertWarp(relwarp=True, out_relwarp=True),
                       name='vsm2dfm')
 
     wf = pe.Workflow(name=name)
     wf.connect([
-        (inputnode,   fixhdr,      [('in_vsm', 'in_file'),
-                                    ('in_ref', 'in_file_hdr')]),
-        (inputnode,   vsm,         [('scaling', 'operand_value')]),
-        (fixhdr,      vsm,         [('out_file', 'in_file')]),
-        (vsm,         vsm2dfm,     [('out_file', 'shift_in_file')]),
-        (inputnode,   vsm2dfm,     [('in_ref', 'reference'),
-                                    ('enc_dir', 'shift_direction')]),
-        (vsm2dfm,     outputnode,  [('out_file', 'out_warp')])
+        (inputnode, fixhdr, [('in_vsm', 'in_file'),
+                             ('in_ref', 'in_file_hdr')]),
+        (inputnode, vsm, [('scaling', 'operand_value')]),
+        (fixhdr, vsm, [('out_file', 'in_file')]),
+        (vsm, vsm2dfm, [('out_file', 'shift_in_file')]),
+        (inputnode, vsm2dfm, [('in_ref', 'reference'),
+                              ('enc_dir', 'shift_direction')]),
+        (vsm2dfm, outputnode, [('out_file', 'out_warp')])
     ])
     return wf
 
@@ -81,54 +86,54 @@ def dwi_flirt(name='DWICoregistration', excl_nodiff=False,
     """
     Generates a workflow for linear registration of dwi volumes
     """
-    inputnode = pe.Node(niu.IdentityInterface(fields=['reference',
-                        'in_file', 'ref_mask', 'in_xfms', 'in_bval']),
-                        name='inputnode')
+    inputnode = pe.Node(niu.IdentityInterface(
+        fields=['reference', 'in_file', 'ref_mask', 'in_xfms', 'in_bval']),
+        name='inputnode')
 
-    initmat = pe.Node(niu.Function(input_names=['in_bval', 'in_xfms',
-                      'excl_nodiff'], output_names=['init_xfms'],
-                                   function=_checkinitxfm), name='InitXforms')
+    initmat = pe.Node(niu.Function(
+        input_names=['in_bval', 'in_xfms', 'excl_nodiff'],
+        output_names=['init_xfms'], function=_checkinitxfm), name='InitXforms')
     initmat.inputs.excl_nodiff = excl_nodiff
-    dilate = pe.Node(fsl.maths.MathsCommand(nan2zeros=True,
-                     args='-kernel sphere 5 -dilM'), name='MskDilate')
+    dilate = pe.Node(fsl.maths.MathsCommand(
+        nan2zeros=True, args='-kernel sphere 5 -dilM'), name='MskDilate')
     split = pe.Node(fsl.Split(dimension='t'), name='SplitDWIs')
     pick_ref = pe.Node(niu.Select(), name='Pick_b0')
     n4 = pe.Node(ants.N4BiasFieldCorrection(dimension=3), name='Bias')
-    enhb0 = pe.Node(niu.Function(input_names=['in_file', 'in_mask',
-                    'clip_limit'], output_names=['out_file'],
-                                 function=enhance), name='B0Equalize')
+    enhb0 = pe.Node(niu.Function(
+        input_names=['in_file', 'in_mask', 'clip_limit'],
+        output_names=['out_file'], function=enhance), name='B0Equalize')
     enhb0.inputs.clip_limit = 0.015
-    enhdw = pe.MapNode(niu.Function(input_names=['in_file', 'in_mask'],
-                       output_names=['out_file'], function=enhance),
-                       name='DWEqualize', iterfield=['in_file'])
+    enhdw = pe.MapNode(niu.Function(
+        input_names=['in_file', 'in_mask'], output_names=['out_file'],
+        function=enhance), name='DWEqualize', iterfield=['in_file'])
     flirt = pe.MapNode(fsl.FLIRT(**flirt_param), name='CoRegistration',
                        iterfield=['in_file', 'in_matrix_file'])
     thres = pe.MapNode(fsl.Threshold(thresh=0.0), iterfield=['in_file'],
                        name='RemoveNegative')
     merge = pe.Node(fsl.Merge(dimension='t'), name='MergeDWIs')
-    outputnode = pe.Node(niu.IdentityInterface(fields=['out_file',
-                         'out_xfms']), name='outputnode')
+    outputnode = pe.Node(niu.IdentityInterface(
+        fields=['out_file', 'out_xfms']), name='outputnode')
     wf = pe.Workflow(name=name)
     wf.connect([
-        (inputnode,  split,      [('in_file', 'in_file')]),
-        (inputnode,  dilate,     [('ref_mask', 'in_file')]),
-        (inputnode,  enhb0,      [('ref_mask', 'in_mask')]),
-        (inputnode,  initmat,    [('in_xfms', 'in_xfms'),
-                                  ('in_bval', 'in_bval')]),
-        (inputnode,  n4,         [('reference', 'input_image'),
-                                  ('ref_mask', 'mask_image')]),
-        (dilate,     flirt,      [('out_file', 'ref_weight'),
-                                  ('out_file', 'in_weight')]),
-        (n4,         enhb0,      [('output_image', 'in_file')]),
-        (split,      enhdw,      [('out_files', 'in_file')]),
-        (dilate,     enhdw,      [('out_file', 'in_mask')]),
-        (enhb0,      flirt,      [('out_file', 'reference')]),
-        (enhdw,      flirt,      [('out_file', 'in_file')]),
-        (initmat,    flirt,      [('init_xfms', 'in_matrix_file')]),
-        (flirt,      thres,      [('out_file', 'in_file')]),
-        (thres,      merge,      [('out_file', 'in_files')]),
-        (merge,      outputnode, [('merged_file', 'out_file')]),
-        (flirt,      outputnode, [('out_matrix_file', 'out_xfms')])
+        (inputnode, split, [('in_file', 'in_file')]),
+        (inputnode, dilate, [('ref_mask', 'in_file')]),
+        (inputnode, enhb0, [('ref_mask', 'in_mask')]),
+        (inputnode, initmat, [('in_xfms', 'in_xfms'),
+                              ('in_bval', 'in_bval')]),
+        (inputnode, n4, [('reference', 'input_image'),
+                         ('ref_mask', 'mask_image')]),
+        (dilate, flirt, [('out_file', 'ref_weight'),
+                         ('out_file', 'in_weight')]),
+        (n4, enhb0, [('output_image', 'in_file')]),
+        (split, enhdw, [('out_files', 'in_file')]),
+        (dilate, enhdw, [('out_file', 'in_mask')]),
+        (enhb0, flirt, [('out_file', 'reference')]),
+        (enhdw, flirt, [('out_file', 'in_file')]),
+        (initmat, flirt, [('init_xfms', 'in_matrix_file')]),
+        (flirt, thres, [('out_file', 'in_file')]),
+        (thres, merge, [('out_file', 'in_files')]),
+        (merge, outputnode, [('merged_file', 'out_file')]),
+        (flirt, outputnode, [('out_matrix_file', 'out_xfms')])
     ])
     return wf
 
@@ -141,10 +146,11 @@ def apply_all_corrections(name='UnwarpArtifacts'):
     the map of determinants of the jacobian.
     """
 
-    inputnode = pe.Node(niu.IdentityInterface(fields=['in_sdc',
-                        'in_hmc', 'in_ecc', 'in_dwi']), name='inputnode')
-    outputnode = pe.Node(niu.IdentityInterface(fields=['out_file', 'out_warp',
-                         'out_coeff', 'out_jacobian']), name='outputnode')
+    inputnode = pe.Node(niu.IdentityInterface(
+        fields=['in_sdc', 'in_hmc', 'in_ecc', 'in_dwi']), name='inputnode')
+    outputnode = pe.Node(niu.IdentityInterface(
+        fields=['out_file', 'out_warp', 'out_coeff', 'out_jacobian']),
+        name='outputnode')
     warps = pe.MapNode(fsl.ConvertWarp(relwarp=True),
                        iterfield=['premat', 'postmat'],
                        name='ConvertWarp')
@@ -169,27 +175,27 @@ def apply_all_corrections(name='UnwarpArtifacts'):
 
     wf = pe.Workflow(name=name)
     wf.connect([
-        (inputnode,   warps,      [('in_sdc', 'warp1'),
-                                   ('in_hmc', 'premat'),
-                                   ('in_ecc', 'postmat'),
-                                   ('in_dwi', 'reference')]),
-        (inputnode,   split,      [('in_dwi', 'in_file')]),
-        (split,       selref,     [('out_files', 'inlist')]),
-        (warps,       unwarp,     [('out_file', 'field_file')]),
-        (split,       unwarp,     [('out_files', 'in_file')]),
-        (selref,      unwarp,     [('out', 'ref_file')]),
-        (selref,      coeffs,     [('out', 'reference')]),
-        (warps,       coeffs,     [('out_file', 'in_file')]),
-        (selref,      jacobian,   [('out', 'reference')]),
-        (coeffs,      jacobian,   [('out_file', 'in_file')]),
-        (unwarp,      jacmult,    [('out_file', 'in_file')]),
-        (jacobian,    jacmult,    [('out_jacobian', 'operand_files')]),
-        (jacmult,     thres,      [('out_file', 'in_file')]),
-        (thres,       merge,      [('out_file', 'in_files')]),
-        (warps,       outputnode, [('out_file', 'out_warp')]),
-        (coeffs,      outputnode, [('out_file', 'out_coeff')]),
-        (jacobian,    outputnode, [('out_jacobian', 'out_jacobian')]),
-        (merge,       outputnode, [('merged_file', 'out_file')])
+        (inputnode, warps, [('in_sdc', 'warp1'),
+                            ('in_hmc', 'premat'),
+                            ('in_ecc', 'postmat'),
+                            ('in_dwi', 'reference')]),
+        (inputnode, split, [('in_dwi', 'in_file')]),
+        (split, selref, [('out_files', 'inlist')]),
+        (warps, unwarp, [('out_file', 'field_file')]),
+        (split, unwarp, [('out_files', 'in_file')]),
+        (selref, unwarp, [('out', 'ref_file')]),
+        (selref, coeffs, [('out', 'reference')]),
+        (warps, coeffs, [('out_file', 'in_file')]),
+        (selref, jacobian, [('out', 'reference')]),
+        (coeffs, jacobian, [('out_file', 'in_file')]),
+        (unwarp, jacmult, [('out_file', 'in_file')]),
+        (jacobian, jacmult, [('out_jacobian', 'operand_files')]),
+        (jacmult, thres, [('out_file', 'in_file')]),
+        (thres, merge, [('out_file', 'in_files')]),
+        (warps, outputnode, [('out_file', 'out_warp')]),
+        (coeffs, outputnode, [('out_file', 'out_coeff')]),
+        (jacobian, outputnode, [('out_jacobian', 'out_jacobian')]),
+        (merge, outputnode, [('merged_file', 'out_file')])
     ])
     return wf
 
@@ -222,10 +228,9 @@ def extract_bval(in_dwi, in_bval, b=0, out_file=None):
         selection = np.where(bvals == b)
 
     extdata = np.squeeze(dwidata.take(selection, axis=3))
-    hdr = im.get_header().copy()
+    hdr = im.header.copy()
     hdr.set_data_shape(extdata.shape)
-    nb.Nifti1Image(extdata, im.get_affine(),
-                   hdr).to_filename(out_file)
+    nb.Nifti1Image(extdata, im.affine, hdr).to_filename(out_file)
     return out_file
 
 
@@ -241,14 +246,14 @@ def hmc_split(in_file, in_bval, ref_num=0, lowbval=5.0):
 
     im = nb.load(in_file)
     data = im.get_data()
-    hdr = im.get_header().copy()
+    hdr = im.header.copy()
     bval = np.loadtxt(in_bval)
 
     lowbs = np.where(bval <= lowbval)[0]
 
     volid = lowbs[0]
     if (isdefined(ref_num) and (ref_num < len(lowbs))):
-        volid = [ref_num]
+        volid = ref_num
 
     if volid == 0:
         data = data[..., 1:]
@@ -265,12 +270,12 @@ def hmc_split(in_file, in_bval, ref_num=0, lowbval=5.0):
     out_mov = op.abspath('hmc_mov.nii.gz')
     out_bval = op.abspath('bval_split.txt')
 
-    hdr.set_data_shape(refdata.shape)
     refdata = data[..., volid]
-    nb.Nifti1Image(refdata, im.get_affine(), hdr).to_filename(out_ref)
+    hdr.set_data_shape(refdata.shape)
+    nb.Nifti1Image(refdata, im.affine, hdr).to_filename(out_ref)
 
     hdr.set_data_shape(data.shape)
-    nb.Nifti1Image(data, im.get_affine(), hdr).to_filename(out_mov)
+    nb.Nifti1Image(data, im.affine, hdr).to_filename(out_mov)
     np.savetxt(out_bval, bval)
     return [out_ref, out_mov, out_bval, volid]
 
@@ -292,7 +297,7 @@ def remove_comp(in_file, in_bval, volid=0, out_file=None):
 
     im = nb.load(in_file)
     data = im.get_data()
-    hdr = im.get_header().copy()
+    hdr = im.header.copy()
     bval = np.loadtxt(in_bval)
 
     if volid == 0:
@@ -306,7 +311,7 @@ def remove_comp(in_file, in_bval, volid=0, out_file=None):
                               axis=3)
         bval = np.hstack((bval[:volid], bval[(volid + 1):]))
     hdr.set_data_shape(data.shape)
-    nb.Nifti1Image(data, im.get_affine(), hdr).to_filename(out_file)
+    nb.Nifti1Image(data, im.affine, hdr).to_filename(out_file)
 
     out_bval = op.abspath('bval_extract.txt')
     np.savetxt(out_bval, bval)
@@ -351,8 +356,7 @@ def recompose_dwi(in_dwi, in_bval, in_corrected, out_file=None):
     for bindex, dwi in zip(dwis, in_corrected):
         dwidata[..., bindex] = nb.load(dwi).get_data()
 
-    nb.Nifti1Image(dwidata, im.get_affine(),
-                   im.get_header()).to_filename(out_file)
+    nb.Nifti1Image(dwidata, im.affine, im.header).to_filename(out_file)
     return out_file
 
 
@@ -372,7 +376,7 @@ def recompose_xfm(in_bval, in_xfms):
         if b == 0.0:
             mat = np.eye(4)
         else:
-            mat = xfms.next()
+            mat = next(xfms)
 
         out_name = op.abspath('eccor_%04d.mat' % i)
         out_files.append(out_name)
@@ -406,14 +410,14 @@ def time_avg(in_file, index=[0], out_file=None):
     if len(index) == 1:
         data = imgs[0].get_data().astype(np.float32)
     else:
-        data = np.average(np.array([im.get_data().astype(np.float32) for im in imgs]),
-                         axis=0)
+        data = np.average(np.array([im.get_data().astype(np.float32)
+                                    for im in imgs]), axis=0)
 
-    hdr = imgs[0].get_header().copy()
+    hdr = imgs[0].header.copy()
     hdr.set_data_shape(data.shape)
     hdr.set_xyzt_units('mm')
     hdr.set_data_dtype(np.float32)
-    nb.Nifti1Image(data, imgs[0].get_affine(), hdr).to_filename(out_file)
+    nb.Nifti1Image(data, imgs[0].affine, hdr).to_filename(out_file)
     return out_file
 
 
@@ -448,16 +452,18 @@ def b0_average(in_dwi, in_bval, max_b=10.0, out_file=None):
         out_file = op.abspath("%s_avg_b0%s" % (fname, ext))
 
     imgs = np.array(nb.four_to_three(nb.load(in_dwi)))
-    index = b0_indices(in_bval, max_b=max_b)
+    bval = np.loadtxt(in_bval)
+    index = np.argwhere(bval <= max_b).flatten().tolist()
+
     b0s = [im.get_data().astype(np.float32)
            for im in imgs[index]]
     b0 = np.average(np.array(b0s), axis=0)
 
-    hdr = imgs[0].get_header().copy()
+    hdr = imgs[0].header.copy()
     hdr.set_data_shape(b0.shape)
     hdr.set_xyzt_units('mm')
     hdr.set_data_dtype(np.float32)
-    nb.Nifti1Image(b0, imgs[0].get_affine(), hdr).to_filename(out_file)
+    nb.Nifti1Image(b0, imgs[0].affine, hdr).to_filename(out_file)
     return out_file
 
 
@@ -483,8 +489,8 @@ def rotate_bvecs(in_bvec, in_matrix):
 
     if len(bvecs) != len(in_matrix):
         raise RuntimeError(('Number of b-vectors (%d) and rotation '
-                           'matrices (%d) should match.') % (len(bvecs),
-                           len(in_matrix)))
+                            'matrices (%d) should match.') % (len(bvecs),
+                                                              len(in_matrix)))
 
     for bvec, mat in zip(bvecs, in_matrix):
         if np.all(bvec == 0.0):
@@ -492,7 +498,7 @@ def rotate_bvecs(in_bvec, in_matrix):
         else:
             invrot = np.linalg.inv(np.loadtxt(mat))[:3, :3]
             newbvec = invrot.dot(bvec)
-            new_bvecs.append((newbvec/np.linalg.norm(newbvec)))
+            new_bvecs.append((newbvec / np.linalg.norm(newbvec)))
 
     np.savetxt(out_file, np.array(new_bvecs).T, fmt='%0.15f')
     return out_file
@@ -519,7 +525,7 @@ def eddy_rotate_bvecs(in_bvec, eddy_params):
 
     if len(bvecs) != len(params):
         raise RuntimeError(('Number of b-vectors and rotation '
-                           'matrices should match.'))
+                            'matrices should match.'))
 
     for bvec, row in zip(bvecs, params):
         if np.all(bvec == 0.0):
@@ -530,19 +536,19 @@ def eddy_rotate_bvecs(in_bvec, eddy_params):
             az = row[5]
 
             Rx = np.array([[1.0, 0.0, 0.0],
-                          [0.0, cos(ax), -sin(ax)],
-                          [0.0, sin(ax), cos(ax)]])
+                           [0.0, cos(ax), -sin(ax)],
+                           [0.0, sin(ax), cos(ax)]])
             Ry = np.array([[cos(ay), 0.0, sin(ay)],
-                          [0.0, 1.0, 0.0],
-                          [-sin(ay), 0.0, cos(ay)]])
+                           [0.0, 1.0, 0.0],
+                           [-sin(ay), 0.0, cos(ay)]])
             Rz = np.array([[cos(az), -sin(az), 0.0],
-                          [sin(az), cos(az), 0.0],
-                          [0.0, 0.0, 1.0]])
+                           [sin(az), cos(az), 0.0],
+                           [0.0, 0.0, 1.0]])
             R = Rx.dot(Ry).dot(Rz)
 
             invrot = np.linalg.inv(R)
             newbvec = invrot.dot(bvec)
-            new_bvecs.append((newbvec/np.linalg.norm(newbvec)))
+            new_bvecs.append(newbvec / np.linalg.norm(newbvec))
 
     np.savetxt(out_file, np.array(new_bvecs).T, fmt='%0.15f')
     return out_file
@@ -590,7 +596,7 @@ def siemens2rads(in_file, out_file=None):
     in_file = np.atleast_1d(in_file).tolist()
     im = nb.load(in_file[0])
     data = im.get_data().astype(np.float32)
-    hdr = im.get_header().copy()
+    hdr = im.header.copy()
 
     if len(in_file) == 2:
         data = nb.load(in_file[1]).get_data().astype(np.float32) - data
@@ -600,11 +606,11 @@ def siemens2rads(in_file, out_file=None):
 
     imin = data.min()
     imax = data.max()
-    data = (2.0 * math.pi * (data - imin)/(imax-imin)) - math.pi
+    data = (2.0 * math.pi * (data - imin) / (imax - imin)) - math.pi
     hdr.set_data_dtype(np.float32)
     hdr.set_xyzt_units('mm')
     hdr['datatype'] = 16
-    nb.Nifti1Image(data, im.get_affine(), hdr).to_filename(out_file)
+    nb.Nifti1Image(data, im.affine, hdr).to_filename(out_file)
     return out_file
 
 
@@ -624,9 +630,8 @@ def rads2radsec(in_file, delta_te, out_file=None):
         out_file = op.abspath('./%s_radsec.nii.gz' % fname)
 
     im = nb.load(in_file)
-    data = im.get_data().astype(np.float32) * (1.0/delta_te)
-    nb.Nifti1Image(data, im.get_affine(),
-                   im.get_header()).to_filename(out_file)
+    data = im.get_data().astype(np.float32) * (1.0 / delta_te)
+    nb.Nifti1Image(data, im.affine, im.header).to_filename(out_file)
     return out_file
 
 
@@ -656,8 +661,7 @@ def demean_image(in_file, in_mask=None, out_file=None):
 
     mean = np.median(data[msk == 1].reshape(-1))
     data[msk == 1] = data[msk == 1] - mean
-    nb.Nifti1Image(data, im.get_affine(),
-                   im.get_header()).to_filename(out_file)
+    nb.Nifti1Image(data, im.affine, im.header).to_filename(out_file)
     return out_file
 
 
@@ -677,8 +681,8 @@ def add_empty_vol(in_file, out_file=None):
         out_file = op.abspath('./%s_4D.nii.gz' % fname)
 
     im = nb.load(in_file)
-    zim = nb.Nifti1Image(np.zeros_like(im.get_data()), im.get_affine(),
-                         im.get_header())
+    zim = nb.Nifti1Image(np.zeros_like(im.get_data()), im.affine,
+                         im.header)
     nb.funcs.concat_images([im, zim]).to_filename(out_file)
     return out_file
 
@@ -699,13 +703,13 @@ def reorient_bvecs(in_dwi, old_dwi, in_bvec):
     bvecs = np.loadtxt(in_bvec).T
     new_bvecs = []
 
-    N = nb.load(in_dwi).get_affine()
-    O = nb.load(old_dwi).get_affine()
+    N = nb.load(in_dwi).affine
+    O = nb.load(old_dwi).affine
     RS = N.dot(np.linalg.inv(O))[:3, :3]
     sc_idx = np.where((np.abs(RS) != 1) & (RS != 0))
     S = np.ones_like(RS)
     S[sc_idx] = RS[sc_idx]
-    R = RS/S
+    R = RS / S
 
     new_bvecs = [R.dot(b) for b in bvecs]
     np.savetxt(out_file, np.array(new_bvecs).T, fmt='%0.15f')
@@ -724,12 +728,12 @@ def copy_hdr(in_file, in_file_hdr, out_file=None):
         out_file = op.abspath('./%s_fixhdr.nii.gz' % fname)
 
     imref = nb.load(in_file_hdr)
-    hdr = imref.get_header().copy()
+    hdr = imref.header.copy()
     hdr.set_data_dtype(np.float32)
     vsm = nb.load(in_file).get_data().astype(np.float32)
     hdr.set_data_shape(vsm.shape)
     hdr.set_xyzt_units('mm')
-    nii = nb.Nifti1Image(vsm, imref.get_affine(), hdr)
+    nii = nb.Nifti1Image(vsm, imref.affine, hdr)
     nii.to_filename(out_file)
     return out_file
 
@@ -748,7 +752,7 @@ def enhance(in_file, clip_limit=0.010, in_mask=None, out_file=None):
 
     im = nb.load(in_file)
     imdata = im.get_data()
-    imshape = im.get_shape()
+    imshape = im.shape
 
     if in_mask is not None:
         msk = nb.load(in_mask).get_data()
@@ -762,8 +766,8 @@ def enhance(in_file, clip_limit=0.010, in_mask=None, out_file=None):
     adapted = exposure.equalize_adapthist(imdata.reshape(imshape[0], -1),
                                           clip_limit=clip_limit)
 
-    nb.Nifti1Image(adapted.reshape(imshape), im.get_affine(),
-                   im.get_header()).to_filename(out_file)
+    nb.Nifti1Image(adapted.reshape(imshape), im.affine,
+                   im.header).to_filename(out_file)
 
     return out_file
 
@@ -782,7 +786,7 @@ def _checkinitxfm(in_bval, excl_nodiff, in_xfms=None):
     if excl_nodiff:
         dws = np.where(bvals != 0)[0].tolist()
     else:
-        dws = range(len(bvals))
+        dws = list(range(len(bvals)))
 
     if gen_id:
         for i in dws:

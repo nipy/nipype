@@ -1,3 +1,10 @@
+# emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
+# vi: set ft=python sts=4 ts=4 sw=4 et:
+"""Testing module for functions and classes from multiproc.py
+"""
+
+# Import packages
+from builtins import range
 import os
 from tempfile import mkdtemp
 from shutil import rmtree
@@ -14,9 +21,9 @@ def mytestFunction(insum=0):
 
     # need to import here since this is executed as an external process
     import multiprocessing
+    import os
     import tempfile
     import time
-    import os
 
     numberOfThreads = 2
 
@@ -35,56 +42,56 @@ def mytestFunction(insum=0):
         '''
         j = 0
         for i in range(0, 10):
-          j += i
+            j += i
 
         # j is now 45 (0+1+2+3+4+5+6+7+8+9)
 
         with open(filename, 'w') as f:
-          f.write(str(j))
+            f.write(str(j))
 
-    for n in xrange(numberOfThreads):
+    for n in range(numberOfThreads):
 
-      # mark thread as alive
-      a[n] = True
+        # mark thread as alive
+        a[n] = True
 
-      # create a temp file to use as the data exchange container
-      tmpFile = tempfile.mkstemp('.txt', 'test_engine_')[1]
-      f[n] = tmpFile # keep track of the temp file
-      t[n] = multiprocessing.Process(target=dummyFunction,
-                                     args=(tmpFile,))
-      # fire up the job
-      t[n].start()
-
+        # create a temp file to use as the data exchange container
+        tmpFile = tempfile.mkstemp('.txt', 'test_engine_')[1]
+        f[n] = tmpFile  # keep track of the temp file
+        t[n] = multiprocessing.Process(target=dummyFunction,
+                                       args=(tmpFile,))
+        # fire up the job
+        t[n].start()
 
     # block until all processes are done
     allDone = False
     while not allDone:
 
-      time.sleep(1)
+        time.sleep(1)
 
-      for n in xrange(numberOfThreads):
+        for n in range(numberOfThreads):
 
-        a[n] = t[n].is_alive()
+            a[n] = t[n].is_alive()
 
-      if not any(a):
-        # if no thread is alive
-        allDone = True
+        if not any(a):
+            # if no thread is alive
+            allDone = True
 
     # here, all processes are done
 
     # read in all temp files and sum them up
     total = insum
-    for file in f:
-      with open(file) as fd:
-        total += int(fd.read())
-      os.remove(file)
+    for ff in f:
+        with open(ff) as fd:
+            total += int(fd.read())
+        os.remove(ff)
 
     return total
 
 
 def run_multiproc_nondaemon_with_flag(nondaemon_flag):
     '''
-    Start a pipe with two nodes using the multiproc plugin and passing the nondaemon_flag.
+    Start a pipe with two nodes using the resource multiproc plugin and
+    passing the nondaemon_flag.
     '''
 
     cur_dir = os.getcwd()
@@ -107,7 +114,6 @@ def run_multiproc_nondaemon_with_flag(nondaemon_flag):
     f1.inputs.insum = 0
 
     pipe.config['execution']['stop_on_first_crash'] = True
-    pipe.config['execution']['poll_sleep_duration'] = 2
 
     # execute the pipe using the MultiProc plugin with 2 processes and the non_daemon flag
     # to enable child processes which start other multiprocessing jobs
@@ -115,7 +121,7 @@ def run_multiproc_nondaemon_with_flag(nondaemon_flag):
                          plugin_args={'n_procs': 2,
                                       'non_daemon': nondaemon_flag})
 
-    names = ['.'.join((node._hierarchy,node.name)) for node in execgraph.nodes()]
+    names = ['.'.join((node._hierarchy, node.name)) for node in execgraph.nodes()]
     node = execgraph.nodes()[names.index('pipe.f2')]
     result = node.get_output('sum_out')
     os.chdir(cur_dir)
@@ -133,14 +139,14 @@ def test_run_multiproc_nondaemon_false():
     '''
     shouldHaveFailed = False
     try:
-        # with nondaemon_flag = False, the execution should fail
+            # with nondaemon_flag = False, the execution should fail
         run_multiproc_nondaemon_with_flag(False)
     except:
         shouldHaveFailed = True
     yield assert_true, shouldHaveFailed
 
+
 def test_run_multiproc_nondaemon_true():
     # with nondaemon_flag = True, the execution should succeed
     result = run_multiproc_nondaemon_with_flag(True)
-    yield assert_equal, result, 180 # n_procs (2) * numberOfThreads (2) * 45 == 180
-
+    yield assert_equal, result, 180  # n_procs (2) * numberOfThreads (2) * 45 == 180

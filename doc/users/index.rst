@@ -38,6 +38,7 @@
    spmmcr
    mipav
    nipypecmd
+   aws
 
 
 

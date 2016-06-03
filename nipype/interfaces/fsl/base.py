@@ -25,6 +25,8 @@ See the docstrings of the individual classes for examples.
 
 """
 
+from builtins import object
+
 from glob import glob
 import os
 import warnings
@@ -35,7 +37,6 @@ from ..base import (traits, isdefined,
                     File, Directory, InputMultiPath, OutputMultiPath)
 
 warn = warnings.warn
-warnings.filterwarnings('always', category=UserWarning)
 
 
 class Info(object):
@@ -145,7 +146,7 @@ class FSLCommandInputSpec(CommandLineInputSpec):
     -------
     fsl.ExtractRoi(tmin=42, tsize=1, output_type='NIFTI')
     """
-    output_type = traits.Enum('NIFTI', Info.ftypes.keys(),
+    output_type = traits.Enum('NIFTI', list(Info.ftypes.keys()),
                               desc='FSL output type')
 
 

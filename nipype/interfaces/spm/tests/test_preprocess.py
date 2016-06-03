@@ -25,24 +25,27 @@ def create_files_in_directory():
     outdir = mkdtemp()
     cwd = os.getcwd()
     os.chdir(outdir)
-    filelist = ['a.nii','b.nii']
+    filelist = ['a.nii', 'b.nii']
     for f in filelist:
         hdr = nb.Nifti1Header()
-        shape = (3,3,3,4)
+        shape = (3, 3, 3, 4)
         hdr.set_data_shape(shape)
         img = np.random.random(shape)
-        nb.save(nb.Nifti1Image(img,np.eye(4),hdr),
-                 os.path.join(outdir,f))
+        nb.save(nb.Nifti1Image(img, np.eye(4), hdr),
+                os.path.join(outdir, f))
     return filelist, outdir, cwd
+
 
 def clean_directory(outdir, old_wd):
     if os.path.exists(outdir):
         rmtree(outdir)
     os.chdir(old_wd)
 
+
 def test_slicetiming():
     yield assert_equal, spm.SliceTiming._jobtype, 'temporal'
     yield assert_equal, spm.SliceTiming._jobname, 'st'
+
 
 def test_slicetiming_list_outputs():
     filelist, outdir, cwd = create_files_in_directory()
@@ -50,10 +53,12 @@ def test_slicetiming_list_outputs():
     yield assert_equal, st._list_outputs()['timecorrected_files'][0][0], 'a'
     clean_directory(outdir, cwd)
 
+
 def test_realign():
     yield assert_equal, spm.Realign._jobtype, 'spatial'
     yield assert_equal, spm.Realign._jobname, 'realign'
     yield assert_equal, spm.Realign().inputs.jobtype, 'estwrite'
+
 
 def test_realign_list_outputs():
     filelist, outdir, cwd = create_files_in_directory()
@@ -63,23 +68,27 @@ def test_realign_list_outputs():
     yield assert_true, rlgn._list_outputs()['mean_image'].startswith('mean')
     clean_directory(outdir, cwd)
 
+
 def test_coregister():
     yield assert_equal, spm.Coregister._jobtype, 'spatial'
     yield assert_equal, spm.Coregister._jobname, 'coreg'
     yield assert_equal, spm.Coregister().inputs.jobtype, 'estwrite'
 
+
 def test_coregister_list_outputs():
     filelist, outdir, cwd = create_files_in_directory()
     coreg = spm.Coregister(source=filelist[0])
     yield assert_true, coreg._list_outputs()['coregistered_source'][0].startswith('r')
-    coreg = spm.Coregister(source=filelist[0],apply_to_files=filelist[1])
+    coreg = spm.Coregister(source=filelist[0], apply_to_files=filelist[1])
     yield assert_true, coreg._list_outputs()['coregistered_files'][0].startswith('r')
     clean_directory(outdir, cwd)
+
 
 def test_normalize():
     yield assert_equal, spm.Normalize._jobtype, 'spatial'
     yield assert_equal, spm.Normalize._jobname, 'normalise'
     yield assert_equal, spm.Normalize().inputs.jobtype, 'estwrite'
+
 
 def test_normalize_list_outputs():
     filelist, outdir, cwd = create_files_in_directory()
@@ -89,10 +98,12 @@ def test_normalize_list_outputs():
     yield assert_true, norm._list_outputs()['normalized_files'][0].startswith('w')
     clean_directory(outdir, cwd)
 
+
 def test_normalize12():
     yield assert_equal, spm.Normalize12._jobtype, 'spatial'
     yield assert_equal, spm.Normalize12._jobname, 'normalise'
     yield assert_equal, spm.Normalize12().inputs.jobtype, 'estwrite'
+
 
 def test_normalize12_list_outputs():
     filelist, outdir, cwd = create_files_in_directory()
@@ -103,6 +114,7 @@ def test_normalize12_list_outputs():
     yield assert_true, norm12._list_outputs()['normalized_files'][0].startswith('w')
     clean_directory(outdir, cwd)
 
+
 @skipif(no_spm)
 def test_segment():
     if spm.Info.version()['name'] == "SPM12":
@@ -111,6 +123,7 @@ def test_segment():
     else:
         yield assert_equal, spm.Segment()._jobtype, 'spatial'
         yield assert_equal, spm.Segment()._jobname, 'preproc'
+
 
 @skipif(no_spm)
 def test_newsegment():
@@ -126,9 +139,11 @@ def test_smooth():
     yield assert_equal, spm.Smooth._jobtype, 'spatial'
     yield assert_equal, spm.Smooth._jobname, 'smooth'
 
+
 def test_dartel():
     yield assert_equal, spm.DARTEL._jobtype, 'tools'
     yield assert_equal, spm.DARTEL._jobname, 'dartel'
+
 
 def test_dartelnorm2mni():
     yield assert_equal, spm.DARTELNorm2MNI._jobtype, 'tools'

@@ -5,6 +5,7 @@
 /nipype/build
 /nipype/nipype.egg-info
 /doc/_build
+/doc/preproc
 /doc/users/examples
 /doc/api/generated
 *.pyc
@@ -17,3 +18,10 @@
 .DS_Store
 nipype/testing/data/von-ray_errmap.nii.gz
 nipype/testing/data/von_errmap.nii.gz
+crash*.pklz
+.coverage
+htmlcov/
+__pycache__/
+*~
+.ipynb_checkpoints/
+.ruby-version

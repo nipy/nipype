@@ -3,6 +3,7 @@
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """Wrapper to run setup.py using setuptools."""
 
+import os.path
 from setuptools import setup
 
 ################################################################################
@@ -15,8 +16,8 @@ extra_setuptools_args = dict(tests_require=['nose'],
 
 
 if __name__ == '__main__':
-    execfile('setup.py', dict(__name__='__main__',
-                          extra_setuptools_args=extra_setuptools_args))
-
-
-
+    setup_file = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'setup.py')
+    with open(setup_file) as f:
+        code = compile(f.read(), setup_file, 'exec')
+        exec(code, dict(__name__='__main__',
+                        extra_setuptools_args=extra_setuptools_args))

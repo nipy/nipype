@@ -1,5 +1,7 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
+from __future__ import division
+
 from copy import deepcopy
 import os
 from shutil import rmtree
@@ -50,7 +52,7 @@ def test_modelgen1():
     s.inputs.input_units = 'scans'
     res = s.run()
     yield assert_almost_equal, np.array(res.outputs.session_info[0]['cond'][0]['duration']), np.array([6., 6.])
-    yield assert_almost_equal, np.array(res.outputs.session_info[0]['cond'][1]['duration']), np.array([6.,])
+    yield assert_almost_equal, np.array(res.outputs.session_info[0]['cond'][1]['duration']), np.array([6., ])
     yield assert_almost_equal, np.array(res.outputs.session_info[1]['cond'][1]['duration']), np.array([6., 6.])
     rmtree(tempdir)
 
@@ -85,7 +87,7 @@ def test_modelgen_spm_concat():
     yield assert_equal, s.inputs.output_units, 'scans'
     s.inputs.subject_info = deepcopy(info)
     res = s.run()
-    yield assert_almost_equal, np.array(res.outputs.session_info[0]['cond'][0]['onset']), np.array([2.0, 50.0, 100.0, 170.0, 210.0, 220.0, 280.0, 330.0])/6
+    yield assert_almost_equal, np.array(res.outputs.session_info[0]['cond'][0]['onset']), np.array([2.0, 50.0, 100.0, 170.0, 210.0, 220.0, 280.0, 330.0]) / 6
     # Test case for no concatenation with seconds as output units
     s.inputs.concatenate_runs = False
     s.inputs.subject_info = deepcopy(info)
@@ -102,9 +104,9 @@ def test_modelgen_spm_concat():
     s.inputs.subject_info = deepcopy(info)
     res = s.run()
     yield assert_almost_equal, np.array(res.outputs.session_info[0]['cond'][0]['duration']), np.array([1., 1.])
-    yield assert_almost_equal, np.array(res.outputs.session_info[0]['cond'][1]['duration']), np.array([1.,])
+    yield assert_almost_equal, np.array(res.outputs.session_info[0]['cond'][1]['duration']), np.array([1., ])
     yield assert_almost_equal, np.array(res.outputs.session_info[1]['cond'][1]['duration']), np.array([1., 1.])
-    yield assert_almost_equal, np.array(res.outputs.session_info[2]['cond'][1]['duration']), np.array([1.,])
+    yield assert_almost_equal, np.array(res.outputs.session_info[2]['cond'][1]['duration']), np.array([1., ])
     # Test case for variable number of events in concatenated runs, sometimes unique.
     s.inputs.concatenate_runs = True
     info = [Bunch(conditions=['cond1', 'cond2'], onsets=[[2, 3], [2]], durations=[[1, 1], [1]]),

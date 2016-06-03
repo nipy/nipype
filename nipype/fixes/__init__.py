@@ -6,6 +6,7 @@ from os.path import dirname
 # Cache for the actual testing functin
 _tester = None
 
+
 def test(*args, **kwargs):
     """ test function for fixes subpackage
 

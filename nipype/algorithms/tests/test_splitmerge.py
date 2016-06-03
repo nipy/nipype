@@ -19,7 +19,7 @@ def test_split_and_merge():
     in_mask = example_data('tpms_msk.nii.gz')
     dwfile = op.join(tmpdir, 'dwi.nii.gz')
     mskdata = nb.load(in_mask).get_data()
-    aff = nb.load(in_mask).get_affine()
+    aff = nb.load(in_mask).affine
 
     dwshape = (mskdata.shape[0], mskdata.shape[1], mskdata.shape[2], 6)
     dwdata = np.random.normal(size=dwshape)

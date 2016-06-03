@@ -81,7 +81,7 @@ functionality.
 """
 
 datasource = pe.Node(nio.DataGrabber(infields=['subject_id'],
-                     outfields=info.keys()), name='datasource')
+                                     outfields=list(info.keys())), name='datasource')
 
 datasource.inputs.template = "%s/%s"
 
@@ -100,7 +100,7 @@ actual processing functions
 """
 
 inputnode = pe.Node(niu.IdentityInterface(fields=["dwi", "bvecs", "bvals",
-                    "dwi_rev"]), name="inputnode")
+                                                  "dwi_rev"]), name="inputnode")
 
 
 """
@@ -155,14 +155,14 @@ style with readability aims.
 wf = pe.Workflow(name="dMRI_Preprocessing")
 wf.base_dir = os.path.abspath('preprocessing_dmri_tutorial')
 wf.connect([
-     (infosource,   datasource,     [('subject_id', 'subject_id')])
-    ,(datasource,   prep,           [('dwi', 'inputnode.in_file'),
-                                     ('dwi_rev', 'inputnode.alt_file'),
-                                     ('bvals', 'inputnode.in_bval'),
-                                     ('bvecs', 'inputnode.in_bvec')])
-    ,(prep,         bias,           [('outputnode.out_file', 'inputnode.in_file'),
-                                     ('outputnode.out_mask', 'inputnode.in_mask')])
-    ,(datasource,   bias,           [('bvals', 'inputnode.in_bval')])
+    (infosource, datasource, [('subject_id', 'subject_id')]),
+    (datasource, prep, [('dwi', 'inputnode.in_file'),
+                        ('dwi_rev', 'inputnode.alt_file'),
+                        ('bvals', 'inputnode.in_bval'),
+                        ('bvecs', 'inputnode.in_bvec')]),
+    (prep, bias, [('outputnode.out_file', 'inputnode.in_file'),
+                  ('outputnode.out_mask', 'inputnode.in_mask')]),
+    (datasource, bias, [('bvals', 'inputnode.in_bval')])
 ])
 
 

@@ -14,13 +14,10 @@
 import os
 import os.path as op
 
-from nipype.interfaces.base import (
-    CommandLineInputSpec, CommandLine, traits, TraitedSpec, File,
-    InputMultiPath)
-
-from nipype.utils.filemanip import split_filename
-from nipype.interfaces.traits_extension import isdefined
-
+from ..base import (CommandLineInputSpec, CommandLine, traits, TraitedSpec, File,
+                    InputMultiPath)
+from ..traits_extension import isdefined
+from ...utils.filemanip import split_filename
 from ... import logging
 logger = logging.getLogger('interface')
 

@@ -1,3 +1,5 @@
+from __future__ import division
+from builtins import range
 from nipype.testing import assert_equal, assert_raises, example_data
 from nipype.interfaces.base import InputMultiPath
 from traits.trait_errors import TraitError
@@ -41,7 +43,7 @@ def test_JointFusion_method():
 
 def test_JointFusion_radius():
     at = JointFusion()
-    set_radius = lambda attr,x,y,z: setattr(at.inputs, attr, [x, y, z])
+    set_radius = lambda attr, x, y, z: setattr(at.inputs, attr, [x, y, z])
     for attr in ['patch_radius', 'search_radius']:
         for x in range(5):
             set_radius(attr, x, x + 1, x**x)
@@ -62,8 +64,8 @@ def test_JointFusion_cmd():
     at.inputs.warped_label_images = segmentation_images
     T1_image = example_data('T1.nii')
     at.inputs.target_image = T1_image
-    at.inputs.patch_radius = [3,2,1]
-    at.inputs.search_radius = [1,2,3]
+    at.inputs.patch_radius = [3, 2, 1]
+    at.inputs.search_radius = [1, 2, 3]
     expected_command = ('jointfusion 3 1 -m Joint[0.1,2] -rp 3x2x1 -rs 1x2x3'
                         ' -tg %s -g %s -g %s -l %s -l %s'
                         ' fusion_labelimage_output.nii') % (T1_image,

@@ -55,7 +55,7 @@ First, we import the necessary modules from nipype.
 
 import nipype.interfaces.fsl as fsl
 import nipype.interfaces.freesurfer as fs    # freesurfer
-import  os.path as op                     # system functions
+import os.path as op                     # system functions
 import cmp
 from nipype.workflows.dmri.mrtrix.group_connectivity import create_group_connectivity_pipeline
 from nipype.workflows.dmri.connectivity.group_connectivity import (create_merge_network_results_by_group_workflow, create_merge_group_network_results_workflow, create_average_networks_by_group_workflow)
@@ -131,7 +131,7 @@ using the NBS plugin in ConnectomeViewer.
 title = ''
 for idx, group_id in enumerate(group_list.keys()):
     title += group_id
-    if not idx == len(group_list.keys()) - 1:
+    if not idx == len(list(group_list.keys())) - 1:
         title += '-'
 
     info = dict(dwi=[['subject_id', 'dti']],

@@ -4,9 +4,16 @@ Nose test running.
 This module implements ``test()`` and ``bench()`` functions for NumPy modules.
 
 """
+
+from __future__ import print_function
+from __future__ import absolute_import
+from builtins import object
+
 import os
 import sys
-from nipype.external import six
+
+from ....external.six import string_types
+
 
 def get_package_name(filepath):
     """
@@ -48,11 +55,12 @@ def get_package_name(filepath):
 
     return '.'.join(pkg_name)
 
+
 def import_nose():
     """ Import nose only when needed.
     """
     fine_nose = True
-    minimum_nose_version = (0,10,0)
+    minimum_nose_version = (0, 10, 0)
     try:
         import nose
         from nose.tools import raises
@@ -71,14 +79,15 @@ def import_nose():
 
     return nose
 
-def run_module_suite(file_to_run = None):
+
+def run_module_suite(file_to_run=None):
     if file_to_run is None:
         f = sys._getframe(1)
         file_to_run = f.f_locals.get('__file__', None)
         if file_to_run is None:
             raise AssertionError
 
-    import_nose().run(argv=['',file_to_run])
+    import_nose().run(argv=['', file_to_run])
 
 
 class NoseTester(object):
@@ -167,7 +176,7 @@ class NoseTester(object):
         '''
         argv = [__file__, self.package_path, '-s']
         if label and label != 'full':
-            if not isinstance(label, six.string_types):
+            if not isinstance(label, string_types):
                 raise TypeError('Selection label should be a string')
             if label == 'fast':
                 label = 'not slow'
@@ -181,19 +190,19 @@ class NoseTester(object):
         nose = import_nose()
 
         import numpy
-        print "NumPy version %s" % numpy.__version__
+        print("NumPy version %s" % numpy.__version__)
         npdir = os.path.dirname(numpy.__file__)
-        print "NumPy is installed in %s" % npdir
+        print("NumPy is installed in %s" % npdir)
 
         if 'scipy' in self.package_name:
             import scipy
-            print "SciPy version %s" % scipy.__version__
+            print("SciPy version %s" % scipy.__version__)
             spdir = os.path.dirname(scipy.__file__)
-            print "SciPy is installed in %s" % spdir
+            print("SciPy is installed in %s" % spdir)
 
-        pyversion = sys.version.replace('\n','')
-        print "Python version %s" % pyversion
-        print "nose version %d.%d.%d" % nose.__versioninfo__
+        pyversion = sys.version.replace('\n', '')
+        print("Python version %s" % pyversion)
+        print("nose version %d.%d.%d" % nose.__versioninfo__)
 
     def _get_custom_doctester(self):
         """ Return instantiated plugin for doctests
@@ -202,7 +211,7 @@ class NoseTester(object):
 
         A return value of None means use the nose builtin doctest plugin
         """
-        from noseclasses import NumpyDoctest
+        from .noseclasses import NumpyDoctest
         return NumpyDoctest()
 
     def prepare_test_args(self, label='fast', verbose=1, extra_argv=None,
@@ -227,24 +236,24 @@ class NoseTester(object):
             argv += ['--exclude', ename]
         # our way of doing coverage
         if coverage:
-            argv+=['--cover-package=%s' % self.package_name, '--with-coverage',
-                   '--cover-tests', '--cover-inclusive', '--cover-erase']
+            argv += ['--cover-package=%s' % self.package_name, '--with-coverage',
+                     '--cover-tests', '--cover-inclusive', '--cover-erase']
         # construct list of plugins
         import nose.plugins.builtin
-        from noseclasses import KnownFailure, Unplugger
+        from .noseclasses import KnownFailure, Unplugger
         plugins = [KnownFailure()]
         plugins += [p() for p in nose.plugins.builtin.plugins]
         # add doctesting if required
         doctest_argv = '--with-doctest' in argv
-        if doctests == False and doctest_argv:
+        if doctests is False and doctest_argv:
             doctests = True
         plug = self._get_custom_doctester()
         if plug is None:
             # use standard doctesting
             if doctests and not doctest_argv:
                 argv += ['--with-doctest']
-        else: # custom doctesting
-            if doctest_argv: # in fact the unplugger would take care of this
+        else:  # custom doctesting
+            if doctest_argv:  # in fact the unplugger would take care of this
                 argv.remove('--with-doctest')
             plugins += [Unplugger('doctest'), plug]
             if doctests:
@@ -310,13 +319,13 @@ class NoseTester(object):
         # cap verbosity at 3 because nose becomes *very* verbose beyond that
         verbose = min(verbose, 3)
 
-        import utils
+        from . import utils
         utils.verbose = verbose
 
         if doctests:
-            print "Running unit tests and doctests for %s" % self.package_name
+            print("Running unit tests and doctests for %s" % self.package_name)
         else:
-            print "Running unit tests for %s" % self.package_name
+            print("Running unit tests for %s" % self.package_name)
 
         self._show_system_info()
 
@@ -326,7 +335,7 @@ class NoseTester(object):
 
         argv, plugins = self.prepare_test_args(label, verbose, extra_argv,
                                                doctests, coverage)
-        from noseclasses import NumpyTestProgram
+        from .noseclasses import NumpyTestProgram
         t = NumpyTestProgram(argv=argv, exit=False, plugins=plugins)
         return t.result
 
@@ -386,7 +395,7 @@ class NoseTester(object):
 
         """
 
-        print "Running benchmarks for %s" % self.package_name
+        print("Running benchmarks for %s" % self.package_name)
         self._show_system_info()
 
         argv = self._test_argv(label, verbose, extra_argv)
@@ -396,8 +405,7 @@ class NoseTester(object):
         nose = import_nose()
 
         # get plugin to disable doctests
-        from noseclasses import Unplugger
+        from .noseclasses import Unplugger
         add_plugins = [Unplugger('doctest')]
 
         return nose.run(argv=argv, addplugins=add_plugins)
-

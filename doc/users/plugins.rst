@@ -9,7 +9,7 @@ available plugins allow local and distributed execution of workflows and
 debugging. Each available plugin is described below.
 
 Current plugins are available for Linear, Multiprocessing, IPython_ distributed
-processing platforms and for direct processing on SGE_, PBS_, HTCondor_, LSF_, and SLURM_. We
+processing platforms and for direct processing on SGE_, PBS_, HTCondor_, LSF_, OAR_, and SLURM_. We
 anticipate future plugins for the Soma_ workflow.
 
 .. note::
@@ -92,7 +92,8 @@ machinery.
 .. note::
 
   We provide backward compatibility with IPython_ versions earlier than
-  0.10.1 using the IPythonX plugin.
+  0.10.1 using the IPythonX plugin. This plugin will be deprecated as of
+  version 0.13 of Nipype.
 
   Please read the IPython_ documentation to determine how to setup your cluster
   for distributed processing. This typically involves calling ipcluster.
@@ -275,6 +276,35 @@ for all nodes could look like this::
                          wrapper_cmd='/usr/lib/condor/shim_dmtcp',
                          wrapper_args=shim_args)
         )
+
+OAR
+---
+
+In order to use nipype with OAR_ you simply need to call::
+
+       workflow.run(plugin='OAR')
+
+Optional arguments::
+
+  template: custom template file to use
+  oar_args: any other command line args to be passed to qsub.
+  max_jobname_len: (PBS only) maximum length of the job name.  Default 15.
+
+For example, the following snippet executes the workflow on myqueue with
+a custom template::
+
+       workflow.run(plugin='oar',
+          plugin_args=dict(template='mytemplate.sh', oarsub_args='-q myqueue')
+
+In addition to overall workflow configuration, you can use node level
+configuration for OAR::
+
+    node.plugin_args = {'overwrite': True, 'oarsub_args': '-l "nodes=1/cores=3"'}
+
+this would apply only to the node and is useful in situations, where a
+particular node might use more resources than other nodes in a workflow.
+You need to set the 'overwrite' flag to bypass the general settings-template you defined for the other nodes.
+
 
 ``qsub`` emulation
 ~~~~~~~~~~~~~~~~~~
