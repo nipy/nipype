@@ -264,7 +264,7 @@ class BEDPOSTX5InputSpec(FSLXCommandInputSpec):
     out_dir = Directory('bedpostx', mandatory=True, desc='output directory',
                         usedefault=True, position=1, argstr='%s')
     gradnonlin = traits.Bool(False, argstr='-g', desc=('consider gradient '
-                             'nonlinearities, default off'))
+                                                       'nonlinearities, default off'))
     grad_dev = File(exists=True, desc='grad_dev file, if gradnonlin, -g is True')
     use_gpu = traits.Bool(False, desc='Use the GPU version of bedpostx')
 
