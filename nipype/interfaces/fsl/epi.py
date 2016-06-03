@@ -378,7 +378,7 @@ class ApplyTOPUP(FSLCommand):
         # If not defined, assume index are the first N entries in the
         # parameters file, for N input images.
         if not isdefined(self.inputs.in_index):
-            self.inputs.in_index = range(len(self.inputs.in_files))
+            self.inputs.in_index = range(1, len(self.inputs.in_files) + 1)
 
         return super(ApplyTOPUP, self)._parse_inputs(skip=skip)
 
