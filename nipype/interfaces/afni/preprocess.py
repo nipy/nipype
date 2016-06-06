@@ -507,6 +507,207 @@ class Despike(AFNICommand):
     output_spec = AFNICommandOutputSpec
 
 
+class CentralityInputSpec(AFNICommandInputSpec):
+    """Common input spec class for all centrality-related commmands
+    """
+
+
+    mask = File(desc='mask file to mask input data',
+                   argstr="-mask %s",
+                   exists=True)
+
+    thresh = traits.Float(desc='threshold to exclude connections where corr <= thresh',
+                          argstr='-thresh %f')
+
+    polort = traits.Int(desc='', argstr='-polort %d')
+
+    autoclip = traits.Bool(desc='Clip off low-intensity regions in the dataset',
+                           argstr='-autoclip')
+
+    automask = traits.Bool(desc='Mask the dataset to target brain-only voxels',
+                           argstr='-automask')
+
+
+class DegreeCentralityInputSpec(CentralityInputSpec):
+    """DegreeCentrality inputspec
+    """
+
+    in_file = File(desc='input file to 3dDegreeCentrality',
+                   argstr='%s',
+                   position=-1,
+                   mandatory=True,
+                   exists=True,
+                   copyfile=False)
+
+    sparsity = traits.Float(desc='only take the top percent of connections',
+                            argstr='-sparsity %f')
+
+    oned_file = traits.Str(desc='output filepath to text dump of correlation matrix',
+                           argstr='-out1D %s', mandatory=False)
+
+
+class DegreeCentralityOutputSpec(AFNICommandOutputSpec):
+    """DegreeCentrality outputspec
+    """
+
+    oned_file = File(desc='The text output of the similarity matrix computed'\
+                          'after thresholding with one-dimensional and '\
+                          'ijk voxel indices, correlations, image extents, '\
+                          'and affine matrix')
+
+
+class DegreeCentrality(AFNICommand):
+    """Performs degree centrality on a dataset using a given maskfile
+    via 3dDegreeCentrality
+
+    For complete details, see the `3dDegreeCentrality Documentation.
+    <http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dDegreeCentrality.html>
+
+    Examples
+    ========
+
+    >>> from nipype.interfaces import afni as afni
+    >>> degree = afni.DegreeCentrality()           
+    >>> degree.inputs.in_file = 'functional.nii'
+    >>> degree.inputs.mask = 'mask.nii'
+    >>> degree.inputs.sparsity = 1 # keep the top one percent of connections
+    >>> degree.inputs.out_file = 'out.nii'
+    >>> degree.cmdline
+    '3dDegreeCentrality -mask mask.nii -prefix out.nii -sparsity 1.000000 functional.nii'
+    >>> res = degree.run() # doctest: +SKIP
+    """
+
+    _cmd = '3dDegreeCentrality'
+    input_spec = DegreeCentralityInputSpec
+    output_spec = DegreeCentralityOutputSpec
+
+    # Re-define generated inputs
+    def _list_outputs(self):
+        # Import packages
+        import os
+
+        # Update outputs dictionary if oned file is defined
+        outputs = super(DegreeCentrality, self)._list_outputs()
+        if self.inputs.oned_file:
+            outputs['oned_file'] = os.path.abspath(self.inputs.oned_file)
+
+        return outputs
+
+
+class ECMInputSpec(CentralityInputSpec):
+    """ECM inputspec
+    """
+
+    in_file = File(desc='input file to 3dECM',
+                   argstr='%s',
+                   position=-1,
+                   mandatory=True,
+                   exists=True,
+                   copyfile=False)
+
+    sparsity = traits.Float(desc='only take the top percent of connections',
+                            argstr='-sparsity %f')
+
+    full = traits.Bool(desc='Full power method; enables thresholding; '\
+                            'automatically selected if -thresh or -sparsity '\
+                            'are set',
+                       argstr='-full')
+
+    fecm = traits.Bool(desc='Fast centrality method; substantial speed '\
+                            'increase but cannot accomodate thresholding; '\
+                            'automatically selected if -thresh or -sparsity '\
+                            'are not set',
+                       argstr='-fecm')
+
+    shift = traits.Float(desc='shift correlation coefficients in similarity '\
+                              'matrix to enforce non-negativity, s >= 0.0; '\
+                              'default = 0.0 for -full, 1.0 for -fecm',
+                            argstr='-shift %f')
+
+    scale = traits.Float(desc='scale correlation coefficients in similarity '\
+                              'matrix to after shifting, x >= 0.0; '\
+                              'default = 1.0 for -full, 0.5 for -fecm',
+                            argstr='-scale %f')
+
+    eps = traits.Float(desc='sets the stopping criterion for the power '\
+                            'iteration; l2|v_old - v_new| < eps*|v_old|; '\
+                            'default = 0.001',
+                            argstr='-eps %f')
+
+    max_iter = traits.Int(desc='sets the maximum number of iterations to use '\
+                               'in the power iteration; default = 1000',
+                          argstr='-max_iter %d')
+
+    memory = traits.Float(desc='Limit memory consumption on system by setting '\
+                               'the amount of GB to limit the algorithm to; '\
+                               'default = 2GB',
+                          argstr='-memory %f')
+
+
+class ECM(AFNICommand):
+    """Performs degree centrality on a dataset using a given maskfile
+    via the 3dLFCD command
+
+    For complete details, see the `3dECM Documentation.
+    <http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dECM.html>
+
+    Examples
+    ========
+
+    >>> from nipype.interfaces import afni as afni
+    >>> ecm = afni.ECM()
+    >>> ecm.inputs.in_file = 'functional.nii'
+    >>> ecm.inputs.mask = 'mask.nii'
+    >>> ecm.inputs.sparsity = 0.1 # keep top 0.1% of connections
+    >>> ecm.inputs.out_file = 'out.nii'
+    >>> ecm.cmdline
+    '3dECM -mask mask.nii -prefix out.nii -sparsity 0.100000 functional.nii'
+    >>> res = ecm.run() # doctest: +SKIP
+    """
+
+    _cmd = '3dECM'
+    input_spec = ECMInputSpec
+    output_spec = AFNICommandOutputSpec
+
+
+class LFCDInputSpec(CentralityInputSpec):
+    """LFCD inputspec
+    """
+
+    in_file = File(desc='input file to 3dLFCD',
+                   argstr='%s',
+                   position=-1,
+                   mandatory=True,
+                   exists=True,
+                   copyfile=False)
+
+
+class LFCD(AFNICommand):
+    """Performs degree centrality on a dataset using a given maskfile
+    via the 3dLFCD command
+
+    For complete details, see the `3dLFCD Documentation.
+    <http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dLFCD.html>
+
+    Examples
+    ========
+
+    >>> from nipype.interfaces import afni as afni
+    >>> lfcd = afni.LFCD()
+    >>> lfcd.inputs.in_file = 'functional.nii'
+    >>> lfcd.inputs.mask = 'mask.nii'
+    >>> lfcd.inputs.thresh = 0.8 # keep all connections with corr >= 0.8
+    >>> lfcd.inputs.out_file = 'out.nii'
+    >>> lfcd.cmdline
+    '3dLFCD -mask mask.nii -prefix out.nii -thresh 0.800000 functional.nii'
+    >>> res = lfcd.run() # doctest: +SKIP
+    """
+
+    _cmd = '3dLFCD'
+    input_spec = LFCDInputSpec
+    output_spec = AFNICommandOutputSpec
+
+
 class AutomaskInputSpec(AFNICommandInputSpec):
     in_file = File(desc='input file to 3dAutomask',
                    argstr='%s',
@@ -1149,6 +1350,10 @@ class Allineate(AFNICommand):
                                                      suffix=self.inputs.suffix)
         else:
             outputs['out_file'] = os.path.abspath(self.inputs.out_file)
+
+        if isdefined(self.inputs.out_matrix):
+            outputs['matrix'] = os.path.abspath(os.path.join(os.getcwd(),\
+                                         self.inputs.out_matrix +".aff12.1D"))
         return outputs
 
     def _gen_filename(self, name):
@@ -1508,6 +1713,252 @@ class BrickStat(AFNICommand):
                 min_val = min_val[0]
             save_json(outfile, dict(stat=min_val))
         outputs.min_val = min_val
+
+        return outputs
+
+
+class ClipLevelInputSpec(CommandLineInputSpec):
+    in_file = File(desc='input file to 3dClipLevel',
+                   argstr='%s',
+                   position=-1,
+                   mandatory=True,
+                   exists=True)
+
+    mfrac = traits.Float(desc='Use the number ff instead of 0.50 in the algorithm',
+                  argstr='-mfrac %s',
+                  position=2)
+
+    doall = traits.Bool(desc='Apply the algorithm to each sub-brick separately',
+                        argstr='-doall',
+                        position=3,
+                        xor=('grad'))
+
+    grad = traits.File(desc='also compute a \'gradual\' clip level as a function of voxel position, and output that to a dataset',
+                       argstr='-grad %s',
+                       position=3,
+                       xor=('doall'))
+
+
+class ClipLevelOutputSpec(TraitedSpec):
+    clip_val = traits.Float(desc='output')
+
+
+class ClipLevel(AFNICommandBase):
+    """Estimates the value at which to clip the anatomical dataset so
+       that background regions are set to zero.
+
+    For complete details, see the `3dClipLevel Documentation.
+    <https://afni.nimh.nih.gov/pub/dist/doc/program_help/3dClipLevel.html>`_
+
+    Examples
+    ========
+
+    >>> from nipype.interfaces.afni import preprocess
+    >>> cliplevel = preprocess.ClipLevel()
+    >>> cliplevel.inputs.in_file = 'anatomical.nii'
+    >>> res = cliplevel.run() # doctest: +SKIP
+
+    """
+    _cmd = '3dClipLevel'
+    input_spec = ClipLevelInputSpec
+    output_spec = ClipLevelOutputSpec
+
+    def aggregate_outputs(self, runtime=None, needed_outputs=None):
+
+        outputs = self._outputs()
+
+        outfile = os.path.join(os.getcwd(), 'stat_result.json')
+
+        if runtime is None:
+            try:
+                clip_val = load_json(outfile)['stat']
+            except IOError:
+                return self.run().outputs
+        else:
+            clip_val = []
+            for line in runtime.stdout.split('\n'):
+                if line:
+                    values = line.split()
+                    if len(values) > 1:
+                        clip_val.append([float(val) for val in values])
+                    else:
+                        clip_val.extend([float(val) for val in values])
+
+            if len(clip_val) == 1:
+                clip_val = clip_val[0]
+            save_json(outfile, dict(stat=clip_val))
+        outputs.clip_val = clip_val
+
+        return outputs
+
+
+class MaskToolInputSpec(AFNICommandInputSpec):
+    in_file = File(desc='input file or files to 3dmask_tool',
+                   argstr='-input %s',
+                   position=-1,
+                   mandatory=True,
+                   exists=True,
+                   copyfile=False)
+
+    out_file = File(name_template="%s_mask", desc='output image file name',
+                    argstr='-prefix %s', name_source="in_file")
+
+    count = traits.Bool(desc='Instead of created a binary 0/1 mask dataset, '+
+                             'create one with. counts of voxel overlap, i.e '+
+                             'each voxel will contain the number of masks ' +
+                             'that it is set in.',
+                        argstr='-count',
+                        position=2)
+
+    datum = traits.Enum('byte','short','float',
+                        argstr='-datum %s',
+                        desc='specify data type for output. Valid types are '+
+                             '\'byte\', \'short\' and \'float\'.')
+
+    dilate_inputs = traits.Str(desc='Use this option to dilate and/or erode '+
+                                    'datasets as they are read. ex. ' +
+                                    '\'5 -5\' to dilate and erode 5 times',
+                               argstr='-dilate_inputs %s')
+
+    dilate_results = traits.Str(desc='dilate and/or erode combined mask at ' +
+                                     'the given levels.',
+                                argstr='-dilate_results %s')
+
+    frac = traits.Float(desc='When combining masks (across datasets and ' +
+                             'sub-bricks), use this option to restrict the ' +
+                             'result to a certain fraction of the set of ' +
+                             'volumes',
+                        argstr='-frac %s')
+
+    inter = traits.Bool(desc='intersection, this means -frac 1.0',
+                        argstr='-inter')
+
+    union = traits.Bool(desc='union, this means -frac 0',
+                        argstr='-union')
+
+    fill_holes = traits.Bool(desc='This option can be used to fill holes ' +
+                                  'in the resulting mask, i.e. after all ' +
+                                  'other processing has been done.',
+                             argstr='-fill_holes')
+
+    fill_dirs = traits.Str(desc='fill holes only in the given directions. ' +
+                                'This option is for use with -fill holes. ' +
+                                'should be a single string that specifies ' +
+                                '1-3 of the axes using {x,y,z} labels (i.e. '+
+                                'dataset axis order), or using the labels ' +
+                                'in {R,L,A,P,I,S}.',
+                           argstr='-fill_dirs %s',
+                           requires=['fill_holes'])
+
+
+class MaskToolOutputSpec(TraitedSpec):
+    out_file = File(desc='mask file',
+                    exists=True)
+
+
+class MaskTool(AFNICommand):
+    """3dmask_tool - for combining/dilating/eroding/filling masks
+
+    For complete details, see the `3dmask_tool Documentation.
+    <https://afni.nimh.nih.gov/pub../pub/dist/doc/program_help/3dmask_tool.html>`_
+
+    Examples
+    ========
+
+    >>> from nipype.interfaces import afni as afni
+    >>> automask = afni.Automask()
+    >>> automask.inputs.in_file = 'functional.nii'
+    >>> automask.inputs.dilate = 1
+    >>> automask.inputs.outputtype = "NIFTI"
+    >>> automask.cmdline #doctest: +ELLIPSIS
+    '3dAutomask -apply_prefix functional_masked.nii -dilate 1 -prefix functional_mask.nii functional.nii'
+    >>> res = automask.run() # doctest: +SKIP
+
+    """
+
+    _cmd = '3dmask_tool'
+    input_spec = MaskToolInputSpec
+    output_spec = MaskToolOutputSpec
+
+
+class SegInputSpec(CommandLineInputSpec):
+    in_file = File(desc='ANAT is the volume to segment',
+                   argstr='-anat %s',
+                   position=-1,
+                   mandatory=True,
+                   exists=True,
+                   copyfile=True)
+
+    mask = traits.Str(desc='only non-zero voxels in mask are analyzed. mask can either be a dataset or the string \'AUTO\' which would use AFNI\'s automask function to create the mask.',
+                   argstr='-mask %s',
+                   position=-2,
+                   mandatory=True,
+                   exists=True)
+
+    blur_meth = traits.Enum('BFT', 'BIM',
+                            argstr='-blur_meth %s',
+                            desc='set the blurring method for bias field estimation')
+
+    bias_fwhm = traits.Float(desc='The amount of blurring used when estimating the field bias with the Wells method',
+                             argstr='-bias_fwhm %f')
+
+    classes = traits.Str(desc='CLASS_STRING is a semicolon delimited string of class labels',
+                         argstr='-classes %s')
+
+    bmrf = traits.Float(desc='Weighting factor controlling spatial homogeneity of the classifications',
+                        argstr='-bmrf %f')
+
+    bias_classes = traits.Str(desc='A semcolon demlimited string of classes that contribute to the estimation of the bias field',
+                              argstr='-bias_classes %s')
+
+    prefix = traits.Str(desc='the prefix for the output folder containing all output volumes',
+                        argstr='-prefix %s')
+
+    mixfrac = traits.Str(desc='MIXFRAC sets up the volume-wide (within mask) tissue fractions while initializing the segmentation (see IGNORE for exception)',
+                              argstr='-mixfrac %s')
+
+    mixfloor = traits.Float(desc='Set the minimum value for any class\'s mixing fraction',
+                            argstr='-mixfloor %f')
+
+    main_N = traits.Int(desc='Number of iterations to perform.',
+                        argstr='-main_N %d')
+
+
+class Seg(AFNICommandBase):
+    """3dSeg segments brain volumes into tissue classes. The program allows
+       for adding a variety of global and voxelwise priors. However for the
+       moment, only mixing fractions and MRF are documented.
+
+    For complete details, see the `3dSeg Documentation.
+    <https://afni.nimh.nih.gov/pub/dist/doc/program_help/3dSeg.html>
+
+    Examples
+    ========
+
+    >>> from nipype.interfaces.afni import preprocess
+    >>> seg = preprocess.Seg()
+    >>> seg.inputs.in_file = 'structural.nii'
+    >>> seg.inputs.mask = 'AUTO'
+    >>> res = seg.run() # doctest: +SKIP
+
+    """
+
+    _cmd = '3dSeg'
+    input_spec = SegInputSpec
+    output_spec = AFNICommandOutputSpec
+
+    def aggregate_outputs(self, runtime=None, needed_outputs=None):
+
+        import glob
+
+        outputs = self._outputs()
+
+        if isdefined(self.inputs.prefix):
+            outfile = os.path.join(os.getcwd(), self.inputs.prefix, 'Classes+*.BRIK')
+        else:
+            outfile = os.path.join(os.getcwd(), 'Segsy', 'Classes+*.BRIK')
+
+        outputs.out_file = glob.glob(outfile)[0]
 
         return outputs
 
