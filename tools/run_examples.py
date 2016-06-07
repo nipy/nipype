@@ -38,7 +38,7 @@ def run_examples(example, pipelines, plugin):
            pipeline == 'l2pipeline':
             # Init callback log
             import logging
-            cb_log_path = os.path.join(wf.base_dir, 'callback.log')
+            cb_log_path = os.path.join(os.path.expanduser('~'), 'callback.log')
             cb_logger = logging.getLogger('callback')
             cb_logger.setLevel(logging.DEBUG)
             handler = logging.FileHandler(cb_log_path)

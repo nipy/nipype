@@ -1333,6 +1333,9 @@ def get_max_resources_used(pid, mem_mb, num_threads, pyfunc=False):
     try:
         mem_mb = max(mem_mb, _get_ram_mb(pid, pyfunc=pyfunc))
         num_threads = max(num_threads, _get_num_threads(psutil.Process(pid)))
+    except psutil.AccessDenied as exc:
+        iflogger.debug('Could not get resources used by process. Error: %s'\
+                      % exc)
     except Exception as exc:
         iflogger.info('Could not get resources used by process. Error: %s'\
                       % exc)
