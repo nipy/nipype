@@ -43,7 +43,7 @@ performance issues.
    utility.
 
 #. The `nipype_crash_search` command allows you to search for regular expressions
-in the tracebacks of the Nipype crashfiles within a log folder.
+   in the tracebacks of the Nipype crashfiles within a log folder.
 
 #. Nipype determines the hash of the input state of a node. If any input
    contains strings that represent files on the system path, the hash evaluation

@@ -5,7 +5,6 @@
 
 from future import standard_library
 standard_library.install_aliases()
-
 from pickle import dumps
 
 import sys
@@ -47,7 +46,7 @@ class IPythonPlugin(DistributedPluginBase):
 
     def __init__(self, plugin_args=None):
         if IPython_not_loaded:
-            raise ImportError('ipyparallel could not be imported')
+            raise ImportError('Please install ipyparallel to use this plugin.')
         super(IPythonPlugin, self).__init__(plugin_args=plugin_args)
         self.iparallel = None
         self.taskclient = None
@@ -64,7 +63,7 @@ class IPythonPlugin(DistributedPluginBase):
             __import__(name)
             self.iparallel = sys.modules[name]
         except ImportError:
-            raise ImportError("Ipython kernel not found. Parallel execution "
+            raise ImportError("ipyparallel not found. Parallel execution "
                               "will be unavailable")
         try:
             self.taskclient = self.iparallel.Client()
