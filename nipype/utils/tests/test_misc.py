@@ -5,7 +5,7 @@ standard_library.install_aliases()
 
 from builtins import next
 
-from nipype.testing import (assert_equal, assert_true, assert_false, 
+from nipype.testing import (assert_equal, assert_true, assert_false,
                             assert_raises)
 
 from nipype.utils.misc import (container_to_string, getsource,
