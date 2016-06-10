@@ -147,6 +147,7 @@ class Level1Design(BaseInterface):
         if basis_key == "dgamma":
             basis_key = "hrf"
         ev_template = load_template('feat_ev_'+basis_key+'.tcl')
+        ev_none = load_template('feat_ev_none.tcl')
         ev_ortho = load_template('feat_ev_ortho.tcl')
         ev_txt = ''
         # generate sections for conditions and other nuisance
