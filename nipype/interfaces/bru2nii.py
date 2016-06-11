@@ -50,5 +50,5 @@ class Bru2(CommandLine):
 
 	def _gen_filename(self, name):
 		if name == 'output_filename':
-			outfile = os.getcwd()+"/"+os.path.basename(os.path.normpath(self.inputs.input_dir))
+			outfile = os.path.join(os.getcwd(),os.path.basename(os.path.normpath(self.inputs.input_dir)))
 			return outfile
