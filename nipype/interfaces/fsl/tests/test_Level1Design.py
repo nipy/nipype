@@ -1,5 +1,4 @@
 import os
-import test_Level1Design
 from ...base import Undefined
 from ..model import Level1Design
 
