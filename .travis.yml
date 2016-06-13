@@ -45,7 +45,6 @@ install:
 - if [ ${TRAVIS_PYTHON_VERSION:0:1} == "2" ]; then conda install --yes vtk; fi
 - pip install python-coveralls
 - pip install nose-cov
-- pip install mock
 # Add tvtk (PIL is required by blockcanvas)
 # Install mayavi (see https://github.com/enthought/mayavi/issues/271)
 - if [ ${TRAVIS_PYTHON_VERSION:0:1} == "2" ]; then
