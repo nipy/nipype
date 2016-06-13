@@ -1,4 +1,5 @@
 import os
+from nose.tools import assert_true
 from ...base import Undefined
 from ..model import Level1Design
 
@@ -9,4 +10,11 @@ def test_level1design():
 	contrasts = Undefined
 	usetd = False
 	do_tempfilter = False
-	return Level1Design._create_ev_files(l,os.getcwd(),runinfo,runidx,usetd,contrasts,do_tempfilter,"hrf")
+	output_num, output_txt = Level1Design._create_ev_files(l,os.getcwd(),runinfo,runidx,usetd,contrasts,do_tempfilter,"hrf")
+	yield assert_true, "set fmri(convolve1) 3" in output_txt
+	output_num, output_txt = Level1Design._create_ev_files(l,os.getcwd(),runinfo,runidx,usetd,contrasts,do_tempfilter,"dgamma")
+	yield assert_true, "set fmri(convolve1) 3" in output_txt
+	output_num, output_txt = Level1Design._create_ev_files(l,os.getcwd(),runinfo,runidx,usetd,contrasts,do_tempfilter,"gamma")
+	yield assert_true, "set fmri(convolve1) 2" in output_txt
+	output_num, output_txt = Level1Design._create_ev_files(l,os.getcwd(),runinfo,runidx,usetd,contrasts,do_tempfilter,"none")
+	yield assert_true, "set fmri(convolve1) 0" in output_txt
