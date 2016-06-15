@@ -105,7 +105,7 @@ class Threshold(MathsCommand):
 
 class StdImageInput(MathsInput):
 
-    dimension = traits.Enum("T", "X", "Y", "Z", usedefault=True, argstr="-%sTstd", position=4,
+    dimension = traits.Enum("T", "X", "Y", "Z", usedefault=True, argstr="-%sstd", position=4,
                             desc="dimension to standard deviate across")
 
 
