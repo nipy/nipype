@@ -1,6 +1,7 @@
 Release 0.12.0-rc1 (April 20, 2016)
 ============
 
+* ENH: Added Bru2Nii interface and test files (https://github.com/nipy/nipype/pull/1425)
 * FIX: Selecting "gamma" in FSL Level1Design now does what the name says (https://github.com/nipy/nipype/pull/1500)
 * ENH: Added grad_dev input to fsl.dti.bedpostx5 interface(https://github.com/nipy/nipype/pull/1493)
 * ENH: ResourceMultiProc plugin to support resource allocation (https://github.com/nipy/nipype/pull/1372)

@@ -32,8 +32,8 @@ class Bru2(CommandLine):
 	>>> from nipype.interfaces.bru2nii import Bru2
 	>>> converter = Bru2()
 	>>> converter.inputs.input_dir = "brukerdir"
-	>>> converter.cmdline
-	'Bru2 -o /home/ubuntu/nipype/nipype/testing/data/brukerdir brukerdir'
+	>>> converter.cmdline  # doctest: +ELLIPSIS
+	'Bru2 -o .../nipype/nipype/testing/data/brukerdir brukerdir'
 	"""
 	input_spec = Bru2InputSpec
 	output_spec = Bru2OutputSpec
@@ -50,5 +50,5 @@ class Bru2(CommandLine):
 
 	def _gen_filename(self, name):
 		if name == 'output_filename':
-			outfile = os.getcwd()+"/"+os.path.basename(os.path.normpath(self.inputs.input_dir))
+			outfile = os.path.join(os.getcwd(),os.path.basename(os.path.normpath(self.inputs.input_dir)))
 			return outfile
