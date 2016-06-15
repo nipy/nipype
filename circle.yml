@@ -21,7 +21,7 @@ dependencies:
     # Set up python environment
     - pip install --upgrade pip
     - pip install -e .
-    - pip install matplotlib sphinx ipython boto coverage dipy mock
+    - pip install matplotlib sphinx ipython boto coverage dipy
     # Add tvtk
     - pip install http://effbot.org/downloads/Imaging-1.1.7.tar.gz
     - pip install -e git+https://github.com/enthought/etsdevtools.git#egg=etsdevtools

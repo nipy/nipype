@@ -24,7 +24,7 @@ or::
 
         git clone https://github.com/nipy/nipype.git
 
-Check out the list of nipype's `current dependencies <https://github.com/nipy/nipype/blob/master/requirements.txt>`_.
+Check out the list of nipype's `current dependencies <https://github.com/shoshber/nipype/blob/master/nipype/info.py#L105>`_.
 
 Install
 -------
@@ -61,8 +61,7 @@ If you downloaded the source distribution named something
 like ``nipype-x.y.tar.gz``, then unpack the tarball, change into the
 ``nipype-x.y`` directory and install nipype using::
 
-    pip install -r requirements.txt
-    python setup.py install
+    pip install -e .
 
 **Note:** Depending on permissions you may need to use ``sudo``.
 
