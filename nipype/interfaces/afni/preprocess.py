@@ -21,6 +21,37 @@ from ..base import (CommandLineInputSpec, CommandLine, Directory, TraitedSpec,
 from ...external.six import string_types
 from ...utils.filemanip import (load_json, save_json, split_filename)
 
+class BlurToFWHMInputSpec(AFNICommandInputSpec):
+    in_file = File(desc='The dataset that will be smoothed', argstr='-input %s', mandatory=True, exists=True)
+
+    automask = traits.Bool(desc='Create an automask from the input dataset.', argstr='-automask', exists=True)
+    fwhm = traits.Float(desc='Blur until the 3D FWHM reaches this value (in mm)', argstr='-FWHM %f')
+    fwhmxy = traits.Float(desc='Blur until the 2D (x,y)-plane FWHM reaches this value (in mm)', argstr='-FWHMxy %f')
+    blurmaster = File(desc='The dataset whose smoothness controls the process.', argstr='-blurmaster %s', exists=True)
+    mask = File(desc='Mask dataset, if desired. Voxels NOT in mask will be set to zero in output.', argstr='-blurmaster %s', exists=True)
+
+
+class BlurToFWHM(AFNICommand):
+    """Blurs a 'master' dataset until it reaches a specified FWHM smoothness (approximately).
+
+    For complete details, see the `to3d Documentation
+    <https://afni.nimh.nih.gov/pub/dist/doc/program_help/3dBlurToFWHM.html>`_
+
+    Examples
+    ========
+
+    >>> from nipype.interfaces import afni
+    >>> blur = afni.BlurToFWHM()
+    >>> blur.inputs.in_file = 'epi.nii'
+    >>> blur.inputs.fwhm = 2.5
+    >>> blur.cmdline #doctest: +ELLIPSIS
+    '3dBlurToFWHM -FWHM 2.500000 -input .../nipype/nipype/testing/data/epi.nii -prefix epi_afni'
+
+    """
+
+    _cmd = '3dBlurToFWHM'
+    input_spec = BlurToFWHMInputSpec
+    output_spec = AFNICommandOutputSpec
 
 class To3DInputSpec(AFNICommandInputSpec):
     out_file = File(name_template="%s", desc='output image file name',
