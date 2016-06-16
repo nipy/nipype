@@ -41,7 +41,7 @@ class BlurToFWHM(AFNICommand):
     ========
 
     >>> from nipype.interfaces import afni
-    >>> blur = afni.BlurToFWHM()
+    >>> blur = afni.preprocess.BlurToFWHM()
     >>> blur.inputs.in_file = 'epi.nii'
     >>> blur.inputs.fwhm = 2.5
     >>> blur.cmdline #doctest: +ELLIPSIS
