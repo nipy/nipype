@@ -113,7 +113,7 @@ class StdImage(MathsCommand):
     """Use fslmaths to generate a standard deviation in an image across a given dimension.
     """
     input_spec = StdImageInput
-_suffix = "_std"
+    _suffix = "_std"
 
 class MeanImageInput(MathsInput):
 
