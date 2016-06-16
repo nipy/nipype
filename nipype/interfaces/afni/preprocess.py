@@ -45,7 +45,7 @@ class BlurToFWHM(AFNICommand):
     >>> blur.inputs.in_file = 'epi.nii'
     >>> blur.inputs.fwhm = 2.5
     >>> blur.cmdline #doctest: +ELLIPSIS
-    '3dBlurToFWHM -FWHM 2.500000 -input .../nipype/nipype/testing/data/epi.nii -prefix epi_afni'
+    '3dBlurToFWHM -FWHM 2.500000 -input epi.nii -prefix epi_afni'
 
     """
 
