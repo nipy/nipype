@@ -425,18 +425,19 @@ class RuntimeProfilerTestCase(unittest.TestCase):
         # Get margin of error for RAM GB
         allowed_gb_err = self.mem_err_gb
         runtime_gb_err = np.abs(runtime_gb-num_gb)
-        # 
-        expected_runtime_threads = num_threads
+        # Get margin of error for number of threads
+        allowed_thr_err = self.num_err_thr
+        runtime_thr_err = np.abs(runtime_threads-num_threads)
 
         # Error message formatting
         mem_err = 'Input memory: %f is not within %.3f GB of runtime '\
-                  'memory: %f' % (num_gb, self.mem_err_gb, runtime_gb)
-        threads_err = 'Input threads: %d is not equal to runtime threads: %d' \
-                    % (expected_runtime_threads, runtime_threads)
+                  'memory: %f' % (num_gb, allowed_gb_err, runtime_gb)
+        threads_err = 'Input threads: %d is not within $d of runtime threads: %d' \
+                    % (num_threads, allowed_thr_err)
 
         # Assert runtime stats are what was input
         self.assertLessEqual(runtime_gb_err, allowed_gb_err, msg=mem_err)
-        self.assertEqual(expected_runtime_threads, runtime_threads, msg=threads_err)
+        self.assertLessEqual(runtime_thr_err, allowed_thr_err, msg=threads_err)
 
 
 # Command-line run-able unittest module
