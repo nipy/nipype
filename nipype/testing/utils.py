@@ -9,6 +9,7 @@ import time
 import shutil
 import signal
 import subprocess
+from subprocess import CalledProcessError
 from tempfile import mkdtemp
 from ..utils.misc import package_check
 from nose import SkipTest
@@ -62,7 +63,7 @@ class TempFATFS(object):
         try:
             subprocess.check_call(args=mkfs_args, stdout=self.dev_null,
                                   stderr=self.dev_null)
-        except subprocess.CalledProcessError as e:
+        except CalledProcessError as e:
             raise_from(IOError("mkfs.vfat failed"), e)
 
         try:
