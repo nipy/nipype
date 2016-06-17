@@ -124,8 +124,8 @@ class Level1Design(BaseInterface):
         f.close()
 
     def _create_ev_files(
-        self, cwd, runinfo, runidx, usetd, contrasts, no_bases,
-            do_tempfilter):
+        self, cwd, runinfo, runidx, usetd, contrasts,
+            do_tempfilter, basis_key):
         """Creates EV files from condition and regressor information.
 
            Parameters:
@@ -144,7 +144,9 @@ class Level1Design(BaseInterface):
         """
         conds = {}
         evname = []
-        ev_hrf = load_template('feat_ev_hrf.tcl')
+        if basis_key == "dgamma":
+            basis_key = "hrf"
+        ev_template = load_template('feat_ev_'+basis_key+'.tcl')
         ev_none = load_template('feat_ev_none.tcl')
         ev_ortho = load_template('feat_ev_ortho.tcl')
         ev_txt = ''
@@ -174,13 +176,13 @@ class Level1Design(BaseInterface):
                             evinfo.insert(j, [onset, cond['duration'][j], amp])
                         else:
                             evinfo.insert(j, [onset, cond['duration'][0], amp])
-                    if no_bases:
-                        ev_txt += ev_none.substitute(ev_num=num_evs[0],
+                    if basis_key == "none":
+                        ev_txt += ev_template.substitute(ev_num=num_evs[0],
                                                      ev_name=name,
                                                      tempfilt_yn=do_tempfilter,
                                                      cond_file=evfname)
                     else:
-                        ev_txt += ev_hrf.substitute(ev_num=num_evs[0],
+                        ev_txt += ev_template.substitute(ev_num=num_evs[0],
                                                     ev_name=name,
                                                     tempfilt_yn=do_tempfilter,
                                                     temporalderiv=usetd,
@@ -296,12 +298,9 @@ class Level1Design(BaseInterface):
         if isdefined(self.inputs.model_serial_correlations):
             prewhiten = int(self.inputs.model_serial_correlations)
         usetd = 0
-        no_bases = False
         basis_key = list(self.inputs.bases.keys())[0]
         if basis_key in ['dgamma', 'gamma']:
             usetd = int(self.inputs.bases[basis_key]['derivs'])
-        if basis_key == 'none':
-            no_bases = True
         session_info = self._format_session_info(self.inputs.session_info)
         func_files = self._get_func_files(session_info)
         n_tcon = 0
@@ -319,7 +318,7 @@ class Level1Design(BaseInterface):
                 do_tempfilter = 0
             num_evs, cond_txt = self._create_ev_files(cwd, info, i, usetd,
                                                       self.inputs.contrasts,
-                                                      no_bases, do_tempfilter)
+                                                      do_tempfilter, basis_key)
             nim = load(func_files[i])
             (_, _, _, timepoints) = nim.shape
             fsf_txt = fsf_header.substitute(run_num=i,
@@ -1770,9 +1769,7 @@ class RandomiseOutputSpec(TraitedSpec):
 
 
 class Randomise(FSLCommand):
-    """XXX UNSTABLE DO NOT USE
-
-    FSL Randomise: feeds the 4D projected FA data into GLM
+    """FSL Randomise: feeds the 4D projected FA data into GLM
     modelling and thresholding
     in order to find voxels which correlate with your model
 
