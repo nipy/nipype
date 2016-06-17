@@ -23,8 +23,21 @@ def test_tempfatfs():
 @patch('subprocess.check_call', MagicMock(
     side_effect=subprocess.CalledProcessError('','')))
 def test_tempfatfs_calledprocesserror():
-    yield assert_raises, IOError, TempFATFS
+    try:
+        TempFATFS()
+    except IOError as e:
+        assert_true(isinstance(e, IOError))
+        assert_true(isinstance(e.__cause__, subprocess.CalledProcessError))
+    else:
+        assert_true(False)
 
+@patch('subprocess.check_call', MagicMock())
 @patch('subprocess.Popen', MagicMock(side_effect=OSError()))
 def test_tempfatfs_oserror():
-    yield assert_raises, IOError, TempFATFS
+    try:
+        TempFATFS()
+    except IOError as e:
+        assert_true(isinstance(e, IOError))
+        assert_true(isinstance(e.__cause__, OSError))
+    else:
+        assert_true(False)
