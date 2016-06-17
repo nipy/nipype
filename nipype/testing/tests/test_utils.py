@@ -20,11 +20,11 @@ def test_tempfatfs():
         with fatfs as tmpdir:
             yield assert_true, os.path.exists(tmpdir)
 
+@patch('subprocess.check_call', MagicMock(
+    side_effect=subprocess.CalledProcessError('','')))
 def test_tempfatfs_calledprocesserror():
-    with patch('subprocess.check_call', MagicMock(side_effect=subprocess.CalledProcessError('',''))):
-        yield assert_raises, IOError, TempFATFS
+    yield assert_raises, IOError, TempFATFS
 
+@patch('subprocess.Popen', MagicMock(side_effect=OSError()))
 def test_tempfatfs_oserror():
-    with patch('subprocess.Popen', MagicMock()):
-        subprocess.Popen.return_value.side_effect = OSError()
-        yield assert_raises, IOError, TempFATFS
+    yield assert_raises, IOError, TempFATFS
