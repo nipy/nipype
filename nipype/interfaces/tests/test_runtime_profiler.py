@@ -134,7 +134,7 @@ class RuntimeProfilerTestCase(unittest.TestCase):
         # Input number of sub-threads (not including parent threads)
         self.num_threads = 2
         # Acceptable percent error for memory profiled against input
-        self.mem_err_gb = 0.25
+        self.mem_err_gb = 0.4
         self.num_err_thr = 1
 
     # ! Only used for benchmarking the profiler over a range of
