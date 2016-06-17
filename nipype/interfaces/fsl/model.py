@@ -1769,9 +1769,7 @@ class RandomiseOutputSpec(TraitedSpec):
 
 
 class Randomise(FSLCommand):
-    """XXX UNSTABLE DO NOT USE
-
-    FSL Randomise: feeds the 4D projected FA data into GLM
+    """FSL Randomise: feeds the 4D projected FA data into GLM
     modelling and thresholding
     in order to find voxels which correlate with your model
 
