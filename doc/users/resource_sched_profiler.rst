@@ -144,9 +144,9 @@ The pandas_ Python package is required to use this feature.
 	from nipype.pipeline.plugins.callback_log import log_nodes_cb
 	args_dict = {'n_procs' : 8, 'memory_gb' : 10, 'status_callback' : log_nodes_cb}
 	workflow.run(plugin='MultiProc', plugin_args=args_dict)
-	
+
 	# ...workflow finishes and writes callback log to '/home/user/run_stats.log'
-	
+
 	from nipype.utils.draw_gantt_chart import generate_gantt_chart
 	generate_gantt_chart('/home/user/run_stats.log', cores=8)
 	# ...creates gantt chart in '/home/user/run_stats.log.html'
@@ -154,7 +154,7 @@ The pandas_ Python package is required to use this feature.
 The ``generate_gantt_chart`` function will create an html file that can be viewed
 in a browser. Below is an example of the gantt chart displayed in a web browser.
 Note that when the cursor is hovered over any particular node bubble or resource
-bubble, some additional information is shown in a pop-up. 
+bubble, some additional information is shown in a pop-up.
 
  * -  .. image:: images/gantt_chart.png
          :width: 100 %

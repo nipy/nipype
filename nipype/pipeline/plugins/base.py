@@ -267,7 +267,7 @@ class DistributedPluginBase(PluginBase):
             else:
                 logger.debug('Not submitting')
             self._wait()
-            
+
         self._remove_node_dirs()
         report_nodes_not_run(notrun)
 

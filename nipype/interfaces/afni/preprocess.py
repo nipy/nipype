@@ -543,7 +543,7 @@ class DegreeCentralityInputSpec(CentralityInputSpec):
                             argstr='-sparsity %f')
 
     oned_file = traits.Str(desc='output filepath to text dump of correlation matrix',
-                           argstr='-out1D %s', mandatory=False)
+                           argstr='-out1D %s')
 
 
 class DegreeCentralityOutputSpec(AFNICommandOutputSpec):
@@ -567,7 +567,7 @@ class DegreeCentrality(AFNICommand):
     ========
 
     >>> from nipype.interfaces import afni as afni
-    >>> degree = afni.DegreeCentrality()           
+    >>> degree = afni.DegreeCentrality()
     >>> degree.inputs.in_file = 'functional.nii'
     >>> degree.inputs.mask = 'mask.nii'
     >>> degree.inputs.sparsity = 1 # keep the top one percent of connections
@@ -1889,11 +1889,15 @@ class SegInputSpec(CommandLineInputSpec):
                    exists=True,
                    copyfile=True)
 
-    mask = traits.Str(desc='only non-zero voxels in mask are analyzed. mask can either be a dataset or the string \'AUTO\' which would use AFNI\'s automask function to create the mask.',
-                   argstr='-mask %s',
-                   position=-2,
-                   mandatory=True,
-                   exists=True)
+    mask = traits.Either(traits.Enum('AUTO'),
+                         File(exists=True),
+                         desc=('only non-zero voxels in mask are analyzed. '
+                               'mask can either be a dataset or the string '
+                               '"AUTO" which would use AFNI\'s automask '
+                               'function to create the mask.'),
+                         argstr='-mask %s',
+                         position=-2,
+                         mandatory=True)
 
     blur_meth = traits.Enum('BFT', 'BIM',
                             argstr='-blur_meth %s',
