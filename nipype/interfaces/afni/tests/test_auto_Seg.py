@@ -30,7 +30,6 @@ def test_Seg_inputs():
     main_N=dict(argstr='-main_N %d',
     ),
     mask=dict(argstr='-mask %s',
-    exists=True,
     mandatory=True,
     position=-2,
     ),

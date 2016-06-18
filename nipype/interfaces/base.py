@@ -1197,7 +1197,7 @@ class Stream(object):
 # Get number of threads for process
 def _get_num_threads(proc):
     """Function to get the number of threads a process is using
-    NOTE: If 
+    NOTE: If
 
     Parameters
     ----------

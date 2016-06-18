@@ -857,7 +857,7 @@ class MRIsConvertInputSpec(FSTraitedSpec):
                                "ICO: .ico, .tri GEO: .geo STL: .stl VTK: .vtk GIFTI: .gii MGH surface-encoded 'volume': .mgh, .mgz")
     to_scanner = traits.Bool(argstr="--to-scanner",
                              desc="convert coordinates from native FS (tkr) coords to scanner coords")
-    to_tkr = traits.Bool(agrstr="--to-tkr",
+    to_tkr = traits.Bool(argstr="--to-tkr",
                          desc="convert coordinates from scanner coords to native FS (tkr) coords")
 
 

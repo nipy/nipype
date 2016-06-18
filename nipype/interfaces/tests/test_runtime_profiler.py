@@ -382,7 +382,7 @@ class RuntimeProfilerTestCase(unittest.TestCase):
         # Get margin of error for RAM GB
         allowed_gb_err = self.mem_err_gb
         runtime_gb_err = np.abs(runtime_gb-num_gb)
-        # 
+        #
         expected_runtime_threads = num_threads
 
         # Error message formatting
@@ -423,7 +423,7 @@ class RuntimeProfilerTestCase(unittest.TestCase):
         # Get margin of error for RAM GB
         allowed_gb_err = self.mem_err_gb
         runtime_gb_err = np.abs(runtime_gb-num_gb)
-        # 
+        #
         expected_runtime_threads = num_threads
 
         # Error message formatting
