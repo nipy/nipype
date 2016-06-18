@@ -20,21 +20,22 @@ def test_scipy_sparse():
 
 def test_report_crash():
     with mock.patch('pickle.dump', mock.MagicMock()) as mock_pickle_dump:
-        mock_pickle_dump.return_value = True
-        mock_node = mock.MagicMock(name='mock_node')
-        mock_node._id = 'an_id'
-        mock_node.config = {
-            'execution' : {
-                'crashdump_dir' : '.'
+        with mock.patch('nipype.pipeline.plugins.base.format_exception', mock.MagicMock()): # see iss 1517
+            mock_pickle_dump.return_value = True
+            mock_node = mock.MagicMock(name='mock_node')
+            mock_node._id = 'an_id'
+            mock_node.config = {
+                'execution' : {
+                    'crashdump_dir' : '.'
+                }
             }
-        }
 
-        actual_crashfile = pb.report_crash(mock_node)
+            actual_crashfile = pb.report_crash(mock_node)
 
-        expected_crashfile = re.compile('.*/crash-.*-an_id-[0-9a-f\-]*.pklz')
+            expected_crashfile = re.compile('.*/crash-.*-an_id-[0-9a-f\-]*.pklz')
 
-        yield assert_regexp_matches, actual_crashfile, expected_crashfile
-        yield assert_true, mock_pickle_dump.call_count == 1
+            yield assert_regexp_matches, actual_crashfile, expected_crashfile
+            yield assert_true, mock_pickle_dump.call_count == 1
 
 '''
 Can use the following code to test that a mapnode crash continues successfully
