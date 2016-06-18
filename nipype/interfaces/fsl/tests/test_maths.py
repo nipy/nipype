@@ -191,11 +191,11 @@ def test_meanimage(fsl_output_type=None):
     yield assert_equal, meaner.cmdline, "fslmaths a.nii -Tmean %s" % os.path.join(testdir, "a_mean%s" % out_ext)
 
     # Clean up our mess
-    clean_directory(testdir, origdir, ftype)
+    clean_directory(testdir, origdir)
     set_output_type(prev_type)
 
 @skipif(no_fsl)
-def test_stdimage():
+def test_stdimage(fsl_output_type=None):
     prev_type = set_output_type(fsl_output_type)
     files, testdir, origdir, out_ext = create_files_in_directory()
 
