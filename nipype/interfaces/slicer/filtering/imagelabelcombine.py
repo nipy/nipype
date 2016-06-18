@@ -35,4 +35,4 @@ contributor: Alex Yarmarkovich (SPL, BWH)
     input_spec = ImageLabelCombineInputSpec
     output_spec = ImageLabelCombineOutputSpec
     _cmd = "ImageLabelCombine "
-    _outputs_filenames = {'OutputLabelMap':'OutputLabelMap.nii'}
+    _outputs_filenames = {'OutputLabelMap': 'OutputLabelMap.nii'}

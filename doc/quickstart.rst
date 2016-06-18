@@ -16,7 +16,7 @@ Downloading and installing
 Beginner's guide
 ================
 
-Beginner's tutorials (IPython Notebooks). `Availible here`__
+Beginner's tutorials (IPython Notebooks). `Available here`__
 
 Michael Notter's Nipype guide. `Available here`__
 
@@ -50,3 +50,13 @@ Developer guides
    devel/gitwash/index
 
 .. include:: links_names.txt
+
+Useful links for beginners
+===========================
+
+Getting started with Python - Tutorials. `Available here`__
+
+Python for Beginners `Available here`__
+
+   __ http://www.codecademy.com/en/tracks/python
+   __ https://www.python.org/about/gettingstarted/

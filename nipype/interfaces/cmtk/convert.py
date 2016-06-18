@@ -7,7 +7,8 @@
 
 """
 
-import os, os.path as op
+import os
+import os.path as op
 import datetime
 import string
 import warnings
@@ -21,7 +22,7 @@ from nipype.utils.misc import package_check
 have_cfflib = True
 try:
     package_check('cfflib')
-except Exception, e:
+except Exception as e:
     have_cfflib = False
 else:
     import cfflib as cf
@@ -48,13 +49,15 @@ class CFFConverterInputSpec(BaseInterfaceInputSpec):
     rights = traits.Str(desc='Rights')
     references = traits.Str(desc='References')
     relation = traits.Str(desc='Relation')
-    species = traits.Str('Homo sapiens',desc='Species',usedefault=True)
+    species = traits.Str('Homo sapiens', desc='Species', usedefault=True)
     description = traits.Str('Created with the Nipype CFF converter', desc='Description', usedefault=True)
 
-    out_file = File('connectome.cff', usedefault = True, desc='Output connectome file')
+    out_file = File('connectome.cff', usedefault=True, desc='Output connectome file')
+
 
 class CFFConverterOutputSpec(TraitedSpec):
     connectome_file = File(exists=True, desc='Output connectome file')
+
 
 class CFFConverter(BaseInterface):
     """
@@ -86,7 +89,7 @@ class CFFConverter(BaseInterface):
         if isdefined(self.inputs.creator):
             a.connectome_meta.set_creator(self.inputs.creator)
         else:
-            #Probably only works on some OSes...
+            # Probably only works on some OSes...
             a.connectome_meta.set_creator(os.getenv('USER'))
 
         if isdefined(self.inputs.email):
@@ -119,7 +122,7 @@ class CFFConverter(BaseInterface):
         if isdefined(self.inputs.graphml_networks):
             for ntwk in self.inputs.graphml_networks:
                 # There must be a better way to deal with the unique name problem
-                #(i.e. tracks and networks can't use the same name, and previously we were pulling them both from the input files)
+                # (i.e. tracks and networks can't use the same name, and previously we were pulling them both from the input files)
                 ntwk_name = 'Network {cnt}'.format(cnt=count)
                 a.add_connectome_network_from_graphml(ntwk_name, ntwk)
                 count += 1
@@ -129,7 +132,7 @@ class CFFConverter(BaseInterface):
             for ntwk in self.inputs.gpickled_networks:
                 _, ntwk_name, _ = split_filename(ntwk)
                 unpickled = nx.read_gpickle(ntwk)
-                cnet = cf.CNetwork(name = ntwk_name)
+                cnet = cf.CNetwork(name=ntwk_name)
                 cnet.set_with_nxgraph(unpickled)
                 a.add_connectome_network(cnet)
                 count += 1
@@ -146,9 +149,9 @@ class CFFConverter(BaseInterface):
         if isdefined(self.inputs.gifti_surfaces):
             for surf in self.inputs.gifti_surfaces:
                 _, surf_name, _ = split_filename(surf)
-                csurf = cf.CSurface.create_from_gifti("Surface %d - %s" % (count,surf_name), surf)
-                csurf.fileformat='Gifti'
-                csurf.dtype='Surfaceset'
+                csurf = cf.CSurface.create_from_gifti("Surface %d - %s" % (count, surf_name), surf)
+                csurf.fileformat = 'Gifti'
+                csurf.dtype = 'Surfaceset'
                 a.add_connectome_surface(csurf)
                 count += 1
 
@@ -156,16 +159,16 @@ class CFFConverter(BaseInterface):
         if isdefined(self.inputs.gifti_labels):
             for label in self.inputs.gifti_labels:
                 _, label_name, _ = split_filename(label)
-                csurf = cf.CSurface.create_from_gifti("Surface Label %d - %s" % (count,label_name), label)
-                csurf.fileformat='Gifti'
-                csurf.dtype='Labels'
+                csurf = cf.CSurface.create_from_gifti("Surface Label %d - %s" % (count, label_name), label)
+                csurf.fileformat = 'Gifti'
+                csurf.dtype = 'Labels'
                 a.add_connectome_surface(csurf)
                 count += 1
 
         if isdefined(self.inputs.nifti_volumes):
             for vol in self.inputs.nifti_volumes:
                 _, vol_name, _ = split_filename(vol)
-                cvol = cf.CVolume.create_from_nifti(vol_name,vol)
+                cvol = cf.CVolume.create_from_nifti(vol_name, vol)
                 a.add_connectome_volume(cvol)
 
         if isdefined(self.inputs.script_files):
@@ -178,11 +181,11 @@ class CFFConverter(BaseInterface):
             for data in self.inputs.data_files:
                 _, data_name, _ = split_filename(data)
                 cda = cf.CData(name=data_name, src=data, fileformat='NumPy')
-                if not string.find(data_name,'lengths') == -1:
+                if not string.find(data_name, 'lengths') == -1:
                     cda.dtype = 'FinalFiberLengthArray'
-                if not string.find(data_name,'endpoints') == -1:
+                if not string.find(data_name, 'endpoints') == -1:
                     cda.dtype = 'FiberEndpoints'
-                if not string.find(data_name,'labels') == -1:
+                if not string.find(data_name, 'labels') == -1:
                     cda.dtype = 'FinalFiberLabels'
                 a.add_connectome_data(cda)
 
@@ -190,7 +193,7 @@ class CFFConverter(BaseInterface):
         _, name, ext = split_filename(self.inputs.out_file)
         if not ext == '.cff':
             ext = '.cff'
-        cf.save_to_cff(a,op.abspath(name + ext))
+        cf.save_to_cff(a, op.abspath(name + ext))
 
         return runtime
 
@@ -202,12 +205,15 @@ class CFFConverter(BaseInterface):
         outputs['connectome_file'] = op.abspath(name + ext)
         return outputs
 
+
 class MergeCNetworksInputSpec(BaseInterfaceInputSpec):
     in_files = InputMultiPath(File(exists=True), mandatory=True, desc='List of CFF files to extract networks from')
-    out_file = File('merged_network_connectome.cff', usedefault = True, desc='Output CFF file with all the networks added')
+    out_file = File('merged_network_connectome.cff', usedefault=True, desc='Output CFF file with all the networks added')
+
 
 class MergeCNetworksOutputSpec(TraitedSpec):
     connectome_file = File(exists=True, desc='Output CFF file with all the networks added')
+
 
 class MergeCNetworks(BaseInterface):
     """ Merges networks from multiple CFF files into one new CFF file.
@@ -235,12 +241,12 @@ class MergeCNetworks(BaseInterface):
                 # metadata information
                 ne.load()
                 contitle = mycon.get_connectome_meta().get_title()
-                ne.set_name( str(i) + ': ' + contitle + ' - ' + ne.get_name() )
+                ne.set_name(str(i) + ': ' + contitle + ' - ' + ne.get_name())
                 ne.set_src(ne.get_name())
                 extracted_networks.append(ne)
 
         # Add networks to new connectome
-        newcon = cf.connectome(title = 'All CNetworks', connectome_network = extracted_networks)
+        newcon = cf.connectome(title='All CNetworks', connectome_network=extracted_networks)
         # Setting additional metadata
         metadata = newcon.get_connectome_meta()
         metadata.set_creator('My Name')

@@ -9,19 +9,22 @@
    >>> os.chdir(datadir)
 
 """
-import re
-from nipype.utils.filemanip import fname_presuffix, split_filename, copyfile
-import os
 __docformat__ = 'restructuredtext'
+from builtins import range
 
-from nipype.interfaces.base import (TraitedSpec, File, traits, CommandLine,
-                                    CommandLineInputSpec, isdefined)
+import os
+import re
+
+from ..base import (TraitedSpec, File, traits, CommandLine,
+                    CommandLineInputSpec, isdefined)
+from ...utils.filemanip import fname_presuffix, split_filename, copyfile
+
 
 class HARDIMatInputSpec(CommandLineInputSpec):
-    bvecs = File(exists=True, desc = 'b vectors file',
-                argstr='%s', position=1, mandatory=True)
-    bvals = File(exists=True,desc = 'b values file', mandatory=True)
-    out_file = File("recon_mat.dat", desc = 'output matrix file', argstr='%s', usedefault=True, position=2)
+    bvecs = File(exists=True, desc='b vectors file',
+                 argstr='%s', position=1, mandatory=True)
+    bvals = File(exists=True, desc='b values file', mandatory=True)
+    out_file = File("recon_mat.dat", desc='output matrix file', argstr='%s', usedefault=True, position=2)
     order = traits.Int(argstr='-order %s', desc="""maximum order of spherical harmonics. must be even number. default
         is 4""")
     odf_file = File(exists=True, argstr='-odf %s', desc="""filename that contains the reconstruction points on a HEMI-sphere.
@@ -47,6 +50,7 @@ class HARDIMatInputSpec(CommandLineInputSpec):
         adjust gradient accordingly, thus it requires adjustment for correct
         diffusion tensor calculation""", argstr="-oc")
 
+
 class HARDIMatOutputSpec(TraitedSpec):
     out_file = File(exists=True, desc='output matrix file')
 
@@ -54,24 +58,24 @@ class HARDIMatOutputSpec(TraitedSpec):
 class HARDIMat(CommandLine):
     """Use hardi_mat to calculate a reconstruction matrix from a gradient table
     """
-    input_spec=HARDIMatInputSpec
-    output_spec=HARDIMatOutputSpec
+    input_spec = HARDIMatInputSpec
+    output_spec = HARDIMatOutputSpec
 
     _cmd = 'hardi_mat'
 
     def _create_gradient_matrix(self, bvecs_file, bvals_file):
         _gradient_matrix_file = 'gradient_matrix.txt'
-        bvals = [val for val in  re.split('\s+', open(bvals_file).readline().strip())]
+        bvals = [val for val in re.split('\s+', open(bvals_file).readline().strip())]
         bvecs_f = open(bvecs_file)
-        bvecs_x = [val for val in  re.split('\s+', bvecs_f.readline().strip())]
-        bvecs_y = [val for val in  re.split('\s+', bvecs_f.readline().strip())]
-        bvecs_z = [val for val in  re.split('\s+', bvecs_f.readline().strip())]
+        bvecs_x = [val for val in re.split('\s+', bvecs_f.readline().strip())]
+        bvecs_y = [val for val in re.split('\s+', bvecs_f.readline().strip())]
+        bvecs_z = [val for val in re.split('\s+', bvecs_f.readline().strip())]
         bvecs_f.close()
         gradient_matrix_f = open(_gradient_matrix_file, 'w')
         for i in range(len(bvals)):
             if int(bvals[i]) == 0:
                 continue
-            gradient_matrix_f.write("%s %s %s\n"%(bvecs_x[i], bvecs_y[i], bvecs_z[i]))
+            gradient_matrix_f.write("%s %s %s\n" % (bvecs_x[i], bvecs_y[i], bvecs_z[i]))
         gradient_matrix_f.close()
         return _gradient_matrix_file
 
@@ -86,8 +90,9 @@ class HARDIMat(CommandLine):
         outputs['out_file'] = os.path.abspath(self.inputs.out_file)
         return outputs
 
+
 class ODFReconInputSpec(CommandLineInputSpec):
-    DWI = File(desc='Input raw data', argstr='%s',exists=True, mandatory=True,position=1)
+    DWI = File(desc='Input raw data', argstr='%s', exists=True, mandatory=True, position=1)
     n_directions = traits.Int(desc='Number of directions', argstr='%s', mandatory=True, position=2)
     n_output_directions = traits.Int(desc='Number of output directions', argstr='%s', mandatory=True, position=3)
     out_prefix = traits.Str("odf", desc='Output file prefix', argstr='%s', usedefault=True, position=4)
@@ -123,12 +128,13 @@ class ODFReconOutputSpec(TraitedSpec):
     ODF = File(exists=True)
     entropy = File()
 
+
 class ODFRecon(CommandLine):
     """Use odf_recon to generate tensors and other maps
     """
 
-    input_spec=ODFReconInputSpec
-    output_spec=ODFReconOutputSpec
+    input_spec = ODFReconInputSpec
+    output_spec = ODFReconOutputSpec
 
     _cmd = 'odf_recon'
 
@@ -137,26 +143,27 @@ class ODFRecon(CommandLine):
         output_type = self.inputs.output_type
 
         outputs = self.output_spec().get()
-        outputs['B0'] = os.path.abspath(fname_presuffix("",  prefix=out_prefix, suffix='_b0.'+ output_type))
-        outputs['DWI'] = os.path.abspath(fname_presuffix("",  prefix=out_prefix, suffix='_dwi.'+ output_type))
-        outputs['max'] = os.path.abspath(fname_presuffix("",  prefix=out_prefix, suffix='_max.'+ output_type))
-        outputs['ODF'] = os.path.abspath(fname_presuffix("",  prefix=out_prefix, suffix='_odf.'+ output_type))
+        outputs['B0'] = os.path.abspath(fname_presuffix("", prefix=out_prefix, suffix='_b0.' + output_type))
+        outputs['DWI'] = os.path.abspath(fname_presuffix("", prefix=out_prefix, suffix='_dwi.' + output_type))
+        outputs['max'] = os.path.abspath(fname_presuffix("", prefix=out_prefix, suffix='_max.' + output_type))
+        outputs['ODF'] = os.path.abspath(fname_presuffix("", prefix=out_prefix, suffix='_odf.' + output_type))
         if isdefined(self.inputs.output_entropy):
-            outputs['entropy'] = os.path.abspath(fname_presuffix("",  prefix=out_prefix, suffix='_entropy.'+ output_type))
+            outputs['entropy'] = os.path.abspath(fname_presuffix("", prefix=out_prefix, suffix='_entropy.' + output_type))
 
         return outputs
+
 
 class ODFTrackerInputSpec(CommandLineInputSpec):
     max = File(exists=True, mandatory=True)
     ODF = File(exists=True, mandatory=True)
     input_data_prefix = traits.Str("odf", desc='recon data prefix', argstr='%s', usedefault=True, position=0)
-    out_file = File("tracks.trk", desc = 'output track file', argstr='%s', usedefault=True, position=1)
+    out_file = File("tracks.trk", desc='output track file', argstr='%s', usedefault=True, position=1)
     input_output_type = traits.Enum('nii', 'analyze', 'ni1', 'nii.gz', argstr='-it %s', desc='input and output file type', usedefault=True)
     runge_kutta2 = traits.Bool(argstr='-rk2', desc="""use 2nd order runge-kutta method for tracking.
         default tracking method is non-interpolate streamline""")
     step_length = traits.Float(argstr='-l %f', desc="""set step length, in the unit of minimum voxel size.
         default value is 0.1.""")
-    angle_threshold = traits.Float(argstr='-at %f',desc="""set angle threshold. default value is 35 degree for
+    angle_threshold = traits.Float(argstr='-at %f', desc="""set angle threshold. default value is 35 degree for
         default tracking method and 25 for rk2""")
     random_seed = traits.Int(argstr='-rseed %s', desc="""use random location in a voxel instead of the center of the voxel
         to seed. can also define number of seed per voxel. default is 1""")
@@ -199,15 +206,17 @@ class ODFTrackerInputSpec(CommandLineInputSpec):
         in the track file and is essential for track display to map onto
         the right coordinates""")
 
+
 class ODFTrackerOutputSpec(TraitedSpec):
     track_file = File(exists=True, desc='output track file')
+
 
 class ODFTracker(CommandLine):
     """Use odf_tracker to generate track file
     """
 
-    input_spec=ODFTrackerInputSpec
-    output_spec=ODFTrackerOutputSpec
+    input_spec = ODFTrackerInputSpec
+    output_spec = ODFTrackerOutputSpec
 
     _cmd = 'odf_tracker'
 
@@ -224,4 +233,3 @@ class ODFTracker(CommandLine):
         outputs = self.output_spec().get()
         outputs['track_file'] = os.path.abspath(self.inputs.out_file)
         return outputs
-

@@ -3,7 +3,7 @@
 ============
  User Guide
 ============
-	
+
 :Release: |version|
 :Date: |today|
 
@@ -38,8 +38,9 @@
    spmmcr
    mipav
    nipypecmd
+   aws
 
- 
+
 
 
 

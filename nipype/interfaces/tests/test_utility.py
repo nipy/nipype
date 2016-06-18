@@ -1,3 +1,5 @@
+from __future__ import print_function
+from builtins import range
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 import os
@@ -61,7 +63,6 @@ def test_function():
     f2 = pe.MapNode(utility.Function(input_names=['in_array'], output_names=['out_array'], function=increment_array), name='increment_array', iterfield=['in_array'])
 
     wf.connect(f1, 'random_array', f2, 'in_array')
-
     wf.run()
 
     # Clean up
@@ -106,7 +107,7 @@ def test_function_with_imports():
                                     function=make_random_array,
                                     imports=["import numpy as np"]),
                    name="should_not_fail")
-    print node.inputs.function_str
+    print(node.inputs.function_str)
     try:
         node.inputs.size = 10
         node.run()
@@ -121,14 +122,14 @@ def test_split():
     os.chdir(tempdir)
 
     try:
-        node = pe.Node(utility.Split(inlist=range(4),
+        node = pe.Node(utility.Split(inlist=list(range(4)),
                                      splits=[1, 3]),
                        name='split_squeeze')
         res = node.run()
         yield assert_equal, res.outputs.out1, [0]
         yield assert_equal, res.outputs.out2, [1, 2, 3]
 
-        node = pe.Node(utility.Split(inlist=range(4),
+        node = pe.Node(utility.Split(inlist=list(range(4)),
                                      splits=[1, 3],
                                      squeeze=True),
                        name='split_squeeze')
@@ -147,7 +148,7 @@ def test_csvReader():
              "baz,goodbye,0.3\n"]
     for x in range(2):
         fd, name = mkstemp(suffix=".csv")
-        with open(name, 'w+b') as fid:
+        with open(name, 'w') as fid:
             reader = utility.CSVReader()
             if x % 2 == 0:
                 fid.write(header)
@@ -165,3 +166,57 @@ def test_csvReader():
                 yield assert_equal, out.outputs.column_1, ['hello', 'world', 'goodbye']
                 yield assert_equal, out.outputs.column_2, ['300.1', '5', '0.3']
         os.unlink(name)
+
+
+def test_aux_connect_function():
+    """ This tests excution nodes with multiple inputs and auxiliary
+    function inside the Workflow connect function.
+    """
+    tempdir = os.path.realpath(mkdtemp())
+    origdir = os.getcwd()
+    os.chdir(tempdir)
+
+    wf = pe.Workflow(name="test_workflow")
+
+    def _gen_tuple(size):
+        return [1, ] * size
+
+    def _sum_and_sub_mul(a, b, c):
+        return (a+b)*c, (a-b)*c
+
+    def _inc(x):
+        return x + 1
+
+    params = pe.Node(utility.IdentityInterface(fields=['size', 'num']), name='params')
+    params.inputs.num  = 42
+    params.inputs.size = 1
+
+    gen_tuple = pe.Node(utility.Function(input_names=['size'],
+                                         output_names=['tuple'],
+                                         function=_gen_tuple),
+                                         name='gen_tuple')
+
+    ssm = pe.Node(utility.Function(input_names=['a', 'b', 'c'],
+                                   output_names=['sum', 'sub'],
+                                   function=_sum_and_sub_mul),
+                                   name='sum_and_sub_mul')
+
+    split = pe.Node(utility.Split(splits=[1, 1],
+                                  squeeze=True),
+                    name='split')
+
+
+    wf.connect([
+                (params,    gen_tuple,  [(("size", _inc),   "size")]),
+                (params,    ssm,        [(("num", _inc),    "c")]),
+                (gen_tuple, split,      [("tuple",          "inlist")]),
+                (split,     ssm,        [(("out1", _inc),   "a"),
+                                         ("out2",           "b"),
+                                        ]),
+                ])
+
+    wf.run()
+
+    # Clean up
+    os.chdir(origdir)
+    shutil.rmtree(tempdir)

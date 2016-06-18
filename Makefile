@@ -5,6 +5,8 @@
 PYTHON ?= python
 NOSETESTS ?= nosetests
 
+.PHONY: zipdoc sdist egg upload_to_pypi trailing-spaces clean-pyc clean-so clean-build clean-ctags clean in inplace test-code test-doc test-coverage test html specs check-before-commit check
+
 zipdoc: html
 	zip documentation.zip doc/_build/html
 
@@ -13,8 +15,6 @@ sdist: zipdoc
 	python setup.py sdist
 	@echo "Done building source distribution."
 	# XXX copy documentation.zip to dist directory.
-	# XXX Somewhere the doc/_build directory is removed and causes
-	# this script to fail.
 
 egg: zipdoc
 	@echo "Building egg..."
@@ -26,7 +26,7 @@ upload_to_pypi: zipdoc
 	python setup.py sdist --formats=zip,gztar upload
 
 trailing-spaces:
-	find . -name "*.py" | xargs perl -pi -e 's/[ \t]*$$//'
+	find . -name "*[.py|.rst]" -type f | xargs perl -pi -e 's/[ \t]*$$//'
 	@echo "Reverting test_docparse"
 	git checkout nipype/utils/tests/test_docparse.py
 
@@ -43,7 +43,10 @@ clean-build:
 clean-ctags:
 	rm -f tags
 
-clean: clean-build clean-pyc clean-so clean-ctags
+clean-doc:
+	rm -rf doc/_build
+
+clean: clean-build clean-pyc clean-so clean-ctags clean-doc
 
 in: inplace # just a shortcut
 inplace:
@@ -64,12 +67,13 @@ test: clean test-code
 
 html:
 	@echo "building docs"
-	make -C doc clean html
+	make -C doc clean htmlonly
 
 specs:
 	@echo "Checking specs and autogenerating spec tests"
 	python tools/checkspecs.py
 
+check: check-before-commit # just a shortcut
 check-before-commit: specs trailing-spaces html test
 	@echo "removed spaces"
 	@echo "built docs"

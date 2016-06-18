@@ -37,7 +37,7 @@ acknowledgements: This work is part of the National Alliance for Medical Image C
     input_spec = MultiplyScalarVolumesInputSpec
     output_spec = MultiplyScalarVolumesOutputSpec
     _cmd = "MultiplyScalarVolumes "
-    _outputs_filenames = {'outputVolume':'outputVolume.nii'}
+    _outputs_filenames = {'outputVolume': 'outputVolume.nii'}
 
 
 class MaskScalarVolumeInputSpec(CommandLineInputSpec):
@@ -72,7 +72,7 @@ acknowledgements: This work is part of the National Alliance for Medical Image C
     input_spec = MaskScalarVolumeInputSpec
     output_spec = MaskScalarVolumeOutputSpec
     _cmd = "MaskScalarVolume "
-    _outputs_filenames = {'OutputVolume':'OutputVolume.nii'}
+    _outputs_filenames = {'OutputVolume': 'OutputVolume.nii'}
 
 
 class SubtractScalarVolumesInputSpec(CommandLineInputSpec):
@@ -106,7 +106,7 @@ acknowledgements: This work is part of the National Alliance for Medical Image C
     input_spec = SubtractScalarVolumesInputSpec
     output_spec = SubtractScalarVolumesOutputSpec
     _cmd = "SubtractScalarVolumes "
-    _outputs_filenames = {'outputVolume':'outputVolume.nii'}
+    _outputs_filenames = {'outputVolume': 'outputVolume.nii'}
 
 
 class AddScalarVolumesInputSpec(CommandLineInputSpec):
@@ -140,7 +140,7 @@ acknowledgements: This work is part of the National Alliance for Medical Image C
     input_spec = AddScalarVolumesInputSpec
     output_spec = AddScalarVolumesOutputSpec
     _cmd = "AddScalarVolumes "
-    _outputs_filenames = {'outputVolume':'outputVolume.nii'}
+    _outputs_filenames = {'outputVolume': 'outputVolume.nii'}
 
 
 class CastScalarVolumeInputSpec(CommandLineInputSpec):
@@ -175,4 +175,4 @@ acknowledgements: This work is part of the National Alliance for Medical Image C
     input_spec = CastScalarVolumeInputSpec
     output_spec = CastScalarVolumeOutputSpec
     _cmd = "CastScalarVolume "
-    _outputs_filenames = {'OutputVolume':'OutputVolume.nii'}
+    _outputs_filenames = {'OutputVolume': 'OutputVolume.nii'}

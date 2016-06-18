@@ -25,6 +25,8 @@ See the docstrings of the individual classes for examples.
 
 """
 
+from builtins import object
+
 from glob import glob
 import os
 import warnings
@@ -35,7 +37,6 @@ from ..base import (traits, isdefined,
                     File, Directory, InputMultiPath, OutputMultiPath)
 
 warn = warnings.warn
-warnings.filterwarnings('always', category=UserWarning)
 
 
 class Info(object):
@@ -73,10 +74,7 @@ class Info(object):
             basedir = os.environ['FSLDIR']
         except KeyError:
             return None
-        clout = CommandLine(command='cat',
-                            args='%s/etc/fslversion' % (basedir),
-                            terminal_output='allatonce').run()
-        out = clout.runtime.stdout
+        out = open('%s/etc/fslversion' % (basedir)).read()
         return out.strip('\n')
 
     @classmethod
@@ -148,7 +146,7 @@ class FSLCommandInputSpec(CommandLineInputSpec):
     -------
     fsl.ExtractRoi(tmin=42, tsize=1, output_type='NIFTI')
     """
-    output_type = traits.Enum('NIFTI', Info.ftypes.keys(),
+    output_type = traits.Enum('NIFTI', list(Info.ftypes.keys()),
                               desc='FSL output type')
 
 
@@ -266,5 +264,4 @@ def no_fsl():
 
 def no_fsl_course_data():
     """check if fsl_course data is present"""
-
-    return not (os.path.isdir(os.path.abspath('fsl_course_data')))
+    return not ('FSL_COURSE_DATA' in os.environ and os.path.isdir(os.path.abspath(os.environ['FSL_COURSE_DATA'])))

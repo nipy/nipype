@@ -1,1 +1,2 @@
-import camino, mrtrix, fsl, dipy
+from __future__ import absolute_import
+from . import camino, mrtrix, fsl, dipy

@@ -8,7 +8,7 @@ Nipype 0.9 introduces a new interface for intelligently finding files on the
 disk and feeding them into your workflows: :ref:`SelectFiles
 <nipype.interfaces.io.SelectFiles>`. SelectFiles is intended as a simpler
 alternative to the :ref:`DataGrabber <nipype.intefaces.io.DataGrabber>`
-interface that was discussed previously in :doc:`grabbing_and_sinking`. 
+interface that was discussed previously in :doc:`grabbing_and_sinking`.
 
 SelectFiles is built on Python `format strings
 <http://docs.python.org/2/library/string.html#format-string-syntax>`_, which

@@ -2,7 +2,7 @@
 .. _caching:
 
 ===========================
-Interface caching 
+Interface caching
 ===========================
 
 This section details the interface-caching mechanism, exposed in the
@@ -29,7 +29,7 @@ Interface caching: why and how
   However, they force the user to specify explicit input and output file
   names and cannot do any caching.
 
-This is why nipype exposes an intermediate mechanism, `caching` that 
+This is why nipype exposes an intermediate mechanism, `caching` that
 provides transparent output file management and caching within imperative
 Python code rather than a workflow.
 
@@ -69,7 +69,7 @@ the argument list by using the `fsl_merge?` synthax to inspect the docs::
     Definition: fsl_merge(self, **kwargs)
     Docstring:
     Use fslmerge to concatenate images
-        
+
     Inputs
     ------
 
@@ -138,7 +138,7 @@ that, when you vary parameters, files are not overridden by the output of
 different computations.
 
 .. topic:: Debuging
-    
+
     If you need to inspect the running environment of the nodes, it may
     be useful to know where they were executed. With `nipype.caching`,
     you do not control this location as it is encoded by hashes.

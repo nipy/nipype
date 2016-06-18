@@ -4,5 +4,7 @@
 
 """Top-level namespace for elastix."""
 
-from registration import Registration, ApplyWarp, AnalyzeWarp, PointsWarp
-from utils import EditTransform
+from __future__ import absolute_import
+
+from .registration import Registration, ApplyWarp, AnalyzeWarp, PointsWarp
+from .utils import EditTransform

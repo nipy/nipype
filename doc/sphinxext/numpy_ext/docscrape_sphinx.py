@@ -1,7 +1,12 @@
-import re, inspect, textwrap, pydoc
+from __future__ import absolute_import
+import re
+import inspect
+import textwrap
+import pydoc
 import sphinx
-from docscrape import NumpyDocString, FunctionDoc, ClassDoc
-from nipype.external import six
+from .docscrape import NumpyDocString, FunctionDoc, ClassDoc
+from nipype.external.six import string_types
+
 
 class SphinxDocString(NumpyDocString):
     def __init__(self, docstring, config={}):
@@ -18,7 +23,7 @@ class SphinxDocString(NumpyDocString):
     def _str_indent(self, doc, indent=4):
         out = []
         for line in doc:
-            out += [' '*indent + line]
+            out += [' ' * indent + line]
         return out
 
     def _str_signature(self):
@@ -39,11 +44,11 @@ class SphinxDocString(NumpyDocString):
         if self[name]:
             out += self._str_field_list(name)
             out += ['']
-            for param,param_type,desc in self[name]:
+            for param, param_type, desc in self[name]:
                 out += self._str_indent(['**%s** : %s' % (param.strip(),
                                                           param_type)])
                 out += ['']
-                out += self._str_indent(desc,8)
+                out += self._str_indent(desc, 8)
                 out += ['']
         return out
 
@@ -85,7 +90,7 @@ class SphinxDocString(NumpyDocString):
             if others:
                 maxlen_0 = max([len(x[0]) for x in others])
                 maxlen_1 = max([len(x[1]) for x in others])
-                hdr = "="*maxlen_0 + "  " + "="*maxlen_1 + "  " + "="*10
+                hdr = "=" * maxlen_0 + "  " + "=" * maxlen_1 + "  " + "=" * 10
                 fmt = '%%%ds  %%%ds  ' % (maxlen_0, maxlen_1)
                 n_indent = maxlen_0 + maxlen_1 + 4
                 out += [hdr]
@@ -127,8 +132,8 @@ class SphinxDocString(NumpyDocString):
         if len(idx) == 0:
             return out
 
-        out += ['.. index:: %s' % idx.get('default','')]
-        for section, references in idx.iteritems():
+        out += ['.. index:: %s' % idx.get('default', '')]
+        for section, references in list(idx.items()):
             if section == 'default':
                 continue
             elif section == 'refguide':
@@ -141,16 +146,16 @@ class SphinxDocString(NumpyDocString):
         out = []
         if self['References']:
             out += self._str_header('References')
-            if isinstance(self['References'], six.string_types):
+            if isinstance(self['References'], string_types):
                 self['References'] = [self['References']]
             out.extend(self['References'])
             out += ['']
             # Latex collects all references to a separate bibliography,
             # so we need to insert links to it
             if sphinx.__version__ >= "0.6":
-                out += ['.. only:: latex','']
+                out += ['.. only:: latex', '']
             else:
-                out += ['.. latexonly::','']
+                out += ['.. latexonly::', '']
             items = []
             for line in self['References']:
                 m = re.match(r'.. \[([a-z0-9._-]+)\]', line, re.I)
@@ -162,8 +167,8 @@ class SphinxDocString(NumpyDocString):
     def _str_examples(self):
         examples_str = "\n".join(self['Examples'])
 
-        if (self.use_plots and 'import matplotlib' in examples_str
-                and 'plot::' not in examples_str):
+        if (self.use_plots and 'import matplotlib' in examples_str and
+                'plot::' not in examples_str):
             out = []
             out += self._str_header('Examples')
             out += ['.. plot::', '']
@@ -189,23 +194,27 @@ class SphinxDocString(NumpyDocString):
         out += self._str_examples()
         for param_list in ('Attributes', 'Methods'):
             out += self._str_member_list(param_list)
-        out = self._str_indent(out,indent)
+        out = self._str_indent(out, indent)
         return '\n'.join(out)
+
 
 class SphinxFunctionDoc(SphinxDocString, FunctionDoc):
     def __init__(self, obj, doc=None, config={}):
         self.use_plots = config.get('use_plots', False)
         FunctionDoc.__init__(self, obj, doc=doc, config=config)
 
+
 class SphinxClassDoc(SphinxDocString, ClassDoc):
     def __init__(self, obj, doc=None, func_doc=None, config={}):
         self.use_plots = config.get('use_plots', False)
         ClassDoc.__init__(self, obj, doc=doc, func_doc=None, config=config)
 
+
 class SphinxObjDoc(SphinxDocString):
     def __init__(self, obj, doc=None, config={}):
         self._f = obj
         SphinxDocString.__init__(self, doc, config=config)
+
 
 def get_doc_object(obj, what=None, doc=None, config={}):
     if what is None:

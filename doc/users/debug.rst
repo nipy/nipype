@@ -42,6 +42,9 @@ performance issues.
 #. All Nipype crashfiles can be inspected with the `nipype_display_crash`
    utility.
 
+#. The `nipype_crash_search` command allows you to search for regular expressions
+   in the tracebacks of the Nipype crashfiles within a log folder.
+
 #. Nipype determines the hash of the input state of a node. If any input
    contains strings that represent files on the system path, the hash evaluation
    mechanism will determine the timestamp or content hash of each of those
@@ -58,11 +61,11 @@ performance issues.
    you will get a `ConcurrentLogHandler` error. Simply remove the pypeline.lock
    file in your home directory and continue.
 
-#. One many clusters with shared NFS mounts synchronization of files across 
-   clusters may not happen before the typical NFS cache timeouts. When using 
-   PBS/LSF/SGE/Condor plugins in such cases the workflow may crash because it 
+#. One many clusters with shared NFS mounts synchronization of files across
+   clusters may not happen before the typical NFS cache timeouts. When using
+   PBS/LSF/SGE/Condor plugins in such cases the workflow may crash because it
    cannot retrieve the node result. Setting the `job_finished_timeout` can help::
-   
+
    workflow.config['execution']['job_finished_timeout'] = 65
 
 .. include:: ../links_names.txt

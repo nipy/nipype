@@ -9,38 +9,41 @@
 
 """
 
-from nipype.interfaces.base import (BaseInterface, BaseInterfaceInputSpec, traits,
-                                    File, TraitedSpec, InputMultiPath,
-                                    OutputMultiPath, isdefined)
-from nipype.utils.filemanip import split_filename
-import os, os.path as op
+from __future__ import division
+from builtins import range
+
+import os.path as op
+import pickle
+
 import numpy as np
 import networkx as nx
 import scipy.io as sio
-import pickle
-from nipype.utils.misc import package_check
-import warnings
 
+from ..base import (BaseInterface, BaseInterfaceInputSpec, traits, File,
+                    TraitedSpec, InputMultiPath, OutputMultiPath, isdefined)
+from ...utils.filemanip import split_filename
+from ...utils.misc import package_check
 from ... import logging
+
 iflogger = logging.getLogger('interface')
 
 have_cmp = True
 try:
     package_check('cmp')
-except Exception, e:
+except Exception as e:
     have_cmp = False
 else:
     import cmp
 
 
 def read_unknown_ntwk(ntwk):
-	if not isinstance(ntwk, nx.classes.graph.Graph):
-		path, name, ext = split_filename(ntwk)
-		if ext == '.pck':
-			ntwk = nx.read_gpickle(ntwk)
-		elif ext == '.graphml':
-			ntwk = nx.read_graphml(ntwk)
-	return ntwk
+    if not isinstance(ntwk, nx.classes.graph.Graph):
+        path, name, ext = split_filename(ntwk)
+        if ext == '.pck':
+            ntwk = nx.read_gpickle(ntwk)
+        elif ext == '.graphml':
+            ntwk = nx.read_graphml(ntwk)
+    return ntwk
 
 
 def remove_all_edges(ntwk):
@@ -62,22 +65,22 @@ def fix_keys_for_gexf(orig):
     for node in nodes:
         newnodedata = {}
         newnodedata.update(orig.node[node])
-        if orig.node[node].has_key('dn_fsname'):
-			newnodedata['label'] = orig.node[node]['dn_fsname']
+        if 'dn_fsname' in orig.node[node]:
+            newnodedata['label'] = orig.node[node]['dn_fsname']
         ntwk.add_node(str(node), newnodedata)
-        if ntwk.node[str(node)].has_key('dn_position') and newnodedata.has_key('dn_position'):
+        if 'dn_position' in ntwk.node[str(node)] and 'dn_position' in newnodedata:
             ntwk.node[str(node)]['dn_position'] = str(newnodedata['dn_position'])
     for edge in edges:
         data = {}
         data = orig.edge[edge[0]][edge[1]]
         ntwk.add_edge(str(edge[0]), str(edge[1]), data)
-        if ntwk.edge[str(edge[0])][str(edge[1])].has_key('fiber_length_mean'):
+        if 'fiber_length_mean' in ntwk.edge[str(edge[0])][str(edge[1])]:
             ntwk.edge[str(edge[0])][str(edge[1])]['fiber_length_mean'] = str(data['fiber_length_mean'])
-        if ntwk.edge[str(edge[0])][str(edge[1])].has_key('fiber_length_std'):
+        if 'fiber_length_std' in ntwk.edge[str(edge[0])][str(edge[1])]:
             ntwk.edge[str(edge[0])][str(edge[1])]['fiber_length_std'] = str(data['fiber_length_std'])
-        if ntwk.edge[str(edge[0])][str(edge[1])].has_key('number_of_fibers'):
+        if 'number_of_fibers' in ntwk.edge[str(edge[0])][str(edge[1])]:
             ntwk.edge[str(edge[0])][str(edge[1])]['number_of_fibers'] = str(data['number_of_fibers'])
-        if ntwk.edge[str(edge[0])][str(edge[1])].has_key('value'):
+        if 'value' in ntwk.edge[str(edge[0])][str(edge[1])]:
             ntwk.edge[str(edge[0])][str(edge[1])]['value'] = str(data['value'])
     return ntwk
 
@@ -101,21 +104,27 @@ def average_networks(in_files, ntwk_res_file, group_id):
     """
     import networkx as nx
     import os.path as op
-    iflogger.info("Creating average network for group: {grp}".format(grp=group_id))
+    iflogger.info(("Creating average network for group: "
+                   "{grp}").format(grp=group_id))
     matlab_network_list = []
     if len(in_files) == 1:
         avg_ntwk = read_unknown_ntwk(in_files[0])
     else:
-        count_to_keep_edge = np.round(float(len(in_files)) / 2)
-        iflogger.info("Number of networks: {L}, an edge must occur in at least {c} to remain in the average network".format(L=len(in_files), c=count_to_keep_edge))
+        count_to_keep_edge = np.round(len(in_files) / 2.0)
+        iflogger.info(("Number of networks: {L}, an edge must occur in at "
+                       "least {c} to remain in the "
+                       "average network").format(L=len(in_files),
+                                                 c=count_to_keep_edge))
         ntwk_res_file = read_unknown_ntwk(ntwk_res_file)
-        iflogger.info("{n} Nodes found in network resolution file".format(n=ntwk_res_file.number_of_nodes()))
+        iflogger.info(("{n} Nodes found in network resolution "
+                       "file").format(n=ntwk_res_file.number_of_nodes()))
         ntwk = remove_all_edges(ntwk_res_file)
         counting_ntwk = ntwk.copy()
         # Sums all the relevant variables
         for index, subject in enumerate(in_files):
             tmp = nx.read_gpickle(subject)
-            iflogger.info('File {s} has {n} edges'.format(s=subject, n=tmp.number_of_edges()))
+            iflogger.info(('File {s} has {n} '
+                           'edges').format(s=subject, n=tmp.number_of_edges()))
             edges = tmp.edges_iter()
             for edge in edges:
                 data = {}
@@ -130,47 +139,49 @@ def average_networks(in_files, ntwk_res_file, group_id):
             for node in nodes:
                 data = {}
                 data = ntwk.node[node]
-                if tmp.node[node].has_key('value'):
+                if 'value' in tmp.node[node]:
                     data['value'] = data['value'] + tmp.node[node]['value']
                 ntwk.add_node(node, data)
 
         # Divides each value by the number of files
         nodes = ntwk.nodes_iter()
         edges = ntwk.edges_iter()
-        iflogger.info('Total network has {n} edges'.format(n=ntwk.number_of_edges()))
+        iflogger.info(('Total network has {n} '
+                       'edges').format(n=ntwk.number_of_edges()))
         avg_ntwk = nx.Graph()
         newdata = {}
         for node in nodes:
             data = ntwk.node[node]
             newdata = data
-            if data.has_key('value'):
+            if 'value' in data:
                 newdata['value'] = data['value'] / len(in_files)
                 ntwk.node[node]['value'] = newdata
             avg_ntwk.add_node(node, newdata)
 
         edge_dict = {}
-        edge_dict['count'] = np.zeros((avg_ntwk.number_of_nodes(), avg_ntwk.number_of_nodes()))
+        edge_dict['count'] = np.zeros((avg_ntwk.number_of_nodes(),
+                                       avg_ntwk.number_of_nodes()))
         for edge in edges:
             data = ntwk.edge[edge[0]][edge[1]]
             if ntwk.edge[edge[0]][edge[1]]['count'] >= count_to_keep_edge:
-                for key in data.keys():
+                for key in list(data.keys()):
                     if not key == 'count':
                         data[key] = data[key] / len(in_files)
                 ntwk.edge[edge[0]][edge[1]] = data
-                avg_ntwk.add_edge(edge[0],edge[1],data)
-            edge_dict['count'][edge[0]-1][edge[1]-1] = ntwk.edge[edge[0]][edge[1]]['count']
+                avg_ntwk.add_edge(edge[0], edge[1], data)
+            edge_dict['count'][edge[0] - 1][edge[1] - 1] = ntwk.edge[edge[0]][edge[1]]['count']
 
         iflogger.info('After thresholding, the average network has has {n} edges'.format(n=avg_ntwk.number_of_edges()))
 
         avg_edges = avg_ntwk.edges_iter()
         for edge in avg_edges:
             data = avg_ntwk.edge[edge[0]][edge[1]]
-            for key in data.keys():
+            for key in list(data.keys()):
                 if not key == 'count':
                     edge_dict[key] = np.zeros((avg_ntwk.number_of_nodes(), avg_ntwk.number_of_nodes()))
-                    edge_dict[key][edge[0]-1][edge[1]-1] = data[key]
+                    edge_dict[key][edge[0] - 1][edge[1] - 1] = data[key]
 
-        for key in edge_dict.keys():
+        for key in list(edge_dict.keys()):
             tmp = {}
             network_name = group_id + '_' + key + '_average.mat'
             matlab_network_list.append(op.abspath(network_name))
@@ -196,35 +207,35 @@ def compute_node_measures(ntwk, calculate_cliques=False):
     iflogger.info('Computing node measures:')
     measures = {}
     iflogger.info('...Computing degree...')
-    measures['degree'] = np.array(ntwk.degree().values())
+    measures['degree'] = np.array(list(ntwk.degree().values()))
     iflogger.info('...Computing load centrality...')
-    measures['load_centrality'] = np.array(nx.load_centrality(ntwk).values())
+    measures['load_centrality'] = np.array(list(nx.load_centrality(ntwk).values()))
     iflogger.info('...Computing betweenness centrality...')
-    measures['betweenness_centrality'] = np.array(nx.betweenness_centrality(ntwk).values())
+    measures['betweenness_centrality'] = np.array(list(nx.betweenness_centrality(ntwk).values()))
     iflogger.info('...Computing degree centrality...')
-    measures['degree_centrality'] = np.array(nx.degree_centrality(ntwk).values())
+    measures['degree_centrality'] = np.array(list(nx.degree_centrality(ntwk).values()))
     iflogger.info('...Computing closeness centrality...')
-    measures['closeness_centrality'] = np.array(nx.closeness_centrality(ntwk).values())
+    measures['closeness_centrality'] = np.array(list(nx.closeness_centrality(ntwk).values()))
 #    iflogger.info('...Computing eigenvector centrality...')
 #    measures['eigenvector_centrality'] = np.array(nx.eigenvector_centrality(ntwk, max_iter=100000).values())
     iflogger.info('...Computing triangles...')
-    measures['triangles'] = np.array(nx.triangles(ntwk).values())
+    measures['triangles'] = np.array(list(nx.triangles(ntwk).values()))
     iflogger.info('...Computing clustering...')
-    measures['clustering'] = np.array(nx.clustering(ntwk).values())
+    measures['clustering'] = np.array(list(nx.clustering(ntwk).values()))
     iflogger.info('...Computing k-core number')
-    measures['core_number'] = np.array(nx.core_number(ntwk).values())
+    measures['core_number'] = np.array(list(nx.core_number(ntwk).values()))
     iflogger.info('...Identifying network isolates...')
     isolate_list = nx.isolates(ntwk)
     binarized = np.zeros((ntwk.number_of_nodes(), 1))
     for value in isolate_list:
-        value = value - 1 # Zero indexing
+        value = value - 1  # Zero indexing
         binarized[value] = 1
     measures['isolates'] = binarized
     if calculate_cliques:
         iflogger.info('...Calculating node clique number')
-        measures['node_clique_number'] = np.array(nx.node_clique_number(ntwk).values())
+        measures['node_clique_number'] = np.array(list(nx.node_clique_number(ntwk).values()))
         iflogger.info('...Computing number of cliques for each node...')
-        measures['number_of_cliques'] = np.array(nx.number_of_cliques(ntwk).values())
+        measures['number_of_cliques'] = np.array(list(nx.number_of_cliques(ntwk).values()))
     return measures
 
 
@@ -234,12 +245,12 @@ def compute_edge_measures(ntwk):
     """
     iflogger.info('Computing edge measures:')
     measures = {}
-    #iflogger.info('...Computing google matrix...' #Makes really large networks (500k+ edges))
-    #measures['google_matrix'] = nx.google_matrix(ntwk)
-    #iflogger.info('...Computing hub matrix...')
-    #measures['hub_matrix'] = nx.hub_matrix(ntwk)
-    #iflogger.info('...Computing authority matrix...')
-    #measures['authority_matrix'] = nx.authority_matrix(ntwk)
+    # iflogger.info('...Computing google matrix...' #Makes really large networks (500k+ edges))
+    # measures['google_matrix'] = nx.google_matrix(ntwk)
+    # iflogger.info('...Computing hub matrix...')
+    # measures['hub_matrix'] = nx.hub_matrix(ntwk)
+    # iflogger.info('...Computing authority matrix...')
+    # measures['authority_matrix'] = nx.authority_matrix(ntwk)
     return measures
 
 
@@ -263,7 +274,7 @@ def compute_singlevalued_measures(ntwk, weighted=True, calculate_cliques=False):
     iflogger.info('...Computing degree assortativity (pearson number) ...')
     try:
         measures['degree_pearsonr'] = nx.degree_pearsonr(ntwk)
-    except AttributeError: # For NetworkX 1.6
+    except AttributeError:  # For NetworkX 1.6
         measures['degree_pearsonr'] = nx.degree_pearson_correlation_coefficient(ntwk)
     iflogger.info('...Computing degree assortativity...')
     try:
@@ -290,18 +301,18 @@ def compute_singlevalued_measures(ntwk, weighted=True, calculate_cliques=False):
         measures['average_shortest_path_length'] = nx.average_shortest_path_length(nx.connected_component_subgraphs(ntwk)[0], weighted)
     if calculate_cliques:
         iflogger.info('...Computing graph clique number...')
-        measures['graph_clique_number'] = nx.graph_clique_number(ntwk) #out of memory error
+        measures['graph_clique_number'] = nx.graph_clique_number(ntwk)  # out of memory error
     return measures
 
 
 def compute_network_measures(ntwk):
     measures = {}
-    #iflogger.info('Identifying k-core')
-    #measures['k_core'] = nx.k_core(ntwk)
-    #iflogger.info('Identifying k-shell')
-    #measures['k_shell'] = nx.k_shell(ntwk)
-    #iflogger.info('Identifying k-crust')
-    #measures['k_crust'] = nx.k_crust(ntwk)
+    # iflogger.info('Identifying k-core')
+    # measures['k_core'] = nx.k_core(ntwk)
+    # iflogger.info('Identifying k-shell')
+    # measures['k_shell'] = nx.k_shell(ntwk)
+    # iflogger.info('Identifying k-crust')
+    # measures['k_crust'] = nx.k_crust(ntwk)
     return measures
 
 
@@ -322,13 +333,13 @@ def add_edge_data(edge_array, ntwk, above=0, below=0):
     for x, row in enumerate(edge_array):
         for y in range(0, np.max(np.shape(edge_array[x]))):
             if not edge_array[x, y] == 0:
-				data['value'] = edge_array[x, y]
-				if data['value'] <= below or data['value'] >= above:
-					if edge_ntwk.has_edge(x + 1, y + 1):
-						old_edge_dict = edge_ntwk.edge[x + 1][y + 1]
-						edge_ntwk.remove_edge(x + 1, y + 1)
-						data.update(old_edge_dict)
-					edge_ntwk.add_edge(x + 1, y + 1, data)
+                data['value'] = edge_array[x, y]
+                if data['value'] <= below or data['value'] >= above:
+                    if edge_ntwk.has_edge(x + 1, y + 1):
+                        old_edge_dict = edge_ntwk.edge[x + 1][y + 1]
+                        edge_ntwk.remove_edge(x + 1, y + 1)
+                        data.update(old_edge_dict)
+                    edge_ntwk.add_edge(x + 1, y + 1, data)
     return edge_ntwk
 
 
@@ -344,6 +355,7 @@ class NetworkXMetricsInputSpec(BaseInterfaceInputSpec):
     out_edge_metrics_matlab = File(genfile=True, desc='Output edge metrics in MATLAB .mat format')
     out_pickled_extra_measures = File('extra_measures', usedefault=True, desc='Network measures for group 1 that return dictionaries stored as a Pickle.')
 
+
 class NetworkXMetricsOutputSpec(TraitedSpec):
     gpickled_network_files = OutputMultiPath(File(desc='Output gpickled network files'))
     matlab_matrix_files = OutputMultiPath(File(desc='Output network metrics in MATLAB .mat format'))
@@ -358,6 +370,7 @@ class NetworkXMetricsOutputSpec(TraitedSpec):
     k_crust = File(desc='Computed k-crust network stored as a NetworkX pickle.')
     pickled_extra_measures = File(desc='Network measures for the group that return dictionaries, stored as a Pickle.')
     matlab_dict_measures = OutputMultiPath(File(desc='Network measures for the group that return dictionaries, stored as matlab matrices.'))
+
 
 class NetworkXMetrics(BaseInterface):
     """
@@ -399,7 +412,7 @@ class NetworkXMetrics(BaseInterface):
         matlab.append(global_out_file)
 
         node_measures = compute_node_measures(ntwk, calculate_cliques)
-        for key in node_measures.keys():
+        for key in list(node_measures.keys()):
             newntwk = add_node_data(node_measures[key], ntwk)
             out_file = op.abspath(self._gen_outfilename(key, 'pck'))
             nx.write_gpickle(newntwk, out_file)
@@ -413,7 +426,7 @@ class NetworkXMetrics(BaseInterface):
         gpickled.extend(nodentwks)
 
         edge_measures = compute_edge_measures(ntwk)
-        for key in edge_measures.keys():
+        for key in list(edge_measures.keys()):
             newntwk = add_edge_data(edge_measures[key], ntwk)
             out_file = op.abspath(self._gen_outfilename(key, 'pck'))
             nx.write_gpickle(newntwk, out_file)
@@ -427,7 +440,7 @@ class NetworkXMetrics(BaseInterface):
         gpickled.extend(edgentwks)
 
         ntwk_measures = compute_network_measures(ntwk)
-        for key in ntwk_measures.keys():
+        for key in list(ntwk_measures.keys()):
             if key == 'k_core':
                 out_file = op.abspath(self._gen_outfilename(self.inputs.out_k_core, 'pck'))
             if key == 'k_shell':
@@ -489,18 +502,21 @@ class NetworkXMetrics(BaseInterface):
     def _gen_outfilename(self, name, ext):
         return name + '.' + ext
 
+
 class AverageNetworksInputSpec(BaseInterfaceInputSpec):
     in_files = InputMultiPath(File(exists=True), mandatory=True, desc='Networks for a group of subjects')
-    resolution_network_file = File(exists=True, desc='Parcellation files from Connectome Mapping Toolkit. This is not necessary' \
-                                ', but if included, the interface will output the statistical maps as networkx graphs.')
+    resolution_network_file = File(exists=True, desc='Parcellation files from Connectome Mapping Toolkit. This is not necessary'
+                                   ', but if included, the interface will output the statistical maps as networkx graphs.')
     group_id = traits.Str('group1', usedefault=True, desc='ID for group')
     out_gpickled_groupavg = File(desc='Average network saved as a NetworkX .pck')
     out_gexf_groupavg = File(desc='Average network saved as a .gexf file')
+
 
 class AverageNetworksOutputSpec(TraitedSpec):
     gpickled_groupavg = File(desc='Average network saved as a NetworkX .pck')
     gexf_groupavg = File(desc='Average network saved as a .gexf file')
     matlab_groupavgs = OutputMultiPath(File(desc='Average network saved as a .gexf file'))
+
 
 class AverageNetworks(BaseInterface):
     """

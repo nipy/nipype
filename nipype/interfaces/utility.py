@@ -9,20 +9,26 @@
    >>> os.chdir(datadir)
 """
 
+from future import standard_library
+standard_library.install_aliases()
+from builtins import zip
+from builtins import range
+
 import os
 import re
-from cPickle import dumps, loads
+from pickle import dumps
+from textwrap import dedent
 import numpy as np
 import nibabel as nb
-from nipype.external import six
 
-from nipype.utils.filemanip import (filename_to_list, copyfile, split_filename)
-from nipype.interfaces.base import (traits, TraitedSpec, DynamicTraitedSpec, File,
-                                    Undefined, isdefined, OutputMultiPath,
-    InputMultiPath, BaseInterface, BaseInterfaceInputSpec)
-from nipype.interfaces.io import IOBase, add_traits
-from nipype.testing import assert_equal
-from nipype.utils.misc import getsource, create_function_from_source
+from .base import (traits, TraitedSpec, DynamicTraitedSpec, File,
+                   Undefined, isdefined, OutputMultiPath,
+                   InputMultiPath, BaseInterface, BaseInterfaceInputSpec)
+from .io import IOBase, add_traits
+from ..external.six import string_types
+from ..testing import assert_equal
+from ..utils.filemanip import (filename_to_list, copyfile, split_filename)
+from ..utils.misc import getsource, create_function_from_source
 
 
 class IdentityInterface(IOBase):
@@ -70,22 +76,17 @@ class IdentityInterface(IOBase):
         self.inputs.set(**inputs)
 
     def _add_output_traits(self, base):
-        undefined_traits = {}
-        for key in self._fields:
-            base.add_trait(key, traits.Any)
-            undefined_traits[key] = Undefined
-        base.trait_set(trait_change_notify=False, **undefined_traits)
-        return base
+        return add_traits(base, self._fields)
 
     def _list_outputs(self):
-        #manual mandatory inputs check
+        # manual mandatory inputs check
         if self._fields and self._mandatory_inputs:
             for key in self._fields:
                 value = getattr(self.inputs, key)
                 if not isdefined(value):
                     msg = "%s requires a value for input '%s' because it was listed in 'fields'. \
                     You can turn off mandatory inputs checking by passing mandatory_inputs = False to the constructor." % \
-                    (self.__class__.__name__, key)
+                        (self.__class__.__name__, key)
                     raise ValueError(msg)
 
         outputs = self._outputs().get()
@@ -98,8 +99,9 @@ class IdentityInterface(IOBase):
 
 class MergeInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
     axis = traits.Enum('vstack', 'hstack', usedefault=True,
-                desc='direction in which to merge, hstack requires same number of elements in each input')
+                       desc='direction in which to merge, hstack requires same number of elements in each input')
     no_flatten = traits.Bool(False, usedefault=True, desc='append to outlist instead of extending in vstack mode')
+
 
 class MergeOutputSpec(TraitedSpec):
     out = traits.List(desc='Merged output')
@@ -188,7 +190,7 @@ class Rename(IOBase):
     >>> rename1.inputs.in_file = "zstat1.nii.gz"
     >>> rename1.inputs.format_string = "Faces-Scenes.nii.gz"
     >>> res = rename1.run()          # doctest: +SKIP
-    >>> print res.outputs.out_file   # doctest: +SKIP
+    >>> res.outputs.out_file         # doctest: +SKIP
     'Faces-Scenes.nii.gz"            # doctest: +SKIP
 
     >>> rename2 = Rename(format_string="%(subject_id)s_func_run%(run)02d")
@@ -197,7 +199,7 @@ class Rename(IOBase):
     >>> rename2.inputs.subject_id = "subj_201"
     >>> rename2.inputs.run = 2
     >>> res = rename2.run()          # doctest: +SKIP
-    >>> print res.outputs.out_file   # doctest: +SKIP
+    >>> res.outputs.out_file         # doctest: +SKIP
     'subj_201_func_run02.nii'        # doctest: +SKIP
 
     >>> rename3 = Rename(format_string="%(subject_id)s_%(seq)s_run%(run)02d.nii")
@@ -206,7 +208,7 @@ class Rename(IOBase):
     >>> rename3.inputs.subject_id = "subj_201"
     >>> rename3.inputs.run = 2
     >>> res = rename3.run()          # doctest: +SKIP
-    >>> print res.outputs.out_file   # doctest: +SKIP
+    >>> res.outputs.out_file         # doctest: +SKIP
     'subj_201_epi_run02.nii'         # doctest: +SKIP
 
     """
@@ -258,9 +260,9 @@ class Rename(IOBase):
 
 class SplitInputSpec(BaseInterfaceInputSpec):
     inlist = traits.List(traits.Any, mandatory=True,
-                  desc='list of values to split')
+                         desc='list of values to split')
     splits = traits.List(traits.Int, mandatory=True,
-                  desc='Number of outputs in each split - should add to number of inputs')
+                         desc='Number of outputs in each split - should add to number of inputs')
     squeeze = traits.Bool(False, usedefault=True,
                           desc='unfold one-element splits removing the list')
 
@@ -310,9 +312,9 @@ class Split(IOBase):
 
 class SelectInputSpec(BaseInterfaceInputSpec):
     inlist = InputMultiPath(traits.Any, mandatory=True,
-                  desc='list of values to choose from')
+                            desc='list of values to choose from')
     index = InputMultiPath(traits.Int, mandatory=True,
-                  desc='0-based indices of values to choose')
+                           desc='0-based indices of values to choose')
 
 
 class SelectOutputSpec(TraitedSpec):
@@ -398,11 +400,11 @@ class Function(IOBase):
                 try:
                     self.inputs.function_str = getsource(function)
                 except IOError:
-                    raise Exception('Interface Function does not accept ' \
-                                    'function objects defined interactively ' \
+                    raise Exception('Interface Function does not accept '
+                                    'function objects defined interactively '
                                     'in a python session')
-            elif isinstance(function, six.string_types):
-                self.inputs.function_str = dumps(function)
+            elif isinstance(function, string_types):
+                self.inputs.function_str = function
             else:
                 raise Exception('Unknown type of function')
         self.inputs.on_trait_change(self._set_function_string,
@@ -419,8 +421,8 @@ class Function(IOBase):
         if name == 'function_str':
             if hasattr(new, '__call__'):
                 function_source = getsource(new)
-            elif isinstance(new, six.string_types):
-                function_source = dumps(new)
+            elif isinstance(new, string_types):
+                function_source = new
             self.inputs.trait_set(trait_change_notify=False,
                                   **{'%s' % name: function_source})
 
@@ -433,16 +435,71 @@ class Function(IOBase):
         return base
 
     def _run_interface(self, runtime):
+        # Get workflow logger for runtime profile error reporting
+        from nipype import logging
+        logger = logging.getLogger('workflow')
+
+        # Create function handle
         function_handle = create_function_from_source(self.inputs.function_str,
                                                       self.imports)
 
+        # Wrapper for running function handle in multiprocessing.Process
+        # Can catch exceptions and report output via multiprocessing.Queue
+        def _function_handle_wrapper(queue, **kwargs):
+            try:
+                out = function_handle(**kwargs)
+                queue.put(out)
+            except Exception as exc:
+                queue.put(exc)
+
+        # Get function args
         args = {}
         for name in self._input_names:
             value = getattr(self.inputs, name)
             if isdefined(value):
                 args[name] = value
 
-        out = function_handle(**args)
+        # Runtime profiler on if dependecies available
+        try:
+            import psutil
+            from nipype.interfaces.base import get_max_resources_used
+            import multiprocessing
+            runtime_profile = True
+        except ImportError as exc:
+            logger.info('Unable to import packages needed for runtime profiling. '\
+                        'Turning off runtime profiler. Reason: %s' % exc)
+            runtime_profile = False
+
+        # Profile resources if set
+        #runtime_profile=False
+        if runtime_profile:
+            # Init communication queue and proc objs
+            queue = multiprocessing.Queue()
+            proc = multiprocessing.Process(target=_function_handle_wrapper,
+                                           args=(queue,), kwargs=args)
+
+            # Init memory and threads before profiling
+            mem_mb = 0
+            num_threads = 0
+
+            # Start process and profile while it's alive
+            proc.start()
+            while proc.is_alive():
+                mem_mb, num_threads = \
+                    get_max_resources_used(proc.pid, mem_mb, num_threads,
+                                           pyfunc=True)
+
+            # Get result from process queue
+            out = queue.get()
+            # If it is an exception, raise it
+            if isinstance(out, Exception):
+                raise out
+
+            # Function ran successfully, populate runtime stats
+            setattr(runtime, 'runtime_memory_gb', mem_mb/1024.0)
+            setattr(runtime, 'runtime_threads', num_threads)
+        else:
+            out = function_handle(**args)
 
         if len(self._output_names) == 1:
             self._out[self._output_names[0]] = out

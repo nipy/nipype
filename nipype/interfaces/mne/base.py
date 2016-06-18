@@ -1,44 +1,44 @@
-from nipype.interfaces.base import (traits, File, Directory, TraitedSpec,
-                                    OutputMultiPath)
+
 import os.path as op
 import glob
-from nipype.interfaces.freesurfer.base import FSCommand, FSTraitedSpec
-from nipype.utils.filemanip import list_to_filename
-from nipype.external import six
 import logging
-
 logging.basicConfig()
 iflogger = logging.getLogger('interface')
+
+from ..base import (traits, File, Directory, TraitedSpec, OutputMultiPath)
+from ..freesurfer.base import FSCommand, FSTraitedSpec
+from ...external.six import string_types
+from ...utils.filemanip import list_to_filename
 
 
 class WatershedBEMInputSpec(FSTraitedSpec):
     subject_id = traits.Str(argstr='--subject %s', mandatory=True,
-                           desc='Subject ID (must have a complete Freesurfer directory)')
+                            desc='Subject ID (must have a complete Freesurfer directory)')
     subjects_dir = Directory(exists=True, mandatory=True, usedefault=True,
-                           desc='Path to Freesurfer subjects directory')
+                             desc='Path to Freesurfer subjects directory')
     volume = traits.Enum('T1', 'aparc+aseg', 'aseg', 'brain', 'orig', 'brainmask', 'ribbon',
-                           argstr='--volume %s', usedefault=True,
-                           desc='The volume from the "mri" directory to use (defaults to T1)')
+                         argstr='--volume %s', usedefault=True,
+                         desc='The volume from the "mri" directory to use (defaults to T1)')
     overwrite = traits.Bool(True, usedefault=True, argstr='--overwrite',
                             desc='Overwrites the existing files')
     atlas_mode = traits.Bool(argstr='--atlas',
-                            desc='Use atlas mode for registration (default: no rigid alignment)')
+                             desc='Use atlas mode for registration (default: no rigid alignment)')
 
 
 class WatershedBEMOutputSpec(TraitedSpec):
     mesh_files = OutputMultiPath(File(exists=True),
-                           desc=('Paths to the output meshes (brain, inner '
-                                 'skull, outer skull, outer skin)'))
+                                 desc=('Paths to the output meshes (brain, inner '
+                                       'skull, outer skull, outer skin)'))
     brain_surface = File(exists=True, loc='bem/watershed',
-                           desc='Brain surface (in Freesurfer format)')
+                         desc='Brain surface (in Freesurfer format)')
     inner_skull_surface = File(exists=True, loc='bem/watershed',
-                           desc='Inner skull surface (in Freesurfer format)')
+                               desc='Inner skull surface (in Freesurfer format)')
     outer_skull_surface = File(exists=True, loc='bem/watershed',
-                           desc='Outer skull surface (in Freesurfer format)')
+                               desc='Outer skull surface (in Freesurfer format)')
     outer_skin_surface = File(exists=True, loc='bem/watershed',
-                           desc='Outer skin surface (in Freesurfer format)')
+                              desc='Outer skin surface (in Freesurfer format)')
     fif_file = File(exists=True, loc='bem', altkey='fif',
-                           desc='"fif" format file for EEG processing in MNE')
+                    desc='"fif" format file for EEG processing in MNE')
     cor_files = OutputMultiPath(File(exists=True), loc='bem/watershed/ws',
                                 altkey='COR', desc='"COR" format files')
 
@@ -79,7 +79,7 @@ class WatershedBEM(FSCommand):
         subject_path = op.join(subjects_dir, self.inputs.subject_id)
         output_traits = self._outputs()
         mesh_paths = []
-        for k in outputs.keys():
+        for k in list(outputs.keys()):
             if k != 'mesh_files':
                 val = self._get_files(subject_path, k,
                                       output_traits.traits()[k].loc,
@@ -90,7 +90,7 @@ class WatershedBEM(FSCommand):
                         out_files = []
                         for value in value_list:
                             out_files.append(op.abspath(value))
-                    elif isinstance(value_list, six.string_types):
+                    elif isinstance(value_list, string_types):
                         out_files = op.abspath(value_list)
                     else:
                         raise TypeError

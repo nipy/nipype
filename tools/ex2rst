@@ -137,7 +137,7 @@ def exfile2rst(filename):
                 s += '\n'
 
             proc_line = auto_image(proc_line)
-            
+
             if proc_line:
                 s += proc_line.rstrip() + '\n'
 
@@ -182,7 +182,7 @@ def exfile2rstfile(filename, opts):
     if opts.sourceref:
         # write post example see also box
         msg = """
-        
+
 .. admonition:: Example source code
 
    You can download :download:`the full source code of this example <%s>`.

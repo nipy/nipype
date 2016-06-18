@@ -1,0 +1,1 @@
+local_generate_classes.py --python_paths=/scratch/johnsonhj/src/NEP-11/NIPYPE --program_paths=/scratch/johnsonhj/src/NEP-11/bin:/usr/local/bin:/opt/ogs/bin/darwin-x64:/bin:/sbin:/usr/local/bin:/usr/bin:/usr/sbin:/usr/texbin:/Shared/sinapse/sharedopt/20120722/Darwin_i386/vv/bin:/usr/texbin:/scratch/johnsonhj/bin --output_path=/scratch/johnsonhj/src/NEP-11/BRAINSTools/AutoWorkup

@@ -49,7 +49,7 @@ the simplistic example below, where startnode is a node belonging to
 workflow 'mywork.'
 
 .. testcode::
-   
+
    for s in subjects:
        startnode.inputs.subject_id = s
        mywork.run()
@@ -58,7 +58,7 @@ The pipeline engine provides a convenience function that simplifies
 this:
 
 .. testcode::
-   
+
    startnode.iterables = ('subject_id', subjects)
    mywork.run()
 
@@ -75,7 +75,7 @@ different kernels (0 mm and 6 mm FWHM). Again the common approach
 would be:
 
 .. testcode::
-   
+
    for s in subjects:
        startnode.inputs.subject_id = s
        uptosmoothingworkflow.run()
@@ -88,7 +88,7 @@ Instead of having multiple ``for`` loops at various stages, you can set up
 another set of iterables for the smoothnode.
 
 .. testcode::
-   
+
    startnode.iterables = ('subject_id', subjects)
    smoothnode.iterables = ('fwhm', [0, 6])
    mywork.run()

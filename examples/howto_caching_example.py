@@ -31,21 +31,18 @@ mem = Memory('.')
 
 # Apply an arbitrary (and pointless, here) threshold to the files)
 threshold = [mem.cache(fsl.Threshold)(in_file=f, thresh=i)
-                        for i, f in enumerate(in_files)]
+             for i, f in enumerate(in_files)]
 
 # Merge all these files along the time dimension
 out_merge = mem.cache(fsl.Merge)(dimension="t",
-                            in_files=[t.outputs.out_file for t in threshold],
-                        )
+                                 in_files=[t.outputs.out_file for t in threshold],
+                                 )
 # And finally compute the mean
 out_mean = mem.cache(fsl.MeanImage)(in_file=out_merge.outputs.merged_file)
 
 # To avoid having increasing disk size we can keep only what was touched
 # in this run
-#mem.clear_previous_runs()
+# mem.clear_previous_runs()
 
 # or what wasn't used since the start of 2011
-#mem.clear_runs_since(year=2011)
-
-
-
+# mem.clear_runs_since(year=2011)

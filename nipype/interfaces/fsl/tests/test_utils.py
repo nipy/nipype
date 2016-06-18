@@ -11,33 +11,15 @@ import nibabel as nb
 from nipype.testing import (assert_equal, assert_not_equal,
                             assert_raises, skipif)
 import nipype.interfaces.fsl.utils as fsl
-from nipype.interfaces.fsl import no_fsl
+from nipype.interfaces.fsl import no_fsl, Info
 
-
-def create_files_in_directory():
-    outdir = mkdtemp()
-    cwd = os.getcwd()
-    os.chdir(outdir)
-    filelist = ['a.nii', 'b.nii']
-    for f in filelist:
-        hdr = nb.Nifti1Header()
-        shape = (3, 3, 3, 4)
-        hdr.set_data_shape(shape)
-        img = np.random.random(shape)
-        nb.save(nb.Nifti1Image(img, np.eye(4), hdr),
-                os.path.join(outdir, f))
-    return filelist, outdir, cwd
-
-
-def clean_directory(outdir, old_wd):
-    if os.path.exists(outdir):
-        rmtree(outdir)
-    os.chdir(old_wd)
+from .test_maths import (set_output_type, create_files_in_directory,
+                         clean_directory)
 
 
 @skipif(no_fsl)
 def test_fslroi():
-    filelist, outdir, cwd = create_files_in_directory()
+    filelist, outdir, cwd, _ = create_files_in_directory()
 
     roi = fsl.ExtractROI()
 
@@ -71,7 +53,7 @@ def test_fslroi():
 
 @skipif(no_fsl)
 def test_fslmerge():
-    filelist, outdir, cwd = create_files_in_directory()
+    filelist, outdir, cwd, _ = create_files_in_directory()
 
     merger = fsl.Merge()
 
@@ -107,9 +89,11 @@ def test_fslmerge():
     # Fslmerge class doesn't have a filled opt_map{}
 
 # test fslmath
+
+
 @skipif(no_fsl)
 def test_fslmaths():
-    filelist, outdir, cwd = create_files_in_directory()
+    filelist, outdir, cwd, _ = create_files_in_directory()
     math = fsl.ImageMaths()
 
     # make sure command gets called
@@ -139,7 +123,7 @@ def test_fslmaths():
 
 @skipif(no_fsl)
 def test_overlay():
-    filelist, outdir, cwd = create_files_in_directory()
+    filelist, outdir, cwd, _ = create_files_in_directory()
     overlay = fsl.Overlay()
 
     # make sure command gets called
@@ -173,7 +157,7 @@ def test_overlay():
 
 @skipif(no_fsl)
 def test_slicer():
-    filelist, outdir, cwd = create_files_in_directory()
+    filelist, outdir, cwd, _ = create_files_in_directory()
     slicer = fsl.Slicer()
 
     # make sure command gets called
@@ -213,7 +197,7 @@ def create_parfiles():
 
 @skipif(no_fsl)
 def test_plottimeseries():
-    filelist, outdir, cwd = create_files_in_directory()
+    filelist, outdir, cwd, _ = create_files_in_directory()
     parfiles = create_parfiles()
     plotter = fsl.PlotTimeSeries()
 
@@ -246,7 +230,7 @@ def test_plottimeseries():
 
 @skipif(no_fsl)
 def test_plotmotionparams():
-    filelist, outdir, cwd = create_files_in_directory()
+    filelist, outdir, cwd, _ = create_files_in_directory()
     parfiles = create_parfiles()
     plotter = fsl.PlotMotionParams()
 
@@ -278,7 +262,7 @@ def test_plotmotionparams():
 
 @skipif(no_fsl)
 def test_convertxfm():
-    filelist, outdir, cwd = create_files_in_directory()
+    filelist, outdir, cwd, _ = create_files_in_directory()
     cvt = fsl.ConvertXFM()
 
     # make sure command gets called
@@ -304,8 +288,9 @@ def test_convertxfm():
 
 
 @skipif(no_fsl)
-def test_swapdims():
-    files, testdir, origdir = create_files_in_directory()
+def test_swapdims(fsl_output_type=None):
+    prev_type = set_output_type(fsl_output_type)
+    files, testdir, origdir, out_ext = create_files_in_directory()
     swap = fsl.SwapDimensions()
 
     # Test the underlying command
@@ -320,7 +305,7 @@ def test_swapdims():
     # Now test a basic command line
     swap.inputs.in_file = files[0]
     swap.inputs.new_dims = ("x", "y", "z")
-    yield assert_equal, swap.cmdline, "fslswapdim a.nii x y z %s" % os.path.realpath(os.path.join(testdir, "a_newdims.nii"))
+    yield assert_equal, swap.cmdline, "fslswapdim a.nii x y z %s" % os.path.realpath(os.path.join(testdir, "a_newdims%s" % out_ext))
 
     # Test that we can set an output name
     swap.inputs.out_file = "b.nii"
@@ -328,3 +313,4 @@ def test_swapdims():
 
     # Clean up
     clean_directory(testdir, origdir)
+    set_output_type(prev_type)

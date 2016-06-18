@@ -7,11 +7,12 @@
 from .registration import ANTS, Registration
 
 # Resampling Programs
-from .resampling import ApplyTransforms, ApplyTransformsToPoints, WarpImageMultiTransform, WarpTimeSeriesImageMultiTransform
-
+from .resampling import (ApplyTransforms, ApplyTransformsToPoints, WarpImageMultiTransform,
+                         WarpTimeSeriesImageMultiTransform)
 
 # Segmentation Programs
-from .segmentation import Atropos, LaplacianThickness, N4BiasFieldCorrection, JointFusion
+from .segmentation import (Atropos, LaplacianThickness, N4BiasFieldCorrection, JointFusion, CorticalThickness,
+                           BrainExtraction, DenoiseImage, AntsJointFusion)
 
 # Visualization Programs
 from .visualization import ConvertScalarImageToRGB, CreateTiledMosaic

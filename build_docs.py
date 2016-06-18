@@ -8,6 +8,8 @@ To use this code, run::
     python setup.py build_sphinx
 """
 
+from __future__ import print_function
+
 # Standard library imports
 import sys
 import os
@@ -27,6 +29,8 @@ DOC_DOCTREES_DIR = os.path.join('doc', '_build', 'doctrees')
 
 ################################################################################
 # Distutils Command class for installing nipype to a temporary location.
+
+
 class TempInstall(Command):
     temp_install_dir = os.path.join('build', 'install')
 
@@ -34,16 +38,16 @@ class TempInstall(Command):
         """ build and install nipype in a temporary location. """
         install = self.distribution.get_command_obj('install')
         install.install_scripts = self.temp_install_dir
-        install.install_base    = self.temp_install_dir
+        install.install_base = self.temp_install_dir
         install.install_platlib = self.temp_install_dir
         install.install_purelib = self.temp_install_dir
-        install.install_data    = self.temp_install_dir
-        install.install_lib     = self.temp_install_dir
+        install.install_data = self.temp_install_dir
+        install.install_lib = self.temp_install_dir
         install.install_headers = self.temp_install_dir
         install.run()
 
         # Horrible trick to reload nipype with our temporary instal
-        for key in sys.modules.keys():
+        for key in list(sys.modules.keys()):
             if key.startswith('nipype'):
                 sys.modules.pop(key, None)
         sys.path.append(os.path.abspath(self.temp_install_dir))
@@ -62,12 +66,11 @@ class TempInstall(Command):
 # Distutils Command class for API generation
 class APIDocs(TempInstall):
     description = \
-    """generate API docs """
+        """generate API docs """
 
     user_options = [
         ('None', None, 'this command has no options'),
-        ]
-
+    ]
 
     def run(self):
         # First build the project and install it to a temporary location.
@@ -131,7 +134,7 @@ else:
 
         def zip_docs(self):
             if not os.path.exists(DOC_BUILD_DIR):
-                raise OSError, 'Doc directory does not exist.'
+                raise OSError('Doc directory does not exist.')
             target_file = os.path.join('doc', 'documentation.zip')
             # ZIP_DEFLATED actually compresses the archive. However, there
             # will be a RuntimeError if zlib is not installed, so we check
@@ -139,21 +142,20 @@ else:
             # require zlib.
             try:
                 zf = zipfile.ZipFile(target_file, 'w',
-                                            compression=zipfile.ZIP_DEFLATED)
+                                     compression=zipfile.ZIP_DEFLATED)
             except RuntimeError:
                 warnings.warn('zlib not installed, storing the docs '
-                                'without compression')
+                              'without compression')
                 zf = zipfile.ZipFile(target_file, 'w',
-                                            compression=zipfile.ZIP_STORED)
+                                     compression=zipfile.ZIP_STORED)
 
             for root, dirs, files in os.walk(DOC_BUILD_DIR):
                 relative = relative_path(root)
                 if not relative.startswith('.doctrees'):
                     for f in files:
                         zf.write(os.path.join(root, f),
-                                os.path.join(relative, 'html_docs', f))
+                                 os.path.join(relative, 'html_docs', f))
             zf.close()
-
 
         def finalize_options(self):
             """ Override the default for the documentation build
@@ -164,23 +166,25 @@ else:
 
 ################################################################################
 # Distutils Command class to clean
+
+
 class Clean(clean):
 
     def run(self):
         clean.run(self)
         api_path = os.path.join('doc', 'api', 'generated')
         if os.path.exists(api_path):
-            print "Removing %s" % api_path
+            print("Removing %s" % api_path)
             shutil.rmtree(api_path)
         interface_path = os.path.join('doc', 'interfaces', 'generated')
         if os.path.exists(interface_path):
-            print "Removing %s" % interface_path
+            print("Removing %s" % interface_path)
             shutil.rmtree(interface_path)
         if os.path.exists(DOC_BUILD_DIR):
-            print "Removing %s" % DOC_BUILD_DIR
+            print("Removing %s" % DOC_BUILD_DIR)
             shutil.rmtree(DOC_BUILD_DIR)
         if os.path.exists(DOC_DOCTREES_DIR):
-            print "Removing %s" % DOC_DOCTREES_DIR
+            print("Removing %s" % DOC_DOCTREES_DIR)
             shutil.rmtree(DOC_DOCTREES_DIR)
 
 
@@ -189,5 +193,3 @@ cmdclass = {'build_sphinx': MyBuildDoc,
             'api_docs': APIDocs,
             'clean': Clean,
             }
-
-

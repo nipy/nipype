@@ -7,11 +7,9 @@ import os
 from shutil import rmtree
 from tempfile import mkdtemp
 
-from nipype.testing import (assert_equal, assert_raises,
-                            assert_almost_equal, example_data)
+from nipype.testing import (example_data)
 
 import numpy as np
-import nibabel as nb
 
 
 def test_overlap():
@@ -25,6 +23,7 @@ def test_overlap():
     in1 = example_data('segmentation0.nii.gz')
     in2 = example_data('segmentation1.nii.gz')
 
+    cwd = os.getcwd()
     os.chdir(tempdir)
     overlap = Overlap()
     overlap.inputs.volume1 = in1
@@ -48,4 +47,5 @@ def test_overlap():
     yield (check_close, res.outputs.roi_voldiff,
            np.array([0.0063086, -0.0025506, 0.0]))
 
+    os.chdir(cwd)
     rmtree(tempdir)

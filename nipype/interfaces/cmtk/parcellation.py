@@ -9,25 +9,27 @@
 
 """
 
-from nipype.interfaces.base import (
-    BaseInterface, BaseInterfaceInputSpec, traits,
-    File, TraitedSpec, Directory, isdefined)
+from builtins import range
+
 import os
 import os.path as op
+import shutil
+import warnings
+
 import numpy as np
 import nibabel as nb
 import networkx as nx
-import shutil
-from nipype.utils.misc import package_check
-import warnings
 
+from ..base import (BaseInterface, BaseInterfaceInputSpec, traits,
+                    File, TraitedSpec, Directory, isdefined)
+from ...utils.misc import package_check
 from ... import logging
 iflogger = logging.getLogger('interface')
 
 have_cmp = True
 try:
     package_check('cmp')
-except Exception, e:
+except Exception as e:
     have_cmp = False
 else:
     import cmp
@@ -154,7 +156,7 @@ def create_annot_label(subject_id, subjects_dir, fs_dir, parcellation_name):
     shutil.copy(op.join(
         output_dir, 'regenerated_lh_60', 'lh.corpuscallosum.label'), lhco)
 
-    mri_cmd = """mri_label2vol --label "%s" --label "%s" --label "%s" --label "%s" --temp "%s" --o  "%s" --identity """ % (rhun, lhun, rhco, lhco, op.join(op.join(subjects_dir, subject_id), 'mri', 'orig.mgz'), op.join(fs_label_dir, 'cc_unknown.nii.gz') )
+    mri_cmd = """mri_label2vol --label "%s" --label "%s" --label "%s" --label "%s" --temp "%s" --o  "%s" --identity """ % (rhun, lhun, rhco, lhco, op.join(op.join(subjects_dir, subject_id), 'mri', 'orig.mgz'), op.join(fs_label_dir, 'cc_unknown.nii.gz'))
     runCmd(mri_cmd, log)
     runCmd('mris_volmask %s' % subject_id, log)
     mri_cmd = 'mri_convert -i "%s/mri/ribbon.mgz" -o "%s/mri/ribbon.nii.gz"' % (op.join(subjects_dir, subject_id), op.join(subjects_dir, subject_id))
@@ -261,17 +263,17 @@ def create_roi(subject_id, subjects_dir, fs_dir, parcellation_name, dilation):
         out_roi = op.abspath('ROI_%s.nii.gz' % parcellation_name)
 
         # update the header
-        hdr = aseg.get_header()
+        hdr = aseg.header
         hdr2 = hdr.copy()
         hdr2.set_data_dtype(np.uint16)
 
         log.info("Save output image to %s" % out_roi)
-        img = nb.Nifti1Image(rois, aseg.get_affine(), hdr2)
+        img = nb.Nifti1Image(rois, aseg.affine, hdr2)
         nb.save(img, out_roi)
 
     iflogger.info("[ DONE ]")
     # dilate cortical regions
-    if (dilation == True):
+    if dilation is True:
         iflogger.info("Dilating cortical regions...")
         # loop throughout all the voxels belonging to the aseg GM volume
         for j in range(xx.size):
@@ -292,7 +294,7 @@ def create_roi(subject_id, subjects_dir, fs_dir, parcellation_name, dilation):
         # store volume eg in ROIv_scale33.nii.gz
         out_roi = op.abspath('ROIv_%s.nii.gz' % parcellation_name)
         iflogger.info("Save output image to %s" % out_roi)
-        img = nb.Nifti1Image(rois, aseg.get_affine(), hdr2)
+        img = nb.Nifti1Image(rois, aseg.affine, hdr2)
         nb.save(img, out_roi)
 
         iflogger.info("[ DONE ]")
@@ -346,34 +348,34 @@ def create_wm_mask(subject_id, subjects_dir, fs_dir, parcellation_name):
     # lateral ventricles, thalamus proper and caudate
     # the latter two removed for better erosion, but put back afterwards
     idx = np.where((asegd == 4) |
-                  (asegd == 43) |
-                  (asegd == 11) |
-                  (asegd == 50) |
-                  (asegd == 31) |
-                  (asegd == 63) |
-                  (asegd == 10) |
-                  (asegd == 49))
+                   (asegd == 43) |
+                   (asegd == 11) |
+                   (asegd == 50) |
+                   (asegd == 31) |
+                   (asegd == 63) |
+                   (asegd == 10) |
+                   (asegd == 49))
     csfA[idx] = 1
     csfA = imerode(imerode(csfA, se1), se)
 
     # thalmus proper and cuadate are put back because they are not lateral ventricles
     idx = np.where((asegd == 11) |
-                  (asegd == 50) |
-                  (asegd == 10) |
-                  (asegd == 49))
+                   (asegd == 50) |
+                   (asegd == 10) |
+                   (asegd == 49))
     csfA[idx] = 0
 
     # REST CSF, IE 3RD AND 4TH VENTRICULE AND EXTRACEREBRAL CSF
     idx = np.where((asegd == 5) |
-                  (asegd == 14) |
-                  (asegd == 15) |
-                  (asegd == 24) |
-                  (asegd == 44) |
-                  (asegd == 72) |
-                  (asegd == 75) |
-                  (asegd == 76) |
-                  (asegd == 213) |
-                  (asegd == 221))
+                   (asegd == 14) |
+                   (asegd == 15) |
+                   (asegd == 24) |
+                   (asegd == 44) |
+                   (asegd == 72) |
+                   (asegd == 75) |
+                   (asegd == 76) |
+                   (asegd == 213) |
+                   (asegd == 221))
     # 43 ??, 4??  213?, 221?
     # more to discuss.
     for i in [5, 14, 15, 24, 44, 72, 75, 76, 213, 221]:
@@ -435,12 +437,12 @@ def create_wm_mask(subject_id, subjects_dir, fs_dir, parcellation_name):
 
     # output white matter mask. crop and move it afterwards
     wm_out = op.join(fs_dir, 'mri', 'fsmask_1mm.nii.gz')
-    img = nb.Nifti1Image(wmmask, fsmask.get_affine(), fsmask.get_header())
+    img = nb.Nifti1Image(wmmask, fsmask.affine, fsmask.header)
     iflogger.info("Save white matter mask: %s" % wm_out)
     nb.save(img, wm_out)
 
 
-def crop_and_move_datasets(subject_id, subjects_dir, fs_dir, parcellation_name, out_roi_file,dilation):
+def crop_and_move_datasets(subject_id, subjects_dir, fs_dir, parcellation_name, out_roi_file, dilation):
     fs_dir = op.join(subjects_dir, subject_id)
     cmp_config = cmp.configuration.PipelineConfiguration()
     cmp_config.parcellation_scheme = "Lausanne2008"
@@ -460,10 +462,10 @@ def crop_and_move_datasets(subject_id, subjects_dir, fs_dir, parcellation_name, 
     ]
 
     ds.append((op.abspath('ROI_%s.nii.gz' % parcellation_name),
-              op.abspath('ROI_HR_th.nii.gz')))
-    if(dilation==True):
-    	ds.append((op.abspath('ROIv_%s.nii.gz' % parcellation_name),
-            op.abspath('ROIv_HR_th.nii.gz')))
+               op.abspath('ROI_HR_th.nii.gz')))
+    if dilation is True:
+        ds.append((op.abspath('ROIv_%s.nii.gz' % parcellation_name),
+                   op.abspath('ROIv_HR_th.nii.gz')))
     orig = op.join(fs_dir, 'mri', 'orig', '001.mgz')
     for d in ds:
         iflogger.info("Processing %s:" % d[0])
@@ -529,15 +531,15 @@ class ParcellateOutputSpec(TraitedSpec):
     white_matter_mask_file = File(exists=True, desc='White matter mask file')
     cc_unknown_file = File(
         desc='Image file with regions labelled as unknown cortical structures',
-                    exists=True)
+        exists=True)
     ribbon_file = File(desc='Image file detailing the cortical ribbon',
-                    exists=True)
+                       exists=True)
     aseg_file = File(
         desc='Automated segmentation file converted from Freesurfer "subjects" directory',
-                    exists=True)
+        exists=True)
     roi_file_in_structural_space = File(
         desc='ROI image resliced to the dimensions of the original structural image',
-                    exists=True)
+        exists=True)
     dilated_roi_file_in_structural_space = File(
         desc='dilated ROI image resliced to the dimensions of the original structural image')
 
@@ -576,7 +578,7 @@ class Parcellate(BaseInterface):
         create_annot_label(self.inputs.subject_id, self.inputs.subjects_dir, self.inputs.freesurfer_dir, self.inputs.parcellation_name)
         create_roi(self.inputs.subject_id, self.inputs.subjects_dir, self.inputs.freesurfer_dir, self.inputs.parcellation_name, self.inputs.dilation)
         create_wm_mask(self.inputs.subject_id, self.inputs.subjects_dir, self.inputs.freesurfer_dir, self.inputs.parcellation_name)
-        crop_and_move_datasets(self.inputs.subject_id, self.inputs.subjects_dir, self.inputs.freesurfer_dir, self.inputs.parcellation_name, self.inputs.out_roi_file,self.inputs.dilation)
+        crop_and_move_datasets(self.inputs.subject_id, self.inputs.subjects_dir, self.inputs.freesurfer_dir, self.inputs.parcellation_name, self.inputs.out_roi_file, self.inputs.dilation)
         return runtime
 
     def _list_outputs(self):
@@ -586,18 +588,18 @@ class Parcellate(BaseInterface):
         else:
             outputs['roi_file'] = op.abspath(
                 self._gen_outfilename('nii.gz', 'ROI'))
-        if(self.inputs.dilation==True):
+        if self.inputs.dilation is True:
             outputs['roiv_file'] = op.abspath(self._gen_outfilename(
-            'nii.gz', 'ROIv'))
+                'nii.gz', 'ROIv'))
         outputs['white_matter_mask_file'] = op.abspath('fsmask_1mm.nii.gz')
         outputs['cc_unknown_file'] = op.abspath('cc_unknown.nii.gz')
         outputs['ribbon_file'] = op.abspath('ribbon.nii.gz')
         outputs['aseg_file'] = op.abspath('aseg.nii.gz')
         outputs['roi_file_in_structural_space'] = op.abspath(
             'ROI_HR_th.nii.gz')
-        if(self.inputs.dilation==True):
+        if self.inputs.dilation is True:
             outputs['dilated_roi_file_in_structural_space'] = op.abspath(
-            'ROIv_HR_th.nii.gz')
+                'ROIv_HR_th.nii.gz')
         return outputs
 
     def _gen_outfilename(self, ext, prefix='ROI'):

@@ -1,3 +1,4 @@
+from builtins import object
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 
@@ -6,7 +7,7 @@ import os
 import sys
 try:
     from ..external.cloghandler import ConcurrentRotatingFileHandler as \
-    RFHandler
+        RFHandler
 except ImportError:
     # Next 2 lines are optional:  issue a warning to the user
     from warnings import warn
@@ -15,17 +16,19 @@ except ImportError:
 from .misc import str2bool
 from .config import NipypeConfig
 
+
 class Logging(object):
     """Nipype logging class
     """
     fmt = ('%(asctime)s,%(msecs)d %(name)-2s '
            '%(levelname)-2s:\n\t %(message)s')
     datefmt = '%y%m%d-%H:%M:%S'
+
     def __init__(self, config):
         self._config = config
         logging.basicConfig(format=self.fmt, datefmt=self.datefmt,
                             stream=sys.stdout)
-        #logging.basicConfig(stream=sys.stdout)
+        # logging.basicConfig(stream=sys.stdout)
         self._logger = logging.getLogger('workflow')
         self._fmlogger = logging.getLogger('filemanip')
         self._iflogger = logging.getLogger('interface')
@@ -84,16 +87,23 @@ class Logging(object):
 
         typical use -- log difference for hashed_inputs
         """
+        # First check inputs, since they usually are lists of tuples
+        # and dicts are required.
+        if isinstance(dnew, list):
+            dnew = dict(dnew)
+        if isinstance(dold, list):
+            dold = dict(dold)
+
         # Compare against hashed_inputs
         # Keys: should rarely differ
         new_keys = set(dnew.keys())
         old_keys = set(dold.keys())
         if len(new_keys - old_keys):
             self._logger.debug("%s not previously seen: %s"
-                         % (prefix, new_keys - old_keys))
+                               % (prefix, new_keys - old_keys))
         if len(old_keys - new_keys):
             self._logger.debug("%s not presently seen: %s"
-                         % (prefix, old_keys - new_keys))
+                               % (prefix, old_keys - new_keys))
 
         # Values in common keys would differ quite often,
         # so we need to join the messages together
@@ -108,11 +118,11 @@ class Logging(object):
                     # tuples, we might need to cast them into the same type
                     # as the last resort.  And lets try to be more generic
                     same = old.__class__(new) == old
-            except Exception, e:
+            except Exception as e:
                 same = False
             if not same:
                 msgs += ["%s: %r != %r"
                          % (k, dnew[k], dold[k])]
         if len(msgs):
             self._logger.debug("%s values differ in fields: %s" % (prefix,
-                                                             ", ".join(msgs)))
+                                                                   ", ".join(msgs)))

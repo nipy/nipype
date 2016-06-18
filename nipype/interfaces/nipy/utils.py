@@ -15,7 +15,7 @@ from ...utils.misc import package_check
 have_nipy = True
 try:
     package_check('nipy')
-except Exception, e:
+except Exception as e:
     have_nipy = False
 else:
     from nipy.algorithms.registration.histogram_registration import HistogramRegistration
@@ -31,8 +31,8 @@ class SimilarityInputSpec(BaseInterfaceInputSpec):
     mask1 = File(exists=True, desc="3D volume")
     mask2 = File(exists=True, desc="3D volume")
     metric = traits.Either(traits.Enum('cc', 'cr', 'crl1', 'mi', 'nmi', 'slr'),
-                          traits.Callable(),
-                         desc="""str or callable
+                           traits.Callable(),
+                           desc="""str or callable
 Cost-function for assessing image similarity. If a string,
 one of 'cc': correlation coefficient, 'cr': correlation
 ratio, 'crl1': L1-norm based correlation ratio, 'mi': mutual
@@ -71,9 +71,9 @@ class Similarity(BaseInterface):
 
     def __init__(self, **inputs):
         warnings.warn(("This interface is deprecated since 0.10.0."
-                      " Please use nipype.algorithms.metrics.Similarity"),
+                       " Please use nipype.algorithms.metrics.Similarity"),
                       DeprecationWarning)
-        super(Similarity,self).__init__(**inputs)
+        super(Similarity, self).__init__(**inputs)
 
     def _run_interface(self, runtime):
 
@@ -90,11 +90,11 @@ class Similarity(BaseInterface):
         else:
             mask2 = None
 
-        histreg = HistogramRegistration(from_img = vol1_nii,
-                                        to_img = vol2_nii,
+        histreg = HistogramRegistration(from_img=vol1_nii,
+                                        to_img=vol2_nii,
                                         similarity=self.inputs.metric,
-                                        from_mask = mask1,
-                                        to_mask = mask2)
+                                        from_mask=mask1,
+                                        to_mask=mask2)
         self._similarity = histreg.eval(Affine())
 
         return runtime

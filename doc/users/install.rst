@@ -9,10 +9,9 @@ This page covers the necessary steps to install Nipype.
 Download
 --------
 
-Release 0.10.0: [`zip <https://github.com/nipy/nipype/archive/0.10.0.zip>`__ `tar.gz
-<https://github.com/nipy/nipype/archive/0.10.0.tar.gz>`__]
+Current release: `<https://github.com/nipy/nipype/releases/latest>`_.
 
-Development: [`zip <http://github.com/nipy/nipype/zipball/master>`__ `tar.gz
+Development version: [`zip <http://github.com/nipy/nipype/zipball/master>`__ `tar.gz
 <http://github.com/nipy/nipype/tarball/master>`__]
 
 `Prior downloads <http://github.com/nipy/nipype/tags>`_
@@ -21,13 +20,18 @@ To check out the latest development version::
 
         git clone git://github.com/nipy/nipype.git
 
+or::
+
+        git clone https://github.com/nipy/nipype.git
+
+Check out the list of nipype's `current dependencies <https://github.com/shoshber/nipype/blob/master/nipype/info.py#L105>`_.
+
 Install
 -------
 
 The installation process is similar to other Python packages.
 
-If you already have a Python environment setup that has the dependencies listed
-below, you can do::
+If you already have a Python environment set up, you can do::
 
 	easy_install nipype
 
@@ -46,9 +50,8 @@ Mac OS X
 ~~~~~~~~
 
 The easiest way to get nipype running on Mac OS X is to install Anaconda_ or
-Canopy_ and then add nibabel and nipype by executing::
+Canopy_ and then add nipype by executing::
 
-	easy_install nibabel
 	easy_install nipype
 
 From source
@@ -58,7 +61,7 @@ If you downloaded the source distribution named something
 like ``nipype-x.y.tar.gz``, then unpack the tarball, change into the
 ``nipype-x.y`` directory and install nipype using::
 
-    python setup.py install
+    pip install -e .
 
 **Note:** Depending on permissions you may need to use ``sudo``.
 
@@ -72,8 +75,18 @@ nose_ installed, then do the following::
 
 you can also test with nosetests::
 
-    nosetests --with-doctest /software/nipy-repo/masternipype/nipype
-    --exclude=external --exclude=testing
+    nosetests --with-doctest <installation filepath>/nipype  --exclude=external --exclude=testing
+
+or::
+
+    nosetests --with-doctest nipype
+
+A successful test run should complete in a few minutes and end with
+something like::
+
+    Ran 13053 tests in 126.618s
+
+    OK (SKIP=66)
 
 All tests should pass (unless you're missing a dependency). If SUBJECTS_DIR
 variable is not set some FreeSurfer related tests will fail. If any tests
@@ -85,9 +98,9 @@ tests::
 
        export MATLABCMD=$pathtomatlabdir/bin/$platform/MATLAB
 
-where, $pathtomatlabdir is the path to your matlab installation and
-$platform is the directory referring to x86 or x64 installations
-(typically glnxa64 on 64-bit installations).
+where ``$pathtomatlabdir`` is the path to your matlab installation and
+``$platform`` is the directory referring to x86 or x64 installations
+(typically ``glnxa64`` on 64-bit installations).
 
 Avoiding any MATLAB calls from testing
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -98,36 +111,8 @@ On unix systems, set an empty environment variable::
 
 This will skip any tests that require matlab.
 
-Dependencies
+Recommended Software
 ------------
-
-Below is a list of required dependencies, along with additional software
-recommendations.
-
-Must Have
-~~~~~~~~~
-
-Python_ 2.7
-
-Nibabel_ 1.0 - 1.4
-  Neuroimaging file i/o library
-
-NetworkX_ 1.0 - 1.8
-  Python package for working with complex networks.
-
-NumPy_ 1.3 - 1.7
-
-SciPy_ 0.7 - 0.12
-  Numpy and Scipy are high-level, optimized scientific computing libraries.
-
-Enthought_ Traits_ 4.0.0 - 4.3.0
-
-Dateutil 1.5 -
-
-.. note::
-
-    Full distributions such as Anaconda_ or Canopy_ provide the above packages,
-    except Nibabel_.
 
 Strong Recommendations
 ~~~~~~~~~~~~~~~~~~~~~~
@@ -140,18 +125,22 @@ Matplotlib_ 1.0 - 1.2
   Plotting library
 
 `RDFLib <http://rdflib.readthedocs.org/en/latest/>`_ 4.1
-RDFLibrary required for provenance export as RDF
+  RDFLibrary required for provenance export as RDF
 
 Sphinx_ 1.1
   Required for building the documentation
 
 `Graphviz <http://www.graphviz.org/>`_
-  Required for building the documentation
+  Required for building the documentation. The python wrapper package (``graphviz``)
+  and the program itself both need to be installed.
 
 Interface Dependencies
 ~~~~~~~~~~~~~~~~~~~~~~
 
-These are the software packages that nipype.interfaces wraps:
+You might not need some of the following packages, depending on what exactly you
+want to use nipype for. If you do need any of them, install nipype's wrapper package
+(``nipype.interfaces``), then install the programs separately onto your computer, just
+like you would install any other app.
 
 FSL_
   4.1.0 or later
@@ -160,10 +149,10 @@ matlab_
   2008a or later
 
 SPM_
-  SPM5/8
+  SPM5 or later
 
 FreeSurfer_
-  FreeSurfer version 4 and higher
+  FreeSurfer v4.0.0 or later
 
 AFNI_
   2009_12_31_1431 or later

@@ -1,2 +1,1 @@
-from nipype.caching.memory import Memory
-
+from .memory import Memory

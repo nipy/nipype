@@ -41,7 +41,7 @@ The code to achieve this is as follows:
 
 This example assumes that interface "A" has one output *subject*,
 interface "B" has two inputs *subject* and *in_file* and one output
-*out_file*, interface "C" has one input *in_file* and one output 
+*out_file*, interface "C" has one input *in_file* and one output
 *out_file*, and interface D has one list input *in_files*. The
 *images* variable is a list of three input image file names.
 

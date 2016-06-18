@@ -5,9 +5,9 @@ The Function Interface
 ======================
 
 Most Nipype interfaces provide access to external programs, such as FSL
-binaries or SPM routines. However, a special interface, 
+binaries or SPM routines. However, a special interface,
 :class:`nipype.interfaces.utility.Function`,
-allows you to wrap arbitrary Python code in the Interface framework and 
+allows you to wrap arbitrary Python code in the Interface framework and
 seamlessly integrate it into your workflows.
 
 A Simple Function Interface
@@ -43,7 +43,7 @@ interface::
     add_two_interface.inputs.val = 2
     res = add_two_interface.run()
     print res.outputs.out_val
-    
+
 Which would print ``4``.
 
 Note that, if you are working interactively, the Function interface is
@@ -54,12 +54,12 @@ Using External Packages
 -----------------------
 
 Chances are, you will want to write functions that do more complicated
-processing, particularly using the growing stack of Python packages 
+processing, particularly using the growing stack of Python packages
 geared towards neuroimaging, such as Nibabel_, Nipy_, or PyMVPA_.
 
 While this is completely possible (and, indeed, an intended use of the
 Function interface), it does come with one important constraint. The
-function code you write is executed in a standalone environment, 
+function code you write is executed in a standalone environment,
 which means that any external functions or classes you use have to
 be imported within the function itself::
 
@@ -79,7 +79,7 @@ import all external definitions inside the function body.
 Hello World - Function interface in a workflow
 ----------------------------------------------
 
-Contributed by: Hänel Nikolaus Valentin 
+Contributed by: Hänel Nikolaus Valentin
 
 The following snippet of code demonstrates the use of the function interface in
 the context of a workflow. Note the use of ``import os`` within the function as
@@ -133,7 +133,7 @@ Advanced Use
 To use an existing function object (as we have been doing so far) with a Function
 interface, it must be passed to the constructor. However, it is also possible
 to dynamically set how a Function interface will process its inputs using the
-special ``function_str`` input. 
+special ``function_str`` input.
 
 This input takes not a function object, but actually a single string that can
 be parsed to define a function. In the equivalent case to our example above,
@@ -146,6 +146,6 @@ the string would be
 Unlike when using a function object, this input can be set like any other,
 meaning that you could write a function that outputs different function
 strings depending on some run-time contingencies, and connect that output
-the the ``function_str`` input of a downstream Function interface. 
+the the ``function_str`` input of a downstream Function interface.
 
 .. include:: ../links_names.txt

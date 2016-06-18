@@ -4,7 +4,7 @@
  Set up your fork
 ==================
 
-First you follow the instructions for :ref:`forking`. 
+First you follow the instructions for :ref:`forking`.
 
 Overview
 ========
