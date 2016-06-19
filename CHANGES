@@ -1,4 +1,4 @@
-Release 0.12.0-rc1 (April 20, 2016)
+Release 0.12.0-rc2 (June 19, 2016)
 ============
 
 * ENH: Adds `fslmaths -Tstd` to maths interfaces (https://github.com/nipy/nipype/pull/1518)
