@@ -69,4 +69,4 @@ deploy:
     tags: true
     repo: nipy/nipype
     branch: master
-  distributions: "sdist bdist_wheel"
+  distributions: "sdist"
