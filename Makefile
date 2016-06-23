@@ -70,8 +70,6 @@ html:
 	make -C doc clean htmlonly
 
 specs:
-	@echo "Setting up developer mode"
-	python setup.py develop
 	@echo "Checking specs and autogenerating spec tests"
 	python tools/checkspecs.py
 
