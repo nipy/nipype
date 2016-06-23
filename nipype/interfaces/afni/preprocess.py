@@ -24,7 +24,7 @@ from ...utils.filemanip import (load_json, save_json, split_filename)
 class BlurToFWHMInputSpec(AFNICommandInputSpec):
     in_file = File(desc='The dataset that will be smoothed', argstr='-input %s', mandatory=True, exists=True)
 
-    automask = traits.Bool(desc='Create an automask from the input dataset.', argstr='-automask', exists=True)
+    automask = traits.Bool(desc='Create an automask from the input dataset.', argstr='-automask')
     fwhm = traits.Float(desc='Blur until the 3D FWHM reaches this value (in mm)', argstr='-FWHM %f')
     fwhmxy = traits.Float(desc='Blur until the 2D (x,y)-plane FWHM reaches this value (in mm)', argstr='-FWHMxy %f')
     blurmaster = File(desc='The dataset whose smoothness controls the process.', argstr='-blurmaster %s', exists=True)
