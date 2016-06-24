@@ -1571,7 +1571,7 @@ class FIRST(FSLCommand):
         path, outname, ext = split_filename(self.inputs.out_file)
 
         method = 'none'
-        if isdefined(self.inputs.method) and self.inputs.method == 'fast':
+        if isdefined(self.inputs.method) and self.inputs.method != 'none':
             method = 'fast'
 
         if isdefined(self.inputs.method_as_numerical_threshold):
