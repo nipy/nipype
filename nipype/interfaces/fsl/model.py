@@ -1134,7 +1134,7 @@ class L2Model(BaseInterface):
     def _run_interface(self, runtime):
         cwd = os.getcwd()
         mat_txt = ['/NumWaves   1',
-                   '/NumPoints  {}'.format(self.inputs.num_copes),
+                   '/NumPoints  {:d}'.format(self.inputs.num_copes),
                    '/PPheights  1',
                    '',
                    '/Matrix']
@@ -1154,7 +1154,7 @@ class L2Model(BaseInterface):
         con_txt = '\n'.join(con_txt)
 
         grp_txt = ['/NumWaves   1',
-                   '/NumPoints  {}'.format(self.inputs.num_copes),
+                   '/NumPoints  {:d}'.format(self.inputs.num_copes),
                    '',
                    '/Matrix']
         for i in range(self.inputs.num_copes):
