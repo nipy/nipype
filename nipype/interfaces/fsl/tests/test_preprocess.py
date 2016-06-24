@@ -579,3 +579,8 @@ def test_first_genfname():
     value = first._gen_fname(name='original_segmentations')
     expected_value = os.path.abspath('segment_all_none_origsegs.nii.gz')
     yield assert_equal, value, expected_value
+    first.inputs.method = 'auto'
+    first.inputs.list_of_specific_structures = ['L_Hipp', 'R_Hipp']
+    value = first._gen_fname(name='original_segmentations')
+    expected_value = os.path.abspath('segment_all_none_origsegs.nii.gz')
+    yield assert_equal, value, expected_value

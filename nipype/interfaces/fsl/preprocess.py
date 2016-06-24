@@ -1573,6 +1573,9 @@ class FIRST(FSLCommand):
         method = 'none'
         if isdefined(self.inputs.method) and self.inputs.method != 'none':
             method = 'fast'
+            if self.inputs.list_of_specific_structures and \
+                self.inputs.method == 'auto':
+                method = 'none'
 
         if isdefined(self.inputs.method_as_numerical_threshold):
             thres = '%.4f' % self.inputs.method_as_numerical_threshold
