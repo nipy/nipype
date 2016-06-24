@@ -564,3 +564,8 @@ def test_fugue():
         yield assert_equal, op.basename(res.outputs.unwarped_file), out_name
 
     teardown_fugue(tmpdir)
+
+
+@skipif(no_fsl)
+def test_first_genfname:
+    
