@@ -13,6 +13,7 @@
 * Use a descriptive prefix for your PR: ENH (enhancement), FIX, TST, DOC, STY, REF (refactor), WIP (Work in progress)
 * The person who accepts/merges your PR will include an update to the CHANGES file: prefix: description (URL of pull request)
 * Run `make check-before-commit` before submitting the PR.
+  This will require you to either install or be in developer mode with: `python setup.py install/develop`.
 * In general, do not catch exceptions without good reason. 
   * catching non-fatal exceptions. 
     Log the exception as a warning.
