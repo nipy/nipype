@@ -1,6 +1,8 @@
 Release 0.12.0-rc2 (June 19, 2016)
 ============
 
+* ENH: New interface for Bruker to Nifti converter (https://github.com/nipy/nipype/pull/1523)
+* FIX: output file naming for FIRST outputs (https://github.com/nipy/nipype/pull/1524)
 * ENH: Adds `fslmaths -Tstd` to maths interfaces (https://github.com/nipy/nipype/pull/1518)
 * FIX: Selecting "gamma" in FSL Level1Design now does what the name says (https://github.com/nipy/nipype/pull/1500)
 * ENH: Added grad_dev input to fsl.dti.bedpostx5 interface(https://github.com/nipy/nipype/pull/1493)
