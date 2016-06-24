@@ -1146,7 +1146,7 @@ class L2Model(BaseInterface):
                    '/NumWaves   1',
                    '/NumContrasts   1',
                    '/PPheights  1',
-                   '/RequiredEffect     100.0',  # XX where does this
+                   '/RequiredEffect     100',  # XX where does this
                    # number come from
                    '',
                    '/Matrix',
