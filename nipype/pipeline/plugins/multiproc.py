@@ -219,9 +219,9 @@ class MultiProcPlugin(DistributedPluginBase):
         jobids = sorted(jobids,
                         key=lambda item: (self.procs[item]._interface.estimated_memory_gb,
                                           self.procs[item]._interface.num_threads))
-
-        logger.debug('Free memory (GB): %d, Free processors: %d',
-                     free_memory_gb, free_processors)
+        if len(jobids) > 0:
+            logger.debug('Free memory (GB): %d, Free processors: %d',
+                         free_memory_gb, free_processors)
 
         # While have enough memory and processors for first job
         # Submit first job on the list
