@@ -220,6 +220,10 @@ class Dcm2niixInputSpec(CommandLineInputSpec):
                               desc="Convert only one image (filename as last input")
     verbose = traits.Bool(False, argstr='-v', usedefault=True,
                           desc="Verbose output")
+    crop = traits.Bool(False, argstr='-x', usedefault=True,
+                       desc="Crop 3D T1 acquisitions")
+    has_private = traits.Bool(False, argstr='-t', usedefault=True,
+                              desc="Flag if text notes includes private patient details")
 
 
 class Dcm2niixOutputSpec(TraitedSpec):
@@ -240,7 +244,7 @@ class Dcm2niix(CommandLine):
     >>> converter.inputs.single_file = True
     >>> converter.inputs.output_dir = '.'
     >>> converter.cmdline
-    'dcm2niix -b y -z i -m n -f %t%p -o . -s y -v n functional_1.dcm'
+    'dcm2niix -b y -z i -m n -f %t%p -o . -s y -v n -x n -t n functional_1.dcm'
     """
 
     input_spec = Dcm2niixInputSpec
@@ -248,7 +252,8 @@ class Dcm2niix(CommandLine):
     _cmd = 'dcm2niix'
 
     def _format_arg(self, opt, spec, val):
-        if opt in ['bids_format', 'merge_imgs', 'single_file', 'verbose']:
+        if opt in ['bids_format', 'merge_imgs', 'single_file', 'verbose', 'crop',
+                   'has_private']:
             spec = deepcopy(spec)
             if val:
                 spec.argstr += ' y'
@@ -299,7 +304,7 @@ class Dcm2niix(CommandLine):
                 if out_file:
                     files.append(out_file + ".nii.gz")
                     if self.inputs.bids_format:
-                        bids.append(out_file + ".bids")
+                        bids.append(out_file + ".json")
                     continue
             skip = False
         # just return what was done
