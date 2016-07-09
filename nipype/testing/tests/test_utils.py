@@ -5,8 +5,10 @@
 
 import os
 import warnings
+import subprocess
+from mock import patch, MagicMock
 from nipype.testing.utils import TempFATFS
-from nose.tools import assert_true
+from nose.tools import assert_true, assert_raises
 
 
 def test_tempfatfs():
@@ -17,3 +19,25 @@ def test_tempfatfs():
     else:
         with fatfs as tmpdir:
             yield assert_true, os.path.exists(tmpdir)
+
+@patch('subprocess.check_call', MagicMock(
+    side_effect=subprocess.CalledProcessError('','')))
+def test_tempfatfs_calledprocesserror():
+    try:
+        TempFATFS()
+    except IOError as e:
+        assert_true(isinstance(e, IOError))
+        assert_true(isinstance(e.__cause__, subprocess.CalledProcessError))
+    else:
+        assert_true(False)
+
+@patch('subprocess.check_call', MagicMock())
+@patch('subprocess.Popen', MagicMock(side_effect=OSError()))
+def test_tempfatfs_oserror():
+    try:
+        TempFATFS()
+    except IOError as e:
+        assert_true(isinstance(e, IOError))
+        assert_true(isinstance(e.__cause__, OSError))
+    else:
+        assert_true(False)

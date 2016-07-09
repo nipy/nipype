@@ -5,6 +5,7 @@
 import os
 from sys import platform
 from builtins import object
+from future.utils import raise_from
 
 from ... import logging
 from ...utils.filemanip import split_filename
@@ -82,9 +83,9 @@ class Info(object):
 
         try:
             return cls.ftypes[outputtype]
-        except KeyError:
+        except KeyError as e:
             msg = 'Invalid AFNIOUTPUTTYPE: ', outputtype
-            raise KeyError(msg)
+            raise_from(KeyError(msg), e)
 
     @classmethod
     def outputtype(cls):
@@ -156,6 +157,10 @@ class AFNICommand(AFNICommandBase):
             self.inputs.outputtype = self._outputtype
         else:
             self._output_update()
+
+        # Update num threads estimate from OMP_NUM_THREADS env var
+        # Default to 1 if not set
+        os.environ['OMP_NUM_THREADS'] = str(self.num_threads)
 
     def _output_update(self):
         """ i think? updates class private attribute based on instance input

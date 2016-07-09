@@ -211,7 +211,7 @@ class DataSinkInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
     encrypt_bucket_keys = traits.Bool(desc='Flag indicating whether to use S3 '\
                                         'server-side AES-256 encryption')
     # Set this if user wishes to override the bucket with their own
-    bucket = traits.Str(desc='Boto3 S3 bucket for manual override of bucket')
+    bucket = traits.Any(desc='Boto3 S3 bucket for manual override of bucket')
     # Set this if user wishes to have local copy of files as well
     local_copy = traits.Str(desc='Copy files locally as well as to S3 bucket')
 
@@ -2458,8 +2458,8 @@ class JSONFileGrabber(IOBase):
     {'param1': 'overrideMe', 'param3': 1.0}
     >>> jsonSource.inputs.in_file = 'jsongrabber.txt'
     >>> res = jsonSource.run()
-    >>> pprint.pprint(res.outputs.get())  # doctest: +NORMALIZE_WHITESPACE
-    {'param1': 'exampleStr', 'param2': 4, 'param3': 1.0}
+    >>> pprint.pprint(res.outputs.get())  # doctest: +NORMALIZE_WHITESPACE, +ELLIPSIS
+    {'param1': ...'exampleStr', 'param2': 4, 'param3': 1.0}
 
 
     """

@@ -1,3 +1,9 @@
+# emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
+# vi: set ft=python sts=4 ts=4 sw=4 et:
+"""Testing module for functions and classes from multiproc.py
+"""
+
+# Import packages
 from builtins import range
 import os
 from tempfile import mkdtemp
@@ -15,9 +21,9 @@ def mytestFunction(insum=0):
 
     # need to import here since this is executed as an external process
     import multiprocessing
+    import os
     import tempfile
     import time
-    import os
 
     numberOfThreads = 2
 
@@ -74,17 +80,18 @@ def mytestFunction(insum=0):
 
     # read in all temp files and sum them up
     total = insum
-    for file in f:
-        with open(file) as fd:
+    for ff in f:
+        with open(ff) as fd:
             total += int(fd.read())
-        os.remove(file)
+        os.remove(ff)
 
     return total
 
 
 def run_multiproc_nondaemon_with_flag(nondaemon_flag):
     '''
-    Start a pipe with two nodes using the multiproc plugin and passing the nondaemon_flag.
+    Start a pipe with two nodes using the resource multiproc plugin and
+    passing the nondaemon_flag.
     '''
 
     cur_dir = os.getcwd()
@@ -107,7 +114,6 @@ def run_multiproc_nondaemon_with_flag(nondaemon_flag):
     f1.inputs.insum = 0
 
     pipe.config['execution']['stop_on_first_crash'] = True
-    pipe.config['execution']['poll_sleep_duration'] = 2
 
     # execute the pipe using the MultiProc plugin with 2 processes and the non_daemon flag
     # to enable child processes which start other multiprocessing jobs

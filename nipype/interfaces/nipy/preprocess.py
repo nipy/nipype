@@ -146,6 +146,11 @@ class FmriRealign4d(BaseInterface):
     output_spec = FmriRealign4dOutputSpec
     keywords = ['slice timing', 'motion correction']
 
+    def __init__(self, **inputs):
+        DeprecationWarning(('Will be deprecated in release 0.13. Please use'
+                            'SpaceTimeRealigner'))
+        BaseInterface.__init__(self, **inputs)
+
     def _run_interface(self, runtime):
         from nipy.algorithms.registration import FmriRealign4d as FR4d
         all_ims = [load_image(fname) for fname in self.inputs.in_file]

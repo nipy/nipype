@@ -13,6 +13,7 @@ import getpass
 import shutil
 from socket import gethostname
 import sys
+import uuid
 from time import strftime, sleep, time
 from traceback import format_exception, format_exc
 from warnings import warn
@@ -57,9 +58,10 @@ def report_crash(node, traceback=None, hostname=None):
                                      exc_traceback)
     timeofcrash = strftime('%Y%m%d-%H%M%S')
     login_name = getpass.getuser()
-    crashfile = 'crash-%s-%s-%s.pklz' % (timeofcrash,
-                                         login_name,
-                                         name)
+    crashfile = 'crash-%s-%s-%s-%s.pklz' % (timeofcrash,
+                                            login_name,
+                                            name,
+                                            str(uuid.uuid4()))
     crashdir = node.config['execution']['crashdump_dir']
     if crashdir is None:
         crashdir = os.getcwd()
@@ -235,6 +237,7 @@ class DistributedPluginBase(PluginBase):
         notrun = []
         while np.any(self.proc_done == False) | \
                 np.any(self.proc_pending == True):
+
             toappend = []
             # trigger callbacks for any pending results
             while self.pending_tasks:
@@ -265,9 +268,15 @@ class DistributedPluginBase(PluginBase):
                                             graph=graph)
             else:
                 logger.debug('Not submitting')
-            sleep(float(self._config['execution']['poll_sleep_duration']))
+            self._wait()
+
         self._remove_node_dirs()
         report_nodes_not_run(notrun)
+
+
+
+    def _wait(self):
+        sleep(float(self._config['execution']['poll_sleep_duration']))
 
     def _get_result(self, taskid):
         raise NotImplementedError
