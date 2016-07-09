@@ -304,5 +304,3 @@ class MultiProcPlugin(DistributedPluginBase):
                         self.pending_tasks.insert(0, (tid, jobid))
             else:
                 break
-
-        logger.debug('No jobs waiting to execute')
