@@ -238,6 +238,7 @@ class Dcm2niix(CommandLine):
 
     Examples
     ========
+
     >>> from nipype.interfaces.dcm2nii import Dcm2niix
     >>> converter = Dcm2niix()
     >>> converter.inputs.source_names = ['functional_1.dcm', 'functional_2.dcm']
