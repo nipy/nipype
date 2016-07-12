@@ -10,3 +10,4 @@ simplejson>=3.8.0
 prov>=1.4.0
 xvfbwrapper
 psutil
+funcsigs
