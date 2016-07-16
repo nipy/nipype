@@ -9,6 +9,29 @@ This page covers the necessary steps to install Nipype.
 Nipype for users
 ----------------
 
+Using conda
+~~~~~~~~~~~
+
+Installing nipype from the conda-forge channel can be achieved by adding conda-forge to your channels with::
+
+  conda config --add channels conda-forge
+
+
+Once the conda-forge channel has been enabled, nipype can be installed with::
+
+  conda install nipype
+
+
+It is possible to list all of the versions of nipype available on your platform with::
+
+  conda search nipype --channel conda-forge
+
+For more information, please see https://github.com/conda-forge/nipype-feedstock
+
+
+Using Pypi
+~~~~~~~~~~
+
 The installation process is similar to other Python packages.
 
 If you already have a Python environment set up, you can do::
