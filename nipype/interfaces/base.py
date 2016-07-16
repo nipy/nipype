@@ -1017,7 +1017,7 @@ class BaseInterface(Interface):
     def _duecredit_cite(self):
         """ Add the interface references to the duecredit citations
         """
-        for r in self._references:
+        for r in self.references_:
             r['path'] = self.__module__ # TODO: check if this is correct
             due.cite(**r, path=self.__module__)
 
