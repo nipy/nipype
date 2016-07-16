@@ -49,6 +49,7 @@ from ..utils.provenance import write_provenance
 from .. import config, logging, LooseVersion
 from .. import __version__
 from ..external.six import string_types, text_type
+from ..external.due import due
 
 nipype_version = LooseVersion(__version__)
 
