@@ -48,7 +48,7 @@ def create_event_dict(start_time, nodes_list):
         runtime_threads = node.get('runtime_threads', 0)
         runtime_memory_gb = node.get('runtime_memory_gb', 0.0)
 
-        # Init and format event-based nodes 
+        # Init and format event-based nodes
         node['estimated_threads'] =  estimated_threads
         node['estimated_memory_gb'] =  estimated_memory_gb
         node['runtime_threads'] =  runtime_threads
@@ -315,7 +315,7 @@ def draw_nodes(start, nodes_list, cores, minute_scale, space_between_minutes,
                 break
 
         # Get color for node object
-        color = random.choice(colors) 
+        color = random.choice(colors)
         if 'error' in node:
             color = 'red'
 
@@ -439,19 +439,19 @@ def generate_gantt_chart(logfile, cores, minute_scale=10,
     # import logging
     # import logging.handlers
     # from nipype.pipeline.plugins.callback_log import log_nodes_cb
-    
+
     # log_filename = 'callback.log'
     # logger = logging.getLogger('callback')
     # logger.setLevel(logging.DEBUG)
     # handler = logging.FileHandler(log_filename)
     # logger.addHandler(handler)
-    
+
     # #create workflow
     # workflow = ...
-    
-    # workflow.run(plugin='MultiProc',  
+
+    # workflow.run(plugin='MultiProc',
     #     plugin_args={'n_procs':8, 'memory':12, 'status_callback': log_nodes_cb})
-    
+
     # generate_gantt_chart('callback.log', 8)
     '''
 

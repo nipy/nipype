@@ -176,6 +176,10 @@ Nipy_
 Nitime_
   (optional)
 
+ANTS_
+
+MRtrix_ and MRtrix3_
+
 Camino_
 
 Camino2Trackvis_

@@ -58,6 +58,7 @@ DataGrabber stores its outputs in a field called outfiles.
   datasource1 = nio.DataGrabber()
   datasource1.inputs.base_directory = os.getcwd()
   datasource1.inputs.template = 'data/s1/f3.nii'
+  datasource1.inputs.sort_filelist = True
   results = datasource1.run()
 
 Or you can get at all uncompressed NIfTI files starting with the letter 'f' in
@@ -67,6 +68,7 @@ all directories starting with the letter 's'.
 
   datasource2.inputs.base_directory = '/mass'
   datasource2.inputs.template = 'data/s*/f*.nii'
+  datasource1.inputs.sort_filelist = True
 
 Two special inputs were used in these previous cases. The input `base_directory`
 indicates in which directory to search, while the input `template` indicates the
@@ -89,6 +91,7 @@ then used to set the template (see %d in the template).
   datasource3 = nio.DataGrabber(infields=['run'])
   datasource3.inputs.base_directory = os.getcwd()
   datasource3.inputs.template = 'data/s1/f%d.nii'
+  datasource1.inputs.sort_filelist = True
   datasource3.inputs.run = [3, 7]
 
 This will return files `basedir/data/s1/f3.nii` and `basedir/data/s1/f7.nii`. We
@@ -98,6 +101,7 @@ can take this a step further and pair subjects with runs.
 
   datasource4 = nio.DataGrabber(infields=['subject_id', 'run'])
   datasource4.inputs.template = 'data/%s/f%d.nii'
+  datasource1.inputs.sort_filelist = True
   datasource4.inputs.run = [3, 7]
   datasource4.inputs.subject_id = ['s1', 's3']
 
@@ -115,6 +119,7 @@ wish to retrieve all the functional runs and the structural image for the subjec
   datasource = nio.DataGrabber(infields=['subject_id'], outfields=['func', 'struct'])
   datasource.inputs.base_directory = 'data'
   datasource.inputs.template = '*'
+  datasource1.inputs.sort_filelist = True
   datasource.inputs.field_template = dict(func='%s/f%d.nii',
                                           struct='%s/struct.nii')
   datasource.inputs.template_args = dict(func=[['subject_id', [3,5,7,10]]],
