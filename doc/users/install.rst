@@ -6,38 +6,19 @@
 
 This page covers the necessary steps to install Nipype.
 
-Download
---------
-
-Current release: `<https://github.com/nipy/nipype/releases/latest>`_.
-
-Development version: [`zip <http://github.com/nipy/nipype/zipball/master>`__ `tar.gz
-<http://github.com/nipy/nipype/tarball/master>`__]
-
-`Prior downloads <http://github.com/nipy/nipype/tags>`_
-
-To check out the latest development version::
-
-        git clone git://github.com/nipy/nipype.git
-
-or::
-
-        git clone https://github.com/nipy/nipype.git
-
-Check out the list of nipype's `current dependencies <https://github.com/nipy/nipype/blob/master/requirements.txt>`_.
-
-Install
--------
+Nipype for users
+----------------
 
 The installation process is similar to other Python packages.
 
 If you already have a Python environment set up, you can do::
 
-	easy_install nipype
+  easy_install nipype
 
 or::
 
-	pip install nipype
+  pip install nipype
+
 
 Debian and Ubuntu
 ~~~~~~~~~~~~~~~~~
@@ -52,10 +33,18 @@ Mac OS X
 The easiest way to get nipype running on Mac OS X is to install Anaconda_ or
 Canopy_ and then add nipype by executing::
 
-	easy_install nipype
+  easy_install nipype
+
 
 From source
 ~~~~~~~~~~~
+
+The current release is found here: `<https://github.com/nipy/nipype/releases/latest>`_.
+
+The development version: [`zip <http://github.com/nipy/nipype/zipball/master>`__ `tar.gz
+<http://github.com/nipy/nipype/tarball/master>`__]
+
+For previous versions: `prior downloads <http://github.com/nipy/nipype/tags>`_
 
 If you downloaded the source distribution named something
 like ``nipype-x.y.tar.gz``, then unpack the tarball, change into the
@@ -65,6 +54,26 @@ like ``nipype-x.y.tar.gz``, then unpack the tarball, change into the
     python setup.py install
 
 **Note:** Depending on permissions you may need to use ``sudo``.
+
+
+Nipype for developers
+---------------------
+
+To check out the latest development version::
+
+        git clone git://github.com/nipy/nipype.git
+
+or::
+
+        git clone https://github.com/nipy/nipype.git
+
+After cloning::
+
+        python setup.py develop
+
+
+Check out the list of nipype's `current dependencies <https://github.com/nipy/nipype/blob/master/requirements.txt>`_.
+
 
 Testing the install
 -------------------
