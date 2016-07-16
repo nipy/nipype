@@ -36,6 +36,7 @@ def test_BEDPOSTX5_inputs():
     ),
     fudge=dict(argstr='-w %d',
     ),
+    grad_dev=dict(),
     gradnonlin=dict(argstr='-g',
     ),
     ignore_exception=dict(nohash=True,

@@ -314,11 +314,9 @@ class ApplyTOPUPInputSpec(FSLCommandInputSpec):
     encoding_file = File(exists=True, mandatory=True,
                          desc='name of text file with PE directions/times',
                          argstr='--datain=%s')
-    in_index = traits.List(traits.Int, argstr='--inindex=%s', sep=',',
-                           mandatory=True,
-                           desc=('comma separated list of indicies into '
-                                 '--datain of the input image (to be '
-                                 'corrected)'))
+    in_index = traits.List(
+        traits.Int, argstr='--inindex=%s', sep=',',
+        desc='comma separated list of indices corresponding to --datain')
     in_topup_fieldcoef = File(exists=True, argstr="--topup=%s", copyfile=False,
                               requires=['in_topup_movpar'],
                               desc=('topup file containing the field '
@@ -360,7 +358,6 @@ class ApplyTOPUP(FSLCommand):
     >>> applytopup = ApplyTOPUP()
     >>> applytopup.inputs.in_files = ["epi.nii", "epi_rev.nii"]
     >>> applytopup.inputs.encoding_file = "topup_encoding.txt"
-    >>> applytopup.inputs.in_index = [1,2]
     >>> applytopup.inputs.in_topup_fieldcoef = "topup_fieldcoef.nii.gz"
     >>> applytopup.inputs.in_topup_movpar = "topup_movpar.txt"
     >>> applytopup.inputs.output_type = "NIFTI_GZ"
@@ -373,6 +370,17 @@ class ApplyTOPUP(FSLCommand):
     _cmd = 'applytopup'
     input_spec = ApplyTOPUPInputSpec
     output_spec = ApplyTOPUPOutputSpec
+
+    def _parse_inputs(self, skip=None):
+        if skip is None:
+            skip = []
+
+        # If not defined, assume index are the first N entries in the
+        # parameters file, for N input images.
+        if not isdefined(self.inputs.in_index):
+            self.inputs.in_index = list(range(1, len(self.inputs.in_files) + 1))
+
+        return super(ApplyTOPUP, self)._parse_inputs(skip=skip)
 
     def _format_arg(self, name, spec, value):
         if name == 'in_topup_fieldcoef':
