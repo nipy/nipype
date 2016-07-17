@@ -39,6 +39,7 @@ RUN apt-get update && \
                        git \
                        xvfb \
                        bzip2 \
+                       unzip \
                        apt-utils \
                        gfortran \
                        fusefat \
@@ -73,21 +74,18 @@ RUN curl -sSL http://neuro.debian.net/lists/vivid.de-m.full | tee /etc/apt/sourc
     apt-get update && \
     apt-get install -y fsl-core afni
 
-RUN echo '#!/bin/bash' > /etc/profile.d/crn_neuro.sh && \
-    echo 'export ANTSPATH=/opt/ants' >> /etc/profile.d/crn_neuro.sh && \
-    echo 'export PATH=$ANTSPATH:$PATH' >> /etc/profile.d/crn_neuro.sh && \
-    echo 'source /etc/fsl/fsl.sh' >> /etc/profile.d/crn_neuro.sh && \
-    echo 'source /etc/afni/afni.sh' >> /etc/profile.d/crn_neuro.sh && \
-    echo 'export ANTSPATH=/opt/ants' >> /etc/bash.bashrc && \
-    echo 'export PATH=$ANTSPATH:$PATH' >> /etc/bash.bashrc && \
-    echo 'source /etc/fsl/fsl.sh' >> /etc/bash.bashrc && \
-    echo 'source /etc/afni/afni.sh' >> /etc/bash.bashrc
-
+RUN echo '#!/bin/bash' > /etc/profile.d/nipype.sh && \
+    echo 'export ANTSPATH=/opt/ants' >> /etc/profile.d/nipype.sh && \
+    echo 'export PATH=$ANTSPATH:$PATH' >> /etc/profile.d/nipype.sh && \
+    echo 'source /etc/fsl/fsl.sh' >> /etc/profile.d/nipype.sh && \
+    echo 'source /etc/afni/afni.sh' >> /etc/profile.d/nipype.sh
+    
 # Clear apt cache to reduce image size
 RUN rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 # Install Matlab: from the good old install_spm_mcr.sh of @chrisfilo
 WORKDIR /root
+
 RUN echo "destinationFolder=/root/mcr" > mcr_options.txt && \
     echo "agreeToLicense=yes" >> mcr_options.txt && \
     echo "outputFile=/tmp/matlabinstall_log" >> mcr_options.txt && \
@@ -97,13 +95,21 @@ RUN echo "destinationFolder=/root/mcr" > mcr_options.txt && \
          -o matlab_installer/installer.zip && \
     unzip matlab_installer/installer.zip -d matlab_installer/ && \
     matlab_installer/install -inputFile mcr_options.txt && \
-    rm -rf matlab_installer mcr_options.txt
+    rm -rf matlab_installer mcr_options.txt && \
+    echo 'export LD_LIBRARY_PATH=/root/mcr/v85/runtime/glnxa64:/root/mcr/v85/bin/glnxa64:/root/mcr/v85/sys/os/glnxa64:$LD_LIBRARY_PATH' >> /etc/profile.d/nipype.sh && \
+    echo 'export SPMMCRCMD="/root/spm12/run_spm12.sh /root/mcr/v85/ script"' >> /etc/profile.d/nipype.sh && \ 
+    echo 'export FORCE_SPMMCR=1' >> /etc/profile.d/nipype.sh
+
+ENV LD_LIBRARY_PATH "/root/mcr/v85/runtime/glnxa64:/root/mcr/v85/bin/glnxa64:/root/mcr/v85/sys/os/glnxa64:$LD_LIBRARY_PATH"
+ENV SPMMCRCMD "/root/spm12/run_spm12.sh /root/mcr/v85/ script"
+ENV FORCE_SPMMCR 1
 
 # Install SPM
 RUN curl -sSL http://www.fil.ion.ucl.ac.uk/spm/download/restricted/utopia/dev/spm12_r6472_Linux_R2015a.zip -o spm12.zip && \
     unzip spm12.zip && \
     rm -rf spm12.zip
 
+RUN echo "source /etc/profile.d/nipype.sh" >> /etc/bash.bashrc
 
 CMD ["/bin/bash"]
 
