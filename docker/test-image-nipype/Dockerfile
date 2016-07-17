@@ -37,8 +37,8 @@ WORKDIR /root
 RUN curl -sSLO https://repo.continuum.io/miniconda/Miniconda-latest-Linux-x86_64.sh && \
     /bin/bash Miniconda-latest-Linux-x86_64.sh -b -p /usr/local/miniconda && \
     rm Miniconda-latest-Linux-x86_64.sh && \
-    echo '#!/bin/bash' >> /etc/profile.d/anaconda.sh && \
-    echo 'export PATH=/usr/local/miniconda/bin:$PATH' >> /etc/profile.d/anaconda.sh
+    echo '#!/bin/bash' >> /etc/profile.d/nipype.sh && \
+    echo 'export PATH=/usr/local/miniconda/bin:$PATH' >> /etc/profile.d/nipype.sh
 
 ENV PATH /usr/local/miniconda/bin:$PATH
 
@@ -66,6 +66,5 @@ RUN conda create -y -n nipypetests-3.5 lockfile nipype python=3.5
 # RUN source activate nipypetests-2.7 && \
 #     pip install --upgrade pip && \
 
-
-
+RUN echo "source /etc/profile.d/nipype.sh" >> /etc/bash.bashrc
 CMD ["/bin/bash"]
