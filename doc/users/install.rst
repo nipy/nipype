@@ -24,7 +24,7 @@ or::
 
         git clone https://github.com/nipy/nipype.git
 
-Check out the list of nipype's `current dependencies <https://github.com/shoshber/nipype/blob/master/nipype/info.py#L105>`_.
+Check out the list of Nipype's `current dependencies <https://github.com/shoshber/nipype/blob/master/nipype/info.py#L105>`_.
 
 Install
 -------
@@ -49,17 +49,26 @@ manager.
 Mac OS X
 ~~~~~~~~
 
-The easiest way to get nipype running on Mac OS X is to install Anaconda_ or
-Canopy_ and then add nipype by executing::
+The easiest way to get Nipype running on Mac OS X is to install Anaconda_ or
+Canopy_ and then add Nipype by executing::
 
-	easy_install nipype
+	pip install nipype
+
+Anaconda
+~~~~~~~~
+
+Nipype packages for Python 2 and 3; for Windows, Mac OS X and Linux are available
+in Anaconda_ through conda-forge. You can install it using::
+
+	conda config --add channels conda-forge
+	conda install nipype
 
 From source
 ~~~~~~~~~~~
 
 If you downloaded the source distribution named something
 like ``nipype-x.y.tar.gz``, then unpack the tarball, change into the
-``nipype-x.y`` directory and install nipype using::
+``nipype-x.y`` directory and install Nipype using::
 
     pip install -e .
 
