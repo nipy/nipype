@@ -1018,7 +1018,8 @@ class BaseInterface(Interface):
         """ Add the interface references to the duecredit citations
         """
         for r in self.references_:
-            due.cite(**r, path=self.__module__)
+            r['path'] = self.__module__
+            due.cite(**r)
 
     def run(self, **inputs):
         """Execute this interface.
