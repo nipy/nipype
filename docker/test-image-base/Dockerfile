@@ -41,6 +41,7 @@ RUN apt-get update && \
                        bzip2 \
                        apt-utils \
                        gfortran \
+                       fusefat \
                        liblapack-dev \
                        libblas-dev \
                        libatlas-dev \
@@ -84,6 +85,25 @@ RUN echo '#!/bin/bash' > /etc/profile.d/crn_neuro.sh && \
 
 # Clear apt cache to reduce image size
 RUN rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+
+# Install Matlab: from the good old install_spm_mcr.sh of @chrisfilo
+WORKDIR /root
+RUN echo "destinationFolder=/root/mcr" > mcr_options.txt && \
+    echo "agreeToLicense=yes" >> mcr_options.txt && \
+    echo "outputFile=/tmp/matlabinstall_log" >> mcr_options.txt && \
+    echo "mode=silent" >> mcr_options.txt && \
+    mkdir -p matlab_installer && \
+    curl -sSL http://www.mathworks.com/supportfiles/downloads/R2015a/deployment_files/R2015a/installers/glnxa64/MCR_R2015a_glnxa64_installer.zip \
+         -o matlab_installer/installer.zip && \
+    unzip matlab_installer/installer.zip -d matlab_installer/ && \
+    matlab_installer/install -inputFile mcr_options.txt && \
+    rm -rf matlab_installer mcr_options.txt
+
+# Install SPM
+RUN curl -sSL http://www.fil.ion.ucl.ac.uk/spm/download/restricted/utopia/dev/spm12_r6472_Linux_R2015a.zip -o spm12.zip && \
+    unzip spm12.zip && \
+    rm -rf spm12.zip
+
 
 CMD ["/bin/bash"]
 

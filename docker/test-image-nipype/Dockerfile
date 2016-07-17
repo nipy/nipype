@@ -46,51 +46,25 @@ ENV PATH /usr/local/miniconda/bin:$PATH
 # > At the moment, setting "LANG=C" on a Linux system *fundamentally breaks Python 3*, and that's not OK.
 ENV LANG C.UTF-8
 
+# Add conda-forge channel in conda
+RUN conda config --add channels conda-forge
+
 # Create conda environment
-RUN conda create -y -n nipypetests-2.7 lockfile && \
+RUN conda create -y -n nipypetests-2.7 lockfile nipype && \
     echo '#!/bin/bash' >> /etc/profile.d/nipype.sh && \
     echo '#!/bin/bash' >> /etc/bashrc && \
     echo 'source activate nipypetests-2.7' >> /etc/profile.d/nipype.sh && \
     echo 'source activate nipypetests-2.7' >> /etc/bashrc
 
-# Install pip
-RUN source activate nipypetests-2.7 && \
-    pip install --upgrade pip && \
-    pip install nose && \
-    pip install numpy && \
-    pip install scipy && \
-    pip install pandas && \
-    pip install matplotlib && \
-    pip install xvfbwrapper && \
-    python -c "from matplotlib import font_manager"
+# Create conda environment
+RUN conda create -y -n nipypetests-3.4 lockfile nipype python=3.4 
 
 # Create conda environment
-RUN conda create -y -n nipypetests-3.4 lockfile python=3.4 
+RUN conda create -y -n nipypetests-3.5 lockfile nipype python=3.5
 
 # Install pip
-RUN source activate nipypetests-3.4 && \
-    pip install --upgrade pip && \
-    pip install nose && \
-    pip install numpy && \
-    pip install scipy && \
-    pip install pandas && \
-    pip install matplotlib && \
-    pip install xvfbwrapper && \
-    python -c "from matplotlib import font_manager"
-
-# Create conda environment
-RUN conda create -y -n nipypetests-3.5 lockfile python=3.5
-
-# Install pip
-RUN source activate nipypetests-3.5 && \
-    pip install --upgrade pip && \
-    pip install nose && \
-    pip install numpy && \
-    pip install scipy && \
-    pip install pandas && \
-    pip install matplotlib && \
-    pip install xvfbwrapper && \
-    python -c "from matplotlib import font_manager"
+# RUN source activate nipypetests-2.7 && \
+#     pip install --upgrade pip && \
 
 
 
