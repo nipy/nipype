@@ -31,5 +31,5 @@ test:
 #   artifacts:
 #     - "doc/_build/html"
 #     - "~/log.txt"
-    - "nosetests.xml"
-    - "coverage.xml"
+#    - "nosetests.xml"
+#    - "coverage.xml"
