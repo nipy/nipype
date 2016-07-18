@@ -26,8 +26,14 @@ test:
         timeout: 1600
     - docker run -i -v /etc/localtime:/etc/localtime:ro -v ~/scratch:/scratch -w /scratch nipype/testbench fmri_fsl_reuse Linear level1_workflow
     - docker run -i -v /etc/localtime:/etc/localtime:ro -v ~/scratch:/scratch -w /scratch nipype/testbench fmri_spm_nested Linear level1 l2pipeline
+    - docker run -i -v /etc/localtime:/etc/localtime:ro -v ~/scratch:/scratch -w /scratch --entrypoint="/usr/bin/run_nosetests.sh" nipype/testbench --xunit-file="/scratch/nose/${CIRCLE_PROJECT_REPONAME}.xml :
+        timeout: 2600
+  post:
+    - mkdir -p ${CIRCLE_TEST_REPORTS}/nose
+    - mv ~/scratch/nose/${CIRCLE_PROJECT_REPONAME}.xml ${CIRCLE_TEST_REPORTS}/nose/
 
-# general:
+general:
+  build_dir: "~/scratch"
 #   artifacts:
 #     - "doc/_build/html"
 #     - "~/log.txt"
