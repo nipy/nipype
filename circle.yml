@@ -12,7 +12,8 @@ dependencies:
   override:
     - if [[ -e ~/docker/image.tar ]]; then docker load -i ~/docker/image.tar; fi
     - docker info
-    - docker pull nipype/testnipypedata
+    - docker pull nipype/testnipypedata :
+        timeout: 1000
     - mkdir -p ~/docker; docker save nipype/testnipypedata > ~/docker/image.tar
     - docker build -t nipype/testbench .
 
