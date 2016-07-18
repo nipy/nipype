@@ -18,10 +18,18 @@ dependencies:
 test:
   override:
     - mkdir -p ${CIRCLE_TEST_REPORTS}/nose
+    # Start with shorter tests first, fail early.
+    - docker run -it nipype/testbench fmri_fsl_reuse Linear level1_workflow
+    - docker run -it nipype/testbench fmri_spm_nested Linear level1 l2pipeline
+    - docker run -it nipype/testbench fmri_fsl_feeds Linear l1pipeline
+    - docker run -it nipype/testbench test_spm Linear workflow3d workflow4d:
+      timeout: 1600
+    - docker run -it nipype/testbench fmri_spm_dartel Linear level1 l2pipeline:
+      timeout: 1600
 
-general:
-  artifacts:
-    - "doc/_build/html"
-    - "~/log.txt"
+# general:
+#   artifacts:
+#     - "doc/_build/html"
+#     - "~/log.txt"
     - "nosetests.xml"
     - "coverage.xml"
