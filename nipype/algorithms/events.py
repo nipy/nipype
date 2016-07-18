@@ -19,7 +19,6 @@ iflogger = logging.getLogger('interface')
 # Eventually, move the following inside the interface, or wrap in an import check
 import pandas as pd
 import sklearn.preprocessing as preproc
-from sklearn.linear_model import LinearRegression
 
 
 def alias(target, append=False):
@@ -96,15 +95,16 @@ class EventTransformer(object):
     @alias(pd.get_dummies, append=True)
     def factor(): pass
 
-    def orthogonalize(self, y_cols, x_cols):
-        y_cols, x_cols = self._select_cols(y_cols), listify(x_cols)
-        x = self.data[x_cols].values
+    def orthogonalize(self, y_cols, X_cols):
+        ''' Orthogonalize each of the variables in y_cols with respect to all
+        of the variables in x_cols.
+        '''
+        y_cols, X_cols = self._select_cols(y_cols), self._select_cols(X_cols)
+        X = self.data[X_cols].values
         y = self.data[y_cols].values
-        est = LinearRegression()
-        est.fit(x, y)
-        y -= est.predict(x)
-        if np.linalg.norm(y, 1) > np.exp(-32):
-            self.data[y_cols] = y
+        _aX = np.c_[np.ones(len(y)), X]
+        coefs, resids, rank, s = np.linalg.lstsq(_aX, y)
+        self.data[y_cols] = y - X.dot(coefs[1:])
 
     def formula(self, f, target=None, replace=False, *args, **kwargs):
         from patsy import dmatrix
@@ -314,7 +314,7 @@ class Transformation(object):
         self._validate()
 
     def _validate(self):
-        missing = set(transform['input'] - set(self.transformer.data.columns)):
+        missing = set(transform['input'] - set(self.transformer.data.columns))
         if missing:
             raise ValueError("Invalid column(s): %s" % missing)
 
