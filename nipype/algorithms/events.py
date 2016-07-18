@@ -130,7 +130,9 @@ class EventTransformer(object):
         self.data = func(self.data, *args, **kwargs)
 
     def _to_dense(self):
-
+        """ Convert the sparse [onset, duration, amplitude] representation
+        typical of event files to a dense matrix where each row represents
+        a fixed unit of time. """
         end = int((self.events['onset'] + self.events['duration']).max())
 
         targ_hz, orig_hz = self.target_hz, self.orig_hz
@@ -155,6 +157,11 @@ class EventTransformer(object):
         self.data.insert(0, 'onset', onsets)
 
     def resample(self, sampling_rate):
+        """
+        Resample the design matrix to the specified sampling rate. Primarily
+        useful for downsampling to match the TR, so as to export the design as
+        a n(TR) x n(conds) matrix.
+        """
         sampling_rate = np.round(sampling_rate * 1000)
         self.data.index = pd.to_datetime(self.data['onset'], unit='s')
         self.data = self.data.resample('%dL' % sampling_rate).mean()
@@ -296,6 +303,25 @@ class TransformEventsOutputSpec(TraitedSpec):
                                         "see :ref:`SpecifyModel` or SpecifyModel.__doc__ for details"))
 
 
+class Transformation(object):
+
+    def __init__(self, transformer, inputs, steps, outputs=None):
+
+        self.transformer = transformer
+        self.inputs = inputs
+        self.steps = steps
+        self.outputs = outputs
+        self._validate()
+
+    def _validate(self):
+        missing = set(transform['input'] - set(self.transformer.data.columns)):
+        if missing:
+            raise ValueError("Invalid column(s): %s" % missing)
+
+    def run(self):
+        pass
+
+
 class TransformEvents(BaseInterface):
 
     input_spec = TransformEventsInputSpec
@@ -313,11 +339,10 @@ class TransformEvents(BaseInterface):
     def _transform_events(self):
         events = self._get_event_data()
         self.transformer = EventTransformer(events)
-        print(self.transformer.data.shape)
+
         # Transformation application logic goes here later
         # ...
         self.transformer.resample(self.inputs.time_repetition)
-        print(self.transformer.data.shape)
 
     def _run_interface(self, runtime):
         self._transform_events()
