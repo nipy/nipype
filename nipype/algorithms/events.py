@@ -18,7 +18,6 @@ iflogger = logging.getLogger('interface')
 
 # Eventually, move the following inside the interface, or wrap in an import check
 import pandas as pd
-import sklearn.preprocessing as preproc
 
 
 def alias(target, append=False):
@@ -74,14 +73,8 @@ class EventTransformer(object):
             cols = [l for l in self.data.columns.tolist() for m in [patt.search(l)] if m]
         return cols
 
-    @alias(preproc.scale)
-    def standardize(): pass
-
     @alias(np.log)
     def log(): pass
-
-    @alias(preproc.binarize)
-    def binarize(): pass
 
     @alias(np.logical_or)
     def or_(): pass
@@ -94,6 +87,19 @@ class EventTransformer(object):
 
     @alias(pd.get_dummies, append=True)
     def factor(): pass
+
+    def standardize(self, cols, demean=True, rescale=True, copy=True):
+        cols = self._select_cols(cols)
+        X = self.data[cols]
+        self.data[cols] = (X - X.mean()) / np.std(X, 0)
+
+    def binarize(self, cols, threshold=0.0):
+        cols = self._select_cols(cols)
+        X = self.data[cols].values
+        above = X > threshold
+        X[above] = 1
+        X[~above] = 0
+        self.data[cols] = X
 
     def orthogonalize(self, y_cols, X_cols):
         ''' Orthogonalize each of the variables in y_cols with respect to all
