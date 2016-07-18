@@ -37,7 +37,6 @@ test:
     - mv ~/scratch/builddocs.log ~/docs/log.txt
 
 general:
-  build_dir: "~/scratch"
   artifacts:
     - "~/docs"
 #     - "doc/_build/html"
