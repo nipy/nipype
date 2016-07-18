@@ -32,10 +32,14 @@ test:
   post:
     - mkdir -p ${CIRCLE_TEST_REPORTS}/nose
     - mv ~/scratch/nose/${CIRCLE_PROJECT_REPONAME}.xml ${CIRCLE_TEST_REPORTS}/nose/
+    - mkdir -p ~/docs
+    - mv ~/scratch/nipype/doc/_build/html/* ~/docs/
+    - mv ~/scratch/builddocs.log ~/docs/log.txt
 
 general:
   build_dir: "~/scratch"
-#   artifacts:
+  artifacts:
+    - "~/docs"
 #     - "doc/_build/html"
 #     - "~/log.txt"
 #    - "nosetests.xml"
