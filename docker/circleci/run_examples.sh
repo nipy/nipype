@@ -3,4 +3,4 @@ for i in /etc/profile.d/*.sh; do
     source $i
 done
 source activate nipypetests-2.7
-python /root/src/nipype/tools/run_examples.py $@
+python /scratch/src/nipype/tools/run_examples.py $@

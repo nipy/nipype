@@ -19,6 +19,7 @@ dependencies:
 
 test:
   override:
+    - docker run -i -v /etc/localtime:/etc/localtime:ro -v ~/scratch:/scratch -w /scratch --entrypoint="/usr/bin/run_builddocs.sh" nipype/testbench
     - docker run -i -v /etc/localtime:/etc/localtime:ro -v ~/scratch:/scratch -w /scratch nipype/testbench test_spm Linear workflow3d workflow4d :
         timeout: 1600
     - docker run -i -v /etc/localtime:/etc/localtime:ro -v ~/scratch:/scratch -w /scratch nipype/testbench fmri_fsl_feeds Linear l1pipeline

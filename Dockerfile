@@ -38,7 +38,11 @@ RUN mkdir -p .nipype && \
     echo 'interface_level = DEBUG' >> .nipype/nipype.cfg && \
     echo 'filemanip_level = DEBUG' >> .nipype/nipype.cfg
 
-WORKDIR /root/src
+ADD docker/circleci/run_* /usr/bin/
+RUN chmod +x /usr/bin/run_*
+
+# Install this branch's code
+WORKDIR /scratch/src
 ADD . nipype/
 
 # Install the checked out version of nipype, check that requirements are
@@ -58,9 +62,6 @@ RUN cd nipype/ && \
     pip install -r requirements.txt && \
     pip install -e .
 
-WORKDIR /root/
-ADD docker/circleci/run_* /usr/bin/
-RUN chmod +x /usr/bin/run_*
 WORKDIR /scratch
 
 # RUN echo 'source /etc/profile.d/nipype_tests.sh' >> /etc/bash.bashrc
