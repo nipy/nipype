@@ -32,37 +32,49 @@ MAINTAINER Stanford Center for Reproducible Neuroscience <crn.poldracklab@gmail.
 # Preparations
 RUN ln -snf /bin/bash /bin/sh
 WORKDIR /root
+
+# Install graphviz to provide dot
+ARG DEBIAN_FRONTEND=noninteractive
+RUN apt-get update && \
+    apt-get install -y graphviz && \
+    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+
 RUN mkdir -p .nipype && \
     echo '[logging]' > .nipype/nipype.cfg && \
     echo 'workflow_level = DEBUG' >> .nipype/nipype.cfg && \
     echo 'interface_level = DEBUG' >> .nipype/nipype.cfg && \
     echo 'filemanip_level = DEBUG' >> .nipype/nipype.cfg
 
-ADD docker/circleci/run_* /usr/bin/
-RUN chmod +x /usr/bin/run_*
-
 # Install this branch's code
-WORKDIR /scratch/src
+WORKDIR /root/src
 ADD . nipype/
 
 # Install the checked out version of nipype, check that requirements are
 # installed and install it for each of the three environments.
+# Additionally, install matplotlib and sphinx to build documentation
 RUN cd nipype/ && \
     source activate nipypetests-2.7 && \
+    pip install matplotlib sphinx coverage && \
     pip install -r requirements.txt && \
     pip install -e .
 
 RUN cd nipype/ && \
     source activate nipypetests-3.4 && \
+    pip install matplotlib sphinx coverage && \
     pip install -r requirements.txt && \
     pip install -e .
 
 RUN cd nipype/ && \
     source activate nipypetests-3.5 && \
+    pip install matplotlib sphinx coverage && \
     pip install -r requirements.txt && \
     pip install -e .
 
 WORKDIR /scratch
+
+# Install entrypoints
+ADD docker/circleci/run_* /usr/bin/
+RUN chmod +x /usr/bin/run_*
 
 # RUN echo 'source /etc/profile.d/nipype_tests.sh' >> /etc/bash.bashrc
 ENTRYPOINT ["/usr/bin/run_examples.sh"]
