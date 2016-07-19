@@ -46,7 +46,6 @@ contributor: University of Iowa Department of Psychiatry, http:://www.psychiatry
     _outputs_filenames = {'outputVolume': 'outputVolume.nii'}
     _redirect_x = False
 
-
 class GenerateEdgeMapImageInputSpec(CommandLineInputSpec):
     inputMRVolumes = InputMultiPath(File(exists=True), desc="List of input structural MR volumes to create the maximum edgemap", argstr="--inputMRVolumes %s...")
     inputMask = File(desc="Input mask file name. If set, image histogram percentiles will be calculated within the mask", exists=True, argstr="--inputMask %s")
@@ -81,4 +80,34 @@ contributor: Ali Ghayoor
     output_spec = GenerateEdgeMapImageOutputSpec
     _cmd = " GenerateEdgeMapImage "
     _outputs_filenames = {'outputEdgeMap': 'outputEdgeMap', 'outputMaximumGradientImage': 'outputMaximumGradientImage'}
+    _redirect_x = False
+
+class GeneratePurePlugMaskInputSpec(CommandLineInputSpec):
+    inputImageModalities = InputMultiPath(File(exists=True), desc="List of input image file names to create pure plugs mask", argstr="--inputImageModalities %s...")
+    threshold = traits.Float(desc="threshold value to define class membership", argstr="--threshold %f")
+    numberOfSubSamples = InputMultiPath(traits.Int, desc="Number of continous index samples taken at each direction of lattice space for each plug volume", sep=",", argstr="--numberOfSubSamples %s")
+    outputMaskFile = traits.Either(traits.Bool, File(), hash_files=False, desc="Output binary mask file name", argstr="--outputMaskFile %s")
+
+
+class GeneratePurePlugMaskOutputSpec(TraitedSpec):
+    outputMaskFile = File(desc="(required) Output binary mask file name", exists=True)
+
+class GeneratePurePlugMask(SEMLikeCommandLine):
+
+    """title: GeneratePurePlugMask
+
+category: BRAINS.Utilities
+
+description: This program gets several modality image files and returns a binary mask that defines the pure plugs
+
+version: 1.0
+
+contributor: Ali Ghayoor
+
+"""
+
+    input_spec = GeneratePurePlugMaskInputSpec
+    output_spec = GeneratePurePlugMaskOutputSpec
+    _cmd = " GeneratePurePlugMask "
+    _outputs_filenames = {'outputMaskFile': 'outputMaskFile'}
     _redirect_x = False
