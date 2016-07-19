@@ -13,7 +13,8 @@ dependencies:
     - if [[ -e ~/docker/image.tar ]]; then docker load -i ~/docker/image.tar; fi
     - docker build -t nipype/testbench . :
         timeout: 1600
-    - mkdir -p ~/docker; docker save nipype/testbench > ~/docker/image.tar
+    - mkdir -p ~/docker; docker save nipype/testbench > ~/docker/image.tar :
+        timeout: 1600
 
 test:
   override:
@@ -37,7 +38,7 @@ test:
 general:
   artifacts:
     - "~/docs"
+#    - "coverage.xml"
 #     - "doc/_build/html"
 #     - "~/log.txt"
 #    - "nosetests.xml"
-#    - "coverage.xml"
