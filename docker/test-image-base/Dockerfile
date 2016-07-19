@@ -57,7 +57,8 @@ RUN apt-get update && \
                        libqhull-dev \
                        libxft-dev \
                        libjpeg-dev \
-                       libyaml-dev
+                       libyaml-dev \
+                       graphviz
 
 
 # Install ANTs
