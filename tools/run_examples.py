@@ -2,15 +2,24 @@ from __future__ import print_function
 import os
 import sys
 from shutil import rmtree
+from multiprocessing import cpu_count
 
 
-def run_examples(example, pipelines, data_path, plugin):
-    print('running example: %s with plugin: %s' % (example, plugin))
+def run_examples(example, pipelines, data_path, plugin=None):
     from nipype import config
+    from nipype.interfaces.base import CommandLine
+
+    if plugin is None:
+        plugin = 'MultiProc'
+
+    print('running example: %s with plugin: %s' % (example, plugin))
     config.enable_debug_mode()
     config.enable_provenance()
-    from nipype.interfaces.base import CommandLine
     CommandLine.set_default_terminal_output("stream")
+
+    plugin_args = {}
+    if plugin == 'MultiProc':
+        plugin_args['n_procs'] = cpu_count()
 
     __import__(example)
     for pipeline in pipelines:
@@ -22,7 +31,7 @@ def run_examples(example, pipelines, data_path, plugin):
                                    'stop_on_first_rerun': 'true',
                                    'write_provenance': 'true'}}
         wf.inputs.inputnode.in_data = os.path.abspath(data_path)
-        wf.run(plugin=plugin, plugin_args={'n_procs': 4})
+        wf.run(plugin=plugin, plugin_args=plugin_args)
         # run twice to check if nothing is rerunning
         wf.run(plugin=plugin)
 
