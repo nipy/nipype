@@ -11,9 +11,9 @@ dependencies:
     - mkdir -p "~/scratch/nose"
   override:
     - if [[ -e ~/docker/image.tar ]]; then docker load -i ~/docker/image.tar; fi
-    - docker build -t nipype/testbench . :
+    - docker build -t nipype/testbench:latest . :
         timeout: 1600
-    - mkdir -p ~/docker; docker save nipype/testbench > ~/docker/image.tar :
+    - mkdir -p ~/docker; docker save nipype/testbench:latest > ~/docker/image.tar :
         timeout: 1600
 
 test:
