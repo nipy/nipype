@@ -53,8 +53,7 @@ RUN conda config --add channels conda-forge
 RUN conda create -y -n nipypetests-2.7 lockfile nipype && \
     echo '#!/bin/bash' >> /etc/profile.d/nipype.sh && \
     echo '#!/bin/bash' >> /etc/bashrc && \
-    echo 'source activate nipypetests-2.7' >> /etc/profile.d/nipype.sh && \
-    echo 'source activate nipypetests-2.7' >> /etc/bashrc
+    echo 'source activate nipypetests-2.7' >> /etc/profile.d/nipype.sh
 
 # Create conda environment
 RUN conda create -y -n nipypetests-3.4 lockfile nipype python=3.4 
@@ -62,9 +61,13 @@ RUN conda create -y -n nipypetests-3.4 lockfile nipype python=3.4
 # Create conda environment
 RUN conda create -y -n nipypetests-3.5 lockfile nipype python=3.5
 
-# Install pip
-# RUN source activate nipypetests-2.7 && \
-#     pip install --upgrade pip && \
+# Install dipy
+RUN source activate nipypetests-2.7 && \
+    pip install dipy && \
+    source activate nipypetests-3.4 && \
+    pip install dipy && \
+    source activate nipypetests-3.5 && \
+    pip install dipy
 
 RUN echo "source /etc/profile.d/nipype.sh" >> /etc/bash.bashrc
 CMD ["/bin/bash"]

@@ -6,7 +6,6 @@ from nipype.interfaces import fsl
 from nipype.interfaces import utility as niu
 from nipype.interfaces import io as nio
 from nipype.algorithms.misc import Gunzip
-import os.path as op
 
 
 def _get_first(inlist):
@@ -59,7 +58,4 @@ def test_spm(name='test_spm_3d'):
     return workflow
 
 workflow3d = test_spm()
-workflow3d.inputs.inputnode.in_data = '/root/examples'
 workflow4d = test_spm(name='test_spm_4d')
-workflow4d.inputs.inputnode.in_data = '/root/examples'
-

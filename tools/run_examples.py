@@ -4,7 +4,7 @@ import sys
 from shutil import rmtree
 
 
-def run_examples(example, pipelines, plugin):
+def run_examples(example, pipelines, data_path, plugin):
     print('running example: %s with plugin: %s' % (example, plugin))
     from nipype import config
     config.enable_debug_mode()
@@ -21,6 +21,7 @@ def run_examples(example, pipelines, plugin):
         wf.config = {'execution': {'hash_method': 'timestamp',
                                    'stop_on_first_rerun': 'true',
                                    'write_provenance': 'true'}}
+        wf.inputs.inputnode.in_data = os.path.abspath(data_path)
         wf.run(plugin=plugin, plugin_args={'n_procs': 4})
         # run twice to check if nothing is rerunning
         wf.run(plugin=plugin)
@@ -35,5 +36,6 @@ if __name__ == '__main__':
                 }
     example = sys.argv[1]
     plugin = sys.argv[2]
-    pipelines = sys.argv[3:]
-    run_examples(example, pipelines, plugin)
+    data_path = sys.argv[3]
+    pipelines = sys.argv[4:]
+    run_examples(example, pipelines, data_path, plugin)

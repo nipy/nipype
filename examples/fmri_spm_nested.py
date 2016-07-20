@@ -22,7 +22,7 @@ import nipype.interfaces.io as nio           # Data i/o
 import nipype.interfaces.spm as spm          # spm
 import nipype.interfaces.matlab as mlab      # how to run matlab
 import nipype.interfaces.fsl as fsl          # fsl
-import nipype.interfaces.utility as util     # utility
+import nipype.interfaces.utility as niu      # utility
 import nipype.pipeline.engine as pe          # pypeline engine
 import nipype.algorithms.rapidart as ra      # artifact detection
 import nipype.algorithms.modelgen as model   # model specification
@@ -167,7 +167,7 @@ contrastestimate = pe.Node(interface=spm.EstimateContrast(), name="contrastestim
 reporting.
 """
 
-selectcontrast = pe.Node(interface=util.Select(), name="selectcontrast")
+selectcontrast = pe.Node(interface=niu.Select(), name="selectcontrast")
 
 """Use :class:`nipype.interfaces.fsl.Overlay` to combine the statistical output of
 the contrast estimate and a background image into one volume.
@@ -237,15 +237,14 @@ nifti filename through a template '%s.nii'. So 'f3' would become
 
 """
 
-# Specify the location of the data.
-data_dir = os.path.abspath('data')
 # Specify the subject directories
 subject_list = ['s1', 's3']
 # Map field names to individual subject runs.
 info = dict(func=[['subject_id', ['f3', 'f5', 'f7', 'f10']]],
             struct=[['subject_id', 'struct']])
 
-infosource = pe.Node(interface=util.IdentityInterface(fields=['subject_id']), name="infosource")
+inputnode = pe.Node(niu.IdentityInterface(fields=['in_data']), name='inputnode')
+infosource = pe.Node(interface=niu.IdentityInterface(fields=['subject_id']), name="infosource")
 
 """Here we set up iteration over all the subjects. The following line
 is a particular example of the flexibility of the system.  The
@@ -269,7 +268,6 @@ functionality.
 datasource = pe.Node(interface=nio.DataGrabber(infields=['subject_id'],
                                                outfields=['func', 'struct']),
                      name='datasource')
-datasource.inputs.base_directory = data_dir
 datasource.inputs.template = '%s/%s.nii'
 datasource.inputs.template_args = info
 datasource.inputs.sort_filelist = True
@@ -361,7 +359,8 @@ the processing nodes.
 level1 = pe.Workflow(name="level1")
 level1.base_dir = os.path.abspath('spm_tutorial2/workingdir')
 
-level1.connect([(infosource, datasource, [('subject_id', 'subject_id')]),
+level1.connect([(inputnode, datasource,  [('in_data', 'base_directory')]),
+                (infosource, datasource, [('subject_id', 'subject_id')]),
                 (datasource, l1pipeline, [('func', 'preproc.realign.in_files'),
                                           ('struct', 'preproc.coregister.target'),
                                           ('struct', 'preproc.normalize.source')]),
