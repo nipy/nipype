@@ -31,13 +31,6 @@ MAINTAINER Stanford Center for Reproducible Neuroscience <crn.poldracklab@gmail.
 
 # Preparations
 RUN ln -snf /bin/bash /bin/sh
-WORKDIR /root
-
-RUN mkdir -p .nipype && \
-    echo '[logging]' > .nipype/nipype.cfg && \
-    echo 'workflow_level = DEBUG' >> .nipype/nipype.cfg && \
-    echo 'interface_level = DEBUG' >> .nipype/nipype.cfg && \
-    echo 'filemanip_level = DEBUG' >> .nipype/nipype.cfg
 
 # Install this branch's code
 WORKDIR /root/src

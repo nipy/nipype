@@ -9,6 +9,10 @@ from nipype.algorithms.misc import Gunzip
 import os.path as op
 
 
+def _get_first(inlist):
+    if isinstance(inlist, (list, tuple)):
+        return inlist[0]
+    return inlist
 
 def test_spm(name='test_spm_3d'):
     """
@@ -18,8 +22,8 @@ def test_spm(name='test_spm_3d'):
     workflow = pe.Workflow(name=name)
 
     inputnode = pe.Node(niu.IdentityInterface(fields=['in_data']), name='inputnode')
-    dgr = pe.Node(nio.DataGrabber(template="feeds/data/fmri.nii.gz", outfields=['out_file']),
-                  name='datasource')
+    dgr = pe.Node(nio.DataGrabber(template="feeds/data/fmri.nii.gz", outfields=['out_file'],
+                                  sort_filelist=False), name='datasource')
 
     stc = pe.Node(spm.SliceTiming(
         num_slices=21, time_repetition=1.0, time_acquisition=2. - 2. / 32,
@@ -33,12 +37,12 @@ def test_spm(name='test_spm_3d'):
     if name == 'test_spm_3d':
         split = pe.Node(fsl.Split(dimension="t", output_type="NIFTI"), name="split")
         workflow.connect([
-            (dgr, split, [('out_file', 'in_file')]),
+            (dgr, split, [(('out_file', _get_first), 'in_file')]),
             (split, stc, [("out_files", "in_files")])])
     elif name == 'test_spm_4d':
         gunzip = pe.Node(Gunzip(), name="gunzip")
         workflow.connect([
-            (dgr, gunzip, [('out_file', 'in_file')]),
+            (dgr, gunzip, [(('out_file', _get_first), 'in_file')]),
             (gunzip, stc, [("out_file", "in_files")])
         ])
     else:
