@@ -30,10 +30,10 @@ test:
         timeout: 2600
   post:
     - mkdir -p ${CIRCLE_TEST_REPORTS}/nose
-    - mv ~/scratch/nosetests.xml ${CIRCLE_TEST_REPORTS}/nose/${CIRCLE_PROJECT_REPONAME}.xml
+    - sudo mv ~/scratch/nosetests.xml ${CIRCLE_TEST_REPORTS}/nose/${CIRCLE_PROJECT_REPONAME}.xml
     - mkdir -p ~/docs
-    - mv ~/scratch/docs/* ~/docs/
-    - mv ~/scratch/builddocs.log ~/docs/log.txt
+    - sudo mv ~/scratch/docs/* ~/docs/
+    - sudo mv ~/scratch/builddocs.log ~/docs/log.txt
 
 general:
   artifacts:
