@@ -65,7 +65,7 @@ additional housekeeping and pipeline specific functionality.
 
 datasource = pe.Node(interface=nio.DataGrabber(outfields=['func', 'struct']),
                      name='datasource')
-datasource.inputs.template = '%s.nii.gz'
+datasource.inputs.template = 'feeds/data/%s.nii.gz'
 datasource.inputs.template_args = info
 datasource.inputs.sort_filelist = True
 
