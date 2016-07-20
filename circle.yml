@@ -29,11 +29,7 @@ test:
     - docker run -i -v /etc/localtime:/etc/localtime:ro -v ~/scratch:/scratch -w /scratch --entrypoint="/usr/bin/run_nosetests.sh" nipype/testbench :
         timeout: 2600
   post:
-    - mkdir -p ${CIRCLE_TEST_REPORTS}/nose
-    - sudo mv ~/scratch/nosetests.xml ${CIRCLE_TEST_REPORTS}/nose/${CIRCLE_PROJECT_REPONAME}.xml
-    - mkdir -p ~/docs
-    - sudo mv ~/scratch/docs/* ~/docs/
-    - sudo mv ~/scratch/builddocs.log ~/docs/log.txt
+    - bash docker/circleci/teardown.sh
 
 general:
   artifacts:

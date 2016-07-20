@@ -106,7 +106,7 @@ includes the template image, T1.nii.
 """
 
 normalize = pe.Node(interface=spm.Normalize(), name="normalize")
-normalize.inputs.template = os.path.abspath('data/T1.nii')
+normalize.inputs.template = os.path.abspath('nipype-tutorial/data/T1.nii')
 
 
 """Smooth the functional data using
