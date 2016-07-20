@@ -56,8 +56,18 @@ analysis. This will demonstrate how pre-defined workflows can be setup
 and shared across users, projects and labs.
 
 
-Setup preprocessing workflow
-----------------------------
+Example of how to inline functions in connect()
+-----------------------------------------------
+
+"""
+def _template_path(in_data):
+    return op.abspath(op.join(in_data, 'nipype-tutorial/data/T1.nii'))
+
+
+"""
+
+Set-up preprocessing workflow
+-----------------------------
 
 This is a generic preprocessing workflow that can be used by different analyses
 
@@ -481,13 +491,6 @@ l2pipeline.connect([(l2source, onesamplettestdes, [('outfiles', 'in_files')]),
                                                  ('beta_images', 'beta_images'),
                                                  ('residual_image', 'residual_image')]),
                     ])
-
-"""
-Inlining functions in connect()
--------------------------------
-"""
-def _template_path(in_data):
-    return op.abspath(op.join(in_data, 'nipype-tutorial/data/T1.nii'))
 
 
 """

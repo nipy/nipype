@@ -264,7 +264,7 @@ inputnode = pe.Node(niu.IdentityInterface(fields=['in_data']), name='inputnode')
 datasource = pe.Node(nio.DataGrabber(infields=['subject_id'],
                                                outfields=['func', 'struct']),
                      name='datasource')
-datasource.inputs.template = '%s/%s.nii'
+datasource.inputs.template = 'nipype-tutorial/data/%s/%s.nii'
 datasource.inputs.template_args = info
 datasource.inputs.sort_filelist = True
 
@@ -275,7 +275,7 @@ datasource_dartel = pe.MapNode(nio.DataGrabber(infields=['subject_id'],
                                                          outfields=['struct']),
                                name='datasource_dartel',
                                iterfield=['subject_id'])
-datasource_dartel.inputs.template = '%s/%s.nii'
+datasource_dartel.inputs.template = 'nipype-tutorial/data/%s/%s.nii'
 datasource_dartel.inputs.template_args = dict(struct=[['subject_id', 'struct']])
 datasource_dartel.inputs.sort_filelist = True
 datasource_dartel.inputs.subject_id = subject_list

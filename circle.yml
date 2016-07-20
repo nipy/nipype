@@ -7,8 +7,8 @@ dependencies:
     - "~/docker"
 
   pre:
-    - pip install coverage
     - mkdir -p "~/scratch/nose"
+
   override:
     - if [[ -e ~/docker/image.tar ]]; then docker load -i ~/docker/image.tar; fi
     - docker build -t nipype/testbench:latest . :
