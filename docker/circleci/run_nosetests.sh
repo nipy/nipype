@@ -5,6 +5,7 @@ done
 source activate nipypetests-2.7
 cd /root/src/nipype
 mkdir -p /scratch/nose
-nosetests --with-doctest -c /root/src/nipype/.noserc --logging-level=DEBUG --verbosity=3 --xunit-file="/scratch/nosetests.xml"
+nosetests -c /root/src/nipype/.noserc --xunit-file="/scratch/nosetests.xml" --cover-xml-file="/scratch/coverage.xml"
 chmod 777 /scratch/nosetests.xml
+chmod 777 /scratch/coverage.xml
 chmod 777 -R /scratch/nose

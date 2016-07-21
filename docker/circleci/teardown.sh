@@ -7,7 +7,8 @@ set -u
 set -e
 
 mkdir -p ${CIRCLE_TEST_REPORTS}/nose
-sudo mv ~/scratch/nosetests.xml ${CIRCLE_TEST_REPORTS}/nose/${CIRCLE_PROJECT_REPONAME}.xml
+sudo cp ~/scratch/nosetests.xml ${CIRCLE_TEST_REPORTS}/nose/${CIRCLE_PROJECT_REPONAME}.xml
+sudo mv ~/scratch/coverage.xml ~/coverage.xml
 mkdir -p ~/docs
 sudo mv ~/scratch/docs/* ~/docs/
-sudo mv ~/scratch/builddocs.log ~/docs/log.txt
+sudo mv ~/scratch/builddocs.log ~/builddocs.log
