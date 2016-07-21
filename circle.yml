@@ -38,3 +38,4 @@ general:
     - "~/coverage.xml"
     - "~/nosetests.xml"
     - "~/builddocs.log"
+    - "~/scratch"
