@@ -34,6 +34,7 @@ test:
 general:
   artifacts:
     - "~/docs"
+    - "~/logs"
     - "~/coverage.xml"
     - "~/nosetests.xml"
     - "~/builddocs.log"

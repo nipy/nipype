@@ -27,9 +27,16 @@ def run_examples(example, pipelines, data_path, plugin=None):
         wf.base_dir = os.path.join(os.getcwd(), 'output', example, plugin)
         if os.path.exists(wf.base_dir):
             rmtree(wf.base_dir)
+
+        # Handle a logging directory
+        log_dir = os.path.join(os.getcwd(), 'logs', example)
+        if os.path.exists(log_dir):
+            rmtree(log_dir)
+        os.makedirs(log_dir)
         wf.config = {'execution': {'hash_method': 'timestamp',
                                    'stop_on_first_rerun': 'true',
-                                   'write_provenance': 'true'}}
+                                   'write_provenance': 'true'},
+                     'logging': {'log_directory': log_dir, 'log_to_file': True}}
         wf.inputs.inputnode.in_data = os.path.abspath(data_path)
         wf.run(plugin=plugin, plugin_args=plugin_args)
         # run twice to check if nothing is rerunning
