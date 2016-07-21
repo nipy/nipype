@@ -284,7 +284,7 @@ functionality.
 """
 
 datasource = pe.Node(nio.DataGrabber(infields=['subject_id'],
-                                               outfields=['func', 'struct']),
+                                     outfields=['func', 'struct']),
                      name='datasource')
 datasource.inputs.template = 'nipype-tutorial/data/%s/%s.nii'
 datasource.inputs.template_args = info
