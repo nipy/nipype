@@ -33,25 +33,26 @@ MAINTAINER Stanford Center for Reproducible Neuroscience <crn.poldracklab@gmail.
 RUN ln -snf /bin/bash /bin/sh
 WORKDIR /root
 
-RUN mkdir -p ~/examples/ && ln -sf /usr/share/fsl-feeds/ ~/examples/feeds
-RUN curl -sSL "https://dl.dropbox.com/s/jzgq2nupxyz36bp/nipype-tutorial.tar.bz2" -o nipype-tutorial.tar.bz2 && \
-    tar jxf nipype-tutorial.tar.bz2 -C /root/examples && \
-    curl -sSL "http://fsl.fmrib.ox.ac.uk/fslcourse/fdt1.tar.gz" -o fdt1.tar.gz && \
-    curl -sSL "http://fsl.fmrib.ox.ac.uk/fslcourse/fdt2.tar.gz" -o fdt2.tar.gz && \
-    curl -sSL "http://fsl.fmrib.ox.ac.uk/fslcourse/tbss.tar.gz" -o tbss.tar.gz && \
-    mkdir ~/examples/fsl_course_data && \
-    echo 'Untarring fsl course data...' && \
-    tar zxf fdt1.tar.gz -C ~/examples/fsl_course_data && \
-    tar zxf fdt2.tar.gz -C ~/examples/fsl_course_data && \
-    tar zxf tbss.tar.gz -C ~/examples/fsl_course_data && \
-    echo 'export FSL_COURSE_DATA=/root/examples/fsl_course_data' >> /etc/profile.d/nipype_data.sh
-
+# Install fsl-feeds and the nipype-tutorial data
 ARG DEBIAN_FRONTEND=noninteractive
 RUN apt-get update && \
     apt-get install -y fsl-feeds && \
-    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* && \
+    mkdir -p ~/examples/ && \
+    ln -sf /usr/share/fsl-feeds/ ~/examples/feeds && \
+    curl -sSL "https://dl.dropbox.com/s/jzgq2nupxyz36bp/nipype-tutorial.tar.bz2" -o nipype-tutorial.tar.bz2 && \
+    tar jxf nipype-tutorial.tar.bz2 -C /root/examples
 
+# RUN curl -sSL "http://fsl.fmrib.ox.ac.uk/fslcourse/fdt1.tar.gz" -o fdt1.tar.gz && \
+#     curl -sSL "http://fsl.fmrib.ox.ac.uk/fslcourse/fdt2.tar.gz" -o fdt2.tar.gz && \
+#     curl -sSL "http://fsl.fmrib.ox.ac.uk/fslcourse/tbss.tar.gz" -o tbss.tar.gz && \
+#     mkdir ~/examples/fsl_course_data && \
+#     echo 'Untarring fsl course data...' && \
+#     tar zxf fdt1.tar.gz -C ~/examples/fsl_course_data && \
+#     tar zxf fdt2.tar.gz -C ~/examples/fsl_course_data && \
+#     tar zxf tbss.tar.gz -C ~/examples/fsl_course_data && \
+#     echo 'export FSL_COURSE_DATA=/root/examples/fsl_course_data' >> /etc/profile.d/nipype_data.sh
+# ENV FSL_COURSE_DATA /root/examples/fsl_course_data
+# RUN echo 'source /etc/profile.d/nipype_data.sh' >> /etc/bash.bashrc
 
-ENV FSL_COURSE_DATA /root/examples/fsl_course_data
-RUN echo 'source /etc/profile.d/nipype_data.sh' >> /etc/bash.bashrc
 CMD ["/bin/bash"]
