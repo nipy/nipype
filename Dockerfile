@@ -67,6 +67,7 @@ WORKDIR /scratch
 
 # Install entrypoints
 ADD docker/circleci/run_* /usr/bin/
+ADD docker/travis/run_* /usr/bin/
 RUN chmod +x /usr/bin/run_*
 
 # RUN echo 'source /etc/profile.d/nipype_tests.sh' >> /etc/bash.bashrc
