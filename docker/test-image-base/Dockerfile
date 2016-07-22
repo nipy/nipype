@@ -57,7 +57,8 @@ RUN apt-get update && \
                        libqhull-dev \
                        libxft-dev \
                        libjpeg-dev \
-                       libyaml-dev
+                       libyaml-dev \
+                       graphviz
 
 
 # Install ANTs
@@ -96,11 +97,10 @@ RUN echo "destinationFolder=/root/mcr" > mcr_options.txt && \
     unzip matlab_installer/installer.zip -d matlab_installer/ && \
     matlab_installer/install -inputFile mcr_options.txt && \
     rm -rf matlab_installer mcr_options.txt && \
-    echo 'export LD_LIBRARY_PATH=/root/mcr/v85/runtime/glnxa64:/root/mcr/v85/bin/glnxa64:/root/mcr/v85/sys/os/glnxa64:$LD_LIBRARY_PATH' >> /etc/profile.d/nipype_deps.sh && \
+#    echo 'export LD_LIBRARY_PATH=/root/mcr/v85/runtime/glnxa64:/root/mcr/v85/bin/glnxa64:/root/mcr/v85/sys/os/glnxa64:$LD_LIBRARY_PATH' >> /etc/profile.d/nipype_deps.sh && \
     echo 'export SPMMCRCMD="/root/spm12/run_spm12.sh /root/mcr/v85/ script"' >> /etc/profile.d/nipype_deps.sh && \ 
     echo 'export FORCE_SPMMCR=1' >> /etc/profile.d/nipype_deps.sh
 
-ENV LD_LIBRARY_PATH "/root/mcr/v85/runtime/glnxa64:/root/mcr/v85/bin/glnxa64:/root/mcr/v85/sys/os/glnxa64:$LD_LIBRARY_PATH"
 ENV SPMMCRCMD "/root/spm12/run_spm12.sh /root/mcr/v85/ script"
 ENV FORCE_SPMMCR 1
 

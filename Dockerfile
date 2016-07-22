@@ -26,26 +26,49 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-FROM nipype/testnipype
+FROM nipype/testnipypedata:latest
 MAINTAINER Stanford Center for Reproducible Neuroscience <crn.poldracklab@gmail.com>
 
 # Preparations
 RUN ln -snf /bin/bash /bin/sh
-WORKDIR /root
 
-RUN mkdir -p ~/examples/ && ln -sf /usr/share/fsl-feeds/ ~/examples/feeds
-RUN curl -sSL "https://dl.dropbox.com/s/jzgq2nupxyz36bp/nipype-tutorial.tar.bz2" && \
-    tar jxvf nipype-tutorial.tar.bz2 && \
-    mv nipype-tutorial/* ~/examples/ && \
-    curl -sSL "http://fsl.fmrib.ox.ac.uk/fslcourse/fdt1.tar.gz" && \
-    curl -sSL "http://fsl.fmrib.ox.ac.uk/fslcourse/fdt2.tar.gz" && \
-    curl -sSL "http://fsl.fmrib.ox.ac.uk/fslcourse/tbss.tar.gz" && \
-    mkdir ~/examples/fsl_course_data && \
-    tar zxvf fdt1.tar.gz -C ~/examples/fsl_course_data && \
-    tar zxvf fdt2.tar.gz -C ~/examples/fsl_course_data && \
-    tar zxvf tbss.tar.gz -C ~/examples/fsl_course_data && \
-    echo 'export FSL_COURSE_DATA=/root/examples/fsl_course_data' >> /etc/profile.d/crn_neuro.sh && \
-    echo 'export FSL_COURSE_DATA=/root/examples/fsl_course_data' >> /etc/bash.bashrc
-ENV FSL_COURSE_DATA /root/examples/fsl_course_data
+# Install this branch's code
+WORKDIR /root/src
 
-CMD ["/bin/bash"]
+# Install matplotlib, sphinx and coverage to build documentation
+# and run tests with coverage
+RUN source activate nipypetests-2.7 && \
+    pip install matplotlib sphinx coverage && \
+    source activate nipypetests-3.4 && \
+    pip install matplotlib sphinx coverage && \
+    source activate nipypetests-3.5 && \
+    pip install matplotlib sphinx coverage
+
+ADD . nipype/
+
+# Install the checked out version of nipype, check that requirements are
+# installed and install it for each of the three environments.
+RUN cd nipype/ && \
+    source activate nipypetests-2.7 && \
+    pip install -r requirements.txt && \
+    pip install -e .
+
+RUN cd nipype/ && \
+    source activate nipypetests-3.4 && \
+    pip install -r requirements.txt && \
+    pip install -e .
+
+RUN cd nipype/ && \
+    source activate nipypetests-3.5 && \
+    pip install -r requirements.txt && \
+    pip install -e .
+
+WORKDIR /scratch
+
+# Install entrypoints
+ADD docker/circleci/run_* /usr/bin/
+RUN chmod +x /usr/bin/run_*
+
+# RUN echo 'source /etc/profile.d/nipype_tests.sh' >> /etc/bash.bashrc
+ENTRYPOINT ["/usr/bin/run_examples.sh"]
+

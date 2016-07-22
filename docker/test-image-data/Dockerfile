@@ -26,48 +26,33 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-FROM nipype/testbase:latest
+FROM nipype/testnipype:latest
 MAINTAINER Stanford Center for Reproducible Neuroscience <crn.poldracklab@gmail.com>
 
 # Preparations
 RUN ln -snf /bin/bash /bin/sh
 WORKDIR /root
 
-# Install miniconda
-RUN curl -sSLO https://repo.continuum.io/miniconda/Miniconda-latest-Linux-x86_64.sh && \
-    /bin/bash Miniconda-latest-Linux-x86_64.sh -b -p /usr/local/miniconda && \
-    rm Miniconda-latest-Linux-x86_64.sh && \
-    echo '#!/bin/bash' >> /etc/profile.d/nipype.sh && \
-    echo 'export PATH=/usr/local/miniconda/bin:$PATH' >> /etc/profile.d/nipype.sh
+# Install fsl-feeds and the nipype-tutorial data
+ARG DEBIAN_FRONTEND=noninteractive
+RUN apt-get update && \
+    apt-get install -y fsl-feeds && \
+    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* && \
+    mkdir -p ~/examples/ && \
+    ln -sf /usr/share/fsl-feeds/ ~/examples/feeds && \
+    curl -sSL "https://dl.dropbox.com/s/jzgq2nupxyz36bp/nipype-tutorial.tar.bz2" -o nipype-tutorial.tar.bz2 && \
+    tar jxf nipype-tutorial.tar.bz2 -C /root/examples
 
-ENV PATH /usr/local/miniconda/bin:$PATH
+# RUN curl -sSL "http://fsl.fmrib.ox.ac.uk/fslcourse/fdt1.tar.gz" -o fdt1.tar.gz && \
+#     curl -sSL "http://fsl.fmrib.ox.ac.uk/fslcourse/fdt2.tar.gz" -o fdt2.tar.gz && \
+#     curl -sSL "http://fsl.fmrib.ox.ac.uk/fslcourse/tbss.tar.gz" -o tbss.tar.gz && \
+#     mkdir ~/examples/fsl_course_data && \
+#     echo 'Untarring fsl course data...' && \
+#     tar zxf fdt1.tar.gz -C ~/examples/fsl_course_data && \
+#     tar zxf fdt2.tar.gz -C ~/examples/fsl_course_data && \
+#     tar zxf tbss.tar.gz -C ~/examples/fsl_course_data && \
+#     echo 'export FSL_COURSE_DATA=/root/examples/fsl_course_data' >> /etc/profile.d/nipype_data.sh
+# ENV FSL_COURSE_DATA /root/examples/fsl_course_data
+# RUN echo 'source /etc/profile.d/nipype_data.sh' >> /etc/bash.bashrc
 
-# http://bugs.python.org/issue19846
-# > At the moment, setting "LANG=C" on a Linux system *fundamentally breaks Python 3*, and that's not OK.
-ENV LANG C.UTF-8
-
-# Add conda-forge channel in conda
-RUN conda config --add channels conda-forge
-
-# Create conda environment
-RUN conda create -y -n nipypetests-2.7 lockfile nipype && \
-    echo '#!/bin/bash' >> /etc/profile.d/nipype.sh && \
-    echo '#!/bin/bash' >> /etc/bashrc && \
-    echo 'source activate nipypetests-2.7' >> /etc/profile.d/nipype.sh
-
-# Create conda environment
-RUN conda create -y -n nipypetests-3.4 lockfile nipype python=3.4 
-
-# Create conda environment
-RUN conda create -y -n nipypetests-3.5 lockfile nipype python=3.5
-
-# Install dipy
-RUN source activate nipypetests-2.7 && \
-    pip install dipy && \
-    source activate nipypetests-3.4 && \
-    pip install dipy && \
-    source activate nipypetests-3.5 && \
-    pip install dipy
-
-RUN echo "source /etc/profile.d/nipype.sh" >> /etc/bash.bashrc
 CMD ["/bin/bash"]
