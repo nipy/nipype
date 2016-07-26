@@ -51,8 +51,14 @@ def run_examples(example, pipelines, plugin):
         # run twice to check if nothing is rerunning
         wf.run(plugin=plugin)
 
-        # Draw gantt chart
-        if plugin_args.has_key('status_callback'):
+        # Draw gantt chart only if pandas is installed
+        try:
+            import pandas
+            pandas_flg = True
+        except ImportError as exc:
+            pandas_flg = False
+
+        if plugin_args.has_key('status_callback') and pandas_flg:
             draw_gantt_chart.generate_gantt_chart(cb_log_path, 4)
             dst_log_html = os.path.join(os.path.expanduser('~'), 'callback.log.html')
             copyfile(cb_log_path+'.html', dst_log_html)
