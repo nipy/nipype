@@ -101,7 +101,7 @@ class ResponseSD(MRTrix3Base):
     >>> resp.run()                                 # doctest: +SKIP
     """
 
-    _cmd = 'dwi2response'
+    _cmd = 'dwi2response tax'
     input_spec = ResponseSDInputSpec
     output_spec = ResponseSDOutputSpec
 
