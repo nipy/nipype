@@ -2,9 +2,10 @@ from __future__ import print_function
 import os
 import sys
 from shutil import rmtree, copyfile
+from multiprocessing import cpu_count
 
 
-def run_examples(example, pipelines, plugin):
+def run_examples(example, pipelines, data_path, plugin=None):
     '''
     Run example workflows
     '''
@@ -15,11 +16,17 @@ def run_examples(example, pipelines, plugin):
     from nipype.utils import draw_gantt_chart
     from nipype.pipeline.plugins import log_nodes_cb
 
-    print('running example: %s with plugin: %s' % (example, plugin))
+    if plugin is None:
+        plugin = 'MultiProc'
 
+    print('running example: %s with plugin: %s' % (example, plugin))
     config.enable_debug_mode()
     config.enable_provenance()
     CommandLine.set_default_terminal_output("stream")
+
+    plugin_args = {}
+    if plugin == 'MultiProc':
+        plugin_args['n_procs'] = cpu_count()
 
     __import__(example)
 
@@ -29,6 +36,12 @@ def run_examples(example, pipelines, plugin):
         wf.base_dir = os.path.join(os.getcwd(), 'output', example, plugin)
         if os.path.exists(wf.base_dir):
             rmtree(wf.base_dir)
+
+        # Handle a logging directory
+        log_dir = os.path.join(os.getcwd(), 'logs', example)
+        if os.path.exists(log_dir):
+            rmtree(log_dir)
+        os.makedirs(log_dir)
         wf.config = {'execution': {'hash_method': 'timestamp',
                                    'stop_on_first_rerun': 'true',
                                    'write_provenance': 'true'}}
@@ -46,10 +59,12 @@ def run_examples(example, pipelines, plugin):
             plugin_args = {'n_procs' : 4, 'status_callback' : log_nodes_cb}
         else:
             plugin_args = {'n_procs' : 4}
+        try:
+            wf.inputs.inputnode.in_data = os.path.abspath(data_path)
+        except AttributeError:
+            pass # the workflow does not have inputnode.in_data
 
         wf.run(plugin=plugin, plugin_args=plugin_args)
-        # run twice to check if nothing is rerunning
-        wf.run(plugin=plugin)
 
         # Draw gantt chart only if pandas is installed
         try:
@@ -73,5 +88,6 @@ if __name__ == '__main__':
                 }
     example = sys.argv[1]
     plugin = sys.argv[2]
-    pipelines = sys.argv[3:]
-    run_examples(example, pipelines, plugin)
+    data_path = sys.argv[3]
+    pipelines = sys.argv[4:]
+    run_examples(example, pipelines, data_path, plugin)
