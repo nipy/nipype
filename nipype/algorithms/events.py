@@ -17,7 +17,10 @@ from os.path import basename
 iflogger = logging.getLogger('interface')
 
 # Eventually, move the following inside the interface, or wrap in an import check
-import pandas as pd
+try:
+    import pandas as pd
+except ImportError:
+    raise ImportError("The events module requires pandas.")
 
 
 def alias(target, append=False):
@@ -88,18 +91,24 @@ class EventTransformer(object):
     @alias(pd.get_dummies, append=True)
     def factor(): pass
 
-    def standardize(self, cols, demean=True, rescale=True, copy=True):
+    def _standardize(self, cols, demean=True, rescale=True, copy=True):
         cols = self._select_cols(cols)
         X = self.data[cols]
         self.data[cols] = (X - X.mean()) / np.std(X, 0)
 
-    def binarize(self, cols, threshold=0.0):
+    @alias(_standardize)
+    def standardize(): pass
+
+    def _binarize(self, cols, threshold=0.0):
         cols = self._select_cols(cols)
         X = self.data[cols].values
         above = X > threshold
         X[above] = 1
         X[~above] = 0
         self.data[cols] = X
+
+    @alias(_binarize)
+    def binarize(): pass
 
     def orthogonalize(self, y_cols, X_cols):
         ''' Orthogonalize each of the variables in y_cols with respect to all
@@ -148,8 +157,7 @@ class EventTransformer(object):
         ts = np.zeros((len_ts, n_conditions))
 
         _events = self.events.copy().reset_index()
-        _events[['onset', 'duration']] = _events[
-            ['onset', 'duration']] * targ_hz / orig_hz
+        _events[['onset', 'duration']] = _events[['onset', 'duration']] * targ_hz / orig_hz
 
         cond_index = [conditions.index(c) for c in _events['condition']]
         ev_end = np.round(_events['onset'] + _events['duration']).astype(int)
@@ -284,7 +292,7 @@ class EventReader(object):
         return pd.concat(dfs, axis=0)
 
 
-class TransformEventsInputSpec(BaseInterfaceInputSpec):
+class SpecifyEventsInputSpec(BaseInterfaceInputSpec):
     subject_info = InputMultiPath(Bunch, mandatory=True, xor=['subject_info',
                                                               'event_files'],
                                   desc=("Bunch or List(Bunch) subject specific condition information. "
@@ -303,7 +311,7 @@ class TransformEventsInputSpec(BaseInterfaceInputSpec):
     #                                  desc=("JSON specification of the transformations to perform."))
 
 
-class TransformEventsOutputSpec(TraitedSpec):
+class SpecifyEventsOutputSpec(TraitedSpec):
     subject_info = OutputMultiPath(Bunch, mandatory=True,
                                   desc=("Bunch or List(Bunch) subject specific condition information. "
                                         "see :ref:`SpecifyModel` or SpecifyModel.__doc__ for details"))
@@ -328,10 +336,10 @@ class Transformation(object):
         pass
 
 
-class TransformEvents(BaseInterface):
+class SpecifyEvents(BaseInterface):
 
-    input_spec = TransformEventsInputSpec
-    output_spec = TransformEventsOutputSpec
+    input_spec = SpecifyEventsInputSpec
+    output_spec = SpecifyEventsOutputSpec
 
     def _get_event_data(self):
         if isdefined(self.inputs.subject_info):
