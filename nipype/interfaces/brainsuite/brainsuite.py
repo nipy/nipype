@@ -1,3 +1,9 @@
+"""This script provides interfaces for BrainSuite command line tools.
+Please see brainsuite.org for more information.
+
+Author: Jason Wong
+"""
+
 import os
 import re as regex
 
@@ -85,18 +91,12 @@ class Bse(CommandLine):
         if isdefined(inputs[name]):
             return os.path.abspath(inputs[name])
         
-        genfiles = {'outputMRIVolume'   : '.bse.nii.gz',
+        fileToSuffixMap = {'outputMRIVolume'   : '.bse.nii.gz',
                     'outputMaskFile'    : '.mask.nii.gz'
         }
         
-        if name in genfiles:
-            return getFileName(self.inputs.inputMRIFile, genfiles[name])
-        
-        '''if name == 'outputMRIVolume':
-            return getFileName(self.inputs.inputMRIFile, name, '.nii.gz')
-        if name == 'outputMaskFile':
-            return getFileName(self.inputs.inputMRIFile, name, '.nii.gz')
-        '''
+        if name in fileToSuffixMap:
+            return getFileName(self.inputs.inputMRIFile, fileToSuffixMap[name])
         
         return None
 
@@ -201,13 +201,9 @@ class Bfc(CommandLine):
         if isdefined(inputs[name]):
             return os.path.abspath(inputs[name])
         
-        genfiles = {'outputMRIVolume': '.bfc.nii.gz'}
-        if name in genfiles:
-            return getFileName(self.inputs.inputMRIFile, genfiles[name])
-       
-        '''if name == 'outputMRIVolume':
-            return getFileName(self.inputs.inputMRIFile, name, '.nii.gz')
-        '''
+        fileToSuffixMap = {'outputMRIVolume': '.bfc.nii.gz'}
+        if name in fileToSuffixMap:
+            return getFileName(self.inputs.inputMRIFile, fileToSuffixMap[name])
         
         return None
 
@@ -271,14 +267,11 @@ class Pvc(CommandLine):
         if isdefined(inputs[name]):
             return os.path.abspath(inputs[name])
 
-        genfiles = {'outputLabelFile'           : '.pvc.label.nii.gz',
+        fileToSuffixMap = {'outputLabelFile'           : '.pvc.label.nii.gz',
                     'outputTissueFractionFile'  : '.pvc.frac.nii.gz'
         }
-        if name in genfiles:
-            return getFileName(self.inputs.inputMRIFile, genfiles[name])
-        '''
-        if name == 'outputLabelFile' or name == 'outputTissueFractionFile':
-            return getFileName(self.inputs.inputMRIFile, name, '.nii.gz')'''
+        if name in fileToSuffixMap:
+            return getFileName(self.inputs.inputMRIFile, fileToSuffixMap[name])
 
         return None
 
@@ -359,16 +352,13 @@ class Cerebro(CommandLine):
         if isdefined(inputs[name]):
             return os.path.abspath(inputs[name])
             
-        genfiles = {'outputCerebrumMaskFile'    : '.cerebrum.mask.nii.gz',
+        fileToSuffixMap = {'outputCerebrumMaskFile'    : '.cerebrum.mask.nii.gz',
                     'outputLabelVolumeFile'     : '.hemi.label.nii.gz',
                     'outputWarpTransformFile'   : '.warp',
                     'outputAffineTransformFile' : '.air'
         }
-        if name in genfiles:
-            return getFileName(self.inputs.inputMRIFile, genfiles[name])
-        '''
-        if name == 'outputCerebrumMaskFile' or name == 'outputLabelVolumeFile':
-            return getFileName(self.inputs.inputMRIFile, name, '.nii.gz')'''
+        if name in fileToSuffixMap:
+            return getFileName(self.inputs.inputMRIFile, fileToSuffixMap[name])
 
         return None
 
@@ -811,20 +801,14 @@ class Hemisplit(CommandLine):
         if isdefined(inputs[name]):
             return os.path.abspath(inputs[name])
 
-        genfiles = {
+        fileToSuffixMap = {
             'outputLeftHemisphere'      : '.left.inner.cortex.dfs',
             'outputLeftPialHemisphere'  : '.left.pial.cortex.dfs',
             'outputRightHemisphere'     : '.right.inner.cortex.dfs',
             'outputRightPialHemisphere' : '.right.pial.cortex.dfs'
         }
-        if name in genfiles:
-            return getFileName(self.inputs.inputSurfaceFile, genfiles[name])
-        '''
-        if (name == 'outputLeftHemisphere'
-            or name == 'outputRightHemisphere'
-            or name == 'outputLeftPialHemisphere'
-            or name == 'outputRightPialHemisphere'):
-            return getFileName(self.inputs.inputSurfaceFile, name, '.dfs')'''
+        if name in fileToSuffixMap:
+            return getFileName(self.inputs.inputSurfaceFile, fileToSuffixMap[name])
 
         return None
 
@@ -1010,6 +994,10 @@ class SVRegInputSpec(CommandLineInputSpec):
         desc='If multiple CPUs are present on the system, the code will try to use '
              'multithreading to make the execution fast.'
         )
+    useSingleThreading = traits.Bool(
+        argstr='\'-U\'',
+        desc='Use single threaded mode.'
+        )
         
 class SVReg(CommandLine):
     """
@@ -1031,6 +1019,7 @@ class SVReg(CommandLine):
     >>> svreg.inputs. keepIntermediates = True
     >>> svreg.inputs.verbosity2 = True
     >>> svreg.inputs.displayTimestamps = True
+    >>> svreg.inputs.useSingleThreading = True
     >>> results = svreg.run() #doctest: +SKIP
 
     
@@ -1040,6 +1029,8 @@ class SVReg(CommandLine):
     _cmd = 'svreg.sh'
     
     def _format_arg(self, name, spec, value):
+        if name == 'subjectFilePrefix' or name == 'atlasFilePrefix' or name == 'curveMatchingInstructions':
+            return spec.argstr % os.path.expanduser(value)
         if name == 'dataSinkDelay':
             return spec.argstr % ''
         return super(SVReg, self)._format_arg(name, spec, value)
@@ -1156,10 +1147,9 @@ class BDPInputSpec(CommandLineInputSpec):
              'The derived generalized-FA (GFA) maps are also saved in the output '
              'directory. '
         )
-    estimateODF_Both = traits.Bool(
-        argstr='--odf',
-        desc='Same as setting both estimateODF_FRT and estimateODF_FRACT to true. Estimates ODFs using both '
-             'FRT and FRACT. '
+    estimateODF_3DShore = traits.Float(
+        argstr='--3dshore --diffusion_time_ms %f',
+        desc='Estimates ODFs using 3Dshore. Pass in diffusion time, in ms'
         )
     odfLambta = traits.Bool(
         argstr='--odf-lambda <L>',
@@ -1529,8 +1519,8 @@ class BDP(CommandLine):
     BrainSuite Diffusion Pipeline (BDP) enables fusion of diffusion and
     structural MRI information for advanced image and connectivity analysis.
     It provides various methods for distortion correction, co-registration,
-    diffusion modeling (DTI and ODF) and basic ROI-wise statistic. BDP is
-    lexible and diverse tool which supports wide variety of diffusion
+    diffusion modeling (DTI and ODF) and basic ROI-wise statistic. BDP is a
+    flexible and diverse tool which supports wide variety of diffusion
     datasets.
     For more information, please see:
     
@@ -1559,7 +1549,38 @@ class BDP(CommandLine):
             return spec.argstr % ''
         return super(BDP, self)._format_arg(name, spec, value)
 
+
+class ThicknessPVCInputSpec(CommandLineInputSpec):
+    subjectFilePrefix = traits.Str(
+        argstr='%s', mandatory=True,
+        desc='Absolute path and filename prefix of the subject data'
+        )
         
+class ThicknessPVC(CommandLine):
+    """
+    ThicknessPVC computes cortical thickness using partial tissue fractions.
+    This thickness measure is then transferred to the atlas surface to 
+    facilitate population studies. It also stores the computed thickness into
+    separate hemisphere files and subject thickness mapped to the atlas
+    hemisphere surfaces. ThicknessPVC is not run through the main SVReg
+    sequence, and should be used after executing the BrainSuite and SVReg 
+    sequence.
+    For more informaction, please see:
+    
+    http://brainsuite.org/processing/svreg/svreg_modules/
+    
+    Examples
+    --------
+    
+    >>> from nipype.interfaces import brainsuite
+    >>> thicknessPVC = brainsuite.ThicknessPVC()
+    >>> thicknessPVC.inputs.subjectFilePrefix = 'home/user/btestsubject/testsubject'
+    >>> results = thicknessPVC.run() #doctest: +SKIP
+    
+    """
+       
+    input_spec = ThicknessPVCInputSpec
+    _cmd = 'thicknessPVC.sh'
 
 
 # used to generate file names for outputs
