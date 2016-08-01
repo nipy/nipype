@@ -90,14 +90,14 @@ class Bse(CommandLine):
         inputs = self.inputs.get()
         if isdefined(inputs[name]):
             return os.path.abspath(inputs[name])
-        
+
         fileToSuffixMap = {'outputMRIVolume'   : '.bse.nii.gz',
                     'outputMaskFile'    : '.mask.nii.gz'
         }
-        
+
         if name in fileToSuffixMap:
             return getFileName(self.inputs.inputMRIFile, fileToSuffixMap[name])
-        
+
         return None
 
     def _list_outputs(self):
@@ -125,7 +125,7 @@ class BfcInputSpec(CommandLineInputSpec):
     splineLambda = traits.Float(
         desc='spline stiffness weighting parameter', argstr='-w %f')
     histogramType = traits.Enum(
-        'ellipse', 'block', desc='Options for type of histogram\nellipse: use ellipsoid for ROI histogram\nblock :use block for ROI histogram', 
+        'ellipse', 'block', desc='Options for type of histogram\nellipse: use ellipsoid for ROI histogram\nblock :use block for ROI histogram',
         argstr='%s')
     iterativeMode = traits.Bool(
         desc='iterative mode (overrides -r, -s, -c, -w settings)', argstr='--iterate')
@@ -200,11 +200,11 @@ class Bfc(CommandLine):
         inputs = self.inputs.get()
         if isdefined(inputs[name]):
             return os.path.abspath(inputs[name])
-        
+
         fileToSuffixMap = {'outputMRIVolume': '.bfc.nii.gz'}
         if name in fileToSuffixMap:
             return getFileName(self.inputs.inputMRIFile, fileToSuffixMap[name])
-        
+
         return None
 
     def _format_arg(self, name, spec, value):
@@ -351,7 +351,7 @@ class Cerebro(CommandLine):
         inputs = self.inputs.get()
         if isdefined(inputs[name]):
             return os.path.abspath(inputs[name])
-            
+
         fileToSuffixMap = {'outputCerebrumMaskFile'    : '.cerebrum.mask.nii.gz',
                     'outputLabelVolumeFile'     : '.hemi.label.nii.gz',
                     'outputWarpTransformFile'   : '.warp',
@@ -881,18 +881,18 @@ class Skullfinder(CommandLine):
     def _list_outputs(self):
         return l_outputs(self)
 
-        
-        
+
+
 class SVRegInputSpec(CommandLineInputSpec):
     subjectFilePrefix = traits.Str(
-        argstr='\'%s\'', mandatory=True, position=0, 
+        argstr='\'%s\'', mandatory=True, position=0,
         desc='Absolute path and filename prefix of the subjects output from BrainSuite '
              'Cortical Surface Extraction Sequence'
         )
     dataSinkDelay = traits.List(
-        str, argstr='%s', 
+        str, argstr='%s',
         desc='Connect datasink out_file to dataSinkDelay to delay execution of SVReg '
-             'until dataSink has finished sinking CSE outputs.' 
+             'until dataSink has finished sinking CSE outputs.'
              'For use with parallel processing workflows including Brainsuites Cortical '
              'Surface Extraction sequence (SVReg requires certain files from Brainsuite '
              'CSE, which must all be in the pathway specified by subjectFilePrefix. see '
@@ -998,16 +998,16 @@ class SVRegInputSpec(CommandLineInputSpec):
         argstr='\'-U\'',
         desc='Use single threaded mode.'
         )
-        
+
 class SVReg(CommandLine):
     """
     surface and volume registration (svreg)
     This program registers a subject's BrainSuite-processed volume and surfaces
     to an atlas, allowing for automatic labelling of volume and surface ROIs.
-    
+
     For more information, please see:
     http://brainsuite.org/processing/svreg/usage/
-    
+
     Examples
     --------
 
@@ -1022,12 +1022,12 @@ class SVReg(CommandLine):
     >>> svreg.inputs.useSingleThreading = True
     >>> results = svreg.run() #doctest: +SKIP
 
-    
+
     """
-    
+
     input_spec = SVRegInputSpec
     _cmd = 'svreg.sh'
-    
+
     def _format_arg(self, name, spec, value):
         if name == 'subjectFilePrefix' or name == 'atlasFilePrefix' or name == 'curveMatchingInstructions':
             return spec.argstr % os.path.expanduser(value)
@@ -1086,7 +1086,7 @@ class BDPInputSpec(CommandLineInputSpec):
              'usually has an extension of .bvec '
         )
     dataSinkDelay = traits.List(
-        str, argstr='%s', 
+        str, argstr='%s',
         desc='For use in parallel processing workflows including Brainsuite Cortical '
              'Surface Extraction sequence. Connect datasink out_file to dataSinkDelay '
              'to delay execution of BDP until dataSink has finished sinking outputs. '
@@ -1513,7 +1513,7 @@ class BDPInputSpec(CommandLineInputSpec):
              'on machines with a low amount of memory. This may result in an '
              'out-of-memory error when BDP cannot allocate sufficient memory. '
         )
-    
+
 class BDP(CommandLine):
     """
     BrainSuite Diffusion Pipeline (BDP) enables fusion of diffusion and
@@ -1523,7 +1523,7 @@ class BDP(CommandLine):
     flexible and diverse tool which supports wide variety of diffusion
     datasets.
     For more information, please see:
-    
+
     http://brainsuite.org/processing/diffusion/
 
     Examples
@@ -1535,13 +1535,13 @@ class BDP(CommandLine):
     >>> bdp.inputs.inputDiffusionData = '/directory/subdir/prefix.dwi.nii.gz'
     >>> bdp.inputs.BVecBValPair = ['/directory/subdir/prefix.dwi.bvec', '/directory/subdir/prefix.dwi.bval']
     >>> results = bdp.run() #doctest: +SKIP
-    
-    
+
+
     """
 
     input_spec = BDPInputSpec
     _cmd = 'bdp.sh'
-    
+
     def _format_arg(self, name, spec, value):
         if name == 'BVecBValPair':
             return spec.argstr % (value[0],  value[1])
@@ -1555,30 +1555,30 @@ class ThicknessPVCInputSpec(CommandLineInputSpec):
         argstr='%s', mandatory=True,
         desc='Absolute path and filename prefix of the subject data'
         )
-        
+
 class ThicknessPVC(CommandLine):
     """
     ThicknessPVC computes cortical thickness using partial tissue fractions.
-    This thickness measure is then transferred to the atlas surface to 
+    This thickness measure is then transferred to the atlas surface to
     facilitate population studies. It also stores the computed thickness into
     separate hemisphere files and subject thickness mapped to the atlas
     hemisphere surfaces. ThicknessPVC is not run through the main SVReg
-    sequence, and should be used after executing the BrainSuite and SVReg 
+    sequence, and should be used after executing the BrainSuite and SVReg
     sequence.
     For more informaction, please see:
-    
+
     http://brainsuite.org/processing/svreg/svreg_modules/
-    
+
     Examples
     --------
-    
+
     >>> from nipype.interfaces import brainsuite
     >>> thicknessPVC = brainsuite.ThicknessPVC()
     >>> thicknessPVC.inputs.subjectFilePrefix = 'home/user/btestsubject/testsubject'
     >>> results = thicknessPVC.run() #doctest: +SKIP
-    
+
     """
-       
+
     input_spec = ThicknessPVCInputSpec
     _cmd = 'thicknessPVC.sh'
 
