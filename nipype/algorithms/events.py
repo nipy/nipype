@@ -14,6 +14,7 @@ from nipype import config, logging
 import re
 from glob import glob
 from os.path import basename
+import json
 iflogger = logging.getLogger('interface')
 
 # Eventually, move the following inside the interface, or wrap in an import check
@@ -25,38 +26,38 @@ except ImportError:
 
 def alias(target, append=False):
     def decorator(func):
-        def wrapper(self, cols, groupby=None, names=None, *args, **kwargs):
+        def wrapper(self, cols, groupby=None, output=None, *args, **kwargs):
 
             cols = self._select_cols(cols)
 
             # groupby can be either a single column, in which case it's
             # interpreted as a categorical variable to groupby directly, or a
-            # list of column names, in which case it's interpreted as a set of
+            # list of column output, in which case it's interpreted as a set of
             # dummy columns to reconstruct a categorical from.
             if groupby is not None:
                 groupby = self._select_cols(groupby)
                 if len(groupby) > 1:
                     group_results = []
-                    names = ['%s_%s' % (cn, gn)for cn in cols for gn in groupby]
+                    output = ['%s_%s' % (cn, gn)for cn in cols for gn in groupby]
                     for i, col in enumerate(groupby):
                         _result = np.zeros((len(self.data), len(cols)))
-                        inds = self.data[col].nonzero()
-                        _result[inds] = target(self.data[cols].iloc[inds], *args, **kwargs)
+                        _result[inds] = target(self, cols, *args, **kwargs)
                         group_results.extend(_result.T)
                     result = np.c_[group_results].squeeze().T
-                    result = pd.DataFrame(result, columns=names)
+                    result = pd.DataFrame(result, columns=output)
                 else:
-                    result = self.data.groupby(groupby).apply(target, *args, **kwargs)
+                    result = self.data.groupby(groupby).apply(target, self, cols, *args, **kwargs)
             else:
-                result = target(self.data[cols], *args, **kwargs)
+                result = target(self, cols, *args, **kwargs)
 
             if append:
-                names = result.columns
+                output = result.columns
 
-            if names is not None:
-                cols = names
-
-            self.data[cols] = result
+            if output is not None:
+                result = pd.DataFrame(result, columns=output)
+                self.data = self.data.join(result)
+            else:
+                self.data[cols] = result
         return wrapper
     return decorator
 
@@ -94,7 +95,13 @@ class EventTransformer(object):
     def _standardize(self, cols, demean=True, rescale=True, copy=True):
         cols = self._select_cols(cols)
         X = self.data[cols]
-        self.data[cols] = (X - X.mean()) / np.std(X, 0)
+        return (X - X.mean()) / np.std(X, 0)
+
+    def select(self, cols):
+        # Always retain onsets
+        if 'onset' not in cols:
+            cols.insert(0, 'onset')
+        self.data = self.data[self._select_cols(cols)]
 
     @alias(_standardize)
     def standardize(): pass
@@ -105,21 +112,24 @@ class EventTransformer(object):
         above = X > threshold
         X[above] = 1
         X[~above] = 0
-        self.data[cols] = X
+        return X
 
     @alias(_binarize)
     def binarize(): pass
 
-    def orthogonalize(self, y_cols, X_cols):
-        ''' Orthogonalize each of the variables in y_cols with respect to all
+    def _orthogonalize(self, cols, X_cols):
+        ''' Orthogonalize each of the variables in cols with respect to all
         of the variables in x_cols.
         '''
-        y_cols, X_cols = self._select_cols(y_cols), self._select_cols(X_cols)
+        cols, X_cols = self._select_cols(cols), self._select_cols(X_cols)
         X = self.data[X_cols].values
-        y = self.data[y_cols].values
+        y = self.data[cols].values
         _aX = np.c_[np.ones(len(y)), X]
         coefs, resids, rank, s = np.linalg.lstsq(_aX, y)
-        self.data[y_cols] = y - X.dot(coefs[1:])
+        return  y - X.dot(coefs[1:])
+
+    @alias(_orthogonalize)
+    def orthogonalize(): pass
 
     def formula(self, f, target=None, replace=False, *args, **kwargs):
         from patsy import dmatrix
@@ -132,17 +142,19 @@ class EventTransformer(object):
             raise ValueError("Either a target column must be passed or replace"
                              " must be True.")
 
-    def multiply(self, y_cols, x_cols):
+    def multiply(self, cols, x_cols):
         x_cols = self._select_cols(x_cols)
-        result = self.data[x_cols].apply(lambda x: np.multiply(x, self.data[y_cols]))
-        names = ['%s_%s' % (y_cols, x) for x in x_cols]
-        self.data[names] = result
+        result = self.data[x_cols].apply(lambda x: np.multiply(x, self.data[cols]))
+        output = ['%s_%s' % (cols, x) for x in x_cols]
+        self.data[output] = result
 
     def query(self, q, *args, **kwargs):
         self.data = self.data.query(filter)
 
     def apply(self, func, *args, **kwargs):
-        self.data = func(self.data, *args, **kwargs)
+        if isinstance(func, string_types):
+            func = getattr(self, func)
+        func(*args, **kwargs)
 
     def _to_dense(self):
         """ Convert the sparse [onset, duration, amplitude] representation
@@ -191,9 +203,9 @@ class EventReader(object):
                  run_pattern=None):
         '''
         Args:
-            columns (list): Optional list of column names to use. If passed,
+            columns (list): Optional list of column output to use. If passed,
                 number of elements must match number of columns in the text
-                files to be read. If omitted, column names are inferred by
+                files to be read. If omitted, column output are inferred by
                 pandas (depending on value of header).
             header (str): passed to pandas; see pd.read_table docs for details.
             sep (str): column separator; see pd.read_table docs for details.
@@ -202,13 +214,13 @@ class EventReader(object):
             default_amplitude (float): Optional default amplitude to set for
                 all events. Will be ignored if an amplitude column is found.
             condition_pattern (str): regex with which to capture condition
-                names from input text file filenames. Only the first captured
+                output from input text file fileoutput. Only the first captured
                 group will be used.
             subject_pattern (str): regex with which to capture subject
-                names from input text file filenames. Only the first captured
+                output from input text file fileoutput. Only the first captured
                 group will be used.
-            run_pattern (str): regex with which to capture run names from input
-                text file filenames. Only the first captured group will be used.
+            run_pattern (str): regex with which to capture run output from input
+                text file fileoutput. Only the first captured group will be used.
         '''
 
         self.columns = columns
@@ -300,15 +312,15 @@ class SpecifyEventsInputSpec(BaseInterfaceInputSpec):
     event_files = InputMultiPath(traits.List(File(exists=True)), mandatory=True,
                                  xor=['subject_info', 'event_files'],
                                  desc=('list of event description files in 1, 2, 3, or 4 column format '
-                                       'corresponding to onsets, durations, amplitudes, and names'))
+                                       'corresponding to onsets, durations, amplitudes, and output'))
     input_units = traits.Enum('secs', 'scans', mandatory=True,
                               desc=("Units of event onsets and durations (secs or scans). Output "
                                     "units are always in secs"))
     time_repetition = traits.Float(mandatory=True,
                                    desc=("Time between the start of one volume to the start of "
                                          "the next image volume."))
-    # transformations = InputMultiPath(traits.List(File(exists=True)), mandatory=True,
-    #                                  desc=("JSON specification of the transformations to perform."))
+    transformations = traits.File(exists=True, mandatory=False,
+                                     desc=("JSON specification of the transformations to perform."))
 
 
 class SpecifyEventsOutputSpec(TraitedSpec):
@@ -353,9 +365,16 @@ class SpecifyEvents(BaseInterface):
     def _transform_events(self):
         events = self._get_event_data()
         self.transformer = EventTransformer(events)
+        if isdefined(self.inputs.transformations):
+            tf = json.load(open(self.inputs.transformations))
+            for t in tf['steps']:
+                name = t.pop('name')
+                cols = t.pop('input', None)
+                # args = t.get('args', {})
+                self.transformer.apply(name, cols, **t)
+            if 'select' in tf:
+                self.transformer.select(tf['select'])
 
-        # Transformation application logic goes here later
-        # ...
         self.transformer.resample(self.inputs.time_repetition)
 
     def _run_interface(self, runtime):
