@@ -40,7 +40,7 @@ def run_node(node, updatehash):
     result : dictionary
         dictionary containing the node runtime results and stats
     """
- 
+
     # Init variables
     result = dict(result=None, traceback=None)
 
@@ -111,7 +111,7 @@ class MultiProcPlugin(DistributedPluginBase):
     than the system can support.
 
     The plugin_args input to run can be used to control the multiprocessing
-    execution and defining the maximum amount of memory and threads that 
+    execution and defining the maximum amount of memory and threads that
     should be used. When those parameters are not specified,
     the number of threads and memory of the system is used.
 
@@ -119,7 +119,7 @@ class MultiProcPlugin(DistributedPluginBase):
     memory_consuming_node.interface.estimated_memory_gb = 8
     thread_consuming_node.interface.num_threads = 16
 
-    The default number of threads and memory for a node is 1. 
+    The default number of threads and memory for a node is 1.
 
     Currently supported options are:
 

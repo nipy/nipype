@@ -3,75 +3,59 @@ from builtins import range
 import nipype.pipeline.engine as pe
 from nipype.interfaces import spm
 from nipype.interfaces import fsl
+from nipype.interfaces import utility as niu
+from nipype.interfaces import io as nio
 from nipype.algorithms.misc import Gunzip
-import os
-
-in_file = "feeds/data/fmri.nii.gz"
-
-split = pe.Node(fsl.Split(dimension="t", output_type="NIFTI"), name="split")
-split.inputs.in_file = os.path.abspath(in_file)
-
-stc = pe.Node(interface=spm.SliceTiming(), name='stc')
-stc.inputs.num_slices = 21
-stc.inputs.time_repetition = 1.0
-stc.inputs.time_acquisition = 2. - 2. / 32
-stc.inputs.slice_order = list(range(21, 0, -1))
-stc.inputs.ref_slice = 10
-
-realign_estimate = pe.Node(interface=spm.Realign(), name='realign_estimate')
-realign_estimate.inputs.jobtype = "estimate"
-
-realign_write = pe.Node(interface=spm.Realign(), name='realign_write')
-realign_write.inputs.jobtype = "write"
-
-realign_estwrite = pe.Node(interface=spm.Realign(), name='realign_estwrite')
-realign_estwrite.inputs.jobtype = "estwrite"
-realign_estwrite.inputs.register_to_mean = True
-
-smooth = pe.Node(interface=spm.Smooth(), name='smooth')
-smooth.inputs.fwhm = [6, 6, 6]
-
-workflow3d = pe.Workflow(name='test_3d')
-workflow3d.base_dir = "/tmp"
-
-workflow3d.connect([(split, stc, [("out_files", "in_files")]),
-                    (stc, realign_estimate, [('timecorrected_files', 'in_files')]),
-                    (realign_estimate, realign_write, [('modified_in_files', 'in_files')]),
-                    (stc, realign_estwrite, [('timecorrected_files', 'in_files')]),
-                    (realign_write, smooth, [('realigned_files', 'in_files')])])
-
-workflow3d.run()
 
 
-gunzip = pe.Node(Gunzip(), name="gunzip")
-gunzip.inputs.in_file = os.path.abspath(in_file)
+def _get_first(inlist):
+    if isinstance(inlist, (list, tuple)):
+        return inlist[0]
+    return inlist
 
-stc = pe.Node(interface=spm.SliceTiming(), name='stc')
-stc.inputs.num_slices = 21
-stc.inputs.time_repetition = 1.0
-stc.inputs.time_acquisition = 2. - 2. / 32
-stc.inputs.slice_order = list(range(21, 0, -1))
-stc.inputs.ref_slice = 10
+def test_spm(name='test_spm_3d'):
+    """
+    A simple workflow to test SPM's installation. By default will split the 4D volume in
+    time-steps.
+    """
+    workflow = pe.Workflow(name=name)
 
-realign_estimate = pe.Node(interface=spm.Realign(), name='realign_estimate')
-realign_estimate.inputs.jobtype = "estimate"
+    inputnode = pe.Node(niu.IdentityInterface(fields=['in_data']), name='inputnode')
+    dgr = pe.Node(nio.DataGrabber(template="feeds/data/fmri.nii.gz", outfields=['out_file'],
+                                  sort_filelist=False), name='datasource')
 
-realign_write = pe.Node(interface=spm.Realign(), name='realign_write')
-realign_write.inputs.jobtype = "write"
+    stc = pe.Node(spm.SliceTiming(
+        num_slices=21, time_repetition=1.0, time_acquisition=2. - 2. / 32,
+        slice_order=list(range(21, 0, -1)), ref_slice=10), name='stc')
+    realign_estimate = pe.Node(spm.Realign(jobtype='estimate'), name='realign_estimate')
+    realign_write = pe.Node(spm.Realign(jobtype='write'), name='realign_write')
+    realign_estwrite = pe.Node(spm.Realign(jobtype='estwrite'), name='realign_estwrite')
+    smooth = pe.Node(spm.Smooth(fwhm=[6, 6, 6]), name='smooth')
 
-realign_estwrite = pe.Node(interface=spm.Realign(), name='realign_estwrite')
-realign_estwrite.inputs.jobtype = "estwrite"
 
-smooth = pe.Node(interface=spm.Smooth(), name='smooth')
-smooth.inputs.fwhm = [6, 6, 6]
+    if name == 'test_spm_3d':
+        split = pe.Node(fsl.Split(dimension="t", output_type="NIFTI"), name="split")
+        workflow.connect([
+            (dgr, split, [(('out_file', _get_first), 'in_file')]),
+            (split, stc, [("out_files", "in_files")])])
+    elif name == 'test_spm_4d':
+        gunzip = pe.Node(Gunzip(), name="gunzip")
+        workflow.connect([
+            (dgr, gunzip, [(('out_file', _get_first), 'in_file')]),
+            (gunzip, stc, [("out_file", "in_files")])
+        ])
+    else:
+        raise NotImplementedError('No implementation of the test workflow \'{}\' was found'.format(
+            name))
 
-workflow4d = pe.Workflow(name='test_4d')
-workflow4d.base_dir = "/tmp"
+    workflow.connect([
+        (inputnode, dgr, [('in_data', 'base_directory')]),
+        (stc, realign_estimate, [('timecorrected_files', 'in_files')]),
+        (realign_estimate, realign_write, [('modified_in_files', 'in_files')]),
+        (stc, realign_estwrite, [('timecorrected_files', 'in_files')]),
+        (realign_write, smooth, [('realigned_files', 'in_files')])
+    ])
+    return workflow
 
-workflow4d.connect([(gunzip, stc, [("out_file", "in_files")]),
-                    (stc, realign_estimate, [('timecorrected_files', 'in_files')]),
-                    (realign_estimate, realign_write, [('modified_in_files', 'in_files')]),
-                    (stc, realign_estwrite, [('timecorrected_files', 'in_files')]),
-                    (realign_write, smooth, [('realigned_files', 'in_files')])])
-
-workflow4d.run()
+workflow3d = test_spm()
+workflow4d = test_spm(name='test_spm_4d')

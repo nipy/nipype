@@ -319,7 +319,7 @@ def draw_nodes(start, nodes_list, cores, minute_scale, space_between_minutes,
                 break
 
         # Get color for node object
-        color = random.choice(colors) 
+        color = random.choice(colors)
         if 'error' in node:
             color = 'red'
 
@@ -444,19 +444,19 @@ def generate_gantt_chart(logfile, cores, minute_scale=10,
     # import logging
     # import logging.handlers
     # from nipype.pipeline.plugins.callback_log import log_nodes_cb
-    
+
     # log_filename = 'callback.log'
     # logger = logging.getLogger('callback')
     # logger.setLevel(logging.DEBUG)
     # handler = logging.FileHandler(log_filename)
     # logger.addHandler(handler)
-    
+
     # #create workflow
     # workflow = ...
-    
-    # workflow.run(plugin='MultiProc',  
+
+    # workflow.run(plugin='MultiProc',
     #     plugin_args={'n_procs':8, 'memory':12, 'status_callback': log_nodes_cb})
-    
+
     # generate_gantt_chart('callback.log', 8)
     '''
 

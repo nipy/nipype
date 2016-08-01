@@ -1,6 +1,13 @@
-Release 0.12.0-rc1 (April 20, 2016)
-============
+Upcoming release 0.13
+=====================
 
+
+Release 0.12.0 (July 12, 2016)
+==============================
+
+* ENH: New interface for Bruker to Nifti converter (https://github.com/nipy/nipype/pull/1523)
+* FIX: output file naming for FIRST outputs (https://github.com/nipy/nipype/pull/1524)
+* ENH: Adds `fslmaths -Tstd` to maths interfaces (https://github.com/nipy/nipype/pull/1518)
 * FIX: Selecting "gamma" in FSL Level1Design now does what the name says (https://github.com/nipy/nipype/pull/1500)
 * ENH: Added grad_dev input to fsl.dti.bedpostx5 interface(https://github.com/nipy/nipype/pull/1493)
 * ENH: ResourceMultiProc plugin to support resource allocation (https://github.com/nipy/nipype/pull/1372)
@@ -38,7 +45,7 @@ Release 0.12.0-rc1 (April 20, 2016)
        (https://github.com/nipy/nipype/pull/1460)
 
 Release 0.11.0 (September 15, 2015)
-============
+===================================
 
 * API: Change how hash values are computed (https://github.com/nipy/nipype/pull/1174)
 * ENH: New algorithm: mesh.WarpPoints applies displacements fields to point sets
@@ -124,7 +131,7 @@ Release 0.11.0 (September 15, 2015)
        (https://github.com/nipy/nipype/pull/1142)
 
 Release 0.10.0 (October 10, 2014)
-============
+=================================
 
 * ENH: New miscelaneous interfaces: SplitROIs (mapper), MergeROIs (reducer)
        to enable parallel processing of very large images.
@@ -168,19 +175,19 @@ Release 0.10.0 (October 10, 2014)
 * FIX: Update for FSL 5.0.7 which deprecated Contrast Manager
 
 Release 0.9.2 (January 31, 2014)
-============
+================================
 
 * FIX: DataFinder was broken due to a typo
 * FIX: Order of DataFinder outputs was not guaranteed, it's human sorted now
 * ENH: New interfaces: Vnifti2Image, VtoMat
 
 Release 0.9.1 (December 25, 2013)
-============
+=================================
 
 * FIX: installation issues
 
 Release 0.9.0 (December 20, 2013)
-============
+=================================
 
 * ENH: SelectFiles: a streamlined version of DataGrabber
 * ENH: new tools for defining workflows: JoinNode, synchronize and itersource
