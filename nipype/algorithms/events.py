@@ -1,27 +1,23 @@
 from __future__ import division
-from builtins import range
 
-from copy import deepcopy
-import os
-
-from nibabel import load
 import numpy as np
 from nipype.external.six import string_types
 from nipype.interfaces.base import (BaseInterface, TraitedSpec, InputMultiPath,
                                traits, File, Bunch, BaseInterfaceInputSpec,
                                isdefined, OutputMultiPath)
-from nipype import config, logging
+from nipype import logging
 import re
 from glob import glob
 from os.path import basename
 import json
 iflogger = logging.getLogger('interface')
 
-# Eventually, move the following inside the interface, or wrap in an import check
+
+have_pandas = True
 try:
     import pandas as pd
-except ImportError:
-    raise ImportError("The events module requires pandas.")
+except:
+    have_nipy = False
 
 
 def alias(target, append=False):
@@ -370,7 +366,6 @@ class SpecifyEvents(BaseInterface):
             for t in tf['steps']:
                 name = t.pop('name')
                 cols = t.pop('input', None)
-                # args = t.get('args', {})
                 self.transformer.apply(name, cols, **t)
             if 'select' in tf:
                 self.transformer.select(tf['select'])
@@ -378,6 +373,9 @@ class SpecifyEvents(BaseInterface):
         self.transformer.resample(self.inputs.time_repetition)
 
     def _run_interface(self, runtime):
+        if not have_pandas:
+            raise ImportError("The SpecifyEvents interface requires pandas. "
+                              "Please make sure that pandas is installed.")
         self._transform_events()
         return runtime
 
