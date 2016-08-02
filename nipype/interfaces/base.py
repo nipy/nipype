@@ -1660,7 +1660,7 @@ class CommandLine(BaseInterface):
         runtime = self._run_interface(runtime)
         return runtime
 
-    def _run_interface(self, runtime, correct_return_codes=[0]):
+    def _run_interface(self, runtime, correct_return_codes=(0,)):
         """Execute command via subprocess
 
         Parameters
