@@ -329,25 +329,6 @@ class SpecifyEventsOutputSpec(TraitedSpec):
                                         "see :ref:`SpecifyModel` or SpecifyModel.__doc__ for details"))
 
 
-class Transformation(object):
-
-    def __init__(self, transformer, inputs, steps, outputs=None):
-
-        self.transformer = transformer
-        self.inputs = inputs
-        self.steps = steps
-        self.outputs = outputs
-        self._validate()
-
-    def _validate(self):
-        missing = set(transform['input'] - set(self.transformer.data.columns))
-        if missing:
-            raise ValueError("Invalid column(s): %s" % missing)
-
-    def run(self):
-        pass
-
-
 class SpecifyEvents(BaseInterface):
 
     input_spec = SpecifyEventsInputSpec
