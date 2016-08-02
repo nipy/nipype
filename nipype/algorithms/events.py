@@ -144,6 +144,10 @@ class EventTransformer(object):
         output = ['%s_%s' % (cols, x) for x in x_cols]
         self.data[output] = result
 
+    def rename(self, cols, output):
+        rename = dict(zip(cols, output))
+        self.data = self.data.rename(columns=rename)
+
     def query(self, q, *args, **kwargs):
         self.data = self.data.query(filter)
 
