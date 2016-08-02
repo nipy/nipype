@@ -20,11 +20,44 @@ except:
     have_nipy = False
 
 
+class Transformations(object):
+
+    @staticmethod
+    def standardize(data, demean=True, rescale=True):
+        if demean:
+            data -= data.mean(0)
+        if rescale:
+            data /= data.std(0)
+        return data
+
+    @staticmethod
+    def orthogonalize(data, other):
+        ''' Orthogonalize each of the variables in cols with respect to all
+        of the variables in x_cols.
+        '''
+        y = data.values
+        X = other.values
+        _aX = np.c_[np.ones(len(y)), X]
+        coefs, resids, rank, s = np.linalg.lstsq(_aX, y)
+        return  y - X.dot(coefs[1:])
+
+    @staticmethod
+    def binarize(data, threshold=0.0):
+        above = data > threshold
+        data[above] = 1
+        data[~above] = 0
+        return data
+
+
 def alias(target, append=False):
     def decorator(func):
         def wrapper(self, cols, groupby=None, output=None, *args, **kwargs):
 
             cols = self._select_cols(cols)
+            data = self.data[cols]
+
+            if 'other' in kwargs:
+                kwargs['other'] = self.data[kwargs['other']]
 
             # groupby can be either a single column, in which case it's
             # interpreted as a categorical variable to groupby directly, or a
@@ -36,15 +69,14 @@ def alias(target, append=False):
                     group_results = []
                     output = ['%s_%s' % (cn, gn)for cn in cols for gn in groupby]
                     for i, col in enumerate(groupby):
-                        _result = np.zeros((len(self.data), len(cols)))
-                        _result[inds] = target(self, cols, *args, **kwargs)
+                        _result = target(data, *args, **kwargs)
                         group_results.extend(_result.T)
                     result = np.c_[group_results].squeeze().T
                     result = pd.DataFrame(result, columns=output)
                 else:
-                    result = self.data.groupby(groupby).apply(target, self, cols, *args, **kwargs)
+                    result = self.data.groupby(groupby).apply(target, data, *args, **kwargs)
             else:
-                result = target(self, cols, *args, **kwargs)
+                result = target(data, *args, **kwargs)
 
             if append:
                 output = result.columns
@@ -66,13 +98,7 @@ class EventTransformer(object):
         self.target_hz = target_hz
         self._to_dense()
 
-    def _select_cols(self, cols):
-        if isinstance(cols, string_types) and '*' in cols:
-            # if '*' in cols:
-            patt = re.compile(cols.replace('*', '.*'))
-            cols = [l for l in self.data.columns.tolist() for m in [patt.search(l)] if m]
-        return cols
-
+    ### Aliased functions ###
     @alias(np.log)
     def log(): pass
 
@@ -88,44 +114,21 @@ class EventTransformer(object):
     @alias(pd.get_dummies, append=True)
     def factor(): pass
 
-    def _standardize(self, cols, demean=True, rescale=True, copy=True):
-        cols = self._select_cols(cols)
-        X = self.data[cols]
-        return (X - X.mean()) / np.std(X, 0)
+    @alias(Transformations.standardize)
+    def standardize(): pass
 
+    @alias(Transformations.binarize)
+    def binarize(): pass
+
+    @alias(Transformations.orthogonalize)
+    def orthogonalize(): pass
+
+    ### Standard instance methods ###
     def select(self, cols):
         # Always retain onsets
         if 'onset' not in cols:
             cols.insert(0, 'onset')
         self.data = self.data[self._select_cols(cols)]
-
-    @alias(_standardize)
-    def standardize(): pass
-
-    def _binarize(self, cols, threshold=0.0):
-        cols = self._select_cols(cols)
-        X = self.data[cols].values
-        above = X > threshold
-        X[above] = 1
-        X[~above] = 0
-        return X
-
-    @alias(_binarize)
-    def binarize(): pass
-
-    def _orthogonalize(self, cols, X_cols):
-        ''' Orthogonalize each of the variables in cols with respect to all
-        of the variables in x_cols.
-        '''
-        cols, X_cols = self._select_cols(cols), self._select_cols(X_cols)
-        X = self.data[X_cols].values
-        y = self.data[cols].values
-        _aX = np.c_[np.ones(len(y)), X]
-        coefs, resids, rank, s = np.linalg.lstsq(_aX, y)
-        return  y - X.dot(coefs[1:])
-
-    @alias(_orthogonalize)
-    def orthogonalize(): pass
 
     def formula(self, f, target=None, replace=False, *args, **kwargs):
         from patsy import dmatrix
@@ -155,6 +158,12 @@ class EventTransformer(object):
         if isinstance(func, string_types):
             func = getattr(self, func)
         func(*args, **kwargs)
+
+    def _select_cols(self, cols):
+        if isinstance(cols, string_types) and '*' in cols:
+            patt = re.compile(cols.replace('*', '.*'))
+            cols = [l for l in self.data.columns.tolist() for m in [patt.search(l)] if m]
+        return cols
 
     def _to_dense(self):
         """ Convert the sparse [onset, duration, amplitude] representation
@@ -352,8 +361,6 @@ class SpecifyEvents(BaseInterface):
                 name = t.pop('name')
                 cols = t.pop('input', None)
                 self.transformer.apply(name, cols, **t)
-            if 'select' in tf:
-                self.transformer.select(tf['select'])
 
         self.transformer.resample(self.inputs.time_repetition)
 
