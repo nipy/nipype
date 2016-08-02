@@ -2020,10 +2020,10 @@ class ROIStatsInputSpec(CommandLineInputSpec):
                         argstr='-quiet',
                         position=1)
 
-    terminal_output = traits.Enum('allatonce',
+    terminal_output = traits.Enum('file',
                                   desc=('Control terminal output:'
-                                        '`allatonce` - waits till command is '
-                                        'finished to display output'),
+                                        '`file` - saves ouptup into '
+                                        'a file'),
                                   nohash=True, mandatory=True, usedefault=True)
 
 
