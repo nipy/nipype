@@ -11,24 +11,23 @@ cache:
     - $HOME/.cache/docker
 
 python:
-- 2.7
+- 27
 - 3.4
 - 3.5
 
 # env:
 # - INSTALL_DEB_DEPENDECIES=true
 # - INSTALL_DEB_DEPENDECIES=false
-before_install:
-- if [[ -e $HOME/.cache/docker/image.tar ]]; then docker load -i $HOME/.cache/docker/image.tar; fi
-- docker build -t nipype/testbench:latest .
-- mkdir -p $HOME/.cache/docker; docker save nipype/testbench:latest > $HOME/.cache/docker/image.tar
 
 install:
 - mkdir -p $HOME/scratch
+- if [[ -e $HOME/.cache/docker/image${TRAVIS_PYTHON_VERSION}.tar ]]; then docker load -i $HOME/.cache/docker/image${TRAVIS_PYTHON_VERSION}.tar; fi
+- docker build -t nipype/nipype_test:${TRAVIS_PYTHON_VERSION} .
 script:
-- docker run -i -v /etc/localtime:/etc/localtime:ro -v $HOME/scratch:/scratch -w /scratch --entrypoint="/usr/bin/run_travis_tests.sh" nipype/testbench ${TRAVIS_PYTHON_VERSION}
+- docker run -i -v /etc/localtime:/etc/localtime:ro -v $HOME/scratch:/scratch -w /scratch /usr/bin/run_travis_tests.sh nipype/nipype_test:${TRAVIS_PYTHON_VERSION}
 after_success:
 - coveralls --config_file .coveragerc
+- mkdir -p $HOME/.cache/docker; docker save nipype/nipype_test:${TRAVIS_PYTHON_VERSION} > $HOME/.cache/docker/image${TRAVIS_PYTHON_VERSION}.tar
 deploy:
   provider: pypi
   user: satra
