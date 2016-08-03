@@ -45,7 +45,7 @@ ENV LANG C.UTF-8
 
 # Add conda-forge channel in conda
 RUN conda config --add channels conda-forge && \
-    conda install -y lockfile nipype matplotlib sphinx
+    conda install -y lockfile nipype matplotlib sphinx boto coverage
 
 RUN mkdir -p /root/src/nipype
 COPY . /root/src/nipype
