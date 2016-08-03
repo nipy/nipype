@@ -43,6 +43,7 @@ RUN sed -i -e 's,main$,main contrib non-free,g' /etc/apt/sources.list.d/neurodeb
                        apt-utils \
                        fusefat \
                        graphviz \
+                       make \
                        fsl-core && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* && \
     echo ". /etc/fsl/fsl.sh" >> /etc/bash.bashrc

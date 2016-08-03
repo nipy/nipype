@@ -18,10 +18,6 @@ NIPYPE: Neuroimaging in Python: Pipelines and Interfaces
     :target: https://pypi.python.org/pypi/nipype/
     :alt: Latest Version
 
-.. image:: https://img.shields.io/pypi/dm/nipype.svg
-    :target: https://pypi.python.org/pypi/nipype/
-    :alt: Downloads
-
 .. image:: https://img.shields.io/pypi/pyversions/nipype.svg
     :target: https://pypi.python.org/pypi/nipype/
     :alt: Supported Python versions
