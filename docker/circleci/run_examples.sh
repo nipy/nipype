@@ -1,4 +1,7 @@
 #!/bin/bash
+set -e
+set -x
+set -u
 
 mkdir -p /root/.nipype
 echo '[logging]' > /root/.nipype/nipype.cfg

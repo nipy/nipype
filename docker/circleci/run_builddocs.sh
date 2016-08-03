@@ -1,4 +1,7 @@
 #!/bin/bash
+set -e
+set -x
+set -u
 
 mkdir -p /scratch/docs
 set -o pipefail && cd /root/src/nipype/doc && make html 2>&1 | tee /scratch/builddocs.log
