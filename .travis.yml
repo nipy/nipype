@@ -30,7 +30,7 @@ install:
 - docker build -f docker/nipype_test_py${TRAVIS_PYTHON_VERSION//.}/Dockerfile -t nipype/nipype_test:py${TRAVIS_PYTHON_VERSION//.} .
 - mkdir -p $HOME/.cache/docker; docker save nipype/nipype_test:py${TRAVIS_PYTHON_VERSION//.} > $HOME/.cache/docker/image${TRAVIS_PYTHON_VERSION//.}.tar
 script:
-- docker run -v /etc/localtime:/etc/localtime:ro -v $HOME/scratch:/scratch -w /root/src/nipype nipype/nipype_test:py${TRAVIS_PYTHON_VERSION//.} python -W once:FSL:UserWarning:nipype `which nosetests` --with-doctest --with-cov --cover-package nipype --cov-config /root/src/nipype/.coveragerc --logging-level=DEBUG --verbosity=3
+- docker run -v /etc/localtime:/etc/localtime:ro -v $HOME/scratch:/scratch -w /root/src/nipype nipype/nipype_test:py${TRAVIS_PYTHON_VERSION//.} python -W once:FSL:UserWarning:nipype nosetests --with-doctest --with-cov --cover-package nipype --cov-config /root/src/nipype/.coveragerc --logging-level=DEBUG --verbosity=3
 after_success:
 - coveralls --config_file .coveragerc
 deploy:
