@@ -52,17 +52,17 @@ from ..external.six import string_types, text_type
 
 runtime_profile = str2bool(config.get('execution', 'profile_runtime'))
 
-try:
-    import psutil
-except ImportError as exc:
-    logger.info('Unable to import packages needed for runtime profiling. '\
-                'Turning off runtime profiler. Reason: %s' % exc)
-    runtime_profile = False
-
 nipype_version = LooseVersion(__version__)
 
 iflogger = logging.getLogger('interface')
 
+if runtime_profile:
+    try:
+        import psutil
+    except ImportError as exc:
+        iflogger.info('Unable to import packages needed for runtime profiling. '\
+                    'Turning off runtime profiler. Reason: %s' % exc)
+        runtime_profile = False
 
 __docformat__ = 'restructuredtext'
 
