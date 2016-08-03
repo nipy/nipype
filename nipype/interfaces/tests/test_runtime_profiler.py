@@ -11,7 +11,7 @@ import unittest
 from nipype.interfaces.base import (traits, CommandLine, CommandLineInputSpec,
                                     runtime_profile)
 
-runtime_profile = True
+run_profile = True
 if runtime_profile:
     try:
         import psutil
