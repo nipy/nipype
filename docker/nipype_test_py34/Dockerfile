@@ -47,7 +47,7 @@ ENV LANG C.UTF-8
 RUN conda config --add channels conda-forge && \
     conda update -y conda && \
     conda update --all -y python=3.4 && \
-    conda install -y lockfile nipype
+    conda install -y lockfile nipype matplotlib boto nose-cov
 
 RUN mkdir -p /root/src/nipype
 COPY . /root/src/nipype
