@@ -22,6 +22,7 @@ python:
 # Update docker to enable -f flag
 before_install:  
   - sudo apt-get install -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" -y docker-engine
+  - pip install coveralls
 
 install:
 - mkdir -p $HOME/scratch

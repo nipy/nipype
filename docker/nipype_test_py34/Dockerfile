@@ -57,7 +57,7 @@ RUN cd /root/src/nipype && \
     pip install -e .
 
 
-COPY docker/circleci/run_* /usr/bin/
+COPY docker/scripts/run_* /usr/bin/
 RUN chmod +x /usr/bin/run_*
 ENV SHELL /bin/bash
 
