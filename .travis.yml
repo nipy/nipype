@@ -20,15 +20,16 @@ python:
 # - INSTALL_DEB_DEPENDECIES=false
 
 # Update docker to enable -f flag
-before_install:  
-  - sudo apt-get install -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" -y docker-engine
-  - pip install coveralls
+before_install:
+  - travis_retry sudo apt-get install -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" -y docker-engine
+  - travis_retry pip install coveralls
 
 install:
 - mkdir -p $HOME/scratch
+- mkdir -p $HOME/.cache/docker
 - if [[ -e $HOME/.cache/docker/image${TRAVIS_PYTHON_VERSION//.}.tar ]]; then docker load -i $HOME/.cache/docker/image${TRAVIS_PYTHON_VERSION//.}.tar; fi
-- docker build -f docker/nipype_test_py${TRAVIS_PYTHON_VERSION//.}/Dockerfile -t nipype/nipype_test:py${TRAVIS_PYTHON_VERSION//.} .
-- mkdir -p $HOME/.cache/docker; docker save nipype/nipype_test:py${TRAVIS_PYTHON_VERSION//.} > $HOME/.cache/docker/image${TRAVIS_PYTHON_VERSION//.}.tar
+- travis_retry docker build -f docker/nipype_test_py${TRAVIS_PYTHON_VERSION//.}/Dockerfile -t nipype/nipype_test:py${TRAVIS_PYTHON_VERSION//.} .
+- travis_retry docker save nipype/nipype_test:py${TRAVIS_PYTHON_VERSION//.} > $HOME/.cache/docker/image${TRAVIS_PYTHON_VERSION//.}.tar
 script:
 - docker run -v /etc/localtime:/etc/localtime:ro -v $HOME/scratch:/scratch -w /root/src/nipype nipype/nipype_test:py${TRAVIS_PYTHON_VERSION//.} nosetests --with-doctest --with-cov --cover-package nipype --cov-config /root/src/nipype/.coveragerc --logging-level=DEBUG --verbosity=3
 after_success:
