@@ -28,8 +28,8 @@ install:
 - mkdir -p $HOME/scratch
 - mkdir -p $HOME/.cache/docker
 - if [[ -e $HOME/.cache/docker/image${TRAVIS_PYTHON_VERSION//.}.tar ]]; then docker load -i $HOME/.cache/docker/image${TRAVIS_PYTHON_VERSION//.}.tar; fi
-- travis_retry docker build -f docker/nipype_test_py${TRAVIS_PYTHON_VERSION//.}/Dockerfile -t nipype/nipype_test:py${TRAVIS_PYTHON_VERSION//.} .
-- travis_retry docker save nipype/nipype_test:py${TRAVIS_PYTHON_VERSION//.} > $HOME/.cache/docker/image${TRAVIS_PYTHON_VERSION//.}.tar
+- docker build -f docker/nipype_test_py${TRAVIS_PYTHON_VERSION//.}/Dockerfile -t nipype/nipype_test:py${TRAVIS_PYTHON_VERSION//.} .
+- travis_wait 30 docker save nipype/nipype_test:py${TRAVIS_PYTHON_VERSION//.} > $HOME/.cache/docker/image${TRAVIS_PYTHON_VERSION//.}.tar
 script:
 - docker run -v /etc/localtime:/etc/localtime:ro -v $HOME/scratch:/scratch -w /root/src/nipype nipype/nipype_test:py${TRAVIS_PYTHON_VERSION//.} nosetests --with-doctest --with-cov --cover-package nipype --cov-config /root/src/nipype/.coveragerc --logging-level=DEBUG --verbosity=3
 after_success:
