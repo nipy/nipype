@@ -45,7 +45,8 @@ ENV LANG C.UTF-8
 
 # Add conda-forge channel in conda
 RUN conda config --add channels conda-forge && \
-    conda install -y lockfile nipype matplotlib boto nose-cov
+    conda install -y lockfile nipype matplotlib && \
+    pip install boto nose-cov
 
 RUN mkdir -p /root/src/nipype
 COPY . /root/src/nipype
