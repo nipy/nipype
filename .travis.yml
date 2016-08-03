@@ -19,6 +19,11 @@ python:
 # - INSTALL_DEB_DEPENDECIES=true
 # - INSTALL_DEB_DEPENDECIES=false
 
+# Update docker to enable -f flag
+before_install:  
+  - sudo apt-get update
+  - sudo apt-get install docker-engine
+
 install:
 - mkdir -p $HOME/scratch
 - if [[ -e $HOME/.cache/docker/image${TRAVIS_PYTHON_VERSION//.}.tar ]]; then docker load -i $HOME/.cache/docker/image${TRAVIS_PYTHON_VERSION//.}.tar; fi
