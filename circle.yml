@@ -10,6 +10,7 @@ dependencies:
 
   pre:
     - mkdir -p "~/scratch/nose"
+    - mkdir -p "~/examples"
     # Let CircleCI cache the apt archive
     - sudo rm -rf /var/cache/apt/archives && sudo ln -s ~/.apt-cache /var/cache/apt/archives && mkdir -p ~/.apt-cache/partial
     - sudo apt-get -y update && sudo apt-get install -y wget bzip2
@@ -20,7 +21,7 @@ dependencies:
         timeout: 1600
     - mkdir -p ~/docker; docker save nipype/nipype_test:py27 > ~/docker/image.tar :
         timeout: 1600
-    - if [[ ! -d ~/examples/data ]]; then wget -O nipype-tutorial.tar.bz2 https://googledrive.com/host/0BxI12kyv2olZR05SU1lPampNcVE && tar jxvf nipype-tutorial.tar.bz2 && mv nipype-tutorial/* ~/examples/; fi
+    - if [[ ! -d ~/examples/data ]]; then mkdir ~/examples/; wget -O nipype-tutorial.tar.bz2 https://googledrive.com/host/0BxI12kyv2olZR05SU1lPampNcVE && tar xjf nipype-tutorial.tar.bz2 && mv nipype-tutorial/* ~/examples/; fi
     - if [[ ! -d ~/examples/feeds ]]; then wget -O fsl-feeds.tar.gz https://googledrive.com/host/0BxI12kyv2olZNXBONlJKV0Y1Tm8 && tar xzf fsl-feeds.tar.gz && mv feeds ~/examples/; fi
 
 test:
