@@ -26,7 +26,7 @@ dependencies:
 
 test:
   override:
-    - docker run -v /etc/localtime:/etc/localtime:ro -v $(pwd)/scratch:/scratch -w /scratch nipype/nipype_test:py27 /usr/bin/run_builddocs.sh
+    - docker run -v /etc/localtime:/etc/localtime:ro -v $(pwd)/scratch:/scratch -w /root/src/nipype/doc nipype/nipype_test:py27 /usr/bin/run_builddocs.sh
     - docker run -v /etc/localtime:/etc/localtime:ro -v ~/examples:/root/examples:ro -v $(pwd)/scratch:/scratch -w /scratch nipype/nipype_test:py27 /usr/bin/run_examples.sh test_spm Linear /root/examples/ workflow3d :
         timeout: 1600
     - docker run -v /etc/localtime:/etc/localtime:ro -v ~/examples:/root/examples:ro -v $(pwd)/scratch:/scratch -w /scratch nipype/nipype_test:py27 /usr/bin/run_examples.sh test_spm Linear /root/examples/ workflow4d :
