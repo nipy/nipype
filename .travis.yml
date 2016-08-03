@@ -26,7 +26,7 @@ before_install:
 install:
 - mkdir -p $HOME/scratch
 - if [[ -e $HOME/.cache/docker/image${TRAVIS_PYTHON_VERSION//.}.tar ]]; then docker load -i $HOME/.cache/docker/image${TRAVIS_PYTHON_VERSION//.}.tar; fi
-- docker build -f docker/nipype_test_py${TRAVIS_PYTHON_VERSION//.} -t nipype/nipype_test:py${TRAVIS_PYTHON_VERSION//.} .
+- docker build -f docker/nipype_test_py${TRAVIS_PYTHON_VERSION//.}/Dockerfile -t nipype/nipype_test:py${TRAVIS_PYTHON_VERSION//.} .
 script:
 - docker run -i -v /etc/localtime:/etc/localtime:ro -v $HOME/scratch:/scratch -w /scratch /usr/bin/run_travis_tests.sh nipype/nipype_test:py${TRAVIS_PYTHON_VERSION//.}
 after_success:
