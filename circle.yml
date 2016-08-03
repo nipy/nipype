@@ -9,9 +9,11 @@ dependencies:
 
   pre:
     - mkdir -p "~/scratch/nose"
-    - apt-get -y update && apt-get install -y wget bzip2
+    # Let CircleCI cache the apt archive
+    - sudo rm -rf /var/cache/apt/archives && sudo ln -s ~/.apt-cache /var/cache/apt/archives && mkdir -p ~/.apt-cache/partial
 
   override:
+    - sudo apt-get -y update && sudo apt-get install -y wget bzip2
     - if [[ -e ~/docker/image.tar ]]; then docker load -i ~/docker/image.tar; fi
     - docker build -f docker/nipype_test_py27/Dockerfile -t nipype/nipype_test:py27 . :
         timeout: 1600
