@@ -8,16 +8,21 @@ Module to unit test the runtime_profiler in nipype
 
 # Import packages
 import unittest
-from nipype.interfaces.base import traits, CommandLine, CommandLineInputSpec
+from nipype.interfaces.base import (traits, CommandLine, CommandLineInputSpec,
+                                    runtime_profile)
 
-try:
-    import psutil
-    run_profiler = True
-    skip_profile_msg = 'Run profiler tests'
-except ImportError as exc:
-    skip_profile_msg = 'Missing python packages for runtime profiling, skipping...\n'\
-                       'Error: %s' % exc
-    run_profiler = False
+run_profile = runtime_profile
+
+if run_profile:
+    try:
+        import psutil
+        skip_profile_msg = 'Run profiler tests'
+    except ImportError as exc:
+        skip_profile_msg = 'Missing python packages for runtime profiling, skipping...\n'\
+                           'Error: %s' % exc
+        run_profile = False
+else:
+    skip_profile_msg = 'Not running profiler'
 
 # UseResources inputspec
 class UseResourcesInputSpec(CommandLineInputSpec):
@@ -355,7 +360,7 @@ class RuntimeProfilerTestCase(unittest.TestCase):
         return start_str, finish_str
 
     # Test resources were used as expected in cmdline interface
-    @unittest.skipIf(run_profiler == False, skip_profile_msg)
+    @unittest.skipIf(run_profile == False, skip_profile_msg)
     def test_cmdline_profiling(self):
         '''
         Test runtime profiler correctly records workflow RAM/CPUs consumption
@@ -397,7 +402,7 @@ class RuntimeProfilerTestCase(unittest.TestCase):
                         msg=threads_err)
 
     # Test resources were used as expected
-    @unittest.skipIf(run_profiler == False, skip_profile_msg)
+    @unittest.skipIf(run_profile == False, skip_profile_msg)
     def test_function_profiling(self):
         '''
         Test runtime profiler correctly records workflow RAM/CPUs consumption
