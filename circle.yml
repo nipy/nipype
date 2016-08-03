@@ -26,20 +26,20 @@ dependencies:
 
 test:
   override:
-    - docker run -i -v /etc/localtime:/etc/localtime:ro -v ~/examples:/root/examples:ro -v $(pwd)/scratch:/scratch -w /scratch nipype/nipype_test:py27 /usr/bin/run_builddocs.sh
-    - docker run -i -v /etc/localtime:/etc/localtime:ro -v ~/examples:/root/examples:ro -v $(pwd)/scratch:/scratch -w /scratch nipype/nipype_test:py27 /usr/bin/run_examples.sh test_spm Linear /root/examples/ workflow3d :
+    - docker run -v /etc/localtime:/etc/localtime:ro -v $(pwd)/scratch:/scratch -w /scratch nipype/nipype_test:py27 /usr/bin/run_builddocs.sh
+    - docker run -v /etc/localtime:/etc/localtime:ro -v ~/examples:/root/examples:ro -v $(pwd)/scratch:/scratch -w /scratch nipype/nipype_test:py27 /usr/bin/run_examples.sh test_spm Linear /root/examples/ workflow3d :
         timeout: 1600
-    - docker run -i -v /etc/localtime:/etc/localtime:ro -v ~/examples:/root/examples:ro -v $(pwd)/scratch:/scratch -w /scratch nipype/nipype_test:py27 /usr/bin/run_examples.sh test_spm Linear /root/examples/ workflow4d :
+    - docker run -v /etc/localtime:/etc/localtime:ro -v ~/examples:/root/examples:ro -v $(pwd)/scratch:/scratch -w /scratch nipype/nipype_test:py27 /usr/bin/run_examples.sh test_spm Linear /root/examples/ workflow4d :
         timeout: 1600
-    - docker run -i -v /etc/localtime:/etc/localtime:ro -v ~/examples:/root/examples:ro -v $(pwd)/scratch:/scratch -w /scratch nipype/nipype_test:py27 /usr/bin/run_examples.sh fmri_fsl_feeds Linear /root/examples/ l1pipeline
-    - docker run -i -v /etc/localtime:/etc/localtime:ro -v ~/examples:/root/examples:ro -v $(pwd)/scratch:/scratch -w /scratch nipype/nipype_test:py27 /usr/bin/run_examples.sh fmri_spm_dartel Linear /root/examples/ level1 :
+    - docker run -v /etc/localtime:/etc/localtime:ro -v ~/examples:/root/examples:ro -v $(pwd)/scratch:/scratch -w /scratch nipype/nipype_test:py27 /usr/bin/run_examples.sh fmri_fsl_feeds Linear /root/examples/ l1pipeline
+    - docker run -v /etc/localtime:/etc/localtime:ro -v ~/examples:/root/examples:ro -v $(pwd)/scratch:/scratch -w /scratch nipype/nipype_test:py27 /usr/bin/run_examples.sh fmri_spm_dartel Linear /root/examples/ level1 :
         timeout: 1600
-    - docker run -i -v /etc/localtime:/etc/localtime:ro -v ~/examples:/root/examples:ro -v $(pwd)/scratch:/scratch -w /scratch nipype/nipype_test:py27 /usr/bin/run_examples.sh fmri_spm_dartel Linear /root/examples/ l2pipeline :
+    - docker run -v /etc/localtime:/etc/localtime:ro -v ~/examples:/root/examples:ro -v $(pwd)/scratch:/scratch -w /scratch nipype/nipype_test:py27 /usr/bin/run_examples.sh fmri_spm_dartel Linear /root/examples/ l2pipeline :
         timeout: 1600
-    - docker run -i -v /etc/localtime:/etc/localtime:ro -v ~/examples:/root/examples:ro -v $(pwd)/scratch:/scratch -w /scratch nipype/nipype_test:py27 /usr/bin/run_examples.sh fmri_fsl_reuse Linear /root/examples/ level1_workflow
-    - docker run -i -v /etc/localtime:/etc/localtime:ro -v ~/examples:/root/examples:ro -v $(pwd)/scratch:/scratch -w /scratch nipype/nipype_test:py27 /usr/bin/run_examples.sh fmri_spm_nested Linear /root/examples/ level1
-    - docker run -i -v /etc/localtime:/etc/localtime:ro -v ~/examples:/root/examples:ro -v $(pwd)/scratch:/scratch -w /scratch nipype/nipype_test:py27 /usr/bin/run_examples.sh fmri_spm_nested Linear /root/examples/ l2pipeline
-    - docker run -i -v /etc/localtime:/etc/localtime:ro -v ~/examples:/root/examples:ro -v $(pwd)/scratch:/scratch -w /scratch nipype/nipype_test:py27 /usr/bin/run_nosetests.sh :
+    - docker run -v /etc/localtime:/etc/localtime:ro -v ~/examples:/root/examples:ro -v $(pwd)/scratch:/scratch -w /scratch nipype/nipype_test:py27 /usr/bin/run_examples.sh fmri_fsl_reuse Linear /root/examples/ level1_workflow
+    - docker run -v /etc/localtime:/etc/localtime:ro -v ~/examples:/root/examples:ro -v $(pwd)/scratch:/scratch -w /scratch nipype/nipype_test:py27 /usr/bin/run_examples.sh fmri_spm_nested Linear /root/examples/ level1
+    - docker run -v /etc/localtime:/etc/localtime:ro -v ~/examples:/root/examples:ro -v $(pwd)/scratch:/scratch -w /scratch nipype/nipype_test:py27 /usr/bin/run_examples.sh fmri_spm_nested Linear /root/examples/ l2pipeline
+    - docker run -v /etc/localtime:/etc/localtime:ro -v $(pwd)/scratch:/scratch -w /scratch nipype/nipype_test:py27 /usr/bin/run_nosetests.sh :
         timeout: 2600
   post:
     - bash docker/circleci/teardown.sh
