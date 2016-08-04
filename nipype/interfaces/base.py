@@ -50,10 +50,19 @@ from .. import config, logging, LooseVersion
 from .. import __version__
 from ..external.six import string_types, text_type
 
+runtime_profile = str2bool(config.get('execution', 'profile_runtime'))
+
 nipype_version = LooseVersion(__version__)
 
 iflogger = logging.getLogger('interface')
 
+if runtime_profile:
+    try:
+        import psutil
+    except ImportError as exc:
+        iflogger.info('Unable to import packages needed for runtime profiling. '\
+                    'Turning off runtime profiler. Reason: %s' % exc)
+        runtime_profile = False
 
 __docformat__ = 'restructuredtext'
 
@@ -1349,15 +1358,6 @@ def run_command(runtime, output=None, timeout=0.01, redirect_x=False):
 
     # Init logger
     logger = logging.getLogger('workflow')
-
-    # Default to profiling the runtime
-    try:
-        import psutil
-        runtime_profile = True
-    except ImportError as exc:
-        logger.info('Unable to import packages needed for runtime profiling. '\
-                    'Turning off runtime profiler. Reason: %s' % exc)
-        runtime_profile = False
 
     # Init variables
     PIPE = subprocess.PIPE
