@@ -1,4 +1,7 @@
 #!/bin/bash
+set -e
+set -x
+set -u
 
 cd /root/src/nipype
 mkdir -p /scratch/nose

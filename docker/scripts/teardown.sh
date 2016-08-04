@@ -13,4 +13,4 @@ sudo mv ~/scratch/coverage.xml ~/coverage.xml
 mkdir -p ~/docs
 sudo mv ~/scratch/docs/* ~/docs/
 mkdir -p ~/logs
-sudo mv ~/scratch/logs/* ~/logs/
+sudo mv $(pwd)/scratch/logs/* ~/logs/
