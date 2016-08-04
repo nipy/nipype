@@ -22,6 +22,7 @@ from builtins import range
 
 import os
 import os.path as op
+import re
 from glob import glob
 import warnings
 import tempfile
@@ -608,7 +609,7 @@ class ImageStats(FSLCommand):
         return outputs
 
 
-class AvScaleInputSpec(FSLCommandInputSpec):
+class AvScaleInputSpec(CommandLineInputSpec):
     all_param = traits.Bool(False, argstr='--allparams')
     mat_file = File(exists=True, argstr='%s',
                     desc='mat file to read', position=-2)
@@ -633,7 +634,7 @@ class AvScaleOutputSpec(TraitedSpec):
     translations = traits.List(traits.Float, desc='translations')
 
 
-class AvScale(FSLCommand):
+class AvScale(CommandLine):
     """Use FSL avscale command to extract info from mat file output of FLIRT
 
     Examples
@@ -650,11 +651,9 @@ class AvScale(FSLCommand):
 
     _cmd = 'avscale'
 
-    def _format_arg(self, name, trait_spec, value):
-        return super(AvScale, self)._format_arg(name, trait_spec, value)
+    def _run_interface(self, runtime):
+        runtime = super(AvScale, self)._run_interface(runtime)
 
-    def aggregate_outputs(self, runtime=None, needed_outputs=None):
-        outputs = self._outputs()
 
         expr = re.compile(
             'Rotation\ &\ Translation\ Matrix:\n(?P<rot_tran_mat>[0-9\.\ \n-]+)[\s\n]*'
@@ -669,26 +668,30 @@ class AvScale(FSLCommand):
             '(?P<fwd_half_xfm>[0-9\.\ \n-]+)[\s\n]*'
             'Backward\ half\ transform\ =[\s]*\n'
             '(?P<bwd_half_xfm>[0-9\.\ \n-]+)[\s\n]*')
-
         out = expr.search(runtime.stdout).groupdict()
-
-        outputs['rotation_translation_matrix'] = [
-            float(v) for v in r.split(' ') for r in out['rot_tran_mat'].strip().split('\n')]
-        outputs['scales'] = [float(s) for s in out['scales'].strip()]
-        outputs['skews'] = [float(s) for s in out['skews'].strip()]
+        outputs = {}
+        outputs['rotation_translation_matrix'] = [[
+            float(v) for v in r.strip().split(' ')] for r in out['rot_tran_mat'].strip().split('\n')]
+        outputs['scales'] = [float(s) for s in out['scales'].strip().split(' ')]
+        outputs['skews'] = [float(s) for s in out['skews'].strip().split(' ')]
         outputs['average_scaling'] = float(out['avg_scaling'].strip())
         outputs['determinant'] = float(out['determinant'].strip())
         outputs['left_right_orientation_preserved'] = out['lr_orientation'].strip() == 'preserved'
-        outputs['forward_half_transform'] = [
-            float(v) for v in r.split(' ') for r in out['fwd_half_xfm'].strip().split('\n')]
-        outputs['backward_half_transform'] = [
-            float(v) for v in r.split(' ') for r in out['bwd_half_xfm'].strip().split('\n')]
+        outputs['forward_half_transform'] = [[
+            float(v) for v in r.strip().split(' ')] for r in out['fwd_half_xfm'].strip().split('\n')]
+        outputs['backward_half_transform'] = [[
+            float(v) for v in r.strip().split(' ')] for r in out['bwd_half_xfm'].strip().split('\n')]
 
         if self.inputs.all_param:
             outputs['rot_angles'] = [float(r) for r in out['rot_angles'].strip().split(' ')]
             outputs['translations'] = [float(r) for r in out['translations'].strip().split(' ')]
 
-        return outputs
+
+        setattr(self, '_results', outputs)
+        return runtime
+
+    def _list_outputs(self):
+        return self._results
 
 
 class OverlayInputSpec(FSLCommandInputSpec):
