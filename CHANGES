@@ -1,6 +1,11 @@
 Upcoming release 0.13
 =====================
 
+Release 0.12.1 (August 3, 2016)
+==============================
+* FIX: runtime profiling is optional and off by default (https://github.com/nipy/nipype/pull/1561)
+* TST: circle CI tests run with docker (https://github.com/nipy/nipype/pull/1541)
+* FIX: workflow export functions without import error (https://github.com/nipy/nipype/pull/1552)
 
 Release 0.12.0 (July 12, 2016)
 ==============================

@@ -30,6 +30,7 @@ except ImportError:
     from funcsigs import signature
 import os
 import re
+import pickle
 import numpy as np
 from nipype.utils.misc import package_check
 from functools import reduce
