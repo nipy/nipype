@@ -220,6 +220,10 @@ class Dcm2niixInputSpec(CommandLineInputSpec):
                               desc="Convert only one image (filename as last input")
     verbose = traits.Bool(False, argstr='-v', usedefault=True,
                           desc="Verbose output")
+    crop = traits.Bool(False, argstr='-x', usedefault=True,
+                       desc="Crop 3D T1 acquisitions")
+    has_private = traits.Bool(False, argstr='-t', usedefault=True,
+                              desc="Flag if text notes includes private patient details")
 
 
 class Dcm2niixOutputSpec(TraitedSpec):
@@ -231,16 +235,22 @@ class Dcm2niixOutputSpec(TraitedSpec):
 
 class Dcm2niix(CommandLine):
     """Uses Chris Rorden's dcm2niix to convert dicom files
+
     Examples
     ========
+
     >>> from nipype.interfaces.dcm2nii import Dcm2niix
     >>> converter = Dcm2niix()
     >>> converter.inputs.source_names = ['functional_1.dcm', 'functional_2.dcm']
     >>> converter.inputs.compress = 'i'
     >>> converter.inputs.single_file = True
     >>> converter.inputs.output_dir = '.'
-    >>> converter.cmdline
-    'dcm2niix -b y -z i -m n -f %t%p -o . -s y -v n functional_1.dcm'
+    >>> converter.cmdline # doctest: +SKIP
+    'dcm2niix -b y -z i -x n -t n -m n -f %t%p -o . -s y -v n functional_1.dcm'
+
+    >>> flags = '-'.join([val.strip() + ' ' for val in sorted(' '.join(converter.cmdline.split()[1:-1]).split('-'))])
+    >>> flags
+    ' -b y -f %t%p -m n -o . -s y -t n -v n -x n -z i '
     """
 
     input_spec = Dcm2niixInputSpec
@@ -248,7 +258,8 @@ class Dcm2niix(CommandLine):
     _cmd = 'dcm2niix'
 
     def _format_arg(self, opt, spec, val):
-        if opt in ['bids_format', 'merge_imgs', 'single_file', 'verbose']:
+        if opt in ['bids_format', 'merge_imgs', 'single_file', 'verbose', 'crop',
+                   'has_private']:
             spec = deepcopy(spec)
             if val:
                 spec.argstr += ' y'
@@ -299,7 +310,7 @@ class Dcm2niix(CommandLine):
                 if out_file:
                     files.append(out_file + ".nii.gz")
                     if self.inputs.bids_format:
-                        bids.append(out_file + ".bids")
+                        bids.append(out_file + ".json")
                     continue
             skip = False
         # just return what was done

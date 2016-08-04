@@ -49,6 +49,7 @@ from ..utils.provenance import write_provenance
 from .. import config, logging, LooseVersion
 from .. import __version__
 from ..external.six import string_types, text_type
+from ..external.due import due
 
 nipype_version = LooseVersion(__version__)
 
@@ -1016,9 +1017,9 @@ class BaseInterface(Interface):
     def _duecredit_cite(self):
         """ Add the interface references to the duecredit citations
         """
-        for r in self._references:
-            r['path'] = self.__module__ # TODO: check if this is correct
-            due.cite(**r, path=self.__module__)
+        for r in self.references_:
+            r['path'] = self.__module__
+            due.cite(**r)
 
     def run(self, **inputs):
         """Execute this interface.
@@ -1078,7 +1079,7 @@ class BaseInterface(Interface):
 
             if config.has_option('logging', 'interface_level') and \
                     config.get('logging', 'interface_level').lower() == 'debug':
-                inputs_str = "Inputs:" + str(self.inputs) + "\n"
+                inputs_str = "\nInputs:" + str(self.inputs) + "\n"
             else:
                 inputs_str = ''
 

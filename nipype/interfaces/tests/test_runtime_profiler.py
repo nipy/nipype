@@ -382,7 +382,7 @@ class RuntimeProfilerTestCase(unittest.TestCase):
         # Get margin of error for RAM GB
         allowed_gb_err = self.mem_err_gb
         runtime_gb_err = np.abs(runtime_gb-num_gb)
-        # 
+        #
         expected_runtime_threads = num_threads
 
         # Error message formatting
@@ -393,7 +393,8 @@ class RuntimeProfilerTestCase(unittest.TestCase):
 
         # Assert runtime stats are what was input
         self.assertLessEqual(runtime_gb_err, allowed_gb_err, msg=mem_err)
-        self.assertEqual(expected_runtime_threads, runtime_threads, msg=threads_err)
+        self.assertTrue(abs(expected_runtime_threads - runtime_threads) <= 1,
+                        msg=threads_err)
 
     # Test resources were used as expected
     @unittest.skipIf(run_profiler == False, skip_profile_msg)
@@ -423,7 +424,7 @@ class RuntimeProfilerTestCase(unittest.TestCase):
         # Get margin of error for RAM GB
         allowed_gb_err = self.mem_err_gb
         runtime_gb_err = np.abs(runtime_gb-num_gb)
-        # 
+        #
         expected_runtime_threads = num_threads
 
         # Error message formatting
@@ -434,7 +435,8 @@ class RuntimeProfilerTestCase(unittest.TestCase):
 
         # Assert runtime stats are what was input
         self.assertLessEqual(runtime_gb_err, allowed_gb_err, msg=mem_err)
-        self.assertEqual(expected_runtime_threads, runtime_threads, msg=threads_err)
+        self.assertTrue(abs(expected_runtime_threads - runtime_threads) <= 1,
+                        msg=threads_err)
 
 
 # Command-line run-able unittest module

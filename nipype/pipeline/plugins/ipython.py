@@ -5,6 +5,8 @@
 
 from future import standard_library
 standard_library.install_aliases()
+from future.utils import raise_from
+
 from pickle import dumps
 
 import sys
@@ -48,6 +50,11 @@ class IPythonPlugin(DistributedPluginBase):
         if IPython_not_loaded:
             raise ImportError('Please install ipyparallel to use this plugin.')
         super(IPythonPlugin, self).__init__(plugin_args=plugin_args)
+        valid_args = ('url_file', 'profile', 'cluster_id', 'context', 'debug',
+                      'timeout', 'config', 'username', 'sshserver', 'sshkey',
+                      'password', 'paramiko')
+        self.client_args = {arg: plugin_args[arg]
+                            for arg in valid_args if arg in plugin_args}
         self.iparallel = None
         self.taskclient = None
         self.taskmap = {}
@@ -62,19 +69,20 @@ class IPythonPlugin(DistributedPluginBase):
             name = 'ipyparallel'
             __import__(name)
             self.iparallel = sys.modules[name]
-        except ImportError:
-            raise ImportError("ipyparallel not found. Parallel execution "
-                              "will be unavailable")
+        except ImportError as e:
+            raise_from(ImportError("ipyparallel not found. Parallel execution "
+                                   "will be unavailable"), e)
         try:
-            self.taskclient = self.iparallel.Client()
+            self.taskclient = self.iparallel.Client(**self.client_args)
         except Exception as e:
             if isinstance(e, TimeoutError):
-                raise Exception("No IPython clients found.")
+                raise_from(Exception("No IPython clients found."), e)
             if isinstance(e, IOError):
-                raise Exception("ipcluster/ipcontroller has not been started")
+                raise_from(Exception("ipcluster/ipcontroller has not been started"), e)
             if isinstance(e, ValueError):
-                raise Exception("Ipython kernel not installed")
-            raise e
+                raise_from(Exception("Ipython kernel not installed"), e)
+            else:
+                raise e
         return super(IPythonPlugin, self).run(graph, config, updatehash=updatehash)
 
     def _get_result(self, taskid):

@@ -3,13 +3,14 @@ settings in setup.py, the nipy top-level docstring, and for building the
 docs.  In setup.py in particular, we exec this file, so it cannot import nipy
 """
 
-# nipy version information.  An empty _version_extra corresponds to a
+
+# nipype version information.  An empty _version_extra corresponds to a
 # full release.  '.dev' as a _version_extra string means this is a development
 # version
 _version_major = 0
 _version_minor = 12
 _version_micro = 0
-_version_extra = '-rc1'  # Remove -dev for release
+_version_extra = ''  # Remove -dev for release
 
 
 def get_nipype_gitversion():
@@ -141,5 +142,6 @@ REQUIRES = ["nibabel>=%s" % NIBABEL_MIN_VERSION,
             "future>=%s" % FUTURE_MIN_VERSION,
             "simplejson>=%s" % SIMPLEJSON_MIN_VERSION,
             "prov>=%s" % PROV_MIN_VERSION,
+            "mock",
             "xvfbwrapper"]
 STATUS = 'stable'
