@@ -609,8 +609,11 @@ class ImageStats(FSLCommand):
 
 
 class AvScaleInputSpec(FSLCommandInputSpec):
-    mat_file = File(exists=True, argstr="%s",
-                    desc='mat file to read', position=0)
+    all_param = traits.Bool(False, argstr='--allparams')
+    mat_file = File(exists=True, argstr='%s',
+                    desc='mat file to read', position=-2)
+    ref_file = File(exists=True, argstr='%s', position=-1,
+                    desc='reference file to get center of rotation')
 
 
 class AvScaleOutputSpec(TraitedSpec):
