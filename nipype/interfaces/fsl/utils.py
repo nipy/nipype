@@ -617,16 +617,20 @@ class AvScaleInputSpec(FSLCommandInputSpec):
 
 
 class AvScaleOutputSpec(TraitedSpec):
-    rotation_translation_matrix = traits.Any(
-        desc='Rotation and Translation Matrix')
-    scales = traits.Any(desc='Scales (x,y,z)')
-    skews = traits.Any(desc='Skews')
-    average_scaling = traits.Any(desc='Average Scaling')
-    determinant = traits.Any(desc='Determinant')
-    forward_half_transform = traits.Any(desc='Forward Half Transform')
-    backward_half_transform = traits.Any(desc='Backwards Half Transform')
+    rotation_translation_matrix = traits.List(
+        traits.List(traits.Float), desc='Rotation and Translation Matrix')
+    scales = traits.List(traits.Float, desc='Scales (x,y,z)')
+    skews = traits.List(traits.Float, desc='Skews')
+    average_scaling = traits.Float(desc='Average Scaling')
+    determinant = traits.Float(desc='Determinant')
+    forward_half_transform = traits.List(
+        traits.List(traits.Float), desc='Forward Half Transform')
+    backward_half_transform = traits.List(
+        traits.List(traits.Float), desc='Backwards Half Transform')
     left_right_orientation_preserved = traits.Bool(
         desc='True if LR orientation preserved')
+    rot_angles = traits.List(traits.Float, desc='rotation angles')
+    translations = traits.List(traits.Float, desc='translations')
 
 
 class AvScale(FSLCommand):
@@ -652,26 +656,37 @@ class AvScale(FSLCommand):
     def aggregate_outputs(self, runtime=None, needed_outputs=None):
         outputs = self._outputs()
 
-        def lines_to_float(lines):
-            out = []
-            for line in lines:
-                values = line.split()
-                out.append([float(val) for val in values])
-            return out
+        expr = re.compile(
+            'Rotation\ &\ Translation\ Matrix:\n(?P<rot_tran_mat>[0-9\.\ \n-]+)[\s\n]*'
+            '(Rotation\ Angles\ \(x,y,z\)\ \[rads\]\ =\ (?P<rot_angles>[0-9\.\ -]+))?[\s\n]*'
+            '(Translations\ \(x,y,z\)\ \[mm\]\ =\ (?P<translations>[0-9\.\ -]+))?[\s\n]*'
+            'Scales\ \(x,y,z\)\ =\ (?P<scales>[0-9\.\ -]+)[\s\n]*'
+            'Skews\ \(xy,xz,yz\)\ =\ (?P<skews>[0-9\.\ -]+)[\s\n]*'
+            'Average\ scaling\ =\ (?P<avg_scaling>[0-9\.-]+)[\s\n]*'
+            'Determinant\ =\ (?P<determinant>[0-9\.-]+)[\s\n]*'
+            'Left-Right\ orientation:\ (?P<lr_orientation>[A-Za-z]+)[\s\n]*'
+            'Forward\ half\ transform\ =[\s]*\n'
+            '(?P<fwd_half_xfm>[0-9\.\ \n-]+)[\s\n]*'
+            'Backward\ half\ transform\ =[\s]*\n'
+            '(?P<bwd_half_xfm>[0-9\.\ \n-]+)[\s\n]*')
 
-        out = runtime.stdout.split('\n')
+        out = expr.search(runtime.stdout).groupdict()
 
-        outputs.rotation_translation_matrix = lines_to_float(out[1:5])
-        outputs.scales = lines_to_float([out[6].split(" = ")[1]])
-        outputs.skews = lines_to_float([out[8].split(" = ")[1]])
-        outputs.average_scaling = lines_to_float([out[10].split(" = ")[1]])
-        outputs.determinant = lines_to_float([out[12].split(" = ")[1]])
-        if out[13].split(": ")[1] == 'preserved':
-            outputs.left_right_orientation_preserved = True
-        else:
-            outputs.left_right_orientation_preserved = False
-        outputs.forward_half_transform = lines_to_float(out[16:20])
-        outputs.backward_half_transform = lines_to_float(out[22:-1])
+        outputs['rotation_translation_matrix'] = [
+            float(v) for v in r.split(' ') for r in out['rot_tran_mat'].strip().split('\n')]
+        outputs['scales'] = [float(s) for s in out['scales'].strip()]
+        outputs['skews'] = [float(s) for s in out['skews'].strip()]
+        outputs['average_scaling'] = float(out['avg_scaling'].strip())
+        outputs['determinant'] = float(out['determinant'].strip())
+        outputs['left_right_orientation_preserved'] = out['lr_orientation'].strip() == 'preserved'
+        outputs['forward_half_transform'] = [
+            float(v) for v in r.split(' ') for r in out['fwd_half_xfm'].strip().split('\n')]
+        outputs['backward_half_transform'] = [
+            float(v) for v in r.split(' ') for r in out['bwd_half_xfm'].strip().split('\n')]
+
+        if self.inputs.all_param:
+            outputs['rot_angles'] = [float(r) for r in out['rot_angles'].strip().split(' ')]
+            outputs['translations'] = [float(r) for r in out['translations'].strip().split(' ')]
 
         return outputs
 
