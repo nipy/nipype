@@ -5,6 +5,8 @@
 """Utility routines for workflow graphs
 """
 
+from __future__ import absolute_import
+
 from future import standard_library
 standard_library.install_aliases()
 
@@ -22,8 +24,13 @@ from collections import OrderedDict
 from copy import deepcopy
 from glob import glob
 from collections import defaultdict
+try:
+    from inspect import signature
+except ImportError:
+    from funcsigs import signature
 import os
 import re
+import pickle
 import numpy as np
 from nipype.utils.misc import package_check
 from functools import reduce
@@ -115,6 +122,7 @@ def _write_inputs(node):
 
 def format_node(node, format='python', include_config=False):
     """Format a node in a given output syntax."""
+    from .nodes import MapNode
     lines = []
     name = node.fullname.replace('.', '_')
     if format == 'python':
@@ -122,8 +130,9 @@ def format_node(node, format='python', include_config=False):
         importline = 'from %s import %s' % (klass.__module__,
                                             klass.__class__.__name__)
         comment = '# Node: %s' % node.fullname
-        spec = inspect.signature(node._interface.__init__)
-        args = spec.args[1:]
+        spec = signature(node._interface.__init__)
+        args = [p.name for p in spec.parameters.values()]
+        args = args[1:]
         if args:
             filled_args = []
             for arg in args:
@@ -1056,9 +1065,15 @@ def make_output_dir(outdir):
     outdir : output directory to create
 
     """
-    if not os.path.exists(os.path.abspath(outdir)):
-        logger.debug("Creating %s" % outdir)
-        os.makedirs(outdir)
+    # this odd approach deals with concurrent directory cureation
+    try:
+        if not os.path.exists(os.path.abspath(outdir)):
+            logger.debug("Creating %s" % outdir)
+            os.makedirs(outdir)
+    except OSError:
+            logger.debug("Problem creating %s" % outdir)
+            if not os.path.exists(outdir):
+               raise OSError('Could not create %s'%outdir)
     return outdir
 
 

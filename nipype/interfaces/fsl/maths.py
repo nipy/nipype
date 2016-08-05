@@ -111,6 +111,17 @@ class Threshold(MathsCommand):
             return arg
         return super(Threshold, self)._format_arg(name, spec, value)
 
+class StdImageInput(MathsInput):
+
+    dimension = traits.Enum("T", "X", "Y", "Z", usedefault=True, argstr="-%sstd", position=4,
+                            desc="dimension to standard deviate across")
+
+
+class StdImage(MathsCommand):
+    """Use fslmaths to generate a standard deviation in an image across a given dimension.
+    """
+    input_spec = StdImageInput
+    _suffix = "_std"
 
 class MeanImageInput(MathsInput):
 

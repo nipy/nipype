@@ -50,10 +50,19 @@ from .. import config, logging, LooseVersion
 from .. import __version__
 from ..external.six import string_types, text_type
 
+runtime_profile = str2bool(config.get('execution', 'profile_runtime'))
+
 nipype_version = LooseVersion(__version__)
 
 iflogger = logging.getLogger('interface')
 
+if runtime_profile:
+    try:
+        import psutil
+    except ImportError as exc:
+        iflogger.info('Unable to import packages needed for runtime profiling. '\
+                    'Turning off runtime profiler. Reason: %s' % exc)
+        runtime_profile = False
 
 __docformat__ = 'restructuredtext'
 
@@ -1056,7 +1065,7 @@ class BaseInterface(Interface):
 
             if config.has_option('logging', 'interface_level') and \
                     config.get('logging', 'interface_level').lower() == 'debug':
-                inputs_str = "Inputs:" + str(self.inputs) + "\n"
+                inputs_str = "\nInputs:" + str(self.inputs) + "\n"
             else:
                 inputs_str = ''
 
@@ -1197,7 +1206,7 @@ class Stream(object):
 # Get number of threads for process
 def _get_num_threads(proc):
     """Function to get the number of threads a process is using
-    NOTE: If 
+    NOTE: If
 
     Parameters
     ----------
@@ -1349,15 +1358,6 @@ def run_command(runtime, output=None, timeout=0.01, redirect_x=False):
 
     # Init logger
     logger = logging.getLogger('workflow')
-
-    # Default to profiling the runtime
-    try:
-        import psutil
-        runtime_profile = True
-    except ImportError as exc:
-        logger.info('Unable to import packages needed for runtime profiling. '\
-                    'Turning off runtime profiler. Reason: %s' % exc)
-        runtime_profile = False
 
     # Init variables
     PIPE = subprocess.PIPE
@@ -1660,7 +1660,7 @@ class CommandLine(BaseInterface):
         runtime = self._run_interface(runtime)
         return runtime
 
-    def _run_interface(self, runtime, correct_return_codes=[0]):
+    def _run_interface(self, runtime, correct_return_codes=(0,)):
         """Execute command via subprocess
 
         Parameters

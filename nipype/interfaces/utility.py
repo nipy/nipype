@@ -22,7 +22,7 @@ import numpy as np
 import nibabel as nb
 
 from .base import (traits, TraitedSpec, DynamicTraitedSpec, File,
-                   Undefined, isdefined, OutputMultiPath,
+                   Undefined, isdefined, OutputMultiPath, runtime_profile,
                    InputMultiPath, BaseInterface, BaseInterfaceInputSpec)
 from .io import IOBase, add_traits
 from ..external.six import string_types
@@ -30,6 +30,13 @@ from ..testing import assert_equal
 from ..utils.filemanip import (filename_to_list, copyfile, split_filename)
 from ..utils.misc import getsource, create_function_from_source
 
+if runtime_profile:
+    try:
+        import psutil
+    except ImportError as exc:
+        logger.info('Unable to import packages needed for runtime profiling. '\
+                    'Turning off runtime profiler. Reason: %s' % exc)
+        runtime_profile = False
 
 class IdentityInterface(IOBase):
     """Basic interface class generates identity mappings
@@ -459,20 +466,10 @@ class Function(IOBase):
             if isdefined(value):
                 args[name] = value
 
-        # Runtime profiler on if dependecies available
-        try:
-            import psutil
+        # Profile resources if set
+        if runtime_profile:
             from nipype.interfaces.base import get_max_resources_used
             import multiprocessing
-            runtime_profile = True
-        except ImportError as exc:
-            logger.info('Unable to import packages needed for runtime profiling. '\
-                        'Turning off runtime profiler. Reason: %s' % exc)
-            runtime_profile = False
-
-        # Profile resources if set
-        #runtime_profile=False
-        if runtime_profile:
             # Init communication queue and proc objs
             queue = multiprocessing.Queue()
             proc = multiprocessing.Process(target=_function_handle_wrapper,
