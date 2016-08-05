@@ -6,7 +6,7 @@ from multiprocessing import cpu_count
 
 import nipype.interfaces.base as nib
 from nipype.utils import draw_gantt_chart
-from nipype.testing import assert_equal
+from nipype.testing import assert_equal, skipif
 import nipype.pipeline.engine as pe
 from nipype.pipeline.plugins.callback_log import log_nodes_cb
 from nipype.pipeline.plugins.multiproc import get_system_total_memory_gb
@@ -180,7 +180,7 @@ def test_do_not_use_more_memory_then_specified():
 
     os.remove(LOG_FILENAME)
 
-
+@skipif(nib.runtime_profile == False)
 def test_do_not_use_more_threads_then_specified():
     LOG_FILENAME = 'callback.log'
     my_logger = logging.getLogger('callback')
