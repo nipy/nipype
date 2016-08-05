@@ -2,6 +2,7 @@ Upcoming release 0.13
 =====================
 
 * TST: reduce the size of docker images & use tags for images (https://github.com/nipy/nipype/pull/1564)
+* ENH: Implement missing inputs/outputs in FSL AvScale (https://github.com/nipy/nipype/pull/1563)
 
 
 Release 0.12.1 (August 3, 2016)

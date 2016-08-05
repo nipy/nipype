@@ -4,7 +4,9 @@ from ..utils import AvScale
 
 
 def test_AvScale_inputs():
-    input_map = dict(args=dict(argstr='%s',
+    input_map = dict(all_param=dict(argstr='--allparams',
+    ),
+    args=dict(argstr='%s',
     ),
     environ=dict(nohash=True,
     usedefault=True,
@@ -13,9 +15,12 @@ def test_AvScale_inputs():
     usedefault=True,
     ),
     mat_file=dict(argstr='%s',
-    position=0,
+    position=-2,
     ),
     output_type=dict(),
+    ref_file=dict(argstr='%s',
+    position=-1,
+    ),
     terminal_output=dict(nohash=True,
     ),
     )
@@ -32,9 +37,11 @@ def test_AvScale_outputs():
     determinant=dict(),
     forward_half_transform=dict(),
     left_right_orientation_preserved=dict(),
+    rot_angles=dict(),
     rotation_translation_matrix=dict(),
     scales=dict(),
     skews=dict(),
+    translations=dict(),
     )
     outputs = AvScale.output_spec()
 
