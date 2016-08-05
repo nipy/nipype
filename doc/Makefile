@@ -35,9 +35,9 @@ htmlonly:
 
 api:
 	rm -rf api/generated
-	python ../tools/build_modref_templates.py
+	python -u ../tools/build_modref_templates.py
 	rm -rf interfaces/generated
-	python ../tools/build_interface_docs.py
+	python -u ../tools/build_interface_docs.py
 	@echo "Build API docs finished."
 
 html: clean examples2rst api htmlonly
@@ -76,7 +76,7 @@ doctest:
 	      "results in _build/doctest/output.txt."
 
 gitwash-update:
-	python ../tools/gitwash_dumper.py devel nipype \
+	python -u ../tools/gitwash_dumper.py devel nipype \
             --repo-name=nipype \
             --github-user=nipy \
             --project-url=http://nipy.org/nipype \
