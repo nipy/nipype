@@ -26,50 +26,14 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-FROM neurodebian:latest
-MAINTAINER Nipype developers
+FROM nipype/nipype_test:nodeps-base
+MAINTAINER The nipype developers
 
-# Preparations
-RUN ln -snf /bin/bash /bin/sh
-ARG DEBIAN_FRONTEND=noninteractive
+RUN mkdir -p /root/src/nipype
+COPY . /root/src/nipype
 
-WORKDIR /root
-RUN apt-get -y update && \
-    apt-get install -y curl \
-                       git \
-                       xvfb \
-                       bzip2 \
-                       unzip \
-                       apt-utils \
-                       fusefat \
-                       graphviz \
-                       make && \
-    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
-
-# Install miniconda
-RUN curl -sSLO https://repo.continuum.io/miniconda/Miniconda-latest-Linux-x86_64.sh && \
-    /bin/bash Miniconda-latest-Linux-x86_64.sh -b -p /usr/local/miniconda && \
-    rm Miniconda-latest-Linux-x86_64.sh
-
-ENV PATH /usr/local/miniconda/bin:$PATH
-
-# http://bugs.python.org/issue19846
-# > At the moment, setting "LANG=C" on a Linux system *fundamentally breaks Python 3*, and that's not OK.
-ENV LANG C.UTF-8
-
-# Add conda-forge channel in conda
-RUN conda config --add channels conda-forge && \
-    conda install -y lockfile \
-                     matplotlib \
-                     sphinx \
-                     boto \
-                     coverage \
-                     python-coveralls \
-                     dipy \
-                     nipype && \
-    conda clean -p && \
-    pip install --no-cache-dir nose-cov
-
-ENV SHELL /bin/bash
+RUN cd /root/src/nipype && \
+    pip install -r requirements.txt && \
+    pip install -e .
 
 CMD ["/bin/bash"]
