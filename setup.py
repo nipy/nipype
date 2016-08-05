@@ -244,7 +244,29 @@ def _package_status(pkg_name, version, version_getter, checker):
         return 'low-version', have_version
     return 'satisfied', have_version
 
-cmdclass = {'build_py': get_comrec_build('nipype')}
+
+# Based on http://stackoverflow.com/a/18410671/1265472
+import distutils
+import distutils.command.install_lib
+
+class _install_lib(distutils.command.install_lib.install_lib):
+  """We need a test script to be executable upon installation"""
+
+  def run(self):
+    distutils.command.install_lib.install_lib.run(self)
+    log.info("Running custom install_lib to fix up permissions")
+    for fn in self.get_outputs():
+      if fn.endswith(pjoin('interfaces', 'tests', 'use_resources')):
+        # copied from distutils source - make the binaries executable
+        mode = ((os.stat(fn).st_mode) | 0555) & 07777
+        log.info("changing mode of %s to %o", fn, mode)
+        os.chmod(fn, mode)
+
+
+cmdclass = {
+    'build_py': get_comrec_build('nipype'),
+    'install_lib': _install_lib,
+}
 
 # Get version and release info, which is all stored in nipype/info.py
 ver_file = os.path.join('nipype', 'info.py')
