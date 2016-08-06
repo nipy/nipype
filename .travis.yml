@@ -15,8 +15,8 @@ python:
 - 3.4
 - 3.5
 
-# env:
-# - INSTALL_DEB_DEPENDECIES=true
+env:
+- INSTALL_DEB_DEPENDECIES="nodeps"
 # - INSTALL_DEB_DEPENDECIES=false
 
 # Update docker to enable -f flag
@@ -27,13 +27,13 @@ before_install:
 install:
 - mkdir -p $HOME/scratch
 - mkdir -p $HOME/.cache/docker
-- if [[ -e $HOME/.cache/docker/image.tar ]]; then docker load -i $HOME/.cache/docker/image.tar; fi
-- docker pull nipype/nipype_test:nodeps-base
-- travis_wait 30 docker save nipype/nipype_test:nodeps-base -o $HOME/.cache/docker/image.tar
-- docker build -f docker/nipype_test_nodeps/Dockerfile_py${TRAVIS_PYTHON_VERSION//.} -t nipype/nipype_test:nodeps-py${TRAVIS_PYTHON_VERSION//.} .
+- if [[ -e $HOME/.cache/docker/image${TRAVIS_PYTHON_VERSION//.}.tar ]]; then docker load -i $HOME/.cache/docker/image${TRAVIS_PYTHON_VERSION//.}.tar; fi
+- docker pull nipype/nipype_test:${INSTALL_DEB_DEPENDECIES}-base${TRAVIS_PYTHON_VERSION//.}
+- travis_wait 30 docker save nipype/nipype_test:${INSTALL_DEB_DEPENDECIES}-base${TRAVIS_PYTHON_VERSION//.} -o $HOME/.cache/docker/image${TRAVIS_PYTHON_VERSION//.}.tar
+- docker build -f docker/nipype_test_${INSTALL_DEB_DEPENDECIES}/Dockerfile_py${TRAVIS_PYTHON_VERSION//.} -t nipype/nipype_test:${INSTALL_DEB_DEPENDECIES}-py${TRAVIS_PYTHON_VERSION//.} .
 
 script:
-- docker run -v /etc/localtime:/etc/localtime:ro -v $HOME/scratch:/scratch -w /root/src/nipype nipype/nipype_test:nodeps-py${TRAVIS_PYTHON_VERSION//.} nosetests --with-doctest --with-cov --cover-package nipype --cov-config /root/src/nipype/.coveragerc --logging-level=DEBUG --verbosity=3
+- docker run -v /etc/localtime:/etc/localtime:ro -v $HOME/scratch:/scratch -w /root/src/nipype nipype/nipype_test:${INSTALL_DEB_DEPENDECIES}-py${TRAVIS_PYTHON_VERSION//.} nosetests --with-doctest --with-cov --cover-package nipype --cov-config /root/src/nipype/.coveragerc --logging-level=DEBUG --verbosity=3
 after_success:
 - coveralls --config_file .coveragerc
 deploy:

@@ -26,32 +26,38 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-FROM neurodebian:latest
+FROM alpine:latest
 MAINTAINER Nipype developers
 
-# Preparations
-RUN ln -snf /bin/bash /bin/sh
-ARG DEBIAN_FRONTEND=noninteractive
+RUN apk --update --no-cache --repository http://dl-4.alpinelinux.org/alpine/edge/community add \
+    bash \
+    curl \
+    xvfb \
+    graphviz \
+    make \
+    ca-certificates \
+    bzip2 \
+    unzip \
+    libstdc++ \
+    glib \
+    && curl -L "https://github.com/andyshinn/alpine-pkg-glibc/releases/download/2.23-r1/glibc-2.23-r1.apk" -o /tmp/glibc.apk \
+    && curl -L "https://github.com/andyshinn/alpine-pkg-glibc/releases/download/2.23-r1/glibc-bin-2.23-r1.apk" -o /tmp/glibc-bin.apk \
+    && curl -L "https://github.com/andyshinn/alpine-pkg-glibc/releases/download/2.23-r1/glibc-i18n-2.23-r1.apk" -o /tmp/glibc-i18n.apk \
+    && apk add --allow-untrusted /tmp/glibc*.apk \
+    && /usr/glibc-compat/sbin/ldconfig /lib /usr/glibc-compat/lib \
+    && /usr/glibc-compat/bin/localedef -i en_US -f UTF-8 en_US.UTF-8 \
+    && rm -rf /tmp/glibc*apk /var/cache/apk/*
 
-WORKDIR /root
-RUN apt-get -y update && \
-    apt-get install -y curl \
-                       git \
-                       xvfb \
-                       bzip2 \
-                       unzip \
-                       apt-utils \
-                       fusefat \
-                       graphviz \
-                       make && \
-    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+#                       fusefat \
+# Configure environment
+ENV CONDA_DIR=/opt/conda
+ENV PATH=$CONDA_DIR/bin:$PATH SHELL=/bin/bash
 
-# Install miniconda
-RUN curl -sSLO https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh && \
-    /bin/bash Miniconda3-latest-Linux-x86_64.sh -b -p /usr/local/miniconda && \
+# Install conda
+RUN mkdir -p $CONDA_DIR && \
+    curl -sSLO https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh && \
+    /bin/bash Miniconda3-latest-Linux-x86_64.sh -f -b -p $CONDA_DIR && \
     rm Miniconda3-latest-Linux-x86_64.sh
-
-ENV PATH /usr/local/miniconda/bin:$PATH
 
 # http://bugs.python.org/issue19846
 # > At the moment, setting "LANG=C" on a Linux system *fundamentally breaks Python 3*, and that's not OK.
@@ -69,7 +75,5 @@ RUN conda config --add channels conda-forge && \
                      nipype && \
     conda clean -p && \
     pip install --no-cache-dir nose-cov
-
-ENV SHELL /bin/bash
 
 CMD ["/bin/bash"]
