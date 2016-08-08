@@ -32,7 +32,8 @@ MAINTAINER The nipype developers
 RUN mkdir -p /root/src/nipype
 COPY . /root/src/nipype
 
-RUN cd /root/src/nipype && \
+RUN rm -r /opt/conda/lib/python3.5/site-packages/nipype* && \
+    cd /root/src/nipype && \
     pip install -r requirements.txt && \
     pip install -e .
 
