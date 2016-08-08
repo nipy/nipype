@@ -1,5 +1,7 @@
 [run]
 branch = True
+concurrency = multiprocessing
+data_file = ./.coverage
 source = nipype
 include = */nipype/*
 omit =
