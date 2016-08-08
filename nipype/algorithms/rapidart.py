@@ -19,7 +19,7 @@ These functions include:
 """
 
 from __future__ import division
-from builtins import range
+from builtins import open, range
 
 import os
 from copy import deepcopy

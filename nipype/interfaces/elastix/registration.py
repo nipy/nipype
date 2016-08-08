@@ -9,6 +9,7 @@ displacement maps to images and points.
 """
 
 from __future__ import absolute_import
+from builtins import open
 
 import os.path as op
 import re

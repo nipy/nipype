@@ -13,6 +13,7 @@ docstring = docparse.get_doc(better.cmd, better.opt_map)
 
 """
 
+from builtins import open
 import subprocess
 from nipype.interfaces.base import CommandLine
 from nipype.utils.misc import is_container

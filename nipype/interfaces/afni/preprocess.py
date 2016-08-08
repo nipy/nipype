@@ -9,6 +9,8 @@
     >>> os.chdir(datadir)
 """
 
+from builtins import open
+
 import os
 import os.path as op
 import re
@@ -2055,9 +2057,8 @@ class ROIStats(AFNICommandBase):
     def aggregate_outputs(self, runtime=None, needed_outputs=None):
         outputs = self._outputs()
         output_filename = "roi_stats.csv"
-        f = open(output_filename, "w")
-        f.write(runtime.stdout)
-        f.close()
+        with open(output_filename, "w") as f:
+          f.write(runtime.stdout)
 
         outputs.stats = os.path.abspath(output_filename)
         return outputs

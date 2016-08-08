@@ -25,7 +25,7 @@ See the docstrings of the individual classes for examples.
 
 """
 
-from builtins import object
+from builtins import open, object
 
 from glob import glob
 import os

@@ -5,7 +5,7 @@ to sourceforge.
 """
 
 from __future__ import print_function
-
+from builtins import open
 import os
 import sys
 import subprocess

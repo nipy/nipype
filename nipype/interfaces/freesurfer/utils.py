@@ -11,6 +11,7 @@
 """
 __docformat__ = 'restructuredtext'
 
+from builtins import open
 
 import os
 import re

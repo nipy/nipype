@@ -15,7 +15,7 @@ See the docstrings for the individual classes for 'working' examples.
 """
 __docformat__ = 'restructuredtext'
 
-from builtins import object
+from builtins import open, object
 
 import os
 
