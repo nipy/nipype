@@ -3,11 +3,11 @@
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """Miscellaneous utility functions
 """
-
+from __future__ import absolute_import, unicode_literals
 from future import standard_library
 standard_library.install_aliases()
 from future.utils import raise_from
-from builtins import next
+from builtins import next, str
 from pickle import dumps, loads
 import inspect
 
@@ -18,7 +18,7 @@ import sys
 import re
 from collections import Iterator
 
-from ..external.six import string_types
+from nipype.external.six import string_types
 
 
 def human_order_sorted(l):
