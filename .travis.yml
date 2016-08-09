@@ -33,7 +33,7 @@ install:
 - docker build -f docker/nipype_test_${INSTALL_DEB_DEPENDECIES}/Dockerfile_py${TRAVIS_PYTHON_VERSION//.} -t nipype/nipype_test:${INSTALL_DEB_DEPENDECIES}-py${TRAVIS_PYTHON_VERSION//.} .
 
 script:
-- docker run -v /etc/localtime:/etc/localtime:ro -v $HOME/scratch:/scratch nipype/nipype_test:${INSTALL_DEB_DEPENDECIES}-py${TRAVIS_PYTHON_VERSION//.} nosetests -c /root/src/nipype/ --with-cov --cover-package nipype --cov-config /root/src/nipype/.coveragerc /root/src/nipype/
+- docker run -v /etc/localtime:/etc/localtime:ro -v $HOME/scratch:/scratch nipype/nipype_test:${INSTALL_DEB_DEPENDECIES}-py${TRAVIS_PYTHON_VERSION//.} nosetests -c /root/src/nipype/.noserc --cov-report xml --with-cov --processes=0 --cover-package nipype --cov-config /root/src/nipype/.coveragerc /root/src/nipype/
 after_success:
 - coveralls --config_file ~/scratch/.coveragerc
 deploy:
