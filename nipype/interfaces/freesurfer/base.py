@@ -13,6 +13,8 @@ Examples
 See the docstrings for the individual classes for 'working' examples.
 
 """
+from __future__ import unicode_literals
+from builtins import str
 __docformat__ = 'restructuredtext'
 
 from builtins import open, object

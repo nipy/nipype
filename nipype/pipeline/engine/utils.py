@@ -6,6 +6,8 @@
 """
 
 from __future__ import absolute_import
+from __future__ import unicode_literals
+from builtins import str
 
 from future import standard_library
 standard_library.install_aliases()
@@ -128,7 +130,7 @@ def format_node(node, format='python', include_config=False):
                                             klass.__class__.__name__)
         comment = '# Node: %s' % node.fullname
         spec = signature(node._interface.__init__)
-        args = [p.name for p in spec.parameters.values()]
+        args = [p.name for p in list(spec.parameters.values())]
         args = args[1:]
         if args:
             filled_args = []
@@ -359,7 +361,7 @@ def count_iterables(iterables, synchronize=False):
         op = max
     else:
         op = lambda x, y: x * y
-    return reduce(op, [len(func()) for _, func in iterables.items()])
+    return reduce(op, [len(func()) for _, func in list(iterables.items())])
 
 
 def walk(children, level=0, path=None, usename=True):
@@ -499,7 +501,7 @@ def _merge_graphs(supergraph, nodes, subgraph, nodeid, iterables,
         for edge in supergraph.in_edges_iter(supernodes[nidx]):
                 # make sure edge is not part of subgraph
             if edge[0] not in subgraph.nodes():
-                if n._hierarchy + n._id not in edgeinfo.keys():
+                if n._hierarchy + n._id not in list(edgeinfo.keys()):
                     edgeinfo[n._hierarchy + n._id] = []
                 edgeinfo[n._hierarchy + n._id].append((edge[0],
                                                        supergraph.get_edge_data(*edge)))
@@ -544,7 +546,7 @@ def _merge_graphs(supergraph, nodes, subgraph, nodeid, iterables,
         supergraph.add_nodes_from(Gc.nodes())
         supergraph.add_edges_from(Gc.edges(data=True))
         for node in Gc.nodes():
-            if node._hierarchy + node._id in edgeinfo.keys():
+            if node._hierarchy + node._id in list(edgeinfo.keys()):
                 for info in edgeinfo[node._hierarchy + node._id]:
                     supergraph.add_edges_from([(info[0], node, info[1])])
             node._id += template % i
@@ -755,7 +757,7 @@ def generate_expanded_graph(graph_in):
             def make_field_func(*pair):
                 return pair[0], lambda: pair[1]
 
-            iterables = dict([make_field_func(*pair) for pair in iter_dict.items()])
+            iterables = dict([make_field_func(*pair) for pair in list(iter_dict.items())])
         else:
             iterables = inode.iterables.copy()
         inode.iterables = None

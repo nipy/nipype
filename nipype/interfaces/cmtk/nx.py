@@ -10,6 +10,8 @@
 """
 
 from __future__ import division
+from __future__ import unicode_literals
+from builtins import str
 from builtins import open, range
 
 import os.path as op

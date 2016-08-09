@@ -9,6 +9,8 @@
    >>> os.chdir(datadir)
 
 """
+from __future__ import unicode_literals
+from builtins import str
 __docformat__ = 'restructuredtext'
 
 from builtins import open
@@ -69,7 +71,7 @@ def copy2subjdir(cls, in_file, folder=None, basename=None, subject_id=None):
 
 def createoutputdirs(outputs):
     """create all output directories. If not created, some freesurfer interfaces fail"""
-    for output in outputs.itervalues():
+    for output in list(outputs.values()):
         dirname = os.path.dirname(output)
         if not os.path.isdir(dirname):
             os.makedirs(dirname)

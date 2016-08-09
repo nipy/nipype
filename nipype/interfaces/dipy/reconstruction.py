@@ -3,6 +3,12 @@
 Interfaces to the reconstruction algorithms in dipy
 
 """
+from __future__ import division
+from __future__ import unicode_literals
+from future import standard_library
+standard_library.install_aliases()
+from builtins import str
+from past.utils import old_div
 from builtins import open
 
 import os.path as op
@@ -111,8 +117,8 @@ class RESTORE(DipyDiffusionInterface):
         # Estimate sigma required by RESTORE
         mean_std = np.median(noise_data.std(-1))
         try:
-            bias = (1. - np.sqrt(2. / (n - 1)) *
-                    (gamma(n / 2.) / gamma((n - 1) / 2.)))
+            bias = (1. - np.sqrt(old_div(2., (n - 1))) *
+                    (old_div(gamma(old_div(n, 2.)), gamma(old_div((n - 1), 2.)))))
         except:
             bias = .0
             pass
@@ -148,7 +154,7 @@ class RESTORE(DipyDiffusionInterface):
 
     def _list_outputs(self):
         outputs = self._outputs().get()
-        for k in outputs.keys():
+        for k in list(outputs.keys()):
             outputs[k] = self._gen_filename(k)
         return outputs
 
@@ -241,13 +247,13 @@ class EstimateResponseSH(DipyDiffusionInterface):
                                           init_trace=0.0021, iter=8,
                                           convergence=0.001,
                                           parallel=True)
-            ratio = abs(response[1] / response[0])
+            ratio = abs(old_div(response[1], response[0]))
         else:
             lambdas = evals[indices]
             l01 = np.sort(np.mean(lambdas, axis=0))
 
             response = np.array([l01[-1], l01[-2], l01[-2], S0])
-            ratio = abs(response[1] / response[0])
+            ratio = abs(old_div(response[1], response[0]))
 
         if ratio > 0.25:
             IFLOGGER.warn(('Estimated response is not prolate enough. '
@@ -319,7 +325,7 @@ class CSD(DipyDiffusionInterface):
         from dipy.reconst.csdeconv import ConstrainedSphericalDeconvModel
         from dipy.data import get_sphere
         # import marshal as pickle
-        import cPickle as pickle
+        import pickle as pickle
         import gzip
 
         img = nb.load(self.inputs.in_file)
@@ -338,7 +344,7 @@ class CSD(DipyDiffusionInterface):
         resp_file = np.loadtxt(self.inputs.response)
 
         response = (np.array(resp_file[0:3]), resp_file[-1])
-        ratio = response[0][1] / response[0][0]
+        ratio = old_div(response[0][1], response[0][0])
 
         if abs(ratio - 0.2) > 0.1:
             IFLOGGER.warn(('Estimated response is not prolate enough. '

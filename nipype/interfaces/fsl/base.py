@@ -24,6 +24,7 @@ Examples
 See the docstrings of the individual classes for examples.
 
 """
+from __future__ import unicode_literals
 
 from builtins import open, object
 

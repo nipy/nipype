@@ -13,6 +13,7 @@ This script demonstrates how to use nipype to analyze a data set::
 """
 
 from __future__ import division
+from __future__ import unicode_literals
 from builtins import open, range
 
 from glob import glob

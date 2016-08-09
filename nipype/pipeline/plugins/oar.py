@@ -1,5 +1,7 @@
 """Parallel workflow execution via OAR http://oar.imag.fr
 """
+from __future__ import unicode_literals
+from builtins import str
 
 from builtins import open
 import os
