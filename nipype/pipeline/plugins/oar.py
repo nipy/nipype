@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """Parallel workflow execution via OAR http://oar.imag.fr
 """
 from __future__ import unicode_literals

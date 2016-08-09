@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from __future__ import print_function
 from builtins import range
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-

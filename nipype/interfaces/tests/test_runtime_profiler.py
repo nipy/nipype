@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # test_runtime_profiler.py
 #
 # Author: Daniel Clark, 2016

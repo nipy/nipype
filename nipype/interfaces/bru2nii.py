@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 
 """The bru2nii module provides basic functions for dicom conversion
 

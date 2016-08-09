@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """The ants visualisation module provides basic functions based on ITK.
    Change directory to provide relative paths for doctests
    >>> import os

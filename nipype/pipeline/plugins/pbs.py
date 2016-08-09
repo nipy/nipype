@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """Parallel workflow execution via PBS/Torque
 """
 from __future__ import unicode_literals

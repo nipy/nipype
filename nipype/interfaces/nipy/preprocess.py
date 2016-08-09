@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
     Change directory to provide relative paths for doctests
     >>> import os

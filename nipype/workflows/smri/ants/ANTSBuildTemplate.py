@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 #################################################################################
 # Program:   Build Template Parallel
 # Language:  Python

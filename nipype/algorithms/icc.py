@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from __future__ import division
 from builtins import range
 from numpy import ones, kron, mean, eye, hstack, dot, tile

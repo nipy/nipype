@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """Parallel workflow execution via Condor DAGMan
 """
 

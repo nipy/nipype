@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # NOTE:  This implementation has been superceeded buy the antsApplyTransform
 #        implmeentation that more closely follows the strucutre and capabilities
 #        of the antsApplyTransform program.  This implementation is here

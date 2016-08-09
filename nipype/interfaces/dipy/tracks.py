@@ -165,7 +165,7 @@ class StreamlineTractography(DipyBaseInterface):
         from dipy.tracking.eudx import EuDX
         from dipy.data import get_sphere
         # import marshal as pickle
-        import cPickle as pickle
+        import pickle as pickle
         import gzip
 
         if (not (isdefined(self.inputs.in_model) or

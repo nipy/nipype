@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """ Set of interfaces that allow interaction with data. Currently
@@ -18,7 +19,7 @@
 
 """
 from __future__ import unicode_literals, absolute_import
-from builtins import zip, filter, range, open
+from builtins import zip, filter, range, open, str
 
 import glob
 import fnmatch
@@ -2583,7 +2584,7 @@ class JSONFileSink(IOBase):
             out_dict[key] = val
 
         with open(out_file, 'w') as f:
-            simplejson.dump(out_dict, f)
+            simplejson.dump(out_dict, f, ensure_ascii=True)
         outputs = self.output_spec().get()
         outputs['out_file'] = out_file
         return outputs

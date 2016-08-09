@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """Provides interfaces to various commands provided by dcmstack
 
    Change directory to provide relative paths for doctests

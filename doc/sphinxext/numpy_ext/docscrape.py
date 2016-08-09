@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """Extract reference documentation from the NumPy source tree.
 
 """

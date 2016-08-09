@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """The dcm2nii module provides basic functions for dicom conversion
 
    Change directory to provide relative paths for doctests

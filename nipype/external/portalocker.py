@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # portalocker.py - Cross-platform (posix/nt) API for flock-style file locking.
 #                  Requires python 1.5.2 or better.
 '''Cross-platform (posix/nt) API for flock-style file locking.

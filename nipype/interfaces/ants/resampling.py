@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """ANTS Apply Transforms interface
 
    Change directory to provide relative paths for doctests
