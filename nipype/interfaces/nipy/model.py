@@ -15,7 +15,7 @@ except Exception as e:
     have_nipy = False
 else:
     import nipy.modalities.fmri.design_matrix as dm
-    import nipy.labs.glm.glm as GLM
+    import nipy.modalities.fmri.glm as GLM
 
 if have_nipy:
     try:
@@ -158,7 +158,7 @@ class FitGLM(BaseInterface):
             pylab.close()
             pylab.clf()
 
-        glm = GLM.glm()
+        glm = GLM.GeneralLinearModel()
         glm.fit(timeseries.T, design_matrix, method=self.inputs.method, model=self.inputs.model)
 
         self._beta_file = os.path.abspath("beta.nii")
@@ -266,7 +266,7 @@ class EstimateContrast(BaseInterface):
         else:
             mask = np.ones(beta_nii.shape[:3]) == 1
 
-        glm = GLM.glm()
+        glm = GLM.GeneralLinearModel()
         nii = nb.load(self.inputs.beta)
         glm.beta = beta_nii.get_data().copy()[mask, :].T
         glm.nvbeta = self.inputs.nvbeta
