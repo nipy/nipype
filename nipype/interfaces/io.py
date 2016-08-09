@@ -17,7 +17,7 @@
     >>> os.chdir(datadir)
 
 """
-from __future__ import unicode_literals
+from __future__ import unicode_literals, absolute_import
 from builtins import zip, filter, range, open
 
 import glob
@@ -2454,7 +2454,7 @@ class JSONFileGrabber(IOBase):
     >>> jsonSource.inputs.in_file = 'jsongrabber.txt'
     >>> res = jsonSource.run()
     >>> pprint.pprint(res.outputs.get())  # doctest: +NORMALIZE_WHITESPACE, +ELLIPSIS
-    {'param1': ...'exampleStr', 'param2': 4, 'param3': 1.0}
+    {'param1': 'exampleStr', 'param2': 4, 'param3': 1.0}
 
 
     """
