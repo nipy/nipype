@@ -26,6 +26,8 @@ from traits.trait_handlers import TraitDictObject, TraitListObject
 from traits.trait_errors import TraitError
 from traits.trait_base import _Undefined
 
+from traits.api import BaseUnicode as BaseStr
+from traits.api import Unicode as Str
 
 class BaseFile (traits.BaseStr):
     """ Defines a trait whose value must be the name of a file.
