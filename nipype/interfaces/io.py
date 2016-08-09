@@ -2584,7 +2584,8 @@ class JSONFileSink(IOBase):
             out_dict[key] = val
 
         with open(out_file, 'w') as f:
-            simplejson.dump(out_dict, f, ensure_ascii=True)
+            f.write(str(simplejson.dumps(out_dict, ensure_ascii=False)))
+
         outputs = self.output_spec().get()
         outputs['out_file'] = out_file
         return outputs
