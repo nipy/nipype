@@ -3,6 +3,8 @@
 Interfaces to the reconstruction algorithms in dipy
 
 """
+from builtins import open
+
 import os.path as op
 
 import numpy as np

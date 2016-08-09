@@ -3,6 +3,7 @@
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """Wrapper to run setup.py using setuptools."""
 
+from builtins import open
 import os.path
 from setuptools import setup
 

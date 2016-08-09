@@ -2,6 +2,7 @@ Upcoming release 0.13
 =====================
 
 * TST: Migrate TravisCI tests to docker (https://github.com/nipy/nipype/pull/1546)
+* FIX: Use builtins open for py3 compatibility (https://github.com/nipy/nipype/pull/1572)
 * TST: reduce the size of docker images & use tags for images (https://github.com/nipy/nipype/pull/1564)
 * ENH: Implement missing inputs/outputs in FSL AvScale (https://github.com/nipy/nipype/pull/1563)
 

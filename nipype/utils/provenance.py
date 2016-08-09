@@ -1,6 +1,6 @@
 from future import standard_library
 standard_library.install_aliases()
-from builtins import object, str
+from builtins import open, object, str
 
 from copy import deepcopy
 from pickle import dumps

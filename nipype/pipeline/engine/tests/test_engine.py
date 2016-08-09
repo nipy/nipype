@@ -4,6 +4,7 @@
 """
 
 from __future__ import print_function
+from builtins import open
 from copy import deepcopy
 from glob import glob
 import os

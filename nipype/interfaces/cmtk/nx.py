@@ -10,7 +10,7 @@
 """
 
 from __future__ import division
-from builtins import range
+from builtins import open, range
 
 import os.path as op
 import pickle

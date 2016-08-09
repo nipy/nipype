@@ -1,6 +1,7 @@
 """Parallel workflow execution via PBS/Torque
 """
 
+from builtins import open
 import os
 from time import sleep
 import subprocess

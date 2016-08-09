@@ -1,6 +1,7 @@
 """Parallel workflow execution via OAR http://oar.imag.fr
 """
 
+from builtins import open
 import os
 import stat
 from time import sleep

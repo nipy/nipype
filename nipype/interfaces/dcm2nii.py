@@ -6,7 +6,7 @@
    >>> datadir = os.path.realpath(os.path.join(filepath, '../testing/data'))
    >>> os.chdir(datadir)
 """
-
+from builtins import open
 import os
 import re
 from copy import deepcopy
@@ -193,10 +193,9 @@ class Dcm2nii(CommandLine):
         elif name == 'config_file':
             self._config_created = True
             config_file = "config.ini"
-            f = open(config_file, "w")
-            # disable interactive mode
-            f.write("[BOOL]\nManualNIfTIConv=0\n")
-            f.close()
+            with open(config_file, "w") as f:
+                # disable interactive mode
+                f.write("[BOOL]\nManualNIfTIConv=0\n")
             return config_file
         return None
 
