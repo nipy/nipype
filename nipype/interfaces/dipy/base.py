@@ -36,7 +36,7 @@ class DipyBaseInterface(BaseInterface):
     """
     def __init__(self, **inputs):
         if no_dipy():
-            IFLOGGER.error('dipy was not found')
+            IFLOGGER.warn('dipy was not found')
             # raise ImportError('dipy was not found')
         super(DipyBaseInterface, self).__init__(**inputs)
 
