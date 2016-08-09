@@ -17,10 +17,8 @@
     >>> os.chdir(datadir)
 
 """
-
-from builtins import zip
-from builtins import filter
-from builtins import range
+from __future__ import unicode_literals
+from builtins import zip, filter, range, open
 
 import glob
 import fnmatch
@@ -35,18 +33,14 @@ from warnings import warn
 
 import sqlite3
 
-from .base import (TraitedSpec, traits, File, Directory,
-                   BaseInterface, InputMultiPath, isdefined,
-                   OutputMultiPath, DynamicTraitedSpec,
-                   Undefined, BaseInterfaceInputSpec)
-from .. import config
-from ..external.six import string_types
-from ..utils.filemanip import (copyfile, list_to_filename,
-                               filename_to_list)
-from ..utils.misc import human_order_sorted
-from ..utils.misc import str2bool
-from .. import logging
-iflogger = logging.getLogger('interface')
+from nipype import config, logging
+from nipype.external.six import string_types
+from nipype.utils.filemanip import copyfile, list_to_filename, filename_to_list
+from nipype.utils.misc import human_order_sorted, str2bool
+from nipype.interfaces.base import (
+    TraitedSpec, traits, Str, File, Directory, BaseInterface, InputMultiPath, isdefined, OutputMultiPath,
+    DynamicTraitedSpec, Undefined, BaseInterfaceInputSpec)
+
 
 try:
     import pyxnat
@@ -64,6 +58,7 @@ try:
 except:
     pass
 
+iflogger = logging.getLogger('interface')
 
 def copytree(src, dst, use_hardlink=False):
     """Recursively copy a directory tree using
@@ -184,27 +179,27 @@ class DataSinkInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
     # Init inputspec data attributes
     base_directory = Directory(
         desc='Path to the base directory for storing data.')
-    container = traits.Str(
+    container = Str(
         desc='Folder within base directory in which to store output')
     parameterization = traits.Bool(True, usedefault=True,
                                    desc='store output in parametrized structure')
     strip_dir = Directory(desc='path to strip out of filename')
-    substitutions = InputMultiPath(traits.Tuple(traits.Str, traits.Str),
+    substitutions = InputMultiPath(traits.Tuple(Str, Str),
                                    desc=('List of 2-tuples reflecting string '
                                          'to substitute and string to replace '
                                          'it with'))
     regexp_substitutions = \
-        InputMultiPath(traits.Tuple(traits.Str, traits.Str),
+        InputMultiPath(traits.Tuple(Str, Str),
                        desc=('List of 2-tuples reflecting a pair of a '\
                              'Python regexp pattern and a replacement '\
                              'string. Invoked after string `substitutions`'))
 
-    _outputs = traits.Dict(traits.Str, value={}, usedefault=True)
+    _outputs = traits.Dict(Str, value={}, usedefault=True)
     remove_dest_dir = traits.Bool(False, usedefault=True,
                                   desc='remove dest directory when copying dirs')
 
     # AWS S3 data attributes
-    creds_path = traits.Str(desc='Filepath to AWS credentials file for S3 bucket '\
+    creds_path = Str(desc='Filepath to AWS credentials file for S3 bucket '\
                                  'access; if not specified, the credentials will '\
                                  'be taken from the AWS_ACCESS_KEY_ID and '\
                                  'AWS_SECRET_ACCESS_KEY environment variables')
@@ -213,7 +208,7 @@ class DataSinkInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
     # Set this if user wishes to override the bucket with their own
     bucket = traits.Any(desc='Boto3 S3 bucket for manual override of bucket')
     # Set this if user wishes to have local copy of files as well
-    local_copy = traits.Str(desc='Copy files locally as well as to S3 bucket')
+    local_copy = Str(desc='Copy files locally as well as to S3 bucket')
 
     # Set call-able inputs attributes
     def __setattr__(self, key, value):
@@ -773,11 +768,11 @@ class S3DataGrabberInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
     anon = traits.Bool(False, usedefault=True,
                        desc='Use anonymous connection to s3.  If this is set to True, boto may print' +
                             ' a urlopen error, but this does not prevent data from being downloaded.')
-    region = traits.Str('us-east-1', usedefault=True,
+    region = Str('us-east-1', usedefault=True,
                         desc='Region of s3 bucket')
-    bucket = traits.Str(mandatory=True,
+    bucket = Str(mandatory=True,
                         desc='Amazon S3 bucket where your data is stored')
-    bucket_path = traits.Str('', usedefault=True,
+    bucket_path = Str('', usedefault=True,
                              desc='Location within your bucket for subject data.')
     local_directory = Directory(exists=True,
                                 desc='Path to the local directory for subject data to be downloaded '
@@ -786,10 +781,10 @@ class S3DataGrabberInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
                                  desc='Generate exception if list is empty for a given field')
     sort_filelist = traits.Bool(mandatory=True,
                                 desc='Sort the filelist that matches the template')
-    template = traits.Str(mandatory=True,
+    template = Str(mandatory=True,
                           desc='Layout used to get files. Relative to bucket_path if defined.'
                                'Uses regex rather than glob style formatting.')
-    template_args = traits.Dict(key_trait=traits.Str,
+    template_args = traits.Dict(key_trait=Str,
                                 value_trait=traits.List(traits.List),
                                 desc='Information to plug into template')
 
@@ -995,9 +990,9 @@ class DataGrabberInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
                                  desc='Generate exception if list is empty for a given field')
     sort_filelist = traits.Bool(mandatory=True,
                                 desc='Sort the filelist that matches the template')
-    template = traits.Str(mandatory=True,
+    template = Str(mandatory=True,
                           desc='Layout used to get files. relative to base directory if defined')
-    template_args = traits.Dict(key_trait=traits.Str,
+    template_args = traits.Dict(key_trait=Str,
                                 value_trait=traits.List(traits.List),
                                 desc='Information to plug into template')
 
@@ -1197,7 +1192,7 @@ class SelectFilesInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
                                 desc="When matching mutliple files, return them in sorted order.")
     raise_on_empty = traits.Bool(True, usedefault=True,
                                  desc="Raise an exception if a template pattern matches no files.")
-    force_lists = traits.Either(traits.Bool(), traits.List(traits.Str()),
+    force_lists = traits.Either(traits.Bool(), traits.List(Str()),
                                 default=False, usedefault=True,
                                 desc=("Whether to return outputs as a list even when only one file "
                                       "matches the template. Either a boolean that applies to all "
@@ -1335,9 +1330,9 @@ class SelectFiles(IOBase):
 
 class DataFinderInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
     root_paths = traits.Either(traits.List(),
-                               traits.Str(),
+                               Str(),
                                mandatory=True,)
-    match_regex = traits.Str('(.+)',
+    match_regex = Str('(.+)',
                              usedefault=True,
                              desc=("Regular expression for matching "
                                    "paths."))
@@ -1483,7 +1478,7 @@ class DataFinder(IOBase):
 class FSSourceInputSpec(BaseInterfaceInputSpec):
     subjects_dir = Directory(mandatory=True,
                              desc='Freesurfer subjects directory.')
-    subject_id = traits.Str(mandatory=True,
+    subject_id = Str(mandatory=True,
                             desc='Subject name for whom to retrieve data')
     hemi = traits.Enum('both', 'lh', 'rh', usedefault=True,
                        desc='Selects hemisphere specific outputs')
@@ -1626,26 +1621,26 @@ class FreeSurferSource(IOBase):
 
 class XNATSourceInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
 
-    query_template = traits.Str(
+    query_template = Str(
         mandatory=True,
         desc=('Layout used to get files. Relative to base '
               'directory if defined')
     )
 
     query_template_args = traits.Dict(
-        traits.Str,
+        Str,
         traits.List(traits.List),
         value=dict(outfiles=[]), usedefault=True,
         desc='Information to plug into template'
     )
 
-    server = traits.Str(
+    server = Str(
         mandatory=True,
         requires=['user', 'pwd'],
         xor=['config']
     )
 
-    user = traits.Str()
+    user = Str()
     pwd = traits.Password()
     config = File(mandatory=True, xor=['server'])
 
@@ -1840,34 +1835,34 @@ class XNATSource(IOBase):
 
 class XNATSinkInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
 
-    _outputs = traits.Dict(traits.Str, value={}, usedefault=True)
+    _outputs = traits.Dict(Str, value={}, usedefault=True)
 
-    server = traits.Str(mandatory=True,
+    server = Str(mandatory=True,
                         requires=['user', 'pwd'],
                         xor=['config']
                         )
 
-    user = traits.Str()
+    user = Str()
     pwd = traits.Password()
     config = File(mandatory=True, xor=['server'])
     cache_dir = Directory(desc='')
 
-    project_id = traits.Str(
+    project_id = Str(
         desc='Project in which to store the outputs', mandatory=True)
 
-    subject_id = traits.Str(
+    subject_id = Str(
         desc='Set to subject id', mandatory=True)
 
-    experiment_id = traits.Str(
+    experiment_id = Str(
         desc='Set to workflow name', mandatory=True)
 
-    assessor_id = traits.Str(
+    assessor_id = Str(
         desc=('Option to customize ouputs representation in XNAT - '
               'assessor level will be used with specified id'),
         xor=['reconstruction_id']
     )
 
-    reconstruction_id = traits.Str(
+    reconstruction_id = Str(
         desc=('Option to customize ouputs representation in XNAT - '
               'reconstruction level will be used with specified id'),
         xor=['assessor_id']
@@ -2067,7 +2062,7 @@ def push_provenance():
 
 class SQLiteSinkInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
     database_file = File(exists=True, mandatory=True)
-    table_name = traits.Str(mandatory=True)
+    table_name = Str(mandatory=True)
 
 
 class SQLiteSink(IOBase):
@@ -2114,16 +2109,16 @@ class SQLiteSink(IOBase):
 
 
 class MySQLSinkInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
-    host = traits.Str('localhost', mandatory=True,
+    host = Str('localhost', mandatory=True,
                       requires=['username', 'password'],
                       xor=['config'], usedefault=True)
     config = File(mandatory=True, xor=['host'],
                   desc="MySQL Options File (same format as my.cnf)")
-    database_name = traits.Str(
+    database_name = Str(
         mandatory=True, desc='Otherwise known as the schema name')
-    table_name = traits.Str(mandatory=True)
-    username = traits.Str()
-    password = traits.Str()
+    table_name = Str(mandatory=True)
+    username = Str()
+    password = Str()
 
 
 class MySQLSink(IOBase):
@@ -2174,16 +2169,16 @@ class MySQLSink(IOBase):
 
 
 class SSHDataGrabberInputSpec(DataGrabberInputSpec):
-    hostname = traits.Str(mandatory=True, desc='Server hostname.')
-    username = traits.Str(desc='Server username.')
+    hostname = Str(mandatory=True, desc='Server hostname.')
+    username = Str(desc='Server username.')
     password = traits.Password(desc='Server password.')
     download_files = traits.Bool(True, usedefault=True,
                                  desc='If false it will return the file names without downloading them')
-    base_directory = traits.Str(mandatory=True,
+    base_directory = Str(mandatory=True,
                                 desc='Path to the base directory consisting of subject data.')
     template_expression = traits.Enum(['fnmatch', 'regexp'], usedefault=True,
                                       desc='Use either fnmatch or regexp to express templates')
-    ssh_log_to_file = traits.Str('', usedefault=True,
+    ssh_log_to_file = Str('', usedefault=True,
                                  desc='If set SSH commands will be logged to the given file')
 
 
