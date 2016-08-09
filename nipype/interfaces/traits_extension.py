@@ -15,6 +15,8 @@ all of these bugs and they've been fixed in enthought svn repository
 (usually by Robert Kern).
 
 """
+from __future__ import unicode_literals
+from builtins import str
 import os
 
 # perform all external trait imports here
@@ -29,7 +31,10 @@ from traits.trait_base import _Undefined
 from traits.api import BaseUnicode as BaseStr
 from traits.api import Unicode as Str
 
-class BaseFile (traits.BaseStr):
+
+DictStrStr = traits.Dict(str, str)
+
+class BaseFile (BaseStr):
     """ Defines a trait whose value must be the name of a file.
     """
 
@@ -121,7 +126,7 @@ class File (BaseFile):
 # -------------------------------------------------------------------------------
 
 
-class BaseDirectory (traits.BaseStr):
+class BaseDirectory (BaseStr):
     """ Defines a trait whose value must be the name of a directory.
     """
 
