@@ -8,12 +8,10 @@ Exaples  FSL, matlab/SPM , afni
 Requires Packages to be installed
 """
 
-from __future__ import print_function
-from __future__ import division
+from __future__ import print_function, division, unicode_literals
 from future import standard_library
 standard_library.install_aliases()
-from builtins import range
-from builtins import object
+from builtins import range, object, open
 
 from configparser import NoOptionError
 from copy import deepcopy
@@ -28,32 +26,25 @@ from string import Template
 import select
 import subprocess
 import sys
-import random
 import time
-import fnmatch
 from textwrap import wrap
 from datetime import datetime as dt
 from dateutil.parser import parse as parseutc
 from warnings import warn
 
 
-from .traits_extension import (traits, Undefined, TraitDictObject,
-                               TraitListObject, TraitError,
-                               isdefined, File, Directory,
-                               has_metadata)
-from ..utils.filemanip import (md5, hash_infile, FileNotFoundError,
-                               hash_timestamp, save_json,
-                               split_filename)
-from ..utils.misc import is_container, trim, str2bool
-from ..utils.provenance import write_provenance
-from .. import config, logging, LooseVersion
-from .. import __version__
-from ..external.six import string_types, text_type
+from nipype import config, logging, LooseVersion, __version__
+from nipype.external.six import string_types, text_type
+from nipype.utils.provenance import write_provenance
+from nipype.utils.misc import is_container, trim, str2bool
+from nipype.utils.filemanip import (md5, hash_infile, FileNotFoundError, hash_timestamp,
+                                    save_json, split_filename)
+from nipype.interfaces.traits_extension import (
+    traits, Undefined, TraitDictObject, TraitListObject, TraitError, isdefined, File,
+    Directory, Str, DictStrStr, has_metadata)
 
 runtime_profile = str2bool(config.get('execution', 'profile_runtime'))
-
 nipype_version = LooseVersion(__version__)
-
 iflogger = logging.getLogger('interface')
 
 if runtime_profile:
@@ -1507,8 +1498,8 @@ def get_dependencies(name, environ):
 
 
 class CommandLineInputSpec(BaseInterfaceInputSpec):
-    args = traits.Str(argstr='%s', desc='Additional parameters to the command')
-    environ = traits.DictStrStr(desc='Environment variables', usedefault=True,
+    args = Str(argstr='%s', desc='Additional parameters to the command')
+    environ = DictStrStr(desc='Environment variables', usedefault=True,
                                 nohash=True)
     # This input does not have a "usedefault=True" so the set_default_terminal_output()
     # method would work

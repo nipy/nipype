@@ -15,8 +15,7 @@ all of these bugs and they've been fixed in enthought svn repository
 (usually by Robert Kern).
 
 """
-from __future__ import unicode_literals
-from builtins import str
+from builtins import filter, object
 import os
 
 # perform all external trait imports here
@@ -26,15 +25,16 @@ if traits.__version__ < '3.7.0':
 import traits.api as traits
 from traits.trait_handlers import TraitDictObject, TraitListObject
 from traits.trait_errors import TraitError
-from traits.trait_base import _Undefined
+from traits.trait_base import _Undefined, class_of
 
-from traits.api import BaseUnicode as BaseStr
-from traits.api import Unicode as Str
+from traits.api import BaseUnicode
+from traits.api import Unicode
+from nipype.external.six import string_types
 
+DictStrStr = traits.Dict(string_types, string_types)
+Str = Unicode
 
-DictStrStr = traits.Dict(str, str)
-
-class BaseFile (BaseStr):
+class BaseFile(BaseUnicode):
     """ Defines a trait whose value must be the name of a file.
     """
 
@@ -88,8 +88,9 @@ class BaseFile (BaseStr):
 
 
 class File (BaseFile):
-    """ Defines a trait whose value must be the name of a file using a C-level
-        fast validator.
+    """
+    Defines a trait whose value must be the name of a file.
+    Disables the default C-level fast validator.
     """
 
     def __init__(self, value='', filter=None, auto_set=False,
@@ -114,9 +115,9 @@ class File (BaseFile):
         -------------
         *value* or ''
         """
-        if not exists:
-            # Define the C-level fast validator to use:
-            fast_validate = (11, str)
+        # if not exists:
+        #     # Define the C-level fast validator to use:
+        #     fast_validate = (11, str)
 
         super(File, self).__init__(value, filter, auto_set, entries, exists,
                                    **metadata)
@@ -126,8 +127,9 @@ class File (BaseFile):
 # -------------------------------------------------------------------------------
 
 
-class BaseDirectory (BaseStr):
-    """ Defines a trait whose value must be the name of a directory.
+class BaseDirectory (BaseUnicode):
+    """
+    Defines a trait whose value must be the name of a directory.
     """
 
     # A description of the type of value this trait accepts:
@@ -166,19 +168,25 @@ class BaseDirectory (BaseStr):
 
             Note: The 'fast validator' version performs this check in C.
         """
-        validated_value = super(BaseDirectory, self).validate(object, name, value)
-        if not self.exists:
-            return validated_value
+        if isinstance(value, string_types):
+            if not self.exists:
+                return value
 
-        if os.path.isdir(value):
-            return validated_value
+            if os.path.isdir(value):
+                return value
+            else:
+                raise TraitError(
+                    args='The trait \'{}\' of {} instance is {}, but the path '
+                         ' \'{}\' does not exist.'.format(name, class_of(object),
+                                                          self.info_text, value))
 
         self.error(object, name, value)
 
 
 class Directory (BaseDirectory):
-    """ Defines a trait whose value must be the name of a directory using a
-        C-level fast validator.
+    """
+    Defines a trait whose value must be the name of a directory.
+    Disables the default C-level fast validator.
     """
 
     def __init__(self, value='', auto_set=False, entries=0,
@@ -202,8 +210,8 @@ class Directory (BaseDirectory):
         """
         # Define the C-level fast validator to use if the directory existence
         # test is not required:
-        if not exists:
-            self.fast_validate = (11, str)
+        # if not exists:
+        #     self.fast_validate = (11, str)
 
         super(Directory, self).__init__(value, auto_set, entries, exists,
                                         **metadata)
