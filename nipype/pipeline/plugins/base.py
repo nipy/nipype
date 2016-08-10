@@ -145,7 +145,7 @@ try:
     cwd = os.getcwd()
     info = loadpkl(pklfile)
     result = info['node'].run(updatehash=info['updatehash'])
-except Exception, e:
+except Exception as e:
     etype, eval, etr = sys.exc_info()
     traceback = format_exception(etype,eval,etr)
     if info is None or not os.path.exists(info['node'].output_dir()):
