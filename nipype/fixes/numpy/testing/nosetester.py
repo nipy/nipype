@@ -13,7 +13,7 @@ from builtins import object
 import os
 import sys
 
-from .six import string_types
+from six import string_types
 
 
 def get_package_name(filepath):

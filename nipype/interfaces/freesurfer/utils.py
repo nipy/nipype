@@ -740,7 +740,7 @@ class SurfaceSnapshots(FSCommand):
                 args = tuple([getattr(self.inputs, arg) for arg in stem_args])
                 stem = stem % args
         snapshots = ["%s-lat.tif", "%s-med.tif", "%s-dor.tif", "%s-ven.tif"]
-        if self.inputs.six_images:
+        if self.inputssix_images:
             snapshots.extend(["%s-pos.tif", "%s-ant.tif"])
         snapshots = [self._gen_fname(f % stem, suffix="") for f in snapshots]
         outputs["snapshots"] = snapshots
