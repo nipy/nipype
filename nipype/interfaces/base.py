@@ -1798,7 +1798,7 @@ class CommandLine(BaseInterface):
         traits = self.inputs.traits(**metadata)
         if traits:
             outputs = self.output_spec().get()  #pylint: disable=E1102
-            for name, trait_spec in traits.items():
+            for name, trait_spec in list(traits.items()):
                 out_name = name
                 if trait_spec.output_name is not None:
                     out_name = trait_spec.output_name

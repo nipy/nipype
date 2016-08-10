@@ -3,6 +3,8 @@
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """Additional handy utilities for testing
 """
+from builtins import range
+from builtins import object
 __docformat__ = 'restructuredtext'
 
 import os

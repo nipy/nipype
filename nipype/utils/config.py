@@ -9,6 +9,7 @@ hash_method : content, timestamp
 
 @author: Chris Filo Gorgolewski
 '''
+from builtins import str
 from future import standard_library
 standard_library.install_aliases()
 from builtins import object

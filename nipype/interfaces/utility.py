@@ -9,6 +9,9 @@
    >>> datadir = os.path.realpath(os.path.join(filepath, '../testing/data'))
    >>> os.chdir(datadir)
 """
+from __future__ import division
+from builtins import str
+from past.utils import old_div
 
 from future import standard_library
 standard_library.install_aliases()
@@ -494,7 +497,7 @@ class Function(IOBase):
                 raise out
 
             # Function ran successfully, populate runtime stats
-            setattr(runtime, 'runtime_memory_gb', mem_mb/1024.0)
+            setattr(runtime, 'runtime_memory_gb', old_div(mem_mb,1024.0))
             setattr(runtime, 'runtime_threads', num_threads)
         else:
             out = function_handle(**args)

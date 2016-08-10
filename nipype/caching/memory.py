@@ -294,7 +294,7 @@ class Memory(object):
             input.
         """
         rm_all_but(self.base_dir, set(runs.keys()), warn=warn)
-        for dir_name, job_names in runs.items():
+        for dir_name, job_names in list(runs.items()):
             rm_all_but(os.path.join(self.base_dir, dir_name),
                        job_names, warn=warn)
 

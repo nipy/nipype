@@ -19,6 +19,9 @@
 
 """
 from __future__ import unicode_literals, absolute_import
+from __future__ import division
+from builtins import object
+from past.utils import old_div
 from builtins import zip, filter, range, open, str
 
 import glob
@@ -161,7 +164,7 @@ class ProgressPercentage(object):
         with self._lock:
             self._seen_so_far += bytes_amount
             if self._size != 0:
-                percentage = (self._seen_so_far / self._size) * 100
+                percentage = (old_div(self._seen_so_far, self._size)) * 100
             else:
                 percentage = 0
             progress_str = '%d / %d (%.2f%%)\r'\
@@ -695,7 +698,7 @@ class DataSink(IOBase):
                         raise(inst)
 
         # Iterate through outputs attributes {key : path(s)}
-        for key, files in self.inputs._outputs.items():
+        for key, files in list(self.inputs._outputs.items()):
             if not isdefined(files):
                 continue
             iflogger.debug("key: %s files: %s" % (key, str(files)))
@@ -854,7 +857,7 @@ class S3DataGrabber(IOBase):
         Using traits.Any instead out OutputMultiPath till add_trait bug
         is fixed.
         """
-        return add_traits(base, self.inputs.template_args.keys())
+        return add_traits(base, list(self.inputs.template_args.keys()))
 
     def _list_outputs(self):
         # infields are mandatory, however I could not figure out how to set 'mandatory' flag dynamically
@@ -874,7 +877,7 @@ class S3DataGrabber(IOBase):
         bkt_files = list(k.key for k in bkt.list())
 
         # keys are outfields, args are template args for the outfield
-        for key, args in self.inputs.template_args.items():
+        for key, args in list(self.inputs.template_args.items()):
             outputs[key] = []
             template = self.inputs.template
             if hasattr(self.inputs, 'field_template') and \
@@ -949,7 +952,7 @@ class S3DataGrabber(IOBase):
         # Outputs are currently stored as locations on S3.
         # We must convert to the local location specified
         # and download the files.
-        for key,val in outputs.iteritems():
+        for key,val in outputs.items():
             #This will basically be either list-like or string-like:
             #if it has the __iter__ attribute, it's list-like (list,
             #tuple, numpy array) and we iterate through each of its
@@ -1256,7 +1259,7 @@ class SelectFiles(IOBase):
 
         # Infer the infields and outfields from the template
         infields = []
-        for name, template in templates.items():
+        for name, template in list(templates.items()):
             for _, field_name, _, _ in string.Formatter().parse(template):
                 if field_name is not None and field_name not in infields:
                     infields.append(field_name)
@@ -1294,7 +1297,7 @@ class SelectFiles(IOBase):
                    "'templates'.") % (plural, bad_fields, verb)
             raise ValueError(msg)
 
-        for field, template in self._templates.items():
+        for field, template in list(self._templates.items()):
 
             # Build the full template path
             if isdefined(self.inputs.base_directory):
@@ -1403,7 +1406,7 @@ class DataFinder(IOBase):
                 for key in list(match_dict.keys()):
                     self.result[key] = []
             self.result['out_paths'].append(target_path)
-            for key, val in match_dict.items():
+            for key, val in list(match_dict.items()):
                 self.result[key].append(val)
 
     def _run_interface(self, runtime):
@@ -1453,7 +1456,7 @@ class DataFinder(IOBase):
                         self._match_path(full_path)
         if (self.inputs.unpack_single and
                 len(self.result['out_paths']) == 1):
-            for key, vals in self.result.items():
+            for key, vals in list(self.result.items()):
                 self.result[key] = vals[0]
         else:
             # sort all keys acording to out_paths
@@ -2474,12 +2477,12 @@ class JSONFileGrabber(IOBase):
             if not isinstance(data, dict):
                 raise RuntimeError('JSON input has no dictionary structure')
 
-            for key, value in data.items():
+            for key, value in list(data.items()):
                 outputs[key] = value
 
         if isdefined(self.inputs.defaults):
             defaults = self.inputs.defaults
-            for key, value in defaults.items():
+            for key, value in list(defaults.items()):
                 if key not in list(outputs.keys()):
                     outputs[key] = value
 

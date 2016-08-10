@@ -183,7 +183,7 @@ class GroupAndStack(DcmStack):
         stacks = dcmstack.parse_and_stack(src_paths)
 
         self.out_list = []
-        for key, stack in stacks.items():
+        for key, stack in list(stacks.items()):
             nw = NiftiWrapper(stack.to_nifti(embed_meta=True))
             const_meta = nw.meta_ext.get_class_dict(('global', 'const'))
             out_path = self._get_out_path(const_meta)
@@ -259,7 +259,7 @@ class LookupMeta(BaseInterface):
         self._make_name_map()
         nw = NiftiWrapper.from_filename(self.inputs.in_file)
         self.result = {}
-        for meta_key, out_name in self._meta_keys.items():
+        for meta_key, out_name in list(self._meta_keys.items()):
             self.result[out_name] = nw.meta_ext.get_values(meta_key)
 
         return runtime

@@ -14,6 +14,7 @@ Miscellaneous algorithms
 from __future__ import print_function
 from __future__ import absolute_import
 from __future__ import division
+from builtins import str
 from builtins import zip
 from builtins import range
 from future.utils import raise_from
@@ -1187,7 +1188,7 @@ class SplitROIs(BaseInterface):
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        for k, v in self._outnames.items():
+        for k, v in list(self._outnames.items()):
             outputs[k] = v
         return outputs
 
