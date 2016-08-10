@@ -17,13 +17,16 @@ import os
 import os.path as op
 import re
 import numpy as np
+from six import string_types
 
 from .base import (AFNICommandBase, AFNICommand, AFNICommandInputSpec, AFNICommandOutputSpec,
                    Info, no_afni)
 from ..base import (CommandLineInputSpec, CommandLine, Directory, TraitedSpec,
                     traits, isdefined, File, InputMultiPath, Undefined)
-from six import string_types
 from ...utils.filemanip import (load_json, save_json, split_filename)
+
+from nipype.utils import py3compat
+
 
 class BlurToFWHMInputSpec(AFNICommandInputSpec):
     in_file = File(desc='The dataset that will be smoothed', argstr='-input %s', mandatory=True, exists=True)
@@ -2439,7 +2442,7 @@ class AFNItoNIFTIInputSpec(AFNICommandInputSpec):
                     argstr='-prefix %s', name_source="in_file")
     hash_files = False
 
-
+@py3compat.u_format
 class AFNItoNIFTI(AFNICommand):
     """Changes AFNI format files to NIFTI format using 3dAFNItoNIFTI
 
@@ -2454,7 +2457,7 @@ class AFNItoNIFTI(AFNICommand):
     >>> a2n.inputs.in_file = 'afni_output.3D'
     >>> a2n.inputs.out_file =  'afni_output.nii'
     >>> a2n.cmdline
-    '3dAFNItoNIFTI -prefix afni_output.nii afni_output.3D'
+    {u}'3dAFNItoNIFTI -prefix afni_output.nii afni_output.3D'
 
     """
 

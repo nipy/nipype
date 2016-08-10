@@ -45,7 +45,6 @@ from nipype.interfaces.base import (
     TraitedSpec, traits, Str, File, Directory, BaseInterface, InputMultiPath, isdefined, OutputMultiPath,
     DynamicTraitedSpec, Undefined, BaseInterfaceInputSpec)
 
-
 try:
     import pyxnat
 except:
