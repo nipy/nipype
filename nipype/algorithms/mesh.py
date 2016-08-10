@@ -21,7 +21,7 @@ from numpy import linalg as nla
 from builtins import zip
 
 from .. import logging
-from ..external.six import string_types
+from six import string_types
 from ..interfaces.base import (BaseInterface, traits, TraitedSpec, File,
                                BaseInterfaceInputSpec)
 from ..interfaces.vtkbase import tvtk

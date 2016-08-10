@@ -24,7 +24,7 @@ from .base import (TraitedSpec, DynamicTraitedSpec,
                    InputMultiPath, File, Directory,
                    traits, BaseInterface)
 from .traits_extension import isdefined, Undefined
-from ..external.six import string_types
+from six import string_types
 
 have_dcmstack = True
 try:

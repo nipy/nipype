@@ -29,7 +29,7 @@ from nibabel import load
 import numpy as np
 from scipy.special import gammaln
 
-from ..external.six import string_types
+from six import string_types
 from ..interfaces.base import (BaseInterface, TraitedSpec, InputMultiPath,
                                traits, File, Bunch, BaseInterfaceInputSpec,
                                isdefined)

@@ -22,7 +22,7 @@ import errno
 from warnings import warn
 
 from ..external import portalocker
-from ..external.six import StringIO
+from six import StringIO
 
 
 # Get home directory in platform-agnostic way

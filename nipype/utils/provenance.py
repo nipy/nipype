@@ -19,7 +19,7 @@ except ImportError:
     from ordereddict import OrderedDict
 
 import prov.model as pm
-from ..external.six import string_types, text_type
+from six import string_types, text_type
 
 from .. import get_info
 from .filemanip import (md5, hashlib, hash_infile)

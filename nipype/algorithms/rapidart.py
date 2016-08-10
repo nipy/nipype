@@ -31,7 +31,7 @@ import numpy as np
 from scipy import signal
 import scipy.io as sio
 
-from ..external.six import string_types
+from six import string_types
 from ..interfaces.base import (BaseInterface, traits, InputMultiPath,
                                OutputMultiPath, TraitedSpec, File,
                                BaseInterfaceInputSpec, isdefined)

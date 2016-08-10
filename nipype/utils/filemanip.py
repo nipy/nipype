@@ -22,7 +22,7 @@ import posixpath
 import numpy as np
 
 from .misc import is_container
-from ..external.six import string_types
+from six import string_types
 from ..interfaces.traits_extension import isdefined
 
 from .. import logging, config
