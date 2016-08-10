@@ -9,8 +9,6 @@
     >>> datadir = os.path.realpath(os.path.join(filepath, '../../testing/data'))
     >>> os.chdir(datadir)
 """
-import warnings
-
 import os
 import re
 
@@ -23,7 +21,7 @@ from .base import AFNICommand, AFNICommandInputSpec,\
 from nipype.interfaces.base import CommandLineInputSpec, CommandLine,\
     OutputMultiPath
 
-warn = warnings.warn
+from warnings import warn
 
 
 class SVMTrainInputSpec(AFNICommandInputSpec):

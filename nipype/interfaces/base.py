@@ -36,6 +36,7 @@ from warnings import warn
 from nipype import config, logging, LooseVersion, __version__
 from six import string_types, text_type
 from nipype.utils.provenance import write_provenance
+from nipype.utils import py3compat
 from nipype.utils.misc import is_container, trim, str2bool
 from nipype.utils.filemanip import (md5, hash_infile, FileNotFoundError, hash_timestamp,
                                     save_json, split_filename)
@@ -66,10 +67,10 @@ class NipypeInterfaceError(Exception):
         return repr(self.value)
 
 def _exists_in_path(cmd, environ):
-    '''
+    """
     Based on a code snippet from
      http://orip.org/2009/08/python-checking-if-executable-exists-in.html
-    '''
+    """
 
     if 'PATH' in environ:
         input_environ = environ.get("PATH")
@@ -119,10 +120,10 @@ class Bunch(object):
     >>> from nipype.interfaces.base import Bunch
     >>> inputs = Bunch(infile='subj.nii', fwhm=6.0, register_to_mean=True)
     >>> inputs
-    Bunch(fwhm=6.0, infile='subj.nii', register_to_mean=True)
+    Bunch(fwhm=6.0, infile={u}'subj.nii', register_to_mean=True)
     >>> inputs.register_to_mean = False
     >>> inputs
-    Bunch(fwhm=6.0, infile='subj.nii', register_to_mean=False)
+    Bunch(fwhm=6.0, infile={u}'subj.nii', register_to_mean=False)
 
 
     Notes
@@ -133,6 +134,8 @@ class Bunch(object):
            Items", Python Cookbook, 2nd Ed, Chapter 4.18, 2005.
 
     """
+    __metaclass__ = py3compat.mymetaclass
+
 
     def __init__(self, *args, **kwargs):
         self.__dict__.update(*args, **kwargs)
@@ -153,13 +156,13 @@ class Bunch(object):
         return list(self.items())
 
     def get(self, *args):
-        '''Support dictionary get() functionality
-        '''
+        """Support dictionary get() functionality
+        """
         return self.__dict__.get(*args)
 
     def set(self, **kwargs):
-        '''Support dictionary get() functionality
-        '''
+        """Support dictionary get() functionality
+        """
         return self.__dict__.update(**kwargs)
 
     def dictcopy(self):
@@ -265,9 +268,9 @@ class Bunch(object):
         return dict_withhash, md5(sorted_dict.encode()).hexdigest()
 
     def __pretty__(self, p, cycle):
-        '''Support for the pretty module
+        """Support for the pretty module
 
-        pretty is included in ipython.externals for ipython > 0.10'''
+        pretty is included in ipython.externals for ipython > 0.10"""
         if cycle:
             p.text('Bunch(...)')
         else:
@@ -655,6 +658,7 @@ class Interface(object):
     and methods all Interface objects should have.
 
     """
+    __metaclass__ = py3compat.mymetaclass
 
     input_spec = None  # A traited input specification
     output_spec = None  # A traited output specification
@@ -1534,7 +1538,7 @@ class CommandLine(BaseInterface):
     >>> cli = CommandLine(command='ls', environ={'DISPLAY': ':1'})
     >>> cli.inputs.args = '-al'
     >>> cli.cmdline
-    'ls -al'
+    {u}'ls -al'
 
     >>> pprint.pprint(cli.inputs.trait_get())  # doctest: +NORMALIZE_WHITESPACE
     {'args': '-al',
@@ -1543,10 +1547,10 @@ class CommandLine(BaseInterface):
      'terminal_output': 'stream'}
 
     >>> cli.inputs.get_hashval()
-    ([('args', '-al')], '11c37f97649cd61627f4afe5136af8c0')
+    ([({u}'args', {u}'-al')], '11c37f97649cd61627f4afe5136af8c0')
 
     """
-
+    __metaclass__ = py3compat.mymetaclass
     input_spec = CommandLineInputSpec
     _cmd = None
     _version = None
@@ -1875,7 +1879,7 @@ class MpiCommandLineInputSpec(CommandLineInputSpec):
 
 
 class MpiCommandLine(CommandLine):
-    '''Implements functionality to interact with command line programs
+    """Implements functionality to interact with command line programs
     that can be run with MPI (i.e. using 'mpiexec').
 
     Examples
@@ -1884,14 +1888,15 @@ class MpiCommandLine(CommandLine):
     >>> mpi_cli = MpiCommandLine(command='my_mpi_prog')
     >>> mpi_cli.inputs.args = '-v'
     >>> mpi_cli.cmdline
-    'my_mpi_prog -v'
+    {u}'my_mpi_prog -v'
 
     >>> mpi_cli.inputs.use_mpi = True
     >>> mpi_cli.inputs.n_procs = 8
     >>> mpi_cli.cmdline
-    'mpiexec -n 8 my_mpi_prog -v'
-    '''
+    {u}'mpiexec -n 8 my_mpi_prog -v'
+    """
     input_spec = MpiCommandLineInputSpec
+    __metaclass__ = py3compat.mymetaclass
 
     @property
     def cmdline(self):

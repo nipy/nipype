@@ -19,13 +19,16 @@ import re
 import numpy as np
 from six import string_types
 
-from .base import (AFNICommandBase, AFNICommand, AFNICommandInputSpec, AFNICommandOutputSpec,
-                   Info, no_afni)
-from ..base import (CommandLineInputSpec, CommandLine, Directory, TraitedSpec,
-                    traits, isdefined, File, InputMultiPath, Undefined)
-from ...utils.filemanip import (load_json, save_json, split_filename)
-
+from nipype.utils.filemanip import (load_json, save_json, split_filename)
 from nipype.utils import py3compat
+from nipype.interfaces.base import (
+    CommandLineInputSpec, CommandLine, Directory, TraitedSpec,
+    traits, isdefined, File, InputMultiPath, Undefined)
+
+from nipype.interfaces.afni.base import (
+    AFNICommandBase, AFNICommand, AFNICommandInputSpec, AFNICommandOutputSpec,
+    Info, no_afni)
+
 
 
 class BlurToFWHMInputSpec(AFNICommandInputSpec):
@@ -38,6 +41,7 @@ class BlurToFWHMInputSpec(AFNICommandInputSpec):
     mask = File(desc='Mask dataset, if desired. Voxels NOT in mask will be set to zero in output.', argstr='-blurmaster %s', exists=True)
 
 
+# @py3compat.u_format
 class BlurToFWHM(AFNICommand):
     """Blurs a 'master' dataset until it reaches a specified FWHM smoothness (approximately).
 
@@ -52,10 +56,10 @@ class BlurToFWHM(AFNICommand):
     >>> blur.inputs.in_file = 'epi.nii'
     >>> blur.inputs.fwhm = 2.5
     >>> blur.cmdline #doctest: +ELLIPSIS
-    '3dBlurToFWHM -FWHM 2.500000 -input epi.nii -prefix epi_afni'
+    {u}'3dBlurToFWHM -FWHM 2.500000 -input epi.nii -prefix epi_afni'
 
     """
-
+    __metaclass__ = py3compat.mymetaclass
     _cmd = '3dBlurToFWHM'
     input_spec = BlurToFWHMInputSpec
     output_spec = AFNICommandOutputSpec
@@ -89,6 +93,7 @@ class To3DInputSpec(AFNICommandInputSpec):
                             argstr='-time:zt %s alt+z2')
 
 
+# @py3compat.u_format
 class To3D(AFNICommand):
     """Create a 3D dataset from 2D image files using AFNI to3d command
 
@@ -105,11 +110,11 @@ class To3D(AFNICommand):
     >>> To3D.inputs.out_file = 'dicomdir.nii'
     >>> To3D.inputs.filetype = "anat"
     >>> To3D.cmdline #doctest: +ELLIPSIS
-    'to3d -datum float -anat -prefix dicomdir.nii ./*.dcm'
+    {u}'to3d -datum float -anat -prefix dicomdir.nii ./*.dcm'
     >>> res = To3D.run() #doctest: +SKIP
 
    """
-
+    __metaclass__ = py3compat.mymetaclass
     _cmd = 'to3d'
     input_spec = To3DInputSpec
     output_spec = AFNICommandOutputSpec
@@ -157,6 +162,7 @@ class TShiftInputSpec(AFNICommandInputSpec):
                           argstr="-rlt+")
 
 
+# @py3compat.u_format
 class TShift(AFNICommand):
     """Shifts voxel time series from input
     so that seperate slices are aligned to the same
@@ -174,11 +180,11 @@ class TShift(AFNICommand):
     >>> tshift.inputs.tpattern = 'alt+z'
     >>> tshift.inputs.tzero = 0.0
     >>> tshift.cmdline #doctest:
-    '3dTshift -prefix functional_tshift -tpattern alt+z -tzero 0.0 functional.nii'
+    {u}'3dTshift -prefix functional_tshift -tpattern alt+z -tzero 0.0 functional.nii'
     >>> res = tshift.run()   # doctest: +SKIP
 
     """
-
+    __metaclass__ = py3compat.mymetaclass
     _cmd = '3dTshift'
     input_spec = TShiftInputSpec
     output_spec = AFNICommandOutputSpec
@@ -219,6 +225,7 @@ class RefitInputSpec(CommandLineInputSpec):
                         ' template type, e.g. TLRC, MNI, ORIG')
 
 
+# @py3compat.u_format
 class Refit(AFNICommandBase):
     """Changes some of the information inside a 3D dataset's header
 
@@ -233,11 +240,11 @@ class Refit(AFNICommandBase):
     >>> refit.inputs.in_file = 'structural.nii'
     >>> refit.inputs.deoblique = True
     >>> refit.cmdline
-    '3drefit -deoblique structural.nii'
+    {u}'3drefit -deoblique structural.nii'
     >>> res = refit.run() # doctest: +SKIP
 
     """
-
+    __metaclass__ = py3compat.mymetaclass
     _cmd = '3drefit'
     input_spec = RefitInputSpec
     output_spec = AFNICommandOutputSpec
@@ -289,6 +296,7 @@ class WarpInputSpec(AFNICommandInputSpec):
                       argstr="-zpad %d")
 
 
+# @py3compat.u_format
 class Warp(AFNICommand):
     """Use 3dWarp for spatially transforming a dataset
 
@@ -304,17 +312,17 @@ class Warp(AFNICommand):
     >>> warp.inputs.deoblique = True
     >>> warp.inputs.out_file = "trans.nii.gz"
     >>> warp.cmdline
-    '3dWarp -deoblique -prefix trans.nii.gz structural.nii'
+    {u}'3dWarp -deoblique -prefix trans.nii.gz structural.nii'
 
     >>> warp_2 = afni.Warp()
     >>> warp_2.inputs.in_file = 'structural.nii'
     >>> warp_2.inputs.newgrid = 1.0
     >>> warp_2.inputs.out_file = "trans.nii.gz"
     >>> warp_2.cmdline
-    '3dWarp -newgrid 1.000000 -prefix trans.nii.gz structural.nii'
+    {u}'3dWarp -newgrid 1.000000 -prefix trans.nii.gz structural.nii'
 
     """
-
+    __metaclass__ = py3compat.mymetaclass
     _cmd = '3dWarp'
     input_spec = WarpInputSpec
     output_spec = AFNICommandOutputSpec
@@ -347,6 +355,7 @@ class ResampleInputSpec(AFNICommandInputSpec):
                          desc='align dataset grid to a reference file')
 
 
+# @py3compat.u_format
 class Resample(AFNICommand):
     """Resample or reorient an image using AFNI 3dresample command
 
@@ -362,10 +371,11 @@ class Resample(AFNICommand):
     >>> resample.inputs.orientation= 'RPI'
     >>> resample.inputs.outputtype = "NIFTI"
     >>> resample.cmdline
-    '3dresample -orient RPI -prefix functional_resample.nii -inset functional.nii'
+    {u}'3dresample -orient RPI -prefix functional_resample.nii -inset functional.nii'
     >>> res = resample.run() # doctest: +SKIP
 
     """
+    __metaclass__ = py3compat.mymetaclass
 
     _cmd = '3dresample'
     input_spec = ResampleInputSpec
@@ -399,6 +409,7 @@ class AutoTcorrelateInputSpec(AFNICommandInputSpec):
                     argstr='-prefix %s', name_source="in_file")
 
 
+# @py3compat.u_format
 class AutoTcorrelate(AFNICommand):
     """Computes the correlation coefficient between the time series of each
     pair of voxels in the input dataset, and stores the output into a
@@ -415,9 +426,10 @@ class AutoTcorrelate(AFNICommand):
     >>> corr.inputs.mask = 'mask.nii'
     >>> corr.inputs.mask_only_targets = True
     >>> corr.cmdline # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
-    '3dAutoTcorrelate -eta2 -mask mask.nii -mask_only_targets -prefix functional_similarity_matrix.1D -polort -1 functional.nii'
+    {u}'3dAutoTcorrelate -eta2 -mask mask.nii -mask_only_targets -prefix functional_similarity_matrix.1D -polort -1 functional.nii'
     >>> res = corr.run() # doctest: +SKIP
     """
+    __metaclass__ = py3compat.mymetaclass
     input_spec = AutoTcorrelateInputSpec
     output_spec = AFNICommandOutputSpec
     _cmd = '3dAutoTcorrelate'
@@ -447,6 +459,7 @@ class TStatInputSpec(AFNICommandInputSpec):
                          argstr='%s')
 
 
+# @py3compat.u_format
 class TStat(AFNICommand):
     """Compute voxel-wise statistics using AFNI 3dTstat command
 
@@ -462,11 +475,12 @@ class TStat(AFNICommand):
     >>> tstat.inputs.args= '-mean'
     >>> tstat.inputs.out_file = "stats"
     >>> tstat.cmdline
-    '3dTstat -mean -prefix stats functional.nii'
+    {u}'3dTstat -mean -prefix stats functional.nii'
     >>> res = tstat.run() # doctest: +SKIP
 
     """
 
+    __metaclass__ = py3compat.mymetaclass
     _cmd = '3dTstat'
     input_spec = TStatInputSpec
     output_spec = AFNICommandOutputSpec
@@ -484,6 +498,7 @@ class DetrendInputSpec(AFNICommandInputSpec):
                     argstr='-prefix %s', name_source="in_file")
 
 
+# @py3compat.u_format
 class Detrend(AFNICommand):
     """This program removes components from voxel time series using
     linear least squares
@@ -500,11 +515,12 @@ class Detrend(AFNICommand):
     >>> detrend.inputs.args = '-polort 2'
     >>> detrend.inputs.outputtype = "AFNI"
     >>> detrend.cmdline
-    '3dDetrend -polort 2 -prefix functional_detrend functional.nii'
+    {u}'3dDetrend -polort 2 -prefix functional_detrend functional.nii'
     >>> res = detrend.run() # doctest: +SKIP
 
     """
 
+    __metaclass__ = py3compat.mymetaclass
     _cmd = '3dDetrend'
     input_spec = DetrendInputSpec
     output_spec = AFNICommandOutputSpec
@@ -522,6 +538,7 @@ class DespikeInputSpec(AFNICommandInputSpec):
                     argstr='-prefix %s', name_source="in_file")
 
 
+# @py3compat.u_format
 class Despike(AFNICommand):
     """Removes 'spikes' from the 3D+time input dataset
 
@@ -535,11 +552,12 @@ class Despike(AFNICommand):
     >>> despike = afni.Despike()
     >>> despike.inputs.in_file = 'functional.nii'
     >>> despike.cmdline
-    '3dDespike -prefix functional_despike functional.nii'
+    {u}'3dDespike -prefix functional_despike functional.nii'
     >>> res = despike.run() # doctest: +SKIP
 
     """
 
+    __metaclass__ = py3compat.mymetaclass
     _cmd = '3dDespike'
     input_spec = DespikeInputSpec
     output_spec = AFNICommandOutputSpec
@@ -594,6 +612,7 @@ class DegreeCentralityOutputSpec(AFNICommandOutputSpec):
                           'and affine matrix')
 
 
+# @py3compat.u_format
 class DegreeCentrality(AFNICommand):
     """Performs degree centrality on a dataset using a given maskfile
     via 3dDegreeCentrality
@@ -611,10 +630,11 @@ class DegreeCentrality(AFNICommand):
     >>> degree.inputs.sparsity = 1 # keep the top one percent of connections
     >>> degree.inputs.out_file = 'out.nii'
     >>> degree.cmdline
-    '3dDegreeCentrality -mask mask.nii -prefix out.nii -sparsity 1.000000 functional.nii'
+    {u}'3dDegreeCentrality -mask mask.nii -prefix out.nii -sparsity 1.000000 functional.nii'
     >>> res = degree.run() # doctest: +SKIP
     """
 
+    __metaclass__ = py3compat.mymetaclass
     _cmd = '3dDegreeCentrality'
     input_spec = DegreeCentralityInputSpec
     output_spec = DegreeCentralityOutputSpec
@@ -682,6 +702,7 @@ class ECMInputSpec(CentralityInputSpec):
                           argstr='-memory %f')
 
 
+# @py3compat.u_format
 class ECM(AFNICommand):
     """Performs degree centrality on a dataset using a given maskfile
     via the 3dLFCD command
@@ -699,10 +720,11 @@ class ECM(AFNICommand):
     >>> ecm.inputs.sparsity = 0.1 # keep top 0.1% of connections
     >>> ecm.inputs.out_file = 'out.nii'
     >>> ecm.cmdline
-    '3dECM -mask mask.nii -prefix out.nii -sparsity 0.100000 functional.nii'
+    {u}'3dECM -mask mask.nii -prefix out.nii -sparsity 0.100000 functional.nii'
     >>> res = ecm.run() # doctest: +SKIP
     """
 
+    __metaclass__ = py3compat.mymetaclass
     _cmd = '3dECM'
     input_spec = ECMInputSpec
     output_spec = AFNICommandOutputSpec
@@ -720,6 +742,7 @@ class LFCDInputSpec(CentralityInputSpec):
                    copyfile=False)
 
 
+# @py3compat.u_format
 class LFCD(AFNICommand):
     """Performs degree centrality on a dataset using a given maskfile
     via the 3dLFCD command
@@ -737,10 +760,11 @@ class LFCD(AFNICommand):
     >>> lfcd.inputs.thresh = 0.8 # keep all connections with corr >= 0.8
     >>> lfcd.inputs.out_file = 'out.nii'
     >>> lfcd.cmdline
-    '3dLFCD -mask mask.nii -prefix out.nii -thresh 0.800000 functional.nii'
+    {u}'3dLFCD -mask mask.nii -prefix out.nii -thresh 0.800000 functional.nii'
     >>> res = lfcd.run() # doctest: +SKIP
     """
 
+    __metaclass__ = py3compat.mymetaclass
     _cmd = '3dLFCD'
     input_spec = LFCDInputSpec
     output_spec = AFNICommandOutputSpec
@@ -781,6 +805,7 @@ class AutomaskOutputSpec(TraitedSpec):
     brain_file = File(desc='brain file (skull stripped)', exists=True)
 
 
+# @py3compat.u_format
 class Automask(AFNICommand):
     """Create a brain-only mask of the image using AFNI 3dAutomask command
 
@@ -796,11 +821,12 @@ class Automask(AFNICommand):
     >>> automask.inputs.dilate = 1
     >>> automask.inputs.outputtype = "NIFTI"
     >>> automask.cmdline #doctest: +ELLIPSIS
-    '3dAutomask -apply_prefix functional_masked.nii -dilate 1 -prefix functional_mask.nii functional.nii'
+    {u}'3dAutomask -apply_prefix functional_masked.nii -dilate 1 -prefix functional_mask.nii functional.nii'
     >>> res = automask.run() # doctest: +SKIP
 
     """
 
+    __metaclass__ = py3compat.mymetaclass
     _cmd = '3dAutomask'
     input_spec = AutomaskInputSpec
     output_spec = AutomaskOutputSpec
@@ -851,6 +877,7 @@ class VolregOutputSpec(TraitedSpec):
     oned_matrix_save = File(desc='matrix transformation from base to input', exists=True)
 
 
+# @py3compat.u_format
 class Volreg(AFNICommand):
     """Register input volumes to a base volume using AFNI 3dvolreg command
 
@@ -867,11 +894,12 @@ class Volreg(AFNICommand):
     >>> volreg.inputs.zpad = 4
     >>> volreg.inputs.outputtype = "NIFTI"
     >>> volreg.cmdline #doctest: +ELLIPSIS
-    '3dvolreg -Fourier -twopass -1Dfile functional.1D -1Dmatrix_save functional.aff12.1D -prefix functional_volreg.nii -zpad 4 -maxdisp1D functional_md.1D functional.nii'
+    {u}'3dvolreg -Fourier -twopass -1Dfile functional.1D -1Dmatrix_save functional.aff12.1D -prefix functional_volreg.nii -zpad 4 -maxdisp1D functional_md.1D functional.nii'
     >>> res = volreg.run() # doctest: +SKIP
 
     """
 
+    __metaclass__ = py3compat.mymetaclass
     _cmd = '3dvolreg'
     input_spec = VolregInputSpec
     output_spec = VolregOutputSpec
@@ -928,6 +956,7 @@ class CopyInputSpec(AFNICommandInputSpec):
                     argstr='%s', position=-1, name_source="in_file")
 
 
+# @py3compat.u_format
 class Copy(AFNICommand):
     """Copies an image of one type to an image of the same
     or different type using 3dcopy command
@@ -942,25 +971,26 @@ class Copy(AFNICommand):
     >>> copy3d = afni.Copy()
     >>> copy3d.inputs.in_file = 'functional.nii'
     >>> copy3d.cmdline
-    '3dcopy functional.nii functional_copy'
+    {u}'3dcopy functional.nii functional_copy'
 
     >>> from copy import deepcopy
     >>> copy3d_2 = deepcopy(copy3d)
     >>> copy3d_2.inputs.outputtype = 'NIFTI'
     >>> copy3d_2.cmdline
-    '3dcopy functional.nii functional_copy.nii'
+    {u}'3dcopy functional.nii functional_copy.nii'
 
     >>> copy3d_3 = deepcopy(copy3d)
     >>> copy3d_3.inputs.outputtype = 'NIFTI_GZ'
     >>> copy3d_3.cmdline
-    '3dcopy functional.nii functional_copy.nii.gz'
+    {u}'3dcopy functional.nii functional_copy.nii.gz'
 
     >>> copy3d_4 = deepcopy(copy3d)
     >>> copy3d_4.inputs.out_file = 'new_func.nii'
     >>> copy3d_4.cmdline
-    '3dcopy functional.nii new_func.nii'
+    {u}'3dcopy functional.nii new_func.nii'
     """
 
+    __metaclass__ = py3compat.mymetaclass
     _cmd = '3dcopy'
     input_spec = CopyInputSpec
     output_spec = AFNICommandOutputSpec
@@ -1418,6 +1448,7 @@ class MaskaveInputSpec(AFNICommandInputSpec):
                         position=2)
 
 
+# @py3compat.u_format
 class Maskave(AFNICommand):
     """Computes average of all voxels in the input dataset
     which satisfy the criterion in the options list
@@ -1434,11 +1465,12 @@ class Maskave(AFNICommand):
     >>> maskave.inputs.mask= 'seed_mask.nii'
     >>> maskave.inputs.quiet= True
     >>> maskave.cmdline #doctest: +ELLIPSIS
-    '3dmaskave -mask seed_mask.nii -quiet functional.nii > functional_maskave.1D'
+    {u}'3dmaskave -mask seed_mask.nii -quiet functional.nii > functional_maskave.1D'
     >>> res = maskave.run() # doctest: +SKIP
 
     """
 
+    __metaclass__ = py3compat.mymetaclass
     _cmd = '3dmaskave'
     input_spec = MaskaveInputSpec
     output_spec = AFNICommandOutputSpec
@@ -1664,6 +1696,7 @@ class TCorr1DOutputSpec(TraitedSpec):
                     exists=True)
 
 
+# @py3compat.u_format
 class TCorr1D(AFNICommand):
     """Computes the correlation coefficient between each voxel time series
     in the input 3D+time dataset.
@@ -1675,10 +1708,11 @@ class TCorr1D(AFNICommand):
     >>> tcorr1D.inputs.xset= 'u_rc1s1_Template.nii'
     >>> tcorr1D.inputs.y_1d = 'seed.1D'
     >>> tcorr1D.cmdline
-    '3dTcorr1D -prefix u_rc1s1_Template_correlation.nii.gz  u_rc1s1_Template.nii  seed.1D'
+    {u}'3dTcorr1D -prefix u_rc1s1_Template_correlation.nii.gz  u_rc1s1_Template.nii  seed.1D'
     >>> res = tcorr1D.run() # doctest: +SKIP
     """
 
+    __metaclass__ = py3compat.mymetaclass
     _cmd = '3dTcorr1D'
     input_spec = TCorr1DInputSpec
     output_spec = TCorr1DOutputSpec
@@ -1894,6 +1928,7 @@ class MaskToolOutputSpec(TraitedSpec):
                     exists=True)
 
 
+# @py3compat.u_format
 class MaskTool(AFNICommand):
     """3dmask_tool - for combining/dilating/eroding/filling masks
 
@@ -1909,11 +1944,12 @@ class MaskTool(AFNICommand):
     >>> automask.inputs.dilate = 1
     >>> automask.inputs.outputtype = "NIFTI"
     >>> automask.cmdline #doctest: +ELLIPSIS
-    '3dAutomask -apply_prefix functional_masked.nii -dilate 1 -prefix functional_mask.nii functional.nii'
+    {u}'3dAutomask -apply_prefix functional_masked.nii -dilate 1 -prefix functional_mask.nii functional.nii'
     >>> res = automask.run() # doctest: +SKIP
 
     """
 
+    __metaclass__ = py3compat.mymetaclass
     _cmd = '3dmask_tool'
     input_spec = MaskToolInputSpec
     output_spec = MaskToolOutputSpec
@@ -2088,6 +2124,7 @@ class CalcInputSpec(AFNICommandInputSpec):
     other = File(desc='other options', argstr='')
 
 
+# @py3compat.u_format
 class Calc(AFNICommand):
     """This program does voxel-by-voxel arithmetic on 3D datasets
 
@@ -2105,10 +2142,11 @@ class Calc(AFNICommand):
     >>> calc.inputs.out_file =  'functional_calc.nii.gz'
     >>> calc.inputs.outputtype = "NIFTI"
     >>> calc.cmdline #doctest: +ELLIPSIS
-    '3dcalc -a functional.nii  -b functional2.nii -expr "a*b" -prefix functional_calc.nii.gz'
+    {u}'3dcalc -a functional.nii  -b functional2.nii -expr "a*b" -prefix functional_calc.nii.gz'
 
     """
 
+    __metaclass__ = py3compat.mymetaclass
     _cmd = '3dcalc'
     input_spec = CalcInputSpec
     output_spec = AFNICommandOutputSpec
@@ -2163,6 +2201,7 @@ class BlurInMaskInputSpec(AFNICommandInputSpec):
     options = traits.Str(desc='options', argstr='%s', position=2)
 
 
+# @py3compat.u_format
 class BlurInMask(AFNICommand):
     """ Blurs a dataset spatially inside a mask.  That's all.  Experimental.
 
@@ -2178,11 +2217,12 @@ class BlurInMask(AFNICommand):
     >>> bim.inputs.mask = 'mask.nii'
     >>> bim.inputs.fwhm = 5.0
     >>> bim.cmdline #doctest: +ELLIPSIS
-    '3dBlurInMask -input functional.nii -FWHM 5.000000 -mask mask.nii -prefix functional_blur'
+    {u}'3dBlurInMask -input functional.nii -FWHM 5.000000 -mask mask.nii -prefix functional_blur'
     >>> res = bim.run()   # doctest: +SKIP
 
     """
 
+    __metaclass__ = py3compat.mymetaclass
     _cmd = '3dBlurInMask'
     input_spec = BlurInMaskInputSpec
     output_spec = AFNICommandOutputSpec
@@ -2442,7 +2482,7 @@ class AFNItoNIFTIInputSpec(AFNICommandInputSpec):
                     argstr='-prefix %s', name_source="in_file")
     hash_files = False
 
-@py3compat.u_format
+# @py3compat.u_format
 class AFNItoNIFTI(AFNICommand):
     """Changes AFNI format files to NIFTI format using 3dAFNItoNIFTI
 
@@ -2461,6 +2501,7 @@ class AFNItoNIFTI(AFNICommand):
 
     """
 
+    __metaclass__ = py3compat.mymetaclass
     _cmd = '3dAFNItoNIFTI'
     input_spec = AFNItoNIFTIInputSpec
     output_spec = AFNICommandOutputSpec
@@ -2496,6 +2537,7 @@ class EvalInputSpec(AFNICommandInputSpec):
     other = File(desc='other options', argstr='')
 
 
+# @py3compat.u_format
 class Eval(AFNICommand):
     """Evaluates an expression that may include columns of data from one or more text files
 
@@ -2512,10 +2554,11 @@ class Eval(AFNICommand):
     >>> eval.inputs.out1D = True
     >>> eval.inputs.out_file =  'data_calc.1D'
     >>> calc.cmdline #doctest: +SKIP
-    '3deval -a timeseries1.1D  -b timeseries2.1D -expr "a*b" -1D -prefix data_calc.1D'
+    {u}'3deval -a timeseries1.1D  -b timeseries2.1D -expr "a*b" -1D -prefix data_calc.1D'
 
     """
 
+    __metaclass__ = py3compat.mymetaclass
     _cmd = '1deval'
     input_spec = EvalInputSpec
     output_spec = AFNICommandOutputSpec
@@ -2560,6 +2603,7 @@ class MeansInputSpec(AFNICommandInputSpec):
     mask_union = traits.Bool(desc='create union mask', argstr='-mask_union')
 
 
+# @py3compat.u_format
 class Means(AFNICommand):
     """Takes the voxel-by-voxel mean of all input datasets using 3dMean
 
@@ -2574,10 +2618,11 @@ class Means(AFNICommand):
     >>> means.inputs.in_file_b = 'im2.nii'
     >>> means.inputs.out_file =  'output.nii'
     >>> means.cmdline
-    '3dMean im1.nii im2.nii -prefix output.nii'
+    {u}'3dMean im1.nii im2.nii -prefix output.nii'
 
     """
 
+    __metaclass__ = py3compat.mymetaclass
     _cmd = '3dMean'
     input_spec = MeansInputSpec
     output_spec = AFNICommandOutputSpec
@@ -2606,6 +2651,7 @@ class HistOutputSpec(TraitedSpec):
     out_show = File(desc='output visual histogram')
 
 
+# @py3compat.u_format
 class Hist(AFNICommandBase):
     """Computes average of all voxels in the input dataset
     which satisfy the criterion in the options list
@@ -2620,11 +2666,12 @@ class Hist(AFNICommandBase):
     >>> hist = afni.Hist()
     >>> hist.inputs.in_file = 'functional.nii'
     >>> hist.cmdline
-    '3dHist -input functional.nii -prefix functional_hist'
+    {u}'3dHist -input functional.nii -prefix functional_hist'
     >>> res = hist.run() # doctest: +SKIP
 
     """
 
+    __metaclass__ = py3compat.mymetaclass
     _cmd = '3dHist'
     input_spec = HistInputSpec
     output_spec = HistOutputSpec
@@ -2707,6 +2754,7 @@ class FWHMxOutputSpec(TraitedSpec):
     out_acf = File(exists=True, desc='output acf file')
 
 
+# @py3compat.u_format
 class FWHMx(AFNICommandBase):
     """
     Unlike the older 3dFWHM, this program computes FWHMs for all sub-bricks
@@ -2723,7 +2771,7 @@ class FWHMx(AFNICommandBase):
     >>> fwhm = afp.FWHMx()
     >>> fwhm.inputs.in_file = 'functional.nii'
     >>> fwhm.cmdline
-    '3dFWHMx -input functional.nii -out functional_subbricks.out > functional_fwhmx.out'
+    {u}'3dFWHMx -input functional.nii -out functional_subbricks.out > functional_fwhmx.out'
 
 
     (Classic) METHOD:
@@ -2805,6 +2853,7 @@ class FWHMx(AFNICommandBase):
 
 
     """
+    __metaclass__ = py3compat.mymetaclass
     _cmd = '3dFWHMx'
     input_spec = FWHMxInputSpec
     output_spec = FWHMxOutputSpec
@@ -2904,6 +2953,7 @@ class OutlierCountOutputSpec(TraitedSpec):
         keep_extension=False, position=-1, desc='capture standard output')
 
 
+# @py3compat.u_format
 class OutlierCount(CommandLine):
     """Create a 3D dataset from 2D image files using AFNI to3d command
 
@@ -2917,11 +2967,12 @@ class OutlierCount(CommandLine):
     >>> toutcount = afni.OutlierCount()
     >>> toutcount.inputs.in_file = 'functional.nii'
     >>> toutcount.cmdline #doctest: +ELLIPSIS
-    '3dToutcount functional.nii > functional_outliers'
+    {u}'3dToutcount functional.nii > functional_outliers'
     >>> res = toutcount.run() #doctest: +SKIP
 
    """
 
+    __metaclass__ = py3compat.mymetaclass
     _cmd = '3dToutcount'
     input_spec = OutlierCountInputSpec
     output_spec = OutlierCountOutputSpec
@@ -2972,6 +3023,7 @@ class QualityIndexOutputSpec(TraitedSpec):
     out_file = File(desc='file containing the caputured standard output')
 
 
+# @py3compat.u_format
 class QualityIndex(CommandLine):
     """Create a 3D dataset from 2D image files using AFNI to3d command
 
@@ -2985,11 +3037,11 @@ class QualityIndex(CommandLine):
     >>> tqual = afni.QualityIndex()
     >>> tqual.inputs.in_file = 'functional.nii'
     >>> tqual.cmdline #doctest: +ELLIPSIS
-    '3dTqual functional.nii > functional_tqual'
+    {u}'3dTqual functional.nii > functional_tqual'
     >>> res = tqual.run() #doctest: +SKIP
 
-   """
-
+    """
+    __metaclass__ = py3compat.mymetaclass
     _cmd = '3dTqual'
     input_spec = QualityIndexInputSpec
     output_spec = QualityIndexOutputSpec
