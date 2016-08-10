@@ -66,7 +66,7 @@ from ...utils.filemanip import (save_json, FileNotFoundError,
                                 split_filename, load_json, savepkl,
                                 write_rst_header, write_rst_dict,
                                 write_rst_list)
-from ...external.six import string_types
+from six import string_types
 from .utils import (generate_expanded_graph, modify_paths,
                     export_graph, make_output_dir, write_workflow_prov,
                     clean_working_directory, format_dot, topological_sort,

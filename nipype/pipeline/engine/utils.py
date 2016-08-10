@@ -38,7 +38,7 @@ package_check('networkx', '1.3')
 
 import networkx as nx
 
-from ...external.six import string_types
+from six import string_types
 from ...utils.filemanip import (fname_presuffix, FileNotFoundError,
                                 filename_to_list, get_related_files)
 from ...utils.misc import create_function_from_source, str2bool

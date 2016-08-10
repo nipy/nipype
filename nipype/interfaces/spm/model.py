@@ -27,7 +27,7 @@ from .base import (SPMCommand, SPMCommandInputSpec,
                    scans_for_fnames)
 from ..base import (Bunch, traits, TraitedSpec, File, Directory,
                     OutputMultiPath, InputMultiPath, isdefined)
-from ...external.six import string_types
+from six import string_types
 from ...utils.filemanip import (filename_to_list, list_to_filename,
                                 split_filename)
 from ... import logging

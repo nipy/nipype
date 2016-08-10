@@ -7,7 +7,7 @@ import nibabel as nb
 import numpy as np
 
 from ...utils.misc import package_check
-from ...external.six import string_types
+from six import string_types
 
 have_nipy = True
 try:

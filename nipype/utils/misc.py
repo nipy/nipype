@@ -18,7 +18,7 @@ import sys
 import re
 from collections import Iterator
 
-from nipype.external.six import string_types
+from six import string_types
 
 
 def human_order_sorted(l):

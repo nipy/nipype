@@ -14,7 +14,7 @@ import re
 import pydoc
 from warnings import warn
 
-from nipype.external.six import StringIO
+from six import StringIO
 
 
 class Reader(object):

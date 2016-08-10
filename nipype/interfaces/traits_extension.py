@@ -30,7 +30,7 @@ from traits.trait_base import _Undefined, class_of
 
 from traits.api import BaseUnicode
 from traits.api import Unicode
-from nipype.external.six import string_types
+from six import string_types
 
 DictStrStr = traits.Dict(string_types, string_types)
 Str = Unicode

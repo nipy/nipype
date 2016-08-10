@@ -7,7 +7,7 @@ import unittest
 import sys
 from contextlib import contextmanager
 
-from nipype.external.six import PY2, PY3, StringIO
+from six import PY2, PY3, StringIO
 from nipype.utils import nipype_cmd
 
 

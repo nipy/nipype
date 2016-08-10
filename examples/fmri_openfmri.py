@@ -25,7 +25,7 @@ import nipype.algorithms.rapidart as ra
 import nipype.interfaces.fsl as fsl
 import nipype.interfaces.io as nio
 import nipype.interfaces.utility as niu
-from nipype.external.six import string_types
+from six import string_types
 from nipype.workflows.fmri.fsl import (create_featreg_preproc,
                                        create_modelfit_workflow,
                                        create_fixed_effects_flow,

@@ -34,7 +34,7 @@ from warnings import warn
 
 
 from nipype import config, logging, LooseVersion, __version__
-from nipype.external.six import string_types, text_type
+from six import string_types, text_type
 from nipype.utils.provenance import write_provenance
 from nipype.utils.misc import is_container, trim, str2bool
 from nipype.utils.filemanip import (md5, hash_infile, FileNotFoundError, hash_timestamp,

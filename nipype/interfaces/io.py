@@ -38,7 +38,7 @@ from warnings import warn
 import sqlite3
 
 from nipype import config, logging
-from nipype.external.six import string_types
+from six import string_types
 from nipype.utils.filemanip import copyfile, list_to_filename, filename_to_list
 from nipype.utils.misc import human_order_sorted, str2bool
 from nipype.interfaces.base import (

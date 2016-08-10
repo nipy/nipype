@@ -6,7 +6,7 @@ import textwrap
 import pydoc
 import sphinx
 from .docscrape import NumpyDocString, FunctionDoc, ClassDoc
-from nipype.external.six import string_types
+from six import string_types
 
 
 class SphinxDocString(NumpyDocString):

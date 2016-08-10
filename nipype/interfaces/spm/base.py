@@ -35,7 +35,7 @@ from ..base import (BaseInterface, traits, isdefined, InputMultiPath,
                     BaseInterfaceInputSpec, Directory, Undefined)
 from ..matlab import MatlabCommand
 from ...utils import spm_docs as sd
-from ...external.six import string_types
+from six import string_types
 from ... import logging
 logger = logging.getLogger('interface')
 

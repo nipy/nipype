@@ -20,7 +20,7 @@ from builtins import open
 import subprocess
 from nipype.interfaces.base import CommandLine
 from nipype.utils.misc import is_container
-from nipype.external.six import string_types
+from six import string_types
 
 
 def grab_doc(cmd, trap_error=True):

@@ -14,7 +14,7 @@ import sys
 import warnings
 
 from nipype.interfaces.base import BaseInterface
-from nipype.external.six import string_types
+from six import string_types
 
 
 # Functions and classes

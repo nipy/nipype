@@ -22,7 +22,7 @@ from .base import (AFNICommandBase, AFNICommand, AFNICommandInputSpec, AFNIComma
                    Info, no_afni)
 from ..base import (CommandLineInputSpec, CommandLine, Directory, TraitedSpec,
                     traits, isdefined, File, InputMultiPath, Undefined)
-from ...external.six import string_types
+from six import string_types
 from ...utils.filemanip import (load_json, save_json, split_filename)
 
 class BlurToFWHMInputSpec(AFNICommandInputSpec):

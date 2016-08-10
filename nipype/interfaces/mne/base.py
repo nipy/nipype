@@ -8,7 +8,7 @@ iflogger = logging.getLogger('interface')
 
 from ..base import (traits, File, Directory, TraitedSpec, OutputMultiPath)
 from ..freesurfer.base import FSCommand, FSTraitedSpec
-from ...external.six import string_types
+from six import string_types
 from ...utils.filemanip import list_to_filename
 
 

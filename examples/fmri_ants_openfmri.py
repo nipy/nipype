@@ -26,7 +26,7 @@ import nipype.pipeline.engine as pe
 import nipype.algorithms.modelgen as model
 import nipype.algorithms.rapidart as ra
 from nipype.algorithms.misc import TSNR
-from nipype.external.six import string_types
+from six import string_types
 from nipype.interfaces.c3 import C3dAffineTool
 import nipype.interfaces.io as nio
 import nipype.interfaces.utility as niu
