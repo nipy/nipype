@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from __future__ import unicode_literals
+from __future__ import unicode_literals, absolute_import
 from future import standard_library
 standard_library.install_aliases()
 from builtins import open, object, str
@@ -19,13 +19,11 @@ except ImportError:
     from ordereddict import OrderedDict
 
 import prov.model as pm
-from six import string_types, text_type
 
-from .. import get_info
-from .filemanip import (md5, hashlib, hash_infile)
-from .. import logging, __version__
+from nipype import get_info, logging, __version__
+from nipype.utils.filemanip import (md5, hashlib, hash_infile)
+
 iflogger = logging.getLogger('interface')
-
 foaf = pm.Namespace("foaf", "http://xmlns.com/foaf/0.1/")
 dcterms = pm.Namespace("dcterms", "http://purl.org/dc/terms/")
 nipype_ns = pm.Namespace("nipype", "http://nipy.org/nipype/terms/")
@@ -35,6 +33,12 @@ crypto = pm.Namespace("crypto",
                        "cryptographicHashFunctions/"))
 get_id = lambda: niiri[uuid1().hex]
 
+PROV_ENVVARS = ['PATH', 'FSLDIR', 'FREESURFER_HOME', 'ANTSPATH',
+                'CAMINOPATH', 'CLASSPATH', 'LD_LIBRARY_PATH',
+                'DYLD_LIBRARY_PATH', 'FIX_VERTEX_AREA',
+                'FSF_OUTPUT_FORMAT', 'FSLCONFDIR', 'FSLOUTPUTTYPE',
+                'LOGNAME', 'USER',
+                'MKL_NUM_THREADS', 'OMP_NUM_THREADS']
 
 def get_attr_id(attr, skip=None):
     dictwithhash, hashval = get_hashval(attr, skip=skip)
@@ -103,21 +107,22 @@ def _get_sorteddict(object, dictwithhash=False):
         if isinstance(object, tuple):
             out = tuple(out)
     else:
-        if isinstance(object, string_types) and os.path.isfile(object):
+        if isinstance(object, str) and os.path.isfile(object):
             hash = hash_infile(object)
             if dictwithhash:
                 out = (object, hash)
             else:
                 out = hash
         elif isinstance(object, float):
-            out = '%.10f' % object
+            out = '%.10f'.format(object)
         else:
             out = object
     return out
 
 
 def safe_encode(x, as_literal=True):
-    """Encodes a python value for prov
+    """
+    Encodes a python value for prov
     """
     if x is None:
         value = "Unknown"
@@ -126,7 +131,7 @@ def safe_encode(x, as_literal=True):
         else:
             return value
     try:
-        if isinstance(x, (str, string_types)):
+        if isinstance(x, str):
             if os.path.exists(x):
                 value = 'file://%s%s' % (getfqdn(), x)
                 if not as_literal:
@@ -145,7 +150,7 @@ def safe_encode(x, as_literal=True):
                 if isinstance(value, str):
                     return pm.Literal(value, pm.XSD['string'])
                 else:
-                    return pm.Literal(text_type(value, 'utf-8'), pm.XSD['string'])
+                    return pm.Literal(str(value), pm.XSD['string'])
         if isinstance(x, int):
             if not as_literal:
                 return x
@@ -165,12 +170,13 @@ def safe_encode(x, as_literal=True):
             if not as_literal:
                 return simplejson.dumps(outdict)
             return pm.Literal(simplejson.dumps(outdict), pm.XSD['string'])
-        if isinstance(x, list):
-            try:
-                nptype = np.array(x).dtype
-                if nptype == np.dtype(object):
-                    raise ValueError('dtype object')
-            except ValueError as e:
+        if isinstance(x, (list, tuple)):
+            x = list(x)
+            nptype = np.array(x).dtype
+
+            # If the array contains an heterogeneous mixture of data types
+            # they should be encoded sequentially
+            if nptype == np.dtype(object):
                 outlist = []
                 for value in x:
                     encoded_value = safe_encode(value, as_literal=False)
@@ -178,17 +184,28 @@ def safe_encode(x, as_literal=True):
                         outlist.append(encoded_value.json_representation())
                     else:
                         outlist.append(encoded_value)
-            else:
-                outlist = x
+                x = outlist
+
+            jsonstr = simplejson.dumps(x)
             if not as_literal:
-                return simplejson.dumps(outlist)
-            return pm.Literal(simplejson.dumps(outlist), pm.XSD['string'])
+                return jsonstr
+
+            return pm.Literal(jsonstr, pm.XSD['string'])
+
+        # If is a literal, and as_literal do nothing.
+        # else bring back to json.
+        if isinstance(x, pm.Literal):
+            if as_literal:
+                return x
+            return dumps(x.json_representation())
+
         if not as_literal:
             return dumps(x)
         return pm.Literal(dumps(x), nipype_ns['pickle'])
-    except TypeError as e:
-        iflogger.debug(e)
-        value = "Could not encode: " + str(e)
+
+    except TypeError as excp:
+        iflogger.debug(excp)
+        value = "Could not encode: {}".format(excp)
         if not as_literal:
             return value
         return pm.Literal(value, pm.XSD['string'])
@@ -209,7 +226,7 @@ def prov_encode(graph, value, create_container=True):
                     entities.append(item_entity)
                     if isinstance(item, list):
                         continue
-                    if not isinstance(list(item_entity.value)[0], string_types):
+                    if not isinstance(list(item_entity.value)[0], str):
                         raise ValueError('Not a string literal')
                     if 'file://' not in list(item_entity.value)[0]:
                         raise ValueError('No file found')
@@ -225,7 +242,7 @@ def prov_encode(graph, value, create_container=True):
     else:
         encoded_literal = safe_encode(value)
         attr = {pm.PROV['value']: encoded_literal}
-        if isinstance(value, string_types) and os.path.exists(value):
+        if isinstance(value, str) and os.path.exists(value):
             attr.update({pm.PROV['location']: encoded_literal})
             if not os.path.isdir(value):
                 sha512 = hash_infile(value, crypto=hashlib.sha512)
@@ -300,12 +317,7 @@ class ProvStore(object):
         self.g.used(a0, id)
         # write environment entities
         for idx, (key, val) in enumerate(sorted(runtime.environ.items())):
-            if key not in ['PATH', 'FSLDIR', 'FREESURFER_HOME', 'ANTSPATH',
-                           'CAMINOPATH', 'CLASSPATH', 'LD_LIBRARY_PATH',
-                           'DYLD_LIBRARY_PATH', 'FIX_VERTEX_AREA',
-                           'FSF_OUTPUT_FORMAT', 'FSLCONFDIR', 'FSLOUTPUTTYPE',
-                           'LOGNAME', 'USER',
-                           'MKL_NUM_THREADS', 'OMP_NUM_THREADS']:
+            if key not in PROV_ENVVARS:
                 continue
             in_attr = {pm.PROV["label"]: key,
                        nipype_ns["environmentVariable"]: key,
