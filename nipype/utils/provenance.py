@@ -172,11 +172,16 @@ def safe_encode(x, as_literal=True):
             return pm.Literal(simplejson.dumps(outdict), pm.XSD['string'])
         if isinstance(x, (list, tuple)):
             x = list(x)
-            nptype = np.array(x).dtype
+            is_object = False
+            try:
+                nptype = np.array(x).dtype
+                is_object = nptype == np.dtype(object)
+            except ValueError:
+                is_object = True
 
             # If the array contains an heterogeneous mixture of data types
             # they should be encoded sequentially
-            if nptype == np.dtype(object):
+            if is_object:
                 outlist = []
                 for value in x:
                     encoded_value = safe_encode(value, as_literal=False)
