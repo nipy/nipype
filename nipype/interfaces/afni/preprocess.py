@@ -541,7 +541,7 @@ class Despike(AFNICommand):
     >>> from nipype.interfaces import afni as afni
     >>> despike = afni.Despike()
     >>> despike.inputs.in_file = 'functional.nii'
-    >>> despike.cmdline # doctests: +IGNORE_UNICODE
+    >>> despike.cmdline #doctest: +IGNORE_UNICODE
     u'3dDespike -prefix functional_despike functional.nii'
     >>> res = despike.run() # doctest: +SKIP
 
@@ -2639,7 +2639,7 @@ class Hist(AFNICommandBase):
     >>> from nipype.interfaces import afni as afni
     >>> hist = afni.Hist()
     >>> hist.inputs.in_file = 'functional.nii'
-    >>> hist.cmdline
+    >>> hist.cmdline  # doctest: +IGNORE_UNICODE
     u'3dHist -input functional.nii -prefix functional_hist'
     >>> res = hist.run() # doctest: +SKIP
 
