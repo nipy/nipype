@@ -8,13 +8,12 @@ from builtins import str
 import os
 from tempfile import mkdtemp
 
-from ...testing import assert_equal, assert_true, assert_false
-
-from ..provenance import ProvStore, safe_encode, text_type
+from nipype.testing import assert_equal, assert_true, assert_false
+from nipype.utils.provenance import ProvStore, safe_encode
 
 def test_provenance():
     ps = ProvStore()
-    from ...interfaces.base import CommandLine
+    from nipype.interfaces.base import CommandLine
     results = CommandLine('echo hello').run()
     ps.add_results(results)
     provn = ps.g.get_provn()
@@ -25,8 +24,8 @@ def test_provenance_exists():
     tempdir = mkdtemp()
     cwd = os.getcwd()
     os.chdir(tempdir)
-    from ...interfaces.base import CommandLine
-    from ... import config
+    from nipype import config
+    from nipype.interfaces.base import CommandLine
     provenance_state = config.get('execution', 'write_provenance')
     hash_state = config.get('execution', 'hash_method')
     config.enable_provenance()
@@ -40,6 +39,4 @@ def test_provenance_exists():
 def test_safe_encode():
     a = '\xc3\xa9lg'
     out = safe_encode(a)
-    if not isinstance(a, str):
-        a = text_type(a, 'utf-8')
     yield assert_equal, out.value, a
