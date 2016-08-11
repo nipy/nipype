@@ -51,7 +51,7 @@ RUN mkdir -p /root/src/nipype
 COPY . /root/src/nipype
 
 RUN cd /root/src/nipype && \
-    pip install dipy && \
+	pip install nose-cov doctest-ignore-unicode && \
     pip install -r requirements.txt && \
     pip install -e .
 

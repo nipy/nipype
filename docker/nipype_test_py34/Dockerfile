@@ -42,6 +42,7 @@ ENV PATH /usr/local/miniconda/bin:$PATH
 # http://bugs.python.org/issue19846
 # > At the moment, setting "LANG=C" on a Linux system *fundamentally breaks Python 3*, and that's not OK.
 ENV LANG C.UTF-8
+ENV LC_ALL C.UTF-8
 
 # Add conda-forge channel in conda
 RUN conda config --add channels conda-forge && \
@@ -53,6 +54,7 @@ RUN mkdir -p /root/src/nipype
 COPY . /root/src/nipype
 
 RUN cd /root/src/nipype && \
+    pip install nose-cov doctest-ignore-unicode && \
     pip install -r requirements.txt && \
     pip install -e .
 
