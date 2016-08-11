@@ -235,7 +235,7 @@ class RegistrationInputSpec(ANTSCommandInputSpec):
     initial_moving_transform = File(argstr='%s', exists=True, desc='',
                                     xor=['initial_moving_transform_com'])
     invert_initial_moving_transform = traits.Bool(requires=["initial_moving_transform"],
-        desc='', xor=['initial_moving_transform_com'])
+                                                  desc='', xor=['initial_moving_transform_com'])
 
     initial_moving_transform_com = traits.Enum(0, 1, 2, argstr='%s',
                                                default=0, xor=['initial_moving_transform'],
@@ -408,7 +408,6 @@ class Registration(ANTSCommand):
     >>> reg.inputs.moving_image = 'moving1.nii'
     >>> reg.inputs.output_transform_prefix = "output_"
     >>> reg.inputs.initial_moving_transform = 'trans.mat'
-    >>> reg.inputs.invert_initial_moving_transform = True
     >>> reg.inputs.transforms = ['Affine', 'SyN']
     >>> reg.inputs.transform_parameters = [(2.0,), (0.25, 3.0, 0.0)]
     >>> reg.inputs.number_of_iterations = [[1500, 200], [100, 50, 30]]
@@ -429,7 +428,18 @@ class Registration(ANTSCommand):
     >>> reg.inputs.use_estimate_learning_rate_once = [True, True]
     >>> reg.inputs.use_histogram_matching = [True, True] # This is the default
     >>> reg.inputs.output_warped_image = 'output_warped_image.nii.gz'
+    >>> reg.cmdline
+    'antsRegistration --collapse-output-transforms 0 --dimensionality 3 --initial-moving-transform [ trans.mat, 0 ] \
+--initialize-transforms-per-stage 0 --interpolation Linear --output [ output_, output_warped_image.nii.gz ] \
+--transform Affine[ 2.0 ] --metric Mattes[ fixed1.nii, moving1.nii, 1, 32, Random, 0.05 ] \
+--convergence [ 1500x200, 1e-08, 20 ] --smoothing-sigmas 1.0x0.0vox --shrink-factors 2x1 \
+--use-estimate-learning-rate-once 1 --use-histogram-matching 1 --transform SyN[ 0.25, 3.0, 0.0 ] \
+--metric Mattes[ fixed1.nii, moving1.nii, 1, 32 ] --convergence [ 100x50x30, 1e-09, 20 ] \
+--smoothing-sigmas 2.0x1.0x0.0vox --shrink-factors 3x2x1 --use-estimate-learning-rate-once 1 \
+--use-histogram-matching 1 --winsorize-image-intensities [ 0.0, 1.0 ]  --write-composite-transform 1'
+    >>> reg.run()  # doctest: +SKIP
 
+    >>> reg.inputs.invert_initial_moving_transform = True
     >>> reg1 = copy.deepcopy(reg)
     >>> reg1.inputs.winsorize_lower_quantile = 0.025
     >>> reg1.cmdline
@@ -812,17 +822,13 @@ class Registration(ANTSCommand):
         elif opt == 'transforms':
             return self._format_registration()
         elif opt == 'initial_moving_transform':
-            try:
-                do_invert_transform = int(self.inputs.invert_initial_moving_transform)
-            except ValueError:
-                do_invert_transform = 0  # Just do the default behavior
+            do_invert_transform = self.inputs.invert_initial_moving_transform \
+                if isdefined(self.inputs.invert_initial_moving_transform) else 0 # Just do the default behavior
             return '--initial-moving-transform [ %s, %d ]' % (self.inputs.initial_moving_transform,
                                                               do_invert_transform)
         elif opt == 'initial_moving_transform_com':
-            try:
-                do_center_of_mass_init = int(self.inputs.initial_moving_transform_com)
-            except ValueError:
-                do_center_of_mass_init = 0  # Just do the default behavior
+            do_center_of_mass_init = self.inputs.initial_moving_transform_com \
+                if isdefined(self.inputs.initial_moving_transform_com) else 0  # Just do the default behavior
             return '--initial-moving-transform [ %s, %s, %d ]' % (self.inputs.fixed_image[0],
                                                                   self.inputs.moving_image[0],
                                                                   do_center_of_mass_init)
