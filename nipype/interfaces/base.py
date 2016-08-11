@@ -36,7 +36,6 @@ from warnings import warn
 from nipype import config, logging, LooseVersion, __version__
 from six import string_types, text_type
 from nipype.utils.provenance import write_provenance
-from nipype.utils import py3compat
 from nipype.utils.misc import is_container, trim, str2bool
 from nipype.utils.filemanip import (md5, hash_infile, FileNotFoundError, hash_timestamp,
                                     save_json, split_filename)
@@ -120,10 +119,10 @@ class Bunch(object):
     >>> from nipype.interfaces.base import Bunch
     >>> inputs = Bunch(infile='subj.nii', fwhm=6.0, register_to_mean=True)
     >>> inputs
-    Bunch(fwhm=6.0, infile={u}'subj.nii', register_to_mean=True)
+    Bunch(fwhm=6.0, infile=u'subj.nii', register_to_mean=True)
     >>> inputs.register_to_mean = False
     >>> inputs
-    Bunch(fwhm=6.0, infile={u}'subj.nii', register_to_mean=False)
+    Bunch(fwhm=6.0, infile=u'subj.nii', register_to_mean=False)
 
 
     Notes
@@ -134,7 +133,6 @@ class Bunch(object):
            Items", Python Cookbook, 2nd Ed, Chapter 4.18, 2005.
 
     """
-    __metaclass__ = py3compat.mymetaclass
 
 
     def __init__(self, *args, **kwargs):
@@ -658,7 +656,6 @@ class Interface(object):
     and methods all Interface objects should have.
 
     """
-    __metaclass__ = py3compat.mymetaclass
 
     input_spec = None  # A traited input specification
     output_spec = None  # A traited output specification
@@ -1538,7 +1535,7 @@ class CommandLine(BaseInterface):
     >>> cli = CommandLine(command='ls', environ={'DISPLAY': ':1'})
     >>> cli.inputs.args = '-al'
     >>> cli.cmdline
-    {u}'ls -al'
+    u'ls -al'
 
     >>> pprint.pprint(cli.inputs.trait_get())  # doctest: +NORMALIZE_WHITESPACE
     {'args': '-al',
@@ -1547,10 +1544,9 @@ class CommandLine(BaseInterface):
      'terminal_output': 'stream'}
 
     >>> cli.inputs.get_hashval()
-    ([({u}'args', {u}'-al')], '11c37f97649cd61627f4afe5136af8c0')
+    ([(u'args', u'-al')], '11c37f97649cd61627f4afe5136af8c0')
 
     """
-    __metaclass__ = py3compat.mymetaclass
     input_spec = CommandLineInputSpec
     _cmd = None
     _version = None
@@ -1888,15 +1884,14 @@ class MpiCommandLine(CommandLine):
     >>> mpi_cli = MpiCommandLine(command='my_mpi_prog')
     >>> mpi_cli.inputs.args = '-v'
     >>> mpi_cli.cmdline
-    {u}'my_mpi_prog -v'
+    u'my_mpi_prog -v'
 
     >>> mpi_cli.inputs.use_mpi = True
     >>> mpi_cli.inputs.n_procs = 8
     >>> mpi_cli.cmdline
-    {u}'mpiexec -n 8 my_mpi_prog -v'
+    u'mpiexec -n 8 my_mpi_prog -v'
     """
     input_spec = MpiCommandLineInputSpec
-    __metaclass__ = py3compat.mymetaclass
 
     @property
     def cmdline(self):

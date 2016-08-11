@@ -17,7 +17,6 @@ from builtins import range
 import os
 from glob import glob
 
-from nipype.utils import py3compat
 from .base import ANTSCommand, ANTSCommandInputSpec
 from ..base import TraitedSpec, File, traits, isdefined, OutputMultiPath
 from ...utils.filemanip import split_filename
@@ -88,11 +87,10 @@ class antsIntroduction(ANTSCommand):
     >>> warp.inputs.input_image = 'structural.nii'
     >>> warp.inputs.max_iterations = [30,90,20]
     >>> warp.cmdline
-    {u}'antsIntroduction.sh -d 3 -i structural.nii -m 30x90x20 -o ants_ -r Template_6.nii -t GR'
+    u'antsIntroduction.sh -d 3 -i structural.nii -m 30x90x20 -o ants_ -r Template_6.nii -t GR'
 
     """
 
-    __metaclass__ = py3compat.mymetaclass
     _cmd = 'antsIntroduction.sh'
     input_spec = antsIntroductionInputSpec
     output_spec = antsIntroductionOutputSpec
@@ -207,11 +205,10 @@ class buildtemplateparallel(ANTSCommand):
     >>> tmpl.inputs.in_files = ['T1.nii', 'structural.nii']
     >>> tmpl.inputs.max_iterations = [30, 90, 20]
     >>> tmpl.cmdline
-    {u}'buildtemplateparallel.sh -d 3 -i 4 -m 30x90x20 -o antsTMPL_ -c 0 -t GR T1.nii structural.nii'
+    u'buildtemplateparallel.sh -d 3 -i 4 -m 30x90x20 -o antsTMPL_ -c 0 -t GR T1.nii structural.nii'
 
     """
 
-    __metaclass__ = py3compat.mymetaclass
     _cmd = 'buildtemplateparallel.sh'
     input_spec = buildtemplateparallelInputSpec
     output_spec = buildtemplateparallelOutputSpec

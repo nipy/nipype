@@ -20,7 +20,6 @@ import numpy as np
 from six import string_types
 
 from nipype.utils.filemanip import (load_json, save_json, split_filename)
-from nipype.utils import py3compat
 from nipype.interfaces.base import (
     CommandLineInputSpec, CommandLine, Directory, TraitedSpec,
     traits, isdefined, File, InputMultiPath, Undefined)
