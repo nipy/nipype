@@ -26,14 +26,11 @@ def run_examples(example, pipelines, data_path, plugin=None):
     for pipeline in pipelines:
         wf = getattr(sys.modules[example], pipeline)
         wf.base_dir = os.path.join(os.getcwd(), 'output', example, plugin)
-        if os.path.exists(wf.base_dir):
-            rmtree(wf.base_dir)
 
         # Handle a logging directory
         log_dir = os.path.join(os.getcwd(), 'logs', example)
-        if os.path.exists(log_dir):
-            rmtree(log_dir)
-        os.makedirs(log_dir)
+        if not os.path.exists(log_dir):
+            os.makedirs(log_dir)
         wf.config = {'execution': {'hash_method': 'timestamp',
                                    'stop_on_first_rerun': 'true',
                                    'write_provenance': 'true'},
