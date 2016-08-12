@@ -141,16 +141,15 @@ def safe_encode(x, as_literal=True):
             except AttributeError:
                 return pm.Literal(value, pm.XSD['anyURI'])
         else:
+            value = x
             if len(x) > max_text_len:
-                value = x[:max_text_len - 13] + ['...Clipped...']
-            else:
-                value = x
+                cliptxt = '...Clipped...'
+                value = x[:max_text_len - len(cliptxt)] + cliptxt
+
             if not as_literal:
                 return value
-            if isinstance(value, str):
-                return pm.Literal(value, pm.XSD['string'])
-            else:
-                return pm.Literal(str(value), pm.XSD['string'])
+
+            return pm.Literal(value, pm.XSD['string'])
     if isinstance(x, int):
         if not as_literal:
             return x
