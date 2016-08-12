@@ -41,7 +41,7 @@ from nipype.utils.filemanip import (md5, hash_infile, FileNotFoundError, hash_ti
                                     save_json, split_filename)
 from nipype.interfaces.traits_extension import (
     traits, Undefined, TraitDictObject, TraitListObject, TraitError, isdefined, File,
-    Directory, Str, DictStrStr, has_metadata)
+    Directory, DictStrStr, has_metadata)
 
 runtime_profile = str2bool(config.get('execution', 'profile_runtime'))
 nipype_version = LooseVersion(__version__)
@@ -57,6 +57,9 @@ if runtime_profile:
 
 __docformat__ = 'restructuredtext'
 
+
+class Str(traits.Unicode):
+    pass
 
 class NipypeInterfaceError(Exception):
     def __init__(self, value):
