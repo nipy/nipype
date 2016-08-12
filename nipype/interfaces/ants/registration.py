@@ -511,7 +511,7 @@ class Registration(ANTSCommand):
      'reverse_transforms': [],
      'save_state': '.../nipype/testing/data/trans.mat',
      'warped_image': '.../nipype/testing/data/output_warped_image.nii.gz'}
-    >>> reg4.cmdline # doctest: +IGNORE_UNICODEu
+    >>> reg4.cmdline # doctest: +IGNORE_UNICODE
     u'antsRegistration --collapse-output-transforms 1 --dimensionality 3 --initial-moving-transform [ trans.mat, 1 ] \
 --initialize-transforms-per-stage 1 --interpolation Linear --output [ output_, output_warped_image.nii.gz ] \
 --restore-state trans.mat --save-state trans.mat --transform Affine[ 2.0 ] \

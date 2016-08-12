@@ -170,7 +170,7 @@ class Smooth(FSLCommand):
     >>> sm.inputs.output_type = 'NIFTI_GZ'
     >>> sm.inputs.in_file = 'functional2.nii'
     >>> sm.inputs.sigma = 8.0
-    >>> sm.cmdline #doctest: +ELLIPSIS # doctest: +IGNORE_UNICODE
+    >>> sm.cmdline # doctest: +ELLIPSIS +IGNORE_UNICODE
     u'fslmaths functional2.nii -kernel gauss 8.000 -fmean functional2_smooth.nii.gz'
 
     Setting the kernel width using fwhm:
@@ -179,7 +179,7 @@ class Smooth(FSLCommand):
     >>> sm.inputs.output_type = 'NIFTI_GZ'
     >>> sm.inputs.in_file = 'functional2.nii'
     >>> sm.inputs.fwhm = 8.0
-    >>> sm.cmdline #doctest: +ELLIPSIS # doctest: +IGNORE_UNICODE
+    >>> sm.cmdline # doctest: +ELLIPSIS +IGNORE_UNICODE
     u'fslmaths functional2.nii -kernel gauss 3.397 -fmean functional2_smooth.nii.gz'
 
     One of sigma or fwhm must be set:
