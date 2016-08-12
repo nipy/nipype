@@ -3007,7 +3007,7 @@ class QualityIndex(CommandLine):
     >>> tqual = afni.QualityIndex()
     >>> tqual.inputs.in_file = 'functional.nii'
     >>> tqual.cmdline #doctest: +ELLIPSIS +IGNORE_UNICODE
-    u'3dTqual functional.nii > functional_tqual'
+    '3dTqual functional.nii > functional_tqual'
     >>> res = tqual.run() #doctest: +SKIP
 
     """

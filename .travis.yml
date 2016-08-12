@@ -30,19 +30,17 @@ install:
 - sudo apt-get install fusefat
 - conda update --yes conda
 - conda config --add channels conda-forge
-- conda create -n testenv --yes pip nipype python=$TRAVIS_PYTHON_VERSION
+- conda create -n testenv --yes pip vtk mayavi nipype python=$TRAVIS_PYTHON_VERSION
 - source activate testenv
 - if [ ${TRAVIS_PYTHON_VERSION:0:1} == "2" ]; then conda install --yes vtk; fi
 - if [ ${TRAVIS_PYTHON_VERSION:0:1} == "2" ]; then pip install ordereddict; fi
 # Doctests
 - pip install python-coveralls nose-cov doctest-ignore-unicode
-- export DOCTEST_UNICODE=""
-- if [ ${TRAVIS_PYTHON_VERSION:0:1} == "3" ]; then export DOCTEST_UNICODE="--with-doctest-ignore-unicode"; fi
 - rm -r /home/travis/miniconda/envs/testenv/lib/python${TRAVIS_PYTHON_VERSION}/site-packages/nipype*
 - pip install -r requirements.txt
 - pip install -e .
 script:
-- python -W once:FSL:UserWarning:nipype `which nosetests` --with-doctest ${DOCTEST_UNICODE} --with-cov --cover-package nipype --cov-config .coveragerc --logging-level=DEBUG --verbosity=3
+- python -W once:FSL:UserWarning:nipype `which nosetests` --with-doctest --with-doctest-ignore-unicode --with-cov --cover-package nipype --cov-config .coveragerc --logging-level=DEBUG --verbosity=3
 after_success:
 - coveralls --config_file .coveragerc
 deploy:
