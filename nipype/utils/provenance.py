@@ -132,6 +132,8 @@ def safe_encode(x, as_literal=True):
             return value
 
     if isinstance(x, (str, bytes)):
+        if isinstance(x, bytes):
+            x = str(x, 'utf-8')
         if os.path.exists(x):
             value = 'file://{}{}'.format(getfqdn(), x)
             if not as_literal:
