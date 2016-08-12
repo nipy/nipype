@@ -127,9 +127,9 @@ class InterfaceHelpWriter(object):
         >>> docwriter._get_object_name("  def func():  ") # doctest: +IGNORE_UNICODE
         u'func'
         >>> docwriter._get_object_name("  class Klass(object):  ") # doctest: +IGNORE_UNICODE
-        u'Klass'
+        'Klass'
         >>> docwriter._get_object_name("  class Klass:  ") # doctest: +IGNORE_UNICODE
-        u'Klass'
+        'Klass'
         '''
         name = line.split()[1].split('(')[0].strip()
         # in case we have classes which are not derived from object

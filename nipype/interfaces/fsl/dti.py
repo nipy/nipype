@@ -688,7 +688,7 @@ class ProbTrackX2(ProbTrackX):
     >>> pbx2.inputs.n_samples = 3
     >>> pbx2.inputs.n_steps = 10
     >>> pbx2.cmdline # doctest: +IGNORE_UNICODE
-    u'probtrackx2 --forcedir -m nodif_brain_mask.nii.gz --nsamples=3 --nsteps=10 --opd --dir=. --samples=merged --seed=seed_source.nii.gz'
+    'probtrackx2 --forcedir -m nodif_brain_mask.nii.gz --nsamples=3 --nsteps=10 --opd --dir=. --samples=merged --seed=seed_source.nii.gz'
     """
     _cmd = 'probtrackx2'
     input_spec = ProbTrackX2InputSpec

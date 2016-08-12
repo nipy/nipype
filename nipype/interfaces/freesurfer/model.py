@@ -840,7 +840,7 @@ class SegStatsReconAll(SegStats):
     >>> segstatsreconall.inputs.euler = True
     >>> segstatsreconall.inputs.exclude_id = 0
     >>> segstatsreconall.cmdline # doctest: +IGNORE_UNICODE
-    u'mri_segstats --annot PWS04 lh aparc --avgwf ./avgwf.txt --brain-vol-from-seg --surf-ctx-vol --empty --etiv --euler --excl-ctxgmwm --excludeid 0 --subcortgray --subject 10335 --supratent --totalgray --surf-wm-vol --sum ./summary.stats'
+    'mri_segstats --annot PWS04 lh aparc --avgwf ./avgwf.txt --brain-vol-from-seg --surf-ctx-vol --empty --etiv --euler --excl-ctxgmwm --excludeid 0 --subcortgray --subject 10335 --supratent --totalgray --surf-wm-vol --sum ./summary.stats'
     """
     input_spec = SegStatsReconAllInputSpec
     output_spec = SegStatsOutputSpec
@@ -1031,7 +1031,7 @@ class MS_LDA(FSCommand):
                                 conform=True, use_weights=True, \
                                 images=['FLASH1.mgz', 'FLASH2.mgz', 'FLASH3.mgz'])
     >>> optimalWeights.cmdline # doctest: +IGNORE_UNICODE
-    u'mri_ms_LDA -conform -label label.mgz -lda 2 3 -shift 1 -W -synth synth_out.mgz -weight weights.txt FLASH1.mgz FLASH2.mgz FLASH3.mgz'
+    'mri_ms_LDA -conform -label label.mgz -lda 2 3 -shift 1 -W -synth synth_out.mgz -weight weights.txt FLASH1.mgz FLASH2.mgz FLASH3.mgz'
     """
 
     _cmd = 'mri_ms_LDA'
@@ -1123,7 +1123,7 @@ class Label2Label(FSCommand):
     >>> l2l.inputs.source_white = 'lh.pial'
     >>> l2l.inputs.source_sphere_reg = 'lh.pial'
     >>> l2l.cmdline # doctest: +IGNORE_UNICODE
-    u'mri_label2label --hemi lh --trglabel lh-pial_converted.stl --regmethod surface --srclabel lh-pial.stl --srcsubject fsaverage --trgsubject 10335'
+    'mri_label2label --hemi lh --trglabel lh-pial_converted.stl --regmethod surface --srclabel lh-pial.stl --srcsubject fsaverage --trgsubject 10335'
     """
 
     _cmd = 'mri_label2label'

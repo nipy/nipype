@@ -1323,7 +1323,7 @@ class Tkregister2(FSCommand):
     >>> tk2.inputs.moving_image = 'epi.nii'
     >>> tk2.inputs.fsl_in_matrix = 'flirt.mat'
     >>> tk2.cmdline # doctest: +IGNORE_UNICODE
-    u'tkregister2 --fsl flirt.mat --mov epi.nii --noedit --reg register.dat'
+    'tkregister2 --fsl flirt.mat --mov epi.nii --noedit --reg register.dat'
     >>> tk2.run() # doctest: +SKIP
     """
     _cmd = "tkregister2"
@@ -1600,7 +1600,7 @@ class MRIFill(FSCommand):
     >>> fill.inputs.in_file = 'wm.mgz' # doctest: +SKIP
     >>> fill.inputs.out_file = 'filled.mgz' # doctest: +SKIP
     >>> fill.cmdline # doctest: +SKIP
-    u'mri_fill wm.mgz filled.mgz'
+    'mri_fill wm.mgz filled.mgz'
     """
 
     _cmd = "mri_fill"
@@ -1648,7 +1648,7 @@ class MRIsInflate(FSCommand):
     >>> inflate.inputs.in_file = 'lh.pial'
     >>> inflate.inputs.no_save_sulc = True
     >>> inflate.cmdline # doctest: +SKIP
-    u'mris_inflate -no-save-sulc lh.pial lh.inflated'
+    'mris_inflate -no-save-sulc lh.pial lh.inflated'
     """
 
     _cmd = 'mris_inflate'
@@ -1950,7 +1950,7 @@ class MakeSurfaces(FSCommand):
     >>> makesurfaces.inputs.in_T1 = 'T1.mgz'
     >>> makesurfaces.inputs.orig_pial = 'lh.pial'
     >>> makesurfaces.cmdline # doctest: +IGNORE_UNICODE
-    u'mris_make_surfaces -T1 T1.mgz -orig pial -orig_pial pial 10335 lh'
+    'mris_make_surfaces -T1 T1.mgz -orig pial -orig_pial pial 10335 lh'
     """
 
     _cmd = 'mris_make_surfaces'
@@ -2083,7 +2083,7 @@ class Curvature(FSCommand):
     >>> curv.inputs.in_file = 'lh.pial'
     >>> curv.inputs.save = True
     >>> curv.cmdline # doctest: +IGNORE_UNICODE
-    u'mris_curvature -w lh.pial'
+    'mris_curvature -w lh.pial'
     """
 
     _cmd = 'mris_curvature'
@@ -2177,7 +2177,7 @@ class CurvatureStats(FSCommand):
     >>> curvstats.inputs.min_max = True
     >>> curvstats.inputs.write = True
     >>> curvstats.cmdline # doctest: +IGNORE_UNICODE
-    u'mris_curvature_stats -m -o lh.curv.stats -F pial -G --writeCurvatureFiles subject_id lh pial pial'
+    'mris_curvature_stats -m -o lh.curv.stats -F pial -G --writeCurvatureFiles subject_id lh pial pial'
     """
 
     _cmd = 'mris_curvature_stats'
@@ -2234,7 +2234,7 @@ class Jacobian(FSCommand):
     >>> jacobian.inputs.in_origsurf = 'lh.pial'
     >>> jacobian.inputs.in_mappedsurf = 'lh.pial'
     >>> jacobian.cmdline # doctest: +IGNORE_UNICODE
-    u'mris_jacobian lh.pial lh.pial lh.jacobian'
+    'mris_jacobian lh.pial lh.pial lh.jacobian'
     """
 
     _cmd = 'mris_jacobian'
@@ -2291,7 +2291,7 @@ class MRIsCalc(FSCommand):
     >>> example.inputs.action = 'add'
     >>> example.inputs.out_file = 'area.mid'
     >>> example.cmdline # doctest: +SKIP
-    u'mris_calc -o lh.area.mid lh.area add lh.area.pial'
+    'mris_calc -o lh.area.mid lh.area add lh.area.pial'
     """
 
     _cmd = 'mris_calc'
@@ -2371,7 +2371,7 @@ class VolumeMask(FSCommand):
     >>> volmask.inputs.subject_id = '10335'
     >>> volmask.inputs.save_ribbon = True
     >>> volmask.cmdline # doctest: +IGNORE_UNICODE
-    u'mris_volmask --label_left_ribbon 3 --label_left_white 2 --label_right_ribbon 42 --label_right_white 41 --save_ribbon 10335'
+    'mris_volmask --label_left_ribbon 3 --label_left_white 2 --label_right_ribbon 42 --label_right_white 41 --save_ribbon 10335'
     """
 
     _cmd = 'mris_volmask'
@@ -2494,7 +2494,7 @@ class ParcellationStats(FSCommand):
     >>> parcstats.inputs.out_table = 'lh.test.stats'
     >>> parcstats.inputs.out_color = 'test.ctab'
     >>> parcstats.cmdline # doctest: +SKIP
-    u'mris_anatomical_stats -c test.ctab -f lh.test.stats 10335 lh white'
+    'mris_anatomical_stats -c test.ctab -f lh.test.stats 10335 lh white'
     """
 
     _cmd = 'mris_anatomical_stats'
@@ -2636,7 +2636,7 @@ class Contrast(FSCommand):
     >>> contrast.inputs.rawavg = '../mri/rawavg.mgz' # doctest: +SKIP
     >>> contrast.inputs.orig = '../mri/orig.mgz' # doctest: +SKIP
     >>> contrast.cmdline # doctest: +SKIP
-    u'pctsurfcon --lh-only --s 10335'
+    'pctsurfcon --lh-only --s 10335'
     """
 
     _cmd = 'pctsurfcon'
@@ -2711,7 +2711,7 @@ class RelabelHypointensities(FSCommand):
     >>> relabelhypos.inputs.surf_directory = '.'
     >>> relabelhypos.inputs.aseg = 'aseg.mgz'
     >>> relabelhypos.cmdline # doctest: +IGNORE_UNICODE
-    u'mri_relabel_hypointensities aseg.mgz . aseg.hypos.mgz'
+    'mri_relabel_hypointensities aseg.mgz . aseg.hypos.mgz'
     """
 
     _cmd = 'mri_relabel_hypointensities'
@@ -2813,7 +2813,7 @@ class Aparc2Aseg(FSCommand):
     >>> aparc2aseg.inputs.label_wm = True
     >>> aparc2aseg.inputs.rip_unknown = True
     >>> aparc2aseg.cmdline # doctest: +SKIP
-    u'mri_aparc2aseg --labelwm  --o aparc+aseg.mgz --rip-unknown --s subject_id'
+    'mri_aparc2aseg --labelwm  --o aparc+aseg.mgz --rip-unknown --s subject_id'
     """
 
     _cmd = 'mri_aparc2aseg'
@@ -2882,7 +2882,7 @@ class Apas2Aseg(FSCommand):
     >>> apas2aseg.inputs.in_file = 'aseg.mgz'
     >>> apas2aseg.inputs.out_file = 'output.mgz'
     >>> apas2aseg.cmdline # doctest: +IGNORE_UNICODE
-    u'apas2aseg --i aseg.mgz --o output.mgz'
+    'apas2aseg --i aseg.mgz --o output.mgz'
     """
 
     _cmd = 'apas2aseg'

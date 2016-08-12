@@ -122,7 +122,7 @@ class Bunch(object):
     >>> from nipype.interfaces.base import Bunch
     >>> inputs = Bunch(infile='subj.nii', fwhm=6.0, register_to_mean=True)
     >>> inputs # doctest: +IGNORE_UNICODE
-    Bunch(fwhm=6.0, infile=u'subj.nii', register_to_mean=True)
+    Bunch(fwhm=6.0, infile='subj.nii', register_to_mean=True)
     >>> inputs.register_to_mean = False
     >>> inputs # doctest: +IGNORE_UNICODE
     Bunch(fwhm=6.0, infile='subj.nii', register_to_mean=False)
@@ -1892,7 +1892,7 @@ class MpiCommandLine(CommandLine):
     >>> mpi_cli.inputs.use_mpi = True
     >>> mpi_cli.inputs.n_procs = 8
     >>> mpi_cli.cmdline # doctest: +IGNORE_UNICODE
-    u'mpiexec -n 8 my_mpi_prog -v'
+    'mpiexec -n 8 my_mpi_prog -v'
     """
     input_spec = MpiCommandLineInputSpec
 

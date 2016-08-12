@@ -209,7 +209,7 @@ class StreamlineTrack(CommandLine):
     >>> strack.inputs.seed_file = 'seed_mask.nii'
     >>> strack.inputs.mask_file = 'mask.nii'
     >>> strack.cmdline # doctest: +IGNORE_UNICODE
-    u'streamtrack -mask mask.nii -seed seed_mask.nii SD_PROB data.Bfloat data_tracked.tck'
+    'streamtrack -mask mask.nii -seed seed_mask.nii SD_PROB data.Bfloat data_tracked.tck'
     >>> strack.run()                                    # doctest: +SKIP
     """
     _cmd = 'streamtrack'

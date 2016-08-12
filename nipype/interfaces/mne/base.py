@@ -55,7 +55,7 @@ class WatershedBEM(FSCommand):
     >>> bem.inputs.subject_id = 'subj1'
     >>> bem.inputs.subjects_dir = '.'
     >>> bem.cmdline # doctest: +IGNORE_UNICODE
-    u'mne_watershed_bem --overwrite --subject subj1 --volume T1'
+    'mne_watershed_bem --overwrite --subject subj1 --volume T1'
     >>> bem.run() 				# doctest: +SKIP
 
    """

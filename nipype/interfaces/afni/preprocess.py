@@ -107,7 +107,7 @@ class To3D(AFNICommand):
     >>> To3D.inputs.out_file = 'dicomdir.nii'
     >>> To3D.inputs.filetype = "anat"
     >>> To3D.cmdline #doctest: +ELLIPSIS +IGNORE_UNICODE
-    u'to3d -datum float -anat -prefix dicomdir.nii ./*.dcm'
+    'to3d -datum float -anat -prefix dicomdir.nii ./*.dcm'
     >>> res = To3D.run() #doctest: +SKIP
 
    """
@@ -235,7 +235,7 @@ class Refit(AFNICommandBase):
     >>> refit.inputs.in_file = 'structural.nii'
     >>> refit.inputs.deoblique = True
     >>> refit.cmdline  # doctest: +IGNORE_UNICODE
-    u'3drefit -deoblique structural.nii'
+    '3drefit -deoblique structural.nii'
     >>> res = refit.run() # doctest: +SKIP
 
     """
@@ -618,7 +618,7 @@ class DegreeCentrality(AFNICommand):
     >>> degree.inputs.sparsity = 1 # keep the top one percent of connections
     >>> degree.inputs.out_file = 'out.nii'
     >>> degree.cmdline # doctest: +IGNORE_UNICODE
-    u'3dDegreeCentrality -mask mask.nii -prefix out.nii -sparsity 1.000000 functional.nii'
+    '3dDegreeCentrality -mask mask.nii -prefix out.nii -sparsity 1.000000 functional.nii'
     >>> res = degree.run() # doctest: +SKIP
     """
 
@@ -707,7 +707,7 @@ class ECM(AFNICommand):
     >>> ecm.inputs.sparsity = 0.1 # keep top 0.1% of connections
     >>> ecm.inputs.out_file = 'out.nii'
     >>> ecm.cmdline # doctest: +IGNORE_UNICODE
-    u'3dECM -mask mask.nii -prefix out.nii -sparsity 0.100000 functional.nii'
+    '3dECM -mask mask.nii -prefix out.nii -sparsity 0.100000 functional.nii'
     >>> res = ecm.run() # doctest: +SKIP
     """
 
@@ -746,7 +746,7 @@ class LFCD(AFNICommand):
     >>> lfcd.inputs.thresh = 0.8 # keep all connections with corr >= 0.8
     >>> lfcd.inputs.out_file = 'out.nii'
     >>> lfcd.cmdline # doctest: +IGNORE_UNICODE
-    u'3dLFCD -mask mask.nii -prefix out.nii -thresh 0.800000 functional.nii'
+    '3dLFCD -mask mask.nii -prefix out.nii -thresh 0.800000 functional.nii'
     >>> res = lfcd.run() # doctest: +SKIP
     """
 
@@ -878,7 +878,7 @@ class Volreg(AFNICommand):
     >>> volreg.inputs.zpad = 4
     >>> volreg.inputs.outputtype = "NIFTI"
     >>> volreg.cmdline #doctest: +ELLIPSIS +IGNORE_UNICODE
-    u'3dvolreg -Fourier -twopass -1Dfile functional.1D -1Dmatrix_save functional.aff12.1D -prefix functional_volreg.nii -zpad 4 -maxdisp1D functional_md.1D functional.nii'
+    '3dvolreg -Fourier -twopass -1Dfile functional.1D -1Dmatrix_save functional.aff12.1D -prefix functional_volreg.nii -zpad 4 -maxdisp1D functional_md.1D functional.nii'
     >>> res = volreg.run() # doctest: +SKIP
 
     """
@@ -970,7 +970,7 @@ class Copy(AFNICommand):
     >>> copy3d_4 = deepcopy(copy3d)
     >>> copy3d_4.inputs.out_file = 'new_func.nii'
     >>> copy3d_4.cmdline  # doctest: +IGNORE_UNICODE
-    u'3dcopy functional.nii new_func.nii'
+    '3dcopy functional.nii new_func.nii'
     """
 
     _cmd = '3dcopy'
@@ -1689,7 +1689,7 @@ class TCorr1D(AFNICommand):
     >>> tcorr1D.inputs.xset= 'u_rc1s1_Template.nii'
     >>> tcorr1D.inputs.y_1d = 'seed.1D'
     >>> tcorr1D.cmdline  # doctest: +IGNORE_UNICODE
-    u'3dTcorr1D -prefix u_rc1s1_Template_correlation.nii.gz  u_rc1s1_Template.nii  seed.1D'
+    '3dTcorr1D -prefix u_rc1s1_Template_correlation.nii.gz  u_rc1s1_Template.nii  seed.1D'
     >>> res = tcorr1D.run() # doctest: +SKIP
     """
 

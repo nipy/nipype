@@ -127,7 +127,7 @@ class UnpackSDICOMDir(FSCommand):
     >>> unpack.inputs.run_info = (5, 'mprage', 'nii', 'struct')
     >>> unpack.inputs.dir_structure = 'generic'
     >>> unpack.cmdline # doctest: +IGNORE_UNICODE
-    u'unpacksdcmdir -generic -targ . -run 5 mprage nii struct -src .'
+    'unpacksdcmdir -generic -targ . -run 5 mprage nii struct -src .'
     """
     _cmd = 'unpacksdcmdir'
     input_spec = UnpackSDICOMDirInputSpec
@@ -1480,7 +1480,7 @@ class WatershedSkullStrip(FSCommand):
     >>> skullstrip.inputs.transform = "transforms/talairach_with_skull.lta"
     >>> skullstrip.inputs.out_file = "brainmask.auto.mgz"
     >>> skullstrip.cmdline # doctest: +IGNORE_UNICODE
-    u'mri_watershed -T1 transforms/talairach_with_skull.lta T1.mgz brainmask.auto.mgz'
+    'mri_watershed -T1 transforms/talairach_with_skull.lta T1.mgz brainmask.auto.mgz'
     """
     _cmd = 'mri_watershed'
     input_spec = WatershedSkullStripInputSpec
@@ -1528,7 +1528,7 @@ class Normalize(FSCommand):
     >>> normalize.inputs.in_file = "T1.mgz"
     >>> normalize.inputs.gradient = 1
     >>> normalize.cmdline # doctest: +IGNORE_UNICODE
-    u'mri_normalize -g 1 T1.mgz T1_norm.mgz'
+    'mri_normalize -g 1 T1.mgz T1_norm.mgz'
     """
     _cmd = "mri_normalize"
     input_spec = NormalizeInputSpec
@@ -1638,7 +1638,7 @@ class CARegister(FSCommandOpenMP):
     >>> ca_register.inputs.in_file = "norm.mgz"
     >>> ca_register.inputs.out_file = "talairach.m3z"
     >>> ca_register.cmdline # doctest: +IGNORE_UNICODE
-    u'mri_ca_register norm.mgz talairach.m3z'
+    'mri_ca_register norm.mgz talairach.m3z'
     """
     _cmd = "mri_ca_register"
     input_spec = CARegisterInputSpec
@@ -1709,7 +1709,7 @@ class CALabel(FSCommandOpenMP):
     >>> ca_label.inputs.transform = "trans.mat"
     >>> ca_label.inputs.template = "Template_6.nii" # in practice use .gcs extension
     >>> ca_label.cmdline # doctest: +IGNORE_UNICODE
-    u'mri_ca_label norm.mgz trans.mat Template_6.nii out.mgz'
+    'mri_ca_label norm.mgz trans.mat Template_6.nii out.mgz'
     """
     _cmd = "mri_ca_label"
     input_spec = CALabelInputSpec
@@ -1869,7 +1869,7 @@ class SegmentCC(FSCommand):
     >>> SegmentCC_node.inputs.out_rotation = "cc.lta"
     >>> SegmentCC_node.inputs.subject_id = "test"
     >>> SegmentCC_node.cmdline # doctest: +IGNORE_UNICODE
-    u'mri_cc -aseg aseg.mgz -o aseg.auto.mgz -lta cc.lta test'
+    'mri_cc -aseg aseg.mgz -o aseg.auto.mgz -lta cc.lta test'
     """
 
     _cmd = "mri_cc"
@@ -1960,7 +1960,7 @@ class SegmentWM(FSCommand):
     >>> SegmentWM_node.inputs.in_file = "norm.mgz"
     >>> SegmentWM_node.inputs.out_file = "wm.seg.mgz"
     >>> SegmentWM_node.cmdline # doctest: +IGNORE_UNICODE
-    u'mri_segment norm.mgz wm.seg.mgz'
+    'mri_segment norm.mgz wm.seg.mgz'
     """
 
     _cmd = "mri_segment"
@@ -2044,7 +2044,7 @@ class ConcatenateLTA(FSCommand):
     >>> conc_lta.inputs.in_lta1 = 'trans.mat'
     >>> conc_lta.inputs.in_lta2 = 'trans.mat'
     >>> conc_lta.cmdline # doctest: +IGNORE_UNICODE
-    u'mri_concatenate_lta trans.mat trans.mat trans-long.mat'
+    'mri_concatenate_lta trans.mat trans.mat trans-long.mat'
     """
 
     _cmd = 'mri_concatenate_lta'

@@ -79,7 +79,7 @@ class AverageImages(ANTSCommand):
     >>> avg.inputs.normalize = True
     >>> avg.inputs.images = ['rc1s1.nii', 'rc1s1.nii']
     >>> avg.cmdline # doctest: +IGNORE_UNICODE
-    u'AverageImages 3 average.nii.gz 1 rc1s1.nii rc1s1.nii'
+    'AverageImages 3 average.nii.gz 1 rc1s1.nii rc1s1.nii'
     """
     _cmd = 'AverageImages'
     input_spec = AverageImagesInputSpec
@@ -120,7 +120,7 @@ class MultiplyImages(ANTSCommand):
     >>> test.inputs.second_input = 0.25
     >>> test.inputs.output_product_image = "out.nii"
     >>> test.cmdline # doctest: +IGNORE_UNICODE
-    u'MultiplyImages 3 moving2.nii 0.25 out.nii'
+    'MultiplyImages 3 moving2.nii 0.25 out.nii'
     """
     _cmd = 'MultiplyImages'
     input_spec = MultiplyImagesInputSpec
@@ -172,7 +172,7 @@ class JacobianDeterminant(ANTSCommand):
     >>> jacobian.inputs.output_prefix = 'Sub001_'
     >>> jacobian.inputs.use_log = 1
     >>> jacobian.cmdline # doctest: +IGNORE_UNICODE
-    u'ANTSJacobian 3 ants_Warp.nii.gz Sub001_ 1'
+    'ANTSJacobian 3 ants_Warp.nii.gz Sub001_ 1'
     """
 
     _cmd = 'ANTSJacobian'

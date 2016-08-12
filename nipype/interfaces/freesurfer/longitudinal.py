@@ -169,7 +169,7 @@ class FuseSegmentations(FSCommand):
     >>> fuse.inputs.in_segmentations_noCC = ['aseg.mgz', 'aseg.mgz']
     >>> fuse.inputs.in_norms = ['norm.mgz', 'norm.mgz', 'norm.mgz']
     >>> fuse.cmdline # doctest: +IGNORE_UNICODE
-    u'mri_fuse_segmentations -n norm.mgz -a aseg.mgz -c aseg.mgz tp.long.A.template tp1 tp2'
+    'mri_fuse_segmentations -n norm.mgz -a aseg.mgz -c aseg.mgz tp.long.A.template tp1 tp2'
     """
 
     _cmd = 'mri_fuse_segmentations'

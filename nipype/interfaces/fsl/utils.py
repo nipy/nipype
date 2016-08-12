@@ -1815,7 +1815,7 @@ class ConvertWarp(FSLCommand):
     >>> warputils.inputs.relwarp = True
     >>> warputils.inputs.output_type = "NIFTI_GZ"
     >>> warputils.cmdline # doctest: +ELLIPSIS +IGNORE_UNICODE
-    u'convertwarp --ref=T1.nii --rel --warp1=warpfield.nii --out=T1_concatwarp.nii.gz'
+    'convertwarp --ref=T1.nii --rel --warp1=warpfield.nii --out=T1_concatwarp.nii.gz'
     >>> res = warputils.run() # doctest: +SKIP
 
 

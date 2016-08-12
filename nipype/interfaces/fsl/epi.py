@@ -465,7 +465,7 @@ class Eddy(FSLCommand):
     >>> eddy.inputs.in_bvec  = 'bvecs.scheme'
     >>> eddy.inputs.in_bval  = 'bvals.scheme'
     >>> eddy.cmdline # doctest: +ELLIPSIS +IGNORE_UNICODE
-    u'eddy --acqp=epi_acqp.txt --bvals=bvals.scheme --bvecs=bvecs.scheme \
+    'eddy --acqp=epi_acqp.txt --bvals=bvals.scheme --bvecs=bvecs.scheme \
 --imain=epi.nii --index=epi_index.txt --mask=epi_mask.nii \
 --out=.../eddy_corrected'
     >>> res = eddy.run() # doctest: +SKIP
@@ -757,7 +757,7 @@ class EPIDeWarp(FSLCommand):
     >>> dewarp.inputs.dph_file = "phase.nii"
     >>> dewarp.inputs.output_type = "NIFTI_GZ"
     >>> dewarp.cmdline # doctest: +ELLIPSIS +IGNORE_UNICODE
-    u'epidewarp.fsl --mag magnitude.nii --dph phase.nii --epi functional.nii \
+    'epidewarp.fsl --mag magnitude.nii --dph phase.nii --epi functional.nii \
 --esp 0.58 --exfdw .../exfdw.nii.gz --nocleanup --sigma 2 --tediff 2.46 \
 --tmpdir .../temp --vsm .../vsm.nii.gz'
     >>> res = dewarp.run() # doctest: +SKIP

@@ -199,7 +199,7 @@ class TensorMetrics(CommandLine):
     >>> comp.inputs.in_file = 'dti.mif'
     >>> comp.inputs.out_fa = 'fa.mif'
     >>> comp.cmdline                               # doctest: +ELLIPSIS +IGNORE_UNICODE
-    u'tensor2metric -fa fa.mif dti.mif'
+    'tensor2metric -fa fa.mif dti.mif'
     >>> comp.run()                                 # doctest: +SKIP
     """
 
@@ -390,7 +390,7 @@ class TCK2VTK(MRTrix3Base):
     >>> vtk.inputs.in_file = 'tracks.tck'
     >>> vtk.inputs.reference = 'b0.nii'
     >>> vtk.cmdline                               # doctest: +ELLIPSIS +IGNORE_UNICODE
-    u'tck2vtk -image b0.nii tracks.tck tracks.vtk'
+    'tck2vtk -image b0.nii tracks.tck tracks.vtk'
     >>> vtk.run()                                 # doctest: +SKIP
     """
 

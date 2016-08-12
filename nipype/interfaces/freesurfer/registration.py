@@ -58,14 +58,14 @@ class MPRtoMNI305(FSScriptCommand):
     >>> mprtomni305.inputs.target = 'structural.nii'
     >>> mprtomni305.inputs.reference_dir = '.' # doctest: +SKIP
     >>> mprtomni305.cmdline # doctest: +SKIP
-    u'mpr2mni305 output'
+    'mpr2mni305 output'
     >>> mprtomni305.inputs.out_file = 'struct_out' # doctest: +SKIP
     >>> mprtomni305.cmdline # doctest: +SKIP
     u'mpr2mni305 struct_out' # doctest: +SKIP
     >>> mprtomni305.inputs.environ['REFDIR'] == os.path.join(Info.home(), 'average') # doctest: +SKIP
     True
     >>> mprtomni305.inputs.environ['MPR2MNI305_TARGET'] # doctest: +SKIP
-    u'structural'
+    'structural'
     >>> mprtomni305.run() # doctest: +SKIP
 
     """
@@ -254,7 +254,7 @@ class Register(FSCommand):
     >>> register.inputs.out_file = 'lh.pial.reg'
     >>> register.inputs.curv = True
     >>> register.cmdline # doctest: +IGNORE_UNICODE
-    u'mris_register -curv lh.pial aseg.mgz lh.pial.reg'
+    'mris_register -curv lh.pial aseg.mgz lh.pial.reg'
     """
 
     _cmd = 'mris_register'
@@ -320,7 +320,7 @@ class Paint(FSCommand):
     >>> paint.inputs.averages = 5
     >>> paint.inputs.out_file = 'lh.avg_curv'
     >>> paint.cmdline # doctest: +IGNORE_UNICODE
-    u'mrisp_paint -a 5 aseg.mgz lh.pial lh.avg_curv'
+    'mrisp_paint -a 5 aseg.mgz lh.pial lh.avg_curv'
     """
 
     _cmd = 'mrisp_paint'

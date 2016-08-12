@@ -22,9 +22,9 @@ def force_to_valid_python_variable_name(old_name):
     provide alternate naming
 
     >>> force_to_valid_python_variable_name('lambda') # doctest: +IGNORE_UNICODE
-    u'opt_lambda'
+    'opt_lambda'
     >>> force_to_valid_python_variable_name('inputVolume') # doctest: +IGNORE_UNICODE
-    u'inputVolume'
+    'inputVolume'
     """
     new_name = old_name
     new_name = new_name.lstrip().rstrip()
