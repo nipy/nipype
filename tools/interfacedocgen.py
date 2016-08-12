@@ -124,12 +124,12 @@ class InterfaceHelpWriter(object):
     def _get_object_name(self, line):
         ''' Get second token in line
         >>> docwriter = ApiDocWriter('sphinx')
-        >>> docwriter._get_object_name("  def func():  ")
-        'func'
-        >>> docwriter._get_object_name("  class Klass(object):  ")
-        'Klass'
-        >>> docwriter._get_object_name("  class Klass:  ")
-        'Klass'
+        >>> docwriter._get_object_name("  def func():  ") # doctest: +IGNORE_UNICODE
+        u'func'
+        >>> docwriter._get_object_name("  class Klass(object):  ") # doctest: +IGNORE_UNICODE
+        u'Klass'
+        >>> docwriter._get_object_name("  class Klass:  ") # doctest: +IGNORE_UNICODE
+        u'Klass'
         '''
         name = line.split()[1].split('(')[0].strip()
         # in case we have classes which are not derived from object

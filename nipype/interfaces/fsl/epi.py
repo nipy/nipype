@@ -544,8 +544,8 @@ class SigLoss(FSLCommand):
     >>> sigloss.inputs.in_file = "phase.nii"
     >>> sigloss.inputs.echo_time = 0.03
     >>> sigloss.inputs.output_type = "NIFTI_GZ"
-    >>> sigloss.cmdline #doctest: +ELLIPSIS
-    'sigloss --te=0.030000 -i phase.nii -s .../phase_sigloss.nii.gz'
+    >>> sigloss.cmdline #doctest: +ELLIPSIS # doctest: +IGNORE_UNICODE
+    u'sigloss --te=0.030000 -i phase.nii -s .../phase_sigloss.nii.gz'
     >>> res = sigloss.run() # doctest: +SKIP
 
 
@@ -849,8 +849,8 @@ class EddyCorrect(FSLCommand):
     >>> from nipype.interfaces.fsl import EddyCorrect
     >>> eddyc = EddyCorrect(in_file='diffusion.nii',
     ...                     out_file="diffusion_edc.nii", ref_num=0)
-    >>> eddyc.cmdline
-    'eddy_correct diffusion.nii diffusion_edc.nii 0'
+    >>> eddyc.cmdline # doctest: +IGNORE_UNICODE
+    u'eddy_correct diffusion.nii diffusion_edc.nii 0'
 
     """
     _cmd = 'eddy_correct'

@@ -216,7 +216,7 @@ class Memory(object):
 
             We can retrieve the resulting file from the outputs:
             >>> results.outputs.merged_file # doctest: +SKIP
-            '...'
+            u'...'
         """
         return PipeFunc(interface, self.base_dir, _MemoryCallback(self))
 

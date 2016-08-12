@@ -313,10 +313,10 @@ def qsub_sanitize_job_name(testjobname):
 
     Numbers and punctuation are  not allowed.
 
-    >>> qsub_sanitize_job_name('01')
-    'J01'
-    >>> qsub_sanitize_job_name('a01')
-    'a01'
+    >>> qsub_sanitize_job_name('01') # doctest: +IGNORE_UNICODE
+    u'J01'
+    >>> qsub_sanitize_job_name('a01') # doctest: +IGNORE_UNICODE
+    u'a01'
     """
     if testjobname[0].isalpha():
         return testjobname

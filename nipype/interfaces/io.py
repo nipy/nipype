@@ -1223,8 +1223,8 @@ class SelectFiles(IOBase):
     ...            "epi": "{subject_id}/func/f[0, 1].nii"}
     >>> dg = Node(SelectFiles(templates), "selectfiles")
     >>> dg.inputs.subject_id = "subj1"
-    >>> pprint.pprint(dg.outputs.get())  # doctest: +NORMALIZE_WHITESPACE
-    {'T1': <undefined>, 'epi': <undefined>}
+    >>> pprint.pprint(dg.outputs.get())  # doctest: +NORMALIZE_WHITESPACE +IGNORE_UNICODE
+    {u'T1': <undefined>, u'epi': <undefined>}
 
     The same thing with dynamic grabbing of specific files:
 
@@ -1369,21 +1369,21 @@ class DataFinder(IOBase):
     >>> df.inputs.root_paths = '.'
     >>> df.inputs.match_regex = '.+/(?P<series_dir>.+(qT1|ep2d_fid_T1).+)/(?P<basename>.+)\.nii.gz'
     >>> result = df.run() # doctest: +SKIP
-    >>> result.outputs.out_paths  # doctest: +SKIP
-    ['./027-ep2d_fid_T1_Gd4/acquisition.nii.gz',
-     './018-ep2d_fid_T1_Gd2/acquisition.nii.gz',
-     './016-ep2d_fid_T1_Gd1/acquisition.nii.gz',
-     './013-ep2d_fid_T1_pre/acquisition.nii.gz']
-    >>> result.outputs.series_dir  # doctest: +SKIP
-    ['027-ep2d_fid_T1_Gd4',
-     '018-ep2d_fid_T1_Gd2',
-     '016-ep2d_fid_T1_Gd1',
-     '013-ep2d_fid_T1_pre']
-    >>> result.outputs.basename  # doctest: +SKIP
-    ['acquisition',
-     'acquisition'
-     'acquisition',
-     'acquisition']
+    >>> result.outputs.out_paths  # doctest: +IGNORE_UNICODE
+    [u'./027-ep2d_fid_T1_Gd4/acquisition.nii.gz',
+     u'./018-ep2d_fid_T1_Gd2/acquisition.nii.gz',
+     u'./016-ep2d_fid_T1_Gd1/acquisition.nii.gz',
+     u'./013-ep2d_fid_T1_pre/acquisition.nii.gz']
+    >>> result.outputs.series_dir  # doctest: +IGNORE_UNICODE
+    [u'027-ep2d_fid_T1_Gd4',
+     u'018-ep2d_fid_T1_Gd2',
+     u'016-ep2d_fid_T1_Gd1',
+     u'013-ep2d_fid_T1_pre']
+    >>> result.outputs.basename  # doctest: +IGNORE_UNICODE
+    [u'acquisition',
+     u'acquisition'
+     u'acquisition',
+     u'acquisition']
 
     """
 
@@ -2452,12 +2452,12 @@ class JSONFileGrabber(IOBase):
     >>> jsonSource = JSONFileGrabber()
     >>> jsonSource.inputs.defaults = {'param1': 'overrideMe', 'param3': 1.0}
     >>> res = jsonSource.run()
-    >>> pprint.pprint(res.outputs.get())
-    {'param1': 'overrideMe', 'param3': 1.0}
+    >>> pprint.pprint(res.outputs.get()) # doctest: +IGNORE_UNICODE
+    {u'param1': u'overrideMe', u'param3': 1.0}
     >>> jsonSource.inputs.in_file = 'jsongrabber.txt'
     >>> res = jsonSource.run()
-    >>> pprint.pprint(res.outputs.get())  # doctest: +NORMALIZE_WHITESPACE, +ELLIPSIS
-    {'param1': 'exampleStr', 'param2': 4, 'param3': 1.0}
+    >>> pprint.pprint(res.outputs.get())  # doctest: +NORMALIZE_WHITESPACE, +ELLIPSIS +IGNORE_UNICODE
+    {u'param1': u'exampleStr', u'param2': 4, u'param3': 1.0}
 
 
     """

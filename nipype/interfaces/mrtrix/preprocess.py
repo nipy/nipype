@@ -142,8 +142,8 @@ class DWI2Tensor(CommandLine):
     >>> dwi2tensor = mrt.DWI2Tensor()
     >>> dwi2tensor.inputs.in_file = 'dwi.mif'
     >>> dwi2tensor.inputs.encoding_file = 'encoding.txt'
-    >>> dwi2tensor.cmdline
-    'dwi2tensor -grad encoding.txt dwi.mif dwi_tensor.mif'
+    >>> dwi2tensor.cmdline # doctest: +IGNORE_UNICODE
+    u'dwi2tensor -grad encoding.txt dwi.mif dwi_tensor.mif'
     >>> dwi2tensor.run()                                   # doctest: +SKIP
     """
 

@@ -120,7 +120,7 @@ class ANTS(ANTSCommand):
     >>> ants.inputs.regularization_gradient_field_sigma = 3
     >>> ants.inputs.regularization_deformation_field_sigma = 0
     >>> ants.inputs.number_of_affine_iterations = [10000,10000,10000,10000,10000]
-    >>> ants.cmdline
+    >>> ants.cmdline # doctest: +IGNORE_UNICODE
     u'ANTS 3 --MI-option 32x16000 --image-metric CC[ T1.nii, resting.nii, 1, 5 ] --number-of-affine-iterations \
 10000x10000x10000x10000x10000 --number-of-iterations 50x35x15 --output-naming MY --regularization Gauss[3.0,0.0] \
 --transformation-model SyN[0.25] --use-Histogram-Matching 1'
@@ -432,7 +432,7 @@ class Registration(ANTSCommand):
 
     >>> reg1 = copy.deepcopy(reg)
     >>> reg1.inputs.winsorize_lower_quantile = 0.025
-    >>> reg1.cmdline
+    >>> reg1.cmdline # doctest: +IGNORE_UNICODE
     u'antsRegistration --collapse-output-transforms 0 --dimensionality 3 --initial-moving-transform [ trans.mat, 1 ] \
 --initialize-transforms-per-stage 0 --interpolation Linear --output [ output_, output_warped_image.nii.gz ] \
 --transform Affine[ 2.0 ] --metric Mattes[ fixed1.nii, moving1.nii, 1, 32, Random, 0.05 ] \
@@ -445,7 +445,7 @@ class Registration(ANTSCommand):
 
     >>> reg2 = copy.deepcopy(reg)
     >>> reg2.inputs.winsorize_upper_quantile = 0.975
-    >>> reg2.cmdline
+    >>> reg2.cmdline # doctest: +IGNORE_UNICODE
     u'antsRegistration --collapse-output-transforms 0 --dimensionality 3 --initial-moving-transform [ trans.mat, 1 ] \
 --initialize-transforms-per-stage 0 --interpolation Linear --output [ output_, output_warped_image.nii.gz ] \
 --transform Affine[ 2.0 ] --metric Mattes[ fixed1.nii, moving1.nii, 1, 32, Random, 0.05 ] \
@@ -458,7 +458,7 @@ class Registration(ANTSCommand):
     >>> reg3 = copy.deepcopy(reg)
     >>> reg3.inputs.winsorize_lower_quantile = 0.025
     >>> reg3.inputs.winsorize_upper_quantile = 0.975
-    >>> reg3.cmdline
+    >>> reg3.cmdline # doctest: +IGNORE_UNICODE
     u'antsRegistration --collapse-output-transforms 0 --dimensionality 3 --initial-moving-transform [ trans.mat, 1 ] \
 --initialize-transforms-per-stage 0 --interpolation Linear --output [ output_, output_warped_image.nii.gz ] \
 --transform Affine[ 2.0 ] --metric Mattes[ fixed1.nii, moving1.nii, 1, 32, Random, 0.05 ] \
@@ -470,7 +470,7 @@ class Registration(ANTSCommand):
 
     >>> reg3a = copy.deepcopy(reg)
     >>> reg3a.inputs.float = True
-    >>> reg3a.cmdline
+    >>> reg3a.cmdline # doctest: +IGNORE_UNICODE
     u'antsRegistration --collapse-output-transforms 0 --dimensionality 3 --float 1 \
 --initial-moving-transform [ trans.mat, 1 ] --initialize-transforms-per-stage 0 --interpolation Linear \
 --output [ output_, output_warped_image.nii.gz ] --transform Affine[ 2.0 ] \
@@ -483,7 +483,7 @@ class Registration(ANTSCommand):
 
     >>> reg3b = copy.deepcopy(reg)
     >>> reg3b.inputs.float = False
-    >>> reg3b.cmdline
+    >>> reg3b.cmdline # doctest: +IGNORE_UNICODE
     u'antsRegistration --collapse-output-transforms 0 --dimensionality 3 --float 0 \
 --initial-moving-transform [ trans.mat, 1 ] --initialize-transforms-per-stage 0 --interpolation Linear \
 --output [ output_, output_warped_image.nii.gz ] --transform Affine[ 2.0 ] \
@@ -501,8 +501,8 @@ class Registration(ANTSCommand):
     >>> reg4.inputs.initialize_transforms_per_stage = True
     >>> reg4.inputs.collapse_output_transforms = True
     >>> outputs = reg4._list_outputs()
-    >>> pprint.pprint(outputs)  # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
-    {'composite_transform': '.../nipype/testing/data/output_Composite.h5',
+    >>> pprint.pprint(outputs)  # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE +IGNORE_UNICODE
+    {u'composite_transform': u'.../nipype/testing/data/output_Composite.h5',
      'forward_invert_flags': [],
      'forward_transforms': [],
      'inverse_composite_transform': '.../nipype/testing/data/output_InverseComposite.h5',
@@ -511,7 +511,7 @@ class Registration(ANTSCommand):
      'reverse_transforms': [],
      'save_state': '.../nipype/testing/data/trans.mat',
      'warped_image': '.../nipype/testing/data/output_warped_image.nii.gz'}
-    >>> reg4.cmdline
+    >>> reg4.cmdline # doctest: +IGNORE_UNICODEu
     u'antsRegistration --collapse-output-transforms 1 --dimensionality 3 --initial-moving-transform [ trans.mat, 1 ] \
 --initialize-transforms-per-stage 1 --interpolation Linear --output [ output_, output_warped_image.nii.gz ] \
 --restore-state trans.mat --save-state trans.mat --transform Affine[ 2.0 ] \
@@ -526,20 +526,20 @@ class Registration(ANTSCommand):
     >>> reg4b = copy.deepcopy(reg4)
     >>> reg4b.inputs.write_composite_transform = False
     >>> outputs = reg4b._list_outputs()
-    >>> pprint.pprint(outputs)  # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
-    {'composite_transform': <undefined>,
-     'forward_invert_flags': [False, False],
-     'forward_transforms': ['.../nipype/testing/data/output_0GenericAffine.mat',
-     '.../nipype/testing/data/output_1Warp.nii.gz'],
-     'inverse_composite_transform': <undefined>,
-     'inverse_warped_image': <undefined>,
-     'reverse_invert_flags': [True, False],
-     'reverse_transforms': ['.../nipype/testing/data/output_0GenericAffine.mat', \
-'.../nipype/testing/data/output_1InverseWarp.nii.gz'],
-     'save_state': '.../nipype/testing/data/trans.mat',
-     'warped_image': '.../nipype/testing/data/output_warped_image.nii.gz'}
+    >>> pprint.pprint(outputs)  # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE +IGNORE_UNICODE
+    {u'composite_transform': <undefined>,
+     u'forward_invert_flags': [False, False],
+     u'forward_transforms': [u'.../nipype/testing/data/output_0GenericAffine.mat',
+     u'.../nipype/testing/data/output_1Warp.nii.gz'],
+     u'inverse_composite_transform': <undefined>,
+     u'inverse_warped_image': <undefined>,
+     u'reverse_invert_flags': [True, False],
+     u'reverse_transforms': [u'.../nipype/testing/data/output_0GenericAffine.mat', \
+u'.../nipype/testing/data/output_1InverseWarp.nii.gz'],
+     u'save_state': u'.../nipype/testing/data/trans.mat',
+     u'warped_image': u'.../nipype/testing/data/output_warped_image.nii.gz'}
     >>> reg4b.aggregate_outputs()  # doctest: +SKIP
-    >>> reg4b.cmdline
+    >>> reg4b.cmdline # doctest: +IGNORE_UNICODE
     u'antsRegistration --collapse-output-transforms 1 --dimensionality 3 --initial-moving-transform [ trans.mat, 1 ] \
 --initialize-transforms-per-stage 1 --interpolation Linear --output [ output_, output_warped_image.nii.gz ] \
 --restore-state trans.mat --save-state trans.mat --transform Affine[ 2.0 ] \
@@ -559,7 +559,7 @@ class Registration(ANTSCommand):
     >>> reg5.inputs.radius_or_number_of_bins = [32, [32, 4] ]
     >>> reg5.inputs.sampling_strategy = ['Random', None] # use default strategy in second stage
     >>> reg5.inputs.sampling_percentage = [0.05, [0.05, 0.10]]
-    >>> reg5.cmdline
+    >>> reg5.cmdline # doctest: +IGNORE_UNICODE
     u'antsRegistration --collapse-output-transforms 0 --dimensionality 3 --initial-moving-transform [ trans.mat, 1 ] \
 --initialize-transforms-per-stage 0 --interpolation Linear --output [ output_, output_warped_image.nii.gz ] \
 --transform Affine[ 2.0 ] --metric Mattes[ fixed1.nii, moving1.nii, 1, 32, Random, 0.05 ] \
@@ -574,7 +574,7 @@ class Registration(ANTSCommand):
     >>> reg6 = copy.deepcopy(reg5)
     >>> reg6.inputs.fixed_image = ['fixed1.nii', 'fixed2.nii']
     >>> reg6.inputs.moving_image = ['moving1.nii', 'moving2.nii']
-    >>> reg6.cmdline
+    >>> reg6.cmdline # doctest: +IGNORE_UNICODE
     u'antsRegistration --collapse-output-transforms 0 --dimensionality 3 --initial-moving-transform [ trans.mat, 1 ] \
 --initialize-transforms-per-stage 0 --interpolation Linear --output [ output_, output_warped_image.nii.gz ] \
 --transform Affine[ 2.0 ] --metric Mattes[ fixed1.nii, moving1.nii, 1, 32, Random, 0.05 ] \
@@ -589,7 +589,7 @@ class Registration(ANTSCommand):
     >>> reg7a = copy.deepcopy(reg)
     >>> reg7a.inputs.interpolation = 'BSpline'
     >>> reg7a.inputs.interpolation_parameters = (3,)
-    >>> reg7a.cmdline
+    >>> reg7a.cmdline # doctest: +IGNORE_UNICODE
     u'antsRegistration --collapse-output-transforms 0 --dimensionality 3 --initial-moving-transform [ trans.mat, 1 ] \
 --initialize-transforms-per-stage 0 --interpolation BSpline[ 3 ] --output [ output_, output_warped_image.nii.gz ] \
 --transform Affine[ 2.0 ] --metric Mattes[ fixed1.nii, moving1.nii, 1, 32, Random, 0.05 ] \
@@ -603,7 +603,7 @@ class Registration(ANTSCommand):
     >>> reg7b = copy.deepcopy(reg)
     >>> reg7b.inputs.interpolation = 'Gaussian'
     >>> reg7b.inputs.interpolation_parameters = (1.0, 1.0)
-    >>> reg7b.cmdline
+    >>> reg7b.cmdline # doctest: +IGNORE_UNICODE
     u'antsRegistration --collapse-output-transforms 0 --dimensionality 3 --initial-moving-transform [ trans.mat, 1 ] \
 --initialize-transforms-per-stage 0 --interpolation Gaussian[ 1.0, 1.0 ] \
 --output [ output_, output_warped_image.nii.gz ] --transform Affine[ 2.0 ] \
@@ -618,7 +618,7 @@ class Registration(ANTSCommand):
     >>> reg8 = copy.deepcopy(reg)
     >>> reg8.inputs.transforms = ['Affine', 'BSplineSyN']
     >>> reg8.inputs.transform_parameters = [(2.0,), (0.25, 26, 0, 3)]
-    >>> reg8.cmdline
+    >>> reg8.cmdline # doctest: +IGNORE_UNICODE
     u'antsRegistration --collapse-output-transforms 0 --dimensionality 3 --initial-moving-transform [ trans.mat, 1 ] \
 --initialize-transforms-per-stage 0 --interpolation Linear --output [ output_, output_warped_image.nii.gz ] \
 --transform Affine[ 2.0 ] --metric Mattes[ fixed1.nii, moving1.nii, 1, 32, Random, 0.05 ] \
