@@ -35,9 +35,9 @@ install:
 - if [ ${TRAVIS_PYTHON_VERSION:0:1} == "2" ]; then conda install --yes vtk; fi
 - if [ ${TRAVIS_PYTHON_VERSION:0:1} == "2" ]; then pip install ordereddict; fi
 # Doctests
-- pip install python-coveralls nose-cov
+- pip install python-coveralls nose-cov doctest-ignore-unicode
 - export DOCTEST_UNICODE=""
-- if [ ${TRAVIS_PYTHON_VERSION:0:1} == "3" ]; then export DOCTEST_UNICODE="--with-doctest-ignore-unicode"; pip install doctest-ignore-unicode; fi
+- if [ ${TRAVIS_PYTHON_VERSION:0:1} == "3" ]; then export DOCTEST_UNICODE="--with-doctest-ignore-unicode"; fi
 - rm -r /home/travis/miniconda/envs/testenv/lib/python${TRAVIS_PYTHON_VERSION}/site-packages/nipype*
 - pip install -r requirements.txt
 - pip install -e .
