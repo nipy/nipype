@@ -118,10 +118,10 @@ class Bunch(object):
     --------
     >>> from nipype.interfaces.base import Bunch
     >>> inputs = Bunch(infile='subj.nii', fwhm=6.0, register_to_mean=True)
-    >>> inputs
+    >>> inputs # doctest: +IGNORE_UNICODE
     Bunch(fwhm=6.0, infile=u'subj.nii', register_to_mean=True)
     >>> inputs.register_to_mean = False
-    >>> inputs
+    >>> inputs # doctest: +IGNORE_UNICODE
     Bunch(fwhm=6.0, infile=u'subj.nii', register_to_mean=False)
 
 
@@ -1534,17 +1534,17 @@ class CommandLine(BaseInterface):
     >>> from nipype.interfaces.base import CommandLine
     >>> cli = CommandLine(command='ls', environ={'DISPLAY': ':1'})
     >>> cli.inputs.args = '-al'
-    >>> cli.cmdline
+    >>> cli.cmdline # doctest: +IGNORE_UNICODE
     u'ls -al'
 
-    >>> pprint.pprint(cli.inputs.trait_get())  # doctest: +NORMALIZE_WHITESPACE
-    {'args': '-al',
-     'environ': {'DISPLAY': ':1'},
-     'ignore_exception': False,
-     'terminal_output': 'stream'}
+    >>> pprint.pprint(cli.inputs.trait_get())  # doctest: +NORMALIZE_WHITESPACE +IGNORE_UNICODE
+    {u'args': u'-al',
+     u'environ': {u'DISPLAY': u':1'},
+     u'ignore_exception': False,
+     u'terminal_output': u'stream'}
 
-    >>> cli.inputs.get_hashval()
-    ([(u'args', u'-al')], '11c37f97649cd61627f4afe5136af8c0')
+    >>> cli.inputs.get_hashval() # doctest: +IGNORE_UNICODE
+    ([(u'args', u'-al')], u'11c37f97649cd61627f4afe5136af8c0')
 
     """
     input_spec = CommandLineInputSpec
@@ -1883,12 +1883,12 @@ class MpiCommandLine(CommandLine):
     >>> from nipype.interfaces.base import MpiCommandLine
     >>> mpi_cli = MpiCommandLine(command='my_mpi_prog')
     >>> mpi_cli.inputs.args = '-v'
-    >>> mpi_cli.cmdline
+    >>> mpi_cli.cmdline # doctest: +IGNORE_UNICODE
     u'my_mpi_prog -v'
 
     >>> mpi_cli.inputs.use_mpi = True
     >>> mpi_cli.inputs.n_procs = 8
-    >>> mpi_cli.cmdline
+    >>> mpi_cli.cmdline # doctest: +IGNORE_UNICODE
     u'mpiexec -n 8 my_mpi_prog -v'
     """
     input_spec = MpiCommandLineInputSpec
@@ -1992,16 +1992,16 @@ class OutputMultiPath(MultiPath):
     <undefined>
 
     >>> a.foo = '/software/temp/foo.txt'
-    >>> a.foo
-    '/software/temp/foo.txt'
+    >>> a.foo # doctest: +IGNORE_UNICODE
+    u'/software/temp/foo.txt'
 
     >>> a.foo = ['/software/temp/foo.txt']
-    >>> a.foo
-    '/software/temp/foo.txt'
+    >>> a.foo # doctest: +IGNORE_UNICODE
+    u'/software/temp/foo.txt'
 
     >>> a.foo = ['/software/temp/foo.txt', '/software/temp/goo.txt']
-    >>> a.foo
-    ['/software/temp/foo.txt', '/software/temp/goo.txt']
+    >>> a.foo # doctest: +IGNORE_UNICODE
+    [u'/software/temp/foo.txt', u'/software/temp/goo.txt']
 
     """
 
@@ -2037,16 +2037,16 @@ class InputMultiPath(MultiPath):
     <undefined>
 
     >>> a.foo = '/software/temp/foo.txt'
-    >>> a.foo
-    ['/software/temp/foo.txt']
+    >>> a.foo # doctest: +IGNORE_UNICODE
+    [u'/software/temp/foo.txt']
 
     >>> a.foo = ['/software/temp/foo.txt']
-    >>> a.foo
-    ['/software/temp/foo.txt']
+    >>> a.foo # doctest: +IGNORE_UNICODE
+    [u'/software/temp/foo.txt']
 
     >>> a.foo = ['/software/temp/foo.txt', '/software/temp/goo.txt']
-    >>> a.foo
-    ['/software/temp/foo.txt', '/software/temp/goo.txt']
+    >>> a.foo # doctest: +IGNORE_UNICODE
+    [u'/software/temp/foo.txt', u'/software/temp/goo.txt']
 
     """
     pass

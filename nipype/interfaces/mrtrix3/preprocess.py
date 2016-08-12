@@ -96,8 +96,8 @@ class ResponseSD(MRTrix3Base):
     >>> resp.inputs.in_file = 'dwi.mif'
     >>> resp.inputs.in_mask = 'mask.nii.gz'
     >>> resp.inputs.grad_fsl = ('bvecs', 'bvals')
-    >>> resp.cmdline                               # doctest: +ELLIPSIS
-    'dwi2response -fslgrad bvecs bvals -mask mask.nii.gz dwi.mif response.txt'
+    >>> resp.cmdline                               # doctest: +ELLIPSIS +IGNORE_UNICODE
+    u'dwi2response -fslgrad bvecs bvals -mask mask.nii.gz dwi.mif response.txt'
     >>> resp.run()                                 # doctest: +SKIP
     """
 
@@ -139,8 +139,8 @@ class ACTPrepareFSL(CommandLine):
     >>> import nipype.interfaces.mrtrix3 as mrt
     >>> prep = mrt.ACTPrepareFSL()
     >>> prep.inputs.in_file = 'T1.nii.gz'
-    >>> prep.cmdline                               # doctest: +ELLIPSIS
-    'act_anat_prepare_fsl T1.nii.gz act_5tt.mif'
+    >>> prep.cmdline                               # doctest: +ELLIPSIS +IGNORE_UNICODE
+    u'act_anat_prepare_fsl T1.nii.gz act_5tt.mif'
     >>> prep.run()                                 # doctest: +SKIP
     """
 

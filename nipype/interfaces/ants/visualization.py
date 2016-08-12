@@ -55,8 +55,8 @@ class ConvertScalarImageToRGB(ANTSCommand):
     >>> converter.inputs.colormap = 'jet'
     >>> converter.inputs.minimum_input = 0
     >>> converter.inputs.maximum_input = 6
-    >>> converter.cmdline
-    'ConvertScalarImageToRGB 3 T1.nii.gz rgb.nii.gz none jet none 0 6 0 255'
+    >>> converter.cmdline # doctest: +IGNORE_UNICODE
+    u'ConvertScalarImageToRGB 3 T1.nii.gz rgb.nii.gz none jet none 0 6 0 255'
     """
     _cmd = 'ConvertScalarImageToRGB'
     input_spec = ConvertScalarImageToRGBInputSpec

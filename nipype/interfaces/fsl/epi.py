@@ -71,8 +71,8 @@ class PrepareFieldmap(FSLCommand):
     >>> prepare.inputs.in_phase = "phase.nii"
     >>> prepare.inputs.in_magnitude = "magnitude.nii"
     >>> prepare.inputs.output_type = "NIFTI_GZ"
-    >>> prepare.cmdline #doctest: +ELLIPSIS
-    'fsl_prepare_fieldmap SIEMENS phase.nii magnitude.nii \
+    >>> prepare.cmdline # doctest: +ELLIPSIS +IGNORE_UNICODE
+    u'fsl_prepare_fieldmap SIEMENS phase.nii magnitude.nii \
 .../phase_fslprepared.nii.gz 2.460000'
     >>> res = prepare.run() # doctest: +SKIP
 
@@ -234,8 +234,8 @@ class TOPUP(FSLCommand):
     >>> topup.inputs.in_file = "b0_b0rev.nii"
     >>> topup.inputs.encoding_file = "topup_encoding.txt"
     >>> topup.inputs.output_type = "NIFTI_GZ"
-    >>> topup.cmdline #doctest: +ELLIPSIS
-    'topup --config=b02b0.cnf --datain=topup_encoding.txt \
+    >>> topup.cmdline # doctest: +ELLIPSIS +IGNORE_UNICODE
+    u'topup --config=b02b0.cnf --datain=topup_encoding.txt \
 --imain=b0_b0rev.nii --out=b0_b0rev_base --iout=b0_b0rev_corrected.nii.gz \
 --fout=b0_b0rev_field.nii.gz --logout=b0_b0rev_topup.log'
     >>> res = topup.run() # doctest: +SKIP
@@ -362,8 +362,8 @@ class ApplyTOPUP(FSLCommand):
     >>> applytopup.inputs.in_topup_fieldcoef = "topup_fieldcoef.nii.gz"
     >>> applytopup.inputs.in_topup_movpar = "topup_movpar.txt"
     >>> applytopup.inputs.output_type = "NIFTI_GZ"
-    >>> applytopup.cmdline #doctest: +ELLIPSIS
-    'applytopup --datain=topup_encoding.txt --imain=epi.nii,epi_rev.nii \
+    >>> applytopup.cmdline # doctest: +ELLIPSIS +IGNORE_UNICODE
+    u'applytopup --datain=topup_encoding.txt --imain=epi.nii,epi_rev.nii \
 --inindex=1,2 --topup=topup --out=epi_corrected.nii.gz'
     >>> res = applytopup.run() # doctest: +SKIP
 
@@ -464,8 +464,8 @@ class Eddy(FSLCommand):
     >>> eddy.inputs.in_acqp  = 'epi_acqp.txt'
     >>> eddy.inputs.in_bvec  = 'bvecs.scheme'
     >>> eddy.inputs.in_bval  = 'bvals.scheme'
-    >>> eddy.cmdline #doctest: +ELLIPSIS
-    'eddy --acqp=epi_acqp.txt --bvals=bvals.scheme --bvecs=bvecs.scheme \
+    >>> eddy.cmdline # doctest: +ELLIPSIS +IGNORE_UNICODE
+    u'eddy --acqp=epi_acqp.txt --bvals=bvals.scheme --bvecs=bvecs.scheme \
 --imain=epi.nii --index=epi_index.txt --mask=epi_mask.nii \
 --out=.../eddy_corrected'
     >>> res = eddy.run() # doctest: +SKIP
@@ -544,8 +544,8 @@ class SigLoss(FSLCommand):
     >>> sigloss.inputs.in_file = "phase.nii"
     >>> sigloss.inputs.echo_time = 0.03
     >>> sigloss.inputs.output_type = "NIFTI_GZ"
-    >>> sigloss.cmdline #doctest: +ELLIPSIS
-    'sigloss --te=0.030000 -i phase.nii -s .../phase_sigloss.nii.gz'
+    >>> sigloss.cmdline # doctest: +ELLIPSIS +IGNORE_UNICODE
+    u'sigloss --te=0.030000 -i phase.nii -s .../phase_sigloss.nii.gz'
     >>> res = sigloss.run() # doctest: +SKIP
 
 
@@ -647,8 +647,8 @@ class EpiReg(FSLCommand):
     >>> epireg.inputs.fmapmagbrain='fieldmap_mag_brain.nii'
     >>> epireg.inputs.echospacing=0.00067
     >>> epireg.inputs.pedir='y'
-    >>> epireg.cmdline #doctest: +ELLIPSIS
-    'epi_reg --echospacing=0.000670 --fmap=fieldmap_phase_fslprepared.nii \
+    >>> epireg.cmdline # doctest: +ELLIPSIS +IGNORE_UNICODE
+    u'epi_reg --echospacing=0.000670 --fmap=fieldmap_phase_fslprepared.nii \
 --fmapmag=fieldmap_mag.nii --fmapmagbrain=fieldmap_mag_brain.nii --noclean \
 --pedir=y --epi=epi.nii --t1=T1.nii --t1brain=T1_brain.nii --out=epi2struct'
     >>> epireg.run() # doctest: +SKIP
@@ -756,8 +756,8 @@ class EPIDeWarp(FSLCommand):
     >>> dewarp.inputs.mag_file = "magnitude.nii"
     >>> dewarp.inputs.dph_file = "phase.nii"
     >>> dewarp.inputs.output_type = "NIFTI_GZ"
-    >>> dewarp.cmdline #doctest: +ELLIPSIS
-    'epidewarp.fsl --mag magnitude.nii --dph phase.nii --epi functional.nii \
+    >>> dewarp.cmdline # doctest: +ELLIPSIS +IGNORE_UNICODE
+    u'epidewarp.fsl --mag magnitude.nii --dph phase.nii --epi functional.nii \
 --esp 0.58 --exfdw .../exfdw.nii.gz --nocleanup --sigma 2 --tediff 2.46 \
 --tmpdir .../temp --vsm .../vsm.nii.gz'
     >>> res = dewarp.run() # doctest: +SKIP
@@ -849,8 +849,8 @@ class EddyCorrect(FSLCommand):
     >>> from nipype.interfaces.fsl import EddyCorrect
     >>> eddyc = EddyCorrect(in_file='diffusion.nii',
     ...                     out_file="diffusion_edc.nii", ref_num=0)
-    >>> eddyc.cmdline
-    'eddy_correct diffusion.nii diffusion_edc.nii 0'
+    >>> eddyc.cmdline # doctest: +IGNORE_UNICODE
+    u'eddy_correct diffusion.nii diffusion_edc.nii 0'
 
     """
     _cmd = 'eddy_correct'

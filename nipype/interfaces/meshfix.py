@@ -105,8 +105,8 @@ class MeshFix(CommandLine):
     >>> fix.inputs.in_file1 = 'lh-pial.stl'
     >>> fix.inputs.in_file2 = 'rh-pial.stl'
     >>> fix.run()                                    # doctest: +SKIP
-    >>> fix.cmdline
-    'meshfix lh-pial.stl rh-pial.stl -o lh-pial_fixed.off'
+    >>> fix.cmdline # doctest: +IGNORE_UNICODE
+    u'meshfix lh-pial.stl rh-pial.stl -o lh-pial_fixed.off'
     """
     _cmd = 'meshfix'
     input_spec = MeshFixInputSpec

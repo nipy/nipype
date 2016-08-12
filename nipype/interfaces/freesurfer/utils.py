@@ -488,8 +488,8 @@ class Surface2VolTransform(FSCommand):
     >>> xfm2vol.inputs.hemi = 'lh'
     >>> xfm2vol.inputs.template_file = 'cope1.nii.gz'
     >>> xfm2vol.inputs.subjects_dir = '.'
-    >>> xfm2vol.cmdline
-    'mri_surf2vol --hemi lh --volreg register.mat --surfval lh.cope1.mgz --sd . --template cope1.nii.gz --outvol lh.cope1_asVol.nii --vtxvol lh.cope1_asVol_vertex.nii'
+    >>> xfm2vol.cmdline # doctest: +IGNORE_UNICODE
+    u'mri_surf2vol --hemi lh --volreg register.mat --surfval lh.cope1.mgz --sd . --template cope1.nii.gz --outvol lh.cope1_asVol.nii --vtxvol lh.cope1_asVol_vertex.nii'
     >>> res = xfm2vol.run()# doctest: +SKIP
 
     """
@@ -1024,8 +1024,8 @@ class MRIPretess(FSCommand):
     >>> pretess.inputs.in_filled = 'wm.mgz'
     >>> pretess.inputs.in_norm = 'norm.mgz'
     >>> pretess.inputs.nocorners = True
-    >>> pretess.cmdline
-    'mri_pretess -nocorners wm.mgz wm norm.mgz wm_pretesswm.mgz'
+    >>> pretess.cmdline # doctest: +IGNORE_UNICODE
+    u'mri_pretess -nocorners wm.mgz wm norm.mgz wm_pretesswm.mgz'
     >>> pretess.run() # doctest: +SKIP
     """
     _cmd = 'mri_pretess'
@@ -1211,8 +1211,8 @@ class MakeAverageSubject(FSCommand):
 
     >>> from nipype.interfaces.freesurfer import MakeAverageSubject
     >>> avg = MakeAverageSubject(subjects_ids=['s1', 's2'])
-    >>> avg.cmdline
-    'make_average_subject --out average --subjects s1 s2'
+    >>> avg.cmdline # doctest: +IGNORE_UNICODE
+    u'make_average_subject --out average --subjects s1 s2'
 
     """
 
@@ -1246,8 +1246,8 @@ class ExtractMainComponent(CommandLine):
 
     >>> from nipype.interfaces.freesurfer import ExtractMainComponent
     >>> mcmp = ExtractMainComponent(in_file='lh.pial')
-    >>> mcmp.cmdline
-    'mris_extract_main_component lh.pial lh.maincmp'
+    >>> mcmp.cmdline # doctest: +IGNORE_UNICODE
+    u'mris_extract_main_component lh.pial lh.maincmp'
 
     """
 
@@ -1322,8 +1322,8 @@ class Tkregister2(FSCommand):
     >>> tk2 = Tkregister2()
     >>> tk2.inputs.moving_image = 'epi.nii'
     >>> tk2.inputs.fsl_in_matrix = 'flirt.mat'
-    >>> tk2.cmdline
-    'tkregister2 --fsl flirt.mat --mov epi.nii --noedit --reg register.dat'
+    >>> tk2.cmdline # doctest: +IGNORE_UNICODE
+    u'tkregister2 --fsl flirt.mat --mov epi.nii --noedit --reg register.dat'
     >>> tk2.run() # doctest: +SKIP
     """
     _cmd = "tkregister2"
@@ -1376,12 +1376,12 @@ class AddXFormToHeader(FSCommand):
     >>> adder = AddXFormToHeader()
     >>> adder.inputs.in_file = 'norm.mgz'
     >>> adder.inputs.transform = 'trans.mat'
-    >>> adder.cmdline
-    'mri_add_xform_to_header trans.mat norm.mgz output.mgz'
+    >>> adder.cmdline # doctest: +IGNORE_UNICODE
+    u'mri_add_xform_to_header trans.mat norm.mgz output.mgz'
 
     >>> adder.inputs.copy_name = True
-    >>> adder.cmdline
-    'mri_add_xform_to_header -c trans.mat norm.mgz output.mgz'
+    >>> adder.cmdline # doctest: +IGNORE_UNICODE
+    u'mri_add_xform_to_header -c trans.mat norm.mgz output.mgz'
 
     >>> adder.run()   # doctest: +SKIP
 
@@ -1434,8 +1434,8 @@ class CheckTalairachAlignment(FSCommand):
 
     >>> checker.inputs.in_file = 'trans.mat'
     >>> checker.inputs.threshold = 0.005
-    >>> checker.cmdline
-    'talairach_afd -T 0.005 -xfm trans.mat'
+    >>> checker.cmdline # doctest: +IGNORE_UNICODE
+    u'talairach_afd -T 0.005 -xfm trans.mat'
 
     >>> checker.run() # doctest: +SKIP
     """
@@ -1483,8 +1483,8 @@ class TalairachAVI(FSCommand):
     >>> example = TalairachAVI()
     >>> example.inputs.in_file = 'norm.mgz'
     >>> example.inputs.out_file = 'trans.mat'
-    >>> example.cmdline
-    'talairach_avi --i norm.mgz --xfm trans.mat'
+    >>> example.cmdline # doctest: +IGNORE_UNICODE
+    u'talairach_avi --i norm.mgz --xfm trans.mat'
 
     >>> example.run() # doctest: +SKIP
     """
@@ -1514,8 +1514,8 @@ class TalairachQC(FSScriptCommand):
     >>> from nipype.interfaces.freesurfer import TalairachQC
     >>> qc = TalairachQC()
     >>> qc.inputs.log_file = 'dirs.txt'
-    >>> qc.cmdline
-    'tal_QC_AZS dirs.txt'
+    >>> qc.cmdline # doctest: +IGNORE_UNICODE
+    u'tal_QC_AZS dirs.txt'
     """
     _cmd = "tal_QC_AZS"
     input_spec = TalairachQCInputSpec
@@ -1553,8 +1553,8 @@ class RemoveNeck(FSCommand):
     >>> remove_neck.inputs.in_file = 'norm.mgz'
     >>> remove_neck.inputs.transform = 'trans.mat'
     >>> remove_neck.inputs.template = 'trans.mat'
-    >>> remove_neck.cmdline
-    'mri_remove_neck norm.mgz trans.mat trans.mat norm_noneck.mgz'
+    >>> remove_neck.cmdline # doctest: +IGNORE_UNICODE
+    u'mri_remove_neck norm.mgz trans.mat trans.mat norm_noneck.mgz'
     """
     _cmd = "mri_remove_neck"
     input_spec = RemoveNeckInputSpec
@@ -1600,7 +1600,7 @@ class MRIFill(FSCommand):
     >>> fill.inputs.in_file = 'wm.mgz' # doctest: +SKIP
     >>> fill.inputs.out_file = 'filled.mgz' # doctest: +SKIP
     >>> fill.cmdline # doctest: +SKIP
-    'mri_fill wm.mgz filled.mgz'
+    u'mri_fill wm.mgz filled.mgz'
     """
 
     _cmd = "mri_fill"
@@ -1648,7 +1648,7 @@ class MRIsInflate(FSCommand):
     >>> inflate.inputs.in_file = 'lh.pial'
     >>> inflate.inputs.no_save_sulc = True
     >>> inflate.cmdline # doctest: +SKIP
-    'mris_inflate -no-save-sulc lh.pial lh.inflated'
+    u'mris_inflate -no-save-sulc lh.pial lh.inflated'
     """
 
     _cmd = 'mris_inflate'
@@ -1693,8 +1693,8 @@ class Sphere(FSCommandOpenMP):
     >>> from nipype.interfaces.freesurfer import Sphere
     >>> sphere = Sphere()
     >>> sphere.inputs.in_file = 'lh.pial'
-    >>> sphere.cmdline
-    'mris_sphere lh.pial lh.sphere'
+    >>> sphere.cmdline # doctest: +IGNORE_UNICODE
+    u'mris_sphere lh.pial lh.sphere'
     """
     _cmd = 'mris_sphere'
     input_spec = SphereInputSpec
@@ -1758,7 +1758,7 @@ class FixTopology(FSCommand):
     >>> ft.inputs.mgz = True
     >>> ft.inputs.ga = True
     >>> ft.cmdline # doctest: +SKIP
-    'mris_fix_topology -ga -mgz -sphere qsphere.nofix 10335 lh'
+    u'mris_fix_topology -ga -mgz -sphere qsphere.nofix 10335 lh'
     """
 
     _cmd = 'mris_fix_topology'
@@ -1817,8 +1817,8 @@ class EulerNumber(FSCommand):
     >>> from nipype.interfaces.freesurfer import EulerNumber
     >>> ft = EulerNumber()
     >>> ft.inputs.in_file = 'lh.pial'
-    >>> ft.cmdline
-    'mris_euler_number lh.pial'
+    >>> ft.cmdline # doctest: +IGNORE_UNICODE
+    u'mris_euler_number lh.pial'
     """
     _cmd = 'mris_euler_number'
     input_spec = EulerNumberInputSpec
@@ -1853,8 +1853,8 @@ class RemoveIntersection(FSCommand):
     >>> from nipype.interfaces.freesurfer import RemoveIntersection
     >>> ri = RemoveIntersection()
     >>> ri.inputs.in_file = 'lh.pial'
-    >>> ri.cmdline
-    'mris_remove_intersection lh.pial lh.pial'
+    >>> ri.cmdline # doctest: +IGNORE_UNICODE
+    u'mris_remove_intersection lh.pial lh.pial'
     """
 
     _cmd = 'mris_remove_intersection'
@@ -1949,8 +1949,8 @@ class MakeSurfaces(FSCommand):
     >>> makesurfaces.inputs.in_label = 'aparc+aseg.nii'
     >>> makesurfaces.inputs.in_T1 = 'T1.mgz'
     >>> makesurfaces.inputs.orig_pial = 'lh.pial'
-    >>> makesurfaces.cmdline
-    'mris_make_surfaces -T1 T1.mgz -orig pial -orig_pial pial 10335 lh'
+    >>> makesurfaces.cmdline # doctest: +IGNORE_UNICODE
+    u'mris_make_surfaces -T1 T1.mgz -orig pial -orig_pial pial 10335 lh'
     """
 
     _cmd = 'mris_make_surfaces'
@@ -2082,8 +2082,8 @@ class Curvature(FSCommand):
     >>> curv = Curvature()
     >>> curv.inputs.in_file = 'lh.pial'
     >>> curv.inputs.save = True
-    >>> curv.cmdline
-    'mris_curvature -w lh.pial'
+    >>> curv.cmdline # doctest: +IGNORE_UNICODE
+    u'mris_curvature -w lh.pial'
     """
 
     _cmd = 'mris_curvature'
@@ -2176,8 +2176,8 @@ class CurvatureStats(FSCommand):
     >>> curvstats.inputs.values = True
     >>> curvstats.inputs.min_max = True
     >>> curvstats.inputs.write = True
-    >>> curvstats.cmdline
-    'mris_curvature_stats -m -o lh.curv.stats -F pial -G --writeCurvatureFiles subject_id lh pial pial'
+    >>> curvstats.cmdline # doctest: +IGNORE_UNICODE
+    u'mris_curvature_stats -m -o lh.curv.stats -F pial -G --writeCurvatureFiles subject_id lh pial pial'
     """
 
     _cmd = 'mris_curvature_stats'
@@ -2233,8 +2233,8 @@ class Jacobian(FSCommand):
     >>> jacobian = Jacobian()
     >>> jacobian.inputs.in_origsurf = 'lh.pial'
     >>> jacobian.inputs.in_mappedsurf = 'lh.pial'
-    >>> jacobian.cmdline
-    'mris_jacobian lh.pial lh.pial lh.jacobian'
+    >>> jacobian.cmdline # doctest: +IGNORE_UNICODE
+    u'mris_jacobian lh.pial lh.pial lh.jacobian'
     """
 
     _cmd = 'mris_jacobian'
@@ -2291,7 +2291,7 @@ class MRIsCalc(FSCommand):
     >>> example.inputs.action = 'add'
     >>> example.inputs.out_file = 'area.mid'
     >>> example.cmdline # doctest: +SKIP
-    'mris_calc -o lh.area.mid lh.area add lh.area.pial'
+    u'mris_calc -o lh.area.mid lh.area add lh.area.pial'
     """
 
     _cmd = 'mris_calc'
@@ -2370,8 +2370,8 @@ class VolumeMask(FSCommand):
     >>> volmask.inputs.rh_white = 'lh.pial'
     >>> volmask.inputs.subject_id = '10335'
     >>> volmask.inputs.save_ribbon = True
-    >>> volmask.cmdline
-    'mris_volmask --label_left_ribbon 3 --label_left_white 2 --label_right_ribbon 42 --label_right_white 41 --save_ribbon 10335'
+    >>> volmask.cmdline # doctest: +IGNORE_UNICODE
+    u'mris_volmask --label_left_ribbon 3 --label_left_white 2 --label_right_ribbon 42 --label_right_white 41 --save_ribbon 10335'
     """
 
     _cmd = 'mris_volmask'
@@ -2494,7 +2494,7 @@ class ParcellationStats(FSCommand):
     >>> parcstats.inputs.out_table = 'lh.test.stats'
     >>> parcstats.inputs.out_color = 'test.ctab'
     >>> parcstats.cmdline # doctest: +SKIP
-    'mris_anatomical_stats -c test.ctab -f lh.test.stats 10335 lh white'
+    u'mris_anatomical_stats -c test.ctab -f lh.test.stats 10335 lh white'
     """
 
     _cmd = 'mris_anatomical_stats'
@@ -2636,7 +2636,7 @@ class Contrast(FSCommand):
     >>> contrast.inputs.rawavg = '../mri/rawavg.mgz' # doctest: +SKIP
     >>> contrast.inputs.orig = '../mri/orig.mgz' # doctest: +SKIP
     >>> contrast.cmdline # doctest: +SKIP
-    'pctsurfcon --lh-only --s 10335'
+    u'pctsurfcon --lh-only --s 10335'
     """
 
     _cmd = 'pctsurfcon'
@@ -2710,8 +2710,8 @@ class RelabelHypointensities(FSCommand):
     >>> relabelhypos.inputs.rh_white = 'lh.pial'
     >>> relabelhypos.inputs.surf_directory = '.'
     >>> relabelhypos.inputs.aseg = 'aseg.mgz'
-    >>> relabelhypos.cmdline
-    'mri_relabel_hypointensities aseg.mgz . aseg.hypos.mgz'
+    >>> relabelhypos.cmdline # doctest: +IGNORE_UNICODE
+    u'mri_relabel_hypointensities aseg.mgz . aseg.hypos.mgz'
     """
 
     _cmd = 'mri_relabel_hypointensities'
@@ -2813,7 +2813,7 @@ class Aparc2Aseg(FSCommand):
     >>> aparc2aseg.inputs.label_wm = True
     >>> aparc2aseg.inputs.rip_unknown = True
     >>> aparc2aseg.cmdline # doctest: +SKIP
-    'mri_aparc2aseg --labelwm  --o aparc+aseg.mgz --rip-unknown --s subject_id'
+    u'mri_aparc2aseg --labelwm  --o aparc+aseg.mgz --rip-unknown --s subject_id'
     """
 
     _cmd = 'mri_aparc2aseg'
@@ -2881,8 +2881,8 @@ class Apas2Aseg(FSCommand):
     >>> apas2aseg = Apas2Aseg()
     >>> apas2aseg.inputs.in_file = 'aseg.mgz'
     >>> apas2aseg.inputs.out_file = 'output.mgz'
-    >>> apas2aseg.cmdline
-    'apas2aseg --i aseg.mgz --o output.mgz'
+    >>> apas2aseg.cmdline # doctest: +IGNORE_UNICODE
+    u'apas2aseg --i aseg.mgz --o output.mgz'
     """
 
     _cmd = 'apas2aseg'

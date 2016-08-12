@@ -37,8 +37,8 @@ class Vnifti2Image(CommandLine):
 
     >>> vimage = Vnifti2Image()
     >>> vimage.inputs.in_file = 'image.nii'
-    >>> vimage.cmdline
-    'vnifti2image -in image.nii -out image.v'
+    >>> vimage.cmdline # doctest: +IGNORE_UNICODE
+    u'vnifti2image -in image.nii -out image.v'
     >>> vimage.run()                                       # doctest: +SKIP
     """
 
@@ -66,8 +66,8 @@ class VtoMat(CommandLine):
 
     >>> vimage = VtoMat()
     >>> vimage.inputs.in_file = 'image.v'
-    >>> vimage.cmdline
-    'vtomat -in image.v -out image.mat'
+    >>> vimage.cmdline # doctest: +IGNORE_UNICODE
+    u'vtomat -in image.v -out image.mat'
     >>> vimage.run()                                       # doctest: +SKIP
     """
 

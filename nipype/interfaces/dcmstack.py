@@ -124,7 +124,7 @@ class DcmStack(NiftiGeneratorBase):
     >>> stacker.inputs.dicom_files = 'path/to/series/'
     >>> stacker.run() # doctest: +SKIP
     >>> result.outputs.out_file # doctest: +SKIP
-    '/path/to/cwd/sequence.nii.gz'
+    u'/path/to/cwd/sequence.nii.gz'
     '''
     input_spec = DcmStackInputSpec
     output_spec = DcmStackOutputSpec

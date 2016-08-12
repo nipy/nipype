@@ -47,8 +47,8 @@ class BrainMask(CommandLine):
     >>> import nipype.interfaces.mrtrix3 as mrt
     >>> bmsk = mrt.BrainMask()
     >>> bmsk.inputs.in_file = 'dwi.mif'
-    >>> bmsk.cmdline                               # doctest: +ELLIPSIS
-    'dwi2mask dwi.mif brainmask.mif'
+    >>> bmsk.cmdline                               # doctest: +ELLIPSIS +IGNORE_UNICODE
+    u'dwi2mask dwi.mif brainmask.mif'
     >>> bmsk.run()                                 # doctest: +SKIP
     """
 
@@ -94,8 +94,8 @@ class Mesh2PVE(CommandLine):
     >>> m2p.inputs.in_file = 'surf1.vtk'
     >>> m2p.inputs.reference = 'dwi.mif'
     >>> m2p.inputs.in_first = 'T1.nii.gz'
-    >>> m2p.cmdline                               # doctest: +ELLIPSIS
-    'mesh2pve -first T1.nii.gz surf1.vtk dwi.mif mesh2volume.nii.gz'
+    >>> m2p.cmdline                               # doctest: +ELLIPSIS +IGNORE_UNICODE
+    u'mesh2pve -first T1.nii.gz surf1.vtk dwi.mif mesh2volume.nii.gz'
     >>> m2p.run()                                 # doctest: +SKIP
     """
 
@@ -198,8 +198,8 @@ class TensorMetrics(CommandLine):
     >>> comp = mrt.TensorMetrics()
     >>> comp.inputs.in_file = 'dti.mif'
     >>> comp.inputs.out_fa = 'fa.mif'
-    >>> comp.cmdline                               # doctest: +ELLIPSIS
-    'tensor2metric -fa fa.mif dti.mif'
+    >>> comp.cmdline                               # doctest: +ELLIPSIS +IGNORE_UNICODE
+    u'tensor2metric -fa fa.mif dti.mif'
     >>> comp.run()                                 # doctest: +SKIP
     """
 
@@ -338,8 +338,8 @@ class ComputeTDI(MRTrix3Base):
     >>> import nipype.interfaces.mrtrix3 as mrt
     >>> tdi = mrt.ComputeTDI()
     >>> tdi.inputs.in_file = 'dti.mif'
-    >>> tdi.cmdline                               # doctest: +ELLIPSIS
-    'tckmap dti.mif tdi.mif'
+    >>> tdi.cmdline                               # doctest: +ELLIPSIS +IGNORE_UNICODE
+    u'tckmap dti.mif tdi.mif'
     >>> tdi.run()                                 # doctest: +SKIP
     """
 
@@ -389,8 +389,8 @@ class TCK2VTK(MRTrix3Base):
     >>> vtk = mrt.TCK2VTK()
     >>> vtk.inputs.in_file = 'tracks.tck'
     >>> vtk.inputs.reference = 'b0.nii'
-    >>> vtk.cmdline                               # doctest: +ELLIPSIS
-    'tck2vtk -image b0.nii tracks.tck tracks.vtk'
+    >>> vtk.cmdline                               # doctest: +ELLIPSIS +IGNORE_UNICODE
+    u'tck2vtk -image b0.nii tracks.tck tracks.vtk'
     >>> vtk.run()                                 # doctest: +SKIP
     """
 

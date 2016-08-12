@@ -84,8 +84,8 @@ class DTIFit(FSLCommand):
     >>> dti.inputs.bvals = 'bvals'
     >>> dti.inputs.base_name = 'TP'
     >>> dti.inputs.mask = 'mask.nii'
-    >>> dti.cmdline
-    'dtifit -k diffusion.nii -o TP -m mask.nii -r bvecs -b bvals'
+    >>> dti.cmdline # doctest: +IGNORE_UNICODE
+    u'dtifit -k diffusion.nii -o TP -m mask.nii -r bvecs -b bvals'
 
     """
 
@@ -313,8 +313,8 @@ class BEDPOSTX5(FSLXCommand):
     >>> from nipype.interfaces import fsl
     >>> bedp = fsl.BEDPOSTX5(bvecs='bvecs', bvals='bvals', dwi='diffusion.nii',
     ...                     mask='mask.nii', n_fibres=1)
-    >>> bedp.cmdline
-    'bedpostx bedpostx --forcedir -n 1'
+    >>> bedp.cmdline # doctest: +IGNORE_UNICODE
+    u'bedpostx bedpostx --forcedir -n 1'
 
     """
 
@@ -523,8 +523,8 @@ class ProbTrackX(FSLCommand):
     target_masks = ['targets_MASK1.nii', 'targets_MASK2.nii'], \
     thsamples='merged_thsamples.nii', fsamples='merged_fsamples.nii', phsamples='merged_phsamples.nii', \
     out_dir='.')
-    >>> pbx.cmdline
-    'probtrackx --forcedir -m mask.nii --mode=seedmask --nsamples=3 --nsteps=10 --opd --os2t --dir=. --samples=merged --seed=MASK_average_thal_right.nii --targetmasks=targets.txt --xfm=trans.mat'
+    >>> pbx.cmdline # doctest: +IGNORE_UNICODE
+    u'probtrackx --forcedir -m mask.nii --mode=seedmask --nsamples=3 --nsteps=10 --opd --os2t --dir=. --samples=merged --seed=MASK_average_thal_right.nii --targetmasks=targets.txt --xfm=trans.mat'
 
     """
 
@@ -687,8 +687,8 @@ class ProbTrackX2(ProbTrackX):
     >>> pbx2.inputs.out_dir = '.'
     >>> pbx2.inputs.n_samples = 3
     >>> pbx2.inputs.n_steps = 10
-    >>> pbx2.cmdline
-    'probtrackx2 --forcedir -m nodif_brain_mask.nii.gz --nsamples=3 --nsteps=10 --opd --dir=. --samples=merged --seed=seed_source.nii.gz'
+    >>> pbx2.cmdline # doctest: +IGNORE_UNICODE
+    u'probtrackx2 --forcedir -m nodif_brain_mask.nii.gz --nsamples=3 --nsteps=10 --opd --dir=. --samples=merged --seed=seed_source.nii.gz'
     """
     _cmd = 'probtrackx2'
     input_spec = ProbTrackX2InputSpec
@@ -759,8 +759,8 @@ class VecReg(FSLCommand):
                  affine_mat='trans.mat', \
                  ref_vol='mni.nii', \
                  out_file='diffusion_vreg.nii')
-    >>> vreg.cmdline
-    'vecreg -t trans.mat -i diffusion.nii -o diffusion_vreg.nii -r mni.nii'
+    >>> vreg.cmdline # doctest: +IGNORE_UNICODE
+    u'vecreg -t trans.mat -i diffusion.nii -o diffusion_vreg.nii -r mni.nii'
 
     """
 
@@ -816,8 +816,8 @@ class ProjThresh(FSLCommand):
     >>> from nipype.interfaces import fsl
     >>> ldir = ['seeds_to_M1.nii', 'seeds_to_M2.nii']
     >>> pThresh = fsl.ProjThresh(in_files=ldir, threshold=3)
-    >>> pThresh.cmdline
-    'proj_thresh seeds_to_M1.nii seeds_to_M2.nii 3'
+    >>> pThresh.cmdline # doctest: +IGNORE_UNICODE
+    u'proj_thresh seeds_to_M1.nii seeds_to_M2.nii 3'
 
     """
 
@@ -861,8 +861,8 @@ class FindTheBiggest(FSLCommand):
     >>> from nipype.interfaces import fsl
     >>> ldir = ['seeds_to_M1.nii', 'seeds_to_M2.nii']
     >>> fBig = fsl.FindTheBiggest(in_files=ldir, out_file='biggestSegmentation')
-    >>> fBig.cmdline
-    'find_the_biggest seeds_to_M1.nii seeds_to_M2.nii biggestSegmentation'
+    >>> fBig.cmdline # doctest: +IGNORE_UNICODE
+    u'find_the_biggest seeds_to_M1.nii seeds_to_M2.nii biggestSegmentation'
 
     """
     _cmd = 'find_the_biggest'
