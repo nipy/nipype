@@ -459,7 +459,7 @@ class Registration(ANTSCommand):
     >>> reg3.inputs.winsorize_lower_quantile = 0.025
     >>> reg3.inputs.winsorize_upper_quantile = 0.975
     >>> reg3.cmdline # doctest: +IGNORE_UNICODE
-    u'antsRegistration --collapse-output-transforms 0 --dimensionality 3 --initial-moving-transform [ trans.mat, 1 ] \
+    'antsRegistration --collapse-output-transforms 0 --dimensionality 3 --initial-moving-transform [ trans.mat, 1 ] \
 --initialize-transforms-per-stage 0 --interpolation Linear --output [ output_, output_warped_image.nii.gz ] \
 --transform Affine[ 2.0 ] --metric Mattes[ fixed1.nii, moving1.nii, 1, 32, Random, 0.05 ] \
 --convergence [ 1500x200, 1e-08, 20 ] --smoothing-sigmas 1.0x0.0vox --shrink-factors 2x1 \
@@ -502,7 +502,7 @@ class Registration(ANTSCommand):
     >>> reg4.inputs.collapse_output_transforms = True
     >>> outputs = reg4._list_outputs()
     >>> pprint.pprint(outputs)  # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE +IGNORE_UNICODE
-    {u'composite_transform': u'.../nipype/testing/data/output_Composite.h5',
+    {'composite_transform': '.../nipype/testing/data/output_Composite.h5',
      'forward_invert_flags': [],
      'forward_transforms': [],
      'inverse_composite_transform': '.../nipype/testing/data/output_InverseComposite.h5',
@@ -528,19 +528,19 @@ class Registration(ANTSCommand):
     >>> outputs = reg4b._list_outputs()
     >>> pprint.pprint(outputs)  # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE +IGNORE_UNICODE
     {'composite_transform': <undefined>,
-     u'forward_invert_flags': [False, False],
-     u'forward_transforms': [u'.../nipype/testing/data/output_0GenericAffine.mat',
-     u'.../nipype/testing/data/output_1Warp.nii.gz'],
-     u'inverse_composite_transform': <undefined>,
-     u'inverse_warped_image': <undefined>,
-     u'reverse_invert_flags': [True, False],
-     u'reverse_transforms': [u'.../nipype/testing/data/output_0GenericAffine.mat', \
-u'.../nipype/testing/data/output_1InverseWarp.nii.gz'],
-     u'save_state': u'.../nipype/testing/data/trans.mat',
-     u'warped_image': u'.../nipype/testing/data/output_warped_image.nii.gz'}
+     'forward_invert_flags': [False, False],
+     'forward_transforms': ['.../nipype/testing/data/output_0GenericAffine.mat',
+     '.../nipype/testing/data/output_1Warp.nii.gz'],
+     'inverse_composite_transform': <undefined>,
+     'inverse_warped_image': <undefined>,
+     'reverse_invert_flags': [True, False],
+     'reverse_transforms': ['.../nipype/testing/data/output_0GenericAffine.mat', \
+'.../nipype/testing/data/output_1InverseWarp.nii.gz'],
+     'save_state': '.../nipype/testing/data/trans.mat',
+     'warped_image': '.../nipype/testing/data/output_warped_image.nii.gz'}
     >>> reg4b.aggregate_outputs()  # doctest: +SKIP
     >>> reg4b.cmdline # doctest: +IGNORE_UNICODE
-    u'antsRegistration --collapse-output-transforms 1 --dimensionality 3 --initial-moving-transform [ trans.mat, 1 ] \
+    'antsRegistration --collapse-output-transforms 1 --dimensionality 3 --initial-moving-transform [ trans.mat, 1 ] \
 --initialize-transforms-per-stage 1 --interpolation Linear --output [ output_, output_warped_image.nii.gz ] \
 --restore-state trans.mat --save-state trans.mat --transform Affine[ 2.0 ] \
 --metric Mattes[ fixed1.nii, moving1.nii, 1, 32, Random, 0.05 ] --convergence [ 1500x200, 1e-08, 20 ] \
@@ -560,7 +560,7 @@ u'.../nipype/testing/data/output_1InverseWarp.nii.gz'],
     >>> reg5.inputs.sampling_strategy = ['Random', None] # use default strategy in second stage
     >>> reg5.inputs.sampling_percentage = [0.05, [0.05, 0.10]]
     >>> reg5.cmdline # doctest: +IGNORE_UNICODE
-    u'antsRegistration --collapse-output-transforms 0 --dimensionality 3 --initial-moving-transform [ trans.mat, 1 ] \
+    'antsRegistration --collapse-output-transforms 0 --dimensionality 3 --initial-moving-transform [ trans.mat, 1 ] \
 --initialize-transforms-per-stage 0 --interpolation Linear --output [ output_, output_warped_image.nii.gz ] \
 --transform Affine[ 2.0 ] --metric Mattes[ fixed1.nii, moving1.nii, 1, 32, Random, 0.05 ] \
 --convergence [ 1500x200, 1e-08, 20 ] --smoothing-sigmas 1.0x0.0vox --shrink-factors 2x1 \

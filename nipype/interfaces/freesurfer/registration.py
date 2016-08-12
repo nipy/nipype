@@ -61,7 +61,7 @@ class MPRtoMNI305(FSScriptCommand):
     'mpr2mni305 output'
     >>> mprtomni305.inputs.out_file = 'struct_out' # doctest: +SKIP
     >>> mprtomni305.cmdline # doctest: +SKIP
-    u'mpr2mni305 struct_out' # doctest: +SKIP
+    'mpr2mni305 struct_out' # doctest: +SKIP
     >>> mprtomni305.inputs.environ['REFDIR'] == os.path.join(Info.home(), 'average') # doctest: +SKIP
     True
     >>> mprtomni305.inputs.environ['MPR2MNI305_TARGET'] # doctest: +SKIP
@@ -204,7 +204,7 @@ class EMRegister(FSCommandOpenMP):
     >>> register.inputs.skull = True
     >>> register.inputs.nbrspacing = 9
     >>> register.cmdline # doctest: +IGNORE_UNICODE
-    u'mri_em_register -uns 9 -skull norm.mgz aseg.mgz norm_transform.lta'
+    'mri_em_register -uns 9 -skull norm.mgz aseg.mgz norm_transform.lta'
     """
     _cmd = 'mri_em_register'
     input_spec = EMRegisterInputSpec

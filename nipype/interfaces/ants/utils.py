@@ -37,7 +37,7 @@ class AverageAffineTransform(ANTSCommand):
     >>> avg.inputs.transforms = ['trans.mat', 'func_to_struct.mat']
     >>> avg.inputs.output_affine_transform = 'MYtemplatewarp.mat'
     >>> avg.cmdline # doctest: +IGNORE_UNICODE
-    u'AverageAffineTransform 3 MYtemplatewarp.mat trans.mat func_to_struct.mat'
+    'AverageAffineTransform 3 MYtemplatewarp.mat trans.mat func_to_struct.mat'
     """
     _cmd = 'AverageAffineTransform'
     input_spec = AverageAffineTransformInputSpec

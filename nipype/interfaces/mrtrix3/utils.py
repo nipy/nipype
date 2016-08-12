@@ -48,7 +48,7 @@ class BrainMask(CommandLine):
     >>> bmsk = mrt.BrainMask()
     >>> bmsk.inputs.in_file = 'dwi.mif'
     >>> bmsk.cmdline                               # doctest: +ELLIPSIS +IGNORE_UNICODE
-    u'dwi2mask dwi.mif brainmask.mif'
+    'dwi2mask dwi.mif brainmask.mif'
     >>> bmsk.run()                                 # doctest: +SKIP
     """
 
@@ -95,7 +95,7 @@ class Mesh2PVE(CommandLine):
     >>> m2p.inputs.reference = 'dwi.mif'
     >>> m2p.inputs.in_first = 'T1.nii.gz'
     >>> m2p.cmdline                               # doctest: +ELLIPSIS +IGNORE_UNICODE
-    u'mesh2pve -first T1.nii.gz surf1.vtk dwi.mif mesh2volume.nii.gz'
+    'mesh2pve -first T1.nii.gz surf1.vtk dwi.mif mesh2volume.nii.gz'
     >>> m2p.run()                                 # doctest: +SKIP
     """
 
@@ -339,7 +339,7 @@ class ComputeTDI(MRTrix3Base):
     >>> tdi = mrt.ComputeTDI()
     >>> tdi.inputs.in_file = 'dti.mif'
     >>> tdi.cmdline                               # doctest: +ELLIPSIS +IGNORE_UNICODE
-    u'tckmap dti.mif tdi.mif'
+    'tckmap dti.mif tdi.mif'
     >>> tdi.run()                                 # doctest: +SKIP
     """
 

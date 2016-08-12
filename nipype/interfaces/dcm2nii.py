@@ -77,7 +77,7 @@ class Dcm2nii(CommandLine):
     >>> converter.inputs.gzip_output = True
     >>> converter.inputs.output_dir = '.'
     >>> converter.cmdline # doctest: +IGNORE_UNICODE
-    u'dcm2nii -a y -c y -b config.ini -v y -d y -e y -g y -i n -n y -o . -p y -x n -f n functional_1.dcm'
+    'dcm2nii -a y -c y -b config.ini -v y -d y -e y -g y -i n -n y -o . -p y -x n -f n functional_1.dcm'
     """
 
     input_spec = Dcm2niiInputSpec
@@ -252,7 +252,7 @@ class Dcm2niix(CommandLine):
 
     >>> flags = '-'.join([val.strip() + ' ' for val in sorted(' '.join(converter.cmdline.split()[1:-1]).split('-'))])
     >>> flags # doctest: +IGNORE_UNICODE
-    u' -b y -f %t%p -m n -o . -s y -t n -v n -x n -z i '
+    ' -b y -f %t%p -m n -o . -s y -t n -v n -x n -z i '
     """
 
     input_spec = Dcm2niixInputSpec

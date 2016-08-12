@@ -489,7 +489,7 @@ class Surface2VolTransform(FSCommand):
     >>> xfm2vol.inputs.template_file = 'cope1.nii.gz'
     >>> xfm2vol.inputs.subjects_dir = '.'
     >>> xfm2vol.cmdline # doctest: +IGNORE_UNICODE
-    u'mri_surf2vol --hemi lh --volreg register.mat --surfval lh.cope1.mgz --sd . --template cope1.nii.gz --outvol lh.cope1_asVol.nii --vtxvol lh.cope1_asVol_vertex.nii'
+    'mri_surf2vol --hemi lh --volreg register.mat --surfval lh.cope1.mgz --sd . --template cope1.nii.gz --outvol lh.cope1_asVol.nii --vtxvol lh.cope1_asVol_vertex.nii'
     >>> res = xfm2vol.run()# doctest: +SKIP
 
     """
@@ -1025,7 +1025,7 @@ class MRIPretess(FSCommand):
     >>> pretess.inputs.in_norm = 'norm.mgz'
     >>> pretess.inputs.nocorners = True
     >>> pretess.cmdline # doctest: +IGNORE_UNICODE
-    u'mri_pretess -nocorners wm.mgz wm norm.mgz wm_pretesswm.mgz'
+    'mri_pretess -nocorners wm.mgz wm norm.mgz wm_pretesswm.mgz'
     >>> pretess.run() # doctest: +SKIP
     """
     _cmd = 'mri_pretess'
@@ -1515,7 +1515,7 @@ class TalairachQC(FSScriptCommand):
     >>> qc = TalairachQC()
     >>> qc.inputs.log_file = 'dirs.txt'
     >>> qc.cmdline # doctest: +IGNORE_UNICODE
-    u'tal_QC_AZS dirs.txt'
+    'tal_QC_AZS dirs.txt'
     """
     _cmd = "tal_QC_AZS"
     input_spec = TalairachQCInputSpec
@@ -1554,7 +1554,7 @@ class RemoveNeck(FSCommand):
     >>> remove_neck.inputs.transform = 'trans.mat'
     >>> remove_neck.inputs.template = 'trans.mat'
     >>> remove_neck.cmdline # doctest: +IGNORE_UNICODE
-    u'mri_remove_neck norm.mgz trans.mat trans.mat norm_noneck.mgz'
+    'mri_remove_neck norm.mgz trans.mat trans.mat norm_noneck.mgz'
     """
     _cmd = "mri_remove_neck"
     input_spec = RemoveNeckInputSpec
@@ -1694,7 +1694,7 @@ class Sphere(FSCommandOpenMP):
     >>> sphere = Sphere()
     >>> sphere.inputs.in_file = 'lh.pial'
     >>> sphere.cmdline # doctest: +IGNORE_UNICODE
-    u'mris_sphere lh.pial lh.sphere'
+    'mris_sphere lh.pial lh.sphere'
     """
     _cmd = 'mris_sphere'
     input_spec = SphereInputSpec
@@ -1758,7 +1758,7 @@ class FixTopology(FSCommand):
     >>> ft.inputs.mgz = True
     >>> ft.inputs.ga = True
     >>> ft.cmdline # doctest: +SKIP
-    u'mris_fix_topology -ga -mgz -sphere qsphere.nofix 10335 lh'
+    'mris_fix_topology -ga -mgz -sphere qsphere.nofix 10335 lh'
     """
 
     _cmd = 'mris_fix_topology'
@@ -1818,7 +1818,7 @@ class EulerNumber(FSCommand):
     >>> ft = EulerNumber()
     >>> ft.inputs.in_file = 'lh.pial'
     >>> ft.cmdline # doctest: +IGNORE_UNICODE
-    u'mris_euler_number lh.pial'
+    'mris_euler_number lh.pial'
     """
     _cmd = 'mris_euler_number'
     input_spec = EulerNumberInputSpec
@@ -1854,7 +1854,7 @@ class RemoveIntersection(FSCommand):
     >>> ri = RemoveIntersection()
     >>> ri.inputs.in_file = 'lh.pial'
     >>> ri.cmdline # doctest: +IGNORE_UNICODE
-    u'mris_remove_intersection lh.pial lh.pial'
+    'mris_remove_intersection lh.pial lh.pial'
     """
 
     _cmd = 'mris_remove_intersection'

@@ -1491,7 +1491,7 @@ class MELODIC(FSLCommand):
     >>> melodic_setup.inputs.s_con = 'subjectDesign.con'
     >>> melodic_setup.inputs.out_dir = 'groupICA.out'
     >>> melodic_setup.cmdline # doctest: +IGNORE_UNICODE
-    u'melodic -i functional.nii,functional2.nii,functional3.nii -a tica --bgthreshold=10.000000 --mmthresh=0.500000 --nobet -o groupICA.out --Ostats --Scon=subjectDesign.con --Sdes=subjectDesign.mat --Tcon=timeDesign.con --Tdes=timeDesign.mat --tr=1.500000'
+    'melodic -i functional.nii,functional2.nii,functional3.nii -a tica --bgthreshold=10.000000 --mmthresh=0.500000 --nobet -o groupICA.out --Ostats --Scon=subjectDesign.con --Sdes=subjectDesign.mat --Tcon=timeDesign.con --Tdes=timeDesign.mat --tr=1.500000'
     >>> melodic_setup.run() # doctest: +SKIP
 
 

@@ -147,7 +147,7 @@ class MRISPreprocReconAll(MRISPreproc):
                                            ('cont1a.nii', 'register.dat')]
     >>> preproc.inputs.out_file = 'concatenated_file.mgz'
     >>> preproc.cmdline # doctest: +IGNORE_UNICODE
-    u'mris_preproc --hemi lh --out concatenated_file.mgz --s subject_id --target fsaverage --iv cont1.nii register.dat --iv cont1a.nii register.dat'
+    'mris_preproc --hemi lh --out concatenated_file.mgz --s subject_id --target fsaverage --iv cont1.nii register.dat --iv cont1a.nii register.dat'
     """
 
     input_spec = MRISPreprocReconAllInputSpec
@@ -1207,7 +1207,7 @@ class Label2Annot(FSCommand):
     >>> l2a.inputs.orig = 'lh.pial'
     >>> l2a.inputs.out_annot = 'test'
     >>> l2a.cmdline # doctest: +IGNORE_UNICODE
-    u'mris_label2annot --hemi lh --l lh.aparc.label --a test --s 10335'
+    'mris_label2annot --hemi lh --l lh.aparc.label --a test --s 10335'
     """
 
     _cmd = 'mris_label2annot'
@@ -1288,7 +1288,7 @@ class SphericalAverage(FSCommand):
     >>> sphericalavg.inputs.erode = 2
     >>> sphericalavg.inputs.threshold = 5
     >>> sphericalavg.cmdline # doctest: +IGNORE_UNICODE
-    u'mris_spherical_average -erode 2 -o 10335 -t 5.0 label lh.entorhinal lh pial . test.out'
+    'mris_spherical_average -erode 2 -o 10335 -t 5.0 label lh.entorhinal lh pial . test.out'
     """
 
     _cmd = 'mris_spherical_average'

@@ -87,7 +87,7 @@ class RobustTemplate(FSCommand):
     >>> template.inputs.no_iteration = True
     >>> template.inputs.subsample_threshold = 200
     >>> template.cmdline  #doctest: +NORMALIZE_WHITESPACE +IGNORE_UNICODE
-    u'mri_robust_template --satit --average 0 --fixtp --mov structural.nii functional.nii --inittp 1 --noit --template mri_robust_template_out.mgz --subsample 200'
+    'mri_robust_template --satit --average 0 --fixtp --mov structural.nii functional.nii --inittp 1 --noit --template mri_robust_template_out.mgz --subsample 200'
     >>> template.inputs.out_file = 'T1.nii'
     >>> template.cmdline  #doctest: +NORMALIZE_WHITESPACE +IGNORE_UNICODE
     'mri_robust_template --satit --average 0 --fixtp --mov structural.nii functional.nii --inittp 1 --noit --template T1.nii --subsample 200'

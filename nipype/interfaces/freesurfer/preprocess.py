@@ -1580,7 +1580,7 @@ class CANormalize(FSCommand):
     >>> ca_normalize.inputs.atlas = "atlas.nii.gz" # in practice use .gca atlases
     >>> ca_normalize.inputs.transform = "trans.mat" # in practice use .lta transforms
     >>> ca_normalize.cmdline # doctest: +IGNORE_UNICODE
-    u'mri_ca_normalize T1.mgz atlas.nii.gz trans.mat T1_norm.mgz'
+    'mri_ca_normalize T1.mgz atlas.nii.gz trans.mat T1_norm.mgz'
     """
     _cmd = "mri_ca_normalize"
     input_spec = CANormalizeInputSpec
@@ -1783,7 +1783,7 @@ class MRIsCALabel(FSCommandOpenMP):
     >>> ca_label.inputs.classifier = "im1.nii" # in pracice, use .gcs extension
     >>> ca_label.inputs.smoothwm = "lh.pial"
     >>> ca_label.cmdline # doctest: +IGNORE_UNICODE
-    u'mris_ca_label test lh lh.pial im1.nii lh.aparc.annot'
+    'mris_ca_label test lh lh.pial im1.nii lh.aparc.annot'
     """
     _cmd = "mris_ca_label"
     input_spec = MRIsCALabelInputSpec
@@ -2004,7 +2004,7 @@ class EditWMwithAseg(FSCommand):
     >>> editwm.inputs.out_file = "wm.asegedit.mgz"
     >>> editwm.inputs.keep_in = True
     >>> editwm.cmdline # doctest: +IGNORE_UNICODE
-    u'mri_edit_wm_with_aseg -keep-in T1.mgz norm.mgz aseg.mgz wm.asegedit.mgz'
+    'mri_edit_wm_with_aseg -keep-in T1.mgz norm.mgz aseg.mgz wm.asegedit.mgz'
     """
     _cmd = 'mri_edit_wm_with_aseg'
     input_spec = EditWMwithAsegInputSpec

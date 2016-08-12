@@ -1265,7 +1265,7 @@ class FUGUE(FSLCommand):
     >>> fugue.inputs.unwarp_direction = 'y'
     >>> fugue.inputs.output_type = "NIFTI_GZ"
     >>> fugue.cmdline # doctest: +ELLIPSIS +IGNORE_UNICODE
-    u'fugue --in=epi.nii --mask=epi_mask.nii --loadshift=vsm.nii --unwarpdir=y --unwarp=epi_unwarped.nii.gz'
+    'fugue --in=epi.nii --mask=epi_mask.nii --loadshift=vsm.nii --unwarpdir=y --unwarp=epi_unwarped.nii.gz'
     >>> fugue.run() #doctest: +SKIP
 
 

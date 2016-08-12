@@ -243,7 +243,7 @@ class Merge(FSLCommand):
     >>> merger.inputs.dimension = 't'
     >>> merger.inputs.output_type = 'NIFTI_GZ'
     >>> merger.cmdline # doctest: +IGNORE_UNICODE
-    u'fslmerge -t functional2_merged.nii.gz functional2.nii functional3.nii'
+    'fslmerge -t functional2_merged.nii.gz functional2.nii functional3.nii'
     >>> merger.inputs.tr = 2.25
     >>> merger.cmdline # doctest: +IGNORE_UNICODE
     'fslmerge -tr functional2_merged.nii.gz functional2.nii functional3.nii 2.25'
@@ -1461,7 +1461,7 @@ class InvWarp(FSLCommand):
     >>> invwarp.inputs.reference = "anatomical.nii"
     >>> invwarp.inputs.output_type = "NIFTI_GZ"
     >>> invwarp.cmdline # doctest: +IGNORE_UNICODE
-    u'invwarp --out=struct2mni_inverse.nii.gz --ref=anatomical.nii --warp=struct2mni.nii'
+    'invwarp --out=struct2mni_inverse.nii.gz --ref=anatomical.nii --warp=struct2mni.nii'
     >>> res = invwarp.run() # doctest: +SKIP
 
 
@@ -1684,7 +1684,7 @@ class WarpUtils(FSLCommand):
     >>> warputils.inputs.warp_resolution = (10,10,10)
     >>> warputils.inputs.output_type = "NIFTI_GZ"
     >>> warputils.cmdline # doctest: +ELLIPSIS +IGNORE_UNICODE
-    u'fnirtfileutils --in=warpfield.nii --outformat=spline --ref=T1.nii --warpres=10.0000,10.0000,10.0000 --out=warpfield_coeffs.nii.gz'
+    'fnirtfileutils --in=warpfield.nii --outformat=spline --ref=T1.nii --warpres=10.0000,10.0000,10.0000 --out=warpfield_coeffs.nii.gz'
     >>> res = invwarp.run() # doctest: +SKIP
 
 
@@ -1873,7 +1873,7 @@ class WarpPoints(CommandLine):
     >>> warppoints.inputs.warp_file = 'warpfield.nii'
     >>> warppoints.inputs.coord_mm = True
     >>> warppoints.cmdline # doctest: +ELLIPSIS +IGNORE_UNICODE
-    u'img2imgcoord -mm -dest T1.nii -src epi.nii -warp warpfield.nii surf.txt'
+    'img2imgcoord -mm -dest T1.nii -src epi.nii -warp warpfield.nii surf.txt'
     >>> res = warppoints.run() # doctest: +SKIP
 
 
@@ -2031,7 +2031,7 @@ class WarpPointsToStd(WarpPoints):
     >>> warppoints.inputs.warp_file = 'warpfield.nii'
     >>> warppoints.inputs.coord_mm = True
     >>> warppoints.cmdline # doctest: +ELLIPSIS +IGNORE_UNICODE
-    u'img2stdcoord -mm -img T1.nii -std mni.nii -warp warpfield.nii surf.txt'
+    'img2stdcoord -mm -img T1.nii -std mni.nii -warp warpfield.nii surf.txt'
     >>> res = warppoints.run() # doctest: +SKIP
 
 
@@ -2081,7 +2081,7 @@ class MotionOutliers(FSLCommand):
     >>> mo = MotionOutliers()
     >>> mo.inputs.in_file = "epi.nii"
     >>> mo.cmdline # doctest: +ELLIPSIS +IGNORE_UNICODE
-    u'fsl_motion_outliers -i epi.nii -o epi_outliers.txt -p epi_metrics.png -s epi_metrics.txt'
+    'fsl_motion_outliers -i epi.nii -o epi_outliers.txt -p epi_metrics.png -s epi_metrics.txt'
     >>> res = mo.run() # doctest: +SKIP
     """
 

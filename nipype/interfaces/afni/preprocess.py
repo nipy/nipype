@@ -176,7 +176,7 @@ class TShift(AFNICommand):
     >>> tshift.inputs.tpattern = 'alt+z'
     >>> tshift.inputs.tzero = 0.0
     >>> tshift.cmdline #doctest: +IGNORE_UNICODE
-    u'3dTshift -prefix functional_tshift -tpattern alt+z -tzero 0.0 functional.nii'
+    '3dTshift -prefix functional_tshift -tpattern alt+z -tzero 0.0 functional.nii'
     >>> res = tshift.run()   # doctest: +SKIP
 
     """
@@ -364,7 +364,7 @@ class Resample(AFNICommand):
     >>> resample.inputs.orientation= 'RPI'
     >>> resample.inputs.outputtype = "NIFTI"
     >>> resample.cmdline  # doctest: +IGNORE_UNICODE
-    u'3dresample -orient RPI -prefix functional_resample.nii -inset functional.nii'
+    '3dresample -orient RPI -prefix functional_resample.nii -inset functional.nii'
     >>> res = resample.run() # doctest: +SKIP
 
     """
@@ -418,7 +418,7 @@ class AutoTcorrelate(AFNICommand):
     >>> corr.inputs.mask = 'mask.nii'
     >>> corr.inputs.mask_only_targets = True
     >>> corr.cmdline # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE +IGNORE_UNICODE
-    u'3dAutoTcorrelate -eta2 -mask mask.nii -mask_only_targets -prefix functional_similarity_matrix.1D -polort -1 functional.nii'
+    '3dAutoTcorrelate -eta2 -mask mask.nii -mask_only_targets -prefix functional_similarity_matrix.1D -polort -1 functional.nii'
     >>> res = corr.run() # doctest: +SKIP
     """
     input_spec = AutoTcorrelateInputSpec
@@ -466,7 +466,7 @@ class TStat(AFNICommand):
     >>> tstat.inputs.args= '-mean'
     >>> tstat.inputs.out_file = "stats"
     >>> tstat.cmdline  # doctest: +IGNORE_UNICODE
-    u'3dTstat -mean -prefix stats functional.nii'
+    '3dTstat -mean -prefix stats functional.nii'
     >>> res = tstat.run() # doctest: +SKIP
 
     """
@@ -505,7 +505,7 @@ class Detrend(AFNICommand):
     >>> detrend.inputs.args = '-polort 2'
     >>> detrend.inputs.outputtype = "AFNI"
     >>> detrend.cmdline  # doctest: +IGNORE_UNICODE
-    u'3dDetrend -polort 2 -prefix functional_detrend functional.nii'
+    '3dDetrend -polort 2 -prefix functional_detrend functional.nii'
     >>> res = detrend.run() # doctest: +SKIP
 
     """
@@ -541,7 +541,7 @@ class Despike(AFNICommand):
     >>> despike = afni.Despike()
     >>> despike.inputs.in_file = 'functional.nii'
     >>> despike.cmdline # doctest: +IGNORE_UNICODE
-    u'3dDespike -prefix functional_despike functional.nii'
+    '3dDespike -prefix functional_despike functional.nii'
     >>> res = despike.run() # doctest: +SKIP
 
     """
@@ -806,7 +806,7 @@ class Automask(AFNICommand):
     >>> automask.inputs.dilate = 1
     >>> automask.inputs.outputtype = "NIFTI"
     >>> automask.cmdline #doctest: +ELLIPSIS +IGNORE_UNICODE
-    u'3dAutomask -apply_prefix functional_masked.nii -dilate 1 -prefix functional_mask.nii functional.nii'
+    '3dAutomask -apply_prefix functional_masked.nii -dilate 1 -prefix functional_mask.nii functional.nii'
     >>> res = automask.run() # doctest: +SKIP
 
     """
@@ -1447,7 +1447,7 @@ class Maskave(AFNICommand):
     >>> maskave.inputs.mask= 'seed_mask.nii'
     >>> maskave.inputs.quiet= True
     >>> maskave.cmdline #doctest: +ELLIPSIS +IGNORE_UNICODE
-    u'3dmaskave -mask seed_mask.nii -quiet functional.nii > functional_maskave.1D'
+    '3dmaskave -mask seed_mask.nii -quiet functional.nii > functional_maskave.1D'
     >>> res = maskave.run() # doctest: +SKIP
 
     """
@@ -1924,7 +1924,7 @@ class MaskTool(AFNICommand):
     >>> automask.inputs.dilate = 1
     >>> automask.inputs.outputtype = "NIFTI"
     >>> automask.cmdline #doctest: +ELLIPSIS +IGNORE_UNICODE
-    u'3dAutomask -apply_prefix functional_masked.nii -dilate 1 -prefix functional_mask.nii functional.nii'
+    '3dAutomask -apply_prefix functional_masked.nii -dilate 1 -prefix functional_mask.nii functional.nii'
     >>> res = automask.run() # doctest: +SKIP
 
     """
@@ -2195,7 +2195,7 @@ class BlurInMask(AFNICommand):
     >>> bim.inputs.mask = 'mask.nii'
     >>> bim.inputs.fwhm = 5.0
     >>> bim.cmdline #doctest: +ELLIPSIS +IGNORE_UNICODE
-    u'3dBlurInMask -input functional.nii -FWHM 5.000000 -mask mask.nii -prefix functional_blur'
+    '3dBlurInMask -input functional.nii -FWHM 5.000000 -mask mask.nii -prefix functional_blur'
     >>> res = bim.run()   # doctest: +SKIP
 
     """
@@ -2639,7 +2639,7 @@ class Hist(AFNICommandBase):
     >>> hist = afni.Hist()
     >>> hist.inputs.in_file = 'functional.nii'
     >>> hist.cmdline  # doctest: +IGNORE_UNICODE
-    u'3dHist -input functional.nii -prefix functional_hist'
+    '3dHist -input functional.nii -prefix functional_hist'
     >>> res = hist.run() # doctest: +SKIP
 
     """
@@ -2938,7 +2938,7 @@ class OutlierCount(CommandLine):
     >>> toutcount = afni.OutlierCount()
     >>> toutcount.inputs.in_file = 'functional.nii'
     >>> toutcount.cmdline #doctest: +ELLIPSIS +IGNORE_UNICODE
-    u'3dToutcount functional.nii > functional_outliers'
+    '3dToutcount functional.nii > functional_outliers'
     >>> res = toutcount.run() #doctest: +SKIP
 
    """
