@@ -11,30 +11,28 @@ env:
 before_install:
 - wget http://repo.continuum.io/miniconda/Miniconda${TRAVIS_PYTHON_VERSION:0:1}-latest-Linux-x86_64.sh
   -O /home/travis/.cache/miniconda.sh
-- chmod +x /home/travis/.cache/miniconda.sh
-- /home/travis/.cache/miniconda.sh -b -p /home/travis/miniconda
+- bash /home/travis/.cache/miniconda.sh -b -p /home/travis/miniconda
 - export PATH=/home/travis/miniconda/bin:$PATH
 - if $INSTALL_DEB_DEPENDECIES; then sudo rm -rf /dev/shm; fi
 - if $INSTALL_DEB_DEPENDECIES; then sudo ln -s /run/shm /dev/shm; fi
 - bash <(wget -q -O- http://neuro.debian.net/_files/neurodebian-travis.sh)
 - sudo apt-get -y update
-- sudo apt-get -y install xvfb
+- sudo apt-get -y install xvfb fusefat
 - if $INSTALL_DEB_DEPENDECIES; then travis_retry sudo apt-get install -y -qq --no-install-recommends
   fsl afni elastix; fi
-- if $INSTALL_DEB_DEPENDECIES; then travis_retry sudo apt-get install -y -qq fsl-atlases;
-  fi
-- if $INSTALL_DEB_DEPENDECIES; then source /etc/fsl/fsl.sh; fi
-- if $INSTALL_DEB_DEPENDECIES; then source /etc/afni/afni.sh; fi
+- if $INSTALL_DEB_DEPENDECIES; then travis_retry sudo apt-get install -y -qq fsl-atlases; fi
+- if $INSTALL_DEB_DEPENDECIES; then
+  source /etc/fsl/fsl.sh; fi
+  source /etc/afni/afni.sh; fi
 - export FSLOUTPUTTYPE=NIFTI_GZ
 install:
-- sudo apt-get install fusefat
-- conda update --yes conda
 - conda config --add channels conda-forge
-- conda create -n testenv --yes pip vtk mayavi nipype python=$TRAVIS_PYTHON_VERSION
-- source activate testenv
-# Doctests
+- conda update --yes conda
+- conda update --all -y python=$TRAVIS_PYTHON_VERSION
+- conda install vtk mayavi
+- conda install nipype
 - pip install python-coveralls nose-cov doctest-ignore-unicode
-- rm -r /home/travis/miniconda/envs/testenv/lib/python${TRAVIS_PYTHON_VERSION}/site-packages/nipype*
+- rm -r /home/travis/miniconda/lib/python${TRAVIS_PYTHON_VERSION}/site-packages/nipype*
 - pip install -r requirements.txt
 - pip install -e .
 script:
