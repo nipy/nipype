@@ -5,16 +5,19 @@
 callback_log.log_nodes_cb()
 """
 from __future__ import division
-from builtins import str
-from builtins import range
+from builtins import str, range
 from past.utils import old_div
+
+# Py2 compat: http://python-future.org/compatible_idioms.html#collections-counter-and-ordereddict
+from future import standard_library
+standard_library.install_aliases()
+from collections import OrderedDict
 
 # Import packages
 import json
 from dateutil import parser
 import datetime
 import random
-from collections import OrderedDict
 # Pandas
 try:
     import pandas as pd

@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals, absolute_import
+from builtins import open, object, str, bytes
 from future import standard_library
 standard_library.install_aliases()
-from builtins import open, object, str, bytes
+# Py2 compat: http://python-future.org/compatible_idioms.html#collections-counter-and-ordereddict
+from collections import OrderedDict
 
 from copy import deepcopy
 from pickle import dumps
@@ -13,10 +15,7 @@ from socket import getfqdn
 from uuid import uuid1
 
 import numpy as np
-try:
-    from collections import OrderedDict
-except ImportError:
-    from ordereddict import OrderedDict
+
 
 import prov.model as pm
 

@@ -16,18 +16,13 @@ The `Workflow` class provides core functionality for batch processing.
 """
 
 from __future__ import absolute_import
+from builtins import range, object
 
+# Py2 compat: http://python-future.org/compatible_idioms.html#collections-counter-and-ordereddict
 from future import standard_library
 standard_library.install_aliases()
-from builtins import range
-from builtins import object
 
 from datetime import datetime
-from nipype.utils.misc import flatten, unflatten
-try:
-    from collections import OrderedDict
-except ImportError:
-    from ordereddict import OrderedDict
 
 from copy import deepcopy
 import pickle
@@ -49,17 +44,15 @@ from hashlib import sha1
 import numpy as np
 import networkx as nx
 
-from ...utils.misc import package_check, str2bool
-package_check('networkx', '1.3')
 
 from ... import config, logging
-logger = logging.getLogger('workflow')
+from nipype.utils.misc import (unflatten, package_check, str2bool,
+                               getsource, create_function_from_source)
 from ...interfaces.base import (traits, InputMultiPath, CommandLine,
                                 Undefined, TraitedSpec, DynamicTraitedSpec,
                                 Bunch, InterfaceResult, md5, Interface,
                                 TraitDictObject, TraitListObject, isdefined)
-from ...utils.misc import (getsource, create_function_from_source,
-                           flatten, unflatten)
+
 from ...utils.filemanip import (save_json, FileNotFoundError,
                                 filename_to_list, list_to_filename,
                                 copyfiles, fnames_presuffix, loadpkl,
@@ -76,6 +69,8 @@ from .utils import (generate_expanded_graph, modify_paths,
 from .base import EngineBase
 from .nodes import Node, MapNode
 
+package_check('networkx', '1.3')
+logger = logging.getLogger('workflow')
 
 class Workflow(EngineBase):
     """Controls the setup and execution of a pipeline of processes."""

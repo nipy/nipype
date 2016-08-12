@@ -32,8 +32,6 @@ install:
 - conda config --add channels conda-forge
 - conda create -n testenv --yes pip vtk mayavi nipype python=$TRAVIS_PYTHON_VERSION
 - source activate testenv
-- if [ ${TRAVIS_PYTHON_VERSION:0:1} == "2" ]; then conda install --yes vtk; fi
-- if [ ${TRAVIS_PYTHON_VERSION:0:1} == "2" ]; then pip install ordereddict; fi
 # Doctests
 - pip install python-coveralls nose-cov doctest-ignore-unicode
 - rm -r /home/travis/miniconda/envs/testenv/lib/python${TRAVIS_PYTHON_VERSION}/site-packages/nipype*

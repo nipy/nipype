@@ -16,24 +16,18 @@ The `EngineBase` class implements the more general view of a task.
 """
 
 from __future__ import absolute_import
+from builtins import object
 
 from future import standard_library
 standard_library.install_aliases()
-from builtins import object
-
-try:
-    from collections import OrderedDict
-except ImportError:
-    from ordereddict import OrderedDict
 
 from copy import deepcopy
 import re
 import numpy as np
-from ...interfaces.traits_extension import traits, Undefined
-from ...interfaces.base import DynamicTraitedSpec
-from ...utils.filemanip import loadpkl, savepkl
+from nipype import logging
+from nipype.interfaces.base import DynamicTraitedSpec
+from nipype.utils.filemanip import loadpkl, savepkl
 
-from ... import logging
 logger = logging.getLogger('workflow')
 
 

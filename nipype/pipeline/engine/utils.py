@@ -7,22 +7,14 @@
 
 from __future__ import absolute_import
 from __future__ import unicode_literals
-from builtins import str
+from builtins import str, open, map, next, zip, range
 
 from future import standard_library
 standard_library.install_aliases()
+from collections import defaultdict
 
-from builtins import open, map, next, zip, range
-
-try:
-    import itertools.imap as map
-except ImportError:
-    pass
-
-from collections import OrderedDict
 from copy import deepcopy
 from glob import glob
-from collections import defaultdict
 try:
     from inspect import signature
 except ImportError:
@@ -30,9 +22,9 @@ except ImportError:
 import os
 import re
 import pickle
+from functools import reduce
 import numpy as np
 from nipype.utils.misc import package_check
-from functools import reduce
 
 package_check('networkx', '1.3')
 
@@ -151,7 +143,10 @@ def format_node(node, format='python', include_config=False):
         lines = [importline, comment, nodedef]
 
         if include_config:
-            lines = [importline, "from collections import OrderedDict",
+            lines = [importline,
+                     "from future import standard_library",
+                     "standard_library.install_aliases()",
+                     "from collections import OrderedDict",
                      comment, nodedef]
             lines.append('%s.config = %s' % (name, node.config))
 
