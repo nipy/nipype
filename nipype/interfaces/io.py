@@ -1369,17 +1369,17 @@ class DataFinder(IOBase):
     >>> df.inputs.root_paths = '.'
     >>> df.inputs.match_regex = '.+/(?P<series_dir>.+(qT1|ep2d_fid_T1).+)/(?P<basename>.+)\.nii.gz'
     >>> result = df.run() # doctest: +SKIP
-    >>> result.outputs.out_paths  # doctest: +IGNORE_UNICODE
+    >>> result.outputs.out_paths  # doctest: +SKIP +IGNORE_UNICODE
     [u'./027-ep2d_fid_T1_Gd4/acquisition.nii.gz',
      u'./018-ep2d_fid_T1_Gd2/acquisition.nii.gz',
      u'./016-ep2d_fid_T1_Gd1/acquisition.nii.gz',
      u'./013-ep2d_fid_T1_pre/acquisition.nii.gz']
-    >>> result.outputs.series_dir  # doctest: +IGNORE_UNICODE
+    >>> result.outputs.series_dir  # doctest: +SKIP +IGNORE_UNICODE
     [u'027-ep2d_fid_T1_Gd4',
      u'018-ep2d_fid_T1_Gd2',
      u'016-ep2d_fid_T1_Gd1',
      u'013-ep2d_fid_T1_pre']
-    >>> result.outputs.basename  # doctest: +IGNORE_UNICODE
+    >>> result.outputs.basename  # doctest: +SKIP +IGNORE_UNICODE
     [u'acquisition',
      u'acquisition'
      u'acquisition',
