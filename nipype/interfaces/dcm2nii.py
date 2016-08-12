@@ -248,7 +248,7 @@ class Dcm2niix(CommandLine):
     >>> converter.inputs.single_file = True
     >>> converter.inputs.output_dir = '.'
     >>> converter.cmdline # doctest: +SKIP
-    u'dcm2niix -b y -z i -x n -t n -m n -f %t%p -o . -s y -v n functional_1.dcm'
+    'dcm2niix -b y -z i -x n -t n -m n -f %t%p -o . -s y -v n functional_1.dcm'
 
     >>> flags = '-'.join([val.strip() + ' ' for val in sorted(' '.join(converter.cmdline.split()[1:-1]).split('-'))])
     >>> flags # doctest: +IGNORE_UNICODE

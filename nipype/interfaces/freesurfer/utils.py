@@ -1212,7 +1212,7 @@ class MakeAverageSubject(FSCommand):
     >>> from nipype.interfaces.freesurfer import MakeAverageSubject
     >>> avg = MakeAverageSubject(subjects_ids=['s1', 's2'])
     >>> avg.cmdline # doctest: +IGNORE_UNICODE
-    u'make_average_subject --out average --subjects s1 s2'
+    'make_average_subject --out average --subjects s1 s2'
 
     """
 
@@ -1247,7 +1247,7 @@ class ExtractMainComponent(CommandLine):
     >>> from nipype.interfaces.freesurfer import ExtractMainComponent
     >>> mcmp = ExtractMainComponent(in_file='lh.pial')
     >>> mcmp.cmdline # doctest: +IGNORE_UNICODE
-    u'mris_extract_main_component lh.pial lh.maincmp'
+    'mris_extract_main_component lh.pial lh.maincmp'
 
     """
 
@@ -1377,11 +1377,11 @@ class AddXFormToHeader(FSCommand):
     >>> adder.inputs.in_file = 'norm.mgz'
     >>> adder.inputs.transform = 'trans.mat'
     >>> adder.cmdline # doctest: +IGNORE_UNICODE
-    u'mri_add_xform_to_header trans.mat norm.mgz output.mgz'
+    'mri_add_xform_to_header trans.mat norm.mgz output.mgz'
 
     >>> adder.inputs.copy_name = True
     >>> adder.cmdline # doctest: +IGNORE_UNICODE
-    u'mri_add_xform_to_header -c trans.mat norm.mgz output.mgz'
+    'mri_add_xform_to_header -c trans.mat norm.mgz output.mgz'
 
     >>> adder.run()   # doctest: +SKIP
 
@@ -1435,7 +1435,7 @@ class CheckTalairachAlignment(FSCommand):
     >>> checker.inputs.in_file = 'trans.mat'
     >>> checker.inputs.threshold = 0.005
     >>> checker.cmdline # doctest: +IGNORE_UNICODE
-    u'talairach_afd -T 0.005 -xfm trans.mat'
+    'talairach_afd -T 0.005 -xfm trans.mat'
 
     >>> checker.run() # doctest: +SKIP
     """
@@ -1484,7 +1484,7 @@ class TalairachAVI(FSCommand):
     >>> example.inputs.in_file = 'norm.mgz'
     >>> example.inputs.out_file = 'trans.mat'
     >>> example.cmdline # doctest: +IGNORE_UNICODE
-    u'talairach_avi --i norm.mgz --xfm trans.mat'
+    'talairach_avi --i norm.mgz --xfm trans.mat'
 
     >>> example.run() # doctest: +SKIP
     """

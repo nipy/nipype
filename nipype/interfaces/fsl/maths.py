@@ -154,7 +154,7 @@ class MaxImage(MathsCommand):
     >>> maxer.inputs.in_file = "functional.nii"  # doctest: +SKIP
     >>> maxer.dimension = "T"
     >>> maxer.cmdline  # doctest: +SKIP
-    u'fslmaths functional.nii -Tmax functional_max.nii'
+    'fslmaths functional.nii -Tmax functional_max.nii'
 
     """
     input_spec = MaxImageInput
@@ -319,7 +319,7 @@ class MultiImageMaths(MathsCommand):
     >>> maths.inputs.operand_files = ["functional2.nii", "functional3.nii"]
     >>> maths.inputs.out_file = "functional4.nii"
     >>> maths.cmdline # doctest: +IGNORE_UNICODE
-    u'fslmaths functional.nii -add functional2.nii -mul -1 -div functional3.nii functional4.nii'
+    'fslmaths functional.nii -add functional2.nii -mul -1 -div functional3.nii functional4.nii'
 
     """
     input_spec = MultiImageMathsInput

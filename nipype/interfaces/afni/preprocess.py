@@ -54,7 +54,7 @@ class BlurToFWHM(AFNICommand):
     >>> blur.inputs.in_file = 'epi.nii'
     >>> blur.inputs.fwhm = 2.5
     >>> blur.cmdline #doctest: +ELLIPSIS +IGNORE_UNICODE
-    u'3dBlurToFWHM -FWHM 2.500000 -input epi.nii -prefix epi_afni'
+    '3dBlurToFWHM -FWHM 2.500000 -input epi.nii -prefix epi_afni'
 
     """
     _cmd = '3dBlurToFWHM'
@@ -306,14 +306,14 @@ class Warp(AFNICommand):
     >>> warp.inputs.deoblique = True
     >>> warp.inputs.out_file = "trans.nii.gz"
     >>> warp.cmdline # doctest: +IGNORE_UNICODE
-    u'3dWarp -deoblique -prefix trans.nii.gz structural.nii'
+    '3dWarp -deoblique -prefix trans.nii.gz structural.nii'
 
     >>> warp_2 = afni.Warp()
     >>> warp_2.inputs.in_file = 'structural.nii'
     >>> warp_2.inputs.newgrid = 1.0
     >>> warp_2.inputs.out_file = "trans.nii.gz"
     >>> warp_2.cmdline  # doctest: +IGNORE_UNICODE
-    u'3dWarp -newgrid 1.000000 -prefix trans.nii.gz structural.nii'
+    '3dWarp -newgrid 1.000000 -prefix trans.nii.gz structural.nii'
 
     """
     _cmd = '3dWarp'
@@ -954,18 +954,18 @@ class Copy(AFNICommand):
     >>> copy3d = afni.Copy()
     >>> copy3d.inputs.in_file = 'functional.nii'
     >>> copy3d.cmdline  # doctest: +IGNORE_UNICODE
-    u'3dcopy functional.nii functional_copy'
+    '3dcopy functional.nii functional_copy'
 
     >>> from copy import deepcopy
     >>> copy3d_2 = deepcopy(copy3d)
     >>> copy3d_2.inputs.outputtype = 'NIFTI'
     >>> copy3d_2.cmdline  # doctest: +IGNORE_UNICODE
-    u'3dcopy functional.nii functional_copy.nii'
+    '3dcopy functional.nii functional_copy.nii'
 
     >>> copy3d_3 = deepcopy(copy3d)
     >>> copy3d_3.inputs.outputtype = 'NIFTI_GZ'
     >>> copy3d_3.cmdline  # doctest: +IGNORE_UNICODE
-    u'3dcopy functional.nii functional_copy.nii.gz'
+    '3dcopy functional.nii functional_copy.nii.gz'
 
     >>> copy3d_4 = deepcopy(copy3d)
     >>> copy3d_4.inputs.out_file = 'new_func.nii'
@@ -2121,7 +2121,7 @@ class Calc(AFNICommand):
     >>> calc.inputs.out_file =  'functional_calc.nii.gz'
     >>> calc.inputs.outputtype = "NIFTI"
     >>> calc.cmdline #doctest: +ELLIPSIS +IGNORE_UNICODE
-    u'3dcalc -a functional.nii  -b functional2.nii -expr "a*b" -prefix functional_calc.nii.gz'
+    '3dcalc -a functional.nii  -b functional2.nii -expr "a*b" -prefix functional_calc.nii.gz'
 
     """
 
@@ -2474,7 +2474,7 @@ class AFNItoNIFTI(AFNICommand):
     >>> a2n.inputs.in_file = 'afni_output.3D'
     >>> a2n.inputs.out_file =  'afni_output.nii'
     >>> a2n.cmdline  # doctest: +IGNORE_UNICODE
-    u'3dAFNItoNIFTI -prefix afni_output.nii afni_output.3D'
+    '3dAFNItoNIFTI -prefix afni_output.nii afni_output.3D'
 
     """
 
@@ -2530,7 +2530,7 @@ class Eval(AFNICommand):
     >>> eval.inputs.out1D = True
     >>> eval.inputs.out_file =  'data_calc.1D'
     >>> calc.cmdline #doctest: +SKIP +IGNORE_UNICODE
-    u'3deval -a timeseries1.1D  -b timeseries2.1D -expr "a*b" -1D -prefix data_calc.1D'
+    '3deval -a timeseries1.1D  -b timeseries2.1D -expr "a*b" -1D -prefix data_calc.1D'
 
     """
 
@@ -2593,7 +2593,7 @@ class Means(AFNICommand):
     >>> means.inputs.in_file_b = 'im2.nii'
     >>> means.inputs.out_file =  'output.nii'
     >>> means.cmdline  # doctest: +IGNORE_UNICODE
-    u'3dMean im1.nii im2.nii -prefix output.nii'
+    '3dMean im1.nii im2.nii -prefix output.nii'
 
     """
 
@@ -2743,7 +2743,7 @@ class FWHMx(AFNICommandBase):
     >>> fwhm = afp.FWHMx()
     >>> fwhm.inputs.in_file = 'functional.nii'
     >>> fwhm.cmdline  # doctest: +IGNORE_UNICODE
-    u'3dFWHMx -input functional.nii -out functional_subbricks.out > functional_fwhmx.out'
+    '3dFWHMx -input functional.nii -out functional_subbricks.out > functional_fwhmx.out'
 
 
     (Classic) METHOD:

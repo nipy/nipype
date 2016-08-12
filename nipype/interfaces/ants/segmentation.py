@@ -209,7 +209,7 @@ class LaplacianThickness(ANTSCommand):
     >>> cort_thick.inputs.input_gm = 'gray_matter.nii.gz'
     >>> cort_thick.inputs.output_image = 'output_thickness.nii.gz'
     >>> cort_thick.cmdline # doctest: +IGNORE_UNICODE
-    u'LaplacianThickness white_matter.nii.gz gray_matter.nii.gz output_thickness.nii.gz'
+    'LaplacianThickness white_matter.nii.gz gray_matter.nii.gz output_thickness.nii.gz'
 
     """
 
@@ -846,14 +846,14 @@ class DenoiseImage(ANTSCommand):
     >>> denoise.inputs.dimension = 3
     >>> denoise.inputs.input_image = 'im1.nii'
     >>> denoise.cmdline # doctest: +IGNORE_UNICODE
-    u'DenoiseImage -d 3 -i im1.nii -n Gaussian -o im1_noise_corrected.nii -s 1'
+    'DenoiseImage -d 3 -i im1.nii -n Gaussian -o im1_noise_corrected.nii -s 1'
 
     >>> denoise_2 = copy.deepcopy(denoise)
     >>> denoise_2.inputs.output_image = 'output_corrected_image.nii.gz'
     >>> denoise_2.inputs.noise_model = 'Rician'
     >>> denoise_2.inputs.shrink_factor = 2
     >>> denoise_2.cmdline # doctest: +IGNORE_UNICODE
-    u'DenoiseImage -d 3 -i im1.nii -n Rician -o output_corrected_image.nii.gz -s 2'
+    'DenoiseImage -d 3 -i im1.nii -n Rician -o output_corrected_image.nii.gz -s 2'
 
     >>> denoise_3 = DenoiseImage()
     >>> denoise_3.inputs.input_image = 'im1.nii'

@@ -85,7 +85,7 @@ class DTIFit(FSLCommand):
     >>> dti.inputs.base_name = 'TP'
     >>> dti.inputs.mask = 'mask.nii'
     >>> dti.cmdline # doctest: +IGNORE_UNICODE
-    u'dtifit -k diffusion.nii -o TP -m mask.nii -r bvecs -b bvals'
+    'dtifit -k diffusion.nii -o TP -m mask.nii -r bvecs -b bvals'
 
     """
 
@@ -314,7 +314,7 @@ class BEDPOSTX5(FSLXCommand):
     >>> bedp = fsl.BEDPOSTX5(bvecs='bvecs', bvals='bvals', dwi='diffusion.nii',
     ...                     mask='mask.nii', n_fibres=1)
     >>> bedp.cmdline # doctest: +IGNORE_UNICODE
-    u'bedpostx bedpostx --forcedir -n 1'
+    'bedpostx bedpostx --forcedir -n 1'
 
     """
 
@@ -524,7 +524,7 @@ class ProbTrackX(FSLCommand):
     thsamples='merged_thsamples.nii', fsamples='merged_fsamples.nii', phsamples='merged_phsamples.nii', \
     out_dir='.')
     >>> pbx.cmdline # doctest: +IGNORE_UNICODE
-    u'probtrackx --forcedir -m mask.nii --mode=seedmask --nsamples=3 --nsteps=10 --opd --os2t --dir=. --samples=merged --seed=MASK_average_thal_right.nii --targetmasks=targets.txt --xfm=trans.mat'
+    'probtrackx --forcedir -m mask.nii --mode=seedmask --nsamples=3 --nsteps=10 --opd --os2t --dir=. --samples=merged --seed=MASK_average_thal_right.nii --targetmasks=targets.txt --xfm=trans.mat'
 
     """
 
@@ -760,7 +760,7 @@ class VecReg(FSLCommand):
                  ref_vol='mni.nii', \
                  out_file='diffusion_vreg.nii')
     >>> vreg.cmdline # doctest: +IGNORE_UNICODE
-    u'vecreg -t trans.mat -i diffusion.nii -o diffusion_vreg.nii -r mni.nii'
+    'vecreg -t trans.mat -i diffusion.nii -o diffusion_vreg.nii -r mni.nii'
 
     """
 
@@ -817,7 +817,7 @@ class ProjThresh(FSLCommand):
     >>> ldir = ['seeds_to_M1.nii', 'seeds_to_M2.nii']
     >>> pThresh = fsl.ProjThresh(in_files=ldir, threshold=3)
     >>> pThresh.cmdline # doctest: +IGNORE_UNICODE
-    u'proj_thresh seeds_to_M1.nii seeds_to_M2.nii 3'
+    'proj_thresh seeds_to_M1.nii seeds_to_M2.nii 3'
 
     """
 
@@ -862,7 +862,7 @@ class FindTheBiggest(FSLCommand):
     >>> ldir = ['seeds_to_M1.nii', 'seeds_to_M2.nii']
     >>> fBig = fsl.FindTheBiggest(in_files=ldir, out_file='biggestSegmentation')
     >>> fBig.cmdline # doctest: +IGNORE_UNICODE
-    u'find_the_biggest seeds_to_M1.nii seeds_to_M2.nii biggestSegmentation'
+    'find_the_biggest seeds_to_M1.nii seeds_to_M2.nii biggestSegmentation'
 
     """
     _cmd = 'find_the_biggest'

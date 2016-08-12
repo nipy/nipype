@@ -90,7 +90,7 @@ class MRISPreproc(FSCommand):
                                            ('cont1a.nii', 'register.dat')]
     >>> preproc.inputs.out_file = 'concatenated_file.mgz'
     >>> preproc.cmdline # doctest: +IGNORE_UNICODE
-    u'mris_preproc --hemi lh --out concatenated_file.mgz --target fsaverage --iv cont1.nii register.dat --iv cont1a.nii register.dat'
+    'mris_preproc --hemi lh --out concatenated_file.mgz --target fsaverage --iv cont1.nii register.dat --iv cont1a.nii register.dat'
 
     """
 
@@ -485,7 +485,7 @@ class Binarize(FSCommand):
 
     >>> binvol = Binarize(in_file='structural.nii', min=10, binary_file='foo_out.nii')
     >>> binvol.cmdline # doctest: +IGNORE_UNICODE
-    u'mri_binarize --o foo_out.nii --i structural.nii --min 10.000000'
+    'mri_binarize --o foo_out.nii --i structural.nii --min 10.000000'
 
    """
 
@@ -594,7 +594,7 @@ class Concatenate(FSCommand):
     >>> concat.inputs.in_files = ['cont1.nii', 'cont2.nii']
     >>> concat.inputs.concatenated_file = 'bar.nii'
     >>> concat.cmdline # doctest: +IGNORE_UNICODE
-    u'mri_concat --o bar.nii --i cont1.nii --i cont2.nii'
+    'mri_concat --o bar.nii --i cont1.nii --i cont2.nii'
 
     """
 
@@ -718,7 +718,7 @@ class SegStats(FSCommand):
     >>> ss.inputs.avgwf_txt_file = 'avgwf.txt'
     >>> ss.inputs.summary_file = 'summary.stats'
     >>> ss.cmdline # doctest: +IGNORE_UNICODE
-    u'mri_segstats --annot PWS04 lh aparc --avgwf ./avgwf.txt --i functional.nii --sum ./summary.stats'
+    'mri_segstats --annot PWS04 lh aparc --avgwf ./avgwf.txt --i functional.nii --sum ./summary.stats'
 
     """
 
@@ -952,7 +952,7 @@ class Label2Vol(FSCommand):
 
     >>> binvol = Label2Vol(label_file='cortex.label', template_file='structural.nii', reg_file='register.dat', fill_thresh=0.5, vol_label_file='foo_out.nii')
     >>> binvol.cmdline # doctest: +IGNORE_UNICODE
-    u'mri_label2vol --fillthresh 0 --label cortex.label --reg register.dat --temp structural.nii --o foo_out.nii'
+    'mri_label2vol --fillthresh 0 --label cortex.label --reg register.dat --temp structural.nii --o foo_out.nii'
 
    """
 

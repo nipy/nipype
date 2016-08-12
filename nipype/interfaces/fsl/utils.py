@@ -171,7 +171,7 @@ class Smooth(FSLCommand):
     >>> sm.inputs.in_file = 'functional2.nii'
     >>> sm.inputs.sigma = 8.0
     >>> sm.cmdline # doctest: +ELLIPSIS +IGNORE_UNICODE
-    u'fslmaths functional2.nii -kernel gauss 8.000 -fmean functional2_smooth.nii.gz'
+    'fslmaths functional2.nii -kernel gauss 8.000 -fmean functional2_smooth.nii.gz'
 
     Setting the kernel width using fwhm:
 
@@ -180,7 +180,7 @@ class Smooth(FSLCommand):
     >>> sm.inputs.in_file = 'functional2.nii'
     >>> sm.inputs.fwhm = 8.0
     >>> sm.cmdline # doctest: +ELLIPSIS +IGNORE_UNICODE
-    u'fslmaths functional2.nii -kernel gauss 3.397 -fmean functional2_smooth.nii.gz'
+    'fslmaths functional2.nii -kernel gauss 3.397 -fmean functional2_smooth.nii.gz'
 
     One of sigma or fwhm must be set:
 
@@ -246,7 +246,7 @@ class Merge(FSLCommand):
     u'fslmerge -t functional2_merged.nii.gz functional2.nii functional3.nii'
     >>> merger.inputs.tr = 2.25
     >>> merger.cmdline # doctest: +IGNORE_UNICODE
-    u'fslmerge -tr functional2_merged.nii.gz functional2.nii functional3.nii 2.25'
+    'fslmerge -tr functional2_merged.nii.gz functional2.nii functional3.nii 2.25'
 
 
     """
@@ -1157,7 +1157,7 @@ class ConvertXFM(FSLCommand):
     >>> invt.inputs.invert_xfm = True
     >>> invt.inputs.out_file = 'flirt_inv.mat'
     >>> invt.cmdline # doctest: +IGNORE_UNICODE
-    u'convert_xfm -omat flirt_inv.mat -inverse flirt.mat'
+    'convert_xfm -omat flirt_inv.mat -inverse flirt.mat'
 
 
     """

@@ -152,7 +152,7 @@ class RegisterAVItoTalairach(FSScriptCommand):
     >>> register.inputs.target = 'mni305.cor.mgz'                          # doctest: +SKIP
     >>> register.inputs.vox2vox = 'talsrcimg_to_structural_t4_vox2vox.txt' # doctest: +SKIP
     >>> register.cmdline                                                   # doctest: +SKIP
-    u'avi2talxfm structural.mgz mni305.cor.mgz talsrcimg_to_structural_t4_vox2vox.txt talairach.auto.xfm'
+    'avi2talxfm structural.mgz mni305.cor.mgz talsrcimg_to_structural_t4_vox2vox.txt talairach.auto.xfm'
 
     >>> register.run() # doctest: +SKIP
     """

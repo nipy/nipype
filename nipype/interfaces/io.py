@@ -1224,7 +1224,7 @@ class SelectFiles(IOBase):
     >>> dg = Node(SelectFiles(templates), "selectfiles")
     >>> dg.inputs.subject_id = "subj1"
     >>> pprint.pprint(dg.outputs.get())  # doctest: +NORMALIZE_WHITESPACE +IGNORE_UNICODE
-    {u'T1': <undefined>, u'epi': <undefined>}
+    {'T1': <undefined>, 'epi': <undefined>}
 
     The same thing with dynamic grabbing of specific files:
 
@@ -1380,10 +1380,10 @@ class DataFinder(IOBase):
      u'016-ep2d_fid_T1_Gd1',
      u'013-ep2d_fid_T1_pre']
     >>> result.outputs.basename  # doctest: +SKIP +IGNORE_UNICODE
-    [u'acquisition',
-     u'acquisition'
-     u'acquisition',
-     u'acquisition']
+    ['acquisition',
+     'acquisition'
+     'acquisition',
+     'acquisition']
 
     """
 
@@ -2457,7 +2457,7 @@ class JSONFileGrabber(IOBase):
     >>> jsonSource.inputs.in_file = 'jsongrabber.txt'
     >>> res = jsonSource.run()
     >>> pprint.pprint(res.outputs.get())  # doctest: +NORMALIZE_WHITESPACE, +ELLIPSIS +IGNORE_UNICODE
-    {u'param1': u'exampleStr', u'param2': 4, u'param3': 1.0}
+    {'param1': 'exampleStr', 'param2': 4, 'param3': 1.0}
 
 
     """

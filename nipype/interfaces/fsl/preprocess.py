@@ -875,7 +875,7 @@ class FNIRT(FSLCommand):
     We can check the command line and confirm that it's what we expect.
 
     >>> fnirt_mprage.cmdline  #doctest: +SKIP
-    u'fnirt --cout=fieldcoeff.nii --in=structural.nii --infwhm=8,4,2,2 --ref=mni.nii --subsamp=4,2,1,1 --warpres=6,6,6 --iout=warped.nii'
+    'fnirt --cout=fieldcoeff.nii --in=structural.nii --infwhm=8,4,2,2 --ref=mni.nii --subsamp=4,2,1,1 --warpres=6,6,6 --iout=warped.nii'
 
     """
 

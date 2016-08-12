@@ -60,7 +60,7 @@ class IdentityInterface(IOBase):
 
     >>> out = ii.run()
     >>> out.outputs.a # doctest: +IGNORE_UNICODE
-    u'foo'
+    'foo'
 
     >>> ii2 = IdentityInterface(fields=['a', 'b'], mandatory_inputs=True)
     >>> ii2.inputs.a = 'foo'
@@ -211,7 +211,7 @@ class Rename(IOBase):
     >>> rename2.inputs.run = 2
     >>> res = rename2.run()          # doctest: +SKIP
     >>> res.outputs.out_file         # doctest: +SKIP
-    u'subj_201_func_run02.nii'        # doctest: +SKIP
+    'subj_201_func_run02.nii'        # doctest: +SKIP
 
     >>> rename3 = Rename(format_string="%(subject_id)s_%(seq)s_run%(run)02d.nii")
     >>> rename3.inputs.in_file = "func_epi_1_1.nii"
@@ -220,7 +220,7 @@ class Rename(IOBase):
     >>> rename3.inputs.run = 2
     >>> res = rename3.run()          # doctest: +SKIP
     >>> res.outputs.out_file         # doctest: +SKIP
-    u'subj_201_epi_run02.nii'         # doctest: +SKIP
+    'subj_201_epi_run02.nii'         # doctest: +SKIP
 
     """
     input_spec = RenameInputSpec

@@ -850,7 +850,7 @@ class EddyCorrect(FSLCommand):
     >>> eddyc = EddyCorrect(in_file='diffusion.nii',
     ...                     out_file="diffusion_edc.nii", ref_num=0)
     >>> eddyc.cmdline # doctest: +IGNORE_UNICODE
-    u'eddy_correct diffusion.nii diffusion_edc.nii 0'
+    'eddy_correct diffusion.nii diffusion_edc.nii 0'
 
     """
     _cmd = 'eddy_correct'

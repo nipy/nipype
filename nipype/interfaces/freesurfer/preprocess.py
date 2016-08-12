@@ -63,7 +63,7 @@ class ParseDICOMDir(FSCommand):
     >>> dcminfo.inputs.sortbyrun = True
     >>> dcminfo.inputs.summarize = True
     >>> dcminfo.cmdline # doctest: +IGNORE_UNICODE
-    u'mri_parse_sdcmdir --d . --o dicominfo.txt --sortbyrun --summarize'
+    'mri_parse_sdcmdir --d . --o dicominfo.txt --sortbyrun --summarize'
 
    """
 
@@ -349,7 +349,7 @@ class MRIConvert(FSCommand):
     >>> mc.inputs.out_file = 'outfile.mgz'
     >>> mc.inputs.out_type = 'mgz'
     >>> mc.cmdline # doctest: +IGNORE_UNICODE
-    u'mri_convert --out_type mgz --input_volume structural.nii --output_volume outfile.mgz'
+    'mri_convert --out_type mgz --input_volume structural.nii --output_volume outfile.mgz'
 
     """
     _cmd = 'mri_convert'
@@ -575,7 +575,7 @@ class Resample(FSCommand):
     >>> resampler.inputs.resampled_file = 'resampled.nii'
     >>> resampler.inputs.voxel_size = (2.1, 2.1, 2.1)
     >>> resampler.cmdline # doctest: +IGNORE_UNICODE
-    u'mri_convert -vs 2.10 2.10 2.10 -i structural.nii -o resampled.nii'
+    'mri_convert -vs 2.10 2.10 2.10 -i structural.nii -o resampled.nii'
 
     """
 
@@ -645,7 +645,7 @@ class ReconAll(CommandLine):
     >>> reconall.inputs.subjects_dir = '.'
     >>> reconall.inputs.T1_files = 'structural.nii'
     >>> reconall.cmdline # doctest: +IGNORE_UNICODE
-    u'recon-all -all -i structural.nii -subjid foo -sd .'
+    'recon-all -all -i structural.nii -subjid foo -sd .'
 
     """
 
@@ -867,7 +867,7 @@ class BBRegister(FSCommand):
     >>> from nipype.interfaces.freesurfer import BBRegister
     >>> bbreg = BBRegister(subject_id='me', source_file='structural.nii', init='header', contrast_type='t2')
     >>> bbreg.cmdline # doctest: +IGNORE_UNICODE
-    u'bbregister --t2 --init-header --reg structural_bbreg_me.dat --mov structural.nii --s me'
+    'bbregister --t2 --init-header --reg structural_bbreg_me.dat --mov structural.nii --s me'
 
     """
 
@@ -1001,7 +1001,7 @@ class ApplyVolTransform(FSCommand):
     >>> applyreg.inputs.transformed_file = 'struct_warped.nii'
     >>> applyreg.inputs.fs_target = True
     >>> applyreg.cmdline # doctest: +IGNORE_UNICODE
-    u'mri_vol2vol --fstarg --reg register.dat --mov structural.nii --o struct_warped.nii'
+    'mri_vol2vol --fstarg --reg register.dat --mov structural.nii --o struct_warped.nii'
 
     """
 
@@ -1081,7 +1081,7 @@ class Smooth(FSCommand):
     >>> from nipype.interfaces.freesurfer import Smooth
     >>> smoothvol = Smooth(in_file='functional.nii', smoothed_file = 'foo_out.nii', reg_file='register.dat', surface_fwhm=10, vol_fwhm=6)
     >>> smoothvol.cmdline # doctest: +IGNORE_UNICODE
-    u'mris_volsmooth --i functional.nii --reg register.dat --o foo_out.nii --fwhm 10.000000 --vol-fwhm 6.000000'
+    'mris_volsmooth --i functional.nii --reg register.dat --o foo_out.nii --fwhm 10.000000 --vol-fwhm 6.000000'
 
     """
 
@@ -1186,7 +1186,7 @@ class RobustRegister(FSCommand):
     >>> reg.inputs.auto_sens = True
     >>> reg.inputs.init_orient = True
     >>> reg.cmdline # doctest: +IGNORE_UNICODE
-    u'mri_robust_register --satit --initorient --lta structural_robustreg.lta --mov structural.nii --dst T1.nii'
+    'mri_robust_register --satit --initorient --lta structural_robustreg.lta --mov structural.nii --dst T1.nii'
 
     References
     ----------
@@ -1272,7 +1272,7 @@ class FitMSParams(FSCommand):
     >>> msfit.inputs.in_files = ['flash_05.mgz', 'flash_30.mgz']
     >>> msfit.inputs.out_dir = 'flash_parameters'
     >>> msfit.cmdline # doctest: +IGNORE_UNICODE
-    u'mri_ms_fitparms  flash_05.mgz flash_30.mgz flash_parameters'
+    'mri_ms_fitparms  flash_05.mgz flash_30.mgz flash_parameters'
 
     """
     _cmd = "mri_ms_fitparms"
@@ -1345,7 +1345,7 @@ class SynthesizeFLASH(FSCommand):
     >>> syn.inputs.pd_image = 'PD.mgz'
     >>> syn.inputs.out_file = 'flash_30syn.mgz'
     >>> syn.cmdline # doctest: +IGNORE_UNICODE
-    u'mri_synthesize 20.00 30.00 3.000 T1.mgz PD.mgz flash_30syn.mgz'
+    'mri_synthesize 20.00 30.00 3.000 T1.mgz PD.mgz flash_30syn.mgz'
 
     """
     _cmd = "mri_synthesize"
@@ -1418,7 +1418,7 @@ class MNIBiasCorrection(FSCommand):
     >>> correct.inputs.protocol_iterations = 1000
     >>> correct.inputs.distance = 50
     >>> correct.cmdline # doctest: +IGNORE_UNICODE
-    u'mri_nu_correct.mni --distance 50 --i norm.mgz --n 6 --o norm_output.mgz --proto-iters 1000'
+    'mri_nu_correct.mni --distance 50 --i norm.mgz --n 6 --o norm_output.mgz --proto-iters 1000'
 
     References:
     ----------

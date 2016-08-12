@@ -28,7 +28,7 @@ def get_package_name(filepath):
     Examples
     --------
     >>> np.testing.nosetester.get_package_name('nonsense') # doctest: +IGNORE_UNICODE
-    u'numpy'
+    'numpy'
 
     """
 

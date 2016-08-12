@@ -55,13 +55,13 @@ def split_filename(fname):
     >>> from nipype.utils.filemanip import split_filename
     >>> pth, fname, ext = split_filename('/home/data/subject.nii.gz')
     >>> pth # doctest: +IGNORE_UNICODE
-    u'/home/data'
+    '/home/data'
 
     >>> fname # doctest: +IGNORE_UNICODE
-    u'subject'
+    'subject'
 
     >>> ext # doctest: +IGNORE_UNICODE
-    u'.nii.gz'
+    '.nii.gz'
 
     """
 
@@ -108,7 +108,7 @@ def fname_presuffix(fname, prefix='', suffix='', newpath=None, use_ext=True):
     >>> from nipype.utils.filemanip import fname_presuffix
     >>> fname = 'foo.nii.gz'
     >>> fname_presuffix(fname,'pre','post','/tmp') # doctest: +IGNORE_UNICODE
-    u'/tmp/prefoopost.nii.gz'
+    '/tmp/prefoopost.nii.gz'
 
     """
     pth, fname, ext = split_filename(fname)
