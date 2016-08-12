@@ -28,7 +28,7 @@ install:
 - conda config --add channels conda-forge
 - conda update --yes conda
 - conda update --all -y python=$TRAVIS_PYTHON_VERSION
-- conda install -y vtk mayavi
+- if $INSTALL_DEB_DEPENDECIES; then conda install -y vtk mayavi; fi
 - conda install -y nipype
 - pip install python-coveralls nose-cov doctest-ignore-unicode
 - rm -r /home/travis/miniconda/lib/python${TRAVIS_PYTHON_VERSION}/site-packages/nipype*
