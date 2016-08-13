@@ -1546,8 +1546,10 @@ class CommandLine(BaseInterface):
      'ignore_exception': False,
      'terminal_output': 'stream'}
 
-    >>> cli.inputs.get_hashval() # doctest: +IGNORE_UNICODE
-    ([('args', '-al')], '11c37f97649cd61627f4afe5136af8c0')
+    >>> cli.inputs.get_hashval()[0][0] # doctest: +IGNORE_UNICODE
+    ('args', '-al')
+    >>> cli.inputs.get_hashval()[1] # doctest: +IGNORE_UNICODE
+    '11c37f97649cd61627f4afe5136af8c0'
 
     """
     input_spec = CommandLineInputSpec

@@ -1309,7 +1309,7 @@ class Tkregister2(FSCommand):
     >>> tk2.inputs.moving_image = 'T1.mgz'
     >>> tk2.inputs.target_image = 'structural.nii'
     >>> tk2.inputs.reg_header = True
-    >>> tk2.cmdline
+    >>> tk2.cmdline # doctest: +IGNORE_UNICODE
     'tkregister2 --mov T1.mgz --noedit --reg T1_to_native.dat --regheader \
 --targ structural.nii'
     >>> tk2.run() # doctest: +SKIP

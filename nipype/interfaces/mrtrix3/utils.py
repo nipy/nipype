@@ -140,7 +140,7 @@ class Generate5tt(CommandLine):
     >>> seg.inputs.in_fast = ['tpm_00.nii.gz',
     ...                       'tpm_01.nii.gz', 'tpm_02.nii.gz']
     >>> seg.inputs.in_first = 'first_merged.nii.gz'
-    >>> seg.cmdline                               # doctest: +ELLIPSIS
+    >>> seg.cmdline                               # doctest: +ELLIPSIS +IGNORE_UNICODE
     '5ttgen tpm_00.nii.gz tpm_01.nii.gz tpm_02.nii.gz first_merged.nii.gz\
  act-5tt.mif'
     >>> seg.run()                                 # doctest: +SKIP
