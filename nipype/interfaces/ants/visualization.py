@@ -141,7 +141,7 @@ class CreateTiledMosaic(ANTSCommand):
     >>> mosaic_slicer.inputs.direction = 2
     >>> mosaic_slicer.inputs.pad_or_crop = '[ -15x -50 , -15x -30 ,0]'
     >>> mosaic_slicer.inputs.slices = '[2 ,100 ,160]'
-    >>> mosaic_slicer.cmdline
+    >>> mosaic_slicer.cmdline # doctest: +IGNORE_UNICODE
     'CreateTiledMosaic -a 0.50 -d 2 -i T1.nii.gz -x mask.nii.gz -o output.png -p [ -15x -50 , -15x -30 ,0] \
 -r rgb.nii.gz -s [2 ,100 ,160]'
     """
