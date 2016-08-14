@@ -1607,7 +1607,8 @@ class ClusterInputSpec(FSLCommandInputSpec):
                              desc='interprets the threshold as a fraction of the robust range')
     connectivity = traits.Int(argstr='--connectivity=%d',
                               desc='the connectivity of voxels (default 26)')
-    use_mm = traits.Bool('--mm', desc='use mm, not voxel, coordinates')
+    use_mm = traits.Bool(False, usedefault=True, argstr='--mm',
+                         desc='use mm, not voxel, coordinates')
     find_min = traits.Bool('--min', desc='find minima instead of maxima')
     no_table = traits.Bool(
         '--no_table', desc='suppresses printing of the table info')
@@ -1644,8 +1645,9 @@ class Cluster(FSLCommand):
     >>> cl.inputs.threshold = 2.3
     >>> cl.inputs.in_file = 'zstat1.nii.gz'
     >>> cl.inputs.out_localmax_txt_file = 'stats.txt'
+    >>> cl.inputs.use_mm = True
     >>> cl.cmdline
-    'cluster --in=zstat1.nii.gz --olmax=stats.txt --thresh=2.3000000000'
+    'cluster --in=zstat1.nii.gz --olmax=stats.txt --thresh=2.3000000000 --mm'
 
     """
     input_spec = ClusterInputSpec
