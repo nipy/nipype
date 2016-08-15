@@ -159,6 +159,21 @@ def test_linkchain():
     yield assert_false, os.path.islink(new_hdr3)
     yield assert_true, os.path.samefile(orig_img, new_img3)
     yield assert_true, os.path.samefile(orig_hdr, new_hdr3)
+
+    # Test that re-copying leaves files
+    stat1 = os.stat(new_img1)
+    stat2 = os.stat(new_img2)
+    stat3 = os.stat(new_img3)
+    # Same symlink
+    copyfile(orig_img, new_img1)
+    # Hash matches
+    copyfile(new_img1, new_img2, copy=True)
+    # Hardlinks
+    copyfile(new_img1, new_img3, copy=True, use_hardlink=True)
+    yield assert_equal, stat1, os.stat(new_img1)
+    yield assert_equal, stat2, os.stat(new_img2)
+    yield assert_equal, stat3, os.stat(new_img3)
+
     os.unlink(new_img1)
     os.unlink(new_hdr1)
     os.unlink(new_img2)
