@@ -1603,15 +1603,17 @@ class ClusterInputSpec(FSLCommandInputSpec):
                         desc='number of voxels in the mask')
     dlh = traits.Float(argstr='--dlh=%.10f',
                        desc='smoothness estimate = sqrt(det(Lambda))')
-    fractional = traits.Bool('--fractional',
+    fractional = traits.Bool(False, usedefault=True, argstr='--fractional',
                              desc='interprets the threshold as a fraction of the robust range')
     connectivity = traits.Int(argstr='--connectivity=%d',
                               desc='the connectivity of voxels (default 26)')
-    use_mm = traits.Bool('--mm', desc='use mm, not voxel, coordinates')
-    find_min = traits.Bool('--min', desc='find minima instead of maxima')
-    no_table = traits.Bool(
-        '--no_table', desc='suppresses printing of the table info')
-    minclustersize = traits.Bool(argstr='--minclustersize',
+    use_mm = traits.Bool(False, usedefault=True, argstr='--mm',
+                         desc='use mm, not voxel, coordinates')
+    find_min = traits.Bool(False, usedefault=True, argstr='--min',
+                           desc='find minima instead of maxima')
+    no_table = traits.Bool(False, usedefault=True, argstr='--no_table',
+                           desc='suppresses printing of the table info')
+    minclustersize = traits.Bool(False, usedefault=True, argstr='--minclustersize',
                                  desc='prints out minimum significant cluster size')
     xfm_file = File(argstr='--xfm=%s',
                     desc='filename for Linear: input->standard-space transform. Non-linear: input->highres transform')
@@ -1644,8 +1646,9 @@ class Cluster(FSLCommand):
     >>> cl.inputs.threshold = 2.3
     >>> cl.inputs.in_file = 'zstat1.nii.gz'
     >>> cl.inputs.out_localmax_txt_file = 'stats.txt'
+    >>> cl.inputs.use_mm = True
     >>> cl.cmdline
-    'cluster --in=zstat1.nii.gz --olmax=stats.txt --thresh=2.3000000000'
+    'cluster --in=zstat1.nii.gz --olmax=stats.txt --thresh=2.3000000000 --mm'
 
     """
     input_spec = ClusterInputSpec
