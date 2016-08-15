@@ -428,7 +428,7 @@ class Registration(ANTSCommand):
     >>> reg.inputs.use_estimate_learning_rate_once = [True, True]
     >>> reg.inputs.use_histogram_matching = [True, True] # This is the default
     >>> reg.inputs.output_warped_image = 'output_warped_image.nii.gz'
-    >>> reg.cmdline
+    >>> reg.cmdline # doctest: +IGNORE_UNICODE
     'antsRegistration --collapse-output-transforms 0 --dimensionality 3 --initial-moving-transform [ trans.mat, 0 ] \
 --initialize-transforms-per-stage 0 --interpolation Linear --output [ output_, output_warped_image.nii.gz ] \
 --transform Affine[ 2.0 ] --metric Mattes[ fixed1.nii, moving1.nii, 1, 32, Random, 0.05 ] \

@@ -1027,6 +1027,7 @@ class MRIPretess(FSCommand):
     >>> pretess.cmdline # doctest: +IGNORE_UNICODE
     'mri_pretess -nocorners wm.mgz wm norm.mgz wm_pretesswm.mgz'
     >>> pretess.run() # doctest: +SKIP
+
     """
     _cmd = 'mri_pretess'
     input_spec = MRIPretessInputSpec
