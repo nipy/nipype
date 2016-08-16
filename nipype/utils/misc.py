@@ -18,9 +18,6 @@ import sys
 import re
 from collections import Iterator
 
-from six import string_types
-
-
 def human_order_sorted(l):
     """Sorts string in human order (i.e. 'stat10' will go after 'stat2')"""
     def atoi(text):
@@ -127,7 +124,7 @@ def is_container(item):
         True if container
         False if not (eg string)
     """
-    if isinstance(item, string_types):
+    if isinstance(item, str):
         return False
     elif hasattr(item, '__iter__'):
         return True
@@ -155,9 +152,8 @@ def container_to_string(cont):
         Container elements joined into a string.
 
     """
-    if hasattr(cont, '__iter__') and not isinstance(cont, string_types):
-        return str(' '.join(cont))
-
+    if hasattr(cont, '__iter__') and not isinstance(cont, str):
+        cont = ' '.join(cont)
     return str(cont)
 
 

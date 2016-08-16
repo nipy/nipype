@@ -30,9 +30,8 @@ FROM neurodebian:latest
 MAINTAINER Nipype developers
 
 # Preparations
-RUN ln -snf /bin/bash /bin/sh
-ARG DEBIAN_FRONTEND=noninteractive
 
+ARG DEBIAN_FRONTEND=noninteractive
 RUN sed -i -e 's,main$,main contrib non-free,g' /etc/apt/sources.list.d/neurodebian.sources.list && \
     apt-get -y update && \
     apt-get install -y curl \
@@ -48,6 +47,8 @@ RUN sed -i -e 's,main$,main contrib non-free,g' /etc/apt/sources.list.d/neurodeb
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* && \
     echo ". /etc/fsl/fsl.sh" >> /etc/bash.bashrc
 
+RUN ln -snf /bin/bash /bin/sh
+ENV SHELL /bin/bash
 ENV FSLDIR=/usr/share/fsl/5.0
 ENV FSLOUTPUTTYPE=NIFTI_GZ
 ENV PATH=/usr/lib/fsl/5.0:$PATH

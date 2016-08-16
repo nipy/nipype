@@ -61,6 +61,8 @@ __docformat__ = 'restructuredtext'
 class Str(traits.Unicode):
     pass
 
+traits.Str = Str
+
 class NipypeInterfaceError(Exception):
     def __init__(self, value):
         self.value = value

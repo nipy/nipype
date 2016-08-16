@@ -25,6 +25,7 @@ from textwrap import dedent
 import numpy as np
 import nibabel as nb
 
+from nipype import logging
 from .base import (traits, TraitedSpec, DynamicTraitedSpec, File,
                    Undefined, isdefined, OutputMultiPath, runtime_profile,
                    InputMultiPath, BaseInterface, BaseInterfaceInputSpec)
@@ -34,6 +35,7 @@ from ..testing import assert_equal
 from ..utils.filemanip import (filename_to_list, copyfile, split_filename)
 from ..utils.misc import getsource, create_function_from_source
 
+logger = logging.getLogger('interface')
 if runtime_profile:
     try:
         import psutil

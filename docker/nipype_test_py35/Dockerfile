@@ -46,19 +46,30 @@ ENV LC_ALL C.UTF-8
 
 # Add conda-forge channel in conda
 RUN conda config --add channels conda-forge && \
-    conda install -y lockfile nipype matplotlib coverage boto sphinx
+    conda install -y lockfile nipype matplotlib coverage boto sphinx && \
+    pip install nose-cov doctest-ignore-unicode
+   
+COPY docker/circleci/run_* /usr/bin/
+RUN chmod +x /usr/bin/run_*
+
+ENV FSLDIR=/usr/share/fsl/5.0
+ENV FSLOUTPUTTYPE=NIFTI_GZ
+ENV PATH=/usr/lib/fsl/5.0:$PATH
+ENV FSLMULTIFILEQUIT=TRUE
+ENV POSSUMDIR=/usr/share/fsl/5.0
+ENV LD_LIBRARY_PATH=/usr/lib/fsl/5.0:$LD_LIBRARY_PATH
+ENV FSLTCLSH=/usr/bin/tclsh
+ENV FSLWISH=/usr/bin/wish
 
 RUN mkdir -p /root/src/nipype
 COPY . /root/src/nipype
 
 RUN cd /root/src/nipype && \
-    pip install nose-cov doctest-ignore-unicode && \
     pip install -r requirements.txt && \
     pip install -e .
 
-
-COPY docker/circleci/run_* /usr/bin/
-RUN chmod +x /usr/bin/run_*
-ENV SHELL /bin/bash
+# Replace imglob with Python3 compatible version
+RUN rm -r ${FSLDIR}/bin/imglob && \
+    ln -s $(which fsl_imglob.py) ${FSLDIR}/bin/imglob
 
 CMD ["/bin/bash"]

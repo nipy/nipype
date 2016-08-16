@@ -46,7 +46,10 @@ clean-ctags:
 clean-doc:
 	rm -rf doc/_build
 
-clean: clean-build clean-pyc clean-so clean-ctags clean-doc
+clean-tests:
+	rm -f .coverage
+
+clean: clean-build clean-pyc clean-so clean-ctags clean-doc clean-tests
 
 in: inplace # just a shortcut
 inplace:
@@ -59,7 +62,7 @@ test-doc:
 	$(NOSETESTS) -s --with-doctest --doctest-tests --doctest-extension=rst \
 	--doctest-fixtures=_fixture doc/
 
-test-coverage:
+test-coverage: clean-tests in
 	$(NOSETESTS) -s --with-doctest --with-coverage --cover-package=nipype \
 	--config=.coveragerc
 
