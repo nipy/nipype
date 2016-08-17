@@ -1691,7 +1691,7 @@ class CommandLine(BaseInterface):
         Formats a trait containing argstr metadata
         """
         argstr = trait_spec.argstr
-        iflogger.debug('{}_{}', name, str(value)))
+        iflogger.debug('{}_{}', name, str(value))
         if trait_spec.is_trait_type(traits.Bool) and "%" not in argstr:
             if value:
                 # Boolean options have no format string. Just append options
