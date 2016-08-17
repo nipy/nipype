@@ -11,7 +11,7 @@ import subprocess
 
 from .base import (SGELikeBatchManagerBase, logger, iflogger, logging)
 
-from ...interfaces.base import CommandLine, text_type
+from ...interfaces.base import CommandLine
 
 
 class PBSPlugin(SGELikeBatchManagerBase):
@@ -99,15 +99,14 @@ class PBSPlugin(SGELikeBatchManagerBase):
                     sleep(self._retry_timeout)  # sleep 2 seconds and try again.
                 else:
                     iflogger.setLevel(oldlevel)
-                    raise RuntimeError('\n'.join((('Could not submit pbs task'
-                                                   ' for node %s') % node._id,
-                                                  text_type(e))))
+                    raise RuntimeError(
+                        'Could not submit pbs task for node {}\n{}'.format(node._id, e))
             else:
                 break
         iflogger.setLevel(oldlevel)
         # retrieve pbs taskid
         taskid = result.runtime.stdout.split('.')[0]
         self._pending[taskid] = node.output_dir()
-        logger.debug('submitted pbs task: %s for node %s' % (taskid, node._id))
+        logger.debug('submitted pbs task: {} for node {}'.format(taskid, node._id))
 
         return taskid
