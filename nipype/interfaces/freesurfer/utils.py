@@ -193,6 +193,8 @@ class SampleToSurface(FSCommand):
     >>> sampler.inputs.sampling_method = "average"
     >>> sampler.inputs.sampling_range = 1
     >>> sampler.inputs.sampling_units = "frac"
+    >>> sampler.cmdline  # doctest: +ELLIPSIS +IGNORE_UNICODE
+    'mri_vol2surf --hemi lh --o ...lh.cope1.mgz --reg register.dat --projfrac-avg 1.000 --mov cope1.nii.gz'
     >>> res = sampler.run() # doctest: +SKIP
 
     """
@@ -314,6 +316,8 @@ class SurfaceSmooth(FSCommand):
     >>> smoother.inputs.subject_id = "subj_1"
     >>> smoother.inputs.hemi = "lh"
     >>> smoother.inputs.fwhm = 5
+    >>> smoother.cmdline # doctest: +ELLIPSIS +IGNORE_UNICODE
+    'mri_surf2surf --cortex --fwhm 5.0000 --hemi lh --sval lh.cope1.mgz --tval ...lh.cope1_smooth5.mgz --s subj_1'
     >>> smoother.run() # doctest: +SKIP
 
     """
@@ -990,8 +994,8 @@ class MRIPretessInputSpec(FSTraitedSpec):
                                 '\'wm\' or a label value (e.g. 127 for rh or 255 for lh)'))
     in_norm = File(exists=True, mandatory=True, position=-2, argstr='%s',
                    desc=('the normalized, brain-extracted T1w image. Usually norm.mgz'))
-    out_file = File(position=-1, argstr='%s', genfile=True,
-                    desc=('the output file after mri_pretess.'))
+    out_file = File(position=-1, argstr='%s', name_source=['in_filled'], name_template='%s_pretesswm',
+                    keep_extension=True, desc='the output file after mri_pretess.')
 
     nocorners = traits.Bool(False, argstr='-nocorners', desc=('do not remove corner configurations'
                                                               ' in addition to edge ones.'))
@@ -1032,24 +1036,6 @@ class MRIPretess(FSCommand):
     _cmd = 'mri_pretess'
     input_spec = MRIPretessInputSpec
     output_spec = MRIPretessOutputSpec
-
-    def _list_outputs(self):
-        outputs = self.output_spec().get()
-        outputs['out_file'] = os.path.abspath(self._gen_outfilename())
-        return outputs
-
-    def _gen_filename(self, name):
-        if name is 'out_file':
-            return self._gen_outfilename()
-        else:
-            return None
-
-    def _gen_outfilename(self):
-        if isdefined(self.inputs.out_file):
-            return self.inputs.out_file
-        else:
-            _, name, ext = split_filename(self.inputs.in_filled)
-            return name + '_pretess' + str(self.inputs.label) + ext
 
 
 class MRIMarchingCubesInputSpec(FSTraitedSpec):
