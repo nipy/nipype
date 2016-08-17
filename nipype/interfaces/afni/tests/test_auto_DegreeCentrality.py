@@ -24,6 +24,7 @@ def test_DegreeCentrality_inputs():
     mask=dict(argstr='-mask %s',
     ),
     oned_file=dict(argstr='-out1D %s',
+    mandatory=False,
     ),
     out_file=dict(argstr='-prefix %s',
     name_source=['in_file'],

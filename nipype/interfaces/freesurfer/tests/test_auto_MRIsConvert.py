@@ -56,7 +56,7 @@ def test_MRIsConvert_inputs():
     ),
     to_scanner=dict(argstr='--to-scanner',
     ),
-    to_tkr=dict(argstr='--to-tkr',
+    to_tkr=dict(agrstr='--to-tkr',
     ),
     vertex=dict(argstr='-v',
     ),

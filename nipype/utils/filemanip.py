@@ -4,6 +4,7 @@
 """Miscellaneous file manipulation functions
 
 """
+from __future__ import unicode_literals, print_function
 from builtins import str
 
 from future import standard_library
