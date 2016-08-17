@@ -47,7 +47,7 @@ ENV LC_ALL C.UTF-8
 # Add conda-forge channel in conda
 RUN conda config --add channels conda-forge && \
     conda install -y lockfile nipype matplotlib sphinx boto coverage && \
-    pip install nose-cov doctest-ignore-unicode
+    pip install nose-cov doctest-ignore-unicode mock pdb
    
 COPY docker/circleci/run_* /usr/bin/
 RUN chmod +x /usr/bin/run_*
@@ -64,7 +64,8 @@ ENV FSLWISH=/usr/bin/wish
 RUN mkdir -p /root/src/nipype
 COPY . /root/src/nipype
 
-RUN cd /root/src/nipype && \
+RUN rm -r /usr/local/miniconda/lib/python3.5/site-packages/nipype* && \
+    cd /root/src/nipype && \
     pip install -r requirements.txt && \
     pip install -e .
 

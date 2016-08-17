@@ -64,7 +64,8 @@ ENV FSLWISH=/usr/bin/wish
 RUN mkdir -p /root/src/nipype
 COPY . /root/src/nipype
 
-RUN cd /root/src/nipype && \
+RUN rm -r /usr/local/miniconda/lib/python2.7/site-packages/nipype* && \
+    cd /root/src/nipype && \
     pip install -r requirements.txt && \
     pip install -e .
 
