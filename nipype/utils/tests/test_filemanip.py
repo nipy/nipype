@@ -160,20 +160,6 @@ def test_linkchain():
     yield assert_true, os.path.samefile(orig_img, new_img3)
     yield assert_true, os.path.samefile(orig_hdr, new_hdr3)
 
-    # Test that re-copying leaves files
-    stat1 = os.stat(new_img1)
-    stat2 = os.stat(new_img2)
-    stat3 = os.stat(new_img3)
-    # Same symlink
-    copyfile(orig_img, new_img1)
-    # Hash matches
-    copyfile(new_img1, new_img2, copy=True)
-    # Hardlinks
-    copyfile(new_img1, new_img3, copy=True, use_hardlink=True)
-    yield assert_equal, stat1, os.stat(new_img1)
-    yield assert_equal, stat2, os.stat(new_img2)
-    yield assert_equal, stat3, os.stat(new_img3)
-
     os.unlink(new_img1)
     os.unlink(new_hdr1)
     os.unlink(new_img2)
@@ -181,6 +167,27 @@ def test_linkchain():
     os.unlink(new_img3)
     os.unlink(new_hdr3)
     # final cleanup
+    os.unlink(orig_img)
+    os.unlink(orig_hdr)
+
+
+def test_recopy():
+    orig_img, orig_hdr = _temp_analyze_files()
+    pth, fname = os.path.split(orig_img)
+    new_img = os.path.join(pth, 'newfile.img')
+    new_hdr = os.path.join(pth, 'newfile.hdr')
+    for copy in (True, False):
+        for use_hardlink in (True, False):
+            copyfile(orig_img, new_img, copy=copy, use_hardlink=use_hardlink)
+            img_stat = os.stat(new_img)
+            hdr_stat = os.stat(new_hdr)
+            copyfile(orig_img, new_img, copy=copy, use_hardlink=use_hardlink)
+            err_msg = "OS: {}; Copy: {}; Hardlink: {}".format(os.name, copy,
+                                                              use_hardlink)
+            yield assert_equal, img_stat, os.stat(new_img), err_msg
+            yield assert_equal, hdr_stat, os.stat(new_hdr), err_msg
+            os.unlink(new_img)
+            os.unlink(new_hdr)
     os.unlink(orig_img)
     os.unlink(orig_hdr)
 
