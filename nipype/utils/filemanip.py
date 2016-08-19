@@ -225,17 +225,18 @@ def copyfile(originalfile, newfile, copy=False, create_new=False,
     # -------------
     # Options:
     #   symlink
-    #       to originalfile             (keep if not (use_hardlink or copy))
-    #       to other file               (unlink)
+    #       to regular file originalfile            (keep if symlinking)
+    #       to same dest as symlink originalfile    (keep if symlinking)
+    #       to other file                           (unlink)
     #   regular file
-    #       hard link to originalfile   (keep)
-    #       copy of file (same hash)    (keep)
-    #       different file (diff hash)  (unlink)
+    #       hard link to originalfile               (keep)
+    #       copy of file (same hash)                (keep)
+    #       different file (diff hash)              (unlink)
     keep = False
     if os.path.lexists(newfile):
         if os.path.islink(newfile):
-            if all((os.readlink(newfile) == originalfile, not use_hardlink,
-                    not copy)):
+            if all((os.readlink(newfile) == os.path.realpath(originalfile),
+                    not use_hardlink, not copy)):
                 keep = True
         elif posixpath.samefile(newfile, originalfile):
             keep = True
