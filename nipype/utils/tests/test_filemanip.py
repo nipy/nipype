@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
-from __future__ import unicode_literals
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
+from __future__ import unicode_literals
 from builtins import open
 
 import os
@@ -172,22 +172,42 @@ def test_linkchain():
 
 
 def test_recopy():
+    # Re-copying with the same parameters on an unchanged file should be
+    # idempotent
+    #
+    # Test for copying from regular files and symlinks
     orig_img, orig_hdr = _temp_analyze_files()
     pth, fname = os.path.split(orig_img)
+    img_link = os.path.join(pth, 'imglink.img')
+    hdr_link = os.path.join(pth, 'imglink.hdr')
     new_img = os.path.join(pth, 'newfile.img')
     new_hdr = os.path.join(pth, 'newfile.hdr')
+    copyfile(orig_img, img_link)
     for copy in (True, False):
         for use_hardlink in (True, False):
             copyfile(orig_img, new_img, copy=copy, use_hardlink=use_hardlink)
             img_stat = os.stat(new_img)
             hdr_stat = os.stat(new_hdr)
             copyfile(orig_img, new_img, copy=copy, use_hardlink=use_hardlink)
-            err_msg = "OS: {}; Copy: {}; Hardlink: {}".format(os.name, copy,
-                                                              use_hardlink)
+            err_msg = "Regular - OS: {}; Copy: {}; Hardlink: {}".format(
+                os.name, copy, use_hardlink)
             yield assert_equal, img_stat, os.stat(new_img), err_msg
             yield assert_equal, hdr_stat, os.stat(new_hdr), err_msg
             os.unlink(new_img)
             os.unlink(new_hdr)
+
+            copyfile(img_link, new_img, copy=copy, use_hardlink=use_hardlink)
+            img_stat = os.stat(new_img)
+            hdr_stat = os.stat(new_hdr)
+            copyfile(img_link, new_img, copy=copy, use_hardlink=use_hardlink)
+            err_msg = "Symlink - OS: {}; Copy: {}; Hardlink: {}".format(
+                os.name, copy, use_hardlink)
+            yield assert_equal, img_stat, os.stat(new_img), err_msg
+            yield assert_equal, hdr_stat, os.stat(new_hdr), err_msg
+            os.unlink(new_img)
+            os.unlink(new_hdr)
+    os.unlink(img_link)
+    os.unlink(hdr_link)
     os.unlink(orig_img)
     os.unlink(orig_hdr)
 
