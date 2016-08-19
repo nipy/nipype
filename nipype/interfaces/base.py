@@ -266,7 +266,7 @@ class Bunch(object):
         # Sort the items of the dictionary, before hashing the string
         # representation so we get a predictable order of the
         # dictionary.
-        sorted_dict = str(sorted(dict_nofilename.items()))
+        sorted_dict = encode_dict(sorted(dict_nofilename.items()))
         return dict_withhash, md5(sorted_dict.encode()).hexdigest()
 
     def __pretty__(self, p, cycle):

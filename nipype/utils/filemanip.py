@@ -5,11 +5,12 @@
 
 """
 from __future__ import unicode_literals, print_function
-from builtins import str
+from builtins import str, bytes, open
 
 from future import standard_library
 standard_library.install_aliases()
 
+import sys
 import pickle
 import gzip
 import hashlib
@@ -19,14 +20,12 @@ import os
 import re
 import shutil
 import posixpath
-
 import numpy as np
 
-from .misc import is_container
-from six import string_types
-from ..interfaces.traits_extension import isdefined
+from nipype import logging, config
+from nipype.utils.misc import is_container
+from nipype.interfaces.traits_extension import isdefined
 
-from .. import logging, config
 fmlogger = logging.getLogger("filemanip")
 
 
@@ -86,9 +85,12 @@ def split_filename(fname):
 
 def encode_dict(value):
     """
-    Manipulates Bunch ordered dicts before they are hashed (Py2/3 compat.)
+    Manipulates ordered dicts before they are hashed (Py2/3 compat.)
 
     """
+    if  sys.version_info[0] > 2:
+        return str(value)
+
     if isinstance(value, str):
         value = value.encode()
 
@@ -387,7 +389,7 @@ def copyfiles(filelist, dest, copy=False, create_new=False):
 def filename_to_list(filename):
     """Returns a list given either a string or a list
     """
-    if isinstance(filename, (str, string_types)):
+    if isinstance(filename, (str, bytes)):
         return [filename]
     elif isinstance(filename, list):
         return filename
@@ -488,12 +490,12 @@ def write_rst_header(header, level=0):
 def write_rst_list(items, prefix=''):
     out = []
     for item in items:
-        out.append(prefix + ' ' + str(item))
+        out.append('{} {}'.format(prefix, str(item)))
     return '\n'.join(out) + '\n\n'
 
 
 def write_rst_dict(info, prefix=''):
     out = []
     for key, value in sorted(info.items()):
-        out.append(prefix + '* ' + key + ' : ' + str(value))
+        out.append('{}* {} : {}'.format(prefix, key, str(value)))
     return '\n'.join(out) + '\n\n'

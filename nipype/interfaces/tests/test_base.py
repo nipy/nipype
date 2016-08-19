@@ -5,7 +5,7 @@ from __future__ import print_function, unicode_literals
 from future import standard_library
 standard_library.install_aliases()
 
-from builtins import open, str
+from builtins import open, str, bytes
 import os
 import tempfile
 import shutil
@@ -663,7 +663,7 @@ def test_CommandLine_output():
     ci.inputs.terminal_output = 'file'
     res = ci.run()
     yield assert_true, 'stdout.nipype' in res.runtime.stdout
-    yield assert_equal, type(res.runtime.stdout), str
+    yield assert_true, isinstance(res.runtime.stdout, (str, bytes))
     ci = nib.CommandLine(command='ls -l')
     ci.inputs.terminal_output = 'none'
     res = ci.run()
