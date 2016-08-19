@@ -183,27 +183,35 @@ def test_recopy():
     copyfile(orig_img, img_link)
     for copy in (True, False):
         for use_hardlink in (True, False):
-            copyfile(orig_img, new_img, copy=copy, use_hardlink=use_hardlink)
-            img_stat = os.stat(new_img)
-            hdr_stat = os.stat(new_hdr)
-            copyfile(orig_img, new_img, copy=copy, use_hardlink=use_hardlink)
-            err_msg = "Regular - OS: {}; Copy: {}; Hardlink: {}".format(
-                os.name, copy, use_hardlink)
-            yield assert_equal, img_stat, os.stat(new_img), err_msg
-            yield assert_equal, hdr_stat, os.stat(new_hdr), err_msg
-            os.unlink(new_img)
-            os.unlink(new_hdr)
+            for hashmethod in ('timestamp', 'content'):
+                kwargs = {'copy': copy, 'use_hardlink': use_hardlink,
+                          'hashmethod': hashmethod}
+                # Copying does not preserve the original file's timestamp, so
+                # we may delete and re-copy, if the test is slower than a clock
+                # tick
+                if copy and not use_hardlink and hashmethod == 'timestamp':
+                    continue
+                copyfile(orig_img, new_img, **kwargs)
+                img_stat = os.stat(new_img)
+                hdr_stat = os.stat(new_hdr)
+                copyfile(orig_img, new_img, **kwargs)
+                err_msg = "Regular - OS: {}; Copy: {}; Hardlink: {}".format(
+                    os.name, copy, use_hardlink)
+                yield assert_equal, img_stat, os.stat(new_img), err_msg
+                yield assert_equal, hdr_stat, os.stat(new_hdr), err_msg
+                os.unlink(new_img)
+                os.unlink(new_hdr)
 
-            copyfile(img_link, new_img, copy=copy, use_hardlink=use_hardlink)
-            img_stat = os.stat(new_img)
-            hdr_stat = os.stat(new_hdr)
-            copyfile(img_link, new_img, copy=copy, use_hardlink=use_hardlink)
-            err_msg = "Symlink - OS: {}; Copy: {}; Hardlink: {}".format(
-                os.name, copy, use_hardlink)
-            yield assert_equal, img_stat, os.stat(new_img), err_msg
-            yield assert_equal, hdr_stat, os.stat(new_hdr), err_msg
-            os.unlink(new_img)
-            os.unlink(new_hdr)
+                copyfile(img_link, new_img, **kwargs)
+                img_stat = os.stat(new_img)
+                hdr_stat = os.stat(new_hdr)
+                copyfile(img_link, new_img, **kwargs)
+                err_msg = "Symlink - OS: {}; Copy: {}; Hardlink: {}".format(
+                    os.name, copy, use_hardlink)
+                yield assert_equal, img_stat, os.stat(new_img), err_msg
+                yield assert_equal, hdr_stat, os.stat(new_hdr), err_msg
+                os.unlink(new_img)
+                os.unlink(new_hdr)
     os.unlink(img_link)
     os.unlink(hdr_link)
     os.unlink(orig_img)
