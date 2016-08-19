@@ -88,7 +88,7 @@ def encode_dict(value):
     Manipulates ordered dicts before they are hashed (Py2/3 compat.)
 
     """
-    if  sys.version_info[0] > 2:
+    if sys.version_info[0] > 2:
         return str(value)
 
     if isinstance(value, str):
@@ -408,7 +408,6 @@ def list_to_filename(filelist):
     else:
         return filelist[0]
 
-
 def save_json(filename, data):
     """Save data to a json file
 
@@ -420,8 +419,10 @@ def save_json(filename, data):
         Dictionary to save in json file.
 
     """
-
-    with open(filename, 'w') as fp:
+    mode = 'w'
+    if sys.version_info[0] < 3:
+        mode = 'wb'
+    with open(filename, mode) as fp:
         simplejson.dump(data, fp, sort_keys=True, indent=4)
 
 

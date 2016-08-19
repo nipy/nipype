@@ -15,8 +15,8 @@ The `Node` class provides core functionality for batch processing.
 
 """
 
-from __future__ import absolute_import
-from builtins import range, object
+from __future__ import absolute_import, unicode_literals
+from builtins import range, object, str, bytes, open
 
 from future import standard_library
 standard_library.install_aliases()
@@ -35,7 +35,6 @@ from shutil import rmtree
 import sys
 from tempfile import mkdtemp
 from hashlib import sha1
-from six import string_types
 
 import numpy as np
 import networkx as nx
@@ -808,7 +807,7 @@ class JoinNode(Node):
         if not joinfield:
             # default is the interface fields
             joinfield = self._interface.inputs.copyable_trait_names()
-        elif isinstance(joinfield, string_types):
+        elif isinstance(joinfield, (str, bytes)):
             joinfield = [joinfield]
         self.joinfield = joinfield
         """the fields to join"""
@@ -1018,7 +1017,7 @@ class MapNode(Node):
         """
 
         super(MapNode, self).__init__(interface, name, **kwargs)
-        if isinstance(iterfield, string_types):
+        if isinstance(iterfield, (str, bytes)):
             iterfield = [iterfield]
         self.iterfield = iterfield
         self.nested = nested

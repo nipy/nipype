@@ -15,7 +15,7 @@ The `EngineBase` class implements the more general view of a task.
 
 """
 
-from __future__ import absolute_import
+from __future__ import absolute_import, unicode_literals
 from builtins import object
 
 from future import standard_library

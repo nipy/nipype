@@ -15,8 +15,8 @@ The `Workflow` class provides core functionality for batch processing.
 
 """
 
-from __future__ import absolute_import
-from builtins import range, object
+from __future__ import absolute_import, unicode_literals
+from builtins import range, object, str, bytes, open
 
 # Py2 compat: http://python-future.org/compatible_idioms.html#collections-counter-and-ordereddict
 from future import standard_library
@@ -59,7 +59,6 @@ from ...utils.filemanip import (save_json, FileNotFoundError,
                                 split_filename, load_json, savepkl,
                                 write_rst_header, write_rst_dict,
                                 write_rst_list)
-from six import string_types
 from .utils import (generate_expanded_graph, modify_paths,
                     export_graph, make_output_dir, write_workflow_prov,
                     clean_working_directory, format_dot, topological_sort,
@@ -220,7 +219,7 @@ connected.
                         # handles the case that source is specified
                         # with a function
                         sourcename = source[0]
-                    elif isinstance(source, string_types):
+                    elif isinstance(source, (str, bytes)):
                         sourcename = source
                     else:
                         raise Exception(('Unknown source specification in '
@@ -241,7 +240,7 @@ connected.
         # turn functions into strings
         for srcnode, destnode, connects in connection_list:
             for idx, (src, dest) in enumerate(connects):
-                if isinstance(src, tuple) and not isinstance(src[1], string_types):
+                if isinstance(src, tuple) and not isinstance(src[1], (str, bytes)):
                     function_source = getsource(src[1])
                     connects[idx] = ((src[0], function_source, src[2:]), dest)
 
@@ -556,7 +555,7 @@ connected.
         """
         if plugin is None:
             plugin = config.get('execution', 'plugin')
-        if not isinstance(plugin, string_types):
+        if not isinstance(plugin, (str, bytes)):
             runner = plugin
         else:
             name = 'nipype.pipeline.plugins'
@@ -794,7 +793,7 @@ connected.
 
     def _set_node_input(self, node, param, source, sourceinfo):
         """Set inputs of a node given the edge connection"""
-        if isinstance(sourceinfo, string_types):
+        if isinstance(sourceinfo, (str, bytes)):
             val = source.get_output(sourceinfo)
         elif isinstance(sourceinfo, tuple):
             if callable(sourceinfo[1]):
