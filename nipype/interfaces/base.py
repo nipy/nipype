@@ -11,7 +11,7 @@ Requires Packages to be installed
 from __future__ import print_function, division, unicode_literals, absolute_import
 from future import standard_library
 standard_library.install_aliases()
-from builtins import range, object, open, str
+from builtins import range, object, open, str, bytes
 
 from configparser import NoOptionError
 from copy import deepcopy
@@ -592,7 +592,7 @@ class BaseTraitedSpec(traits.HasTraits):
                 out = tuple(out)
         else:
             if isdefined(object):
-                if (hash_files and isinstance(object, str) and
+                if (hash_files and isinstance(object, (str, bytes)) and
                         os.path.isfile(object)):
                     if hash_method is None:
                         hash_method = config.get('execution', 'hash_method')
@@ -1065,7 +1065,7 @@ class BaseInterface(Interface):
             else:
                 inputs_str = ''
 
-            if len(e.args) == 1 and isinstance(e.args[0], str):
+            if len(e.args) == 1 and isinstance(e.args[0], (str, bytes)):
                 e.args = (e.args[0] + " ".join([message, inputs_str]),)
             else:
                 e.args += (message, )
@@ -1608,11 +1608,10 @@ class CommandLine(BaseInterface):
         return ' '.join(allargs)
 
     def raise_exception(self, runtime):
-        message = "Command:\n" + runtime.cmdline + "\n"
-        message += "Standard output:\n" + runtime.stdout + "\n"
-        message += "Standard error:\n" + runtime.stderr + "\n"
-        message += "Return code: " + str(runtime.returncode)
-        raise RuntimeError(message)
+        raise RuntimeError(
+            ('Command:\n{cmdline}\nStandard output:\n{stdout}\n'
+             'Standard error:\n{stderr}\nReturn code: {returncode}').format(
+                 **runtime.dictcopy()))
 
     @classmethod
     def help(cls, returnhelp=False):
@@ -1754,14 +1753,15 @@ class CommandLine(BaseInterface):
                 name_template = "%s_generated"
 
             ns = trait_spec.name_source
-            while isinstance(ns, list):
+            while isinstance(ns, (list, tuple)):
                 if len(ns) > 1:
                     iflogger.warn('Only one name_source per trait is allowed')
                 ns = ns[0]
 
-            if not isinstance(ns, str):
-                raise ValueError(('name_source of \'%s\' trait sould be an '
-                                  'input trait name') % name)
+            if not isinstance(ns, (str, bytes)):
+                raise ValueError(
+                    'name_source of \'{}\' trait should be an input trait '
+                    'name, but a type {} object was found'.format(name, type(ns)))
 
             if isdefined(getattr(self.inputs, ns)):
                 name_source = ns
