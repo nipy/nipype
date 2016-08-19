@@ -4,3 +4,4 @@
 __pycache__
 docker/nipype_*
 docker/test-*
+.coverage

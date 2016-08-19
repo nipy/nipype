@@ -31,14 +31,17 @@ install:
 # - if [[ "${INSTALL_DEB_DEPENDECIES}" == "true" && ${TRAVIS_PYTHON_VERSION:0:1} == "2" ]]; then
 #   conda install -y vtk mayavi; fi
 - conda install -y nipype
-- pip install python-coveralls nose-cov doctest-ignore-unicode
+- pip install python-coveralls coverage doctest-ignore-unicode
 - rm -r /home/travis/miniconda/lib/python${TRAVIS_PYTHON_VERSION}/site-packages/nipype*
 - pip install -r requirements.txt
 - pip install -e .
+- export COVERAGE_PROCESS_START=$(pwd)/.coveragerc
+- export COVERAGE_DATA_FILE=$(pwd)/.coverage
+- echo "data_file = ${COVERAGE_DATA_FILE}" >> ${COVERAGE_PROCESS_START}
 script:
-- python -W once:FSL:UserWarning:nipype `which nosetests` --with-doctest --with-doctest-ignore-unicode --with-cov --cover-package nipype --cov-config .coveragerc --logging-level=DEBUG --verbosity=3
+- python -W once:FSL:UserWarning:nipype `which nosetests` --with-doctest --with-doctest-ignore-unicode --with-cov --cover-package nipype --logging-level=DEBUG --verbosity=3
 after_success:
-- coveralls --config_file .coveragerc
+- coveralls --config_file ${COVERAGE_PROCESS_START}
 deploy:
   provider: pypi
   user: satra
