@@ -37,7 +37,7 @@ from nipype import config, logging, LooseVersion, __version__
 from nipype.utils.provenance import write_provenance
 from nipype.utils.misc import is_container, trim, str2bool
 from nipype.utils.filemanip import (md5, hash_infile, FileNotFoundError, hash_timestamp,
-                                    save_json, split_filename)
+                                    save_json, split_filename, encode_dict)
 from nipype.interfaces.traits_extension import (
     traits, Undefined, TraitDictObject, TraitListObject, TraitError, isdefined, File,
     Directory, DictStrStr, has_metadata)
@@ -569,7 +569,7 @@ class BaseTraitedSpec(traits.HasTraits):
                 dict_withhash.append((name,
                                       self._get_sorteddict(val, True, hash_method=hash_method,
                                                            hash_files=hash_files)))
-        return dict_withhash, md5(str(dict_nofilename).encode()).hexdigest()
+        return dict_withhash, md5(encode_dict(dict_nofilename).encode()).hexdigest()
 
     def _get_sorteddict(self, object, dictwithhash=False, hash_method=None,
                         hash_files=True):

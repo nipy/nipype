@@ -84,6 +84,27 @@ def split_filename(fname):
 
     return pth, fname, ext
 
+def encode_dict(value):
+    """
+    Manipulates Bunch ordered dicts before they are hashed (Py2/3 compat.)
+
+    """
+    if isinstance(value, str):
+        value = value.encode()
+
+    if isinstance(value, tuple):
+        val0 = encode_dict(value[0])
+        val1 = encode_dict(value[1])
+        return '(' + val0 + ', ' + val1 + ')'
+
+    if isinstance(value, list):
+        retval = '['
+        for i, v in enumerate(value):
+            if i > 0:
+                retval += ', '
+            retval += encode_dict(v)
+        return retval + ']'
+    return repr(value)
 
 def fname_presuffix(fname, prefix='', suffix='', newpath=None, use_ext=True):
     """Manipulates path and name of input filename
