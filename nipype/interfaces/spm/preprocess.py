@@ -570,6 +570,8 @@ class Normalize12InputSpec(SPMCommandInputSpec):
                                           'normalised images'))
     write_interp = traits.Range(low=0, high=7, field='woptions.interp',
                                 desc='degree of b-spline used for interpolation')
+    out_prefix = traits.String('w', field='woptions.prefix', usedefault=True,
+                               desc='Normalized output prefix')
 
 
 class Normalize12OutputSpec(TraitedSpec):
