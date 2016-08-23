@@ -849,6 +849,7 @@ class NewSegmentInputSpec(SPMCommandInputSpec):
                                      desc='Sampling distance on data for parameter estimation')
     write_deformation_fields = traits.List(traits.Bool(), minlen=2, maxlen=2, field='warp.write',
                                            desc="Which deformation fields to write:[Inverse, Forward]")
+    mrf_parameter = traits.Int(field='warp.mrf', desc='Strength of the Markov Random Field (MRF) parameter')
 
 
 class NewSegmentOutputSpec(TraitedSpec):
