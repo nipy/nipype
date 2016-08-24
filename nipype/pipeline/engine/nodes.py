@@ -57,7 +57,8 @@ logger = logging.getLogger('workflow')
 from ...interfaces.base import (traits, InputMultiPath, CommandLine,
                                 Undefined, TraitedSpec, DynamicTraitedSpec,
                                 Bunch, InterfaceResult, md5, Interface,
-                                TraitDictObject, TraitListObject, isdefined)
+                                TraitDictObject, TraitListObject, isdefined,
+                                runtime_profile)
 from ...utils.misc import (getsource, create_function_from_source,
                            flatten, unflatten)
 from ...utils.filemanip import (save_json, FileNotFoundError,
@@ -743,11 +744,12 @@ class Node(EngineBase):
             rst_dict = {'hostname' : self.result.runtime.hostname,
                         'duration' : self.result.runtime.duration}
             # Try and insert memory/threads usage if available
-            try:
-                rst_dict['runtime_memory_gb'] = self.result.runtime.runtime_memory_gb
-                rst_dict['runtime_threads'] = self.result.runtime.runtime_threads
-            except AttributeError:
-                logger.info('Runtime memory and threads stats unavailable')
+            if runtime_profile:
+                try:
+                    rst_dict['runtime_memory_gb'] = self.result.runtime.runtime_memory_gb
+                    rst_dict['runtime_threads'] = self.result.runtime.runtime_threads
+                except AttributeError:
+                    logger.info('Runtime memory and threads stats unavailable')
             if hasattr(self.result.runtime, 'cmdline'):
                 rst_dict['command'] = self.result.runtime.cmdline
                 fp.writelines(write_rst_dict(rst_dict))
