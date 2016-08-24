@@ -732,11 +732,12 @@ class Node(EngineBase):
             rst_dict = {'hostname' : self.result.runtime.hostname,
                         'duration' : self.result.runtime.duration}
             # Try and insert memory/threads usage if available
-            try:
-                rst_dict['runtime_memory_gb'] = self.result.runtime.runtime_memory_gb
-                rst_dict['runtime_threads'] = self.result.runtime.runtime_threads
-            except AttributeError:
-                logger.info('Runtime memory and threads stats unavailable')
+            if runtime_profile:
+                try:
+                    rst_dict['runtime_memory_gb'] = self.result.runtime.runtime_memory_gb
+                    rst_dict['runtime_threads'] = self.result.runtime.runtime_threads
+                except AttributeError:
+                    logger.info('Runtime memory and threads stats unavailable')
             if hasattr(self.result.runtime, 'cmdline'):
                 rst_dict['command'] = self.result.runtime.cmdline
                 fp.writelines(write_rst_dict(rst_dict))
