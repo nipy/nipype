@@ -11,21 +11,22 @@
    >>> os.chdir(datadir)
 
 """
-__docformat__ = 'restructuredtext'
+from __future__ import print_function, division, unicode_literals, absolute_import
 
 import os
 import os.path
 
-from ... utils.filemanip import split_filename, copyfile
+from ... import logging
+from ...utils.filemanip import split_filename, copyfile
 
-from ..freesurfer.base import (Info, FSCommand, FSTraitedSpec,
-                               FSScriptCommand,
-                               FSScriptOutputSpec,
-                               FSCommandOpenMP,
-                               FSTraitedSpecOpenMP)
+from .base import (FSCommand, FSTraitedSpec,
+                   FSScriptCommand,
+                   FSScriptOutputSpec,
+                   FSCommandOpenMP,
+                   FSTraitedSpecOpenMP)
 from ..base import (isdefined, TraitedSpec, File, traits, Directory)
 
-from ... import logging
+__docformat__ = 'restructuredtext'
 iflogger = logging.getLogger('interface')
 
 

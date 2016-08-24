@@ -16,6 +16,7 @@ from builtins import range, object, open, str, bytes
 from configparser import NoOptionError
 from copy import deepcopy
 import datetime
+from datetime import datetime as dt
 import errno
 import locale
 import os
@@ -28,17 +29,16 @@ import subprocess
 import sys
 import time
 from textwrap import wrap
-from datetime import datetime as dt
-from dateutil.parser import parse as parseutc
 from warnings import warn
+from dateutil.parser import parse as parseutc
 
 
-from nipype import config, logging, LooseVersion, __version__
-from nipype.utils.provenance import write_provenance
-from nipype.utils.misc import is_container, trim, str2bool
-from nipype.utils.filemanip import (md5, hash_infile, FileNotFoundError, hash_timestamp,
-                                    save_json, split_filename, encode_dict)
-from nipype.interfaces.traits_extension import (
+from .. import config, logging, LooseVersion, __version__
+from ..utils.provenance import write_provenance
+from ..utils.misc import is_container, trim, str2bool
+from ..utils.filemanip import (md5, hash_infile, FileNotFoundError, hash_timestamp,
+                               split_filename, encode_dict)
+from .traits_extension import (
     traits, Undefined, TraitDictObject, TraitListObject, TraitError, isdefined, File,
     Directory, DictStrStr, has_metadata)
 

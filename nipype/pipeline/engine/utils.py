@@ -4,9 +4,7 @@
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """Utility routines for workflow graphs
 """
-
-from __future__ import absolute_import
-from __future__ import unicode_literals
+from __future__ import print_function, division, unicode_literals, absolute_import
 from builtins import str, open, map, next, zip, range
 
 from future import standard_library
@@ -19,6 +17,7 @@ try:
     from inspect import signature
 except ImportError:
     from funcsigs import signature
+
 import os
 import re
 import pickle
@@ -30,7 +29,6 @@ package_check('networkx', '1.3')
 
 import networkx as nx
 
-from six import string_types
 from ...utils.filemanip import (fname_presuffix, FileNotFoundError,
                                 filename_to_list, get_related_files)
 from ...utils.misc import create_function_from_source, str2bool
@@ -188,7 +186,7 @@ def modify_paths(object, relative=True, basedir=None):
             out = tuple(out)
     else:
         if isdefined(object):
-            if isinstance(object, string_types) and os.path.isfile(object):
+            if isinstance(object, (str, bytes)) and os.path.isfile(object):
                 if relative:
                     if config.getboolean('execution', 'use_relative_paths'):
                         out = relpath(object, start=basedir)
@@ -271,7 +269,7 @@ def _write_detailed_dot(graph, dotfilename):
         inports = []
         for u, v, d in graph.in_edges_iter(nbunch=n, data=True):
             for cd in d['connect']:
-                if isinstance(cd[0], string_types):
+                if isinstance(cd[0], (str, bytes)):
                     outport = cd[0]
                 else:
                     outport = cd[0][0]
@@ -291,7 +289,7 @@ def _write_detailed_dot(graph, dotfilename):
         outports = []
         for u, v, d in graph.out_edges_iter(nbunch=n, data=True):
             for cd in d['connect']:
-                if isinstance(cd[0], string_types):
+                if isinstance(cd[0], (str, bytes)):
                     outport = cd[0]
                 else:
                     outport = cd[0][0]
@@ -718,7 +716,7 @@ def generate_expanded_graph(graph_in):
             # the itersource is a (node name, fields) tuple
             src_name, src_fields = inode.itersource
             # convert a single field to a list
-            if isinstance(src_fields, string_types):
+            if isinstance(src_fields, (str, bytes)):
                 src_fields = [src_fields]
             # find the unique iterable source node in the graph
             try:
@@ -903,7 +901,7 @@ def _standardize_iterables(node):
     if node.synchronize:
         if len(iterables) == 2:
             first, last = iterables
-            if all((isinstance(item, string_types) and item in fields
+            if all((isinstance(item, (str, bytes)) and item in fields
                     for item in first)):
                 iterables = _transpose_iterables(first, last)
 
@@ -1094,7 +1092,7 @@ def walk_outputs(object):
             if isdefined(val):
                 out.extend(walk_outputs(val))
     else:
-        if isdefined(object) and isinstance(object, string_types):
+        if isdefined(object) and isinstance(object, (str, bytes)):
             if os.path.islink(object) or os.path.isfile(object):
                 out = [(filename, 'f') for filename in get_all_files(object)]
             elif os.path.isdir(object):

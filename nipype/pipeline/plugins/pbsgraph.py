@@ -1,13 +1,13 @@
 """Parallel workflow execution via PBS/Torque
 """
+from __future__ import print_function, division, unicode_literals, absolute_import
 
 import os
 import sys
 
-from .base import (GraphPluginBase, logger)
-
 from ...interfaces.base import CommandLine
 from .sgegraph import SGEGraphPlugin
+from .base import logger
 
 
 class PBSGraphPlugin(SGEGraphPlugin):

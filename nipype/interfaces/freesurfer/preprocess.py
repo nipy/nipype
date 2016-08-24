@@ -10,9 +10,8 @@
    >>> os.chdir(datadir)
 
 """
-
+from __future__ import print_function, division, unicode_literals, absolute_import
 from builtins import range
-__docformat__ = 'restructuredtext'
 
 import os
 import os.path as op
@@ -22,17 +21,19 @@ import shutil
 import numpy as np
 from nibabel import load
 
+from ... import logging
+from ...utils.filemanip import fname_presuffix
 from ..io import FreeSurferSource
-from ..freesurfer.base import (FSCommand, FSTraitedSpec,
-                               FSTraitedSpecOpenMP,
-                               FSCommandOpenMP)
 from ..base import (TraitedSpec, File, traits,
                     Directory, InputMultiPath,
                     OutputMultiPath, CommandLine,
                     CommandLineInputSpec, isdefined)
-from ...utils.filemanip import fname_presuffix
-from ... import logging
-from ..freesurfer.utils import copy2subjdir
+from .base import (FSCommand, FSTraitedSpec,
+                   FSTraitedSpecOpenMP,
+                   FSCommandOpenMP)
+from .utils import copy2subjdir
+
+__docformat__ = 'restructuredtext'
 iflogger = logging.getLogger('interface')
 
 

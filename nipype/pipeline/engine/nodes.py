@@ -14,8 +14,7 @@ The `Node` class provides core functionality for batch processing.
      os.chdir(datadir)
 
 """
-
-from __future__ import absolute_import, unicode_literals
+from __future__ import print_function, division, unicode_literals, absolute_import
 from builtins import range, object, str, bytes, open
 
 from future import standard_library
@@ -36,24 +35,18 @@ import sys
 from tempfile import mkdtemp
 from hashlib import sha1
 
-import numpy as np
-import networkx as nx
-
-
 from ... import config, logging
-from ...interfaces.base import (traits, InputMultiPath, CommandLine,
-                                Undefined, TraitedSpec, DynamicTraitedSpec,
-                                Bunch, InterfaceResult, md5, Interface,
-                                TraitDictObject, TraitListObject, isdefined)
-from nipype.utils.misc import (flatten, unflatten, package_check, str2bool,
-                               getsource, create_function_from_source)
-
+from ...utils.misc import (flatten, unflatten, package_check, str2bool)
 from ...utils.filemanip import (save_json, FileNotFoundError,
                                 filename_to_list, list_to_filename,
                                 copyfiles, fnames_presuffix, loadpkl,
                                 split_filename, load_json, savepkl,
                                 write_rst_header, write_rst_dict,
                                 write_rst_list)
+from ...interfaces.base import (traits, InputMultiPath, CommandLine,
+                                Undefined, TraitedSpec, DynamicTraitedSpec,
+                                Bunch, InterfaceResult, md5, Interface,
+                                TraitDictObject, TraitListObject, isdefined)
 from .utils import (generate_expanded_graph, modify_paths,
                     export_graph, make_output_dir, write_workflow_prov,
                     clean_working_directory, format_dot, topological_sort,

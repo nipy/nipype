@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from __future__ import unicode_literals, absolute_import
+from __future__ import print_function, division, unicode_literals, absolute_import
 from builtins import open, object, str, bytes
 
 # Py2 compat: http://python-future.org/compatible_idioms.html#collections-counter-and-ordereddict
@@ -9,19 +9,17 @@ from collections import OrderedDict
 
 from copy import deepcopy
 from pickle import dumps
-import simplejson
 import os
 import getpass
 from socket import getfqdn
 from uuid import uuid1
+import simplejson as json
 
 import numpy as np
-
-
 import prov.model as pm
 
-from nipype import get_info, logging, __version__
-from nipype.utils.filemanip import (md5, hashlib, hash_infile)
+from .. import get_info, logging, __version__
+from .filemanip import (md5, hashlib, hash_infile)
 
 iflogger = logging.getLogger('interface')
 foaf = pm.Namespace("foaf", "http://xmlns.com/foaf/0.1/")
@@ -170,7 +168,7 @@ def safe_encode(x, as_literal=True):
                 outdict[key] = encoded_value
 
         try:
-            jsonstr = simplejson.dumps(outdict)
+            jsonstr = json.dumps(outdict)
         except UnicodeDecodeError as excp:
             jsonstr = "Could not encode dictionary. {}".format(excp)
             iflogger.warn('Prov: %s', jsonstr)
@@ -200,7 +198,7 @@ def safe_encode(x, as_literal=True):
             x = outlist
 
         try:
-            jsonstr = simplejson.dumps(x)
+            jsonstr = json.dumps(x)
         except UnicodeDecodeError as excp:
             jsonstr = "Could not encode list/tuple. {}".format(excp)
             iflogger.warn('Prov: %s', jsonstr)
@@ -219,7 +217,7 @@ def safe_encode(x, as_literal=True):
     jsonstr = None
     ltype = pm.XSD['string']
     try:
-        jsonstr = simplejson.dumps(x.__dict__)
+        jsonstr = json.dumps(x.__dict__)
     except AttributeError:
         pass
 

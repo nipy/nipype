@@ -10,21 +10,20 @@
    >>> os.chdir(datadir)
 
 """
-from __future__ import unicode_literals
-from builtins import str
-__docformat__ = 'restructuredtext'
-
-from builtins import open
+from __future__ import print_function, division, unicode_literals, absolute_import
+from builtins import str, open
 
 import os
 import re
 import shutil
 
-from ..freesurfer.base import (FSCommand, FSTraitedSpec,
-                               FSScriptCommand, FSScriptOutputSpec,
-                               FSTraitedSpecOpenMP, FSCommandOpenMP)
-from ..base import TraitedSpec, File, traits, OutputMultiPath, isdefined, CommandLine, CommandLineInputSpec
 from ...utils.filemanip import fname_presuffix, split_filename
+from ..base import (TraitedSpec, File, traits, OutputMultiPath, isdefined,
+                    CommandLine, CommandLineInputSpec)
+from .base import (FSCommand, FSTraitedSpec,
+                   FSScriptCommand, FSScriptOutputSpec,
+                   FSTraitedSpecOpenMP, FSCommandOpenMP)
+__docformat__ = 'restructuredtext'
 
 filemap = dict(cor='cor', mgh='mgh', mgz='mgz', minc='mnc',
                afni='brik', brik='brik', bshort='bshort',
@@ -744,7 +743,7 @@ class SurfaceSnapshots(FSCommand):
                 args = tuple([getattr(self.inputs, arg) for arg in stem_args])
                 stem = stem % args
         snapshots = ["%s-lat.tif", "%s-med.tif", "%s-dor.tif", "%s-ven.tif"]
-        if self.inputssix_images:
+        if self.inputs.six_images:
             snapshots.extend(["%s-pos.tif", "%s-ant.tif"])
         snapshots = [self._gen_fname(f % stem, suffix="") for f in snapshots]
         outputs["snapshots"] = snapshots

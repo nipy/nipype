@@ -7,14 +7,18 @@
     >>> os.chdir(datadir)
 
 """
+from __future__ import print_function, division, unicode_literals, absolute_import
+
 import os
-import warnings
 
 import nibabel as nb
 import numpy as np
 
 from ...utils.misc import package_check
 from ...utils.filemanip import split_filename, fname_presuffix
+from ..base import (TraitedSpec, BaseInterface, traits,
+                    BaseInterfaceInputSpec, isdefined, File,
+                    InputMultiPath, OutputMultiPath)
 
 
 have_nipy = True
@@ -27,9 +31,6 @@ else:
     from nipy import save_image, load_image
     nipy_version = nipy.__version__
 
-from ..base import (TraitedSpec, BaseInterface, traits,
-                    BaseInterfaceInputSpec, isdefined, File,
-                    InputMultiPath, OutputMultiPath)
 
 
 class ComputeMaskInputSpec(BaseInterfaceInputSpec):

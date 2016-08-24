@@ -5,15 +5,15 @@ Created on Aug 2, 2013
 
 Parallel workflow execution with SLURM
 '''
+from __future__ import print_function, division, unicode_literals, absolute_import
 
 import os
 import re
-import subprocess
 from time import sleep
 
+from ...interfaces.base import CommandLine
 from .base import (SGELikeBatchManagerBase, logger, iflogger, logging)
 
-from ...interfaces.base import CommandLine
 
 
 class SLURMPlugin(SGELikeBatchManagerBase):

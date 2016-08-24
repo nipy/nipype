@@ -11,5 +11,4 @@ prov>=1.4.0
 xvfbwrapper
 psutil
 funcsigs
-six
 configparser

@@ -1,17 +1,16 @@
 # -*- coding: utf-8 -*-
 """Parallel workflow execution via PBS/Torque
 """
-from __future__ import unicode_literals
-from builtins import str
+from __future__ import print_function, division, unicode_literals, absolute_import
+from builtins import str, open
 
-from builtins import open
 import os
 from time import sleep
 import subprocess
 
+from ...interfaces.base import CommandLine
 from .base import (SGELikeBatchManagerBase, logger, iflogger, logging)
 
-from ...interfaces.base import CommandLine
 
 
 class PBSPlugin(SGELikeBatchManagerBase):

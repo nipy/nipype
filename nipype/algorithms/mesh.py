@@ -12,16 +12,14 @@ Miscellaneous algorithms for 2D contours and 3D triangularized meshes handling
     >>> os.chdir(datadir)
 
 """
-from __future__ import division
+from __future__ import print_function, division, unicode_literals, absolute_import
+from builtins import zip, str, bytes
 
 import os.path as op
 import numpy as np
 from numpy import linalg as nla
 
-from builtins import zip
-
 from .. import logging
-from six import string_types
 from ..interfaces.base import (BaseInterface, traits, TraitedSpec, File,
                                BaseInterfaceInputSpec)
 from ..interfaces.vtkbase import tvtk
@@ -325,7 +323,7 @@ class MeshWarpMaths(TVTKBaseInterface):
         operator = self.inputs.operator
         opfield = np.ones_like(points1)
 
-        if isinstance(operator, string_types):
+        if isinstance(operator, (str, bytes)):
             r2 = tvtk.PolyDataReader(file_name=self.inputs.surface2)
             vtk2 = VTKInfo.vtk_output(r2)
             r2.update()

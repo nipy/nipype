@@ -7,18 +7,17 @@
    >>> datadir = os.path.realpath(os.path.join(filepath, '../testing/data'))
    >>> os.chdir(datadir)
 """
-from __future__ import unicode_literals
-from builtins import str
-from builtins import open
+from __future__ import print_function, division, unicode_literals, absolute_import
+from builtins import str, open
 import os
 import re
 from copy import deepcopy
 
+from ..utils.filemanip import split_filename
 from .base import (CommandLine, CommandLineInputSpec,
                    InputMultiPath, traits, TraitedSpec,
                    OutputMultiPath, isdefined,
                    File, Directory)
-from ..utils.filemanip import split_filename
 
 
 class Dcm2niiInputSpec(CommandLineInputSpec):

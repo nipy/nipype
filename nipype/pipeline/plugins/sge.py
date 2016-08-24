@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 """Parallel workflow execution via SGE
 """
+from __future__ import print_function, division, unicode_literals, absolute_import
 
 from builtins import object
 
@@ -14,8 +15,8 @@ import xml.dom.minidom
 
 import random
 
+from ...interfaces.base import CommandLine
 from .base import (SGELikeBatchManagerBase, logger, iflogger, logging)
-from nipype.interfaces.base import CommandLine
 
 DEBUGGING_PREFIX = str(int(random.uniform(100, 999)))
 

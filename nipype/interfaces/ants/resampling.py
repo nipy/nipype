@@ -7,8 +7,8 @@
    >>> datadir = os.path.realpath(os.path.join(filepath, '../../testing/data'))
    >>> os.chdir(datadir)
 """
-
-from builtins import range
+from __future__ import print_function, division, unicode_literals, absolute_import
+from builtins import range, str
 import os
 
 from .base import ANTSCommand, ANTSCommandInputSpec

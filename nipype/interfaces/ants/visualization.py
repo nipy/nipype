@@ -6,10 +6,12 @@
    >>> datadir = os.path.realpath(os.path.join(filepath, '../../testing/data'))
    >>> os.chdir(datadir)
 """
+from __future__ import print_function, division, unicode_literals, absolute_import
+
 import os
 
-from .base import ANTSCommand, ANTSCommandInputSpec
 from ..base import TraitedSpec, File, traits
+from .base import ANTSCommand, ANTSCommandInputSpec
 
 
 class ConvertScalarImageToRGBInputSpec(ANTSCommandInputSpec):

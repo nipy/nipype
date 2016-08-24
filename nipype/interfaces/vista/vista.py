@@ -9,12 +9,9 @@
     >>> os.chdir(datadir)
 
 """
+from __future__ import print_function, division, unicode_literals, absolute_import
 
-from nipype.interfaces.base import CommandLineInputSpec, CommandLine, traits, TraitedSpec, File
-from nipype.utils.filemanip import split_filename
-import os
-import os.path as op
-from nipype.interfaces.traits_extension import isdefined
+from ..base import CommandLineInputSpec, CommandLine, TraitedSpec, File
 
 
 class Vnifti2ImageInputSpec(CommandLineInputSpec):

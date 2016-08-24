@@ -11,29 +11,24 @@ was written to work with FSL version 4.1.4.
     >>> datadir = os.path.realpath(os.path.join(filepath, '../../testing/data'))
     >>> os.chdir(datadir)
 """
-
-from __future__ import print_function
+from __future__ import print_function, division, unicode_literals, absolute_import
 from builtins import range
 
 import os
 from glob import glob
-import warnings
 from shutil import rmtree
 
 import numpy as np
-
 from nibabel import load
 
 from ... import LooseVersion
-from .base import (FSLCommand, FSLCommandInputSpec, Info)
+from ...utils.filemanip import list_to_filename, filename_to_list
+from ...utils.misc import human_order_sorted
 from ..base import (load_template, File, traits, isdefined,
                     TraitedSpec, BaseInterface, Directory,
                     InputMultiPath, OutputMultiPath,
                     BaseInterfaceInputSpec)
-from ...utils.filemanip import (list_to_filename, filename_to_list)
-from ...utils.misc import human_order_sorted
-
-warn = warnings.warn
+from .base import FSLCommand, FSLCommandInputSpec, Info
 
 
 class Level1DesignInputSpec(BaseInterfaceInputSpec):

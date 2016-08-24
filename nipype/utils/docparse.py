@@ -13,14 +13,12 @@ better = fsl.Bet()
 docstring = docparse.get_doc(better.cmd, better.opt_map)
 
 """
-from __future__ import unicode_literals
-from builtins import str
+from __future__ import print_function, division, unicode_literals, absolute_import
+from builtins import str, open, bytes
 
-from builtins import open
 import subprocess
-from nipype.interfaces.base import CommandLine
-from nipype.utils.misc import is_container
-from six import string_types
+from ..interfaces.base import CommandLine
+from .misc import is_container
 
 
 def grab_doc(cmd, trap_error=True):
@@ -286,7 +284,7 @@ def _parse_doc(doc, style=['--']):
     # individual flag/option.
     doclist = doc.split('\n')
     optmap = {}
-    if isinstance(style, string_types):
+    if isinstance(style, (str, bytes)):
         style = [style]
     for line in doclist:
         linelist = line.split()

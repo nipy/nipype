@@ -9,7 +9,7 @@
     >>> os.chdir(datadir)
 
 """
-
+from __future__ import print_function, division, unicode_literals, absolute_import
 from builtins import range
 
 import os
@@ -21,10 +21,10 @@ import numpy as np
 import nibabel as nb
 import networkx as nx
 
+from ... import logging
+from ...utils.misc import package_check
 from ..base import (BaseInterface, BaseInterfaceInputSpec, traits,
                     File, TraitedSpec, Directory, isdefined)
-from ...utils.misc import package_check
-from ... import logging
 iflogger = logging.getLogger('interface')
 
 have_cmp = True

@@ -4,7 +4,7 @@
 """Miscellaneous file manipulation functions
 
 """
-from __future__ import unicode_literals, print_function
+from __future__ import print_function, division, unicode_literals, absolute_import
 from builtins import str, bytes, open
 
 from future import standard_library
@@ -15,16 +15,16 @@ import pickle
 import gzip
 import hashlib
 from hashlib import md5
-import simplejson
 import os
 import re
 import shutil
 import posixpath
+import simplejson as json
 import numpy as np
 
-from nipype import logging, config
-from nipype.utils.misc import is_container
-from nipype.interfaces.traits_extension import isdefined
+from .. import logging, config
+from .misc import is_container
+from ..interfaces.traits_extension import isdefined
 
 fmlogger = logging.getLogger("filemanip")
 
@@ -424,7 +424,7 @@ def save_json(filename, data):
     if sys.version_info[0] < 3:
         mode = 'wb'
     with open(filename, mode) as fp:
-        simplejson.dump(data, fp, sort_keys=True, indent=4)
+        json.dump(data, fp, sort_keys=True, indent=4)
 
 
 def load_json(filename):
@@ -442,7 +442,7 @@ def load_json(filename):
     """
 
     with open(filename, 'r') as fp:
-        data = simplejson.load(fp)
+        data = json.load(fp)
     return data
 
 

@@ -3,20 +3,20 @@
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """Miscellaneous utility functions
 """
-from __future__ import absolute_import, unicode_literals
+from __future__ import print_function, division, unicode_literals, absolute_import
 from future import standard_library
 standard_library.install_aliases()
-from future.utils import raise_from
 from builtins import next, str
-from pickle import dumps, loads
-import inspect
+from future.utils import raise_from
 
-from distutils.version import LooseVersion
-import numpy as np
-from textwrap import dedent
 import sys
 import re
 from collections import Iterator
+import inspect
+
+from distutils.version import LooseVersion
+from textwrap import dedent
+import numpy as np
 
 def human_order_sorted(l):
     """Sorts string in human order (i.e. 'stat10' will go after 'stat2')"""

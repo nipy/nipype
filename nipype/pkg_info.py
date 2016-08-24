@@ -1,16 +1,14 @@
 # -*- coding: utf-8 -*-
-from __future__ import unicode_literals
+from __future__ import print_function, division, unicode_literals, absolute_import
+from builtins import open
+
 from future import standard_library
 standard_library.install_aliases()
-from builtins import open
+from configparser import ConfigParser
+
 import os
 import sys
 import subprocess
-
-try:
-    from configparser import ConfigParser
-except ImportError:
-    from configparser import ConfigParser  # python 3
 
 COMMIT_INFO_FNAME = 'COMMIT_INFO.txt'
 

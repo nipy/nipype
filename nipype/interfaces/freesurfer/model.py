@@ -11,15 +11,17 @@
    >>> os.chdir(datadir)
 
 """
-__docformat__ = 'restructuredtext'
+from __future__ import print_function, division, unicode_literals, absolute_import
 
 import os
 
-from ..freesurfer.base import FSCommand, FSTraitedSpec
+from ...utils.filemanip import fname_presuffix, split_filename
 from ..base import (TraitedSpec, File, traits, InputMultiPath,
                     OutputMultiPath, Directory, isdefined)
-from ...utils.filemanip import fname_presuffix, split_filename
-from ..freesurfer.utils import copy2subjdir
+from .base import FSCommand, FSTraitedSpec
+from .utils import copy2subjdir
+
+__docformat__ = 'restructuredtext'
 
 class MRISPreprocInputSpec(FSTraitedSpec):
     out_file = File(argstr='--out %s', genfile=True,

@@ -14,8 +14,7 @@ The `EngineBase` class implements the more general view of a task.
      os.chdir(datadir)
 
 """
-
-from __future__ import absolute_import, unicode_literals
+from __future__ import print_function, division, unicode_literals, absolute_import
 from builtins import object
 
 from future import standard_library
@@ -24,9 +23,9 @@ standard_library.install_aliases()
 from copy import deepcopy
 import re
 import numpy as np
-from nipype import logging
-from nipype.interfaces.base import DynamicTraitedSpec
-from nipype.utils.filemanip import loadpkl, savepkl
+from ... import logging
+from ...utils.filemanip import loadpkl, savepkl
+from ..interfaces.base import DynamicTraitedSpec
 
 logger = logging.getLogger('workflow')
 

@@ -9,19 +9,14 @@
    >>> datadir = os.path.realpath(os.path.join(filepath, '../testing/data'))
    >>> os.chdir(datadir)
 """
-from __future__ import division
-from builtins import str
-from past.utils import old_div
+from __future__ import print_function, division, unicode_literals, absolute_import
+from builtins import zip, range, str
 
 from future import standard_library
 standard_library.install_aliases()
-from builtins import zip
-from builtins import range
 
 import os
 import re
-from pickle import dumps
-from textwrap import dedent
 import numpy as np
 import nibabel as nb
 
@@ -30,7 +25,6 @@ from .base import (traits, TraitedSpec, DynamicTraitedSpec, File,
                    Undefined, isdefined, OutputMultiPath, runtime_profile,
                    InputMultiPath, BaseInterface, BaseInterfaceInputSpec)
 from .io import IOBase, add_traits
-from six import string_types
 from ..testing import assert_equal
 from ..utils.filemanip import (filename_to_list, copyfile, split_filename)
 from ..utils.misc import getsource, create_function_from_source
@@ -416,7 +410,7 @@ class Function(IOBase):
                     raise Exception('Interface Function does not accept '
                                     'function objects defined interactively '
                                     'in a python session')
-            elif isinstance(function, string_types):
+            elif isinstance(function, (str, bytes)):
                 self.inputs.function_str = function
             else:
                 raise Exception('Unknown type of function')
@@ -434,7 +428,7 @@ class Function(IOBase):
         if name == 'function_str':
             if hasattr(new, '__call__'):
                 function_source = getsource(new)
-            elif isinstance(new, string_types):
+            elif isinstance(new, (str, bytes)):
                 function_source = new
             self.inputs.trait_set(trait_change_notify=False,
                                   **{'%s' % name: function_source})
@@ -499,7 +493,7 @@ class Function(IOBase):
                 raise out
 
             # Function ran successfully, populate runtime stats
-            setattr(runtime, 'runtime_memory_gb', old_div(mem_mb,1024.0))
+            setattr(runtime, 'runtime_memory_gb', mem_mb / 1024.0)
             setattr(runtime, 'runtime_threads', num_threads)
         else:
             out = function_handle(**args)

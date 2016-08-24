@@ -11,13 +11,12 @@
     >>> datadir = os.path.realpath(os.path.join(filepath, '../../testing/data'))
     >>> os.chdir(datadir)
 """
-
-from __future__ import division
+from __future__ import print_function, division, unicode_literals, absolute_import
 import os
 import numpy as np
 
 from ..base import (TraitedSpec, File, traits, InputMultiPath, isdefined)
-from ..fsl.base import FSLCommand, FSLCommandInputSpec
+from .base import FSLCommand, FSLCommandInputSpec
 
 
 class MathsInput(FSLCommandInputSpec):

@@ -8,28 +8,15 @@ module was written to work with MINC version 2.2.00.
 Author: Carlo Hamalainen <carlo@carlo-hamalainen.net>
         http://carlo-hamalainen.net
 """
-
-from ..base import (
-    TraitedSpec,
-    CommandLineInputSpec,
-    CommandLine,
-    StdOutCommandLineInputSpec,
-    StdOutCommandLine,
-    File,
-    Directory,
-    InputMultiPath,
-    OutputMultiPath,
-    traits,
-    isdefined,
-)
-
-import glob
+from __future__ import print_function, division, unicode_literals, absolute_import
+from builtins import object
 import os
 import os.path
-import re
-
 import warnings
-warn = warnings.warn
+
+from ..base import CommandLine
+
+
 warnings.filterwarnings('always', category=UserWarning)
 
 

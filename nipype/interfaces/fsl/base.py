@@ -25,20 +25,15 @@ Examples
 See the docstrings of the individual classes for examples.
 
 """
-from __future__ import unicode_literals
-
+from __future__ import print_function, division, unicode_literals, absolute_import
 from builtins import open, object
 
 from glob import glob
 import os
-import warnings
 
-from ...utils.filemanip import fname_presuffix, split_filename, copyfile
-from ..base import (traits, isdefined,
-                    CommandLine, CommandLineInputSpec, TraitedSpec,
-                    File, Directory, InputMultiPath, OutputMultiPath)
+from ...utils.filemanip import fname_presuffix
+from ..base import traits, isdefined, CommandLine, CommandLineInputSpec
 
-warn = warnings.warn
 
 
 class Info(object):

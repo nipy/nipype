@@ -14,8 +14,7 @@ The `Workflow` class provides core functionality for batch processing.
      os.chdir(datadir)
 
 """
-
-from __future__ import absolute_import, unicode_literals
+from __future__ import print_function, division, unicode_literals, absolute_import
 from builtins import range, object, str, bytes, open
 
 # Py2 compat: http://python-future.org/compatible_idioms.html#collections-counter-and-ordereddict
@@ -26,27 +25,18 @@ from datetime import datetime
 
 from copy import deepcopy
 import pickle
-from glob import glob
-import gzip
-import inspect
 import os
 import os.path as op
-import re
 import shutil
-import errno
-import socket
-from shutil import rmtree
 import sys
-from tempfile import mkdtemp
 from warnings import warn
-from hashlib import sha1
 
 import numpy as np
 import networkx as nx
 
 
 from ... import config, logging
-from nipype.utils.misc import (unflatten, package_check, str2bool,
+from ...utils.misc import (unflatten, package_check, str2bool,
                                getsource, create_function_from_source)
 from ...interfaces.base import (traits, InputMultiPath, CommandLine,
                                 Undefined, TraitedSpec, DynamicTraitedSpec,

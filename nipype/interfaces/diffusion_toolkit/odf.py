@@ -10,16 +10,17 @@
    >>> os.chdir(datadir)
 
 """
-__docformat__ = 'restructuredtext'
+from __future__ import print_function, division, unicode_literals, absolute_import
 from builtins import range
 
 import os
 import re
 
+from ...utils.filemanip import fname_presuffix, split_filename, copyfile
 from ..base import (TraitedSpec, File, traits, CommandLine,
                     CommandLineInputSpec, isdefined)
-from ...utils.filemanip import fname_presuffix, split_filename, copyfile
 
+__docformat__ = 'restructuredtext'
 
 class HARDIMatInputSpec(CommandLineInputSpec):
     bvecs = File(exists=True, desc='b vectors file',

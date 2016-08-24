@@ -4,9 +4,8 @@
 """Module to draw an html gantt chart from logfile produced by
 callback_log.log_nodes_cb()
 """
-from __future__ import division
+from __future__ import print_function, division, unicode_literals, absolute_import
 from builtins import str, range
-from past.utils import old_div
 
 # Py2 compat: http://python-future.org/compatible_idioms.html#collections-counter-and-ordereddict
 from future import standard_library
@@ -14,10 +13,11 @@ standard_library.install_aliases()
 from collections import OrderedDict
 
 # Import packages
-import json
-from dateutil import parser
-import datetime
 import random
+import datetime
+import simplejson as json
+from dateutil import parser
+
 # Pandas
 try:
     import pandas as pd
@@ -235,7 +235,7 @@ def draw_lines(start, total_duration, minute_scale, scale):
     result = ''
     next_line = 220
     next_time = start
-    num_lines = int(old_div((old_div(total_duration,60)), minute_scale)) + 2
+    num_lines = ((total_duration // 60) // minute_scale) + 2
 
     # Iterate through the lines and create html line markers string
     for line in range(num_lines):
@@ -290,8 +290,8 @@ def draw_nodes(start, nodes_list, cores, minute_scale, space_between_minutes,
 
     # Init variables
     result = ''
-    scale = float(old_div(space_between_minutes,float(minute_scale)))
-    space_between_minutes = float(old_div(space_between_minutes,scale))
+    scale = space_between_minutes / minute_scale
+    space_between_minutes = space_between_minutes / scale
     end_times = [datetime.datetime(start.year, start.month, start.day,
                                    start.hour, start.minute, start.second) \
                  for core in range(cores)]
@@ -302,10 +302,10 @@ def draw_nodes(start, nodes_list, cores, minute_scale, space_between_minutes,
         node_start = node['start']
         node_finish = node['finish']
         # Calculate an offset and scale duration
-        offset = (old_div((node_start - start).total_seconds(), 60)) * scale * \
+        offset = ((node_start - start).total_seconds() / 60) * scale * \
                  space_between_minutes + 220
         # Scale duration
-        scale_duration = (old_div(node['duration'], 60)) * scale * space_between_minutes
+        scale_duration = (node['duration'] / 60) * scale * space_between_minutes
         if scale_duration < 5:
             scale_duration = 5
         scale_duration -= 2
@@ -333,7 +333,7 @@ def draw_nodes(start, nodes_list, cores, minute_scale, space_between_minutes,
                      'scale_duration' : scale_duration,
                      'color' : color,
                      'node_name' : node['name'],
-                     'node_dur' : old_div(node['duration'],60.0),
+                     'node_dur' : node['duration'] / 60.0,
                      'node_start' : node_start.strftime("%Y-%m-%d %H:%M:%S"),
                      'node_finish' : node_finish.strftime("%Y-%m-%d %H:%M:%S")}
         # Create new node string
@@ -358,8 +358,8 @@ def draw_resource_bar(start_time, finish_time, time_series, space_between_minute
     result = "<p class='time' style='top:198px;left:%dpx;'>%s</p>" \
              % (left, resource)
     # Image scaling factors
-    scale = float(old_div(space_between_minutes,float(minute_scale)))
-    space_between_minutes = float(old_div(space_between_minutes,scale))
+    scale = space_between_minutes / minute_scale
+    space_between_minutes = space_between_minutes / scale
 
     # Iterate through time series
     ts_len = len(time_series)
@@ -369,10 +369,10 @@ def draw_resource_bar(start_time, finish_time, time_series, space_between_minute
         else:
             ts_end = finish_time
         # Calculate offset from start at top
-        offset = (old_div((ts_start-start_time).total_seconds(), 60.0)) * scale * \
+        offset = ((ts_start-start_time).total_seconds() / 60.0) * scale * \
                  space_between_minutes + 220
         # Scale duration
-        duration_mins = old_div((ts_end-ts_start).total_seconds(), 60.0)
+        duration_mins = (ts_end-ts_start).total_seconds() / 60.0
         height = duration_mins * scale * \
                  space_between_minutes
         if height < 5:
@@ -544,7 +544,7 @@ def generate_gantt_chart(logfile, cores, minute_scale=10,
     # Summary strings of workflow at top
     html_string += '<p>Start: ' + start_node['start'].strftime("%Y-%m-%d %H:%M:%S") + '</p>'
     html_string += '<p>Finish: ' + last_node['finish'].strftime("%Y-%m-%d %H:%M:%S") + '</p>'
-    html_string += '<p>Duration: ' + "{0:.2f}".format(old_div(duration,60)) + ' minutes</p>'
+    html_string += '<p>Duration: ' + "{0:.2f}".format(duration / 60) + ' minutes</p>'
     html_string += '<p>Nodes: ' + str(len(nodes_list))+'</p>'
     html_string += '<p>Cores: ' + str(cores) + '</p>'
     html_string += close_header

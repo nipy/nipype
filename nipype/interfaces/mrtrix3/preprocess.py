@@ -11,14 +11,14 @@
     >>> os.chdir(datadir)
 
 """
-import os
+from __future__ import print_function, division, unicode_literals, absolute_import
+
 import os.path as op
 
-from .base import MRTrix3BaseInputSpec, MRTrix3Base
+from ..traits_extension import isdefined
 from ..base import (CommandLineInputSpec, CommandLine, traits, TraitedSpec,
                     File)
-from ..traits_extension import isdefined
-from ...utils.filemanip import split_filename
+from .base import MRTrix3BaseInputSpec, MRTrix3Base
 
 
 class ResponseSDInputSpec(MRTrix3BaseInputSpec):

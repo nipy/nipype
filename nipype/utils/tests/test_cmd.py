@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+from __future__ import print_function, division, unicode_literals, absolute_import
 
 from future import standard_library
 standard_library.install_aliases()
@@ -7,9 +8,11 @@ import unittest
 import sys
 from contextlib import contextmanager
 
-from six import PY2, PY3, StringIO
-from nipype.utils import nipype_cmd
+from io import StringIO
+from ...utils import nipype_cmd
 
+PY3 = sys.version_info[0] >= 3
+PY2 = sys.version_info[0] < 2
 
 @contextmanager
 def capture_sys_output():

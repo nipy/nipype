@@ -10,19 +10,18 @@ Interfaces to functionality from nitime for time-series analysis of fmri data
 - nitime.viz.drawmatrix_channels
 
 """
+from __future__ import print_function, division, unicode_literals, absolute_import
 
-from builtins import zip
-from builtins import object
+from builtins import zip, object
 
-import warnings
 import numpy as np
 import tempfile
-from ...utils.misc import package_check
 
+from ...utils.misc import package_check
+from ...utils.filemanip import fname_presuffix
 from ..base import (TraitedSpec, File, Undefined, traits,
                     BaseInterface, isdefined, BaseInterfaceInputSpec)
 
-from ...utils.filemanip import fname_presuffix
 
 have_nitime = True
 try:

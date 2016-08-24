@@ -16,27 +16,22 @@ See the docstrings of the individual classes for examples.
     datadir = os.path.realpath(os.path.join(filepath, '../testing/data'))
     os.chdir(datadir)
 """
-
-from __future__ import division
-from builtins import map
-from builtins import range
+from __future__ import print_function, division, unicode_literals, absolute_import
+from builtins import map, range
 
 import os
 import os.path as op
 import re
 from glob import glob
-import warnings
 import tempfile
 
 import numpy as np
 
-from .base import FSLCommand, FSLCommandInputSpec, Info
+from ...utils.filemanip import (load_json, save_json, split_filename,
+                                fname_presuffix)
 from ..base import (traits, TraitedSpec, OutputMultiPath, File,
                     CommandLine, CommandLineInputSpec, isdefined)
-from ...utils.filemanip import (load_json, save_json, split_filename,
-                                fname_presuffix, copyfile)
-
-warn = warnings.warn
+from .base import FSLCommand, FSLCommandInputSpec, Info
 
 
 class CopyGeomInputSpec(FSLCommandInputSpec):

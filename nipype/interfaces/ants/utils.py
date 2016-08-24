@@ -7,11 +7,13 @@
    >>> datadir = os.path.realpath(os.path.join(filepath, '../../testing/data'))
    >>> os.chdir(datadir)
 """
+from __future__ import print_function, division, unicode_literals, absolute_import
+
 import os
 
-from .base import ANTSCommand, ANTSCommandInputSpec
-from ..base import TraitedSpec, File, traits, isdefined, InputMultiPath
 from ...utils.filemanip import split_filename
+from ..base import TraitedSpec, File, traits, isdefined, InputMultiPath
+from .base import ANTSCommand, ANTSCommandInputSpec
 
 
 class AverageAffineTransformInputSpec(ANTSCommandInputSpec):

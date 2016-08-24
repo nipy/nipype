@@ -18,10 +18,8 @@ These functions include:
    >>> datadir = os.path.realpath(os.path.join(filepath, '../testing/data'))
    >>> os.chdir(datadir)
 """
-
-from __future__ import division
-from __future__ import unicode_literals
-from builtins import open, range
+from __future__ import print_function, division, unicode_literals, absolute_import
+from builtins import open, range, str, bytes
 
 import os
 from copy import deepcopy
@@ -31,7 +29,6 @@ import numpy as np
 from scipy import signal
 import scipy.io as sio
 
-from six import string_types
 from ..interfaces.base import (BaseInterface, traits, InputMultiPath,
                                OutputMultiPath, TraitedSpec, File,
                                BaseInterfaceInputSpec, isdefined)
@@ -283,7 +280,7 @@ class ArtifactDetect(BaseInterface):
         output_dir: string
             output directory in which the files will be generated
         """
-        if isinstance(motionfile, string_types):
+        if isinstance(motionfile, (str, bytes)):
             infile = motionfile
         elif isinstance(motionfile, list):
             infile = motionfile[0]
@@ -354,7 +351,7 @@ class ArtifactDetect(BaseInterface):
             cwd = os.getcwd()
 
         # read in functional image
-        if isinstance(imgfile, string_types):
+        if isinstance(imgfile, (str, bytes)):
             nim = load(imgfile)
         elif isinstance(imgfile, list):
             if len(imgfile) == 1:

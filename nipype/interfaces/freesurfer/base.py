@@ -14,19 +14,18 @@ Examples
 See the docstrings for the individual classes for 'working' examples.
 
 """
-from __future__ import unicode_literals
-from builtins import str
-__docformat__ = 'restructuredtext'
+from __future__ import print_function, division, unicode_literals, absolute_import
+from builtins import open, object, str
 
-from builtins import open, object
 
 import os
 
+from ...utils.filemanip import fname_presuffix
 from ..base import (CommandLine, Directory,
                     CommandLineInputSpec, isdefined,
                     traits, TraitedSpec, File)
-from ...utils.filemanip import fname_presuffix
 
+__docformat__ = 'restructuredtext'
 
 class Info(object):
     """ Freesurfer subject directory and version information.

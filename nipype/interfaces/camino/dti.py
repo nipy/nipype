@@ -7,13 +7,15 @@
     >>> os.chdir(datadir)
 
 """
+from __future__ import print_function, division, unicode_literals, absolute_import
+
 import os
 
+from ...utils.filemanip import split_filename
 from ..base import (CommandLineInputSpec, CommandLine, traits,
                     TraitedSpec, File, Directory, StdOutCommandLine,
                     StdOutCommandLineInputSpec, isdefined,
                     InputMultiPath)
-from ...utils.filemanip import split_filename
 
 
 class DTIFitInputSpec(StdOutCommandLineInputSpec):

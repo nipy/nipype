@@ -3,23 +3,20 @@
 Interfaces to the reconstruction algorithms in dipy
 
 """
-from __future__ import division
-from __future__ import unicode_literals
+from __future__ import print_function, division, unicode_literals, absolute_import
 from future import standard_library
 standard_library.install_aliases()
-from builtins import str
-from past.utils import old_div
-from builtins import open
+from builtins import str, open
 
 import os.path as op
 
 import numpy as np
 import nibabel as nb
 
-from nipype.interfaces.base import TraitedSpec, File, traits, isdefined
+from ... import logging
+from ..base import TraitedSpec, File, traits, isdefined
 from .base import DipyDiffusionInterface, DipyBaseInterfaceInputSpec
 
-from nipype import logging
 IFLOGGER = logging.getLogger('interface')
 
 
@@ -117,8 +114,8 @@ class RESTORE(DipyDiffusionInterface):
         # Estimate sigma required by RESTORE
         mean_std = np.median(noise_data.std(-1))
         try:
-            bias = (1. - np.sqrt(old_div(2., (n - 1))) *
-                    (old_div(gamma(old_div(n, 2.)), gamma(old_div((n - 1), 2.)))))
+            bias = (1. - np.sqrt(2. / (n - 1)) *
+                    (gamma(n / 2.) / gamma((n - 1) / 2.)))
         except:
             bias = .0
             pass
@@ -247,13 +244,13 @@ class EstimateResponseSH(DipyDiffusionInterface):
                                           init_trace=0.0021, iter=8,
                                           convergence=0.001,
                                           parallel=True)
-            ratio = abs(old_div(response[1], response[0]))
+            ratio = abs(response[1] / response[0])
         else:
             lambdas = evals[indices]
             l01 = np.sort(np.mean(lambdas, axis=0))
 
             response = np.array([l01[-1], l01[-2], l01[-2], S0])
-            ratio = abs(old_div(response[1], response[0]))
+            ratio = abs(response[1] / response[0])
 
         if ratio > 0.25:
             IFLOGGER.warn(('Estimated response is not prolate enough. '
@@ -344,7 +341,7 @@ class CSD(DipyDiffusionInterface):
         resp_file = np.loadtxt(self.inputs.response)
 
         response = (np.array(resp_file[0:3]), resp_file[-1])
-        ratio = old_div(response[0][1], response[0][0])
+        ratio = response[0][1] / response[0][0]
 
         if abs(ratio - 0.2) > 0.1:
             IFLOGGER.warn(('Estimated response is not prolate enough. '

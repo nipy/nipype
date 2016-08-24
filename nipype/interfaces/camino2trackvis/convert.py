@@ -9,10 +9,12 @@ Provides interfaces to various commands provided by Camino-Trackvis
     >>> os.chdir(datadir)
 
 """
+from __future__ import print_function, division, unicode_literals, absolute_import
+
 import os
 
-from ..base import CommandLineInputSpec, CommandLine, traits, TraitedSpec, File
 from ...utils.filemanip import split_filename
+from ..base import CommandLineInputSpec, CommandLine, traits, TraitedSpec, File
 
 
 class Camino2TrackvisInputSpec(CommandLineInputSpec):

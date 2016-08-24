@@ -10,12 +10,12 @@
     >>> os.chdir(datadir)
 
 """
+from __future__ import print_function, division, unicode_literals, absolute_import
 
-from .base import (CommandLine, CommandLineInputSpec,
-                   traits, TraitedSpec, isdefined,
-                   File)
 import os.path as op
 from ..utils.filemanip import split_filename
+from .base import (CommandLine, CommandLineInputSpec,
+                   traits, TraitedSpec, isdefined, File)
 
 
 class MeshFixInputSpec(CommandLineInputSpec):

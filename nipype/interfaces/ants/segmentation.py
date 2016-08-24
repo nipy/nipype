@@ -8,14 +8,13 @@
    >>> os.chdir(datadir)
 
 """
+from __future__ import print_function, division, unicode_literals, absolute_import
+from builtins import range, str
 
-from builtins import range
-
-from ..base import TraitedSpec, File, traits, InputMultiPath, OutputMultiPath, isdefined
-from ...utils.filemanip import split_filename
-from .base import ANTSCommand, ANTSCommandInputSpec
 import os
-from ...utils.filemanip import copyfile
+from ...utils.filemanip import split_filename, copyfile
+from ..base import TraitedSpec, File, traits, InputMultiPath, OutputMultiPath, isdefined
+from .base import ANTSCommand, ANTSCommandInputSpec
 
 
 class AtroposInputSpec(ANTSCommandInputSpec):

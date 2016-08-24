@@ -10,17 +10,17 @@
    >>> os.chdir(datadir)
 
 """
-__docformat__ = 'restructuredtext'
+from __future__ import print_function, division, unicode_literals, absolute_import
 
 import os
 #import itertools
 
-from nipype.utils.filemanip import fname_presuffix
-from nipype.interfaces.freesurfer.base import FSCommand, FSTraitedSpec
-from nipype.interfaces.base import (TraitedSpec, File, traits,
-                                    InputMultiPath, OutputMultiPath, isdefined)
-
 from ... import logging
+from ..base import (TraitedSpec, File, traits,
+                    InputMultiPath, OutputMultiPath, isdefined)
+from .base import FSCommand, FSTraitedSpec
+
+__docformat__ = 'restructuredtext'
 iflogger = logging.getLogger('interface')
 
 

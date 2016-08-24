@@ -9,9 +9,7 @@
     >>> os.chdir(datadir)
 
 """
-
-from __future__ import print_function
-from __future__ import division
+from __future__ import print_function, division, unicode_literals, absolute_import
 from builtins import range
 
 import pickle
@@ -22,11 +20,10 @@ import nibabel as nb
 import networkx as nx
 import scipy.io as sio
 
-from ..base import (BaseInterface, BaseInterfaceInputSpec, traits,
-                    File, TraitedSpec, InputMultiPath, Directory,
-                    OutputMultiPath, isdefined)
-from ...utils.filemanip import split_filename
 from ... import logging
+from ...utils.filemanip import split_filename
+from ..base import (BaseInterface, BaseInterfaceInputSpec, traits, File,
+                    TraitedSpec, Directory, OutputMultiPath, isdefined)
 iflogger = logging.getLogger('interface')
 
 

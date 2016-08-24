@@ -11,12 +11,8 @@ Miscellaneous algorithms
     >>> os.chdir(datadir)
 
 '''
-from __future__ import print_function
-from __future__ import absolute_import
-from __future__ import division
-from builtins import str
-from builtins import zip
-from builtins import range
+from __future__ import print_function, division, unicode_literals, absolute_import
+from builtins import str, zip, range
 from future.utils import raise_from
 
 import os
@@ -30,17 +26,15 @@ from scipy.special import legendre
 import scipy.io as sio
 import itertools
 import scipy.stats as stats
-
-from nipype import logging
-
 import warnings
 
+from .. import logging
 from . import metrics as nam
 from ..interfaces.base import (BaseInterface, traits, TraitedSpec, File,
                                InputMultiPath, OutputMultiPath,
                                BaseInterfaceInputSpec, isdefined,
                                DynamicTraitedSpec, Undefined)
-from nipype.utils.filemanip import fname_presuffix, split_filename
+from ..utils.filemanip import fname_presuffix, split_filename
 iflogger = logging.getLogger('interface')
 
 

@@ -9,21 +9,20 @@
     >>> datadir = os.path.realpath(os.path.join(filepath, '../../testing/data'))
     >>> os.chdir(datadir)
 """
-from __future__ import unicode_literals
-from builtins import open
+from __future__ import print_function, division, unicode_literals, absolute_import
+from builtins import open, str, bytes
 
 import os
 import os.path as op
 import re
 import numpy as np
-from six import string_types
 
-from nipype.utils.filemanip import (load_json, save_json, split_filename)
-from nipype.interfaces.base import (
+from ...utils.filemanip import (load_json, save_json, split_filename)
+from ..base import (
     CommandLineInputSpec, CommandLine, Directory, TraitedSpec,
     traits, isdefined, File, InputMultiPath, Undefined)
 
-from nipype.interfaces.afni.base import (
+from .base import (
     AFNICommandBase, AFNICommand, AFNICommandInputSpec, AFNICommandOutputSpec,
     Info, no_afni)
 
@@ -2856,7 +2855,7 @@ class FWHMx(AFNICommandBase):
                     return None
             elif isinstance(value, tuple):
                 return trait_spec.argstr + ' %s %f' % value
-            elif isinstance(value, string_types):
+            elif isinstance(value, (str, bytes)):
                 return trait_spec.argstr + ' ' + value
         return super(FWHMx, self)._format_arg(name, trait_spec, value)
 
@@ -2878,7 +2877,7 @@ class FWHMx(AFNICommandBase):
             sout = tuple(sout[0])
 
             outputs['out_acf'] = op.abspath('3dFWHMx.1D')
-            if isinstance(self.inputs.acf, string_types):
+            if isinstance(self.inputs.acf, (str, bytes)):
                 outputs['out_acf'] = op.abspath(self.inputs.acf)
 
         outputs['fwhm'] = tuple(sout)

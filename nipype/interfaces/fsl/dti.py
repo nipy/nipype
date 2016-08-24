@@ -12,21 +12,15 @@ was written to work with FSL version 4.1.4.
     >>> os.chdir(datadir)
 
 """
-
+from __future__ import print_function, division, unicode_literals, absolute_import
 from builtins import range
 
 import os
-import shutil
-import warnings
 
-from ... import LooseVersion
+from ...utils.filemanip import fname_presuffix, split_filename, copyfile
 from ..base import (TraitedSpec, isdefined, File, Directory,
                     InputMultiPath, OutputMultiPath, traits)
-from ..fsl.base import (FSLCommand, FSLCommandInputSpec, Info)
-from ...utils.filemanip import fname_presuffix, split_filename, copyfile
-
-warn = warnings.warn
-
+from .base import (FSLCommand, FSLCommandInputSpec, Info)
 
 class DTIFitInputSpec(FSLCommandInputSpec):
     dwi = File(exists=True, desc='diffusion weighted image data file',

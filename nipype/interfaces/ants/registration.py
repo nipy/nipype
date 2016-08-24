@@ -7,12 +7,12 @@
    >>> datadir = os.path.realpath(os.path.join(filepath, '../../testing/data'))
    >>> os.chdir(datadir)
 """
-
-from builtins import range
+from __future__ import print_function, division, unicode_literals, absolute_import
+from builtins import range, str
 import os
 
-from nipype.interfaces.base import TraitedSpec, File, Str, traits, InputMultiPath, isdefined
-from nipype.interfaces.ants.base import ANTSCommand, ANTSCommandInputSpec
+from ..base import TraitedSpec, File, Str, traits, InputMultiPath, isdefined
+from .base import ANTSCommand, ANTSCommandInputSpec
 
 
 class ANTSInputSpec(ANTSCommandInputSpec):

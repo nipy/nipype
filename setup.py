@@ -11,17 +11,29 @@ Much of the machinery at the beginning of this file has been copied over from
 nibabel denoted by ## START - COPIED FROM NIBABEL and a corresponding ## END
 
 """
-"""Build helper."""
+# Build helper
+from __future__ import print_function, division, unicode_literals, absolute_import
+
+from builtins import str, bytes
 
 import os
-from glob import glob
+from os.path import join as pjoin
 import sys
+from configparser import ConfigParser
+
+from glob import glob
 from functools import partial
 
 # BEFORE importing distutils, remove MANIFEST. distutils doesn't properly
 # update it when the contents of directories change.
 if os.path.exists('MANIFEST'):
     os.remove('MANIFEST')
+from distutils.core import setup
+
+# Distutils / setuptools helpers from nibabel.nisext
+from distutils.version import LooseVersion
+from distutils.command.build_py import build_py
+from distutils import log
 
 # For some commands, use setuptools.
 if len(set(('develop', 'bdist_egg', 'bdist_rpm', 'bdist', 'bdist_dumb',
@@ -30,28 +42,10 @@ if len(set(('develop', 'bdist_egg', 'bdist_rpm', 'bdist', 'bdist_dumb',
     # setup_egg imports setuptools setup, thus monkeypatching distutils.
     import setup_egg
 
-from distutils.core import setup
 
 # Commit hash writing, and dependency checking
-''' Distutils / setuptools helpers from nibabel.nisext'''
 
-import os
-from os.path import join as pjoin
-import sys
 PY3 = sys.version_info[0] >= 3
-if PY3:
-    string_types = str,
-else:
-    string_types = basestring,
-try:
-    from ConfigParser import ConfigParser
-except ImportError:
-    from configparser import ConfigParser
-
-from distutils.version import LooseVersion
-from distutils.command.build_py import build_py
-from distutils import log
-
 
 def get_comrec_build(pkg_dir, build_cmd=build_py):
     """ Return extended build command class for recording commit
@@ -116,7 +110,7 @@ def _add_append_key(in_dict, key, value):
     # Append value to in_dict[key] list
     if key not in in_dict:
         in_dict[key] = []
-    elif isinstance(in_dict[key], string_types):
+    elif isinstance(in_dict[key], (str, bytes)):
         in_dict[key] = [in_dict[key]]
     in_dict[key].append(value)
 
@@ -213,7 +207,7 @@ def package_check(pkg_name, version=None,
                  msgs['opt suffix'])
         return
     # setuptools mode
-    if optional_tf and not isinstance(optional, string_types):
+    if optional_tf and not isinstance(optional, (str, bytes)):
         raise RuntimeError('Not-False optional arg should be string')
     dependency = pkg_name
     if version:

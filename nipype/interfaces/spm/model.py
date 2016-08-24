@@ -11,8 +11,8 @@ and spm to access spm tools.
    >>> os.chdir(datadir)
 
 """
-
-__docformat__ = 'restructuredtext'
+from __future__ import print_function, division, unicode_literals, absolute_import
+from builtins import str, bytes
 
 # Standard library imports
 import os
@@ -23,14 +23,15 @@ import numpy as np
 import scipy.io as sio
 
 # Local imports
-from .base import (SPMCommand, SPMCommandInputSpec,
-                   scans_for_fnames)
-from ..base import (Bunch, traits, TraitedSpec, File, Directory,
-                    OutputMultiPath, InputMultiPath, isdefined)
-from six import string_types
+from ... import logging
 from ...utils.filemanip import (filename_to_list, list_to_filename,
                                 split_filename)
-from ... import logging
+from ..base import (Bunch, traits, TraitedSpec, File, Directory,
+                    OutputMultiPath, InputMultiPath, isdefined)
+from .base import (SPMCommand, SPMCommandInputSpec,
+                   scans_for_fnames)
+
+__docformat__ = 'restructuredtext'
 logger = logging.getLogger('interface')
 
 
@@ -201,7 +202,7 @@ class EstimateModel(SPMCommand):
         if opt == 'spm_mat_file':
             return np.array([str(val)], dtype=object)
         if opt == 'estimation_method':
-            if isinstance(val, string_types):
+            if isinstance(val, (str, bytes)):
                 return {'%s' % val: 1}
             else:
                 return val

@@ -12,21 +12,16 @@ was written to work with FSL version 5.0.4.
     ...                            '../../testing/data'))
     >>> os.chdir(datadir)
 """
+from __future__ import print_function, division, unicode_literals, absolute_import
 
 import os
-import warnings
-from glob import glob
-
 import numpy as np
 import nibabel as nib
 
-from ..fsl.base import FSLCommand, FSLCommandInputSpec, Info
+from ...utils.filemanip import split_filename
 from ..base import (traits, TraitedSpec, InputMultiPath, File,
-                    isdefined, Undefined)
-from ...utils.filemanip import (load_json, save_json, split_filename,
-                                fname_presuffix)
-
-warn = warnings.warn
+                    isdefined)
+from .base import FSLCommand, FSLCommandInputSpec
 
 
 class PrepareFieldmapInputSpec(FSLCommandInputSpec):

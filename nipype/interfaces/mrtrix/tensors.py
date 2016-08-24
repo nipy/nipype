@@ -9,15 +9,15 @@
     >>> os.chdir(datadir)
 
 """
-import os.path as op
+from __future__ import print_function, division, unicode_literals, absolute_import
 
+import os.path as op
 import numpy as np
 
-from ..base import (CommandLineInputSpec, CommandLine, BaseInterface,
-                    BaseInterfaceInputSpec, traits, File, TraitedSpec,
-                    Directory, InputMultiPath, OutputMultiPath, isdefined)
-from ...utils.filemanip import split_filename
 from ... import logging
+from ...utils.filemanip import split_filename
+from ..base import (CommandLineInputSpec, CommandLine, BaseInterface,
+                    traits, File, TraitedSpec, isdefined)
 iflogger = logging.getLogger('interface')
 
 

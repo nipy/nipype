@@ -16,30 +16,20 @@ Author: Carlo Hamalainen <carlo@carlo-hamalainen.net>
     >>> os.chdir(datadir)
 
 """
-
-from ..base import (
-    TraitedSpec,
-    CommandLineInputSpec,
-    CommandLine,
-    StdOutCommandLineInputSpec,
-    StdOutCommandLine,
-    File,
-    Directory,
-    InputMultiPath,
-    OutputMultiPath,
-    traits,
-    isdefined,
-)
+from __future__ import print_function, division, unicode_literals, absolute_import
 
 import glob
 import os
 import os.path
 import re
-
-from ..minc.base import check_minc, no_minc, Info, aggregate_filename
-
 import warnings
-warn = warnings.warn
+
+from ..base import (TraitedSpec, CommandLineInputSpec, CommandLine,
+                    StdOutCommandLineInputSpec, StdOutCommandLine, File,
+                    Directory, InputMultiPath, OutputMultiPath, traits,
+                    isdefined)
+from .base import aggregate_filename
+
 warnings.filterwarnings('always', category=UserWarning)
 
 

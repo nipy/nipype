@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 """Parallel workflow execution via Condor DAGMan
 """
+from __future__ import print_function, division, unicode_literals, absolute_import
 
 import os
 import sys
@@ -9,7 +10,6 @@ import time
 from warnings import warn
 
 from .base import (GraphPluginBase, logger)
-
 from ...interfaces.base import CommandLine
 
 

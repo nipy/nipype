@@ -16,7 +16,9 @@ all of these bugs and they've been fixed in enthought svn repository
 (usually by Robert Kern).
 
 """
-from builtins import filter, object
+from __future__ import print_function, division, unicode_literals, absolute_import
+
+from builtins import filter, object, str, bytes
 import os
 
 # perform all external trait imports here
@@ -30,9 +32,8 @@ from traits.trait_base import _Undefined, class_of
 
 from traits.api import BaseUnicode
 from traits.api import Unicode
-from six import string_types
 
-DictStrStr = traits.Dict(string_types, string_types)
+DictStrStr = traits.Dict(str, str)
 Str = Unicode
 
 class BaseFile(BaseUnicode):
@@ -169,7 +170,7 @@ class BaseDirectory (BaseUnicode):
 
             Note: The 'fast validator' version performs this check in C.
         """
-        if isinstance(value, string_types):
+        if isinstance(value, (str, bytes)):
             if not self.exists:
                 return value
 

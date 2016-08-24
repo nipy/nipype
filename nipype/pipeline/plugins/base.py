@@ -3,9 +3,8 @@
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """Common graph operations for execution
 """
-
-from builtins import range
-from builtins import object
+from __future__ import print_function, division, unicode_literals, absolute_import
+from builtins import range, object
 
 from copy import deepcopy
 from glob import glob
@@ -23,13 +22,13 @@ import numpy as np
 import scipy.sparse as ssp
 
 
+from ... import logging
 from ...utils.filemanip import savepkl, loadpkl
 from ...utils.misc import str2bool
 from ..engine.utils import (nx, dfs_preorder, topological_sort)
 from ..engine import MapNode
 
 
-from ... import logging
 logger = logging.getLogger('workflow')
 iflogger = logging.getLogger('interface')
 

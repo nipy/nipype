@@ -8,12 +8,13 @@ Generic interfaces to manipulate registration parameters files, including
 transform files (to configure warpings)
 
 """
-import os.path as op
-import re
+from __future__ import print_function, division, unicode_literals, absolute_import
 
-from ..base import (BaseInterface, BaseInterfaceInputSpec, isdefined,
-                    TraitedSpec, File, traits, InputMultiPath)
+import os.path as op
+
 from ... import logging
+from ..base import (BaseInterface, BaseInterfaceInputSpec, isdefined,
+                    TraitedSpec, File, traits)
 logger = logging.getLogger('interface')
 
 

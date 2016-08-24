@@ -18,11 +18,8 @@
     >>> os.chdir(datadir)
 
 """
-from __future__ import unicode_literals, absolute_import
-from __future__ import division
-from builtins import object
-from past.utils import old_div
-from builtins import zip, filter, range, open, str
+from __future__ import print_function, division, unicode_literals, absolute_import
+from builtins import object, zip, filter, range, open, str
 
 import glob
 import fnmatch
@@ -37,13 +34,12 @@ from warnings import warn
 
 import sqlite3
 
-from nipype import config, logging
-from six import string_types
-from nipype.utils.filemanip import copyfile, list_to_filename, filename_to_list
-from nipype.utils.misc import human_order_sorted, str2bool
-from nipype.interfaces.base import (
-    TraitedSpec, traits, Str, File, Directory, BaseInterface, InputMultiPath, isdefined, OutputMultiPath,
-    DynamicTraitedSpec, Undefined, BaseInterfaceInputSpec)
+from .. import config, logging
+from ..utils.filemanip import copyfile, list_to_filename, filename_to_list
+from ..utils.misc import human_order_sorted, str2bool
+from .base import (
+    TraitedSpec, traits, Str, File, Directory, BaseInterface, InputMultiPath,
+    isdefined, OutputMultiPath, DynamicTraitedSpec, Undefined, BaseInterfaceInputSpec)
 
 try:
     import pyxnat
@@ -163,7 +159,7 @@ class ProgressPercentage(object):
         with self._lock:
             self._seen_so_far += bytes_amount
             if self._size != 0:
-                percentage = (old_div(self._seen_so_far, self._size)) * 100
+                percentage = (self._seen_so_far // self._size) * 100
             else:
                 percentage = 0
             progress_str = '%d / %d (%.2f%%)\r'\
@@ -904,7 +900,7 @@ class S3DataGrabber(IOBase):
             for argnum, arglist in enumerate(args):
                 maxlen = 1
                 for arg in arglist:
-                    if isinstance(arg, string_types) and hasattr(self.inputs, arg):
+                    if isinstance(arg, (str, bytes)) and hasattr(self.inputs, arg):
                         arg = getattr(self.inputs, arg)
                     if isinstance(arg, list):
                         if (maxlen > 1) and (len(arg) != maxlen):
@@ -915,7 +911,7 @@ class S3DataGrabber(IOBase):
                 for i in range(maxlen):
                     argtuple = []
                     for arg in arglist:
-                        if isinstance(arg, string_types) and hasattr(self.inputs, arg):
+                        if isinstance(arg, (str, bytes)) and hasattr(self.inputs, arg):
                             arg = getattr(self.inputs, arg)
                         if isinstance(arg, list):
                             argtuple.append(arg[i])
@@ -1143,7 +1139,7 @@ class DataGrabber(IOBase):
             for argnum, arglist in enumerate(args):
                 maxlen = 1
                 for arg in arglist:
-                    if isinstance(arg, string_types) and hasattr(self.inputs, arg):
+                    if isinstance(arg, (str, bytes)) and hasattr(self.inputs, arg):
                         arg = getattr(self.inputs, arg)
                     if isinstance(arg, list):
                         if (maxlen > 1) and (len(arg) != maxlen):
@@ -1154,7 +1150,7 @@ class DataGrabber(IOBase):
                 for i in range(maxlen):
                     argtuple = []
                     for arg in arglist:
-                        if isinstance(arg, string_types) and hasattr(self.inputs, arg):
+                        if isinstance(arg, (str, bytes)) and hasattr(self.inputs, arg):
                             arg = getattr(self.inputs, arg)
                         if isinstance(arg, list):
                             argtuple.append(arg[i])
@@ -1410,7 +1406,7 @@ class DataFinder(IOBase):
 
     def _run_interface(self, runtime):
         # Prepare some of the inputs
-        if isinstance(self.inputs.root_paths, string_types):
+        if isinstance(self.inputs.root_paths, (str, bytes)):
             self.inputs.root_paths = [self.inputs.root_paths]
         self.match_regex = re.compile(self.inputs.match_regex)
         if self.inputs.max_depth is Undefined:
@@ -1778,7 +1774,7 @@ class XNATSource(IOBase):
             for argnum, arglist in enumerate(args):
                 maxlen = 1
                 for arg in arglist:
-                    if isinstance(arg, string_types) and hasattr(self.inputs, arg):
+                    if isinstance(arg, (str, bytes)) and hasattr(self.inputs, arg):
                         arg = getattr(self.inputs, arg)
                     if isinstance(arg, list):
                         if (maxlen > 1) and (len(arg) != maxlen):
@@ -1791,7 +1787,7 @@ class XNATSource(IOBase):
                 for i in range(maxlen):
                     argtuple = []
                     for arg in arglist:
-                        if isinstance(arg, string_types) and \
+                        if isinstance(arg, (str, bytes)) and \
                                 hasattr(self.inputs, arg):
                             arg = getattr(self.inputs, arg)
                         if isinstance(arg, list):
@@ -2348,7 +2344,7 @@ class SSHDataGrabber(DataGrabber):
             for argnum, arglist in enumerate(args):
                 maxlen = 1
                 for arg in arglist:
-                    if isinstance(arg, string_types) and hasattr(self.inputs, arg):
+                    if isinstance(arg, (str, bytes)) and hasattr(self.inputs, arg):
                         arg = getattr(self.inputs, arg)
                     if isinstance(arg, list):
                         if (maxlen > 1) and (len(arg) != maxlen):
@@ -2359,7 +2355,7 @@ class SSHDataGrabber(DataGrabber):
                 for i in range(maxlen):
                     argtuple = []
                     for arg in arglist:
-                        if isinstance(arg, string_types) and hasattr(self.inputs, arg):
+                        if isinstance(arg, (str, bytes)) and hasattr(self.inputs, arg):
                             arg = getattr(self.inputs, arg)
                         if isinstance(arg, list):
                             argtuple.append(arg[i])
