@@ -845,6 +845,8 @@ class NewSegmentInputSpec(SPMCommandInputSpec):
                                         desc='mni, eastern, subj, none ')
     warping_regularization = traits.Float(field='warp.reg',
                                           desc='Aproximate distance between sampling points.')
+    warping_regularization_12 = traits.List(traits.Float(), minlen=5, maxlen=5, field='warp.reg',
+                                            desc='Warping regularization parameters')
     sampling_distance = traits.Float(field='warp.samp',
                                      desc='Sampling distance on data for parameter estimation')
     write_deformation_fields = traits.List(traits.Bool(), minlen=2, maxlen=2, field='warp.write',
