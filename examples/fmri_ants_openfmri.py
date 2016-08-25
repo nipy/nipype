@@ -10,7 +10,9 @@ A growing number of datasets are available on `OpenfMRI <http://openfmri.org>`_.
 This script demonstrates how to use nipype to analyze a data set::
 
     python fmri_ants_openfmri.py --datasetdir ds107
+
 """
+
 from __future__ import division, unicode_literals
 from builtins import open, range, str, bytes
 
@@ -37,19 +39,19 @@ from nipype.workflows.fmri.fsl import (create_featreg_preproc,
 
 config.enable_provenance()
 version = 0
-if fsl.Info.version() and \
-        LooseVersion(fsl.Info.version()) > LooseVersion('5.0.6'):
+if (fsl.Info.version() and LooseVersion(fsl.Info.version()) > LooseVersion('5.0.6')):
     version = 507
 
 fsl.FSLCommand.set_default_output_type('NIFTI_GZ')
 
-imports = ['import os',
-           'import nibabel as nb',
-           'import numpy as np',
-           'import scipy as sp',
-           'from nipype.utils.filemanip import filename_to_list, list_to_filename, split_filename',
-           'from scipy.special import legendre'
-           ]
+imports = [
+    'import os',
+    'import nibabel as nb',
+    'import numpy as np',
+    'import scipy as sp',
+    'from nipype.utils.filemanip import filename_to_list, list_to_filename, split_filename',
+    'from scipy.special import legendre'
+]
 
 def median(in_files):
     """Computes an average of the median of each realigned timeseries
