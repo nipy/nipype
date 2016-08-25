@@ -31,9 +31,11 @@ from builtins import open, object
 from glob import glob
 import os
 
+from ... import logging
 from ...utils.filemanip import fname_presuffix
 from ..base import traits, isdefined, CommandLine, CommandLineInputSpec
 
+LOGGER = logging.getLogger('interface')
 
 
 class Info(object):
@@ -110,8 +112,8 @@ class Info(object):
         try:
             return os.environ['FSLOUTPUTTYPE']
         except KeyError:
-            warnings.warn(('FSL environment variables not set. setting output '
-                           'type to NIFTI'))
+            LOGGER.warn('FSLOUTPUTTYPE environment variable is not set. '
+                        'Setting FSLOUTPUTTYPE=NIFTI')
             return 'NIFTI'
 
     @staticmethod

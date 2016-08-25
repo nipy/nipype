@@ -17,6 +17,7 @@ from __future__ import print_function, division, unicode_literals, absolute_impo
 import os
 import numpy as np
 import nibabel as nib
+import warnings
 
 from ...utils.filemanip import split_filename
 from ..base import (traits, TraitedSpec, InputMultiPath, File,

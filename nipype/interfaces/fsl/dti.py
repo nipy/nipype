@@ -16,6 +16,7 @@ from __future__ import print_function, division, unicode_literals, absolute_impo
 from builtins import range
 
 import os
+import warnings
 
 from ...utils.filemanip import fname_presuffix, split_filename, copyfile
 from ..base import (TraitedSpec, isdefined, File, Directory,

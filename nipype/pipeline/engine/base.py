@@ -24,8 +24,8 @@ from copy import deepcopy
 import re
 import numpy as np
 from ... import logging
+from ...interfaces.base import DynamicTraitedSpec
 from ...utils.filemanip import loadpkl, savepkl
-from ..interfaces.base import DynamicTraitedSpec
 
 logger = logging.getLogger('workflow')
 

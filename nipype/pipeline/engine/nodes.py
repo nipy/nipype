@@ -46,7 +46,8 @@ from ...utils.filemanip import (save_json, FileNotFoundError,
 from ...interfaces.base import (traits, InputMultiPath, CommandLine,
                                 Undefined, TraitedSpec, DynamicTraitedSpec,
                                 Bunch, InterfaceResult, md5, Interface,
-                                TraitDictObject, TraitListObject, isdefined)
+                                TraitDictObject, TraitListObject, isdefined,
+                                runtime_profile)
 from .utils import (generate_expanded_graph, modify_paths,
                     export_graph, make_output_dir, write_workflow_prov,
                     clean_working_directory, format_dot, topological_sort,
