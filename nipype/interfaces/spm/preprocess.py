@@ -843,10 +843,14 @@ class NewSegmentInputSpec(SPMCommandInputSpec):
                           field='tissue')
     affine_regularization = traits.Enum('mni', 'eastern', 'subj', 'none', field='warp.affreg',
                                         desc='mni, eastern, subj, none ')
-    warping_regularization = traits.Float(field='warp.reg',
-                                          desc='Aproximate distance between sampling points.')
-    warping_regularization_12 = traits.List(traits.Float(), minlen=5, maxlen=5, field='warp.reg',
-                                            desc='Warping regularization parameter list (SPM12)')
+    warping_regularization = traits.Either(traits.Float,
+                                           traits.List(traits.Float(),
+                                                       minlen=5, maxlen=5),
+                                           field='warp.reg'
+                                           desc='Warping regularization \
+                                           parameter(s). Accepts float or \
+                                           list of floats (the latter being \
+                                           required by SPM12)')
     sampling_distance = traits.Float(field='warp.samp',
                                      desc='Sampling distance on data for parameter estimation')
     write_deformation_fields = traits.List(traits.Bool(), minlen=2, maxlen=2, field='warp.write',
