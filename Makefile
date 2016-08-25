@@ -56,14 +56,14 @@ inplace:
 	$(PYTHON) setup.py build_ext -i
 
 test-code: in
-	$(NOSETESTS) -s nipype --with-doctest
+	$(NOSETESTS) -s nipype --with-doctest --with-doctest-ignore-unicode
 
 test-doc:
-	$(NOSETESTS) -s --with-doctest --doctest-tests --doctest-extension=rst \
+	$(NOSETESTS) -s --with-doctest --with-doctest-ignore-unicode --doctest-tests --doctest-extension=rst \
 	--doctest-fixtures=_fixture doc/
 
 test-coverage: clean-tests in
-	$(NOSETESTS) -s --with-doctest --with-coverage --cover-package=nipype \
+	$(NOSETESTS) -s --with-doctest --with-doctest-ignore-unicode --with-coverage --cover-package=nipype \
 	--config=.coveragerc
 
 test: clean test-code

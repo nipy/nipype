@@ -56,7 +56,7 @@ def test_TCorrMap_inputs():
     suffix='_mean',
     ),
     out_file=dict(argstr='-prefix %s',
-    name_source=['in_file'],
+    name_source=[u'in_file'],
     name_template='%s_afni',
     ),
     outputtype=dict(),

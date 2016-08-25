@@ -21,7 +21,7 @@ def test_Paint_inputs():
     out_file=dict(argstr='%s',
     hash_files=False,
     keep_extension=False,
-    name_source=['in_surf'],
+    name_source=[u'in_surf'],
     name_template='%s.avg_curv',
     position=-1,
     ),

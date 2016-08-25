@@ -4,7 +4,7 @@ from ..segmentation import JointFusion
 
 
 def test_JointFusion_inputs():
-    input_map = dict(alpha=dict(requires=['method'],
+    input_map = dict(alpha=dict(requires=[u'method'],
     usedefault=True,
     ),
     args=dict(argstr='%s',
@@ -13,7 +13,7 @@ def test_JointFusion_inputs():
     ),
     atlas_group_weights=dict(argstr='-gpw %d...',
     ),
-    beta=dict(requires=['method'],
+    beta=dict(requires=[u'method'],
     usedefault=True,
     ),
     dimension=dict(argstr='%d',

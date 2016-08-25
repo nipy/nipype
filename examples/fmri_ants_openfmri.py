@@ -11,9 +11,8 @@ This script demonstrates how to use nipype to analyze a data set::
 
     python fmri_ants_openfmri.py --datasetdir ds107
 """
-
-from __future__ import division
-from builtins import range
+from __future__ import division, unicode_literals
+from builtins import range, str, bytes
 
 from nipype import config
 config.enable_provenance()
@@ -26,7 +25,6 @@ import nipype.pipeline.engine as pe
 import nipype.algorithms.modelgen as model
 import nipype.algorithms.rapidart as ra
 from nipype.algorithms.misc import TSNR
-from six import string_types
 from nipype.interfaces.c3 import C3dAffineTool
 import nipype.interfaces.io as nio
 import nipype.interfaces.utility as niu
@@ -774,7 +772,7 @@ def analyze_openfmri_dataset(data_dir, subject=None, model_id=None,
     def check_behav_list(behav, run_id, conds):
         import numpy as np
         num_conds = len(conds)
-        if isinstance(behav, string_types):
+        if isinstance(behav, (str, bytes)):
             behav = [behav]
         behav_array = np.array(behav).flatten()
         num_elements = behav_array.shape[0]

@@ -292,7 +292,7 @@ def main(**extra_args):
         pjoin('interfaces', 'tests', 'realign_json.json'),
         pjoin('interfaces', 'tests', 'use_resources'),
     ]
-    
+
     setup(name=NAME,
           maintainer=MAINTAINER,
           maintainer_email=MAINTAINER_EMAIL,
