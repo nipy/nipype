@@ -178,7 +178,7 @@ class Memory(object):
         elif not os.path.isdir(base_dir):
             raise ValueError('base_dir should be a directory')
         self.base_dir = base_dir
-        open(os.path.join(base_dir, 'log.current'), 'w')
+        open(os.path.join(base_dir, 'log.current'), 'a').close()
 
     def cache(self, interface):
         """ Returns a callable that caches the output of an interface

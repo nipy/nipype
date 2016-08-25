@@ -32,6 +32,9 @@ def human_order_sorted(l):
 
 
 def trim(docstring, marker=None):
+    if isinstance(docstring, bytes):
+        docstring = str(docstring, 'utf-8')
+
     if not docstring:
         return ''
     # Convert tabs to spaces (following the normal Python rules)
