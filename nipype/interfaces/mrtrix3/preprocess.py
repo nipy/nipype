@@ -97,11 +97,11 @@ class ResponseSD(MRTrix3Base):
     >>> resp.inputs.in_mask = 'mask.nii.gz'
     >>> resp.inputs.grad_fsl = ('bvecs', 'bvals')
     >>> resp.cmdline                               # doctest: +ELLIPSIS
-    'dwi2response -fslgrad bvecs bvals -mask mask.nii.gz dwi.mif response.txt'
+    'dwi2response tax -fslgrad bvecs bvals -mask mask.nii.gz dwi.mif response.txt'
     >>> resp.run()                                 # doctest: +SKIP
     """
 
-    _cmd = 'dwi2response'
+    _cmd = 'dwi2response tax'
     input_spec = ResponseSDInputSpec
     output_spec = ResponseSDOutputSpec
 
