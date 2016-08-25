@@ -1055,7 +1055,7 @@ class MS_LDA(FSCommand):
             raise traits.TraitError("MS_LDA: use_weights must accompany an existing weights file")
 
     def _format_arg(self, name, spec, value):
-        if name is 'use_weights':
+        if name == 'use_weights':
             if self.inputs.use_weights is True:
                 self._verify_weights_file_exists()
             else:

@@ -80,7 +80,7 @@ class MRConvert(CommandLine):
         return outputs
 
     def _gen_filename(self, name):
-        if name is 'out_filename':
+        if name == 'out_filename':
             return self._gen_outfilename()
         else:
             return None
@@ -193,7 +193,7 @@ class Tensor2Vector(CommandLine):
         return outputs
 
     def _gen_filename(self, name):
-        if name is 'out_filename':
+        if name == 'out_filename':
             return self._gen_outfilename()
         else:
             return None
@@ -242,7 +242,7 @@ class Tensor2FractionalAnisotropy(CommandLine):
         return outputs
 
     def _gen_filename(self, name):
-        if name is 'out_filename':
+        if name == 'out_filename':
             return self._gen_outfilename()
         else:
             return None
@@ -291,7 +291,7 @@ class Tensor2ApparentDiffusion(CommandLine):
         return outputs
 
     def _gen_filename(self, name):
-        if name is 'out_filename':
+        if name == 'out_filename':
             return self._gen_outfilename()
         else:
             return None
@@ -341,7 +341,7 @@ class MRMultiply(CommandLine):
         return outputs
 
     def _gen_filename(self, name):
-        if name is 'out_filename':
+        if name == 'out_filename':
             return self._gen_outfilename()
         else:
             return None
@@ -451,7 +451,7 @@ class GenerateWhiteMatterMask(CommandLine):
         return outputs
 
     def _gen_filename(self, name):
-        if name is 'out_WMProb_filename':
+        if name == 'out_WMProb_filename':
             return self._gen_outfilename()
         else:
             return None
@@ -501,7 +501,7 @@ class Erode(CommandLine):
         return outputs
 
     def _gen_filename(self, name):
-        if name is 'out_filename':
+        if name == 'out_filename':
             return self._gen_outfilename()
         else:
             return None
@@ -559,7 +559,7 @@ class Threshold(CommandLine):
         return outputs
 
     def _gen_filename(self, name):
-        if name is 'out_filename':
+        if name == 'out_filename':
             return self._gen_outfilename()
         else:
             return None
@@ -608,7 +608,7 @@ class MedianFilter3D(CommandLine):
         return outputs
 
     def _gen_filename(self, name):
-        if name is 'out_filename':
+        if name == 'out_filename':
             return self._gen_outfilename()
         else:
             return None
@@ -666,7 +666,7 @@ class MRTransform(CommandLine):
         return outputs
 
     def _gen_filename(self, name):
-        if name is 'out_filename':
+        if name == 'out_filename':
             return self._gen_outfilename()
         else:
             return None

@@ -86,7 +86,7 @@ class DWI2SphericalHarmonicsImage(CommandLine):
         return outputs
 
     def _gen_filename(self, name):
-        if name is 'out_filename':
+        if name == 'out_filename':
             return self._gen_outfilename()
         else:
             return None
@@ -169,7 +169,7 @@ class ConstrainedSphericalDeconvolution(CommandLine):
         return outputs
 
     def _gen_filename(self, name):
-        if name is 'out_filename':
+        if name == 'out_filename':
             return self._gen_outfilename()
         else:
             return None
@@ -223,7 +223,7 @@ class EstimateResponseForSH(CommandLine):
         return outputs
 
     def _gen_filename(self, name):
-        if name is 'out_filename':
+        if name == 'out_filename':
             return self._gen_outfilename()
         else:
             return None
@@ -303,7 +303,7 @@ class FSL2MRTrix(BaseInterface):
         return outputs
 
     def _gen_filename(self, name):
-        if name is 'out_encoding_file':
+        if name == 'out_encoding_file':
             return self._gen_outfilename()
         else:
             return None

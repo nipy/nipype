@@ -781,7 +781,7 @@ class VecReg(FSLCommand):
         return outputs
 
     def _gen_filename(self, name):
-        if name is 'out_file':
+        if name == 'out_file':
             return self._list_outputs()[name]
         else:
             return None
@@ -878,7 +878,7 @@ class FindTheBiggest(FSLCommand):
         return outputs
 
     def _gen_filename(self, name):
-        if name is 'out_file':
+        if name == 'out_file':
             return self._list_outputs()[name]
         else:
             return None

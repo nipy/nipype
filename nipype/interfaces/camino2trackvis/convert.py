@@ -82,7 +82,7 @@ class Camino2Trackvis(CommandLine):
         return outputs
 
     def _gen_filename(self, name):
-        if name is 'out_file':
+        if name == 'out_file':
             return self._gen_outfilename()
         else:
             return None
@@ -133,7 +133,7 @@ class Trackvis2Camino(CommandLine):
         return outputs
 
     def _gen_filename(self, name):
-        if name is 'out_file':
+        if name == 'out_file':
             return self._gen_outfilename()
         else:
             return None

@@ -120,7 +120,7 @@ class Tracks2Prob(CommandLine):
         return outputs
 
     def _gen_filename(self, name):
-        if name is 'out_filename':
+        if name == 'out_filename':
             return self._gen_outfilename()
         else:
             return None
