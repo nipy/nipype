@@ -843,7 +843,7 @@ class NewSegmentInputSpec(SPMCommandInputSpec):
                           field='tissue')
     affine_regularization = traits.Enum('mni', 'eastern', 'subj', 'none', field='warp.affreg',
                                         desc='mni, eastern, subj, none ')
-    warping_regularization = traits.Either(traits.Float,
+    warping_regularization = traits.Either(traits.Float(),
                                            traits.List(traits.Float(),
                                                        minlen=5, maxlen=5),
                                            field='warp.reg'
