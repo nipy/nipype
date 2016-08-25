@@ -13,7 +13,7 @@ nibabel denoted by ## START - COPIED FROM NIBABEL and a corresponding ## END
 """
 # Build helper
 from __future__ import print_function
-from builtins import str, bytes
+from builtins import str, bytes, open
 
 import os
 from os.path import join as pjoin

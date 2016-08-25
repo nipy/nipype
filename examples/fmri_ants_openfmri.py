@@ -12,35 +12,30 @@ This script demonstrates how to use nipype to analyze a data set::
     python fmri_ants_openfmri.py --datasetdir ds107
 """
 from __future__ import division, unicode_literals
-from builtins import range, str, bytes
-
-from nipype import config
-config.enable_provenance()
-
+from builtins import open, range, str, bytes
 
 from glob import glob
 import os
 
+from nipype import config
+from nipype import LooseVersion
+from nipype import Workflow, Node, MapNode
+from nipype.utils.filemanip import filename_to_list
 import nipype.pipeline.engine as pe
 import nipype.algorithms.modelgen as model
 import nipype.algorithms.rapidart as ra
 from nipype.algorithms.misc import TSNR
 from nipype.interfaces.c3 import C3dAffineTool
+from nipype.interfaces import fsl, Function, ants, freesurfer as fs
 import nipype.interfaces.io as nio
+from nipype.interfaces.io import FreeSurferSource
 import nipype.interfaces.utility as niu
+from nipype.interfaces.utility import Merge, IdentityInterface
 from nipype.workflows.fmri.fsl import (create_featreg_preproc,
                                        create_modelfit_workflow,
                                        create_fixed_effects_flow)
 
-from nipype import LooseVersion
-from nipype import Workflow, Node, MapNode
-from nipype.interfaces import (fsl, Function, ants, freesurfer)
-
-from nipype.interfaces.utility import Merge, IdentityInterface
-from nipype.utils.filemanip import filename_to_list
-from nipype.interfaces.io import FreeSurferSource
-import nipype.interfaces.freesurfer as fs
-
+config.enable_provenance()
 version = 0
 if fsl.Info.version() and \
         LooseVersion(fsl.Info.version()) > LooseVersion('5.0.6'):
@@ -55,7 +50,6 @@ imports = ['import os',
            'from nipype.utils.filemanip import filename_to_list, list_to_filename, split_filename',
            'from scipy.special import legendre'
            ]
-
 
 def median(in_files):
     """Computes an average of the median of each realigned timeseries

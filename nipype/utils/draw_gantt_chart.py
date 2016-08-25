@@ -5,7 +5,7 @@
 callback_log.log_nodes_cb()
 """
 from __future__ import print_function, division, unicode_literals, absolute_import
-from builtins import str, range
+from builtins import str, range, open
 
 # Py2 compat: http://python-future.org/compatible_idioms.html#collections-counter-and-ordereddict
 from future import standard_library

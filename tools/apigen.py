@@ -18,11 +18,11 @@ files are modules, and therefore which module URIs will be passed to
 
 NOTE: this is a modified version of a script originally shipped with the
 PyMVPA project, which we've adapted for NIPY use.  PyMVPA is an MIT-licensed
-project."""
+project.
+"""
+from __future__ import print_function, division, unicode_literals, absolute_import
+from builtins import object, open
 
-# Stdlib imports
-from __future__ import print_function
-from builtins import object
 import os
 import re
 

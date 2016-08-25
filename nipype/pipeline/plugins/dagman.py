@@ -2,6 +2,7 @@
 """Parallel workflow execution via Condor DAGMan
 """
 from __future__ import print_function, division, unicode_literals, absolute_import
+from builtins import open
 
 import os
 import sys
@@ -53,7 +54,8 @@ getenv = True
 
     def _get_str_or_file(self, arg):
         if os.path.isfile(arg):
-            content = open(arg).read()
+            with open(arg) as f:
+                content = f.read()
         else:
             content = arg
         return content

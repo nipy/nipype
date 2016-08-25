@@ -10,7 +10,7 @@
    >>> os.chdir(datadir)
 """
 from __future__ import print_function, division, unicode_literals, absolute_import
-from builtins import zip, range, str
+from builtins import zip, range, str, open
 
 from future import standard_library
 standard_library.install_aliases()

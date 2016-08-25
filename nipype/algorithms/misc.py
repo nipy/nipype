@@ -12,7 +12,7 @@ Miscellaneous algorithms
 
 '''
 from __future__ import print_function, division, unicode_literals, absolute_import
-from builtins import str, zip, range
+from builtins import str, zip, range, open
 from future.utils import raise_from
 
 import os
@@ -236,15 +236,17 @@ class CreateNifti(BaseInterface):
         return os.path.abspath(base + ".nii")
 
     def _run_interface(self, runtime):
-        hdr = nb.AnalyzeHeader.from_fileobj(
-            open(self.inputs.header_file, 'rb'))
+        with open(self.inputs.header_file, 'rb') as hdr_file:
+            hdr = nb.AnalyzeHeader.from_fileobj(hdr_file)
 
         if isdefined(self.inputs.affine):
             affine = self.inputs.affine
         else:
             affine = None
 
-        data = hdr.data_from_fileobj(open(self.inputs.data_file, 'rb'))
+        with open(self.inputs.header_file, 'rb') as data_file:
+            data = hdr.data_from_fileobj(data_file)
+
         img = nb.Nifti1Image(data, affine, hdr)
         nb.save(img, self._gen_output_file_name())
 
@@ -364,11 +366,9 @@ class Gunzip(BaseInterface):
 
     def _run_interface(self, runtime):
         import gzip
-        in_file = gzip.open(self.inputs.in_file, 'rb')
-        out_file = open(self._gen_output_file_name(), 'wb')
-        out_file.write(in_file.read())
-        out_file.close()
-        in_file.close()
+        with gzip.open(self.inputs.in_file, 'rb') as in_file:
+            with open(self._gen_output_file_name(), 'wb') as out_file:
+                out_file.write(in_file.read())
         return runtime
 
     def _list_outputs(self):
@@ -501,8 +501,9 @@ def merge_csvs(in_list):
             try:
                 in_array = np.loadtxt(in_file, delimiter=',', skiprows=1)
             except ValueError as ex:
-                first = open(in_file, 'r')
-                header_line = first.readline()
+                with open(in_file, 'r') as first:
+                    header_line = first.readline()
+
                 header_list = header_line.split(',')
                 n_cols = len(header_list)
                 try:
@@ -681,8 +682,8 @@ class MergeCSVFiles(BaseInterface):
             ext = '.csv'
 
         out_file = op.abspath(name + ext)
-        file_handle = open(out_file, 'w')
-        file_handle.write(csv_headings)
+        with open(out_file, 'w') as file_handle:
+            file_handle.write(csv_headings)
 
         shape = np.shape(output_array)
         typelist = maketypelist(
@@ -711,8 +712,9 @@ class MergeCSVFiles(BaseInterface):
             output[extraheading] = extrafieldlist
         iflogger.info(output)
         iflogger.info(fmt)
-        np.savetxt(file_handle, output, fmt, delimiter=',')
-        file_handle.close()
+        with open(out_file, 'a') as file_handle:
+            np.savetxt(file_handle, output, fmt, delimiter=',')
+
         return runtime
 
     def _list_outputs(self):
@@ -774,6 +776,8 @@ class AddCSVColumn(BaseInterface):
             new_line = line.replace('\n', '')
             new_line = new_line + ',' + self.inputs.extra_field + '\n'
             out_file.write(new_line)
+        in_file.close()
+        out_file.close()
         return runtime
 
     def _list_outputs(self):

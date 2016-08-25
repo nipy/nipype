@@ -10,7 +10,7 @@ name-steps pipeline: getting back scope in command-line based programming.
    >>> os.chdir(datadir)
 """
 from __future__ import print_function, division, unicode_literals, absolute_import
-from builtins import object
+from builtins import object, open
 
 import os
 import hashlib
@@ -106,11 +106,13 @@ class PipeFunc(object):
 def read_log(filename, run_dict=None):
     if run_dict is None:
         run_dict = dict()
-    for line in open(filename, 'r'):
-        dir_name, job_name = line[:-1].split('/')
-        jobs = run_dict.get(dir_name, set())
-        jobs.add(job_name)
-        run_dict[dir_name] = jobs
+
+    with open(filename, 'r') as logfile:
+        for line in logfile:
+            dir_name, job_name = line[:-1].split('/')
+            jobs = run_dict.get(dir_name, set())
+            jobs.add(job_name)
+            run_dict[dir_name] = jobs
     return run_dict
 
 
@@ -226,8 +228,9 @@ class Memory(object):
         # Every counter is a file opened in append mode and closed
         # immediately to avoid race conditions in parallel computing:
         # file appends are atomic
-        open(os.path.join(base_dir, 'log.current'),
-             'a').write('%s/%s\n' % (dir_name, job_name))
+        with open(os.path.join(base_dir, 'log.current'), 'a') as currentlog:
+            currentlog.write('%s/%s\n' % (dir_name, job_name))
+
         t = time.localtime()
         year_dir = os.path.join(base_dir, 'log.%i' % t.tm_year)
         try:
@@ -239,8 +242,9 @@ class Memory(object):
             os.mkdir(month_dir)
         except OSError:
             "Dir exists"
-        open(os.path.join(month_dir, '%02i.log' % t.tm_mday),
-             'a').write('%s/%s\n' % (dir_name, job_name))
+
+        with open(os.path.join(month_dir, '%02i.log' % t.tm_mday), 'a') as rotatefile:
+            rotatefile.write('%s/%s\n' % (dir_name, job_name))
 
     def clear_previous_runs(self, warn=True):
         """ Remove all the cache that where not used in the latest run of
