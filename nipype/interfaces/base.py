@@ -758,13 +758,17 @@ class BaseInterface(Interface):
     _additional_metadata = []
     _redirect_x = False
 
-    def __init__(self, **inputs):
+    def __init__(self, from_file=None, **inputs):
         if not self.input_spec:
             raise Exception('No input_spec in class: %s' %
                             self.__class__.__name__)
         self.inputs = self.input_spec(**inputs)
         self.estimated_memory_gb = 1
         self.num_threads = 1
+
+        if from_file is not None:
+            self.load_inputs_from_json(from_file)
+
 
     @classmethod
     def help(cls, returnhelp=False):

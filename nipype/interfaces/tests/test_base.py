@@ -480,6 +480,8 @@ def test_BaseInterface_load_save_inputs():
     bif2.load_inputs_from_json(tmp_json)
     yield assert_equal, inputs_dict, bif2.inputs.get()
 
+    bif3 = DerivedInterface(from_file=tmp_json)
+    yield assert_equal, inputs_dict, bif3.inputs.get()
 
 def assert_not_raises(fn, *args, **kwargs):
     fn(*args, **kwargs)
