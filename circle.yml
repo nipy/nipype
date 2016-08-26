@@ -19,7 +19,7 @@ dependencies:
     - if [[ ! -d ~/examples/nipype-fsl_course_data ]]; then wget --retry-connrefused --waitretry=5 --read-timeout=20 --timeout=15 -t 0 -q https://3552243d5be815c1b09152da6525cb8fe7b900a6.googledrive.com/host/0BxI12kyv2olZVUswazA3NkFvOXM/nipype-fsl_course_data.tar.gz && tar xzf nipype-fsl_course_data.tar.gz -C ~/examples/; fi
     - if [[ ! -d ~/examples/feeds ]]; then wget --retry-connrefused --waitretry=5 --read-timeout=20 --timeout=15 -t 0 -q https://3552243d5be815c1b09152da6525cb8fe7b900a6.googledrive.com/host/0BxI12kyv2olZVUswazA3NkFvOXM/fsl-5.0.9-feeds.tar.gz && tar xzf fsl-5.0.9-feeds.tar.gz -C ~/examples/; fi
     - if [[ -e ~/docker/image.tar ]]; then docker load -i ~/docker/image.tar; fi
-    - docker build -f docker/nipype_test_py35/Dockerfile -t nipype/nipype_test:py35 . :
+    - docker build -f docker/nipype_test/Dockerfile_py35 -t nipype/nipype_test:py35 . :
         timeout: 1600
     - mkdir -p ~/docker; docker save nipype/nipype_test:py35 > ~/docker/image.tar :
         timeout: 1600

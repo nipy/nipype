@@ -30,7 +30,6 @@ FROM neurodebian:latest
 MAINTAINER Nipype developers
 
 # Preparations
-
 ARG DEBIAN_FRONTEND=noninteractive
 RUN sed -i -e 's,main$,main contrib non-free,g' /etc/apt/sources.list.d/neurodebian.sources.list && \
     apt-get -y update && \
@@ -92,9 +91,9 @@ RUN curl -sSL http://www.fil.ion.ucl.ac.uk/spm/download/restricted/utopia/dev/sp
     unzip spm12.zip && \
     rm -rf spm12.zip
 
-ENV MATLABCMD "/opt/mcr/v85/toolbox/matlab"
-ENV SPMMCRCMD "/opt/spm12/run_spm12.sh /opt/mcr/v85/ script"
-ENV FORCE_SPMMCR 1
+ENV MATLABCMD "/opt/mcr/v85/toolbox/matlab" \
+    SPMMCRCMD "/opt/spm12/run_spm12.sh /opt/mcr/v85/ script" \
+    FORCE_SPMMCR 1
 
 
 CMD ["/bin/bash"]

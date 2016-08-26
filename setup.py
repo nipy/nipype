@@ -434,7 +434,7 @@ def main(**extra_args):
           # python -- duplicating things into MANIFEST.in but this is admittedly
           # only a workaround to get things started -- not a solution
           package_data={'nipype': testdatafiles},
-          scripts=glob('bin/*'),
+          scripts=glob('bin/*') + ['nipype/external/fsl_imglob.py'],
           cmdclass=cmdclass,
           **extra_args
           )
