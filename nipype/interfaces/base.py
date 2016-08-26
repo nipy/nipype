@@ -35,7 +35,7 @@ from textwrap import wrap
 from datetime import datetime as dt
 from dateutil.parser import parse as parseutc
 from warnings import warn
-
+import simplejson as json
 
 from .traits_extension import (traits, Undefined, TraitDictObject,
                                TraitListObject, TraitError,
@@ -1147,6 +1147,15 @@ class BaseInterface(Interface):
                 raise ValueError('Interface %s has no version information' %
                                  self.__class__.__name__)
         return self._version
+
+    def load_inputs_from_json(self, json_file):
+        with open(json_file) as fhandle:
+            inputs_dict = json.load(fhandle)
+
+        for key, val in list(inputs_dict.items()):
+            if not isdefined(getattr(self.inputs, key, Undefined)):
+                setattr(self.inputs, key, val)
+
 
 
 class Stream(object):
