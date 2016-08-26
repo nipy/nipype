@@ -28,7 +28,7 @@ def test_Volpad_inputs():
     output_file=dict(argstr='%s',
     genfile=True,
     hash_files=False,
-    name_source=['input_file'],
+    name_source=[u'input_file'],
     name_template='%s_volpad.mnc',
     position=-1,
     ),

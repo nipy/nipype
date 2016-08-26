@@ -24,7 +24,7 @@ def test_LFCD_inputs():
     mask=dict(argstr='-mask %s',
     ),
     out_file=dict(argstr='-prefix %s',
-    name_source=['in_file'],
+    name_source=[u'in_file'],
     name_template='%s_afni',
     ),
     outputtype=dict(),

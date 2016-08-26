@@ -29,7 +29,7 @@ def test_Hist_inputs():
     ),
     out_file=dict(argstr='-prefix %s',
     keep_extension=False,
-    name_source=['in_file'],
+    name_source=[u'in_file'],
     name_template='%s_hist',
     ),
     out_show=dict(argstr='> %s',

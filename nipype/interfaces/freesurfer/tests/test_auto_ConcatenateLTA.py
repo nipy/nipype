@@ -23,7 +23,7 @@ def test_ConcatenateLTA_inputs():
     out_file=dict(argstr='%s',
     hash_files=False,
     keep_extension=True,
-    name_source=['in_lta1'],
+    name_source=[u'in_lta1'],
     name_template='%s-long',
     position=-1,
     ),

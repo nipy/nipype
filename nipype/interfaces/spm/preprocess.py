@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """SPM wrappers for preprocessing data
@@ -8,11 +9,8 @@
    >>> datadir = os.path.realpath(os.path.join(filepath, '../../testing/data'))
    >>> os.chdir(datadir)
 """
-
+from __future__ import print_function, division, unicode_literals, absolute_import
 from builtins import range
-
-__docformat__ = 'restructuredtext'
-
 # Standard library imports
 from copy import deepcopy
 import os
@@ -21,14 +19,14 @@ import os
 import numpy as np
 
 # Local imports
-from ..base import (OutputMultiPath, TraitedSpec, isdefined,
-                    traits, InputMultiPath, File)
-from .base import (SPMCommand, scans_for_fname,
-                   func_is_3d, Info,
-                   scans_for_fnames, SPMCommandInputSpec)
 from ...utils.filemanip import (fname_presuffix, filename_to_list,
                                 list_to_filename, split_filename)
+from ..base import (OutputMultiPath, TraitedSpec, isdefined,
+                    traits, InputMultiPath, File)
+from .base import (SPMCommand, scans_for_fname, func_is_3d,
+                   scans_for_fnames, SPMCommandInputSpec)
 
+__docformat__ = 'restructuredtext'
 
 class SliceTimingInputSpec(SPMCommandInputSpec):
     in_files = InputMultiPath(traits.Either(traits.List(File(exists=True)),

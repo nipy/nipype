@@ -1,9 +1,8 @@
+# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
-from __future__ import print_function
-from builtins import zip
-from builtins import range
-from builtins import open
+from __future__ import print_function, unicode_literals
+from builtins import str, zip, range, open
 
 import os
 import glob
@@ -441,7 +440,7 @@ def test_datafinder_depth():
             df.inputs.min_depth = min_depth
             df.inputs.max_depth = max_depth
             result = df.run()
-            expected = [str(x) for x in range(min_depth, max_depth + 1)]
+            expected = ['{}'.format(x) for x in range(min_depth, max_depth + 1)]
             for path, exp_fname in zip(result.outputs.out_paths, expected):
                 _, fname = os.path.split(path)
                 yield assert_equal, fname, exp_fname

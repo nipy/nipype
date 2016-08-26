@@ -26,7 +26,7 @@ def test_MNIBiasCorrection_inputs():
     out_file=dict(argstr='--o %s',
     hash_files=False,
     keep_extension=True,
-    name_source=['in_file'],
+    name_source=[u'in_file'],
     name_template='%s_output',
     ),
     protocol_iterations=dict(argstr='--proto-iters %d',

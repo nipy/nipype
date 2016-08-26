@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """
@@ -9,19 +10,17 @@ Interfaces to functionality from nitime for time-series analysis of fmri data
 - nitime.viz.drawmatrix_channels
 
 """
+from __future__ import print_function, division, unicode_literals, absolute_import
+from builtins import zip, object, open
 
-from builtins import zip
-from builtins import object
-
-import warnings
 import numpy as np
 import tempfile
-from ...utils.misc import package_check
 
+from ...utils.misc import package_check
+from ...utils.filemanip import fname_presuffix
 from ..base import (TraitedSpec, File, Undefined, traits,
                     BaseInterface, isdefined, BaseInterfaceInputSpec)
 
-from ...utils.filemanip import fname_presuffix
 
 have_nitime = True
 try:

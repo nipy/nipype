@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """The dcm2nii module provides basic functions for dicom conversion
 
    Change directory to provide relative paths for doctests
@@ -6,16 +7,17 @@
    >>> datadir = os.path.realpath(os.path.join(filepath, '../testing/data'))
    >>> os.chdir(datadir)
 """
-
+from __future__ import print_function, division, unicode_literals, absolute_import
+from builtins import str, open
 import os
 import re
 from copy import deepcopy
 
+from ..utils.filemanip import split_filename
 from .base import (CommandLine, CommandLineInputSpec,
                    InputMultiPath, traits, TraitedSpec,
                    OutputMultiPath, isdefined,
                    File, Directory)
-from ..utils.filemanip import split_filename
 
 
 class Dcm2niiInputSpec(CommandLineInputSpec):
@@ -73,7 +75,7 @@ class Dcm2nii(CommandLine):
     >>> converter.inputs.source_names = ['functional_1.dcm', 'functional_2.dcm']
     >>> converter.inputs.gzip_output = True
     >>> converter.inputs.output_dir = '.'
-    >>> converter.cmdline
+    >>> converter.cmdline # doctest: +IGNORE_UNICODE
     'dcm2nii -a y -c y -b config.ini -v y -d y -e y -g y -i n -n y -o . -p y -x n -f n functional_1.dcm'
     """
 
@@ -193,10 +195,9 @@ class Dcm2nii(CommandLine):
         elif name == 'config_file':
             self._config_created = True
             config_file = "config.ini"
-            f = open(config_file, "w")
-            # disable interactive mode
-            f.write("[BOOL]\nManualNIfTIConv=0\n")
-            f.close()
+            with open(config_file, "w") as f:
+                # disable interactive mode
+                f.write("[BOOL]\nManualNIfTIConv=0\n")
             return config_file
         return None
 
@@ -249,7 +250,7 @@ class Dcm2niix(CommandLine):
     'dcm2niix -b y -z i -x n -t n -m n -f %t%p -o . -s y -v n functional_1.dcm'
 
     >>> flags = '-'.join([val.strip() + ' ' for val in sorted(' '.join(converter.cmdline.split()[1:-1]).split('-'))])
-    >>> flags
+    >>> flags # doctest: +IGNORE_UNICODE
     ' -b y -f %t%p -m n -o . -s y -t n -v n -x n -z i '
     """
 

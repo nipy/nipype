@@ -46,21 +46,24 @@ clean-ctags:
 clean-doc:
 	rm -rf doc/_build
 
-clean: clean-build clean-pyc clean-so clean-ctags clean-doc
+clean-tests:
+	rm -f .coverage
+
+clean: clean-build clean-pyc clean-so clean-ctags clean-doc clean-tests
 
 in: inplace # just a shortcut
 inplace:
 	$(PYTHON) setup.py build_ext -i
 
 test-code: in
-	$(NOSETESTS) -s nipype --with-doctest
+	$(NOSETESTS) -s nipype --with-doctest --with-doctest-ignore-unicode
 
 test-doc:
-	$(NOSETESTS) -s --with-doctest --doctest-tests --doctest-extension=rst \
+	$(NOSETESTS) -s --with-doctest --with-doctest-ignore-unicode --doctest-tests --doctest-extension=rst \
 	--doctest-fixtures=_fixture doc/
 
-test-coverage:
-	$(NOSETESTS) -s --with-doctest --with-coverage --cover-package=nipype \
+test-coverage: clean-tests in
+	$(NOSETESTS) -s --with-doctest --with-doctest-ignore-unicode --with-coverage --cover-package=nipype \
 	--config=.coveragerc
 
 test: clean test-code

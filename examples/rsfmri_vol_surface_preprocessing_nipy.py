@@ -44,8 +44,8 @@ specifically the 2mm versions of:
 
 """
 
-from __future__ import division
-from builtins import range
+from __future__ import division, unicode_literals
+from builtins import open, range
 
 import os
 

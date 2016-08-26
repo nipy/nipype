@@ -43,8 +43,8 @@ specifically the 2mm versions of:
 - `MNI template <http://mindboggle.info/data/templates/ants/OASIS-30_Atropos_template_in_MNI152_2mm.nii.gz>`_
 """
 
-from __future__ import division
-from builtins import range
+from __future__ import division, unicode_literals
+from builtins import open, range
 
 import os
 

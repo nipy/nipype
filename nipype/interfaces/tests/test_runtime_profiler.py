@@ -1,10 +1,14 @@
+# -*- coding: utf-8 -*-
 # test_runtime_profiler.py
 #
 # Author: Daniel Clark, 2016
 
-'''
+"""
 Module to unit test the runtime_profiler in nipype
-'''
+"""
+
+from __future__ import print_function, division, unicode_literals, absolute_import
+from builtins import open
 
 # Import packages
 import unittest
@@ -272,8 +276,9 @@ class RuntimeProfilerTestCase(unittest.TestCase):
         wf.run(plugin='MultiProc', plugin_args=plugin_args)
 
         # Get runtime stats from log file
-        start_str = open(log_file, 'r').readlines()[0].rstrip('\n')
-        finish_str = open(log_file, 'r').readlines()[1].rstrip('\n')
+        with open(log_file, 'r') as log_handle:
+            start_str = log_handle.readlines()[0].rstrip('\n')
+            finish_str = log_handle.readlines()[1].rstrip('\n')
 
         # Delete wf base dir
         shutil.rmtree(base_dir)
@@ -350,8 +355,9 @@ class RuntimeProfilerTestCase(unittest.TestCase):
         wf.run(plugin='MultiProc', plugin_args=plugin_args)
 
         # Get runtime stats from log file
-        start_str = open(log_file, 'r').readlines()[0].rstrip('\n')
-        finish_str = open(log_file, 'r').readlines()[1].rstrip('\n')
+        with open(log_file, 'r') as log_handle:
+            start_str = log_handle.readlines()[0].rstrip('\n')
+            finish_str = log_handle.readlines()[1].rstrip('\n')
 
         # Delete wf base dir
         shutil.rmtree(base_dir)

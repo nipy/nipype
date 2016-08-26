@@ -24,7 +24,7 @@ def test_Normalize_inputs():
     out_file=dict(argstr='%s',
     hash_files=False,
     keep_extension=True,
-    name_source=['in_file'],
+    name_source=[u'in_file'],
     name_template='%s_norm',
     position=-1,
     ),

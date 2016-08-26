@@ -42,21 +42,29 @@ ENV PATH /usr/local/miniconda/bin:$PATH
 # http://bugs.python.org/issue19846
 # > At the moment, setting "LANG=C" on a Linux system *fundamentally breaks Python 3*, and that's not OK.
 ENV LANG C.UTF-8
+ENV LC_ALL C.UTF-8
 
 # Add conda-forge channel in conda
 RUN conda config --add channels conda-forge && \
-    conda install -y lockfile nipype
+    conda update -y conda && \
+    conda update --all -y python=3.4 && \
+    conda install -y lockfile nipype matplotlib sphinx boto boto3 coverage mock pbr nitime dipy && \
+    pip install nose-cov doctest-ignore-unicode configparser
+   
+COPY docker/circleci/run_* /usr/bin/
+RUN chmod +x /usr/bin/run_*
 
 RUN mkdir -p /root/src/nipype
 COPY . /root/src/nipype
 
-RUN cd /root/src/nipype && \
+RUN rm -r /usr/local/miniconda/lib/python3.5/site-packages/nipype* && \
+    cd /root/src/nipype && \
     pip install -r requirements.txt && \
-    pip install -e .
+    pip install -e . && \
+    make specs
 
-
-COPY docker/circleci/run_* /usr/bin/
-RUN chmod +x /usr/bin/run_*
-ENV SHELL /bin/bash
+# Replace imglob with Python3 compatible version
+RUN rm -r ${FSLDIR}/bin/imglob && \
+    ln -s $(which fsl_imglob.py) ${FSLDIR}/bin/imglob
 
 CMD ["/bin/bash"]

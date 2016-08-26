@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """The spm module provides basic functions for interfacing with SPM  tools.
@@ -13,12 +14,9 @@ you can test by calling::
 
    spm.SPMCommand().version
 """
+from __future__ import print_function, division, unicode_literals, absolute_import
+from builtins import range, object, str, bytes
 
-from __future__ import print_function
-from builtins import range
-from builtins import object
-
-__docformat__ = 'restructuredtext'
 
 # Standard library imports
 import os
@@ -30,12 +28,13 @@ import numpy as np
 from scipy.io import savemat
 
 # Local imports
+from ... import logging
+from ...utils import spm_docs as sd
 from ..base import (BaseInterface, traits, isdefined, InputMultiPath,
                     BaseInterfaceInputSpec, Directory, Undefined)
 from ..matlab import MatlabCommand
-from ...utils import spm_docs as sd
-from ...external.six import string_types
-from ... import logging
+
+__docformat__ = 'restructuredtext'
 logger = logging.getLogger('interface')
 
 
@@ -420,7 +419,7 @@ class SPMCommand(BaseInterface):
                     if isinstance(val, np.ndarray):
                         jobstring += self._generate_job(prefix=None,
                                                         contents=val)
-                    elif isinstance(val, string_types):
+                    elif isinstance(val, (str, bytes)):
                         jobstring += '\'%s\';...\n' % (val)
                     else:
                         jobstring += '%s;...\n' % str(val)
@@ -435,7 +434,7 @@ class SPMCommand(BaseInterface):
                         jobstring += self._generate_job(newprefix,
                                                         val[field])
             return jobstring
-        if isinstance(contents, string_types):
+        if isinstance(contents, (str, bytes)):
             jobstring += "%s = '%s';\n" % (prefix, contents)
             return jobstring
         jobstring += "%s = %s;\n" % (prefix, str(contents))

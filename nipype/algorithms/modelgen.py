@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """
@@ -17,9 +18,8 @@ These functions include:
    >>> os.chdir(datadir)
 
 """
-
-from __future__ import division
-from builtins import range
+from __future__ import print_function, division, unicode_literals, absolute_import
+from builtins import range, str, bytes
 
 from copy import deepcopy
 import os
@@ -28,7 +28,6 @@ from nibabel import load
 import numpy as np
 from scipy.special import gammaln
 
-from ..external.six import string_types
 from ..interfaces.base import (BaseInterface, TraitedSpec, InputMultiPath,
                                traits, File, Bunch, BaseInterfaceInputSpec,
                                isdefined)
@@ -457,7 +456,7 @@ class SpecifySPMModel(SpecifyModel):
         for i, f in enumerate(self.inputs.functional_runs):
             if isinstance(f, list):
                 numscans = len(f)
-            elif isinstance(f, string_types):
+            elif isinstance(f, (str, bytes)):
                 img = load(f)
                 numscans = img.shape[3]
             else:
