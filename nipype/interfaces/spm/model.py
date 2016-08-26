@@ -328,7 +328,7 @@ class EstimateContrastOutputSpec(TraitedSpec):
 
 
 class EstimateContrast(SPMCommand):
-    """use spm_contrasts to estimate contrasts of interest
+    """Use spm_contrasts to estimate contrasts of interest
 
     Examples
     --------
