@@ -846,11 +846,12 @@ class NewSegmentInputSpec(SPMCommandInputSpec):
     warping_regularization = traits.Either(traits.Float(),
                                            traits.List(traits.Float(),
                                                        minlen=5, maxlen=5),
-                                           field='warp.reg'
-                                           desc='Warping regularization \
-                                           parameter(s). Accepts float or \
-                                           list of floats (the latter being \
-                                           required by SPM12)')
+                                           field='warp.reg',
+                                           desc=('Warping regularization '
+                                                 'parameter(s). Accepts float '
+                                                 'or list of floats (the
+                                                 'latter is required by '
+                                                 'SPM12)')
     sampling_distance = traits.Float(field='warp.samp',
                                      desc='Sampling distance on data for parameter estimation')
     write_deformation_fields = traits.List(traits.Bool(), minlen=2, maxlen=2, field='warp.write',
