@@ -851,7 +851,7 @@ class NewSegmentInputSpec(SPMCommandInputSpec):
                                                  'parameter(s). Accepts float '
                                                  'or list of floats (the '
                                                  'latter is required by '
-                                                 'SPM12)')
+                                                 'SPM12)'))
     sampling_distance = traits.Float(field='warp.samp',
                                      desc='Sampling distance on data for parameter estimation')
     write_deformation_fields = traits.List(traits.Bool(), minlen=2, maxlen=2, field='warp.write',
