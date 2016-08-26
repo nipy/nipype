@@ -476,7 +476,8 @@ class SPMCommand(BaseInterface):
         end\n
         """
         if self.mlab.inputs.mfile:
-            if isdefined(self.inputs.use_v8struct) and self.inputs.use_v8struct:
+            if (isdefined(self.inputs.use_v8struct) and
+                    self.inputs.use_v8struct):
                 mscript += self._generate_job('jobs{1}.spm.%s.%s' %
                                               (self.jobtype, self.jobname),
                                               contents[0])
