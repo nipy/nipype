@@ -1149,6 +1149,10 @@ class BaseInterface(Interface):
         return self._version
 
     def load_inputs_from_json(self, json_file):
+        """
+        A convenient way to load pre-set inputs from a JSON file.
+        """
+
         with open(json_file) as fhandle:
             inputs_dict = json.load(fhandle)
 
@@ -1156,6 +1160,12 @@ class BaseInterface(Interface):
             if not isdefined(getattr(self.inputs, key, Undefined)):
                 setattr(self.inputs, key, val)
 
+    def save_inputs_to_json(self, json_file):
+        """
+        A convenient way to save current inputs to a JSON file.
+        """
+        with open(json_file, 'w') as fhandle:
+            json.dump(self.inputs.get(), fhandle, indent=4)
 
 
 class Stream(object):

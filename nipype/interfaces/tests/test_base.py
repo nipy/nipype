@@ -455,6 +455,31 @@ def test_BaseInterface():
     nib.BaseInterface.input_spec = None
     yield assert_raises, Exception, nib.BaseInterface
 
+def test_BaseInterface_load_save_inputs():
+    tmp_dir = tempfile.mkdtemp()
+    tmp_json = os.path.join(tmp_dir, 'settings.json')
+
+
+    class InputSpec(nib.TraitedSpec):
+        input1 = nib.traits.Int()
+        input2 = nib.traits.Float()
+        input3 = nib.traits.Bool()
+        input4 = nib.traits.Str()
+
+    class DerivedInterface(nib.BaseInterface):
+        input_spec = InputSpec
+
+        def __init__(self, **inputs):
+            super(DerivedInterface, self).__init__(**inputs)
+
+    inputs_dict = {'input1': 12, 'input2': 3.4, 'input3': True,
+                   'input4': 'some string'}
+    bif = DerivedInterface(**inputs_dict)
+    bif.save_inputs_to_json(tmp_json)
+    bif2 = DerivedInterface()
+    bif2.load_inputs_from_json(tmp_json)
+    yield assert_equal, inputs_dict, bif2.inputs.get()
+
 
 def assert_not_raises(fn, *args, **kwargs):
     fn(*args, **kwargs)
