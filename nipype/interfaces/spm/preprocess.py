@@ -47,7 +47,8 @@ class SliceTimingInputSpec(SPMCommandInputSpec):
                                           'calculated as TR-(TR/num_slices)'),
                                     mandatory=True)
     slice_order = traits.List(traits.Int(), field='so',
-                              desc='1-based order in which slices are acquired',
+                              desc=('1-based order in which slices are '
+                                    'acquired'),
                               mandatory=True)
     ref_slice = traits.Int(field='refslice',
                            desc='1-based Number of the reference slice',
@@ -104,7 +105,8 @@ class SliceTiming(SPMCommand):
         filelist = filename_to_list(self.inputs.in_files)
         for f in filelist:
             if isinstance(f, list):
-                run = [fname_presuffix(in_f, prefix=self.inputs.out_prefix) for in_f in f]
+                run = [fname_presuffix(in_f, prefix=self.inputs.out_prefix)
+                       for in_f in f]
             else:
                 run = fname_presuffix(f, prefix=self.inputs.out_prefix)
             outputs['timecorrected_files'].append(run)
@@ -126,7 +128,8 @@ class RealignInputSpec(SPMCommandInputSpec):
     separation = traits.Range(low=0.0, field='eoptions.sep',
                               desc='sampling separation in mm')
     register_to_mean = traits.Bool(field='eoptions.rtm',
-                                   desc='Indicate whether realignment is done to the mean image')
+                                   desc=('Indicate whether realignment is '
+                                         'done to the mean image'))
     weight_img = File(exists=True, field='eoptions.weight',
                       desc='filename of weighting image')
     interp = traits.Range(low=0, high=7, field='eoptions.interp',
@@ -138,10 +141,12 @@ class RealignInputSpec(SPMCommandInputSpec):
                                  minlen=2, maxlen=2, usedefault=True,
                                  desc='determines which images to reslice')
     write_interp = traits.Range(low=0, high=7, field='roptions.interp',
-                                desc='degree of b-spline used for interpolation')
+                                desc=('degree of b-spline used for '
+                                      'interpolation'))
     write_wrap = traits.List(traits.Int(), minlen=3, maxlen=3,
                              field='roptions.wrap',
-                             desc='Check if interpolation should wrap in [x,y,z]')
+                             desc=('Check if interpolation should wrap in '
+                                   '[x,y,z]'))
     write_mask = traits.Bool(field='roptions.mask',
                              desc='True/False mask output image')
     out_prefix = traits.String('r', field='roptions.prefix', usedefault=True,
@@ -150,20 +155,25 @@ class RealignInputSpec(SPMCommandInputSpec):
 
 class RealignOutputSpec(TraitedSpec):
     mean_image = File(exists=True, desc='Mean image file from the realignment')
-    modified_in_files = OutputMultiPath(traits.Either(traits.List(File(exists=True)),
-                                                      File(exists=True)),
-                                        desc='Copies of all files passed to in_files.\
-                                              Headers will have been modified to align all\
-                                              images with the first, or optionally to first\
-                                              do that, extract a mean image, and re-align to\
-                                              that mean image.')
-    realigned_files = OutputMultiPath(traits.Either(traits.List(File(exists=True)),
-                                                    File(exists=True)),
-                                      desc='If jobtype is write or estwrite, these will be the\
-                                            resliced files. Otherwise, they will be copies of\
-                                            in_files that have had their headers rewritten.')
+    modified_in_files = OutputMultiPath(traits.Either(
+        traits.List(File(exists=True)), File(exists=True)),
+                                        desc=('Copies of all files passed to '
+                                              'in_files. Headers will have '
+                                              'been modified to align all '
+                                              'images with the first, or '
+                                              'optionally to first do that, '
+                                              'extract a mean image, and '
+                                              're-align to that mean image.'))
+    realigned_files = OutputMultiPath(traits.Either(
+        traits.List(File(exists=True)), File(exists=True)),
+                                      desc=('If jobtype is write or estwrite, '
+                                            'these will be the resliced files.'
+                                            ' Otherwise, they will be copies '
+                                            'of in_files that have had their '
+                                            'headers rewritten.'))
     realignment_parameters = OutputMultiPath(File(exists=True),
-                                             desc='Estimated translation and rotation parameters')
+                                             desc=('Estimated translation and '
+                                                   'rotation parameters'))
 
 
 class Realign(SPMCommand):
@@ -220,10 +230,9 @@ class Realign(SPMCommand):
                     tmp_imgf = imgf[0]
                 else:
                     tmp_imgf = imgf
-                outputs['realignment_parameters'].append(fname_presuffix(tmp_imgf,
-                                                                         prefix='rp_',
-                                                                         suffix='.txt',
-                                                                         use_ext=False))
+                outputs['realignment_parameters'].append(
+                    fname_presuffix(tmp_imgf, prefix='rp_', suffix='.txt',
+                                    use_ext=False))
                 if not isinstance(imgf, list) and func_is_3d(imgf):
                     break
         if self.inputs.jobtype == "estimate":
