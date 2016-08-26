@@ -1161,7 +1161,7 @@ class BaseInterface(Interface):
             inputs_dict = json.load(fhandle)
 
         for key, val in list(inputs_dict.items()):
-            if not isdefined(getattr(self.inputs, key, Undefined)):
+            if not hasattr(self.inputs, key):
                 setattr(self.inputs, key, val)
 
     def save_inputs_to_json(self, json_file):
