@@ -1,7 +1,7 @@
 Upcoming release 0.13
 =====================
 
-* ENH: [ENH] Convenient load/save of interface inputs (https://github.com/nipy/nipype/pull/1591)
+* ENH: Convenient load/save of interface inputs (https://github.com/nipy/nipype/pull/1591)
 * TST: reduce the size of docker images & use tags for images (https://github.com/nipy/nipype/pull/1564)
 * ENH: Implement missing inputs/outputs in FSL AvScale (https://github.com/nipy/nipype/pull/1563)
 * FIX: Fix symlink test in copyfile (https://github.com/nipy/nipype/pull/1570, https://github.com/nipy/nipype/pull/1586)
