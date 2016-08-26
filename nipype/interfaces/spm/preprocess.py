@@ -849,7 +849,7 @@ class NewSegmentInputSpec(SPMCommandInputSpec):
                                            field='warp.reg',
                                            desc=('Warping regularization '
                                                  'parameter(s). Accepts float '
-                                                 'or list of floats (the
+                                                 'or list of floats (the '
                                                  'latter is required by '
                                                  'SPM12)')
     sampling_distance = traits.Float(field='warp.samp',
