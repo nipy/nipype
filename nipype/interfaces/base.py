@@ -56,6 +56,8 @@ nipype_version = LooseVersion(__version__)
 
 iflogger = logging.getLogger('interface')
 
+PY35 = sys.version_info >= (3, 5)
+
 if runtime_profile:
     try:
         import psutil
@@ -762,12 +764,13 @@ class BaseInterface(Interface):
         if not self.input_spec:
             raise Exception('No input_spec in class: %s' %
                             self.__class__.__name__)
+
         self.inputs = self.input_spec(**inputs)
         self.estimated_memory_gb = 1
         self.num_threads = 1
 
         if from_file is not None:
-            self.load_inputs_from_json(from_file)
+            self.load_inputs_from_json(from_file, overwrite=False)
 
 
     @classmethod
@@ -1152,7 +1155,7 @@ class BaseInterface(Interface):
                                  self.__class__.__name__)
         return self._version
 
-    def load_inputs_from_json(self, json_file):
+    def load_inputs_from_json(self, json_file, overwrite=True):
         """
         A convenient way to load pre-set inputs from a JSON file.
         """
@@ -1160,16 +1163,25 @@ class BaseInterface(Interface):
         with open(json_file) as fhandle:
             inputs_dict = json.load(fhandle)
 
-        for key, val in list(inputs_dict.items()):
+        for key, newval in list(inputs_dict.items()):
             if not hasattr(self.inputs, key):
-                setattr(self.inputs, key, val)
+                continue
+            val = getattr(self.inputs, key)
+            if overwrite or not isdefined(val):
+                setattr(self.inputs, key, newval)
 
     def save_inputs_to_json(self, json_file):
         """
         A convenient way to save current inputs to a JSON file.
         """
+        inputs = self.inputs.get()
+        for key, val in list(inputs.items()):
+            if not isdefined(val):
+                inputs.pop(key, None)
+
+        iflogger.debug('saving inputs {}', inputs)
         with open(json_file, 'w') as fhandle:
-            json.dump(self.inputs.get(), fhandle, indent=4)
+            json.dump(inputs, fhandle, indent=4)
 
 
 class Stream(object):

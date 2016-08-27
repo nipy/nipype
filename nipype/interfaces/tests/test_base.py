@@ -459,6 +459,11 @@ def test_BaseInterface_load_save_inputs():
     tmp_dir = tempfile.mkdtemp()
     tmp_json = os.path.join(tmp_dir, 'settings.json')
 
+    def _rem_undefined(indict):
+        for key, val in list(indict.items()):
+            if not nib.isdefined(val):
+                indict.pop(key, None)
+        return indict
 
     class InputSpec(nib.TraitedSpec):
         input1 = nib.traits.Int()
@@ -472,16 +477,20 @@ def test_BaseInterface_load_save_inputs():
         def __init__(self, **inputs):
             super(DerivedInterface, self).__init__(**inputs)
 
-    inputs_dict = {'input1': 12, 'input2': 3.4, 'input3': True,
+    inputs_dict = {'input1': 12, 'input3': True,
                    'input4': 'some string'}
     bif = DerivedInterface(**inputs_dict)
     bif.save_inputs_to_json(tmp_json)
     bif2 = DerivedInterface()
     bif2.load_inputs_from_json(tmp_json)
-    yield assert_equal, inputs_dict, bif2.inputs.get()
+    yield assert_equal, _rem_undefined(bif2.inputs.get()), inputs_dict
 
     bif3 = DerivedInterface(from_file=tmp_json)
-    yield assert_equal, inputs_dict, bif3.inputs.get()
+    yield assert_equal, _rem_undefined(bif3.inputs.get()), inputs_dict
+
+    inputs_dict.update({'input4': 'some other string'})
+    bif4 = DerivedInterface(from_file=tmp_json, input4='some other string')
+    yield assert_equal, _rem_undefined(bif4.inputs.get()), inputs_dict
 
 def assert_not_raises(fn, *args, **kwargs):
     fn(*args, **kwargs)
