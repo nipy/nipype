@@ -60,7 +60,7 @@ class SliceTimingInputSpec(SPMCommandInputSpec):
 class SliceTimingOutputSpec(TraitedSpec):
     timecorrected_files = OutputMultiPath(
         traits.Either(traits.List(File(exists=True)), File(exists=True)),
-                      desc='slice time corrected files')
+        desc='slice time corrected files')
 
 
 class SliceTiming(SPMCommand):
@@ -366,8 +366,8 @@ class Coregister(SPMCommand):
             if isdefined(self.inputs.apply_to_files):
                 outputs['coregistered_files'] = self.inputs.apply_to_files
             outputs['coregistered_source'] = self.inputs.source
-        elif (self.inputs.jobtype == "write"
-                or self.inputs.jobtype == "estwrite"):
+        elif (self.inputs.jobtype == "write" or
+                self.inputs.jobtype == "estwrite"):
             if isdefined(self.inputs.apply_to_files):
                 outputs['coregistered_files'] = []
                 for imgf in filename_to_list(self.inputs.apply_to_files):
@@ -522,8 +522,8 @@ class Normalize(SPMCommand):
                 outputs['normalized_files'] = self.inputs.apply_to_files
             outputs['normalized_source'] = self.inputs.source
         elif 'write' in self.inputs.jobtype:
-            if (isdefined(self.inputs.write_preserve)
-                    and self.inputs.write_preserve):
+            if (isdefined(self.inputs.write_preserve) and
+                    self.inputs.write_preserve):
                 prefixNorm = ''.join(['m', self.inputs.out_prefix])
             else:
                 prefixNorm = self.inputs.out_prefix
@@ -607,9 +607,10 @@ class Normalize12InputSpec(SPMCommandInputSpec):
 
 class Normalize12OutputSpec(TraitedSpec):
     deformation_field = OutputMultiPath(File(exists=True),
-                                        desc=('NIfTI file containing 3 deformation '
-                                              'fields for the deformation in '
-                                              'x, y and z dimension'))
+                                        desc=('NIfTI file containing 3 '
+                                              'deformation fields for the '
+                                              'deformation in x, y and z '
+                                              'dimension'))
     normalized_image = OutputMultiPath(File(exists=True),
                                        desc=('Normalized file that needed to '
                                              'be aligned'))
@@ -708,9 +709,11 @@ class Normalize12(SPMCommand):
 
 
 class SegmentInputSpec(SPMCommandInputSpec):
-    data = InputMultiPath(File(exists=True), field='data', desc='one scan per subject',
+    data = InputMultiPath(File(exists=True), field='data',
+                          desc='one scan per subject',
                           copyfile=False, mandatory=True)
-    gm_output_type = traits.List(traits.Bool(), minlen=3, maxlen=3, field='output.GM',
+    gm_output_type = traits.List(traits.Bool(), minlen=3, maxlen=3,
+                                 field='output.GM',
                                  desc="""Options to produce grey matter images: c1*.img, wc1*.img and mwc1*.img.
             None: [False,False,False],
             Native Space: [False,False,True],
@@ -720,7 +723,8 @@ class SegmentInputSpec(SPMCommandInputSpec):
             Native + Modulated Normalised: [True,False,True],
             Native + Modulated + Unmodulated: [True,True,True],
             Modulated + Unmodulated Normalised: [True,True,False]""")
-    wm_output_type = traits.List(traits.Bool(), minlen=3, maxlen=3, field='output.WM',
+    wm_output_type = traits.List(traits.Bool(), minlen=3, maxlen=3,
+                                 field='output.WM',
                                  desc="""Options to produce white matter images: c2*.img, wc2*.img and mwc2*.img.
             None: [False,False,False],
             Native Space: [False,False,True],
@@ -742,24 +746,36 @@ class SegmentInputSpec(SPMCommandInputSpec):
             Modulated + Unmodulated Normalised: [True,True,False]""")
     save_bias_corrected = traits.Bool(field='output.biascor',
                                       desc='True/False produce a bias corrected image')
-    clean_masks = traits.Enum('no', 'light', 'thorough', field='output.cleanup',
-                              desc="clean using estimated brain mask ('no','light','thorough')")
+    clean_masks = traits.Enum('no', 'light', 'thorough',
+                              field='output.cleanup',
+                              desc=("clean using estimated brain mask "
+                                    "('no','light','thorough')"))
     tissue_prob_maps = traits.List(File(exists=True), field='opts.tpm',
-                                   desc='list of gray, white & csf prob. (opt,)')
+                                   desc=('list of gray, white & csf prob. '
+                                         '(opt,)'))
     gaussians_per_class = traits.List(traits.Int(), field='opts.ngaus',
-                                      desc='num Gaussians capture intensity distribution')
-    affine_regularization = traits.Enum('mni', 'eastern', 'subj', 'none', '', field='opts.regtype',
-                                        desc='Possible options: "mni", "eastern", "subj", "none" (no reguralisation), "" (no affine registration)')
+                                      desc=('num Gaussians capture intensity '
+                                            'distribution'))
+    affine_regularization = traits.Enum('mni', 'eastern', 'subj', 'none', '',
+                                        field='opts.regtype',
+                                        desc=('Possible options: "mni", '
+                                              '"eastern", "subj", "none" '
+                                              '(no reguralisation), "" '
+                                              '(no affine registration)'))
     warping_regularization = traits.Float(field='opts.warpreg',
-                                          desc='Controls balance between parameters and data')
-    warp_frequency_cutoff = traits.Float(field='opts.warpco', desc='Cutoff of DCT bases')
-    bias_regularization = traits.Enum(0, 0.00001, 0.0001, 0.001, 0.01, 0.1, 1, 10, field='opts.biasreg',
+                                          desc=('Controls balance between '
+                                                'parameters and data'))
+    warp_frequency_cutoff = traits.Float(field='opts.warpco',
+                                         desc='Cutoff of DCT bases')
+    bias_regularization = traits.Enum(0, 0.00001, 0.0001, 0.001,
+                                      0.01, 0.1, 1, 10, field='opts.biasreg',
                                       desc='no(0) - extremely heavy (10)')
     bias_fwhm = traits.Enum(30, 40, 50, 60, 70, 80, 90, 100, 110, 120, 130,
                             'Inf', field='opts.biasfwhm',
                             desc='FWHM of Gaussian smoothness of bias')
     sampling_distance = traits.Float(field='opts.samp',
-                                     desc='Sampling distance on data for parameter estimation')
+                                     desc=('Sampling distance on data for '
+                                           'parameter estimation'))
     mask_image = File(exists=True, field='opts.msk',
                       desc='Binary image to restrict parameter estimation ')
 
@@ -767,13 +783,16 @@ class SegmentInputSpec(SPMCommandInputSpec):
 class SegmentOutputSpec(TraitedSpec):
     native_gm_image = File(desc='native space grey probability map')
     normalized_gm_image = File(desc='normalized grey probability map',)
-    modulated_gm_image = File(desc='modulated, normalized grey probability map')
+    modulated_gm_image = File(desc=('modulated, normalized grey '
+                                    'probability map'))
     native_wm_image = File(desc='native space white probability map')
     normalized_wm_image = File(desc='normalized white probability map')
-    modulated_wm_image = File(desc='modulated, normalized white probability map')
+    modulated_wm_image = File(desc=('modulated, normalized white '
+                                    'probability map'))
     native_csf_image = File(desc='native space csf probability map')
     normalized_csf_image = File(desc='normalized csf probability map')
-    modulated_csf_image = File(desc='modulated, normalized csf probability map')
+    modulated_csf_image = File(desc=('modulated, normalized csf '
+                                     'probability map'))
     modulated_input_image = File(deprecated='0.10',
                                  new_name='bias_corrected_image',
                                  desc='bias-corrected version of input image')
@@ -874,31 +893,44 @@ class NewSegmentInputSpec(SPMCommandInputSpec):
             - which maps to save [Native, DARTEL] - a tuple of two boolean values
             - which maps to save [Unmodulated, Modulated] - a tuple of two boolean values""",
                           field='tissue')
-    affine_regularization = traits.Enum('mni', 'eastern', 'subj', 'none', field='warp.affreg',
+    affine_regularization = traits.Enum('mni', 'eastern', 'subj', 'none',
+                                        field='warp.affreg',
                                         desc='mni, eastern, subj, none ')
     warping_regularization = traits.Float(field='warp.reg',
-                                          desc='Aproximate distance between sampling points.')
+                                          desc=('Aproximate distance between '
+                                                'sampling points.'))
     sampling_distance = traits.Float(field='warp.samp',
-                                     desc='Sampling distance on data for parameter estimation')
-    write_deformation_fields = traits.List(traits.Bool(), minlen=2, maxlen=2, field='warp.write',
-                                           desc="Which deformation fields to write:[Inverse, Forward]")
+                                     desc=('Sampling distance on data for '
+                                           'parameter estimation'))
+    write_deformation_fields = traits.List(traits.Bool(), minlen=2, maxlen=2,
+                                           field='warp.write',
+                                           desc=("Which deformation fields to "
+                                                 "write:[Inverse, Forward]"))
 
 
 class NewSegmentOutputSpec(TraitedSpec):
-    native_class_images = traits.List(traits.List(File(exists=True)), desc='native space probability maps')
-    dartel_input_images = traits.List(traits.List(File(exists=True)), desc='dartel imported class images')
-    normalized_class_images = traits.List(traits.List(File(exists=True)), desc='normalized class images')
-    modulated_class_images = traits.List(traits.List(File(exists=True)), desc='modulated+normalized class images')
-    transformation_mat = OutputMultiPath(File(exists=True), desc='Normalization transformation')
-    bias_corrected_images = OutputMultiPath(File(exists=True), desc='bias corrected images')
-    bias_field_images = OutputMultiPath(File(exists=True), desc='bias field images')
+    native_class_images = traits.List(traits.List(File(exists=True)),
+                                      desc='native space probability maps')
+    dartel_input_images = traits.List(traits.List(File(exists=True)),
+                                      desc='dartel imported class images')
+    normalized_class_images = traits.List(traits.List(File(exists=True)),
+                                          desc='normalized class images')
+    modulated_class_images = traits.List(traits.List(File(exists=True)),
+                                         desc=('modulated+normalized class '
+                                               'images'))
+    transformation_mat = OutputMultiPath(File(exists=True),
+                                         desc='Normalization transformation')
+    bias_corrected_images = OutputMultiPath(File(exists=True),
+                                            desc='bias corrected images')
+    bias_field_images = OutputMultiPath(File(exists=True),
+                                        desc='bias field images')
     forward_deformation_field = OutputMultiPath(File(exists=True))
     inverse_deformation_field = OutputMultiPath(File(exists=True))
 
 
 class NewSegment(SPMCommand):
-    """Use spm_preproc8 (New Segment) to separate structural images into different
-    tissue classes. Supports multiple modalities.
+    """Use spm_preproc8 (New Segment) to separate structural images into
+    different tissue classes. Supports multiple modalities.
 
     NOTE: This interface currently supports single channel input only
 
@@ -959,14 +991,18 @@ class NewSegment(SPMCommand):
             new_tissues = []
             for tissue in val:
                 new_tissue = {}
-                new_tissue['tpm'] = np.array([','.join([tissue[0][0], str(tissue[0][1])])], dtype=object)
+                new_tissue['tpm'] = np.array([','.join([tissue[0][0],
+                                                        str(tissue[0][1])])],
+                                             dtype=object)
                 new_tissue['ngaus'] = tissue[1]
                 new_tissue['native'] = [int(tissue[2][0]), int(tissue[2][1])]
                 new_tissue['warped'] = [int(tissue[3][0]), int(tissue[3][1])]
                 new_tissues.append(new_tissue)
             return new_tissues
         elif opt == 'write_deformation_fields':
-            return super(NewSegment, self)._format_arg(opt, spec, [int(val[0]), int(val[1])])
+            return super(NewSegment, self)._format_arg(opt, spec,
+                                                       [int(val[0]),
+                                                        int(val[1])])
         else:
             return super(NewSegment, self)._format_arg(opt, spec, val)
 
@@ -1080,14 +1116,16 @@ class Smooth(SPMCommand):
         outputs['smoothed_files'] = []
 
         for imgf in filename_to_list(self.inputs.in_files):
-            outputs['smoothed_files'].append(fname_presuffix(imgf, prefix=self.inputs.out_prefix))
+            outputs['smoothed_files'].append(
+                fname_presuffix(imgf, prefix=self.inputs.out_prefix))
         return outputs
 
 
 class DARTELInputSpec(SPMCommandInputSpec):
     image_files = traits.List(traits.List(File(exists=True)),
                               desc="A list of files to be segmented",
-                              field='warp.images', copyfile=False, mandatory=True)
+                              field='warp.images', copyfile=False,
+                              mandatory=True)
     template_prefix = traits.Str('Template', usedefault=True,
                                  field='warp.settings.template',
                                  desc='Prefix for template')
@@ -1101,8 +1139,8 @@ class DARTELInputSpec(SPMCommandInputSpec):
                                                     traits.Enum(1, 2, 4, 8, 16,
                                                                 32, 64, 128,
                                                                 256, 512),
-                                                    traits.Enum(0, 0.5, 1, 2, 4,
-                                                                8, 16, 32)),
+                                                    traits.Enum(0, 0.5, 1, 2,
+                                                                4, 8, 16, 32)),
                                        minlen=3,
                                        maxlen=12,
                                        field='warp.settings.param',
@@ -1124,8 +1162,11 @@ class DARTELInputSpec(SPMCommandInputSpec):
 
 class DARTELOutputSpec(TraitedSpec):
     final_template_file = File(exists=True, desc='final DARTEL template')
-    template_files = traits.List(File(exists=True), desc='Templates from different stages of iteration')
-    dartel_flow_fields = traits.List(File(exists=True), desc='DARTEL flow fields')
+    template_files = traits.List(File(exists=True),
+                                 desc=('Templates from different stages of '
+                                       'iteration'))
+    dartel_flow_fields = traits.List(File(exists=True),
+                                     desc='DARTEL flow fields')
 
 
 class DARTEL(SPMCommand):
@@ -1193,7 +1234,8 @@ class DARTEL(SPMCommand):
 class DARTELNorm2MNIInputSpec(SPMCommandInputSpec):
     template_file = File(exists=True,
                          desc="DARTEL template",
-                         field='mni_norm.template', copyfile=False, mandatory=True)
+                         field='mni_norm.template', copyfile=False,
+                         mandatory=True)
     flowfield_files = InputMultiPath(File(exists=True),
                                      desc="DARTEL flow fields u_rc1*",
                                      field='mni_norm.data.subjs.flowfields',
@@ -1210,15 +1252,19 @@ class DARTELNorm2MNIInputSpec(SPMCommandInputSpec):
                                 desc="Voxel sizes for output file",
                                 field='mni_norm.bb')
     modulate = traits.Bool(field='mni_norm.preserve',
-                           desc="Modulate out images - no modulation preserves concentrations")
+                           desc=("Modulate out images - no modulation "
+                                 "preserves concentrations"))
     fwhm = traits.Either(traits.List(traits.Float(), minlen=3, maxlen=3),
                          traits.Float(), field='mni_norm.fwhm',
                          desc='3-list of fwhm for each dimension')
 
 
 class DARTELNorm2MNIOutputSpec(TraitedSpec):
-    normalized_files = OutputMultiPath(File(exists=True), desc='Normalized files in MNI space')
-    normalization_parameter_file = File(exists=True, desc='Transform parameters to MNI space')
+    normalized_files = OutputMultiPath(File(exists=True),
+                                       desc='Normalized files in MNI space')
+    normalization_parameter_file = File(exists=True,
+                                        desc=('Transform parameters to MNI '
+                                              'space'))
 
 
 class DARTELNorm2MNI(SPMCommand):
@@ -1354,7 +1400,8 @@ class CreateWarped(SPMCommand):
 
 
 class ApplyDeformationFieldInputSpec(SPMCommandInputSpec):
-    in_files = InputMultiPath(File(exists=True), mandatory=True, field='fnames')
+    in_files = InputMultiPath(File(exists=True), mandatory=True,
+                              field='fnames')
     deformation_field = File(exists=True, mandatory=True, field='comp{1}.def')
     reference_volume = File(exists=True, mandatory=True,
                             field='comp{2}.id.space')
@@ -1511,7 +1558,8 @@ class VBMSegmentOuputSpec(TraitedSpec):
     normalized_class_images = traits.List(traits.List(File(exists=True)),
                                           desc='normalized class images')
     modulated_class_images = traits.List(traits.List(File(exists=True)),
-                                         desc='modulated+normalized class images')
+                                         desc=('modulated+normalized class '
+                                               'images'))
     transformation_mat = OutputMultiPath(File(exists=True),
                                          desc='Normalization transformation')
 
