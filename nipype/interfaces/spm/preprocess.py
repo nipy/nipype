@@ -732,7 +732,9 @@ class SegmentInputSpec(SPMCommandInputSpec):
             Modulated + Unmodulated Normalised: [True,True,False]""")
     wm_output_type = traits.List(traits.Bool(), minlen=3, maxlen=3,
                                  field='output.WM',
-                                 desc="""Options to produce white matter images: c2*.img, wc2*.img and mwc2*.img.
+                                 desc="""
+            Options to produce white matter images: \
+c2*.img, wc2*.img and mwc2*.img.
             None: [False,False,False],
             Native Space: [False,False,True],
             Unmodulated Normalised: [False,True,False],
@@ -741,8 +743,10 @@ class SegmentInputSpec(SPMCommandInputSpec):
             Native + Modulated Normalised: [True,False,True],
             Native + Modulated + Unmodulated: [True,True,True],
             Modulated + Unmodulated Normalised: [True,True,False]""")
-    csf_output_type = traits.List(traits.Bool(), minlen=3, maxlen=3, field='output.CSF',
-                                  desc="""Options to produce CSF images: c3*.img, wc3*.img and mwc3*.img.
+    csf_output_type = traits.List(traits.Bool(), minlen=3, maxlen=3,
+                                  field='output.CSF',
+                                  desc="""
+            Options to produce CSF images: c3*.img, wc3*.img and mwc3*.img.
             None: [False,False,False],
             Native Space: [False,False,True],
             Unmodulated Normalised: [False,True,False],
@@ -891,7 +895,8 @@ class NewSegmentInputSpec(SPMCommandInputSpec):
                                 desc="""A tuple with the following fields:
             - bias reguralisation (0-10)
             - FWHM of Gaussian smoothness of bias
-            - which maps to save (Corrected, Field) - a tuple of two boolean values""",
+            - which maps to save (Corrected, Field) - \
+a tuple of two boolean values""",
                                 field='channel')
     tissues = traits.List(
         traits.Tuple(traits.Tuple(File(exists=True), traits.Int()),
@@ -900,8 +905,10 @@ class NewSegmentInputSpec(SPMCommandInputSpec):
         desc="""A list of tuples (one per tissue) with the following fields:
             - tissue probability map (4D), 1-based index to frame
             - number of gaussians
-            - which maps to save [Native, DARTEL] - a tuple of two boolean values
-            - which maps to save [Unmodulated, Modulated] - a tuple of two boolean values""",
+            - which maps to save [Native, DARTEL] - \
+a tuple of two boolean values
+            - which maps to save [Unmodulated, Modulated] - \
+a tuple of two boolean values""",
         field='tissue')
     affine_regularization = traits.Enum('mni', 'eastern', 'subj', 'none',
                                         field='warp.affreg',
@@ -1174,7 +1181,8 @@ class DARTELInputSpec(SPMCommandInputSpec):
     optimization_parameters = traits.Tuple(traits.Float, traits.Range(1, 8),
                                            traits.Range(1, 8),
                                            field='warp.settings.optim',
-                                           desc="""Optimization settings a tuple
+                                           desc="""
+                                           Optimization settings a tuple
                                            - LM regularization
                                            - cycles of multigrid solver
                                            - relaxation iterations
@@ -1679,12 +1687,15 @@ class VBMSegment(SPMCommand):
             # normalized space
                 if getattr(self.inputs, '%s_normalized' % tis):
                     outputs['normalized_class_images'][i].append(
-                        os.path.join(pth, "w%sp%d%s.nii" % (dartel_px, i + 1, base)))
+                        os.path.join(pth,
+                                     "w%sp%d%s.nii" % (dartel_px,
+                                                       i + 1, base)))
 
                 if getattr(self.inputs, '%s_modulated_normalized' % tis) == 1:
                     outputs['modulated_class_images'][i].append(os.path.join(
                         pth, "mw%sp%d%s.nii" % (dartel_px, i + 1, base)))
-                elif getattr(self.inputs, '%s_modulated_normalized' % tis) == 2:
+                elif getattr(self.inputs,
+                             '%s_modulated_normalized' % tis) == 2:
                     outputs['normalized_class_images'][i].append(os.path.join(
                         pth, "m0w%sp%d%s.nii" % (dartel_px, i + 1, base)))
 
