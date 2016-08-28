@@ -598,8 +598,7 @@ if isempty(XYZth)
 else
     if use_topo_fdr
         V2R        = 1/prod(FWHM(stat_map_vol.dim > 1));
-        [uc,Pc,ue] = spm_uc_clusterFDR(cluster_extent_p_fdr_thr,df,\
-STAT,R,n,Z,XYZ,V2R,cluster_forming_thr);
+        [uc,Pc,ue] = spm_uc_clusterFDR(cluster_extent_p_fdr_thr,df,STAT,R,n,Z,XYZ,V2R,cluster_forming_thr);
     end
 
     voxel_labels = spm_clusters(XYZth);
@@ -610,10 +609,8 @@ STAT,R,n,Z,XYZ,V2R,cluster_forming_thr);
 
     for i = 1:nclusters
         cluster_size = sum(voxel_labels==i);
-         if cluster_size > extent_threshold && (~use_topo_fdr || \
-(cluster_size - uc) > -1)
-            thresholded_XYZ = cat(2, thresholded_XYZ, \
-XYZth(:,voxel_labels == i));
+         if cluster_size > extent_threshold && (~use_topo_fdr || (cluster_size - uc) > -1)
+            thresholded_XYZ = cat(2, thresholded_XYZ, XYZth(:,voxel_labels == i));
             thresholded_Z = cat(2, thresholded_Z, Zth(voxel_labels == i));
             th_nclusters = th_nclusters + 1;
          end
@@ -749,8 +746,7 @@ Zum = Z;
                 voxelwise_P_uncor = (1-spm_Ncdf(cluster_forming_thr)).^n
             case 'T'
                 VPs = (1 - spm_Tcdf(Zum,df(2))).^n;
-                voxelwise_P_uncor = \
-(1 - spm_Tcdf(cluster_forming_thr,df(2))).^n
+                voxelwise_P_uncor = (1 - spm_Tcdf(cluster_forming_thr,df(2))).^n
             case 'X'
                 VPs = (1-spm_Xcdf(Zum,df(2))).^n;
                 voxelwise_P_uncor = (1-spm_Xcdf(cluster_forming_thr,df(2))).^n
@@ -764,17 +760,14 @@ voxelwise_P_FDR = spm_P_FDR(cluster_forming_thr,df,STAT,n,VPs)
 
 V2R        = 1/prod(FWHM(stat_map_vol.dim > 1));
 
-clusterwise_P_RF = \
-spm_P_RF(1,extent_threshold*V2R,cluster_forming_thr,df,STAT,R,n)
+clusterwise_P_RF = spm_P_RF(1,extent_threshold*V2R,cluster_forming_thr,df,STAT,R,n)
 
 [x,y,z] = ind2sub(size(stat_map_data),(1:numel(stat_map_data))');
 XYZ = cat(1, x', y', z');
 
-[u, CPs, ue] = \
-spm_uc_clusterFDR(0.05,df,STAT,R,n,Z,XYZ,V2R,cluster_forming_thr);
+[u, CPs, ue] = spm_uc_clusterFDR(0.05,df,STAT,R,n,Z,XYZ,V2R,cluster_forming_thr);
 
-clusterwise_P_FDR = \
-spm_P_clusterFDR(extent_threshold*V2R,df,STAT,R,n,cluster_forming_thr,CPs')
+clusterwise_P_FDR = spm_P_clusterFDR(extent_threshold*V2R,df,STAT,R,n,cluster_forming_thr,CPs')
 """
         return script
 
@@ -980,8 +973,7 @@ class PairedTTestDesign(FactorialDesign):
     --------
 
     >>> pttest = PairedTTestDesign()
-    >>> pttest.inputs.paired_files = [['cont1.nii','cont1a.nii'],\
-['cont2.nii','cont2a.nii']]
+    >>> pttest.inputs.paired_files = [['cont1.nii','cont1a.nii'],['cont2.nii','cont2a.nii']]
     >>> pttest.run() # doctest: +SKIP
     """
 
