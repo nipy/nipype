@@ -472,7 +472,7 @@ class Normalize(SPMCommand):
         return super(Normalize, self)._format_arg(opt, spec, val)
 
     def _parse_inputs(self):
-        """validate spm normalize options if set to None ignore
+        """Validate spm normalize options if set to None ignore
         """
         einputs = super(Normalize, self)._parse_inputs(skip=('jobtype',
                                                              'apply_to_files'))
