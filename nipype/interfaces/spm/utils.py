@@ -3,13 +3,15 @@
 import os
 import numpy as np
 
-from .base import SPMCommandInputSpec, SPMCommand, Info, scans_for_fnames, scans_for_fname
+from .base import (SPMCommandInputSpec, SPMCommand, Info, scans_for_fnames,
+                   scans_for_fname)
 from ..matlab import MatlabCommand
 from ..base import (TraitedSpec, BaseInterface,
                     BaseInterfaceInputSpec, isdefined,
                     OutputMultiPath, InputMultiPath)
 from ..base import File, traits
-from ...utils.filemanip import split_filename, fname_presuffix, filename_to_list, list_to_filename
+from ...utils.filemanip import (split_filename, fname_presuffix,
+                                filename_to_list, list_to_filename)
 
 
 class Analyze2niiInputSpec(SPMCommandInputSpec):
@@ -45,7 +47,8 @@ class CalcCoregAffineInputSpec(SPMCommandInputSpec):
     target = File(exists=True, mandatory=True,
                   desc='target for generating affine transform')
     moving = File(exists=True, mandatory=True, copyfile=False,
-                  desc='volume transform can be applied to register with target')
+                  desc=('volume transform can be applied to register with '
+                        'target'))
     mat = File(desc='Filename used to store affine matrix')
     invmat = File(desc='Filename used to store inverse affine matrix')
 
@@ -346,7 +349,8 @@ class ResliceToReferenceOutput(TraitedSpec):
 
 
 class ResliceToReference(SPMCommand):
-    """ Uses spm to reslice a volume to a target image space or to a provided voxel size and bounding box
+    """Uses spm to reslice a volume to a target image space or to a provided
+    voxel size and bounding box
 
     Examples
     --------
@@ -409,10 +413,11 @@ class DicomImportInputSpec(SPMCommandInputSpec):
     icedims = traits.Bool(False,
                           field='convopts.icedims',
                           usedefault=True,
-                          desc='If image sorting fails, one can try using the additional\
-              SIEMENS ICEDims information to create unique filenames.\
-              Use this only if there would be multiple volumes with\
-              exactly the same file names.')
+                          desc=('If image sorting fails, one can try using '
+                                'the additional SIEMENS ICEDims information '
+                                'to create unique filenames. Use this only if '
+                                'there would be multiple volumes with exactly '
+                                'the same file names.'))
 
 
 class DicomImportOutputSpec(TraitedSpec):
@@ -468,9 +473,13 @@ class DicomImport(SPMCommand):
         if self.inputs.output_dir_struct == "flat":
             outputs['out_files'] = glob(os.path.join(od, '*.%s' % ext))
         elif self.inputs.output_dir_struct == 'series':
-            outputs['out_files'] = glob(os.path.join(od, os.path.join('*', '*.%s' % ext)))
-        elif self.inputs.output_dir_struct in ['patid', 'date_time', 'patname']:
-            outputs['out_files'] = glob(os.path.join(od, os.path.join('*', '*', '*.%s' % ext)))
+            outputs['out_files'] = glob(
+                os.path.join(od, os.path.join('*', '*.%s' % ext)))
+        elif (self.inputs.output_dir_struct in
+              ['patid', 'date_time', 'patname']):
+            outputs['out_files'] = glob(
+                os.path.join(od, os.path.join('*', '*', '*.%s' % ext)))
         elif self.inputs.output_dir_struct == 'patid_date':
-            outputs['out_files'] = glob(os.path.join(od, os.path.join('*', '*', '*', '*.%s' % ext)))
+            outputs['out_files'] = glob(
+                os.path.join(od, os.path.join('*', '*', '*', '*.%s' % ext)))
         return outputs

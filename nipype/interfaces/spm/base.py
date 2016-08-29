@@ -14,13 +14,10 @@ you can test by calling::
    spm.SPMCommand().version
 """
 
+# Standard library imports
 from __future__ import print_function
 from builtins import range
 from builtins import object
-
-__docformat__ = 'restructuredtext'
-
-# Standard library imports
 import os
 from copy import deepcopy
 
@@ -37,6 +34,8 @@ from ...utils import spm_docs as sd
 from ...external.six import string_types
 from ... import logging
 logger = logging.getLogger('interface')
+
+__docformat__ = 'restructuredtext'
 
 
 def func_is_3d(in_file):
@@ -216,7 +215,8 @@ class SPMCommandInputSpec(BaseInterfaceInputSpec):
                         usedefault=True)
     use_mcr = traits.Bool(desc='Run m-code using SPM MCR')
     use_v8struct = traits.Bool(True, min_ver='8', usedefault=True,
-                               desc=('Generate SPM8 and higher compatible jobs')
+                               desc=('Generate SPM8 and higher '
+                                     'compatible jobs')
                                )
 
 
@@ -476,14 +476,15 @@ class SPMCommand(BaseInterface):
         end\n
         """
         if self.mlab.inputs.mfile:
-            if isdefined(self.inputs.use_v8struct) and self.inputs.use_v8struct:
+            if (isdefined(self.inputs.use_v8struct) and
+                    self.inputs.use_v8struct):
                 mscript += self._generate_job('jobs{1}.spm.%s.%s' %
                                               (self.jobtype, self.jobname),
                                               contents[0])
             else:
                 if self.jobname in ['st', 'smooth', 'preproc', 'preproc8',
-                                    'fmri_spec', 'fmri_est', 'factorial_design',
-                                    'defs']:
+                                    'fmri_spec', 'fmri_est',
+                                    'factorial_design', 'defs']:
                     # parentheses
                     mscript += self._generate_job('jobs{1}.%s{1}.%s(1)' %
                                                   (self.jobtype, self.jobname),
