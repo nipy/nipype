@@ -9,11 +9,9 @@
    >>> os.chdir(datadir)
 """
 
-from builtins import range
-
-__docformat__ = 'restructuredtext'
 
 # Standard library imports
+from builtins import range
 from copy import deepcopy
 import os
 
@@ -28,6 +26,8 @@ from .base import (SPMCommand, scans_for_fname,
                    scans_for_fnames, SPMCommandInputSpec)
 from ...utils.filemanip import (fname_presuffix, filename_to_list,
                                 list_to_filename, split_filename)
+
+__docformat__ = 'restructuredtext'
 
 
 class SliceTimingInputSpec(SPMCommandInputSpec):
@@ -252,7 +252,8 @@ class Realign(SPMCommand):
 
             if resliced_all:
                 outputs['realigned_files'] = []
-                for idx, imgf in enumerate(filename_to_list(self.inputs.in_files)):
+                for idx, imgf in enumerate(
+                    filename_to_list(self.inputs.in_files)):
                     realigned_run = []
                     if isinstance(imgf, list):
                         for i, inner_imgf in enumerate(filename_to_list(imgf)):
@@ -612,7 +613,6 @@ class Normalize12InputSpec(SPMCommandInputSpec):
                                desc='Normalized output prefix')
 
 
-
 class Normalize12OutputSpec(TraitedSpec):
     deformation_field = OutputMultiPath(File(exists=True),
                                         desc=('NIfTI file containing 3 '
@@ -877,8 +877,8 @@ class Segment(SPMCommand):
                         outfield = '%s_%s_image' % (image, tissue)
                         outputs[outfield] = fname_presuffix(
                             f, prefix='%sc%d' % (prefix, tidx + 1))
-        if (isdefined(self.inputs.save_bias_corrected)
-                and self.inputs.save_bias_corrected):
+        if (isdefined(self.inputs.save_bias_corrected) and
+                self.inputs.save_bias_corrected):
             outputs['bias_corrected_image'] = fname_presuffix(f, prefix='m')
         t_mat = fname_presuffix(f, suffix='_seg_sn.mat', use_ext=False)
         outputs['transformation_mat'] = t_mat
