@@ -30,7 +30,8 @@ warn = warnings.warn
 class DTIFitInputSpec(FSLCommandInputSpec):
     dwi = File(exists=True, desc='diffusion weighted image data file',
                argstr='-k %s', position=0, mandatory=True)
-    base_name = traits.Str("dtifit_", desc='base_name that all output files will start with',
+    base_name = traits.Str("dtifit_", desc=('base_name that all output files '
+                                            'will start with'),
                            argstr='-o %s', position=1, usedefault=True)
     mask = File(exists=True, desc='bet binary mask file',
                 argstr='-m %s', position=2, mandatory=True)
@@ -47,7 +48,8 @@ class DTIFitInputSpec(FSLCommandInputSpec):
     save_tensor = traits.Bool(desc='save the elements of the tensor',
                               argstr='--save_tensor')
     sse = traits.Bool(desc='output sum of squared errors', argstr='--sse')
-    cni = File(exists=True, desc='input counfound regressors', argstr='--cni=%s')
+    cni = File(exists=True, desc='input counfound regressors',
+               argstr='--cni=%s')
     little_bit = traits.Bool(desc='only process small area of brain',
                              argstr='--littlebit')
     gradnonlin = File(exists=True, argstr='--gradnonlin=%s',
@@ -62,11 +64,15 @@ class DTIFitOutputSpec(TraitedSpec):
     L2 = File(exists=True, desc='path/name of file with the 2nd eigenvalue')
     L3 = File(exists=True, desc='path/name of file with the 3rd eigenvalue')
     MD = File(exists=True, desc='path/name of file with the mean diffusivity')
-    FA = File(exists=True, desc='path/name of file with the fractional anisotropy')
-    MO = File(exists=True, desc='path/name of file with the mode of anisotropy')
-    S0 = File(exists=True, desc='path/name of file with the raw T2 signal with no ' +
-                                'diffusion weighting')
-    tensor = File(exists=True, desc='path/name of file with the 4D tensor volume')
+    FA = File(exists=True,
+              desc='path/name of file with the fractional anisotropy')
+    MO = File(exists=True,
+              desc='path/name of file with the mode of anisotropy')
+    S0 = File(exists=True,
+              desc=('path/name of file with the raw T2 signal with no '
+                    'diffusion weighting'))
+    tensor = File(exists=True,
+                  desc='path/name of file with the 4D tensor volume')
 
 
 class DTIFit(FSLCommand):
@@ -98,7 +104,8 @@ class DTIFit(FSLCommand):
             if k not in ('outputtype', 'environ', 'args'):
                 if k != 'tensor' or (isdefined(self.inputs.save_tensor) and
                                      self.inputs.save_tensor):
-                    outputs[k] = self._gen_fname(self.inputs.base_name, suffix='_' + k)
+                    outputs[k] = self._gen_fname(
+                        self.inputs.base_name, suffix='_' + k)
         return outputs
 
 
@@ -172,16 +179,22 @@ class FSLXCommandOutputSpec(TraitedSpec):
     dyads = OutputMultiPath(File(exists=True), desc=('Mean of PDD distribution'
                                                      ' in vector form.'))
     fsamples = OutputMultiPath(File(exists=True), desc=('Samples from the '
-                                                        'distribution on f anisotropy'))
-    mean_dsamples = File(exists=True, desc='Mean of distribution on diffusivity d')
-    mean_fsamples = OutputMultiPath(File(exists=True), desc=('Mean of '
-                                                             'distribution on f anisotropy'))
+                                                        'distribution on f '
+                                                        'anisotropy'))
+    mean_dsamples = File(exists=True,
+                         desc='Mean of distribution on diffusivity d')
+    mean_fsamples = OutputMultiPath(File(exists=True),
+                                    desc=('Mean of distribution on f '
+                                          'anisotropy'))
     mean_S0samples = File(exists=True, desc=('Mean of distribution on T2w'
                                              'baseline signal intensity S0'))
     mean_tausamples = File(exists=True, desc=('Mean of distribution on '
-                                              'tau samples (only with rician noise)'))
-    phsamples = OutputMultiPath(File(exists=True), desc=('phi samples, per fiber'))
-    thsamples = OutputMultiPath(File(exists=True), desc=('theta samples, per fiber'))
+                                              'tau samples (only with rician '
+                                              'noise)'))
+    phsamples = OutputMultiPath(File(exists=True),
+                                desc=('phi samples, per fiber'))
+    thsamples = OutputMultiPath(File(exists=True),
+                                desc=('theta samples, per fiber'))
 
 
 class FSLXCommand(FSLCommand):
@@ -224,8 +237,8 @@ class FSLXCommand(FSLCommand):
         for i in range(1, n_fibres + 1):
             outputs['fsamples'].append(self._gen_fname('f%dsamples' % i,
                                                        cwd=out_dir))
-            outputs['mean_fsamples'].append(self._gen_fname(('mean_f%d'
-                                                             'samples') % i, cwd=out_dir))
+            outputs['mean_fsamples'].append(
+                self._gen_fname('mean_f%dsamples' % i, cwd=out_dir))
 
         for i in range(1, n_fibres + 1):
             outputs['dyads'].append(self._gen_fname('dyads%d' % i,
@@ -263,31 +276,37 @@ class BEDPOSTX5InputSpec(FSLXCommandInputSpec):
                                 desc='Num of jumps for each sample (MCMC)')
     out_dir = Directory('bedpostx', mandatory=True, desc='output directory',
                         usedefault=True, position=1, argstr='%s')
-    gradnonlin = traits.Bool(False, argstr='-g', desc=('consider gradient '
-                                                       'nonlinearities, default off'))
-    grad_dev = File(exists=True, desc='grad_dev file, if gradnonlin, -g is True')
+    gradnonlin = traits.Bool(False, argstr='-g',
+                             desc=('consider gradient nonlinearities, '
+                                   'default off'))
+    grad_dev = File(exists=True,
+                    desc='grad_dev file, if gradnonlin, -g is True')
     use_gpu = traits.Bool(False, desc='Use the GPU version of bedpostx')
 
 
 class BEDPOSTX5OutputSpec(TraitedSpec):
-    mean_dsamples = File(exists=True, desc='Mean of distribution on diffusivity d')
-    mean_fsamples = OutputMultiPath(File(exists=True), desc=('Mean of '
-                                                             'distribution on f anisotropy'))
+    mean_dsamples = File(exists=True,
+                         desc='Mean of distribution on diffusivity d')
+    mean_fsamples = OutputMultiPath(File(exists=True),
+                                    desc=('Mean of distribution on f '
+                                          'anisotropy'))
     mean_S0samples = File(exists=True, desc=('Mean of distribution on T2w'
                                              'baseline signal intensity S0'))
-    mean_phsamples = OutputMultiPath(File(exists=True), desc=('Mean of '
-                                                              'distribution on phi'))
-    mean_thsamples = OutputMultiPath(File(exists=True), desc=('Mean of '
-                                                              'distribution on theta'))
-    merged_thsamples = OutputMultiPath(File(exists=True), desc=('Samples from '
-                                                                'the distribution on theta'))
-    merged_phsamples = OutputMultiPath(File(exists=True), desc=('Samples from '
-                                                                'the distribution on phi'))
+    mean_phsamples = OutputMultiPath(File(exists=True),
+                                     desc='Mean of distribution on phi')
+    mean_thsamples = OutputMultiPath(File(exists=True),
+                                     desc='Mean of distribution on theta')
+    merged_thsamples = OutputMultiPath(File(exists=True),
+                                       desc=('Samples from the distribution '
+                                             'on theta'))
+    merged_phsamples = OutputMultiPath(File(exists=True),
+                                       desc=('Samples from the distribution '
+                                             'on phi'))
     merged_fsamples = OutputMultiPath(File(exists=True),
                                       desc=('Samples from the distribution on '
                                             'anisotropic volume fraction'))
-    dyads = OutputMultiPath(File(exists=True), desc=('Mean of PDD distribution'
-                                                     ' in vector form.'))
+    dyads = OutputMultiPath(File(exists=True),
+                            desc='Mean of PDD distribution in vector form.')
     dyads_dispersion = OutputMultiPath(File(exists=True), desc=('Dispersion'))
 
 
@@ -377,23 +396,22 @@ class BEDPOSTX5(FSLXCommand):
             outputs[k] = []
 
         for i in range(1, n_fibres + 1):
-            outputs['merged_thsamples'].append(self._gen_fname('merged_th%dsamples' % i,
-                                                               cwd=self._out_dir))
-            outputs['merged_fsamples'].append(self._gen_fname('merged_f%dsamples' % i,
-                                                              cwd=self._out_dir))
-            outputs['merged_phsamples'].append(self._gen_fname('merged_ph%dsamples' % i,
-                                                               cwd=self._out_dir))
-
-            outputs['mean_thsamples'].append(self._gen_fname('mean_th%dsamples' % i,
-                                                             cwd=self._out_dir))
-            outputs['mean_phsamples'].append(self._gen_fname('mean_ph%dsamples' % i,
-                                                             cwd=self._out_dir))
-            outputs['mean_fsamples'].append(self._gen_fname('mean_f%dsamples' % i,
-                                                            cwd=self._out_dir))
-            outputs['dyads'].append(self._gen_fname('dyads%d' % i,
-                                                    cwd=self._out_dir))
-            outputs['dyads_dispersion'].append(self._gen_fname('dyads%d_dispersion' % i,
-                                                               cwd=self._out_dir))
+            outputs['merged_thsamples'].append(
+                self._gen_fname('merged_th%dsamples' % i, cwd=self._out_dir))
+            outputs['merged_fsamples'].append(
+                self._gen_fname('merged_f%dsamples' % i, cwd=self._out_dir))
+            outputs['merged_phsamples'].append(
+                self._gen_fname('merged_ph%dsamples' % i, cwd=self._out_dir))
+            outputs['mean_thsamples'].append(
+                self._gen_fname('mean_th%dsamples' % i, cwd=self._out_dir))
+            outputs['mean_phsamples'].append(
+                self._gen_fname('mean_ph%dsamples' % i, cwd=self._out_dir))
+            outputs['mean_fsamples'].append(
+                self._gen_fname('mean_f%dsamples' % i, cwd=self._out_dir))
+            outputs['dyads'].append(
+                self._gen_fname('dyads%d' % i, cwd=self._out_dir))
+            outputs['dyads_dispersion'].append(
+                self._gen_fname('dyads%d_dispersion' % i, cwd=self._out_dir))
         return outputs
 
 
@@ -419,69 +437,104 @@ class ProbTrackXBaseInputSpec(FSLCommandInputSpec):
     thsamples = InputMultiPath(File(exists=True), mandatory=True)
     phsamples = InputMultiPath(File(exists=True), mandatory=True)
     fsamples = InputMultiPath(File(exists=True), mandatory=True)
-    samples_base_name = traits.Str("merged", desc='the rootname/base_name for samples files',
+    samples_base_name = traits.Str("merged",
+                                   desc=('the rootname/base_name for samples '
+                                         'files'),
                                    argstr='--samples=%s', usedefault=True)
     mask = File(exists=True, desc='bet binary mask file in diffusion space',
                 argstr='-m %s', mandatory=True)
     seed = traits.Either(File(exists=True), traits.List(File(exists=True)),
-                         traits.List(traits.List(traits.Int(), minlen=3, maxlen=3)),
-                         desc='seed volume(s), or voxel(s)' +
-                         'or freesurfer label file',
+                         traits.List(traits.List(traits.Int(),
+                         minlen=3, maxlen=3)),
+                         desc=('seed volume(s), or voxel(s) or freesurfer '
+                               'label file'),
                          argstr='--seed=%s', mandatory=True)
-    target_masks = InputMultiPath(File(exits=True), desc='list of target masks - ' +
-                                  'required for seeds_to_targets classification', argstr='--targetmasks=%s')
-    waypoints = File(exists=True, desc='waypoint mask or ascii list of waypoint masks - ' +
-                     'only keep paths going through ALL the masks', argstr='--waypoints=%s')
-    network = traits.Bool(desc='activate network mode - only keep paths going through ' +
-                          'at least one seed mask (required if multiple seed masks)',
+    target_masks = InputMultiPath(File(exits=True),
+                                  desc=('list of target masks - required for '
+                                        'seeds_to_targets classification'),
+                                  argstr='--targetmasks=%s')
+    waypoints = File(exists=True,
+                     desc=('waypoint mask or ascii list of waypoint masks - '
+                           'only keep paths going through ALL the masks'),
+                     argstr='--waypoints=%s')
+    network = traits.Bool(desc=('activate network mode - only keep paths '
+                                'going through at least one seed mask '
+                                '(required if multiple seed masks)'),
                           argstr='--network')
-    seed_ref = File(exists=True, desc='reference vol to define seed space in ' +
-                    'simple mode - diffusion space assumed if absent',
+    seed_ref = File(exists=True,
+                    desc=('reference vol to define seed space in simple mode '
+                          '- diffusion space assumed if absent'),
                     argstr='--seedref=%s')
     out_dir = Directory(exists=True, argstr='--dir=%s',
-                        desc='directory to put the final volumes in', genfile=True)
-    force_dir = traits.Bool(True, desc='use the actual directory name given - i.e. ' +
-                            'do not add + to make a new directory', argstr='--forcedir',
-                            usedefault=True)
-    opd = traits.Bool(True, desc='outputs path distributions', argstr='--opd', usedefault=True)
-    correct_path_distribution = traits.Bool(desc='correct path distribution for the length of the pathways',
+                        desc='directory to put the final volumes in',
+                        genfile=True)
+    force_dir = traits.Bool(True,
+                            desc=('use the actual directory name given - i.e. '
+                                  'do not add + to make a new directory'),
+                            argstr='--forcedir', usedefault=True)
+    opd = traits.Bool(True, desc='outputs path distributions',
+                      argstr='--opd', usedefault=True)
+    correct_path_distribution = traits.Bool(desc=('correct path distribution '
+                                                  'for the length of the '
+                                                  'pathways'),
                                             argstr='--pd')
     os2t = traits.Bool(desc='Outputs seeds to targets', argstr='--os2t')
     # paths_file = File('nipype_fdtpaths', usedefault=True, argstr='--out=%s',
     #                 desc='produces an output file (default is fdt_paths)')
-    avoid_mp = File(exists=True, desc='reject pathways passing through locations given by this mask',
+    avoid_mp = File(exists=True,
+                    desc=('reject pathways passing through locations given by '
+                          'this mask'),
                     argstr='--avoid=%s')
     stop_mask = File(exists=True, argstr='--stop=%s',
                      desc='stop tracking at locations given by this mask file')
     xfm = File(exists=True, argstr='--xfm=%s',
-               desc='transformation matrix taking seed space to DTI space ' +
-               '(either FLIRT matrix or FNIRT warp_field) - default is identity')
-    inv_xfm = File(argstr='--invxfm=%s', desc='transformation matrix taking DTI space to seed' +
-                   ' space (compulsory when using a warp_field for seeds_to_dti)')
+               desc=('transformation matrix taking seed space to DTI space '
+                     '(either FLIRT matrix or FNIRT warp_field) - default is '
+                     'identity'))
+    inv_xfm = File(argstr='--invxfm=%s',
+                   desc=('transformation matrix taking DTI space to seed '
+                         'space (compulsory when using a warp_field for '
+                         'seeds_to_dti)'))
     n_samples = traits.Int(5000, argstr='--nsamples=%d',
-                           desc='number of samples - default=5000', usedefault=True)
-    n_steps = traits.Int(argstr='--nsteps=%d', desc='number of steps per sample - default=2000')
-    dist_thresh = traits.Float(argstr='--distthresh=%.3f', desc='discards samples shorter than ' +
-                               'this threshold (in mm - default=0)')
-    c_thresh = traits.Float(argstr='--cthr=%.3f', desc='curvature threshold - default=0.2')
-    sample_random_points = traits.Bool(argstr='--sampvox', desc='sample random points within seed voxels')
-    step_length = traits.Float(argstr='--steplength=%.3f', desc='step_length in mm - default=0.5')
-    loop_check = traits.Bool(argstr='--loopcheck', desc='perform loop_checks on paths -' +
-                             ' slower, but allows lower curvature threshold')
-    use_anisotropy = traits.Bool(argstr='--usef', desc='use anisotropy to constrain tracking')
+                           desc='number of samples - default=5000',
+                           usedefault=True)
+    n_steps = traits.Int(argstr='--nsteps=%d',
+                         desc='number of steps per sample - default=2000')
+    dist_thresh = traits.Float(argstr='--distthresh=%.3f',
+                               desc=('discards samples shorter than this '
+                                     'threshold (in mm - default=0)'))
+    c_thresh = traits.Float(argstr='--cthr=%.3f',
+                            desc='curvature threshold - default=0.2')
+    sample_random_points = traits.Bool(argstr='--sampvox',
+                                       desc=('sample random points within '
+                                             'seed voxels'))
+    step_length = traits.Float(argstr='--steplength=%.3f',
+                               desc='step_length in mm - default=0.5')
+    loop_check = traits.Bool(argstr='--loopcheck',
+                             desc=('perform loop_checks on paths - slower, '
+                                   'but allows lower curvature threshold'))
+    use_anisotropy = traits.Bool(argstr='--usef',
+                                 desc='use anisotropy to constrain tracking')
     rand_fib = traits.Enum(0, 1, 2, 3, argstr='--randfib=%d',
-                           desc='options: 0 - default, 1 - to randomly sample' +
-                           ' initial fibres (with f > fibthresh), 2 - to sample in ' +
-                           'proportion fibres (with f>fibthresh) to f, 3 - to sample ALL ' +
-                           'populations at random (even if f<fibthresh)')
-    fibst = traits.Int(argstr='--fibst=%d', desc='force a starting fibre for tracking - ' +
-                       'default=1, i.e. first fibre orientation. Only works if randfib==0')
-    mod_euler = traits.Bool(argstr='--modeuler', desc='use modified euler streamlining')
+                           desc=('options: 0 - default, 1 - to randomly '
+                                 'sample initial fibres (with f > fibthresh), '
+                                 '2 - to sample in proportion fibres (with '
+                                 'f>fibthresh) to f, 3 - to sample ALL '
+                                 'populations at random (even if '
+                                 'f<fibthresh)'))
+    fibst = traits.Int(argstr='--fibst=%d',
+                       desc=('force a starting fibre for tracking - '
+                             'default=1, i.e. first fibre orientation. Only '
+                             'works if randfib==0'))
+    mod_euler = traits.Bool(argstr='--modeuler',
+                            desc='use modified euler streamlining')
     random_seed = traits.Bool(argstr='--rseed', desc='random seed')
-    s2tastext = traits.Bool(argstr='--s2tastext', desc='output seed-to-target counts as a' +
-                            ' text file (useful when seeding from a mesh)')
-    verbose = traits.Enum(0, 1, 2, desc="Verbose level, [0-2]." +
-                          "Level 2 is required to output particle files.",
+    s2tastext = traits.Bool(argstr='--s2tastext',
+                            desc=('output seed-to-target counts as a text '
+                                  'file (useful when seeding from a mesh)'))
+    verbose = traits.Enum(0, 1, 2,
+                          desc=("Verbose level, [0-2]. Level 2 is required to "
+                                "output particle files."),
                           argstr="--verbose=%d")
 
 
