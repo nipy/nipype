@@ -733,8 +733,7 @@ class SegmentInputSpec(SPMCommandInputSpec):
     wm_output_type = traits.List(traits.Bool(), minlen=3, maxlen=3,
                                  field='output.WM',
                                  desc="""
-            Options to produce white matter images: \
-c2*.img, wc2*.img and mwc2*.img.
+            Options to produce white matter images: c2*.img, wc2*.img and mwc2*.img.
             None: [False,False,False],
             Native Space: [False,False,True],
             Unmodulated Normalised: [False,True,False],
@@ -875,8 +874,8 @@ class Segment(SPMCommand):
                         outfield = '%s_%s_image' % (image, tissue)
                         outputs[outfield] = fname_presuffix(
                             f, prefix='%sc%d' % (prefix, tidx + 1))
-        if isdefined(self.inputs.save_bias_corrected) and \
-                self.inputs.save_bias_corrected:
+        if (isdefined(self.inputs.save_bias_corrected)
+                and self.inputs.save_bias_corrected):
             outputs['bias_corrected_image'] = fname_presuffix(f, prefix='m')
         t_mat = fname_presuffix(f, suffix='_seg_sn.mat', use_ext=False)
         outputs['transformation_mat'] = t_mat
@@ -895,8 +894,7 @@ class NewSegmentInputSpec(SPMCommandInputSpec):
                                 desc="""A tuple with the following fields:
             - bias reguralisation (0-10)
             - FWHM of Gaussian smoothness of bias
-            - which maps to save (Corrected, Field) - \
-a tuple of two boolean values""",
+            - which maps to save (Corrected, Field) - a tuple of two boolean values""",
                                 field='channel')
     tissues = traits.List(
         traits.Tuple(traits.Tuple(File(exists=True), traits.Int()),
@@ -905,10 +903,8 @@ a tuple of two boolean values""",
         desc="""A list of tuples (one per tissue) with the following fields:
             - tissue probability map (4D), 1-based index to frame
             - number of gaussians
-            - which maps to save [Native, DARTEL] - \
-a tuple of two boolean values
-            - which maps to save [Unmodulated, Modulated] - \
-a tuple of two boolean values""",
+            - which maps to save [Native, DARTEL] - a tuple of two boolean values
+            - which maps to save [Unmodulated, Modulated] - a tuple of two boolean values""",
         field='tissue')
     affine_regularization = traits.Enum('mni', 'eastern', 'subj', 'none',
                                         field='warp.affreg',
