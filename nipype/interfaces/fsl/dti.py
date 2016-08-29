@@ -445,7 +445,7 @@ class ProbTrackXBaseInputSpec(FSLCommandInputSpec):
                 argstr='-m %s', mandatory=True)
     seed = traits.Either(File(exists=True), traits.List(File(exists=True)),
                          traits.List(traits.List(traits.Int(),
-                         minlen=3, maxlen=3)),
+                                     minlen=3, maxlen=3)),
                          desc=('seed volume(s), or voxel(s) or freesurfer '
                                'label file'),
                          argstr='--seed=%s', mandatory=True)
