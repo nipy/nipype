@@ -608,6 +608,9 @@ class Normalize12InputSpec(SPMCommandInputSpec):
     write_interp = traits.Range(low=0, high=7, field='woptions.interp',
                                 desc=('degree of b-spline used for '
                                       'interpolation'))
+    out_prefix = traits.String('w', field='woptions.prefix', usedefault=True,
+                               desc='Normalized output prefix')
+
 
 
 class Normalize12OutputSpec(TraitedSpec):
@@ -909,9 +912,15 @@ class NewSegmentInputSpec(SPMCommandInputSpec):
     affine_regularization = traits.Enum('mni', 'eastern', 'subj', 'none',
                                         field='warp.affreg',
                                         desc='mni, eastern, subj, none ')
-    warping_regularization = traits.Float(field='warp.reg',
-                                          desc=('Aproximate distance between '
-                                                'sampling points.'))
+    warping_regularization = traits.Either(traits.List(traits.Float(),
+                                                       minlen=5, maxlen=5),
+                                           traits.Float(),
+                                           field='warp.reg',
+                                           desc=('Warping regularization '
+                                                 'parameter(s). Accepts float '
+                                                 'or list of floats (the '
+                                                 'latter is required by '
+                                                 'SPM12)'))
     sampling_distance = traits.Float(field='warp.samp',
                                      desc=('Sampling distance on data for '
                                            'parameter estimation'))
