@@ -30,7 +30,7 @@ class BseInputSpec(CommandLineInputSpec):
     diffusionConstant = traits.Float(
         25, usedefault=True, desc='diffusion constant', argstr='-d %f')
     diffusionIterations = traits.Int(
-        3, usedefault=True,    desc='diffusion iterations', argstr='-n %d')
+        3, usedefault=True, desc='diffusion iterations', argstr='-n %d')
     edgeDetectionConstant = traits.Float(
         0.64, usedefault=True, desc='edge detection constant', argstr='-s %f')
     radius = traits.Float(
@@ -65,6 +65,7 @@ class BseOutputSpec(TraitedSpec):
 
 
 class Bse(CommandLine):
+
     """
     brain surface extractor (BSE)
     This program performs automated skull and scalp removal on T1-weighted MRI volumes.
@@ -91,9 +92,9 @@ class Bse(CommandLine):
         if isdefined(inputs[name]):
             return os.path.abspath(inputs[name])
 
-        fileToSuffixMap = {'outputMRIVolume'   : '.bse.nii.gz',
-                    'outputMaskFile'    : '.mask.nii.gz'
-        }
+        fileToSuffixMap = {'outputMRIVolume': '.bse.nii.gz',
+                           'outputMaskFile': '.mask.nii.gz'
+                           }
 
         if name in fileToSuffixMap:
             return getFileName(self.inputs.inputMRIFile, fileToSuffixMap[name])
@@ -113,7 +114,7 @@ class BfcInputSpec(CommandLineInputSpec):
         desc='output bias-corrected MRI volume.If unspecified, output file name will be auto generated.',
         argstr='-o %s', hash_files=False, genfile=True)
     outputBiasField = File(
-        desc='save bias field estimate',argstr='--bias %s', hash_files=False)
+        desc='save bias field estimate', argstr='--bias %s', hash_files=False)
     outputMaskedBiasField = File(
         desc='save bias field estimate (masked)', argstr='--maskedbias %s', hash_files=False)
     histogramRadius = traits.Int(
@@ -173,6 +174,7 @@ class BfcOutputSpec(TraitedSpec):
 
 
 class Bfc(CommandLine):
+
     """
     bias field corrector (BFC)
     This program corrects gain variation in T1-weighted MRI.
@@ -190,7 +192,6 @@ class Bfc(CommandLine):
     >>> results = bfc.run() #doctest: +SKIP
 
     """
-
 
     input_spec = BfcInputSpec
     output_spec = BfcOutputSpec
@@ -224,8 +225,12 @@ class Bfc(CommandLine):
 class PvcInputSpec(CommandLineInputSpec):
     inputMRIFile = File(mandatory=True, desc='MRI file', argstr='-i %s')
     inputMaskFile = File(desc='brain mask file', argstr='-m %s')
-    outputLabelFile = File(desc='output label file. If unspecified, output file name will be auto generated.', argstr='-o %s', genfile=True)
-    outputTissueFractionFile = File(desc='output tissue fraction file', argstr='-f %s', genfile=True)
+    outputLabelFile = File(
+        desc='output label file. If unspecified, output file name will be auto generated.',
+        argstr='-o %s', genfile=True)
+    outputTissueFractionFile = File(
+        desc='output tissue fraction file',
+        argstr='-f %s', genfile=True)
     spatialPrior = traits.Float(desc='spatial prior strength', argstr='-l %f')
     verbosity = traits.Int(desc='verbosity level (0 = silent)', argstr='-v %d')
     threeClassFlag = traits.Bool(
@@ -239,6 +244,7 @@ class PvcOutputSpec(TraitedSpec):
 
 
 class Pvc(CommandLine):
+
     """
     partial volume classifier (PVC) tool.
     This program performs voxel-wise tissue classification T1-weighted MRI.
@@ -267,9 +273,9 @@ class Pvc(CommandLine):
         if isdefined(inputs[name]):
             return os.path.abspath(inputs[name])
 
-        fileToSuffixMap = {'outputLabelFile'           : '.pvc.label.nii.gz',
-                    'outputTissueFractionFile'  : '.pvc.frac.nii.gz'
-        }
+        fileToSuffixMap = {'outputLabelFile': '.pvc.label.nii.gz',
+                           'outputTissueFractionFile': '.pvc.frac.nii.gz'
+                           }
         if name in fileToSuffixMap:
             return getFileName(self.inputs.inputMRIFile, fileToSuffixMap[name])
 
@@ -287,10 +293,12 @@ class CerebroInputSpec(CommandLineInputSpec):
     inputAtlasLabelFile = File(
         mandatory=True, desc='atlas labeling', argstr='--atlaslabels %s')
     inputBrainMaskFile = File(desc='brain mask file', argstr='-m %s')
-    outputCerebrumMaskFile = File(desc='output cerebrum mask volume. If unspecified, output file name will be auto generated.',
-                                  argstr='-o %s', genfile=True)
-    outputLabelVolumeFile = File(desc='output labeled hemisphere/cerebrum volume. If unspecified, output file name will be auto generated.',
-                               argstr='-l %s', genfile=True)
+    outputCerebrumMaskFile = File(
+        desc='output cerebrum mask volume. If unspecified, output file name will be auto generated.',
+        argstr='-o %s', genfile=True)
+    outputLabelVolumeFile = File(
+        desc='output labeled hemisphere/cerebrum volume. If unspecified, output file name will be auto generated.',
+        argstr='-l %s', genfile=True)
     costFunction = traits.Int(2, usedefault=True, desc='0,1,2', argstr='-c %d')
     useCentroids = traits.Bool(
         desc='use centroids of data to initialize position', argstr='--centroids')
@@ -321,6 +329,7 @@ class CerebroOutputSpec(TraitedSpec):
 
 
 class Cerebro(CommandLine):
+
     """
     Cerebrum/cerebellum labeling tool
     This program performs automated labeling of cerebellum and cerebrum in T1 MRI.
@@ -352,10 +361,11 @@ class Cerebro(CommandLine):
         if isdefined(inputs[name]):
             return os.path.abspath(inputs[name])
 
-        fileToSuffixMap = {'outputCerebrumMaskFile'    : '.cerebrum.mask.nii.gz',
-                    'outputLabelVolumeFile'     : '.hemi.label.nii.gz',
-                    'outputWarpTransformFile'   : '.warp',
-                    'outputAffineTransformFile' : '.air'
+        fileToSuffixMap = {
+            'outputCerebrumMaskFile': '.cerebrum.mask.nii.gz',
+            'outputLabelVolumeFile': '.hemi.label.nii.gz',
+            'outputWarpTransformFile': '.warp',
+            'outputAffineTransformFile': '.air'
         }
         if name in fileToSuffixMap:
             return getFileName(self.inputs.inputMRIFile, fileToSuffixMap[name])
@@ -390,6 +400,7 @@ class CortexOutputSpec(TraitedSpec):
 
 
 class Cortex(CommandLine):
+
     """
     cortex extractor
     This program produces a cortical mask using tissue fraction estimates
@@ -445,6 +456,7 @@ class ScrubmaskOutputSpec(TraitedSpec):
 
 
 class Scrubmask(CommandLine):
+
     """
     ScrubMask tool
     scrubmask filters binary masks to trim loosely connected voxels that may
@@ -474,7 +486,6 @@ class Scrubmask(CommandLine):
         if name == 'outputMaskFile':
             return getFileName(self.inputs.inputMaskFile, '.cortex.scrubbed.mask.nii.gz')
 
-
         return None
 
     def _list_outputs(self):
@@ -501,6 +512,7 @@ class TcaOutputSpec(TraitedSpec):
 
 
 class Tca(CommandLine):
+
     """
     topological correction algorithm (TCA)
     This program removes topological handles from a binary object.
@@ -550,6 +562,7 @@ class DewispOutputSpec(TraitedSpec):
 
 
 class Dewisp(CommandLine):
+
     """
     dewisp
     removes wispy tendril structures from cortex model binary masks.
@@ -625,6 +638,7 @@ class DfsOutputSpec(TraitedSpec):
 
 
 class Dfs(CommandLine):
+
     """
     Surface Generator
     Generates mesh surfaces using an isosurface algorithm.
@@ -709,6 +723,7 @@ class PialmeshOutputSpec(TraitedSpec):
 
 
 class Pialmesh(CommandLine):
+
     """
     pialmesh
     computes a pial surface model using an inner WM/GM mesh and a tissue fraction map.
@@ -773,6 +788,7 @@ class HemisplitOutputSpec(TraitedSpec):
 
 
 class Hemisplit(CommandLine):
+
     """
     Hemisphere splitter
     Splits a surface object into two separate surfaces given an input label volume.
@@ -802,10 +818,10 @@ class Hemisplit(CommandLine):
             return os.path.abspath(inputs[name])
 
         fileToSuffixMap = {
-            'outputLeftHemisphere'      : '.left.inner.cortex.dfs',
-            'outputLeftPialHemisphere'  : '.left.pial.cortex.dfs',
-            'outputRightHemisphere'     : '.right.inner.cortex.dfs',
-            'outputRightPialHemisphere' : '.right.pial.cortex.dfs'
+            'outputLeftHemisphere': '.left.inner.cortex.dfs',
+            'outputLeftPialHemisphere': '.left.pial.cortex.dfs',
+            'outputRightHemisphere': '.right.inner.cortex.dfs',
+            'outputRightPialHemisphere': '.right.pial.cortex.dfs'
         }
         if name in fileToSuffixMap:
             return getFileName(self.inputs.inputSurfaceFile, fileToSuffixMap[name])
@@ -850,6 +866,7 @@ class SkullfinderOutputSpec(TraitedSpec):
 
 
 class Skullfinder(CommandLine):
+
     """
     Skull and scalp segmentation algorithm.
 
@@ -882,13 +899,12 @@ class Skullfinder(CommandLine):
         return l_outputs(self)
 
 
-
 class SVRegInputSpec(CommandLineInputSpec):
     subjectFilePrefix = traits.Str(
         argstr='\'%s\'', mandatory=True, position=0,
         desc='Absolute path and filename prefix of the subjects output from BrainSuite '
              'Cortical Surface Extraction Sequence'
-        )
+    )
     dataSinkDelay = traits.List(
         str, argstr='%s',
         desc='Connect datasink out_file to dataSinkDelay to delay execution of SVReg '
@@ -897,109 +913,111 @@ class SVRegInputSpec(CommandLineInputSpec):
              'Surface Extraction sequence (SVReg requires certain files from Brainsuite '
              'CSE, which must all be in the pathway specified by subjectFilePrefix. see '
              'http://brainsuite.org/processing/svreg/usage/ for list of required inputs '
-        )
+    )
     atlasFilePrefix = traits.Str(
         position=1, argstr='\'%s\'',
         desc='Optional: Absolute Path and filename prefix of atlas files and labels to which '
              'the subject will be registered. If unspecified, SVReg'
              'will use its own included atlas files'
-        )
+    )
     iterations = traits.Int(
         argstr='\'-H %d\'',
         desc='Assigns a number of iterations in the intensity registration step.'
              'if unspecified, performs 100 iterations'
-        )
+    )
     refineOutputs = traits.Bool(
         argstr='\'-r\'',
         desc='Refine outputs at the expense of more processing time.'
-        )
+    )
     skipToVolumeReg = traits.Bool(
         argstr='\'-s\'',
         desc='If surface registration was already performed at an earlier time and the '
              'user would not like to redo this step, then this flag may be used to skip '
              'ahead to the volumetric registration. Necessary input files will need to '
              'be present in the input directory called by the command.'
-        )
+    )
     skipToIntensityReg = traits.Bool(
         argstr='\'-p\'',
         desc='If the p-harmonic volumetric registration was already performed at an '
              'earlier time and the user would not like to redo this step, then this '
              'flag may be used to skip ahead to the intensity registration and '
              'label transfer step.'
-        )
+    )
     useManualMaskFile = traits.Bool(
         argstr='\'-cbm\'',
         desc='Can call a manually edited cerebrum mask to limit boundaries. Will '
              'use file: subbasename.cerebrum.mask.nii.gz Make sure to correctly '
              'replace your manually edited mask file in your input folder with the '
              'correct subbasename.'
-        )
+    )
     curveMatchingInstructions = traits.Str(
         argstr='\'-cur %s\'',
         desc='Used to take control of the curve matching process between the atlas '
              'and subject. One can specify the name of the .dfc file <sulname.dfc> and '
              'the sulcal numbers <#sul> to be used as constraints. '
              'example: curveMatchingInstructions = "subbasename.right.dfc 1 2 20"'
-        )
+    )
     useCerebrumMask = traits.Bool(
         argstr='\'-C\'',
         desc='The cerebrum mask <subbasename.cerebrum.mask.nii.gz> will be used for '
              'masking the final labels instead of the default pial surface mask. '
              'Every voxel will be labeled within the cerebrum mask regardless of '
              'the boundaries of the pial surface.'
-        )
+    )
     pialSurfaceMaskDilation = traits.Int(
         argstr='\'-D %d\'',
         desc='Cortical volume labels found in file output subbasename.svreg.label.nii.gz '
              'find its boundaries by using the pial surface then dilating by 1 voxel. '
              'Use this flag in order to control the number of pial surface mask dilation. '
              '(ie. -D 0 will assign no voxel dilation)'
-        )
+    )
     keepIntermediates = traits.Bool(
         argstr='\'-k\'',
         desc='Keep the intermediate files after the svreg sequence is complete.'
-        )
+    )
     _XOR_verbosity = ('verbosity0', 'verbosity1', 'verbosity2')
     verbosity0 = traits.Bool(
         argstr='\'-v0\'', xor=_XOR_verbosity,
         desc='no messages will be reported'
-        )
+    )
     verbosity1 = traits.Bool(
         argstr='\'-v1\'', xor=_XOR_verbosity,
         desc='messages will be reported but not the iteration-wise detailed messages'
-        )
+    )
     verbosity2 = traits.Bool(
         argstr='\'v2\'', xor=_XOR_verbosity,
         desc='all the messages, including per-iteration, will be displayed'
-        )
+    )
     shortMessages = traits.Bool(
         argstr='\'-gui\'',
         desc='Short messages instead of detailed messages'
-        )
+    )
     displayModuleName = traits.Bool(
         argstr='\'-m\'',
         desc='Module name will be displayed in the messages'
-        )
+    )
     displayTimestamps = traits.Bool(
         argstr='\'-t\'',
         desc='Timestamps will be displayed in the messages'
-        )
+    )
     skipVolumetricProcessing = traits.Bool(
         argstr='\'-S\'',
         desc='Only surface registration and labeling will be performed. Volumetric '
              'processing will be skipped.'
-        )
+    )
     useMultiThreading = traits.Bool(
         argstr='\'-P\'',
         desc='If multiple CPUs are present on the system, the code will try to use '
              'multithreading to make the execution fast.'
-        )
+    )
     useSingleThreading = traits.Bool(
         argstr='\'-U\'',
         desc='Use single threaded mode.'
-        )
+    )
+
 
 class SVReg(CommandLine):
+
     """
     surface and volume registration (svreg)
     This program registers a subject's BrainSuite-processed volume and surfaces
@@ -1038,29 +1056,29 @@ class SVReg(CommandLine):
 
 class BDPInputSpec(CommandLineInputSpec):
     bfcFile = File(
-        argstr='%s', mandatory=True,position=0,xor=['noStructuralRegistration'],
+        argstr='%s', mandatory=True, position=0, xor=['noStructuralRegistration'],
         desc='Specify absolute path to file produced by bfc. By default, bfc produces the file in '
              'the format: prefix.bfc.nii.gz'
-        )
+    )
     noStructuralRegistration = traits.Bool(
-        argstr='--no-structural-registration', mandatory=True, position=0,xor=['bfcFile'],
+        argstr='--no-structural-registration', mandatory=True, position=0, xor=['bfcFile'],
         desc='Allows BDP to work without any structural input. This can useful when '
              'one is only interested in diffusion modelling part of BDP. With this '
              'flag only fieldmap-based distortion correction is supported. '
              'outPrefix can be used to specify fileprefix of the output '
              'filenames. Change dwiMask to define region of interest '
              'for diffusion modelling.'
-        )
+    )
     inputDiffusionData = File(
-        argstr='--nii %s', mandatory=True,position=-2,
+        argstr='--nii %s', mandatory=True, position=-2,
         desc='Specifies the absolute path and filename of the input diffusion data in 4D NIfTI-1 '
              'format. The flag must be followed by the filename. Only NIfTI-1 files '
              'with extension .nii or .nii.gz are supported. Furthermore, either  '
              'bMatrixFile, or a combination of both bValueFile and diffusionGradientFile '
              'must be used to provide the necessary b-matrices/b-values and gradient vectors. '
-        )
+    )
     bMatrixFile = File(
-        argstr='--bmat %s', mandatory=True, xor=['BVecBValPair'],position=-1,
+        argstr='--bmat %s', mandatory=True, xor=['BVecBValPair'], position=-1,
         desc='Specifies the absolute path and filename of the file containing b-matrices for '
              'diffusion-weighted scans. The flag must be followed by the filename. '
              'This file must be a plain text file containing 3x3 matrices for each '
@@ -1071,9 +1089,9 @@ class BDPInputSpec(CommandLineInputSpec):
              'specified by the file must be in the voxel coordinates of the input '
              'diffusion weighted image (NIfTI file). In case b-matrices are not known/calculated, '
              'bvec and .bval files can be used instead (see diffusionGradientFile and bValueFile). '
-        )
+    )
     BVecBValPair = traits.List(
-        str, minlen=2, maxlen=2, mandatory=True, position=-1,xor=['bMatrixFile'],
+        str, minlen=2, maxlen=2, mandatory=True, position=-1, xor=['bMatrixFile'],
         argstr='--bvec %s --bval %s',
         desc='Must input a list containing first the BVector file, then the BValue file (both must be absolute paths)\n'
              'Example: bdp.inputs.BVecBValPair = [\'/directory/subdir/prefix.dwi.bvec\', \'/directory/subdir/prefix.dwi.bval\'] '
@@ -1084,7 +1102,7 @@ class BDPInputSpec(CommandLineInputSpec):
              'directions (specified in the voxel coordinates of the input '
              'diffusion-weighted image)The b-vectors file must be a plain text file and '
              'usually has an extension of .bvec '
-        )
+    )
     dataSinkDelay = traits.List(
         str, argstr='%s',
         desc='For use in parallel processing workflows including Brainsuite Cortical '
@@ -1092,7 +1110,7 @@ class BDPInputSpec(CommandLineInputSpec):
              'to delay execution of BDP until dataSink has finished sinking outputs. '
              'In particular, BDP may be run after BFC has finished. For more information '
              'see http://brainsuite.org/processing/diffusion/pipeline/'
-        )
+    )
     phaseEncodingDirection = traits.Enum(
         'x', 'x-', 'y', 'y-', 'z', 'z-',
         argstr='--dir=%s',
@@ -1106,12 +1124,12 @@ class BDPInputSpec(CommandLineInputSpec):
              'the subject, and "z" & "z-" are along the inferior-superior direction. '
              'When this flag is not used, BDP uses "y" as the default phase-encoding '
              'direction. '
-        )
+    )
     echoSpacing = traits.Float(
         argstr='--echo-spacing=%f',
         desc='Sets the echo spacing to t seconds, which is used for fieldmap-based '
              'distortion correction. This flag is required when using fieldmapCorrection'
-        )
+    )
     bValRatioThreshold = traits.Float(
         argstr='--bval-ratio-threshold %f',
         desc='Sets a threshold which is used to determine b=0 images. When there are '
@@ -1122,7 +1140,7 @@ class BDPInputSpec(CommandLineInputSpec):
              'threshold. A lower value of threshold will allow diffusion images with '
              'higher b-value to be used as b=0 image. The default value of this '
              'threshold is set to 45, if this trait is not set. '
-        )
+    )
     estimateTensors = traits.Bool(
         argstr='--tensors',
         desc='Estimates diffusion tensors using a weighted log-linear estimation and '
@@ -1132,13 +1150,13 @@ class BDPInputSpec(CommandLineInputSpec):
              'the saved *.eig.nii.gz file in BrainSuite. BDP reports diffusivity (MD, '
              'axial, radial, L2 and L3) in a unit which is reciprocal inverse of the '
              'unit of input b-value. '
-        )
+    )
     estimateODF_FRACT = traits.Bool(
         argstr='--FRACT',
         desc='Estimates ODFs using the Funk-Radon and Cosine Transformation (FRACT). '
              'The outputs are saved in a separate directory with name "FRACT" and the '
              'ODFs can be visualized by loading the saved ".odf" file in BrainSuite. '
-        )
+    )
     estimateODF_FRT = traits.Bool(
         argstr='--FRT',
         desc='Estimates ODFs using Funk-Radon Transformation (FRT). The coefficient '
@@ -1146,18 +1164,18 @@ class BDPInputSpec(CommandLineInputSpec):
              'ODFs can be visualized by loading the saved ".odf" file in BrainSuite. '
              'The derived generalized-FA (GFA) maps are also saved in the output '
              'directory. '
-        )
+    )
     estimateODF_3DShore = traits.Float(
         argstr='--3dshore --diffusion_time_ms %f',
         desc='Estimates ODFs using 3Dshore. Pass in diffusion time, in ms'
-        )
+    )
     odfLambta = traits.Bool(
         argstr='--odf-lambda <L>',
         desc='Sets the regularization parameter, lambda, of the Laplace-Beltrami '
              'operator while estimating ODFs. The default value is set to 0.006 . This '
              'can be used to set the appropriate regularization for the input '
              'diffusion data. '
-        )
+    )
     t1Mask = File(
         argstr='--t1-mask %s',
         desc='Specifies the filename of the brain-mask file for input T1-weighted '
@@ -1176,7 +1194,7 @@ class BDPInputSpec(CommandLineInputSpec):
              'not found, then BDP will use the input <fileprefix>.bfc.nii.gz itself as '
              'mask (i.e. all non-zero voxels in <fileprefix>.bfc.nii.gz is assumed to '
              'constitute brain mask).  '
-        )
+    )
     dwiMask = File(
         argstr='--dwi-mask %s',
         desc='Specifies the filename of the brain-mask file for diffusion data. This '
@@ -1192,7 +1210,7 @@ class BDPInputSpec(CommandLineInputSpec):
              'accurate with automatically generated pseudo mask, BDP should be re-run '
              'with a refined diffusion mask. The mask can be generated and/or edited '
              'in BrainSuite. '
-        )
+    )
     rigidRegMeasure = traits.Enum(
         'MI', 'INVERSION', 'BDP',
         argstr='--rigid-reg-measure %s',
@@ -1204,7 +1222,7 @@ class BDPInputSpec(CommandLineInputSpec):
              'T2-weighted images. BDP measure combines MI and INVERSION. It starts '
              'with INVERSION measure and refines the result with MI measure. BDP is '
              'the default measure when this trait is not set.  '
-        )
+    )
     dcorrRegMeasure = traits.Enum(
         'MI', 'INVERSION-EPI', 'INVERSION-T1', 'INVERSION-BOTH', 'BDP',
         argstr='--dcorr-reg-method %s',
@@ -1219,7 +1237,7 @@ class BDPInputSpec(CommandLineInputSpec):
              'used; and both are inverted when INVERSION-BOTH is used. BDP method add '
              'the MI-based refinement after the correction using INVERSION-BOTH '
              'method. BDP is the default method when this trait is not set.  '
-        )
+    )
     dcorrWeight = traits.Float(
         argstr='--dcorr-regularization-wt %f',
         desc='Sets the (scalar) weighting parameter for regularization penalty in '
@@ -1232,29 +1250,29 @@ class BDPInputSpec(CommandLineInputSpec):
              'the penalty to half of the default regularization penalty (By default, this weight '
              'is set to 1.0). Similarly, a weight of 2.0 '
              'would increase the penalty to twice of the default penalty.  '
-        )
+    )
     skipDistortionCorr = traits.Bool(
         argstr='--no-distortion-correction',
         desc='Skips distortion correction completely and performs only a rigid '
              'registration of diffusion and T1-weighted image. This can be useful when '
              'the input diffusion images do not have any distortion or they have been '
              'corrected for distortion. '
-        )
+    )
     skipNonuniformityCorr = traits.Bool(
         argstr='--no-nonuniformity-correction',
         desc='Skips intensity non-uniformity correction in b=0 image for '
              'registration-based distortion correction. The intensity non-uniformity '
              'correction does not affect any diffusion modeling. '
-        )
+    )
     skipIntensityCorr = traits.Bool(
         argstr='--no-intensity-correction', xor=['fieldmapCorrectionMethod'],
         desc='Disables intensity correction when performing distortion correction. '
              'Intensity correction can change the noise distribution in the corrected '
              'image, but it does not affect estimated diffusion parameters like FA, '
              'etc. '
-        )
+    )
     fieldmapCorrection = File(
-        argstr='--fieldmap-correction %s', requires = ['echoSpacing'],
+        argstr='--fieldmap-correction %s', requires=['echoSpacing'],
         desc='Use an acquired fieldmap for distortion correction. The fieldmap must '
              'have units of radians/second. Specify the filename of the fieldmap file. '
              'The field of view (FOV) of the fieldmap scan must cover the FOV of the diffusion '
@@ -1272,7 +1290,7 @@ class BDPInputSpec(CommandLineInputSpec):
              'distortion correction also requires the echoSpacing. Also '
              'fieldmapCorrectionMethod allows you to define method for '
              'distortion correction. least squares is the default method. '
-        )
+    )
     fieldmapCorrectionMethod = traits.Enum(
         'pixelshift', 'leastsq', xor=['skipIntensityCorr'],
         argstr='--fieldmap-correction-method %s',
@@ -1283,21 +1301,21 @@ class BDPInputSpec(CommandLineInputSpec):
              'squares (leastsq) method uses a physical model of distortion which is '
              'more accurate (and more computationally expensive) than pixel-shift '
              'method.'
-        )
+    )
     ignoreFieldmapFOV = traits.Bool(
         argstr='--ignore-fieldmap-fov',
         desc='Supresses the error generated by an insufficient field of view of the '
              'input fieldmap and continues with the processing. It is useful only when '
              'used with fieldmap-based distortion correction. See '
              'fieldmap-correction for a detailed explanation. '
-        )
+    )
     fieldmapSmooth = traits.Float(
         argstr='--fieldmap-smooth3=%f',
         desc='Applies 3D Gaussian smoothing with a standard deviation of S '
              'millimeters (mm) to the input fieldmap before applying distortion '
              'correction. This trait is only useful with '
              'fieldmapCorrection. Skip this trait for no smoothing. '
-        )
+    )
     transformDiffusionVolume = File(
         argstr='--transform-diffusion-volume %s',
         desc='This flag allows to define custom volumes in diffusion coordinate '
@@ -1313,7 +1331,7 @@ class BDPInputSpec(CommandLineInputSpec):
              'is set to linear). If you are attempting to transform a label file or '
              'mask file, use "nearest" interpolation method with transformInterpolation. '
              'See also transformT1Volume and transformInterpolation'
-        )
+    )
     transformT1Volume = File(
         argstr='--transform-t1-volume %s',
         desc='Same as transformDiffusionVolume except that files specified must '
@@ -1322,7 +1340,7 @@ class BDPInputSpec(CommandLineInputSpec):
              'data/images from T1 coordinate to diffusion coordinate. The transformed '
              'files are written to the output directory with suffix ".D_coord" in the '
              'filename. See also transformDiffusionVolume  and transformInterpolation. '
-        )
+    )
     transformInterpolation = traits.Enum(
         'linear', 'nearest', 'cubic', 'spline',
         argstr='--transform-interpolation %s',
@@ -1330,7 +1348,7 @@ class BDPInputSpec(CommandLineInputSpec):
              'transforming volumes defined by transformT1Volume and '
              'transformDiffusionVolume. Possible methods are "linear", "nearest", '
              '"cubic" and "spline". By default, "linear" interpolation is used. '
-        )
+    )
     transformT1Surface = File(
         argstr='--transform-t1-surface %s',
         desc='Similar to transformT1Volume, except that this flag allows '
@@ -1341,7 +1359,7 @@ class BDPInputSpec(CommandLineInputSpec):
              'should overlay correctly with the T1-weighted scan in BrainSuite. The '
              'transformed files are written to the output directory with suffix '
              'D_coord" in the filename. '
-        )
+    )
     transformDiffusionSurface = File(
         argstr='--transform-diffusion-surface %s',
         desc='Same as transformT1Volume, except that the .dfs files specified '
@@ -1349,7 +1367,7 @@ class BDPInputSpec(CommandLineInputSpec):
              'correctly with the diffusion scan in BrainSuite. The transformed files '
              'are written to the output directory with suffix ".T1_coord" in the '
              'filename. See also transformT1Volume. '
-        )
+    )
     transformDataOnly = traits.Bool(
         argstr='--transform-data-only',
         desc='Skip all of the processing (co-registration, distortion correction and '
@@ -1363,7 +1381,7 @@ class BDPInputSpec(CommandLineInputSpec):
              'assumes that all the necessary files were generated earlier and all of '
              'the other flags MUST be used in the same way as they were in the initial '
              'BDP run that processed the data. '
-        )
+    )
     generateStats = traits.Bool(
         argstr='--generate-stats',
         desc='Generate ROI-wise statistics of estimated diffusion tensor parameters. '
@@ -1384,7 +1402,7 @@ class BDPInputSpec(CommandLineInputSpec):
              'outputDiffusionCoordinates for outputs in diffusion coordinate and '
              'forcePartialROIStats for an important note about field of view of '
              'diffusion and T1-weighted scans. '
-        )
+    )
     onlyStats = traits.Bool(
         argstr='--generate-only-stats',
         desc='Skip all of the processing (co-registration, distortion correction and '
@@ -1394,7 +1412,7 @@ class BDPInputSpec(CommandLineInputSpec):
              'assumes that all the necessary files were generated earlier. All of the '
              'other flags MUST be used in the same way as they were in the initial BDP '
              'run that processed the data. '
-        )
+    )
     forcePartialROIStats = traits.Bool(
         argstr='--force-partial-roi-stats',
         desc='The field of view (FOV) of the diffusion and T1-weighted scans may '
@@ -1406,7 +1424,7 @@ class BDPInputSpec(CommandLineInputSpec):
              'voxels are also reported for each ROI in statistics files. Number of '
              'missing voxels are reported in the same coordinate system as the '
              'statistics file.  '
-        )
+    )
     customDiffusionLabel = File(
         argstr='--custom-diffusion-label %s',
         desc='BDP supports custom ROIs in addition to those generated by BrainSuite '
@@ -1424,7 +1442,7 @@ class BDPInputSpec(CommandLineInputSpec):
              'fileprefix>.BDP_ROI_MAP.xml. Custom label files can also be generated '
              'by using the label painter tool in BrainSuite. See also '
              'customLabelXML'
-        )
+    )
     customT1Label = File(
         argstr='--custom-t1-label %s',
         desc='Same as customDiffusionLabelexcept that the label files specified '
@@ -1434,7 +1452,7 @@ class BDPInputSpec(CommandLineInputSpec):
              'are also transferred (and saved) to diffusion coordinate for statistics '
              'in diffusion coordinate. BDP uses nearest-neighborhood interpolation for '
              'this transformation. See also customLabelXML. '
-        )
+    )
     customLabelXML = File(
         argstr='--custom-label-xml %s',
         desc='BrainSuite saves a descriptions of the SVReg labels (ROI name, ID, '
@@ -1452,7 +1470,7 @@ class BDPInputSpec(CommandLineInputSpec):
              'custom label files and NO Statistics will be calculated for ROIs not '
              'identified in the custom xml file. See also customDiffusionLabel and '
              'customT1Label.'
-        )
+    )
     outputSubdir = traits.Str(
         argstr='--output-subdir %s',
         desc='By default, BDP writes out all the output (and intermediate) files in '
@@ -1462,7 +1480,7 @@ class BDPInputSpec(CommandLineInputSpec):
              'directory as BFC file. <directory_name> should be the name of the '
              'sub-directory without any path. This can be useful to organize all '
              'outputs generated by BDP in a separate sub-directory. '
-        )
+    )
     outputDiffusionCoordinates = traits.Bool(
         argstr='--output-diffusion-coordinate',
         desc='Enables estimation of diffusion tensors and/or ODFs (and statistics if '
@@ -1472,7 +1490,7 @@ class BDPInputSpec(CommandLineInputSpec):
              'computation is required, it will also transform/save all label/mask '
              'files required to diffusion coordinate (see generateStats for '
              'details). '
-        )
+    )
     flagConfigFile = File(
         argstr='--flag-conf-file %s',
         desc='Uses the defined file to specify BDP flags which can be useful for '
@@ -1483,7 +1501,7 @@ class BDPInputSpec(CommandLineInputSpec):
              'file and is also specified in the command used to run BDP, then the '
              'later get preference and overrides the definition in configuration '
              'file. '
-        )
+    )
     outPrefix = traits.Str(
         argstr='--output-fileprefix %s',
         desc='Specifies output fileprefix when noStructuralRegistration is '
@@ -1492,29 +1510,31 @@ class BDPInputSpec(CommandLineInputSpec):
              'not specified (and noStructuralRegistration is used) then the output '
              'files have same file-base as the input diffusion file. This trait is '
              'ignored when noStructuralRegistration is not used. '
-        )
+    )
     threads = traits.Int(
         argstr='--threads=%d',
         desc='Sets the number of parallel process threads which can be used for '
              'computations to N, where N must be an integer. Default value of N is '
              ' '
-        )
+    )
     lowMemory = traits.Bool(
         argstr='--low-memory',
         desc='Activates low-memory mode. This will run the registration-based '
              'distortion correction at a lower resolution, which could result in a '
              'less-accurate correction. This should only be used when no other '
              'alternative is available. '
-        )
+    )
     ignoreMemory = traits.Bool(
         argstr='--ignore-memory',
         desc='Deactivates the inbuilt memory checks and forces BDP to run '
              'registration-based distortion correction at its default resolution even '
              'on machines with a low amount of memory. This may result in an '
              'out-of-memory error when BDP cannot allocate sufficient memory. '
-        )
+    )
+
 
 class BDP(CommandLine):
+
     """
     BrainSuite Diffusion Pipeline (BDP) enables fusion of diffusion and
     structural MRI information for advanced image and connectivity analysis.
@@ -1544,7 +1564,7 @@ class BDP(CommandLine):
 
     def _format_arg(self, name, spec, value):
         if name == 'BVecBValPair':
-            return spec.argstr % (value[0],  value[1])
+            return spec.argstr % (value[0], value[1])
         if name == 'dataSinkDelay':
             return spec.argstr % ''
         return super(BDP, self)._format_arg(name, spec, value)
@@ -1554,9 +1574,11 @@ class ThicknessPVCInputSpec(CommandLineInputSpec):
     subjectFilePrefix = traits.Str(
         argstr='%s', mandatory=True,
         desc='Absolute path and filename prefix of the subject data'
-        )
+    )
+
 
 class ThicknessPVC(CommandLine):
+
     """
     ThicknessPVC computes cortical thickness using partial tissue fractions.
     This thickness measure is then transferred to the atlas surface to
@@ -1589,15 +1611,18 @@ class ThicknessPVC(CommandLine):
 def getFileName(inputName, suffix):
     fullInput = os.path.basename(inputName)
     dotRegex = regex.compile("[^.]+")
-    inputNoExtension = dotRegex.findall(fullInput)[0] #extract between last slash and first period
+    # extract between last slash and first period
+    inputNoExtension = dotRegex.findall(fullInput)[0]
     return os.path.abspath(
         ''.join((inputNoExtension, suffix)))
+
 
 def l_outputs(self):
     outputs = self.output_spec().get()
     for key in outputs:
         name = self._gen_filename(key)
-        if not name is None:
+        if name is not None:
             outputs[key] = name
 
     return outputs
+
