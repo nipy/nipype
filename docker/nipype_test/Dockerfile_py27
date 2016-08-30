@@ -58,8 +58,7 @@ COPY . /root/src/nipype
 RUN rm -r /usr/local/miniconda/lib/python2.7/site-packages/nipype* && \
     cd /root/src/nipype && \
     pip install -r requirements.txt && \
-    pip install -e . && \
-    make specs
+    pip install -e . 
 
 # Replace imglob with Python3 compatible version
 RUN rm -r ${FSLDIR}/bin/imglob && \
