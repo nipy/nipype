@@ -21,7 +21,7 @@ Currently these tools are supported:
 
 Examples
 --------
-See the docstrings of the individual classes for examples.
+See the docstrings of the individual classes for examples.  
 
 """
 
