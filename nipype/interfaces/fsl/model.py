@@ -356,7 +356,8 @@ class Level1Design(BaseInterface):
         basis_key = list(self.inputs.bases.keys())[0]
         if basis_key in ['dgamma', 'gamma']:
             usetd = int(self.inputs.bases[basis_key]['derivs'])
-        for runno, runinfo in enumerate(self._format_session_info(self.inputs.session_info)):
+        for runno, runinfo in enumerate(
+                self._format_session_info(self.inputs.session_info)):
             outputs['fsf_files'].append(os.path.join(cwd, 'run%d.fsf' % runno))
             outputs['ev_files'].insert(runno, [])
             evname = []
@@ -1258,7 +1259,8 @@ class MultipleRegressDesign(BaseInterface):
     .. note::
       FSL does not demean columns for higher level analysis.
 
-    Please see `FSL documentation <http://www.fmrib.ox.ac.uk/fsl/feat5/detail.html#higher>`_
+    Please see `FSL documentation
+    <http://www.fmrib.ox.ac.uk/fsl/feat5/detail.html#higher>`_
     for more details on model specification for higher level analysis.
 
     Examples
@@ -1652,10 +1654,11 @@ class ClusterInputSpec(FSLCommandInputSpec):
                                   argstr='--omean=%s',
                                   desc='filename for output of mean image',
                                   hash_files=False)
-    out_pval_file = traits.Either(traits.Bool, File,
-                                  argstr='--opvals=%s',
-                                  desc='filename for image output of log pvals',
-                                  hash_files=False)
+    out_pval_file = traits.Either(
+        traits.Bool, File,
+        argstr='--opvals=%s',
+        desc='filename for image output of log pvals',
+        hash_files=False)
     pthreshold = traits.Float(argstr='--pthresh=%.10f',
                               requires=['dlh', 'volume'],
                               desc='p-threshold for clusters')

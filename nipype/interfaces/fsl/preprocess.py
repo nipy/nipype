@@ -863,10 +863,11 @@ class FNIRTInputSpec(FSLCommandInputSpec):
         argstr='--refderiv',
         desc=('If true, ref image is used to calculate derivatives. '
               'Default false'))
-    intensity_mapping_model = traits.Enum('none', 'global_linear', 'global_non_linear'
-                                          'local_linear', 'global_non_linear_with_bias',
-                                          'local_non_linear', argstr='--intmod=%s',
-                                          desc='Model for intensity-mapping')
+    intensity_mapping_model = traits.Enum(
+        'none', 'global_linear', 'global_non_linear'
+        'local_linear', 'global_non_linear_with_bias',
+        'local_non_linear', argstr='--intmod=%s',
+        desc='Model for intensity-mapping')
     intensity_mapping_order = traits.Int(
         argstr='--intorder=%d',
         desc='Order of poynomial for mapping intensities, default 5')
@@ -1330,10 +1331,12 @@ class FUGUE(FSLCommand):
     a set of tools for EPI distortion correction.
 
     Distortions may be corrected for
-        1. improving registration with non-distorted images (e.g. structurals), or
+        1. improving registration with non-distorted images (e.g. structurals),
+           or
         2. dealing with motion-dependent changes.
 
-    FUGUE is designed to deal only with the first case - improving registration.
+    FUGUE is designed to deal only with the first case -
+    improving registration.
 
 
     Examples

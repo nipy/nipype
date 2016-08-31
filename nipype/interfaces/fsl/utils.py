@@ -682,7 +682,8 @@ class AvScale(CommandLine):
         out = expr.search(runtime.stdout).groupdict()
         outputs = {}
         outputs['rotation_translation_matrix'] = [[
-            float(v) for v in r.strip().split(' ')] for r in out['rot_tran_mat'].strip().split('\n')]
+            float(v) for v in r.strip().split(' ')]
+            for r in out['rot_tran_mat'].strip().split('\n')]
         outputs['scales'] = [
             float(s) for s in out['scales'].strip().split(' ')]
         outputs['skews'] = [float(s) for s in out['skews'].strip().split(' ')]
@@ -691,13 +692,17 @@ class AvScale(CommandLine):
         outputs['left_right_orientation_preserved'] = out[
             'lr_orientation'].strip() == 'preserved'
         outputs['forward_half_transform'] = [[
-            float(v) for v in r.strip().split(' ')] for r in out['fwd_half_xfm'].strip().split('\n')]
+            float(v) for v in r.strip().split(' ')]
+            for r in out['fwd_half_xfm'].strip().split('\n')]
         outputs['backward_half_transform'] = [[
-            float(v) for v in r.strip().split(' ')] for r in out['bwd_half_xfm'].strip().split('\n')]
+            float(v) for v in r.strip().split(' ')]
+            for r in out['bwd_half_xfm'].strip().split('\n')]
 
         if self.inputs.all_param:
-            outputs['rot_angles'] = [float(r) for r in out['rot_angles'].strip().split(' ')]
-            outputs['translations'] = [float(r) for r in out['translations'].strip().split(' ')]
+            outputs['rot_angles'] = [
+                float(r) for r in out['rot_angles'].strip().split(' ')]
+            outputs['translations'] = [
+                float(r) for r in out['translations'].strip().split(' ')]
 
         setattr(self, '_results', outputs)
         return runtime
