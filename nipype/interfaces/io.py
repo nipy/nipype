@@ -700,7 +700,7 @@ class DataSink(IOBase):
 
         # Iterate through outputs attributes {key : path(s)}
         for key, files in self.inputs._outputs.items():
-            if not isdefined(files):
+            if not isdefined(files) or isinstance(files, bool):
                 continue
             iflogger.debug("key: %s files: %s" % (key, str(files)))
             files = filename_to_list(files)
