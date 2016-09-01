@@ -36,8 +36,6 @@ from ..matlab import MatlabCommand
 __docformat__ = 'restructuredtext'
 logger = logging.getLogger('interface')
 
-__docformat__ = 'restructuredtext'
-
 
 def func_is_3d(in_file):
     """Checks if input functional files are 3d."""
@@ -421,8 +419,11 @@ class SPMCommand(BaseInterface):
                     if isinstance(val, np.ndarray):
                         jobstring += self._generate_job(prefix=None,
                                                         contents=val)
+                    elif isinstance(val, list):
+                        val_format = ', '.join(['\'{}\''] * len(val)).format
+                        jobstring += '[{}];...\n'.format(val_format(*val))
                     elif isinstance(val, (str, bytes)):
-                        jobstring += '\'%s\';...\n' % (val)
+                        jobstring += '\'{}\';...\n'.format(val)
                     else:
                         jobstring += '%s;...\n' % str(val)
                 jobstring += '};\n'
