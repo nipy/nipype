@@ -466,6 +466,7 @@ def loadcrash(infile, *args):
 def loadpkl(infile):
     """Load a zipped or plain cPickled file
     """
+    fmlogger.debug('Loading pkl: %s', infile)
     if infile.endswith('pklz'):
         pkl_file = gzip.open(infile, 'rb')
     else:
