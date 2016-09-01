@@ -26,7 +26,7 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-FROM nipype/nipype_test:base
+FROM nipype/nipype_test:base-0.0.1
 MAINTAINER The nipype developers https://github.com/nipy/nipype
 
 # Pre-check that requirements are installed
