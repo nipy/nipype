@@ -470,17 +470,21 @@ def loadpkl(infile):
     if infile.endswith('pklz'):
         pkl_file = gzip.open(infile, 'rb')
     else:
-        pkl_file = open(infile)
-    return pickle.load(pkl_file)
+        pkl_file = open(infile, 'rb')
+
+    try:
+        unpkl = pickle.load(pkl_file)
+    except UnicodeDecodeError:
+        unpkl = pickle.load(pkl_file, fix_imports=True, encoding='utf-8')
+    return unpkl
 
 
 def savepkl(filename, record):
-    content = pickle.dumps(record)
     if filename.endswith('pklz'):
         pkl_file = gzip.open(filename, 'wb')
     else:
         pkl_file = open(filename, 'wb')
-    pkl_file.write(content.encode())
+    pickle.dump(record, pkl_file)
     pkl_file.close()
 
 rst_levels = ['=', '-', '~', '+']

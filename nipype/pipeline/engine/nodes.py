@@ -528,6 +528,10 @@ class Node(EngineBase):
             pkl_file = gzip.open(resultsoutputfile, 'rb')
             try:
                 result = pickle.load(pkl_file)
+            except UnicodeDecodeError:
+                # Was this pickle created with Python 2.x?
+                pickle.load(pkl_file, fix_imports=True, encoding='utf-8')
+                logger.warn('Successfully loaded pickle in compatibility mode')
             except (traits.TraitError, AttributeError, ImportError) as err:
                 if isinstance(err, (AttributeError, ImportError)):
                     attribute_error = True
