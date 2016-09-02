@@ -475,11 +475,12 @@ def loadpkl(infile):
 
 
 def savepkl(filename, record):
+    content = pickle.dumps(record)
     if filename.endswith('pklz'):
         pkl_file = gzip.open(filename, 'wb')
     else:
         pkl_file = open(filename, 'wb')
-    pickle.dump(record, pkl_file)
+    pkl_file.write(content.encode())
     pkl_file.close()
 
 rst_levels = ['=', '-', '~', '+']
