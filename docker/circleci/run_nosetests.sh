@@ -11,7 +11,8 @@ mkdir -p /root/.nipype
 echo '[logging]' > /root/.nipype/nipype.cfg
 echo 'log_to_file = true' >> /root/.nipype/nipype.cfg
 echo "log_directory = /scratch/logs/$1" >> /root/.nipype/nipype.cfg
-
+echo '[execution]' >> /root/.nipype/nipype.cfg
+echo 'profile_runtime = true' >> /root/.nipype/nipype.cfg
 
 # Run tests
 cd /root/src/nipype/
