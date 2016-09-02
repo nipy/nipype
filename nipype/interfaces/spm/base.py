@@ -420,7 +420,11 @@ class SPMCommand(BaseInterface):
                         jobstring += self._generate_job(prefix=None,
                                                         contents=val)
                     elif isinstance(val, list):
-                        val_format = ', '.join(['\'{}\''] * len(val)).format
+                        items_format = []
+                        for el in val:
+                            items_format += ['{}' if not isinstance(el, (str, bytes))
+                                             else '\'{}\'']
+                        val_format = ', '.join(items_format).format
                         jobstring += '[{}];...\n'.format(val_format(*val))
                     elif isinstance(val, (str, bytes)):
                         jobstring += '\'{}\';...\n'.format(val)

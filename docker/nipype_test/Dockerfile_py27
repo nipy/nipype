@@ -31,8 +31,9 @@ MAINTAINER The nipype developers https://github.com/nipy/nipype
 
 # Downgrade python to 2.7
 RUN conda update -y conda && \
-    conda update --all -y python=2.7
-   
+    conda update --all -y python=2.7 && \
+    pip install nose-cov doctest-ignore-unicode configparser
+
 COPY docker/circleci/run_* /usr/bin/
 RUN chmod +x /usr/bin/run_*
 
@@ -45,6 +46,6 @@ RUN pip install -r /root/src/nipype/requirements.txt
 COPY . /root/src/nipype
 RUN rm -r /usr/local/miniconda/lib/python2.7/site-packages/nipype* && \
     cd /root/src/nipype && \
-    pip install -e . 
+    pip install -e .
 
 CMD ["/bin/bash"]
