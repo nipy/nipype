@@ -22,6 +22,15 @@ class CompCoreOutputSpec(TraitedSpec):
 class CompCore(BaseInterface):
     '''
     Node with core CompCor computation, used in aCompCor and tCompCor
+
+    Example
+    -------
+
+    >>> ccinterface = CompCore()
+    >>> ccinterface.inputs.realigned_file = 'nipype/testing/data/functional.nii'
+    >>> ccinterface.inputs.mask_file = 'nipype/testing/data/mask.nii'
+    >>> ccinterface.inputs.num_components = 1
+
     '''
     input_spec = CompCoreInputSpec
     output_spec = CompCoreOutputSpec
