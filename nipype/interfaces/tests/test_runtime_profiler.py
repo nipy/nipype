@@ -277,8 +277,9 @@ class RuntimeProfilerTestCase(unittest.TestCase):
 
         # Get runtime stats from log file
         with open(log_file, 'r') as log_handle:
-            start_str = log_handle.readlines()[0].rstrip('\n')
-            finish_str = log_handle.readlines()[1].rstrip('\n')
+            lines = log_handle.readlines()
+            start_str = lines[0].rstrip('\n')
+            finish_str = lines[1].rstrip('\n')
 
         # Delete wf base dir
         shutil.rmtree(base_dir)
@@ -356,8 +357,9 @@ class RuntimeProfilerTestCase(unittest.TestCase):
 
         # Get runtime stats from log file
         with open(log_file, 'r') as log_handle:
-            start_str = log_handle.readlines()[0].rstrip('\n')
-            finish_str = log_handle.readlines()[1].rstrip('\n')
+            lines = log_handle.readlines()
+            start_str = lines[0].rstrip('\n')
+            finish_str = lines[1].rstrip('\n')
 
         # Delete wf base dir
         shutil.rmtree(base_dir)
