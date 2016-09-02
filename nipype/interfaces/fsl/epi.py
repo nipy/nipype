@@ -296,7 +296,7 @@ class TOPUP(FSLCommand):
             line = [float(val[0] == encdir[0]) * direction
                     for val in ['x', 'y', 'z']] + [durations[idx]]
             lines.append(line)
-        np.savetxt(out_file, np.array(lines), fmt=str('%d %d %d %.8f').encode())
+        np.savetxt(out_file, np.array(lines), fmt=b'%d %d %d %.8f')
         return out_file
 
     def _overload_extension(self, value, name=None):

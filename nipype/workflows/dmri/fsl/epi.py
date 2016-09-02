@@ -681,7 +681,7 @@ def _rotate_bvecs(in_bvec, in_matrix):
         bvec = np.matrix(bvecs[:, i])
         rot = np.matrix(np.loadtxt(vol_matrix)[0:3, 0:3])
         new_bvecs[i] = (np.array(rot * bvec.T).T)[0]  # fill each volume with x,y,z as we go along
-    np.savetxt(out_file, np.array(new_bvecs).T, fmt=str('%0.15f').encode())
+    np.savetxt(out_file, np.array(new_bvecs).T, fmt=b'%0.15f')
     return out_file
 
 

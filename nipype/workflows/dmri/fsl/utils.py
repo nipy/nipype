@@ -499,7 +499,7 @@ def rotate_bvecs(in_bvec, in_matrix):
             newbvec = invrot.dot(bvec)
             new_bvecs.append((newbvec / np.linalg.norm(newbvec)))
 
-    np.savetxt(out_file, np.array(new_bvecs).T, fmt=str('%0.15f').encode())
+    np.savetxt(out_file, np.array(new_bvecs).T, fmt=b'%0.15f')
     return out_file
 
 
@@ -549,7 +549,7 @@ def eddy_rotate_bvecs(in_bvec, eddy_params):
             newbvec = invrot.dot(bvec)
             new_bvecs.append(newbvec / np.linalg.norm(newbvec))
 
-    np.savetxt(out_file, np.array(new_bvecs).T, fmt=str('%0.15f').encode())
+    np.savetxt(out_file, np.array(new_bvecs).T, fmt=b'%0.15f')
     return out_file
 
 
@@ -711,7 +711,7 @@ def reorient_bvecs(in_dwi, old_dwi, in_bvec):
     R = RS / S
 
     new_bvecs = [R.dot(b) for b in bvecs]
-    np.savetxt(out_file, np.array(new_bvecs).T, fmt=str('%0.15f').encode())
+    np.savetxt(out_file, np.array(new_bvecs).T, fmt=b'%0.15f')
     return out_file
 
 

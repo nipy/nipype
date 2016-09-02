@@ -36,7 +36,7 @@ def extract_noise_components(realigned_file, noise_mask_file, num_components):
     else:
         components = np.hstack((components, u[:, :num_components]))
     components_file = os.path.join(os.getcwd(), 'noise_components.txt')
-    np.savetxt(components_file, components, fmt=str("%.10f").encode())
+    np.savetxt(components_file, components, fmt=b"%.10f")
     return components_file
 
 
