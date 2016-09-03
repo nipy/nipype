@@ -1,7 +1,4 @@
-from __future__ import division
-from builtins import range
-from numpy import ones, kron, mean, eye, hstack, dot, tile
-from scipy.linalg import pinv
+from scipy.linalg import svd # singular value decomposition
 from ..interfaces.base import BaseInterfaceInputSpec, TraitedSpec, \
     BaseInterface, traits, File
 import nibabel as nb
