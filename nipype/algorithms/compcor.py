@@ -1,8 +1,8 @@
-from scipy.linalg import svd # singular value decomposition
-from ..interfaces.base import BaseInterfaceInputSpec, TraitedSpec, \
-    BaseInterface, traits, File
+from ..interfaces.base import (BaseInterfaceInputSpec, TraitedSpec,
+                               BaseInterface, traits, File)
 import nibabel as nb
 import numpy as np
+from scipy import linalg, stats
 import os
 
 from nipype.pipeline.engine import Workflow
@@ -10,7 +10,7 @@ from nipype.pipeline.engine import Workflow
 class CompCoreInputSpec(BaseInterfaceInputSpec):
     realigned_file = File(exists=True, mandatory=True, desc='already realigned brain image (4D)')
     mask_file = File(exists=True, mandatory=True, desc='mask file that determines ROI (3D)')
-    num_components = traits.Int(default=6) # 6 for BOLD, 4 for ASL
+    num_components = traits.Int(6, usedefault=True) # 6 for BOLD, 4 for ASL
     # additional_regressors??
 
 class CompCoreOutputSpec(TraitedSpec):
@@ -44,9 +44,14 @@ class CompCore(BaseInterface):
         # and voxels along the column dimension."
         # voxel_timecourses.shape == [nvoxels, time]
         M = voxel_timecourses.T
+        numvols = M.shape[0]
+        numvoxels = M.shape[1]
 
         # "The constant and linear trends of the columns in the matrix M were removed ..."
-        M = (M - np.mean(M, axis=0))
+        timesteps = range(numvols)
+        for voxel in range(numvoxels):
+            m, b, _, _, _ = stats.linregress(M[:, voxel], timesteps)
+            M[:, voxel] = M[:, voxel] - [m*t + b for t in timesteps]
 
         # "... prior to column-wise variance normalization."
         stdM = np.std(M, axis=0)
@@ -58,8 +63,7 @@ class CompCore(BaseInterface):
 
         # "The covariance matrix C = MMT was constructed and decomposed into its
         # principal components using a singular value decomposition."
-        u, _, _ = svd(M, full_matrices=False)
-
+        u, _, _ = linalg.svd(M, full_matrices=False)
         components = u[:, :self.inputs.num_components]
         components_file = os.path.join(os.getcwd(), "components_file.txt")
         np.savetxt(components_file, components, fmt="%.10f")
