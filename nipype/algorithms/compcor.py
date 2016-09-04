@@ -69,6 +69,11 @@ class CompCore(BaseInterface):
         np.savetxt(components_file, components, fmt="%.10f")
         return runtime
 
+    def _list_outputs(self):
+        outputs = self._outputs().get()
+        outputs['components_file'] = os.path.abspath("components_file.txt")
+        return outputs
+
 class aCompCor(Workflow):
     pass
 
