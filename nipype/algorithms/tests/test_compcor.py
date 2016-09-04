@@ -6,27 +6,40 @@ from nipype.algorithms.compcor import CompCore
 
 import nibabel as nb
 import numpy as np
+import os
 
-# first 3 = spatial; last = temporal
-dim = 2, 3, 4, 5
+functionalnii = 'func.nii'
+masknii = 'mask.nii'
 
-@skipif(True)
 def test_compcore():
     # setup
     noise = np.fromfunction(fake_noise_fun, fake_data.shape)
-    realigned_file = make_toy(fake_data + noise, 'func.nii')
+    realigned_file = make_toy(fake_data + noise, functionalnii)
 
     mask = np.ones(fake_data.shape[:3])
     mask[0,0,0] = 0
     mask[0,0,1] = 0
-    mask_file = make_toy(mask, 'mask.nii')
+    mask_file = make_toy(mask, masknii)
 
     # run
     ccinterface = CompCore(realigned_file=realigned_file, mask_file=mask_file)
     ccresult = ccinterface.run()
 
-def make_toy(array, filename):
-    toy = nb.Nifti1Image(array, np.eye(4))
+    # asserts
+    components = ccinterface._list_outputs()['components_file']
+    assert_true(os.path.exists(components))
+    assert_true(os.path.getsize(components) > 0)
+    assert_equal(ccinterface.inputs.num_components, 6)
+
+    #  apply components_file to realigned_file, is it better? the same as before adding noise?
+
+    # remove temporary nifti files
+    os.remove(functionalnii)
+    os.remove(masknii)
+    os.remove(components)
+
+def make_toy(ndarray, filename):
+    toy = nb.Nifti1Image(ndarray, np.eye(4))
     nb.nifti1.save(toy, filename)
     return filename
 
