@@ -12,12 +12,36 @@ dim = 2, 3, 4, 5
 
 @skipif(True)
 def test_compcore():
-    ccinterface = CompCore(realigned_file=make_toy(np.random.rand(*dim), 'func.nii'),
-                           mask_file=make_toy(np.random.randint(0, 2, dim[:2]),
-                                              'mask.nii'))
+    # setup
+    noise = np.fromfunction(fake_noise_fun, fake_data.shape)
+    realigned_file = make_toy(fake_data + noise, 'func.nii')
+
+    mask = np.ones(fake_data.shape[:3])
+    mask[0,0,0] = 0
+    mask[0,0,1] = 0
+    mask_file = make_toy(mask, 'mask.nii')
+
+    # run
+    ccinterface = CompCore(realigned_file=realigned_file, mask_file=mask_file)
     ccresult = ccinterface.run()
 
 def make_toy(array, filename):
     toy = nb.Nifti1Image(array, np.eye(4))
     nb.nifti1.save(toy, filename)
     return filename
+
+fake_data = np.array([[[[8, 5, 3, 8, 0],
+                        [6, 7, 4, 7, 1]],
+
+                       [[7, 9, 1, 6, 5],
+                        [0, 7, 4, 7, 7]]],
+
+
+                      [[[2, 4, 5, 7, 0],
+                        [1, 7, 0, 5, 4]],
+
+                       [[7, 3, 9, 0, 4],
+                        [9, 4, 1, 5, 0]]]])
+
+def fake_noise_fun(i, j, l, m):
+    return m*i + l - j
