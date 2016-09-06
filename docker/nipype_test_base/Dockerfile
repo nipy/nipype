@@ -31,8 +31,9 @@ MAINTAINER Nipype developers
 
 # Preparations
 RUN ln -snf /bin/bash /bin/sh
-ARG DEBIAN_FRONTEND=noninteractive
+ENV SHELL /bin/bash
 
+ARG DEBIAN_FRONTEND=noninteractive
 RUN sed -i -e 's,main$,main contrib non-free,g' /etc/apt/sources.list.d/neurodebian.sources.list && \
     apt-get -y update && \
     apt-get install -y curl \
@@ -48,14 +49,14 @@ RUN sed -i -e 's,main$,main contrib non-free,g' /etc/apt/sources.list.d/neurodeb
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* && \
     echo ". /etc/fsl/fsl.sh" >> /etc/bash.bashrc
 
-ENV FSLDIR=/usr/share/fsl/5.0
-ENV FSLOUTPUTTYPE=NIFTI_GZ
-ENV PATH=/usr/lib/fsl/5.0:$PATH
-ENV FSLMULTIFILEQUIT=TRUE
-ENV POSSUMDIR=/usr/share/fsl/5.0
-ENV LD_LIBRARY_PATH=/usr/lib/fsl/5.0:$LD_LIBRARY_PATH
-ENV FSLTCLSH=/usr/bin/tclsh
-ENV FSLWISH=/usr/bin/wish
+ENV FSLDIR=/usr/share/fsl/5.0 \
+    FSLOUTPUTTYPE=NIFTI_GZ \
+    PATH=/usr/lib/fsl/5.0:$PATH \
+    FSLMULTIFILEQUIT=TRUE \
+    POSSUMDIR=/usr/share/fsl/5.0 \
+    LD_LIBRARY_PATH=/usr/lib/fsl/5.0:$LD_LIBRARY_PATH \
+    FSLTCLSH=/usr/bin/tclsh \
+    FSLWISH=/usr/bin/wish
 
 # Install Matlab: from the good old install_spm_mcr.sh of @chrisfilo
 WORKDIR /opt
@@ -78,6 +79,26 @@ ENV FORCE_SPMMCR 1
 RUN curl -sSL http://www.fil.ion.ucl.ac.uk/spm/download/restricted/utopia/dev/spm12_r6472_Linux_R2015a.zip -o spm12.zip && \
     unzip spm12.zip && \
     rm -rf spm12.zip
+
+WORKDIR /root
+# Install miniconda
+RUN curl -sSLO https://repo.continuum.io/miniconda/Miniconda-latest-Linux-x86_64.sh && \
+    /bin/bash Miniconda-latest-Linux-x86_64.sh -b -p /usr/local/miniconda && \
+    rm Miniconda-latest-Linux-x86_64.sh
+
+ENV PATH /usr/local/miniconda/bin:$PATH
+
+# http://bugs.python.org/issue19846
+# > At the moment, setting "LANG=C" on a Linux system *fundamentally breaks Python 3*, and that's not OK.
+ENV LANG C.UTF-8
+
+# Add conda-forge channel in conda
+RUN conda config --add channels conda-forge && \
+    conda install -y lockfile nipype matplotlib sphinx boto coverage dipy
+
+# Install run scripts
+COPY docker/circleci/run_* /usr/bin/
+RUN chmod +x /usr/bin/run_*
 
 CMD ["/bin/bash"]
 
