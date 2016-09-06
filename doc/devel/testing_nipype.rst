@@ -18,7 +18,7 @@ Tests implementation
 --------------------
 
 Nipype testing framework is built upon `nose <http://nose.readthedocs.io/en/latest/>`_.
-By the time this guidelines are written, Nipype implements 17638 tests.
+By the time these guidelines are written, Nipype implements 17638 tests.
 
 To run the tests locally, first get nose installed::
 
