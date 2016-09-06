@@ -32,6 +32,8 @@ from ...utils import spm_docs as sd
 from ..base import (BaseInterface, traits, isdefined, InputMultiPath,
                     BaseInterfaceInputSpec, Directory, Undefined)
 from ..matlab import MatlabCommand
+from ...external.due import due, Doi, BibTeX
+
 
 __docformat__ = 'restructuredtext'
 logger = logging.getLogger('interface')
@@ -233,6 +235,17 @@ class SPMCommand(BaseInterface):
     _matlab_cmd = None
     _paths = None
     _use_mcr = None
+
+    references_ = [{'entry': BibTeX("@book{FrackowiakFristonFrithDolanMazziotta1997,"
+                                    "author={R.S.J. Frackowiak, K.J. Friston, C.D. Frith, R.J. Dolan, and J.C. Mazziotta},"
+                                    "title={Human Brain Function},"
+                                    "publisher={Academic Press USA},"
+                                    "year={1997},"
+                                    "}"),
+                    'description': 'The fundamental text on Statistical Parametric Mapping (SPM)',
+                    # 'path': "nipype.interfaces.spm",
+                    'tags': ['implementation'],
+                    }]
 
     def __init__(self, **inputs):
         super(SPMCommand, self).__init__(**inputs)

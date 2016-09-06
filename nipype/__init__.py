@@ -13,6 +13,7 @@ from .info import (LONG_DESCRIPTION as __doc__,
 from .utils.config import NipypeConfig
 from .fixes.numpy.testing import nosetester
 from .utils.logger import Logging
+from .refs import due
 
 try:
     import faulthandler

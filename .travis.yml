@@ -8,6 +8,7 @@ python:
 env:
 - INSTALL_DEB_DEPENDECIES=true
 - INSTALL_DEB_DEPENDECIES=false
+- INSTALL_DEB_DEPENDECIES=true DUECREDIT_ENABLE=yes
 before_install:
 - wget http://repo.continuum.io/miniconda/Miniconda${TRAVIS_PYTHON_VERSION:0:1}-latest-Linux-x86_64.sh
   -O /home/travis/.cache/miniconda.sh
@@ -32,6 +33,7 @@ install:
 #   conda install -y vtk mayavi; fi
 - conda install -y nipype
 - pip install python-coveralls coverage doctest-ignore-unicode
+- if [ ! -z "$DUECREDIT_ENABLE"]; then pip install duecredit; fi
 - rm -r /home/travis/miniconda/lib/python${TRAVIS_PYTHON_VERSION}/site-packages/nipype*
 - pip install -r requirements.txt
 - pip install -e .
