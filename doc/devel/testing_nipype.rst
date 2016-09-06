@@ -25,7 +25,8 @@ To run the tests locally, first get nose installed::
   pip install nose
 
 
-Then, the tests can be run with the following simple command::
+Then, after nipype is `installed in developer mode <../users/install.html#nipype-for-developers>`_,
+the tests can be run with the following simple command::
 
   make tests
 
