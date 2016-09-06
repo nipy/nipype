@@ -1,35 +1,37 @@
 from ..interfaces.base import (BaseInterfaceInputSpec, TraitedSpec,
                                BaseInterface, traits, File)
+
+from nipype.pipeline import engine as pe
+from nipype.interfaces.utility import IdentityInterface
+
 import nibabel as nb
 import numpy as np
 from scipy import linalg, stats
 import os
 
-from nipype.pipeline.engine import Workflow
-
-class CompCoreInputSpec(BaseInterfaceInputSpec):
+class CompCorInputSpec(BaseInterfaceInputSpec):
     realigned_file = File(exists=True, mandatory=True, desc='already realigned brain image (4D)')
     mask_file = File(exists=True, mandatory=True, desc='mask file that determines ROI (3D)')
     num_components = traits.Int(6, usedefault=True) # 6 for BOLD, 4 for ASL
     # additional_regressors??
 
-class CompCoreOutputSpec(TraitedSpec):
+class CompCorOutputSpec(TraitedSpec):
     components_file = File(desc='text file containing the noise components', exists=True)
 
-class CompCore(BaseInterface):
+class CompCor(BaseInterface):
     '''
     Interface with core CompCor computation, used in aCompCor and tCompCor
 
     Example
     -------
 
-    >>> ccinterface = CompCore()
+    >>> ccinterface = CompCor()
     >>> ccinterface.inputs.realigned_file = 'nipype/testing/data/functional.nii'
     >>> ccinterface.inputs.mask_file = 'nipype/testing/data/mask.nii'
     >>> ccinterface.inputs.num_components = 1
     '''
-    input_spec = CompCoreInputSpec
-    output_spec = CompCoreOutputSpec
+    input_spec = CompCorInputSpec
+    output_spec = CompCorOutputSpec
 
     def _run_interface(self, runtime):
         imgseries = nb.load(self.inputs.realigned_file).get_data()

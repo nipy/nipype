@@ -2,8 +2,10 @@
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 import nipype
 from nipype.testing import assert_equal, assert_true, assert_false, skipif
-from nipype.algorithms.compcor import CompCore
+from nipype.algorithms.compcor import (CompCor, CompCorWorkflow, ACompCor,
+                                       TCompCor)
 
+import mock
 import nibabel as nb
 import numpy as np
 import os
@@ -11,7 +13,7 @@ import os
 functionalnii = 'func.nii'
 masknii = 'mask.nii'
 
-def test_compcore():
+def test_compcor():
     # setup
     noise = np.fromfunction(fake_noise_fun, fake_data.shape)
     realigned_file = make_toy(fake_data + noise, functionalnii)
@@ -22,7 +24,7 @@ def test_compcore():
     mask_file = make_toy(mask, masknii)
 
     # run
-    ccinterface = CompCore(realigned_file=realigned_file, mask_file=mask_file)
+    ccinterface = CompCor(realigned_file=realigned_file, mask_file=mask_file)
     ccresult = ccinterface.run()
 
     # asserts
