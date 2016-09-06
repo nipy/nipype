@@ -16,6 +16,7 @@ dependencies:
   override:
     - mkdir -p ~/scratch/nose ~/examples
     - if [[ ! -d ~/examples/nipype-tutorial ]]; then wget -q -O nipype-tutorial.tar.bz2 https://dl.dropbox.com/s/jzgq2nupxyz36bp/nipype-tutorial.tar.bz2 && tar xjf nipype-tutorial.tar.bz2 -C ~/examples/; fi
+    - if [[ ! -d ~/examples/nipype-fsl_course_data ]]; then wget --retry-connrefused --waitretry=5 --read-timeout=20 --timeout=15 -t 0 -q https://3552243d5be815c1b09152da6525cb8fe7b900a6.googledrive.com/host/0BxI12kyv2olZVUswazA3NkFvOXM/nipype-fsl_course_data.tar.gz && tar xzf nipype-fsl_course_data.tar.gz -C ~/examples/; fi
     - if [[ ! -d ~/examples/feeds ]]; then wget -q -O fsl-feeds.tar.gz https://googledrive.com/host/0BxI12kyv2olZNXBONlJKV0Y1Tm8 && tar xzf fsl-feeds.tar.gz -C ~/examples/; fi
     - if [[ -e ~/docker/image.tar ]]; then docker load -i ~/docker/image.tar; fi
     - docker build -f docker/nipype_test_py27/Dockerfile -t nipype/nipype_test:py27 . :
@@ -38,7 +39,7 @@ test:
     - docker run -v /etc/localtime:/etc/localtime:ro -v ~/examples:/root/examples:ro -v $(pwd)/scratch:/scratch -w /scratch nipype/nipype_test:py27 /usr/bin/run_examples.sh fmri_fsl_reuse Linear /root/examples/ level1_workflow
     - docker run -v /etc/localtime:/etc/localtime:ro -v ~/examples:/root/examples:ro -v $(pwd)/scratch:/scratch -w /scratch nipype/nipype_test:py27 /usr/bin/run_examples.sh fmri_spm_nested Linear /root/examples/ level1
     - docker run -v /etc/localtime:/etc/localtime:ro -v ~/examples:/root/examples:ro -v $(pwd)/scratch:/scratch -w /scratch nipype/nipype_test:py27 /usr/bin/run_examples.sh fmri_spm_nested Linear /root/examples/ l2pipeline
-    - docker run -v /etc/localtime:/etc/localtime:ro -v ~/scratch:/scratch -w /scratch nipype/nipype_test:py27 /usr/bin/run_nosetests.sh :
+    - docker run -e FSL_COURSE_DATA="/root/examples/nipype-fsl_course_data" -v /etc/localtime:/etc/localtime:ro -v ~/scratch:/scratch -w /scratch nipype/nipype_test:py27 /usr/bin/run_nosetests.sh :
         timeout: 2600
   post:
     - bash docker/circleci/teardown.sh

@@ -26,38 +26,16 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-FROM nipype/nipype_test:base
+FROM nipype/nipype_test:base-0.0.1
 MAINTAINER The nipype developers https://github.com/nipy/nipype
-# Preparations
-RUN ln -snf /bin/bash /bin/sh
-WORKDIR /root
 
-# Install miniconda
-RUN curl -sSLO https://repo.continuum.io/miniconda/Miniconda-latest-Linux-x86_64.sh && \
-    /bin/bash Miniconda-latest-Linux-x86_64.sh -b -p /usr/local/miniconda && \
-    rm Miniconda-latest-Linux-x86_64.sh
+# Pre-check that requirements are installed
+WORKDIR /root/src/nipype
+COPY requirements.txt /root/src/nipype/requirements.txt
+RUN pip install -r requirements.txt
 
-ENV PATH /usr/local/miniconda/bin:$PATH
-
-# http://bugs.python.org/issue19846
-# > At the moment, setting "LANG=C" on a Linux system *fundamentally breaks Python 3*, and that's not OK.
-ENV LANG C.UTF-8
-
-# Add conda-forge channel in conda
-RUN conda config --add channels conda-forge && \
-    conda install -y lockfile nipype matplotlib sphinx boto coverage
-
-RUN mkdir -p /root/src/nipype
 COPY . /root/src/nipype
-
-RUN cd /root/src/nipype && \
-    pip install dipy && \
-    pip install -r requirements.txt && \
+RUN rm -r /usr/local/miniconda/lib/python2.7/site-packages/nipype* && \
     pip install -e .
-
-
-COPY docker/circleci/run_* /usr/bin/
-RUN chmod +x /usr/bin/run_*
-ENV SHELL /bin/bash
 
 CMD ["/bin/bash"]
