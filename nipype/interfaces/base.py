@@ -1163,22 +1163,20 @@ class BaseInterface(Interface):
         with open(json_file) as fhandle:
             inputs_dict = json.load(fhandle)
 
-        for key, newval in list(inputs_dict.items()):
-            if not hasattr(self.inputs, key):
-                continue
-            val = getattr(self.inputs, key)
-            if overwrite or not isdefined(val):
-                setattr(self.inputs, key, newval)
+        def_inputs = []
+        if not overwrite:
+            def_inputs = list(self.inputs.get_traitsfree().keys())
+
+        new_inputs = list(set(list(inputs_dict.keys())) - set(def_inputs))
+        for key in new_inputs:
+            if hasattr(self.inputs, key):
+                setattr(self.inputs, key, inputs_dict[key])
 
     def save_inputs_to_json(self, json_file):
         """
         A convenient way to save current inputs to a JSON file.
         """
-        inputs = self.inputs.get()
-        for key, val in list(inputs.items()):
-            if not isdefined(val):
-                inputs.pop(key, None)
-
+        inputs = self.inputs.get_traitsfree()
         iflogger.debug('saving inputs {}', inputs)
         with open(json_file, 'w') as fhandle:
             json.dump(inputs, fhandle, indent=4)
