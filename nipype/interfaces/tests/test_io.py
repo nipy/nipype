@@ -35,11 +35,11 @@ except ImportError:
 
 # Check for fakes3
 standard_library.install_aliases()
-from subprocess import check_call
+from subprocess import check_call, CalledProcessError
 try:
     ret_code = check_call(['which', 'fakes3'], stdout=open(os.devnull, 'wb'))
     fakes3 = (ret_code == 0)
-except subprocess.CalledProcessError:
+except CalledProcessError:
     fakes3 = False
 
 def test_datagrabber():
