@@ -49,6 +49,7 @@ from ..utils.provenance import write_provenance
 from .. import config, logging, LooseVersion
 from .. import __version__
 from ..external.six import string_types, text_type
+from ..external.due import due
 
 runtime_profile = str2bool(config.get('execution', 'profile_runtime'))
 
@@ -757,6 +758,7 @@ class BaseInterface(Interface):
     _version = None
     _additional_metadata = []
     _redirect_x = False
+    references_ = []
 
     def __init__(self, **inputs):
         if not self.input_spec:
@@ -779,11 +781,23 @@ class BaseInterface(Interface):
             docstring = ['']
 
         allhelp = '\n'.join(docstring + cls._inputs_help() + [''] +
-                            cls._outputs_help() + [''])
+                            cls._outputs_help() + [''] +
+                            cls._refs_help() + [''])
         if returnhelp:
             return allhelp
         else:
             print(allhelp)
+
+    @classmethod
+    def _refs_help(cls):
+        """ Prints interface references.
+        """
+        helpstr = ['References::']
+
+        for r in cls.references_:
+            helpstr += [repr(r['entry'])]
+
+        return helpstr
 
     @classmethod
     def _get_trait_desc(self, inputs, name, spec):
@@ -1009,6 +1023,13 @@ class BaseInterface(Interface):
         """
         raise NotImplementedError
 
+    def _duecredit_cite(self):
+        """ Add the interface references to the duecredit citations
+        """
+        for r in self.references_:
+            r['path'] = self.__module__
+            due.cite(**r)
+
     def run(self, **inputs):
         """Execute this interface.
 
@@ -1028,6 +1049,8 @@ class BaseInterface(Interface):
         self._check_mandatory_inputs()
         self._check_version_requirements(self.inputs)
         interface = self.__class__
+        self._duecredit_cite()
+
         # initialize provenance tracking
         env = deepcopy(dict(os.environ))
         runtime = Bunch(cwd=os.getcwd(),
