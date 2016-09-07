@@ -14,7 +14,7 @@ class TestCompCor(unittest.TestCase):
     ''' Note: Tests currently do a poor job of testing functionality '''
 
     functionalnii = 'func.nii'
-    masknii = 'mask.nii'
+    masknii = 'amask.nii'
     components_file = None
 
     def setUp(self):
