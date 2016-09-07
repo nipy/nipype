@@ -11,7 +11,7 @@ import os
 
 class CompCorInputSpec(BaseInterfaceInputSpec):
     realigned_file = File(exists=True, mandatory=True, desc='already realigned brain image (4D)')
-    mask_file = File(exists=True, mandatory=True, desc='mask file that determines ROI (3D)')
+    mask_file = File(exists=True, mandatory=False, desc='mask file that determines ROI (3D)')
     num_components = traits.Int(6, usedefault=True) # 6 for BOLD, 4 for ASL
     # additional_regressors??
 
@@ -76,8 +76,10 @@ class CompCor(BaseInterface):
         outputs['components_file'] = os.path.abspath("components_file.txt")
         return outputs
 
-class aCompCor(Workflow):
-    pass
+class TCompCor(CompCor):
 
-class tCompCor(Workflow):
-    pass
+    def _run_interface(self, runtime):
+        # create mask here
+
+        super(TCompCor, self)._run_interface(runtime)
+        return runtime

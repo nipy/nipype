@@ -2,61 +2,79 @@
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 import nipype
 from nipype.testing import assert_equal, assert_true, assert_false, skipif
-from nipype.algorithms.compcor import (CompCor, CompCorWorkflow, ACompCor,
-                                       TCompCor)
+from nipype.algorithms.compcor import CompCor, TCompCor
 
+import unittest
 import mock
 import nibabel as nb
 import numpy as np
 import os
 
-functionalnii = 'func.nii'
-masknii = 'mask.nii'
+class TestCompCor(unittest.TestCase):
+    ''' Note: Tests currently do a poor job of testing functionality '''
 
-def test_compcor():
-    # setup
-    noise = np.fromfunction(fake_noise_fun, fake_data.shape)
-    realigned_file = make_toy(fake_data + noise, functionalnii)
+    functionalnii = 'func.nii'
+    masknii = 'mask.nii'
+    components_file = None
 
-    mask = np.ones(fake_data.shape[:3])
-    mask[0,0,0] = 0
-    mask[0,0,1] = 0
-    mask_file = make_toy(mask, masknii)
+    def setUp(self):
+        # setup
+        noise = np.fromfunction(self.fake_noise_fun, self.fake_data.shape)
+        self.realigned_file = self.make_toy(self.fake_data + noise,
+                                            self.functionalnii)
 
-    # run
-    ccinterface = CompCor(realigned_file=realigned_file, mask_file=mask_file)
-    ccresult = ccinterface.run()
+    def test_compcor(self):
+        mask = np.ones(self.fake_data.shape[:3])
+        mask[0,0,0] = 0
+        mask[0,0,1] = 0
+        mask_file = self.make_toy(mask, self.masknii)
 
-    # asserts
-    components = ccinterface._list_outputs()['components_file']
-    assert_true(os.path.exists(components))
-    assert_true(os.path.getsize(components) > 0)
-    assert_equal(ccinterface.inputs.num_components, 6)
+        ccinterface = CompCor(realigned_file=self.realigned_file,
+                               mask_file=mask_file)
+        self.meat(ccinterface)
 
-    #  apply components_file to realigned_file, is it better? the same as before adding noise?
+    @skipif(True)
+    def test_tcompcor(self):
+        ccinterface = TCompCor(realigned_file=self.realigned_file)
+        self.meat(ccinterface)
 
-    # remove temporary nifti files
-    os.remove(functionalnii)
-    os.remove(masknii)
-    os.remove(components)
+    def meat(self, ccinterface):
+        # run
+        ccresult = ccinterface.run()
 
-def make_toy(ndarray, filename):
-    toy = nb.Nifti1Image(ndarray, np.eye(4))
-    nb.nifti1.save(toy, filename)
-    return filename
+        # assert
+        print(ccresult.outputs.components_file)
+        self.components_file = ccinterface._list_outputs()['components_file']
+        assert_equal(ccresult.outputs.components_file, self.components_file)
+        assert_true(os.path.exists(self.components_file))
+        assert_true(os.path.getsize(self.components_file) > 0)
+        assert_equal(ccinterface.inputs.num_components, 6)
 
-fake_data = np.array([[[[8, 5, 3, 8, 0],
-                        [6, 7, 4, 7, 1]],
+    def tearDown(self):
+        # remove temporary nifti files
+        try:
+            os.remove(self.functionalnii)
+            os.remove(self.components_file)
+            os.remove(self.masknii)
+        except (FileNotFoundError, TypeError) as e:
+            print(e)
 
-                       [[7, 9, 1, 6, 5],
-                        [0, 7, 4, 7, 7]]],
+    def make_toy(self, ndarray, filename):
+        toy = nb.Nifti1Image(ndarray, np.eye(4))
+        nb.nifti1.save(toy, filename)
+        return filename
 
+    def fake_noise_fun(self, i, j, l, m):
+        return m*i + l - j
 
-                      [[[2, 4, 5, 7, 0],
-                        [1, 7, 0, 5, 4]],
+    fake_data = np.array([[[[8, 5, 3, 8, 0],
+                            [6, 7, 4, 7, 1]],
 
-                       [[7, 3, 9, 0, 4],
-                        [9, 4, 1, 5, 0]]]])
+                           [[7, 9, 1, 6, 5],
+                            [0, 7, 4, 7, 7]]],
 
-def fake_noise_fun(i, j, l, m):
-    return m*i + l - j
+                          [[[2, 4, 5, 7, 0],
+                            [1, 7, 0, 5, 4]],
+
+                           [[7, 3, 9, 0, 4],
+                            [9, 4, 1, 5, 0]]]])
