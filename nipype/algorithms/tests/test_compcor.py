@@ -33,7 +33,6 @@ class TestCompCor(unittest.TestCase):
                                mask_file=mask_file)
         self.meat(ccinterface)
 
-    @skipif(True)
     def test_tcompcor(self):
         ccinterface = TCompCor(realigned_file=self.realigned_file)
         self.meat(ccinterface)

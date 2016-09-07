@@ -56,7 +56,7 @@ class CompCor(BaseInterface):
             M[:, voxel] = M[:, voxel] - [m*t + b for t in timesteps]
 
         # "... prior to column-wise variance normalization."
-        M = M / self._compute_tSTD(M)
+        M = M / self._compute_tSTD(M, 1.)
 
         # "The covariance matrix C = MMT was constructed and decomposed into its
         # principal components using a singular value decomposition."
@@ -71,18 +71,40 @@ class CompCor(BaseInterface):
         outputs['components_file'] = os.path.abspath("components_file.txt")
         return outputs
 
-    def _compute_tSTD(self, matrix):
+    def _compute_tSTD(self, M, x):
         stdM = np.std(M, axis=0)
-        # set bad values to division identity
-        stdM[stdM == 0] = 1.
-        stdM[np.isnan(stdM)] = 1.
-        stdM[np.isinf(stdM)] = 1.
+        # set bad values to x
+        stdM[stdM == 0] = x
+        stdM[np.isnan(stdM)] = x
+        stdM[np.isinf(stdM)] = x
         return stdM
 
 class TCompCor(CompCor):
 
     def _run_interface(self, runtime):
-        # create mask here
+        imgseries = nb.load(self.inputs.realigned_file).get_data()
+        time_voxels = imgseries.T
+        num_voxels = np.prod(time_voxels.shape[1:])
 
+        # From the paper:
+        # "For each voxel time series, the temporal standard deviation is
+        # defined as the standard deviation of the time series after the removal
+        # of low-frequency nuisance terms (e.g., linear and quadratic drift)."
+
+        # "To construct the tSTD noise ROI, we sorted the voxels by their
+        # temporal standard deviation ..."
+        tSTD = self._compute_tSTD(time_voxels, 0)
+        sortSTD = np.sort(tSTD, axis=None) # flattened sorted matrix
+
+        # "... and retained a pre-specified upper fraction of the sorted voxels
+        # within each slice ... we chose a 2% threshold"
+        threshold = sortSTD[int(num_voxels * .98)]
+        mask = tSTD >= threshold
+        mask = mask.astype(int)
+
+        # save mask
+        mask_file = 'mask.nii'
+        nb.nifti1.save(nb.Nifti1Image(mask, np.eye(4)), mask_file)
+        self.inputs.mask_file = 'mask.nii'
         super(TCompCor, self)._run_interface(runtime)
         return runtime
