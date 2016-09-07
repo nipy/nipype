@@ -13,8 +13,8 @@ import os
 class TestCompCor(unittest.TestCase):
     ''' Note: Tests currently do a poor job of testing functionality '''
 
-    functionalnii = 'func.nii'
-    masknii = 'amask.nii'
+    functionalnii = 'compcorfunc.nii'
+    masknii = 'compcormask.nii'
     components_file = None
 
     def setUp(self):
