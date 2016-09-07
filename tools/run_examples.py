@@ -20,7 +20,7 @@ def run_examples(example, pipelines, data_path, plugin=None, rm_base_dir=True):
 
     plugin_args = {}
     if plugin == 'MultiProc':
-        plugin_args['n_procs'] = cpu_count()
+        plugin_args['n_procs'] = os.getenv('NIPYPE_NUMBER_OF_CPUS', cpu_count())
 
     __import__(example)
     for pipeline in pipelines:
