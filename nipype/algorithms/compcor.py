@@ -56,12 +56,7 @@ class CompCor(BaseInterface):
             M[:, voxel] = M[:, voxel] - [m*t + b for t in timesteps]
 
         # "... prior to column-wise variance normalization."
-        stdM = np.std(M, axis=0)
-        # set bad values to division identity
-        stdM[stdM == 0] = 1.
-        stdM[np.isnan(stdM)] = 1.
-        stdM[np.isinf(stdM)] = 1.
-        M = M / stdM
+        M = M / self._compute_tSTD(M)
 
         # "The covariance matrix C = MMT was constructed and decomposed into its
         # principal components using a singular value decomposition."
@@ -75,6 +70,14 @@ class CompCor(BaseInterface):
         outputs = self._outputs().get()
         outputs['components_file'] = os.path.abspath("components_file.txt")
         return outputs
+
+    def _compute_tSTD(self, matrix):
+        stdM = np.std(M, axis=0)
+        # set bad values to division identity
+        stdM[stdM == 0] = 1.
+        stdM[np.isnan(stdM)] = 1.
+        stdM[np.isinf(stdM)] = 1.
+        return stdM
 
 class TCompCor(CompCor):
 
