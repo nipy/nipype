@@ -2,7 +2,7 @@
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 import nipype
 from nipype.testing import assert_equal, assert_true, assert_false, skipif
-from nipype.algorithms.compcor import CompCor, TCompCor
+from nipype.algorithms.compcor import CompCor, TCompCor, ACompCor
 
 import unittest
 import mock
@@ -29,25 +29,32 @@ class TestCompCor(unittest.TestCase):
         mask[0,0,1] = 0
         mask_file = self.make_toy(mask, self.masknii)
 
-        ccinterface = CompCor(realigned_file=self.realigned_file,
-                               mask_file=mask_file)
-        self.meat(ccinterface)
+        ccresult = self.run_cc(CompCor(realigned_file=self.realigned_file,
+                               mask_file=mask_file))
+
+        accresult = self.run_cc(ACompCor(realigned_file=self.realigned_file,
+                             mask_file=mask_file,
+                             components_file='acc_components_file'))
+
+        assert_equal(os.path.getsize(ccresult.outputs.components_file),
+                     os.path.getsize(accresult.outputs.components_file))
 
     def test_tcompcor(self):
         ccinterface = TCompCor(realigned_file=self.realigned_file)
-        self.meat(ccinterface)
+        self.run_cc(ccinterface)
 
-    def meat(self, ccinterface):
+    def run_cc(self, ccinterface):
         # run
         ccresult = ccinterface.run()
 
         # assert
-        print(ccresult.outputs.components_file)
-        self.components_file = ccinterface._list_outputs()['components_file']
-        assert_equal(ccresult.outputs.components_file, self.components_file)
-        assert_true(os.path.exists(self.components_file))
-        assert_true(os.path.getsize(self.components_file) > 0)
+        expected_file = ccinterface._list_outputs()['components_file']
+        assert_equal(ccresult.outputs.components_file, expected_file)
+        assert_true(os.path.exists(expected_file))
+        assert_true(os.path.getsize(expected_file) > 0)
         assert_equal(ccinterface.inputs.num_components, 6)
+
+        return ccresult
 
     def tearDown(self):
         # remove temporary nifti files

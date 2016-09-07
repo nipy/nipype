@@ -10,10 +10,13 @@ from scipy import linalg, stats
 import os
 
 class CompCorInputSpec(BaseInterfaceInputSpec):
-    realigned_file = File(exists=True, mandatory=True, desc='already realigned brain image (4D)')
-    mask_file = File(exists=True, mandatory=False, desc='mask file that determines ROI (3D)')
+    realigned_file = File(exists=True, mandatory=True,
+                          desc='already realigned brain image (4D)')
+    mask_file = File(exists=True, mandatory=False,
+                     desc='mask file that determines ROI (3D)')
+    components_file = File('components_file.txt', exists=False, mandatory=False, usedefault=True,
+                           desc='filename to store physiological components in')
     num_components = traits.Int(6, usedefault=True) # 6 for BOLD, 4 for ASL
-    # additional_regressors??
 
 class CompCorOutputSpec(TraitedSpec):
     components_file = File(desc='text file containing the noise components', exists=True)
@@ -62,13 +65,13 @@ class CompCor(BaseInterface):
         # principal components using a singular value decomposition."
         u, _, _ = linalg.svd(M, full_matrices=False)
         components = u[:, :self.inputs.num_components]
-        components_file = os.path.join(os.getcwd(), "components_file.txt")
+        components_file = os.path.join(os.getcwd(), self.inputs.components_file)
         np.savetxt(components_file, components, fmt="%.10f")
         return runtime
 
     def _list_outputs(self):
         outputs = self._outputs().get()
-        outputs['components_file'] = os.path.abspath("components_file.txt")
+        outputs['components_file'] = os.path.abspath(self.inputs.components_file)
         return outputs
 
     def _compute_tSTD(self, M, x):
@@ -108,3 +111,5 @@ class TCompCor(CompCor):
         self.inputs.mask_file = 'mask.nii'
         super(TCompCor, self)._run_interface(runtime)
         return runtime
+
+ACompCor = CompCor
