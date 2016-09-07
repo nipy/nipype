@@ -56,7 +56,7 @@ class TestCompCor(unittest.TestCase):
             os.remove(self.functionalnii)
             os.remove(self.components_file)
             os.remove(self.masknii)
-        except (FileNotFoundError, TypeError) as e:
+        except (OSError, TypeError) as e:
             print(e)
 
     def make_toy(self, ndarray, filename):
