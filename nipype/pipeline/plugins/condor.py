@@ -1,13 +1,13 @@
+# -*- coding: utf-8 -*-
 """Parallel workflow execution via Condor
 """
+from __future__ import print_function, division, unicode_literals, absolute_import
 
 import os
-
-from .base import (SGELikeBatchManagerBase, logger, iflogger, logging)
-
-from nipype.interfaces.base import CommandLine
-
 from time import sleep
+
+from ...interfaces.base import CommandLine
+from .base import (SGELikeBatchManagerBase, logger, iflogger, logging)
 
 
 class CondorPlugin(SGELikeBatchManagerBase):

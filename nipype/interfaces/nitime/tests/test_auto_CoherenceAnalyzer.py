@@ -15,7 +15,7 @@ def test_CoherenceAnalyzer_inputs():
     usedefault=True,
     ),
     in_TS=dict(),
-    in_file=dict(requires=('TR',),
+    in_file=dict(requires=(u'TR',),
     ),
     n_overlap=dict(usedefault=True,
     ),

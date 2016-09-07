@@ -3,9 +3,8 @@
 
 """Attempt to check each interface in nipype
 """
-
-from __future__ import print_function
-from builtins import object
+from __future__ import print_function, unicode_literals
+from builtins import object, str, bytes, open
 
 # Stdlib imports
 import os
@@ -14,7 +13,6 @@ import sys
 import warnings
 
 from nipype.interfaces.base import BaseInterface
-from nipype.external.six import string_types
 
 
 # Functions and classes
@@ -219,7 +217,7 @@ class InterfaceChecker(object):
                         for key, value in sorted(trait.__dict__.items()):
                             if key in in_built or key == 'desc':
                                 continue
-                            if isinstance(value, string_types):
+                            if isinstance(value, (str, bytes)):
                                 quote = "'"
                                 if "'" in value:
                                     quote = '"'
@@ -263,7 +261,7 @@ class InterfaceChecker(object):
                         for key, value in sorted(trait.__dict__.items()):
                             if key in in_built or key == 'desc':
                                 continue
-                            if isinstance(value, string_types):
+                            if isinstance(value, (str, bytes)):
                                 quote = "'"
                                 if "'" in value:
                                     quote = '"'

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """Provides interfaces to various commands provided by FreeSurfer
@@ -9,9 +10,8 @@
    >>> os.chdir(datadir)
 
 """
-
+from __future__ import print_function, division, unicode_literals, absolute_import
 from builtins import range
-__docformat__ = 'restructuredtext'
 
 import os
 import os.path as op
@@ -21,17 +21,19 @@ import shutil
 import numpy as np
 from nibabel import load
 
+from ... import logging
+from ...utils.filemanip import fname_presuffix
 from ..io import FreeSurferSource
-from ..freesurfer.base import (FSCommand, FSTraitedSpec,
-                               FSTraitedSpecOpenMP,
-                               FSCommandOpenMP)
 from ..base import (TraitedSpec, File, traits,
                     Directory, InputMultiPath,
                     OutputMultiPath, CommandLine,
                     CommandLineInputSpec, isdefined)
-from ...utils.filemanip import fname_presuffix
-from ... import logging
-from ..freesurfer.utils import copy2subjdir
+from .base import (FSCommand, FSTraitedSpec,
+                   FSTraitedSpecOpenMP,
+                   FSCommandOpenMP)
+from .utils import copy2subjdir
+
+__docformat__ = 'restructuredtext'
 iflogger = logging.getLogger('interface')
 
 
@@ -61,7 +63,7 @@ class ParseDICOMDir(FSCommand):
     >>> dcminfo.inputs.dicom_dir = '.'
     >>> dcminfo.inputs.sortbyrun = True
     >>> dcminfo.inputs.summarize = True
-    >>> dcminfo.cmdline
+    >>> dcminfo.cmdline # doctest: +IGNORE_UNICODE
     'mri_parse_sdcmdir --d . --o dicominfo.txt --sortbyrun --summarize'
 
    """
@@ -125,7 +127,7 @@ class UnpackSDICOMDir(FSCommand):
     >>> unpack.inputs.output_dir = '.'
     >>> unpack.inputs.run_info = (5, 'mprage', 'nii', 'struct')
     >>> unpack.inputs.dir_structure = 'generic'
-    >>> unpack.cmdline
+    >>> unpack.cmdline # doctest: +IGNORE_UNICODE
     'unpacksdcmdir -generic -targ . -run 5 mprage nii struct -src .'
     """
     _cmd = 'unpacksdcmdir'
@@ -347,7 +349,7 @@ class MRIConvert(FSCommand):
     >>> mc.inputs.in_file = 'structural.nii'
     >>> mc.inputs.out_file = 'outfile.mgz'
     >>> mc.inputs.out_type = 'mgz'
-    >>> mc.cmdline
+    >>> mc.cmdline # doctest: +IGNORE_UNICODE
     'mri_convert --out_type mgz --input_volume structural.nii --output_volume outfile.mgz'
 
     """
@@ -573,7 +575,7 @@ class Resample(FSCommand):
     >>> resampler.inputs.in_file = 'structural.nii'
     >>> resampler.inputs.resampled_file = 'resampled.nii'
     >>> resampler.inputs.voxel_size = (2.1, 2.1, 2.1)
-    >>> resampler.cmdline
+    >>> resampler.cmdline # doctest: +IGNORE_UNICODE
     'mri_convert -vs 2.10 2.10 2.10 -i structural.nii -o resampled.nii'
 
     """
@@ -643,7 +645,7 @@ class ReconAll(CommandLine):
     >>> reconall.inputs.directive = 'all'
     >>> reconall.inputs.subjects_dir = '.'
     >>> reconall.inputs.T1_files = 'structural.nii'
-    >>> reconall.cmdline
+    >>> reconall.cmdline # doctest: +IGNORE_UNICODE
     'recon-all -all -i structural.nii -subjid foo -sd .'
 
     """
@@ -865,7 +867,7 @@ class BBRegister(FSCommand):
 
     >>> from nipype.interfaces.freesurfer import BBRegister
     >>> bbreg = BBRegister(subject_id='me', source_file='structural.nii', init='header', contrast_type='t2')
-    >>> bbreg.cmdline
+    >>> bbreg.cmdline # doctest: +IGNORE_UNICODE
     'bbregister --t2 --init-header --reg structural_bbreg_me.dat --mov structural.nii --s me'
 
     """
@@ -999,7 +1001,7 @@ class ApplyVolTransform(FSCommand):
     >>> applyreg.inputs.reg_file = 'register.dat'
     >>> applyreg.inputs.transformed_file = 'struct_warped.nii'
     >>> applyreg.inputs.fs_target = True
-    >>> applyreg.cmdline
+    >>> applyreg.cmdline # doctest: +IGNORE_UNICODE
     'mri_vol2vol --fstarg --reg register.dat --mov structural.nii --o struct_warped.nii'
 
     """
@@ -1079,7 +1081,7 @@ class Smooth(FSCommand):
 
     >>> from nipype.interfaces.freesurfer import Smooth
     >>> smoothvol = Smooth(in_file='functional.nii', smoothed_file = 'foo_out.nii', reg_file='register.dat', surface_fwhm=10, vol_fwhm=6)
-    >>> smoothvol.cmdline
+    >>> smoothvol.cmdline # doctest: +IGNORE_UNICODE
     'mris_volsmooth --i functional.nii --reg register.dat --o foo_out.nii --fwhm 10.000000 --vol-fwhm 6.000000'
 
     """
@@ -1184,7 +1186,7 @@ class RobustRegister(FSCommand):
     >>> reg.inputs.target_file = 'T1.nii'
     >>> reg.inputs.auto_sens = True
     >>> reg.inputs.init_orient = True
-    >>> reg.cmdline
+    >>> reg.cmdline # doctest: +IGNORE_UNICODE
     'mri_robust_register --satit --initorient --lta structural_robustreg.lta --mov structural.nii --dst T1.nii'
 
     References
@@ -1270,7 +1272,7 @@ class FitMSParams(FSCommand):
     >>> msfit = FitMSParams()
     >>> msfit.inputs.in_files = ['flash_05.mgz', 'flash_30.mgz']
     >>> msfit.inputs.out_dir = 'flash_parameters'
-    >>> msfit.cmdline
+    >>> msfit.cmdline # doctest: +IGNORE_UNICODE
     'mri_ms_fitparms  flash_05.mgz flash_30.mgz flash_parameters'
 
     """
@@ -1343,7 +1345,7 @@ class SynthesizeFLASH(FSCommand):
     >>> syn.inputs.t1_image = 'T1.mgz'
     >>> syn.inputs.pd_image = 'PD.mgz'
     >>> syn.inputs.out_file = 'flash_30syn.mgz'
-    >>> syn.cmdline
+    >>> syn.cmdline # doctest: +IGNORE_UNICODE
     'mri_synthesize 20.00 30.00 3.000 T1.mgz PD.mgz flash_30syn.mgz'
 
     """
@@ -1416,7 +1418,7 @@ class MNIBiasCorrection(FSCommand):
     >>> correct.inputs.iterations = 6
     >>> correct.inputs.protocol_iterations = 1000
     >>> correct.inputs.distance = 50
-    >>> correct.cmdline
+    >>> correct.cmdline # doctest: +IGNORE_UNICODE
     'mri_nu_correct.mni --distance 50 --i norm.mgz --n 6 --o norm_output.mgz --proto-iters 1000'
 
     References:
@@ -1478,7 +1480,7 @@ class WatershedSkullStrip(FSCommand):
     >>> skullstrip.inputs.t1 = True
     >>> skullstrip.inputs.transform = "transforms/talairach_with_skull.lta"
     >>> skullstrip.inputs.out_file = "brainmask.auto.mgz"
-    >>> skullstrip.cmdline
+    >>> skullstrip.cmdline # doctest: +IGNORE_UNICODE
     'mri_watershed -T1 transforms/talairach_with_skull.lta T1.mgz brainmask.auto.mgz'
     """
     _cmd = 'mri_watershed'
@@ -1526,7 +1528,7 @@ class Normalize(FSCommand):
     >>> normalize = freesurfer.Normalize()
     >>> normalize.inputs.in_file = "T1.mgz"
     >>> normalize.inputs.gradient = 1
-    >>> normalize.cmdline
+    >>> normalize.cmdline # doctest: +IGNORE_UNICODE
     'mri_normalize -g 1 T1.mgz T1_norm.mgz'
     """
     _cmd = "mri_normalize"
@@ -1578,7 +1580,7 @@ class CANormalize(FSCommand):
     >>> ca_normalize.inputs.in_file = "T1.mgz"
     >>> ca_normalize.inputs.atlas = "atlas.nii.gz" # in practice use .gca atlases
     >>> ca_normalize.inputs.transform = "trans.mat" # in practice use .lta transforms
-    >>> ca_normalize.cmdline
+    >>> ca_normalize.cmdline # doctest: +IGNORE_UNICODE
     'mri_ca_normalize T1.mgz atlas.nii.gz trans.mat T1_norm.mgz'
     """
     _cmd = "mri_ca_normalize"
@@ -1636,7 +1638,7 @@ class CARegister(FSCommandOpenMP):
     >>> ca_register = freesurfer.CARegister()
     >>> ca_register.inputs.in_file = "norm.mgz"
     >>> ca_register.inputs.out_file = "talairach.m3z"
-    >>> ca_register.cmdline
+    >>> ca_register.cmdline # doctest: +IGNORE_UNICODE
     'mri_ca_register norm.mgz talairach.m3z'
     """
     _cmd = "mri_ca_register"
@@ -1707,7 +1709,7 @@ class CALabel(FSCommandOpenMP):
     >>> ca_label.inputs.out_file = "out.mgz"
     >>> ca_label.inputs.transform = "trans.mat"
     >>> ca_label.inputs.template = "Template_6.nii" # in practice use .gcs extension
-    >>> ca_label.cmdline
+    >>> ca_label.cmdline # doctest: +IGNORE_UNICODE
     'mri_ca_label norm.mgz trans.mat Template_6.nii out.mgz'
     """
     _cmd = "mri_ca_label"
@@ -1781,7 +1783,7 @@ class MRIsCALabel(FSCommandOpenMP):
     >>> ca_label.inputs.sulc = "lh.pial"
     >>> ca_label.inputs.classifier = "im1.nii" # in pracice, use .gcs extension
     >>> ca_label.inputs.smoothwm = "lh.pial"
-    >>> ca_label.cmdline
+    >>> ca_label.cmdline # doctest: +IGNORE_UNICODE
     'mris_ca_label test lh lh.pial im1.nii lh.aparc.annot'
     """
     _cmd = "mris_ca_label"
@@ -1867,7 +1869,7 @@ class SegmentCC(FSCommand):
     >>> SegmentCC_node.inputs.in_norm = "norm.mgz"
     >>> SegmentCC_node.inputs.out_rotation = "cc.lta"
     >>> SegmentCC_node.inputs.subject_id = "test"
-    >>> SegmentCC_node.cmdline
+    >>> SegmentCC_node.cmdline # doctest: +IGNORE_UNICODE
     'mri_cc -aseg aseg.mgz -o aseg.auto.mgz -lta cc.lta test'
     """
 
@@ -1958,7 +1960,7 @@ class SegmentWM(FSCommand):
     >>> SegmentWM_node = freesurfer.SegmentWM()
     >>> SegmentWM_node.inputs.in_file = "norm.mgz"
     >>> SegmentWM_node.inputs.out_file = "wm.seg.mgz"
-    >>> SegmentWM_node.cmdline
+    >>> SegmentWM_node.cmdline # doctest: +IGNORE_UNICODE
     'mri_segment norm.mgz wm.seg.mgz'
     """
 
@@ -2002,7 +2004,7 @@ class EditWMwithAseg(FSCommand):
     >>> editwm.inputs.seg_file = "aseg.mgz"
     >>> editwm.inputs.out_file = "wm.asegedit.mgz"
     >>> editwm.inputs.keep_in = True
-    >>> editwm.cmdline
+    >>> editwm.cmdline # doctest: +IGNORE_UNICODE
     'mri_edit_wm_with_aseg -keep-in T1.mgz norm.mgz aseg.mgz wm.asegedit.mgz'
     """
     _cmd = 'mri_edit_wm_with_aseg'
@@ -2042,7 +2044,7 @@ class ConcatenateLTA(FSCommand):
     >>> conc_lta = ConcatenateLTA()
     >>> conc_lta.inputs.in_lta1 = 'trans.mat'
     >>> conc_lta.inputs.in_lta2 = 'trans.mat'
-    >>> conc_lta.cmdline
+    >>> conc_lta.cmdline # doctest: +IGNORE_UNICODE
     'mri_concatenate_lta trans.mat trans.mat trans-long.mat'
     """
 

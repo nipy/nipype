@@ -3,8 +3,7 @@
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """Script to auto-generate interface docs.
 """
-
-from __future__ import print_function
+from __future__ import print_function, unicode_literals
 # stdlib imports
 import os
 import sys

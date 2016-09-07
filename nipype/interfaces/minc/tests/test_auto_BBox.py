@@ -23,7 +23,7 @@ def test_BBox_inputs():
     position=-2,
     ),
     one_line=dict(argstr='-one_line',
-    xor=('one_line', 'two_lines'),
+    xor=(u'one_line', u'two_lines'),
     ),
     out_file=dict(argstr='> %s',
     genfile=True,
@@ -31,7 +31,7 @@ def test_BBox_inputs():
     ),
     output_file=dict(hash_files=False,
     keep_extension=False,
-    name_source=['input_file'],
+    name_source=[u'input_file'],
     name_template='%s_bbox.txt',
     position=-1,
     ),
@@ -40,7 +40,7 @@ def test_BBox_inputs():
     threshold=dict(argstr='-threshold',
     ),
     two_lines=dict(argstr='-two_lines',
-    xor=('one_line', 'two_lines'),
+    xor=(u'one_line', u'two_lines'),
     ),
     )
     inputs = BBox.input_spec()

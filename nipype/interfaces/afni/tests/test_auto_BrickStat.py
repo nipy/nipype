@@ -23,7 +23,7 @@ def test_BrickStat_inputs():
     position=1,
     ),
     out_file=dict(argstr='-prefix %s',
-    name_source=['in_file'],
+    name_source=[u'in_file'],
     name_template='%s_afni',
     ),
     outputtype=dict(),

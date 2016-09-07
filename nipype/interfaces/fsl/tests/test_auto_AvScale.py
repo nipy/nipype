@@ -17,7 +17,6 @@ def test_AvScale_inputs():
     mat_file=dict(argstr='%s',
     position=-2,
     ),
-    output_type=dict(),
     ref_file=dict(argstr='%s',
     position=-1,
     ),

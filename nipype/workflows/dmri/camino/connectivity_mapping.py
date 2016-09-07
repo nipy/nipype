@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import inspect
 import os.path as op
 

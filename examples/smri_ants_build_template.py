@@ -12,7 +12,8 @@ create a template out of multiple T1 volumes.
 1. Tell python where to find the appropriate functions.
 """
 
-from __future__ import print_function
+from __future__ import print_function, unicode_literals
+from builtins import open
 from future import standard_library
 standard_library.install_aliases()
 

@@ -6,15 +6,17 @@ Change directory to provide relative paths for doctests
    >>> datadir = os.path.realpath(os.path.join(filepath, '../../testing/data'))
    >>> os.chdir(datadir)
 """
+from __future__ import print_function, division, unicode_literals, absolute_import
+
 import os.path as op
 import numpy as np
 import nibabel as nb
 import nibabel.trackvis as nbt
 
+from ... import logging
 from ..base import (TraitedSpec, BaseInterfaceInputSpec,
                     File, isdefined, traits)
 from .base import DipyBaseInterface
-from ... import logging
 IFLOGGER = logging.getLogger('interface')
 
 
@@ -165,7 +167,7 @@ class StreamlineTractography(DipyBaseInterface):
         from dipy.tracking.eudx import EuDX
         from dipy.data import get_sphere
         # import marshal as pickle
-        import cPickle as pickle
+        import pickle as pickle
         import gzip
 
         if (not (isdefined(self.inputs.in_model) or
