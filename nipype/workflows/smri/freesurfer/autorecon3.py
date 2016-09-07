@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from nipype.interfaces.utility import IdentityInterface, Merge, Function
 import nipype.pipeline.engine as pe  # pypeline engine
 from nipype.interfaces.freesurfer import *

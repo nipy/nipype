@@ -1,12 +1,16 @@
+# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """Local serial workflow execution
 """
+from __future__ import print_function, division, unicode_literals, absolute_import
+
 import os
 
+import networkx as nx
 from .base import (PluginBase, logger, report_crash, report_nodes_not_run,
                    str2bool)
-from ..engine.utils import (nx, dfs_preorder, topological_sort)
+from ..engine.utils import dfs_preorder, topological_sort
 
 
 class LinearPlugin(PluginBase):

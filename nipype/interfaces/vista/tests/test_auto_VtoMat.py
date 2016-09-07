@@ -19,7 +19,7 @@ def test_VtoMat_inputs():
     out_file=dict(argstr='-out %s',
     hash_files=False,
     keep_extension=False,
-    name_source=['in_file'],
+    name_source=[u'in_file'],
     name_template='%s.mat',
     position=-1,
     ),

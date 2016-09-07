@@ -14,66 +14,48 @@ The `Node` class provides core functionality for batch processing.
      os.chdir(datadir)
 
 """
-
-from __future__ import absolute_import
+from __future__ import print_function, division, unicode_literals, absolute_import
+from builtins import range, object, str, bytes, open
 
 from future import standard_library
 standard_library.install_aliases()
-from builtins import range
-from builtins import object
-
-from datetime import datetime
-from nipype.utils.misc import flatten, unflatten
-try:
-    from collections import OrderedDict
-except ImportError:
-    from ordereddict import OrderedDict
+from collections import OrderedDict
 
 from copy import deepcopy
 import pickle
 from glob import glob
 import gzip
-import inspect
 import os
 import os.path as op
-import re
 import shutil
 import errno
 import socket
 from shutil import rmtree
 import sys
 from tempfile import mkdtemp
-from warnings import warn
 from hashlib import sha1
 
-import numpy as np
-import networkx as nx
-
-from ...utils.misc import package_check, str2bool
-package_check('networkx', '1.3')
-
 from ... import config, logging
-logger = logging.getLogger('workflow')
-from ...interfaces.base import (traits, InputMultiPath, CommandLine,
-                                Undefined, TraitedSpec, DynamicTraitedSpec,
-                                Bunch, InterfaceResult, md5, Interface,
-                                TraitDictObject, TraitListObject, isdefined,
-                                runtime_profile)
-from ...utils.misc import (getsource, create_function_from_source,
-                           flatten, unflatten)
+from ...utils.misc import (flatten, unflatten, package_check, str2bool)
 from ...utils.filemanip import (save_json, FileNotFoundError,
                                 filename_to_list, list_to_filename,
                                 copyfiles, fnames_presuffix, loadpkl,
                                 split_filename, load_json, savepkl,
                                 write_rst_header, write_rst_dict,
                                 write_rst_list)
-from ...external.six import string_types
+from ...interfaces.base import (traits, InputMultiPath, CommandLine,
+                                Undefined, TraitedSpec, DynamicTraitedSpec,
+                                Bunch, InterfaceResult, md5, Interface,
+                                TraitDictObject, TraitListObject, isdefined,
+                                runtime_profile)
 from .utils import (generate_expanded_graph, modify_paths,
                     export_graph, make_output_dir, write_workflow_prov,
                     clean_working_directory, format_dot, topological_sort,
                     get_print_name, merge_dict, evaluate_connect_function)
 from .base import EngineBase
 
+package_check('networkx', '1.3')
+logger = logging.getLogger('workflow')
 
 class Node(EngineBase):
     """Wraps interface objects for use in pipeline
@@ -546,6 +528,10 @@ class Node(EngineBase):
             pkl_file = gzip.open(resultsoutputfile, 'rb')
             try:
                 result = pickle.load(pkl_file)
+            except UnicodeDecodeError:
+                # Was this pickle created with Python 2.x?
+                pickle.load(pkl_file, fix_imports=True, encoding='utf-8')
+                logger.warn('Successfully loaded pickle in compatibility mode')
             except (traits.TraitError, AttributeError, ImportError) as err:
                 if isinstance(err, (AttributeError, ImportError)):
                     attribute_error = True
@@ -820,7 +806,7 @@ class JoinNode(Node):
         if not joinfield:
             # default is the interface fields
             joinfield = self._interface.inputs.copyable_trait_names()
-        elif isinstance(joinfield, string_types):
+        elif isinstance(joinfield, (str, bytes)):
             joinfield = [joinfield]
         self.joinfield = joinfield
         """the fields to join"""
@@ -869,7 +855,7 @@ class JoinNode(Node):
         ...    name='inputspec'),
         >>> join = JoinNode(IdentityInterface(fields=['images', 'mask']),
         ...    joinsource='inputspec', joinfield='images', name='join')
-        >>> join._add_join_item_fields()
+        >>> join._add_join_item_fields() # doctest: +IGNORE_UNICODE
         {'images': 'imagesJ1'}
 
         Return the {base field: slot field} dictionary
@@ -1030,7 +1016,7 @@ class MapNode(Node):
         """
 
         super(MapNode, self).__init__(interface, name, **kwargs)
-        if isinstance(iterfield, string_types):
+        if isinstance(iterfield, (str, bytes)):
             iterfield = [iterfield]
         self.iterfield = iterfield
         self.nested = nested

@@ -5,7 +5,7 @@ from ..utils import InvWarp
 
 def test_InvWarp_inputs():
     input_map = dict(absolute=dict(argstr='--abs',
-    xor=['relative'],
+    xor=[u'relative'],
     ),
     args=dict(argstr='%s',
     ),
@@ -17,7 +17,7 @@ def test_InvWarp_inputs():
     ),
     inverse_warp=dict(argstr='--out=%s',
     hash_files=False,
-    name_source=['warp'],
+    name_source=[u'warp'],
     name_template='%s_inverse',
     ),
     jacobian_max=dict(argstr='--jmax=%f',
@@ -35,7 +35,7 @@ def test_InvWarp_inputs():
     regularise=dict(argstr='--regularise=%f',
     ),
     relative=dict(argstr='--rel',
-    xor=['absolute'],
+    xor=[u'absolute'],
     ),
     terminal_output=dict(nohash=True,
     ),

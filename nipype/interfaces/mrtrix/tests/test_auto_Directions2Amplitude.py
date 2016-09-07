@@ -25,7 +25,7 @@ def test_Directions2Amplitude_inputs():
     out_file=dict(argstr='%s',
     hash_files=False,
     keep_extension=False,
-    name_source=['in_file'],
+    name_source=[u'in_file'],
     name_template='%s_amplitudes.mif',
     position=-1,
     ),

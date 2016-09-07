@@ -19,7 +19,7 @@ def test_MaskTool_inputs():
     usedefault=True,
     ),
     fill_dirs=dict(argstr='-fill_dirs %s',
-    requires=['fill_holes'],
+    requires=[u'fill_holes'],
     ),
     fill_holes=dict(argstr='-fill_holes',
     ),

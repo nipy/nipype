@@ -18,7 +18,7 @@ def test_WarpUtils_inputs():
     knot_space=dict(argstr='--knotspace=%d,%d,%d',
     ),
     out_file=dict(argstr='--out=%s',
-    name_source=['in_file'],
+    name_source=[u'in_file'],
     output_name='out_file',
     position=-1,
     ),

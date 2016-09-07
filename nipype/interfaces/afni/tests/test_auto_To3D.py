@@ -25,7 +25,7 @@ def test_To3D_inputs():
     position=-1,
     ),
     out_file=dict(argstr='-prefix %s',
-    name_source=['in_folder'],
+    name_source=[u'in_folder'],
     name_template='%s',
     ),
     outputtype=dict(),

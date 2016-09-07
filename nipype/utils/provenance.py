@@ -1,29 +1,27 @@
+# -*- coding: utf-8 -*-
+from __future__ import print_function, division, unicode_literals, absolute_import
+from builtins import open, object, str, bytes
+
+# Py2 compat: http://python-future.org/compatible_idioms.html#collections-counter-and-ordereddict
 from future import standard_library
 standard_library.install_aliases()
-from builtins import object, str
+from collections import OrderedDict
 
 from copy import deepcopy
 from pickle import dumps
-import simplejson
 import os
 import getpass
 from socket import getfqdn
 from uuid import uuid1
+import simplejson as json
 
 import numpy as np
-try:
-    from collections import OrderedDict
-except ImportError:
-    from ordereddict import OrderedDict
-
 import prov.model as pm
-from ..external.six import string_types, text_type
 
-from .. import get_info
+from .. import get_info, logging, __version__
 from .filemanip import (md5, hashlib, hash_infile)
-from .. import logging, __version__
-iflogger = logging.getLogger('interface')
 
+iflogger = logging.getLogger('interface')
 foaf = pm.Namespace("foaf", "http://xmlns.com/foaf/0.1/")
 dcterms = pm.Namespace("dcterms", "http://purl.org/dc/terms/")
 nipype_ns = pm.Namespace("nipype", "http://nipy.org/nipype/terms/")
@@ -33,6 +31,12 @@ crypto = pm.Namespace("crypto",
                        "cryptographicHashFunctions/"))
 get_id = lambda: niiri[uuid1().hex]
 
+PROV_ENVVARS = ['PATH', 'FSLDIR', 'FREESURFER_HOME', 'ANTSPATH',
+                'CAMINOPATH', 'CLASSPATH', 'LD_LIBRARY_PATH',
+                'DYLD_LIBRARY_PATH', 'FIX_VERTEX_AREA',
+                'FSF_OUTPUT_FORMAT', 'FSLCONFDIR', 'FSLOUTPUTTYPE',
+                'LOGNAME', 'USER',
+                'MKL_NUM_THREADS', 'OMP_NUM_THREADS']
 
 def get_attr_id(attr, skip=None):
     dictwithhash, hashval = get_hashval(attr, skip=skip)
@@ -101,21 +105,22 @@ def _get_sorteddict(object, dictwithhash=False):
         if isinstance(object, tuple):
             out = tuple(out)
     else:
-        if isinstance(object, string_types) and os.path.isfile(object):
+        if isinstance(object, str) and os.path.isfile(object):
             hash = hash_infile(object)
             if dictwithhash:
                 out = (object, hash)
             else:
                 out = hash
         elif isinstance(object, float):
-            out = '%.10f' % object
+            out = '%.10f'.format(object)
         else:
             out = object
     return out
 
 
 def safe_encode(x, as_literal=True):
-    """Encodes a python value for prov
+    """
+    Encodes a python value for prov
     """
     if x is None:
         value = "Unknown"
@@ -123,119 +128,157 @@ def safe_encode(x, as_literal=True):
             return pm.Literal(value, pm.XSD['string'])
         else:
             return value
-    try:
-        if isinstance(x, (str, string_types)):
-            if os.path.exists(x):
-                value = 'file://%s%s' % (getfqdn(), x)
-                if not as_literal:
-                    return value
-                try:
-                    return pm.URIRef(value)
-                except AttributeError:
-                    return pm.Literal(value, pm.XSD['anyURI'])
+
+    if isinstance(x, (str, bytes)):
+        if isinstance(x, bytes):
+            x = str(x, 'utf-8')
+        if os.path.exists(x):
+            value = 'file://{}{}'.format(getfqdn(), x)
+            if not as_literal:
+                return value
+            try:
+                return pm.URIRef(value)
+            except AttributeError:
+                return pm.Literal(value, pm.XSD['anyURI'])
+        else:
+            value = x
+            if len(x) > max_text_len:
+                cliptxt = '...Clipped...'
+                value = x[:max_text_len - len(cliptxt)] + cliptxt
+
+            if not as_literal:
+                return value
+
+            return pm.Literal(value, pm.XSD['string'])
+    if isinstance(x, int):
+        if not as_literal:
+            return x
+        return pm.Literal(int(x), pm.XSD['integer'])
+    if isinstance(x, float):
+        if not as_literal:
+            return x
+        return pm.Literal(x, pm.XSD['float'])
+    if isinstance(x, dict):
+        outdict = {}
+        for key, value in list(x.items()):
+            encoded_value = safe_encode(value, as_literal=False)
+            if isinstance(encoded_value, pm.Literal):
+                outdict[key] = encoded_value.json_representation()
             else:
-                if len(x) > max_text_len:
-                    value = x[:max_text_len - 13] + ['...Clipped...']
-                else:
-                    value = x
-                if not as_literal:
-                    return value
-                if isinstance(value, str):
-                    return pm.Literal(value, pm.XSD['string'])
-                else:
-                    return pm.Literal(text_type(value, 'utf-8'), pm.XSD['string'])
-        if isinstance(x, int):
-            if not as_literal:
-                return x
-            return pm.Literal(int(x), pm.XSD['integer'])
-        if isinstance(x, float):
-            if not as_literal:
-                return x
-            return pm.Literal(x, pm.XSD['float'])
-        if isinstance(x, dict):
-            outdict = {}
-            for key, value in list(x.items()):
+                outdict[key] = encoded_value
+
+        try:
+            jsonstr = json.dumps(outdict)
+        except UnicodeDecodeError as excp:
+            jsonstr = "Could not encode dictionary. {}".format(excp)
+            iflogger.warn('Prov: %s', jsonstr)
+
+        if not as_literal:
+            return jsonstr
+        return pm.Literal(jsonstr, pm.XSD['string'])
+    if isinstance(x, (list, tuple)):
+        x = list(x)
+        is_object = False
+        try:
+            nptype = np.array(x).dtype
+            is_object = nptype == np.dtype(object)
+        except ValueError:
+            is_object = True
+
+        # If the array contains an heterogeneous mixture of data types
+        # they should be encoded sequentially
+        if is_object:
+            outlist = []
+            for value in x:
                 encoded_value = safe_encode(value, as_literal=False)
                 if isinstance(encoded_value, pm.Literal):
-                    outdict[key] = encoded_value.json_representation()
+                    outlist.append(encoded_value.json_representation())
                 else:
-                    outdict[key] = encoded_value
-            if not as_literal:
-                return simplejson.dumps(outdict)
-            return pm.Literal(simplejson.dumps(outdict), pm.XSD['string'])
-        if isinstance(x, list):
-            try:
-                nptype = np.array(x).dtype
-                if nptype == np.dtype(object):
-                    raise ValueError('dtype object')
-            except ValueError as e:
-                outlist = []
-                for value in x:
-                    encoded_value = safe_encode(value, as_literal=False)
-                    if isinstance(encoded_value, pm.Literal):
-                        outlist.append(encoded_value.json_representation())
-                    else:
-                        outlist.append(encoded_value)
-            else:
-                outlist = x
-            if not as_literal:
-                return simplejson.dumps(outlist)
-            return pm.Literal(simplejson.dumps(outlist), pm.XSD['string'])
+                    outlist.append(encoded_value)
+            x = outlist
+
+        try:
+            jsonstr = json.dumps(x)
+        except UnicodeDecodeError as excp:
+            jsonstr = "Could not encode list/tuple. {}".format(excp)
+            iflogger.warn('Prov: %s', jsonstr)
+
         if not as_literal:
-            return dumps(x)
-        return pm.Literal(dumps(x), nipype_ns['pickle'])
-    except TypeError as e:
-        iflogger.debug(e)
-        value = "Could not encode: " + str(e)
-        if not as_literal:
-            return value
-        return pm.Literal(value, pm.XSD['string'])
+            return jsonstr
+        return pm.Literal(jsonstr, pm.XSD['string'])
+
+    # If is a literal, and as_literal do nothing.
+    # else bring back to json.
+    if isinstance(x, pm.Literal):
+        if as_literal:
+            return x
+        return dumps(x.json_representation())
+
+    jsonstr = None
+    ltype = pm.XSD['string']
+    try:
+        jsonstr = json.dumps(x.__dict__)
+    except AttributeError:
+        pass
+
+    if jsonstr is None:
+        try:
+            jsonstr = dumps(x)
+            ltype = nipype_ns['pickle']
+        except TypeError as excp:
+            jsonstr = 'Could not encode object. {}'.format(excp)
+
+    if not as_literal:
+        return jsonstr
+    return pm.Literal(jsonstr, ltype)
 
 
 def prov_encode(graph, value, create_container=True):
-    if isinstance(value, list) and create_container:
+    if isinstance(value, (list, tuple)) and create_container:
+        value = list(value)
         if len(value) == 0:
             encoded_literal = safe_encode(value)
             attr = {pm.PROV['value']: encoded_literal}
-            id = get_attr_id(attr)
-            entity = graph.entity(id, attr)
-        elif len(value) > 1:
-            try:
-                entities = []
-                for item in value:
-                    item_entity = prov_encode(graph, item)
-                    entities.append(item_entity)
-                    if isinstance(item, list):
-                        continue
-                    if not isinstance(list(item_entity.value)[0], string_types):
-                        raise ValueError('Not a string literal')
-                    if 'file://' not in list(item_entity.value)[0]:
-                        raise ValueError('No file found')
-                id = get_id()
-                entity = graph.collection(identifier=id)
-                for item_entity in entities:
-                    graph.hadMember(id, item_entity)
-            except ValueError as e:
-                iflogger.debug(e)
-                entity = prov_encode(graph, value, create_container=False)
-        else:
-            entity = prov_encode(graph, value[0])
+            eid = get_attr_id(attr)
+            return graph.entity(eid, attr)
+
+        if len(value) == 1:
+            return prov_encode(graph, value[0])
+
+        entities = []
+        for item in value:
+            item_entity = prov_encode(graph, item)
+            entities.append(item_entity)
+            if isinstance(item, (list, tuple)):
+                continue
+
+            item_entity_val = list(item_entity.value)[0]
+            is_str = isinstance(item_entity_val, str)
+            if not is_str or (is_str and 'file://' not in item_entity_val):
+                return prov_encode(graph, value, create_container=False)
+
+        eid = get_id()
+        entity = graph.collection(identifier=eid)
+        for item_entity in entities:
+            graph.hadMember(eid, item_entity)
+
+        return entity
     else:
         encoded_literal = safe_encode(value)
         attr = {pm.PROV['value']: encoded_literal}
-        if isinstance(value, string_types) and os.path.exists(value):
+        if isinstance(value, str) and os.path.exists(value):
             attr.update({pm.PROV['location']: encoded_literal})
             if not os.path.isdir(value):
                 sha512 = hash_infile(value, crypto=hashlib.sha512)
                 attr.update({crypto['sha512']: pm.Literal(sha512,
                                                           pm.XSD['string'])})
-                id = get_attr_id(attr, skip=[pm.PROV['location'],
-                                             pm.PROV['value']])
+                eid = get_attr_id(attr, skip=[pm.PROV['location'],
+                                              pm.PROV['value']])
             else:
-                id = get_attr_id(attr, skip=[pm.PROV['location']])
+                eid = get_attr_id(attr, skip=[pm.PROV['location']])
         else:
-            id = get_attr_id(attr)
-        entity = graph.entity(id, attr)
+            eid = get_attr_id(attr)
+        entity = graph.entity(eid, attr)
     return entity
 
 
@@ -298,12 +341,7 @@ class ProvStore(object):
         self.g.used(a0, id)
         # write environment entities
         for idx, (key, val) in enumerate(sorted(runtime.environ.items())):
-            if key not in ['PATH', 'FSLDIR', 'FREESURFER_HOME', 'ANTSPATH',
-                           'CAMINOPATH', 'CLASSPATH', 'LD_LIBRARY_PATH',
-                           'DYLD_LIBRARY_PATH', 'FIX_VERTEX_AREA',
-                           'FSF_OUTPUT_FORMAT', 'FSLCONFDIR', 'FSLOUTPUTTYPE',
-                           'LOGNAME', 'USER',
-                           'MKL_NUM_THREADS', 'OMP_NUM_THREADS']:
+            if key not in PROV_ENVVARS:
                 continue
             in_attr = {pm.PROV["label"]: key,
                        nipype_ns["environmentVariable"]: key,

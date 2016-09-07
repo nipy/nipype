@@ -5,15 +5,16 @@ Created on Aug 2, 2013
 
 Parallel workflow execution with SLURM
 '''
+from __future__ import print_function, division, unicode_literals, absolute_import
+from builtins import open
 
 import os
 import re
-import subprocess
 from time import sleep
 
+from ...interfaces.base import CommandLine
 from .base import (SGELikeBatchManagerBase, logger, iflogger, logging)
 
-from ...interfaces.base import CommandLine
 
 
 class SLURMPlugin(SGELikeBatchManagerBase):
@@ -50,7 +51,8 @@ class SLURMPlugin(SGELikeBatchManagerBase):
             if 'template' in kwargs['plugin_args']:
                 self._template = kwargs['plugin_args']['template']
                 if os.path.isfile(self._template):
-                    self._template = open(self._template).read()
+                    with open(self._template) as f:
+                        self._template = f.read()
             if 'sbatch_args' in kwargs['plugin_args']:
                 self._sbatch_args = kwargs['plugin_args']['sbatch_args']
         self._pending = {}

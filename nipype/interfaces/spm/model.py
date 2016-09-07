@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """The spm module provides basic functions for interfacing with matlab
@@ -10,6 +11,8 @@ and spm to access spm tools.
    >>> os.chdir(datadir)
 
 """
+from __future__ import print_function, division, unicode_literals, absolute_import
+from builtins import str, bytes
 
 # Standard library imports
 import os
@@ -20,17 +23,16 @@ import numpy as np
 import scipy.io as sio
 
 # Local imports
-from .base import (SPMCommand, SPMCommandInputSpec,
-                   scans_for_fnames)
-from ..base import (Bunch, traits, TraitedSpec, File, Directory,
-                    OutputMultiPath, InputMultiPath, isdefined)
-from ...external.six import string_types
+from ... import logging
 from ...utils.filemanip import (filename_to_list, list_to_filename,
                                 split_filename)
-from ... import logging
+from ..base import (Bunch, traits, TraitedSpec, File, Directory,
+                    OutputMultiPath, InputMultiPath, isdefined)
+from .base import (SPMCommand, SPMCommandInputSpec,
+                   scans_for_fnames)
 
-logger = logging.getLogger('interface')
 __docformat__ = 'restructuredtext'
+logger = logging.getLogger('interface')
 
 
 class Level1DesignInputSpec(SPMCommandInputSpec):
@@ -222,7 +224,7 @@ class EstimateModel(SPMCommand):
         if opt == 'spm_mat_file':
             return np.array([str(val)], dtype=object)
         if opt == 'estimation_method':
-            if isinstance(val, string_types):
+            if isinstance(val, (str, bytes)):
                 return {'%s' % val: 1}
             else:
                 return val
@@ -505,7 +507,7 @@ class ThresholdOutputSpec(TraitedSpec):
 
 
 class Threshold(SPMCommand):
-    '''Topological FDR thresholding based on cluster extent/size. Smoothness is
+    """Topological FDR thresholding based on cluster extent/size. Smoothness is
     estimated from GLM residuals but is assumed to be the same for all of the
     voxels.
 
@@ -518,7 +520,7 @@ class Threshold(SPMCommand):
     >>> thresh.inputs.contrast_index = 1
     >>> thresh.inputs.extent_fdr_p_threshold = 0.05
     >>> thresh.run() # doctest: +SKIP
-    '''
+    """
     input_spec = ThresholdInputSpec
     output_spec = ThresholdOutputSpec
 
@@ -701,7 +703,7 @@ class ThresholdStatisticsOutputSpec(TraitedSpec):
 
 
 class ThresholdStatistics(SPMCommand):
-    '''Given height and cluster size threshold calculate theoretical
+    """Given height and cluster size threshold calculate theoretical
     probabilities concerning false positives
 
     Examples
@@ -713,7 +715,7 @@ class ThresholdStatistics(SPMCommand):
     >>> thresh.inputs.contrast_index = 1
     >>> thresh.inputs.height_threshold = 4.56
     >>> thresh.run() # doctest: +SKIP
-    '''
+    """
     input_spec = ThresholdStatisticsInputSpec
     output_spec = ThresholdStatisticsOutputSpec
 

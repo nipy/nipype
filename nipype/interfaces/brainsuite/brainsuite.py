@@ -1,14 +1,10 @@
+# -*- coding: utf-8 -*-
+from __future__ import print_function, division, unicode_literals, absolute_import
+
 import os
 import re as regex
 
-from nipype.interfaces.base import(
-    TraitedSpec,
-    CommandLineInputSpec,
-    CommandLine,
-    File,
-    traits,
-    isdefined,
-)
+from ..base import TraitedSpec, CommandLineInputSpec, CommandLine, File, traits, isdefined
 
 
 class BseInputSpec(CommandLineInputSpec):

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from ....pipeline import engine as pe
 from ....interfaces import freesurfer as fs
 from ....interfaces import utility as niu

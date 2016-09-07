@@ -24,7 +24,7 @@ def test_Sphere_inputs():
     num_threads=dict(),
     out_file=dict(argstr='%s',
     hash_files=False,
-    name_source=['in_file'],
+    name_source=[u'in_file'],
     name_template='%s.sphere',
     position=-1,
     ),

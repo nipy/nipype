@@ -22,7 +22,7 @@ def test_Gennlxfm_inputs():
     output_file=dict(argstr='%s',
     genfile=True,
     hash_files=False,
-    name_source=['like'],
+    name_source=[u'like'],
     name_template='%s_gennlxfm.xfm',
     position=-1,
     ),
