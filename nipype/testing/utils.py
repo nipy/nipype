@@ -15,6 +15,9 @@ from ..utils.misc import package_check
 from nose import SkipTest
 from future.utils import raise_from
 
+import numpy as np
+import nibabel as nb
+
 def skip_if_no_package(*args, **kwargs):
     """Raise SkipTest if package_check fails
 
@@ -98,3 +101,8 @@ class TempFATFS(object):
             assert not os.path.exists(self.canary)
         self.dev_null.close()
         shutil.rmtree(self.tmpdir)
+
+def save_toy_nii(ndarray, filename):
+    toy = nb.Nifti1Image(ndarray, np.eye(4))
+    nb.nifti1.save(toy, filename)
+    return filename

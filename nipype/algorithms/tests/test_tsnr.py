@@ -1,8 +1,7 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 import nipype
-from nipype.testing import (assert_equal, assert_true, assert_false, skipif,
-                            utils)
+from nipype.testing import assert_equal, assert_true, assert_false, skipif
 from nipype.algorithms.compcor import CompCor, TCompCor, ACompCor
 
 import unittest
@@ -21,14 +20,14 @@ class TestCompCor(unittest.TestCase):
     def setUp(self):
         # setup
         noise = np.fromfunction(self.fake_noise_fun, self.fake_data.shape)
-        self.realigned_file = utils.save_toy_nii(self.fake_data + noise,
-                                                 self.functionalnii)
+        self.realigned_file = self.make_toy(self.fake_data + noise,
+                                            self.functionalnii)
 
     def test_compcor(self):
         mask = np.ones(self.fake_data.shape[:3])
         mask[0,0,0] = 0
         mask[0,0,1] = 0
-        mask_file = utils.save_toy_nii(mask, self.masknii)
+        mask_file = self.make_toy(mask, self.masknii)
 
         ccresult = self.run_cc(CompCor(realigned_file=self.realigned_file,
                                mask_file=mask_file))
@@ -65,6 +64,11 @@ class TestCompCor(unittest.TestCase):
             os.remove(self.masknii)
         except (OSError, TypeError) as e:
             print(e)
+
+    def make_toy(self, ndarray, filename):
+        toy = nb.Nifti1Image(ndarray, np.eye(4))
+        nb.nifti1.save(toy, filename)
+        return filename
 
     def fake_noise_fun(self, i, j, l, m):
         return m*i + l - j
