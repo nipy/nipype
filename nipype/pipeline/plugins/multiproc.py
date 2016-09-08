@@ -223,14 +223,14 @@ class MultiProcPlugin(DistributedPluginBase):
                         key=lambda item: (self.procs[item]._interface.estimated_memory_gb,
                                           self.procs[item]._interface.num_threads))
 
-        if config['execution']['profile_runtime']:
+        if str2bool(config['execution']['profile_runtime']):
             logger.debug('Free memory (GB): %d, Free processors: %d',
                          free_memory_gb, free_processors)
 
         # While have enough memory and processors for first job
         # Submit first job on the list
         for jobid in jobids:
-            if config['execution']['profile_runtime']:
+            if str2bool(config['execution']['profile_runtime']):
                 logger.debug('Next Job: %d, memory (GB): %d, threads: %d' \
                              % (jobid,
                                 self.procs[jobid]._interface.estimated_memory_gb,
