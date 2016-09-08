@@ -4,7 +4,13 @@ from ..confounds import ComputeDVARS
 
 
 def test_ComputeDVARS_inputs():
-    input_map = dict(ignore_exception=dict(nohash=True,
+    input_map = dict(figdpi=dict(usedefault=True,
+    ),
+    figformat=dict(usedefault=True,
+    ),
+    figsize=dict(usedefault=True,
+    ),
+    ignore_exception=dict(nohash=True,
     usedefault=True,
     ),
     in_file=dict(mandatory=True,
@@ -15,10 +21,13 @@ def test_ComputeDVARS_inputs():
     ),
     save_nstd=dict(usedefault=True,
     ),
+    save_plot=dict(usedefault=True,
+    ),
     save_std=dict(usedefault=True,
     ),
     save_vxstd=dict(usedefault=True,
     ),
+    series_tr=dict(),
     )
     inputs = ComputeDVARS.input_spec()
 
@@ -28,7 +37,13 @@ def test_ComputeDVARS_inputs():
 
 
 def test_ComputeDVARS_outputs():
-    output_map = dict(out_all=dict(),
+    output_map = dict(avg_nstd=dict(),
+    avg_std=dict(),
+    avg_vxstd=dict(),
+    fig_nstd=dict(),
+    fig_std=dict(),
+    fig_vxstd=dict(),
+    out_all=dict(),
     out_nstd=dict(),
     out_std=dict(),
     out_vxstd=dict(),
