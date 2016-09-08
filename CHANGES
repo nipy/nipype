@@ -1,6 +1,7 @@
 Upcoming release 0.13
 =====================
 
+* ENH: Add a Framewise Displacement calculation interface (https://github.com/nipy/nipype/pull/1604)
 * FIX: Use builtins open and unicode literals for py3 compatibility (https://github.com/nipy/nipype/pull/1572)
 * TST: reduce the size of docker images & use tags for images (https://github.com/nipy/nipype/pull/1564)
 * ENH: Implement missing inputs/outputs in FSL AvScale (https://github.com/nipy/nipype/pull/1563)
