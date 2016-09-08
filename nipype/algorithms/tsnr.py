@@ -95,15 +95,24 @@ class TSNR(BaseInterface):
         return outputs
 
 def regress_poly(degree, data):
-    timepoints = data.shape[-1]
+    datashape = data.shape
+    timepoints = datashape[-1]
+
+    # Rearrange all voxel-wise time-series in rows
+    data = data.reshape((-1, timepoints))
+
+    # Generate design matrix
     X = np.ones((timepoints, 1))
     for i in range(degree):
         X = np.hstack((X, legendre(
             i + 1)(np.linspace(-1, 1, timepoints))[:, None]))
-    betas = np.dot(np.linalg.pinv(X), np.rollaxis(data, 3, 2))
-    datahat = np.rollaxis(np.dot(X[:, 1:],
-                                 np.rollaxis(
-                                     betas[1:, :, :, :], 0, 3)),
-                          0, 4)
+
+    # Calculate coefficients
+    betas = np.linalg.pinv(X).dot(data.T)
+
+    # Estimation
+    datahat = X[:, 1:].dot(betas[1:, ...]).T
     regressed_data = data - datahat
-    return regressed_data
+
+    # Back to original shape
+    return regressed_data.reshape(datashape)
