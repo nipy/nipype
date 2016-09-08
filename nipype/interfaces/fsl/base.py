@@ -22,7 +22,7 @@ Currently these tools are supported:
 
 Examples
 --------
-See the docstrings of the individual classes for examples.
+See the docstrings of the individual classes for examples.  
 
 """
 from __future__ import print_function, division, unicode_literals, absolute_import
@@ -263,4 +263,5 @@ def no_fsl():
 
 def no_fsl_course_data():
     """check if fsl_course data is present"""
-    return not ('FSL_COURSE_DATA' in os.environ and os.path.isdir(os.path.abspath(os.environ['FSL_COURSE_DATA'])))
+    return not ('FSL_COURSE_DATA' in os.environ and
+                os.path.isdir(os.path.abspath(os.environ['FSL_COURSE_DATA'])))

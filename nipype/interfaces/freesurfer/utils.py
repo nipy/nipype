@@ -858,7 +858,7 @@ class MRIsConvertInputSpec(FSTraitedSpec):
                     xor=['out_datatype'], mandatory=True,
                     desc='output filename or True to generate one')
 
-    out_datatype = traits.Enum("ico", "tri", "stl", "vtk", "gii", "mgh", "mgz",
+    out_datatype = traits.Enum("asc", "ico", "tri", "stl", "vtk", "gii", "mgh", "mgz",
                                xor=['out_file'], mandatory=True,
                                desc="These file formats are supported:  ASCII:       .asc"
                                "ICO: .ico, .tri GEO: .geo STL: .stl VTK: .vtk GIFTI: .gii MGH surface-encoded 'volume': .mgh, .mgz")
