@@ -30,12 +30,8 @@ import sys
 import time
 from textwrap import wrap
 from warnings import warn
-<<<<<<< HEAD
 import simplejson as json
-=======
 from dateutil.parser import parse as parseutc
-
->>>>>>> upstream/master
 
 from .. import config, logging, LooseVersion, __version__
 from ..utils.provenance import write_provenance
