@@ -376,7 +376,8 @@ class ApplyTOPUP(FSLCommand):
         # If not defined, assume index are the first N entries in the
         # parameters file, for N input images.
         if not isdefined(self.inputs.in_index):
-            self.inputs.in_index = list(range(1, len(self.inputs.in_files) + 1))
+            self.inputs.in_index = list(
+                range(1, len(self.inputs.in_files) + 1))
 
         return super(ApplyTOPUP, self)._parse_inputs(skip=skip)
 
@@ -489,7 +490,8 @@ class Eddy(FSLCommand):
             if 'OMP_NUM_THREADS' in self.inputs.environ:
                 del self.inputs.environ['OMP_NUM_THREADS']
         else:
-            self.inputs.environ['OMP_NUM_THREADS'] = str(self.inputs.num_threads)
+            self.inputs.environ['OMP_NUM_THREADS'] = str(
+                self.inputs.num_threads)
 
     def _format_arg(self, name, spec, value):
         if name == 'in_topup_fieldcoef':
@@ -500,8 +502,10 @@ class Eddy(FSLCommand):
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        outputs['out_corrected'] = os.path.abspath('%s.nii.gz' % self.inputs.out_base)
-        outputs['out_parameter'] = os.path.abspath('%s.eddy_parameters' % self.inputs.out_base)
+        outputs['out_corrected'] = os.path.abspath(
+            '%s.nii.gz' % self.inputs.out_base)
+        outputs['out_parameter'] = os.path.abspath(
+            '%s.eddy_parameters' % self.inputs.out_base)
         return outputs
 
 
@@ -573,7 +577,8 @@ class EpiRegInputSpec(FSLCommandInputSpec):
                    position=-3, desc='wholehead T1 image')
     t1_brain = File(exists=True, argstr='--t1brain=%s', mandatory=True,
                     position=-2, desc='brain extracted T1 image')
-    out_base = traits.String("epi2struct", desc='output base name', argstr='--out=%s',
+    out_base = traits.String("epi2struct", desc='output base name',
+                             argstr='--out=%s',
                              position=-1, usedefault=True)
     fmap = File(exists=True, argstr='--fmap=%s',
                 desc='fieldmap image (in rad/s)')
@@ -620,7 +625,8 @@ class EpiRegOutputSpec(TraitedSpec):
     fullwarp = File(exists=True,
                     desc='warpfield to unwarp epi and transform into \
                     structural space')
-    wmseg = File(exists=True, desc='white matter segmentation used in flirt bbr')
+    wmseg = File(exists=True,
+                 desc='white matter segmentation used in flirt bbr')
     wmedge = File(exists=True, desc='white matter edges for visualization')
 
 
@@ -659,32 +665,34 @@ class EpiReg(FSLCommand):
         outputs = self.output_spec().get()
         outputs['out_file'] = os.path.join(os.getcwd(),
                                            self.inputs.out_base + '.nii.gz')
-        if not (isdefined(self.inputs.no_fmapreg) and self.inputs.no_fmapreg) and isdefined(self.inputs.fmap):
-            outputs['out_1vol'] = os.path.join(os.getcwd(),
-                                               self.inputs.out_base + '_1vol.nii.gz')
-            outputs['fmap2str_mat'] = os.path.join(os.getcwd(),
-                                                   self.inputs.out_base + '_fieldmap2str.mat')
-            outputs['fmap2epi_mat'] = os.path.join(os.getcwd(),
-                                                   self.inputs.out_base + '_fieldmaprads2epi.mat')
-            outputs['fmap_epi'] = os.path.join(os.getcwd(),
-                                               self.inputs.out_base + '_fieldmaprads2epi.nii.gz')
-            outputs['fmap_str'] = os.path.join(os.getcwd(),
-                                               self.inputs.out_base + '_fieldmaprads2str.nii.gz')
-            outputs['fmapmag_str'] = os.path.join(os.getcwd(),
-                                                  self.inputs.out_base + '_fieldmap2str.nii.gz')
-            outputs['shiftmap'] = os.path.join(os.getcwd(),
-                                               self.inputs.out_base + '_fieldmaprads2epi_shift.nii.gz')
-            outputs['fullwarp'] = os.path.join(os.getcwd(),
-                                               self.inputs.out_base + '_warp.nii.gz')
-            outputs['epi2str_inv'] = os.path.join(os.getcwd(),
-                                                  self.inputs.out_base + '_inv.mat')
+        if (not (isdefined(self.inputs.no_fmapreg) and
+                 self.inputs.no_fmapreg) and isdefined(self.inputs.fmap)):
+            outputs['out_1vol'] = os.path.join(
+                os.getcwd(), self.inputs.out_base + '_1vol.nii.gz')
+            outputs['fmap2str_mat'] = os.path.join(
+                os.getcwd(), self.inputs.out_base + '_fieldmap2str.mat')
+            outputs['fmap2epi_mat'] = os.path.join(
+                os.getcwd(), self.inputs.out_base + '_fieldmaprads2epi.mat')
+            outputs['fmap_epi'] = os.path.join(
+                os.getcwd(), self.inputs.out_base + '_fieldmaprads2epi.nii.gz')
+            outputs['fmap_str'] = os.path.join(
+                os.getcwd(), self.inputs.out_base + '_fieldmaprads2str.nii.gz')
+            outputs['fmapmag_str'] = os.path.join(
+                os.getcwd(), self.inputs.out_base + '_fieldmap2str.nii.gz')
+            outputs['shiftmap'] = os.path.join(
+                os.getcwd(),
+                self.inputs.out_base + '_fieldmaprads2epi_shift.nii.gz')
+            outputs['fullwarp'] = os.path.join(
+                os.getcwd(), self.inputs.out_base + '_warp.nii.gz')
+            outputs['epi2str_inv'] = os.path.join(
+                os.getcwd(), self.inputs.out_base + '_inv.mat')
 
-        outputs['epi2str_mat'] = os.path.join(os.getcwd(),
-                                              self.inputs.out_base + '.mat')
-        outputs['wmedge'] = os.path.join(os.getcwd(),
-                                         self.inputs.out_base + '_fast_wmedge.nii.gz')
-        outputs['wmseg'] = os.path.join(os.getcwd(),
-                                        self.inputs.out_base + '_fast_wmseg.nii.gz')
+        outputs['epi2str_mat'] = os.path.join(
+            os.getcwd(), self.inputs.out_base + '.mat')
+        outputs['wmedge'] = os.path.join(
+            os.getcwd(), self.inputs.out_base + '_fast_wmedge.nii.gz')
+        outputs['wmseg'] = os.path.join(
+            os.getcwd(), self.inputs.out_base + '_fast_wmseg.nii.gz')
 
         return outputs
 
