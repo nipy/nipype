@@ -29,6 +29,7 @@ import scipy.stats as stats
 import warnings
 
 from .. import logging
+from ..external.due import due, Doi, BibTeX
 from . import metrics as nam
 from ..interfaces.base import (BaseInterface, traits, TraitedSpec, File,
                                InputMultiPath, OutputMultiPath,
@@ -72,6 +73,25 @@ class FramewiseDisplacement(BaseInterface):
 
     input_spec = FramewiseDisplacementInputSpec
     output_spec = FramewiseDisplacementOutputSpec
+
+    references_ = [{
+        'entry': BibTex("""\
+@article{power_spurious_2012,
+    title = {Spurious but systematic correlations in functional connectivity {MRI} networks \
+arise from subject motion},
+    volume = {59},
+    doi = {10.1016/j.neuroimage.2011.10.018},
+    number = {3},
+    urldate = {2016-08-16},
+    journal = {NeuroImage},
+    author = {Power, Jonathan D. and Barnes, Kelly A. and Snyder, Abraham Z. and Schlaggar, \
+Bradley L. and Petersen, Steven E.},
+    year = {2012},
+    pages = {2142--2154},
+}
+"""),
+        'tags': ['method']
+    }]
 
     def _run_interface(self, runtime):
         mpars = np.loadtxt(self.inputs.in_plots)  # mpars is N_t x 6
@@ -1225,6 +1245,10 @@ class SplitROIs(BaseInterface):
     """
     Splits a 3D image in small chunks to enable parallel processing.
     ROIs keep time series structure in 4D images.
+
+    Example
+    -------
+
     >>> from nipype.algorithms import misc
     >>> rois = misc.SplitROIs()
     >>> rois.inputs.in_file = 'diffusion.nii'
