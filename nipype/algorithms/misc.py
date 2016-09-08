@@ -75,7 +75,7 @@ class FramewiseDisplacement(BaseInterface):
     output_spec = FramewiseDisplacementOutputSpec
 
     references_ = [{
-        'entry': BibTex("""\
+        'entry': BibTeX("""\
 @article{power_spurious_2012,
     title = {Spurious but systematic correlations in functional connectivity {MRI} networks \
 arise from subject motion},
