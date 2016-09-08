@@ -1,5 +1,7 @@
+# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
+from __future__ import unicode_literals
 from builtins import open
 
 import os
@@ -168,7 +170,6 @@ def test_linkchain():
     os.unlink(orig_img)
     os.unlink(orig_hdr)
 
-
 def test_recopy():
     # Re-copying with the same parameters on an unchanged file should be
     # idempotent
@@ -216,7 +217,6 @@ def test_recopy():
     os.unlink(hdr_link)
     os.unlink(orig_img)
     os.unlink(orig_hdr)
-
 
 def test_copyfallback():
     if os.name is not 'posix':

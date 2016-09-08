@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """The fsl module provides classes for interfacing with the `FSL
@@ -11,21 +12,16 @@ was written to work with FSL version 4.1.4.
     >>> os.chdir(datadir)
 
 """
-
-from builtins import range
+from __future__ import print_function, division, unicode_literals, absolute_import
+from builtins import range, open
 
 import os
-import shutil
 import warnings
 
-from ... import LooseVersion
+from ...utils.filemanip import fname_presuffix, split_filename, copyfile
 from ..base import (TraitedSpec, isdefined, File, Directory,
                     InputMultiPath, OutputMultiPath, traits)
-from ..fsl.base import (FSLCommand, FSLCommandInputSpec, Info)
-from ...utils.filemanip import fname_presuffix, split_filename, copyfile
-
-warn = warnings.warn
-
+from .base import (FSLCommand, FSLCommandInputSpec, Info)
 
 class DTIFitInputSpec(FSLCommandInputSpec):
     dwi = File(exists=True, desc='diffusion weighted image data file',
@@ -83,7 +79,7 @@ class DTIFit(FSLCommand):
     >>> dti.inputs.bvals = 'bvals'
     >>> dti.inputs.base_name = 'TP'
     >>> dti.inputs.mask = 'mask.nii'
-    >>> dti.cmdline
+    >>> dti.cmdline # doctest: +IGNORE_UNICODE
     'dtifit -k diffusion.nii -o TP -m mask.nii -r bvecs -b bvals'
 
     """
@@ -312,7 +308,7 @@ class BEDPOSTX5(FSLXCommand):
     >>> from nipype.interfaces import fsl
     >>> bedp = fsl.BEDPOSTX5(bvecs='bvecs', bvals='bvals', dwi='diffusion.nii',
     ...                     mask='mask.nii', n_fibres=1)
-    >>> bedp.cmdline
+    >>> bedp.cmdline # doctest: +IGNORE_UNICODE
     'bedpostx bedpostx --forcedir -n 1'
 
     """
@@ -522,7 +518,7 @@ class ProbTrackX(FSLCommand):
     target_masks = ['targets_MASK1.nii', 'targets_MASK2.nii'], \
     thsamples='merged_thsamples.nii', fsamples='merged_fsamples.nii', phsamples='merged_phsamples.nii', \
     out_dir='.')
-    >>> pbx.cmdline
+    >>> pbx.cmdline # doctest: +IGNORE_UNICODE
     'probtrackx --forcedir -m mask.nii --mode=seedmask --nsamples=3 --nsteps=10 --opd --os2t --dir=. --samples=merged --seed=MASK_average_thal_right.nii --targetmasks=targets.txt --xfm=trans.mat'
 
     """
@@ -686,7 +682,7 @@ class ProbTrackX2(ProbTrackX):
     >>> pbx2.inputs.out_dir = '.'
     >>> pbx2.inputs.n_samples = 3
     >>> pbx2.inputs.n_steps = 10
-    >>> pbx2.cmdline
+    >>> pbx2.cmdline # doctest: +IGNORE_UNICODE
     'probtrackx2 --forcedir -m nodif_brain_mask.nii.gz --nsamples=3 --nsteps=10 --opd --dir=. --samples=merged --seed=seed_source.nii.gz'
     """
     _cmd = 'probtrackx2'
@@ -758,7 +754,7 @@ class VecReg(FSLCommand):
                  affine_mat='trans.mat', \
                  ref_vol='mni.nii', \
                  out_file='diffusion_vreg.nii')
-    >>> vreg.cmdline
+    >>> vreg.cmdline # doctest: +IGNORE_UNICODE
     'vecreg -t trans.mat -i diffusion.nii -o diffusion_vreg.nii -r mni.nii'
 
     """
@@ -785,7 +781,7 @@ class VecReg(FSLCommand):
         return outputs
 
     def _gen_filename(self, name):
-        if name is 'out_file':
+        if name == 'out_file':
             return self._list_outputs()[name]
         else:
             return None
@@ -815,7 +811,7 @@ class ProjThresh(FSLCommand):
     >>> from nipype.interfaces import fsl
     >>> ldir = ['seeds_to_M1.nii', 'seeds_to_M2.nii']
     >>> pThresh = fsl.ProjThresh(in_files=ldir, threshold=3)
-    >>> pThresh.cmdline
+    >>> pThresh.cmdline # doctest: +IGNORE_UNICODE
     'proj_thresh seeds_to_M1.nii seeds_to_M2.nii 3'
 
     """
@@ -860,7 +856,7 @@ class FindTheBiggest(FSLCommand):
     >>> from nipype.interfaces import fsl
     >>> ldir = ['seeds_to_M1.nii', 'seeds_to_M2.nii']
     >>> fBig = fsl.FindTheBiggest(in_files=ldir, out_file='biggestSegmentation')
-    >>> fBig.cmdline
+    >>> fBig.cmdline # doctest: +IGNORE_UNICODE
     'find_the_biggest seeds_to_M1.nii seeds_to_M2.nii biggestSegmentation'
 
     """
@@ -882,7 +878,7 @@ class FindTheBiggest(FSLCommand):
         return outputs
 
     def _gen_filename(self, name):
-        if name is 'out_file':
+        if name == 'out_file':
             return self._list_outputs()[name]
         else:
             return None

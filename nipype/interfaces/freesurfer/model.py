@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """The freesurfer module provides basic functions for interfacing with
@@ -10,15 +11,17 @@
    >>> os.chdir(datadir)
 
 """
-__docformat__ = 'restructuredtext'
+from __future__ import print_function, division, unicode_literals, absolute_import
 
 import os
 
-from ..freesurfer.base import FSCommand, FSTraitedSpec
+from ...utils.filemanip import fname_presuffix, split_filename
 from ..base import (TraitedSpec, File, traits, InputMultiPath,
                     OutputMultiPath, Directory, isdefined)
-from ...utils.filemanip import fname_presuffix, split_filename
-from ..freesurfer.utils import copy2subjdir
+from .base import FSCommand, FSTraitedSpec
+from .utils import copy2subjdir
+
+__docformat__ = 'restructuredtext'
 
 class MRISPreprocInputSpec(FSTraitedSpec):
     out_file = File(argstr='--out %s', genfile=True,
@@ -88,7 +91,7 @@ class MRISPreproc(FSCommand):
     >>> preproc.inputs.vol_measure_file = [('cont1.nii', 'register.dat'), \
                                            ('cont1a.nii', 'register.dat')]
     >>> preproc.inputs.out_file = 'concatenated_file.mgz'
-    >>> preproc.cmdline
+    >>> preproc.cmdline # doctest: +IGNORE_UNICODE
     'mris_preproc --hemi lh --out concatenated_file.mgz --target fsaverage --iv cont1.nii register.dat --iv cont1a.nii register.dat'
 
     """
@@ -145,7 +148,7 @@ class MRISPreprocReconAll(MRISPreproc):
     >>> preproc.inputs.vol_measure_file = [('cont1.nii', 'register.dat'), \
                                            ('cont1a.nii', 'register.dat')]
     >>> preproc.inputs.out_file = 'concatenated_file.mgz'
-    >>> preproc.cmdline
+    >>> preproc.cmdline # doctest: +IGNORE_UNICODE
     'mris_preproc --hemi lh --out concatenated_file.mgz --s subject_id --target fsaverage --iv cont1.nii register.dat --iv cont1a.nii register.dat'
     """
 
@@ -483,7 +486,7 @@ class Binarize(FSCommand):
     --------
 
     >>> binvol = Binarize(in_file='structural.nii', min=10, binary_file='foo_out.nii')
-    >>> binvol.cmdline
+    >>> binvol.cmdline # doctest: +IGNORE_UNICODE
     'mri_binarize --o foo_out.nii --i structural.nii --min 10.000000'
 
    """
@@ -592,7 +595,7 @@ class Concatenate(FSCommand):
     >>> concat = Concatenate()
     >>> concat.inputs.in_files = ['cont1.nii', 'cont2.nii']
     >>> concat.inputs.concatenated_file = 'bar.nii'
-    >>> concat.cmdline
+    >>> concat.cmdline # doctest: +IGNORE_UNICODE
     'mri_concat --o bar.nii --i cont1.nii --i cont2.nii'
 
     """
@@ -716,7 +719,7 @@ class SegStats(FSCommand):
     >>> ss.inputs.subjects_dir = '.'
     >>> ss.inputs.avgwf_txt_file = 'avgwf.txt'
     >>> ss.inputs.summary_file = 'summary.stats'
-    >>> ss.cmdline
+    >>> ss.cmdline # doctest: +IGNORE_UNICODE
     'mri_segstats --annot PWS04 lh aparc --avgwf ./avgwf.txt --i functional.nii --sum ./summary.stats'
 
     """
@@ -838,7 +841,7 @@ class SegStatsReconAll(SegStats):
     >>> segstatsreconall.inputs.total_gray = True
     >>> segstatsreconall.inputs.euler = True
     >>> segstatsreconall.inputs.exclude_id = 0
-    >>> segstatsreconall.cmdline
+    >>> segstatsreconall.cmdline # doctest: +IGNORE_UNICODE
     'mri_segstats --annot PWS04 lh aparc --avgwf ./avgwf.txt --brain-vol-from-seg --surf-ctx-vol --empty --etiv --euler --excl-ctxgmwm --excludeid 0 --subcortgray --subject 10335 --supratent --totalgray --surf-wm-vol --sum ./summary.stats'
     """
     input_spec = SegStatsReconAllInputSpec
@@ -950,7 +953,7 @@ class Label2Vol(FSCommand):
     --------
 
     >>> binvol = Label2Vol(label_file='cortex.label', template_file='structural.nii', reg_file='register.dat', fill_thresh=0.5, vol_label_file='foo_out.nii')
-    >>> binvol.cmdline
+    >>> binvol.cmdline # doctest: +IGNORE_UNICODE
     'mri_label2vol --fillthresh 0 --label cortex.label --reg register.dat --temp structural.nii --o foo_out.nii'
 
    """
@@ -1029,7 +1032,7 @@ class MS_LDA(FSCommand):
                                 shift=zero_value, vol_synth_file='synth_out.mgz', \
                                 conform=True, use_weights=True, \
                                 images=['FLASH1.mgz', 'FLASH2.mgz', 'FLASH3.mgz'])
-    >>> optimalWeights.cmdline
+    >>> optimalWeights.cmdline # doctest: +IGNORE_UNICODE
     'mri_ms_LDA -conform -label label.mgz -lda 2 3 -shift 1 -W -synth synth_out.mgz -weight weights.txt FLASH1.mgz FLASH2.mgz FLASH3.mgz'
     """
 
@@ -1052,7 +1055,7 @@ class MS_LDA(FSCommand):
             raise traits.TraitError("MS_LDA: use_weights must accompany an existing weights file")
 
     def _format_arg(self, name, spec, value):
-        if name is 'use_weights':
+        if name == 'use_weights':
             if self.inputs.use_weights is True:
                 self._verify_weights_file_exists()
             else:
@@ -1121,7 +1124,7 @@ class Label2Label(FSCommand):
     >>> l2l.inputs.source_label = 'lh-pial.stl'
     >>> l2l.inputs.source_white = 'lh.pial'
     >>> l2l.inputs.source_sphere_reg = 'lh.pial'
-    >>> l2l.cmdline
+    >>> l2l.cmdline # doctest: +IGNORE_UNICODE
     'mri_label2label --hemi lh --trglabel lh-pial_converted.stl --regmethod surface --srclabel lh-pial.stl --srcsubject fsaverage --trgsubject 10335'
     """
 
@@ -1205,7 +1208,7 @@ class Label2Annot(FSCommand):
     >>> l2a.inputs.in_labels = ['lh.aparc.label']
     >>> l2a.inputs.orig = 'lh.pial'
     >>> l2a.inputs.out_annot = 'test'
-    >>> l2a.cmdline
+    >>> l2a.cmdline # doctest: +IGNORE_UNICODE
     'mris_label2annot --hemi lh --l lh.aparc.label --a test --s 10335'
     """
 
@@ -1286,7 +1289,7 @@ class SphericalAverage(FSCommand):
     >>> sphericalavg.inputs.subject_id = '10335'
     >>> sphericalavg.inputs.erode = 2
     >>> sphericalavg.inputs.threshold = 5
-    >>> sphericalavg.cmdline
+    >>> sphericalavg.cmdline # doctest: +IGNORE_UNICODE
     'mris_spherical_average -erode 2 -o 10335 -t 5.0 label lh.entorhinal lh pial . test.out'
     """
 

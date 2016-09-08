@@ -4,11 +4,11 @@ from ..cmtk import ROIGen
 
 
 def test_ROIGen_inputs():
-    input_map = dict(LUT_file=dict(xor=['use_freesurfer_LUT'],
+    input_map = dict(LUT_file=dict(xor=[u'use_freesurfer_LUT'],
     ),
     aparc_aseg_file=dict(mandatory=True,
     ),
-    freesurfer_dir=dict(requires=['use_freesurfer_LUT'],
+    freesurfer_dir=dict(requires=[u'use_freesurfer_LUT'],
     ),
     ignore_exception=dict(nohash=True,
     usedefault=True,
@@ -17,7 +17,7 @@ def test_ROIGen_inputs():
     ),
     out_roi_file=dict(genfile=True,
     ),
-    use_freesurfer_LUT=dict(xor=['LUT_file'],
+    use_freesurfer_LUT=dict(xor=[u'LUT_file'],
     ),
     )
     inputs = ROIGen.input_spec()

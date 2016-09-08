@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """Provides interfaces to various commands provided by diffusion toolkit
@@ -9,13 +10,13 @@
    >>> os.chdir(datadir)
 
 """
-__docformat__ = 'restructuredtext'
+from __future__ import print_function, division, unicode_literals, absolute_import
 
 import os
-
 from ..base import (TraitedSpec, File, traits, CommandLine,
                     InputMultiPath, CommandLineInputSpec)
 
+__docformat__ = 'restructuredtext'
 
 class SplineFilterInputSpec(CommandLineInputSpec):
     track_file = File(exists=True, desc="file containing tracks to be filtered", position=0, argstr="%s", mandatory=True)

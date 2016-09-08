@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """Parallel workflow execution via multiprocessing
@@ -5,19 +6,21 @@
 Support for child processes running as non-daemons based on
 http://stackoverflow.com/a/8963618/1183453
 """
+from __future__ import print_function, division, unicode_literals, absolute_import
+from builtins import open
 
 # Import packages
 from multiprocessing import Process, Pool, cpu_count, pool
 from traceback import format_exception
-import os
 import sys
 
-import numpy as np
 from copy import deepcopy
-from ..engine import MapNode
-from ...utils.misc import str2bool
+import numpy as np
+
 from ... import logging
-from nipype.pipeline.plugins import semaphore_singleton
+from ...utils.misc import str2bool
+from ..engine import MapNode
+from ..plugins import semaphore_singleton
 from .base import (DistributedPluginBase, report_crash)
 
 # Init logger

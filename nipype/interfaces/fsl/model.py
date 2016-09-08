@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """The fsl module provides classes for interfacing with the `FSL
@@ -10,29 +11,24 @@ was written to work with FSL version 4.1.4.
     >>> datadir = os.path.realpath(os.path.join(filepath, '../../testing/data'))
     >>> os.chdir(datadir)
 """
-
-from __future__ import print_function
-from builtins import range
+from __future__ import print_function, division, unicode_literals, absolute_import
+from builtins import range, open
 
 import os
 from glob import glob
-import warnings
 from shutil import rmtree
 
 import numpy as np
-
 from nibabel import load
 
 from ... import LooseVersion
-from .base import (FSLCommand, FSLCommandInputSpec, Info)
+from ...utils.filemanip import list_to_filename, filename_to_list
+from ...utils.misc import human_order_sorted
 from ..base import (load_template, File, traits, isdefined,
                     TraitedSpec, BaseInterface, Directory,
                     InputMultiPath, OutputMultiPath,
                     BaseInterfaceInputSpec)
-from ...utils.filemanip import (list_to_filename, filename_to_list)
-from ...utils.misc import human_order_sorted
-
-warn = warnings.warn
+from .base import FSLCommand, FSLCommandInputSpec, Info
 
 
 class Level1DesignInputSpec(BaseInterfaceInputSpec):
@@ -887,7 +883,7 @@ class FLAMEO(FSLCommand):
                             t_con_file='design.con', \
                             mask_file='mask.nii', \
                             run_mode='fe')
-    >>> flameo.cmdline
+    >>> flameo.cmdline # doctest: +IGNORE_UNICODE
     'flameo --copefile=cope.nii.gz --covsplitfile=cov_split.mat --designfile=design.mat --ld=stats --maskfile=mask.nii --runmode=fe --tcontrastsfile=design.con --varcopefile=varcope.nii.gz'
 
     """
@@ -1489,7 +1485,7 @@ class MELODIC(FSLCommand):
     >>> melodic_setup.inputs.s_des = 'subjectDesign.mat'
     >>> melodic_setup.inputs.s_con = 'subjectDesign.con'
     >>> melodic_setup.inputs.out_dir = 'groupICA.out'
-    >>> melodic_setup.cmdline
+    >>> melodic_setup.cmdline # doctest: +IGNORE_UNICODE
     'melodic -i functional.nii,functional2.nii,functional3.nii -a tica --bgthreshold=10.000000 --mmthresh=0.500000 --nobet -o groupICA.out --Ostats --Scon=subjectDesign.con --Sdes=subjectDesign.mat --Tcon=timeDesign.con --Tdes=timeDesign.mat --tr=1.500000'
     >>> melodic_setup.run() # doctest: +SKIP
 
@@ -1544,7 +1540,7 @@ class SmoothEstimate(FSLCommand):
     >>> est = SmoothEstimate()
     >>> est.inputs.zstat_file = 'zstat1.nii.gz'
     >>> est.inputs.mask_file = 'mask.nii'
-    >>> est.cmdline
+    >>> est.cmdline # doctest: +IGNORE_UNICODE
     'smoothest --mask=mask.nii --zstat=zstat1.nii.gz'
 
     """
@@ -1647,7 +1643,7 @@ class Cluster(FSLCommand):
     >>> cl.inputs.in_file = 'zstat1.nii.gz'
     >>> cl.inputs.out_localmax_txt_file = 'stats.txt'
     >>> cl.inputs.use_mm = True
-    >>> cl.cmdline
+    >>> cl.cmdline # doctest: +IGNORE_UNICODE
     'cluster --in=zstat1.nii.gz --olmax=stats.txt --thresh=2.3000000000 --mm'
 
     """
@@ -1780,7 +1776,7 @@ class Randomise(FSLCommand):
     -------
     >>> import nipype.interfaces.fsl as fsl
     >>> rand = fsl.Randomise(in_file='allFA.nii', mask = 'mask.nii', tcon='design.con', design_mat='design.mat')
-    >>> rand.cmdline
+    >>> rand.cmdline # doctest: +IGNORE_UNICODE
     'randomise -i allFA.nii -o "tbss_" -d design.mat -t design.con -m mask.nii'
 
     """
@@ -1917,7 +1913,7 @@ class GLM(FSLCommand):
     -------
     >>> import nipype.interfaces.fsl as fsl
     >>> glm = fsl.GLM(in_file='functional.nii', design='maps.nii', output_type='NIFTI')
-    >>> glm.cmdline
+    >>> glm.cmdline # doctest: +IGNORE_UNICODE
     'fsl_glm -i functional.nii -d maps.nii -o functional_glm.nii'
 
     """

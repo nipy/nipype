@@ -22,7 +22,7 @@ def test_Reshape_inputs():
     output_file=dict(argstr='%s',
     genfile=True,
     hash_files=False,
-    name_source=['input_file'],
+    name_source=[u'input_file'],
     name_template='%s_reshape.mnc',
     position=-1,
     ),

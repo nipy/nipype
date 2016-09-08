@@ -39,7 +39,7 @@ def test_Threshold_inputs():
     mandatory=True,
     position=4,
     ),
-    use_nonzero_voxels=dict(requires=['use_robust_range'],
+    use_nonzero_voxels=dict(requires=[u'use_robust_range'],
     ),
     use_robust_range=dict(),
     )

@@ -16,9 +16,9 @@ Example Makefile rule::
             ./ext/autosummary_generate.py -o source/generated source/*.rst
 
 """
+from __future__ import print_function, unicode_literals
+from builtins import open
 
-from __future__ import print_function
-import glob
 import re
 import inspect
 import os

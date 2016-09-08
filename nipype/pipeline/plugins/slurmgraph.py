@@ -1,12 +1,14 @@
+# -*- coding: utf-8 -*-
 """Parallel workflow execution via SLURM
 """
+from __future__ import print_function, division, unicode_literals, absolute_import
+from builtins import open
 
 import os
 import sys
 
-from .base import (GraphPluginBase, logger)
-
 from ...interfaces.base import CommandLine
+from .base import (GraphPluginBase, logger)
 
 
 def node_completed_status(checknode):
