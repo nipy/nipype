@@ -38,6 +38,69 @@ from ..utils.filemanip import fname_presuffix, split_filename
 iflogger = logging.getLogger('interface')
 
 
+class FramewiseDisplacementInputSpec(BaseInterfaceInputSpec):
+    in_plots = File(exists=True, desc='motion parameters as written by FSL MCFLIRT')
+    radius = traits.Float(50, usedefault=True,
+                          desc='radius in mm to calculate angular FDs, 50mm is the '
+                               'default since it is used in Power et al. 2012')
+    out_file = File('fd_power_2012.txt', usedefault=True, desc='output file name')
+    out_figure = File('fd_power_2012.pdf', usedefault=True, desc='output figure name')
+    series_tr = traits.Float(desc='repetition time in sec.')
+    save_plot = traits.Bool(False, usedefault=True, desc='write FD plot')
+    normalize = traits.Bool(False, usedefault=True, desc='calculate FD in mm/s',
+                            requires=['series_tr'])
+    figdpi = traits.Int(100, usedefault=True, desc='output dpi for the FD plot')
+    figsize = traits.Tuple(traits.Float(11.7), traits.Float(2.3), usedefault=True,
+                           desc='output figure size')
+
+class FramewiseDisplacementOutputSpec(TraitedSpec):
+    out_file = File(desc='calculated FD per timestep')
+    out_figure = File(desc='output image file')
+    fd_average = traits.Float(desc='average FD')
+
+class FramewiseDisplacement(BaseInterface):
+    """
+    Calculate the :abbr:`FD (framewise displacement)` as in [Power2012]_.
+    This implementation reproduces the calculation in fsl_motion_outliers
+
+    .. [Power2012] Power et al., Spurious but systematic correlations in functional
+         connectivity MRI networks arise from subject motion, NeuroImage 59(3),
+         2012. doi:`10.1016/j.neuroimage.2011.10.018
+         <http://dx.doi.org/10.1016/j.neuroimage.2011.10.018>`_.
+
+
+    """
+
+    input_spec = FramewiseDisplacementInputSpec
+    output_spec = FramewiseDisplacementOutputSpec
+
+    def _run_interface(self, runtime):
+        mpars = np.loadtxt(self.inputs.in_plots)  # mpars is N_t x 6
+        diff = mpars[:-1, :] - mpars[1:, :]
+        diff[:, :3] *= self.inputs.radius
+        fd_res = np.abs(diff).sum(axis=1)
+
+        self._results = {
+            'out_file': op.abspath(self.inputs.out_file),
+            'fd_average': float(fd_res.mean())
+        }
+        np.savetxt(self.inputs.out_file, fd_res)
+
+        if self.inputs.save_plot:
+            self._results['out_figure'] = op.abspath(self.inputs.out_figure)
+            tr = None
+            if self.inputs.normalize:
+                tr = self.inputs.series_tr
+            fig = plot_fd(fd_res, self.inputs.figsize, series_tr=tr)
+            fig.savefig(self._results['out_figure'], dpi=float(self.inputs.figdpi),
+                        format=self.inputs.out_figure[-3:],
+                        bbox_inches='tight')
+        return runtime
+
+    def _list_outputs(self):
+        return self._results
+
+
 class PickAtlasInputSpec(BaseInterfaceInputSpec):
     atlas = File(exists=True, desc="Location of the atlas that will be used.",
                  mandatory=True)
@@ -1459,6 +1522,40 @@ def merge_rois(in_files, in_idxs, in_ref,
 
     return out_file
 
+
+def plot_fd(fd_values, figsize, series_tr=None):
+    """
+    A helper function to plot the framewise displacement
+    """
+    import matplotlib
+    matplotlib.use('Agg')
+    import matplotlib.pyplot as plt
+    from matplotlib.gridspec import GridSpec
+    from matplotlib.backends.backend_pdf import FigureCanvasPdf as FigureCanvas
+    import seaborn as sns
+
+    fig = plt.Figure(figsize=figsize)
+    FigureCanvas(fig)
+    grid = GridSpec(1, 2, width_ratios=[3, 1], wspace=0.025)
+    grid.update(hspace=1.0, right=0.95, left=0.1, bottom=0.2)
+
+    ax = fig.add_subplot(grid[0, :-1])
+    ax.plot(fd_values)
+    ax.set_xlim((0, len(fd_values)))
+    ax.set_ylabel('FD [{}]'.format('mm/s' if series_tr is not None else 'mm'))
+
+    xlabel = 'Frame #'
+    if series_tr is not None:
+        xlabel = 'Frame # ({} sec TR)'.format(series_tr)
+    ax.set_xlabel(xlabel)
+    ylim = ax.get_ylim()
+
+    ax = fig.add_subplot(grid[0, -1])
+    sns.distplot(fd_values, vertical=True, ax=ax)
+    ax.set_xlabel('Frames')
+    ax.set_ylim(ylim)
+    ax.set_yticklabels([])
+    return fig
 
 # Deprecated interfaces ------------------------------------------------------
 
