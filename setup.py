@@ -98,7 +98,10 @@ def get_comrec_build(pkg_dir, build_cmd=build_py):
             cfg_parser.read(pjoin(pkg_dir, 'COMMIT_INFO.txt'))
             cfg_parser.set('commit hash', 'install_hash', repo_commit)
             out_pth = pjoin(self.build_lib, pkg_dir, 'COMMIT_INFO.txt')
-            cfg_parser.write(open(out_pth, 'wt'))
+            if PY3:
+                cfg_parser.write(open(out_pth, 'wt'))
+            else:
+                cfg_parser.write(open(out_pth, 'wb'))
     return MyBuildPy
 
 
