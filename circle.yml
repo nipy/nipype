@@ -26,7 +26,6 @@ dependencies:
     - mkdir -p ~/docker; docker save nipype/nipype_test:py27 > ~/docker/image.tar :
         timeout: 1600
     - pip install xunitmerge
-    - pip install codecov
 
 test:
   override:
@@ -51,7 +50,7 @@ test:
 
   post:
     - bash docker/circleci/teardown.sh
-    - codecov
+    - bash <(curl -s https://codecov.io/bash)
 
 general:
   artifacts:
