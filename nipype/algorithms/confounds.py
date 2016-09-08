@@ -20,9 +20,11 @@ import os.path as op
 import nibabel as nb
 import numpy as np
 
+from .. import logging
 from ..external.due import due, Doi, BibTeX
 from ..interfaces.base import (traits, TraitedSpec, BaseInterface,
-                               BaseInterfaceInputSpec, File)
+                               BaseInterfaceInputSpec, File, isdefined)
+IFLOG = logging.getLogger('interface')
 
 
 class ComputeDVARSInputSpec(BaseInterfaceInputSpec):
@@ -36,12 +38,27 @@ class ComputeDVARSInputSpec(BaseInterfaceInputSpec):
                              desc='save voxel-wise standardized DVARS')
     save_all = traits.Bool(False, usedefault=True, desc='output all DVARS')
 
+    series_tr = traits.Float(desc='repetition time in sec.')
+    save_plot = traits.Bool(False, usedefault=True, desc='write DVARS plot')
+    figdpi = traits.Int(100, usedefault=True, desc='output dpi for the plot')
+    figsize = traits.Tuple(traits.Float(11.7), traits.Float(2.3), usedefault=True,
+                           desc='output figure size')
+    figformat = traits.Enum('png', 'pdf', 'svg', usedefault=True,
+                            desc='output format for figures')
+
+
 
 class ComputeDVARSOutputSpec(TraitedSpec):
     out_std = File(exists=True, desc='output text file')
     out_nstd = File(exists=True, desc='output text file')
     out_vxstd = File(exists=True, desc='output text file')
     out_all = File(exists=True, desc='output text file')
+    avg_std = traits.Float()
+    avg_nstd = traits.Float()
+    avg_vxstd = traits.Float()
+    fig_std = File(exists=True, desc='output DVARS plot')
+    fig_nstd = File(exists=True, desc='output DVARS plot')
+    fig_vxstd = File(exists=True, desc='output DVARS plot')
 
 
 class ComputeDVARS(BaseInterface):
@@ -51,7 +68,7 @@ class ComputeDVARS(BaseInterface):
     input_spec = ComputeDVARSInputSpec
     output_spec = ComputeDVARSOutputSpec
     references_ = [{
-        'entry': BibTex("""\
+        'entry': BibTeX("""\
 @techreport{nichols_notes_2013,
     address = {Coventry, UK},
     title = {Notes on {Creating} a {Standardized} {Version} of {DVARS}},
@@ -64,7 +81,7 @@ research/nichols/scripts/fsl/standardizeddvars.pdf},
 }"""),
         'tags': ['method']
     }, {
-        'entry': BibTex("""\
+        'entry': BibTeX("""\
 @article{power_spurious_2012,
     title = {Spurious but systematic correlations in functional connectivity {MRI} networks \
 arise from subject motion},
@@ -100,37 +117,67 @@ Bradley L. and Petersen, Steven E.},
         if ext.startswith('.'):
             ext = ext[1:]
 
-        return op.abspath('{}_{},{}'.format(fname, suffix, ext))
-
-    def _parse_inputs(self):
-        if (self.inputs.save_std or self.inputs.save_nstd or
-            self.inputs.save_vxstd or self.inputs.save_all):
-            return super(ComputeDVARS, self)._parse_inputs()
-        else:
-            raise RuntimeError('At least one of the save_* options must be True')
+        return op.abspath('{}_{}.{}'.format(fname, suffix, ext))
 
     def _run_interface(self, runtime):
         dvars = compute_dvars(self.inputs.in_file, self.inputs.in_mask)
 
+        self._results['avg_std'] = dvars[0].mean()
+        self._results['avg_nstd'] = dvars[1].mean()
+        self._results['avg_vxstd'] = dvars[2].mean()
+
+        tr = None
+        if isdefined(self.inputs.series_tr):
+            tr = self.inputs.series_tr
+
         if self.inputs.save_std:
             out_file = self._gen_fname('dvars_std', ext='tsv')
-            np.savetxt(out_file, dvars[0], fmt=b'%.12f')
+            np.savetxt(out_file, dvars[0], fmt=b'%0.6f')
             self._results['out_std'] = out_file
+
+            if self.inputs.save_plot:
+                self._results['fig_std'] = self._gen_fname(
+                    'dvars_std', ext=self.inputs.figformat)
+                fig = plot_confound(dvars[0], self.inputs.figsize, 'Standardized DVARS',
+                                    series_tr=tr)
+                fig.savefig(self._results['fig_std'], dpi=float(self.inputs.figdpi),
+                        format=self.inputs.figformat,
+                        bbox_inches='tight')
+                fig.clf()
 
         if self.inputs.save_nstd:
             out_file = self._gen_fname('dvars_nstd', ext='tsv')
-            np.savetxt(out_file, dvars[1], fmt=b'%.12f')
+            np.savetxt(out_file, dvars[1], fmt=b'%0.6f')
             self._results['out_nstd'] = out_file
+
+            if self.inputs.save_plot:
+                self._results['fig_nstd'] = self._gen_fname(
+                    'dvars_nstd', ext=self.inputs.figformat)
+                fig = plot_confound(dvars[1], self.inputs.figsize, 'DVARS', series_tr=tr)
+                fig.savefig(self._results['fig_nstd'], dpi=float(self.inputs.figdpi),
+                        format=self.inputs.figformat,
+                        bbox_inches='tight')
+                fig.clf()
 
         if self.inputs.save_vxstd:
             out_file = self._gen_fname('dvars_vxstd', ext='tsv')
-            np.savetxt(out_file, dvars[2], fmt=b'%.12f')
+            np.savetxt(out_file, dvars[2], fmt=b'%0.6f')
             self._results['out_vxstd'] = out_file
+
+            if self.inputs.save_plot:
+                self._results['fig_vxstd'] = self._gen_fname(
+                    'dvars_vxstd', ext=self.inputs.figformat)
+                fig = plot_confound(dvars[2], self.inputs.figsize, 'Voxelwise std DVARS',
+                                    series_tr=tr)
+                fig.savefig(self._results['fig_vxstd'], dpi=float(self.inputs.figdpi),
+                        format=self.inputs.figformat,
+                        bbox_inches='tight')
+                fig.clf()
 
         if self.inputs.save_all:
             out_file = self._gen_fname('dvars', ext='tsv')
-            np.savetxt(out_file, np.vstack(dvars), fmt=b'%.12f', delimiter=b'\t',
-                       header='# std DVARS\tnon-std DVARS\tvx-wise std DVARS')
+            np.savetxt(out_file, np.vstack(dvars).T, fmt=b'%0.8f', delimiter=b'\t',
+                       header='std DVARS\tnon-std DVARS\tvx-wise std DVARS')
             self._results['out_all'] = out_file
 
         return runtime
@@ -210,7 +257,7 @@ research/nichols/scripts/fsl/standardizeddvars.pdf>`_, 2013.
 
     # voxelwise standardization
     diff_vx_stdz = func_diff / np.array([func_sd_pd] * func_diff.shape[-1]).T
-    dvars_vx_stdz = diff_vx_stdz.std(1, ddof=1)
+    dvars_vx_stdz = diff_vx_stdz.std(axis=0, ddof=1)
 
     return (dvars_stdz, dvars_nstd, dvars_vx_stdz)
 
@@ -233,3 +280,44 @@ def zero_variance(func, mask):
     newmask = np.zeros_like(mask, dtype=np.uint8)
     newmask[idx] = tv_mask
     return newmask
+
+def plot_confound(tseries, figsize, name, units=None,
+                  series_tr=None, normalize=False):
+    """
+    A helper function to plot the framewise displacement
+    """
+    import matplotlib
+    matplotlib.use('Agg')
+    import matplotlib.pyplot as plt
+    from matplotlib.gridspec import GridSpec
+    from matplotlib.backends.backend_pdf import FigureCanvasPdf as FigureCanvas
+    import seaborn as sns
+
+    fig = plt.Figure(figsize=figsize)
+    FigureCanvas(fig)
+    grid = GridSpec(1, 2, width_ratios=[3, 1], wspace=0.025)
+    grid.update(hspace=1.0, right=0.95, left=0.1, bottom=0.2)
+
+    ax = fig.add_subplot(grid[0, :-1])
+    if normalize and series_tr is not None:
+        tseries /= series_tr
+
+    ax.plot(tseries)
+    ax.set_xlim((0, len(tseries)))
+    ylabel = name
+    if units is not None:
+        ylabel += (' speed [{}/s]' if normalize else ' [{}]').format(units)
+    ax.set_ylabel(ylabel)
+
+    xlabel = 'Frame #'
+    if series_tr is not None:
+        xlabel = 'Frame # ({} sec TR)'.format(series_tr)
+    ax.set_xlabel(xlabel)
+    ylim = ax.get_ylim()
+
+    ax = fig.add_subplot(grid[0, -1])
+    sns.distplot(tseries, vertical=True, ax=ax)
+    ax.set_xlabel('Frames')
+    ax.set_ylim(ylim)
+    ax.set_yticklabels([])
+    return fig
