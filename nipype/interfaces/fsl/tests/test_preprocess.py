@@ -1,6 +1,9 @@
+# -*- coding: utf-8 -*-
+from __future__ import unicode_literals
+from builtins import str
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
-from builtins import open
+from builtins import open, open
 
 import os
 import tempfile
@@ -10,7 +13,7 @@ from nipype.testing import (assert_equal, assert_not_equal, assert_raises,
                             skipif)
 
 from nipype.utils.filemanip import split_filename
-import nipype.interfaces.fsl.preprocess as fsl
+from .. import preprocess as fsl
 from nipype.interfaces.fsl import Info
 from nipype.interfaces.base import File, TraitError, Undefined, isdefined
 from nipype.interfaces.fsl import no_fsl
@@ -564,3 +567,23 @@ def test_fugue():
         yield assert_equal, op.basename(res.outputs.unwarped_file), out_name
 
     teardown_fugue(tmpdir)
+
+
+@skipif(no_fsl)
+def test_first_genfname():
+    first = fsl.FIRST()
+    first.inputs.out_file = 'segment.nii'
+    first.inputs.output_type = "NIFTI_GZ"
+
+    value = first._gen_fname(name='original_segmentations')
+    expected_value = os.path.abspath('segment_all_fast_origsegs.nii.gz')
+    yield assert_equal, value, expected_value
+    first.inputs.method = 'none'
+    value = first._gen_fname(name='original_segmentations')
+    expected_value = os.path.abspath('segment_all_none_origsegs.nii.gz')
+    yield assert_equal, value, expected_value
+    first.inputs.method = 'auto'
+    first.inputs.list_of_specific_structures = ['L_Hipp', 'R_Hipp']
+    value = first._gen_fname(name='original_segmentations')
+    expected_value = os.path.abspath('segment_all_none_origsegs.nii.gz')
+    yield assert_equal, value, expected_value

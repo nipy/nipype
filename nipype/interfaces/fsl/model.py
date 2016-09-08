@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """The fsl module provides classes for interfacing with the `FSL
@@ -10,29 +11,24 @@ was written to work with FSL version 4.1.4.
     >>> datadir = os.path.realpath(os.path.join(filepath, '../../testing/data'))
     >>> os.chdir(datadir)
 """
-
-from __future__ import print_function
-from builtins import range
+from __future__ import print_function, division, unicode_literals, absolute_import
+from builtins import range, open
 
 import os
 from glob import glob
-import warnings
 from shutil import rmtree
 
 import numpy as np
-
 from nibabel import load
 
 from ... import LooseVersion
-from .base import (FSLCommand, FSLCommandInputSpec, Info)
+from ...utils.filemanip import list_to_filename, filename_to_list
+from ...utils.misc import human_order_sorted
 from ..base import (load_template, File, traits, isdefined,
                     TraitedSpec, BaseInterface, Directory,
                     InputMultiPath, OutputMultiPath,
                     BaseInterfaceInputSpec)
-from ...utils.filemanip import (list_to_filename, filename_to_list)
-from ...utils.misc import human_order_sorted
-
-warn = warnings.warn
+from .base import FSLCommand, FSLCommandInputSpec, Info
 
 
 class Level1DesignInputSpec(BaseInterfaceInputSpec):
@@ -124,8 +120,8 @@ class Level1Design(BaseInterface):
         f.close()
 
     def _create_ev_files(
-        self, cwd, runinfo, runidx, usetd, contrasts, no_bases,
-            do_tempfilter):
+        self, cwd, runinfo, runidx, usetd, contrasts,
+            do_tempfilter, basis_key):
         """Creates EV files from condition and regressor information.
 
            Parameters:
@@ -144,7 +140,9 @@ class Level1Design(BaseInterface):
         """
         conds = {}
         evname = []
-        ev_hrf = load_template('feat_ev_hrf.tcl')
+        if basis_key == "dgamma":
+            basis_key = "hrf"
+        ev_template = load_template('feat_ev_'+basis_key+'.tcl')
         ev_none = load_template('feat_ev_none.tcl')
         ev_ortho = load_template('feat_ev_ortho.tcl')
         ev_txt = ''
@@ -174,13 +172,13 @@ class Level1Design(BaseInterface):
                             evinfo.insert(j, [onset, cond['duration'][j], amp])
                         else:
                             evinfo.insert(j, [onset, cond['duration'][0], amp])
-                    if no_bases:
-                        ev_txt += ev_none.substitute(ev_num=num_evs[0],
+                    if basis_key == "none":
+                        ev_txt += ev_template.substitute(ev_num=num_evs[0],
                                                      ev_name=name,
                                                      tempfilt_yn=do_tempfilter,
                                                      cond_file=evfname)
                     else:
-                        ev_txt += ev_hrf.substitute(ev_num=num_evs[0],
+                        ev_txt += ev_template.substitute(ev_num=num_evs[0],
                                                     ev_name=name,
                                                     tempfilt_yn=do_tempfilter,
                                                     temporalderiv=usetd,
@@ -296,12 +294,9 @@ class Level1Design(BaseInterface):
         if isdefined(self.inputs.model_serial_correlations):
             prewhiten = int(self.inputs.model_serial_correlations)
         usetd = 0
-        no_bases = False
         basis_key = list(self.inputs.bases.keys())[0]
         if basis_key in ['dgamma', 'gamma']:
             usetd = int(self.inputs.bases[basis_key]['derivs'])
-        if basis_key == 'none':
-            no_bases = True
         session_info = self._format_session_info(self.inputs.session_info)
         func_files = self._get_func_files(session_info)
         n_tcon = 0
@@ -319,7 +314,7 @@ class Level1Design(BaseInterface):
                 do_tempfilter = 0
             num_evs, cond_txt = self._create_ev_files(cwd, info, i, usetd,
                                                       self.inputs.contrasts,
-                                                      no_bases, do_tempfilter)
+                                                      do_tempfilter, basis_key)
             nim = load(func_files[i])
             (_, _, _, timepoints) = nim.shape
             fsf_txt = fsf_header.substitute(run_num=i,
@@ -888,7 +883,7 @@ class FLAMEO(FSLCommand):
                             t_con_file='design.con', \
                             mask_file='mask.nii', \
                             run_mode='fe')
-    >>> flameo.cmdline
+    >>> flameo.cmdline # doctest: +IGNORE_UNICODE
     'flameo --copefile=cope.nii.gz --covsplitfile=cov_split.mat --designfile=design.mat --ld=stats --maskfile=mask.nii --runmode=fe --tcontrastsfile=design.con --varcopefile=varcope.nii.gz'
 
     """
@@ -1134,28 +1129,28 @@ class L2Model(BaseInterface):
 
     def _run_interface(self, runtime):
         cwd = os.getcwd()
-        mat_txt = ['/NumWaves       1',
-                   '/NumPoints      %d' % self.inputs.num_copes,
-                   '/PPheights      %e' % 1,
+        mat_txt = ['/NumWaves   1',
+                   '/NumPoints  {:d}'.format(self.inputs.num_copes),
+                   '/PPheights  1',
                    '',
                    '/Matrix']
         for i in range(self.inputs.num_copes):
-            mat_txt += ['%e' % 1]
+            mat_txt += ['1']
         mat_txt = '\n'.join(mat_txt)
 
-        con_txt = ['/ContrastName1   group mean',
-                   '/NumWaves       1',
+        con_txt = ['/ContrastName1  group mean',
+                   '/NumWaves   1',
                    '/NumContrasts   1',
-                   '/PPheights          %e' % 1,
-                   '/RequiredEffect     100.0',  # XX where does this
+                   '/PPheights  1',
+                   '/RequiredEffect     100',  # XX where does this
                    # number come from
                    '',
                    '/Matrix',
-                   '%e' % 1]
+                   '1']
         con_txt = '\n'.join(con_txt)
 
-        grp_txt = ['/NumWaves       1',
-                   '/NumPoints      %d' % self.inputs.num_copes,
+        grp_txt = ['/NumWaves   1',
+                   '/NumPoints  {:d}'.format(self.inputs.num_copes),
                    '',
                    '/Matrix']
         for i in range(self.inputs.num_copes):
@@ -1490,7 +1485,7 @@ class MELODIC(FSLCommand):
     >>> melodic_setup.inputs.s_des = 'subjectDesign.mat'
     >>> melodic_setup.inputs.s_con = 'subjectDesign.con'
     >>> melodic_setup.inputs.out_dir = 'groupICA.out'
-    >>> melodic_setup.cmdline
+    >>> melodic_setup.cmdline # doctest: +IGNORE_UNICODE
     'melodic -i functional.nii,functional2.nii,functional3.nii -a tica --bgthreshold=10.000000 --mmthresh=0.500000 --nobet -o groupICA.out --Ostats --Scon=subjectDesign.con --Sdes=subjectDesign.mat --Tcon=timeDesign.con --Tdes=timeDesign.mat --tr=1.500000'
     >>> melodic_setup.run() # doctest: +SKIP
 
@@ -1545,7 +1540,7 @@ class SmoothEstimate(FSLCommand):
     >>> est = SmoothEstimate()
     >>> est.inputs.zstat_file = 'zstat1.nii.gz'
     >>> est.inputs.mask_file = 'mask.nii'
-    >>> est.cmdline
+    >>> est.cmdline # doctest: +IGNORE_UNICODE
     'smoothest --mask=mask.nii --zstat=zstat1.nii.gz'
 
     """
@@ -1604,15 +1599,17 @@ class ClusterInputSpec(FSLCommandInputSpec):
                         desc='number of voxels in the mask')
     dlh = traits.Float(argstr='--dlh=%.10f',
                        desc='smoothness estimate = sqrt(det(Lambda))')
-    fractional = traits.Bool('--fractional',
+    fractional = traits.Bool(False, usedefault=True, argstr='--fractional',
                              desc='interprets the threshold as a fraction of the robust range')
     connectivity = traits.Int(argstr='--connectivity=%d',
                               desc='the connectivity of voxels (default 26)')
-    use_mm = traits.Bool('--mm', desc='use mm, not voxel, coordinates')
-    find_min = traits.Bool('--min', desc='find minima instead of maxima')
-    no_table = traits.Bool(
-        '--no_table', desc='suppresses printing of the table info')
-    minclustersize = traits.Bool(argstr='--minclustersize',
+    use_mm = traits.Bool(False, usedefault=True, argstr='--mm',
+                         desc='use mm, not voxel, coordinates')
+    find_min = traits.Bool(False, usedefault=True, argstr='--min',
+                           desc='find minima instead of maxima')
+    no_table = traits.Bool(False, usedefault=True, argstr='--no_table',
+                           desc='suppresses printing of the table info')
+    minclustersize = traits.Bool(False, usedefault=True, argstr='--minclustersize',
                                  desc='prints out minimum significant cluster size')
     xfm_file = File(argstr='--xfm=%s',
                     desc='filename for Linear: input->standard-space transform. Non-linear: input->highres transform')
@@ -1645,8 +1642,9 @@ class Cluster(FSLCommand):
     >>> cl.inputs.threshold = 2.3
     >>> cl.inputs.in_file = 'zstat1.nii.gz'
     >>> cl.inputs.out_localmax_txt_file = 'stats.txt'
-    >>> cl.cmdline
-    'cluster --in=zstat1.nii.gz --olmax=stats.txt --thresh=2.3000000000'
+    >>> cl.inputs.use_mm = True
+    >>> cl.cmdline # doctest: +IGNORE_UNICODE
+    'cluster --in=zstat1.nii.gz --olmax=stats.txt --thresh=2.3000000000 --mm'
 
     """
     input_spec = ClusterInputSpec
@@ -1770,9 +1768,7 @@ class RandomiseOutputSpec(TraitedSpec):
 
 
 class Randomise(FSLCommand):
-    """XXX UNSTABLE DO NOT USE
-
-    FSL Randomise: feeds the 4D projected FA data into GLM
+    """FSL Randomise: feeds the 4D projected FA data into GLM
     modelling and thresholding
     in order to find voxels which correlate with your model
 
@@ -1780,7 +1776,7 @@ class Randomise(FSLCommand):
     -------
     >>> import nipype.interfaces.fsl as fsl
     >>> rand = fsl.Randomise(in_file='allFA.nii', mask = 'mask.nii', tcon='design.con', design_mat='design.mat')
-    >>> rand.cmdline
+    >>> rand.cmdline # doctest: +IGNORE_UNICODE
     'randomise -i allFA.nii -o "tbss_" -d design.mat -t design.con -m mask.nii'
 
     """
@@ -1917,7 +1913,7 @@ class GLM(FSLCommand):
     -------
     >>> import nipype.interfaces.fsl as fsl
     >>> glm = fsl.GLM(in_file='functional.nii', design='maps.nii', output_type='NIFTI')
-    >>> glm.cmdline
+    >>> glm.cmdline # doctest: +IGNORE_UNICODE
     'fsl_glm -i functional.nii -d maps.nii -o functional_glm.nii'
 
     """

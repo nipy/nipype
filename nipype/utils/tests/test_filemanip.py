@@ -1,12 +1,15 @@
+# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
+from __future__ import unicode_literals
 from builtins import open
 
 import os
 from tempfile import mkstemp, mkdtemp
+import warnings
 
-from nipype.testing import assert_equal, assert_true, assert_false
-from nipype.utils.filemanip import (save_json, load_json,
+from ...testing import assert_equal, assert_true, assert_false, TempFATFS
+from ...utils.filemanip import (save_json, load_json,
                                     fname_presuffix, fnames_presuffix,
                                     hash_rename, check_forhash,
                                     copyfile, copyfiles,
@@ -156,6 +159,7 @@ def test_linkchain():
     yield assert_false, os.path.islink(new_hdr3)
     yield assert_true, os.path.samefile(orig_img, new_img3)
     yield assert_true, os.path.samefile(orig_hdr, new_hdr3)
+
     os.unlink(new_img1)
     os.unlink(new_hdr1)
     os.unlink(new_img2)
@@ -165,6 +169,84 @@ def test_linkchain():
     # final cleanup
     os.unlink(orig_img)
     os.unlink(orig_hdr)
+
+def test_recopy():
+    # Re-copying with the same parameters on an unchanged file should be
+    # idempotent
+    #
+    # Test for copying from regular files and symlinks
+    orig_img, orig_hdr = _temp_analyze_files()
+    pth, fname = os.path.split(orig_img)
+    img_link = os.path.join(pth, 'imglink.img')
+    hdr_link = os.path.join(pth, 'imglink.hdr')
+    new_img = os.path.join(pth, 'newfile.img')
+    new_hdr = os.path.join(pth, 'newfile.hdr')
+    copyfile(orig_img, img_link)
+    for copy in (True, False):
+        for use_hardlink in (True, False):
+            for hashmethod in ('timestamp', 'content'):
+                kwargs = {'copy': copy, 'use_hardlink': use_hardlink,
+                          'hashmethod': hashmethod}
+                # Copying does not preserve the original file's timestamp, so
+                # we may delete and re-copy, if the test is slower than a clock
+                # tick
+                if copy and not use_hardlink and hashmethod == 'timestamp':
+                    continue
+                copyfile(orig_img, new_img, **kwargs)
+                img_stat = os.stat(new_img)
+                hdr_stat = os.stat(new_hdr)
+                copyfile(orig_img, new_img, **kwargs)
+                err_msg = "Regular - OS: {}; Copy: {}; Hardlink: {}".format(
+                    os.name, copy, use_hardlink)
+                yield assert_equal, img_stat, os.stat(new_img), err_msg
+                yield assert_equal, hdr_stat, os.stat(new_hdr), err_msg
+                os.unlink(new_img)
+                os.unlink(new_hdr)
+
+                copyfile(img_link, new_img, **kwargs)
+                img_stat = os.stat(new_img)
+                hdr_stat = os.stat(new_hdr)
+                copyfile(img_link, new_img, **kwargs)
+                err_msg = "Symlink - OS: {}; Copy: {}; Hardlink: {}".format(
+                    os.name, copy, use_hardlink)
+                yield assert_equal, img_stat, os.stat(new_img), err_msg
+                yield assert_equal, hdr_stat, os.stat(new_hdr), err_msg
+                os.unlink(new_img)
+                os.unlink(new_hdr)
+    os.unlink(img_link)
+    os.unlink(hdr_link)
+    os.unlink(orig_img)
+    os.unlink(orig_hdr)
+
+def test_copyfallback():
+    if os.name is not 'posix':
+        return
+    orig_img, orig_hdr = _temp_analyze_files()
+    pth, imgname = os.path.split(orig_img)
+    pth, hdrname = os.path.split(orig_hdr)
+    try:
+        fatfs = TempFATFS()
+    except (IOError, OSError):
+        warnings.warn('Fuse mount failed. copyfile fallback tests skipped.')
+    else:
+        with fatfs as fatdir:
+            tgt_img = os.path.join(fatdir, imgname)
+            tgt_hdr = os.path.join(fatdir, hdrname)
+            for copy in (True, False):
+                for use_hardlink in (True, False):
+                    copyfile(orig_img, tgt_img, copy=copy,
+                             use_hardlink=use_hardlink)
+                    yield assert_true, os.path.exists(tgt_img)
+                    yield assert_true, os.path.exists(tgt_hdr)
+                    yield assert_false, os.path.islink(tgt_img)
+                    yield assert_false, os.path.islink(tgt_hdr)
+                    yield assert_false, os.path.samefile(orig_img, tgt_img)
+                    yield assert_false, os.path.samefile(orig_hdr, tgt_hdr)
+                    os.unlink(tgt_img)
+                    os.unlink(tgt_hdr)
+    finally:
+        os.unlink(orig_img)
+        os.unlink(orig_hdr)
 
 
 def test_filename_to_list():

@@ -5,15 +5,16 @@ Created on Aug 2, 2013
 
 Parallel workflow execution with SLURM
 '''
+from __future__ import print_function, division, unicode_literals, absolute_import
+from builtins import open
 
 import os
 import re
-import subprocess
 from time import sleep
 
+from ...interfaces.base import CommandLine
 from .base import (SGELikeBatchManagerBase, logger, iflogger, logging)
 
-from nipype.interfaces.base import CommandLine
 
 
 class SLURMPlugin(SGELikeBatchManagerBase):
@@ -38,16 +39,20 @@ class SLURMPlugin(SGELikeBatchManagerBase):
         self._max_tries = 2
         self._template = template
         self._sbatch_args = None
+        self._jobid_re = "Submitted batch job ([0-9]*)"
 
         if 'plugin_args' in kwargs and kwargs['plugin_args']:
             if 'retry_timeout' in kwargs['plugin_args']:
                 self._retry_timeout = kwargs['plugin_args']['retry_timeout']
             if 'max_tries' in kwargs['plugin_args']:
                 self._max_tries = kwargs['plugin_args']['max_tries']
+            if 'jobid_re' in kwargs['plugin_args']:
+                self._jobid_re = kwargs['plugin_args']['jobid_re']
             if 'template' in kwargs['plugin_args']:
                 self._template = kwargs['plugin_args']['template']
                 if os.path.isfile(self._template):
-                    self._template = open(self._template).read()
+                    with open(self._template) as f:
+                        self._template = f.read()
             if 'sbatch_args' in kwargs['plugin_args']:
                 self._sbatch_args = kwargs['plugin_args']['sbatch_args']
         self._pending = {}
@@ -55,17 +60,16 @@ class SLURMPlugin(SGELikeBatchManagerBase):
 
     def _is_pending(self, taskid):
         #  subprocess.Popen requires taskid to be a string
-        proc = subprocess.Popen(["squeue", '-j', '%s' % taskid],
-                                stdout=subprocess.PIPE,
-                                stderr=subprocess.PIPE)
-        o, _ = proc.communicate()
-
-        return o.find(str(taskid)) > -1
+        res = CommandLine('squeue',
+                          args=' '.join(['-j', '%s' % taskid]),
+                          terminal_output='allatonce').run()
+        return res.runtime.stdout.find(str(taskid)) > -1
 
     def _submit_batchtask(self, scriptfile, node):
         """
-        This is more or less the _submit_batchtask from sge.py with flipped variable
-        names, different command line switches, and different output formatting/processing
+        This is more or less the _submit_batchtask from sge.py with flipped
+        variable names, different command line switches, and different output
+        formatting/processing
         """
         cmd = CommandLine('sbatch', environ=dict(os.environ),
                           terminal_output='allatonce')
@@ -118,7 +122,7 @@ class SLURMPlugin(SGELikeBatchManagerBase):
         iflogger.setLevel(oldlevel)
         # retrieve taskid
         lines = [line for line in result.runtime.stdout.split('\n') if line]
-        taskid = int(re.match("Submitted batch job ([0-9]*)",
+        taskid = int(re.match(self._jobid_re,
                               lines[-1]).groups()[0])
         self._pending[taskid] = node.output_dir()
         logger.debug('submitted sbatch task: %d for node %s' % (taskid, node._id))

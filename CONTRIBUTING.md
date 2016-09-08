@@ -10,16 +10,22 @@
 * Pull Requests should be tested, if feasible:
     - bugfixes should include regression tests
     - new behavior should at least get minimal exercise
-* Use a descriptive prefix for your PR: ENH, FIX, TST, DOC, STY, REF (refactor), WIP (Work in progress)
-* After submiting the PR, include an update to the CHANGES file: prefix: description (URL of pull request)
-* `make specs`
-* do: `make check-before-commit` before submitting the PR. This will require you to either install or be in developer mode with: `python setup.py install/develop`.
+* Use a descriptive prefix for your PR: ENH (enhancement), FIX, TST, DOC, STY, REF (refactor), WIP (Work in progress)
+* The person who accepts/merges your PR will include an update to the CHANGES file: prefix: description (URL of pull request)
+* Run `make check-before-commit` before submitting the PR.
+  This will require you to either install or be in developer mode with: `python setup.py install/develop`.
+* In general, do not catch exceptions without good reason. 
+  * catching non-fatal exceptions. 
+    Log the exception as a warning.
+  * adding more information about what may have caused the error.
+    Raise a new exception using ``raise_from(NewException("message"), oldException)`` from ``future``.
+    Do not log this, as it creates redundant/confusing logs.
 
 ## Contributing issues
 
 When opening a new Issue, please take the following steps:
 
-1. Search GitHub and/or [Neurostars](neurostars.org) for your issue to avoid duplicate reports.
+1. Search GitHub and/or [Neurostars](http://neurostars.org) for your issue to avoid duplicate reports.
    Keyword searches for your error messages are most helpful.
 2. If possible, try updating to master and reproducing your issue,
    because we may have already fixed it.

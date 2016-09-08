@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import numpy as np
 from nipype.testing import assert_true
 import tempfile

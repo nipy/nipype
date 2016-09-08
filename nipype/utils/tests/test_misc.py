@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 from future import standard_library
@@ -5,7 +6,8 @@ standard_library.install_aliases()
 
 from builtins import next
 
-from nipype.testing import assert_equal, assert_true, assert_false
+from nipype.testing import (assert_equal, assert_true, assert_false,
+                            assert_raises)
 
 from nipype.utils.misc import (container_to_string, getsource,
                                create_function_from_source, str2bool, flatten,
@@ -49,6 +51,9 @@ def test_func_to_str():
         f_recreated = create_function_from_source(f_src)
         yield assert_equal, f(2.3), f_recreated(2.3)
 
+def test_func_to_str_err():
+    bad_src = "obbledygobbledygook"
+    yield assert_raises, RuntimeError, create_function_from_source, bad_src
 
 def test_str2bool():
     yield assert_true, str2bool("yes")

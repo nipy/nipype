@@ -11,14 +11,11 @@
     >>> os.chdir(datadir)
 
 """
-import os
-import os.path as op
+from __future__ import print_function, division, unicode_literals, absolute_import
 
-from ..base import (CommandLineInputSpec, CommandLine, traits, TraitedSpec, File,
-                    InputMultiPath)
-from ..traits_extension import isdefined
-from ...utils.filemanip import split_filename
 from ... import logging
+from ..traits_extension import isdefined
+from ..base import (CommandLineInputSpec, CommandLine, traits, File)
 logger = logging.getLogger('interface')
 
 

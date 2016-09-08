@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """The minc module provides classes for interfacing with the `MINC
@@ -15,30 +16,21 @@ Author: Carlo Hamalainen <carlo@carlo-hamalainen.net>
     >>> os.chdir(datadir)
 
 """
-
-from ..base import (
-    TraitedSpec,
-    CommandLineInputSpec,
-    CommandLine,
-    StdOutCommandLineInputSpec,
-    StdOutCommandLine,
-    File,
-    Directory,
-    InputMultiPath,
-    OutputMultiPath,
-    traits,
-    isdefined,
-)
+from __future__ import print_function, division, unicode_literals, absolute_import
+from builtins import open
 
 import glob
 import os
 import os.path
 import re
-
-from ..minc.base import check_minc, no_minc, Info, aggregate_filename
-
 import warnings
-warn = warnings.warn
+
+from ..base import (TraitedSpec, CommandLineInputSpec, CommandLine,
+                    StdOutCommandLineInputSpec, StdOutCommandLine, File,
+                    Directory, InputMultiPath, OutputMultiPath, traits,
+                    isdefined)
+from .base import aggregate_filename
+
 warnings.filterwarnings('always', category=UserWarning)
 
 
@@ -485,7 +477,6 @@ class ToEcatInputSpec(CommandLineInputSpec):
 
     output_file = File(
         desc='output file',
-        mandatory=False,
         genfile=True,
         argstr='%s',
         position=-1,
@@ -663,9 +654,8 @@ class AverageInputSpec(CommandLineInputSpec):
     _xor_input_files = ('input_files', 'filelist')
 
     input_files = InputMultiPath(
-        traits.File,
+        traits.File(exists=True),
         desc='input file(s)',
-        exists=True,
         mandatory=True,
         sep=' ',
         argstr='%s',
@@ -917,9 +907,8 @@ class CalcInputSpec(CommandLineInputSpec):
     _xor_input_files = ('input_files', 'filelist')
 
     input_files = InputMultiPath(
-        traits.File,
+        traits.File(exists=True),
         desc='input file(s) for calculation',
-        exists=True,
         mandatory=True,
         sep=' ',
         argstr='%s',
@@ -1733,9 +1722,8 @@ class MathInputSpec(CommandLineInputSpec):
     _xor_input_files = ('input_files', 'filelist')
 
     input_files = InputMultiPath(
-        traits.File,
+        traits.File(exists=True),
         desc='input file(s) for calculation',
-        exists=True,
         mandatory=True,
         sep=' ',
         argstr='%s',
@@ -2604,9 +2592,9 @@ class NormInputSpec(CommandLineInputSpec):
         usedefault=True,
         default_value=True)
 
-    cutoff = traits.Float(
-        min=0,
-        max=100,
+    cutoff = traits.Range(
+        low=0.0,
+        high=100.0,
         desc='Cutoff value to use to calculate thresholds by a histogram PcT in %. [default: 0.01]',
         argstr='-cutoff %s',
     )
@@ -2626,9 +2614,9 @@ class NormInputSpec(CommandLineInputSpec):
         desc='Threshold the image (set values below threshold_perc to -out_floor).',
         argstr='-threshold')
 
-    threshold_perc = traits.Float(
-        min=0,
-        max=100,
+    threshold_perc = traits.Range(
+        low=0.0,
+        high=100.0,
         desc='Threshold percentage (0.1 == lower 10% of intensity range) [default: 0.1].',
         argstr='-threshold_perc %s')
 
@@ -2981,9 +2969,8 @@ class Gennlxfm(CommandLine):
 
 class XfmConcatInputSpec(CommandLineInputSpec):
     input_files = InputMultiPath(
-        traits.File,
+        traits.File(exists=True),
         desc='input file(s)',
-        exists=True,
         mandatory=True,
         sep=' ',
         argstr='%s',
@@ -3015,7 +3002,7 @@ class XfmConcatInputSpec(CommandLineInputSpec):
 
 class XfmConcatOutputSpec(TraitedSpec):
     output_file = File(desc='output file', exists=True)
-    output_grids = OutputMultiPath(desc='output grids', exists=True)
+    output_grids = OutputMultiPath(File(exists=True), desc='output grids')
 
 
 class XfmConcat(CommandLine):
@@ -3247,9 +3234,8 @@ class NlpFit(CommandLine):
 
 class XfmAvgInputSpec(CommandLineInputSpec):
     input_files = InputMultiPath(
-        traits.File,
+        traits.File(exists=True),
         desc='input file(s)',
-        exists=True,
         mandatory=True,
         sep=' ',
         argstr='%s',
@@ -3425,9 +3411,8 @@ class XfmInvert(CommandLine):
 
 class BigAverageInputSpec(CommandLineInputSpec):
     input_files = InputMultiPath(
-        traits.File,
+        traits.File(exists=True),
         desc='input file(s)',
-        exists=True,
         mandatory=True,
         sep=' ',
         argstr='%s',

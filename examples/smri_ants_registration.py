@@ -11,8 +11,9 @@ coregister two T1 volumes.
 
 1. Tell python where to find the appropriate functions.
 """
+from __future__ import print_function, unicode_literals
+from builtins import open
 
-from __future__ import print_function
 from future import standard_library
 standard_library.install_aliases()
 

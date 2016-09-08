@@ -15,8 +15,6 @@ sdist: zipdoc
 	python setup.py sdist
 	@echo "Done building source distribution."
 	# XXX copy documentation.zip to dist directory.
-	# XXX Somewhere the doc/_build directory is removed and causes
-	# this script to fail.
 
 egg: zipdoc
 	@echo "Building egg..."
@@ -45,28 +43,34 @@ clean-build:
 clean-ctags:
 	rm -f tags
 
-clean: clean-build clean-pyc clean-so clean-ctags
+clean-doc:
+	rm -rf doc/_build
+
+clean-tests:
+	rm -f .coverage
+
+clean: clean-build clean-pyc clean-so clean-ctags clean-doc clean-tests
 
 in: inplace # just a shortcut
 inplace:
 	$(PYTHON) setup.py build_ext -i
 
 test-code: in
-	$(NOSETESTS) -s nipype --with-doctest
+	$(NOSETESTS) -s nipype --with-doctest --with-doctest-ignore-unicode
 
 test-doc:
-	$(NOSETESTS) -s --with-doctest --doctest-tests --doctest-extension=rst \
+	$(NOSETESTS) -s --with-doctest --with-doctest-ignore-unicode --doctest-tests --doctest-extension=rst \
 	--doctest-fixtures=_fixture doc/
 
-test-coverage:
-	$(NOSETESTS) -s --with-doctest --with-coverage --cover-package=nipype \
+test-coverage: clean-tests in
+	$(NOSETESTS) -s --with-doctest --with-doctest-ignore-unicode --with-coverage --cover-package=nipype \
 	--config=.coveragerc
 
 test: clean test-code
 
 html:
 	@echo "building docs"
-	make -C doc clean html
+	make -C doc clean htmlonly
 
 specs:
 	@echo "Checking specs and autogenerating spec tests"

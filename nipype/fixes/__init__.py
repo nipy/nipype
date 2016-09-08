@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # We import numpy fixes during init of the testing package.  We need to delay
 # import of the testing package until after it has initialized
 

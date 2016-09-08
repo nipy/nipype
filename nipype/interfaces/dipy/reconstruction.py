@@ -3,15 +3,20 @@
 Interfaces to the reconstruction algorithms in dipy
 
 """
+from __future__ import print_function, division, unicode_literals, absolute_import
+from future import standard_library
+standard_library.install_aliases()
+from builtins import str, open
+
 import os.path as op
 
 import numpy as np
 import nibabel as nb
 
-from nipype.interfaces.base import TraitedSpec, File, traits, isdefined
+from ... import logging
+from ..base import TraitedSpec, File, traits, isdefined
 from .base import DipyDiffusionInterface, DipyBaseInterfaceInputSpec
 
-from nipype import logging
 IFLOGGER = logging.getLogger('interface')
 
 
@@ -146,7 +151,7 @@ class RESTORE(DipyDiffusionInterface):
 
     def _list_outputs(self):
         outputs = self._outputs().get()
-        for k in outputs.keys():
+        for k in list(outputs.keys()):
             outputs[k] = self._gen_filename(k)
         return outputs
 
@@ -276,9 +281,9 @@ class EstimateResponseSH(DipyDiffusionInterface):
 class CSDInputSpec(DipyBaseInterfaceInputSpec):
     in_mask = File(exists=True, desc=('input mask in which compute tensors'))
     response = File(exists=True, desc=('single fiber estimated response'))
-    sh_order = traits.Int(8, exists=True, usedefault=True,
+    sh_order = traits.Int(8, usedefault=True,
                           desc=('maximal shperical harmonics order'))
-    save_fods = traits.Bool(True, exists=True, usedefault=True,
+    save_fods = traits.Bool(True, usedefault=True,
                             desc=('save fODFs in file'))
     out_fods = File(desc=('fODFs output file name'))
 
@@ -317,7 +322,7 @@ class CSD(DipyDiffusionInterface):
         from dipy.reconst.csdeconv import ConstrainedSphericalDeconvModel
         from dipy.data import get_sphere
         # import marshal as pickle
-        import cPickle as pickle
+        import pickle as pickle
         import gzip
 
         img = nb.load(self.inputs.in_file)

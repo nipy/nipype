@@ -8,7 +8,7 @@ def test_SmoothEstimate_inputs():
     ),
     dof=dict(argstr='--dof=%d',
     mandatory=True,
-    xor=['zstat_file'],
+    xor=[u'zstat_file'],
     ),
     environ=dict(nohash=True,
     usedefault=True,
@@ -21,12 +21,12 @@ def test_SmoothEstimate_inputs():
     ),
     output_type=dict(),
     residual_fit_file=dict(argstr='--res=%s',
-    requires=['dof'],
+    requires=[u'dof'],
     ),
     terminal_output=dict(nohash=True,
     ),
     zstat_file=dict(argstr='--zstat=%s',
-    xor=['dof'],
+    xor=[u'dof'],
     ),
     )
     inputs = SmoothEstimate.input_spec()

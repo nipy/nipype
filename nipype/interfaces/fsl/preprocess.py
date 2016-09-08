@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """The fsl module provides classes for interfacing with the `FSL
@@ -10,25 +11,21 @@ was written to work with FSL version 4.1.4.
     >>> datadir = os.path.realpath(os.path.join(filepath, '../../testing/data'))
     >>> os.chdir(datadir)
 """
-
-from __future__ import print_function
-from __future__ import division
-from builtins import range
+from __future__ import print_function, division, unicode_literals, absolute_import
+from builtins import range, open
 
 import os
 import os.path as op
-import warnings
+from warnings import warn
 
 import numpy as np
 from nibabel import load
 
-from ..fsl.base import FSLCommand, FSLCommandInputSpec
+from ...utils.filemanip import split_filename
 from ..base import (TraitedSpec, File, InputMultiPath,
                     OutputMultiPath, Undefined, traits,
-                    isdefined, OutputMultiPath)
-from ...utils.filemanip import split_filename
-
-warn = warnings.warn
+                    isdefined)
+from .base import FSLCommand, FSLCommandInputSpec
 
 
 class BETInputSpec(FSLCommandInputSpec):
@@ -536,7 +533,7 @@ class FLIRT(FSLCommand):
     >>> flt.inputs.in_file = 'structural.nii'
     >>> flt.inputs.reference = 'mni.nii'
     >>> flt.inputs.output_type = "NIFTI_GZ"
-    >>> flt.cmdline #doctest: +ELLIPSIS
+    >>> flt.cmdline # doctest: +ELLIPSIS +IGNORE_UNICODE
     'flirt -in structural.nii -ref mni.nii -out structural_flirt.nii.gz -omat structural_flirt.mat -bins 640 -searchcost mutualinfo'
     >>> res = flt.run() #doctest: +SKIP
 
@@ -1263,7 +1260,7 @@ class FUGUE(FSLCommand):
     >>> fugue.inputs.shift_in_file = 'vsm.nii'  # Previously computed with fugue as well
     >>> fugue.inputs.unwarp_direction = 'y'
     >>> fugue.inputs.output_type = "NIFTI_GZ"
-    >>> fugue.cmdline #doctest: +ELLIPSIS
+    >>> fugue.cmdline # doctest: +ELLIPSIS +IGNORE_UNICODE
     'fugue --in=epi.nii --mask=epi_mask.nii --loadshift=vsm.nii --unwarpdir=y --unwarp=epi_unwarped.nii.gz'
     >>> fugue.run() #doctest: +SKIP
 
@@ -1278,7 +1275,7 @@ class FUGUE(FSLCommand):
     >>> fugue.inputs.shift_in_file = 'vsm.nii'  # Previously computed with fugue as well
     >>> fugue.inputs.unwarp_direction = 'y'
     >>> fugue.inputs.output_type = "NIFTI_GZ"
-    >>> fugue.cmdline #doctest: +ELLIPSIS
+    >>> fugue.cmdline # doctest: +ELLIPSIS +IGNORE_UNICODE
     'fugue --in=epi.nii --mask=epi_mask.nii --loadshift=vsm.nii --unwarpdir=y --warp=epi_warped.nii.gz'
     >>> fugue.run() #doctest: +SKIP
 
@@ -1293,7 +1290,7 @@ class FUGUE(FSLCommand):
     >>> fugue.inputs.unwarp_direction = 'y'
     >>> fugue.inputs.save_shift = True
     >>> fugue.inputs.output_type = "NIFTI_GZ"
-    >>> fugue.cmdline #doctest: +ELLIPSIS
+    >>> fugue.cmdline # doctest: +ELLIPSIS +IGNORE_UNICODE
     'fugue --dwelltoasym=0.9390243902 --mask=epi_mask.nii --phasemap=epi_phasediff.nii --saveshift=epi_phasediff_vsm.nii.gz --unwarpdir=y'
     >>> fugue.run() #doctest: +SKIP
 
@@ -1571,8 +1568,11 @@ class FIRST(FSLCommand):
         path, outname, ext = split_filename(self.inputs.out_file)
 
         method = 'none'
-        if isdefined(self.inputs.method) and self.inputs.method == 'fast':
+        if isdefined(self.inputs.method) and self.inputs.method != 'none':
             method = 'fast'
+            if self.inputs.list_of_specific_structures and \
+                self.inputs.method == 'auto':
+                method = 'none'
 
         if isdefined(self.inputs.method_as_numerical_threshold):
             thres = '%.4f' % self.inputs.method_as_numerical_threshold

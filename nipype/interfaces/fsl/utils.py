@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """The fsl module provides classes for interfacing with the `FSL
@@ -15,26 +16,22 @@ See the docstrings of the individual classes for examples.
     datadir = os.path.realpath(os.path.join(filepath, '../testing/data'))
     os.chdir(datadir)
 """
-
-from __future__ import division
-from builtins import map
-from builtins import range
+from __future__ import print_function, division, unicode_literals, absolute_import
+from builtins import map, range
 
 import os
 import os.path as op
+import re
 from glob import glob
-import warnings
 import tempfile
 
 import numpy as np
 
-from .base import FSLCommand, FSLCommandInputSpec, Info
+from ...utils.filemanip import (load_json, save_json, split_filename,
+                                fname_presuffix)
 from ..base import (traits, TraitedSpec, OutputMultiPath, File,
                     CommandLine, CommandLineInputSpec, isdefined)
-from ...utils.filemanip import (load_json, save_json, split_filename,
-                                fname_presuffix, copyfile)
-
-warn = warnings.warn
+from .base import FSLCommand, FSLCommandInputSpec, Info
 
 
 class CopyGeomInputSpec(FSLCommandInputSpec):
@@ -165,23 +162,26 @@ class Smooth(FSLCommand):
     Setting the kernel width using sigma:
 
     >>> sm = Smooth()
+    >>> sm.inputs.output_type = 'NIFTI_GZ'
     >>> sm.inputs.in_file = 'functional2.nii'
     >>> sm.inputs.sigma = 8.0
-    >>> sm.cmdline #doctest: +ELLIPSIS
+    >>> sm.cmdline # doctest: +ELLIPSIS +IGNORE_UNICODE
     'fslmaths functional2.nii -kernel gauss 8.000 -fmean functional2_smooth.nii.gz'
 
     Setting the kernel width using fwhm:
 
     >>> sm = Smooth()
+    >>> sm.inputs.output_type = 'NIFTI_GZ'
     >>> sm.inputs.in_file = 'functional2.nii'
     >>> sm.inputs.fwhm = 8.0
-    >>> sm.cmdline #doctest: +ELLIPSIS
+    >>> sm.cmdline # doctest: +ELLIPSIS +IGNORE_UNICODE
     'fslmaths functional2.nii -kernel gauss 3.397 -fmean functional2_smooth.nii.gz'
 
     One of sigma or fwhm must be set:
 
     >>> from nipype.interfaces.fsl import Smooth
     >>> sm = Smooth()
+    >>> sm.inputs.output_type = 'NIFTI_GZ'
     >>> sm.inputs.in_file = 'functional2.nii'
     >>> sm.cmdline #doctest: +ELLIPSIS
     Traceback (most recent call last):
@@ -237,10 +237,10 @@ class Merge(FSLCommand):
     >>> merger.inputs.in_files = ['functional2.nii', 'functional3.nii']
     >>> merger.inputs.dimension = 't'
     >>> merger.inputs.output_type = 'NIFTI_GZ'
-    >>> merger.cmdline
+    >>> merger.cmdline # doctest: +IGNORE_UNICODE
     'fslmerge -t functional2_merged.nii.gz functional2.nii functional3.nii'
     >>> merger.inputs.tr = 2.25
-    >>> merger.cmdline
+    >>> merger.cmdline # doctest: +IGNORE_UNICODE
     'fslmerge -tr functional2_merged.nii.gz functional2.nii functional3.nii 2.25'
 
 
@@ -605,25 +605,32 @@ class ImageStats(FSLCommand):
         return outputs
 
 
-class AvScaleInputSpec(FSLCommandInputSpec):
-    mat_file = File(exists=True, argstr="%s",
-                    desc='mat file to read', position=0)
+class AvScaleInputSpec(CommandLineInputSpec):
+    all_param = traits.Bool(False, argstr='--allparams')
+    mat_file = File(exists=True, argstr='%s',
+                    desc='mat file to read', position=-2)
+    ref_file = File(exists=True, argstr='%s', position=-1,
+                    desc='reference file to get center of rotation')
 
 
 class AvScaleOutputSpec(TraitedSpec):
-    rotation_translation_matrix = traits.Any(
-        desc='Rotation and Translation Matrix')
-    scales = traits.Any(desc='Scales (x,y,z)')
-    skews = traits.Any(desc='Skews')
-    average_scaling = traits.Any(desc='Average Scaling')
-    determinant = traits.Any(desc='Determinant')
-    forward_half_transform = traits.Any(desc='Forward Half Transform')
-    backward_half_transform = traits.Any(desc='Backwards Half Transform')
+    rotation_translation_matrix = traits.List(
+        traits.List(traits.Float), desc='Rotation and Translation Matrix')
+    scales = traits.List(traits.Float, desc='Scales (x,y,z)')
+    skews = traits.List(traits.Float, desc='Skews')
+    average_scaling = traits.Float(desc='Average Scaling')
+    determinant = traits.Float(desc='Determinant')
+    forward_half_transform = traits.List(
+        traits.List(traits.Float), desc='Forward Half Transform')
+    backward_half_transform = traits.List(
+        traits.List(traits.Float), desc='Backwards Half Transform')
     left_right_orientation_preserved = traits.Bool(
         desc='True if LR orientation preserved')
+    rot_angles = traits.List(traits.Float, desc='rotation angles')
+    translations = traits.List(traits.Float, desc='translations')
 
 
-class AvScale(FSLCommand):
+class AvScale(CommandLine):
     """Use FSL avscale command to extract info from mat file output of FLIRT
 
     Examples
@@ -640,34 +647,47 @@ class AvScale(FSLCommand):
 
     _cmd = 'avscale'
 
-    def _format_arg(self, name, trait_spec, value):
-        return super(AvScale, self)._format_arg(name, trait_spec, value)
+    def _run_interface(self, runtime):
+        runtime = super(AvScale, self)._run_interface(runtime)
 
-    def aggregate_outputs(self, runtime=None, needed_outputs=None):
-        outputs = self._outputs()
 
-        def lines_to_float(lines):
-            out = []
-            for line in lines:
-                values = line.split()
-                out.append([float(val) for val in values])
-            return out
+        expr = re.compile(
+            'Rotation\ &\ Translation\ Matrix:\n(?P<rot_tran_mat>[0-9\.\ \n-]+)[\s\n]*'
+            '(Rotation\ Angles\ \(x,y,z\)\ \[rads\]\ =\ (?P<rot_angles>[0-9\.\ -]+))?[\s\n]*'
+            '(Translations\ \(x,y,z\)\ \[mm\]\ =\ (?P<translations>[0-9\.\ -]+))?[\s\n]*'
+            'Scales\ \(x,y,z\)\ =\ (?P<scales>[0-9\.\ -]+)[\s\n]*'
+            'Skews\ \(xy,xz,yz\)\ =\ (?P<skews>[0-9\.\ -]+)[\s\n]*'
+            'Average\ scaling\ =\ (?P<avg_scaling>[0-9\.-]+)[\s\n]*'
+            'Determinant\ =\ (?P<determinant>[0-9\.-]+)[\s\n]*'
+            'Left-Right\ orientation:\ (?P<lr_orientation>[A-Za-z]+)[\s\n]*'
+            'Forward\ half\ transform\ =[\s]*\n'
+            '(?P<fwd_half_xfm>[0-9\.\ \n-]+)[\s\n]*'
+            'Backward\ half\ transform\ =[\s]*\n'
+            '(?P<bwd_half_xfm>[0-9\.\ \n-]+)[\s\n]*')
+        out = expr.search(runtime.stdout).groupdict()
+        outputs = {}
+        outputs['rotation_translation_matrix'] = [[
+            float(v) for v in r.strip().split(' ')] for r in out['rot_tran_mat'].strip().split('\n')]
+        outputs['scales'] = [float(s) for s in out['scales'].strip().split(' ')]
+        outputs['skews'] = [float(s) for s in out['skews'].strip().split(' ')]
+        outputs['average_scaling'] = float(out['avg_scaling'].strip())
+        outputs['determinant'] = float(out['determinant'].strip())
+        outputs['left_right_orientation_preserved'] = out['lr_orientation'].strip() == 'preserved'
+        outputs['forward_half_transform'] = [[
+            float(v) for v in r.strip().split(' ')] for r in out['fwd_half_xfm'].strip().split('\n')]
+        outputs['backward_half_transform'] = [[
+            float(v) for v in r.strip().split(' ')] for r in out['bwd_half_xfm'].strip().split('\n')]
 
-        out = runtime.stdout.split('\n')
+        if self.inputs.all_param:
+            outputs['rot_angles'] = [float(r) for r in out['rot_angles'].strip().split(' ')]
+            outputs['translations'] = [float(r) for r in out['translations'].strip().split(' ')]
 
-        outputs.rotation_translation_matrix = lines_to_float(out[1:5])
-        outputs.scales = lines_to_float([out[6].split(" = ")[1]])
-        outputs.skews = lines_to_float([out[8].split(" = ")[1]])
-        outputs.average_scaling = lines_to_float([out[10].split(" = ")[1]])
-        outputs.determinant = lines_to_float([out[12].split(" = ")[1]])
-        if out[13].split(": ")[1] == 'preserved':
-            outputs.left_right_orientation_preserved = True
-        else:
-            outputs.left_right_orientation_preserved = False
-        outputs.forward_half_transform = lines_to_float(out[16:20])
-        outputs.backward_half_transform = lines_to_float(out[22:-1])
 
-        return outputs
+        setattr(self, '_results', outputs)
+        return runtime
+
+    def _list_outputs(self):
+        return self._results
 
 
 class OverlayInputSpec(FSLCommandInputSpec):
@@ -1131,7 +1151,7 @@ class ConvertXFM(FSLCommand):
     >>> invt.inputs.in_file = "flirt.mat"
     >>> invt.inputs.invert_xfm = True
     >>> invt.inputs.out_file = 'flirt_inv.mat'
-    >>> invt.cmdline
+    >>> invt.cmdline # doctest: +IGNORE_UNICODE
     'convert_xfm -omat flirt_inv.mat -inverse flirt.mat'
 
 
@@ -1435,7 +1455,7 @@ class InvWarp(FSLCommand):
     >>> invwarp.inputs.warp = "struct2mni.nii"
     >>> invwarp.inputs.reference = "anatomical.nii"
     >>> invwarp.inputs.output_type = "NIFTI_GZ"
-    >>> invwarp.cmdline
+    >>> invwarp.cmdline # doctest: +IGNORE_UNICODE
     'invwarp --out=struct2mni_inverse.nii.gz --ref=anatomical.nii --warp=struct2mni.nii'
     >>> res = invwarp.run() # doctest: +SKIP
 
@@ -1658,7 +1678,7 @@ class WarpUtils(FSLCommand):
     >>> warputils.inputs.out_format = 'spline'
     >>> warputils.inputs.warp_resolution = (10,10,10)
     >>> warputils.inputs.output_type = "NIFTI_GZ"
-    >>> warputils.cmdline # doctest: +ELLIPSIS
+    >>> warputils.cmdline # doctest: +ELLIPSIS +IGNORE_UNICODE
     'fnirtfileutils --in=warpfield.nii --outformat=spline --ref=T1.nii --warpres=10.0000,10.0000,10.0000 --out=warpfield_coeffs.nii.gz'
     >>> res = invwarp.run() # doctest: +SKIP
 
@@ -1789,7 +1809,7 @@ class ConvertWarp(FSLCommand):
     >>> warputils.inputs.reference = "T1.nii"
     >>> warputils.inputs.relwarp = True
     >>> warputils.inputs.output_type = "NIFTI_GZ"
-    >>> warputils.cmdline # doctest: +ELLIPSIS
+    >>> warputils.cmdline # doctest: +ELLIPSIS +IGNORE_UNICODE
     'convertwarp --ref=T1.nii --rel --warp1=warpfield.nii --out=T1_concatwarp.nii.gz'
     >>> res = warputils.run() # doctest: +SKIP
 
@@ -1847,7 +1867,7 @@ class WarpPoints(CommandLine):
     >>> warppoints.inputs.dest_file = 'T1.nii'
     >>> warppoints.inputs.warp_file = 'warpfield.nii'
     >>> warppoints.inputs.coord_mm = True
-    >>> warppoints.cmdline # doctest: +ELLIPSIS
+    >>> warppoints.cmdline # doctest: +ELLIPSIS +IGNORE_UNICODE
     'img2imgcoord -mm -dest T1.nii -src epi.nii -warp warpfield.nii surf.txt'
     >>> res = warppoints.run() # doctest: +SKIP
 
@@ -2005,7 +2025,7 @@ class WarpPointsToStd(WarpPoints):
     >>> warppoints.inputs.std_file = 'mni.nii'
     >>> warppoints.inputs.warp_file = 'warpfield.nii'
     >>> warppoints.inputs.coord_mm = True
-    >>> warppoints.cmdline # doctest: +ELLIPSIS
+    >>> warppoints.cmdline # doctest: +ELLIPSIS +IGNORE_UNICODE
     'img2stdcoord -mm -img T1.nii -std mni.nii -warp warpfield.nii surf.txt'
     >>> res = warppoints.run() # doctest: +SKIP
 
@@ -2112,7 +2132,7 @@ class MotionOutliers(FSLCommand):
     >>> from nipype.interfaces.fsl import MotionOutliers
     >>> mo = MotionOutliers()
     >>> mo.inputs.in_file = "epi.nii"
-    >>> mo.cmdline # doctest: +ELLIPSIS
+    >>> mo.cmdline # doctest: +ELLIPSIS +IGNORE_UNICODE
     'fsl_motion_outliers -i epi.nii -o epi_outliers.txt -p epi_metrics.png -s epi_metrics.txt'
     >>> res = mo.run() # doctest: +SKIP
     """

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """
@@ -7,17 +8,15 @@ Exaples  FSL, matlab/SPM , afni
 
 Requires Packages to be installed
 """
-
-from __future__ import print_function
-from __future__ import division
+from __future__ import print_function, division, unicode_literals, absolute_import
 from future import standard_library
 standard_library.install_aliases()
-from builtins import range
-from builtins import object
+from builtins import range, object, open, str, bytes
 
 from configparser import NoOptionError
 from copy import deepcopy
 import datetime
+from datetime import datetime as dt
 import errno
 import locale
 import os
@@ -28,35 +27,41 @@ from string import Template
 import select
 import subprocess
 import sys
-import random
 import time
-import fnmatch
 from textwrap import wrap
-from datetime import datetime as dt
-from dateutil.parser import parse as parseutc
 from warnings import warn
+from dateutil.parser import parse as parseutc
 
 
-from .traits_extension import (traits, Undefined, TraitDictObject,
-                               TraitListObject, TraitError,
-                               isdefined, File, Directory,
-                               has_metadata)
-from ..utils.filemanip import (md5, hash_infile, FileNotFoundError,
-                               hash_timestamp, save_json,
-                               split_filename)
-from ..utils.misc import is_container, trim, str2bool
+from .. import config, logging, LooseVersion, __version__
 from ..utils.provenance import write_provenance
-from .. import config, logging, LooseVersion
-from .. import __version__
-from ..external.six import string_types, text_type
+from ..utils.misc import is_container, trim, str2bool
+from ..utils.filemanip import (md5, hash_infile, FileNotFoundError, hash_timestamp,
+                               split_filename, encode_dict)
+from .traits_extension import (
+    traits, Undefined, TraitDictObject, TraitListObject, TraitError, isdefined, File,
+    Directory, DictStrStr, has_metadata)
+from ..external.due import due
 
+runtime_profile = str2bool(config.get('execution', 'profile_runtime'))
 nipype_version = LooseVersion(__version__)
-
 iflogger = logging.getLogger('interface')
 
+if runtime_profile:
+    try:
+        import psutil
+    except ImportError as exc:
+        iflogger.info('Unable to import packages needed for runtime profiling. '\
+                    'Turning off runtime profiler. Reason: %s' % exc)
+        runtime_profile = False
 
 __docformat__ = 'restructuredtext'
 
+
+class Str(traits.Unicode):
+    pass
+
+traits.Str = Str
 
 class NipypeInterfaceError(Exception):
     def __init__(self, value):
@@ -66,10 +71,10 @@ class NipypeInterfaceError(Exception):
         return repr(self.value)
 
 def _exists_in_path(cmd, environ):
-    '''
+    """
     Based on a code snippet from
      http://orip.org/2009/08/python-checking-if-executable-exists-in.html
-    '''
+    """
 
     if 'PATH' in environ:
         input_environ = environ.get("PATH")
@@ -118,10 +123,10 @@ class Bunch(object):
     --------
     >>> from nipype.interfaces.base import Bunch
     >>> inputs = Bunch(infile='subj.nii', fwhm=6.0, register_to_mean=True)
-    >>> inputs
+    >>> inputs # doctest: +IGNORE_UNICODE
     Bunch(fwhm=6.0, infile='subj.nii', register_to_mean=True)
     >>> inputs.register_to_mean = False
-    >>> inputs
+    >>> inputs # doctest: +IGNORE_UNICODE
     Bunch(fwhm=6.0, infile='subj.nii', register_to_mean=False)
 
 
@@ -133,6 +138,7 @@ class Bunch(object):
            Items", Python Cookbook, 2nd Ed, Chapter 4.18, 2005.
 
     """
+
 
     def __init__(self, *args, **kwargs):
         self.__dict__.update(*args, **kwargs)
@@ -153,13 +159,13 @@ class Bunch(object):
         return list(self.items())
 
     def get(self, *args):
-        '''Support dictionary get() functionality
-        '''
+        """Support dictionary get() functionality
+        """
         return self.__dict__.get(*args)
 
     def set(self, **kwargs):
-        '''Support dictionary get() functionality
-        '''
+        """Support dictionary get() functionality
+        """
         return self.__dict__.update(**kwargs)
 
     def dictcopy(self):
@@ -261,13 +267,13 @@ class Bunch(object):
         # Sort the items of the dictionary, before hashing the string
         # representation so we get a predictable order of the
         # dictionary.
-        sorted_dict = str(sorted(dict_nofilename.items()))
+        sorted_dict = encode_dict(sorted(dict_nofilename.items()))
         return dict_withhash, md5(sorted_dict.encode()).hexdigest()
 
     def __pretty__(self, p, cycle):
-        '''Support for the pretty module
+        """Support for the pretty module
 
-        pretty is included in ipython.externals for ipython > 0.10'''
+        pretty is included in ipython.externals for ipython > 0.10"""
         if cycle:
             p.text('Bunch(...)')
         else:
@@ -564,7 +570,7 @@ class BaseTraitedSpec(traits.HasTraits):
                 dict_withhash.append((name,
                                       self._get_sorteddict(val, True, hash_method=hash_method,
                                                            hash_files=hash_files)))
-        return dict_withhash, md5(str(dict_nofilename).encode()).hexdigest()
+        return dict_withhash, md5(encode_dict(dict_nofilename).encode()).hexdigest()
 
     def _get_sorteddict(self, object, dictwithhash=False, hash_method=None,
                         hash_files=True):
@@ -587,7 +593,7 @@ class BaseTraitedSpec(traits.HasTraits):
                 out = tuple(out)
         else:
             if isdefined(object):
-                if (hash_files and isinstance(object, string_types) and
+                if (hash_files and isinstance(object, (str, bytes)) and
                         os.path.isfile(object)):
                     if hash_method is None:
                         hash_method = config.get('execution', 'hash_method')
@@ -748,12 +754,15 @@ class BaseInterface(Interface):
     _version = None
     _additional_metadata = []
     _redirect_x = False
+    references_ = []
 
     def __init__(self, **inputs):
         if not self.input_spec:
             raise Exception('No input_spec in class: %s' %
                             self.__class__.__name__)
         self.inputs = self.input_spec(**inputs)
+        self.estimated_memory_gb = 1
+        self.num_threads = 1
 
     @classmethod
     def help(cls, returnhelp=False):
@@ -768,11 +777,23 @@ class BaseInterface(Interface):
             docstring = ['']
 
         allhelp = '\n'.join(docstring + cls._inputs_help() + [''] +
-                            cls._outputs_help() + [''])
+                            cls._outputs_help() + [''] +
+                            cls._refs_help() + [''])
         if returnhelp:
             return allhelp
         else:
             print(allhelp)
+
+    @classmethod
+    def _refs_help(cls):
+        """ Prints interface references.
+        """
+        helpstr = ['References::']
+
+        for r in cls.references_:
+            helpstr += [repr(r['entry'])]
+
+        return helpstr
 
     @classmethod
     def _get_trait_desc(self, inputs, name, spec):
@@ -998,6 +1019,13 @@ class BaseInterface(Interface):
         """
         raise NotImplementedError
 
+    def _duecredit_cite(self):
+        """ Add the interface references to the duecredit citations
+        """
+        for r in self.references_:
+            r['path'] = self.__module__
+            due.cite(**r)
+
     def run(self, **inputs):
         """Execute this interface.
 
@@ -1017,6 +1045,8 @@ class BaseInterface(Interface):
         self._check_mandatory_inputs()
         self._check_version_requirements(self.inputs)
         interface = self.__class__
+        self._duecredit_cite()
+
         # initialize provenance tracking
         env = deepcopy(dict(os.environ))
         runtime = Bunch(cwd=os.getcwd(),
@@ -1054,11 +1084,11 @@ class BaseInterface(Interface):
 
             if config.has_option('logging', 'interface_level') and \
                     config.get('logging', 'interface_level').lower() == 'debug':
-                inputs_str = "Inputs:" + str(self.inputs) + "\n"
+                inputs_str = "\nInputs:" + str(self.inputs) + "\n"
             else:
                 inputs_str = ''
 
-            if len(e.args) == 1 and isinstance(e.args[0], string_types):
+            if len(e.args) == 1 and isinstance(e.args[0], (str, bytes)):
                 e.args = (e.args[0] + " ".join([message, inputs_str]),)
             else:
                 e.args += (message, )
@@ -1150,6 +1180,9 @@ class Stream(object):
         self._buf = ''
         self._rows = []
         self._lastidx = 0
+        self.default_encoding = locale.getdefaultlocale()[1]
+        if self.default_encoding is None:
+            self.default_encoding = 'UTF-8'
 
     def fileno(self):
         "Pass-through for file descriptor."
@@ -1164,7 +1197,7 @@ class Stream(object):
     def _read(self, drain):
         "Read from the file descriptor"
         fd = self.fileno()
-        buf = os.read(fd, 4096).decode()
+        buf = os.read(fd, 4096).decode(self.default_encoding)
         if not buf and not self._buf:
             return None
         if '\n' not in buf:
@@ -1189,20 +1222,175 @@ class Stream(object):
         self._lastidx = len(self._rows)
 
 
+# Get number of threads for process
+def _get_num_threads(proc):
+    """Function to get the number of threads a process is using
+    NOTE: If
+
+    Parameters
+    ----------
+    proc : psutil.Process instance
+        the process to evaluate thead usage of
+
+    Returns
+    -------
+    num_threads : int
+        the number of threads that the process is using
+    """
+
+    # Import packages
+    import psutil
+
+    # If process is running
+    if proc.status() == psutil.STATUS_RUNNING:
+        num_threads = proc.num_threads()
+    elif proc.num_threads() > 1:
+        tprocs = [psutil.Process(thr.id) for thr in proc.threads()]
+        alive_tprocs = [tproc for tproc in tprocs if tproc.status() == psutil.STATUS_RUNNING]
+        num_threads = len(alive_tprocs)
+    else:
+        num_threads = 1
+
+    # Try-block for errors
+    try:
+        child_threads = 0
+        # Iterate through child processes and get number of their threads
+        for child in proc.children(recursive=True):
+            # Leaf process
+            if len(child.children()) == 0:
+                # If process is running, get its number of threads
+                if child.status() == psutil.STATUS_RUNNING:
+                    child_thr = child.num_threads()
+                # If its not necessarily running, but still multi-threaded
+                elif child.num_threads() > 1:
+                    # Cast each thread as a process and check for only running
+                    tprocs = [psutil.Process(thr.id) for thr in child.threads()]
+                    alive_tprocs = [tproc for tproc in tprocs if tproc.status() == psutil.STATUS_RUNNING]
+                    child_thr = len(alive_tprocs)
+                # Otherwise, no threads are running
+                else:
+                    child_thr = 0
+                # Increment child threads
+                child_threads += child_thr
+    # Catch any NoSuchProcess errors
+    except psutil.NoSuchProcess:
+        pass
+
+    # Number of threads is max between found active children and parent
+    num_threads = max(child_threads, num_threads)
+
+    # Return number of threads found
+    return num_threads
+
+
+# Get ram usage of process
+def _get_ram_mb(pid, pyfunc=False):
+    """Function to get the RAM usage of a process and its children
+
+    Parameters
+    ----------
+    pid : integer
+        the PID of the process to get RAM usage of
+    pyfunc : boolean (optional); default=False
+        a flag to indicate if the process is a python function;
+        when Pythons are multithreaded via multiprocess or threading,
+        children functions include their own memory + parents. if this
+        is set, the parent memory will removed from children memories
+
+    Reference: http://ftp.dev411.com/t/python/python-list/095thexx8g/multiprocessing-forking-memory-usage
+
+    Returns
+    -------
+    mem_mb : float
+        the memory RAM in MB utilized by the process PID
+    """
+
+    # Import packages
+    import psutil
+
+    # Init variables
+    _MB = 1024.0**2
+
+    # Try block to protect against any dying processes in the interim
+    try:
+        # Init parent
+        parent = psutil.Process(pid)
+        # Get memory of parent
+        parent_mem = parent.memory_info().rss
+        mem_mb = parent_mem/_MB
+
+        # Iterate through child processes
+        for child in parent.children(recursive=True):
+            child_mem = child.memory_info().rss
+            if pyfunc:
+                child_mem -= parent_mem
+            mem_mb += child_mem/_MB
+
+    # Catch if process dies, return gracefully
+    except psutil.NoSuchProcess:
+        pass
+
+    # Return memory
+    return mem_mb
+
+
+# Get max resources used for process
+def get_max_resources_used(pid, mem_mb, num_threads, pyfunc=False):
+    """Function to get the RAM and threads usage of a process
+
+    Paramters
+    ---------
+    pid : integer
+        the process ID of process to profile
+    mem_mb : float
+        the high memory watermark so far during process execution (in MB)
+    num_threads: int
+        the high thread watermark so far during process execution
+
+    Returns
+    -------
+    mem_mb : float
+        the new high memory watermark of process (MB)
+    num_threads : float
+        the new high thread watermark of process
+    """
+
+    # Import packages
+    import psutil
+
+    try:
+        mem_mb = max(mem_mb, _get_ram_mb(pid, pyfunc=pyfunc))
+        num_threads = max(num_threads, _get_num_threads(psutil.Process(pid)))
+    except Exception as exc:
+        iflogger.info('Could not get resources used by process. Error: %s'\
+                      % exc)
+
+    # Return resources
+    return mem_mb, num_threads
+
+
 def run_command(runtime, output=None, timeout=0.01, redirect_x=False):
     """Run a command, read stdout and stderr, prefix with timestamp.
 
     The returned runtime contains a merged stdout+stderr log with timestamps
     """
-    PIPE = subprocess.PIPE
 
+    # Init logger
+    logger = logging.getLogger('workflow')
+
+    # Init variables
+    PIPE = subprocess.PIPE
     cmdline = runtime.cmdline
+
     if redirect_x:
         exist_xvfb, _ = _exists_in_path('xvfb-run', runtime.environ)
         if not exist_xvfb:
             raise RuntimeError('Xvfb was not found, X redirection aborted')
         cmdline = 'xvfb-run -a ' + cmdline
 
+    default_encoding = locale.getdefaultlocale()[1]
+    if default_encoding is None:
+        default_encoding = 'UTF-8'
     if output == 'file':
         errfile = os.path.join(runtime.cwd, 'stderr.nipype')
         outfile = os.path.join(runtime.cwd, 'stdout.nipype')
@@ -1225,6 +1413,12 @@ def run_command(runtime, output=None, timeout=0.01, redirect_x=False):
     result = {}
     errfile = os.path.join(runtime.cwd, 'stderr.nipype')
     outfile = os.path.join(runtime.cwd, 'stdout.nipype')
+
+    # Init variables for memory profiling
+    mem_mb = 0
+    num_threads = 1
+    interval = .5
+
     if output == 'stream':
         streams = [Stream('stdout', proc.stdout), Stream('stderr', proc.stderr)]
 
@@ -1240,10 +1434,13 @@ def run_command(runtime, output=None, timeout=0.01, redirect_x=False):
             else:
                 for stream in res[0]:
                     stream.read(drain)
-
         while proc.returncode is None:
+            if runtime_profile:
+                mem_mb, num_threads = \
+                    get_max_resources_used(proc.pid, mem_mb, num_threads)
             proc.poll()
             _process()
+            time.sleep(interval)
         _process(drain=1)
 
         # collect results, merge and return
@@ -1255,25 +1452,47 @@ def run_command(runtime, output=None, timeout=0.01, redirect_x=False):
             result[stream._name] = [r[2] for r in rows]
         temp.sort()
         result['merged'] = [r[1] for r in temp]
+
     if output == 'allatonce':
+        if runtime_profile:
+            while proc.returncode is None:
+                mem_mb, num_threads = \
+                    get_max_resources_used(proc.pid, mem_mb, num_threads)
+                proc.poll()
+                time.sleep(interval)
         stdout, stderr = proc.communicate()
-        stdout = stdout.decode(locale.getdefaultlocale()[1])
-        stderr = stderr.decode(locale.getdefaultlocale()[1])
+        stdout = stdout.decode(default_encoding)
+        stderr = stderr.decode(default_encoding)
         result['stdout'] = stdout.split('\n')
         result['stderr'] = stderr.split('\n')
         result['merged'] = ''
     if output == 'file':
+        if runtime_profile:
+            while proc.returncode is None:
+                mem_mb, num_threads = \
+                    get_max_resources_used(proc.pid, mem_mb, num_threads)
+                proc.poll()
+                time.sleep(interval)
         ret_code = proc.wait()
         stderr.flush()
         stdout.flush()
-        result['stdout'] = [line.decode(locale.getdefaultlocale()[1]).strip() for line in open(outfile, 'rb').readlines()]
-        result['stderr'] = [line.decode(locale.getdefaultlocale()[1]).strip() for line in open(errfile, 'rb').readlines()]
+        result['stdout'] = [line.decode(default_encoding).strip() for line in open(outfile, 'rb').readlines()]
+        result['stderr'] = [line.decode(default_encoding).strip() for line in open(errfile, 'rb').readlines()]
         result['merged'] = ''
     if output == 'none':
+        if runtime_profile:
+            while proc.returncode is None:
+                mem_mb, num_threads = \
+                    get_max_resources_used(proc.pid, mem_mb, num_threads)
+                proc.poll()
+                time.sleep(interval)
         proc.communicate()
         result['stdout'] = []
         result['stderr'] = []
         result['merged'] = ''
+
+    setattr(runtime, 'runtime_memory_gb', mem_mb/1024.0)
+    setattr(runtime, 'runtime_threads', num_threads)
     runtime.stderr = '\n'.join(result['stderr'])
     runtime.stdout = '\n'.join(result['stdout'])
     runtime.merged = result['merged']
@@ -1307,8 +1526,8 @@ def get_dependencies(name, environ):
 
 
 class CommandLineInputSpec(BaseInterfaceInputSpec):
-    args = traits.Str(argstr='%s', desc='Additional parameters to the command')
-    environ = traits.DictStrStr(desc='Environment variables', usedefault=True,
+    args = Str(argstr='%s', desc='Additional parameters to the command')
+    environ = DictStrStr(desc='Environment variables', usedefault=True,
                                 nohash=True)
     # This input does not have a "usedefault=True" so the set_default_terminal_output()
     # method would work
@@ -1342,20 +1561,21 @@ class CommandLine(BaseInterface):
     >>> from nipype.interfaces.base import CommandLine
     >>> cli = CommandLine(command='ls', environ={'DISPLAY': ':1'})
     >>> cli.inputs.args = '-al'
-    >>> cli.cmdline
+    >>> cli.cmdline # doctest: +IGNORE_UNICODE
     'ls -al'
 
-    >>> pprint.pprint(cli.inputs.trait_get())  # doctest: +NORMALIZE_WHITESPACE
+    >>> pprint.pprint(cli.inputs.trait_get())  # doctest: +NORMALIZE_WHITESPACE +IGNORE_UNICODE
     {'args': '-al',
      'environ': {'DISPLAY': ':1'},
      'ignore_exception': False,
      'terminal_output': 'stream'}
 
-    >>> cli.inputs.get_hashval()
-    ([('args', '-al')], '11c37f97649cd61627f4afe5136af8c0')
+    >>> cli.inputs.get_hashval()[0][0] # doctest: +IGNORE_UNICODE
+    ('args', '-al')
+    >>> cli.inputs.get_hashval()[1] # doctest: +IGNORE_UNICODE
+    '11c37f97649cd61627f4afe5136af8c0'
 
     """
-
     input_spec = CommandLineInputSpec
     _cmd = None
     _version = None
@@ -1411,11 +1631,10 @@ class CommandLine(BaseInterface):
         return ' '.join(allargs)
 
     def raise_exception(self, runtime):
-        message = "Command:\n" + runtime.cmdline + "\n"
-        message += "Standard output:\n" + runtime.stdout + "\n"
-        message += "Standard error:\n" + runtime.stderr + "\n"
-        message += "Return code: " + str(runtime.returncode)
-        raise RuntimeError(message)
+        raise RuntimeError(
+            ('Command:\n{cmdline}\nStandard output:\n{stdout}\n'
+             'Standard error:\n{stderr}\nReturn code: {returncode}').format(
+                 **runtime.dictcopy()))
 
     @classmethod
     def help(cls, returnhelp=False):
@@ -1460,7 +1679,7 @@ class CommandLine(BaseInterface):
         runtime = self._run_interface(runtime)
         return runtime
 
-    def _run_interface(self, runtime, correct_return_codes=[0]):
+    def _run_interface(self, runtime, correct_return_codes=(0,)):
         """Execute command via subprocess
 
         Parameters
@@ -1557,14 +1776,15 @@ class CommandLine(BaseInterface):
                 name_template = "%s_generated"
 
             ns = trait_spec.name_source
-            while isinstance(ns, list):
+            while isinstance(ns, (list, tuple)):
                 if len(ns) > 1:
                     iflogger.warn('Only one name_source per trait is allowed')
                 ns = ns[0]
 
-            if not isinstance(ns, string_types):
-                raise ValueError(('name_source of \'%s\' trait sould be an '
-                                  'input trait name') % name)
+            if not isinstance(ns, (str, bytes)):
+                raise ValueError(
+                    'name_source of \'{}\' trait should be an input trait '
+                    'name, but a type {} object was found'.format(name, type(ns)))
 
             if isdefined(getattr(self.inputs, ns)):
                 name_source = ns
@@ -1607,7 +1827,7 @@ class CommandLine(BaseInterface):
         traits = self.inputs.traits(**metadata)
         if traits:
             outputs = self.output_spec().get()  #pylint: disable=E1102
-            for name, trait_spec in traits.items():
+            for name, trait_spec in list(traits.items()):
                 out_name = name
                 if trait_spec.output_name is not None:
                     out_name = trait_spec.output_name
@@ -1635,10 +1855,12 @@ class CommandLine(BaseInterface):
             if skip and name in skip:
                 continue
             value = getattr(self.inputs, name)
-            if spec.genfile or spec.name_source:
+            if spec.name_source:
                 value = self._filename_from_source(name)
-                if not isdefined(value):
+            elif spec.genfile:
+                if not isdefined(value) or value is None:
                     value = self._gen_filename(name)
+
             if not isdefined(value):
                 continue
             arg = self._format_arg(name, spec, value)
@@ -1665,7 +1887,7 @@ class StdOutCommandLine(CommandLine):
     input_spec = StdOutCommandLineInputSpec
 
     def _gen_filename(self, name):
-        if name is 'out_file':
+        if name == 'out_file':
             return self._gen_outfilename()
         else:
             return None
@@ -1684,7 +1906,7 @@ class MpiCommandLineInputSpec(CommandLineInputSpec):
 
 
 class MpiCommandLine(CommandLine):
-    '''Implements functionality to interact with command line programs
+    """Implements functionality to interact with command line programs
     that can be run with MPI (i.e. using 'mpiexec').
 
     Examples
@@ -1692,14 +1914,14 @@ class MpiCommandLine(CommandLine):
     >>> from nipype.interfaces.base import MpiCommandLine
     >>> mpi_cli = MpiCommandLine(command='my_mpi_prog')
     >>> mpi_cli.inputs.args = '-v'
-    >>> mpi_cli.cmdline
+    >>> mpi_cli.cmdline # doctest: +IGNORE_UNICODE
     'my_mpi_prog -v'
 
     >>> mpi_cli.inputs.use_mpi = True
     >>> mpi_cli.inputs.n_procs = 8
-    >>> mpi_cli.cmdline
+    >>> mpi_cli.cmdline # doctest: +IGNORE_UNICODE
     'mpiexec -n 8 my_mpi_prog -v'
-    '''
+    """
     input_spec = MpiCommandLineInputSpec
 
     @property
@@ -1801,15 +2023,15 @@ class OutputMultiPath(MultiPath):
     <undefined>
 
     >>> a.foo = '/software/temp/foo.txt'
-    >>> a.foo
+    >>> a.foo # doctest: +IGNORE_UNICODE
     '/software/temp/foo.txt'
 
     >>> a.foo = ['/software/temp/foo.txt']
-    >>> a.foo
+    >>> a.foo # doctest: +IGNORE_UNICODE
     '/software/temp/foo.txt'
 
     >>> a.foo = ['/software/temp/foo.txt', '/software/temp/goo.txt']
-    >>> a.foo
+    >>> a.foo # doctest: +IGNORE_UNICODE
     ['/software/temp/foo.txt', '/software/temp/goo.txt']
 
     """
@@ -1846,15 +2068,15 @@ class InputMultiPath(MultiPath):
     <undefined>
 
     >>> a.foo = '/software/temp/foo.txt'
-    >>> a.foo
+    >>> a.foo # doctest: +IGNORE_UNICODE
     ['/software/temp/foo.txt']
 
     >>> a.foo = ['/software/temp/foo.txt']
-    >>> a.foo
+    >>> a.foo # doctest: +IGNORE_UNICODE
     ['/software/temp/foo.txt']
 
     >>> a.foo = ['/software/temp/foo.txt', '/software/temp/goo.txt']
-    >>> a.foo
+    >>> a.foo # doctest: +IGNORE_UNICODE
     ['/software/temp/foo.txt', '/software/temp/goo.txt']
 
     """

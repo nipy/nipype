@@ -1,7 +1,35 @@
-Next release
-============
+Upcoming release 0.13
+=====================
 
 * ENH: Simple interface to FSL std2imgcoords (https://github.com/nipy/nipype/pull/1398)
+* FIX: Use builtins open and unicode literals for py3 compatibility (https://github.com/nipy/nipype/pull/1572)
+* TST: reduce the size of docker images & use tags for images (https://github.com/nipy/nipype/pull/1564)
+* ENH: Implement missing inputs/outputs in FSL AvScale (https://github.com/nipy/nipype/pull/1563)
+* FIX: Fix symlink test in copyfile (https://github.com/nipy/nipype/pull/1570, https://github.com/nipy/nipype/pull/1586)
+* ENH: Added support for custom job submission check in SLURM (https://github.com/nipy/nipype/pull/1582)
+
+
+Release 0.12.1 (August 3, 2016)
+===============================
+
+* FIX: runtime profiling is optional and off by default (https://github.com/nipy/nipype/pull/1561)
+* TST: circle CI tests run with docker (https://github.com/nipy/nipype/pull/1541)
+* FIX: workflow export functions without import error (https://github.com/nipy/nipype/pull/1552)
+
+
+Release 0.12.0 (July 12, 2016)
+==============================
+
+* ENH: New interface for Bruker to Nifti converter (https://github.com/nipy/nipype/pull/1523)
+* FIX: output file naming for FIRST outputs (https://github.com/nipy/nipype/pull/1524)
+* ENH: Adds `fslmaths -Tstd` to maths interfaces (https://github.com/nipy/nipype/pull/1518)
+* FIX: Selecting "gamma" in FSL Level1Design now does what the name says (https://github.com/nipy/nipype/pull/1500)
+* ENH: Added grad_dev input to fsl.dti.bedpostx5 interface(https://github.com/nipy/nipype/pull/1493)
+* ENH: ResourceMultiProc plugin to support resource allocation (https://github.com/nipy/nipype/pull/1372)
+* ENH: Added dcm2niix interface (https://github.com/nipy/nipype/pull/1435)
+* ENH: Add nipype_crash_search command (https://github.com/nipy/nipype/pull/1422)
+* ENH: Created interface for BrainSuite Cortical Surface Extraction command line tools (https://github.com/nipy/nipype/pull/1305)
+* FIX: job execution on systems/approaches where locale is undefined (https://github.com/nipy/nipype/pull/1401)
 * FIX: Clean up byte/unicode issues using subprocess (https://github.com/nipy/nipype/pull/1394)
 * FIX: Prevent crash when tvtk is loaded - ETS_TOOLKIT=null (https://github.com/nipy/nipype/pull/973)
 * ENH: New interfaces in dipy: RESTORE, EstimateResponseSH, CSD and StreamlineTractography
@@ -24,9 +52,15 @@ Next release
 * ENH: New interfaces for interacting with AWS S3: S3DataSink and S3DataGrabber (https://github.com/nipy/nipype/pull/1201)
 * ENH: Interfaces for MINC tools (https://github.com/nipy/nipype/pull/1304)
 * FIX: Use realpath to determine hard link source (https://github.com/nipy/nipype/pull/1388)
+* FIX: Correct linking/copying fallback behavior (https://github.com/nipy/nipype/pull/1391)
+* ENH: Nipype workflow and interfaces for FreeSurfer's recon-all (https://github.com/nipy/nipype/pull/1326)
+* FIX: Permit relative path for concatenated_file input to Concatenate() (https://github.com/nipy/nipype/pull/1411)
+* ENH: Makes ReconAll workflow backwards compatible with FreeSurfer 5.3.0 (https://github.com/nipy/nipype/pull/1434)
+* ENH: Added interfaces for AFNI 3dDegreeCentrality, 3dECM, 3dLFCD, 3dClipLevel, 3dmask_tool, and 3dSeg
+       (https://github.com/nipy/nipype/pull/1460)
 
 Release 0.11.0 (September 15, 2015)
-============
+===================================
 
 * API: Change how hash values are computed (https://github.com/nipy/nipype/pull/1174)
 * ENH: New algorithm: mesh.WarpPoints applies displacements fields to point sets
@@ -112,7 +146,7 @@ Release 0.11.0 (September 15, 2015)
        (https://github.com/nipy/nipype/pull/1142)
 
 Release 0.10.0 (October 10, 2014)
-============
+=================================
 
 * ENH: New miscelaneous interfaces: SplitROIs (mapper), MergeROIs (reducer)
        to enable parallel processing of very large images.
@@ -156,19 +190,19 @@ Release 0.10.0 (October 10, 2014)
 * FIX: Update for FSL 5.0.7 which deprecated Contrast Manager
 
 Release 0.9.2 (January 31, 2014)
-============
+================================
 
 * FIX: DataFinder was broken due to a typo
 * FIX: Order of DataFinder outputs was not guaranteed, it's human sorted now
 * ENH: New interfaces: Vnifti2Image, VtoMat
 
 Release 0.9.1 (December 25, 2013)
-============
+=================================
 
 * FIX: installation issues
 
 Release 0.9.0 (December 20, 2013)
-============
+=================================
 
 * ENH: SelectFiles: a streamlined version of DataGrabber
 * ENH: new tools for defining workflows: JoinNode, synchronize and itersource

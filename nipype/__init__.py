@@ -1,27 +1,28 @@
+# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
-from __future__ import absolute_import
+from __future__ import print_function, division, unicode_literals, absolute_import
 
 import os
+from distutils.version import LooseVersion
 
 from .info import (LONG_DESCRIPTION as __doc__,
                    URL as __url__,
                    STATUS as __status__,
                    __version__)
 from .utils.config import NipypeConfig
-config = NipypeConfig()
-from .utils.logger import Logging
-logging = Logging(config)
-
-from distutils.version import LooseVersion
-
 from .fixes.numpy.testing import nosetester
+from .utils.logger import Logging
+from .refs import due
 
 try:
     import faulthandler
     faulthandler.enable()
-except (ImportError,IOError) as e:
+except (ImportError, IOError) as e:
     pass
+
+config = NipypeConfig()
+logging = Logging(config)
 
 
 class _NoseTester(nosetester.NoseTester):
@@ -55,25 +56,9 @@ except TypeError:
     test = _NoseTester().test
 del nosetester
 
-
-def _test_local_install():
-    """ Warn the user that running with nipy being
-        imported locally is a bad idea.
-    """
-    if os.getcwd() == os.sep.join(
-            os.path.abspath(__file__).split(os.sep)[:-2]):
-        import warnings
-        warnings.warn('Running the tests from the install directory may '
-                      'trigger some failures')
-
-_test_local_install()
-
 # Set up package information function
 from .pkg_info import get_pkg_info as _get_pkg_info
 get_info = lambda: _get_pkg_info(os.path.dirname(__file__))
-
-# Cleanup namespace
-del _test_local_install
 
 # If this file is exec after being imported, the following lines will
 # fail

@@ -4,7 +4,9 @@ from ..diffusion import DWIConvert
 
 
 def test_DWIConvert_inputs():
-    input_map = dict(args=dict(argstr='%s',
+    input_map = dict(allowLossyConversion=dict(argstr='--allowLossyConversion ',
+    ),
+    args=dict(argstr='%s',
     ),
     conversionMode=dict(argstr='--conversionMode %s',
     ),
@@ -44,6 +46,8 @@ def test_DWIConvert_inputs():
     smallGradientThreshold=dict(argstr='--smallGradientThreshold %f',
     ),
     terminal_output=dict(nohash=True,
+    ),
+    transposeInputBVectors=dict(argstr='--transposeInputBVectors ',
     ),
     useBMatrixGradientDirections=dict(argstr='--useBMatrixGradientDirections ',
     ),

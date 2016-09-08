@@ -1,6 +1,9 @@
+# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 from __future__ import division
+from __future__ import unicode_literals
+from builtins import open
 
 import os
 from tempfile import mkdtemp
@@ -194,6 +197,33 @@ def test_meanimage(fsl_output_type=None):
     clean_directory(testdir, origdir)
     set_output_type(prev_type)
 
+@skipif(no_fsl)
+def test_stdimage(fsl_output_type=None):
+    prev_type = set_output_type(fsl_output_type)
+    files, testdir, origdir, out_ext = create_files_in_directory()
+
+    # Get the command
+    stder = fsl.StdImage(in_file="a.nii",out_file="b.nii")
+
+    # Test the underlying command
+    yield assert_equal, stder.cmd, "fslmaths"
+
+    # Test the defualt opstring
+    yield assert_equal, stder.cmdline, "fslmaths a.nii -Tstd b.nii"
+
+    # Test the other dimensions
+    cmdline = "fslmaths a.nii -%sstd b.nii"
+    for dim in ["X","Y","Z","T"]:
+        stder.inputs.dimension=dim
+        yield assert_equal, stder.cmdline, cmdline%dim
+
+    # Test the auto naming
+    stder = fsl.StdImage(in_file="a.nii")
+    yield assert_equal, stder.cmdline, "fslmaths a.nii -Tstd %s"%os.path.join(testdir, "a_std.nii")
+
+    # Clean up our mess
+    clean_directory(testdir, origdir)
+    set_output_type(prev_type)
 
 @skipif(no_fsl)
 def test_maximage(fsl_output_type=None):
