@@ -17,7 +17,6 @@ python:
 
 env:
 - INSTALL_DEB_DEPENDECIES="nodeps"
-# - INSTALL_DEB_DEPENDECIES=false
 
 # Update docker to enable -f flag
 before_install:
@@ -36,6 +35,7 @@ script:
 - docker run -v /etc/localtime:/etc/localtime:ro -v $HOME/scratch:/scratch nipype/nipype_test:${INSTALL_DEB_DEPENDECIES}-py${TRAVIS_PYTHON_VERSION//.} nosetests -c /root/src/nipype/.noserc --cov-report xml --with-cov --processes=0 --cover-package nipype --cov-config /root/src/nipype/.coveragerc /root/src/nipype/
 after_success:
 - coveralls --config_file ~/scratch/.coveragerc
+
 deploy:
   provider: pypi
   user: satra

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from __future__ import absolute_import
 from builtins import object
 # These classes implement a doctest runner plugin for nose, a "known failure"

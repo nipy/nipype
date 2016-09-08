@@ -18,7 +18,7 @@ def test_RobustFOV_inputs():
     ),
     out_roi=dict(argstr='-r %s',
     hash_files=False,
-    name_source=['in_file'],
+    name_source=[u'in_file'],
     name_template='%s_ROI',
     ),
     output_type=dict(),

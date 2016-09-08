@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
     Change directory to provide relative paths for doctests
     >>> import os
@@ -6,11 +7,14 @@
     >>> os.chdir(datadir)
 
 """
-import warnings
+from __future__ import print_function, division, unicode_literals, absolute_import
 
+import warnings
 import nibabel as nb
 
 from ...utils.misc import package_check
+from ..base import (TraitedSpec, BaseInterface, traits,
+                    BaseInterfaceInputSpec, File, isdefined)
 
 have_nipy = True
 try:
@@ -21,8 +25,6 @@ else:
     from nipy.algorithms.registration.histogram_registration import HistogramRegistration
     from nipy.algorithms.registration.affine import Affine
 
-from ..base import (TraitedSpec, BaseInterface, traits,
-                    BaseInterfaceInputSpec, File, isdefined)
 
 
 class SimilarityInputSpec(BaseInterfaceInputSpec):

@@ -1,4 +1,5 @@
+# -*- coding: utf-8 -*-
 from __future__ import absolute_import
 
-from .onetime import OneTimeProperty, setattr_on_read
-from .tmpdirs import TemporaryDirectory, InTemporaryDirectory
+from nipype.utils.onetime import OneTimeProperty, setattr_on_read
+from nipype.utils.tmpdirs import TemporaryDirectory, InTemporaryDirectory

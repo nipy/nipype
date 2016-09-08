@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """Provides interfaces to various longitudinal commands provided by freesurfer
@@ -9,17 +10,17 @@
    >>> os.chdir(datadir)
 
 """
-__docformat__ = 'restructuredtext'
+from __future__ import print_function, division, unicode_literals, absolute_import
 
 import os
 #import itertools
 
-from nipype.utils.filemanip import fname_presuffix
-from nipype.interfaces.freesurfer.base import FSCommand, FSTraitedSpec
-from nipype.interfaces.base import (TraitedSpec, File, traits,
-                                    InputMultiPath, OutputMultiPath, isdefined)
-
 from ... import logging
+from ..base import (TraitedSpec, File, traits,
+                    InputMultiPath, OutputMultiPath, isdefined)
+from .base import FSCommand, FSTraitedSpec
+
+__docformat__ = 'restructuredtext'
 iflogger = logging.getLogger('interface')
 
 
@@ -85,15 +86,15 @@ class RobustTemplate(FSCommand):
     >>> template.inputs.fixed_timepoint = True
     >>> template.inputs.no_iteration = True
     >>> template.inputs.subsample_threshold = 200
-    >>> template.cmdline  #doctest: +NORMALIZE_WHITESPACE
+    >>> template.cmdline  #doctest: +NORMALIZE_WHITESPACE +IGNORE_UNICODE
     'mri_robust_template --satit --average 0 --fixtp --mov structural.nii functional.nii --inittp 1 --noit --template mri_robust_template_out.mgz --subsample 200'
     >>> template.inputs.out_file = 'T1.nii'
-    >>> template.cmdline  #doctest: +NORMALIZE_WHITESPACE
+    >>> template.cmdline  #doctest: +NORMALIZE_WHITESPACE +IGNORE_UNICODE
     'mri_robust_template --satit --average 0 --fixtp --mov structural.nii functional.nii --inittp 1 --noit --template T1.nii --subsample 200'
 
     >>> template.inputs.transform_outputs = ['structural.lta', 'functional.lta']
     >>> template.inputs.scaled_intensity_outputs = ['structural-iscale.txt', 'functional-iscale.txt']
-    >>> template.cmdline    #doctest: +NORMALIZE_WHITESPACE
+    >>> template.cmdline    #doctest: +NORMALIZE_WHITESPACE +IGNORE_UNICODE
     'mri_robust_template --satit --average 0 --fixtp --mov structural.nii functional.nii --inittp 1 --noit --template T1.nii --iscaleout structural-iscale.txt functional-iscale.txt --subsample 200 --lta structural.lta functional.lta'
 
     >>> template.run()  #doctest: +SKIP
@@ -167,7 +168,7 @@ class FuseSegmentations(FSCommand):
     >>> fuse.inputs.in_segmentations = ['aseg.mgz', 'aseg.mgz']
     >>> fuse.inputs.in_segmentations_noCC = ['aseg.mgz', 'aseg.mgz']
     >>> fuse.inputs.in_norms = ['norm.mgz', 'norm.mgz', 'norm.mgz']
-    >>> fuse.cmdline
+    >>> fuse.cmdline # doctest: +IGNORE_UNICODE
     'mri_fuse_segmentations -n norm.mgz -a aseg.mgz -c aseg.mgz tp.long.A.template tp1 tp2'
     """
 

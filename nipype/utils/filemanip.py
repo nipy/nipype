@@ -1,29 +1,31 @@
+# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """Miscellaneous file manipulation functions
 
 """
+from __future__ import print_function, division, unicode_literals, absolute_import
+from builtins import str, bytes, open
 
 from future import standard_library
 standard_library.install_aliases()
 
+import sys
 import pickle
 import gzip
 import hashlib
 from hashlib import md5
-import simplejson
 import os
 import re
 import shutil
 import posixpath
-
+import simplejson as json
 import numpy as np
 
+from .. import logging, config
 from .misc import is_container
-from ..external.six import string_types
 from ..interfaces.traits_extension import isdefined
 
-from .. import logging, config
 fmlogger = logging.getLogger("filemanip")
 
 
@@ -52,13 +54,13 @@ def split_filename(fname):
     --------
     >>> from nipype.utils.filemanip import split_filename
     >>> pth, fname, ext = split_filename('/home/data/subject.nii.gz')
-    >>> pth
+    >>> pth # doctest: +IGNORE_UNICODE
     '/home/data'
 
-    >>> fname
+    >>> fname # doctest: +IGNORE_UNICODE
     'subject'
 
-    >>> ext
+    >>> ext # doctest: +IGNORE_UNICODE
     '.nii.gz'
 
     """
@@ -81,6 +83,30 @@ def split_filename(fname):
 
     return pth, fname, ext
 
+def encode_dict(value):
+    """
+    Manipulates ordered dicts before they are hashed (Py2/3 compat.)
+
+    """
+    if sys.version_info[0] > 2:
+        return str(value)
+
+    if isinstance(value, str):
+        value = value.encode()
+
+    if isinstance(value, tuple):
+        val0 = encode_dict(value[0])
+        val1 = encode_dict(value[1])
+        return '(' + val0 + ', ' + val1 + ')'
+
+    if isinstance(value, list):
+        retval = '['
+        for i, v in enumerate(value):
+            if i > 0:
+                retval += ', '
+            retval += encode_dict(v)
+        return retval + ']'
+    return repr(value)
 
 def fname_presuffix(fname, prefix='', suffix='', newpath=None, use_ext=True):
     """Manipulates path and name of input filename
@@ -105,7 +131,7 @@ def fname_presuffix(fname, prefix='', suffix='', newpath=None, use_ext=True):
 
     >>> from nipype.utils.filemanip import fname_presuffix
     >>> fname = 'foo.nii.gz'
-    >>> fname_presuffix(fname,'pre','post','/tmp')
+    >>> fname_presuffix(fname,'pre','post','/tmp') # doctest: +IGNORE_UNICODE
     '/tmp/prefoopost.nii.gz'
 
     """
@@ -225,17 +251,18 @@ def copyfile(originalfile, newfile, copy=False, create_new=False,
     # -------------
     # Options:
     #   symlink
-    #       to originalfile             (keep if not (use_hardlink or copy))
-    #       to other file               (unlink)
+    #       to regular file originalfile            (keep if symlinking)
+    #       to same dest as symlink originalfile    (keep if symlinking)
+    #       to other file                           (unlink)
     #   regular file
-    #       hard link to originalfile   (keep)
-    #       copy of file (same hash)    (keep)
-    #       different file (diff hash)  (unlink)
+    #       hard link to originalfile               (keep)
+    #       copy of file (same hash)                (keep)
+    #       different file (diff hash)              (unlink)
     keep = False
     if os.path.lexists(newfile):
         if os.path.islink(newfile):
-            if all(os.path.readlink(newfile) == originalfile, not use_hardlink,
-                   not copy):
+            if all((os.readlink(newfile) == os.path.realpath(originalfile),
+                    not use_hardlink, not copy)):
                 keep = True
         elif posixpath.samefile(newfile, originalfile):
             keep = True
@@ -363,7 +390,7 @@ def copyfiles(filelist, dest, copy=False, create_new=False):
 def filename_to_list(filename):
     """Returns a list given either a string or a list
     """
-    if isinstance(filename, (str, string_types)):
+    if isinstance(filename, (str, bytes)):
         return [filename]
     elif isinstance(filename, list):
         return filename
@@ -382,7 +409,6 @@ def list_to_filename(filelist):
     else:
         return filelist[0]
 
-
 def save_json(filename, data):
     """Save data to a json file
 
@@ -394,9 +420,11 @@ def save_json(filename, data):
         Dictionary to save in json file.
 
     """
-
-    with open(filename, 'w') as fp:
-        simplejson.dump(data, fp, sort_keys=True, indent=4)
+    mode = 'w'
+    if sys.version_info[0] < 3:
+        mode = 'wb'
+    with open(filename, mode) as fp:
+        json.dump(data, fp, sort_keys=True, indent=4)
 
 
 def load_json(filename):
@@ -414,7 +442,7 @@ def load_json(filename):
     """
 
     with open(filename, 'r') as fp:
-        data = simplejson.load(fp)
+        data = json.load(fp)
     return data
 
 
@@ -438,11 +466,17 @@ def loadcrash(infile, *args):
 def loadpkl(infile):
     """Load a zipped or plain cPickled file
     """
+    fmlogger.debug('Loading pkl: %s', infile)
     if infile.endswith('pklz'):
         pkl_file = gzip.open(infile, 'rb')
     else:
-        pkl_file = open(infile)
-    return pickle.load(pkl_file)
+        pkl_file = open(infile, 'rb')
+
+    try:
+        unpkl = pickle.load(pkl_file)
+    except UnicodeDecodeError:
+        unpkl = pickle.load(pkl_file, fix_imports=True, encoding='utf-8')
+    return unpkl
 
 
 def savepkl(filename, record):
@@ -464,12 +498,12 @@ def write_rst_header(header, level=0):
 def write_rst_list(items, prefix=''):
     out = []
     for item in items:
-        out.append(prefix + ' ' + str(item))
+        out.append('{} {}'.format(prefix, str(item)))
     return '\n'.join(out) + '\n\n'
 
 
 def write_rst_dict(info, prefix=''):
     out = []
     for key, value in sorted(info.items()):
-        out.append(prefix + '* ' + key + ' : ' + str(value))
+        out.append('{}* {} : {}'.format(prefix, key, str(value)))
     return '\n'.join(out) + '\n\n'

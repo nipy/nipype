@@ -5,14 +5,14 @@ from ..io import MySQLSink
 
 def test_MySQLSink_inputs():
     input_map = dict(config=dict(mandatory=True,
-    xor=['host'],
+    xor=[u'host'],
     ),
     database_name=dict(mandatory=True,
     ),
     host=dict(mandatory=True,
-    requires=['username', 'password'],
+    requires=[u'username', u'password'],
     usedefault=True,
-    xor=['config'],
+    xor=[u'config'],
     ),
     ignore_exception=dict(nohash=True,
     usedefault=True,

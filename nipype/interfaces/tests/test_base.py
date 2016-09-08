@@ -1,9 +1,11 @@
+# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
-from __future__ import print_function
+from __future__ import print_function, unicode_literals
 from future import standard_library
 standard_library.install_aliases()
 
+from builtins import open, str, bytes
 import os
 import tempfile
 import shutil
@@ -14,7 +16,7 @@ from nipype.testing import (assert_equal, assert_not_equal, assert_raises,
                             skipif)
 import nipype.interfaces.base as nib
 from nipype.utils.filemanip import split_filename
-from nipype.interfaces.base import Undefined, config, text_type
+from nipype.interfaces.base import Undefined, config
 from traits.testing.nose_tools import skip
 import traits.api as traits
 
@@ -62,7 +64,7 @@ def test_bunch_hash():
     yield assert_equal, bhash, 'ddcc7b4ec5675df8cf317a48bd1857fa'
     # Make sure the hash stored in the json file for `infile` is correct.
     jshash = nib.md5()
-    with open(json_pth) as fp:
+    with open(json_pth, 'r') as fp:
         jshash.update(fp.read().encode('utf-8'))
     yield assert_equal, newbdict['infile'][0][1], jshash.hexdigest()
     yield assert_equal, newbdict['yat'], True
@@ -588,7 +590,7 @@ def test_Commandline():
     yield assert_equal, res.outputs, None
 
     class CommandLineInputSpec1(nib.CommandLineInputSpec):
-        foo = nib.traits.Str(argstr='%s', desc='a str')
+        foo = nib.Str(argstr='%s', desc='a str')
         goo = nib.traits.Bool(argstr='-g', desc='a bool', position=0)
         hoo = nib.traits.List(argstr='-l %s', desc='a list')
         moo = nib.traits.List(argstr='-i %d...', desc='a repeated list',
@@ -661,7 +663,7 @@ def test_CommandLine_output():
     ci.inputs.terminal_output = 'file'
     res = ci.run()
     yield assert_true, 'stdout.nipype' in res.runtime.stdout
-    yield assert_equal, type(res.runtime.stdout), text_type
+    yield assert_true, isinstance(res.runtime.stdout, (str, bytes))
     ci = nib.CommandLine(command='ls -l')
     ci.inputs.terminal_output = 'none'
     res = ci.run()

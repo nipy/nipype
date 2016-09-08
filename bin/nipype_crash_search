@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!python
 """Search for tracebacks inside a folder of nipype crash
 log files that match a given regular expression.
 
@@ -6,6 +6,7 @@ Examples:
 nipype_crash_search -d nipype/wd/log -r '.*subject123.*'
 """
 import re
+import sys
 import os.path as op
 from glob import glob
 
@@ -60,6 +61,7 @@ def display_crash_search(logdir, regex):
 
 if __name__ == "__main__":
     from argparse import ArgumentParser, RawTextHelpFormatter
+
     defstr = ' (default %(default)s)'
     parser = ArgumentParser(prog='nipype_crash_search',
                             description=__doc__,
@@ -71,6 +73,10 @@ if __name__ == "__main__":
                         default='*',
                         help='Regular expression to be searched in each traceback.' + defstr)
 
-    args = parser.parse_args()
+    if len(sys.argv) == 1:
+        parser.print_help()
+        exit(0)
 
+    args = parser.parse_args()
     display_crash_search(args.logdir, args.regex)
+    exit(0)

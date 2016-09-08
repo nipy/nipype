@@ -1,10 +1,13 @@
-from __future__ import print_function
+# -*- coding: utf-8 -*-
+from __future__ import print_function, division, unicode_literals, absolute_import
+from builtins import str
 import os
 import argparse
 import inspect
 import sys
-from nipype.interfaces.base import Interface, InputMultiPath, traits
-from nipype.utils.misc import str2bool
+
+from ..interfaces.base import Interface, InputMultiPath, traits
+from .misc import str2bool
 
 
 def listClasses(module=None):

@@ -1,5 +1,9 @@
+# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
+from __future__ import unicode_literals
+from builtins import str, bytes
+
 import os
 from tempfile import mkdtemp
 from shutil import rmtree
@@ -12,7 +16,7 @@ import nipype.interfaces.spm.base as spm
 from nipype.interfaces.spm import no_spm
 import nipype.interfaces.matlab as mlab
 from nipype.interfaces.spm.base import SPMCommandInputSpec
-from nipype.interfaces.base import traits, text_type
+from nipype.interfaces.base import traits
 
 try:
     matlab_cmd = os.environ['MATLABCMD']
@@ -57,7 +61,7 @@ if not save_time:
     def test_spm_path():
         spm_path = spm.Info.version()['path']
         if spm_path is not None:
-            yield assert_equal, type(spm_path), text_type
+            yield assert_true, isinstance(spm_path, (str, bytes))
             yield assert_true, 'spm' in spm_path
 
 

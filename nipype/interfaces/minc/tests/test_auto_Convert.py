@@ -27,7 +27,7 @@ def test_Convert_inputs():
     output_file=dict(argstr='%s',
     genfile=True,
     hash_files=False,
-    name_source=['input_file'],
+    name_source=[u'input_file'],
     name_template='%s_convert_output.mnc',
     position=-1,
     ),

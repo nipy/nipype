@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """
@@ -10,13 +11,12 @@
     >>> datadir = os.path.realpath(os.path.join(filepath, '../../testing/data'))
     >>> os.chdir(datadir)
 """
-
-from __future__ import division
+from __future__ import print_function, division, unicode_literals, absolute_import
 import os
 import numpy as np
 
 from ..base import (TraitedSpec, File, traits, InputMultiPath, isdefined)
-from ..fsl.base import FSLCommand, FSLCommandInputSpec
+from .base import FSLCommand, FSLCommandInputSpec
 
 
 class MathsInput(FSLCommandInputSpec):
@@ -317,7 +317,7 @@ class MultiImageMaths(MathsCommand):
     >>> maths.inputs.op_string = "-add %s -mul -1 -div %s"
     >>> maths.inputs.operand_files = ["functional2.nii", "functional3.nii"]
     >>> maths.inputs.out_file = "functional4.nii"
-    >>> maths.cmdline
+    >>> maths.cmdline # doctest: +IGNORE_UNICODE
     'fslmaths functional.nii -add functional2.nii -mul -1 -div functional3.nii functional4.nii'
 
     """

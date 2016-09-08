@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """Various utilities common to IPython release and maintenance tools.
 """
 

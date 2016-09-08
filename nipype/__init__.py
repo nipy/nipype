@@ -1,27 +1,28 @@
+# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
-from __future__ import absolute_import
+from __future__ import print_function, division, unicode_literals, absolute_import
 
 import os
+from distutils.version import LooseVersion
 
 from .info import (LONG_DESCRIPTION as __doc__,
                    URL as __url__,
                    STATUS as __status__,
                    __version__)
 from .utils.config import NipypeConfig
-config = NipypeConfig()
-from .utils.logger import Logging
-logging = Logging(config)
-
-from distutils.version import LooseVersion
-
 from .fixes.numpy.testing import nosetester
+from .utils.logger import Logging
+from .refs import due
 
 try:
     import faulthandler
     faulthandler.enable()
-except (ImportError,IOError) as e:
+except (ImportError, IOError) as e:
     pass
+
+config = NipypeConfig()
+logging = Logging(config)
 
 
 class _NoseTester(nosetester.NoseTester):

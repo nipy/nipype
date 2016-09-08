@@ -1,6 +1,8 @@
+# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
-from __future__ import division
+from __future__ import print_function, division, unicode_literals, absolute_import
+from builtins import str
 
 from ....interfaces import fsl as fsl          # fsl
 from ....interfaces import utility as util     # utility
@@ -34,7 +36,7 @@ def extract_noise_components(realigned_file, noise_mask_file, num_components):
     else:
         components = np.hstack((components, u[:, :num_components]))
     components_file = os.path.join(os.getcwd(), 'noise_components.txt')
-    np.savetxt(components_file, components, fmt="%.10f")
+    np.savetxt(components_file, components, fmt=b"%.10f")
     return components_file
 
 

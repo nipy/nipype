@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
     Change directory to provide relative paths for doctests
     >>> import os
@@ -6,13 +7,15 @@
     >>> os.chdir(datadir)
 
 """
+from __future__ import print_function, division, unicode_literals, absolute_import
+
 import os
 
+from ...utils.filemanip import split_filename
 from ..base import (CommandLineInputSpec, CommandLine, traits,
                     TraitedSpec, File, Directory, StdOutCommandLine,
                     StdOutCommandLineInputSpec, isdefined,
                     InputMultiPath)
-from ...utils.filemanip import split_filename
 
 
 class DTIFitInputSpec(StdOutCommandLineInputSpec):
@@ -574,7 +577,7 @@ class Track(CommandLine):
         return outputs
 
     def _gen_filename(self, name):
-        if name is 'out_file':
+        if name == 'out_file':
             return self._gen_outfilename()
         else:
             return None

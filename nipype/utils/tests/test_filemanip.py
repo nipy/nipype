@@ -1,5 +1,7 @@
+# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
+from __future__ import unicode_literals
 from builtins import open
 
 import os
@@ -157,6 +159,7 @@ def test_linkchain():
     yield assert_false, os.path.islink(new_hdr3)
     yield assert_true, os.path.samefile(orig_img, new_img3)
     yield assert_true, os.path.samefile(orig_hdr, new_hdr3)
+
     os.unlink(new_img1)
     os.unlink(new_hdr1)
     os.unlink(new_img2)
@@ -167,6 +170,53 @@ def test_linkchain():
     os.unlink(orig_img)
     os.unlink(orig_hdr)
 
+def test_recopy():
+    # Re-copying with the same parameters on an unchanged file should be
+    # idempotent
+    #
+    # Test for copying from regular files and symlinks
+    orig_img, orig_hdr = _temp_analyze_files()
+    pth, fname = os.path.split(orig_img)
+    img_link = os.path.join(pth, 'imglink.img')
+    hdr_link = os.path.join(pth, 'imglink.hdr')
+    new_img = os.path.join(pth, 'newfile.img')
+    new_hdr = os.path.join(pth, 'newfile.hdr')
+    copyfile(orig_img, img_link)
+    for copy in (True, False):
+        for use_hardlink in (True, False):
+            for hashmethod in ('timestamp', 'content'):
+                kwargs = {'copy': copy, 'use_hardlink': use_hardlink,
+                          'hashmethod': hashmethod}
+                # Copying does not preserve the original file's timestamp, so
+                # we may delete and re-copy, if the test is slower than a clock
+                # tick
+                if copy and not use_hardlink and hashmethod == 'timestamp':
+                    continue
+                copyfile(orig_img, new_img, **kwargs)
+                img_stat = os.stat(new_img)
+                hdr_stat = os.stat(new_hdr)
+                copyfile(orig_img, new_img, **kwargs)
+                err_msg = "Regular - OS: {}; Copy: {}; Hardlink: {}".format(
+                    os.name, copy, use_hardlink)
+                yield assert_equal, img_stat, os.stat(new_img), err_msg
+                yield assert_equal, hdr_stat, os.stat(new_hdr), err_msg
+                os.unlink(new_img)
+                os.unlink(new_hdr)
+
+                copyfile(img_link, new_img, **kwargs)
+                img_stat = os.stat(new_img)
+                hdr_stat = os.stat(new_hdr)
+                copyfile(img_link, new_img, **kwargs)
+                err_msg = "Symlink - OS: {}; Copy: {}; Hardlink: {}".format(
+                    os.name, copy, use_hardlink)
+                yield assert_equal, img_stat, os.stat(new_img), err_msg
+                yield assert_equal, hdr_stat, os.stat(new_hdr), err_msg
+                os.unlink(new_img)
+                os.unlink(new_hdr)
+    os.unlink(img_link)
+    os.unlink(hdr_link)
+    os.unlink(orig_img)
+    os.unlink(orig_hdr)
 
 def test_copyfallback():
     if os.name is not 'posix':

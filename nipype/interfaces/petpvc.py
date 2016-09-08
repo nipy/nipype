@@ -8,23 +8,12 @@
    >>> datadir = os.path.realpath(os.path.join(filepath, '../testing/data'))
    >>> os.chdir(datadir)
 """
-
-from __future__ import print_function
-from __future__ import division
+from __future__ import print_function, division, unicode_literals, absolute_import
 
 import os
-import warnings
 
-from nipype.interfaces.base import (
-    TraitedSpec,
-    CommandLineInputSpec,
-    CommandLine,
-    File,
-    isdefined,
-    traits,
-)
+from .base import TraitedSpec, CommandLineInputSpec, CommandLine, File, isdefined, traits
 
-warn = warnings.warn
 
 pvc_methods = ['GTM',
                'IY',
