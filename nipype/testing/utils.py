@@ -113,4 +113,4 @@ def remove_nii(filenames):
         try:
             os.remove(filename)
         except (OSError, TypeError) as e:
-            print(e)
+            pass
