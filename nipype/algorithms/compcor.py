@@ -3,6 +3,7 @@ from ..interfaces.base import (BaseInterfaceInputSpec, TraitedSpec,
 
 from nipype.pipeline import engine as pe
 from nipype.interfaces.utility import IdentityInterface
+from nipype.algorithms.tsnr import regress_poly
 
 import nibabel as nb
 import numpy as np
@@ -14,12 +15,15 @@ class CompCorInputSpec(BaseInterfaceInputSpec):
                           desc='already realigned brain image (4D)')
     mask_file = File(exists=True, mandatory=False,
                      desc='mask file that determines ROI (3D)')
-    components_file = File('components_file.txt', exists=False, mandatory=False, usedefault=True,
+    components_file = File('components_file.txt', exists=False, mandatory=False,
+                           usedefault=True, 
                            desc='filename to store physiological components in')
     num_components = traits.Int(6, usedefault=True) # 6 for BOLD, 4 for ASL
+    regress_poly = traits.Range(low=1, default=1, usedefault=True)
 
 class CompCorOutputSpec(TraitedSpec):
-    components_file = File(desc='text file containing the noise components', exists=True)
+    components_file = File(exists=True,
+                           desc='text file containing the noise components')
 
 class CompCor(BaseInterface):
     '''

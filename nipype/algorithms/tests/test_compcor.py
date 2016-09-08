@@ -10,6 +10,7 @@ import mock
 import nibabel as nb
 import numpy as np
 import os
+from hashlib import sha1
 
 class TestCompCor(unittest.TestCase):
     ''' Note: Tests currently do a poor job of testing functionality '''
@@ -30,21 +31,25 @@ class TestCompCor(unittest.TestCase):
         mask[0,0,1] = 0
         mask_file = utils.save_toy_nii(mask, self.filenames['masknii'])
 
+        expected_sha1 = 'b0dd7f9ab7ba8f516712eb0204dacc9e397fc6aa'
+
         ccresult = self.run_cc(CompCor(realigned_file=self.realigned_file,
-                               mask_file=mask_file))
+                                       mask_file=mask_file),
+                               expected_sha1)
 
         accresult = self.run_cc(ACompCor(realigned_file=self.realigned_file,
-                             mask_file=mask_file,
-                             components_file='acc_components_file'))
+                                         mask_file=mask_file,
+                                         components_file='acc_components_file'),
+                                expected_sha1)
 
         assert_equal(os.path.getsize(ccresult.outputs.components_file),
                      os.path.getsize(accresult.outputs.components_file))
 
     def test_tcompcor(self):
         ccinterface = TCompCor(realigned_file=self.realigned_file)
-        self.run_cc(ccinterface)
+        self.run_cc(ccinterface, '12e54c07281a28ac0da3b934dce5c9d27626848a')
 
-    def run_cc(self, ccinterface):
+    def run_cc(self, ccinterface, expected_components_data_sha1):
         # run
         ccresult = ccinterface.run()
 
@@ -55,6 +60,13 @@ class TestCompCor(unittest.TestCase):
         assert_true(os.path.getsize(expected_file) > 0)
         assert_equal(ccinterface.inputs.num_components, 6)
 
+        with open(ccresult.outputs.components_file, 'r') as components_file:
+            components_data = [line for line in components_file]
+            num_got_components = len(components_data)
+            assert_true(num_got_components == ccinterface.inputs.num_components
+                        or num_got_components == self.fake_data.shape[3])
+            print(str(components_data), "comdata")
+            assert_equal(sha1(str(components_data)).hexdigest(), expected_components_data_sha1)
         return ccresult
 
     def tearDown(self):

@@ -69,8 +69,9 @@ class TSNR(BaseInterface):
             data = data.astype(np.float32)
 
         if isdefined(self.inputs.regress_poly):
-            img, data = regress_poly(self.inputs.regress_poly, header, img, data,
-                                     self.inputs.detrended_file)
+            data = regress_poly(self.inputs.regress_poly, data)
+            img = nb.Nifti1Image(data, img.get_affine(), header)
+            nb.save(img, op.abspath(self.inputs.detrended_file))
 
         meanimg = np.mean(data, axis=3)
         stddevimg = np.std(data, axis=3)
@@ -93,8 +94,8 @@ class TSNR(BaseInterface):
             outputs['detrended_file'] = op.abspath(self.inputs.detrended_file)
         return outputs
 
-def regress_poly(degree, header, img, data, filename):
-    timepoints = img.shape[-1]
+def regress_poly(degree, data):
+    timepoints = data.shape[-1]
     X = np.ones((timepoints, 1))
     for i in range(degree):
         X = np.hstack((X, legendre(
@@ -105,6 +106,4 @@ def regress_poly(degree, header, img, data, filename):
                                      betas[1:, :, :, :], 0, 3)),
                           0, 4)
     regressed_data = data - datahat
-    regressed_img = nb.Nifti1Image(regressed_data, img.get_affine(), header)
-    nb.save(regressed_img, op.abspath(filename))
-    return regressed_img, regressed_data
+    return regressed_data
