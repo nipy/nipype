@@ -1,0 +1,36 @@
+#!python
+"""Prints the content of any .pklz file in your working directory.
+
+Examples:
+
+nipype_print_pklz _inputs.pklz
+nipype_print_pklz _node.pklz
+"""
+
+def pprint_pklz_file(pklz_file):
+    """ Print the content of the pklz_file. """
+    from pprint import pprint
+    from nipype.utils.filemanip import loadpkl
+
+    pkl_data = loadpkl(pklz_file)
+    pprint(pkl_data)
+
+
+if __name__ == "__main__":
+
+    import sys
+    from argparse import ArgumentParser, RawTextHelpFormatter
+
+    defstr = ' (default %(default)s)'
+    parser = ArgumentParser(prog='nipype_print_pklz',
+                            description=__doc__,
+                            formatter_class=RawTextHelpFormatter)
+    parser.add_argument('pklzfile', metavar='f', type=str,
+                        help='pklz file to display')
+
+    if len(sys.argv) == 1:
+        parser.print_help()
+        exit(0)
+
+    args = parser.parse_args()
+    pprint_pklz_file(args.pklzfile)

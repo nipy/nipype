@@ -8,7 +8,7 @@ Module to unit test the runtime_profiler in nipype
 """
 
 from __future__ import print_function, division, unicode_literals, absolute_import
-from builtins import open
+from builtins import open, str
 
 # Import packages
 import unittest
@@ -72,9 +72,17 @@ def use_resources(num_threads, num_gb):
         '''
         Function to consume GB of memory
         '''
+        import sys
 
-        # Eat 1 GB of memory for 1 second
-        gb_str = ' ' * int(num_gb*1024.0**3)
+        # Getsize of one character string
+        bsize = sys.getsizeof('  ') - sys.getsizeof(' ')
+        boffset = sys.getsizeof('')
+
+        num_bytes = int(num_gb * (1024**3))
+        # Eat num_gb GB of memory for 1 second
+        gb_str = ' ' * ((num_bytes - boffset) // bsize)
+
+        assert sys.getsizeof(gb_str) == num_bytes
 
         # Spin CPU
         ctr = 0
@@ -143,7 +151,7 @@ class RuntimeProfilerTestCase(unittest.TestCase):
         # Input number of sub-threads (not including parent threads)
         self.num_threads = 2
         # Acceptable percent error for memory profiled against input
-        self.mem_err_gb = 0.25
+        self.mem_err_gb = 0.3  # Increased to 30% for py2.7
 
     # ! Only used for benchmarking the profiler over a range of
     # ! RAM usage and number of threads
@@ -277,8 +285,9 @@ class RuntimeProfilerTestCase(unittest.TestCase):
 
         # Get runtime stats from log file
         with open(log_file, 'r') as log_handle:
-            start_str = log_handle.readlines()[0].rstrip('\n')
-            finish_str = log_handle.readlines()[1].rstrip('\n')
+            lines = log_handle.readlines()
+            start_str = lines[0].rstrip('\n')
+            finish_str = lines[1].rstrip('\n')
 
         # Delete wf base dir
         shutil.rmtree(base_dir)
@@ -356,8 +365,9 @@ class RuntimeProfilerTestCase(unittest.TestCase):
 
         # Get runtime stats from log file
         with open(log_file, 'r') as log_handle:
-            start_str = log_handle.readlines()[0].rstrip('\n')
-            finish_str = log_handle.readlines()[1].rstrip('\n')
+            lines = log_handle.readlines()
+            start_str = lines[0].rstrip('\n')
+            finish_str = lines[1].rstrip('\n')
 
         # Delete wf base dir
         shutil.rmtree(base_dir)

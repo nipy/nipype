@@ -13,6 +13,7 @@ was written to work with FSL version 5.0.4.
     >>> os.chdir(datadir)
 """
 from __future__ import print_function, division, unicode_literals, absolute_import
+from builtins import str
 
 import os
 import numpy as np
@@ -295,7 +296,7 @@ class TOPUP(FSLCommand):
             line = [float(val[0] == encdir[0]) * direction
                     for val in ['x', 'y', 'z']] + [durations[idx]]
             lines.append(line)
-        np.savetxt(out_file, np.array(lines), fmt='%d %d %d %.8f')
+        np.savetxt(out_file, np.array(lines), fmt=b'%d %d %d %.8f')
         return out_file
 
     def _overload_extension(self, value, name=None):

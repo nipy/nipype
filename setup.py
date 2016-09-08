@@ -241,7 +241,7 @@ cmdclass = {'build_py': get_comrec_build('nipype')}
 
 # Get version and release info, which is all stored in nipype/info.py
 ver_file = os.path.join('nipype', 'info.py')
-exec(open(ver_file).read())
+exec(open(ver_file).read(), locals())
 
 # Prepare setuptools args
 if 'setuptools' in sys.modules:

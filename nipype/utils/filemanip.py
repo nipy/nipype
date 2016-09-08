@@ -466,11 +466,17 @@ def loadcrash(infile, *args):
 def loadpkl(infile):
     """Load a zipped or plain cPickled file
     """
+    fmlogger.debug('Loading pkl: %s', infile)
     if infile.endswith('pklz'):
         pkl_file = gzip.open(infile, 'rb')
     else:
-        pkl_file = open(infile)
-    return pickle.load(pkl_file)
+        pkl_file = open(infile, 'rb')
+
+    try:
+        unpkl = pickle.load(pkl_file)
+    except UnicodeDecodeError:
+        unpkl = pickle.load(pkl_file, fix_imports=True, encoding='utf-8')
+    return unpkl
 
 
 def savepkl(filename, record):

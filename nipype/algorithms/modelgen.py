@@ -19,7 +19,7 @@ These functions include:
 
 """
 from __future__ import print_function, division, unicode_literals, absolute_import
-from builtins import range, str, bytes
+from builtins import range, str, bytes, int
 
 from copy import deepcopy
 import os
@@ -541,16 +541,20 @@ class SpecifySPMModel(SpecifyModel):
             outliers = [[]]
             for i, filename in enumerate(self.inputs.outlier_files):
                 try:
-                    out = np.loadtxt(filename, dtype=int)
+                    out = np.loadtxt(filename)
                 except IOError:
+                    iflogger.warn('Error reading outliers file %s', filename)
                     out = np.array([])
+
                 if out.size > 0:
+                    iflogger.debug('fname=%s, out=%s, nscans=%s', filename, out, repr(sum(nscans[0:i])))
+                    sumscans = out.astype(int) + sum(nscans[0:i])
+
                     if out.size == 1:
-                        outliers[0].extend([(np.array(out) +
-                                             sum(nscans[0:i])).tolist()])
+                        outliers[0]+= [np.array(sumscans, dtype=int).tolist()]
                     else:
-                        outliers[0].extend((np.array(out) +
-                                            sum(nscans[0:i])).tolist())
+                        outliers[0]+= np.array(sumscans, dtype=int).tolist()
+
         self._sessinfo = self._generate_standard_design(concatlist,
                                                         functional_runs=functional_runs,
                                                         realignment_parameters=realignment_parameters,

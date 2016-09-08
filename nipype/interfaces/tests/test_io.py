@@ -3,7 +3,7 @@
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 from __future__ import print_function, unicode_literals
 from builtins import str, zip, range, open
-
+from future import standard_library
 import os
 import glob
 import shutil
@@ -34,14 +34,12 @@ except ImportError:
     noboto3 = True
 
 # Check for fakes3
-import subprocess
+standard_library.install_aliases()
+from subprocess import check_call, CalledProcessError
 try:
-    ret_code = subprocess.check_call(['which', 'fakes3'], stdout=open(os.devnull, 'wb'))
-    if ret_code == 0:
-        fakes3 = True
-    else:
-        fakes3 = False
-except subprocess.CalledProcessError:
+    ret_code = check_call(['which', 'fakes3'], stdout=open(os.devnull, 'wb'))
+    fakes3 = (ret_code == 0)
+except CalledProcessError:
     fakes3 = False
 
 def test_datagrabber():

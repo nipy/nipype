@@ -6,7 +6,7 @@ from shutil import rmtree
 from multiprocessing import cpu_count
 
 
-def run_examples(example, pipelines, data_path, plugin=None):
+def run_examples(example, pipelines, data_path, plugin=None, rm_base_dir=True):
     from nipype import config
     from nipype.interfaces.base import CommandLine
 
@@ -20,12 +20,16 @@ def run_examples(example, pipelines, data_path, plugin=None):
 
     plugin_args = {}
     if plugin == 'MultiProc':
-        plugin_args['n_procs'] = cpu_count()
+        plugin_args['n_procs'] = int(os.getenv('NIPYPE_NUMBER_OF_CPUS', cpu_count()))
 
     __import__(example)
     for pipeline in pipelines:
         wf = getattr(sys.modules[example], pipeline)
         wf.base_dir = os.path.join(os.getcwd(), 'output', example, plugin)
+
+        results_dir = os.path.join(wf.base_dir, wf.name)
+        if rm_base_dir and os.path.exists(results_dir):
+            rmtree(results_dir)
 
         # Handle a logging directory
         log_dir = os.path.join(os.getcwd(), 'logs', example)
