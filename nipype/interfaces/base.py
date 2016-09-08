@@ -48,6 +48,7 @@ nipype_version = LooseVersion(__version__)
 iflogger = logging.getLogger('interface')
 
 PY35 = sys.version_info >= (3, 5)
+PY3 = sys.version_info[0] > 2
 
 if runtime_profile:
     try:
@@ -1197,8 +1198,8 @@ class BaseInterface(Interface):
         """
         inputs = self.inputs.get_traitsfree()
         iflogger.debug('saving inputs {}', inputs)
-        with open(json_file, 'w') as fhandle:
-            json.dump(inputs, fhandle, indent=4)
+        with open(json_file, 'w' if PY3 else 'wb') as fhandle:
+            json.dump(inputs, fhandle, indent=4, ensure_ascii=False)
 
 
 class Stream(object):
