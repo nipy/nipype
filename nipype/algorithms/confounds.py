@@ -20,6 +20,7 @@ import os.path as op
 import nibabel as nb
 import numpy as np
 
+from ..external.due import due, Doi, BibTeX
 from ..interfaces.base import (traits, TraitedSpec, BaseInterface,
                                BaseInterfaceInputSpec, File)
 
@@ -49,6 +50,21 @@ class ComputeDVARS(BaseInterface):
     """
     input_spec = ComputeDVARSInputSpec
     output_spec = ComputeDVARSOutputSpec
+    references_ = [{
+        'entry': BibTex("""\
+@techreport{nichols_notes_2013,
+    address = {Coventry, UK},
+    title = {Notes on {Creating} a {Standardized} {Version} of {DVARS}},
+    url = {http://www2.warwick.ac.uk/fac/sci/statistics/staff/academic-\
+research/nichols/scripts/fsl/standardizeddvars.pdf},
+    urldate = {2016-08-16},
+    institution = {University of Warwick},
+    author = {Nichols, Thomas},
+    year = {2013}
+}"""),
+        'tags': ['method']
+
+    }]
 
     def __init__(self, **inputs):
         self._results = {}
