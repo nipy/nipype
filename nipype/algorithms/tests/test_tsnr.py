@@ -22,13 +22,14 @@ class TestTSNR(unittest.TestCase):
         'in_file': 'tsnrinfile.nii',
     }
 
-    out_filenames = {
-        # default output file names
-        'detrended_file': '/home/ubuntu/nipype/detrend.nii.gz',
-        'mean_file':  '/home/ubuntu/nipype/mean.nii.gz',
-        'stddev_file': '/home/ubuntu/nipype/stdev.nii.gz',
-        'tsnr_file': '/home/ubuntu/nipype/tsnr.nii.gz'
-    }
+    out_filenames = {key: os.path.abspath(filename) for key, filename in
+                     {
+                         # default output file names
+                         'detrended_file': 'detrend.nii.gz',
+                         'mean_file':  'mean.nii.gz',
+                         'stddev_file': 'stdev.nii.gz',
+                         'tsnr_file': 'tsnr.nii.gz'
+                     }.items()}
 
     def setUp(self):
         # setup
@@ -85,7 +86,7 @@ class TestTSNR(unittest.TestCase):
         })
 
     def assert_expected_outputs_poly(self, tsnrresult, hash_dict):
-        assert_equal(tsnrresult.outputs.detrended_file,
+        assert_equal(os.path.abspath(tsnrresult.outputs.detrended_file),
                      self.out_filenames['detrended_file'])
         self.assert_expected_outputs(tsnrresult, hash_dict)
 
@@ -94,9 +95,12 @@ class TestTSNR(unittest.TestCase):
         self.assert_unchanged(hash_dict)
 
     def assert_default_outputs(self, outputs):
-        assert_equal(outputs.mean_file, self.out_filenames['mean_file'])
-        assert_equal(outputs.stddev_file, self.out_filenames['stddev_file'])
-        assert_equal(outputs.tsnr_file, self.out_filenames['tsnr_file'])
+        assert_equal(os.path.abspath(outputs.mean_file),
+                     self.out_filenames['mean_file'])
+        assert_equal(os.path.abspath(outputs.stddev_file),
+                     self.out_filenames['stddev_file'])
+        assert_equal(os.path.abspath(outputs.tsnr_file),
+                     self.out_filenames['tsnr_file'])
 
     def assert_unchanged(self, expected_hashes):
         for key, hexhash in expected_hashes.iteritems():
