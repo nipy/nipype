@@ -47,8 +47,7 @@ class FramewiseDisplacementInputSpec(BaseInterfaceInputSpec):
     out_figure = File('fd_power_2012.pdf', usedefault=True, desc='output figure name')
     series_tr = traits.Float(desc='repetition time in sec.')
     save_plot = traits.Bool(False, usedefault=True, desc='write FD plot')
-    normalize = traits.Bool(False, usedefault=True, desc='calculate FD in mm/s',
-                            requires=['series_tr'])
+    normalize = traits.Bool(False, usedefault=True, desc='calculate FD in mm/s')
     figdpi = traits.Int(100, usedefault=True, desc='output dpi for the FD plot')
     figsize = traits.Tuple(traits.Float(11.7), traits.Float(2.3), usedefault=True,
                            desc='output figure size')
@@ -86,12 +85,18 @@ class FramewiseDisplacement(BaseInterface):
         }
         np.savetxt(self.inputs.out_file, fd_res)
 
+
         if self.inputs.save_plot:
-            self._results['out_figure'] = op.abspath(self.inputs.out_figure)
             tr = None
-            if self.inputs.normalize:
+            if isdefined(self.inputs.series_tr):
                 tr = self.inputs.series_tr
-            fig = plot_fd(fd_res, self.inputs.figsize, series_tr=tr)
+
+            if self.inputs.normalize and tr is None:
+                iflogger.warn('FD plot cannot be normalized if TR is not set')
+
+            self._results['out_figure'] = op.abspath(self.inputs.out_figure)
+            fig = plot_fd(fd_res, self.inputs.figsize, series_tr=tr,
+                          normalize=self.inputs.normalize)
             fig.savefig(self._results['out_figure'], dpi=float(self.inputs.figdpi),
                         format=self.inputs.out_figure[-3:],
                         bbox_inches='tight')
@@ -1523,7 +1528,7 @@ def merge_rois(in_files, in_idxs, in_ref,
     return out_file
 
 
-def plot_fd(fd_values, figsize, series_tr=None):
+def plot_fd(fd_values, figsize, series_tr=None, normalize=False):
     """
     A helper function to plot the framewise displacement
     """
@@ -1540,9 +1545,12 @@ def plot_fd(fd_values, figsize, series_tr=None):
     grid.update(hspace=1.0, right=0.95, left=0.1, bottom=0.2)
 
     ax = fig.add_subplot(grid[0, :-1])
+    if normalize and series_tr is not None:
+        fd_values /= series_tr
+
     ax.plot(fd_values)
     ax.set_xlim((0, len(fd_values)))
-    ax.set_ylabel('FD [{}]'.format('mm/s' if series_tr is not None else 'mm'))
+    ax.set_ylabel('FD {}'.format('speed [mm/s]' if normalize else '[mm]'))
 
     xlabel = 'Frame #'
     if series_tr is not None:
