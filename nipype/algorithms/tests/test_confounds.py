@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from nipype.testing import (assert_equal, example_data)
-from nipype.algorithms.misc import FramewiseDisplacement
+from nipype.algorithms.confounds import FramewiseDisplacement
 import numpy as np
 from tempfile import mkdtemp
 from shutil import rmtree
