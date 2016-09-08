@@ -2073,7 +2073,7 @@ class WarpPointsFromStd(CommandLine):
     >>> warppoints.inputs.std_file = 'mni.nii'
     >>> warppoints.inputs.warp_file = 'warpfield.nii'
     >>> warppoints.inputs.coord_mm = True
-    >>> warppoints.cmdline # doctest: +ELLIPSIS
+    >>> warppoints.cmdline # doctest: +ELLIPSIS +IGNORE_UNICODE
     'std2imgcoord -mm -img T1.nii -std mni.nii -warp warpfield.nii surf.txt'
     >>> res = warppoints.run() # doctest: +SKIP
 
