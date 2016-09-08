@@ -69,19 +69,8 @@ class TSNR(BaseInterface):
             data = data.astype(np.float32)
 
         if isdefined(self.inputs.regress_poly):
-            timepoints = img.shape[-1]
-            X = np.ones((timepoints, 1))
-            for i in range(self.inputs.regress_poly):
-                X = np.hstack((X, legendre(
-                    i + 1)(np.linspace(-1, 1, timepoints))[:, None]))
-            betas = np.dot(np.linalg.pinv(X), np.rollaxis(data, 3, 2))
-            datahat = np.rollaxis(np.dot(X[:, 1:],
-                                         np.rollaxis(
-                                             betas[1:, :, :, :], 0, 3)),
-                                  0, 4)
-            data = data - datahat
-            img = nb.Nifti1Image(data, img.get_affine(), header)
-            nb.save(img, op.abspath(self.inputs.detrended_file))
+            img, data = regress_poly(self.inputs.regress_poly, header, img, data,
+                                     self.inputs.detrended_file)
 
         meanimg = np.mean(data, axis=3)
         stddevimg = np.std(data, axis=3)
@@ -103,3 +92,19 @@ class TSNR(BaseInterface):
         if isdefined(self.inputs.regress_poly):
             outputs['detrended_file'] = op.abspath(self.inputs.detrended_file)
         return outputs
+
+def regress_poly(degree, header, img, data, filename):
+    timepoints = img.shape[-1]
+    X = np.ones((timepoints, 1))
+    for i in range(degree):
+        X = np.hstack((X, legendre(
+            i + 1)(np.linspace(-1, 1, timepoints))[:, None]))
+    betas = np.dot(np.linalg.pinv(X), np.rollaxis(data, 3, 2))
+    datahat = np.rollaxis(np.dot(X[:, 1:],
+                                 np.rollaxis(
+                                     betas[1:, :, :, :], 0, 3)),
+                          0, 4)
+    regressed_data = data - datahat
+    regressed_img = nb.Nifti1Image(regressed_data, img.get_affine(), header)
+    nb.save(regressed_img, op.abspath(filename))
+    return regressed_img, regressed_data
