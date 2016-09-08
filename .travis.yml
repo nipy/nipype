@@ -37,13 +37,14 @@ install:
 - rm -r /home/travis/miniconda/lib/python${TRAVIS_PYTHON_VERSION}/site-packages/nipype*
 - pip install -r requirements.txt
 - pip install -e .
+- pip install codecov
 - export COVERAGE_PROCESS_START=$(pwd)/.coveragerc
 - export COVERAGE_DATA_FILE=$(pwd)/.coverage
 - echo "data_file = ${COVERAGE_DATA_FILE}" >> ${COVERAGE_PROCESS_START}
 script:
 - python -W once:FSL:UserWarning:nipype `which nosetests` --with-doctest --with-doctest-ignore-unicode --with-cov --cover-package nipype --logging-level=DEBUG --verbosity=3
 after_success:
-- coveralls --config_file ${COVERAGE_PROCESS_START}
+- codecov
 deploy:
   provider: pypi
   user: satra
