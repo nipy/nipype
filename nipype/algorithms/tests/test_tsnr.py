@@ -16,11 +16,20 @@ class TestTSNR(unittest.TestCase):
     in_file = InputMultiPath(File(exists=True), mandatory=True,
     regress_poly = traits.Range(low=1, desc='Remove polynomials')
     '''
-    in_file_name = 'tsnrinfile.nii'
+
+    filenames = {
+        'in_file': 'tsnrinfile.nii',
+
+        # default output file names
+        'detrended_file': '/home/ubuntu/nipype/detrend.nii.gz',
+        'mean_file':  '/home/ubuntu/nipype/mean.nii.gz',
+        'stddev_file': '/home/ubuntu/nipype/stdev.nii.gz',
+        'tsnr_file': '/home/ubuntu/nipype/tsnr.nii.gz'
+    }
 
     def setUp(self):
         # setup
-        utils.save_toy_nii(self.fake_data, self.in_file_name)
+        utils.save_toy_nii(self.fake_data, self.filenames['in_file'])
 
     def test_tsnr(self):
         # setup
@@ -30,11 +39,7 @@ class TestTSNR(unittest.TestCase):
         # cleanup
 
     def tearDown(self):
-        # remove temporary nifti files
-        try:
-            os.remove(self.in_file_name)
-        except (OSError, TypeError) as e:
-            print(e)
+        utils.remove_nii(self.filenames.values())
 
     fake_data = np.array([[[[2, 4, 3, 9, 1],
                             [3, 6, 4, 7, 4]],

@@ -14,21 +14,21 @@ import os
 class TestCompCor(unittest.TestCase):
     ''' Note: Tests currently do a poor job of testing functionality '''
 
-    functionalnii = 'compcorfunc.nii'
-    masknii = 'compcormask.nii'
-    components_file = None
+    filenames = {'functionalnii': 'compcorfunc.nii',
+                 'masknii': 'compcormask.nii',
+                 'components_file': None}
 
     def setUp(self):
         # setup
         noise = np.fromfunction(self.fake_noise_fun, self.fake_data.shape)
         self.realigned_file = utils.save_toy_nii(self.fake_data + noise,
-                                                 self.functionalnii)
+                                                 self.filenames['functionalnii'])
 
     def test_compcor(self):
         mask = np.ones(self.fake_data.shape[:3])
         mask[0,0,0] = 0
         mask[0,0,1] = 0
-        mask_file = utils.save_toy_nii(mask, self.masknii)
+        mask_file = utils.save_toy_nii(mask, self.filenames['masknii'])
 
         ccresult = self.run_cc(CompCor(realigned_file=self.realigned_file,
                                mask_file=mask_file))
@@ -58,13 +58,7 @@ class TestCompCor(unittest.TestCase):
         return ccresult
 
     def tearDown(self):
-        # remove temporary nifti files
-        try:
-            os.remove(self.functionalnii)
-            os.remove(self.components_file)
-            os.remove(self.masknii)
-        except (OSError, TypeError) as e:
-            print(e)
+        utils.remove_nii(self.filenames.values())
 
     def fake_noise_fun(self, i, j, l, m):
         return m*i + l - j
