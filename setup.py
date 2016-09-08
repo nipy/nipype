@@ -401,6 +401,7 @@ def main(**extra_args):
                     'nipype.pipeline.engine.tests',
                     'nipype.pipeline.plugins',
                     'nipype.pipeline.plugins.tests',
+                    'nipype.scripts',
                     'nipype.testing',
                     'nipype.testing.data',
                     'nipype.testing.data.bedpostxout',
@@ -438,6 +439,10 @@ def main(**extra_args):
           # only a workaround to get things started -- not a solution
           package_data={'nipype': testdatafiles},
           scripts=glob('bin/*') + ['nipype/external/fsl_imglob.py'],
+          entry_points='''
+            [console_scripts]
+            nipype=nipype.scripts.cli:cli
+            ''',
           cmdclass=cmdclass,
           **extra_args
           )
