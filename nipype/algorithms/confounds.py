@@ -63,7 +63,23 @@ research/nichols/scripts/fsl/standardizeddvars.pdf},
     year = {2013}
 }"""),
         'tags': ['method']
-
+    }, {
+        'entry': BibTex("""\
+@article{power_spurious_2012,
+    title = {Spurious but systematic correlations in functional connectivity {MRI} networks \
+arise from subject motion},
+    volume = {59},
+    doi = {10.1016/j.neuroimage.2011.10.018},
+    number = {3},
+    urldate = {2016-08-16},
+    journal = {NeuroImage},
+    author = {Power, Jonathan D. and Barnes, Kelly A. and Snyder, Abraham Z. and Schlaggar, \
+Bradley L. and Petersen, Steven E.},
+    year = {2012},
+    pages = {2142--2154},
+}
+"""),
+        'tags': ['method']
     }]
 
     def __init__(self, **inputs):
@@ -132,6 +148,10 @@ def compute_dvars(in_file, in_mask):
     Particularly, the *standardized* :abbr:`DVARS (D referring to temporal
     derivative of timecourses, VARS referring to RMS variance over voxels)`
     [Nichols2013]_ are computed.
+
+    .. [Nichols2013] Nichols T, `Notes on creating a standardized version of
+         DVARS <http://www2.warwick.ac.uk/fac/sci/statistics/staff/academic-\
+research/nichols/scripts/fsl/standardizeddvars.pdf>`_, 2013.
 
     .. note:: Implementation details
 
