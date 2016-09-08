@@ -1,49 +1,41 @@
 cache:
 - apt
 language: python
+sudo: required
+
+services:
+  - docker
+
+cache:
+  directories:
+    - $HOME/.cache/docker
+
 python:
 - 2.7
 - 3.4
 - 3.5
+
 env:
-- INSTALL_DEB_DEPENDECIES=true
-- INSTALL_DEB_DEPENDECIES=false
-- INSTALL_DEB_DEPENDECIES=true DUECREDIT_ENABLE=yes
+- INSTALL_DEB_DEPENDECIES="nodeps"
+
+# Update docker to enable -f flag
 before_install:
-- wget http://repo.continuum.io/miniconda/Miniconda${TRAVIS_PYTHON_VERSION:0:1}-latest-Linux-x86_64.sh
-  -O /home/travis/.cache/miniconda.sh
-- bash /home/travis/.cache/miniconda.sh -b -p /home/travis/miniconda
-- export PATH=/home/travis/miniconda/bin:$PATH
-- if $INSTALL_DEB_DEPENDECIES; then sudo rm -rf /dev/shm; fi
-- if $INSTALL_DEB_DEPENDECIES; then sudo ln -s /run/shm /dev/shm; fi
-- bash <(wget -q -O- http://neuro.debian.net/_files/neurodebian-travis.sh)
-- sudo apt-get -y update
-- sudo apt-get -y install xvfb fusefat
-- if $INSTALL_DEB_DEPENDECIES; then travis_retry sudo apt-get install -y -qq
-  fsl afni elastix fsl-atlases; fi
-- if $INSTALL_DEB_DEPENDECIES; then
-  source /etc/fsl/fsl.sh;
-  source /etc/afni/afni.sh; fi
-- export FSLOUTPUTTYPE=NIFTI_GZ
+  - travis_retry sudo apt-get install -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" -y docker-engine
+  - travis_retry pip install coveralls
+
 install:
-- conda config --add channels conda-forge
-- conda update --yes conda
-- conda update --all -y python=$TRAVIS_PYTHON_VERSION
-# - if [[ "${INSTALL_DEB_DEPENDECIES}" == "true" && ${TRAVIS_PYTHON_VERSION:0:1} == "2" ]]; then
-#   conda install -y vtk mayavi; fi
-- conda install -y nipype
-- pip install python-coveralls coverage doctest-ignore-unicode
-- if [ ! -z "$DUECREDIT_ENABLE"]; then pip install duecredit; fi
-- rm -r /home/travis/miniconda/lib/python${TRAVIS_PYTHON_VERSION}/site-packages/nipype*
-- pip install -r requirements.txt
-- pip install -e .
-- export COVERAGE_PROCESS_START=$(pwd)/.coveragerc
-- export COVERAGE_DATA_FILE=$(pwd)/.coverage
-- echo "data_file = ${COVERAGE_DATA_FILE}" >> ${COVERAGE_PROCESS_START}
+- mkdir -p $HOME/scratch
+- mkdir -p $HOME/.cache/docker
+- if [[ -e $HOME/.cache/docker/image${TRAVIS_PYTHON_VERSION//.}.tar ]]; then docker load -i $HOME/.cache/docker/image${TRAVIS_PYTHON_VERSION//.}.tar; fi
+- docker pull nipype/nipype_test:${INSTALL_DEB_DEPENDECIES}-base${TRAVIS_PYTHON_VERSION//.}
+- travis_wait 30 docker save nipype/nipype_test:${INSTALL_DEB_DEPENDECIES}-base${TRAVIS_PYTHON_VERSION//.} -o $HOME/.cache/docker/image${TRAVIS_PYTHON_VERSION//.}.tar
+- docker build -f docker/nipype_test_${INSTALL_DEB_DEPENDECIES}/Dockerfile_py${TRAVIS_PYTHON_VERSION//.} -t nipype/nipype_test:${INSTALL_DEB_DEPENDECIES}-py${TRAVIS_PYTHON_VERSION//.} .
+
 script:
-- python -W once:FSL:UserWarning:nipype `which nosetests` --with-doctest --with-doctest-ignore-unicode --with-cov --cover-package nipype --logging-level=DEBUG --verbosity=3
+- docker run -v /etc/localtime:/etc/localtime:ro -v $HOME/scratch:/scratch nipype/nipype_test:${INSTALL_DEB_DEPENDECIES}-py${TRAVIS_PYTHON_VERSION//.} nosetests -c /root/src/nipype/.noserc --cov-report xml --with-cov --processes=0 --cover-package nipype --cov-config /root/src/nipype/.coveragerc /root/src/nipype/
 after_success:
-- coveralls --config_file ${COVERAGE_PROCESS_START}
+- coveralls --config_file ~/scratch/.coveragerc
+
 deploy:
   provider: pypi
   user: satra

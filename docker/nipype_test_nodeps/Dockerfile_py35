@@ -1,4 +1,4 @@
-# Copyright (c) 2016, The developers of the Stanford CRN
+# Copyright (c) 2016, The developers of nipype
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -26,50 +26,16 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-FROM nipype/testnipypedata:latest
-MAINTAINER Stanford Center for Reproducible Neuroscience <crn.poldracklab@gmail.com>
+FROM nipype/nipype_test:nodeps-base35
+MAINTAINER The nipype developers
 
-# Preparations
-RUN ln -snf /bin/bash /bin/sh
+RUN mkdir -p /root/src/nipype
+COPY . /root/src/nipype
 
-# Install this branch's code
-WORKDIR /root/src
-
-# Install matplotlib, sphinx and coverage to build documentation
-# and run tests with coverage
-RUN source activate nipypetests-2.7 && \
-    pip install matplotlib sphinx coverage && \
-    source activate nipypetests-3.4 && \
-    pip install matplotlib sphinx coverage && \
-    source activate nipypetests-3.5 && \
-    pip install matplotlib sphinx coverage
-
-ADD . nipype/
-
-# Install the checked out version of nipype, check that requirements are
-# installed and install it for each of the three environments.
-RUN cd nipype/ && \
-    source activate nipypetests-2.7 && \
-    pip install -r requirements.txt && \
-    pip install -e .
-
-RUN cd nipype/ && \
-    source activate nipypetests-3.4 && \
-    pip install -r requirements.txt && \
-    pip install -e .
-
-RUN cd nipype/ && \
-    source activate nipypetests-3.5 && \
+RUN rm -r /opt/conda/lib/python3.5/site-packages/nipype* && \
+    cd /root/src/nipype && \
     pip install -r requirements.txt && \
     pip install -e .
 
 WORKDIR /scratch
-
-# Install entrypoints
-ADD docker/circleci/run_* /usr/bin/
-ADD docker/travis/run_* /usr/bin/
-RUN chmod +x /usr/bin/run_*
-
-# RUN echo 'source /etc/profile.d/nipype_tests.sh' >> /etc/bash.bashrc
-ENTRYPOINT ["/usr/bin/run_examples.sh"]
-
+CMD ["/bin/bash"]

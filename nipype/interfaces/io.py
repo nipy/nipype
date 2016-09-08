@@ -947,7 +947,11 @@ class S3DataGrabber(IOBase):
         # Outputs are currently stored as locations on S3.
         # We must convert to the local location specified
         # and download the files.
+<<<<<<< HEAD
+        for key,val in list(outputs.items()):
+=======
         for key,val in outputs.items():
+>>>>>>> upstream/master
             #This will basically be either list-like or string-like:
             #if it has the __iter__ attribute, it's list-like (list,
             #tuple, numpy array) and we iterate through each of its
