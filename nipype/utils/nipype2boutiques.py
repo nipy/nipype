@@ -35,16 +35,20 @@ def generate_boutiques_descriptor(module, interface_name, ignored_template_input
         raise Exception("Undefined module.")
 
     # Retrieves Nipype interface
-    __import__(module)
-    interface = getattr(sys.modules[module], interface_name)()
+    if isinstance(module, str):
+        __import__(module)
+        module_name = str(module)
+        module = sys.modules[module]
+
+    interface = getattr(module, interface_name)()
     inputs = interface.input_spec()
     outputs = interface.output_spec()
 
     # Tool description
     tool_desc = {}
     tool_desc['name'] = interface_name
-    tool_desc['command-line'] = "nipype_cmd " + str(module) + " " + interface_name + " "
-    tool_desc['description'] = interface_name + ", as implemented in Nipype (module: " + str(module) + ", interface: " + interface_name + ")."
+    tool_desc['command-line'] = "nipype_cmd " + module_name + " " + interface_name + " "
+    tool_desc['description'] = interface_name + ", as implemented in Nipype (module: " + module_name + ", interface: " + interface_name + ")."
     tool_desc['inputs'] = []
     tool_desc['outputs'] = []
     tool_desc['tool-version'] = interface.version

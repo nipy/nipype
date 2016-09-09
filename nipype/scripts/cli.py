@@ -9,7 +9,8 @@ from .utils import (CONTEXT_SETTINGS,
                     ExistingDirPath,
                     ExistingFilePath,
                     RegularExpression,
-                    PythonModule)
+                    PythonModule,
+                    grouper)
 
 
 # declare the CLI group
@@ -111,7 +112,7 @@ def run(ctx, module, interface, list, help):
     if not module_given:
         click.echo(ctx.command.get_help(ctx))
 
-    # print the list available interfaces for the given module
+    # print the list of available interfaces for the given module
     elif (module_given and list) or (module_given and not interface):
         iface_names = list_interfaces(module)
         click.echo('Available Interfaces:')
@@ -120,11 +121,11 @@ def run(ctx, module, interface, list, help):
 
     # check the interface
     elif (module_given and interface):
+        # create the argument parser
         description = "Run {}".format(interface)
         prog = " ".join([ctx.command_path,
                          module.__name__,
-                         interface] +
-                        ctx.args)
+                         interface] + ctx.args)
         iface_parser = argparse.ArgumentParser(description=description,
                                                prog=prog)
 
@@ -141,54 +142,54 @@ def run(ctx, module, interface, list, help):
             run_instance(node, args)
 
 
-#
-# @cli.command(context_settings=CONTEXT_SETTINGS.update(dict(ignore_unknown_options=True,)))
-# @click.argument('-f', '--format', type=click.Choice(['boutiques']))
+# @cli.command(context_settings=UNKNOWN_OPTIONS)
+# @click.option('-f', '--format', type=click.Choice(['boutiques']),
+#               help='Output format type.')
 # @click.argument('format_args', nargs=-1, type=click.UNPROCESSED)
 # @click.pass_context
-# def convert(ctx, format):
+# def convert(ctx, format, format_args):
 #     """Export nipype interfaces to other formats."""
 #     if format == 'boutiques':
+#         ctx.params.pop('format')
+#         ctx.params = dict(grouper(ctx.params['format_args'], 2))
 #         ctx.forward(to_boutiques)
-#         import pdb; pdb.set_trace()
-#         ctx.invoke(to_boutiques, **format_args)
-#
-#
-# @cli.command(context_settings=CONTEXT_SETTINGS)
-# @click.option("-i", "--interface", type=str, required=True,
-#               help="Name of the Nipype interface to export.")
-# @click.option("-m", "--module", type=PythonModule(), required=True,
-#               help="Module where the interface is defined.")
-# @click.option("-o", "--output", type=str, required=True,
-#               help="JSON file name where the Boutiques descriptor will be written.")
-# @click.option("-t", "--ignored-template-inputs", type=str, multiple=True,
-#               help="Interface inputs ignored in path template creations.")
-# @click.option("-d", "--docker-image", type=str,
-#               help="Name of the Docker image where the Nipype interface is available.")
-# @click.option("-r", "--docker-index", type=str,
-#               help="Docker index where the Docker image is stored (e.g. http://index.docker.io).")
-# @click.option("-n", "--ignore-template-numbers", is_flag=True, flag_value=True,
-#               help="Ignore all numbers in path template creations.")
-# @click.option("-v", "--verbose", is_flag=True, flag_value=True,
-#               help="Enable verbose output.")
-# def to_boutiques(interface, module, output, ignored_template_inputs,
-#                  docker_image, docker_index, ignore_template_numbers,
-#                  verbose):
-#     """Nipype Boutiques exporter.
-#
-#     See Boutiques specification at https://github.com/boutiques/schema.
-#     """
-#     from nipype.utils.nipype2boutiques import generate_boutiques_descriptor
-#
-#     # Generates JSON string
-#     json_string = generate_boutiques_descriptor(module,
-#                                                 interface,
-#                                                 ignored_template_inputs,
-#                                                 docker_image,
-#                                                 docker_index,
-#                                                 verbose,
-#                                                 ignore_template_numbers)
-#
-#     # Writes JSON string to file
-#     with open(output, 'w') as f:
-#         f.write(json_string)
+
+
+@cli.command(context_settings=CONTEXT_SETTINGS)
+@click.option("-i", "--interface", type=str, required=True,
+              help="Name of the Nipype interface to export.")
+@click.option("-m", "--module", type=PythonModule(), required=True,
+              help="Module where the interface is defined.")
+@click.option("-o", "--output", type=str, required=True,
+              help="JSON file name where the Boutiques descriptor will be written.")
+@click.option("-t", "--ignored-template-inputs", type=str, multiple=True,
+              help="Interface inputs ignored in path template creations.")
+@click.option("-d", "--docker-image", type=str,
+              help="Name of the Docker image where the Nipype interface is available.")
+@click.option("-r", "--docker-index", type=str,
+              help="Docker index where the Docker image is stored (e.g. http://index.docker.io).")
+@click.option("-n", "--ignore-template-numbers", is_flag=True, flag_value=True,
+              help="Ignore all numbers in path template creations.")
+@click.option("-v", "--verbose", is_flag=True, flag_value=True,
+              help="Enable verbose output.")
+def to_boutiques(interface, module, output, ignored_template_inputs,
+                 docker_image, docker_index, ignore_template_numbers,
+                 verbose):
+    """Nipype Boutiques exporter.
+
+    See Boutiques specification at https://github.com/boutiques/schema.
+    """
+    from nipype.utils.nipype2boutiques import generate_boutiques_descriptor
+
+    # Generates JSON string
+    json_string = generate_boutiques_descriptor(module,
+                                                interface,
+                                                ignored_template_inputs,
+                                                docker_image,
+                                                docker_index,
+                                                verbose,
+                                                ignore_template_numbers)
+
+    # Writes JSON string to file
+    with open(output, 'w') as f:
+        f.write(json_string)

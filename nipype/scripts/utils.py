@@ -4,6 +4,7 @@ Utilities for the CLI functions.
 """
 from __future__ import print_function, division, unicode_literals, absolute_import
 import re
+from itertools import zip_longest
 
 import click
 
@@ -67,3 +68,10 @@ def add_args_options(arg_parser, interface):
             arg_parser.add_argument("--%s" % name, dest=name,
                                     help=desc, **args)
     return arg_parser
+
+
+def grouper(iterable, n, fillvalue=None):
+    "Collect data into fixed-length chunks or blocks"
+    # grouper('ABCDEFG', 3, 'x') --> ABC DEF Gxx
+    args = [iter(iterable)] * n
+    return zip_longest(fillvalue=fillvalue, *args)
