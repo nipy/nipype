@@ -43,32 +43,3 @@ def list_interfaces(module):
         if inspect.isclass(v) and issubclass(v, Interface):
             iface_names.append(k)
     return iface_names
-
-
-def instantiate_this(class_path, init_args):
-    """Instantiates an object of the class in class_path with the given
-    initialization arguments.
-
-    Parameters
-    ----------
-    class_path: str
-        String to the path of the class.
-
-    init_args: dict
-        Dictionary of the names and values of the initialization arguments
-        to the class
-
-    Return
-    ------
-    Instantiated object
-    """
-    try:
-        cls = import_this(class_path)
-        if init_args is None:
-            return cls()
-        else:
-            return cls(**init_args)
-    except:
-        raise RuntimeError('Error instantiating class {} '
-                           'with the arguments {}.'.format(class_path,
-                                                           init_args))
