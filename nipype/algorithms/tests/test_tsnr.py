@@ -22,14 +22,12 @@ class TestTSNR(unittest.TestCase):
         'in_file': 'tsnrinfile.nii',
     }
 
-    out_filenames = {key: os.path.abspath(filename) for key, filename in
-                     {
-                         # default output file names
-                         'detrended_file': 'detrend.nii.gz',
-                         'mean_file':  'mean.nii.gz',
-                         'stddev_file': 'stdev.nii.gz',
-                         'tsnr_file': 'tsnr.nii.gz'
-                     }.items()}
+    out_filenames = {# default output file names
+        'detrended_file': 'detrend.nii.gz',
+        'mean_file':  'mean.nii.gz',
+        'stddev_file': 'stdev.nii.gz',
+        'tsnr_file': 'tsnr.nii.gz'
+    }
 
     def setUp(self):
         # setup
@@ -86,7 +84,7 @@ class TestTSNR(unittest.TestCase):
         })
 
     def assert_expected_outputs_poly(self, tsnrresult, hash_dict):
-        assert_equal(os.path.abspath(tsnrresult.outputs.detrended_file),
+        assert_equal(os.path.basename(tsnrresult.outputs.detrended_file),
                      self.out_filenames['detrended_file'])
         self.assert_expected_outputs(tsnrresult, hash_dict)
 
@@ -95,11 +93,11 @@ class TestTSNR(unittest.TestCase):
         self.assert_unchanged(hash_dict)
 
     def assert_default_outputs(self, outputs):
-        assert_equal(os.path.abspath(outputs.mean_file),
+        assert_equal(os.path.basename(outputs.mean_file),
                      self.out_filenames['mean_file'])
-        assert_equal(os.path.abspath(outputs.stddev_file),
+        assert_equal(os.path.basename(outputs.stddev_file),
                      self.out_filenames['stddev_file'])
-        assert_equal(os.path.abspath(outputs.tsnr_file),
+        assert_equal(os.path.basename(outputs.tsnr_file),
                      self.out_filenames['tsnr_file'])
 
     def assert_unchanged(self, expected_hashes):
