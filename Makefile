@@ -53,10 +53,7 @@ inplace:
 	$(PYTHON) setup.py build_ext -i
 
 test-code: in
-#	$(NOSETESTS) -s nipype/algorithms/compcor.py --with-doctest -v
-	$(NOSETESTS) -s nipype/algorithms/tests/test_tsnr.py #--with-coverage
-	$(NOSETESTS) -s nipype/algorithms/tests/test_compcor.py #--with-coverage
-#	$(NOSETESTS) -s nipype/algorithms/misc.py --with-doctest -v
+	$(NOSETESTS) -s nipype --with-doctest
 
 test-doc:
 	$(NOSETESTS) -s --with-doctest --doctest-tests --doctest-extension=rst \

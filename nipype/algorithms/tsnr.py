@@ -60,11 +60,8 @@ class TSNR(BaseInterface):
         img = nb.load(self.inputs.in_file[0])
         header = img.header.copy()
         vollist = [nb.load(filename) for filename in self.inputs.in_file]
-        data = np.concatenate(
-            [vol.get_data().reshape(
-                vol.get_shape()[:3] + (-1,))
-             for vol in vollist],
-                              axis=3)
+        data = np.concatenate([vol.get_data().reshape(
+            vol.get_shape()[:3] + (-1,)) for vol in vollist], axis=3)
         data = np.nan_to_num(data)
 
         if data.dtype.kind == 'i':
