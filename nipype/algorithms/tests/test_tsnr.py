@@ -13,10 +13,6 @@ import os
 
 class TestTSNR(unittest.TestCase):
     ''' Note: Tests currently do a poor job of testing functionality '''
-    '''
-    in_file = InputMultiPath(File(exists=True), mandatory=True,
-    regress_poly = traits.Range(low=1, desc='Remove polynomials')
-    '''
 
     in_filenames = {
         'in_file': 'tsnrinfile.nii',
