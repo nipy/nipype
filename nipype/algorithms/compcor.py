@@ -53,25 +53,21 @@ class CompCor(BaseInterface):
         voxel_timecourses[np.isnan(np.sum(voxel_timecourses, axis=1)), :] = 0
 
         # from paper:
+        # "The constant and linear trends of the columns in the matrix M were
+        # removed [prior to ...]"
+        if self.inputs.use_regress_poly:
+            regressed = regress_poly(self.inputs.regress_poly_degree,
+                                             voxel_timecourses)
+            regressed = regressed - np.mean(regressed, axis=1)[:,None]
+
         # "Voxel time series from the noise ROI (either anatomical or tSTD) were
         # placed in a matrix M of size Nxm, with time along the row dimension
         # and voxels along the column dimension."
-        # voxel_timecourses.shape == [nvoxels, time]
-
-        M = voxel_timecourses.T
+        M = regressed.T
         numvols = M.shape[0]
         numvoxels = M.shape[1]
 
-        if self.inputs.use_regress_poly:
-            # "The constant and linear trends of the columns in the matrix M were removed ..."
-            regress_poly(self.inputs.regress_poly_degree, voxel_timecourses)
-
-        timesteps = range(numvols)
-        for voxel in range(numvoxels):
-            m, b, _, _, _ = stats.linregress(timesteps, M[:, voxel])
-            M[:, voxel] = M[:, voxel] - [m*t + b for t in timesteps]
-
-        # "... prior to column-wise variance normalization."
+        # "[... were removed] prior to column-wise variance normalization."
         M = M / self._compute_tSTD(M, 1.)
 
         # "The covariance matrix C = MMT was constructed and decomposed into its
