@@ -60,8 +60,11 @@ class TSNR(BaseInterface):
         img = nb.load(self.inputs.in_file[0])
         header = img.header.copy()
         vollist = [nb.load(filename) for filename in self.inputs.in_file]
-        data = np.concatenate([vol.get_data().reshape(
-            vol.get_shape()[:3] + (-1,)) for vol in vollist], axis=3)
+        data = np.concatenate(
+            [vol.get_data().reshape(
+                vol.get_shape()[:3] + (-1,))
+             for vol in vollist],
+                              axis=3)
         data = np.nan_to_num(data)
 
         if data.dtype.kind == 'i':
@@ -98,17 +101,25 @@ def regress_poly(degree, data):
     ''' returns data with degree polynomial regressed out.
     The last dimension (i.e. data.shape[-1]) should be time.
     '''
-    timepoints = data.shape[-1]
+    datashape = data.shape
+    timepoints = datashape[-1]
+
+    # Rearrange all voxel-wise time-series in rows
+    data = data.reshape((-1, timepoints))
+
+    # Generate design matrix
     X = np.ones((timepoints, 1))
     for i in range(degree):
         polynomial_func = legendre(i+1)
         value_array = np.linspace(-1, 1, timepoints)
         X = np.hstack((X, polynomial_func(value_array)[:, newaxis]))
 
-    betas = np.dot(np.linalg.pinv(X), np.rollaxis(data, 3, 2))
-    datahat = np.rollaxis(np.dot(X[:, 1:],
-                                 np.rollaxis(
-                                     betas[1:, :, :, :], 0, 3)),
-                          0, 4)
+    # Calculate coefficients
+    betas = np.linalg.pinv(X).dot(data.T)
+
+    # Estimation
+    datahat = X[:, 1:].dot(betas[1:, ...]).T
     regressed_data = data - datahat
-    return regressed_data
+
+    # Back to original shape
+    return regressed_data.reshape(datashape)

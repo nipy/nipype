@@ -123,6 +123,7 @@ class TCompCor(CompCor):
         mask_file = 'mask.nii'
         nb.nifti1.save(nb.Nifti1Image(mask, np.eye(4)), mask_file)
         self.inputs.mask_file = 'mask.nii'
+
         super(TCompCor, self)._run_interface(runtime)
         return runtime
 
