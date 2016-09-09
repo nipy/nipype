@@ -50,7 +50,7 @@ test:
 
   post:
     - bash docker/circleci/teardown.sh
-    - bash <(curl -s https://codecov.io/bash)
+    - bash <(curl -s https://codecov.io/bash) -f ${CIRCLE_TEST_REPORTS}/nose/${CIRCLE_PROJECT_REPONAME}.xml
 
 general:
   artifacts:
