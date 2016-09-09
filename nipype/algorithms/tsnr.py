@@ -13,7 +13,7 @@ Miscellaneous algorithms
 from nipype.interfaces.base import (BaseInterface, traits, TraitedSpec, File,
                                     InputMultiPath, BaseInterfaceInputSpec,
                                     isdefined)
-
+from numpy import newaxis
 import nibabel as nb
 import numpy as np
 import os.path as op
@@ -95,11 +95,16 @@ class TSNR(BaseInterface):
         return outputs
 
 def regress_poly(degree, data):
+    ''' returns data with degree polynomial regressed out.
+    The last dimension (i.e. data.shape[-1]) should be time.
+    '''
     timepoints = data.shape[-1]
     X = np.ones((timepoints, 1))
     for i in range(degree):
-        X = np.hstack((X, legendre(
-            i + 1)(np.linspace(-1, 1, timepoints))[:, None]))
+        polynomial_func = legendre(i+1)
+        value_array = np.linspace(-1, 1, timepoints)
+        X = np.hstack((X, polynomial_func(value_array)[:, newaxis]))
+
     betas = np.dot(np.linalg.pinv(X), np.rollaxis(data, 3, 2))
     datahat = np.rollaxis(np.dot(X[:, 1:],
                                  np.rollaxis(
