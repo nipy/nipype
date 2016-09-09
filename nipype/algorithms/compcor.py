@@ -1,9 +1,8 @@
 from ..interfaces.base import (BaseInterfaceInputSpec, TraitedSpec,
                                BaseInterface, traits, File)
-
-from nipype.pipeline import engine as pe
-from nipype.interfaces.utility import IdentityInterface
-from nipype.algorithms.tsnr import regress_poly
+from ..pipeline import engine as pe
+from ..interfaces.utility import IdentityInterface
+from .tsnr import regress_poly
 
 import nibabel as nb
 import numpy as np
@@ -16,7 +15,7 @@ class CompCorInputSpec(BaseInterfaceInputSpec):
     mask_file = File(exists=True, mandatory=False,
                      desc='mask file that determines ROI (3D)')
     components_file = File('components_file.txt', exists=False, mandatory=False,
-                           usedefault=True, 
+                           usedefault=True,
                            desc='filename to store physiological components in')
     num_components = traits.Int(6, usedefault=True) # 6 for BOLD, 4 for ASL
     regress_poly = traits.Range(low=1, default=1, usedefault=True)

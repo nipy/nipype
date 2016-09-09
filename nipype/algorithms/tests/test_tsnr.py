@@ -1,8 +1,8 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 import nipype
-from nipype.testing import assert_equal, assert_true, skipif, utils
-from nipype.algorithms.misc import TSNR
+from ...testing import assert_equal, assert_true, skipif, utils
+from ..misc import TSNR
 
 from hashlib import sha1
 import unittest

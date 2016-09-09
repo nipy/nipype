@@ -10,9 +10,9 @@ Miscellaneous algorithms
     >>> os.chdir(datadir)
 
 '''
-from nipype.interfaces.base import (BaseInterface, traits, TraitedSpec, File,
-                                    InputMultiPath, BaseInterfaceInputSpec,
-                                    isdefined)
+from ..interfaces.base import (BaseInterface, traits, TraitedSpec, File,
+                               InputMultiPath, BaseInterfaceInputSpec,
+                               isdefined)
 from numpy import newaxis
 import nibabel as nb
 import numpy as np
