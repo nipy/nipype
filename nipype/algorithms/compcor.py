@@ -2,7 +2,7 @@ from ..interfaces.base import (BaseInterfaceInputSpec, TraitedSpec,
                                BaseInterface, traits, File)
 from ..pipeline import engine as pe
 from ..interfaces.utility import IdentityInterface
-from .tsnr import regress_poly
+from .misc import regress_poly
 
 import nibabel as nb
 import numpy as np
