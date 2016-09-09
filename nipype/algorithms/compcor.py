@@ -66,12 +66,11 @@ class CompCor(BaseInterface):
             # "The constant and linear trends of the columns in the matrix M were removed ..."
             regress_poly(self.inputs.regress_poly_degree, voxel_timecourses)
 
-        '''
         timesteps = range(numvols)
         for voxel in range(numvoxels):
             m, b, _, _, _ = stats.linregress(timesteps, M[:, voxel])
             M[:, voxel] = M[:, voxel] - [m*t + b for t in timesteps]
-        '''
+
         # "... prior to column-wise variance normalization."
         M = M / self._compute_tSTD(M, 1.)
 

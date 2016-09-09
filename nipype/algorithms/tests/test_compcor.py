@@ -30,25 +30,31 @@ class TestCompCor(unittest.TestCase):
         mask[0,0,1] = 0
         mask_file = utils.save_toy_nii(mask, self.filenames['masknii'])
 
-        expected_sha1 = 'b0dd7f9ab7ba8f516712eb0204dacc9e397fc6aa'
+        expected_components = [['-0.1989607212', '-0.5753813646'],
+                               ['0.5692369697', '0.5674945949'],
+                               ['-0.6662573243', '0.4675843432'],
+                               ['0.4206466244', '-0.3361270124'],
+                               ['-0.1246655485', '-0.1235705610']]
 
         ccresult = self.run_cc(CompCor(realigned_file=self.realigned_file,
                                        mask_file=mask_file),
-                               expected_sha1)
+                               expected_components)
 
         accresult = self.run_cc(ACompCor(realigned_file=self.realigned_file,
                                          mask_file=mask_file,
                                          components_file='acc_components_file'),
-                                expected_sha1)
+                                expected_components)
 
         assert_equal(os.path.getsize(ccresult.outputs.components_file),
                      os.path.getsize(accresult.outputs.components_file))
 
     def test_tcompcor(self):
         ccinterface = TCompCor(realigned_file=self.realigned_file)
-        self.run_cc(ccinterface, '12e54c07281a28ac0da3b934dce5c9d27626848a')
+        self.run_cc(ccinterface, [['-0.2846272268'], ['0.7115680670'],
+                                  ['-0.6048328569'], ['0.2134704201'],
+                                  ['-0.0355784033']])
 
-    def run_cc(self, ccinterface, expected_components_data_sha1):
+    def run_cc(self, ccinterface, expected_components):
         # run
         ccresult = ccinterface.run()
 
@@ -60,12 +66,12 @@ class TestCompCor(unittest.TestCase):
         assert_equal(ccinterface.inputs.num_components, 6)
 
         with open(ccresult.outputs.components_file, 'r') as components_file:
-            components_data = [line for line in components_file]
+            components_data = [line.split() for line in components_file]
             num_got_components = len(components_data)
             assert_true(num_got_components == ccinterface.inputs.num_components
                         or num_got_components == self.fake_data.shape[3])
-            print(str(components_data), "comdata")
-            assert_equal(sha1(str(components_data)).hexdigest(), expected_components_data_sha1)
+            first_two = [row[:2] for row in components_data]
+            assert_equal(first_two, expected_components)
         return ccresult
 
     def tearDown(self):
