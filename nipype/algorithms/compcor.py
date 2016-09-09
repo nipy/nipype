@@ -69,7 +69,7 @@ class CompCor(BaseInterface):
         '''
         timesteps = range(numvols)
         for voxel in range(numvoxels):
-            m, b, _, _, _ = stats.linregress(M[:, voxel], timesteps)
+            m, b, _, _, _ = stats.linregress(timesteps, M[:, voxel])
             M[:, voxel] = M[:, voxel] - [m*t + b for t in timesteps]
         '''
         # "... prior to column-wise variance normalization."
