@@ -9,7 +9,6 @@ import mock
 import nibabel as nb
 import numpy as np
 import os
-from hashlib import sha1
 
 class TestCompCor(unittest.TestCase):
     ''' Note: Tests currently do a poor job of testing functionality '''

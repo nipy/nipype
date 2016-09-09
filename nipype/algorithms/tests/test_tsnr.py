@@ -1,10 +1,10 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
-import nipype
-from ...testing import assert_equal, assert_true, skipif, utils
+
+from ...testing import (assert_equal, assert_true, assert_almost_equal,
+                        skipif, utils)
 from ..misc import TSNR
 
-from hashlib import sha1
 import unittest
 import mock
 import nibabel as nb
@@ -39,9 +39,9 @@ class TestTSNR(unittest.TestCase):
 
         # assert
         self.assert_expected_outputs(tsnrresult, {
-            'mean_file':   '1a55bcdf49901f25a2a838c90769989b9e4f2f19',
-            'stddev_file': '0ba52a51fae90a9db6090c735432df5b742d663a',
-            'tsnr_file': 'a794fc55766c8ad725437d3ff8b1153bd5f6e9b0'
+            'mean_file': (2.8, 7.4),
+            'stddev_file': (0.8, 2.9),
+            'tsnr_file': (1.3, 9.25)
         })
 
     def test_tsnr_withpoly1(self):
@@ -51,10 +51,10 @@ class TestTSNR(unittest.TestCase):
 
         # assert
         self.assert_expected_outputs_poly(tsnrresult, {
-            'detrended_file': 'ee4f6c0b0e8c547617fc11aa50cf659436f9ccf0',
-            'mean_file': '1a55bcdf49901f25a2a838c90769989b9e4f2f19',
-            'stddev_file': 'e61d94e3cfea20b0c86c81bfdf80d82c55e9203b',
-            'tsnr_file': 'a49f1cbd88f2aa71183dcd7aa4b86b17df622f0c'
+            'detrended_file': (-0.1, 8.7),
+            'mean_file': (2.8, 7.4),
+            'stddev_file': (0.75, 2.75),
+            'tsnr_file': (1.4, 9.9)
         })
 
     def test_tsnr_withpoly2(self):
@@ -64,10 +64,10 @@ class TestTSNR(unittest.TestCase):
 
         # assert
         self.assert_expected_outputs_poly(tsnrresult, {
-            'detrended_file': '22cb7f058d61cc090eb1a9dd7d31550bd4362a61',
-            'mean_file': '4cee6776461f6bc238d11a55c0a8d1947a5732df',
-            'stddev_file': '7267de4d9b63fcc553115c0198f1fa3bbb6a5a13',
-            'tsnr_file': '1c6ed05f94806838f7b563df65900f37e60f8a6d'
+            'detrended_file': (-0.22, 8.55),
+            'mean_file': (2.8, 7.7),
+            'stddev_file': (0.21, 2.4),
+            'tsnr_file': (1.7, 35.9)
         })
 
     def test_tsnr_withpoly3(self):
@@ -77,20 +77,20 @@ class TestTSNR(unittest.TestCase):
 
         # assert
         self.assert_expected_outputs_poly(tsnrresult, {
-            'detrended_file': '3f2c1c7da233f128a7020b6fed79d6be2ec59fca',
-            'mean_file': '4cee6776461f6bc238d11a55c0a8d1947a5732df',
-            'stddev_file': '82bb793b76fab503d1d6b3e2d1b20a1bdebd7a2a',
-            'tsnr_file': 'e004bd6096a0077b15058aabd4b0339bf6e21f64'
+            'detrended_file': (1.8, 7.95),
+            'mean_file': (2.8, 7.7),
+            'stddev_file': (0.1, 1.7),
+            'tsnr_file': (2.6, 57.3)
         })
 
-    def assert_expected_outputs_poly(self, tsnrresult, hash_dict):
+    def assert_expected_outputs_poly(self, tsnrresult, expected_ranges):
         assert_equal(os.path.basename(tsnrresult.outputs.detrended_file),
                      self.out_filenames['detrended_file'])
-        self.assert_expected_outputs(tsnrresult, hash_dict)
+        self.assert_expected_outputs(tsnrresult, expected_ranges)
 
-    def assert_expected_outputs(self, tsnrresult, hash_dict):
+    def assert_expected_outputs(self, tsnrresult, expected_ranges):
         self.assert_default_outputs(tsnrresult.outputs)
-        self.assert_unchanged(hash_dict)
+        self.assert_unchanged(expected_ranges)
 
     def assert_default_outputs(self, outputs):
         assert_equal(os.path.basename(outputs.mean_file),
@@ -100,10 +100,11 @@ class TestTSNR(unittest.TestCase):
         assert_equal(os.path.basename(outputs.tsnr_file),
                      self.out_filenames['tsnr_file'])
 
-    def assert_unchanged(self, expected_hashes):
-        for key, hexhash in expected_hashes.iteritems():
-            data = np.asanyarray(nb.load(self.out_filenames[key])._data)
-            assert_equal(sha1(str(data)).hexdigest(), hexhash)
+    def assert_unchanged(self, expected_ranges):
+        for key, (min_, max_) in expected_ranges.iteritems():
+            data = np.asarray(nb.load(self.out_filenames[key])._data)
+            assert_almost_equal(np.amin(data), min_, decimal=1)
+            assert_almost_equal(np.amax(data), max_, decimal=1)
 
     def tearDown(self):
         utils.remove_nii(self.in_filenames.values())
