@@ -14,11 +14,15 @@ class CompCorInputSpec(BaseInterfaceInputSpec):
                           desc='already realigned brain image (4D)')
     mask_file = File(exists=True, mandatory=False,
                      desc='mask file that determines ROI (3D)')
-    components_file = File('components_file.txt', exists=False, mandatory=False,
-                           usedefault=True,
-                           desc='filename to store physiological components in')
+    components_file = File('components_file.txt', exists=False,
+                           mandatory=False, usedefault=True,
+                           desc='filename to store physiological components')
     num_components = traits.Int(6, usedefault=True) # 6 for BOLD, 4 for ASL
-    regress_poly = traits.Range(low=1, default=1, usedefault=True)
+    use_regress_poly = traits.Bool(True, usedefault=True,
+                                   desc='use polynomial regression'
+                                   'pre-component extraction')
+    regress_poly_degree = traits.Range(low=1, default=1, usedefault=True,
+                                       desc='the degree polynomial to use')
 
 class CompCorOutputSpec(TraitedSpec):
     components_file = File(exists=True,
@@ -35,6 +39,8 @@ class CompCor(BaseInterface):
     >>> ccinterface.inputs.realigned_file = 'nipype/testing/data/functional.nii'
     >>> ccinterface.inputs.mask_file = 'nipype/testing/data/mask.nii'
     >>> ccinterface.inputs.num_components = 1
+    >>> ccinterface.inputs.use_regress_poly = True
+    >>> ccinterface.inputs.regress_poly_degree = 2
     '''
     input_spec = CompCorInputSpec
     output_spec = CompCorOutputSpec
@@ -51,16 +57,21 @@ class CompCor(BaseInterface):
         # placed in a matrix M of size Nxm, with time along the row dimension
         # and voxels along the column dimension."
         # voxel_timecourses.shape == [nvoxels, time]
+
         M = voxel_timecourses.T
         numvols = M.shape[0]
         numvoxels = M.shape[1]
 
-        # "The constant and linear trends of the columns in the matrix M were removed ..."
+        if self.inputs.use_regress_poly:
+            # "The constant and linear trends of the columns in the matrix M were removed ..."
+            regress_poly(self.inputs.regress_poly_degree, voxel_timecourses)
+
+        '''
         timesteps = range(numvols)
         for voxel in range(numvoxels):
             m, b, _, _, _ = stats.linregress(M[:, voxel], timesteps)
             M[:, voxel] = M[:, voxel] - [m*t + b for t in timesteps]
-
+        '''
         # "... prior to column-wise variance normalization."
         M = M / self._compute_tSTD(M, 1.)
 
