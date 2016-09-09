@@ -37,10 +37,10 @@ def test_TShift_inputs():
     tr=dict(argstr='-TR %s',
     ),
     tslice=dict(argstr='-slice %s',
-    xor=['tzero'],
+    xor=[u'tzero'],
     ),
     tzero=dict(argstr='-tzero %s',
-    xor=['tslice'],
+    xor=[u'tslice'],
     ),
     )
     inputs = TShift.input_spec()

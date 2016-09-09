@@ -11,11 +11,16 @@ Much of the machinery at the beginning of this file has been copied over from
 nibabel denoted by ## START - COPIED FROM NIBABEL and a corresponding ## END
 
 """
-"""Build helper."""
+# Build helper
+from __future__ import print_function
+from builtins import str, bytes, open
 
 import os
-from glob import glob
+from os.path import join as pjoin
 import sys
+from configparser import ConfigParser
+
+from glob import glob
 from functools import partial
 
 # BEFORE importing distutils, remove MANIFEST. distutils doesn't properly
@@ -27,31 +32,19 @@ if os.path.exists('MANIFEST'):
 if len(set(('develop', 'bdist_egg', 'bdist_rpm', 'bdist', 'bdist_dumb',
             'install_egg_info', 'egg_info', 'easy_install', 'bdist_wheel',
             'bdist_mpkg')).intersection(sys.argv)) > 0:
-    # setup_egg imports setuptools setup, thus monkeypatching distutils.
+    # import setuptools setup, thus monkeypatching distutils.
     import setup_egg
-
-from distutils.core import setup
+    from setuptools import setup
+else:
+    from distutils.core import setup
 
 # Commit hash writing, and dependency checking
 ''' Distutils / setuptools helpers from nibabel.nisext'''
-
-import os
-from os.path import join as pjoin
-import sys
-PY3 = sys.version_info[0] >= 3
-if PY3:
-    string_types = str,
-else:
-    string_types = basestring,
-try:
-    from ConfigParser import ConfigParser
-except ImportError:
-    from configparser import ConfigParser
-
 from distutils.version import LooseVersion
 from distutils.command.build_py import build_py
 from distutils import log
 
+PY3 = sys.version_info[0] >= 3
 
 def get_comrec_build(pkg_dir, build_cmd=build_py):
     """ Return extended build command class for recording commit
@@ -105,7 +98,10 @@ def get_comrec_build(pkg_dir, build_cmd=build_py):
             cfg_parser.read(pjoin(pkg_dir, 'COMMIT_INFO.txt'))
             cfg_parser.set('commit hash', 'install_hash', repo_commit)
             out_pth = pjoin(self.build_lib, pkg_dir, 'COMMIT_INFO.txt')
-            cfg_parser.write(open(out_pth, 'wt'))
+            if PY3:
+                cfg_parser.write(open(out_pth, 'wt'))
+            else:
+                cfg_parser.write(open(out_pth, 'wb'))
     return MyBuildPy
 
 
@@ -116,7 +112,7 @@ def _add_append_key(in_dict, key, value):
     # Append value to in_dict[key] list
     if key not in in_dict:
         in_dict[key] = []
-    elif isinstance(in_dict[key], string_types):
+    elif isinstance(in_dict[key], (str, bytes)):
         in_dict[key] = [in_dict[key]]
     in_dict[key].append(value)
 
@@ -213,7 +209,7 @@ def package_check(pkg_name, version=None,
                  msgs['opt suffix'])
         return
     # setuptools mode
-    if optional_tf and not isinstance(optional, string_types):
+    if optional_tf and not isinstance(optional, (str, bytes)):
         raise RuntimeError('Not-False optional arg should be string')
     dependency = pkg_name
     if version:
@@ -248,7 +244,7 @@ cmdclass = {'build_py': get_comrec_build('nipype')}
 
 # Get version and release info, which is all stored in nipype/info.py
 ver_file = os.path.join('nipype', 'info.py')
-exec(open(ver_file).read())
+exec(open(ver_file).read(), locals())
 
 # Prepare setuptools args
 if 'setuptools' in sys.modules:
@@ -287,6 +283,19 @@ def main(**extra_args):
     testdatafiles = [pjoin('testing', 'data', val)
                      for val in os.listdir(pjoin(thispath, 'nipype', 'testing', 'data'))
                      if not os.path.isdir(pjoin(thispath, 'nipype', 'testing', 'data', val))]
+
+    testdatafiles+=[
+        pjoin('testing', 'data', 'dicomdir', '*'),
+        pjoin('testing', 'data', 'bedpostxout', '*'),
+        pjoin('testing', 'data', 'tbss_dir', '*'),
+        pjoin('workflows', 'data', '*'),
+        pjoin('pipeline', 'engine', 'report_template.html'),
+        pjoin('external', 'd3.js'),
+        pjoin('interfaces', 'script_templates', '*'),
+        pjoin('interfaces', 'tests', 'realign_json.json'),
+        pjoin('interfaces', 'tests', 'use_resources'),
+    ]
+
     setup(name=NAME,
           maintainer=MAINTAINER,
           maintainer_email=MAINTAINER_EMAIL,
@@ -427,18 +436,8 @@ def main(**extra_args):
           # above, but distutils is surely the worst piece of code in all of
           # python -- duplicating things into MANIFEST.in but this is admittedly
           # only a workaround to get things started -- not a solution
-          package_data={'nipype':
-                         testdatafiles + [
-                         pjoin('testing', 'data', 'dicomdir', '*'),
-                         pjoin('testing', 'data', 'bedpostxout', '*'),
-                         pjoin('testing', 'data', 'tbss_dir', '*'),
-                         pjoin('workflows', 'data', '*'),
-                         pjoin('pipeline', 'engine', 'report_template.html'),
-                         pjoin('external', 'd3.js'),
-                         pjoin('interfaces', 'script_templates', '*'),
-                         pjoin('interfaces', 'tests', 'realign_json.json')
-                         ]},
-          scripts=glob('bin/*'),
+          package_data={'nipype': testdatafiles},
+          scripts=glob('bin/*') + ['nipype/external/fsl_imglob.py'],
           cmdclass=cmdclass,
           **extra_args
           )

@@ -1,5 +1,7 @@
+# -*- coding: utf-8 -*-
 """Parallel workflow execution via SGE
 """
+from __future__ import print_function, division, unicode_literals, absolute_import
 
 from builtins import object
 
@@ -13,8 +15,8 @@ import xml.dom.minidom
 
 import random
 
+from ...interfaces.base import CommandLine
 from .base import (SGELikeBatchManagerBase, logger, iflogger, logging)
-from nipype.interfaces.base import CommandLine
 
 DEBUGGING_PREFIX = str(int(random.uniform(100, 999)))
 
@@ -312,9 +314,9 @@ def qsub_sanitize_job_name(testjobname):
 
     Numbers and punctuation are  not allowed.
 
-    >>> qsub_sanitize_job_name('01')
+    >>> qsub_sanitize_job_name('01') # doctest: +IGNORE_UNICODE
     'J01'
-    >>> qsub_sanitize_job_name('a01')
+    >>> qsub_sanitize_job_name('a01') # doctest: +IGNORE_UNICODE
     'a01'
     """
     if testjobname[0].isalpha():

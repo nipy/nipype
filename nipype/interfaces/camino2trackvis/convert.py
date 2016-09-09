@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Provides interfaces to various commands provided by Camino-Trackvis
 
@@ -8,10 +9,12 @@ Provides interfaces to various commands provided by Camino-Trackvis
     >>> os.chdir(datadir)
 
 """
+from __future__ import print_function, division, unicode_literals, absolute_import
+
 import os
 
-from ..base import CommandLineInputSpec, CommandLine, traits, TraitedSpec, File
 from ...utils.filemanip import split_filename
+from ..base import CommandLineInputSpec, CommandLine, traits, TraitedSpec, File
 
 
 class Camino2TrackvisInputSpec(CommandLineInputSpec):
@@ -79,7 +82,7 @@ class Camino2Trackvis(CommandLine):
         return outputs
 
     def _gen_filename(self, name):
-        if name is 'out_file':
+        if name == 'out_file':
             return self._gen_outfilename()
         else:
             return None
@@ -130,7 +133,7 @@ class Trackvis2Camino(CommandLine):
         return outputs
 
     def _gen_filename(self, name):
-        if name is 'out_file':
+        if name == 'out_file':
             return self._gen_outfilename()
         else:
             return None

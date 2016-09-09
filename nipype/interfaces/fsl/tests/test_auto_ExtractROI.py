@@ -8,7 +8,7 @@ def test_ExtractROI_inputs():
     ),
     crop_list=dict(argstr='%s',
     position=2,
-    xor=['x_min', 'x_size', 'y_min', 'y_size', 'z_min', 'z_size', 't_min', 't_size'],
+    xor=[u'x_min', u'x_size', u'y_min', u'y_size', u'z_min', u'z_size', u't_min', u't_size'],
     ),
     environ=dict(nohash=True,
     usedefault=True,

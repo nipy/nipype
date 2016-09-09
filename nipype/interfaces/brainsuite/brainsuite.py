@@ -1,21 +1,16 @@
+# -*- coding: utf-8 -*-
+from __future__ import print_function, division, unicode_literals, absolute_import
+
+import os
+import re as regex
+
+from ..base import TraitedSpec, CommandLineInputSpec, CommandLine, File, traits, isdefined
+
 """This script provides interfaces for BrainSuite command line tools.
 Please see brainsuite.org for more information.
 
 Author: Jason Wong
 """
-
-import os
-import re as regex
-
-from nipype.interfaces.base import(
-    TraitedSpec,
-    CommandLineInputSpec,
-    CommandLine,
-    File,
-    traits,
-    isdefined,
-)
-
 
 class BseInputSpec(CommandLineInputSpec):
 

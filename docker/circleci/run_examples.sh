@@ -1,13 +1,16 @@
 #!/bin/bash
-for i in /etc/profile.d/*.sh; do
-    source $i
-done
+set -e
+set -x
+set -u
 
 mkdir -p /root/.nipype
 echo '[logging]' > /root/.nipype/nipype.cfg
 echo 'workflow_level = DEBUG' >> /root/.nipype/nipype.cfg
 echo 'interface_level = DEBUG' >> /root/.nipype/nipype.cfg
 echo 'filemanip_level = DEBUG' >> /root/.nipype/nipype.cfg
+echo 'log_to_file = true' >> /root/.nipype/nipype.cfg
+echo 'log_directory = /scratch/logs/' >> /root/.nipype/nipype.cfg
 
-source activate nipypetests-2.7
 python /root/src/nipype/tools/run_examples.py $@
+
+chmod 777 -R /scratch/logs

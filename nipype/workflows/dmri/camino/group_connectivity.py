@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import os.path as op                      # system functions
 
 from .connectivity_mapping import create_connectivity_pipeline

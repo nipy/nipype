@@ -1,12 +1,15 @@
+# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
+from __future__ import print_function, division, unicode_literals, absolute_import
+
 import os
 import warnings
 import xml.dom.minidom
 
-from nipype.interfaces.base import (CommandLine, CommandLineInputSpec,
-                                    DynamicTraitedSpec, traits, Undefined,
-                                    File, isdefined)
+from .base import (CommandLine, CommandLineInputSpec,
+                   DynamicTraitedSpec, traits, Undefined,
+                   File, isdefined)
 
 
 class SlicerCommandLineInputSpec(DynamicTraitedSpec, CommandLineInputSpec):

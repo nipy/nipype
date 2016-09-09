@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from __future__ import absolute_import
 from .dti import create_bedpostx_pipeline, bedpostx_parallel
 
