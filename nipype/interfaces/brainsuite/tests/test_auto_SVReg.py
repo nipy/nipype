@@ -54,13 +54,13 @@ def test_SVReg_inputs():
     useSingleThreading=dict(argstr="'-U'",
     ),
     verbosity0=dict(argstr="'-v0'",
-    xor=('verbosity0', 'verbosity1', 'verbosity2'),
+    xor=(u'verbosity0', u'verbosity1', u'verbosity2'),
     ),
     verbosity1=dict(argstr="'-v1'",
-    xor=('verbosity0', 'verbosity1', 'verbosity2'),
+    xor=(u'verbosity0', u'verbosity1', u'verbosity2'),
     ),
     verbosity2=dict(argstr="'v2'",
-    xor=('verbosity0', 'verbosity1', 'verbosity2'),
+    xor=(u'verbosity0', u'verbosity1', u'verbosity2'),
     ),
     )
     inputs = SVReg.input_spec()
