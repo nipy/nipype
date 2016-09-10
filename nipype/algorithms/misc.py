@@ -1157,6 +1157,10 @@ class SplitROIs(BaseInterface):
     """
     Splits a 3D image in small chunks to enable parallel processing.
     ROIs keep time series structure in 4D images.
+
+    Example
+    -------
+
     >>> from nipype.algorithms import misc
     >>> rois = misc.SplitROIs()
     >>> rois.inputs.in_file = 'diffusion.nii'
