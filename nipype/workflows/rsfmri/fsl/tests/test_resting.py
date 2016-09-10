@@ -15,9 +15,15 @@ import nibabel as nb
 import numpy as np
 import os
 
+
+
+
+
 def mock_node_factory(*args, **kwargs):
     ''' return mocks for all the nodes except compcor and compcor's neighbors'''
     mock = MagicMock()
+    if 'interface' in kwargs.keys():
+        mock = mock.create_autospec(kwargs['interface'], instance=True)
     if 'name' in kwargs.keys():
         name = kwargs['name']
         if name == 'compcor':
@@ -28,14 +34,12 @@ def mock_node_factory(*args, **kwargs):
             return Node(IdentityInterface(fields=['out_file', 'lowpass_sigma',
                                                   'num_noise_components',
                                                   'func', 'highpass_sigma']),
-                        name='fake'+name)
+                        name=name)
         if name in ('remove_noise'):
             # node that takes output from compcor
             return Node(IdentityInterface(fields=['design_file', 'out_file']),
                         name=name)
         mock.name = kwargs['name']
-    if 'interface' in kwargs.keys():
-        mock = mock.create_autospec(kwargs['interface'], instance=True)
     mock.iterables = None
     return mock
 
@@ -43,6 +47,7 @@ class TestResting(unittest.TestCase):
 
     in_filenames = {
         'in_file': 'rsfmrifunc.nii',
+        'noise_mask_file': 'rsfmrimask.nii'
     }
 
     out_filenames = {
@@ -64,6 +69,8 @@ class TestResting(unittest.TestCase):
         # setup
         # run
         wf = create_resting_preproc()
+        wf.inputs.inputspec.num_noise_components = 6
+        wf.get_node('threshold').inputs.out_file = self.in_filenames['noise_mask_file']
         wf.run()
 
         # assert
