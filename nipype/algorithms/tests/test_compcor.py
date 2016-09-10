@@ -9,6 +9,8 @@ import mock
 import nibabel as nb
 import numpy as np
 import os
+import tempfile
+import shutil
 
 class TestCompCor(unittest.TestCase):
     ''' Note: Tests currently do a poor job of testing functionality '''
@@ -19,6 +21,9 @@ class TestCompCor(unittest.TestCase):
 
     def setUp(self):
         # setup
+        self.orig_dir = os.getcwd()
+        self.temp_dir = tempfile.mkdtemp()
+        os.chdir(self.temp_dir)
         noise = np.fromfunction(self.fake_noise_fun, self.fake_data.shape)
         self.realigned_file = utils.save_toy_nii(self.fake_data + noise,
                                                  self.filenames['functionalnii'])
@@ -74,7 +79,8 @@ class TestCompCor(unittest.TestCase):
         return ccresult
 
     def tearDown(self):
-        utils.remove_nii(self.filenames.values())
+        os.chdir(self.orig_dir)
+        shutil.rmtree(self.temp_dir)
 
     def fake_noise_fun(self, i, j, l, m):
         return m*i + l - j
