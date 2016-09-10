@@ -24,8 +24,8 @@ dependencies:
         timeout: 1600
     # - docker build -f docker/nipype_test/Dockerfile_py27 -t nipype/nipype_test:py27 . :
     #     timeout: 1600
-    - mkdir -p ~/docker; docker save nipype/nipype_test:py27 > ~/docker/image.tar :
-        timeout: 1600
+    # - mkdir -p ~/docker; docker save nipype/nipype_test:py27 > ~/docker/image.tar :
+    #     timeout: 1600
     - pip install xunitmerge
 
 test:
