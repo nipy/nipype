@@ -49,8 +49,8 @@ test:
 
   post:
     - bash docker/circleci/teardown.sh
-    - bash <(curl -s https://codecov.io/bash) -f ${CIRCLE_TEST_REPORTS}/nose/coverage*.xml -t ac172a50-8e66-42e5-8822-5373fcf54686 -F unittests
-    - bash <(curl -s https://codecov.io/bash) -f ${CIRCLE_TEST_REPORTS}/nose/smoketest*.xml -t ac172a50-8e66-42e5-8822-5373fcf54686 -F smoketests
+    - bash <(curl -s https://codecov.io/bash) -f "${CIRCLE_TEST_REPORTS}/nose/coverage*.xml" -t ac172a50-8e66-42e5-8822-5373fcf54686 -F unittests
+    - bash <(curl -s https://codecov.io/bash) -f "${CIRCLE_TEST_REPORTS}/nose/smoketest*.xml" -t ac172a50-8e66-42e5-8822-5373fcf54686 -F smoketests
 
 general:
   artifacts:
