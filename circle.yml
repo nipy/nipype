@@ -7,7 +7,6 @@ dependencies:
     - "~/docker"
     - "~/examples"
     - "~/.apt-cache"
-    - "~/scratch"
 
   pre:
     # Let CircleCI cache the apt archive
@@ -51,8 +50,8 @@ test:
 
   post:
     - bash docker/circleci/teardown.sh
-    - bash <(curl -s https://codecov.io/bash) -f ~/scratch/nosetest*.xml -t ac172a50-8e66-42e5-8822-5373fcf54686 -cF unittests
-    - bash <(curl -s https://codecov.io/bash) -f ~/scratch/smoketest*.xml -t ac172a50-8e66-42e5-8822-5373fcf54686 -cF smoketests
+    - bash <(curl -s https://codecov.io/bash) -f ~/nosetest*.xml -t ac172a50-8e66-42e5-8822-5373fcf54686 -cF unittests
+    - bash <(curl -s https://codecov.io/bash) -f ~/smoketest*.xml -t ac172a50-8e66-42e5-8822-5373fcf54686 -cF smoketests
 
 general:
   artifacts:
