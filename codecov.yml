@@ -1,0 +1,9 @@
+coverage:
+  status:
+    project:
+      unittests:  # declare a new status context "tests"
+        flags:
+          - "unittests"  # only include coverage in "tests/" folder
+      smoketests:  # declare a new status context "app"
+        paths:
+          - "smoketests"  # remove all files in "tests/"
