@@ -151,7 +151,7 @@ def create_resting_preproc(name='restpreproc'):
                                                  'num_components'],
                                     output_names=['noise_components'],
                                     function=extract_noise_components),
-                      name='compcorr')
+                      name='compcor')
     remove_noise = pe.Node(fsl.FilterRegressor(filter_all=True),
                            name='remove_noise')
     bandpass_filter = pe.Node(fsl.TemporalFilter(),

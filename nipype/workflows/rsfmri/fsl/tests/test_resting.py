@@ -3,7 +3,8 @@
 
 from .....testing import (assert_equal, assert_true, assert_almost_equal,
                           skipif, utils)
-from .....interfaces import fsl
+from .....interfaces import fsl, IdentityInterface
+from .....pipeline.engine import Node
 
 from ..resting import create_resting_preproc
 
@@ -15,8 +16,24 @@ import numpy as np
 import os
 
 def mock_node_factory(*args, **kwargs):
+    ''' return mocks for all the nodes except compcor and compcor's neighbors'''
     mock = MagicMock()
-    mock.name = kwargs['name'] if 'name' in kwargs.keys() else ''
+    if 'name' in kwargs.keys():
+        name = kwargs['name']
+        if name == 'compcor':
+            return Node(*args, **kwargs)
+        if name in ['threshold', 'inputspec']:
+            # nodes that provide inputs for compcor
+            # just give all of them all of the fields
+            return Node(IdentityInterface(fields=['out_file', 'lowpass_sigma',
+                                                  'num_noise_components',
+                                                  'func', 'highpass_sigma']),
+                        name='fake'+name)
+        if name in ('remove_noise'):
+            # node that takes output from compcor
+            return Node(IdentityInterface(fields=['design_file', 'out_file']),
+                        name=name)
+        mock.name = kwargs['name']
     if 'interface' in kwargs.keys():
         mock = mock.create_autospec(kwargs['interface'], instance=True)
     mock.iterables = None
@@ -40,11 +57,11 @@ class TestResting(unittest.TestCase):
     @skipif(True)
     @mock.patch('nipype.pipeline.engine.Workflow._write_report_info')
     @mock.patch('nipype.workflows.rsfmri.fsl.resting.create_realign_flow',
-                side_effect=mock_node_factory)
+                return_value=Node(name='realigner', interface=IdentityInterface(
+                    fields=['outputspec.realigned_file'])))
     @mock.patch('nipype.pipeline.engine.Node', side_effect=mock_node_factory)
     def test_create_resting_preproc(self, mock_Node, mock_realign_wf, nothing):
         # setup
-        print(np.random.randint(0, 10, (2, 2, 2, 5)))
         # run
         wf = create_resting_preproc()
         wf.run()
