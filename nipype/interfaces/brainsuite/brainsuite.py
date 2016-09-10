@@ -5,6 +5,7 @@ import os
 import re as regex
 
 from ..base import TraitedSpec, CommandLineInputSpec, CommandLine, File, traits, isdefined
+from ..traits_extension import str
 
 """This script provides interfaces for BrainSuite command line tools.
 Please see brainsuite.org for more information.
