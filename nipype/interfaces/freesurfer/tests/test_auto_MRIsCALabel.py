@@ -35,7 +35,7 @@ def test_MRIsCALabel_inputs():
     out_file=dict(argstr='%s',
     hash_files=False,
     keep_extension=True,
-    name_source=['hemisphere'],
+    name_source=[u'hemisphere'],
     name_template='%s.aparc.annot',
     position=-1,
     ),

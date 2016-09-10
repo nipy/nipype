@@ -1,11 +1,10 @@
+# -*- coding: utf-8 -*-
 # coding: utf-8
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 
-from __future__ import division
-from builtins import zip
-from builtins import next
-from builtins import range
+from __future__ import print_function, division, unicode_literals, absolute_import
+from builtins import zip, next, range, str
 
 from ....pipeline import engine as pe
 from ....interfaces import utility as niu
@@ -500,7 +499,7 @@ def rotate_bvecs(in_bvec, in_matrix):
             newbvec = invrot.dot(bvec)
             new_bvecs.append((newbvec / np.linalg.norm(newbvec)))
 
-    np.savetxt(out_file, np.array(new_bvecs).T, fmt='%0.15f')
+    np.savetxt(out_file, np.array(new_bvecs).T, fmt=b'%0.15f')
     return out_file
 
 
@@ -550,7 +549,7 @@ def eddy_rotate_bvecs(in_bvec, eddy_params):
             newbvec = invrot.dot(bvec)
             new_bvecs.append(newbvec / np.linalg.norm(newbvec))
 
-    np.savetxt(out_file, np.array(new_bvecs).T, fmt='%0.15f')
+    np.savetxt(out_file, np.array(new_bvecs).T, fmt=b'%0.15f')
     return out_file
 
 
@@ -712,7 +711,7 @@ def reorient_bvecs(in_dwi, old_dwi, in_bvec):
     R = RS / S
 
     new_bvecs = [R.dot(b) for b in bvecs]
-    np.savetxt(out_file, np.array(new_bvecs).T, fmt='%0.15f')
+    np.savetxt(out_file, np.array(new_bvecs).T, fmt=b'%0.15f')
     return out_file
 
 

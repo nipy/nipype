@@ -26,7 +26,7 @@ def test_DegreeCentrality_inputs():
     oned_file=dict(argstr='-out1D %s',
     ),
     out_file=dict(argstr='-prefix %s',
-    name_source=['in_file'],
+    name_source=[u'in_file'],
     name_template='%s_afni',
     ),
     outputtype=dict(),

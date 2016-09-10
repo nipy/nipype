@@ -1,17 +1,14 @@
+# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
+from __future__ import print_function, division, unicode_literals, absolute_import
+
 import os
 import numpy as np
 
-from .base import (SPMCommandInputSpec, SPMCommand, Info, scans_for_fnames,
-                   scans_for_fname)
-from ..matlab import MatlabCommand
-from ..base import (TraitedSpec, BaseInterface,
-                    BaseInterfaceInputSpec, isdefined,
-                    OutputMultiPath, InputMultiPath)
-from ..base import File, traits
-from ...utils.filemanip import (split_filename, fname_presuffix,
-                                filename_to_list, list_to_filename)
+from ...utils.filemanip import split_filename, fname_presuffix, filename_to_list, list_to_filename
+from ..base import TraitedSpec, isdefined, File, traits, OutputMultiPath, InputMultiPath
+from .base import SPMCommandInputSpec, SPMCommand, scans_for_fnames, scans_for_fname
 
 
 class Analyze2niiInputSpec(SPMCommandInputSpec):

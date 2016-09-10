@@ -1,10 +1,10 @@
+# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """Common graph operations for execution
 """
-
-from builtins import range
-from builtins import object
+from __future__ import print_function, division, unicode_literals, absolute_import
+from builtins import range, object, open
 
 from copy import deepcopy
 from glob import glob
@@ -22,13 +22,13 @@ import numpy as np
 import scipy.sparse as ssp
 
 
+from ... import logging
 from ...utils.filemanip import savepkl, loadpkl
 from ...utils.misc import str2bool
 from ..engine.utils import (nx, dfs_preorder, topological_sort)
 from ..engine import MapNode
 
 
-from ... import logging
 logger = logging.getLogger('workflow')
 iflogger = logging.getLogger('interface')
 
@@ -173,9 +173,8 @@ except Exception as e:
 """
     cmdstr = cmdstr % (mpl_backend, pkl_file, batch_dir, node.config, suffix)
     pyscript = os.path.join(batch_dir, 'pyscript_%s.py' % suffix)
-    fp = open(pyscript, 'wt')
-    fp.writelines(cmdstr)
-    fp.close()
+    with open(pyscript, 'wt') as fp:
+        fp.writelines(cmdstr)
     return pyscript
 
 
@@ -491,7 +490,8 @@ class SGELikeBatchManagerBase(DistributedPluginBase):
             if 'template' in plugin_args:
                 self._template = plugin_args['template']
                 if os.path.isfile(self._template):
-                    self._template = open(self._template).read()
+                    with open(self._template) as tpl_file:
+                        self._template = tpl_file.read()
             if 'qsub_args' in plugin_args:
                 self._qsub_args = plugin_args['qsub_args']
         self._pending = {}
@@ -567,9 +567,8 @@ class SGELikeBatchManagerBase(DistributedPluginBase):
         batchscript = '\n'.join((self._template,
                                  '%s %s' % (sys.executable, pyscript)))
         batchscriptfile = os.path.join(batch_dir, 'batchscript_%s.sh' % name)
-        fp = open(batchscriptfile, 'wt')
-        fp.writelines(batchscript)
-        fp.close()
+        with open(batchscriptfile, 'wt') as fp:
+            fp.writelines(batchscript)
         return self._submit_batchtask(batchscriptfile, node)
 
     def _report_crash(self, node, result=None):
@@ -613,13 +612,15 @@ class GraphPluginBase(PluginBase):
         for keyword in keywords:
             value = getattr(self, "_" + keyword)
             if keyword == "template" and os.path.isfile(value):
-                value = open(value).read()
+                with open(value) as f:
+                    value = f.read()
             if (hasattr(node, "plugin_args") and
                     isinstance(node.plugin_args, dict) and
                     keyword in node.plugin_args):
                 if (keyword == "template" and
                         os.path.isfile(node.plugin_args[keyword])):
-                    tmp_value = open(node.plugin_args[keyword]).read()
+                    with open(node.plugin_args[keyword]) as f:
+                        tmp_value = f.read()
                 else:
                     tmp_value = node.plugin_args[keyword]
 

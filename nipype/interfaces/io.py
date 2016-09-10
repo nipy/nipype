@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """ Set of interfaces that allow interaction with data. Currently
@@ -17,10 +18,8 @@
     >>> os.chdir(datadir)
 
 """
-
-from builtins import zip
-from builtins import filter
-from builtins import range
+from __future__ import print_function, division, unicode_literals, absolute_import
+from builtins import object, zip, filter, range, open, str
 
 import glob
 import fnmatch
@@ -35,18 +34,12 @@ from warnings import warn
 
 import sqlite3
 
-from .base import (TraitedSpec, traits, File, Directory,
-                   BaseInterface, InputMultiPath, isdefined,
-                   OutputMultiPath, DynamicTraitedSpec,
-                   Undefined, BaseInterfaceInputSpec)
-from .. import config
-from ..external.six import string_types
-from ..utils.filemanip import (copyfile, list_to_filename,
-                               filename_to_list)
-from ..utils.misc import human_order_sorted
-from ..utils.misc import str2bool
-from .. import logging
-iflogger = logging.getLogger('interface')
+from .. import config, logging
+from ..utils.filemanip import copyfile, list_to_filename, filename_to_list
+from ..utils.misc import human_order_sorted, str2bool
+from .base import (
+    TraitedSpec, traits, Str, File, Directory, BaseInterface, InputMultiPath,
+    isdefined, OutputMultiPath, DynamicTraitedSpec, Undefined, BaseInterfaceInputSpec)
 
 try:
     import pyxnat
@@ -64,6 +57,7 @@ try:
 except:
     pass
 
+iflogger = logging.getLogger('interface')
 
 def copytree(src, dst, use_hardlink=False):
     """Recursively copy a directory tree using
@@ -165,7 +159,7 @@ class ProgressPercentage(object):
         with self._lock:
             self._seen_so_far += bytes_amount
             if self._size != 0:
-                percentage = (self._seen_so_far / self._size) * 100
+                percentage = (self._seen_so_far // self._size) * 100
             else:
                 percentage = 0
             progress_str = '%d / %d (%.2f%%)\r'\
@@ -184,27 +178,27 @@ class DataSinkInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
     # Init inputspec data attributes
     base_directory = Directory(
         desc='Path to the base directory for storing data.')
-    container = traits.Str(
+    container = Str(
         desc='Folder within base directory in which to store output')
     parameterization = traits.Bool(True, usedefault=True,
                                    desc='store output in parametrized structure')
     strip_dir = Directory(desc='path to strip out of filename')
-    substitutions = InputMultiPath(traits.Tuple(traits.Str, traits.Str),
+    substitutions = InputMultiPath(traits.Tuple(Str, Str),
                                    desc=('List of 2-tuples reflecting string '
                                          'to substitute and string to replace '
                                          'it with'))
     regexp_substitutions = \
-        InputMultiPath(traits.Tuple(traits.Str, traits.Str),
+        InputMultiPath(traits.Tuple(Str, Str),
                        desc=('List of 2-tuples reflecting a pair of a '\
                              'Python regexp pattern and a replacement '\
                              'string. Invoked after string `substitutions`'))
 
-    _outputs = traits.Dict(traits.Str, value={}, usedefault=True)
+    _outputs = traits.Dict(Str, value={}, usedefault=True)
     remove_dest_dir = traits.Bool(False, usedefault=True,
                                   desc='remove dest directory when copying dirs')
 
     # AWS S3 data attributes
-    creds_path = traits.Str(desc='Filepath to AWS credentials file for S3 bucket '\
+    creds_path = Str(desc='Filepath to AWS credentials file for S3 bucket '\
                                  'access; if not specified, the credentials will '\
                                  'be taken from the AWS_ACCESS_KEY_ID and '\
                                  'AWS_SECRET_ACCESS_KEY environment variables')
@@ -213,7 +207,7 @@ class DataSinkInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
     # Set this if user wishes to override the bucket with their own
     bucket = traits.Any(desc='Boto3 S3 bucket for manual override of bucket')
     # Set this if user wishes to have local copy of files as well
-    local_copy = traits.Str(desc='Copy files locally as well as to S3 bucket')
+    local_copy = Str(desc='Copy files locally as well as to S3 bucket')
 
     # Set call-able inputs attributes
     def __setattr__(self, key, value):
@@ -699,7 +693,7 @@ class DataSink(IOBase):
                         raise(inst)
 
         # Iterate through outputs attributes {key : path(s)}
-        for key, files in self.inputs._outputs.items():
+        for key, files in list(self.inputs._outputs.items()):
             if not isdefined(files):
                 continue
             iflogger.debug("key: %s files: %s" % (key, str(files)))
@@ -773,11 +767,11 @@ class S3DataGrabberInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
     anon = traits.Bool(False, usedefault=True,
                        desc='Use anonymous connection to s3.  If this is set to True, boto may print' +
                             ' a urlopen error, but this does not prevent data from being downloaded.')
-    region = traits.Str('us-east-1', usedefault=True,
+    region = Str('us-east-1', usedefault=True,
                         desc='Region of s3 bucket')
-    bucket = traits.Str(mandatory=True,
+    bucket = Str(mandatory=True,
                         desc='Amazon S3 bucket where your data is stored')
-    bucket_path = traits.Str('', usedefault=True,
+    bucket_path = Str('', usedefault=True,
                              desc='Location within your bucket for subject data.')
     local_directory = Directory(exists=True,
                                 desc='Path to the local directory for subject data to be downloaded '
@@ -786,10 +780,10 @@ class S3DataGrabberInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
                                  desc='Generate exception if list is empty for a given field')
     sort_filelist = traits.Bool(mandatory=True,
                                 desc='Sort the filelist that matches the template')
-    template = traits.Str(mandatory=True,
+    template = Str(mandatory=True,
                           desc='Layout used to get files. Relative to bucket_path if defined.'
                                'Uses regex rather than glob style formatting.')
-    template_args = traits.Dict(key_trait=traits.Str,
+    template_args = traits.Dict(key_trait=Str,
                                 value_trait=traits.List(traits.List),
                                 desc='Information to plug into template')
 
@@ -858,7 +852,7 @@ class S3DataGrabber(IOBase):
         Using traits.Any instead out OutputMultiPath till add_trait bug
         is fixed.
         """
-        return add_traits(base, self.inputs.template_args.keys())
+        return add_traits(base, list(self.inputs.template_args.keys()))
 
     def _list_outputs(self):
         # infields are mandatory, however I could not figure out how to set 'mandatory' flag dynamically
@@ -878,7 +872,7 @@ class S3DataGrabber(IOBase):
         bkt_files = list(k.key for k in bkt.list())
 
         # keys are outfields, args are template args for the outfield
-        for key, args in self.inputs.template_args.items():
+        for key, args in list(self.inputs.template_args.items()):
             outputs[key] = []
             template = self.inputs.template
             if hasattr(self.inputs, 'field_template') and \
@@ -906,7 +900,7 @@ class S3DataGrabber(IOBase):
             for argnum, arglist in enumerate(args):
                 maxlen = 1
                 for arg in arglist:
-                    if isinstance(arg, string_types) and hasattr(self.inputs, arg):
+                    if isinstance(arg, (str, bytes)) and hasattr(self.inputs, arg):
                         arg = getattr(self.inputs, arg)
                     if isinstance(arg, list):
                         if (maxlen > 1) and (len(arg) != maxlen):
@@ -917,7 +911,7 @@ class S3DataGrabber(IOBase):
                 for i in range(maxlen):
                     argtuple = []
                     for arg in arglist:
-                        if isinstance(arg, string_types) and hasattr(self.inputs, arg):
+                        if isinstance(arg, (str, bytes)) and hasattr(self.inputs, arg):
                             arg = getattr(self.inputs, arg)
                         if isinstance(arg, list):
                             argtuple.append(arg[i])
@@ -953,7 +947,7 @@ class S3DataGrabber(IOBase):
         # Outputs are currently stored as locations on S3.
         # We must convert to the local location specified
         # and download the files.
-        for key,val in outputs.iteritems():
+        for key,val in outputs.items():
             #This will basically be either list-like or string-like:
             #if it has the __iter__ attribute, it's list-like (list,
             #tuple, numpy array) and we iterate through each of its
@@ -995,9 +989,9 @@ class DataGrabberInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
                                  desc='Generate exception if list is empty for a given field')
     sort_filelist = traits.Bool(mandatory=True,
                                 desc='Sort the filelist that matches the template')
-    template = traits.Str(mandatory=True,
+    template = Str(mandatory=True,
                           desc='Layout used to get files. relative to base directory if defined')
-    template_args = traits.Dict(key_trait=traits.Str,
+    template_args = traits.Dict(key_trait=Str,
                                 value_trait=traits.List(traits.List),
                                 desc='Information to plug into template')
 
@@ -1145,7 +1139,7 @@ class DataGrabber(IOBase):
             for argnum, arglist in enumerate(args):
                 maxlen = 1
                 for arg in arglist:
-                    if isinstance(arg, string_types) and hasattr(self.inputs, arg):
+                    if isinstance(arg, (str, bytes)) and hasattr(self.inputs, arg):
                         arg = getattr(self.inputs, arg)
                     if isinstance(arg, list):
                         if (maxlen > 1) and (len(arg) != maxlen):
@@ -1156,7 +1150,7 @@ class DataGrabber(IOBase):
                 for i in range(maxlen):
                     argtuple = []
                     for arg in arglist:
-                        if isinstance(arg, string_types) and hasattr(self.inputs, arg):
+                        if isinstance(arg, (str, bytes)) and hasattr(self.inputs, arg):
                             arg = getattr(self.inputs, arg)
                         if isinstance(arg, list):
                             argtuple.append(arg[i])
@@ -1197,7 +1191,7 @@ class SelectFilesInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
                                 desc="When matching mutliple files, return them in sorted order.")
     raise_on_empty = traits.Bool(True, usedefault=True,
                                  desc="Raise an exception if a template pattern matches no files.")
-    force_lists = traits.Either(traits.Bool(), traits.List(traits.Str()),
+    force_lists = traits.Either(traits.Bool(), traits.List(Str()),
                                 default=False, usedefault=True,
                                 desc=("Whether to return outputs as a list even when only one file "
                                       "matches the template. Either a boolean that applies to all "
@@ -1225,7 +1219,7 @@ class SelectFiles(IOBase):
     ...            "epi": "{subject_id}/func/f[0, 1].nii"}
     >>> dg = Node(SelectFiles(templates), "selectfiles")
     >>> dg.inputs.subject_id = "subj1"
-    >>> pprint.pprint(dg.outputs.get())  # doctest: +NORMALIZE_WHITESPACE
+    >>> pprint.pprint(dg.outputs.get())  # doctest: +NORMALIZE_WHITESPACE +IGNORE_UNICODE
     {'T1': <undefined>, 'epi': <undefined>}
 
     The same thing with dynamic grabbing of specific files:
@@ -1260,7 +1254,7 @@ class SelectFiles(IOBase):
 
         # Infer the infields and outfields from the template
         infields = []
-        for name, template in templates.items():
+        for name, template in list(templates.items()):
             for _, field_name, _, _ in string.Formatter().parse(template):
                 if field_name is not None and field_name not in infields:
                     infields.append(field_name)
@@ -1298,7 +1292,7 @@ class SelectFiles(IOBase):
                    "'templates'.") % (plural, bad_fields, verb)
             raise ValueError(msg)
 
-        for field, template in self._templates.items():
+        for field, template in list(self._templates.items()):
 
             # Build the full template path
             if isdefined(self.inputs.base_directory):
@@ -1335,9 +1329,9 @@ class SelectFiles(IOBase):
 
 class DataFinderInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
     root_paths = traits.Either(traits.List(),
-                               traits.Str(),
+                               Str(),
                                mandatory=True,)
-    match_regex = traits.Str('(.+)',
+    match_regex = Str('(.+)',
                              usedefault=True,
                              desc=("Regular expression for matching "
                                    "paths."))
@@ -1407,12 +1401,12 @@ class DataFinder(IOBase):
                 for key in list(match_dict.keys()):
                     self.result[key] = []
             self.result['out_paths'].append(target_path)
-            for key, val in match_dict.items():
+            for key, val in list(match_dict.items()):
                 self.result[key].append(val)
 
     def _run_interface(self, runtime):
         # Prepare some of the inputs
-        if isinstance(self.inputs.root_paths, string_types):
+        if isinstance(self.inputs.root_paths, (str, bytes)):
             self.inputs.root_paths = [self.inputs.root_paths]
         self.match_regex = re.compile(self.inputs.match_regex)
         if self.inputs.max_depth is Undefined:
@@ -1457,7 +1451,7 @@ class DataFinder(IOBase):
                         self._match_path(full_path)
         if (self.inputs.unpack_single and
                 len(self.result['out_paths']) == 1):
-            for key, vals in self.result.items():
+            for key, vals in list(self.result.items()):
                 self.result[key] = vals[0]
         else:
             # sort all keys acording to out_paths
@@ -1483,7 +1477,7 @@ class DataFinder(IOBase):
 class FSSourceInputSpec(BaseInterfaceInputSpec):
     subjects_dir = Directory(mandatory=True,
                              desc='Freesurfer subjects directory.')
-    subject_id = traits.Str(mandatory=True,
+    subject_id = Str(mandatory=True,
                             desc='Subject name for whom to retrieve data')
     hemi = traits.Enum('both', 'lh', 'rh', usedefault=True,
                        desc='Selects hemisphere specific outputs')
@@ -1626,26 +1620,26 @@ class FreeSurferSource(IOBase):
 
 class XNATSourceInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
 
-    query_template = traits.Str(
+    query_template = Str(
         mandatory=True,
         desc=('Layout used to get files. Relative to base '
               'directory if defined')
     )
 
     query_template_args = traits.Dict(
-        traits.Str,
+        Str,
         traits.List(traits.List),
         value=dict(outfiles=[]), usedefault=True,
         desc='Information to plug into template'
     )
 
-    server = traits.Str(
+    server = Str(
         mandatory=True,
         requires=['user', 'pwd'],
         xor=['config']
     )
 
-    user = traits.Str()
+    user = Str()
     pwd = traits.Password()
     config = File(mandatory=True, xor=['server'])
 
@@ -1780,7 +1774,7 @@ class XNATSource(IOBase):
             for argnum, arglist in enumerate(args):
                 maxlen = 1
                 for arg in arglist:
-                    if isinstance(arg, string_types) and hasattr(self.inputs, arg):
+                    if isinstance(arg, (str, bytes)) and hasattr(self.inputs, arg):
                         arg = getattr(self.inputs, arg)
                     if isinstance(arg, list):
                         if (maxlen > 1) and (len(arg) != maxlen):
@@ -1793,7 +1787,7 @@ class XNATSource(IOBase):
                 for i in range(maxlen):
                     argtuple = []
                     for arg in arglist:
-                        if isinstance(arg, string_types) and \
+                        if isinstance(arg, (str, bytes)) and \
                                 hasattr(self.inputs, arg):
                             arg = getattr(self.inputs, arg)
                         if isinstance(arg, list):
@@ -1840,34 +1834,34 @@ class XNATSource(IOBase):
 
 class XNATSinkInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
 
-    _outputs = traits.Dict(traits.Str, value={}, usedefault=True)
+    _outputs = traits.Dict(Str, value={}, usedefault=True)
 
-    server = traits.Str(mandatory=True,
+    server = Str(mandatory=True,
                         requires=['user', 'pwd'],
                         xor=['config']
                         )
 
-    user = traits.Str()
+    user = Str()
     pwd = traits.Password()
     config = File(mandatory=True, xor=['server'])
     cache_dir = Directory(desc='')
 
-    project_id = traits.Str(
+    project_id = Str(
         desc='Project in which to store the outputs', mandatory=True)
 
-    subject_id = traits.Str(
+    subject_id = Str(
         desc='Set to subject id', mandatory=True)
 
-    experiment_id = traits.Str(
+    experiment_id = Str(
         desc='Set to workflow name', mandatory=True)
 
-    assessor_id = traits.Str(
+    assessor_id = Str(
         desc=('Option to customize ouputs representation in XNAT - '
               'assessor level will be used with specified id'),
         xor=['reconstruction_id']
     )
 
-    reconstruction_id = traits.Str(
+    reconstruction_id = Str(
         desc=('Option to customize ouputs representation in XNAT - '
               'reconstruction level will be used with specified id'),
         xor=['assessor_id']
@@ -2067,7 +2061,7 @@ def push_provenance():
 
 class SQLiteSinkInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
     database_file = File(exists=True, mandatory=True)
-    table_name = traits.Str(mandatory=True)
+    table_name = Str(mandatory=True)
 
 
 class SQLiteSink(IOBase):
@@ -2114,16 +2108,16 @@ class SQLiteSink(IOBase):
 
 
 class MySQLSinkInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
-    host = traits.Str('localhost', mandatory=True,
+    host = Str('localhost', mandatory=True,
                       requires=['username', 'password'],
                       xor=['config'], usedefault=True)
     config = File(mandatory=True, xor=['host'],
                   desc="MySQL Options File (same format as my.cnf)")
-    database_name = traits.Str(
+    database_name = Str(
         mandatory=True, desc='Otherwise known as the schema name')
-    table_name = traits.Str(mandatory=True)
-    username = traits.Str()
-    password = traits.Str()
+    table_name = Str(mandatory=True)
+    username = Str()
+    password = Str()
 
 
 class MySQLSink(IOBase):
@@ -2174,16 +2168,16 @@ class MySQLSink(IOBase):
 
 
 class SSHDataGrabberInputSpec(DataGrabberInputSpec):
-    hostname = traits.Str(mandatory=True, desc='Server hostname.')
-    username = traits.Str(desc='Server username.')
+    hostname = Str(mandatory=True, desc='Server hostname.')
+    username = Str(desc='Server username.')
     password = traits.Password(desc='Server password.')
     download_files = traits.Bool(True, usedefault=True,
                                  desc='If false it will return the file names without downloading them')
-    base_directory = traits.Str(mandatory=True,
+    base_directory = Str(mandatory=True,
                                 desc='Path to the base directory consisting of subject data.')
     template_expression = traits.Enum(['fnmatch', 'regexp'], usedefault=True,
                                       desc='Use either fnmatch or regexp to express templates')
-    ssh_log_to_file = traits.Str('', usedefault=True,
+    ssh_log_to_file = Str('', usedefault=True,
                                  desc='If set SSH commands will be logged to the given file')
 
 
@@ -2350,7 +2344,7 @@ class SSHDataGrabber(DataGrabber):
             for argnum, arglist in enumerate(args):
                 maxlen = 1
                 for arg in arglist:
-                    if isinstance(arg, string_types) and hasattr(self.inputs, arg):
+                    if isinstance(arg, (str, bytes)) and hasattr(self.inputs, arg):
                         arg = getattr(self.inputs, arg)
                     if isinstance(arg, list):
                         if (maxlen > 1) and (len(arg) != maxlen):
@@ -2361,7 +2355,7 @@ class SSHDataGrabber(DataGrabber):
                 for i in range(maxlen):
                     argtuple = []
                     for arg in arglist:
-                        if isinstance(arg, string_types) and hasattr(self.inputs, arg):
+                        if isinstance(arg, (str, bytes)) and hasattr(self.inputs, arg):
                             arg = getattr(self.inputs, arg)
                         if isinstance(arg, list):
                             argtuple.append(arg[i])
@@ -2454,12 +2448,12 @@ class JSONFileGrabber(IOBase):
     >>> jsonSource = JSONFileGrabber()
     >>> jsonSource.inputs.defaults = {'param1': 'overrideMe', 'param3': 1.0}
     >>> res = jsonSource.run()
-    >>> pprint.pprint(res.outputs.get())
+    >>> pprint.pprint(res.outputs.get()) # doctest: +IGNORE_UNICODE
     {'param1': 'overrideMe', 'param3': 1.0}
     >>> jsonSource.inputs.in_file = 'jsongrabber.txt'
     >>> res = jsonSource.run()
-    >>> pprint.pprint(res.outputs.get())  # doctest: +NORMALIZE_WHITESPACE, +ELLIPSIS
-    {'param1': ...'exampleStr', 'param2': 4, 'param3': 1.0}
+    >>> pprint.pprint(res.outputs.get())  # doctest: +NORMALIZE_WHITESPACE, +ELLIPSIS +IGNORE_UNICODE
+    {'param1': 'exampleStr', 'param2': 4, 'param3': 1.0}
 
 
     """
@@ -2478,12 +2472,12 @@ class JSONFileGrabber(IOBase):
             if not isinstance(data, dict):
                 raise RuntimeError('JSON input has no dictionary structure')
 
-            for key, value in data.items():
+            for key, value in list(data.items()):
                 outputs[key] = value
 
         if isdefined(self.inputs.defaults):
             defaults = self.inputs.defaults
-            for key, value in defaults.items():
+            for key, value in list(defaults.items()):
                 if key not in list(outputs.keys()):
                     outputs[key] = value
 
@@ -2588,7 +2582,8 @@ class JSONFileSink(IOBase):
             out_dict[key] = val
 
         with open(out_file, 'w') as f:
-            simplejson.dump(out_dict, f)
+            f.write(str(simplejson.dumps(out_dict, ensure_ascii=False)))
+
         outputs = self.output_spec().get()
         outputs['out_file'] = out_file
         return outputs

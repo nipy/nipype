@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """
@@ -8,9 +9,8 @@
     >>> os.chdir(datadir)
 
 """
-
-from __future__ import division
-from builtins import range
+from __future__ import print_function, division, unicode_literals, absolute_import
+from builtins import str, open, range
 
 import os.path as op
 import pickle
@@ -19,11 +19,11 @@ import numpy as np
 import networkx as nx
 import scipy.io as sio
 
-from ..base import (BaseInterface, BaseInterfaceInputSpec, traits, File,
-                    TraitedSpec, InputMultiPath, OutputMultiPath, isdefined)
+from ... import logging
 from ...utils.filemanip import split_filename
 from ...utils.misc import package_check
-from ... import logging
+from ..base import (BaseInterface, BaseInterfaceInputSpec, traits, File,
+                    TraitedSpec, InputMultiPath, OutputMultiPath, isdefined)
 
 iflogger = logging.getLogger('interface')
 

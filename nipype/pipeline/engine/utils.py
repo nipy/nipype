@@ -4,42 +4,31 @@
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """Utility routines for workflow graphs
 """
-
-from __future__ import absolute_import
+from __future__ import print_function, division, unicode_literals, absolute_import
+from builtins import str, open, map, next, zip, range
 
 from future import standard_library
 standard_library.install_aliases()
+from collections import defaultdict
 
-from builtins import map
-from builtins import next
-from builtins import zip
-from builtins import range
-
-try:
-    import itertools.imap as map
-except ImportError:
-    pass
-
-from collections import OrderedDict
 from copy import deepcopy
 from glob import glob
-from collections import defaultdict
 try:
     from inspect import signature
 except ImportError:
     from funcsigs import signature
+
 import os
 import re
 import pickle
+from functools import reduce
 import numpy as np
 from nipype.utils.misc import package_check
-from functools import reduce
 
 package_check('networkx', '1.3')
 
 import networkx as nx
 
-from ...external.six import string_types
 from ...utils.filemanip import (fname_presuffix, FileNotFoundError,
                                 filename_to_list, get_related_files)
 from ...utils.misc import create_function_from_source, str2bool
@@ -131,7 +120,7 @@ def format_node(node, format='python', include_config=False):
                                             klass.__class__.__name__)
         comment = '# Node: %s' % node.fullname
         spec = signature(node._interface.__init__)
-        args = [p.name for p in spec.parameters.values()]
+        args = [p.name for p in list(spec.parameters.values())]
         args = args[1:]
         if args:
             filled_args = []
@@ -152,7 +141,10 @@ def format_node(node, format='python', include_config=False):
         lines = [importline, comment, nodedef]
 
         if include_config:
-            lines = [importline, "from collections import OrderedDict",
+            lines = [importline,
+                     "from future import standard_library",
+                     "standard_library.install_aliases()",
+                     "from collections import OrderedDict",
                      comment, nodedef]
             lines.append('%s.config = %s' % (name, node.config))
 
@@ -194,7 +186,7 @@ def modify_paths(object, relative=True, basedir=None):
             out = tuple(out)
     else:
         if isdefined(object):
-            if isinstance(object, string_types) and os.path.isfile(object):
+            if isinstance(object, (str, bytes)) and os.path.isfile(object):
                 if relative:
                     if config.getboolean('execution', 'use_relative_paths'):
                         out = relpath(object, start=basedir)
@@ -277,7 +269,7 @@ def _write_detailed_dot(graph, dotfilename):
         inports = []
         for u, v, d in graph.in_edges_iter(nbunch=n, data=True):
             for cd in d['connect']:
-                if isinstance(cd[0], string_types):
+                if isinstance(cd[0], (str, bytes)):
                     outport = cd[0]
                 else:
                     outport = cd[0][0]
@@ -297,7 +289,7 @@ def _write_detailed_dot(graph, dotfilename):
         outports = []
         for u, v, d in graph.out_edges_iter(nbunch=n, data=True):
             for cd in d['connect']:
-                if isinstance(cd[0], string_types):
+                if isinstance(cd[0], (str, bytes)):
                     outport = cd[0]
                 else:
                     outport = cd[0][0]
@@ -362,7 +354,7 @@ def count_iterables(iterables, synchronize=False):
         op = max
     else:
         op = lambda x, y: x * y
-    return reduce(op, [len(func()) for _, func in iterables.items()])
+    return reduce(op, [len(func()) for _, func in list(iterables.items())])
 
 
 def walk(children, level=0, path=None, usename=True):
@@ -502,7 +494,7 @@ def _merge_graphs(supergraph, nodes, subgraph, nodeid, iterables,
         for edge in supergraph.in_edges_iter(supernodes[nidx]):
                 # make sure edge is not part of subgraph
             if edge[0] not in subgraph.nodes():
-                if n._hierarchy + n._id not in edgeinfo.keys():
+                if n._hierarchy + n._id not in list(edgeinfo.keys()):
                     edgeinfo[n._hierarchy + n._id] = []
                 edgeinfo[n._hierarchy + n._id].append((edge[0],
                                                        supergraph.get_edge_data(*edge)))
@@ -547,7 +539,7 @@ def _merge_graphs(supergraph, nodes, subgraph, nodeid, iterables,
         supergraph.add_nodes_from(Gc.nodes())
         supergraph.add_edges_from(Gc.edges(data=True))
         for node in Gc.nodes():
-            if node._hierarchy + node._id in edgeinfo.keys():
+            if node._hierarchy + node._id in list(edgeinfo.keys()):
                 for info in edgeinfo[node._hierarchy + node._id]:
                     supergraph.add_edges_from([(info[0], node, info[1])])
             node._id += template % i
@@ -724,7 +716,7 @@ def generate_expanded_graph(graph_in):
             # the itersource is a (node name, fields) tuple
             src_name, src_fields = inode.itersource
             # convert a single field to a list
-            if isinstance(src_fields, string_types):
+            if isinstance(src_fields, (str, bytes)):
                 src_fields = [src_fields]
             # find the unique iterable source node in the graph
             try:
@@ -758,7 +750,7 @@ def generate_expanded_graph(graph_in):
             def make_field_func(*pair):
                 return pair[0], lambda: pair[1]
 
-            iterables = dict([make_field_func(*pair) for pair in iter_dict.items()])
+            iterables = dict([make_field_func(*pair) for pair in list(iter_dict.items())])
         else:
             iterables = inode.iterables.copy()
         inode.iterables = None
@@ -909,7 +901,7 @@ def _standardize_iterables(node):
     if node.synchronize:
         if len(iterables) == 2:
             first, last = iterables
-            if all((isinstance(item, string_types) and item in fields
+            if all((isinstance(item, (str, bytes)) and item in fields
                     for item in first)):
                 iterables = _transpose_iterables(first, last)
 
@@ -1100,7 +1092,7 @@ def walk_outputs(object):
             if isdefined(val):
                 out.extend(walk_outputs(val))
     else:
-        if isdefined(object) and isinstance(object, string_types):
+        if isdefined(object) and isinstance(object, (str, bytes)):
             if os.path.islink(object) or os.path.isfile(object):
                 out = [(filename, 'f') for filename in get_all_files(object)]
             elif os.path.isdir(object):

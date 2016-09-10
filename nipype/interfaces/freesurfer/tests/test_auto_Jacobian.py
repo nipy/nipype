@@ -23,7 +23,7 @@ def test_Jacobian_inputs():
     out_file=dict(argstr='%s',
     hash_files=False,
     keep_extension=False,
-    name_source=['in_origsurf'],
+    name_source=[u'in_origsurf'],
     name_template='%s.jacobian',
     position=-1,
     ),

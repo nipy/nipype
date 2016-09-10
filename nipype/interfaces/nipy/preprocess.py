@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
     Change directory to provide relative paths for doctests
     >>> import os
@@ -6,14 +7,19 @@
     >>> os.chdir(datadir)
 
 """
+from __future__ import print_function, division, unicode_literals, absolute_import
+from builtins import open
+
 import os
-import warnings
 
 import nibabel as nb
 import numpy as np
 
 from ...utils.misc import package_check
 from ...utils.filemanip import split_filename, fname_presuffix
+from ..base import (TraitedSpec, BaseInterface, traits,
+                    BaseInterfaceInputSpec, isdefined, File,
+                    InputMultiPath, OutputMultiPath)
 
 
 have_nipy = True
@@ -26,9 +32,6 @@ else:
     from nipy import save_image, load_image
     nipy_version = nipy.__version__
 
-from ..base import (TraitedSpec, BaseInterface, traits,
-                    BaseInterfaceInputSpec, isdefined, File,
-                    InputMultiPath, OutputMultiPath)
 
 
 class ComputeMaskInputSpec(BaseInterfaceInputSpec):

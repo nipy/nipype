@@ -14,59 +14,41 @@ The `Workflow` class provides core functionality for batch processing.
      os.chdir(datadir)
 
 """
+from __future__ import print_function, division, unicode_literals, absolute_import
+from builtins import range, object, str, bytes, open
 
-from __future__ import absolute_import
-
+# Py2 compat: http://python-future.org/compatible_idioms.html#collections-counter-and-ordereddict
 from future import standard_library
 standard_library.install_aliases()
-from builtins import range
-from builtins import object
 
 from datetime import datetime
-from nipype.utils.misc import flatten, unflatten
-try:
-    from collections import OrderedDict
-except ImportError:
-    from ordereddict import OrderedDict
 
 from copy import deepcopy
 import pickle
-from glob import glob
-import gzip
-import inspect
 import os
 import os.path as op
-import re
 import shutil
-import errno
-import socket
-from shutil import rmtree
 import sys
-from tempfile import mkdtemp
 from warnings import warn
-from hashlib import sha1
 
 import numpy as np
 import networkx as nx
 
-from ...utils.misc import package_check, str2bool
-package_check('networkx', '1.3')
 
 from ... import config, logging
-logger = logging.getLogger('workflow')
+from ...utils.misc import (unflatten, package_check, str2bool,
+                               getsource, create_function_from_source)
 from ...interfaces.base import (traits, InputMultiPath, CommandLine,
                                 Undefined, TraitedSpec, DynamicTraitedSpec,
                                 Bunch, InterfaceResult, md5, Interface,
                                 TraitDictObject, TraitListObject, isdefined)
-from ...utils.misc import (getsource, create_function_from_source,
-                           flatten, unflatten)
+
 from ...utils.filemanip import (save_json, FileNotFoundError,
                                 filename_to_list, list_to_filename,
                                 copyfiles, fnames_presuffix, loadpkl,
                                 split_filename, load_json, savepkl,
                                 write_rst_header, write_rst_dict,
                                 write_rst_list)
-from ...external.six import string_types
 from .utils import (generate_expanded_graph, modify_paths,
                     export_graph, make_output_dir, write_workflow_prov,
                     clean_working_directory, format_dot, topological_sort,
@@ -76,6 +58,8 @@ from .utils import (generate_expanded_graph, modify_paths,
 from .base import EngineBase
 from .nodes import Node, MapNode
 
+package_check('networkx', '1.3')
+logger = logging.getLogger('workflow')
 
 class Workflow(EngineBase):
     """Controls the setup and execution of a pipeline of processes."""
@@ -225,7 +209,7 @@ connected.
                         # handles the case that source is specified
                         # with a function
                         sourcename = source[0]
-                    elif isinstance(source, string_types):
+                    elif isinstance(source, (str, bytes)):
                         sourcename = source
                     else:
                         raise Exception(('Unknown source specification in '
@@ -246,7 +230,7 @@ connected.
         # turn functions into strings
         for srcnode, destnode, connects in connection_list:
             for idx, (src, dest) in enumerate(connects):
-                if isinstance(src, tuple) and not isinstance(src[1], string_types):
+                if isinstance(src, tuple) and not isinstance(src[1], (str, bytes)):
                     function_source = getsource(src[1])
                     connects[idx] = ((src[0], function_source, src[2:]), dest)
 
@@ -561,7 +545,7 @@ connected.
         """
         if plugin is None:
             plugin = config.get('execution', 'plugin')
-        if not isinstance(plugin, string_types):
+        if not isinstance(plugin, (str, bytes)):
             runner = plugin
         else:
             name = 'nipype.pipeline.plugins'
@@ -799,7 +783,7 @@ connected.
 
     def _set_node_input(self, node, param, source, sourceinfo):
         """Set inputs of a node given the edge connection"""
-        if isinstance(sourceinfo, string_types):
+        if isinstance(sourceinfo, (str, bytes)):
             val = source.get_output(sourceinfo)
         elif isinstance(sourceinfo, tuple):
             if callable(sourceinfo[1]):
