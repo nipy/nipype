@@ -7,8 +7,7 @@ set -u
 set -e
 
 mkdir -p ${CIRCLE_TEST_REPORTS}/nose
-xunitmerge ~/scratch/nosetests*.xml ~/scratch/smoketest*.xml ${CIRCLE_TEST_REPORTS}/nose/${CIRCLE_PROJECT_REPONAME}.xml
-sudo mv ~/scratch/*.xml ~/
+sudo mv ~/scratch/*.xml ${CIRCLE_TEST_REPORTS}/nose
 mkdir -p ~/docs
 sudo mv ~/scratch/docs/* ~/docs/
 mkdir -p ~/logs
