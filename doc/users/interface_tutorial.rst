@@ -50,7 +50,7 @@ Settings can be saved to a json file:
    mybet = fsl.BET(in_file='foo.nii', out_file='bar.nii', frac=0.5)
    mybet.save_inputs_to_json('bet-settings.json')
 
-Once saved, the three inputs set for `mybet` will be stored in a JSON
+Once saved, the three inputs set for ``mybet`` will be stored in a JSON
 file. These settings can also be loaded from a json file:
 
 .. testcode::
@@ -61,7 +61,7 @@ file. These settings can also be loaded from a json file:
 
 
 Loading settings will overwrite previously set inputs by default, unless
-the `overwrite` argument is `False`. Conveniently, the settings can be
+the ``overwrite`` argument is ``False``. Conveniently, the settings can be
 also read during the interface instantiation:
 
 .. testcode::
@@ -70,15 +70,15 @@ also read during the interface instantiation:
    mybet = fsl.BET(from_file='bet-settings.json')
 
 If the user provides settings during interface creation, they will take
-precedence over those loaded using `from_file`:
+precedence over those loaded using ``from_file``:
 
 .. testcode::
 
    import nipype.interfaces.fsl as fsl
    mybet = fsl.BET(from_file='bet-settings.json', frac=0.7)
 
-In this case, `mybet.inputs.frac` will contain the value `0.7` regardless
-the value that could be stored in the `bet-settings.json` file.
+In this case, ``mybet.inputs.frac`` will contain the value ``0.7`` regardless
+the value that could be stored in the ``bet-settings.json`` file.
 
 
 Getting Help

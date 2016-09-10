@@ -10,7 +10,9 @@ In this simple tutorial we will use the Registration interface from ANTS to
 coregister two T1 volumes.
 
 1. Tell python where to find the appropriate functions.
+
 """
+
 from __future__ import print_function, unicode_literals
 from builtins import open
 
@@ -25,6 +27,7 @@ from nipype.interfaces.ants import Registration
 
 """
 2. Download T1 volumes into home directory
+
 """
 
 homeDir = os.getenv("HOME")
@@ -58,7 +61,8 @@ input_images = [
 
 """
 3. Define the parameters of the registration. Settings are
-  saved in `./smri_ants_registration_settings.json`.
+saved in ``smri_ants_registration_settings.json``.
+
 """
 
 reg = Registration(from_file='./smri_ants_registration_settings.json')
@@ -66,7 +70,7 @@ reg.inputs.fixed_image = input_images[0]
 reg.inputs.moving_image = input_images[1]
 
 """
-Alternatively to the use of the `from_file` feature to load ANTs settings,
+Alternatively to the use of the ``from_file`` feature to load ANTs settings,
 the user can manually set all those inputs instead::
 
     reg.inputs.output_transform_prefix = 'thisTransform'
@@ -94,6 +98,7 @@ the user can manually set all those inputs instead::
     reg.inputs.initial_moving_transform_com = True
 
 """
+
 print(reg.cmdline)
 
 
