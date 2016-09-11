@@ -180,6 +180,92 @@ Bradley L. and Petersen, Steven E.},
                        header='std DVARS\tnon-std DVARS\tvx-wise std DVARS')
             self._results['out_all'] = out_file
 
+    def _list_outputs(self):
+        return self._results
+
+
+class FramewiseDisplacementInputSpec(BaseInterfaceInputSpec):
+    in_plots = File(exists=True, desc='motion parameters as written by FSL MCFLIRT')
+    radius = traits.Float(50, usedefault=True,
+                          desc='radius in mm to calculate angular FDs, 50mm is the '
+                               'default since it is used in Power et al. 2012')
+    out_file = File('fd_power_2012.txt', usedefault=True, desc='output file name')
+    out_figure = File('fd_power_2012.pdf', usedefault=True, desc='output figure name')
+    series_tr = traits.Float(desc='repetition time in sec.')
+    save_plot = traits.Bool(False, usedefault=True, desc='write FD plot')
+    normalize = traits.Bool(False, usedefault=True, desc='calculate FD in mm/s')
+    figdpi = traits.Int(100, usedefault=True, desc='output dpi for the FD plot')
+    figsize = traits.Tuple(traits.Float(11.7), traits.Float(2.3), usedefault=True,
+                           desc='output figure size')
+
+class FramewiseDisplacementOutputSpec(TraitedSpec):
+    out_file = File(desc='calculated FD per timestep')
+    out_figure = File(desc='output image file')
+    fd_average = traits.Float(desc='average FD')
+
+class FramewiseDisplacement(BaseInterface):
+    """
+    Calculate the :abbr:`FD (framewise displacement)` as in [Power2012]_.
+    This implementation reproduces the calculation in fsl_motion_outliers
+
+    .. [Power2012] Power et al., Spurious but systematic correlations in functional
+         connectivity MRI networks arise from subject motion, NeuroImage 59(3),
+         2012. doi:`10.1016/j.neuroimage.2011.10.018
+         <http://dx.doi.org/10.1016/j.neuroimage.2011.10.018>`_.
+
+
+    """
+
+    input_spec = FramewiseDisplacementInputSpec
+    output_spec = FramewiseDisplacementOutputSpec
+
+    references_ = [{
+        'entry': BibTeX("""\
+@article{power_spurious_2012,
+    title = {Spurious but systematic correlations in functional connectivity {MRI} networks \
+arise from subject motion},
+    volume = {59},
+    doi = {10.1016/j.neuroimage.2011.10.018},
+    number = {3},
+    urldate = {2016-08-16},
+    journal = {NeuroImage},
+    author = {Power, Jonathan D. and Barnes, Kelly A. and Snyder, Abraham Z. and Schlaggar, \
+Bradley L. and Petersen, Steven E.},
+    year = {2012},
+    pages = {2142--2154},
+}
+"""),
+        'tags': ['method']
+    }]
+
+    def _run_interface(self, runtime):
+        mpars = np.loadtxt(self.inputs.in_plots)  # mpars is N_t x 6
+        diff = mpars[:-1, :] - mpars[1:, :]
+        diff[:, :3] *= self.inputs.radius
+        fd_res = np.abs(diff).sum(axis=1)
+
+        self._results = {
+            'out_file': op.abspath(self.inputs.out_file),
+            'fd_average': float(fd_res.mean())
+        }
+        np.savetxt(self.inputs.out_file, fd_res)
+
+
+        if self.inputs.save_plot:
+            tr = None
+            if isdefined(self.inputs.series_tr):
+                tr = self.inputs.series_tr
+
+            if self.inputs.normalize and tr is None:
+                IFLOG.warn('FD plot cannot be normalized if TR is not set')
+
+            self._results['out_figure'] = op.abspath(self.inputs.out_figure)
+            fig = plot_confound(fd_res, self.inputs.figsize, 'FD', units='mm',
+                                series_tr=tr, normalize=self.inputs.normalize)
+            fig.savefig(self._results['out_figure'], dpi=float(self.inputs.figdpi),
+                        format=self.inputs.out_figure[-3:],
+                        bbox_inches='tight')
+            fig.clf()
         return runtime
 
     def _list_outputs(self):
@@ -284,7 +370,8 @@ def zero_variance(func, mask):
 def plot_confound(tseries, figsize, name, units=None,
                   series_tr=None, normalize=False):
     """
-    A helper function to plot the framewise displacement
+    A helper function to plot :abbr:`fMRI (functional MRI)` confounds.
+
     """
     import matplotlib
     matplotlib.use('Agg')
