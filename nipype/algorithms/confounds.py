@@ -30,6 +30,8 @@ IFLOG = logging.getLogger('interface')
 class ComputeDVARSInputSpec(BaseInterfaceInputSpec):
     in_file = File(exists=True, mandatory=True, desc='functional data, after HMC')
     in_mask = File(exists=True, mandatory=True, desc='a brain mask')
+    remove_zerovariance = traits.Bool(False, usedefault=True,
+                                      desc='remove voxels with zero variance')
     save_std = traits.Bool(True, usedefault=True,
                            desc='save standardized DVARS')
     save_nstd = traits.Bool(False, usedefault=True,
@@ -120,7 +122,8 @@ Bradley L. and Petersen, Steven E.},
         return op.abspath('{}_{}.{}'.format(fname, suffix, ext))
 
     def _run_interface(self, runtime):
-        dvars = compute_dvars(self.inputs.in_file, self.inputs.in_mask)
+        dvars = compute_dvars(self.inputs.in_file, self.inputs.in_mask,
+                              remove_zerovariance=self.inputs.remove_zerovariance)
 
         self._results['avg_std'] = dvars[0].mean()
         self._results['avg_nstd'] = dvars[1].mean()
@@ -179,6 +182,8 @@ Bradley L. and Petersen, Steven E.},
             np.savetxt(out_file, np.vstack(dvars).T, fmt=b'%0.8f', delimiter=b'\t',
                        header='std DVARS\tnon-std DVARS\tvx-wise std DVARS')
             self._results['out_all'] = out_file
+
+        return runtime
 
     def _list_outputs(self):
         return self._results
@@ -250,7 +255,6 @@ Bradley L. and Petersen, Steven E.},
         }
         np.savetxt(self.inputs.out_file, fd_res)
 
-
         if self.inputs.save_plot:
             tr = None
             if isdefined(self.inputs.series_tr):
@@ -266,13 +270,14 @@ Bradley L. and Petersen, Steven E.},
                         format=self.inputs.out_figure[-3:],
                         bbox_inches='tight')
             fig.clf()
+
         return runtime
 
     def _list_outputs(self):
         return self._results
 
 
-def compute_dvars(in_file, in_mask):
+def compute_dvars(in_file, in_mask, remove_zerovariance=False):
     """
     Compute the :abbr:`DVARS (D referring to temporal
     derivative of timecourses, VARS referring to RMS variance over voxels)`
@@ -313,24 +318,32 @@ research/nichols/scripts/fsl/standardizeddvars.pdf>`_, 2013.
         raise RuntimeError(
             "Input fMRI dataset should be 4-dimensional")
 
-    # Remove zero-variance voxels across time axis
-    zv_mask = zero_variance(func, mask)
-    idx = np.where(zv_mask > 0)
-    mfunc = func[idx[0], idx[1], idx[2], :]
-
     # Robust standard deviation
-    func_sd = (np.percentile(mfunc, 75) -
-               np.percentile(mfunc, 25)) / 1.349
+    func_sd = (np.percentile(func, 75, axis=3) -
+               np.percentile(func, 25, axis=3)) / 1.349
+    func_sd[mask <= 0] = 0
+
+    # ar1_img = np.zeros_like(func_sd)
+    # ar1_img[idx] = diff_SDhat
+    nb.Nifti1Image(func_sd, nb.load(in_mask).get_affine()).to_filename('func_sd.nii.gz')
+
+
+    if remove_zerovariance:
+        # Remove zero-variance voxels across time axis
+        mask = zero_variance(func, mask)
+
+    idx = np.where(mask > 0)
+    mfunc = func[idx[0], idx[1], idx[2], :]
 
     # Demean
     mfunc -= mfunc.mean(axis=1).astype(np.float32)[..., np.newaxis]
 
-    # AR1
-    ak_coeffs = np.apply_along_axis(AR_est_YW, 1, mfunc, 1)
+    # Compute (non-robust) estimate of lag-1 autocorrelation
+    ar1 = np.apply_along_axis(AR_est_YW, 1, mfunc, 1)[:, 0]
 
-    # Predicted standard deviation of temporal derivative
-    func_sd_pd = np.squeeze(np.sqrt((2. * (1. - ak_coeffs[:, 0])).tolist()) * func_sd)
-    diff_sd_mean = func_sd_pd[func_sd_pd > 0].mean()
+    # Compute (predicted) standard deviation of temporal difference time series
+    diff_SDhat = np.squeeze(np.sqrt(((1 - ar1) * 2).tolist())) * func_sd[mask > 0].reshape(-1)
+    diff_sd_mean = diff_SDhat.mean()
 
     # Compute temporal difference time series
     func_diff = np.diff(mfunc, axis=1)
@@ -342,7 +355,7 @@ research/nichols/scripts/fsl/standardizeddvars.pdf>`_, 2013.
     dvars_stdz = dvars_nstd / diff_sd_mean
 
     # voxelwise standardization
-    diff_vx_stdz = func_diff / np.array([func_sd_pd] * func_diff.shape[-1]).T
+    diff_vx_stdz = func_diff / np.array([diff_SDhat] * func_diff.shape[-1]).T
     dvars_vx_stdz = diff_vx_stdz.std(axis=0, ddof=1)
 
     return (dvars_stdz, dvars_nstd, dvars_vx_stdz)
