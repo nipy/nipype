@@ -4,7 +4,7 @@
 from .....testing import (assert_equal, assert_true, assert_almost_equal,
                           skipif, utils)
 from .....interfaces import fsl, IdentityInterface
-from .....pipeline.engine import Node
+from .....pipeline.engine import Node, Workflow
 
 from ..resting import create_resting_preproc
 
@@ -14,41 +14,35 @@ from mock import MagicMock
 import nibabel as nb
 import numpy as np
 import os
+import tempfile
+import shutil
 
+all_fields = ['func', 'in_file', 'slice_time_corrected_file', 'stddev_file',
+              'out_stat', 'thresh', 'num_noise_components', 'detrended_file',
+              'design_file', 'highpass_sigma', 'lowpass_sigma', 'out_file',
+              'noise_mask_file', 'filtered_file']
 
+def stub_node_factory(*args, **kwargs):
+    if 'name' not in kwargs.keys():
+        raise Exception()
+    name = kwargs['name']
+    if name == 'compcor':
+        return Node(*args, **kwargs)
+    else: # replace with an IdentityInterface
+        return Node(IdentityInterface(fields=all_fields),
+                    name=name)
 
-
-
-def mock_node_factory(*args, **kwargs):
-    ''' return mocks for all the nodes except compcor and compcor's neighbors'''
-    mock = MagicMock()
-    if 'interface' in kwargs.keys():
-        mock = mock.create_autospec(kwargs['interface'], instance=True)
-    if 'name' in kwargs.keys():
-        name = kwargs['name']
-        if name == 'compcor':
-            return Node(*args, **kwargs)
-        if name in ['threshold', 'inputspec']:
-            # nodes that provide inputs for compcor
-            # just give all of them all of the fields
-            return Node(IdentityInterface(fields=['out_file', 'lowpass_sigma',
-                                                  'num_noise_components',
-                                                  'func', 'highpass_sigma']),
-                        name=name)
-        if name in ('remove_noise'):
-            # node that takes output from compcor
-            return Node(IdentityInterface(fields=['design_file', 'out_file']),
-                        name=name)
-        mock.name = kwargs['name']
-    mock.iterables = None
-    return mock
+def stub_wf(*args, **kwargs):
+    wf = Workflow(name='realigner')
+    inputnode = Node(IdentityInterface(fields=['func']), name='inputspec')
+    outputnode = Node(interface=IdentityInterface(fields=['realigned_file']),
+                      name='outputspec')
+    wf.connect(inputnode, 'func', outputnode, 'realigned_file')
+    return wf
 
 class TestResting(unittest.TestCase):
 
-    in_filenames = {
-        'in_file': 'rsfmrifunc.nii',
-        'noise_mask_file': 'rsfmrimask.nii'
-    }
+    in_filenames = {}
 
     out_filenames = {
         'noise_mask_file': '',
@@ -57,27 +51,34 @@ class TestResting(unittest.TestCase):
 
     def setUp(self):
         # setup
-        utils.save_toy_nii(self.fake_data, self.in_filenames['in_file'])
+        self.orig_dir = os.getcwd()
+        self.temp_dir = tempfile.mkdtemp()
+        os.chdir(self.temp_dir)
+        self.in_filenames['realigned_file'] = utils.save_toy_nii(self.fake_data, os.path.abspath('rsfmrifunc.nii'))
+        mask = np.zeros(self.fake_data.shape[:3])
+        for i in range(mask.shape[0]):
+            for j in range(mask.shape[1]):
+                if i==j:
+                    mask[i,j] = 1
+        self.in_filenames['noise_mask_file'] = utils.save_toy_nii(mask, os.path.abspath('rsfmrimask.nii'))
 
-    @skipif(True)
-    @mock.patch('nipype.pipeline.engine.Workflow._write_report_info')
     @mock.patch('nipype.workflows.rsfmri.fsl.resting.create_realign_flow',
-                return_value=Node(name='realigner', interface=IdentityInterface(
-                    fields=['outputspec.realigned_file'])))
-    @mock.patch('nipype.pipeline.engine.Node', side_effect=mock_node_factory)
-    def test_create_resting_preproc(self, mock_Node, mock_realign_wf, nothing):
-        # setup
-        # run
+                side_effect=stub_wf)
+    @mock.patch('nipype.pipeline.engine.Node', side_effect=stub_node_factory)
+    def test_create_resting_preproc(self, mock_Node, mock_realign_wf):
         wf = create_resting_preproc()
+
         wf.inputs.inputspec.num_noise_components = 6
+        wf.get_node('slicetimer').inputs.slice_time_corrected_file = self.in_filenames['realigned_file']
         wf.get_node('threshold').inputs.out_file = self.in_filenames['noise_mask_file']
+
         wf.run()
 
         # assert
 
     def tearDown(self):
-        utils.remove_nii(self.in_filenames.values())
-        utils.remove_nii(self.out_filenames.values())
+        os.chdir(self.orig_dir)
+        shutil.rmtree(self.temp_dir)
 
     fake_data = np.array([[[[2, 4, 3, 9, 1],
                             [3, 6, 4, 7, 4]],
