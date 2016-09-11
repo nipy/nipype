@@ -37,7 +37,8 @@ def run_examples(example, pipelines, data_path, plugin=None, rm_base_dir=True):
             os.makedirs(log_dir)
         wf.config = {'execution': {'hash_method': 'timestamp',
                                    'stop_on_first_rerun': 'true',
-                                   'write_provenance': 'true'},
+                                   'write_provenance': 'true',
+                                   'poll_sleep_duration': 2},
                      'logging': {'log_directory': log_dir, 'log_to_file': True}}
         try:
             wf.inputs.inputnode.in_data = os.path.abspath(data_path)

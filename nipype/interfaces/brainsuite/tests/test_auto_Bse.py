@@ -46,6 +46,7 @@ def test_Bse_inputs():
     hash_files=False,
     ),
     outputMaskFile=dict(argstr='--mask %s',
+    genfile=True,
     hash_files=False,
     ),
     radius=dict(argstr='-r %f',
