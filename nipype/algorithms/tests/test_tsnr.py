@@ -97,7 +97,7 @@ class TestTSNR(unittest.TestCase):
                      self.out_filenames['tsnr_file'])
 
     def assert_unchanged(self, expected_ranges):
-        for key, (min_, max_) in expected_ranges.iteritems():
+        for key, (min_, max_) in expected_ranges.items():
             data = np.asarray(nb.load(self.out_filenames[key])._data)
             assert_almost_equal(np.amin(data), min_, decimal=1)
             assert_almost_equal(np.amax(data), max_, decimal=1)
