@@ -96,7 +96,7 @@ def create_realign_flow(name='realign'):
     return realignflow
 
 
-def create_resting_preproc(name='restpreproc'):
+def create_resting_preproc(name='restpreproc', base_dir=None):
     """Create a "resting" time series preprocessing workflow
 
     The noise removal is based on Behzadi et al. (2007)
@@ -128,7 +128,7 @@ def create_resting_preproc(name='restpreproc'):
 
     """
 
-    restpreproc = pe.Workflow(name=name)
+    restpreproc = pe.Workflow(name=name, base_dir=base_dir)
 
     # Define nodes
     inputnode = pe.Node(interface=util.IdentityInterface(fields=['func',
