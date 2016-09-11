@@ -56,14 +56,15 @@ class CompCor(BaseInterface):
         # "The constant and linear trends of the columns in the matrix M were
         # removed [prior to ...]"
         if self.inputs.use_regress_poly:
-            regressed = regress_poly(self.inputs.regress_poly_degree,
+            voxel_timecourses = regress_poly(self.inputs.regress_poly_degree,
                                              voxel_timecourses)
-            regressed = regressed - np.mean(regressed, axis=1)[:,None]
+        voxel_timecourses = voxel_timecourses - np.mean(voxel_timecourses,
+                                                        axis=1)[:, np.newaxis]
 
         # "Voxel time series from the noise ROI (either anatomical or tSTD) were
         # placed in a matrix M of size Nxm, with time along the row dimension
         # and voxels along the column dimension."
-        M = regressed.T
+        M = voxel_timecourses.T
         numvols = M.shape[0]
         numvoxels = M.shape[1]
 
