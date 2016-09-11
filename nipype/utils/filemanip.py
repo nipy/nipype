@@ -29,6 +29,12 @@ from ..interfaces.traits_extension import isdefined
 fmlogger = logging.getLogger("filemanip")
 
 
+related_filetype_sets = [
+    ('.hdr', '.img', '.mat'),
+    ('.BRIK', '.HEAD'),
+]
+
+
 class FileNotFoundError(Exception):
     pass
 
@@ -314,38 +320,30 @@ def copyfile(originalfile, newfile, copy=False, create_new=False,
             fmlogger.warn(e.message)
 
     # Associated files
-    if originalfile.endswith(".img"):
-        hdrofile = originalfile[:-4] + ".hdr"
-        hdrnfile = newfile[:-4] + ".hdr"
-        matofile = originalfile[:-4] + ".mat"
-        if os.path.exists(matofile):
-            matnfile = newfile[:-4] + ".mat"
-            copyfile(matofile, matnfile, copy, hashmethod=hashmethod,
-                     use_hardlink=use_hardlink)
-        copyfile(hdrofile, hdrnfile, copy, hashmethod=hashmethod,
-                 use_hardlink=use_hardlink)
-    elif originalfile.endswith(".BRIK"):
-        hdrofile = originalfile[:-5] + ".HEAD"
-        hdrnfile = newfile[:-5] + ".HEAD"
-        copyfile(hdrofile, hdrnfile, copy, hashmethod=hashmethod,
-                 use_hardlink=use_hardlink)
+    _, _, this_type = split_filename(originalfile)
+    for type_set in related_filetype_sets:
+        if this_type in type_set:
+            for alt_type in type_set:
+                alt_ofile = originalfile[:-len(this_type)] + alt_type
+                alt_nfile = newfile[:-len(this_type)] + alt_type
+                if os.path.exists(alt_ofile) and not os.path.exists(alt_nfile):
+                    copyfile(alt_ofile, alt_nfile, copy,
+                             hashmethod=hashmethod,
+                             use_hardlink=use_hardlink)
 
     return newfile
 
 
 def get_related_files(filename):
     """Returns a list of related files for Nifti-Pair, Analyze (SPM) and AFNI
-       files
+    files
     """
     related_files = []
-    if filename.endswith(".img") or filename.endswith(".hdr"):
-        path, name, ext = split_filename(filename)
-        for ext in ['.hdr', '.img', '.mat']:
-            related_files.append(os.path.join(path, name + ext))
-    elif filename.endswith(".BRIK") or filename.endswith(".HEAD"):
-        path, name, ext = split_filename(filename)
-        for ext in ['.BRIK', '.HEAD']:
-            related_files.append(os.path.join(path, name + ext))
+    path, name, ext = split_filename(filename)
+    for type_set in related_filetype_sets:
+        if ext in type_set:
+            for new_ext in type_set:
+                related_files.append(os.path.join(path, name + new_ext))
     if not len(related_files):
         related_files = [filename]
     return related_files
