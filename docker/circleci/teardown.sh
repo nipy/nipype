@@ -8,8 +8,8 @@ set -e
 
 mkdir -p ${CIRCLE_TEST_REPORTS}/nose
 sudo cp ~/scratch/*.xml ${CIRCLE_TEST_REPORTS}/nose
-mkdir -p ~/docs
-sudo mv ~/scratch/docs/* ~/docs/
+# mkdir -p ~/docs
+# sudo mv ~/scratch/docs/* ~/docs/
 mkdir -p ~/logs
 sudo mv ~/scratch/builddocs.log ~/logs/builddocs.log
 sudo mv ~/scratch/logs/* ~/logs/
