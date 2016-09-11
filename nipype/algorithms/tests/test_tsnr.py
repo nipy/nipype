@@ -10,6 +10,8 @@ import mock
 import nibabel as nb
 import numpy as np
 import os
+import tempfile
+import shutil
 
 class TestTSNR(unittest.TestCase):
     ''' Note: Tests currently do a poor job of testing functionality '''
@@ -26,7 +28,11 @@ class TestTSNR(unittest.TestCase):
     }
 
     def setUp(self):
-        # setup
+        # setup temp folder
+        self.orig_dir = os.getcwd()
+        self.temp_dir = tempfile.mkdtemp()
+        os.chdir(self.temp_dir)
+
         utils.save_toy_nii(self.fake_data, self.in_filenames['in_file'])
 
     def test_tsnr(self):
@@ -103,8 +109,8 @@ class TestTSNR(unittest.TestCase):
             assert_almost_equal(np.amax(data), max_, decimal=1)
 
     def tearDown(self):
-        utils.remove_nii(self.in_filenames.values())
-        utils.remove_nii(self.out_filenames.values())
+        os.chdir(self.orig_dir)
+        shutil.rmtree(self.temp_dir)
 
     fake_data = np.array([[[[2, 4, 3, 9, 1],
                             [3, 6, 4, 7, 4]],

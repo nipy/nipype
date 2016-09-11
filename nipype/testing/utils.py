@@ -110,11 +110,3 @@ def save_toy_nii(ndarray, filename):
     toy = nb.Nifti1Image(ndarray, np.eye(4))
     nb.nifti1.save(toy, filename)
     return filename
-
-def remove_nii(filenames):
-    ''' remove temporary nifti files'''
-    for filename in filenames:
-        try:
-            os.remove(filename)
-        except (OSError, TypeError) as e:
-            pass
