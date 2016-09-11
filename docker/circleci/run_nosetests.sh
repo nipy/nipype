@@ -24,13 +24,16 @@ fi
 cd /root/src/nipype/
 make clean
 nosetests -s nipype -c /root/src/nipype/.noserc --xunit-file="/scratch/nosetests_py${PYTHON_VERSION}.xml" --cover-xml-file="/scratch/coverage_py${PYTHON_VERSION}.xml"
+bash <(curl -s https://codecov.io/bash) -f /scratch/coverage_py${PYTHON_VERSION}.xml -t ac172a50-8e66-42e5-8822-5373fcf54686 -F unittests
 
 # Workaround: run here the profiler tests in python 3
 if [[ "${PYTHON_VERSION}" -ge "30" ]]; then
     echo '[execution]' >> /root/.nipype/nipype.cfg
     echo 'profile_runtime = true' >> /root/.nipype/nipype.cfg
     nosetests nipype/interfaces/tests/test_runtime_profiler.py --xunit-file="/scratch/nosetests_py${PYTHON_VERSION}_profiler.xml" --cover-xml-file="/scratch/coverage_py${PYTHON_VERSION}_profiler.xml"
+    bash <(curl -s https://codecov.io/bash) -f /scratch/coverage_py${PYTHON_VERSION}_profiler.xml -t ac172a50-8e66-42e5-8822-5373fcf54686 -F unittests
     nosetests nipype/pipeline/plugins/tests/test_multiproc*.py --xunit-file="/scratch/nosetests_py${PYTHON_VERSION}_multiproc.xml" --cover-xml-file="/scratch/coverage_py${PYTHON_VERSION}_multiproc.xml"
+    bash <(curl -s https://codecov.io/bash) -f /scratch/coverage_py${PYTHON_VERSION}_multiproc.xml -t ac172a50-8e66-42e5-8822-5373fcf54686 -F unittests
 fi
 
 # Copy crashfiles to scratch
