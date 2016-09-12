@@ -27,13 +27,12 @@ class TestCompCor(unittest.TestCase):
         noise = np.fromfunction(self.fake_noise_fun, self.fake_data.shape)
         self.realigned_file = utils.save_toy_nii(self.fake_data + noise,
                                                  self.filenames['functionalnii'])
-
-    def test_compcor(self):
         mask = np.ones(self.fake_data.shape[:3])
         mask[0,0,0] = 0
         mask[0,0,1] = 0
-        mask_file = utils.save_toy_nii(mask, self.filenames['masknii'])
+        self.mask_file = utils.save_toy_nii(mask, self.filenames['masknii'])
 
+    def test_compcor(self):
         expected_components = [['-0.1989607212', '-0.5753813646'],
                                ['0.5692369697', '0.5674945949'],
                                ['-0.6662573243', '0.4675843432'],
@@ -41,16 +40,24 @@ class TestCompCor(unittest.TestCase):
                                ['-0.1246655485', '-0.1235705610']]
 
         ccresult = self.run_cc(CompCor(realigned_file=self.realigned_file,
-                                       mask_file=mask_file),
+                                       mask_file=self.mask_file),
                                expected_components)
 
         accresult = self.run_cc(ACompCor(realigned_file=self.realigned_file,
-                                         mask_file=mask_file,
+                                         mask_file=self.mask_file,
                                          components_file='acc_components_file'),
                                 expected_components)
 
         assert_equal(os.path.getsize(ccresult.outputs.components_file),
                      os.path.getsize(accresult.outputs.components_file))
+
+    @mock.patch('nipype.algorithms.compcor.CompCor._add_extras')
+    def test_compcor_with_extra_regressors(self, mock_add_extras):
+        regressors_file ='regress.txt'
+        open(regressors_file, 'a').close() # make sure file exists
+        CompCor(realigned_file=self.realigned_file, mask_file=self.mask_file,
+                extra_regressors=regressors_file).run()
+        assert_true(mock_add_extras.called)
 
     def test_tcompcor(self):
         ccinterface = TCompCor(realigned_file=self.realigned_file)
