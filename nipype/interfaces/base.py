@@ -30,8 +30,8 @@ import sys
 import time
 from textwrap import wrap
 from warnings import warn
+import simplejson as json
 from dateutil.parser import parse as parseutc
-
 
 from .. import config, logging, LooseVersion, __version__
 from ..utils.provenance import write_provenance
@@ -46,6 +46,9 @@ from ..external.due import due
 runtime_profile = str2bool(config.get('execution', 'profile_runtime'))
 nipype_version = LooseVersion(__version__)
 iflogger = logging.getLogger('interface')
+
+PY35 = sys.version_info >= (3, 5)
+PY3 = sys.version_info[0] > 2
 
 if runtime_profile:
     try:
@@ -756,13 +759,18 @@ class BaseInterface(Interface):
     _redirect_x = False
     references_ = []
 
-    def __init__(self, **inputs):
+    def __init__(self, from_file=None, **inputs):
         if not self.input_spec:
             raise Exception('No input_spec in class: %s' %
                             self.__class__.__name__)
+
         self.inputs = self.input_spec(**inputs)
         self.estimated_memory_gb = 1
         self.num_threads = 1
+
+        if from_file is not None:
+            self.load_inputs_from_json(from_file, overwrite=False)
+
 
     @classmethod
     def help(cls, returnhelp=False):
@@ -1166,6 +1174,32 @@ class BaseInterface(Interface):
                 raise ValueError('Interface %s has no version information' %
                                  self.__class__.__name__)
         return self._version
+
+    def load_inputs_from_json(self, json_file, overwrite=True):
+        """
+        A convenient way to load pre-set inputs from a JSON file.
+        """
+
+        with open(json_file) as fhandle:
+            inputs_dict = json.load(fhandle)
+
+        def_inputs = []
+        if not overwrite:
+            def_inputs = list(self.inputs.get_traitsfree().keys())
+
+        new_inputs = list(set(list(inputs_dict.keys())) - set(def_inputs))
+        for key in new_inputs:
+            if hasattr(self.inputs, key):
+                setattr(self.inputs, key, inputs_dict[key])
+
+    def save_inputs_to_json(self, json_file):
+        """
+        A convenient way to save current inputs to a JSON file.
+        """
+        inputs = self.inputs.get_traitsfree()
+        iflogger.debug('saving inputs {}', inputs)
+        with open(json_file, 'w' if PY3 else 'wb') as fhandle:
+            json.dump(inputs, fhandle, indent=4, ensure_ascii=False)
 
 
 class Stream(object):
