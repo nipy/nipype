@@ -21,6 +21,7 @@ UNKNOWN_OPTIONS = dict(allow_extra_args=True,
 # specification of existing ParamTypes
 ExistingDirPath  = click.Path(exists=True, file_okay=False, resolve_path=True)
 ExistingFilePath = click.Path(exists=True,  dir_okay=False, resolve_path=True)
+UnexistingFilePath = click.Path(dir_okay=False, resolve_path=True)
 
 
 # declare custom click.ParamType
@@ -37,7 +38,7 @@ class RegularExpression(click.ParamType):
 
 
 class PythonModule(click.ParamType):
-    name = 'Python module'
+    name = 'Python module path'
 
     def convert(self, value, param, ctx):
         try:

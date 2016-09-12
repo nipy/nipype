@@ -8,6 +8,7 @@ from .utils import (CONTEXT_SETTINGS,
                     UNKNOWN_OPTIONS,
                     ExistingDirPath,
                     ExistingFilePath,
+                    UnexistingFilePath,
                     RegularExpression,
                     PythonModule,
                     grouper)
@@ -142,25 +143,18 @@ def run(ctx, module, interface, list, help):
             run_instance(node, args)
 
 
-# @cli.command(context_settings=UNKNOWN_OPTIONS)
-# @click.option('-f', '--format', type=click.Choice(['boutiques']),
-#               help='Output format type.')
-# @click.argument('format_args', nargs=-1, type=click.UNPROCESSED)
-# @click.pass_context
-# def convert(ctx, format, format_args):
-#     """Export nipype interfaces to other formats."""
-#     if format == 'boutiques':
-#         ctx.params.pop('format')
-#         ctx.params = dict(grouper(ctx.params['format_args'], 2))
-#         ctx.forward(to_boutiques)
+@cli.group()
+def convert():
+    """Export nipype interfaces to other formats."""
+    pass
 
 
-@cli.command(context_settings=CONTEXT_SETTINGS)
+@convert.command(context_settings=CONTEXT_SETTINGS)
 @click.option("-i", "--interface", type=str, required=True,
               help="Name of the Nipype interface to export.")
 @click.option("-m", "--module", type=PythonModule(), required=True,
               help="Module where the interface is defined.")
-@click.option("-o", "--output", type=str, required=True,
+@click.option("-o", "--output", type=UnexistingFilePath, required=True,
               help="JSON file name where the Boutiques descriptor will be written.")
 @click.option("-t", "--ignored-template-inputs", type=str, multiple=True,
               help="Interface inputs ignored in path template creations.")
@@ -172,10 +166,10 @@ def run(ctx, module, interface, list, help):
               help="Ignore all numbers in path template creations.")
 @click.option("-v", "--verbose", is_flag=True, flag_value=True,
               help="Enable verbose output.")
-def to_boutiques(interface, module, output, ignored_template_inputs,
-                 docker_image, docker_index, ignore_template_numbers,
-                 verbose):
-    """Nipype Boutiques exporter.
+def boutiques(interface, module, output, ignored_template_inputs,
+              docker_image, docker_index, ignore_template_numbers,
+              verbose):
+    """Nipype to Boutiques exporter.
 
     See Boutiques specification at https://github.com/boutiques/schema.
     """
