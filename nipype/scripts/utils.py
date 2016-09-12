@@ -69,10 +69,3 @@ def add_args_options(arg_parser, interface):
             arg_parser.add_argument("--%s" % name, dest=name,
                                     help=desc, **args)
     return arg_parser
-
-
-def grouper(iterable, n, fillvalue=None):
-    "Collect data into fixed-length chunks or blocks"
-    # grouper('ABCDEFG', 3, 'x') --> ABC DEF Gxx
-    args = [iter(iterable)] * n
-    return zip_longest(fillvalue=fillvalue, *args)

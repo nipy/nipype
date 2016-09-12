@@ -10,8 +10,7 @@ from .utils import (CONTEXT_SETTINGS,
                     ExistingFilePath,
                     UnexistingFilePath,
                     RegularExpression,
-                    PythonModule,
-                    grouper)
+                    PythonModule,)
 
 
 # declare the CLI group
