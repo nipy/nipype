@@ -43,7 +43,7 @@ install:
 script:
 - python -W once:FSL:UserWarning:nipype `which nosetests` --with-doctest --with-doctest-ignore-unicode --with-cov --cover-package nipype --logging-level=DEBUG --verbosity=3
 after_success:
-- coveralls --config_file ${COVERAGE_PROCESS_START}
+- bash <(curl -s https://codecov.io/bash) -t ac172a50-8e66-42e5-8822-5373fcf54686 -cF unittests
 deploy:
   provider: pypi
   user: satra
