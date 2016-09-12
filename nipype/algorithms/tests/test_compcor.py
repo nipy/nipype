@@ -65,6 +65,14 @@ class TestCompCor(unittest.TestCase):
                                   ['-0.6048328569'], ['0.2134704201'],
                                   ['-0.0355784033']])
 
+    def test_tcompcor_with_percentile(self):
+        ccinterface = TCompCor(realigned_file=self.realigned_file, percentile_threshold=0.2)
+        ccinterface.run()
+
+        mask = nb.load('mask.nii').get_data()
+        num_nonmasked_voxels = np.count_nonzero(mask)
+        assert_equal(num_nonmasked_voxels, 2)
+
     def run_cc(self, ccinterface, expected_components):
         # run
         ccresult = ccinterface.run()

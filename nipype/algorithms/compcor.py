@@ -102,7 +102,19 @@ class CompCor(BaseInterface):
             regressors = np.genfromtxt(self.inputs.extra_regressors)
             return np.hstack((components, regressors))
 
+class TCompCorInputSpec(CompCorInputSpec):
+    # and all the fields in CompCorInputSpec
+    percentile_threshold = traits.Range(low=0., high=1., value=.02,
+                                        exclude_low=True, exclude_high=True,
+                                        usedefault=True, desc='the percentile '
+                                        'used to select highest-variance '
+                                        'voxels. By default the 2% of voxels '
+                                        'with the highest variance are used.')
+
 class TCompCor(CompCor):
+
+    input_spec = TCompCorInputSpec
+    output_spec = CompCorOutputSpec
 
     def _run_interface(self, runtime):
         imgseries = nb.load(self.inputs.realigned_file).get_data()
@@ -119,16 +131,16 @@ class TCompCor(CompCor):
         tSTD = self._compute_tSTD(time_voxels, 0)
         sortSTD = np.sort(tSTD, axis=None) # flattened sorted matrix
 
-        # "... and retained a pre-specified upper fraction of the sorted voxels
-        # within each slice ... we chose a 2% threshold"
-        threshold = sortSTD[int(num_voxels * .98)]
-        mask = tSTD >= threshold
+        # use percentile_threshold to pick voxels
+        threshold_index = int(num_voxels * (1. - self.inputs.percentile_threshold))
+        threshold_std = sortSTD[threshold_index]
+        mask = tSTD >= threshold_std
         mask = mask.astype(int)
 
         # save mask
         mask_file = 'mask.nii'
         nb.nifti1.save(nb.Nifti1Image(mask, np.eye(4)), mask_file)
-        self.inputs.mask_file = 'mask.nii'
+        self.inputs.mask_file = mask_file
 
         super(TCompCor, self)._run_interface(runtime)
         return runtime
