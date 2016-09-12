@@ -60,18 +60,20 @@ class TestCompCor(unittest.TestCase):
         assert_true(mock_add_extras.called)
 
     def test_tcompcor(self):
-        ccinterface = TCompCor(realigned_file=self.realigned_file)
-        self.run_cc(ccinterface, [['-0.2500000000'], ['0.2500000000'],
-                                  ['-0.2500000000'], ['0.7500000000'],
-                                  ['-0.5000000000']])
+        ccinterface = TCompCor(realigned_file=self.realigned_file, percentile_threshold=0.75)
+        self.run_cc(ccinterface, [['-0.1535587949', '-0.4318584065'],
+                                  ['0.4286265207', '0.7162580102'],
+                                  ['-0.6288093202', '0.0465452630'],
+                                  ['0.5859742580', '-0.5144309306'],
+                                  ['-0.2322326636', '0.1834860639']])
 
-    def test_tcompcor_with_percentile(self):
-        ccinterface = TCompCor(realigned_file=self.realigned_file, percentile_threshold=0.2)
+    def test_tcompcor_with_default_percentile(self):
+        ccinterface = TCompCor(realigned_file=self.realigned_file)
         ccinterface.run()
 
         mask = nb.load('mask.nii').get_data()
         num_nonmasked_voxels = np.count_nonzero(mask)
-        assert_equal(num_nonmasked_voxels, 2)
+        assert_equal(num_nonmasked_voxels, 1)
 
     def run_cc(self, ccinterface, expected_components):
         # run
