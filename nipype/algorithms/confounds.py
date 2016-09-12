@@ -323,11 +323,6 @@ research/nichols/scripts/fsl/standardizeddvars.pdf>`_, 2013.
                np.percentile(func, 25, axis=3)) / 1.349
     func_sd[mask <= 0] = 0
 
-    # ar1_img = np.zeros_like(func_sd)
-    # ar1_img[idx] = diff_SDhat
-    nb.Nifti1Image(func_sd, nb.load(in_mask).get_affine()).to_filename('func_sd.nii.gz')
-
-
     if remove_zerovariance:
         # Remove zero-variance voxels across time axis
         mask = zero_variance(func, mask)
@@ -342,8 +337,8 @@ research/nichols/scripts/fsl/standardizeddvars.pdf>`_, 2013.
     ar1 = np.apply_along_axis(AR_est_YW, 1, mfunc, 1)[:, 0]
 
     # Compute (predicted) standard deviation of temporal difference time series
-    diff_SDhat = np.squeeze(np.sqrt(((1 - ar1) * 2).tolist())) * func_sd[mask > 0].reshape(-1)
-    diff_sd_mean = diff_SDhat.mean()
+    diff_sdhat = np.squeeze(np.sqrt(((1 - ar1) * 2).tolist())) * func_sd[mask > 0].reshape(-1)
+    diff_sd_mean = diff_sdhat.mean()
 
     # Compute temporal difference time series
     func_diff = np.diff(mfunc, axis=1)
@@ -355,7 +350,7 @@ research/nichols/scripts/fsl/standardizeddvars.pdf>`_, 2013.
     dvars_stdz = dvars_nstd / diff_sd_mean
 
     # voxelwise standardization
-    diff_vx_stdz = func_diff / np.array([diff_SDhat] * func_diff.shape[-1]).T
+    diff_vx_stdz = func_diff / np.array([diff_sdhat] * func_diff.shape[-1]).T
     dvars_vx_stdz = diff_vx_stdz.std(axis=0, ddof=1)
 
     return (dvars_stdz, dvars_nstd, dvars_vx_stdz)
