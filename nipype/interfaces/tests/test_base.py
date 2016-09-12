@@ -13,7 +13,7 @@ import warnings
 
 from nipype.testing import (assert_equal, assert_not_equal, assert_raises,
                             assert_true, assert_false, with_setup, package_check,
-                            skipif)
+                            skipif, example_data)
 import nipype.interfaces.base as nib
 from nipype.utils.filemanip import split_filename
 from nipype.interfaces.base import Undefined, config
@@ -496,6 +496,13 @@ def test_BaseInterface_load_save_inputs():
     bif6 = DerivedInterface(input4=inputs_dict2['input4'])
     bif6.load_inputs_from_json(tmp_json)
     yield assert_equal, bif6.inputs.get_traitsfree(), inputs_dict
+
+    # test get hashval in a complex interface
+    from nipype.interfaces.ants import Registration
+    tsthash = Registration(from_file=example_data('smri_ants_registration_settings.json'))
+    hashed_inputs, hashvalue = tsthash.inputs.get_hashval(hash_method='timestamp')
+    # yield assert_equal, hashed_inputs, [('input1', 12), ('input3', True), ('input4', 'some string')]
+    yield assert_equal, hashvalue, '9ab944cbccba61475becb9eac65052af'
 
 def assert_not_raises(fn, *args, **kwargs):
     fn(*args, **kwargs)

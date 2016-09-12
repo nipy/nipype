@@ -536,6 +536,14 @@ class BaseTraitedSpec(traits.HasTraits):
                     out = undefinedval
         return out
 
+    def has_metadata(self, name, metadata, value=None, recursive=True):
+        """
+        Return has_metadata for the requested trait name in this
+        interface
+        """
+        return has_metadata(self.trait(name).trait_type, metadata, value,
+                            recursive)
+
     def get_hashval(self, hash_method=None):
         """Return a dictionary of our items with hashes for each file.
 
@@ -559,62 +567,61 @@ class BaseTraitedSpec(traits.HasTraits):
 
         dict_withhash = []
         dict_nofilename = []
-        for name, val in sorted(self.get().items()):
-            if isdefined(val):
-                trait = self.trait(name)
-                if has_metadata(trait.trait_type, "nohash", True):
-                    continue
-                hash_files = (not has_metadata(trait.trait_type, "hash_files",
-                                               False) and not
-                              has_metadata(trait.trait_type, "name_source"))
-                dict_nofilename.append((name,
-                                        self._get_sorteddict(val, hash_method=hash_method,
-                                                             hash_files=hash_files)))
-                dict_withhash.append((name,
-                                      self._get_sorteddict(val, True, hash_method=hash_method,
-                                                           hash_files=hash_files)))
+
+        for name, val in sorted(self.get_traitsfree().items()):
+            if self.has_metadata(name, "nohash", True):
+                continue
+
+            hash_files = (not has_metadata(name, "hash_files", False) and not
+                          has_metadata(name, "name_source"))
+            dict_nofilename.append((name,
+                                    self._get_sorteddict(val, hash_method=hash_method,
+                                                         hash_files=hash_files)))
+            dict_withhash.append((name,
+                                  self._get_sorteddict(val, True, hash_method=hash_method,
+                                                       hash_files=hash_files)))
         return dict_withhash, md5(encode_dict(dict_nofilename).encode()).hexdigest()
 
-    def _get_sorteddict(self, object, dictwithhash=False, hash_method=None,
+    def _get_sorteddict(self, theobject, dictwithhash=False, hash_method=None,
                         hash_files=True):
-        if isinstance(object, dict):
+        if isinstance(theobject, dict):
             out = []
-            for key, val in sorted(object.items()):
+            for key, val in sorted(theobject.items()):
                 if isdefined(val):
                     out.append((key,
                                 self._get_sorteddict(val, dictwithhash,
                                                      hash_method=hash_method,
                                                      hash_files=hash_files)))
-        elif isinstance(object, (list, tuple)):
+        elif isinstance(theobject, (list, tuple)):
             out = []
-            for val in object:
+            for val in theobject:
                 if isdefined(val):
                     out.append(self._get_sorteddict(val, dictwithhash,
                                                     hash_method=hash_method,
                                                     hash_files=hash_files))
-            if isinstance(object, tuple):
+            if isinstance(theobject, tuple):
                 out = tuple(out)
         else:
-            if isdefined(object):
-                if (hash_files and isinstance(object, (str, bytes)) and
-                        os.path.isfile(object)):
+            if isdefined(theobject):
+                if (hash_files and isinstance(theobject, (str, bytes)) and
+                        os.path.isfile(theobject)):
                     if hash_method is None:
                         hash_method = config.get('execution', 'hash_method')
 
                     if hash_method.lower() == 'timestamp':
-                        hash = hash_timestamp(object)
+                        hash = hash_timestamp(theobject)
                     elif hash_method.lower() == 'content':
-                        hash = hash_infile(object)
+                        hash = hash_infile(theobject)
                     else:
                         raise Exception("Unknown hash method: %s" % hash_method)
                     if dictwithhash:
-                        out = (object, hash)
+                        out = (theobject, hash)
                     else:
                         out = hash
-                elif isinstance(object, float):
-                    out = '%.10f' % object
+                elif isinstance(theobject, float):
+                    out = '%.10f' % theobject
                 else:
-                    out = object
+                    out = theobject
         return out
 
 

@@ -94,18 +94,16 @@ def encode_dict(value):
     if isinstance(value, str):
         value = value.encode()
 
-    if isinstance(value, tuple):
-        val0 = encode_dict(value[0])
-        val1 = encode_dict(value[1])
-        return '(' + val0 + ', ' + val1 + ')'
-
-    if isinstance(value, list):
-        retval = '['
+    istuple = isinstance(value, tuple)
+    if isinstance(value, list) or istuple:
+        retval = '(' if istuple else '['
         for i, v in enumerate(value):
             if i > 0:
                 retval += ', '
             retval += encode_dict(v)
-        return retval + ']'
+        retval += ')' if istuple else ']'
+        return retval
+
     return repr(value)
 
 def fname_presuffix(fname, prefix='', suffix='', newpath=None, use_ext=True):
