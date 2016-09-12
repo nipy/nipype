@@ -10,10 +10,17 @@ nipype_display_crash crashfile.pklz -r -i
 
 """
 
+import re
+import glob
+import os.path as op
+
 def display_crash_files(crashfile, rerun, debug, directory):
     """display crash file content and rerun if required"""
 
     from nipype.utils.filemanip import loadcrash
+
+    crashfile = crashfile if crashfile else get_latest_crashfile(directory)
+
     crash_data = loadcrash(crashfile)
     node = None
     if 'node' in crash_data:
@@ -52,13 +59,24 @@ def display_crash_files(crashfile, rerun, debug, directory):
                 raise
         print("\n")
 
+def get_latest_crashfile(directory):
+    directory = directory if directory else "."
+    print("No crashfile specified. Defaulting to latest crashfile in %s" % directory)
+
+    crash_files = glob.glob(op.join(directory, '*.pkl*'))
+    crash_files.sort(key=lambda file_: op.getctime(op.join(directory, file_)))
+    latest_file = crash_files[-1]
+
+    print("Found latest file %s" % latest_file)
+    return latest_file
+
 if __name__ == "__main__":
     from argparse import ArgumentParser, RawTextHelpFormatter
     defstr = ' (default %(default)s)'
     parser = ArgumentParser(prog='nipype_display_crash',
                             description=__doc__,
                             formatter_class=RawTextHelpFormatter)
-    parser.add_argument('crashfile', metavar='f', type=str,
+    parser.add_argument('crashfile', metavar='f', type=str, nargs='?',
                         help='crash file to display')
     parser.add_argument('-r','--rerun', dest='rerun',
                         default=False, action="store_true",
