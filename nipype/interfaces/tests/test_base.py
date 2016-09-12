@@ -10,6 +10,7 @@ import os
 import tempfile
 import shutil
 import warnings
+import simplejson as json
 
 from nipype.testing import (assert_equal, assert_not_equal, assert_raises,
                             assert_true, assert_false, with_setup, package_check,
@@ -499,15 +500,23 @@ def test_BaseInterface_load_save_inputs():
 
     # test get hashval in a complex interface
     from nipype.interfaces.ants import Registration
-    tsthash = Registration(from_file=example_data('smri_ants_registration_settings.json'))
+    settings = example_data(example_data('smri_ants_registration_settings.json'))
+    with open(settings) as setf:
+        data_dict = json.load(setf)
+    tsthash = Registration(from_file=settings)
+    yield assert_all_true, data_dict, tsthash.inputs.get_traitsfree()
     hashed_inputs, hashvalue = tsthash.inputs.get_hashval(hash_method='timestamp')
-    # yield assert_equal, hashed_inputs, [('input1', 12), ('input3', True), ('input4', 'some string')]
-    yield assert_equal, hashvalue, '9ab944cbccba61475becb9eac65052af'
+    # yield assert_equal, hashvalue, '9ab944cbccba61475becb9eac65052af'
 
 def assert_not_raises(fn, *args, **kwargs):
     fn(*args, **kwargs)
     return True
 
+def assert_all_true(ref_dict, tst_dict):
+    for key, value in list(ref_dict.items()):
+        if tst_dict[key] != value:
+            return False
+    return True
 
 def test_input_version():
     class InputSpec(nib.TraitedSpec):
