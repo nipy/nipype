@@ -1,4 +1,10 @@
 coverage:
+  ignore:
+    - "test_*"
+    - "*/test_*"
+    - "*/*/test_*"
+    - "*/*/*/test_*"
+    - "*/*/*/*/test_*"
   status:
     project:
       unittests:  # declare a new status context "tests"
