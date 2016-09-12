@@ -567,13 +567,12 @@ class BaseTraitedSpec(traits.HasTraits):
 
         dict_withhash = []
         dict_nofilename = []
-
         for name, val in sorted(self.get_traitsfree().items()):
             if self.has_metadata(name, "nohash", True):
                 continue
 
-            hash_files = (not has_metadata(name, "hash_files", False) and not
-                          has_metadata(name, "name_source"))
+            hash_files = (not self.has_metadata(name, "hash_files", False) and not
+                          self.has_metadata(name, "name_source"))
             dict_nofilename.append((name,
                                     self._get_sorteddict(val, hash_method=hash_method,
                                                          hash_files=hash_files)))
@@ -581,6 +580,7 @@ class BaseTraitedSpec(traits.HasTraits):
                                   self._get_sorteddict(val, True, hash_method=hash_method,
                                                        hash_files=hash_files)))
         return dict_withhash, md5(encode_dict(dict_nofilename).encode()).hexdigest()
+
 
     def _get_sorteddict(self, theobject, dictwithhash=False, hash_method=None,
                         hash_files=True):
