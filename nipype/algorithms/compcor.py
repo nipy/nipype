@@ -118,13 +118,16 @@ class TCompCor(CompCor):
 
     def _run_interface(self, runtime):
         imgseries = nb.load(self.inputs.realigned_file).get_data()
-        time_voxels = imgseries.T
-        num_voxels = np.prod(time_voxels.shape[1:])
 
         # From the paper:
         # "For each voxel time series, the temporal standard deviation is
         # defined as the standard deviation of the time series after the removal
         # of low-frequency nuisance terms (e.g., linear and quadratic drift)."
+        imgseries = regress_poly(2, imgseries)
+        imgseries = imgseries - np.mean(imgseries, axis=1)[:, np.newaxis]
+
+        time_voxels = imgseries.T
+        num_voxels = np.prod(time_voxels.shape[1:])
 
         # "To construct the tSTD noise ROI, we sorted the voxels by their
         # temporal standard deviation ..."
