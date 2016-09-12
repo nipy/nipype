@@ -52,7 +52,9 @@ import os
 from nipype.interfaces.base import CommandLine
 CommandLine.set_default_terminal_output('allatonce')
 
+# https://github.com/moloney/dcmstack
 from dcmstack.extract import default_extractor
+# pip install pydicom
 from dicom import read_file
 
 from nipype.interfaces import (fsl, Function, ants, freesurfer, nipy)
@@ -653,7 +655,7 @@ def create_workflow(files,
     createfilter2 = MapNode(ACompCor(),
                             iterfield=['realigned_file', 'extra_regressors'],
                             name='makecompcorrfilter')
-    createfilter2.inputs.components_file('noise_components.txt')
+    createfilter2.inputs.components_file = 'noise_components.txt'
     createfilter2.inputs.num_components = num_components
 
     wf.connect(createfilter1, 'out_files', createfilter2, 'extra_regressors')
