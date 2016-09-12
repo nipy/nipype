@@ -1,3 +1,16 @@
+# -*- coding: utf-8 -*-
+# emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
+# vi: set ft=python sts=4 ts=4 sw=4 et:
+'''
+Miscellaneous algorithms
+
+    Change directory to provide relative paths for doctests
+    >>> import os
+    >>> filepath = os.path.dirname(os.path.realpath(__file__))
+    >>> datadir = os.path.realpath(os.path.join(filepath, '../testing/data'))
+    >>> os.chdir(datadir)
+
+'''
 from ..interfaces.base import (BaseInterfaceInputSpec, TraitedSpec,
                                BaseInterface, traits, File)
 from ..pipeline import engine as pe
@@ -38,8 +51,8 @@ class CompCor(BaseInterface):
     -------
 
     >>> ccinterface = CompCor()
-    >>> ccinterface.inputs.realigned_file = 'nipype/testing/data/functional.nii'
-    >>> ccinterface.inputs.mask_file = 'nipype/testing/data/mask.nii'
+    >>> ccinterface.inputs.realigned_file = 'functional.nii'
+    >>> ccinterface.inputs.mask_file = 'mask.nii'
     >>> ccinterface.inputs.num_components = 1
     >>> ccinterface.inputs.use_regress_poly = True
     >>> ccinterface.inputs.regress_poly_degree = 2
@@ -112,6 +125,20 @@ class TCompCorInputSpec(CompCorInputSpec):
                                         'with the highest variance are used.')
 
 class TCompCor(CompCor):
+    '''
+    Interface for tCompCor. Computes a ROI mask based on variance of voxels.
+
+    Example
+    -------
+
+    >>> ccinterface = TCompCor()
+    >>> ccinterface.inputs.realigned_file = 'functional.nii'
+    >>> ccinterface.inputs.mask_file = 'mask.nii'
+    >>> ccinterface.inputs.num_components = 1
+    >>> ccinterface.inputs.use_regress_poly = True
+    >>> ccinterface.inputs.regress_poly_degree = 2
+    >>> ccinterface.inputs.percentile_threshold = .03
+    '''
 
     input_spec = TCompCorInputSpec
     output_spec = CompCorOutputSpec
