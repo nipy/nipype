@@ -12,4 +12,3 @@ xvfbwrapper
 psutil
 funcsigs
 configparser
-nitime

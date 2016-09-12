@@ -1,11 +1,19 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 import os
-from nipype.testing import (assert_equal, example_data)
+from nipype.testing import (assert_equal, example_data, skipif)
 from nipype.algorithms.confounds import FramewiseDisplacement, ComputeDVARS
 import numpy as np
 from tempfile import mkdtemp
 from shutil import rmtree
+
+nonitime = True
+try:
+    import nitime
+    nonitime = False
+except ImportError:
+    pass
+
 
 def test_fd():
     tempdir = mkdtemp()
@@ -17,6 +25,7 @@ def test_fd():
     yield assert_equal, np.abs(ground_truth.mean() - res.outputs.fd_average) < 1e-4, True
     rmtree(tempdir)
 
+@skipif(nonitime)
 def test_dvars():
     tempdir = mkdtemp()
     ground_truth = np.loadtxt(example_data('ds003_sub-01_mc.DVARS'))
