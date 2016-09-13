@@ -158,7 +158,9 @@ EXTRA_REQUIRES = {
     'doc': ['Sphinx>=0.3'],
     'tests': TESTS_REQUIRES,
     'fmri': ['nitime'],
-    'profiler': ['psutil']
+    'profiler': ['psutil'],
+    'duecredit': ['duecredit'],
+    # 'mesh': ['mayavi']  # Enable when it works
 }
 
 # Enable a handle to install all extra dependencies at once

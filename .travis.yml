@@ -6,9 +6,9 @@ python:
 - 3.4
 - 3.5
 env:
-- INSTALL_DEB_DEPENDECIES=true
-- INSTALL_DEB_DEPENDECIES=false
-- INSTALL_DEB_DEPENDECIES=true DUECREDIT_ENABLE=yes
+- INSTALL_DEB_DEPENDECIES=true NIPYPE_EXTRAS="doc,tests,fmri,profiler"
+- INSTALL_DEB_DEPENDECIES=false NIPYPE_EXTRAS="doc,tests,fmri,profiler"
+- INSTALL_DEB_DEPENDECIES=true NIPYPE_EXTRAS="doc,tests,fmri,profiler,duecredit"
 before_install:
 - wget http://repo.continuum.io/miniconda/Miniconda${TRAVIS_PYTHON_VERSION:0:1}-latest-Linux-x86_64.sh
   -O /home/travis/.cache/miniconda.sh
@@ -29,16 +29,13 @@ install:
 - conda config --add channels conda-forge
 - conda update --yes conda
 - conda update --all -y python=$TRAVIS_PYTHON_VERSION
+- conda install -y nipype
+- rm -r /home/travis/miniconda/lib/python${TRAVIS_PYTHON_VERSION}/site-packages/nipype*
 # - if [[ "${INSTALL_DEB_DEPENDECIES}" == "true" && ${TRAVIS_PYTHON_VERSION:0:1} == "2" ]]; then
 #   conda install -y vtk mayavi; fi
-- conda install -y nipype
-- pip install python-coveralls coverage doctest-ignore-unicode
-- if [ ! -z "$DUECREDIT_ENABLE"]; then pip install duecredit; fi
-- rm -r /home/travis/miniconda/lib/python${TRAVIS_PYTHON_VERSION}/site-packages/nipype*
 - pip install -r requirements.txt
-- pip install -e .
-- export COVERAGE_PROCESS_START=$(pwd)/.coveragerc
-- export COVERAGE_DATA_FILE=$(pwd)/.coverage
+- pip install -e .[$NIPYPE_EXTRAS]
+- export COVERAGE_PROCESS_START=$(pwd)/.coveragerc && export COVERAGE_DATA_FILE=$(pwd)/.coverage
 - echo "data_file = ${COVERAGE_DATA_FILE}" >> ${COVERAGE_PROCESS_START}
 script:
 - python -W once:FSL:UserWarning:nipype `which nosetests` --with-doctest --with-doctest-ignore-unicode --with-cov --cover-package nipype --logging-level=DEBUG --verbosity=3

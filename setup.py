@@ -17,8 +17,7 @@ import sys
 from glob import glob
 import os
 from os.path import join as pjoin
-
-from builtins import str, bytes, open
+from io import open
 
 # Commit hash writing, and dependency checking
 from setuptools.command.build_py import build_py
@@ -72,7 +71,7 @@ class BuildWithCommitInfoCommand(build_py):
                                 shell=True)
         repo_commit, _ = proc.communicate()
         # Fix for python 3
-        repo_commit = str(repo_commit)
+        repo_commit = '{}'.format(repo_commit)
         # We write the installation commit even if it's empty
         cfg_parser = ConfigParser()
         cfg_parser.read(pjoin('nipype', 'COMMIT_INFO.txt'))
@@ -93,7 +92,7 @@ def main():
                      for val in os.listdir(pjoin(thispath, 'nipype', 'testing', 'data'))
                      if not os.path.isdir(pjoin(thispath, 'nipype', 'testing', 'data', val))]
 
-    testdatafiles+=[
+    testdatafiles += [
         pjoin('testing', 'data', 'dicomdir', '*'),
         pjoin('testing', 'data', 'bedpostxout', '*'),
         pjoin('testing', 'data', 'tbss_dir', '*'),
@@ -128,7 +127,7 @@ def main():
         platforms=ldict['PLATFORMS'],
         version=ldict['VERSION'],
         install_requires=ldict['REQUIRES'],
-        setup_requires=['configparser'],
+        setup_requires=['future', 'configparser'],
         provides=ldict['PROVIDES'],
         packages=[
             'nipype',
@@ -253,7 +252,7 @@ def main():
 
         package_data={'nipype': testdatafiles},
         scripts=glob('bin/*'),
-        cmdclass={ 'build_py': BuildWithCommitInfoCommand },
+        cmdclass={'build_py': BuildWithCommitInfoCommand},
         tests_require=ldict['TESTS_REQUIRES'],
         test_suite='nose.collector',
         zip_safe=False,
