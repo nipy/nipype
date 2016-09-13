@@ -12,7 +12,6 @@ nibabel denoted by ## START - COPIED FROM NIBABEL and a corresponding ## END
 
 """
 # Build helper
-from __future__ import print_function
 import sys
 from glob import glob
 import os
