@@ -35,6 +35,7 @@ from ..interfaces.base import (BaseInterface, traits, TraitedSpec, File,
                                BaseInterfaceInputSpec, isdefined,
                                DynamicTraitedSpec, Undefined)
 from ..utils.filemanip import fname_presuffix, split_filename
+
 iflogger = logging.getLogger('interface')
 
 
@@ -257,7 +258,6 @@ class CreateNifti(BaseInterface):
         outputs['nifti_file'] = self._gen_output_file_name()
         return outputs
 
-
 class TSNRInputSpec(BaseInterfaceInputSpec):
     in_file = InputMultiPath(File(exists=True), mandatory=True,
                              desc='realigned 4D file or a list of 3D files')
@@ -308,17 +308,7 @@ class TSNR(BaseInterface):
             data = data.astype(np.float32)
 
         if isdefined(self.inputs.regress_poly):
-            timepoints = img.shape[-1]
-            X = np.ones((timepoints, 1))
-            for i in range(self.inputs.regress_poly):
-                X = np.hstack((X, legendre(
-                    i + 1)(np.linspace(-1, 1, timepoints))[:, None]))
-            betas = np.dot(np.linalg.pinv(X), np.rollaxis(data, 3, 2))
-            datahat = np.rollaxis(np.dot(X[:, 1:],
-                                         np.rollaxis(
-                                             betas[1:, :, :, :], 0, 3)),
-                                  0, 4)
-            data = data - datahat
+            data = regress_poly(self.inputs.regress_poly, data)
             img = nb.Nifti1Image(data, img.get_affine(), header)
             nb.save(img, op.abspath(self.inputs.detrended_file))
 
@@ -343,6 +333,32 @@ class TSNR(BaseInterface):
             outputs['detrended_file'] = op.abspath(self.inputs.detrended_file)
         return outputs
 
+def regress_poly(degree, data):
+    ''' returns data with degree polynomial regressed out.
+    The last dimension (i.e. data.shape[-1]) should be time.
+    '''
+    datashape = data.shape
+    timepoints = datashape[-1]
+
+    # Rearrange all voxel-wise time-series in rows
+    data = data.reshape((-1, timepoints))
+
+    # Generate design matrix
+    X = np.ones((timepoints, 1))
+    for i in range(degree):
+        polynomial_func = legendre(i+1)
+        value_array = np.linspace(-1, 1, timepoints)
+        X = np.hstack((X, polynomial_func(value_array)[:, np.newaxis]))
+
+    # Calculate coefficients
+    betas = np.linalg.pinv(X).dot(data.T)
+
+    # Estimation
+    datahat = X[:, 1:].dot(betas[1:, ...]).T
+    regressed_data = data - datahat
+
+    # Back to original shape
+    return regressed_data.reshape(datashape)
 
 class GunzipInputSpec(BaseInterfaceInputSpec):
     in_file = File(exists=True, mandatory=True)
