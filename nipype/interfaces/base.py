@@ -776,7 +776,10 @@ class BaseInterface(Interface):
         self.num_threads = 1
 
         if from_file is not None:
-            self.load_inputs_from_json(from_file, overwrite=False)
+            self.load_inputs_from_json(from_file, overwrite=True)
+
+            for name, value in list(inputs.items()):
+                setattr(self.inputs, name, value)
 
 
     @classmethod
