@@ -345,7 +345,7 @@ class CompCor(BaseInterface):
         u, _, _ = linalg.svd(M, full_matrices=False)
         components = u[:, :self.inputs.num_components]
         components_file = os.path.join(os.getcwd(), self.inputs.components_file)
-        np.savetxt(components_file, components, fmt="%.10f")
+        np.savetxt(components_file, components, fmt=b"%.10f")
         return runtime
 
     def _list_outputs(self):
