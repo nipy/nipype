@@ -7,7 +7,7 @@ from builtins import str
 from ....interfaces import fsl as fsl          # fsl
 from ....interfaces import utility as util     # utility
 from ....pipeline import engine as pe          # pypeline engine
-from ....algorithms.misc import TSNR
+from ....algorithms.confounds import TSNR
 from ....algorithms import confounds
 
 def select_volume(filename, which):
