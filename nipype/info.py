@@ -133,16 +133,35 @@ MICRO = _version_micro
 ISRELEASE = _version_extra == ''
 VERSION = __version__
 PROVIDES = ['nipype']
-REQUIRES = ["nibabel>=%s" % NIBABEL_MIN_VERSION,
-            "networkx>=%s" % NETWORKX_MIN_VERSION,
-            "numpy>=%s" % NUMPY_MIN_VERSION,
-            "python-dateutil>=%s" % DATEUTIL_MIN_VERSION,
-            "scipy>=%s" % SCIPY_MIN_VERSION,
-            "traits>=%s" % TRAITS_MIN_VERSION,
-            "nose>=%s" % NOSE_MIN_VERSION,
-            "future>=%s" % FUTURE_MIN_VERSION,
-            "simplejson>=%s" % SIMPLEJSON_MIN_VERSION,
-            "prov>=%s" % PROV_MIN_VERSION,
-            "mock",
-            "xvfbwrapper"]
+REQUIRES = [
+    "nibabel>=%s" % NIBABEL_MIN_VERSION,
+    "networkx>=%s" % NETWORKX_MIN_VERSION,
+    "numpy>=%s" % NUMPY_MIN_VERSION,
+    "python-dateutil>=%s" % DATEUTIL_MIN_VERSION,
+    "scipy>=%s" % SCIPY_MIN_VERSION,
+    "traits>=%s" % TRAITS_MIN_VERSION,
+    "future>=%s" % FUTURE_MIN_VERSION,
+    "simplejson>=%s" % SIMPLEJSON_MIN_VERSION,
+    "prov>=%s" % PROV_MIN_VERSION,
+    "xvfbwrapper",
+    "funcsigs"
+]
+
+TESTS_REQUIRES = [
+    "nose>=%s" % NOSE_MIN_VERSION,
+    "mock",
+    "codecov",
+    "doctest-ignore-unicode"
+]
+
+EXTRA_REQUIRES = {
+    'doc': ['Sphinx>=0.3'],
+    'tests': TESTS_REQUIRES,
+    'fmri': ['nitime'],
+    'profiler': ['psutil']
+}
+
+# Enable a handle to install all extra dependencies at once
+EXTRA_REQUIRES['all'] = [val for _, val in list(EXTRA_REQUIRES.items())]
+
 STATUS = 'stable'

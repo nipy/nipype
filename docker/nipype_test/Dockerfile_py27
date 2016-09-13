@@ -46,6 +46,6 @@ RUN pip install -r /root/src/nipype/requirements.txt
 COPY . /root/src/nipype
 RUN rm -r /usr/local/miniconda/lib/python2.7/site-packages/nipype* && \
     cd /root/src/nipype && \
-    pip install -e .
+    pip install -e .[all]
 
 CMD ["/bin/bash"]
