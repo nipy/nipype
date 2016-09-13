@@ -36,8 +36,6 @@ class CompCorInputSpec(BaseInterfaceInputSpec):
                                    'pre-component extraction')
     regress_poly_degree = traits.Range(low=1, default=1, usedefault=True,
                                        desc='the degree polynomial to use')
-    extra_regressors = File(exists=True, mandatory=False,
-                            desc='additional regressors to add')
 
 class CompCorOutputSpec(TraitedSpec):
     components_file = File(exists=True,
@@ -90,10 +88,6 @@ class CompCor(BaseInterface):
         # principal components using a singular value decomposition."
         u, _, _ = linalg.svd(M, full_matrices=False)
         components = u[:, :self.inputs.num_components]
-        if self.inputs.extra_regressors:
-            components = self._add_extras(components,
-                                          self.inputs.extra_regressors)
-
         components_file = os.path.join(os.getcwd(), self.inputs.components_file)
         np.savetxt(components_file, components, fmt="%.10f")
         return runtime
@@ -108,12 +102,7 @@ class CompCor(BaseInterface):
         # set bad values to x
         stdM[stdM == 0] = x
         stdM[np.isnan(stdM)] = x
-        stdM[np.isinf(stdM)] = x
         return stdM
-
-    def _add_extras(self, components, extra_regressors):
-            regressors = np.genfromtxt(self.inputs.extra_regressors)
-            return np.hstack((components, regressors))
 
 class TCompCorInputSpec(CompCorInputSpec):
     # and all the fields in CompCorInputSpec

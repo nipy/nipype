@@ -5,7 +5,6 @@ from ...testing import assert_equal, assert_true, assert_false, skipif, utils
 from ..compcor import CompCor, TCompCor, ACompCor
 
 import unittest
-import mock
 import nibabel as nb
 import numpy as np
 import os
@@ -50,14 +49,6 @@ class TestCompCor(unittest.TestCase):
 
         assert_equal(os.path.getsize(ccresult.outputs.components_file),
                      os.path.getsize(accresult.outputs.components_file))
-
-    @mock.patch('nipype.algorithms.compcor.CompCor._add_extras')
-    def test_compcor_with_extra_regressors(self, mock_add_extras):
-        regressors_file ='regress.txt'
-        open(regressors_file, 'a').close() # make sure file exists
-        CompCor(realigned_file=self.realigned_file, mask_file=self.mask_file,
-                extra_regressors=regressors_file).run()
-        assert_true(mock_add_extras.called)
 
     def test_tcompcor(self):
         ccinterface = TCompCor(realigned_file=self.realigned_file, percentile_threshold=0.75)
