@@ -44,25 +44,19 @@ RUN apt-get -y update && \
                        ruby && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
-RUN wget -O- http://neuro.debian.net/lists/xenial.us-ca.full | tee /etc/apt/sources.list.d/neurodebian.sources.list && \
-    apt-key adv --recv-keys --keyserver hkp://pgp.mit.edu:80 0xA5D32F012649A5A9 && \
-    apt-get -y update && \
-    apt-get install -y fsl && \
-    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
-
-# Use bash
-RUN ln -snf /bin/bash /bin/sh
-ENV SHELL /bin/bash
+WORKDIR /opt
+RUN wget  --retry-connrefused --waitretry=5 --read-timeout=20 --timeout=15 -t 0 -q https://2a353b13e8d2d9ac21ce543b7064482f771ce658.googledrive.com/host/0BxI12kyv2olZVFhUcGVpYWF3R3c/FSL-5.0.9-centos6_64.tar.gz && \
+    tar xzf FSL-5.0.9-centos6_64.tar.gz -C /opt/
 
 # Set FSL environment variables
-ENV FSLDIR=/usr/share/fsl/5.0 \
+ENV FSLDIR=/opt/fsl \
     FSLOUTPUTTYPE=NIFTI_GZ \
     FSLMULTIFILEQUIT=TRUE \
-    POSSUMDIR=/usr/share/fsl/5.0 \
+    POSSUMDIR=/opt/fsl \
     FSLTCLSH=/usr/bin/tclsh \
     FSLWISH=/usr/bin/wish \
-    PATH=/usr/lib/fsl/5.0:$PATH \
-    LD_LIBRARY_PATH=/usr/lib/fsl/5.0:$LD_LIBRARY_PATH
+    PATH=/opt/fsl/bin:$PATH \
+    LD_LIBRARY_PATH=/opt/fsl/lib:$LD_LIBRARY_PATH
 
 # Install fake-S3
 ENV GEM_HOME /usr/local/bundle
@@ -76,55 +70,25 @@ RUN mkdir -p "$GEM_HOME" "$BUNDLE_BIN" && \
 
 RUN gem install fakes3
 
-# Install Matlab MCR: from the good old install_spm_mcr.sh of @chrisfilo
-WORKDIR /opt
-RUN echo "destinationFolder=/opt/mcr" > mcr_options.txt && \
-    echo "agreeToLicense=yes" >> mcr_options.txt && \
-    echo "outputFile=/tmp/matlabinstall_log" >> mcr_options.txt && \
-    echo "mode=silent" >> mcr_options.txt && \
-    mkdir -p matlab_installer && \
-    curl -sSL http://www.mathworks.com/supportfiles/downloads/R2015a/deployment_files/R2015a/installers/glnxa64/MCR_R2015a_glnxa64_installer.zip \
-         -o matlab_installer/installer.zip && \
-    unzip matlab_installer/installer.zip -d matlab_installer/ && \
-    matlab_installer/install -inputFile mcr_options.txt && \
-    rm -rf matlab_installer mcr_options.txt
-
-# Install SPM
-RUN curl -sSL http://www.fil.ion.ucl.ac.uk/spm/download/restricted/utopia/dev/spm12_r6472_Linux_R2015a.zip -o spm12.zip && \
-    unzip spm12.zip && \
-    rm -rf spm12.zip
-
-ENV MATLABCMD="/opt/mcr/v85/toolbox/matlab" \
-    SPMMCRCMD="/opt/spm12/run_spm12.sh /opt/mcr/v85/ script" \
-    FORCE_SPMMCR=1
-
-WORKDIR /root
-# Install miniconda
-RUN curl -sSLO https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh && \
-    /bin/bash Miniconda3-latest-Linux-x86_64.sh -b -p /usr/local/miniconda && \
-    rm Miniconda3-latest-Linux-x86_64.sh
-
-ENV PATH /usr/local/miniconda/bin:$PATH
-
-# http://bugs.python.org/issue19846
-# > At the moment, setting "LANG=C" on a Linux system *fundamentally breaks Python 3*, and that's not OK.
-ENV LANG=C.UTF-8 \
-    LC_ALL=C.UTF-8
-
-# Add conda-forge channel in conda
-RUN conda config --add channels conda-forge && \
-    conda install -y lockfile \
-                     nipype \
-                     matplotlib \
-                     sphinx \
-                     boto \
-                     boto3 \
-                     coverage \
-                     mock \
-                     pbr \
-                     nitime \
-                     dipy \
-                     pandas && \
-    pip install nose-cov doctest-ignore-unicode configparser
+# # Install Matlab MCR: from the good old install_spm_mcr.sh of @chrisfilo
+# RUN echo "destinationFolder=/opt/mcr" > mcr_options.txt && \
+#     echo "agreeToLicense=yes" >> mcr_options.txt && \
+#     echo "outputFile=/tmp/matlabinstall_log" >> mcr_options.txt && \
+#     echo "mode=silent" >> mcr_options.txt && \
+#     mkdir -p matlab_installer && \
+#     curl -sSL http://www.mathworks.com/supportfiles/downloads/R2015a/deployment_files/R2015a/installers/glnxa64/MCR_R2015a_glnxa64_installer.zip \
+#          -o matlab_installer/installer.zip && \
+#     unzip matlab_installer/installer.zip -d matlab_installer/ && \
+#     matlab_installer/install -inputFile mcr_options.txt && \
+#     rm -rf matlab_installer mcr_options.txt
+# 
+# # Install SPM
+# RUN curl -sSL http://www.fil.ion.ucl.ac.uk/spm/download/restricted/utopia/dev/spm12_r6472_Linux_R2015a.zip -o spm12.zip && \
+#     unzip spm12.zip && \
+#     rm -rf spm12.zip
+# 
+# ENV MATLABCMD="/opt/mcr/v85/toolbox/matlab" \
+#     SPMMCRCMD="/opt/spm12/run_spm12.sh /opt/mcr/v85/ script" \
+#     FORCE_SPMMCR=1
 
 CMD ["/bin/bash"]

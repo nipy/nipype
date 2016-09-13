@@ -26,26 +26,37 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-FROM nipype/nipype_test:base-0.0.2
+FROM nipype/nipype_test:sge-base-0.0.2
 MAINTAINER The nipype developers https://github.com/nipy/nipype
-
-# Downgrade python to 2.7
-RUN conda update -y conda && \
-    conda update --all -y python=2.7 && \
-    pip install nose-cov doctest-ignore-unicode configparser
 
 COPY docker/circleci/run_* /usr/bin/
 RUN chmod +x /usr/bin/run_*
 
-# Speed up building
-RUN mkdir -p /root/src/nipype
-COPY requirements.txt /root/src/nipype/requirements.txt
-RUN pip install -r /root/src/nipype/requirements.txt
+USER sgeadmin
+WORKDIR /home/sgeadmin/
+# Set FSL environment variables
+ENV FSLDIR=/opt/fsl \
+    FSLOUTPUTTYPE=NIFTI_GZ \
+    FSLMULTIFILEQUIT=TRUE \
+    POSSUMDIR=/opt/fsl \
+    FSLTCLSH=/usr/bin/tclsh \
+    FSLWISH=/usr/bin/wish \
+    PATH=/opt/fsl/bin:$PATH \
+    LD_LIBRARY_PATH=/opt/fsl/lib:$LD_LIBRARY_PATH
 
-# Re-install nipype
-COPY . /root/src/nipype
-RUN rm -r /usr/local/miniconda/lib/python2.7/site-packages/nipype* && \
-    cd /root/src/nipype && \
-    pip install -e .
+RUN curl -sSLO https://repo.continuum.io/miniconda/Miniconda2-latest-Linux-x86_64.sh && \
+    /bin/bash Miniconda2-latest-Linux-x86_64.sh -b -p /home/sgeadmin/.conda && \
+    rm Miniconda2-latest-Linux-x86_64.sh
+ENV PATH=/home/sgeadmin/.conda/bin:$PATH
+RUN conda install -y numpy scipy
+
+WORKDIR /home/sgeadmin/src/nipype
+COPY . ./
+ENV SHELL /bin/bash
+#     source activate nipypetest && \
+#     pip install -r requirements && \
+#     pip install -e .
+
+USER root
 
 CMD ["/bin/bash"]

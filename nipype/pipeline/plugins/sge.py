@@ -18,7 +18,7 @@ import random
 from ...interfaces.base import CommandLine
 from .base import (SGELikeBatchManagerBase, logger, iflogger, logging)
 
-DEBUGGING_PREFIX = '{0!d}'.format(random.uniform(100, 999))
+DEBUGGING_PREFIX = '{0:d}'.format(int(random.uniform(100, 999)))
 
 
 def sge_debug_print(message):
@@ -147,7 +147,7 @@ class QstatSubstitute(object):
         while qacct_retries > 0:
             qacct_retries -= 1
             try:
-                strtaskid = '{0!d}'.format(taskid)
+                strtaskid = '{0:d}'.format(int(taskid))
                 proc = subprocess.Popen(
                     [this_command, '-o', pwd.getpwuid(os.getuid())[0], '-j', strtaskid],
                     stdout=subprocess.PIPE,
