@@ -16,6 +16,7 @@ from ..interfaces.base import (BaseInterfaceInputSpec, TraitedSpec,
 from ..pipeline import engine as pe
 from ..interfaces.utility import IdentityInterface
 from .misc import regress_poly
+from ..external.due import BibTeX, Doi, due
 
 import nibabel as nb
 import numpy as np
@@ -57,6 +58,19 @@ class CompCor(BaseInterface):
     '''
     input_spec = CompCorInputSpec
     output_spec = CompCorOutputSpec
+    references_ = [{'entry': BibTeX("@article{compcor_2007,"
+                                    "title = {A component based noise correction method (CompCor) for BOLD and perfusion based},"
+                                    "volume = {37},"
+                                    "number = {1},"
+                                    "doi = {10.1016/j.neuroimage.2007.04.042},"
+                                    "urldate = {2016-08-13},"
+                                    "journal = {NeuroImage},"
+                                    "author = {Behzadi, Yashar and Restom, Khaled and Liau, Joy and Liu, Thomas T.},"
+                                    "year = {2007},"
+                                    "pages = {90-101},}"
+                                ),
+                    'tags': ['method', 'implementation']
+                }]
 
     def _run_interface(self, runtime):
         imgseries = nb.load(self.inputs.realigned_file).get_data()
