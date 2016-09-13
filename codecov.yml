@@ -16,5 +16,5 @@ coverage:
       smoketests:  # declare a new status context "app"
         target: 0
         threshold: 100
-        paths:
+        flags:
           - "smoketests"  # remove all files in "tests/"
