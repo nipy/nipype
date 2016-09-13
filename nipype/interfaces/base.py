@@ -568,8 +568,9 @@ class BaseTraitedSpec(traits.HasTraits):
 
         dict_withhash = []
         dict_nofilename = []
-        for name, val in sorted(self.get_traitsfree().items()):
-            if self.has_metadata(name, "nohash", True):
+        for name, val in sorted(self.get().items()):
+            if not isdefined(val) or self.has_metadata(name, "nohash", True):
+                # skip undefined traits and traits with nohash=True
                 continue
 
             hash_files = (not self.has_metadata(name, "hash_files", False) and not
