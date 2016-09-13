@@ -33,7 +33,7 @@ from traits.trait_base import _Undefined, class_of
 from traits.api import BaseUnicode
 from traits.api import Unicode
 
-DictStrStr = traits.Dict((bytes,str), (bytes, str))
+DictStrStr = traits.Dict((bytes,str,unicode), (bytes,str,unicode))
 Str = Unicode
 
 class BaseFile(BaseUnicode):
