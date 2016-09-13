@@ -207,7 +207,8 @@ def hash_timestamp(afile):
 
 
 def copyfile(originalfile, newfile, copy=False, create_new=False,
-             hashmethod=None, use_hardlink=False):
+             hashmethod=None, use_hardlink=False,
+             copy_related_files=True):
     """Copy or link ``originalfile`` to ``newfile``.
 
     If ``use_hardlink`` is True, and the file can be hard-linked, then a
@@ -228,6 +229,9 @@ def copyfile(originalfile, newfile, copy=False, create_new=False,
     use_hardlink : Bool
         specifies whether to hard-link files, when able
         (Default=False), taking precedence over copy
+    copy_related_files : Bool
+        specifies whether to also operate on related files, as defined in
+        ``related_filetype_sets``
 
     Returns
     -------
@@ -320,30 +324,36 @@ def copyfile(originalfile, newfile, copy=False, create_new=False,
             fmlogger.warn(e.message)
 
     # Associated files
-    _, _, this_type = split_filename(originalfile)
-    for type_set in related_filetype_sets:
-        if this_type in type_set:
-            for alt_type in type_set:
-                alt_ofile = originalfile[:-len(this_type)] + alt_type
-                alt_nfile = newfile[:-len(this_type)] + alt_type
-                if os.path.exists(alt_ofile) and not os.path.exists(alt_nfile):
-                    copyfile(alt_ofile, alt_nfile, copy,
-                             hashmethod=hashmethod,
-                             use_hardlink=use_hardlink)
+    if copy_related_files:
+        related_file_pairs = (get_related_files(f, include_this_file=False)
+                              for f in (originalfile, newfile))
+        for alt_ofile, alt_nfile in zip(*related_file_pairs):
+            if os.path.exists(alt_ofile):
+                copyfile(alt_ofile, alt_nfile, copy, hashmethod=hashmethod,
+                         use_hardlink=use_hardlink, copy_related_files=False)
 
     return newfile
 
 
-def get_related_files(filename):
-    """Returns a list of related files for Nifti-Pair, Analyze (SPM) and AFNI
-    files
+def get_related_files(filename, include_this_file=True):
+    """Returns a list of related files, as defined in
+    ``related_filetype_sets``, for a filename. (e.g., Nifti-Pair, Analyze (SPM)
+    and AFNI files).
+
+    Parameters
+    ----------
+    filename : str
+        File name to find related filetypes of.
+    include_this_file : bool
+        If true, output includes the input filename.
     """
     related_files = []
-    path, name, ext = split_filename(filename)
+    path, name, this_type = split_filename(filename)
     for type_set in related_filetype_sets:
-        if ext in type_set:
-            for new_ext in type_set:
-                related_files.append(os.path.join(path, name + new_ext))
+        if this_type in type_set:
+            for related_type in type_set:
+                if include_this_file or related_type != this_type:
+                    related_files.append(os.path.join(path, name + related_type))
     if not len(related_files):
         related_files = [filename]
     return related_files
