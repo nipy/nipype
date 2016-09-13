@@ -89,10 +89,6 @@ def main():
 
     thispath, _ = os.path.split(__file__)
 
-    # Get version and release info, which is all stored in nipype/info.py
-    ver_file = os.path.join(thispath, 'nipype', 'info.py')
-    exec(open(ver_file).read(), locals())
-
     testdatafiles = [pjoin('testing', 'data', val)
                      for val in os.listdir(pjoin(thispath, 'nipype', 'testing', 'data'))
                      if not os.path.isdir(pjoin(thispath, 'nipype', 'testing', 'data', val))]
@@ -109,23 +105,31 @@ def main():
         pjoin('interfaces', 'tests', 'use_resources'),
     ]
 
+    # Python 3: use a locals dictionary
+    # http://stackoverflow.com/a/1463370/6820620
+    ldict = locals()
+    # Get version and release info, which is all stored in nipype/info.py
+    ver_file = os.path.join(thispath, 'nipype', 'info.py')
+    with open(ver_file) as infofile:
+        exec(infofile.read(), globals(), ldict)
+
     setup(
-        name=NAME,
-        maintainer=MAINTAINER,
-        maintainer_email=MAINTAINER_EMAIL,
-        description=DESCRIPTION,
-        long_description=LONG_DESCRIPTION,
-        url=URL,
-        download_url=DOWNLOAD_URL,
-        license=LICENSE,
-        classifiers=CLASSIFIERS,
-        author=AUTHOR,
-        author_email=AUTHOR_EMAIL,
-        platforms=PLATFORMS,
-        version=VERSION,
-        install_requires=REQUIRES,
+        name=ldict['NAME'],
+        maintainer=ldict['MAINTAINER'],
+        maintainer_email=ldict['MAINTAINER_EMAIL'],
+        description=ldict['DESCRIPTION'],
+        long_description=ldict['LONG_DESCRIPTION'],
+        url=ldict['URL'],
+        download_url=ldict['DOWNLOAD_URL'],
+        license=ldict['LICENSE'],
+        classifiers=ldict['CLASSIFIERS'],
+        author=ldict['AUTHOR'],
+        author_email=ldict['AUTHOR_EMAIL'],
+        platforms=ldict['PLATFORMS'],
+        version=ldict['VERSION'],
+        install_requires=ldict['REQUIRES'],
         setup_requires=['configparser'],
-        provides=PROVIDES,
+        provides=ldict['PROVIDES'],
         packages=[
             'nipype',
             'nipype.algorithms',
@@ -250,10 +254,10 @@ def main():
         package_data={'nipype': testdatafiles},
         scripts=glob('bin/*'),
         cmdclass={ 'build_py': BuildWithCommitInfoCommand },
-        tests_require=TESTS_REQUIRES,
+        tests_require=ldict['TESTS_REQUIRES'],
         test_suite='nose.collector',
         zip_safe=False,
-        extras_require=EXTRA_REQUIRES
+        extras_require=ldict['EXTRA_REQUIRES']
     )
 
 if __name__ == "__main__":
