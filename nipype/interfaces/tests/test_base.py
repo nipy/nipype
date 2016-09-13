@@ -511,8 +511,8 @@ def test_BaseInterface_load_save_inputs():
     tsthash2 = Registration(from_file=settings)
     yield assert_equal, {}, check_dict(data_dict, tsthash2.inputs.get_traitsfree())
 
-    hashed_inputs, hashvalue = tsthash.inputs.get_hashval(hash_method='timestamp')
-    yield assert_equal, hashvalue, '9ab944cbccba61475becb9eac65052af'
+    _, hashvalue = tsthash.inputs.get_hashval(hash_method='timestamp')
+    yield assert_equal, 'ec5755e07287e04a4b409e03b77a517c', hashvalue
 
 def test_input_version():
     class InputSpec(nib.TraitedSpec):

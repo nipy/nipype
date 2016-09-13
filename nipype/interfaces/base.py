@@ -47,6 +47,7 @@ runtime_profile = str2bool(config.get('execution', 'profile_runtime'))
 nipype_version = LooseVersion(__version__)
 iflogger = logging.getLogger('interface')
 
+FLOAT_FORMAT = '{:.10f}'.format
 PY35 = sys.version_info >= (3, 5)
 PY3 = sys.version_info[0] > 2
 
@@ -619,7 +620,7 @@ class BaseTraitedSpec(traits.HasTraits):
                     else:
                         out = hash
                 elif isinstance(theobject, float):
-                    out = '%.10f' % theobject
+                    out = FLOAT_FORMAT(theobject)
                 else:
                     out = theobject
         return out
