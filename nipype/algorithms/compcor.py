@@ -121,7 +121,10 @@ class TCompCorInputSpec(CompCorInputSpec):
                                         exclude_low=True, exclude_high=True,
                                         usedefault=True, desc='the percentile '
                                         'used to select highest-variance '
-                                        'voxels. By default the 2% of voxels '
+                                        'voxels, represented by a number '
+                                        'between 0 and 1, exclusive. By '
+                                        'default, this value is set to .02. '
+                                        'That is, the 2% of voxels '
                                         'with the highest variance are used.')
 
 class TCompCor(CompCor):
