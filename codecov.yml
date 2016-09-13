@@ -1,9 +1,20 @@
 coverage:
+  range: "0...100"
   status:
     project:
-      unittests:  # declare a new status context "tests"
+      default:
+        target: 0
+        threshold: 100
+      patch:
+        target: 0
+        threshold: 100
+      unittests:
+        target: 0
+        threshold: 100
         flags:
-          - "unittests"  # only include coverage in "tests/" folder
-      smoketests:  # declare a new status context "app"
-        paths:
-          - "smoketests"  # remove all files in "tests/"
+          - "unittests"
+      smoketests:
+        target: 0
+        threshold: 100
+        flags:
+          - "smoketests"
