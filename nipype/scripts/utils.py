@@ -24,6 +24,13 @@ ExistingFilePath = click.Path(exists=True,  dir_okay=False, resolve_path=True)
 UnexistingFilePath = click.Path(dir_okay=False, resolve_path=True)
 
 
+# validators
+def check_not_none(ctx, param, value):
+    if value is None:
+        raise click.BadParameter('got {}.'.format(value))
+    return value
+
+
 # declare custom click.ParamType
 class RegularExpression(click.ParamType):
     name = 'regex'

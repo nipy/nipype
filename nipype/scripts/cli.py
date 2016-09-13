@@ -10,7 +10,8 @@ from .utils import (CONTEXT_SETTINGS,
                     ExistingFilePath,
                     UnexistingFilePath,
                     RegularExpression,
-                    PythonModule,)
+                    PythonModule,
+                    check_not_none,)
 
 
 # declare the CLI group
@@ -20,8 +21,8 @@ def cli():
 
 
 @cli.command(context_settings=CONTEXT_SETTINGS)
-@click.argument('logdir', type=ExistingDirPath)
-@click.option('-r', '--regex', type=RegularExpression(), default='*',
+@click.argument('logdir', type=ExistingDirPath, callback=check_not_none)
+@click.option('-r', '--regex', type=RegularExpression(), callback=check_not_none,
               help='Regular expression to be searched in each traceback.')
 def search(logdir, regex):
     """Search for tracebacks content.
@@ -43,16 +44,16 @@ def search(logdir, regex):
 
 
 @cli.command(context_settings=CONTEXT_SETTINGS)
-@click.argument('crashfile', type=ExistingFilePath,)
+@click.argument('crashfile', type=ExistingFilePath, callback=check_not_none)
 @click.option('-r', '--rerun', is_flag=True, flag_value=True,
               help='Rerun crashed node.')
 @click.option('-d', '--debug', is_flag=True, flag_value=True,
               help='Enable Python debugger when re-executing.')
 @click.option('-i', '--ipydebug', is_flag=True, flag_value=True,
               help='Enable IPython debugger when re-executing.')
-@click.option('--dir', type=ExistingDirPath,
+@click.option('-w', '--dir', type=ExistingDirPath,
               help='Directory where to run the node in.')
-def crash(crashfile, rerun, debug, ipydebug, directory):
+def crash(crashfile, rerun, debug, ipydebug, dir):
     """Display Nipype crash files.
 
     For certain crash files, one can rerun a failed node in a temp directory.
@@ -70,11 +71,11 @@ def crash(crashfile, rerun, debug, ipydebug, directory):
         sys.excepthook = ultratb.FormattedTB(mode='Verbose',
                                              color_scheme='Linux',
                                              call_pdb=1)
-    display_crash_file(crashfile, rerun, debug, directory)
+    display_crash_file(crashfile, rerun, debug, dir)
 
 
 @cli.command(context_settings=CONTEXT_SETTINGS)
-@click.argument('pklz_file', type=ExistingFilePath)
+@click.argument('pklz_file', type=ExistingFilePath, callback=check_not_none)
 def show(pklz_file):
     """Print the content of Nipype node .pklz file.
 
@@ -89,7 +90,8 @@ def show(pklz_file):
 
 
 @cli.command(context_settings=UNKNOWN_OPTIONS)
-@click.argument('module', type=PythonModule(), required=False)
+@click.argument('module', type=PythonModule(), required=False,
+                callback=check_not_none)
 @click.argument('interface', type=str, required=False)
 @click.option('--list', is_flag=True, flag_value=True,
               help='List the available Interfaces inside the given module.')
@@ -152,8 +154,10 @@ def convert():
 @click.option("-i", "--interface", type=str, required=True,
               help="Name of the Nipype interface to export.")
 @click.option("-m", "--module", type=PythonModule(), required=True,
+              callback=check_not_none,
               help="Module where the interface is defined.")
 @click.option("-o", "--output", type=UnexistingFilePath, required=True,
+              callback=check_not_none,
               help="JSON file name where the Boutiques descriptor will be written.")
 @click.option("-t", "--ignored-template-inputs", type=str, multiple=True,
               help="Interface inputs ignored in path template creations.")
