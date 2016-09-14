@@ -7,7 +7,6 @@ from builtins import str
 from ....interfaces import fsl as fsl          # fsl
 from ....interfaces import utility as util     # utility
 from ....pipeline import engine as pe          # pypeline engine
-from ....algorithms.confounds import TSNR
 from ....algorithms import confounds
 
 def select_volume(filename, which):
@@ -114,7 +113,7 @@ def create_resting_preproc(name='restpreproc', base_dir=None):
         name='outputspec')
     slicetimer = pe.Node(fsl.SliceTimer(), name='slicetimer')
     realigner = create_realign_flow()
-    tsnr = pe.Node(TSNR(regress_poly=2), name='tsnr')
+    tsnr = pe.Node(confounds.TSNR(regress_poly=2), name='tsnr')
     getthresh = pe.Node(interface=fsl.ImageStats(op_string='-p 98'),
                         name='getthreshold')
     threshold_stddev = pe.Node(fsl.Threshold(), name='threshold')
