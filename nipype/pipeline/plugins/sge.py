@@ -8,7 +8,6 @@ from builtins import object, str, bytes
 import os
 import pwd
 import re
-import subprocess
 import time
 
 import xml.dom.minidom
@@ -141,18 +140,18 @@ class QstatSubstitute(object):
                         "CONTACTING qacct for finished jobs, "
                         "{0}: {1}".format(time.time(), "Verifying Completion"))
 
-        this_command = 'qacct'
+        cmd = CommandLine('qacct', environ=dict(os.environ),
+                          terminal_output='allatonce')
+
         qacct_retries = 10
         is_complete = False
         while qacct_retries > 0:
             qacct_retries -= 1
             try:
                 strtaskid = '{0:d}'.format(int(taskid))
-                proc = subprocess.Popen(
-                    [this_command, '-o', pwd.getpwuid(os.getuid())[0], '-j', strtaskid],
-                    stdout=subprocess.PIPE,
-                    stderr=subprocess.PIPE)
-                qacct_result, _ = proc.communicate()
+                cmd.inputs.args = '-o {} -j {}'.format(pwd.getpwuid(os.getuid())[0], strtaskid)
+                qacct_result = cmd.run().runtime.stdout
+
                 if qacct_result.find(strtaskid):
                     is_complete = True
                 sge_debug_print(
@@ -162,6 +161,7 @@ class QstatSubstitute(object):
                 sge_debug_print("NOTE: qacct call failed")
                 time.sleep(5)
                 pass
+
         return is_complete
 
     def _parse_qstat_job_list(self, xml_job_list):
@@ -246,15 +246,15 @@ class QstatSubstitute(object):
         else:
             this_command = self._qstat_cached_executable
 
+        cmd = CommandLine(this_command, environ=dict(os.environ),
+                          terminal_output='allatonce')
+
         qstat_retries = 10
         while qstat_retries > 0:
             qstat_retries -= 1
             try:
-                proc = subprocess.Popen(
-                    [this_command, '-u', pwd.getpwuid(os.getuid())[0], '-xml', '-s', 'psrz'],
-                    stdout=subprocess.PIPE,
-                    stderr=subprocess.PIPE)
-                qstat_xml_result, _ = proc.communicate()
+                cmd.inputs.args = '-u {} -xml -s psrz'.format(pwd.getpwuid(os.getuid())[0])
+                qstat_xml_result = cmd.run().runtime.stdout
                 dom = xml.dom.minidom.parseString(qstat_xml_result)
                 jobs = dom.getElementsByTagName('job_info')
                 run = jobs[0]
