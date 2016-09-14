@@ -87,12 +87,12 @@ class TestTSNR(unittest.TestCase):
         })
 
     @mock.patch('warnings.warn')
-    def test_deprecation_warning(self, mock_warn):
+    def test_warning(self, mock_warn):
         # run
         misc.TSNR(in_file=self.in_filenames['in_file'])
 
         # assert
-        mock_warn.assert_called_once_with(mock.ANY, DeprecationWarning)
+        mock_warn.assert_called_once_with(mock.ANY, UserWarning)
 
     def assert_expected_outputs_poly(self, tsnrresult, expected_ranges):
         assert_equal(os.path.basename(tsnrresult.outputs.detrended_file),

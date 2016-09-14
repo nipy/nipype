@@ -1426,6 +1426,6 @@ class TSNR(confounds.TSNR):
     """
     def __init__(self, **inputs):
         super(confounds.TSNR, self).__init__(**inputs)
-        warnings.warn(("This interface has been deprecated since 0.12.0,"
+        warnings.warn(("This interface has been moved since 0.12.0,"
                        " please use nipype.algorithms.confounds.TSNR"),
-                      DeprecationWarning)
+                      UserWarning)
