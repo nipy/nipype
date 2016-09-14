@@ -89,24 +89,38 @@ def encode_dict(value):
 
     """
     if sys.version_info[0] > 2:
-        return str(value)
+        retval = str(value)
+    else:
+        retval = encode_dict_py27(value)
+    return retval
 
-    if isinstance(value, str):
-        value = value.encode()
+def encode_dict_py27(value):
+    """
+    Encode dictionary for python 2
+    """
 
-    if isinstance(value, tuple):
-        val0 = encode_dict(value[0])
-        val1 = encode_dict(value[1])
-        return '(' + val0 + ', ' + val1 + ')'
-
-    if isinstance(value, list):
-        retval = '['
+    istuple = isinstance(value, tuple)
+    if isinstance(value, (tuple, list)):
+        retval = '(' if istuple else '['
+        nels = len(value)
         for i, v in enumerate(value):
-            if i > 0:
+            venc = encode_dict_py27(v)
+            if venc.startswith("u'") or venc.startswith('u"'):
+                venc = venc[1:]
+            retval += venc
+
+            if i < nels - 1:
                 retval += ', '
-            retval += encode_dict(v)
-        return retval + ']'
-    return repr(value)
+
+        if istuple and nels == 1:
+            retval += ','
+        retval += ')' if istuple else ']'
+        return retval
+
+    retval = repr(value).decode()
+    if retval.startswith("u'") or retval.startswith('u"'):
+        retval = retval[1:]
+    return retval
 
 def fname_presuffix(fname, prefix='', suffix='', newpath=None, use_ext=True):
     """Manipulates path and name of input filename
