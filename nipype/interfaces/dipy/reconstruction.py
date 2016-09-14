@@ -211,6 +211,7 @@ class EstimateResponseSH(DipyDiffusionInterface):
         from dipy.reconst.csdeconv import recursive_response, auto_response
 
         img = nb.load(self.inputs.in_file)
+        imref = nb.four_to_three(img)[0]
         affine = img.get_affine()
 
         if isdefined(self.inputs.in_mask):
