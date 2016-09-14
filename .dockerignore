@@ -1,5 +1,6 @@
 .git/
 *.pyc
+.eggs
 *.egg-info
 __pycache__
 docker/nipype_*
