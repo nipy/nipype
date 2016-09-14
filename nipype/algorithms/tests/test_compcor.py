@@ -2,7 +2,7 @@
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 import nipype
 from ...testing import assert_equal, assert_true, assert_false, skipif, utils
-from ..compcor import CompCor, TCompCor, ACompCor
+from ..confounds import CompCor, TCompCor, ACompCor
 
 import unittest
 import nibabel as nb

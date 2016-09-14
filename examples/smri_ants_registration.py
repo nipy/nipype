@@ -24,6 +24,7 @@ import urllib.request
 import urllib.error
 import urllib.parse
 from nipype.interfaces.ants import Registration
+from nipype.testing import example_data
 
 """
 2. Download T1 volumes into home directory
@@ -61,11 +62,12 @@ input_images = [
 
 """
 3. Define the parameters of the registration. Settings are
-saved in ``smri_ants_registration_settings.json``.
+found in the file ``smri_ants_registration_settings.json``
+distributed with the ``example_data`` of `nipype`.
 
 """
 
-reg = Registration(from_file='./smri_ants_registration_settings.json')
+reg = Registration(from_file=example_data('smri_ants_registration_settings.json'))
 reg.inputs.fixed_image = input_images[0]
 reg.inputs.moving_image = input_images[1]
 
