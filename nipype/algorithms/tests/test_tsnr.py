@@ -3,7 +3,8 @@
 
 from ...testing import (assert_equal, assert_true, assert_almost_equal,
                         skipif, utils)
-from ..misc import TSNR
+from ..confounds import TSNR
+from .. import misc
 
 import unittest
 import mock
@@ -84,6 +85,14 @@ class TestTSNR(unittest.TestCase):
             'stddev_file': (0.1, 1.7),
             'tsnr_file': (2.6, 57.3)
         })
+
+    @mock.patch('warnings.warn')
+    def test_warning(self, mock_warn):
+        # run
+        misc.TSNR(in_file=self.in_filenames['in_file'])
+
+        # assert
+        mock_warn.assert_called_once_with(mock.ANY, UserWarning)
 
     def assert_expected_outputs_poly(self, tsnrresult, expected_ranges):
         assert_equal(os.path.basename(tsnrresult.outputs.detrended_file),
