@@ -5,6 +5,7 @@ from __future__ import unicode_literals
 from builtins import open
 
 import os
+import time
 from tempfile import mkstemp, mkdtemp
 import warnings
 
@@ -17,6 +18,17 @@ from ...utils.filemanip import (save_json, load_json,
                                 split_filename, get_related_files)
 
 import numpy as np
+
+
+def _wait_for_tick(tic=None):
+    tic = time.time() if tic is None else tic
+    toc = time.time()
+    while int(tic) == int(toc):
+        toc = time.time()
+
+
+def _ignore_atime(stat):
+    return stat[:7] + stat[8:]
 
 
 def test_split_filename():
@@ -192,27 +204,37 @@ def test_recopy():
                 # tick
                 if copy and not use_hardlink and hashmethod == 'timestamp':
                     continue
+
+                tic = time.time()
                 copyfile(orig_img, new_img, **kwargs)
-                img_stat = os.stat(new_img)
-                hdr_stat = os.stat(new_hdr)
+                img_stat = _ignore_atime(os.stat(new_img))
+                hdr_stat = _ignore_atime(os.stat(new_hdr))
+                _wait_for_tick(tic)
                 copyfile(orig_img, new_img, **kwargs)
                 err_msg = "Regular - OS: {}; Copy: {}; Hardlink: {}".format(
                     os.name, copy, use_hardlink)
-                yield assert_equal, img_stat, os.stat(new_img), err_msg
-                yield assert_equal, hdr_stat, os.stat(new_hdr), err_msg
+                yield (assert_equal, img_stat, _ignore_atime(os.stat(new_img)),
+                       err_msg)
+                yield (assert_equal, hdr_stat, _ignore_atime(os.stat(new_hdr)),
+                       err_msg)
                 os.unlink(new_img)
                 os.unlink(new_hdr)
 
+                tic = time.time()
                 copyfile(img_link, new_img, **kwargs)
-                img_stat = os.stat(new_img)
-                hdr_stat = os.stat(new_hdr)
+                img_stat = _ignore_atime(os.stat(new_img))
+                hdr_stat = _ignore_atime(os.stat(new_hdr))
+                _wait_for_tick(tic)
                 copyfile(img_link, new_img, **kwargs)
                 err_msg = "Symlink - OS: {}; Copy: {}; Hardlink: {}".format(
                     os.name, copy, use_hardlink)
-                yield assert_equal, img_stat, os.stat(new_img), err_msg
-                yield assert_equal, hdr_stat, os.stat(new_hdr), err_msg
+                yield (assert_equal, img_stat, _ignore_atime(os.stat(new_img)),
+                       err_msg)
+                yield (assert_equal, hdr_stat, _ignore_atime(os.stat(new_hdr)),
+                       err_msg)
                 os.unlink(new_img)
                 os.unlink(new_hdr)
+
     os.unlink(img_link)
     os.unlink(hdr_link)
     os.unlink(orig_img)
