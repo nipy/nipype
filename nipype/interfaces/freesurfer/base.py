@@ -15,7 +15,7 @@ See the docstrings for the individual classes for 'working' examples.
 
 """
 from __future__ import print_function, division, unicode_literals, absolute_import
-from builtins import open, object, str
+from builtins import open, object
 
 
 import os
@@ -211,7 +211,7 @@ class FSCommandOpenMP(FSCommand):
     def _num_threads_update(self):
         if self.inputs.num_threads:
             self.inputs.environ.update(
-                {'OMP_NUM_THREADS': str(self.inputs.num_threads)})
+                {'OMP_NUM_THREADS': bytes(self.inputs.num_threads)})
 
     def run(self, **inputs):
         if 'num_threads' in inputs:
