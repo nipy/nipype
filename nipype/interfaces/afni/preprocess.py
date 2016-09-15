@@ -3058,7 +3058,7 @@ class Notes(CommandLine):
     _cmd = '3dNotes'
     input_spec = NotesInputSpec
     output_spec = AFNICommandOutputSpec
-    
+
     def _list_outputs(self):
         outputs = self.output_spec().get()
         outputs["out_file"] = os.path.abspath(self.inputs.in_file)

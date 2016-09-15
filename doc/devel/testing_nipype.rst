@@ -39,7 +39,7 @@ dependencies. Installing software dependencies and downloading the necessary dat
 will reduce the number of skip tests.
 
 Some tests in Nipype make use of some images distributed within the `FSL course data
-<http://fsl.fmrib.ox.ac.uk/fslcourse/>`_. This reduced version of the package can be downloaded `here 
+<http://fsl.fmrib.ox.ac.uk/fslcourse/>`_. This reduced version of the package can be downloaded `here
 <https://3552243d5be815c1b09152da6525cb8fe7b900a6.googledrive.com/host/0BxI12kyv2olZVUswazA3NkFvOXM/nipype-fsl_course_data.tar.gz>`_.
 To enable the tests depending on these data, just unpack the targz file and set the :code:`FSL_COURSE_DATA` environment
 variable to point to that folder.
