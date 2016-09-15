@@ -5,9 +5,7 @@ coverage:
       default:
         target: 0
         threshold: 100
-      patch:
-        target: 0
-        threshold: 100
+      patch: false
       unittests:
         target: 0
         threshold: 100
