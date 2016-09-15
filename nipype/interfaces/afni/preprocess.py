@@ -3050,7 +3050,7 @@ class Notes(CommandLine):
     >>> notes.inputs.in_file = "functional.HEAD"
     >>> notes.inputs.add = "This note is added."
     >>> notes.inputs.add_history = "This note is added to history."
-    >>> notes.cmdline #doctest:
+    >>> notes.cmdline #doctest: +IGNORE_UNICODE
     '3dNotes -a "This note is added." -h "This note is added to history." functional.HEAD'
     >>> res = notes.run()   # doctest: +SKIP
     """
