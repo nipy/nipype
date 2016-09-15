@@ -3013,24 +3013,24 @@ class QualityIndex(CommandLine):
 
 
 class NotesInputSpec(AFNICommandInputSpec):
-    in_file = File(desc="input file to 3dNotes",
-                   argstr="%s",
+    in_file = File(desc='input file to 3dNotes',
+                   argstr='%s',
                    position=-1,
                    mandatory=True,
                    exists=True,
                    copyfile=False)
-    add = traits.Str(desc="note to add",
-                     argstr="-a '%s'")
-    add_history = traits.Str(desc="note to add to history",
-                             argstr="-h '%s'",
-                             xor=["rep_history"])
-    rep_history = traits.Str(desc="note with which to replace history",
-                             argstr="-HH '%s'",
-                             xor=["add_history"])
-    delete = traits.Int(desc="delete note number num",
-                        argstr="-d %d")
-    ses = traits.Bool(desc="print to stdout the expanded notes",
-                      argstr="-ses")
+    add = traits.Str(desc='note to add',
+                     argstr='-a "%s"')
+    add_history = traits.Str(desc='note to add to history',
+                             argstr='-h "%s"',
+                             xor=['rep_history'])
+    rep_history = traits.Str(desc='note with which to replace history',
+                             argstr='-HH "%s"',
+                             xor=['add_history'])
+    delete = traits.Int(desc='delete note number num',
+                        argstr='-d %d')
+    ses = traits.Bool(desc='print to stdout the expanded notes',
+                      argstr='-ses')
     out_file = File(desc='output image file name',
                     argstr='%s')
 
@@ -3045,14 +3045,14 @@ class Notes(CommandLine):
     Examples
     ========
 
-    >>> from nipype.interfaces import afni as afni
+    >>> from nipype.interfaces import afni
     >>> notes = afni.Notes()
     >>> notes.inputs.in_file = "functional.HEAD"
     >>> notes.inputs.add = "This note is added."
     >>> notes.inputs.add_history = "This note is added to history."
     >>> notes.cmdline #doctest: +IGNORE_UNICODE
     '3dNotes -a "This note is added." -h "This note is added to history." functional.HEAD'
-    >>> res = notes.run()   # doctest: +SKIP
+    >>> res = notes.run() # doctest: +SKIP
     """
 
     _cmd = '3dNotes'
@@ -3061,5 +3061,5 @@ class Notes(CommandLine):
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        outputs["out_file"] = os.path.abspath(self.inputs.in_file)
+        outputs['out_file'] = os.path.abspath(self.inputs.in_file)
         return outputs
