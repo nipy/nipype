@@ -19,13 +19,15 @@ import os.path as op
 
 import nibabel as nb
 import numpy as np
+from scipy import linalg
+from scipy.special import legendre
 
 from .. import logging
 from ..external.due import due, Doi, BibTeX
 from ..interfaces.base import (traits, TraitedSpec, BaseInterface,
-                               BaseInterfaceInputSpec, File, isdefined)
+                               BaseInterfaceInputSpec, File, isdefined,
+                               InputMultiPath)
 IFLOG = logging.getLogger('interface')
-
 
 class ComputeDVARSInputSpec(BaseInterfaceInputSpec):
     in_file = File(exists=True, mandatory=True, desc='functional data, after HMC')
@@ -276,6 +278,254 @@ Bradley L. and Petersen, Steven E.},
     def _list_outputs(self):
         return self._results
 
+class CompCorInputSpec(BaseInterfaceInputSpec):
+    realigned_file = File(exists=True, mandatory=True,
+                          desc='already realigned brain image (4D)')
+    mask_file = File(exists=True, mandatory=False,
+                     desc='mask file that determines ROI (3D)')
+    components_file = File('components_file.txt', exists=False,
+                           mandatory=False, usedefault=True,
+                           desc='filename to store physiological components')
+    num_components = traits.Int(6, usedefault=True) # 6 for BOLD, 4 for ASL
+    use_regress_poly = traits.Bool(True, usedefault=True,
+                                   desc='use polynomial regression'
+                                   'pre-component extraction')
+    regress_poly_degree = traits.Range(low=1, default=1, usedefault=True,
+                                       desc='the degree polynomial to use')
+
+class CompCorOutputSpec(TraitedSpec):
+    components_file = File(exists=True,
+                           desc='text file containing the noise components')
+
+class CompCor(BaseInterface):
+    '''
+    Interface with core CompCor computation, used in aCompCor and tCompCor
+
+    Example
+    -------
+
+    >>> ccinterface = CompCor()
+    >>> ccinterface.inputs.realigned_file = 'functional.nii'
+    >>> ccinterface.inputs.mask_file = 'mask.nii'
+    >>> ccinterface.inputs.num_components = 1
+    >>> ccinterface.inputs.use_regress_poly = True
+    >>> ccinterface.inputs.regress_poly_degree = 2
+    '''
+    input_spec = CompCorInputSpec
+    output_spec = CompCorOutputSpec
+
+    def _run_interface(self, runtime):
+        imgseries = nb.load(self.inputs.realigned_file).get_data()
+        mask = nb.load(self.inputs.mask_file).get_data()
+        voxel_timecourses = imgseries[mask > 0]
+        # Zero-out any bad values
+        voxel_timecourses[np.isnan(np.sum(voxel_timecourses, axis=1)), :] = 0
+
+        # from paper:
+        # "The constant and linear trends of the columns in the matrix M were
+        # removed [prior to ...]"
+        if self.inputs.use_regress_poly:
+            voxel_timecourses = regress_poly(self.inputs.regress_poly_degree,
+                                             voxel_timecourses)
+        voxel_timecourses = voxel_timecourses - np.mean(voxel_timecourses,
+                                                        axis=1)[:, np.newaxis]
+
+        # "Voxel time series from the noise ROI (either anatomical or tSTD) were
+        # placed in a matrix M of size Nxm, with time along the row dimension
+        # and voxels along the column dimension."
+        M = voxel_timecourses.T
+        numvols = M.shape[0]
+        numvoxels = M.shape[1]
+
+        # "[... were removed] prior to column-wise variance normalization."
+        M = M / self._compute_tSTD(M, 1.)
+
+        # "The covariance matrix C = MMT was constructed and decomposed into its
+        # principal components using a singular value decomposition."
+        u, _, _ = linalg.svd(M, full_matrices=False)
+        components = u[:, :self.inputs.num_components]
+        components_file = os.path.join(os.getcwd(), self.inputs.components_file)
+        np.savetxt(components_file, components, fmt=b"%.10f")
+        return runtime
+
+    def _list_outputs(self):
+        outputs = self._outputs().get()
+        outputs['components_file'] = os.path.abspath(self.inputs.components_file)
+        return outputs
+
+    def _compute_tSTD(self, M, x):
+        stdM = np.std(M, axis=0)
+        # set bad values to x
+        stdM[stdM == 0] = x
+        stdM[np.isnan(stdM)] = x
+        return stdM
+
+class TCompCorInputSpec(CompCorInputSpec):
+    # and all the fields in CompCorInputSpec
+    percentile_threshold = traits.Range(low=0., high=1., value=.02,
+                                        exclude_low=True, exclude_high=True,
+                                        usedefault=True, desc='the percentile '
+                                        'used to select highest-variance '
+                                        'voxels, represented by a number '
+                                        'between 0 and 1, exclusive. By '
+                                        'default, this value is set to .02. '
+                                        'That is, the 2% of voxels '
+                                        'with the highest variance are used.')
+
+class TCompCor(CompCor):
+    '''
+    Interface for tCompCor. Computes a ROI mask based on variance of voxels.
+
+    Example
+    -------
+
+    >>> ccinterface = TCompCor()
+    >>> ccinterface.inputs.realigned_file = 'functional.nii'
+    >>> ccinterface.inputs.mask_file = 'mask.nii'
+    >>> ccinterface.inputs.num_components = 1
+    >>> ccinterface.inputs.use_regress_poly = True
+    >>> ccinterface.inputs.regress_poly_degree = 2
+    >>> ccinterface.inputs.percentile_threshold = .03
+    '''
+
+    input_spec = TCompCorInputSpec
+    output_spec = CompCorOutputSpec
+
+    def _run_interface(self, runtime):
+        imgseries = nb.load(self.inputs.realigned_file).get_data()
+
+        # From the paper:
+        # "For each voxel time series, the temporal standard deviation is
+        # defined as the standard deviation of the time series after the removal
+        # of low-frequency nuisance terms (e.g., linear and quadratic drift)."
+        imgseries = regress_poly(2, imgseries)
+        imgseries = imgseries - np.mean(imgseries, axis=1)[:, np.newaxis]
+
+        time_voxels = imgseries.T
+        num_voxels = np.prod(time_voxels.shape[1:])
+
+        # "To construct the tSTD noise ROI, we sorted the voxels by their
+        # temporal standard deviation ..."
+        tSTD = self._compute_tSTD(time_voxels, 0)
+        sortSTD = np.sort(tSTD, axis=None) # flattened sorted matrix
+
+        # use percentile_threshold to pick voxels
+        threshold_index = int(num_voxels * (1. - self.inputs.percentile_threshold))
+        threshold_std = sortSTD[threshold_index]
+        mask = tSTD >= threshold_std
+        mask = mask.astype(int)
+
+        # save mask
+        mask_file = 'mask.nii'
+        nb.nifti1.save(nb.Nifti1Image(mask, np.eye(4)), mask_file)
+        self.inputs.mask_file = mask_file
+
+        super(TCompCor, self)._run_interface(runtime)
+        return runtime
+
+ACompCor = CompCor
+
+class TSNRInputSpec(BaseInterfaceInputSpec):
+    in_file = InputMultiPath(File(exists=True), mandatory=True,
+                             desc='realigned 4D file or a list of 3D files')
+    regress_poly = traits.Range(low=1, desc='Remove polynomials')
+    tsnr_file = File('tsnr.nii.gz', usedefault=True, hash_files=False,
+                     desc='output tSNR file')
+    mean_file = File('mean.nii.gz', usedefault=True, hash_files=False,
+                     desc='output mean file')
+    stddev_file = File('stdev.nii.gz', usedefault=True, hash_files=False,
+                       desc='output tSNR file')
+    detrended_file = File('detrend.nii.gz', usedefault=True, hash_files=False,
+                          desc='input file after detrending')
+
+
+class TSNROutputSpec(TraitedSpec):
+    tsnr_file = File(exists=True, desc='tsnr image file')
+    mean_file = File(exists=True, desc='mean image file')
+    stddev_file = File(exists=True, desc='std dev image file')
+    detrended_file = File(desc='detrended input file')
+
+
+class TSNR(BaseInterface):
+    """Computes the time-course SNR for a time series
+
+    Typically you want to run this on a realigned time-series.
+
+    Example
+    -------
+
+    >>> tsnr = TSNR()
+    >>> tsnr.inputs.in_file = 'functional.nii'
+    >>> res = tsnr.run() # doctest: +SKIP
+
+    """
+    input_spec = TSNRInputSpec
+    output_spec = TSNROutputSpec
+
+    def _run_interface(self, runtime):
+        img = nb.load(self.inputs.in_file[0])
+        header = img.header.copy()
+        vollist = [nb.load(filename) for filename in self.inputs.in_file]
+        data = np.concatenate([vol.get_data().reshape(
+            vol.get_shape()[:3] + (-1,)) for vol in vollist], axis=3)
+        data = np.nan_to_num(data)
+
+        if data.dtype.kind == 'i':
+            header.set_data_dtype(np.float32)
+            data = data.astype(np.float32)
+
+        if isdefined(self.inputs.regress_poly):
+            data = regress_poly(self.inputs.regress_poly, data)
+            img = nb.Nifti1Image(data, img.get_affine(), header)
+            nb.save(img, op.abspath(self.inputs.detrended_file))
+
+        meanimg = np.mean(data, axis=3)
+        stddevimg = np.std(data, axis=3)
+        tsnr = np.zeros_like(meanimg)
+        tsnr[stddevimg > 1.e-3] = meanimg[stddevimg > 1.e-3] / stddevimg[stddevimg > 1.e-3]
+        img = nb.Nifti1Image(tsnr, img.get_affine(), header)
+        nb.save(img, op.abspath(self.inputs.tsnr_file))
+        img = nb.Nifti1Image(meanimg, img.get_affine(), header)
+        nb.save(img, op.abspath(self.inputs.mean_file))
+        img = nb.Nifti1Image(stddevimg, img.get_affine(), header)
+        nb.save(img, op.abspath(self.inputs.stddev_file))
+        return runtime
+
+    def _list_outputs(self):
+        outputs = self._outputs().get()
+        for k in ['tsnr_file', 'mean_file', 'stddev_file']:
+            outputs[k] = op.abspath(getattr(self.inputs, k))
+
+        if isdefined(self.inputs.regress_poly):
+            outputs['detrended_file'] = op.abspath(self.inputs.detrended_file)
+        return outputs
+
+def regress_poly(degree, data):
+    ''' returns data with degree polynomial regressed out.
+    The last dimension (i.e. data.shape[-1]) should be time.
+    '''
+    datashape = data.shape
+    timepoints = datashape[-1]
+
+    # Rearrange all voxel-wise time-series in rows
+    data = data.reshape((-1, timepoints))
+
+    # Generate design matrix
+    X = np.ones((timepoints, 1))
+    for i in range(degree):
+        polynomial_func = legendre(i+1)
+        value_array = np.linspace(-1, 1, timepoints)
+        X = np.hstack((X, polynomial_func(value_array)[:, np.newaxis]))
+
+    # Calculate coefficients
+    betas = np.linalg.pinv(X).dot(data.T)
+
+    # Estimation
+    datahat = X[:, 1:].dot(betas[1:, ...]).T
+    regressed_data = data - datahat
+
+    # Back to original shape
+    return regressed_data.reshape(datashape)
 
 def compute_dvars(in_file, in_mask, remove_zerovariance=False):
     """
