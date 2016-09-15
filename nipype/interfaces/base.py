@@ -568,8 +568,9 @@ class BaseTraitedSpec(traits.HasTraits):
 
         dict_withhash = []
         dict_nofilename = []
-        for name, val in sorted(self.get_traitsfree().items()):
-            if self.has_metadata(name, "nohash", True):
+        for name, val in sorted(self.get().items()):
+            if not isdefined(val) or self.has_metadata(name, "nohash", True):
+                # skip undefined traits and traits with nohash=True
                 continue
 
             hash_files = (not self.has_metadata(name, "hash_files", False) and not
@@ -583,46 +584,46 @@ class BaseTraitedSpec(traits.HasTraits):
         return dict_withhash, md5(encode_dict(dict_nofilename).encode()).hexdigest()
 
 
-    def _get_sorteddict(self, theobject, dictwithhash=False, hash_method=None,
+    def _get_sorteddict(self, objekt, dictwithhash=False, hash_method=None,
                         hash_files=True):
-        if isinstance(theobject, dict):
+        if isinstance(objekt, dict):
             out = []
-            for key, val in sorted(theobject.items()):
+            for key, val in sorted(objekt.items()):
                 if isdefined(val):
                     out.append((key,
                                 self._get_sorteddict(val, dictwithhash,
                                                      hash_method=hash_method,
                                                      hash_files=hash_files)))
-        elif isinstance(theobject, (list, tuple)):
+        elif isinstance(objekt, (list, tuple)):
             out = []
-            for val in theobject:
+            for val in objekt:
                 if isdefined(val):
                     out.append(self._get_sorteddict(val, dictwithhash,
                                                     hash_method=hash_method,
                                                     hash_files=hash_files))
-            if isinstance(theobject, tuple):
+            if isinstance(objekt, tuple):
                 out = tuple(out)
         else:
-            if isdefined(theobject):
-                if (hash_files and isinstance(theobject, (str, bytes)) and
-                        os.path.isfile(theobject)):
+            if isdefined(objekt):
+                if (hash_files and isinstance(objekt, (str, bytes)) and
+                        os.path.isfile(objekt)):
                     if hash_method is None:
                         hash_method = config.get('execution', 'hash_method')
 
                     if hash_method.lower() == 'timestamp':
-                        hash = hash_timestamp(theobject)
+                        hash = hash_timestamp(objekt)
                     elif hash_method.lower() == 'content':
-                        hash = hash_infile(theobject)
+                        hash = hash_infile(objekt)
                     else:
                         raise Exception("Unknown hash method: %s" % hash_method)
                     if dictwithhash:
-                        out = (theobject, hash)
+                        out = (objekt, hash)
                     else:
                         out = hash
-                elif isinstance(theobject, float):
-                    out = FLOAT_FORMAT(theobject)
+                elif isinstance(objekt, float):
+                    out = FLOAT_FORMAT(objekt)
                 else:
-                    out = theobject
+                    out = objekt
         return out
 
 
