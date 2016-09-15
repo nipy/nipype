@@ -17,7 +17,7 @@ import sys
 from copy import deepcopy
 import numpy as np
 
-from ... import logging
+from ... import logging, config
 from ...utils.misc import str2bool
 from ..engine import MapNode
 from ..plugins import semaphore_singleton
@@ -223,15 +223,18 @@ class MultiProcPlugin(DistributedPluginBase):
                         key=lambda item: (self.procs[item]._interface.estimated_memory_gb,
                                           self.procs[item]._interface.num_threads))
 
-        logger.debug('Free memory (GB): %d, Free processors: %d',
-                     free_memory_gb, free_processors)
+        if str2bool(config.get('execution', 'profile_runtime')):
+            logger.debug('Free memory (GB): %d, Free processors: %d',
+                         free_memory_gb, free_processors)
 
         # While have enough memory and processors for first job
         # Submit first job on the list
         for jobid in jobids:
-            logger.debug('Next Job: %d, memory (GB): %d, threads: %d' \
-                         % (jobid, self.procs[jobid]._interface.estimated_memory_gb,
-                            self.procs[jobid]._interface.num_threads))
+            if str2bool(config.get('execution', 'profile_runtime')):
+                logger.debug('Next Job: %d, memory (GB): %d, threads: %d' \
+                             % (jobid,
+                                self.procs[jobid]._interface.estimated_memory_gb,
+                                self.procs[jobid]._interface.num_threads))
 
             if self.procs[jobid]._interface.estimated_memory_gb <= free_memory_gb and \
                self.procs[jobid]._interface.num_threads <= free_processors:
@@ -307,5 +310,3 @@ class MultiProcPlugin(DistributedPluginBase):
                         self.pending_tasks.insert(0, (tid, jobid))
             else:
                 break
-
-        logger.debug('No jobs waiting to execute')

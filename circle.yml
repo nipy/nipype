@@ -25,7 +25,6 @@ dependencies:
         timeout: 1600
     - mkdir -p ~/docker; docker save nipype/nipype_test:py27 > ~/docker/image.tar :
         timeout: 1600
-    - pip install xunitmerge
 
 test:
   override:
@@ -50,13 +49,10 @@ test:
 
   post:
     - bash docker/circleci/teardown.sh
+    - for xml_f in ${CIRCLE_TEST_REPORTS}/nose/coverage*.xml; do bash <(curl -s https://codecov.io/bash) -f $xml_f -t ac172a50-8e66-42e5-8822-5373fcf54686 -F unittests; done
+    - for xml_f in ${CIRCLE_TEST_REPORTS}/nose/smoketest*.xml; do bash <(curl -s https://codecov.io/bash) -f $xml_f -t ac172a50-8e66-42e5-8822-5373fcf54686 -F smoketests; done
 
 general:
   artifacts:
     - "~/docs"
     - "~/logs"
-    - "~/coverage_py27.xml"
-    - "~/coverage_py35.xml"
-    - "~/nosetests_py27.xml"
-    - "~/nosetests_py35.xml"
-    - "~/scratch"

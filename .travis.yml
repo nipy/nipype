@@ -31,7 +31,7 @@ install:
 - conda update --all -y python=$TRAVIS_PYTHON_VERSION
 # - if [[ "${INSTALL_DEB_DEPENDECIES}" == "true" && ${TRAVIS_PYTHON_VERSION:0:1} == "2" ]]; then
 #   conda install -y vtk mayavi; fi
-- conda install -y nipype
+- conda install -y nipype matplotlib nitime
 - pip install python-coveralls coverage doctest-ignore-unicode
 - if [ ! -z "$DUECREDIT_ENABLE"]; then pip install duecredit; fi
 - rm -r /home/travis/miniconda/lib/python${TRAVIS_PYTHON_VERSION}/site-packages/nipype*
@@ -43,7 +43,7 @@ install:
 script:
 - python -W once:FSL:UserWarning:nipype `which nosetests` --with-doctest --with-doctest-ignore-unicode --with-cov --cover-package nipype --logging-level=DEBUG --verbosity=3
 after_success:
-- coveralls --config_file ${COVERAGE_PROCESS_START}
+- bash <(curl -s https://codecov.io/bash) -t ac172a50-8e66-42e5-8822-5373fcf54686 -cF unittests
 deploy:
   provider: pypi
   user: satra

@@ -10,11 +10,11 @@ import warnings
 
 from ...testing import assert_equal, assert_true, assert_false, TempFATFS
 from ...utils.filemanip import (save_json, load_json,
-                                    fname_presuffix, fnames_presuffix,
-                                    hash_rename, check_forhash,
-                                    copyfile, copyfiles,
-                                    filename_to_list, list_to_filename,
-                                    split_filename, get_related_files)
+                                fname_presuffix, fnames_presuffix,
+                                hash_rename, check_forhash,
+                                copyfile, copyfiles,
+                                filename_to_list, list_to_filename,
+                                split_filename, get_related_files)
 
 import numpy as np
 
