@@ -32,7 +32,9 @@ class SignalExtractionInputSpec(BaseInterfaceInputSpec):
                                desc='Human-readable labels for each segment '
                                'in the label file, in order. The length of '
                                'class_labels must be equal to the number of '
-                               'segments (background excluded)')
+                               'segments (background excluded). This list '
+                               'corresponds to the class labels in label_file '
+                               'in ascending order')
     out_file = File('signals.tsv', usedefault=True, exists=False,
                     mandatory=False, desc='The name of the file to output to. '
                     'signals.tsv by default')
@@ -40,6 +42,8 @@ class SignalExtractionInputSpec(BaseInterfaceInputSpec):
                        usedefault=True,
                        desc='The stat you wish to calculate on each segment. '
                        'The default is finding the mean')
+    detrend = traits.Bool(False, usedefault=True, mandatory=False,
+                          desc='If True, perform detrending using nilearn.')
 
 class SignalExtractionOutputSpec(TraitedSpec):
     out_file = File(exists=True, desc='tsv file containing the computed '
@@ -64,8 +68,11 @@ class SignalExtraction(BaseInterface):
 
     def _run_interface(self, runtime):
         ins = self.inputs
+
         if ins.stat == 'mean': # always true for now
-            nlmasker = nl.NiftiLabelsMasker(ins.label_file).fit()
+            nlmasker = nl.NiftiLabelsMasker(ins.label_file,
+                                            detrend=ins.detrend)
+            nlmasker.fit()
             region_signals = nlmasker.transform_single_imgs(ins.in_file)
 
             num_labels_found = region_signals.shape[1]
