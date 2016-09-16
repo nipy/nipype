@@ -137,7 +137,13 @@ def run(ctx, module, interface, list, help):
 
         if not ctx.args:
             # print the interface help
-            iface_parser.print_help()
+            try:
+                iface_parser.print_help()
+            except:
+                print('An error ocurred when trying to print the full'
+                      'command help, printing usage.')
+            finally:
+                iface_parser.print_usage()
         else:
             # run the interface
             args = iface_parser.parse_args(args=ctx.args)
