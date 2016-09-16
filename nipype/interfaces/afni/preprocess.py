@@ -20,7 +20,7 @@ import numpy as np
 from ...utils.filemanip import (load_json, save_json, split_filename)
 from ..base import (
     CommandLineInputSpec, CommandLine, Directory, TraitedSpec,
-    traits, isdefined, File, InputMultiPath, Undefined)
+    traits, isdefined, File, InputMultiPath, Undefined, Str)
 
 from .base import (
     AFNICommandBase, AFNICommand, AFNICommandInputSpec, AFNICommandOutputSpec,
@@ -3013,26 +3013,26 @@ class QualityIndex(CommandLine):
 
 
 class NotesInputSpec(AFNICommandInputSpec):
-    in_file = File(desc="input file to 3dNotes",
-                   argstr="%s",
+    in_file = File(desc='input file to 3dNotes',
+                   argstr='%s',
                    position=-1,
                    mandatory=True,
                    exists=True,
                    copyfile=False)
-    add = traits.Str(desc="note to add",
-                     argstr="-a '%s'")
-    add_history = traits.Str(desc="note to add to history",
-                             argstr="-h '%s'",
-                             xor=["rep_history"])
-    rep_history = traits.Str(desc="note with which to replace history",
-                             argstr="-HH '%s'",
-                             xor=["add_history"])
-    delete = traits.Int(desc="delete note number num",
-                        argstr="-d %d")
-    ses = traits.Bool(desc="print to stdout the expanded notes",
-                      argstr="-ses")
-    out_file = File(desc="output image file name",
-                    argstr="%s")
+    add = Str(desc='note to add',
+              argstr='-a "%s"')
+    add_history = Str(desc='note to add to history',
+                      argstr='-h "%s"',
+                      xor=['rep_history'])
+    rep_history = Str(desc='note with which to replace history',
+                      argstr='-HH "%s"',
+                      xor=['add_history'])
+    delete = traits.Int(desc='delete note number num',
+                        argstr='-d %d')
+    ses = traits.Bool(desc='print to stdout the expanded notes',
+                      argstr='-ses')
+    out_file = File(desc='output image file name',
+                    argstr='%s')
 
 
 class Notes(CommandLine):
@@ -3051,7 +3051,7 @@ class Notes(CommandLine):
     >>> notes.inputs.add = "This note is added."
     >>> notes.inputs.add_history = "This note is added to history."
     >>> notes.cmdline #doctest: +IGNORE_UNICODE
-    "3dNotes -a 'This note is added.' -h 'This note is added to history.' functional.HEAD"
+    '3dNotes -a "This note is added." -h "This note is added to history." functional.HEAD'
     >>> res = notes.run() # doctest: +SKIP
     """
 

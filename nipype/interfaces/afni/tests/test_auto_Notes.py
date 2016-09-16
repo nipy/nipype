@@ -4,9 +4,9 @@ from ..preprocess import Notes
 
 
 def test_Notes_inputs():
-    input_map = dict(add=dict(argstr="-a '%s'",
+    input_map = dict(add=dict(argstr='-a "%s"',
     ),
-    add_history=dict(argstr="-h '%s'",
+    add_history=dict(argstr='-h "%s"',
     xor=[u'rep_history'],
     ),
     args=dict(argstr='%s',
@@ -27,7 +27,7 @@ def test_Notes_inputs():
     out_file=dict(argstr='%s',
     ),
     outputtype=dict(),
-    rep_history=dict(argstr="-HH '%s'",
+    rep_history=dict(argstr='-HH "%s"',
     xor=[u'add_history'],
     ),
     ses=dict(argstr='-ses',
