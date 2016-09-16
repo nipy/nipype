@@ -8,7 +8,8 @@ import os
 from tempfile import mkstemp, mkdtemp
 import warnings
 
-from ...testing import assert_equal, assert_true, assert_false, TempFATFS
+from ...testing import (assert_equal, assert_true, assert_false,
+                        assert_in, assert_not_in, TempFATFS)
 from ...utils.filemanip import (save_json, load_json,
                                 fname_presuffix, fnames_presuffix,
                                 hash_rename, check_forhash,
@@ -257,6 +258,30 @@ def test_copyfallback():
     finally:
         os.unlink(orig_img)
         os.unlink(orig_hdr)
+
+
+def test_get_related_files():
+    orig_img, orig_hdr = _temp_analyze_files()
+
+    related_files = get_related_files(orig_img)
+    yield assert_in, orig_img, related_files
+    yield assert_in, orig_hdr, related_files
+
+    related_files = get_related_files(orig_hdr)
+    yield assert_in, orig_img, related_files
+    yield assert_in, orig_hdr, related_files
+
+
+def test_get_related_files_noninclusive():
+    orig_img, orig_hdr = _temp_analyze_files()
+
+    related_files = get_related_files(orig_img, include_this_file=False)
+    yield assert_not_in, orig_img, related_files
+    yield assert_in, orig_hdr, related_files
+
+    related_files = get_related_files(orig_hdr, include_this_file=False)
+    yield assert_in, orig_img, related_files
+    yield assert_not_in, orig_hdr, related_files
 
 
 def test_filename_to_list():
