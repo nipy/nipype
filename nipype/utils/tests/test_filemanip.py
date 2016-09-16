@@ -19,6 +19,10 @@ from ...utils.filemanip import (save_json, load_json,
 import numpy as np
 
 
+def _ignore_atime(stat):
+    return stat[:7] + stat[8:]
+
+
 def test_split_filename():
     res = split_filename('foo.nii')
     yield assert_equal, res, ('', 'foo', '.nii')
@@ -192,27 +196,33 @@ def test_recopy():
                 # tick
                 if copy and not use_hardlink and hashmethod == 'timestamp':
                     continue
+
                 copyfile(orig_img, new_img, **kwargs)
-                img_stat = os.stat(new_img)
-                hdr_stat = os.stat(new_hdr)
+                img_stat = _ignore_atime(os.stat(new_img))
+                hdr_stat = _ignore_atime(os.stat(new_hdr))
                 copyfile(orig_img, new_img, **kwargs)
                 err_msg = "Regular - OS: {}; Copy: {}; Hardlink: {}".format(
                     os.name, copy, use_hardlink)
-                yield assert_equal, img_stat, os.stat(new_img), err_msg
-                yield assert_equal, hdr_stat, os.stat(new_hdr), err_msg
+                yield (assert_equal, img_stat, _ignore_atime(os.stat(new_img)),
+                       err_msg)
+                yield (assert_equal, hdr_stat, _ignore_atime(os.stat(new_hdr)),
+                       err_msg)
                 os.unlink(new_img)
                 os.unlink(new_hdr)
 
                 copyfile(img_link, new_img, **kwargs)
-                img_stat = os.stat(new_img)
-                hdr_stat = os.stat(new_hdr)
+                img_stat = _ignore_atime(os.stat(new_img))
+                hdr_stat = _ignore_atime(os.stat(new_hdr))
                 copyfile(img_link, new_img, **kwargs)
                 err_msg = "Symlink - OS: {}; Copy: {}; Hardlink: {}".format(
                     os.name, copy, use_hardlink)
-                yield assert_equal, img_stat, os.stat(new_img), err_msg
-                yield assert_equal, hdr_stat, os.stat(new_hdr), err_msg
+                yield (assert_equal, img_stat, _ignore_atime(os.stat(new_img)),
+                       err_msg)
+                yield (assert_equal, hdr_stat, _ignore_atime(os.stat(new_hdr)),
+                       err_msg)
                 os.unlink(new_img)
                 os.unlink(new_hdr)
+
     os.unlink(img_link)
     os.unlink(hdr_link)
     os.unlink(orig_img)
