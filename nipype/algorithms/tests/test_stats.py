@@ -12,12 +12,12 @@ import os
 import tempfile
 import shutil
 
-class TestStatExtraction(unittest.TestCase):
+class TestSignalExtraction(unittest.TestCase):
 
     filenames = {
         'in_file': 'fmri.nii',
         'label_file': 'labels.nii',
-        'out_file': 'stats.tsv'
+        'out_file': 'signals.tsv'
     }
 
     def setUp(self):
@@ -29,16 +29,16 @@ class TestStatExtraction(unittest.TestCase):
         utils.save_toy_nii(self.fake_label_data, self.filenames['label_file'])
 
     @skipif(True)
-    def test_stat_extraction(self):
+    def test_signal_extraction(self):
         # setup
         wanted = [[]]
         num_timepoints_wanted = self.fake_fmri_data.shape[3]
         # run
 
         labels_wanted = ['csf', 'gray', 'white']
-        stats.StatExtraction(in_file=self.filenames['in_file'],
-                             label_file=self.filenames['label_file'],
-                             class_labels=labels_wanted).run()
+        stats.SignalExtraction(in_file=self.filenames['in_file'],
+                               label_file=self.filenames['label_file'],
+                               class_labels=labels_wanted).run()
         # assert
         with open(self.filenames['out_file'], 'r') as output:
             got = [line.split() for line in output]
