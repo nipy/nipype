@@ -13,3 +13,4 @@ psutil
 funcsigs
 configparser
 nilearn
+sklearn
