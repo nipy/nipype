@@ -11,23 +11,16 @@ Algorithms to compute statistics on :abbr:`fMRI (functional MRI)`
     >>> os.chdir(datadir)
 
 '''
-from __future__ import print_function, division, unicode_literals, absolute_import
-from builtins import str, zip, range, open
+from __future__ import (print_function, division, unicode_literals,
+                        absolute_import)
+from builtins import str
 
-import os
-import os.path as op
-
-import nibabel as nb
 import numpy as np
-from scipy import linalg
-from scipy.special import legendre
 import nilearn.input_data as nl
 
 from .. import logging
-from ..external.due import due, Doi, BibTeX
 from ..interfaces.base import (traits, TraitedSpec, BaseInterface,
-                               BaseInterfaceInputSpec, File, isdefined,
-                               InputMultiPath)
+                               BaseInterfaceInputSpec, File)
 IFLOG = logging.getLogger('interface')
 
 class SignalExtractionInputSpec(BaseInterfaceInputSpec):
