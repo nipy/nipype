@@ -44,15 +44,17 @@ specifically the 2mm versions of:
 
 """
 
-from __future__ import division
-from builtins import range
+from __future__ import division, unicode_literals
+from builtins import open, range, str
 
 import os
 
 from nipype.interfaces.base import CommandLine
 CommandLine.set_default_terminal_output('allatonce')
 
+# https://github.com/moloney/dcmstack
 from dcmstack.extract import default_extractor
+# pip install pydicom
 from dicom import read_file
 
 from nipype.interfaces import (fsl, Function, ants, freesurfer, nipy)
@@ -64,6 +66,7 @@ from nipype import Workflow, Node, MapNode
 
 from nipype.algorithms.rapidart import ArtifactDetect
 from nipype.algorithms.misc import TSNR
+from nipype.algorithms.compcor import ACompCor
 from nipype.interfaces.utility import Rename, Merge, IdentityInterface
 from nipype.utils.filemanip import filename_to_list
 from nipype.interfaces.io import DataSink, FreeSurferSource
@@ -179,7 +182,7 @@ def motion_regressors(motion_params, order=0, derivatives=1):
         for i in range(2, order + 1):
             out_params2 = np.hstack((out_params2, np.power(out_params, i)))
         filename = os.path.join(os.getcwd(), "motion_regressor%02d.txt" % idx)
-        np.savetxt(filename, out_params2, fmt="%.10f")
+        np.savetxt(filename, out_params2, fmt=b"%.10f")
         out_files.append(filename)
     return out_files
 
@@ -224,54 +227,9 @@ def build_filter1(motion_params, comp_norm, outliers, detrend_poly=None):
                     i + 1)(np.linspace(-1, 1, timepoints))[:, None]))
             out_params = np.hstack((out_params, X))
         filename = os.path.join(os.getcwd(), "filter_regressor%02d.txt" % idx)
-        np.savetxt(filename, out_params, fmt="%.10f")
+        np.savetxt(filename, out_params, fmt=b"%.10f")
         out_files.append(filename)
     return out_files
-
-
-def extract_noise_components(realigned_file, mask_file, num_components=5,
-                             extra_regressors=None):
-    """Derive components most reflective of physiological noise
-
-    Parameters
-    ----------
-    realigned_file: a 4D Nifti file containing realigned volumes
-    mask_file: a 3D Nifti file containing white matter + ventricular masks
-    num_components: number of components to use for noise decomposition
-    extra_regressors: additional regressors to add
-
-    Returns
-    -------
-    components_file: a text file containing the noise components
-    """
-    imgseries = nb.load(realigned_file)
-    components = None
-    for filename in filename_to_list(mask_file):
-        mask = nb.load(filename).get_data()
-        if len(np.nonzero(mask > 0)[0]) == 0:
-            continue
-        voxel_timecourses = imgseries.get_data()[mask > 0]
-        voxel_timecourses[np.isnan(np.sum(voxel_timecourses, axis=1)), :] = 0
-        # remove mean and normalize by variance
-        # voxel_timecourses.shape == [nvoxels, time]
-        X = voxel_timecourses.T
-        stdX = np.std(X, axis=0)
-        stdX[stdX == 0] = 1.
-        stdX[np.isnan(stdX)] = 1.
-        stdX[np.isinf(stdX)] = 1.
-        X = (X - np.mean(X, axis=0)) / stdX
-        u, _, _ = sp.linalg.svd(X, full_matrices=False)
-        if components is None:
-            components = u[:, :num_components]
-        else:
-            components = np.hstack((components, u[:, :num_components]))
-    if extra_regressors:
-        regressors = np.genfromtxt(extra_regressors)
-        components = np.hstack((components, regressors))
-    components_file = os.path.join(os.getcwd(), 'noise_components.txt')
-    np.savetxt(components_file, components, fmt="%.10f")
-    return components_file
-
 
 def rename(in_files, suffix=None):
     from nipype.utils.filemanip import (filename_to_list, split_filename,
@@ -592,7 +550,7 @@ def create_workflow(files,
     realign.inputs.slice_info = 2
     realign.plugin_args = {'sbatch_args': '-c%d' % 4}
 
-    # Comute TSNR on realigned data regressing polynomials upto order 2
+    # Compute TSNR on realigned data regressing polynomials up to order 2
     tsnr = MapNode(TSNR(regress_poly=2), iterfield=['in_file'], name='tsnr')
     wf.connect(realign, "out_file", tsnr, "in_file")
 
@@ -694,14 +652,10 @@ def create_workflow(files,
                filter1, 'out_res_name')
     wf.connect(createfilter1, 'out_files', filter1, 'design')
 
-    createfilter2 = MapNode(Function(input_names=['realigned_file', 'mask_file',
-                                                  'num_components',
-                                                  'extra_regressors'],
-                                     output_names=['out_files'],
-                                     function=extract_noise_components,
-                                     imports=imports),
+    createfilter2 = MapNode(ACompCor(),
                             iterfield=['realigned_file', 'extra_regressors'],
                             name='makecompcorrfilter')
+    createfilter2.inputs.components_file = 'noise_components.txt'
     createfilter2.inputs.num_components = num_components
 
     wf.connect(createfilter1, 'out_files', createfilter2, 'extra_regressors')
@@ -717,7 +671,7 @@ def create_workflow(files,
     wf.connect(filter1, 'out_res', filter2, 'in_file')
     wf.connect(filter1, ('out_res', rename, '_cleaned'),
                filter2, 'out_res_name')
-    wf.connect(createfilter2, 'out_files', filter2, 'design')
+    wf.connect(createfilter2, 'components_file', filter2, 'design')
     wf.connect(mask, 'mask_file', filter2, 'mask')
 
     bandpass = Node(Function(input_names=['files', 'lowpass_freq',
@@ -923,7 +877,7 @@ def create_workflow(files,
     wf.connect(smooth, 'out_file', datasink, 'resting.timeseries.@smoothed')
     wf.connect(createfilter1, 'out_files',
                datasink, 'resting.regress.@regressors')
-    wf.connect(createfilter2, 'out_files',
+    wf.connect(createfilter2, 'components_file',
                datasink, 'resting.regress.@compcorr')
     wf.connect(maskts, 'out_file', datasink, 'resting.timeseries.target')
     wf.connect(sampleaparc, 'summary_file',

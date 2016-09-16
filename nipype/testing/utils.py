@@ -1,8 +1,10 @@
+# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """Additional handy utilities for testing
 """
-__docformat__ = 'restructuredtext'
+from __future__ import print_function, division, unicode_literals, absolute_import
+from builtins import range, object, open
 
 import os
 import time
@@ -11,9 +13,14 @@ import signal
 import subprocess
 from subprocess import CalledProcessError
 from tempfile import mkdtemp
-from ..utils.misc import package_check
 from nose import SkipTest
 from future.utils import raise_from
+from ..utils.misc import package_check
+
+__docformat__ = 'restructuredtext'
+
+import numpy as np
+import nibabel as nb
 
 def skip_if_no_package(*args, **kwargs):
     """Raise SkipTest if package_check fails
@@ -98,3 +105,8 @@ class TempFATFS(object):
             assert not os.path.exists(self.canary)
         self.dev_null.close()
         shutil.rmtree(self.tmpdir)
+
+def save_toy_nii(ndarray, filename):
+    toy = nb.Nifti1Image(ndarray, np.eye(4))
+    nb.nifti1.save(toy, filename)
+    return filename

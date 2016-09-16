@@ -7,13 +7,15 @@ Change directory to provide relative paths for doctests
    >>> datadir = os.path.realpath(os.path.join(filepath, '../../testing/data'))
    >>> os.chdir(datadir)
 """
+from __future__ import print_function, division, unicode_literals, absolute_import
+
 import os.path as op
 import nibabel as nb
 import numpy as np
 
+from ... import logging
 from ..base import (traits, TraitedSpec, File, isdefined)
 from .base import DipyBaseInterface
-from ... import logging
 IFLOGGER = logging.getLogger('interface')
 
 

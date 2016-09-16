@@ -1,4 +1,4 @@
-# Copyright (c) 2016, The developers of the Stanford CRN
+# Copyright (c) 2016, The developers of nipype
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -26,68 +26,40 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-FROM ubuntu:vivid
-MAINTAINER Stanford Center for Reproducible Neuroscience <crn.poldracklab@gmail.com>
+FROM neurodebian:latest
+MAINTAINER Nipype developers
 
 # Preparations
 RUN ln -snf /bin/bash /bin/sh
 ARG DEBIAN_FRONTEND=noninteractive
 
-# Update packages and install the minimal set of tools
-RUN apt-get update && \
+RUN sed -i -e 's,main$,main contrib non-free,g' /etc/apt/sources.list.d/neurodebian.sources.list && \
+    apt-get -y update && \
     apt-get install -y curl \
                        git \
                        xvfb \
                        bzip2 \
                        unzip \
                        apt-utils \
-                       gfortran \
                        fusefat \
-                       liblapack-dev \
-                       libblas-dev \
-                       libatlas-dev \
-                       libatlas-base-dev \
-                       libblas3 \
-                       libblas-common \
-                       libopenblas-dev \
-                       libxml2-dev \
-                       libxslt1-dev \
-                       libfreetype6-dev \
-                       libpng12-dev \
-                       libqhull-dev \
-                       libxft-dev \
-                       libjpeg-dev \
-                       libyaml-dev \
-                       graphviz
+                       graphviz \
+                       fsl-core && \
+    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* && \
+    echo ". /etc/fsl/fsl.sh" >> /etc/bash.bashrc
 
-
-# Install ANTs
-RUN mkdir -p /opt/ants && \
-    curl -sSL "https://2a353b13e8d2d9ac21ce543b7064482f771ce658.googledrive.com/host/0BxI12kyv2olZVFhUcGVpYWF3R3c/ANTs-Linux_Ubuntu14.04.tar.bz2" \
-    | tar -xjC /opt/ants --strip-components 1
-ENV ANTSPATH /opt/ants
-ENV PATH $ANTSPATH:$PATH
-
-# Enable neurodebian
-RUN curl -sSL http://neuro.debian.net/lists/vivid.de-m.full | tee /etc/apt/sources.list.d/neurodebian.sources.list && \
-    curl -sSL http://neuro.debian.net/lists/vivid.us-tn.full >> /etc/apt/sources.list.d/neurodebian.sources.list && \
-    apt-key adv --recv-keys --keyserver hkp://pgp.mit.edu:80 0xA5D32F012649A5A9 && \
-    apt-get update && \
-    apt-get install -y fsl-core afni
-
-RUN echo '#!/bin/bash' > /etc/profile.d/nipype_deps.sh && \
-    echo 'export ANTSPATH=/opt/ants' >> /etc/profile.d/nipype_deps.sh && \
-    echo 'export PATH=$ANTSPATH:$PATH' >> /etc/profile.d/nipype_deps.sh && \
-    echo 'source /etc/fsl/fsl.sh' >> /etc/profile.d/nipype_deps.sh && \
-    echo 'source /etc/afni/afni.sh' >> /etc/profile.d/nipype_deps.sh
-    
-# Clear apt cache to reduce image size
-RUN rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+ENV FSLDIR=/usr/share/fsl/5.0
+ENV FSLOUTPUTTYPE=NIFTI_GZ
+ENV PATH=/usr/lib/fsl/5.0:$PATH
+ENV FSLMULTIFILEQUIT=TRUE
+ENV POSSUMDIR=/usr/share/fsl/5.0
+ENV LD_LIBRARY_PATH=/usr/lib/fsl/5.0:$LD_LIBRARY_PATH
+ENV FSLTCLSH=/usr/bin/tclsh
+ENV FSLWISH=/usr/bin/wish
 
 # Install Matlab: from the good old install_spm_mcr.sh of @chrisfilo
-WORKDIR /root
+WORKDIR /opt
 
-RUN echo "destinationFolder=/root/mcr" > mcr_options.txt && \
+RUN echo "destinationFolder=/opt/mcr" > mcr_options.txt && \
     echo "agreeToLicense=yes" >> mcr_options.txt && \
     echo "outputFile=/tmp/matlabinstall_log" >> mcr_options.txt && \
     echo "mode=silent" >> mcr_options.txt && \
@@ -96,20 +68,15 @@ RUN echo "destinationFolder=/root/mcr" > mcr_options.txt && \
          -o matlab_installer/installer.zip && \
     unzip matlab_installer/installer.zip -d matlab_installer/ && \
     matlab_installer/install -inputFile mcr_options.txt && \
-    rm -rf matlab_installer mcr_options.txt && \
-#    echo 'export LD_LIBRARY_PATH=/root/mcr/v85/runtime/glnxa64:/root/mcr/v85/bin/glnxa64:/root/mcr/v85/sys/os/glnxa64:$LD_LIBRARY_PATH' >> /etc/profile.d/nipype_deps.sh && \
-    echo 'export SPMMCRCMD="/root/spm12/run_spm12.sh /root/mcr/v85/ script"' >> /etc/profile.d/nipype_deps.sh && \ 
-    echo 'export FORCE_SPMMCR=1' >> /etc/profile.d/nipype_deps.sh
+    rm -rf matlab_installer mcr_options.txt
 
-ENV SPMMCRCMD "/root/spm12/run_spm12.sh /root/mcr/v85/ script"
+ENV SPMMCRCMD "/opt/spm12/run_spm12.sh /opt/mcr/v85/ script"
 ENV FORCE_SPMMCR 1
 
 # Install SPM
 RUN curl -sSL http://www.fil.ion.ucl.ac.uk/spm/download/restricted/utopia/dev/spm12_r6472_Linux_R2015a.zip -o spm12.zip && \
     unzip spm12.zip && \
     rm -rf spm12.zip
-
-RUN echo "source /etc/profile.d/nipype_deps.sh" >> /etc/bash.bashrc
 
 CMD ["/bin/bash"]
 

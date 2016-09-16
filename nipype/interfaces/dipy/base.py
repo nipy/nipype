@@ -1,10 +1,12 @@
 # -*- coding: utf-8 -*-
 """ Base interfaces for dipy """
+from __future__ import print_function, division, unicode_literals, absolute_import
+
 import os.path as op
 import numpy as np
-from nipype.interfaces.base import (traits, File, isdefined,
-                                    BaseInterface, BaseInterfaceInputSpec)
 from ... import logging
+from ..base import (traits, File, isdefined,
+                    BaseInterface, BaseInterfaceInputSpec)
 
 IFLOGGER = logging.getLogger('interface')
 
@@ -36,7 +38,7 @@ class DipyBaseInterface(BaseInterface):
     """
     def __init__(self, **inputs):
         if no_dipy():
-            IFLOGGER.error('dipy was not found')
+            IFLOGGER.warn('dipy was not found')
             # raise ImportError('dipy was not found')
         super(DipyBaseInterface, self).__init__(**inputs)
 

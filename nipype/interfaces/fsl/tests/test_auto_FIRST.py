@@ -30,7 +30,7 @@ def test_FIRST_inputs():
     method=dict(argstr='-m %s',
     position=4,
     usedefault=True,
-    xor=['method_as_numerical_threshold'],
+    xor=[u'method_as_numerical_threshold'],
     ),
     method_as_numerical_threshold=dict(argstr='-m %.4f',
     position=4,

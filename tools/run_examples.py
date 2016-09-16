@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from __future__ import print_function
 import os
 import sys
@@ -5,12 +6,8 @@ from shutil import rmtree, copyfile
 from multiprocessing import cpu_count
 
 
-def run_examples(example, pipelines, data_path, plugin=None):
-    '''
-    Run example workflows
-    '''
-
-    # Import packages
+def run_examples(example, pipelines, data_path, plugin=None, rm_base_dir=True):
+    """ Run example workflows """
     from nipype import config
     from nipype.interfaces.base import CommandLine
     from nipype.utils import draw_gantt_chart
@@ -26,7 +23,7 @@ def run_examples(example, pipelines, data_path, plugin=None):
 
     plugin_args = {}
     if plugin == 'MultiProc':
-        plugin_args['n_procs'] = cpu_count()
+        plugin_args['n_procs'] = int(os.getenv('NIPYPE_NUMBER_OF_CPUS', cpu_count()))
 
     __import__(example)
 
@@ -34,17 +31,21 @@ def run_examples(example, pipelines, data_path, plugin=None):
         # Init and run workflow
         wf = getattr(sys.modules[example], pipeline)
         wf.base_dir = os.path.join(os.getcwd(), 'output', example, plugin)
-        if os.path.exists(wf.base_dir):
-            rmtree(wf.base_dir)
+
+        results_dir = os.path.join(wf.base_dir, wf.name)
+        if rm_base_dir and os.path.exists(results_dir):
+            rmtree(results_dir)
 
         # Handle a logging directory
         log_dir = os.path.join(os.getcwd(), 'logs', example)
-        if os.path.exists(log_dir):
-            rmtree(log_dir)
-        os.makedirs(log_dir)
+        if not os.path.exists(log_dir):
+            os.makedirs(log_dir)
         wf.config = {'execution': {'hash_method': 'timestamp',
                                    'stop_on_first_rerun': 'true',
-                                   'write_provenance': 'true'}}
+                                   'write_provenance': 'true',
+                                   'poll_sleep_duration': 2},
+                     'logging': {'log_directory': log_dir, 'log_to_file': True}}
+
 
         # Callback log setup
         if example == 'fmri_spm_nested' and plugin == 'MultiProc' and \
@@ -56,9 +57,8 @@ def run_examples(example, pipelines, data_path, plugin=None):
             cb_logger.setLevel(logging.DEBUG)
             handler = logging.FileHandler(cb_log_path)
             cb_logger.addHandler(handler)
-            plugin_args = {'n_procs' : 4, 'status_callback' : log_nodes_cb}
-        else:
-            plugin_args = {'n_procs' : 4}
+            plugin_args['status_callback'] = cb_logger
+
         try:
             wf.inputs.inputnode.in_data = os.path.abspath(data_path)
         except AttributeError:
@@ -76,7 +76,8 @@ def run_examples(example, pipelines, data_path, plugin=None):
         if plugin_args.has_key('status_callback') and pandas_flg:
             draw_gantt_chart.generate_gantt_chart(cb_log_path, 4)
             dst_log_html = os.path.join(os.path.expanduser('~'), 'callback.log.html')
-            copyfile(cb_log_path+'.html', dst_log_html)
+            copyfile(cb_log_path + '.html', dst_log_html)
+
 
 if __name__ == '__main__':
     path, file = os.path.split(__file__)

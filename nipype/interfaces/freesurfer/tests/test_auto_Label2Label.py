@@ -19,7 +19,7 @@ def test_Label2Label_inputs():
     out_file=dict(argstr='--trglabel %s',
     hash_files=False,
     keep_extension=True,
-    name_source=['source_label'],
+    name_source=[u'source_label'],
     name_template='%s_converted',
     ),
     registration_method=dict(argstr='--regmethod %s',

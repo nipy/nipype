@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft = python sts = 4 ts = 4 sw = 4 et:
 """Afni svm interfaces
@@ -8,21 +9,10 @@
     >>> datadir = os.path.realpath(os.path.join(filepath, '../../testing/data'))
     >>> os.chdir(datadir)
 """
-import warnings
+from __future__ import print_function, division, unicode_literals, absolute_import
 
-import os
-import re
-
-from ..base import (Directory, TraitedSpec,
-                    traits, isdefined, File, InputMultiPath, Undefined)
-from ...utils.filemanip import (load_json, save_json, split_filename)
-from nipype.utils.filemanip import fname_presuffix
-from .base import AFNICommand, AFNICommandInputSpec,\
-    AFNICommandOutputSpec
-from nipype.interfaces.base import CommandLineInputSpec, CommandLine,\
-    OutputMultiPath
-
-warn = warnings.warn
+from ..base import TraitedSpec, traits, File
+from .base import AFNICommand, AFNICommandInputSpec, AFNICommandOutputSpec
 
 
 class SVMTrainInputSpec(AFNICommandInputSpec):

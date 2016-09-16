@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """Parallel workflow execution via multiprocessing
@@ -5,19 +6,21 @@
 Support for child processes running as non-daemons based on
 http://stackoverflow.com/a/8963618/1183453
 """
+from __future__ import print_function, division, unicode_literals, absolute_import
+from builtins import open
 
 # Import packages
 from multiprocessing import Process, Pool, cpu_count, pool
 from traceback import format_exception
-import os
 import sys
 
-import numpy as np
 from copy import deepcopy
-from ..engine import MapNode
+import numpy as np
+
+from ... import logging, config
 from ...utils.misc import str2bool
-from ... import logging
-from nipype.pipeline.plugins import semaphore_singleton
+from ..engine import MapNode
+from ..plugins import semaphore_singleton
 from .base import (DistributedPluginBase, report_crash)
 
 # Init logger
@@ -219,16 +222,19 @@ class MultiProcPlugin(DistributedPluginBase):
         jobids = sorted(jobids,
                         key=lambda item: (self.procs[item]._interface.estimated_memory_gb,
                                           self.procs[item]._interface.num_threads))
-        if len(jobids) > 0:
+
+        if str2bool(config.get('execution', 'profile_runtime')):
             logger.debug('Free memory (GB): %d, Free processors: %d',
                          free_memory_gb, free_processors)
 
         # While have enough memory and processors for first job
         # Submit first job on the list
         for jobid in jobids:
-            logger.debug('Next Job: %d, memory (GB): %d, threads: %d' \
-                         % (jobid, self.procs[jobid]._interface.estimated_memory_gb,
-                            self.procs[jobid]._interface.num_threads))
+            if str2bool(config.get('execution', 'profile_runtime')):
+                logger.debug('Next Job: %d, memory (GB): %d, threads: %d' \
+                             % (jobid,
+                                self.procs[jobid]._interface.estimated_memory_gb,
+                                self.procs[jobid]._interface.num_threads))
 
             if self.procs[jobid]._interface.estimated_memory_gb <= free_memory_gb and \
                self.procs[jobid]._interface.num_threads <= free_processors:

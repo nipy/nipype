@@ -1,24 +1,22 @@
+# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """Miscellaneous utility functions
 """
-
+from __future__ import print_function, division, unicode_literals, absolute_import
 from future import standard_library
 standard_library.install_aliases()
+from builtins import next, str
 from future.utils import raise_from
-from builtins import next
-from pickle import dumps, loads
-import inspect
 
-from distutils.version import LooseVersion
-import numpy as np
-from textwrap import dedent
 import sys
 import re
 from collections import Iterator
+import inspect
 
-from ..external.six import string_types
-
+from distutils.version import LooseVersion
+from textwrap import dedent
+import numpy as np
 
 def human_order_sorted(l):
     """Sorts string in human order (i.e. 'stat10' will go after 'stat2')"""
@@ -34,6 +32,9 @@ def human_order_sorted(l):
 
 
 def trim(docstring, marker=None):
+    if isinstance(docstring, bytes):
+        docstring = str(docstring, 'utf-8')
+
     if not docstring:
         return ''
     # Convert tabs to spaces (following the normal Python rules)
@@ -126,7 +127,7 @@ def is_container(item):
         True if container
         False if not (eg string)
     """
-    if isinstance(item, string_types):
+    if isinstance(item, str):
         return False
     elif hasattr(item, '__iter__'):
         return True
@@ -154,9 +155,8 @@ def container_to_string(cont):
         Container elements joined into a string.
 
     """
-    if hasattr(cont, '__iter__') and not isinstance(cont, string_types):
-        return str(' '.join(cont))
-
+    if hasattr(cont, '__iter__') and not isinstance(cont, str):
+        cont = ' '.join(cont)
     return str(cont)
 
 

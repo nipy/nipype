@@ -4,19 +4,19 @@
  Tutorial : Interfaces
 =======================
 
-Specifying options
-------------------
+Specifying input settings
+-------------------------
 
 The nipype interface modules provide a Python interface to external
 packages like FSL_ and SPM_.  Within the module are a series of Python
 classes which wrap specific package functionality.  For example, in
 the fsl module, the class :class:`nipype.interfaces.fsl.Bet` wraps the
 ``bet`` command-line tool.  Using the command-line tool, one would
-specify options using flags like ``-o``, ``-m``, ``-f <f>``, etc...
+specify input settings using flags like ``-o``, ``-m``, ``-f <f>``, etc...
 However, in nipype, options are assigned to Python attributes and can
 be specified in the following ways:
 
-Options can be assigned when you first create an interface object:
+Settings can be assigned when you first create an interface object:
 
 .. testcode::
 
@@ -24,7 +24,7 @@ Options can be assigned when you first create an interface object:
    mybet = fsl.BET(in_file='foo.nii', out_file='bar.nii')
    result = mybet.run()
 
-Options can be assigned through the ``inputs`` attribute:
+Settings can be assigned through the ``inputs`` attribute:
 
 .. testcode::
 
@@ -34,13 +34,52 @@ Options can be assigned through the ``inputs`` attribute:
    mybet.inputs.out_file = 'bar.nii'
    result = mybet.run()
 
-Options can be assigned when calling the ``run`` method:
+Settings can be assigned when calling the ``run`` method:
 
 .. testcode::
 
    import nipype.interfaces.fsl as fsl
    mybet = fsl.BET()
    result = mybet.run(in_file='foo.nii', out_file='bar.nii', frac=0.5)
+
+Settings can be saved to a json file:
+
+.. testcode::
+
+   import nipype.interfaces.fsl as fsl
+   mybet = fsl.BET(in_file='foo.nii', out_file='bar.nii', frac=0.5)
+   mybet.save_inputs_to_json('bet-settings.json')
+
+Once saved, the three inputs set for ``mybet`` will be stored in a JSON
+file. These settings can also be loaded from a json file:
+
+.. testcode::
+
+   import nipype.interfaces.fsl as fsl
+   mybet = fsl.BET()
+   mybet.load_inputs_from_json('bet-settings.json', overwrite=False)
+
+
+Loading settings will overwrite previously set inputs by default, unless
+the ``overwrite`` argument is ``False``. Conveniently, the settings can be
+also read during the interface instantiation:
+
+.. testcode::
+
+   import nipype.interfaces.fsl as fsl
+   mybet = fsl.BET(from_file='bet-settings.json')
+
+If the user provides settings during interface creation, they will take
+precedence over those loaded using ``from_file``:
+
+.. testcode::
+
+   import nipype.interfaces.fsl as fsl
+   mybet = fsl.BET(from_file='bet-settings.json', frac=0.7)
+
+In this case, ``mybet.inputs.frac`` will contain the value ``0.7`` regardless
+the value that could be stored in the ``bet-settings.json`` file.
+
 
 Getting Help
 ------------

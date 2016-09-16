@@ -12,15 +12,16 @@
 ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ##
 
 """Helper to automagically generate ReST versions of examples"""
-
-__docformat__ = 'restructuredtext'
-
+from __future__ import print_function, division, unicode_literals, absolute_import
+from builtins import open, str
 
 import os
 import sys
 import re
 import glob
 from optparse import OptionParser
+
+__docformat__ = 'restructuredtext'
 
 
 def auto_image(line):

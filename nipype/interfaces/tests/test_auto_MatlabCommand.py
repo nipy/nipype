@@ -41,7 +41,7 @@ def test_MatlabCommand_inputs():
     terminal_output=dict(nohash=True,
     ),
     uses_mcr=dict(nohash=True,
-    xor=['nodesktop', 'nosplash', 'single_comp_thread'],
+    xor=[u'nodesktop', u'nosplash', u'single_comp_thread'],
     ),
     )
     inputs = MatlabCommand.input_spec()
