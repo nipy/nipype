@@ -14,18 +14,19 @@ import shutil
 class TestCompCor(unittest.TestCase):
     ''' Note: Tests currently do a poor job of testing functionality '''
 
-    filenames = {
-        'in_file': None,
-        'label_file': None,
-        'out_file': 'stats.tsv'
-    }
+    filenames = {'functionalnii': 'compcorfunc.nii',
+                 'masknii': 'compcormask.nii',
+                 'components_file': None}
 
     def setUp(self):
         # setup
         self.orig_dir = os.getcwd()
         self.temp_dir = tempfile.mkdtemp()
         os.chdir(self.temp_dir)
-
+        noise = np.fromfunction(self.fake_noise_fun, self.fake_data.shape)
+        self.realigned_file = utils.save_toy_nii(self.fake_data + noise,
+                                                 self.filenames['functionalnii'])
+        mask = np.ones(self.fake_data.shape[:3])
         mask[0,0,0] = 0
         mask[0,0,1] = 0
         self.mask_file = utils.save_toy_nii(mask, self.filenames['masknii'])
