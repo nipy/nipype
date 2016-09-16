@@ -2,7 +2,7 @@
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 import nipype
 from ...testing import (assert_equal, assert_true, assert_false, skipif, utils,
-                        assert_almost_equal)
+                        assert_almost_equal, raises)
 from .. import stats
 
 import unittest
@@ -49,6 +49,13 @@ class TestSignalExtraction(unittest.TestCase):
                 for segment in range(len(got[time])):
                     assert_almost_equal(got[time][segment],
                                         wanted[time][segment])
+
+    @raises(ValueError)
+    def test_signal_extraction_bad_class_labels(self):
+        # run
+        stats.SignalExtraction(in_file=self.filenames['in_file'],
+                               label_file=self.filenames['label_file'],
+                               class_labels=['bad']).run()
 
     def tearDown(self):
         os.chdir(self.orig_dir)
