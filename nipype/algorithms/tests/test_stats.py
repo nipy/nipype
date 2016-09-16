@@ -28,10 +28,13 @@ class TestSignalExtraction(unittest.TestCase):
         utils.save_toy_nii(self.fake_fmri_data, self.filenames['in_file'])
         utils.save_toy_nii(self.fake_label_data, self.filenames['label_file'])
 
-    @skipif(True)
     def test_signal_extraction(self):
         # setup
-        wanted = [[]]
+        wanted = [[-2.33333, 2, .5],
+                  [0, -2, .5],
+                  [-.3333333, -1, 2.5],
+                  [0, -2, .5],
+                  [-1.3333333, -5, 1]]
         num_timepoints_wanted = self.fake_fmri_data.shape[3]
         # run
 
@@ -42,13 +45,16 @@ class TestSignalExtraction(unittest.TestCase):
         # assert
         with open(self.filenames['out_file'], 'r') as output:
             got = [line.split() for line in output]
-            labels_got = got.pop(0)
+            labels_got = got.pop(0) # remove header
             assert_equal(labels_got, labels_wanted)
             assert_equal(len(got), num_timepoints_wanted)
+            # convert from string to float
+            got = [[float(num) for num in row] for row in got]
             for time in range(len(got)):
+                assert_equal(len(labels_wanted), len(got[time]))
                 for segment in range(len(got[time])):
                     assert_almost_equal(got[time][segment],
-                                        wanted[time][segment])
+                                        wanted[time][segment], decimal=1)
 
     @raises(ValueError)
     def test_signal_extraction_bad_class_labels(self):
