@@ -16,7 +16,6 @@ from __future__ import (print_function, division, unicode_literals,
 from builtins import str
 
 import numpy as np
-import nilearn.input_data as nl
 
 from .. import logging
 from ..interfaces.base import (traits, TraitedSpec, BaseInterface,
@@ -67,6 +66,8 @@ class SignalExtraction(BaseInterface):
     output_spec = SignalExtractionOutputSpec
 
     def _run_interface(self, runtime):
+        import nilearn.input_data as nl
+
         ins = self.inputs
 
         if ins.stat == 'mean': # always true for now

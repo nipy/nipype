@@ -7,8 +7,16 @@ import shutil
 
 import numpy as np
 
-from ...testing import (assert_equal, utils, assert_almost_equal, raises)
+from ...testing import (assert_equal, utils, assert_almost_equal, raises,
+                        skipif)
 from .. import stats
+
+no_nilearn = True
+try:
+    import nilearn
+    no_nilearn = False
+except ImportError:
+    pass
 
 class TestSignalExtraction(unittest.TestCase):
 
@@ -26,6 +34,7 @@ class TestSignalExtraction(unittest.TestCase):
         utils.save_toy_nii(self.fake_fmri_data, self.filenames['in_file'])
         utils.save_toy_nii(self.fake_label_data, self.filenames['label_file'])
 
+    @skipif(no_nilearn)
     def test_signal_extraction(self):
         # setup
         wanted = [[-2.33333, 2, .5],
@@ -53,6 +62,7 @@ class TestSignalExtraction(unittest.TestCase):
                 for j, segment in enumerate(time):
                     assert_almost_equal(segment, wanted[i][j], decimal=1)
 
+    @skipif(no_nilearn)
     @raises(ValueError)
     def test_signal_extraction_bad_class_labels(self):
         # run

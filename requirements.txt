@@ -12,5 +12,3 @@ xvfbwrapper
 psutil
 funcsigs
 configparser
-nilearn
-sklearn
