@@ -21,31 +21,33 @@ import nibabel as nb
 import numpy as np
 from scipy import linalg
 from scipy.special import legendre
+import nilearn.input_data as nl
 
 from .. import logging
 from ..external.due import due, Doi, BibTeX
 from ..interfaces.base import (traits, TraitedSpec, BaseInterface,
                                BaseInterfaceInputSpec, File, isdefined,
-                               InputMultiPath, ListStr)
+                               InputMultiPath)
 IFLOG = logging.getLogger('interface')
 
 class StatExtractionInputSpec(BaseInterfaceInputSpec):
     in_file = File(exists=True, mandatory=True, desc='4-D fMRI nii file')
-    label_file = File(exists=True, mandatory=False,
+    label_file = File(exists=True, mandatory=True,
                       desc='a 3-D label image, with 0 denoting background, or '
                       'a 4-D file of probability maps. If this is not '
                       'provided, this interface outputs one stat.')
+    class_labels = traits.List(mandatory=True,
+                               desc='Human-readable labels for each segment '
+                               'in the label file, in order. The length of '
+                               'class_labels must be equal to the number of '
+                               'segments (background excluded)')
     out_file = File('stats.tsv', usedefault=True, exists=False, mandatory=False,
                     desc='The name of the file to output the stats to. '
                     'stats.tsv by default')
-    class_labels = ListStr(mandatory=False,
-                           desc='Human-readable labels for each segment in the '
-                           'label file, in order. The length of class_labels '
-                           'must be equal to or less than the number of '
-                           'segments.')
-    stat = Enum(('mean',), mandatory=False, default='mean', usedefault=True,
-                desc='The stat you wish to calculate on each segment. '
-                'The default is findig the mean')
+    stat = traits.Enum(('mean',), mandatory=False, default='mean',
+                       usedefault=True,
+                       desc='The stat you wish to calculate on each segment. '
+                       'The default is finding the mean')
 
 class StatExtractionOutputSpec(TraitedSpec):
     out_file = File(exists=True, desc='tsv file containing the computed stats, '
@@ -58,9 +60,9 @@ class StatExtraction(BaseInterface):
 
     >>> seinterface = StatExtraction()
     >>> seinterface.inputs.in_file = 'functional.nii'
-    >>> seinterface.inputs.in_file = 'segmentation0.nii'
+    >>> seinterface.inputs.in_file = 'segmentation0.nii.gz'
     >>> seinterface.inputs.out_file = 'means.tsv'
-    >>> segments =['background', 'CSF', 'gray', 'white']
+    >>> segments = ['CSF', 'gray', 'white']
     >>> seinterface.inputs.class_labels = segments
     >>> seinterface.inputs.stat = 'mean'
     '''
@@ -68,10 +70,24 @@ class StatExtraction(BaseInterface):
     output_spec = StatExtractionOutputSpec
 
     def _run_interface(self, runtime):
-        # assert/check inputs make sense
+        ins = self.inputs
+        if ins.stat == 'mean': # always true for now
+            nlmasker = nl.NiftiLabelsMasker(ins.label_file).fit()
+            region_signals = nlmasker.transform_single_imgs(ins.in_file)
 
-        
-        pass
+            num_labels_found = region_signals.shape[1]
+            if len(ins.class_labels) != num_labels_found:
+                raise ValueError('The length of class_labels {} does not '
+                                 'match the number of regions {} found in '
+                                 'label_file {}'.format(ins.class_labels,
+                                                        num_labels_found,
+                                                        ins.label_file))
+
+            output = np.vstack((ins.class_labels, region_signals.astype(str)))
+
+            # save output
+            np.savetxt(ins.out_file, output, fmt=b'%s', delimiter='\t')
+        return runtime
 
     def _list_outputs(self):
         outputs = self._outputs().get()
