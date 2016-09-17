@@ -13,7 +13,7 @@ from .. import stats
 
 no_nilearn = True
 try:
-    import nilearn
+    __import__('nilearn')
     no_nilearn = False
 except ImportError:
     pass
@@ -23,6 +23,7 @@ class TestSignalExtraction(unittest.TestCase):
     filenames = {
         'in_file': 'fmri.nii',
         'label_file': 'labels.nii',
+        '4d_label_file': '4dlabels.nii',
         'out_file': 'signals.tsv'
     }
 
@@ -70,6 +71,11 @@ class TestSignalExtraction(unittest.TestCase):
                                label_file=self.filenames['label_file'],
                                class_labels=['bad']).run()
 
+    @skipif(no_nilearn)
+    def test_signal_extraction_4d_label(self):
+        # setup
+        utils.save_toy_nii(self.fake_4d_label_data, self.filenames['4d_label_file'])
+
     def tearDown(self):
         os.chdir(self.orig_dir)
         shutil.rmtree(self.temp_dir)
@@ -92,3 +98,16 @@ class TestSignalExtraction(unittest.TestCase):
 
                                 [[2, 0],
                                  [1, 3]]])
+
+    fake_4d_label_data = np.array([[[[0.2, 0.3, 0.5],
+                                     [0.1, 0.1, 0.8]],
+
+                                    [[0.1, 0.3, 0.6],
+                                     [0.3, 0.4, 0.3]]],
+
+
+                                   [[[0.2, 0.2, 0.6],
+                                     [0., 0.3, 0.7]],
+
+                                    [[0.3, 0.3, 0.4],
+                                     [0.3, 0.4, 0.3]]]])

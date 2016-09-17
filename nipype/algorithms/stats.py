@@ -13,7 +13,6 @@ Algorithms to compute statistics on :abbr:`fMRI (functional MRI)`
 '''
 from __future__ import (print_function, division, unicode_literals,
                         absolute_import)
-from builtins import str
 
 import numpy as np
 
@@ -71,11 +70,7 @@ class SignalExtraction(BaseInterface):
         ins = self.inputs
 
         if ins.stat == 'mean': # always true for now
-            nlmasker = nl.NiftiLabelsMasker(ins.label_file,
-                                            detrend=ins.detrend)
-            nlmasker.fit()
-            region_signals = nlmasker.transform_single_imgs(ins.in_file)
-
+            region_signals = self._3d_label_handler(nl, ins)
             num_labels_found = region_signals.shape[1]
             if len(ins.class_labels) != num_labels_found:
                 raise ValueError('The length of class_labels {} does not '
@@ -89,6 +84,13 @@ class SignalExtraction(BaseInterface):
             # save output
             np.savetxt(ins.out_file, output, fmt=b'%s', delimiter='\t')
         return runtime
+
+    def _3d_label_handler(self, nl, ins):
+        nlmasker = nl.NiftiLabelsMasker(ins.label_file,
+                                        detrend=ins.detrend)
+        nlmasker.fit()
+        region_signals = nlmasker.transform_single_imgs(ins.in_file)
+        return region_signals
 
     def _list_outputs(self):
         outputs = self._outputs().get()
