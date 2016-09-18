@@ -41,8 +41,6 @@ class SignalExtractionInputSpec(BaseInterfaceInputSpec):
                        usedefault=True,
                        desc='The stat you wish to calculate on each segment. '
                        'The default is finding the mean')
-    detrend = traits.Bool(False, usedefault=True, mandatory=False,
-                          desc='If True, perform detrending using nilearn.')
 
 class SignalExtractionOutputSpec(TraitedSpec):
     out_file = File(exists=True, desc='tsv file containing the computed '
