@@ -19,14 +19,16 @@ import nibabel as nb
 
 from .. import logging
 from ..interfaces.base import (traits, TraitedSpec, BaseInterface,
-                               BaseInterfaceInputSpec, File)
+                               BaseInterfaceInputSpec, File, InputMultiPath)
 IFLOG = logging.getLogger('interface')
 
 class SignalExtractionInputSpec(BaseInterfaceInputSpec):
     in_file = File(exists=True, mandatory=True, desc='4-D fMRI nii file')
-    label_file = File(exists=True, mandatory=True,
-                      desc='a 3-D label image, with 0 denoting background, or '
-                      'a 4-D file of probability maps.')
+    label_files = InputMultiPath(File(exists=True), mandatory=True,
+                                desc='a 3-D label image, with 0 denoting '
+                                'background, or a list of 3-D probability '
+                                'maps (one per label) or the equivalent 4D '
+                                'file.')
     class_labels = traits.List(mandatory=True,
                                desc='Human-readable labels for each segment '
                                'in the label file, in order. The length of '
@@ -37,10 +39,6 @@ class SignalExtractionInputSpec(BaseInterfaceInputSpec):
     out_file = File('signals.tsv', usedefault=True, exists=False,
                     mandatory=False, desc='The name of the file to output to. '
                     'signals.tsv by default')
-    stat = traits.Enum(('mean',), mandatory=False, default='mean',
-                       usedefault=True,
-                       desc='The stat you wish to calculate on each segment. '
-                       'The default is finding the mean')
     detrend = traits.Bool(False, usedefault=True, mandatory=False,
                           desc='If True, perform detrending using nilearn.')
 
@@ -56,51 +54,59 @@ class SignalExtraction(BaseInterface):
 
     >>> seinterface = SignalExtraction()
     >>> seinterface.inputs.in_file = 'functional.nii'
-    >>> seinterface.inputs.in_file = 'segmentation0.nii.gz'
+    >>> seinterface.inputs.label_files = 'segmentation0.nii.gz'
     >>> seinterface.inputs.out_file = 'means.tsv'
     >>> segments = ['CSF', 'gray', 'white']
     >>> seinterface.inputs.class_labels = segments
-    >>> seinterface.inputs.stat = 'mean'
+    >>> seinterface.inputs.detrend = True
     '''
     input_spec = SignalExtractionInputSpec
     output_spec = SignalExtractionOutputSpec
 
     def _run_interface(self, runtime):
-        import nilearn.input_data as nl
+        masker = self._process_inputs()
 
-        ins = self.inputs
-        labels = nb.load(ins.label_file)
+        region_signals = masker.fit_transform(self.inputs.in_file)
 
-        if ins.stat == 'mean': # always true for now
-            if len(labels.get_data().shape) == 3:
-                region_signals = self._3d_label_handler(nl, labels)
-            else:
-                region_signals = self._4d_label_handler(nl, labels)
-            num_labels_found = region_signals.shape[1]
-            if len(ins.class_labels) != num_labels_found:
-                raise ValueError('The length of class_labels {} does not '
-                                 'match the number of regions {} found in '
-                                 'label_file {}'.format(ins.class_labels,
-                                                        num_labels_found,
-                                                        ins.label_file))
+        output = np.vstack((self.inputs.class_labels, region_signals.astype(str)))
 
-            output = np.vstack((ins.class_labels, region_signals.astype(str)))
-
-            # save output
-            np.savetxt(ins.out_file, output, fmt=b'%s', delimiter='\t')
+        # save output
+        np.savetxt(self.inputs.out_file, output, fmt=b'%s', delimiter='\t')
         return runtime
 
-    def _3d_label_handler(self, nl, labels):
-        nlmasker = nl.NiftiLabelsMasker(labels, detrend=self.inputs.detrend)
-        nlmasker.fit()
-        region_signals = nlmasker.transform_single_imgs(self.inputs.in_file)
-        return region_signals
+    def _process_inputs(self):
+        ''' validate and  process inputs into useful form '''
 
-    def _4d_label_handler(self, nl, labels):
-        nmmasker = nl.NiftiMapsMasker(labels, detrend=self.inputs.detrend)
-        nmmasker.fit()
-        region_signals = nmmasker.transform_single_imgs(self.inputs.in_file)
-        return region_signals
+        import nilearn.input_data as nl
+
+        # determine form of label files, choose appropriate nilearn masker
+        if len(self.inputs.label_files) > 1: # list of 3D nifti images
+            masker = nl.NiftiMapsMasker(self.inputs.label_files)
+            n_labels = len(self.inputs.label_files)
+        else: # list of size one, containing either a 3d or a 4d file
+            label_data = nb.load(self.inputs.label_files[0])
+            if len(label_data.shape) == 4: # 4d file
+                masker = nl.NiftiMapsMasker(label_data)
+                n_labels = label_data.shape[3]
+            else: # 3d file
+                if np.amax(label_data) > 1: # 3d label file
+                    masker = nl.NiftiLabelsMasker(label_data)
+                    # assuming consecutive positive integers for regions
+                    n_labels = np.amax(label_data.get_data())
+                else: # most probably a single probability map for one label
+                    masker = nl.NiftiMapsMasker(label_data)
+                    n_labels = 1
+
+        # check label list size
+        if len(self.inputs.class_labels) != n_labels:
+            raise ValueError('The length of class_labels {} does not '
+                             'match the number of regions {} found in '
+                             'label_files {}'.format(self.inputs.class_labels,
+                                                    n_labels,
+                                                    self.inputs.label_files))
+
+        masker.set_params(detrend=self.inputs.detrend)
+        return masker
 
     def _list_outputs(self):
         outputs = self._outputs().get()

@@ -22,7 +22,7 @@ class TestSignalExtraction(unittest.TestCase):
 
     filenames = {
         'in_file': 'fmri.nii',
-        'label_file': 'labels.nii',
+        'label_files': 'labels.nii',
         '4d_label_file': '4dlabels.nii',
         'out_file': 'signals.tsv'
     }
@@ -34,13 +34,13 @@ class TestSignalExtraction(unittest.TestCase):
         os.chdir(self.temp_dir)
 
         utils.save_toy_nii(self.fake_fmri_data, self.filenames['in_file'])
-        utils.save_toy_nii(self.fake_label_data, self.filenames['label_file'])
+        utils.save_toy_nii(self.fake_label_data, self.filenames['label_files'])
 
     @skipif(no_nilearn)
     def test_signal_extraction(self):
         # run
         stats.SignalExtraction(in_file=self.filenames['in_file'],
-                               label_file=self.filenames['label_file'],
+                               label_files=self.filenames['label_files'],
                                class_labels=self.labels).run()
         # assert
         self.assert_expected_output(self.base_wanted)
@@ -50,7 +50,7 @@ class TestSignalExtraction(unittest.TestCase):
     def test_signal_extraction_bad_label_list(self):
         # run
         stats.SignalExtraction(in_file=self.filenames['in_file'],
-                               label_file=self.filenames['label_file'],
+                               label_files=self.filenames['label_files'],
                                class_labels=['bad']).run()
 
     @skipif(no_nilearn)
@@ -58,12 +58,12 @@ class TestSignalExtraction(unittest.TestCase):
         self._test_4d_label(self.base_wanted, self.fake_equiv_4d_label_data)
 
     @skipif(no_nilearn)
-    def test_signal_extraction_4d_(self):
+    def test_signal_extraction_4d(self):
         self._test_4d_label([[-5.0652173913, -5.44565217391, 5.50543478261],
-                             [0, -2, .5],
-                             [-.3333333, -1, 2.5],
-                             [0, -2, .5],
-                             [-1.3333333, -5, 1]], self.fake_4d_label_data)
+                             [-7.02173913043, 11.1847826087, -4.33152173913],
+                             [-19.0869565217, 21.2391304348, -4.57608695652],
+                             [5.19565217391, -3.66304347826, -1.51630434783],
+                             [-12.0, 3., 0.5]], self.fake_4d_label_data)
 
     def _test_4d_label(self, wanted, fake_labels):
         # setup
@@ -71,7 +71,7 @@ class TestSignalExtraction(unittest.TestCase):
 
         # run
         stats.SignalExtraction(in_file=self.filenames['in_file'],
-                               label_file=self.filenames['4d_label_file'],
+                               label_files=self.filenames['4d_label_file'],
                                class_labels=self.labels).run()
 
         self.assert_expected_output(wanted)
