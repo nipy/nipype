@@ -41,6 +41,9 @@ class SignalExtractionInputSpec(BaseInterfaceInputSpec):
                        usedefault=True,
                        desc='The stat you wish to calculate on each segment. '
                        'The default is finding the mean')
+    include_global = traits.Bool(False, usedefault=True, mandatory=False,
+                                 desc='If True, include an extra column '
+                                 'labeled "global"')
 
 class SignalExtractionOutputSpec(TraitedSpec):
     out_file = File(exists=True, desc='tsv file containing the computed '
@@ -76,7 +79,7 @@ class SignalExtraction(BaseInterface):
         for time in range(n_volumes):
             volume_data = fmri_data[:, :, :, time]
             for label in range(label_data.shape[3]):
-                voxels = volume_data[label_data[:,:,:,label] != 0]
+                voxels = volume_data[label_data[:, :, :, label] != 0]
                 signals[time, label] = fun(voxels)
 
         output = np.vstack((labels, signals.astype(str)))
@@ -103,7 +106,8 @@ class SignalExtraction(BaseInterface):
         return label_data, fmri_data, fun, n_volumes, labels
 
     def _load_label_data(self):
-        ''' retrieves label data from self.inputs.label_file, 4d-ifies if 3d'''
+        ''' retrieves label data from self.inputs.label_file, 4d-ifies if 3d,
+        and adds an extra "mask" (all ones) if global signal was requested '''
         label_data = nb.load(self.inputs.label_file).get_data()
         n_dims = len(label_data.shape)
 
@@ -119,6 +123,10 @@ class SignalExtraction(BaseInterface):
             raise ValueError('Expected 3-D or 4-D label data. {} has '
                              '{} dimensions'.format(self.inputs.label_file,
                                                     n_dims))
+            '''
+        if self.inputs.include_global:
+            fourd_label_data = np.vstack((glofourd_label_data))
+            '''
         return fourd_label_data, fourd_label_data.shape[3]
 
     def _list_outputs(self):
