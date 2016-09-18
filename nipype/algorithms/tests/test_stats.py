@@ -57,7 +57,7 @@ class TestSignalExtraction(unittest.TestCase):
     def test_signal_extraction_equiv_4d(self):
         self._test_4d_label(self.base_wanted, self.fake_equiv_4d_label_data)
 
-    def test_signal_extraction_4d_(self):
+    def test_signal_extraction_4d(self):
         self._test_4d_label([[-5.0652173913, -5.44565217391, 5.50543478261],
                              [0, -2, .5],
                              [-.3333333, -1, 2.5],

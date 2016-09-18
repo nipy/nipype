@@ -16,6 +16,7 @@ from __future__ import (print_function, division, unicode_literals,
 from builtins import str
 
 import numpy as np
+import nibabel as nb
 
 from .. import logging
 from ..interfaces.base import (traits, TraitedSpec, BaseInterface,
@@ -65,30 +66,37 @@ class SignalExtraction(BaseInterface):
     input_spec = SignalExtractionInputSpec
     output_spec = SignalExtractionOutputSpec
 
+    functions = { 'mean': np.mean }
+
     def _run_interface(self, runtime):
         import nilearn.input_data as nl
 
         ins = self.inputs
+        label_data = self._load_label_data()
 
-        if ins.stat == 'mean': # always true for now
-            nlmasker = nl.NiftiLabelsMasker(ins.label_file,
-                                            detrend=ins.detrend)
-            nlmasker.fit()
-            region_signals = nlmasker.transform_single_imgs(ins.in_file)
+        nlmasker = nl.NiftiLabelsMasker(label_data,
+                                        detrend=ins.detrend)
+        nlmasker.fit()
+        region_signals = nlmasker.transform_single_imgs(ins.in_file)
 
-            num_labels_found = region_signals.shape[1]
-            if len(ins.class_labels) != num_labels_found:
-                raise ValueError('The length of class_labels {} does not '
-                                 'match the number of regions {} found in '
-                                 'label_file {}'.format(ins.class_labels,
-                                                        num_labels_found,
-                                                        ins.label_file))
+        num_labels_found = region_signals.shape[1]
+        if len(ins.class_labels) != num_labels_found:
+            raise ValueError('The length of class_labels {} does not '
+                             'match the number of regions {} found in '
+                             'label_file {}'.format(ins.class_labels,
+                                                    num_labels_found,
+                                                    ins.label_file))
 
-            output = np.vstack((ins.class_labels, region_signals.astype(str)))
+        output = np.vstack((ins.class_labels, region_signals.astype(str)))
 
-            # save output
-            np.savetxt(ins.out_file, output, fmt=b'%s', delimiter='\t')
+        # save output
+        np.savetxt(ins.out_file, output, fmt=b'%s', delimiter='\t')
         return runtime
+
+    def _load_label_data(self):
+        ''' retrieves label data from self.inputs.label_file, 4d-ifies if 3d '''
+        label_data = nb.load(self.inputs.label_file)
+        return label_data
 
     def _list_outputs(self):
         outputs = self._outputs().get()
