@@ -111,8 +111,8 @@ class SignalExtraction(BaseInterface):
             fourd_label_data = label_data
         elif (n_dims == 3):
             n_labels = np.amax(label_data)
-            fourd_label_data = np.ndarray((*label_data.shape, n_labels))
-            total_mask = np.ones_like(label_data)
+            haxis, vaxis, daxis = label_data.shape
+            fourd_label_data = np.ndarray((haxis, vaxis, daxis, n_labels))
             for label in range(1, n_labels + 1):
                 fourd_label_data[:,:,:,label - 1] = (label_data == label).astype(int)
         else:
