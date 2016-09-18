@@ -15,6 +15,7 @@ from __future__ import (print_function, division, unicode_literals,
                         absolute_import)
 
 import numpy as np
+import nibabel as nb
 
 from .. import logging
 from ..interfaces.base import (traits, TraitedSpec, BaseInterface,
@@ -68,9 +69,13 @@ class SignalExtraction(BaseInterface):
         import nilearn.input_data as nl
 
         ins = self.inputs
+        labels = nb.load(ins.label_file)
 
         if ins.stat == 'mean': # always true for now
-            region_signals = self._3d_label_handler(nl, ins)
+            if len(labels.get_data().shape) == 3:
+                region_signals = self._3d_label_handler(nl, labels)
+            else:
+                region_signals = self._4d_label_handler(nl, labels)
             num_labels_found = region_signals.shape[1]
             if len(ins.class_labels) != num_labels_found:
                 raise ValueError('The length of class_labels {} does not '
@@ -85,11 +90,16 @@ class SignalExtraction(BaseInterface):
             np.savetxt(ins.out_file, output, fmt=b'%s', delimiter='\t')
         return runtime
 
-    def _3d_label_handler(self, nl, ins):
-        nlmasker = nl.NiftiLabelsMasker(ins.label_file,
-                                        detrend=ins.detrend)
+    def _3d_label_handler(self, nl, labels):
+        nlmasker = nl.NiftiLabelsMasker(labels, detrend=self.inputs.detrend)
         nlmasker.fit()
-        region_signals = nlmasker.transform_single_imgs(ins.in_file)
+        region_signals = nlmasker.transform_single_imgs(self.inputs.in_file)
+        return region_signals
+
+    def _4d_label_handler(self, nl, labels):
+        nmmasker = nl.NiftiMapsMasker(labels, detrend=self.inputs.detrend)
+        nmmasker.fit()
+        region_signals = nmmasker.transform_single_imgs(self.inputs.in_file)
         return region_signals
 
     def _list_outputs(self):
