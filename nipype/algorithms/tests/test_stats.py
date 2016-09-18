@@ -11,13 +11,6 @@ from ...testing import (assert_equal, utils, assert_almost_equal, raises,
                         skipif)
 from .. import stats
 
-no_nilearn = True
-try:
-    __import__('nilearn')
-    no_nilearn = False
-except ImportError:
-    pass
-
 class TestSignalExtraction(unittest.TestCase):
 
     filenames = {
@@ -36,7 +29,6 @@ class TestSignalExtraction(unittest.TestCase):
         utils.save_toy_nii(self.fake_fmri_data, self.filenames['in_file'])
         utils.save_toy_nii(self.fake_label_data, self.filenames['label_file'])
 
-    @skipif(no_nilearn)
     def test_signal_extraction(self):
         # run
         stats.SignalExtraction(in_file=self.filenames['in_file'],
@@ -45,18 +37,17 @@ class TestSignalExtraction(unittest.TestCase):
         # assert
         self.assert_expected_output(self.base_wanted)
 
-    @skipif(no_nilearn)
     @raises(ValueError)
     def test_signal_extraction_bad_label_list(self):
         # run
         stats.SignalExtraction(in_file=self.filenames['in_file'],
                                label_file=self.filenames['label_file'],
                                class_labels=['bad']).run()
-
-    @skipif(no_nilearn)
+    @skipif(True)
     def test_signal_extraction_equiv_4d(self):
         self._test_4d_label(self.base_wanted, self.fake_equiv_4d_label_data)
 
+    @skipif(True)
     def test_signal_extraction_4d(self):
         self._test_4d_label([[-5.0652173913, -5.44565217391, 5.50543478261],
                              [0, -2, .5],

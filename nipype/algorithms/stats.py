@@ -13,7 +13,6 @@ Algorithms to compute statistics on :abbr:`fMRI (functional MRI)`
 '''
 from __future__ import (print_function, division, unicode_literals,
                         absolute_import)
-from builtins import str
 
 import numpy as np
 import nibabel as nb
@@ -66,36 +65,50 @@ class SignalExtraction(BaseInterface):
     input_spec = SignalExtractionInputSpec
     output_spec = SignalExtractionOutputSpec
 
-    functions = { 'mean': np.mean }
+    functions = {
+        'mean': np.mean
+    }
 
     def _run_interface(self, runtime):
-        import nilearn.input_data as nl
+        label_data, fmri_data, fun, n_volumes, labels = self._get_inputs()
 
-        ins = self.inputs
-        label_data = self._load_label_data()
+        # empty array to fill with output
+        signals = np.ndarray((n_volumes, len(labels)))
 
-        nlmasker = nl.NiftiLabelsMasker(label_data,
-                                        detrend=ins.detrend)
-        nlmasker.fit()
-        region_signals = nlmasker.transform_single_imgs(ins.in_file)
+        for time in range(n_volumes):
+            volume_data = fmri_data[:, :, :, time]
+            for label in range(1, len(labels) + 1): # skip 0 (background)
+                voxels = volume_data[label_data == label]
+                signals[time, label - 1] = fun(voxels)
 
-        num_labels_found = region_signals.shape[1]
-        if len(ins.class_labels) != num_labels_found:
-            raise ValueError('The length of class_labels {} does not '
-                             'match the number of regions {} found in '
-                             'label_file {}'.format(ins.class_labels,
-                                                    num_labels_found,
-                                                    ins.label_file))
-
-        output = np.vstack((ins.class_labels, region_signals.astype(str)))
+        output = np.vstack((labels, signals.astype(str)))
 
         # save output
-        np.savetxt(ins.out_file, output, fmt=b'%s', delimiter='\t')
+        np.savetxt(self.inputs.out_file, output, fmt=b'%s', delimiter='\t')
         return runtime
 
+    def _get_inputs(self):
+        ''' manipulate self.inputs values into useful form; check validity '''
+        ins = self.inputs
+
+        label_data = self._load_label_data()
+        fmri_data = nb.load(ins.in_file).get_data()
+        fun = self.functions[ins.stat]
+        n_volumes = fmri_data.shape[3]
+        labels = ins.class_labels
+        # assuming consecutive int labels
+        if len(labels) != np.amax(label_data):
+            raise ValueError('The length of class_labels {} does not '
+                             'match the number of regions, {}, found in '
+                             'label_file {}'.format(labels,
+                                                    np.amax(label_data),
+                                                    ins.label_file))
+        return label_data, fmri_data, fun, n_volumes, labels
+
     def _load_label_data(self):
-        ''' retrieves label data from self.inputs.label_file, 4d-ifies if 3d '''
-        label_data = nb.load(self.inputs.label_file)
+        ''' retrieves label data from self.inputs.label_file,
+        todo 4d-ifies if 3d '''
+        label_data = nb.load(self.inputs.label_file).get_data()
         return label_data
 
     def _list_outputs(self):
