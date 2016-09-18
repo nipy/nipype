@@ -89,7 +89,7 @@ class SignalExtraction(BaseInterface):
                 masker = nl.NiftiMapsMasker(label_data)
                 n_labels = label_data.shape[3]
             else: # 3d file
-                if np.amax(label_data) > 1: # 3d label file
+                if np.amax(label_data.get_data()) > 1: # 3d label file
                     masker = nl.NiftiLabelsMasker(label_data)
                     # assuming consecutive positive integers for regions
                     n_labels = np.amax(label_data.get_data())
