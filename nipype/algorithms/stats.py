@@ -75,9 +75,9 @@ class SignalExtraction(BaseInterface):
 
         for time in range(n_volumes):
             volume_data = fmri_data[:, :, :, time]
-            for label in range(1, len(labels) + 1): # skip 0 (background)
-                voxels = volume_data[label_data == label]
-                signals[time, label - 1] = fun(voxels)
+            for label in range(label_data.shape[3]):
+                voxels = volume_data[label_data[:,:,:,label] != 0]
+                signals[time, label] = fun(voxels)
 
         output = np.vstack((labels, signals.astype(str)))
 
@@ -88,26 +88,38 @@ class SignalExtraction(BaseInterface):
     def _get_inputs(self):
         ''' manipulate self.inputs values into useful form; check validity '''
         ins = self.inputs
-
-        label_data = self._load_label_data()
+        label_data, n_labels = self._load_label_data()
         fmri_data = nb.load(ins.in_file).get_data()
         fun = self.functions[ins.stat]
         n_volumes = fmri_data.shape[3]
         labels = ins.class_labels
-        # assuming consecutive int labels
-        if len(labels) != np.amax(label_data):
+        # assuming consecutive positive int labels
+        if len(labels) != n_labels:
             raise ValueError('The length of class_labels {} does not '
                              'match the number of regions, {}, found in '
                              'label_file {}'.format(labels,
-                                                    np.amax(label_data),
+                                                    n_labels,
                                                     ins.label_file))
         return label_data, fmri_data, fun, n_volumes, labels
 
     def _load_label_data(self):
-        ''' retrieves label data from self.inputs.label_file,
-        todo 4d-ifies if 3d '''
+        ''' retrieves label data from self.inputs.label_file, 4d-ifies if 3d'''
         label_data = nb.load(self.inputs.label_file).get_data()
-        return label_data
+        n_dims = len(label_data.shape)
+
+        if (n_dims == 4):
+            fourd_label_data = label_data
+        elif (n_dims == 3):
+            n_labels = np.amax(label_data)
+            fourd_label_data = np.ndarray((*label_data.shape, n_labels))
+            total_mask = np.ones_like(label_data)
+            for label in range(1, n_labels + 1):
+                fourd_label_data[:,:,:,label - 1] = (label_data == label).astype(int)
+        else:
+            raise ValueError('Expected 3-D or 4-D label data. {} has '
+                             '{} dimensions'.format(self.inputs.label_file,
+                                                    n_dims))
+        return fourd_label_data, fourd_label_data.shape[3]
 
     def _list_outputs(self):
         outputs = self._outputs().get()

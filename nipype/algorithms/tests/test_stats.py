@@ -43,7 +43,6 @@ class TestSignalExtraction(unittest.TestCase):
         stats.SignalExtraction(in_file=self.filenames['in_file'],
                                label_file=self.filenames['label_file'],
                                class_labels=['bad']).run()
-    @skipif(True)
     def test_signal_extraction_equiv_4d(self):
         self._test_4d_label(self.base_wanted, self.fake_equiv_4d_label_data)
 
