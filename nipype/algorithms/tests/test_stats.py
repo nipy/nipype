@@ -13,7 +13,7 @@ from .. import stats
 
 no_nilearn = True
 try:
-    import nilearn
+    __import__('nilearn')
     no_nilearn = False
 except ImportError:
     pass
@@ -23,8 +23,10 @@ class TestSignalExtraction(unittest.TestCase):
     filenames = {
         'in_file': 'fmri.nii',
         'label_file': 'labels.nii',
+        '4d_label_file': '4dlabels.nii',
         'out_file': 'signals.tsv'
     }
+    labels = ['csf', 'gray', 'white']
 
     def setUp(self):
         self.orig_dir = os.getcwd()
@@ -36,39 +38,57 @@ class TestSignalExtraction(unittest.TestCase):
 
     @skipif(no_nilearn)
     def test_signal_extraction(self):
-        # setup
-        wanted = [[-2.33333, 2, .5],
-                  [0, -2, .5],
-                  [-.3333333, -1, 2.5],
-                  [0, -2, .5],
-                  [-1.3333333, -5, 1]]
-        num_timepoints_wanted = self.fake_fmri_data.shape[3]
         # run
-
-        labels_wanted = ['csf', 'gray', 'white']
         stats.SignalExtraction(in_file=self.filenames['in_file'],
                                label_file=self.filenames['label_file'],
-                               class_labels=labels_wanted).run()
+                               class_labels=self.labels).run()
         # assert
-        with open(self.filenames['out_file'], 'r') as output:
-            got = [line.split() for line in output]
-            labels_got = got.pop(0) # remove header
-            assert_equal(labels_got, labels_wanted)
-            assert_equal(len(got), num_timepoints_wanted)
-            # convert from string to float
-            got = [[float(num) for num in row] for row in got]
-            for i, time in enumerate(got):
-                assert_equal(len(labels_wanted), len(time))
-                for j, segment in enumerate(time):
-                    assert_almost_equal(segment, wanted[i][j], decimal=1)
+        self.assert_expected_output(self.base_wanted)
 
     @skipif(no_nilearn)
     @raises(ValueError)
-    def test_signal_extraction_bad_class_labels(self):
+    def test_signal_extraction_bad_label_list(self):
         # run
         stats.SignalExtraction(in_file=self.filenames['in_file'],
                                label_file=self.filenames['label_file'],
                                class_labels=['bad']).run()
+
+    @skipif(no_nilearn)
+    def test_signal_extraction_equiv_4d(self):
+        self._test_4d_label(self.base_wanted, self.fake_equiv_4d_label_data)
+
+    def test_signal_extraction_4d_(self):
+        self._test_4d_label([[-5.0652173913, -5.44565217391, 5.50543478261],
+                             [0, -2, .5],
+                             [-.3333333, -1, 2.5],
+                             [0, -2, .5],
+                             [-1.3333333, -5, 1]], self.fake_4d_label_data)
+
+    def _test_4d_label(self, wanted, fake_labels):
+        # setup
+        utils.save_toy_nii(fake_labels, self.filenames['4d_label_file'])
+
+        # run
+        stats.SignalExtraction(in_file=self.filenames['in_file'],
+                               label_file=self.filenames['4d_label_file'],
+                               class_labels=self.labels).run()
+
+        self.assert_expected_output(wanted)
+
+    def assert_expected_output(self, wanted):
+        with open(self.filenames['out_file'], 'r') as output:
+            got = [line.split() for line in output]
+            labels_got = got.pop(0) # remove header
+            assert_equal(labels_got, self.labels)
+            assert_equal(len(got), self.fake_fmri_data.shape[3],
+                         'num rows and num volumes')
+            # convert from string to float
+            got = [[float(num) for num in row] for row in got]
+            for i, time in enumerate(got):
+                assert_equal(len(self.labels), len(time))
+                for j, segment in enumerate(time):
+                    assert_almost_equal(segment, wanted[i][j], decimal=1)
+
 
     def tearDown(self):
         os.chdir(self.orig_dir)
@@ -92,3 +112,30 @@ class TestSignalExtraction(unittest.TestCase):
 
                                 [[2, 0],
                                  [1, 3]]])
+
+    fake_equiv_4d_label_data = np.array([[[[1., 0., 0.],
+                                           [0., 0., 0.]],
+                                          [[0., 0., 1.],
+                                           [1., 0., 0.]]],
+                                         [[[0., 1., 0.],
+                                           [0., 0., 0.]],
+                                          [[1., 0., 0.],
+                                           [0., 0., 1.]]]])
+
+    base_wanted = [[-2.33333, 2, .5],
+                   [0, -2, .5],
+                   [-.3333333, -1, 2.5],
+                   [0, -2, .5],
+                   [-1.3333333, -5, 1]]
+
+    fake_4d_label_data = np.array([[[[0.2, 0.3, 0.5],
+                                     [0.1, 0.1, 0.8]],
+
+                                    [[0.1, 0.3, 0.6],
+                                     [0.3, 0.4, 0.3]]],
+
+                                   [[[0.2, 0.2, 0.6],
+                                     [0., 0.3, 0.7]],
+
+                                    [[0.3, 0.3, 0.4],
+                                     [0.3, 0.4, 0.3]]]])
