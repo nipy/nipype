@@ -43,6 +43,18 @@ class TestSignalExtraction(unittest.TestCase):
         stats.SignalExtraction(in_file=self.filenames['in_file'],
                                label_file=self.filenames['label_file'],
                                class_labels=['bad']).run()
+
+    @raises(ValueError)
+    def test_signal_extraction_bad_label_file(self):
+        # setup
+        bad_label_file = 'bad_label_file.nii'
+        utils.save_toy_nii(np.ndarray([1]), bad_label_file)
+
+        # run
+        stats.SignalExtraction(in_file=self.filenames['in_file'],
+                               label_file=bad_label_file,
+                               class_labels=self.labels).run()
+
     def test_signal_extraction_equiv_4d(self):
         self._test_4d_label(self.base_wanted, self.fake_equiv_4d_label_data)
 
