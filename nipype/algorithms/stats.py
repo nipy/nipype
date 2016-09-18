@@ -39,6 +39,9 @@ class SignalExtractionInputSpec(BaseInterfaceInputSpec):
     out_file = File('signals.tsv', usedefault=True, exists=False,
                     mandatory=False, desc='The name of the file to output to. '
                     'signals.tsv by default')
+    include_global = traits.Bool(False, usedefault=True, mandatory=False,
+                                 desc='If True, include an extra column '
+                                 'labeled "global"')
     detrend = traits.Bool(False, usedefault=True, mandatory=False,
                           desc='If True, perform detrending using nilearn.')
 
