@@ -57,7 +57,7 @@ class TestSignalExtraction(unittest.TestCase):
 
     def test_signal_extraction_include_global(self):
         # wanted
-        wanted_global = [[3/8], [-3/8], [1/8], [-7/8], [-9/8]]
+        wanted_global = [[3./8], [-3./8], [1./8], [-7./8], [-9./8]]
         for i, vals in enumerate(self.base_wanted):
             wanted_global[i].extend(vals)
         wanted_labels = ['global']

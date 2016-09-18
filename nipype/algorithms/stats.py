@@ -107,7 +107,8 @@ class SignalExtraction(BaseInterface):
 
         # if global signal requested, add a "mask" that includes all voxels
         if self.inputs.include_global:
-            full_mask = np.ones((*label_data.shape[:3], 1))
+            haxis, vaxis, daxis, taxis = label_data.shape
+            full_mask = np.ones((haxis, vaxis, daxis, 1))
             label_data = np.concatenate((full_mask, label_data), axis=3)
             labels.insert(0, 'global')
 
