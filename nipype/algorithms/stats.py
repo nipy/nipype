@@ -71,7 +71,7 @@ class SignalExtraction(BaseInterface):
     }
 
     def _run_interface(self, runtime):
-        label_data, fmri_data, fun, n_volumes, labels = self._get_inputs()
+        label_data, fmri_data, fun, n_volumes, labels = self._process_inputs()
 
         # empty array to fill with output
         signals = np.ndarray((n_volumes, len(labels)))
@@ -88,7 +88,7 @@ class SignalExtraction(BaseInterface):
         np.savetxt(self.inputs.out_file, output, fmt=b'%s', delimiter='\t')
         return runtime
 
-    def _get_inputs(self):
+    def _process_inputs(self):
         ''' manipulate self.inputs values into useful form; check validity '''
         ins = self.inputs
         label_data, n_labels = self._load_label_data()
@@ -96,6 +96,7 @@ class SignalExtraction(BaseInterface):
         fun = self.functions[ins.stat]
         n_volumes = fmri_data.shape[3]
         labels = ins.class_labels
+
         # assuming consecutive positive int labels
         if len(labels) != n_labels:
             raise ValueError('The length of class_labels {} does not '
@@ -103,11 +104,17 @@ class SignalExtraction(BaseInterface):
                              'label_file {}'.format(labels,
                                                     n_labels,
                                                     ins.label_file))
+
+        # if global signal requested, add a "mask" that includes all voxels
+        if self.inputs.include_global:
+            full_mask = np.ones((*label_data.shape[:3], 1))
+            label_data = np.concatenate((full_mask, label_data), axis=3)
+            labels.insert(0, 'global')
+
         return label_data, fmri_data, fun, n_volumes, labels
 
     def _load_label_data(self):
-        ''' retrieves label data from self.inputs.label_file, 4d-ifies if 3d,
-        and adds an extra "mask" (all ones) if global signal was requested '''
+        ''' retrieves label data from self.inputs.label_file, 4d-ifies if 3d'''
         label_data = nb.load(self.inputs.label_file).get_data()
         n_dims = len(label_data.shape)
 
@@ -123,10 +130,6 @@ class SignalExtraction(BaseInterface):
             raise ValueError('Expected 3-D or 4-D label data. {} has '
                              '{} dimensions'.format(self.inputs.label_file,
                                                     n_dims))
-            '''
-        if self.inputs.include_global:
-            fourd_label_data = np.vstack((glofourd_label_data))
-            '''
         return fourd_label_data, fourd_label_data.shape[3]
 
     def _list_outputs(self):

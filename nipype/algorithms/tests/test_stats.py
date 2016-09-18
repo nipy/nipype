@@ -35,7 +35,7 @@ class TestSignalExtraction(unittest.TestCase):
                                label_file=self.filenames['label_file'],
                                class_labels=self.labels).run()
         # assert
-        self.assert_expected_output(self.base_wanted)
+        self.assert_expected_output(self.labels, self.base_wanted)
 
     @raises(ValueError)
     def test_signal_extraction_bad_label_list(self):
@@ -54,6 +54,23 @@ class TestSignalExtraction(unittest.TestCase):
         stats.SignalExtraction(in_file=self.filenames['in_file'],
                                label_file=bad_label_file,
                                class_labels=self.labels).run()
+
+    def test_signal_extraction_include_global(self):
+        # wanted
+        wanted_global = [[3/8], [-3/8], [1/8], [-7/8], [-9/8]]
+        for i, vals in enumerate(self.base_wanted):
+            wanted_global[i].extend(vals)
+        wanted_labels = ['global']
+        wanted_labels.extend(self.labels)
+
+        # run
+        stats.SignalExtraction(in_file=self.filenames['in_file'],
+                               label_file=self.filenames['label_file'],
+                               class_labels=self.labels,
+                               include_global=True).run()
+
+        # assert
+        self.assert_expected_output(wanted_labels, wanted_global)
 
     def test_signal_extraction_equiv_4d(self):
         self._test_4d_label(self.base_wanted, self.fake_equiv_4d_label_data)
@@ -75,19 +92,19 @@ class TestSignalExtraction(unittest.TestCase):
                                label_file=self.filenames['4d_label_file'],
                                class_labels=self.labels).run()
 
-        self.assert_expected_output(wanted)
+        self.assert_expected_output(self.labels, wanted)
 
-    def assert_expected_output(self, wanted):
+    def assert_expected_output(self, wanted_labels, wanted):
         with open(self.filenames['out_file'], 'r') as output:
             got = [line.split() for line in output]
             labels_got = got.pop(0) # remove header
-            assert_equal(labels_got, self.labels)
+            assert_equal(labels_got, wanted_labels)
             assert_equal(len(got), self.fake_fmri_data.shape[3],
                          'num rows and num volumes')
             # convert from string to float
             got = [[float(num) for num in row] for row in got]
             for i, time in enumerate(got):
-                assert_equal(len(self.labels), len(time))
+                assert_equal(len(wanted_labels), len(time))
                 for j, segment in enumerate(time):
                     assert_almost_equal(segment, wanted[i][j], decimal=1)
 
