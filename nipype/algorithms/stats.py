@@ -62,14 +62,21 @@ class SignalExtraction(BaseInterface):
     >>> segments = ['CSF', 'gray', 'white']
     >>> seinterface.inputs.class_labels = segments
     >>> seinterface.inputs.detrend = True
+    >>> seinterface.inputs.include_global = True
     '''
     input_spec = SignalExtractionInputSpec
     output_spec = SignalExtractionOutputSpec
 
     def _run_interface(self, runtime):
-        masker = self._process_inputs()
+        masker, global_masker = self._process_inputs()
 
         region_signals = masker.fit_transform(self.inputs.in_file)
+
+        if global_masker:
+            self.inputs.class_labels.insert(0, 'global')
+            global_masker.fit()
+            global_signal= global_masker.transform(self.inputs.in_file)
+            region_signals = np.hstack((global_signal, region_signals))
 
         output = np.vstack((self.inputs.class_labels, region_signals.astype(str)))
 
@@ -87,18 +94,19 @@ class SignalExtraction(BaseInterface):
             masker = nl.NiftiMapsMasker(self.inputs.label_files)
             n_labels = len(self.inputs.label_files)
         else: # list of size one, containing either a 3d or a 4d file
-            label_data = nb.load(self.inputs.label_files[0])
-            if len(label_data.shape) == 4: # 4d file
-                masker = nl.NiftiMapsMasker(label_data)
-                n_labels = label_data.shape[3]
+            self.label_data = nb.load(self.inputs.label_files[0])
+            if len(self.label_data.shape) == 4: # 4d file
+                masker = nl.NiftiMapsMasker(self.label_data)
+                n_labels = self.label_data.shape[3]
             else: # 3d file
-                if np.amax(label_data.get_data()) > 1: # 3d label file
-                    masker = nl.NiftiLabelsMasker(label_data)
+                if np.amax(self.label_data.get_data()) > 1: # 3d label file
+                    masker = nl.NiftiLabelsMasker(self.label_data)
                     # assuming consecutive positive integers for regions
-                    n_labels = np.amax(label_data.get_data())
+                    n_labels = np.amax(self.label_data.get_data())
                 else: # most probably a single probability map for one label
-                    masker = nl.NiftiMapsMasker(label_data)
+                    masker = nl.NiftiMapsMasker(self.label_data)
                     n_labels = 1
+        masker.set_params(detrend=self.inputs.detrend)
 
         # check label list size
         if len(self.inputs.class_labels) != n_labels:
@@ -108,8 +116,19 @@ class SignalExtraction(BaseInterface):
                                                     n_labels,
                                                     self.inputs.label_files))
 
-        masker.set_params(detrend=self.inputs.detrend)
-        return masker
+        if self.inputs.include_global:
+            all_ones_mask = nb.Nifti1Image(np.ones(self._label_data_shape()), np.eye(4))
+            global_masker = nl.NiftiLabelsMasker(all_ones_mask, detrend=self.inputs.detrend)
+        else:
+            global_masker = False
+
+        return masker, global_masker
+
+    def _label_data_shape(self):
+        if self.label_data:
+            return self.label_data.shape
+        else:
+            return nb.load(self.inputs.label_files[0]).shape
 
     def _list_outputs(self):
         outputs = self._outputs().get()

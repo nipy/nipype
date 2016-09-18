@@ -65,7 +65,6 @@ class TestSignalExtraction(unittest.TestCase):
                              [5.19565217391, -3.66304347826, -1.51630434783],
                              [-12.0, 3., 0.5]], self.fake_4d_label_data)
 
-    @skipif(True)
     @skipif(no_nilearn)
     def test_signal_extraction_include_global(self):
         # wanted
