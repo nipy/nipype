@@ -408,7 +408,7 @@ class TCompCor(CompCor):
         # defined as the standard deviation of the time series after the removal
         # of low-frequency nuisance terms (e.g., linear and quadratic drift)."
         imgseries = regress_poly(2, imgseries)
-        imgseries = imgseries - np.mean(imgseries, axis=1)[:, np.newaxis]
+        imgseries = regress_poly(0, imgseries, remove_mean=True, axis=1) #this is super weird
 
         time_voxels = imgseries.T
         num_voxels = np.prod(time_voxels.shape[1:])
@@ -509,15 +509,15 @@ class TSNR(BaseInterface):
             outputs['detrended_file'] = op.abspath(self.inputs.detrended_file)
         return outputs
 
-def regress_poly(degree, data, remove_mean=False):
+def regress_poly(degree, data, remove_mean=False, axis=-1):
     ''' returns data with degree polynomial regressed out.
-    The last dimension (i.e. data.shape[-1]) should be time.
+    Be default it is calculated along the last axis (usu. time)
     '''
     datashape = data.shape
-    timepoints = datashape[-1]
+    timepoints = datashape[axis]
 
     if remove_mean: # i.e. regress_poly degree 0, which the following does not do
-        data = signal.detrend(data, axis=-1, type='constant')
+        data = signal.detrend(data, axis=axis, type='constant')
 
     # Rearrange all voxel-wise time-series in rows
     data = data.reshape((-1, timepoints))
