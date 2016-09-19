@@ -9,7 +9,7 @@ import numpy as np
 
 from ...testing import (assert_equal, utils, assert_almost_equal, raises,
                         skipif)
-from .. import stats
+from .. import nilearn as iface
 
 no_nilearn = True
 try:
@@ -39,7 +39,7 @@ class TestSignalExtraction(unittest.TestCase):
     @skipif(no_nilearn)
     def test_signal_extraction(self):
         # run
-        stats.SignalExtraction(in_file=self.filenames['in_file'],
+        iface.SignalExtraction(in_file=self.filenames['in_file'],
                                label_files=self.filenames['label_files'],
                                class_labels=self.labels).run()
         # assert
@@ -50,7 +50,7 @@ class TestSignalExtraction(unittest.TestCase):
     @raises(ValueError)
     def test_signal_extraction_bad_label_list(self):
         # run
-        stats.SignalExtraction(in_file=self.filenames['in_file'],
+        iface.SignalExtraction(in_file=self.filenames['in_file'],
                                label_files=self.filenames['label_files'],
                                class_labels=['bad']).run()
 
@@ -76,7 +76,7 @@ class TestSignalExtraction(unittest.TestCase):
         wanted_labels.extend(self.labels)
 
         # run
-        stats.SignalExtraction(in_file=self.filenames['in_file'],
+        iface.SignalExtraction(in_file=self.filenames['in_file'],
                                label_files=self.filenames['label_files'],
                                class_labels=self.labels,
                                include_global=True).run()
@@ -89,7 +89,7 @@ class TestSignalExtraction(unittest.TestCase):
         utils.save_toy_nii(fake_labels, self.filenames['4d_label_file'])
 
         # run
-        stats.SignalExtraction(in_file=self.filenames['in_file'],
+        iface.SignalExtraction(in_file=self.filenames['in_file'],
                                label_files=self.filenames['4d_label_file'],
                                class_labels=self.labels).run()
 
