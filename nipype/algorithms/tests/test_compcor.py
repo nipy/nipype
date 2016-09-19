@@ -52,11 +52,11 @@ class TestCompCor(unittest.TestCase):
 
     def test_tcompcor(self):
         ccinterface = TCompCor(realigned_file=self.realigned_file, percentile_threshold=0.75)
-        self.run_cc(ccinterface, [['-0.1535587949', '-0.4318584065'],
-                                  ['0.4286265207', '0.7162580102'],
-                                  ['-0.6288093202', '0.0465452630'],
-                                  ['0.5859742580', '-0.5144309306'],
-                                  ['-0.2322326636', '0.1834860639']])
+        self.run_cc(ccinterface, [['-0.1114536190', '-0.4632908609'],
+                                  ['0.4566907310', '0.6983205193'],
+                                  ['-0.7132557407', '0.1340170559'],
+                                  ['0.5022537643', '-0.5098322262'],
+                                  ['-0.1342351356', '0.1407855119']])
 
     def test_tcompcor_with_default_percentile(self):
         ccinterface = TCompCor(realigned_file=self.realigned_file)

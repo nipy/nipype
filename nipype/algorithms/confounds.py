@@ -407,8 +407,7 @@ class TCompCor(CompCor):
         # "For each voxel time series, the temporal standard deviation is
         # defined as the standard deviation of the time series after the removal
         # of low-frequency nuisance terms (e.g., linear and quadratic drift)."
-        imgseries = regress_poly(2, imgseries)
-        imgseries = regress_poly(0, imgseries, remove_mean=True, axis=1) #this is super weird
+        imgseries = regress_poly(2, imgseries, remove_mean=True)
 
         time_voxels = imgseries.T
         num_voxels = np.prod(time_voxels.shape[1:])
