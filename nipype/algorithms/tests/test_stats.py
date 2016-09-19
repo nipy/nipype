@@ -36,6 +36,7 @@ class TestSignalExtraction(unittest.TestCase):
         utils.save_toy_nii(self.fake_fmri_data, self.filenames['in_file'])
         utils.save_toy_nii(self.fake_label_data, self.filenames['label_files'])
 
+    @skipif(no_nilearn)
     def test_signal_extraction(self):
         # run
         stats.SignalExtraction(in_file=self.filenames['in_file'],
