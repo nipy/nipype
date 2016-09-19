@@ -12,7 +12,7 @@ Algorithms to compute confounds in :abbr:`fMRI (functional MRI)`
 
 '''
 from __future__ import print_function, division, unicode_literals, absolute_import
-from builtins import str, zip, range, open
+from builtins import range
 
 import os
 import os.path as op
@@ -23,7 +23,7 @@ from scipy import linalg
 from scipy.special import legendre
 
 from .. import logging
-from ..external.due import due, Doi, BibTeX
+from ..external.due import BibTeX
 from ..interfaces.base import (traits, TraitedSpec, BaseInterface,
                                BaseInterfaceInputSpec, File, isdefined,
                                InputMultiPath)
@@ -160,8 +160,8 @@ Bradley L. and Petersen, Steven E.},
                     'dvars_nstd', ext=self.inputs.figformat)
                 fig = plot_confound(dvars[1], self.inputs.figsize, 'DVARS', series_tr=tr)
                 fig.savefig(self._results['fig_nstd'], dpi=float(self.inputs.figdpi),
-                        format=self.inputs.figformat,
-                        bbox_inches='tight')
+                            format=self.inputs.figformat,
+                            bbox_inches='tight')
                 fig.clf()
 
         if self.inputs.save_vxstd:
@@ -175,8 +175,8 @@ Bradley L. and Petersen, Steven E.},
                 fig = plot_confound(dvars[2], self.inputs.figsize, 'Voxelwise std DVARS',
                                     series_tr=tr)
                 fig.savefig(self._results['fig_vxstd'], dpi=float(self.inputs.figdpi),
-                        format=self.inputs.figformat,
-                        bbox_inches='tight')
+                            format=self.inputs.figformat,
+                            bbox_inches='tight')
                 fig.clf()
 
         if self.inputs.save_all:
@@ -323,9 +323,9 @@ class CompCor(BaseInterface):
                                     "author = {Behzadi, Yashar and Restom, Khaled and Liau, Joy and Liu, Thomas T.},"
                                     "year = {2007},"
                                     "pages = {90-101},}"
-                                ),
+                                   ),
                     'tags': ['method', 'implementation']
-                }]
+                   }]
 
     def _run_interface(self, runtime):
         imgseries = nb.load(self.inputs.realigned_file).get_data()
@@ -347,8 +347,6 @@ class CompCor(BaseInterface):
         # placed in a matrix M of size Nxm, with time along the row dimension
         # and voxels along the column dimension."
         M = voxel_timecourses.T
-        numvols = M.shape[0]
-        numvoxels = M.shape[1]
 
         # "[... were removed] prior to column-wise variance normalization."
         M = M / self._compute_tSTD(M, 1.)
@@ -513,7 +511,7 @@ class TSNR(BaseInterface):
             outputs['detrended_file'] = op.abspath(self.inputs.detrended_file)
         return outputs
 
-def regress_poly(degree, data):
+def regress_poly(degree, data, remove_mean=False):
     ''' returns data with degree polynomial regressed out.
     The last dimension (i.e. data.shape[-1]) should be time.
     '''
@@ -569,7 +567,6 @@ research/nichols/scripts/fsl/standardizeddvars.pdf>`_, 2013.
     :return: the standardized DVARS
 
     """
-    import os.path as op
     import numpy as np
     import nibabel as nb
     from nitime.algorithms import AR_est_YW
