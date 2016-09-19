@@ -1,11 +1,17 @@
 coverage:
   range: "0...100"
   status:
+    patch:
+      default:
+        target: 0
+        threshold: 100
     project:
       default:
         target: 0
         threshold: 100
-      patch: false
+      patch:
+        target: 0
+        threshold: 100
       unittests:
         target: 0
         threshold: 100
