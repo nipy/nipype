@@ -1,15 +1,15 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
-import nipype
-from ...testing import assert_equal, assert_true, assert_false, skipif, utils
-from ..confounds import CompCor, TCompCor, ACompCor
-
-import unittest
-import nibabel as nb
-import numpy as np
 import os
 import tempfile
 import shutil
+import unittest
+
+import nibabel as nb
+import numpy as np
+
+from ...testing import assert_equal, assert_true, utils
+from ..confounds import CompCor, TCompCor, ACompCor
 
 class TestCompCor(unittest.TestCase):
     ''' Note: Tests currently do a poor job of testing functionality '''
@@ -27,8 +27,8 @@ class TestCompCor(unittest.TestCase):
         self.realigned_file = utils.save_toy_nii(self.fake_data + noise,
                                                  self.filenames['functionalnii'])
         mask = np.ones(self.fake_data.shape[:3])
-        mask[0,0,0] = 0
-        mask[0,0,1] = 0
+        mask[0, 0, 0] = 0
+        mask[0, 0, 1] = 0
         self.mask_file = utils.save_toy_nii(mask, self.filenames['masknii'])
 
     def test_compcor(self):
@@ -58,7 +58,7 @@ class TestCompCor(unittest.TestCase):
                                   ['0.5022537643', '-0.5098322262'],
                                   ['-0.1342351356', '0.1407855119']])
 
-    def test_tcompcor_with_default_percentile(self):
+    def test_tcompcor_no_percentile(self):
         ccinterface = TCompCor(realigned_file=self.realigned_file)
         ccinterface.run()
 
