@@ -25,7 +25,7 @@ def test_fd():
     res = fdisplacement.run()
 
     yield assert_true, np.allclose(ground_truth, np.loadtxt(res.outputs.out_file), atol=.16)
-    yield assert_true, np.abs(ground_truth.mean() - res.outputs.fd_average) < 1e-3
+    yield assert_true, np.abs(ground_truth.mean() - res.outputs.fd_average) < 1e-2
     rmtree(tempdir)
 
 @skipif(nonitime)
