@@ -19,7 +19,7 @@ import os.path as op
 
 import nibabel as nb
 import numpy as np
-from scipy import linalg
+from scipy import linalg, signal
 from scipy.special import legendre
 
 from .. import logging
@@ -339,9 +339,7 @@ class CompCor(BaseInterface):
         # removed [prior to ...]"
         if self.inputs.use_regress_poly:
             voxel_timecourses = regress_poly(self.inputs.regress_poly_degree,
-                                             voxel_timecourses)
-        voxel_timecourses = voxel_timecourses - np.mean(voxel_timecourses,
-                                                        axis=1)[:, np.newaxis]
+                                             voxel_timecourses, remove_mean=True)
 
         # "Voxel time series from the noise ROI (either anatomical or tSTD) were
         # placed in a matrix M of size Nxm, with time along the row dimension
@@ -518,6 +516,9 @@ def regress_poly(degree, data, remove_mean=False):
     datashape = data.shape
     timepoints = datashape[-1]
 
+    if remove_mean: # i.e. regress_poly degree 0, which the following does not do
+        data = signal.detrend(data, axis=-1, type='constant')
+
     # Rearrange all voxel-wise time-series in rows
     data = data.reshape((-1, timepoints))
 
@@ -591,7 +592,7 @@ research/nichols/scripts/fsl/standardizeddvars.pdf>`_, 2013.
     mfunc = func[idx[0], idx[1], idx[2], :]
 
     # Demean
-    mfunc -= mfunc.mean(axis=1).astype(np.float32)[..., np.newaxis]
+    mfunc = regress_poly(0, mfunc, remove_mean=True).astype(np.float32)
 
     # Compute (non-robust) estimate of lag-1 autocorrelation
     ar1 = np.apply_along_axis(AR_est_YW, 1, mfunc, 1)[:, 0]
