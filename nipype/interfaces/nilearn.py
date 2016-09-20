@@ -47,7 +47,8 @@ class SignalExtractionInputSpec(BaseInterfaceInputSpec):
     include_global = traits.Bool(False, usedefault=True, mandatory=False,
                                  desc='If True, include an extra column '
                                  'labeled "global", with values calculated from the entire brain '
-                                 '(instead of just regions)')
+                                 '(instead of just regions). Only has effect with 4D probability '
+                                 'maps.')
     detrend = traits.Bool(False, usedefault=True, mandatory=False,
                           desc='If True, perform detrending using nilearn.')
 

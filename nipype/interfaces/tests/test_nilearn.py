@@ -38,34 +38,38 @@ class TestSignalExtraction(unittest.TestCase):
         utils.save_toy_nii(self.fake_label_data, self.filenames['label_files'])
 
     @skipif(no_nilearn)
-    def test_signal_extraction(self):
+    def test_signal_extract_no_shared(self):
         # run
         iface.SignalExtraction(in_file=self.filenames['in_file'],
                                label_files=self.filenames['label_files'],
-                               class_labels=self.labels).run()
+                               class_labels=self.labels,
+                               incl_shared_variance=False).run()
         # assert
         self.assert_expected_output(self.labels, self.base_wanted)
 
 
     @skipif(no_nilearn)
     @raises(ValueError)
-    def test_signal_extraction_bad_label_list(self):
+    def test_signal_extr_bad_label_list(self):
         # run
         iface.SignalExtraction(in_file=self.filenames['in_file'],
                                label_files=self.filenames['label_files'],
-                               class_labels=['bad']).run()
+                               class_labels=['bad'],
+                               incl_shared_variance=False).run()
 
     @skipif(no_nilearn)
-    def test_signal_extraction_equiv_4d(self):
-        self._test_4d_label(self.base_wanted, self.fake_equiv_4d_label_data)
+    def test_signal_extr_equiv_4d_no_shared(self):
+        self._test_4d_label(self.base_wanted, self.fake_equiv_4d_label_data,
+                            incl_shared_variance=False)
 
     @skipif(no_nilearn)
-    def test_signal_extraction_4d(self):
-        self._test_4d_label(self.fourd_wanted, self.fake_4d_label_data)
+    def test_signal_extr_4d_no_shared(self):
+        # set up & run & assert
+        self._test_4d_label(self.fourd_wanted, self.fake_4d_label_data, incl_shared_variance=False)
 
     @skipif(no_nilearn)
-    def test_signal_extraction_global(self):
-        # wanted
+    def test_signal_extr_global_no_shared(self):
+        # set up
         wanted_global = [[-4./6], [-1./6], [3./6], [-1./6], [-7./6]]
         for i, vals in enumerate(self.base_wanted):
             wanted_global[i].extend(vals)
@@ -74,32 +78,52 @@ class TestSignalExtraction(unittest.TestCase):
         iface.SignalExtraction(in_file=self.filenames['in_file'],
                                label_files=self.filenames['label_files'],
                                class_labels=self.labels,
-                               include_global=True).run()
+                               include_global=True,
+                               incl_shared_variance=False).run()
 
         # assert
         self.assert_expected_output(self.global_labels, wanted_global)
 
     @skipif(no_nilearn)
-    def test_signal_extraction_4d_global(self):
-        # wanted
+    def test_signal_extr_4d_global_no_shared(self):
+        # set up
         wanted_global = [[3./8], [-3./8], [1./8], [-7./8], [-9./8]]
         for i, vals in enumerate(self.fourd_wanted):
             wanted_global[i].extend(vals)
 
-        # run
-        self._test_4d_label(wanted_global, self.fake_4d_label_data, include_global=True)
+        # run & assert
+        self._test_4d_label(wanted_global, self.fake_4d_label_data,
+                            include_global=True, incl_shared_variance=False)
 
-    def _test_4d_label(self, wanted, fake_labels, include_global=False):
-        # setup
+    @skipif(no_nilearn)
+    def test_signal_extr_shared(self):
+        # set up
+        wanted = []
+        for vol in range(self.fake_fmri_data.shape[3]):
+            volume = self.fake_fmri_data[:, :, :, vol].flatten()
+            wanted_row = []
+            for reg in range(self.fake_4d_label_data.shape[3]):
+                region = self.fake_4d_label_data[:, :, :, reg].flatten()
+                wanted_row.append(np.average(volume, weights=region))
+            wanted.append(wanted_row)
+
+        # run & assert
+        self._test_4d_label(wanted, self.fake_4d_label_data)
+
+    def _test_4d_label(self, wanted, fake_labels, include_global=False, incl_shared_variance=True):
+        # set up
         utils.save_toy_nii(fake_labels, self.filenames['4d_label_file'])
 
         # run
         iface.SignalExtraction(in_file=self.filenames['in_file'],
                                label_files=self.filenames['4d_label_file'],
                                class_labels=self.labels,
+                               incl_shared_variance=incl_shared_variance,
                                include_global=include_global).run()
 
         wanted_labels = self.global_labels if include_global else self.labels
+
+        # assert
         self.assert_expected_output(wanted_labels, wanted)
 
     def assert_expected_output(self, labels, wanted):
