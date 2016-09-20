@@ -199,3 +199,46 @@ class JacobianDeterminant(ANTSCommand):
             outputs['jacobian_image'] = os.path.abspath(
                 self._gen_filename('output_prefix') + 'jacobian.nii.gz')
         return outputs
+
+
+class CreateJacobianDeterminantImageInputSpec(ANTSCommandInputSpec):
+    imageDimension = traits.Enum(3, 2, argstr='%d', usedefault=False, mandatory=True,
+                            position=0, desc='image dimension (2 or 3)')
+    deformationField = File(argstr='%s', exists=True, mandatory=True,
+                     position=1, desc='deformation transformation file')
+    outputImage = File(argstr='%s', mandatory=True,
+                         position=2,
+                         desc='output filename')
+    doLogJacobian = traits.Enum(0, 1, argstr='%d', mandatory=False, position=3,
+                          desc='return the log jacobian')
+    useGeometric = traits.Enum(0, 1, argstr='%d', mandatory=False, position=4,
+                          desc='return the geometric jacobian')
+
+class CreateJacobianDeterminantImageOutputSpec(TraitedSpec):
+    jacobian_image = File(exists=True, desc='jacobian image')
+
+class CreateJacobianDeterminantImage(ANTSCommand):
+    """
+    Examples
+    --------
+    >>> from nipype.interfaces.ants import CreateJacobianDeterminantImage
+    >>> jacobian = CreateJacobianDeterminantImage()
+    >>> jacobian.inputs.imageDimension = 3
+    >>> jacobian.inputs.warp_file = 'ants_Warp.nii.gz'
+    >>> jacobian.inputs.outputImage = 'out_name.nii.gz'
+    >>> jacobian.cmdline # doctest: +IGNORE_UNICODE
+    'CreateJacobianDeterminantImage 3 ants_Warp.nii.gz out_name.nii.gz'
+    """
+
+    _cmd = 'CreateJacobianDeterminantImage'
+    input_spec = CreateJacobianDeterminantImageInputSpec
+    output_spec = CreateJacobianDeterminantImageOutputSpec
+
+    def _format_arg(self, opt, spec, val):
+        return super(CreateJacobianDeterminantImage, self)._format_arg(opt, spec, val)
+
+    def _list_outputs(self):
+        outputs = self._outputs().get()
+        outputs['jacobian_image'] = os.path.abspath(
+            self.inputs.outputImage)
+        return outputs
