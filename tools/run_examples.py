@@ -52,7 +52,7 @@ def run_examples(example, pipelines, data_path, plugin=None, rm_base_dir=True):
            pipeline == 'l2pipeline':
             # Init callback log
             import logging
-            cb_log_path = os.path.join(os.path.expanduser('~'), 'callback.log')
+            cb_log_path = os.path.abspath('callback.log')
             cb_logger = logging.getLogger('callback')
             cb_logger.setLevel(logging.DEBUG)
             handler = logging.FileHandler(cb_log_path)
@@ -73,9 +73,9 @@ def run_examples(example, pipelines, data_path, plugin=None, rm_base_dir=True):
         except ImportError as exc:
             pandas_flg = False
 
-        if plugin_args.has_key('status_callback') and pandas_flg:
+        if plugin_args.get('status_callback', False) and pandas_flg:
             draw_gantt_chart.generate_gantt_chart(cb_log_path, 4)
-            dst_log_html = os.path.join(os.path.expanduser('~'), 'callback.log.html')
+            dst_log_html = os.path.abspath('callback.log.html')
             copyfile(cb_log_path + '.html', dst_log_html)
 
 
