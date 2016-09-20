@@ -27,6 +27,7 @@ class TestSignalExtraction(unittest.TestCase):
         'out_file': 'signals.tsv'
     }
     labels = ['csf', 'gray', 'white']
+    global_labels = ['global'] + labels
 
     def setUp(self):
         self.orig_dir = os.getcwd()
@@ -60,20 +61,14 @@ class TestSignalExtraction(unittest.TestCase):
 
     @skipif(no_nilearn)
     def test_signal_extraction_4d(self):
-        self._test_4d_label([[-5.0652173913, -5.44565217391, 5.50543478261],
-                             [-7.02173913043, 11.1847826087, -4.33152173913],
-                             [-19.0869565217, 21.2391304348, -4.57608695652],
-                             [5.19565217391, -3.66304347826, -1.51630434783],
-                             [-12.0, 3., 0.5]], self.fake_4d_label_data)
+        self._test_4d_label(self.fourd_wanted, self.fake_4d_label_data)
 
     @skipif(no_nilearn)
-    def test_signal_extraction_include_global(self):
+    def test_signal_extraction_global(self):
         # wanted
-        wanted_global = [[3./8], [-3./8], [1./8], [-7./8], [-9./8]]
+        wanted_global = [[-4./6], [-1./6], [3./6], [-1./6], [-7./6]]
         for i, vals in enumerate(self.base_wanted):
             wanted_global[i].extend(vals)
-        wanted_labels = ['global']
-        wanted_labels.extend(self.labels)
 
         # run
         iface.SignalExtraction(in_file=self.filenames['in_file'],
@@ -82,18 +77,30 @@ class TestSignalExtraction(unittest.TestCase):
                                include_global=True).run()
 
         # assert
-        self.assert_expected_output(wanted_labels, wanted_global)
+        self.assert_expected_output(self.global_labels, wanted_global)
 
-    def _test_4d_label(self, wanted, fake_labels):
+    @skipif(no_nilearn)
+    def test_signal_extraction_4d_global(self):
+        # wanted
+        wanted_global = [[3./8], [-3./8], [1./8], [-7./8], [-9./8]]
+        for i, vals in enumerate(self.fourd_wanted):
+            wanted_global[i].extend(vals)
+
+        # run
+        self._test_4d_label(wanted_global, self.fake_4d_label_data, include_global=True)
+
+    def _test_4d_label(self, wanted, fake_labels, include_global=False):
         # setup
         utils.save_toy_nii(fake_labels, self.filenames['4d_label_file'])
 
         # run
         iface.SignalExtraction(in_file=self.filenames['in_file'],
                                label_files=self.filenames['4d_label_file'],
-                               class_labels=self.labels).run()
+                               class_labels=self.labels,
+                               include_global=include_global).run()
 
-        self.assert_expected_output(self.labels, wanted)
+        wanted_labels = self.global_labels if include_global else self.labels
+        self.assert_expected_output(wanted_labels, wanted)
 
     def assert_expected_output(self, labels, wanted):
         with open(self.filenames['out_file'], 'r') as output:
@@ -159,3 +166,10 @@ class TestSignalExtraction(unittest.TestCase):
 
                                     [[0.3, 0.3, 0.4],
                                      [0.3, 0.4, 0.3]]]])
+
+
+    fourd_wanted = [[-5.0652173913, -5.44565217391, 5.50543478261],
+                    [-7.02173913043, 11.1847826087, -4.33152173913],
+                    [-19.0869565217, 21.2391304348, -4.57608695652],
+                    [5.19565217391, -3.66304347826, -1.51630434783],
+                    [-12.0, 3., 0.5]]
