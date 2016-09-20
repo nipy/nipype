@@ -129,7 +129,7 @@ class DTITrackerInputSpec(CommandLineInputSpec):
     angle_threshold_weight = traits.Float(desc="set angle threshold weighting factor. weighting will be be applied \
         on top of the angle_threshold", argstr="-atw %f")
     random_seed = traits.Int(desc="use random location in a voxel instead of the center of the voxel \
-          to seed. can also define number of seed per voxel. default is 1", argstr="-rseed")
+          to seed. can also define number of seed per voxel. default is 1", argstr="-rseed %d")
     invert_x = traits.Bool(desc="invert x component of the vector", argstr="-ix")
     invert_y = traits.Bool(desc="invert y component of the vector", argstr="-iy")
     invert_z = traits.Bool(desc="invert z component of the vector", argstr="-iz")
