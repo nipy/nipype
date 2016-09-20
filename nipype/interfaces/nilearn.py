@@ -39,6 +39,11 @@ class SignalExtractionInputSpec(BaseInterfaceInputSpec):
     out_file = File('signals.tsv', usedefault=True, exists=False,
                     mandatory=False, desc='The name of the file to output to. '
                     'signals.tsv by default')
+    incl_shared_variance = traits.Bool(True, usedefault=True, mandatory=False, desc='By default '
+                                       '(True), returns simple time series calculated from each '
+                                       'region independently (e.g., for noise regression). If '
+                                       'False, returns unique signals for each region, discarding '
+                                       'shared variance (e.g., for connectivity)')
     include_global = traits.Bool(False, usedefault=True, mandatory=False,
                                  desc='If True, include an extra column '
                                  'labeled "global", with values calculated from the entire brain '
