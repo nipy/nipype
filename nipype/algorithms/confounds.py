@@ -339,7 +339,8 @@ class CompCor(BaseInterface):
         # removed [prior to ...]"
         if self.inputs.use_regress_poly:
             voxel_timecourses = regress_poly(self.inputs.regress_poly_degree,
-                                             voxel_timecourses, remove_mean=True)
+                                             voxel_timecourses)
+        voxel_timecourses = regress_poly(0, voxel_timecourses, remove_mean=True)
 
         # "Voxel time series from the noise ROI (either anatomical or tSTD) were
         # placed in a matrix M of size Nxm, with time along the row dimension

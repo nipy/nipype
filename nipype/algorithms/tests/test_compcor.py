@@ -66,6 +66,14 @@ class TestCompCor(unittest.TestCase):
         num_nonmasked_voxels = np.count_nonzero(mask)
         assert_equal(num_nonmasked_voxels, 1)
 
+    def test_compcor_no_regress_poly(self):
+        self.run_cc(CompCor(realigned_file=self.realigned_file, mask_file=self.mask_file,
+                            use_regress_poly=False), [['0.4451946442', '-0.7683311482'],
+                                                      ['-0.4285129505', '-0.0926034137'],
+                                                      ['0.5721540256', '0.5608764842'],
+                                                      ['-0.5367548139', '0.0059943226'],
+                                                      ['-0.0520809054', '0.2940637551']])
+
     def run_cc(self, ccinterface, expected_components):
         # run
         ccresult = ccinterface.run()
