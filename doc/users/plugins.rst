@@ -88,7 +88,7 @@ MultiProc: profiling resources
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The ``MultiProc`` plugin can profile memory and cpu usage, 
-please see :ref:`resource_ched_profiler` for a comprehensive description.
+please see :ref:`resource_sched_profiler` for a comprehensive description.
 
 
 IPython

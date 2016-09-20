@@ -21,7 +21,7 @@
 
    pipeline_tutorial
    plugins
-   resource_ched_profiler
+   resource_sched_profiler
    config_file
    debug
 
