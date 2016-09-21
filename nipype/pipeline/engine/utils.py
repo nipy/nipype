@@ -30,7 +30,7 @@ package_check('networkx', '1.3')
 
 import networkx as nx
 
-from ...utils.filemanip import (fname_presuffix, FileNotFoundError,
+from ...utils.filemanip import (fname_presuffix, FileNotFoundError, to_str,
                                 filename_to_list, get_related_files)
 from ...utils.misc import create_function_from_source, str2bool
 from ...interfaces.base import (CommandLine, isdefined, Undefined,
@@ -330,10 +330,9 @@ def _get_valid_pathstr(pathstr):
     Removes:  [][ (){}?:<>#!|"';]
     Replaces: ',' -> '.'
     """
+    if not isinstance(pathstr, (str, bytes)):
+        pathstr = to_str(pathstr)
     pathstr = pathstr.replace(os.sep, '..')
-    if sys.version_info[0] < 3:
-        # Remove those u'string' patterns
-        pathstr = re.sub(r'''([^\w])u['"]([\w\d -\.:;,]*)['"]''', r'\1\2', pathstr)
     pathstr = re.sub(r'''[][ (){}?:<>#!|"';]''', '', pathstr)
     pathstr = pathstr.replace(',', '.')
     return pathstr
@@ -520,7 +519,7 @@ def _merge_graphs(supergraph, nodes, subgraph, nodeid, iterables,
         paramstr = ''
         for key, val in sorted(params.items()):
             paramstr = '{}_{}_{}'.format(
-                paramstr, _get_valid_pathstr(key), _get_valid_pathstr(str(val)))
+                paramstr, _get_valid_pathstr(key), _get_valid_pathstr(val))
             rootnode.set_input(key, val)
 
         logger.debug('Parameterization: paramstr=%s', paramstr)

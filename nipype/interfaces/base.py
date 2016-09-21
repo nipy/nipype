@@ -37,7 +37,7 @@ from .. import config, logging, LooseVersion, __version__
 from ..utils.provenance import write_provenance
 from ..utils.misc import is_container, trim, str2bool
 from ..utils.filemanip import (md5, hash_infile, FileNotFoundError, hash_timestamp,
-                               split_filename, encode_dict)
+                               split_filename, to_str)
 from .traits_extension import (
     traits, Undefined, TraitDictObject, TraitListObject, TraitError, isdefined, File,
     Directory, DictStrStr, has_metadata)
@@ -271,7 +271,7 @@ class Bunch(object):
         # Sort the items of the dictionary, before hashing the string
         # representation so we get a predictable order of the
         # dictionary.
-        sorted_dict = encode_dict(sorted(dict_nofilename.items()))
+        sorted_dict = to_str(sorted(dict_nofilename.items()))
         return dict_withhash, md5(sorted_dict.encode()).hexdigest()
 
     def __pretty__(self, p, cycle):
@@ -581,7 +581,7 @@ class BaseTraitedSpec(traits.HasTraits):
             dict_withhash.append((name,
                                   self._get_sorteddict(val, True, hash_method=hash_method,
                                                        hash_files=hash_files)))
-        return dict_withhash, md5(encode_dict(dict_nofilename).encode()).hexdigest()
+        return dict_withhash, md5(to_str(dict_nofilename).encode()).hexdigest()
 
 
     def _get_sorteddict(self, objekt, dictwithhash=False, hash_method=None,

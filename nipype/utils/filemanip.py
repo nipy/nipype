@@ -89,7 +89,7 @@ def split_filename(fname):
 
     return pth, fname, ext
 
-def encode_dict(value):
+def to_str(value):
     """
     Manipulates ordered dicts before they are hashed (Py2/3 compat.)
 
@@ -97,20 +97,36 @@ def encode_dict(value):
     if sys.version_info[0] > 2:
         retval = str(value)
     else:
-        retval = encode_dict_py27(value)
+        retval = to_str_py27(value)
     return retval
 
-def encode_dict_py27(value):
+def to_str_py27(value):
     """
     Encode dictionary for python 2
     """
+
+    if isinstance(value, dict):
+        entry = '{}: {}'.format
+        retval = '{'
+        for key, val in list(value.items()):
+            if len(retval) > 1:
+                retval += ', '
+            kenc = repr(key)
+            if kenc.startswith(("u'", 'u"')):
+                kenc = kenc[1:]
+            venc = to_str_py27(val)
+            if venc.startswith(("u'", 'u"')):
+                venc = venc[1:]
+            retval+= entry(kenc, venc)
+        retval += '}'
+        return retval
 
     istuple = isinstance(value, tuple)
     if isinstance(value, (tuple, list)):
         retval = '(' if istuple else '['
         nels = len(value)
         for i, v in enumerate(value):
-            venc = encode_dict_py27(v)
+            venc = to_str_py27(v)
             if venc.startswith(("u'", 'u"')):
                 venc = venc[1:]
             retval += venc

@@ -42,7 +42,7 @@ from ...utils.filemanip import (save_json, FileNotFoundError,
                                 copyfiles, fnames_presuffix, loadpkl,
                                 split_filename, load_json, savepkl,
                                 write_rst_header, write_rst_dict,
-                                write_rst_list)
+                                write_rst_list, to_str)
 from ...interfaces.base import (traits, InputMultiPath, CommandLine,
                                 Undefined, TraitedSpec, DynamicTraitedSpec,
                                 Bunch, InterfaceResult, md5, Interface,
@@ -213,7 +213,8 @@ class Node(EngineBase):
 
     def set_input(self, parameter, val):
         """ Set interface input value"""
-        logger.debug('setting nodelevel(%s) input %s = %s', self.name, parameter, val)
+        logger.debug('setting nodelevel(%s) input %s = %s',
+                     self.name, parameter, to_str(val))
         setattr(self.inputs, parameter, deepcopy(val))
 
     def get_output(self, parameter):
@@ -238,18 +239,18 @@ class Node(EngineBase):
         hashed_inputs, hashvalue = self._get_hashval()
         outdir = self.output_dir()
         if op.exists(outdir):
-            logger.debug(os.listdir(outdir))
+            logger.debug('Output dir: %s', to_str(os.listdir(outdir)))
         hashfiles = glob(op.join(outdir, '_0x*.json'))
-        logger.debug(hashfiles)
+        logger.debug('Found hashfiles: %s', to_str(hashfiles))
         if len(hashfiles) > 1:
             logger.info(hashfiles)
             logger.info('Removing multiple hashfiles and forcing node to rerun')
             for hashfile in hashfiles:
                 os.unlink(hashfile)
         hashfile = op.join(outdir, '_0x%s.json' % hashvalue)
-        logger.debug(hashfile)
+        logger.debug('Final hashfile: %s', hashfile)
         if updatehash and op.exists(outdir):
-            logger.debug("Updating hash: %s" % hashvalue)
+            logger.debug("Updating hash: %s", hashvalue)
             for file in glob(op.join(outdir, '_0x*.json')):
                 os.remove(file)
             self._save_hashfile(hashfile, hashed_inputs)
@@ -275,17 +276,17 @@ class Node(EngineBase):
         outdir = self.output_dir()
         logger.info("Executing node %s in dir: %s", self._id, outdir)
         if op.exists(outdir):
-            logger.debug(os.listdir(outdir))
+            logger.debug('Output dir: %s', to_str(os.listdir(outdir)))
         hash_info = self.hash_exists(updatehash=updatehash)
         hash_exists, hashvalue, hashfile, hashed_inputs = hash_info
-        logger.debug(('updatehash, overwrite, always_run, hash_exists',
-                      updatehash, self.overwrite, self._interface.always_run,
-                      hash_exists))
+        logger.debug(
+            'updatehash=%s, overwrite=%s, always_run=%s, hash_exists=%s',
+            updatehash, self.overwrite, self._interface.always_run, hash_exists)
         if (not updatehash and (((self.overwrite is None and
                                   self._interface.always_run) or
                                  self.overwrite) or not
                                 hash_exists)):
-            logger.debug("Node hash: %s" % hashvalue)
+            logger.debug("Node hash: %s", hashvalue)
 
             # by rerunning we mean only nodes that did finish to run previously
             json_pat = op.join(outdir, '_0x*.json')
@@ -295,8 +296,8 @@ class Node(EngineBase):
                           len(glob(json_pat)) != 0 and
                           len(glob(json_unfinished_pat)) == 0)
             if need_rerun:
-                logger.debug("Rerunning node")
                 logger.debug(
+                    "Rerunning node:\n"
                     "updatehash = %s, self.overwrite = %s, self._interface.always_run = %s, "
                     "os.path.exists(%s) = %s, hash_method = %s", updatehash, self.overwrite,
                     self._interface.always_run, hashfile, op.exists(hashfile),
@@ -371,15 +372,15 @@ class Node(EngineBase):
             self.write_report(report_type='postexec', cwd=outdir)
         else:
             if not op.exists(op.join(outdir, '_inputs.pklz')):
-                logger.debug('%s: creating inputs file' % self.name)
+                logger.debug('%s: creating inputs file', self.name)
                 savepkl(op.join(outdir, '_inputs.pklz'),
                         self.inputs.get_traitsfree())
             if not op.exists(op.join(outdir, '_node.pklz')):
-                logger.debug('%s: creating node file' % self.name)
+                logger.debug('%s: creating node file', self.name)
                 savepkl(op.join(outdir, '_node.pklz'), self)
             logger.debug("Hashfile exists. Skipping execution")
             self._run_interface(execute=False, updatehash=updatehash)
-        logger.debug('Finished running %s in dir: %s\n' % (self._id, outdir))
+        logger.debug('Finished running %s in dir: %s\n', self._id, outdir)
         return self._result
 
     # Private functions
@@ -424,10 +425,10 @@ class Node(EngineBase):
                 with open(hashfile, 'wt') as fd:
                     fd.writelines(str(hashed_inputs))
 
-                logger.debug(('Unable to write a particular type to the json '
-                              'file'))
+                logger.debug(
+                    'Unable to write a particular type to the json file')
             else:
-                logger.critical('Unable to open the file in write mode: %s' %
+                logger.critical('Unable to open the file in write mode: %s',
                                 hashfile)
 
     def _get_inputs(self):
@@ -438,9 +439,9 @@ class Node(EngineBase):
         """
         logger.debug('Setting node inputs')
         for key, info in list(self.input_source.items()):
-            logger.debug('input: %s' % key)
+            logger.debug('input: %s', key)
             results_file = info[0]
-            logger.debug('results file: %s' % results_file)
+            logger.debug('results file: %s', results_file)
             results = loadpkl(results_file)
             output_value = Undefined
             if isinstance(info[1], tuple):
@@ -456,7 +457,7 @@ class Node(EngineBase):
                     output_value = results.outputs.get()[output_name]
                 except TypeError:
                     output_value = results.outputs.dictcopy()[output_name]
-            logger.debug('output: %s' % output_name)
+            logger.debug('output: %s', output_name)
             try:
                 self.set_input(key, deepcopy(output_value))
             except traits.TraitError as e:
@@ -487,7 +488,7 @@ class Node(EngineBase):
                                               basedir=cwd))
 
         savepkl(resultsfile, result)
-        logger.debug('saved results in %s' % resultsfile)
+        logger.debug('saved results in %s', resultsfile)
 
         if result.outputs:
             result.outputs.set(**outputs)
@@ -524,11 +525,11 @@ class Node(EngineBase):
             except (traits.TraitError, AttributeError, ImportError) as err:
                 if isinstance(err, (AttributeError, ImportError)):
                     attribute_error = True
-                    logger.debug(('attribute error: %s probably using '
-                                  'different trait pickled file') % str(err))
+                    logger.debug('attribute error: %s probably using '
+                                 'different trait pickled file', str(err))
                 else:
-                    logger.debug(('some file does not exist. hence trait '
-                                  'cannot be set'))
+                    logger.debug(
+                        'some file does not exist. hence trait cannot be set')
             else:
                 if result.outputs:
                     try:
@@ -540,8 +541,8 @@ class Node(EngineBase):
                                                           relative=False,
                                                           basedir=cwd))
                     except FileNotFoundError:
-                        logger.debug(('conversion to full path results in '
-                                      'non existent file'))
+                        logger.debug('conversion to full path results in '
+                                     'non existent file')
                 aggregate = False
             pkl_file.close()
         logger.debug('Aggregate: %s', aggregate)
@@ -640,8 +641,8 @@ class Node(EngineBase):
     def _copyfiles_to_wd(self, outdir, execute, linksonly=False):
         """ copy files over and change the inputs"""
         if hasattr(self._interface, '_get_filecopy_info'):
-            logger.debug('copying files to wd [execute=%s, linksonly=%s]' %
-                         (str(execute), str(linksonly)))
+            logger.debug('copying files to wd [execute=%s, linksonly=%s]',
+                         str(execute), str(linksonly))
             if execute and linksonly:
                 olddir = outdir
                 outdir = op.join(outdir, '_tempinput')
@@ -689,7 +690,7 @@ class Node(EngineBase):
         if not op.exists(report_dir):
             os.makedirs(report_dir)
         if report_type == 'preexec':
-            logger.debug('writing pre-exec report to %s' % report_file)
+            logger.debug('writing pre-exec report to %s', report_file)
             fp = open(report_file, 'wt')
             fp.writelines(write_rst_header('Node: %s' % get_print_name(self),
                                            level=0))
@@ -698,7 +699,7 @@ class Node(EngineBase):
             fp.writelines(write_rst_header('Original Inputs', level=1))
             fp.writelines(write_rst_dict(self.inputs.get()))
         if report_type == 'postexec':
-            logger.debug('writing post-exec report to %s' % report_file)
+            logger.debug('writing post-exec report to %s', report_file)
             fp = open(report_file, 'at')
             fp.writelines(write_rst_header('Execution Inputs', level=1))
             fp.writelines(write_rst_dict(self.inputs.get()))
@@ -854,7 +855,7 @@ class JoinNode(Node):
         newfields = dict([(field, self._add_join_item_field(field, idx))
                           for field in self.joinfield])
         # increment the join slot index
-        logger.debug("Added the %s join item fields %s." % (self, newfields))
+        logger.debug("Added the %s join item fields %s.", self, newfields)
         self._next_slot_index += 1
         return newfields
 
@@ -900,10 +901,9 @@ class JoinNode(Node):
                 item_trait = trait.inner_traits[0]
                 dyntraits.add_trait(name, item_trait)
                 setattr(dyntraits, name, Undefined)
-                logger.debug("Converted the join node %s field %s"
-                             " trait type from %s to %s"
-                             % (self, name, trait.trait_type.info(),
-                                item_trait.info()))
+                logger.debug(
+                    "Converted the join node %s field %s trait type from %s to %s",
+                    self, name, trait.trait_type.info(), item_trait.info())
             else:
                 dyntraits.add_trait(name, traits.Any)
                 setattr(dyntraits, name, Undefined)
@@ -931,8 +931,8 @@ class JoinNode(Node):
                 val = getattr(self._inputs, field)
                 if isdefined(val):
                     setattr(self._interface.inputs, field, val)
-        logger.debug("Collated %d inputs into the %s node join fields"
-                     % (self._next_slot_index, self))
+        logger.debug("Collated %d inputs into the %s node join fields",
+                     self._next_slot_index, self)
 
     def _collate_input_value(self, field):
         """
@@ -1023,7 +1023,7 @@ class MapNode(Node):
             fields = basetraits.copyable_trait_names()
         for name, spec in list(basetraits.items()):
             if name in fields and ((nitems is None) or (nitems > 1)):
-                logger.debug('adding multipath trait: %s' % name)
+                logger.debug('adding multipath trait: %s', name)
                 if self.nested:
                     output.add_trait(name, InputMultiPath(traits.Any()))
                 else:
@@ -1042,15 +1042,13 @@ class MapNode(Node):
 
         Priority goes to interface.
         """
-        logger.debug('setting nodelevel(%s) input %s = %s' % (str(self),
-                                                              parameter,
-                                                              str(val)))
+        logger.debug('setting nodelevel(%s) input %s = %s',
+                     to_str(self), parameter, to_str(val))
         self._set_mapnode_input(self.inputs, parameter, deepcopy(val))
 
     def _set_mapnode_input(self, object, name, newvalue):
-        logger.debug('setting mapnode(%s) input: %s -> %s' % (str(self),
-                                                              name,
-                                                              str(newvalue)))
+        logger.debug('setting mapnode(%s) input: %s -> %s',
+                     to_str(self), name, to_str(newvalue))
         if name in self.iterfield:
             setattr(self._inputs, name, newvalue)
         else:
@@ -1069,8 +1067,8 @@ class MapNode(Node):
                 name,
                 InputMultiPath(
                     self._interface.inputs.traits()[name].trait_type))
-            logger.debug('setting hashinput %s-> %s' %
-                         (name, getattr(self._inputs, name)))
+            logger.debug('setting hashinput %s-> %s',
+                         name, getattr(self._inputs, name))
             if self.nested:
                 setattr(hashinputs, name, flatten(getattr(self._inputs, name)))
             else:
@@ -1118,10 +1116,8 @@ class MapNode(Node):
                     fieldvals = flatten(filename_to_list(getattr(self.inputs, field)))
                 else:
                     fieldvals = filename_to_list(getattr(self.inputs, field))
-                logger.debug('setting input %d %s %s' % (i, field,
-                                                         fieldvals[i]))
-                setattr(node.inputs, field,
-                        fieldvals[i])
+                logger.debug('setting input %d %s %s', i, field, fieldvals[i])
+                setattr(node.inputs, field, fieldvals[i])
             node.config = self.config
             node.base_dir = op.join(cwd, 'mapflow')
             yield i, node
