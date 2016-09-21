@@ -209,8 +209,7 @@ class Node(EngineBase):
             if not str2bool(self.config['execution']['parameterize_dirs']):
                 params_str = [self._parameterization_dir(p) for p in params_str]
             outputdir = op.join(outputdir, *params_str)
-        return op.abspath(op.join(outputdir,
-                                  self.name))
+        return op.abspath(op.join(outputdir, self.name))
 
     def set_input(self, parameter, val):
         """ Set interface input value"""

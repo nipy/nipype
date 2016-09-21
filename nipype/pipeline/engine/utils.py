@@ -7,6 +7,7 @@
 from __future__ import print_function, division, unicode_literals, absolute_import
 from builtins import str, open, map, next, zip, range
 
+import sys
 from future import standard_library
 standard_library.install_aliases()
 from collections import defaultdict
@@ -330,6 +331,9 @@ def _get_valid_pathstr(pathstr):
     Replaces: ',' -> '.'
     """
     pathstr = pathstr.replace(os.sep, '..')
+    if sys.version_info[0] < 3:
+        # Remove those u'string' patterns
+        pathstr = re.sub(r'''([^\w])u['"]([\w\d -\.:;,]*)['"]''', r'\1\2', pathstr)
     pathstr = re.sub(r'''[][ (){}?:<>#!|"';]''', '', pathstr)
     pathstr = pathstr.replace(',', '.')
     return pathstr
@@ -515,9 +519,11 @@ def _merge_graphs(supergraph, nodes, subgraph, nodeid, iterables,
         rootnode = Gc.nodes()[nodeidx]
         paramstr = ''
         for key, val in sorted(params.items()):
-            paramstr = '_'.join((paramstr, _get_valid_pathstr(key),
-                                 _get_valid_pathstr(str(val))))
+            paramstr = '{}_{}_{}'.format(
+                paramstr, _get_valid_pathstr(key), _get_valid_pathstr(str(val)))
             rootnode.set_input(key, val)
+
+        logger.debug('Parameterization: paramstr=%s', paramstr)
         levels = get_levels(Gc)
         for n in Gc.nodes():
             """
