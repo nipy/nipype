@@ -1243,7 +1243,7 @@ class Stream(object):
     def _read(self, drain):
         "Read from the file descriptor"
         fd = self.fileno()
-        buf = os.read(fd, 4096).decode(self.default_encoding)
+        buf = os.read(fd, 4096).decode(self.default_encoding, errors='backslashreplace')
         if not buf and not self._buf:
             return None
         if '\n' not in buf:
@@ -1507,8 +1507,8 @@ def run_command(runtime, output=None, timeout=0.01, redirect_x=False):
                 proc.poll()
                 time.sleep(interval)
         stdout, stderr = proc.communicate()
-        stdout = stdout.decode(default_encoding)
-        stderr = str(stderr.decode(default_encoding))
+        stdout = stdout.decode(default_encoding, errors='backslashreplace')
+        stderr = stderr.decode(default_encoding, errors='backslashreplace')
         result['stdout'] = stdout.split('\n')
         result['stderr'] = stderr.split('\n')
         result['merged'] = ''
@@ -1522,8 +1522,8 @@ def run_command(runtime, output=None, timeout=0.01, redirect_x=False):
         ret_code = proc.wait()
         stderr.flush()
         stdout.flush()
-        result['stdout'] = [line.decode(default_encoding).strip() for line in open(outfile, 'rb').readlines()]
-        result['stderr'] = [line.decode(default_encoding).strip() for line in open(errfile, 'rb').readlines()]
+        result['stdout'] = [line.decode(default_encoding, errors='backslashreplace').strip() for line in open(outfile, 'rb').readlines()]
+        result['stderr'] = [line.decode(default_encoding, errors='backslashreplace').strip() for line in open(errfile, 'rb').readlines()]
         result['merged'] = ''
     if output == 'none':
         if runtime_profile:
