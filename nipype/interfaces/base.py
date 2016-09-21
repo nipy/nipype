@@ -1443,7 +1443,7 @@ def run_command(runtime, output=None, timeout=0.01, redirect_x=False):
                 time.sleep(interval)
         stdout, stderr = proc.communicate()
         stdout = stdout.decode(default_encoding)
-        stderr = stderr.decode(default_encoding)
+        stderr = str(stderr.decode(default_encoding))
         result['stdout'] = stdout.split('\n')
         result['stderr'] = stderr.split('\n')
         result['merged'] = ''
@@ -1612,8 +1612,8 @@ class CommandLine(BaseInterface):
 
     def raise_exception(self, runtime):
         message = "Command:\n" + runtime.cmdline + "\n"
-        message += "Standard output:\n" + runtime.stdout + "\n"
-        message += "Standard error:\n" + runtime.stderr + "\n"
+        message += "Standard output:\n" + str(runtime.stdout) + "\n"
+        message += "Standard error:\n" + str(runtime.stderr) + "\n"
         message += "Return code: " + str(runtime.returncode)
         raise RuntimeError(message)
 
