@@ -1,4 +1,7 @@
-from __future__ import print_function
+# -*- coding: utf-8 -*-
+from __future__ import print_function, division, unicode_literals, absolute_import
+
+from builtins import str, open
 # This tool exports a Nipype interface in the Boutiques (https://github.com/boutiques) JSON format.
 # Boutiques tools can be imported in CBRAIN (https://github.com/aces/cbrain) among other platforms.
 #
@@ -13,12 +16,9 @@ from __future__ import print_function
 
 import os
 import argparse
-import inspect
 import sys
-import simplejson
 import tempfile
-
-from nipype.interfaces.base import Interface
+import simplejson as json
 
 
 def main(argv):
@@ -45,9 +45,8 @@ def main(argv):
                                                 parsed.ignore_template_numbers)
 
     # Writes JSON string to file
-    f = open(parsed.output, 'w')
-    f.write(json_string)
-    f.close()
+    with open(parsed.output, 'w') as f:
+        f.write(json_string)
 
 
 def generate_boutiques_descriptor(module, interface_name, ignored_template_inputs, docker_image, docker_index, verbose, ignore_template_numbers):
@@ -108,7 +107,7 @@ def generate_boutiques_descriptor(module, interface_name, ignored_template_input
     for input in tool_desc['inputs']:
         del input['tempvalue']
 
-    return simplejson.dumps(tool_desc, indent=4, separators=(',', ': '))
+    return json.dumps(tool_desc, indent=4, separators=(',', ': '))
 
 
 def get_boutiques_input(inputs, interface, input_name, spec, ignored_template_inputs, verbose, ignore_template_numbers):

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 '''
@@ -10,11 +11,8 @@ Miscellaneous algorithms
     >>> os.chdir(datadir)
 
 '''
-from __future__ import print_function
-from __future__ import absolute_import
-from __future__ import division
-from builtins import zip
-from builtins import range
+from __future__ import print_function, division, unicode_literals, absolute_import
+from builtins import str, zip, range, open
 from future.utils import raise_from
 
 import os
@@ -24,21 +22,20 @@ import nibabel as nb
 import numpy as np
 from math import floor, ceil
 from scipy.ndimage.morphology import grey_dilation
-from scipy.special import legendre
 import scipy.io as sio
 import itertools
 import scipy.stats as stats
-
-from nipype import logging
-
 import warnings
 
+from .. import logging
 from . import metrics as nam
 from ..interfaces.base import (BaseInterface, traits, TraitedSpec, File,
                                InputMultiPath, OutputMultiPath,
                                BaseInterfaceInputSpec, isdefined,
                                DynamicTraitedSpec, Undefined)
-from nipype.utils.filemanip import fname_presuffix, split_filename
+from ..utils.filemanip import fname_presuffix, split_filename
+from . import confounds
+
 iflogger = logging.getLogger('interface')
 
 
@@ -240,15 +237,17 @@ class CreateNifti(BaseInterface):
         return os.path.abspath(base + ".nii")
 
     def _run_interface(self, runtime):
-        hdr = nb.AnalyzeHeader.from_fileobj(
-            open(self.inputs.header_file, 'rb'))
+        with open(self.inputs.header_file, 'rb') as hdr_file:
+            hdr = nb.AnalyzeHeader.from_fileobj(hdr_file)
 
         if isdefined(self.inputs.affine):
             affine = self.inputs.affine
         else:
             affine = None
 
-        data = hdr.data_from_fileobj(open(self.inputs.data_file, 'rb'))
+        with open(self.inputs.header_file, 'rb') as data_file:
+            data = hdr.data_from_fileobj(data_file)
+
         img = nb.Nifti1Image(data, affine, hdr)
         nb.save(img, self._gen_output_file_name())
 
@@ -258,93 +257,6 @@ class CreateNifti(BaseInterface):
         outputs = self._outputs().get()
         outputs['nifti_file'] = self._gen_output_file_name()
         return outputs
-
-
-class TSNRInputSpec(BaseInterfaceInputSpec):
-    in_file = InputMultiPath(File(exists=True), mandatory=True,
-                             desc='realigned 4D file or a list of 3D files')
-    regress_poly = traits.Range(low=1, desc='Remove polynomials')
-    tsnr_file = File('tsnr.nii.gz', usedefault=True, hash_files=False,
-                     desc='output tSNR file')
-    mean_file = File('mean.nii.gz', usedefault=True, hash_files=False,
-                     desc='output mean file')
-    stddev_file = File('stdev.nii.gz', usedefault=True, hash_files=False,
-                       desc='output tSNR file')
-    detrended_file = File('detrend.nii.gz', usedefault=True, hash_files=False,
-                          desc='input file after detrending')
-
-
-class TSNROutputSpec(TraitedSpec):
-    tsnr_file = File(exists=True, desc='tsnr image file')
-    mean_file = File(exists=True, desc='mean image file')
-    stddev_file = File(exists=True, desc='std dev image file')
-    detrended_file = File(desc='detrended input file')
-
-
-class TSNR(BaseInterface):
-    """Computes the time-course SNR for a time series
-
-    Typically you want to run this on a realigned time-series.
-
-    Example
-    -------
-
-    >>> tsnr = TSNR()
-    >>> tsnr.inputs.in_file = 'functional.nii'
-    >>> res = tsnr.run() # doctest: +SKIP
-
-    """
-    input_spec = TSNRInputSpec
-    output_spec = TSNROutputSpec
-
-    def _run_interface(self, runtime):
-        img = nb.load(self.inputs.in_file[0])
-        header = img.header.copy()
-        vollist = [nb.load(filename) for filename in self.inputs.in_file]
-        data = np.concatenate([vol.get_data().reshape(
-            vol.get_shape()[:3] + (-1,)) for vol in vollist], axis=3)
-        data = np.nan_to_num(data)
-
-        if data.dtype.kind == 'i':
-            header.set_data_dtype(np.float32)
-            data = data.astype(np.float32)
-
-        if isdefined(self.inputs.regress_poly):
-            timepoints = img.shape[-1]
-            X = np.ones((timepoints, 1))
-            for i in range(self.inputs.regress_poly):
-                X = np.hstack((X, legendre(
-                    i + 1)(np.linspace(-1, 1, timepoints))[:, None]))
-            betas = np.dot(np.linalg.pinv(X), np.rollaxis(data, 3, 2))
-            datahat = np.rollaxis(np.dot(X[:, 1:],
-                                         np.rollaxis(
-                                             betas[1:, :, :, :], 0, 3)),
-                                  0, 4)
-            data = data - datahat
-            img = nb.Nifti1Image(data, img.get_affine(), header)
-            nb.save(img, op.abspath(self.inputs.detrended_file))
-
-        meanimg = np.mean(data, axis=3)
-        stddevimg = np.std(data, axis=3)
-        tsnr = np.zeros_like(meanimg)
-        tsnr[stddevimg > 1.e-3] = meanimg[stddevimg > 1.e-3] / stddevimg[stddevimg > 1.e-3]
-        img = nb.Nifti1Image(tsnr, img.get_affine(), header)
-        nb.save(img, op.abspath(self.inputs.tsnr_file))
-        img = nb.Nifti1Image(meanimg, img.get_affine(), header)
-        nb.save(img, op.abspath(self.inputs.mean_file))
-        img = nb.Nifti1Image(stddevimg, img.get_affine(), header)
-        nb.save(img, op.abspath(self.inputs.stddev_file))
-        return runtime
-
-    def _list_outputs(self):
-        outputs = self._outputs().get()
-        for k in ['tsnr_file', 'mean_file', 'stddev_file']:
-            outputs[k] = op.abspath(getattr(self.inputs, k))
-
-        if isdefined(self.inputs.regress_poly):
-            outputs['detrended_file'] = op.abspath(self.inputs.detrended_file)
-        return outputs
-
 
 class GunzipInputSpec(BaseInterfaceInputSpec):
     in_file = File(exists=True, mandatory=True)
@@ -368,11 +280,9 @@ class Gunzip(BaseInterface):
 
     def _run_interface(self, runtime):
         import gzip
-        in_file = gzip.open(self.inputs.in_file, 'rb')
-        out_file = open(self._gen_output_file_name(), 'wb')
-        out_file.write(in_file.read())
-        out_file.close()
-        in_file.close()
+        with gzip.open(self.inputs.in_file, 'rb') as in_file:
+            with open(self._gen_output_file_name(), 'wb') as out_file:
+                out_file.write(in_file.read())
         return runtime
 
     def _list_outputs(self):
@@ -505,8 +415,9 @@ def merge_csvs(in_list):
             try:
                 in_array = np.loadtxt(in_file, delimiter=',', skiprows=1)
             except ValueError as ex:
-                first = open(in_file, 'r')
-                header_line = first.readline()
+                with open(in_file, 'r') as first:
+                    header_line = first.readline()
+
                 header_list = header_line.split(',')
                 n_cols = len(header_list)
                 try:
@@ -685,8 +596,8 @@ class MergeCSVFiles(BaseInterface):
             ext = '.csv'
 
         out_file = op.abspath(name + ext)
-        file_handle = open(out_file, 'w')
-        file_handle.write(csv_headings)
+        with open(out_file, 'w') as file_handle:
+            file_handle.write(csv_headings)
 
         shape = np.shape(output_array)
         typelist = maketypelist(
@@ -715,8 +626,9 @@ class MergeCSVFiles(BaseInterface):
             output[extraheading] = extrafieldlist
         iflogger.info(output)
         iflogger.info(fmt)
-        np.savetxt(file_handle, output, fmt, delimiter=',')
-        file_handle.close()
+        with open(out_file, 'a') as file_handle:
+            np.savetxt(file_handle, output, fmt, delimiter=',')
+
         return runtime
 
     def _list_outputs(self):
@@ -778,6 +690,8 @@ class AddCSVColumn(BaseInterface):
             new_line = line.replace('\n', '')
             new_line = new_line + ',' + self.inputs.extra_field + '\n'
             out_file.write(new_line)
+        in_file.close()
+        out_file.close()
         return runtime
 
     def _list_outputs(self):
@@ -1157,6 +1071,10 @@ class SplitROIs(BaseInterface):
     """
     Splits a 3D image in small chunks to enable parallel processing.
     ROIs keep time series structure in 4D images.
+
+    Example
+    -------
+
     >>> from nipype.algorithms import misc
     >>> rois = misc.SplitROIs()
     >>> rois.inputs.in_file = 'diffusion.nii'
@@ -1186,7 +1104,7 @@ class SplitROIs(BaseInterface):
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        for k, v in self._outnames.items():
+        for k, v in list(self._outnames.items()):
             outputs[k] = v
         return outputs
 
@@ -1500,3 +1418,14 @@ class FuzzyOverlap(nam.FuzzyOverlap):
         warnings.warn(("This interface has been deprecated since 0.10.0,"
                        " please use nipype.algorithms.metrics.FuzzyOverlap"),
                       DeprecationWarning)
+
+class TSNR(confounds.TSNR):
+    """
+    .. deprecated:: 0.12.1
+       Use :py:class:`nipype.algorithms.confounds.TSNR` instead
+    """
+    def __init__(self, **inputs):
+        super(confounds.TSNR, self).__init__(**inputs)
+        warnings.warn(("This interface has been moved since 0.12.0,"
+                       " please use nipype.algorithms.confounds.TSNR"),
+                      UserWarning)

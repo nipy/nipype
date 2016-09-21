@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """Provides interfaces to various commands provided by diffusion toolkit
@@ -9,16 +10,17 @@
    >>> os.chdir(datadir)
 
 """
-__docformat__ = 'restructuredtext'
-from builtins import range
+from __future__ import print_function, division, unicode_literals, absolute_import
+from builtins import range, open
 
 import os
 import re
 
+from ...utils.filemanip import fname_presuffix, split_filename, copyfile
 from ..base import (TraitedSpec, File, traits, CommandLine,
                     CommandLineInputSpec, isdefined)
-from ...utils.filemanip import fname_presuffix, split_filename, copyfile
 
+__docformat__ = 'restructuredtext'
 
 class DTIReconInputSpec(CommandLineInputSpec):
     DWI = File(desc='Input diffusion volume', argstr='%s', exists=True, mandatory=True, position=1)
@@ -69,16 +71,16 @@ class DTIRecon(CommandLine):
 
     def _create_gradient_matrix(self, bvecs_file, bvals_file):
         _gradient_matrix_file = 'gradient_matrix.txt'
-        bvals = [val for val in re.split('\s+', open(bvals_file).readline().strip())]
-        bvecs_f = open(bvecs_file)
-        bvecs_x = [val for val in re.split('\s+', bvecs_f.readline().strip())]
-        bvecs_y = [val for val in re.split('\s+', bvecs_f.readline().strip())]
-        bvecs_z = [val for val in re.split('\s+', bvecs_f.readline().strip())]
-        bvecs_f.close()
-        gradient_matrix_f = open(_gradient_matrix_file, 'w')
-        for i in range(len(bvals)):
-            gradient_matrix_f.write("%s, %s, %s, %s\n" % (bvecs_x[i], bvecs_y[i], bvecs_z[i], bvals[i]))
-        gradient_matrix_f.close()
+        with open(bvals_file) as fbvals:
+            bvals = [val for val in re.split('\s+', fbvals.readline().strip())]
+        with open(bvecs_file) as fbvecs:
+            bvecs_y = [val for val in re.split('\s+', fbvecs.readline().strip())]
+            bvecs_z = [val for val in re.split('\s+', fbvecs.readline().strip())]
+            bvecs_x = [val for val in re.split('\s+', fbvecs.readline().strip())]
+
+        with open(_gradient_matrix_file, 'w') as gradient_matrix_f:
+            for i in range(len(bvals)):
+                gradient_matrix_f.write("%s, %s, %s, %s\n" % (bvecs_x[i], bvecs_y[i], bvecs_z[i], bvals[i]))
         return _gradient_matrix_file
 
     def _format_arg(self, name, spec, value):

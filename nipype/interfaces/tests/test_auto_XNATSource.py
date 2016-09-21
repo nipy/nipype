@@ -6,7 +6,7 @@ from ..io import XNATSource
 def test_XNATSource_inputs():
     input_map = dict(cache_dir=dict(),
     config=dict(mandatory=True,
-    xor=['server'],
+    xor=[u'server'],
     ),
     ignore_exception=dict(nohash=True,
     usedefault=True,
@@ -17,8 +17,8 @@ def test_XNATSource_inputs():
     query_template_args=dict(usedefault=True,
     ),
     server=dict(mandatory=True,
-    requires=['user', 'pwd'],
-    xor=['config'],
+    requires=[u'user', u'pwd'],
+    xor=[u'config'],
     ),
     user=dict(),
     )

@@ -24,7 +24,7 @@ def test_XfmConcat_inputs():
     output_file=dict(argstr='%s',
     genfile=True,
     hash_files=False,
-    name_source=['input_files'],
+    name_source=[u'input_files'],
     name_template='%s_xfmconcat.xfm',
     position=-1,
     ),

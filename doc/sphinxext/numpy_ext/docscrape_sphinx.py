@@ -1,11 +1,12 @@
-from __future__ import absolute_import
+# -*- coding: utf-8 -*-
+from __future__ import absolute_import, unicode_literals
+from builtins import str, bytes
 import re
 import inspect
 import textwrap
 import pydoc
 import sphinx
 from .docscrape import NumpyDocString, FunctionDoc, ClassDoc
-from nipype.external.six import string_types
 
 
 class SphinxDocString(NumpyDocString):
@@ -146,7 +147,7 @@ class SphinxDocString(NumpyDocString):
         out = []
         if self['References']:
             out += self._str_header('References')
-            if isinstance(self['References'], string_types):
+            if isinstance(self['References'], (str, bytes)):
                 self['References'] = [self['References']]
             out.extend(self['References'])
             out += ['']

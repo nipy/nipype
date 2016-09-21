@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """The fsl module provides classes for interfacing with the `FSL
@@ -11,26 +12,22 @@ was written to work with FSL version 4.1.4.
     >>> os.chdir(datadir)
 
 """
-
-from builtins import range
+from __future__ import print_function, division, unicode_literals, absolute_import
+from builtins import range, open
 
 import os
-import shutil
 import warnings
 
-from ... import LooseVersion
+from ...utils.filemanip import fname_presuffix, split_filename, copyfile
 from ..base import (TraitedSpec, isdefined, File, Directory,
                     InputMultiPath, OutputMultiPath, traits)
-from ..fsl.base import (FSLCommand, FSLCommandInputSpec, Info)
-from ...utils.filemanip import fname_presuffix, split_filename, copyfile
-
-warn = warnings.warn
-
+from .base import (FSLCommand, FSLCommandInputSpec, Info)
 
 class DTIFitInputSpec(FSLCommandInputSpec):
     dwi = File(exists=True, desc='diffusion weighted image data file',
                argstr='-k %s', position=0, mandatory=True)
-    base_name = traits.Str("dtifit_", desc='base_name that all output files will start with',
+    base_name = traits.Str("dtifit_", desc=('base_name that all output files '
+                                            'will start with'),
                            argstr='-o %s', position=1, usedefault=True)
     mask = File(exists=True, desc='bet binary mask file',
                 argstr='-m %s', position=2, mandatory=True)
@@ -47,7 +44,8 @@ class DTIFitInputSpec(FSLCommandInputSpec):
     save_tensor = traits.Bool(desc='save the elements of the tensor',
                               argstr='--save_tensor')
     sse = traits.Bool(desc='output sum of squared errors', argstr='--sse')
-    cni = File(exists=True, desc='input counfound regressors', argstr='--cni=%s')
+    cni = File(exists=True, desc='input counfound regressors',
+               argstr='--cni=%s')
     little_bit = traits.Bool(desc='only process small area of brain',
                              argstr='--littlebit')
     gradnonlin = File(exists=True, argstr='--gradnonlin=%s',
@@ -62,11 +60,15 @@ class DTIFitOutputSpec(TraitedSpec):
     L2 = File(exists=True, desc='path/name of file with the 2nd eigenvalue')
     L3 = File(exists=True, desc='path/name of file with the 3rd eigenvalue')
     MD = File(exists=True, desc='path/name of file with the mean diffusivity')
-    FA = File(exists=True, desc='path/name of file with the fractional anisotropy')
-    MO = File(exists=True, desc='path/name of file with the mode of anisotropy')
-    S0 = File(exists=True, desc='path/name of file with the raw T2 signal with no ' +
-                                'diffusion weighting')
-    tensor = File(exists=True, desc='path/name of file with the 4D tensor volume')
+    FA = File(exists=True,
+              desc='path/name of file with the fractional anisotropy')
+    MO = File(exists=True,
+              desc='path/name of file with the mode of anisotropy')
+    S0 = File(exists=True,
+              desc=('path/name of file with the raw T2 signal with no '
+                    'diffusion weighting'))
+    tensor = File(exists=True,
+                  desc='path/name of file with the 4D tensor volume')
 
 
 class DTIFit(FSLCommand):
@@ -83,7 +85,7 @@ class DTIFit(FSLCommand):
     >>> dti.inputs.bvals = 'bvals'
     >>> dti.inputs.base_name = 'TP'
     >>> dti.inputs.mask = 'mask.nii'
-    >>> dti.cmdline
+    >>> dti.cmdline # doctest: +IGNORE_UNICODE
     'dtifit -k diffusion.nii -o TP -m mask.nii -r bvecs -b bvals'
 
     """
@@ -98,7 +100,8 @@ class DTIFit(FSLCommand):
             if k not in ('outputtype', 'environ', 'args'):
                 if k != 'tensor' or (isdefined(self.inputs.save_tensor) and
                                      self.inputs.save_tensor):
-                    outputs[k] = self._gen_fname(self.inputs.base_name, suffix='_' + k)
+                    outputs[k] = self._gen_fname(
+                        self.inputs.base_name, suffix='_' + k)
         return outputs
 
 
@@ -172,16 +175,22 @@ class FSLXCommandOutputSpec(TraitedSpec):
     dyads = OutputMultiPath(File(exists=True), desc=('Mean of PDD distribution'
                                                      ' in vector form.'))
     fsamples = OutputMultiPath(File(exists=True), desc=('Samples from the '
-                                                        'distribution on f anisotropy'))
-    mean_dsamples = File(exists=True, desc='Mean of distribution on diffusivity d')
-    mean_fsamples = OutputMultiPath(File(exists=True), desc=('Mean of '
-                                                             'distribution on f anisotropy'))
+                                                        'distribution on f '
+                                                        'anisotropy'))
+    mean_dsamples = File(exists=True,
+                         desc='Mean of distribution on diffusivity d')
+    mean_fsamples = OutputMultiPath(File(exists=True),
+                                    desc=('Mean of distribution on f '
+                                          'anisotropy'))
     mean_S0samples = File(exists=True, desc=('Mean of distribution on T2w'
                                              'baseline signal intensity S0'))
     mean_tausamples = File(exists=True, desc=('Mean of distribution on '
-                                              'tau samples (only with rician noise)'))
-    phsamples = OutputMultiPath(File(exists=True), desc=('phi samples, per fiber'))
-    thsamples = OutputMultiPath(File(exists=True), desc=('theta samples, per fiber'))
+                                              'tau samples (only with rician '
+                                              'noise)'))
+    phsamples = OutputMultiPath(File(exists=True),
+                                desc=('phi samples, per fiber'))
+    thsamples = OutputMultiPath(File(exists=True),
+                                desc=('theta samples, per fiber'))
 
 
 class FSLXCommand(FSLCommand):
@@ -224,8 +233,8 @@ class FSLXCommand(FSLCommand):
         for i in range(1, n_fibres + 1):
             outputs['fsamples'].append(self._gen_fname('f%dsamples' % i,
                                                        cwd=out_dir))
-            outputs['mean_fsamples'].append(self._gen_fname(('mean_f%d'
-                                                             'samples') % i, cwd=out_dir))
+            outputs['mean_fsamples'].append(
+                self._gen_fname('mean_f%dsamples' % i, cwd=out_dir))
 
         for i in range(1, n_fibres + 1):
             outputs['dyads'].append(self._gen_fname('dyads%d' % i,
@@ -263,31 +272,37 @@ class BEDPOSTX5InputSpec(FSLXCommandInputSpec):
                                 desc='Num of jumps for each sample (MCMC)')
     out_dir = Directory('bedpostx', mandatory=True, desc='output directory',
                         usedefault=True, position=1, argstr='%s')
-    gradnonlin = traits.Bool(False, argstr='-g', desc=('consider gradient '
-                                                       'nonlinearities, default off'))
-    grad_dev = File(exists=True, desc='grad_dev file, if gradnonlin, -g is True')
+    gradnonlin = traits.Bool(False, argstr='-g',
+                             desc=('consider gradient nonlinearities, '
+                                   'default off'))
+    grad_dev = File(exists=True,
+                    desc='grad_dev file, if gradnonlin, -g is True')
     use_gpu = traits.Bool(False, desc='Use the GPU version of bedpostx')
 
 
 class BEDPOSTX5OutputSpec(TraitedSpec):
-    mean_dsamples = File(exists=True, desc='Mean of distribution on diffusivity d')
-    mean_fsamples = OutputMultiPath(File(exists=True), desc=('Mean of '
-                                                             'distribution on f anisotropy'))
+    mean_dsamples = File(exists=True,
+                         desc='Mean of distribution on diffusivity d')
+    mean_fsamples = OutputMultiPath(File(exists=True),
+                                    desc=('Mean of distribution on f '
+                                          'anisotropy'))
     mean_S0samples = File(exists=True, desc=('Mean of distribution on T2w'
                                              'baseline signal intensity S0'))
-    mean_phsamples = OutputMultiPath(File(exists=True), desc=('Mean of '
-                                                              'distribution on phi'))
-    mean_thsamples = OutputMultiPath(File(exists=True), desc=('Mean of '
-                                                              'distribution on theta'))
-    merged_thsamples = OutputMultiPath(File(exists=True), desc=('Samples from '
-                                                                'the distribution on theta'))
-    merged_phsamples = OutputMultiPath(File(exists=True), desc=('Samples from '
-                                                                'the distribution on phi'))
+    mean_phsamples = OutputMultiPath(File(exists=True),
+                                     desc='Mean of distribution on phi')
+    mean_thsamples = OutputMultiPath(File(exists=True),
+                                     desc='Mean of distribution on theta')
+    merged_thsamples = OutputMultiPath(File(exists=True),
+                                       desc=('Samples from the distribution '
+                                             'on theta'))
+    merged_phsamples = OutputMultiPath(File(exists=True),
+                                       desc=('Samples from the distribution '
+                                             'on phi'))
     merged_fsamples = OutputMultiPath(File(exists=True),
                                       desc=('Samples from the distribution on '
                                             'anisotropic volume fraction'))
-    dyads = OutputMultiPath(File(exists=True), desc=('Mean of PDD distribution'
-                                                     ' in vector form.'))
+    dyads = OutputMultiPath(File(exists=True),
+                            desc='Mean of PDD distribution in vector form.')
     dyads_dispersion = OutputMultiPath(File(exists=True), desc=('Dispersion'))
 
 
@@ -312,7 +327,7 @@ class BEDPOSTX5(FSLXCommand):
     >>> from nipype.interfaces import fsl
     >>> bedp = fsl.BEDPOSTX5(bvecs='bvecs', bvals='bvals', dwi='diffusion.nii',
     ...                     mask='mask.nii', n_fibres=1)
-    >>> bedp.cmdline
+    >>> bedp.cmdline # doctest: +IGNORE_UNICODE
     'bedpostx bedpostx --forcedir -n 1'
 
     """
@@ -377,23 +392,22 @@ class BEDPOSTX5(FSLXCommand):
             outputs[k] = []
 
         for i in range(1, n_fibres + 1):
-            outputs['merged_thsamples'].append(self._gen_fname('merged_th%dsamples' % i,
-                                                               cwd=self._out_dir))
-            outputs['merged_fsamples'].append(self._gen_fname('merged_f%dsamples' % i,
-                                                              cwd=self._out_dir))
-            outputs['merged_phsamples'].append(self._gen_fname('merged_ph%dsamples' % i,
-                                                               cwd=self._out_dir))
-
-            outputs['mean_thsamples'].append(self._gen_fname('mean_th%dsamples' % i,
-                                                             cwd=self._out_dir))
-            outputs['mean_phsamples'].append(self._gen_fname('mean_ph%dsamples' % i,
-                                                             cwd=self._out_dir))
-            outputs['mean_fsamples'].append(self._gen_fname('mean_f%dsamples' % i,
-                                                            cwd=self._out_dir))
-            outputs['dyads'].append(self._gen_fname('dyads%d' % i,
-                                                    cwd=self._out_dir))
-            outputs['dyads_dispersion'].append(self._gen_fname('dyads%d_dispersion' % i,
-                                                               cwd=self._out_dir))
+            outputs['merged_thsamples'].append(
+                self._gen_fname('merged_th%dsamples' % i, cwd=self._out_dir))
+            outputs['merged_fsamples'].append(
+                self._gen_fname('merged_f%dsamples' % i, cwd=self._out_dir))
+            outputs['merged_phsamples'].append(
+                self._gen_fname('merged_ph%dsamples' % i, cwd=self._out_dir))
+            outputs['mean_thsamples'].append(
+                self._gen_fname('mean_th%dsamples' % i, cwd=self._out_dir))
+            outputs['mean_phsamples'].append(
+                self._gen_fname('mean_ph%dsamples' % i, cwd=self._out_dir))
+            outputs['mean_fsamples'].append(
+                self._gen_fname('mean_f%dsamples' % i, cwd=self._out_dir))
+            outputs['dyads'].append(
+                self._gen_fname('dyads%d' % i, cwd=self._out_dir))
+            outputs['dyads_dispersion'].append(
+                self._gen_fname('dyads%d_dispersion' % i, cwd=self._out_dir))
         return outputs
 
 
@@ -419,94 +433,141 @@ class ProbTrackXBaseInputSpec(FSLCommandInputSpec):
     thsamples = InputMultiPath(File(exists=True), mandatory=True)
     phsamples = InputMultiPath(File(exists=True), mandatory=True)
     fsamples = InputMultiPath(File(exists=True), mandatory=True)
-    samples_base_name = traits.Str("merged", desc='the rootname/base_name for samples files',
+    samples_base_name = traits.Str("merged",
+                                   desc=('the rootname/base_name for samples '
+                                         'files'),
                                    argstr='--samples=%s', usedefault=True)
     mask = File(exists=True, desc='bet binary mask file in diffusion space',
                 argstr='-m %s', mandatory=True)
     seed = traits.Either(File(exists=True), traits.List(File(exists=True)),
-                         traits.List(traits.List(traits.Int(), minlen=3, maxlen=3)),
-                         desc='seed volume(s), or voxel(s)' +
-                         'or freesurfer label file',
+                         traits.List(traits.List(traits.Int(),
+                                     minlen=3, maxlen=3)),
+                         desc=('seed volume(s), or voxel(s) or freesurfer '
+                               'label file'),
                          argstr='--seed=%s', mandatory=True)
-    target_masks = InputMultiPath(File(exits=True), desc='list of target masks - ' +
-                                  'required for seeds_to_targets classification', argstr='--targetmasks=%s')
-    waypoints = File(exists=True, desc='waypoint mask or ascii list of waypoint masks - ' +
-                     'only keep paths going through ALL the masks', argstr='--waypoints=%s')
-    network = traits.Bool(desc='activate network mode - only keep paths going through ' +
-                          'at least one seed mask (required if multiple seed masks)',
+    target_masks = InputMultiPath(File(exits=True),
+                                  desc=('list of target masks - required for '
+                                        'seeds_to_targets classification'),
+                                  argstr='--targetmasks=%s')
+    waypoints = File(exists=True,
+                     desc=('waypoint mask or ascii list of waypoint masks - '
+                           'only keep paths going through ALL the masks'),
+                     argstr='--waypoints=%s')
+    network = traits.Bool(desc=('activate network mode - only keep paths '
+                                'going through at least one seed mask '
+                                '(required if multiple seed masks)'),
                           argstr='--network')
-    seed_ref = File(exists=True, desc='reference vol to define seed space in ' +
-                    'simple mode - diffusion space assumed if absent',
+    seed_ref = File(exists=True,
+                    desc=('reference vol to define seed space in simple mode '
+                          '- diffusion space assumed if absent'),
                     argstr='--seedref=%s')
     out_dir = Directory(exists=True, argstr='--dir=%s',
-                        desc='directory to put the final volumes in', genfile=True)
-    force_dir = traits.Bool(True, desc='use the actual directory name given - i.e. ' +
-                            'do not add + to make a new directory', argstr='--forcedir',
-                            usedefault=True)
-    opd = traits.Bool(True, desc='outputs path distributions', argstr='--opd', usedefault=True)
-    correct_path_distribution = traits.Bool(desc='correct path distribution for the length of the pathways',
+                        desc='directory to put the final volumes in',
+                        genfile=True)
+    force_dir = traits.Bool(True,
+                            desc=('use the actual directory name given - i.e. '
+                                  'do not add + to make a new directory'),
+                            argstr='--forcedir', usedefault=True)
+    opd = traits.Bool(True, desc='outputs path distributions',
+                      argstr='--opd', usedefault=True)
+    correct_path_distribution = traits.Bool(desc=('correct path distribution '
+                                                  'for the length of the '
+                                                  'pathways'),
                                             argstr='--pd')
     os2t = traits.Bool(desc='Outputs seeds to targets', argstr='--os2t')
     # paths_file = File('nipype_fdtpaths', usedefault=True, argstr='--out=%s',
     #                 desc='produces an output file (default is fdt_paths)')
-    avoid_mp = File(exists=True, desc='reject pathways passing through locations given by this mask',
+    avoid_mp = File(exists=True,
+                    desc=('reject pathways passing through locations given by '
+                          'this mask'),
                     argstr='--avoid=%s')
     stop_mask = File(exists=True, argstr='--stop=%s',
                      desc='stop tracking at locations given by this mask file')
     xfm = File(exists=True, argstr='--xfm=%s',
-               desc='transformation matrix taking seed space to DTI space ' +
-               '(either FLIRT matrix or FNIRT warp_field) - default is identity')
-    inv_xfm = File(argstr='--invxfm=%s', desc='transformation matrix taking DTI space to seed' +
-                   ' space (compulsory when using a warp_field for seeds_to_dti)')
+               desc=('transformation matrix taking seed space to DTI space '
+                     '(either FLIRT matrix or FNIRT warp_field) - default is '
+                     'identity'))
+    inv_xfm = File(argstr='--invxfm=%s',
+                   desc=('transformation matrix taking DTI space to seed '
+                         'space (compulsory when using a warp_field for '
+                         'seeds_to_dti)'))
     n_samples = traits.Int(5000, argstr='--nsamples=%d',
-                           desc='number of samples - default=5000', usedefault=True)
-    n_steps = traits.Int(argstr='--nsteps=%d', desc='number of steps per sample - default=2000')
-    dist_thresh = traits.Float(argstr='--distthresh=%.3f', desc='discards samples shorter than ' +
-                               'this threshold (in mm - default=0)')
-    c_thresh = traits.Float(argstr='--cthr=%.3f', desc='curvature threshold - default=0.2')
-    sample_random_points = traits.Bool(argstr='--sampvox', desc='sample random points within seed voxels')
-    step_length = traits.Float(argstr='--steplength=%.3f', desc='step_length in mm - default=0.5')
-    loop_check = traits.Bool(argstr='--loopcheck', desc='perform loop_checks on paths -' +
-                             ' slower, but allows lower curvature threshold')
-    use_anisotropy = traits.Bool(argstr='--usef', desc='use anisotropy to constrain tracking')
+                           desc='number of samples - default=5000',
+                           usedefault=True)
+    n_steps = traits.Int(argstr='--nsteps=%d',
+                         desc='number of steps per sample - default=2000')
+    dist_thresh = traits.Float(argstr='--distthresh=%.3f',
+                               desc=('discards samples shorter than this '
+                                     'threshold (in mm - default=0)'))
+    c_thresh = traits.Float(argstr='--cthr=%.3f',
+                            desc='curvature threshold - default=0.2')
+    sample_random_points = traits.Bool(argstr='--sampvox',
+                                       desc=('sample random points within '
+                                             'seed voxels'))
+    step_length = traits.Float(argstr='--steplength=%.3f',
+                               desc='step_length in mm - default=0.5')
+    loop_check = traits.Bool(argstr='--loopcheck',
+                             desc=('perform loop_checks on paths - slower, '
+                                   'but allows lower curvature threshold'))
+    use_anisotropy = traits.Bool(argstr='--usef',
+                                 desc='use anisotropy to constrain tracking')
     rand_fib = traits.Enum(0, 1, 2, 3, argstr='--randfib=%d',
-                           desc='options: 0 - default, 1 - to randomly sample' +
-                           ' initial fibres (with f > fibthresh), 2 - to sample in ' +
-                           'proportion fibres (with f>fibthresh) to f, 3 - to sample ALL ' +
-                           'populations at random (even if f<fibthresh)')
-    fibst = traits.Int(argstr='--fibst=%d', desc='force a starting fibre for tracking - ' +
-                       'default=1, i.e. first fibre orientation. Only works if randfib==0')
-    mod_euler = traits.Bool(argstr='--modeuler', desc='use modified euler streamlining')
+                           desc=('options: 0 - default, 1 - to randomly '
+                                 'sample initial fibres (with f > fibthresh), '
+                                 '2 - to sample in proportion fibres (with '
+                                 'f>fibthresh) to f, 3 - to sample ALL '
+                                 'populations at random (even if '
+                                 'f<fibthresh)'))
+    fibst = traits.Int(argstr='--fibst=%d',
+                       desc=('force a starting fibre for tracking - '
+                             'default=1, i.e. first fibre orientation. Only '
+                             'works if randfib==0'))
+    mod_euler = traits.Bool(argstr='--modeuler',
+                            desc='use modified euler streamlining')
     random_seed = traits.Bool(argstr='--rseed', desc='random seed')
-    s2tastext = traits.Bool(argstr='--s2tastext', desc='output seed-to-target counts as a' +
-                            ' text file (useful when seeding from a mesh)')
-    verbose = traits.Enum(0, 1, 2, desc="Verbose level, [0-2]." +
-                          "Level 2 is required to output particle files.",
+    s2tastext = traits.Bool(argstr='--s2tastext',
+                            desc=('output seed-to-target counts as a text '
+                                  'file (useful when seeding from a mesh)'))
+    verbose = traits.Enum(0, 1, 2,
+                          desc=("Verbose level, [0-2]. Level 2 is required to "
+                                "output particle files."),
                           argstr="--verbose=%d")
 
 
 class ProbTrackXInputSpec(ProbTrackXBaseInputSpec):
     mode = traits.Enum("simple", "two_mask_symm", "seedmask",
-                       desc='options: simple (single seed voxel), seedmask (mask of seed voxels), ' +
-                            'twomask_symm (two bet binary masks) ',
+                       desc=('options: simple (single seed voxel), seedmask '
+                             '(mask of seed voxels), twomask_symm (two bet '
+                             'binary masks)'),
                        argstr='--mode=%s', genfile=True)
-    mask2 = File(exists=True, desc='second bet binary mask (in diffusion space) in twomask_symm mode',
+    mask2 = File(exists=True,
+                 desc=('second bet binary mask (in diffusion space) in '
+                       'twomask_symm mode'),
                  argstr='--mask2=%s')
-    mesh = File(exists=True, desc='Freesurfer-type surface descriptor (in ascii format)',
+    mesh = File(exists=True,
+                desc='Freesurfer-type surface descriptor (in ascii format)',
                 argstr='--mesh=%s')
 
 
 class ProbTrackXOutputSpec(TraitedSpec):
-    log = File(exists=True, desc='path/name of a text record of the command that was run')
-    fdt_paths = OutputMultiPath(File(exists=True), desc='path/name of a 3D image file containing the output ' +
-                                'connectivity distribution to the seed mask')
-    way_total = File(exists=True, desc='path/name of a text file containing a single number ' +
-                     'corresponding to the total number of generated tracts that ' +
-                     'have not been rejected by inclusion/exclusion mask criteria')
-    targets = traits.List(File(exists=True), desc='a list with all generated seeds_to_target files')
-    particle_files = traits.List(File(exists=True), desc='Files describing ' +
-                                 'all of the tract samples. Generated only if ' +
-                                 'verbose is set to 2')
+    log = File(exists=True,
+               desc='path/name of a text record of the command that was run')
+    fdt_paths = OutputMultiPath(File(exists=True),
+                                desc=('path/name of a 3D image file '
+                                      'containing the output connectivity '
+                                      'distribution to the seed mask'))
+    way_total = File(exists=True,
+                     desc=('path/name of a text file containing a single '
+                           'number corresponding to the total number of '
+                           'generated tracts that have not been rejected by '
+                           'inclusion/exclusion mask criteria'))
+    targets = traits.List(File(exists=True),
+                          desc=('a list with all generated seeds_to_target '
+                                'files'))
+    particle_files = traits.List(File(exists=True),
+                                 desc=('Files describing all of the tract '
+                                       'samples. Generated only if verbose is '
+                                       'set to 2'))
 
 
 class ProbTrackX(FSLCommand):
@@ -522,7 +583,7 @@ class ProbTrackX(FSLCommand):
     target_masks = ['targets_MASK1.nii', 'targets_MASK2.nii'], \
     thsamples='merged_thsamples.nii', fsamples='merged_fsamples.nii', phsamples='merged_phsamples.nii', \
     out_dir='.')
-    >>> pbx.cmdline
+    >>> pbx.cmdline # doctest: +IGNORE_UNICODE
     'probtrackx --forcedir -m mask.nii --mode=seedmask --nsamples=3 --nsteps=10 --opd --os2t --dir=. --samples=merged --seed=MASK_average_thal_right.nii --targetmasks=targets.txt --xfm=trans.mat'
 
     """
@@ -532,7 +593,8 @@ class ProbTrackX(FSLCommand):
     output_spec = ProbTrackXOutputSpec
 
     def __init__(self, **inputs):
-        warnings.warn("Deprecated: Please use create_bedpostx_pipeline instead", DeprecationWarning)
+        warnings.warn(("Deprecated: Please use create_bedpostx_pipeline "
+                       "instead"), DeprecationWarning)
         return super(ProbTrackX, self).__init__(**inputs)
 
     def _run_interface(self, runtime):
@@ -586,19 +648,23 @@ class ProbTrackX(FSLCommand):
         else:
             out_dir = self.inputs.out_dir
 
-        outputs['log'] = os.path.abspath(os.path.join(out_dir, 'probtrackx.log'))
+        outputs['log'] = os.path.abspath(
+            os.path.join(out_dir, 'probtrackx.log'))
         # utputs['way_total'] = os.path.abspath(os.path.join(out_dir, 'waytotal'))
         if isdefined(self.inputs.opd is True):
-            if isinstance(self.inputs.seed, list) and isinstance(self.inputs.seed[0], list):
+            if (isinstance(self.inputs.seed, list) and
+                    isinstance(self.inputs.seed[0], list)):
                 outputs['fdt_paths'] = []
                 for seed in self.inputs.seed:
                     outputs['fdt_paths'].append(
                         os.path.abspath(
-                            self._gen_fname("fdt_paths_%s" % ("_".join([str(s) for s in seed])),
-                                            cwd=out_dir, suffix='')))
+                            self._gen_fname(
+                                ("fdt_paths_%s" %
+                                 ("_".join([str(s) for s in seed]))),
+                                cwd=out_dir, suffix='')))
             else:
-                outputs['fdt_paths'] = os.path.abspath(self._gen_fname("fdt_paths",
-                                                                       cwd=out_dir, suffix=''))
+                outputs['fdt_paths'] = os.path.abspath(
+                    self._gen_fname("fdt_paths", cwd=out_dir, suffix=''))
 
         # handle seeds-to-target output files
         if isdefined(self.inputs.target_masks):
@@ -618,56 +684,84 @@ class ProbTrackX(FSLCommand):
         if name == "out_dir":
             return os.getcwd()
         elif name == "mode":
-            if isinstance(self.inputs.seed, list) and isinstance(self.inputs.seed[0], list):
+            if (isinstance(self.inputs.seed, list) and
+                    isinstance(self.inputs.seed[0], list)):
                 return "simple"
             else:
                 return "seedmask"
 
 
 class ProbTrackX2InputSpec(ProbTrackXBaseInputSpec):
-    simple = traits.Bool(desc='rack from a list of voxels (seed must be a ASCII list of coordinates)',
+    simple = traits.Bool(desc=('rack from a list of voxels (seed must be a '
+                               'ASCII list of coordinates)'),
                          usedefault=False, argstr='--simple')
-    fopd = File(exists=True, desc='Other mask for binning tract distribution',
+    fopd = File(exists=True,
+                desc='Other mask for binning tract distribution',
                 argstr='--fopd=%s')
     waycond = traits.Enum("OR", "AND", argstr='--waycond=%s',
-                          desc='Waypoint condition. Either "AND" (default) or "OR"')
-    wayorder = traits.Bool(desc='Reject streamlines that do not hit waypoints in given order. ' +
-                           'Only valid if waycond=AND', argstr='--wayorder')
-    onewaycondition = traits.Bool(desc='Apply waypoint conditions to each half tract separately',
+                          desc=('Waypoint condition. Either "AND" (default) '
+                                'or "OR"'))
+    wayorder = traits.Bool(desc=('Reject streamlines that do not hit '
+                                 'waypoints in given order. Only valid if '
+                                 'waycond=AND'),
+                           argstr='--wayorder')
+    onewaycondition = traits.Bool(desc=('Apply waypoint conditions to each '
+                                        'half tract separately'),
                                   argstr='--onewaycondition')
     omatrix1 = traits.Bool(desc='Output matrix1 - SeedToSeed Connectivity',
                            argstr='--omatrix1')
     distthresh1 = traits.Float(argstr='--distthresh1=%.3f',
-                               desc='Discards samples (in matrix1) shorter than this threshold ' +
-                               '(in mm - default=0)')
-    omatrix2 = traits.Bool(desc='Output matrix2 - SeedToLowResMask', argstr='--omatrix2', requires=['target2'])
-    target2 = File(exists=True, desc='Low resolution binary brain mask for storing ' +
-                   'connectivity distribution in matrix2 mode', argstr='--target2=%s')
-    omatrix3 = traits.Bool(desc='Output matrix3 (NxN connectivity matrix)', argstr='--omatrix3',
+                               desc=('Discards samples (in matrix1) shorter '
+                                     'than this threshold (in mm - '
+                                     'default=0)'))
+    omatrix2 = traits.Bool(desc='Output matrix2 - SeedToLowResMask',
+                           argstr='--omatrix2', requires=['target2'])
+    target2 = File(exists=True,
+                   desc=('Low resolution binary brain mask for storing '
+                         'connectivity distribution in matrix2 mode'),
+                   argstr='--target2=%s')
+    omatrix3 = traits.Bool(desc='Output matrix3 (NxN connectivity matrix)',
+                           argstr='--omatrix3',
                            requires=['target3', 'lrtarget3'])
-    target3 = File(exists=True, desc='Mask used for NxN connectivity matrix ' +
-                   '(or Nxn if lrtarget3 is set)', argstr='--target3=%s')
-    lrtarget3 = File(exists=True, desc='Column-space mask used for Nxn connectivity matrix',
+    target3 = File(exists=True,
+                   desc=('Mask used for NxN connectivity matrix (or Nxn if '
+                         'lrtarget3 is set)'),
+                   argstr='--target3=%s')
+    lrtarget3 = File(exists=True,
+                     desc='Column-space mask used for Nxn connectivity matrix',
                      argstr='--lrtarget3=%s')
     distthresh3 = traits.Float(argstr='--distthresh3=%.3f',
-                               desc='Discards samples (in matrix3) shorter than this threshold ' +
-                               '(in mm - default=0)')
-    omatrix4 = traits.Bool(desc='Output matrix4 - DtiMaskToSeed (special Oxford Sparse Format)',
+                               desc=('Discards samples (in matrix3) shorter '
+                                     'than this threshold (in mm - '
+                                     'default=0)'))
+    omatrix4 = traits.Bool(desc=('Output matrix4 - DtiMaskToSeed (special '
+                                 'Oxford Sparse Format)'),
                            argstr='--omatrix4')
-    colmask4 = File(exists=True, desc='Mask for columns of matrix4 (default=seed mask)',
+    colmask4 = File(exists=True,
+                    desc='Mask for columns of matrix4 (default=seed mask)',
                     argstr='--colmask4=%s')
-    target4 = File(exists=True, desc='Brain mask in DTI space', argstr='--target4=%s')
-    meshspace = traits.Enum("caret", "freesurfer", "first", "vox", argstr='--meshspace=%s',
-                            desc='Mesh reference space - either "caret" (default) or ' +
-                            '"freesurfer" or "first" or "vox"')
+    target4 = File(exists=True, desc='Brain mask in DTI space',
+                   argstr='--target4=%s')
+    meshspace = traits.Enum("caret", "freesurfer", "first", "vox",
+                            argstr='--meshspace=%s',
+                            desc=('Mesh reference space - either "caret" '
+                                  '(default) or "freesurfer" or "first" or '
+                                  '"vox"'))
 
 
 class ProbTrackX2OutputSpec(ProbTrackXOutputSpec):
-    network_matrix = File(exists=True, desc='the network matrix generated by --omatrix1 option')
-    matrix1_dot = File(exists=True, desc='Output matrix1.dot - SeedToSeed Connectivity')
-    lookup_tractspace = File(exists=True, desc='lookup_tractspace generated by --omatrix2 option')
-    matrix2_dot = File(exists=True, desc='Output matrix2.dot - SeedToLowResMask')
-    matrix3_dot = File(exists=True, desc='Output matrix3 - NxN connectivity matrix')
+    network_matrix = File(exists=True,
+                          desc=('the network matrix generated by --omatrix1 '
+                                'option'))
+    matrix1_dot = File(exists=True,
+                       desc='Output matrix1.dot - SeedToSeed Connectivity')
+    lookup_tractspace = File(exists=True,
+                             desc=('lookup_tractspace generated by '
+                                   '--omatrix2 option'))
+    matrix2_dot = File(exists=True,
+                       desc='Output matrix2.dot - SeedToLowResMask')
+    matrix3_dot = File(exists=True,
+                       desc='Output matrix3 - NxN connectivity matrix')
 
 
 class ProbTrackX2(ProbTrackX):
@@ -686,7 +780,7 @@ class ProbTrackX2(ProbTrackX):
     >>> pbx2.inputs.out_dir = '.'
     >>> pbx2.inputs.n_samples = 3
     >>> pbx2.inputs.n_steps = 10
-    >>> pbx2.cmdline
+    >>> pbx2.cmdline # doctest: +IGNORE_UNICODE
     'probtrackx2 --forcedir -m nodif_brain_mask.nii.gz --nsamples=3 --nsteps=10 --opd --dir=. --samples=merged --seed=seed_source.nii.gz'
     """
     _cmd = 'probtrackx2'
@@ -702,47 +796,64 @@ class ProbTrackX2(ProbTrackX):
             out_dir = self.inputs.out_dir
 
         if isdefined(self.inputs.omatrix1):
-            outputs['network_matrix'] = os.path.abspath(os.path.join(out_dir, 'fdt_network_matrix'))
-            outputs['matrix1_dot'] = os.path.abspath(os.path.join(out_dir, 'fdt_matrix1.dot'))
+            outputs['network_matrix'] = os.path.abspath(
+                os.path.join(out_dir, 'fdt_network_matrix'))
+            outputs['matrix1_dot'] = os.path.abspath(
+                os.path.join(out_dir, 'fdt_matrix1.dot'))
 
         if isdefined(self.inputs.omatrix2):
-            outputs['lookup_tractspace'] = \
-                os.path.abspath(os.path.join(out_dir, 'lookup_tractspace_fdt_matrix2.nii.gz'))
-            outputs['matrix2_dot'] = os.path.abspath(os.path.join(out_dir, 'fdt_matrix2.dot'))
+            outputs['lookup_tractspace'] = os.path.abspath(
+                os.path.join(out_dir, 'lookup_tractspace_fdt_matrix2.nii.gz'))
+            outputs['matrix2_dot'] = os.path.abspath(
+                os.path.join(out_dir, 'fdt_matrix2.dot'))
 
         if isdefined(self.inputs.omatrix3):
-            outputs['matrix3_dot'] = os.path.abspath(os.path.join(out_dir, 'fdt_matrix3.dot'))
+            outputs['matrix3_dot'] = os.path.abspath(
+                os.path.join(out_dir, 'fdt_matrix3.dot'))
         return outputs
 
 
 class VecRegInputSpec(FSLCommandInputSpec):
-    in_file = File(exists=True, argstr='-i %s', desc='filename for input vector or tensor field',
+    in_file = File(exists=True, argstr='-i %s',
+                   desc='filename for input vector or tensor field',
                    mandatory=True)
-    out_file = File(argstr='-o %s', desc='filename for output registered vector or tensor field',
+    out_file = File(argstr='-o %s',
+                    desc=('filename for output registered vector or tensor '
+                          'field'),
                     genfile=True, hash_files=False)
-    ref_vol = File(exists=True, argstr='-r %s', desc='filename for reference (target) volume',
+    ref_vol = File(exists=True, argstr='-r %s',
+                   desc='filename for reference (target) volume',
                    mandatory=True)
     affine_mat = File(exists=True, argstr='-t %s',
                       desc='filename for affine transformation matrix')
     warp_field = File(exists=True, argstr='-w %s',
-                      desc='filename for 4D warp field for nonlinear registration')
+                      desc=('filename for 4D warp field for nonlinear '
+                            'registration'))
     rotation_mat = File(exists=True, argstr='--rotmat=%s',
-                        desc='filename for secondary affine matrix' +
-                        'if set, this will be used for the rotation of the vector/tensor field')
+                        desc=('filename for secondary affine matrix if set, '
+                              'this will be used for the rotation of the '
+                              'vector/tensor field'))
     rotation_warp = File(exists=True, argstr='--rotwarp=%s',
-                         desc='filename for secondary warp field' +
-                         'if set, this will be used for the rotation of the vector/tensor field')
-    interpolation = traits.Enum("nearestneighbour", "trilinear", "sinc", "spline",
+                         desc=('filename for secondary warp field if set, '
+                               'this will be used for the rotation of the '
+                               'vector/tensor field'))
+    interpolation = traits.Enum("nearestneighbour", "trilinear",
+                                "sinc", "spline",
                                 argstr='--interp=%s',
-                                desc='interpolation method : ' +
-                                     'nearestneighbour, trilinear (default), sinc or spline')
-    mask = File(exists=True, argstr='-m %s', desc='brain mask in input space')
-    ref_mask = File(exists=True, argstr='--refmask=%s', desc='brain mask in output space ' +
-                    '(useful for speed up of nonlinear reg)')
+                                desc=('interpolation method : '
+                                      'nearestneighbour, trilinear (default), '
+                                      'sinc or spline'))
+    mask = File(exists=True, argstr='-m %s',
+                desc='brain mask in input space')
+    ref_mask = File(exists=True, argstr='--refmask=%s',
+                    desc=('brain mask in output space (useful for speed up of '
+                          'nonlinear reg)'))
 
 
 class VecRegOutputSpec(TraitedSpec):
-    out_file = File(exists=True, desc='path/name of filename for the registered vector or tensor field')
+    out_file = File(exists=True,
+                    desc=('path/name of filename for the registered vector or '
+                          'tensor field'))
 
 
 class VecReg(FSLCommand):
@@ -758,7 +869,7 @@ class VecReg(FSLCommand):
                  affine_mat='trans.mat', \
                  ref_vol='mni.nii', \
                  out_file='diffusion_vreg.nii')
-    >>> vreg.cmdline
+    >>> vreg.cmdline # doctest: +IGNORE_UNICODE
     'vecreg -t trans.mat -i diffusion.nii -o diffusion_vreg.nii -r mni.nii'
 
     """
@@ -770,22 +881,23 @@ class VecReg(FSLCommand):
     def _run_interface(self, runtime):
         if not isdefined(self.inputs.out_file):
             pth, base_name = os.path.split(self.inputs.in_file)
-            self.inputs.out_file = self._gen_fname(base_name, cwd=os.path.abspath(pth),
-                                                   suffix='_vreg')
+            self.inputs.out_file = self._gen_fname(
+                base_name, cwd=os.path.abspath(pth), suffix='_vreg')
         return super(VecReg, self)._run_interface(runtime)
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
         outputs['out_file'] = self.inputs.out_file
-        if not isdefined(outputs['out_file']) and isdefined(self.inputs.in_file):
+        if (not isdefined(outputs['out_file']) and
+                isdefined(self.inputs.in_file)):
             pth, base_name = os.path.split(self.inputs.in_file)
-            outputs['out_file'] = self._gen_fname(base_name, cwd=os.path.abspath(pth),
-                                                  suffix='_vreg')
+            outputs['out_file'] = self._gen_fname(
+                base_name, cwd=os.path.abspath(pth), suffix='_vreg')
         outputs['out_file'] = os.path.abspath(outputs['out_file'])
         return outputs
 
     def _gen_filename(self, name):
-        if name is 'out_file':
+        if name == 'out_file':
             return self._list_outputs()[name]
         else:
             return None
@@ -795,13 +907,16 @@ class ProjThreshInputSpec(FSLCommandInputSpec):
     in_files = traits.List(File(exists=True), argstr='%s',
                            desc='a list of input volumes',
                            mandatory=True, position=0)
-    threshold = traits.Int(argstr='%d', desc='threshold indicating minimum ' +
-                           'number of seed voxels entering this mask region',
+    threshold = traits.Int(argstr='%d',
+                           desc=('threshold indicating minimum number of seed '
+                                 'voxels entering this mask region'),
                            mandatory=True, position=1)
 
 
 class ProjThreshOuputSpec(TraitedSpec):
-    out_files = traits.List(File(exists=True), desc='path/name of output volume after thresholding')
+    out_files = traits.List(File(exists=True),
+                            desc=('path/name of output volume after '
+                                  'thresholding'))
 
 
 class ProjThresh(FSLCommand):
@@ -815,7 +930,7 @@ class ProjThresh(FSLCommand):
     >>> from nipype.interfaces import fsl
     >>> ldir = ['seeds_to_M1.nii', 'seeds_to_M2.nii']
     >>> pThresh = fsl.ProjThresh(in_files=ldir, threshold=3)
-    >>> pThresh.cmdline
+    >>> pThresh.cmdline # doctest: +IGNORE_UNICODE
     'proj_thresh seeds_to_M1.nii seeds_to_M2.nii 3'
 
     """
@@ -829,22 +944,25 @@ class ProjThresh(FSLCommand):
         outputs['out_files'] = []
         for name in self.inputs.in_files:
             cwd, base_name = os.path.split(name)
-            outputs['out_files'].append(self._gen_fname(base_name, cwd=cwd,
-                                                        suffix='_proj_seg_thr_' +
-                                                               repr(self.inputs.threshold)))
+            outputs['out_files'].append(self._gen_fname(
+                base_name, cwd=cwd,
+                suffix='_proj_seg_thr_' + repr(self.inputs.threshold)))
         return outputs
 
 
 class FindTheBiggestInputSpec(FSLCommandInputSpec):
     in_files = traits.List(File(exists=True), argstr='%s',
-                           desc='a list of input volumes or a singleMatrixFile',
+                           desc=('a list of input volumes or a '
+                                 'singleMatrixFile'),
                            position=0, mandatory=True)
-    out_file = File(argstr='%s', desc='file with the resulting segmentation',
+    out_file = File(argstr='%s',
+                    desc='file with the resulting segmentation',
                     position=2, genfile=True, hash_files=False)
 
 
 class FindTheBiggestOutputSpec(TraitedSpec):
-    out_file = File(exists=True, argstr='%s', desc='output file indexed in order of input files')
+    out_file = File(exists=True, argstr='%s',
+                    desc='output file indexed in order of input files')
 
 
 class FindTheBiggest(FSLCommand):
@@ -860,7 +978,7 @@ class FindTheBiggest(FSLCommand):
     >>> from nipype.interfaces import fsl
     >>> ldir = ['seeds_to_M1.nii', 'seeds_to_M2.nii']
     >>> fBig = fsl.FindTheBiggest(in_files=ldir, out_file='biggestSegmentation')
-    >>> fBig.cmdline
+    >>> fBig.cmdline # doctest: +IGNORE_UNICODE
     'find_the_biggest seeds_to_M1.nii seeds_to_M2.nii biggestSegmentation'
 
     """
@@ -870,19 +988,21 @@ class FindTheBiggest(FSLCommand):
 
     def _run_interface(self, runtime):
         if not isdefined(self.inputs.out_file):
-            self.inputs.out_file = self._gen_fname('biggestSegmentation', suffix='')
+            self.inputs.out_file = self._gen_fname('biggestSegmentation',
+                                                   suffix='')
         return super(FindTheBiggest, self)._run_interface(runtime)
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
         outputs['out_file'] = self.inputs.out_file
         if not isdefined(outputs['out_file']):
-            outputs['out_file'] = self._gen_fname('biggestSegmentation', suffix='')
+            outputs['out_file'] = self._gen_fname('biggestSegmentation',
+                                                  suffix='')
         outputs['out_file'] = os.path.abspath(outputs['out_file'])
         return outputs
 
     def _gen_filename(self, name):
-        if name is 'out_file':
+        if name == 'out_file':
             return self._list_outputs()[name]
         else:
             return None
@@ -893,7 +1013,8 @@ class TractSkeletonInputSpec(FSLCommandInputSpec):
     in_file = File(exists=True, mandatory=True, argstr="-i %s",
                    desc="input image (typcially mean FA volume)")
     _proj_inputs = ["threshold", "distance_map", "data_file"]
-    project_data = traits.Bool(argstr="-p %.3f %s %s %s %s", requires=_proj_inputs,
+    project_data = traits.Bool(argstr="-p %.3f %s %s %s %s",
+                               requires=_proj_inputs,
                                desc="project data onto skeleton")
     threshold = traits.Float(desc="skeleton threshold value")
     distance_map = File(exists=True, desc="distance map image")
@@ -901,12 +1022,17 @@ class TractSkeletonInputSpec(FSLCommandInputSpec):
                             desc="mask in which to use alternate search rule")
     use_cingulum_mask = traits.Bool(True, usedefault=True,
                                     xor=["search_mask_file"],
-                                    desc="perform alternate search using built-in cingulum mask")
-    data_file = File(exists=True, desc="4D data to project onto skeleton (usually FA)")
-    alt_data_file = File(exists=True, argstr="-a %s", desc="4D non-FA data to project onto skeleton")
-    alt_skeleton = File(exists=True, argstr="-s %s", desc="alternate skeleton to use")
+                                    desc=("perform alternate search using "
+                                          "built-in cingulum mask"))
+    data_file = File(exists=True,
+                     desc="4D data to project onto skeleton (usually FA)")
+    alt_data_file = File(exists=True, argstr="-a %s",
+                         desc="4D non-FA data to project onto skeleton")
+    alt_skeleton = File(exists=True, argstr="-s %s",
+                        desc="alternate skeleton to use")
     projected_data = File(desc="input data projected onto skeleton")
-    skeleton_file = traits.Either(traits.Bool, File, argstr="-o %s", desc="write out skeleton image")
+    skeleton_file = traits.Either(traits.Bool, File, argstr="-o %s",
+                                  desc="write out skeleton image")
 
 
 class TractSkeletonOutputSpec(TraitedSpec):
@@ -916,15 +1042,18 @@ class TractSkeletonOutputSpec(TraitedSpec):
 
 
 class TractSkeleton(FSLCommand):
-    """Use FSL's tbss_skeleton to skeletonise an FA image or project arbitrary values onto a skeleton.
+    """Use FSL's tbss_skeleton to skeletonise an FA image or project arbitrary
+    values onto a skeleton.
 
-    There are two ways to use this interface.  To create a skeleton from an FA image, just
-    supply the ``in_file`` and set ``skeleton_file`` to True (or specify a skeleton filename.
-    To project values onto a skeleton, you must set ``project_data`` to True, and then also
-    supply values for ``threshold``, ``distance_map``, and ``data_file``. The ``search_mask_file``
-    and ``use_cingulum_mask`` inputs are also used in data projection, but ``use_cingulum_mask``
-    is set to True by default.  This mask controls where the projection algorithm searches
-    within a circular space around a tract, rather than in a single perpindicular direction.
+    There are two ways to use this interface.  To create a skeleton from an FA
+    image, just supply the ``in_file`` and set ``skeleton_file`` to True (or
+    specify a skeleton filename. To project values onto a skeleton, you must
+    set ``project_data`` to True, and then also supply values for
+    ``threshold``, ``distance_map``, and ``data_file``. The
+    ``search_mask_file`` and ``use_cingulum_mask`` inputs are also used in data
+    projection, but ``use_cingulum_mask`` is set to True by default.  This mask
+    controls where the projection algorithm searches within a circular space
+    around a tract, rather than in a single perpindicular direction.
 
     Example
     -------
@@ -953,7 +1082,8 @@ class TractSkeleton(FSLCommand):
                     proj_file = self._list_outputs()["projected_data"]
                 else:
                     proj_file = _si.projected_data
-                return spec.argstr % (_si.threshold, _si.distance_map, mask_file, _si.data_file, proj_file)
+                return spec.argstr % (_si.threshold, _si.distance_map,
+                                      mask_file, _si.data_file, proj_file)
         elif name == "skeleton_file":
             if isinstance(value, bool):
                 return spec.argstr % self._list_outputs()["skeleton_file"]
@@ -971,17 +1101,15 @@ class TractSkeleton(FSLCommand):
                 stem = _si.data_file
                 if isdefined(_si.alt_data_file):
                     stem = _si.alt_data_file
-                outputs["projected_data"] = fname_presuffix(stem,
-                                                            suffix="_skeletonised",
-                                                            newpath=os.getcwd(),
-                                                            use_ext=True)
+                outputs["projected_data"] = fname_presuffix(
+                    stem, suffix="_skeletonised", newpath=os.getcwd(),
+                    use_ext=True)
         if isdefined(_si.skeleton_file) and _si.skeleton_file:
             outputs["skeleton_file"] = _si.skeleton_file
             if isinstance(_si.skeleton_file, bool):
-                outputs["skeleton_file"] = fname_presuffix(_si.in_file,
-                                                           suffix="_skeleton",
-                                                           newpath=os.getcwd(),
-                                                           use_ext=True)
+                outputs["skeleton_file"] = fname_presuffix(
+                    _si.in_file, suffix="_skeleton", newpath=os.getcwd(),
+                    use_ext=True)
         return outputs
 
 
@@ -993,18 +1121,22 @@ class DistanceMapInputSpec(FSLCommandInputSpec):
                      desc="binary mask to contrain calculations")
     invert_input = traits.Bool(argstr="--invert", desc="invert input image")
     local_max_file = traits.Either(traits.Bool, File, argstr="--localmax=%s",
-                                   desc="write an image of the local maxima", hash_files=False)
-    distance_map = File(genfile=True, argstr="--out=%s", desc="distance map to write", hash_files=False)
+                                   desc="write an image of the local maxima",
+                                   hash_files=False)
+    distance_map = File(genfile=True, argstr="--out=%s",
+                        desc="distance map to write", hash_files=False)
 
 
 class DistanceMapOutputSpec(TraitedSpec):
 
-    distance_map = File(exists=True, desc="value is distance to nearest nonzero voxels")
+    distance_map = File(exists=True,
+                        desc="value is distance to nearest nonzero voxels")
     local_max_file = File(desc="image of local maxima")
 
 
 class DistanceMap(FSLCommand):
-    """Use FSL's distancemap to generate a map of the distance to the nearest nonzero voxel.
+    """Use FSL's distancemap to generate a map of the distance to the nearest
+    nonzero voxel.
 
     Example
     -------
@@ -1039,11 +1171,11 @@ class DistanceMap(FSLCommand):
         if isdefined(_si.local_max_file):
             outputs["local_max_file"] = _si.local_max_file
             if isinstance(_si.local_max_file, bool):
-                outputs["local_max_file"] = fname_presuffix(_si.in_file,
-                                                            suffix="_lclmax",
-                                                            use_ext=True,
-                                                            newpath=os.getcwd())
-            outputs["local_max_file"] = os.path.abspath(outputs["local_max_file"])
+                outputs["local_max_file"] = fname_presuffix(
+                    _si.in_file, suffix="_lclmax", use_ext=True,
+                    newpath=os.getcwd())
+            outputs["local_max_file"] = os.path.abspath(
+                outputs["local_max_file"])
         return outputs
 
     def _gen_filename(self, name):
@@ -1056,9 +1188,10 @@ class MakeDyadicVectorsInputSpec(FSLCommandInputSpec):
     theta_vol = File(exists=True, mandatory=True, position=0, argstr="%s")
     phi_vol = File(exists=True, mandatory=True, position=1, argstr="%s")
     mask = File(exists=True, position=2, argstr="%s")
-    output = File("dyads", position=3, usedefault=True, argstr="%s", hash_files=False)
-    perc = traits.Float(desc="the {perc}% angle of the output cone of \
-uncertainty (output will be in degrees)",
+    output = File("dyads", position=3, usedefault=True, argstr="%s",
+                  hash_files=False)
+    perc = traits.Float(desc=("the {perc}% angle of the output cone of "
+                              "uncertainty (output will be in degrees)"),
                         position=4,
                         argstr="%f")
 

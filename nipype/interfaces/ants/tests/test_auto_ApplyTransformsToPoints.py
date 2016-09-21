@@ -23,7 +23,7 @@ def test_ApplyTransformsToPoints_inputs():
     ),
     output_file=dict(argstr='--output %s',
     hash_files=False,
-    name_source=['input_file'],
+    name_source=[u'input_file'],
     name_template='%s_transformed.csv',
     ),
     terminal_output=dict(nohash=True,

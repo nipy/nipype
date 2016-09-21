@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
     Change directory to provide relative paths for doctests
     >>> import os
@@ -6,18 +7,18 @@
     >>> os.chdir(datadir)
 
 """
+from __future__ import print_function, division, unicode_literals, absolute_import
 
 import os
 import os.path as op
 import datetime
 import string
-import warnings
 import networkx as nx
 
-from nipype.interfaces.base import (BaseInterface, BaseInterfaceInputSpec, traits,
-                                    File, TraitedSpec, InputMultiPath, isdefined)
-from nipype.utils.filemanip import split_filename
-from nipype.utils.misc import package_check
+from ...utils.misc import package_check
+from ...utils.filemanip import split_filename
+from ..base import (BaseInterface, BaseInterfaceInputSpec, traits,
+                    File, TraitedSpec, InputMultiPath, isdefined)
 
 have_cfflib = True
 try:

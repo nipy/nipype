@@ -12,7 +12,7 @@ def test_MESD_inputs():
     usedefault=True,
     ),
     fastmesd=dict(argstr='-fastmesd',
-    requires=['mepointset'],
+    requires=[u'mepointset'],
     ),
     ignore_exception=dict(nohash=True,
     usedefault=True,

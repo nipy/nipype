@@ -8,58 +8,42 @@ python:
 env:
 - INSTALL_DEB_DEPENDECIES=true
 - INSTALL_DEB_DEPENDECIES=false
+- INSTALL_DEB_DEPENDECIES=true DUECREDIT_ENABLE=yes
 before_install:
-- if [ ${TRAVIS_PYTHON_VERSION:0:1} == "2" ]; then wget http://repo.continuum.io/miniconda/Miniconda2-latest-Linux-x86_64.sh
-  -O miniconda.sh; else wget http://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh
-  -O miniconda.sh; fi
-- chmod +x miniconda.sh
-- "./miniconda.sh -b"
-- if [ ${TRAVIS_PYTHON_VERSION:0:1} == "2" ]; then export PATH=/home/travis/miniconda2/bin:$PATH; else export PATH=/home/travis/miniconda3/bin:$PATH; fi
+- wget http://repo.continuum.io/miniconda/Miniconda${TRAVIS_PYTHON_VERSION:0:1}-latest-Linux-x86_64.sh
+  -O /home/travis/.cache/miniconda.sh
+- bash /home/travis/.cache/miniconda.sh -b -p /home/travis/miniconda
+- export PATH=/home/travis/miniconda/bin:$PATH
 - if $INSTALL_DEB_DEPENDECIES; then sudo rm -rf /dev/shm; fi
 - if $INSTALL_DEB_DEPENDECIES; then sudo ln -s /run/shm /dev/shm; fi
 - bash <(wget -q -O- http://neuro.debian.net/_files/neurodebian-travis.sh)
-- sudo apt-get update
-- sudo apt-get install xvfb
-- if $INSTALL_DEB_DEPENDECIES; then travis_retry sudo apt-get install -qq --no-install-recommends
-  fsl afni elastix; fi
-- if $INSTALL_DEB_DEPENDECIES; then travis_retry sudo apt-get install -qq fsl-atlases;
-  fi
-- if $INSTALL_DEB_DEPENDECIES; then source /etc/fsl/fsl.sh; fi
-- if $INSTALL_DEB_DEPENDECIES; then source /etc/afni/afni.sh; fi
+- sudo apt-get -y update
+- sudo apt-get -y install xvfb fusefat
+- if $INSTALL_DEB_DEPENDECIES; then travis_retry sudo apt-get install -y -qq
+  fsl afni elastix fsl-atlases; fi
+- if $INSTALL_DEB_DEPENDECIES; then
+  source /etc/fsl/fsl.sh;
+  source /etc/afni/afni.sh; fi
 - export FSLOUTPUTTYPE=NIFTI_GZ
-# Install vtk and fix numpy installation problem
-# Fix numpy problem: https://github.com/enthought/enable/issues/34#issuecomment-2029381
-- if [ ${TRAVIS_PYTHON_VERSION:0:1} == "2" ]; then travis_retry sudo apt-get install -qq libx11-dev swig;
-  echo '[x11]' >> $HOME/.numpy-site.cfg; 
-  echo 'library_dirs = /usr/lib64:/usr/lib:/usr/lib/x86_64-linux-gnu' >> $HOME/.numpy-site.cfg;
-  echo 'include_dirs = /usr/include:/usr/include/X11' >> $HOME/.numpy-site.cfg;
-  fi
 install:
-- sudo apt-get install fusefat
+- conda config --add channels conda-forge
 - conda update --yes conda
-- conda create -n testenv --yes pip python=$TRAVIS_PYTHON_VERSION
-- source activate testenv
-- if [ ${TRAVIS_PYTHON_VERSION:0:1} == "2" ]; then pip install ordereddict; fi
-- conda install --yes numpy scipy nose networkx python-dateutil
-- if [ ${TRAVIS_PYTHON_VERSION:0:1} == "2" ]; then conda install --yes traits; else pip install traits; fi
-- if [ ${TRAVIS_PYTHON_VERSION:0:1} == "2" ]; then conda install --yes vtk; fi
-- pip install python-coveralls
-- pip install nose-cov
-# Add tvtk (PIL is required by blockcanvas)
-# Install mayavi (see https://github.com/enthought/mayavi/issues/271)
-- if [ ${TRAVIS_PYTHON_VERSION:0:1} == "2" ]; then
-  pip install http://effbot.org/downloads/Imaging-1.1.7.tar.gz;
-  pip install -e git+https://github.com/enthought/etsdevtools.git#egg=etsdevtools;
-  pip install -e git+https://github.com/enthought/blockcanvas.git#egg=blockcanvas;
-  pip install -e git+https://github.com/enthought/etsproxy.git#egg=etsproxy;
-  pip install https://github.com/dmsurti/mayavi/archive/4d4aaf315a29d6a86707dd95149e27d9ed2225bf.zip;
-  pip install -e git+https://github.com/enthought/ets.git#egg=ets;
-  fi
+- conda update --all -y python=$TRAVIS_PYTHON_VERSION
+# - if [[ "${INSTALL_DEB_DEPENDECIES}" == "true" && ${TRAVIS_PYTHON_VERSION:0:1} == "2" ]]; then
+#   conda install -y vtk mayavi; fi
+- conda install -y nipype matplotlib nitime
+- pip install python-coveralls coverage doctest-ignore-unicode
+- if [ ! -z "$DUECREDIT_ENABLE"]; then pip install duecredit; fi
+- rm -r /home/travis/miniconda/lib/python${TRAVIS_PYTHON_VERSION}/site-packages/nipype*
+- pip install -r requirements.txt
 - pip install -e .
+- export COVERAGE_PROCESS_START=$(pwd)/.coveragerc
+- export COVERAGE_DATA_FILE=$(pwd)/.coverage
+- echo "data_file = ${COVERAGE_DATA_FILE}" >> ${COVERAGE_PROCESS_START}
 script:
-- python -W once:FSL:UserWarning:nipype `which nosetests` --with-doctest --with-cov --cover-package nipype --cov-config .coveragerc --logging-level=DEBUG --verbosity=3
+- python -W once:FSL:UserWarning:nipype `which nosetests` --with-doctest --with-doctest-ignore-unicode --with-cov --cover-package nipype --logging-level=DEBUG --verbosity=3
 after_success:
-- coveralls --config_file .coveragerc
+- bash <(curl -s https://codecov.io/bash) -t ac172a50-8e66-42e5-8822-5373fcf54686 -cF unittests
 deploy:
   provider: pypi
   user: satra

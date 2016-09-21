@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
     Change directory to provide relative paths for doctests
     >>> import os
@@ -6,14 +7,16 @@
     >>> os.chdir(datadir)
 
 """
+from __future__ import print_function, division, unicode_literals, absolute_import
+
 import os
 import glob
 
+from ...utils.filemanip import split_filename
 from ..base import (CommandLineInputSpec, CommandLine, traits,
                     TraitedSpec, File, StdOutCommandLine,
                     OutputMultiPath, StdOutCommandLineInputSpec,
                     isdefined)
-from ...utils.filemanip import split_filename
 
 
 class Image2VoxelInputSpec(StdOutCommandLineInputSpec):

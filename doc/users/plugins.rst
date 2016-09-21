@@ -178,6 +178,7 @@ Optional arguments::
 
   template: custom template file to use
   sbatch_args: any other command line args to be passed to bsub.
+  jobid_re: regular expression for custom job submission id search
 
 
 SLURMGraph

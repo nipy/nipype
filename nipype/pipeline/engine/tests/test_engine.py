@@ -1,9 +1,13 @@
+# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """Tests for the engine module
 """
 
 from __future__ import print_function
+from __future__ import unicode_literals
+from builtins import str
+from builtins import open
 from copy import deepcopy
 from glob import glob
 import os
@@ -427,7 +431,7 @@ wf1.write_graph(graph2use='exec')
 import nipype.pipeline.engine as pe
 import nipype.interfaces.spm as spm
 import os
-from nipype.external.six import StringIO
+from io import StringIO
 from nipype.utils.config import config
 
 config.readfp(StringIO("""

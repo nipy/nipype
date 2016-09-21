@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from ....interfaces import utility as util     # utility
 from ....pipeline import engine as pe          # pypeline engine
 from ....interfaces import fsl as fsl

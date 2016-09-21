@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 
@@ -10,21 +11,22 @@
    >>> os.chdir(datadir)
 
 """
-__docformat__ = 'restructuredtext'
+from __future__ import print_function, division, unicode_literals, absolute_import
 
 import os
 import os.path
 
-from ... utils.filemanip import split_filename, copyfile
+from ... import logging
+from ...utils.filemanip import split_filename, copyfile
 
-from ..freesurfer.base import (Info, FSCommand, FSTraitedSpec,
-                               FSScriptCommand,
-                               FSScriptOutputSpec,
-                               FSCommandOpenMP,
-                               FSTraitedSpecOpenMP)
+from .base import (FSCommand, FSTraitedSpec,
+                   FSScriptCommand,
+                   FSScriptOutputSpec,
+                   FSCommandOpenMP,
+                   FSTraitedSpecOpenMP)
 from ..base import (isdefined, TraitedSpec, File, traits, Directory)
 
-from ... import logging
+__docformat__ = 'restructuredtext'
 iflogger = logging.getLogger('interface')
 
 
@@ -202,7 +204,7 @@ class EMRegister(FSCommandOpenMP):
     >>> register.inputs.out_file = 'norm_transform.lta'
     >>> register.inputs.skull = True
     >>> register.inputs.nbrspacing = 9
-    >>> register.cmdline
+    >>> register.cmdline # doctest: +IGNORE_UNICODE
     'mri_em_register -uns 9 -skull norm.mgz aseg.mgz norm_transform.lta'
     """
     _cmd = 'mri_em_register'
@@ -252,7 +254,7 @@ class Register(FSCommand):
     >>> register.inputs.target = 'aseg.mgz'
     >>> register.inputs.out_file = 'lh.pial.reg'
     >>> register.inputs.curv = True
-    >>> register.cmdline
+    >>> register.cmdline # doctest: +IGNORE_UNICODE
     'mris_register -curv lh.pial aseg.mgz lh.pial.reg'
     """
 
@@ -318,7 +320,7 @@ class Paint(FSCommand):
     >>> paint.inputs.template = 'aseg.mgz'
     >>> paint.inputs.averages = 5
     >>> paint.inputs.out_file = 'lh.avg_curv'
-    >>> paint.cmdline
+    >>> paint.cmdline # doctest: +IGNORE_UNICODE
     'mrisp_paint -a 5 aseg.mgz lh.pial lh.avg_curv'
     """
 

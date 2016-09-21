@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """Interfaces to assorted Freesurfer utility programs.
@@ -9,18 +10,20 @@
    >>> os.chdir(datadir)
 
 """
-__docformat__ = 'restructuredtext'
-
+from __future__ import print_function, division, unicode_literals, absolute_import
+from builtins import str, open
 
 import os
 import re
 import shutil
 
-from ..freesurfer.base import (FSCommand, FSTraitedSpec,
-                               FSScriptCommand, FSScriptOutputSpec,
-                               FSTraitedSpecOpenMP, FSCommandOpenMP)
-from ..base import TraitedSpec, File, traits, OutputMultiPath, isdefined, CommandLine, CommandLineInputSpec
 from ...utils.filemanip import fname_presuffix, split_filename
+from ..base import (TraitedSpec, File, traits, OutputMultiPath, isdefined,
+                    CommandLine, CommandLineInputSpec)
+from .base import (FSCommand, FSTraitedSpec,
+                   FSScriptCommand, FSScriptOutputSpec,
+                   FSTraitedSpecOpenMP, FSCommandOpenMP)
+__docformat__ = 'restructuredtext'
 
 filemap = dict(cor='cor', mgh='mgh', mgz='mgz', minc='mnc',
                afni='brik', brik='brik', bshort='bshort',
@@ -68,7 +71,7 @@ def copy2subjdir(cls, in_file, folder=None, basename=None, subject_id=None):
 
 def createoutputdirs(outputs):
     """create all output directories. If not created, some freesurfer interfaces fail"""
-    for output in outputs.itervalues():
+    for output in list(outputs.values()):
         dirname = os.path.dirname(output)
         if not os.path.isdir(dirname):
             os.makedirs(dirname)
@@ -189,6 +192,8 @@ class SampleToSurface(FSCommand):
     >>> sampler.inputs.sampling_method = "average"
     >>> sampler.inputs.sampling_range = 1
     >>> sampler.inputs.sampling_units = "frac"
+    >>> sampler.cmdline  # doctest: +ELLIPSIS +IGNORE_UNICODE
+    'mri_vol2surf --hemi lh --o ...lh.cope1.mgz --reg register.dat --projfrac-avg 1.000 --mov cope1.nii.gz'
     >>> res = sampler.run() # doctest: +SKIP
 
     """
@@ -310,6 +315,8 @@ class SurfaceSmooth(FSCommand):
     >>> smoother.inputs.subject_id = "subj_1"
     >>> smoother.inputs.hemi = "lh"
     >>> smoother.inputs.fwhm = 5
+    >>> smoother.cmdline # doctest: +ELLIPSIS +IGNORE_UNICODE
+    'mri_surf2surf --cortex --fwhm 5.0000 --hemi lh --sval lh.cope1.mgz --tval ...lh.cope1_smooth5.mgz --s subj_1'
     >>> smoother.run() # doctest: +SKIP
 
     """
@@ -484,7 +491,7 @@ class Surface2VolTransform(FSCommand):
     >>> xfm2vol.inputs.hemi = 'lh'
     >>> xfm2vol.inputs.template_file = 'cope1.nii.gz'
     >>> xfm2vol.inputs.subjects_dir = '.'
-    >>> xfm2vol.cmdline
+    >>> xfm2vol.cmdline # doctest: +IGNORE_UNICODE
     'mri_surf2vol --hemi lh --volreg register.mat --surfval lh.cope1.mgz --sd . --template cope1.nii.gz --outvol lh.cope1_asVol.nii --vtxvol lh.cope1_asVol_vertex.nii'
     >>> res = xfm2vol.run()# doctest: +SKIP
 
@@ -851,7 +858,7 @@ class MRIsConvertInputSpec(FSTraitedSpec):
                     xor=['out_datatype'], mandatory=True,
                     desc='output filename or True to generate one')
 
-    out_datatype = traits.Enum("ico", "tri", "stl", "vtk", "gii", "mgh", "mgz",
+    out_datatype = traits.Enum("asc", "ico", "tri", "stl", "vtk", "gii", "mgh", "mgz",
                                xor=['out_file'], mandatory=True,
                                desc="These file formats are supported:  ASCII:       .asc"
                                "ICO: .ico, .tri GEO: .geo STL: .stl VTK: .vtk GIFTI: .gii MGH surface-encoded 'volume': .mgh, .mgz")
@@ -896,7 +903,7 @@ class MRIsConvert(FSCommand):
         return outputs
 
     def _gen_filename(self, name):
-        if name is 'out_file':
+        if name == 'out_file':
             return os.path.abspath(self._gen_outfilename())
         else:
             return None
@@ -964,7 +971,7 @@ class MRITessellate(FSCommand):
         return outputs
 
     def _gen_filename(self, name):
-        if name is 'out_file':
+        if name == 'out_file':
             return self._gen_outfilename()
         else:
             return None
@@ -986,8 +993,8 @@ class MRIPretessInputSpec(FSTraitedSpec):
                                 '\'wm\' or a label value (e.g. 127 for rh or 255 for lh)'))
     in_norm = File(exists=True, mandatory=True, position=-2, argstr='%s',
                    desc=('the normalized, brain-extracted T1w image. Usually norm.mgz'))
-    out_file = File(position=-1, argstr='%s', genfile=True,
-                    desc=('the output file after mri_pretess.'))
+    out_file = File(position=-1, argstr='%s', name_source=['in_filled'], name_template='%s_pretesswm',
+                    keep_extension=True, desc='the output file after mri_pretess.')
 
     nocorners = traits.Bool(False, argstr='-nocorners', desc=('do not remove corner configurations'
                                                               ' in addition to edge ones.'))
@@ -1020,31 +1027,14 @@ class MRIPretess(FSCommand):
     >>> pretess.inputs.in_filled = 'wm.mgz'
     >>> pretess.inputs.in_norm = 'norm.mgz'
     >>> pretess.inputs.nocorners = True
-    >>> pretess.cmdline
+    >>> pretess.cmdline # doctest: +IGNORE_UNICODE
     'mri_pretess -nocorners wm.mgz wm norm.mgz wm_pretesswm.mgz'
     >>> pretess.run() # doctest: +SKIP
+
     """
     _cmd = 'mri_pretess'
     input_spec = MRIPretessInputSpec
     output_spec = MRIPretessOutputSpec
-
-    def _list_outputs(self):
-        outputs = self.output_spec().get()
-        outputs['out_file'] = os.path.abspath(self._gen_outfilename())
-        return outputs
-
-    def _gen_filename(self, name):
-        if name is 'out_file':
-            return self._gen_outfilename()
-        else:
-            return None
-
-    def _gen_outfilename(self):
-        if isdefined(self.inputs.out_file):
-            return self.inputs.out_file
-        else:
-            _, name, ext = split_filename(self.inputs.in_filled)
-            return name + '_pretess' + str(self.inputs.label) + ext
 
 
 class MRIMarchingCubesInputSpec(FSTraitedSpec):
@@ -1091,7 +1081,7 @@ class MRIMarchingCubes(FSCommand):
         return outputs
 
     def _gen_filename(self, name):
-        if name is 'out_file':
+        if name == 'out_file':
             return self._gen_outfilename()
         else:
             return None
@@ -1165,7 +1155,7 @@ class SmoothTessellation(FSCommand):
         return outputs
 
     def _gen_filename(self, name):
-        if name is 'out_file':
+        if name == 'out_file':
             return self._gen_outfilename()
         else:
             return None
@@ -1207,7 +1197,7 @@ class MakeAverageSubject(FSCommand):
 
     >>> from nipype.interfaces.freesurfer import MakeAverageSubject
     >>> avg = MakeAverageSubject(subjects_ids=['s1', 's2'])
-    >>> avg.cmdline
+    >>> avg.cmdline # doctest: +IGNORE_UNICODE
     'make_average_subject --out average --subjects s1 s2'
 
     """
@@ -1242,7 +1232,7 @@ class ExtractMainComponent(CommandLine):
 
     >>> from nipype.interfaces.freesurfer import ExtractMainComponent
     >>> mcmp = ExtractMainComponent(in_file='lh.pial')
-    >>> mcmp.cmdline
+    >>> mcmp.cmdline # doctest: +IGNORE_UNICODE
     'mris_extract_main_component lh.pial lh.maincmp'
 
     """
@@ -1305,7 +1295,7 @@ class Tkregister2(FSCommand):
     >>> tk2.inputs.moving_image = 'T1.mgz'
     >>> tk2.inputs.target_image = 'structural.nii'
     >>> tk2.inputs.reg_header = True
-    >>> tk2.cmdline
+    >>> tk2.cmdline # doctest: +IGNORE_UNICODE
     'tkregister2 --mov T1.mgz --noedit --reg T1_to_native.dat --regheader \
 --targ structural.nii'
     >>> tk2.run() # doctest: +SKIP
@@ -1318,7 +1308,7 @@ class Tkregister2(FSCommand):
     >>> tk2 = Tkregister2()
     >>> tk2.inputs.moving_image = 'epi.nii'
     >>> tk2.inputs.fsl_in_matrix = 'flirt.mat'
-    >>> tk2.cmdline
+    >>> tk2.cmdline # doctest: +IGNORE_UNICODE
     'tkregister2 --fsl flirt.mat --mov epi.nii --noedit --reg register.dat'
     >>> tk2.run() # doctest: +SKIP
     """
@@ -1372,11 +1362,11 @@ class AddXFormToHeader(FSCommand):
     >>> adder = AddXFormToHeader()
     >>> adder.inputs.in_file = 'norm.mgz'
     >>> adder.inputs.transform = 'trans.mat'
-    >>> adder.cmdline
+    >>> adder.cmdline # doctest: +IGNORE_UNICODE
     'mri_add_xform_to_header trans.mat norm.mgz output.mgz'
 
     >>> adder.inputs.copy_name = True
-    >>> adder.cmdline
+    >>> adder.cmdline # doctest: +IGNORE_UNICODE
     'mri_add_xform_to_header -c trans.mat norm.mgz output.mgz'
 
     >>> adder.run()   # doctest: +SKIP
@@ -1430,7 +1420,7 @@ class CheckTalairachAlignment(FSCommand):
 
     >>> checker.inputs.in_file = 'trans.mat'
     >>> checker.inputs.threshold = 0.005
-    >>> checker.cmdline
+    >>> checker.cmdline # doctest: +IGNORE_UNICODE
     'talairach_afd -T 0.005 -xfm trans.mat'
 
     >>> checker.run() # doctest: +SKIP
@@ -1479,7 +1469,7 @@ class TalairachAVI(FSCommand):
     >>> example = TalairachAVI()
     >>> example.inputs.in_file = 'norm.mgz'
     >>> example.inputs.out_file = 'trans.mat'
-    >>> example.cmdline
+    >>> example.cmdline # doctest: +IGNORE_UNICODE
     'talairach_avi --i norm.mgz --xfm trans.mat'
 
     >>> example.run() # doctest: +SKIP
@@ -1510,7 +1500,7 @@ class TalairachQC(FSScriptCommand):
     >>> from nipype.interfaces.freesurfer import TalairachQC
     >>> qc = TalairachQC()
     >>> qc.inputs.log_file = 'dirs.txt'
-    >>> qc.cmdline
+    >>> qc.cmdline # doctest: +IGNORE_UNICODE
     'tal_QC_AZS dirs.txt'
     """
     _cmd = "tal_QC_AZS"
@@ -1549,7 +1539,7 @@ class RemoveNeck(FSCommand):
     >>> remove_neck.inputs.in_file = 'norm.mgz'
     >>> remove_neck.inputs.transform = 'trans.mat'
     >>> remove_neck.inputs.template = 'trans.mat'
-    >>> remove_neck.cmdline
+    >>> remove_neck.cmdline # doctest: +IGNORE_UNICODE
     'mri_remove_neck norm.mgz trans.mat trans.mat norm_noneck.mgz'
     """
     _cmd = "mri_remove_neck"
@@ -1689,7 +1679,7 @@ class Sphere(FSCommandOpenMP):
     >>> from nipype.interfaces.freesurfer import Sphere
     >>> sphere = Sphere()
     >>> sphere.inputs.in_file = 'lh.pial'
-    >>> sphere.cmdline
+    >>> sphere.cmdline # doctest: +IGNORE_UNICODE
     'mris_sphere lh.pial lh.sphere'
     """
     _cmd = 'mris_sphere'
@@ -1813,7 +1803,7 @@ class EulerNumber(FSCommand):
     >>> from nipype.interfaces.freesurfer import EulerNumber
     >>> ft = EulerNumber()
     >>> ft.inputs.in_file = 'lh.pial'
-    >>> ft.cmdline
+    >>> ft.cmdline # doctest: +IGNORE_UNICODE
     'mris_euler_number lh.pial'
     """
     _cmd = 'mris_euler_number'
@@ -1849,7 +1839,7 @@ class RemoveIntersection(FSCommand):
     >>> from nipype.interfaces.freesurfer import RemoveIntersection
     >>> ri = RemoveIntersection()
     >>> ri.inputs.in_file = 'lh.pial'
-    >>> ri.cmdline
+    >>> ri.cmdline # doctest: +IGNORE_UNICODE
     'mris_remove_intersection lh.pial lh.pial'
     """
 
@@ -1945,7 +1935,7 @@ class MakeSurfaces(FSCommand):
     >>> makesurfaces.inputs.in_label = 'aparc+aseg.nii'
     >>> makesurfaces.inputs.in_T1 = 'T1.mgz'
     >>> makesurfaces.inputs.orig_pial = 'lh.pial'
-    >>> makesurfaces.cmdline
+    >>> makesurfaces.cmdline # doctest: +IGNORE_UNICODE
     'mris_make_surfaces -T1 T1.mgz -orig pial -orig_pial pial 10335 lh'
     """
 
@@ -2078,7 +2068,7 @@ class Curvature(FSCommand):
     >>> curv = Curvature()
     >>> curv.inputs.in_file = 'lh.pial'
     >>> curv.inputs.save = True
-    >>> curv.cmdline
+    >>> curv.cmdline # doctest: +IGNORE_UNICODE
     'mris_curvature -w lh.pial'
     """
 
@@ -2172,7 +2162,7 @@ class CurvatureStats(FSCommand):
     >>> curvstats.inputs.values = True
     >>> curvstats.inputs.min_max = True
     >>> curvstats.inputs.write = True
-    >>> curvstats.cmdline
+    >>> curvstats.cmdline # doctest: +IGNORE_UNICODE
     'mris_curvature_stats -m -o lh.curv.stats -F pial -G --writeCurvatureFiles subject_id lh pial pial'
     """
 
@@ -2229,7 +2219,7 @@ class Jacobian(FSCommand):
     >>> jacobian = Jacobian()
     >>> jacobian.inputs.in_origsurf = 'lh.pial'
     >>> jacobian.inputs.in_mappedsurf = 'lh.pial'
-    >>> jacobian.cmdline
+    >>> jacobian.cmdline # doctest: +IGNORE_UNICODE
     'mris_jacobian lh.pial lh.pial lh.jacobian'
     """
 
@@ -2366,7 +2356,7 @@ class VolumeMask(FSCommand):
     >>> volmask.inputs.rh_white = 'lh.pial'
     >>> volmask.inputs.subject_id = '10335'
     >>> volmask.inputs.save_ribbon = True
-    >>> volmask.cmdline
+    >>> volmask.cmdline # doctest: +IGNORE_UNICODE
     'mris_volmask --label_left_ribbon 3 --label_left_white 2 --label_right_ribbon 42 --label_right_white 41 --save_ribbon 10335'
     """
 
@@ -2706,7 +2696,7 @@ class RelabelHypointensities(FSCommand):
     >>> relabelhypos.inputs.rh_white = 'lh.pial'
     >>> relabelhypos.inputs.surf_directory = '.'
     >>> relabelhypos.inputs.aseg = 'aseg.mgz'
-    >>> relabelhypos.cmdline
+    >>> relabelhypos.cmdline # doctest: +IGNORE_UNICODE
     'mri_relabel_hypointensities aseg.mgz . aseg.hypos.mgz'
     """
 
@@ -2877,7 +2867,7 @@ class Apas2Aseg(FSCommand):
     >>> apas2aseg = Apas2Aseg()
     >>> apas2aseg.inputs.in_file = 'aseg.mgz'
     >>> apas2aseg.inputs.out_file = 'output.mgz'
-    >>> apas2aseg.cmdline
+    >>> apas2aseg.cmdline # doctest: +IGNORE_UNICODE
     'apas2aseg --i aseg.mgz --o output.mgz'
     """
 
