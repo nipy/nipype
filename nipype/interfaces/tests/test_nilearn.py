@@ -104,9 +104,9 @@ class TestSignalExtraction(unittest.TestCase):
             wanted_row = []
             for reg in range(self.fake_4d_label_data.shape[3]):
                 region = self.fake_4d_label_data[:, :, :, reg].flatten()
-                wanted_row.append(np.average(volume, weights=region))
-            wanted.append(wanted_row)
+                wanted_row.append((volume*region).sum()/(region*region).sum())
 
+            wanted.append(wanted_row)
         # run & assert
         self._test_4d_label(wanted, self.fake_4d_label_data)
 
