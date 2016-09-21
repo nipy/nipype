@@ -1060,12 +1060,12 @@ def make_output_dir(outdir):
     # this odd approach deals with concurrent directory cureation
     try:
         if not os.path.exists(os.path.abspath(outdir)):
-            logger.debug("Creating %s" % outdir)
+            logger.debug("Creating %s", outdir)
             os.makedirs(outdir)
     except OSError:
-            logger.debug("Problem creating %s" % outdir)
+            logger.debug("Problem creating %s", outdir)
             if not os.path.exists(outdir):
-               raise OSError('Could not create %s'%outdir)
+               raise OSError('Could not create %s', outdir)
     return outdir
 
 

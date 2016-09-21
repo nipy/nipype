@@ -72,7 +72,7 @@ class NipypeInterfaceError(Exception):
         self.value = value
 
     def __str__(self):
-        return repr(self.value)
+        return '{}'.format(self.value)
 
 def _exists_in_path(cmd, environ):
     """
@@ -381,7 +381,7 @@ class BaseTraitedSpec(traits.HasTraits):
         outstr = []
         for name, value in sorted(self.trait_get().items()):
             outstr.append('%s = %s' % (name, value))
-        return '\n' + '\n'.join(outstr) + '\n'
+        return '\n{}\n'.format('\n'.join(outstr))
 
     def _generate_handlers(self):
         """Find all traits with the 'xor' metadata and attach an event
@@ -808,10 +808,13 @@ class BaseInterface(Interface):
     def _refs_help(cls):
         """ Prints interface references.
         """
+        if not cls.references_:
+            return []
+
         helpstr = ['References::']
 
         for r in cls.references_:
-            helpstr += [repr(r['entry'])]
+            helpstr += ['{}'.format(r['entry'])]
 
         return helpstr
 

@@ -111,7 +111,7 @@ def encode_dict_py27(value):
         nels = len(value)
         for i, v in enumerate(value):
             venc = encode_dict_py27(v)
-            if venc.startswith("u'") or venc.startswith('u"'):
+            if venc.startswith(("u'", 'u"')):
                 venc = venc[1:]
             retval += venc
 
@@ -124,7 +124,7 @@ def encode_dict_py27(value):
         return retval
 
     retval = repr(value).decode()
-    if retval.startswith("u'") or retval.startswith('u"'):
+    if retval.startswith(("u'", 'u"')):
         retval = retval[1:]
     return retval
 

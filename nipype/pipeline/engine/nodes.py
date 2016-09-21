@@ -205,20 +205,16 @@ class Node(EngineBase):
         if self._hierarchy:
             outputdir = op.join(outputdir, *self._hierarchy.split('.'))
         if self.parameterization:
+            params_str = ['{}'.format(p) for p in self.parameterization]
             if not str2bool(self.config['execution']['parameterize_dirs']):
-                param_dirs = [self._parameterization_dir(p) for p in
-                              self.parameterization]
-                outputdir = op.join(outputdir, *param_dirs)
-            else:
-                outputdir = op.join(outputdir, *self.parameterization)
+                params_str = [self._parameterization_dir(p) for p in params_str]
+            outputdir = op.join(outputdir, *params_str)
         return op.abspath(op.join(outputdir,
                                   self.name))
 
     def set_input(self, parameter, val):
         """ Set interface input value"""
-        logger.debug('setting nodelevel(%s) input %s = %s' % (str(self),
-                                                              parameter,
-                                                              str(val)))
+        logger.debug('setting nodelevel(%s) input %s = %s', self.name, parameter, val)
         setattr(self.inputs, parameter, deepcopy(val))
 
     def get_output(self, parameter):
@@ -278,7 +274,7 @@ class Node(EngineBase):
             self._get_inputs()
             self._got_inputs = True
         outdir = self.output_dir()
-        logger.info("Executing node %s in dir: %s" % (self._id, outdir))
+        logger.info("Executing node %s in dir: %s", self._id, outdir)
         if op.exists(outdir):
             logger.debug(os.listdir(outdir))
         hash_info = self.hash_exists(updatehash=updatehash)
@@ -301,17 +297,11 @@ class Node(EngineBase):
                           len(glob(json_unfinished_pat)) == 0)
             if need_rerun:
                 logger.debug("Rerunning node")
-                logger.debug(("updatehash = %s, "
-                              "self.overwrite = %s, "
-                              "self._interface.always_run = %s, "
-                              "os.path.exists(%s) = %s, "
-                              "hash_method = %s") %
-                             (str(updatehash),
-                              str(self.overwrite),
-                              str(self._interface.always_run),
-                              hashfile,
-                              str(op.exists(hashfile)),
-                              self.config['execution']['hash_method'].lower()))
+                logger.debug(
+                    "updatehash = %s, self.overwrite = %s, self._interface.always_run = %s, "
+                    "os.path.exists(%s) = %s, hash_method = %s", updatehash, self.overwrite,
+                    self._interface.always_run, hashfile, op.exists(hashfile),
+                    self.config['execution']['hash_method'].lower())
                 log_debug = config.get('logging', 'workflow_level') == 'DEBUG'
                 if log_debug and not op.exists(hashfile):
                     exp_hash_paths = glob(json_pat)
@@ -319,7 +309,7 @@ class Node(EngineBase):
                         split_out = split_filename(exp_hash_paths[0])
                         exp_hash_file_base = split_out[1]
                         exp_hash = exp_hash_file_base[len('_0x'):]
-                        logger.debug("Previous node hash = %s" % exp_hash)
+                        logger.debug("Previous node hash = %s", exp_hash)
                         try:
                             prev_inputs = load_json(exp_hash_paths[0])
                         except:
@@ -343,26 +333,26 @@ class Node(EngineBase):
                              self._interface.can_resume) and not
                          isinstance(self, MapNode))
             if rm_outdir:
-                logger.debug("Removing old %s and its contents" % outdir)
+                logger.debug("Removing old %s and its contents", outdir)
                 try:
                     rmtree(outdir)
                 except OSError as ex:
                     outdircont = os.listdir(outdir)
                     if ((ex.errno == errno.ENOTEMPTY) and (len(outdircont) == 0)):
-                        logger.warn(('An exception was raised trying to remove old %s, '
-                                     'but the path seems empty. Is it an NFS mount?. '
-                                     'Passing the exception.') % outdir)
+                        logger.warn(
+                            'An exception was raised trying to remove old %s, but the path '
+                            'seems empty. Is it an NFS mount?. Passing the exception.', outdir)
                     elif ((ex.errno == errno.ENOTEMPTY) and (len(outdircont) != 0)):
-                        logger.debug(('Folder contents (%d items): '
-                                      '%s') % (len(outdircont), outdircont))
+                        logger.debug(
+                            'Folder contents (%d items): %s', len(outdircont), outdircont)
                         raise ex
                     else:
                         raise ex
 
             else:
-                logger.debug(("%s found and can_resume is True or Node is a "
-                              "MapNode - resuming execution") %
-                             hashfile_unfinished)
+                logger.debug(
+                    "%s found and can_resume is True or Node is a MapNode - resuming execution",
+                    hashfile_unfinished)
                 if isinstance(self, MapNode):
                     # remove old json files
                     for filename in glob(op.join(outdir, '_0x*.json')):
