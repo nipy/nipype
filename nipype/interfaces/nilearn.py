@@ -119,7 +119,8 @@ class SignalExtraction(BaseInterface):
                                                     self.inputs.label_files))
 
         if self.inputs.include_global:
-            global_label_data = label_data.get_data().clip(0, 1).sum(axis=3)
+            global_label_data = label_data.get_data().sum(axis=3)
+            global_label_data = np.rint(global_label_data).astype(int).clip(0, 1)
             global_label_data = global_label_data[:, :, :, np.newaxis] # add back 4th dimension
             global_label_data = nb.Nifti1Image(global_label_data, np.eye(4))
             global_masker = nl.NiftiMapsMasker(global_label_data, detrend=self.inputs.detrend)
