@@ -224,7 +224,7 @@ class CreateJacobianDeterminantImage(ANTSCommand):
     >>> from nipype.interfaces.ants import CreateJacobianDeterminantImage
     >>> jacobian = CreateJacobianDeterminantImage()
     >>> jacobian.inputs.imageDimension = 3
-    >>> jacobian.inputs.warp_file = 'ants_Warp.nii.gz'
+    >>> jacobian.inputs.deformationField = 'ants_Warp.nii.gz'
     >>> jacobian.inputs.outputImage = 'out_name.nii.gz'
     >>> jacobian.cmdline # doctest: +IGNORE_UNICODE
     'CreateJacobianDeterminantImage 3 ants_Warp.nii.gz out_name.nii.gz'
