@@ -25,10 +25,10 @@ IFLOG = logging.getLogger('interface')
 class SignalExtractionInputSpec(BaseInterfaceInputSpec):
     in_file = File(exists=True, mandatory=True, desc='4-D fMRI nii file')
     label_files = InputMultiPath(File(exists=True), mandatory=True,
-                                desc='a 3-D label image, with 0 denoting '
-                                'background, or a list of 3-D probability '
-                                'maps (one per label) or the equivalent 4D '
-                                'file.')
+                                 desc='a 3-D label image, with 0 denoting '
+                                 'background, or a list of 3-D probability '
+                                 'maps (one per label) or the equivalent 4D '
+                                 'file.')
     class_labels = traits.List(mandatory=True,
                                desc='Human-readable labels for each segment '
                                'in the label file, in order. The length of '
@@ -43,12 +43,12 @@ class SignalExtractionInputSpec(BaseInterfaceInputSpec):
                                        '(True), returns simple time series calculated from each '
                                        'region independently (e.g., for noise regression). If '
                                        'False, returns unique signals for each region, discarding '
-                                       'shared variance (e.g., for connectivity)')
+                                       'shared variance (e.g., for connectivity. Only has effect '
+                                       'with 4D probability maps.')
     include_global = traits.Bool(False, usedefault=True, mandatory=False,
                                  desc='If True, include an extra column '
                                  'labeled "global", with values calculated from the entire brain '
-                                 '(instead of just regions). Only has effect with 4D probability '
-                                 'maps.')
+                                 '(instead of just regions).')
     detrend = traits.Bool(False, usedefault=True, mandatory=False,
                           desc='If True, perform detrending using nilearn.')
 
@@ -105,8 +105,7 @@ class SignalExtraction(BaseInterface):
             n_labels = label_data.get_data().shape[3]
             if self.inputs.incl_shared_variance: # 4d labels, independent computation
                 for img in nli.iter_img(label_data):
-                    sortof_4d_img = nb.Nifti1Image(img.get_data()[:, :, :, np.newaxis], np.eye(4))
-                    maskers.append(nl.NiftiMapsMasker(sortof_4d_img))
+                    maskers.append(nl.NiftiMapsMasker(self._4d(img.get_data(), img.affine)))
             else: # 4d labels, one computation fitting all
                 maskers.append(nl.NiftiMapsMasker(label_data))
 
@@ -115,15 +114,14 @@ class SignalExtraction(BaseInterface):
             raise ValueError('The length of class_labels {} does not '
                              'match the number of regions {} found in '
                              'label_files {}'.format(self.inputs.class_labels,
-                                                    n_labels,
-                                                    self.inputs.label_files))
+                                                     n_labels,
+                                                     self.inputs.label_files))
 
         if self.inputs.include_global:
-            global_label_data = label_data.get_data().sum(axis=3)
-            global_label_data = np.rint(global_label_data).astype(int).clip(0, 1)
-            global_label_data = global_label_data[:, :, :, np.newaxis] # add back 4th dimension
-            global_label_data = nb.Nifti1Image(global_label_data, np.eye(4))
-            global_masker = nl.NiftiMapsMasker(global_label_data, detrend=self.inputs.detrend)
+            global_label_data = label_data.get_data().sum(axis=3) # sum across all regions
+            global_label_data = np.rint(global_label_data).astype(int).clip(0, 1) # binarize
+            global_label_data = self._4d(global_label_data, label_data.affine)
+            global_masker = nl.NiftiLabelsMasker(global_label_data, detrend=self.inputs.detrend)
             maskers.insert(0, global_masker)
             self.inputs.class_labels.insert(0, 'global')
 
@@ -131,6 +129,11 @@ class SignalExtraction(BaseInterface):
             masker.set_params(detrend=self.inputs.detrend)
 
         return maskers
+
+    def _4d(self, array, affine):
+        ''' takes a 3-dimensional numpy array and an affine,
+        returns the equivalent 4th dimensional nifti file '''
+        return nb.Nifti1Image(array[:, :, :, np.newaxis], affine)
 
     def _list_outputs(self):
         outputs = self._outputs().get()
