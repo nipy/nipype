@@ -1,6 +1,7 @@
 Upcoming release 0.13
 =====================
 
+* FIX: Minor bugfixes related to unicode literals (https://github.com/nipy/nipype/pull/1656)
 * ENH: Add a DVARS calculation interface (https://github.com/nipy/nipype/pull/1606)
 * ENH: New interface to b0calc of FSL-POSSUM (https://github.com/nipy/nipype/pull/1399)
 * ENH: Convenient load/save of interface inputs (https://github.com/nipy/nipype/pull/1591)
