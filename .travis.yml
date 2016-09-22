@@ -10,6 +10,7 @@ env:
 - INSTALL_DEB_DEPENDECIES=false
 - INSTALL_DEB_DEPENDECIES=true DUECREDIT_ENABLE=yes
 before_install:
+- bleh
 - wget http://repo.continuum.io/miniconda/Miniconda${TRAVIS_PYTHON_VERSION:0:1}-latest-Linux-x86_64.sh
   -O /home/travis/.cache/miniconda.sh
 - bash /home/travis/.cache/miniconda.sh -b -p /home/travis/miniconda
