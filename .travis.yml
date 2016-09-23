@@ -40,8 +40,7 @@ install:
   pip install -e . ;
   export COVERAGE_PROCESS_START=$(pwd)/.coveragerc ;
   export COVERAGE_DATA_FILE=$(pwd)/.coverage ;
-  echo "data_file = ${COVERAGE_DATA_FILE}" >> ${COVERAGE_PROCESS_START} ;
-  bleh ; }
+  echo "data_file = ${COVERAGE_DATA_FILE}" >> ${COVERAGE_PROCESS_START} ; }
 - travis_retry inst
 script:
 - python -W once:FSL:UserWarning:nipype `which nosetests` --with-doctest --with-doctest-ignore-unicode --with-cov --cover-package nipype --logging-level=DEBUG --verbosity=3
