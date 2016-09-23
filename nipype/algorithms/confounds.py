@@ -19,8 +19,8 @@ import os.path as op
 
 import nibabel as nb
 import numpy as np
+from numpy.polynomial import Legendre
 from scipy import linalg, signal
-from scipy.special import legendre
 
 from .. import logging
 from ..external.due import BibTeX
@@ -337,10 +337,8 @@ class CompCor(BaseInterface):
         # from paper:
         # "The constant and linear trends of the columns in the matrix M were
         # removed [prior to ...]"
-        if self.inputs.use_regress_poly:
-            voxel_timecourses = regress_poly(self.inputs.regress_poly_degree,
-                                             voxel_timecourses)
-        voxel_timecourses = regress_poly(0, voxel_timecourses, remove_mean=True)
+        degree = self.inputs.regress_poly_degree if self.inputs.use_regress_poly else 0
+        voxel_timecourses = regress_poly(degree, voxel_timecourses)
 
         # "Voxel time series from the noise ROI (either anatomical or tSTD) were
         # placed in a matrix M of size Nxm, with time along the row dimension
@@ -408,7 +406,7 @@ class TCompCor(CompCor):
         # "For each voxel time series, the temporal standard deviation is
         # defined as the standard deviation of the time series after the removal
         # of low-frequency nuisance terms (e.g., linear and quadratic drift)."
-        imgseries = regress_poly(2, imgseries, remove_mean=True)
+        imgseries = regress_poly(2, imgseries)
 
         time_voxels = imgseries.T
         num_voxels = np.prod(time_voxels.shape[1:])
@@ -484,7 +482,7 @@ class TSNR(BaseInterface):
             data = data.astype(np.float32)
 
         if isdefined(self.inputs.regress_poly):
-            data = regress_poly(self.inputs.regress_poly, data)
+            data = regress_poly(self.inputs.regress_poly, data, remove_mean=False)
             img = nb.Nifti1Image(data, img.get_affine(), header)
             nb.save(img, op.abspath(self.inputs.detrended_file))
 
@@ -509,7 +507,7 @@ class TSNR(BaseInterface):
             outputs['detrended_file'] = op.abspath(self.inputs.detrended_file)
         return outputs
 
-def regress_poly(degree, data, remove_mean=False, axis=-1):
+def regress_poly(degree, data, remove_mean=True, axis=-1):
     ''' returns data with degree polynomial regressed out.
     Be default it is calculated along the last axis (usu. time)
     '''
@@ -525,7 +523,7 @@ def regress_poly(degree, data, remove_mean=False, axis=-1):
     # Generate design matrix
     X = np.ones((timepoints, 1))
     for i in range(degree):
-        polynomial_func = legendre(i+1)
+        polynomial_func = Legendre.basis(i+1)
         value_array = np.linspace(-1, 1, timepoints)
         X = np.hstack((X, polynomial_func(value_array)[:, np.newaxis]))
 
