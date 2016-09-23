@@ -509,21 +509,20 @@ class TSNR(BaseInterface):
 
 def regress_poly(degree, data, remove_mean=True, axis=-1):
     ''' returns data with degree polynomial regressed out.
-    Be default it is calculated along the last axis (usu. time)
+    Be default it is calculated along the last axis (usu. time).
+    If remove_mean is True (default), the data is demeaned (i.e. degree 0).
+    If remove_mean is false, the data is not.
     '''
     datashape = data.shape
     timepoints = datashape[axis]
-
-    if remove_mean: # i.e. regress_poly degree 0, which the following does not do
-        data = signal.detrend(data, axis=axis, type='constant')
 
     # Rearrange all voxel-wise time-series in rows
     data = data.reshape((-1, timepoints))
 
     # Generate design matrix
-    X = np.ones((timepoints, 1))
+    X = np.ones((timepoints, 1)) # quick way to calc degree 0
     for i in range(degree):
-        polynomial_func = Legendre.basis(i+1)
+        polynomial_func = Legendre.basis(i + 1)
         value_array = np.linspace(-1, 1, timepoints)
         X = np.hstack((X, polynomial_func(value_array)[:, np.newaxis]))
 
@@ -531,7 +530,10 @@ def regress_poly(degree, data, remove_mean=True, axis=-1):
     betas = np.linalg.pinv(X).dot(data.T)
 
     # Estimation
-    datahat = X[:, 1:].dot(betas[1:, ...]).T
+    if remove_mean:
+        datahat = X.dot(betas).T
+    else: # disregard the first layer of X, which is degree 0
+        datahat = X[:, 1:].dot(betas[1:, ...]).T
     regressed_data = data - datahat
 
     # Back to original shape
