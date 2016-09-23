@@ -157,7 +157,7 @@ TESTS_REQUIRES = [
 EXTRA_REQUIRES = {
     'doc': ['Sphinx>=0.3'],
     'tests': TESTS_REQUIRES,
-    'fmri': ['nitime'],
+    'fmri': ['nitime', 'nilearn'],
     'profiler': ['psutil'],
     'duecredit': ['duecredit'],
     # 'mesh': ['mayavi']  # Enable when it works
@@ -167,3 +167,4 @@ EXTRA_REQUIRES = {
 EXTRA_REQUIRES['all'] = [val for _, val in list(EXTRA_REQUIRES.items())]
 
 STATUS = 'stable'
+
