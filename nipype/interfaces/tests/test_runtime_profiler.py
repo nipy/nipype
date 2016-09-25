@@ -279,7 +279,7 @@ class RuntimeProfilerTestCase(unittest.TestCase):
 
         # Run workflow
         plugin_args = {'n_procs' : num_threads,
-                       'memory' : num_gb,
+                       'memory_gb' : num_gb,
                        'status_callback' : log_nodes_cb}
         wf.run(plugin='MultiProc', plugin_args=plugin_args)
 
@@ -359,7 +359,7 @@ class RuntimeProfilerTestCase(unittest.TestCase):
 
         # Run workflow
         plugin_args = {'n_procs' : num_threads,
-                       'memory' : num_gb,
+                       'memory_gb' : num_gb,
                        'status_callback' : log_nodes_cb}
         wf.run(plugin='MultiProc', plugin_args=plugin_args)
 
