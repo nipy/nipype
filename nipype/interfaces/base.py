@@ -1366,10 +1366,10 @@ def _get_ram_mb(pid, pyfunc=False):
         mem_mb = parent_mem/_MB
 
         # Iterate through child processes
-        for child in parent.children(recursive=False):
+        for child in parent.children(recursive=True):
             child_mem = child.memory_info().rss
             if pyfunc:
-                child_mem -= parent_mem # does not handle indirect children properly
+                child_mem -= parent_mem
             mem_mb += child_mem/_MB
 
     # Catch if process dies, return gracefully
