@@ -216,6 +216,14 @@ class ANTS(ANTSCommand):
 
 
 class RegistrationInputSpec(ANTSCommandInputSpec):
+    terminal_output = traits.Enum('stream', 'allatonce', 'file', 'none',
+                                  desc=('Control terminal output: `stream` - '
+                                        'displays to terminal immediately (default), '
+                                        '`allatonce` - waits till command is '
+                                        'finished to display output, `file` - '
+                                        'writes output to file, `none` - output'
+                                        ' is ignored'),
+                                  nohash=True, argstr='%s')
     dimension = traits.Enum(3, 2, argstr='--dimensionality %d',
                             usedefault=True, desc='image dimension (2 or 3)')
     fixed_image = InputMultiPath(File(exists=True), mandatory=True,
@@ -855,6 +863,14 @@ class Registration(ANTSCommand):
         # This feature was removed from recent versions of antsRegistration due to corrupt outputs.
         # elif opt == 'collapse_linear_transforms_to_fixed_image_header':
         #    return self._formatCollapseLinearTransformsToFixedImageHeader()
+        elif opt == 'terminal_output':
+            arg = super(Registration, self)._format_arg(opt, spec, val)
+            if arg in ['stream', 'allatonce', 'file']:
+                if isdefined(self.inputs.args) and 'verbose' in self.inputs.args:
+                    return ''
+                return ' --verbose 1'
+            else:
+                return ''
         return super(Registration, self)._format_arg(opt, spec, val)
 
     def _output_filenames(self, prefix, count, transform, inverse=False):
