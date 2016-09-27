@@ -418,7 +418,7 @@ class RuntimeProfilerTestCase(unittest.TestCase):
                         msg=threads_err)
 
     # Test resources were used as expected
-    @unittest.skipIf(True)
+    @unittest.skipIf(True, "https://github.com/nipy/nipype/issues/1663")
     @unittest.skipIf(run_profile == False, skip_profile_msg)
     def test_function_profiling(self):
         '''
