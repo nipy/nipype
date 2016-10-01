@@ -192,7 +192,7 @@ Bradley L. and Petersen, Steven E.},
 
 
 class FramewiseDisplacementInputSpec(BaseInterfaceInputSpec):
-    in_plots = File(exists=True, desc='motion parameters as written by FSL MCFLIRT')
+    in_plots = File(exists=True, mandatory=True, desc='motion parameters as written by FSL MCFLIRT')
     radius = traits.Float(50, usedefault=True,
                           desc='radius in mm to calculate angular FDs, 50mm is the '
                                'default since it is used in Power et al. 2012')
