@@ -70,27 +70,26 @@ description = 'Neuroimaging in Python: Pipelines and Interfaces'
 # Note: this long_description is actually a copy/paste from the top-level
 # README.txt, so that it shows up nicely on PyPI.  So please remember to edit
 # it only in one place and sync it correctly.
-long_description = \
-    """
+long_description = """\
 ========================================================
 NIPYPE: Neuroimaging in Python: Pipelines and Interfaces
 ========================================================
 
-Current neuroimaging software offer users an incredible opportunity to
-analyze data using a variety of different algorithms. However, this has
-resulted in a heterogeneous collection of specialized applications
+Current neuroimaging software offer users an incredible opportunity to \
+analyze data using a variety of different algorithms. However, this has \
+resulted in a heterogeneous collection of specialized applications \
 without transparent interoperability or a uniform operating interface.
 
-*Nipype*, an open-source, community-developed initiative under the
-umbrella of NiPy_, is a Python project that provides a uniform interface
-to existing neuroimaging software and facilitates interaction between
-these packages within a single workflow. Nipype provides an environment
-that encourages interactive exploration of algorithms from different
-packages (e.g., AFNI, ANTS, BRAINS, BrainSuite, Camino, FreeSurfer, FSL, MNE,
-MRtrix, MNE, Nipy, Slicer, SPM), eases the design of workflows within and
-between packages, and reduces the learning curve necessary to use different
-packages. Nipype is creating a collaborative platform for neuroimaging software
-development in a high-level language and addressing limitations of existing
+*Nipype*, an open-source, community-developed initiative under the \
+umbrella of NiPy_, is a Python project that provides a uniform interface \
+to existing neuroimaging software and facilitates interaction between \
+these packages within a single workflow. Nipype provides an environment \
+that encourages interactive exploration of algorithms from different \
+packages (e.g., AFNI, ANTS, BRAINS, BrainSuite, Camino, FreeSurfer, FSL, MNE, \
+MRtrix, MNE, Nipy, Slicer, SPM), eases the design of workflows within and \
+between packages, and reduces the learning curve necessary to use different \
+packages. Nipype is creating a collaborative platform for neuroimaging software \
+development in a high-level language and addressing limitations of existing \
 pipeline systems.
 
 *Nipype* allows you to:

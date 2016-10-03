@@ -28,12 +28,12 @@ before_install:
   export FSLOUTPUTTYPE=NIFTI_GZ; }
 - travis_retry bef_inst
 install:
+#  Add install of vtk and mayavi to test mesh (disabled): conda install -y vtk mayavi &&
 - function inst {
   conda config --add channels conda-forge &&
   conda update --yes conda &&
   conda update --all -y python=$TRAVIS_PYTHON_VERSION &&
   conda install -y nipype &&
-#   conda install -y vtk mayavi &&
   rm -r /home/travis/miniconda/lib/python${TRAVIS_PYTHON_VERSION}/site-packages/nipype* &&
   pip install -r requirements.txt &&
   pip install -e .[$NIPYPE_EXTRAS] &&
