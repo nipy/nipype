@@ -48,30 +48,29 @@ if '-dev' in _version_extra:
     if gitversion:
         _version_extra = '-' + gitversion + '.dev'
 
-# Format expected by setup.py and doc/source/conf.py: string of form "X.Y.Z"
-__version__ = "%s.%s.%s%s" % (_version_major,
+# Format expected by setup.py and doc/source/conf.py: string of form 'X.Y.Z'
+__version__ = '%s.%s.%s%s' % (_version_major,
                               _version_minor,
                               _version_micro,
                               _version_extra)
 
-CLASSIFIERS = ["Development Status :: 5 - Production/Stable",
-               "Environment :: Console",
-               "Intended Audience :: Science/Research",
-               "License :: OSI Approved :: Apache Software License",
-               "Operating System :: MacOS :: MacOS X",
-               "Operating System :: POSIX :: Linux",
-               "Programming Language :: Python :: 2.7",
-               "Programming Language :: Python :: 3.4",
-               "Programming Language :: Python :: 3.5",
-               "Topic :: Scientific/Engineering"]
+CLASSIFIERS = ['Development Status :: 5 - Production/Stable',
+               'Environment :: Console',
+               'Intended Audience :: Science/Research',
+               'License :: OSI Approved :: Apache Software License',
+               'Operating System :: MacOS :: MacOS X',
+               'Operating System :: POSIX :: Linux',
+               'Programming Language :: Python :: 2.7',
+               'Programming Language :: Python :: 3.4',
+               'Programming Language :: Python :: 3.5',
+               'Topic :: Scientific/Engineering']
 
 description = 'Neuroimaging in Python: Pipelines and Interfaces'
 
 # Note: this long_description is actually a copy/paste from the top-level
 # README.txt, so that it shows up nicely on PyPI.  So please remember to edit
 # it only in one place and sync it correctly.
-long_description = """\
-========================================================
+long_description = """========================================================
 NIPYPE: Neuroimaging in Python: Pipelines and Interfaces
 ========================================================
 
@@ -115,17 +114,17 @@ SIMPLEJSON_MIN_VERSION = '3.8.0'
 PROV_MIN_VERSION = '1.4.0'
 
 NAME = 'nipype'
-MAINTAINER = "nipype developers"
-MAINTAINER_EMAIL = "neuroimaging@python.org"
+MAINTAINER = 'nipype developers'
+MAINTAINER_EMAIL = 'neuroimaging@python.org'
 DESCRIPTION = description
 LONG_DESCRIPTION = long_description
-URL = "http://nipy.org/nipype"
-DOWNLOAD_URL = "http://github.com/nipy/nipype/archives/master"
-LICENSE = "Apache License, 2.0"
+URL = 'http://nipy.org/nipype'
+DOWNLOAD_URL = 'http://github.com/nipy/nipype/archives/master'
+LICENSE = 'Apache License, 2.0'
 CLASSIFIERS = CLASSIFIERS
-AUTHOR = "nipype developers"
-AUTHOR_EMAIL = "neuroimaging@python.org"
-PLATFORMS = "OS Independent"
+AUTHOR = 'nipype developers'
+AUTHOR_EMAIL = 'neuroimaging@python.org'
+PLATFORMS = 'OS Independent'
 MAJOR = _version_major
 MINOR = _version_minor
 MICRO = _version_micro
@@ -133,30 +132,33 @@ ISRELEASE = _version_extra == ''
 VERSION = __version__
 PROVIDES = ['nipype']
 REQUIRES = [
-    "nibabel>=%s" % NIBABEL_MIN_VERSION,
-    "networkx>=%s" % NETWORKX_MIN_VERSION,
-    "numpy>=%s" % NUMPY_MIN_VERSION,
-    "python-dateutil>=%s" % DATEUTIL_MIN_VERSION,
-    "scipy>=%s" % SCIPY_MIN_VERSION,
-    "traits>=%s" % TRAITS_MIN_VERSION,
-    "future>=%s" % FUTURE_MIN_VERSION,
-    "simplejson>=%s" % SIMPLEJSON_MIN_VERSION,
-    "prov>=%s" % PROV_MIN_VERSION,
-    "xvfbwrapper",
-    "funcsigs"
+    'nibabel>=%s' % NIBABEL_MIN_VERSION,
+    'networkx>=%s' % NETWORKX_MIN_VERSION,
+    'numpy>=%s' % NUMPY_MIN_VERSION,
+    'python-dateutil>=%s' % DATEUTIL_MIN_VERSION,
+    'scipy>=%s' % SCIPY_MIN_VERSION,
+    'traits>=%s' % TRAITS_MIN_VERSION,
+    'future>=%s' % FUTURE_MIN_VERSION,
+    'simplejson>=%s' % SIMPLEJSON_MIN_VERSION,
+    'prov>=%s' % PROV_MIN_VERSION,
+    'xvfbwrapper',
+    'funcsigs'
 ]
 
 TESTS_REQUIRES = [
-    "nose>=%s" % NOSE_MIN_VERSION,
-    "mock",
-    "codecov",
-    "doctest-ignore-unicode"
+    'nose>=%s' % NOSE_MIN_VERSION,
+    'mock',
+    'codecov',
+    'doctest-ignore-unicode',
+    'dipy',
+    'nipy',
+    'matplotlib'
 ]
 
 EXTRA_REQUIRES = {
-    'doc': ['Sphinx>=0.3'],
+    'doc': ['Sphinx>=0.3', 'matplotlib', 'pydotplus'],
     'tests': TESTS_REQUIRES,
-    'fmri': ['nitime', 'nilearn'],
+    'fmri': ['nitime', 'nilearn', 'dipy', 'nipy', 'matplotlib'],
     'profiler': ['psutil'],
     'duecredit': ['duecredit'],
     # 'mesh': ['mayavi']  # Enable when it works
