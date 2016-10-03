@@ -1,15 +1,15 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
-import nipype
-from ...testing import assert_equal, assert_true, assert_false, skipif, utils
-from ..confounds import CompCor, TCompCor, ACompCor
-
-import unittest
-import nibabel as nb
-import numpy as np
 import os
 import tempfile
 import shutil
+import unittest
+
+import nibabel as nb
+import numpy as np
+
+from ...testing import assert_equal, assert_true, utils
+from ..confounds import CompCor, TCompCor, ACompCor
 
 class TestCompCor(unittest.TestCase):
     ''' Note: Tests currently do a poor job of testing functionality '''
@@ -27,8 +27,8 @@ class TestCompCor(unittest.TestCase):
         self.realigned_file = utils.save_toy_nii(self.fake_data + noise,
                                                  self.filenames['functionalnii'])
         mask = np.ones(self.fake_data.shape[:3])
-        mask[0,0,0] = 0
-        mask[0,0,1] = 0
+        mask[0, 0, 0] = 0
+        mask[0, 0, 1] = 0
         self.mask_file = utils.save_toy_nii(mask, self.filenames['masknii'])
 
     def test_compcor(self):
@@ -52,19 +52,27 @@ class TestCompCor(unittest.TestCase):
 
     def test_tcompcor(self):
         ccinterface = TCompCor(realigned_file=self.realigned_file, percentile_threshold=0.75)
-        self.run_cc(ccinterface, [['-0.1535587949', '-0.4318584065'],
-                                  ['0.4286265207', '0.7162580102'],
-                                  ['-0.6288093202', '0.0465452630'],
-                                  ['0.5859742580', '-0.5144309306'],
-                                  ['-0.2322326636', '0.1834860639']])
+        self.run_cc(ccinterface, [['-0.1114536190', '-0.4632908609'],
+                                  ['0.4566907310', '0.6983205193'],
+                                  ['-0.7132557407', '0.1340170559'],
+                                  ['0.5022537643', '-0.5098322262'],
+                                  ['-0.1342351356', '0.1407855119']])
 
-    def test_tcompcor_with_default_percentile(self):
+    def test_tcompcor_no_percentile(self):
         ccinterface = TCompCor(realigned_file=self.realigned_file)
         ccinterface.run()
 
         mask = nb.load('mask.nii').get_data()
         num_nonmasked_voxels = np.count_nonzero(mask)
         assert_equal(num_nonmasked_voxels, 1)
+
+    def test_compcor_no_regress_poly(self):
+        self.run_cc(CompCor(realigned_file=self.realigned_file, mask_file=self.mask_file,
+                            use_regress_poly=False), [['0.4451946442', '-0.7683311482'],
+                                                      ['-0.4285129505', '-0.0926034137'],
+                                                      ['0.5721540256', '0.5608764842'],
+                                                      ['-0.5367548139', '0.0059943226'],
+                                                      ['-0.0520809054', '0.2940637551']])
 
     def run_cc(self, ccinterface, expected_components):
         # run

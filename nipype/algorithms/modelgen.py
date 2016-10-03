@@ -547,7 +547,7 @@ class SpecifySPMModel(SpecifyModel):
                     out = np.array([])
 
                 if out.size > 0:
-                    iflogger.debug('fname=%s, out=%s, nscans=%s', filename, out, repr(sum(nscans[0:i])))
+                    iflogger.debug('fname=%s, out=%s, nscans=%d', filename, out, sum(nscans[0:i]))
                     sumscans = out.astype(int) + sum(nscans[0:i])
 
                     if out.size == 1:

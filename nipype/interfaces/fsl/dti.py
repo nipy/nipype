@@ -946,7 +946,7 @@ class ProjThresh(FSLCommand):
             cwd, base_name = os.path.split(name)
             outputs['out_files'].append(self._gen_fname(
                 base_name, cwd=cwd,
-                suffix='_proj_seg_thr_' + repr(self.inputs.threshold)))
+                suffix='_proj_seg_thr_{}'.format(self.inputs.threshold)))
         return outputs
 
 
