@@ -70,11 +70,13 @@ class BuildWithCommitInfoCommand(build_py):
                                 shell=True)
         repo_commit, _ = proc.communicate()
         # Fix for python 3
-        repo_commit = '{}'.format(repo_commit)
+        if PY3:
+            repo_commit = repo_commit.decode()
+
         # We write the installation commit even if it's empty
         cfg_parser = ConfigParser()
         cfg_parser.read(pjoin('nipype', 'COMMIT_INFO.txt'))
-        cfg_parser.set('commit hash', 'install_hash', repo_commit)
+        cfg_parser.set('commit hash', 'install_hash', repo_commit.strip())
         out_pth = pjoin(self.build_lib, 'nipype', 'COMMIT_INFO.txt')
         if PY3:
             cfg_parser.write(open(out_pth, 'wt'))
