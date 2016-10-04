@@ -6,9 +6,9 @@ python:
 - 3.4
 - 3.5
 env:
-- INSTALL_DEB_DEPENDECIES=true
-- INSTALL_DEB_DEPENDECIES=false
-- INSTALL_DEB_DEPENDECIES=true DUECREDIT_ENABLE=yes
+- INSTALL_DEB_DEPENDECIES=true NIPYPE_EXTRAS="doc,tests,fmri,profiler"
+- INSTALL_DEB_DEPENDECIES=false NIPYPE_EXTRAS="doc,tests,fmri,profiler"
+- INSTALL_DEB_DEPENDECIES=true NIPYPE_EXTRAS="doc,tests,fmri,profiler,duecredit"
 before_install:
 - function bef_inst {
   wget http://repo.continuum.io/miniconda/Miniconda${TRAVIS_PYTHON_VERSION:0:1}-latest-Linux-x86_64.sh
@@ -28,16 +28,15 @@ before_install:
   export FSLOUTPUTTYPE=NIFTI_GZ; }
 - travis_retry bef_inst
 install:
+#  Add install of vtk and mayavi to test mesh (disabled): conda install -y vtk mayavi &&
 - function inst {
   conda config --add channels conda-forge &&
   conda update --yes conda &&
   conda update --all -y python=$TRAVIS_PYTHON_VERSION &&
-  conda install -y nipype matplotlib nitime &&
-  pip install python-coveralls coverage doctest-ignore-unicode &&
-  if [ ! -z "$DUECREDIT_ENABLE"]; then pip install duecredit; fi &&
+  conda install -y nipype &&
   rm -r /home/travis/miniconda/lib/python${TRAVIS_PYTHON_VERSION}/site-packages/nipype* &&
   pip install -r requirements.txt &&
-  pip install -e . &&
+  pip install -e .[$NIPYPE_EXTRAS] &&
   export COVERAGE_PROCESS_START=$(pwd)/.coveragerc &&
   export COVERAGE_DATA_FILE=$(pwd)/.coverage &&
   echo "data_file = ${COVERAGE_DATA_FILE}" >> ${COVERAGE_PROCESS_START}; }
