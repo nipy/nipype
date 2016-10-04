@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
-# vi: set ft = python sts = 4 ts = 4 sw = 4 et:
+# vi: set ft=python sts=4 ts=4 sw=4 et:
 """Afni preprocessing interfaces
 
     Change directory to provide relative paths for doctests
@@ -2385,7 +2385,9 @@ class RetroicorInputSpec(AFNICommandInputSpec):
                    mandatory=True,
                    exists=True,
                    copyfile=False)
-    out_file = File(desc='output image file name', argstr='-prefix %s', mandatory=True, position=1)
+    out_file = File(name_template='%s_retroicor', name_source=['in_file'],
+                    desc='output image file name',
+                    argstr='-prefix %s', position=1)
     card = File(desc='1D cardiac data file for cardiac correction',
                 argstr='-card %s',
                 position=-2,
@@ -2439,12 +2441,20 @@ class Retroicor(AFNICommand):
     >>> ret.inputs.in_file = 'functional.nii'
     >>> ret.inputs.card = 'mask.1D'
     >>> ret.inputs.resp = 'resp.1D'
+    >>> ret.inputs.outputtype = 'NIFTI'
     >>> res = ret.run()   # doctest: +SKIP
     """
 
     _cmd = '3dretroicor'
     input_spec = RetroicorInputSpec
     output_spec = AFNICommandOutputSpec
+
+
+    def _format_arg(self, name, trait_spec, value):
+        if name == 'in_file':
+            if not isdefined(self.inputs.card) and not isdefined(self.inputs.resp):
+                return None
+        return super(Retroicor, self)._format_arg(name, trait_spec, value)
 
 
 class AFNItoNIFTIInputSpec(AFNICommandInputSpec):
