@@ -13,15 +13,12 @@ nibabel denoted by ## START - COPIED FROM NIBABEL and a corresponding ## END
 """
 # Build helper
 from __future__ import print_function
-from builtins import str, bytes, open
-
 import os
 from os.path import join as pjoin
 import sys
-from configparser import ConfigParser
-
 from glob import glob
 from functools import partial
+from io import open
 
 # BEFORE importing distutils, remove MANIFEST. distutils doesn't properly
 # update it when the contents of directories change.
@@ -45,6 +42,11 @@ from distutils.command.build_py import build_py
 from distutils import log
 
 PY3 = sys.version_info[0] >= 3
+
+if PY3:
+    string_types = (str, bytes)
+else:
+    string_types = (basestring, str, unicode)
 
 def get_comrec_build(pkg_dir, build_cmd=build_py):
     """ Return extended build command class for recording commit
@@ -84,15 +86,21 @@ def get_comrec_build(pkg_dir, build_cmd=build_py):
     class MyBuildPy(build_cmd):
         ''' Subclass to write commit data into installation tree '''
         def run(self):
-            build_cmd.run(self)
             import subprocess
+            try:
+                from configparser import ConfigParser
+            except ImportError:
+                from ConfigParser import ConfigParser
+
+            build_cmd.run(self)
+
             proc = subprocess.Popen('git rev-parse --short HEAD',
                                     stdout=subprocess.PIPE,
                                     stderr=subprocess.PIPE,
                                     shell=True)
             repo_commit, _ = proc.communicate()
             # Fix for python 3
-            repo_commit = str(repo_commit)
+            repo_commit = '{}'.format(repo_commit)
             # We write the installation commit even if it's empty
             cfg_parser = ConfigParser()
             cfg_parser.read(pjoin(pkg_dir, 'COMMIT_INFO.txt'))
@@ -112,7 +120,7 @@ def _add_append_key(in_dict, key, value):
     # Append value to in_dict[key] list
     if key not in in_dict:
         in_dict[key] = []
-    elif isinstance(in_dict[key], (str, bytes)):
+    elif isinstance(in_dict[key], string_types):
         in_dict[key] = [in_dict[key]]
     in_dict[key].append(value)
 
@@ -209,7 +217,7 @@ def package_check(pkg_name, version=None,
                  msgs['opt suffix'])
         return
     # setuptools mode
-    if optional_tf and not isinstance(optional, (str, bytes)):
+    if optional_tf and not isinstance(optional, string_types):
         raise RuntimeError('Not-False optional arg should be string')
     dependency = pkg_name
     if version:

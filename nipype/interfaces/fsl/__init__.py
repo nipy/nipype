@@ -30,3 +30,5 @@ from .dti import (BEDPOSTX, XFibres, DTIFit,
 from .maths import (ChangeDataType, Threshold, MeanImage, ApplyMask,
                     IsotropicSmooth, TemporalFilter, DilateImage, ErodeImage,
                     SpatialFilter, UnaryMaths, BinaryMaths, MultiImageMaths)
+
+from .possum import B0Calc

@@ -12,18 +12,18 @@ Algorithms to compute confounds in :abbr:`fMRI (functional MRI)`
 
 '''
 from __future__ import print_function, division, unicode_literals, absolute_import
-from builtins import str, zip, range, open
+from builtins import range
 
 import os
 import os.path as op
 
 import nibabel as nb
 import numpy as np
-from scipy import linalg
-from scipy.special import legendre
+from numpy.polynomial import Legendre
+from scipy import linalg, signal
 
 from .. import logging
-from ..external.due import due, Doi, BibTeX
+from ..external.due import BibTeX
 from ..interfaces.base import (traits, TraitedSpec, BaseInterface,
                                BaseInterfaceInputSpec, File, isdefined,
                                InputMultiPath)
@@ -160,8 +160,8 @@ Bradley L. and Petersen, Steven E.},
                     'dvars_nstd', ext=self.inputs.figformat)
                 fig = plot_confound(dvars[1], self.inputs.figsize, 'DVARS', series_tr=tr)
                 fig.savefig(self._results['fig_nstd'], dpi=float(self.inputs.figdpi),
-                        format=self.inputs.figformat,
-                        bbox_inches='tight')
+                            format=self.inputs.figformat,
+                            bbox_inches='tight')
                 fig.clf()
 
         if self.inputs.save_vxstd:
@@ -175,8 +175,8 @@ Bradley L. and Petersen, Steven E.},
                 fig = plot_confound(dvars[2], self.inputs.figsize, 'Voxelwise std DVARS',
                                     series_tr=tr)
                 fig.savefig(self._results['fig_vxstd'], dpi=float(self.inputs.figdpi),
-                        format=self.inputs.figformat,
-                        bbox_inches='tight')
+                            format=self.inputs.figformat,
+                            bbox_inches='tight')
                 fig.clf()
 
         if self.inputs.save_all:
@@ -192,7 +192,7 @@ Bradley L. and Petersen, Steven E.},
 
 
 class FramewiseDisplacementInputSpec(BaseInterfaceInputSpec):
-    in_plots = File(exists=True, desc='motion parameters as written by FSL MCFLIRT')
+    in_plots = File(exists=True, mandatory=True, desc='motion parameters as written by FSL MCFLIRT')
     radius = traits.Float(50, usedefault=True,
                           desc='radius in mm to calculate angular FDs, 50mm is the '
                                'default since it is used in Power et al. 2012')
@@ -313,6 +313,19 @@ class CompCor(BaseInterface):
     '''
     input_spec = CompCorInputSpec
     output_spec = CompCorOutputSpec
+    references_ = [{'entry': BibTeX("@article{compcor_2007,"
+                                    "title = {A component based noise correction method (CompCor) for BOLD and perfusion based},"
+                                    "volume = {37},"
+                                    "number = {1},"
+                                    "doi = {10.1016/j.neuroimage.2007.04.042},"
+                                    "urldate = {2016-08-13},"
+                                    "journal = {NeuroImage},"
+                                    "author = {Behzadi, Yashar and Restom, Khaled and Liau, Joy and Liu, Thomas T.},"
+                                    "year = {2007},"
+                                    "pages = {90-101},}"
+                                   ),
+                    'tags': ['method', 'implementation']
+                   }]
 
     def _run_interface(self, runtime):
         imgseries = nb.load(self.inputs.realigned_file).get_data()
@@ -324,18 +337,13 @@ class CompCor(BaseInterface):
         # from paper:
         # "The constant and linear trends of the columns in the matrix M were
         # removed [prior to ...]"
-        if self.inputs.use_regress_poly:
-            voxel_timecourses = regress_poly(self.inputs.regress_poly_degree,
-                                             voxel_timecourses)
-        voxel_timecourses = voxel_timecourses - np.mean(voxel_timecourses,
-                                                        axis=1)[:, np.newaxis]
+        degree = self.inputs.regress_poly_degree if self.inputs.use_regress_poly else 0
+        voxel_timecourses = regress_poly(degree, voxel_timecourses)
 
         # "Voxel time series from the noise ROI (either anatomical or tSTD) were
         # placed in a matrix M of size Nxm, with time along the row dimension
         # and voxels along the column dimension."
         M = voxel_timecourses.T
-        numvols = M.shape[0]
-        numvoxels = M.shape[1]
 
         # "[... were removed] prior to column-wise variance normalization."
         M = M / self._compute_tSTD(M, 1.)
@@ -399,7 +407,6 @@ class TCompCor(CompCor):
         # defined as the standard deviation of the time series after the removal
         # of low-frequency nuisance terms (e.g., linear and quadratic drift)."
         imgseries = regress_poly(2, imgseries)
-        imgseries = imgseries - np.mean(imgseries, axis=1)[:, np.newaxis]
 
         time_voxels = imgseries.T
         num_voxels = np.prod(time_voxels.shape[1:])
@@ -475,7 +482,7 @@ class TSNR(BaseInterface):
             data = data.astype(np.float32)
 
         if isdefined(self.inputs.regress_poly):
-            data = regress_poly(self.inputs.regress_poly, data)
+            data = regress_poly(self.inputs.regress_poly, data, remove_mean=False)
             img = nb.Nifti1Image(data, img.get_affine(), header)
             nb.save(img, op.abspath(self.inputs.detrended_file))
 
@@ -500,20 +507,22 @@ class TSNR(BaseInterface):
             outputs['detrended_file'] = op.abspath(self.inputs.detrended_file)
         return outputs
 
-def regress_poly(degree, data):
+def regress_poly(degree, data, remove_mean=True, axis=-1):
     ''' returns data with degree polynomial regressed out.
-    The last dimension (i.e. data.shape[-1]) should be time.
+    Be default it is calculated along the last axis (usu. time).
+    If remove_mean is True (default), the data is demeaned (i.e. degree 0).
+    If remove_mean is false, the data is not.
     '''
     datashape = data.shape
-    timepoints = datashape[-1]
+    timepoints = datashape[axis]
 
     # Rearrange all voxel-wise time-series in rows
     data = data.reshape((-1, timepoints))
 
     # Generate design matrix
-    X = np.ones((timepoints, 1))
+    X = np.ones((timepoints, 1)) # quick way to calc degree 0
     for i in range(degree):
-        polynomial_func = legendre(i+1)
+        polynomial_func = Legendre.basis(i + 1)
         value_array = np.linspace(-1, 1, timepoints)
         X = np.hstack((X, polynomial_func(value_array)[:, np.newaxis]))
 
@@ -521,7 +530,10 @@ def regress_poly(degree, data):
     betas = np.linalg.pinv(X).dot(data.T)
 
     # Estimation
-    datahat = X[:, 1:].dot(betas[1:, ...]).T
+    if remove_mean:
+        datahat = X.dot(betas).T
+    else: # disregard the first layer of X, which is degree 0
+        datahat = X[:, 1:].dot(betas[1:, ...]).T
     regressed_data = data - datahat
 
     # Back to original shape
@@ -556,7 +568,6 @@ research/nichols/scripts/fsl/standardizeddvars.pdf>`_, 2013.
     :return: the standardized DVARS
 
     """
-    import os.path as op
     import numpy as np
     import nibabel as nb
     from nitime.algorithms import AR_est_YW
@@ -581,7 +592,7 @@ research/nichols/scripts/fsl/standardizeddvars.pdf>`_, 2013.
     mfunc = func[idx[0], idx[1], idx[2], :]
 
     # Demean
-    mfunc -= mfunc.mean(axis=1).astype(np.float32)[..., np.newaxis]
+    mfunc = regress_poly(0, mfunc, remove_mean=True).astype(np.float32)
 
     # Compute (non-robust) estimate of lag-1 autocorrelation
     ar1 = np.apply_along_axis(AR_est_YW, 1, mfunc, 1)[:, 0]

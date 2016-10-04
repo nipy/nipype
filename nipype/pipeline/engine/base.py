@@ -105,7 +105,7 @@ class EngineBase(object):
         if self._hierarchy:
             return '.'.join((self._hierarchy, self._id))
         else:
-            return self._id
+            return '{}'.format(self._id)
 
     def save(self, filename=None):
         if filename is None:
