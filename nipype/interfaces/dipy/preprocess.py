@@ -23,9 +23,6 @@ try:
     package_check('dipy', version='0.6.0')
 except Exception as e:
     have_dipy = False
-else:
-    from dipy.align.aniso2iso import resample
-    from dipy.core.gradients import GradientTable
 
 
 class ResampleInputSpec(TraitedSpec):
@@ -172,6 +169,7 @@ def resample_proxy(in_file, order=3, new_zooms=None, out_file=None):
     """
     Performs regridding of an image to set isotropic voxel sizes using dipy.
     """
+    from dipy.align.aniso2iso import resample
 
     if out_file is None:
         fname, fext = op.splitext(op.basename(in_file))

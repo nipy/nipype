@@ -319,6 +319,8 @@ class BRAINSABCInputSpec(CommandLineInputSpec):
     filterMethod = traits.Enum("None", "CurvatureFlow", "GradientAnisotropicDiffusion", "Median", desc="Filter method for preprocessing of registration", argstr="--filterMethod %s")
     maxBiasDegree = traits.Int(desc="Maximum bias degree", argstr="--maxBiasDegree %d")
     useKNN = traits.Bool(desc="Use the KNN stage of estimating posteriors.", argstr="--useKNN ")
+    purePlugsThreshold = traits.Float(desc="If this threshold value is greater than zero, only pure samples are used to compute the distributions in EM classification, and only pure samples are used for KNN training. The default value is set to 0, that means not using pure plugs. However, a value of 0.2 is suggested if you want to activate using pure plugs option.", argstr="--purePlugsThreshold %f")
+    numberOfSubSamplesInEachPlugArea = InputMultiPath(traits.Int, desc="Number of continous index samples taken at each direction of lattice space for each plug volume.", sep=",", argstr="--numberOfSubSamplesInEachPlugArea %s")
     atlasWarpingOff = traits.Bool(desc="Deformable registration of atlas to subject", argstr="--atlasWarpingOff ")
     gridSize = InputMultiPath(traits.Int, desc="Grid size for atlas warping with BSplines", sep=",", argstr="--gridSize %s")
     defaultSuffix = traits.Str(argstr="--defaultSuffix %s")

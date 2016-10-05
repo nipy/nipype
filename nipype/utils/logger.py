@@ -87,6 +87,13 @@ class Logging(object):
 
         typical use -- log difference for hashed_inputs
         """
+        # First check inputs, since they usually are lists of tuples
+        # and dicts are required.
+        if isinstance(dnew, list):
+            dnew = dict(dnew)
+        if isinstance(dold, list):
+            dold = dict(dold)
+
         # Compare against hashed_inputs
         # Keys: should rarely differ
         new_keys = set(dnew.keys())

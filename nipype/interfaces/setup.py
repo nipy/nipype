@@ -17,6 +17,8 @@ def configuration(parent_package='', top_path=None):
     config.add_subpackage('elastix')
     config.add_subpackage('freesurfer')
     config.add_subpackage('fsl')
+    config.add_subpackage('minc')
+    config.add_subpackage('mipav')
     config.add_subpackage('mne')
     config.add_subpackage('mrtrix')
     config.add_subpackage('mrtrix3')
@@ -26,7 +28,6 @@ def configuration(parent_package='', top_path=None):
     config.add_subpackage('nipy')
     config.add_subpackage('spm')
     config.add_subpackage('slicer')
-    config.add_subpackage('mipav')
     config.add_subpackage('ttk')
 
     config.add_data_dir('script_templates')

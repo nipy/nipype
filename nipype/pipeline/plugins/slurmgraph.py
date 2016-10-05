@@ -143,7 +143,7 @@ class SLURMGraphPlugin(GraphPluginBase):
                         dependantIndex=deps,
                         batchscript=batchscriptfile)
                     fp.writelines(full_line)
-        cmd = CommandLine('bash', environ=os.environ.data,
+        cmd = CommandLine('bash', environ=dict(os.environ),
                           terminal_output='allatonce')
         cmd.inputs.args = '%s' % submitjobsfile
         cmd.run()

@@ -60,7 +60,7 @@ class LSFPlugin(SGELikeBatchManagerBase):
             return True
 
     def _submit_batchtask(self, scriptfile, node):
-        cmd = CommandLine('bsub', environ=os.environ.data,
+        cmd = CommandLine('bsub', environ=dict(os.environ),
                           terminal_output='allatonce')
         path = os.path.dirname(scriptfile)
         bsubargs = ''
@@ -77,11 +77,11 @@ class LSFPlugin(SGELikeBatchManagerBase):
         if '-e' not in bsubargs:
             bsubargs = '%s -e %s' % (bsubargs, scriptfile + ".log")  # -e error file
         if node._hierarchy:
-            jobname = '.'.join((os.environ.data['LOGNAME'],
+            jobname = '.'.join((dict(os.environ)['LOGNAME'],
                                 node._hierarchy,
                                 node._id))
         else:
-            jobname = '.'.join((os.environ.data['LOGNAME'],
+            jobname = '.'.join((dict(os.environ)['LOGNAME'],
                                 node._id))
         jobnameitems = jobname.split('.')
         jobnameitems.reverse()

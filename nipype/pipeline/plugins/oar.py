@@ -63,7 +63,7 @@ class OARPlugin(SGELikeBatchManagerBase):
         return is_pending
 
     def _submit_batchtask(self, scriptfile, node):
-        cmd = CommandLine('oarsub', environ=os.environ.data,
+        cmd = CommandLine('oarsub', environ=dict(os.environ),
                           terminal_output='allatonce')
         path = os.path.dirname(scriptfile)
         oarsubargs = ''
@@ -79,11 +79,11 @@ class OARPlugin(SGELikeBatchManagerBase):
                 oarsubargs += (" " + node.plugin_args['oarsub_args'])
 
         if node._hierarchy:
-            jobname = '.'.join((os.environ.data['LOGNAME'],
+            jobname = '.'.join((dict(os.environ)['LOGNAME'],
                                 node._hierarchy,
                                 node._id))
         else:
-            jobname = '.'.join((os.environ.data['LOGNAME'],
+            jobname = '.'.join((dict(os.environ)['LOGNAME'],
                                 node._id))
         jobnameitems = jobname.split('.')
         jobnameitems.reverse()

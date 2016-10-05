@@ -390,7 +390,7 @@ class SurfaceTransform(FSCommand):
 
 class Surface2VolTransformInputSpec(FSTraitedSpec):
     source_file = File(exists=True, argstr='--surfval %s',
-                       copyfile=False, mandatory=True,
+                       copyfile=False, mandatory=True, xor=['mkmask'],
                        desc='This is the source of the surface values')
     hemi = traits.Str(argstr='--hemi %s', mandatory=True,
                       desc='hemisphere of data')
@@ -404,7 +404,7 @@ class Surface2VolTransformInputSpec(FSTraitedSpec):
     template_file = File(exists=True, argstr='--template %s',
                          desc='Output template volume')
     mkmask = traits.Bool(desc='make a mask instead of loading surface values',
-                         argstr='--mkmask')
+                         argstr='--mkmask', xor=['source_file'])
     vertexvol_file = File(name_template="%s_asVol_vertex.nii",
                           desc=('Path name of the vertex output volume, which '
                                 'is the same as output volume except that the '

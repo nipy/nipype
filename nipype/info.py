@@ -111,6 +111,7 @@ DATEUTIL_MIN_VERSION = '1.5'
 NOSE_MIN_VERSION = '1.2'
 FUTURE_MIN_VERSION = '0.15.2'
 SIMPLEJSON_MIN_VERSION = '3.8.0'
+PROV_MIN_VERSION = '1.4.0'
 
 NAME = 'nipype'
 MAINTAINER = "nipype developers"
@@ -138,5 +139,6 @@ REQUIRES = ["nibabel>=%s" % NIBABEL_MIN_VERSION,
             "traits>=%s" % TRAITS_MIN_VERSION,
             "nose>=%s" % NOSE_MIN_VERSION,
             "future>=%s" % FUTURE_MIN_VERSION,
-            "simplejson>=%s" % SIMPLEJSON_MIN_VERSION]
+            "simplejson>=%s" % SIMPLEJSON_MIN_VERSION,
+            "prov>=%s" % PROV_MIN_VERSION]
 STATUS = 'stable'

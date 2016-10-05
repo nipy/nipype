@@ -21,10 +21,11 @@ import numpy as np
 import scipy.sparse as ssp
 
 
-from ..utils import (nx, dfs_preorder, topological_sort)
-from ..engine import (MapNode, str2bool)
+from ...utils.filemanip import savepkl, loadpkl
+from ...utils.misc import str2bool
+from ..engine.utils import (nx, dfs_preorder, topological_sort)
+from ..engine import MapNode
 
-from nipype.utils.filemanip import savepkl, loadpkl
 
 from ... import logging
 logger = logging.getLogger('workflow')
@@ -342,7 +343,10 @@ class DistributedPluginBase(PluginBase):
                                     (self.depidx.sum(axis=0) == 0).__array__())
             if len(jobids) > 0:
                 # send all available jobs
-                logger.info('Submitting %d jobs' % len(jobids[:slots]))
+                if slots:
+                    logger.info('Pending[%d] Submitting[%d] jobs Slots[%d]' % (num_jobs, len(jobids[:slots]), slots))
+                else:
+                    logger.info('Pending[%d] Submitting[%d] jobs Slots[inf]' % (num_jobs, len(jobids)))
                 for jobid in jobids[:slots]:
                     if isinstance(self.procs[jobid], MapNode):
                         try:
@@ -401,6 +405,8 @@ class DistributedPluginBase(PluginBase):
                                 self.proc_pending[jobid] = False
                             else:
                                 self.pending_tasks.insert(0, (tid, jobid))
+                    logger.info('Finished executing: %s ID: %d' %
+                                (self.procs[jobid]._id, jobid))
             else:
                 break
 
@@ -507,9 +513,6 @@ class SGELikeBatchManagerBase(DistributedPluginBase):
         timed_out = True
         while (time() - t) < timeout:
             try:
-                logger.debug(os.listdir(os.path.realpath(os.path.join(node_dir,
-                                                                      '..'))))
-                logger.debug(os.listdir(node_dir))
                 glob(os.path.join(node_dir, 'result_*.pklz')).pop()
                 timed_out = False
                 break
@@ -634,9 +637,6 @@ class GraphPluginBase(PluginBase):
             return None
         node_dir = self._pending[taskid]
 
-        logger.debug(os.listdir(os.path.realpath(os.path.join(node_dir,
-                                                              '..'))))
-        logger.debug(os.listdir(node_dir))
         glob(os.path.join(node_dir, 'result_*.pklz')).pop()
 
         results_file = glob(os.path.join(node_dir, 'result_*.pklz'))[0]

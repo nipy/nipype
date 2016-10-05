@@ -9,8 +9,7 @@ import warnings
 
 from nipype.interfaces.niftyreg.base import (get_custom_path, NiftyRegCommand)
 from nipype.utils.filemanip import split_filename
-from nipype.interfaces.base import (TraitedSpec, File,  InputMultiPath,
-                                    traits, isdefined, CommandLineInputSpec)
+from nipype.interfaces.base import (TraitedSpec, File, traits, isdefined, CommandLineInputSpec)
 
 warn = warnings.warn
 warnings.filterwarnings('always', category=UserWarning)

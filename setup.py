@@ -274,6 +274,7 @@ pkg_chk('traits', TRAITS_MIN_VERSION)
 pkg_chk('nose', NOSE_MIN_VERSION)
 pkg_chk('future', FUTURE_MIN_VERSION)
 pkg_chk('simplejson', SIMPLEJSON_MIN_VERSION)
+pkg_chk('prov', PROV_MIN_VERSION)
 custom_dateutil_messages = {'missing opt': ('Missing optional package "%s"'
                                             ' provided by package '
                                             '"python-dateutil"')}
@@ -327,6 +328,8 @@ def main(**extra_args):
                     'nipype.interfaces.freesurfer.tests',
                     'nipype.interfaces.fsl',
                     'nipype.interfaces.fsl.tests',
+                    'nipype.interfaces.minc',
+                    'nipype.interfaces.minc.tests',
                     'nipype.interfaces.mipav',
                     'nipype.interfaces.mipav.tests',
                     'nipype.interfaces.mne',
@@ -339,6 +342,11 @@ def main(**extra_args):
                     'nipype.interfaces.niftyseg',
                     'nipype.interfaces.nipy',
                     'nipype.interfaces.nipy.tests',
+                    'nipype.interfaces.niftyreg',
+                    'nipype.interfaces.niftyseg',
+                    'nipype.interfaces.niftyfit',
+                    'nipype.interfaces.susceptibility',
+                    'nipype.interfaces.ttk',
                     'nipype.interfaces.nitime',
                     'nipype.interfaces.nitime.tests',
                     'nipype.interfaces.script_templates',
@@ -384,9 +392,10 @@ def main(**extra_args):
                     'nipype.interfaces.vista',
                     'nipype.interfaces.vista.tests',
                     'nipype.pipeline',
+                    'nipype.pipeline.engine',
+                    'nipype.pipeline.engine.tests',
                     'nipype.pipeline.plugins',
                     'nipype.pipeline.plugins.tests',
-                    'nipype.pipeline.tests',
                     'nipype.testing',
                     'nipype.testing.data',
                     'nipype.testing.data.bedpostxout',
@@ -429,7 +438,7 @@ def main(**extra_args):
                          pjoin('testing', 'data', 'bedpostxout', '*'),
                          pjoin('testing', 'data', 'tbss_dir', '*'),
                          pjoin('workflows', 'data', '*'),
-                         pjoin('pipeline', 'report_template.html'),
+                         pjoin('pipeline', 'engine', 'report_template.html'),
                          pjoin('external', 'd3.js'),
                          pjoin('interfaces', 'script_templates', '*'),
                          pjoin('interfaces', 'tests', 'realign_json.json')

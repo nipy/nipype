@@ -589,7 +589,7 @@ class EpiRegInputSpec(FSLCommandInputSpec):
     no_fmapreg = traits.Bool(False, argstr='--nofmapreg',
                              desc='do not perform registration of fmap to T1 \
                         (use if fmap already registered)')
-    no_clean = traits.Bool(False, argstr='--noclean',
+    no_clean = traits.Bool(True, argstr='--noclean', usedefault=True,
                            desc='do not clean up intermediate files')
 
 
@@ -640,8 +640,8 @@ class EpiReg(FSLCommand):
     >>> epireg.inputs.pedir='y'
     >>> epireg.cmdline #doctest: +ELLIPSIS
     'epi_reg --echospacing=0.000670 --fmap=fieldmap_phase_fslprepared.nii \
---fmapmag=fieldmap_mag.nii --fmapmagbrain=fieldmap_mag_brain.nii --pedir=y \
---epi=epi.nii --t1=T1.nii --t1brain=T1_brain.nii --out=epi2struct'
+--fmapmag=fieldmap_mag.nii --fmapmagbrain=fieldmap_mag_brain.nii --noclean \
+--pedir=y --epi=epi.nii --t1=T1.nii --t1brain=T1_brain.nii --out=epi2struct'
     >>> epireg.run() # doctest: +SKIP
 
     """
