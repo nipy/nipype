@@ -1,6 +1,7 @@
 Upcoming release 0.13
 =====================
 
+* ENH: Add AFNI 3dNote interface (https://github.com/nipy/nipype/pull/1637)
 * FIX: Minor bugfixes related to unicode literals (https://github.com/nipy/nipype/pull/1656)
 * ENH: Add a DVARS calculation interface (https://github.com/nipy/nipype/pull/1606)
 * ENH: New interface to b0calc of FSL-POSSUM (https://github.com/nipy/nipype/pull/1399)
