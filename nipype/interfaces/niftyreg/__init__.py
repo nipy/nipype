@@ -6,6 +6,7 @@
 Top-level namespace for niftyreg.
 """
 
-from .base import (Info)
-from .regutils import (RegResample, RegJacobian, RegAladin,
-    RegTools, RegF3D, RegTransform, RegMeasure, RegAverage)
+from .base import (no_niftyreg, get_custom_path)
+from .regutils import (RegResample, RegJacobian, RegAverage,
+                       RegTools, RegTransform, RegMeasure)
+from .reg import (RegAladin, RegF3D)

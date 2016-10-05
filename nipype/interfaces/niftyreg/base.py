@@ -20,95 +20,80 @@ See the docstrings of the individual classes for examples.
 
 """
 
-import os
 import warnings
-from exceptions import NotImplementedError
-
-from ...utils.filemanip import fname_presuffix
-from ..base import (CommandLine, traits, CommandLineInputSpec, isdefined)
-
-from nipype.interfaces.fsl.base import FSLCommand as NIFTYREGCommand
+import os
+from nipype.interfaces.base import (CommandLineInputSpec, CommandLine, isdefined)
+from nipype.utils.filemanip import split_filename
+import subprocess
 
 warn = warnings.warn
 warnings.filterwarnings('always', category=UserWarning)
 
 
-class Info(object):
-    """Handle fsl output type and version information.
-
-    version refers to the version of fsl on the system
-
-    output type refers to the type of file fsl defaults to writing
-    eg, NIFTI, NIFTI_GZ
-
-    """
-
-    ftypes = {'NIFTI': '.nii',
-              'NIFTI_PAIR': '.img',
-              'NIFTI_GZ': '.nii.gz',
-              'NIFTI_PAIR_GZ': '.img.gz'}
-
-    @staticmethod
-    def version():
-        """Check for niftyreg version on system
-
-        Parameters
-        ----------
-        None
-
-        Returns
-        -------
-        version : str
-           Version number as string or None if niftyreg not found
-
-        """
-        raise NotImplementedError("Waiting for NiftyReg version fix before "
-        "implementing this")
-
-    @classmethod
-    def output_type_to_ext(cls, output_type):
-        """Get the file extension for the given output type.
-
-        Parameters
-        ----------
-        output_type : {'NIFTI', 'NIFTI_GZ', 'NIFTI_PAIR', 'NIFTI_PAIR_GZ'}
-            String specifying the output type.
-
-        Returns
-        -------
-        extension : str
-            The file extension for the output type.
-        """
-
-        try:
-            return cls.ftypes[output_type]
-        except KeyError:
-            msg = 'Invalid NiftyRegOutputType: ', output_type
-            raise KeyError(msg)
-
-
-class NIFTYREGCommandInputSpec(CommandLineInputSpec):
-    """
-    Base Input Specification for all NiftyReg Commands
-
-    All command support specifying the output type dynamically
-    via output_type.
-    """
-    output_type = traits.Enum('NIFTI_GZ', Info.ftypes.keys(),
-                              desc='NiftyReg output type')
-
-def no_niftyreg():
-    """Checks if niftyreg is NOT installed
-    """
-    raise NotImplementedError("Waiting for version fix")
-
-
-# A custom function for getting specific niftyreg path
-def getNiftyRegPath(cmd):
-    try:    
+def get_custom_path(command):
+    try:
         specific_dir = os.environ['NIFTYREGDIR']
-        cmd = os.path.join(specific_dir, cmd)
-        return cmd
-    except KeyError:                
-        return cmd
+        command = os.path.join(specific_dir, command)
+        return command
+    except KeyError:
+        return command
 
+
+def no_niftyreg(cmd='reg_f3d'):
+    if True in [os.path.isfile(os.path.join(path, cmd)) and
+                os.access(os.path.join(path, cmd), os.X_OK)
+                for path in os.environ["PATH"].split(os.pathsep)]:
+        return False
+    return True
+
+
+class NiftyRegCommand(CommandLine):
+    """
+    Base support for NiftyReg commands
+    """
+    _suffix = '_nr'
+
+    def __init__(self, **inputs):
+        super(NiftyRegCommand, self).__init__(**inputs)
+
+    def get_version(self):
+        if no_niftyreg(cmd=self.cmd):
+            return None
+        exec_cmd = ''.join((self.cmd, ' -v'))
+        return subprocess.check_output(exec_cmd, shell=True).strip('\n')
+
+    @property
+    def version(self):
+        return self.get_version()
+
+    def exists(self):
+        if self.get_version() is None:
+            return False
+        return True
+
+    def _gen_fname(self, basename, out_dir=None, suffix=None, ext=None):
+        if basename == '':
+            msg = 'Unable to generate filename for command %s. ' % self.cmd
+            msg += 'basename is not set!'
+            raise ValueError(msg)
+        _, final_bn, final_ext = split_filename(basename)
+        if out_dir is None:
+            out_dir = os.getcwd()
+        if ext is not None:
+            final_ext = ext
+        if suffix is not None:
+            final_bn = ''.join((final_bn, suffix))
+        return os.path.abspath(os.path.join(out_dir, final_bn + final_ext))
+
+    def _gen_filename(self, name):
+        if name == 'out_file':
+            return self._gen_fname(self.inputs.in_file, suffix=self._suffix, ext='.nii.gz')
+        return None
+
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        if isdefined(self.inputs.out_file):
+            outputs['out_file'] = self.inputs.out_file
+        else:
+            outputs['out_file'] = self._gen_filename('out_file')
+        return outputs
