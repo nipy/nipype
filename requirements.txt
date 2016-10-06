@@ -12,3 +12,4 @@ xvfbwrapper
 psutil
 funcsigs
 configparser
+doctest-ignore-unicode
