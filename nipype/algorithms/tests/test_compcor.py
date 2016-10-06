@@ -74,6 +74,14 @@ class TestCompCor(unittest.TestCase):
                                                       ['-0.5367548139', '0.0059943226'],
                                                       ['-0.0520809054', '0.2940637551']])
 
+    def test_tcompcor_asymmetric_dim(self):
+        asymmetric_shape = (2, 3, 4, 5)
+        asymmetric_data = utils.save_toy_nii(np.zeros(asymmetric_shape), 'asymmetric.nii')
+
+        TCompCor(realigned_file=asymmetric_data).run()
+
+        self.assertEqual(nb.load('mask.nii').get_data().shape, asymmetric_shape[:3])
+
     def run_cc(self, ccinterface, expected_components):
         # run
         ccresult = ccinterface.run()

@@ -420,11 +420,13 @@ class TCompCor(CompCor):
         threshold_index = int(num_voxels * (1. - self.inputs.percentile_threshold))
         threshold_std = sortSTD[threshold_index]
         mask = tSTD >= threshold_std
-        mask = mask.astype(int)
+        mask = mask.astype(int).T
 
         # save mask
         mask_file = 'mask.nii'
         nb.nifti1.save(nb.Nifti1Image(mask, np.eye(4)), mask_file)
+        IFLOG.debug('tCompcor computed and saved mask of shape {} to mask_file {}'
+                   .format(mask.shape, mask_file))
         self.inputs.mask_file = mask_file
 
         super(TCompCor, self)._run_interface(runtime)
@@ -513,6 +515,8 @@ def regress_poly(degree, data, remove_mean=True, axis=-1):
     If remove_mean is True (default), the data is demeaned (i.e. degree 0).
     If remove_mean is false, the data is not.
     '''
+    IFLOG.debug('Performing polynomial regression on data of shape ' + str(data.shape))
+
     datashape = data.shape
     timepoints = datashape[axis]
 
