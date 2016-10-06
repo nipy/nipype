@@ -30,14 +30,14 @@ import sys
 import time
 from textwrap import wrap
 from warnings import warn
+import simplejson as json
 from dateutil.parser import parse as parseutc
-
 
 from .. import config, logging, LooseVersion, __version__
 from ..utils.provenance import write_provenance
 from ..utils.misc import is_container, trim, str2bool
 from ..utils.filemanip import (md5, hash_infile, FileNotFoundError, hash_timestamp,
-                               split_filename, encode_dict)
+                               split_filename, to_str)
 from .traits_extension import (
     traits, Undefined, TraitDictObject, TraitListObject, TraitError, isdefined, File,
     Directory, DictStrStr, has_metadata)
@@ -46,6 +46,10 @@ from ..external.due import due
 runtime_profile = str2bool(config.get('execution', 'profile_runtime'))
 nipype_version = LooseVersion(__version__)
 iflogger = logging.getLogger('interface')
+
+FLOAT_FORMAT = '{:.10f}'.format
+PY35 = sys.version_info >= (3, 5)
+PY3 = sys.version_info[0] > 2
 
 if runtime_profile:
     try:
@@ -68,7 +72,7 @@ class NipypeInterfaceError(Exception):
         self.value = value
 
     def __str__(self):
-        return repr(self.value)
+        return '{}'.format(self.value)
 
 def _exists_in_path(cmd, environ):
     """
@@ -267,7 +271,7 @@ class Bunch(object):
         # Sort the items of the dictionary, before hashing the string
         # representation so we get a predictable order of the
         # dictionary.
-        sorted_dict = encode_dict(sorted(dict_nofilename.items()))
+        sorted_dict = to_str(sorted(dict_nofilename.items()))
         return dict_withhash, md5(sorted_dict.encode()).hexdigest()
 
     def __pretty__(self, p, cycle):
@@ -377,7 +381,7 @@ class BaseTraitedSpec(traits.HasTraits):
         outstr = []
         for name, value in sorted(self.trait_get().items()):
             outstr.append('%s = %s' % (name, value))
-        return '\n' + '\n'.join(outstr) + '\n'
+        return '\n{}\n'.format('\n'.join(outstr))
 
     def _generate_handlers(self):
         """Find all traits with the 'xor' metadata and attach an event
@@ -533,6 +537,14 @@ class BaseTraitedSpec(traits.HasTraits):
                     out = undefinedval
         return out
 
+    def has_metadata(self, name, metadata, value=None, recursive=True):
+        """
+        Return has_metadata for the requested trait name in this
+        interface
+        """
+        return has_metadata(self.trait(name).trait_type, metadata, value,
+                            recursive)
+
     def get_hashval(self, hash_method=None):
         """Return a dictionary of our items with hashes for each file.
 
@@ -557,61 +569,61 @@ class BaseTraitedSpec(traits.HasTraits):
         dict_withhash = []
         dict_nofilename = []
         for name, val in sorted(self.get().items()):
-            if isdefined(val):
-                trait = self.trait(name)
-                if has_metadata(trait.trait_type, "nohash", True):
-                    continue
-                hash_files = (not has_metadata(trait.trait_type, "hash_files",
-                                               False) and not
-                              has_metadata(trait.trait_type, "name_source"))
-                dict_nofilename.append((name,
-                                        self._get_sorteddict(val, hash_method=hash_method,
-                                                             hash_files=hash_files)))
-                dict_withhash.append((name,
-                                      self._get_sorteddict(val, True, hash_method=hash_method,
-                                                           hash_files=hash_files)))
-        return dict_withhash, md5(encode_dict(dict_nofilename).encode()).hexdigest()
+            if not isdefined(val) or self.has_metadata(name, "nohash", True):
+                # skip undefined traits and traits with nohash=True
+                continue
 
-    def _get_sorteddict(self, object, dictwithhash=False, hash_method=None,
+            hash_files = (not self.has_metadata(name, "hash_files", False) and not
+                          self.has_metadata(name, "name_source"))
+            dict_nofilename.append((name,
+                                    self._get_sorteddict(val, hash_method=hash_method,
+                                                         hash_files=hash_files)))
+            dict_withhash.append((name,
+                                  self._get_sorteddict(val, True, hash_method=hash_method,
+                                                       hash_files=hash_files)))
+        return dict_withhash, md5(to_str(dict_nofilename).encode()).hexdigest()
+
+
+    def _get_sorteddict(self, objekt, dictwithhash=False, hash_method=None,
                         hash_files=True):
-        if isinstance(object, dict):
+        if isinstance(objekt, dict):
             out = []
-            for key, val in sorted(object.items()):
+            for key, val in sorted(objekt.items()):
                 if isdefined(val):
                     out.append((key,
                                 self._get_sorteddict(val, dictwithhash,
                                                      hash_method=hash_method,
                                                      hash_files=hash_files)))
-        elif isinstance(object, (list, tuple)):
+        elif isinstance(objekt, (list, tuple)):
             out = []
-            for val in object:
+            for val in objekt:
                 if isdefined(val):
                     out.append(self._get_sorteddict(val, dictwithhash,
                                                     hash_method=hash_method,
                                                     hash_files=hash_files))
-            if isinstance(object, tuple):
+            if isinstance(objekt, tuple):
                 out = tuple(out)
         else:
-            if isdefined(object):
-                if (hash_files and isinstance(object, (str, bytes)) and
-                        os.path.isfile(object)):
+            if isdefined(objekt):
+                if (hash_files and isinstance(objekt, (str, bytes)) and
+                        os.path.isfile(objekt)):
                     if hash_method is None:
                         hash_method = config.get('execution', 'hash_method')
 
                     if hash_method.lower() == 'timestamp':
-                        hash = hash_timestamp(object)
+                        hash = hash_timestamp(objekt)
                     elif hash_method.lower() == 'content':
-                        hash = hash_infile(object)
+                        hash = hash_infile(objekt)
                     else:
                         raise Exception("Unknown hash method: %s" % hash_method)
                     if dictwithhash:
-                        out = (object, hash)
+                        out = (objekt, hash)
                     else:
                         out = hash
-                elif isinstance(object, float):
-                    out = '%.10f' % object
+                elif isinstance(objekt, float):
+                    out = FLOAT_FORMAT(objekt)
                 else:
-                    out = object
+                    out = objekt
         return out
 
 
@@ -756,13 +768,21 @@ class BaseInterface(Interface):
     _redirect_x = False
     references_ = []
 
-    def __init__(self, **inputs):
+    def __init__(self, from_file=None, **inputs):
         if not self.input_spec:
             raise Exception('No input_spec in class: %s' %
                             self.__class__.__name__)
+
         self.inputs = self.input_spec(**inputs)
         self.estimated_memory_gb = 1
         self.num_threads = 1
+
+        if from_file is not None:
+            self.load_inputs_from_json(from_file, overwrite=True)
+
+            for name, value in list(inputs.items()):
+                setattr(self.inputs, name, value)
+
 
     @classmethod
     def help(cls, returnhelp=False):
@@ -788,10 +808,13 @@ class BaseInterface(Interface):
     def _refs_help(cls):
         """ Prints interface references.
         """
+        if not cls.references_:
+            return []
+
         helpstr = ['References::']
 
         for r in cls.references_:
-            helpstr += [repr(r['entry'])]
+            helpstr += ['{}'.format(r['entry'])]
 
         return helpstr
 
@@ -1166,6 +1189,32 @@ class BaseInterface(Interface):
                 raise ValueError('Interface %s has no version information' %
                                  self.__class__.__name__)
         return self._version
+
+    def load_inputs_from_json(self, json_file, overwrite=True):
+        """
+        A convenient way to load pre-set inputs from a JSON file.
+        """
+
+        with open(json_file) as fhandle:
+            inputs_dict = json.load(fhandle)
+
+        def_inputs = []
+        if not overwrite:
+            def_inputs = list(self.inputs.get_traitsfree().keys())
+
+        new_inputs = list(set(list(inputs_dict.keys())) - set(def_inputs))
+        for key in new_inputs:
+            if hasattr(self.inputs, key):
+                setattr(self.inputs, key, inputs_dict[key])
+
+    def save_inputs_to_json(self, json_file):
+        """
+        A convenient way to save current inputs to a JSON file.
+        """
+        inputs = self.inputs.get_traitsfree()
+        iflogger.debug('saving inputs {}', inputs)
+        with open(json_file, 'w' if PY3 else 'wb') as fhandle:
+            json.dump(inputs, fhandle, indent=4, ensure_ascii=False)
 
 
 class Stream(object):

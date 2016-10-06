@@ -42,7 +42,7 @@ class InactiveDueCreditCollector(object):
     cite = load = add = _donothing
 
     def __repr__(self):
-        return self.__class__.__name__ + '()'
+        return '{}()'.format(self.__class__.__name__)
 
 
 def _donothing_func(*args, **kwargs):

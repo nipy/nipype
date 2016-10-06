@@ -431,7 +431,7 @@ wf1.write_graph(graph2use='exec')
 import nipype.pipeline.engine as pe
 import nipype.interfaces.spm as spm
 import os
-from six import StringIO
+from io import StringIO
 from nipype.utils.config import config
 
 config.readfp(StringIO("""

@@ -51,12 +51,10 @@ class QJobInfo(object):
         self._qsub_command_line = qsub_command_line
 
     def __repr__(self):
-        return str(self._job_num).ljust(8) \
-            + str(self._job_queue_state).ljust(12) \
-            + str(self._job_slots).ljust(3) \
-            + time.strftime("%Y-%m-%dT%H:%M:%S", time.gmtime(self._job_time)).ljust(20) \
-            + str(self._job_queue_name).ljust(8) \
-            + str(self._qsub_command_line)
+        return '{:<8d}{:12}{:<3d}{:20}{:8}{}'.format(
+            self._job_num, self._queue_state, self._job_slots,
+            time.strftime("%Y-%m-%dT%H:%M:%S", time.gmtime(self._job_time)),
+            self._job_queue_name, self._qsub_command_line)
 
     def is_initializing(self):
         return self._job_queue_state == "initializing"

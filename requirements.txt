@@ -12,3 +12,5 @@ click>=6.6.0
 xvfbwrapper
 psutil
 funcsigs
+configparser
+doctest-ignore-unicode
