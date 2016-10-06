@@ -13,6 +13,7 @@ Algorithms to compute statistics on :abbr:`fMRI (functional MRI)`
 '''
 from __future__ import (print_function, division, unicode_literals,
                         absolute_import)
+import os
 
 import numpy as np
 import nibabel as nb
@@ -85,7 +86,7 @@ class SignalExtraction(BaseInterface):
         output = np.vstack((self.inputs.class_labels, region_signals.astype(str)))
 
         # save output
-        np.savetxt(self.inputs.out_file, output, fmt=b'%s', delimiter='\t')
+        np.savetxt(os.path.abspath(self.inputs.out_file), output, fmt=b'%s', delimiter='\t')
         return runtime
 
     def _process_inputs(self):

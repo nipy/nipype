@@ -423,7 +423,7 @@ class TCompCor(CompCor):
         mask = mask.astype(int).T
 
         # save mask
-        mask_file = 'mask.nii'
+        mask_file = os.path.abspath('mask.nii')
         nb.nifti1.save(nb.Nifti1Image(mask, np.eye(4)), mask_file)
         IFLOG.debug('tCompcor computed and saved mask of shape {} to mask_file {}'
                    .format(mask.shape, mask_file))
