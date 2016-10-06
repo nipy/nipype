@@ -7,7 +7,9 @@ Top-level namespace for niftyseg.
 """
 
 from .base import (NIFTYSEGCommand, Info, no_niftyseg)
-from .maths import (UnaryMaths, BinaryMaths, BinaryMathsInteger)
+from .maths import (UnaryMaths, BinaryMaths, BinaryMathsInteger,
+                    Merge, TupleMaths)
 from .stats import (UnaryStats, BinaryStats)
 from .steps import (STEPS, CalcTopNCC)
 from .patchmatch import (PatchMatch)
+from .lesions import (FillLesions)
