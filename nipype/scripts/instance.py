@@ -15,7 +15,6 @@ def import_module(module_path):
        If the name is specified in relative terms, then the package argument
        must be set to the name of the package which is to act as the anchor
        for resolving the package name (e.g. import_module('..mod', 'pkg.subpkg')
-
        will import pkg.mod).
 
     Parameters
