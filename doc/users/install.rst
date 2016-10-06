@@ -103,24 +103,19 @@ Testing the install
 -------------------
 
 The best way to test the install is to run the test suite.  If you have
-nose_ installed, then do the following::
+nose_ installed, then do the following at the root folder of the repository ::
 
-    python -c "import nipype; nipype.test()"
+    make test
 
-you can also test with nosetests::
-
-    nosetests --with-doctest <installation filepath>/nipype  --exclude=external --exclude=testing
-
-or::
-
-    nosetests --with-doctest nipype
 
 A successful test run should complete in a few minutes and end with
 something like::
 
-    Ran 13053 tests in 126.618s
+    ----------------------------------------------------------------------
+    Ran 17922 tests in 107.254s
 
-    OK (SKIP=66)
+    OK (SKIP=27)
+
 
 All tests should pass (unless you're missing a dependency). If SUBJECTS_DIR
 variable is not set some FreeSurfer related tests will fail. If any tests
