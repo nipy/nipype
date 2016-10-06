@@ -336,6 +336,10 @@ def main(**extra_args):
                     'nipype.interfaces.mne.tests',
                     'nipype.interfaces.mrtrix',
                     'nipype.interfaces.mrtrix.tests',
+                    'nipype.interfaces.niftyfit',
+                    'nipype.interfaces.niftyreg',
+                    'nipype.interfaces.niftyreg.tests',
+                    'nipype.interfaces.niftyseg',
                     'nipype.interfaces.nipy',
                     'nipype.interfaces.nipy.tests',
                     'nipype.interfaces.niftyreg',
@@ -384,6 +388,7 @@ def main(**extra_args):
                     'nipype.interfaces.spm',
                     'nipype.interfaces.spm.tests',
                     'nipype.interfaces.tests',
+                    'nipype.interfaces.ttk',
                     'nipype.interfaces.vista',
                     'nipype.interfaces.vista.tests',
                     'nipype.pipeline',
@@ -419,6 +424,7 @@ def main(**extra_args):
                     'nipype.workflows.smri',
                     'nipype.workflows.smri.ants',
                     'nipype.workflows.smri.freesurfer',
+                    'nipype.workflows.smri.niftyreg',
                     'nipype.workflows.warp'],
           # The package_data spec has no effect for me (on python 2.6) -- even
           # changing to data_files doesn't get this stuff included in the source
