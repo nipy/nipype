@@ -51,8 +51,8 @@ class Info(object):
            Version number as string or None if niftyreg not found
 
         """
-        raise NotImplementedError("Waiting for NiftyReg version fix before "
-        "implementing this")
+        raise NotImplementedError("Waiting for NiftyReg version fix before " +
+                                  "implementing this")
 
     @classmethod
     def output_type_to_ext(cls, output_type):
@@ -86,17 +86,18 @@ class NIFTYFITCommandInputSpec(CommandLineInputSpec):
     output_type = traits.Enum('NIFTI_GZ', Info.ftypes.keys(),
                               desc='NiftyFit output type')
 
+
 def no_niftyfit():
     """Checks if niftyfit is NOT installed
     """
     raise NotImplementedError("Waiting for version fix")
 
+
 # A custom function for getting specific niftyfit path
 def getNiftyFitPath(cmd):
-    try:    
-        specific_dir=os.environ['NIFTYFITDIR']
-        cmd=os.path.join(specific_dir,cmd)
+    try:
+        specific_dir = os.environ['NIFTYFITDIR']
+        cmd = os.path.join(specific_dir, cmd)
         return cmd
-    except KeyError:                
+    except KeyError:
         return cmd
-
