@@ -74,6 +74,7 @@ class SignalExtraction(BaseInterface):
     '''
     input_spec = SignalExtractionInputSpec
     output_spec = SignalExtractionOutputSpec
+    _results = {}
 
     def _run_interface(self, runtime):
         maskers = self._process_inputs()
@@ -86,7 +87,8 @@ class SignalExtraction(BaseInterface):
         output = np.vstack((self.inputs.class_labels, region_signals.astype(str)))
 
         # save output
-        np.savetxt(os.path.abspath(self.inputs.out_file), output, fmt=b'%s', delimiter='\t')
+        self._results['out_file'] = os.path.abspath(self.inputs.out_file)
+        np.savetxt(self._results['out_file'], output, fmt=b'%s', delimiter='\t')
         return runtime
 
     def _process_inputs(self):
@@ -137,6 +139,4 @@ class SignalExtraction(BaseInterface):
         return nb.Nifti1Image(array[:, :, :, np.newaxis], affine)
 
     def _list_outputs(self):
-        outputs = self._outputs().get()
-        outputs['out_file'] = self.inputs.out_file
-        return outputs
+        return self._results
