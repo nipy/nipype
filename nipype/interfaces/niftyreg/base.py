@@ -1,8 +1,7 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """The niftyreg module provides classes for interfacing with `niftyreg
-<http://sourceforge.net/projects/niftyreg/>`_ command line tools. The 
-interfaces were written to work with niftyreg version 1.4
+<http://sourceforge.net/projects/niftyreg/>`_ command line tools.
 
 These are the base tools for working with niftyreg.
 
@@ -22,7 +21,8 @@ See the docstrings of the individual classes for examples.
 
 import warnings
 import os
-from nipype.interfaces.base import (CommandLineInputSpec, CommandLine, isdefined)
+from distutils.version import StrictVersion
+from nipype.interfaces.base import (CommandLine, isdefined)
 from nipype.utils.filemanip import split_filename
 import subprocess
 
@@ -51,10 +51,15 @@ class NiftyRegCommand(CommandLine):
     """
     Base support for NiftyReg commands
     """
+    _min_version = '1.5.0'
     _suffix = '_nr'
 
     def __init__(self, **inputs):
         super(NiftyRegCommand, self).__init__(**inputs)
+        current_version = self.get_version()
+        if StrictVersion(current_version) < StrictVersion(self._min_version):
+            raise ValueError('A later version of Niftyreg is required (%s < %s)' %
+                             (current_version, self._min_version))
 
     def get_version(self):
         if no_niftyreg(cmd=self.cmd):
