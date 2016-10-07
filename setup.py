@@ -137,7 +137,11 @@ def main():
         tests_require=ldict['TESTS_REQUIRES'],
         test_suite='nose.collector',
         zip_safe=False,
-        extras_require=ldict['EXTRA_REQUIRES']
+        extras_require=ldict['EXTRA_REQUIRES'],
+        entry_points='''
+           [console_scripts]
+           nipypecli=nipype.scripts.cli:cli
+        '''
     )
 
 if __name__ == "__main__":
