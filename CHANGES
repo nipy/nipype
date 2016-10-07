@@ -1,6 +1,7 @@
 Upcoming release 0.13
 =====================
 
+* FIX: AFNI Retroicor interface fixes (https://github.com/nipy/nipype/pull/1669)
 * ENH: Add AFNI 3dNote interface (https://github.com/nipy/nipype/pull/1637)
 * FIX: Minor bugfixes related to unicode literals (https://github.com/nipy/nipype/pull/1656)
 * ENH: Add a DVARS calculation interface (https://github.com/nipy/nipype/pull/1606)

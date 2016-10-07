@@ -156,7 +156,7 @@ TESTS_REQUIRES = [
 ]
 
 EXTRA_REQUIRES = {
-    'doc': ['Sphinx>=0.3', 'matplotlib', 'pydotplus'],
+    'doc': ['Sphinx>=0.3', 'matplotlib', 'pydotplus', 'doctest-ignore-unicode'],
     'tests': TESTS_REQUIRES,
     'fmri': ['nitime', 'nilearn', 'dipy', 'nipy', 'matplotlib'],
     'profiler': ['psutil'],
