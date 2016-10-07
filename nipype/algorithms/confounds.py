@@ -332,8 +332,8 @@ class CompCor(BaseInterface):
         mask = nb.load(self.inputs.mask_file).get_data()
 
         if imgseries.shape[:3] != mask.shape:
-            raise ValueError("Inputs for CompCor, func {} and mask {}, do not have matching '
-            'spatial dimensions ({} and {}, respectively)"
+            raise ValueError('Inputs for CompCor, func {} and mask {}, do not have matching '
+                             'spatial dimensions ({} and {}, respectively)'
                              .format(self.inputs.realigned_file, self.inputs.mask_file,
                                      imgseries.shape[:3], mask.shape))
 
