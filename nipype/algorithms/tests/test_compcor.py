@@ -79,8 +79,16 @@ class TestCompCor(unittest.TestCase):
         asymmetric_data = utils.save_toy_nii(np.zeros(asymmetric_shape), 'asymmetric.nii')
 
         TCompCor(realigned_file=asymmetric_data).run()
-
         self.assertEqual(nb.load('mask.nii').get_data().shape, asymmetric_shape[:3])
+
+    def test_compcor_bad_input_shapes(self):
+        shape_less_than = (1, 2, 2, 5) # dim 0 is < dim 0 of self.mask_file (2)
+        shape_more_than = (3, 3, 3, 5) # dim 0 is > dim 0 of self.mask_file (2)
+
+        for data_shape in (shape_less_than, shape_more_than):
+            data_file = utils.save_toy_nii(np.zeros(data_shape), 'temp.nii')
+            interface = CompCor(realigned_file=data_file, mask_file=self.mask_file)
+            self.assertRaisesRegexp(ValueError, "dimensions", interface.run)
 
     def run_cc(self, ccinterface, expected_components):
         # run

@@ -330,6 +330,13 @@ class CompCor(BaseInterface):
     def _run_interface(self, runtime):
         imgseries = nb.load(self.inputs.realigned_file).get_data()
         mask = nb.load(self.inputs.mask_file).get_data()
+
+        if imgseries.shape[:3] != mask.shape:
+            raise ValueError("Inputs for CompCor, func {} and mask {}, do not have matching '
+            'spatial dimensions ({} and {}, respectively)"
+                             .format(self.inputs.realigned_file, self.inputs.mask_file,
+                                     imgseries.shape[:3], mask.shape))
+
         voxel_timecourses = imgseries[mask > 0]
         # Zero-out any bad values
         voxel_timecourses[np.isnan(np.sum(voxel_timecourses, axis=1)), :] = 0
