@@ -51,15 +51,19 @@ class NiftyRegCommand(CommandLine):
     """
     Base support for NiftyReg commands
     """
-    _min_version = '1.5.0'
     _suffix = '_nr'
+    _min_version = '1.5.0'
 
-    def __init__(self, **inputs):
+    def __init__(self, required_version=None, **inputs):
         super(NiftyRegCommand, self).__init__(**inputs)
         current_version = self.get_version()
         if StrictVersion(current_version) < StrictVersion(self._min_version):
             raise ValueError('A later version of Niftyreg is required (%s < %s)' %
                              (current_version, self._min_version))
+        if required_version is not None:
+            if StrictVersion(current_version) != StrictVersion(required_version):
+                raise ValueError('The version of NiftyReg differs from the required (%s != %s)' %
+                                 (current_version, required_version))
 
     def get_version(self):
         if no_niftyreg(cmd=self.cmd):
