@@ -50,8 +50,8 @@ extensions = ['sphinx.ext.todo',
               'sphinx.ext.pngmath',
               'sphinx.ext.autosummary',
               'numpy_ext.numpydoc',
-              #'matplotlib.sphinxext.plot_directive',
-              #'matplotlib.sphinxext.only_directives',
+              'matplotlib.sphinxext.plot_directive',
+              'matplotlib.sphinxext.only_directives',
               #'IPython.sphinxext.ipython_directive',
               #'IPython.sphinxext.ipython_console_highlighting'
               ]
