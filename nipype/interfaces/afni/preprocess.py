@@ -1655,6 +1655,8 @@ class Retroicor(AFNICommand):
     >>> ret.inputs.card = 'mask.1D'
     >>> ret.inputs.resp = 'resp.1D'
     >>> ret.inputs.outputtype = 'NIFTI'
+    >>> ret.cmdline  # doctest: +IGNORE_UNICODE
+    '3dretroicor -prefix functional_retroicor.nii -resp resp.1D -card mask.1D functional.nii'
     >>> res = ret.run()   # doctest: +SKIP
     """
 
