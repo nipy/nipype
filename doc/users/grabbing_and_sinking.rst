@@ -235,7 +235,7 @@ when using multiple nested iterables.
 Substitutions
 -------------
 
-The `substitutions` and `substitutions_regexp` inputs allow users to modify the
+The ``substitutions`` and ``regexp_substitutions`` inputs allow users to modify the
 output destination path and name of a file. Substitutions are a list of 2-tuples
 and are carried out in the order in which they were entered. Assuming that the
 output path of a file is:

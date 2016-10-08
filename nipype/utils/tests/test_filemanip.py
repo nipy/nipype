@@ -8,7 +8,8 @@ import os
 from tempfile import mkstemp, mkdtemp
 import warnings
 
-from ...testing import assert_equal, assert_true, assert_false, TempFATFS
+from ...testing import (assert_equal, assert_true, assert_false,
+                        assert_in, assert_not_in, TempFATFS)
 from ...utils.filemanip import (save_json, load_json,
                                 fname_presuffix, fnames_presuffix,
                                 hash_rename, check_forhash,
@@ -17,6 +18,10 @@ from ...utils.filemanip import (save_json, load_json,
                                 split_filename, get_related_files)
 
 import numpy as np
+
+
+def _ignore_atime(stat):
+    return stat[:7] + stat[8:]
 
 
 def test_split_filename():
@@ -192,27 +197,33 @@ def test_recopy():
                 # tick
                 if copy and not use_hardlink and hashmethod == 'timestamp':
                     continue
+
                 copyfile(orig_img, new_img, **kwargs)
-                img_stat = os.stat(new_img)
-                hdr_stat = os.stat(new_hdr)
+                img_stat = _ignore_atime(os.stat(new_img))
+                hdr_stat = _ignore_atime(os.stat(new_hdr))
                 copyfile(orig_img, new_img, **kwargs)
                 err_msg = "Regular - OS: {}; Copy: {}; Hardlink: {}".format(
                     os.name, copy, use_hardlink)
-                yield assert_equal, img_stat, os.stat(new_img), err_msg
-                yield assert_equal, hdr_stat, os.stat(new_hdr), err_msg
+                yield (assert_equal, img_stat, _ignore_atime(os.stat(new_img)),
+                       err_msg)
+                yield (assert_equal, hdr_stat, _ignore_atime(os.stat(new_hdr)),
+                       err_msg)
                 os.unlink(new_img)
                 os.unlink(new_hdr)
 
                 copyfile(img_link, new_img, **kwargs)
-                img_stat = os.stat(new_img)
-                hdr_stat = os.stat(new_hdr)
+                img_stat = _ignore_atime(os.stat(new_img))
+                hdr_stat = _ignore_atime(os.stat(new_hdr))
                 copyfile(img_link, new_img, **kwargs)
                 err_msg = "Symlink - OS: {}; Copy: {}; Hardlink: {}".format(
                     os.name, copy, use_hardlink)
-                yield assert_equal, img_stat, os.stat(new_img), err_msg
-                yield assert_equal, hdr_stat, os.stat(new_hdr), err_msg
+                yield (assert_equal, img_stat, _ignore_atime(os.stat(new_img)),
+                       err_msg)
+                yield (assert_equal, hdr_stat, _ignore_atime(os.stat(new_hdr)),
+                       err_msg)
                 os.unlink(new_img)
                 os.unlink(new_hdr)
+
     os.unlink(img_link)
     os.unlink(hdr_link)
     os.unlink(orig_img)
@@ -247,6 +258,30 @@ def test_copyfallback():
     finally:
         os.unlink(orig_img)
         os.unlink(orig_hdr)
+
+
+def test_get_related_files():
+    orig_img, orig_hdr = _temp_analyze_files()
+
+    related_files = get_related_files(orig_img)
+    yield assert_in, orig_img, related_files
+    yield assert_in, orig_hdr, related_files
+
+    related_files = get_related_files(orig_hdr)
+    yield assert_in, orig_img, related_files
+    yield assert_in, orig_hdr, related_files
+
+
+def test_get_related_files_noninclusive():
+    orig_img, orig_hdr = _temp_analyze_files()
+
+    related_files = get_related_files(orig_img, include_this_file=False)
+    yield assert_not_in, orig_img, related_files
+    yield assert_in, orig_hdr, related_files
+
+    related_files = get_related_files(orig_hdr, include_this_file=False)
+    yield assert_in, orig_img, related_files
+    yield assert_not_in, orig_hdr, related_files
 
 
 def test_filename_to_list():

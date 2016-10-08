@@ -1,4 +1,10 @@
 machine:
+  environment:
+    OSF_NIPYPE_URL: "https://files.osf.io/v1/resources/nefdp/providers/osfstorage"
+    DATA_NIPYPE_TUTORIAL_URL: "${OSF_NIPYPE_URL}/57f4739cb83f6901ed94bf21"
+    DATA_NIPYPE_FSL_COURSE: "${OSF_NIPYPE_URL}/57f472cf9ad5a101f977ecfe"
+    DATA_NIPYPE_FSL_FEEDS: "${OSF_NIPYPE_URL}/57f473066c613b01f113e7af"
+
   services:
     - docker
 
@@ -15,9 +21,9 @@ dependencies:
 
   override:
     - mkdir -p ~/examples ~/scratch/nose ~/scratch/logs
-    - if [[ ! -d ~/examples/nipype-tutorial ]]; then wget --retry-connrefused --waitretry=5 --read-timeout=20 --timeout=15 -t 0 -q -O nipype-tutorial.tar.bz2 https://dl.dropbox.com/s/jzgq2nupxyz36bp/nipype-tutorial.tar.bz2 && tar xjf nipype-tutorial.tar.bz2 -C ~/examples/; fi
-    - if [[ ! -d ~/examples/nipype-fsl_course_data ]]; then wget --retry-connrefused --waitretry=5 --read-timeout=20 --timeout=15 -t 0 -q https://3552243d5be815c1b09152da6525cb8fe7b900a6.googledrive.com/host/0BxI12kyv2olZVUswazA3NkFvOXM/nipype-fsl_course_data.tar.gz && tar xzf nipype-fsl_course_data.tar.gz -C ~/examples/; fi
-    - if [[ ! -d ~/examples/feeds ]]; then wget --retry-connrefused --waitretry=5 --read-timeout=20 --timeout=15 -t 0 -q https://3552243d5be815c1b09152da6525cb8fe7b900a6.googledrive.com/host/0BxI12kyv2olZVUswazA3NkFvOXM/fsl-5.0.9-feeds.tar.gz && tar xzf fsl-5.0.9-feeds.tar.gz -C ~/examples/; fi
+    - if [[ ! -d ~/examples/nipype-tutorial ]]; then wget --retry-connrefused --waitretry=5 --read-timeout=20 --timeout=15 -t 0 -q -O nipype-tutorial.tar.bz2 "${DATA_NIPYPE_TUTORIAL_URL}" && tar xjf nipype-tutorial.tar.bz2 -C ~/examples/; fi
+    - if [[ ! -d ~/examples/nipype-fsl_course_data ]]; then wget --retry-connrefused --waitretry=5 --read-timeout=20 --timeout=15 -t 0 -q -O nipype-fsl_course_data.tar.gz "${DATA_NIPYPE_FSL_COURSE}" && tar xzf nipype-fsl_course_data.tar.gz -C ~/examples/; fi
+    - if [[ ! -d ~/examples/feeds ]]; then wget --retry-connrefused --waitretry=5 --read-timeout=20 --timeout=15 -t 0 -q -O fsl-5.0.9-feeds.tar.gz "${DATA_NIPYPE_FSL_FEEDS}" && tar xzf fsl-5.0.9-feeds.tar.gz -C ~/examples/; fi
     - if [[ -e ~/docker/image.tar ]]; then docker load -i ~/docker/image.tar; fi
     - docker build -f docker/nipype_test/Dockerfile_py35 -t nipype/nipype_test:py35 . :
         timeout: 1600

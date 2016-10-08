@@ -48,7 +48,7 @@ from ...utils.filemanip import (save_json, FileNotFoundError,
                                 copyfiles, fnames_presuffix, loadpkl,
                                 split_filename, load_json, savepkl,
                                 write_rst_header, write_rst_dict,
-                                write_rst_list)
+                                write_rst_list, to_str)
 from .utils import (generate_expanded_graph, modify_paths,
                     export_graph, make_output_dir, write_workflow_prov,
                     clean_working_directory, format_dot, topological_sort,
@@ -238,13 +238,13 @@ connected.
         for srcnode, destnode, connects in connection_list:
             edge_data = self._graph.get_edge_data(srcnode, destnode, None)
             if edge_data:
-                logger.debug('(%s, %s): Edge data exists: %s'
-                             % (srcnode, destnode, str(edge_data)))
+                logger.debug('(%s, %s): Edge data exists: %s', srcnode, destnode,
+                             to_str(edge_data))
                 for data in connects:
                     if data not in edge_data['connect']:
                         edge_data['connect'].append(data)
                     if disconnect:
-                        logger.debug('Removing connection: %s' % str(data))
+                        logger.debug('Removing connection: %s', to_str(data))
                         edge_data['connect'].remove(data)
                 if edge_data['connect']:
                     self._graph.add_edges_from([(srcnode,
@@ -252,16 +252,14 @@ connected.
                                                  edge_data)])
                 else:
                     # pass
-                    logger.debug('Removing connection: %s->%s' % (srcnode,
-                                                                  destnode))
+                    logger.debug('Removing connection: %s->%s', srcnode, destnode)
                     self._graph.remove_edges_from([(srcnode, destnode)])
             elif not disconnect:
-                logger.debug('(%s, %s): No edge data' % (srcnode, destnode))
+                logger.debug('(%s, %s): No edge data', srcnode, destnode)
                 self._graph.add_edges_from([(srcnode, destnode,
                                              {'connect': connects})])
             edge_data = self._graph.get_edge_data(srcnode, destnode)
-            logger.debug('(%s, %s): new edge data: %s' % (srcnode, destnode,
-                                                          str(edge_data)))
+            logger.debug('(%s, %s): new edge data: %s', srcnode, destnode, to_str(edge_data))
 
     def disconnect(self, *args):
         """Disconnect nodes
@@ -276,7 +274,7 @@ connected.
                             'of connection tuples (%d args given)' % len(args))
 
         for srcnode, dstnode, conn in connection_list:
-            logger.debug('disconnect(): %s->%s %s' % (srcnode, dstnode, conn))
+            logger.debug('disconnect(): %s->%s %s', srcnode, dstnode, to_str(conn))
             if self in [srcnode, dstnode]:
                 raise IOError(
                     'Workflow connect cannot contain itself as node: src[%s] '
@@ -296,10 +294,10 @@ connected.
                     idx = ed_conns.index(edge)
                     remove.append((edge[0], edge[1]))
 
-            logger.debug('disconnect(): remove list %s' % remove)
+            logger.debug('disconnect(): remove list %s', to_str(remove))
             for el in remove:
                 edge_data['connect'].remove(el)
-                logger.debug('disconnect(): removed connection %s' % str(el))
+                logger.debug('disconnect(): removed connection %s', to_str(el))
 
             if not edge_data['connect']:
                 self._graph.remove_edge(srcnode, dstnode)
@@ -330,8 +328,7 @@ connected.
             return
         for node in newnodes:
             if not issubclass(node.__class__, EngineBase):
-                raise Exception('Node %s must be a subclass of EngineBase' %
-                                str(node))
+                raise Exception('Node %s must be a subclass of EngineBase', node)
         self._check_nodes(newnodes)
         for node in newnodes:
             if node._hierarchy is None:
@@ -566,7 +563,7 @@ connected.
             crash_dir = self.config['crashdump_dir']
             self.config['execution']['crashdump_dir'] = crash_dir
             del self.config['crashdump_dir']
-        logger.info(str(sorted(self.config)))
+        logger.info('Workflow %s settings: %s', self.name, to_str(sorted(self.config)))
         self._set_needed_outputs(flatgraph)
         execgraph = generate_expanded_graph(deepcopy(flatgraph))
         for index, node in enumerate(execgraph.nodes()):
@@ -794,7 +791,7 @@ connected.
             newval = dict(val)
         if isinstance(val, TraitListObject):
             newval = val[:]
-        logger.debug('setting node input: %s->%s', param, str(newval))
+        logger.debug('setting node input: %s->%s', param, to_str(newval))
         node.set_input(param, deepcopy(newval))
 
     def _get_all_nodes(self):
@@ -844,29 +841,29 @@ connected.
                              '(DAG)') % self.name)
         nodes = nx.topological_sort(self._graph)
         for node in nodes:
-            logger.debug('processing node: %s' % node)
+            logger.debug('processing node: %s', node)
             if isinstance(node, Workflow):
                 nodes2remove.append(node)
                 # use in_edges instead of in_edges_iter to allow
                 # disconnections to take place properly. otherwise, the
                 # edge dict is modified.
                 for u, _, d in self._graph.in_edges(nbunch=node, data=True):
-                    logger.debug('in: connections-> %s' % str(d['connect']))
+                    logger.debug('in: connections-> %s', to_str(d['connect']))
                     for cd in deepcopy(d['connect']):
-                        logger.debug("in: %s" % str(cd))
+                        logger.debug("in: %s", to_str(cd))
                         dstnode = node._get_parameter_node(cd[1], subtype='in')
                         srcnode = u
                         srcout = cd[0]
                         dstin = cd[1].split('.')[-1]
-                        logger.debug('in edges: %s %s %s %s' %
-                                     (srcnode, srcout, dstnode, dstin))
+                        logger.debug('in edges: %s %s %s %s', srcnode, srcout,
+                                     dstnode, dstin)
                         self.disconnect(u, cd[0], node, cd[1])
                         self.connect(srcnode, srcout, dstnode, dstin)
                 # do not use out_edges_iter for reasons stated in in_edges
                 for _, v, d in self._graph.out_edges(nbunch=node, data=True):
-                    logger.debug('out: connections-> %s' % str(d['connect']))
+                    logger.debug('out: connections-> %s', to_str(d['connect']))
                     for cd in deepcopy(d['connect']):
-                        logger.debug("out: %s" % str(cd))
+                        logger.debug("out: %s", to_str(cd))
                         dstnode = v
                         if isinstance(cd[0], tuple):
                             parameter = cd[0][0]
@@ -881,10 +878,8 @@ connected.
                         else:
                             srcout = parameter.split('.')[-1]
                         dstin = cd[1]
-                        logger.debug('out edges: %s %s %s %s' % (srcnode,
-                                                                 srcout,
-                                                                 dstnode,
-                                                                 dstin))
+                        logger.debug('out edges: %s %s %s %s',
+                                     srcnode, srcout, dstnode, dstin)
                         self.disconnect(node, cd[0], v, cd[1])
                         self.connect(srcnode, srcout, dstnode, dstin)
                 # expand the workflow node
@@ -963,7 +958,7 @@ connected.
                                                            subnode)['connect']:
                             dotlist.append('%s -> %s;' % (nodename,
                                                           subnodename))
-                        logger.debug('connection: ' + dotlist[-1])
+                        logger.debug('connection: %s', dotlist[-1])
         # add between workflow connections
         for u, v, d in self._graph.edges_iter(data=True):
             uname = '.'.join(hierarchy + [u.fullname])
@@ -987,5 +982,5 @@ connected.
                 if uname1.split('.')[:-1] != vname1.split('.')[:-1]:
                     dotlist.append('%s -> %s;' % (uname1.replace('.', '_'),
                                                   vname1.replace('.', '_')))
-                    logger.debug('cross connection: ' + dotlist[-1])
+                    logger.debug('cross connection: %s', dotlist[-1])
         return ('\n' + prefix).join(dotlist)

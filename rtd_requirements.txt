@@ -13,3 +13,4 @@ psutil
 funcsigs
 configparser
 doctest-ignore-unicode
+matplotlib

@@ -29,6 +29,12 @@ from ..interfaces.traits_extension import isdefined
 fmlogger = logging.getLogger("filemanip")
 
 
+related_filetype_sets = [
+    ('.hdr', '.img', '.mat'),
+    ('.BRIK', '.HEAD'),
+]
+
+
 class FileNotFoundError(Exception):
     pass
 
@@ -83,7 +89,7 @@ def split_filename(fname):
 
     return pth, fname, ext
 
-def encode_dict(value):
+def to_str(value):
     """
     Manipulates ordered dicts before they are hashed (Py2/3 compat.)
 
@@ -91,21 +97,37 @@ def encode_dict(value):
     if sys.version_info[0] > 2:
         retval = str(value)
     else:
-        retval = encode_dict_py27(value)
+        retval = to_str_py27(value)
     return retval
 
-def encode_dict_py27(value):
+def to_str_py27(value):
     """
     Encode dictionary for python 2
     """
+
+    if isinstance(value, dict):
+        entry = '{}: {}'.format
+        retval = '{'
+        for key, val in list(value.items()):
+            if len(retval) > 1:
+                retval += ', '
+            kenc = repr(key)
+            if kenc.startswith(("u'", 'u"')):
+                kenc = kenc[1:]
+            venc = to_str_py27(val)
+            if venc.startswith(("u'", 'u"')):
+                venc = venc[1:]
+            retval+= entry(kenc, venc)
+        retval += '}'
+        return retval
 
     istuple = isinstance(value, tuple)
     if isinstance(value, (tuple, list)):
         retval = '(' if istuple else '['
         nels = len(value)
         for i, v in enumerate(value):
-            venc = encode_dict_py27(v)
-            if venc.startswith("u'") or venc.startswith('u"'):
+            venc = to_str_py27(v)
+            if venc.startswith(("u'", 'u"')):
                 venc = venc[1:]
             retval += venc
 
@@ -118,7 +140,7 @@ def encode_dict_py27(value):
         return retval
 
     retval = repr(value).decode()
-    if retval.startswith("u'") or retval.startswith('u"'):
+    if retval.startswith(("u'", 'u"')):
         retval = retval[1:]
     return retval
 
@@ -215,7 +237,8 @@ def hash_timestamp(afile):
 
 
 def copyfile(originalfile, newfile, copy=False, create_new=False,
-             hashmethod=None, use_hardlink=False):
+             hashmethod=None, use_hardlink=False,
+             copy_related_files=True):
     """Copy or link ``originalfile`` to ``newfile``.
 
     If ``use_hardlink`` is True, and the file can be hard-linked, then a
@@ -236,6 +259,9 @@ def copyfile(originalfile, newfile, copy=False, create_new=False,
     use_hardlink : Bool
         specifies whether to hard-link files, when able
         (Default=False), taking precedence over copy
+    copy_related_files : Bool
+        specifies whether to also operate on related files, as defined in
+        ``related_filetype_sets``
 
     Returns
     -------
@@ -328,38 +354,36 @@ def copyfile(originalfile, newfile, copy=False, create_new=False,
             fmlogger.warn(e.message)
 
     # Associated files
-    if originalfile.endswith(".img"):
-        hdrofile = originalfile[:-4] + ".hdr"
-        hdrnfile = newfile[:-4] + ".hdr"
-        matofile = originalfile[:-4] + ".mat"
-        if os.path.exists(matofile):
-            matnfile = newfile[:-4] + ".mat"
-            copyfile(matofile, matnfile, copy, hashmethod=hashmethod,
-                     use_hardlink=use_hardlink)
-        copyfile(hdrofile, hdrnfile, copy, hashmethod=hashmethod,
-                 use_hardlink=use_hardlink)
-    elif originalfile.endswith(".BRIK"):
-        hdrofile = originalfile[:-5] + ".HEAD"
-        hdrnfile = newfile[:-5] + ".HEAD"
-        copyfile(hdrofile, hdrnfile, copy, hashmethod=hashmethod,
-                 use_hardlink=use_hardlink)
+    if copy_related_files:
+        related_file_pairs = (get_related_files(f, include_this_file=False)
+                              for f in (originalfile, newfile))
+        for alt_ofile, alt_nfile in zip(*related_file_pairs):
+            if os.path.exists(alt_ofile):
+                copyfile(alt_ofile, alt_nfile, copy, hashmethod=hashmethod,
+                         use_hardlink=use_hardlink, copy_related_files=False)
 
     return newfile
 
 
-def get_related_files(filename):
-    """Returns a list of related files for Nifti-Pair, Analyze (SPM) and AFNI
-       files
+def get_related_files(filename, include_this_file=True):
+    """Returns a list of related files, as defined in
+    ``related_filetype_sets``, for a filename. (e.g., Nifti-Pair, Analyze (SPM)
+    and AFNI files).
+
+    Parameters
+    ----------
+    filename : str
+        File name to find related filetypes of.
+    include_this_file : bool
+        If true, output includes the input filename.
     """
     related_files = []
-    if filename.endswith(".img") or filename.endswith(".hdr"):
-        path, name, ext = split_filename(filename)
-        for ext in ['.hdr', '.img', '.mat']:
-            related_files.append(os.path.join(path, name + ext))
-    elif filename.endswith(".BRIK") or filename.endswith(".HEAD"):
-        path, name, ext = split_filename(filename)
-        for ext in ['.BRIK', '.HEAD']:
-            related_files.append(os.path.join(path, name + ext))
+    path, name, this_type = split_filename(filename)
+    for type_set in related_filetype_sets:
+        if this_type in type_set:
+            for related_type in type_set:
+                if include_this_file or related_type != this_type:
+                    related_files.append(os.path.join(path, name + related_type))
     if not len(related_files):
         related_files = [filename]
     return related_files

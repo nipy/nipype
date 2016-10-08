@@ -279,7 +279,7 @@ class RuntimeProfilerTestCase(unittest.TestCase):
 
         # Run workflow
         plugin_args = {'n_procs' : num_threads,
-                       'memory' : num_gb,
+                       'memory_gb' : num_gb,
                        'status_callback' : log_nodes_cb}
         wf.run(plugin='MultiProc', plugin_args=plugin_args)
 
@@ -359,7 +359,7 @@ class RuntimeProfilerTestCase(unittest.TestCase):
 
         # Run workflow
         plugin_args = {'n_procs' : num_threads,
-                       'memory' : num_gb,
+                       'memory_gb' : num_gb,
                        'status_callback' : log_nodes_cb}
         wf.run(plugin='MultiProc', plugin_args=plugin_args)
 
@@ -418,6 +418,7 @@ class RuntimeProfilerTestCase(unittest.TestCase):
                         msg=threads_err)
 
     # Test resources were used as expected
+    @unittest.skipIf(True, "https://github.com/nipy/nipype/issues/1663")
     @unittest.skipIf(run_profile == False, skip_profile_msg)
     def test_function_profiling(self):
         '''
