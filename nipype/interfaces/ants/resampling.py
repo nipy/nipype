@@ -247,10 +247,12 @@ class ApplyTransformsInputSpec(ANTSCommandInputSpec):
                                              traits.Tuple(traits.Float(),  # Gaussian/MultiLabel (sigma, alpha)
                                                           traits.Float())
                                             )
-    transforms = InputMultiPath(
-        File(exists=True), argstr='%s', desc='transform files: will be applied in reverse order. '
-        'For example, the last specified transform will be applied first; if this input is not '
-        'set, the identity transform is used')
+    transforms = traits.Either(InputMultiPath(File(exists=True), desc='transform files: will be '
+                                              'applied in reverse order. For example, the last '
+                                              'specified transform will be applied first.'),
+                               traits.Enum('identity', desc='use the identity transform'),
+                               mandatory=True,
+                               argstr='%s')
     invert_transform_flags = InputMultiPath(traits.Bool())
     default_value = traits.Float(0.0, argstr='--default-value %g', usedefault=True)
     print_out_composite_warp_file = traits.Bool(False, requires=["output_image"],
@@ -294,12 +296,24 @@ class ApplyTransforms(ANTSCommand):
     >>> at1.inputs.default_value = 0
     >>> at1.inputs.transforms = ['ants_Warp.nii.gz', 'trans.mat']
     >>> at1.inputs.invert_transform_flags = [False, False]
-    >>> at1.cmdline # doctest: +IGNORE_UNICODE
+    >>> at1.cmdline
     'antsApplyTransforms --default-value 0 --dimensionality 3 --input moving1.nii --interpolation BSpline[ 5 ] \
 --output deformed_moving1.nii --reference-image fixed1.nii --transform [ ants_Warp.nii.gz, 0 ] \
 --transform [ trans.mat, 0 ]'
 
-
+    >>> atid = ApplyTransforms()
+    >>> atid.inputs.dimension = 3
+    >>> atid.inputs.input_image = 'moving1.nii'
+    >>> atid.inputs.reference_image = 'fixed1.nii'
+    >>> atid.inputs.output_image = 'deformed_moving1.nii'
+    >>> atid.inputs.interpolation = 'BSpline'
+    >>> atid.inputs.interpolation_parameters = (5,)
+    >>> atid.inputs.default_value = 0
+    >>> atid.inputs.transforms = 'identity'
+    >>> atid.cmdline
+    'antsApplyTransforms --default-value 0 --dimensionality 3 --input moving1.nii \
+--interpolation BSpline[ 5 ] --output deformed_moving1.nii --reference-image fixed1.nii \
+--transform identity'
     """
     _cmd = 'antsApplyTransforms'
     input_spec = ApplyTransformsInputSpec
@@ -315,6 +329,9 @@ class ApplyTransforms(ANTSCommand):
         return None
 
     def _get_transform_filenames(self):
+        ''' the input transforms may be a list of files or the keyword 'identity' '''
+        if self.inputs.transforms == 'identity':
+            return "--transform identity"
         retval = []
         for ii in range(len(self.inputs.transforms)):
             if isdefined(self.inputs.invert_transform_flags):
