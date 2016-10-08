@@ -113,6 +113,10 @@ class SignalExtraction(BaseInterface):
                 maskers.append(nl.NiftiMapsMasker(label_data))
 
         # check label list size
+        if not np.isclose(int(n_labels), n_labels):
+            raise ValueError('The label files {} contain invalid value {}. Check input.'
+                             .format(self.inputs.label_files, n_labels))
+
         if len(self.inputs.class_labels) != n_labels:
             raise ValueError('The length of class_labels {} does not '
                              'match the number of regions {} found in '
