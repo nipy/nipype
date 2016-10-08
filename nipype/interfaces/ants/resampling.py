@@ -296,7 +296,7 @@ class ApplyTransforms(ANTSCommand):
     >>> at1.inputs.default_value = 0
     >>> at1.inputs.transforms = ['ants_Warp.nii.gz', 'trans.mat']
     >>> at1.inputs.invert_transform_flags = [False, False]
-    >>> at1.cmdline
+    >>> at1.cmdline # doctest: +IGNORE_UNICODE
     'antsApplyTransforms --default-value 0 --dimensionality 3 --input moving1.nii --interpolation BSpline[ 5 ] \
 --output deformed_moving1.nii --reference-image fixed1.nii --transform [ ants_Warp.nii.gz, 0 ] \
 --transform [ trans.mat, 0 ]'
@@ -310,7 +310,7 @@ class ApplyTransforms(ANTSCommand):
     >>> atid.inputs.interpolation_parameters = (5,)
     >>> atid.inputs.default_value = 0
     >>> atid.inputs.transforms = 'identity'
-    >>> atid.cmdline
+    >>> atid.cmdline # doctest: +IGNORE_UNICODE
     'antsApplyTransforms --default-value 0 --dimensionality 3 --input moving1.nii \
 --interpolation BSpline[ 5 ] --output deformed_moving1.nii --reference-image fixed1.nii \
 --transform identity'
