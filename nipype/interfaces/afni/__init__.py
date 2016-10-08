@@ -8,12 +8,16 @@ Top-level namespace for afni.
 """
 
 from .base import Info
-from .preprocess import (AFNItoNIFTI, Allineate, AutoTcorrelate, Autobox,
-                         Automask, Bandpass, BlurInMask, BlurToFWHM, BrickStat,
-                         Calc, ClipLevel, Copy, DegreeCentrality, Despike,
-                         Detrend, ECM, Eval, FWHMx, Fim, Fourier, Hist, LFCD,
-                         MaskTool, Maskave, Means, Merge, Notes, OutlierCount,
-                         QualityIndex, ROIStats, Refit, Resample, Retroicor,
-                         Seg, SkullStrip, TCat, TCorr1D, TCorrMap, TCorrelate,
-                         TShift, TStat, To3D, Volreg, Warp, ZCutUp)
+from .preprocess import (Allineate, Automask, AutoTcorrelate,
+                         Bandpass, BlurInMask, BlurToFWHM,
+                         ClipLevel, DegreeCentrality, Despike,
+                         Detrend, ECM, Fim, Fourier, Hist, LFCD,
+                         Maskave, Means, OutlierCount,
+                         QualityIndex, ROIStats, Retroicor,
+                         Seg, SkullStrip, TCorr1D, TCorrMap, TCorrelate,
+                         TShift, Volreg, Warp)
 from .svm import (SVMTest, SVMTrain)
+from .utils import (AFNItoNIFTI, Autobox, BrickStat, Calc, Copy,
+                    Eval, FWHMx,
+                    MaskTool, Merge, Notes, Refit, Resample, TCat, TStat, To3D,
+                    ZCutUp,)
