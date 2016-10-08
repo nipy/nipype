@@ -7,7 +7,7 @@ def test_Register_inputs():
     input_map = dict(args=dict(argstr='%s',
     ),
     curv=dict(argstr='-curv',
-    requires=[u'in_smoothwm'],
+    requires=['in_smoothwm'],
     ),
     environ=dict(nohash=True,
     usedefault=True,

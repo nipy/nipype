@@ -5,7 +5,7 @@ from ..modelgen import SpecifyModel
 
 def test_SpecifyModel_inputs():
     input_map = dict(event_files=dict(mandatory=True,
-    xor=[u'subject_info', u'event_files'],
+    xor=['subject_info', 'event_files'],
     ),
     functional_runs=dict(copyfile=False,
     mandatory=True,
@@ -22,7 +22,7 @@ def test_SpecifyModel_inputs():
     realignment_parameters=dict(copyfile=False,
     ),
     subject_info=dict(mandatory=True,
-    xor=[u'subject_info', u'event_files'],
+    xor=['subject_info', 'event_files'],
     ),
     time_repetition=dict(mandatory=True,
     ),

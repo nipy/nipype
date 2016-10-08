@@ -31,7 +31,7 @@ def test_MRIPretess_inputs():
     ),
     out_file=dict(argstr='%s',
     keep_extension=True,
-    name_source=[u'in_filled'],
+    name_source=['in_filled'],
     name_template='%s_pretesswm',
     position=-1,
     ),

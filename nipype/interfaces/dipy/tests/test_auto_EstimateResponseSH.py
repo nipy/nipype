@@ -5,7 +5,7 @@ from ..reconstruction import EstimateResponseSH
 
 def test_EstimateResponseSH_inputs():
     input_map = dict(auto=dict(usedefault=True,
-    xor=[u'recursive'],
+    xor=['recursive'],
     ),
     b0_thres=dict(usedefault=True,
     ),
@@ -27,7 +27,7 @@ def test_EstimateResponseSH_inputs():
     ),
     out_prefix=dict(),
     recursive=dict(usedefault=True,
-    xor=[u'auto'],
+    xor=['auto'],
     ),
     response=dict(usedefault=True,
     ),

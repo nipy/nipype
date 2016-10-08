@@ -5,7 +5,7 @@ from ..preprocess import ApplyWarp
 
 def test_ApplyWarp_inputs():
     input_map = dict(abswarp=dict(argstr='--abs',
-    xor=[u'relwarp'],
+    xor=['relwarp'],
     ),
     args=dict(argstr='%s',
     ),
@@ -44,7 +44,7 @@ def test_ApplyWarp_inputs():
     ),
     relwarp=dict(argstr='--rel',
     position=-1,
-    xor=[u'abswarp'],
+    xor=['abswarp'],
     ),
     superlevel=dict(argstr='--superlevel=%s',
     ),
