@@ -1,4 +1,0 @@
-{
-  "nipype/algorithms/tests/test_mesh_ops.py::test_ident_distances": true, 
-  "nipype/algorithms/tests/test_mesh_ops.py::test_trans_distances": true
-}
