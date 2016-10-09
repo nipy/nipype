@@ -112,6 +112,7 @@ NOSE_MIN_VERSION = '1.2'
 FUTURE_MIN_VERSION = '0.15.2'
 SIMPLEJSON_MIN_VERSION = '3.8.0'
 PROV_MIN_VERSION = '1.4.0'
+CLICK_MIN_VERSION = '6.6.0'
 
 NAME = 'nipype'
 MAINTAINER = 'nipype developers'
@@ -141,6 +142,7 @@ REQUIRES = [
     'future>=%s' % FUTURE_MIN_VERSION,
     'simplejson>=%s' % SIMPLEJSON_MIN_VERSION,
     'prov>=%s' % PROV_MIN_VERSION,
+    'click>=%s' % CLICK_MIN_VERSION,
     'xvfbwrapper',
     'funcsigs'
 ]

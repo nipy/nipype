@@ -47,32 +47,31 @@ def add_options(parser=None, module=None, function=None):
 
 
 def run_instance(interface, options):
-    if interface:
-        print("setting function inputs")
+    print("setting function inputs")
 
-        for input_name, _ in list(interface.inputs.items()):
-            if getattr(options, input_name) != None:
-                value = getattr(options, input_name)
-                if not isinstance(value, bool):
-                    # traits cannot cast from string to float or int
-                    try:
-                        value = float(value)
-                    except:
-                        pass
-                    # try to cast string input to boolean
-                    try:
-                        value = str2bool(value)
-                    except:
-                        pass
+    for input_name, _ in list(interface.inputs.items()):
+        if getattr(options, input_name) != None:
+            value = getattr(options, input_name)
+            if not isinstance(value, bool):
+                # traits cannot cast from string to float or int
                 try:
-                    setattr(interface.inputs, input_name,
-                            value)
-                except ValueError as e:
-                    print("Error when setting the value of %s: '%s'" % (input_name, str(e)))
+                    value = float(value)
+                except:
+                    pass
+                # try to cast string input to boolean
+                try:
+                    value = str2bool(value)
+                except:
+                    pass
+            try:
+                setattr(interface.inputs, input_name,
+                        value)
+            except ValueError as e:
+                print("Error when setting the value of %s: '%s'" % (input_name, str(e)))
 
-        print(interface.inputs)
-        res = interface.run()
-        print(res.outputs)
+    print(interface.inputs)
+    res = interface.run()
+    print(res.outputs)
 
 
 def main(argv):
