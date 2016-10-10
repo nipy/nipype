@@ -409,6 +409,11 @@ class TCompCor(CompCor):
     def _run_interface(self, runtime):
         imgseries = nb.load(self.inputs.realigned_file).get_data()
 
+        if imgseries.ndim != 4:
+            raise ValueError('tCompCor expected a 4-D nifti file. Input {} has {} dimensions '
+                             '(shape {})'
+                             .format(self.inputs.realigned_file, imgseries.ndim, imgseries.shape))
+
         # From the paper:
         # "For each voxel time series, the temporal standard deviation is
         # defined as the standard deviation of the time series after the removal

@@ -84,8 +84,9 @@ class TestCompCor(unittest.TestCase):
     def test_compcor_bad_input_shapes(self):
         shape_less_than = (1, 2, 2, 5) # dim 0 is < dim 0 of self.mask_file (2)
         shape_more_than = (3, 3, 3, 5) # dim 0 is > dim 0 of self.mask_file (2)
+        bad_dims = (2, 2, 2) # not 4-D
 
-        for data_shape in (shape_less_than, shape_more_than):
+        for data_shape in (shape_less_than, shape_more_than, bad_dims):
             data_file = utils.save_toy_nii(np.zeros(data_shape), 'temp.nii')
             interface = CompCor(realigned_file=data_file, mask_file=self.mask_file)
             self.assertRaisesRegexp(ValueError, "dimensions", interface.run)
