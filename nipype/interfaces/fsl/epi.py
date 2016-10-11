@@ -373,6 +373,12 @@ class ApplyTOPUP(FSLCommand):
         if skip is None:
             skip = []
 
+        for filename in self.inputs.in_files:
+            ndims = nib.load(filename).get_data().ndim
+            if ndims != 4:
+                raise ValueError('Input in_files for ApplyTopUp must be 4-D. {} is {}-D.'
+                                 .format(filename, ndims))
+
         # If not defined, assume index are the first N entries in the
         # parameters file, for N input images.
         if not isdefined(self.inputs.in_index):
