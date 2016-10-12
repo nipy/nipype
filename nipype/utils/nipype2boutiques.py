@@ -21,34 +21,6 @@ import tempfile
 import simplejson as json
 
 
-def main(argv):
-
-    # Parses arguments
-    parser = argparse.ArgumentParser(description='Nipype Boutiques exporter. See Boutiques specification at https://github.com/boutiques/schema.', prog=argv[0])
-    parser.add_argument("-i", "--interface", type=str, help="Name of the Nipype interface to export.", required=True)
-    parser.add_argument("-m", "--module", type=str, help="Module where the interface is defined.", required=True)
-    parser.add_argument("-o", "--output", type=str, help="JSON file name where the Boutiques descriptor will be written.", required=True)
-    parser.add_argument("-t", "--ignored-template-inputs", type=str, help="Interface inputs ignored in path template creations.", nargs='+')
-    parser.add_argument("-d", "--docker-image", type=str, help="Name of the Docker image where the Nipype interface is available.")
-    parser.add_argument("-r", "--docker-index", type=str, help="Docker index where the Docker image is stored (e.g. http://index.docker.io).")
-    parser.add_argument("-n", "--ignore-template-numbers", action='store_true', default=False, help="Ignore all numbers in path template creations.")
-    parser.add_argument("-v", "--verbose", action='store_true', default=False, help="Enable verbose output.")
-
-    parsed = parser.parse_args()
-
-    # Generates JSON string
-    json_string = generate_boutiques_descriptor(parsed.module,
-                                                parsed.interface,
-                                                parsed.ignored_template_inputs,
-                                                parsed.docker_image, parsed.docker_index,
-                                                parsed.verbose,
-                                                parsed.ignore_template_numbers)
-
-    # Writes JSON string to file
-    with open(parsed.output, 'w') as f:
-        f.write(json_string)
-
-
 def generate_boutiques_descriptor(module, interface_name, ignored_template_inputs, docker_image, docker_index, verbose, ignore_template_numbers):
     '''
     Returns a JSON string containing a JSON Boutiques description of a Nipype interface.
@@ -63,16 +35,20 @@ def generate_boutiques_descriptor(module, interface_name, ignored_template_input
         raise Exception("Undefined module.")
 
     # Retrieves Nipype interface
-    __import__(module)
-    interface = getattr(sys.modules[module], interface_name)()
+    if isinstance(module, str):
+        __import__(module)
+        module_name = str(module)
+        module = sys.modules[module]
+
+    interface = getattr(module, interface_name)()
     inputs = interface.input_spec()
     outputs = interface.output_spec()
 
     # Tool description
     tool_desc = {}
     tool_desc['name'] = interface_name
-    tool_desc['command-line'] = "nipype_cmd " + str(module) + " " + interface_name + " "
-    tool_desc['description'] = interface_name + ", as implemented in Nipype (module: " + str(module) + ", interface: " + interface_name + ")."
+    tool_desc['command-line'] = "nipype_cmd " + module_name + " " + interface_name + " "
+    tool_desc['description'] = interface_name + ", as implemented in Nipype (module: " + module_name + ", interface: " + interface_name + ")."
     tool_desc['inputs'] = []
     tool_desc['outputs'] = []
     tool_desc['tool-version'] = interface.version
