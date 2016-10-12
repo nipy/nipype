@@ -10,16 +10,14 @@
     >>> os.chdir(datadir)
 """
 from __future__ import print_function, division, unicode_literals, absolute_import
-from builtins import open, str, bytes
+from builtins import open
 
 import os
 import os.path as op
-import re
-import numpy as np
 
 from ...utils.filemanip import (load_json, save_json, split_filename)
 from ..base import (
-    CommandLineInputSpec, CommandLine, Directory, TraitedSpec,
+    CommandLineInputSpec, CommandLine, TraitedSpec,
     traits, isdefined, File, InputMultiPath, Undefined, Str)
 
 from .base import (
@@ -260,7 +258,7 @@ class Allineate(AFNICommand):
     """Program to align one dataset (the 'source') to a base dataset
 
     For complete details, see the `3dAllineate Documentation.
-    <http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dAllineate.html>`_
+    <https://afni.nimh.nih.gov/pub/dist/doc/program_help/3dAllineate.html>`_
 
     Examples
     ========
@@ -340,6 +338,9 @@ class AutoTcorrelate(AFNICommand):
     """Computes the correlation coefficient between the time series of each
     pair of voxels in the input dataset, and stores the output into a
     new anatomical bucket dataset [scaled to shorts to save memory space].
+    
+    For complete details, see the `3dAutoTcorrelate Documentation.
+    <https://afni.nimh.nih.gov/pub/dist/doc/program_help/3dAutoTcorrelate.html>`_
 
     Examples
     ========
@@ -409,7 +410,7 @@ class Automask(AFNICommand):
     """Create a brain-only mask of the image using AFNI 3dAutomask command
 
     For complete details, see the `3dAutomask Documentation.
-    <http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dAutomask.html>`_
+    <https://afni.nimh.nih.gov/pub/dist/doc/program_help/3dAutomask.html>`_
 
     Examples
     ========
@@ -517,7 +518,7 @@ class Bandpass(AFNICommand):
     dataset, offering more/different options than Fourier
 
     For complete details, see the `3dBandpass Documentation.
-    <http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dbandpass.html>`_
+    <https://afni.nimh.nih.gov/pub/dist/doc/program_help/3dbandpass.html>`_
 
     Examples
     ========
@@ -581,10 +582,10 @@ class BlurInMaskInputSpec(AFNICommandInputSpec):
 
 
 class BlurInMask(AFNICommand):
-    """ Blurs a dataset spatially inside a mask.  That's all.  Experimental.
+    """Blurs a dataset spatially inside a mask.  That's all.  Experimental.
 
     For complete details, see the `3dBlurInMask Documentation.
-    <http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dBlurInMask.html>
+    <https://afni.nimh.nih.gov/pub/dist/doc/program_help/3dBlurInMask.html>`_
 
     Examples
     ========
@@ -635,7 +636,7 @@ class BlurToFWHM(AFNICommand):
     """Blurs a 'master' dataset until it reaches a specified FWHM smoothness
     (approximately).
 
-    For complete details, see the `to3d Documentation
+    For complete details, see the `3dBlurToFWHM Documentation
     <https://afni.nimh.nih.gov/pub/dist/doc/program_help/3dBlurToFWHM.html>`_
 
     Examples
@@ -765,7 +766,7 @@ class DegreeCentrality(AFNICommand):
     via 3dDegreeCentrality
 
     For complete details, see the `3dDegreeCentrality Documentation.
-    <http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dDegreeCentrality.html>
+    <https://afni.nimh.nih.gov/pub/dist/doc/program_help/3dDegreeCentrality.html>`_
 
     Examples
     ========
@@ -779,6 +780,7 @@ class DegreeCentrality(AFNICommand):
     >>> degree.cmdline # doctest: +IGNORE_UNICODE
     '3dDegreeCentrality -mask mask.nii -prefix out.nii -sparsity 1.000000 functional.nii'
     >>> res = degree.run() # doctest: +SKIP
+    
     """
 
     _cmd = '3dDegreeCentrality'
@@ -817,7 +819,7 @@ class Despike(AFNICommand):
     """Removes 'spikes' from the 3D+time input dataset
 
     For complete details, see the `3dDespike Documentation.
-    <http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dDespike.html>`_
+    <https://afni.nimh.nih.gov/pub/dist/doc/program_help/3dDespike.html>`_
 
     Examples
     ========
@@ -856,7 +858,7 @@ class Detrend(AFNICommand):
     linear least squares
 
     For complete details, see the `3dDetrend Documentation.
-    <http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dDetrend.html>`_
+    <https://afni.nimh.nih.gov/pub/dist/doc/program_help/3dDetrend.html>`_
 
     Examples
     ========
@@ -927,7 +929,7 @@ class ECM(AFNICommand):
     via the 3dECM command
 
     For complete details, see the `3dECM Documentation.
-    <http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dECM.html>
+    <https://afni.nimh.nih.gov/pub/dist/doc/program_help/3dECM.html>`_
 
     Examples
     ========
@@ -941,6 +943,7 @@ class ECM(AFNICommand):
     >>> ecm.cmdline # doctest: +IGNORE_UNICODE
     '3dECM -mask mask.nii -prefix out.nii -sparsity 0.100000 functional.nii'
     >>> res = ecm.run() # doctest: +SKIP
+    
     """
 
     _cmd = '3dECM'
@@ -978,12 +981,11 @@ class FimInputSpec(AFNICommandInputSpec):
 
 
 class Fim(AFNICommand):
-    """Program to calculate the cross-correlation of
-    an ideal reference waveform with the measured FMRI
-    time series for each voxel
+    """Program to calculate the cross-correlation of an ideal reference
+    waveform with the measured FMRI time series for each voxel.
 
     For complete details, see the `3dfim+ Documentation.
-    <http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dfim+.html>`_
+    <https://afni.nimh.nih.gov/pub/dist/doc/program_help/3dfim+.html>`_
 
     Examples
     ========
@@ -1034,7 +1036,7 @@ class Fourier(AFNICommand):
     dataset, via the FFT
 
     For complete details, see the `3dFourier Documentation.
-    <http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dfourier.html>`_
+    <https://afni.nimh.nih.gov/pub/dist/doc/program_help/3dFourier.html>`_
 
     Examples
     ========
@@ -1108,7 +1110,7 @@ class Hist(AFNICommandBase):
     which satisfy the criterion in the options list
 
     For complete details, see the `3dHist Documentation.
-    <http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dHist.html>`_
+    <https://afni.nimh.nih.gov/pub/dist/doc/program_help/3dHist.html>`_
 
     Examples
     ========
@@ -1169,7 +1171,7 @@ class LFCD(AFNICommand):
     via the 3dLFCD command
 
     For complete details, see the `3dLFCD Documentation.
-    <http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dLFCD.html>
+    <https://afni.nimh.nih.gov/pub/dist/doc/program_help/3dLFCD.html>`_
 
     Examples
     ========
@@ -1221,7 +1223,7 @@ class Maskave(AFNICommand):
     which satisfy the criterion in the options list
 
     For complete details, see the `3dmaskave Documentation.
-    <http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dmaskave.html>`_
+    <https://afni.nimh.nih.gov/pub/dist/doc/program_help/3dmaskave.html>`_
 
     Examples
     ========
@@ -1288,7 +1290,8 @@ class MeansInputSpec(AFNICommandInputSpec):
 class Means(AFNICommand):
     """Takes the voxel-by-voxel mean of all input datasets using 3dMean
 
-    see AFNI Documentation: <http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dMean.html>
+    For complete details, see the `3dMean Documentation.
+    <https://afni.nimh.nih.gov/pub/dist/doc/program_help/3dMean.html>`_
 
     Examples
     ========
@@ -1300,6 +1303,7 @@ class Means(AFNICommand):
     >>> means.inputs.out_file =  'output.nii'
     >>> means.cmdline  # doctest: +IGNORE_UNICODE
     '3dMean im1.nii im2.nii -prefix output.nii'
+    >>> res = means.run()  # doctest: +SKIP
 
     """
 
@@ -1404,9 +1408,9 @@ class OutlierCount(CommandLine):
     >>> from nipype.interfaces import afni
     >>> toutcount = afni.OutlierCount()
     >>> toutcount.inputs.in_file = 'functional.nii'
-    >>> toutcount.cmdline #doctest: +ELLIPSIS +IGNORE_UNICODE
+    >>> toutcount.cmdline  # doctest: +ELLIPSIS +IGNORE_UNICODE
     '3dToutcount functional.nii > functional_outliers'
-    >>> res = toutcount.run() #doctest: +SKIP
+    >>> res = toutcount.run()  # doctest: +SKIP
 
    """
 
@@ -1503,9 +1507,9 @@ class QualityIndex(CommandLine):
     >>> from nipype.interfaces import afni
     >>> tqual = afni.QualityIndex()
     >>> tqual.inputs.in_file = 'functional.nii'
-    >>> tqual.cmdline #doctest: +ELLIPSIS +IGNORE_UNICODE
+    >>> tqual.cmdline  # doctest: +ELLIPSIS +IGNORE_UNICODE
     '3dTqual functional.nii > functional_tqual'
-    >>> res = tqual.run() #doctest: +SKIP
+    >>> res = tqual.run()  # doctest: +SKIP
 
     """
     _cmd = '3dTqual'
@@ -1553,7 +1557,7 @@ class ROIStats(AFNICommandBase):
     """Display statistics over masked regions
 
     For complete details, see the `3dROIstats Documentation.
-    <http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dROIstats.html>`_
+    <https://afni.nimh.nih.gov/pub/dist/doc/program_help/3dROIstats.html>`_
 
     Examples
     ========
@@ -1563,7 +1567,7 @@ class ROIStats(AFNICommandBase):
     >>> roistats.inputs.in_file = 'functional.nii'
     >>> roistats.inputs.mask = 'skeleton_mask.nii.gz'
     >>> roistats.inputs.quiet=True
-    >>> res = roistats.run() # doctest: +SKIP
+    >>> res = roistats.run()  # doctest: +SKIP
 
     """
     _cmd = '3dROIstats'
@@ -1645,7 +1649,7 @@ class Retroicor(AFNICommand):
     motion correction).
 
     For complete details, see the `3dretroicor Documentation.
-    <http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dretroicor.html>`_
+    <https://afni.nimh.nih.gov/pub/dist/doc/program_help/3dretroicor.html>`_
 
     Examples
     ========
@@ -1657,7 +1661,8 @@ class Retroicor(AFNICommand):
     >>> ret.inputs.outputtype = 'NIFTI'
     >>> ret.cmdline  # doctest: +IGNORE_UNICODE
     '3dretroicor -prefix functional_retroicor.nii -resp resp.1D -card mask.1D functional.nii'
-    >>> res = ret.run()   # doctest: +SKIP
+    >>> res = ret.run()  # doctest: +SKIP
+    
     """
 
     _cmd = '3dretroicor'
@@ -1728,7 +1733,7 @@ class Seg(AFNICommandBase):
        moment, only mixing fractions and MRF are documented.
 
     For complete details, see the `3dSeg Documentation.
-    <https://afni.nimh.nih.gov/pub/dist/doc/program_help/3dSeg.html>
+    <https://afni.nimh.nih.gov/pub/dist/doc/program_help/3dSeg.html>`_
 
     Examples
     ========
@@ -1737,7 +1742,7 @@ class Seg(AFNICommandBase):
     >>> seg = preprocess.Seg()
     >>> seg.inputs.in_file = 'structural.nii'
     >>> seg.inputs.mask = 'AUTO'
-    >>> res = seg.run() # doctest: +SKIP
+    >>> res = seg.run()  # doctest: +SKIP
 
     """
 
@@ -1781,7 +1786,7 @@ class SkullStrip(AFNICommand):
     tissue from MRI T1-weighted images
 
     For complete details, see the `3dSkullStrip Documentation.
-    <http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dSkullStrip.html>`_
+    <https://afni.nimh.nih.gov/pub/dist/doc/program_help/3dSkullStrip.html>`_
 
     Examples
     ========
@@ -1790,7 +1795,7 @@ class SkullStrip(AFNICommand):
     >>> skullstrip = afni.SkullStrip()
     >>> skullstrip.inputs.in_file = 'functional.nii'
     >>> skullstrip.inputs.args = '-o_ply'
-    >>> res = skullstrip.run() # doctest: +SKIP
+    >>> res = skullstrip.run()  # doctest: +SKIP
 
     """
     _cmd = '3dSkullStrip'
@@ -1858,8 +1863,9 @@ class TCorr1DOutputSpec(TraitedSpec):
 class TCorr1D(AFNICommand):
     """Computes the correlation coefficient between each voxel time series
     in the input 3D+time dataset.
+    
     For complete details, see the `3dTcorr1D Documentation.
-    <http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dTcorr1D.html>`_
+    <https://afni.nimh.nih.gov/pub/dist/doc/program_help/3dTcorr1D.html>`_
 
     >>> from nipype.interfaces import afni as afni
     >>> tcorr1D = afni.TCorr1D()
@@ -1867,7 +1873,8 @@ class TCorr1D(AFNICommand):
     >>> tcorr1D.inputs.y_1d = 'seed.1D'
     >>> tcorr1D.cmdline  # doctest: +IGNORE_UNICODE
     '3dTcorr1D -prefix u_rc1s1_Template_correlation.nii.gz  u_rc1s1_Template.nii  seed.1D'
-    >>> res = tcorr1D.run() # doctest: +SKIP
+    >>> res = tcorr1D.run()  # doctest: +SKIP
+    
     """
 
     _cmd = '3dTcorr1D'
@@ -1991,12 +1998,12 @@ class TCorrMapOutputSpec(TraitedSpec):
 
 
 class TCorrMap(AFNICommand):
-    """ For each voxel time series, computes the correlation between it
+    """For each voxel time series, computes the correlation between it
     and all other voxels, and combines this set of values into the
     output dataset(s) in some way.
 
     For complete details, see the `3dTcorrMap Documentation.
-    <http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dTcorrMap.html>
+    <https://afni.nimh.nih.gov/pub/dist/doc/program_help/3dTcorrMap.html>`_
 
     Examples
     ========
@@ -2006,7 +2013,7 @@ class TCorrMap(AFNICommand):
     >>> tcm.inputs.in_file = 'functional.nii'
     >>> tcm.inputs.mask = 'mask.nii'
     >>> tcm.mean_file = '%s_meancorr.nii'
-    >>> res = tcm.run()   # doctest: +SKIP
+    >>> res = tcm.run()  # doctest: +SKIP
 
     """
 
@@ -2062,7 +2069,7 @@ class TCorrelate(AFNICommand):
     time series in two input 3D+time datasets 'xset' and 'yset'
 
     For complete details, see the `3dTcorrelate Documentation.
-    <http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dTcorrelate.html>`_
+    <https://afni.nimh.nih.gov/pub/dist/doc/program_help/3dTcorrelate.html>`_
 
     Examples
     ========
@@ -2074,7 +2081,7 @@ class TCorrelate(AFNICommand):
     >>> tcorrelate.inputs.out_file = 'functional_tcorrelate.nii.gz'
     >>> tcorrelate.inputs.polort = -1
     >>> tcorrelate.inputs.pearson = True
-    >>> res = tcarrelate.run() # doctest: +SKIP
+    >>> res = tcarrelate.run()  # doctest: +SKIP
 
     """
 
@@ -2129,12 +2136,11 @@ class TShiftInputSpec(AFNICommandInputSpec):
 
 
 class TShift(AFNICommand):
-    """Shifts voxel time series from input
-    so that seperate slices are aligned to the same
-    temporal origin
+    """Shifts voxel time series from input so that seperate slices are aligned
+    to the same temporal origin.
 
     For complete details, see the `3dTshift Documentation.
-    <http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dTshift.html>
+    <https://afni.nimh.nih.gov/pub/dist/doc/program_help/3dTshift.html>`_
 
     Examples
     ========
@@ -2144,9 +2150,10 @@ class TShift(AFNICommand):
     >>> tshift.inputs.in_file = 'functional.nii'
     >>> tshift.inputs.tpattern = 'alt+z'
     >>> tshift.inputs.tzero = 0.0
-    >>> tshift.cmdline #doctest: +IGNORE_UNICODE
+    >>> tshift.cmdline  # doctest: +IGNORE_UNICODE
     '3dTshift -prefix functional_tshift -tpattern alt+z -tzero 0.0 functional.nii'
-    >>> res = tshift.run()   # doctest: +SKIP
+    >>> res = tshift.run()  # doctest: +SKIP
+    
 
     """
     _cmd = '3dTshift'
@@ -2225,7 +2232,7 @@ class Volreg(AFNICommand):
     """Register input volumes to a base volume using AFNI 3dvolreg command
 
     For complete details, see the `3dvolreg Documentation.
-    <http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dvolreg.html>`_
+    <https://afni.nimh.nih.gov/pub/dist/doc/program_help/3dvolreg.html>`_
 
     Examples
     ========
@@ -2236,9 +2243,9 @@ class Volreg(AFNICommand):
     >>> volreg.inputs.args = '-Fourier -twopass'
     >>> volreg.inputs.zpad = 4
     >>> volreg.inputs.outputtype = 'NIFTI'
-    >>> volreg.cmdline #doctest: +ELLIPSIS +IGNORE_UNICODE
+    >>> volreg.cmdline  # doctest: +ELLIPSIS +IGNORE_UNICODE
     '3dvolreg -Fourier -twopass -1Dfile functional.1D -1Dmatrix_save functional.aff12.1D -prefix functional_volreg.nii -zpad 4 -maxdisp1D functional_md.1D functional.nii'
-    >>> res = volreg.run() # doctest: +SKIP
+    >>> res = volreg.run()  # doctest: +SKIP
 
     """
 
@@ -2293,7 +2300,7 @@ class Warp(AFNICommand):
     """Use 3dWarp for spatially transforming a dataset
 
     For complete details, see the `3dWarp Documentation.
-    <http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dWarp.html>`_
+    <https://afni.nimh.nih.gov/pub/dist/doc/program_help/3dWarp.html>`_
 
     Examples
     ========
@@ -2303,8 +2310,9 @@ class Warp(AFNICommand):
     >>> warp.inputs.in_file = 'structural.nii'
     >>> warp.inputs.deoblique = True
     >>> warp.inputs.out_file = 'trans.nii.gz'
-    >>> warp.cmdline # doctest: +IGNORE_UNICODE
+    >>> warp.cmdline  # doctest: +IGNORE_UNICODE
     '3dWarp -deoblique -prefix trans.nii.gz structural.nii'
+    >>> res = warp.run()  # doctest: +SKIP
 
     >>> warp_2 = afni.Warp()
     >>> warp_2.inputs.in_file = 'structural.nii'
@@ -2312,6 +2320,7 @@ class Warp(AFNICommand):
     >>> warp_2.inputs.out_file = 'trans.nii.gz'
     >>> warp_2.cmdline  # doctest: +IGNORE_UNICODE
     '3dWarp -newgrid 1.000000 -prefix trans.nii.gz structural.nii'
+    >>> res = warp_2.run()  # doctest: +SKIP
 
     """
     _cmd = '3dWarp'

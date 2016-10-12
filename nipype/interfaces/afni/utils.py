@@ -13,7 +13,7 @@ See the docstrings of the individual classes for examples.
     >>> os.chdir(datadir)
 """
 from __future__ import print_function, division, unicode_literals, absolute_import
-from builtins import open, str, bytes
+from builtins import str, bytes
 
 import os
 import os.path as op
@@ -26,8 +26,7 @@ from ..base import (
     traits, isdefined, File, InputMultiPath, Undefined, Str)
 
 from .base import (
-    AFNICommandBase, AFNICommand, AFNICommandInputSpec, AFNICommandOutputSpec,
-    Info, no_afni)
+    AFNICommandBase, AFNICommand, AFNICommandInputSpec, AFNICommandOutputSpec)
 
 
 class AFNItoNIFTIInputSpec(AFNICommandInputSpec):
@@ -71,12 +70,11 @@ class AFNItoNIFTIInputSpec(AFNICommandInputSpec):
 
 
 class AFNItoNIFTI(AFNICommand):
-    """Changes AFNI format files to NIFTI format using 3dAFNItoNIFTI
+    """Converts AFNI format files to NIFTI format. This can also convert 2D or
+    1D data, which you can numpy.squeeze() to remove extra dimensions.
 
-    see AFNI Documentation:
-    <http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dAFNItoNIFTI.html>
-    this can also convert 2D or 1D data, which you can numpy.squeeze() to
-    remove extra dimensions
+    For complete details, see the `3dAFNItoNIFTI Documentation.
+    <https://afni.nimh.nih.gov/pub/dist/doc/program_help/3dAFNItoNIFTI.html>`_
 
     Examples
     ========
@@ -87,6 +85,7 @@ class AFNItoNIFTI(AFNICommand):
     >>> a2n.inputs.out_file =  'afni_output.nii'
     >>> a2n.cmdline  # doctest: +IGNORE_UNICODE
     '3dAFNItoNIFTI -prefix afni_output.nii afni_output.3D'
+    >>> res = a2n.run()  # doctest: +SKIP
 
     """
 
@@ -138,11 +137,11 @@ class AutoboxOutputSpec(TraitedSpec):  # out_file not mandatory
 
 
 class Autobox(AFNICommand):
-    """ Computes size of a box that fits around the volume.
+    """Computes size of a box that fits around the volume.
     Also can be used to crop the volume to that box.
 
     For complete details, see the `3dAutobox Documentation.
-    <http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dAutobox.html>
+    <https://afni.nimh.nih.gov/pub/dist/doc/program_help/3dAutobox.html>`_
 
     Examples
     ========
@@ -204,10 +203,10 @@ class BrickStatOutputSpec(TraitedSpec):
 
 
 class BrickStat(AFNICommand):
-    """Compute maximum and/or minimum voxel values of an input dataset
+    """Computes maximum and/or minimum voxel values of an input dataset.
 
     For complete details, see the `3dBrickStat Documentation.
-    <http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dBrickStat.html>`_
+    <https://afni.nimh.nih.gov/pub/dist/doc/program_help/3dBrickStat.html>`_
 
     Examples
     ========
@@ -294,10 +293,10 @@ class CalcInputSpec(AFNICommandInputSpec):
 
 
 class Calc(AFNICommand):
-    """This program does voxel-by-voxel arithmetic on 3D datasets
+    """This program does voxel-by-voxel arithmetic on 3D datasets.
 
     For complete details, see the `3dcalc Documentation.
-    <http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dcalc.html>`_
+    <https://afni.nimh.nih.gov/pub/dist/doc/program_help/3dcalc.html>`_
 
     Examples
     ========
@@ -357,7 +356,7 @@ class Copy(AFNICommand):
     or different type using 3dcopy command
 
     For complete details, see the `3dcopy Documentation.
-    <http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dcopy.html>`_
+    <https://afni.nimh.nih.gov/pub/dist/doc/program_help/3dcopy.html>`_
 
     Examples
     ========
@@ -436,7 +435,8 @@ class EvalInputSpec(AFNICommandInputSpec):
 class Eval(AFNICommand):
     """Evaluates an expression that may include columns of data from one or more text files
 
-    see AFNI Documentation: <http://afni.nimh.nih.gov/pub/dist/doc/program_help/1deval.html>
+    For complete details, see the `1deval Documentation.
+    <https://afni.nimh.nih.gov/pub/dist/doc/program_help/1deval.html>`_
 
     Examples
     ========
@@ -588,6 +588,9 @@ class FWHMx(AFNICommandBase):
     of all the FWHMs along each axis is written to stdout.  (A non-positive
     output value indicates something bad happened; e.g., FWHM in z is meaningless
     for a 2D dataset; the estimation method computed incoherent intermediate results.)
+    
+    For complete details, see the `3dFWHMx Documentation.
+    <https://afni.nimh.nih.gov/pub../pub/dist/doc/program_help/3dFWHMx.html>`_
 
     Examples
     --------
@@ -850,7 +853,7 @@ class Merge(AFNICommand):
     """Merge or edit volumes using AFNI 3dmerge command
 
     For complete details, see the `3dmerge Documentation.
-    <http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dmerge.html>`_
+    <https://afni.nimh.nih.gov/pub/dist/doc/program_help/3dmerge.html>`_
 
     Examples
     ========
@@ -901,11 +904,10 @@ class NotesInputSpec(AFNICommandInputSpec):
 
 
 class Notes(CommandLine):
-    """
-    A program to add, delete, and show notes for AFNI datasets.
+    """A program to add, delete, and show notes for AFNI datasets.
 
     For complete details, see the `3dNotes Documentation.
-    <http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dNotes.html>
+    <https://afni.nimh.nih.gov/pub/dist/doc/program_help/3dNotes.html>`_
 
     Examples
     ========
@@ -970,7 +972,7 @@ class Refit(AFNICommandBase):
     """Changes some of the information inside a 3D dataset's header
 
     For complete details, see the `3drefit Documentation.
-    <http://afni.nimh.nih.gov/pub/dist/doc/program_help/3drefit.html>
+    <https://afni.nimh.nih.gov/pub/dist/doc/program_help/3drefit.html>`_
 
     Examples
     ========
@@ -1030,7 +1032,7 @@ class Resample(AFNICommand):
     """Resample or reorient an image using AFNI 3dresample command
 
     For complete details, see the `3dresample Documentation.
-    <http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dresample.html>`_
+    <https://afni.nimh.nih.gov/pub/dist/doc/program_help/3dresample.html>`_
 
     Examples
     ========
@@ -1076,7 +1078,7 @@ class TCat(AFNICommand):
     one big 3D+time dataset
 
     For complete details, see the `3dTcat Documentation.
-    <http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dTcat.html>`_
+    <https://afni.nimh.nih.gov/pub/dist/doc/program_help/3dTcat.html>`_
 
     Examples
     ========
@@ -1121,7 +1123,7 @@ class TStat(AFNICommand):
     """Compute voxel-wise statistics using AFNI 3dTstat command
 
     For complete details, see the `3dTstat Documentation.
-    <http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dTstat.html>`_
+    <https://afni.nimh.nih.gov/pub/dist/doc/program_help/3dTstat.html>`_
 
     Examples
     ========
@@ -1182,7 +1184,7 @@ class To3D(AFNICommand):
     """Create a 3D dataset from 2D image files using AFNI to3d command
 
     For complete details, see the `to3d Documentation
-    <http://afni.nimh.nih.gov/pub/dist/doc/program_help/to3d.html>`_
+    <https://afni.nimh.nih.gov/pub/dist/doc/program_help/to3d.html>`_
 
     Examples
     ========
@@ -1225,7 +1227,7 @@ class ZCutUp(AFNICommand):
     """Cut z-slices from a volume using AFNI 3dZcutup command
 
     For complete details, see the `3dZcutup Documentation.
-    <http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dZcutup.html>`_
+    <https://afni.nimh.nih.gov/pub/dist/doc/program_help/3dZcutup.html>`_
 
     Examples
     ========
