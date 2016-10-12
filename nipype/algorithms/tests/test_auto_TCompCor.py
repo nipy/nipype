@@ -4,14 +4,12 @@ from ..confounds import TCompCor
 
 
 def test_TCompCor_inputs():
-    input_map = dict(components_file=dict(mandatory=False,
-    usedefault=True,
+    input_map = dict(components_file=dict(usedefault=True,
     ),
     ignore_exception=dict(nohash=True,
     usedefault=True,
     ),
-    mask_file=dict(mandatory=False,
-    ),
+    mask_file=dict(),
     num_components=dict(usedefault=True,
     ),
     percentile_threshold=dict(usedefault=True,
