@@ -27,6 +27,7 @@ if __name__ == '__main__':
                                         '\.testing$',
                                         '\.fixes$',
                                         '\.algorithms$',
+                                        '\.scripts$',
                                         ]
     # Modules that should not be included in generated API docs.
     docwriter.module_skip_patterns += ['\.version$',
@@ -35,6 +36,7 @@ if __name__ == '__main__':
                                        '\.pipeline\.utils$',
                                        '\.interfaces\.slicer\.generate_classes$',
                                        '\.interfaces\.pymvpa$',
+                                       '\.scripts$',
                                        ]
     docwriter.write_api_docs(outdir)
     docwriter.write_index(outdir, 'gen', relative_to='api')

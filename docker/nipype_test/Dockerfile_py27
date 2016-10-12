@@ -40,12 +40,13 @@ RUN chmod +x /usr/bin/run_*
 # Speed up building
 RUN mkdir -p /root/src/nipype
 COPY requirements.txt /root/src/nipype/requirements.txt
-RUN pip install -r /root/src/nipype/requirements.txt
+RUN pip install -r /root/src/nipype/requirements.txt && \
+    sed -i 's/\(backend *: \).*$/\1Agg/g' /usr/local/miniconda/lib/python2.7/site-packages/matplotlib/mpl-data/matplotlibrc
 
 # Re-install nipype
 COPY . /root/src/nipype
 RUN rm -r /usr/local/miniconda/lib/python2.7/site-packages/nipype* && \
     cd /root/src/nipype && \
-    pip install -e .
+    pip install -e .[all]
 
 CMD ["/bin/bash"]

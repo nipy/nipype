@@ -93,10 +93,9 @@ class PipeFunc(object):
         return out
 
     def __repr__(self):
-        return '%s(%s.%s, base_dir=%s)' % (self.__class__.__name__,
-                                           self.interface.__module__,
-                                           self.interface.__name__,
-                                           self.base_dir)
+        return '{}({}.{}}, base_dir={})'.format(
+            self.__class__.__name__, self.interface.__module__, self.interface.__name__,
+            self.base_dir)
 
 ################################################################################
 # Memory manager: provide some tracking about what is computed when, to
@@ -302,5 +301,4 @@ class Memory(object):
                        job_names, warn=warn)
 
     def __repr__(self):
-        return '%s(base_dir=%s)' % (self.__class__.__name__,
-                                    self.base_dir)
+        return '{}(base_dir={})'.format(self.__class__.__name__, self.base_dir)
