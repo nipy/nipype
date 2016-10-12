@@ -190,6 +190,13 @@ class BinaryMaths(MathsCommand):
 
     """
     input_spec = BinaryMathsInput
+  
+    def _format_arg(self, opt, spec, val):
+        """Convert input to appropriate format for seg_maths."""
+        if opt == 'operand_value' and float(val) == 0.0:
+            return '0'
+
+        return super(BinaryMaths, self)._format_arg(opt, spec, val)
 
 
 class BinaryMathsInputInteger(MathsInput):
