@@ -1,6 +1,7 @@
 Upcoming release 0.13
 =====================
 
+* REF: Refactor AFNI interfaces (https://github.com/nipy/nipype/pull/1678)
 * ENH: Move nipype commands to group command using click (https://github.com/nipy/nipype/pull/1608)
 * FIX: AFNI Retroicor interface fixes (https://github.com/nipy/nipype/pull/1669)
 * FIX: Minor errors after migration to setuptools (https://github.com/nipy/nipype/pull/1671)
