@@ -22,7 +22,7 @@ def test_RelabelHypointensities_inputs():
     out_file=dict(argstr='%s',
     hash_files=False,
     keep_extension=False,
-    name_source=['aseg'],
+    name_source=[u'aseg'],
     name_template='%s.hypos.mgz',
     position=-1,
     ),

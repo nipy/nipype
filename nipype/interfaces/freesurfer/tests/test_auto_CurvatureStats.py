@@ -29,7 +29,7 @@ def test_CurvatureStats_inputs():
     ),
     out_file=dict(argstr='-o %s',
     hash_files=False,
-    name_source=['hemisphere'],
+    name_source=[u'hemisphere'],
     name_template='%s.curv.stats',
     ),
     subject_id=dict(argstr='%s',

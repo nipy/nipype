@@ -26,7 +26,7 @@ def test_BlurToFWHM_inputs():
     mask=dict(argstr='-blurmaster %s',
     ),
     out_file=dict(argstr='-prefix %s',
-    name_source=['in_file'],
+    name_source=[u'in_file'],
     name_template='%s_afni',
     ),
     outputtype=dict(),

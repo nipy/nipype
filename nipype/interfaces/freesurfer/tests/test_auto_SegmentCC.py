@@ -21,7 +21,7 @@ def test_SegmentCC_inputs():
     out_file=dict(argstr='-o %s',
     hash_files=False,
     keep_extension=False,
-    name_source=['in_file'],
+    name_source=[u'in_file'],
     name_template='%s.auto.mgz',
     ),
     out_rotation=dict(argstr='-lta %s',

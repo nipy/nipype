@@ -29,7 +29,7 @@ def test_ApplyMask_inputs():
     out_file=dict(argstr='%s',
     hash_files=True,
     keep_extension=True,
-    name_source=['in_file'],
+    name_source=[u'in_file'],
     name_template='%s_masked',
     position=-1,
     ),

@@ -63,7 +63,7 @@ def test_Cluster_inputs():
     peak_distance=dict(argstr='--peakdist=%.10f',
     ),
     pthreshold=dict(argstr='--pthresh=%.10f',
-    requires=['dlh', 'volume'],
+    requires=[u'dlh', u'volume'],
     ),
     std_space_file=dict(argstr='--stdvol=%s',
     ),

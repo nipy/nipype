@@ -38,7 +38,7 @@ def test_ApplyTransforms_inputs():
     genfile=True,
     hash_files=False,
     ),
-    print_out_composite_warp_file=dict(requires=['output_image'],
+    print_out_composite_warp_file=dict(requires=[u'output_image'],
     ),
     reference_image=dict(argstr='--reference-image %s',
     mandatory=True,
