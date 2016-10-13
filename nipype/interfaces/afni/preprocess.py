@@ -520,7 +520,7 @@ class Bandpass(AFNICommand):
     dataset, offering more/different options than Fourier
 
     For complete details, see the `3dBandpass Documentation.
-    <https://afni.nimh.nih.gov/pub/dist/doc/program_help/3dbandpass.html>`_
+    <https://afni.nimh.nih.gov/pub/dist/doc/program_help/3dBandpass.html>`_
 
     Examples
     ========
