@@ -263,12 +263,14 @@ class Allineate(AFNICommand):
     Examples
     ========
 
-    >>> from nipype.interfaces import afni as afni
+    >>> from nipype.interfaces import afni
     >>> allineate = afni.Allineate()
     >>> allineate.inputs.in_file = 'functional.nii'
-    >>> allineate.inputs.out_file= 'functional_allineate.nii'
-    >>> allineate.inputs.in_matrix= 'cmatrix.mat'
-    >>> res = allineate.run() # doctest: +SKIP
+    >>> allineate.inputs.out_file = 'functional_allineate.nii'
+    >>> allineate.inputs.in_matrix = 'cmatrix.mat'
+    >>> allineate.cmdline  # doctest: +IGNORE_UNICODE
+    '3dAllineate -1Dmatrix_apply cmatrix.mat -prefix functional_allineate.nii -source functional.nii'
+    >>> res = allineate.run()  # doctest: +SKIP
 
     """
 
@@ -338,23 +340,23 @@ class AutoTcorrelate(AFNICommand):
     """Computes the correlation coefficient between the time series of each
     pair of voxels in the input dataset, and stores the output into a
     new anatomical bucket dataset [scaled to shorts to save memory space].
-    
+
     For complete details, see the `3dAutoTcorrelate Documentation.
     <https://afni.nimh.nih.gov/pub/dist/doc/program_help/3dAutoTcorrelate.html>`_
 
     Examples
     ========
 
-    >>> from nipype.interfaces import afni as afni
+    >>> from nipype.interfaces import afni
     >>> corr = afni.AutoTcorrelate()
     >>> corr.inputs.in_file = 'functional.nii'
     >>> corr.inputs.polort = -1
     >>> corr.inputs.eta2 = True
     >>> corr.inputs.mask = 'mask.nii'
     >>> corr.inputs.mask_only_targets = True
-    >>> corr.cmdline # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE +IGNORE_UNICODE
+    >>> corr.cmdline  # doctest: +ELLIPSIS +NORMALIZE_WHITESPACE +IGNORE_UNICODE
     '3dAutoTcorrelate -eta2 -mask mask.nii -mask_only_targets -prefix functional_similarity_matrix.1D -polort -1 functional.nii'
-    >>> res = corr.run() # doctest: +SKIP
+    >>> res = corr.run()  # doctest: +SKIP
     """
     input_spec = AutoTcorrelateInputSpec
     output_spec = AFNICommandOutputSpec
@@ -362,7 +364,7 @@ class AutoTcorrelate(AFNICommand):
 
     def _overload_extension(self, value, name=None):
         path, base, ext = split_filename(value)
-        if ext.lower() not in ['.1d', '.nii.gz', '.nii']:
+        if ext.lower() not in ['.1d', '.1D', '.nii.gz', '.nii']:
             ext = ext + '.1D'
         return os.path.join(path, base + ext)
 
@@ -415,14 +417,14 @@ class Automask(AFNICommand):
     Examples
     ========
 
-    >>> from nipype.interfaces import afni as afni
+    >>> from nipype.interfaces import afni
     >>> automask = afni.Automask()
     >>> automask.inputs.in_file = 'functional.nii'
     >>> automask.inputs.dilate = 1
     >>> automask.inputs.outputtype = 'NIFTI'
-    >>> automask.cmdline #doctest: +ELLIPSIS +IGNORE_UNICODE
+    >>> automask.cmdline  # doctest: +ELLIPSIS +IGNORE_UNICODE
     '3dAutomask -apply_prefix functional_masked.nii -dilate 1 -prefix functional_mask.nii functional.nii'
-    >>> res = automask.run() # doctest: +SKIP
+    >>> res = automask.run()  # doctest: +SKIP
 
     """
 
@@ -523,13 +525,15 @@ class Bandpass(AFNICommand):
     Examples
     ========
 
-    >>> from nipype.interfaces import afni as afni
+    >>> from nipype.interfaces import afni
     >>> from nipype.testing import  example_data
     >>> bandpass = afni.Bandpass()
-    >>> bandpass.inputs.in_file = example_data('functional.nii')
+    >>> bandpass.inputs.in_file = 'functional.nii'
     >>> bandpass.inputs.highpass = 0.005
     >>> bandpass.inputs.lowpass = 0.1
-    >>> res = bandpass.run() # doctest: +SKIP
+    >>> bandpass.cmdline  # doctest: +IGNORE_UNICODE
+    '3dBandpass 0.005 0.1 functional.nii'
+    >>> res = bandpass.run()  # doctest: +SKIP
 
     """
 
@@ -590,14 +594,14 @@ class BlurInMask(AFNICommand):
     Examples
     ========
 
-    >>> from nipype.interfaces import afni as afni
+    >>> from nipype.interfaces import afni
     >>> bim = afni.BlurInMask()
     >>> bim.inputs.in_file = 'functional.nii'
     >>> bim.inputs.mask = 'mask.nii'
     >>> bim.inputs.fwhm = 5.0
-    >>> bim.cmdline #doctest: +ELLIPSIS +IGNORE_UNICODE
+    >>> bim.cmdline  # doctest: +ELLIPSIS +IGNORE_UNICODE
     '3dBlurInMask -input functional.nii -FWHM 5.000000 -mask mask.nii -prefix functional_blur'
-    >>> res = bim.run()   # doctest: +SKIP
+    >>> res = bim.run()  # doctest: +SKIP
 
     """
 
@@ -646,8 +650,9 @@ class BlurToFWHM(AFNICommand):
     >>> blur = afni.preprocess.BlurToFWHM()
     >>> blur.inputs.in_file = 'epi.nii'
     >>> blur.inputs.fwhm = 2.5
-    >>> blur.cmdline #doctest: +ELLIPSIS +IGNORE_UNICODE
+    >>> blur.cmdline  # doctest: +ELLIPSIS +IGNORE_UNICODE
     '3dBlurToFWHM -FWHM 2.500000 -input epi.nii -prefix epi_afni'
+    >>> res = blur.run()  # doctest: +SKIP
 
     """
     _cmd = '3dBlurToFWHM'
@@ -696,7 +701,9 @@ class ClipLevel(AFNICommandBase):
     >>> from nipype.interfaces.afni import preprocess
     >>> cliplevel = preprocess.ClipLevel()
     >>> cliplevel.inputs.in_file = 'anatomical.nii'
-    >>> res = cliplevel.run() # doctest: +SKIP
+    >>> cliplevel.cmdline  # doctest: +IGNORE_UNICODE
+    '3dClipLevel anatomical.nii'
+    >>> res = cliplevel.run()  # doctest: +SKIP
 
     """
     _cmd = '3dClipLevel'
@@ -771,16 +778,16 @@ class DegreeCentrality(AFNICommand):
     Examples
     ========
 
-    >>> from nipype.interfaces import afni as afni
+    >>> from nipype.interfaces import afni
     >>> degree = afni.DegreeCentrality()
     >>> degree.inputs.in_file = 'functional.nii'
     >>> degree.inputs.mask = 'mask.nii'
     >>> degree.inputs.sparsity = 1 # keep the top one percent of connections
     >>> degree.inputs.out_file = 'out.nii'
-    >>> degree.cmdline # doctest: +IGNORE_UNICODE
+    >>> degree.cmdline  # doctest: +IGNORE_UNICODE
     '3dDegreeCentrality -mask mask.nii -prefix out.nii -sparsity 1.000000 functional.nii'
-    >>> res = degree.run() # doctest: +SKIP
-    
+    >>> res = degree.run()  # doctest: +SKIP
+
     """
 
     _cmd = '3dDegreeCentrality'
@@ -824,12 +831,12 @@ class Despike(AFNICommand):
     Examples
     ========
 
-    >>> from nipype.interfaces import afni as afni
+    >>> from nipype.interfaces import afni
     >>> despike = afni.Despike()
     >>> despike.inputs.in_file = 'functional.nii'
-    >>> despike.cmdline # doctest: +IGNORE_UNICODE
+    >>> despike.cmdline  # doctest: +IGNORE_UNICODE
     '3dDespike -prefix functional_despike functional.nii'
-    >>> res = despike.run() # doctest: +SKIP
+    >>> res = despike.run()  # doctest: +SKIP
 
     """
 
@@ -863,14 +870,14 @@ class Detrend(AFNICommand):
     Examples
     ========
 
-    >>> from nipype.interfaces import afni as afni
+    >>> from nipype.interfaces import afni
     >>> detrend = afni.Detrend()
     >>> detrend.inputs.in_file = 'functional.nii'
     >>> detrend.inputs.args = '-polort 2'
     >>> detrend.inputs.outputtype = 'AFNI'
     >>> detrend.cmdline  # doctest: +IGNORE_UNICODE
     '3dDetrend -polort 2 -prefix functional_detrend functional.nii'
-    >>> res = detrend.run() # doctest: +SKIP
+    >>> res = detrend.run()  # doctest: +SKIP
 
     """
 
@@ -934,16 +941,16 @@ class ECM(AFNICommand):
     Examples
     ========
 
-    >>> from nipype.interfaces import afni as afni
+    >>> from nipype.interfaces import afni
     >>> ecm = afni.ECM()
     >>> ecm.inputs.in_file = 'functional.nii'
     >>> ecm.inputs.mask = 'mask.nii'
     >>> ecm.inputs.sparsity = 0.1 # keep top 0.1% of connections
     >>> ecm.inputs.out_file = 'out.nii'
-    >>> ecm.cmdline # doctest: +IGNORE_UNICODE
+    >>> ecm.cmdline  # doctest: +IGNORE_UNICODE
     '3dECM -mask mask.nii -prefix out.nii -sparsity 0.100000 functional.nii'
-    >>> res = ecm.run() # doctest: +SKIP
-    
+    >>> res = ecm.run()  # doctest: +SKIP
+
     """
 
     _cmd = '3dECM'
@@ -990,14 +997,16 @@ class Fim(AFNICommand):
     Examples
     ========
 
-    >>> from nipype.interfaces import afni as afni
+    >>> from nipype.interfaces import afni
     >>> fim = afni.Fim()
     >>> fim.inputs.in_file = 'functional.nii'
     >>> fim.inputs.ideal_file= 'seed.1D'
     >>> fim.inputs.out_file = 'functional_corr.nii'
     >>> fim.inputs.out = 'Correlation'
     >>> fim.inputs.fim_thr = 0.0009
-    >>> res = fim.run() # doctest: +SKIP
+    >>> fim.cmdline  # doctest: +IGNORE_UNICODE
+    '3dfim+ -input functional.nii -ideal_file seed.1D -fim_thr 0.0009 -out Correlation -bucket functional_corr.nii'
+    >>> res = fim.run()  # doctest: +SKIP
 
     """
 
@@ -1022,13 +1031,15 @@ class FourierInputSpec(AFNICommandInputSpec):
     lowpass = traits.Float(
         desc='lowpass',
         argstr='-lowpass %f',
-        position=0,
         mandatory=True)
     highpass = traits.Float(
         desc='highpass',
         argstr='-highpass %f',
-        position=1,
         mandatory=True)
+    retrend = traits.Bool(
+        desc='Any mean and linear trend are removed before filtering. This '
+             'will restore the trend after filtering.',
+        argstr='-retrend')
 
 
 class Fourier(AFNICommand):
@@ -1041,13 +1052,15 @@ class Fourier(AFNICommand):
     Examples
     ========
 
-    >>> from nipype.interfaces import afni as afni
+    >>> from nipype.interfaces import afni
     >>> fourier = afni.Fourier()
     >>> fourier.inputs.in_file = 'functional.nii'
-    >>> fourier.inputs.args = '-retrend'
+    >>> fourier.inputs.retrend = True
     >>> fourier.inputs.highpass = 0.005
     >>> fourier.inputs.lowpass = 0.1
-    >>> res = fourier.run() # doctest: +SKIP
+    >>> fourier.cmdline  # doctest: +IGNORE_UNICODE
+    '3dFourier -highpass 0.005000 -lowpass 0.100000 -prefix functional_fourier -retrend functional.nii'
+    >>> res = fourier.run()  # doctest: +SKIP
 
     """
 
@@ -1115,12 +1128,12 @@ class Hist(AFNICommandBase):
     Examples
     ========
 
-    >>> from nipype.interfaces import afni as afni
+    >>> from nipype.interfaces import afni
     >>> hist = afni.Hist()
     >>> hist.inputs.in_file = 'functional.nii'
     >>> hist.cmdline  # doctest: +IGNORE_UNICODE
     '3dHist -input functional.nii -prefix functional_hist'
-    >>> res = hist.run() # doctest: +SKIP
+    >>> res = hist.run()  # doctest: +SKIP
 
     """
 
@@ -1176,15 +1189,15 @@ class LFCD(AFNICommand):
     Examples
     ========
 
-    >>> from nipype.interfaces import afni as afni
+    >>> from nipype.interfaces import afni
     >>> lfcd = afni.LFCD()
     >>> lfcd.inputs.in_file = 'functional.nii'
     >>> lfcd.inputs.mask = 'mask.nii'
     >>> lfcd.inputs.thresh = 0.8 # keep all connections with corr >= 0.8
     >>> lfcd.inputs.out_file = 'out.nii'
-    >>> lfcd.cmdline # doctest: +IGNORE_UNICODE
+    >>> lfcd.cmdline  # doctest: +IGNORE_UNICODE
     '3dLFCD -mask mask.nii -prefix out.nii -thresh 0.800000 functional.nii'
-    >>> res = lfcd.run() # doctest: +SKIP
+    >>> res = lfcd.run()  # doctest: +SKIP
     """
 
     _cmd = '3dLFCD'
@@ -1228,14 +1241,14 @@ class Maskave(AFNICommand):
     Examples
     ========
 
-    >>> from nipype.interfaces import afni as afni
+    >>> from nipype.interfaces import afni
     >>> maskave = afni.Maskave()
     >>> maskave.inputs.in_file = 'functional.nii'
     >>> maskave.inputs.mask= 'seed_mask.nii'
     >>> maskave.inputs.quiet= True
-    >>> maskave.cmdline #doctest: +ELLIPSIS +IGNORE_UNICODE
+    >>> maskave.cmdline  # doctest: +ELLIPSIS +IGNORE_UNICODE
     '3dmaskave -mask seed_mask.nii -quiet functional.nii > functional_maskave.1D'
-    >>> res = maskave.run() # doctest: +SKIP
+    >>> res = maskave.run()  # doctest: +SKIP
 
     """
 
@@ -1296,7 +1309,7 @@ class Means(AFNICommand):
     Examples
     ========
 
-    >>> from nipype.interfaces import afni as afni
+    >>> from nipype.interfaces import afni
     >>> means = afni.Means()
     >>> means.inputs.in_file_a = 'im1.nii'
     >>> means.inputs.in_file_b = 'im2.nii'
@@ -1412,7 +1425,7 @@ class OutlierCount(CommandLine):
     '3dToutcount functional.nii > functional_outliers'
     >>> res = toutcount.run()  # doctest: +SKIP
 
-   """
+    """
 
     _cmd = '3dToutcount'
     input_spec = OutlierCountInputSpec
@@ -1562,11 +1575,13 @@ class ROIStats(AFNICommandBase):
     Examples
     ========
 
-    >>> from nipype.interfaces import afni as afni
+    >>> from nipype.interfaces import afni
     >>> roistats = afni.ROIStats()
     >>> roistats.inputs.in_file = 'functional.nii'
     >>> roistats.inputs.mask = 'skeleton_mask.nii.gz'
-    >>> roistats.inputs.quiet=True
+    >>> roistats.inputs.quiet = True
+    >>> roistats.cmdline  # doctest: +IGNORE_UNICODE
+    '3dROIstats -quiet -mask skeleton_mask.nii.gz functional.nii'
     >>> res = roistats.run()  # doctest: +SKIP
 
     """
@@ -1653,7 +1668,7 @@ class Retroicor(AFNICommand):
 
     Examples
     ========
-    >>> from nipype.interfaces import afni as afni
+    >>> from nipype.interfaces import afni
     >>> ret = afni.Retroicor()
     >>> ret.inputs.in_file = 'functional.nii'
     >>> ret.inputs.card = 'mask.1D'
@@ -1662,7 +1677,7 @@ class Retroicor(AFNICommand):
     >>> ret.cmdline  # doctest: +IGNORE_UNICODE
     '3dretroicor -prefix functional_retroicor.nii -resp resp.1D -card mask.1D functional.nii'
     >>> res = ret.run()  # doctest: +SKIP
-    
+
     """
 
     _cmd = '3dretroicor'
@@ -1729,8 +1744,8 @@ class SegInputSpec(CommandLineInputSpec):
 
 class Seg(AFNICommandBase):
     """3dSeg segments brain volumes into tissue classes. The program allows
-       for adding a variety of global and voxelwise priors. However for the
-       moment, only mixing fractions and MRF are documented.
+    for adding a variety of global and voxelwise priors. However for the
+    moment, only mixing fractions and MRF are documented.
 
     For complete details, see the `3dSeg Documentation.
     <https://afni.nimh.nih.gov/pub/dist/doc/program_help/3dSeg.html>`_
@@ -1742,6 +1757,8 @@ class Seg(AFNICommandBase):
     >>> seg = preprocess.Seg()
     >>> seg.inputs.in_file = 'structural.nii'
     >>> seg.inputs.mask = 'AUTO'
+    >>> seg.cmdline  # doctest: +IGNORE_UNICODE
+    '3dSeg -mask AUTO -anat structural.nii'
     >>> res = seg.run()  # doctest: +SKIP
 
     """
@@ -1782,8 +1799,9 @@ class SkullStripInputSpec(AFNICommandInputSpec):
 
 
 class SkullStrip(AFNICommand):
-    """A program to extract the brain from surrounding
-    tissue from MRI T1-weighted images
+    """A program to extract the brain from surrounding tissue from MRI
+    T1-weighted images.
+    TODO Add optional arguments.
 
     For complete details, see the `3dSkullStrip Documentation.
     <https://afni.nimh.nih.gov/pub/dist/doc/program_help/3dSkullStrip.html>`_
@@ -1791,10 +1809,12 @@ class SkullStrip(AFNICommand):
     Examples
     ========
 
-    >>> from nipype.interfaces import afni as afni
+    >>> from nipype.interfaces import afni
     >>> skullstrip = afni.SkullStrip()
     >>> skullstrip.inputs.in_file = 'functional.nii'
     >>> skullstrip.inputs.args = '-o_ply'
+    >>> skullstrip.cmdline  # doctest: +IGNORE_UNICODE
+    '3dSkullStrip -input functional.nii -o_ply -prefix functional_skullstrip'
     >>> res = skullstrip.run()  # doctest: +SKIP
 
     """
@@ -1863,18 +1883,18 @@ class TCorr1DOutputSpec(TraitedSpec):
 class TCorr1D(AFNICommand):
     """Computes the correlation coefficient between each voxel time series
     in the input 3D+time dataset.
-    
+
     For complete details, see the `3dTcorr1D Documentation.
     <https://afni.nimh.nih.gov/pub/dist/doc/program_help/3dTcorr1D.html>`_
 
-    >>> from nipype.interfaces import afni as afni
+    >>> from nipype.interfaces import afni
     >>> tcorr1D = afni.TCorr1D()
     >>> tcorr1D.inputs.xset= 'u_rc1s1_Template.nii'
     >>> tcorr1D.inputs.y_1d = 'seed.1D'
     >>> tcorr1D.cmdline  # doctest: +IGNORE_UNICODE
     '3dTcorr1D -prefix u_rc1s1_Template_correlation.nii.gz  u_rc1s1_Template.nii  seed.1D'
     >>> res = tcorr1D.run()  # doctest: +SKIP
-    
+
     """
 
     _cmd = '3dTcorr1D'
@@ -2008,11 +2028,13 @@ class TCorrMap(AFNICommand):
     Examples
     ========
 
-    >>> from nipype.interfaces import afni as afni
+    >>> from nipype.interfaces import afni
     >>> tcm = afni.TCorrMap()
     >>> tcm.inputs.in_file = 'functional.nii'
     >>> tcm.inputs.mask = 'mask.nii'
-    >>> tcm.mean_file = '%s_meancorr.nii'
+    >>> tcm.mean_file = 'functional_meancorr.nii'
+    >>> tcm.cmdline  # doctest: +IGNORE_UNICODE
+    '3dTcorrMap -input functional.nii -mask mask.nii -Mean functional_meancorr.nii'
     >>> res = tcm.run()  # doctest: +SKIP
 
     """
@@ -2056,12 +2078,10 @@ class TCorrelateInputSpec(AFNICommandInputSpec):
         name_source='xset')
     pearson = traits.Bool(
         desc='Correlation is the normal Pearson correlation coefficient',
-        argstr='-pearson',
-        position=1)
+        argstr='-pearson')
     polort = traits.Int(
         desc='Remove polynomical trend of order m',
-        argstr='-polort %d',
-        position=2)
+        argstr='-polort %d')
 
 
 class TCorrelate(AFNICommand):
@@ -2074,13 +2094,15 @@ class TCorrelate(AFNICommand):
     Examples
     ========
 
-    >>> from nipype.interfaces import afni as afni
+    >>> from nipype.interfaces import afni
     >>> tcorrelate = afni.TCorrelate()
     >>> tcorrelate.inputs.xset= 'u_rc1s1_Template.nii'
     >>> tcorrelate.inputs.yset = 'u_rc1s2_Template.nii'
     >>> tcorrelate.inputs.out_file = 'functional_tcorrelate.nii.gz'
     >>> tcorrelate.inputs.polort = -1
     >>> tcorrelate.inputs.pearson = True
+    >>> tcorrelate.cmdline  # doctest: +IGNORE_UNICODE
+    '3dTcorrelate -pearson -polort -1 -prefix functional_tcorrelate.nii.gz u_rc1s1_Template.nii u_rc1s2_Template.nii'
     >>> res = tcarrelate.run()  # doctest: +SKIP
 
     """
@@ -2145,7 +2167,7 @@ class TShift(AFNICommand):
     Examples
     ========
 
-    >>> from nipype.interfaces import afni as afni
+    >>> from nipype.interfaces import afni
     >>> tshift = afni.TShift()
     >>> tshift.inputs.in_file = 'functional.nii'
     >>> tshift.inputs.tpattern = 'alt+z'
@@ -2153,7 +2175,6 @@ class TShift(AFNICommand):
     >>> tshift.cmdline  # doctest: +IGNORE_UNICODE
     '3dTshift -prefix functional_tshift -tpattern alt+z -tzero 0.0 functional.nii'
     >>> res = tshift.run()  # doctest: +SKIP
-    
 
     """
     _cmd = '3dTshift'
@@ -2237,7 +2258,7 @@ class Volreg(AFNICommand):
     Examples
     ========
 
-    >>> from nipype.interfaces import afni as afni
+    >>> from nipype.interfaces import afni
     >>> volreg = afni.Volreg()
     >>> volreg.inputs.in_file = 'functional.nii'
     >>> volreg.inputs.args = '-Fourier -twopass'
@@ -2305,7 +2326,7 @@ class Warp(AFNICommand):
     Examples
     ========
 
-    >>> from nipype.interfaces import afni as afni
+    >>> from nipype.interfaces import afni
     >>> warp = afni.Warp()
     >>> warp.inputs.in_file = 'structural.nii'
     >>> warp.inputs.deoblique = True
