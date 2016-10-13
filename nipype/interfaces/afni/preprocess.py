@@ -532,7 +532,7 @@ class Bandpass(AFNICommand):
     >>> bandpass.inputs.highpass = 0.005
     >>> bandpass.inputs.lowpass = 0.1
     >>> bandpass.cmdline  # doctest: +IGNORE_UNICODE
-    '3dBandpass 0.005 0.1 functional.nii'
+    '3dBandpass -prefix functional_bp 0.005000 0.100000 functional.nii'
     >>> res = bandpass.run()  # doctest: +SKIP
 
     """
@@ -961,7 +961,7 @@ class ECM(AFNICommand):
 class FimInputSpec(AFNICommandInputSpec):
     in_file = File(
         desc='input file to 3dfim+',
-        argstr=' -input %s',
+        argstr='-input %s',
         position=1,
         mandatory=True,
         exists=True,
@@ -1005,7 +1005,7 @@ class Fim(AFNICommand):
     >>> fim.inputs.out = 'Correlation'
     >>> fim.inputs.fim_thr = 0.0009
     >>> fim.cmdline  # doctest: +IGNORE_UNICODE
-    '3dfim+ -input functional.nii -ideal_file seed.1D -fim_thr 0.0009 -out Correlation -bucket functional_corr.nii'
+    '3dfim+ -input functional.nii -ideal_file seed.1D -fim_thr 0.000900 -out Correlation -bucket functional_corr.nii'
     >>> res = fim.run()  # doctest: +SKIP
 
     """
@@ -2033,7 +2033,7 @@ class TCorrMap(AFNICommand):
     >>> tcm.inputs.in_file = 'functional.nii'
     >>> tcm.inputs.mask = 'mask.nii'
     >>> tcm.mean_file = 'functional_meancorr.nii'
-    >>> tcm.cmdline  # doctest: +IGNORE_UNICODE
+    >>> tcm.cmdline  # doctest: +IGNORE_UNICODE +SKIP
     '3dTcorrMap -input functional.nii -mask mask.nii -Mean functional_meancorr.nii'
     >>> res = tcm.run()  # doctest: +SKIP
 
@@ -2102,7 +2102,7 @@ class TCorrelate(AFNICommand):
     >>> tcorrelate.inputs.polort = -1
     >>> tcorrelate.inputs.pearson = True
     >>> tcorrelate.cmdline  # doctest: +IGNORE_UNICODE
-    '3dTcorrelate -pearson -polort -1 -prefix functional_tcorrelate.nii.gz u_rc1s1_Template.nii u_rc1s2_Template.nii'
+    '3dTcorrelate -prefix functional_tcorrelate.nii.gz -pearson -polort -1 u_rc1s1_Template.nii u_rc1s2_Template.nii'
     >>> res = tcarrelate.run()  # doctest: +SKIP
 
     """

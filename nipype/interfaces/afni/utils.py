@@ -392,7 +392,7 @@ class Copy(AFNICommand):
     >>> copy3d_4.cmdline  # doctest: +IGNORE_UNICODE
     '3dcopy functional.nii new_func.nii'
     >>> res = copy3d_4.run()  # doctest: +SKIP
-    
+
     """
 
     _cmd = '3dcopy'
@@ -457,11 +457,11 @@ class Eval(AFNICommand):
     >>> eval = afni.Eval()
     >>> eval.inputs.in_file_a = 'seed.1D'
     >>> eval.inputs.in_file_b = 'resp.1D'
-    >>> eval.inputs.expr='a*b'
+    >>> eval.inputs.expr = 'a*b'
     >>> eval.inputs.out1D = True
     >>> eval.inputs.out_file =  'data_calc.1D'
     >>> eval.cmdline  # doctest: +IGNORE_UNICODE
-    '1deval -a seed.1D  -b resp.1D -expr "a*b" -1D -prefix data_calc.1D'
+    '1deval -a seed.1D -b resp.1D -expr "a*b" -1D -prefix data_calc.1D'
     >>> res = eval.run()  # doctest: +SKIP
 
     """
@@ -485,7 +485,7 @@ class Eval(AFNICommand):
         """Skip the arguments without argstr metadata
         """
         return super(Eval, self)._parse_inputs(
-            skip=('start_idx', 'stop_idx', 'out1D', 'other'))
+            skip=('start_idx', 'stop_idx', 'other'))
 
 
 class FWHMxInputSpec(CommandLineInputSpec):
@@ -867,7 +867,7 @@ class Merge(AFNICommand):
 
     For complete details, see the `3dmerge Documentation.
     <https://afni.nimh.nih.gov/pub/dist/doc/program_help/3dmerge.html>`_
-    
+
     Examples
     ========
 
@@ -1095,7 +1095,7 @@ class TCatInputSpec(AFNICommandInputSpec):
 
 class TCat(AFNICommand):
     """Concatenate sub-bricks from input datasets into one big 3D+time dataset.
-    
+
     TODO Replace InputMultiPath in_files with Traits.List, if possible. Current
     version adds extra whitespace.
 
@@ -1224,7 +1224,7 @@ class To3D(AFNICommand):
     >>> res = to3d.run()  # doctest: +SKIP
 
    """
-   
+
     _cmd = 'to3d'
     input_spec = To3DInputSpec
     output_spec = AFNICommandOutputSpec
@@ -1263,7 +1263,7 @@ class ZCutUp(AFNICommand):
     >>> zcutup.inputs.out_file = 'functional_zcutup.nii'
     >>> zcutup.inputs.keep= '0 10'
     >>> zcutup.cmdline  # doctest: +IGNORE_UNICODE
-    '3dZcutup -keep 0 10 -prefix functional_zcutup.nii functional.nii
+    '3dZcutup -keep 0 10 -prefix functional_zcutup.nii functional.nii'
     >>> res = zcutup.run()  # doctest: +SKIP
 
     """
