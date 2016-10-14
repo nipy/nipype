@@ -8,6 +8,42 @@ This was written to work with FSL version v5.0
     >>> filepath = os.path.dirname( os.path.realpath( __file__ ) )
     >>> datadir = os.path.realpath(os.path.join(filepath, '../../testing/data'))
     >>> os.chdir(datadir)
+
+Example Usage:
+
+def flatten(l):
+    # turn 2D list into 1D
+    l = sum(l, [])
+    return(l)
+
+# extract features
+extract_features = pe.MapNode(interface=fix.FeatureExtractor(), name='extract_features', iterfield=['mel_ica'])
+preproc.connect(feat, 'feat_dir', extract_features, 'mel_ica')
+
+# the next two nodes are simply for assembling a training set for the classifier. This looks for handlabeled noise txt files in all the specified feat_dirs 
+training_input = pe.JoinNode(interface=util.IdentityInterface(fields=['mel_ica']), joinfield=['mel_ica'], joinsource='datasource', name='training_input')
+preproc.connect(extract_features, 'mel_ica', training_input, 'mel_ica')
+
+create_training_set = pe.Node(interface=fix.TrainingSetCreator(), name='trainingset_creator')
+preproc.connect(training_input, ('mel_ica', flatten), create_training_set, 'mel_icas_in')
+
+# now train the classifier
+train_node = pe.Node(interface=fix.Training(trained_wts_filestem='core_shell_py'), name='train_node')
+preproc.connect(create_training_set, 'mel_icas_out', train_node, 'mel_icas')
+
+# ask classifier to label ICA components as noise or signal
+classify_node = pe.MapNode(interface=fix.Classifier(thresh=5), name='classify', iterfield=['mel_ica'])
+preproc.connect(train_node, 'trained_wts_file', classify_node, 'trained_wts_file')
+preproc.connect(feat, 'feat_dir', classify_node, 'mel_ica')
+
+# remove noise
+cleaner_node = pe.MapNode(interface=fix.Cleaner(cleanup_motion=True,), name='cleaner', iterfield=['artifacts_list_file'])
+preproc.connect(classify_node, 'artifacts_list_file', cleaner_node, 'artifacts_list_file')
+
+# extract mean func
+meanfunc = pe.MapNode(interface=fsl.ImageMaths(op_string = '-Tmean', suffix='_mean'), name='meanfunc', iterfield = ['in_file'])
+preproc.connect(cleaner_node, 'cleaned_functional_file', meanfunc, 'in_file')
+
 """
 
 from nipype.interfaces.base import (
