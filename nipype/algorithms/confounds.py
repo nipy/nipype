@@ -281,10 +281,9 @@ Bradley L. and Petersen, Steven E.},
 class CompCorInputSpec(BaseInterfaceInputSpec):
     realigned_file = File(exists=True, mandatory=True,
                           desc='already realigned brain image (4D)')
-    mask_file = File(exists=True, mandatory=False,
-                     desc='mask file that determines ROI (3D)')
+    mask_file = File(exists=True, desc='mask file that determines ROI (3D)')
     components_file = File('components_file.txt', exists=False,
-                           mandatory=False, usedefault=True,
+                           usedefault=True,
                            desc='filename to store physiological components')
     num_components = traits.Int(6, usedefault=True) # 6 for BOLD, 4 for ASL
     use_regress_poly = traits.Bool(True, usedefault=True,
