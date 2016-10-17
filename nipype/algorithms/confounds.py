@@ -255,7 +255,7 @@ Bradley L. and Petersen, Steven E.},
             'out_file': op.abspath(self.inputs.out_file),
             'fd_average': float(fd_res.mean())
         }
-        np.savetxt(self.inputs.out_file, fd_res)
+        np.savetxt(self.inputs.out_file, fd_res, header='framewise_displacement')
 
         if self.inputs.save_plot:
             tr = None
@@ -291,6 +291,8 @@ class CompCorInputSpec(BaseInterfaceInputSpec):
                                    'pre-component extraction')
     regress_poly_degree = traits.Range(low=1, default=1, usedefault=True,
                                        desc='the degree polynomial to use')
+    header = traits.Str(desc='the desired header for the output tsv file (one column).'
+                        'If undefined, will default to "CompCor"')
 
 class CompCorOutputSpec(TraitedSpec):
     components_file = File(exists=True,
@@ -359,7 +361,9 @@ class CompCor(BaseInterface):
         u, _, _ = linalg.svd(M, full_matrices=False)
         components = u[:, :self.inputs.num_components]
         components_file = os.path.join(os.getcwd(), self.inputs.components_file)
-        np.savetxt(components_file, components, fmt=b"%.10f")
+
+        self._set_header()
+        np.savetxt(components_file, components, fmt=b"%.10f", header=self._make_headers(components.shape[1]))
         return runtime
 
     def _list_outputs(self):
@@ -373,6 +377,26 @@ class CompCor(BaseInterface):
         stdM[stdM == 0] = x
         stdM[np.isnan(stdM)] = x
         return stdM
+
+    def _set_header(self, header='CompCor'):
+        self.inputs.header = self.inputs.header if isdefined(self.inputs.header) else header
+
+    def _make_headers(self, num_col):
+        headers = []
+        for i in range(num_col):
+            headers.append(self.inputs.header + str(i))
+        return '\t'.join(headers)
+
+
+class ACompCor(CompCor):
+    ''' Anatomical compcor; for input/output, see CompCor.
+    If the mask provided is an anatomical mask, CompCor == ACompCor '''
+
+    def __init__(self, *args, **kwargs):
+        ''' exactly the same as compcor except the header '''
+        super(ACompCor, self).__init__(*args, **kwargs)
+        self._set_header('aCompCor')
+
 
 class TCompCorInputSpec(CompCorInputSpec):
     # and all the fields in CompCorInputSpec
@@ -439,11 +463,10 @@ class TCompCor(CompCor):
         IFLOG.debug('tCompcor computed and saved mask of shape {} to mask_file {}'
                    .format(mask.shape, mask_file))
         self.inputs.mask_file = mask_file
+        self._set_header('tCompCor')
 
         super(TCompCor, self)._run_interface(runtime)
         return runtime
-
-ACompCor = CompCor
 
 class TSNRInputSpec(BaseInterfaceInputSpec):
     in_file = InputMultiPath(File(exists=True), mandatory=True,
