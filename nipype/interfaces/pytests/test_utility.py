@@ -1,16 +1,13 @@
-import os, shutil
+### WIP: moving tests from nose framework, based on nipype/nipype/interfaces/tests/test_utility.py
+### TODO: move ALL tests from nose file
+import pytest
+import os 
 from nipype.interfaces import utility
 import nipype.pipeline.engine as pe
 
-from tempfile import mkdtemp, mkstemp
+import pdb
 
-from nose.tools import assert_true, assert_raises #TODO: remove it!
-
-#TODO: usung py.test to create and clean tmpfile
-def test_function():
-    tempdir = os.path.realpath(mkdtemp())
-    origdir = os.getcwd()
-    os.chdir(tempdir)
+def test_function(tmpdir):
 
     def gen_random_array(size):
         import numpy as np
@@ -29,46 +26,30 @@ def test_function():
     wf.connect(f1, 'random_array', f2, 'in_array')
     wf.run()
 
-    # Clean up
-    os.chdir(origdir)
-    shutil.rmtree(tempdir)
 
-
-
-##############################
 
 def make_random_array(size):
-
     return np.random.randn(size, size)
 
 
-def should_fail():
-
-    tempdir = os.path.realpath(mkdtemp())
-    origdir = os.getcwd()
+def should_fail(tempdir):
     os.chdir(tempdir)
 
     node = pe.Node(utility.Function(input_names=["size"],
                                     output_names=["random_array"],
                                     function=make_random_array),
                    name="should_fail")
-    try:
-        node.inputs.size = 10
-        node.run()
-    finally:
-        os.chdir(origdir)
-        shutil.rmtree(tempdir)
+    node.inputs.size = 10
+    node.run()
 
-def test_should_fail():
-    assert_raises(NameError, should_fail)
+ 
+def test_should_fail(tmpdir):
+    with pytest.raises(NameError) as excinfo:
+        should_fail(str(tmpdir))
 
-##################################
 
-def test_function_with_imports():
-
-    tempdir = os.path.realpath(mkdtemp())
-    origdir = os.getcwd()
-    os.chdir(tempdir)
+def test_function_with_imports(tmpdir):
+    os.chdir(str(tmpdir))
 
     node = pe.Node(utility.Function(input_names=["size"],
                                     output_names=["random_array"],
@@ -76,10 +57,5 @@ def test_function_with_imports():
                                     imports=["import numpy as np"]),
                    name="should_not_fail")
     print(node.inputs.function_str)
-    try:
-        node.inputs.size = 10
-        node.run()
-    finally:
-        os.chdir(origdir)
-
-#################################
+    node.inputs.size = 10
+    node.run()
