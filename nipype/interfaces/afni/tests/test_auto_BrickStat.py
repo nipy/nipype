@@ -22,11 +22,6 @@ def test_BrickStat_inputs():
     min=dict(argstr='-min',
     position=1,
     ),
-    out_file=dict(argstr='-prefix %s',
-    name_source=[u'in_file'],
-    name_template='%s_afni',
-    ),
-    outputtype=dict(),
     terminal_output=dict(nohash=True,
     ),
     )
