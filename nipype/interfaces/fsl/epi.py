@@ -307,7 +307,7 @@ class TOPUP(FSLCommand):
 
 class ApplyTOPUPInputSpec(FSLCommandInputSpec):
     in_files = InputMultiPath(File(exists=True), mandatory=True,
-                              desc='name of 4D file with images',
+                              desc='name of file with images',
                               argstr='--imain=%s', sep=',')
     encoding_file = File(exists=True, mandatory=True,
                          desc='name of text file with PE directions/times',
@@ -354,14 +354,14 @@ class ApplyTOPUP(FSLCommand):
 
     >>> from nipype.interfaces.fsl import ApplyTOPUP
     >>> applytopup = ApplyTOPUP()
-    >>> applytopup.inputs.in_files = ["ds003_sub-01_mc.nii.gz", "ds003_sub-01_mc.nii.gz"]
+    >>> applytopup.inputs.in_files = ["epi.nii", "epi_rev.nii"]
     >>> applytopup.inputs.encoding_file = "topup_encoding.txt"
     >>> applytopup.inputs.in_topup_fieldcoef = "topup_fieldcoef.nii.gz"
     >>> applytopup.inputs.in_topup_movpar = "topup_movpar.txt"
     >>> applytopup.inputs.output_type = "NIFTI_GZ"
     >>> applytopup.cmdline # doctest: +ELLIPSIS +IGNORE_UNICODE
-    'applytopup --datain=topup_encoding.txt --imain=ds003_sub-01_mc.nii.gz,ds003_sub-01_mc.nii.gz \
---inindex=1,2 --topup=topup --out=ds003_sub-01_mc_corrected.nii.gz'
+    'applytopup --datain=topup_encoding.txt --imain=epi.nii,epi_rev.nii \
+--inindex=1,2 --topup=topup --out=epi_corrected.nii.gz'
     >>> res = applytopup.run() # doctest: +SKIP
 
     """
@@ -372,12 +372,6 @@ class ApplyTOPUP(FSLCommand):
     def _parse_inputs(self, skip=None):
         if skip is None:
             skip = []
-
-        for filename in self.inputs.in_files:
-            ndims = nib.load(filename).header['dim'][0]
-            if ndims != 4:
-                raise ValueError('Input in_files for ApplyTopUp must be 4-D. {} is {}-D.'
-                                 .format(filename, ndims))
 
         # If not defined, assume index are the first N entries in the
         # parameters file, for N input images.
