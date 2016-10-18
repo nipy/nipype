@@ -41,10 +41,14 @@ def test_dvars():
     dvars = ComputeDVARS(in_file=example_data('ds003_sub-01_mc.nii.gz'),
                          in_mask=example_data('ds003_sub-01_mc_brainmask.nii.gz'),
                          save_all=True)
+
+    origdir = os.getcwd()
     os.chdir(tempdir)
+
     res = dvars.run()
 
     dv1 = np.loadtxt(res.outputs.out_std)
     yield assert_equal, (np.abs(dv1 - ground_truth).sum()/ len(dv1)) < 0.05, True
 
+    os.chdir(origdir)
     rmtree(tempdir)
