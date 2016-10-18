@@ -32,7 +32,7 @@ install:
 - function inst {
   conda config --add channels conda-forge &&
   conda update --yes conda &&
-  conda update --all -y python=$TRAVIS_PYTHON_VERSION &&
+  conda update --all -y python=$TRAVIS_PYTHON_VERSION pytest=2.4.2 &&
   conda install -y nipype &&
   rm -r /home/travis/miniconda/lib/python${TRAVIS_PYTHON_VERSION}/site-packages/nipype* &&
   pip install -r requirements.txt &&
