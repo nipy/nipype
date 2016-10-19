@@ -32,7 +32,7 @@ install:
 - function inst {
   conda config --add channels conda-forge &&
   conda update --yes conda &&
-  conda update --all -y python=$TRAVIS_PYTHON_VERSION &&
+  conda update --all -y python=$TRAVIS_PYTHON_VERSION pytest &&
   conda install -y nipype &&
   rm -r /home/travis/miniconda/lib/python${TRAVIS_PYTHON_VERSION}/site-packages/nipype* &&
   pip install -r requirements.txt &&
@@ -42,7 +42,8 @@ install:
   echo "data_file = ${COVERAGE_DATA_FILE}" >> ${COVERAGE_PROCESS_START}; }
 - travis_retry inst
 script:
-- python -W once:FSL:UserWarning:nipype `which nosetests` --with-doctest --with-doctest-ignore-unicode --with-cov --cover-package nipype --logging-level=DEBUG --verbosity=3
+# removed nose; run py.test only on tests that have been rewritten
+- py.test nipype/interfaces/tests/test_utility.py
 after_success:
 - bash <(curl -s https://codecov.io/bash) -t ac172a50-8e66-42e5-8822-5373fcf54686 -cF unittests
 deploy:
