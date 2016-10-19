@@ -13,7 +13,7 @@ See the docstrings of the individual classes for examples.
     >>> os.chdir(datadir)
 """
 from __future__ import print_function, division, unicode_literals, absolute_import
-from builtins import open, str, bytes
+from builtins import str, bytes
 
 import os
 import os.path as op
@@ -26,8 +26,7 @@ from ..base import (
     traits, isdefined, File, InputMultiPath, Undefined, Str)
 
 from .base import (
-    AFNICommandBase, AFNICommand, AFNICommandInputSpec, AFNICommandOutputSpec,
-    Info, no_afni)
+    AFNICommandBase, AFNICommand, AFNICommandInputSpec, AFNICommandOutputSpec)
 
 
 class AFNItoNIFTIInputSpec(AFNICommandInputSpec):
@@ -71,22 +70,22 @@ class AFNItoNIFTIInputSpec(AFNICommandInputSpec):
 
 
 class AFNItoNIFTI(AFNICommand):
-    """Changes AFNI format files to NIFTI format using 3dAFNItoNIFTI
+    """Converts AFNI format files to NIFTI format. This can also convert 2D or
+    1D data, which you can numpy.squeeze() to remove extra dimensions.
 
-    see AFNI Documentation:
-    <http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dAFNItoNIFTI.html>
-    this can also convert 2D or 1D data, which you can numpy.squeeze() to
-    remove extra dimensions
+    For complete details, see the `3dAFNItoNIFTI Documentation.
+    <https://afni.nimh.nih.gov/pub/dist/doc/program_help/3dAFNItoNIFTI.html>`_
 
     Examples
     ========
 
-    >>> from nipype.interfaces import afni as afni
+    >>> from nipype.interfaces import afni
     >>> a2n = afni.AFNItoNIFTI()
     >>> a2n.inputs.in_file = 'afni_output.3D'
     >>> a2n.inputs.out_file =  'afni_output.nii'
     >>> a2n.cmdline  # doctest: +IGNORE_UNICODE
     '3dAFNItoNIFTI -prefix afni_output.nii afni_output.3D'
+    >>> res = a2n.run()  # doctest: +SKIP
 
     """
 
@@ -138,20 +137,22 @@ class AutoboxOutputSpec(TraitedSpec):  # out_file not mandatory
 
 
 class Autobox(AFNICommand):
-    """ Computes size of a box that fits around the volume.
+    """Computes size of a box that fits around the volume.
     Also can be used to crop the volume to that box.
 
     For complete details, see the `3dAutobox Documentation.
-    <http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dAutobox.html>
+    <https://afni.nimh.nih.gov/pub/dist/doc/program_help/3dAutobox.html>`_
 
     Examples
     ========
 
-    >>> from nipype.interfaces import afni as afni
+    >>> from nipype.interfaces import afni
     >>> abox = afni.Autobox()
     >>> abox.inputs.in_file = 'structural.nii'
     >>> abox.inputs.padding = 5
-    >>> res = abox.run()   # doctest: +SKIP
+    >>> abox.cmdline  # doctest: +IGNORE_UNICODE
+    '3dAutobox -input structural.nii -prefix structural_generated -npad 5'
+    >>> res = abox.run()  # doctest: +SKIP
 
     """
 
@@ -180,7 +181,7 @@ class Autobox(AFNICommand):
         return super(Autobox, self)._gen_filename(name)
 
 
-class BrickStatInputSpec(AFNICommandInputSpec):
+class BrickStatInputSpec(CommandLineInputSpec):
     in_file = File(
         desc='input file to 3dmaskave',
         argstr='%s',
@@ -203,21 +204,24 @@ class BrickStatOutputSpec(TraitedSpec):
         desc='output')
 
 
-class BrickStat(AFNICommand):
-    """Compute maximum and/or minimum voxel values of an input dataset
+class BrickStat(AFNICommandBase):
+    """Computes maximum and/or minimum voxel values of an input dataset.
+    TODO Add optional arguments.
 
     For complete details, see the `3dBrickStat Documentation.
-    <http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dBrickStat.html>`_
+    <https://afni.nimh.nih.gov/pub/dist/doc/program_help/3dBrickStat.html>`_
 
     Examples
     ========
 
-    >>> from nipype.interfaces import afni as afni
+    >>> from nipype.interfaces import afni
     >>> brickstat = afni.BrickStat()
     >>> brickstat.inputs.in_file = 'functional.nii'
     >>> brickstat.inputs.mask = 'skeleton_mask.nii.gz'
     >>> brickstat.inputs.min = True
-    >>> res = brickstat.run() # doctest: +SKIP
+    >>> brickstat.cmdline  # doctest: +IGNORE_UNICODE
+    '3dBrickStat -min -mask skeleton_mask.nii.gz functional.nii'
+    >>> res = brickstat.run()  # doctest: +SKIP
 
     """
     _cmd = '3dBrickStat'
@@ -294,23 +298,24 @@ class CalcInputSpec(AFNICommandInputSpec):
 
 
 class Calc(AFNICommand):
-    """This program does voxel-by-voxel arithmetic on 3D datasets
+    """This program does voxel-by-voxel arithmetic on 3D datasets.
 
     For complete details, see the `3dcalc Documentation.
-    <http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dcalc.html>`_
+    <https://afni.nimh.nih.gov/pub/dist/doc/program_help/3dcalc.html>`_
 
     Examples
     ========
 
-    >>> from nipype.interfaces import afni as afni
+    >>> from nipype.interfaces import afni
     >>> calc = afni.Calc()
     >>> calc.inputs.in_file_a = 'functional.nii'
     >>> calc.inputs.in_file_b = 'functional2.nii'
     >>> calc.inputs.expr='a*b'
     >>> calc.inputs.out_file =  'functional_calc.nii.gz'
     >>> calc.inputs.outputtype = 'NIFTI'
-    >>> calc.cmdline #doctest: +ELLIPSIS +IGNORE_UNICODE
+    >>> calc.cmdline  # doctest: +ELLIPSIS +IGNORE_UNICODE
     '3dcalc -a functional.nii -b functional2.nii -expr "a*b" -prefix functional_calc.nii.gz'
+    >>> res = calc.run()  # doctest: +SKIP
 
     """
 
@@ -357,32 +362,37 @@ class Copy(AFNICommand):
     or different type using 3dcopy command
 
     For complete details, see the `3dcopy Documentation.
-    <http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dcopy.html>`_
+    <https://afni.nimh.nih.gov/pub/dist/doc/program_help/3dcopy.html>`_
 
     Examples
     ========
 
-    >>> from nipype.interfaces import afni as afni
+    >>> from nipype.interfaces import afni
     >>> copy3d = afni.Copy()
     >>> copy3d.inputs.in_file = 'functional.nii'
     >>> copy3d.cmdline  # doctest: +IGNORE_UNICODE
     '3dcopy functional.nii functional_copy'
+    >>> res = copy3d.run()  # doctest: +SKIP
 
     >>> from copy import deepcopy
     >>> copy3d_2 = deepcopy(copy3d)
     >>> copy3d_2.inputs.outputtype = 'NIFTI'
     >>> copy3d_2.cmdline  # doctest: +IGNORE_UNICODE
     '3dcopy functional.nii functional_copy.nii'
+    >>> res = copy3d_2.run()  # doctest: +SKIP
 
     >>> copy3d_3 = deepcopy(copy3d)
     >>> copy3d_3.inputs.outputtype = 'NIFTI_GZ'
     >>> copy3d_3.cmdline  # doctest: +IGNORE_UNICODE
     '3dcopy functional.nii functional_copy.nii.gz'
+    >>> res = copy3d_3.run()  # doctest: +SKIP
 
     >>> copy3d_4 = deepcopy(copy3d)
     >>> copy3d_4.inputs.out_file = 'new_func.nii'
     >>> copy3d_4.cmdline  # doctest: +IGNORE_UNICODE
     '3dcopy functional.nii new_func.nii'
+    >>> res = copy3d_4.run()  # doctest: +SKIP
+
     """
 
     _cmd = '3dcopy'
@@ -434,22 +444,25 @@ class EvalInputSpec(AFNICommandInputSpec):
 
 
 class Eval(AFNICommand):
-    """Evaluates an expression that may include columns of data from one or more text files
+    """Evaluates an expression that may include columns of data from one or
+    more text files.
 
-    see AFNI Documentation: <http://afni.nimh.nih.gov/pub/dist/doc/program_help/1deval.html>
+    For complete details, see the `1deval Documentation.
+    <https://afni.nimh.nih.gov/pub/dist/doc/program_help/1deval.html>`_
 
     Examples
     ========
 
-    >>> from nipype.interfaces import afni as afni
+    >>> from nipype.interfaces import afni
     >>> eval = afni.Eval()
     >>> eval.inputs.in_file_a = 'seed.1D'
     >>> eval.inputs.in_file_b = 'resp.1D'
-    >>> eval.inputs.expr='a*b'
+    >>> eval.inputs.expr = 'a*b'
     >>> eval.inputs.out1D = True
     >>> eval.inputs.out_file =  'data_calc.1D'
-    >>> calc.cmdline #doctest: +SKIP +IGNORE_UNICODE
-    '3deval -a timeseries1.1D  -b timeseries2.1D -expr "a*b" -1D -prefix data_calc.1D'
+    >>> eval.cmdline  # doctest: +IGNORE_UNICODE
+    '1deval -a seed.1D -b resp.1D -expr "a*b" -1D -prefix data_calc.1D'
+    >>> res = eval.run()  # doctest: +SKIP
 
     """
 
@@ -472,7 +485,7 @@ class Eval(AFNICommand):
         """Skip the arguments without argstr metadata
         """
         return super(Eval, self)._parse_inputs(
-            skip=('start_idx', 'stop_idx', 'out1D', 'other'))
+            skip=('start_idx', 'stop_idx', 'other'))
 
 
 class FWHMxInputSpec(CommandLineInputSpec):
@@ -589,14 +602,18 @@ class FWHMx(AFNICommandBase):
     output value indicates something bad happened; e.g., FWHM in z is meaningless
     for a 2D dataset; the estimation method computed incoherent intermediate results.)
 
+    For complete details, see the `3dFWHMx Documentation.
+    <https://afni.nimh.nih.gov/pub../pub/dist/doc/program_help/3dFWHMx.html>`_
+
     Examples
     --------
 
-    >>> from nipype.interfaces import afni as afp
-    >>> fwhm = afp.FWHMx()
+    >>> from nipype.interfaces import afni
+    >>> fwhm = afni.FWHMx()
     >>> fwhm.inputs.in_file = 'functional.nii'
     >>> fwhm.cmdline  # doctest: +IGNORE_UNICODE
     '3dFWHMx -input functional.nii -out functional_subbricks.out > functional_fwhmx.out'
+    >>> res = fwhm.run()  # doctest: +SKIP
 
 
     (Classic) METHOD:
@@ -807,14 +824,13 @@ class MaskTool(AFNICommand):
     Examples
     ========
 
-    >>> from nipype.interfaces import afni as afni
-    >>> automask = afni.Automask()
-    >>> automask.inputs.in_file = 'functional.nii'
-    >>> automask.inputs.dilate = 1
-    >>> automask.inputs.outputtype = 'NIFTI'
-    >>> automask.cmdline #doctest: +ELLIPSIS +IGNORE_UNICODE
-    '3dAutomask -apply_prefix functional_masked.nii -dilate 1 -prefix functional_mask.nii functional.nii'
-    >>> res = automask.run() # doctest: +SKIP
+    >>> from nipype.interfaces import afni
+    >>> masktool = afni.MaskTool()
+    >>> masktool.inputs.in_file = 'functional.nii'
+    >>> masktool.inputs.outputtype = 'NIFTI'
+    >>> masktool.cmdline  # doctest: +IGNORE_UNICODE
+    '3dmask_tool -prefix functional_mask.nii -input functional.nii'
+    >>> res = automask.run()  # doctest: +SKIP
 
     """
 
@@ -850,18 +866,20 @@ class Merge(AFNICommand):
     """Merge or edit volumes using AFNI 3dmerge command
 
     For complete details, see the `3dmerge Documentation.
-    <http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dmerge.html>`_
+    <https://afni.nimh.nih.gov/pub/dist/doc/program_help/3dmerge.html>`_
 
     Examples
     ========
 
-    >>> from nipype.interfaces import afni as afni
+    >>> from nipype.interfaces import afni
     >>> merge = afni.Merge()
     >>> merge.inputs.in_files = ['functional.nii', 'functional2.nii']
     >>> merge.inputs.blurfwhm = 4
     >>> merge.inputs.doall = True
     >>> merge.inputs.out_file = 'e7.nii'
-    >>> res = merge.run() # doctest: +SKIP
+    >>> merge.cmdline  # doctest: +IGNORE_UNICODE
+    '3dmerge -1blur_fwhm 4 -doall -prefix e7.nii functional.nii functional2.nii'
+    >>> res = merge.run()  # doctest: +SKIP
 
     """
 
@@ -901,11 +919,10 @@ class NotesInputSpec(AFNICommandInputSpec):
 
 
 class Notes(CommandLine):
-    """
-    A program to add, delete, and show notes for AFNI datasets.
+    """A program to add, delete, and show notes for AFNI datasets.
 
     For complete details, see the `3dNotes Documentation.
-    <http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dNotes.html>
+    <https://afni.nimh.nih.gov/pub/dist/doc/program_help/3dNotes.html>`_
 
     Examples
     ========
@@ -915,9 +932,9 @@ class Notes(CommandLine):
     >>> notes.inputs.in_file = 'functional.HEAD'
     >>> notes.inputs.add = 'This note is added.'
     >>> notes.inputs.add_history = 'This note is added to history.'
-    >>> notes.cmdline #doctest: +IGNORE_UNICODE
+    >>> notes.cmdline  # doctest: +IGNORE_UNICODE
     '3dNotes -a "This note is added." -h "This note is added to history." functional.HEAD'
-    >>> res = notes.run() # doctest: +SKIP
+    >>> res = notes.run()  # doctest: +SKIP
     """
 
     _cmd = '3dNotes'
@@ -970,18 +987,18 @@ class Refit(AFNICommandBase):
     """Changes some of the information inside a 3D dataset's header
 
     For complete details, see the `3drefit Documentation.
-    <http://afni.nimh.nih.gov/pub/dist/doc/program_help/3drefit.html>
+    <https://afni.nimh.nih.gov/pub/dist/doc/program_help/3drefit.html>`_
 
     Examples
     ========
 
-    >>> from nipype.interfaces import afni as afni
+    >>> from nipype.interfaces import afni
     >>> refit = afni.Refit()
     >>> refit.inputs.in_file = 'structural.nii'
     >>> refit.inputs.deoblique = True
     >>> refit.cmdline  # doctest: +IGNORE_UNICODE
     '3drefit -deoblique structural.nii'
-    >>> res = refit.run() # doctest: +SKIP
+    >>> res = refit.run()  # doctest: +SKIP
 
     """
     _cmd = '3drefit'
@@ -1030,19 +1047,19 @@ class Resample(AFNICommand):
     """Resample or reorient an image using AFNI 3dresample command
 
     For complete details, see the `3dresample Documentation.
-    <http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dresample.html>`_
+    <https://afni.nimh.nih.gov/pub/dist/doc/program_help/3dresample.html>`_
 
     Examples
     ========
 
-    >>> from nipype.interfaces import afni as afni
+    >>> from nipype.interfaces import afni
     >>> resample = afni.Resample()
     >>> resample.inputs.in_file = 'functional.nii'
     >>> resample.inputs.orientation= 'RPI'
     >>> resample.inputs.outputtype = 'NIFTI'
     >>> resample.cmdline  # doctest: +IGNORE_UNICODE
     '3dresample -orient RPI -prefix functional_resample.nii -inset functional.nii'
-    >>> res = resample.run() # doctest: +SKIP
+    >>> res = resample.run()  # doctest: +SKIP
 
     """
 
@@ -1065,28 +1082,37 @@ class TCatInputSpec(AFNICommandInputSpec):
         desc='output image file name',
         argstr='-prefix %s',
         name_source='in_files')
-    rlt = Str(
-        desc='options',
+    rlt = traits.Enum(
+        '', '+', '++',
         argstr='-rlt%s',
+        desc='Remove linear trends in each voxel time series loaded from each '
+             'input dataset, SEPARATELY. Option -rlt removes the least squares '
+             'fit of \'a+b*t\' to each voxel time series. Option -rlt+ adds '
+             'dataset mean back in. Option -rlt++ adds overall mean of all '
+             'dataset timeseries back in.',
         position=1)
 
 
 class TCat(AFNICommand):
-    """Concatenate sub-bricks from input datasets into
-    one big 3D+time dataset
+    """Concatenate sub-bricks from input datasets into one big 3D+time dataset.
+
+    TODO Replace InputMultiPath in_files with Traits.List, if possible. Current
+    version adds extra whitespace.
 
     For complete details, see the `3dTcat Documentation.
-    <http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dTcat.html>`_
+    <https://afni.nimh.nih.gov/pub/dist/doc/program_help/3dTcat.html>`_
 
     Examples
     ========
 
-    >>> from nipype.interfaces import afni as afni
+    >>> from nipype.interfaces import afni
     >>> tcat = afni.TCat()
     >>> tcat.inputs.in_files = ['functional.nii', 'functional2.nii']
     >>> tcat.inputs.out_file= 'functional_tcat.nii'
     >>> tcat.inputs.rlt = '+'
-    >>> res = tcat.run() # doctest: +SKIP
+    >>> tcat.cmdline  # doctest: +IGNORE_UNICODE +NORMALIZE_WHITESPACE
+    '3dTcat -rlt+ -prefix functional_tcat.nii functional.nii functional2.nii'
+    >>> res = tcat.run()  # doctest: +SKIP
 
     """
 
@@ -1121,19 +1147,19 @@ class TStat(AFNICommand):
     """Compute voxel-wise statistics using AFNI 3dTstat command
 
     For complete details, see the `3dTstat Documentation.
-    <http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dTstat.html>`_
+    <https://afni.nimh.nih.gov/pub/dist/doc/program_help/3dTstat.html>`_
 
     Examples
     ========
 
-    >>> from nipype.interfaces import afni as afni
+    >>> from nipype.interfaces import afni
     >>> tstat = afni.TStat()
     >>> tstat.inputs.in_file = 'functional.nii'
-    >>> tstat.inputs.args= '-mean'
+    >>> tstat.inputs.args = '-mean'
     >>> tstat.inputs.out_file = 'stats'
     >>> tstat.cmdline  # doctest: +IGNORE_UNICODE
     '3dTstat -mean -prefix stats functional.nii'
-    >>> res = tstat.run() # doctest: +SKIP
+    >>> res = tstat.run()  # doctest: +SKIP
 
     """
 
@@ -1182,22 +1208,23 @@ class To3D(AFNICommand):
     """Create a 3D dataset from 2D image files using AFNI to3d command
 
     For complete details, see the `to3d Documentation
-    <http://afni.nimh.nih.gov/pub/dist/doc/program_help/to3d.html>`_
+    <https://afni.nimh.nih.gov/pub/dist/doc/program_help/to3d.html>`_
 
     Examples
     ========
 
     >>> from nipype.interfaces import afni
-    >>> To3D = afni.To3D()
-    >>> To3D.inputs.datatype = 'float'
-    >>> To3D.inputs.in_folder = '.'
-    >>> To3D.inputs.out_file = 'dicomdir.nii'
-    >>> To3D.inputs.filetype = 'anat'
-    >>> To3D.cmdline #doctest: +ELLIPSIS +IGNORE_UNICODE
+    >>> to3d = afni.To3D()
+    >>> to3d.inputs.datatype = 'float'
+    >>> to3d.inputs.in_folder = '.'
+    >>> to3d.inputs.out_file = 'dicomdir.nii'
+    >>> to3d.inputs.filetype = 'anat'
+    >>> to3d.cmdline  # doctest: +ELLIPSIS +IGNORE_UNICODE
     'to3d -datum float -anat -prefix dicomdir.nii ./*.dcm'
-    >>> res = To3D.run() #doctest: +SKIP
+    >>> res = to3d.run()  # doctest: +SKIP
 
    """
+
     _cmd = 'to3d'
     input_spec = To3DInputSpec
     output_spec = AFNICommandOutputSpec
@@ -1225,17 +1252,19 @@ class ZCutUp(AFNICommand):
     """Cut z-slices from a volume using AFNI 3dZcutup command
 
     For complete details, see the `3dZcutup Documentation.
-    <http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dZcutup.html>`_
+    <https://afni.nimh.nih.gov/pub/dist/doc/program_help/3dZcutup.html>`_
 
     Examples
     ========
 
-    >>> from nipype.interfaces import afni as afni
+    >>> from nipype.interfaces import afni
     >>> zcutup = afni.ZCutUp()
     >>> zcutup.inputs.in_file = 'functional.nii'
     >>> zcutup.inputs.out_file = 'functional_zcutup.nii'
     >>> zcutup.inputs.keep= '0 10'
-    >>> res = zcutup.run() # doctest: +SKIP
+    >>> zcutup.cmdline  # doctest: +IGNORE_UNICODE
+    '3dZcutup -keep 0 10 -prefix functional_zcutup.nii functional.nii'
+    >>> res = zcutup.run()  # doctest: +SKIP
 
     """
 
