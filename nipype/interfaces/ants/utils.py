@@ -137,65 +137,44 @@ class MultiplyImages(ANTSCommand):
             self.inputs.output_product_image)
         return outputs
 
-
-class JacobianDeterminantInputSpec(ANTSCommandInputSpec):
-    dimension = traits.Enum(3, 2, argstr='%d', usedefault=False, mandatory=True,
+class CreateJacobianDeterminantImageInputSpec(ANTSCommandInputSpec):
+    imageDimension = traits.Enum(3, 2, argstr='%d', usedefault=False, mandatory=True,
                             position=0, desc='image dimension (2 or 3)')
-    warp_file = File(argstr='%s', exists=True, mandatory=True,
-                     position=1, desc='input warp file')
-    output_prefix = File(argstr='%s', genfile=True, hash_files=False,
+    deformationField = File(argstr='%s', exists=True, mandatory=True,
+                     position=1, desc='deformation transformation file')
+    outputImage = File(argstr='%s', mandatory=True,
                          position=2,
-                         desc=('prefix of the output image filename: '
-                               'PREFIX(log)jacobian.nii.gz'))
-    use_log = traits.Enum(0, 1, argstr='%d', position=3,
-                          desc='log transform the jacobian determinant')
-    template_mask = File(argstr='%s', exists=True, position=4,
-                         desc='template mask to adjust for head size')
-    norm_by_total = traits.Enum(0, 1, argstr='%d', position=5,
-                                desc=('normalize jacobian by total in mask to '
-                                      'adjust for head size'))
-    projection_vector = traits.List(traits.Float(), argstr='%s', sep='x',
-                                    position=6,
-                                    desc='vector to project warp against')
+                         desc='output filename')
+    doLogJacobian = traits.Enum(0, 1, argstr='%d', mandatory=False, position=3,
+                          desc='return the log jacobian')
+    useGeometric = traits.Enum(0, 1, argstr='%d', mandatory=False, position=4,
+                          desc='return the geometric jacobian')
 
+class CreateJacobianDeterminantImageOutputSpec(TraitedSpec):
+    jacobian_image = File(exists=True, desc='jacobian image')
 
-class JacobianDeterminantOutputSpec(TraitedSpec):
-    jacobian_image = File(exists=True, desc='(log transformed) jacobian image')
-
-
-class JacobianDeterminant(ANTSCommand):
+class CreateJacobianDeterminantImage(ANTSCommand):
     """
     Examples
     --------
-    >>> from nipype.interfaces.ants import JacobianDeterminant
-    >>> jacobian = JacobianDeterminant()
-    >>> jacobian.inputs.dimension = 3
-    >>> jacobian.inputs.warp_file = 'ants_Warp.nii.gz'
-    >>> jacobian.inputs.output_prefix = 'Sub001_'
-    >>> jacobian.inputs.use_log = 1
+    >>> from nipype.interfaces.ants import CreateJacobianDeterminantImage
+    >>> jacobian = CreateJacobianDeterminantImage()
+    >>> jacobian.inputs.imageDimension = 3
+    >>> jacobian.inputs.deformationField = 'ants_Warp.nii.gz'
+    >>> jacobian.inputs.outputImage = 'out_name.nii.gz'
     >>> jacobian.cmdline # doctest: +IGNORE_UNICODE
-    'ANTSJacobian 3 ants_Warp.nii.gz Sub001_ 1'
+    'CreateJacobianDeterminantImage 3 ants_Warp.nii.gz out_name.nii.gz'
     """
 
-    _cmd = 'ANTSJacobian'
-    input_spec = JacobianDeterminantInputSpec
-    output_spec = JacobianDeterminantOutputSpec
+    _cmd = 'CreateJacobianDeterminantImage'
+    input_spec = CreateJacobianDeterminantImageInputSpec
+    output_spec = CreateJacobianDeterminantImageOutputSpec
 
-    def _gen_filename(self, name):
-        if name == 'output_prefix':
-            output = self.inputs.output_prefix
-            if not isdefined(output):
-                _, name, ext = split_filename(self.inputs.warp_file)
-                output = name + '_'
-            return output
-        return None
+    def _format_arg(self, opt, spec, val):
+        return super(CreateJacobianDeterminantImage, self)._format_arg(opt, spec, val)
 
     def _list_outputs(self):
         outputs = self._outputs().get()
-        if self.inputs.use_log == 1:
-            outputs['jacobian_image'] = os.path.abspath(
-                self._gen_filename('output_prefix') + 'logjacobian.nii.gz')
-        else:
-            outputs['jacobian_image'] = os.path.abspath(
-                self._gen_filename('output_prefix') + 'jacobian.nii.gz')
+        outputs['jacobian_image'] = os.path.abspath(
+            self.inputs.outputImage)
         return outputs
