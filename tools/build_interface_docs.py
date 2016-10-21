@@ -40,7 +40,7 @@ if __name__ == '__main__':
                                        '\.testing',
                                        '\.scripts',
                                        ]
-    docwriter.class_skip_patterns += ['AFNI',
+    docwriter.class_skip_patterns += ['AFNICommand',
                                       'ANTS',
                                       'FSL',
                                       'FS',
