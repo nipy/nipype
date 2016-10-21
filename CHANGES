@@ -1,6 +1,7 @@
 Upcoming release 0.13
 =====================
 
+* FIX: Semaphore capture using MultiProc plugin (https://github.com/nipy/nipype/pull/1689)
 * REF: Refactor AFNI interfaces (https://github.com/nipy/nipype/pull/1678, https://github.com/nipy/nipype/pull/1680)
 * ENH: Move nipype commands to group command using click (https://github.com/nipy/nipype/pull/1608)
 * FIX: AFNI Retroicor interface fixes (https://github.com/nipy/nipype/pull/1669)
