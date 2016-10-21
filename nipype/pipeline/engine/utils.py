@@ -648,11 +648,13 @@ def _propagate_internal_output(graph, node, field, connections, portinputs):
         if field in portinputs:
             srcnode, srcport = portinputs[field]
             if isinstance(srcport, tuple) and isinstance(src, tuple):
-                raise ValueError(("Does not support two inline functions "
-                                  "in series (\'%s\'  and \'%s\'). "
-                                  "Please use a Function node") %
-                                 (srcport[1].split("\\n")[0][6:-1],
-                                  src[1].split("\\n")[0][6:-1]))
+                src_func = srcport[1].split("\\n")[0]
+                dst_func = src[1].split("\\n")[0]
+                raise ValueError("Does not support two inline functions "
+                                 "in series ('{}'  and '{}'), found when "
+                                 "connecting {} to {}. Please use a Function "
+                                 "node.".format(src_func, dst_func, srcnode, destnode))
+
             connect = graph.get_edge_data(srcnode, destnode,
                                           default={'connect': []})
             if isinstance(src, tuple):
