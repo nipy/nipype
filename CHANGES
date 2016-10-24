@@ -1,6 +1,7 @@
 Upcoming release 0.13
 =====================
 
+* FIX: Semaphore capture using MultiProc plugin (https://github.com/nipy/nipype/pull/1689)
 * REF: Refactor AFNI interfaces (https://github.com/nipy/nipype/pull/1678, https://github.com/nipy/nipype/pull/1680)
 * ENH: Move nipype commands to group command using click (https://github.com/nipy/nipype/pull/1608)
 * FIX: AFNI Retroicor interface fixes (https://github.com/nipy/nipype/pull/1669)
@@ -26,7 +27,8 @@ Upcoming release 0.13
 * ENH: Implement missing inputs/outputs in FSL AvScale (https://github.com/nipy/nipype/pull/1563)
 * FIX: Fix symlink test in copyfile (https://github.com/nipy/nipype/pull/1570, https://github.com/nipy/nipype/pull/1586)
 * ENH: Added support for custom job submission check in SLURM (https://github.com/nipy/nipype/pull/1582)
-
+* ENH: Added ANTs interface CreateJacobianDeterminantImage; replaces deprecated JacobianDeterminant
+       (https://github.com/nipy/nipype/pull/1654)
 
 Release 0.12.1 (August 3, 2016)
 ===============================
