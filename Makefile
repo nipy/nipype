@@ -3,7 +3,7 @@
 # rsync -e ssh nipype-0.1-py2.5.egg cburns,nipy@frs.sourceforge.net:/home/frs/project/n/ni/nipy/nipype/nipype-0.1/
 
 PYTHON ?= python
-NOSETESTS ?= nosetests
+NOSETESTS=`which nosetests`
 
 .PHONY: zipdoc sdist egg upload_to_pypi trailing-spaces clean-pyc clean-so clean-build clean-ctags clean in inplace test-code test-doc test-coverage test html specs check-before-commit check
 
@@ -46,24 +46,28 @@ clean-ctags:
 clean-doc:
 	rm -rf doc/_build
 
-clean: clean-build clean-pyc clean-so clean-ctags clean-doc
+clean-tests:
+	rm -f .coverage
+
+clean: clean-build clean-pyc clean-so clean-ctags clean-doc clean-tests
 
 in: inplace # just a shortcut
 inplace:
 	$(PYTHON) setup.py build_ext -i
 
 test-code: in
-	$(NOSETESTS) -s nipype --with-doctest
+	python -W once:FSL:UserWarning:nipype $(NOSETESTS) --with-doctest --with-doctest-ignore-unicode --logging-level=DEBUG --verbosity=3 nipype
 
 test-doc:
-	$(NOSETESTS) -s --with-doctest --doctest-tests --doctest-extension=rst \
+	$(NOSETESTS) -s --with-doctest --with-doctest-ignore-unicode --doctest-tests --doctest-extension=rst \
 	--doctest-fixtures=_fixture doc/
 
-test-coverage:
-	$(NOSETESTS) -s --with-doctest --with-coverage --cover-package=nipype \
+test-coverage: clean-tests in
+	$(NOSETESTS) -s --with-doctest --with-doctest-ignore-unicode --with-coverage --cover-package=nipype \
 	--config=.coveragerc
 
-test: clean test-code
+test: tests # just another name
+tests: clean test-code
 
 html:
 	@echo "building docs"

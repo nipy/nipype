@@ -1,11 +1,13 @@
+# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """Provide interface to AFNI commands."""
+from __future__ import print_function, division, unicode_literals, absolute_import
+from builtins import object, str, bytes
+from future.utils import raise_from
 
 import os
 from sys import platform
-from builtins import object
-from future.utils import raise_from
 
 from ... import logging
 from ...utils.filemanip import split_filename

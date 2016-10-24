@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Using nipype with persistence and lazy recomputation but without explicit
 name-steps pipeline: getting back scope in command-line based programming.
@@ -8,9 +9,8 @@ name-steps pipeline: getting back scope in command-line based programming.
    >>> datadir = os.path.realpath(os.path.join(filepath, '../testing/data'))
    >>> os.chdir(datadir)
 """
-
-from __future__ import print_function
-from builtins import object
+from __future__ import print_function, division, unicode_literals, absolute_import
+from builtins import object, open
 
 import os
 import hashlib
@@ -93,10 +93,9 @@ class PipeFunc(object):
         return out
 
     def __repr__(self):
-        return '%s(%s.%s, base_dir=%s)' % (self.__class__.__name__,
-                                           self.interface.__module__,
-                                           self.interface.__name__,
-                                           self.base_dir)
+        return '{}({}.{}}, base_dir={})'.format(
+            self.__class__.__name__, self.interface.__module__, self.interface.__name__,
+            self.base_dir)
 
 ################################################################################
 # Memory manager: provide some tracking about what is computed when, to
@@ -106,11 +105,13 @@ class PipeFunc(object):
 def read_log(filename, run_dict=None):
     if run_dict is None:
         run_dict = dict()
-    for line in open(filename, 'r'):
-        dir_name, job_name = line[:-1].split('/')
-        jobs = run_dict.get(dir_name, set())
-        jobs.add(job_name)
-        run_dict[dir_name] = jobs
+
+    with open(filename, 'r') as logfile:
+        for line in logfile:
+            dir_name, job_name = line[:-1].split('/')
+            jobs = run_dict.get(dir_name, set())
+            jobs.add(job_name)
+            run_dict[dir_name] = jobs
     return run_dict
 
 
@@ -176,7 +177,7 @@ class Memory(object):
         elif not os.path.isdir(base_dir):
             raise ValueError('base_dir should be a directory')
         self.base_dir = base_dir
-        open(os.path.join(base_dir, 'log.current'), 'w')
+        open(os.path.join(base_dir, 'log.current'), 'a').close()
 
     def cache(self, interface):
         """ Returns a callable that caches the output of an interface
@@ -226,8 +227,9 @@ class Memory(object):
         # Every counter is a file opened in append mode and closed
         # immediately to avoid race conditions in parallel computing:
         # file appends are atomic
-        open(os.path.join(base_dir, 'log.current'),
-             'a').write('%s/%s\n' % (dir_name, job_name))
+        with open(os.path.join(base_dir, 'log.current'), 'a') as currentlog:
+            currentlog.write('%s/%s\n' % (dir_name, job_name))
+
         t = time.localtime()
         year_dir = os.path.join(base_dir, 'log.%i' % t.tm_year)
         try:
@@ -239,8 +241,9 @@ class Memory(object):
             os.mkdir(month_dir)
         except OSError:
             "Dir exists"
-        open(os.path.join(month_dir, '%02i.log' % t.tm_mday),
-             'a').write('%s/%s\n' % (dir_name, job_name))
+
+        with open(os.path.join(month_dir, '%02i.log' % t.tm_mday), 'a') as rotatefile:
+            rotatefile.write('%s/%s\n' % (dir_name, job_name))
 
     def clear_previous_runs(self, warn=True):
         """ Remove all the cache that where not used in the latest run of
@@ -293,10 +296,9 @@ class Memory(object):
             input.
         """
         rm_all_but(self.base_dir, set(runs.keys()), warn=warn)
-        for dir_name, job_names in runs.items():
+        for dir_name, job_names in list(runs.items()):
             rm_all_but(os.path.join(self.base_dir, dir_name),
                        job_names, warn=warn)
 
     def __repr__(self):
-        return '%s(base_dir=%s)' % (self.__class__.__name__,
-                                    self.base_dir)
+        return '{}(base_dir={})'.format(self.__class__.__name__, self.base_dir)

@@ -1,18 +1,15 @@
+# -*- coding: utf-8 -*-
 """
 Nose test running.
 
 This module implements ``test()`` and ``bench()`` functions for NumPy modules.
 
 """
-
-from __future__ import print_function
-from __future__ import absolute_import
-from builtins import object
+from __future__ import print_function, division, unicode_literals, absolute_import
+from builtins import object, str, bytes
 
 import os
 import sys
-
-from ....external.six import string_types
 
 
 def get_package_name(filepath):
@@ -26,7 +23,7 @@ def get_package_name(filepath):
 
     Examples
     --------
-    >>> np.testing.nosetester.get_package_name('nonsense')
+    >>> np.testing.nosetester.get_package_name('nonsense') # doctest: +IGNORE_UNICODE
     'numpy'
 
     """
@@ -176,7 +173,7 @@ class NoseTester(object):
         '''
         argv = [__file__, self.package_path, '-s']
         if label and label != 'full':
-            if not isinstance(label, string_types):
+            if not isinstance(label, (str, bytes)):
                 raise TypeError('Selection label should be a string')
             if label == 'fast':
                 label = 'not slow'

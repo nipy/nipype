@@ -1,20 +1,23 @@
+# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
-from __future__ import print_function
+from __future__ import print_function, unicode_literals
 from future import standard_library
 standard_library.install_aliases()
 
+from builtins import open, str, bytes
 import os
 import tempfile
 import shutil
 import warnings
+import simplejson as json
 
 from nipype.testing import (assert_equal, assert_not_equal, assert_raises,
                             assert_true, assert_false, with_setup, package_check,
-                            skipif)
+                            skipif, example_data)
 import nipype.interfaces.base as nib
 from nipype.utils.filemanip import split_filename
-from nipype.interfaces.base import Undefined, config, text_type
+from nipype.interfaces.base import Undefined, config
 from traits.testing.nose_tools import skip
 import traits.api as traits
 
@@ -62,7 +65,7 @@ def test_bunch_hash():
     yield assert_equal, bhash, 'ddcc7b4ec5675df8cf317a48bd1857fa'
     # Make sure the hash stored in the json file for `infile` is correct.
     jshash = nib.md5()
-    with open(json_pth) as fp:
+    with open(json_pth, 'r') as fp:
         jshash.update(fp.read().encode('utf-8'))
     yield assert_equal, newbdict['infile'][0][1], jshash.hexdigest()
     yield assert_equal, newbdict['yat'], True
@@ -455,11 +458,61 @@ def test_BaseInterface():
     nib.BaseInterface.input_spec = None
     yield assert_raises, Exception, nib.BaseInterface
 
+def test_BaseInterface_load_save_inputs():
+    tmp_dir = tempfile.mkdtemp()
+    tmp_json = os.path.join(tmp_dir, 'settings.json')
 
-def assert_not_raises(fn, *args, **kwargs):
-    fn(*args, **kwargs)
-    return True
+    class InputSpec(nib.TraitedSpec):
+        input1 = nib.traits.Int()
+        input2 = nib.traits.Float()
+        input3 = nib.traits.Bool()
+        input4 = nib.traits.Str()
 
+    class DerivedInterface(nib.BaseInterface):
+        input_spec = InputSpec
+
+        def __init__(self, **inputs):
+            super(DerivedInterface, self).__init__(**inputs)
+
+    inputs_dict = {'input1': 12, 'input3': True,
+                   'input4': 'some string'}
+    bif = DerivedInterface(**inputs_dict)
+    bif.save_inputs_to_json(tmp_json)
+    bif2 = DerivedInterface()
+    bif2.load_inputs_from_json(tmp_json)
+    yield assert_equal, bif2.inputs.get_traitsfree(), inputs_dict
+
+    bif3 = DerivedInterface(from_file=tmp_json)
+    yield assert_equal, bif3.inputs.get_traitsfree(), inputs_dict
+
+    inputs_dict2 = inputs_dict.copy()
+    inputs_dict2.update({'input4': 'some other string'})
+    bif4 = DerivedInterface(from_file=tmp_json, input4=inputs_dict2['input4'])
+    yield assert_equal, bif4.inputs.get_traitsfree(), inputs_dict2
+
+    bif5 = DerivedInterface(input4=inputs_dict2['input4'])
+    bif5.load_inputs_from_json(tmp_json, overwrite=False)
+    yield assert_equal, bif5.inputs.get_traitsfree(), inputs_dict2
+
+    bif6 = DerivedInterface(input4=inputs_dict2['input4'])
+    bif6.load_inputs_from_json(tmp_json)
+    yield assert_equal, bif6.inputs.get_traitsfree(), inputs_dict
+
+    # test get hashval in a complex interface
+    from nipype.interfaces.ants import Registration
+    settings = example_data(example_data('smri_ants_registration_settings.json'))
+    with open(settings) as setf:
+        data_dict = json.load(setf)
+
+    tsthash = Registration()
+    tsthash.load_inputs_from_json(settings)
+    yield assert_equal, {}, check_dict(data_dict, tsthash.inputs.get_traitsfree())
+
+    tsthash2 = Registration(from_file=settings)
+    yield assert_equal, {}, check_dict(data_dict, tsthash2.inputs.get_traitsfree())
+
+    _, hashvalue = tsthash.inputs.get_hashval(hash_method='timestamp')
+    yield assert_equal, 'ec5755e07287e04a4b409e03b77a517c', hashvalue
 
 def test_input_version():
     class InputSpec(nib.TraitedSpec):
@@ -588,7 +641,7 @@ def test_Commandline():
     yield assert_equal, res.outputs, None
 
     class CommandLineInputSpec1(nib.CommandLineInputSpec):
-        foo = nib.traits.Str(argstr='%s', desc='a str')
+        foo = nib.Str(argstr='%s', desc='a str')
         goo = nib.traits.Bool(argstr='-g', desc='a bool', position=0)
         hoo = nib.traits.List(argstr='-l %s', desc='a list')
         moo = nib.traits.List(argstr='-i %d...', desc='a repeated list',
@@ -661,7 +714,7 @@ def test_CommandLine_output():
     ci.inputs.terminal_output = 'file'
     res = ci.run()
     yield assert_true, 'stdout.nipype' in res.runtime.stdout
-    yield assert_equal, type(res.runtime.stdout), text_type
+    yield assert_true, isinstance(res.runtime.stdout, (str, bytes))
     ci = nib.CommandLine(command='ls -l')
     ci.inputs.terminal_output = 'none'
     res = ci.run()
@@ -697,3 +750,27 @@ def test_global_CommandLine_output():
     yield assert_equal, res.runtime.stdout, ''
     os.chdir(pwd)
     teardown_file(tmpd)
+
+def assert_not_raises(fn, *args, **kwargs):
+    fn(*args, **kwargs)
+    return True
+
+def check_dict(ref_dict, tst_dict):
+    """Compare dictionaries of inputs and and those loaded from json files"""
+    def to_list(x):
+        if isinstance(x, tuple):
+            x = list(x)
+
+        if isinstance(x, list):
+            for i, xel in enumerate(x):
+                x[i] = to_list(xel)
+
+        return x
+
+    failed_dict = {}
+    for key, value in list(ref_dict.items()):
+        newval = to_list(tst_dict[key])
+        if newval != value:
+            failed_dict[key] = (value, newval)
+    return failed_dict
+

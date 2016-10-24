@@ -8,6 +8,9 @@ nose>=1.2
 future==0.15.2
 simplejson>=3.8.0
 prov>=1.4.0
+click>=6.6.0
 xvfbwrapper
 psutil
 funcsigs
+configparser
+doctest-ignore-unicode

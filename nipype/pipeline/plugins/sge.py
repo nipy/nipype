@@ -1,5 +1,7 @@
+# -*- coding: utf-8 -*-
 """Parallel workflow execution via SGE
 """
+from __future__ import print_function, division, unicode_literals, absolute_import
 
 from builtins import object
 
@@ -13,8 +15,8 @@ import xml.dom.minidom
 
 import random
 
+from ...interfaces.base import CommandLine
 from .base import (SGELikeBatchManagerBase, logger, iflogger, logging)
-from nipype.interfaces.base import CommandLine
 
 DEBUGGING_PREFIX = str(int(random.uniform(100, 999)))
 
@@ -49,12 +51,10 @@ class QJobInfo(object):
         self._qsub_command_line = qsub_command_line
 
     def __repr__(self):
-        return str(self._job_num).ljust(8) \
-            + str(self._job_queue_state).ljust(12) \
-            + str(self._job_slots).ljust(3) \
-            + time.strftime("%Y-%m-%dT%H:%M:%S", time.gmtime(self._job_time)).ljust(20) \
-            + str(self._job_queue_name).ljust(8) \
-            + str(self._qsub_command_line)
+        return '{:<8d}{:12}{:<3d}{:20}{:8}{}'.format(
+            self._job_num, self._queue_state, self._job_slots,
+            time.strftime("%Y-%m-%dT%H:%M:%S", time.gmtime(self._job_time)),
+            self._job_queue_name, self._qsub_command_line)
 
     def is_initializing(self):
         return self._job_queue_state == "initializing"
@@ -312,9 +312,9 @@ def qsub_sanitize_job_name(testjobname):
 
     Numbers and punctuation are  not allowed.
 
-    >>> qsub_sanitize_job_name('01')
+    >>> qsub_sanitize_job_name('01') # doctest: +IGNORE_UNICODE
     'J01'
-    >>> qsub_sanitize_job_name('a01')
+    >>> qsub_sanitize_job_name('a01') # doctest: +IGNORE_UNICODE
     'a01'
     """
     if testjobname[0].isalpha():

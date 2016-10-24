@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import os
 import nipype
 from nipype.interfaces.utility import Function,IdentityInterface

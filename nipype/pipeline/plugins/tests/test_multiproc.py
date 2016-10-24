@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import logging
 import os
 from tempfile import mkdtemp
@@ -6,7 +7,7 @@ from multiprocessing import cpu_count
 
 import nipype.interfaces.base as nib
 from nipype.utils import draw_gantt_chart
-from nipype.testing import assert_equal
+from nipype.testing import assert_equal, skipif
 import nipype.pipeline.engine as pe
 from nipype.pipeline.plugins.callback_log import log_nodes_cb
 from nipype.pipeline.plugins.multiproc import get_system_total_memory_gb
@@ -76,7 +77,7 @@ class TestInterfaceSingleNode(nib.BaseInterface):
 
     def _list_outputs(self):
         outputs = self._outputs().get()
-        outputs['output1'] =  self.inputs.input1
+        outputs['output1'] = self.inputs.input1
         return outputs
 
 
@@ -122,7 +123,7 @@ def find_metrics(nodes, last_node):
     return total_memory, total_threads
 
 
-def test_do_not_use_more_memory_then_specified():
+def test_no_more_memory_than_specified():
     LOG_FILENAME = 'callback.log'
     my_logger = logging.getLogger('callback')
     my_logger.setLevel(logging.DEBUG)
@@ -150,7 +151,7 @@ def test_do_not_use_more_memory_then_specified():
     n1.inputs.input1 = 1
 
     pipe.run(plugin='MultiProc',
-             plugin_args={'memory': max_memory,
+             plugin_args={'memory_gb': max_memory,
                           'status_callback': log_nodes_cb})
 
 
@@ -180,8 +181,8 @@ def test_do_not_use_more_memory_then_specified():
 
     os.remove(LOG_FILENAME)
 
-
-def test_do_not_use_more_threads_then_specified():
+@skipif(nib.runtime_profile == False)
+def test_no_more_threads_than_specified():
     LOG_FILENAME = 'callback.log'
     my_logger = logging.getLogger('callback')
     my_logger.setLevel(logging.DEBUG)

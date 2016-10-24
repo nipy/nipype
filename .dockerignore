@@ -1,0 +1,7 @@
+.git/
+*.pyc
+*.egg-info
+__pycache__
+docker/nipype_*
+docker/test-*
+.coverage

@@ -31,14 +31,16 @@ def test_Cerebro_inputs():
     linearConvergence=dict(argstr='--linconv %f',
     ),
     outputAffineTransformFile=dict(argstr='--air %s',
+    genfile=True,
     ),
     outputCerebrumMaskFile=dict(argstr='-o %s',
     genfile=True,
     ),
-    outputLabelMaskFile=dict(argstr='-l %s',
+    outputLabelVolumeFile=dict(argstr='-l %s',
     genfile=True,
     ),
     outputWarpTransformFile=dict(argstr='--warp %s',
+    genfile=True,
     ),
     tempDirectory=dict(argstr='--tempdir %s',
     ),
@@ -65,7 +67,7 @@ def test_Cerebro_inputs():
 def test_Cerebro_outputs():
     output_map = dict(outputAffineTransformFile=dict(),
     outputCerebrumMaskFile=dict(),
-    outputLabelMaskFile=dict(),
+    outputLabelVolumeFile=dict(),
     outputWarpTransformFile=dict(),
     )
     outputs = Cerebro.output_spec()

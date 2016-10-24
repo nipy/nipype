@@ -1,6 +1,42 @@
 Upcoming release 0.13
 =====================
 
+* FIX: Semaphore capture using MultiProc plugin (https://github.com/nipy/nipype/pull/1689)
+* REF: Refactor AFNI interfaces (https://github.com/nipy/nipype/pull/1678, https://github.com/nipy/nipype/pull/1680)
+* ENH: Move nipype commands to group command using click (https://github.com/nipy/nipype/pull/1608)
+* FIX: AFNI Retroicor interface fixes (https://github.com/nipy/nipype/pull/1669)
+* FIX: Minor errors after migration to setuptools (https://github.com/nipy/nipype/pull/1671)
+* ENH: Add AFNI 3dNote interface (https://github.com/nipy/nipype/pull/1637)
+* ENH: Abandon distutils, only use setuptools (https://github.com/nipy/nipype/pull/1627)
+* FIX: Minor bugfixes related to unicode literals (https://github.com/nipy/nipype/pull/1656)
+* TST: Automatic retries in travis (https://github.com/nipy/nipype/pull/1659/files)
+* ENH: Add signal extraction interface (https://github.com/nipy/nipype/pull/1647)
+* ENH: Add a DVARS calculation interface (https://github.com/nipy/nipype/pull/1606)
+* ENH: New interface to b0calc of FSL-POSSUM (https://github.com/nipy/nipype/pull/1399)
+* ENH: Add CompCor (https://github.com/nipy/nipype/pull/1599)
+* ENH: Add duecredit entries (https://github.com/nipy/nipype/pull/1466)
+* FIX: Python 3 compatibility fixes (https://github.com/nipy/nipype/pull/1572)
+* REF: Improved PEP8 compliance for fsl interfaces (https://github.com/nipy/nipype/pull/1597)
+* REF: Improved PEP8 compliance for spm interfaces (https://github.com/nipy/nipype/pull/1593)
+* TST: Replaced coveralls with codecov (https://github.com/nipy/nipype/pull/1609)
+* ENH: More BrainSuite interfaces (https://github.com/nipy/nipype/pull/1554)
+* ENH: Convenient load/save of interface inputs (https://github.com/nipy/nipype/pull/1591)
+* ENH: Add a Framewise Displacement calculation interface (https://github.com/nipy/nipype/pull/1604)
+* FIX: Use builtins open and unicode literals for py3 compatibility (https://github.com/nipy/nipype/pull/1572)
+* TST: reduce the size of docker images & use tags for images (https://github.com/nipy/nipype/pull/1564)
+* ENH: Implement missing inputs/outputs in FSL AvScale (https://github.com/nipy/nipype/pull/1563)
+* FIX: Fix symlink test in copyfile (https://github.com/nipy/nipype/pull/1570, https://github.com/nipy/nipype/pull/1586)
+* ENH: Added support for custom job submission check in SLURM (https://github.com/nipy/nipype/pull/1582)
+* ENH: Added ANTs interface CreateJacobianDeterminantImage; replaces deprecated JacobianDeterminant
+       (https://github.com/nipy/nipype/pull/1654)
+
+Release 0.12.1 (August 3, 2016)
+===============================
+
+* FIX: runtime profiling is optional and off by default (https://github.com/nipy/nipype/pull/1561)
+* TST: circle CI tests run with docker (https://github.com/nipy/nipype/pull/1541)
+* FIX: workflow export functions without import error (https://github.com/nipy/nipype/pull/1552)
+
 
 Release 0.12.0 (July 12, 2016)
 ==============================
@@ -107,14 +143,14 @@ Release 0.11.0 (September 15, 2015)
 * FIX: Bug crashed 'make api' (https://github.com/nipy/nipype/pull/1026)
 * ENH: Updated antsIntroduction to handle RA and RI registrations (https://github.com/nipy/nipype/pull/1009)
 * ENH: Updated N4BiasCorrection input spec to include weight image and spline order. Made
-	   argument formatting consistent. Cleaned ants.segmentation according to PEP8.
-	   (https://github.com/nipy/nipype/pull/990/files)
+     argument formatting consistent. Cleaned ants.segmentation according to PEP8.
+     (https://github.com/nipy/nipype/pull/990/files)
 * ENH: SPM12 Normalize interface (https://github.com/nipy/nipype/pull/986)
 * FIX: Utility interface test dir (https://github.com/nipy/nipype/pull/986)
 * FIX: IPython engine directory reset after crash (https://github.com/nipy/nipype/pull/987)
 * ENH: Resting state fMRI example with NiPy realignment and no SPM (https://github.com/nipy/nipype/pull/992)
 * FIX: Corrected Freesurfer SegStats _list_outputs to avoid error if summary_file is
-	   undefined (issue #994)(https://https://github.com/nipy/nipype/pull/996)
+     undefined (issue #994)(https://https://github.com/nipy/nipype/pull/996)
 * FIX: OpenfMRI support and FSL 5.0.7 changes (https://github.com/nipy/nipype/pull/1006)
 * FIX: Output prefix in SPM Normalize with modulation (https://github.com/nipy/nipype/pull/1023)
 * ENH: Usability improvements in cluster environments (https://github.com/nipy/nipype/pull/1025)
@@ -196,11 +232,11 @@ Release 0.9.0 (December 20, 2013)
 * ENH: AFNI interfaces refactor, prefix, suffix are replaced by
        "flexible_%s_templates"
 * ENH: New SPM interfaces:
-		- spm.ResliceToReference,
-		- spm.DicomImport
+    - spm.ResliceToReference,
+    - spm.DicomImport
 * ENH: New AFNI interfaces:
-		- afni.AFNItoNIFTI
-		- afni.TCorr1D
+    - afni.AFNItoNIFTI
+    - afni.TCorr1D
 * ENH: Several new interfaces related to Camino were added:
         - camino.SFPICOCalibData
         - camino.Conmat
@@ -214,13 +250,13 @@ Release 0.9.0 (December 20, 2013)
         - mrtrix.FindShPeaks
         - mrtrix.Directions2Amplitude
 * ENH: New FSL interfaces:
-		- fsl.PrepareFieldmap
-		- fsl.TOPUP
-		- fsl.ApplyTOPUP
-		- fsl.Eddy
+    - fsl.PrepareFieldmap
+    - fsl.TOPUP
+    - fsl.ApplyTOPUP
+    - fsl.Eddy
 * ENH: New misc interfaces:
-		- FuzzyOverlap,
-		- P2PDistance
+    - FuzzyOverlap,
+    - P2PDistance
 * ENH: New workflows: nipype.workflows.dmri.fsl.epi.[fieldmap_correction&topup_correction]
 * ENH: Added simplified outputname generation for command line interfaces.
 * ENH: Allow ants use a single mask image
@@ -278,7 +314,7 @@ Release 0.7.0 (Dec 18, 2012)
        afni.AutoTcorrelate, DcmStack
 * ENH: New workflows: ants template building (both using 'ANTS' and the new 'antsRegistration')
 * ENH: New examples: how to use ANTS template building workflows (smri_ants_build_tmeplate),
-	  how to set SGE specific options (smri_ants_build_template_new)
+    how to set SGE specific options (smri_ants_build_template_new)
 * ENH: added no_flatten option to Merge
 * ENH: added versioning option and checking to traits
 * ENH: added deprecation metadata to traits
@@ -340,9 +376,9 @@ Release 0.5 (Mar 10, 2012)
 * API: Canned workflows are now all under a different package structure
 * API: SpecifyModel event_info renamed to event_files
 * API: DataGrabber is always being rerun (unless overwrite is set to False on
-	   Node level)
+     Node level)
 * API: "stop_on_first_rerun" does not stop for DataGrabber (unless overwrite is
-	   set to True on Node level)
+     set to True on Node level)
 * API: Output prefix can be set for spm nodes (SliceTiming, Realign, Coregister,
        Normalize, Smooth)
 

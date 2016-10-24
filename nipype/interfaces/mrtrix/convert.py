@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """
@@ -8,35 +9,33 @@
     >>> os.chdir(datadir)
 
 """
+from __future__ import print_function, division, unicode_literals, absolute_import
+from builtins import open
 
-from __future__ import division
-
-# -*- coding: utf-8 -*-
 import os.path as op
 import nibabel as nb
 import nibabel.trackvis as trk
 import numpy as np
 from nibabel.trackvis import HeaderError
 from nibabel.volumeutils import native_code
+from nibabel.orientations import aff2axcodes
 
-from ..base import (TraitedSpec, BaseInterface, BaseInterfaceInputSpec,
-                    File, isdefined, traits)
+from ... import logging
 from ...utils.filemanip import split_filename
 from ...utils.misc import package_check
 from ...workflows.misc.utils import get_data_dims, get_vox_dims
+from ..base import TraitedSpec, BaseInterface, File, isdefined
 
 import warnings
 have_dipy = True
 try:
     package_check('dipy')
 except Exception as e:
-    False
+    have_dipy = False
 else:
     from dipy.tracking.utils import move_streamlines, affine_from_fsl_mat_file
 
-from nibabel.orientations import aff2axcodes
 
-from ... import logging
 iflogger = logging.getLogger('interface')
 
 
@@ -245,7 +244,7 @@ class MRTrix2TrackVis(BaseInterface):
         return outputs
 
     def _gen_filename(self, name):
-        if name is 'out_filename':
+        if name == 'out_filename':
             return self._gen_outfilename()
         else:
             return None
