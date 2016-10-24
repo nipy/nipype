@@ -4,6 +4,8 @@ import os
 from tempfile import mkdtemp
 from shutil import rmtree
 
+from io import open
+
 from nipype.testing import (assert_equal, example_data, skipif, assert_true, assert_in)
 from nipype.algorithms.confounds import FramewiseDisplacement, ComputeDVARS
 import numpy as np
