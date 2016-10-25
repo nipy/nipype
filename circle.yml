@@ -38,7 +38,7 @@ test:
     - docker run -v /etc/localtime:/etc/localtime:ro -e FSL_COURSE_DATA="/root/examples/nipype-fsl_course_data" -v ~/examples:/root/examples:ro -v ~/scratch:/scratch -w /root/src/nipype nipype/nipype_test:py35 /usr/bin/run_nosetests.sh py35 :
         timeout: 2600
     - docker run -v /etc/localtime:/etc/localtime:ro -e FSL_COURSE_DATA="/root/examples/nipype-fsl_course_data" -v ~/examples:/root/examples:ro -v ~/scratch:/scratch -w /root/src/nipype nipype/nipype_test:py27 /usr/bin/run_nosetests.sh py27 :
-        timeout: 2600
+        timeout: 5200
     - docker run -v /etc/localtime:/etc/localtime:ro -v ~/examples:/root/examples:ro -v ~/scratch:/scratch -w /scratch nipype/nipype_test:py35 /usr/bin/run_examples.sh test_spm Linear /root/examples/ workflow3d :
         timeout: 1600
     - docker run -v /etc/localtime:/etc/localtime:ro -v ~/examples:/root/examples:ro -v ~/scratch:/scratch -w /scratch nipype/nipype_test:py35 /usr/bin/run_examples.sh test_spm Linear /root/examples/ workflow4d :
