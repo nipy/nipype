@@ -750,3 +750,70 @@ def test_serial_input():
 
     os.chdir(cwd)
     rmtree(wd)
+
+
+def test_write_graph_runs():
+    cwd = os.getcwd()
+    wd = mkdtemp()
+    os.chdir(wd)
+
+    for graph in ('orig', 'flat', 'exec', 'hierarchical', 'colored'):
+        for simple in (True, False):
+            pipe = pe.Workflow(name='pipe')
+            mod1 = pe.Node(interface=TestInterface(), name='mod1')
+            mod2 = pe.Node(interface=TestInterface(), name='mod2')
+            pipe.connect([(mod1, mod2, [('output1', 'input1')])])
+            try:
+                pipe.write_graph(graph2use=graph, simple_form=simple)
+            except Exception:
+                yield assert_true, False, \
+                'Failed to plot {} {} graph'.format(
+                    'simple' if simple else 'detailed', graph)
+
+            yield assert_true, os.path.exists('graph.dot') or os.path.exists('graph_detailed.dot')
+            try:
+                os.remove('graph.dot')
+            except OSError:
+                pass
+            try:
+                os.remove('graph_detailed.dot')
+            except OSError:
+                pass
+
+    os.chdir(cwd)
+    rmtree(wd)
+
+def test_deep_nested_write_graph_runs():
+    cwd = os.getcwd()
+    wd = mkdtemp()
+    os.chdir(wd)
+
+    for graph in ('orig', 'flat', 'exec', 'hierarchical', 'colored'):
+        for simple in (True, False):
+            pipe = pe.Workflow(name='pipe')
+            parent = pipe
+            for depth in range(10):
+                sub = pe.Workflow(name='pipe_nest_{}'.format(depth))
+                parent.add_nodes([sub])
+                parent = sub
+            mod1 = pe.Node(interface=TestInterface(), name='mod1')
+            parent.add_nodes([mod1])
+            try:
+                pipe.write_graph(graph2use=graph, simple_form=simple)
+            except Exception as e:
+                yield assert_true, False, \
+                'Failed to plot {} {} deep graph: {!s}'.format(
+                    'simple' if simple else 'detailed', graph, e)
+
+            yield assert_true, os.path.exists('graph.dot') or os.path.exists('graph_detailed.dot')
+            try:
+                os.remove('graph.dot')
+            except OSError:
+                pass
+            try:
+                os.remove('graph_detailed.dot')
+            except OSError:
+                pass
+
+    os.chdir(cwd)
+    rmtree(wd)
