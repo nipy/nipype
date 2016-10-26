@@ -5,11 +5,13 @@ from __future__ import print_function, unicode_literals
 from builtins import str, zip, range, open
 from future import standard_library
 import os
+import simplejson
 import glob
 import shutil
 import os.path as op
 from tempfile import mkstemp
 from subprocess import Popen
+import hashlib
 
 import pytest
 import nipype
@@ -197,9 +199,6 @@ def test_datasink_to_s3(dummy_input, tmpdir):
     This function tests to see if the S3 functionality of a DataSink
     works properly
     '''
-    # Import packages
-    import hashlib
-
     # Init variables
     ds = nio.DataSink()
     bucket_name = 'test'
@@ -255,10 +254,6 @@ def test_aws_keys_from_env():
     credentials from the environment variables
     '''
 
-    # Import packages
-    import os
-    import nipype.interfaces.io as nio
-
     # Init variables
     ds = nio.DataSink()
     aws_access_key_id = 'ABCDACCESS'
@@ -282,9 +277,6 @@ def test_datasink_localcopy(dummy_input, tmpdir):
     Function to validate DataSink will make local copy via local_copy
     attribute
     '''
-
-    # Import packages
-    import hashlib
 
     # Init variables
     local_dir = str(tmpdir)
@@ -382,8 +374,7 @@ def test_datafinder_depth(tmpdir):
     outdir = str(tmpdir)
     os.makedirs(os.path.join(outdir, '0', '1', '2', '3'))
 
-    from nipype.interfaces.io import DataFinder
-    df = DataFinder()
+    df = nio.DataFinder()
     df.inputs.root_paths = os.path.join(outdir, '0')
     for min_depth in range(4):
         for max_depth in range(min_depth, 4):
@@ -402,8 +393,7 @@ def test_datafinder_unpack(tmpdir):
     open(single_res, 'a').close()
     open(os.path.join(outdir, "dontfindme"), 'a').close()
 
-    from nipype.interfaces.io import DataFinder
-    df = DataFinder()
+    df = nio.DataFinder()
     df.inputs.root_paths = outdir
     df.inputs.match_regex = '.+/(?P<basename>.+)\.txt'
     df.inputs.unpack_single = True
@@ -420,8 +410,6 @@ def test_freesurfersource():
 
 #NOTE: I split the test_jsonsink, didn't find connection between two parts, could easier use parametrize for the second part
 def test_jsonsink_input(tmpdir):
-    import simplejson
-    import os
 
     ds = nio.JSONFileSink()
     assert ds.inputs._outputs == {}
@@ -438,7 +426,6 @@ def test_jsonsink_input(tmpdir):
         {'new_entry' : 'someValue', 'test' : 'testInfields'}
 ])
 def test_jsonsink(tmpdir, inputs_attributes):
-    import simplejson
     os.chdir(str(tmpdir))
     js = nio.JSONFileSink(infields=['test'], in_dict={'foo': 'var'})
     setattr(js.inputs, 'contrasts.alt', 'someNestedValue')
