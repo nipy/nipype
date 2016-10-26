@@ -363,7 +363,8 @@ class CompCor(BaseInterface):
         components_file = os.path.join(os.getcwd(), self.inputs.components_file)
 
         self._set_header()
-        np.savetxt(components_file, components, fmt=b"%.10f", header=self._make_headers(components.shape[1]))
+        np.savetxt(components_file, components, fmt=b"%.10f", delimiter='\t',
+                   header=self._make_headers(components.shape[1]))
         return runtime
 
     def _list_outputs(self):

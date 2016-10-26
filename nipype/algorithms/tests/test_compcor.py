@@ -8,7 +8,7 @@ import unittest
 import nibabel as nb
 import numpy as np
 
-from ...testing import assert_equal, assert_true, utils
+from ...testing import assert_equal, assert_true, utils, assert_in
 from ..confounds import CompCor, TCompCor, ACompCor
 
 class TestCompCor(unittest.TestCase):
@@ -39,7 +39,7 @@ class TestCompCor(unittest.TestCase):
                                ['-0.1246655485', '-0.1235705610']]
 
         self.run_cc(CompCor(realigned_file=self.realigned_file, mask_file=self.mask_file),
-                               expected_components)
+                    expected_components)
 
         self.run_cc(ACompCor(realigned_file=self.realigned_file, mask_file=self.mask_file,
                              components_file='acc_components_file'),
@@ -105,10 +105,12 @@ class TestCompCor(unittest.TestCase):
         with open(ccresult.outputs.components_file, 'r') as components_file:
             expected_n_components = min(ccinterface.inputs.num_components, self.fake_data.shape[3])
 
-            components_data = [line.split() for line in components_file]
+            components_data = [line.split('\t') for line in components_file]
 
-            header = components_data.pop(0)[1:] # the first item will be '#', we can throw it out
-            assert_equal(header, [expected_header + str(i) for i in range(expected_n_components)])
+            header = components_data.pop(0) # the first item will be '#', we can throw it out
+            expected_header = [expected_header + str(i) for i in range(expected_n_components)]
+            for i, heading in enumerate(header):
+                assert_in(expected_header[i], heading)
 
             num_got_timepoints = len(components_data)
             assert_equal(num_got_timepoints, self.fake_data.shape[3])
