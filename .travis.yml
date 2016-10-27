@@ -44,6 +44,9 @@ install:
 script:
 # removed nose; run py.test only on tests that have been rewritten
 - py.test nipype/interfaces/tests/test_utility.py
+- py.test nipype/interfaces/tests/test_io.py
+- py.test nipype/interfaces/tests/test_nilearn.py
+
 after_success:
 - bash <(curl -s https://codecov.io/bash) -t ac172a50-8e66-42e5-8822-5373fcf54686 -cF unittests
 deploy:
