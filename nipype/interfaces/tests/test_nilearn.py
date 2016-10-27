@@ -6,8 +6,8 @@ import shutil
 
 import numpy as np
 
-#NOTE: can we change the imports, so it's more clear where the function come from
-#NOTE: in ...testing there is simply from numpy.testing import * 
+#NOTE_dj: can we change the imports, so it's more clear where the function come from
+#NOTE_dj: in ...testing there is simply from numpy.testing import * 
 from ...testing import utils
 from numpy.testing import assert_equal, assert_almost_equal, raises
 from numpy.testing.decorators import  skipif
