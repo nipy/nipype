@@ -6,8 +6,12 @@ import shutil
 
 import numpy as np
 
-from ...testing import (assert_equal, utils, assert_almost_equal, raises,
-                        skipif)
+#NOTE: can we change the imports, so it's more clear where the function come from
+#NOTE: in ...testing there is simply from numpy.testing import * 
+from ...testing import utils
+from numpy.testing import assert_equal, assert_almost_equal, raises
+from numpy.testing.decorators import  skipif
+
 from .. import nilearn as iface
 from ...pipeline import engine as pe
 
