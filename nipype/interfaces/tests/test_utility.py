@@ -60,8 +60,8 @@ def make_random_array(size):
     return np.random.randn(size, size)
 
 
-def should_fail(tempdir):
-    os.chdir(tempdir)
+def should_fail(tmpdir):
+    os.chdir(tmpdir)
 
     node = pe.Node(utility.Function(input_names=["size"],
                                     output_names=["random_array"],

@@ -9,7 +9,6 @@ import simplejson
 import glob
 import shutil
 import os.path as op
-from tempfile import mkstemp
 from subprocess import Popen
 import hashlib
 
@@ -61,9 +60,9 @@ def test_s3datagrabber():
     assert dg.inputs.template_args == {'outfiles': []}
 
 
-### NOTE: changed one long test for a shorter one with parametrize; for every template and set of attributes I'm checking now the same set of fileds using assert
-### NOTE: in io.py, an example has a node  dg = Node(SelectFiles(templates), "selectfiles")
-### NOTE: keys from templates are repeated as strings  many times: didn't change this from an old code
+### NOTE_dj: changed one long test for a shorter one with parametrize; for every template and set of attributes I'm checking now the same set of fileds using assert
+### NOTE_dj: in io.py, an example has a node  dg = Node(SelectFiles(templates), "selectfiles")
+### NOTE_dj: keys from templates are repeated as strings  many times: didn't change this from an old code
 templates1 = {"model": "interfaces/{package}/model.py",
              "preprocess": "interfaces/{package}/pre*.py"}
 templates2 = {"converter": "interfaces/dcm{to!s}nii.py"}
@@ -246,7 +245,7 @@ def test_datasink_to_s3(dummy_input, tmpdir):
 
 
 # Test AWS creds read from env vars
-#NOTE: noboto3 and fakes3 are not used in this test, is skipif needed?
+#NOTE_dj: noboto3 and fakes3 are not used in this test, is skipif needed?
 @pytest.mark.skipif(noboto3 or not fakes3, reason="boto3 or fakes3 library is not available")
 def test_aws_keys_from_env():
     '''
@@ -344,8 +343,8 @@ def _temp_analyze_files():
     return orig_img, orig_hdr
 
 
-#NOTE: had some problems with pytest and did fully understand the test
-#NOTE: at the end only removed yield  
+#NOTE_dj: had some problems with pytest and did fully understand the test
+#NOTE_dj: at the end only removed yield  
 def test_datasink_copydir():
     orig_img, orig_hdr = _temp_analyze_files()
     outdir = mkdtemp()
@@ -408,7 +407,7 @@ def test_freesurfersource():
     assert fss.inputs.subject_id == Undefined
     assert fss.inputs.subjects_dir == Undefined
 
-#NOTE: I split the test_jsonsink, didn't find connection between two parts, could easier use parametrize for the second part
+#NOTE_dj: I split the test_jsonsink, didn't find connection between two parts, could easier use parametrize for the second part
 def test_jsonsink_input(tmpdir):
 
     ds = nio.JSONFileSink()
