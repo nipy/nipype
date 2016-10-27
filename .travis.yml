@@ -47,7 +47,7 @@ script:
 - py.test nipype/interfaces/tests/test_io.py
 - py.test nipype/interfaces/tests/test_nilearn.py
 - py.test nipype/interfaces/tests/test_matlab.py
-
+- py.test nipype/interfaces/tests/test_base.py
 after_success:
 - bash <(curl -s https://codecov.io/bash) -t ac172a50-8e66-42e5-8822-5373fcf54686 -cF unittests
 deploy:
