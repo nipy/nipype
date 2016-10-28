@@ -610,6 +610,7 @@ research/nichols/scripts/fsl/standardizeddvars.pdf>`_, 2013.
     import numpy as np
     import nibabel as nb
     from nitime.algorithms import AR_est_YW
+    import warnings
 
     func = nb.load(in_file).get_data().astype(np.float32)
     mask = nb.load(in_mask).get_data().astype(np.uint8)
@@ -649,9 +650,13 @@ research/nichols/scripts/fsl/standardizeddvars.pdf>`_, 2013.
     # standardization
     dvars_stdz = dvars_nstd / diff_sd_mean
 
-    # voxelwise standardization
-    diff_vx_stdz = func_diff / np.array([diff_sdhat] * func_diff.shape[-1]).T
-    dvars_vx_stdz = diff_vx_stdz.std(axis=0, ddof=1)
+
+    with warnings.catch_warnings(): # catch divide by zero errors
+        warnings.filterwarnings('error')
+
+        # voxelwise standardization
+        diff_vx_stdz = func_diff / np.array([diff_sdhat] * func_diff.shape[-1]).T
+        dvars_vx_stdz = diff_vx_stdz.std(axis=0, ddof=1)
 
     return (dvars_stdz, dvars_nstd, dvars_vx_stdz)
 
