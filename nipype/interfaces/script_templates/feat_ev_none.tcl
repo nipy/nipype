@@ -8,7 +8,7 @@ set fmri(evtitle$ev_num) "$ev_name"
 # 3 : Custom (3 column format)
 # 4 : Interaction
 # 10 : Empty (all zeros)
-set fmri(shape$ev_num) 2
+set fmri(shape$ev_num) 3
 
 # Convolution
 # 0 : None
