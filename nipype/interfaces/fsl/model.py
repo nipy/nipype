@@ -51,7 +51,8 @@ class Level1DesignInputSpec(BaseInterfaceInputSpec):
         mandatory=False,
         desc=("which regressors to make orthogonal e.g., "
               "{1: {0:0,1:0,2:0}, 2: {0:1,1:1,2:0}} to make the second "
-              "regressor in a 2-regressor model orthogonal to the first."))
+              "regressor in a 2-regressor model orthogonal to the first."),
+        default={})
     model_serial_correlations = traits.Bool(
         desc="Option to model serial correlations using an \
 autoregressive estimator (order 1). Setting this option is only \
@@ -215,10 +216,10 @@ class Level1Design(BaseInterface):
         # add ev orthogonalization
         for i in range(1, num_evs[0] + 1):
             for j in range(0, num_evs[0] + 1):
-                if not orthogonalization:
-                    orthogonal = 0
-                else:
+                try:
                     orthogonal = int(orthogonalization[i][j])
+                except (ValueError, TypeError):
+                    orthogonal = 0
                 ev_txt += ev_ortho.substitute(c0=i, c1=j, orthogonal=orthogonal)
                 ev_txt += "\n"
         # add contrast info to fsf file
