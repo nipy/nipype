@@ -144,7 +144,8 @@ REQUIRES = [
     'prov>=%s' % PROV_MIN_VERSION,
     'click>=%s' % CLICK_MIN_VERSION,
     'xvfbwrapper',
-    'funcsigs'
+    'funcsigs',
+    'configparser',
 ]
 
 TESTS_REQUIRES = [
