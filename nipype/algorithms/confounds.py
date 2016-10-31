@@ -32,7 +32,7 @@ IFLOG = logging.getLogger('interface')
 class ComputeDVARSInputSpec(BaseInterfaceInputSpec):
     in_file = File(exists=True, mandatory=True, desc='functional data, after HMC')
     in_mask = File(exists=True, mandatory=True, desc='a brain mask')
-    remove_zerovariance = traits.Bool(False, usedefault=True,
+    remove_zerovariance = traits.Bool(True, usedefault=True,
                                       desc='remove voxels with zero variance')
     save_std = traits.Bool(True, usedefault=True,
                            desc='save standardized DVARS')
@@ -626,7 +626,7 @@ research/nichols/scripts/fsl/standardizeddvars.pdf>`_, 2013.
 
     if remove_zerovariance:
         # Remove zero-variance voxels across time axis
-        mask = zero_variance(func, mask)
+        mask = zero_remove(func_sd, mask)
 
     idx = np.where(mask > 0)
     mfunc = func[idx[0], idx[1], idx[2], :]
@@ -650,35 +650,28 @@ research/nichols/scripts/fsl/standardizeddvars.pdf>`_, 2013.
     # standardization
     dvars_stdz = dvars_nstd / diff_sd_mean
 
-
-    with warnings.catch_warnings(): # catch divide by zero errors
+    with warnings.catch_warnings(): # catch, e.g., divide by zero errors
         warnings.filterwarnings('error')
 
         # voxelwise standardization
-        diff_vx_stdz = func_diff / np.array([diff_sdhat] * func_diff.shape[-1]).T
+        diff_vx_stdz = func_diff / np.array([diff_sdhat] * func_diff.shape[-1]).T            
         dvars_vx_stdz = diff_vx_stdz.std(axis=0, ddof=1)
 
     return (dvars_stdz, dvars_nstd, dvars_vx_stdz)
 
-def zero_variance(func, mask):
+def zero_remove(data, mask):
     """
-    Mask out voxels with zero variance across t-axis
+    Modify inputted mask to also mask out zero values
 
-    :param numpy.ndarray func: input fMRI dataset, after motion correction
-    :param numpy.ndarray mask: 3D brain mask
-    :return: the 3D mask of voxels with nonzero variance across :math:`t`.
+    :param numpy.ndarray data: e.g. voxelwise stddev of fMRI dataset, after motion correction
+    :param numpy.ndarray mask: brain mask (same dimensions as data)
+    :return: the mask with any additional zero voxels removed (same dimensions as inputs)
     :rtype: numpy.ndarray
 
     """
-    idx = np.where(mask > 0)
-    func = func[idx[0], idx[1], idx[2], :]
-    tvariance = func.var(axis=1)
-    tv_mask = np.zeros_like(tvariance, dtype=np.uint8)
-    tv_mask[tvariance > 0] = 1
-
-    newmask = np.zeros_like(mask, dtype=np.uint8)
-    newmask[idx] = tv_mask
-    return newmask
+    new_mask = mask.copy()
+    new_mask[data == 0] = 0
+    return new_mask
 
 def plot_confound(tseries, figsize, name, units=None,
                   series_tr=None, normalize=False):
