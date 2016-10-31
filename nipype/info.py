@@ -133,18 +133,19 @@ ISRELEASE = _version_extra == ''
 VERSION = __version__
 PROVIDES = ['nipype']
 REQUIRES = [
-    'nibabel>=%s' % NIBABEL_MIN_VERSION,
-    'networkx>=%s' % NETWORKX_MIN_VERSION,
     'numpy>=%s' % NUMPY_MIN_VERSION,
-    'python-dateutil>=%s' % DATEUTIL_MIN_VERSION,
     'scipy>=%s' % SCIPY_MIN_VERSION,
+    'networkx>=%s' % NETWORKX_MIN_VERSION,
     'traits>=%s' % TRAITS_MIN_VERSION,
+    'python-dateutil>=%s' % DATEUTIL_MIN_VERSION,
+    'nibabel>=%s' % NIBABEL_MIN_VERSION,
     'future>=%s' % FUTURE_MIN_VERSION,
     'simplejson>=%s' % SIMPLEJSON_MIN_VERSION,
     'prov>=%s' % PROV_MIN_VERSION,
     'click>=%s' % CLICK_MIN_VERSION,
     'xvfbwrapper',
-    'funcsigs'
+    'funcsigs',
+    'configparser'
 ]
 
 TESTS_REQUIRES = [
