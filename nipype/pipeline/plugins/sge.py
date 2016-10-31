@@ -47,7 +47,7 @@ class QJobInfo(object):
         self._job_info_creation_time = time.time(
         )  # When this job was created (for comparing against initalization)
         self._job_queue_name = job_queue_name  # Where the job is running
-        self._job_slots = job_slots  # How many slots are being used
+        self._job_slots = int(job_slots)  # How many slots are being used
         self._qsub_command_line = qsub_command_line
 
     def __repr__(self):
@@ -91,7 +91,7 @@ class QJobInfo(object):
         self._job_queue_state = job_queue_state
         self._job_time = job_time
         self._job_queue_name = job_queue_name
-        self._job_slots = job_slots
+        self._job_slots = int(job_slots)
 
     def set_state(self, new_state):
         self._job_queue_state = new_state
