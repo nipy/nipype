@@ -258,7 +258,7 @@ class Bunch(object):
             else:
                 item = val
             try:
-                if os.path.isfile(item):
+                if isinstance(item, str) and os.path.isfile(item):
                     infile_list.append(key)
             except TypeError:
                 # `item` is not a file or string.
