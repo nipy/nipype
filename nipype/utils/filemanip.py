@@ -429,7 +429,7 @@ def filename_to_list(filename):
     """Returns a list given either a string or a list
     """
     if isinstance(filename, (str, bytes,unicode)):
-        return [str(filename)]
+        return [filename]
     elif isinstance(filename, list):
         return filename
     elif is_container(filename):
