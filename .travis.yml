@@ -43,11 +43,8 @@ install:
 - travis_retry inst
 script:
 # removed nose; run py.test only on tests that have been rewritten
-- py.test nipype/interfaces/tests/test_utility.py
-- py.test nipype/interfaces/tests/test_io.py
-- py.test nipype/interfaces/tests/test_nilearn.py
-- py.test nipype/interfaces/tests/test_matlab.py
-- py.test nipype/interfaces/tests/test_base.py
+# adding parts that has been changed and doesnt return errors or pytest warnings about yield
+- py.test nipype/interfaces/tests/
 after_success:
 - bash <(curl -s https://codecov.io/bash) -t ac172a50-8e66-42e5-8822-5373fcf54686 -cF unittests
 deploy:
