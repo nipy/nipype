@@ -9,8 +9,7 @@ import numpy as np
 #NOTE_dj: can we change the imports, so it's more clear where the function come from
 #NOTE_dj: in ...testing there is simply from numpy.testing import * 
 from ...testing import utils
-from numpy.testing import assert_equal, assert_almost_equal, raises
-from numpy.testing.decorators import  skipif
+from numpy.testing import assert_almost_equal 
 
 from .. import nilearn as iface
 from ...pipeline import engine as pe
@@ -146,13 +145,12 @@ class TestSignalExtraction():
         with open(self.filenames['out_file'], 'r') as output:
             got = [line.split() for line in output]
             labels_got = got.pop(0) # remove header
-            assert_equal(labels_got, labels)
-            assert_equal(len(got), self.fake_fmri_data.shape[3],
-                         'num rows and num volumes')
+            assert labels_got == labels
+            assert len(got) == self.fake_fmri_data.shape[3],'num rows and num volumes'
             # convert from string to float
             got = [[float(num) for num in row] for row in got]
             for i, time in enumerate(got):
-                assert_equal(len(labels), len(time))
+                assert len(labels) == len(time)
                 for j, segment in enumerate(time):
                     assert_almost_equal(segment, wanted[i][j], decimal=1)
 
