@@ -711,7 +711,7 @@ def generate_expanded_graph(graph_in):
             in_edges = jedge_dict[jnode] = {}
             edges2remove = []
             for src, dest, data in graph_in.in_edges_iter(jnode, True):
-                in_edges[src._id] = data
+                in_edges[src.fullname] = data
                 edges2remove.append((src, dest))
 
             for src, dest in edges2remove:
