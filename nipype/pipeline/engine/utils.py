@@ -796,7 +796,7 @@ def generate_expanded_graph(graph_in):
             expansions = defaultdict(list)
             for node in graph_in.nodes_iter():
                 for src_id, edge_data in list(old_edge_dict.items()):
-                    if (node._id == src_id and
+                    if (node._id.startswith(src_id + '.') and
                        jnode._hierarchy in node._hierarchy):
                         expansions[src_id].append(node)
             for in_id, in_nodes in list(expansions.items()):
