@@ -333,6 +333,7 @@ def test_multi_disconnected_iterable():
     yield assert_equal, len(eg.nodes()), 60
     rmtree(out_dir)
 
+
 def test_provenance():
     out_dir = mkdtemp()
     metawf = pe.Workflow(name='meta')
@@ -345,3 +346,28 @@ def test_provenance():
     yield assert_equal, len(psg.bundles), 2
     yield assert_equal, len(psg.get_records()), 7
     rmtree(out_dir)
+
+
+def test_mapnode_crash():
+    def myfunction(string):
+        return string + 'meh'
+    node = pe.MapNode(niu.Function(input_names=['WRONG'],
+                                   output_names=['newstring'],
+                                   function=myfunction),
+                      iterfield=['WRONG'],
+                      name='myfunc')
+
+    node.inputs.WRONG = ['string' + str(i) for i in range(3)]
+    node.config = deepcopy(config._sections)
+    node.config['execution']['stop_on_first_crash'] = True
+    cwd = os.getcwd()
+    node.base_dir = mkdtemp()
+
+    error_raised = False
+    try:
+        node.run()
+    except TypeError as e:
+        error_raised = True
+    os.chdir(cwd)
+    rmtree(node.base_dir)
+    yield assert_true, error_raised

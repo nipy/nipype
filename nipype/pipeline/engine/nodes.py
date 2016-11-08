@@ -1129,7 +1129,6 @@ class MapNode(Node):
                 node.run(updatehash=updatehash)
             except Exception as err:
                 if str2bool(self.config['execution']['stop_on_first_crash']):
-                    self._result = node.result
                     raise
             finally:
                 yield i, node, err
