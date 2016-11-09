@@ -13,6 +13,7 @@ Algorithms to compute statistics on :abbr:`fMRI (functional MRI)`
 '''
 from __future__ import (print_function, division, unicode_literals,
                         absolute_import)
+import os
 
 import numpy as np
 import nibabel as nb
@@ -72,6 +73,7 @@ class SignalExtraction(BaseInterface):
     '''
     input_spec = SignalExtractionInputSpec
     output_spec = SignalExtractionOutputSpec
+    _results = {}
 
     def _run_interface(self, runtime):
         maskers = self._process_inputs()
@@ -84,7 +86,8 @@ class SignalExtraction(BaseInterface):
         output = np.vstack((self.inputs.class_labels, region_signals.astype(str)))
 
         # save output
-        np.savetxt(self.inputs.out_file, output, fmt=b'%s', delimiter='\t')
+        self._results['out_file'] = os.path.abspath(self.inputs.out_file)
+        np.savetxt(self._results['out_file'], output, fmt=b'%s', delimiter='\t')
         return runtime
 
     def _process_inputs(self):
@@ -109,6 +112,10 @@ class SignalExtraction(BaseInterface):
                 maskers.append(nl.NiftiMapsMasker(label_data))
 
         # check label list size
+        if not np.isclose(int(n_labels), n_labels):
+            raise ValueError('The label files {} contain invalid value {}. Check input.'
+                             .format(self.inputs.label_files, n_labels))
+
         if len(self.inputs.class_labels) != n_labels:
             raise ValueError('The length of class_labels {} does not '
                              'match the number of regions {} found in '
@@ -135,6 +142,4 @@ class SignalExtraction(BaseInterface):
         return nb.Nifti1Image(array[:, :, :, np.newaxis], affine)
 
     def _list_outputs(self):
-        outputs = self._outputs().get()
-        outputs['out_file'] = self.inputs.out_file
-        return outputs
+        return self._results

@@ -307,7 +307,7 @@ class TOPUP(FSLCommand):
 
 class ApplyTOPUPInputSpec(FSLCommandInputSpec):
     in_files = InputMultiPath(File(exists=True), mandatory=True,
-                              desc='name of 4D file with images',
+                              desc='name of file with images',
                               argstr='--imain=%s', sep=',')
     encoding_file = File(exists=True, mandatory=True,
                          desc='name of text file with PE directions/times',
