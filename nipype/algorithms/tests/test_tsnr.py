@@ -1,8 +1,7 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 
-from ...testing import (assert_equal, assert_true, assert_almost_equal,
-                        skipif, utils)
+from ...testing import (assert_equal, assert_almost_equal, assert_in, utils)
 from ..confounds import TSNR
 from .. import misc
 
@@ -88,11 +87,12 @@ class TestTSNR(unittest.TestCase):
 
     @mock.patch('warnings.warn')
     def test_warning(self, mock_warn):
+        ''' test that usage of misc.TSNR trips a warning to use confounds.TSNR instead '''
         # run
         misc.TSNR(in_file=self.in_filenames['in_file'])
 
         # assert
-        mock_warn.assert_called_once_with(mock.ANY, UserWarning)
+        assert_in(True, [args[0].count('confounds') > 0 for _, args, _ in mock_warn.mock_calls])
 
     def assert_expected_outputs_poly(self, tsnrresult, expected_ranges):
         assert_equal(os.path.basename(tsnrresult.outputs.detrended_file),
