@@ -18,21 +18,28 @@ import nipype.interfaces.fsl.maths as fsl
 from nipype.interfaces.fsl import no_fsl, Info
 from nipype.interfaces.fsl.base import FSLCommand
 
+import pytest, pdb
+#27failed, 913 passed
 
 def set_output_type(fsl_output_type):
+    # TODO_djto moze powinno byc zawsze w finalizer? zrobix fixture per funkcja?
+    # TODO to musi byc przekazane jakos do creat_file, zeby zmienic format
     prev_output_type = os.environ.get('FSLOUTPUTTYPE', None)
-
+    #pdb.set_trace()
     if fsl_output_type is not None:
         os.environ['FSLOUTPUTTYPE'] = fsl_output_type
     elif 'FSLOUTPUTTYPE' in os.environ:
         del os.environ['FSLOUTPUTTYPE']
 
     FSLCommand.set_default_output_type(Info.output_type())
-
+    #pdb.set_trace()
     return prev_output_type
 
-
-def create_files_in_directory():
+# TODO: to musi jakos wiedziec o set_output_type
+#NOTE_dj, didn't change to tmpdir 
+#TODO moze per funkcja??
+@pytest.fixture(scope="module")
+def create_files_in_directory(request):
     testdir = os.path.realpath(mkdtemp())
     origdir = os.getcwd()
     os.chdir(testdir)
@@ -45,37 +52,39 @@ def create_files_in_directory():
         img = np.random.random(shape)
         nb.save(nb.Nifti1Image(img, np.eye(4), hdr),
                 os.path.join(testdir, f))
+    pdb.set_trace()
+    out_ext = Info.output_type_to_ext(Info.output_type()) #TODO: different extension
 
-    out_ext = Info.output_type_to_ext(Info.output_type())
-    return filelist, testdir, origdir, out_ext
-
-
-def clean_directory(testdir, origdir):
-    if os.path.exists(testdir):
+    def fin():
         rmtree(testdir)
-    os.chdir(origdir)
+        #NOTE_dj: I believe  os.chdir(origdir), is not needed
+    
+    request.addfinalizer(fin)
+    return (filelist, testdir, out_ext)
 
 
-@skipif(no_fsl)
-def test_maths_base(fsl_output_type=None):
+@pytest.mark.skipif(no_fsl(), reason="fsl is not installed")
+def test_maths_base(create_files_in_directory, fsl_output_type=None):
     prev_type = set_output_type(fsl_output_type)
-    files, testdir, origdir, out_ext = create_files_in_directory()
+    files, testdir, out_ext = create_files_in_directory
 
     # Get some fslmaths
     maths = fsl.MathsCommand()
 
     # Test that we got what we wanted
-    yield assert_equal, maths.cmd, "fslmaths"
+    assert maths.cmd == "fslmaths"
 
     # Test that it needs a mandatory argument
-    yield assert_raises, ValueError, maths.run
+    with pytest.raises(ValueError):
+        maths.run()
 
     # Set an in file
     maths.inputs.in_file = "a.nii"
     out_file = "a_maths%s" % out_ext
 
+    pdb.set_trace()
     # Now test the most basic command line
-    yield assert_equal, maths.cmdline, "fslmaths a.nii %s" % os.path.join(testdir, out_file)
+    assert maths.cmdline == "fslmaths a.nii %s" % os.path.join(testdir, out_file)
 
     # Now test that we can set the various data types
     dtypes = ["float", "char", "int", "short", "double", "input"]
@@ -84,25 +93,25 @@ def test_maths_base(fsl_output_type=None):
     duo_cmdline = "fslmaths -dt %s a.nii " + os.path.join(testdir, out_file) + " -odt %s"
     for dtype in dtypes:
         foo = fsl.MathsCommand(in_file="a.nii", internal_datatype=dtype)
-        yield assert_equal, foo.cmdline, int_cmdline % dtype
+        #assert foo.cmdline == int_cmdline % dtype
         bar = fsl.MathsCommand(in_file="a.nii", output_datatype=dtype)
-        yield assert_equal, bar.cmdline, out_cmdline % dtype
+        #assert bar.cmdline == out_cmdline % dtype
         foobar = fsl.MathsCommand(in_file="a.nii", internal_datatype=dtype, output_datatype=dtype)
-        yield assert_equal, foobar.cmdline, duo_cmdline % (dtype, dtype)
+        pdb.set_trace()
+        #assert foobar.cmdline == duo_cmdline % (dtype, dtype)
 
     # Test that we can ask for an outfile name
     maths.inputs.out_file = "b.nii"
-    yield assert_equal, maths.cmdline, "fslmaths a.nii b.nii"
+    #assert maths.cmdline == "fslmaths a.nii b.nii"
 
     # Clean up our mess
-    clean_directory(testdir, origdir)
     set_output_type(prev_type)
 
 
-@skipif(no_fsl)
-def test_changedt(fsl_output_type=None):
+@pytest.mark.skipif(no_fsl(), reason="fsl is not installed")
+def test_changedt(create_files_in_directory, fsl_output_type=None):
     prev_type = set_output_type(fsl_output_type)
-    files, testdir, origdir, out_ext = create_files_in_directory()
+    files, testdir, out_ext = create_files_in_directory
 
     # Get some fslmaths
     cdt = fsl.ChangeDataType()
@@ -128,14 +137,13 @@ def test_changedt(fsl_output_type=None):
         yield assert_equal, foo.cmdline, cmdline % dtype
 
     # Clean up our mess
-    clean_directory(testdir, origdir)
     set_output_type(prev_type)
 
 
-@skipif(no_fsl)
-def test_threshold(fsl_output_type=None):
+@pytest.mark.skipif(no_fsl(), reason="fsl is not installed")
+def test_threshold(create_files_in_directory, fsl_output_type=None):
     prev_type = set_output_type(fsl_output_type)
-    files, testdir, origdir, out_ext = create_files_in_directory()
+    files, testdir, out_ext = create_files_in_directory
 
     # Get the command
     thresh = fsl.Threshold(in_file="a.nii", out_file="b.nii")
@@ -165,14 +173,13 @@ def test_threshold(fsl_output_type=None):
     yield assert_equal, thresh.cmdline, cmdline % ("-uthrP " + val)
 
     # Clean up our mess
-    clean_directory(testdir, origdir)
     set_output_type(prev_type)
 
 
-@skipif(no_fsl)
-def test_meanimage(fsl_output_type=None):
+@pytest.mark.skipif(no_fsl(), reason="fsl is not installed")
+def test_meanimage(create_files_in_directory, fsl_output_type=None):
     prev_type = set_output_type(fsl_output_type)
-    files, testdir, origdir, out_ext = create_files_in_directory()
+    files, testdir, out_ext = create_files_in_directory
 
     # Get the command
     meaner = fsl.MeanImage(in_file="a.nii", out_file="b.nii")
@@ -194,13 +201,12 @@ def test_meanimage(fsl_output_type=None):
     yield assert_equal, meaner.cmdline, "fslmaths a.nii -Tmean %s" % os.path.join(testdir, "a_mean%s" % out_ext)
 
     # Clean up our mess
-    clean_directory(testdir, origdir)
     set_output_type(prev_type)
 
-@skipif(no_fsl)
-def test_stdimage(fsl_output_type=None):
+@pytest.mark.skipif(no_fsl(), reason="fsl is not installed")
+def test_stdimage(create_files_in_directory, fsl_output_type=None):
     prev_type = set_output_type(fsl_output_type)
-    files, testdir, origdir, out_ext = create_files_in_directory()
+    files, testdir, out_ext = create_files_in_directory
 
     # Get the command
     stder = fsl.StdImage(in_file="a.nii",out_file="b.nii")
@@ -222,13 +228,12 @@ def test_stdimage(fsl_output_type=None):
     yield assert_equal, stder.cmdline, "fslmaths a.nii -Tstd %s"%os.path.join(testdir, "a_std.nii")
 
     # Clean up our mess
-    clean_directory(testdir, origdir)
     set_output_type(prev_type)
 
-@skipif(no_fsl)
-def test_maximage(fsl_output_type=None):
+@pytest.mark.skipif(no_fsl(), reason="fsl is not installed")
+def test_maximage(create_files_in_directory, fsl_output_type=None):
     prev_type = set_output_type(fsl_output_type)
-    files, testdir, origdir, out_ext = create_files_in_directory()
+    files, testdir, out_ext = create_files_in_directory
 
     # Get the command
     maxer = fsl.MaxImage(in_file="a.nii", out_file="b.nii")
@@ -250,14 +255,13 @@ def test_maximage(fsl_output_type=None):
     yield assert_equal, maxer.cmdline, "fslmaths a.nii -Tmax %s" % os.path.join(testdir, "a_max%s" % out_ext)
 
     # Clean up our mess
-    clean_directory(testdir, origdir)
     set_output_type(prev_type)
 
 
-@skipif(no_fsl)
-def test_smooth(fsl_output_type=None):
+@pytest.mark.skipif(no_fsl(), reason="fsl is not installed")
+def test_smooth(create_files_in_directory, fsl_output_type=None):
     prev_type = set_output_type(fsl_output_type)
-    files, testdir, origdir, out_ext = create_files_in_directory()
+    files, testdir, out_ext = create_files_in_directory
 
     # Get the command
     smoother = fsl.IsotropicSmooth(in_file="a.nii", out_file="b.nii")
@@ -282,14 +286,13 @@ def test_smooth(fsl_output_type=None):
     yield assert_equal, smoother.cmdline, "fslmaths a.nii -s %.5f %s" % (5, os.path.join(testdir, "a_smooth%s" % out_ext))
 
     # Clean up our mess
-    clean_directory(testdir, origdir)
     set_output_type(prev_type)
 
 
-@skipif(no_fsl)
-def test_mask(fsl_output_type=None):
+@pytest.mark.skipif(no_fsl(), reason="fsl is not installed")
+def test_mask(create_files_in_directory, fsl_output_type=None):
     prev_type = set_output_type(fsl_output_type)
-    files, testdir, origdir, out_ext = create_files_in_directory()
+    files, testdir, out_ext = create_files_in_directory
 
     # Get the command
     masker = fsl.ApplyMask(in_file="a.nii", out_file="c.nii")
@@ -309,14 +312,13 @@ def test_mask(fsl_output_type=None):
     yield assert_equal, masker.cmdline, "fslmaths a.nii -mas b.nii " + os.path.join(testdir, "a_masked%s" % out_ext)
 
     # Clean up our mess
-    clean_directory(testdir, origdir)
     set_output_type(prev_type)
 
 
-@skipif(no_fsl)
-def test_dilation(fsl_output_type=None):
+@pytest.mark.skipif(no_fsl(), reason="fsl is not installed")
+def test_dilation(create_files_in_directory, fsl_output_type=None):
     prev_type = set_output_type(fsl_output_type)
-    files, testdir, origdir, out_ext = create_files_in_directory()
+    files, testdir, out_ext = create_files_in_directory
 
     # Get the command
     diller = fsl.DilateImage(in_file="a.nii", out_file="b.nii")
@@ -353,14 +355,13 @@ def test_dilation(fsl_output_type=None):
     yield assert_equal, dil.cmdline, "fslmaths a.nii -dilF %s" % os.path.join(testdir, "a_dil%s" % out_ext)
 
     # Clean up our mess
-    clean_directory(testdir, origdir)
     set_output_type(prev_type)
 
 
-@skipif(no_fsl)
-def test_erosion(fsl_output_type=None):
+@pytest.mark.skipif(no_fsl(), reason="fsl is not installed")
+def test_erosion(create_files_in_directory, fsl_output_type=None):
     prev_type = set_output_type(fsl_output_type)
-    files, testdir, origdir, out_ext = create_files_in_directory()
+    files, testdir, out_ext = create_files_in_directory
 
     # Get the command
     erode = fsl.ErodeImage(in_file="a.nii", out_file="b.nii")
@@ -380,14 +381,13 @@ def test_erosion(fsl_output_type=None):
     yield assert_equal, erode.cmdline, "fslmaths a.nii -ero %s" % os.path.join(testdir, "a_ero%s" % out_ext)
 
     # Clean up our mess
-    clean_directory(testdir, origdir)
     set_output_type(prev_type)
 
 
-@skipif(no_fsl)
-def test_spatial_filter(fsl_output_type=None):
+@pytest.mark.skipif(no_fsl(), reason="fsl is not installed")
+def test_spatial_filter(create_files_in_directory, fsl_output_type=None):
     prev_type = set_output_type(fsl_output_type)
-    files, testdir, origdir, out_ext = create_files_in_directory()
+    files, testdir, out_ext = create_files_in_directory
 
     # Get the command
     filter = fsl.SpatialFilter(in_file="a.nii", out_file="b.nii")
@@ -408,14 +408,13 @@ def test_spatial_filter(fsl_output_type=None):
     yield assert_equal, filter.cmdline, "fslmaths a.nii -fmean %s" % os.path.join(testdir, "a_filt%s" % out_ext)
 
     # Clean up our mess
-    clean_directory(testdir, origdir)
     set_output_type(prev_type)
 
 
-@skipif(no_fsl)
-def test_unarymaths(fsl_output_type=None):
+@pytest.mark.skipif(no_fsl(), reason="fsl is not installed")
+def test_unarymaths(create_files_in_directory, fsl_output_type=None):
     prev_type = set_output_type(fsl_output_type)
-    files, testdir, origdir, out_ext = create_files_in_directory()
+    files, testdir, out_ext = create_files_in_directory
 
     # Get the command
     maths = fsl.UnaryMaths(in_file="a.nii", out_file="b.nii")
@@ -438,14 +437,13 @@ def test_unarymaths(fsl_output_type=None):
         yield assert_equal, maths.cmdline, "fslmaths a.nii -%s %s" % (op, os.path.join(testdir, "a_%s%s" % (op, out_ext)))
 
     # Clean up our mess
-    clean_directory(testdir, origdir)
     set_output_type(prev_type)
 
 
-@skipif(no_fsl)
-def test_binarymaths(fsl_output_type=None):
+@pytest.mark.skipif(no_fsl(), reason="fsl is not installed")
+def test_binarymaths(create_files_in_directory, fsl_output_type=None):
     prev_type = set_output_type(fsl_output_type)
-    files, testdir, origdir, out_ext = create_files_in_directory()
+    files, testdir, out_ext = create_files_in_directory
 
     # Get the command
     maths = fsl.BinaryMaths(in_file="a.nii", out_file="c.nii")
@@ -475,14 +473,13 @@ def test_binarymaths(fsl_output_type=None):
         yield assert_equal, maths.cmdline, "fslmaths a.nii -%s b.nii %s" % (op, os.path.join(testdir, "a_maths%s" % out_ext))
 
     # Clean up our mess
-    clean_directory(testdir, origdir)
     set_output_type(prev_type)
 
 
-@skipif(no_fsl)
-def test_multimaths(fsl_output_type=None):
+@pytest.mark.skipif(no_fsl(), reason="fsl is not installed")
+def test_multimaths(create_files_in_directory, fsl_output_type=None):
     prev_type = set_output_type(fsl_output_type)
-    files, testdir, origdir, out_ext = create_files_in_directory()
+    files, testdir, out_ext = create_files_in_directory
 
     # Get the command
     maths = fsl.MultiImageMaths(in_file="a.nii", out_file="c.nii")
@@ -508,14 +505,13 @@ def test_multimaths(fsl_output_type=None):
         "fslmaths a.nii -add b.nii -mul 5 %s" % os.path.join(testdir, "a_maths%s" % out_ext)
 
     # Clean up our mess
-    clean_directory(testdir, origdir)
     set_output_type(prev_type)
 
 
-@skipif(no_fsl)
-def test_tempfilt(fsl_output_type=None):
+@pytest.mark.skipif(no_fsl(), reason="fsl is not installed")
+def test_tempfilt(create_files_in_directory, fsl_output_type=None):
     prev_type = set_output_type(fsl_output_type)
-    files, testdir, origdir, out_ext = create_files_in_directory()
+    files, testdir, out_ext = create_files_in_directory
 
     # Get the command
     filt = fsl.TemporalFilter(in_file="a.nii", out_file="b.nii")
@@ -539,11 +535,10 @@ def test_tempfilt(fsl_output_type=None):
         "fslmaths a.nii -bptf 64.000000 -1.000000 %s" % os.path.join(testdir, "a_filt%s" % out_ext)
 
     # Clean up our mess
-    clean_directory(testdir, origdir)
     set_output_type(prev_type)
 
 
-@skipif(no_fsl)
+@pytest.mark.skipif(no_fsl(), reason="fsl is not installed")
 def test_all_again():
     # Rerun tests with all output file types
     all_func = [test_binarymaths, test_changedt, test_dilation, test_erosion,
