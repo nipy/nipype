@@ -432,6 +432,20 @@ class EddyInputSpec(FSLCommandInputSpec):
                         desc='Detect and replace outlier slices')
     num_threads = traits.Int(1, usedefault=True, nohash=True,
                              desc="Number of openmp threads to use")
+    is_shelled = traits.Bool(False, argstr='--data_is_shelled',
+                             desc="Override internal check to ensure that "
+                                  "date are acquired on a set of b-value "
+                                  "shells")
+    field = traits.Str(argstr='--field=%s',
+                       desc="NonTOPUP fieldmap scaled in Hz - filename has "
+                            "to be provided without an extension. TOPUP is "
+                            "strongly recommended")
+    field_mat = File(exists=True, argstr='--field_mat=%s',
+                     desc="Matrix that specifies the relative locations of "
+                          "the field specified by --field and first volume "
+                          "in file --imain")
+    use_gpu = traits.Str(desc="Run eddy using gpu, possible values are "
+                              "[openmp] or [cuda]")
 
 
 class EddyOutputSpec(TraitedSpec):
@@ -478,7 +492,8 @@ class Eddy(FSLCommand):
     def __init__(self, **inputs):
         super(Eddy, self).__init__(**inputs)
         self.inputs.on_trait_change(self._num_threads_update, 'num_threads')
-
+        if isdefined(self.inputs.use_gpu):
+            self._use_gpu()
         if not isdefined(self.inputs.num_threads):
             self.inputs.num_threads = self._num_threads
         else:
@@ -493,6 +508,14 @@ class Eddy(FSLCommand):
             self.inputs.environ['OMP_NUM_THREADS'] = str(
                 self.inputs.num_threads)
 
+    def _use_gpu(self):
+        if self.inputs.use_gpu.lower().startswith('cuda'):
+            _cmd = 'eddy_cuda'
+        elif self.inputs.use_gpu.lower().startswith('openmp'):
+            _cmd = 'eddy_openmp'
+        else:
+            _cmd = 'eddy'
+        
     def _format_arg(self, name, spec, value):
         if name == 'in_topup_fieldcoef':
             return spec.argstr % value.split('_fieldcoef')[0]
