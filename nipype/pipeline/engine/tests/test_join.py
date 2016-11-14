@@ -627,7 +627,7 @@ def test_nested_workflow_join():
         wf.connect(pre_join, 'output1', join, 'n')
         return wf
     # master wf
-    meta_wf = Workflow(name='meta', base_dir='.')
+    meta_wf = pe.Workflow(name='meta', base_dir='.')
     # add each mini-workflow to master
     for i in [[1,3],[2,4]]:
         mini_wf = nested_wf(i)
