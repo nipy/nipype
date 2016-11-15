@@ -73,7 +73,7 @@ class EngineBase(object):
     def itername(self):
         itername = self._id
         if self._hierarchy:
-            itername = self._hierachy + '.' + self._id
+            itername = self._hierarchy + '.' + self._id
         return itername
 
     def clone(self, name):
