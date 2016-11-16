@@ -563,17 +563,6 @@ class FLIRT(FSLCommand):
         skip.append('save_log')
         return super(FLIRT, self)._parse_inputs(skip=skip)
 
-class ApplyXfm(ApplyXFM):
-    """
-    .. deprecated:: 0.12.1
-       Use :py:class:`nipype.interfaces.fsl.ApplyXFM` instead
-    """
-    def __init__(self, **inputs):
-        super(confounds.TSNR, self).__init__(**inputs)
-        warnings.warn(("This interface has been renamed since 0.12.1,"
-                       " please use nipype.interfaces.fsl.ApplyXFM"),
-                      UserWarning)
-
 class ApplyXFMInputSpec(FLIRTInputSpec):
     apply_xfm = traits.Bool(
         True, argstr='-applyxfm', requires=['in_matrix_file'],
@@ -604,6 +593,16 @@ class ApplyXFM(FLIRT):
     """
     input_spec = ApplyXFMInputSpec
 
+class ApplyXfm(ApplyXFM):
+    """
+    .. deprecated:: 0.12.1
+       Use :py:class:`nipype.interfaces.fsl.ApplyXFM` instead
+    """
+    def __init__(self, **inputs):
+        super(confounds.TSNR, self).__init__(**inputs)
+        warnings.warn(("This interface has been renamed since 0.12.1,"
+                       " please use nipype.interfaces.fsl.ApplyXFM"),
+                      UserWarning)
 
 class MCFLIRTInputSpec(FSLCommandInputSpec):
     in_file = File(exists=True, position=0, argstr="-in %s", mandatory=True,
