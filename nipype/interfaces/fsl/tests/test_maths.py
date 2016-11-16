@@ -36,7 +36,7 @@ def set_output_type(fsl_output_type):
 
 #NOTE_dj, didn't change to tmpdir 
 #NOTE_dj: not sure if I should change the scope, kept the function scope for now
-@pytest.fixture(params=[None]+Info.ftypes.keys())
+@pytest.fixture(params=[None]+list(Info.ftypes))
 def create_files_in_directory(request):
     #NOTE_dj: removed set_output_type from test functions
     func_prev_type = set_output_type(request.param)
