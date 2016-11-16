@@ -582,7 +582,7 @@ class ApplyXFM(FLIRT):
 
     >>> import nipype.interfaces.fsl as fsl
     >>> from nipype.testing import example_data
-    >>> applyxfm = fsl.ApplyXFM()
+    >>> applyxfm = fsl.preprocess.ApplyXFM()
     >>> applyxfm.inputs.in_file = example_data('structural.nii')
     >>> applyxfm.inputs.in_matrix_file = example_data('trans.mat')
     >>> applyxfm.inputs.out_file = 'newfile.nii'
