@@ -563,19 +563,29 @@ class FLIRT(FSLCommand):
         skip.append('save_log')
         return super(FLIRT, self)._parse_inputs(skip=skip)
 
+class ApplyXfm(ApplyXFM):
+    """
+    .. deprecated:: 0.12.1
+       Use :py:class:`nipype.interfaces.fsl.ApplyXFM` instead
+    """
+    def __init__(self, **inputs):
+        super(confounds.TSNR, self).__init__(**inputs)
+        warnings.warn(("This interface has been renamed since 0.12.1,"
+                       " please use nipype.interfaces.fsl.ApplyXFM"),
+                      UserWarning)
 
-class ApplyXfmInputSpec(FLIRTInputSpec):
+class ApplyXFMInputSpec(FLIRTInputSpec):
     apply_xfm = traits.Bool(
         True, argstr='-applyxfm', requires=['in_matrix_file'],
         desc='apply transformation supplied by in_matrix_file',
         usedefault=True)
 
 
-class ApplyXfm(FLIRT):
+class ApplyXFM(FLIRT):
     """Currently just a light wrapper around FLIRT,
     with no modifications
 
-    ApplyXfm is used to apply an existing tranform to an image
+    ApplyXFM is used to apply an existing tranform to an image
 
 
     Examples
@@ -583,7 +593,7 @@ class ApplyXfm(FLIRT):
 
     >>> import nipype.interfaces.fsl as fsl
     >>> from nipype.testing import example_data
-    >>> applyxfm = fsl.ApplyXfm()
+    >>> applyxfm = fsl.ApplyXFM()
     >>> applyxfm.inputs.in_file = example_data('structural.nii')
     >>> applyxfm.inputs.in_matrix_file = example_data('trans.mat')
     >>> applyxfm.inputs.out_file = 'newfile.nii'
@@ -592,7 +602,7 @@ class ApplyXfm(FLIRT):
     >>> result = applyxfm.run() # doctest: +SKIP
 
     """
-    input_spec = ApplyXfmInputSpec
+    input_spec = ApplyXFMInputSpec
 
 
 class MCFLIRTInputSpec(FSLCommandInputSpec):
