@@ -6,13 +6,14 @@ that can be performed with the niftysegmaths (seg_maths) command-line program.
 """
 import os
 
-from nipype.interfaces.niftyseg.base import NIFTYSEGCommand, \
-                                    NIFTYSEGCommandInputSpec, getNiftySegPath
+from nipype.interfaces.niftyseg.base import (NiftySegCommand,
+                                             get_custom_path)
 from nipype.interfaces.base import (TraitedSpec, File, traits, isdefined,
-                                    InputMultiPath)
+                                    InputMultiPath, CommandLineInputSpec)
 
 
-class MathsInput(NIFTYSEGCommandInputSpec):
+class MathsInput(CommandLineInputSpec):
+    """Input Spec for seg_maths interfaces."""
     in_file = File(position=2, argstr='%s', exists=True, mandatory=True,
                    desc='image to operate on')
     out_file = File(genfile=True, position=-2, argstr='%s',
@@ -24,11 +25,13 @@ class MathsInput(NIFTYSEGCommandInputSpec):
 
 
 class MathsOutput(TraitedSpec):
+    """Output Spec for seg_maths interfaces."""
     out_file = File(exists=True, desc='image written after calculations')
 
 
-class MathsCommand(NIFTYSEGCommand):
-    _cmd = getNiftySegPath('seg_maths')
+class MathsCommand(NiftySegCommand):
+    """Command Line for seg_maths interfaces."""
+    _cmd = get_custom_path('seg_maths')
     input_spec = MathsInput
     output_spec = MathsOutput
     _suffix = '_maths'
@@ -54,6 +57,7 @@ class MathsCommand(NIFTYSEGCommand):
 
 
 class UnaryMathsInput(MathsInput):
+    """Input Spec for seg_maths Unary operations."""
     operation = traits.Enum('sqrt', 'exp', 'log', 'recip', 'abs', 'bin',
                             'otsu', 'lconcomp', 'concomp6', 'concomp26',
                             'fill', 'euc', 'tpmax', 'tmean', 'tmin', 'tmax',
@@ -131,6 +135,7 @@ class UnaryMaths(MathsCommand):
 
 
 class BinaryMathsInput(MathsInput):
+    """Input Spec for seg_maths Binary operations."""
     operation = traits.Enum('mul', 'div', 'add', 'sub', 'pow', 'thr', 'uthr',
                             'smo', 'edge', 'sobel3', 'sobel5', 'min',
                             'smol', 'geo', 'llsnorm', 'masknan', 'hdr_copy',
@@ -190,7 +195,7 @@ class BinaryMaths(MathsCommand):
 
     """
     input_spec = BinaryMathsInput
-  
+
     def _format_arg(self, opt, spec, val):
         """Convert input to appropriate format for seg_maths."""
         if opt == 'operand_value' and float(val) == 0.0:
@@ -200,6 +205,7 @@ class BinaryMaths(MathsCommand):
 
 
 class BinaryMathsInputInteger(MathsInput):
+    """Input Spec for seg_maths Binary operations that require integer."""
     operation = traits.Enum('dil', 'ero', 'tp',
                             mandatory=True, argstr='-%s', position=4,
                             desc='operation to perform')
@@ -233,6 +239,7 @@ class BinaryMathsInteger(MathsCommand):
 
 
 class TupleMathsInput(MathsInput):
+    """Input Spec for seg_maths Tuple operations."""
     operation = traits.Enum('lncc', 'lssd', 'lltsnorm', 'qlsnorm',
                             mandatory=True, argstr='-%s', position=4,
                             desc='operation to perform')
@@ -252,7 +259,7 @@ class TupleMathsInput(MathsInput):
 
 class TupleMaths(MathsCommand):
     """
-    Use seg_maths to perform a variety of mathematical binary operations.
+    Use seg_maths to perform a variety of mathematical tuple operations.
 
     mandatory input specs is operation and (operand_file or operand_value)
 
@@ -274,6 +281,7 @@ class TupleMaths(MathsCommand):
 
 
 class MergeInput(MathsInput):
+    """Input Spec for seg_maths merge operation."""
     nb_images = traits.Int(mandatory=True, argstr='-merge %d', position=4,
                            desc='Number of images to merge.')
     dimension = traits.Int(exists=True, argstr='%d', mandatory=True,

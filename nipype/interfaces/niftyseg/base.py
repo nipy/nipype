@@ -1,10 +1,13 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """The niftyseg module provides classes for interfacing with `niftyseg
-<http://sourceforge.net/projects/niftyseg/>`_ command line tools. The 
-interfaces were written to work with niftyreg version 1.4
+<https://sourceforge.net/projects/niftyseg/>`_ command line tools.
 
 These are the base tools for working with niftyseg.
+
+
+Currently these tools are supported:
+
 
 Examples
 --------
@@ -14,92 +17,91 @@ See the docstrings of the individual classes for examples.
 
 import os
 import warnings
-from exceptions import NotImplementedError
-
-from ...utils.filemanip import fname_presuffix
-from ..base import (CommandLine, traits, CommandLineInputSpec, isdefined)
-
-from nipype.interfaces.fsl.base import FSLCommand as NIFTYSEGCommand
+from distutils.version import StrictVersion
+from nipype.interfaces.base import (CommandLine, isdefined)
+from nipype.utils.filemanip import split_filename
+import subprocess
 
 warn = warnings.warn
 warnings.filterwarnings('always', category=UserWarning)
 
 
-class Info(object):
-    """Handle fsl output type and version information.
+def get_custom_path(command):
+    """Get path of niftyseg."""
+    try:
+        specific_dir = os.environ['NIFTYSEGDIR']
+        command = os.path.join(specific_dir, command)
+        return command
+    except KeyError:
+        return command
 
-    version refers to the version of fsl on the system
 
-    output type refers to the type of file fsl defaults to writing
-    eg, NIFTI, NIFTI_GZ
+def no_niftyseg(cmd='seg_EM'):
+    """Check if niftyseg is installed."""
+    if True in [os.path.isfile(os.path.join(path, cmd)) and
+                os.access(os.path.join(path, cmd), os.X_OK)
+                for path in os.environ["PATH"].split(os.pathsep)]:
+        return False
+    return True
 
+
+class NiftySegCommand(CommandLine):
     """
-
-    ftypes = {'NIFTI': '.nii',
-              'NIFTI_PAIR': '.img',
-              'NIFTI_GZ': '.nii.gz',
-              'NIFTI_PAIR_GZ': '.img.gz'}
-
-    @staticmethod
-    def version():
-        """Check for niftyseg version on system
-
-        Parameters
-        ----------
-        None
-
-        Returns
-        -------
-        version : str
-           Version number as string or None if niftyreg not found
-
-        """
-        raise NotImplementedError("Waiting for NiftySeg version fix before "
-        "implementing this")
-
-    @classmethod
-    def output_type_to_ext(cls, output_type):
-        """Get the file extension for the given output type.
-
-        Parameters
-        ----------
-        output_type : {'NIFTI', 'NIFTI_GZ', 'NIFTI_PAIR', 'NIFTI_PAIR_GZ'}
-            String specifying the output type.
-
-        Returns
-        -------
-        extension : str
-            The file extension for the output type.
-        """
-
-        try:
-            return cls.ftypes[output_type]
-        except KeyError:
-            msg = 'Invalid NiftySegOutputType: ', output_type
-            raise KeyError(msg)
-
-
-class NIFTYSEGCommandInputSpec(CommandLineInputSpec):
+    Base support for NiftySeg commands.
     """
-    Base Input Specification for all NiftySeg Commands
+    _suffix = '_ns'
+    _min_version = '0.9.4'
 
-    All command support specifying the output type dynamically
-    via output_type.
-    """
-    output_type = traits.Enum('NIFTI_GZ', Info.ftypes.keys(),
-                              desc='NiftySeg output type')
+    def __init__(self, required_version=None, **inputs):
+        super(NiftySegCommand, self).__init__(**inputs)
+        current_version = self.get_version()
+        if StrictVersion(current_version) < StrictVersion(self._min_version):
+            msg = 'A later version of NiftySeg is required (%s < %s)'
+            raise ValueError(msg % (current_version, self._min_version))
+        if required_version is not None and \
+           StrictVersion(current_version) != StrictVersion(required_version):
+            msg = 'The version of NiftySeg differs from the required (%s!=%s)'
+            raise ValueError(msg % (current_version, required_version))
 
-def no_niftyseg():
-    """Checks if niftyseg is NOT installed
-    """
-    raise NotImplementedError("Waiting for version fix")
+    def get_version(self):
+        if no_niftyseg(cmd=self.cmd):
+            return None
+        exec_cmd = ''.join((self.cmd, ' --version'))
+        return subprocess.check_output(exec_cmd, shell=True).strip('\n')
 
-# A custom function for getting specific niftyseg path
-def getNiftySegPath(cmd):
-    try:    
-        specific_dir=os.environ['NIFTYSEGDIR']
-        cmd=os.path.join(specific_dir,cmd)
-        return cmd
-    except KeyError:                
-        return cmd
+    @property
+    def version(self):
+        return self.get_version()
 
+    def exists(self):
+        if self.get_version() is None:
+            return False
+        return True
+
+    def _gen_fname(self, basename, out_dir=None, suffix=None, ext=None):
+        if basename == '':
+            msg = 'Unable to generate filename for command %s. ' % self.cmd
+            msg += 'basename is not set!'
+            raise ValueError(msg)
+        _, final_bn, final_ext = split_filename(basename)
+        if out_dir is None:
+            out_dir = os.getcwd()
+        if ext is not None:
+            final_ext = ext
+        if suffix is not None:
+            final_bn = ''.join((final_bn, suffix))
+        return os.path.abspath(os.path.join(out_dir, final_bn + final_ext))
+
+    def _gen_filename(self, name):
+        if name == 'out_file':
+            return self._gen_fname(self.inputs.in_file, suffix=self._suffix,
+                                   ext='.nii.gz')
+        return None
+
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        if isdefined(self.inputs.out_file):
+            outputs['out_file'] = self.inputs.out_file
+        else:
+            outputs['out_file'] = self._gen_filename('out_file')
+        return outputs
