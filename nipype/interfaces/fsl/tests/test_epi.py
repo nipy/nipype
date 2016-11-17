@@ -19,7 +19,6 @@ from nipype.interfaces.fsl import no_fsl
 @pytest.fixture(scope="module")
 def create_files_in_directory(request):
     outdir = os.path.realpath(mkdtemp())
-    cwd = os.getcwd()
     os.chdir(outdir)
     filelist = ['a.nii', 'b.nii']
     for f in filelist:
@@ -32,7 +31,6 @@ def create_files_in_directory(request):
 
     def fin():
         rmtree(outdir)
-        #NOTE_dj: I believe  os.chdir(old_wd), i.e. os.chdir(cwd) is not needed      
 
     request.addfinalizer(fin)
     return (filelist, outdir)

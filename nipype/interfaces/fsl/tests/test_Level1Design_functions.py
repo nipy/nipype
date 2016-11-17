@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 import os
-from nose.tools import assert_true
 from ...base import Undefined
 from ..model import Level1Design
 
@@ -19,4 +18,4 @@ def test_level1design():
                                                                usetd, contrasts,
                                                                do_tempfilter,
                                                                key)
-        yield assert_true, "set fmri(convolve1) {0}".format(val) in output_txt
+        assert "set fmri(convolve1) {0}".format(val) in output_txt
