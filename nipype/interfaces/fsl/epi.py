@@ -434,6 +434,30 @@ class EddyOutputSpec(TraitedSpec):
     out_parameter = File(exists=True,
                          desc=('text file with parameters definining the '
                                'field and movement for each scan'))
+    out_bvec     = File(exists=True,
+                         desc=('text file with rotated bvectors'))
+    out_rms       = File(exists=True,
+                         desc=('rms displacement for masked voxels in each '
+                               'volume, column 1 relative to first volume '
+                               'column 2 relative to previous volume'))
+    out_restricted_rms = File(exists=True,
+                         desc=('Like out_rms, but with phase encode '
+                               'displacement ommitted from calculation'))
+    out_shell_align = File(exists=True,
+                         desc=('Rigid body movement parameters between '
+                               'shells'))
+    out_outlier_report = File(exists=True,
+                         desc=('Report on outlier slices'))
+    out_outlier_map    = File(exists=True,
+                         desc=('Outlier volume, slice matrix'))
+    out_outlier_n_sd_map    = File(exists=True,
+                         desc=('Outlier volume, slice matrix, '
+                               'n of standard deviations mean '
+                               'from prediction'))
+    out_outlier_n_sqr_sd_map    = File(exists=True,
+                         desc=('Outlier volume, slice matrix, '
+                               'n of standard deviations rms '
+                               'difference from prediction'))
 
 
 class Eddy(FSLCommand):
@@ -496,6 +520,14 @@ class Eddy(FSLCommand):
         outputs = self.output_spec().get()
         outputs['out_corrected'] = os.path.abspath('%s.nii.gz' % self.inputs.out_base)
         outputs['out_parameter'] = os.path.abspath('%s.eddy_parameters' % self.inputs.out_base)
+        outputs['out_bvec'] = os.path.abspath('%s.eddy_rotated_bvecs' % self.inputs.out_base)
+        outputs['out_rms'] = os.path.abspath('%s.eddy_movement_rms' % self.inputs.out_base)
+        outputs['out_restricted_rms'] = os.path.abspath('%s.eddy_restricted_movement_rms' % self.inputs.out_base)
+        outputs['out_shell_align'] = os.path.abspath('%s.eddy_post_eddy_shell_alignment_parameters' % self.inputs.out_base)
+        outputs['out_outlier_report'] = os.path.abspath('%s.eddy_outlier_report' % self.inputs.out_base)
+        outputs['out_outlier_map'] = os.path.abspath('%s.eddy_outlier_map' % self.inputs.out_base)
+        outputs['out_outlier_n_sd_map'] = os.path.abspath('%s.eddy_outlier_n_stdev_map' % self.inputs.out_base)
+        outputs['out_outlier_n_sqr_sd_map'] = os.path.abspath('%s.eddy_outlier_n_sqr_stdev_map' % self.inputs.out_base)
         return outputs
 
 
