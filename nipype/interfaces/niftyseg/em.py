@@ -45,7 +45,7 @@ class EMOutputSpec(TraitedSpec):
 
 class EM(NIFTYSEGCommand):
 
-    _cmd = getNiftySegPath('seg_em')
+    _cmd = getNiftySegPath('seg_EM')
     _suffix = '_em'
     input_spec = EMInputSpec
     output_spec = EMOutputSpec
