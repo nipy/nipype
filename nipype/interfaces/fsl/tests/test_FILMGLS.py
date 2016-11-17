@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-from nipype.testing import assert_equal
 from nipype.interfaces.fsl.model import FILMGLS, FILMGLSInputSpec
 
 
@@ -46,11 +45,12 @@ def test_filmgls():
                       use_pava=dict(argstr='--pava',),
                       )
     instance = FILMGLS()
+    #NOTE_dj: don't understand this test: it should go to IF or ELSE? instance doesn't depend on any parameters
     if isinstance(instance.inputs, FILMGLSInputSpec):
         for key, metadata in list(input_map.items()):
             for metakey, value in list(metadata.items()):
-                yield assert_equal, getattr(instance.inputs.traits()[key], metakey), value
+                assert getattr(instance.inputs.traits()[key], metakey) == value
     else:
         for key, metadata in list(input_map2.items()):
             for metakey, value in list(metadata.items()):
-                yield assert_equal, getattr(instance.inputs.traits()[key], metakey), value
+                assert getattr(instance.inputs.traits()[key], metakey) == value
