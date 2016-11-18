@@ -47,7 +47,7 @@ script:
 - py.test nipype/interfaces/tests/
 - py.test nipype/interfaces/ants/
 - py.test nipype/interfaces/fsl/
-- py.test  nipype/interfaces/freesurfer/tests/test_model.py
+- py.test  nipype/interfaces/spm/
 after_success:
 - bash <(curl -s https://codecov.io/bash) -t ac172a50-8e66-42e5-8822-5373fcf54686 -cF unittests
 deploy:
