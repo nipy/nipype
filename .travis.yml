@@ -44,11 +44,7 @@ install:
 script:
 # removed nose; run py.test only on tests that have been rewritten
 # adding parts that has been changed and doesnt return errors or pytest warnings about yield
-- py.test nipype/interfaces/tests/
-- py.test nipype/interfaces/ants/
-- py.test nipype/interfaces/fsl/
-- py.test nipype/interfaces/spm/
-- py.test nipype/interfaces/nitime/ 
+- py.test nipype/interfaces/
 after_success:
 - bash <(curl -s https://codecov.io/bash) -t ac172a50-8e66-42e5-8822-5373fcf54686 -cF unittests
 deploy:
