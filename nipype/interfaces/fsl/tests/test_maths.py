@@ -42,6 +42,7 @@ def create_files_in_directory(request):
     func_prev_type = set_output_type(request.param)
 
     testdir = os.path.realpath(mkdtemp())
+    origdir = os.getcwd()
     os.chdir(testdir)
 
     filelist = ['a.nii', 'b.nii']
@@ -56,9 +57,11 @@ def create_files_in_directory(request):
     out_ext = Info.output_type_to_ext(Info.output_type()) 
 
     def fin():
-        rmtree(testdir)
+        if os.path.exists(testdir):
+            rmtree(testdir)
         set_output_type(func_prev_type)
-    
+        os.chdir(origdir)
+
     request.addfinalizer(fin)
     return (filelist, testdir, out_ext)
 

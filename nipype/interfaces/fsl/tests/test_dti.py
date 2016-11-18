@@ -36,11 +36,11 @@ def create_files_in_directory(request):
         nb.save(nb.Nifti1Image(img, np.eye(4), hdr),
                 os.path.join(outdir, f))
 
-    def fin():
+    def clean_directory():
         rmtree(outdir)
-        #NOTE_dj: I believe  os.chdir(old_wd), i.e. os.chdir(cwd) is not needed
+        os.chdir(cwd)
 
-    request.addfinalizer(fin)
+    request.addfinalizer(clean_directory)
     return (filelist, outdir)
 
 
