@@ -18,22 +18,21 @@ warnings.filterwarnings('always', category=UserWarning)
 class PatchMatchInputSpec(CommandLineInputSpec):
     """Input Spec for seg_PatchMatch."""
     # Mandatory input arguments
-    in_file = File(argstr='%s', exists=True, mandatory=True,
+    in_file = File(argstr='-i %s', exists=True, mandatory=True,
                    desc='Input image to segment',
                    position=1)
 
-    mask_file = File(argstr='%s', exists=True, mandatory=True,
+    mask_file = File(argstr='-m %s', exists=True, mandatory=True,
                      desc='Input mask for the area where applies PatchMatch',
                      position=2)
 
-    database_file = File(argstr='%s', genfile=True,  mandatory=True,
+    database_file = File(argstr='-db %s', genfile=True,  mandatory=True,
                          desc='Database with the segmentations',
                          position=3)
 
     # Output file name
     out_file = File(desc='The output filename of the patchmatch results',
-                    argstr='%s', name_source=['in_file'],
-                    name_template='%s_pm', position=4)
+                    argstr='-o %s', position=4, genfile=True)
 
     # Optional arguments
     patch_size = traits.Int(desc="Patch size, #voxels",

@@ -6,10 +6,11 @@
 Top-level namespace for niftyseg.
 """
 
-from .base import (no_niftyseg, get_custom_path)
+from .base import no_niftyseg, get_custom_path
 from .maths import (UnaryMaths, BinaryMaths, BinaryMathsInteger,
                     Merge, TupleMaths)
-from .stats import (UnaryStats, BinaryStats)
-from .steps import (STEPS, CalcTopNCC)
-from .patchmatch import (PatchMatch)
-from .lesions import (FillLesions)
+from .stats import UnaryStats, BinaryStats
+from .steps import STEPS, CalcTopNCC
+from .patchmatch import PatchMatch
+from .lesions import FillLesions
+from .em import EM

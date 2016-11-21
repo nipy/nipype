@@ -17,7 +17,6 @@ See the docstrings of the individual classes for examples.
 
 import os
 import warnings
-from distutils.version import StrictVersion
 from nipype.interfaces.base import (CommandLine, isdefined)
 from nipype.utils.filemanip import split_filename
 import subprocess
@@ -36,7 +35,7 @@ def get_custom_path(command):
         return command
 
 
-def no_niftyseg(cmd='seg_EM'):
+def no_niftyseg(cmd='seg_LabFusion'):
     """Check if niftyseg is installed."""
     if True in [os.path.isfile(os.path.join(path, cmd)) and
                 os.access(os.path.join(path, cmd), os.X_OK)
@@ -54,14 +53,6 @@ class NiftySegCommand(CommandLine):
 
     def __init__(self, required_version=None, **inputs):
         super(NiftySegCommand, self).__init__(**inputs)
-        current_version = self.get_version()
-        if StrictVersion(current_version) < StrictVersion(self._min_version):
-            msg = 'A later version of NiftySeg is required (%s < %s)'
-            raise ValueError(msg % (current_version, self._min_version))
-        if required_version is not None and \
-           StrictVersion(current_version) != StrictVersion(required_version):
-            msg = 'The version of NiftySeg differs from the required (%s!=%s)'
-            raise ValueError(msg % (current_version, required_version))
 
     def get_version(self):
         if no_niftyseg(cmd=self.cmd):
