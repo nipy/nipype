@@ -35,7 +35,6 @@ class TestSignalExtraction():
     labels = ['CSF', 'GrayMatter', 'WhiteMatter']
     global_labels = ['GlobalSignal'] + labels
 
-    @classmethod
     def setup_class(self):
         self.orig_dir = os.getcwd()
         self.temp_dir = tempfile.mkdtemp()
@@ -155,7 +154,6 @@ class TestSignalExtraction():
                     assert_almost_equal(segment, wanted[i][j], decimal=1)
 
 
-    @classmethod
     def teardown_class(self):
         os.chdir(self.orig_dir)
         shutil.rmtree(self.temp_dir)
