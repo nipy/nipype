@@ -1,19 +1,19 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 
-from ...testing import (assert_equal, assert_almost_equal, assert_in, utils)
+from ...testing import (assert_equal, assert_almost_equal, utils)
 from ..confounds import TSNR
 from .. import misc
 
-import unittest
+import pytest
 import mock
 import nibabel as nb
 import numpy as np
 import os
-import tempfile
-import shutil
 
-class TestTSNR(unittest.TestCase):
+#NOTE_dj: haven't removed mock (have to understand better)
+
+class TestTSNR():
     ''' Note: Tests currently do a poor job of testing functionality '''
 
     in_filenames = {
@@ -27,10 +27,10 @@ class TestTSNR(unittest.TestCase):
         'tsnr_file': 'tsnr.nii.gz'
     }
 
-    def setUp(self):
+    @pytest.fixture(autouse=True)
+    def setup_class(self, tmpdir):
         # setup temp folder
-        self.orig_dir = os.getcwd()
-        self.temp_dir = tempfile.mkdtemp()
+        self.temp_dir = str(tmpdir)
         os.chdir(self.temp_dir)
 
         utils.save_toy_nii(self.fake_data, self.in_filenames['in_file'])
@@ -117,9 +117,6 @@ class TestTSNR(unittest.TestCase):
             assert_almost_equal(np.amin(data), min_, decimal=1)
             assert_almost_equal(np.amax(data), max_, decimal=1)
 
-    def tearDown(self):
-        os.chdir(self.orig_dir)
-        shutil.rmtree(self.temp_dir)
 
     fake_data = np.array([[[[2, 4, 3, 9, 1],
                             [3, 6, 4, 7, 4]],

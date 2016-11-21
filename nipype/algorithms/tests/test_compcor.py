@@ -1,27 +1,26 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 import os
-import tempfile
-import shutil
-import unittest
 
 import nibabel as nb
 import numpy as np
 
-from ...testing import assert_equal, assert_true, utils, assert_in
+import pytest
+from ...testing import utils
 from ..confounds import CompCor, TCompCor, ACompCor
 
-class TestCompCor(unittest.TestCase):
+
+class TestCompCor():
     ''' Note: Tests currently do a poor job of testing functionality '''
 
     filenames = {'functionalnii': 'compcorfunc.nii',
                  'masknii': 'compcormask.nii',
                  'components_file': None}
-
-    def setUp(self):
+    
+    @pytest.fixture(autouse=True)
+    def setup_class(self, tmpdir):
         # setup
-        self.orig_dir = os.getcwd()
-        self.temp_dir = tempfile.mkdtemp()
+        self.temp_dir = str(tmpdir)
         os.chdir(self.temp_dir)
         noise = np.fromfunction(self.fake_noise_fun, self.fake_data.shape)
         self.realigned_file = utils.save_toy_nii(self.fake_data + noise,
@@ -45,6 +44,7 @@ class TestCompCor(unittest.TestCase):
                              components_file='acc_components_file'),
                     expected_components, 'aCompCor')
 
+
     def test_tcompcor(self):
         ccinterface = TCompCor(realigned_file=self.realigned_file, percentile_threshold=0.75)
         self.run_cc(ccinterface, [['-0.1114536190', '-0.4632908609'],
@@ -59,7 +59,7 @@ class TestCompCor(unittest.TestCase):
 
         mask = nb.load('mask.nii').get_data()
         num_nonmasked_voxels = np.count_nonzero(mask)
-        assert_equal(num_nonmasked_voxels, 1)
+        assert num_nonmasked_voxels == 1
 
     def test_compcor_no_regress_poly(self):
         self.run_cc(CompCor(realigned_file=self.realigned_file, mask_file=self.mask_file,
@@ -97,10 +97,10 @@ class TestCompCor(unittest.TestCase):
 
         # assert
         expected_file = ccinterface._list_outputs()['components_file']
-        assert_equal(ccresult.outputs.components_file, expected_file)
-        assert_true(os.path.exists(expected_file))
-        assert_true(os.path.getsize(expected_file) > 0)
-        assert_equal(ccinterface.inputs.num_components, 6)
+        assert ccresult.outputs.components_file == expected_file
+        assert os.path.exists(expected_file)
+        assert os.path.getsize(expected_file) > 0
+        assert ccinterface.inputs.num_components == 6
 
         with open(ccresult.outputs.components_file, 'r') as components_file:
             expected_n_components = min(ccinterface.inputs.num_components, self.fake_data.shape[3])
@@ -110,21 +110,19 @@ class TestCompCor(unittest.TestCase):
             header = components_data.pop(0) # the first item will be '#', we can throw it out
             expected_header = [expected_header + str(i) for i in range(expected_n_components)]
             for i, heading in enumerate(header):
-                assert_in(expected_header[i], heading)
+                assert expected_header[i] in heading
 
             num_got_timepoints = len(components_data)
-            assert_equal(num_got_timepoints, self.fake_data.shape[3])
+            assert num_got_timepoints == self.fake_data.shape[3]
             for index, timepoint in enumerate(components_data):
-                assert_true(len(timepoint) == ccinterface.inputs.num_components
-                            or len(timepoint) == self.fake_data.shape[3])
-                assert_equal(timepoint[:2], expected_components[index])
+                assert (len(timepoint) == ccinterface.inputs.num_components
+                        or len(timepoint) == self.fake_data.shape[3])
+                assert timepoint[:2] == expected_components[index]
         return ccresult
 
-    def tearDown(self):
-        os.chdir(self.orig_dir)
-        shutil.rmtree(self.temp_dir)
 
-    def fake_noise_fun(self, i, j, l, m):
+    @staticmethod
+    def fake_noise_fun(i, j, l, m):
         return m*i + l - j
 
     fake_data = np.array([[[[8, 5, 3, 8, 0],
