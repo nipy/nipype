@@ -124,7 +124,6 @@ class TestRuntimeProfiler():
     '''
 
     # setup method for the necessary arguments to run cpac_pipeline.run
-    @classmethod
     def setup_class(self):
         '''
         Method to instantiate TestRuntimeProfiler
