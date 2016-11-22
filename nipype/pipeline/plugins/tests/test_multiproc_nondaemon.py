@@ -11,7 +11,6 @@ import os
 from tempfile import mkdtemp
 from shutil import rmtree
 
-from nipype.testing import assert_equal, assert_true
 import nipype.pipeline.engine as pe
 from nipype.interfaces.utility import Function
 
@@ -145,10 +144,10 @@ def test_run_multiproc_nondaemon_false():
         run_multiproc_nondaemon_with_flag(False)
     except:
         shouldHaveFailed = True
-    yield assert_true, shouldHaveFailed
+    assert shouldHaveFailed
 
 
 def test_run_multiproc_nondaemon_true():
     # with nondaemon_flag = True, the execution should succeed
     result = run_multiproc_nondaemon_with_flag(True)
-    yield assert_equal, result, 180  # n_procs (2) * numberOfThreads (2) * 45 == 180
+    assert result == 180  # n_procs (2) * numberOfThreads (2) * 45 == 180
