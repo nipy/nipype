@@ -46,6 +46,7 @@ script:
 # adding parts that has been changed and doesnt return errors or pytest warnings about yield
 - py.test nipype/interfaces/
 - py.test nipype/algorithms/
+- py.test nipype/pipeline/
 after_success:
 - bash <(curl -s https://codecov.io/bash) -t ac172a50-8e66-42e5-8822-5373fcf54686 -cF unittests
 deploy:

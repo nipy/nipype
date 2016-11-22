@@ -9,15 +9,16 @@ import re
 
 import mock
 
-from nipype.testing import (assert_raises, assert_equal, assert_true,
-                            assert_false, skipif, assert_regexp_matches)
+from nipype.testing import assert_regexp_matches
 import nipype.pipeline.plugins.base as pb
+
+#NOTE_dj: didn't remove the mock library
 
 def test_scipy_sparse():
     foo = ssp.lil_matrix(np.eye(3, k=1))
     goo = foo.getrowview(0)
     goo[goo.nonzero()] = 0
-    yield assert_equal, foo[0, 1], 0
+    assert foo[0, 1] == 0
 
 def test_report_crash():
     with mock.patch('pickle.dump', mock.MagicMock()) as mock_pickle_dump:
@@ -35,8 +36,8 @@ def test_report_crash():
 
             expected_crashfile = re.compile('.*/crash-.*-an_id-[0-9a-f\-]*.pklz')
 
-            yield assert_regexp_matches, actual_crashfile, expected_crashfile
-            yield assert_true, mock_pickle_dump.call_count == 1
+            assert_regexp_matches, actual_crashfile, expected_crashfile
+            assert mock_pickle_dump.call_count == 1
 
 '''
 Can use the following code to test that a mapnode crash continues successfully
