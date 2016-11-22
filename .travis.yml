@@ -48,6 +48,7 @@ script:
 - py.test nipype/algorithms/
 - py.test nipype/pipeline/
 - py.test nipype/caching/
+- py.test nipype/testing/
 after_success:
 - bash <(curl -s https://codecov.io/bash) -t ac172a50-8e66-42e5-8822-5373fcf54686 -cF unittests
 deploy:
