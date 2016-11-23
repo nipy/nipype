@@ -45,7 +45,8 @@ def test_filmgls():
                       use_pava=dict(argstr='--pava',),
                       )
     instance = FILMGLS()
-    #NOTE_dj: don't understand this test: it should go to IF or ELSE? instance doesn't depend on any parameters
+    #NOTE_dj: don't understand this test: 
+    #NOTE_dj: IMO, it should go either to IF or ELSE, instance doesn't depend on any parameters
     if isinstance(instance.inputs, FILMGLSInputSpec):
         for key, metadata in list(input_map.items()):
             for metakey, value in list(metadata.items()):

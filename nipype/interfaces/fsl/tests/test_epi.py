@@ -15,7 +15,6 @@ import nipype.interfaces.fsl.epi as fsl
 from nipype.interfaces.fsl import no_fsl
 
 
-#NOTE_dj, didn't change to tmpdir                                                      
 @pytest.fixture(scope="module")
 def create_files_in_directory(request):
     outdir = os.path.realpath(mkdtemp())
