@@ -92,7 +92,7 @@ class TestTSNR():
         misc.TSNR(in_file=self.in_filenames['in_file'])
 
         # assert
-        assert_in(True, [args[0].count('confounds') > 0 for _, args, _ in mock_warn.mock_calls])
+        assert True in [args[0].count('confounds') > 0 for _, args, _ in mock_warn.mock_calls]
 
     def assert_expected_outputs_poly(self, tsnrresult, expected_ranges):
         assert_equal(os.path.basename(tsnrresult.outputs.detrended_file),
