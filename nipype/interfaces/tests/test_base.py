@@ -419,8 +419,11 @@ def test_BaseInterface():
     assert DerivedInterface2()._outputs().foo == Undefined
     with pytest.raises(NotImplementedError): DerivedInterface2(goo=1).run()
 
+    default_inpu_spec = nib.BaseInterface.input_spec 
     nib.BaseInterface.input_spec = None
     with pytest.raises(Exception): nib.BaseInterface()
+    nib.BaseInterface.input_spec = default_inpu_spec    
+
 
 def test_BaseInterface_load_save_inputs(tmpdir):
     tmp_json = os.path.join(str(tmpdir), 'settings.json')
