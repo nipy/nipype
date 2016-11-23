@@ -34,8 +34,7 @@ def set_output_type(fsl_output_type):
     FSLCommand.set_default_output_type(Info.output_type())
     return prev_output_type
 
-#NOTE_dj, didn't change to tmpdir 
-#NOTE_dj: not sure if I should change the scope, kept the function scope for now
+
 @pytest.fixture(params=[None]+list(Info.ftypes))
 def create_files_in_directory(request):
     #NOTE_dj: removed set_output_type from test functions
@@ -213,8 +212,8 @@ def test_stdimage(create_files_in_directory):
 
     # Test the auto naming
     stder = fsl.StdImage(in_file="a.nii")
-    #NOTE_dj: this is failing (even the original version of the test with pytest)
-    #NOTE_dj: not sure if this should pass, it uses cmdline from interface.base.CommandLine
+    #NOTE_dj, FAIL: this is failing (even the original version of the test with pytest)
+    #NOTE_dj: not sure if this should pass, it uses cmdline from interface.base.CommandLine 
     #assert stder.cmdline == "fslmaths a.nii -Tstd %s"%os.path.join(testdir, "a_std.nii")
 
 

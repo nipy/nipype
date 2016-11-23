@@ -82,6 +82,7 @@ def _temp_analyze_files(tmpdir):
     return str(orig_img), str(orig_hdr)
 
 #NOTE_dj: this is not the best way of creating second set of files, but it works
+#NOTE_dj: wasn't sure who to use one fixture only without too many changes
 @pytest.fixture()
 def _temp_analyze_files_prime(tmpdir):
     """Generate temporary analyze file pair."""

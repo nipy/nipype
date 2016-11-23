@@ -69,7 +69,7 @@ def test_bunch_hash():
     assert newbdict['infile'][0][1] == jshash.hexdigest()
     assert newbdict['yat'] == True
 
-#NOTE_dj: should be change to scope="module"
+#NOTE_dj: is it ok to change the scope to scope="module"
 @pytest.fixture(scope="module")
 def setup_file(request, tmpdir_factory):
     tmp_dir = str(tmpdir_factory.mktemp('files'))
@@ -135,7 +135,7 @@ def test_TraitedSpec_logic():
         output_spec = out3
 
     myif = MyInterface()
-    # NOTE_dj: I don't get a TypeError...TODO
+    # NOTE_dj, FAIL: I don't get a TypeError, only a UserWarning
     #with pytest.raises(TypeError): 
     #    setattr(myif.inputs, 'kung', 10.0)
     myif.inputs.foo = 1
@@ -156,7 +156,6 @@ def test_deprecation():
             foo = nib.traits.Int(deprecated='0.1')
         spec_instance = DeprecationSpec1()
         set_foo = lambda: setattr(spec_instance, 'foo', 1)
-        #NOTE_dj: didn't work with assert_raises (don't understand this)
         with pytest.raises(nib.TraitError): set_foo()
         assert len(w) == 0, 'no warnings, just errors'
         
@@ -167,7 +166,6 @@ def test_deprecation():
             foo = nib.traits.Int(deprecated='0.1')
         spec_instance = DeprecationSpec1numeric()
         set_foo = lambda: setattr(spec_instance, 'foo', 1)
-        #NOTE_dj: didn't work with assert_raises (don't understand this)
         with pytest.raises(nib.TraitError): set_foo()
         assert len(w) == 0, 'no warnings, just errors'
 
@@ -178,7 +176,6 @@ def test_deprecation():
             foo = nib.traits.Int(deprecated='100', new_name='bar')
         spec_instance = DeprecationSpec2()
         set_foo = lambda: setattr(spec_instance, 'foo', 1)
-        #NOTE_dj: didn't work with assert_raises (don't understand this)
         with pytest.raises(nib.TraitError): set_foo()
         assert len(w) == 0, 'no warnings, just errors'
 
@@ -488,12 +485,11 @@ def test_input_version():
     class DerivedInterface1(nib.BaseInterface):
         input_spec = InputSpec
     obj = DerivedInterface1()
-    #NOTE_dj: removed yield assert_not_raises, is that ok?
+    #NOTE_dj: removed yield assert_not_raises, if it raises the test will fail anyway
     obj._check_version_requirements(obj.inputs)
 
     config.set('execution', 'stop_on_unknown_version', True)
     
-    #NOTE_dj: did not work with assert_raises
     with pytest.raises(Exception): obj._check_version_requirements(obj.inputs)
 
     config.set_default_config()
@@ -515,7 +511,7 @@ def test_input_version():
         input_spec = InputSpec
         _version = '0.10'
     obj = DerivedInterface1()
-    #NOTE_dj: removed yield assert_not_raises, is that ok?
+    #NOTE_dj: removed yield assert_not_raises
     obj._check_version_requirements(obj.inputs)
 
     class InputSpec(nib.TraitedSpec):
@@ -527,7 +523,7 @@ def test_input_version():
     obj = DerivedInterface1()
     obj.inputs.foo = 1
     not_raised = True
-    #NOTE_dj: removed yield assert_not_raises, is that ok?
+    #NOTE_dj: removed yield assert_not_raises
     obj._check_version_requirements(obj.inputs)
 
     class InputSpec(nib.TraitedSpec):
@@ -549,7 +545,7 @@ def test_input_version():
     obj = DerivedInterface1()
     obj.inputs.foo = 1
     not_raised = True
-    #NOTE_dj: removed yield assert_not_raises, is that ok?
+    #NOTE_dj: removed yield assert_not_raises
     obj._check_version_requirements(obj.inputs)
 
 
@@ -717,6 +713,7 @@ def test_global_CommandLine_output(setup_file):
     assert res.runtime.stdout == ''
 
 #NOTE_dj: not sure if this function is needed
+#NOTE_dj: if my changes are accepted, I'll remove it
 def assert_not_raises(fn, *args, **kwargs):
     fn(*args, **kwargs)
     return True

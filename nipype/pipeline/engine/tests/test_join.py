@@ -238,7 +238,7 @@ def test_set_join_node(tmpdir):
 
 def test_unique_join_node(tmpdir):
     """Test join with the ``unique`` flag set to True."""
-    #NOTE_dj: does it mean that this test depend on others?? why the global is used?
+    #NOTE_dj: why the global is used? does it mean that this test depends on others?
     global _sum_operands
     _sum_operands = []
     os.chdir(str(tmpdir))

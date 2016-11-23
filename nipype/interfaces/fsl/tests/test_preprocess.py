@@ -16,7 +16,7 @@ from nipype.interfaces.fsl import Info
 from nipype.interfaces.base import File, TraitError, Undefined, isdefined
 from nipype.interfaces.fsl import no_fsl
 
-#NOTE_dj: the file contains many very long test, should be split and use parmatrize
+#NOTE_dj: the file contains many very long test, I might try to split and use parametrize
 
 def fsl_name(obj, fname):
     """Create valid fsl name, including file extension for output type.

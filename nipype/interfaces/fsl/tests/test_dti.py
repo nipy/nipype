@@ -21,7 +21,6 @@ import pytest, pdb
 
 #NOTE_dj: this file contains not finished tests (search xfail) and function that are not used
 
-#NOTE_dj, didn't change to tmpdir
 @pytest.fixture(scope="module")
 def create_files_in_directory(request):
     outdir = os.path.realpath(mkdtemp())
