@@ -20,7 +20,7 @@ import sys
 import tempfile
 import simplejson as json
 
-from .scripts.instance import import_module
+from ..scripts.instance import import_module
 
 
 def generate_boutiques_descriptor(module, interface_name, ignored_template_inputs, docker_image, docker_index, verbose, ignore_template_numbers):
