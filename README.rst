@@ -77,17 +77,20 @@ Information specific to Nipype is located here::
 Support and Communication
 -------------------------
 
-If you have a problem or would like to ask a question about how to do something in Nipype please submit a question
-to `NeuroStars.org <http://neurostars.org>`_ with a *nipype* tag. `NeuroStars.org <http://neurostars.org>`_  is a platform similar to StackOverflow but dedicated to neuroinformatics. All previous Nipype questions are available here::
-
-       http://neurostars.org/t/nipype/
-
+If you have a problem or would like to ask a question about how to do something in Nipype please open an issue
+in this GitHub repository.
 
 To participate in the Nipype development related discussions please use the following mailing list::
 
        http://mail.python.org/mailman/listinfo/neuroimaging
 
 Please add *[nipype]* to the subject line when posting on the mailing list.
+
+  .. warning ::
+
+    As of `Nov 23, 2016 <https://twitter.com/neuroquestion/status/801453442132754432>`_,
+    `NeuroStars <http://neurostars.org>`_ is down. We used to have all previous Nipype
+    questions available under the `nipype <http://neurostars.org/t/nipype/>`_ label.
 
 
 Nipype structure
