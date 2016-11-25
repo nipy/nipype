@@ -5,6 +5,7 @@ from ..confounds import TCompCor
 def test_TCompCor_inputs():
     input_map = dict(components_file=dict(usedefault=True,
     ),
+    header=dict(),
     ignore_exception=dict(nohash=True,
     usedefault=True,
     ),
