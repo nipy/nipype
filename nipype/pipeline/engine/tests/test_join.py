@@ -546,10 +546,9 @@ def test_set_join_node_file_input(tmpdir):
     wf.run()
 
 
-def test_nested_workflow_join():
+def test_nested_workflow_join(tmpdir):
     """Test collecting join inputs within a nested workflow"""
-    cwd = os.getcwd()
-    wd = mkdtemp()
+    wd = str(tmpdir)
     os.chdir(wd)
 
     # Make the nested workflow
@@ -580,9 +579,7 @@ def test_nested_workflow_join():
     result = meta_wf.run()
     
     # there should be six nodes in total
-    assert_equal(len(result.nodes()), 6,
-             "The number of expanded nodes is incorrect.")
+    assert len(result.nodes()) == 6, \
+        "The number of expanded nodes is incorrect."
     
-    os.chdir(cwd)
-    rmtree(wd)
 
