@@ -218,7 +218,7 @@ class Level1Design(BaseInterface):
             for j in range(0, num_evs[0] + 1):
                 try:
                     orthogonal = int(orthogonalization[i][j])
-                except (KeyError, TypeError, ValueError):
+                except (KeyError, TypeError, ValueError, IndexError):
                     orthogonal = 0
                 ev_txt += ev_ortho.substitute(c0=i, c1=j, orthogonal=orthogonal)
                 ev_txt += "\n"
