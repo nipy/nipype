@@ -23,6 +23,7 @@ def get_package_name(filepath):
 
     Examples
     --------
+    >>> import numpy as np
     >>> np.testing.nosetester.get_package_name('nonsense') # doctest: +ALLOW_UNICODE
     'numpy'
 
