@@ -96,7 +96,7 @@ class BuildConnectome(MRTrix3Base):
     >>> mat = mrt.BuildConnectome()
     >>> mat.inputs.in_file = 'tracks.tck'
     >>> mat.inputs.in_parc = 'aparc+aseg.nii'
-    >>> mat.cmdline                               # doctest: +ELLIPSIS +IGNORE_UNICODE
+    >>> mat.cmdline                               # doctest: +ELLIPSIS +ALLOW_UNICODE
     'tck2connectome tracks.tck aparc+aseg.nii connectome.csv'
     >>> mat.run()                                 # doctest: +SKIP
     """
@@ -155,7 +155,7 @@ class LabelConfig(MRTrix3Base):
     >>> labels = mrt.LabelConfig()
     >>> labels.inputs.in_file = 'aparc+aseg.nii'
     >>> labels.inputs.in_config = 'mrtrix3_labelconfig.txt'
-    >>> labels.cmdline                               # doctest: +ELLIPSIS +IGNORE_UNICODE
+    >>> labels.cmdline                               # doctest: +ELLIPSIS +ALLOW_UNICODE
     'labelconfig aparc+aseg.nii mrtrix3_labelconfig.txt parcellation.mif'
     >>> labels.run()                                 # doctest: +SKIP
     """

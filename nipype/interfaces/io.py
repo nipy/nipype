@@ -1219,7 +1219,7 @@ class SelectFiles(IOBase):
     ...            "epi": "{subject_id}/func/f[0, 1].nii"}
     >>> dg = Node(SelectFiles(templates), "selectfiles")
     >>> dg.inputs.subject_id = "subj1"
-    >>> pprint.pprint(dg.outputs.get())  # doctest: +NORMALIZE_WHITESPACE +IGNORE_UNICODE
+    >>> pprint.pprint(dg.outputs.get())  # doctest: +NORMALIZE_WHITESPACE +ALLOW_UNICODE
     {'T1': <undefined>, 'epi': <undefined>}
 
     The same thing with dynamic grabbing of specific files:
@@ -2448,11 +2448,11 @@ class JSONFileGrabber(IOBase):
     >>> jsonSource = JSONFileGrabber()
     >>> jsonSource.inputs.defaults = {'param1': 'overrideMe', 'param3': 1.0}
     >>> res = jsonSource.run()
-    >>> pprint.pprint(res.outputs.get()) # doctest: +IGNORE_UNICODE
+    >>> pprint.pprint(res.outputs.get()) # doctest: +ALLOW_UNICODE
     {'param1': 'overrideMe', 'param3': 1.0}
     >>> jsonSource.inputs.in_file = 'jsongrabber.txt'
     >>> res = jsonSource.run()
-    >>> pprint.pprint(res.outputs.get())  # doctest: +NORMALIZE_WHITESPACE, +ELLIPSIS +IGNORE_UNICODE
+    >>> pprint.pprint(res.outputs.get())  # doctest: +NORMALIZE_WHITESPACE, +ELLIPSIS +ALLOW_UNICODE
     {'param1': 'exampleStr', 'param2': 4, 'param3': 1.0}
 
 
