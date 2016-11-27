@@ -315,6 +315,15 @@ class FAST(FSLCommand):
             formated = "-S %d %s" % (len(value), formated)
         return formated
 
+    def _parse_inputs(self, skip=None):
+        ''' ensures out_basename (argstring -o) always exists, otherwise fast
+        puts the outputs in the same folder as the inputs '''
+        arg_list = super(FAST, self)._parse_inputs(skip)
+        if not ('-o ' in [arg[:3] for arg in arg_list]
+                or '--out ' in [arg[:6] for arg in arg_list]):
+            arg_list.insert(0, '-o {}'.format(self._gen_fname(self.inputs.in_files[-1])))
+        return arg_list
+
     def _list_outputs(self):
         outputs = self.output_spec().get()
         if not isdefined(self.inputs.number_classes):
