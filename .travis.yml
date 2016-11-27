@@ -34,6 +34,7 @@ install:
   conda update --yes conda &&
   conda update --all -y python=$TRAVIS_PYTHON_VERSION pytest &&
   pip install pytest-raisesregexp &&
+  pip install click #needed for doctest		  
   conda install -y nipype &&
   rm -r /home/travis/miniconda/lib/python${TRAVIS_PYTHON_VERSION}/site-packages/nipype* &&
   pip install -r requirements.txt &&
@@ -43,9 +44,7 @@ install:
   echo "data_file = ${COVERAGE_DATA_FILE}" >> ${COVERAGE_PROCESS_START}; }
 - travis_retry inst
 script:
-# removed nose; run py.test only on tests that have been rewritten
-# adding parts that has been changed and doesnt return errors or pytest warnings about yield
-- py.test 
+- py.test --doctest-modules nipype
 after_success:
 - bash <(curl -s https://codecov.io/bash) -t ac172a50-8e66-42e5-8822-5373fcf54686 -cF unittests
 deploy:
