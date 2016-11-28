@@ -167,6 +167,30 @@ def test_fast():
                                                       "-S 1 %s" % tmp_infile])
     teardown_infile(tmp_dir)
 
+@skipif(no_fsl)
+def test_fast_list_outputs():
+    ''' By default (no -o), FSL's fast command outputs files into the same
+    directory as the input files. If the flag -o is set, it outputs files into
+    the cwd '''
+    def _run_and_test(opts, output_base):
+        outputs = fsl.FAST(**opts)._list_outputs()
+        assert_equal(output_base, outputs['tissue_class_map'][:len(output_base)])
+        assert_true(False)
+
+    # set up
+    infile, indir = setup_infile()
+    cwd = tempfile.mkdtemp()
+    os.chdir(cwd)
+    yield assert_not_equal, indir, cwd
+    out_basename = 'a_basename.nii.gz'
+
+    # run and test
+    opts = {'in_files': tmp_infile}
+    input_path, input_filename, input_ext = split_filename(tmp_infile)
+    _run_and_test(opts, os.path.join(input_path, input_filename))
+
+    opts['out_basename'] = out_basename
+    _run_and_test(opts, os.path.join(cwd, out_basename))
 
 @skipif(no_fsl)
 def setup_flirt():
