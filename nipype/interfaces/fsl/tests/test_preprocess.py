@@ -12,7 +12,7 @@ import shutil
 from nipype.testing import (assert_equal, assert_not_equal, assert_raises,
                             skipif)
 
-from nipype.utils.filemanip import split_filename
+from nipype.utils.filemanip import split_filename, filename_to_list
 from .. import preprocess as fsl
 from nipype.interfaces.fsl import Info
 from nipype.interfaces.base import File, TraitError, Undefined, isdefined
@@ -174,15 +174,18 @@ def test_fast_list_outputs():
     the cwd '''
     def _run_and_test(opts, output_base):
         outputs = fsl.FAST(**opts)._list_outputs()
-        assert_equal(output_base, outputs['tissue_class_map'][:len(output_base)])
-        assert_true(False)
+        for output in outputs.values():
+            filenames = filename_to_list(output)
+            if filenames is not None:
+                for filename in filenames:
+                    assert_equal(filename[:len(output_base)], output_base)
 
     # set up
     infile, indir = setup_infile()
     cwd = tempfile.mkdtemp()
     os.chdir(cwd)
     yield assert_not_equal, indir, cwd
-    out_basename = 'a_basename.nii.gz'
+    out_basename = 'a_basename'
 
     # run and test
     opts = {'in_files': tmp_infile}
