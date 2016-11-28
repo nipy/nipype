@@ -35,10 +35,10 @@ dependencies:
 test:
   override:
     - docker run -v /etc/localtime:/etc/localtime:ro -v ~/scratch:/scratch -w /root/src/nipype/doc nipype/nipype_test:py35 /usr/bin/run_builddocs.sh
-#    - docker run -v /etc/localtime:/etc/localtime:ro -e FSL_COURSE_DATA="/root/examples/nipype-fsl_course_data" -v ~/examples:/root/examples:ro -v ~/scratch:/scratch -w /root/src/nipype nipype/nipype_test:py35 /usr/bin/run_nosetests.sh py35 :
-#        timeout: 2600
-#    - docker run -v /etc/localtime:/etc/localtime:ro -e FSL_COURSE_DATA="/root/examples/nipype-fsl_course_data" -v ~/examples:/root/examples:ro -v ~/scratch:/scratch -w /root/src/nipype nipype/nipype_test:py27 /usr/bin/run_nosetests.sh py27 :
-#        timeout: 5200
+    - docker run -v /etc/localtime:/etc/localtime:ro -e FSL_COURSE_DATA="/root/examples/nipype-fsl_course_data" -v ~/examples:/root/examples:ro -v ~/scratch:/scratch -w /root/src/nipype nipype/nipype_test:py35 /usr/bin/run_pytests.sh py35 :
+        timeout: 2600
+    - docker run -v /etc/localtime:/etc/localtime:ro -e FSL_COURSE_DATA="/root/examples/nipype-fsl_course_data" -v ~/examples:/root/examples:ro -v ~/scratch:/scratch -w /root/src/nipype nipype/nipype_test:py27 /usr/bin/run_pytests.sh py27 :
+        timeout: 5200
     - docker run -v /etc/localtime:/etc/localtime:ro -v ~/examples:/root/examples:ro -v ~/scratch:/scratch -w /scratch nipype/nipype_test:py35 /usr/bin/run_examples.sh test_spm Linear /root/examples/ workflow3d :
         timeout: 1600
     - docker run -v /etc/localtime:/etc/localtime:ro -v ~/examples:/root/examples:ro -v ~/scratch:/scratch -w /scratch nipype/nipype_test:py35 /usr/bin/run_examples.sh test_spm Linear /root/examples/ workflow4d :
@@ -55,8 +55,9 @@ test:
 
   post:
     - bash docker/circleci/teardown.sh
-    - for xml_f in ${CIRCLE_TEST_REPORTS}/nose/coverage*.xml; do bash <(curl -s https://codecov.io/bash) -f $xml_f -t ac172a50-8e66-42e5-8822-5373fcf54686 -F unittests; done
-    - for xml_f in ${CIRCLE_TEST_REPORTS}/nose/smoketest*.xml; do bash <(curl -s https://codecov.io/bash) -f $xml_f -t ac172a50-8e66-42e5-8822-5373fcf54686 -F smoketests; done
+#NOTE_dj: haven't created xml files, TODO?
+#    - for xml_f in ${CIRCLE_TEST_REPORTS}/nose/coverage*.xml; do bash <(curl -s https://codecov.io/bash) -f $xml_f -t ac172a50-8e66-42e5-8822-5373fcf54686 -F unittests; done
+#    - for xml_f in ${CIRCLE_TEST_REPORTS}/nose/smoketest*.xml; do bash <(curl -s https://codecov.io/bash) -f $xml_f -t ac172a50-8e66-42e5-8822-5373fcf54686 -F smoketests; done
 
 general:
   artifacts:
