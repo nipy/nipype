@@ -130,7 +130,7 @@ MAJOR = _version_major
 MINOR = _version_minor
 MICRO = _version_micro
 ISRELEASE = _version_extra == ''
-VERSION = "shoshber"
+VERSION = __version__
 PROVIDES = ['nipype']
 REQUIRES = [
     'nibabel>=%s' % NIBABEL_MIN_VERSION,
