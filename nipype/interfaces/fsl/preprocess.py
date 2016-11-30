@@ -601,9 +601,9 @@ class ApplyXfm(ApplyXFM):
     """
     def __init__(self, **inputs):
         super(ApplyXfm, self).__init__(**inputs)
-        warnings.warn(("This interface has been renamed since 0.12.1,"
-                       " please use nipype.interfaces.fsl.ApplyXFM"),
-                      UserWarning)
+        warn(('This interface has been renamed since 0.12.1, please use '
+              'nipype.interfaces.fsl.ApplyXFM'),
+             UserWarning)
 
 class MCFLIRTInputSpec(FSLCommandInputSpec):
     in_file = File(exists=True, position=0, argstr="-in %s", mandatory=True,
