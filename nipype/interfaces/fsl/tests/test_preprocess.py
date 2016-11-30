@@ -10,7 +10,7 @@ import tempfile
 import shutil
 
 from nipype.testing import (assert_equal, assert_not_equal, assert_raises,
-                            skipif)
+                            skipif, assert_true)
 
 from nipype.utils.filemanip import split_filename, filename_to_list
 from .. import preprocess as fsl
@@ -617,4 +617,5 @@ def test_first_genfname():
 
 @skipif(no_fsl)
 def test_deprecation():
-    fsl.ApplyXfm()
+    interface = fsl.ApplyXfm()
+    yield assert_true, isinstance(interface, fsl.ApplyXFM)
