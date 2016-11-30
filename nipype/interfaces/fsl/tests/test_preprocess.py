@@ -614,3 +614,7 @@ def test_first_genfname():
     value = first._gen_fname(name='original_segmentations')
     expected_value = os.path.abspath('segment_all_none_origsegs.nii.gz')
     yield assert_equal, value, expected_value
+
+@skipif(no_fsl)
+def test_deprecation():
+    fsl.ApplyXfm()
