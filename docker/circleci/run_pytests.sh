@@ -39,8 +39,8 @@ py.test --doctest-modules --cov-report xml:/scratch/coverage_py${PYTHON_VERSION}
 if [[ "${PYTHON_VERSION}" -ge "30" ]]; then
     echo '[execution]' >> /root/.nipype/nipype.cfg
     echo 'profile_runtime = true' >> /root/.nipype/nipype.cfg
-    py.test --cov-report xml:/scratch/pytest_py${PYTHON_VERSION}_profiler.xml --cov=nipype nipype/interfaces/tests/test_runtime_profiler.py #--xunit-file="/scratch/nosetests_py${PYTHON_VERSION}_profiler.xml" --cover-xml-file="/scratch/coverage_py${PYTHON_VERSION}_profiler.xml"
-    py.test --cov-report xml:/scratch/pytest_py${PYTHON_VERSION}_multiproc.xml --cov=nipype nipype/pipeline/plugins/tests/test_multiproc*.py #--xunit-file="/scratch/nosetests_py${PYTHON_VERSION}_multiproc.xml" --cover-xml-file="/scratch/coverage_py${PYTHON_VERSION}_multiproc.xml"
+    py.test --cov-report xml:/scratch/coverage_py${PYTHON_VERSION}_profiler.xml --cov=nipype nipype/interfaces/tests/test_runtime_profiler.py #--xunit-file="/scratch/nosetests_py${PYTHON_VERSION}_profiler.xml" --cover-xml-file="/scratch/coverage_py${PYTHON_VERSION}_profiler.xml"
+    py.test --cov-report xml:/scratch/coverage_py${PYTHON_VERSION}_multiproc.xml --cov=nipype nipype/pipeline/plugins/tests/test_multiproc*.py #--xunit-file="/scratch/nosetests_py${PYTHON_VERSION}_multiproc.xml" --cover-xml-file="/scratch/coverage_py${PYTHON_VERSION}_multiproc.xml"
 fi
 
 # Copy crashfiles to scratch
