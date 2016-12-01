@@ -10,7 +10,7 @@ import tempfile
 import shutil
 
 from nipype.testing import (assert_equal, assert_not_equal, assert_raises,
-                            skipif)
+                            skipif, assert_true)
 
 from nipype.utils.filemanip import split_filename, filename_to_list
 from .. import preprocess as fsl
@@ -614,3 +614,8 @@ def test_first_genfname():
     value = first._gen_fname(name='original_segmentations')
     expected_value = os.path.abspath('segment_all_none_origsegs.nii.gz')
     yield assert_equal, value, expected_value
+
+@skipif(no_fsl)
+def test_deprecation():
+    interface = fsl.ApplyXfm()
+    yield assert_true, isinstance(interface, fsl.ApplyXFM)
