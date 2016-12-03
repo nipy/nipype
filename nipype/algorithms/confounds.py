@@ -255,7 +255,7 @@ Bradley L. and Petersen, Steven E.},
             'out_file': op.abspath(self.inputs.out_file),
             'fd_average': float(fd_res.mean())
         }
-        np.savetxt(self.inputs.out_file, fd_res, header='framewise_displacement')
+        np.savetxt(self.inputs.out_file, fd_res, header='FramewiseDisplacement')
 
         if self.inputs.save_plot:
             tr = None
