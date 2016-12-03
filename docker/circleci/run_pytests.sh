@@ -23,7 +23,7 @@ fi
 # Run tests using pytest
 # NOTE_dj: this has to be improved, help needed.
 # NOTE_dj: pip install can be probably moved to dockerfiles
-# NOTE_dj: not sure if the xml files with coverage have to be created; testing pytest-cov 
+# NOTE_dj: not sure about --xunit-file part (not using with pytest for now)
 cd /root/src/nipype/
 make clean
 pip install -U pytest
@@ -34,8 +34,8 @@ py.test --doctest-modules --cov-report xml:/scratch/coverage_py${PYTHON_VERSION}
 #nosetests -s nipype -c /root/src/nipype/.noserc --xunit-file="/scratch/nosetests_py${PYTHON_VERSION}.xml" --cover-xml-file="/scratch/coverage_py${PYTHON_VERSION}.xml"
 
 # Workaround: run here the profiler tests in python 3
-# NOTE_dj: don't understand this part, 
-# NOTE_dj: removed xunit-file, cover-xml for now and testing --cov=nipype
+# NOTE_dj: not sure why this is different for python 3 and 2, is it ok that only python3 part is included in coverage?
+# NOTE_dj: I'm not sure about --xunit-file
 if [[ "${PYTHON_VERSION}" -ge "30" ]]; then
     echo '[execution]' >> /root/.nipype/nipype.cfg
     echo 'profile_runtime = true' >> /root/.nipype/nipype.cfg
