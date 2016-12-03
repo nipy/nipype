@@ -28,7 +28,7 @@ def test_fd():
 
     with open(res.outputs.out_file) as all_lines:
         for line in all_lines:
-            yield assert_in, 'framewise_displacement', line
+            yield assert_in, 'FramewiseDisplacement', line
             break
 
     yield assert_true, np.allclose(ground_truth, np.loadtxt(res.outputs.out_file), atol=.16)
