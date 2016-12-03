@@ -182,7 +182,7 @@ Bradley L. and Petersen, Steven E.},
         if self.inputs.save_all:
             out_file = self._gen_fname('dvars', ext='tsv')
             np.savetxt(out_file, np.vstack(dvars).T, fmt=b'%0.8f', delimiter=b'\t',
-                       header='std DVARS\tnon-std DVARS\tvx-wise std DVARS')
+                       header='std DVARS\tnon-std DVARS\tvx-wise std DVARS', comments='')
             self._results['out_all'] = out_file
 
         return runtime
@@ -255,7 +255,7 @@ Bradley L. and Petersen, Steven E.},
             'out_file': op.abspath(self.inputs.out_file),
             'fd_average': float(fd_res.mean())
         }
-        np.savetxt(self.inputs.out_file, fd_res, header='FramewiseDisplacement')
+        np.savetxt(self.inputs.out_file, fd_res, header='FramewiseDisplacement', comments='')
 
         if self.inputs.save_plot:
             tr = None
@@ -364,7 +364,7 @@ class CompCor(BaseInterface):
 
         self._set_header()
         np.savetxt(components_file, components, fmt=b"%.10f", delimiter='\t',
-                   header=self._make_headers(components.shape[1]))
+                   header=self._make_headers(components.shape[1]), comments='')
         return runtime
 
     def _list_outputs(self):
