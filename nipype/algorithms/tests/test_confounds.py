@@ -31,7 +31,7 @@ def test_fd():
             yield assert_in, 'FramewiseDisplacement', line
             break
 
-    yield assert_true, np.allclose(ground_truth, np.loadtxt(res.outputs.out_file), atol=.16)
+    yield assert_true, np.allclose(ground_truth, np.loadtxt(res.outputs.out_file), atol=.16, skiprows=1)
     yield assert_true, np.abs(ground_truth.mean() - res.outputs.fd_average) < 1e-2
 
     rmtree(tempdir)
@@ -49,7 +49,7 @@ def test_dvars():
 
     res = dvars.run()
 
-    dv1 = np.loadtxt(res.outputs.out_std)
+    dv1 = np.loadtxt(res.outputs.out_std, skiprows=1)
     yield assert_equal, (np.abs(dv1 - ground_truth).sum()/ len(dv1)) < 0.05, True
 
     os.chdir(origdir)
