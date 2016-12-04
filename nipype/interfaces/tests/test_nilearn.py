@@ -27,8 +27,8 @@ class TestSignalExtraction(unittest.TestCase):
         '4d_label_file': '4dlabels.nii',
         'out_file': 'signals.tsv'
     }
-    labels = ['csf', 'gray', 'white']
-    global_labels = ['global'] + labels
+    labels = ['CSF', 'GrayMatter', 'WhiteMatter']
+    global_labels = ['GlobalSignal'] + labels
 
     def setUp(self):
         self.orig_dir = os.getcwd()
