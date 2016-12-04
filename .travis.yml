@@ -28,7 +28,7 @@ before_install:
     export FSLOUTPUTTYPE=NIFTI_GZ; fi }
 - travis_retry bef_inst
 install:
-#  Add install of vtk and mayavi to test mesh (disabled): conda install -y vtk mayavi &&
+# testing travis  Add install of vtk and mayavi to test mesh (disabled): conda install -y vtk mayavi &&
 - function inst {
   conda config --add channels conda-forge &&
   conda update --yes conda &&
