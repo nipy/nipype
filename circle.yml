@@ -55,8 +55,8 @@ test:
 
   post:
     - bash docker/circleci/teardown.sh
-    - for xml_f in ${CIRCLE_TEST_REPORTS}/pytest/coverage*.xml; do bash <(curl -s https://codecov.io/bash) -f $xml_f -t ac172a50-8e66-42e5-8822-5373fcf54686 -F unittests; done
-    - for xml_f in ${CIRCLE_TEST_REPORTS}/pytest/smoketest*.xml; do bash <(curl -s https://codecov.io/bash) -f $xml_f -t ac172a50-8e66-42e5-8822-5373fcf54686 -F smoketests; done
+    #- for xml_f in ${CIRCLE_TEST_REPORTS}/pytest/coverage*.xml; do bash <(curl -s https://codecov.io/bash) -f $xml_f -t ac172a50-8e66-42e5-8822-5373fcf54686 -F unittests; done
+    #- for xml_f in ${CIRCLE_TEST_REPORTS}/pytest/smoketest*.xml; do bash <(curl -s https://codecov.io/bash) -f $xml_f -t ac172a50-8e66-42e5-8822-5373fcf54686 -F smoketests; done
 
 general:
   artifacts:
