@@ -34,7 +34,7 @@ install:
   conda update --yes conda &&
   conda update --all -y python=$TRAVIS_PYTHON_VERSION pytest &&
   pip install pytest-raisesregexp &&
-  pip install pytest-cov &&
+  #pip install pytest-cov &&
   pip install click && 
   conda install -y nipype &&
   rm -r /home/travis/miniconda/lib/python${TRAVIS_PYTHON_VERSION}/site-packages/nipype* &&
