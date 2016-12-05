@@ -26,10 +26,10 @@ fi
 # NOTE_dj: not sure about --xunit-file part (not using with pytest for now)
 cd /root/src/nipype/
 make clean
-pip install -U pytest
+conda install pytest
 pip install pytest-raisesregexp
-pip install pytest-cov
-pip install click
+conda install pytest-cov
+conda install click
 py.test --doctest-modules --cov-report xml:/scratch/coverage_py${PYTHON_VERSION}.xml --cov=nipype nipype
 #nosetests -s nipype -c /root/src/nipype/.noserc --xunit-file="/scratch/nosetests_py${PYTHON_VERSION}.xml" --cover-xml-file="/scratch/coverage_py${PYTHON_VERSION}.xml"
 
