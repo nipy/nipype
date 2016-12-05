@@ -10,7 +10,7 @@ import tempfile
 import shutil
 
 import pytest
-from nipype.utils.filemanip import split_filename
+from nipype.utils.filemanip import split_filename, filename_to_list
 from .. import preprocess as fsl
 from nipype.interfaces.fsl import Info
 from nipype.interfaces.base import File, TraitError, Undefined, isdefined
@@ -163,8 +163,9 @@ def test_fast(setup_infile):
         assert faster.cmdline == ' '.join([faster.cmd, settings[0],
                                            "-S 1 %s" % tmp_infile])
 
-@skipif(no_fsl)
-def test_fast_list_outputs():
+
+@pytest.mark.skipif(no_fsl(), reason="fsl is not installed")
+def test_fast_list_outputs(setup_infile):
     ''' By default (no -o), FSL's fast command outputs files into the same
     directory as the input files. If the flag -o is set, it outputs files into
     the cwd '''
@@ -174,13 +175,14 @@ def test_fast_list_outputs():
             filenames = filename_to_list(output)
             if filenames is not None:
                 for filename in filenames:
-                    assert_equal(filename[:len(output_base)], output_base)
+                    assert filename[:len(output_base)] == output_base
 
     # set up
-    infile, indir = setup_infile()
+    #NOTE_dj: checking with Shoshana if my changes are ok
+    tmp_infile, indir = setup_infile
     cwd = tempfile.mkdtemp()
     os.chdir(cwd)
-    yield assert_not_equal, indir, cwd
+    assert indir != cwd
     out_basename = 'a_basename'
 
     # run and test
@@ -190,6 +192,7 @@ def test_fast_list_outputs():
 
     opts['out_basename'] = out_basename
     _run_and_test(opts, os.path.join(cwd, out_basename))
+
 
 @pytest.fixture()
 def setup_flirt(request):
