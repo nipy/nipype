@@ -10,6 +10,7 @@ from builtins import range, open
 import os
 from tempfile import mkdtemp
 from shutil import rmtree
+import pytest
 
 import nipype.pipeline.engine as pe
 from nipype.interfaces.utility import Function
@@ -89,8 +90,8 @@ def mytestFunction(insum=0):
     return total
 
 
-# Disabled until https://github.com/nipy/nipype/issues/1692 is resolved
-@skipif(os.environ.get('TRAVIS_PYTHON_VERSION', '') == '2.7')
+@pytest.mark.skipif(os.environ.get('TRAVIS_PYTHON_VERSION', '') == '2.7',
+                    reason="Disabled until https://github.com/nipy/nipype/issues/1692 is resolved")
 def run_multiproc_nondaemon_with_flag(nondaemon_flag):
     '''
     Start a pipe with two nodes using the resource multiproc plugin and
@@ -132,8 +133,8 @@ def run_multiproc_nondaemon_with_flag(nondaemon_flag):
     return result
 
 
-# Disabled until https://github.com/nipy/nipype/issues/1692 is resolved
-@skipif(os.environ.get('TRAVIS_PYTHON_VERSION', '') == '2.7')
+@pytest.mark.skipif(os.environ.get('TRAVIS_PYTHON_VERSION', '') == '2.7',
+                    reason="Disabled until https://github.com/nipy/nipype/issues/1692 is resolved")
 def test_run_multiproc_nondaemon_false():
     '''
     This is the entry point for the test. Two times a pipe of several multiprocessing jobs gets
@@ -151,8 +152,8 @@ def test_run_multiproc_nondaemon_false():
     assert shouldHaveFailed
 
 
-# Disabled until https://github.com/nipy/nipype/issues/1692 is resolved
-@skipif(os.environ.get('TRAVIS_PYTHON_VERSION', '') == '2.7')
+@pytest.mark.skipif(os.environ.get('TRAVIS_PYTHON_VERSION', '') == '2.7',
+                    reason="Disabled until https://github.com/nipy/nipype/issues/1692 is resolved")
 def test_run_multiproc_nondaemon_true():
     # with nondaemon_flag = True, the execution should succeed
     result = run_multiproc_nondaemon_with_flag(True)

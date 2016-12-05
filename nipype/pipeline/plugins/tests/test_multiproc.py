@@ -118,8 +118,9 @@ def find_metrics(nodes, last_node):
 
     return total_memory, total_threads
 
-# Disabled until https://github.com/nipy/nipype/issues/1692 is resolved
-@skipif(os.environ.get('TRAVIS_PYTHON_VERSION') == '2.7')
+
+@pytest.mark.skipif(os.environ.get('TRAVIS_PYTHON_VERSION') == '2.7',
+                    reason="Disabled until https://github.com/nipy/nipype/issues/1692 is resolved")
 def test_no_more_memory_than_specified():
     LOG_FILENAME = 'callback.log'
     my_logger = logging.getLogger('callback')
