@@ -21,15 +21,9 @@ if [[ "${PYTHON_VERSION}" -lt "30" ]]; then
 fi
 
 # Run tests using pytest
-# NOTE_dj: this has to be improved, help needed.
-# NOTE_dj: pip install can be probably moved to dockerfiles
 # NOTE_dj: not sure about --xunit-file part (not using with pytest for now)
 cd /root/src/nipype/
 make clean
-conda install pytest
-pip install pytest-raisesregexp
-conda install pytest-cov
-conda install click
 py.test --doctest-modules --cov-report xml:/scratch/coverage_py${PYTHON_VERSION}.xml --cov=nipype nipype
 #nosetests -s nipype -c /root/src/nipype/.noserc --xunit-file="/scratch/nosetests_py${PYTHON_VERSION}.xml" --cover-xml-file="/scratch/coverage_py${PYTHON_VERSION}.xml"
 
