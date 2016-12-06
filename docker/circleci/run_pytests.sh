@@ -21,20 +21,17 @@ if [[ "${PYTHON_VERSION}" -lt "30" ]]; then
 fi
 
 # Run tests using pytest
-# NOTE_dj: not sure about --xunit-file part (not using with pytest for now)
 cd /root/src/nipype/
 make clean
 py.test --doctest-modules --cov-report xml:/scratch/coverage_py${PYTHON_VERSION}.xml --cov=nipype nipype
-#nosetests -s nipype -c /root/src/nipype/.noserc --xunit-file="/scratch/nosetests_py${PYTHON_VERSION}.xml" --cover-xml-file="/scratch/coverage_py${PYTHON_VERSION}.xml"
+
 
 # Workaround: run here the profiler tests in python 3
-# NOTE_dj: not sure why this is different for python 3 and 2, is it ok that only python3 part is included in coverage?
-# NOTE_dj: I'm not sure about --xunit-file
 if [[ "${PYTHON_VERSION}" -ge "30" ]]; then
     echo '[execution]' >> /root/.nipype/nipype.cfg
     echo 'profile_runtime = true' >> /root/.nipype/nipype.cfg
-    py.test --cov-report xml:/scratch/coverage_py${PYTHON_VERSION}_profiler.xml --cov=nipype nipype/interfaces/tests/test_runtime_profiler.py #--xunit-file="/scratch/nosetests_py${PYTHON_VERSION}_profiler.xml" --cover-xml-file="/scratch/coverage_py${PYTHON_VERSION}_profiler.xml"
-    py.test --cov-report xml:/scratch/coverage_py${PYTHON_VERSION}_multiproc.xml --cov=nipype nipype/pipeline/plugins/tests/test_multiproc*.py #--xunit-file="/scratch/nosetests_py${PYTHON_VERSION}_multiproc.xml" --cover-xml-file="/scratch/coverage_py${PYTHON_VERSION}_multiproc.xml"
+    py.test --cov-report xml:/scratch/coverage_py${PYTHON_VERSION}_profiler.xml --cov=nipype nipype/interfaces/tests/test_runtime_profiler.py 
+    py.test --cov-report xml:/scratch/coverage_py${PYTHON_VERSION}_multiproc.xml --cov=nipype nipype/pipeline/plugins/tests/test_multiproc*.py 
 fi
 
 # Copy crashfiles to scratch
