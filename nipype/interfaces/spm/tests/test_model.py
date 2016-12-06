@@ -4,7 +4,6 @@
 import os
 
 import nipype.interfaces.spm.model as spm
-from nipype.interfaces.spm import no_spm #NOTE_dj:it is NOT used, should I create skipif??
 import nipype.interfaces.matlab as mlab
 
 try:

@@ -69,7 +69,7 @@ def test_bunch_hash():
     assert newbdict['infile'][0][1] == jshash.hexdigest()
     assert newbdict['yat'] == True
 
-#NOTE_dj: is it ok to change the scope to scope="module"
+
 @pytest.fixture(scope="module")
 def setup_file(request, tmpdir_factory):
     tmp_dir = str(tmpdir_factory.mktemp('files'))
@@ -146,8 +146,7 @@ def test_TraitedSpec_logic():
     myif.inputs.kung = 2
     assert myif.inputs.kung == 2.0
 
-#NOTE_dj: don't understand this test. 
-#NOTE_dj: it looks like it does many times the same things
+
 def test_deprecation():
     with warnings.catch_warnings(record=True) as w:
         warnings.filterwarnings('always', '', UserWarning)

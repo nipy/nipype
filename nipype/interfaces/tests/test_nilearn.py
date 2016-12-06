@@ -6,15 +6,13 @@ import shutil
 
 import numpy as np
 
-#NOTE_dj: can we change the imports, so it's more clear where the function come from
-#NOTE_dj: in ...testing there is simply from numpy.testing import * 
 from ...testing import utils
 from numpy.testing import assert_almost_equal 
 
 from .. import nilearn as iface
 from ...pipeline import engine as pe
 
-import pytest, pdb
+import pytest
 
 no_nilearn = True
 try:

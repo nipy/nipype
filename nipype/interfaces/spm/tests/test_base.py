@@ -55,7 +55,6 @@ def test_scan_for_fnames(create_files_in_directory):
     assert names[1] == filelist[1]
   
 
-#NOTE_dj: should I remove save_time?? it's probably not used
 save_time = False
 if not save_time:
     @pytest.mark.skipif(no_spm(), reason="spm is not installed")

@@ -16,7 +16,6 @@ from nipype.interfaces.fsl import Info
 from nipype.interfaces.base import File, TraitError, Undefined, isdefined
 from nipype.interfaces.fsl import no_fsl
 
-#NOTE_dj: the file contains many very long test, I might try to split and use parametrize
 
 def fsl_name(obj, fname):
     """Create valid fsl name, including file extension for output type.
@@ -176,7 +175,6 @@ def test_fast_list_outputs(setup_infile):
                     assert filename[:len(output_base)] == output_base
 
     # set up
-    #NOTE_dj: checking with Shoshana if my changes are ok
     tmp_infile, indir = setup_infile
     cwd = tempfile.mkdtemp()
     os.chdir(cwd)
