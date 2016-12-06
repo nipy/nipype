@@ -15,10 +15,6 @@ from nipype.interfaces.fsl import no_fsl, Info
 
 from .test_maths import (set_output_type, create_files_in_directory)
 
-#NOTE_dj: didn't know that some functions are shared between tests files 
-#NOTE_dj: and changed create_files_in_directory to a fixture with parameters
-#NOTE_dj: I believe there's no way to use this fixture for one parameter only 
-#NOTE_dj: the test works fine for all params so can either leave it as it is or create a new fixture
 
 @pytest.mark.skipif(no_fsl(), reason="fsl is not installed")
 def test_fslroi(create_files_in_directory):

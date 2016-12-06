@@ -9,9 +9,6 @@ from nipype.interfaces.fsl import check_fsl, no_fsl
 
 import pytest
 
-
-#NOTE_dj: a function, e.g. "no_fsl" always gives True, shuld always change to no_fsl in pytest skipif
-#NOTE_dj: removed the IF statement, since skipif is used? 
 @pytest.mark.skipif(no_fsl(), reason="fsl is not installed") 
 def test_fslversion():
     ver = fsl.Info.version()
@@ -64,7 +61,7 @@ def test_FSLCommand2():
 
 @pytest.mark.skipif(no_fsl(), reason="fsl is not installed")
 @pytest.mark.parametrize("args, desired_name", 
-                         [({},   {"file": 'foo.nii.gz'}), # just the filename #NOTE_dj: changed slightly the test to meet description "just the file" 
+                         [({},   {"file": 'foo.nii.gz'}), # just the filename 
                           ({"suffix": '_brain'}, {"file": 'foo_brain.nii.gz'}), # filename with suffix 
                           ({"suffix": '_brain', "cwd": '/data'}, 
                            {"dir": '/data', "file": 'foo_brain.nii.gz'}), # filename with suffix and working directory 

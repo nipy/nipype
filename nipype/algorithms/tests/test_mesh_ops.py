@@ -11,8 +11,6 @@ import numpy as np
 from nipype.algorithms import mesh as m
 from ...interfaces import vtkbase as VTKInfo
 
-#NOTE_dj: I moved all tests of errors reports to a new test function
-#NOTE_dj: some tests are empty
 
 @pytest.mark.skipif(VTKInfo.no_tvtk(), reason="tvtk is not installed")
 def test_ident_distances(tmpdir):

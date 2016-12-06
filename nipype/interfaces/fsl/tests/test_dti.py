@@ -19,7 +19,6 @@ from nipype.interfaces.base import Undefined
 
 import pytest, pdb
 
-#NOTE_dj: this file contains not finished tests (search xfail) and function that are not used
 
 @pytest.fixture(scope="module")
 def create_files_in_directory(request):
@@ -69,33 +68,6 @@ def test_dtifit2(create_files_in_directory):
                                                                        filelist[1],
                                                                        filelist[0],
                                                                        filelist[1])
-
-
-#NOTE_dj: setup/teardown_tbss are not used! 
-#NOTE_dj: should be removed or will be used in the tests that are not finished?
-# Globals to store paths for tbss tests
-tbss_dir = None
-test_dir = None
-
-
-def setup_tbss():
-    # Setup function is called before each test.  Setup is called only
-    # once for each generator function.
-    global tbss_dir, tbss_files, test_dir
-    test_dir = os.getcwd()
-    tbss_dir = mkdtemp()
-    os.chdir(tbss_dir)
-    tbss_files = ['a.nii', 'b.nii']
-    for f in tbss_files:
-        fp = open(f, 'wt')
-        fp.write('dummy')
-        fp.close()
-
-
-def teardown_tbss():
-    # Teardown is called after each test to perform cleanup
-    os.chdir(test_dir)
-    rmtree(tbss_dir)
 
 
 @pytest.mark.xfail(reason="These tests are skipped until we clean up some of this code") 

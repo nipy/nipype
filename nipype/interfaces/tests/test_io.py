@@ -60,8 +60,6 @@ def test_s3datagrabber():
     assert dg.inputs.template_args == {'outfiles': []}
 
 
-# NOTE_dj: changed one long test for a shorter one with parametrize; for every template and set of attributes I'm checking now the same set of fields using assert
-# NOTE_dj: in io.py, an example has different syntax with a node  dg = Node(SelectFiles(templates), "selectfiles")
 templates1 = {"model": "interfaces/{package}/model.py",
              "preprocess": "interfaces/{package}/pre*.py"}
 templates2 = {"converter": "interfaces/dcm{to!s}nii.py"}
@@ -404,7 +402,7 @@ def test_freesurfersource():
     assert fss.inputs.subject_id == Undefined
     assert fss.inputs.subjects_dir == Undefined
 
-#NOTE_dj: I split the test_jsonsink, didn't find connection between two parts, could easier use parametrize for the second part
+
 def test_jsonsink_input(tmpdir):
 
     ds = nio.JSONFileSink()

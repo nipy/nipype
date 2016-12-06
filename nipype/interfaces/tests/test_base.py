@@ -485,7 +485,6 @@ def test_input_version():
     class DerivedInterface1(nib.BaseInterface):
         input_spec = InputSpec
     obj = DerivedInterface1()
-    #NOTE_dj: removed yield assert_not_raises, if it raises the test will fail anyway
     obj._check_version_requirements(obj.inputs)
 
     config.set('execution', 'stop_on_unknown_version', True)
@@ -511,7 +510,6 @@ def test_input_version():
         input_spec = InputSpec
         _version = '0.10'
     obj = DerivedInterface1()
-    #NOTE_dj: removed yield assert_not_raises
     obj._check_version_requirements(obj.inputs)
 
     class InputSpec(nib.TraitedSpec):
@@ -523,7 +521,6 @@ def test_input_version():
     obj = DerivedInterface1()
     obj.inputs.foo = 1
     not_raised = True
-    #NOTE_dj: removed yield assert_not_raises
     obj._check_version_requirements(obj.inputs)
 
     class InputSpec(nib.TraitedSpec):
@@ -545,7 +542,6 @@ def test_input_version():
     obj = DerivedInterface1()
     obj.inputs.foo = 1
     not_raised = True
-    #NOTE_dj: removed yield assert_not_raises
     obj._check_version_requirements(obj.inputs)
 
 
@@ -712,11 +708,6 @@ def test_global_CommandLine_output(setup_file):
     res = ci.run()
     assert res.runtime.stdout == ''
 
-#NOTE_dj: not sure if this function is needed
-#NOTE_dj: if my changes are accepted, I'll remove it
-def assert_not_raises(fn, *args, **kwargs):
-    fn(*args, **kwargs)
-    return True
 
 def check_dict(ref_dict, tst_dict):
     """Compare dictionaries of inputs and and those loaded from json files"""

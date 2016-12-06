@@ -25,8 +25,6 @@ def fsl_name(obj, fname):
     return fname + ext
 
 
-#NOTE_dj: can't find reason why the global variables are needed, removed
-
 @pytest.fixture()
 def setup_infile(request):
     ext = Info.output_type_to_ext(Info.output_type())
@@ -511,8 +509,6 @@ def test_applywarp(setup_flirt):
                                         settings[0])
         assert awarp.cmdline == realcmd
 
-    #NOTE_dj: removed a new definition of awarp, not sure why this was at the end of the test
-
    
 @pytest.fixture(scope="module")
 def setup_fugue(request):
@@ -551,7 +547,6 @@ def test_fugue(setup_fugue, attr, out_file):
         else: setattr(fugue.inputs, key, value)
     res = fugue.run()
 
-    # NOTE_dj: believe that don't have to use if, since pytest would stop here anyway  
     assert isdefined(getattr(res.outputs,out_file))
     trait_spec = fugue.inputs.trait(out_file)
     out_name = trait_spec.name_template % 'dumbfile'

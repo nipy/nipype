@@ -18,8 +18,6 @@ import pytest
 from ... import engine as pe
 from ....interfaces import base as nib
 
-#NOTE_dj: I combined some tests that didn't have any extra description
-#NOTE_dj: some other test can be combined but could be harder to read as examples of usage
 
 class InputSpec(nib.TraitedSpec):
     input1 = nib.traits.Int(desc='a random int')

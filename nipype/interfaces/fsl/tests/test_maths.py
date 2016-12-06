@@ -19,9 +19,6 @@ from nipype.interfaces.fsl.base import FSLCommand
 
 import pytest
 
-#NOTE_dj: i've changed a lot in the general structure of the file (not in the test themselves)
-#NOTE_dj: set_output_type has been changed to fixture that calls  create_files_in_directory
-#NOTE_dj: used params within the fixture to recreate test_all_again, hope this is what the author had in mind...
 
 def set_output_type(fsl_output_type):
     prev_output_type = os.environ.get('FSLOUTPUTTYPE', None)
@@ -37,7 +34,6 @@ def set_output_type(fsl_output_type):
 
 @pytest.fixture(params=[None]+list(Info.ftypes))
 def create_files_in_directory(request):
-    #NOTE_dj: removed set_output_type from test functions
     func_prev_type = set_output_type(request.param)
 
     testdir = os.path.realpath(mkdtemp())

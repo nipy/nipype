@@ -10,7 +10,6 @@ import pytest
 import nipype.interfaces.fsl.model as fsl
 from nipype.interfaces.fsl import no_fsl
 
-# NOTE_dj: couldn't find any reason to keep setup_file (most things were not used in the test), so i removed it
 
 @pytest.mark.skipif(no_fsl(), reason="fsl is not installed")
 def test_MultipleRegressDesign(tmpdir):
