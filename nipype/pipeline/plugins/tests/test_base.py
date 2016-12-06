@@ -12,7 +12,6 @@ import mock
 from nipype.testing import assert_regexp_matches
 import nipype.pipeline.plugins.base as pb
 
-#NOTE_dj: didn't remove the mock library
 
 def test_scipy_sparse():
     foo = ssp.lil_matrix(np.eye(3, k=1))

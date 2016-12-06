@@ -11,7 +11,6 @@ import nibabel as nb
 import numpy as np
 import os
 
-#NOTE_dj: haven't removed mock (have to understand better)
 
 class TestTSNR():
     ''' Note: Tests currently do a poor job of testing functionality '''

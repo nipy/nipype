@@ -10,7 +10,6 @@ config.set_default_config()
 
 nb_runs = 0
 
-#NOTE_dj: confg_set can be probably done by monkeypatching (TODO)
 
 class SideEffectInterface(EngineTestInterface):
 
