@@ -150,8 +150,8 @@ REQUIRES = [
 
 TESTS_REQUIRES = [
     'pytest>=%s' % PYTEST_MIN_VERSION,
-    'pytest-raisesregexp'
-    'pytest-cov'
+    'pytest-raisesregexp',
+    'pytest-cov',
     'mock',
     'codecov',
     'dipy',
