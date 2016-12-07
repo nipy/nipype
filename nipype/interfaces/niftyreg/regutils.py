@@ -41,6 +41,13 @@ class RegResampleInputSpec(CommandLineInputSpec):
                               argstr='-tensor ')
     # Verbosity off
     verbosity_off_flag = traits.Bool(argstr='-voff', desc='Turn off verbose output')
+    # PSF flag
+    psf_flag = traits.Bool(argstr='-psf',
+                           desc='Perform the resampling in two steps to resample an image to a lower resolution')
+
+    psf_alg = traits.Enum(0,1, argstr='-psf_alg %i',
+                         desc='Minimise the matrix metric (0) or the determinant (1) when estimating the PSF [0]')
+
     # Set the number of omp thread to use
     omp_core_val = traits.Int(desc='Number of openmp thread to use',
                               argstr='-omp %i')
