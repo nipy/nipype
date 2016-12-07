@@ -7,7 +7,7 @@ from __future__ import print_function, division, unicode_literals, absolute_impo
 from builtins import range, open
 
 # Import packages
-import os
+import os, sys
 from tempfile import mkdtemp
 from shutil import rmtree
 import pytest
@@ -90,7 +90,7 @@ def mytestFunction(insum=0):
     return total
 
 
-@pytest.mark.skipif(os.environ.get('TRAVIS_PYTHON_VERSION', '') == '2.7',
+@pytest.mark.skipif(sys.version_info < (3, 0),
                     reason="Disabled until https://github.com/nipy/nipype/issues/1692 is resolved")
 def run_multiproc_nondaemon_with_flag(nondaemon_flag):
     '''
@@ -133,7 +133,7 @@ def run_multiproc_nondaemon_with_flag(nondaemon_flag):
     return result
 
 
-@pytest.mark.skipif(os.environ.get('TRAVIS_PYTHON_VERSION', '') == '2.7',
+@pytest.mark.skipif(sys.version_info < (3, 0),
                     reason="Disabled until https://github.com/nipy/nipype/issues/1692 is resolved")
 def test_run_multiproc_nondaemon_false():
     '''
@@ -152,7 +152,7 @@ def test_run_multiproc_nondaemon_false():
     assert shouldHaveFailed
 
 
-@pytest.mark.skipif(os.environ.get('TRAVIS_PYTHON_VERSION', '') == '2.7',
+@pytest.mark.skipif(sys.version_info < (3, 0),
                     reason="Disabled until https://github.com/nipy/nipype/issues/1692 is resolved")
 def test_run_multiproc_nondaemon_true():
     # with nondaemon_flag = True, the execution should succeed
