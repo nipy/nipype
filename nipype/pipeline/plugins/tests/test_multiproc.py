@@ -34,13 +34,11 @@ class TestInterface(nib.BaseInterface):
         outputs['output1'] = [1, self.inputs.input1]
         return outputs
 
-# Disabled until https://github.com/nipy/nipype/issues/1692 is resolved
-@skipif(os.environ.get('TRAVIS_PYTHON_VERSION', '') == '2.7')
 def test_run_multiproc():
     cur_dir = os.getcwd()
     temp_dir = mkdtemp(prefix='test_engine_')
     os.chdir(temp_dir)
-
+    global pipe
     pipe = pe.Workflow(name='pipe')
     mod1 = pe.Node(interface=TestInterface(), name='mod1')
     mod2 = pe.MapNode(interface=TestInterface(),
@@ -50,6 +48,7 @@ def test_run_multiproc():
     pipe.base_dir = os.getcwd()
     mod1.inputs.input1 = 1
     pipe.config['execution']['poll_sleep_duration'] = 2
+    global execgraph
     execgraph = pipe.run(plugin="MultiProc")
     names = ['.'.join((node._hierarchy, node.name)) for node in execgraph.nodes()]
     node = execgraph.nodes()[names.index('pipe.mod1')]
@@ -57,6 +56,8 @@ def test_run_multiproc():
     yield assert_equal, result, [1, 1]
     os.chdir(cur_dir)
     rmtree(temp_dir)
+    del pipe
+    del execgraph
 
 
 class InputSpecSingleNode(nib.TraitedSpec):
@@ -123,8 +124,6 @@ def find_metrics(nodes, last_node):
 
     return total_memory, total_threads
 
-# Disabled until https://github.com/nipy/nipype/issues/1692 is resolved
-@skipif(os.environ.get('TRAVIS_PYTHON_VERSION') == '2.7')
 def test_no_more_memory_than_specified():
     LOG_FILENAME = 'callback.log'
     my_logger = logging.getLogger('callback')
@@ -135,6 +134,7 @@ def test_no_more_memory_than_specified():
     my_logger.addHandler(handler)
 
     max_memory = 1
+    global pipe 
     pipe = pe.Workflow(name='pipe')
     n1 = pe.Node(interface=TestInterfaceSingleNode(), name='n1')
     n2 = pe.Node(interface=TestInterfaceSingleNode(), name='n2')
@@ -182,9 +182,9 @@ def test_no_more_memory_than_specified():
           "using more threads than system has (threads is not specified by user)"
 
     os.remove(LOG_FILENAME)
+    del pipe
 
-# Disabled until https://github.com/nipy/nipype/issues/1692 is resolved
-@skipif(os.environ.get('TRAVIS_PYTHON_VERSION') == '2.7')
+
 @skipif(nib.runtime_profile == False)
 def test_no_more_threads_than_specified():
     LOG_FILENAME = 'callback.log'
@@ -196,6 +196,7 @@ def test_no_more_threads_than_specified():
     my_logger.addHandler(handler)
 
     max_threads = 4
+    global pipe
     pipe = pe.Workflow(name='pipe')
     n1 = pe.Node(interface=TestInterfaceSingleNode(), name='n1')
     n2 = pe.Node(interface=TestInterfaceSingleNode(), name='n2')
@@ -239,3 +240,4 @@ def test_no_more_threads_than_specified():
           "using more memory than system has (memory is not specified by user)"
 
     os.remove(LOG_FILENAME)
+    del pipe
