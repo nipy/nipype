@@ -138,7 +138,7 @@ def test_no_more_memory_than_specified():
     my_logger.addHandler(handler)
 
     max_memory = 1
-    global pipe
+    global pipe 
     pipe = pe.Workflow(name='pipe')
     n1 = pe.Node(interface=TestInterfaceSingleNode(), name='n1')
     n2 = pe.Node(interface=TestInterfaceSingleNode(), name='n2')
