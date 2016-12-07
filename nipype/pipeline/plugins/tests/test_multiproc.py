@@ -34,8 +34,6 @@ class TestInterface(nib.BaseInterface):
         outputs['output1'] = [1, self.inputs.input1]
         return outputs
 
-# Disabled until https://github.com/nipy/nipype/issues/1692 is resolved
-@skipif(os.environ.get('TRAVIS_PYTHON_VERSION', '') == '2.7')
 def test_run_multiproc():
     cur_dir = os.getcwd()
     temp_dir = mkdtemp(prefix='test_engine_')
@@ -126,8 +124,6 @@ def find_metrics(nodes, last_node):
 
     return total_memory, total_threads
 
-# Disabled until https://github.com/nipy/nipype/issues/1692 is resolved
-@skipif(os.environ.get('TRAVIS_PYTHON_VERSION') == '2.7')
 def test_no_more_memory_than_specified():
     LOG_FILENAME = 'callback.log'
     my_logger = logging.getLogger('callback')
@@ -188,8 +184,7 @@ def test_no_more_memory_than_specified():
     os.remove(LOG_FILENAME)
     del pipe
 
-# Disabled until https://github.com/nipy/nipype/issues/1692 is resolved
-@skipif(os.environ.get('TRAVIS_PYTHON_VERSION') == '2.7')
+
 @skipif(nib.runtime_profile == False)
 def test_no_more_threads_than_specified():
     LOG_FILENAME = 'callback.log'
