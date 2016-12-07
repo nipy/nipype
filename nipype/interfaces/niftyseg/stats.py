@@ -6,29 +6,37 @@ that can be performed with the niftysegstats (seg_stats) command-line program.
 """
 import numpy as np
 
-from nipype.interfaces.niftyseg.base import NIFTYSEGCommand, \
-                    NIFTYSEGCommandInputSpec, getNiftySegPath
-from nipype.interfaces.base import (TraitedSpec, File, traits)
+from nipype.interfaces.niftyseg.base import NiftySegCommand, get_custom_path
+from nipype.interfaces.base import (TraitedSpec, File, traits,
+                                    CommandLineInputSpec)
 
 
-class StatsInput(NIFTYSEGCommandInputSpec):
+class StatsInput(CommandLineInputSpec):
+    """Input Spec for seg_stats interfaces."""
     in_file = File(position=2, argstr='%s', exists=True, mandatory=True,
                    desc='image to operate on')
+    # Constrains
     mask_file = File(exists=True, mandatory=False, position=-2, argstr='-m %s',
                      desc='statistics within the masked area')
+    larger_voxel = traits.Float(
+        argstr='-t %f', mandatory=False, position=-3,
+        desc='Only estimate statistics if voxel is larger than <float>')
 
 
 class StatsOutput(TraitedSpec):
+    """Output Spec for seg_stats interfaces."""
     output = traits.Array(desc='Output array from seg_stats')
 
 
-class StatsCommand(NIFTYSEGCommand):
-    _cmd = getNiftySegPath('seg_stats')
+class StatsCommand(NiftySegCommand):
+    """Base interface for seg_stats interfaces."""
+    _cmd = get_custom_path('seg_stats')
     input_spec = StatsInput
     output_spec = StatsOutput
 
 
 class UnaryStatsInput(StatsInput):
+    """Input Spec for seg_stats unary operations."""
     operation = traits.Enum('r', 'R', 'a', 's', 'v', 'vl', 'vp', 'n', 'np',
                             'e', 'ne', 'x', 'X', 'c', 'B', 'xvox', 'xdim',
                             argstr='-%s', position=4, mandatory=True,
@@ -37,8 +45,8 @@ class UnaryStatsInput(StatsInput):
 
 class UnaryStats(StatsCommand):
     """
-    Use niftysegstats (seg_stats) to calculate statistics on an image.
-    mandatory input specs is in_file
+    Use seg_stats to perform a variety of mathematical binary operations.
+    mandatory input specs is in_file.
 
     Note: All NaN or Inf are ignored for all stats.
           The -m and -t options can be used in conjusction.
@@ -115,6 +123,7 @@ class UnaryStats(StatsCommand):
 
 
 class BinaryStatsInput(StatsInput):
+    """Input Spec for seg_stats Binary operations."""
     operation = traits.Enum('p', 'd', 'al', 'ncc', 'nmi', 'sa', 'ss', 'svp',
                             mandatory=True, argstr='-%s', position=4,
                             desc='operation to perform')
