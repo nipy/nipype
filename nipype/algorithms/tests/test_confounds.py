@@ -27,6 +27,8 @@ def test_fd(tmpdir):
 
     with open(res.outputs.out_file) as all_lines:
         for line in all_lines:
+            assert 'FramewiseDisplacement' in line
+            break
 
     assert np.allclose(ground_truth, np.loadtxt(res.outputs.out_file, skiprows=1), atol=.16)
     assert np.abs(ground_truth.mean() - res.outputs.fd_average) < 1e-2
