@@ -1,11 +1,12 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 
-from ...testing import (assert_equal, assert_almost_equal, utils)
+from ...testing import utils
 from ..confounds import TSNR
 from .. import misc
 
 import pytest
+import numpy.testing as npt
 import mock
 import nibabel as nb
 import numpy as np
@@ -94,8 +95,8 @@ class TestTSNR():
         assert True in [args[0].count('confounds') > 0 for _, args, _ in mock_warn.mock_calls]
 
     def assert_expected_outputs_poly(self, tsnrresult, expected_ranges):
-        assert_equal(os.path.basename(tsnrresult.outputs.detrended_file),
-                     self.out_filenames['detrended_file'])
+        assert os.path.basename(tsnrresult.outputs.detrended_file) == \
+            self.out_filenames['detrended_file']
         self.assert_expected_outputs(tsnrresult, expected_ranges)
 
     def assert_expected_outputs(self, tsnrresult, expected_ranges):
@@ -103,18 +104,18 @@ class TestTSNR():
         self.assert_unchanged(expected_ranges)
 
     def assert_default_outputs(self, outputs):
-        assert_equal(os.path.basename(outputs.mean_file),
-                     self.out_filenames['mean_file'])
-        assert_equal(os.path.basename(outputs.stddev_file),
-                     self.out_filenames['stddev_file'])
-        assert_equal(os.path.basename(outputs.tsnr_file),
-                     self.out_filenames['tsnr_file'])
+        assert os.path.basename(outputs.mean_file) == \
+            self.out_filenames['mean_file']
+        assert os.path.basename(outputs.stddev_file) == \
+            self.out_filenames['stddev_file']
+        assert os.path.basename(outputs.tsnr_file) == \
+            self.out_filenames['tsnr_file']
 
     def assert_unchanged(self, expected_ranges):
         for key, (min_, max_) in expected_ranges.items():
             data = np.asarray(nb.load(self.out_filenames[key])._data)
-            assert_almost_equal(np.amin(data), min_, decimal=1)
-            assert_almost_equal(np.amax(data), max_, decimal=1)
+            npt.assert_almost_equal(np.amin(data), min_, decimal=1)
+            npt.assert_almost_equal(np.amax(data), max_, decimal=1)
 
 
     fake_data = np.array([[[[2, 4, 3, 9, 1],

@@ -6,7 +6,8 @@
 import os
 
 import pytest
-from nipype.testing import assert_almost_equal, example_data
+import nipype.testing as npt
+from nipype.testing import example_data
 import numpy as np
 from nipype.algorithms import mesh as m
 from ...interfaces import vtkbase as VTKInfo
@@ -56,10 +57,10 @@ def test_trans_distances(tmpdir):
     dist.inputs.surface2 = warped_surf
     dist.inputs.out_file = os.path.join(tempdir, 'distance.npy')
     res = dist.run()
-    assert_almost_equal(res.outputs.distance, np.linalg.norm(inc), 4)
+    npt.assert_almost_equal(res.outputs.distance, np.linalg.norm(inc), 4)
     dist.inputs.weighting = 'area'
     res = dist.run()
-    assert_almost_equal(res.outputs.distance, np.linalg.norm(inc), 4)
+    npt.assert_almost_equal(res.outputs.distance, np.linalg.norm(inc), 4)
 
 
 @pytest.mark.skipif(VTKInfo.no_tvtk(), reason="tvtk is not installed")

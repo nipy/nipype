@@ -532,7 +532,6 @@ def test_node_hash(tmpdir):
         logger.info('Exception: %s' % str(e))
         error_raised = True
     assert error_raised
-    # yield assert_true, 'Submit called' in e
     # rerun to ensure we have outputs
     w1.run(plugin='Linear')
     # set local check

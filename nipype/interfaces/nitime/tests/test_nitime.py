@@ -6,8 +6,7 @@ import tempfile
 
 import numpy as np
 
-import pytest, pdb
-from nipype.testing import (assert_equal, assert_raises, skipif)
+import pytest
 from nipype.testing import example_data
 import nipype.interfaces.nitime as nitime
 

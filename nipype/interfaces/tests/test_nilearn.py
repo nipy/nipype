@@ -7,12 +7,12 @@ import shutil
 import numpy as np
 
 from ...testing import utils
-from numpy.testing import assert_almost_equal 
 
 from .. import nilearn as iface
 from ...pipeline import engine as pe
 
 import pytest
+import numpy.testing as npt
 
 no_nilearn = True
 try:
@@ -149,7 +149,7 @@ class TestSignalExtraction():
             for i, time in enumerate(got):
                 assert len(labels) == len(time)
                 for j, segment in enumerate(time):
-                    assert_almost_equal(segment, wanted[i][j], decimal=1)
+                    npt.assert_almost_equal(segment, wanted[i][j], decimal=1)
 
 
     def teardown_class(self):

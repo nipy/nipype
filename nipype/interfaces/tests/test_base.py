@@ -16,7 +16,6 @@ from nipype.testing import example_data
 import nipype.interfaces.base as nib
 from nipype.utils.filemanip import split_filename
 from nipype.interfaces.base import Undefined, config
-from traits.testing.nose_tools import skip
 import traits.api as traits
 
 @pytest.mark.parametrize("args", [
@@ -97,7 +96,6 @@ def test_TraitedSpec():
     infields = spec(foo=1)
     hashval = ([('foo', 1), ('goo', '0.0000000000')], 'e89433b8c9141aa0fda2f8f4d662c047')
     assert infields.get_hashval() == hashval
-    # yield assert_equal, infields.hashval[1], hashval[1]
     assert infields.__repr__() == '\nfoo = 1\ngoo = 0.0\n'
 
 

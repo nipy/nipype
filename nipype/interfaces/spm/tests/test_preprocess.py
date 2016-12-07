@@ -8,8 +8,6 @@ from shutil import rmtree
 import numpy as np
 
 import pytest
-from nipype.testing import (assert_equal, assert_false, assert_true,
-                            assert_raises, skipif)
 import nibabel as nb
 import nipype.interfaces.spm as spm
 from nipype.interfaces.spm import no_spm
