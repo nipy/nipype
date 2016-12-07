@@ -43,7 +43,7 @@ class TempFATFS(object):
         with TempFATFS() as fatdir:
             target = os.path.join(fatdir, 'target')
             copyfile(file1, target, copy=False)
-            assert_false(os.path.islink(target))
+            assert not os.path.islink(target)
 
         Arguments
         ---------
