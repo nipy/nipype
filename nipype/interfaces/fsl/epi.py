@@ -154,7 +154,7 @@ class TOPUPInputSpec(FSLCommandInputSpec):
                          desc='sub-sampling scheme')
     fwhm = traits.Float(8.0, argstr='--fwhm=%f',
                         desc='FWHM (in mm) of gaussian smoothing kernel')
-    config = traits.String('b02b0.cnf', argstr='--config=%s', usedefault=True,
+    config = traits.String(argstr='--config=%s',
                            desc=('Name of config file specifying command line '
                                  'arguments'))
     max_iter = traits.Int(5, argstr='--miter=%d',
@@ -232,9 +232,9 @@ class TOPUP(FSLCommand):
     >>> topup.inputs.encoding_file = "topup_encoding.txt"
     >>> topup.inputs.output_type = "NIFTI_GZ"
     >>> topup.cmdline # doctest: +ELLIPSIS +IGNORE_UNICODE
-    'topup --config=b02b0.cnf --datain=topup_encoding.txt \
---imain=b0_b0rev.nii --out=b0_b0rev_base --iout=b0_b0rev_corrected.nii.gz \
---fout=b0_b0rev_field.nii.gz --logout=b0_b0rev_topup.log'
+    'topup --datain=topup_encoding.txt --imain=b0_b0rev.nii --out=b0_b0rev_base \
+--iout=b0_b0rev_corrected.nii.gz --fout=b0_b0rev_field.nii.gz \
+--logout=b0_b0rev_topup.log'
     >>> res = topup.run() # doctest: +SKIP
 
     """
