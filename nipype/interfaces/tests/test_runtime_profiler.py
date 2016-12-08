@@ -14,6 +14,7 @@ from builtins import open, str
 from nipype.interfaces.base import (traits, CommandLine, CommandLineInputSpec,
                                     runtime_profile)
 import pytest
+import sys
 
 run_profile = runtime_profile
 

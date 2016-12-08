@@ -7,7 +7,8 @@
 
 from builtins import object
 
-import pytest, pdb
+import pytest
+import sys
 import nipype.interfaces.utility as niu
 import nipype.pipeline.engine as pe
 
