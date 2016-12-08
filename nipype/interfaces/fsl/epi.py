@@ -154,7 +154,7 @@ class TOPUPInputSpec(FSLCommandInputSpec):
                          desc='sub-sampling scheme')
     fwhm = traits.Float(8.0, argstr='--fwhm=%f',
                         desc='FWHM (in mm) of gaussian smoothing kernel')
-    config = traits.String('b02b0.cnf', argstr='--config=%s', usedefault=True,
+    config = traits.String(argstr='--config=%s',
                            desc=('Name of config file specifying command line '
                                  'arguments'))
     max_iter = traits.Int(5, argstr='--miter=%d',
