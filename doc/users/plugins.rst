@@ -83,6 +83,14 @@ the number of used resources (to say 2 CPUs), you can call::
 
   workflow.run(plugin='MultiProc', plugin_args={'n_procs' : 2}
 
+
+MultiProc: profiling resources
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The ``MultiProc`` plugin can profile memory and cpu usage, 
+please see :ref:`resource_sched_profiler` for a comprehensive description.
+
+
 IPython
 -------
 

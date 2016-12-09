@@ -2,13 +2,16 @@
 from __future__ import print_function
 import os
 import sys
-from shutil import rmtree
+from shutil import rmtree, copyfile
 from multiprocessing import cpu_count
 
 
 def run_examples(example, pipelines, data_path, plugin=None, rm_base_dir=True):
+    """ Run example workflows """
     from nipype import config
     from nipype.interfaces.base import CommandLine
+    from nipype.utils import draw_gantt_chart
+    from nipype.pipeline.plugins import log_nodes_cb
 
     if plugin is None:
         plugin = 'MultiProc'
@@ -23,7 +26,9 @@ def run_examples(example, pipelines, data_path, plugin=None, rm_base_dir=True):
         plugin_args['n_procs'] = int(os.getenv('NIPYPE_NUMBER_OF_CPUS', cpu_count()))
 
     __import__(example)
+
     for pipeline in pipelines:
+        # Init and run workflow
         wf = getattr(sys.modules[example], pipeline)
         wf.base_dir = os.path.join(os.getcwd(), 'output', example, plugin)
 
@@ -40,14 +45,39 @@ def run_examples(example, pipelines, data_path, plugin=None, rm_base_dir=True):
                                    'write_provenance': 'true',
                                    'poll_sleep_duration': 2},
                      'logging': {'log_directory': log_dir, 'log_to_file': True}}
+
+
+        # Callback log setup
+        if example == 'fmri_spm_nested' and plugin == 'MultiProc' and \
+           pipeline == 'l2pipeline':
+            # Init callback log
+            import logging
+            cb_log_path = os.path.abspath('callback.log')
+            cb_logger = logging.getLogger('callback')
+            cb_logger.setLevel(logging.DEBUG)
+            handler = logging.FileHandler(cb_log_path)
+            cb_logger.addHandler(handler)
+            plugin_args['status_callback'] = cb_logger
+
         try:
             wf.inputs.inputnode.in_data = os.path.abspath(data_path)
         except AttributeError:
             pass # the workflow does not have inputnode.in_data
 
         wf.run(plugin=plugin, plugin_args=plugin_args)
-        # run twice to check if nothing is rerunning
-        wf.run(plugin=plugin)
+
+        # Draw gantt chart only if pandas is installed
+        try:
+            import pandas
+            pandas_flg = True
+        except ImportError as exc:
+            pandas_flg = False
+
+        if plugin_args.get('status_callback', False) and pandas_flg:
+            draw_gantt_chart.generate_gantt_chart(cb_log_path, 4)
+            dst_log_html = os.path.abspath('callback.log.html')
+            copyfile(cb_log_path + '.html', dst_log_html)
+
 
 if __name__ == '__main__':
     path, file = os.path.split(__file__)

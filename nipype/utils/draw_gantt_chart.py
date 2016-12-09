@@ -56,11 +56,11 @@ def create_event_dict(start_time, nodes_list):
         runtime_threads = node.get('runtime_threads', 0)
         runtime_memory_gb = node.get('runtime_memory_gb', 0.0)
 
-        # Init and format event-based nodes
-        node['estimated_threads'] =  estimated_threads
-        node['estimated_memory_gb'] =  estimated_memory_gb
-        node['runtime_threads'] =  runtime_threads
-        node['runtime_memory_gb'] =  runtime_memory_gb
+        # Init and format event-based nodes 
+        node['estimated_threads'] = estimated_threads
+        node['estimated_memory_gb'] = estimated_memory_gb
+        node['runtime_threads'] = runtime_threads
+        node['runtime_memory_gb'] = runtime_memory_gb
         start_node = node
         finish_node = copy.deepcopy(node)
         start_node['event'] = 'start'
@@ -71,11 +71,14 @@ def create_event_dict(start_time, nodes_list):
         finish_delta = (node['finish'] - start_time).total_seconds()
 
         # Populate dictionary
-        if events.has_key(start_delta) or events.has_key(finish_delta):
-            err_msg = 'Event logged twice or events started at exact same time!'
-            raise KeyError(err_msg)
-        events[start_delta] = start_node
-        events[finish_delta] = finish_node
+        if events.has_key(start_delta):
+            events[start_delta].append(start_node)
+        else:
+            events[start_delta] = [start_node]
+        if events.has_key(finish_delta):
+            events[finish_delta].append(finish_node)
+        else:
+            events[finish_delta] = [finish_node]
 
     # Return events dictionary
     return events
@@ -186,15 +189,16 @@ def calculate_resource_timeseries(events, resource):
     all_res = 0.0
 
     # Iterate through the events
-    for tdelta, event in sorted(events.items()):
-        if event['event'] == "start":
-            if resource in event and event[resource] != 'Unknown':
-                all_res += float(event[resource])
-            current_time = event['start'];
-        elif event['event'] == "finish":
-            if resource in event and event[resource] != 'Unknown':
-                all_res -= float(event[resource])
-            current_time = event['finish'];
+    for tdelta, events in sorted(events.items()):
+        for event in events:
+            if event['event'] == "start":
+                if resource in event and event[resource] != 'Unknown':
+                    all_res += float(event[resource])
+                current_time = event['start']
+            elif event['event'] == "finish":
+                if resource in event and event[resource] != 'Unknown':
+                    all_res -= float(event[resource])
+                current_time = event['finish']
         res[current_time] = all_res
 
     # Formulate the pandas timeseries
@@ -348,6 +352,7 @@ def draw_nodes(start, nodes_list, cores, minute_scale, space_between_minutes,
 
     # Return html string for nodes
     return result
+
 
 def draw_resource_bar(start_time, finish_time, time_series, space_between_minutes,
                       minute_scale, color, left, resource):

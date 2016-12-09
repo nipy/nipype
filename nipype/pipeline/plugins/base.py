@@ -261,7 +261,6 @@ class DistributedPluginBase(PluginBase):
             if toappend:
                 self.pending_tasks.extend(toappend)
             num_jobs = len(self.pending_tasks)
-            logger.debug('Number of pending tasks: %d' % num_jobs)
             if num_jobs < self.max_jobs:
                 self._send_procs_to_workers(updatehash=updatehash,
                                             graph=graph)
