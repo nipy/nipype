@@ -16,12 +16,12 @@ You can find it at http://www.fmrib.ox.ac.uk/fsl/feeds/doc/index.html
 from __future__ import division
 from builtins import range
 
-import os                                    # system functions
-
-import nipype.interfaces.io as nio           # Data i/o
-import nipype.interfaces.fsl as fsl          # fsl
-import nipype.pipeline.engine as pe          # pypeline engine
-import nipype.algorithms.modelgen as model   # model generation
+import os                                         # system functions
+from nipype.interfaces import io as nio           # Data i/o
+from nipype.interfaces import utility as niu      # Utilities
+from nipype.interfaces import fsl                 # fsl
+from nipype.pipeline import engine as pe          # pypeline engine
+from nipype.algorithms import modelgen as model   # model generation
 from nipype.workflows.fmri.fsl import (create_featreg_preproc,
                                        create_modelfit_workflow,
                                        create_reg_workflow)
@@ -48,7 +48,9 @@ iterables
 """
 
 # Specify the location of the FEEDS data. You can find it at http://www.fmrib.ox.ac.uk/fsl/feeds/doc/index.html
-feeds_data_dir = os.path.abspath('feeds/data')
+
+
+inputnode = pe.Node(niu.IdentityInterface(fields=['in_data']), name='inputnode')
 # Specify the subject directories
 # Map field names to individual subject runs.
 info = dict(func=[['fmri']],
@@ -63,8 +65,7 @@ additional housekeeping and pipeline specific functionality.
 
 datasource = pe.Node(interface=nio.DataGrabber(outfields=['func', 'struct']),
                      name='datasource')
-datasource.inputs.base_directory = feeds_data_dir
-datasource.inputs.template = '%s.nii.gz'
+datasource.inputs.template = 'feeds/data/%s.nii.gz'
 datasource.inputs.template_args = info
 datasource.inputs.sort_filelist = True
 
@@ -110,6 +111,7 @@ l1pipeline = pe.Workflow(name="level1")
 l1pipeline.base_dir = os.path.abspath('./fsl_feeds/workingdir')
 l1pipeline.config = {"execution": {"crashdump_dir": os.path.abspath('./fsl_feeds/crashdumps')}}
 
+l1pipeline.connect(inputnode, 'in_data', datasource, 'base_directory')
 l1pipeline.connect(datasource, 'func', preproc, 'inputspec.func')
 l1pipeline.connect(preproc, 'outputspec.highpassed_files', modelspec, 'functional_runs')
 l1pipeline.connect(preproc, 'outputspec.motion_parameters', modelspec, 'realignment_parameters')
@@ -142,4 +144,5 @@ generate any output. To actually run the analysis on the data the
 """
 
 if __name__ == '__main__':
+    l1pipeline.inputs.inputnode.in_data = os.path.abspath('feeds/data')
     l1pipeline.run()

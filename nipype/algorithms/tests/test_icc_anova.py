@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from __future__ import division
 import numpy as np
 from nipype.testing import assert_equal

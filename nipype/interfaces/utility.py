@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """Various utilities
@@ -8,28 +9,33 @@
    >>> datadir = os.path.realpath(os.path.join(filepath, '../testing/data'))
    >>> os.chdir(datadir)
 """
+from __future__ import print_function, division, unicode_literals, absolute_import
+from builtins import zip, range, str, open
 
 from future import standard_library
 standard_library.install_aliases()
-from builtins import zip
-from builtins import range
 
 import os
 import re
-from pickle import dumps
-from textwrap import dedent
 import numpy as np
 import nibabel as nb
 
+from nipype import logging
 from .base import (traits, TraitedSpec, DynamicTraitedSpec, File,
-                   Undefined, isdefined, OutputMultiPath,
+                   Undefined, isdefined, OutputMultiPath, runtime_profile,
                    InputMultiPath, BaseInterface, BaseInterfaceInputSpec)
 from .io import IOBase, add_traits
-from ..external.six import string_types
-from ..testing import assert_equal
 from ..utils.filemanip import (filename_to_list, copyfile, split_filename)
 from ..utils.misc import getsource, create_function_from_source
 
+logger = logging.getLogger('interface')
+if runtime_profile:
+    try:
+        import psutil
+    except ImportError as exc:
+        logger.info('Unable to import packages needed for runtime profiling. '\
+                    'Turning off runtime profiler. Reason: %s' % exc)
+        runtime_profile = False
 
 class IdentityInterface(IOBase):
     """Basic interface class generates identity mappings
@@ -48,7 +54,7 @@ class IdentityInterface(IOBase):
     <undefined>
 
     >>> out = ii.run()
-    >>> out.outputs.a
+    >>> out.outputs.a # doctest: +IGNORE_UNICODE
     'foo'
 
     >>> ii2 = IdentityInterface(fields=['a', 'b'], mandatory_inputs=True)
@@ -76,12 +82,7 @@ class IdentityInterface(IOBase):
         self.inputs.set(**inputs)
 
     def _add_output_traits(self, base):
-        undefined_traits = {}
-        for key in self._fields:
-            base.add_trait(key, traits.Any)
-            undefined_traits[key] = Undefined
-        base.trait_set(trait_change_notify=False, **undefined_traits)
-        return base
+        return add_traits(base, self._fields)
 
     def _list_outputs(self):
         # manual mandatory inputs check
@@ -408,7 +409,7 @@ class Function(IOBase):
                     raise Exception('Interface Function does not accept '
                                     'function objects defined interactively '
                                     'in a python session')
-            elif isinstance(function, string_types):
+            elif isinstance(function, (str, bytes)):
                 self.inputs.function_str = function
             else:
                 raise Exception('Unknown type of function')
@@ -426,7 +427,7 @@ class Function(IOBase):
         if name == 'function_str':
             if hasattr(new, '__call__'):
                 function_source = getsource(new)
-            elif isinstance(new, string_types):
+            elif isinstance(new, (str, bytes)):
                 function_source = new
             self.inputs.trait_set(trait_change_notify=False,
                                   **{'%s' % name: function_source})
@@ -440,16 +441,61 @@ class Function(IOBase):
         return base
 
     def _run_interface(self, runtime):
+        # Get workflow logger for runtime profile error reporting
+        from nipype import logging
+        logger = logging.getLogger('workflow')
+
+        # Create function handle
         function_handle = create_function_from_source(self.inputs.function_str,
                                                       self.imports)
 
+        # Wrapper for running function handle in multiprocessing.Process
+        # Can catch exceptions and report output via multiprocessing.Queue
+        def _function_handle_wrapper(queue, **kwargs):
+            try:
+                out = function_handle(**kwargs)
+                queue.put(out)
+            except Exception as exc:
+                queue.put(exc)
+
+        # Get function args
         args = {}
         for name in self._input_names:
             value = getattr(self.inputs, name)
             if isdefined(value):
                 args[name] = value
 
-        out = function_handle(**args)
+        # Profile resources if set
+        if runtime_profile:
+            from nipype.interfaces.base import get_max_resources_used
+            import multiprocessing
+            # Init communication queue and proc objs
+            queue = multiprocessing.Queue()
+            proc = multiprocessing.Process(target=_function_handle_wrapper,
+                                           args=(queue,), kwargs=args)
+
+            # Init memory and threads before profiling
+            mem_mb = 0
+            num_threads = 0
+
+            # Start process and profile while it's alive
+            proc.start()
+            while proc.is_alive():
+                mem_mb, num_threads = \
+                    get_max_resources_used(proc.pid, mem_mb, num_threads,
+                                           pyfunc=True)
+
+            # Get result from process queue
+            out = queue.get()
+            # If it is an exception, raise it
+            if isinstance(out, Exception):
+                raise out
+
+            # Function ran successfully, populate runtime stats
+            setattr(runtime, 'runtime_memory_gb', mem_mb / 1024.0)
+            setattr(runtime, 'runtime_threads', num_threads)
+        else:
+            out = function_handle(**args)
 
         if len(self._output_names) == 1:
             self._out[self._output_names[0]] = out
@@ -483,8 +529,8 @@ class AssertEqual(BaseInterface):
         data1 = nb.load(self.inputs.volume1).get_data()
         data2 = nb.load(self.inputs.volume2).get_data()
 
-        assert_equal(data1, data2)
-
+        if not np.all(data1 == data2):
+            raise RuntimeError('Input images are not exactly equal')
         return runtime
 
 

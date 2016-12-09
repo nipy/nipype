@@ -1,11 +1,11 @@
 [nosetests]
 verbosity=3
+logging-level=DEBUG
+with-doctest=1
+with-doctest-ignore-unicode=1
 
+with-xunit=1
 with-coverage=1
 cover-branches=1
 cover-xml=1
-cover-xml-file=./coverage.xml
 cover-min-percentage=50
-
-
-with-xunit=1

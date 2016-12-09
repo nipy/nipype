@@ -23,10 +23,10 @@ def test_TractSkeleton_inputs():
     ),
     output_type=dict(),
     project_data=dict(argstr='-p %.3f %s %s %s %s',
-    requires=['threshold', 'distance_map', 'data_file'],
+    requires=[u'threshold', u'distance_map', u'data_file'],
     ),
     projected_data=dict(),
-    search_mask_file=dict(xor=['use_cingulum_mask'],
+    search_mask_file=dict(xor=[u'use_cingulum_mask'],
     ),
     skeleton_file=dict(argstr='-o %s',
     ),
@@ -34,7 +34,7 @@ def test_TractSkeleton_inputs():
     ),
     threshold=dict(),
     use_cingulum_mask=dict(usedefault=True,
-    xor=['search_mask_file'],
+    xor=[u'search_mask_file'],
     ),
     )
     inputs = TractSkeleton.input_spec()

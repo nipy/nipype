@@ -17,7 +17,7 @@ def test_EddyCorrect_inputs():
     position=0,
     ),
     out_file=dict(argstr='%s',
-    name_source=['in_file'],
+    name_source=[u'in_file'],
     name_template='%s_edc',
     output_name='eddy_corrected',
     position=1,

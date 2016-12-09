@@ -1,7 +1,10 @@
+# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """Tests for join expansion
 """
+from __future__ import print_function, division, unicode_literals, absolute_import
+from builtins import open
 
 import os
 from shutil import rmtree
@@ -596,6 +599,46 @@ def test_set_join_node_file_input():
 
     wf.run()
 
+    os.chdir(cwd)
+    rmtree(wd)
+
+def test_nested_workflow_join():
+    """Test collecting join inputs within a nested workflow"""
+    cwd = os.getcwd()
+    wd = mkdtemp()
+    os.chdir(wd)
+
+    # Make the nested workflow
+    def nested_wf(i, name='smallwf'):
+        #iterables with list of nums
+        inputspec = pe.Node(IdentityInterface(fields=['n']), name='inputspec')
+        inputspec.iterables = [('n', i)]
+        # increment each iterable before joining
+        pre_join = pe.Node(IncrementInterface(),
+                           name='pre_join')
+        # rejoin nums into list
+        join = pe.JoinNode(IdentityInterface(fields=['n']),
+                          joinsource='inputspec',
+                          joinfield='n',
+                          name='join')
+        #define and connect nested workflow
+        wf = pe.Workflow(name='wf_%d'%i[0])
+        wf.connect(inputspec, 'n', pre_join, 'input1')
+        wf.connect(pre_join, 'output1', join, 'n')
+        return wf
+    # master wf
+    meta_wf = pe.Workflow(name='meta', base_dir='.')
+    # add each mini-workflow to master
+    for i in [[1,3],[2,4]]:
+        mini_wf = nested_wf(i)
+        meta_wf.add_nodes([mini_wf])
+
+    result = meta_wf.run()
+    
+    # there should be six nodes in total
+    assert_equal(len(result.nodes()), 6,
+             "The number of expanded nodes is incorrect.")
+    
     os.chdir(cwd)
     rmtree(wd)
 

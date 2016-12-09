@@ -8,8 +8,8 @@ NIPYPE: Neuroimaging in Python: Pipelines and Interfaces
 .. image:: https://circleci.com/gh/nipy/nipype/tree/master.svg?style=svg
   :target: https://circleci.com/gh/nipy/nipype/tree/master
 
-.. image:: https://coveralls.io/repos/nipy/nipype/badge.png
-  :target: https://coveralls.io/r/nipy/nipype
+.. image:: https://codecov.io/gh/nipy/nipype/branch/master/graph/badge.svg
+  :target: https://codecov.io/gh/nipy/nipype
 
 .. image:: https://www.codacy.com/project/badge/182f27944c51474490b369d0a23e2f32
   :target: https://www.codacy.com/app/krzysztof-gorgolewski/nipy_nipype
@@ -17,10 +17,6 @@ NIPYPE: Neuroimaging in Python: Pipelines and Interfaces
 .. image:: https://img.shields.io/pypi/v/nipype.svg
     :target: https://pypi.python.org/pypi/nipype/
     :alt: Latest Version
-
-.. image:: https://img.shields.io/pypi/dm/nipype.svg
-    :target: https://pypi.python.org/pypi/nipype/
-    :alt: Downloads
 
 .. image:: https://img.shields.io/pypi/pyversions/nipype.svg
     :target: https://pypi.python.org/pypi/nipype/
@@ -33,6 +29,10 @@ NIPYPE: Neuroimaging in Python: Pipelines and Interfaces
 .. image:: https://img.shields.io/pypi/l/nipype.svg
     :target: https://pypi.python.org/pypi/nipype/
     :alt: License
+
+.. image:: https://img.shields.io/badge/gitter-join%20chat%20%E2%86%92-brightgreen.svg?style=flat
+    :target: http://gitter.im/nipy/nipype
+    :alt: Chat
 
 Current neuroimaging software offer users an incredible opportunity to
 analyze data using a variety of different algorithms. However, this has
@@ -77,17 +77,20 @@ Information specific to Nipype is located here::
 Support and Communication
 -------------------------
 
-If you have a problem or would like to ask a question about how to do something in Nipype please submit a question
-to `NeuroStars.org <http://neurostars.org>`_ with a *nipype* tag. `NeuroStars.org <http://neurostars.org>`_  is a platform similar to StackOverflow but dedicated to neuroinformatics. All previous Nipype questions are available here::
-
-       http://neurostars.org/t/nipype/
-
+If you have a problem or would like to ask a question about how to do something in Nipype please open an issue
+in this GitHub repository.
 
 To participate in the Nipype development related discussions please use the following mailing list::
 
        http://mail.python.org/mailman/listinfo/neuroimaging
 
 Please add *[nipype]* to the subject line when posting on the mailing list.
+
+  .. warning ::
+
+    As of `Nov 23, 2016 <https://twitter.com/neuroquestion/status/801453442132754432>`_,
+    `NeuroStars <http://neurostars.org>`_ is down. We used to have all previous Nipype
+    questions available under the `nipype <http://neurostars.org/t/nipype/>`_ label.
 
 
 Nipype structure

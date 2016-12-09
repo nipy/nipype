@@ -92,7 +92,8 @@ machinery.
 .. note::
 
   We provide backward compatibility with IPython_ versions earlier than
-  0.10.1 using the IPythonX plugin.
+  0.10.1 using the IPythonX plugin. This plugin will be deprecated as of
+  version 0.13 of Nipype.
 
   Please read the IPython_ documentation to determine how to setup your cluster
   for distributed processing. This typically involves calling ipcluster.
@@ -177,6 +178,7 @@ Optional arguments::
 
   template: custom template file to use
   sbatch_args: any other command line args to be passed to bsub.
+  jobid_re: regular expression for custom job submission id search
 
 
 SLURMGraph
@@ -298,10 +300,11 @@ a custom template::
 In addition to overall workflow configuration, you can use node level
 configuration for OAR::
 
-    node.plugin_args = {'oarsub_args': '-l "nodes=1/cores=3"'}
+    node.plugin_args = {'overwrite': True, 'oarsub_args': '-l "nodes=1/cores=3"'}
 
 this would apply only to the node and is useful in situations, where a
 particular node might use more resources than other nodes in a workflow.
+You need to set the 'overwrite' flag to bypass the general settings-template you defined for the other nodes.
 
 
 ``qsub`` emulation

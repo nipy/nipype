@@ -24,7 +24,7 @@ def test_GenerateDirections_inputs():
     ),
     out_file=dict(argstr='%s',
     hash_files=False,
-    name_source=['num_dirs'],
+    name_source=[u'num_dirs'],
     name_template='directions_%d.txt',
     position=-1,
     ),

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # portalocker.py - Cross-platform (posix/nt) API for flock-style file locking.
 #                  Requires python 1.5.2 or better.
 '''Cross-platform (posix/nt) API for flock-style file locking.
@@ -48,9 +49,8 @@ Author: Jonathan Feinberg <jdf@pobox.com>,
 Version: $Id: portalocker.py 5474 2008-05-16 20:53:50Z lowell $
 
 '''
-from __future__ import print_function
-from __future__ import absolute_import
-
+from __future__ import print_function, division, unicode_literals, absolute_import
+from builtins import open
 
 __all__ = [
     'lock',
@@ -131,11 +131,9 @@ if __name__ == '__main__':
 
     log = open('log.txt', 'a+')
     portalocker.lock(log, portalocker.LOCK_EX)
-
     timestamp = strftime('%m/%d/%Y %H:%M:%S\n', localtime(time()))
     log.write(timestamp)
 
     print('Wrote lines. Hit enter to release lock.')
     dummy = sys.stdin.readline()
-
     log.close()

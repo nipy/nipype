@@ -1,3 +1,6 @@
+# -*- coding: utf-8 -*-
+from __future__ import print_function, division, unicode_literals, absolute_import
+
 from builtins import object
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
@@ -5,6 +8,8 @@ from builtins import object
 import logging
 import os
 import sys
+from .misc import str2bool
+
 try:
     from ..external.cloghandler import ConcurrentRotatingFileHandler as \
         RFHandler
@@ -13,8 +18,6 @@ except ImportError:
     from warnings import warn
     warn("ConcurrentLogHandler not installed. Using builtin log handler")
     from logging.handlers import RotatingFileHandler as RFHandler
-from .misc import str2bool
-from .config import NipypeConfig
 
 
 class Logging(object):

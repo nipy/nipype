@@ -1,7 +1,7 @@
+# -*- coding: utf-8 -*-
 """Extract reference documentation from the NumPy source tree.
 
 """
-
 from __future__ import print_function
 from future import standard_library
 standard_library.install_aliases()
@@ -13,7 +13,7 @@ import re
 import pydoc
 from warnings import warn
 
-from nipype.external.six import StringIO
+from io import StringIO
 
 
 class Reader(object):

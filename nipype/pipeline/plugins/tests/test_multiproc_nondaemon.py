@@ -1,9 +1,17 @@
-from builtins import range
+# -*- coding: utf-8 -*-
+# emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
+# vi: set ft=python sts=4 ts=4 sw=4 et:
+"""Testing module for functions and classes from multiproc.py
+"""
+from __future__ import print_function, division, unicode_literals, absolute_import
+from builtins import range, open
+
+# Import packages
 import os
 from tempfile import mkdtemp
 from shutil import rmtree
 
-from nipype.testing import assert_equal, assert_true
+from nipype.testing import assert_equal, assert_true, skipif
 import nipype.pipeline.engine as pe
 from nipype.interfaces.utility import Function
 
@@ -15,9 +23,9 @@ def mytestFunction(insum=0):
 
     # need to import here since this is executed as an external process
     import multiprocessing
+    import os
     import tempfile
     import time
-    import os
 
     numberOfThreads = 2
 
@@ -74,17 +82,20 @@ def mytestFunction(insum=0):
 
     # read in all temp files and sum them up
     total = insum
-    for file in f:
-        with open(file) as fd:
+    for ff in f:
+        with open(ff) as fd:
             total += int(fd.read())
-        os.remove(file)
+        os.remove(ff)
 
     return total
 
 
+# Disabled until https://github.com/nipy/nipype/issues/1692 is resolved
+@skipif(os.environ.get('TRAVIS_PYTHON_VERSION', '') == '2.7')
 def run_multiproc_nondaemon_with_flag(nondaemon_flag):
     '''
-    Start a pipe with two nodes using the multiproc plugin and passing the nondaemon_flag.
+    Start a pipe with two nodes using the resource multiproc plugin and
+    passing the nondaemon_flag.
     '''
 
     cur_dir = os.getcwd()
@@ -107,7 +118,6 @@ def run_multiproc_nondaemon_with_flag(nondaemon_flag):
     f1.inputs.insum = 0
 
     pipe.config['execution']['stop_on_first_crash'] = True
-    pipe.config['execution']['poll_sleep_duration'] = 2
 
     # execute the pipe using the MultiProc plugin with 2 processes and the non_daemon flag
     # to enable child processes which start other multiprocessing jobs
@@ -123,6 +133,8 @@ def run_multiproc_nondaemon_with_flag(nondaemon_flag):
     return result
 
 
+# Disabled until https://github.com/nipy/nipype/issues/1692 is resolved
+@skipif(os.environ.get('TRAVIS_PYTHON_VERSION', '') == '2.7')
 def test_run_multiproc_nondaemon_false():
     '''
     This is the entry point for the test. Two times a pipe of several multiprocessing jobs gets
@@ -140,6 +152,8 @@ def test_run_multiproc_nondaemon_false():
     yield assert_true, shouldHaveFailed
 
 
+# Disabled until https://github.com/nipy/nipype/issues/1692 is resolved
+@skipif(os.environ.get('TRAVIS_PYTHON_VERSION', '') == '2.7')
 def test_run_multiproc_nondaemon_true():
     # with nondaemon_flag = True, the execution should succeed
     result = run_multiproc_nondaemon_with_flag(True)

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
     Change directory to provide relative paths for doctests
     >>> import os
@@ -6,11 +7,12 @@
     >>> os.chdir(datadir)
 
 """
+from __future__ import print_function, division, unicode_literals, absolute_import
 import os
 
+from ...utils.filemanip import split_filename
 from ..base import (traits, TraitedSpec, File,
                     CommandLine, CommandLineInputSpec, isdefined)
-from ...utils.filemanip import split_filename
 
 
 class ConmatInputSpec(CommandLineInputSpec):
@@ -126,6 +128,7 @@ class Conmat(CommandLine):
     >>> conmat.inputs.in_file = 'tracts.Bdouble'
     >>> conmat.inputs.target_file = 'atlas.nii.gz'
     >>> conmat.inputs.scalar_file = 'fa.nii.gz'
+    >>> conmat.tract_stat         = 'mean'
     >>> conmat.run()        # doctest: +SKIP
     """
     _cmd = 'conmat'

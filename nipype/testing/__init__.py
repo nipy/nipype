@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """The testing directory contains a small set of imaging files to be
@@ -29,7 +30,7 @@ from nose.tools import *
 from numpy.testing import *
 
 from . import decorators as dec
-from .utils import skip_if_no_package, package_check
+from .utils import skip_if_no_package, package_check, TempFATFS
 
 skipif = dec.skipif
 

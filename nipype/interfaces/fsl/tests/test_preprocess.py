@@ -1,16 +1,19 @@
+# -*- coding: utf-8 -*-
+from __future__ import unicode_literals
+from builtins import str
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
-from builtins import open
+from builtins import open, open
 
 import os
 import tempfile
 import shutil
 
 from nipype.testing import (assert_equal, assert_not_equal, assert_raises,
-                            skipif)
+                            skipif, assert_true)
 
-from nipype.utils.filemanip import split_filename
-import nipype.interfaces.fsl.preprocess as fsl
+from nipype.utils.filemanip import split_filename, filename_to_list
+from .. import preprocess as fsl
 from nipype.interfaces.fsl import Info
 from nipype.interfaces.base import File, TraitError, Undefined, isdefined
 from nipype.interfaces.fsl import no_fsl
@@ -164,6 +167,33 @@ def test_fast():
                                                       "-S 1 %s" % tmp_infile])
     teardown_infile(tmp_dir)
 
+@skipif(no_fsl)
+def test_fast_list_outputs():
+    ''' By default (no -o), FSL's fast command outputs files into the same
+    directory as the input files. If the flag -o is set, it outputs files into
+    the cwd '''
+    def _run_and_test(opts, output_base):
+        outputs = fsl.FAST(**opts)._list_outputs()
+        for output in outputs.values():
+            filenames = filename_to_list(output)
+            if filenames is not None:
+                for filename in filenames:
+                    assert_equal(filename[:len(output_base)], output_base)
+
+    # set up
+    infile, indir = setup_infile()
+    cwd = tempfile.mkdtemp()
+    os.chdir(cwd)
+    yield assert_not_equal, indir, cwd
+    out_basename = 'a_basename'
+
+    # run and test
+    opts = {'in_files': tmp_infile}
+    input_path, input_filename, input_ext = split_filename(tmp_infile)
+    _run_and_test(opts, os.path.join(input_path, input_filename))
+
+    opts['out_basename'] = out_basename
+    _run_and_test(opts, os.path.join(cwd, out_basename))
 
 @skipif(no_fsl)
 def setup_flirt():
@@ -564,3 +594,28 @@ def test_fugue():
         yield assert_equal, op.basename(res.outputs.unwarped_file), out_name
 
     teardown_fugue(tmpdir)
+
+
+@skipif(no_fsl)
+def test_first_genfname():
+    first = fsl.FIRST()
+    first.inputs.out_file = 'segment.nii'
+    first.inputs.output_type = "NIFTI_GZ"
+
+    value = first._gen_fname(name='original_segmentations')
+    expected_value = os.path.abspath('segment_all_fast_origsegs.nii.gz')
+    yield assert_equal, value, expected_value
+    first.inputs.method = 'none'
+    value = first._gen_fname(name='original_segmentations')
+    expected_value = os.path.abspath('segment_all_none_origsegs.nii.gz')
+    yield assert_equal, value, expected_value
+    first.inputs.method = 'auto'
+    first.inputs.list_of_specific_structures = ['L_Hipp', 'R_Hipp']
+    value = first._gen_fname(name='original_segmentations')
+    expected_value = os.path.abspath('segment_all_none_origsegs.nii.gz')
+    yield assert_equal, value, expected_value
+
+@skipif(no_fsl)
+def test_deprecation():
+    interface = fsl.ApplyXfm()
+    yield assert_true, isinstance(interface, fsl.ApplyXFM)

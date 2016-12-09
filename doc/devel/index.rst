@@ -19,6 +19,7 @@ conventions documented in the `NIPY Developers Guide
    architecture
    provenance
    software_using_nipype
+   testing_nipype
 
 
 .. include:: ../links_names.txt

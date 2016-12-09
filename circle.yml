@@ -1,71 +1,65 @@
-dependencies:
-  cache_directories:
-    - "~/.apt-cache"
-    - "~/examples/data"
-    - "~/examples/fsdata"
-    - "~/mcr"
-    - "~/spm12"
-    - "~/examples/fsl_course_data"
-  pre:
-    # Let CircleCI cache the apt archive
-    - sudo rm -rf /var/cache/apt/archives && sudo ln -s ~/.apt-cache /var/cache/apt/archives && mkdir -p ~/.apt-cache/partial
-    - wget -O- http://neuro.debian.net/lists/precise.us-ca.full | sudo tee /etc/apt/sources.list.d/neurodebian.sources.list
-    - sudo apt-key adv --recv-keys --keyserver hkp://pgp.mit.edu:80 0xA5D32F012649A5A9
-    - sudo apt-get update
-  override:
-    # Install apt packages
-    - sudo apt-get install -y fsl-core fsl-atlases fsl-mni152-templates fsl-feeds afni
-    - echo "source /etc/fsl/fsl.sh" >> $HOME/.profile
-    - echo "source /etc/afni/afni.sh" >> $HOME/.profile
-    - mkdir -p ~/examples/ && ln -sf /usr/share/fsl-feeds/ ~/examples/feeds
-    # Set up python environment
-    - pip install --upgrade pip
-    - pip install -e .
-    - pip install matplotlib sphinx ipython boto coverage
-    - gem install fakes3
-    - if [[ ! -d ~/examples/data ]]; then wget "http://tcpdiag.dl.sourceforge.net/project/nipy/nipype/nipype-0.2/nipype-tutorial.tar.bz2" && tar jxvf nipype-tutorial.tar.bz2 && mv nipype-tutorial/* ~/examples/; fi
-    - if [[ ! -d ~/examples/fsl_course_data ]]; then wget -c "http://fsl.fmrib.ox.ac.uk/fslcourse/fdt1.tar.gz" && wget -c "http://fsl.fmrib.ox.ac.uk/fslcourse/fdt2.tar.gz" && wget -c "http://fsl.fmrib.ox.ac.uk/fslcourse/tbss.tar.gz" && mkdir ~/examples/fsl_course_data && tar zxvf fdt1.tar.gz -C ~/examples/fsl_course_data && tar zxvf fdt2.tar.gz -C ~/examples/fsl_course_data && tar zxvf tbss.tar.gz -C ~/examples/fsl_course_data; fi
-    - bash ~/nipype/tools/install_spm_mcr.sh
-    - mkdir -p ~/.nipype && echo '[logging]' > ~/.nipype/nipype.cfg && echo 'workflow_level = DEBUG' >> ~/.nipype/nipype.cfg && echo 'interface_level = DEBUG' >> ~/.nipype/nipype.cfg && echo 'filemanip_level = DEBUG' >> ~/.nipype/nipype.cfg
 machine:
   environment:
-    FSLOUTPUTTYPE: NIFTI_GZ
+    OSF_NIPYPE_URL: "https://files.osf.io/v1/resources/nefdp/providers/osfstorage"
+    DATA_NIPYPE_TUTORIAL_URL: "${OSF_NIPYPE_URL}/57f4739cb83f6901ed94bf21"
+    DATA_NIPYPE_FSL_COURSE: "${OSF_NIPYPE_URL}/57f472cf9ad5a101f977ecfe"
+    DATA_NIPYPE_FSL_FEEDS: "${OSF_NIPYPE_URL}/57f473066c613b01f113e7af"
+
+  services:
+    - docker
+
+dependencies:
+  cache_directories:
+    - "~/docker"
+    - "~/examples"
+    - "~/.apt-cache"
+
+  pre:
+    # Let CircleCI cache the apt archive
+    - mkdir -p ~/.apt-cache/partial && sudo rm -rf /var/cache/apt/archives && sudo ln -s ~/.apt-cache /var/cache/apt/archives
+    - sudo apt-get -y update && sudo apt-get install -y wget bzip2
+
+  override:
+    - mkdir -p ~/examples ~/scratch/nose ~/scratch/logs
+    - if [[ ! -d ~/examples/nipype-tutorial ]]; then wget --retry-connrefused --waitretry=5 --read-timeout=20 --timeout=15 -t 0 -q -O nipype-tutorial.tar.bz2 "${DATA_NIPYPE_TUTORIAL_URL}" && tar xjf nipype-tutorial.tar.bz2 -C ~/examples/; fi
+    - if [[ ! -d ~/examples/nipype-fsl_course_data ]]; then wget --retry-connrefused --waitretry=5 --read-timeout=20 --timeout=15 -t 0 -q -O nipype-fsl_course_data.tar.gz "${DATA_NIPYPE_FSL_COURSE}" && tar xzf nipype-fsl_course_data.tar.gz -C ~/examples/; fi
+    - if [[ ! -d ~/examples/feeds ]]; then wget --retry-connrefused --waitretry=5 --read-timeout=20 --timeout=15 -t 0 -q -O fsl-5.0.9-feeds.tar.gz "${DATA_NIPYPE_FSL_FEEDS}" && tar xzf fsl-5.0.9-feeds.tar.gz -C ~/examples/; fi
+    - if [[ -e ~/docker/image.tar ]]; then docker load -i ~/docker/image.tar; fi
+    - docker build -f docker/nipype_test/Dockerfile_py35 -t nipype/nipype_test:py35 . :
+        timeout: 1600
+    - docker build -f docker/nipype_test/Dockerfile_py27 -t nipype/nipype_test:py27 . :
+        timeout: 1600
+    - mkdir -p ~/docker; docker save nipype/nipype_test:py27 > ~/docker/image.tar :
+        timeout: 1600
+
 test:
   override:
-    - mkdir -p ${CIRCLE_TEST_REPORTS}/nose
-    - source $HOME/.profile; nosetests --with-doctest --xunit-file="${CIRCLE_TEST_REPORTS}/nose/${CIRCLE_PROJECT_REPONAME}.xml" -c ./.noserc --logging-level=DEBUG --verbosity=3:
-        environment:
-          SPMMCRCMD: "$HOME/spm12/run_spm12.sh $HOME/mcr/v85/ script"
-          FORCE_SPMMCR: 1
-          FSL_COURSE_DATA: "$HOME/examples/fsl_course_data"
+    - docker run -v /etc/localtime:/etc/localtime:ro -v ~/scratch:/scratch -w /root/src/nipype/doc nipype/nipype_test:py35 /usr/bin/run_builddocs.sh
+    - docker run -v /etc/localtime:/etc/localtime:ro -e FSL_COURSE_DATA="/root/examples/nipype-fsl_course_data" -e TRAVIS_PYTHON_VERSION="3.5" -v ~/examples:/root/examples:ro -v ~/scratch:/scratch -w /root/src/nipype nipype/nipype_test:py35 /usr/bin/run_nosetests.sh py35 :
         timeout: 2600
-    - set -o pipefail && cd doc && make html 2>&1 | tee ~/log.txt
-    - cat ~/log.txt && if grep -q "ERROR" ~/log.txt; then false; else true; fi
-    - source $HOME/.profile; python ~/nipype/tools/run_examples.py test_spm Linear workflow3d workflow4d:
-        pwd: ../examples
-        environment:
-          SPMMCRCMD: "$HOME/spm12/run_spm12.sh $HOME/mcr/v85/ script"
-          FORCE_SPMMCR: 1
+    - docker run -v /etc/localtime:/etc/localtime:ro -e FSL_COURSE_DATA="/root/examples/nipype-fsl_course_data" -e TRAVIS_PYTHON_VERSION="2.7" -v ~/examples:/root/examples:ro -v ~/scratch:/scratch -w /root/src/nipype nipype/nipype_test:py27 /usr/bin/run_nosetests.sh py27 :
+        timeout: 5200
+    - docker run -v /etc/localtime:/etc/localtime:ro -v ~/examples:/root/examples:ro -v ~/scratch:/scratch -w /scratch nipype/nipype_test:py35 /usr/bin/run_examples.sh test_spm Linear /root/examples/ workflow3d :
         timeout: 1600
-    - source $HOME/.profile; python ~/nipype/tools/run_examples.py fmri_fsl_feeds Linear l1pipeline:
-        pwd: ../examples
-    - source $HOME/.profile; python ~/nipype/tools/run_examples.py fmri_spm_dartel Linear level1 l2pipeline:
-        pwd: ../examples
-        environment:
-          SPMMCRCMD: "$HOME/spm12/run_spm12.sh $HOME/mcr/v85/ script"
-          FORCE_SPMMCR: 1
+    - docker run -v /etc/localtime:/etc/localtime:ro -v ~/examples:/root/examples:ro -v ~/scratch:/scratch -w /scratch nipype/nipype_test:py35 /usr/bin/run_examples.sh test_spm Linear /root/examples/ workflow4d :
         timeout: 1600
-    - source $HOME/.profile; python ~/nipype/tools/run_examples.py fmri_fsl_reuse Linear level1_workflow:
-        pwd: ../examples
-    - source $HOME/.profile; python ~/nipype/tools/run_examples.py fmri_spm_nested Linear level1 l2pipeline:
-        pwd: ../examples
-        environment:
-          SPMMCRCMD: "$HOME/spm12/run_spm12.sh $HOME/mcr/v85/ script"
-          FORCE_SPMMCR: 1
+    - docker run -v /etc/localtime:/etc/localtime:ro -v ~/examples:/root/examples:ro -v ~/scratch:/scratch -w /scratch nipype/nipype_test:py35 /usr/bin/run_examples.sh fmri_fsl_feeds Linear /root/examples/ l1pipeline
+    - docker run -v /etc/localtime:/etc/localtime:ro -v ~/examples:/root/examples:ro -v ~/scratch:/scratch -w /scratch nipype/nipype_test:py35 /usr/bin/run_examples.sh fmri_spm_dartel Linear /root/examples/ level1 :
+        timeout: 1600
+    - docker run -v /etc/localtime:/etc/localtime:ro -v ~/examples:/root/examples:ro -v ~/scratch:/scratch -w /scratch nipype/nipype_test:py35 /usr/bin/run_examples.sh fmri_spm_dartel Linear /root/examples/ l2pipeline :
+        timeout: 1600
+    - docker run -v /etc/localtime:/etc/localtime:ro -v ~/examples:/root/examples:ro -v ~/scratch:/scratch -w /scratch nipype/nipype_test:py35 /usr/bin/run_examples.sh fmri_fsl_reuse Linear /root/examples/ level1_workflow
+    # Disabled until https://github.com/nipy/nipype/issues/1692 is resolved
+    # - docker run -v /etc/localtime:/etc/localtime:ro -e NIPYPE_NUMBER_OF_CPUS=4 -v ~/examples:/root/examples:ro -v ~/scratch:/scratch -w /scratch nipype/nipype_test:py27 /usr/bin/run_examples.sh fmri_spm_nested MultiProc /root/examples/ level1
+    - docker run -v /etc/localtime:/etc/localtime:ro -e NIPYPE_NUMBER_OF_CPUS=4 -v ~/examples:/root/examples:ro -v ~/scratch:/scratch -w /scratch nipype/nipype_test:py35 /usr/bin/run_examples.sh fmri_spm_nested MultiProc /root/examples/ level1
+    - docker run -v /etc/localtime:/etc/localtime:ro -e NIPYPE_NUMBER_OF_CPUS=4 -v ~/examples:/root/examples:ro -v ~/scratch:/scratch -w /scratch nipype/nipype_test:py35 /usr/bin/run_examples.sh fmri_spm_nested MultiProc /root/examples/ l2pipeline
+
+  post:
+    - bash docker/circleci/teardown.sh
+    - for xml_f in ${CIRCLE_TEST_REPORTS}/nose/coverage*.xml; do bash <(curl -s https://codecov.io/bash) -f $xml_f -t ac172a50-8e66-42e5-8822-5373fcf54686 -F unittests; done
+    - for xml_f in ${CIRCLE_TEST_REPORTS}/nose/smoketest*.xml; do bash <(curl -s https://codecov.io/bash) -f $xml_f -t ac172a50-8e66-42e5-8822-5373fcf54686 -F smoketests; done
 
 general:
   artifacts:
-    - "doc/_build/html"
-    - "~/log.txt"
-    - "nosetests.xml"
-    - "coverage.xml"
+    - "~/docs"
+    - "~/logs"
