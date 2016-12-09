@@ -43,6 +43,12 @@ or::
   pip install nipype
 
 
+If you want to install all the optional features of ``nipype``,
+use the following command (only for ``nipype>=0.13``)::
+
+  pip install nipype[all]
+
+
 Debian and Ubuntu
 ~~~~~~~~~~~~~~~~~
 
@@ -73,77 +79,24 @@ If you downloaded the source distribution named something
 like ``nipype-x.y.tar.gz``, then unpack the tarball, change into the
 ``nipype-x.y`` directory and install nipype using::
 
-    pip install -r requirements.txt
     python setup.py install
 
 **Note:** Depending on permissions you may need to use ``sudo``.
 
 
-Nipype for developers
----------------------
-
-To check out the latest development version::
-
-        git clone git://github.com/nipy/nipype.git
-
-or::
-
-        git clone https://github.com/nipy/nipype.git
-
-After cloning::
-
-        pip install -r requirements.txt
-        python setup.py develop
-
-
-Check out the list of nipype's `current dependencies <https://github.com/nipy/nipype/blob/master/requirements.txt>`_.
-
-
 Testing the install
 -------------------
 
-The best way to test the install is to run the test suite.  If you have
-nose_ installed, then do the following::
+The best way to test the install is checking nipype's version ::
 
-    python -c "import nipype; nipype.test()"
+    python -c "import nipype; print(nipype.__version__)"
 
-you can also test with nosetests::
 
-    nosetests --with-doctest <installation filepath>/nipype  --exclude=external --exclude=testing
+Installation for developers
+---------------------------
 
-or::
+Developers should start `here <../devel/testing_nipype.html>`_.
 
-    nosetests --with-doctest nipype
-
-A successful test run should complete in a few minutes and end with
-something like::
-
-    Ran 13053 tests in 126.618s
-
-    OK (SKIP=66)
-
-All tests should pass (unless you're missing a dependency). If SUBJECTS_DIR
-variable is not set some FreeSurfer related tests will fail. If any tests
-fail, please report them on our `bug tracker
-<http://github.com/nipy/nipype/issues>`_.
-
-On Debian systems, set the following environment variable before running
-tests::
-
-       export MATLABCMD=$pathtomatlabdir/bin/$platform/MATLAB
-
-where ``$pathtomatlabdir`` is the path to your matlab installation and
-``$platform`` is the directory referring to x86 or x64 installations
-(typically ``glnxa64`` on 64-bit installations).
-
-Avoiding any MATLAB calls from testing
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-On unix systems, set an empty environment variable::
-
-    export NIPYPE_NO_MATLAB=
-
-This will skip any tests that require matlab.
 
 Recommended Software
 ------------

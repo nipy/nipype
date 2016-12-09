@@ -25,7 +25,6 @@ from .base import (traits, TraitedSpec, DynamicTraitedSpec, File,
                    Undefined, isdefined, OutputMultiPath, runtime_profile,
                    InputMultiPath, BaseInterface, BaseInterfaceInputSpec)
 from .io import IOBase, add_traits
-from ..testing import assert_equal
 from ..utils.filemanip import (filename_to_list, copyfile, split_filename)
 from ..utils.misc import getsource, create_function_from_source
 
@@ -530,8 +529,8 @@ class AssertEqual(BaseInterface):
         data1 = nb.load(self.inputs.volume1).get_data()
         data2 = nb.load(self.inputs.volume2).get_data()
 
-        assert_equal(data1, data2)
-
+        if not np.all(data1 == data2):
+            raise RuntimeError('Input images are not exactly equal')
         return runtime
 
 

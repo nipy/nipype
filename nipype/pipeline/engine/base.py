@@ -69,6 +69,13 @@ class EngineBase(object):
             fullname = self._hierarchy + '.' + self.name
         return fullname
 
+    @property
+    def itername(self):
+        itername = self._id
+        if self._hierarchy:
+            itername = self._hierarchy + '.' + self._id
+        return itername
+
     def clone(self, name):
         """Clone an EngineBase object
 
@@ -105,7 +112,7 @@ class EngineBase(object):
         if self._hierarchy:
             return '.'.join((self._hierarchy, self._id))
         else:
-            return self._id
+            return '{}'.format(self._id)
 
     def save(self, filename=None):
         if filename is None:

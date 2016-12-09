@@ -246,9 +246,10 @@ class ApplyTransformsInputSpec(ANTSCommandInputSpec):
     interpolation_parameters = traits.Either(traits.Tuple(traits.Int()),  # BSpline (order)
                                              traits.Tuple(traits.Float(),  # Gaussian/MultiLabel (sigma, alpha)
                                                           traits.Float())
-                                             )
-    transforms = InputMultiPath(
-        File(exists=True), argstr='%s', mandatory=True, desc='transform files: will be applied in reverse order. For example, the last specified transform will be applied first')
+                                            )
+    transforms = InputMultiPath(File(exists=True), argstr='%s', mandatory=True,
+                                desc='transform files: will be applied in reverse order. For '
+                                'example, the last specified transform will be applied first.')
     invert_transform_flags = InputMultiPath(traits.Bool())
     default_value = traits.Float(0.0, argstr='--default-value %g', usedefault=True)
     print_out_composite_warp_file = traits.Bool(False, requires=["output_image"],
@@ -296,8 +297,6 @@ class ApplyTransforms(ANTSCommand):
     'antsApplyTransforms --default-value 0 --dimensionality 3 --input moving1.nii --interpolation BSpline[ 5 ] \
 --output deformed_moving1.nii --reference-image fixed1.nii --transform [ ants_Warp.nii.gz, 0 ] \
 --transform [ trans.mat, 0 ]'
-
-
     """
     _cmd = 'antsApplyTransforms'
     input_spec = ApplyTransformsInputSpec

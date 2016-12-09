@@ -160,7 +160,6 @@ class MultiProcPlugin(DistributedPluginBase):
     def _wait(self):
         if len(self.pending_tasks) > 0:
             semaphore_singleton.semaphore.acquire()
-        semaphore_singleton.semaphore.release()
 
     def _get_result(self, taskid):
         if taskid not in self._taskresult:

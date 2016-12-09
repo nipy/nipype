@@ -22,7 +22,7 @@ Currently these tools are supported:
 
 Examples
 --------
-See the docstrings of the individual classes for examples.  
+See the docstrings of the individual classes for examples.
 
 """
 from __future__ import print_function, division, unicode_literals, absolute_import

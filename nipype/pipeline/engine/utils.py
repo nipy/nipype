@@ -7,6 +7,7 @@
 from __future__ import print_function, division, unicode_literals, absolute_import
 from builtins import str, open, map, next, zip, range
 
+import sys
 from future import standard_library
 standard_library.install_aliases()
 from collections import defaultdict
@@ -29,7 +30,7 @@ package_check('networkx', '1.3')
 
 import networkx as nx
 
-from ...utils.filemanip import (fname_presuffix, FileNotFoundError,
+from ...utils.filemanip import (fname_presuffix, FileNotFoundError, to_str,
                                 filename_to_list, get_related_files)
 from ...utils.misc import create_function_from_source, str2bool
 from ...interfaces.base import (CommandLine, isdefined, Undefined,
@@ -329,6 +330,8 @@ def _get_valid_pathstr(pathstr):
     Removes:  [][ (){}?:<>#!|"';]
     Replaces: ',' -> '.'
     """
+    if not isinstance(pathstr, (str, bytes)):
+        pathstr = to_str(pathstr)
     pathstr = pathstr.replace(os.sep, '..')
     pathstr = re.sub(r'''[][ (){}?:<>#!|"';]''', '', pathstr)
     pathstr = pathstr.replace(',', '.')
@@ -515,9 +518,11 @@ def _merge_graphs(supergraph, nodes, subgraph, nodeid, iterables,
         rootnode = Gc.nodes()[nodeidx]
         paramstr = ''
         for key, val in sorted(params.items()):
-            paramstr = '_'.join((paramstr, _get_valid_pathstr(key),
-                                 _get_valid_pathstr(str(val))))
+            paramstr = '{}_{}_{}'.format(
+                paramstr, _get_valid_pathstr(key), _get_valid_pathstr(val))
             rootnode.set_input(key, val)
+
+        logger.debug('Parameterization: paramstr=%s', paramstr)
         levels = get_levels(Gc)
         for n in Gc.nodes():
             """
@@ -643,11 +648,13 @@ def _propagate_internal_output(graph, node, field, connections, portinputs):
         if field in portinputs:
             srcnode, srcport = portinputs[field]
             if isinstance(srcport, tuple) and isinstance(src, tuple):
-                raise ValueError(("Does not support two inline functions "
-                                  "in series (\'%s\'  and \'%s\'). "
-                                  "Please use a Function node") %
-                                 (srcport[1].split("\\n")[0][6:-1],
-                                  src[1].split("\\n")[0][6:-1]))
+                src_func = srcport[1].split("\\n")[0]
+                dst_func = src[1].split("\\n")[0]
+                raise ValueError("Does not support two inline functions "
+                                 "in series ('{}'  and '{}'), found when "
+                                 "connecting {} to {}. Please use a Function "
+                                 "node.".format(src_func, dst_func, srcnode, destnode))
+
             connect = graph.get_edge_data(srcnode, destnode,
                                           default={'connect': []})
             if isinstance(src, tuple):
@@ -704,7 +711,7 @@ def generate_expanded_graph(graph_in):
             in_edges = jedge_dict[jnode] = {}
             edges2remove = []
             for src, dest, data in graph_in.in_edges_iter(jnode, True):
-                in_edges[src._id] = data
+                in_edges[src.itername] = data
                 edges2remove.append((src, dest))
 
             for src, dest in edges2remove:
@@ -789,7 +796,7 @@ def generate_expanded_graph(graph_in):
             expansions = defaultdict(list)
             for node in graph_in.nodes_iter():
                 for src_id, edge_data in list(old_edge_dict.items()):
-                    if node._id.startswith(src_id):
+                    if node.itername.startswith(src_id):
                         expansions[src_id].append(node)
             for in_id, in_nodes in list(expansions.items()):
                 logger.debug("The join node %s input %s was expanded"
@@ -1060,12 +1067,12 @@ def make_output_dir(outdir):
     # this odd approach deals with concurrent directory cureation
     try:
         if not os.path.exists(os.path.abspath(outdir)):
-            logger.debug("Creating %s" % outdir)
+            logger.debug("Creating %s", outdir)
             os.makedirs(outdir)
     except OSError:
-            logger.debug("Problem creating %s" % outdir)
+            logger.debug("Problem creating %s", outdir)
             if not os.path.exists(outdir):
-               raise OSError('Could not create %s'%outdir)
+               raise OSError('Could not create %s', outdir)
     return outdir
 
 

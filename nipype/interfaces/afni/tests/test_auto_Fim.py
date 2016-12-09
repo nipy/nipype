@@ -19,7 +19,7 @@ def test_Fim_inputs():
     ignore_exception=dict(nohash=True,
     usedefault=True,
     ),
-    in_file=dict(argstr=' -input %s',
+    in_file=dict(argstr='-input %s',
     copyfile=False,
     mandatory=True,
     position=1,

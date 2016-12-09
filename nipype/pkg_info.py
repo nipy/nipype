@@ -11,7 +11,7 @@ import sys
 import subprocess
 
 COMMIT_INFO_FNAME = 'COMMIT_INFO.txt'
-
+PY3 = sys.version_info[0] >= 3
 
 def pkg_commit_hash(pkg_path):
     ''' Get short form of commit hash given directory `pkg_path`
@@ -62,6 +62,8 @@ def pkg_commit_hash(pkg_path):
                             cwd=pkg_path, shell=True)
     repo_commit, _ = proc.communicate()
     if repo_commit:
+        if PY3:
+            repo_commit = repo_commit.decode()
         return 'repository', repo_commit.strip()
     return '(none found)', '<not found>'
 
