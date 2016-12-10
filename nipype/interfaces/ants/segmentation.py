@@ -701,7 +701,7 @@ class BrainExtraction(ANTSCommand):
                                                        self.inputs.out_prefix +
                                                        'BrainExtractionBrain.' +
                                                        self.inputs.image_suffix)
-        if self.keep_temporary_files != 0:
+        if self.inputs.keep_temporary_files != 0:
             outputs['BrainExtractionCSF'] = os.path.join(
                 os.getcwd(),
                 self.inputs.out_prefix + 'BrainExtractionCSF.' + self.inputs.image_suffix
