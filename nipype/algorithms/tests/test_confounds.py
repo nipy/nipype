@@ -1,12 +1,11 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 import os
-from tempfile import mkdtemp
-from shutil import rmtree
 
 from io import open
 
-from nipype.testing import (assert_equal, example_data, skipif, assert_true, assert_in)
+import pytest
+from nipype.testing import example_data
 from nipype.algorithms.confounds import FramewiseDisplacement, ComputeDVARS
 import numpy as np
 
@@ -19,8 +18,8 @@ except ImportError:
     pass
 
 
-def test_fd():
-    tempdir = mkdtemp()
+def test_fd(tmpdir):
+    tempdir = str(tmpdir)
     ground_truth = np.loadtxt(example_data('fsl_motion_outliers_fd.txt'))
     fdisplacement = FramewiseDisplacement(in_plots=example_data('fsl_mcflirt_movpar.txt'),
                                           out_file=tempdir + '/fd.txt')
@@ -28,29 +27,21 @@ def test_fd():
 
     with open(res.outputs.out_file) as all_lines:
         for line in all_lines:
-            yield assert_in, 'FramewiseDisplacement', line
+            assert 'FramewiseDisplacement' in line
             break
 
-    yield assert_true, np.allclose(ground_truth, np.loadtxt(res.outputs.out_file, skiprows=1), atol=.16)
-    yield assert_true, np.abs(ground_truth.mean() - res.outputs.fd_average) < 1e-2
+    assert np.allclose(ground_truth, np.loadtxt(res.outputs.out_file, skiprows=1), atol=.16)
+    assert np.abs(ground_truth.mean() - res.outputs.fd_average) < 1e-2
 
-    rmtree(tempdir)
 
-@skipif(nonitime)
-def test_dvars():
-    tempdir = mkdtemp()
+@pytest.mark.skipif(nonitime, reason="nitime is not installed")
+def test_dvars(tmpdir):
     ground_truth = np.loadtxt(example_data('ds003_sub-01_mc.DVARS'))
     dvars = ComputeDVARS(in_file=example_data('ds003_sub-01_mc.nii.gz'),
                          in_mask=example_data('ds003_sub-01_mc_brainmask.nii.gz'),
                          save_all=True)
-
-    origdir = os.getcwd()
-    os.chdir(tempdir)
-
+    os.chdir(str(tmpdir))
     res = dvars.run()
 
     dv1 = np.loadtxt(res.outputs.out_std)
-    yield assert_equal, (np.abs(dv1 - ground_truth).sum()/ len(dv1)) < 0.05, True
-
-    os.chdir(origdir)
-    rmtree(tempdir)
+    assert (np.abs(dv1 - ground_truth).sum()/ len(dv1)) < 0.05

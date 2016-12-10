@@ -204,7 +204,7 @@ class EMRegister(FSCommandOpenMP):
     >>> register.inputs.out_file = 'norm_transform.lta'
     >>> register.inputs.skull = True
     >>> register.inputs.nbrspacing = 9
-    >>> register.cmdline # doctest: +IGNORE_UNICODE
+    >>> register.cmdline # doctest: +ALLOW_UNICODE
     'mri_em_register -uns 9 -skull norm.mgz aseg.mgz norm_transform.lta'
     """
     _cmd = 'mri_em_register'
@@ -254,7 +254,7 @@ class Register(FSCommand):
     >>> register.inputs.target = 'aseg.mgz'
     >>> register.inputs.out_file = 'lh.pial.reg'
     >>> register.inputs.curv = True
-    >>> register.cmdline # doctest: +IGNORE_UNICODE
+    >>> register.cmdline # doctest: +ALLOW_UNICODE
     'mris_register -curv lh.pial aseg.mgz lh.pial.reg'
     """
 
@@ -320,7 +320,7 @@ class Paint(FSCommand):
     >>> paint.inputs.template = 'aseg.mgz'
     >>> paint.inputs.averages = 5
     >>> paint.inputs.out_file = 'lh.avg_curv'
-    >>> paint.cmdline # doctest: +IGNORE_UNICODE
+    >>> paint.cmdline # doctest: +ALLOW_UNICODE
     'mrisp_paint -a 5 aseg.mgz lh.pial lh.avg_curv'
     """
 

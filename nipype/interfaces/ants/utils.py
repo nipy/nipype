@@ -38,7 +38,7 @@ class AverageAffineTransform(ANTSCommand):
     >>> avg.inputs.dimension = 3
     >>> avg.inputs.transforms = ['trans.mat', 'func_to_struct.mat']
     >>> avg.inputs.output_affine_transform = 'MYtemplatewarp.mat'
-    >>> avg.cmdline # doctest: +IGNORE_UNICODE
+    >>> avg.cmdline # doctest: +ALLOW_UNICODE
     'AverageAffineTransform 3 MYtemplatewarp.mat trans.mat func_to_struct.mat'
     """
     _cmd = 'AverageAffineTransform'
@@ -80,7 +80,7 @@ class AverageImages(ANTSCommand):
     >>> avg.inputs.output_average_image = "average.nii.gz"
     >>> avg.inputs.normalize = True
     >>> avg.inputs.images = ['rc1s1.nii', 'rc1s1.nii']
-    >>> avg.cmdline # doctest: +IGNORE_UNICODE
+    >>> avg.cmdline # doctest: +ALLOW_UNICODE
     'AverageImages 3 average.nii.gz 1 rc1s1.nii rc1s1.nii'
     """
     _cmd = 'AverageImages'
@@ -121,7 +121,7 @@ class MultiplyImages(ANTSCommand):
     >>> test.inputs.first_input = 'moving2.nii'
     >>> test.inputs.second_input = 0.25
     >>> test.inputs.output_product_image = "out.nii"
-    >>> test.cmdline # doctest: +IGNORE_UNICODE
+    >>> test.cmdline # doctest: +ALLOW_UNICODE
     'MultiplyImages 3 moving2.nii 0.25 out.nii'
     """
     _cmd = 'MultiplyImages'
@@ -162,7 +162,7 @@ class CreateJacobianDeterminantImage(ANTSCommand):
     >>> jacobian.inputs.imageDimension = 3
     >>> jacobian.inputs.deformationField = 'ants_Warp.nii.gz'
     >>> jacobian.inputs.outputImage = 'out_name.nii.gz'
-    >>> jacobian.cmdline # doctest: +IGNORE_UNICODE
+    >>> jacobian.cmdline # doctest: +ALLOW_UNICODE
     'CreateJacobianDeterminantImage 3 ants_Warp.nii.gz out_name.nii.gz'
     """
 

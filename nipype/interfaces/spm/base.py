@@ -200,7 +200,7 @@ exit;
 
 def no_spm():
     """ Checks if SPM is NOT installed
-    used with nosetests skipif to skip tests
+    used with pytest.mark.skipif decorator to skip tests
     that will fail if spm is not installed"""
 
     if 'NIPYPE_NO_MATLAB' in os.environ or Info.version() is None:
