@@ -218,7 +218,6 @@ class DistributedPluginBase(PluginBase):
         self.proc_done = None
         self.proc_pending = None
         self.max_jobs = np.inf
-        self.last_pending_task = []
         if plugin_args and 'max_jobs' in plugin_args:
             self.max_jobs = plugin_args['max_jobs']
 
@@ -236,14 +235,11 @@ class DistributedPluginBase(PluginBase):
         # setup polling - TODO: change to threaded model
         notrun = []
 
-        if self._config['execution']['poll_sleep_duration']:
-            self._timeout=float(self._config['execution']['poll_sleep_duration'])
-        
+
         while np.any(self.proc_done == False) | \
                 np.any(self.proc_pending == True):
             toappend = []
             # trigger callbacks for any pending results
-            num_jobs_to_begin_with=len(self.pending_tasks)
             while self.pending_tasks:
                 taskid, jobid = self.pending_tasks.pop()
                 try:
