@@ -234,9 +234,10 @@ class DistributedPluginBase(PluginBase):
         self.mapnodesubids = {}
         # setup polling - TODO: change to threaded model
         notrun = []
+
+
         while np.any(self.proc_done == False) | \
                 np.any(self.proc_pending == True):
-
             toappend = []
             # trigger callbacks for any pending results
             while self.pending_tasks:
@@ -267,12 +268,11 @@ class DistributedPluginBase(PluginBase):
                                             graph=graph)
             else:
                 logger.debug('Not submitting')
+
             self._wait()
 
         self._remove_node_dirs()
         report_nodes_not_run(notrun)
-
-
 
     def _wait(self):
         sleep(float(self._config['execution']['poll_sleep_duration']))
