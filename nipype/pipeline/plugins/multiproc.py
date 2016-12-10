@@ -139,7 +139,7 @@ class MultiProcPlugin(DistributedPluginBase):
         self.processors = cpu_count()
         self.memory_gb = get_system_total_memory_gb()*0.9 # 90% of system memory
 
-        self._timout=2.0
+        self._timeout=2.0
         self._event = threading.Event()
 
 
