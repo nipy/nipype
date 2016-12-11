@@ -30,6 +30,7 @@ def test_TCompCor_inputs():
 
 def test_TCompCor_outputs():
     output_map = dict(components_file=dict(),
+                      high_variance_mask=dict()
     )
     outputs = TCompCor.output_spec()
 
