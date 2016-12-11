@@ -74,7 +74,7 @@ def test_add_nodes():
 # ensure that all connections are tested later
 
 @pytest.mark.parametrize("iterables, expected", [
-        ({"1": None}, (1,0)), #test1 
+        ({"1": None}, (1,0)), #test1
         ({"1": dict(input1=lambda: [1, 2], input2=lambda: [1, 2])}, (4,0)) #test2
         ])
 def test_1mod(iterables, expected):
@@ -89,8 +89,8 @@ def test_1mod(iterables, expected):
 
 
 @pytest.mark.parametrize("iterables, expected", [
-        ({"1": {}, "2": dict(input1=lambda: [1, 2])}, (3,2)), #test3 
-        ({"1": dict(input1=lambda: [1, 2]), "2": {}}, (4,2)), #test4 
+        ({"1": {}, "2": dict(input1=lambda: [1, 2])}, (3,2)), #test3
+        ({"1": dict(input1=lambda: [1, 2]), "2": {}}, (4,2)), #test4
         ({"1": dict(input1=lambda: [1, 2]), "2": dict(input1=lambda: [1, 2])}, (6,4)) #test5
         ])
 def test_2mods(iterables, expected):
@@ -109,7 +109,7 @@ def test_2mods(iterables, expected):
 @pytest.mark.parametrize("iterables, expected, connect", [
         ({"1": {}, "2": dict(input1=lambda: [1, 2]), "3": {}}, (5,4), ("1-2","2-3")), #test6
         ({"1": dict(input1=lambda: [1, 2]), "2": {}, "3": {}}, (5,4), ("1-3","2-3")), #test7
-        ({"1": dict(input1=lambda: [1, 2]), "2":  dict(input1=lambda: [1, 2]), "3": {}}, 
+        ({"1": dict(input1=lambda: [1, 2]), "2":  dict(input1=lambda: [1, 2]), "3": {}},
          (8,8), ("1-3","2-3")), #test8
         ])
 def test_3mods(iterables, expected, connect):
@@ -582,7 +582,7 @@ def test_old_config(tmpdir):
         logger.info('Exception: %s' % str(e))
         error_raised = True
     assert not error_raised
-    
+
 
 def test_mapnode_json(tmpdir):
     """Tests that mapnodes don't generate excess jsons
@@ -678,7 +678,7 @@ def test_serial_input(tmpdir):
         error_raised = True
 
     assert not error_raised
-    
+
 
 def test_write_graph_runs(tmpdir):
     os.chdir(str(tmpdir))

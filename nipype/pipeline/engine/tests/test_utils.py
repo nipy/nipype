@@ -336,4 +336,4 @@ def test_provenance(tmpdir):
     psg = write_workflow_prov(eg, prov_base, format='all')
     assert len(psg.bundles) == 2
     assert len(psg.get_records()) == 7
-    
+

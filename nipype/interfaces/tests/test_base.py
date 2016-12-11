@@ -134,7 +134,7 @@ def test_TraitedSpec_logic():
 
     myif = MyInterface()
     # NOTE_dj, FAIL: I don't get a TypeError, only a UserWarning
-    #with pytest.raises(TypeError): 
+    #with pytest.raises(TypeError):
     #    setattr(myif.inputs, 'kung', 10.0)
     myif.inputs.foo = 1
     assert myif.inputs.foo == 1
@@ -155,7 +155,7 @@ def test_deprecation():
         set_foo = lambda: setattr(spec_instance, 'foo', 1)
         with pytest.raises(nib.TraitError): set_foo()
         assert len(w) == 0, 'no warnings, just errors'
-        
+
     with warnings.catch_warnings(record=True) as w:
         warnings.filterwarnings('always', '', UserWarning)
 
@@ -324,7 +324,7 @@ def test_TraitedSpec_withFile(setup_file):
     infields = spec2(moo=tmp_infile, doo=[tmp_infile])
     hashval = infields.get_hashval(hash_method='content')
     assert hashval[1] == 'a00e9ee24f5bfa9545a515b7a759886b'
-    
+
 
 def test_TraitedSpec_withNoFileHashing(setup_file):
     tmp_infile = setup_file
@@ -413,10 +413,10 @@ def test_BaseInterface():
     assert DerivedInterface2()._outputs().foo == Undefined
     with pytest.raises(NotImplementedError): DerivedInterface2(goo=1).run()
 
-    default_inpu_spec = nib.BaseInterface.input_spec 
+    default_inpu_spec = nib.BaseInterface.input_spec
     nib.BaseInterface.input_spec = None
     with pytest.raises(Exception): nib.BaseInterface()
-    nib.BaseInterface.input_spec = default_inpu_spec    
+    nib.BaseInterface.input_spec = default_inpu_spec
 
 
 def test_BaseInterface_load_save_inputs(tmpdir):
@@ -485,7 +485,7 @@ def test_input_version():
     obj._check_version_requirements(obj.inputs)
 
     config.set('execution', 'stop_on_unknown_version', True)
-    
+
     with pytest.raises(Exception): obj._check_version_requirements(obj.inputs)
 
     config.set_default_config()
@@ -682,7 +682,7 @@ def test_CommandLine_output(setup_file):
     ci = nib.CommandLine(command='ls -l')
     res = ci.run()
     assert 'stdout.nipype' in res.runtime.stdout
-    
+
 
 def test_global_CommandLine_output(setup_file):
     tmp_infile = setup_file

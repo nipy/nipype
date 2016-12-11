@@ -9,7 +9,7 @@ from nipype.interfaces.fsl import check_fsl, no_fsl
 
 import pytest
 
-@pytest.mark.skipif(no_fsl(), reason="fsl is not installed") 
+@pytest.mark.skipif(no_fsl(), reason="fsl is not installed")
 def test_fslversion():
     ver = fsl.Info.version()
     ver = ver.split('.')
@@ -27,8 +27,8 @@ def test_outputtype_to_ext():
     for ftype, ext in fsl.Info.ftypes.items():
         res = fsl.Info.output_type_to_ext(ftype)
         assert res == ext
-        
-    with pytest.raises(KeyError): 
+
+    with pytest.raises(KeyError):
         fsl.Info.output_type_to_ext('JUNK')
 
 
@@ -60,11 +60,11 @@ def test_FSLCommand2():
 
 
 @pytest.mark.skipif(no_fsl(), reason="fsl is not installed")
-@pytest.mark.parametrize("args, desired_name", 
-                         [({},   {"file": 'foo.nii.gz'}), # just the filename 
-                          ({"suffix": '_brain'}, {"file": 'foo_brain.nii.gz'}), # filename with suffix 
-                          ({"suffix": '_brain', "cwd": '/data'}, 
-                           {"dir": '/data', "file": 'foo_brain.nii.gz'}), # filename with suffix and working directory 
+@pytest.mark.parametrize("args, desired_name",
+                         [({},   {"file": 'foo.nii.gz'}), # just the filename
+                          ({"suffix": '_brain'}, {"file": 'foo_brain.nii.gz'}), # filename with suffix
+                          ({"suffix": '_brain', "cwd": '/data'},
+                           {"dir": '/data', "file": 'foo_brain.nii.gz'}), # filename with suffix and working directory
                           ({"suffix": '_brain.mat', "change_ext": False}, {"file": 'foo_brain.mat'}) # filename with suffix and no file extension change
                           ])
 def test_gen_fname(args, desired_name):
