@@ -464,7 +464,7 @@ class TCompCor(CompCor):
             mask_data = np.zeros_like(in_mask_data)
             mask_data[in_mask_data != 0] = mask
         else:
-            mask_data = mask
+            mask_data = mask.astype(int)
 
         # save mask
         mask_file = os.path.abspath('mask.nii')
