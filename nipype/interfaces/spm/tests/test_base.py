@@ -53,7 +53,7 @@ def test_scan_for_fnames(create_files_in_directory):
     names = spm.scans_for_fnames(filelist, keep4d=True)
     assert names[0] == filelist[0]
     assert names[1] == filelist[1]
-  
+
 
 save_time = False
 if not save_time:

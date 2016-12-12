@@ -70,7 +70,7 @@ def test_dtifit2(create_files_in_directory):
                                                                        filelist[1])
 
 
-@pytest.mark.xfail(reason="These tests are skipped until we clean up some of this code") 
+@pytest.mark.xfail(reason="These tests are skipped until we clean up some of this code")
 def test_randomise2():
 
     rand = fsl.Randomise()
@@ -79,7 +79,7 @@ def test_randomise2():
     assert rand.cmd == 'randomise'
 
     # test raising error with mandatory args absent
-    with pytest.raises(ValueError): 
+    with pytest.raises(ValueError):
         rand.run()
 
     # .inputs based parameters setting
@@ -155,7 +155,7 @@ def test_Randomise_parallel():
     assert rand.cmd == 'randomise_parallel'
 
     # test raising error with mandatory args absent
-    with pytest.raises(ValueError): 
+    with pytest.raises(ValueError):
         rand.run()
 
     # .inputs based parameters setting
@@ -269,7 +269,7 @@ def test_Vec_reg():
     assert vrg.cmd == 'vecreg'
 
     # test raising error with mandatory args absent
-    with pytest.raises(ValueError): 
+    with pytest.raises(ValueError):
         vrg.run()
 
     # .inputs based parameters setting
@@ -330,7 +330,7 @@ def test_Find_the_biggest():
     assert fbg.cmd == 'find_the_biggest'
 
     # test raising error with mandatory args absent
-    with pytest.raises(ValueError): 
+    with pytest.raises(ValueError):
         fbg.run()
 
     # .inputs based parameters setting
@@ -355,12 +355,12 @@ def test_tbss_skeleton(create_files_in_directory):
     skeletor = fsl.TractSkeleton()
 
     files, newdir = create_files_in_directory
-    
+
     # Test the underlying command
     assert skeletor.cmd == "tbss_skeleton"
 
     # It shouldn't run yet
-    with pytest.raises(ValueError): 
+    with pytest.raises(ValueError):
         skeletor.run()
 
     # Test the most basic way to use it
@@ -379,7 +379,7 @@ def test_tbss_skeleton(create_files_in_directory):
     bones = fsl.TractSkeleton(in_file="a.nii", project_data=True)
 
     # This should error
-    with pytest.raises(ValueError): 
+    with pytest.raises(ValueError):
         bones.run()
 
     # But we can set what we need

@@ -26,7 +26,7 @@ def test_overlap(tmpdir):
     overlap.inputs.volume2 = in1
     res = overlap.run()
     check_close(res.outputs.jaccard, 1.0)
-    
+
     overlap = Overlap()
     overlap.inputs.volume1 = in1
     overlap.inputs.volume2 = in2

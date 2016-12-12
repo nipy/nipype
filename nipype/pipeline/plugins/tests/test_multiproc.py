@@ -225,7 +225,7 @@ def test_no_more_threads_than_specified():
             break
 
     assert result, "using more threads than specified"
-    
+
     max_memory = get_system_total_memory_gb()
     result = True
     for m in memory:

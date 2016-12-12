@@ -29,10 +29,10 @@ class TestNipypeCMD():
     maxDiff = None
 
     def test_main_returns_2_on_empty(self):
-        with pytest.raises(SystemExit) as cm: 
+        with pytest.raises(SystemExit) as cm:
             with capture_sys_output() as (stdout, stderr):
                 nipype_cmd.main(['nipype_cmd'])
-        
+
         exit_exception = cm.value
         assert exit_exception.code == 2
 
@@ -71,7 +71,7 @@ optional arguments:
   -h, --help  show this help message and exit
 """
 
-        
+
     def test_list_nipy_interfacesp(self):
         with pytest.raises(SystemExit) as cm:
             with capture_sys_output() as (stdout, stderr):

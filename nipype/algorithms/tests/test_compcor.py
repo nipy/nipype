@@ -16,7 +16,7 @@ class TestCompCor():
     filenames = {'functionalnii': 'compcorfunc.nii',
                  'masknii': 'compcormask.nii',
                  'components_file': None}
-    
+
     @pytest.fixture(autouse=True)
     def setup_class(self, tmpdir):
         # setup

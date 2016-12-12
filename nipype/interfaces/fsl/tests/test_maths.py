@@ -49,7 +49,7 @@ def create_files_in_directory(request):
         nb.save(nb.Nifti1Image(img, np.eye(4), hdr),
                 os.path.join(testdir, f))
 
-    out_ext = Info.output_type_to_ext(Info.output_type()) 
+    out_ext = Info.output_type_to_ext(Info.output_type())
 
     def fin():
         if os.path.exists(testdir):
@@ -186,7 +186,7 @@ def test_meanimage(create_files_in_directory):
     meaner = fsl.MeanImage(in_file="a.nii")
     assert meaner.cmdline == "fslmaths a.nii -Tmean %s" % os.path.join(testdir, "a_mean%s" % out_ext)
 
-    
+
 @pytest.mark.skipif(no_fsl(), reason="fsl is not installed")
 def test_stdimage(create_files_in_directory):
     files, testdir, out_ext = create_files_in_directory
@@ -209,7 +209,7 @@ def test_stdimage(create_files_in_directory):
     # Test the auto naming
     stder = fsl.StdImage(in_file="a.nii")
     #NOTE_dj, FAIL: this is failing (even the original version of the test with pytest)
-    #NOTE_dj: not sure if this should pass, it uses cmdline from interface.base.CommandLine 
+    #NOTE_dj: not sure if this should pass, it uses cmdline from interface.base.CommandLine
     #assert stder.cmdline == "fslmaths a.nii -Tstd %s"%os.path.join(testdir, "a_std.nii")
 
 
@@ -248,7 +248,7 @@ def test_smooth(create_files_in_directory):
     assert smoother.cmd == "fslmaths"
 
     # Test that smoothing kernel is mandatory
-    with pytest.raises(ValueError): 
+    with pytest.raises(ValueError):
         smoother.run()
 
     # Test smoothing kernels
@@ -276,7 +276,7 @@ def test_mask(create_files_in_directory):
     assert masker.cmd == "fslmaths"
 
     # Test that the mask image is mandatory
-    with pytest.raises(ValueError): 
+    with pytest.raises(ValueError):
         masker.run()
 
     # Test setting the mask image
@@ -299,7 +299,7 @@ def test_dilation(create_files_in_directory):
     assert diller.cmd == "fslmaths"
 
     # Test that the dilation operation is mandatory
-    with pytest.raises(ValueError): 
+    with pytest.raises(ValueError):
         diller.run()
 
     # Test the different dilation operations
@@ -361,7 +361,7 @@ def test_spatial_filter(create_files_in_directory):
     assert filter.cmd == "fslmaths"
 
     # Test that it fails without an operation
-    with pytest.raises(ValueError): 
+    with pytest.raises(ValueError):
         filter.run()
 
     # Test the different operations
@@ -385,7 +385,7 @@ def test_unarymaths(create_files_in_directory):
     assert maths.cmd == "fslmaths"
 
     # Test that it fails without an operation
-    with pytest.raises(ValueError): 
+    with pytest.raises(ValueError):
         maths.run()
 
     # Test the different operations
@@ -488,4 +488,4 @@ def test_tempfilt(create_files_in_directory):
         "fslmaths a.nii -bptf 64.000000 -1.000000 %s" % os.path.join(testdir, "a_filt%s" % out_ext)
 
 
-            
+

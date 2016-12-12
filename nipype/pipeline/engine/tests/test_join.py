@@ -576,9 +576,9 @@ def test_nested_workflow_join(tmpdir):
         meta_wf.add_nodes([mini_wf])
 
     result = meta_wf.run()
-    
+
     # there should be six nodes in total
     assert len(result.nodes()) == 6, \
         "The number of expanded nodes is incorrect."
-    
+
 

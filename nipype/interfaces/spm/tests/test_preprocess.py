@@ -52,7 +52,7 @@ def test_slicetiming_list_outputs(create_files_in_directory):
     filelist, outdir, cwd = create_files_in_directory
     st = spm.SliceTiming(in_files=filelist[0])
     assert st._list_outputs()['timecorrected_files'][0][0] == 'a'
-    
+
 
 def test_realign():
     assert spm.Realign._jobtype == 'spatial'
@@ -66,7 +66,7 @@ def test_realign_list_outputs(create_files_in_directory):
     assert rlgn._list_outputs()['realignment_parameters'][0].startswith('rp_')
     assert rlgn._list_outputs()['realigned_files'][0].startswith('r')
     assert rlgn._list_outputs()['mean_image'].startswith('mean')
-    
+
 
 def test_coregister():
     assert spm.Coregister._jobtype == 'spatial'
@@ -80,7 +80,7 @@ def test_coregister_list_outputs(create_files_in_directory):
     assert coreg._list_outputs()['coregistered_source'][0].startswith('r')
     coreg = spm.Coregister(source=filelist[0], apply_to_files=filelist[1])
     assert coreg._list_outputs()['coregistered_files'][0].startswith('r')
-    
+
 
 def test_normalize():
     assert spm.Normalize._jobtype == 'spatial'
@@ -94,7 +94,7 @@ def test_normalize_list_outputs(create_files_in_directory):
     assert norm._list_outputs()['normalized_source'][0].startswith('w')
     norm = spm.Normalize(source=filelist[0], apply_to_files=filelist[1])
     assert norm._list_outputs()['normalized_files'][0].startswith('w')
-    
+
 
 def test_normalize12():
     assert spm.Normalize12._jobtype == 'spatial'
@@ -109,7 +109,7 @@ def test_normalize12_list_outputs(create_files_in_directory):
     norm12 = spm.Normalize12(image_to_align=filelist[0],
                              apply_to_files=filelist[1])
     assert norm12._list_outputs()['normalized_files'][0].startswith('w')
-    
+
 
 @pytest.mark.skipif(no_spm(), reason="spm is not installed")
 def test_segment():

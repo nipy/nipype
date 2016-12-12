@@ -30,7 +30,7 @@ def setup_infile(request):
     tmp_dir = tempfile.mkdtemp()
     tmp_infile = os.path.join(tmp_dir, 'foo' + ext)
     open(tmp_infile, 'w')
-    
+
     def fin():
         shutil.rmtree(tmp_dir)
 
@@ -50,7 +50,7 @@ def test_bet(setup_infile):
     assert better.cmd == 'bet'
 
     # Test raising error with mandatory args absent
-    with pytest.raises(ValueError): 
+    with pytest.raises(ValueError):
         better.run()
 
     # Test generated outfile name
@@ -68,7 +68,7 @@ def test_bet(setup_infile):
     # infile foo.nii doesn't exist
     def func():
         better.run(in_file='foo2.nii', out_file='bar.nii')
-    with pytest.raises(TraitError): 
+    with pytest.raises(TraitError):
         func()
 
     # Our options and some test values for them
@@ -100,7 +100,7 @@ def test_bet(setup_infile):
         better.inputs.in_file = tmp_infile
         realcmd = ' '.join([better.cmd, tmp_infile, outpath, settings[0]])
         assert better.cmdline == realcmd
-    
+
 # test fast
 
 
@@ -196,7 +196,7 @@ def setup_flirt(request):
     tmpdir = tempfile.mkdtemp()
     _, infile = tempfile.mkstemp(suffix=ext, dir=tmpdir)
     _, reffile = tempfile.mkstemp(suffix=ext, dir=tmpdir)
-    
+
     def teardown_flirt():
         shutil.rmtree(tmpdir)
 
@@ -234,11 +234,11 @@ def test_flirt(setup_flirt):
 
     flirter = fsl.FLIRT()
     # infile not specified
-    with pytest.raises(ValueError): 
+    with pytest.raises(ValueError):
         flirter.run()
     flirter.inputs.in_file = infile
     # reference not specified
-    with pytest.raises(ValueError): 
+    with pytest.raises(ValueError):
         flirter.run()
     flirter.inputs.reference = reffile
     # Generate outfile and outmatrix
@@ -415,7 +415,7 @@ def test_fnirt(setup_flirt):
 
     # Test ValueError is raised when missing mandatory args
     fnirt = fsl.FNIRT()
-    with pytest.raises(ValueError): 
+    with pytest.raises(ValueError):
         fnirt.run()
     fnirt.inputs.in_file = infile
     fnirt.inputs.ref_file = reffile
@@ -507,7 +507,7 @@ def test_applywarp(setup_flirt):
                                         settings[0])
         assert awarp.cmdline == realcmd
 
-   
+
 @pytest.fixture(scope="module")
 def setup_fugue(request):
     import nibabel as nb
@@ -528,7 +528,7 @@ def setup_fugue(request):
 
 @pytest.mark.skipif(no_fsl(), reason="fsl is not installed")
 @pytest.mark.parametrize("attr, out_file", [
-        ({"save_unmasked_fmap":True, "fmap_in_file":"infile", "mask_file":"infile", "output_type":"NIFTI_GZ"}, 
+        ({"save_unmasked_fmap":True, "fmap_in_file":"infile", "mask_file":"infile", "output_type":"NIFTI_GZ"},
          'fmap_out_file'),
         ({"save_unmasked_shift":True, "fmap_in_file":"infile", "dwell_time":1.e-3, "mask_file":"infile", "output_type": "NIFTI_GZ"},
          "shift_out_file"),
