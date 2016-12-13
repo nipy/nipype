@@ -11,14 +11,14 @@ from shutil import rmtree
 import numpy as np
 
 import nibabel as nif
-from nipype.testing import (assert_equal, assert_not_equal,
-                            assert_raises, skipif)
+import pytest
 from nipype.interfaces.base import TraitError
 
 import nipype.interfaces.freesurfer as fs
 
 
-def create_files_in_directory():
+@pytest.fixture()
+def create_files_in_directory(request):
     outdir = os.path.realpath(mkdtemp())
     cwd = os.getcwd()
     os.chdir(outdir)
@@ -33,10 +33,18 @@ def create_files_in_directory():
     with open(os.path.join(outdir, 'reg.dat'), 'wt') as fp:
         fp.write('dummy file')
     filelist.append('reg.dat')
-    return filelist, outdir, cwd
+
+    def clean_directory():
+        if os.path.exists(outdir):
+            rmtree(outdir)
+        os.chdir(cwd)
+
+    request.addfinalizer(clean_directory)
+    return (filelist, outdir, cwd)
 
 
-def create_surf_file():
+@pytest.fixture()
+def create_surf_file(request):
     outdir = os.path.realpath(mkdtemp())
     cwd = os.getcwd()
     os.chdir(outdir)
@@ -47,27 +55,28 @@ def create_surf_file():
     img = np.random.random(shape)
     nif.save(nif.Nifti1Image(img, np.eye(4), hdr),
              os.path.join(outdir, surf))
-    return surf, outdir, cwd
+
+    def clean_directory():
+        if os.path.exists(outdir):
+            rmtree(outdir)
+        os.chdir(cwd)
+
+    request.addfinalizer(clean_directory)
+    return (surf, outdir, cwd)
 
 
-def clean_directory(outdir, old_wd):
-    if os.path.exists(outdir):
-        rmtree(outdir)
-    os.chdir(old_wd)
-
-
-@skipif(fs.no_freesurfer)
-def test_sample2surf():
+@pytest.mark.skipif(fs.no_freesurfer(), reason="freesurfer is not installed")
+def test_sample2surf(create_files_in_directory):
 
     s2s = fs.SampleToSurface()
     # Test underlying command
-    yield assert_equal, s2s.cmd, 'mri_vol2surf'
+    assert s2s.cmd == 'mri_vol2surf'
 
     # Test mandatory args exception
-    yield assert_raises, ValueError, s2s.run
+    with pytest.raises(ValueError): s2s.run()
 
     # Create testing files
-    files, cwd, oldwd = create_files_in_directory()
+    files, cwd, oldwd = create_files_in_directory
 
     # Test input settings
     s2s.inputs.source_file = files[0]
@@ -79,40 +88,37 @@ def test_sample2surf():
     s2s.inputs.sampling_method = "point"
 
     # Test a basic command line
-    yield assert_equal, s2s.cmdline, ("mri_vol2surf "
-                                      "--hemi lh --o %s --ref %s --reg reg.dat --projfrac 0.500 --mov %s"
-                                      % (os.path.join(cwd, "lh.a.mgz"), files[1], files[0]))
+    assert s2s.cmdline == ("mri_vol2surf "
+                           "--hemi lh --o %s --ref %s --reg reg.dat --projfrac 0.500 --mov %s"
+                           % (os.path.join(cwd, "lh.a.mgz"), files[1], files[0]))
 
     # Test identity
     s2sish = fs.SampleToSurface(source_file=files[1], reference_file=files[0], hemi="rh")
-    yield assert_not_equal, s2s, s2sish
+    assert s2s != s2sish
 
     # Test hits file name creation
     s2s.inputs.hits_file = True
-    yield assert_equal, s2s._get_outfilename("hits_file"), os.path.join(cwd, "lh.a_hits.mgz")
+    assert s2s._get_outfilename("hits_file") == os.path.join(cwd, "lh.a_hits.mgz")
 
     # Test that a 2-tuple range raises an error
     def set_illegal_range():
         s2s.inputs.sampling_range = (.2, .5)
-    yield assert_raises, TraitError, set_illegal_range
-
-    # Clean up our mess
-    clean_directory(cwd, oldwd)
+    with pytest.raises(TraitError): set_illegal_range()
 
 
-@skipif(fs.no_freesurfer)
-def test_surfsmooth():
+@pytest.mark.skipif(fs.no_freesurfer(), reason="freesurfer is not installed")
+def test_surfsmooth(create_surf_file):
 
     smooth = fs.SurfaceSmooth()
 
     # Test underlying command
-    yield assert_equal, smooth.cmd, "mri_surf2surf"
+    assert smooth.cmd == "mri_surf2surf"
 
     # Test mandatory args exception
-    yield assert_raises, ValueError, smooth.run
+    with pytest.raises(ValueError): smooth.run()
 
     # Create testing files
-    surf, cwd, oldwd = create_surf_file()
+    surf, cwd, oldwd = create_surf_file
 
     # Test input settings
     smooth.inputs.in_file = surf
@@ -122,32 +128,29 @@ def test_surfsmooth():
     smooth.inputs.hemi = "lh"
 
     # Test the command line
-    yield assert_equal, smooth.cmdline, \
+    assert smooth.cmdline == \
         ("mri_surf2surf --cortex --fwhm 5.0000 --hemi lh --sval %s --tval %s/lh.a_smooth%d.nii --s fsaverage" %
          (surf, cwd, fwhm))
 
     # Test identity
     shmooth = fs.SurfaceSmooth(
         subject_id="fsaverage", fwhm=6, in_file=surf, hemi="lh", out_file="lh.a_smooth.nii")
-    yield assert_not_equal, smooth, shmooth
-
-    # Clean up
-    clean_directory(cwd, oldwd)
+    assert smooth != shmooth
 
 
-@skipif(fs.no_freesurfer)
-def test_surfxfm():
+@pytest.mark.skipif(fs.no_freesurfer(), reason="freesurfer is not installed")
+def test_surfxfm(create_surf_file):
 
     xfm = fs.SurfaceTransform()
 
     # Test underlying command
-    yield assert_equal, xfm.cmd, "mri_surf2surf"
+    assert xfm.cmd == "mri_surf2surf"
 
     # Test mandatory args exception
-    yield assert_raises, ValueError, xfm.run
+    with pytest.raises(ValueError): xfm.run()
 
     # Create testing files
-    surf, cwd, oldwd = create_surf_file()
+    surf, cwd, oldwd = create_surf_file
 
     # Test input settings
     xfm.inputs.source_file = surf
@@ -156,32 +159,29 @@ def test_surfxfm():
     xfm.inputs.hemi = "lh"
 
     # Test the command line
-    yield assert_equal, xfm.cmdline, \
+    assert xfm.cmdline == \
         ("mri_surf2surf --hemi lh --tval %s/lh.a.fsaverage.nii --sval %s --srcsubject my_subject --trgsubject fsaverage" %
          (cwd, surf))
 
     # Test identity
     xfmish = fs.SurfaceTransform(
         source_subject="fsaverage", target_subject="my_subject", source_file=surf, hemi="lh")
-    yield assert_not_equal, xfm, xfmish
-
-    # Clean up
-    clean_directory(cwd, oldwd)
+    assert xfm != xfmish
 
 
-@skipif(fs.no_freesurfer)
-def test_surfshots():
+@pytest.mark.skipif(fs.no_freesurfer(), reason="freesurfer is not installed")
+def test_surfshots(create_files_in_directory):
 
     fotos = fs.SurfaceSnapshots()
 
     # Test underlying command
-    yield assert_equal, fotos.cmd, "tksurfer"
+    assert fotos.cmd == "tksurfer"
 
     # Test mandatory args exception
-    yield assert_raises, ValueError, fotos.run
+    with pytest.raises(ValueError): fotos.run()
 
     # Create testing files
-    files, cwd, oldwd = create_files_in_directory()
+    files, cwd, oldwd = create_files_in_directory
 
     # Test input settins
     fotos.inputs.subject_id = "fsaverage"
@@ -189,29 +189,26 @@ def test_surfshots():
     fotos.inputs.surface = "pial"
 
     # Test a basic command line
-    yield assert_equal, fotos.cmdline, "tksurfer fsaverage lh pial -tcl snapshots.tcl"
+    assert fotos.cmdline == "tksurfer fsaverage lh pial -tcl snapshots.tcl"
 
     # Test identity
     schmotos = fs.SurfaceSnapshots(subject_id="mysubject", hemi="rh", surface="white")
-    yield assert_not_equal, fotos, schmotos
+    assert fotos != schmotos
 
     # Test that the tcl script gets written
     fotos._write_tcl_script()
-    yield assert_equal, True, os.path.exists("snapshots.tcl")
+    assert os.path.exists("snapshots.tcl")
 
     # Test that we can use a different tcl script
     foo = open("other.tcl", "w").close()
     fotos.inputs.tcl_script = "other.tcl"
-    yield assert_equal, fotos.cmdline, "tksurfer fsaverage lh pial -tcl other.tcl"
+    assert fotos.cmdline == "tksurfer fsaverage lh pial -tcl other.tcl"
 
     # Test that the interface crashes politely if graphics aren't enabled
     try:
         hold_display = os.environ["DISPLAY"]
         del os.environ["DISPLAY"]
-        yield assert_raises, RuntimeError, fotos.run
+        with pytest.raises(RuntimeError): fotos.run()
         os.environ["DISPLAY"] = hold_display
     except KeyError:
         pass
-
-    # Clean up our mess
-    clean_directory(cwd, oldwd)

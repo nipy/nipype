@@ -11,9 +11,10 @@ from __future__ import print_function, division, unicode_literals, absolute_impo
 from builtins import open, str
 
 # Import packages
-import unittest
 from nipype.interfaces.base import (traits, CommandLine, CommandLineInputSpec,
                                     runtime_profile)
+import pytest
+import sys
 
 run_profile = runtime_profile
 
@@ -118,31 +119,21 @@ def use_resources(num_threads, num_gb):
 
 
 # Test case for the run function
-class RuntimeProfilerTestCase(unittest.TestCase):
+@pytest.mark.skipif(sys.version_info < (3, 0),
+                    reason="Disabled until https://github.com/nipy/nipype/issues/1692 is resolved")
+class TestRuntimeProfiler():
     '''
     This class is a test case for the runtime profiler
-
-    Inherits
-    --------
-    unittest.TestCase class
-
-    Attributes (class):
-    ------------------
-    see unittest.TestCase documentation
-
-    Attributes (instance):
-    ----------------------
     '''
 
-    # setUp method for the necessary arguments to run cpac_pipeline.run
-    def setUp(self):
+    # setup method for the necessary arguments to run cpac_pipeline.run
+    def setup_class(self):
         '''
-        Method to instantiate TestCase
+        Method to instantiate TestRuntimeProfiler
 
         Parameters
         ----------
-        self : RuntimeProfileTestCase
-            a unittest.TestCase-inherited class
+        self : TestRuntimeProfile
         '''
 
         # Init parameters
@@ -227,8 +218,7 @@ class RuntimeProfilerTestCase(unittest.TestCase):
 
         Parameters
         ----------
-        self : RuntimeProfileTestCase
-            a unittest.TestCase-inherited class
+        self : TestRuntimeProfile
 
         Returns
         -------
@@ -303,8 +293,7 @@ class RuntimeProfilerTestCase(unittest.TestCase):
 
         Parameters
         ----------
-        self : RuntimeProfileTestCase
-            a unittest.TestCase-inherited class
+        self : TestRuntimeProfile
 
         Returns
         -------
@@ -376,7 +365,7 @@ class RuntimeProfilerTestCase(unittest.TestCase):
         return start_str, finish_str
 
     # Test resources were used as expected in cmdline interface
-    @unittest.skipIf(run_profile == False, skip_profile_msg)
+    @pytest.mark.skipif(run_profile == False, reason=skip_profile_msg)
     def test_cmdline_profiling(self):
         '''
         Test runtime profiler correctly records workflow RAM/CPUs consumption
@@ -413,13 +402,12 @@ class RuntimeProfilerTestCase(unittest.TestCase):
                     % (expected_runtime_threads, runtime_threads)
 
         # Assert runtime stats are what was input
-        self.assertLessEqual(runtime_gb_err, allowed_gb_err, msg=mem_err)
-        self.assertTrue(abs(expected_runtime_threads - runtime_threads) <= 1,
-                        msg=threads_err)
+        assert runtime_gb_err <= allowed_gb_err, mem_err
+        assert abs(expected_runtime_threads - runtime_threads) <= 1, threads_err
 
     # Test resources were used as expected
-    @unittest.skipIf(True, "https://github.com/nipy/nipype/issues/1663")
-    @unittest.skipIf(run_profile == False, skip_profile_msg)
+    @pytest.mark.skipif(True, reason="https://github.com/nipy/nipype/issues/1663")
+    @pytest.mark.skipif(run_profile == False, reason=skip_profile_msg)
     def test_function_profiling(self):
         '''
         Test runtime profiler correctly records workflow RAM/CPUs consumption
@@ -456,11 +444,7 @@ class RuntimeProfilerTestCase(unittest.TestCase):
                     % (expected_runtime_threads, runtime_threads)
 
         # Assert runtime stats are what was input
-        self.assertLessEqual(runtime_gb_err, allowed_gb_err, msg=mem_err)
-        self.assertTrue(abs(expected_runtime_threads - runtime_threads) <= 1,
-                        msg=threads_err)
+        assert runtime_gb_err <= allowed_gb_err, mem_err
+        assert abs(expected_runtime_threads - runtime_threads) <= 1, threads_err
 
 
-# Command-line run-able unittest module
-if __name__ == '__main__':
-    unittest.main()

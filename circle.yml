@@ -20,7 +20,7 @@ dependencies:
     - sudo apt-get -y update && sudo apt-get install -y wget bzip2
 
   override:
-    - mkdir -p ~/examples ~/scratch/nose ~/scratch/logs
+    - mkdir -p ~/examples ~/scratch/pytest ~/scratch/logs
     - if [[ ! -d ~/examples/nipype-tutorial ]]; then wget --retry-connrefused --waitretry=5 --read-timeout=20 --timeout=15 -t 0 -q -O nipype-tutorial.tar.bz2 "${DATA_NIPYPE_TUTORIAL_URL}" && tar xjf nipype-tutorial.tar.bz2 -C ~/examples/; fi
     - if [[ ! -d ~/examples/nipype-fsl_course_data ]]; then wget --retry-connrefused --waitretry=5 --read-timeout=20 --timeout=15 -t 0 -q -O nipype-fsl_course_data.tar.gz "${DATA_NIPYPE_FSL_COURSE}" && tar xzf nipype-fsl_course_data.tar.gz -C ~/examples/; fi
     - if [[ ! -d ~/examples/feeds ]]; then wget --retry-connrefused --waitretry=5 --read-timeout=20 --timeout=15 -t 0 -q -O fsl-5.0.9-feeds.tar.gz "${DATA_NIPYPE_FSL_FEEDS}" && tar xzf fsl-5.0.9-feeds.tar.gz -C ~/examples/; fi
@@ -35,10 +35,10 @@ dependencies:
 test:
   override:
     - docker run -v /etc/localtime:/etc/localtime:ro -v ~/scratch:/scratch -w /root/src/nipype/doc nipype/nipype_test:py35 /usr/bin/run_builddocs.sh
-    - docker run -v /etc/localtime:/etc/localtime:ro -e FSL_COURSE_DATA="/root/examples/nipype-fsl_course_data" -e TRAVIS_PYTHON_VERSION="3.5" -v ~/examples:/root/examples:ro -v ~/scratch:/scratch -w /root/src/nipype nipype/nipype_test:py35 /usr/bin/run_nosetests.sh py35 :
+    - docker run -v /etc/localtime:/etc/localtime:ro -e FSL_COURSE_DATA="/root/examples/nipype-fsl_course_data" -v ~/examples:/root/examples:ro -v ~/scratch:/scratch -w /root/src/nipype nipype/nipype_test:py35 /usr/bin/run_pytests.sh py35 :
         timeout: 2600
-    - docker run -v /etc/localtime:/etc/localtime:ro -e FSL_COURSE_DATA="/root/examples/nipype-fsl_course_data" -e TRAVIS_PYTHON_VERSION="2.7" -v ~/examples:/root/examples:ro -v ~/scratch:/scratch -w /root/src/nipype nipype/nipype_test:py27 /usr/bin/run_nosetests.sh py27 :
-        timeout: 5200
+    - docker run -v /etc/localtime:/etc/localtime:ro -e FSL_COURSE_DATA="/root/examples/nipype-fsl_course_data" -v ~/examples:/root/examples:ro -v ~/scratch:/scratch -w /root/src/nipype nipype/nipype_test:py27 /usr/bin/run_pytests.sh py27 :
+        timeout: 2600
     - docker run -v /etc/localtime:/etc/localtime:ro -v ~/examples:/root/examples:ro -v ~/scratch:/scratch -w /scratch nipype/nipype_test:py35 /usr/bin/run_examples.sh test_spm Linear /root/examples/ workflow3d :
         timeout: 1600
     - docker run -v /etc/localtime:/etc/localtime:ro -v ~/examples:/root/examples:ro -v ~/scratch:/scratch -w /scratch nipype/nipype_test:py35 /usr/bin/run_examples.sh test_spm Linear /root/examples/ workflow4d :
@@ -56,8 +56,8 @@ test:
 
   post:
     - bash docker/circleci/teardown.sh
-    - for xml_f in ${CIRCLE_TEST_REPORTS}/nose/coverage*.xml; do bash <(curl -s https://codecov.io/bash) -f $xml_f -t ac172a50-8e66-42e5-8822-5373fcf54686 -F unittests; done
-    - for xml_f in ${CIRCLE_TEST_REPORTS}/nose/smoketest*.xml; do bash <(curl -s https://codecov.io/bash) -f $xml_f -t ac172a50-8e66-42e5-8822-5373fcf54686 -F smoketests; done
+    - for xml_f in ${CIRCLE_TEST_REPORTS}/pytest/coverage*.xml; do bash <(curl -s https://codecov.io/bash) -f $xml_f -t ac172a50-8e66-42e5-8822-5373fcf54686 -F unittests; done
+    - for xml_f in ${CIRCLE_TEST_REPORTS}/pytest/smoketest*.xml; do bash <(curl -s https://codecov.io/bash) -f $xml_f -t ac172a50-8e66-42e5-8822-5373fcf54686 -F smoketests; done
 
 general:
   artifacts:

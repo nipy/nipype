@@ -372,8 +372,8 @@ class CompCor(BaseInterface):
         outputs['components_file'] = os.path.abspath(self.inputs.components_file)
         return outputs
 
-    def _compute_tSTD(self, M, x):
-        stdM = np.std(M, axis=0)
+    def _compute_tSTD(self, M, x, axis=0):
+        stdM = np.std(M, axis=axis)
         # set bad values to x
         stdM[stdM == 0] = x
         stdM[np.isnan(stdM)] = x
@@ -411,6 +411,10 @@ class TCompCorInputSpec(CompCorInputSpec):
                                         'That is, the 2% of voxels '
                                         'with the highest variance are used.')
 
+class TCompCorOutputSpec(CompCorInputSpec):
+    # and all the fields in CompCorInputSpec
+    high_variance_mask = File(exists=True, desc="voxels excedding the variance threshold")
+
 class TCompCor(CompCor):
     '''
     Interface for tCompCor. Computes a ROI mask based on variance of voxels.
@@ -428,7 +432,7 @@ class TCompCor(CompCor):
     '''
 
     input_spec = TCompCorInputSpec
-    output_spec = CompCorOutputSpec
+    output_spec = TCompCorOutputSpec
 
     def _run_interface(self, runtime):
         imgseries = nb.load(self.inputs.realigned_file).get_data()
@@ -438,29 +442,34 @@ class TCompCor(CompCor):
                              '(shape {})'
                              .format(self.inputs.realigned_file, imgseries.ndim, imgseries.shape))
 
+        if isdefined(self.inputs.mask_file):
+            in_mask_data = nb.load(self.inputs.mask_file).get_data()
+            imgseries = imgseries[in_mask_data != 0, :]
+
         # From the paper:
         # "For each voxel time series, the temporal standard deviation is
         # defined as the standard deviation of the time series after the removal
         # of low-frequency nuisance terms (e.g., linear and quadratic drift)."
         imgseries = regress_poly(2, imgseries)
 
-        time_voxels = imgseries.T
-        num_voxels = np.prod(time_voxels.shape[1:])
-
         # "To construct the tSTD noise ROI, we sorted the voxels by their
         # temporal standard deviation ..."
-        tSTD = self._compute_tSTD(time_voxels, 0)
-        sortSTD = np.sort(tSTD, axis=None) # flattened sorted matrix
+        tSTD = self._compute_tSTD(imgseries, 0, axis=-1)
 
         # use percentile_threshold to pick voxels
-        threshold_index = int(num_voxels * (1. - self.inputs.percentile_threshold))
-        threshold_std = sortSTD[threshold_index]
+        threshold_std = np.percentile(tSTD, 100. * (1. - self.inputs.percentile_threshold))
         mask = tSTD >= threshold_std
-        mask = mask.astype(int).T
+
+        if isdefined(self.inputs.mask_file):
+            mask_data = np.zeros_like(in_mask_data)
+            mask_data[in_mask_data != 0] = mask
+        else:
+            mask_data = mask.astype(int)
 
         # save mask
         mask_file = os.path.abspath('mask.nii')
-        nb.nifti1.save(nb.Nifti1Image(mask, np.eye(4)), mask_file)
+        nb.Nifti1Image(mask_data,
+                       nb.load(self.inputs.realigned_file).affine).to_filename(mask_file)
         IFLOG.debug('tCompcor computed and saved mask of shape {} to mask_file {}'
                    .format(mask.shape, mask_file))
         self.inputs.mask_file = mask_file
@@ -468,6 +477,11 @@ class TCompCor(CompCor):
 
         super(TCompCor, self)._run_interface(runtime)
         return runtime
+
+    def _list_outputs(self):
+        outputs = super(TCompCor, self)._list_outputs()
+        outputs['high_variance_mask'] = self.inputs.mask_file
+        return outputs
 
 class TSNRInputSpec(BaseInterfaceInputSpec):
     in_file = InputMultiPath(File(exists=True), mandatory=True,
@@ -654,7 +668,7 @@ research/nichols/scripts/fsl/standardizeddvars.pdf>`_, 2013.
         warnings.filterwarnings('error')
 
         # voxelwise standardization
-        diff_vx_stdz = func_diff / np.array([diff_sdhat] * func_diff.shape[-1]).T            
+        diff_vx_stdz = func_diff / np.array([diff_sdhat] * func_diff.shape[-1]).T
         dvars_vx_stdz = diff_vx_stdz.std(axis=0, ddof=1)
 
     return (dvars_stdz, dvars_nstd, dvars_vx_stdz)

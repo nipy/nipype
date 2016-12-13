@@ -26,8 +26,6 @@ anatfile = os.path.join(basedir, 'data', 'structural.nii')
 template = funcfile
 transfm = funcfile
 
-from nose.tools import *
-from numpy.testing import *
 
 from . import decorators as dec
 from .utils import skip_if_no_package, package_check, TempFATFS

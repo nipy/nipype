@@ -911,7 +911,7 @@ class FLAMEO(FSLCommand):
                             t_con_file='design.con', \
                             mask_file='mask.nii', \
                             run_mode='fe')
-    >>> flameo.cmdline # doctest: +IGNORE_UNICODE
+    >>> flameo.cmdline # doctest: +ALLOW_UNICODE
     'flameo --copefile=cope.nii.gz --covsplitfile=cov_split.mat --designfile=design.mat --ld=stats --maskfile=mask.nii --runmode=fe --tcontrastsfile=design.con --varcopefile=varcope.nii.gz'
 
     """
@@ -1543,7 +1543,7 @@ class MELODIC(FSLCommand):
     >>> melodic_setup.inputs.s_des = 'subjectDesign.mat'
     >>> melodic_setup.inputs.s_con = 'subjectDesign.con'
     >>> melodic_setup.inputs.out_dir = 'groupICA.out'
-    >>> melodic_setup.cmdline # doctest: +IGNORE_UNICODE
+    >>> melodic_setup.cmdline # doctest: +ALLOW_UNICODE
     'melodic -i functional.nii,functional2.nii,functional3.nii -a tica --bgthreshold=10.000000 --mmthresh=0.500000 --nobet -o groupICA.out --Ostats --Scon=subjectDesign.con --Sdes=subjectDesign.mat --Tcon=timeDesign.con --Tdes=timeDesign.mat --tr=1.500000'
     >>> melodic_setup.run() # doctest: +SKIP
 
@@ -1598,7 +1598,7 @@ class SmoothEstimate(FSLCommand):
     >>> est = SmoothEstimate()
     >>> est.inputs.zstat_file = 'zstat1.nii.gz'
     >>> est.inputs.mask_file = 'mask.nii'
-    >>> est.cmdline # doctest: +IGNORE_UNICODE
+    >>> est.cmdline # doctest: +ALLOW_UNICODE
     'smoothest --mask=mask.nii --zstat=zstat1.nii.gz'
 
     """
@@ -1714,7 +1714,7 @@ class Cluster(FSLCommand):
     >>> cl.inputs.in_file = 'zstat1.nii.gz'
     >>> cl.inputs.out_localmax_txt_file = 'stats.txt'
     >>> cl.inputs.use_mm = True
-    >>> cl.cmdline # doctest: +IGNORE_UNICODE
+    >>> cl.cmdline # doctest: +ALLOW_UNICODE
     'cluster --in=zstat1.nii.gz --olmax=stats.txt --thresh=2.3000000000 --mm'
 
     """
@@ -1852,7 +1852,7 @@ class Randomise(FSLCommand):
     -------
     >>> import nipype.interfaces.fsl as fsl
     >>> rand = fsl.Randomise(in_file='allFA.nii', mask = 'mask.nii', tcon='design.con', design_mat='design.mat')
-    >>> rand.cmdline # doctest: +IGNORE_UNICODE
+    >>> rand.cmdline # doctest: +ALLOW_UNICODE
     'randomise -i allFA.nii -o "tbss_" -d design.mat -t design.con -m mask.nii'
 
     """
@@ -1997,7 +1997,7 @@ class GLM(FSLCommand):
     -------
     >>> import nipype.interfaces.fsl as fsl
     >>> glm = fsl.GLM(in_file='functional.nii', design='maps.nii', output_type='NIFTI')
-    >>> glm.cmdline # doctest: +IGNORE_UNICODE
+    >>> glm.cmdline # doctest: +ALLOW_UNICODE
     'fsl_glm -i functional.nii -d maps.nii -o functional_glm.nii'
 
     """

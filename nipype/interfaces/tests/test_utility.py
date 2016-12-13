@@ -1,53 +1,42 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function, unicode_literals
-from builtins import range, open, str, bytes
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 import os
-import shutil
-from tempfile import mkdtemp, mkstemp
+import pytest
 
-import numpy as np
-from nipype.testing import assert_equal, assert_true, assert_raises
 from nipype.interfaces import utility
 import nipype.pipeline.engine as pe
 
 
-def test_rename():
-    tempdir = os.path.realpath(mkdtemp())
-    origdir = os.getcwd()
-    os.chdir(tempdir)
+def test_rename(tmpdir):
+    os.chdir(str(tmpdir))
 
     # Test very simple rename
     _ = open("file.txt", "w").close()
     rn = utility.Rename(in_file="file.txt", format_string="test_file1.txt")
     res = rn.run()
-    outfile = os.path.join(tempdir, "test_file1.txt")
-    yield assert_equal, res.outputs.out_file, outfile
-    yield assert_true, os.path.exists(outfile)
+    outfile = str(tmpdir.join("test_file1.txt"))
+    assert res.outputs.out_file == outfile
+    assert os.path.exists(outfile)
 
     # Now a string-formatting version
     rn = utility.Rename(in_file="file.txt", format_string="%(field1)s_file%(field2)d", keep_ext=True)
     # Test .input field creation
-    yield assert_true, hasattr(rn.inputs, "field1")
-    yield assert_true, hasattr(rn.inputs, "field2")
+    assert hasattr(rn.inputs, "field1")
+    assert hasattr(rn.inputs, "field2")
+
     # Set the inputs
     rn.inputs.field1 = "test"
     rn.inputs.field2 = 2
     res = rn.run()
-    outfile = os.path.join(tempdir, "test_file2.txt")
-    yield assert_equal, res.outputs.out_file, outfile
-    yield assert_true, os.path.exists(outfile)
-
-    # Clean up
-    os.chdir(origdir)
-    shutil.rmtree(tempdir)
+    outfile = str(tmpdir.join("test_file2.txt"))
+    assert res.outputs.out_file == outfile
+    assert os.path.exists(outfile)
 
 
-def test_function():
-    tempdir = os.path.realpath(mkdtemp())
-    origdir = os.getcwd()
-    os.chdir(tempdir)
+def test_function(tmpdir):
+    os.chdir(str(tmpdir))
 
     def gen_random_array(size):
         import numpy as np
@@ -66,42 +55,29 @@ def test_function():
     wf.connect(f1, 'random_array', f2, 'in_array')
     wf.run()
 
-    # Clean up
-    os.chdir(origdir)
-    shutil.rmtree(tempdir)
-
 
 def make_random_array(size):
-
     return np.random.randn(size, size)
 
 
-def should_fail():
-
-    tempdir = os.path.realpath(mkdtemp())
-    origdir = os.getcwd()
-    os.chdir(tempdir)
+def should_fail(tmpdir):
+    os.chdir(tmpdir)
 
     node = pe.Node(utility.Function(input_names=["size"],
                                     output_names=["random_array"],
                                     function=make_random_array),
                    name="should_fail")
-    try:
-        node.inputs.size = 10
-        node.run()
-    finally:
-        os.chdir(origdir)
-        shutil.rmtree(tempdir)
+    node.inputs.size = 10
+    node.run()
 
 
-assert_raises(NameError, should_fail)
+def test_should_fail(tmpdir):
+    with pytest.raises(NameError):
+        should_fail(str(tmpdir))
 
 
-def test_function_with_imports():
-
-    tempdir = os.path.realpath(mkdtemp())
-    origdir = os.getcwd()
-    os.chdir(tempdir)
+def test_function_with_imports(tmpdir):
+    os.chdir(str(tmpdir))
 
     node = pe.Node(utility.Function(input_names=["size"],
                                     output_names=["random_array"],
@@ -109,46 +85,33 @@ def test_function_with_imports():
                                     imports=["import numpy as np"]),
                    name="should_not_fail")
     print(node.inputs.function_str)
-    try:
-        node.inputs.size = 10
-        node.run()
-    finally:
-        os.chdir(origdir)
-        shutil.rmtree(tempdir)
+    node.inputs.size = 10
+    node.run()
 
 
-def test_split():
-    tempdir = os.path.realpath(mkdtemp())
-    origdir = os.getcwd()
-    os.chdir(tempdir)
+@pytest.mark.parametrize("args, expected", [
+        ({}                ,  ([0], [1,2,3])),
+        ({"squeeze" : True},  (0  , [1,2,3]))
+        ])
+def test_split(tmpdir, args, expected):
+    os.chdir(str(tmpdir))
 
-    try:
-        node = pe.Node(utility.Split(inlist=list(range(4)),
-                                     splits=[1, 3]),
-                       name='split_squeeze')
-        res = node.run()
-        yield assert_equal, res.outputs.out1, [0]
-        yield assert_equal, res.outputs.out2, [1, 2, 3]
-
-        node = pe.Node(utility.Split(inlist=list(range(4)),
-                                     splits=[1, 3],
-                                     squeeze=True),
-                       name='split_squeeze')
-        res = node.run()
-        yield assert_equal, res.outputs.out1, 0
-        yield assert_equal, res.outputs.out2, [1, 2, 3]
-    finally:
-        os.chdir(origdir)
-        shutil.rmtree(tempdir)
+    node = pe.Node(utility.Split(inlist=list(range(4)),
+                                 splits=[1, 3],
+                                 **args),
+                   name='split_squeeze')
+    res = node.run()
+    assert res.outputs.out1 == expected[0]
+    assert res.outputs.out2 == expected[1]
 
 
-def test_csvReader():
+def test_csvReader(tmpdir):
     header = "files,labels,erosion\n"
     lines = ["foo,hello,300.1\n",
              "bar,world,5\n",
              "baz,goodbye,0.3\n"]
     for x in range(2):
-        fd, name = mkstemp(suffix=".csv")
+        name = str(tmpdir.join("testfile.csv"))
         with open(name, 'w') as fid:
             reader = utility.CSVReader()
             if x % 2 == 0:
@@ -159,23 +122,20 @@ def test_csvReader():
             reader.inputs.in_file = name
             out = reader.run()
             if x % 2 == 0:
-                yield assert_equal, out.outputs.files, ['foo', 'bar', 'baz']
-                yield assert_equal, out.outputs.labels, ['hello', 'world', 'goodbye']
-                yield assert_equal, out.outputs.erosion, ['300.1', '5', '0.3']
+                assert out.outputs.files == ['foo', 'bar', 'baz']
+                assert out.outputs.labels == ['hello', 'world', 'goodbye']
+                assert out.outputs.erosion == ['300.1', '5', '0.3']
             else:
-                yield assert_equal, out.outputs.column_0, ['foo', 'bar', 'baz']
-                yield assert_equal, out.outputs.column_1, ['hello', 'world', 'goodbye']
-                yield assert_equal, out.outputs.column_2, ['300.1', '5', '0.3']
-        os.unlink(name)
+                assert out.outputs.column_0 == ['foo', 'bar', 'baz']
+                assert out.outputs.column_1 == ['hello', 'world', 'goodbye']
+                assert out.outputs.column_2 == ['300.1', '5', '0.3']
 
 
-def test_aux_connect_function():
+def test_aux_connect_function(tmpdir):
     """ This tests excution nodes with multiple inputs and auxiliary
     function inside the Workflow connect function.
     """
-    tempdir = os.path.realpath(mkdtemp())
-    origdir = os.getcwd()
-    os.chdir(tempdir)
+    os.chdir(str(tmpdir))
 
     wf = pe.Workflow(name="test_workflow")
 
@@ -206,7 +166,6 @@ def test_aux_connect_function():
                                   squeeze=True),
                     name='split')
 
-
     wf.connect([
                 (params,    gen_tuple,  [(("size", _inc),   "size")]),
                 (params,    ssm,        [(("num", _inc),    "c")]),
@@ -217,7 +176,3 @@ def test_aux_connect_function():
                 ])
 
     wf.run()
-
-    # Clean up
-    os.chdir(origdir)
-    shutil.rmtree(tempdir)

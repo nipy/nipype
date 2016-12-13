@@ -9,9 +9,7 @@ import os
 import tempfile
 import shutil
 
-from nipype.testing import (assert_equal, assert_not_equal, assert_raises,
-                            skipif, assert_true)
-
+import pytest
 from nipype.utils.filemanip import split_filename, filename_to_list
 from .. import preprocess as fsl
 from nipype.interfaces.fsl import Info
@@ -19,60 +17,59 @@ from nipype.interfaces.base import File, TraitError, Undefined, isdefined
 from nipype.interfaces.fsl import no_fsl
 
 
-@skipif(no_fsl)
 def fsl_name(obj, fname):
     """Create valid fsl name, including file extension for output type.
     """
     ext = Info.output_type_to_ext(obj.inputs.output_type)
     return fname + ext
 
-tmp_infile = None
-tmp_dir = None
 
-
-@skipif(no_fsl)
-def setup_infile():
-    global tmp_infile, tmp_dir
+@pytest.fixture()
+def setup_infile(request):
     ext = Info.output_type_to_ext(Info.output_type())
     tmp_dir = tempfile.mkdtemp()
     tmp_infile = os.path.join(tmp_dir, 'foo' + ext)
     open(tmp_infile, 'w')
-    return tmp_infile, tmp_dir
 
+    def fin():
+        shutil.rmtree(tmp_dir)
 
-def teardown_infile(tmp_dir):
-    shutil.rmtree(tmp_dir)
+    request.addfinalizer(fin)
+    return (tmp_infile, tmp_dir)
+
 
 # test BET
 # @with_setup(setup_infile, teardown_infile)
 # broken in nose with generators
 
 
-@skipif(no_fsl)
-def test_bet():
-    tmp_infile, tp_dir = setup_infile()
+@pytest.mark.skipif(no_fsl(), reason="fsl is not installed")
+def test_bet(setup_infile):
+    tmp_infile, tp_dir = setup_infile
     better = fsl.BET()
-    yield assert_equal, better.cmd, 'bet'
+    assert better.cmd == 'bet'
 
     # Test raising error with mandatory args absent
-    yield assert_raises, ValueError, better.run
+    with pytest.raises(ValueError):
+        better.run()
 
     # Test generated outfile name
     better.inputs.in_file = tmp_infile
     outfile = fsl_name(better, 'foo_brain')
     outpath = os.path.join(os.getcwd(), outfile)
     realcmd = 'bet %s %s' % (tmp_infile, outpath)
-    yield assert_equal, better.cmdline, realcmd
+    assert better.cmdline == realcmd
     # Test specified outfile name
     outfile = fsl_name(better, '/newdata/bar')
     better.inputs.out_file = outfile
     realcmd = 'bet %s %s' % (tmp_infile, outfile)
-    yield assert_equal, better.cmdline, realcmd
+    assert better.cmdline == realcmd
 
     # infile foo.nii doesn't exist
     def func():
         better.run(in_file='foo2.nii', out_file='bar.nii')
-    yield assert_raises, TraitError, func
+    with pytest.raises(TraitError):
+        func()
 
     # Our options and some test values for them
     # Should parallel the opt_map structure in the class for clarity
@@ -102,33 +99,31 @@ def test_bet():
         # Add mandatory input
         better.inputs.in_file = tmp_infile
         realcmd = ' '.join([better.cmd, tmp_infile, outpath, settings[0]])
-        yield assert_equal, better.cmdline, realcmd
-    teardown_infile(tmp_dir)
+        assert better.cmdline == realcmd
 
 # test fast
 
 
-@skipif(no_fsl)
-def test_fast():
-    tmp_infile, tp_dir = setup_infile()
+@pytest.mark.skipif(no_fsl(), reason="fsl is not installed")
+def test_fast(setup_infile):
+    tmp_infile, tp_dir = setup_infile
     faster = fsl.FAST()
     faster.inputs.verbose = True
     fasted = fsl.FAST(in_files=tmp_infile, verbose=True)
     fasted2 = fsl.FAST(in_files=[tmp_infile, tmp_infile], verbose=True)
 
-    yield assert_equal, faster.cmd, 'fast'
-    yield assert_equal, faster.inputs.verbose, True
-    yield assert_equal, faster.inputs.manual_seg, Undefined
-    yield assert_not_equal, faster.inputs, fasted.inputs
-    yield assert_equal, fasted.cmdline, 'fast -v -S 1 %s' % (tmp_infile)
-    yield assert_equal, fasted2.cmdline, 'fast -v -S 2 %s %s' % (tmp_infile,
-                                                                 tmp_infile)
+    assert faster.cmd == 'fast'
+    assert faster.inputs.verbose == True
+    assert faster.inputs.manual_seg == Undefined
+    assert faster.inputs != fasted.inputs
+    assert fasted.cmdline == 'fast -v -S 1 %s' % (tmp_infile)
+    assert fasted2.cmdline == 'fast -v -S 2 %s %s' % (tmp_infile, tmp_infile)
 
     faster = fsl.FAST()
     faster.inputs.in_files = tmp_infile
-    yield assert_equal, faster.cmdline, 'fast -S 1 %s' % (tmp_infile)
+    assert faster.cmdline == 'fast -S 1 %s' % (tmp_infile)
     faster.inputs.in_files = [tmp_infile, tmp_infile]
-    yield assert_equal, faster.cmdline, 'fast -S 2 %s %s' % (tmp_infile, tmp_infile)
+    assert faster.cmdline == 'fast -S 2 %s %s' % (tmp_infile, tmp_infile)
 
     # Our options and some test values for them
     # Should parallel the opt_map structure in the class for clarity
@@ -162,13 +157,12 @@ def test_fast():
     # test each of our arguments
     for name, settings in list(opt_map.items()):
         faster = fsl.FAST(in_files=tmp_infile, **{name: settings[1]})
-        yield assert_equal, faster.cmdline, ' '.join([faster.cmd,
-                                                      settings[0],
-                                                      "-S 1 %s" % tmp_infile])
-    teardown_infile(tmp_dir)
+        assert faster.cmdline == ' '.join([faster.cmd, settings[0],
+                                           "-S 1 %s" % tmp_infile])
 
-@skipif(no_fsl)
-def test_fast_list_outputs():
+
+@pytest.mark.skipif(no_fsl(), reason="fsl is not installed")
+def test_fast_list_outputs(setup_infile):
     ''' By default (no -o), FSL's fast command outputs files into the same
     directory as the input files. If the flag -o is set, it outputs files into
     the cwd '''
@@ -178,13 +172,13 @@ def test_fast_list_outputs():
             filenames = filename_to_list(output)
             if filenames is not None:
                 for filename in filenames:
-                    assert_equal(filename[:len(output_base)], output_base)
+                    assert filename[:len(output_base)] == output_base
 
     # set up
-    infile, indir = setup_infile()
+    tmp_infile, indir = setup_infile
     cwd = tempfile.mkdtemp()
     os.chdir(cwd)
-    yield assert_not_equal, indir, cwd
+    assert indir != cwd
     out_basename = 'a_basename'
 
     # run and test
@@ -195,26 +189,28 @@ def test_fast_list_outputs():
     opts['out_basename'] = out_basename
     _run_and_test(opts, os.path.join(cwd, out_basename))
 
-@skipif(no_fsl)
-def setup_flirt():
+
+@pytest.fixture()
+def setup_flirt(request):
     ext = Info.output_type_to_ext(Info.output_type())
     tmpdir = tempfile.mkdtemp()
     _, infile = tempfile.mkstemp(suffix=ext, dir=tmpdir)
     _, reffile = tempfile.mkstemp(suffix=ext, dir=tmpdir)
-    return tmpdir, infile, reffile
+
+    def teardown_flirt():
+        shutil.rmtree(tmpdir)
+
+    request.addfinalizer(teardown_flirt)
+    return (tmpdir, infile, reffile)
 
 
-def teardown_flirt(tmpdir):
-    shutil.rmtree(tmpdir)
-
-
-@skipif(no_fsl)
-def test_flirt():
+@pytest.mark.skipif(no_fsl(), reason="fsl is not installed")
+def test_flirt(setup_flirt):
     # setup
-    tmpdir, infile, reffile = setup_flirt()
+    tmpdir, infile, reffile = setup_flirt
 
     flirter = fsl.FLIRT()
-    yield assert_equal, flirter.cmd, 'flirt'
+    assert flirter.cmd == 'flirt'
 
     flirter.inputs.bins = 256
     flirter.inputs.cost = 'mutualinfo'
@@ -227,21 +223,23 @@ def test_flirt():
                           out_matrix_file='outmat.mat',
                           bins=256,
                           cost='mutualinfo')
-    yield assert_not_equal, flirter.inputs, flirted.inputs
-    yield assert_not_equal, flirted.inputs, flirt_est.inputs
+    assert flirter.inputs != flirted.inputs
+    assert flirted.inputs != flirt_est.inputs
 
-    yield assert_equal, flirter.inputs.bins, flirted.inputs.bins
-    yield assert_equal, flirter.inputs.cost, flirt_est.inputs.cost
+    assert flirter.inputs.bins == flirted.inputs.bins
+    assert flirter.inputs.cost == flirt_est.inputs.cost
     realcmd = 'flirt -in %s -ref %s -out outfile -omat outmat.mat ' \
         '-bins 256 -cost mutualinfo' % (infile, reffile)
-    yield assert_equal, flirted.cmdline, realcmd
+    assert flirted.cmdline == realcmd
 
     flirter = fsl.FLIRT()
     # infile not specified
-    yield assert_raises, ValueError, flirter.run
+    with pytest.raises(ValueError):
+        flirter.run()
     flirter.inputs.in_file = infile
     # reference not specified
-    yield assert_raises, ValueError, flirter.run
+    with pytest.raises(ValueError):
+        flirter.run()
     flirter.inputs.reference = reffile
     # Generate outfile and outmatrix
     pth, fname, ext = split_filename(infile)
@@ -249,7 +247,7 @@ def test_flirt():
     outmat = '%s_flirt.mat' % fname
     realcmd = 'flirt -in %s -ref %s -out %s -omat %s' % (infile, reffile,
                                                          outfile, outmat)
-    yield assert_equal, flirter.cmdline, realcmd
+    assert flirter.cmdline == realcmd
 
     _, tmpfile = tempfile.mkstemp(suffix='.nii', dir=tmpdir)
     # Loop over all inputs, set a reasonable value and make sure the
@@ -290,7 +288,7 @@ def test_flirt():
         cmdline = ' '.join([cmdline, outfile, outmatrix, param])
         flirter = fsl.FLIRT(in_file=infile, reference=reffile)
         setattr(flirter.inputs, key, value)
-        yield assert_equal, flirter.cmdline, cmdline
+        assert flirter.cmdline == cmdline
 
     # Test OutputSpec
     flirter = fsl.FLIRT(in_file=infile, reference=reffile)
@@ -298,21 +296,19 @@ def test_flirt():
     flirter.inputs.out_file = ''.join(['foo', ext])
     flirter.inputs.out_matrix_file = ''.join(['bar', ext])
     outs = flirter._list_outputs()
-    yield assert_equal, outs['out_file'], \
+    assert outs['out_file'] == \
         os.path.join(os.getcwd(), flirter.inputs.out_file)
-    yield assert_equal, outs['out_matrix_file'], \
+    assert outs['out_matrix_file'] == \
         os.path.join(os.getcwd(), flirter.inputs.out_matrix_file)
-
-    teardown_flirt(tmpdir)
 
 
 # Mcflirt
-@skipif(no_fsl)
-def test_mcflirt():
-    tmpdir, infile, reffile = setup_flirt()
+@pytest.mark.skipif(no_fsl(), reason="fsl is not installed")
+def test_mcflirt(setup_flirt):
+    tmpdir, infile, reffile = setup_flirt
 
     frt = fsl.MCFLIRT()
-    yield assert_equal, frt.cmd, 'mcflirt'
+    assert frt.cmd == 'mcflirt'
     # Test generated outfile name
 
     frt.inputs.in_file = infile
@@ -320,12 +316,12 @@ def test_mcflirt():
     outfile = os.path.join(os.getcwd(), nme)
     outfile = frt._gen_fname(outfile, suffix='_mcf')
     realcmd = 'mcflirt -in ' + infile + ' -out ' + outfile
-    yield assert_equal, frt.cmdline, realcmd
+    assert frt.cmdline == realcmd
     # Test specified outfile name
     outfile2 = '/newdata/bar.nii'
     frt.inputs.out_file = outfile2
     realcmd = 'mcflirt -in ' + infile + ' -out ' + outfile2
-    yield assert_equal, frt.cmdline, realcmd
+    assert frt.cmdline == realcmd
 
     opt_map = {
         'cost': ('-cost mutualinfo', 'mutualinfo'),
@@ -350,30 +346,30 @@ def test_mcflirt():
         instr = '-in %s' % (infile)
         outstr = '-out %s' % (outfile)
         if name in ('init', 'cost', 'dof', 'mean_vol', 'bins'):
-            yield assert_equal, fnt.cmdline, ' '.join([fnt.cmd,
-                                                       instr,
-                                                       settings[0],
-                                                       outstr])
+            assert fnt.cmdline == ' '.join([fnt.cmd,
+                                            instr,
+                                            settings[0],
+                                            outstr])
         else:
-            yield assert_equal, fnt.cmdline, ' '.join([fnt.cmd,
-                                                       instr,
-                                                       outstr,
-                                                       settings[0]])
+            assert fnt.cmdline == ' '.join([fnt.cmd,
+                                            instr,
+                                            outstr,
+                                            settings[0]])
 
     # Test error is raised when missing required args
     fnt = fsl.MCFLIRT()
-    yield assert_raises, ValueError, fnt.run
-    teardown_flirt(tmpdir)
+    with pytest.raises(ValueError):
+        fnt.run()
 
 # test fnirt
 
 
-@skipif(no_fsl)
-def test_fnirt():
+@pytest.mark.skipif(no_fsl(), reason="fsl is not installed")
+def test_fnirt(setup_flirt):
 
-    tmpdir, infile, reffile = setup_flirt()
+    tmpdir, infile, reffile = setup_flirt
     fnirt = fsl.FNIRT()
-    yield assert_equal, fnirt.cmd, 'fnirt'
+    assert fnirt.cmd == 'fnirt'
 
     # Test list parameters
     params = [('subsampling_scheme', '--subsamp', [4, 2, 2, 1], '4,2,2,1'),
@@ -415,11 +411,12 @@ def test_fnirt():
                                                 reffile,
                                                 flag, strval,
                                                 iout)
-        yield assert_equal, fnirt.cmdline, cmd
+        assert fnirt.cmdline == cmd
 
     # Test ValueError is raised when missing mandatory args
     fnirt = fsl.FNIRT()
-    yield assert_raises, ValueError, fnirt.run
+    with pytest.raises(ValueError):
+        fnirt.run()
     fnirt.inputs.in_file = infile
     fnirt.inputs.ref_file = reffile
 
@@ -478,13 +475,12 @@ def test_fnirt():
                                           settings, infile,
                                           reffile, iout)
 
-        yield assert_equal, fnirt.cmdline, cmd
-    teardown_flirt(tmpdir)
+        assert fnirt.cmdline == cmd
 
 
-@skipif(no_fsl)
-def test_applywarp():
-    tmpdir, infile, reffile = setup_flirt()
+@pytest.mark.skipif(no_fsl(), reason="fsl is not installed")
+def test_applywarp(setup_flirt):
+    tmpdir, infile, reffile = setup_flirt
     opt_map = {
         'out_file': ('--out=bar.nii', 'bar.nii'),
         'premat': ('--premat=%s' % (reffile), reffile),
@@ -509,17 +505,11 @@ def test_applywarp():
                       '--warp=%s %s' % (infile, reffile,
                                         outfile, reffile,
                                         settings[0])
-        yield assert_equal, awarp.cmdline, realcmd
-
-    awarp = fsl.ApplyWarp(in_file=infile,
-                          ref_file=reffile,
-                          field_file=reffile)
-
-    teardown_flirt(tmpdir)
+        assert awarp.cmdline == realcmd
 
 
-@skipif(no_fsl)
-def setup_fugue():
+@pytest.fixture(scope="module")
+def setup_fugue(request):
     import nibabel as nb
     import numpy as np
     import os.path as op
@@ -528,75 +518,41 @@ def setup_fugue():
     tmpdir = tempfile.mkdtemp()
     infile = op.join(tmpdir, 'dumbfile.nii.gz')
     nb.Nifti1Image(d, None, None).to_filename(infile)
-    return tmpdir, infile
+
+    def teardown_fugue():
+        shutil.rmtree(tmpdir)
+
+    request.addfinalizer(teardown_fugue)
+    return (tmpdir, infile)
 
 
-def teardown_fugue(tmpdir):
-    shutil.rmtree(tmpdir)
-
-
-@skipif(no_fsl)
-def test_fugue():
+@pytest.mark.skipif(no_fsl(), reason="fsl is not installed")
+@pytest.mark.parametrize("attr, out_file", [
+        ({"save_unmasked_fmap":True, "fmap_in_file":"infile", "mask_file":"infile", "output_type":"NIFTI_GZ"},
+         'fmap_out_file'),
+        ({"save_unmasked_shift":True, "fmap_in_file":"infile", "dwell_time":1.e-3, "mask_file":"infile", "output_type": "NIFTI_GZ"},
+         "shift_out_file"),
+        ({"in_file":"infile", "mask_file":"infile", "shift_in_file":"infile", "output_type":"NIFTI_GZ"},
+         'unwarped_file')
+        ])
+def test_fugue(setup_fugue, attr, out_file):
     import os.path as op
-    tmpdir, infile = setup_fugue()
+    tmpdir, infile = setup_fugue
 
     fugue = fsl.FUGUE()
-    fugue.inputs.save_unmasked_fmap = True
-    fugue.inputs.fmap_in_file = infile
-    fugue.inputs.mask_file = infile
-    fugue.inputs.output_type = "NIFTI_GZ"
-
+    for key, value in attr.items():
+        if value == "infile": setattr(fugue.inputs, key, infile)
+        else: setattr(fugue.inputs, key, value)
     res = fugue.run()
 
-    if not isdefined(res.outputs.fmap_out_file):
-        yield False
-    else:
-        trait_spec = fugue.inputs.trait('fmap_out_file')
-        out_name = trait_spec.name_template % 'dumbfile'
-        out_name += '.nii.gz'
-
-        yield assert_equal, op.basename(res.outputs.fmap_out_file), out_name
-
-    fugue = fsl.FUGUE()
-    fugue.inputs.save_unmasked_shift = True
-    fugue.inputs.fmap_in_file = infile
-    fugue.inputs.dwell_time = 1.0e-3
-    fugue.inputs.mask_file = infile
-    fugue.inputs.output_type = "NIFTI_GZ"
-    res = fugue.run()
-
-    if not isdefined(res.outputs.shift_out_file):
-        yield False
-    else:
-        trait_spec = fugue.inputs.trait('shift_out_file')
-        out_name = trait_spec.name_template % 'dumbfile'
-        out_name += '.nii.gz'
-
-        yield assert_equal, op.basename(res.outputs.shift_out_file), \
-            out_name
-
-    fugue = fsl.FUGUE()
-    fugue.inputs.in_file = infile
-    fugue.inputs.mask_file = infile
-    # Previously computed with fugue as well
-    fugue.inputs.shift_in_file = infile
-    fugue.inputs.output_type = "NIFTI_GZ"
-
-    res = fugue.run()
-
-    if not isdefined(res.outputs.unwarped_file):
-        yield False
-    else:
-        trait_spec = fugue.inputs.trait('unwarped_file')
-        out_name = trait_spec.name_template % 'dumbfile'
-        out_name += '.nii.gz'
-
-        yield assert_equal, op.basename(res.outputs.unwarped_file), out_name
-
-    teardown_fugue(tmpdir)
+    assert isdefined(getattr(res.outputs,out_file))
+    trait_spec = fugue.inputs.trait(out_file)
+    out_name = trait_spec.name_template % 'dumbfile'
+    out_name += '.nii.gz'
+    assert op.basename(getattr(res.outputs, out_file)) == out_name
 
 
-@skipif(no_fsl)
+@pytest.mark.skipif(no_fsl(), reason="fsl is not installed")
 def test_first_genfname():
     first = fsl.FIRST()
     first.inputs.out_file = 'segment.nii'
@@ -604,18 +560,20 @@ def test_first_genfname():
 
     value = first._gen_fname(name='original_segmentations')
     expected_value = os.path.abspath('segment_all_fast_origsegs.nii.gz')
-    yield assert_equal, value, expected_value
+    assert value == expected_value
     first.inputs.method = 'none'
     value = first._gen_fname(name='original_segmentations')
     expected_value = os.path.abspath('segment_all_none_origsegs.nii.gz')
-    yield assert_equal, value, expected_value
+    assert value == expected_value
     first.inputs.method = 'auto'
     first.inputs.list_of_specific_structures = ['L_Hipp', 'R_Hipp']
     value = first._gen_fname(name='original_segmentations')
     expected_value = os.path.abspath('segment_all_none_origsegs.nii.gz')
-    yield assert_equal, value, expected_value
+    assert value == expected_value
 
-@skipif(no_fsl)
+
+@pytest.mark.skipif(no_fsl(), reason="fsl is not installed")
 def test_deprecation():
     interface = fsl.ApplyXfm()
-    yield assert_true, isinstance(interface, fsl.ApplyXFM)
+    assert isinstance(interface, fsl.ApplyXFM)
+

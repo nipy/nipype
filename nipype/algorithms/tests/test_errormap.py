@@ -1,17 +1,17 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from nipype.testing import (assert_equal, example_data)
+import pytest
+from nipype.testing import example_data
 from nipype.algorithms.metrics import ErrorMap
 import nibabel as nib
 import numpy as np
-from tempfile import mkdtemp
 import os
 
 
-def test_errormap():
+def test_errormap(tmpdir):
 
-    tempdir = mkdtemp()
+    tempdir = str(tmpdir)
     # Single-Spectual
     # Make two fake 2*2*2 voxel volumes
     volume1 = np.array([[[2.0, 8.0], [1.0, 2.0]], [[1.0, 9.0], [0.0, 3.0]]])  # John von Neumann's birthday
@@ -32,22 +32,22 @@ def test_errormap():
     errmap.inputs.in_ref = os.path.join(tempdir, 'alan.nii.gz')
     errmap.out_map = os.path.join(tempdir, 'out_map.nii.gz')
     result = errmap.run()
-    yield assert_equal, result.outputs.distance, 1.125
+    assert result.outputs.distance == 1.125
 
     # Square metric
     errmap.inputs.metric = 'sqeuclidean'
     result = errmap.run()
-    yield assert_equal, result.outputs.distance, 1.125
+    assert result.outputs.distance == 1.125
 
     # Linear metric
     errmap.inputs.metric = 'euclidean'
     result = errmap.run()
-    yield assert_equal, result.outputs.distance, 0.875
+    assert result.outputs.distance == 0.875
 
     # Masked
     errmap.inputs.mask = os.path.join(tempdir, 'mask.nii.gz')
     result = errmap.run()
-    yield assert_equal, result.outputs.distance, 1.0
+    assert result.outputs.distance == 1.0
 
     # Multi-Spectual
     volume3 = np.array([[[1.0, 6.0], [0.0, 3.0]], [[1.0, 9.0], [3.0, 6.0]]])  # Raymond Vahan Damadian's birthday
@@ -69,8 +69,8 @@ def test_errormap():
     errmap.inputs.in_ref = os.path.join(tempdir, 'alan-ray.nii.gz')
     errmap.inputs.metric = 'sqeuclidean'
     result = errmap.run()
-    yield assert_equal, result.outputs.distance, 5.5
+    assert result.outputs.distance == 5.5
 
     errmap.inputs.metric = 'euclidean'
     result = errmap.run()
-    yield assert_equal, result.outputs.distance, np.float32(1.25 * (2**0.5))
+    assert result.outputs.distance == np.float32(1.25 * (2**0.5))
