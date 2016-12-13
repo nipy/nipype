@@ -48,7 +48,7 @@ class SignalExtractionInputSpec(BaseInterfaceInputSpec):
                                        'with 4D probability maps.')
     include_global = traits.Bool(False, usedefault=True,
                                  desc='If True, include an extra column '
-                                 'labeled "global", with values calculated from the entire brain '
+                                 'labeled "GlobalSignal", with values calculated from the entire brain '
                                  '(instead of just regions).')
     detrend = traits.Bool(False, usedefault=True, desc='If True, perform detrending using nilearn.')
 
@@ -66,7 +66,7 @@ class SignalExtraction(BaseInterface):
     >>> seinterface.inputs.in_file = 'functional.nii'
     >>> seinterface.inputs.label_files = 'segmentation0.nii.gz'
     >>> seinterface.inputs.out_file = 'means.tsv'
-    >>> segments = ['CSF', 'gray', 'white']
+    >>> segments = ['CSF', 'GrayMatter', 'WhiteMatter']
     >>> seinterface.inputs.class_labels = segments
     >>> seinterface.inputs.detrend = True
     >>> seinterface.inputs.include_global = True
@@ -129,7 +129,7 @@ class SignalExtraction(BaseInterface):
             global_label_data = self._4d(global_label_data, label_data.affine)
             global_masker = nl.NiftiLabelsMasker(global_label_data, detrend=self.inputs.detrend)
             maskers.insert(0, global_masker)
-            self.inputs.class_labels.insert(0, 'global')
+            self.inputs.class_labels.insert(0, 'GlobalSignal')
 
         for masker in maskers:
             masker.set_params(detrend=self.inputs.detrend)

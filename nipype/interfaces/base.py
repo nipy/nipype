@@ -127,10 +127,10 @@ class Bunch(object):
     --------
     >>> from nipype.interfaces.base import Bunch
     >>> inputs = Bunch(infile='subj.nii', fwhm=6.0, register_to_mean=True)
-    >>> inputs # doctest: +IGNORE_UNICODE
+    >>> inputs # doctest: +ALLOW_UNICODE
     Bunch(fwhm=6.0, infile='subj.nii', register_to_mean=True)
     >>> inputs.register_to_mean = False
-    >>> inputs # doctest: +IGNORE_UNICODE
+    >>> inputs # doctest: +ALLOW_UNICODE
     Bunch(fwhm=6.0, infile='subj.nii', register_to_mean=False)
 
 
@@ -258,7 +258,7 @@ class Bunch(object):
             else:
                 item = val
             try:
-                if os.path.isfile(item):
+                if isinstance(item, str) and os.path.isfile(item):
                     infile_list.append(key)
             except TypeError:
                 # `item` is not a file or string.
@@ -1610,18 +1610,18 @@ class CommandLine(BaseInterface):
     >>> from nipype.interfaces.base import CommandLine
     >>> cli = CommandLine(command='ls', environ={'DISPLAY': ':1'})
     >>> cli.inputs.args = '-al'
-    >>> cli.cmdline # doctest: +IGNORE_UNICODE
+    >>> cli.cmdline # doctest: +ALLOW_UNICODE
     'ls -al'
 
-    >>> pprint.pprint(cli.inputs.trait_get())  # doctest: +NORMALIZE_WHITESPACE +IGNORE_UNICODE
+    >>> pprint.pprint(cli.inputs.trait_get())  # doctest: +NORMALIZE_WHITESPACE +ALLOW_UNICODE
     {'args': '-al',
      'environ': {'DISPLAY': ':1'},
      'ignore_exception': False,
      'terminal_output': 'stream'}
 
-    >>> cli.inputs.get_hashval()[0][0] # doctest: +IGNORE_UNICODE
+    >>> cli.inputs.get_hashval()[0][0] # doctest: +ALLOW_UNICODE
     ('args', '-al')
-    >>> cli.inputs.get_hashval()[1] # doctest: +IGNORE_UNICODE
+    >>> cli.inputs.get_hashval()[1] # doctest: +ALLOW_UNICODE
     '11c37f97649cd61627f4afe5136af8c0'
 
     """
@@ -1963,12 +1963,12 @@ class MpiCommandLine(CommandLine):
     >>> from nipype.interfaces.base import MpiCommandLine
     >>> mpi_cli = MpiCommandLine(command='my_mpi_prog')
     >>> mpi_cli.inputs.args = '-v'
-    >>> mpi_cli.cmdline # doctest: +IGNORE_UNICODE
+    >>> mpi_cli.cmdline # doctest: +ALLOW_UNICODE
     'my_mpi_prog -v'
 
     >>> mpi_cli.inputs.use_mpi = True
     >>> mpi_cli.inputs.n_procs = 8
-    >>> mpi_cli.cmdline # doctest: +IGNORE_UNICODE
+    >>> mpi_cli.cmdline # doctest: +ALLOW_UNICODE
     'mpiexec -n 8 my_mpi_prog -v'
     """
     input_spec = MpiCommandLineInputSpec
@@ -2072,15 +2072,15 @@ class OutputMultiPath(MultiPath):
     <undefined>
 
     >>> a.foo = '/software/temp/foo.txt'
-    >>> a.foo # doctest: +IGNORE_UNICODE
+    >>> a.foo # doctest: +ALLOW_UNICODE
     '/software/temp/foo.txt'
 
     >>> a.foo = ['/software/temp/foo.txt']
-    >>> a.foo # doctest: +IGNORE_UNICODE
+    >>> a.foo # doctest: +ALLOW_UNICODE
     '/software/temp/foo.txt'
 
     >>> a.foo = ['/software/temp/foo.txt', '/software/temp/goo.txt']
-    >>> a.foo # doctest: +IGNORE_UNICODE
+    >>> a.foo # doctest: +ALLOW_UNICODE
     ['/software/temp/foo.txt', '/software/temp/goo.txt']
 
     """
@@ -2117,15 +2117,15 @@ class InputMultiPath(MultiPath):
     <undefined>
 
     >>> a.foo = '/software/temp/foo.txt'
-    >>> a.foo # doctest: +IGNORE_UNICODE
+    >>> a.foo # doctest: +ALLOW_UNICODE
     ['/software/temp/foo.txt']
 
     >>> a.foo = ['/software/temp/foo.txt']
-    >>> a.foo # doctest: +IGNORE_UNICODE
+    >>> a.foo # doctest: +ALLOW_UNICODE
     ['/software/temp/foo.txt']
 
     >>> a.foo = ['/software/temp/foo.txt', '/software/temp/goo.txt']
-    >>> a.foo # doctest: +IGNORE_UNICODE
+    >>> a.foo # doctest: +ALLOW_UNICODE
     ['/software/temp/foo.txt', '/software/temp/goo.txt']
 
     """
