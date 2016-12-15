@@ -5,11 +5,11 @@ from __future__ import unicode_literals
 from builtins import open
 
 import os
-from tempfile import mkstemp, mkdtemp
+from tempfile import mkstemp
 import warnings
 
-from ...testing import (assert_equal, assert_true, assert_false,
-                        assert_in, assert_not_in, TempFATFS)
+import pytest
+from ...testing import TempFATFS
 from ...utils.filemanip import (save_json, load_json,
                                 fname_presuffix, fnames_presuffix,
                                 hash_rename, check_forhash,
@@ -23,44 +23,42 @@ import numpy as np
 def _ignore_atime(stat):
     return stat[:7] + stat[8:]
 
-
-def test_split_filename():
-    res = split_filename('foo.nii')
-    yield assert_equal, res, ('', 'foo', '.nii')
-    res = split_filename('foo.nii.gz')
-    yield assert_equal, res, ('', 'foo', '.nii.gz')
-    res = split_filename('/usr/local/foo.nii.gz')
-    yield assert_equal, res, ('/usr/local', 'foo', '.nii.gz')
-    res = split_filename('../usr/local/foo.nii')
-    yield assert_equal, res, ('../usr/local', 'foo', '.nii')
-    res = split_filename('/usr/local/foo.a.b.c.d')
-    yield assert_equal, res, ('/usr/local', 'foo.a.b.c', '.d')
-    res = split_filename('/usr/local/')
-    yield assert_equal, res, ('/usr/local', '', '')
+@pytest.mark.parametrize("filename, split",[
+        ('foo.nii',                ('', 'foo', '.nii')),
+        ('foo.nii.gz',             ('', 'foo', '.nii.gz')),
+        ('/usr/local/foo.nii.gz',  ('/usr/local', 'foo', '.nii.gz')),
+        ('../usr/local/foo.nii',   ('../usr/local', 'foo', '.nii')),
+        ('/usr/local/foo.a.b.c.d', ('/usr/local', 'foo.a.b.c', '.d')),
+        ('/usr/local/',            ('/usr/local', '', ''))
+        ])
+def test_split_filename(filename, split):
+    res = split_filename(filename)
+    assert res == split
 
 
 def test_fname_presuffix():
     fname = 'foo.nii'
     pth = fname_presuffix(fname, 'pre_', '_post', '/tmp')
-    yield assert_equal, pth, '/tmp/pre_foo_post.nii'
+    assert pth == '/tmp/pre_foo_post.nii'
     fname += '.gz'
     pth = fname_presuffix(fname, 'pre_', '_post', '/tmp')
-    yield assert_equal, pth, '/tmp/pre_foo_post.nii.gz'
+    assert pth == '/tmp/pre_foo_post.nii.gz'
     pth = fname_presuffix(fname, 'pre_', '_post', '/tmp', use_ext=False)
-    yield assert_equal, pth, '/tmp/pre_foo_post'
+    assert pth == '/tmp/pre_foo_post'
 
 
 def test_fnames_presuffix():
     fnames = ['foo.nii', 'bar.nii']
     pths = fnames_presuffix(fnames, 'pre_', '_post', '/tmp')
-    yield assert_equal, pths, ['/tmp/pre_foo_post.nii', '/tmp/pre_bar_post.nii']
+    assert pths == ['/tmp/pre_foo_post.nii', '/tmp/pre_bar_post.nii']
 
-
-def test_hash_rename():
-    new_name = hash_rename('foobar.nii', 'abc123')
-    yield assert_equal, new_name, 'foobar_0xabc123.nii'
-    new_name = hash_rename('foobar.nii.gz', 'abc123')
-    yield assert_equal, new_name, 'foobar_0xabc123.nii.gz'
+@pytest.mark.parametrize("filename, newname",[
+        ('foobar.nii',    'foobar_0xabc123.nii'),
+        ('foobar.nii.gz', 'foobar_0xabc123.nii.gz')
+        ])
+def test_hash_rename(filename, newname):
+    new_name = hash_rename(filename, 'abc123')
+    assert new_name == newname
 
 
 def test_check_forhash():
@@ -68,56 +66,56 @@ def test_check_forhash():
     orig_hash = '_0x4323dbcefdc51906decd8edcb3327943'
     hashed_name = ''.join((fname, orig_hash, '.nii'))
     result, hash = check_forhash(hashed_name)
-    yield assert_true, result
-    yield assert_equal, hash, [orig_hash]
+    assert result
+    assert hash == [orig_hash]
     result, hash = check_forhash('foobar.nii')
-    yield assert_false, result
-    yield assert_equal, hash, None
+    assert not result
+    assert hash == None
 
-
-def _temp_analyze_files():
+@pytest.fixture()
+def _temp_analyze_files(tmpdir):
     """Generate temporary analyze file pair."""
-    fd, orig_img = mkstemp(suffix='.img')
-    orig_hdr = orig_img[:-4] + '.hdr'
-    fp = open(orig_hdr, 'w+')
-    fp.close()
-    return orig_img, orig_hdr
+    orig_img = tmpdir.join("orig.img")
+    orig_hdr = tmpdir.join("orig.hdr")
+    orig_img.open('w+').close()
+    orig_hdr.open('w+').close()
+    return str(orig_img), str(orig_hdr)
 
 
-def test_copyfile():
-    orig_img, orig_hdr = _temp_analyze_files()
+@pytest.fixture()
+def _temp_analyze_files_prime(tmpdir):
+    """Generate temporary analyze file pair."""
+    orig_img = tmpdir.join("orig_prime.img")
+    orig_hdr = tmpdir.join("orig_prime.hdr")
+    orig_img.open('w+').close()
+    orig_hdr.open('w+').close()
+    return str(orig_img), str(orig_hdr)
+
+
+def test_copyfile(_temp_analyze_files):
+    orig_img, orig_hdr = _temp_analyze_files
     pth, fname = os.path.split(orig_img)
     new_img = os.path.join(pth, 'newfile.img')
     new_hdr = os.path.join(pth, 'newfile.hdr')
     copyfile(orig_img, new_img)
-    yield assert_true, os.path.exists(new_img)
-    yield assert_true, os.path.exists(new_hdr)
-    os.unlink(new_img)
-    os.unlink(new_hdr)
-    # final cleanup
-    os.unlink(orig_img)
-    os.unlink(orig_hdr)
+    assert os.path.exists(new_img)
+    assert os.path.exists(new_hdr)
 
 
-def test_copyfile_true():
-    orig_img, orig_hdr = _temp_analyze_files()
+def test_copyfile_true(_temp_analyze_files):
+    orig_img, orig_hdr = _temp_analyze_files
     pth, fname = os.path.split(orig_img)
     new_img = os.path.join(pth, 'newfile.img')
     new_hdr = os.path.join(pth, 'newfile.hdr')
     # Test with copy=True
     copyfile(orig_img, new_img, copy=True)
-    yield assert_true, os.path.exists(new_img)
-    yield assert_true, os.path.exists(new_hdr)
-    os.unlink(new_img)
-    os.unlink(new_hdr)
-    # final cleanup
-    os.unlink(orig_img)
-    os.unlink(orig_hdr)
+    assert os.path.exists(new_img)
+    assert os.path.exists(new_hdr)
 
 
-def test_copyfiles():
-    orig_img1, orig_hdr1 = _temp_analyze_files()
-    orig_img2, orig_hdr2 = _temp_analyze_files()
+def test_copyfiles(_temp_analyze_files, _temp_analyze_files_prime):
+    orig_img1, orig_hdr1 = _temp_analyze_files
+    orig_img2, orig_hdr2 = _temp_analyze_files_prime
     pth, fname = os.path.split(orig_img1)
     new_img1 = os.path.join(pth, 'newfile.img')
     new_hdr1 = os.path.join(pth, 'newfile.hdr')
@@ -125,25 +123,16 @@ def test_copyfiles():
     new_img2 = os.path.join(pth, 'secondfile.img')
     new_hdr2 = os.path.join(pth, 'secondfile.hdr')
     newfiles = copyfiles([orig_img1, orig_img2], [new_img1, new_img2])
-    yield assert_true, os.path.exists(new_img1)
-    yield assert_true, os.path.exists(new_hdr1)
-    yield assert_true, os.path.exists(new_img2)
-    yield assert_true, os.path.exists(new_hdr2)
-    # cleanup
-    os.unlink(orig_img1)
-    os.unlink(orig_hdr1)
-    os.unlink(orig_img2)
-    os.unlink(orig_hdr2)
-    os.unlink(new_img1)
-    os.unlink(new_hdr1)
-    os.unlink(new_img2)
-    os.unlink(new_hdr2)
+    assert os.path.exists(new_img1)
+    assert os.path.exists(new_hdr1)
+    assert os.path.exists(new_img2)
+    assert os.path.exists(new_hdr2)
 
 
-def test_linkchain():
+def test_linkchain(_temp_analyze_files):
     if os.name is not 'posix':
         return
-    orig_img, orig_hdr = _temp_analyze_files()
+    orig_img, orig_hdr = _temp_analyze_files
     pth, fname = os.path.split(orig_img)
     new_img1 = os.path.join(pth, 'newfile1.img')
     new_hdr1 = os.path.join(pth, 'newfile1.hdr')
@@ -152,35 +141,26 @@ def test_linkchain():
     new_img3 = os.path.join(pth, 'newfile3.img')
     new_hdr3 = os.path.join(pth, 'newfile3.hdr')
     copyfile(orig_img, new_img1)
-    yield assert_true, os.path.islink(new_img1)
-    yield assert_true, os.path.islink(new_hdr1)
+    assert os.path.islink(new_img1)
+    assert os.path.islink(new_hdr1)
     copyfile(new_img1, new_img2, copy=True)
-    yield assert_false, os.path.islink(new_img2)
-    yield assert_false, os.path.islink(new_hdr2)
-    yield assert_false, os.path.samefile(orig_img, new_img2)
-    yield assert_false, os.path.samefile(orig_hdr, new_hdr2)
+    assert not os.path.islink(new_img2)
+    assert not os.path.islink(new_hdr2)
+    assert not os.path.samefile(orig_img, new_img2)
+    assert not os.path.samefile(orig_hdr, new_hdr2)
     copyfile(new_img1, new_img3, copy=True, use_hardlink=True)
-    yield assert_false, os.path.islink(new_img3)
-    yield assert_false, os.path.islink(new_hdr3)
-    yield assert_true, os.path.samefile(orig_img, new_img3)
-    yield assert_true, os.path.samefile(orig_hdr, new_hdr3)
+    assert not os.path.islink(new_img3)
+    assert not os.path.islink(new_hdr3)
+    assert os.path.samefile(orig_img, new_img3)
+    assert os.path.samefile(orig_hdr, new_hdr3)
 
-    os.unlink(new_img1)
-    os.unlink(new_hdr1)
-    os.unlink(new_img2)
-    os.unlink(new_hdr2)
-    os.unlink(new_img3)
-    os.unlink(new_hdr3)
-    # final cleanup
-    os.unlink(orig_img)
-    os.unlink(orig_hdr)
 
-def test_recopy():
+def test_recopy(_temp_analyze_files):
     # Re-copying with the same parameters on an unchanged file should be
     # idempotent
     #
     # Test for copying from regular files and symlinks
-    orig_img, orig_hdr = _temp_analyze_files()
+    orig_img, orig_hdr = _temp_analyze_files
     pth, fname = os.path.split(orig_img)
     img_link = os.path.join(pth, 'imglink.img')
     hdr_link = os.path.join(pth, 'imglink.hdr')
@@ -204,10 +184,8 @@ def test_recopy():
                 copyfile(orig_img, new_img, **kwargs)
                 err_msg = "Regular - OS: {}; Copy: {}; Hardlink: {}".format(
                     os.name, copy, use_hardlink)
-                yield (assert_equal, img_stat, _ignore_atime(os.stat(new_img)),
-                       err_msg)
-                yield (assert_equal, hdr_stat, _ignore_atime(os.stat(new_hdr)),
-                       err_msg)
+                assert img_stat == _ignore_atime(os.stat(new_img)), err_msg
+                assert hdr_stat == _ignore_atime(os.stat(new_hdr)), err_msg
                 os.unlink(new_img)
                 os.unlink(new_hdr)
 
@@ -217,22 +195,16 @@ def test_recopy():
                 copyfile(img_link, new_img, **kwargs)
                 err_msg = "Symlink - OS: {}; Copy: {}; Hardlink: {}".format(
                     os.name, copy, use_hardlink)
-                yield (assert_equal, img_stat, _ignore_atime(os.stat(new_img)),
-                       err_msg)
-                yield (assert_equal, hdr_stat, _ignore_atime(os.stat(new_hdr)),
-                       err_msg)
+                assert img_stat == _ignore_atime(os.stat(new_img)), err_msg
+                assert hdr_stat == _ignore_atime(os.stat(new_hdr)), err_msg
                 os.unlink(new_img)
                 os.unlink(new_hdr)
 
-    os.unlink(img_link)
-    os.unlink(hdr_link)
-    os.unlink(orig_img)
-    os.unlink(orig_hdr)
 
-def test_copyfallback():
+def test_copyfallback(_temp_analyze_files):
     if os.name is not 'posix':
         return
-    orig_img, orig_hdr = _temp_analyze_files()
+    orig_img, orig_hdr = _temp_analyze_files
     pth, imgname = os.path.split(orig_img)
     pth, hdrname = os.path.split(orig_hdr)
     try:
@@ -247,59 +219,56 @@ def test_copyfallback():
                 for use_hardlink in (True, False):
                     copyfile(orig_img, tgt_img, copy=copy,
                              use_hardlink=use_hardlink)
-                    yield assert_true, os.path.exists(tgt_img)
-                    yield assert_true, os.path.exists(tgt_hdr)
-                    yield assert_false, os.path.islink(tgt_img)
-                    yield assert_false, os.path.islink(tgt_hdr)
-                    yield assert_false, os.path.samefile(orig_img, tgt_img)
-                    yield assert_false, os.path.samefile(orig_hdr, tgt_hdr)
+                    assert os.path.exists(tgt_img)
+                    assert os.path.exists(tgt_hdr)
+                    assert not os.path.islink(tgt_img)
+                    assert not os.path.islink(tgt_hdr)
+                    assert not os.path.samefile(orig_img, tgt_img)
+                    assert not os.path.samefile(orig_hdr, tgt_hdr)
                     os.unlink(tgt_img)
                     os.unlink(tgt_hdr)
-    finally:
-        os.unlink(orig_img)
-        os.unlink(orig_hdr)
 
 
-def test_get_related_files():
-    orig_img, orig_hdr = _temp_analyze_files()
+def test_get_related_files(_temp_analyze_files):
+    orig_img, orig_hdr = _temp_analyze_files
 
     related_files = get_related_files(orig_img)
-    yield assert_in, orig_img, related_files
-    yield assert_in, orig_hdr, related_files
+    assert orig_img in related_files
+    assert orig_hdr in related_files
 
     related_files = get_related_files(orig_hdr)
-    yield assert_in, orig_img, related_files
-    yield assert_in, orig_hdr, related_files
+    assert orig_img in related_files
+    assert orig_hdr in related_files
 
 
-def test_get_related_files_noninclusive():
-    orig_img, orig_hdr = _temp_analyze_files()
+def test_get_related_files_noninclusive(_temp_analyze_files):
+    orig_img, orig_hdr = _temp_analyze_files
 
     related_files = get_related_files(orig_img, include_this_file=False)
-    yield assert_not_in, orig_img, related_files
-    yield assert_in, orig_hdr, related_files
+    assert orig_img not in related_files
+    assert orig_hdr in related_files
 
     related_files = get_related_files(orig_hdr, include_this_file=False)
-    yield assert_in, orig_img, related_files
-    yield assert_not_in, orig_hdr, related_files
+    assert orig_img in related_files
+    assert orig_hdr not in related_files
 
+@pytest.mark.parametrize("filename, expected", [
+        ('foo.nii',      ['foo.nii']),
+        (['foo.nii'],    ['foo.nii']),
+        (('foo', 'bar'), ['foo', 'bar']),
+        (12.34,          None)
+        ])
+def test_filename_to_list(filename, expected):
+    x = filename_to_list(filename)
+    assert x == expected
 
-def test_filename_to_list():
-    x = filename_to_list('foo.nii')
-    yield assert_equal, x, ['foo.nii']
-    x = filename_to_list(['foo.nii'])
-    yield assert_equal, x, ['foo.nii']
-    x = filename_to_list(('foo', 'bar'))
-    yield assert_equal, x, ['foo', 'bar']
-    x = filename_to_list(12.34)
-    yield assert_equal, x, None
-
-
-def test_list_to_filename():
-    x = list_to_filename(['foo.nii'])
-    yield assert_equal, x, 'foo.nii'
-    x = list_to_filename(['foo', 'bar'])
-    yield assert_equal, x, ['foo', 'bar']
+@pytest.mark.parametrize("list, expected", [
+        (['foo.nii'],    'foo.nii'),
+        (['foo', 'bar'], ['foo', 'bar']),
+        ])
+def test_list_to_filename(list, expected):
+    x = list_to_filename(list)
+    assert x == expected
 
 
 def test_json():
@@ -309,33 +278,21 @@ def test_json():
     save_json(name, adict)  # save_json closes the file
     new_dict = load_json(name)
     os.unlink(name)
-    yield assert_equal, sorted(adict.items()), sorted(new_dict.items())
+    assert sorted(adict.items()) == sorted(new_dict.items())
 
 
-def test_related_files():
-    file1 = '/path/test.img'
-    file2 = '/path/test.hdr'
-    file3 = '/path/test.BRIK'
-    file4 = '/path/test.HEAD'
-    file5 = '/path/foo.nii'
+@pytest.mark.parametrize("file, length, expected_files", [
+        ('/path/test.img',  3, ['/path/test.hdr', '/path/test.img', '/path/test.mat']),
+        ('/path/test.hdr',  3, ['/path/test.hdr', '/path/test.img', '/path/test.mat']),
+        ('/path/test.BRIK', 2, ['/path/test.BRIK', '/path/test.HEAD']),
+        ('/path/test.HEAD', 2, ['/path/test.BRIK', '/path/test.HEAD']),
+        ('/path/foo.nii',   1, [])
+        ])
+def test_related_files(file, length, expected_files):
+    related_files = get_related_files(file)
 
-    spm_files1 = get_related_files(file1)
-    spm_files2 = get_related_files(file2)
-    afni_files1 = get_related_files(file3)
-    afni_files2 = get_related_files(file4)
-    yield assert_equal, len(spm_files1), 3
-    yield assert_equal, len(spm_files2), 3
-    yield assert_equal, len(afni_files1), 2
-    yield assert_equal, len(afni_files2), 2
-    yield assert_equal, len(get_related_files(file5)), 1
+    assert len(related_files) == length
 
-    yield assert_true, '/path/test.hdr' in spm_files1
-    yield assert_true, '/path/test.img' in spm_files1
-    yield assert_true, '/path/test.mat' in spm_files1
-    yield assert_true, '/path/test.hdr' in spm_files2
-    yield assert_true, '/path/test.img' in spm_files2
-    yield assert_true, '/path/test.mat' in spm_files2
-    yield assert_true, '/path/test.BRIK' in afni_files1
-    yield assert_true, '/path/test.HEAD' in afni_files1
-    yield assert_true, '/path/test.BRIK' in afni_files2
-    yield assert_true, '/path/test.HEAD' in afni_files2
+    for ef in expected_files:
+        assert ef in related_files
+

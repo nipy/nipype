@@ -1,29 +1,25 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from shutil import rmtree
-from tempfile import mkdtemp
-from nipype.testing import (assert_equal, example_data)
+from nipype.testing import example_data
 
 
-def test_split_and_merge():
+def test_split_and_merge(tmpdir):
     import numpy as np
     import nibabel as nb
     import os.path as op
     import os
-    cwd = os.getcwd()
 
     from nipype.algorithms.misc import split_rois, merge_rois
-    tmpdir = mkdtemp()
 
     in_mask = example_data('tpms_msk.nii.gz')
-    dwfile = op.join(tmpdir, 'dwi.nii.gz')
+    dwfile = op.join(str(tmpdir), 'dwi.nii.gz')
     mskdata = nb.load(in_mask).get_data()
     aff = nb.load(in_mask).affine
 
     dwshape = (mskdata.shape[0], mskdata.shape[1], mskdata.shape[2], 6)
     dwdata = np.random.normal(size=dwshape)
-    os.chdir(tmpdir)
+    os.chdir(str(tmpdir))
     nb.Nifti1Image(dwdata.astype(np.float32),
                    aff, None).to_filename(dwfile)
 
@@ -32,7 +28,5 @@ def test_split_and_merge():
     dwmerged = nb.load(merged).get_data()
 
     dwmasked = dwdata * mskdata[:, :, :, np.newaxis]
-    os.chdir(cwd)
-    rmtree(tmpdir)
 
-    yield assert_equal, np.allclose(dwmasked, dwmerged), True
+    assert np.allclose(dwmasked, dwmerged)

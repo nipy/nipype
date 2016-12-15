@@ -38,7 +38,7 @@ class C3dAffineTool(SEMLikeCommandLine):
     >>> c3.inputs.source_file = 'cmatrix.mat'
     >>> c3.inputs.itk_transform = 'affine.txt'
     >>> c3.inputs.fsl2ras = True
-    >>> c3.cmdline # doctest: +IGNORE_UNICODE
+    >>> c3.cmdline # doctest: +ALLOW_UNICODE
     'c3d_affine_tool -src cmatrix.mat -fsl2ras -oitk affine.txt'
     """
     input_spec = C3dAffineToolInputSpec

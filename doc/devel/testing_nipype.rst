@@ -40,7 +40,7 @@ or::
 Test implementation
 -------------------
 
-Nipype testing framework is built upon `nose <http://nose.readthedocs.io/en/latest/>`_.
+Nipype testing framework is built upon `pytest <http://doc.pytest.org/en/latest/>`_.
 By the time these guidelines are written, Nipype implements 17638 tests.
 
 After installation in developer mode, the tests can be run with the
@@ -50,20 +50,18 @@ following simple command at the root folder of the project ::
 
 If ``make`` is not installed in the system, it is possible to run the tests using::
 
-    python -W once:FSL:UserWarning:nipype `which nosetests` --with-doctest \
-           --with-doctest-ignore-unicode --logging-level=DEBUG --verbosity=3 nipype
+     py.test --doctest-modules --cov=nipype nipype
 
 
-A successful test run should complete in a few minutes and end with
+A successful test run should complete in 10-30 minutes and end with
 something like::
 
     ----------------------------------------------------------------------
-    Ran 17922 tests in 107.254s
-
-    OK (SKIP=27)
+    2445 passed, 41 skipped, 7 xfailed in 1277.66 seconds
 
 
-All tests should pass (unless you're missing a dependency). If the ``SUBJECTS_DIR```
+
+No test should fail (unless you're missing a dependency). If the ``SUBJECTS_DIR```
 environment variable is not set, some FreeSurfer related tests will fail.
 If any of the tests failed, please report them on our `bug tracker
 <http://github.com/nipy/nipype/issues>`_.
@@ -90,6 +88,11 @@ Some tests in Nipype make use of some images distributed within the `FSL course 
 To enable the tests depending on these data, just unpack the targz file and set the :code:`FSL_COURSE_DATA` environment
 variable to point to that folder.
 
+Xfail tests
+~~~~~~~~~~
+
+Some tests are expect to fail until the code will be changed or for other reasons.
+
 
 Avoiding any MATLAB calls from testing
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -115,7 +118,7 @@ Nipype is as easy as follows::
                       -v ~/examples:/root/examples:ro \
                       -v ~/scratch:/scratch \
                       -w /root/src/nipype \
-                      nipype/nipype_test:py27 /usr/bin/run_nosetests.sh
+                      nipype/nipype_test:py27 /usr/bin/run_pytest.sh
 
 For running nipype in Python 3.5::
 
@@ -126,4 +129,4 @@ For running nipype in Python 3.5::
                       -v ~/examples:/root/examples:ro \
                       -v ~/scratch:/scratch \
                       -w /root/src/nipype \
-                      nipype/nipype_test:py35 /usr/bin/run_nosetests.sh
+                      nipype/nipype_test:py35 /usr/bin/run_pytest.sh

@@ -1,16 +1,18 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
-import unittest
 import os
 import tempfile
 import shutil
 
 import numpy as np
 
-from ...testing import (assert_equal, utils, assert_almost_equal, raises,
-                        skipif)
+from ...testing import utils
+
 from .. import nilearn as iface
 from ...pipeline import engine as pe
+
+import pytest
+import numpy.testing as npt
 
 no_nilearn = True
 try:
@@ -19,7 +21,8 @@ try:
 except ImportError:
     pass
 
-class TestSignalExtraction(unittest.TestCase):
+@pytest.mark.skipif(no_nilearn, reason="the nilearn library is not available")
+class TestSignalExtraction():
 
     filenames = {
         'in_file': 'fmri.nii',
@@ -30,15 +33,13 @@ class TestSignalExtraction(unittest.TestCase):
     labels = ['CSF', 'GrayMatter', 'WhiteMatter']
     global_labels = ['GlobalSignal'] + labels
 
-    def setUp(self):
+    def setup_class(self):
         self.orig_dir = os.getcwd()
         self.temp_dir = tempfile.mkdtemp()
         os.chdir(self.temp_dir)
-
         utils.save_toy_nii(self.fake_fmri_data, self.filenames['in_file'])
         utils.save_toy_nii(self.fake_label_data, self.filenames['label_files'])
 
-    @skipif(no_nilearn)
     def test_signal_extract_no_shared(self):
         # run
         iface.SignalExtraction(in_file=self.filenames['in_file'],
@@ -49,26 +50,22 @@ class TestSignalExtraction(unittest.TestCase):
         self.assert_expected_output(self.labels, self.base_wanted)
 
 
-    @skipif(no_nilearn)
-    @raises(ValueError)
     def test_signal_extr_bad_label_list(self):
         # run
-        iface.SignalExtraction(in_file=self.filenames['in_file'],
-                               label_files=self.filenames['label_files'],
-                               class_labels=['bad'],
-                               incl_shared_variance=False).run()
+        with pytest.raises(ValueError):
+            iface.SignalExtraction(in_file=self.filenames['in_file'],
+                                   label_files=self.filenames['label_files'],
+                                   class_labels=['bad'],
+                                   incl_shared_variance=False).run()
 
-    @skipif(no_nilearn)
     def test_signal_extr_equiv_4d_no_shared(self):
         self._test_4d_label(self.base_wanted, self.fake_equiv_4d_label_data,
                             incl_shared_variance=False)
 
-    @skipif(no_nilearn)
     def test_signal_extr_4d_no_shared(self):
         # set up & run & assert
         self._test_4d_label(self.fourd_wanted, self.fake_4d_label_data, incl_shared_variance=False)
 
-    @skipif(no_nilearn)
     def test_signal_extr_global_no_shared(self):
         # set up
         wanted_global = [[-4./6], [-1./6], [3./6], [-1./6], [-7./6]]
@@ -85,7 +82,6 @@ class TestSignalExtraction(unittest.TestCase):
         # assert
         self.assert_expected_output(self.global_labels, wanted_global)
 
-    @skipif(no_nilearn)
     def test_signal_extr_4d_global_no_shared(self):
         # set up
         wanted_global = [[3./8], [-3./8], [1./8], [-7./8], [-9./8]]
@@ -96,7 +92,6 @@ class TestSignalExtraction(unittest.TestCase):
         self._test_4d_label(wanted_global, self.fake_4d_label_data,
                             include_global=True, incl_shared_variance=False)
 
-    @skipif(no_nilearn)
     def test_signal_extr_shared(self):
         # set up
         wanted = []
@@ -111,7 +106,7 @@ class TestSignalExtraction(unittest.TestCase):
         # run & assert
         self._test_4d_label(wanted, self.fake_4d_label_data)
 
-    @skipif(no_nilearn)
+
     def test_signal_extr_traits_valid(self):
         ''' Test a node using the SignalExtraction interface.
         Unlike interface.run(), node.run() checks the traits
@@ -147,20 +142,20 @@ class TestSignalExtraction(unittest.TestCase):
         with open(self.filenames['out_file'], 'r') as output:
             got = [line.split() for line in output]
             labels_got = got.pop(0) # remove header
-            assert_equal(labels_got, labels)
-            assert_equal(len(got), self.fake_fmri_data.shape[3],
-                         'num rows and num volumes')
+            assert labels_got == labels
+            assert len(got) == self.fake_fmri_data.shape[3],'num rows and num volumes'
             # convert from string to float
             got = [[float(num) for num in row] for row in got]
             for i, time in enumerate(got):
-                assert_equal(len(labels), len(time))
+                assert len(labels) == len(time)
                 for j, segment in enumerate(time):
-                    assert_almost_equal(segment, wanted[i][j], decimal=1)
+                    npt.assert_almost_equal(segment, wanted[i][j], decimal=1)
 
 
-    def tearDown(self):
+    def teardown_class(self):
         os.chdir(self.orig_dir)
         shutil.rmtree(self.temp_dir)
+
 
     fake_fmri_data = np.array([[[[2, -1, 4, -2, 3],
                                  [4, -2, -5, -1, 0]],
