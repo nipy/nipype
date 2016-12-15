@@ -10,13 +10,13 @@ import numpy as np
 
 import nibabel as nb
 
-from nipype.testing import (assert_equal, assert_not_equal,
-                            assert_raises, skipif)
+import pytest
 import nipype.interfaces.fsl.epi as fsl
 from nipype.interfaces.fsl import no_fsl
 
 
-def create_files_in_directory():
+@pytest.fixture(scope="module")
+def create_files_in_directory(request):
     outdir = os.path.realpath(mkdtemp())
     cwd = os.getcwd()
     os.chdir(outdir)
@@ -28,37 +28,37 @@ def create_files_in_directory():
         img = np.random.random(shape)
         nb.save(nb.Nifti1Image(img, np.eye(4), hdr),
                 os.path.join(outdir, f))
-    return filelist, outdir, cwd
 
-
-def clean_directory(outdir, old_wd):
-    if os.path.exists(outdir):
+    def clean_directory():
         rmtree(outdir)
-    os.chdir(old_wd)
+        os.chdir(cwd)
+
+    request.addfinalizer(clean_directory)
+    return (filelist, outdir)
 
 
 # test eddy_correct
-@skipif(no_fsl)
-def test_eddy_correct2():
-    filelist, outdir, cwd = create_files_in_directory()
+@pytest.mark.skipif(no_fsl(), reason="fsl is not installed")
+def test_eddy_correct2(create_files_in_directory):
+    filelist, outdir = create_files_in_directory
     eddy = fsl.EddyCorrect()
 
     # make sure command gets called
-    yield assert_equal, eddy.cmd, 'eddy_correct'
+    assert eddy.cmd == 'eddy_correct'
 
     # test raising error with mandatory args absent
-    yield assert_raises, ValueError, eddy.run
+    with pytest.raises(ValueError):
+        eddy.run()
 
     # .inputs based parameters setting
     eddy.inputs.in_file = filelist[0]
     eddy.inputs.out_file = 'foo_eddc.nii'
     eddy.inputs.ref_num = 100
-    yield assert_equal, eddy.cmdline, 'eddy_correct %s foo_eddc.nii 100' % filelist[0]
+    assert eddy.cmdline == 'eddy_correct %s foo_eddc.nii 100' % filelist[0]
 
     # .run based parameter setting
     eddy2 = fsl.EddyCorrect(in_file=filelist[0], out_file='foo_ec.nii', ref_num=20)
-    yield assert_equal, eddy2.cmdline, 'eddy_correct %s foo_ec.nii 20' % filelist[0]
+    assert eddy2.cmdline == 'eddy_correct %s foo_ec.nii 20' % filelist[0]
 
     # test arguments for opt_map
     # eddy_correct class doesn't have opt_map{}
-    clean_directory(outdir, cwd)

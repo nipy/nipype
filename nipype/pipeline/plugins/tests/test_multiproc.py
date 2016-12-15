@@ -1,13 +1,11 @@
 # -*- coding: utf-8 -*-
 import logging
-import os
-from tempfile import mkdtemp
-from shutil import rmtree
+import os, sys
 from multiprocessing import cpu_count
 
 import nipype.interfaces.base as nib
 from nipype.utils import draw_gantt_chart
-from nipype.testing import assert_equal, skipif
+import pytest
 import nipype.pipeline.engine as pe
 from nipype.pipeline.plugins.callback_log import log_nodes_cb
 from nipype.pipeline.plugins.multiproc import get_system_total_memory_gb
@@ -21,7 +19,7 @@ class OutputSpec(nib.TraitedSpec):
     output1 = nib.traits.List(nib.traits.Int, desc='outputs')
 
 
-class TestInterface(nib.BaseInterface):
+class MultiprocTestInterface(nib.BaseInterface):
     input_spec = InputSpec
     output_spec = OutputSpec
 
@@ -34,16 +32,15 @@ class TestInterface(nib.BaseInterface):
         outputs['output1'] = [1, self.inputs.input1]
         return outputs
 
-# Disabled until https://github.com/nipy/nipype/issues/1692 is resolved
-@skipif(os.environ.get('TRAVIS_PYTHON_VERSION', '') == '2.7')
-def test_run_multiproc():
-    cur_dir = os.getcwd()
-    temp_dir = mkdtemp(prefix='test_engine_')
-    os.chdir(temp_dir)
+
+@pytest.mark.skipif(sys.version_info < (3, 0),
+                    reason="Disabled until https://github.com/nipy/nipype/issues/1692 is resolved")
+def test_run_multiproc(tmpdir):
+    os.chdir(str(tmpdir))
 
     pipe = pe.Workflow(name='pipe')
-    mod1 = pe.Node(interface=TestInterface(), name='mod1')
-    mod2 = pe.MapNode(interface=TestInterface(),
+    mod1 = pe.Node(interface=MultiprocTestInterface(), name='mod1')
+    mod2 = pe.MapNode(interface=MultiprocTestInterface(),
                       iterfield=['input1'],
                       name='mod2')
     pipe.connect([(mod1, mod2, [('output1', 'input1')])])
@@ -54,9 +51,7 @@ def test_run_multiproc():
     names = ['.'.join((node._hierarchy, node.name)) for node in execgraph.nodes()]
     node = execgraph.nodes()[names.index('pipe.mod1')]
     result = node.get_output('output1')
-    yield assert_equal, result, [1, 1]
-    os.chdir(cur_dir)
-    rmtree(temp_dir)
+    assert result == [1, 1]
 
 
 class InputSpecSingleNode(nib.TraitedSpec):
@@ -68,7 +63,7 @@ class OutputSpecSingleNode(nib.TraitedSpec):
     output1 = nib.traits.Int(desc='a random int')
 
 
-class TestInterfaceSingleNode(nib.BaseInterface):
+class SingleNodeTestInterface(nib.BaseInterface):
     input_spec = InputSpecSingleNode
     output_spec = OutputSpecSingleNode
 
@@ -123,8 +118,9 @@ def find_metrics(nodes, last_node):
 
     return total_memory, total_threads
 
-# Disabled until https://github.com/nipy/nipype/issues/1692 is resolved
-@skipif(os.environ.get('TRAVIS_PYTHON_VERSION') == '2.7')
+
+@pytest.mark.skipif(sys.version_info < (3, 0),
+                    reason="Disabled until https://github.com/nipy/nipype/issues/1692 is resolved")
 def test_no_more_memory_than_specified():
     LOG_FILENAME = 'callback.log'
     my_logger = logging.getLogger('callback')
@@ -136,10 +132,10 @@ def test_no_more_memory_than_specified():
 
     max_memory = 1
     pipe = pe.Workflow(name='pipe')
-    n1 = pe.Node(interface=TestInterfaceSingleNode(), name='n1')
-    n2 = pe.Node(interface=TestInterfaceSingleNode(), name='n2')
-    n3 = pe.Node(interface=TestInterfaceSingleNode(), name='n3')
-    n4 = pe.Node(interface=TestInterfaceSingleNode(), name='n4')
+    n1 = pe.Node(interface=SingleNodeTestInterface(), name='n1')
+    n2 = pe.Node(interface=SingleNodeTestInterface(), name='n2')
+    n3 = pe.Node(interface=SingleNodeTestInterface(), name='n3')
+    n4 = pe.Node(interface=SingleNodeTestInterface(), name='n4')
 
     n1.interface.estimated_memory_gb = 1
     n2.interface.estimated_memory_gb = 1
@@ -168,7 +164,7 @@ def test_no_more_memory_than_specified():
             result = False
             break
 
-    yield assert_equal, result, True
+    assert result
 
     max_threads = cpu_count()
 
@@ -178,14 +174,15 @@ def test_no_more_memory_than_specified():
             result = False
             break
 
-    yield assert_equal, result, True,\
-          "using more threads than system has (threads is not specified by user)"
+    assert result,\
+        "using more threads than system has (threads is not specified by user)"
 
     os.remove(LOG_FILENAME)
 
-# Disabled until https://github.com/nipy/nipype/issues/1692 is resolved
-@skipif(os.environ.get('TRAVIS_PYTHON_VERSION') == '2.7')
-@skipif(nib.runtime_profile == False)
+
+@pytest.mark.skipif(sys.version_info < (3, 0),
+                    reason="Disabled until https://github.com/nipy/nipype/issues/1692 is resolved")
+@pytest.mark.skipif(nib.runtime_profile == False, reason="runtime_profile=False")
 def test_no_more_threads_than_specified():
     LOG_FILENAME = 'callback.log'
     my_logger = logging.getLogger('callback')
@@ -197,10 +194,10 @@ def test_no_more_threads_than_specified():
 
     max_threads = 4
     pipe = pe.Workflow(name='pipe')
-    n1 = pe.Node(interface=TestInterfaceSingleNode(), name='n1')
-    n2 = pe.Node(interface=TestInterfaceSingleNode(), name='n2')
-    n3 = pe.Node(interface=TestInterfaceSingleNode(), name='n3')
-    n4 = pe.Node(interface=TestInterfaceSingleNode(), name='n4')
+    n1 = pe.Node(interface=SingleNodeTestInterface(), name='n1')
+    n2 = pe.Node(interface=SingleNodeTestInterface(), name='n2')
+    n3 = pe.Node(interface=SingleNodeTestInterface(), name='n3')
+    n4 = pe.Node(interface=SingleNodeTestInterface(), name='n4')
 
     n1.interface.num_threads = 1
     n2.interface.num_threads = 1
@@ -227,7 +224,7 @@ def test_no_more_threads_than_specified():
             result = False
             break
 
-    yield assert_equal, result, True, "using more threads than specified"
+    assert result, "using more threads than specified"
 
     max_memory = get_system_total_memory_gb()
     result = True
@@ -235,7 +232,7 @@ def test_no_more_threads_than_specified():
         if m > max_memory:
             result = False
             break
-    yield assert_equal, result, True,\
-          "using more memory than system has (memory is not specified by user)"
+    assert result,\
+        "using more memory than system has (memory is not specified by user)"
 
     os.remove(LOG_FILENAME)

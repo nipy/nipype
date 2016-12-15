@@ -86,7 +86,7 @@ class antsIntroduction(ANTSCommand):
     >>> warp.inputs.reference_image = 'Template_6.nii'
     >>> warp.inputs.input_image = 'structural.nii'
     >>> warp.inputs.max_iterations = [30,90,20]
-    >>> warp.cmdline # doctest: +IGNORE_UNICODE
+    >>> warp.cmdline # doctest: +ALLOW_UNICODE
     'antsIntroduction.sh -d 3 -i structural.nii -m 30x90x20 -o ants_ -r Template_6.nii -t GR'
 
     """
@@ -204,7 +204,7 @@ class buildtemplateparallel(ANTSCommand):
     >>> tmpl = buildtemplateparallel()
     >>> tmpl.inputs.in_files = ['T1.nii', 'structural.nii']
     >>> tmpl.inputs.max_iterations = [30, 90, 20]
-    >>> tmpl.cmdline # doctest: +IGNORE_UNICODE
+    >>> tmpl.cmdline # doctest: +ALLOW_UNICODE
     'buildtemplateparallel.sh -d 3 -i 4 -m 30x90x20 -o antsTMPL_ -c 0 -t GR T1.nii structural.nii'
 
     """

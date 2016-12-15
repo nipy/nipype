@@ -845,7 +845,7 @@ class JoinNode(Node):
         ...    name='inputspec'),
         >>> join = JoinNode(IdentityInterface(fields=['images', 'mask']),
         ...    joinsource='inputspec', joinfield='images', name='join')
-        >>> join._add_join_item_fields() # doctest: +IGNORE_UNICODE
+        >>> join._add_join_item_fields() # doctest: +ALLOW_UNICODE
         {'images': 'imagesJ1'}
 
         Return the {base field: slot field} dictionary

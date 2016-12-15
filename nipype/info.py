@@ -108,7 +108,7 @@ NUMPY_MIN_VERSION = '1.6.2'
 SCIPY_MIN_VERSION = '0.11'
 TRAITS_MIN_VERSION = '4.3'
 DATEUTIL_MIN_VERSION = '1.5'
-NOSE_MIN_VERSION = '1.2'
+PYTEST_MIN_VERSION = '3.0'
 FUTURE_MIN_VERSION = '0.15.2'
 SIMPLEJSON_MIN_VERSION = '3.8.0'
 PROV_MIN_VERSION = '1.4.0'
@@ -149,17 +149,18 @@ REQUIRES = [
 ]
 
 TESTS_REQUIRES = [
-    'nose>=%s' % NOSE_MIN_VERSION,
+    'pytest>=%s' % PYTEST_MIN_VERSION,
+    'pytest-raisesregexp',
+    'pytest-cov',
     'mock',
     'codecov',
-    'doctest-ignore-unicode',
     'dipy',
     'nipy',
     'matplotlib'
 ]
 
 EXTRA_REQUIRES = {
-    'doc': ['Sphinx>=0.3', 'matplotlib', 'pydotplus', 'doctest-ignore-unicode'],
+    'doc': ['Sphinx>=0.3', 'matplotlib', 'pydotplus'],
     'tests': TESTS_REQUIRES,
     'fmri': ['nitime', 'nilearn', 'dipy', 'nipy', 'matplotlib'],
     'profiler': ['psutil'],

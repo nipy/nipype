@@ -6,10 +6,9 @@
 """
 
 from builtins import object
-from tempfile import mkdtemp
-from shutil import rmtree
 
-from nipype.testing import assert_equal
+import pytest
+import sys
 import nipype.interfaces.utility as niu
 import nipype.pipeline.engine as pe
 
@@ -31,26 +30,25 @@ class Status(object):
         self.statuses.append((node, status))
 
 
-def test_callback_normal():
+def test_callback_normal(tmpdir):
     so = Status()
-    wf = pe.Workflow(name='test', base_dir=mkdtemp())
+    wf = pe.Workflow(name='test', base_dir=str(tmpdir))
     f_node = pe.Node(niu.Function(function=func, input_names=[],
                                   output_names=[]),
                      name='f_node')
     wf.add_nodes([f_node])
     wf.config['execution'] = {'crashdump_dir': wf.base_dir}
     wf.run(plugin="Linear", plugin_args={'status_callback': so.callback})
-    assert_equal(len(so.statuses), 2)
+    assert len(so.statuses) == 2
     for (n, s) in so.statuses:
-        yield assert_equal, n.name, 'f_node'
-    yield assert_equal, so.statuses[0][1], 'start'
-    yield assert_equal, so.statuses[1][1], 'end'
-    rmtree(wf.base_dir)
+        assert n.name == 'f_node'
+    assert so.statuses[0][1] == 'start'
+    assert so.statuses[1][1] == 'end'
 
 
-def test_callback_exception():
+def test_callback_exception(tmpdir):
     so = Status()
-    wf = pe.Workflow(name='test', base_dir=mkdtemp())
+    wf = pe.Workflow(name='test', base_dir=str(tmpdir))
     f_node = pe.Node(niu.Function(function=bad_func, input_names=[],
                                   output_names=[]),
                      name='f_node')
@@ -60,17 +58,18 @@ def test_callback_exception():
         wf.run(plugin="Linear", plugin_args={'status_callback': so.callback})
     except:
         pass
-    assert_equal(len(so.statuses), 2)
+    assert len(so.statuses) == 2
     for (n, s) in so.statuses:
-        yield assert_equal, n.name, 'f_node'
-    yield assert_equal, so.statuses[0][1], 'start'
-    yield assert_equal, so.statuses[1][1], 'exception'
-    rmtree(wf.base_dir)
+        assert n.name == 'f_node'
+    assert so.statuses[0][1] == 'start'
+    assert so.statuses[1][1] == 'exception'
 
 
-def test_callback_multiproc_normal():
+@pytest.mark.skipif(sys.version_info < (3, 0),
+                    reason="Disabled until https://github.com/nipy/nipype/issues/1692 is resolved")
+def test_callback_multiproc_normal(tmpdir):
     so = Status()
-    wf = pe.Workflow(name='test', base_dir=mkdtemp())
+    wf = pe.Workflow(name='test', base_dir=str(tmpdir))
     f_node = pe.Node(niu.Function(function=func, input_names=[],
                                   output_names=[]),
                      name='f_node')
@@ -78,17 +77,18 @@ def test_callback_multiproc_normal():
     wf.config['execution']['crashdump_dir'] = wf.base_dir
     wf.config['execution']['poll_sleep_duration'] = 2
     wf.run(plugin='MultiProc', plugin_args={'status_callback': so.callback})
-    assert_equal(len(so.statuses), 2)
+    assert len(so.statuses) == 2
     for (n, s) in so.statuses:
-        yield assert_equal, n.name, 'f_node'
-    yield assert_equal, so.statuses[0][1], 'start'
-    yield assert_equal, so.statuses[1][1], 'end'
-    rmtree(wf.base_dir)
+        assert n.name == 'f_node'
+    assert so.statuses[0][1] == 'start'
+    assert so.statuses[1][1] == 'end'
 
 
-def test_callback_multiproc_exception():
+@pytest.mark.skipif(sys.version_info < (3, 0),
+                    reason="Disabled until https://github.com/nipy/nipype/issues/1692 is resolved")
+def test_callback_multiproc_exception(tmpdir):
     so = Status()
-    wf = pe.Workflow(name='test', base_dir=mkdtemp())
+    wf = pe.Workflow(name='test', base_dir=str(tmpdir))
     f_node = pe.Node(niu.Function(function=bad_func, input_names=[],
                                   output_names=[]),
                      name='f_node')
@@ -99,9 +99,9 @@ def test_callback_multiproc_exception():
                plugin_args={'status_callback': so.callback})
     except:
         pass
-    assert_equal(len(so.statuses), 2)
+    assert len(so.statuses) == 2
     for (n, s) in so.statuses:
-        yield assert_equal, n.name, 'f_node'
-    yield assert_equal, so.statuses[0][1], 'start'
-    yield assert_equal, so.statuses[1][1], 'exception'
-    rmtree(wf.base_dir)
+        assert n.name == 'f_node'
+    assert so.statuses[0][1] == 'start'
+    assert so.statuses[1][1] == 'exception'
+
