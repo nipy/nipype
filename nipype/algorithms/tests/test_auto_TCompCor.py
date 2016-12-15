@@ -29,8 +29,22 @@ def test_TCompCor_inputs():
 
 
 def test_TCompCor_outputs():
-    output_map = dict(components_file=dict(),
-                      high_variance_mask=dict()
+    output_map = dict(components_file=dict(usedefault=True,
+    ),
+    header=dict(),
+    high_variance_mask=dict(),
+    ignore_exception=dict(nohash=True,
+    usedefault=True,
+    ),
+    mask_file=dict(),
+    num_components=dict(usedefault=True,
+    ),
+    realigned_file=dict(mandatory=True,
+    ),
+    regress_poly_degree=dict(usedefault=True,
+    ),
+    use_regress_poly=dict(usedefault=True,
+    ),
     )
     outputs = TCompCor.output_spec()
 
