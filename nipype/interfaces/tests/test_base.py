@@ -156,15 +156,6 @@ def test_deprecation():
         with pytest.raises(nib.TraitError): set_foo()
         assert len(w) == 0, 'no warnings, just errors'
 
-    with warnings.catch_warnings(record=True) as w:
-        warnings.filterwarnings('always', '', UserWarning)
-
-        class DeprecationSpec1numeric(nib.TraitedSpec):
-            foo = nib.traits.Int(deprecated='0.1')
-        spec_instance = DeprecationSpec1numeric()
-        set_foo = lambda: setattr(spec_instance, 'foo', 1)
-        with pytest.raises(nib.TraitError): set_foo()
-        assert len(w) == 0, 'no warnings, just errors'
 
     with warnings.catch_warnings(record=True) as w:
         warnings.filterwarnings('always', '', UserWarning)
