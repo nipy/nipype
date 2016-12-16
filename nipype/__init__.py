@@ -56,8 +56,8 @@ logging = Logging(config)
 #del nosetester
 
 # Set up package information function
-#from .pkg_info import get_pkg_info as _get_pkg_info
-#get_info = lambda: _get_pkg_info(os.path.dirname(__file__))
+from .pkg_info import get_pkg_info as _get_pkg_info
+get_info = lambda: _get_pkg_info(os.path.dirname(__file__))
 
 # If this file is exec after being imported, the following lines will
 # fail
