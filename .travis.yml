@@ -36,10 +36,7 @@ install:
   conda install -y nipype &&
   rm -r /home/travis/miniconda/lib/python${TRAVIS_PYTHON_VERSION}/site-packages/nipype* &&
   pip install -r requirements.txt &&
-  pip install -e .[$NIPYPE_EXTRAS] &&
-  export COVERAGE_PROCESS_START=$(pwd)/.coveragerc &&
-  export COVERAGE_DATA_FILE=$(pwd)/.coverage &&
-  echo "data_file = ${COVERAGE_DATA_FILE}" >> ${COVERAGE_PROCESS_START}; }
+  pip install -e .[$NIPYPE_EXTRAS]; }
 - travis_retry inst
 script:
 - py.test --doctest-modules nipype
