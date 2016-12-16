@@ -655,6 +655,22 @@ class BrainExtractionInputSpec(ANTSCommandInputSpec):
 class BrainExtractionOutputSpec(TraitedSpec):
     BrainExtractionMask = File(exists=True, desc='brain extraction mask')
     BrainExtractionBrain = File(exists=True, desc='brain extraction image')
+    BrainExtractionCSF = File(exists=True, desc='segmentation mask with only CSF')
+    BrainExtractionGM = File(exists=True, desc='segmentation mask with only grey matter')
+    BrainExtractionInitialAffine = File(exists=True, desc='')
+    BrainExtractionInitialAffineFixed = File(exists=True, desc='')
+    BrainExtractionInitialAffineMoving = File(exists=True, desc='')
+    BrainExtractionLaplacian = File(exists=True, desc='')
+    BrainExtractionPrior0GenericAffine = File(exists=True, desc='')
+    BrainExtractionPrior1InverseWarp = File(exists=True, desc='')
+    BrainExtractionPrior1Warp = File(exists=True, desc='')
+    BrainExtractionPriorWarped = File(exists=True, desc='')
+    BrainExtractionSegmentation = File(exists=True, desc='segmentation mask with CSF, GM, and WM')
+    BrainExtractionTemplateLaplacian = File(exists=True, desc='')
+    BrainExtractionTmp = File(exists=True, desc='')
+    BrainExtractionWM = File(exists=True, desc='segmenration mask with only white matter')
+    N4Corrected0 = File(exists=True, desc='N4 bias field corrected image')
+    N4Truncated0 = File(exists=True, desc='')
 
 
 class BrainExtraction(ANTSCommand):
@@ -685,6 +701,72 @@ class BrainExtraction(ANTSCommand):
                                                        self.inputs.out_prefix +
                                                        'BrainExtractionBrain.' +
                                                        self.inputs.image_suffix)
+        if isdefined(self.inputs.keep_temporary_files) and self.inputs.keep_temporary_files != 0:
+            outputs['BrainExtractionCSF'] = os.path.join(
+                os.getcwd(),
+                self.inputs.out_prefix + 'BrainExtractionCSF.' + self.inputs.image_suffix
+            )
+            outputs['BrainExtractionGM'] = os.path.join(
+                os.getcwd(),
+                self.inputs.out_prefix + 'BrainExtractionGM.' + self.inputs.image_suffix
+            )
+            outputs['BrainExtractionInitialAffine'] = os.path.join(
+                os.getcwd(),
+                self.inputs.out_prefix +'BrainExtractionInitialAffine.mat'
+            )
+            outputs['BrainExtractionInitialAffineFixed'] = os.path.join(
+                os.getcwd(),
+                self.inputs.out_prefix + 'BrainExtractionInitialAffineFixed.' + self.inputs.image_suffix
+            )
+            outputs['BrainExtractionInitialAffineMoving'] = os.path.join(
+                os.getcwd(),
+                self.inputs.out_prefix + 'BrainExtractionInitialAffineMoving.' + self.inputs.image_suffix
+            )
+            outputs['BrainExtractionLaplacian'] = os.path.join(
+                os.getcwd(),
+                self.inputs.out_prefix + 'BrainExtractionLaplacian.' + self.inputs.image_suffix
+            )
+            outputs['BrainExtractionPrior0GenericAffine'] = os.path.join(
+                os.getcwd(),
+                self.inputs.out_prefix + 'BrainExtractionPrior0GenericAffine.mat'
+            )
+            outputs['BrainExtractionPrior1InverseWarp'] = os.path.join(
+                os.getcwd(),
+                self.inputs.out_prefix + 'BrainExtractionPrior1InverseWarp.' + self.inputs.image_suffix
+            )
+            outputs['BrainExtractionPrior1Warp'] = os.path.join(
+                os.getcwd(),
+                self.inputs.out_prefix + 'BrainExtractionPrior1Warp.' + self.inputs.image_suffix
+            )
+            outputs['BrainExtractionPriorWarped'] = os.path.join(
+                os.getcwd(),
+                self.inputs.out_prefix + 'BrainExtractionPriorWarped.' + self.inputs.image_suffix
+            )
+            outputs['BrainExtractionSegmentation'] = os.path.join(
+                os.getcwd(),
+                self.inputs.out_prefix + 'BrainExtractionSegmentation.' + self.inputs.image_suffix
+            )
+            outputs['BrainExtractionTemplateLaplacian'] = os.path.join(
+                os.getcwd(),
+                self.inputs.out_prefix + 'BrainExtractionTemplateLaplacian.' + self.inputs.image_suffix
+            )
+            outputs['BrainExtractionTmp'] = os.path.join(
+                os.getcwd(),
+                self.inputs.out_prefix + 'BrainExtractionTmp.' + self.inputs.image_suffix
+            )
+            outputs['BrainExtractionWM'] = os.path.join(
+                os.getcwd(),
+                self.inputs.out_prefix + 'BrainExtractionWM.' + self.inputs.image_suffix
+            )
+            outputs['N4Corrected0'] = os.path.join(
+                os.getcwd(),
+                self.inputs.out_prefix + 'N4Corrected0.' + self.inputs.image_suffix
+            )
+            outputs['N4Truncated0'] = os.path.join(
+                os.getcwd(),
+                self.inputs.out_prefix + 'N4Truncated0.' + self.inputs.image_suffix
+            )
+
         return outputs
 
 

@@ -55,7 +55,23 @@ def test_BrainExtraction_inputs():
 
 def test_BrainExtraction_outputs():
     output_map = dict(BrainExtractionBrain=dict(),
+    BrainExtractionCSF=dict(),
+    BrainExtractionGM=dict(),
+    BrainExtractionInitialAffine=dict(),
+    BrainExtractionInitialAffineFixed=dict(),
+    BrainExtractionInitialAffineMoving=dict(),
+    BrainExtractionLaplacian=dict(),
     BrainExtractionMask=dict(),
+    BrainExtractionPrior0GenericAffine=dict(),
+    BrainExtractionPrior1InverseWarp=dict(),
+    BrainExtractionPrior1Warp=dict(),
+    BrainExtractionPriorWarped=dict(),
+    BrainExtractionSegmentation=dict(),
+    BrainExtractionTemplateLaplacian=dict(),
+    BrainExtractionTmp=dict(),
+    BrainExtractionWM=dict(),
+    N4Corrected0=dict(),
+    N4Truncated0=dict(),
     )
     outputs = BrainExtraction.output_spec()
 
