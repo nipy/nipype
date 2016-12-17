@@ -173,8 +173,6 @@ def test_no_more_memory_than_specified():
 
     os.remove(LOG_FILENAME)
 
-
-@skipif(nib.runtime_profile == False)
 def test_no_more_threads_than_specified():
     LOG_FILENAME = 'callback.log'
     my_logger = logging.getLogger('callback')
