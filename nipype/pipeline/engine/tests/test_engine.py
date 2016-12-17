@@ -626,8 +626,6 @@ def test_mapnode_json(tmpdir):
     assert not error_raised
 
 
-@pytest.mark.skipif(sys.version_info < (3, 0),
-                    reason="Disabled until https://github.com/nipy/nipype/issues/1692 is resolved")
 def test_serial_input(tmpdir):
     wd = str(tmpdir)
     os.chdir(wd)
