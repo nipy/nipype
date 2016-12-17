@@ -163,15 +163,14 @@ class MultiProcPlugin(DistributedPluginBase):
             self.pool = Pool(processes=self.processors)
 
     def _wait(self):
-        self._event.clear()
-        if len(self.pending_tasks) > 0:
 
+        if len(self.pending_tasks) > 0:
             if self._config['execution']['poll_sleep_duration']:
                 self._timeout = float(self._config['execution']['poll_sleep_duration'])
-
             sig_received=self._event.wait(self._timeout)
             if not sig_received:
                 logger.debug('MultiProcPlugin timeout before signal received. Deadlock averted??')
+            self._event.clear()
 
     def _async_callback(self, args):
         self._taskresult[args['taskid']]=args
@@ -207,6 +206,10 @@ class MultiProcPlugin(DistributedPluginBase):
                                   (node, updatehash, self._taskid),
                                   callback=self._async_callback)
         return self._taskid
+
+    def _close(self):
+        self.pool.close()
+        return True
 
     def _send_procs_to_workers(self, updatehash=False, graph=None):
         """ Sends jobs to workers when system resources are available.
