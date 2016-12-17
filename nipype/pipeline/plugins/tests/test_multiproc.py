@@ -32,9 +32,6 @@ class MultiprocTestInterface(nib.BaseInterface):
         outputs['output1'] = [1, self.inputs.input1]
         return outputs
 
-
-@pytest.mark.skipif(sys.version_info < (3, 0),
-                    reason="Disabled until https://github.com/nipy/nipype/issues/1692 is resolved")
 def test_run_multiproc(tmpdir):
     os.chdir(str(tmpdir))
 
@@ -118,9 +115,6 @@ def find_metrics(nodes, last_node):
 
     return total_memory, total_threads
 
-
-@pytest.mark.skipif(sys.version_info < (3, 0),
-                    reason="Disabled until https://github.com/nipy/nipype/issues/1692 is resolved")
 def test_no_more_memory_than_specified():
     LOG_FILENAME = 'callback.log'
     my_logger = logging.getLogger('callback')
@@ -179,10 +173,6 @@ def test_no_more_memory_than_specified():
 
     os.remove(LOG_FILENAME)
 
-
-@pytest.mark.skipif(sys.version_info < (3, 0),
-                    reason="Disabled until https://github.com/nipy/nipype/issues/1692 is resolved")
-@pytest.mark.skipif(nib.runtime_profile == False, reason="runtime_profile=False")
 def test_no_more_threads_than_specified():
     LOG_FILENAME = 'callback.log'
     my_logger = logging.getLogger('callback')

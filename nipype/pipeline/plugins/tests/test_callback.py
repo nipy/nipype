@@ -64,9 +64,6 @@ def test_callback_exception(tmpdir):
     assert so.statuses[0][1] == 'start'
     assert so.statuses[1][1] == 'exception'
 
-
-@pytest.mark.skipif(sys.version_info < (3, 0),
-                    reason="Disabled until https://github.com/nipy/nipype/issues/1692 is resolved")
 def test_callback_multiproc_normal(tmpdir):
     so = Status()
     wf = pe.Workflow(name='test', base_dir=str(tmpdir))
@@ -83,9 +80,6 @@ def test_callback_multiproc_normal(tmpdir):
     assert so.statuses[0][1] == 'start'
     assert so.statuses[1][1] == 'end'
 
-
-@pytest.mark.skipif(sys.version_info < (3, 0),
-                    reason="Disabled until https://github.com/nipy/nipype/issues/1692 is resolved")
 def test_callback_multiproc_exception(tmpdir):
     so = Status()
     wf = pe.Workflow(name='test', base_dir=str(tmpdir))
