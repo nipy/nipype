@@ -339,6 +339,7 @@ def test_provenance(tmpdir):
 
 
 def test_mapnode_crash(tmpdir):
+    """Test mapnode crash when stop_on_first_crash is True"""
     def myfunction(string):
         return string + 'meh'
     node = pe.MapNode(niu.Function(input_names=['WRONG'],
@@ -350,14 +351,55 @@ def test_mapnode_crash(tmpdir):
     node.inputs.WRONG = ['string' + str(i) for i in range(3)]
     node.config = deepcopy(config._sections)
     node.config['execution']['stop_on_first_crash'] = True
-    cwd = os.getcwd()
-    node.base_dir = tmpdir
+    node.base_dir = str(tmpdir)
 
     error_raised = False
     try:
         node.run()
     except TypeError as e:
         error_raised = True
-    os.chdir(cwd)
-    rmtree(node.base_dir)
+    assert error_raised
+
+
+def test_mapnode_crash2(tmpdir):
+    """Test mapnode crash when stop_on_first_crash is False"""
+    def myfunction(string):
+        return string + 'meh'
+    node = pe.MapNode(niu.Function(input_names=['WRONG'],
+                                   output_names=['newstring'],
+                                   function=myfunction),
+                      iterfield=['WRONG'],
+                      name='myfunc')
+
+    node.inputs.WRONG = ['string' + str(i) for i in range(3)]
+    node.base_dir = str(tmpdir)
+
+    error_raised = False
+    try:
+        node.run()
+    except Exception as e:
+        error_raised = True
+    assert error_raised
+
+
+def test_mapnode_crash3(tmpdir):
+    """Test mapnode crash when mapnode is embedded in a workflow"""
+    def myfunction(string):
+        return string + 'meh'
+    node = pe.MapNode(niu.Function(input_names=['WRONG'],
+                                   output_names=['newstring'],
+                                   function=myfunction),
+                      iterfield=['WRONG'],
+                      name='myfunc')
+
+    node.inputs.WRONG = ['string' + str(i) for i in range(3)]
+    wf = pe.Workflow('test_mapnode_crash')
+    wf.add_nodes([node])
+    wf.base_dir = str(tmpdir)
+
+    error_raised = False
+    try:
+        wf.run()
+    except RuntimeError as e:
+        error_raised = True
     assert error_raised
