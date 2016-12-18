@@ -241,6 +241,7 @@ def test_datasink_to_s3(dummy_input, tmpdir):
 
 
 # Test AWS creds read from env vars
+@pytest.mark.skipif(noboto3 or not fakes3, reason="boto3 or fakes3 library is not available")
 def test_aws_keys_from_env():
     '''
     Function to ensure the DataSink can successfully read in AWS
