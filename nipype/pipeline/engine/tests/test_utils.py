@@ -9,6 +9,7 @@ from builtins import range, open
 import os
 from copy import deepcopy
 from shutil import rmtree
+import pytest
 
 from ... import engine as pe
 from ....interfaces import base as nib
@@ -352,13 +353,8 @@ def test_mapnode_crash(tmpdir):
     node.config = deepcopy(config._sections)
     node.config['execution']['stop_on_first_crash'] = True
     node.base_dir = str(tmpdir)
-
-    error_raised = False
-    try:
+    with pytest.raises(TypeError):
         node.run()
-    except TypeError as e:
-        error_raised = True
-    assert error_raised
 
 
 def test_mapnode_crash2(tmpdir):
@@ -374,12 +370,8 @@ def test_mapnode_crash2(tmpdir):
     node.inputs.WRONG = ['string' + str(i) for i in range(3)]
     node.base_dir = str(tmpdir)
 
-    error_raised = False
-    try:
+    with pytest.raises(Exception):
         node.run()
-    except Exception as e:
-        error_raised = True
-    assert error_raised
 
 
 def test_mapnode_crash3(tmpdir):
@@ -395,13 +387,7 @@ def test_mapnode_crash3(tmpdir):
 
     node.inputs.WRONG = ['string' + str(i) for i in range(3)]
     wf = pe.Workflow('testmapnodecrash')
-    wf.config['crashdump_dir'] = str(tmpdir)
     wf.add_nodes([node])
     wf.base_dir = str(tmpdir)
-
-    error_raised = False
-    try:
-        wf.run()
-    except RuntimeError as e:
-        error_raised = True
-    assert error_raised
+    with pytest.raises(RuntimeError):
+        wf.run(plugin='Linear')
