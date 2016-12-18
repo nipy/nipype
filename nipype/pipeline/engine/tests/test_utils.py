@@ -384,6 +384,7 @@ def test_mapnode_crash2(tmpdir):
 
 def test_mapnode_crash3(tmpdir):
     """Test mapnode crash when mapnode is embedded in a workflow"""
+
     def myfunction(string):
         return string + 'meh'
     node = pe.MapNode(niu.Function(input_names=['WRONG'],
@@ -393,7 +394,8 @@ def test_mapnode_crash3(tmpdir):
                       name='myfunc')
 
     node.inputs.WRONG = ['string' + str(i) for i in range(3)]
-    wf = pe.Workflow('test_mapnode_crash')
+    wf = pe.Workflow('testmapnodecrash')
+    wf.config['crashdump_dir'] = str(tmpdir)
     wf.add_nodes([node])
     wf.base_dir = str(tmpdir)
 
