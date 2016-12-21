@@ -1275,9 +1275,12 @@ class MapNode(Node):
                 nitems = len(filename_to_list(getattr(self.inputs,
                                                       self.iterfield[0])))
             nodenames = ['_' + self.name + str(i) for i in range(nitems)]
+            nodes = list(self._make_nodes(cwd))
+            node_results = list(self._node_runner(nodes))
+            self._collate_results(node_results)
             # map-reduce formulation
-            self._collate_results(self._node_runner(self._make_nodes(cwd),
-                                                    updatehash=updatehash))
+            #self._collate_results(self._node_runner(self._make_nodes(cwd),
+            #                                        updatehash=updatehash))
             self._save_results(self._result, cwd)
             # remove any node directories no longer required
             dirs2remove = []
