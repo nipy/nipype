@@ -338,9 +338,9 @@ def test_provenance(tmpdir):
     assert len(psg.bundles) == 2
     assert len(psg.get_records()) == 7
 
-
 def test_mapnode_crash(tmpdir):
     """Test mapnode crash when stop_on_first_crash is True"""
+    cwd = os.getcwd()
     def myfunction(string):
         return string + 'meh'
     node = pe.MapNode(niu.Function(input_names=['WRONG'],
@@ -348,30 +348,31 @@ def test_mapnode_crash(tmpdir):
                                    function=myfunction),
                       iterfield=['WRONG'],
                       name='myfunc')
-
     node.inputs.WRONG = ['string' + str(i) for i in range(3)]
     node.config = deepcopy(config._sections)
     node.config['execution']['stop_on_first_crash'] = True
     node.base_dir = str(tmpdir)
     with pytest.raises(TypeError):
         node.run()
-
+    os.chdir(cwd)
 
 def test_mapnode_crash2(tmpdir):
     """Test mapnode crash when stop_on_first_crash is False"""
+    cwd = os.getcwd()
     def myfunction(string):
         return string + 'meh'
+
     node = pe.MapNode(niu.Function(input_names=['WRONG'],
                                    output_names=['newstring'],
                                    function=myfunction),
                       iterfield=['WRONG'],
                       name='myfunc')
-
     node.inputs.WRONG = ['string' + str(i) for i in range(3)]
     node.base_dir = str(tmpdir)
 
     with pytest.raises(Exception):
         node.run()
+    os.chdir(cwd)
 
 
 def test_mapnode_crash3(tmpdir):
@@ -384,7 +385,6 @@ def test_mapnode_crash3(tmpdir):
                                    function=myfunction),
                       iterfield=['WRONG'],
                       name='myfunc')
-
     node.inputs.WRONG = ['string' + str(i) for i in range(3)]
     wf = pe.Workflow('testmapnodecrash')
     wf.add_nodes([node])
