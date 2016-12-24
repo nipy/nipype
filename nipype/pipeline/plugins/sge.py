@@ -3,12 +3,11 @@
 """
 from __future__ import print_function, division, unicode_literals, absolute_import
 
-from builtins import object
+from builtins import object, str, bytes
 
 import os
 import pwd
 import re
-import subprocess
 import time
 
 import xml.dom.minidom
@@ -18,13 +17,13 @@ import random
 from ...interfaces.base import CommandLine
 from .base import (SGELikeBatchManagerBase, logger, iflogger, logging)
 
-DEBUGGING_PREFIX = str(int(random.uniform(100, 999)))
+DEBUGGING_PREFIX = '{0:d}'.format(int(random.uniform(100, 999)))
 
 
 def sge_debug_print(message):
     """  Needed for debugging on big jobs.  Once this is fully vetted, it can be removed.
     """
-    logger.debug(DEBUGGING_PREFIX + " " + "=!" * 3 + "  " + message)
+    logger.debug('%s ' + '=!' * 3 + '  %s', DEBUGGING_PREFIX, message)
     # print DEBUGGING_PREFIX + " " + "=!" * 3 + "  " + message
 
 
@@ -40,8 +39,7 @@ class QJobInfo(object):
         self._job_num = int(
             job_num)      # The primary unique identifier for this job, must be an integer!
         # self._jobOwn  = None           # Who owns this job
-        self._job_queue_state = str(
-            job_queue_state)     # ["running","zombie",...??]
+        self._job_queue_state = '%s' % job_queue_state     # ["running","zombie",...??]
         # self._jobActionState = str(jobActionState)  # ['r','qw','S',...??]
         self._job_time = job_time               # The job start time
         self._job_info_creation_time = time.time(
@@ -142,18 +140,19 @@ class QstatSubstitute(object):
                         "CONTACTING qacct for finished jobs, "
                         "{0}: {1}".format(time.time(), "Verifying Completion"))
 
-        this_command = 'qacct'
+        cmd = CommandLine('qacct', environ=dict(os.environ),
+                          terminal_output='allatonce')
+
         qacct_retries = 10
         is_complete = False
         while qacct_retries > 0:
             qacct_retries -= 1
             try:
-                proc = subprocess.Popen(
-                    [this_command, '-o', pwd.getpwuid(os.getuid())[0], '-j', str(taskid)],
-                    stdout=subprocess.PIPE,
-                    stderr=subprocess.PIPE)
-                qacct_result, _ = proc.communicate()
-                if qacct_result.find(str(taskid)):
+                strtaskid = '{0:d}'.format(int(taskid))
+                cmd.inputs.args = '-o {} -j {}'.format(pwd.getpwuid(os.getuid())[0], strtaskid)
+                qacct_result = cmd.run().runtime.stdout
+
+                if qacct_result.find(strtaskid):
                     is_complete = True
                 sge_debug_print(
                     "NOTE: qacct for jobs\n{0}".format(qacct_result))
@@ -162,6 +161,7 @@ class QstatSubstitute(object):
                 sge_debug_print("NOTE: qacct call failed")
                 time.sleep(5)
                 pass
+
         return is_complete
 
     def _parse_qstat_job_list(self, xml_job_list):
@@ -246,15 +246,15 @@ class QstatSubstitute(object):
         else:
             this_command = self._qstat_cached_executable
 
+        cmd = CommandLine(this_command, environ=dict(os.environ),
+                          terminal_output='allatonce')
+
         qstat_retries = 10
         while qstat_retries > 0:
             qstat_retries -= 1
             try:
-                proc = subprocess.Popen(
-                    [this_command, '-u', pwd.getpwuid(os.getuid())[0], '-xml', '-s', 'psrz'],
-                    stdout=subprocess.PIPE,
-                    stderr=subprocess.PIPE)
-                qstat_xml_result, _ = proc.communicate()
+                cmd.inputs.args = '-u {} -xml -s psrz'.format(pwd.getpwuid(os.getuid())[0])
+                qstat_xml_result = cmd.run().runtime.stdout
                 dom = xml.dom.minidom.parseString(qstat_xml_result)
                 jobs = dom.getElementsByTagName('job_info')
                 run = jobs[0]
@@ -274,7 +274,7 @@ class QstatSubstitute(object):
     def print_dictionary(self):
         """For debugging"""
         for vv in list(self._task_dictionary.values()):
-            sge_debug_print(str(vv))
+            sge_debug_print('%s' % vv)
 
     def is_job_pending(self, task_id):
         task_id = int(task_id)  # Ensure that it is an integer
@@ -396,7 +396,7 @@ class SGEPlugin(SGELikeBatchManagerBase):
         oldlevel = iflogger.level
         iflogger.setLevel(logging.getLevelName('CRITICAL'))
         tries = 0
-        result = list()
+        result = None
         while True:
             try:
                 result = cmd.run()
@@ -407,9 +407,8 @@ class SGEPlugin(SGELikeBatchManagerBase):
                         self._retry_timeout)  # sleep 2 seconds and try again.
                 else:
                     iflogger.setLevel(oldlevel)
-                    raise RuntimeError('\n'.join((('Could not submit sge task'
-                                                   ' for node %s') % node._id,
-                                                  str(e))))
+                    raise RuntimeError(
+                        'Could not submit sge task for node %s\n%s' % (node._id, e))
             else:
                 break
         iflogger.setLevel(oldlevel)
@@ -419,6 +418,6 @@ class SGEPlugin(SGELikeBatchManagerBase):
                               lines[-1]).groups()[0])
         self._pending[taskid] = node.output_dir()
         self._refQstatSubstitute.add_startup_job(taskid, cmd.cmdline)
-        logger.debug('submitted sge task: %d for node %s with %s' %
-                     (taskid, node._id, cmd.cmdline))
+        logger.debug('submitted sge task: %d for node %s with %s',
+                     taskid, node._id, cmd.cmdline)
         return taskid
