@@ -77,23 +77,23 @@ def test_maths_base(create_files_in_directory):
 
     # Set an in file
     maths.inputs.in_file = "a.nii"
-    out_file = "a_maths%s" % out_ext
+    out_file = "a_maths{}".format(out_ext)
 
     # Now test the most basic command line
-    assert maths.cmdline == "fslmaths a.nii %s" % os.path.join(testdir, out_file)
+    assert maths.cmdline == "fslmaths a.nii {}".format(os.path.join(testdir, out_file))
 
     # Now test that we can set the various data types
     dtypes = ["float", "char", "int", "short", "double", "input"]
-    int_cmdline = "fslmaths -dt %s a.nii " + os.path.join(testdir, out_file)
-    out_cmdline = "fslmaths a.nii " + os.path.join(testdir, out_file) + " -odt %s"
-    duo_cmdline = "fslmaths -dt %s a.nii " + os.path.join(testdir, out_file) + " -odt %s"
+    int_cmdline = "fslmaths -dt {} a.nii " + os.path.join(testdir, out_file)
+    out_cmdline = "fslmaths a.nii " + os.path.join(testdir, out_file) + " -odt {}"
+    duo_cmdline = "fslmaths -dt {} a.nii " + os.path.join(testdir, out_file) + " -odt {}"
     for dtype in dtypes:
         foo = fsl.MathsCommand(in_file="a.nii", internal_datatype=dtype)
-        assert foo.cmdline == int_cmdline % dtype
+        assert foo.cmdline == int_cmdline.format(dtype)
         bar = fsl.MathsCommand(in_file="a.nii", output_datatype=dtype)
-        assert bar.cmdline == out_cmdline % dtype
+        assert bar.cmdline == out_cmdline.format(dtype)
         foobar = fsl.MathsCommand(in_file="a.nii", internal_datatype=dtype, output_datatype=dtype)
-        assert foobar.cmdline == duo_cmdline % (dtype, dtype)
+        assert foobar.cmdline == duo_cmdline.format(dtype, dtype)
 
     # Test that we can ask for an outfile name
     maths.inputs.out_file = "b.nii"
@@ -124,10 +124,10 @@ def test_changedt(create_files_in_directory):
 
     # Now test that we can set the various data types
     dtypes = ["float", "char", "int", "short", "double", "input"]
-    cmdline = "fslmaths a.nii b.nii -odt %s"
+    cmdline = "fslmaths a.nii b.nii -odt {}"
     for dtype in dtypes:
         foo = fsl.MathsCommand(in_file="a.nii", out_file="b.nii", output_datatype=dtype)
-        assert foo.cmdline == cmdline % dtype
+        assert foo.cmdline == cmdline.format(dtype)
 
 
 @pytest.mark.skipif(no_fsl(), reason="fsl is not installed")
@@ -145,22 +145,22 @@ def test_threshold(create_files_in_directory):
         thresh.run()
 
     # Test the various opstrings
-    cmdline = "fslmaths a.nii %s b.nii"
+    cmdline = "fslmaths a.nii {} b.nii"
     for val in [0, 0., -1, -1.5, -0.5, 0.5, 3, 400, 400.5]:
         thresh.inputs.thresh = val
-        assert thresh.cmdline == cmdline % "-thr %.10f" % val
+        assert thresh.cmdline == cmdline.format("-thr {:.10f}".format(val))
 
-    val = "%.10f" % 42
+    val = "{:.10f}".format(42)
     thresh = fsl.Threshold(in_file="a.nii", out_file="b.nii", thresh=42, use_robust_range=True)
-    assert thresh.cmdline == cmdline % ("-thrp " + val)
+    assert thresh.cmdline == cmdline.format("-thrp " + val)
     thresh.inputs.use_nonzero_voxels = True
-    assert thresh.cmdline == cmdline % ("-thrP " + val)
+    assert thresh.cmdline == cmdline.format("-thrP " + val)
     thresh = fsl.Threshold(in_file="a.nii", out_file="b.nii", thresh=42, direction="above")
-    assert thresh.cmdline == cmdline % ("-uthr " + val)
+    assert thresh.cmdline == cmdline.format("-uthr " + val)
     thresh.inputs.use_robust_range = True
-    assert thresh.cmdline == cmdline % ("-uthrp " + val)
+    assert thresh.cmdline == cmdline.format("-uthrp " + val)
     thresh.inputs.use_nonzero_voxels = True
-    assert thresh.cmdline == cmdline % ("-uthrP " + val)
+    assert thresh.cmdline == cmdline.format("-uthrP " + val)
 
 
 @pytest.mark.skipif(no_fsl(), reason="fsl is not installed")
@@ -177,14 +177,14 @@ def test_meanimage(create_files_in_directory):
     assert meaner.cmdline == "fslmaths a.nii -Tmean b.nii"
 
     # Test the other dimensions
-    cmdline = "fslmaths a.nii -%smean b.nii"
+    cmdline = "fslmaths a.nii -{}mean b.nii"
     for dim in ["X", "Y", "Z", "T"]:
         meaner.inputs.dimension = dim
-        assert meaner.cmdline == cmdline % dim
+        assert meaner.cmdline == cmdline.format(dim)
 
     # Test the auto naming
     meaner = fsl.MeanImage(in_file="a.nii")
-    assert meaner.cmdline == "fslmaths a.nii -Tmean %s" % os.path.join(testdir, "a_mean%s" % out_ext)
+    assert meaner.cmdline == "fslmaths a.nii -Tmean {}".format(os.path.join(testdir, "a_mean{}".format(out_ext)))
 
 
 @pytest.mark.skipif(no_fsl(), reason="fsl is not installed")
@@ -201,16 +201,14 @@ def test_stdimage(create_files_in_directory):
     assert stder.cmdline == "fslmaths a.nii -Tstd b.nii"
 
     # Test the other dimensions
-    cmdline = "fslmaths a.nii -%sstd b.nii"
+    cmdline = "fslmaths a.nii -{}std b.nii"
     for dim in ["X","Y","Z","T"]:
         stder.inputs.dimension=dim
-        assert stder.cmdline == cmdline%dim
+        assert stder.cmdline == cmdline.format(dim)
 
     # Test the auto naming
-    stder = fsl.StdImage(in_file="a.nii")
-    #NOTE_dj, FAIL: this is failing (even the original version of the test with pytest)
-    #NOTE_dj: not sure if this should pass, it uses cmdline from interface.base.CommandLine
-    #assert stder.cmdline == "fslmaths a.nii -Tstd %s"%os.path.join(testdir, "a_std.nii")
+    stder = fsl.StdImage(in_file="a.nii", output_type='NIFTI')
+    assert stder.cmdline == "fslmaths a.nii -Tstd {}".format(os.path.join(testdir, "a_std.nii"))
 
 
 @pytest.mark.skipif(no_fsl(), reason="fsl is not installed")
@@ -227,14 +225,14 @@ def test_maximage(create_files_in_directory):
     assert maxer.cmdline == "fslmaths a.nii -Tmax b.nii"
 
     # Test the other dimensions
-    cmdline = "fslmaths a.nii -%smax b.nii"
+    cmdline = "fslmaths a.nii -{}max b.nii"
     for dim in ["X", "Y", "Z", "T"]:
         maxer.inputs.dimension = dim
-        assert maxer.cmdline == cmdline % dim
+        assert maxer.cmdline == cmdline.format(dim)
 
     # Test the auto naming
     maxer = fsl.MaxImage(in_file="a.nii")
-    assert maxer.cmdline == "fslmaths a.nii -Tmax %s" % os.path.join(testdir, "a_max%s" % out_ext)
+    assert maxer.cmdline == "fslmaths a.nii -Tmax {}".format(os.path.join(testdir, "a_max{}".format(out_ext)))
 
 
 @pytest.mark.skipif(no_fsl(), reason="fsl is not installed")
@@ -252,17 +250,17 @@ def test_smooth(create_files_in_directory):
         smoother.run()
 
     # Test smoothing kernels
-    cmdline = "fslmaths a.nii -s %.5f b.nii"
+    cmdline = "fslmaths a.nii -s {:.5f} b.nii"
     for val in [0, 1., 1, 25, 0.5, 8 / 3.]:
         smoother = fsl.IsotropicSmooth(in_file="a.nii", out_file="b.nii", sigma=val)
-        assert smoother.cmdline == cmdline % val
+        assert smoother.cmdline == cmdline.format(val)
         smoother = fsl.IsotropicSmooth(in_file="a.nii", out_file="b.nii", fwhm=val)
         val = float(val) / np.sqrt(8 * np.log(2))
-        assert smoother.cmdline == cmdline % val
+        assert smoother.cmdline == cmdline.format(val)
 
     # Test automatic naming
     smoother = fsl.IsotropicSmooth(in_file="a.nii", sigma=5)
-    assert smoother.cmdline == "fslmaths a.nii -s %.5f %s" % (5, os.path.join(testdir, "a_smooth%s" % out_ext))
+    assert smoother.cmdline == "fslmaths a.nii -s {:.5f} {}".format(5, os.path.join(testdir, "a_smooth{}".format(out_ext)))
 
 
 @pytest.mark.skipif(no_fsl(), reason="fsl is not installed")
@@ -285,7 +283,7 @@ def test_mask(create_files_in_directory):
 
     # Test auto name generation
     masker = fsl.ApplyMask(in_file="a.nii", mask_file="b.nii")
-    assert masker.cmdline == "fslmaths a.nii -mas b.nii " + os.path.join(testdir, "a_masked%s" % out_ext)
+    assert masker.cmdline == "fslmaths a.nii -mas b.nii " + os.path.join(testdir, "a_masked{}".format(out_ext))
 
 
 @pytest.mark.skipif(no_fsl(), reason="fsl is not installed")
@@ -306,14 +304,14 @@ def test_dilation(create_files_in_directory):
     for op in ["mean", "modal", "max"]:
         cv = dict(mean="M", modal="D", max="F")
         diller.inputs.operation = op
-        assert diller.cmdline == "fslmaths a.nii -dil%s b.nii" % cv[op]
+        assert diller.cmdline == "fslmaths a.nii -dil{} b.nii".format(cv[op])
 
     # Now test the different kernel options
     for k in ["3D", "2D", "box", "boxv", "gauss", "sphere"]:
         for size in [1, 1.5, 5]:
             diller.inputs.kernel_shape = k
             diller.inputs.kernel_size = size
-            assert diller.cmdline == "fslmaths a.nii -kernel %s %.4f -dilF b.nii" % (k, size)
+            assert diller.cmdline == "fslmaths a.nii -kernel {} {:.4f} -dilF b.nii".format(k, size)
 
     # Test that we can use a file kernel
     f = open("kernel.txt", "w").close()
@@ -325,7 +323,7 @@ def test_dilation(create_files_in_directory):
 
     # Test that we don't need to request an out name
     dil = fsl.DilateImage(in_file="a.nii", operation="max")
-    assert dil.cmdline == "fslmaths a.nii -dilF %s" % os.path.join(testdir, "a_dil%s" % out_ext)
+    assert dil.cmdline == "fslmaths a.nii -dilF {}".format(os.path.join(testdir, "a_dil{}".format(out_ext)))
 
 
 @pytest.mark.skipif(no_fsl(), reason="fsl is not installed")
@@ -347,7 +345,7 @@ def test_erosion(create_files_in_directory):
 
     # Test that we don't need to request an out name
     erode = fsl.ErodeImage(in_file="a.nii")
-    assert erode.cmdline == "fslmaths a.nii -ero %s" % os.path.join(testdir, "a_ero%s" % out_ext)
+    assert erode.cmdline == "fslmaths a.nii -ero {}".format(os.path.join(testdir, "a_ero{}".format(out_ext)))
 
 
 @pytest.mark.skipif(no_fsl(), reason="fsl is not installed")
@@ -367,11 +365,11 @@ def test_spatial_filter(create_files_in_directory):
     # Test the different operations
     for op in ["mean", "meanu", "median"]:
         filter.inputs.operation = op
-        assert filter.cmdline == "fslmaths a.nii -f%s b.nii" % op
+        assert filter.cmdline == "fslmaths a.nii -f{} b.nii".format(op)
 
     # Test that we don't need to ask for an out name
     filter = fsl.SpatialFilter(in_file="a.nii", operation="mean")
-    assert filter.cmdline == "fslmaths a.nii -fmean %s" % os.path.join(testdir, "a_filt%s" % out_ext)
+    assert filter.cmdline == "fslmaths a.nii -fmean {}".format(os.path.join(testdir, "a_filt{}".format(out_ext)))
 
 
 @pytest.mark.skipif(no_fsl(), reason="fsl is not installed")
@@ -392,12 +390,12 @@ def test_unarymaths(create_files_in_directory):
     ops = ["exp", "log", "sin", "cos", "sqr", "sqrt", "recip", "abs", "bin", "index"]
     for op in ops:
         maths.inputs.operation = op
-        assert maths.cmdline == "fslmaths a.nii -%s b.nii" % op
+        assert maths.cmdline == "fslmaths a.nii -{} b.nii".format(op)
 
     # Test that we don't need to ask for an out file
     for op in ops:
         maths = fsl.UnaryMaths(in_file="a.nii", operation=op)
-        assert maths.cmdline == "fslmaths a.nii -%s %s" % (op, os.path.join(testdir, "a_%s%s" % (op, out_ext)))
+        assert maths.cmdline == "fslmaths a.nii -{} {}".format(op, os.path.join(testdir, "a_{}{}".format(op, out_ext)))
 
 
 @pytest.mark.skipif(no_fsl(), reason="fsl is not installed")
@@ -422,15 +420,15 @@ def test_binarymaths(create_files_in_directory):
             maths = fsl.BinaryMaths(in_file="a.nii", out_file="c.nii", operation=op)
             if ent == "b.nii":
                 maths.inputs.operand_file = ent
-                assert maths.cmdline == "fslmaths a.nii -%s b.nii c.nii" % op
+                assert maths.cmdline == "fslmaths a.nii -{} b.nii c.nii".format(op)
             else:
                 maths.inputs.operand_value = ent
-                assert maths.cmdline == "fslmaths a.nii -%s %.8f c.nii" % (op, ent)
+                assert maths.cmdline == "fslmaths a.nii -{} {:.8f} c.nii".format(op, ent)
 
     # Test that we don't need to ask for an out file
     for op in ops:
         maths = fsl.BinaryMaths(in_file="a.nii", operation=op, operand_file="b.nii")
-        assert maths.cmdline == "fslmaths a.nii -%s b.nii %s" % (op, os.path.join(testdir, "a_maths%s" % out_ext))
+        assert maths.cmdline == "fslmaths a.nii -{} b.nii {}".format(op, os.path.join(testdir, "a_maths{}".format(out_ext)))
 
 
 @pytest.mark.skipif(no_fsl(), reason="fsl is not installed")
@@ -480,12 +478,12 @@ def test_tempfilt(create_files_in_directory):
     for win in windows:
         filt.inputs.highpass_sigma = win[0]
         filt.inputs.lowpass_sigma = win[1]
-        assert filt.cmdline == "fslmaths a.nii -bptf %.6f %.6f b.nii" % win
+        assert filt.cmdline == "fslmaths a.nii -bptf {:.6f} {:.6f} b.nii".format(win[0], win[1])
 
     # Test that we don't need to ask for an out file
     filt = fsl.TemporalFilter(in_file="a.nii", highpass_sigma=64)
     assert filt.cmdline == \
-        "fslmaths a.nii -bptf 64.000000 -1.000000 %s" % os.path.join(testdir, "a_filt%s" % out_ext)
+        "fslmaths a.nii -bptf 64.000000 -1.000000 {}".format(os.path.join(testdir, "a_filt{}".format(out_ext)))
 
 
 

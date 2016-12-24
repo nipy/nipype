@@ -169,10 +169,9 @@ def test_fast_list_outputs(setup_infile):
     def _run_and_test(opts, output_base):
         outputs = fsl.FAST(**opts)._list_outputs()
         for output in outputs.values():
-            filenames = filename_to_list(output)
-            if filenames is not None:
-                for filename in filenames:
-                    assert filename[:len(output_base)] == output_base
+            if output:
+                for filename in filename_to_list(output):
+                    assert os.path.realpath(filename).startswith(os.path.realpath(output_base))
 
     # set up
     tmp_infile, indir = setup_infile

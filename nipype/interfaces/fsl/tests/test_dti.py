@@ -17,7 +17,7 @@ import nipype.interfaces.fsl.dti as fsl
 from nipype.interfaces.fsl import Info, no_fsl
 from nipype.interfaces.base import Undefined
 
-import pytest, pdb
+import pytest
 
 
 @pytest.fixture(scope="module")

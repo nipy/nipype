@@ -22,7 +22,6 @@ import locale
 import os
 import re
 import platform
-from socket import getfqdn
 from string import Template
 import select
 import subprocess
@@ -1079,7 +1078,7 @@ class BaseInterface(Interface):
                         startTime=dt.isoformat(dt.utcnow()),
                         endTime=None,
                         platform=platform.platform(),
-                        hostname=getfqdn(),
+                        hostname=platform.node(),
                         version=self.version)
         try:
             runtime = self._run_wrapper(runtime)
