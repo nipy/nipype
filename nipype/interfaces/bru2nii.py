@@ -52,7 +52,7 @@ class Bru2(CommandLine):
     def _list_outputs(self):
         outputs = self._outputs().get()
         if isdefined(self.inputs.output_filename):
-            output_filename1 = self.inputs.output_filename
+            output_filename1 = os.path.abspath(self.inputs.output_filename)
         else:
             output_filename1 = self._gen_filename('output_filename')
         outputs["nii_file"] = output_filename1+".nii"
