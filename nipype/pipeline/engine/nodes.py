@@ -36,7 +36,7 @@ from tempfile import mkdtemp
 from hashlib import sha1
 
 from ... import config, logging
-from ...utils.misc import (flatten, unflatten, package_check, str2bool)
+from ...utils.misc import (flatten, unflatten, str2bool)
 from ...utils.filemanip import (save_json, FileNotFoundError,
                                 filename_to_list, list_to_filename,
                                 copyfiles, fnames_presuffix, loadpkl,
@@ -54,7 +54,6 @@ from .utils import (generate_expanded_graph, modify_paths,
                     get_print_name, merge_dict, evaluate_connect_function)
 from .base import EngineBase
 
-package_check('networkx', '1.3')
 logger = logging.getLogger('workflow')
 
 class Node(EngineBase):
@@ -607,6 +606,7 @@ class Node(EngineBase):
             try:
                 result = self._interface.run()
             except Exception as msg:
+                self._save_results(result, cwd)
                 self._result.runtime.stderr = msg
                 raise
 
@@ -1124,6 +1124,7 @@ class MapNode(Node):
             yield i, node
 
     def _node_runner(self, nodes, updatehash=False):
+        old_cwd = os.getcwd()
         for i, node in nodes:
             err = None
             try:
@@ -1133,6 +1134,7 @@ class MapNode(Node):
                 if str2bool(self.config['execution']['stop_on_first_crash']):
                     raise
             finally:
+                os.chdir(old_cwd)
                 yield i, node, err
 
     def _collate_results(self, nodes):
@@ -1275,12 +1277,8 @@ class MapNode(Node):
                 nitems = len(filename_to_list(getattr(self.inputs,
                                                       self.iterfield[0])))
             nodenames = ['_' + self.name + str(i) for i in range(nitems)]
-            nodes = list(self._make_nodes(cwd))
-            node_results = list(self._node_runner(nodes))
-            self._collate_results(node_results)
-            # map-reduce formulation
-            #self._collate_results(self._node_runner(self._make_nodes(cwd),
-            #                                        updatehash=updatehash))
+            self._collate_results(self._node_runner(self._make_nodes(cwd),
+                                                    updatehash=updatehash))
             self._save_results(self._result, cwd)
             # remove any node directories no longer required
             dirs2remove = []
