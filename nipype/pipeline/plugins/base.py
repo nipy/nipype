@@ -272,10 +272,16 @@ class DistributedPluginBase(PluginBase):
         self._remove_node_dirs()
         report_nodes_not_run(notrun)
 
-
+        # close any open resources
+        self._close()
 
     def _wait(self):
         sleep(float(self._config['execution']['poll_sleep_duration']))
+
+    def _close(self):
+        # close any open resources, this could raise NotImplementedError
+        # but I didn't want to break other plugins
+        return True
 
     def _get_result(self, taskid):
         raise NotImplementedError

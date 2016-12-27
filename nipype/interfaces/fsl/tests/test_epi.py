@@ -47,7 +47,7 @@ def test_eddy_correct2(create_files_in_directory):
     assert eddy.cmd == 'eddy_correct'
 
     # test raising error with mandatory args absent
-    with pytest.raises(ValueError): 
+    with pytest.raises(ValueError):
         eddy.run()
 
     # .inputs based parameters setting

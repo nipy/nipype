@@ -58,8 +58,8 @@ def test_fnames_presuffix():
         ])
 def test_hash_rename(filename, newname):
     new_name = hash_rename(filename, 'abc123')
-    assert new_name == newname 
-    
+    assert new_name == newname
+
 
 def test_check_forhash():
     fname = 'foobar'
@@ -253,7 +253,7 @@ def test_get_related_files_noninclusive(_temp_analyze_files):
     assert orig_hdr not in related_files
 
 @pytest.mark.parametrize("filename, expected", [
-        ('foo.nii',      ['foo.nii']), 
+        ('foo.nii',      ['foo.nii']),
         (['foo.nii'],    ['foo.nii']),
         (('foo', 'bar'), ['foo', 'bar']),
         (12.34,          None)
@@ -261,7 +261,7 @@ def test_get_related_files_noninclusive(_temp_analyze_files):
 def test_filename_to_list(filename, expected):
     x = filename_to_list(filename)
     assert x == expected
-    
+
 @pytest.mark.parametrize("list, expected", [
         (['foo.nii'],    'foo.nii'),
         (['foo', 'bar'], ['foo', 'bar']),

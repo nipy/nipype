@@ -58,7 +58,7 @@ def test_robustregister(create_files_in_directory):
     assert reg2.cmdline == ('mri_robust_register --halfdst %s_halfway.nii --lta foo.lta '
                             '--sat 3.0000 --mov %s --dst %s'
                             % (os.path.join(outdir, filelist[1][:-4]), filelist[0], filelist[1]))
-    
+
 
 @pytest.mark.skipif(freesurfer.no_freesurfer(), reason="freesurfer is not installed")
 def test_fitmsparams(create_files_in_directory):

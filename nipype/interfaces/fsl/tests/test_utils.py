@@ -60,7 +60,7 @@ def test_fslmerge(create_files_in_directory):
     assert merger.cmd == 'fslmerge'
 
     # test raising error with mandatory args absent
-    with pytest.raises(ValueError): 
+    with pytest.raises(ValueError):
         merger.run()
 
     # .inputs based parameters setting
@@ -99,7 +99,7 @@ def test_fslmaths(create_files_in_directory):
     assert math.cmd == 'fslmaths'
 
     # test raising error with mandatory args absent
-    with pytest.raises(ValueError): 
+    with pytest.raises(ValueError):
         math.run()
 
     # .inputs based parameters setting
@@ -116,7 +116,7 @@ def test_fslmaths(create_files_in_directory):
 
     # test arguments for opt_map
     # Fslmath class doesn't have opt_map{}
-    
+
 # test overlay
 
 
@@ -129,7 +129,7 @@ def test_overlay(create_files_in_directory):
     assert overlay.cmd == 'overlay'
 
     # test raising error with mandatory args absent
-    with pytest.raises(ValueError): 
+    with pytest.raises(ValueError):
         overlay.run()
 
     # .inputs based parameters setting
@@ -163,7 +163,7 @@ def test_slicer(create_files_in_directory):
     assert slicer.cmd == 'slicer'
 
     # test raising error with mandatory args absent
-    with pytest.raises(ValueError): 
+    with pytest.raises(ValueError):
         slicer.run()
 
     # .inputs based parameters setting
@@ -202,7 +202,7 @@ def test_plottimeseries(create_files_in_directory):
     assert plotter.cmd == 'fsl_tsplot'
 
     # test raising error with mandatory args absent
-    with pytest.raises(ValueError): 
+    with pytest.raises(ValueError):
         plotter.run()
 
     # .inputs based parameters setting
@@ -234,7 +234,7 @@ def test_plotmotionparams(create_files_in_directory):
     assert plotter.cmd == 'fsl_tsplot'
 
     # test raising error with mandatory args absent
-    with pytest.raises(ValueError): 
+    with pytest.raises(ValueError):
         plotter.run()
 
     # .inputs based parameters setting
@@ -264,7 +264,7 @@ def test_convertxfm(create_files_in_directory):
     assert cvt.cmd == "convert_xfm"
 
     # test raising error with mandatory args absent
-    with pytest.raises(ValueError): 
+    with pytest.raises(ValueError):
         cvt.run()
 
     # .inputs based parameters setting
@@ -293,7 +293,7 @@ def test_swapdims(create_files_in_directory):
     args = [dict(in_file=files[0]), dict(new_dims=("x", "y", "z"))]
     for arg in args:
         wontrun = fsl.SwapDimensions(**arg)
-        with pytest.raises(ValueError): 
+        with pytest.raises(ValueError):
             wontrun.run()
 
     # Now test a basic command line

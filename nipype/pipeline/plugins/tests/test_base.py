@@ -33,7 +33,7 @@ def test_report_crash():
             actual_crashfile = pb.report_crash(mock_node)
 
             expected_crashfile = re.compile('.*/crash-.*-an_id-[0-9a-f\-]*.pklz')
-                        
+
             assert expected_crashfile.match(actual_crashfile).group() == actual_crashfile
             assert mock_pickle_dump.call_count == 1
 

@@ -74,7 +74,7 @@ def test_add_nodes():
 # ensure that all connections are tested later
 
 @pytest.mark.parametrize("iterables, expected", [
-        ({"1": None}, (1,0)), #test1 
+        ({"1": None}, (1,0)), #test1
         ({"1": dict(input1=lambda: [1, 2], input2=lambda: [1, 2])}, (4,0)) #test2
         ])
 def test_1mod(iterables, expected):
@@ -89,8 +89,8 @@ def test_1mod(iterables, expected):
 
 
 @pytest.mark.parametrize("iterables, expected", [
-        ({"1": {}, "2": dict(input1=lambda: [1, 2])}, (3,2)), #test3 
-        ({"1": dict(input1=lambda: [1, 2]), "2": {}}, (4,2)), #test4 
+        ({"1": {}, "2": dict(input1=lambda: [1, 2])}, (3,2)), #test3
+        ({"1": dict(input1=lambda: [1, 2]), "2": {}}, (4,2)), #test4
         ({"1": dict(input1=lambda: [1, 2]), "2": dict(input1=lambda: [1, 2])}, (6,4)) #test5
         ])
 def test_2mods(iterables, expected):
@@ -109,7 +109,7 @@ def test_2mods(iterables, expected):
 @pytest.mark.parametrize("iterables, expected, connect", [
         ({"1": {}, "2": dict(input1=lambda: [1, 2]), "3": {}}, (5,4), ("1-2","2-3")), #test6
         ({"1": dict(input1=lambda: [1, 2]), "2": {}, "3": {}}, (5,4), ("1-3","2-3")), #test7
-        ({"1": dict(input1=lambda: [1, 2]), "2":  dict(input1=lambda: [1, 2]), "3": {}}, 
+        ({"1": dict(input1=lambda: [1, 2]), "2":  dict(input1=lambda: [1, 2]), "3": {}},
          (8,8), ("1-3","2-3")), #test8
         ])
 def test_3mods(iterables, expected, connect):
@@ -582,7 +582,7 @@ def test_old_config(tmpdir):
         logger.info('Exception: %s' % str(e))
         error_raised = True
     assert not error_raised
-    
+
 
 def test_mapnode_json(tmpdir):
     """Tests that mapnodes don't generate excess jsons
@@ -626,8 +626,6 @@ def test_mapnode_json(tmpdir):
     assert not error_raised
 
 
-@pytest.mark.skipif(sys.version_info < (3, 0),
-                    reason="Disabled until https://github.com/nipy/nipype/issues/1692 is resolved")
 def test_serial_input(tmpdir):
     wd = str(tmpdir)
     os.chdir(wd)
@@ -678,7 +676,7 @@ def test_serial_input(tmpdir):
         error_raised = True
 
     assert not error_raised
-    
+
 
 def test_write_graph_runs(tmpdir):
     os.chdir(str(tmpdir))
@@ -736,3 +734,37 @@ def test_deep_nested_write_graph_runs(tmpdir):
                 os.remove('graph_detailed.dot')
             except OSError:
                 pass
+
+
+def test_io_subclass():
+    """Ensure any io subclass allows dynamic traits"""
+    from nipype.interfaces.io import IOBase
+    from nipype.interfaces.base import DynamicTraitedSpec
+
+    class TestKV(IOBase):
+        _always_run = True
+        output_spec = DynamicTraitedSpec
+
+        def _list_outputs(self):
+            outputs = {}
+            outputs['test'] = 1
+            outputs['foo'] = 'bar'
+            return outputs
+
+    wf = pe.Workflow('testkv')
+
+    def testx2(test):
+        return test * 2
+
+    kvnode = pe.Node(TestKV(), name='testkv')
+    from nipype.interfaces.utility import Function
+    func = pe.Node(
+        Function(input_names=['test'], output_names=['test2'], function=testx2),
+        name='func')
+    exception_not_raised = True
+    try:
+        wf.connect(kvnode, 'test', func, 'test')
+    except Exception as e:
+        if 'Module testkv has no output called test' in e:
+            exception_not_raised = False
+    assert exception_not_raised

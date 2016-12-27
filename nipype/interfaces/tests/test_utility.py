@@ -1,9 +1,9 @@
-# -*- coding: utf-8 -*- 
+# -*- coding: utf-8 -*-
 from __future__ import print_function, unicode_literals
-# emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-                    
-# vi: set ft=python sts=4 ts=4 sw=4 et:                                                      
+# emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
+# vi: set ft=python sts=4 ts=4 sw=4 et:
 import os
-import pytest 
+import pytest
 
 from nipype.interfaces import utility
 import nipype.pipeline.engine as pe
@@ -18,7 +18,7 @@ def test_rename(tmpdir):
     res = rn.run()
     outfile = str(tmpdir.join("test_file1.txt"))
     assert res.outputs.out_file == outfile
-    assert os.path.exists(outfile) 
+    assert os.path.exists(outfile)
 
     # Now a string-formatting version
     rn = utility.Rename(in_file="file.txt", format_string="%(field1)s_file%(field2)d", keep_ext=True)
@@ -70,7 +70,7 @@ def should_fail(tmpdir):
     node.inputs.size = 10
     node.run()
 
- 
+
 def test_should_fail(tmpdir):
     with pytest.raises(NameError):
         should_fail(str(tmpdir))
@@ -129,7 +129,7 @@ def test_csvReader(tmpdir):
                 assert out.outputs.column_0 == ['foo', 'bar', 'baz']
                 assert out.outputs.column_1 == ['hello', 'world', 'goodbye']
                 assert out.outputs.column_2 == ['300.1', '5', '0.3']
-    
+
 
 def test_aux_connect_function(tmpdir):
     """ This tests excution nodes with multiple inputs and auxiliary

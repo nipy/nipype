@@ -89,9 +89,6 @@ def mytestFunction(insum=0):
 
     return total
 
-
-@pytest.mark.skipif(sys.version_info < (3, 0),
-                    reason="Disabled until https://github.com/nipy/nipype/issues/1692 is resolved")
 def run_multiproc_nondaemon_with_flag(nondaemon_flag):
     '''
     Start a pipe with two nodes using the resource multiproc plugin and
@@ -132,9 +129,6 @@ def run_multiproc_nondaemon_with_flag(nondaemon_flag):
     rmtree(temp_dir)
     return result
 
-
-@pytest.mark.skipif(sys.version_info < (3, 0),
-                    reason="Disabled until https://github.com/nipy/nipype/issues/1692 is resolved")
 def test_run_multiproc_nondaemon_false():
     '''
     This is the entry point for the test. Two times a pipe of several multiprocessing jobs gets
@@ -151,9 +145,6 @@ def test_run_multiproc_nondaemon_false():
         shouldHaveFailed = True
     assert shouldHaveFailed
 
-
-@pytest.mark.skipif(sys.version_info < (3, 0),
-                    reason="Disabled until https://github.com/nipy/nipype/issues/1692 is resolved")
 def test_run_multiproc_nondaemon_true():
     # with nondaemon_flag = True, the execution should succeed
     result = run_multiproc_nondaemon_with_flag(True)

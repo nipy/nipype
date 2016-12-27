@@ -156,7 +156,7 @@ class TestSignalExtraction():
         os.chdir(self.orig_dir)
         shutil.rmtree(self.temp_dir)
 
- 
+
     fake_fmri_data = np.array([[[[2, -1, 4, -2, 3],
                                  [4, -2, -5, -1, 0]],
 

@@ -152,8 +152,8 @@ def test_modelgen_sparse(tmpdir):
     assert len(res.outputs.session_info[0]['regress']) == 1
     s.inputs.use_temporal_deriv = True
     res = s.run()
-    
+
     assert len(res.outputs.session_info[0]['regress']) == 2
     npt.assert_almost_equal(res.outputs.session_info[0]['regress'][0]['val'][0], 0.016675298129743384)
     npt.assert_almost_equal(res.outputs.session_info[1]['regress'][1]['val'][5], 0.007671459162258378)
-    
+

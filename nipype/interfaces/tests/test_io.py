@@ -79,7 +79,7 @@ templates2 = {"converter": "interfaces/dcm{to!s}nii.py"}
 def test_selectfiles(SF_args, inputs_att, expected):
     base_dir = op.dirname(nipype.__file__)
     dg = nio.SelectFiles(base_directory=base_dir, **SF_args)
-    for key, val in inputs_att.items(): 
+    for key, val in inputs_att.items():
         setattr(dg.inputs, key, val)
 
     assert dg._infields == expected["infields"]
@@ -202,7 +202,7 @@ def test_datasink_to_s3(dummy_input, tmpdir):
     output_dir = 's3://' + bucket_name
     # Local temporary filepaths for testing
     fakes3_dir = str(tmpdir)
-    input_path = dummy_input 
+    input_path = dummy_input
 
     # Start up fake-S3 server
     proc = Popen(['fakes3', '-r', fakes3_dir, '-p', '4567'], stdout=open(os.devnull, 'wb'))
@@ -241,6 +241,7 @@ def test_datasink_to_s3(dummy_input, tmpdir):
 
 
 # Test AWS creds read from env vars
+@pytest.mark.skipif(noboto3 or not fakes3, reason="boto3 or fakes3 library is not available")
 def test_aws_keys_from_env():
     '''
     Function to ensure the DataSink can successfully read in AWS
@@ -424,11 +425,11 @@ def test_jsonsink(tmpdir, inputs_attributes):
     for key, val in inputs_attributes.items():
         setattr(js.inputs, key, val)
         expected_data[key] = val
- 
+
     res = js.run()
     with open(res.outputs.out_file, 'r') as f:
         data = simplejson.load(f)
-    
+
     assert data == expected_data
 
 

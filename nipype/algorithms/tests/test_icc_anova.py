@@ -19,4 +19,4 @@ def test_ICC_rep_anova():
     assert round(icc, 2) == 0.71
     assert dfc == 3
     assert dfe == 15
-    assert r_var / (r_var + e_var) == icc
+    assert np.isclose(r_var / (r_var + e_var), icc)
