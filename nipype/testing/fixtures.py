@@ -17,19 +17,22 @@ from nipype.interfaces.fsl import Info
 from nipype.interfaces.fsl.base import FSLCommand
 
 
+def nifti_image_files(outdir, filelist, shape):
+    for f in filelist:
+        hdr = nb.Nifti1Header()
+        hdr.set_data_shape(shape)
+        img = np.random.random(shape)
+        nb.save(nb.Nifti1Image(img, np.eye(4), hdr),
+                 os.path.join(outdir, f))
+
+
 @pytest.fixture()
 def create_files_in_directory(request):
     outdir = os.path.realpath(mkdtemp())
     cwd = os.getcwd()
     os.chdir(outdir)
     filelist = ['a.nii', 'b.nii']
-    for f in filelist:
-        hdr = nb.Nifti1Header()
-        shape = (3, 3, 3, 4)
-        hdr.set_data_shape(shape)
-        img = np.random.random(shape)
-        nb.save(nb.Nifti1Image(img, np.eye(4), hdr),
-                 os.path.join(outdir, f))
+    nifti_image_files(outdir, filelist, shape=(3,3,3,4))
 
     def clean_directory():
         if os.path.exists(outdir):
@@ -46,13 +49,7 @@ def create_files_in_directory_plus_dummy_file(request):
     cwd = os.getcwd()
     os.chdir(outdir)
     filelist = ['a.nii', 'b.nii']
-    for f in filelist:
-        hdr = nb.Nifti1Header()
-        shape = (3, 3, 3, 4)
-        hdr.set_data_shape(shape)
-        img = np.random.random(shape)
-        nb.save(nb.Nifti1Image(img, np.eye(4), hdr),
-                 os.path.join(outdir, f))
+    nifti_image_files(outdir, filelist, shape=(3,3,3,4))
 
     with open(os.path.join(outdir, 'reg.dat'), 'wt') as fp:
         fp.write('dummy file')
@@ -73,12 +70,7 @@ def create_surf_file_in_directory(request):
     cwd = os.getcwd()
     os.chdir(outdir)
     surf = 'lh.a.nii'
-    hdr = nif.Nifti1Header()
-    shape = (1, 100, 1)
-    hdr.set_data_shape(shape)
-    img = np.random.random(shape)
-    nif.save(nif.Nifti1Image(img, np.eye(4), hdr),
-             os.path.join(outdir, surf))
+    nifti_image_files(outdir, filelist=surf, shape=(1,100,1))
 
     def clean_directory():
         if os.path.exists(outdir):
@@ -107,15 +99,8 @@ def create_files_in_directory_plus_output_type(request):
     testdir = os.path.realpath(mkdtemp())
     origdir = os.getcwd()
     os.chdir(testdir)
-
     filelist = ['a.nii', 'b.nii']
-    for f in filelist:
-        hdr = nb.Nifti1Header()
-        shape = (3, 3, 3, 4)
-        hdr.set_data_shape(shape)
-        img = np.random.random(shape)
-        nb.save(nb.Nifti1Image(img, np.eye(4), hdr),
-                os.path.join(testdir, f))
+    nifti_image_files(testdir, filelist, shape=(3,3,3,4))
 
     out_ext = Info.output_type_to_ext(Info.output_type())
 
