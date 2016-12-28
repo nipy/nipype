@@ -25,22 +25,13 @@ def fsl_name(obj, fname):
 
 
 @pytest.fixture()
-def setup_infile(request):
+def setup_infile(tmpdir):
     ext = Info.output_type_to_ext(Info.output_type())
-    tmp_dir = tempfile.mkdtemp()
+    tmp_dir = str(tmpdir)
     tmp_infile = os.path.join(tmp_dir, 'foo' + ext)
     open(tmp_infile, 'w')
 
-    def fin():
-        shutil.rmtree(tmp_dir)
-
-    request.addfinalizer(fin)
     return (tmp_infile, tmp_dir)
-
-
-# test BET
-# @with_setup(setup_infile, teardown_infile)
-# broken in nose with generators
 
 
 @pytest.mark.skipif(no_fsl(), reason="fsl is not installed")
@@ -190,17 +181,13 @@ def test_fast_list_outputs(setup_infile):
 
 
 @pytest.fixture()
-def setup_flirt(request):
+def setup_flirt(tmpdir):
     ext = Info.output_type_to_ext(Info.output_type())
-    tmpdir = tempfile.mkdtemp()
-    _, infile = tempfile.mkstemp(suffix=ext, dir=tmpdir)
-    _, reffile = tempfile.mkstemp(suffix=ext, dir=tmpdir)
+    tmp_dir = str(tmpdir)
+    _, infile = tempfile.mkstemp(suffix=ext, dir=tmp_dir)
+    _, reffile = tempfile.mkstemp(suffix=ext, dir=tmp_dir)
 
-    def teardown_flirt():
-        shutil.rmtree(tmpdir)
-
-    request.addfinalizer(teardown_flirt)
-    return (tmpdir, infile, reffile)
+    return (tmp_dir, infile, reffile)
 
 
 @pytest.mark.skipif(no_fsl(), reason="fsl is not installed")
@@ -507,22 +494,18 @@ def test_applywarp(setup_flirt):
         assert awarp.cmdline == realcmd
 
 
-@pytest.fixture(scope="module")
-def setup_fugue(request):
+@pytest.fixture()
+def setup_fugue(tmpdir):
     import nibabel as nb
     import numpy as np
     import os.path as op
 
     d = np.ones((80, 80, 80))
-    tmpdir = tempfile.mkdtemp()
-    infile = op.join(tmpdir, 'dumbfile.nii.gz')
+    tmp_dir = str(tmpdir)
+    infile = op.join(tmp_dir, 'dumbfile.nii.gz')
     nb.Nifti1Image(d, None, None).to_filename(infile)
 
-    def teardown_fugue():
-        shutil.rmtree(tmpdir)
-
-    request.addfinalizer(teardown_fugue)
-    return (tmpdir, infile)
+    return (tmp_dir, infile)
 
 
 @pytest.mark.skipif(no_fsl(), reason="fsl is not installed")
