@@ -7,7 +7,6 @@ from builtins import open, open
 
 import os
 import tempfile
-import shutil
 
 import pytest
 from nipype.utils.filemanip import split_filename, filename_to_list

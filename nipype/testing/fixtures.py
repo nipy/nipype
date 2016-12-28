@@ -9,8 +9,6 @@ Pytest fixtures used in tests.
 import os
 import pytest
 import numpy as np
-from tempfile import mkdtemp
-from shutil import rmtree
 
 import nibabel as nb
 from nipype.interfaces.fsl import Info
