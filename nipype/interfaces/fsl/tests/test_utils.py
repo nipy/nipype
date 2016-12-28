@@ -13,12 +13,12 @@ import pytest
 import nipype.interfaces.fsl.utils as fsl
 from nipype.interfaces.fsl import no_fsl, Info
 
-from .test_maths import (set_output_type, create_files_in_directory)
+from nipype.testing.fixtures import create_files_in_directory_plus_output_type
 
 
 @pytest.mark.skipif(no_fsl(), reason="fsl is not installed")
-def test_fslroi(create_files_in_directory):
-    filelist, outdir, _ = create_files_in_directory
+def test_fslroi(create_files_in_directory_plus_output_type):
+    filelist, outdir, _ = create_files_in_directory_plus_output_type
 
     roi = fsl.ExtractROI()
 
@@ -51,8 +51,8 @@ def test_fslroi(create_files_in_directory):
 
 
 @pytest.mark.skipif(no_fsl(), reason="fsl is not installed")
-def test_fslmerge(create_files_in_directory):
-    filelist, outdir, _ = create_files_in_directory
+def test_fslmerge(create_files_in_directory_plus_output_type):
+    filelist, outdir, _ = create_files_in_directory_plus_output_type
 
     merger = fsl.Merge()
 
@@ -91,8 +91,8 @@ def test_fslmerge(create_files_in_directory):
 
 
 @pytest.mark.skipif(no_fsl(), reason="fsl is not installed")
-def test_fslmaths(create_files_in_directory):
-    filelist, outdir, _ = create_files_in_directory
+def test_fslmaths(create_files_in_directory_plus_output_type):
+    filelist, outdir, _ = create_files_in_directory_plus_output_type
     math = fsl.ImageMaths()
 
     # make sure command gets called
@@ -121,8 +121,8 @@ def test_fslmaths(create_files_in_directory):
 
 
 @pytest.mark.skipif(no_fsl(), reason="fsl is not installed")
-def test_overlay(create_files_in_directory):
-    filelist, outdir, _ = create_files_in_directory
+def test_overlay(create_files_in_directory_plus_output_type):
+    filelist, outdir, _ = create_files_in_directory_plus_output_type
     overlay = fsl.Overlay()
 
     # make sure command gets called
@@ -155,8 +155,8 @@ def test_overlay(create_files_in_directory):
 
 
 @pytest.mark.skipif(no_fsl(), reason="fsl is not installed")
-def test_slicer(create_files_in_directory):
-    filelist, outdir, _ = create_files_in_directory
+def test_slicer(create_files_in_directory_plus_output_type):
+    filelist, outdir, _ = create_files_in_directory_plus_output_type
     slicer = fsl.Slicer()
 
     # make sure command gets called
@@ -193,8 +193,8 @@ def create_parfiles():
 
 
 @pytest.mark.skipif(no_fsl(), reason="fsl is not installed")
-def test_plottimeseries(create_files_in_directory):
-    filelist, outdir, _ = create_files_in_directory
+def test_plottimeseries(create_files_in_directory_plus_output_type):
+    filelist, outdir, _ = create_files_in_directory_plus_output_type
     parfiles = create_parfiles()
     plotter = fsl.PlotTimeSeries()
 
@@ -225,8 +225,8 @@ def test_plottimeseries(create_files_in_directory):
 
 
 @pytest.mark.skipif(no_fsl(), reason="fsl is not installed")
-def test_plotmotionparams(create_files_in_directory):
-    filelist, outdir, _ = create_files_in_directory
+def test_plotmotionparams(create_files_in_directory_plus_output_type):
+    filelist, outdir, _ = create_files_in_directory_plus_output_type
     parfiles = create_parfiles()
     plotter = fsl.PlotMotionParams()
 
@@ -256,8 +256,8 @@ def test_plotmotionparams(create_files_in_directory):
 
 
 @pytest.mark.skipif(no_fsl(), reason="fsl is not installed")
-def test_convertxfm(create_files_in_directory):
-    filelist, outdir, _ = create_files_in_directory
+def test_convertxfm(create_files_in_directory_plus_output_type):
+    filelist, outdir, _ = create_files_in_directory_plus_output_type
     cvt = fsl.ConvertXFM()
 
     # make sure command gets called
@@ -282,8 +282,8 @@ def test_convertxfm(create_files_in_directory):
 
 
 @pytest.mark.skipif(no_fsl(), reason="fsl is not installed")
-def test_swapdims(create_files_in_directory):
-    files, testdir, out_ext = create_files_in_directory
+def test_swapdims(create_files_in_directory_plus_output_type):
+    files, testdir, out_ext = create_files_in_directory_plus_output_type
     swap = fsl.SwapDimensions()
 
     # Test the underlying command

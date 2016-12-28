@@ -2,40 +2,16 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 import os
-from shutil import rmtree
-import nibabel as nif
-import numpy as np
-from tempfile import mkdtemp
+
 import pytest
+from nipype.testing.fixtures import create_files_in_directory
+
 import nipype.interfaces.freesurfer as freesurfer
-
-
-@pytest.fixture()
-def create_files_in_directory(request):
-    outdir = os.path.realpath(mkdtemp())
-    cwd = os.getcwd()
-    os.chdir(outdir)
-    filelist = ['a.nii', 'b.nii']
-    for f in filelist:
-        hdr = nif.Nifti1Header()
-        shape = (3, 3, 3, 4)
-        hdr.set_data_shape(shape)
-        img = np.random.random(shape)
-        nif.save(nif.Nifti1Image(img, np.eye(4), hdr),
-                 os.path.join(outdir, f))
-
-    def clean_directory():
-        if os.path.exists(outdir):
-            rmtree(outdir)
-        os.chdir(cwd)
-
-    request.addfinalizer(clean_directory)
-    return (filelist, outdir, cwd)
 
 
 @pytest.mark.skipif(freesurfer.no_freesurfer(), reason="freesurfer is not installed")
 def test_robustregister(create_files_in_directory):
-    filelist, outdir, cwd = create_files_in_directory
+    filelist, outdir = create_files_in_directory
 
     reg = freesurfer.RobustRegister()
 
@@ -62,7 +38,7 @@ def test_robustregister(create_files_in_directory):
 
 @pytest.mark.skipif(freesurfer.no_freesurfer(), reason="freesurfer is not installed")
 def test_fitmsparams(create_files_in_directory):
-    filelist, outdir, cwd = create_files_in_directory
+    filelist, outdir = create_files_in_directory
 
     fit = freesurfer.FitMSParams()
 
@@ -85,7 +61,7 @@ def test_fitmsparams(create_files_in_directory):
 
 @pytest.mark.skipif(freesurfer.no_freesurfer(), reason="freesurfer is not installed")
 def test_synthesizeflash(create_files_in_directory):
-    filelist, outdir, cwd = create_files_in_directory
+    filelist, outdir = create_files_in_directory
 
     syn = freesurfer.SynthesizeFLASH()
 

@@ -5,13 +5,11 @@ from __future__ import unicode_literals
 from builtins import str, bytes
 
 import os
-from tempfile import mkdtemp
-from shutil import rmtree
-
-import nibabel as nb
 import numpy as np
 
 import pytest
+from nipype.testing.fixtures import create_files_in_directory
+
 import nipype.interfaces.spm.base as spm
 from nipype.interfaces.spm import no_spm
 import nipype.interfaces.matlab as mlab
@@ -24,28 +22,6 @@ except:
     matlab_cmd = 'matlab'
 
 mlab.MatlabCommand.set_default_matlab_cmd(matlab_cmd)
-
-@pytest.fixture()
-def create_files_in_directory(request):
-    outdir = mkdtemp()
-    cwd = os.getcwd()
-    os.chdir(outdir)
-    filelist = ['a.nii', 'b.nii']
-    for f in filelist:
-        hdr = nb.Nifti1Header()
-        shape = (3, 3, 3, 4)
-        hdr.set_data_shape(shape)
-        img = np.random.random(shape)
-        nb.save(nb.Nifti1Image(img, np.eye(4), hdr),
-                os.path.join(outdir, f))
-
-    def clean_directory():
-        if os.path.exists(outdir):
-            rmtree(outdir)
-        os.chdir(cwd)
-
-    request.addfinalizer(clean_directory)
-    return (filelist, outdir)
 
 
 def test_scan_for_fnames(create_files_in_directory):
