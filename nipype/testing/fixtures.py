@@ -27,25 +27,23 @@ def nifti_image_files(outdir, filelist, shape):
 
 
 @pytest.fixture()
-def create_files_in_directory(request):
-    outdir = os.path.realpath(mkdtemp())
+def create_files_in_directory(request, tmpdir):
+    outdir = str(tmpdir)
     cwd = os.getcwd()
     os.chdir(outdir)
     filelist = ['a.nii', 'b.nii']
     nifti_image_files(outdir, filelist, shape=(3,3,3,4))
 
-    def clean_directory():
-        if os.path.exists(outdir):
-            rmtree(outdir)
+    def change_directory():
         os.chdir(cwd)
 
-    request.addfinalizer(clean_directory)
+    request.addfinalizer(change_directory)
     return (filelist, outdir)
 
 
 @pytest.fixture()
-def create_files_in_directory_plus_dummy_file(request):
-    outdir = os.path.realpath(mkdtemp())
+def create_files_in_directory_plus_dummy_file(request, tmpdir):
+    outdir = str(tmpdir)
     cwd = os.getcwd()
     os.chdir(outdir)
     filelist = ['a.nii', 'b.nii']
@@ -55,29 +53,25 @@ def create_files_in_directory_plus_dummy_file(request):
         fp.write('dummy file')
     filelist.append('reg.dat')
 
-    def clean_directory():
-        if os.path.exists(outdir):
-            rmtree(outdir)
+    def change_directory():
         os.chdir(cwd)
 
-    request.addfinalizer(clean_directory)
+    request.addfinalizer(change_directory)
     return (filelist, outdir)
 
 
 @pytest.fixture()
-def create_surf_file_in_directory(request):
-    outdir = os.path.realpath(mkdtemp())
+def create_surf_file_in_directory(request, tmpdir):
+    outdir = str(tmpdir)
     cwd = os.getcwd()
     os.chdir(outdir)
     surf = 'lh.a.nii'
     nifti_image_files(outdir, filelist=surf, shape=(1,100,1))
 
-    def clean_directory():
-        if os.path.exists(outdir):
-            rmtree(outdir)
+    def change_directory():
         os.chdir(cwd)
 
-    request.addfinalizer(clean_directory)
+    request.addfinalizer(change_directory)
     return (surf, outdir)
 
 
@@ -93,10 +87,10 @@ def set_output_type(fsl_output_type):
     return prev_output_type
 
 @pytest.fixture(params=[None]+list(Info.ftypes))
-def create_files_in_directory_plus_output_type(request):
+def create_files_in_directory_plus_output_type(request, tmpdir):
     func_prev_type = set_output_type(request.param)
 
-    testdir = os.path.realpath(mkdtemp())
+    testdir = str(tmpdir)
     origdir = os.getcwd()
     os.chdir(testdir)
     filelist = ['a.nii', 'b.nii']
@@ -105,8 +99,6 @@ def create_files_in_directory_plus_output_type(request):
     out_ext = Info.output_type_to_ext(Info.output_type())
 
     def fin():
-        if os.path.exists(testdir):
-            rmtree(testdir)
         set_output_type(func_prev_type)
         os.chdir(origdir)
 
