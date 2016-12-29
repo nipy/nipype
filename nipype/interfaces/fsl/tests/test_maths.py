@@ -4,66 +4,20 @@
 from __future__ import division
 from __future__ import unicode_literals
 from builtins import open
-
 import os
-from tempfile import mkdtemp
-from shutil import rmtree
-
 import numpy as np
 
-import nibabel as nb
 from nipype.interfaces.base import Undefined
 import nipype.interfaces.fsl.maths as fsl
-from nipype.interfaces.fsl import no_fsl, Info
-from nipype.interfaces.fsl.base import FSLCommand
+from nipype.interfaces.fsl import no_fsl
 
 import pytest
-
-
-def set_output_type(fsl_output_type):
-    prev_output_type = os.environ.get('FSLOUTPUTTYPE', None)
-
-    if fsl_output_type is not None:
-        os.environ['FSLOUTPUTTYPE'] = fsl_output_type
-    elif 'FSLOUTPUTTYPE' in os.environ:
-        del os.environ['FSLOUTPUTTYPE']
-
-    FSLCommand.set_default_output_type(Info.output_type())
-    return prev_output_type
-
-
-@pytest.fixture(params=[None]+list(Info.ftypes))
-def create_files_in_directory(request):
-    func_prev_type = set_output_type(request.param)
-
-    testdir = os.path.realpath(mkdtemp())
-    origdir = os.getcwd()
-    os.chdir(testdir)
-
-    filelist = ['a.nii', 'b.nii']
-    for f in filelist:
-        hdr = nb.Nifti1Header()
-        shape = (3, 3, 3, 4)
-        hdr.set_data_shape(shape)
-        img = np.random.random(shape)
-        nb.save(nb.Nifti1Image(img, np.eye(4), hdr),
-                os.path.join(testdir, f))
-
-    out_ext = Info.output_type_to_ext(Info.output_type())
-
-    def fin():
-        if os.path.exists(testdir):
-            rmtree(testdir)
-        set_output_type(func_prev_type)
-        os.chdir(origdir)
-
-    request.addfinalizer(fin)
-    return (filelist, testdir, out_ext)
+from nipype.testing.fixtures import create_files_in_directory_plus_output_type 
 
 
 @pytest.mark.skipif(no_fsl(), reason="fsl is not installed")
-def test_maths_base(create_files_in_directory):
-    files, testdir, out_ext = create_files_in_directory
+def test_maths_base(create_files_in_directory_plus_output_type):
+    files, testdir, out_ext = create_files_in_directory_plus_output_type
 
     # Get some fslmaths
     maths = fsl.MathsCommand()
@@ -101,8 +55,8 @@ def test_maths_base(create_files_in_directory):
 
 
 @pytest.mark.skipif(no_fsl(), reason="fsl is not installed")
-def test_changedt(create_files_in_directory):
-    files, testdir, out_ext = create_files_in_directory
+def test_changedt(create_files_in_directory_plus_output_type):
+    files, testdir, out_ext = create_files_in_directory_plus_output_type
 
     # Get some fslmaths
     cdt = fsl.ChangeDataType()
@@ -131,8 +85,8 @@ def test_changedt(create_files_in_directory):
 
 
 @pytest.mark.skipif(no_fsl(), reason="fsl is not installed")
-def test_threshold(create_files_in_directory):
-    files, testdir, out_ext = create_files_in_directory
+def test_threshold(create_files_in_directory_plus_output_type):
+    files, testdir, out_ext = create_files_in_directory_plus_output_type
 
     # Get the command
     thresh = fsl.Threshold(in_file="a.nii", out_file="b.nii")
@@ -164,8 +118,8 @@ def test_threshold(create_files_in_directory):
 
 
 @pytest.mark.skipif(no_fsl(), reason="fsl is not installed")
-def test_meanimage(create_files_in_directory):
-    files, testdir, out_ext = create_files_in_directory
+def test_meanimage(create_files_in_directory_plus_output_type):
+    files, testdir, out_ext = create_files_in_directory_plus_output_type
 
     # Get the command
     meaner = fsl.MeanImage(in_file="a.nii", out_file="b.nii")
@@ -188,8 +142,8 @@ def test_meanimage(create_files_in_directory):
 
 
 @pytest.mark.skipif(no_fsl(), reason="fsl is not installed")
-def test_stdimage(create_files_in_directory):
-    files, testdir, out_ext = create_files_in_directory
+def test_stdimage(create_files_in_directory_plus_output_type):
+    files, testdir, out_ext = create_files_in_directory_plus_output_type
 
     # Get the command
     stder = fsl.StdImage(in_file="a.nii",out_file="b.nii")
@@ -212,8 +166,8 @@ def test_stdimage(create_files_in_directory):
 
 
 @pytest.mark.skipif(no_fsl(), reason="fsl is not installed")
-def test_maximage(create_files_in_directory):
-    files, testdir, out_ext = create_files_in_directory
+def test_maximage(create_files_in_directory_plus_output_type):
+    files, testdir, out_ext = create_files_in_directory_plus_output_type
 
     # Get the command
     maxer = fsl.MaxImage(in_file="a.nii", out_file="b.nii")
@@ -236,8 +190,8 @@ def test_maximage(create_files_in_directory):
 
 
 @pytest.mark.skipif(no_fsl(), reason="fsl is not installed")
-def test_smooth(create_files_in_directory):
-    files, testdir, out_ext = create_files_in_directory
+def test_smooth(create_files_in_directory_plus_output_type):
+    files, testdir, out_ext = create_files_in_directory_plus_output_type
 
     # Get the command
     smoother = fsl.IsotropicSmooth(in_file="a.nii", out_file="b.nii")
@@ -264,8 +218,8 @@ def test_smooth(create_files_in_directory):
 
 
 @pytest.mark.skipif(no_fsl(), reason="fsl is not installed")
-def test_mask(create_files_in_directory):
-    files, testdir, out_ext = create_files_in_directory
+def test_mask(create_files_in_directory_plus_output_type):
+    files, testdir, out_ext = create_files_in_directory_plus_output_type
 
     # Get the command
     masker = fsl.ApplyMask(in_file="a.nii", out_file="c.nii")
@@ -287,8 +241,8 @@ def test_mask(create_files_in_directory):
 
 
 @pytest.mark.skipif(no_fsl(), reason="fsl is not installed")
-def test_dilation(create_files_in_directory):
-    files, testdir, out_ext = create_files_in_directory
+def test_dilation(create_files_in_directory_plus_output_type):
+    files, testdir, out_ext = create_files_in_directory_plus_output_type
 
     # Get the command
     diller = fsl.DilateImage(in_file="a.nii", out_file="b.nii")
@@ -327,8 +281,8 @@ def test_dilation(create_files_in_directory):
 
 
 @pytest.mark.skipif(no_fsl(), reason="fsl is not installed")
-def test_erosion(create_files_in_directory):
-    files, testdir, out_ext = create_files_in_directory
+def test_erosion(create_files_in_directory_plus_output_type):
+    files, testdir, out_ext = create_files_in_directory_plus_output_type
 
     # Get the command
     erode = fsl.ErodeImage(in_file="a.nii", out_file="b.nii")
@@ -349,8 +303,8 @@ def test_erosion(create_files_in_directory):
 
 
 @pytest.mark.skipif(no_fsl(), reason="fsl is not installed")
-def test_spatial_filter(create_files_in_directory):
-    files, testdir, out_ext = create_files_in_directory
+def test_spatial_filter(create_files_in_directory_plus_output_type):
+    files, testdir, out_ext = create_files_in_directory_plus_output_type
 
     # Get the command
     filter = fsl.SpatialFilter(in_file="a.nii", out_file="b.nii")
@@ -373,8 +327,8 @@ def test_spatial_filter(create_files_in_directory):
 
 
 @pytest.mark.skipif(no_fsl(), reason="fsl is not installed")
-def test_unarymaths(create_files_in_directory):
-    files, testdir, out_ext = create_files_in_directory
+def test_unarymaths(create_files_in_directory_plus_output_type):
+    files, testdir, out_ext = create_files_in_directory_plus_output_type
 
     # Get the command
     maths = fsl.UnaryMaths(in_file="a.nii", out_file="b.nii")
@@ -399,8 +353,8 @@ def test_unarymaths(create_files_in_directory):
 
 
 @pytest.mark.skipif(no_fsl(), reason="fsl is not installed")
-def test_binarymaths(create_files_in_directory):
-    files, testdir, out_ext = create_files_in_directory
+def test_binarymaths(create_files_in_directory_plus_output_type):
+    files, testdir, out_ext = create_files_in_directory_plus_output_type
 
     # Get the command
     maths = fsl.BinaryMaths(in_file="a.nii", out_file="c.nii")
@@ -432,8 +386,8 @@ def test_binarymaths(create_files_in_directory):
 
 
 @pytest.mark.skipif(no_fsl(), reason="fsl is not installed")
-def test_multimaths(create_files_in_directory):
-    files, testdir, out_ext = create_files_in_directory
+def test_multimaths(create_files_in_directory_plus_output_type):
+    files, testdir, out_ext = create_files_in_directory_plus_output_type
 
     # Get the command
     maths = fsl.MultiImageMaths(in_file="a.nii", out_file="c.nii")
@@ -461,8 +415,8 @@ def test_multimaths(create_files_in_directory):
 
 
 @pytest.mark.skipif(no_fsl(), reason="fsl is not installed")
-def test_tempfilt(create_files_in_directory):
-    files, testdir, out_ext = create_files_in_directory
+def test_tempfilt(create_files_in_directory_plus_output_type):
+    files, testdir, out_ext = create_files_in_directory_plus_output_type
 
     # Get the command
     filt = fsl.TemporalFilter(in_file="a.nii", out_file="b.nii")

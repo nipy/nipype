@@ -3,38 +3,11 @@
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 import os
 
-from tempfile import mkdtemp
-from shutil import rmtree
-
-import numpy as np
-
-import nibabel as nb
-
 import pytest
+from nipype.testing.fixtures import create_files_in_directory
+
 import nipype.interfaces.fsl.epi as fsl
 from nipype.interfaces.fsl import no_fsl
-
-
-@pytest.fixture(scope="module")
-def create_files_in_directory(request):
-    outdir = os.path.realpath(mkdtemp())
-    cwd = os.getcwd()
-    os.chdir(outdir)
-    filelist = ['a.nii', 'b.nii']
-    for f in filelist:
-        hdr = nb.Nifti1Header()
-        shape = (3, 3, 3, 4)
-        hdr.set_data_shape(shape)
-        img = np.random.random(shape)
-        nb.save(nb.Nifti1Image(img, np.eye(4), hdr),
-                os.path.join(outdir, f))
-
-    def clean_directory():
-        rmtree(outdir)
-        os.chdir(cwd)
-
-    request.addfinalizer(clean_directory)
-    return (filelist, outdir)
 
 
 # test eddy_correct
