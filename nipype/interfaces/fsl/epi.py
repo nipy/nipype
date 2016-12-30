@@ -444,8 +444,7 @@ class EddyInputSpec(FSLCommandInputSpec):
                      desc="Matrix that specifies the relative locations of "
                           "the field specified by --field and first volume "
                           "in file --imain")
-    use_gpu = traits.Str(desc="Run eddy using gpu, possible values are "
-                              "[openmp] or [cuda]")
+    use_cuda = traits.Bool(False, desc="Run eddy using cuda gpu")
 
 
 class EddyOutputSpec(TraitedSpec):
@@ -483,7 +482,7 @@ class Eddy(FSLCommand):
     >>> res = eddy.run() # doctest: +SKIP
 
     """
-    _cmd = 'eddy'
+    _cmd = 'eddy_openmp'
     input_spec = EddyInputSpec
     output_spec = EddyOutputSpec
 
@@ -492,8 +491,8 @@ class Eddy(FSLCommand):
     def __init__(self, **inputs):
         super(Eddy, self).__init__(**inputs)
         self.inputs.on_trait_change(self._num_threads_update, 'num_threads')
-        if isdefined(self.inputs.use_gpu):
-            self._use_gpu()
+        if isdefined(self.inputs.use_cuda):
+            self._use_cuda()
         if not isdefined(self.inputs.num_threads):
             self.inputs.num_threads = self._num_threads
         else:
@@ -508,13 +507,11 @@ class Eddy(FSLCommand):
             self.inputs.environ['OMP_NUM_THREADS'] = str(
                 self.inputs.num_threads)
 
-    def _use_gpu(self):
-        if self.inputs.use_gpu.lower().startswith('cuda'):
+    def _use_cuda(self):
+        if self.inputs.use_cuda:
             _cmd = 'eddy_cuda'
-        elif self.inputs.use_gpu.lower().startswith('openmp'):
-            _cmd = 'eddy_openmp'
         else:
-            _cmd = 'eddy'
+            _cmd = 'eddy_openmp'
         
     def _format_arg(self, name, spec, value):
         if name == 'in_topup_fieldcoef':
