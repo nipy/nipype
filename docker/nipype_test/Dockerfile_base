@@ -122,6 +122,6 @@ RUN conda config --add channels conda-forge && \
                      nitime \
                      dipy \
                      pandas && \
-    pip install nose-cov doctest-ignore-unicode configparser
+    pip install configparser
 
 CMD ["/bin/bash"]

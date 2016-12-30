@@ -46,12 +46,14 @@ class SliceTimingInputSpec(SPMCommandInputSpec):
                                     desc=('time of volume acquisition. usually'
                                           'calculated as TR-(TR/num_slices)'),
                                     mandatory=True)
-    slice_order = traits.List(traits.Int(), field='so',
-                              desc=('1-based order in which slices are '
-                                    'acquired'),
+    slice_order = traits.List(traits.Float(), field='so',
+                              desc=('1-based order or onset (in ms) in which '
+                                    'slices are acquired'),
                               mandatory=True)
     ref_slice = traits.Int(field='refslice',
-                           desc='1-based Number of the reference slice',
+                           desc='1-based Number of the reference slice or '
+                                'reference time point if slice_order is in '
+                                'onsets (ms)',
                            mandatory=True)
     out_prefix = traits.String('a', field='prefix', usedefault=True,
                                desc='slicetimed output prefix')

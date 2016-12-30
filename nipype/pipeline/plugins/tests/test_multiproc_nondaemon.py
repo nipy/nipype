@@ -7,11 +7,11 @@ from __future__ import print_function, division, unicode_literals, absolute_impo
 from builtins import range, open
 
 # Import packages
-import os
+import os, sys
 from tempfile import mkdtemp
 from shutil import rmtree
+import pytest
 
-from nipype.testing import assert_equal, assert_true
 import nipype.pipeline.engine as pe
 from nipype.interfaces.utility import Function
 
@@ -89,7 +89,6 @@ def mytestFunction(insum=0):
 
     return total
 
-
 def run_multiproc_nondaemon_with_flag(nondaemon_flag):
     '''
     Start a pipe with two nodes using the resource multiproc plugin and
@@ -130,7 +129,6 @@ def run_multiproc_nondaemon_with_flag(nondaemon_flag):
     rmtree(temp_dir)
     return result
 
-
 def test_run_multiproc_nondaemon_false():
     '''
     This is the entry point for the test. Two times a pipe of several multiprocessing jobs gets
@@ -145,10 +143,9 @@ def test_run_multiproc_nondaemon_false():
         run_multiproc_nondaemon_with_flag(False)
     except:
         shouldHaveFailed = True
-    yield assert_true, shouldHaveFailed
-
+    assert shouldHaveFailed
 
 def test_run_multiproc_nondaemon_true():
     # with nondaemon_flag = True, the execution should succeed
     result = run_multiproc_nondaemon_with_flag(True)
-    yield assert_equal, result, 180  # n_procs (2) * numberOfThreads (2) * 45 == 180
+    assert result == 180  # n_procs (2) * numberOfThreads (2) * 45 == 180

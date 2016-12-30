@@ -32,7 +32,7 @@ def make_label_dec(label, ds=None):
     --------
     >>> slow = make_label_dec('slow')
     >>> slow.__doc__
-    Labels a test as 'slow'
+    "Labels a test as 'slow'"
 
     >>> rare = make_label_dec(['slow','hard'],
     ... "Mix labels 'slow' and 'hard' for rare tests")

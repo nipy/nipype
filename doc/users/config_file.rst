@@ -134,7 +134,7 @@ Execution
 *poll_sleep_duration*
     This controls how long the job submission loop will sleep between submitting
     all pending jobs and checking for job completion. To be nice to cluster
-    schedulers the default is set to 60 seconds.
+    schedulers the default is set to 2 seconds.
 
 *xvfb_max_wait*
     Maximum time (in seconds) to wait for Xvfb to start, if the _redirect_x parameter of an Interface is True.

@@ -5,7 +5,7 @@
 PYTHON ?= python
 NOSETESTS=`which nosetests`
 
-.PHONY: zipdoc sdist egg upload_to_pypi trailing-spaces clean-pyc clean-so clean-build clean-ctags clean in inplace test-code test-doc test-coverage test html specs check-before-commit check
+.PHONY: zipdoc sdist egg upload_to_pypi trailing-spaces clean-pyc clean-so clean-build clean-ctags clean in inplace test-code test-coverage test html specs check-before-commit check
 
 zipdoc: html
 	zip documentation.zip doc/_build/html
@@ -56,16 +56,11 @@ inplace:
 	$(PYTHON) setup.py build_ext -i
 
 test-code: in
-	python -W once:FSL:UserWarning:nipype $(NOSETESTS) --with-doctest --with-doctest-ignore-unicode --logging-level=DEBUG --verbosity=3 nipype
-
-test-doc:
-	$(NOSETESTS) -s --with-doctest --with-doctest-ignore-unicode --doctest-tests --doctest-extension=rst \
-	--doctest-fixtures=_fixture doc/
+	py.test --doctest-module nipype
 
 test-coverage: clean-tests in
-	$(NOSETESTS) -s --with-doctest --with-doctest-ignore-unicode --with-coverage --cover-package=nipype \
-	--config=.coveragerc
-
+	py.test --doctest-modules --cov-config .coveragerc --cov=nipype nipype
+	
 test: tests # just another name
 tests: clean test-code
 
