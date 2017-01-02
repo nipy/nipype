@@ -476,7 +476,7 @@ class Eddy(FSLCommand):
     >>> eddy.inputs.in_bvec  = 'bvecs.scheme'
     >>> eddy.inputs.in_bval  = 'bvals.scheme'
     >>> eddy.cmdline # doctest: +ELLIPSIS +ALLOW_UNICODE
-    'eddy --acqp=epi_acqp.txt --bvals=bvals.scheme --bvecs=bvecs.scheme \
+    'eddy_openmp --acqp=epi_acqp.txt --bvals=bvals.scheme --bvecs=bvecs.scheme \
 --imain=epi.nii --index=epi_index.txt --mask=epi_mask.nii \
 --out=.../eddy_corrected'
     >>> res = eddy.run() # doctest: +SKIP
@@ -512,7 +512,7 @@ class Eddy(FSLCommand):
             _cmd = 'eddy_cuda'
         else:
             _cmd = 'eddy_openmp'
-        
+
     def _format_arg(self, name, spec, value):
         if name == 'in_topup_fieldcoef':
             return spec.argstr % value.split('_fieldcoef')[0]
