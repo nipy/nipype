@@ -8,6 +8,10 @@ def test_Eddy_inputs():
     environ=dict(nohash=True,
     usedefault=True,
     ),
+    field=dict(argstr='--field=%s',
+    ),
+    field_mat=dict(argstr='--field_mat=%s',
+    ),
     flm=dict(argstr='--flm=%s',
     ),
     fwhm=dict(argstr='--fwhm=%s',
@@ -34,9 +38,11 @@ def test_Eddy_inputs():
     mandatory=True,
     ),
     in_topup_fieldcoef=dict(argstr='--topup=%s',
-    requires=[u'in_topup_movpar'],
+    requires=['in_topup_movpar'],
     ),
-    in_topup_movpar=dict(requires=[u'in_topup_fieldcoef'],
+    in_topup_movpar=dict(requires=['in_topup_fieldcoef'],
+    ),
+    is_shelled=dict(argstr='--data_is_shelled',
     ),
     method=dict(argstr='--resamp=%s',
     ),
@@ -55,6 +61,7 @@ def test_Eddy_inputs():
     ),
     terminal_output=dict(nohash=True,
     ),
+    use_cuda=dict(),
     )
     inputs = Eddy.input_spec()
 
