@@ -646,14 +646,7 @@ def test_serial_input(tmpdir):
     assert n1.num_subnodes() == len(n1.inputs.in1)
 
     # test running the workflow on default conditions
-    error_raised = False
-    try:
-        w1.run(plugin='MultiProc')
-    except Exception as e:
-        from nipype.pipeline.engine.base import logger
-        logger.info('Exception: %s' % str(e))
-        error_raised = True
-    assert not error_raised
+    w1.run(plugin='MultiProc')
 
     # test output of num_subnodes method when serial is True
     n1._serial = True
