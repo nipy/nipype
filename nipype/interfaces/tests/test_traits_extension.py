@@ -13,6 +13,10 @@ class TestNiftiFile(unittest.TestCase):
     def test_NiftiFile_no_dimension(self):
         """ Initialize a NiftiFile trait without specifying dimensionality
         or setting dimensionality = None """
+        nifti_files = [NiftiFile(), NiftiFile(dimensionality=None)]
+
+        for nifti_file in nifti_files:
+            self.assertEqual(nifti_file.dimensionality, None)
 
     def test_NiftiFile_dimensionality_check(self):
         """ Initialize a NiftiFile trait, specifying dimensionality """

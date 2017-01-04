@@ -141,7 +141,10 @@ class NiftiFile (File):
         super(NiftiFile, self).__init__(*args, **kwargs)
 
         try:
-            self.dimensionality = int(kwargs['dimensionality']) if 'dimensionality' in kwargs.keys() else None
+            if 'dimensionality' in kwargs.keys() and kwargs['dimensionality'] is not None:
+                self.dimensionality = int(kwargs['dimensionality'])
+            else:
+                self.dimensionality = None
         except ValueError as verr:
             raise_from(TraitError('The dimensionality of a nifti object must be an integer'), verr)
 
