@@ -2,13 +2,19 @@
 """ tests for the custom traits defined in ./traits_extension.py """
 
 import unittest
+import mock
 
 from traits.trait_errors import TraitError
+
+import nibabel as nb
+import numpy as np
 
 from nipype.interfaces.traits_extension import NiftiFile
 
 class TestNiftiFile(unittest.TestCase):
     """ tests the custom Trait class NiftiFile """
+
+    filename = 'not a real filename'
 
     def test_NiftiFile_no_dimension(self):
         """ Initialize a NiftiFile trait without specifying dimensionality
@@ -41,11 +47,18 @@ class TestNiftiFile(unittest.TestCase):
         for nifti_file in nifti_files:
             self.assertTrue(nifti_file.exists)
 
-    def test_validate_dimensionality(self):
+    @mock.patch('os.path.isfile', return_value=True)
+    @mock.patch('nibabel.load')
+    def test_validate_dimensionality(self, mock_load, mock_isfile):
         """ Test that validation passes when dimensionalities match, fails when they don't """
+        mock_load.return_value = nb.Nifti1Image(np.ones((2, 3, 4)), np.eye(4))
+
+        NiftiFile(dimensionality=3).validate(None, 'this will pass', self.filename)
 
     def test_validate_existence(self):
         """ Pass validation when the file exists, fail when it doesn't """
+        with self.assertRaisesRegexp(TraitError, 'this will fail'):
+            NiftiFile(dimensionality=4).validate(None, 'this will fail', self.filename)
 
     def test_validate_nifti(self):
         """ Pass validation when the file is a nifti file, fail when it isn't """

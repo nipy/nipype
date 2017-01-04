@@ -171,9 +171,9 @@ class NiftiFile (File):
         """
         returns a string that will be used in the error message
         """
-        error_message_string = super(ReportFile, self).info() + ' and be a Nifti object'
+        error_message_string = super(NiftiFile, self).info() + ' and be a Nifti object'
         if self.dimensionality is not None:
-            error_message_string = error_message_string + ' with ' + self.dimensionality + ' dimensions'
+            error_message_string = error_message_string + ' with ' + str(self.dimensionality) + ' dimensions'
         return error_message_string
 
 
