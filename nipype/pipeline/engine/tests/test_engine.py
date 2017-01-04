@@ -646,9 +646,9 @@ def test_parameterize_dirs_false(tmpdir):
     error_raised = False
     try:
         wf.run()
-    except Exception as ex:
+    except TypeError as typerr:
         from nipype.pipeline.engine.base import logger
-        logger.info('Exception: %s' % str(ex))
+        logger.info('Exception: %s' % str(typerr))
         error_raised = True
     assert not error_raised
 
