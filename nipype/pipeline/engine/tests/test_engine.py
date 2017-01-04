@@ -627,33 +627,28 @@ def test_mapnode_json(tmpdir):
 
 
 def test_parameterize_dirs_false(tmpdir):
-    from .... import config
     from ....interfaces.utility import IdentityInterface
     from ....testing import example_data
 
-    config.update_config({'execution': {'parameterize_dirs': False}})
-
-    wd = str(tmpdir)
-    os.chdir(wd)
-
     input_file = example_data('fsl_motion_outliers_fd.txt')
 
-    n1 = pe.Node(EngineTestInterface(), name="Node1")
+    n1 = pe.Node(EngineTestInterface(), name='Node1')
     n1.iterables = ('input_file', (input_file, input_file))
     n1.interface.inputs.input1 = 1
 
-    n2 = pe.Node(IdentityInterface(fields='in1'), name="Node2")
+    n2 = pe.Node(IdentityInterface(fields='in1'), name='Node2')
 
-    wf = pe.Workflow(name="Test")
-    wf.base_dir = wd
+    wf = pe.Workflow(name='Test')
+    wf.base_dir = str(tmpdir)
+    wf.config['execution']['parameterize_dirs'] = False
     wf.connect([(n1, n2, [('output1', 'in1')])])
 
     error_raised = False
     try:
         wf.run()
-    except TypeError as typerr:
+    except Exception as ex:
         from nipype.pipeline.engine.base import logger
-        logger.info('Exception: %s' % str(typerr))
+        logger.info('Exception: %s' % str(ex))
         error_raised = True
     assert not error_raised
 
