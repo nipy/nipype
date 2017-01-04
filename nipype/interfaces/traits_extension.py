@@ -18,7 +18,7 @@ all of these bugs and they've been fixed in enthought svn repository
 """
 from __future__ import print_function, division, unicode_literals, absolute_import
 
-from builtins import filter, object, str, bytes
+from builtins import filter, object, str, bytes, int
 import os
 
 import nibabel
@@ -140,13 +140,12 @@ class NiftiFile (File):
         """
         super(NiftiFile, self).__init__(*args, **kwargs)
 
-        try:
-            if 'dimensionality' in kwargs.keys() and kwargs['dimensionality'] is not None:
-                self.dimensionality = int(kwargs['dimensionality'])
+        if 'dimensionality' in kwargs.keys():
+            if kwargs['dimensionality'] is None or isinstance(kwargs['dimensionality'], int):
+                self.dimensionality = kwargs['dimensionality']
             else:
-                self.dimensionality = None
-        except ValueError as verr:
-            raise_from(TraitError('The dimensionality of a nifti object must be an integer'), verr)
+                raise TraitError('The dimensionality of a nifti object must be an integer, '
+                                 'not {}'.format(kwargs['dimensionality']))
 
         if 'exists' in kwargs.keys() and kwargs['exists'] == False:
             raise TraitError('A NiftiFile trait must be the name of an existing nifti file (`exists=True`)')

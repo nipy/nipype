@@ -18,6 +18,12 @@ class TestNiftiFile(unittest.TestCase):
         for nifti_file in nifti_files:
             self.assertEqual(nifti_file.dimensionality, None)
 
+    def test_NiftiFile_bad_dimensionality(self):
+        """ Fail to initialize a NiftiFile trait if dimensionality is not an integer """
+        for bad_dim in ['string', 3.14]:
+            with self.assertRaisesRegexp(TraitError, 'must be an integer'):
+                NiftiFile(dimensionality=bad_dim)
+
     def test_NiftiFile_dimensionality(self):
         """ Initialize a NiftiFile trait, specifying dimensionality """
         for dim in range(1, 5):
