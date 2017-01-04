@@ -1555,12 +1555,13 @@ class MELODIC(FSLCommand):
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        outputs['out_dir'] = self.inputs.out_dir
-        if not isdefined(outputs['out_dir']):
+        if isdefined(self.inputs.out_dir):
+            outputs['out_dir'] = os.path.abspath(self.inputs.out_dir)
+        else:
             outputs['out_dir'] = self._gen_filename("out_dir")
         if isdefined(self.inputs.report) and self.inputs.report:
             outputs['report_dir'] = os.path.join(
-                self._gen_filename("out_dir"), "report")
+                outputs['out_dir'], "report")
         return outputs
 
     def _gen_filename(self, name):

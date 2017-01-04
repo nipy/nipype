@@ -432,6 +432,19 @@ class EddyInputSpec(FSLCommandInputSpec):
                         desc='Detect and replace outlier slices')
     num_threads = traits.Int(1, usedefault=True, nohash=True,
                              desc="Number of openmp threads to use")
+    is_shelled = traits.Bool(False, argstr='--data_is_shelled',
+                             desc="Override internal check to ensure that "
+                                  "date are acquired on a set of b-value "
+                                  "shells")
+    field = traits.Str(argstr='--field=%s',
+                       desc="NonTOPUP fieldmap scaled in Hz - filename has "
+                            "to be provided without an extension. TOPUP is "
+                            "strongly recommended")
+    field_mat = File(exists=True, argstr='--field_mat=%s',
+                     desc="Matrix that specifies the relative locations of "
+                          "the field specified by --field and first volume "
+                          "in file --imain")
+    use_cuda = traits.Bool(False, desc="Run eddy using cuda gpu")
 
 
 class EddyOutputSpec(TraitedSpec):
@@ -463,13 +476,13 @@ class Eddy(FSLCommand):
     >>> eddy.inputs.in_bvec  = 'bvecs.scheme'
     >>> eddy.inputs.in_bval  = 'bvals.scheme'
     >>> eddy.cmdline # doctest: +ELLIPSIS +ALLOW_UNICODE
-    'eddy --acqp=epi_acqp.txt --bvals=bvals.scheme --bvecs=bvecs.scheme \
+    'eddy_openmp --acqp=epi_acqp.txt --bvals=bvals.scheme --bvecs=bvecs.scheme \
 --imain=epi.nii --index=epi_index.txt --mask=epi_mask.nii \
 --out=.../eddy_corrected'
     >>> res = eddy.run() # doctest: +SKIP
 
     """
-    _cmd = 'eddy'
+    _cmd = 'eddy_openmp'
     input_spec = EddyInputSpec
     output_spec = EddyOutputSpec
 
@@ -478,7 +491,8 @@ class Eddy(FSLCommand):
     def __init__(self, **inputs):
         super(Eddy, self).__init__(**inputs)
         self.inputs.on_trait_change(self._num_threads_update, 'num_threads')
-
+        if isdefined(self.inputs.use_cuda):
+            self._use_cuda()
         if not isdefined(self.inputs.num_threads):
             self.inputs.num_threads = self._num_threads
         else:
@@ -492,6 +506,12 @@ class Eddy(FSLCommand):
         else:
             self.inputs.environ['OMP_NUM_THREADS'] = str(
                 self.inputs.num_threads)
+
+    def _use_cuda(self):
+        if self.inputs.use_cuda:
+            _cmd = 'eddy_cuda'
+        else:
+            _cmd = 'eddy_openmp'
 
     def _format_arg(self, name, spec, value):
         if name == 'in_topup_fieldcoef':

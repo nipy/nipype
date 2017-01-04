@@ -391,7 +391,7 @@ class Node(EngineBase):
             - Otherwise, return the parameterization unchanged.
         """
         if len(param) > 32:
-            return sha1(param).hexdigest()
+            return sha1(param.encode()).hexdigest()
         else:
             return param
 
