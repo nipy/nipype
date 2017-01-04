@@ -41,11 +41,18 @@ class Level1DesignInputSpec(BaseInterfaceInputSpec):
         traits.Dict(traits.Enum(
             'dgamma'), traits.Dict(traits.Enum('derivs'), traits.Bool)),
         traits.Dict(traits.Enum('gamma'), traits.Dict(
-                    traits.Enum('derivs'), traits.Bool)),
-        traits.Dict(traits.Enum('none'), traits.Enum(None)),
+                    traits.Enum('derivs', 'gammasigma', 'gammadelay'))),
+        traits.Dict(traits.Enum('none'), traits.Dict()),
         mandatory=True,
         desc=("name of basis function and options e.g., "
               "{'dgamma': {'derivs': True}}"))
+    orthogonalization = traits.Dict(traits.Int, traits.Dict(traits.Int,
+        traits.Either(traits.Bool,traits.Int)),
+        mandatory=False,
+        desc=("which regressors to make orthogonal e.g., "
+              "{1: {0:0,1:0,2:0}, 2: {0:1,1:1,2:0}} to make the second "
+              "regressor in a 2-regressor model orthogonal to the first."),
+        default={})
     model_serial_correlations = traits.Bool(
         desc="Option to model serial correlations using an \
 autoregressive estimator (order 1). Setting this option is only \
@@ -122,8 +129,8 @@ class Level1Design(BaseInterface):
         f.close()
 
     def _create_ev_files(
-        self, cwd, runinfo, runidx, usetd, contrasts,
-            do_tempfilter, basis_key):
+        self, cwd, runinfo, runidx, ev_parameters, orthogonalization,
+        contrasts, do_tempfilter, basis_key):
         """Creates EV files from condition and regressor information.
 
            Parameters:
@@ -134,9 +141,11 @@ class Level1Design(BaseInterface):
                about events and other regressors.
            runidx  : int
                Index to run number
-           usetd   : int
-               Whether or not to use temporal derivatives for
-               conditions
+           ev_parameters : dict
+               A dictionary containing the model parameters for the
+               given design type.
+           orthogonalization : dict
+               A dictionary of dictionaries specifying orthogonal EVs.
            contrasts : list of lists
                Information on contrasts to be evaluated
         """
@@ -144,6 +153,15 @@ class Level1Design(BaseInterface):
         evname = []
         if basis_key == "dgamma":
             basis_key = "hrf"
+        elif basis_key == "gamma":
+            try:
+                _ = ev_parameters['gammasigma']
+            except KeyError:
+                ev_parameters['gammasigma'] = 3
+            try:
+                _ = ev_parameters['gammadelay']
+            except KeyError:
+                ev_parameters['gammadelay'] = 6
         ev_template = load_template('feat_ev_'+basis_key+'.tcl')
         ev_none = load_template('feat_ev_none.tcl')
         ev_ortho = load_template('feat_ev_ortho.tcl')
@@ -174,22 +192,18 @@ class Level1Design(BaseInterface):
                             evinfo.insert(j, [onset, cond['duration'][j], amp])
                         else:
                             evinfo.insert(j, [onset, cond['duration'][0], amp])
-                    if basis_key == "none":
-                        ev_txt += ev_template.substitute(
-                            ev_num=num_evs[0],
-                            ev_name=name,
-                            tempfilt_yn=do_tempfilter,
-                            cond_file=evfname)
+                    ev_parameters['ev_num'] = num_evs[0]
+                    ev_parameters['ev_name'] = name
+                    ev_parameters['tempfilt_yn'] = do_tempfilter
+                    ev_parameters['cond_file'] = evfname
+                    try:
+                        ev_parameters['temporalderiv'] = ev_parameters.pop('derivs')
+                    except KeyError:
+                        pass
                     else:
-                        ev_txt += ev_template.substitute(
-                            ev_num=num_evs[0],
-                            ev_name=name,
-                            tempfilt_yn=do_tempfilter,
-                            temporalderiv=usetd,
-                            cond_file=evfname)
-                    if usetd:
                         evname.append(name + 'TD')
                         num_evs[1] += 1
+                    ev_txt += ev_template.substitute(ev_parameters)
                 elif field == 'regress':
                     evinfo = [[j] for j in cond['val']]
                     ev_txt += ev_none.substitute(ev_num=num_evs[0],
@@ -202,7 +216,11 @@ class Level1Design(BaseInterface):
         # add ev orthogonalization
         for i in range(1, num_evs[0] + 1):
             for j in range(0, num_evs[0] + 1):
-                ev_txt += ev_ortho.substitute(c0=i, c1=j)
+                try:
+                    orthogonal = int(orthogonalization[i][j])
+                except (KeyError, TypeError, ValueError, IndexError):
+                    orthogonal = 0
+                ev_txt += ev_ortho.substitute(c0=i, c1=j, orthogonal=orthogonal)
                 ev_txt += "\n"
         # add contrast info to fsf file
         if isdefined(contrasts):
@@ -297,10 +315,8 @@ class Level1Design(BaseInterface):
         prewhiten = 0
         if isdefined(self.inputs.model_serial_correlations):
             prewhiten = int(self.inputs.model_serial_correlations)
-        usetd = 0
         basis_key = list(self.inputs.bases.keys())[0]
-        if basis_key in ['dgamma', 'gamma']:
-            usetd = int(self.inputs.bases[basis_key]['derivs'])
+        ev_parameters = dict(self.inputs.bases[basis_key])
         session_info = self._format_session_info(self.inputs.session_info)
         func_files = self._get_func_files(session_info)
         n_tcon = 0
@@ -316,8 +332,9 @@ class Level1Design(BaseInterface):
             do_tempfilter = 1
             if info['hpf'] == np.inf:
                 do_tempfilter = 0
-            num_evs, cond_txt = self._create_ev_files(cwd, info, i, usetd,
+            num_evs, cond_txt = self._create_ev_files(cwd, info, i, ev_parameters,
                                                       self.inputs.contrasts,
+                                                      self.inputs.orthogonalization,
                                                       do_tempfilter, basis_key)
             nim = load(func_files[i])
             (_, _, _, timepoints) = nim.shape
@@ -370,7 +387,6 @@ class Level1Design(BaseInterface):
                     outputs['ev_files'][runno].append(
                         os.path.join(cwd, evfname))
         return outputs
-
 
 class FEATInputSpec(FSLCommandInputSpec):
     fsf_file = File(exists=True, mandatory=True, argstr="%s", position=0,
