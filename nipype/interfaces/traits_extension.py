@@ -21,6 +21,8 @@ from __future__ import print_function, division, unicode_literals, absolute_impo
 from builtins import filter, object, str, bytes
 import os
 
+import nibabel
+
 # perform all external trait imports here
 import traits
 if traits.__version__ < '3.7.0':
@@ -123,6 +125,55 @@ class File (BaseFile):
 
         super(File, self).__init__(value, filter, auto_set, entries, exists,
                                    **metadata)
+
+class NiftiFile (File):
+    """
+    Defines a trait whose value must be the name of a nifti file (i.e., loadable by nibabel.load).
+    Optionally checks nifti dimensionality.
+    No `*args` to promote explicit trait declarations and to simplify implementation.
+    """
+
+    def __init__(self, *args, **kwargs):
+        """
+        Set self.dimensionality.
+        The contents of the file must be nifti-formatted, therefore the file must exist.
+        """
+        super(NiftiFile, self).__init(*args, **kwargs)
+
+        try:
+            self.dimensionality = int(kwargs['dimensionality']) if 'dimensionality' in kwargs.keys() else None
+        except ValueError as verr:
+            raise_from(TraitError('The dimensionality of a nifti object must be an integer'), verr)
+
+        if 'exists' in kwargs.keys() and kwargs['exists'] == False:
+            raise TraitError('A NiftiFile trait must be the name of an existing nifti file (`exists=True`)')
+        self.exists = True
+
+    def validate(self, object, name, value):
+        """
+        Validates that the file name can be read by `nibabel` as a nifti file.
+        Optionally, if dimensionality is set, checks the dimensionality of the nifti object
+        """
+        validated_value = super(NiftiFile, self).validate(object, name, value)
+
+        try:
+            nifti_dimension = nibabel.load(value).header['dim'][0]
+            if self.dimensionality is not None and self.dimensionality != nifti_dimension:
+                self.error(object, name, value)
+        except ImageFileError as iferr: # nibabel thinks value doesn't look like a nifti1 file
+            self.error(object, name, value)
+
+        return validated_value
+
+    def info(self):
+        """
+        returns a string that will be used in the error message
+        """
+        error_message_string = super(ReportFile, self).info() + ' and be a Nifti object'
+        if self.dimensionality is not None:
+            error_message_string = error_message_string + ' with ' + self.dimensionality + ' dimensions'
+        return error_message_string
+
 
 # -------------------------------------------------------------------------------
 #  'BaseDirectory' and 'Directory' traits:
