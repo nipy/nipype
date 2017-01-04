@@ -1,6 +1,12 @@
 # -*- coding: utf-8 -*-
 """ tests for the custom traits defined in ./traits_extension.py """
 
+import unittest
+
+from traits.trait_errors import TraitError
+
+from nipype.interfaces.traits_extension import NiftiFile
+
 class TestNiftiFile(unittest.TestCase):
     """ tests the custom Trait class NiftiFile """
 

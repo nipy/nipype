@@ -138,7 +138,7 @@ class NiftiFile (File):
         Set self.dimensionality.
         The contents of the file must be nifti-formatted, therefore the file must exist.
         """
-        super(NiftiFile, self).__init(*args, **kwargs)
+        super(NiftiFile, self).__init__(*args, **kwargs)
 
         try:
             self.dimensionality = int(kwargs['dimensionality']) if 'dimensionality' in kwargs.keys() else None
