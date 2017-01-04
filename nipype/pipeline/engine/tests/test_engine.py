@@ -22,7 +22,7 @@ from ....interfaces import base as nib
 class InputSpec(nib.TraitedSpec):
     input1 = nib.traits.Int(desc='a random int')
     input2 = nib.traits.Int(desc='a random int')
-
+    input_file = nib.traits.File(desc='Random File')
 
 class OutputSpec(nib.TraitedSpec):
     output1 = nib.traits.List(nib.traits.Int, desc='outputs')
@@ -622,6 +622,33 @@ def test_mapnode_json(tmpdir):
     try:
         w1.run()
     except:
+        error_raised = True
+    assert not error_raised
+
+
+def test_parameterize_dirs_false(tmpdir):
+    from ....interfaces.utility import IdentityInterface
+    from ....testing import example_data
+
+    input_file = example_data('fsl_motion_outliers_fd.txt')
+
+    n1 = pe.Node(EngineTestInterface(), name='Node1')
+    n1.iterables = ('input_file', (input_file, input_file))
+    n1.interface.inputs.input1 = 1
+
+    n2 = pe.Node(IdentityInterface(fields='in1'), name='Node2')
+
+    wf = pe.Workflow(name='Test')
+    wf.base_dir = str(tmpdir)
+    wf.config['execution']['parameterize_dirs'] = False
+    wf.connect([(n1, n2, [('output1', 'in1')])])
+
+    error_raised = False
+    try:
+        wf.run()
+    except TypeError as typerr:
+        from nipype.pipeline.engine.base import logger
+        logger.info('Exception: %s' % str(typerr))
         error_raised = True
     assert not error_raised
 
