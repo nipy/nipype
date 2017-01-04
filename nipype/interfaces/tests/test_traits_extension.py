@@ -18,8 +18,10 @@ class TestNiftiFile(unittest.TestCase):
         for nifti_file in nifti_files:
             self.assertEqual(nifti_file.dimensionality, None)
 
-    def test_NiftiFile_dimensionality_check(self):
+    def test_NiftiFile_dimensionality(self):
         """ Initialize a NiftiFile trait, specifying dimensionality """
+        for dim in range(1, 5):
+            self.assertEqual(NiftiFile(dimensionality=dim).dimensionality, dim)
 
     def test_NiftiFile_exists_false(self):
         """ Fail to initialize a NiftiFile trait if exists=False """
