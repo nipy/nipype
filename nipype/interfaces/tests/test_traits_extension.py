@@ -35,5 +35,14 @@ class TestNiftiFile(unittest.TestCase):
         for nifti_file in nifti_files:
             self.assertTrue(nifti_file.exists)
 
+    def test_validate_dimensionality(self):
+        """ Test that validation passes when dimensionalities match, fails when they don't """
+
+    def test_validate_existence(self):
+        """ Pass validation when the file exists, fail when it doesn't """
+
+    def test_validate_nifti(self):
+        """ Pass validation when the file is a nifti file, fail when it isn't """
+
     def test_integration(self):
         """ test behavior while actually in a workflow """
