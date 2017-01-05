@@ -43,7 +43,7 @@ class EngineTestInterface(nib.BaseInterface):
 
 
 def test_init():
-    with pytest.raises(Exception): pe.Workflow()
+    with pytest.raises(TypeError): pe.Workflow()
     pipe = pe.Workflow(name='pipe')
     assert type(pipe._graph) == nx.DiGraph
 
@@ -326,11 +326,16 @@ def test_doubleconnect():
     flow1 = pe.Workflow(name='test')
     flow1.connect(a, 'a', b, 'a')
     x = lambda: flow1.connect(a, 'b', b, 'a')
-    with pytest.raises(Exception): x()
+    with pytest.raises(Exception) as excinfo: 
+        x()
+    assert "Trying to connect" in str(excinfo.value)
+
     c = pe.Node(IdentityInterface(fields=['a', 'b']), name='c')
     flow1 = pe.Workflow(name='test2')
     x = lambda: flow1.connect([(a, c, [('b', 'b')]), (b, c, [('a', 'b')])])
-    with pytest.raises(Exception): x()
+    with pytest.raises(Exception) as excinfo: 
+        x()
+    assert "Trying to connect" in str(excinfo.value)
 
 
 '''
@@ -476,8 +481,9 @@ def test_mapnode_nested(tmpdir):
                  name='n1')
     n2.inputs.in1 = [[1, [2]], 3, [4, 5]]
 
-    with pytest.raises(Exception): n2.run()
-
+    with pytest.raises(Exception) as excinfo: 
+        n2.run()
+    assert "can only concatenate list" in str(excinfo.value)
 
 
 def test_node_hash(tmpdir):
