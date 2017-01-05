@@ -512,11 +512,16 @@ def test_node_hash(tmpdir):
     # create dummy distributed plugin class
     from nipype.pipeline.plugins.base import DistributedPluginBase
 
+    # create a custom exception 
+    class EngineTestException(Exception):
+        pass
+
     class RaiseError(DistributedPluginBase):
         def _submit_job(self, node, updatehash=False):
-            raise Exception('Submit called')
+            raise EngineTestException('Submit called')
 
-    with pytest.raises(Exception) as excinfo:
+    # check if a proper exception is raised
+    with pytest.raises(EngineTestException) as excinfo:
         w1.run(plugin=RaiseError())
     assert 'Submit called' == str(excinfo.value)        
 
