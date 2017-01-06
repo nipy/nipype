@@ -47,6 +47,13 @@ class Level1DesignInputSpec(BaseInterfaceInputSpec):
         mandatory=True,
         desc=("name of basis function and options e.g., "
               "{'dgamma': {'derivs': True}}"))
+    orthogonalization = traits.Dict(traits.Int, traits.Dict(traits.Int,
+        traits.Either(traits.Bool,traits.Int)),
+        mandatory=False,
+        desc=("which regressors to make orthogonal e.g., "
+              "{1: {0:0,1:0,2:0}, 2: {0:1,1:1,2:0}} to make the second "
+              "regressor in a 2-regressor model orthogonal to the first."),
+        default={})
     model_serial_correlations = traits.Bool(
         desc="Option to model serial correlations using an \
 autoregressive estimator (order 1). Setting this option is only \
@@ -123,8 +130,8 @@ class Level1Design(BaseInterface):
         f.close()
 
     def _create_ev_files(
-        self, cwd, runinfo, runidx, ev_parameters, contrasts,
-            do_tempfilter, basis_key):
+        self, cwd, runinfo, runidx, ev_parameters, orthogonalization,
+            contrasts, do_tempfilter, basis_key):
         """Creates EV files from condition and regressor information.
 
            Parameters:
@@ -138,6 +145,8 @@ class Level1Design(BaseInterface):
            ev_parameters : dict
                A dictionary containing the model parameters for the
                given design type.
+           orthogonalization : dict
+               A dictionary of dictionaries specifying orthogonal EVs.
            contrasts : list of lists
                Information on contrasts to be evaluated
         """
@@ -208,7 +217,11 @@ class Level1Design(BaseInterface):
         # add ev orthogonalization
         for i in range(1, num_evs[0] + 1):
             for j in range(0, num_evs[0] + 1):
-                ev_txt += ev_ortho.substitute(c0=i, c1=j)
+                try:
+                    orthogonal = int(orthogonalization[i][j])
+                except (KeyError, TypeError, ValueError, IndexError):
+                    orthogonal = 0
+                ev_txt += ev_ortho.substitute(c0=i, c1=j, orthogonal=orthogonal)
                 ev_txt += "\n"
         # add contrast info to fsf file
         if isdefined(contrasts):
@@ -321,6 +334,7 @@ class Level1Design(BaseInterface):
             if info['hpf'] == np.inf:
                 do_tempfilter = 0
             num_evs, cond_txt = self._create_ev_files(cwd, info, i, ev_parameters,
+                                                      self.inputs.orthogonalization,
                                                       self.inputs.contrasts,
                                                       do_tempfilter, basis_key)
             nim = load(func_files[i])
