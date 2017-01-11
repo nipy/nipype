@@ -127,9 +127,9 @@ Bradley L. and Petersen, Steven E.},
         dvars = compute_dvars(self.inputs.in_file, self.inputs.in_mask,
                               remove_zerovariance=self.inputs.remove_zerovariance)
 
-        self._results['avg_std'] = dvars[0].mean()
-        self._results['avg_nstd'] = dvars[1].mean()
-        self._results['avg_vxstd'] = dvars[2].mean()
+        self._results['avg_std'] = float(dvars[0].mean())
+        self._results['avg_nstd'] = float(dvars[1].mean())
+        self._results['avg_vxstd'] = float(dvars[2].mean())
 
         tr = None
         if isdefined(self.inputs.series_tr):
