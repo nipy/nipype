@@ -11,7 +11,7 @@ See the docstrings of the individual classes for examples.
 
 import os
 import warnings
-from ..base import (CommandLine, isdefined)
+from ..base import CommandLine
 from nipype.utils.filemanip import split_filename
 
 warn = warnings.warn
@@ -68,17 +68,3 @@ class NiftyFitCommand(CommandLine):
         if suffix is not None:
             final_bn = ''.join((final_bn, suffix))
         return os.path.abspath(os.path.join(out_dir, final_bn + final_ext))
-
-    def _gen_filename(self, name):
-        if name == 'out_file':
-            return self._gen_fname(self.inputs.in_file, suffix=self._suffix,
-                                   ext='.nii.gz')
-        return None
-
-    def _list_outputs(self):
-        outputs = self.output_spec().get()
-        if isdefined(self.inputs.out_file):
-            outputs['out_file'] = self.inputs.out_file
-        else:
-            outputs['out_file'] = self._gen_filename('out_file')
-        return outputs
