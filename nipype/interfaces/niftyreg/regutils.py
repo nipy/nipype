@@ -6,10 +6,12 @@ The interfaces were written to work with niftyreg version 1.4
 """
 
 import warnings
+import os
 
 from nipype.interfaces.niftyreg.base import (get_custom_path, NiftyRegCommand)
 from nipype.utils.filemanip import split_filename
-from nipype.interfaces.base import (TraitedSpec, File, traits, isdefined, CommandLineInputSpec)
+from nipype.interfaces.base import (TraitedSpec, File, traits, isdefined,
+                                    CommandLineInputSpec)
 
 warn = warnings.warn
 warnings.filterwarnings('always', category=UserWarning)
@@ -26,27 +28,28 @@ class RegResampleInputSpec(CommandLineInputSpec):
     trans_file = File(exists=True, desc='The input transformation file',
                       argstr='-trans %s')
 
-    type = traits.Enum('res', 'blank', default='res', argstr='-%s', position=-2,
-                       usedefault=True, desc='Type of output')
+    type = traits.Enum('res', 'blank', default='res', argstr='-%s',
+                       position=-2, usedefault=True, desc='Type of output')
     # Output file name
-    out_file = File(genfile=True, desc='The output filename of the transformed image',
-                    argstr='%s', position=-1)
+    out_file = File(genfile=True, argstr='%s', position=-1,
+                    desc='The output filename of the transformed image')
     # Interpolation type
-    inter_val = traits.Enum('NN', 'LIN', 'CUB', 'SINC', desc='Interpolation type',
-                            argstr='-inter %d')
+    inter_val = traits.Enum('NN', 'LIN', 'CUB', 'SINC',
+                            desc='Interpolation type', argstr='-inter %d')
     # Padding value
     pad_val = traits.Float(desc='Padding value', argstr='-pad %f')
     # Tensor flag
-    tensor_flag = traits.Bool(desc='Resample Tensor Map', 
+    tensor_flag = traits.Bool(desc='Resample Tensor Map',
                               argstr='-tensor ')
     # Verbosity off
-    verbosity_off_flag = traits.Bool(argstr='-voff', desc='Turn off verbose output')
+    verbosity_off_flag = traits.Bool(argstr='-voff',
+                                     desc='Turn off verbose output')
     # PSF flag
-    psf_flag = traits.Bool(argstr='-psf',
-                           desc='Perform the resampling in two steps to resample an image to a lower resolution')
+    psf_flag = traits.Bool(argstr='-psf', desc='Perform the resampling in two \
+steps to resample an image to a lower resolution')
 
-    psf_alg = traits.Enum(0,1, argstr='-psf_alg %i',
-                         desc='Minimise the matrix metric (0) or the determinant (1) when estimating the PSF [0]')
+    psf_alg = traits.Enum(0, 1, argstr='-psf_alg %i', desc='Minimise the matrix \
+metric (0) or the determinant (1) when estimating the PSF [0]')
 
     # Set the number of omp thread to use
     omp_core_val = traits.Int(desc='Number of openmp thread to use',
@@ -120,7 +123,7 @@ class RegToolsInputSpec(CommandLineInputSpec):
     mask_file = File(exists=True, desc='Values outside the mask are set to NaN',
                      argstr='-nan %s')
     # Threshold the input image
-    thr_val = traits.Float(desc='Binarise the input image with the given threshold', 
+    thr_val = traits.Float(desc='Binarise the input image with the given threshold',
                            argstr='-thr %f')
     # Binarise the input image
     bin_flag = traits.Bool(argstr='-bin', desc='Binarise the input image')
@@ -128,16 +131,16 @@ class RegToolsInputSpec(CommandLineInputSpec):
     rms_val = File(exists=True, desc='Compute the mean RMS between the images',
                    argstr='-rms %s')
     # Perform division by image or value
-    div_val = traits.Either(traits.Float, File(exists=True), 
+    div_val = traits.Either(traits.Float, File(exists=True),
                             desc='Divide the input by image or value', argstr='-div %s')
     # Perform multiplication by image or value
-    mul_val = traits.Either(traits.Float, File(exists=True), 
+    mul_val = traits.Either(traits.Float, File(exists=True),
                             desc='Multiply the input by image or value', argstr='-mul %s')
     # Perform addition by image or value
-    add_val = traits.Either(traits.Float, File(exists=True), 
+    add_val = traits.Either(traits.Float, File(exists=True),
                             desc='Add to the input image or value', argstr='-add %s')
     # Perform subtraction by image or value
-    sub_val = traits.Either(traits.Float, File(exists=True), 
+    sub_val = traits.Either(traits.Float, File(exists=True),
                             desc='Add to the input image or value', argstr='-sub %s')
     # Downsample the image by a factor of 2.
     down_flag = traits.Bool(desc='Downsample the image by a factor of 2', argstr='-down')
@@ -218,7 +221,7 @@ class RegAverage(NiftyRegCommand):
     input_spec = RegAverageInputSpec
     output_spec = RegAverageOutputSpec
     _suffix = 'avg_out'
-    
+
     def _gen_filename(self, name):
         if name == 'out_file':
             if isdefined(self.inputs.avg_lts_files):
@@ -230,14 +233,23 @@ class RegAverage(NiftyRegCommand):
             return self._gen_fname(self._suffix, ext='.nii.gz')
         return None
 
+    @property
+    def cmdline(self):
+        """ Rewrite the cmdline to write options in text_file."""
+        argv = super(RegAverage, self).cmdline
+        reg_average_cmd = os.path.join(os.getcwd(), 'reg_average_cmd')
+        with open(reg_average_cmd, 'w') as f:
+            f.write(argv)
+        return '%s --cmd_file %s' % (self.cmd, reg_average_cmd)
+
 
 class RegTransformInputSpec(CommandLineInputSpec):
 
-    ref1_file = File(exists=True, 
+    ref1_file = File(exists=True,
                      desc='The input reference/target image',
-                     argstr='-ref %s', 
+                     argstr='-ref %s',
                      position=0)
-    ref2_file = File(exists=True, 
+    ref2_file = File(exists=True,
                      desc='The input second reference/target image',
                      argstr='-ref2 %s',
                      position=1,
@@ -271,7 +283,7 @@ class RegTransformInputSpec(CommandLineInputSpec):
                                  'aff_2_rig_input', 'flirt_2_nr_input'],
                             requires=['upd_s_form_input2'])
     upd_s_form_input2 = File(exists=True, argstr='%s', position=-2,
-                             desc='Update s-form using the affine transformation', 
+                             desc='Update s-form using the affine transformation',
                              requires=['upd_s_form_input'])
 
     inv_aff_input = File(exists=True, argstr='-invAff %s', position=-2,
@@ -280,14 +292,14 @@ class RegTransformInputSpec(CommandLineInputSpec):
                               'inv_nrr_input', 'half_input', 'make_aff_input', 'aff_2_rig_input', 'flirt_2_nr_input'])
 
     inv_nrr_input = traits.Tuple(File(exists=True), File(exists=True),
-                                 desc='Invert a non-linear transformation', 
+                                 desc='Invert a non-linear transformation',
                                  argstr='-invNrr %s %s', position=-2,
                                  xor=['def_input', 'disp_input', 'flow_input', 'comp_input',
                                       'upd_s_form_input', 'inv_aff_input', 'half_input', 'make_aff_input',
                                       'aff_2_rig_input', 'flirt_2_nr_input'])
 
     half_input = File(exists=True, argstr='-half %s', position=-2,
-                      desc='Half way to the input transformation', 
+                      desc='Half way to the input transformation',
                       xor=['def_input', 'disp_input', 'flow_input', 'comp_input', 'upd_s_form_input',
                            'inv_aff_input', 'inv_nrr_input', 'make_aff_input', 'aff_2_rig_input', 'flirt_2_nr_input'])
 
@@ -367,7 +379,7 @@ class RegTransform(NiftyRegCommand):
             else:
                 return self._gen_fname(input_to_use, suffix=self._suffix, ext='.nii.gz')
         return None
-                
+
     def _list_outputs(self):
         outputs = self.output_spec().get()
         if isdefined(self.inputs.out_file):
