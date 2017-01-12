@@ -420,7 +420,7 @@ class CorticalThicknessInputSpec(ANTSCommandInputSpec):
     extraction_registration_mask = File(exists=True, argstr='-f %s',
                                         desc=('Mask (defined in the template space) used during'
                                               ' registration for brain extraction.'))
-    keep_temporary_files = traits.Int(argstr='-k %d',
+    keep_temporary_files = traits.Bool(argstr='-k %d',
                                       desc='Keep brain extraction/segmentation warps, etc (default = 0).')
     max_iterations = traits.Int(argstr='-i %d', desc=('ANTS registration max iterations'
                                                       '(default = 100x100x70x20)'))
@@ -641,7 +641,7 @@ class BrainExtractionInputSpec(ANTSCommandInputSpec):
     use_random_seeding = traits.Enum(0, 1, argstr='-u %d',
                                      desc=('Use random number generated from system clock in Atropos'
                                            '(default = 1)'))
-    keep_temporary_files = traits.Int(argstr='-k %d',
+    keep_temporary_files = traits.Bool(argstr='-k %d',
                                       desc='Keep brain extraction/segmentation warps, etc (default = 0).')
     use_floatingpoint_precision = traits.Enum(0, 1, argstr='-q %d',
                                               desc=('Use floating point precision '
@@ -701,7 +701,7 @@ class BrainExtraction(ANTSCommand):
                                                        self.inputs.out_prefix +
                                                        'BrainExtractionBrain.' +
                                                        self.inputs.image_suffix)
-        if isdefined(self.inputs.keep_temporary_files) and self.inputs.keep_temporary_files != 0:
+        if isdefined(self.inputs.keep_temporary_files) and self.inputs.keep_temporary_files:
             outputs['BrainExtractionCSF'] = os.path.join(
                 os.getcwd(),
                 self.inputs.out_prefix + 'BrainExtractionCSF.' + self.inputs.image_suffix
