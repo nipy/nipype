@@ -52,7 +52,7 @@ class NiftyRegCommand(CommandLine):
     Base support for NiftyReg commands
     """
     _suffix = '_nr'
-    _min_version = '1.5.0'
+    _min_version = '1.5.10'
 
     def __init__(self, required_version=None, **inputs):
         super(NiftyRegCommand, self).__init__(**inputs)
