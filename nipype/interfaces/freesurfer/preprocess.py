@@ -627,7 +627,7 @@ class ReconAllInputSpec(CommandLineInputSpec):
     flags = traits.Str(argstr='%s', desc='additional parameters')
 
 
-class ReconAllIOutputSpec(FreeSurferSource.output_spec):
+class ReconAllOutputSpec(FreeSurferSource.output_spec):
     subjects_dir = Directory(exists=True, desc='Freesurfer subjects directory.')
     subject_id = traits.Str(desc='Subject name for whom to retrieve data')
 
@@ -653,7 +653,7 @@ class ReconAll(CommandLine):
     _cmd = 'recon-all'
     _additional_metadata = ['loc', 'altkey']
     input_spec = ReconAllInputSpec
-    output_spec = ReconAllIOutputSpec
+    output_spec = ReconAllOutputSpec
     _can_resume = True
 
     _steps = [
