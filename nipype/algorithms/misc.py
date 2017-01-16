@@ -245,7 +245,7 @@ class CreateNifti(BaseInterface):
         else:
             affine = None
 
-        with open(self.inputs.header_file, 'rb') as data_file:
+        with open(self.inputs.data_file, 'rb') as data_file:
             data = hdr.data_from_fileobj(data_file)
 
         img = nb.Nifti1Image(data, affine, hdr)
