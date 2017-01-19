@@ -13,8 +13,8 @@ from ....pipeline.engine.base import logger
 def create_skullstripped_recon_flow(name="skullstripped_recon_all"):
     """Performs recon-all on voulmes that are already skull stripped.
     FreeSurfer failes to perform skullstrippig on some volumes (especially
-    MP2RAGE). This can be avoided by doing skullstripping before runnig recon-all
-    (using for example SPECTRE algorithm)
+    MP2RAGE). This can be avoided by doing skullstripping before running
+    recon-all (using for example SPECTRE algorithm).
 
     Example
     -------
@@ -107,7 +107,7 @@ def create_reconall_workflow(name="ReconAll", plugin_args=None):
            inputspec.cw256 : Conform inputs to 256 FOV (optional)
            inputspec.num_threads: Number of threads on nodes that utilize OpenMP (default=1)
            plugin_args : Dictionary of plugin args to set to nodes that utilize OpenMP (optional)
-    Outpus::
+    Outputs::
            postdatasink_outputspec.subject_id : name of the datasinked output folder in the subjects directory
 
     Note:
