@@ -77,7 +77,9 @@ Information specific to Nipype is located here::
 Support and Communication
 -------------------------
 
-If you have a problem or would like to ask a question about how to do something in Nipype please open an issue to `NeuroStars.org <http://neurostars.org>`_ with a *nipype* tag. `NeuroStars.org <http://neurostars.org>`_  is a platform similar to StackOverflow but dedicated to neuroinformatics. 
+If you have a problem or would like to ask a question about how to do something in Nipype please open an issue to
+`NeuroStars.org <http://neurostars.org>`_ with a *nipype* tag. `NeuroStars.org <http://neurostars.org>`_  is a 
+platform similar to StackOverflow but dedicated to neuroinformatics. 
 
 To participate in the Nipype development related discussions please use the following mailing list::
 
