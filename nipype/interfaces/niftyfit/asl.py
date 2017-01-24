@@ -4,28 +4,23 @@
 """
 
 from nipype.interfaces.niftyfit.base import NiftyFitCommand, get_custom_path
-from nipype.interfaces.base import (TraitedSpec, File, traits,
+from nipype.interfaces.base import (TraitedSpec, File, traits, isdefined,
                                     CommandLineInputSpec)
 
 
 class FitAslInputSpec(CommandLineInputSpec):
-    source_file = File(
-        exists=True,  argstr='-source %s', mandatory=True,
+    source_file = File(exists=True,  argstr='-source %s', mandatory=True,
         desc='Filename of the 4D ASL (control/label) source image (mandatory)')
     pasl = traits.Bool(desc='Fit PASL ASL data [default]', argstr='-pasl')
     pcasl = traits.Bool(desc='Fit PCASL ASL data', argstr='-pcasl')
 
     # *** Output options:
-    cbf_file = File(
-        genfile=True, exists=True, argstr='-cbf %s',
-        desc='Filename of the Cerebral Blood Flow map (in ml/100g/min).',
-        name_source=['source_file'], name_template='%s_cbf')
-    error_file = File(genfile=True, exists=True, argstr='-error %s',
-                      desc='Filename of the CBF error map.',
-                      name_source=['source_file'], name_template='%s_error')
-    syn_file = File(genfile=True, exists=True, argstr='-syn %s',
-                    desc='Filename of the synthetic ASL data.',
-                    name_source=['source_file'], name_template='%s_syn')
+    cbf_file = File(genfile=True, argstr='-cbf %s',
+        desc='Filename of the Cerebral Blood Flow map (in ml/100g/min).')
+    error_file = File(genfile=True, argstr='-error %s',
+                      desc='Filename of the CBF error map.')
+    syn_file = File(genfile=True, argstr='-syn %s',
+                    desc='Filename of the synthetic ASL data.')
 
     # *** Input options (see also fit_qt1 for generic T1 fitting):
     t1map = File(exists=True, argstr='-t1map %s',
@@ -119,3 +114,32 @@ class FitAsl(NiftyFitCommand):
     output_spec = FitAslOutputSpec
 
     _suffix = '_fit_asl'
+
+    def _gen_filename(self, name):
+        if name == 'error_file':
+            return self._gen_fname(self.inputs.source_file, suffix='_error', ext='.nii.gz')
+        if name == 'syn_file':
+            return self._gen_fname(self.inputs.source_file, suffix='_syn', ext='.nii.gz')
+        if name == 'cbf_file':
+            return self._gen_fname(self.inputs.source_file, suffix='_cbf', ext='.nii.gz')
+        return None
+
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+
+        if isdefined(self.inputs.error_file):
+            outputs['error_file'] = self.inputs.error_file
+        else:
+            outputs['error_file'] = self._gen_filename('error_file')
+
+        if isdefined(self.inputs.syn_file):
+            outputs['syn_file'] = self.inputs.syn_file
+        else:
+            outputs['syn_file'] = self._gen_filename('syn_file')
+
+        if isdefined(self.inputs.cbf_file):
+            outputs['cbf_file'] = self.inputs.cbf_file
+        else:
+            outputs['cbf_file'] = self._gen_filename('cbf_file')
+
+        return outputs
