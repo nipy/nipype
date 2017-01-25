@@ -323,17 +323,20 @@ class FAST(FSLCommand):
             nclasses = self.inputs.number_classes
         # when using multichannel, results basename is based on last
         # input filename
+        _gen_fname_opts = {}
         if isdefined(self.inputs.out_basename):
-            basefile = self.inputs.out_basename
+            _gen_fname_opts['basename'] = self.inputs.out_basename
+            _gen_fname_opts['cwd'] = os.getcwd()
         else:
-            basefile = self.inputs.in_files[-1]
+            _gen_fname_opts['basename'] = self.inputs.in_files[-1]
+            _gen_fname_opts['cwd'], _, _ = split_filename(_gen_fname_opts['basename'])
 
-        outputs['tissue_class_map'] = self._gen_fname(basefile, suffix='_seg')
+        outputs['tissue_class_map'] = self._gen_fname(suffix='_seg', **_gen_fname_opts)
         if self.inputs.segments:
             outputs['tissue_class_files'] = []
             for i in range(nclasses):
                 outputs['tissue_class_files'].append(
-                    self._gen_fname(basefile, suffix='_seg_%d' % i))
+                    self._gen_fname(suffix='_seg_%d' % i, **_gen_fname_opts))
         if isdefined(self.inputs.output_biascorrected):
             outputs['restored_image'] = []
             if len(self.inputs.in_files) > 1:
@@ -342,22 +345,21 @@ class FAST(FSLCommand):
                 for val, f in enumerate(self.inputs.in_files):
                     # image numbering is 1-based
                     outputs['restored_image'].append(
-                        self._gen_fname(basefile,
-                                        suffix='_restore_%d' % (val + 1)))
+                        self._gen_fname(suffix='_restore_%d' % (val + 1), **_gen_fname_opts))
             else:
                 # single image segmentation has unnumbered output image
                 outputs['restored_image'].append(
-                    self._gen_fname(basefile, suffix='_restore'))
+                    self._gen_fname(suffix='_restore', **_gen_fname_opts))
 
-        outputs['mixeltype'] = self._gen_fname(basefile, suffix='_mixeltype')
+        outputs['mixeltype'] = self._gen_fname(suffix='_mixeltype', **_gen_fname_opts)
         if not self.inputs.no_pve:
             outputs['partial_volume_map'] = self._gen_fname(
-                basefile, suffix='_pveseg')
+                suffix='_pveseg', **_gen_fname_opts)
             outputs['partial_volume_files'] = []
             for i in range(nclasses):
                 outputs[
                     'partial_volume_files'].append(
-                        self._gen_fname(basefile, suffix='_pve_%d' % i))
+                        self._gen_fname(suffix='_pve_%d' % i, **_gen_fname_opts))
         if self.inputs.output_biasfield:
             outputs['bias_field'] = []
             if len(self.inputs.in_files) > 1:
@@ -366,18 +368,17 @@ class FAST(FSLCommand):
                 for val, f in enumerate(self.inputs.in_files):
                     # image numbering is 1-based
                     outputs['bias_field'].append(
-                        self._gen_fname(basefile,
-                                        suffix='_bias_%d' % (val + 1)))
+                        self._gen_fname(suffix='_bias_%d' % (val + 1), **_gen_fname_opts))
             else:
                 # single image segmentation has unnumbered output image
                 outputs['bias_field'].append(
-                    self._gen_fname(basefile, suffix='_bias'))
+                    self._gen_fname(suffix='_bias', **_gen_fname_opts))
 
         if self.inputs.probability_maps:
             outputs['probability_maps'] = []
             for i in range(nclasses):
                 outputs['probability_maps'].append(
-                    self._gen_fname(basefile, suffix='_prob_%d' % i))
+                    self._gen_fname(suffix='_prob_%d' % i, **_gen_fname_opts))
         return outputs
 
 
@@ -538,7 +539,7 @@ class FLIRT(FSLCommand):
     >>> flt.inputs.in_file = 'structural.nii'
     >>> flt.inputs.reference = 'mni.nii'
     >>> flt.inputs.output_type = "NIFTI_GZ"
-    >>> flt.cmdline # doctest: +ELLIPSIS +IGNORE_UNICODE
+    >>> flt.cmdline # doctest: +ELLIPSIS +ALLOW_UNICODE
     'flirt -in structural.nii -ref mni.nii -out structural_flirt.nii.gz -omat structural_flirt.mat -bins 640 -searchcost mutualinfo'
     >>> res = flt.run() #doctest: +SKIP
 
@@ -563,19 +564,18 @@ class FLIRT(FSLCommand):
         skip.append('save_log')
         return super(FLIRT, self)._parse_inputs(skip=skip)
 
-
-class ApplyXfmInputSpec(FLIRTInputSpec):
+class ApplyXFMInputSpec(FLIRTInputSpec):
     apply_xfm = traits.Bool(
         True, argstr='-applyxfm', requires=['in_matrix_file'],
         desc='apply transformation supplied by in_matrix_file',
         usedefault=True)
 
 
-class ApplyXfm(FLIRT):
+class ApplyXFM(FLIRT):
     """Currently just a light wrapper around FLIRT,
     with no modifications
 
-    ApplyXfm is used to apply an existing tranform to an image
+    ApplyXFM is used to apply an existing tranform to an image
 
 
     Examples
@@ -583,7 +583,7 @@ class ApplyXfm(FLIRT):
 
     >>> import nipype.interfaces.fsl as fsl
     >>> from nipype.testing import example_data
-    >>> applyxfm = fsl.ApplyXfm()
+    >>> applyxfm = fsl.preprocess.ApplyXFM()
     >>> applyxfm.inputs.in_file = example_data('structural.nii')
     >>> applyxfm.inputs.in_matrix_file = example_data('trans.mat')
     >>> applyxfm.inputs.out_file = 'newfile.nii'
@@ -592,8 +592,18 @@ class ApplyXfm(FLIRT):
     >>> result = applyxfm.run() # doctest: +SKIP
 
     """
-    input_spec = ApplyXfmInputSpec
+    input_spec = ApplyXFMInputSpec
 
+class ApplyXfm(ApplyXFM):
+    """
+    .. deprecated:: 0.12.1
+       Use :py:class:`nipype.interfaces.fsl.ApplyXFM` instead
+    """
+    def __init__(self, **inputs):
+        super(ApplyXfm, self).__init__(**inputs)
+        warn(('This interface has been renamed since 0.12.1, please use '
+              'nipype.interfaces.fsl.ApplyXFM'),
+             UserWarning)
 
 class MCFLIRTInputSpec(FSLCommandInputSpec):
     in_file = File(exists=True, position=0, argstr="-in %s", mandatory=True,
@@ -1349,7 +1359,7 @@ class FUGUE(FSLCommand):
     >>> fugue.inputs.shift_in_file = 'vsm.nii'  # Previously computed with fugue as well
     >>> fugue.inputs.unwarp_direction = 'y'
     >>> fugue.inputs.output_type = "NIFTI_GZ"
-    >>> fugue.cmdline # doctest: +ELLIPSIS +IGNORE_UNICODE
+    >>> fugue.cmdline # doctest: +ELLIPSIS +ALLOW_UNICODE
     'fugue --in=epi.nii --mask=epi_mask.nii --loadshift=vsm.nii --unwarpdir=y --unwarp=epi_unwarped.nii.gz'
     >>> fugue.run() #doctest: +SKIP
 
@@ -1364,7 +1374,7 @@ class FUGUE(FSLCommand):
     >>> fugue.inputs.shift_in_file = 'vsm.nii'  # Previously computed with fugue as well
     >>> fugue.inputs.unwarp_direction = 'y'
     >>> fugue.inputs.output_type = "NIFTI_GZ"
-    >>> fugue.cmdline # doctest: +ELLIPSIS +IGNORE_UNICODE
+    >>> fugue.cmdline # doctest: +ELLIPSIS +ALLOW_UNICODE
     'fugue --in=epi.nii --mask=epi_mask.nii --loadshift=vsm.nii --unwarpdir=y --warp=epi_warped.nii.gz'
     >>> fugue.run() #doctest: +SKIP
 
@@ -1379,7 +1389,7 @@ class FUGUE(FSLCommand):
     >>> fugue.inputs.unwarp_direction = 'y'
     >>> fugue.inputs.save_shift = True
     >>> fugue.inputs.output_type = "NIFTI_GZ"
-    >>> fugue.cmdline # doctest: +ELLIPSIS +IGNORE_UNICODE
+    >>> fugue.cmdline # doctest: +ELLIPSIS +ALLOW_UNICODE
     'fugue --dwelltoasym=0.9390243902 --mask=epi_mask.nii --phasemap=epi_phasediff.nii --saveshift=epi_phasediff_vsm.nii.gz --unwarpdir=y'
     >>> fugue.run() #doctest: +SKIP
 

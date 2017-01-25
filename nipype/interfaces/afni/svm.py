@@ -72,7 +72,7 @@ class SVMTrain(AFNICommand):
     """Temporally predictive modeling with the support vector machine
     SVM Train Only
     For complete details, see the `3dsvm Documentation.
-    <http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dsvm.html>`_
+    <https://afni.nimh.nih.gov/pub/dist/doc/program_help/3dsvm.html>`_
 
     Examples
     ========
@@ -128,7 +128,7 @@ class SVMTest(AFNICommand):
     """Temporally predictive modeling with the support vector machine
     SVM Test Only
     For complete details, see the `3dsvm Documentation.
-    <http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dsvm.html>`_
+    <https://afni.nimh.nih.gov/pub/dist/doc/program_help/3dsvm.html>`_
 
     Examples
     ========

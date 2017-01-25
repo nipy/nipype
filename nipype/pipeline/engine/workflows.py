@@ -200,11 +200,16 @@ Trying to connect %s:%s to %s:%s but input '%s' of node '%s' is already
 connected.
 """ % (srcnode, source, destnode, dest, dest, destnode))
                 if not (hasattr(destnode, '_interface') and
-                        '.io' in str(destnode._interface.__class__)):
+                            ('.io' in str(destnode._interface.__class__) or
+                                any(['.io' in str(val) for val in
+                                     destnode._interface.__class__.__bases__]))
+                        ):
                     if not destnode._check_inputs(dest):
                         not_found.append(['in', destnode.name, dest])
                 if not (hasattr(srcnode, '_interface') and
-                        '.io' in str(srcnode._interface.__class__)):
+                            ('.io' in str(srcnode._interface.__class__)
+                             or any(['.io' in str(val) for val in
+                                     srcnode._interface.__class__.__bases__]))):
                     if isinstance(source, tuple):
                         # handles the case that source is specified
                         # with a function
@@ -902,8 +907,13 @@ connected.
             prefix = '  '
         if hierarchy is None:
             hierarchy = []
-        colorset = ['#FFFFC8', '#0000FF', '#B4B4FF', '#E6E6FF', '#FF0000',
-                    '#FFB4B4', '#FFE6E6', '#00A300', '#B4FFB4', '#E6FFE6']
+        colorset = ['#FFFFC8',                       # Y
+                    '#0000FF', '#B4B4FF', '#E6E6FF', # B
+                    '#FF0000', '#FFB4B4', '#FFE6E6', # R
+                    '#00A300', '#B4FFB4', '#E6FFE6', # G
+                    '#0000FF', '#B4B4FF'] # loop B
+        if level > len(colorset) - 2:
+            level = 3 # Loop back to blue
 
         dotlist = ['%slabel="%s";' % (prefix, self.name)]
         for node in nx.topological_sort(self._graph):
@@ -942,8 +952,6 @@ connected.
                                              colored=colored,
                                              simple_form=simple_form, level=level + 3))
                 dotlist.append('}')
-                if level == 6:
-                    level = 2
             else:
                 for subnode in self._graph.successors_iter(node):
                     if node._hierarchy != subnode._hierarchy:

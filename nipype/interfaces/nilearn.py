@@ -13,6 +13,7 @@ Algorithms to compute statistics on :abbr:`fMRI (functional MRI)`
 '''
 from __future__ import (print_function, division, unicode_literals,
                         absolute_import)
+import os
 
 import numpy as np
 import nibabel as nb
@@ -37,20 +38,19 @@ class SignalExtractionInputSpec(BaseInterfaceInputSpec):
                                'corresponds to the class labels in label_file '
                                'in ascending order')
     out_file = File('signals.tsv', usedefault=True, exists=False,
-                    mandatory=False, desc='The name of the file to output to. '
+                    desc='The name of the file to output to. '
                     'signals.tsv by default')
-    incl_shared_variance = traits.Bool(True, usedefault=True, mandatory=False, desc='By default '
+    incl_shared_variance = traits.Bool(True, usedefault=True, desc='By default '
                                        '(True), returns simple time series calculated from each '
                                        'region independently (e.g., for noise regression). If '
                                        'False, returns unique signals for each region, discarding '
                                        'shared variance (e.g., for connectivity. Only has effect '
                                        'with 4D probability maps.')
-    include_global = traits.Bool(False, usedefault=True, mandatory=False,
+    include_global = traits.Bool(False, usedefault=True,
                                  desc='If True, include an extra column '
-                                 'labeled "global", with values calculated from the entire brain '
+                                 'labeled "GlobalSignal", with values calculated from the entire brain '
                                  '(instead of just regions).')
-    detrend = traits.Bool(False, usedefault=True, mandatory=False,
-                          desc='If True, perform detrending using nilearn.')
+    detrend = traits.Bool(False, usedefault=True, desc='If True, perform detrending using nilearn.')
 
 class SignalExtractionOutputSpec(TraitedSpec):
     out_file = File(exists=True, desc='tsv file containing the computed '
@@ -66,13 +66,14 @@ class SignalExtraction(BaseInterface):
     >>> seinterface.inputs.in_file = 'functional.nii'
     >>> seinterface.inputs.label_files = 'segmentation0.nii.gz'
     >>> seinterface.inputs.out_file = 'means.tsv'
-    >>> segments = ['CSF', 'gray', 'white']
+    >>> segments = ['CSF', 'GrayMatter', 'WhiteMatter']
     >>> seinterface.inputs.class_labels = segments
     >>> seinterface.inputs.detrend = True
     >>> seinterface.inputs.include_global = True
     '''
     input_spec = SignalExtractionInputSpec
     output_spec = SignalExtractionOutputSpec
+    _results = {}
 
     def _run_interface(self, runtime):
         maskers = self._process_inputs()
@@ -85,7 +86,8 @@ class SignalExtraction(BaseInterface):
         output = np.vstack((self.inputs.class_labels, region_signals.astype(str)))
 
         # save output
-        np.savetxt(self.inputs.out_file, output, fmt=b'%s', delimiter='\t')
+        self._results['out_file'] = os.path.abspath(self.inputs.out_file)
+        np.savetxt(self._results['out_file'], output, fmt=b'%s', delimiter='\t')
         return runtime
 
     def _process_inputs(self):
@@ -110,6 +112,10 @@ class SignalExtraction(BaseInterface):
                 maskers.append(nl.NiftiMapsMasker(label_data))
 
         # check label list size
+        if not np.isclose(int(n_labels), n_labels):
+            raise ValueError('The label files {} contain invalid value {}. Check input.'
+                             .format(self.inputs.label_files, n_labels))
+
         if len(self.inputs.class_labels) != n_labels:
             raise ValueError('The length of class_labels {} does not '
                              'match the number of regions {} found in '
@@ -123,7 +129,7 @@ class SignalExtraction(BaseInterface):
             global_label_data = self._4d(global_label_data, label_data.affine)
             global_masker = nl.NiftiLabelsMasker(global_label_data, detrend=self.inputs.detrend)
             maskers.insert(0, global_masker)
-            self.inputs.class_labels.insert(0, 'global')
+            self.inputs.class_labels.insert(0, 'GlobalSignal')
 
         for masker in maskers:
             masker.set_params(detrend=self.inputs.detrend)
@@ -136,6 +142,4 @@ class SignalExtraction(BaseInterface):
         return nb.Nifti1Image(array[:, :, :, np.newaxis], affine)
 
     def _list_outputs(self):
-        outputs = self._outputs().get()
-        outputs['out_file'] = self.inputs.out_file
-        return outputs
+        return self._results

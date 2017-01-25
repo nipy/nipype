@@ -52,7 +52,7 @@ class QJobInfo(object):
 
     def __repr__(self):
         return '{:<8d}{:12}{:<3d}{:20}{:8}{}'.format(
-            self._job_num, self._queue_state, self._job_slots,
+            self._job_num, self._job_queue_state, self._job_slots,
             time.strftime("%Y-%m-%dT%H:%M:%S", time.gmtime(self._job_time)),
             self._job_queue_name, self._qsub_command_line)
 
@@ -312,9 +312,9 @@ def qsub_sanitize_job_name(testjobname):
 
     Numbers and punctuation are  not allowed.
 
-    >>> qsub_sanitize_job_name('01') # doctest: +IGNORE_UNICODE
+    >>> qsub_sanitize_job_name('01') # doctest: +ALLOW_UNICODE
     'J01'
-    >>> qsub_sanitize_job_name('a01') # doctest: +IGNORE_UNICODE
+    >>> qsub_sanitize_job_name('a01') # doctest: +ALLOW_UNICODE
     'a01'
     """
     if testjobname[0].isalpha():
