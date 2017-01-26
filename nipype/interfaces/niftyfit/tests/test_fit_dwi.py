@@ -22,15 +22,15 @@ def test_fit_dwi():
     test_node.inputs.bval_file = bval_file
     test_node.inputs.bvec_file = bvec_file
 
-    cmd_tmp = '{cmd} -bval {bval} -bvec {bvec} -famap {famap} -mcmap \
-{mcmap} -mdmap {mdmap} -res {resmap} -rgbmap {rgbmap} \
--source {in_file} -syn {syn} -tenmap2 {tenmap} -v1map \
-{v1map}'
+    cmd_tmp = '{cmd} -bval {bval} -bvec {bvec} -error {error} -famap {famap} \
+-mcmap {mcmap} -mdmap {mdmap} -res {resmap} -rgbmap {rgbmap} \
+-source {in_file} -syn {syn} -tenmap2 {tenmap} -v1map {v1map}'
     expected_cmd = cmd_tmp.format(
         cmd=get_custom_path('fit_dwi'),
         in_file=in_file,
         bval=bval_file,
         bvec=bvec_file,
+        error=os.path.join(os.getcwd(), 'diffusion_error.nii.gz'),
         famap=os.path.join(os.getcwd(), 'diffusion_famap.nii.gz'),
         mcmap=os.path.join(os.getcwd(), 'diffusion_mcmap.nii.gz'),
         mdmap=os.path.join(os.getcwd(), 'diffusion_mdmap.nii.gz'),

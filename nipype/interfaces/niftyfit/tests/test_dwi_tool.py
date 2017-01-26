@@ -18,13 +18,14 @@ def test_dwi_tool():
     in_file = example_data('diffusion.nii')
     test_node.inputs.source_file = in_file
 
-    cmd_tmp = '{cmd} -famap {famap} -logdti2 {logdti2} -mdmap {mdmap} \
--rgbmap {rgbmap} -source {in_file}  -v1map {v1map}'
+    cmd_tmp = '{cmd} -famap {famap} -logdti2 {logdti2} -mcmap {mcmap} \
+-mdmap {mdmap} -rgbmap {rgbmap} -source {in_file}  -v1map {v1map}'
     expected_cmd = cmd_tmp.format(
         cmd=get_custom_path('dwi_tool'),
         in_file=in_file,
         famap=os.path.join(os.getcwd(), 'diffusion_famap.nii.gz'),
         logdti2=os.path.join(os.getcwd(), 'diffusion_logdti2.nii.gz'),
+        mcmap=os.path.join(os.getcwd(), 'diffusion_mcmap.nii.gz'),
         mdmap=os.path.join(os.getcwd(), 'diffusion_mdmap.nii.gz'),
         rgbmap=os.path.join(os.getcwd(), 'diffusion_rgbmap.nii.gz'),
         v1map=os.path.join(os.getcwd(), 'diffusion_v1map.nii.gz'))
