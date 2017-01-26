@@ -3,22 +3,11 @@
 """The dwi module of niftyfit, which wraps the fitting methods in NiftyFit.
 """
 
-import warnings
-
 from nipype.interfaces.niftyfit.base import NiftyFitCommand, get_custom_path
-
 from nipype.interfaces.base import (TraitedSpec, File, traits, isdefined,
                                     CommandLineInputSpec)
 
-warn = warnings.warn
-warnings.filterwarnings('always', category=UserWarning)
 
-
-# -----------------------------------------------------------
-# reg_resample wrapper interface
-# -----------------------------------------------------------
-
-# Input spec
 class FitDwiInputSpec(CommandLineInputSpec):
     # Input options
     source_file = File(exists=True, argstr='-source %s', mandatory=True,
@@ -41,20 +30,24 @@ the image (resulting tensors will be in mm coordinates, default: 0).',
 [default: 20]')
 
     # Output options, with templated output names based on the source image
-    mcmap_file = File(desc='Filename of multi-compartment model parameter map \
-(-ivim,-ball,-nod)', argstr='-mcmap %s', requires=['nodv_flag'])
-    error_file = File(desc='Filename of parameter error maps',
+    mcmap_file = File(genfile=True, desc='Filename of multi-compartment model \
+parameter map (-ivim,-ball,-nod)', argstr='-mcmap %s', requires=['nodv_flag'])
+    error_file = File(genfile=True, desc='Filename of parameter error maps',
                       argstr='-error %s')
-    res_file = File(desc='Filename of model residual map', argstr='-res %s')
-    syn_file = File(desc='Filename of synthetic image', argstr='-syn %s')
-    mdmap_file = File(desc='Filename of MD map/ADC', argstr='-mdmap %s')
-    famap_file = File(desc='Filename of FA map', argstr='-famap %s')
-    v1map_file = File(desc='Filename of PDD map [x,y,z]', argstr='-v1map %s')
-    rgbmap_file = File(desc='Filename of colour FA map', argstr='-rgbmap %s',
-                       requires=['dti_flag'])
-    tenmap_file = File(
-        desc='Filename of tensor map in lower triangular format',
-        argstr='-tenmap2 %s', requires=['dti_flag'])
+    res_file = File(genfile=True, desc='Filename of model residual map',
+                    argstr='-res %s')
+    syn_file = File(genfile=True, desc='Filename of synthetic image',
+                    argstr='-syn %s')
+    mdmap_file = File(genfile=True, desc='Filename of MD map/ADC',
+                      argstr='-mdmap %s')
+    famap_file = File(genfile=True, desc='Filename of FA map',
+                      argstr='-famap %s')
+    v1map_file = File(genfile=True, desc='Filename of PDD map [x,y,z]',
+                      argstr='-v1map %s')
+    rgbmap_file = File(genfile=True, desc='Filename of colour FA map',
+                       argstr='-rgbmap %s', requires=['dti_flag'])
+    tenmap_file = File(genfile=True, desc='Filename of tensor map in lower \
+triangular format', argstr='-tenmap2 %s', requires=['dti_flag'])
 
     # Methods options
     mono_flag = traits.Bool(desc='Fit single exponential to non-directional \
@@ -245,15 +238,19 @@ class DwiToolInputSpec(CommandLineInputSpec):
                    argstr='-b0 %s', mandatory=False)
 
     # Output options, with templated output names based on the source image
-    mcmap_file = File(desc='Filename of multi-compartment model parameter map \
-(-ivim,-ball,-nod)', argstr='-mcmap %s')
-    syn_file = File(desc='Filename of synthetic image', argstr='-syn %s')
-    mdmap_file = File(desc='Filename of MD map/ADC', argstr='-mdmap %s')
-    famap_file = File(desc='Filename of FA map', argstr='-famap %s')
-    v1map_file = File(desc='Filename of PDD map [x,y,z]', argstr='-v1map %s')
-    rgbmap_file = File(desc='Filename of colour FA map', argstr='-rgbmap %s',
-                       requires=['dti_flag'])
-    logdti_file = File(desc='Filename of output logdti map',
+    mcmap_file = File(genfile=True, desc='Filename of multi-compartment model \
+parameter map (-ivim,-ball,-nod)', argstr='-mcmap %s')
+    syn_file = File(genfile=True, desc='Filename of synthetic image',
+                    argstr='-syn %s')
+    mdmap_file = File(genfile=True, desc='Filename of MD map/ADC',
+                      argstr='-mdmap %s')
+    famap_file = File(genfile=True, desc='Filename of FA map',
+                      argstr='-famap %s')
+    v1map_file = File(genfile=True, desc='Filename of PDD map [x,y,z]',
+                      argstr='-v1map %s')
+    rgbmap_file = File(genfile=True, desc='Filename of colour FA map',
+                       argstr='-rgbmap %s', requires=['dti_flag'])
+    logdti_file = File(genfile=True, desc='Filename of output logdti map',
                        argstr='-logdti2 %s', requires=['dti_flag'])
     bvallowthreshold = traits.Float(
         10, desc='B-value threshold used for detection of B0 and DWI images \

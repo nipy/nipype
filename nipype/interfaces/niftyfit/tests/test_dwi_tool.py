@@ -21,7 +21,7 @@ def test_dwi_tool():
     cmd_tmp = '{cmd} -famap {famap} -logdti2 {logdti2} -mdmap {mdmap} \
 -rgbmap {rgbmap} -source {in_file}  -v1map {v1map}'
     expected_cmd = cmd_tmp.format(
-        cmd=get_custom_path('fit_dwi'),
+        cmd=get_custom_path('dwi_tool'),
         in_file=in_file,
         famap=os.path.join(os.getcwd(), 'diffusion_famap.nii.gz'),
         logdti2=os.path.join(os.getcwd(), 'diffusion_logdti2.nii.gz'),
