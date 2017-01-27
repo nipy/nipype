@@ -35,12 +35,15 @@ class AntsMotionCorrInputSpec(ANTSCommandInputSpec):
 
     metric_type = traits.Enum("CC", "MeanSquares", "Demons", "GC", "MI",
                               "Mattes", argstr="%s")
-    fixed_image = File(hash_files=False, desc="")
-    moving_image = File(hash_files=False, desc="")
-    metric_weight = traits.Float(1.0)
-    radius_or_bins = traits.Int(desc="")
-    sampling_strategy = traits.Enum("None", "Regular", "Random", None)
-    sampling_percentage = traits.Either(traits.Range(low=0.0, high=1.0), None)
+    fixed_image = File(hash_files=False, requires=['metric_type'], desc="")
+    moving_image = File(hash_files=False, requires=['metric_type'],
+                        desc="This is the 4d image to be motion corrected")
+    metric_weight = traits.Float(1.0, requires=['metric_type'])
+    radius_or_bins = traits.Int(desc="", requires=['metric_type'])
+    sampling_strategy = traits.Enum("None", "Regular", "Random", None,
+                                    requires=['metric_type'])
+    sampling_percentage = traits.Either(traits.Range(low=0.0, high=1.0), None,
+                                        requires=['metric_type'])
 
     transformation_model = traits.Enum("Affine", "Rigid", argstr="%s")
     gradient_step_length = traits.Float(requires=['transformation_model'],
@@ -112,6 +115,10 @@ class AntsMotionCorr(ANTSCommand):
     >>> ants_mc.inputs.use_scales_estimator = True
     >>> print(ants_mc.cmdline)
     antsMotionCorr -d 3 -i 10 -m GC[average_image.nii.gz,input.nii.gz,1.0,1,Random,0.05] -n 10 -o [motcorr,warped.nii.gz,average_image.nii.gz] -f 1 -s 0 -t Affine[0.005] -u 1 -e 1
+
+    Format and description of the affine motion correction parameters can in 
+    this PDF starting on page 555 section 3.9.16 AffineTransform:
+    https://itk.org/ItkSoftwareGuide.pdf
     '''
     _cmd = 'antsMotionCorr'
     input_spec = AntsMotionCorrInputSpec
@@ -135,20 +142,12 @@ class AntsMotionCorr(ANTSCommand):
                       "{metric_weight},{radius_or_bins},{sampling_strategy},"
                       "{sampling_percentage}]")
         format_args = {}
-        if _extant(self.inputs.metric_type):
-            format_args['metric_type'] = self.inputs.metric_type
-        if _extant(self.inputs.fixed_image):
-            format_args['fixed_image'] = self.inputs.fixed_image
-        if _extant(self.inputs.moving_image):
-            format_args['moving_image'] = self.inputs.moving_image
-        if _extant(self.inputs.metric_weight):
-            format_args['metric_weight'] = self.inputs.metric_weight
-        if _extant(self.inputs.sampling_strategy):
-            format_args['sampling_strategy'] = self.inputs.sampling_strategy
-        if _extant(self.inputs.sampling_percentage):
-            format_args['sampling_percentage'] = self.inputs.sampling_percentage
-        if _extant(self.inputs.radius_or_bins):
-            format_args['radius_or_bins'] = self.inputs.radius_or_bins
+        metric_args = ["metric_type", "fixed_image", "moving_image",
+                       "metric_weight", "radius_or_bins", "sampling_strategy",
+                       "sampling_percentage"]
+        for metric_arg in metric_args:
+            if _extant(getattr(self.inputs, metric_arg)):
+                format_args[metric_arg] = getattr(self.inputs, metric_arg)
         return metric_str.format(**format_args)
 
     def _format_transform(self):
