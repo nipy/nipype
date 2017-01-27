@@ -13,8 +13,45 @@ import os
 from ..base import TraitedSpec, File, traits, isdefined
 from .base import ANTSCommand, ANTSCommandInputSpec
 
+
 def _extant(field):
     return (field is not None) and isdefined(field)
+
+class AntsMotionCorrStatsInputSpec(ANTSCommandInputSpec):
+    ''' Input spec for the antsMotionCorrStats command '''
+    mask = File(argstr="-x %s", mandatory=True,
+                desc="compute displacements within specified mask.")
+    moco = File(
+        argstr="-m %s", mandatory=True,
+        desc="motion correction parameter file to calculate statistics on"
+    )
+    output = File(argstr="-o %s", hash_files=False, mandatory=True,
+                  desc="csv file to output calculated statistics into")
+    framewise = traits.Bool(argstr="-f %d",
+                            desc="do framwise summarywise stats")
+    output_spatial_map = File(argstr='-s %s', hash_files=False,
+                              desc="File to output displacement magnitude to.")
+
+class AntsMotionCorrStatsOutputSpec(TraitedSpec):
+    ''' Output spec for the antsMotionCorrStats command '''
+    spatial_map = File(exists=True)
+    output = File(exists=True)
+
+class AntsMotionCorrStats(ANTSCommand):
+    ''' Interface for the antsMotionCorrStats command '''
+
+    def _gen_filename(self, name):
+        return None
+
+    def _list_outputs(self):
+        outputs = self._outputs().get()
+        if _extant(self.inputs.output_spatial_map):
+            outputs['spatial_map'] = (
+                os.path.abspath(self.inputs.output_spatial_map)
+            )
+        if _extant(self.inputs.output):
+            outputs['output'] = os.path.abspath(self.inputs.output)
+        return outputs
 
 class AntsMotionCorrInputSpec(ANTSCommandInputSpec):
     '''Input spec for the antsMotionCorr command.'''
@@ -116,8 +153,8 @@ class AntsMotionCorr(ANTSCommand):
     >>> print(ants_mc.cmdline)
     antsMotionCorr -d 3 -i 10 -m GC[average_image.nii.gz,input.nii.gz,1.0,1,Random,0.05] -n 10 -o [motcorr,warped.nii.gz,average_image.nii.gz] -f 1 -s 0 -t Affine[0.005] -u 1 -e 1
 
-    Format and description of the affine motion correction parameters can in 
-    this PDF starting on page 555 section 3.9.16 AffineTransform:
+    Format and description of the affine motion correction parameters can be
+    found in this PDF starting on page 555 section 3.9.16 AffineTransform:
     https://itk.org/ItkSoftwareGuide.pdf
     '''
     _cmd = 'antsMotionCorr'
@@ -177,5 +214,13 @@ class AntsMotionCorr(ANTSCommand):
         if _extant(self.inputs.output_average_image):
             outputs['average_image'] = (
                 os.path.abspath(self.inputs.output_average_image)
+            )
+        if _extant(self.inputs.output_warped_image):
+            outputs['warped_image'] = (
+                os.path.abspath(self.inputs.output_warped_image)
+            )
+        if _extant(self.inputs.output_transform_prefix):
+            outputs['composite_transform'] = '{}MOCOparams.csv'.format(
+                self.inputs.output_tranform_prefix
             )
         return outputs
