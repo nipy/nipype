@@ -12,6 +12,7 @@ import os
 
 from ..base import TraitedSpec, File, traits, isdefined
 from .base import ANTSCommand, ANTSCommandInputSpec
+from ..utils.filemanip import split_filename
 
 
 def _extant(field):
@@ -61,19 +62,19 @@ class AntsMotionCorrInputSpec(ANTSCommandInputSpec):
         "the dimensionality from the input image."
     )
     dimensionality = traits.Enum(3, 2, argstr='-d %d', usedefault=False,
-                                 position=0, desc=dimension_desc)
+                                 position=0, desc=dimension_desc, default=3)
 
     average_image = File(argstr='-a %s', position=1,
                          desc="Average the input time series image.")
 
-    output_average_image = File(argstr="%s", hash_files=False, desc="")
+    output_average_image = File(argstr="%s", hash_files=False, desc="", genfile)
     output_transform_prefix = traits.Str()
     output_warped_image = File(hash_files=False, desc="")
 
     metric_type = traits.Enum("CC", "MeanSquares", "Demons", "GC", "MI",
                               "Mattes", argstr="%s")
-    fixed_image = File(hash_files=False, requires=['metric_type'], desc="")
-    moving_image = File(hash_files=False, requires=['metric_type'],
+    fixed_image = File(requires=['metric_type'], desc="")
+    moving_image = File(requires=['metric_type'],
                         desc="This is the 4d image to be motion corrected")
     metric_weight = traits.Float(1.0, requires=['metric_type'])
     radius_or_bins = traits.Int(desc="", requires=['metric_type'])
@@ -163,6 +164,10 @@ class AntsMotionCorr(ANTSCommand):
 
 
     def _gen_filename(self, name):
+        if name == 'output_average_image' and _extant(self.inputs.average):
+            pth, fname, ext = split_filename(self.inputs.average)
+            new_fname = '{}{}{}'.format(fname, '_avg', ext)
+            return os.path.join(pth, new_fname)
         return None
 
     def _format_arg(self, opt, spec, val):
