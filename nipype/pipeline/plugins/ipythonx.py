@@ -1,19 +1,25 @@
+# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """Parallel workflow execution via IPython controller
 """
+from __future__ import print_function, division, unicode_literals, absolute_import
 
 import sys
+from future.utils import raise_from
+
+from ...interfaces.base import LooseVersion
+from .base import (DistributedPluginBase, logger, report_crash)
 
 IPython_not_loaded = False
 try:
     from IPython import __version__ as IPyversion
-    from IPython.kernel.contexts import ConnectionRefusedError
-except:
+    if LooseVersion(IPyversion) < LooseVersion('0.11'):
+        from IPython.kernel.contexts import ConnectionRefusedError
+except ImportError:
     IPython_not_loaded = True
 
 
-from .base import (DistributedPluginBase, logger, report_crash)
 
 
 class IPythonXPlugin(DistributedPluginBase):
@@ -21,6 +27,12 @@ class IPythonXPlugin(DistributedPluginBase):
     """
 
     def __init__(self, plugin_args=None):
+        if LooseVersion(IPyversion) > LooseVersion('0.10.1'):
+            raise EnvironmentError(('The IPythonX plugin can only be used with'
+                                    ' older IPython versions. Please use the '
+                                    'IPython plugin instead.'
+                                    ))
+        DeprecationWarning('This plugin will be deprecated as of version 0.13')
         if IPython_not_loaded:
             raise ImportError('ipyparallel could not be imported')
         super(IPythonXPlugin, self).__init__(plugin_args=plugin_args)
@@ -36,16 +48,16 @@ class IPythonXPlugin(DistributedPluginBase):
             name = 'IPython.kernel.client'
             __import__(name)
             self.ipyclient = sys.modules[name]
-        except ImportError:
-            raise ImportError("Ipython kernel not found. Parallel execution "
-                              "will be unavailable")
+        except ImportError as e:
+            raise_from(ImportError("Ipython kernel not found. Parallel execution "
+                                   "will be unavailable"), e)
         try:
             self.taskclient = self.ipyclient.TaskClient()
         except Exception as e:
             if isinstance(e, ConnectionRefusedError):
-                raise Exception("No IPython clients found.")
+                raise_from(Exception("No IPython clients found."), e)
             if isinstance(e, ValueError):
-                raise Exception("Ipython kernel not installed")
+                raise_from(Exception("Ipython kernel not installed"), e)
         return super(IPythonXPlugin, self).run(graph, config, updatehash=updatehash)
 
     def _get_result(self, taskid):

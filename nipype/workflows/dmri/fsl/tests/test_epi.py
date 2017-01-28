@@ -1,6 +1,7 @@
+# -*- coding: utf-8 -*-
 import os
 
-from nipype.testing import (skipif)
+import pytest
 import nipype.workflows.fmri.fsl as fsl_wf
 import nipype.interfaces.fsl as fsl
 import nipype.interfaces.utility as util
@@ -13,8 +14,8 @@ import shutil
 from nipype.workflows.dmri.fsl.epi import create_eddy_correct_pipeline
 
 
-@skipif(no_fsl)
-@skipif(no_fsl_course_data)
+@pytest.mark.skipif(no_fsl(), reason="fsl is not installed")
+@pytest.mark.skipif(no_fsl_course_data(), reason="fsl data not available")
 def test_create_eddy_correct_pipeline():
     fsl_course_dir = os.path.abspath(os.environ['FSL_COURSE_DATA'])
 

@@ -46,7 +46,7 @@
 .. _pylint: http://www.logilab.org/project/pylint
 .. _pyflakes: http://divmod.org/trac/wiki/DivmodPyflakes
 .. _virtualenv: http://pypi.python.org/pypi/virtualenv
-.. _git: http://git.or.cz/
+.. _git: https://git-scm.com/
 .. _flymake: http://flymake.sourceforge.net/
 .. _rope: http://rope.sourceforge.net/
 .. _pymacs: http://pymacs.progiciels-bpi.ca/pymacs.html
@@ -56,25 +56,25 @@
 .. _doctest-mode: http://www.cis.upenn.edu/~edloper/projects/doctestmode/
 .. _bazaar: http://bazaar-vcs.org/
 .. _subversion: http://subversion.tigris.org/
-.. _nose: http://somethingaboutorange.com/mrl/projects/nose
+.. _nose: http://nose.readthedocs.io/en/latest/
 .. _`python coverage tester`: http://nedbatchelder.com/code/modules/coverage.html
 
 .. Other python projects
-.. _numpy: http://www.scipy.org/NumPy
+.. _numpy: http://www.numpy.org/
 .. _scipy: http://www.scipy.org
-.. _ipython: http://ipython.scipy.org
-.. _`ipython manual`: http://ipython.scipy.org/doc/manual/html
-.. _matplotlib: http://matplotlib.sourceforge.net
+.. _ipython: https://ipython.org
+.. _`ipython manual`: https://ipython.readthedocs.org/en/stable/
+.. _matplotlib: http://matplotlib.org/
 .. _ETS: http://code.enthought.com/projects/tool-suite.php
 .. _`Enthought Tool Suite`: http://code.enthought.com/projects/tool-suite.php
 .. _python: http://www.python.org
 .. _mayavi: http://mayavi.sourceforge.net/
-.. _sympy: http://code.google.com/p/sympy/
-.. _networkx: http://networkx.lanl.gov/
-.. _pythonxy: http://www.pythonxy.com/
+.. _sympy: http://www.sympy.org/
+.. _networkx: https://networkx.github.io/
+.. _pythonxy: https://python-xy.github.io/
 .. _EPD: http://www.enthought.com/products/epd.php
 .. _Traits: http://code.enthought.com/projects/traits/
-.. _Anaconda: https://store.continuum.io/cshop/anaconda/
+.. _Anaconda: https://www.continuum.io/downloads
 .. _Canopy: https://www.enthought.com/products/canopy/
 
 .. Python imaging projects
@@ -95,7 +95,9 @@
 .. _Camino: http://web4.cs.ucl.ac.uk/research/medic/camino/pmwiki/pmwiki.php
 .. _Camino2Trackvis: http://camino-trackvis.sourceforge.net/
 .. _MRtrix: http://www.brain.org.au/software/mrtrix/index.html
+.. _MRtrix3: http://www.mrtrix.org/
 .. _MNE: https://martinos.org/mne/index.html
+.. _ANTS: http://stnava.github.io/ANTs/
 
 .. General software
 .. _gcc: http://gcc.gnu.org

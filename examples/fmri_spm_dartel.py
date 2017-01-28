@@ -16,13 +16,14 @@ nipype tutorial directory::
 Import necessary modules from nipype."""
 
 from __future__ import print_function
+from builtins import str
 from builtins import range
 
 import nipype.interfaces.io as nio           # Data i/o
 import nipype.interfaces.spm as spm          # spm
 import nipype.workflows.fmri.spm as spm_wf          # spm
 import nipype.interfaces.fsl as fsl          # fsl
-import nipype.interfaces.utility as util     # utility
+from nipype.interfaces import utility as niu # Utilities
 import nipype.pipeline.engine as pe          # pypeline engine
 import nipype.algorithms.rapidart as ra      # artifact detection
 import nipype.algorithms.modelgen as model   # model specification
@@ -68,7 +69,7 @@ preproc = pe.Workflow(name='preproc')
 and register all images to the mean image.
 """
 
-realign = pe.Node(interface=spm.Realign(), name="realign")
+realign = pe.Node(spm.Realign(), name="realign")
 realign.inputs.register_to_mean = True
 
 """Use :class:`nipype.algorithms.rapidart` to determine which of the
@@ -76,7 +77,7 @@ images in the functional series are outliers based on deviations in
 intensity or movement.
 """
 
-art = pe.Node(interface=ra.ArtifactDetect(), name="art")
+art = pe.Node(ra.ArtifactDetect(), name="art")
 art.inputs.use_differences = [True, False]
 art.inputs.use_norm = True
 art.inputs.norm_threshold = 1
@@ -88,14 +89,14 @@ art.inputs.parameter_source = 'SPM'
 :class:`nipype.interfaces.fsl.BET`.
 """
 
-skullstrip = pe.Node(interface=fsl.BET(), name="skullstrip")
+skullstrip = pe.Node(fsl.BET(), name="skullstrip")
 skullstrip.inputs.mask = True
 
 """Use :class:`nipype.interfaces.spm.Coregister` to perform a rigid
 body registration of the functional data to the structural data.
 """
 
-coregister = pe.Node(interface=spm.Coregister(), name="coregister")
+coregister = pe.Node(spm.Coregister(), name="coregister")
 coregister.inputs.jobtype = 'estimate'
 
 
@@ -134,40 +135,40 @@ l1analysis = pe.Workflow(name='analysis')
 :class:`nipype.interfaces.spm.SpecifyModel`.
 """
 
-modelspec = pe.Node(interface=model.SpecifySPMModel(), name="modelspec")
+modelspec = pe.Node(model.SpecifySPMModel(), name="modelspec")
 modelspec.inputs.concatenate_runs = True
 
 """Generate a first level SPM.mat file for analysis
 :class:`nipype.interfaces.spm.Level1Design`.
 """
 
-level1design = pe.Node(interface=spm.Level1Design(), name="level1design")
+level1design = pe.Node(spm.Level1Design(), name="level1design")
 level1design.inputs.bases = {'hrf': {'derivs': [0, 0]}}
 
 """Use :class:`nipype.interfaces.spm.EstimateModel` to determine the
 parameters of the model.
 """
 
-level1estimate = pe.Node(interface=spm.EstimateModel(), name="level1estimate")
+level1estimate = pe.Node(spm.EstimateModel(), name="level1estimate")
 level1estimate.inputs.estimation_method = {'Classical': 1}
 
 """Use :class:`nipype.interfaces.spm.EstimateContrast` to estimate the
 first level contrasts specified in a few steps above.
 """
 
-contrastestimate = pe.Node(interface=spm.EstimateContrast(), name="contrastestimate")
+contrastestimate = pe.Node(spm.EstimateContrast(), name="contrastestimate")
 
 """Use :class: `nipype.interfaces.utility.Select` to select each contrast for
 reporting.
 """
 
-selectcontrast = pe.Node(interface=util.Select(), name="selectcontrast")
+selectcontrast = pe.Node(niu.Select(), name="selectcontrast")
 
 """Use :class:`nipype.interfaces.fsl.Overlay` to combine the statistical output of
 the contrast estimate and a background image into one volume.
 """
 
-overlaystats = pe.Node(interface=fsl.Overlay(), name="overlaystats")
+overlaystats = pe.Node(fsl.Overlay(), name="overlaystats")
 overlaystats.inputs.stat_thresh = (3, 10)
 overlaystats.inputs.show_negative_stats = True
 overlaystats.inputs.auto_thresh_bg = True
@@ -176,7 +177,7 @@ overlaystats.inputs.auto_thresh_bg = True
 statistical volumes for a report of the first-level results.
 """
 
-slicestats = pe.Node(interface=fsl.Slicer(), name="slicestats")
+slicestats = pe.Node(fsl.Slicer(), name="slicestats")
 slicestats.inputs.all_axial = True
 slicestats.inputs.image_width = 750
 
@@ -232,14 +233,14 @@ nifti filename through a template '%s.nii'. So 'f3' would become
 """
 
 # Specify the location of the data.
-data_dir = os.path.abspath('data')
+# data_dir = os.path.abspath('data')
 # Specify the subject directories
 subject_list = ['s1', 's3']
 # Map field names to individual subject runs.
 info = dict(func=[['subject_id', ['f3', 'f5', 'f7', 'f10']]],
             struct=[['subject_id', 'struct']])
 
-infosource = pe.Node(interface=util.IdentityInterface(fields=['subject_id']), name="infosource")
+infosource = pe.Node(niu.IdentityInterface(fields=['subject_id']), name="infosource")
 
 """Here we set up iteration over all the subjects. The following line
 is a particular example of the flexibility of the system.  The
@@ -260,23 +261,22 @@ and provides additional housekeeping and pipeline specific
 functionality.
 """
 
-datasource = pe.Node(interface=nio.DataGrabber(infields=['subject_id'],
+inputnode = pe.Node(niu.IdentityInterface(fields=['in_data']), name='inputnode')
+datasource = pe.Node(nio.DataGrabber(infields=['subject_id'],
                                                outfields=['func', 'struct']),
                      name='datasource')
-datasource.inputs.base_directory = data_dir
-datasource.inputs.template = '%s/%s.nii'
+datasource.inputs.template = 'nipype-tutorial/data/%s/%s.nii'
 datasource.inputs.template_args = info
 datasource.inputs.sort_filelist = True
 
 """We need to create a separate workflow to make the DARTEL template
 """
 
-datasource_dartel = pe.MapNode(interface=nio.DataGrabber(infields=['subject_id'],
+datasource_dartel = pe.MapNode(nio.DataGrabber(infields=['subject_id'],
                                                          outfields=['struct']),
                                name='datasource_dartel',
                                iterfield=['subject_id'])
-datasource_dartel.inputs.base_directory = data_dir
-datasource_dartel.inputs.template = '%s/%s.nii'
+datasource_dartel.inputs.template = 'nipype-tutorial/data/%s/%s.nii'
 datasource_dartel.inputs.template_args = dict(struct=[['subject_id', 'struct']])
 datasource_dartel.inputs.sort_filelist = True
 datasource_dartel.inputs.subject_id = subject_list
@@ -285,7 +285,7 @@ datasource_dartel.inputs.subject_id = subject_list
 This way we will be able to pick the right field flows later.
 """
 
-rename_dartel = pe.MapNode(util.Rename(format_string="subject_id_%(subject_id)s_struct"),
+rename_dartel = pe.MapNode(niu.Rename(format_string="subject_id_%(subject_id)s_struct"),
                            iterfield=['in_file', 'subject_id'],
                            name='rename_dartel')
 rename_dartel.inputs.subject_id = subject_list
@@ -307,7 +307,7 @@ def pickFieldFlow(dartel_flow_fields, subject_id):
 
     raise Exception
 
-pick_flow = pe.Node(util.Function(input_names=['dartel_flow_fields',
+pick_flow = pe.Node(niu.Function(input_names=['dartel_flow_fields',
                                                'subject_id'],
                                   output_names=['dartel_flow_field'],
                                   function=pickFieldFlow),
@@ -399,7 +399,9 @@ the processing nodes.
 level1 = pe.Workflow(name="level1")
 level1.base_dir = os.path.abspath('spm_dartel_tutorial/workingdir')
 
-level1.connect([(datasource_dartel, rename_dartel, [('struct', 'in_file')]),
+level1.connect([(inputnode, datasource, [('in_data', 'base_directory')]),
+                (inputnode, datasource_dartel, [('in_data', 'base_directory')]),
+                (datasource_dartel, rename_dartel, [('struct', 'in_file')]),
                 (rename_dartel, dartel_workflow, [('out_file', 'inputspec.structural_files')]),
 
                 (infosource, datasource, [('subject_id', 'subject_id')]),
@@ -437,9 +439,9 @@ out, then a sub-directory with the name 'mean' would be created and
 the mean image would be copied to that directory.
 """
 
-datasink = pe.Node(interface=nio.DataSink(), name="datasink")
+datasink = pe.Node(nio.DataSink(), name="datasink")
 datasink.inputs.base_directory = os.path.abspath('spm_dartel_tutorial/l1output')
-report = pe.Node(interface=nio.DataSink(), name='report')
+report = pe.Node(nio.DataSink(), name='report')
 report.inputs.base_directory = os.path.abspath('spm_dartel_tutorial/report')
 report.inputs.parameterization = False
 
@@ -501,10 +503,10 @@ subjects (n=2 in this example).
 """
 
 # setup a 1-sample t-test node
-onesamplettestdes = pe.Node(interface=spm.OneSampleTTestDesign(), name="onesampttestdes")
-l2estimate = pe.Node(interface=spm.EstimateModel(), name="level2estimate")
+onesamplettestdes = pe.Node(spm.OneSampleTTestDesign(), name="onesampttestdes")
+l2estimate = pe.Node(spm.EstimateModel(), name="level2estimate")
 l2estimate.inputs.estimation_method = {'Classical': 1}
-l2conestimate = pe.Node(interface=spm.EstimateContrast(), name="level2conestimate")
+l2conestimate = pe.Node(spm.EstimateContrast(), name="level2conestimate")
 cont1 = ('Group', 'T', ['mean'], [1])
 l2conestimate.inputs.contrasts = [cont1]
 l2conestimate.inputs.group_contrast = True

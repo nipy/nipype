@@ -1,14 +1,13 @@
+# -*- coding: utf-8 -*-
 # coding: utf-8
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 
 from builtins import range
 import os
-from shutil import rmtree
-from tempfile import mkdtemp
 
-from nipype.testing import (assert_equal, assert_raises,
-                            assert_almost_equal, example_data)
+import pytest
+from nipype.testing import example_data
 
 import numpy as np
 import nibabel as nb
@@ -17,8 +16,8 @@ import nipype.testing as nit
 from nipype.algorithms.misc import normalize_tpms
 
 
-def test_normalize_tpms():
-    tempdir = mkdtemp()
+def test_normalize_tpms(tmpdir):
+    tempdir = str(tmpdir)
 
     in_mask = example_data('tpms_msk.nii.gz')
     mskdata = nb.load(in_mask).get_data()
@@ -48,9 +47,8 @@ def test_normalize_tpms():
     for i, tstfname in enumerate(out_files):
         normdata = nb.load(tstfname).get_data()
         sumdata += normdata
-        yield assert_equal, np.all(normdata[mskdata == 0] == 0), True
-        yield assert_equal, np.allclose(normdata, mapdata[i]), True
+        assert np.all(normdata[mskdata == 0] == 0)
+        assert np.allclose(normdata, mapdata[i])
 
-    yield assert_equal, np.allclose(sumdata[sumdata > 0.0], 1.0), True
+    assert np.allclose(sumdata[sumdata > 0.0], 1.0)
 
-    rmtree(tempdir)

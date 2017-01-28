@@ -1,13 +1,9 @@
+# -*- coding: utf-8 -*-
 """ Test the nipype interface caching mechanism
 """
 
-from tempfile import mkdtemp
-from shutil import rmtree
-
-from nose.tools import assert_equal
-
 from .. import Memory
-from ...pipeline.engine.tests.test_engine import TestInterface
+from ...pipeline.engine.tests.test_engine import EngineTestInterface
 
 from ... import config
 config.set_default_config()
@@ -15,7 +11,7 @@ config.set_default_config()
 nb_runs = 0
 
 
-class SideEffectInterface(TestInterface):
+class SideEffectInterface(EngineTestInterface):
 
     def _run_interface(self, runtime):
         global nb_runs
@@ -24,29 +20,24 @@ class SideEffectInterface(TestInterface):
         return runtime
 
 
-def test_caching():
-    temp_dir = mkdtemp(prefix='test_memory_')
+def test_caching(tmpdir):
     old_rerun = config.get('execution', 'stop_on_first_rerun')
     try:
         # Prevent rerun to check that evaluation is computed only once
         config.set('execution', 'stop_on_first_rerun', 'true')
-        mem = Memory(temp_dir)
+        mem = Memory(str(tmpdir))
         first_nb_run = nb_runs
         results = mem.cache(SideEffectInterface)(input1=2, input2=1)
-        assert_equal(nb_runs, first_nb_run + 1)
-        assert_equal(results.outputs.output1, [1, 2])
+        assert nb_runs == first_nb_run + 1
+        assert results.outputs.output1 == [1, 2]
         results = mem.cache(SideEffectInterface)(input1=2, input2=1)
         # Check that the node hasn't been rerun
-        assert_equal(nb_runs, first_nb_run + 1)
-        assert_equal(results.outputs.output1, [1, 2])
+        assert nb_runs == first_nb_run + 1
+        assert results.outputs.output1 == [1, 2]
         results = mem.cache(SideEffectInterface)(input1=1, input2=1)
         # Check that the node hasn been rerun
-        assert_equal(nb_runs, first_nb_run + 2)
-        assert_equal(results.outputs.output1, [1, 1])
+        assert nb_runs == first_nb_run + 2
+        assert results.outputs.output1 == [1, 1]
     finally:
-        rmtree(temp_dir)
         config.set('execution', 'stop_on_first_rerun', old_rerun)
 
-
-if __name__ == '__main__':
-    test_caching()

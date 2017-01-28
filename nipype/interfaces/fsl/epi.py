@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """The fsl module provides classes for interfacing with the `FSL
@@ -11,21 +12,18 @@ was written to work with FSL version 5.0.4.
     ...                            '../../testing/data'))
     >>> os.chdir(datadir)
 """
+from __future__ import print_function, division, unicode_literals, absolute_import
+from builtins import str
 
 import os
-import warnings
-from glob import glob
-
 import numpy as np
 import nibabel as nib
+import warnings
 
-from ..fsl.base import FSLCommand, FSLCommandInputSpec, Info
+from ...utils.filemanip import split_filename
 from ..base import (traits, TraitedSpec, InputMultiPath, File,
-                    isdefined, Undefined)
-from ...utils.filemanip import (load_json, save_json, split_filename,
-                                fname_presuffix)
-
-warn = warnings.warn
+                    isdefined)
+from .base import FSLCommand, FSLCommandInputSpec
 
 
 class PrepareFieldmapInputSpec(FSLCommandInputSpec):
@@ -70,7 +68,7 @@ class PrepareFieldmap(FSLCommand):
     >>> prepare.inputs.in_phase = "phase.nii"
     >>> prepare.inputs.in_magnitude = "magnitude.nii"
     >>> prepare.inputs.output_type = "NIFTI_GZ"
-    >>> prepare.cmdline #doctest: +ELLIPSIS
+    >>> prepare.cmdline # doctest: +ELLIPSIS +ALLOW_UNICODE
     'fsl_prepare_fieldmap SIEMENS phase.nii magnitude.nii \
 .../phase_fslprepared.nii.gz 2.460000'
     >>> res = prepare.run() # doctest: +SKIP
@@ -233,7 +231,7 @@ class TOPUP(FSLCommand):
     >>> topup.inputs.in_file = "b0_b0rev.nii"
     >>> topup.inputs.encoding_file = "topup_encoding.txt"
     >>> topup.inputs.output_type = "NIFTI_GZ"
-    >>> topup.cmdline #doctest: +ELLIPSIS
+    >>> topup.cmdline # doctest: +ELLIPSIS +ALLOW_UNICODE
     'topup --config=b02b0.cnf --datain=topup_encoding.txt \
 --imain=b0_b0rev.nii --out=b0_b0rev_base --iout=b0_b0rev_corrected.nii.gz \
 --fout=b0_b0rev_field.nii.gz --logout=b0_b0rev_topup.log'
@@ -298,7 +296,7 @@ class TOPUP(FSLCommand):
             line = [float(val[0] == encdir[0]) * direction
                     for val in ['x', 'y', 'z']] + [durations[idx]]
             lines.append(line)
-        np.savetxt(out_file, np.array(lines), fmt='%d %d %d %.8f')
+        np.savetxt(out_file, np.array(lines), fmt=b'%d %d %d %.8f')
         return out_file
 
     def _overload_extension(self, value, name=None):
@@ -309,16 +307,14 @@ class TOPUP(FSLCommand):
 
 class ApplyTOPUPInputSpec(FSLCommandInputSpec):
     in_files = InputMultiPath(File(exists=True), mandatory=True,
-                              desc='name of 4D file with images',
+                              desc='name of file with images',
                               argstr='--imain=%s', sep=',')
     encoding_file = File(exists=True, mandatory=True,
                          desc='name of text file with PE directions/times',
                          argstr='--datain=%s')
-    in_index = traits.List(traits.Int, argstr='--inindex=%s', sep=',',
-                           mandatory=True,
-                           desc=('comma separated list of indicies into '
-                                 '--datain of the input image (to be '
-                                 'corrected)'))
+    in_index = traits.List(
+        traits.Int, argstr='--inindex=%s', sep=',',
+        desc='comma separated list of indices corresponding to --datain')
     in_topup_fieldcoef = File(exists=True, argstr="--topup=%s", copyfile=False,
                               requires=['in_topup_movpar'],
                               desc=('topup file containing the field '
@@ -360,11 +356,10 @@ class ApplyTOPUP(FSLCommand):
     >>> applytopup = ApplyTOPUP()
     >>> applytopup.inputs.in_files = ["epi.nii", "epi_rev.nii"]
     >>> applytopup.inputs.encoding_file = "topup_encoding.txt"
-    >>> applytopup.inputs.in_index = [1,2]
     >>> applytopup.inputs.in_topup_fieldcoef = "topup_fieldcoef.nii.gz"
     >>> applytopup.inputs.in_topup_movpar = "topup_movpar.txt"
     >>> applytopup.inputs.output_type = "NIFTI_GZ"
-    >>> applytopup.cmdline #doctest: +ELLIPSIS
+    >>> applytopup.cmdline # doctest: +ELLIPSIS +ALLOW_UNICODE
     'applytopup --datain=topup_encoding.txt --imain=epi.nii,epi_rev.nii \
 --inindex=1,2 --topup=topup --out=epi_corrected.nii.gz'
     >>> res = applytopup.run() # doctest: +SKIP
@@ -373,6 +368,18 @@ class ApplyTOPUP(FSLCommand):
     _cmd = 'applytopup'
     input_spec = ApplyTOPUPInputSpec
     output_spec = ApplyTOPUPOutputSpec
+
+    def _parse_inputs(self, skip=None):
+        if skip is None:
+            skip = []
+
+        # If not defined, assume index are the first N entries in the
+        # parameters file, for N input images.
+        if not isdefined(self.inputs.in_index):
+            self.inputs.in_index = list(
+                range(1, len(self.inputs.in_files) + 1))
+
+        return super(ApplyTOPUP, self)._parse_inputs(skip=skip)
 
     def _format_arg(self, name, spec, value):
         if name == 'in_topup_fieldcoef':
@@ -425,6 +432,19 @@ class EddyInputSpec(FSLCommandInputSpec):
                         desc='Detect and replace outlier slices')
     num_threads = traits.Int(1, usedefault=True, nohash=True,
                              desc="Number of openmp threads to use")
+    is_shelled = traits.Bool(False, argstr='--data_is_shelled',
+                             desc="Override internal check to ensure that "
+                                  "date are acquired on a set of b-value "
+                                  "shells")
+    field = traits.Str(argstr='--field=%s',
+                       desc="NonTOPUP fieldmap scaled in Hz - filename has "
+                            "to be provided without an extension. TOPUP is "
+                            "strongly recommended")
+    field_mat = File(exists=True, argstr='--field_mat=%s',
+                     desc="Matrix that specifies the relative locations of "
+                          "the field specified by --field and first volume "
+                          "in file --imain")
+    use_cuda = traits.Bool(False, desc="Run eddy using cuda gpu")
 
 
 class EddyOutputSpec(TraitedSpec):
@@ -479,14 +499,14 @@ class Eddy(FSLCommand):
     >>> eddy.inputs.in_acqp  = 'epi_acqp.txt'
     >>> eddy.inputs.in_bvec  = 'bvecs.scheme'
     >>> eddy.inputs.in_bval  = 'bvals.scheme'
-    >>> eddy.cmdline #doctest: +ELLIPSIS
-    'eddy --acqp=epi_acqp.txt --bvals=bvals.scheme --bvecs=bvecs.scheme \
+    >>> eddy.cmdline # doctest: +ELLIPSIS +ALLOW_UNICODE
+    'eddy_openmp --acqp=epi_acqp.txt --bvals=bvals.scheme --bvecs=bvecs.scheme \
 --imain=epi.nii --index=epi_index.txt --mask=epi_mask.nii \
 --out=.../eddy_corrected'
     >>> res = eddy.run() # doctest: +SKIP
 
     """
-    _cmd = 'eddy'
+    _cmd = 'eddy_openmp'
     input_spec = EddyInputSpec
     output_spec = EddyOutputSpec
 
@@ -495,7 +515,8 @@ class Eddy(FSLCommand):
     def __init__(self, **inputs):
         super(Eddy, self).__init__(**inputs)
         self.inputs.on_trait_change(self._num_threads_update, 'num_threads')
-
+        if isdefined(self.inputs.use_cuda):
+            self._use_cuda()
         if not isdefined(self.inputs.num_threads):
             self.inputs.num_threads = self._num_threads
         else:
@@ -507,7 +528,14 @@ class Eddy(FSLCommand):
             if 'OMP_NUM_THREADS' in self.inputs.environ:
                 del self.inputs.environ['OMP_NUM_THREADS']
         else:
-            self.inputs.environ['OMP_NUM_THREADS'] = str(self.inputs.num_threads)
+            self.inputs.environ['OMP_NUM_THREADS'] = str(
+                self.inputs.num_threads)
+
+    def _use_cuda(self):
+        if self.inputs.use_cuda:
+            _cmd = 'eddy_cuda'
+        else:
+            _cmd = 'eddy_openmp'
 
     def _format_arg(self, name, spec, value):
         if name == 'in_topup_fieldcoef':
@@ -567,7 +595,7 @@ class SigLoss(FSLCommand):
     >>> sigloss.inputs.in_file = "phase.nii"
     >>> sigloss.inputs.echo_time = 0.03
     >>> sigloss.inputs.output_type = "NIFTI_GZ"
-    >>> sigloss.cmdline #doctest: +ELLIPSIS
+    >>> sigloss.cmdline # doctest: +ELLIPSIS +ALLOW_UNICODE
     'sigloss --te=0.030000 -i phase.nii -s .../phase_sigloss.nii.gz'
     >>> res = sigloss.run() # doctest: +SKIP
 
@@ -599,7 +627,8 @@ class EpiRegInputSpec(FSLCommandInputSpec):
                    position=-3, desc='wholehead T1 image')
     t1_brain = File(exists=True, argstr='--t1brain=%s', mandatory=True,
                     position=-2, desc='brain extracted T1 image')
-    out_base = traits.String("epi2struct", desc='output base name', argstr='--out=%s',
+    out_base = traits.String("epi2struct", desc='output base name',
+                             argstr='--out=%s',
                              position=-1, usedefault=True)
     fmap = File(exists=True, argstr='--fmap=%s',
                 desc='fieldmap image (in rad/s)')
@@ -646,7 +675,8 @@ class EpiRegOutputSpec(TraitedSpec):
     fullwarp = File(exists=True,
                     desc='warpfield to unwarp epi and transform into \
                     structural space')
-    wmseg = File(exists=True, desc='white matter segmentation used in flirt bbr')
+    wmseg = File(exists=True,
+                 desc='white matter segmentation used in flirt bbr')
     wmedge = File(exists=True, desc='white matter edges for visualization')
 
 
@@ -670,7 +700,7 @@ class EpiReg(FSLCommand):
     >>> epireg.inputs.fmapmagbrain='fieldmap_mag_brain.nii'
     >>> epireg.inputs.echospacing=0.00067
     >>> epireg.inputs.pedir='y'
-    >>> epireg.cmdline #doctest: +ELLIPSIS
+    >>> epireg.cmdline # doctest: +ELLIPSIS +ALLOW_UNICODE
     'epi_reg --echospacing=0.000670 --fmap=fieldmap_phase_fslprepared.nii \
 --fmapmag=fieldmap_mag.nii --fmapmagbrain=fieldmap_mag_brain.nii --noclean \
 --pedir=y --epi=epi.nii --t1=T1.nii --t1brain=T1_brain.nii --out=epi2struct'
@@ -685,32 +715,34 @@ class EpiReg(FSLCommand):
         outputs = self.output_spec().get()
         outputs['out_file'] = os.path.join(os.getcwd(),
                                            self.inputs.out_base + '.nii.gz')
-        if not (isdefined(self.inputs.no_fmapreg) and self.inputs.no_fmapreg) and isdefined(self.inputs.fmap):
-            outputs['out_1vol'] = os.path.join(os.getcwd(),
-                                               self.inputs.out_base + '_1vol.nii.gz')
-            outputs['fmap2str_mat'] = os.path.join(os.getcwd(),
-                                                   self.inputs.out_base + '_fieldmap2str.mat')
-            outputs['fmap2epi_mat'] = os.path.join(os.getcwd(),
-                                                   self.inputs.out_base + '_fieldmaprads2epi.mat')
-            outputs['fmap_epi'] = os.path.join(os.getcwd(),
-                                               self.inputs.out_base + '_fieldmaprads2epi.nii.gz')
-            outputs['fmap_str'] = os.path.join(os.getcwd(),
-                                               self.inputs.out_base + '_fieldmaprads2str.nii.gz')
-            outputs['fmapmag_str'] = os.path.join(os.getcwd(),
-                                                  self.inputs.out_base + '_fieldmap2str.nii.gz')
-            outputs['shiftmap'] = os.path.join(os.getcwd(),
-                                               self.inputs.out_base + '_fieldmaprads2epi_shift.nii.gz')
-            outputs['fullwarp'] = os.path.join(os.getcwd(),
-                                               self.inputs.out_base + '_warp.nii.gz')
-            outputs['epi2str_inv'] = os.path.join(os.getcwd(),
-                                                  self.inputs.out_base + '_inv.mat')
+        if (not (isdefined(self.inputs.no_fmapreg) and
+                 self.inputs.no_fmapreg) and isdefined(self.inputs.fmap)):
+            outputs['out_1vol'] = os.path.join(
+                os.getcwd(), self.inputs.out_base + '_1vol.nii.gz')
+            outputs['fmap2str_mat'] = os.path.join(
+                os.getcwd(), self.inputs.out_base + '_fieldmap2str.mat')
+            outputs['fmap2epi_mat'] = os.path.join(
+                os.getcwd(), self.inputs.out_base + '_fieldmaprads2epi.mat')
+            outputs['fmap_epi'] = os.path.join(
+                os.getcwd(), self.inputs.out_base + '_fieldmaprads2epi.nii.gz')
+            outputs['fmap_str'] = os.path.join(
+                os.getcwd(), self.inputs.out_base + '_fieldmaprads2str.nii.gz')
+            outputs['fmapmag_str'] = os.path.join(
+                os.getcwd(), self.inputs.out_base + '_fieldmap2str.nii.gz')
+            outputs['shiftmap'] = os.path.join(
+                os.getcwd(),
+                self.inputs.out_base + '_fieldmaprads2epi_shift.nii.gz')
+            outputs['fullwarp'] = os.path.join(
+                os.getcwd(), self.inputs.out_base + '_warp.nii.gz')
+            outputs['epi2str_inv'] = os.path.join(
+                os.getcwd(), self.inputs.out_base + '_inv.mat')
 
-        outputs['epi2str_mat'] = os.path.join(os.getcwd(),
-                                              self.inputs.out_base + '.mat')
-        outputs['wmedge'] = os.path.join(os.getcwd(),
-                                         self.inputs.out_base + '_fast_wmedge.nii.gz')
-        outputs['wmseg'] = os.path.join(os.getcwd(),
-                                        self.inputs.out_base + '_fast_wmseg.nii.gz')
+        outputs['epi2str_mat'] = os.path.join(
+            os.getcwd(), self.inputs.out_base + '.mat')
+        outputs['wmedge'] = os.path.join(
+            os.getcwd(), self.inputs.out_base + '_fast_wmedge.nii.gz')
+        outputs['wmseg'] = os.path.join(
+            os.getcwd(), self.inputs.out_base + '_fast_wmseg.nii.gz')
 
         return outputs
 
@@ -779,7 +811,7 @@ class EPIDeWarp(FSLCommand):
     >>> dewarp.inputs.mag_file = "magnitude.nii"
     >>> dewarp.inputs.dph_file = "phase.nii"
     >>> dewarp.inputs.output_type = "NIFTI_GZ"
-    >>> dewarp.cmdline #doctest: +ELLIPSIS
+    >>> dewarp.cmdline # doctest: +ELLIPSIS +ALLOW_UNICODE
     'epidewarp.fsl --mag magnitude.nii --dph phase.nii --epi functional.nii \
 --esp 0.58 --exfdw .../exfdw.nii.gz --nocleanup --sigma 2 --tediff 2.46 \
 --tmpdir .../temp --vsm .../vsm.nii.gz'
@@ -872,7 +904,7 @@ class EddyCorrect(FSLCommand):
     >>> from nipype.interfaces.fsl import EddyCorrect
     >>> eddyc = EddyCorrect(in_file='diffusion.nii',
     ...                     out_file="diffusion_edc.nii", ref_num=0)
-    >>> eddyc.cmdline
+    >>> eddyc.cmdline # doctest: +ALLOW_UNICODE
     'eddy_correct diffusion.nii diffusion_edc.nii 0'
 
     """

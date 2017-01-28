@@ -1,13 +1,13 @@
+# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """Tests for join expansion
 """
+from __future__ import print_function, division, unicode_literals, absolute_import
+from builtins import open
 
 import os
-from shutil import rmtree
-from tempfile import mkdtemp
 
-from ....testing import (assert_equal, assert_true)
 from ... import engine as pe
 from ....interfaces import base as nib
 from ....interfaces.utility import IdentityInterface
@@ -148,10 +148,8 @@ class ProductInterface(nib.BaseInterface):
         return outputs
 
 
-def test_join_expansion():
-    cwd = os.getcwd()
-    wd = mkdtemp()
-    os.chdir(wd)
+def test_join_expansion(tmpdir):
+    os.chdir(str(tmpdir))
 
     # Make the workflow.
     wf = pe.Workflow(name='test')
@@ -180,31 +178,25 @@ def test_join_expansion():
 
     # the two expanded pre-join predecessor nodes feed into one join node
     joins = [node for node in result.nodes() if node.name == 'join']
-    assert_equal(len(joins), 1, "The number of join result nodes is incorrect.")
+    assert len(joins) == 1, "The number of join result nodes is incorrect."
     # the expanded graph contains 2 * 2 = 4 iteration pre-join nodes, 1 join
     # node, 1 non-iterated post-join node and 2 * 1 iteration post-join nodes.
     # Nipype factors away the IdentityInterface.
-    assert_equal(len(result.nodes()), 8, "The number of expanded nodes is incorrect.")
+    assert len(result.nodes()) == 8, "The number of expanded nodes is incorrect."
     # the join Sum result is (1 + 1 + 1) + (2 + 1 + 1)
-    assert_equal(len(_sums), 1,
-                 "The number of join outputs is incorrect")
-    assert_equal(_sums[0], 7, "The join Sum output value is incorrect: %s." % _sums[0])
+    assert len(_sums) == 1, "The number of join outputs is incorrect"
+    assert _sums[0] == 7, "The join Sum output value is incorrect: %s." % _sums[0]
     # the join input preserves the iterables input order
-    assert_equal(_sum_operands[0], [3, 4],
-                 "The join Sum input is incorrect: %s." % _sum_operands[0])
+    assert _sum_operands[0] == [3, 4], \
+        "The join Sum input is incorrect: %s." % _sum_operands[0]
     # there are two iterations of the post-join node in the iterable path
-    assert_equal(len(_products), 2,
-                 "The number of iterated post-join outputs is incorrect")
-
-    os.chdir(cwd)
-    rmtree(wd)
+    assert len(_products) == 2,\
+        "The number of iterated post-join outputs is incorrect"
 
 
-def test_node_joinsource():
+def test_node_joinsource(tmpdir):
     """Test setting the joinsource to a Node."""
-    cwd = os.getcwd()
-    wd = mkdtemp()
-    os.chdir(wd)
+    os.chdir(str(tmpdir))
 
     # Make the workflow.
     wf = pe.Workflow(name='test')
@@ -216,18 +208,13 @@ def test_node_joinsource():
                        joinfield='input1', name='join')
 
     # the joinsource is the inputspec name
-    assert_equal(join.joinsource, inputspec.name,
-                 "The joinsource is not set to the node name.")
-
-    os.chdir(cwd)
-    rmtree(wd)
+    assert join.joinsource == inputspec.name, \
+                 "The joinsource is not set to the node name."
 
 
-def test_set_join_node():
+def test_set_join_node(tmpdir):
     """Test collecting join inputs to a set."""
-    cwd = os.getcwd()
-    wd = mkdtemp()
-    os.chdir(wd)
+    os.chdir(str(tmpdir))
 
     # Make the workflow.
     wf = pe.Workflow(name='test')
@@ -245,20 +232,15 @@ def test_set_join_node():
     wf.run()
 
     # the join length is the number of unique inputs
-    assert_equal(_set_len, 3,
-                 "The join Set output value is incorrect: %s." % _set_len)
-
-    os.chdir(cwd)
-    rmtree(wd)
+    assert _set_len == 3, \
+        "The join Set output value is incorrect: %s." % _set_len
 
 
-def test_unique_join_node():
+def test_unique_join_node(tmpdir):
     """Test join with the ``unique`` flag set to True."""
     global _sum_operands
     _sum_operands = []
-    cwd = os.getcwd()
-    wd = mkdtemp()
-    os.chdir(wd)
+    os.chdir(str(tmpdir))
 
     # Make the workflow.
     wf = pe.Workflow(name='test')
@@ -275,20 +257,15 @@ def test_unique_join_node():
 
     wf.run()
 
-    assert_equal(_sum_operands[0], [4, 2, 3],
-                 "The unique join output value is incorrect: %s." % _sum_operands[0])
-
-    os.chdir(cwd)
-    rmtree(wd)
+    assert _sum_operands[0] == [4, 2, 3], \
+                 "The unique join output value is incorrect: %s." % _sum_operands[0]
 
 
-def test_multiple_join_nodes():
+def test_multiple_join_nodes(tmpdir):
     """Test two join nodes, one downstream of the other."""
     global _products
     _products = []
-    cwd = os.getcwd()
-    wd = mkdtemp()
-    os.chdir(wd)
+    os.chdir(str(tmpdir))
 
     # Make the workflow.
     wf = pe.Workflow(name='test')
@@ -326,27 +303,22 @@ def test_multiple_join_nodes():
     # The expanded graph contains one pre_join1 replicate per inputspec
     # replicate and one of each remaining node = 3 + 5 = 8 nodes.
     # The replicated inputspec nodes are factored out of the expansion.
-    assert_equal(len(result.nodes()), 8,
-                 "The number of expanded nodes is incorrect.")
+    assert len(result.nodes()) == 8, \
+        "The number of expanded nodes is incorrect."
     # The outputs are:
     # pre_join1: [2, 3, 4]
     # post_join1: 9
     # join2: [2, 3, 4] and 9
     # post_join2: 9
     # post_join3: 9 * 9 = 81
-    assert_equal(_products, [81], "The post-join product is incorrect")
-
-    os.chdir(cwd)
-    rmtree(wd)
+    assert _products == [81], "The post-join product is incorrect"
 
 
-def test_identity_join_node():
+def test_identity_join_node(tmpdir):
     """Test an IdentityInterface join."""
     global _sum_operands
     _sum_operands = []
-    cwd = os.getcwd()
-    wd = mkdtemp()
-    os.chdir(wd)
+    os.chdir(str(tmpdir))
 
     # Make the workflow.
     wf = pe.Workflow(name='test')
@@ -371,22 +343,17 @@ def test_identity_join_node():
     # the expanded graph contains 1 * 3 iteration pre-join nodes, 1 join
     # node and 1 post-join node. Nipype factors away the iterable input
     # IdentityInterface but keeps the join IdentityInterface.
-    assert_equal(len(result.nodes()), 5,
-                 "The number of expanded nodes is incorrect.")
-    assert_equal(_sum_operands[0], [2, 3, 4],
-                 "The join Sum input is incorrect: %s." % _sum_operands[0])
-
-    os.chdir(cwd)
-    rmtree(wd)
+    assert len(result.nodes()) == 5, \
+        "The number of expanded nodes is incorrect."
+    assert _sum_operands[0] == [2, 3, 4], \
+        "The join Sum input is incorrect: %s." % _sum_operands[0]
 
 
-def test_multifield_join_node():
+def test_multifield_join_node(tmpdir):
     """Test join on several fields."""
     global _products
     _products = []
-    cwd = os.getcwd()
-    wd = mkdtemp()
-    os.chdir(wd)
+    os.chdir(str(tmpdir))
 
     # Make the workflow.
     wf = pe.Workflow(name='test')
@@ -415,23 +382,18 @@ def test_multifield_join_node():
     # the iterables are expanded as the cartesian product of the iterables values.
     # thus, the expanded graph contains 2 * (2 * 2) iteration pre-join nodes, 1 join
     # node and 1 post-join node.
-    assert_equal(len(result.nodes()), 10,
-                 "The number of expanded nodes is incorrect.")
+    assert len(result.nodes()) == 10, \
+        "The number of expanded nodes is incorrect."
     # the product inputs are [2, 4], [2, 5], [3, 4], [3, 5]
-    assert_equal(set(_products), set([8, 10, 12, 15]),
-                 "The post-join products is incorrect: %s." % _products)
-
-    os.chdir(cwd)
-    rmtree(wd)
+    assert set(_products) == set([8, 10, 12, 15]), \
+        "The post-join products is incorrect: %s." % _products
 
 
-def test_synchronize_join_node():
+def test_synchronize_join_node(tmpdir):
     """Test join on an input node which has the ``synchronize`` flag set to True."""
     global _products
     _products = []
-    cwd = os.getcwd()
-    wd = mkdtemp()
-    os.chdir(wd)
+    os.chdir(str(tmpdir))
 
     # Make the workflow.
     wf = pe.Workflow(name='test')
@@ -459,21 +421,16 @@ def test_synchronize_join_node():
     # there are 3 iterables expansions.
     # thus, the expanded graph contains 2 * 2 iteration pre-join nodes, 1 join
     # node and 1 post-join node.
-    assert_equal(len(result.nodes()), 6,
-                 "The number of expanded nodes is incorrect.")
+    assert len(result.nodes()) == 6, \
+                 "The number of expanded nodes is incorrect."
     # the product inputs are [2, 3] and [4, 5]
-    assert_equal(_products, [8, 15],
-                 "The post-join products is incorrect: %s." % _products)
-
-    os.chdir(cwd)
-    rmtree(wd)
+    assert _products == [8, 15], \
+        "The post-join products is incorrect: %s." % _products
 
 
-def test_itersource_join_source_node():
+def test_itersource_join_source_node(tmpdir):
     """Test join on an input node which has an ``itersource``."""
-    cwd = os.getcwd()
-    wd = mkdtemp()
-    os.chdir(wd)
+    os.chdir(str(tmpdir))
 
     # Make the workflow.
     wf = pe.Workflow(name='test')
@@ -510,29 +467,24 @@ def test_itersource_join_source_node():
     # 2 + (2 * 2) + 4 + 2 + 2 = 14 expansion graph nodes.
     # Nipype factors away the iterable input
     # IdentityInterface but keeps the join IdentityInterface.
-    assert_equal(len(result.nodes()), 14,
-                 "The number of expanded nodes is incorrect.")
+    assert len(result.nodes()) == 14, \
+        "The number of expanded nodes is incorrect."
     # The first join inputs are:
     # 1 + (3 * 2) and 1 + (4 * 2)
     # The second join inputs are:
     # 1 + (5 * 3) and 1 + (6 * 3)
     # the post-join nodes execution order is indeterminate;
     # therefore, compare the lists item-wise.
-    assert_true([16, 19] in _sum_operands,
-                "The join Sum input is incorrect: %s." % _sum_operands)
-    assert_true([7, 9] in _sum_operands,
-                "The join Sum input is incorrect: %s." % _sum_operands)
-
-    os.chdir(cwd)
-    rmtree(wd)
+    assert [16, 19] in _sum_operands, \
+        "The join Sum input is incorrect: %s." % _sum_operands
+    assert [7, 9] in _sum_operands, \
+                    "The join Sum input is incorrect: %s." % _sum_operands
 
 
-def test_itersource_two_join_nodes():
+def test_itersource_two_join_nodes(tmpdir):
     """Test join with a midstream ``itersource`` and an upstream
     iterable."""
-    cwd = os.getcwd()
-    wd = mkdtemp()
-    os.chdir(wd)
+    os.chdir(str(tmpdir))
 
     # Make the workflow.
     wf = pe.Workflow(name='test')
@@ -566,17 +518,13 @@ def test_itersource_two_join_nodes():
 
     # the expanded graph contains the 14 test_itersource_join_source_node
     # nodes plus the summary join node.
-    assert_equal(len(result.nodes()), 15,
-                 "The number of expanded nodes is incorrect.")
-
-    os.chdir(cwd)
-    rmtree(wd)
+    assert len(result.nodes()) == 15, \
+        "The number of expanded nodes is incorrect."
 
 
-def test_set_join_node_file_input():
+def test_set_join_node_file_input(tmpdir):
     """Test collecting join inputs to a set."""
-    cwd = os.getcwd()
-    wd = mkdtemp()
+    wd = str(tmpdir)
     os.chdir(wd)
     open('test.nii', 'w+').close()
     open('test2.nii', 'w+').close()
@@ -596,11 +544,41 @@ def test_set_join_node_file_input():
 
     wf.run()
 
-    os.chdir(cwd)
-    rmtree(wd)
+
+def test_nested_workflow_join(tmpdir):
+    """Test collecting join inputs within a nested workflow"""
+    wd = str(tmpdir)
+    os.chdir(wd)
+
+    # Make the nested workflow
+    def nested_wf(i, name='smallwf'):
+        #iterables with list of nums
+        inputspec = pe.Node(IdentityInterface(fields=['n']), name='inputspec')
+        inputspec.iterables = [('n', i)]
+        # increment each iterable before joining
+        pre_join = pe.Node(IncrementInterface(),
+                           name='pre_join')
+        # rejoin nums into list
+        join = pe.JoinNode(IdentityInterface(fields=['n']),
+                          joinsource='inputspec',
+                          joinfield='n',
+                          name='join')
+        #define and connect nested workflow
+        wf = pe.Workflow(name='wf_%d'%i[0])
+        wf.connect(inputspec, 'n', pre_join, 'input1')
+        wf.connect(pre_join, 'output1', join, 'n')
+        return wf
+    # master wf
+    meta_wf = pe.Workflow(name='meta', base_dir='.')
+    # add each mini-workflow to master
+    for i in [[1,3],[2,4]]:
+        mini_wf = nested_wf(i)
+        meta_wf.add_nodes([mini_wf])
+
+    result = meta_wf.run()
+
+    # there should be six nodes in total
+    assert len(result.nodes()) == 6, \
+        "The number of expanded nodes is incorrect."
 
 
-if __name__ == "__main__":
-    import nose
-
-    nose.main(defaultTest=__name__)

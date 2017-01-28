@@ -75,7 +75,8 @@ realigner to the smoother in step 5.
 **3. Creating and configuring a workflow**
 
 Here we create an instance of a workflow and indicate that it should operate in
-the current directory.
+the current directory. The workflow's output will be placed in the ``preproc``
+directory.
 
 .. testcode::
 
@@ -128,11 +129,13 @@ above were generated using this.
 
    workflow.write_graph()
 
-This creates two files graph.dot and graph_detailed.dot and if
+This creates two files ``graph.dot`` and ``graph_detailed.dot`` inside
+``./preproc`` and if
 graphviz_ is installed on your system it automatically converts it
 to png files. If graphviz is not installed you can take the dot files
 and load them in a graphviz visualizer elsewhere. You can specify how detailed
-the graph is going to be, by using "graph2use" argument which takes the following
+the graph is going to be, by using the ``graph2use`` argument which takes
+the following
 options:
 
 * hierarchical - creates a graph showing all embedded workflows (default)
@@ -152,9 +155,11 @@ above pipeline.
    import nipype.algorithms.rapidart as ra
    artdetect = pe.Node(interface=ra.ArtifactDetect(), name='artdetect')
    artdetect.inputs.use_differences  = [True, False]
-   art.inputs.use_norm = True
-   art.inputs.norm_threshold = 0.5
-   art.inputs.zintensity_threshold = 3
+   artdetect.inputs.use_norm = True
+   artdetect.inputs.norm_threshold = 0.5
+   artdetect.inputs.zintensity_threshold = 3
+   artdetect.inputs.parameter_source = "SPM"
+   artdetect.inputs.mask_type = "spm_global"
    workflow.connect([(realigner, artdetect,
                       [('realigned_files', 'realigned_files'),
                        ('realignment_parameters','realignment_parameters')]

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 
 if __name__ == "__main__":
     from nipype.interfaces.slicer.generate_classes import generate_all_classes

@@ -14,24 +14,19 @@ The `EngineBase` class implements the more general view of a task.
      os.chdir(datadir)
 
 """
+from __future__ import print_function, division, unicode_literals, absolute_import
+from builtins import object
 
 from future import standard_library
 standard_library.install_aliases()
-from builtins import object
-
-try:
-    from collections import OrderedDict
-except ImportError:
-    from ordereddict import OrderedDict
 
 from copy import deepcopy
 import re
 import numpy as np
-from ...interfaces.traits_extension import traits, Undefined
+from ... import logging
 from ...interfaces.base import DynamicTraitedSpec
 from ...utils.filemanip import loadpkl, savepkl
 
-from ... import logging
 logger = logging.getLogger('workflow')
 
 
@@ -74,6 +69,13 @@ class EngineBase(object):
             fullname = self._hierarchy + '.' + self.name
         return fullname
 
+    @property
+    def itername(self):
+        itername = self._id
+        if self._hierarchy:
+            itername = self._hierarchy + '.' + self._id
+        return itername
+
     def clone(self, name):
         """Clone an EngineBase object
 
@@ -110,7 +112,7 @@ class EngineBase(object):
         if self._hierarchy:
             return '.'.join((self._hierarchy, self._id))
         else:
-            return self._id
+            return '{}'.format(self._id)
 
     def save(self, filename=None):
         if filename is None:

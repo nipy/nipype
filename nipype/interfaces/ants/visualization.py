@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """The ants visualisation module provides basic functions based on ITK.
    Change directory to provide relative paths for doctests
    >>> import os
@@ -5,10 +6,12 @@
    >>> datadir = os.path.realpath(os.path.join(filepath, '../../testing/data'))
    >>> os.chdir(datadir)
 """
+from __future__ import print_function, division, unicode_literals, absolute_import
+
 import os
 
-from .base import ANTSCommand, ANTSCommandInputSpec
 from ..base import TraitedSpec, File, traits
+from .base import ANTSCommand, ANTSCommandInputSpec
 
 
 class ConvertScalarImageToRGBInputSpec(ANTSCommandInputSpec):
@@ -54,7 +57,7 @@ class ConvertScalarImageToRGB(ANTSCommand):
     >>> converter.inputs.colormap = 'jet'
     >>> converter.inputs.minimum_input = 0
     >>> converter.inputs.maximum_input = 6
-    >>> converter.cmdline
+    >>> converter.cmdline # doctest: +ALLOW_UNICODE
     'ConvertScalarImageToRGB 3 T1.nii.gz rgb.nii.gz none jet none 0 6 0 255'
     """
     _cmd = 'ConvertScalarImageToRGB'
@@ -140,7 +143,7 @@ class CreateTiledMosaic(ANTSCommand):
     >>> mosaic_slicer.inputs.direction = 2
     >>> mosaic_slicer.inputs.pad_or_crop = '[ -15x -50 , -15x -30 ,0]'
     >>> mosaic_slicer.inputs.slices = '[2 ,100 ,160]'
-    >>> mosaic_slicer.cmdline
+    >>> mosaic_slicer.cmdline # doctest: +ALLOW_UNICODE
     'CreateTiledMosaic -a 0.50 -d 2 -i T1.nii.gz -x mask.nii.gz -o output.png -p [ -15x -50 , -15x -30 ,0] \
 -r rgb.nii.gz -s [2 ,100 ,160]'
     """

@@ -11,16 +11,15 @@
     >>> os.chdir(datadir)
 
 """
+from __future__ import print_function, division, unicode_literals, absolute_import
 
-from __future__ import absolute_import
-import os
 import os.path as op
 
-from .base import MRTrix3BaseInputSpec, MRTrix3Base
+from ..traits_extension import isdefined
 from ..base import (CommandLineInputSpec, CommandLine, traits, TraitedSpec,
                     File, InputMultiPath)
-from ..traits_extension import isdefined
-from ...utils.filemanip import split_filename
+from .base import MRTrix3BaseInputSpec, MRTrix3Base
+
 
 
 class BrainMaskInputSpec(MRTrix3BaseInputSpec):
@@ -47,7 +46,7 @@ class BrainMask(CommandLine):
     >>> import nipype.interfaces.mrtrix3 as mrt
     >>> bmsk = mrt.BrainMask()
     >>> bmsk.inputs.in_file = 'dwi.mif'
-    >>> bmsk.cmdline                               # doctest: +ELLIPSIS
+    >>> bmsk.cmdline                               # doctest: +ELLIPSIS +ALLOW_UNICODE
     'dwi2mask dwi.mif brainmask.mif'
     >>> bmsk.run()                                 # doctest: +SKIP
     """
@@ -94,7 +93,7 @@ class Mesh2PVE(CommandLine):
     >>> m2p.inputs.in_file = 'surf1.vtk'
     >>> m2p.inputs.reference = 'dwi.mif'
     >>> m2p.inputs.in_first = 'T1.nii.gz'
-    >>> m2p.cmdline                               # doctest: +ELLIPSIS
+    >>> m2p.cmdline                               # doctest: +ELLIPSIS +ALLOW_UNICODE
     'mesh2pve -first T1.nii.gz surf1.vtk dwi.mif mesh2volume.nii.gz'
     >>> m2p.run()                                 # doctest: +SKIP
     """
@@ -140,7 +139,7 @@ class Generate5tt(CommandLine):
     >>> seg.inputs.in_fast = ['tpm_00.nii.gz',
     ...                       'tpm_01.nii.gz', 'tpm_02.nii.gz']
     >>> seg.inputs.in_first = 'first_merged.nii.gz'
-    >>> seg.cmdline                               # doctest: +ELLIPSIS
+    >>> seg.cmdline                               # doctest: +ELLIPSIS +ALLOW_UNICODE
     '5ttgen tpm_00.nii.gz tpm_01.nii.gz tpm_02.nii.gz first_merged.nii.gz\
  act-5tt.mif'
     >>> seg.run()                                 # doctest: +SKIP
@@ -198,7 +197,7 @@ class TensorMetrics(CommandLine):
     >>> comp = mrt.TensorMetrics()
     >>> comp.inputs.in_file = 'dti.mif'
     >>> comp.inputs.out_fa = 'fa.mif'
-    >>> comp.cmdline                               # doctest: +ELLIPSIS
+    >>> comp.cmdline                               # doctest: +ELLIPSIS +ALLOW_UNICODE
     'tensor2metric -fa fa.mif dti.mif'
     >>> comp.run()                                 # doctest: +SKIP
     """
@@ -338,7 +337,7 @@ class ComputeTDI(MRTrix3Base):
     >>> import nipype.interfaces.mrtrix3 as mrt
     >>> tdi = mrt.ComputeTDI()
     >>> tdi.inputs.in_file = 'dti.mif'
-    >>> tdi.cmdline                               # doctest: +ELLIPSIS
+    >>> tdi.cmdline                               # doctest: +ELLIPSIS +ALLOW_UNICODE
     'tckmap dti.mif tdi.mif'
     >>> tdi.run()                                 # doctest: +SKIP
     """
@@ -389,7 +388,7 @@ class TCK2VTK(MRTrix3Base):
     >>> vtk = mrt.TCK2VTK()
     >>> vtk.inputs.in_file = 'tracks.tck'
     >>> vtk.inputs.reference = 'b0.nii'
-    >>> vtk.cmdline                               # doctest: +ELLIPSIS
+    >>> vtk.cmdline                               # doctest: +ELLIPSIS +ALLOW_UNICODE
     'tck2vtk -image b0.nii tracks.tck tracks.vtk'
     >>> vtk.run()                                 # doctest: +SKIP
     """

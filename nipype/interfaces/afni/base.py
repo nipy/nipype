@@ -1,11 +1,13 @@
+# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """Provide interface to AFNI commands."""
-
-from builtins import object
-
+from __future__ import print_function, division, unicode_literals, absolute_import
+from builtins import object, str, bytes
+from future.utils import raise_from
 
 import os
+from sys import platform
 
 from ... import logging
 from ...utils.filemanip import split_filename
@@ -13,7 +15,7 @@ from ..base import (
     CommandLine, traits, CommandLineInputSpec, isdefined, File, TraitedSpec)
 
 # Use nipype's logging system
-iflogger = logging.getLogger('interface')
+IFLOGGER = logging.getLogger('interface')
 
 
 class Info(object):
@@ -46,14 +48,14 @@ class Info(object):
             currv = clout.runtime.stdout.split('\n')[1].split('=', 1)[1].strip()
         except IOError:
             # If afni_vcheck is not present, return None
-            iflogger.warn('afni_vcheck executable not found.')
+            IFLOGGER.warn('afni_vcheck executable not found.')
             return None
         except RuntimeError as e:
             # If AFNI is outdated, afni_vcheck throws error.
             # Show new version, but parse current anyways.
             currv = str(e).split('\n')[4].split('=', 1)[1].strip()
             nextv = str(e).split('\n')[6].split('=', 1)[1].strip()
-            iflogger.warn(
+            IFLOGGER.warn(
                 'AFNI is outdated, detected version %s and %s is available.' % (currv, nextv))
 
         if currv.startswith('AFNI_'):
@@ -83,9 +85,9 @@ class Info(object):
 
         try:
             return cls.ftypes[outputtype]
-        except KeyError:
+        except KeyError as e:
             msg = 'Invalid AFNIOUTPUTTYPE: ', outputtype
-            raise KeyError(msg)
+            raise_from(KeyError(msg), e)
 
     @classmethod
     def outputtype(cls):
@@ -117,6 +119,17 @@ class Info(object):
         return os.path.join(basedir, img_name)
 
 
+class AFNICommandBase(CommandLine):
+    """
+    A base class to fix a linking problem in OSX and afni.
+    See http://afni.nimh.nih.gov/afni/community/board/read.php?1,145346,145347#msg-145347
+    """
+    def _run_interface(self, runtime):
+        if platform == 'darwin':
+            runtime.environ['DYLD_FALLBACK_LIBRARY_PATH'] = '/usr/local/afni/'
+        return super(AFNICommandBase, self)._run_interface(runtime)
+
+
 class AFNICommandInputSpec(CommandLineInputSpec):
     outputtype = traits.Enum('AFNI', list(Info.ftypes.keys()),
                              desc='AFNI output filetype')
@@ -130,8 +143,8 @@ class AFNICommandOutputSpec(TraitedSpec):
                     exists=True)
 
 
-class AFNICommand(CommandLine):
-
+class AFNICommand(AFNICommandBase):
+    """Shared options for several AFNI commands """
     input_spec = AFNICommandInputSpec
     _outputtype = None
 
@@ -146,6 +159,10 @@ class AFNICommand(CommandLine):
             self.inputs.outputtype = self._outputtype
         else:
             self._output_update()
+
+        # Update num threads estimate from OMP_NUM_THREADS env var
+        # Default to 1 if not set
+        os.environ['OMP_NUM_THREADS'] = str(self.num_threads)
 
     def _output_update(self):
         """ i think? updates class private attribute based on instance input

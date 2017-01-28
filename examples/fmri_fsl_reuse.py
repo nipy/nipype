@@ -17,13 +17,13 @@ First tell python where to find the appropriate functions.
 
 from __future__ import print_function
 from __future__ import division
+from builtins import str
 from builtins import range
 
 import os                                    # system functions
-
 import nipype.interfaces.io as nio           # Data i/o
 import nipype.interfaces.fsl as fsl          # fsl
-import nipype.interfaces.utility as util     # utility
+from nipype.interfaces import utility as niu # Utilities
 import nipype.pipeline.engine as pe          # pypeline engine
 import nipype.algorithms.modelgen as model   # model generation
 import nipype.algorithms.rapidart as ra      # artifact detection
@@ -56,7 +56,7 @@ Add artifact detection and model specification nodes between the preprocessing
 and modelfitting workflows.
 """
 
-art = pe.MapNode(interface=ra.ArtifactDetect(use_differences=[True, False],
+art = pe.MapNode(ra.ArtifactDetect(use_differences=[True, False],
                                              use_norm=True,
                                              norm_threshold=1,
                                              zintensity_threshold=3,
@@ -65,7 +65,7 @@ art = pe.MapNode(interface=ra.ArtifactDetect(use_differences=[True, False],
                  iterfield=['realigned_files', 'realignment_parameters', 'mask_file'],
                  name="art")
 
-modelspec = pe.Node(interface=model.SpecifyModel(), name="modelspec")
+modelspec = pe.Node(model.SpecifyModel(), name="modelspec")
 
 level1_workflow.connect([(preproc, art, [('outputspec.motion_parameters',
                                           'realignment_parameters'),
@@ -139,15 +139,15 @@ nifti filename through a template '%s.nii'. So 'f3' would become
 
 """
 
-# Specify the location of the data.
-data_dir = os.path.abspath('data')
+inputnode = pe.Node(niu.IdentityInterface(fields=['in_data']), name='inputnode')
+
 # Specify the subject directories
 subject_list = ['s1']  # , 's3']
 # Map field names to individual subject runs.
 info = dict(func=[['subject_id', ['f3', 'f5', 'f7', 'f10']]],
             struct=[['subject_id', 'struct']])
 
-infosource = pe.Node(interface=util.IdentityInterface(fields=['subject_id']),
+infosource = pe.Node(niu.IdentityInterface(fields=['subject_id']),
                      name="infosource")
 
 """Here we set up iteration over all the subjects. The following line
@@ -169,11 +169,10 @@ and provides additional housekeeping and pipeline specific
 functionality.
 """
 
-datasource = pe.Node(interface=nio.DataGrabber(infields=['subject_id'],
+datasource = pe.Node(nio.DataGrabber(infields=['subject_id'],
                                                outfields=['func', 'struct']),
                      name='datasource')
-datasource.inputs.base_directory = data_dir
-datasource.inputs.template = '%s/%s.nii'
+datasource.inputs.template = 'nipype-tutorial/data/%s/%s.nii'
 datasource.inputs.template_args = info
 datasource.inputs.sort_filelist = True
 
@@ -182,12 +181,12 @@ Use the get_node function to retrieve an internal node by name. Then set the
 iterables on this node to perform two different extents of smoothing.
 """
 
-inputnode = level1_workflow.get_node('featpreproc.inputspec')
-inputnode.iterables = ('fwhm', [5., 10.])
+featinput = level1_workflow.get_node('featpreproc.inputspec')
+featinput.iterables = ('fwhm', [5., 10.])
 
 hpcutoff = 120.
 TR = 3.
-inputnode.inputs.highpass = hpcutoff / (2. * TR)
+featinput.inputs.highpass = hpcutoff / (2. * TR)
 
 """
 Setup a function that returns subject-specific information about the
@@ -239,7 +238,8 @@ modelfit.inputs.inputspec.film_threshold = 1000
 level1_workflow.base_dir = os.path.abspath('./fsl/workingdir')
 level1_workflow.config['execution'] = dict(crashdump_dir=os.path.abspath('./fsl/crashdumps'))
 
-level1_workflow.connect([(infosource, datasource, [('subject_id', 'subject_id')]),
+level1_workflow.connect([(inputnode, datasource, [('in_data', 'base_directory')]),
+                         (infosource, datasource, [('subject_id', 'subject_id')]),
                          (infosource, modelspec, [(('subject_id', subjectinfo),
                                                    'subject_info')]),
                          (datasource, preproc, [('func', 'inputspec.func')]),

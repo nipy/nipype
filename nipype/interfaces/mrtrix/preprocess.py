@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """
@@ -8,11 +9,13 @@
     >>> os.chdir(datadir)
 
 """
+from __future__ import print_function, division, unicode_literals, absolute_import
+
 import os.path as op
 
+from ...utils.filemanip import split_filename
 from ..base import (CommandLineInputSpec, CommandLine, traits, TraitedSpec,
                     File, InputMultiPath, isdefined)
-from ...utils.filemanip import split_filename
 
 
 class MRConvertInputSpec(CommandLineInputSpec):
@@ -77,7 +80,7 @@ class MRConvert(CommandLine):
         return outputs
 
     def _gen_filename(self, name):
-        if name is 'out_filename':
+        if name == 'out_filename':
             return self._gen_outfilename()
         else:
             return None
@@ -141,7 +144,7 @@ class DWI2Tensor(CommandLine):
     >>> dwi2tensor = mrt.DWI2Tensor()
     >>> dwi2tensor.inputs.in_file = 'dwi.mif'
     >>> dwi2tensor.inputs.encoding_file = 'encoding.txt'
-    >>> dwi2tensor.cmdline
+    >>> dwi2tensor.cmdline # doctest: +ALLOW_UNICODE
     'dwi2tensor -grad encoding.txt dwi.mif dwi_tensor.mif'
     >>> dwi2tensor.run()                                   # doctest: +SKIP
     """
@@ -190,7 +193,7 @@ class Tensor2Vector(CommandLine):
         return outputs
 
     def _gen_filename(self, name):
-        if name is 'out_filename':
+        if name == 'out_filename':
             return self._gen_outfilename()
         else:
             return None
@@ -239,7 +242,7 @@ class Tensor2FractionalAnisotropy(CommandLine):
         return outputs
 
     def _gen_filename(self, name):
-        if name is 'out_filename':
+        if name == 'out_filename':
             return self._gen_outfilename()
         else:
             return None
@@ -288,7 +291,7 @@ class Tensor2ApparentDiffusion(CommandLine):
         return outputs
 
     def _gen_filename(self, name):
-        if name is 'out_filename':
+        if name == 'out_filename':
             return self._gen_outfilename()
         else:
             return None
@@ -338,7 +341,7 @@ class MRMultiply(CommandLine):
         return outputs
 
     def _gen_filename(self, name):
-        if name is 'out_filename':
+        if name == 'out_filename':
             return self._gen_outfilename()
         else:
             return None
@@ -448,7 +451,7 @@ class GenerateWhiteMatterMask(CommandLine):
         return outputs
 
     def _gen_filename(self, name):
-        if name is 'out_WMProb_filename':
+        if name == 'out_WMProb_filename':
             return self._gen_outfilename()
         else:
             return None
@@ -498,7 +501,7 @@ class Erode(CommandLine):
         return outputs
 
     def _gen_filename(self, name):
-        if name is 'out_filename':
+        if name == 'out_filename':
             return self._gen_outfilename()
         else:
             return None
@@ -556,7 +559,7 @@ class Threshold(CommandLine):
         return outputs
 
     def _gen_filename(self, name):
-        if name is 'out_filename':
+        if name == 'out_filename':
             return self._gen_outfilename()
         else:
             return None
@@ -605,7 +608,7 @@ class MedianFilter3D(CommandLine):
         return outputs
 
     def _gen_filename(self, name):
-        if name is 'out_filename':
+        if name == 'out_filename':
             return self._gen_outfilename()
         else:
             return None
@@ -663,7 +666,7 @@ class MRTransform(CommandLine):
         return outputs
 
     def _gen_filename(self, name):
-        if name is 'out_filename':
+        if name == 'out_filename':
             return self._gen_outfilename()
         else:
             return None

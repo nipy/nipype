@@ -1,14 +1,18 @@
+# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """Parallel workflow execution via IPython controller
 """
+from __future__ import print_function, division, unicode_literals, absolute_import
 
 from future import standard_library
 standard_library.install_aliases()
+from future.utils import raise_from
 
 from pickle import dumps
 
 import sys
+from .base import (DistributedPluginBase, logger, report_crash)
 
 IPython_not_loaded = False
 try:
@@ -17,7 +21,6 @@ try:
 except:
     IPython_not_loaded = True
 
-from .base import (DistributedPluginBase, logger, report_crash)
 
 
 def execute_task(pckld_task, node_config, updatehash):
@@ -47,8 +50,13 @@ class IPythonPlugin(DistributedPluginBase):
 
     def __init__(self, plugin_args=None):
         if IPython_not_loaded:
-            raise ImportError('ipyparallel could not be imported')
+            raise ImportError('Please install ipyparallel to use this plugin.')
         super(IPythonPlugin, self).__init__(plugin_args=plugin_args)
+        valid_args = ('url_file', 'profile', 'cluster_id', 'context', 'debug',
+                      'timeout', 'config', 'username', 'sshserver', 'sshkey',
+                      'password', 'paramiko')
+        self.client_args = {arg: plugin_args[arg]
+                            for arg in valid_args if arg in plugin_args}
         self.iparallel = None
         self.taskclient = None
         self.taskmap = {}
@@ -63,19 +71,20 @@ class IPythonPlugin(DistributedPluginBase):
             name = 'ipyparallel'
             __import__(name)
             self.iparallel = sys.modules[name]
-        except ImportError:
-            raise ImportError("Ipython kernel not found. Parallel execution "
-                              "will be unavailable")
+        except ImportError as e:
+            raise_from(ImportError("ipyparallel not found. Parallel execution "
+                                   "will be unavailable"), e)
         try:
-            self.taskclient = self.iparallel.Client()
+            self.taskclient = self.iparallel.Client(**self.client_args)
         except Exception as e:
             if isinstance(e, TimeoutError):
-                raise Exception("No IPython clients found.")
+                raise_from(Exception("No IPython clients found."), e)
             if isinstance(e, IOError):
-                raise Exception("ipcluster/ipcontroller has not been started")
+                raise_from(Exception("ipcluster/ipcontroller has not been started"), e)
             if isinstance(e, ValueError):
-                raise Exception("Ipython kernel not installed")
-            raise e
+                raise_from(Exception("Ipython kernel not installed"), e)
+            else:
+                raise e
         return super(IPythonPlugin, self).run(graph, config, updatehash=updatehash)
 
     def _get_result(self, taskid):

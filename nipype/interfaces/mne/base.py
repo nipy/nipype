@@ -1,14 +1,16 @@
+# -*- coding: utf-8 -*-
+from __future__ import print_function, division, unicode_literals, absolute_import
+from builtins import str, bytes
 
 import os.path as op
 import glob
-import logging
-logging.basicConfig()
-iflogger = logging.getLogger('interface')
 
+from ... import logging
+from ...utils.filemanip import list_to_filename
 from ..base import (traits, File, Directory, TraitedSpec, OutputMultiPath)
 from ..freesurfer.base import FSCommand, FSTraitedSpec
-from ...external.six import string_types
-from ...utils.filemanip import list_to_filename
+
+iflogger = logging.getLogger('interface')
 
 
 class WatershedBEMInputSpec(FSTraitedSpec):
@@ -53,7 +55,7 @@ class WatershedBEM(FSCommand):
     >>> bem = WatershedBEM()
     >>> bem.inputs.subject_id = 'subj1'
     >>> bem.inputs.subjects_dir = '.'
-    >>> bem.cmdline
+    >>> bem.cmdline # doctest: +ALLOW_UNICODE
     'mne_watershed_bem --overwrite --subject subj1 --volume T1'
     >>> bem.run() 				# doctest: +SKIP
 
@@ -90,7 +92,7 @@ class WatershedBEM(FSCommand):
                         out_files = []
                         for value in value_list:
                             out_files.append(op.abspath(value))
-                    elif isinstance(value_list, string_types):
+                    elif isinstance(value_list, (str, bytes)):
                         out_files = op.abspath(value_list)
                     else:
                         raise TypeError

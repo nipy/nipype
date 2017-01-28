@@ -49,7 +49,7 @@ Requirements
   - FSL_, FreeSurfer_, Camino_, ConnectomeViewer and MATLAB_ are available and
     callable from the command line
 
-  - SPM_ 5/8 is installed and callable in matlab
+  - SPM_ 5/8/12 is installed and callable in matlab
 
   - Space: 3-10 GB
 
@@ -59,29 +59,12 @@ Checklist for analysis tutorials
 For the analysis tutorials, we will be using a slightly modified version of the
 FBIRN Phase I travelling data set.
 
-Step 0
-~~~~~~
+1. Download and extract the `Pipeline tutorial data (429MB).
+<https://figshare.com/articles/nipype_tutorial_data/3395806>`_
+(md5: d175083784c5167de4ea11b43b37c166)
 
-Download and extract the `Pipeline tutorial data (429MB).
-<http://sourceforge.net/projects/nipy/files/nipype/nipype-0.2/nipype-tutorial.tar.bz2/download>`_
-
-(checksum: 56ed4b7e0aac5627d1724e9c10cd26a7)
-
-
-Step 1.
-~~~~~~~
-
-Ensure that all programs are available by calling ``bet``, ``matlab``
-and then ``which spm`` within matlab to ensure you have spm5/8 in your
+2. Ensure that all programs are available by calling ``bet``, ``matlab``
+and then ``which spm`` within matlab to ensure you have spm5/8/12 in your
 matlab path.
-
-Step 2.
-~~~~~~~
-
-You can now run the tutorial by typing ``python tutorial_script.py``
-within the nipype-tutorial directory. This will run a full first level
-analysis on two subjects following by a 1-sample t-test on their first
-level results. The next section goes through each section of the
-tutorial script and describes what it is doing.
 
 .. include:: ../links_names.txt
