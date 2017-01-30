@@ -793,10 +793,8 @@ class ReconAll(CommandLine):
         subjects_dir = self.inputs.subjects_dir
         if not isdefined(subjects_dir):
             subjects_dir = self._gen_subjects_dir()
-        # cmd = cmd.replace(' -all ', ' -make all ')
-        iflogger.info('Overriding recon-all directive')
+
         flags = []
-        directive = 'all'
         for idx, step in enumerate(self._steps):
             step, outfiles, infiles = step
             flag = '-{}'.format(step)
@@ -808,14 +806,8 @@ class ReconAll(CommandLine):
             if check_depends([os.path.join(subj_dir, f) for f in outfiles],
                              [os.path.join(subj_dir, f) for f in infiles]):
                 flags.append(noflag)
-                if idx > 4:
-                    directive = 'autorecon2'
-                elif idx > 23:
-                    directive = 'autorecon3'
-            else:
-                flags.append(flag)
-        cmd = cmd.replace(' -%s ' % self.inputs.directive, ' -%s ' % directive)
         cmd += ' ' + ' '.join(flags)
+
         iflogger.info('resume recon-all : %s' % cmd)
         return cmd
 
