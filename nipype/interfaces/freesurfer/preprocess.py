@@ -22,7 +22,7 @@ import numpy as np
 from nibabel import load
 
 from ... import logging
-from ...utils.filemanip import fname_presuffix
+from ...utils.filemanip import fname_presuffix, check_depends
 from ..io import FreeSurferSource
 from ..base import (TraitedSpec, File, traits,
                     Directory, InputMultiPath,
@@ -658,86 +658,85 @@ class ReconAll(CommandLine):
 
     _steps = [
         # autorecon1
-        ('motioncor', ['mri/rawavg.mgz', 'mri/orig.mgz']),
+        ('motioncor', ['mri/rawavg.mgz', 'mri/orig.mgz'], []),
         ('talairach', ['mri/orig_nu.mgz',
                        'mri/transforms/talairach.auto.xfm',
                        'mri/transforms/talairach.xfm',
                        # 'mri/transforms/talairach_avi.log',
-                       ]),
-        ('nuintensitycor', ['mri/nu.mgz']),
-        ('normalization', ['mri/T1.mgz']),
+                       ], []),
+        ('nuintensitycor', ['mri/nu.mgz'], []),
+        ('normalization', ['mri/T1.mgz'], []),
         ('skullstrip', ['mri/talairach_with_skull.lta',
                         'mri/brainmask.auto.mgz',
-                        'mri/brainmask.mgz']),
+                        'mri/brainmask.mgz'], []),
         # autorecon2
-        ('gcareg', ['mri/transforms/talairach.lta']),
-        ('canorm', ['mri/norm.mgz']),
-        ('careg', ['mri/transforms/talairach.m3z']),
+        ('gcareg', ['mri/transforms/talairach.lta'], []),
+        ('canorm', ['mri/norm.mgz'], []),
+        ('careg', ['mri/transforms/talairach.m3z'], []),
         ('calabel', ['mri/aseg.auto_noCCseg.mgz',
                      'mri/aseg.auto.mgz',
-                     'mri/aseg.mgz']),
-        ('normalization2', ['mri/brain.mgz']),
-        ('maskbfs', ['mri/brain.finalsurfs.mgz']),
+                     'mri/aseg.mgz'], []),
+        ('normalization2', ['mri/brain.mgz'], []),
+        ('maskbfs', ['mri/brain.finalsurfs.mgz'], []),
         ('segmentation', ['mri/wm.seg.mgz',
                           'mri/wm.asegedit.mgz',
-                          'mri/wm.mgz']),
+                          'mri/wm.mgz'], []),
         ('fill', ['mri/filled.mgz',
                   # 'scripts/ponscc.cut.log',
-                  ]),
-        ('tessellate', ['surf/lh.orig.nofix', 'surf/rh.orig.nofix']),
-        ('smooth1', ['surf/lh.smoothwm.nofix', 'surf/rh.smoothwm.nofix']),
-        ('inflate1', ['surf/lh.inflated.nofix', 'surf/rh.inflated.nofix']),
-        ('qsphere', ['surf/lh.qsphere.nofix', 'surf/rh.qsphere.nofix']),
-        ('fix', ['surf/lh.orig', 'surf/rh.orig']),
+                  ], []),
+        ('tessellate', ['surf/lh.orig.nofix', 'surf/rh.orig.nofix'], []),
+        ('smooth1', ['surf/lh.smoothwm.nofix', 'surf/rh.smoothwm.nofix'], []),
+        ('inflate1', ['surf/lh.inflated.nofix', 'surf/rh.inflated.nofix'], []),
+        ('qsphere', ['surf/lh.qsphere.nofix', 'surf/rh.qsphere.nofix'], []),
+        ('fix', ['surf/lh.orig', 'surf/rh.orig'], []),
         ('white', ['surf/lh.white.preaparc', 'surf/rh.white.preaparc',
                    'surf/lh.curv', 'surf/rh.curv',
                    'surf/lh.area', 'surf/rh.area',
-                   'label/lh.cortex.label', 'label/rh.cortex.label']),
-        ('smooth2', ['surf/lh.smoothwm', 'surf/rh.smoothwm']),
+                   'label/lh.cortex.label', 'label/rh.cortex.label'], []),
+        ('smooth2', ['surf/lh.smoothwm', 'surf/rh.smoothwm'], []),
         ('inflate2', ['surf/lh.inflated', 'surf/rh.inflated',
-                      'surf/lh.sulc', 'surf/rh.sulc']),
+                      'surf/lh.sulc', 'surf/rh.sulc'], []),
         ('curvHK', ['surf/lh.white.H', 'surf/rh.white.H',
                     'surf/lh.white.K', 'surf/rh.white.K',
                     'surf/lh.inflated.H', 'surf/rh.inflated.H',
-                    'surf/lh.inflated.K', 'surf/rh.inflated.K']),
-        ('curvstats', ['stats/lh.curv.stats', 'stats/rh.curv.stats']),
+                    'surf/lh.inflated.K', 'surf/rh.inflated.K'], []),
+        ('curvstats', ['stats/lh.curv.stats', 'stats/rh.curv.stats'], []),
         # autorecon3
-        ('sphere', ['surf/lh.sphere', 'surf/rh.sphere']),
-        ('surfreg', ['surf/lh.sphere.reg', 'surf/rh.sphere.reg']),
+        ('sphere', ['surf/lh.sphere', 'surf/rh.sphere'], []),
+        ('surfreg', ['surf/lh.sphere.reg', 'surf/rh.sphere.reg'], []),
         ('jacobian_white', ['surf/lh.jacobian_white',
-                            'surf/rh.jacobian_white']),
-        ('avgcurv', ['surf/lh.avg_curv', 'surf/rh.avg_curv']),
-        ('cortparc', ['label/lh.aparc.annot', 'label/rh.aparc.annot']),
+                            'surf/rh.jacobian_white'], []),
+        ('avgcurv', ['surf/lh.avg_curv', 'surf/rh.avg_curv'], []),
+        ('cortparc', ['label/lh.aparc.annot', 'label/rh.aparc.annot'], []),
         ('pial', ['surf/lh.pial', 'surf/rh.pial',
                   'surf/lh.curv.pial', 'surf/rh.curv.pial',
                   'surf/lh.area.pial', 'surf/rh.area.pial',
-                  'surf/lh.thickness', 'surf/rh.thickness']),
-        # TODO: Optional -T2pial / -FLAIRpial
+                  'surf/lh.thickness', 'surf/rh.thickness'], []),
         ('cortribbon', ['mri/lh.ribbon.mgz', 'mri/rh.ribbon.mgz',
-                        'mri/ribbon.mgz']),
+                        'mri/ribbon.mgz'], []),
         ('parcstats', ['stats/lh.aparc.astats', 'stats/rh.aparc.stats',
-                       'stats/aparc.annot.ctab']),
+                       'stats/aparc.annot.ctab'], []),
         ('cortparc2', ['label/lh.aparc.a2009s.annot',
-                       'label/rh.aparc.a2009s.annot']),
+                       'label/rh.aparc.a2009s.annot'], []),
         ('parcstats2', ['stats/lh.aparc.a2009s.stats',
                         'stats/rh.aparc.a2009s.stats',
-                        'stats/aparc.annot.a2009s.ctab']),
+                        'stats/aparc.annot.a2009s.ctab'], []),
         ('cortparc3', ['label/lh.aparc.DKTatlas.annot',
-                       'label/rh.aparc.DKTatlas.annot']),
+                       'label/rh.aparc.DKTatlas.annot'], []),
         ('parcstats3', ['stats/lh.aparc.DKTatlas.stats',
                         'stats/rh.aparc.DKTatlas.stats',
-                        'stats/aparc.annot.DKTatlas.ctab']),
-        ('pctsurfcon', ['surf/lh.w-g.pct.mgh', 'surf/rh.w-g.pct.mgh']),
-        ('hyporelabel', ['mri/aseg.presurf.hypos.mgz']),
+                        'stats/aparc.annot.DKTatlas.ctab'], []),
+        ('pctsurfcon', ['surf/lh.w-g.pct.mgh', 'surf/rh.w-g.pct.mgh'], []),
+        ('hyporelabel', ['mri/aseg.presurf.hypos.mgz'], []),
         ('aparc2aseg', ['mri/aparc+aseg.mgz',
                         'mri/aparc.a2009s+aseg.mgz',
-                        'mri/aparc.DKTatlas+aseg.mgz']),
-        ('apas2aseg', ['mri/aseg.mgz']),  # XXX: Will not run because of calabel
-        ('segstats', ['stats/aseg.stats']),
-        ('wmparc', ['mri/wmparc.mgz', 'stats/wmparc.stats']),
+                        'mri/aparc.DKTatlas+aseg.mgz'], []),
+        ('apas2aseg', ['mri/aseg.mgz'], ['mri/aparc+aseg.mgz']),
+        ('segstats', ['stats/aseg.stats'], []),
+        ('wmparc', ['mri/wmparc.mgz', 'stats/wmparc.stats'], []),
         ('balabels', ['BA.ctab', 'BA.thresh.ctab',
                       'label/lh.entorhinal_exvivo.label',
-                      'label/rh.entorhinal_exvivo.label']),
+                      'label/rh.entorhinal_exvivo.label'], []),
         ]
 
     def _gen_subjects_dir(self):
@@ -799,15 +798,15 @@ class ReconAll(CommandLine):
         flags = []
         directive = 'all'
         for idx, step in enumerate(self._steps):
-            step, outfiles = step
+            step, outfiles, infiles = step
             flag = '-{}'.format(step)
             noflag = '-no{}'.format(step)
             if flag in cmd or noflag in cmd:
                 continue
 
-            if all([os.path.exists(os.path.join(subjects_dir,
-                                                self.inputs.subject_id, f)) for
-                    f in outfiles]):
+            subj_dir = os.path.join(subjects_dir, self.inputs.subject_id)
+            if check_depends([os.path.join(subj_dir, f) for f in outfiles],
+                             [os.path.join(subj_dir, f) for f in infiles]):
                 flags.append(noflag)
                 if idx > 4:
                     directive = 'autorecon2'
