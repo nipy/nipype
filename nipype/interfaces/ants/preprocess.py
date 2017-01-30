@@ -12,7 +12,7 @@ import os
 
 from ..base import TraitedSpec, File, traits, isdefined
 from .base import ANTSCommand, ANTSCommandInputSpec
-from ..utils.filemanip import split_filename
+from ...utils.filemanip import split_filename
 
 
 def _extant(field):
@@ -67,7 +67,7 @@ class AntsMotionCorrInputSpec(ANTSCommandInputSpec):
     average_image = File(argstr='-a %s', position=1,
                          desc="Average the input time series image.")
 
-    output_average_image = File(argstr="%s", hash_files=False, desc="", genfile)
+    output_average_image = File(argstr="%s", hash_files=False, desc="", genfile=True)
     output_transform_prefix = traits.Str()
     output_warped_image = File(hash_files=False, desc="")
 
