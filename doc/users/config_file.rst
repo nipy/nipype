@@ -55,7 +55,7 @@ Execution
 	Should the input files be checked for changes using their content (slow, but
 	100% accurate) or just their size and modification date (fast, but
 	potentially prone to errors)? (possible values: ``content`` and
-	``timestamp``; default value: ``content``)
+	``timestamp``; default value: ``timestamp``)
 
 *keep_inputs*
     Ensures that all inputs that are created in the nodes working directory are
