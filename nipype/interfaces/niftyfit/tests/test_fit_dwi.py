@@ -1,13 +1,13 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 
+import os
 from nipype.interfaces.niftyfit import no_niftyfit, get_custom_path, FitDwi
 from nipype.testing import assert_equal, skipif, example_data
 
 
 @skipif(no_niftyfit(cmd='fit_dwi'))
-def test_seg_em():
-
+def test_fit_dwi():
     # Create a reg_aladin object
     test_node = FitDwi()
 
@@ -22,14 +22,22 @@ def test_seg_em():
     test_node.inputs.bval_file = bval_file
     test_node.inputs.bvec_file = bvec_file
 
-    cmd_tmp = '{cmd} -bval {bval} -bvec {bvec} -famap dwifit__famap -mcmap \
-dwifit__mcmap -mdmap dwifit__mdmap -res dwifit__resmap -rgbmap dwifit__rgbmap \
--source {in_file} -syn dwifit__syn -tenmap2 dwifit__tenmap2 -v1map \
-dwifit__v1map'
+    cmd_tmp = '{cmd} -bval {bval} -bvec {bvec} -error {error} -famap {famap} \
+-mcmap {mcmap} -mdmap {mdmap} -res {resmap} -rgbmap {rgbmap} \
+-source {in_file} -syn {syn} -tenmap2 {tenmap} -v1map {v1map}'
     expected_cmd = cmd_tmp.format(
         cmd=get_custom_path('fit_dwi'),
         in_file=in_file,
         bval=bval_file,
-        bvec=bvec_file)
+        bvec=bvec_file,
+        error=os.path.join(os.getcwd(), 'diffusion_error.nii.gz'),
+        famap=os.path.join(os.getcwd(), 'diffusion_famap.nii.gz'),
+        mcmap=os.path.join(os.getcwd(), 'diffusion_mcmap.nii.gz'),
+        mdmap=os.path.join(os.getcwd(), 'diffusion_mdmap.nii.gz'),
+        resmap=os.path.join(os.getcwd(), 'diffusion_resmap.nii.gz'),
+        rgbmap=os.path.join(os.getcwd(), 'diffusion_rgbmap.nii.gz'),
+        syn=os.path.join(os.getcwd(), 'diffusion_syn.nii.gz'),
+        tenmap=os.path.join(os.getcwd(), 'diffusion_tenmap2.nii.gz'),
+        v1map=os.path.join(os.getcwd(), 'diffusion_v1map.nii.gz'))
 
     yield assert_equal, test_node.cmdline, expected_cmd

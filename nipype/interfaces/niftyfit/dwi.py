@@ -3,22 +3,11 @@
 """The dwi module of niftyfit, which wraps the fitting methods in NiftyFit.
 """
 
-import warnings
-
 from nipype.interfaces.niftyfit.base import NiftyFitCommand, get_custom_path
-
 from nipype.interfaces.base import (TraitedSpec, File, traits, isdefined,
                                     CommandLineInputSpec)
 
-warn = warnings.warn
-warnings.filterwarnings('always', category=UserWarning)
 
-
-# -----------------------------------------------------------
-# reg_resample wrapper interface
-# -----------------------------------------------------------
-
-# Input spec
 class FitDwiInputSpec(CommandLineInputSpec):
     # Input options
     source_file = File(exists=True, argstr='-source %s', mandatory=True,
@@ -39,52 +28,28 @@ the image (resulting tensors will be in mm coordinates, default: 0).',
         20, argstr='-bvallowthreshold %f', mandatory=False, usedefault=False,
         desc='B-value threshold used for detection of B0 and DWI images \
 [default: 20]')
-    op_basename = traits.String('dwifit_', desc='Output file basename',
-                                usedefault=True)
 
     # Output options, with templated output names based on the source image
-    mcmap_file = File(desc='Filename of multi-compartment model parameter map \
-(-ivim,-ball,-nod)', argstr='-mcmap %s', name_source=['op_basename'],
-                      name_template='%s_mcmap', requires=['nodv_flag'])
-    error_file = File(desc='Filename of parameter error maps',
+    mcmap_file = File(genfile=True, desc='Filename of multi-compartment model \
+parameter map (-ivim,-ball,-nod)', argstr='-mcmap %s', requires=['nodv_flag'])
+    error_file = File(genfile=True, desc='Filename of parameter error maps',
                       argstr='-error %s')
-    res_file = File(desc='Filename of model residual map',
-                    argstr='-res %s',
-                    name_source=['op_basename'],
-                    name_template='%s_resmap')
-    syn_file = File(desc='Filename of synthetic image',
-                    argstr='-syn %s',
-                    name_source=['op_basename'],
-                    name_template='%s_syn')
-    mdmap_file = File(desc='Filename of MD map/ADC',
-                      argstr='-mdmap %s',
-                      name_source=['op_basename'],
-                      name_template='%s_mdmap')
-    famap_file = File(desc='Filename of FA map',
-                      argstr='-famap %s',
-                      name_source=['op_basename'],
-                      name_template='%s_famap')
-    v1map_file = File(desc='Filename of PDD map [x,y,z]',
-                      argstr='-v1map %s',
-                      name_source=['op_basename'],
-                      name_template='%s_v1map')
-    rgbmap_file = File(desc='Filename of colour FA map',
-                       argstr='-rgbmap %s',
-                       name_source=['op_basename'],
-                       name_template='%s_rgbmap',
-                       requires=['dti_flag'])
-    # tenmap_file = File(desc='Filename of tensor map',
-    #                   argstr='-tenmap %s',
-    #                   name_source=['source_file'],
-    #                   name_template='%s_tenmap',
-    #                   requires=['dti_flag'])
-    tenmap_file = File(
-        desc='Filename of tensor map in lower triangular format',
-        argstr='-tenmap2 %s', name_source=['op_basename'],
-        name_template='%s_tenmap2', requires=['dti_flag'])
+    res_file = File(genfile=True, desc='Filename of model residual map',
+                    argstr='-res %s')
+    syn_file = File(genfile=True, desc='Filename of synthetic image',
+                    argstr='-syn %s')
+    mdmap_file = File(genfile=True, desc='Filename of MD map/ADC',
+                      argstr='-mdmap %s')
+    famap_file = File(genfile=True, desc='Filename of FA map',
+                      argstr='-famap %s')
+    v1map_file = File(genfile=True, desc='Filename of PDD map [x,y,z]',
+                      argstr='-v1map %s')
+    rgbmap_file = File(genfile=True, desc='Filename of colour FA map',
+                       argstr='-rgbmap %s', requires=['dti_flag'])
+    tenmap_file = File(genfile=True, desc='Filename of tensor map in lower \
+triangular format', argstr='-tenmap2 %s', requires=['dti_flag'])
 
     # Methods options
-
     mono_flag = traits.Bool(desc='Fit single exponential to non-directional \
 data [default with no b-vectors]', argstr='-mono',
                             xor=['ivim_flag', 'dti_flag', 'ball_flag',
@@ -174,6 +139,86 @@ class FitDwi(NiftyFitCommand):
 
     _suffix = '_fit_dwi'
 
+    def _gen_filename(self, name):
+        if name == 'mcmap_file':
+            return self._gen_fname(self.inputs.source_file, suffix='_mcmap',
+                                   ext='.nii.gz')
+        if name == 'error_file':
+            return self._gen_fname(self.inputs.source_file, suffix='_error',
+                                   ext='.nii.gz')
+        if name == 'res_file':
+            return self._gen_fname(self.inputs.source_file, suffix='_resmap',
+                                   ext='.nii.gz')
+        if name == 'syn_file':
+            return self._gen_fname(self.inputs.source_file, suffix='_syn',
+                                   ext='.nii.gz')
+        if name == 'mdmap_file':
+            return self._gen_fname(self.inputs.source_file, suffix='_mdmap',
+                                   ext='.nii.gz')
+        if name == 'famap_file':
+            return self._gen_fname(self.inputs.source_file, suffix='_famap',
+                                   ext='.nii.gz')
+        if name == 'v1map_file':
+            return self._gen_fname(self.inputs.source_file, suffix='_v1map',
+                                   ext='.nii.gz')
+        if name == 'rgbmap_file':
+            return self._gen_fname(self.inputs.source_file, suffix='_rgbmap',
+                                   ext='.nii.gz')
+        if name == 'tenmap_file':
+            return self._gen_fname(self.inputs.source_file, suffix='_tenmap2',
+                                   ext='.nii.gz')
+        return None
+
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+
+        if isdefined(self.inputs.mcmap_file):
+            outputs['mcmap_file'] = self.inputs.mcmap_file
+        else:
+            outputs['mcmap_file'] = self._gen_filename('mcmap_file')
+
+        if isdefined(self.inputs.error_file):
+            outputs['error_file'] = self.inputs.error_file
+        else:
+            outputs['error_file'] = self._gen_filename('error_file')
+
+        if isdefined(self.inputs.res_file):
+            outputs['res_file'] = self.inputs.res_file
+        else:
+            outputs['res_file'] = self._gen_filename('res_file')
+
+        if isdefined(self.inputs.mcmap_file):
+            outputs['syn_file'] = self.inputs.syn_file
+        else:
+            outputs['syn_file'] = self._gen_filename('syn_file')
+
+        if isdefined(self.inputs.mdmap_file):
+            outputs['mdmap_file'] = self.inputs.mdmap_file
+        else:
+            outputs['mdmap_file'] = self._gen_filename('mdmap_file')
+
+        if isdefined(self.inputs.famap_file):
+            outputs['famap_file'] = self.inputs.famap_file
+        else:
+            outputs['famap_file'] = self._gen_filename('famap_file')
+
+        if isdefined(self.inputs.v1map_file):
+            outputs['v1map_file'] = self.inputs.v1map_file
+        else:
+            outputs['v1map_file'] = self._gen_filename('v1map_file')
+
+        if isdefined(self.inputs.rgbmap_file):
+            outputs['rgbmap_file'] = self.inputs.rgbmap_file
+        else:
+            outputs['rgbmap_file'] = self._gen_filename('rgbmap_file')
+
+        if isdefined(self.inputs.tenmap_file):
+            outputs['tenmap_file'] = self.inputs.tenmap_file
+        else:
+            outputs['tenmap_file'] = self._gen_filename('tenmap_file')
+
+        return outputs
+
 
 # Input spec
 class DwiToolInputSpec(CommandLineInputSpec):
@@ -191,38 +236,22 @@ class DwiToolInputSpec(CommandLineInputSpec):
                      argstr='-mask %s', mandatory=False)
     b0_file = File(exists=True, desc='The B0 image corresponding to the',
                    argstr='-b0 %s', mandatory=False)
-    op_basename = traits.String('dwifit_', desc='Output file basename',
-                                usedefault=True)
 
     # Output options, with templated output names based on the source image
-    mcmap_file = File(desc='Filename of multi-compartment model parameter map \
-(-ivim,-ball,-nod)', argstr='-mcmap %s')
-    syn_file = File(desc='Filename of synthetic image',
-                    argstr='-syn %s',
-                    name_source=['op_basename'],
-                    name_template='%s_syn')
-    mdmap_file = File(desc='Filename of MD map/ADC',
-                      argstr='-mdmap %s',
-                      name_source=['op_basename'],
-                      name_template='%s_mdmap')
-    famap_file = File(desc='Filename of FA map',
-                      argstr='-famap %s',
-                      name_source=['op_basename'],
-                      name_template='%s_famap')
-    v1map_file = File(desc='Filename of PDD map [x,y,z]',
-                      argstr='-v1map %s',
-                      name_source=['op_basename'],
-                      name_template='%s_v1map')
-    rgbmap_file = File(desc='Filename of colour FA map',
-                       argstr='-rgbmap %s',
-                       name_source=['op_basename'],
-                       name_template='%s_rgbmap',
-                       requires=['dti_flag'])
-    logdti_file = File(desc='Filename of output logdti map',
-                       argstr='-logdti2 %s',
-                       name_source=['op_basename'],
-                       name_template='%s_logdti2',
-                       requires=['dti_flag'])
+    mcmap_file = File(genfile=True, desc='Filename of multi-compartment model \
+parameter map (-ivim,-ball,-nod)', argstr='-mcmap %s')
+    syn_file = File(genfile=True, desc='Filename of synthetic image',
+                    argstr='-syn %s')
+    mdmap_file = File(genfile=True, desc='Filename of MD map/ADC',
+                      argstr='-mdmap %s')
+    famap_file = File(genfile=True, desc='Filename of FA map',
+                      argstr='-famap %s')
+    v1map_file = File(genfile=True, desc='Filename of PDD map [x,y,z]',
+                      argstr='-v1map %s')
+    rgbmap_file = File(genfile=True, desc='Filename of colour FA map',
+                       argstr='-rgbmap %s', requires=['dti_flag'])
+    logdti_file = File(genfile=True, desc='Filename of output logdti map',
+                       argstr='-logdti2 %s', requires=['dti_flag'])
     bvallowthreshold = traits.Float(
         10, desc='B-value threshold used for detection of B0 and DWI images \
 [default: 10]', argstr='-bvallowthreshold %f', mandatory=False,
@@ -313,6 +342,8 @@ class DwiTool(NiftyFitCommand):
     input_spec = DwiToolInputSpec
     output_spec = DwiToolOutputSpec
 
+    _suffix = '_dwi_tool'
+
     def _format_arg(self, name, trait_spec, value):
         if name == 'syn_file':
             if not isdefined(self.inputs.bvec_file) or \
@@ -322,4 +353,66 @@ class DwiTool(NiftyFitCommand):
                 return trait_spec.argstr % value
         return super(DwiTool, self)._format_arg(name, trait_spec, value)
 
-    _suffix = '_dwi_tool'
+    def _gen_filename(self, name):
+        if name == 'mcmap_file':
+            return self._gen_fname(self.inputs.source_file, suffix='_mcmap',
+                                   ext='.nii.gz')
+        if name == 'syn_file':
+            return self._gen_fname(self.inputs.source_file, suffix='_syn',
+                                   ext='.nii.gz')
+        if name == 'mdmap_file':
+            return self._gen_fname(self.inputs.source_file, suffix='_mdmap',
+                                   ext='.nii.gz')
+        if name == 'famap_file':
+            return self._gen_fname(self.inputs.source_file, suffix='_famap',
+                                   ext='.nii.gz')
+        if name == 'v1map_file':
+            return self._gen_fname(self.inputs.source_file, suffix='_v1map',
+                                   ext='.nii.gz')
+        if name == 'rgbmap_file':
+            return self._gen_fname(self.inputs.source_file, suffix='_rgbmap',
+                                   ext='.nii.gz')
+        if name == 'logdti_file':
+            return self._gen_fname(self.inputs.source_file, suffix='_logdti2',
+                                   ext='.nii.gz')
+        return None
+
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+
+        if isdefined(self.inputs.mcmap_file):
+            outputs['mcmap_file'] = self.inputs.mcmap_file
+        else:
+            outputs['mcmap_file'] = self._gen_filename('mcmap_file')
+
+        if isdefined(self.inputs.mcmap_file):
+            outputs['syn_file'] = self.inputs.syn_file
+        else:
+            outputs['syn_file'] = self._gen_filename('syn_file')
+
+        if isdefined(self.inputs.mdmap_file):
+            outputs['mdmap_file'] = self.inputs.mdmap_file
+        else:
+            outputs['mdmap_file'] = self._gen_filename('mdmap_file')
+
+        if isdefined(self.inputs.famap_file):
+            outputs['famap_file'] = self.inputs.famap_file
+        else:
+            outputs['famap_file'] = self._gen_filename('famap_file')
+
+        if isdefined(self.inputs.v1map_file):
+            outputs['v1map_file'] = self.inputs.v1map_file
+        else:
+            outputs['v1map_file'] = self._gen_filename('v1map_file')
+
+        if isdefined(self.inputs.rgbmap_file):
+            outputs['rgbmap_file'] = self.inputs.rgbmap_file
+        else:
+            outputs['rgbmap_file'] = self._gen_filename('rgbmap_file')
+
+        if isdefined(self.inputs.logdti_file):
+            outputs['logdti_file'] = self.inputs.logdti_file
+        else:
+            outputs['logdti_file'] = self._gen_filename('logdti_file')
+
+        return outputs

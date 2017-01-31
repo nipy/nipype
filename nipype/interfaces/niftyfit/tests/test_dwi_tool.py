@@ -1,13 +1,13 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 
+import os
 from nipype.interfaces.niftyfit import no_niftyfit, get_custom_path, DwiTool
 from nipype.testing import assert_equal, skipif, example_data
 
 
 @skipif(no_niftyfit(cmd='dwi_tool'))
-def test_seg_em():
-
+def test_dwi_tool():
     # Create a reg_aladin object
     test_node = DwiTool()
 
@@ -18,10 +18,16 @@ def test_seg_em():
     in_file = example_data('diffusion.nii')
     test_node.inputs.source_file = in_file
 
-    cmd_tmp = '{cmd} -famap dwifit__famap -logdti2 dwifit__logdti2 -mdmap \
-dwifit__mdmap -rgbmap dwifit__rgbmap -source {in_file}  -v1map dwifit__v1map'
+    cmd_tmp = '{cmd} -famap {famap} -logdti2 {logdti2} -mcmap {mcmap} \
+-mdmap {mdmap} -rgbmap {rgbmap} -source {in_file}  -v1map {v1map}'
     expected_cmd = cmd_tmp.format(
         cmd=get_custom_path('dwi_tool'),
-        in_file=in_file)
+        in_file=in_file,
+        famap=os.path.join(os.getcwd(), 'diffusion_famap.nii.gz'),
+        logdti2=os.path.join(os.getcwd(), 'diffusion_logdti2.nii.gz'),
+        mcmap=os.path.join(os.getcwd(), 'diffusion_mcmap.nii.gz'),
+        mdmap=os.path.join(os.getcwd(), 'diffusion_mdmap.nii.gz'),
+        rgbmap=os.path.join(os.getcwd(), 'diffusion_rgbmap.nii.gz'),
+        v1map=os.path.join(os.getcwd(), 'diffusion_v1map.nii.gz'))
 
     yield assert_equal, test_node.cmdline, expected_cmd

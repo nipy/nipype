@@ -7,7 +7,7 @@ from nipype.testing import assert_equal, skipif, example_data
 
 
 @skipif(no_niftyfit(cmd='fit_qt1'))
-def test_seg_em():
+def test_fit_qt1():
     # Create a reg_aladin object
     test_node = FitQt1()
 
