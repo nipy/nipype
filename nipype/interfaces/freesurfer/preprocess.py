@@ -21,7 +21,7 @@ import shutil
 import numpy as np
 from nibabel import load
 
-from ... import logging
+from ... import logging, LooseVersion
 from ...utils.filemanip import fname_presuffix, check_depends
 from ..io import FreeSurferSource
 from ..base import (TraitedSpec, File, traits,
@@ -30,11 +30,19 @@ from ..base import (TraitedSpec, File, traits,
                     CommandLineInputSpec, isdefined)
 from .base import (FSCommand, FSTraitedSpec,
                    FSTraitedSpecOpenMP,
-                   FSCommandOpenMP)
+                   FSCommandOpenMP, Info)
 from .utils import copy2subjdir
 
 __docformat__ = 'restructuredtext'
 iflogger = logging.getLogger('interface')
+
+FSVersion = "0"
+_ver = Info.version()
+if _ver:
+    if 'dev' in _ver:
+        FSVersion = _ver.rstrip().split('-')[-1] + '.dev'
+    else:
+        FSVersion = _ver.rstrip().split('-v')[-1]
 
 
 class ParseDICOMDirInputSpec(FSTraitedSpec):
@@ -656,8 +664,19 @@ class ReconAll(CommandLine):
     output_spec = ReconAllOutputSpec
     _can_resume = True
 
-    _steps = [
-        # autorecon1
+    # Steps are based off of the recon-all tables [0,1] describing, inputs,
+    # commands, and outputs of each step of the recon-all process,
+    # controlled by flags.
+    #
+    # Each step is a 3-tuple containing (flag, [outputs], [inputs])
+    # A step is considered complete if all of its outputs exist and are newer
+    # than the inputs. An empty input list indicates input mtimes will not
+    # be checked. This may need updating, if users are working with manually
+    # edited files.
+    #
+    # [0] https://surfer.nmr.mgh.harvard.edu/fswiki/ReconAllTableStableV5.3
+    # [1] https://surfer.nmr.mgh.harvard.edu/fswiki/ReconAllTableStableV6.0
+    _autorecon1_steps = [
         ('motioncor', ['mri/rawavg.mgz', 'mri/orig.mgz'], []),
         ('talairach', ['mri/orig_nu.mgz',
                        'mri/transforms/talairach.auto.xfm',
@@ -669,75 +688,149 @@ class ReconAll(CommandLine):
         ('skullstrip', ['mri/talairach_with_skull.lta',
                         'mri/brainmask.auto.mgz',
                         'mri/brainmask.mgz'], []),
-        # autorecon2
-        ('gcareg', ['mri/transforms/talairach.lta'], []),
-        ('canorm', ['mri/norm.mgz'], []),
-        ('careg', ['mri/transforms/talairach.m3z'], []),
-        ('calabel', ['mri/aseg.auto_noCCseg.mgz',
-                     'mri/aseg.auto.mgz',
-                     'mri/aseg.mgz'], []),
-        ('normalization2', ['mri/brain.mgz'], []),
-        ('maskbfs', ['mri/brain.finalsurfs.mgz'], []),
-        ('segmentation', ['mri/wm.seg.mgz',
-                          'mri/wm.asegedit.mgz',
-                          'mri/wm.mgz'], []),
-        ('fill', ['mri/filled.mgz',
-                  # 'scripts/ponscc.cut.log',
-                  ], []),
-        ('tessellate', ['surf/lh.orig.nofix', 'surf/rh.orig.nofix'], []),
-        ('smooth1', ['surf/lh.smoothwm.nofix', 'surf/rh.smoothwm.nofix'], []),
-        ('inflate1', ['surf/lh.inflated.nofix', 'surf/rh.inflated.nofix'], []),
-        ('qsphere', ['surf/lh.qsphere.nofix', 'surf/rh.qsphere.nofix'], []),
-        ('fix', ['surf/lh.orig', 'surf/rh.orig'], []),
-        ('white', ['surf/lh.white.preaparc', 'surf/rh.white.preaparc',
-                   'surf/lh.curv', 'surf/rh.curv',
-                   'surf/lh.area', 'surf/rh.area',
-                   'label/lh.cortex.label', 'label/rh.cortex.label'], []),
-        ('smooth2', ['surf/lh.smoothwm', 'surf/rh.smoothwm'], []),
-        ('inflate2', ['surf/lh.inflated', 'surf/rh.inflated',
-                      'surf/lh.sulc', 'surf/rh.sulc'], []),
-        ('curvHK', ['surf/lh.white.H', 'surf/rh.white.H',
-                    'surf/lh.white.K', 'surf/rh.white.K',
-                    'surf/lh.inflated.H', 'surf/rh.inflated.H',
-                    'surf/lh.inflated.K', 'surf/rh.inflated.K'], []),
-        ('curvstats', ['stats/lh.curv.stats', 'stats/rh.curv.stats'], []),
-        # autorecon3
-        ('sphere', ['surf/lh.sphere', 'surf/rh.sphere'], []),
-        ('surfreg', ['surf/lh.sphere.reg', 'surf/rh.sphere.reg'], []),
-        ('jacobian_white', ['surf/lh.jacobian_white',
-                            'surf/rh.jacobian_white'], []),
-        ('avgcurv', ['surf/lh.avg_curv', 'surf/rh.avg_curv'], []),
-        ('cortparc', ['label/lh.aparc.annot', 'label/rh.aparc.annot'], []),
-        ('pial', ['surf/lh.pial', 'surf/rh.pial',
-                  'surf/lh.curv.pial', 'surf/rh.curv.pial',
-                  'surf/lh.area.pial', 'surf/rh.area.pial',
-                  'surf/lh.thickness', 'surf/rh.thickness'], []),
-        ('cortribbon', ['mri/lh.ribbon.mgz', 'mri/rh.ribbon.mgz',
-                        'mri/ribbon.mgz'], []),
-        ('parcstats', ['stats/lh.aparc.astats', 'stats/rh.aparc.stats',
-                       'stats/aparc.annot.ctab'], []),
-        ('cortparc2', ['label/lh.aparc.a2009s.annot',
-                       'label/rh.aparc.a2009s.annot'], []),
-        ('parcstats2', ['stats/lh.aparc.a2009s.stats',
-                        'stats/rh.aparc.a2009s.stats',
-                        'stats/aparc.annot.a2009s.ctab'], []),
-        ('cortparc3', ['label/lh.aparc.DKTatlas.annot',
-                       'label/rh.aparc.DKTatlas.annot'], []),
-        ('parcstats3', ['stats/lh.aparc.DKTatlas.stats',
-                        'stats/rh.aparc.DKTatlas.stats',
-                        'stats/aparc.annot.DKTatlas.ctab'], []),
-        ('pctsurfcon', ['surf/lh.w-g.pct.mgh', 'surf/rh.w-g.pct.mgh'], []),
-        ('hyporelabel', ['mri/aseg.presurf.hypos.mgz'], []),
-        ('aparc2aseg', ['mri/aparc+aseg.mgz',
-                        'mri/aparc.a2009s+aseg.mgz',
-                        'mri/aparc.DKTatlas+aseg.mgz'], []),
-        ('apas2aseg', ['mri/aseg.mgz'], ['mri/aparc+aseg.mgz']),
-        ('segstats', ['stats/aseg.stats'], []),
-        ('wmparc', ['mri/wmparc.mgz', 'stats/wmparc.stats'], []),
-        ('balabels', ['BA.ctab', 'BA.thresh.ctab',
-                      'label/lh.entorhinal_exvivo.label',
-                      'label/rh.entorhinal_exvivo.label'], []),
         ]
+    if LooseVersion(FSVersion) < LooseVersion("6.0.0"):
+        _autorecon2_steps = [
+            ('gcareg', ['mri/transforms/talairach.lta'], []),
+            ('canorm', ['mri/norm.mgz'], []),
+            ('careg', ['mri/transforms/talairach.m3z'], []),
+            ('careginv', ['mri/transforms/talairach.m3z.inv.x.mgz',
+                          'mri/transforms/talairach.m3z.inv.y.mgz',
+                          'mri/transforms/talairach.m3z.inv.z.mgz',
+                          ], []),
+            ('rmneck', ['mri/nu_noneck.mgz'], []),
+            ('skull-lta', ['mri/transforms/talairach_with_skull_2.lta'], []),
+            ('calabel', ['mri/aseg.auto_noCCseg.mgz',
+                         'mri/aseg.auto.mgz',
+                         'mri/aseg.mgz'], []),
+            ('normalization2', ['mri/brain.mgz'], []),
+            ('maskbfs', ['mri/brain.finalsurfs.mgz'], []),
+            ('segmentation', ['mri/wm.seg.mgz',
+                              'mri/wm.asegedit.mgz',
+                              'mri/wm.mgz'], []),
+            ('fill', ['mri/filled.mgz',
+                      # 'scripts/ponscc.cut.log',
+                      ], []),
+            ('tessellate', ['surf/lh.orig.nofix', 'surf/rh.orig.nofix'], []),
+            ('smooth1', ['surf/lh.smoothwm.nofix', 'surf/rh.smoothwm.nofix'],
+             []),
+            ('inflate1', ['surf/lh.inflated.nofix', 'surf/rh.inflated.nofix'],
+             []),
+            ('qsphere', ['surf/lh.qsphere.nofix', 'surf/rh.qsphere.nofix'],
+             []),
+            ('fix', ['surf/lh.orig', 'surf/rh.orig'], []),
+            ('white', ['surf/lh.white', 'surf/rh.white',
+                       'surf/lh.curv', 'surf/rh.curv',
+                       'surf/lh.area', 'surf/rh.area',
+                       'label/lh.cortex.label', 'label/rh.cortex.label'], []),
+            ('smooth2', ['surf/lh.smoothwm', 'surf/rh.smoothwm'], []),
+            ('inflate2', ['surf/lh.inflated', 'surf/rh.inflated',
+                          'surf/lh.sulc', 'surf/rh.sulc',
+                          'surf/lh.inflated.H', 'surf/rh.inflated.H',
+                          'surf/lh.inflated.K', 'surf/rh.inflated.K'], []),
+            ]
+        _autorecon3_steps = [
+            ('sphere', ['surf/lh.sphere', 'surf/rh.sphere'], []),
+            ('surfreg', ['surf/lh.sphere.reg', 'surf/rh.sphere.reg'], []),
+            ('jacobian_white', ['surf/lh.jacobian_white',
+                                'surf/rh.jacobian_white'], []),
+            ('avgcurv', ['surf/lh.avg_curv', 'surf/rh.avg_curv'], []),
+            ('cortparc', ['label/lh.aparc.annot', 'label/rh.aparc.annot'], []),
+            ('pial', ['surf/lh.pial', 'surf/rh.pial',
+                      'surf/lh.curv.pial', 'surf/rh.curv.pial',
+                      'surf/lh.area.pial', 'surf/rh.area.pial',
+                      'surf/lh.thickness', 'surf/rh.thickness'], []),
+            ('cortparc2', ['label/lh.aparc.a2009s.annot',
+                           'label/rh.aparc.a2009s.annot'], []),
+            ('parcstats2', ['stats/lh.aparc.a2009s.stats',
+                            'stats/rh.aparc.a2009s.stats',
+                            'stats/aparc.annot.a2009s.ctab'], []),
+            ('cortribbon', ['mri/lh.ribbon.mgz', 'mri/rh.ribbon.mgz',
+                            'mri/ribbon.mgz'], []),
+            ('segstats', ['stats/aseg.stats'], []),
+            ('aparc2aseg', ['mri/aparc+aseg.mgz',
+                            'mri/aparc.a2009s+aseg.mgz'], []),
+            ('wmparc', ['mri/wmparc.mgz', 'stats/wmparc.stats'], []),
+            ('balabels', ['BA.ctab', 'BA.thresh.ctab'], []),
+            ('label-exvivo-ec', ['label/lh.entorhinal_exvivo.label',
+                                 'label/rh.entorhinal_exvivo.label'], []),
+            ]
+    else:
+        _autorecon2_steps = [
+            ('gcareg', ['mri/transforms/talairach.lta'], []),
+            ('canorm', ['mri/norm.mgz'], []),
+            ('careg', ['mri/transforms/talairach.m3z'], []),
+            ('calabel', ['mri/aseg.auto_noCCseg.mgz',
+                         'mri/aseg.auto.mgz',
+                         'mri/aseg.mgz'], []),
+            ('normalization2', ['mri/brain.mgz'], []),
+            ('maskbfs', ['mri/brain.finalsurfs.mgz'], []),
+            ('segmentation', ['mri/wm.seg.mgz',
+                              'mri/wm.asegedit.mgz',
+                              'mri/wm.mgz'], []),
+            ('fill', ['mri/filled.mgz',
+                      # 'scripts/ponscc.cut.log',
+                      ], []),
+            ('tessellate', ['surf/lh.orig.nofix', 'surf/rh.orig.nofix'], []),
+            ('smooth1', ['surf/lh.smoothwm.nofix', 'surf/rh.smoothwm.nofix'],
+             []),
+            ('inflate1', ['surf/lh.inflated.nofix', 'surf/rh.inflated.nofix'],
+             []),
+            ('qsphere', ['surf/lh.qsphere.nofix', 'surf/rh.qsphere.nofix'],
+             []),
+            ('fix', ['surf/lh.orig', 'surf/rh.orig'], []),
+            ('white', ['surf/lh.white.preaparc', 'surf/rh.white.preaparc',
+                       'surf/lh.curv', 'surf/rh.curv',
+                       'surf/lh.area', 'surf/rh.area',
+                       'label/lh.cortex.label', 'label/rh.cortex.label'], []),
+            ('smooth2', ['surf/lh.smoothwm', 'surf/rh.smoothwm'], []),
+            ('inflate2', ['surf/lh.inflated', 'surf/rh.inflated',
+                          'surf/lh.sulc', 'surf/rh.sulc'], []),
+            ('curvHK', ['surf/lh.white.H', 'surf/rh.white.H',
+                        'surf/lh.white.K', 'surf/rh.white.K',
+                        'surf/lh.inflated.H', 'surf/rh.inflated.H',
+                        'surf/lh.inflated.K', 'surf/rh.inflated.K'], []),
+            ('curvstats', ['stats/lh.curv.stats', 'stats/rh.curv.stats'], []),
+            ]
+        _autorecon3_steps = [
+            ('sphere', ['surf/lh.sphere', 'surf/rh.sphere'], []),
+            ('surfreg', ['surf/lh.sphere.reg', 'surf/rh.sphere.reg'], []),
+            ('jacobian_white', ['surf/lh.jacobian_white',
+                                'surf/rh.jacobian_white'], []),
+            ('avgcurv', ['surf/lh.avg_curv', 'surf/rh.avg_curv'], []),
+            ('cortparc', ['label/lh.aparc.annot', 'label/rh.aparc.annot'], []),
+            ('pial', ['surf/lh.pial', 'surf/rh.pial',
+                      'surf/lh.curv.pial', 'surf/rh.curv.pial',
+                      'surf/lh.area.pial', 'surf/rh.area.pial',
+                      'surf/lh.thickness', 'surf/rh.thickness'], []),
+            ('cortribbon', ['mri/lh.ribbon.mgz', 'mri/rh.ribbon.mgz',
+                            'mri/ribbon.mgz'], []),
+            ('parcstats', ['stats/lh.aparc.astats', 'stats/rh.aparc.stats',
+                           'stats/aparc.annot.ctab'], []),
+            ('cortparc2', ['label/lh.aparc.a2009s.annot',
+                           'label/rh.aparc.a2009s.annot'], []),
+            ('parcstats2', ['stats/lh.aparc.a2009s.stats',
+                            'stats/rh.aparc.a2009s.stats',
+                            'stats/aparc.annot.a2009s.ctab'], []),
+            ('cortparc3', ['label/lh.aparc.DKTatlas.annot',
+                           'label/rh.aparc.DKTatlas.annot'], []),
+            ('parcstats3', ['stats/lh.aparc.DKTatlas.stats',
+                            'stats/rh.aparc.DKTatlas.stats',
+                            'stats/aparc.annot.DKTatlas.ctab'], []),
+            ('pctsurfcon', ['surf/lh.w-g.pct.mgh', 'surf/rh.w-g.pct.mgh'], []),
+            ('hyporelabel', ['mri/aseg.presurf.hypos.mgz'], []),
+            ('aparc2aseg', ['mri/aparc+aseg.mgz',
+                            'mri/aparc.a2009s+aseg.mgz',
+                            'mri/aparc.DKTatlas+aseg.mgz'], []),
+            ('apas2aseg', ['mri/aseg.mgz'], ['mri/aparc+aseg.mgz']),
+            ('segstats', ['stats/aseg.stats'], []),
+            ('wmparc', ['mri/wmparc.mgz', 'stats/wmparc.stats'], []),
+            ('balabels', ['BA.ctab', 'BA.thresh.ctab',
+                          'label/lh.entorhinal_exvivo.label',
+                          'label/rh.entorhinal_exvivo.label'], []),
+            ]
+
+    _steps = _autorecon1_steps + _autorecon2_steps + _autorecon3_steps
 
     def _gen_subjects_dir(self):
         return os.getcwd()
