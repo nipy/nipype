@@ -457,7 +457,7 @@ def check_depends(targets, dependencies):
     deps = filename_to_list(dependencies)
     return all(map(os.path.exists, tgts)) and \
         min(map(os.path.getmtime, tgts)) > \
-        max(map(os.path.getmtime, deps), default=0)
+        max(list(map(os.path.getmtime, deps)) + [0])
 
 
 def save_json(filename, data):
