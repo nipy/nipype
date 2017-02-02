@@ -61,15 +61,17 @@ class AntsMotionCorrInputSpec(ANTSCommandInputSpec):
         "specified-dimensional image. If not specified, N4 tries to infer "
         "the dimensionality from the input image."
     )
-    dimensionality = traits.Enum(3, 2, argstr='-d %d', usedefault=False,
+    dimensionality = traits.Enum(3, 2, argstr='-d %d', usedefault=True,
                                  position=0, desc=dimension_desc, default=3)
 
-    average_image = File(argstr='-a %s', position=1,
+    average_image = File(argstr='-a %s', position=1, exists=False,
                          desc="Average the input time series image.")
 
-    output_average_image = File(argstr="%s", hash_files=False, desc="", genfile=True)
+    output_average_image = File(hash_files=False, desc="", argstr="%s",
+                                genfile=True, exists=False, usedefault=True)
     output_transform_prefix = traits.Str()
-    output_warped_image = File(hash_files=False, desc="")
+    output_warped_image = File(hash_files=False, desc="",
+                               exists=False)
 
     metric_type = traits.Enum("CC", "MeanSquares", "Demons", "GC", "MI",
                               "Mattes", argstr="%s")
@@ -120,7 +122,7 @@ class AntsMotionCorrInputSpec(ANTSCommandInputSpec):
 class AntsMotionCorrOutputSpec(TraitedSpec):
     '''Output spec for the antsMotionCorr command'''
     average_image = File(exists=True, desc='Average of an image')
-    composite_transform = File(exists=True, desc='Composite transform file')
+    composite_transform = File(desc='Composite transform file')
     inverse_composite_transform = File(desc='Inverse composite transform file')
     warped_image = File(desc="Outputs warped image")
     inverse_warped_image = File(desc="Outputs the inverse of the warped image")
@@ -164,9 +166,16 @@ class AntsMotionCorr(ANTSCommand):
 
 
     def _gen_filename(self, name):
-        if name == 'output_average_image' and _extant(self.inputs.average):
-            pth, fname, ext = split_filename(self.inputs.average)
+        if name == 'output_average_image':
+            if _extant(self.inputs.average_image):
+                pth, fname, ext = split_filename(self.inputs.average_image)
+            else:
+                pth, fname, ext = split_filename(self.inputs.fixed_image)
             new_fname = '{}{}{}'.format(fname, '_avg', ext)
+            return os.path.join(pth, new_fname)
+        if name == 'ouput_warped_image' and _extant(self.inputs.fixed_image):
+            pth, fname, ext = split_filename(self.inputs.fixed_image)
+            new_fname = '{}{}{}'.format(fname, '_warped', ext)
             return os.path.join(pth, new_fname)
         return None
 
@@ -176,6 +185,7 @@ class AntsMotionCorr(ANTSCommand):
         if opt == 'transformation_model':
             return self._format_transform()
         if opt == 'output_average_image':
+            self.inputs.output_average_image = self._gen_filename("output_average_image")
             return self._format_output()
         return super(AntsMotionCorr, self)._format_arg(opt, spec, val)
 
@@ -198,7 +208,7 @@ class AntsMotionCorr(ANTSCommand):
                 and _extant(self.inputs.gradient_step_length)):
             return transform_str.format(self.inputs.transformation_model,
                                         self.inputs.gradient_step_length)
-        return ""
+        return " bad format "
 
     def _format_output(self):
         if (_extant(self.inputs.output_transform_prefix)
@@ -226,6 +236,6 @@ class AntsMotionCorr(ANTSCommand):
             )
         if _extant(self.inputs.output_transform_prefix):
             outputs['composite_transform'] = '{}MOCOparams.csv'.format(
-                self.inputs.output_tranform_prefix
+                self.inputs.output_transform_prefix
             )
         return outputs
