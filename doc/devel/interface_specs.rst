@@ -353,7 +353,7 @@ CommandLine
 	be fixed it's recommended to just use ``usedefault``.
 
 ``sep``
-	For List traits the string with witch elements of the list will be joined.
+	For List traits the string with which elements of the list will be joined.
 
 ``name_source``
     Indicates the list of input fields from which the value of the current File
