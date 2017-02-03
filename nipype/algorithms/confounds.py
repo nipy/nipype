@@ -629,7 +629,6 @@ research/nichols/scripts/fsl/standardizeddvars.pdf>`_, 2013.
     from nitime.algorithms import AR_est_YW
     import warnings
 
-    mmap
     func = nb.load(in_file, mmap=NUMPY_MMAP).get_data().astype(np.float32)
     mask = nb.load(in_mask, mmap=NUMPY_MMAP).get_data().astype(np.uint8)
 
