@@ -30,6 +30,7 @@ before_install:
 install:
 #  Add install of vtk and mayavi to test mesh (disabled): conda install -y vtk mayavi &&
 - function inst {
+  conda config --add channels conda-forge &&
   conda update --yes conda &&
   conda update --all -y python=$TRAVIS_PYTHON_VERSION &&
   conda install -y $(sed -e ':a' -e 'N' -e '$!ba' -e 's/\n/ /g' requirements.txt) &&
