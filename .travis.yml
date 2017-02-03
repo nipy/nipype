@@ -11,10 +11,6 @@ env:
 - INSTALL_DEB_DEPENDECIES=true NIPYPE_EXTRAS="doc,tests,fmri,profiler,duecredit"
 before_install:
 - function bef_inst {
-  wget https://repo.continuum.io/archive/Anaconda${TRAVIS_PYTHON_VERSION:0:1}-4.3.0-Linux-x86_64.sh
-  -O /home/travis/.cache/anaconda.sh &&
-  bash /home/travis/.cache/anaconda.sh -b -p /home/travis/anaconda &&
-  export PATH=/home/travis/anaconda/bin:$PATH &&
   if $INSTALL_DEB_DEPENDECIES; then sudo rm -rf /dev/shm; fi &&
   if $INSTALL_DEB_DEPENDECIES; then sudo ln -s /run/shm /dev/shm; fi &&
   bash <(wget -q -O- http://neuro.debian.net/_files/neurodebian-travis.sh) &&
@@ -25,16 +21,20 @@ before_install:
   if $INSTALL_DEB_DEPENDECIES; then
     source /etc/fsl/fsl.sh;
     source /etc/afni/afni.sh;
-    export FSLOUTPUTTYPE=NIFTI_GZ; fi }
+    export FSLOUTPUTTYPE=NIFTI_GZ; fi &&
+  wget https://repo.continuum.io/archive/Anaconda${TRAVIS_PYTHON_VERSION:0:1}-4.3.0-Linux-x86_64.sh
+  -O /home/travis/.cache/anaconda.sh &&
+  bash /home/travis/.cache/anaconda.sh -b -p /home/travis/anaconda &&
+  export PATH=/home/travis/anaconda/bin:$PATH &&
+  conda config --add channels conda-forge &&
+  echo 'always_yes: True' >> /home/travis/.condarc &&
+  conda update --all -y python=$TRAVIS_PYTHON_VERSION &&
+  conda install -y numpy scipy
+  }
 - travis_retry bef_inst
 install:
 #  Add install of vtk and mayavi to test mesh (disabled): conda install -y vtk mayavi &&
-- function inst {
-  conda config --add channels conda-forge &&
-  conda update --yes conda &&
-  conda update --all -y python=$TRAVIS_PYTHON_VERSION &&
-  conda install -y $(sed -e ':a' -e 'N' -e '$!ba' -e 's/\n/ /g' requirements.txt) &&
-  pip install -e .[$NIPYPE_EXTRAS]; }
+- function inst {pip install -e .[$NIPYPE_EXTRAS];}
 - travis_retry inst
 script:
 - py.test --doctest-modules nipype
