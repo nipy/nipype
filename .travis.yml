@@ -11,10 +11,10 @@ env:
 - INSTALL_DEB_DEPENDECIES=true NIPYPE_EXTRAS="doc,tests,fmri,profiler,duecredit"
 before_install:
 - function bef_inst {
-  wget http://repo.continuum.io/miniconda/Miniconda${TRAVIS_PYTHON_VERSION:0:1}-latest-Linux-x86_64.sh
-  -O /home/travis/.cache/miniconda.sh &&
-  bash /home/travis/.cache/miniconda.sh -b -p /home/travis/miniconda &&
-  export PATH=/home/travis/miniconda/bin:$PATH &&
+  wget https://repo.continuum.io/archive/Anaconda${TRAVIS_PYTHON_VERSION:0:1}-4.3.0-Linux-x86_64.sh
+  -O /home/travis/.cache/anaconda.sh &&
+  bash /home/travis/.cache/anaconda.sh -b -p /home/travis/anaconda &&
+  export PATH=/home/travis/anaconda/bin:$PATH &&
   if $INSTALL_DEB_DEPENDECIES; then sudo rm -rf /dev/shm; fi &&
   if $INSTALL_DEB_DEPENDECIES; then sudo ln -s /run/shm /dev/shm; fi &&
   bash <(wget -q -O- http://neuro.debian.net/_files/neurodebian-travis.sh) &&
@@ -34,7 +34,7 @@ install:
   conda update --yes conda &&
   conda update --all -y python=$TRAVIS_PYTHON_VERSION &&
   conda install -y nipype &&
-  rm -r /home/travis/miniconda/lib/python${TRAVIS_PYTHON_VERSION}/site-packages/nipype* &&
+  rm -r /home/travis/anaconda/lib/python${TRAVIS_PYTHON_VERSION}/site-packages/nipype* &&
   pip install -r requirements.txt &&
   pip install -e .[$NIPYPE_EXTRAS]; }
 - travis_retry inst
