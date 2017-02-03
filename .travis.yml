@@ -33,9 +33,7 @@ install:
   conda config --add channels conda-forge &&
   conda update --yes conda &&
   conda update --all -y python=$TRAVIS_PYTHON_VERSION &&
-  conda install -y nipype &&
-  rm -r /home/travis/anaconda/lib/python${TRAVIS_PYTHON_VERSION}/site-packages/nipype* &&
-  pip install -r requirements.txt &&
+  conda install -y $(sed -e ':a' -e 'N' -e '$!ba' -e 's/\n/ /g' requirements.txt) &&
   pip install -e .[$NIPYPE_EXTRAS]; }
 - travis_retry inst
 script:
