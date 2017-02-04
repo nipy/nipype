@@ -424,6 +424,7 @@ def test_fnirt(setup_flirt):
         ('out_intensitymap_file',
             '--intout=%s_intmap' % infile_basename, True),
         ('out_intensitymap_file', '--intout=%s' % infile_basename, infile),
+        ('fieldcoeff_file', '--cout=%s' % infile, infile),
         ('log_file', '--logout=%s' % infile, infile)]
 
     for (name, settings, arg) in opt_map:
@@ -431,7 +432,7 @@ def test_fnirt(setup_flirt):
                           ref_file=reffile,
                           **{name: arg})
 
-        if name in ('config_file', 'affine_file', 'field_file'):
+        if name in ('config_file', 'affine_file', 'field_file', 'fieldcoeff_file'):
             cmd = 'fnirt %s --in=%s '\
                   '--logout=%s '\
                   '--ref=%s --iout=%s' % (settings, infile, log,
