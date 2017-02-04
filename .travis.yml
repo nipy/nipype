@@ -27,15 +27,13 @@ before_install:
   bash /home/travis/.cache/anaconda.sh -b -p /home/travis/anaconda &&
   export PATH=/home/travis/anaconda/bin:$PATH &&
   conda config --add channels conda-forge &&
-  echo 'always_yes: True' >> /home/travis/.condarc &&
   conda update --all -y python=$TRAVIS_PYTHON_VERSION &&
-  conda install -y numpy scipy
+  conda install -y numpy scipy;
   }
 - travis_retry bef_inst
 install:
 #  Add install of vtk and mayavi to test mesh (disabled): conda install -y vtk mayavi &&
-- function inst {pip install -e .[$NIPYPE_EXTRAS];}
-- travis_retry inst
+- travis_retry pip install -e .[$NIPYPE_EXTRAS]
 script:
 - py.test --doctest-modules nipype
 deploy:
