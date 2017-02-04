@@ -353,6 +353,7 @@ def test_mcflirt(setup_flirt):
 def test_fnirt(setup_flirt):
 
     tmpdir, infile, reffile = setup_flirt
+    os.chdir(tmpdir)
     fnirt = fsl.FNIRT()
     assert fnirt.cmd == 'fnirt'
 
@@ -404,60 +405,66 @@ def test_fnirt(setup_flirt):
         fnirt.run()
     fnirt.inputs.in_file = infile
     fnirt.inputs.ref_file = reffile
+    infile_basename = fsl.FNIRT.intensitymap_file_basename(infile)
 
     # test files
-    opt_map = {
-        'affine_file': ('--aff='),
-        'inwarp_file': ('--inwarp='),
-        'in_intensitymap_file': ('--intin='),
-        'config_file': ('--config='),
-        'refmask_file': ('--refmask='),
-        'inmask_file': ('--inmask='),
-        'field_file': ('--fout='),
-        'jacobian_file': ('--jout='),
-        'modulatedref_file': ('--refout='),
-        'out_intensitymap_file': ('--intout='),
-        'log_file': ('--logout=')}
+    opt_map = [
+        ('affine_file', '--aff=%s' % infile, infile),
+        ('inwarp_file', '--inwarp=%s' % infile, infile),
+        ('in_intensitymap_file', '--intin=%s' % infile_basename, [infile]),
+        ('in_intensitymap_file',
+            '--intin=%s' % infile_basename,
+            [infile, '%s.txt' % infile_basename]),
+        ('config_file', '--config=%s' % infile, infile),
+        ('refmask_file', '--refmask=%s' % infile, infile),
+        ('inmask_file', '--inmask=%s' % infile, infile),
+        ('field_file', '--fout=%s' % infile, infile),
+        ('jacobian_file', '--jout=%s' % infile, infile),
+        ('modulatedref_file', '--refout=%s' % infile, infile),
+        ('out_intensitymap_file',
+            '--intout=%s_intmap' % infile_basename, True),
+        ('out_intensitymap_file', '--intout=%s' % infile_basename, infile),
+        ('log_file', '--logout=%s' % infile, infile)]
 
-    for name, settings in list(opt_map.items()):
+    for (name, settings, arg) in opt_map:
         fnirt = fsl.FNIRT(in_file=infile,
                           ref_file=reffile,
-                          **{name: infile})
+                          **{name: arg})
 
         if name in ('config_file', 'affine_file', 'field_file'):
-            cmd = 'fnirt %s%s --in=%s '\
+            cmd = 'fnirt %s --in=%s '\
                   '--logout=%s '\
-                  '--ref=%s --iout=%s' % (settings, infile, infile, log,
+                  '--ref=%s --iout=%s' % (settings, infile, log,
                                           reffile, iout)
         elif name in ('refmask_file'):
             cmd = 'fnirt --in=%s '\
                   '--logout=%s --ref=%s '\
-                  '%s%s '\
+                  '%s '\
                   '--iout=%s' % (infile, log,
                                  reffile,
-                                 settings, infile,
+                                 settings,
                                  iout)
         elif name in ('in_intensitymap_file', 'inwarp_file', 'inmask_file', 'jacobian_file'):
             cmd = 'fnirt --in=%s '\
-                  '%s%s '\
+                  '%s '\
                   '--logout=%s --ref=%s '\
                   '--iout=%s' % (infile,
-                                 settings, infile,
+                                 settings,
                                  log,
                                  reffile,
                                  iout)
         elif name in ('log_file'):
             cmd = 'fnirt --in=%s '\
-                  '%s%s --ref=%s '\
+                  '%s --ref=%s '\
                   '--iout=%s' % (infile,
-                                 settings, infile,
+                                 settings,
                                  reffile,
                                  iout)
         else:
             cmd = 'fnirt --in=%s '\
-                  '--logout=%s %s%s '\
+                  '--logout=%s %s '\
                   '--ref=%s --iout=%s' % (infile, log,
-                                          settings, infile,
+                                          settings,
                                           reffile, iout)
 
         assert fnirt.cmdline == cmd
