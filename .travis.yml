@@ -28,7 +28,10 @@ before_install:
   export PATH=/home/travis/anaconda/bin:$PATH &&
   conda config --append channels conda-forge &&
   conda update --all -y python=$TRAVIS_PYTHON_VERSION &&
-  conda install -y icu numpy scipy traits;}
+  conda install -y icu numpy scipy traits &&
+  if [ "${TRAVIS_PYTHON_VERSION:0:1}" -gt "2" ]; then
+    conda install -y boto3;
+  fi }
 - travis_retry bef_inst
 install:
 #  Add install of vtk and mayavi to test mesh (disabled): conda install -y vtk mayavi &&
