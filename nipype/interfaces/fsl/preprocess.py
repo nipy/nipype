@@ -750,7 +750,7 @@ class FNIRTInputSpec(FSLCommandInputSpec):
                        desc='name of file containing affine transform')
     inwarp_file = File(exists=True, argstr='--inwarp=%s',
                        desc='name of file containing initial non-linear warps')
-    in_intensitymap_file = traits.List(File, exists=True, argstr='--intin=%s',
+    in_intensitymap_file = traits.List(File(exists=True), argstr='--intin=%s',
                                        copyfiles=False, minlen=1, maxlen=2,
                                        desc=('name of file/files containing '
                                              'initial intensity mapping '
