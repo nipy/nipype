@@ -630,6 +630,8 @@ class ReconAllInputSpec(CommandLineInputSpec):
                          desc='Use converted T2 to refine the cortical surface')
     openmp = traits.Int(argstr="-openmp %d",
                         desc="Number of processors to use in parallel")
+    parallel = traits.Bool(argstr="-parallel",
+                           desc="Enable parallel execution")
     subjects_dir = Directory(exists=True, argstr='-sd %s', hash_files=False,
                              desc='path to subjects directory', genfile=True)
     flags = traits.Str(argstr='%s', desc='additional parameters')
