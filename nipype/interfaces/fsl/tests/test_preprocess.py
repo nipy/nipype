@@ -406,6 +406,10 @@ def test_fnirt(setup_flirt):
     fnirt.inputs.in_file = infile
     fnirt.inputs.ref_file = reffile
     infile_basename = fsl.FNIRT.intensitymap_file_basename(infile)
+    infile_txt = '%s.txt' % infile_basename
+    # doing this to create the file to pass tests for file existence
+    with open(infile_txt, 'w'):
+        pass
 
     # test files
     opt_map = [
@@ -414,7 +418,7 @@ def test_fnirt(setup_flirt):
         ('in_intensitymap_file', '--intin=%s' % infile_basename, [infile]),
         ('in_intensitymap_file',
             '--intin=%s' % infile_basename,
-            [infile, '%s.txt' % infile_basename]),
+            [infile, infile_txt]),
         ('config_file', '--config=%s' % infile, infile),
         ('refmask_file', '--refmask=%s' % infile, infile),
         ('inmask_file', '--inmask=%s' % infile, infile),
