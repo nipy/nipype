@@ -405,20 +405,23 @@ def test_fnirt(setup_flirt):
         fnirt.run()
     fnirt.inputs.in_file = infile
     fnirt.inputs.ref_file = reffile
-    infile_basename = fsl.FNIRT.intensitymap_file_basename(infile)
-    infile_txt = '%s.txt' % infile_basename
+    intmap_basename = '%s_intmap' % fsl.FNIRT.intensitymap_file_basename(infile)
+    intmap_image = fsl_name(fnirt, intmap_basename)
+    intmap_txt = '%s.txt' % intmap_basename
     # doing this to create the file to pass tests for file existence
-    with open(infile_txt, 'w'):
+    with open(intmap_image, 'w'):
+        pass
+    with open(intmap_txt, 'w'):
         pass
 
     # test files
     opt_map = [
         ('affine_file', '--aff=%s' % infile, infile),
         ('inwarp_file', '--inwarp=%s' % infile, infile),
-        ('in_intensitymap_file', '--intin=%s' % infile_basename, [infile]),
+        ('in_intensitymap_file', '--intin=%s' % intmap_basename, [intmap_image]),
         ('in_intensitymap_file',
-            '--intin=%s' % infile_basename,
-            [infile, infile_txt]),
+            '--intin=%s' % intmap_basename,
+            [intmap_image, intmap_txt]),
         ('config_file', '--config=%s' % infile, infile),
         ('refmask_file', '--refmask=%s' % infile, infile),
         ('inmask_file', '--inmask=%s' % infile, infile),
@@ -426,8 +429,8 @@ def test_fnirt(setup_flirt):
         ('jacobian_file', '--jout=%s' % infile, infile),
         ('modulatedref_file', '--refout=%s' % infile, infile),
         ('out_intensitymap_file',
-            '--intout=%s_intmap' % infile_basename, True),
-        ('out_intensitymap_file', '--intout=%s' % infile_basename, infile),
+            '--intout=%s' % intmap_basename, True),
+        ('out_intensitymap_file', '--intout=%s' % intmap_basename, intmap_image),
         ('fieldcoeff_file', '--cout=%s' % infile, infile),
         ('log_file', '--logout=%s' % infile, infile)]
 
@@ -474,6 +477,9 @@ def test_fnirt(setup_flirt):
 
         assert fnirt.cmdline == cmd
 
+        if name == 'out_intensitymap_file':
+            assert fnirt._list_outputs()['out_intensitymap_file'] == [
+                intmap_image, intmap_txt]
 
 @pytest.mark.skipif(no_fsl(), reason="fsl is not installed")
 def test_applywarp(setup_flirt):
