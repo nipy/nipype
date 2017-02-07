@@ -991,7 +991,7 @@ class FNIRT(FSLCommand):
         if name in ('in_intensitymap_file', 'out_intensitymap_file'):
             if name == 'out_intensitymap_file':
                 value = self._list_outputs()[name]
-            value = map(FNIRT.intensitymap_file_basename, value)
+            value = [FNIRT.intensitymap_file_basename(v) for v in value]
             assert len(set(value)) == 1, (
                 'Found different basenames for {}: {}'.format(name, value))
             return spec.argstr % value[0]
@@ -1027,7 +1027,7 @@ class FNIRT(FSLCommand):
         """Removes valid intensitymap extensions from `f`, returning a basename
         that can refer to both intensitymap files.
         """
-        for ext in Info.ftypes.values() + ['.txt']:
+        for ext in list(Info.ftypes.values()) + ['.txt']:
             if f.endswith(ext):
                 return f[:-len(ext)]
         # TODO consider warning for this case
