@@ -454,6 +454,20 @@ class EddyOutputSpec(TraitedSpec):
     out_parameter = File(exists=True,
                          desc=('text file with parameters definining the '
                                'field and movement for each scan'))
+    out_rotated_bvecs = File(exists=True,
+                             desc=('File containing rotated b-values for all volumes'))
+    out_movement_rms = File(exists=True,
+                            desc=('Summary of the "total movement" in each volume'))
+    out_restricted_movement_rms = File(exists=True,
+                                       desc=('Summary of the "total movement" in each volume '
+                                             'disregarding translation in the PE direction'))
+    out_shell_alignment_parameters = File(exists=True,
+                                          desc=('File containing rigid body movement parameters '
+                                                'between the different shells as estimated by a '
+                                                'post-hoc mutual information based registration'))
+    out_outlier_report = File(exists=True,
+                              desc=('Text-file with a plain language report '
+                                    'on what outlier slices eddy has found'))
 
 
 class Eddy(FSLCommand):
@@ -526,6 +540,30 @@ class Eddy(FSLCommand):
             '%s.nii.gz' % self.inputs.out_base)
         outputs['out_parameter'] = os.path.abspath(
             '%s.eddy_parameters' % self.inputs.out_base)
+
+        # File generation might depend on the version of EDDY
+        out_rotated_bvecs = os.path.abspath(
+            '%s.eddy_rotated_bvecs' % self.inputs.out_base)
+        out_movement_rms = os.path.abspath(
+            '%s.eddy_movement_rms' % self.inputs.out_base)
+        out_restricted_movement_rms = os.path.abspath(
+            '%s.eddy_restricted_movement_rms' % self.inputs.out_base)
+        out_shell_alignment_parameters = os.path.abspath(
+            '%s.eddy_post_eddy_shell_alignment_parameters' % self.inputs.out_base)
+        out_outlier_report = os.path.abspath(
+            '%s.eddy_outlier_report' % self.inputs.out_base)
+
+        if os.path.exists(out_rotated_bvecs):
+            outputs['out_rotated_bvecs'] = out_rotated_bvecs
+        if os.path.exists(out_movement_rms):
+            outputs['out_movement_rms'] = out_movement_rms
+        if os.path.exists(out_restricted_movement_rms):
+            outputs['out_restricted_movement_rms'] = out_restricted_movement_rms
+        if os.path.exists(out_shell_alignment_parameters):
+            outputs['out_shell_alignment_parameters'] = out_shell_alignment_parameters
+        if os.path.exists(out_outlier_report):
+            outputs['out_outlier_report'] = out_outlier_report
+
         return outputs
 
 
