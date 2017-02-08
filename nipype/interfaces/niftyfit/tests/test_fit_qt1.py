@@ -1,14 +1,14 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 
-import os
 from nipype.interfaces.niftyfit import no_niftyfit, get_custom_path, FitQt1
 from nipype.testing import assert_equal, skipif, example_data
+import os
 
 
 @skipif(no_niftyfit(cmd='fit_qt1'))
-def test_seg_em():
-    # Create a reg_aladin object
+def test_fit_qt1():
+    # Create a node object
     test_node = FitQt1()
 
     # Check if the command is properly defined

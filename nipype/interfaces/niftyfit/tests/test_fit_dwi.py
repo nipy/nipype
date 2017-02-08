@@ -3,12 +3,13 @@
 
 from nipype.interfaces.niftyfit import no_niftyfit, get_custom_path, FitDwi
 from nipype.testing import assert_equal, skipif, example_data
+import os
 
 
 @skipif(no_niftyfit(cmd='fit_dwi'))
-def test_seg_em():
+def test_fit_dwi():
 
-    # Create a reg_aladin object
+    # Create a node object
     test_node = FitDwi()
 
     # Check if the command is properly defined
@@ -22,14 +23,21 @@ def test_seg_em():
     test_node.inputs.bval_file = bval_file
     test_node.inputs.bvec_file = bvec_file
 
-    cmd_tmp = '{cmd} -bval {bval} -bvec {bvec} -famap dwifit__famap -mcmap \
-dwifit__mcmap -mdmap dwifit__mdmap -res dwifit__resmap -rgbmap dwifit__rgbmap \
--source {in_file} -syn dwifit__syn -tenmap2 dwifit__tenmap2 -v1map \
-dwifit__v1map'
+    cmd_tmp = '{cmd} -bval {bval} -bvec {bvec} -famap {fa} -mcmap {mc} -mdmap \
+{md} -res {res} -rgbmap {rgb} -source {in_file} -syn {syn} -tenmap2 {ten2} \
+-v1map {v1}'
     expected_cmd = cmd_tmp.format(
         cmd=get_custom_path('fit_dwi'),
         in_file=in_file,
         bval=bval_file,
-        bvec=bvec_file)
+        bvec=bvec_file,
+        fa=os.path.join(os.getcwd(), 'dwifit_famap.nii.gz'),
+        mc=os.path.join(os.getcwd(), 'dwifit_mcmap.nii.gz'),
+        md=os.path.join(os.getcwd(), 'dwifit_mdmap.nii.gz'),
+        res=os.path.join(os.getcwd(), 'dwifit_resmap.nii.gz'),
+        rgb=os.path.join(os.getcwd(), 'dwifit_rgbmap.nii.gz'),
+        syn=os.path.join(os.getcwd(), 'dwifit_syn.nii.gz'),
+        ten2=os.path.join(os.getcwd(), 'dwifit_tenmap2.nii.gz'),
+        v1=os.path.join(os.getcwd(), 'dwifit_v1map.nii.gz'))
 
     yield assert_equal, test_node.cmdline, expected_cmd

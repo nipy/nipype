@@ -1,100 +1,123 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
+
 """
 The QT1 module of niftyfit, which wraps the Multi-Echo T1 fitting methods
 in NiftyFit.
 """
 
-from nipype.interfaces.niftyfit.base import get_custom_path, NiftyFitCommand
-from nipype.interfaces.base import (TraitedSpec, File, traits, isdefined,
-                                    CommandLineInputSpec)
-
-# -----------------------------------------------------------
-# FitAsl wrapper interface
-# -----------------------------------------------------------
+from ..base import TraitedSpec, File, traits, isdefined, CommandLineInputSpec
+from .base import get_custom_path, NiftyFitCommand
 
 
-# Input spec
 class FitQt1InputSpec(CommandLineInputSpec):
-    source_file = File(exists=True, desc='Filename of the 4D Multi-Echo T1 \
-source image (mandatory)', argstr='-source %s', mandatory=True, position=2)
+    """ Input Spec for FitQt1. """
+    desc = 'Filename of the 4D Multi-Echo T1 source image (mandatory)'
+    source_file = File(exists=True,
+                       desc=desc,
+                       argstr='-source %s',
+                       mandatory=True,
+                       position=0)
 
     # *** Output options:
-    t1map = File(genfile=True, argstr='-t1map %s',
+    t1map = File(genfile=True,
+                 argstr='-t1map %s',
                  desc='Filename of the estimated output T1 map (in ms).')
-    m0map = File(genfile=True, argstr='-m0map %s',
+    m0map = File(genfile=True,
+                 argstr='-m0map %s',
                  desc='Filename of the estimated input M0 map.')
-    mcmap = File(genfile=True, argstr='-mcmap %s',
+    mcmap = File(genfile=True,
+                 argstr='-mcmap %s',
                  desc='Filename of the estimated output multi-parameter map.')
-    error_file = File(genfile=True, argstr='-error %s',
-                      desc='Filename of the error map (symmetric matrix, [Diag,OffDiag]).')
-    syn_file = File(genfile=True, argstr='-syn %s',
+    desc = 'Filename of the error map (symmetric matrix, [Diag,OffDiag]).'
+    error_file = File(genfile=True,
+                      argstr='-error %s',
+                      desc=desc)
+    syn_file = File(genfile=True,
+                    argstr='-syn %s',
                     desc='Filename of the synthetic ASL data.')
-    res_file = File(genfile=True, argstr='-res %s',
+    res_file = File(genfile=True,
+                    argstr='-res %s',
                     desc='Filename of the model fit residuals')
 
     # *** Experimental options (Choose those suitable for the model!):
-    mask = File(exists=True, desc='Filename of image mask.',
+    mask = File(exists=True,
+                desc='Filename of image mask.',
                 argstr='-mask %s')
-    prior = File(exists=True, desc='Filename of parameter prior.',
+    prior = File(exists=True,
+                 desc='Filename of parameter prior.',
                  argstr='-prior %s')
     TE = traits.Float(desc='TE Echo Time [0ms!].', argstr='-TE %f')
     TR = traits.Float(desc='TR Repetition Time [10s!].', argstr='-TR %f')
 
     # IR options:
-
     SR = traits.Bool(desc='Saturation Recovery fitting [default].',
                      argstr='-SR')
     IR = traits.Bool(desc='Inversion Recovery fitting [default].',
                      argstr='-SR')
-    TIs = traits.List(traits.Float, minlen=3, maxlen=3,
+    TIs = traits.List(traits.Float,
+                      minlen=3,
+                      maxlen=3,
                       desc='Inversion times for T1 data as a list (in s)',
-                      argstr='-TIs %s', sep=' ')
-    T1Lists = traits.File(exists=True, argstr='-T1List %s',
+                      argstr='-TIs %s',
+                      sep=' ')
+    T1Lists = traits.File(exists=True,
+                          argstr='-T1List %s',
                           desc='Filename of list of pre-defined TIs')
 
     # SPGR options
     SPGR = traits.Bool(desc='Spoiled Gradient Echo fitting', argstr='-SPGR')
 
 
-# Output spec
 class FitQt1OutputSpec(TraitedSpec):
+    """ Output Spec for FitQt1. """
     t1map = File(desc='Filename of the estimated output T1 map (in ms)')
     m0map = File(desc='Filename of the m0 map')
     mcmap = File(desc='Filename of the estimated output multi-parameter map')
-    error_file = File(desc='Filename of the error map (symmetric matrix, [Diag,OffDiag])')
+    desc = 'Filename of the error map (symmetric matrix, [Diag,OffDiag])'
+    error_file = File(desc=desc)
     syn_file = File(desc='Filename of the synthetic ASL data')
     res_file = File(desc='Filename of the model fit residuals')
 
 
-# FitAsl function
 class FitQt1(NiftyFitCommand):
-    """ Use NiftyFit to perform ASL fitting.
+    """ Use NiftyFit to perform Qt1 fitting.
 
     Examples
     --------
 
-    >>> from nipype.interfaces import niftyfit
+    >>> from nipype.interfaces.niftyfit import FitQt1
+    >>> fit_qt1 = FitQt1()
+    >>> fit_qt1.inputs.source_file = 'im1.nii.gz'  # doctest: +SKIP
+    >>> fit_qt1.cmdline  # doctest: +SKIP
+    'fit_qt1 -source im1.nii.gz -t1map im1_t1map.nii.gz -m0map \
+im1_m0map.nii.gz -mcmap im1_mcmap.nii.gz -error im1_error.nii.gz \
+-syn im1_syn.nii.gz -res im1_res.nii.gz'
     """
     _cmd = get_custom_path('fit_qt1')
     input_spec = FitQt1InputSpec
     output_spec = FitQt1OutputSpec
-
     _suffix = '_fit_qt1'
 
     def _gen_filename(self, name):
         if name == 't1map':
-            return self._gen_fname(self.inputs.source_file, suffix='_t1map', ext='.nii.gz')
+            return self._gen_fname(self.inputs.source_file,
+                                   suffix='_t1map', ext='.nii.gz')
         if name == 'm0map':
-            return self._gen_fname(self.inputs.source_file, suffix='_m0map', ext='.nii.gz')
+            return self._gen_fname(self.inputs.source_file,
+                                   suffix='_m0map', ext='.nii.gz')
         if name == 'mcmap':
-            return self._gen_fname(self.inputs.source_file, suffix='_mcmap', ext='.nii.gz')
+            return self._gen_fname(self.inputs.source_file,
+                                   suffix='_mcmap', ext='.nii.gz')
         if name == 'error_file':
-            return self._gen_fname(self.inputs.source_file, suffix='_error', ext='.nii.gz')
+            return self._gen_fname(self.inputs.source_file,
+                                   suffix='_error', ext='.nii.gz')
         if name == 'syn_file':
-            return self._gen_fname(self.inputs.source_file, suffix='_syn', ext='.nii.gz')
+            return self._gen_fname(self.inputs.source_file,
+                                   suffix='_syn', ext='.nii.gz')
         if name == 'res_file':
-            return self._gen_fname(self.inputs.source_file, suffix='_res', ext='.nii.gz')
+            return self._gen_fname(self.inputs.source_file,
+                                   suffix='_res', ext='.nii.gz')
         return None
 
     def _list_outputs(self):
@@ -131,5 +154,3 @@ class FitQt1(NiftyFitCommand):
             outputs['res_file'] = self._gen_filename('res_file')
 
         return outputs
-
-

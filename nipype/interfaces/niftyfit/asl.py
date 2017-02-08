@@ -1,70 +1,76 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
-"""The ASL module of niftyfit, which wraps the fitting methods in NiftyFit.
+
+"""
+The ASL module of niftyfit, which wraps the fitting methods in NiftyFit.
 """
 
-from nipype.interfaces.niftyfit.base import NiftyFitCommand, get_custom_path
-from nipype.interfaces.base import (TraitedSpec, File, traits, isdefined,
-                                    CommandLineInputSpec)
+from ..base import TraitedSpec, traits, isdefined, CommandLineInputSpec
+from .base import NiftyFitCommand, get_custom_path
 
 
 class FitAslInputSpec(CommandLineInputSpec):
-    source_file = File(exists=True,  argstr='-source %s', mandatory=True,
-        desc='Filename of the 4D ASL (control/label) source image (mandatory)')
+    """ Input Spec for FitAsl. """
+    desc = 'Filename of the 4D ASL (control/label) source image (mandatory).'
+    source_file = traits.File(exists=True,
+                              argstr='-source %s',
+                              mandatory=True,
+                              desc=desc)
     pasl = traits.Bool(desc='Fit PASL ASL data [default]', argstr='-pasl')
     pcasl = traits.Bool(desc='Fit PCASL ASL data', argstr='-pcasl')
 
     # *** Output options:
-    cbf_file = File(genfile=True, argstr='-cbf %s',
-        desc='Filename of the Cerebral Blood Flow map (in ml/100g/min).')
-    error_file = File(genfile=True, argstr='-error %s',
-                      desc='Filename of the CBF error map.')
-    syn_file = File(genfile=True, argstr='-syn %s',
-                    desc='Filename of the synthetic ASL data.')
+    desc = 'Filename of the Cerebral Blood Flow map (in ml/100g/min).'
+    cbf_file = traits.File(genfile=True, argstr='-cbf %s', desc=desc)
+    desc = 'Filename of the CBF error map.'
+    error_file = traits.File(genfile=True, argstr='-error %s', desc=desc)
+    desc = 'Filename of the synthetic ASL data.'
+    syn_file = traits.File(genfile=True, argstr='-syn %s', desc=desc)
 
     # *** Input options (see also fit_qt1 for generic T1 fitting):
-    t1map = File(exists=True, argstr='-t1map %s',
-                 desc='Filename of the estimated input T1 map (in ms).')
-    m0map = File(exists=True, argstr='-m0map %s',
-                 desc='Filename of the estimated input M0 map.')
-    m0mape = File(exists=True, argstr='-m0mape %s',
-                  desc='Filename of the estimated input M0 map error.')
-    IRvolume = File(exists=True, argstr='-IRvolume %s', desc='Filename of a \
-[1,2,5]s Inversion Recovery volume (T1/M0 fitting carried out internally).')
-    IRoutput = File(exists=True, argstr='-IRoutput %s',
-                    desc='Output of [1,2,5]s Inversion Recovery fitting.')
+    desc = 'Filename of the estimated input T1 map (in ms).'
+    t1map = traits.File(exists=True, argstr='-t1map %s', desc=desc)
+    desc = 'Filename of the estimated input M0 map.'
+    m0map = traits.File(exists=True, argstr='-m0map %s', desc=desc)
+    desc = 'Filename of the estimated input M0 map error.'
+    m0mape = traits.File(exists=True, argstr='-m0mape %s', desc=desc)
+    desc = 'Filename of a [1,2,5]s Inversion Recovery volume (T1/M0 fitting \
+carried out internally).'
+    IRvolume = traits.File(exists=True, argstr='-IRvolume %s', desc=desc)
+    desc = 'Output of [1,2,5]s Inversion Recovery fitting.'
+    IRoutput = traits.File(exists=True, argstr='-IRoutput %s', desc=desc)
 
     # *** Experimental options (Choose those suitable for the model!):
-    mask = File(exists=True, desc='Filename of image mask.', argstr='-mask %s')
+    mask = traits.File(exists=True,
+                       desc='Filename of image mask.',
+                       argstr='-mask %s')
     T1a = traits.Float(desc='T1 of arterial component [1650ms].',
                        argstr='-T1a %f')
-    L = traits.Float(
-        desc='Single plasma/tissue partition coefficient [0.9ml/g].',
-        argstr='-L %f')
-    eff = traits.Float(
-        desc='Labelling efficiency [0.99 (pasl), 0.85 (pcasl)], ensure any \
-background suppression pulses are included in -eff', argstr='-eff %f')
-    out = traits.Float(desc='Outlier rejection for multi CL volumes \
-(enter z-score threshold (e.g. 2.5)) [off].', argstr='-out %f')
+    desc = 'Single plasma/tissue partition coefficient [0.9ml/g].'
+    L = traits.Float(desc=desc, argstr='-L %f')
+    desc = 'Labelling efficiency [0.99 (pasl), 0.85 (pcasl)], ensure any \
+background suppression pulses are included in -eff'
+    eff = traits.Float(desc=desc, argstr='-eff %f')
+    desc = 'Outlier rejection for multi CL volumes (enter z-score threshold \
+(e.g. 2.5)) [off].'
+    out = traits.Float(desc=desc, argstr='-out %f')
 
     # *** PCASL options (Choose those suitable for the model!):
     PLD = traits.Float(desc='Post Labelling Delay [2000ms].', argstr='-PLD %f')
     LDD = traits.Float(desc='Labelling Duration [1800ms].', argstr='-LDD %f')
-    dPLD = traits.Float(
-        desc='Difference in labelling delay per slice [0.0 ms/slice',
-        argstr='-dPLD %f')
+    desc = 'Difference in labelling delay per slice [0.0 ms/slice.'
+    dPLD = traits.Float(desc=desc, argstr='-dPLD %f')
 
     # *** PASL options (Choose those suitable for the model!):
     Tinv1 = traits.Float(desc='Saturation pulse time [800ms].',
                          argstr='-Tinv1 %f')
     Tinv2 = traits.Float(desc='Inversion time [2000ms].', argstr='-Tinv2 %f')
-    dTinv2 = traits.Float(
-        desc='Difference in inversion time per slice [0ms/slice]',
-        argstr='-dTinv2 %f')
+    desc = 'Difference in inversion time per slice [0ms/slice].'
+    dTinv2 = traits.Float(desc=desc, argstr='-dTinv2 %f')
 
     # *** Other experimental assumptions:
-    ATT = traits.Float(desc='Slope and intercept for Arterial Transit Time \
-[0ms/slice 1000ms].', argstr='-ATT %f')
+    desc = 'Slope and intercept for Arterial Transit Time [0ms/slice 1000ms].'
+    ATT = traits.Float(desc=desc, argstr='-ATT %f')
     gmT1 = traits.Float(desc='T1 of GM [1150ms].', argstr='-gmT1 %f')
     gmL = traits.Float(desc='Plasma/GM water partition [0.95ml/g].',
                        argstr='-gmL %f')
@@ -75,53 +81,61 @@ background suppression pulses are included in -eff', argstr='-eff %f')
     wmTTT = traits.Float(desc='Time to WM [ATT+0ms].', argstr='-wmTTT %f')
 
     # *** Segmentation options:
-    seg = File(exists=True, argstr='-seg %s',
-               desc='Filename of the 4D segmentation (in ASL space) for L/T1 \
-estimation and PV correction {WM,GM,CSF}.')
-    sig = traits.Bool(desc='Use sigmoid to estimate L from T1: L(T1|gmL,wmL) \
-[Off].', argstr='-sig')
+    desc = 'Filename of the 4D segmentation (in ASL space) for L/T1 \
+estimation and PV correction {WM,GM,CSF}.'
+    seg = traits.File(exists=True, argstr='-seg %s', desc=desc)
+    desc = 'Use sigmoid to estimate L from T1: L(T1|gmL,wmL) [Off].'
+    sig = traits.Bool(desc=desc, argstr='-sig')
     pv2 = traits.Int(desc='In plane PV kernel size [3x3].', argstr='pv2 %d')
     pv3 = traits.Int(desc='3D kernel size [3x3x1].', argstr='pv3 %d')
-    mul = traits.Float(desc='Multiply CBF by this value (e.g. if CL are \
-mislabelled use -1.0)...', argstr='-mul %f')
+    desc = 'Multiply CBF by this value (e.g. if CL are mislabelled use -1.0).'
+    mul = traits.Float(desc=desc, argstr='-mul %f')
     mulgm = traits.Bool(desc='Multiply CBF by segmentation [Off].',
                         argstr='-sig')
-    pvthreshold = traits.Bool(desc='Set PV threshold for switching off LSQR \
-[O.05].', argstr='-pvthreshold')
+    desc = 'Set PV threshold for switching off LSQR [O.05].'
+    pvthreshold = traits.Bool(desc=desc, argstr='-pvthreshold')
     segstyle = traits.Bool(desc='Set CBF as [gm,wm] not [wm,gm].',
                            argstr='-segstyle')
 
 
-# Output spec
 class FitAslOutputSpec(TraitedSpec):
-    cbf_file = File(exists=True, desc='Filename of the Cerebral Blood Flow map \
-(in ml/100g/min).')
-    error_file = File(exists=True, desc='Filename of the CBF error map.')
-    syn_file = File(exists=True, desc='Filename of the synthetic ASL data.')
+    """ Output Spec for FitAsl. """
+    desc = 'Filename of the Cerebral Blood Flow map (in ml/100g/min).'
+    cbf_file = traits.File(exists=True, desc=desc)
+    desc = 'Filename of the CBF error map.'
+    error_file = traits.File(exists=True, desc=desc)
+    desc = 'Filename of the synthetic ASL data.'
+    syn_file = traits.File(exists=True, desc=desc)
 
 
-# FitAsl function
 class FitAsl(NiftyFitCommand):
-    """ Use NiftyFit to perform ASL fitting.
+    """Use NiftyFit to perform ASL fitting.
 
     Examples
     --------
+    >>> from nipype.interfaces.niftyfit import FitAsl
+    >>> node = FitAsl()
+    >>> node.inputs.source_file = "asl.nii.gz"  # doctest: +SKIP
+    >>> node.cmdline  # doctest: +SKIP
+    'fit_asl -source asl.nii -cbf asl_cbf.nii.gz -error asl_error.nii.gz \
+-syn asl_syn.nii.gz'
 
-    >>> from nipype.interfaces import niftyfit
     """
     _cmd = get_custom_path('fit_asl')
     input_spec = FitAslInputSpec
     output_spec = FitAslOutputSpec
-
     _suffix = '_fit_asl'
 
     def _gen_filename(self, name):
         if name == 'error_file':
-            return self._gen_fname(self.inputs.source_file, suffix='_error', ext='.nii.gz')
+            return self._gen_fname(self.inputs.source_file,
+                                   suffix='_error', ext='.nii.gz')
         if name == 'syn_file':
-            return self._gen_fname(self.inputs.source_file, suffix='_syn', ext='.nii.gz')
+            return self._gen_fname(self.inputs.source_file,
+                                   suffix='_syn', ext='.nii.gz')
         if name == 'cbf_file':
-            return self._gen_fname(self.inputs.source_file, suffix='_cbf', ext='.nii.gz')
+            return self._gen_fname(self.inputs.source_file,
+                                   suffix='_cbf', ext='.nii.gz')
         return None
 
     def _list_outputs(self):

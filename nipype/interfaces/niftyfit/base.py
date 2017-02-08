@@ -1,18 +1,21 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
-"""The niftyfit module provide an interface with the niftyfit software
+
+"""
+The niftyfit module provide an interface with the niftyfit software
 developed in TIG, UCL.
 
 Examples
 --------
 See the docstrings of the individual classes for examples.
-
 """
 
 import os
 import warnings
+
 from ..base import CommandLine
-from nipype.utils.filemanip import split_filename
+from ...utils.filemanip import split_filename
+
 
 warn = warnings.warn
 warnings.filterwarnings('always', category=UserWarning)
@@ -42,18 +45,10 @@ class NiftyFitCommand(CommandLine):
     Base support for NiftyFit commands.
     """
     _suffix = '_nf'
-    # _min_version = '0.9.4'
 
-    def __init__(self, required_version=None, **inputs):
+    def __init__(self, **inputs):
+        """ Init method calling super. No version to be checked."""
         super(NiftyFitCommand, self).__init__(**inputs)
-        """current_version = self.get_version()
-        if StrictVersion(current_version) < StrictVersion(self._min_version):
-            msg = 'A later version of NiftySeg is required (%s < %s)'
-            raise ValueError(msg % (current_version, self._min_version))
-        if required_version is not None and \
-           StrictVersion(current_version) != StrictVersion(required_version):
-            msg = 'The version of NiftySeg differs from the required (%s!=%s)'
-            raise ValueError(msg % (current_version, required_version))"""
 
     def _gen_fname(self, basename, out_dir=None, suffix=None, ext=None):
         if basename == '':

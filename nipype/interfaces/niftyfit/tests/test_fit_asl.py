@@ -8,7 +8,7 @@ from nipype.testing import assert_equal, skipif, example_data
 
 @skipif(no_niftyfit(cmd='fit_asl'))
 def test_seg_em():
-    # Create a reg_aladin object
+    # Create a node object
     test_node = FitAsl()
 
     # Check if the command is properly defined
