@@ -10,11 +10,6 @@ These are the base tools for working with niftyreg.
 Registration tools are found in niftyreg/reg.py
 Every other tool is found in niftyreg/regutils.py
 
-Currently these tools are supported:
-
-* reg_aladin: Global image registration
-* reg_f3d: Non-rigid registration
-
 Examples
 --------
 See the docstrings of the individual classes for examples.
