@@ -907,6 +907,91 @@ class ReconAll(CommandLine):
         return cmd
 
 
+class PreprocSessInputSpec(CommandLineInputSpec):
+    directive = traits.Enum(
+        'per-run', 'per-session', argstr='-%s',
+        desc='motion-correction/registration target (per-session for FSv4 '
+             'compatibility)',
+        usedefault=True, position=0)
+    fwhm = traits.Float(mandatory=True, argstr='-fwhm %g',
+                        desc='full-width/half-max (in mm); 0 for no smoothing',
+                        position=1)
+
+    force = traits.Bool(argstr='-force',
+                        desc='force reprocessing of all stages')
+    sliceorder = traits.Enum(
+        'siemens', 'up', 'down', 'even', 'odd', argstr='-sliceorder %s',
+        desc='Perform slice-timing correction with the given slice order.')
+
+    # subject/hemi are combined: "-surface subject hemi"
+    subject = traits.Str(
+        argstr='-surface %s %s',
+        desc='Resample functional volumes to surface (use "self" or '
+             'subject_id of target surface)',
+        requires=['hemi'])
+    hemi = traits.Enum('lhrh', 'lh', 'rh',
+                       desc='hemisphere to sample to (lhrh for both)',
+                       usedefault=True)
+
+    session_id = traits.Str(argstr='-s %s', desc='session name',
+                            mandatory=True)
+    sessions_dir = Directory(
+        exists=True, argstr='-d %s', hash_files=False, mandatory=True,
+        desc='path to sessions directory (FUNCTIONALS_DIR)')
+    functional_subdir = traits.Enum("bold", argstr="-fsd %s",
+                                    desc="functional subdirectory",
+                                    usedefault=True)
+
+    # Subjects directory is needed to resolve `subject`, if given, but it needs
+    # to be added to the environment as SUBJECTS_DIR; there is no option to
+    # pass it by flag
+    subjects_dir = Directory(exists=True, hash_files=False,
+                             desc='path to subjects directory')
+    flags = traits.Str(argstr='%s', desc='additional parameters')
+
+
+class PreprocSessOutputSpec(FreeSurferSource.output_spec):
+    sessions_dir = Directory(exists=True,
+                             desc='Freesurfer sessions directory.')
+    session_id = traits.Str(desc='Name of session')
+
+
+class PreprocSess(CommandLine):
+    """Uses preproc-sess to align functional series to a FreeSurfer subject.
+
+    Examples
+    --------
+
+    >>> import os
+    >>> from nipype.interfaces.freesurfer import PreprocSess
+    >>> preproc = PreprocSess()
+    >>> preproc.inputs.fwhm = 5
+    >>> preproc.inputs.session_id = 'sample'
+    >>> preproc.inputs.sessions_dir = '/opt/freesurfer/sessions'
+    >>> preproc.cmdline # doctest: +ALLOW_UNICODE
+    'preproc-sess -per-run -fwhm 5 -fsd bold -s sample -d /opt/freesurfer/sessions'
+
+    """
+
+    _cmd = 'preproc-sess'
+    input_spec = PreprocSessInputSpec
+    output_spec = PreprocSessOutputSpec
+    _can_resume = True
+
+    def _format_arg(self, name, trait_spec, value):
+        if name == 'hemi':
+            return ''
+        if name == 'subject':
+            value = (value, self.inputs.hemi)
+        return super(PreprocSess, self)._format_arg(name, trait_spec, value)
+
+    def _get_environ(self):
+        out_environ = super(PreprocSess, self)._get_environ()
+        if isdefined(self.inputs.subjects_dir):
+            out_environ['SUBJECTS_DIR'] = self.inputs.subjects_dir
+        return out_environ
+
+
 class BBRegisterInputSpec(FSTraitedSpec):
     subject_id = traits.Str(argstr='--s %s',
                             desc='freesurfer subject id',
