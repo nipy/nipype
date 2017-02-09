@@ -55,7 +55,7 @@ def read_mrtrix_tracks(in_file, as_generator=True):
 
 
 def read_mrtrix_header(in_file):
-    fileobj = open(in_file, 'r', encoding='utf-8', errors='ignore')
+    fileobj = open(in_file, 'r', errors='ignore')
     header = {}
     iflogger.info('Reading header data...')
     for line in fileobj:
@@ -78,7 +78,7 @@ def read_mrtrix_header(in_file):
 def read_mrtrix_streamlines(in_file, header, as_generator=True):
     offset = header['offset']
     stream_count = header['count']
-    fileobj = open(in_file, 'r', encoding='utf-8', errors='ignore')
+    fileobj = open(in_file, 'r', errors='ignore')
     fileobj.seek(offset)
     endianness = native_code
     f4dt = np.dtype(endianness + 'f4')
