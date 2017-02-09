@@ -1,24 +1,30 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 
-"""Nipype interface for seg_FillLesions.
+"""
+Nipype interface for seg_FillLesions.
 
 The fusion module provides higher-level interfaces to some of the operations
 that can be performed with the seg_FillLesions command-line program.
+
+Examples
+--------
+See the docstrings of the individual classes for examples.
 """
 
 import os
 import warnings
-from nipype.interfaces.niftyseg.base import NiftySegCommand, get_custom_path
-from nipype.interfaces.base import (TraitedSpec, File, traits, isdefined,
-                                    CommandLineInputSpec)
+
+from ..base import TraitedSpec, File, traits, isdefined, CommandLineInputSpec
+from .base import NiftySegCommand, get_custom_path
+
 
 warn = warnings.warn
 warnings.filterwarnings('always', category=UserWarning)
 
 
 class FillLesionsInputSpec(CommandLineInputSpec):
-    """Input Spec for seg_FillLesions."""
+    """Input Spec for FillLesions."""
     # Mandatory input arguments
     in_file = File(argstr='-i %s', exists=True, mandatory=True,
                    desc='Input image to fill lesions', position=1)
@@ -77,41 +83,24 @@ float, double).'
 
 
 class FillLesionsOutputSpec(TraitedSpec):
-    """Output Spec for seg_FillLesions."""
+    """Output Spec for FillLesions."""
     out_file = File(desc="Output segmentation")
 
 
 class FillLesions(NiftySegCommand):
-    """Interface for seg_FillLesions.
+    """Interface for executable seg_FillLesions from NiftySeg platform.
 
-    Fill all the masked lesions with WM intensity average
+    Fill all the masked lesions with WM intensity average.
 
-    Usage:	seg_FillLesions -i <input> -l <lesionmask> -o <output> [options].
+    Examples
+    --------
+    >>> from nipype.interfaces.niftyseg import seg_EM
+    >>> node = seg_EM()
+    >>> node.inputs.in_file = 'im1.nii'  # doctest: +SKIP
+    >>> node.inputs.lesion_mask = 'im2.nii'  # doctest: +SKIP
+    >>> node.cmdline  # doctest: +SKIP
+    'seg_FillLesions -i im1.nii -l im2.nii -o im1_lesions_filled.nii'
 
-    * * Optional parameters * *
-    -dil	<int>		Dilate the mask <int> times (in voxels, by default 0).
-    -match	<float>		Percentage of minimum number of voxels between patches
-                        <float> (by default 0.5).
-    -search	<float>		Minimum percentage of valid voxels in target patch
-                        <float> (by default 0).
-    -smo	<float>		Smoothing by <float> (in minimal 6-neighbourhood voxels
-                        (by default 0.1)).
-    -size	<int>		Search regions size respect biggest patch size
-                        (by default 4).
-    -cwf	<float>		Patch cardinality weighting factor (by default 2).
-    -mask			Give a binary mask with the valid search areas.
-    -other			Guizard et al. (FIN 2015) method, it doesn't include the
-                    multiresolution / hierarchical inpainting part, this part
-                    needs to be done with some external software such as
-                    reg_tools and reg_resample from NiftyReg.
-                    By default it uses the method presented in Prados
-                    et al. (Neuroimage 2016).
-    -debug			Save all intermidium files (by default OFF).
-    -odt <datatype> 	Set output <datatype> (char, short, int, uchar, ushort,
-                                               uint, float, double).
-    -v			Verbose (by default OFF).
-    -omp <int>		Number of openmp threads [4]
-    --version		Print current source code git hash key and exit
     """
     _cmd = get_custom_path('seg_FillLesions')
     input_spec = FillLesionsInputSpec

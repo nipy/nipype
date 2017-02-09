@@ -1,9 +1,9 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 
-import os
 from nipype.interfaces.niftyseg import no_niftyseg, get_custom_path, EM
 from nipype.testing import assert_equal, skipif, example_data
+import os
 
 
 @skipif(no_niftyseg(cmd='seg_EM'))
@@ -20,8 +20,8 @@ def test_seg_em():
     seg_em.inputs.in_file = in_file
     seg_em.inputs.no_prior = 4
 
-    cmd_tmp = '{cmd} -in {in_file} -nopriors 4 -bc_out {bc_out} -out {out_file} \
--out_outlier {out_outlier}'
+    cmd_tmp = '{cmd} -in {in_file} -nopriors 4 -bc_out {bc_out} -out \
+{out_file} -out_outlier {out_outlier}'
     expected_cmd = cmd_tmp.format(
         cmd=get_custom_path('seg_EM'),
         in_file=in_file,

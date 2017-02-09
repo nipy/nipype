@@ -7,7 +7,7 @@ from nipype.testing import assert_equal, skipif, example_data
 
 
 @skipif(no_niftyseg(cmd='seg_CalcTopNCC'))
-def test_seg_patchmatch():
+def test_seg_calctopncc():
 
     # Create a node object
     calctopncc = CalcTopNCC()
@@ -17,6 +17,8 @@ def test_seg_patchmatch():
 
     # Assign some input data
     in_file = example_data('im1.nii')
+    file1 = example_data('im2.nii')
+    file2 = example_data('im3.nii')
     calctopncc.inputs.in_file = in_file
     calctopncc.inputs.num_templates = 2
     calctopncc.inputs.in_templates = [in_file, in_file]
@@ -24,10 +26,10 @@ def test_seg_patchmatch():
 
     cmd_tmp = '{cmd} -target {in_file} -templates 2 {file1} {file2} -n 1'
     expected_cmd = cmd_tmp.format(
-                        cmd=get_custom_path('seg_CalcTopNCC'),
-                        in_file=in_file,
-                        file1=in_file,
-                        file2=in_file)
+        cmd=get_custom_path('seg_CalcTopNCC'),
+        in_file=in_file,
+        file1=file1,
+        file2=file2)
     # out_file=os.path.join(os.getcwd(), 'im1_pm.nii'))
 
     yield assert_equal, calctopncc.cmdline, expected_cmd

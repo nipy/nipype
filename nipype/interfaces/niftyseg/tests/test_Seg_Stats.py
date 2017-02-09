@@ -7,7 +7,7 @@ from nipype.testing import (assert_equal, skipif, example_data)
 
 
 @skipif(no_niftyseg(cmd='seg_stats'))
-def test_seg_stats():
+def test_unary_stats():
 
     # Create a node object
     unarys = UnaryStats()
@@ -21,11 +21,14 @@ def test_seg_stats():
     unarys.inputs.operation = 'a'
 
     expected_cmd = '{cmd} {in_file} -a'.format(
-                        cmd=get_custom_path('seg_stats'),
-                        in_file=in_file)
+        cmd=get_custom_path('seg_stats'),
+        in_file=in_file)
 
     yield assert_equal, unarys.cmdline, expected_cmd
 
+
+@skipif(no_niftyseg(cmd='seg_stats'))
+def test_binary_stats():
     # Create a node object
     binarys = BinaryStats()
 
@@ -35,11 +38,11 @@ def test_seg_stats():
     # Assign some input data
     in_file = example_data('im1.nii')
     binarys.inputs.in_file = in_file
-    binarys.inputs.operand_value = 1
+    binarys.inputs.operand_value = 2
     binarys.inputs.operation = 'sa'
 
-    expected_cmd = '{cmd} {in_file} -sa 1.00000000'.format(
-                        cmd=get_custom_path('seg_stats'),
-                        in_file=in_file)
+    expected_cmd = '{cmd} {in_file} -sa 2.00000000'.format(
+        cmd=get_custom_path('seg_stats'),
+        in_file=in_file)
 
     yield assert_equal, binarys.cmdline, expected_cmd

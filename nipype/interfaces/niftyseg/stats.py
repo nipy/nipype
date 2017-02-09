@@ -6,21 +6,30 @@ that can be performed with the niftysegstats (seg_stats) command-line program.
 """
 import numpy as np
 
-from nipype.interfaces.niftyseg.base import NiftySegCommand, get_custom_path
-from nipype.interfaces.base import (TraitedSpec, File, traits,
-                                    CommandLineInputSpec)
+from ..base import TraitedSpec, File, traits, CommandLineInputSpec
+from .base import NiftySegCommand, get_custom_path
 
 
 class StatsInput(CommandLineInputSpec):
     """Input Spec for seg_stats interfaces."""
-    in_file = File(position=2, argstr='%s', exists=True, mandatory=True,
+    in_file = File(position=2,
+                   argstr='%s',
+                   exists=True,
+                   mandatory=True,
                    desc='image to operate on')
+
     # Constrains
-    mask_file = File(exists=True, mandatory=False, position=-2, argstr='-m %s',
+    mask_file = File(exists=True,
+                     mandatory=False,
+                     position=-2,
+                     argstr='-m %s',
                      desc='statistics within the masked area')
-    larger_voxel = traits.Float(
-        argstr='-t %f', mandatory=False, position=-3,
-        desc='Only estimate statistics if voxel is larger than <float>')
+
+    desc = 'Only estimate statistics if voxel is larger than <float>'
+    larger_voxel = traits.Float(argstr='-t %f',
+                                mandatory=False,
+                                position=-3,
+                                desc=desc)
 
 
 class StatsOutput(TraitedSpec):
@@ -29,74 +38,12 @@ class StatsOutput(TraitedSpec):
 
 
 class StatsCommand(NiftySegCommand):
-    """Base interface for seg_stats interfaces."""
+    """
+    Base Command Interface for seg_stats interfaces.
+    """
     _cmd = get_custom_path('seg_stats')
     input_spec = StatsInput
     output_spec = StatsOutput
-
-
-class UnaryStatsInput(StatsInput):
-    """Input Spec for seg_stats unary operations."""
-    operation = traits.Enum('r', 'R', 'a', 's', 'v', 'vl', 'vp', 'n', 'np',
-                            'e', 'ne', 'x', 'X', 'c', 'B', 'xvox', 'xdim',
-                            argstr='-%s', position=4, mandatory=True,
-                            desc='operation to perform')
-
-
-class UnaryStats(StatsCommand):
-    """
-    Use seg_stats to perform a variety of mathematical binary operations.
-    mandatory input specs is in_file.
-
-    Note: All NaN or Inf are ignored for all stats.
-          The -m and -t options can be used in conjusction.
-
-    Examples
-    --------
-    from nipype.interfaces.niftyseg import UnaryStats
-    calculator = UnaryStats()
-    calculator.inputs.in_file = "T1.nii.gz"
-    calculator.inputs.operation = "v"
-    calculator.cmdline
-    seg_stats T1.nii.gz -v
-
-    available operations:
-
-    * * Statistics (at least one option is mandatory) * *
-        Range operations (datatype: all)
-        -r     		| The range <min max> of all voxels.
-        -R     		| The robust range (assuming 2% outliers on both sides)
-                      of all voxels
-
-    Classical statistics (datatype: all)
-        -a     		| Average of all voxels
-        -s     		| Standard deviation of all voxels
-        -v     		| Volume of all voxels above 0 (<# voxels> *
-                      <volume per voxel>)
-        -vl    		| Volume of each integer label (<# voxels per label> *
-                      <volume per voxel>)
-        -vp    		| Volume of all probabilsitic voxels (sum(<in>) *
-                      <volume per voxel>)
-        -n     		| Count of all voxels above 0 (<# voxels>)
-        -np    		| Sum of all fuzzy voxels (sum(<in>))
-        -e     		| Entropy of all voxels
-        -ne    		| Normalized entropy of all voxels
-
-    Coordinates operations (datatype: all)
-        -x     		| Location (i j k x y z) of the smallest value in the image
-        -X     		| Location (i j k x y z) of the largest value in the image
-        -c     		| Location (i j k x y z) of the centre of mass of the object
-        -B     		| Bounding box of all nonzero voxels
-                        [ xmin xsize ymin ysize zmin zsize ]
-
-    Header info (datatype: all)
-        -xvox  		| Output the number of voxels in the x direction.
-                      Replace x with y/z for other directions.
-        -xdim  		| Output the voxel dimention in the x direction.
-                      Replace x with y/z for other directions.
-
-    """
-    input_spec = UnaryStatsInput
 
     def _parse_stdout(self, stdout):
         out = []
@@ -122,54 +69,119 @@ class UnaryStats(StatsCommand):
         return outputs
 
 
+class UnaryStatsInput(StatsInput):
+    """Input Spec for seg_stats unary operations."""
+    operation = traits.Enum('r', 'R', 'a', 's', 'v', 'vl', 'vp', 'n', 'np',
+                            'e', 'ne', 'x', 'X', 'c', 'B', 'xvox', 'xdim',
+                            argstr='-%s',
+                            position=4,
+                            mandatory=True,
+                            desc='operation to perform')
+
+
+class UnaryStats(StatsCommand):
+    """
+    Interface for executable seg_stats from NiftySeg platform.
+
+    Only the unary statistical operations.
+    Options from seg_stats in this interface:
+        -r          | The range <min max> of all voxels.
+        -R          | The robust range (assuming 2% outliers on both sides)
+                    | of all voxels
+        -a          | Average of all voxels
+        -s          | Standard deviation of all voxels
+        -v          | Volume of all voxels above 0 (<# voxels> *
+                    | <volume per voxel>)
+        -vl         | Volume of each integer label (<# voxels per label> *
+                    | <volume per voxel>)
+        -vp         | Volume of all probabilsitic voxels (sum(<in>) *
+                    | <volume per voxel>)
+        -n          | Count of all voxels above 0 (<# voxels>)
+        -np         | Sum of all fuzzy voxels (sum(<in>))
+        -e          | Entropy of all voxels
+        -ne         | Normalized entropy of all voxels
+        -x          | Location (i j k x y z) of the smallest value in the image
+        -X          | Location (i j k x y z) of the largest value in the image
+        -c          | Location (i j k x y z) of the centre of mass of the
+                    | object
+        -B          | Bounding box of all nonzero voxels
+                    | [ xmin xsize ymin ysize zmin zsize ]
+        -xvox       | Output the number of voxels in the x direction.
+                    | Replace x with y/z for other directions.
+        -xdim       | Output the voxel dimention in the x direction.
+                    | Replace x with y/z for other directions.
+
+    Note: All NaN or Inf are ignored for all stats.
+          The -m and -t options can be used in conjusction.
+
+    Examples
+    --------
+    >>> from nipype.interfaces.niftyseg import UnaryStats
+    >>> node = UnaryStats()
+    >>> node.inputs.in_file = 'im1.nii'  # doctest: +SKIP
+    >>> node.inputs.operation = 'v'
+    >>> node.cmdline  # doctest: +SKIP
+    'seg_stats im1.nii -v'
+
+    """
+    input_spec = UnaryStatsInput
+
+
 class BinaryStatsInput(StatsInput):
     """Input Spec for seg_stats Binary operations."""
-    operation = traits.Enum('p', 'd', 'al', 'ncc', 'nmi', 'sa', 'ss', 'svp',
-                            mandatory=True, argstr='-%s', position=4,
+    operation = traits.Enum('p', 'sa', 'ss', 'svp', 'al', 'd', 'ncc', 'nmi',
+                            'Vl', 'Nl',
+                            mandatory=True,
+                            argstr='-%s',
+                            position=4,
                             desc='operation to perform')
-    operand_file = File(exists=True, argstr="%s", mandatory=True, position=5,
+
+    operand_file = File(exists=True,
+                        argstr="%s",
+                        mandatory=True,
+                        position=5,
                         xor=["operand_value"],
                         desc="second image to perform operation with")
-    operand_value = traits.Float(argstr='%.8f', mandatory=True, position=5,
+
+    operand_value = traits.Float(argstr='%.8f',
+                                 mandatory=True,
+                                 position=5,
                                  xor=["operand_file"],
                                  desc='value to perform operation with')
 
 
 class BinaryStats(StatsCommand):
     """
-    Use seg_stats to perform a variety of mathematical binary operations.
-    mandatory input specs is operation and (operand_file or operand_value)
+    Interface for executable seg_stats from NiftySeg platform.
+
+    Only the binary statistical operations.
+    Options from seg_stats in this interface:
+        -p <float>      | The <float>th percentile of all voxels intensity
+                        | (float=[0,100])
+        -sa  <ax>       | Average of all voxels
+        -ss  <ax>       | Standard deviation of all voxels
+        -svp <ax>       | Volume of all probabilsitic voxels (sum(<in>) *
+                        | <volume per voxel>)
+        -al <in2>       | Average value in <in> for each label in <in2>
+        -d <in2>        | Calculate the Dice score between all classes in <in>
+                        | and <in2>
+        -ncc <in2>      | Normalized cross correlation between <in> and <in2>
+        -nmi <in2>      | Normalized Mutual Information between <in> and <in2>
+        -Vl <csv>       | Volume of each integer label <in>. Save to <csv>file.
+        -Nl <csv>       | Count of each label <in>. Save to <csv> file.
 
     Note: All NaN or Inf are ignored for all stats.
         The -m and -t options can be used in conjusction.
+
     Examples
     --------
-    from nipype.interfaces.niftyseg import UnaryStats
-    calculator = UnaryStats()
-    calculator.inputs.in_file = "T1.nii.gz"
-    calculator.inputs.operation = "v"
-    calculator.cmdline
-    seg_stats T1.nii.gz -v
+    >>> from nipype.interfaces.niftyseg import UnaryStats
+    >>> node = UnaryStats()
+    >>> node.inputs.in_file = 'im1.nii'  # doctest: +SKIP
+    >>> node.inputs.operation = 'sa'
+    >>> node.inputs.operand_value = '2'
+    >>> node.cmdline  # doctest: +SKIP
+    'seg_stats im1.nii -sa 2'
 
-    available operations:
-
-    Range operations (datatype: all)
-        -p <float> 	| The <float>th percentile of all voxels intensity
-                      (float=[0,100])
-
-    Classical statistics per slice along axis <ax> (ax=1,2,3)
-        -sa  <ax>      	| Average of all voxels
-        -ss  <ax>      	| Standard deviation of all voxels
-        -svp <ax>      	| Volume of all probabilsitic voxels (sum(<in>) *
-                          <volume per voxel>)
-
-    Label attribute operations (datatype: char or uchar)
-        -al <in2>      	| Average value in <in> for each label in <in2>
-        -d <in2>	    | Calculate the Dice score between all classes in <in>
-                          and <in2>
-
-    Image similarities (datatype: all)
-        -ncc <in2>     	| Normalized cross correlation between <in> and <in2>
-        -nmi <in2>     	| Normalized Mutual Information between <in> and <in2>
     """
     input_spec = BinaryStatsInput
