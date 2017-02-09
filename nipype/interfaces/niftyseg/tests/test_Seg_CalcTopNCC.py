@@ -9,7 +9,7 @@ from nipype.testing import assert_equal, skipif, example_data
 @skipif(no_niftyseg(cmd='seg_CalcTopNCC'))
 def test_seg_patchmatch():
 
-    # Create a reg_aladin object
+    # Create a node object
     calctopncc = CalcTopNCC()
 
     # Check if the command is properly defined

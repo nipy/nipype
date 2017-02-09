@@ -10,7 +10,7 @@ from nipype.testing import assert_equal, skipif, example_data
 @skipif(no_niftyseg(cmd='seg_FillLesions'))
 def test_seg_filllesions():
 
-    # Create a reg_aladin object
+    # Create a node object
     seg_fill = FillLesions()
 
     # Check if the command is properly defined

@@ -10,7 +10,7 @@ from nipype.testing import assert_equal, skipif, example_data
 @skipif(no_niftyseg(cmd='seg_LabFusion'))
 def test_seg_patchmatch():
 
-    # Create a reg_aladin object
+    # Create a node object
     steps = STEPS()
 
     # Check if the command is properly defined

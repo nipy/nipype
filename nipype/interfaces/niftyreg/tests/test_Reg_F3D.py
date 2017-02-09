@@ -1,10 +1,9 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 
-
+from nipype.interfaces.niftyreg import no_niftyreg, get_custom_path, RegF3D
+from nipype.testing import assert_equal, skipif, example_data
 import os
-from nipype.interfaces.niftyreg import (no_niftyreg, get_custom_path, RegF3D)
-from nipype.testing import (assert_equal, skipif, example_data)
 
 
 @skipif(no_niftyreg(cmd='reg_f3d'))
@@ -28,8 +27,14 @@ def test_reg_f3d():
     nr.inputs.be_val = 0.1
     nr.inputs.le_val = 0.1
 
-    expected_cmd = get_custom_path('reg_f3d') + ' ' + '-be 0.100000 ' +\
-                   '-cpp ' + os.getcwd() + os.sep + 'im2_cpp.nii.gz ' +'-flo ' + flo_file + ' ' +\
-                   '-le 0.100000 ' + '-omp 4 ' + '-ref ' + ref_file + ' ' +\
-                   '-res ' + os.getcwd() + os.sep + 'im2_res.nii.gz ' + '-rmask ' + rmask_file + ' ' + '-vel'
+    cmd_tmp = '{cmd} -be 0.100000 -cpp {cpp} -flo {flo} -le 0.100000 -omp 4 \
+-ref {ref} -res {res} -rmask {rmask} -vel'
+    expected_cmd = cmd_tmp.format(
+        cmd=get_custom_path('reg_f3d'),
+        cpp=os.path.join(os.getcwd(), 'im2_cpp.nii.gz'),
+        flo=flo_file,
+        ref=ref_file,
+        res=os.path.join(os.getcwd(), 'im2_res.nii.gz'),
+        rmask=rmask_file)
+
     yield assert_equal, nr.cmdline, expected_cmd

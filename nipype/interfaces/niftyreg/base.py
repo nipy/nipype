@@ -1,6 +1,8 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
-"""The niftyreg module provides classes for interfacing with `niftyreg
+
+"""
+The niftyreg module provides classes for interfacing with `niftyreg
 <http://sourceforge.net/projects/niftyreg/>`_ command line tools.
 
 These are the base tools for working with niftyreg.
@@ -19,12 +21,14 @@ See the docstrings of the individual classes for examples.
 
 """
 
-import warnings
-import os
 from distutils.version import StrictVersion
-from nipype.interfaces.base import (CommandLine, isdefined)
-from nipype.utils.filemanip import split_filename
+import os
 import subprocess
+import warnings
+
+from ..base import CommandLine, isdefined, traits
+from ...utils.filemanip import split_filename
+
 
 warn = warnings.warn
 warnings.filterwarnings('always', category=UserWarning)
@@ -47,6 +51,19 @@ def no_niftyreg(cmd='reg_f3d'):
     return True
 
 
+class PositiveInt(traits.BaseInt):
+    # Define the default value
+    default_value = 0
+    # Describe the trait type
+    info_text = 'A positive integer'
+
+    def validate(self, obj, name, value):
+        value = super(PositiveInt, self).validate(obj, name, value)
+        if (value >= 0) == 1:
+            return value
+        self.error(obj, name, value)
+
+
 class NiftyRegCommand(CommandLine):
     """
     Base support for NiftyReg commands
@@ -56,14 +73,15 @@ class NiftyRegCommand(CommandLine):
 
     def __init__(self, required_version=None, **inputs):
         super(NiftyRegCommand, self).__init__(**inputs)
-        current_version = self.get_version()
-        if StrictVersion(current_version) < StrictVersion(self._min_version):
-            raise ValueError('A later version of Niftyreg is required (%s < %s)' %
-                             (current_version, self._min_version))
+        cur_version = self.get_version()
+        if StrictVersion(cur_version) < StrictVersion(self._min_version):
+            err = 'A later version of Niftyreg is required (%s < %s)'
+            raise ValueError(err % (cur_version, self._min_version))
         if required_version is not None:
-            if StrictVersion(current_version) != StrictVersion(required_version):
-                raise ValueError('The version of NiftyReg differs from the required (%s != %s)' %
-                                 (current_version, required_version))
+            if StrictVersion(cur_version) != StrictVersion(required_version):
+                err = 'The version of NiftyReg differs from the required'
+                err += '(%s != %s)'
+                raise ValueError(err % (cur_version, required_version))
 
     def get_version(self):
         if no_niftyreg(cmd=self.cmd):
@@ -96,7 +114,8 @@ class NiftyRegCommand(CommandLine):
 
     def _gen_filename(self, name):
         if name == 'out_file':
-            return self._gen_fname(self.inputs.in_file, suffix=self._suffix, ext='.nii.gz')
+            return self._gen_fname(self.inputs.in_file,
+                                   suffix=self._suffix, ext='.nii.gz')
         return None
 
     def _list_outputs(self):

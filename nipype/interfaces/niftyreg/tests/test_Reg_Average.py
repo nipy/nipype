@@ -1,11 +1,10 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 
-
-import os
 from nipype.interfaces.niftyreg import (no_niftyreg, get_custom_path,
                                         RegAverage)
-from nipype.testing import (assert_equal, skipif, example_data)
+from nipype.testing import assert_equal, skipif, example_data
+import os
 
 
 @skipif(no_niftyreg(cmd='reg_average'))

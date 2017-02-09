@@ -1,10 +1,10 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 
-
+from nipype.interfaces.niftyreg import (no_niftyreg, get_custom_path,
+                                        RegMeasure)
+from nipype.testing import assert_equal, skipif, example_data
 import os
-from nipype.interfaces.niftyreg import (no_niftyreg, get_custom_path, RegMeasure)
-from nipype.testing import (assert_equal, skipif, example_data)
 
 
 @skipif(no_niftyreg(cmd='reg_measure'))
@@ -24,6 +24,11 @@ def test_reg_measure():
     nr.inputs.measure_type = 'lncc'
     nr.inputs.omp_core_val = 4
 
-    expected_cmd = get_custom_path('reg_measure') + ' ' + '-flo ' + flo_file + ' ' + '-lncc ' + '-omp 4 '+\
-                   '-out ' + os.getcwd() + os.sep + 'im2_lncc.txt ' + '-ref ' + ref_file
+    cmd_tmp = '{cmd} -flo {flo} -lncc -omp 4 -out {out} -ref {ref}'
+    expected_cmd = cmd_tmp.format(
+        cmd=get_custom_path('reg_transform'),
+        flo=flo_file,
+        out=os.path.join(os.getcwd(), 'im2_lncc.txt'),
+        ref=ref_file)
+
     yield assert_equal, nr.cmdline, expected_cmd

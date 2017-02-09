@@ -9,7 +9,7 @@ from nipype.testing import assert_equal, skipif, example_data
 @skipif(no_niftyseg(cmd='seg_EM'))
 def test_seg_em():
 
-    # Create a reg_aladin object
+    # Create a node object
     seg_em = EM()
 
     # Check if the command is properly defined

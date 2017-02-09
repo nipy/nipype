@@ -9,7 +9,7 @@ from nipype.testing import (assert_equal, skipif, example_data)
 @skipif(no_niftyseg(cmd='seg_stats'))
 def test_seg_stats():
 
-    # Create a reg_aladin object
+    # Create a node object
     unarys = UnaryStats()
 
     # Check if the command is properly defined
@@ -26,7 +26,7 @@ def test_seg_stats():
 
     yield assert_equal, unarys.cmdline, expected_cmd
 
-    # Create a reg_aladin object
+    # Create a node object
     binarys = BinaryStats()
 
     # Check if the command is properly defined

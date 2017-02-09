@@ -10,7 +10,7 @@ from nipype.testing import (assert_equal, skipif, example_data)
 @skipif(no_niftyseg(cmd='seg_maths'))
 def test_seg_maths():
 
-    # Create a reg_aladin object
+    # Create a node object
     unarym = UnaryMaths()
 
     # Check if the command is properly defined
@@ -28,7 +28,7 @@ def test_seg_maths():
 
     yield assert_equal, unarym.cmdline, expected_cmd
 
-    # Create a reg_aladin object
+    # Create a node object
     binarym = BinaryMaths()
 
     # Check if the command is properly defined
