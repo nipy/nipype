@@ -447,6 +447,19 @@ def list_to_filename(filelist):
     else:
         return filelist[0]
 
+
+def check_depends(targets, dependencies):
+    """Return true if all targets exist and are newer than all dependencies.
+
+    An OSError will be raised if there are missing dependencies.
+    """
+    tgts = filename_to_list(targets)
+    deps = filename_to_list(dependencies)
+    return all(map(os.path.exists, tgts)) and \
+        min(map(os.path.getmtime, tgts)) > \
+        max(list(map(os.path.getmtime, deps)) + [0])
+
+
 def save_json(filename, data):
     """Save data to a json file
 

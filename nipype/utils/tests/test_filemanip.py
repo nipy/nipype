@@ -5,7 +5,9 @@ from __future__ import unicode_literals
 from builtins import open
 
 import os
-from tempfile import mkstemp
+import time
+from tempfile import mkstemp, mkdtemp
+import shutil
 import warnings
 
 import pytest
@@ -15,6 +17,7 @@ from ...utils.filemanip import (save_json, load_json,
                                 hash_rename, check_forhash,
                                 copyfile, copyfiles,
                                 filename_to_list, list_to_filename,
+                                check_depends,
                                 split_filename, get_related_files)
 
 import numpy as np
@@ -269,6 +272,41 @@ def test_filename_to_list(filename, expected):
 def test_list_to_filename(list, expected):
     x = list_to_filename(list)
     assert x == expected
+
+
+def test_check_depends():
+    def touch(fname):
+        with open(fname, 'a'):
+            os.utime(fname, None)
+
+    tmpdir = mkdtemp()
+
+    dependencies = [os.path.join(tmpdir, str(i)) for i in range(3)]
+    targets = [os.path.join(tmpdir, str(i)) for i in range(3, 6)]
+
+    # Targets newer than dependencies
+    for dep in dependencies:
+        touch(dep)
+    time.sleep(1)
+    for tgt in targets:
+        touch(tgt)
+    assert check_depends(targets, dependencies)
+
+    # Targets older than newest dependency
+    time.sleep(1)
+    touch(dependencies[0])
+    assert not check_depends(targets, dependencies)
+
+    # Missing dependency
+    os.unlink(dependencies[0])
+    try:
+        check_depends(targets, dependencies)
+    except OSError as e:
+        pass
+    else:
+        assert False, "Should raise OSError on missing dependency"
+
+    shutil.rmtree(tmpdir)   
 
 
 def test_json():
