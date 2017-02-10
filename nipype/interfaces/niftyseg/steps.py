@@ -30,8 +30,8 @@ class STEPSInputSpec(CommandLineInputSpec):
                                mandatory=True,
                                position=2)
 
-    template_num = traits.Int(desc='Number of images to fuse',
-                              argstr='%i',
+    template_num = traits.Int(desc='Number of labels to use',
+                              argstr='%d',
                               mandatory=True,
                               position=3)
 
@@ -83,12 +83,12 @@ class STEPS(NiftySegCommand):
     >>> from nipype.interfaces.niftyseg import STEPS
     >>> node = STEPS()
     >>> node.inputs.in_file = 'im1.nii'  # doctest: +SKIP
-    >>> node.inputs.kernel_size = 2
+    >>> node.inputs.kernel_size = 2.0
     >>> node.inputs.warped_seg_file = 'im2.nii'  # doctest: +SKIP
     >>> node.inputs.warped_img_file = 'im3.nii'  # doctest: +SKIP
     >>> node.inputs.template_num = 2
     >>> node.cmdline  # doctest: +SKIP
-    'seg_LabelFusion -in im3.nii -STEPS 2.000000 2 im1.nii im2.nii -out \
+    'seg_LabelFusion -in im2.nii -STEPS 2.000000 2 im1.nii im3.nii -out \
 im1_steps.nii'
 
     """

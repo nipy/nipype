@@ -14,7 +14,7 @@ See the docstrings of the individual classes for examples.
 import os
 
 from ..base import (TraitedSpec, File, traits, isdefined, CommandLineInputSpec,
-                    InputMultiPath, NipypeInterfaceError)
+                    NipypeInterfaceError)
 from .base import NiftySegCommand, get_custom_path
 
 
@@ -52,19 +52,18 @@ class MathsCommand(NiftySegCommand):
     _cmd = get_custom_path('seg_maths')
     input_spec = MathsInput
     output_spec = MathsOutput
-    _suffix = '_maths'
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
+
+        suffix = self._suffix
+        if suffix != '_merged' and isdefined(self.inputs.operation):
+            suffix = '_' + self.inputs.operation
+
         outputs['out_file'] = self.inputs.out_file
         if not isdefined(self.inputs.out_file):
-            if isdefined(self.inputs.operation) and \
-               self.inputs.operation == 'hdr_copy':
-                outputs['out_file'] = self._gen_fname(self.inputs.operand_file,
-                                                      suffix=self._suffix)
-            else:
-                outputs['out_file'] = self._gen_fname(self.inputs.in_file,
-                                                      suffix=self._suffix)
+            outputs['out_file'] = self._gen_fname(self.inputs.in_file,
+                                                  suffix=suffix)
         outputs['out_file'] = os.path.abspath(outputs['out_file'])
         return outputs
 
@@ -132,10 +131,6 @@ class UnaryMaths(MathsCommand):
 
     """
     input_spec = UnaryMathsInput
-
-    def _list_outputs(self):
-        self._suffix = '_' + self.inputs.operation
-        return super(UnaryMaths, self)._list_outputs()
 
 
 class BinaryMathsInput(MathsInput):
@@ -234,8 +229,20 @@ class BinaryMaths(MathsCommand):
         return super(BinaryMaths, self)._format_arg(opt, spec, val)
 
     def _list_outputs(self):
+        outputs = self.output_spec().get()
         self._suffix = '_' + self.inputs.operation
-        return super(UnaryMaths, self)._list_outputs()
+
+        outputs['out_file'] = self.inputs.out_file
+        if not isdefined(self.inputs.out_file):
+            if isdefined(self.inputs.operation) and \
+               self.inputs.operation == 'hdr_copy':
+                outputs['out_file'] = self._gen_fname(self.inputs.operand_file,
+                                                      suffix=self._suffix)
+            else:
+                outputs['out_file'] = self._gen_fname(self.inputs.in_file,
+                                                      suffix=self._suffix)
+        outputs['out_file'] = os.path.abspath(outputs['out_file'])
+        return outputs
 
 
 class BinaryMathsInputInteger(MathsInput):
@@ -249,7 +256,6 @@ class BinaryMathsInputInteger(MathsInput):
     operand_value = traits.Int(argstr='%d',
                                mandatory=True,
                                position=5,
-                               xor=['operand_file'],
                                desc='int value to perform operation with')
 
 
@@ -279,10 +285,6 @@ class BinaryMathsInteger(MathsCommand):
 
     """
     input_spec = BinaryMathsInputInteger
-
-    def _list_outputs(self):
-        self._suffix = '_' + self.inputs.operation
-        return super(UnaryMaths, self)._list_outputs()
 
 
 class TupleMathsInput(MathsInput):
@@ -341,18 +343,15 @@ class TupleMaths(MathsCommand):
     >>> from nipype.interfaces.niftyseg import TupleMaths
     >>> node = TupleMaths()
     >>> node.inputs.in_file = 'im1.nii'  # doctest: +SKIP
-    >>> node.inputs.operation = 'dil'
-    >>> node.inputs.operand_value = 2
+    >>> node.inputs.operation = 'lncc'
+    >>> node.inputs.operand_file1 = 'im2.nii'  # doctest: +SKIP
+    >>> node.inputs.operand_value2 = 2.0
     >>> node.inputs.output_datatype = 'float'
     >>> node.cmdline  # doctest: +SKIP
-    'seg_maths im1.nii -dil 2 im1_dil.nii -odt float'
+    'seg_maths im1.nii -lncc im2.nii 2.00000000 im1_lncc.nii -odt float'
 
     """
     input_spec = TupleMathsInput
-
-    def _list_outputs(self):
-        self._suffix = '_' + self.inputs.operation
-        return super(UnaryMaths, self)._list_outputs()
 
 
 class MergeInput(MathsInput):
@@ -361,9 +360,11 @@ class MergeInput(MathsInput):
                            desc='Dimension to merge the images.')
 
     desc = 'List of images to merge to the working image <input>.'
-    merge_files = InputMultiPath(mandatory=True,
-                                 position=4,
-                                 desc=desc)
+    merge_files = traits.List(File(exists=True),
+                              argstr='%s',
+                              mandatory=True,
+                              position=4,
+                              desc=desc)
 
 
 class Merge(MathsCommand):
@@ -383,14 +384,20 @@ class Merge(MathsCommand):
     >>> node.inputs.dimension = 2
     >>> node.inputs.output_datatype = 'float'
     >>> node.cmdline  # doctest: +SKIP
-    'seg_maths im1.nii -merge 2 2 im2.nii im3.nii -odt float'
+    'seg_maths im1.nii -merge 2 2 im2.nii im3.nii -odt float im1_merged.nii'
 
     """
     input_spec = MergeInput
     _suffix = '_merged'
 
     def _format_arg(self, opt, spec, val):
-        """Convert input to appropriate format for Seg_BiASM."""
+        """Convert input to appropriate format for seg_maths."""
+        print opt
         if opt == 'merge_files':
+            print self.inputs.dimension
+            print ' '.join(val)
+            print len(val)
             return "-merge %d %d %s" % (len(val), self.inputs.dimension,
                                         ' '.join(val))
+
+        return super(Merge, self)._format_arg(opt, spec, val)

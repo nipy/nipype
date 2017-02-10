@@ -175,11 +175,11 @@ class BinaryStats(StatsCommand):
 
     Examples
     --------
-    >>> from nipype.interfaces.niftyseg import UnaryStats
-    >>> node = UnaryStats()
+    >>> from nipype.interfaces.niftyseg import BinaryStats
+    >>> node = BinaryStats()
     >>> node.inputs.in_file = 'im1.nii'  # doctest: +SKIP
     >>> node.inputs.operation = 'sa'
-    >>> node.inputs.operand_value = '2'
+    >>> node.inputs.operand_value = 2.0
     >>> node.cmdline  # doctest: +SKIP
     'seg_stats im1.nii -sa 2'
 

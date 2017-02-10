@@ -94,8 +94,8 @@ class FillLesions(NiftySegCommand):
 
     Examples
     --------
-    >>> from nipype.interfaces.niftyseg import seg_EM
-    >>> node = seg_EM()
+    >>> from nipype.interfaces.niftyseg import FillLesions
+    >>> node = FillLesions()
     >>> node.inputs.in_file = 'im1.nii'  # doctest: +SKIP
     >>> node.inputs.lesion_mask = 'im2.nii'  # doctest: +SKIP
     >>> node.cmdline  # doctest: +SKIP

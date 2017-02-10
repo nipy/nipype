@@ -2,8 +2,9 @@
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 
 from nipype.interfaces.niftyseg import no_niftyseg, get_custom_path, EM
-from nipype.testing import assert_equal, skipif, example_data
+from nipype.testing import skipif, example_data
 import os
+import pytest
 
 
 @skipif(no_niftyseg(cmd='seg_EM'))
@@ -13,7 +14,11 @@ def test_seg_em():
     seg_em = EM()
 
     # Check if the command is properly defined
-    yield assert_equal, seg_em.cmd, get_custom_path('seg_EM')
+    assert seg_em.cmd == get_custom_path('seg_EM')
+
+    # test raising error with mandatory args absent
+    with pytest.raises(ValueError):
+        seg_em.run()
 
     # Assign some input data
     in_file = example_data('im1.nii')
@@ -29,4 +34,4 @@ def test_seg_em():
         bc_out=os.path.join(os.getcwd(), 'im1_bc_em.nii'),
         out_outlier=os.path.join(os.getcwd(), 'im1_outlier_em.nii'))
 
-    yield assert_equal, seg_em.cmdline, expected_cmd
+    assert seg_em.cmdline == expected_cmd

@@ -1,10 +1,10 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 
-from nipype.interfaces.niftyseg import (no_niftyseg, get_custom_path,
-                                        PatchMatch)
-from nipype.testing import assert_equal, skipif, example_data
+from nipype.interfaces.niftyseg import no_niftyseg, get_custom_path, PatchMatch
+from nipype.testing import skipif, example_data
 import os
+import pytest
 
 
 @skipif(no_niftyseg(cmd='seg_PatchMatch'))
@@ -14,7 +14,11 @@ def test_seg_patchmatch():
     seg_patchmatch = PatchMatch()
 
     # Check if the command is properly defined
-    yield assert_equal, seg_patchmatch.cmd, get_custom_path('seg_PatchMatch')
+    assert seg_patchmatch.cmd == get_custom_path('seg_PatchMatch')
+
+    # test raising error with mandatory args absent
+    with pytest.raises(ValueError):
+        seg_patchmatch.run()
 
     # Assign some input data
     in_file = example_data('im1.nii')
@@ -32,4 +36,4 @@ def test_seg_patchmatch():
                         db=db_file,
                         out_file=os.path.join(os.getcwd(), 'im1_pm.nii'))
 
-    yield assert_equal, seg_patchmatch.cmdline, expected_cmd
+    assert seg_patchmatch.cmdline == expected_cmd

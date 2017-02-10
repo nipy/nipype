@@ -3,8 +3,9 @@
 
 from nipype.interfaces.niftyseg import (no_niftyseg, get_custom_path,
                                         FillLesions)
-from nipype.testing import assert_equal, skipif, example_data
+from nipype.testing import skipif, example_data
 import os
+import pytest
 
 
 @skipif(no_niftyseg(cmd='seg_FillLesions'))
@@ -14,7 +15,11 @@ def test_seg_filllesions():
     seg_fill = FillLesions()
 
     # Check if the command is properly defined
-    yield assert_equal, seg_fill.cmd, get_custom_path('seg_FillLesions')
+    assert seg_fill.cmd == get_custom_path('seg_FillLesions')
+
+    # test raising error with mandatory args absent
+    with pytest.raises(ValueError):
+        seg_fill.run()
 
     # Assign some input data
     in_file = example_data('im1.nii')
@@ -28,4 +33,4 @@ def test_seg_filllesions():
                 lesion_mask=lesion_mask,
                 out_file=os.path.join(os.getcwd(), 'im1_lesions_filled.nii'))
 
-    yield assert_equal, seg_fill.cmdline, expected_cmd
+    assert seg_fill.cmdline == expected_cmd

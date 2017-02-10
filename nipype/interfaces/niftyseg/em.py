@@ -109,8 +109,8 @@ class EM(NiftySegCommand):
 
     Examples
     --------
-    >>> from nipype.interfaces.niftyseg import seg_EM
-    >>> node = seg_EM()
+    >>> from nipype.interfaces.niftyseg import EM
+    >>> node = EM()
     >>> node.inputs.in_file = 'im1.nii'  # doctest: +SKIP
     >>> node.inputs.no_prior = 4
     >>> node.cmdline  # doctest: +SKIP
