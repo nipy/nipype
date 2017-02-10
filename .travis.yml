@@ -26,7 +26,7 @@ before_install:
     source /etc/afni/afni.sh;
     export FSLOUTPUTTYPE=NIFTI_GZ; fi }
 - function conda_inst {
-  export CONDA_HOME=$HOME/conda
+  export CONDA_HOME=$HOME/conda &&
   if [ ! -d "${CONDA_HOME}" ]; then
     wget https://repo.continuum.io/archive/Miniconda${TRAVIS_PYTHON_VERSION:0:1}-latest-Linux-x86_64.sh
     -O /home/travis/.cache/conda.sh &&
