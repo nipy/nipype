@@ -23,8 +23,10 @@ before_install:
     source /etc/afni/afni.sh;
     export FSLOUTPUTTYPE=NIFTI_GZ; fi }
 - function conda_inst {
-  export CONDA_HOME=/home/travis/anaconda &&
-  bash /home/travis/.cache/anaconda.sh -b -p ${CONDA_HOME} &&
+  if [ ! -d "${CONDA_HOME}" ]; then
+    wget -N https://repo.continuum.io/archive/Anaconda${TRAVIS_PYTHON_VERSION:0:1}-4.3.0-Linux-x86_64.sh
+    -O /home/travis/.cache/anaconda.sh &&
+    bash /home/travis/.cache/anaconda.sh -b -p ${CONDA_HOME}; fi &&
   export PATH=${CONDA_HOME}/bin:$PATH &&
   conda config --add channels conda-forge &&
   conda update --all -y python=$TRAVIS_PYTHON_VERSION &&
@@ -32,7 +34,7 @@ before_install:
   rm -r ${CONDA_HOME}/lib/python${TRAVIS_PYTHON_VERSION}/site-packages/nipype*; }
 #  Add install of vtk and mayavi to test mesh (disabled): conda install -y vtk mayavi
 - travis_retry apt_inst
-- travis_retry if [ ! -f /home/travis/.cache/anaconda.sh]; then wget https://repo.continuum.io/archive/Anaconda${TRAVIS_PYTHON_VERSION:0:1}-4.3.0-Linux-x86_64.sh -O /home/travis/.cache/anaconda.sh; fi
+- export CONDA_HOME=/home/travis/anaconda
 - travis_retry conda_inst
 install:
 - travis_retry pip install -e .[$NIPYPE_EXTRAS]
