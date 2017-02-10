@@ -655,12 +655,12 @@ class SpecifySparseModel(SpecifyModel):
             hrf = spm_hrf(dt * 1e-3)
         reg_scale = 1.0
         if self.inputs.scale_regressors:
-            boxcar = np.zeros((50.0 * 1e3 / dt))
+            boxcar = np.zeros(int(50.0 * 1e3 / dt))
             if self.inputs.stimuli_as_impulses:
-                boxcar[1.0 * 1e3 / dt] = 1.0
+                boxcar[int(1.0 * 1e3 / dt)] = 1.0
                 reg_scale = float(TA / dt)
             else:
-                boxcar[(1.0 * 1e3 / dt):(2.0 * 1e3 / dt)] = 1.0
+                boxcar[int(1.0 * 1e3 / dt):int(2.0 * 1e3 / dt)] = 1.0
             if isdefined(self.inputs.model_hrf) and self.inputs.model_hrf:
                 response = np.convolve(boxcar, hrf)
                 reg_scale = 1.0 / response.max()
