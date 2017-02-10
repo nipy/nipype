@@ -1271,7 +1271,7 @@ def split_rois(in_file, mask=None, roishape=None):
         np.savez(iname, (nzels[0][first:last],))
 
         if fill > 0:
-            droi = np.vstack((droi, np.zeros((fill, nvols), dtype=np.float32)))
+            droi = np.vstack((droi, np.zeros(int(fill, nvols), dtype=np.float32)))
             partialmsk = np.ones((roisize,), dtype=np.uint8)
             partialmsk[-fill:] = 0
             partname = op.abspath('partialmask.nii.gz')
