@@ -1273,7 +1273,7 @@ def split_rois(in_file, mask=None, roishape=None):
         if fill > 0:
             droi = np.vstack((droi, np.zeros((int(fill), int(nvols)), dtype=np.float32)))
             partialmsk = np.ones((roisize,), dtype=np.uint8)
-            partialmsk[-fill:] = 0
+            partialmsk[-int(fill):] = 0
             partname = op.abspath('partialmask.nii.gz')
             nb.Nifti1Image(partialmsk.reshape(roishape), None,
                            None).to_filename(partname)
