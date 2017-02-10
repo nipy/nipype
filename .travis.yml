@@ -1,19 +1,17 @@
 cache:
   apt: true
   directories:
-  - $HOME/anaconda
+  - $HOME/conda
 
-language: c
+language: python
+python:
+- 2.7
+- 3.4
+- 3.5
 env:
-- PYTHON_VER=2.7 INSTALL_DEB_DEPENDECIES=true NIPYPE_EXTRAS="doc,tests,fmri,profiler"
-- PYTHON_VER=2.7 INSTALL_DEB_DEPENDECIES=false NIPYPE_EXTRAS="doc,tests,fmri,profiler"
-- PYTHON_VER=2.7 INSTALL_DEB_DEPENDECIES=true NIPYPE_EXTRAS="doc,tests,fmri,profiler,duecredit"
-- PYTHON_VER=3.4 INSTALL_DEB_DEPENDECIES=true NIPYPE_EXTRAS="doc,tests,fmri,profiler"
-- PYTHON_VER=3.4 INSTALL_DEB_DEPENDECIES=false NIPYPE_EXTRAS="doc,tests,fmri,profiler"
-- PYTHON_VER=3.4 INSTALL_DEB_DEPENDECIES=true NIPYPE_EXTRAS="doc,tests,fmri,profiler,duecredit"
-- PYTHON_VER=3.5 INSTALL_DEB_DEPENDECIES=true NIPYPE_EXTRAS="doc,tests,fmri,profiler"
-- PYTHON_VER=3.5 INSTALL_DEB_DEPENDECIES=false NIPYPE_EXTRAS="doc,tests,fmri,profiler"
-- PYTHON_VER=3.5 INSTALL_DEB_DEPENDECIES=true NIPYPE_EXTRAS="doc,tests,fmri,profiler,duecredit"
+- INSTALL_DEB_DEPENDECIES=true NIPYPE_EXTRAS="doc,tests,fmri,profiler"
+- INSTALL_DEB_DEPENDECIES=false NIPYPE_EXTRAS="doc,tests,fmri,profiler"
+- INSTALL_DEB_DEPENDECIES=true NIPYPE_EXTRAS="doc,tests,fmri,profiler,duecredit"
 before_install:
 - function apt_inst {
   if $INSTALL_DEB_DEPENDECIES; then sudo rm -rf /dev/shm; fi &&
@@ -28,18 +26,21 @@ before_install:
     source /etc/afni/afni.sh;
     export FSLOUTPUTTYPE=NIFTI_GZ; fi }
 - function conda_inst {
+  export CONDA_HOME=$HOME/conda
   if [ ! -d "${CONDA_HOME}" ]; then
-    wget -N https://repo.continuum.io/archive/Anaconda${PYTHON_VER:0:1}-4.3.0-Linux-x86_64.sh
-    -O /home/travis/.cache/anaconda.sh &&
-    bash /home/travis/.cache/anaconda.sh -b -p ${CONDA_HOME}; fi &&
+    wget https://repo.continuum.io/archive/Miniconda${TRAVIS_PYTHON_VERSION:0:1}-latest-Linux-x86_64.sh
+    -O /home/travis/.cache/conda.sh &&
+    bash /home/travis/.cache/conda.sh -b -p ${CONDA_HOME}; fi &&
   export PATH=${CONDA_HOME}/bin:$PATH &&
+  hash -r &&
+  conda config --set always_yes yes --set changeps1 no &&
+  conda update -q conda &&
   conda config --add channels conda-forge &&
-  conda update --all -y python=${PYTHON_VER} &&
+  conda update --all -y python=${TRAVIS_PYTHON_VERSION} &&
   conda install -y nipype icu==56.1 &&
-  rm -r ${CONDA_HOME}/lib/python${PYTHON_VER}/site-packages/nipype*; }
+  rm -r ${CONDA_HOME}/lib/python${TRAVIS_PYTHON_VERSION}/site-packages/nipype*; }
 #  Add install of vtk and mayavi to test mesh (disabled): conda install -y vtk mayavi
 - travis_retry apt_inst
-- export CONDA_HOME=$HOME/anaconda
 - travis_retry conda_inst
 install:
 - travis_retry pip install -e .[$NIPYPE_EXTRAS]
