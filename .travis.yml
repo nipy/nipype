@@ -29,8 +29,8 @@ before_install:
   conda config --append channels conda-forge &&
   conda update --all -y python=$TRAVIS_PYTHON_VERSION &&
   conda install -y nipype icu==56.1 &&
-#  Add install of vtk and mayavi to test mesh (disabled): conda install -y vtk mayavi &&
   rm -r /home/travis/miniconda/lib/python${TRAVIS_PYTHON_VERSION}/site-packages/nipype*}
+#  Add install of vtk and mayavi to test mesh (disabled): conda install -y vtk mayavi &&
 - travis_retry bef_inst
 install:
 - travis_retry pip install -e .[$NIPYPE_EXTRAS]
