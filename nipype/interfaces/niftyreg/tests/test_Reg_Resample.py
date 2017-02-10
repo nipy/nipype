@@ -3,8 +3,9 @@
 
 from nipype.interfaces.niftyreg import (no_niftyreg, get_custom_path,
                                         RegResample)
-from nipype.testing import assert_equal, skipif, example_data
+from nipype.testing import skipif, example_data
 import os
+import pytest
 
 
 @skipif(no_niftyreg(cmd='reg_resample'))
@@ -14,7 +15,11 @@ def test_reg_resample_res():
     nr = RegResample()
 
     # Check if the command is properly defined
-    yield assert_equal, nr.cmd, get_custom_path('reg_resample')
+    assert nr.cmd == get_custom_path('reg_resample')
+
+    # test raising error with mandatory args absent
+    with pytest.raises(ValueError):
+        nr.run()
 
     # Assign some input data
     ref_file = example_data('im1.nii')
@@ -35,7 +40,7 @@ def test_reg_resample_res():
         trans=trans_file,
         res=os.path.join(os.getcwd(), 'im2_res.nii.gz'))
 
-    yield assert_equal, nr.cmdline, expected_cmd
+    assert nr.cmdline == expected_cmd
 
 
 @skipif(no_niftyreg(cmd='reg_resample'))
@@ -45,7 +50,11 @@ def test_reg_resample_blank():
     nr = RegResample()
 
     # Check if the command is properly defined
-    yield assert_equal, nr.cmd, get_custom_path('reg_resample')
+    assert nr.cmd == get_custom_path('reg_resample')
+
+    # test raising error with mandatory args absent
+    with pytest.raises(ValueError):
+        nr.run()
 
     # Assign some input data
     ref_file = example_data('im1.nii')
@@ -67,4 +76,4 @@ def test_reg_resample_blank():
         trans=trans_file,
         blank=os.path.join(os.getcwd(), 'im2_blank.nii.gz'))
 
-    yield assert_equal, nr.cmdline, expected_cmd
+    assert nr.cmdline == expected_cmd

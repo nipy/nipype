@@ -3,7 +3,7 @@
 
 from nipype.interfaces.niftyreg import (no_niftyreg, get_custom_path,
                                         RegAverage)
-from nipype.testing import assert_equal, skipif, example_data
+from nipype.testing import skipif, example_data
 import os
 
 
@@ -14,7 +14,7 @@ def test_reg_average_avg_nii():
     nr = RegAverage()
 
     # Check if the command is properly defined
-    yield assert_equal, nr.cmd, get_custom_path('reg_average')
+    assert nr.cmd == get_custom_path('reg_average')
 
     # Assign some input data
     one_file = example_data('im1.nii')
@@ -34,12 +34,12 @@ def test_reg_average_avg_nii():
                                                           'avg_out.nii.gz'),
                                              one_file, two_file, three_file)
 
-    yield assert_equal, argv, expected_argv
+    assert argv == expected_argv
 
     expected_cmd = ('%s --cmd_file %s'
                     % (get_custom_path('reg_average'), reg_average_cmd))
 
-    yield assert_equal, nr.cmdline, expected_cmd
+    assert nr.cmdline == expected_cmd
 
 
 @skipif(no_niftyreg(cmd='reg_average'))
@@ -49,7 +49,7 @@ def test_reg_average_avg_txt():
     nr = RegAverage()
 
     # Check if the command is properly defined
-    yield assert_equal, nr.cmd, get_custom_path('reg_average')
+    assert nr.cmd == get_custom_path('reg_average')
 
     # Assign some input data
     one_file = example_data('TransformParameters.0.txt')
@@ -69,12 +69,12 @@ def test_reg_average_avg_txt():
                                                           'avg_out.txt'),
                                              one_file, two_file, three_file)
 
-    yield assert_equal, argv, expected_argv
+    assert argv == expected_argv
 
     expected_cmd = ('%s --cmd_file %s'
                     % (get_custom_path('reg_average'), reg_average_cmd))
 
-    yield assert_equal, nr.cmdline, expected_cmd
+    assert nr.cmdline == expected_cmd
 
 
 @skipif(no_niftyreg(cmd='reg_average'))
@@ -84,7 +84,7 @@ def test_reg_average_avg_lts():
     nr = RegAverage()
 
     # Check if the command is properly defined
-    yield assert_equal, nr.cmd, get_custom_path('reg_average')
+    assert nr.cmd == get_custom_path('reg_average')
 
     # Assign some input data
     one_file = example_data('TransformParameters.0.txt')
@@ -104,12 +104,12 @@ def test_reg_average_avg_lts():
                         os.path.join(os.getcwd(), 'avg_out.txt'),
                         one_file, two_file, three_file))
 
-    yield assert_equal, argv, expected_argv
+    assert argv == expected_argv
 
     expected_cmd = ('%s --cmd_file %s'
                     % (get_custom_path('reg_average'), reg_average_cmd))
 
-    yield assert_equal, nr.cmdline, expected_cmd
+    assert nr.cmdline == expected_cmd
 
 
 @skipif(no_niftyreg(cmd='reg_average'))
@@ -119,7 +119,7 @@ def test_reg_average_avg_ref():
     nr = RegAverage()
 
     # Check if the command is properly defined
-    yield assert_equal, nr.cmd, get_custom_path('reg_average')
+    assert nr.cmd == get_custom_path('reg_average')
 
     # Assign some input data
     ref_file = example_data('anatomical.nii')
@@ -147,12 +147,12 @@ def test_reg_average_avg_ref():
                         ref_file, trans1_file, one_file, trans2_file, two_file,
                         trans3_file, three_file))
 
-    yield assert_equal, argv, expected_argv
+    assert argv == expected_argv
 
     expected_cmd = ('%s --cmd_file %s'
                     % (get_custom_path('reg_average'), reg_average_cmd))
 
-    yield assert_equal, nr.cmdline, expected_cmd
+    assert nr.cmdline == expected_cmd
 
 
 @skipif(no_niftyreg(cmd='reg_average'))
@@ -162,7 +162,7 @@ def test_reg_average_demean3():
     nr = RegAverage()
 
     # Check if the command is properly defined
-    yield assert_equal, nr.cmd, get_custom_path('reg_average')
+    assert nr.cmd == get_custom_path('reg_average')
 
     # Assign some input data
     ref_file = example_data('anatomical.nii')
@@ -195,9 +195,9 @@ def test_reg_average_demean3():
                         aff2_file, trans2_file, two_file,
                         aff3_file, trans3_file, three_file))
 
-    yield assert_equal, argv, expected_argv
+    assert argv == expected_argv
 
     expected_cmd = ('%s --cmd_file %s'
                     % (get_custom_path('reg_average'), reg_average_cmd))
 
-    yield assert_equal, nr.cmdline, expected_cmd
+    assert nr.cmdline == expected_cmd

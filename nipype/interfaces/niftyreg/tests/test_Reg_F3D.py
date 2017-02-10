@@ -2,8 +2,9 @@
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 
 from nipype.interfaces.niftyreg import no_niftyreg, get_custom_path, RegF3D
-from nipype.testing import assert_equal, skipif, example_data
+from nipype.testing import skipif, example_data
 import os
+import pytest
 
 
 @skipif(no_niftyreg(cmd='reg_f3d'))
@@ -13,7 +14,11 @@ def test_reg_f3d():
     nr = RegF3D()
 
     # Check if the command is properly defined
-    yield assert_equal, nr.cmd, get_custom_path('reg_f3d')
+    assert nr.cmd == get_custom_path('reg_f3d')
+
+    # test raising error with mandatory args absent
+    with pytest.raises(ValueError):
+        nr.run()
 
     # Assign some input data
     ref_file = example_data('im1.nii')
@@ -37,4 +42,4 @@ def test_reg_f3d():
         res=os.path.join(os.getcwd(), 'im2_res.nii.gz'),
         rmask=rmask_file)
 
-    yield assert_equal, nr.cmdline, expected_cmd
+    assert nr.cmdline == expected_cmd

@@ -3,7 +3,8 @@
 
 from nipype.interfaces.niftyreg import (no_niftyreg, get_custom_path,
                                         RegMeasure)
-from nipype.testing import assert_equal, skipif, example_data
+from nipype.testing import skipif, example_data
+import pytest
 import os
 
 
@@ -14,7 +15,11 @@ def test_reg_measure():
     nr = RegMeasure()
 
     # Check if the command is properly defined
-    yield assert_equal, nr.cmd, get_custom_path('reg_measure')
+    assert nr.cmd == get_custom_path('reg_measure')
+
+    # test raising error with mandatory args absent
+    with pytest.raises(ValueError):
+        nr.run()
 
     # Assign some input data
     ref_file = example_data('im1.nii')
@@ -26,9 +31,9 @@ def test_reg_measure():
 
     cmd_tmp = '{cmd} -flo {flo} -lncc -omp 4 -out {out} -ref {ref}'
     expected_cmd = cmd_tmp.format(
-        cmd=get_custom_path('reg_transform'),
+        cmd=get_custom_path('reg_measure'),
         flo=flo_file,
         out=os.path.join(os.getcwd(), 'im2_lncc.txt'),
         ref=ref_file)
 
-    yield assert_equal, nr.cmdline, expected_cmd
+    assert nr.cmdline == expected_cmd

@@ -2,8 +2,9 @@
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 
 from nipype.interfaces.niftyreg import no_niftyreg, get_custom_path, RegTools
-from nipype.testing import assert_equal, skipif, example_data
+from nipype.testing import skipif, example_data
 import os
+import pytest
 
 
 @skipif(no_niftyreg(cmd='reg_tools'))
@@ -13,7 +14,11 @@ def test_reg_tools_mul():
     nr = RegTools()
 
     # Check if the command is properly defined
-    yield assert_equal, nr.cmd, get_custom_path('reg_tools')
+    assert nr.cmd == get_custom_path('reg_tools')
+
+    # test raising error with mandatory args absent
+    with pytest.raises(ValueError):
+        nr.run()
 
     # Assign some input data
     in_file = example_data('im1.nii')
@@ -27,7 +32,7 @@ def test_reg_tools_mul():
         in_file=in_file,
         out_file=os.path.join(os.getcwd(), 'im1_tools.nii.gz'))
 
-    yield assert_equal, nr.cmdline, expected_cmd
+    assert nr.cmdline == expected_cmd
 
 
 @skipif(no_niftyreg(cmd='reg_tools'))
@@ -37,7 +42,11 @@ def test_reg_tools_iso():
     nr = RegTools()
 
     # Check if the command is properly defined
-    yield assert_equal, nr.cmd, get_custom_path('reg_tools')
+    assert nr.cmd == get_custom_path('reg_tools')
+
+    # test raising error with mandatory args absent
+    with pytest.raises(ValueError):
+        nr.run()
 
     # Assign some input data
     in_file = example_data('im1.nii')
@@ -51,4 +60,4 @@ def test_reg_tools_iso():
         in_file=in_file,
         out_file=os.path.join(os.getcwd(), 'im1_tools.nii.gz'))
 
-    yield assert_equal, nr.cmdline, expected_cmd
+    assert nr.cmdline == expected_cmd

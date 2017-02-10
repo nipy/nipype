@@ -3,8 +3,9 @@
 
 from nipype.interfaces.niftyreg import (no_niftyreg, get_custom_path,
                                         RegJacobian)
-from nipype.testing import (assert_equal, skipif, example_data)
+from nipype.testing import skipif, example_data
 import os
+import pytest
 
 
 @skipif(no_niftyreg(cmd='reg_jacobian'))
@@ -14,7 +15,11 @@ def test_reg_jacobian_jac():
     nr = RegJacobian()
 
     # Check if the command is properly defined
-    yield assert_equal, nr.cmd, get_custom_path('reg_jacobian')
+    assert nr.cmd == get_custom_path('reg_jacobian')
+
+    # test raising error with mandatory args absent
+    with pytest.raises(ValueError):
+        nr.run()
 
     # Assign some input data
     ref_file = example_data('im1.nii')
@@ -30,7 +35,7 @@ def test_reg_jacobian_jac():
         trans=trans_file,
         jac=os.path.join(os.getcwd(), 'warpfield_jac.nii.gz'))
 
-    yield assert_equal, nr.cmdline, expected_cmd
+    assert nr.cmdline == expected_cmd
 
 
 @skipif(no_niftyreg(cmd='reg_jacobian'))
@@ -40,7 +45,11 @@ def test_reg_jacobian_jac_m():
     nr = RegJacobian()
 
     # Check if the command is properly defined
-    yield assert_equal, nr.cmd, get_custom_path('reg_jacobian')
+    assert nr.cmd == get_custom_path('reg_jacobian')
+
+    # test raising error with mandatory args absent
+    with pytest.raises(ValueError):
+        nr.run()
 
     # Assign some input data
     ref_file = example_data('im1.nii')
@@ -57,7 +66,7 @@ def test_reg_jacobian_jac_m():
         trans=trans_file,
         jac=os.path.join(os.getcwd(), 'warpfield_jacM.nii.gz'))
 
-    yield assert_equal, nr.cmdline, expected_cmd
+    assert nr.cmdline == expected_cmd
 
 
 @skipif(no_niftyreg(cmd='reg_jacobian'))
@@ -67,7 +76,11 @@ def test_reg_jacobian_jac_l():
     nr = RegJacobian()
 
     # Check if the command is properly defined
-    yield assert_equal, nr.cmd, get_custom_path('reg_jacobian')
+    assert nr.cmd == get_custom_path('reg_jacobian')
+
+    # test raising error with mandatory args absent
+    with pytest.raises(ValueError):
+        nr.run()
 
     # Assign some input data
     ref_file = example_data('im1.nii')
@@ -84,4 +97,4 @@ def test_reg_jacobian_jac_l():
         trans=trans_file,
         jac=os.path.join(os.getcwd(), 'warpfield_jacL.nii.gz'))
 
-    yield assert_equal, nr.cmdline, expected_cmd
+    assert nr.cmdline == expected_cmd

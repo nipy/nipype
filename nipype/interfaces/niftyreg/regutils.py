@@ -371,8 +371,8 @@ class RegAverage(NiftyRegCommand):
     >>> one_file = 'im1.nii'
     >>> two_file = 'im2.nii'
     >>> three_file = 'im3.nii'
-    >>> node.inputs.avg_files = [one_file, two_file, three_file]
-    >>> node.cmdline
+    >>> node.inputs.avg_files = [one_file, two_file, three_file]  # doctest: +SKIP
+    >>> node.cmdline  # doctest: +SKIP
     'reg_average --cmd_file reg_average_cmd'
 
     """
@@ -564,7 +564,7 @@ class RegTransform(NiftyRegCommand):
     --------
     >>> from nipype.interfaces.niftyreg import RegResample
     >>> node = RegTransform()
-    >>> node.inputs.def_input = 'warpfield.nii'
+    >>> node.inputs.def_input = 'warpfield.nii'  # doctest: +SKIP
     >>> node.inputs.omp_core_val = 4
     >>> node.cmdline  # doctest: +SKIP
     'reg_transform -omp 4 -def warpfield.nii warpfield_trans.nii.gz'
