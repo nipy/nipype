@@ -10,7 +10,7 @@
 
 """
 from __future__ import print_function, division, unicode_literals, absolute_import
-from io import open
+from builtins import open
 
 import os.path as op
 import nibabel as nb
@@ -55,11 +55,10 @@ def read_mrtrix_tracks(in_file, as_generator=True):
 
 
 def read_mrtrix_header(in_file):
-    fileobj = open(in_file, 'rb')
+    fileobj = open(in_file, 'r')
     header = {}
     iflogger.info('Reading header data...')
     for line in fileobj:
-        line = line.decode()
         if line == 'END\n':
             iflogger.info('Reached the end of the header!')
             break
@@ -79,7 +78,7 @@ def read_mrtrix_header(in_file):
 def read_mrtrix_streamlines(in_file, header, as_generator=True):
     offset = header['offset']
     stream_count = header['count']
-    fileobj = open(in_file, 'rb')
+    fileobj = open(in_file, 'r')
     fileobj.seek(offset)
     endianness = native_code
     f4dt = np.dtype(endianness + 'f4')
