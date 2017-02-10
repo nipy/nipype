@@ -343,38 +343,38 @@ class DwiToolInputSpec(CommandLineInputSpec):
                                  'nodv_flag'])
     desc = 'Inputs is an IVIM model to non-directional data.'
     ivim_flag = traits.Bool(desc=desc,
-                            argstr='-ivim ',
+                            argstr='-ivim',
                             xor=['mono_flag', 'dti_flag', 'dti_flag2',
                                  'ball_flag', 'ballv_flag', 'nod_flag',
                                  'nodv_flag'])
     dti_flag = traits.Bool(desc='Input is a tensor model diag/off-diag.',
-                           argstr='-dti ',
+                           argstr='-dti',
                            xor=['mono_flag', 'ivim_flag', 'dti_flag2',
                                 'ball_flag', 'ballv_flag', 'nod_flag',
                                 'nodv_flag'])
     dti_flag2 = traits.Bool(desc='Input is a tensor model lower triangular',
-                            argstr='-dti2 ',
+                            argstr='-dti2',
                             xor=['mono_flag', 'ivim_flag', 'dti_flag',
                                  'ball_flag', 'ballv_flag', 'nod_flag',
                                  'nodv_flag'])
     ball_flag = traits.Bool(desc='Input is a ball and stick model.',
-                            argstr='-ball ',
+                            argstr='-ball',
                             xor=['mono_flag', 'ivim_flag', 'dti_flag',
                                  'dti_flag2', 'ballv_flag', 'nod_flag',
                                  'nodv_flag'])
     desc = 'Input is a ball and stick model with optimised PDD.'
     ballv_flag = traits.Bool(desc=desc,
-                             argstr='-ballv ',
+                             argstr='-ballv',
                              xor=['mono_flag', 'ivim_flag', 'dti_flag',
                                   'dti_flag2', 'ball_flag', 'nod_flag',
                                   'nodv_flag'])
     nod_flag = traits.Bool(desc='Input is a NODDI model',
-                           argstr='-nod ',
+                           argstr='-nod',
                            xor=['mono_flag', 'ivim_flag', 'dti_flag',
                                 'dti_flag2', 'ball_flag', 'ballv_flag',
                                 'nodv_flag'])
     nodv_flag = traits.Bool(desc='Input is a NODDI model with optimised PDD',
-                            argstr='-nodv ',
+                            argstr='-nodv',
                             xor=['mono_flag', 'ivim_flag', 'dti_flag',
                                  'dti_flag2', 'ball_flag', 'ballv_flag',
                                  'nod_flag'])
@@ -415,7 +415,7 @@ class DwiTool(NiftyFitCommand):
     >>> dwi_tool.inputs.bvec_file = 'im1.bval'  # doctest: +SKIP
     >>> dwi_tool.inputs.bval_file = 'im1.bvec'  # doctest: +SKIP
     >>> dwi_tool.inputs.mask_file = 'im1.bvec'  # doctest: +SKIP
-    >>> dwi_tool.inputs.b0_file = 'b0.nii.hgz'  # doctest: +SKIP
+    >>> dwi_tool.inputs.b0_file = 'b0.nii.gz'  # doctest: +SKIP
     >>> dwi_tool.inputs.dti_flag = True
     >>> dwi_tool.inputs.rgbmap_file = 'rgb_map.nii.gz'
     >>> dwi_tool.cmdline  # doctest: +SKIP

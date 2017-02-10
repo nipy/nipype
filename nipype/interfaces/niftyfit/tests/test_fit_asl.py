@@ -1,9 +1,10 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 
-import os
 from nipype.interfaces.niftyfit import no_niftyfit, get_custom_path, FitAsl
-from nipype.testing import assert_equal, skipif, example_data
+from nipype.testing import skipif, example_data
+import os
+import pytest
 
 
 @skipif(no_niftyfit(cmd='fit_asl'))
@@ -12,7 +13,11 @@ def test_seg_em():
     test_node = FitAsl()
 
     # Check if the command is properly defined
-    yield assert_equal, test_node.cmd, get_custom_path('fit_asl')
+    assert test_node.cmd == get_custom_path('fit_asl')
+
+    # test raising error with mandatory args absent
+    with pytest.raises(ValueError):
+        test_node.run()
 
     # Assign some input data
     in_file = example_data('im1.nii')
@@ -26,4 +31,4 @@ def test_seg_em():
         error=os.path.join(os.getcwd(), 'im1_error.nii.gz'),
         syn=os.path.join(os.getcwd(), 'im1_syn.nii.gz'))
 
-    yield assert_equal, test_node.cmdline, expected_cmd
+    assert test_node.cmdline == expected_cmd
