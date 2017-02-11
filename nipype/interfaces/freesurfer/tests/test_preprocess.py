@@ -102,11 +102,11 @@ def test_mandatory_outvol(create_files_in_directory):
     with pytest.raises(ValueError): mni.run()
 
     # rest of mandatory inputs
-    mni.inputs.out_file = 'bias_corrected_file'
+    mni.inputs.out_file = 'bias_corrected_output'
 
-    assert mni.cmdline == ('mri_nu_correct.mni --i %s --n 4 --o bias_corrected_file.mgz'
+    assert mni.cmdline == ('mri_nu_correct.mni --i %s --n 4 --o bias_corrected_output.mgz'
                             % filelist[0])
     # constructor based tests
-    mni2 = freesurfer.MNIBiasCorrection(in_file=filelist[0], out_file='bias_corrected_file')
-    assert mni2.cmdline == ('mri_nu_correct.mni --i %s --n 4 --o bias_corrected_file.mgz'
+    mni2 = freesurfer.MNIBiasCorrection(in_file=filelist[0], out_file='bias_corrected_output')
+    assert mni2.cmdline == ('mri_nu_correct.mni --i %s --n 4 --o bias_corrected_output.mgz'
                              % filelist[0])

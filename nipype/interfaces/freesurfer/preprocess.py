@@ -1510,6 +1510,7 @@ class MNIBiasCorrection(FSCommand):
     >>> from nipype.interfaces.freesurfer import MNIBiasCorrection
     >>> correct = MNIBiasCorrection()
     >>> correct.inputs.in_file = "norm.mgz"
+    >>> correct.inputs.out_file = "norm_output.mgz"
     >>> correct.inputs.iterations = 6
     >>> correct.inputs.protocol_iterations = 1000
     >>> correct.inputs.distance = 50
