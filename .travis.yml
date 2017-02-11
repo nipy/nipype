@@ -1,5 +1,6 @@
 cache:
-- apt
+  apt: true
+
 language: python
 python:
 - 2.7
@@ -10,7 +11,7 @@ env:
 - INSTALL_DEB_DEPENDECIES=false NIPYPE_EXTRAS="doc,tests,fmri,profiler"
 - INSTALL_DEB_DEPENDECIES=true NIPYPE_EXTRAS="doc,tests,fmri,profiler,duecredit"
 before_install:
-- function bef_inst {
+- function apt_inst {
   if $INSTALL_DEB_DEPENDECIES; then sudo rm -rf /dev/shm; fi &&
   if $INSTALL_DEB_DEPENDECIES; then sudo ln -s /run/shm /dev/shm; fi &&
   bash <(wget -q -O- http://neuro.debian.net/_files/neurodebian-travis.sh) &&
@@ -21,18 +22,23 @@ before_install:
   if $INSTALL_DEB_DEPENDECIES; then
     source /etc/fsl/fsl.sh;
     source /etc/afni/afni.sh;
-    export FSLOUTPUTTYPE=NIFTI_GZ; fi &&
-  wget https://repo.continuum.io/archive/Anaconda${TRAVIS_PYTHON_VERSION:0:1}-4.3.0-Linux-x86_64.sh
-  -O /home/travis/.cache/anaconda.sh &&
-  bash /home/travis/.cache/anaconda.sh -b -p /home/travis/anaconda &&
-  export PATH=/home/travis/anaconda/bin:$PATH &&
-  conda config --append channels conda-forge &&
-  conda update --all -y python=$TRAVIS_PYTHON_VERSION &&
+    export FSLOUTPUTTYPE=NIFTI_GZ; fi }
+- function conda_inst {
+  export CONDA_HOME=$HOME/conda &&
+  wget https://repo.continuum.io/miniconda/Miniconda${TRAVIS_PYTHON_VERSION:0:1}-latest-Linux-x86_64.sh
+    -O /home/travis/.cache/conda.sh &&
+  bash /home/travis/.cache/conda.sh -b -p ${CONDA_HOME} &&
+  export PATH=${CONDA_HOME}/bin:$PATH &&
+  hash -r &&
+  conda config --set always_yes yes --set changeps1 no &&
+  conda update -q conda &&
+  conda config --add channels conda-forge &&
+  conda update --all -y python=${TRAVIS_PYTHON_VERSION} &&
   conda install -y nipype icu &&
-  rm -r /home/travis/miniconda/lib/python${TRAVIS_PYTHON_VERSION}/site-packages/nipype* &&
-  pip install -r requirements.txt ; }
+  rm -r ${CONDA_HOME}/lib/python${TRAVIS_PYTHON_VERSION}/site-packages/nipype*; }
 #  Add install of vtk and mayavi to test mesh (disabled): conda install -y vtk mayavi
-- travis_retry bef_inst
+- travis_retry apt_inst
+- travis_retry conda_inst
 install:
 - travis_retry pip install -e .[$NIPYPE_EXTRAS]
 script:
