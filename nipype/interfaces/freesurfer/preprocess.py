@@ -942,6 +942,12 @@ class BBRegisterInputSpec(FSTraitedSpec):
                                     desc='output warped sourcefile either True or filename')
 
 
+class BBRegisterInputSpec6(BBRegisterInputSpec):
+    init = traits.Enum('coreg', 'rr', 'spm', 'fsl', 'header', 'best', argstr='--init-%s',
+                       usedefault=True, xor=['init_reg_file'],
+                       desc='initialize registration with mri_coreg, spm, fsl, or header')
+
+
 class BBRegisterOutputSpec(TraitedSpec):
     out_reg_file = File(exists=True, desc='Output registration file')
     out_fsl_file = File(desc='Output FLIRT-style registration file')
@@ -968,7 +974,10 @@ class BBRegister(FSCommand):
     """
 
     _cmd = 'bbregister'
-    input_spec = BBRegisterInputSpec
+    if LooseVersion(FSVersion) < LooseVersion("6.0.0"):
+        input_spec = BBRegisterInputSpec
+    else:
+        input_spec = BBRegisterInputSpec6
     output_spec = BBRegisterOutputSpec
 
     def _list_outputs(self):
