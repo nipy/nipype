@@ -10,9 +10,9 @@ Top-level namespace for niftyseg.
 
 from .base import no_niftyseg, get_custom_path
 from .em import EM
+from .label_fusion import LabelFusion, CalcTopNCC
 from .lesions import FillLesions
-from .maths import (UnaryMaths, BinaryMaths, BinaryMathsInteger,
-                    Merge, TupleMaths)
+from .maths import (UnaryMaths, BinaryMaths, BinaryMathsInteger, TupleMaths,
+                    Merge)
 from .patchmatch import PatchMatch
 from .stats import UnaryStats, BinaryStats
-from .steps import STEPS, CalcTopNCC

@@ -92,8 +92,7 @@ class NiftySegCommand(CommandLine):
 
     def _gen_filename(self, name):
         if name == 'out_file':
-            return self._gen_fname(self.inputs.in_file, suffix=self._suffix,
-                                   ext='.nii.gz')
+            return self._gen_fname(self.inputs.in_file, suffix=self._suffix)
         return None
 
     def _list_outputs(self):

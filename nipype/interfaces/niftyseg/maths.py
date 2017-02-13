@@ -394,9 +394,6 @@ class Merge(MathsCommand):
         """Convert input to appropriate format for seg_maths."""
         print opt
         if opt == 'merge_files':
-            print self.inputs.dimension
-            print ' '.join(val)
-            print len(val)
             return "-merge %d %d %s" % (len(val), self.inputs.dimension,
                                         ' '.join(val))
 
