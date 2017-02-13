@@ -22,7 +22,6 @@ import locale
 import os
 import re
 import platform
-from socket import getfqdn
 from string import Template
 import select
 import subprocess
@@ -644,7 +643,8 @@ class DynamicTraitedSpec(BaseTraitedSpec):
         dup_dict = deepcopy(self.get(), memo)
         # access all keys
         for key in self.copyable_trait_names():
-            _ = getattr(self, key)
+            if key in self.__dict__.keys():
+                _ = getattr(self, key)
         # clone once
         dup = self.clone_traits(memo=memo)
         for key in self.copyable_trait_names():
@@ -1079,7 +1079,7 @@ class BaseInterface(Interface):
                         startTime=dt.isoformat(dt.utcnow()),
                         endTime=None,
                         platform=platform.platform(),
-                        hostname=getfqdn(),
+                        hostname=platform.node(),
                         version=self.version)
         try:
             runtime = self._run_wrapper(runtime)

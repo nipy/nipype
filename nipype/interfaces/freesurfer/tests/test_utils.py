@@ -3,70 +3,18 @@
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 from __future__ import print_function, division, unicode_literals, absolute_import
 from builtins import open
-
 import os
-from tempfile import mkdtemp
-from shutil import rmtree
 
-import numpy as np
-
-import nibabel as nif
 import pytest
-from nipype.interfaces.base import TraitError
+from nipype.testing.fixtures import (create_files_in_directory_plus_dummy_file, 
+                                     create_surf_file_in_directory)
 
+from nipype.interfaces.base import TraitError
 import nipype.interfaces.freesurfer as fs
 
 
-@pytest.fixture()
-def create_files_in_directory(request):
-    outdir = os.path.realpath(mkdtemp())
-    cwd = os.getcwd()
-    os.chdir(outdir)
-    filelist = ['a.nii', 'b.nii']
-    for f in filelist:
-        hdr = nif.Nifti1Header()
-        shape = (3, 3, 3, 4)
-        hdr.set_data_shape(shape)
-        img = np.random.random(shape)
-        nif.save(nif.Nifti1Image(img, np.eye(4), hdr),
-                 os.path.join(outdir, f))
-    with open(os.path.join(outdir, 'reg.dat'), 'wt') as fp:
-        fp.write('dummy file')
-    filelist.append('reg.dat')
-
-    def clean_directory():
-        if os.path.exists(outdir):
-            rmtree(outdir)
-        os.chdir(cwd)
-
-    request.addfinalizer(clean_directory)
-    return (filelist, outdir, cwd)
-
-
-@pytest.fixture()
-def create_surf_file(request):
-    outdir = os.path.realpath(mkdtemp())
-    cwd = os.getcwd()
-    os.chdir(outdir)
-    surf = 'lh.a.nii'
-    hdr = nif.Nifti1Header()
-    shape = (1, 100, 1)
-    hdr.set_data_shape(shape)
-    img = np.random.random(shape)
-    nif.save(nif.Nifti1Image(img, np.eye(4), hdr),
-             os.path.join(outdir, surf))
-
-    def clean_directory():
-        if os.path.exists(outdir):
-            rmtree(outdir)
-        os.chdir(cwd)
-
-    request.addfinalizer(clean_directory)
-    return (surf, outdir, cwd)
-
-
 @pytest.mark.skipif(fs.no_freesurfer(), reason="freesurfer is not installed")
-def test_sample2surf(create_files_in_directory):
+def test_sample2surf(create_files_in_directory_plus_dummy_file):
 
     s2s = fs.SampleToSurface()
     # Test underlying command
@@ -76,7 +24,7 @@ def test_sample2surf(create_files_in_directory):
     with pytest.raises(ValueError): s2s.run()
 
     # Create testing files
-    files, cwd, oldwd = create_files_in_directory
+    files, cwd = create_files_in_directory_plus_dummy_file
 
     # Test input settings
     s2s.inputs.source_file = files[0]
@@ -107,7 +55,7 @@ def test_sample2surf(create_files_in_directory):
 
 
 @pytest.mark.skipif(fs.no_freesurfer(), reason="freesurfer is not installed")
-def test_surfsmooth(create_surf_file):
+def test_surfsmooth(create_surf_file_in_directory):
 
     smooth = fs.SurfaceSmooth()
 
@@ -118,7 +66,7 @@ def test_surfsmooth(create_surf_file):
     with pytest.raises(ValueError): smooth.run()
 
     # Create testing files
-    surf, cwd, oldwd = create_surf_file
+    surf, cwd = create_surf_file_in_directory
 
     # Test input settings
     smooth.inputs.in_file = surf
@@ -139,7 +87,7 @@ def test_surfsmooth(create_surf_file):
 
 
 @pytest.mark.skipif(fs.no_freesurfer(), reason="freesurfer is not installed")
-def test_surfxfm(create_surf_file):
+def test_surfxfm(create_surf_file_in_directory):
 
     xfm = fs.SurfaceTransform()
 
@@ -150,7 +98,7 @@ def test_surfxfm(create_surf_file):
     with pytest.raises(ValueError): xfm.run()
 
     # Create testing files
-    surf, cwd, oldwd = create_surf_file
+    surf, cwd = create_surf_file_in_directory
 
     # Test input settings
     xfm.inputs.source_file = surf
@@ -170,7 +118,7 @@ def test_surfxfm(create_surf_file):
 
 
 @pytest.mark.skipif(fs.no_freesurfer(), reason="freesurfer is not installed")
-def test_surfshots(create_files_in_directory):
+def test_surfshots(create_files_in_directory_plus_dummy_file):
 
     fotos = fs.SurfaceSnapshots()
 
@@ -181,7 +129,7 @@ def test_surfshots(create_files_in_directory):
     with pytest.raises(ValueError): fotos.run()
 
     # Create testing files
-    files, cwd, oldwd = create_files_in_directory
+    files, cwd = create_files_in_directory_plus_dummy_file
 
     # Test input settins
     fotos.inputs.subject_id = "fsaverage"

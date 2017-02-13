@@ -2,13 +2,10 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 import os
-from tempfile import mkdtemp
-from shutil import rmtree
-
-import numpy as np
 
 import pytest
-import nibabel as nb
+from nipype.testing.fixtures import create_files_in_directory
+
 import nipype.interfaces.spm as spm
 from nipype.interfaces.spm import no_spm
 import nipype.interfaces.matlab as mlab
@@ -20,28 +17,6 @@ except:
 
 mlab.MatlabCommand.set_default_matlab_cmd(matlab_cmd)
 
-@pytest.fixture()
-def create_files_in_directory(request):
-    outdir = mkdtemp()
-    cwd = os.getcwd()
-    os.chdir(outdir)
-    filelist = ['a.nii', 'b.nii']
-    for f in filelist:
-        hdr = nb.Nifti1Header()
-        shape = (3, 3, 3, 4)
-        hdr.set_data_shape(shape)
-        img = np.random.random(shape)
-        nb.save(nb.Nifti1Image(img, np.eye(4), hdr),
-                os.path.join(outdir, f))
-
-    def clean_directory():
-        if os.path.exists(outdir):
-            rmtree(outdir)
-        os.chdir(cwd)
-
-    request.addfinalizer(clean_directory)
-    return filelist, outdir, cwd
-
 
 def test_slicetiming():
     assert spm.SliceTiming._jobtype == 'temporal'
@@ -49,7 +24,7 @@ def test_slicetiming():
 
 
 def test_slicetiming_list_outputs(create_files_in_directory):
-    filelist, outdir, cwd = create_files_in_directory
+    filelist, outdir = create_files_in_directory
     st = spm.SliceTiming(in_files=filelist[0])
     assert st._list_outputs()['timecorrected_files'][0][0] == 'a'
 
@@ -61,7 +36,7 @@ def test_realign():
 
 
 def test_realign_list_outputs(create_files_in_directory):
-    filelist, outdir, cwd = create_files_in_directory
+    filelist, outdir = create_files_in_directory
     rlgn = spm.Realign(in_files=filelist[0])
     assert rlgn._list_outputs()['realignment_parameters'][0].startswith('rp_')
     assert rlgn._list_outputs()['realigned_files'][0].startswith('r')
@@ -75,7 +50,7 @@ def test_coregister():
 
 
 def test_coregister_list_outputs(create_files_in_directory):
-    filelist, outdir, cwd = create_files_in_directory
+    filelist, outdir = create_files_in_directory
     coreg = spm.Coregister(source=filelist[0])
     assert coreg._list_outputs()['coregistered_source'][0].startswith('r')
     coreg = spm.Coregister(source=filelist[0], apply_to_files=filelist[1])
@@ -89,7 +64,7 @@ def test_normalize():
 
 
 def test_normalize_list_outputs(create_files_in_directory):
-    filelist, outdir, cwd = create_files_in_directory
+    filelist, outdir = create_files_in_directory
     norm = spm.Normalize(source=filelist[0])
     assert norm._list_outputs()['normalized_source'][0].startswith('w')
     norm = spm.Normalize(source=filelist[0], apply_to_files=filelist[1])
@@ -103,7 +78,7 @@ def test_normalize12():
 
 
 def test_normalize12_list_outputs(create_files_in_directory):
-    filelist, outdir, cwd = create_files_in_directory
+    filelist, outdir = create_files_in_directory
     norm12 = spm.Normalize12(image_to_align=filelist[0])
     assert norm12._list_outputs()['normalized_image'][0].startswith('w')
     norm12 = spm.Normalize12(image_to_align=filelist[0],

@@ -146,11 +146,11 @@ REQUIRES = [
     'xvfbwrapper',
     'funcsigs',
     'configparser',
+    'pytest>=%s' % PYTEST_MIN_VERSION
 ]
 
 TESTS_REQUIRES = [
     'pytest>=%s' % PYTEST_MIN_VERSION,
-    'pytest-raisesregexp',
     'pytest-cov',
     'mock',
     'codecov',

@@ -5,9 +5,8 @@ traits>=4.3
 python-dateutil>=1.5
 nibabel>=2.0.1
 pytest>=3.0
-pytest-raisesregexp
 pytest-cov
-future==0.15.2
+future>=0.15.2
 simplejson>=3.8.0
 prov>=1.4.0
 xvfbwrapper

@@ -22,7 +22,7 @@ from ....interfaces import base as nib
 class InputSpec(nib.TraitedSpec):
     input1 = nib.traits.Int(desc='a random int')
     input2 = nib.traits.Int(desc='a random int')
-
+    input_file = nib.traits.File(desc='Random File')
 
 class OutputSpec(nib.TraitedSpec):
     output1 = nib.traits.List(nib.traits.Int, desc='outputs')
@@ -43,7 +43,7 @@ class EngineTestInterface(nib.BaseInterface):
 
 
 def test_init():
-    with pytest.raises(Exception): pe.Workflow()
+    with pytest.raises(TypeError): pe.Workflow()
     pipe = pe.Workflow(name='pipe')
     assert type(pipe._graph) == nx.DiGraph
 
@@ -156,12 +156,8 @@ def test_expansion():
     pipe5.add_nodes([pipe4])
     pipe6 = pe.Workflow(name="pipe6")
     pipe6.connect([(pipe5, pipe3, [('pipe4.mod5.output1', 'pipe2.mod3.input1')])])
-    error_raised = False
-    try:
-        pipe6._flatgraph = pipe6._create_flat_graph()
-    except:
-        error_raised = True
-    assert not error_raised
+
+    pipe6._flatgraph = pipe6._create_flat_graph()
 
 
 def test_iterable_expansion():
@@ -330,11 +326,16 @@ def test_doubleconnect():
     flow1 = pe.Workflow(name='test')
     flow1.connect(a, 'a', b, 'a')
     x = lambda: flow1.connect(a, 'b', b, 'a')
-    with pytest.raises(Exception): x()
+    with pytest.raises(Exception) as excinfo: 
+        x()
+    assert "Trying to connect" in str(excinfo.value)
+
     c = pe.Node(IdentityInterface(fields=['a', 'b']), name='c')
     flow1 = pe.Workflow(name='test2')
     x = lambda: flow1.connect([(a, c, [('b', 'b')]), (b, c, [('a', 'b')])])
-    with pytest.raises(Exception): x()
+    with pytest.raises(Exception) as excinfo: 
+        x()
+    assert "Trying to connect" in str(excinfo.value)
 
 
 '''
@@ -479,14 +480,10 @@ def test_mapnode_nested(tmpdir):
                  nested=False,
                  name='n1')
     n2.inputs.in1 = [[1, [2]], 3, [4, 5]]
-    error_raised = False
-    try:
+
+    with pytest.raises(Exception) as excinfo: 
         n2.run()
-    except Exception as e:
-        from nipype.pipeline.engine.base import logger
-        logger.info('Exception: %s' % str(e))
-        error_raised = True
-    assert error_raised
+    assert "can only concatenate list" in str(excinfo.value)
 
 
 def test_node_hash(tmpdir):
@@ -518,35 +515,31 @@ def test_node_hash(tmpdir):
     w1.config['execution'] = {'stop_on_first_crash': 'true',
                               'local_hash_check': 'false',
                               'crashdump_dir': wd}
-    error_raised = False
     # create dummy distributed plugin class
     from nipype.pipeline.plugins.base import DistributedPluginBase
 
+    # create a custom exception 
+    class EngineTestException(Exception):
+        pass
+
     class RaiseError(DistributedPluginBase):
         def _submit_job(self, node, updatehash=False):
-            raise Exception('Submit called')
-    try:
+            raise EngineTestException('Submit called')
+
+    # check if a proper exception is raised
+    with pytest.raises(EngineTestException) as excinfo:
         w1.run(plugin=RaiseError())
-    except Exception as e:
-        from nipype.pipeline.engine.base import logger
-        logger.info('Exception: %s' % str(e))
-        error_raised = True
-    assert error_raised
+    assert 'Submit called' == str(excinfo.value)        
+
     # rerun to ensure we have outputs
     w1.run(plugin='Linear')
     # set local check
     w1.config['execution'] = {'stop_on_first_crash': 'true',
                               'local_hash_check': 'true',
                               'crashdump_dir': wd}
-    error_raised = False
-    try:
-        w1.run(plugin=RaiseError())
-    except Exception as e:
-        from nipype.pipeline.engine.base import logger
-        logger.info('Exception: %s' % str(e))
-        error_raised = True
-    assert not error_raised
 
+    w1.run(plugin=RaiseError())
+    
 
 def test_old_config(tmpdir):
     wd = str(tmpdir)
@@ -574,14 +567,8 @@ def test_old_config(tmpdir):
 
     w1.config['execution']['crashdump_dir'] = wd
     # generate outputs
-    error_raised = False
-    try:
-        w1.run(plugin='Linear')
-    except Exception as e:
-        from nipype.pipeline.engine.base import logger
-        logger.info('Exception: %s' % str(e))
-        error_raised = True
-    assert not error_raised
+
+    w1.run(plugin='Linear')
 
 
 def test_mapnode_json(tmpdir):
@@ -618,12 +605,29 @@ def test_mapnode_json(tmpdir):
     with open(os.path.join(node.output_dir(), 'test.json'), 'wt') as fp:
         fp.write('dummy file')
     w1.config['execution'].update(**{'stop_on_first_rerun': True})
-    error_raised = False
-    try:
-        w1.run()
-    except:
-        error_raised = True
-    assert not error_raised
+
+    w1.run()
+   
+
+def test_parameterize_dirs_false(tmpdir):
+    from ....interfaces.utility import IdentityInterface
+    from ....testing import example_data
+
+    input_file = example_data('fsl_motion_outliers_fd.txt')
+
+    n1 = pe.Node(EngineTestInterface(), name='Node1')
+    n1.iterables = ('input_file', (input_file, input_file))
+    n1.interface.inputs.input1 = 1
+
+    n2 = pe.Node(IdentityInterface(fields='in1'), name='Node2')
+
+    wf = pe.Workflow(name='Test')
+    wf.base_dir = str(tmpdir)
+    wf.config['execution']['parameterize_dirs'] = False
+    wf.connect([(n1, n2, [('output1', 'in1')])])
+
+
+    wf.run()
 
 
 def test_serial_input(tmpdir):
@@ -653,30 +657,15 @@ def test_serial_input(tmpdir):
     assert n1.num_subnodes() == len(n1.inputs.in1)
 
     # test running the workflow on default conditions
-    error_raised = False
-    try:
-        w1.run(plugin='MultiProc')
-    except Exception as e:
-        from nipype.pipeline.engine.base import logger
-        logger.info('Exception: %s' % str(e))
-        error_raised = True
-    assert not error_raised
+    w1.run(plugin='MultiProc')
 
     # test output of num_subnodes method when serial is True
     n1._serial = True
     assert n1.num_subnodes() == 1
 
     # test running the workflow on serial conditions
-    error_raised = False
-    try:
-        w1.run(plugin='MultiProc')
-    except Exception as e:
-        from nipype.pipeline.engine.base import logger
-        logger.info('Exception: %s' % str(e))
-        error_raised = True
-
-    assert not error_raised
-
+    w1.run(plugin='MultiProc')
+    
 
 def test_write_graph_runs(tmpdir):
     os.chdir(str(tmpdir))
@@ -734,3 +723,37 @@ def test_deep_nested_write_graph_runs(tmpdir):
                 os.remove('graph_detailed.dot')
             except OSError:
                 pass
+
+
+def test_io_subclass():
+    """Ensure any io subclass allows dynamic traits"""
+    from nipype.interfaces.io import IOBase
+    from nipype.interfaces.base import DynamicTraitedSpec
+
+    class TestKV(IOBase):
+        _always_run = True
+        output_spec = DynamicTraitedSpec
+
+        def _list_outputs(self):
+            outputs = {}
+            outputs['test'] = 1
+            outputs['foo'] = 'bar'
+            return outputs
+
+    wf = pe.Workflow('testkv')
+
+    def testx2(test):
+        return test * 2
+
+    kvnode = pe.Node(TestKV(), name='testkv')
+    from nipype.interfaces.utility import Function
+    func = pe.Node(
+        Function(input_names=['test'], output_names=['test2'], function=testx2),
+        name='func')
+    exception_not_raised = True
+    try:
+        wf.connect(kvnode, 'test', func, 'test')
+    except Exception as e:
+        if 'Module testkv has no output called test' in e:
+            exception_not_raised = False
+    assert exception_not_raised

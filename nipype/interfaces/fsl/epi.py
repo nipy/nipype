@@ -432,6 +432,19 @@ class EddyInputSpec(FSLCommandInputSpec):
                         desc='Detect and replace outlier slices')
     num_threads = traits.Int(1, usedefault=True, nohash=True,
                              desc="Number of openmp threads to use")
+    is_shelled = traits.Bool(False, argstr='--data_is_shelled',
+                             desc="Override internal check to ensure that "
+                                  "date are acquired on a set of b-value "
+                                  "shells")
+    field = traits.Str(argstr='--field=%s',
+                       desc="NonTOPUP fieldmap scaled in Hz - filename has "
+                            "to be provided without an extension. TOPUP is "
+                            "strongly recommended")
+    field_mat = File(exists=True, argstr='--field_mat=%s',
+                     desc="Matrix that specifies the relative locations of "
+                          "the field specified by --field and first volume "
+                          "in file --imain")
+    use_cuda = traits.Bool(False, desc="Run eddy using cuda gpu")
 
 
 class EddyOutputSpec(TraitedSpec):
@@ -441,6 +454,20 @@ class EddyOutputSpec(TraitedSpec):
     out_parameter = File(exists=True,
                          desc=('text file with parameters definining the '
                                'field and movement for each scan'))
+    out_rotated_bvecs = File(exists=True,
+                             desc=('File containing rotated b-values for all volumes'))
+    out_movement_rms = File(exists=True,
+                            desc=('Summary of the "total movement" in each volume'))
+    out_restricted_movement_rms = File(exists=True,
+                                       desc=('Summary of the "total movement" in each volume '
+                                             'disregarding translation in the PE direction'))
+    out_shell_alignment_parameters = File(exists=True,
+                                          desc=('File containing rigid body movement parameters '
+                                                'between the different shells as estimated by a '
+                                                'post-hoc mutual information based registration'))
+    out_outlier_report = File(exists=True,
+                              desc=('Text-file with a plain language report '
+                                    'on what outlier slices eddy has found'))
 
 
 class Eddy(FSLCommand):
@@ -463,13 +490,13 @@ class Eddy(FSLCommand):
     >>> eddy.inputs.in_bvec  = 'bvecs.scheme'
     >>> eddy.inputs.in_bval  = 'bvals.scheme'
     >>> eddy.cmdline # doctest: +ELLIPSIS +ALLOW_UNICODE
-    'eddy --acqp=epi_acqp.txt --bvals=bvals.scheme --bvecs=bvecs.scheme \
+    'eddy_openmp --acqp=epi_acqp.txt --bvals=bvals.scheme --bvecs=bvecs.scheme \
 --imain=epi.nii --index=epi_index.txt --mask=epi_mask.nii \
 --out=.../eddy_corrected'
     >>> res = eddy.run() # doctest: +SKIP
 
     """
-    _cmd = 'eddy'
+    _cmd = 'eddy_openmp'
     input_spec = EddyInputSpec
     output_spec = EddyOutputSpec
 
@@ -478,7 +505,8 @@ class Eddy(FSLCommand):
     def __init__(self, **inputs):
         super(Eddy, self).__init__(**inputs)
         self.inputs.on_trait_change(self._num_threads_update, 'num_threads')
-
+        if isdefined(self.inputs.use_cuda):
+            self._use_cuda()
         if not isdefined(self.inputs.num_threads):
             self.inputs.num_threads = self._num_threads
         else:
@@ -493,6 +521,12 @@ class Eddy(FSLCommand):
             self.inputs.environ['OMP_NUM_THREADS'] = str(
                 self.inputs.num_threads)
 
+    def _use_cuda(self):
+        if self.inputs.use_cuda:
+            _cmd = 'eddy_cuda'
+        else:
+            _cmd = 'eddy_openmp'
+
     def _format_arg(self, name, spec, value):
         if name == 'in_topup_fieldcoef':
             return spec.argstr % value.split('_fieldcoef')[0]
@@ -506,6 +540,30 @@ class Eddy(FSLCommand):
             '%s.nii.gz' % self.inputs.out_base)
         outputs['out_parameter'] = os.path.abspath(
             '%s.eddy_parameters' % self.inputs.out_base)
+
+        # File generation might depend on the version of EDDY
+        out_rotated_bvecs = os.path.abspath(
+            '%s.eddy_rotated_bvecs' % self.inputs.out_base)
+        out_movement_rms = os.path.abspath(
+            '%s.eddy_movement_rms' % self.inputs.out_base)
+        out_restricted_movement_rms = os.path.abspath(
+            '%s.eddy_restricted_movement_rms' % self.inputs.out_base)
+        out_shell_alignment_parameters = os.path.abspath(
+            '%s.eddy_post_eddy_shell_alignment_parameters' % self.inputs.out_base)
+        out_outlier_report = os.path.abspath(
+            '%s.eddy_outlier_report' % self.inputs.out_base)
+
+        if os.path.exists(out_rotated_bvecs):
+            outputs['out_rotated_bvecs'] = out_rotated_bvecs
+        if os.path.exists(out_movement_rms):
+            outputs['out_movement_rms'] = out_movement_rms
+        if os.path.exists(out_restricted_movement_rms):
+            outputs['out_restricted_movement_rms'] = out_restricted_movement_rms
+        if os.path.exists(out_shell_alignment_parameters):
+            outputs['out_shell_alignment_parameters'] = out_shell_alignment_parameters
+        if os.path.exists(out_outlier_report):
+            outputs['out_outlier_report'] = out_outlier_report
+
         return outputs
 
 

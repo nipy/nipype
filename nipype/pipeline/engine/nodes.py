@@ -36,7 +36,7 @@ from tempfile import mkdtemp
 from hashlib import sha1
 
 from ... import config, logging
-from ...utils.misc import (flatten, unflatten, package_check, str2bool)
+from ...utils.misc import (flatten, unflatten, str2bool)
 from ...utils.filemanip import (save_json, FileNotFoundError,
                                 filename_to_list, list_to_filename,
                                 copyfiles, fnames_presuffix, loadpkl,
@@ -54,7 +54,6 @@ from .utils import (generate_expanded_graph, modify_paths,
                     get_print_name, merge_dict, evaluate_connect_function)
 from .base import EngineBase
 
-package_check('networkx', '1.3')
 logger = logging.getLogger('workflow')
 
 class Node(EngineBase):
@@ -392,7 +391,7 @@ class Node(EngineBase):
             - Otherwise, return the parameterization unchanged.
         """
         if len(param) > 32:
-            return sha1(param).hexdigest()
+            return sha1(param.encode()).hexdigest()
         else:
             return param
 
@@ -522,7 +521,8 @@ class Node(EngineBase):
                 # Was this pickle created with Python 2.x?
                 pickle.load(pkl_file, fix_imports=True, encoding='utf-8')
                 logger.warn('Successfully loaded pickle in compatibility mode')
-            except (traits.TraitError, AttributeError, ImportError) as err:
+            except (traits.TraitError, AttributeError, ImportError,
+                    EOFError) as err:
                 if isinstance(err, (AttributeError, ImportError)):
                     attribute_error = True
                     logger.debug('attribute error: %s probably using '
@@ -606,6 +606,7 @@ class Node(EngineBase):
             try:
                 result = self._interface.run()
             except Exception as msg:
+                self._save_results(result, cwd)
                 self._result.runtime.stderr = msg
                 raise
 
@@ -1123,15 +1124,17 @@ class MapNode(Node):
             yield i, node
 
     def _node_runner(self, nodes, updatehash=False):
+        old_cwd = os.getcwd()
         for i, node in nodes:
             err = None
             try:
                 node.run(updatehash=updatehash)
-            except Exception as err:
+            except Exception as this_err:
+                err = this_err
                 if str2bool(self.config['execution']['stop_on_first_crash']):
-                    self._result = node.result
                     raise
             finally:
+                os.chdir(old_cwd)
                 yield i, node, err
 
     def _collate_results(self, nodes):
@@ -1274,7 +1277,6 @@ class MapNode(Node):
                 nitems = len(filename_to_list(getattr(self.inputs,
                                                       self.iterfield[0])))
             nodenames = ['_' + self.name + str(i) for i in range(nitems)]
-            # map-reduce formulation
             self._collate_results(self._node_runner(self._make_nodes(cwd),
                                                     updatehash=updatehash))
             self._save_results(self._result, cwd)

@@ -200,11 +200,16 @@ Trying to connect %s:%s to %s:%s but input '%s' of node '%s' is already
 connected.
 """ % (srcnode, source, destnode, dest, dest, destnode))
                 if not (hasattr(destnode, '_interface') and
-                        '.io' in str(destnode._interface.__class__)):
+                            ('.io' in str(destnode._interface.__class__) or
+                                any(['.io' in str(val) for val in
+                                     destnode._interface.__class__.__bases__]))
+                        ):
                     if not destnode._check_inputs(dest):
                         not_found.append(['in', destnode.name, dest])
                 if not (hasattr(srcnode, '_interface') and
-                        '.io' in str(srcnode._interface.__class__)):
+                            ('.io' in str(srcnode._interface.__class__)
+                             or any(['.io' in str(val) for val in
+                                     srcnode._interface.__class__.__bases__]))):
                     if isinstance(source, tuple):
                         # handles the case that source is specified
                         # with a function

@@ -13,7 +13,6 @@ import signal
 import subprocess
 from subprocess import CalledProcessError
 from tempfile import mkdtemp
-from nose import SkipTest
 from future.utils import raise_from
 from ..utils.misc import package_check
 
@@ -21,18 +20,6 @@ __docformat__ = 'restructuredtext'
 
 import numpy as np
 import nibabel as nb
-
-def skip_if_no_package(*args, **kwargs):
-    """Raise SkipTest if package_check fails
-
-    Parameters
-    ----------
-    *args Positional parameters passed to `package_check`
-    *kwargs Keyword parameters passed to `package_check`
-    """
-    package_check(exc_failed_import=SkipTest,
-                  exc_failed_check=SkipTest,
-                  *args, **kwargs)
 
 
 class TempFATFS(object):
