@@ -8,9 +8,14 @@
    >>> datadir = os.path.realpath(os.path.join(filepath, '../../testing/data'))
    >>> os.chdir(datadir)
 """
+import csv
+import math
 import os
-
-from ..base import TraitedSpec, File, traits, isdefined
+ 
+from nipype.interfaces.base import BaseInterface, \
+    BaseInterfaceInputSpec, traits, File, TraitedSpec
+from ..base import (BaseInterface, BaseInterfaceInputSpec, TraitedSpec, File,
+                    traits, isdefined)
 from .base import ANTSCommand, ANTSCommandInputSpec
 from ...utils.filemanip import split_filename
 
@@ -26,7 +31,7 @@ class AntsMotionCorrStatsInputSpec(ANTSCommandInputSpec):
         argstr="-m %s", mandatory=True,
         desc="motion correction parameter file to calculate statistics on"
     )
-    output = File(argstr="-o %s", hash_files=False, mandatory=True,
+    output = File(argstr="-o %s", hash_files=False, genfile=True,
                   desc="csv file to output calculated statistics into")
     framewise = traits.Bool(argstr="-f %d",
                             desc="do framwise summarywise stats")
@@ -41,7 +46,13 @@ class AntsMotionCorrStatsOutputSpec(TraitedSpec):
 class AntsMotionCorrStats(ANTSCommand):
     ''' Interface for the antsMotionCorrStats command '''
 
+    _cmd = 'antsMotionCorrStats'
+    input_spec = AntsMotionCorrStatsInputSpec
+    output_spec = AntsMotionCorrStatsOutputSpec
+
     def _gen_filename(self, name):
+        if name == 'output':
+            return "frame_displacement.csv"
         return None
 
     def _list_outputs(self):
@@ -107,17 +118,20 @@ class AntsMotionCorrInputSpec(ANTSCommandInputSpec):
         desc=("This option sets the number of images to use to construct the "
               "template image.")
     )
+
     use_fixed_reference_image = traits.Bool(
         argstr="-u %d",
         default=True,
         desc=("use a fixed reference image instead of the neighor in the time "
               "series.")
     )
+
     use_scales_estimator = traits.Bool(
         argstr="-e %d",
         default=True,
         desc="use the scale estimator to control optimization."
     )
+
 
 class AntsMotionCorrOutputSpec(TraitedSpec):
     '''Output spec for the antsMotionCorr command'''
@@ -235,7 +249,57 @@ class AntsMotionCorr(ANTSCommand):
                 os.path.abspath(self.inputs.output_warped_image)
             )
         if _extant(self.inputs.output_transform_prefix):
-            outputs['composite_transform'] = '{}MOCOparams.csv'.format(
+            fname = '{}MOCOparams.csv'.format(
                 self.inputs.output_transform_prefix
             )
+            outputs['composite_transform'] = os.path.abspath(fname)
+        return outputs
+
+class AntsMatrixConversionInputSpec(BaseInterfaceInputSpec):
+    matrix = File(
+        exists=True,
+        desc='Motion crrection matrices to be converted into FSL style motion parameters',
+        mandatory=True
+    )
+
+class AntsMatrixConversionOutputSpec(TraitedSpec):
+    parameters = File(exists=True, desc="parameters to be output")
+
+
+class AntsMatrixConversion(BaseInterface):
+    ''' Take antsMotionCorr motion output as input, convert to FSL style parameter files'''
+    input_spec = AntsMatrixConversionInputSpec
+    output_spec = AntsMatrixConversionOutputSpec
+
+    def _run_interface(self, runtime):
+        in_fp = open(self.inputs.matrix)
+        in_data = csv.reader(in_fp)
+        pars = []
+
+        # Ants motion correction output has a single line header that we ignore
+        next(in_data)
+
+        for x in in_data:
+            t1 = math.atan2(float(x[7]), float(x[10]))
+            c2 = math.sqrt((float(x[2]) * float(x[2])) + (float(x[3]) * float(x[3])))
+            t2 = math.atan2(-float(x[4]), c2)
+            t3 = math.atan2(float(x[3]), float(x[2]))
+            parameters = "{:.8f} {:.8f} {:.8f} {:.8f} {:.8f} {:.8f}"
+            pars.append(parameters.format(t1, t2, t3, float(x[11]), float(x[12]),
+                                          float(x[13])))
+
+        pth, fname, _ = split_filename(self.inputs.matrix)
+        new_fname = '{}{}'.format(fname, '.par')
+        parameters = os.path.join(pth, new_fname)
+        with open(parameters, mode='wt') as out_fp:
+            out_fp.write('\n'.join(pars))
+        in_fp.close()
+        return runtime
+
+    def _list_outputs(self):
+        outputs = self._outputs().get()
+        pth, fname, _ = split_filename(self.inputs.matrix)
+        new_fname = '{}{}'.format(fname, '.par')
+        out_file = os.path.join(pth, new_fname)
+        outputs["parameters"] = out_file
         return outputs
