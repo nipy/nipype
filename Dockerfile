@@ -167,7 +167,7 @@ ENV PATH=/usr/local/miniconda/bin:$PATH \
     ACCEPT_INTEL_PYTHON_EULA=yes
 
 # Installing precomputed python packages
-RUN conda config --add channels intel --add channels conda-forge && \
+RUN conda config --add channels conda-forge --add channels intel && \
     conda config --set always_yes yes --set changeps1 no && \
     conda update -q conda && \
     conda install -y mkl=2017.0.1 \
