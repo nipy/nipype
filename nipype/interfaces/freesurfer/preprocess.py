@@ -1537,7 +1537,7 @@ class MNIBiasCorrection(FSCommand):
     output_spec = MNIBiasCorrectionOutputSpec
 
     def _list_outputs(self):
-        outputs = self._output_spec().get()
+        outputs = self.output_spec().get()
         outputs["out_file"] = os.path.abspath(self.inputs.out_file)
         return outputs
 
