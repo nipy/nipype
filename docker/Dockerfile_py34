@@ -26,11 +26,11 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-FROM nipype/nipype_test:base-0.0.2
+FROM nipype/nipype:latest
 MAINTAINER The nipype developers https://github.com/nipy/nipype
 
 # Downgrade python to 3.4
-RUN conda update -y conda && \
+RUN conda install python=3.4 && \
     conda update --all -y python=3.4
 
 COPY docker/files/run_* /usr/bin/
@@ -42,15 +42,9 @@ RUN rm -r ${FSLDIR}/bin/imglob && \
     chmod +x /usr/bin/fsl_imglob.py && \
     ln -s /usr/bin/fsl_imglob.py ${FSLDIR}/bin/imglob
 
-# Speed up building
-RUN mkdir -p /root/src/nipype
-COPY requirements.txt /root/src/nipype/requirements.txt
-RUN pip install -r /root/src/nipype/requirements.txt && \
-    sed -i 's/\(backend *: \).*$/\1Agg/g' /usr/local/miniconda/lib/python3.4/site-packages/matplotlib/mpl-data/matplotlibrc
-
 # Re-install nipype
 COPY . /root/src/nipype
-RUN rm -r /usr/local/miniconda/lib/python3.4/site-packages/nipype* && \
+RUN rm -r /usr/local/miniconda/lib/python2.7/site-packages/nipype* && \
     cd /root/src/nipype && \
     pip install -e .[all]
 
