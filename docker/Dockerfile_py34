@@ -48,8 +48,7 @@ RUN sed -i 's/\(backend *: \).*$/\1Agg/g' /usr/local/miniconda/lib/python3.4/sit
 
 # Re-install nipype
 COPY . /root/src/nipype
-RUN rm -r /usr/local/miniconda/lib/python2.7/site-packages/nipype* && \
-    cd /root/src/nipype && \
+RUN cd /root/src/nipype && \
     pip install -e .[all]
 
 CMD ["/bin/bash"]
