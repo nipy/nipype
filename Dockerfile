@@ -109,12 +109,19 @@ RUN mkdir -p /opt/c3d && \
 ENV C3DPATH=/opt/c3d/ \
     PATH=$C3DPATH/bin:$PATH
 
+# Installing Ubuntu packages and cleaning up
+RUN apt-get install -y --no-install-recommends \
+                    git=1:2.7.4-0ubuntu1 \
+                    graphviz=2.38.0-12ubuntu2 && \
+    apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+
 # Install some other required tools
 ENV apt-get install -y --no-install-recommends \
+                    git=1:2.7.4-0ubuntu1 \
+                    graphviz=2.38.0-12ubuntu2 \
                     unzip \
                     apt-utils \
                     fusefat \
-                    graphviz \
                     make \
                     ruby && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
@@ -165,7 +172,7 @@ ENV PATH=/usr/local/miniconda/bin:$PATH \
     ACCEPT_INTEL_PYTHON_EULA=yes
 
 # Installing precomputed python packages
-RUN conda config --add channels intel && \
+RUN conda config --add channels intel conda-forge && \
     conda config --set always_yes yes --set changeps1 no && \
     conda update -q conda && \
     conda install -y mkl=2017.0.1 \
@@ -177,18 +184,14 @@ RUN conda config --add channels intel && \
                      libxml2=2.9.4 \
                      libxslt=1.1.29 \
                      traits=4.6.0 \
-                     icu &&  \
+                     psutil=5.0.1 \
+                     icu=58.1 &&  \
     chmod +x /usr/local/miniconda/bin/* && \
     conda clean --all -y
 
-# Precaching fonts
-RUN python -c "from matplotlib import font_manager"
-
-# Installing Ubuntu packages and cleaning up
-RUN apt-get install -y --no-install-recommends \
-                    git=1:2.7.4-0ubuntu1 \
-                    graphviz=2.38.0-12ubuntu2 && \
-    apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+# matplotlib cleanups: set default backend, precaching fonts
+RUN sed -i 's/\(backend *: \).*$/\1Agg/g' /usr/local/miniconda/lib/python2.7/site-packages/matplotlib/mpl-data/matplotlibrc && \
+    python -c "from matplotlib import font_manager"
 
 # Unless otherwise specified each process should only use one thread - nipype
 # will handle parallelization
