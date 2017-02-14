@@ -167,7 +167,7 @@ ENV PATH=/usr/local/miniconda/bin:$PATH \
     ACCEPT_INTEL_PYTHON_EULA=yes
 
 # Installing precomputed python packages
-RUN conda config --add channels intel conda-forge && \
+RUN conda config --add channels intel --add channels conda-forge && \
     conda config --set always_yes yes --set changeps1 no && \
     conda update -q conda && \
     conda install -y mkl=2017.0.1 \
@@ -181,11 +181,10 @@ RUN conda config --add channels intel conda-forge && \
                      traits=4.6.0 \
                      psutil=5.0.1 \
                      icu=58.1 &&  \
-    chmod +x /usr/local/miniconda/bin/* && \
-    conda clean --all -y
+    chmod +x /usr/local/miniconda/bin/*
 
 # matplotlib cleanups: set default backend, precaching fonts
-RUN sed -i 's/\(backend *: \).*$/\1Agg/g' /usr/local/miniconda/lib/python2.7/site-packages/matplotlib/mpl-data/matplotlibrc && \
+RUN sed -i 's/\(backend *: \).*$/\1Agg/g' /usr/local/miniconda/lib/python3.5/site-packages/matplotlib/mpl-data/matplotlibrc && \
     python -c "from matplotlib import font_manager"
 
 # Unless otherwise specified each process should only use one thread - nipype

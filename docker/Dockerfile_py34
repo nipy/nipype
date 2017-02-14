@@ -42,6 +42,10 @@ RUN rm -r ${FSLDIR}/bin/imglob && \
     chmod +x /usr/bin/fsl_imglob.py && \
     ln -s /usr/bin/fsl_imglob.py ${FSLDIR}/bin/imglob
 
+# matplotlib cleanups: set default backend, precaching fonts
+RUN sed -i 's/\(backend *: \).*$/\1Agg/g' /usr/local/miniconda/lib/python3.4/site-packages/matplotlib/mpl-data/matplotlibrc && \
+    python -c "from matplotlib import font_manager"
+
 # Re-install nipype
 COPY . /root/src/nipype
 RUN rm -r /usr/local/miniconda/lib/python2.7/site-packages/nipype* && \
