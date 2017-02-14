@@ -85,3 +85,28 @@ def test_synthesizeflash(create_files_in_directory):
     syn2 = freesurfer.SynthesizeFLASH(t1_image=filelist[0], pd_image=filelist[1], flip_angle=20, te=5, tr=25)
     assert syn2.cmdline == ('mri_synthesize 25.00 20.00 5.000 %s %s %s'
                             % (filelist[0], filelist[1], os.path.join(outdir, 'synth-flash_20.mgz')))
+
+@pytest.mark.skipif(freesurfer.no_freesurfer(), reason="freesurfer is not installed")
+def test_mandatory_outvol(create_files_in_directory):
+    filelist, outdir = create_files_in_directory
+    mni = freesurfer.MNIBiasCorrection()
+
+    # make sure command gets called
+    assert mni.cmd == "mri_nu_correct.mni"
+
+    # test raising error with mandatory args absent
+    with pytest.raises(ValueError): mni.run()
+
+    # test raising error with only partial mandatory args present
+    mni.inputs.in_file = filelist[0] #mgz
+    with pytest.raises(ValueError): mni.run()
+
+    # rest of mandatory inputs
+    mni.inputs.out_file = 'bias_corrected_output'
+
+    assert mni.cmdline == ('mri_nu_correct.mni --i %s --n 4 --o bias_corrected_output.mgz'
+                            % filelist[0])
+    # constructor based tests
+    mni2 = freesurfer.MNIBiasCorrection(in_file=filelist[0], out_file='bias_corrected_output')
+    assert mni2.cmdline == ('mri_nu_correct.mni --i %s --n 4 --o bias_corrected_output.mgz'
+                             % filelist[0])
