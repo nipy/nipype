@@ -46,3 +46,15 @@ general:
   artifacts:
     - "~/docs"
     - "~/logs"
+
+# To enable when ready
+# deployment:
+#   production:
+#     tag: /.*/
+#     commands:
+#       - if [[ -n "$DOCKER_PASS" ]]; then docker login -e $DOCKER_EMAIL -u $DOCKER_USER -p $DOCKER_PASS && docker push poldracklab/fmriprep:latest; fi :
+#           timeout: 21600
+#       - if [[ -n "$DOCKER_PASS" ]]; then docker login -e $DOCKER_EMAIL -u $DOCKER_USER -p $DOCKER_PASS && docker tag poldracklab/fmriprep poldracklab/fmriprep:$CIRCLE_TAG && docker push poldracklab/fmriprep:$CIRCLE_TAG; fi :
+#           timeout: 21600
+#       - printf "[distutils]\nindex-servers =\n    pypi\n\n[pypi]\nusername:$PYPI_USER\npassword:$PYPI_PASS\n" > ~/.pypirc
+#       - python setup.py sdist upload -r pypi
