@@ -1477,7 +1477,7 @@ class MNIBiasCorrectionInputSpec(FSTraitedSpec):
     in_file = File(exists=True, mandatory=True, argstr="--i %s",
                    desc="input volume. Input can be any format accepted by mri_convert.")
     # optional
-    out_file = File(argstr="--o %s", name_source=['in_file'],
+    out_file = File(argstr="--o %s", name_source=['in_file'], genfile=True,
                     name_template='%s_output', hash_files=False, keep_extension=True,
                     desc="output volume. Output can be any format accepted by mri_convert. " +
                     "If the output format is COR, then the directory must exist.")
@@ -1501,7 +1501,7 @@ class MNIBiasCorrectionInputSpec(FSTraitedSpec):
                         desc="Shrink parameter for finer sampling (default is 4)")
 
 class MNIBiasCorrectionOutputSpec(TraitedSpec):
-    out_file = File(desc="output volume")
+    out_file = File(exists=True, desc="output volume")
 
 
 class MNIBiasCorrection(FSCommand):
@@ -1536,9 +1536,17 @@ class MNIBiasCorrection(FSCommand):
     input_spec = MNIBiasCorrectionInputSpec
     output_spec = MNIBiasCorrectionOutputSpec
 
+    def _gen_filename(self):
+        # if outfile was not defined
+        if not isdefined(self.inputs.out_file):
+            return self._gen_fname(self.inputs.in_file,
+                                   suffix='_output')
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        outputs["out_file"] = os.path.abspath(self.inputs.out_file)
+        if not isdefined(self.inputs.out_file):
+            outputs["out_file"] = self._gen_filename()
+        else:
+            outputs["out_file"] = os.path.abspath(self.inputs.out_file)
         return outputs
 
 
