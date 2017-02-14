@@ -29,26 +29,23 @@
 FROM nipype/nipype_test:base-0.0.2
 MAINTAINER The nipype developers https://github.com/nipy/nipype
 
-WORKDIR /root
+# Downgrade python to 2.7
+RUN conda update -y conda && \
+    conda update --all -y python=2.7 && \
+    pip install configparser
 
-COPY docker/circleci/run_* /usr/bin/
+COPY docker/files/run_* /usr/bin/
 RUN chmod +x /usr/bin/run_*
-
-# Replace imglob with a Python3 compatible version
-COPY nipype/external/fsl_imglob.py /usr/bin/fsl_imglob.py
-RUN rm -r ${FSLDIR}/bin/imglob && \
-    chmod +x /usr/bin/fsl_imglob.py && \
-    ln -s /usr/bin/fsl_imglob.py ${FSLDIR}/bin/imglob
 
 # Speed up building
 RUN mkdir -p /root/src/nipype
 COPY requirements.txt /root/src/nipype/requirements.txt
 RUN pip install -r /root/src/nipype/requirements.txt && \
-    sed -i 's/\(backend *: \).*$/\1Agg/g' /usr/local/miniconda/lib/python3.5/site-packages/matplotlib/mpl-data/matplotlibrc
+    sed -i 's/\(backend *: \).*$/\1Agg/g' /usr/local/miniconda/lib/python2.7/site-packages/matplotlib/mpl-data/matplotlibrc
 
 # Re-install nipype
 COPY . /root/src/nipype
-RUN rm -r /usr/local/miniconda/lib/python3.5/site-packages/nipype* && \
+RUN rm -r /usr/local/miniconda/lib/python2.7/site-packages/nipype* && \
     cd /root/src/nipype && \
     pip install -e .[all]
 

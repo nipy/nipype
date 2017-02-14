@@ -36,7 +36,7 @@ case ${CIRCLE_NODE_INDEX} in
 esac
 
 # Put the artifacts in place
-bash docker/circleci/teardown.sh
+bash docker/files/teardown.sh
 
 # Send coverage data to codecov.io
 curl -so codecov.io https://codecov.io/bash
