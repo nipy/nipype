@@ -109,25 +109,20 @@ RUN mkdir -p /opt/c3d && \
 ENV C3DPATH=/opt/c3d/ \
     PATH=$C3DPATH/bin:$PATH
 
-# Installing Ubuntu packages and cleaning up
-RUN apt-get install -y --no-install-recommends \
-                    git=1:2.7.4-0ubuntu1 \
-                    graphviz=2.38.0-12ubuntu2 && \
-    apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
-
 # Install some other required tools
-ENV apt-get install -y --no-install-recommends \
+RUN apt-get install -y --no-install-recommends \
                     git=1:2.7.4-0ubuntu1 \
                     graphviz=2.38.0-12ubuntu2 \
                     unzip \
                     apt-utils \
                     fusefat \
                     make \
-                    ruby && \
+                    ruby=1:2.3.0+1 && \
+    apt-get clean && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 # Install fake-S3
-ENV GEM_HOME /usr/local/bundle
+ENV GEM_HOME /usr/lib/ruby/gems/2.3
 ENV BUNDLE_PATH="$GEM_HOME" \
     BUNDLE_BIN="$GEM_HOME/bin" \
     BUNDLE_SILENCE_ROOT_WARNING=1 \
