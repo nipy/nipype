@@ -168,8 +168,10 @@ ENV PATH=/usr/local/miniconda/bin:$PATH \
 
 # Installing precomputed python packages
 RUN conda config --add channels conda-forge --add channels intel && \
+    chmod +x /usr/local/miniconda/bin/* && \
     conda config --set always_yes yes --set changeps1 no && \
     conda update -q conda && \
+    chmod +x /usr/local/miniconda/bin/* && \
     conda install -y mkl=2017.0.1 \
                      numpy=1.11.2 \
                      scipy=0.18.1 \
@@ -181,7 +183,6 @@ RUN conda config --add channels conda-forge --add channels intel && \
                      traits=4.6.0 \
                      psutil=5.0.1 \
                      icu=58.1 &&  \
-    chmod +x /usr/local/miniconda/bin/*
 
 # matplotlib cleanups: set default backend, precaching fonts
 RUN sed -i 's/\(backend *: \).*$/\1Agg/g' /usr/local/miniconda/lib/python3.5/site-packages/matplotlib/mpl-data/matplotlibrc && \
