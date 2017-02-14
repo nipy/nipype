@@ -1476,11 +1476,11 @@ class MNIBiasCorrectionInputSpec(FSTraitedSpec):
     # mandatory
     in_file = File(exists=True, mandatory=True, argstr="--i %s",
                    desc="input volume. Input can be any format accepted by mri_convert.")
-    out_file = File(argstr="--o %s", mandatory=True, name_source=['in_file'],
+    # optional
+    out_file = File(argstr="--o %s", name_source=['in_file'], genfile=True,
                     name_template='%s_output', hash_files=False, keep_extension=True,
                     desc="output volume. Output can be any format accepted by mri_convert. " +
                     "If the output format is COR, then the directory must exist.")
-    # optional
     iterations = traits.Int(4, argstr="--n %d",
                             desc="Number of iterations to run nu_correct. Default is 4. This is the number of times " +
                             "that nu_correct is repeated (ie, using the output from the previous run as the input for " +
@@ -1519,7 +1519,6 @@ class MNIBiasCorrection(FSCommand):
     >>> from nipype.interfaces.freesurfer import MNIBiasCorrection
     >>> correct = MNIBiasCorrection()
     >>> correct.inputs.in_file = "norm.mgz"
-    >>> correct.inputs.out_file = "norm_output.mgz"
     >>> correct.inputs.iterations = 6
     >>> correct.inputs.protocol_iterations = 1000
     >>> correct.inputs.distance = 50
