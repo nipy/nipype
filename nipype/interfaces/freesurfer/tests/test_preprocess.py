@@ -95,18 +95,21 @@ def test_mandatory_outvol(create_files_in_directory):
     assert mni.cmd == "mri_nu_correct.mni"
 
     # test raising error with mandatory args absent
-    with pytest.raises(ValueError): mni.run()
+    with pytest.raises(ValueError): mni.cmdline
 
-    # test raising error with only partial mandatory args present
-    mni.inputs.in_file = filelist[0] #mgz
-    with pytest.raises(ValueError): mni.run()
+    # test with minimal args
+    mni.inputs.in_file = filelist[0] 
+    assert mni.cmdline == ('mri_nu_correct.mni --i %s --o %s_output.mgz'
+                           % (filelist[0], filelist[0].replace('.mgz', ''))
 
-    # rest of mandatory inputs
-    mni.inputs.out_file = 'bias_corrected_output'
+    # test with custom outfile
+    mni.inputs.out_file = 'new_corrected_file.mgz'
+    assert mni.cmdline == ('mri_nu_correct.mni --i %s --o new_corrected_file.mgz'
+                           % (filelist[0])
 
-    assert mni.cmdline == ('mri_nu_correct.mni --i %s --n 4 --o bias_corrected_output.mgz'
-                            % filelist[0])
     # constructor based tests
-    mni2 = freesurfer.MNIBiasCorrection(in_file=filelist[0], out_file='bias_corrected_output')
+    mni2 = freesurfer.MNIBiasCorrection(in_file=filelist[0], 
+                                        out_file='bias_corrected_output',
+                                        iterations=4)
     assert mni2.cmdline == ('mri_nu_correct.mni --i %s --n 4 --o bias_corrected_output.mgz'
                              % filelist[0])
