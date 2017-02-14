@@ -29,6 +29,7 @@ Upcoming release 0.13
 * ENH: Added support for custom job submission check in SLURM (https://github.com/nipy/nipype/pull/1582)
 * ENH: Added ANTs interface CreateJacobianDeterminantImage; replaces deprecated JacobianDeterminant
        (https://github.com/nipy/nipype/pull/1654)
+* ENH: Update ReconAll interface for FreeSurfer v6.0.0 (https://github.com/nipy/nipype/pull/1790)
 
 Release 0.12.1 (August 3, 2016)
 ===============================
