@@ -186,7 +186,7 @@ def resample_proxy(in_file, order=3, new_zooms=None, out_file=None):
             fext = fext2 + fext
         out_file = op.abspath('./%s_reslice%s' % (fname, fext))
 
-    img = nb.load(in_file)
+    img = nb.load(in_file, mmap=NUMPY_MMAP)
     hdr = img.header.copy()
     data = img.get_data().astype(np.float32)
     affine = img.affine
@@ -229,7 +229,7 @@ def nlmeans_proxy(in_file, settings,
             fext = fext2 + fext
         out_file = op.abspath('./%s_denoise%s' % (fname, fext))
 
-    img = nb.load(in_file)
+    img = nb.load(in_file, mmap=NUMPY_MMAP)
     hdr = img.header
     data = img.get_data()
     aff = img.affine

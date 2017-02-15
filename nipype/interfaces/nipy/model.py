@@ -99,7 +99,7 @@ class FitGLM(BaseInterface):
         del data
 
         for functional_run in functional_runs[1:]:
-            nii = nb.load(functional_run)
+            nii = nb.load(functional_run, mmap=NUMPY_MMAP)
             data = nii.get_data()
             npdata = data.copy()
             del data

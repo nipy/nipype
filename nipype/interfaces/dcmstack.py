@@ -357,7 +357,7 @@ class MergeNifti(NiftiGeneratorBase):
     output_spec = MergeNiftiOutputSpec
 
     def _run_interface(self, runtime):
-        niis = [nb.load(fn)
+        niis = [nb.load(fn, mmap=NUMPY_MMAP)
                 for fn in self.inputs.in_files
                 ]
         nws = [NiftiWrapper(nii, make_empty=True)

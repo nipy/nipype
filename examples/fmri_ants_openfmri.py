@@ -68,7 +68,7 @@ def median(in_files):
     """
     average = None
     for idx, filename in enumerate(filename_to_list(in_files)):
-        img = nb.load(filename)
+        img = nb.load(filename, mmap=NUMPY_MMAP)
         data = np.median(img.get_data(), axis=3)
         if average is None:
             average = data
