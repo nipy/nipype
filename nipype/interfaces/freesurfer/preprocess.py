@@ -1536,19 +1536,6 @@ class MNIBiasCorrection(FSCommand):
     input_spec = MNIBiasCorrectionInputSpec
     output_spec = MNIBiasCorrectionOutputSpec
 
-    def _gen_filename(self):
-        # if outfile was not defined
-        if not isdefined(self.inputs.out_file):
-            return self._gen_fname(self.inputs.in_file,
-                                   suffix='_output')
-    def _list_outputs(self):
-        outputs = self._outputs().get()
-        if not isdefined(self.inputs.out_file):
-            outputs["out_file"] = self._gen_filename()
-        else:
-            outputs["out_file"] = os.path.abspath(self.inputs.out_file)
-        return outputs
-
 
 class WatershedSkullStripInputSpec(FSTraitedSpec):
     # required

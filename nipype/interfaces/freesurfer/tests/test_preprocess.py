@@ -100,12 +100,12 @@ def test_mandatory_outvol(create_files_in_directory):
     # test with minimal args
     mni.inputs.in_file = filelist[0] 
     assert mni.cmdline == ('mri_nu_correct.mni --i %s --o %s_output.mgz'
-                           % (filelist[0], filelist[0].replace('.mgz', ''))
+                           % (filelist[0], filelist[0].replace('.mgz', '')))
 
     # test with custom outfile
     mni.inputs.out_file = 'new_corrected_file.mgz'
     assert mni.cmdline == ('mri_nu_correct.mni --i %s --o new_corrected_file.mgz'
-                           % (filelist[0])
+                           % (filelist[0]))
 
     # constructor based tests
     mni2 = freesurfer.MNIBiasCorrection(in_file=filelist[0], 
