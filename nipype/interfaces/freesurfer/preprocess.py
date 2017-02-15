@@ -1542,7 +1542,7 @@ class MNIBiasCorrection(FSCommand):
             return self._gen_fname(self.inputs.in_file,
                                    suffix='_output')
     def _list_outputs(self):
-        outputs = self.output_spec().get()
+        outputs = self._outputs().get()
         if not isdefined(self.inputs.out_file):
             outputs["out_file"] = self._gen_filename()
         else:
