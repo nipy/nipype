@@ -75,7 +75,6 @@ from nipype.interfaces.io import DataSink, FreeSurferSource
 import numpy as np
 import scipy as sp
 import nibabel as nb
-from nipype.utils import NUMPY_MMAP
 
 
 imports = ['import os',
@@ -119,6 +118,7 @@ def median(in_files):
     """
     import numpy as np
     import nibabel as nb
+    from nipype.utils import NUMPY_MMAP
     average = None
     for idx, filename in enumerate(filename_to_list(in_files)):
         img = nb.load(filename, mmap=NUMPY_MMAP)
@@ -147,6 +147,7 @@ def bandpass_filter(files, lowpass_freq, highpass_freq, fs):
     from nipype.utils.filemanip import split_filename, list_to_filename
     import numpy as np
     import nibabel as nb
+    from nipype.utils import NUMPY_MMAP
     out_files = []
     for filename in filename_to_list(files):
         path, name, ext = split_filename(filename)
@@ -262,6 +263,7 @@ def extract_noise_components(realigned_file, mask_file, num_components=5,
     from scipy.linalg.decomp_svd import svd
     import numpy as np
     import nibabel as nb
+    from nipype.utils import NUMPY_MMAP
     import os
     imgseries = nb.load(realigned_file, mmap=NUMPY_MMAP)
     components = None
@@ -331,6 +333,7 @@ def extract_subrois(timeseries_file, label_file, indices):
     """
     from nipype.utils.filemanip import split_filename
     import nibabel as nb
+    from nipype.utils import NUMPY_MMAP
     import os
     img = nb.load(timeseries_file, mmap=NUMPY_MMAP)
     data = img.get_data()
@@ -354,6 +357,7 @@ def combine_hemi(left, right):
     """
     import os
     import numpy as np
+    from nipype.utils import NUMPY_MMAP
     lh_data = nb.load(left, mmap=NUMPY_MMAP).get_data()
     rh_data = nb.load(right, mmap=NUMPY_MMAP).get_data()
 

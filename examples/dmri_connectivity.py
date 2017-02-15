@@ -60,7 +60,6 @@ import nipype.interfaces.camino2trackvis as cam2trk
 import nipype.interfaces.freesurfer as fs    # freesurfer
 import nipype.interfaces.cmtk as cmtk
 import nipype.algorithms.misc as misc
-from nipype.utils import NUMPY_MMAP
 
 """
 We define the following functions to scrape the voxel and data dimensions of the input images. This allows the
@@ -75,6 +74,7 @@ regions.
 
 def get_vox_dims(volume):
     import nibabel as nb
+    from nipype.utils import NUMPY_MMAP
     if isinstance(volume, list):
         volume = volume[0]
     nii = nb.load(volume, mmap=NUMPY_MMAP)
@@ -85,6 +85,7 @@ def get_vox_dims(volume):
 
 def get_data_dims(volume):
     import nibabel as nb
+    from nipype.utils import NUMPY_MMAP
     if isinstance(volume, list):
         volume = volume[0]
     nii = nb.load(volume, mmap=NUMPY_MMAP)
@@ -95,6 +96,7 @@ def get_data_dims(volume):
 
 def get_affine(volume):
     import nibabel as nb
+    from nipype.utils import NUMPY_MMAP
     nii = nb.load(volume, mmap=NUMPY_MMAP)
     return nii.affine
 
