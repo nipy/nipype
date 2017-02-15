@@ -14,8 +14,6 @@ nipype.egg-info
 .eggs
 src/**/*
 src/
-docker/nipype_*
-docker/test-*
 
 # releasing
 Makefile
