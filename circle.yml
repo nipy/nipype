@@ -10,11 +10,6 @@ machine:
   services:
     - docker
 
-# Disable python
-checkout:
-  post:
-    - rm -rf virtualenvs venv .pyenv
-
 dependencies:
   cache_directories:
     - "~/docker"
@@ -43,7 +38,7 @@ dependencies:
 
 test:
   override:
-    - bash docker/circleci/tests.sh :
+    - bash docker/files/tests.sh :
         timeout: 7200
         parallel: true
 
