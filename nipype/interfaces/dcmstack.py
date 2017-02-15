@@ -23,6 +23,7 @@ from .base import (TraitedSpec, DynamicTraitedSpec,
                    InputMultiPath, File, Directory,
                    traits, BaseInterface)
 from .traits_extension import isdefined, Undefined
+from ..utils import NUMPY_MMAP
 
 
 have_dcmstack = True

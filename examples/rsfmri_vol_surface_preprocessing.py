@@ -75,6 +75,8 @@ from nipype.interfaces.io import DataSink, FreeSurferSource
 import numpy as np
 import scipy as sp
 import nibabel as nb
+from nipype.utils import NUMPY_MMAP
+
 
 imports = ['import os',
            'import nibabel as nb',

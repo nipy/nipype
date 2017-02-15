@@ -5,6 +5,7 @@ from builtins import open, str
 
 import warnings
 
+from nipype.utils import NUMPY_MMAP
 from ....pipeline import engine as pe
 from ....interfaces import utility as niu
 from ....interfaces import fsl as fsl

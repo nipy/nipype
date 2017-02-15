@@ -36,6 +36,8 @@ from nipype.interfaces.utility import Merge, IdentityInterface
 from nipype.workflows.fmri.fsl import (create_featreg_preproc,
                                        create_modelfit_workflow,
                                        create_fixed_effects_flow)
+from nipype.utils import NUMPY_MMAP
+
 
 config.enable_provenance()
 version = 0

@@ -21,6 +21,8 @@ import nibabel as nb
 import warnings
 
 from ...utils.filemanip import split_filename
+from ...utils import NUMPY_MMAP
+
 from ..base import (traits, TraitedSpec, InputMultiPath, File,
                     isdefined)
 from .base import FSLCommand, FSLCommandInputSpec

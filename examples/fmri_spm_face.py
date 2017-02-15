@@ -20,13 +20,14 @@ Import necessary modules from nipype."""
 from __future__ import division
 from builtins import range
 
+import os                                    # system functions
 import nipype.interfaces.io as nio           # Data i/o
 import nipype.interfaces.spm as spm          # spm
 import nipype.interfaces.matlab as mlab      # how to run matlab
 import nipype.interfaces.utility as util     # utility
 import nipype.pipeline.engine as pe          # pypeline engine
 import nipype.algorithms.modelgen as model   # model specification
-import os                                    # system functions
+from nipype.utils import NUMPY_MMAP
 
 """
 

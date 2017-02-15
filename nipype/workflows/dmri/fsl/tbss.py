@@ -5,6 +5,7 @@
 import os
 from warnings import warn
 
+from nipype.utils import NUMPY_MMAP
 from ....pipeline import engine as pe
 from ....interfaces import utility as util
 from ....interfaces import fsl as fsl

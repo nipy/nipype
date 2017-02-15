@@ -75,6 +75,7 @@ import nipype.interfaces.freesurfer as fs
 import numpy as np
 import scipy as sp
 import nibabel as nb
+from nipype.utils import NUMPY_MMAP
 
 imports = ['import os',
            'import nibabel as nb',

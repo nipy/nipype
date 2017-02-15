@@ -7,6 +7,8 @@ import numpy as np
 import nibabel as nb
 
 import pytest
+
+from nipype.utils import NUMPY_MMAP
 from nipype.interfaces.freesurfer import model, no_freesurfer
 import nipype.pipeline.engine as pe
 

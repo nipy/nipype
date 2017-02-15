@@ -4,6 +4,8 @@
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 from __future__ import division
 
+from nipype.utils import NUMPY_MMAP
+
 from ....interfaces.io import JSONFileGrabber
 from ....interfaces import utility as niu
 from ....interfaces import ants

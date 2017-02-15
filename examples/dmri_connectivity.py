@@ -47,6 +47,10 @@ Output data can be visualized in the ConnectomeViewer
 First, we import the necessary modules from nipype.
 """
 
+import inspect
+
+import os.path as op                      # system functions
+import cmp                                    # connectome mapper
 import nipype.interfaces.io as nio           # Data i/o
 import nipype.interfaces.utility as util     # utility
 import nipype.pipeline.engine as pe          # pypeline engine
@@ -56,10 +60,7 @@ import nipype.interfaces.camino2trackvis as cam2trk
 import nipype.interfaces.freesurfer as fs    # freesurfer
 import nipype.interfaces.cmtk as cmtk
 import nipype.algorithms.misc as misc
-import inspect
-
-import os.path as op                      # system functions
-import cmp                                    # connectome mapper
+from nipype.utils import NUMPY_MMAP
 
 """
 We define the following functions to scrape the voxel and data dimensions of the input images. This allows the

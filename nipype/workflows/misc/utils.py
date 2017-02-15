@@ -4,6 +4,7 @@
 from __future__ import print_function, division, unicode_literals, absolute_import
 
 from builtins import map, range
+from nipype.utils import NUMPY_MMAP
 
 
 def get_vox_dims(volume):

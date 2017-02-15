@@ -6,6 +6,8 @@
 from __future__ import print_function, division, unicode_literals, absolute_import
 from builtins import zip, next, range, str
 
+from nipype.utils import NUMPY_MMAP
+
 from ....pipeline import engine as pe
 from ....interfaces import utility as niu
 from ....interfaces import fsl

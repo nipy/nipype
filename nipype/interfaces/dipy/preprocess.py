@@ -16,6 +16,8 @@ import numpy as np
 from ... import logging
 from ..base import (traits, TraitedSpec, File, isdefined)
 from .base import DipyBaseInterface
+from ...utils import NUMPY_MMAP
+
 IFLOGGER = logging.getLogger('interface')
 
 

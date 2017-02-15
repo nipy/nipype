@@ -16,21 +16,21 @@ from builtins import range
 
 import os
 import os.path as op
-from distutils.version import LooseVersion
 
 import nibabel as nb
 import numpy as np
 from numpy.polynomial import Legendre
-from scipy import linalg, signal
+from scipy import linalg
 
 from .. import logging
 from ..external.due import BibTeX
 from ..interfaces.base import (traits, TraitedSpec, BaseInterface,
                                BaseInterfaceInputSpec, File, isdefined,
                                InputMultiPath)
+from nipype.utils import NUMPY_MMAP
+
 IFLOG = logging.getLogger('interface')
 
-NUMPY_MMAP = LooseVersion(np.__version__) >= LooseVersion('1.12.0')
 
 class ComputeDVARSInputSpec(BaseInterfaceInputSpec):
     in_file = File(exists=True, mandatory=True, desc='functional data, after HMC')

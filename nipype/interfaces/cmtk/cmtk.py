@@ -22,6 +22,8 @@ import scipy.io as sio
 
 from ... import logging
 from ...utils.filemanip import split_filename
+from ...utils import NUMPY_MMAP
+
 from ..base import (BaseInterface, BaseInterfaceInputSpec, traits, File,
                     TraitedSpec, Directory, OutputMultiPath, isdefined)
 iflogger = logging.getLogger('interface')

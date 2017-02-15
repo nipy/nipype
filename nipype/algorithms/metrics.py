@@ -30,6 +30,8 @@ from ..utils.misc import package_check
 from ..interfaces.base import (BaseInterface, traits, TraitedSpec, File,
                                InputMultiPath,
                                BaseInterfaceInputSpec, isdefined)
+from nipype.utils import NUMPY_MMAP
+
 iflogger = logging.getLogger('interface')
 
 

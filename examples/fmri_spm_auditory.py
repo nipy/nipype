@@ -28,6 +28,8 @@ import nipype.interfaces.utility as util     # utility
 import nipype.pipeline.engine as pe          # pypeline engine
 import nipype.algorithms.modelgen as model   # model specification
 import os                                    # system functions
+from nipype.utils import NUMPY_MMAP
+
 
 """
 

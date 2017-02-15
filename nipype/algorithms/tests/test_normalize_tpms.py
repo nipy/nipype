@@ -14,6 +14,7 @@ import nibabel as nb
 import nipype.testing as nit
 
 from nipype.algorithms.misc import normalize_tpms
+from nipype.utils import NUMPY_MMAP
 
 
 def test_normalize_tpms(tmpdir):

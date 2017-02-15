@@ -18,6 +18,7 @@ http://www.fmrib.ox.ac.uk/fslcourse/fsl_course_data2.tar.gz
 Import necessary modules from nipype.
 """
 
+import os                                    # system functions
 import nipype.interfaces.io as nio           # Data i/o
 import nipype.interfaces.utility as util     # utility
 import nipype.pipeline.engine as pe          # pypeline engine
@@ -25,7 +26,7 @@ import nipype.interfaces.camino as camino
 import nipype.interfaces.fsl as fsl
 import nipype.interfaces.camino2trackvis as cam2trk
 import nipype.algorithms.misc as misc
-import os                                    # system functions
+from nipype.utils import NUMPY_MMAP
 
 """
 We use the following functions to scrape the voxel and data dimensions of the input images. This allows the

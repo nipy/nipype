@@ -8,6 +8,8 @@ import nibabel as nb
 import numpy as np
 
 from ...utils.misc import package_check
+from ...utils import NUMPY_MMAP
+
 from ..base import (BaseInterface, TraitedSpec, traits, File, OutputMultiPath,
                     BaseInterfaceInputSpec, isdefined)
 
