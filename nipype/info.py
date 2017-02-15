@@ -143,7 +143,6 @@ REQUIRES = [
     'simplejson>=%s' % SIMPLEJSON_MIN_VERSION,
     'prov>=%s' % PROV_MIN_VERSION,
     'click>=%s' % CLICK_MIN_VERSION,
-    'xvfbwrapper',
     'funcsigs',
     'configparser',
     'pytest>=%s' % PYTEST_MIN_VERSION
