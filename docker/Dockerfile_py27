@@ -29,14 +29,14 @@
 FROM nipype/nipype:latest
 MAINTAINER The nipype developers https://github.com/nipy/nipype
 
-# Downgrade python to 2.7
-RUN conda install python=2.7
-
 COPY docker/files/run_* /usr/bin/
 RUN chmod +x /usr/bin/run_*
 
+# Downgrade python to 2.7
 # matplotlib cleanups: set default backend, precaching fonts
-RUN sed -i 's/\(backend *: \).*$/\1Agg/g' /usr/local/miniconda/lib/python2.7/site-packages/matplotlib/mpl-data/matplotlibrc && \
+RUN conda install python=2.7 && \
+    find /usr/local/miniconda/ -exec chmod 775 {} + && \
+    sed -i 's/\(backend *: \).*$/\1Agg/g' /usr/local/miniconda/lib/python2.7/site-packages/matplotlib/mpl-data/matplotlibrc && \
     python -c "from matplotlib import font_manager"
 
 # Re-install nipype
