@@ -944,7 +944,7 @@ class BBRegisterInputSpec(FSTraitedSpec):
 
 class BBRegisterInputSpec6(BBRegisterInputSpec):
     init = traits.Enum('coreg', 'rr', 'spm', 'fsl', 'header', 'best', argstr='--init-%s',
-                       usedefault=True, xor=['init_reg_file'],
+                       xor=['init_reg_file'],
                        desc='initialize registration with mri_coreg, spm, fsl, or header')
 
 
@@ -974,7 +974,7 @@ class BBRegister(FSCommand):
     """
 
     _cmd = 'bbregister'
-    if LooseVersion(FSVersion) < LooseVersion("6.0.0"):
+    if FSVersion and LooseVersion(FSVersion) < LooseVersion("6.0.0"):
         input_spec = BBRegisterInputSpec
     else:
         input_spec = BBRegisterInputSpec6

@@ -28,19 +28,21 @@ def pickfirst(files):
 def pickmiddle(files):
     from nibabel import load
     import numpy as np
+    from nipype.utils import NUMPY_MMAP
     middlevol = []
     for f in files:
-        middlevol.append(int(np.ceil(load(f).shape[3] / 2)))
+        middlevol.append(int(np.ceil(load(f, mmap=NUMPY_MMAP).shape[3] / 2)))
     return middlevol
 
 
 def pickvol(filenames, fileidx, which):
     from nibabel import load
     import numpy as np
+    from nipype.utils import NUMPY_MMAP
     if which.lower() == 'first':
         idx = 0
     elif which.lower() == 'middle':
-        idx = int(np.ceil(load(filenames[fileidx]).shape[3] / 2))
+        idx = int(np.ceil(load(filenames[fileidx], mmap=NUMPY_MMAP).shape[3] / 2))
     elif which.lower() == 'last':
         idx = load(filenames[fileidx]).shape[3] - 1
     else:

@@ -28,7 +28,7 @@ from scipy.io import savemat
 
 # Local imports
 from ... import logging
-from ...utils import spm_docs as sd
+from ...utils import spm_docs as sd, NUMPY_MMAP
 from ..base import (BaseInterface, traits, isdefined, InputMultiPath,
                     BaseInterfaceInputSpec, Directory, Undefined)
 from ..matlab import MatlabCommand
@@ -45,7 +45,7 @@ def func_is_3d(in_file):
     if isinstance(in_file, list):
         return func_is_3d(in_file[0])
     else:
-        img = load(in_file)
+        img = load(in_file, mmap=NUMPY_MMAP)
         shape = img.shape
         if len(shape) == 3 or (len(shape) == 4 and shape[3] == 1):
             return True
@@ -73,7 +73,7 @@ def scans_for_fname(fname):
         for sno, f in enumerate(fname):
             scans[sno] = '%s,1' % f
         return scans
-    img = load(fname)
+    img = load(fname, mmap=NUMPY_MMAP)
     if len(img.shape) == 3:
         return np.array(('%s,1' % fname,), dtype=object)
     else:

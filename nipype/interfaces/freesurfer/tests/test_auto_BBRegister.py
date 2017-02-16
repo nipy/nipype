@@ -17,7 +17,6 @@ def test_BBRegister_inputs():
     usedefault=True,
     ),
     init=dict(argstr='--init-%s',
-    mandatory=True,
     xor=[u'init_reg_file'],
     ),
     init_reg_file=dict(argstr='--init-reg %s',

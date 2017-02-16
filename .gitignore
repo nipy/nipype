@@ -13,6 +13,7 @@
 .project
 .settings
 .pydevproject
+.eggs
 .idea/
 /documentation.zip
 .DS_Store

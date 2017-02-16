@@ -4,7 +4,7 @@
 import pytest
 from nipype.testing import example_data
 from nipype.algorithms.metrics import ErrorMap
-import nibabel as nib
+import nibabel as nb
 import numpy as np
 import os
 
@@ -18,13 +18,13 @@ def test_errormap(tmpdir):
     volume2 = np.array([[[0.0, 7.0], [2.0, 3.0]], [[1.0, 9.0], [1.0, 2.0]]])  # Alan Turing's birthday
     mask = np.array([[[1, 0], [0, 1]], [[1, 0], [0, 1]]])
 
-    img1 = nib.Nifti1Image(volume1, np.eye(4))
-    img2 = nib.Nifti1Image(volume2, np.eye(4))
-    maskimg = nib.Nifti1Image(mask, np.eye(4))
+    img1 = nb.Nifti1Image(volume1, np.eye(4))
+    img2 = nb.Nifti1Image(volume2, np.eye(4))
+    maskimg = nb.Nifti1Image(mask, np.eye(4))
 
-    nib.save(img1, os.path.join(tempdir, 'von.nii.gz'))
-    nib.save(img2, os.path.join(tempdir, 'alan.nii.gz'))
-    nib.save(maskimg, os.path.join(tempdir, 'mask.nii.gz'))
+    nb.save(img1, os.path.join(tempdir, 'von.nii.gz'))
+    nb.save(img2, os.path.join(tempdir, 'alan.nii.gz'))
+    nb.save(maskimg, os.path.join(tempdir, 'mask.nii.gz'))
 
     # Default metric
     errmap = ErrorMap()
@@ -55,15 +55,15 @@ def test_errormap(tmpdir):
     msvolume1 = np.zeros(shape=(2, 2, 2, 2))
     msvolume1[:, :, :, 0] = volume1
     msvolume1[:, :, :, 1] = volume3
-    msimg1 = nib.Nifti1Image(msvolume1, np.eye(4))
+    msimg1 = nb.Nifti1Image(msvolume1, np.eye(4))
 
     msvolume2 = np.zeros(shape=(2, 2, 2, 2))
     msvolume2[:, :, :, 0] = volume3
     msvolume2[:, :, :, 1] = volume1
-    msimg2 = nib.Nifti1Image(msvolume2, np.eye(4))
+    msimg2 = nb.Nifti1Image(msvolume2, np.eye(4))
 
-    nib.save(msimg1, os.path.join(tempdir, 'von-ray.nii.gz'))
-    nib.save(msimg2, os.path.join(tempdir, 'alan-ray.nii.gz'))
+    nb.save(msimg1, os.path.join(tempdir, 'von-ray.nii.gz'))
+    nb.save(msimg2, os.path.join(tempdir, 'alan-ray.nii.gz'))
 
     errmap.inputs.in_tst = os.path.join(tempdir, 'von-ray.nii.gz')
     errmap.inputs.in_ref = os.path.join(tempdir, 'alan-ray.nii.gz')

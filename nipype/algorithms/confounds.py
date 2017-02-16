@@ -20,14 +20,17 @@ import os.path as op
 import nibabel as nb
 import numpy as np
 from numpy.polynomial import Legendre
-from scipy import linalg, signal
+from scipy import linalg
 
 from .. import logging
 from ..external.due import BibTeX
 from ..interfaces.base import (traits, TraitedSpec, BaseInterface,
                                BaseInterfaceInputSpec, File, isdefined,
                                InputMultiPath)
+from nipype.utils import NUMPY_MMAP
+
 IFLOG = logging.getLogger('interface')
+
 
 class ComputeDVARSInputSpec(BaseInterfaceInputSpec):
     in_file = File(exists=True, mandatory=True, desc='functional data, after HMC')
@@ -127,9 +130,9 @@ Bradley L. and Petersen, Steven E.},
         dvars = compute_dvars(self.inputs.in_file, self.inputs.in_mask,
                               remove_zerovariance=self.inputs.remove_zerovariance)
 
-        self._results['avg_std'] = float(dvars[0].mean())
-        self._results['avg_nstd'] = float(dvars[1].mean())
-        self._results['avg_vxstd'] = float(dvars[2].mean())
+        (self._results['avg_std'],
+         self._results['avg_nstd'],
+         self._results['avg_vxstd']) = np.mean(dvars, axis=1).astype(float)
 
         tr = None
         if isdefined(self.inputs.series_tr):
@@ -329,8 +332,8 @@ class CompCor(BaseInterface):
                    }]
 
     def _run_interface(self, runtime):
-        imgseries = nb.load(self.inputs.realigned_file).get_data()
-        mask = nb.load(self.inputs.mask_file).get_data()
+        imgseries = nb.load(self.inputs.realigned_file, mmap=NUMPY_MMAP).get_data()
+        mask = nb.load(self.inputs.mask_file, mmap=NUMPY_MMAP).get_data()
 
         if imgseries.shape[:3] != mask.shape:
             raise ValueError('Inputs for CompCor, func {} and mask {}, do not have matching '
@@ -435,7 +438,7 @@ class TCompCor(CompCor):
     output_spec = TCompCorOutputSpec
 
     def _run_interface(self, runtime):
-        imgseries = nb.load(self.inputs.realigned_file).get_data()
+        imgseries = nb.load(self.inputs.realigned_file, mmap=NUMPY_MMAP).get_data()
 
         if imgseries.ndim != 4:
             raise ValueError('tCompCor expected a 4-D nifti file. Input {} has {} dimensions '
@@ -443,7 +446,7 @@ class TCompCor(CompCor):
                              .format(self.inputs.realigned_file, imgseries.ndim, imgseries.shape))
 
         if isdefined(self.inputs.mask_file):
-            in_mask_data = nb.load(self.inputs.mask_file).get_data()
+            in_mask_data = nb.load(self.inputs.mask_file, mmap=NUMPY_MMAP).get_data()
             imgseries = imgseries[in_mask_data != 0, :]
 
         # From the paper:
@@ -521,9 +524,9 @@ class TSNR(BaseInterface):
     output_spec = TSNROutputSpec
 
     def _run_interface(self, runtime):
-        img = nb.load(self.inputs.in_file[0])
+        img = nb.load(self.inputs.in_file[0], mmap=NUMPY_MMAP)
         header = img.header.copy()
-        vollist = [nb.load(filename) for filename in self.inputs.in_file]
+        vollist = [nb.load(filename, mmap=NUMPY_MMAP) for filename in self.inputs.in_file]
         data = np.concatenate([vol.get_data().reshape(
             vol.get_shape()[:3] + (-1,)) for vol in vollist], axis=3)
         data = np.nan_to_num(data)
@@ -626,8 +629,8 @@ research/nichols/scripts/fsl/standardizeddvars.pdf>`_, 2013.
     from nitime.algorithms import AR_est_YW
     import warnings
 
-    func = nb.load(in_file).get_data().astype(np.float32)
-    mask = nb.load(in_mask).get_data().astype(np.uint8)
+    func = nb.load(in_file, mmap=NUMPY_MMAP).get_data().astype(np.float32)
+    mask = nb.load(in_mask, mmap=NUMPY_MMAP).get_data().astype(np.uint8)
 
     if len(func.shape) != 4:
         raise RuntimeError(
