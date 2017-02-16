@@ -1477,7 +1477,7 @@ class MNIBiasCorrectionInputSpec(FSTraitedSpec):
     in_file = File(exists=True, mandatory=True, argstr="--i %s",
                    desc="input volume. Input can be any format accepted by mri_convert.")
     # optional
-    out_file = File(argstr="--o %s", name_source=['in_file'], genfile=True,
+    out_file = File(argstr="--o %s", name_source=['in_file'],
                     name_template='%s_output', hash_files=False, keep_extension=True,
                     desc="output volume. Output can be any format accepted by mri_convert. " +
                     "If the output format is COR, then the directory must exist.")
