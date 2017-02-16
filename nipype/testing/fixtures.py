@@ -15,6 +15,15 @@ from nipype.interfaces.fsl import Info
 from nipype.interfaces.fsl.base import FSLCommand
 
 
+def analyze_pair_image_files(outdir, filelist, shape):
+    for f in filelist:
+        hdr = nb.Nifti1Header()
+        hdr.set_data_shape(shape)
+        img = np.random.random(shape)
+        analyze = nb.AnalyzeImage(img, np.eye(4), hdr)
+        analyze.to_filename(os.path.join(outdir, f))
+
+
 def nifti_image_files(outdir, filelist, shape):
     for f in filelist:
         hdr = nb.Nifti1Header()
@@ -31,6 +40,21 @@ def create_files_in_directory(request, tmpdir):
     os.chdir(outdir)
     filelist = ['a.nii', 'b.nii']
     nifti_image_files(outdir, filelist, shape=(3,3,3,4))
+
+    def change_directory():
+        os.chdir(cwd)
+
+    request.addfinalizer(change_directory)
+    return (filelist, outdir)
+
+
+@pytest.fixture()
+def create_analyze_pair_file_in_directory(request, tmpdir):
+    outdir = str(tmpdir)
+    cwd = os.getcwd()
+    os.chdir(outdir)
+    filelist = ['a.hdr']
+    analyze_pair_image_files(outdir, filelist, shape=(3, 3, 3, 4))
 
     def change_directory():
         os.chdir(cwd)
