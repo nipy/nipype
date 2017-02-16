@@ -8,6 +8,8 @@ import nibabel as nb
 import numpy as np
 
 from ...utils.misc import package_check
+from ...utils import NUMPY_MMAP
+
 from ..base import (BaseInterface, TraitedSpec, traits, File, OutputMultiPath,
                     BaseInterfaceInputSpec, isdefined)
 
@@ -99,7 +101,7 @@ class FitGLM(BaseInterface):
         del data
 
         for functional_run in functional_runs[1:]:
-            nii = nb.load(functional_run)
+            nii = nb.load(functional_run, mmap=NUMPY_MMAP)
             data = nii.get_data()
             npdata = data.copy()
             del data

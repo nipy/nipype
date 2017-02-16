@@ -14,10 +14,12 @@ def select_volume(filename, which):
     """
     from nibabel import load
     import numpy as np
+    from nipype.utils import NUMPY_MMAP
+
     if which.lower() == 'first':
         idx = 0
     elif which.lower() == 'middle':
-        idx = int(np.ceil(load(filename).shape[3] / 2))
+        idx = int(np.ceil(load(filename, mmap=NUMPY_MMAP).shape[3] / 2))
     else:
         raise Exception('unknown value for volume selection : %s' % which)
     return idx
