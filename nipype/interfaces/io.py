@@ -1174,8 +1174,11 @@ class DataGrabber(IOBase):
                         if self.inputs.sort_filelist:
                             outfiles = human_order_sorted(outfiles)
                         outputs[key].append(list_to_filename(outfiles))
-            if any([val is None for val in outputs[key]]):
-                outputs[key] = []
+            if self.inputs.raise_on_empty: # if the raise_on_empty is True by default, make sure no None in outputs
+                if any([val is None for val in outputs[key]]):
+                    outputs[key] = []
+            else: # if the raise_on_empty is False remove the Nones in outputs
+                outputs[key] = [[] if x is None else x for x in outputs[key]]
             if len(outputs[key]) == 0:
                 outputs[key] = None
             elif len(outputs[key]) == 1:
