@@ -687,7 +687,7 @@ class ReconAll(CommandLine):
                        ], []),
         ('nuintensitycor', ['mri/nu.mgz'], []),
         ('normalization', ['mri/T1.mgz'], []),
-        ('skullstrip', ['mri/talairach_with_skull.lta',
+        ('skullstrip', ['mri/transforms/talairach_with_skull.lta',
                         'mri/brainmask.auto.mgz',
                         'mri/brainmask.mgz'], []),
         ]
@@ -742,6 +742,9 @@ class ReconAll(CommandLine):
                       'surf/lh.curv.pial', 'surf/rh.curv.pial',
                       'surf/lh.area.pial', 'surf/rh.area.pial',
                       'surf/lh.thickness', 'surf/rh.thickness'], []),
+            ('pctsurfcon', ['surf/lh.w-g.pct.mgh', 'surf/rh.w-g.pct.mgh'], []),
+            ('parcstats', ['stats/lh.aparc.stats', 'stats/rh.aparc.stats',
+                           'label/aparc.annot.a2009s.ctab'], []),
             ('cortparc2', ['label/lh.aparc.a2009s.annot',
                            'label/rh.aparc.a2009s.annot'], []),
             ('parcstats2', ['stats/lh.aparc.a2009s.stats',
