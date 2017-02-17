@@ -34,9 +34,9 @@ dependencies:
     - sed -i -E "s/(__version__ = )'[A-Za-z0-9.-]+'/\1'$CIRCLE_TAG'/" nipype/info.py
     - e=1 && for i in {1..5}; do docker build -t nipype/nipype:latest --build-arg BUILD_DATE=`date -u +"%Y-%m-%dT%H:%M:%SZ"` --build-arg VCS_REF=`git rev-parse --short HEAD` --build-arg VERSION=$CIRCLE_TAG . && e=0 && break || sleep 15; done && [ "$e" -eq "0" ] :
         timeout: 21600
-    - docker build -f docker/Dockerfile_py27 -t nipype/nipype_test:py27 . :
+    - e=1 && for i in {1..5}; do docker build -f docker/Dockerfile_py27 -t nipype/nipype_test:py27 . && e=0 && break || sleep 15; done && [ "$e" -eq "0" ] :
         timeout: 1600
-    - docker build -f docker/Dockerfile_py35 -t nipype/nipype_test:py35 . :
+    - e=1 && for i in {1..5}; do docker build -f docker/Dockerfile_py35 -t nipype/nipype_test:py35 . && e=0 && break || sleep 15; done && [ "$e" -eq "0" ] :
         timeout: 1600
     - docker save nipype/nipype:latest > $HOME/docker/image.tar
     - docker save nipype/nipype_test:py27 > $HOME/docker/image27.tar
