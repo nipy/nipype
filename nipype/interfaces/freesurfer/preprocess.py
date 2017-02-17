@@ -730,6 +730,8 @@ class ReconAll(CommandLine):
                           'surf/lh.sulc', 'surf/rh.sulc',
                           'surf/lh.inflated.H', 'surf/rh.inflated.H',
                           'surf/lh.inflated.K', 'surf/rh.inflated.K'], []),
+            # Undocumented in ReconAllTableStableV5.3
+            ('curvstats', ['stats/lh.curv.stats', 'stats/rh.curv.stats'], []),
             ]
         _autorecon3_steps = [
             ('sphere', ['surf/lh.sphere', 'surf/rh.sphere'], []),
@@ -742,12 +744,20 @@ class ReconAll(CommandLine):
                       'surf/lh.curv.pial', 'surf/rh.curv.pial',
                       'surf/lh.area.pial', 'surf/rh.area.pial',
                       'surf/lh.thickness', 'surf/rh.thickness'], []),
+            # Misnamed outputs in ReconAllTableStableV5.3: ?h.w-c.pct.mgz
             ('pctsurfcon', ['surf/lh.w-g.pct.mgh', 'surf/rh.w-g.pct.mgh'], []),
             ('parcstats', ['stats/lh.aparc.stats', 'stats/rh.aparc.stats',
                            'label/aparc.annot.a2009s.ctab'], []),
             ('cortparc2', ['label/lh.aparc.a2009s.annot',
                            'label/rh.aparc.a2009s.annot'], []),
             ('parcstats2', ['stats/lh.aparc.a2009s.stats',
+                            'stats/rh.aparc.a2009s.stats',
+                            'label/aparc.annot.a2009s.ctab'], []),
+            # Undocumented in ReconAllTableStableV5.3
+            ('cortparc3', ['label/lh.aparc.DKTatlas40.annot',
+                           'label/rh.aparc.DKTatlas40.annot'], []),
+            # Undocumented in ReconAllTableStableV5.3
+            ('parcstats3', ['stats/lh.aparc.a2009s.stats',
                             'stats/rh.aparc.a2009s.stats',
                             'label/aparc.annot.a2009s.ctab'], []),
             ('cortribbon', ['mri/lh.ribbon.mgz', 'mri/rh.ribbon.mgz',
