@@ -182,7 +182,8 @@ RUN conda config --add channels conda-forge --add channels intel && \
                      libxslt=1.1.29 \
                      traits=4.6.0 \
                      psutil=5.0.1 \
-                     icu=58.1
+                     icu=58.1 && \
+    find /usr/local/miniconda/ -exec chmod 775 {} +
 
 # matplotlib cleanups: set default backend, precaching fonts
 RUN sed -i 's/\(backend *: \).*$/\1Agg/g' /usr/local/miniconda/lib/python3.5/site-packages/matplotlib/mpl-data/matplotlibrc && \
