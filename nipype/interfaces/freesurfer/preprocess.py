@@ -665,6 +665,7 @@ class ReconAll(CommandLine):
     input_spec = ReconAllInputSpec
     output_spec = ReconAllOutputSpec
     _can_resume = True
+    force_run = False
 
     # Steps are based off of the recon-all tables [0,1] describing, inputs,
     # commands, and outputs of each step of the recon-all process,
@@ -905,20 +906,30 @@ class ReconAll(CommandLine):
         if not isdefined(subjects_dir):
             subjects_dir = self._gen_subjects_dir()
 
+        no_run = True
         flags = []
         for idx, step in enumerate(self._steps):
             step, outfiles, infiles = step
             flag = '-{}'.format(step)
             noflag = '-no{}'.format(step)
-            if flag in cmd or noflag in cmd:
+            if noflag in cmd:
+                continue
+            elif flag in cmd:
+                no_run = False
                 continue
 
             subj_dir = os.path.join(subjects_dir, self.inputs.subject_id)
             if check_depends([os.path.join(subj_dir, f) for f in outfiles],
                              [os.path.join(subj_dir, f) for f in infiles]):
                 flags.append(noflag)
-        cmd += ' ' + ' '.join(flags)
+            else:
+                no_run = False
 
+        if no_run and not self.force_run:
+            iflogger.info('recon-all complete : Not running')
+            return "echo recon-all: nothing to do"
+
+        cmd += ' ' + ' '.join(flags)
         iflogger.info('resume recon-all : %s' % cmd)
         return cmd
 
