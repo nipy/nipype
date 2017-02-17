@@ -821,7 +821,7 @@ class ReconAll(CommandLine):
                       'surf/lh.thickness', 'surf/rh.thickness'], []),
             ('cortribbon', ['mri/lh.ribbon.mgz', 'mri/rh.ribbon.mgz',
                             'mri/ribbon.mgz'], []),
-            ('parcstats', ['stats/lh.aparc.astats', 'stats/rh.aparc.stats',
+            ('parcstats', ['stats/lh.aparc.stats', 'stats/rh.aparc.stats',
                            'label/aparc.annot.ctab'], []),
             ('cortparc2', ['label/lh.aparc.a2009s.annot',
                            'label/rh.aparc.a2009s.annot'], []),
