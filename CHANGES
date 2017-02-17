@@ -1,6 +1,7 @@
 Upcoming release 0.13
 =====================
 
+* FIX: Issues in Docker image permissions, and docker documentation (https://github.com/nipy/nipype/pull/1825)
 * ENH: Revised all Dockerfiles and automated deployment to Docker Hub
        from CircleCI (https://github.com/nipy/nipype/pull/1815)
 * FIX: Semaphore capture using MultiProc plugin (https://github.com/nipy/nipype/pull/1689)
