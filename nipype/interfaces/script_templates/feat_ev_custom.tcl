@@ -1,7 +1,7 @@
 # EV title
 set fmri(evtitle$ev_num) "$ev_name"
 
-# Basic waveform shape
+# Basic waveform shape (EV $ev_num)
 # 0 : Square
 # 1 : Sinusoid
 # 2 : Custom (1 entry per volume)
@@ -10,7 +10,7 @@ set fmri(evtitle$ev_num) "$ev_name"
 # 10 : Empty (all zeros)
 set fmri(shape$ev_num) 3
 
-# Convolution
+# Convolution (EV $ev_num)
 # 0 : None
 # 1 : Gaussian
 # 2 : Gamma
@@ -19,22 +19,20 @@ set fmri(shape$ev_num) 3
 # 5 : Sine basis functions
 # 6 : FIR basis functions
 # 7 : Optimal/custom basis functions
-set fmri(convolve$ev_num) 2
+set fmri(convolve$ev_num) 7
 
-# Convolve phase
+# Convolve phase (EV $ev_num)
 set fmri(convolve_phase$ev_num) 0
 
-# Apply temporal filtering
-set fmri(tempfilt_yn$ev_num) 1
+# Apply temporal filtering (EV $ev_num)
+set fmri(tempfilt_yn$ev_num) $tempfilt_yn
 
-# Add temporal derivative
+# Add temporal derivative (EV $ev_num)
 set fmri(deriv_yn$ev_num) $temporalderiv
 
-# Custom EV file
+# Custom EV file (EV $ev_num)
 set fmri(custom$ev_num) "$cond_file"
 
-# Gamma sigma
-set fmri(gammasigma$ev_num) $gammasigma
-
-# Gamma delay
-set fmri(gammadelay$ev_num) $gammadelay
+# Optimal/custom HRF convolution file
+set fmri(default_bfcustom) "${fsldir}etc/default_flobs.flobs/hrfbasisfns.txt"
+set fmri(bfcustom) "$bfcustompath"
