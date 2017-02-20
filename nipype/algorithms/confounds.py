@@ -662,7 +662,7 @@ research/nichols/scripts/fsl/standardizeddvars.pdf>`_, 2013.
     func_diff = np.diff(mfunc, axis=1)
 
     # DVARS (no standardization)
-    dvars_nstd = func_diff.std(axis=0)
+    dvars_nstd = np.sqrt(np.square(func_diff).mean(axis=0))
 
     # standardization
     dvars_stdz = dvars_nstd / diff_sd_mean
