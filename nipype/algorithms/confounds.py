@@ -685,8 +685,8 @@ research/nichols/scripts/fsl/standardizeddvars.pdf>`_, 2013.
         warnings.filterwarnings('error')
 
         # voxelwise standardization
-        diff_vx_stdz = func_diff / np.array([diff_sdhat] * func_diff.shape[-1]).T
-        dvars_vx_stdz = diff_vx_stdz.std(axis=0, ddof=1)
+        diff_vx_stdz = np.square(func_diff) / np.array([diff_sdhat] * func_diff.shape[-1]).T
+        dvars_vx_stdz = np.sqrt(diff_vx_stdz.mean(axis=0))
 
     return (dvars_stdz, dvars_nstd, dvars_vx_stdz)
 
