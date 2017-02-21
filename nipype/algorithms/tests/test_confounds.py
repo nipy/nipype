@@ -39,7 +39,8 @@ def test_dvars(tmpdir):
     ground_truth = np.loadtxt(example_data('ds003_sub-01_mc.DVARS'))
     dvars = ComputeDVARS(in_file=example_data('ds003_sub-01_mc.nii.gz'),
                          in_mask=example_data('ds003_sub-01_mc_brainmask.nii.gz'),
-                         save_all=True)
+                         save_all=True,
+                         intensity_normalization=False)
     os.chdir(str(tmpdir))
     res = dvars.run()
 
