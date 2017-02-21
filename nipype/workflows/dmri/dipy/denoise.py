@@ -4,7 +4,6 @@
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 
 from builtins import range
-from nipype.utils import NUMPY_MMAP
 from ....pipeline import engine as pe
 from ....interfaces import utility as niu
 from ....interfaces import dipy
@@ -57,6 +56,7 @@ def csf_mask(in_file, in_mask, out_file=None):
     from scipy.ndimage import binary_erosion, binary_opening, label
     import scipy.ndimage as nd
     import os.path as op
+    from nipype.utils import NUMPY_MMAP
 
     if out_file is None:
         fname, ext = op.splitext(op.basename(in_file))
@@ -100,6 +100,7 @@ def bg_mask(in_file, in_mask, out_file=None):
     from scipy.ndimage import binary_dilation
     import scipy.ndimage as nd
     import os.path as op
+    from nipype.utils import NUMPY_MMAP
 
     if out_file is None:
         fname, ext = op.splitext(op.basename(in_file))
