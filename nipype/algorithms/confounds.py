@@ -52,6 +52,16 @@ class ComputeDVARSInputSpec(BaseInterfaceInputSpec):
                            desc='output figure size')
     figformat = traits.Enum('png', 'pdf', 'svg', usedefault=True,
                             desc='output format for figures')
+    intensity_normalization = traits.Float(1000.0, usedefault=True,
+                              desc='Divide value in each voxel at each timepoint '
+                                   'by the median calculated across all voxels'
+                                   'and timepoints within the mask (if specified)'
+                                   'and then multiply by the value specified by'
+                                   'this parameter. By using the default (1000)' \
+                                   'output DVARS will be expressed in ' \
+                                   'x10 % BOLD units compatible with Power et al.' \
+                                   '2012. Set this to 0 to disable intensity' \
+                                   'normalization altogether.')
 
 
 
@@ -128,7 +138,8 @@ Bradley L. and Petersen, Steven E.},
 
     def _run_interface(self, runtime):
         dvars = compute_dvars(self.inputs.in_file, self.inputs.in_mask,
-                              remove_zerovariance=self.inputs.remove_zerovariance)
+                              remove_zerovariance=self.inputs.remove_zerovariance,
+                              intensity_normalization=self.inputs.intensity_normalization)
 
         (self._results['avg_std'],
          self._results['avg_nstd'],
@@ -595,7 +606,8 @@ def regress_poly(degree, data, remove_mean=True, axis=-1):
     # Back to original shape
     return regressed_data.reshape(datashape)
 
-def compute_dvars(in_file, in_mask, remove_zerovariance=False):
+def compute_dvars(in_file, in_mask, remove_zerovariance=False,
+                  intensity_normalization=1000):
     """
     Compute the :abbr:`DVARS (D referring to temporal
     derivative of timecourses, VARS referring to RMS variance over voxels)`
@@ -650,6 +662,9 @@ research/nichols/scripts/fsl/standardizeddvars.pdf>`_, 2013.
 
     # Demean
     mfunc = regress_poly(0, mfunc, remove_mean=True).astype(np.float32)
+
+    if intensity_normalization != False:
+        mfunc = (mfunc / np.median(mfunc)) * intensity_normalization
 
     # Compute (non-robust) estimate of lag-1 autocorrelation
     ar1 = np.apply_along_axis(AR_est_YW, 1, mfunc, 1)[:, 0]
