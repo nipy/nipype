@@ -43,7 +43,8 @@ RUN sed -i -e 's,main$,main contrib non-free,g' /etc/apt/sources.list.d/neurodeb
                        graphviz \
                        make \
                        ruby \
-                       fsl-core && \
+                       fsl-core \
+                       fsl-mni152-templates && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* && \
     echo ". /etc/fsl/fsl.sh" >> /etc/bash.bashrc
 
