@@ -34,5 +34,5 @@ set fmri(deriv_yn$ev_num) $temporalderiv
 set fmri(custom$ev_num) "$cond_file"
 
 # Optimal/custom HRF convolution file
-set fmri(default_bfcustom) "${fsldir}etc/default_flobs.flobs/hrfbasisfns.txt"
+set fmri(default_bfcustom) "${fsldir}/etc/default_flobs.flobs/hrfbasisfns.txt"
 set fmri(bfcustom) "$bfcustompath"

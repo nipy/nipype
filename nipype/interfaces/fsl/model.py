@@ -197,8 +197,14 @@ class Level1Design(BaseInterface):
                     ev_parameters['cond_file'] = evfname
                     ev_parameters['ev_num'] = num_evs[0]
                     ev_parameters['ev_name'] = name
-                    ev_parameters['fsldir'] = os.environ['FSLDIR']
                     ev_parameters['tempfilt_yn'] = do_tempfilter
+                    try:
+                        ev_parameters['fsldir'] = os.environ['FSLDIR']
+                    except KeyError:
+                        if basis_key == 'flobs':
+                            raise Exception('FSL environment variables not set')
+                        else:
+                            ev_parameters['fsldir'] = '/usr/share/fsl'
                     try:
                         ev_parameters['temporalderiv'] = int(bool(ev_parameters.pop('derivs')))
                     except KeyError:
