@@ -78,6 +78,7 @@ RUN echo "cHJpbnRmICJrcnp5c3p0b2YuZ29yZ29sZXdza2lAZ21haWwuY29tXG41MTcyXG4gKkN2dW
 # Installing Neurodebian packages (FSL, AFNI, git)
 RUN apt-get install -y --no-install-recommends \
                     fsl-core=5.0.9-1~nd+1+nd16.04+1 \
+                    fsl-mni152-templates=5.0.7-2 \
                     afni=16.2.07~dfsg.1-2~nd16.04+1
 
 ENV FSLDIR=/usr/share/fsl/5.0 \
