@@ -31,6 +31,9 @@
 # Based on https://github.com/poldracklab/fmriprep/blob/9c92a3de9112f8ef1655b876de060a2ad336ffb0/Dockerfile
 #
 FROM ubuntu:xenial-20161213
+MAINTAINER The nipype developers https://github.com/nipy/nipype
+
+ARG DEBIAN_FRONTEND=noninteractive
 
 # Prepare environment
 RUN apt-get update && \
