@@ -22,7 +22,7 @@ from nipype.interfaces.fsl.base import FSLCommand
 
 
 def analyze_pair_image_files(outdir, filelist, shape):
-    for f in filelist:
+    for f in filename_to_list(filelist):
         hdr = nb.Nifti1Header()
         hdr.set_data_shape(shape)
         img = np.random.random(shape)
