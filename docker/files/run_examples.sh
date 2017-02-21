@@ -15,5 +15,3 @@ coverage run /root/src/nipype/tools/run_examples.py $@
 arr=$@
 tmp_var=$( IFS=$' '; echo "${arr[*]}" )
 coverage xml -o "/scratch/smoketest_${tmp_var//[^A-Za-z0-9_-]/_}.xml"
-
-chmod 777 -R /scratch/logs
