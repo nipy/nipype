@@ -651,22 +651,22 @@ research/nichols/scripts/fsl/standardizeddvars.pdf>`_, 2013.
     idx = np.where(mask > 0)
     mfunc = func[idx[0], idx[1], idx[2], :]
 
-    # Demean
-    mfunc = regress_poly(0, mfunc, remove_mean=True).astype(np.float32)
-
     if intensity_normalization != 0:
         mfunc = (mfunc / np.median(mfunc)) * intensity_normalization
 
-    # Robust standard deviation
-    func_sd = (np.percentile(mfunc, 75, axis=1) -
-               np.percentile(mfunc, 25, axis=1)) / 1.349
+    # Robust standard deviation (we are using "lower" interpolation
+    # because this is what FSL is doing
+    func_sd = (np.percentile(mfunc, 75, axis=1, interpolation="lower") -
+               np.percentile(mfunc, 25, axis=1, interpolation="lower")) / 1.349
 
     if remove_zerovariance:
         mfunc = mfunc[func_sd != 0, :]
         func_sd = func_sd[func_sd != 0]
 
     # Compute (non-robust) estimate of lag-1 autocorrelation
-    ar1 = np.apply_along_axis(AR_est_YW, 1, mfunc, 1)[:, 0]
+    ar1 = np.apply_along_axis(AR_est_YW, 1,
+                              regress_poly(0, mfunc, remove_mean=True).astype(
+                                  np.float32), 1)[:, 0]
 
     # Compute (predicted) standard deviation of temporal difference time series
     diff_sdhat = np.squeeze(np.sqrt(((1 - ar1) * 2).tolist())) * func_sd
@@ -681,11 +681,12 @@ research/nichols/scripts/fsl/standardizeddvars.pdf>`_, 2013.
     # standardization
     dvars_stdz = dvars_nstd / diff_sd_mean
 
-    with warnings.catch_warnings(): # catch, e.g., divide by zero errors
+    with warnings.catch_warnings():  # catch, e.g., divide by zero errors
         warnings.filterwarnings('error')
 
         # voxelwise standardization
-        diff_vx_stdz = np.square(func_diff) / np.array([diff_sdhat] * func_diff.shape[-1]).T
+        diff_vx_stdz = np.square(
+            func_diff / np.array([diff_sdhat] * func_diff.shape[-1]).T)
         dvars_vx_stdz = np.sqrt(diff_vx_stdz.mean(axis=0))
 
     return (dvars_stdz, dvars_nstd, dvars_vx_stdz)
