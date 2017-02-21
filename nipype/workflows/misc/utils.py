@@ -4,11 +4,11 @@
 from __future__ import print_function, division, unicode_literals, absolute_import
 
 from builtins import map, range
-from nipype.utils import NUMPY_MMAP
 
 
 def get_vox_dims(volume):
     import nibabel as nb
+    from nipype.utils import NUMPY_MMAP
     if isinstance(volume, list):
         volume = volume[0]
     nii = nb.load(volume, mmap=NUMPY_MMAP)
@@ -19,6 +19,7 @@ def get_vox_dims(volume):
 
 def get_data_dims(volume):
     import nibabel as nb
+    from nipype.utils import NUMPY_MMAP
     if isinstance(volume, list):
         volume = volume[0]
     nii = nb.load(volume, mmap=NUMPY_MMAP)
@@ -29,6 +30,7 @@ def get_data_dims(volume):
 
 def get_affine(volume):
     import nibabel as nb
+    from nipype.utils import NUMPY_MMAP
     nii = nb.load(volume, mmap=NUMPY_MMAP)
     return nii.affine
 
@@ -50,6 +52,7 @@ def select_aparc_annot(list_of_files):
 def region_list_from_volume(in_file):
     import nibabel as nb
     import numpy as np
+    from nipype.utils import NUMPY_MMAP
     segmentation = nb.load(in_file, mmap=NUMPY_MMAP)
     segmentationdata = segmentation.get_data()
     rois = np.unique(segmentationdata)
