@@ -648,15 +648,6 @@ research/nichols/scripts/fsl/standardizeddvars.pdf>`_, 2013.
         raise RuntimeError(
             "Input fMRI dataset should be 4-dimensional")
 
-    # Robust standard deviation
-    func_sd = (np.percentile(func, 75, axis=3) -
-               np.percentile(func, 25, axis=3)) / 1.349
-    func_sd[mask <= 0] = 0
-
-    if remove_zerovariance:
-        # Remove zero-variance voxels across time axis
-        mask = zero_remove(func_sd, mask)
-
     idx = np.where(mask > 0)
     mfunc = func[idx[0], idx[1], idx[2], :]
 
@@ -666,11 +657,19 @@ research/nichols/scripts/fsl/standardizeddvars.pdf>`_, 2013.
     if intensity_normalization != 0:
         mfunc = (mfunc / np.median(mfunc)) * intensity_normalization
 
+    # Robust standard deviation
+    func_sd = (np.percentile(mfunc, 75, axis=1) -
+               np.percentile(mfunc, 25, axis=1)) / 1.349
+
+    if remove_zerovariance:
+        mfunc = mfunc[func_sd != 0, :]
+        func_sd = func_sd[func_sd != 0]
+
     # Compute (non-robust) estimate of lag-1 autocorrelation
     ar1 = np.apply_along_axis(AR_est_YW, 1, mfunc, 1)[:, 0]
 
     # Compute (predicted) standard deviation of temporal difference time series
-    diff_sdhat = np.squeeze(np.sqrt(((1 - ar1) * 2).tolist())) * func_sd[mask > 0].reshape(-1)
+    diff_sdhat = np.squeeze(np.sqrt(((1 - ar1) * 2).tolist())) * func_sd
     diff_sd_mean = diff_sdhat.mean()
 
     # Compute temporal difference time series
@@ -691,19 +690,6 @@ research/nichols/scripts/fsl/standardizeddvars.pdf>`_, 2013.
 
     return (dvars_stdz, dvars_nstd, dvars_vx_stdz)
 
-def zero_remove(data, mask):
-    """
-    Modify inputted mask to also mask out zero values
-
-    :param numpy.ndarray data: e.g. voxelwise stddev of fMRI dataset, after motion correction
-    :param numpy.ndarray mask: brain mask (same dimensions as data)
-    :return: the mask with any additional zero voxels removed (same dimensions as inputs)
-    :rtype: numpy.ndarray
-
-    """
-    new_mask = mask.copy()
-    new_mask[data == 0] = 0
-    return new_mask
 
 def plot_confound(tseries, figsize, name, units=None,
                   series_tr=None, normalize=False):
