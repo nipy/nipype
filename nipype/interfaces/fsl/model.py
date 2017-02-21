@@ -198,6 +198,10 @@ class Level1Design(BaseInterface):
                     ev_parameters['ev_num'] = num_evs[0]
                     ev_parameters['ev_name'] = name
                     ev_parameters['tempfilt_yn'] = do_tempfilter
+                    if not 'basisorth' in ev_parameters:
+                        ev_parameters['basisorth'] = 1
+                    if not 'basisfnum' in ev_parameters:
+                        ev_parameters['basisfnum'] = 1
                     try:
                         ev_parameters['fsldir'] = os.environ['FSLDIR']
                     except KeyError:

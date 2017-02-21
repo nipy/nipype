@@ -35,4 +35,6 @@ set fmri(custom$ev_num) "$cond_file"
 
 # Optimal/custom HRF convolution file
 set fmri(default_bfcustom) "${fsldir}/etc/default_flobs.flobs/hrfbasisfns.txt"
+set fmri(basisorth$ev_num) $basisorth
+set fmri(basisfnum$ev_num) $basisfnum
 set fmri(bfcustom) "$bfcustompath"
