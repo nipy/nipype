@@ -663,7 +663,7 @@ research/nichols/scripts/fsl/standardizeddvars.pdf>`_, 2013.
     # Demean
     mfunc = regress_poly(0, mfunc, remove_mean=True).astype(np.float32)
 
-    if intensity_normalization != False:
+    if intensity_normalization != 0:
         mfunc = (mfunc / np.median(mfunc)) * intensity_normalization
 
     # Compute (non-robust) estimate of lag-1 autocorrelation
