@@ -15,9 +15,6 @@ nipype.egg-info
 src/**/*
 src/
 
-# releasing
-Makefile
-
 # git
 .gitignore
 .git/**/*
