@@ -35,11 +35,16 @@ MAINTAINER The nipype developers https://github.com/nipy/nipype
 
 ARG DEBIAN_FRONTEND=noninteractive
 
+# Pre-cache neurodebian key
+COPY docker/files/neurodebian.gpg /root/.neurodebian.gpg
+
 # Prepare environment
-RUN apt-get update && \
+RUN apt-key add /root/.neurodebian.gpg && \
+    apt-get update && \
     apt-get install -y --no-install-recommends curl bzip2 ca-certificates xvfb && \
     curl -sSL http://neuro.debian.net/lists/xenial.us-ca.full >> /etc/apt/sources.list.d/neurodebian.sources.list && \
-    apt-key adv --recv-keys --keyserver hkp://pgp.mit.edu:80 0xA5D32F012649A5A9 && \
+# Enable if really necessary
+#    apt-key adv --recv-keys --keyserver hkp://ha.pool.sks-keyservers.net 0xA5D32F012649A5A9 || true; \
     apt-get update
 
 # Installing freesurfer
@@ -200,7 +205,7 @@ ENV MKL_NUM_THREADS=1 \
 
 # Installing dev requirements (packages that are not in pypi)
 WORKDIR /root/
-ADD requirements.txt requirements.txt
+COPY requirements.txt requirements.txt
 RUN pip install -r requirements.txt && \
     rm -rf ~/.cache/pip
 
