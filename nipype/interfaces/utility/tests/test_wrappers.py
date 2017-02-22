@@ -135,7 +135,9 @@ def test_workflow_wrapper_fail_3():
 
 def test_workflow_wrapper_fail_4():
     wf = pe.Workflow('some_failing_workflow')
-    wf.add_nodes([utility.IdentityInterface(fields=['a'])])
+
+    # Add one inputnode to check how it fails when it does not find an outputnode
+    wf.add_nodes([pe.Node(utility.IdentityInterface(fields=['a']), name='inputnode')])
     with pytest.raises(RuntimeError):
         utility.WorkflowInterface(workflow=wf)
 

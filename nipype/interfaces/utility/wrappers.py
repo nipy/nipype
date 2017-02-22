@@ -230,7 +230,7 @@ class WorkflowInterface(IOBase):
     >>> wi.inputs.a = 'b input '
     >>> wi.inputs.b = 'was concatenated to a'
     >>> res = wi.run()
-    >>> res.outputs.out
+    >>> res.outputs.out  # doctest: +ALLOW_UNICODE
     'b input was concatenated to a'
 
     """
