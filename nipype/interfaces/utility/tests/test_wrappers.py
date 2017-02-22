@@ -108,3 +108,98 @@ def test_aux_connect_function(tmpdir):
                 ])
 
     wf.run()
+
+def test_workflow_wrapper_fail_0():
+    with pytest.raises(RuntimeError):
+        utility.WorkflowInterface(workflow=None)
+
+def test_workflow_wrapper_fail_1():
+    with pytest.raises(RuntimeError):
+        utility.WorkflowInterface(workflow='generate_workflow')
+
+def test_workflow_wrapper_fail_2(tmpdir):
+    """ This tests excution nodes with multiple inputs and auxiliary
+    function inside the Workflow connect function.
+    """
+    os.chdir(str(tmpdir))
+    wfif = utility.WorkflowInterface(workflow=generate_workflow)
+    wfif.inputs.num = 42
+    wfif.inputs.size = 'a'
+
+    with pytest.raises(TypeError):
+        res = wfif.run()
+
+def test_workflow_wrapper_fail_3():
+    with pytest.raises(RuntimeError):
+        utility.WorkflowInterface(workflow=pe.Workflow('some_failing_workflow'))
+
+def test_workflow_wrapper_fail_4():
+    wf = pe.Workflow('some_failing_workflow')
+    wf.add_nodes([utility.IdentityInterface(fields=['a'])])
+    with pytest.raises(RuntimeError):
+        utility.WorkflowInterface(workflow=wf)
+
+def test_workflow_wrapper(tmpdir):
+    """ This tests excution nodes with multiple inputs and auxiliary
+    function inside the Workflow connect function.
+    """
+    os.chdir(str(tmpdir))
+    wf = generate_workflow('test_workflow_1')
+    wfif = utility.WorkflowInterface(workflow=wf)
+    wfif.inputs.num = 42
+    wfif.inputs.size = 1
+
+    res = wfif.run()
+    assert res.outputs.sub == 43
+    assert res.outputs.sum == 129
+
+def test_workflow_wrapper_callable(tmpdir):
+    """ This tests excution nodes with multiple inputs and auxiliary
+    function inside the Workflow connect function.
+    """
+    os.chdir(str(tmpdir))
+    wfif = utility.WorkflowInterface(workflow=generate_workflow)
+    wfif.inputs.num = 42
+    wfif.inputs.size = 1
+
+    res = wfif.run()
+    assert res.outputs.sub == 43
+    assert res.outputs.sum == 129
+
+
+def generate_workflow(name='test_workflow'):
+
+    def _gen_tuple(size):
+        return [1, ] * size
+
+    def _sum_and_sub_mul(a, b, c):
+        return (a+b)*c, (a-b)*c
+
+    def _inc(x):
+        return x + 1
+
+    wf = pe.Workflow(name=name)
+    params = pe.Node(utility.IdentityInterface(fields=['size', 'num']), name='inputnode')
+    gen_tuple = pe.Node(utility.Function(input_names=['size'],
+                                         output_names=['tuple'],
+                                         function=_gen_tuple),
+                                         name='gen_tuple')
+
+    ssm = pe.Node(utility.Function(input_names=['a', 'b', 'c'],
+                                   output_names=['sum', 'sub'],
+                                   function=_sum_and_sub_mul),
+                                   name='sum_and_sub_mul')
+
+    split = pe.Node(utility.Split(splits=[1, 1], squeeze=True),
+                    name='split')
+
+    outputnode = pe.Node(utility.IdentityInterface(fields=['sum', 'sub']), name='outputnode')
+    wf.connect([
+        (params,    gen_tuple,  [(("size", _inc),   "size")]),
+        (params,    ssm,        [(("num", _inc),    "c")]),
+        (gen_tuple, split,      [("tuple",          "inlist")]),
+        (split,     ssm,        [(("out1", _inc),   "a"),
+                                 ("out2",           "b")]),
+        (ssm, outputnode,       [("sum", "sum"), ("sub", "sub")])
+    ])
+    return wf

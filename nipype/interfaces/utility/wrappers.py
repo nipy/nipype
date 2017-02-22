@@ -266,8 +266,26 @@ class WorkflowInterface(IOBase):
         if not isinstance(self._wf, WorkflowType):
             raise RuntimeError
 
-        self._input_names = list(self._wf.inputs.inputnode.get().keys())
-        self._output_names = list(self._wf.outputs.outputnode.get().keys())
+        # Find input fields
+        self._input_names = []
+        try:
+            self._input_names = list(self._wf.inputs.inputnode.get().keys())
+        except AttributeError:
+            raise RuntimeError('Wrapped workflow does not have an inputnode')
+
+        if not self._input_names:
+            raise RuntimeError('No inputs found in wrapped workflow')
+
+        # Find output fields
+        self._output_names = []
+        try:
+            self._output_names = list(self._wf.outputs.outputnode.get().keys())
+        except AttributeError:
+            raise RuntimeError('Wrapped workflow does not have an outputnode')
+
+        if not self._output_names:
+            raise RuntimeError('No inputs found in wrapped workflow')
+
         add_traits(self.inputs, [name for name in self._input_names])
         self._out = {}
         for name in self._output_names:
