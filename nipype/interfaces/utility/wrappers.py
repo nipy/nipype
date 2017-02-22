@@ -3,13 +3,12 @@
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """Various utilities
 
-   Change directory to provide relative paths for doctests
-
-   .. testsetup::
-      import os
-      filepath = os.path.dirname( os.path.realpath( __file__ ) )
-      datadir = os.path.realpath(os.path.join(filepath, '../../testing/data'))
-      os.chdir(datadir)
+    Change directory to provide relative paths for doctests
+    >>> import os
+    >>> filepath = os.path.dirname(os.path.realpath(__file__))
+    >>> datadir = os.path.realpath(os.path.join(filepath,
+    ...                            '../../testing/data'))
+    >>> os.chdir(datadir)
 
 
 """
@@ -18,6 +17,7 @@ from __future__ import print_function, division, unicode_literals, absolute_impo
 from future import standard_library
 standard_library.install_aliases()
 
+from builtins import str, bytes
 
 from nipype import logging
 from ..base import (traits, DynamicTraitedSpec, Undefined, isdefined, runtime_profile,
