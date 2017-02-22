@@ -31,12 +31,19 @@
 # Based on https://github.com/poldracklab/fmriprep/blob/9c92a3de9112f8ef1655b876de060a2ad336ffb0/Dockerfile
 #
 FROM ubuntu:xenial-20161213
+MAINTAINER The nipype developers https://github.com/nipy/nipype
+
+ARG DEBIAN_FRONTEND=noninteractive
+
+# Pre-cache neurodebian key
+COPY docker/files/neurodebian.gpg /root/.neurodebian.gpg
 
 # Prepare environment
-RUN apt-get update && \
+RUN apt-key add /root/.neurodebian.gpg && \
+    apt-get update && \
     apt-get install -y --no-install-recommends curl bzip2 ca-certificates xvfb && \
     curl -sSL http://neuro.debian.net/lists/xenial.us-ca.full >> /etc/apt/sources.list.d/neurodebian.sources.list && \
-    apt-key adv --recv-keys --keyserver hkp://pgp.mit.edu:80 0xA5D32F012649A5A9 && \
+    apt-key adv --refresh-keys --keyserver hkp://ha.pool.sks-keyservers.net 0xA5D32F012649A5A9 || true; \
     apt-get update
 
 # Installing freesurfer
@@ -78,6 +85,7 @@ RUN echo "cHJpbnRmICJrcnp5c3p0b2YuZ29yZ29sZXdza2lAZ21haWwuY29tXG41MTcyXG4gKkN2dW
 # Installing Neurodebian packages (FSL, AFNI, git)
 RUN apt-get install -y --no-install-recommends \
                     fsl-core=5.0.9-1~nd+1+nd16.04+1 \
+                    fsl-mni152-templates=5.0.7-2 \
                     afni=16.2.07~dfsg.1-2~nd16.04+1
 
 ENV FSLDIR=/usr/share/fsl/5.0 \
@@ -171,7 +179,7 @@ RUN conda config --add channels conda-forge --add channels intel && \
     chmod +x /usr/local/miniconda/bin/* && \
     conda config --set always_yes yes --set changeps1 no && \
     conda update -q conda && \
-    chmod +x /usr/local/miniconda/bin/* && \
+    chmod +x /usr/local/miniconda/bin/*; sync && \
     conda install -y mkl=2017.0.1 \
                      numpy=1.11.2 \
                      scipy=0.18.1 \
@@ -196,7 +204,7 @@ ENV MKL_NUM_THREADS=1 \
 
 # Installing dev requirements (packages that are not in pypi)
 WORKDIR /root/
-ADD requirements.txt requirements.txt
+COPY requirements.txt requirements.txt
 RUN pip install -r requirements.txt && \
     rm -rf ~/.cache/pip
 
