@@ -13,6 +13,7 @@
 
 """
 from __future__ import print_function, division, unicode_literals, absolute_import
+import os
 
 from future import standard_library
 standard_library.install_aliases()
@@ -197,7 +198,7 @@ class Function(IOBase):
 
 
 class WorkflowInterfaceInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
-    pass
+    nprocs = traits.Int(1, usedefault=True, mandatory=True, desc='number of processes')
 
 
 class WorkflowInterface(IOBase):
@@ -243,12 +244,7 @@ class WorkflowInterface(IOBase):
         Parameters
         ----------
 
-        input_names: single str or list
-            names corresponding to function inputs
-        output_names: single str or list
-            names corresponding to function outputs.
-            has to match the number of outputs
-        function : callable
+        workflow : callable or nipype.pipeline.engine.Workflow object
             callable python object. must be able to execute in an
             isolated namespace (possibly in concert with the ``imports``
             parameter)
@@ -256,6 +252,7 @@ class WorkflowInterface(IOBase):
             list of import statements that allow the function to execute
             in an otherwise empty namespace
         """
+        from nipype.pipeline.engine import Workflow as WorkflowType
 
         if workflow is None:
             raise RuntimeError('WorkflowInterface must be created with a workflow'
@@ -264,111 +261,33 @@ class WorkflowInterface(IOBase):
         super(WorkflowInterface, self).__init__(**inputs)
 
 
-        # if hasattr(function, '__call__'):
-        #         try:
-        #             self.inputs.function_str = getsource(function)
-        #         except IOError:
-        #             raise Exception('Interface Function does not accept '
-        #                             'function objects defined interactively '
-        #                             'in a python session')
-        #     elif isinstance(function, (str, bytes)):
-        #         self.inputs.function_str = function
-        #     else:
-        #         raise Exception('Unknown type of function')
-        # self.inputs.on_trait_change(self._set_function_string,
-        #                             'function_str')
-        # self._input_names = filename_to_list(input_names)
-        # self._output_names = filename_to_list(output_names)
-        # add_traits(self.inputs, [name for name in self._input_names])
-        # self.imports = imports
-        # self._out = {}
-        # for name in self._output_names:
-        #     self._out[name] = None
+        self._wf = workflow() if hasattr(workflow, '__call__') else workflow
 
-    def _set_function_string(self, obj, name, old, new):
-        if name == 'function_str':
-            if hasattr(new, '__call__'):
-                function_source = getsource(new)
-            elif isinstance(new, (str, bytes)):
-                function_source = new
-            self.inputs.trait_set(trait_change_notify=False,
-                                  **{'%s' % name: function_source})
+        if not isinstance(self._wf, WorkflowType):
+            raise RuntimeError
 
-    def _add_output_traits(self, base):
-        undefined_traits = {}
-        for key in self._output_names:
-            base.add_trait(key, traits.Any)
-            undefined_traits[key] = Undefined
-        base.trait_set(trait_change_notify=False, **undefined_traits)
-        return base
+        self._input_names = list(self._wf.inputs.inputnode.get().keys())
+        self._output_names = list(self._wf.outputs.outputnode.get().keys())
+        add_traits(self.inputs, [name for name in self._input_names])
+        self._out = {}
+        for name in self._output_names:
+            self._out[name] = None
 
     def _run_interface(self, runtime):
-        # Get workflow logger for runtime profile error reporting
-        from nipype import logging
-        logger = logging.getLogger('workflow')
 
-        # Create function handle
-        function_handle = create_function_from_source(self.inputs.function_str,
-                                                      self.imports)
-
-        # Wrapper for running function handle in multiprocessing.Process
-        # Can catch exceptions and report output via multiprocessing.Queue
-        def _function_handle_wrapper(queue, **kwargs):
-            try:
-                out = function_handle(**kwargs)
-                queue.put(out)
-            except Exception as exc:
-                queue.put(exc)
-
-        # Get function args
-        args = {}
         for name in self._input_names:
             value = getattr(self.inputs, name)
             if isdefined(value):
-                args[name] = value
+                setattr(self._wf.inputs.inputnode, name, value)
 
-        # Profile resources if set
-        if runtime_profile:
-            from nipype.interfaces.base import get_max_resources_used
-            import multiprocessing
-            # Init communication queue and proc objs
-            queue = multiprocessing.Queue()
-            proc = multiprocessing.Process(target=_function_handle_wrapper,
-                                           args=(queue,), kwargs=args)
-
-            # Init memory and threads before profiling
-            mem_mb = 0
-            num_threads = 0
-
-            # Start process and profile while it's alive
-            proc.start()
-            while proc.is_alive():
-                mem_mb, num_threads = \
-                    get_max_resources_used(proc.pid, mem_mb, num_threads,
-                                           pyfunc=True)
-
-            # Get result from process queue
-            out = queue.get()
-            # If it is an exception, raise it
-            if isinstance(out, Exception):
-                raise out
-
-            # Function ran successfully, populate runtime stats
-            setattr(runtime, 'runtime_memory_gb', mem_mb / 1024.0)
-            setattr(runtime, 'runtime_threads', num_threads)
-        else:
-            out = function_handle(**args)
-
-        if len(self._output_names) == 1:
-            self._out[self._output_names[0]] = out
-        else:
-            if isinstance(out, tuple) and (len(out) != len(self._output_names)):
-                raise RuntimeError('Mismatch in number of expected outputs')
-
-            else:
-                for idx, name in enumerate(self._output_names):
-                    self._out[name] = out[idx]
-
+        # set stop_at_first_crash
+        self._wf.base_dir = os.getcwd()
+        plugin_settings = {'plugin': 'Linear'}
+        if self.inputs.nprocs > 1:
+            plugin_settings = {'plugin': 'MultiProc',
+                               'plugin_args': {'n_procs': self.inputs.nprocs}}
+        result = self._wf.run(**plugin_settings)
+        self._out = self._wf.post_outputs
         return runtime
 
     def _list_outputs(self):

@@ -78,6 +78,11 @@ class Workflow(EngineBase):
         super(Workflow, self).__init__(name, base_dir)
         self._graph = nx.DiGraph()
         self.config = deepcopy(config._sections)
+        self._post_outputs = None
+
+    @property
+    def post_outputs(self):
+        return self._post_outputs
 
     # PUBLIC API
     def clone(self, name):
@@ -587,6 +592,10 @@ connected.
                                 'workflow_provenance_%s' % datestr)
             logger.info('Provenance file prefix: %s' % prov_base)
             write_workflow_prov(execgraph, prov_base, format='all')
+
+        if not runner.async:
+            self._post_outputs = self._aggregate_outputs(execgraph)
+
         return execgraph
 
     # PRIVATE API AND FUNCTIONS
@@ -726,6 +735,27 @@ connected.
         for attr in attrlist[:-1]:
             cur_out = getattr(cur_out, attr)
         return cur_out.traits()[attrlist[-1]].node
+
+    def _aggregate_outputs(self, execgraph):
+        out_edges = []
+        outputs = {}
+
+        for edge in self._graph.edges(data=True):
+            if str(edge[1]) == ('%s.outputnode' % self.name):
+                out_edges.append(edge)
+
+        nodes = execgraph.nodes()
+        for edge in out_edges:
+            for i, node in enumerate(nodes):
+                if str(node) != str(edge[0]):
+                    continue
+
+                for src, dst in edge[2]['connect']:
+                    outputs[dst] = getattr(node.result.outputs, src)
+
+        return outputs
+
+
 
     def _check_outputs(self, parameter):
         return self._has_attr(parameter, subtype='out')

@@ -131,6 +131,7 @@ class MultiProcPlugin(DistributedPluginBase):
     def __init__(self, plugin_args=None):
         # Init variables and instance attributes
         super(MultiProcPlugin, self).__init__(plugin_args=plugin_args)
+        self._async = False
         self._taskresult = {}
         self._task_obj = {}
         self._taskid = 0
@@ -141,7 +142,6 @@ class MultiProcPlugin(DistributedPluginBase):
 
         self._timeout=2.0
         self._event = threading.Event()
-
 
 
         # Check plugin args

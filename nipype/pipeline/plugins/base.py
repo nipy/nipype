@@ -182,11 +182,18 @@ class PluginBase(object):
     """Base class for plugins"""
 
     def __init__(self, plugin_args=None):
+        self._async = True
+
         if plugin_args and 'status_callback' in plugin_args:
             self._status_callback = plugin_args['status_callback']
         else:
             self._status_callback = None
         return
+
+    @property
+    def async(self):
+        return self._async
+
 
     def run(self, graph, config, updatehash=False):
         raise NotImplementedError
