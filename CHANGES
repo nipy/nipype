@@ -1,7 +1,9 @@
 Upcoming release 0.13
 =====================
 
+* ENH: New WorkflowInterface (https://github.com/nipy/nipype/pull/1835)
 * ENH: Refactoring of nipype.interfaces.utility (https://github.com/nipy/nipype/pull/1828)
+* FIX: CircleCI were failing silently. Some fixes to tests (https://github.com/nipy/nipype/pull/1833)
 * FIX: Issues in Docker image permissions, and docker documentation (https://github.com/nipy/nipype/pull/1825)
 * ENH: Revised all Dockerfiles and automated deployment to Docker Hub
        from CircleCI (https://github.com/nipy/nipype/pull/1815)
