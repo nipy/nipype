@@ -36,4 +36,3 @@ fi
 
 # Copy crashfiles to scratch
 for i in $(find /root/src/nipype/ -name "crash-*" ); do cp $i /scratch/crashfiles/; done
-chmod 777 -R /scratch/*
