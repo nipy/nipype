@@ -18,11 +18,6 @@ from .... import config
 from ..utils import merge_dict, clean_working_directory, write_workflow_prov
 
 
-def test_traits_version():
-    #just a temprorary test, testing CI
-    import traits
-    assert traits.__version__ >= "4.6.0"
-
 def test_identitynode_removal():
 
     def test_function(arg1, arg2, arg3):
