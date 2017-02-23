@@ -196,7 +196,9 @@ Bradley L. and Petersen, Steven E.},
 
 class FramewiseDisplacementInputSpec(BaseInterfaceInputSpec):
     in_file = File(exists=True, mandatory=True, desc='motion parameters as written by FSL MCFLIRT or AFNI 3dvolreg')
-    format = traits.Enum("FSL", "AFNI", desc="Format of the motion parameters file: FSL (radians), AFNI (degrees)")
+    parameter_source = traits.Enum("FSL", "AFNI",
+                                   desc="Source of movement parameters",
+                                   mandatory=True)
     radius = traits.Float(50, usedefault=True,
                           desc='radius in mm to calculate angular FDs, 50mm is the '
                                'default since it is used in Power et al. 2012')
@@ -253,7 +255,7 @@ Bradley L. and Petersen, Steven E.},
         mpars = np.loadtxt(self.inputs.in_file)  # mpars is N_t x 6
         diff = mpars[:-1, :] - mpars[1:, :]
         diff[:, :3] *= self.inputs.radius
-        if self.inputs.format == "AFNI":
+        if self.inputs.parameter_source == "AFNI":
             diff[:, :3] *= (np.pi / 180)
         fd_res = np.abs(diff).sum(axis=1)
 
