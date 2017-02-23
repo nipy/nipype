@@ -1,6 +1,8 @@
 Upcoming release 0.13
 =====================
 
+* ENH: DVARS includes intensity normalization feature - turned on by default (https://github.com/nipy/nipype/pull/1827)
+* FIX: DVARS is correctly using sum of squares instead of standard deviation (https://github.com/nipy/nipype/pull/1827)
 * ENH: Refactoring of nipype.interfaces.utility (https://github.com/nipy/nipype/pull/1828)
 * FIX: CircleCI were failing silently. Some fixes to tests (https://github.com/nipy/nipype/pull/1833)
 * FIX: Issues in Docker image permissions, and docker documentation (https://github.com/nipy/nipype/pull/1825)
