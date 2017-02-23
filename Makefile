@@ -71,7 +71,7 @@ html:
 
 specs:
 	@echo "Checking specs and autogenerating spec tests"
-	python tools/checkspecs.py
+	env PYTHONPATH=".:$(PYTHONPATH)" python tools/checkspecs.py
 
 check: check-before-commit # just a shortcut
 check-before-commit: specs trailing-spaces html test
