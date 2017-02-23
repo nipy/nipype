@@ -75,7 +75,7 @@ class Dcm2nii(CommandLine):
     >>> converter.inputs.source_names = ['functional_1.dcm', 'functional_2.dcm']
     >>> converter.inputs.gzip_output = True
     >>> converter.inputs.output_dir = '.'
-    >>> converter.cmdline # doctest: +IGNORE_UNICODE
+    >>> converter.cmdline # doctest: +ALLOW_UNICODE
     'dcm2nii -a y -c y -b config.ini -v y -d y -e y -g y -i n -n y -o . -p y -x n -f n functional_1.dcm'
     """
 
@@ -250,7 +250,7 @@ class Dcm2niix(CommandLine):
     'dcm2niix -b y -z i -x n -t n -m n -f %t%p -o . -s y -v n functional_1.dcm'
 
     >>> flags = '-'.join([val.strip() + ' ' for val in sorted(' '.join(converter.cmdline.split()[1:-1]).split('-'))])
-    >>> flags # doctest: +IGNORE_UNICODE
+    >>> flags # doctest: +ALLOW_UNICODE
     ' -b y -f %t%p -m n -o . -s y -t n -v n -x n -z i '
     """
 

@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+
+from nipype.utils import NUMPY_MMAP
 from nipype.interfaces.utility import Function,IdentityInterface
 import nipype.pipeline.engine as pe  # pypeline engine
 from nipype.interfaces.freesurfer import *
@@ -8,7 +10,7 @@ from .utils import copy_file
 def checkT1s(T1_files, cw256=False):
     """Verifying size of inputs and setting workflow parameters"""
     import sys
-    import nibabel as nib
+    import nibabel as nb
     from nipype.utils.filemanip import filename_to_list
 
     T1_files = filename_to_list(T1_files)
@@ -16,9 +18,9 @@ def checkT1s(T1_files, cw256=False):
         print("ERROR: No T1's Given")
         sys.exit(-1)
 
-    shape = nib.load(T1_files[0]).shape
+    shape = nb.load(T1_files[0]).shape
     for t1 in T1_files[1:]:
-        if nib.load(t1).shape != shape:
+        if nb.load(t1, mmap=NUMPY_MMAP).shape != shape:
             print("ERROR: T1s not the same size. Cannot process {0} and {1} "
                   "together".format(T1_files[0], t1))
             sys.exit(-1)

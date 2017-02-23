@@ -20,7 +20,10 @@ performance issues.
       from nipype import config
       config.enable_debug_mode()
 
-   as the first import of your nipype script.
+   as the first import of your nipype script. To enable debug logging use::
+
+       from nipype import logging
+       logging.update_logging(config)
 
    .. note::
 
@@ -39,10 +42,10 @@ performance issues.
    node to fail without generating a crash file in the crashdump directory. In
    such cases, it will store a crash file in the `batch` directory.
 
-#. All Nipype crashfiles can be inspected with the `nipype_display_crash`
+#. All Nipype crashfiles can be inspected with the `nipypecli crash`
    utility.
 
-#. The `nipype_crash_search` command allows you to search for regular expressions
+#. The `nipypecli search` command allows you to search for regular expressions
    in the tracebacks of the Nipype crashfiles within a log folder.
 
 #. Nipype determines the hash of the input state of a node. If any input
@@ -66,6 +69,6 @@ performance issues.
    PBS/LSF/SGE/Condor plugins in such cases the workflow may crash because it
    cannot retrieve the node result. Setting the `job_finished_timeout` can help::
 
-   workflow.config['execution']['job_finished_timeout'] = 65
+       workflow.config['execution']['job_finished_timeout'] = 65
 
 .. include:: ../links_names.txt

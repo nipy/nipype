@@ -1,6 +1,0 @@
-The numpytesting directory contains a copy of all the files from
-numpy/testing for numpy version 1.3.  This provides all the test
-integration with the nose test framework we need to run the nipype
-tests.  By including these files, nipype can now run on systems that
-only have numpy 1.1, like Debian Lenny.  This feature was added by
-Yaroslav Halchenko.

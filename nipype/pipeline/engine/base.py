@@ -69,6 +69,13 @@ class EngineBase(object):
             fullname = self._hierarchy + '.' + self.name
         return fullname
 
+    @property
+    def itername(self):
+        itername = self._id
+        if self._hierarchy:
+            itername = self._hierarchy + '.' + self._id
+        return itername
+
     def clone(self, name):
         """Clone an EngineBase object
 

@@ -207,6 +207,7 @@ def extract_bval(in_dwi, in_bval, b=0, out_file=None):
     import numpy as np
     import nibabel as nb
     import os.path as op
+    from nipype.utils import NUMPY_MMAP
 
     if out_file is None:
         fname, ext = op.splitext(op.basename(in_dwi))
@@ -215,7 +216,7 @@ def extract_bval(in_dwi, in_bval, b=0, out_file=None):
             ext = ext2 + ext
         out_file = op.abspath("%s_tsoi%s" % (fname, ext))
 
-    im = nb.load(in_dwi)
+    im = nb.load(in_dwi, mmap=NUMPY_MMAP)
     dwidata = im.get_data()
     bvals = np.loadtxt(in_bval)
 
@@ -242,8 +243,9 @@ def hmc_split(in_file, in_bval, ref_num=0, lowbval=5.0):
     import nibabel as nb
     import os.path as op
     from nipype.interfaces.base import isdefined
+    from nipype.utils import NUMPY_MMAP
 
-    im = nb.load(in_file)
+    im = nb.load(in_file, mmap=NUMPY_MMAP)
     data = im.get_data()
     hdr = im.header.copy()
     bval = np.loadtxt(in_bval)
@@ -286,6 +288,7 @@ def remove_comp(in_file, in_bval, volid=0, out_file=None):
     import numpy as np
     import nibabel as nb
     import os.path as op
+    from nipype.utils import NUMPY_MMAP
 
     if out_file is None:
         fname, ext = op.splitext(op.basename(in_file))
@@ -294,7 +297,7 @@ def remove_comp(in_file, in_bval, volid=0, out_file=None):
             ext = ext2 + ext
         out_file = op.abspath("%s_extract%s" % (fname, ext))
 
-    im = nb.load(in_file)
+    im = nb.load(in_file, mmap=NUMPY_MMAP)
     data = im.get_data()
     hdr = im.header.copy()
     bval = np.loadtxt(in_bval)
@@ -335,6 +338,7 @@ def recompose_dwi(in_dwi, in_bval, in_corrected, out_file=None):
     import numpy as np
     import nibabel as nb
     import os.path as op
+    from nipype.utils import NUMPY_MMAP
 
     if out_file is None:
         fname, ext = op.splitext(op.basename(in_dwi))
@@ -343,7 +347,7 @@ def recompose_dwi(in_dwi, in_bval, in_corrected, out_file=None):
             ext = ext2 + ext
         out_file = op.abspath("%s_eccorrect%s" % (fname, ext))
 
-    im = nb.load(in_dwi)
+    im = nb.load(in_dwi, mmap=NUMPY_MMAP)
     dwidata = im.get_data()
     bvals = np.loadtxt(in_bval)
     dwis = np.where(bvals != 0)[0].tolist()
@@ -353,7 +357,7 @@ def recompose_dwi(in_dwi, in_bval, in_corrected, out_file=None):
                             'correction should match'))
 
     for bindex, dwi in zip(dwis, in_corrected):
-        dwidata[..., bindex] = nb.load(dwi).get_data()
+        dwidata[..., bindex] = nb.load(dwi, mmap=NUMPY_MMAP).get_data()
 
     nb.Nifti1Image(dwidata, im.affine, im.header).to_filename(out_file)
     return out_file
@@ -395,6 +399,7 @@ def time_avg(in_file, index=[0], out_file=None):
     import numpy as np
     import nibabel as nb
     import os.path as op
+    from nipype.utils import NUMPY_MMAP
 
     if out_file is None:
         fname, ext = op.splitext(op.basename(in_file))
@@ -405,7 +410,7 @@ def time_avg(in_file, index=[0], out_file=None):
 
     index = np.atleast_1d(index).tolist()
 
-    imgs = np.array(nb.four_to_three(nb.load(in_file)))[index]
+    imgs = np.array(nb.four_to_three(nb.load(in_file, mmap=NUMPY_MMAP)))[index]
     if len(index) == 1:
         data = imgs[0].get_data().astype(np.float32)
     else:
@@ -442,6 +447,7 @@ def b0_average(in_dwi, in_bval, max_b=10.0, out_file=None):
     import numpy as np
     import nibabel as nb
     import os.path as op
+    from nipype.utils import NUMPY_MMAP
 
     if out_file is None:
         fname, ext = op.splitext(op.basename(in_dwi))
@@ -450,7 +456,7 @@ def b0_average(in_dwi, in_bval, max_b=10.0, out_file=None):
             ext = ext2 + ext
         out_file = op.abspath("%s_avg_b0%s" % (fname, ext))
 
-    imgs = np.array(nb.four_to_three(nb.load(in_dwi)))
+    imgs = np.array(nb.four_to_three(nb.load(in_dwi, mmap=NUMPY_MMAP)))
     bval = np.loadtxt(in_bval)
     index = np.argwhere(bval <= max_b).flatten().tolist()
 
@@ -621,6 +627,7 @@ def rads2radsec(in_file, delta_te, out_file=None):
     import nibabel as nb
     import os.path as op
     import math
+    from nipype.utils import NUMPY_MMAP
 
     if out_file is None:
         fname, fext = op.splitext(op.basename(in_file))
@@ -628,7 +635,7 @@ def rads2radsec(in_file, delta_te, out_file=None):
             fname, _ = op.splitext(fname)
         out_file = op.abspath('./%s_radsec.nii.gz' % fname)
 
-    im = nb.load(in_file)
+    im = nb.load(in_file, mmap=NUMPY_MMAP)
     data = im.get_data().astype(np.float32) * (1.0 / delta_te)
     nb.Nifti1Image(data, im.affine, im.header).to_filename(out_file)
     return out_file
@@ -642,6 +649,7 @@ def demean_image(in_file, in_mask=None, out_file=None):
     import nibabel as nb
     import os.path as op
     import math
+    from nipype.utils import NUMPY_MMAP
 
     if out_file is None:
         fname, fext = op.splitext(op.basename(in_file))
@@ -649,12 +657,12 @@ def demean_image(in_file, in_mask=None, out_file=None):
             fname, _ = op.splitext(fname)
         out_file = op.abspath('./%s_demean.nii.gz' % fname)
 
-    im = nb.load(in_file)
+    im = nb.load(in_file, mmap=NUMPY_MMAP)
     data = im.get_data().astype(np.float32)
     msk = np.ones_like(data)
 
     if in_mask is not None:
-        msk = nb.load(in_mask).get_data().astype(np.float32)
+        msk = nb.load(in_mask, mmap=NUMPY_MMAP).get_data().astype(np.float32)
         msk[msk > 0] = 1.0
         msk[msk < 1] = 0.0
 
@@ -672,6 +680,7 @@ def add_empty_vol(in_file, out_file=None):
     import os.path as op
     import numpy as np
     import math
+    from nipype.utils import NUMPY_MMAP
 
     if out_file is None:
         fname, fext = op.splitext(op.basename(in_file))
@@ -679,7 +688,7 @@ def add_empty_vol(in_file, out_file=None):
             fname, _ = op.splitext(fname)
         out_file = op.abspath('./%s_4D.nii.gz' % fname)
 
-    im = nb.load(in_file)
+    im = nb.load(in_file, mmap=NUMPY_MMAP)
     zim = nb.Nifti1Image(np.zeros_like(im.get_data()), im.affine,
                          im.header)
     nb.funcs.concat_images([im, zim]).to_filename(out_file)
@@ -694,6 +703,7 @@ def reorient_bvecs(in_dwi, old_dwi, in_bvec):
     import os
     import numpy as np
     import nibabel as nb
+    from nipype.utils import NUMPY_MMAP
 
     name, fext = os.path.splitext(os.path.basename(in_bvec))
     if fext == '.gz':
@@ -702,8 +712,8 @@ def reorient_bvecs(in_dwi, old_dwi, in_bvec):
     bvecs = np.loadtxt(in_bvec).T
     new_bvecs = []
 
-    N = nb.load(in_dwi).affine
-    O = nb.load(old_dwi).affine
+    N = nb.load(in_dwi, mmap=NUMPY_MMAP).affine
+    O = nb.load(old_dwi, mmap=NUMPY_MMAP).affine
     RS = N.dot(np.linalg.inv(O))[:3, :3]
     sc_idx = np.where((np.abs(RS) != 1) & (RS != 0))
     S = np.ones_like(RS)
@@ -719,6 +729,7 @@ def copy_hdr(in_file, in_file_hdr, out_file=None):
     import numpy as np
     import nibabel as nb
     import os.path as op
+    from nipype.utils import NUMPY_MMAP
 
     if out_file is None:
         fname, fext = op.splitext(op.basename(in_file))
@@ -726,10 +737,10 @@ def copy_hdr(in_file, in_file_hdr, out_file=None):
             fname, _ = op.splitext(fname)
         out_file = op.abspath('./%s_fixhdr.nii.gz' % fname)
 
-    imref = nb.load(in_file_hdr)
+    imref = nb.load(in_file_hdr, mmap=NUMPY_MMAP)
     hdr = imref.header.copy()
     hdr.set_data_dtype(np.float32)
-    vsm = nb.load(in_file).get_data().astype(np.float32)
+    vsm = nb.load(in_file, mmap=NUMPY_MMAP).get_data().astype(np.float32)
     hdr.set_data_shape(vsm.shape)
     hdr.set_xyzt_units('mm')
     nii = nb.Nifti1Image(vsm, imref.affine, hdr)
@@ -742,6 +753,7 @@ def enhance(in_file, clip_limit=0.010, in_mask=None, out_file=None):
     import nibabel as nb
     import os.path as op
     from skimage import exposure, img_as_int
+    from nipype.utils import NUMPY_MMAP
 
     if out_file is None:
         fname, fext = op.splitext(op.basename(in_file))
@@ -749,12 +761,12 @@ def enhance(in_file, clip_limit=0.010, in_mask=None, out_file=None):
             fname, _ = op.splitext(fname)
         out_file = op.abspath('./%s_enh.nii.gz' % fname)
 
-    im = nb.load(in_file)
+    im = nb.load(in_file, mmap=NUMPY_MMAP)
     imdata = im.get_data()
     imshape = im.shape
 
     if in_mask is not None:
-        msk = nb.load(in_mask).get_data()
+        msk = nb.load(in_mask, mmap=NUMPY_MMAP).get_data()
         msk[msk > 0] = 1
         msk[msk < 1] = 0
         imdata = imdata * msk

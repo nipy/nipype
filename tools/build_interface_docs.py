@@ -24,6 +24,7 @@ if __name__ == '__main__':
                                         '\.pipeline',
                                         '\.testing',
                                         '\.caching',
+                                        '\.scripts',
                                         ]
     # Modules that should not be included in generated API docs.
     docwriter.module_skip_patterns += ['\.version$',
@@ -36,9 +37,10 @@ if __name__ == '__main__':
                                        '\.interfaces\.traits',
                                        '\.pipeline\.alloy$',
                                        '\.pipeline\.s3_node_wrapper$',
-                                       '.\testing',
+                                       '\.testing',
+                                       '\.scripts',
                                        ]
-    docwriter.class_skip_patterns += ['AFNI',
+    docwriter.class_skip_patterns += ['AFNICommand',
                                       'ANTS',
                                       'FSL',
                                       'FS',

@@ -29,6 +29,7 @@ import numpy as np
 from scipy import signal
 import scipy.io as sio
 
+from ..utils import NUMPY_MMAP
 from ..interfaces.base import (BaseInterface, traits, InputMultiPath,
                                OutputMultiPath, TraitedSpec, File,
                                BaseInterfaceInputSpec, isdefined)
@@ -352,12 +353,12 @@ class ArtifactDetect(BaseInterface):
 
         # read in functional image
         if isinstance(imgfile, (str, bytes)):
-            nim = load(imgfile)
+            nim = load(imgfile, mmap=NUMPY_MMAP)
         elif isinstance(imgfile, list):
             if len(imgfile) == 1:
-                nim = load(imgfile[0])
+                nim = load(imgfile[0], mmap=NUMPY_MMAP)
             else:
-                images = [load(f) for f in imgfile]
+                images = [load(f, mmap=NUMPY_MMAP) for f in imgfile]
                 nim = funcs.concat_images(images)
 
         # compute global intensity signal
@@ -394,7 +395,7 @@ class ArtifactDetect(BaseInterface):
                     mask[:, :, :, t0] = mask_tmp
                     g[t0] = np.nansum(vol * mask_tmp) / np.nansum(mask_tmp)
         elif masktype == 'file':  # uses a mask image to determine intensity
-            maskimg = load(self.inputs.mask_file)
+            maskimg = load(self.inputs.mask_file, mmap=NUMPY_MMAP)
             mask = maskimg.get_data()
             affine = maskimg.affine
             mask = mask > 0.5

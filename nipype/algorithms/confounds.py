@@ -20,19 +20,22 @@ import os.path as op
 import nibabel as nb
 import numpy as np
 from numpy.polynomial import Legendre
-from scipy import linalg, signal
+from scipy import linalg
 
 from .. import logging
 from ..external.due import BibTeX
 from ..interfaces.base import (traits, TraitedSpec, BaseInterface,
                                BaseInterfaceInputSpec, File, isdefined,
                                InputMultiPath)
+from nipype.utils import NUMPY_MMAP
+
 IFLOG = logging.getLogger('interface')
+
 
 class ComputeDVARSInputSpec(BaseInterfaceInputSpec):
     in_file = File(exists=True, mandatory=True, desc='functional data, after HMC')
     in_mask = File(exists=True, mandatory=True, desc='a brain mask')
-    remove_zerovariance = traits.Bool(False, usedefault=True,
+    remove_zerovariance = traits.Bool(True, usedefault=True,
                                       desc='remove voxels with zero variance')
     save_std = traits.Bool(True, usedefault=True,
                            desc='save standardized DVARS')
@@ -49,6 +52,16 @@ class ComputeDVARSInputSpec(BaseInterfaceInputSpec):
                            desc='output figure size')
     figformat = traits.Enum('png', 'pdf', 'svg', usedefault=True,
                             desc='output format for figures')
+    intensity_normalization = traits.Float(1000.0, usedefault=True,
+                              desc='Divide value in each voxel at each timepoint '
+                                   'by the median calculated across all voxels'
+                                   'and timepoints within the mask (if specified)'
+                                   'and then multiply by the value specified by'
+                                   'this parameter. By using the default (1000)' \
+                                   'output DVARS will be expressed in ' \
+                                   'x10 % BOLD units compatible with Power et al.' \
+                                   '2012. Set this to 0 to disable intensity' \
+                                   'normalization altogether.')
 
 
 
@@ -125,11 +138,12 @@ Bradley L. and Petersen, Steven E.},
 
     def _run_interface(self, runtime):
         dvars = compute_dvars(self.inputs.in_file, self.inputs.in_mask,
-                              remove_zerovariance=self.inputs.remove_zerovariance)
+                              remove_zerovariance=self.inputs.remove_zerovariance,
+                              intensity_normalization=self.inputs.intensity_normalization)
 
-        self._results['avg_std'] = dvars[0].mean()
-        self._results['avg_nstd'] = dvars[1].mean()
-        self._results['avg_vxstd'] = dvars[2].mean()
+        (self._results['avg_std'],
+         self._results['avg_nstd'],
+         self._results['avg_vxstd']) = np.mean(dvars, axis=1).astype(float)
 
         tr = None
         if isdefined(self.inputs.series_tr):
@@ -182,7 +196,7 @@ Bradley L. and Petersen, Steven E.},
         if self.inputs.save_all:
             out_file = self._gen_fname('dvars', ext='tsv')
             np.savetxt(out_file, np.vstack(dvars).T, fmt=b'%0.8f', delimiter=b'\t',
-                       header='std DVARS\tnon-std DVARS\tvx-wise std DVARS')
+                       header='std DVARS\tnon-std DVARS\tvx-wise std DVARS', comments='')
             self._results['out_all'] = out_file
 
         return runtime
@@ -255,7 +269,7 @@ Bradley L. and Petersen, Steven E.},
             'out_file': op.abspath(self.inputs.out_file),
             'fd_average': float(fd_res.mean())
         }
-        np.savetxt(self.inputs.out_file, fd_res)
+        np.savetxt(self.inputs.out_file, fd_res, header='FramewiseDisplacement', comments='')
 
         if self.inputs.save_plot:
             tr = None
@@ -281,10 +295,9 @@ Bradley L. and Petersen, Steven E.},
 class CompCorInputSpec(BaseInterfaceInputSpec):
     realigned_file = File(exists=True, mandatory=True,
                           desc='already realigned brain image (4D)')
-    mask_file = File(exists=True, mandatory=False,
-                     desc='mask file that determines ROI (3D)')
+    mask_file = File(exists=True, desc='mask file that determines ROI (3D)')
     components_file = File('components_file.txt', exists=False,
-                           mandatory=False, usedefault=True,
+                           usedefault=True,
                            desc='filename to store physiological components')
     num_components = traits.Int(6, usedefault=True) # 6 for BOLD, 4 for ASL
     use_regress_poly = traits.Bool(True, usedefault=True,
@@ -292,6 +305,8 @@ class CompCorInputSpec(BaseInterfaceInputSpec):
                                    'pre-component extraction')
     regress_poly_degree = traits.Range(low=1, default=1, usedefault=True,
                                        desc='the degree polynomial to use')
+    header = traits.Str(desc='the desired header for the output tsv file (one column).'
+                        'If undefined, will default to "CompCor"')
 
 class CompCorOutputSpec(TraitedSpec):
     components_file = File(exists=True,
@@ -328,8 +343,15 @@ class CompCor(BaseInterface):
                    }]
 
     def _run_interface(self, runtime):
-        imgseries = nb.load(self.inputs.realigned_file).get_data()
-        mask = nb.load(self.inputs.mask_file).get_data()
+        imgseries = nb.load(self.inputs.realigned_file, mmap=NUMPY_MMAP).get_data()
+        mask = nb.load(self.inputs.mask_file, mmap=NUMPY_MMAP).get_data()
+
+        if imgseries.shape[:3] != mask.shape:
+            raise ValueError('Inputs for CompCor, func {} and mask {}, do not have matching '
+                             'spatial dimensions ({} and {}, respectively)'
+                             .format(self.inputs.realigned_file, self.inputs.mask_file,
+                                     imgseries.shape[:3], mask.shape))
+
         voxel_timecourses = imgseries[mask > 0]
         # Zero-out any bad values
         voxel_timecourses[np.isnan(np.sum(voxel_timecourses, axis=1)), :] = 0
@@ -353,7 +375,10 @@ class CompCor(BaseInterface):
         u, _, _ = linalg.svd(M, full_matrices=False)
         components = u[:, :self.inputs.num_components]
         components_file = os.path.join(os.getcwd(), self.inputs.components_file)
-        np.savetxt(components_file, components, fmt=b"%.10f")
+
+        self._set_header()
+        np.savetxt(components_file, components, fmt=b"%.10f", delimiter='\t',
+                   header=self._make_headers(components.shape[1]), comments='')
         return runtime
 
     def _list_outputs(self):
@@ -361,12 +386,32 @@ class CompCor(BaseInterface):
         outputs['components_file'] = os.path.abspath(self.inputs.components_file)
         return outputs
 
-    def _compute_tSTD(self, M, x):
-        stdM = np.std(M, axis=0)
+    def _compute_tSTD(self, M, x, axis=0):
+        stdM = np.std(M, axis=axis)
         # set bad values to x
         stdM[stdM == 0] = x
         stdM[np.isnan(stdM)] = x
         return stdM
+
+    def _set_header(self, header='CompCor'):
+        self.inputs.header = self.inputs.header if isdefined(self.inputs.header) else header
+
+    def _make_headers(self, num_col):
+        headers = []
+        for i in range(num_col):
+            headers.append(self.inputs.header + str(i))
+        return '\t'.join(headers)
+
+
+class ACompCor(CompCor):
+    ''' Anatomical compcor; for input/output, see CompCor.
+    If the mask provided is an anatomical mask, CompCor == ACompCor '''
+
+    def __init__(self, *args, **kwargs):
+        ''' exactly the same as compcor except the header '''
+        super(ACompCor, self).__init__(*args, **kwargs)
+        self._set_header('aCompCor')
+
 
 class TCompCorInputSpec(CompCorInputSpec):
     # and all the fields in CompCorInputSpec
@@ -379,6 +424,10 @@ class TCompCorInputSpec(CompCorInputSpec):
                                         'default, this value is set to .02. '
                                         'That is, the 2% of voxels '
                                         'with the highest variance are used.')
+
+class TCompCorOutputSpec(CompCorInputSpec):
+    # and all the fields in CompCorInputSpec
+    high_variance_mask = File(exists=True, desc="voxels excedding the variance threshold")
 
 class TCompCor(CompCor):
     '''
@@ -397,10 +446,19 @@ class TCompCor(CompCor):
     '''
 
     input_spec = TCompCorInputSpec
-    output_spec = CompCorOutputSpec
+    output_spec = TCompCorOutputSpec
 
     def _run_interface(self, runtime):
-        imgseries = nb.load(self.inputs.realigned_file).get_data()
+        imgseries = nb.load(self.inputs.realigned_file, mmap=NUMPY_MMAP).get_data()
+
+        if imgseries.ndim != 4:
+            raise ValueError('tCompCor expected a 4-D nifti file. Input {} has {} dimensions '
+                             '(shape {})'
+                             .format(self.inputs.realigned_file, imgseries.ndim, imgseries.shape))
+
+        if isdefined(self.inputs.mask_file):
+            in_mask_data = nb.load(self.inputs.mask_file, mmap=NUMPY_MMAP).get_data()
+            imgseries = imgseries[in_mask_data != 0, :]
 
         # From the paper:
         # "For each voxel time series, the temporal standard deviation is
@@ -408,29 +466,36 @@ class TCompCor(CompCor):
         # of low-frequency nuisance terms (e.g., linear and quadratic drift)."
         imgseries = regress_poly(2, imgseries)
 
-        time_voxels = imgseries.T
-        num_voxels = np.prod(time_voxels.shape[1:])
-
         # "To construct the tSTD noise ROI, we sorted the voxels by their
         # temporal standard deviation ..."
-        tSTD = self._compute_tSTD(time_voxels, 0)
-        sortSTD = np.sort(tSTD, axis=None) # flattened sorted matrix
+        tSTD = self._compute_tSTD(imgseries, 0, axis=-1)
 
         # use percentile_threshold to pick voxels
-        threshold_index = int(num_voxels * (1. - self.inputs.percentile_threshold))
-        threshold_std = sortSTD[threshold_index]
+        threshold_std = np.percentile(tSTD, 100. * (1. - self.inputs.percentile_threshold))
         mask = tSTD >= threshold_std
-        mask = mask.astype(int)
+
+        if isdefined(self.inputs.mask_file):
+            mask_data = np.zeros_like(in_mask_data)
+            mask_data[in_mask_data != 0] = mask
+        else:
+            mask_data = mask.astype(int)
 
         # save mask
-        mask_file = 'mask.nii'
-        nb.nifti1.save(nb.Nifti1Image(mask, np.eye(4)), mask_file)
+        mask_file = os.path.abspath('mask.nii')
+        nb.Nifti1Image(mask_data,
+                       nb.load(self.inputs.realigned_file).affine).to_filename(mask_file)
+        IFLOG.debug('tCompcor computed and saved mask of shape {} to mask_file {}'
+                   .format(mask.shape, mask_file))
         self.inputs.mask_file = mask_file
+        self._set_header('tCompCor')
 
         super(TCompCor, self)._run_interface(runtime)
         return runtime
 
-ACompCor = CompCor
+    def _list_outputs(self):
+        outputs = super(TCompCor, self)._list_outputs()
+        outputs['high_variance_mask'] = self.inputs.mask_file
+        return outputs
 
 class TSNRInputSpec(BaseInterfaceInputSpec):
     in_file = InputMultiPath(File(exists=True), mandatory=True,
@@ -470,9 +535,9 @@ class TSNR(BaseInterface):
     output_spec = TSNROutputSpec
 
     def _run_interface(self, runtime):
-        img = nb.load(self.inputs.in_file[0])
+        img = nb.load(self.inputs.in_file[0], mmap=NUMPY_MMAP)
         header = img.header.copy()
-        vollist = [nb.load(filename) for filename in self.inputs.in_file]
+        vollist = [nb.load(filename, mmap=NUMPY_MMAP) for filename in self.inputs.in_file]
         data = np.concatenate([vol.get_data().reshape(
             vol.get_shape()[:3] + (-1,)) for vol in vollist], axis=3)
         data = np.nan_to_num(data)
@@ -513,6 +578,8 @@ def regress_poly(degree, data, remove_mean=True, axis=-1):
     If remove_mean is True (default), the data is demeaned (i.e. degree 0).
     If remove_mean is false, the data is not.
     '''
+    IFLOG.debug('Performing polynomial regression on data of shape ' + str(data.shape))
+
     datashape = data.shape
     timepoints = datashape[axis]
 
@@ -539,7 +606,8 @@ def regress_poly(degree, data, remove_mean=True, axis=-1):
     # Back to original shape
     return regressed_data.reshape(datashape)
 
-def compute_dvars(in_file, in_mask, remove_zerovariance=False):
+def compute_dvars(in_file, in_mask, remove_zerovariance=False,
+                  intensity_normalization=1000):
     """
     Compute the :abbr:`DVARS (D referring to temporal
     derivative of timecourses, VARS referring to RMS variance over voxels)`
@@ -571,70 +639,58 @@ research/nichols/scripts/fsl/standardizeddvars.pdf>`_, 2013.
     import numpy as np
     import nibabel as nb
     from nitime.algorithms import AR_est_YW
+    import warnings
 
-    func = nb.load(in_file).get_data().astype(np.float32)
-    mask = nb.load(in_mask).get_data().astype(np.uint8)
+    func = nb.load(in_file, mmap=NUMPY_MMAP).get_data().astype(np.float32)
+    mask = nb.load(in_mask, mmap=NUMPY_MMAP).get_data().astype(np.uint8)
 
     if len(func.shape) != 4:
         raise RuntimeError(
             "Input fMRI dataset should be 4-dimensional")
 
-    # Robust standard deviation
-    func_sd = (np.percentile(func, 75, axis=3) -
-               np.percentile(func, 25, axis=3)) / 1.349
-    func_sd[mask <= 0] = 0
-
-    if remove_zerovariance:
-        # Remove zero-variance voxels across time axis
-        mask = zero_variance(func, mask)
-
     idx = np.where(mask > 0)
     mfunc = func[idx[0], idx[1], idx[2], :]
 
-    # Demean
-    mfunc = regress_poly(0, mfunc, remove_mean=True).astype(np.float32)
+    if intensity_normalization != 0:
+        mfunc = (mfunc / np.median(mfunc)) * intensity_normalization
+
+    # Robust standard deviation (we are using "lower" interpolation
+    # because this is what FSL is doing
+    func_sd = (np.percentile(mfunc, 75, axis=1, interpolation="lower") -
+               np.percentile(mfunc, 25, axis=1, interpolation="lower")) / 1.349
+
+    if remove_zerovariance:
+        mfunc = mfunc[func_sd != 0, :]
+        func_sd = func_sd[func_sd != 0]
 
     # Compute (non-robust) estimate of lag-1 autocorrelation
-    ar1 = np.apply_along_axis(AR_est_YW, 1, mfunc, 1)[:, 0]
+    ar1 = np.apply_along_axis(AR_est_YW, 1,
+                              regress_poly(0, mfunc, remove_mean=True).astype(
+                                  np.float32), 1)[:, 0]
 
     # Compute (predicted) standard deviation of temporal difference time series
-    diff_sdhat = np.squeeze(np.sqrt(((1 - ar1) * 2).tolist())) * func_sd[mask > 0].reshape(-1)
+    diff_sdhat = np.squeeze(np.sqrt(((1 - ar1) * 2).tolist())) * func_sd
     diff_sd_mean = diff_sdhat.mean()
 
     # Compute temporal difference time series
     func_diff = np.diff(mfunc, axis=1)
 
     # DVARS (no standardization)
-    dvars_nstd = func_diff.std(axis=0)
+    dvars_nstd = np.sqrt(np.square(func_diff).mean(axis=0))
 
     # standardization
     dvars_stdz = dvars_nstd / diff_sd_mean
 
-    # voxelwise standardization
-    diff_vx_stdz = func_diff / np.array([diff_sdhat] * func_diff.shape[-1]).T
-    dvars_vx_stdz = diff_vx_stdz.std(axis=0, ddof=1)
+    with warnings.catch_warnings():  # catch, e.g., divide by zero errors
+        warnings.filterwarnings('error')
+
+        # voxelwise standardization
+        diff_vx_stdz = np.square(
+            func_diff / np.array([diff_sdhat] * func_diff.shape[-1]).T)
+        dvars_vx_stdz = np.sqrt(diff_vx_stdz.mean(axis=0))
 
     return (dvars_stdz, dvars_nstd, dvars_vx_stdz)
 
-def zero_variance(func, mask):
-    """
-    Mask out voxels with zero variance across t-axis
-
-    :param numpy.ndarray func: input fMRI dataset, after motion correction
-    :param numpy.ndarray mask: 3D brain mask
-    :return: the 3D mask of voxels with nonzero variance across :math:`t`.
-    :rtype: numpy.ndarray
-
-    """
-    idx = np.where(mask > 0)
-    func = func[idx[0], idx[1], idx[2], :]
-    tvariance = func.var(axis=1)
-    tv_mask = np.zeros_like(tvariance, dtype=np.uint8)
-    tv_mask[tvariance > 0] = 1
-
-    newmask = np.zeros_like(mask, dtype=np.uint8)
-    newmask[idx] = tv_mask
-    return newmask
 
 def plot_confound(tseries, figsize, name, units=None,
                   series_tr=None, normalize=False):

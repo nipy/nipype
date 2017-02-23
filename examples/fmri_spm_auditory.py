@@ -29,6 +29,7 @@ import nipype.pipeline.engine as pe          # pypeline engine
 import nipype.algorithms.modelgen as model   # model specification
 import os                                    # system functions
 
+
 """
 
 Preliminaries
@@ -120,9 +121,10 @@ using the following function:
 
 def get_vox_dims(volume):
     import nibabel as nb
+    from nipype.utils import NUMPY_MMAP
     if isinstance(volume, list):
         volume = volume[0]
-    nii = nb.load(volume)
+    nii = nb.load(volume, mmap=NUMPY_MMAP)
     hdr = nii.header
     voxdims = hdr.get_zooms()
     return [float(voxdims[0]), float(voxdims[1]), float(voxdims[2])]

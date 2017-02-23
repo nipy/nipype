@@ -648,11 +648,13 @@ def _propagate_internal_output(graph, node, field, connections, portinputs):
         if field in portinputs:
             srcnode, srcport = portinputs[field]
             if isinstance(srcport, tuple) and isinstance(src, tuple):
-                raise ValueError(("Does not support two inline functions "
-                                  "in series (\'%s\'  and \'%s\'). "
-                                  "Please use a Function node") %
-                                 (srcport[1].split("\\n")[0][6:-1],
-                                  src[1].split("\\n")[0][6:-1]))
+                src_func = srcport[1].split("\\n")[0]
+                dst_func = src[1].split("\\n")[0]
+                raise ValueError("Does not support two inline functions "
+                                 "in series ('{}'  and '{}'), found when "
+                                 "connecting {} to {}. Please use a Function "
+                                 "node.".format(src_func, dst_func, srcnode, destnode))
+
             connect = graph.get_edge_data(srcnode, destnode,
                                           default={'connect': []})
             if isinstance(src, tuple):
@@ -709,7 +711,7 @@ def generate_expanded_graph(graph_in):
             in_edges = jedge_dict[jnode] = {}
             edges2remove = []
             for src, dest, data in graph_in.in_edges_iter(jnode, True):
-                in_edges[src._id] = data
+                in_edges[src.itername] = data
                 edges2remove.append((src, dest))
 
             for src, dest in edges2remove:
@@ -794,7 +796,7 @@ def generate_expanded_graph(graph_in):
             expansions = defaultdict(list)
             for node in graph_in.nodes_iter():
                 for src_id, edge_data in list(old_edge_dict.items()):
-                    if node._id.startswith(src_id):
+                    if node.itername.startswith(src_id):
                         expansions[src_id].append(node)
             for in_id, in_nodes in list(expansions.items()):
                 logger.debug("The join node %s input %s was expanded"

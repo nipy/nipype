@@ -33,7 +33,7 @@ set fmri(deriv_yn$ev_num) $temporalderiv
 set fmri(custom$ev_num) "$cond_file"
 
 # Gamma sigma
-set fmri(gammasigma$ev_num) 3
+set fmri(gammasigma$ev_num) $gammasigma
 
 # Gamma delay
-set fmri(gammadelay$ev_num) 6
+set fmri(gammadelay$ev_num) $gammadelay

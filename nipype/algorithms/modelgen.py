@@ -28,6 +28,7 @@ from nibabel import load
 import numpy as np
 from scipy.special import gammaln
 
+from ..utils import NUMPY_MMAP
 from ..interfaces.base import (BaseInterface, TraitedSpec, InputMultiPath,
                                traits, File, Bunch, BaseInterfaceInputSpec,
                                isdefined)
@@ -354,7 +355,7 @@ class SpecifyModel(BaseInterface):
             for i, out in enumerate(outliers):
                 numscans = 0
                 for f in filename_to_list(sessinfo[i]['scans']):
-                    shape = load(f).shape
+                    shape = load(f, mmap=NUMPY_MMAP).shape
                     if len(shape) == 3 or shape[3] == 1:
                         iflogger.warning(("You are using 3D instead of 4D "
                                           "files. Are you sure this was "
@@ -457,7 +458,7 @@ class SpecifySPMModel(SpecifyModel):
             if isinstance(f, list):
                 numscans = len(f)
             elif isinstance(f, (str, bytes)):
-                img = load(f)
+                img = load(f, mmap=NUMPY_MMAP)
                 numscans = img.shape[3]
             else:
                 raise Exception('Functional input not specified correctly')
@@ -655,12 +656,12 @@ class SpecifySparseModel(SpecifyModel):
             hrf = spm_hrf(dt * 1e-3)
         reg_scale = 1.0
         if self.inputs.scale_regressors:
-            boxcar = np.zeros((50.0 * 1e3 / dt))
+            boxcar = np.zeros(int(50.0 * 1e3 / dt))
             if self.inputs.stimuli_as_impulses:
-                boxcar[1.0 * 1e3 / dt] = 1.0
+                boxcar[int(1.0 * 1e3 / dt)] = 1.0
                 reg_scale = float(TA / dt)
             else:
-                boxcar[(1.0 * 1e3 / dt):(2.0 * 1e3 / dt)] = 1.0
+                boxcar[int(1.0 * 1e3 / dt):int(2.0 * 1e3 / dt)] = 1.0
             if isdefined(self.inputs.model_hrf) and self.inputs.model_hrf:
                 response = np.convolve(boxcar, hrf)
                 reg_scale = 1.0 / response.max()
@@ -781,7 +782,7 @@ class SpecifySparseModel(SpecifyModel):
             infoout[i].onsets = None
             infoout[i].durations = None
             if info.conditions:
-                img = load(self.inputs.functional_runs[i])
+                img = load(self.inputs.functional_runs[i], mmap=NUMPY_MMAP)
                 nscans = img.shape[3]
                 reg, regnames = self._cond_to_regress(info, nscans)
                 if hasattr(infoout[i], 'regressors') and infoout[i].regressors:
