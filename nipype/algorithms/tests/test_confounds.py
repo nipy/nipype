@@ -44,8 +44,6 @@ def test_dvars(tmpdir):
                          intensity_normalization=0)
     os.chdir(str(tmpdir))
     res = dvars.run()
-    dv1 = np.loadtxt(res.outputs.out_std)
-    assert (np.abs(dv1 - ground_truth).sum()/ len(dv1)) < 0.05
 
     dv1 = np.loadtxt(res.outputs.out_all, skiprows=1)
     assert (np.abs(dv1[:, 0] - ground_truth[:, 0]).sum()/ len(dv1)) < 0.05
