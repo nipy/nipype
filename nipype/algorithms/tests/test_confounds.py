@@ -6,7 +6,8 @@ from io import open
 
 import pytest
 from nipype.testing import example_data
-from nipype.algorithms.confounds import FramewiseDisplacement, ComputeDVARS
+from nipype.algorithms.confounds import FramewiseDisplacement, ComputeDVARS, \
+    _is_outlier
 import numpy as np
 
 
@@ -45,3 +46,10 @@ def test_dvars(tmpdir):
 
     dv1 = np.loadtxt(res.outputs.out_std)
     assert (np.abs(dv1 - ground_truth).sum()/ len(dv1)) < 0.05
+
+
+def test_outliers(tmpdir):
+    in_data = np.random.randn(100)
+    in_data[0] += 10
+
+    assert _is_outlier(in_data) == 1
