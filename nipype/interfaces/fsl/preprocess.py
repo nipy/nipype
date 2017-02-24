@@ -25,7 +25,7 @@ from ...utils.filemanip import split_filename
 from ..base import (TraitedSpec, File, InputMultiPath,
                     OutputMultiPath, Undefined, traits,
                     isdefined)
-from .base import FSLCommand, FSLCommandInputSpec
+from .base import FSLCommand, FSLCommandInputSpec, Info
 
 
 class BETInputSpec(FSLCommandInputSpec):
@@ -323,17 +323,20 @@ class FAST(FSLCommand):
             nclasses = self.inputs.number_classes
         # when using multichannel, results basename is based on last
         # input filename
+        _gen_fname_opts = {}
         if isdefined(self.inputs.out_basename):
-            basefile = self.inputs.out_basename
+            _gen_fname_opts['basename'] = self.inputs.out_basename
+            _gen_fname_opts['cwd'] = os.getcwd()
         else:
-            basefile = self.inputs.in_files[-1]
+            _gen_fname_opts['basename'] = self.inputs.in_files[-1]
+            _gen_fname_opts['cwd'], _, _ = split_filename(_gen_fname_opts['basename'])
 
-        outputs['tissue_class_map'] = self._gen_fname(basefile, suffix='_seg')
+        outputs['tissue_class_map'] = self._gen_fname(suffix='_seg', **_gen_fname_opts)
         if self.inputs.segments:
             outputs['tissue_class_files'] = []
             for i in range(nclasses):
                 outputs['tissue_class_files'].append(
-                    self._gen_fname(basefile, suffix='_seg_%d' % i))
+                    self._gen_fname(suffix='_seg_%d' % i, **_gen_fname_opts))
         if isdefined(self.inputs.output_biascorrected):
             outputs['restored_image'] = []
             if len(self.inputs.in_files) > 1:
@@ -342,22 +345,21 @@ class FAST(FSLCommand):
                 for val, f in enumerate(self.inputs.in_files):
                     # image numbering is 1-based
                     outputs['restored_image'].append(
-                        self._gen_fname(basefile,
-                                        suffix='_restore_%d' % (val + 1)))
+                        self._gen_fname(suffix='_restore_%d' % (val + 1), **_gen_fname_opts))
             else:
                 # single image segmentation has unnumbered output image
                 outputs['restored_image'].append(
-                    self._gen_fname(basefile, suffix='_restore'))
+                    self._gen_fname(suffix='_restore', **_gen_fname_opts))
 
-        outputs['mixeltype'] = self._gen_fname(basefile, suffix='_mixeltype')
+        outputs['mixeltype'] = self._gen_fname(suffix='_mixeltype', **_gen_fname_opts)
         if not self.inputs.no_pve:
             outputs['partial_volume_map'] = self._gen_fname(
-                basefile, suffix='_pveseg')
+                suffix='_pveseg', **_gen_fname_opts)
             outputs['partial_volume_files'] = []
             for i in range(nclasses):
                 outputs[
                     'partial_volume_files'].append(
-                        self._gen_fname(basefile, suffix='_pve_%d' % i))
+                        self._gen_fname(suffix='_pve_%d' % i, **_gen_fname_opts))
         if self.inputs.output_biasfield:
             outputs['bias_field'] = []
             if len(self.inputs.in_files) > 1:
@@ -366,18 +368,17 @@ class FAST(FSLCommand):
                 for val, f in enumerate(self.inputs.in_files):
                     # image numbering is 1-based
                     outputs['bias_field'].append(
-                        self._gen_fname(basefile,
-                                        suffix='_bias_%d' % (val + 1)))
+                        self._gen_fname(suffix='_bias_%d' % (val + 1), **_gen_fname_opts))
             else:
                 # single image segmentation has unnumbered output image
                 outputs['bias_field'].append(
-                    self._gen_fname(basefile, suffix='_bias'))
+                    self._gen_fname(suffix='_bias', **_gen_fname_opts))
 
         if self.inputs.probability_maps:
             outputs['probability_maps'] = []
             for i in range(nclasses):
                 outputs['probability_maps'].append(
-                    self._gen_fname(basefile, suffix='_prob_%d' % i))
+                    self._gen_fname(suffix='_prob_%d' % i, **_gen_fname_opts))
         return outputs
 
 
@@ -538,7 +539,7 @@ class FLIRT(FSLCommand):
     >>> flt.inputs.in_file = 'structural.nii'
     >>> flt.inputs.reference = 'mni.nii'
     >>> flt.inputs.output_type = "NIFTI_GZ"
-    >>> flt.cmdline # doctest: +ELLIPSIS +IGNORE_UNICODE
+    >>> flt.cmdline # doctest: +ELLIPSIS +ALLOW_UNICODE
     'flirt -in structural.nii -ref mni.nii -out structural_flirt.nii.gz -omat structural_flirt.mat -bins 640 -searchcost mutualinfo'
     >>> res = flt.run() #doctest: +SKIP
 
@@ -599,10 +600,10 @@ class ApplyXfm(ApplyXFM):
        Use :py:class:`nipype.interfaces.fsl.ApplyXFM` instead
     """
     def __init__(self, **inputs):
-        super(confounds.TSNR, self).__init__(**inputs)
-        warnings.warn(("This interface has been renamed since 0.12.1,"
-                       " please use nipype.interfaces.fsl.ApplyXFM"),
-                      UserWarning)
+        super(ApplyXfm, self).__init__(**inputs)
+        warn(('This interface has been renamed since 0.12.1, please use '
+              'nipype.interfaces.fsl.ApplyXFM'),
+             UserWarning)
 
 class MCFLIRTInputSpec(FSLCommandInputSpec):
     in_file = File(exists=True, position=0, argstr="-in %s", mandatory=True,
@@ -749,10 +750,12 @@ class FNIRTInputSpec(FSLCommandInputSpec):
                        desc='name of file containing affine transform')
     inwarp_file = File(exists=True, argstr='--inwarp=%s',
                        desc='name of file containing initial non-linear warps')
-    in_intensitymap_file = File(exists=True, argstr='--intin=%s',
-                                desc=('name of file/files containing initial '
-                                      'intensity maping usually generated by '
-                                      'previous fnirt run'))
+    in_intensitymap_file = traits.List(File(exists=True), argstr='--intin=%s',
+                                       copyfiles=False, minlen=1, maxlen=2,
+                                       desc=('name of file/files containing '
+                                             'initial intensity mapping '
+                                             'usually generated by previous '
+                                             'fnirt run'))
     fieldcoeff_file = traits.Either(
         traits.Bool, File, argstr='--cout=%s',
         desc='name of output file with field coefficients or true')
@@ -906,8 +909,9 @@ class FNIRTOutputSpec(TraitedSpec):
     field_file = File(desc='file with warp field')
     jacobian_file = File(desc='file containing Jacobian of the field')
     modulatedref_file = File(desc='file containing intensity modulated --ref')
-    out_intensitymap_file = File(
-        desc='file containing info pertaining to intensity mapping')
+    out_intensitymap_file = traits.List(
+        File, minlen=2, maxlen=2,
+        desc='files containing info pertaining to intensity mapping')
     log_file = File(desc='Name of log-file')
 
 
@@ -974,9 +978,23 @@ class FNIRT(FSLCommand):
                                                        change_ext=change_ext)
                 else:
                     outputs[key] = os.path.abspath(inval)
+
+            if key == 'out_intensitymap_file' and isdefined(outputs[key]):
+                basename = FNIRT.intensitymap_file_basename(outputs[key])
+                outputs[key] = [
+                    outputs[key],
+                    '%s.txt' % basename,
+                ]
         return outputs
 
     def _format_arg(self, name, spec, value):
+        if name in ('in_intensitymap_file', 'out_intensitymap_file'):
+            if name == 'out_intensitymap_file':
+                value = self._list_outputs()[name]
+            value = [FNIRT.intensitymap_file_basename(v) for v in value]
+            assert len(set(value)) == 1, (
+                'Found different basenames for {}: {}'.format(name, value))
+            return spec.argstr % value[0]
         if name in list(self.filemap.keys()):
             return spec.argstr % self._list_outputs()[name]
         return super(FNIRT, self)._format_arg(name, spec, value)
@@ -1003,6 +1021,17 @@ class FNIRT(FSLCommand):
         for item in list(self.inputs.get().items()):
             fid.write('%s\n' % (item))
         fid.close()
+
+    @classmethod
+    def intensitymap_file_basename(cls, f):
+        """Removes valid intensitymap extensions from `f`, returning a basename
+        that can refer to both intensitymap files.
+        """
+        for ext in list(Info.ftypes.values()) + ['.txt']:
+            if f.endswith(ext):
+                return f[:-len(ext)]
+        # TODO consider warning for this case
+        return f
 
 
 class ApplyWarpInputSpec(FSLCommandInputSpec):
@@ -1358,7 +1387,7 @@ class FUGUE(FSLCommand):
     >>> fugue.inputs.shift_in_file = 'vsm.nii'  # Previously computed with fugue as well
     >>> fugue.inputs.unwarp_direction = 'y'
     >>> fugue.inputs.output_type = "NIFTI_GZ"
-    >>> fugue.cmdline # doctest: +ELLIPSIS +IGNORE_UNICODE
+    >>> fugue.cmdline # doctest: +ELLIPSIS +ALLOW_UNICODE
     'fugue --in=epi.nii --mask=epi_mask.nii --loadshift=vsm.nii --unwarpdir=y --unwarp=epi_unwarped.nii.gz'
     >>> fugue.run() #doctest: +SKIP
 
@@ -1373,7 +1402,7 @@ class FUGUE(FSLCommand):
     >>> fugue.inputs.shift_in_file = 'vsm.nii'  # Previously computed with fugue as well
     >>> fugue.inputs.unwarp_direction = 'y'
     >>> fugue.inputs.output_type = "NIFTI_GZ"
-    >>> fugue.cmdline # doctest: +ELLIPSIS +IGNORE_UNICODE
+    >>> fugue.cmdline # doctest: +ELLIPSIS +ALLOW_UNICODE
     'fugue --in=epi.nii --mask=epi_mask.nii --loadshift=vsm.nii --unwarpdir=y --warp=epi_warped.nii.gz'
     >>> fugue.run() #doctest: +SKIP
 
@@ -1388,7 +1417,7 @@ class FUGUE(FSLCommand):
     >>> fugue.inputs.unwarp_direction = 'y'
     >>> fugue.inputs.save_shift = True
     >>> fugue.inputs.output_type = "NIFTI_GZ"
-    >>> fugue.cmdline # doctest: +ELLIPSIS +IGNORE_UNICODE
+    >>> fugue.cmdline # doctest: +ELLIPSIS +ALLOW_UNICODE
     'fugue --dwelltoasym=0.9390243902 --mask=epi_mask.nii --phasemap=epi_phasediff.nii --saveshift=epi_phasediff_vsm.nii.gz --unwarpdir=y'
     >>> fugue.run() #doctest: +SKIP
 

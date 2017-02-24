@@ -1,15 +1,12 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 
-import unittest
+import pytest
 import os
-import tempfile
-import shutil
-
 import mock
 import numpy as np
 
-from .....testing import (assert_equal, assert_true, utils)
+from .....testing import utils
 from .....interfaces import IdentityInterface
 from .....pipeline.engine import Node, Workflow
 
@@ -38,7 +35,7 @@ def stub_wf(*args, **kwargs):
     wflow.connect(inputnode, 'func', outputnode, 'realigned_file')
     return wflow
 
-class TestResting(unittest.TestCase):
+class TestResting():
 
     in_filenames = {
         'realigned_file': 'rsfmrifunc.nii',
@@ -51,11 +48,10 @@ class TestResting(unittest.TestCase):
 
     num_noise_components = 6
 
-    def setUp(self):
+    @pytest.fixture(autouse=True)
+    def setup_class(self, tmpdir):
         # setup temp folder
-        self.orig_dir = os.getcwd()
-        self.temp_dir = tempfile.mkdtemp()
-        os.chdir(self.temp_dir)
+        os.chdir(str(tmpdir))
         self.in_filenames = {key: os.path.abspath(value)
                              for key, value in self.in_filenames.items()}
 
@@ -87,18 +83,15 @@ class TestResting(unittest.TestCase):
         with open(expected_file, 'r') as components_file:
             components_data = [line.split() for line in components_file]
             num_got_components = len(components_data)
-            assert_true(num_got_components == self.num_noise_components
-                        or num_got_components == self.fake_data.shape[3])
+            assert (num_got_components == self.num_noise_components
+                    or num_got_components == self.fake_data.shape[3])
             first_two = [row[:2] for row in components_data[1:]]
-            assert_equal(first_two, [['-0.5172356654', '-0.6973053243'],
-                                     ['0.2574722644', '0.1645270737'],
-                                     ['-0.0806469590', '0.5156853779'],
-                                     ['0.7187176051', '-0.3235820287'],
-                                     ['-0.3783072450', '0.3406749013']])
+            assert first_two == [['-0.5172356654', '-0.6973053243'],
+                                 ['0.2574722644', '0.1645270737'],
+                                 ['-0.0806469590', '0.5156853779'],
+                                 ['0.7187176051', '-0.3235820287'],
+                                 ['-0.3783072450', '0.3406749013']]
 
-    def tearDown(self):
-        os.chdir(self.orig_dir)
-        shutil.rmtree(self.temp_dir)
 
     fake_data = np.array([[[[2, 4, 3, 9, 1],
                             [3, 6, 4, 7, 4]],

@@ -10,21 +10,24 @@ hash_method : content, timestamp
 @author: Chris Filo Gorgolewski
 '''
 from __future__ import print_function, division, unicode_literals, absolute_import
-from builtins import str, object, open
-
-from future import standard_library
-standard_library.install_aliases()
-
-import configparser
 import os
 import shutil
 import errno
 from warnings import warn
 from io import StringIO
+from distutils.version import LooseVersion
 from simplejson import load, dump
+import numpy as np
 
+from builtins import str, object, open
+from future import standard_library
+standard_library.install_aliases()
+
+import configparser
 from ..external import portalocker
 
+
+NUMPY_MMAP = LooseVersion(np.__version__) >= LooseVersion('1.12.0')
 
 # Get home directory in platform-agnostic way
 homedir = os.path.expanduser('~')
@@ -58,7 +61,7 @@ use_relative_paths = false
 stop_on_unknown_version = false
 write_provenance = false
 parameterize_dirs = true
-poll_sleep_duration = 60
+poll_sleep_duration = 2
 xvfb_max_wait = 10
 profile_runtime = false
 
