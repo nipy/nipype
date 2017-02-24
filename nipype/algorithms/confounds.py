@@ -27,7 +27,8 @@ from ..external.due import BibTeX
 from ..interfaces.base import (traits, TraitedSpec, BaseInterface,
                                BaseInterfaceInputSpec, File, isdefined,
                                InputMultiPath)
-from nipype.utils import NUMPY_MMAP
+from ..utils import NUMPY_MMAP
+from ..utils.misc import normalize_mc_params
 
 IFLOG = logging.getLogger('interface')
 
@@ -195,8 +196,8 @@ Bradley L. and Petersen, Steven E.},
 
 
 class FramewiseDisplacementInputSpec(BaseInterfaceInputSpec):
-    in_file = File(exists=True, mandatory=True, desc='motion parameters as written by FSL MCFLIRT or AFNI 3dvolreg')
-    parameter_source = traits.Enum("FSL", "AFNI",
+    in_file = File(exists=True, mandatory=True, desc='motion parameters')
+    parameter_source = traits.Enum("FSL", "AFNI", "SPM", "FSFAST",
                                    desc="Source of movement parameters",
                                    mandatory=True)
     radius = traits.Float(50, usedefault=True,
@@ -253,10 +254,11 @@ Bradley L. and Petersen, Steven E.},
 
     def _run_interface(self, runtime):
         mpars = np.loadtxt(self.inputs.in_file)  # mpars is N_t x 6
-        diff = mpars[:-1, :] - mpars[1:, :]
-        diff[:, :3] *= self.inputs.radius
-        if self.inputs.parameter_source == "AFNI":
-            diff[:, :3] *= (np.pi / 180)
+        mpars = np.apply_along_axis(func1d=normalize_mc_params,
+                                    axis=1, arr=mpars,
+                                    source=self.inputs.parameter_source)
+        diff = mpars[:-1, :6] - mpars[1:, :6]
+        diff[:, 3:6] *= self.inputs.radius
         fd_res = np.abs(diff).sum(axis=1)
 
         self._results = {
