@@ -4,9 +4,11 @@
 
 import os
 import numpy as np
-import nibabel as nib
+import nibabel as nb
 
 import pytest
+
+from nipype.utils import NUMPY_MMAP
 from nipype.interfaces.freesurfer import model, no_freesurfer
 import nipype.pipeline.engine as pe
 
@@ -24,18 +26,18 @@ def test_concatenate(tmpdir):
     out_data = np.concatenate((data1, data2), axis=3)
     mean_data = np.mean(out_data, axis=3)
 
-    nib.Nifti1Image(data1, affine=np.eye(4)).to_filename(in1)
-    nib.Nifti1Image(data2, affine=np.eye(4)).to_filename(in2)
+    nb.Nifti1Image(data1, affine=np.eye(4)).to_filename(in1)
+    nb.Nifti1Image(data2, affine=np.eye(4)).to_filename(in2)
 
     # Test default behavior
     res = model.Concatenate(in_files=[in1, in2]).run()
     assert res.outputs.concatenated_file == os.path.join(tempdir, 'concat_output.nii.gz')
-    assert np.allclose(nib.load('concat_output.nii.gz').get_data(), out_data)
+    assert np.allclose(nb.load('concat_output.nii.gz').get_data(), out_data)
 
     # Test specified concatenated_file
     res = model.Concatenate(in_files=[in1, in2], concatenated_file=out).run()
     assert res.outputs.concatenated_file == os.path.join(tempdir, out)
-    assert np.allclose(nib.load(out).get_data(), out_data)
+    assert np.allclose(nb.load(out, mmap=NUMPY_MMAP).get_data(), out_data)
 
     # Test in workflow
     wf = pe.Workflow('test_concatenate', base_dir=tempdir)
@@ -44,7 +46,7 @@ def test_concatenate(tmpdir):
                      name='concat')
     wf.add_nodes([concat])
     wf.run()
-    assert np.allclose(nib.load(os.path.join(tempdir,
+    assert np.allclose(nb.load(os.path.join(tempdir,
                                              'test_concatenate',
                                              'concat', out)).get_data(),
                        out_data)
@@ -52,4 +54,4 @@ def test_concatenate(tmpdir):
     # Test a simple statistic
     res = model.Concatenate(in_files=[in1, in2], concatenated_file=out,
                             stats='mean').run()
-    assert np.allclose(nib.load(out).get_data(), mean_data)
+    assert np.allclose(nb.load(out, mmap=NUMPY_MMAP).get_data(), mean_data)

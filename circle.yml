@@ -1,10 +1,13 @@
 machine:
+  pre:
+    - sudo curl -L -o /usr/bin/docker 'https://s3-external-1.amazonaws.com/circle-downloads/docker-1.9.1-circleci'
+    - sudo chmod 0755 /usr/bin/docker
   environment:
     OSF_NIPYPE_URL: "https://files.osf.io/v1/resources/nefdp/providers/osfstorage"
     DATA_NIPYPE_TUTORIAL_URL: "${OSF_NIPYPE_URL}/57f4739cb83f6901ed94bf21"
     DATA_NIPYPE_FSL_COURSE: "${OSF_NIPYPE_URL}/57f472cf9ad5a101f977ecfe"
     DATA_NIPYPE_FSL_FEEDS: "${OSF_NIPYPE_URL}/57f473066c613b01f113e7af"
-
+    SCRATCH: "$HOME/scratch"
   services:
     - docker
 
@@ -18,27 +21,29 @@ dependencies:
     # Let CircleCI cache the apt archive
     - mkdir -p ~/.apt-cache/partial && sudo rm -rf /var/cache/apt/archives && sudo ln -s ~/.apt-cache /var/cache/apt/archives
     - sudo apt-get -y update && sudo apt-get install -y wget bzip2
-
+    # Create scratch folder and force group permissions
+    - mkdir -p $SCRATCH && sudo setfacl -d -m group:ubuntu:rwx $SCRATCH && sudo setfacl -m group:ubuntu:rwx $SCRATCH
+    - mkdir -p $HOME/docker $HOME/examples $SCRATCH/pytest $SCRATCH/logs
   override:
-    - mkdir -p ~/docker ~/examples ~/scratch/pytest ~/scratch/logs
+    - if [[ -e $HOME/docker/cache.tar ]]; then docker load --input $HOME/docker/image.tar; else echo 'No docker image found in cache'; fi :
+        timeout: 6000
     - if [[ ! -d ~/examples/nipype-tutorial ]]; then wget --retry-connrefused --waitretry=5 --read-timeout=20 --timeout=15 -t 0 -q -O nipype-tutorial.tar.bz2 "${DATA_NIPYPE_TUTORIAL_URL}" && tar xjf nipype-tutorial.tar.bz2 -C ~/examples/; fi
     - if [[ ! -d ~/examples/nipype-fsl_course_data ]]; then wget --retry-connrefused --waitretry=5 --read-timeout=20 --timeout=15 -t 0 -q -O nipype-fsl_course_data.tar.gz "${DATA_NIPYPE_FSL_COURSE}" && tar xzf nipype-fsl_course_data.tar.gz -C ~/examples/; fi
     - if [[ ! -d ~/examples/feeds ]]; then wget --retry-connrefused --waitretry=5 --read-timeout=20 --timeout=15 -t 0 -q -O fsl-5.0.9-feeds.tar.gz "${DATA_NIPYPE_FSL_FEEDS}" && tar xzf fsl-5.0.9-feeds.tar.gz -C ~/examples/; fi
-    - if [[ -e ~/docker/image.tar ]]; then mv -n ~/docker/image.tar ~/docker/image_27.tar; fi
-    - if [[ -e ~/docker/image_27.tar ]]; then docker load -i ~/docker/image_27.tar; fi
-    - if [[ -e ~/docker/image_35.tar ]]; then docker load -i ~/docker/image_35.tar; fi
-    - docker build -f docker/nipype_test/Dockerfile_py27 -t nipype/nipype_test:py27 . :
+    - docker images
+    - sed -i -E "s/(__version__ = )'[A-Za-z0-9.-]+'/\1'$CIRCLE_TAG'/" nipype/info.py
+    - e=1 && for i in {1..5}; do docker build -t nipype/nipype:latest --build-arg BUILD_DATE=`date -u +"%Y-%m-%dT%H:%M:%SZ"` --build-arg VCS_REF=`git rev-parse --short HEAD` --build-arg VERSION=$CIRCLE_TAG . && e=0 && break || sleep 15; done && [ "$e" -eq "0" ] :
+        timeout: 21600
+    - e=1 && for i in {1..5}; do docker build -f docker/Dockerfile_py27 -t nipype/nipype_test:py27 . && e=0 && break || sleep 15; done && [ "$e" -eq "0" ] :
         timeout: 1600
-    - docker build -f docker/nipype_test/Dockerfile_py35 -t nipype/nipype_test:py35 . :
+    - e=1 && for i in {1..5}; do docker build -f docker/Dockerfile_py35 -t nipype/nipype_test:py35 . && e=0 && break || sleep 15; done && [ "$e" -eq "0" ] :
         timeout: 1600
-    - docker save nipype/nipype_test:py27 > ~/docker/image_27.tar :
-        timeout: 1600
-    - docker save nipype/nipype_test:py35 > ~/docker/image_35.tar :
-        timeout: 1600
+    - docker save -o $HOME/docker/cache.tar nipype/nipype:latest nipype/nipype_test:py27 nipype/nipype_test:py35 :
+        timeout: 6000
 
 test:
   override:
-    - bash docker/circleci/tests.sh :
+    - bash docker/files/tests.sh :
         timeout: 7200
         parallel: true
 
@@ -46,3 +51,15 @@ general:
   artifacts:
     - "~/docs"
     - "~/logs"
+
+deployment:
+  production:
+    tag: /.*/
+    commands:
+      - if [[ -n "$DOCKER_PASS" ]]; then docker login -e $DOCKER_EMAIL -u $DOCKER_USER -p $DOCKER_PASS && docker push nipype/nipype:latest; fi :
+          timeout: 21600
+      - if [[ -n "$DOCKER_PASS" ]]; then docker login -e $DOCKER_EMAIL -u $DOCKER_USER -p $DOCKER_PASS && docker tag nipype/nipype nipype/nipype:$CIRCLE_TAG && docker push nipype/nipype:$CIRCLE_TAG; fi :
+          timeout: 21600
+# Automatic deployment to Pypi:
+#       - printf "[distutils]\nindex-servers =\n    pypi\n\n[pypi]\nusername:$PYPI_USER\npassword:$PYPI_PASS\n" > ~/.pypirc
+#       - python setup.py sdist upload -r pypi

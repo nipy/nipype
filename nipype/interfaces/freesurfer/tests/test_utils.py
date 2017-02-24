@@ -3,10 +3,9 @@
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 from __future__ import print_function, division, unicode_literals, absolute_import
 from builtins import open
-import os
-
+import os, os.path as op
 import pytest
-from nipype.testing.fixtures import (create_files_in_directory_plus_dummy_file, 
+from nipype.testing.fixtures import (create_files_in_directory_plus_dummy_file,
                                      create_surf_file_in_directory)
 
 from nipype.interfaces.base import TraitError
