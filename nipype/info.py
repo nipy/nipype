@@ -164,6 +164,7 @@ EXTRA_REQUIRES = {
     'fmri': ['nitime', 'nilearn', 'dipy', 'nipy', 'matplotlib'],
     'profiler': ['psutil'],
     'duecredit': ['duecredit'],
+    'xvfbwrapper': ['xvfbwrapper'],
     # 'mesh': ['mayavi']  # Enable when it works
 }
 
@@ -171,4 +172,3 @@ EXTRA_REQUIRES = {
 EXTRA_REQUIRES['all'] = [val for _, val in list(EXTRA_REQUIRES.items())]
 
 STATUS = 'stable'
-
