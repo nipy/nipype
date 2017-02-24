@@ -60,10 +60,11 @@ class SLURMPlugin(SGELikeBatchManagerBase):
 
     def _is_pending(self, taskid):
         #  subprocess.Popen requires taskid to be a string
-        res = CommandLine('squeue',
-                          args=' '.join(['-j', '%s' % taskid]),
-                          terminal_output='allatonce').run()
-        return res.runtime.stdout.find(str(taskid)) > -1
+        proc = subprocess.Popen(["squeue", '-j', '%s' % taskid],
+                                stdout=subprocess.PIPE,
+                                stderr=subprocess.PIPE)
+        o, _ = proc.communicate()
+        return o.find(str(taskid)) > -1
 
     def _submit_batchtask(self, scriptfile, node):
         """
