@@ -1157,12 +1157,10 @@ ants_joint_fusion_posterior_%d.nii.gz, ants_joint_fusion_voting_weight_%d.nii.gz
 
 
 class KellyKapowskiInputSpec(ANTSCommandInputSpec):
-    dimension = traits.Enum(3, 2, argstr='--image-dimensionality %d',
-                            usedefault=True,
+    dimension = traits.Enum(3, 2, argstr='--image-dimensionality %d', usedefault=True,
                             desc='image dimension (2 or 3)')
 
-    segmentation_image = File(exists=True, argstr='--segmentation-image "%s"',
-                              mandatory=True,
+    segmentation_image = File(exists=True, argstr='--segmentation-image "%s"', mandatory=True,
                               desc="A segmentation image must be supplied labeling the gray and white matters.\n"
                                    "Default values = 2 and 3, respectively.",)
 
@@ -1234,7 +1232,7 @@ class KellyKapowski(ANTSCommand):
 
     Examples
     --------
-    >>> from pypes.interfaces.ants import KellyKapowski
+    >>> from nipype.interfaces.ants.segmentation import KellyKapowski
     >>> kk = KellyKapowski()
     >>> kk.inputs.dimension = 3
     >>> kk.inputs.segmentation_image = "anat_hc_gm_wm.nii.gz"
