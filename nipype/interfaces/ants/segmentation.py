@@ -1235,9 +1235,7 @@ class KellyKapowski(ANTSCommand):
     >>> from nipype.interfaces.ants.segmentation import KellyKapowski
     >>> kk = KellyKapowski()
     >>> kk.inputs.dimension = 3
-    >>> kk.inputs.segmentation_image = "anat_hc_gm_wm.nii.gz"
-    >>> kk.inputs.gray_matter_prob_image = "anat_hc_gm.nii.gz"
-    >>> kk.inputs.white_matter_prob_image = "anat_hc_wm.nii.gz"
+    >>> kk.inputs.segmentation_image = "segmentation0.nii.gz"
     >>> kk.inputs.convergence = "[45,0.0,10]"
     >>> kk.inputs.gradient_step = 0.025
     >>> kk.inputs.smoothing_variance = 1.0
@@ -1246,12 +1244,15 @@ class KellyKapowski(ANTSCommand):
     >>> kk.inputs.number_integration_points = 10
     >>> kk.inputs.thickness_prior_estimate = 10
     >>> kk.cmdline # doctest: +ALLOW_UNICODE
-    'KellyKapowski --convergence "[45,0.0,10]"
-    --output "[anat_hc_gm_wm_cortical_thickness.nii.gz, anat_hc_gm_wm_warped_white_matter.nii.gz]"
-    --image-dimensionality 3 --gradient-step 0.025000 --gray-matter-probability-image "anat_hc_gm.nii.gz"
-    --number-of-integration-points 10 --segmentation-image "[anat_hc_gm_wm.nii.gz,2,3]" --smoothing-variance 1.000000
-    --smoothing-velocity-field-parameter 1.500000 --thickness-prior-estimate 10.000000
-    --white-matter-probability-image "anat_hc_wm.nii.gz"'
+    "KellyKapowski --convergence "[45,0.0,10]" \
+--output "[segmentation0_cortical_thickness.nii.gz,segmentation0_warped_white_matter.nii.gz]"  \
+--image-dimensionality 3 --gradient-step 0.025000 \
+--number-of-integration-points 10 \
+--segmentation-image "[segmentation0.nii.gz,2,3]" \
+--smoothing-variance 1.000000 \
+--smoothing-velocity-field-parameter 1.500000 \
+--thickness-prior-estimate 10.000000"
+
     """
     _cmd = "KellyKapowski"
     input_spec = KellyKapowskiInputSpec
@@ -1312,7 +1313,7 @@ class KellyKapowski(ANTSCommand):
         if opt == "cortical_thickness":
             ct = self._gen_filename("cortical_thickness")
             wm = self._gen_filename("warped_white_matter")
-            newval = '[{}, {}]'.format(ct, wm)
+            newval = '[{},{}]'.format(ct, wm)
             return spec.argstr % newval
 
         return super(KellyKapowski, self)._format_arg(opt, spec, val)
