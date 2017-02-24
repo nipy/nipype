@@ -6,8 +6,6 @@
 from __future__ import print_function, division, unicode_literals, absolute_import
 from builtins import zip, next, range, str
 
-from nipype.utils import NUMPY_MMAP
-
 from ....pipeline import engine as pe
 from ....interfaces import utility as niu
 from ....interfaces import fsl
@@ -208,6 +206,7 @@ def extract_bval(in_dwi, in_bval, b=0, out_file=None):
     import numpy as np
     import nibabel as nb
     import os.path as op
+    from nipype.utils import NUMPY_MMAP
 
     if out_file is None:
         fname, ext = op.splitext(op.basename(in_dwi))
@@ -243,6 +242,7 @@ def hmc_split(in_file, in_bval, ref_num=0, lowbval=5.0):
     import nibabel as nb
     import os.path as op
     from nipype.interfaces.base import isdefined
+    from nipype.utils import NUMPY_MMAP
 
     im = nb.load(in_file, mmap=NUMPY_MMAP)
     data = im.get_data()
@@ -287,6 +287,7 @@ def remove_comp(in_file, in_bval, volid=0, out_file=None):
     import numpy as np
     import nibabel as nb
     import os.path as op
+    from nipype.utils import NUMPY_MMAP
 
     if out_file is None:
         fname, ext = op.splitext(op.basename(in_file))
@@ -336,6 +337,7 @@ def recompose_dwi(in_dwi, in_bval, in_corrected, out_file=None):
     import numpy as np
     import nibabel as nb
     import os.path as op
+    from nipype.utils import NUMPY_MMAP
 
     if out_file is None:
         fname, ext = op.splitext(op.basename(in_dwi))
@@ -396,6 +398,7 @@ def time_avg(in_file, index=[0], out_file=None):
     import numpy as np
     import nibabel as nb
     import os.path as op
+    from nipype.utils import NUMPY_MMAP
 
     if out_file is None:
         fname, ext = op.splitext(op.basename(in_file))
@@ -443,6 +446,7 @@ def b0_average(in_dwi, in_bval, max_b=10.0, out_file=None):
     import numpy as np
     import nibabel as nb
     import os.path as op
+    from nipype.utils import NUMPY_MMAP
 
     if out_file is None:
         fname, ext = op.splitext(op.basename(in_dwi))
@@ -622,6 +626,7 @@ def rads2radsec(in_file, delta_te, out_file=None):
     import nibabel as nb
     import os.path as op
     import math
+    from nipype.utils import NUMPY_MMAP
 
     if out_file is None:
         fname, fext = op.splitext(op.basename(in_file))
@@ -643,6 +648,7 @@ def demean_image(in_file, in_mask=None, out_file=None):
     import nibabel as nb
     import os.path as op
     import math
+    from nipype.utils import NUMPY_MMAP
 
     if out_file is None:
         fname, fext = op.splitext(op.basename(in_file))
@@ -673,6 +679,7 @@ def add_empty_vol(in_file, out_file=None):
     import os.path as op
     import numpy as np
     import math
+    from nipype.utils import NUMPY_MMAP
 
     if out_file is None:
         fname, fext = op.splitext(op.basename(in_file))
@@ -695,6 +702,7 @@ def reorient_bvecs(in_dwi, old_dwi, in_bvec):
     import os
     import numpy as np
     import nibabel as nb
+    from nipype.utils import NUMPY_MMAP
 
     name, fext = os.path.splitext(os.path.basename(in_bvec))
     if fext == '.gz':
@@ -720,6 +728,7 @@ def copy_hdr(in_file, in_file_hdr, out_file=None):
     import numpy as np
     import nibabel as nb
     import os.path as op
+    from nipype.utils import NUMPY_MMAP
 
     if out_file is None:
         fname, fext = op.splitext(op.basename(in_file))
@@ -743,6 +752,7 @@ def enhance(in_file, clip_limit=0.010, in_mask=None, out_file=None):
     import nibabel as nb
     import os.path as op
     from skimage import exposure, img_as_int
+    from nipype.utils import NUMPY_MMAP
 
     if out_file is None:
         fname, fext = op.splitext(op.basename(in_file))
