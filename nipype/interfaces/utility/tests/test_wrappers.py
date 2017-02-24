@@ -133,6 +133,77 @@ def test_workflow_wrapper_fail_3():
     with pytest.raises(RuntimeError):
         utility.WorkflowInterface(workflow=pe.Workflow('some_failing_workflow'))
 
+
+def test_workflow_wrapper_fail_4():
+    from nipype.interfaces import utility as niu
+    from nipype.pipeline import engine as pe
+    from nipype.interfaces.fsl import BET
+
+    wf = pe.Workflow('fail workflow')
+    wf = pe.Workflow('failworkflow')
+    node = pe.Node(BET(), name='inputnode')
+    outputnode = pe.Node(niu.IdentityInterface(fields=['out_file']), name='outputnode')
+    wf.connect([
+        (node, outputnode, [('out_file', 'out_file')])
+    ])
+    wi = niu.WorkflowInterface(workflow=wf)
+    with pytest.raises(RuntimeError):
+        wi.run()
+
+def test_workflow_wrapper_fail_5():
+    from nipype.interfaces import utility as niu
+    from nipype.pipeline import engine as pe
+    from nipype.interfaces.fsl import BET
+    from nipype.interfaces.base import TraitError
+
+    wf = pe.Workflow('fail workflow')
+    wf = pe.Workflow('failworkflow')
+    node = pe.Node(BET(), name='inputnode')
+    outputnode = pe.Node(niu.IdentityInterface(fields=['out_file']), name='outputnode')
+    wf.connect([
+        (node, outputnode, [('out_file', 'out_file')])
+    ])
+    wi = niu.WorkflowInterface(workflow=wf)
+    wi.inputs.in_file = 'idonotexist.nii.gz'
+    with pytest.raises(TraitError):
+        wi.run()
+
+def test_workflow_wrapper_mapnode():
+    def merge_workflow(name='MergeWorkflow'):
+        inputnode = pe.Node(niu.IdentityInterface(
+            fields=['a', 'b']), name='inputnode')
+
+        mergenode = pe.Node(niu.Merge(2), name='mergenode')
+
+        outputnode = pe.Node(niu.IdentityInterface(
+            fields=['c']), name='outputnode')
+
+        wf = pe.Workflow(name=name)
+        wf.connect([
+            (inputnode, mergenode, [('a', 'in1'), ('b', 'in2')]),
+            (mergenode, outputnode, [('out', 'c')])
+        ])
+        return wf
+
+    outerworkflow = pe.Workflow(name='OuterWorkflow')
+    outerinput = pe.Node(niu.IdentityInterface(
+                         fields=['a', 'b']), name='outerinput')
+    wrapped = pe.MapNode(niu.WorkflowInterface(workflow=merge_workflow),
+                         iterfield=['a', 'b'], name='dyniterable')
+    outeroutput = pe.Node(niu.IdentityInterface(
+                          fields=['c']), name='outeroutput')
+
+    outerworkflow.connect([
+        (outerinput, wrapped, [('a', 'a'), ('b', 'b')]),
+        (wrapped, outeroutput, [('out', 'c')])
+    ])
+    outerworkflow.inputs.outerinput.a = [10, 12, 14]
+    outerworkflow.inputs.outerinput.b = [9, -1, 10]
+
+    outerworkflow.run()
+
+
+
 def test_workflow_wrapper_fail_4():
     wf = pe.Workflow('some_failing_workflow')
 
