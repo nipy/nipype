@@ -21,8 +21,9 @@ except ImportError:
 def test_fd(tmpdir):
     tempdir = str(tmpdir)
     ground_truth = np.loadtxt(example_data('fsl_motion_outliers_fd.txt'))
-    fdisplacement = FramewiseDisplacement(in_plots=example_data('fsl_mcflirt_movpar.txt'),
-                                          out_file=tempdir + '/fd.txt')
+    fdisplacement = FramewiseDisplacement(in_file=example_data('fsl_mcflirt_movpar.txt'),
+                                          out_file=tempdir + '/fd.txt',
+                                          parameter_source="FSL")
     res = fdisplacement.run()
 
     with open(res.outputs.out_file) as all_lines:
