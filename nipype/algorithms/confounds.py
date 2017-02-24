@@ -52,6 +52,16 @@ class ComputeDVARSInputSpec(BaseInterfaceInputSpec):
                            desc='output figure size')
     figformat = traits.Enum('png', 'pdf', 'svg', usedefault=True,
                             desc='output format for figures')
+    intensity_normalization = traits.Float(1000.0, usedefault=True,
+                              desc='Divide value in each voxel at each timepoint '
+                                   'by the median calculated across all voxels'
+                                   'and timepoints within the mask (if specified)'
+                                   'and then multiply by the value specified by'
+                                   'this parameter. By using the default (1000)' \
+                                   'output DVARS will be expressed in ' \
+                                   'x10 % BOLD units compatible with Power et al.' \
+                                   '2012. Set this to 0 to disable intensity' \
+                                   'normalization altogether.')
 
 
 
@@ -128,7 +138,8 @@ Bradley L. and Petersen, Steven E.},
 
     def _run_interface(self, runtime):
         dvars = compute_dvars(self.inputs.in_file, self.inputs.in_mask,
-                              remove_zerovariance=self.inputs.remove_zerovariance)
+                              remove_zerovariance=self.inputs.remove_zerovariance,
+                              intensity_normalization=self.inputs.intensity_normalization)
 
         (self._results['avg_std'],
          self._results['avg_nstd'],
@@ -595,7 +606,8 @@ def regress_poly(degree, data, remove_mean=True, axis=-1):
     # Back to original shape
     return regressed_data.reshape(datashape)
 
-def compute_dvars(in_file, in_mask, remove_zerovariance=False):
+def compute_dvars(in_file, in_mask, remove_zerovariance=False,
+                  intensity_normalization=1000):
     """
     Compute the :abbr:`DVARS (D referring to temporal
     derivative of timecourses, VARS referring to RMS variance over voxels)`
@@ -636,59 +648,49 @@ research/nichols/scripts/fsl/standardizeddvars.pdf>`_, 2013.
         raise RuntimeError(
             "Input fMRI dataset should be 4-dimensional")
 
-    # Robust standard deviation
-    func_sd = (np.percentile(func, 75, axis=3) -
-               np.percentile(func, 25, axis=3)) / 1.349
-    func_sd[mask <= 0] = 0
-
-    if remove_zerovariance:
-        # Remove zero-variance voxels across time axis
-        mask = zero_remove(func_sd, mask)
-
     idx = np.where(mask > 0)
     mfunc = func[idx[0], idx[1], idx[2], :]
 
-    # Demean
-    mfunc = regress_poly(0, mfunc, remove_mean=True).astype(np.float32)
+    if intensity_normalization != 0:
+        mfunc = (mfunc / np.median(mfunc)) * intensity_normalization
+
+    # Robust standard deviation (we are using "lower" interpolation
+    # because this is what FSL is doing
+    func_sd = (np.percentile(mfunc, 75, axis=1, interpolation="lower") -
+               np.percentile(mfunc, 25, axis=1, interpolation="lower")) / 1.349
+
+    if remove_zerovariance:
+        mfunc = mfunc[func_sd != 0, :]
+        func_sd = func_sd[func_sd != 0]
 
     # Compute (non-robust) estimate of lag-1 autocorrelation
-    ar1 = np.apply_along_axis(AR_est_YW, 1, mfunc, 1)[:, 0]
+    ar1 = np.apply_along_axis(AR_est_YW, 1,
+                              regress_poly(0, mfunc, remove_mean=True).astype(
+                                  np.float32), 1)[:, 0]
 
     # Compute (predicted) standard deviation of temporal difference time series
-    diff_sdhat = np.squeeze(np.sqrt(((1 - ar1) * 2).tolist())) * func_sd[mask > 0].reshape(-1)
+    diff_sdhat = np.squeeze(np.sqrt(((1 - ar1) * 2).tolist())) * func_sd
     diff_sd_mean = diff_sdhat.mean()
 
     # Compute temporal difference time series
     func_diff = np.diff(mfunc, axis=1)
 
     # DVARS (no standardization)
-    dvars_nstd = func_diff.std(axis=0)
+    dvars_nstd = np.sqrt(np.square(func_diff).mean(axis=0))
 
     # standardization
     dvars_stdz = dvars_nstd / diff_sd_mean
 
-    with warnings.catch_warnings(): # catch, e.g., divide by zero errors
+    with warnings.catch_warnings():  # catch, e.g., divide by zero errors
         warnings.filterwarnings('error')
 
         # voxelwise standardization
-        diff_vx_stdz = func_diff / np.array([diff_sdhat] * func_diff.shape[-1]).T
-        dvars_vx_stdz = diff_vx_stdz.std(axis=0, ddof=1)
+        diff_vx_stdz = np.square(
+            func_diff / np.array([diff_sdhat] * func_diff.shape[-1]).T)
+        dvars_vx_stdz = np.sqrt(diff_vx_stdz.mean(axis=0))
 
     return (dvars_stdz, dvars_nstd, dvars_vx_stdz)
 
-def zero_remove(data, mask):
-    """
-    Modify inputted mask to also mask out zero values
-
-    :param numpy.ndarray data: e.g. voxelwise stddev of fMRI dataset, after motion correction
-    :param numpy.ndarray mask: brain mask (same dimensions as data)
-    :return: the mask with any additional zero voxels removed (same dimensions as inputs)
-    :rtype: numpy.ndarray
-
-    """
-    new_mask = mask.copy()
-    new_mask[data == 0] = 0
-    return new_mask
 
 def plot_confound(tseries, figsize, name, units=None,
                   series_tr=None, normalize=False):

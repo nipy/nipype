@@ -5,7 +5,6 @@
 import os
 from warnings import warn
 
-from nipype.utils import NUMPY_MMAP
 from ....pipeline import engine as pe
 from ....interfaces import utility as util
 from ....interfaces import fsl as fsl
@@ -13,6 +12,7 @@ from ....interfaces import fsl as fsl
 
 def tbss1_op_string(in_files):
     import nibabel as nb
+    from nipype.utils import NUMPY_MMAP
     op_strings = []
     for infile in in_files:
         img = nb.load(infile, mmap=NUMPY_MMAP)

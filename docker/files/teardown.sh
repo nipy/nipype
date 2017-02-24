@@ -7,9 +7,9 @@ set -u
 set -e
 
 mkdir -p ${CIRCLE_TEST_REPORTS}/pytest
-sudo mv ~/scratch/*.xml ${CIRCLE_TEST_REPORTS}/pytest
+mv ~/scratch/*.xml ${CIRCLE_TEST_REPORTS}/pytest
 mkdir -p ~/docs
-sudo mv ~/scratch/docs/* ~/docs/
+mv ~/scratch/docs/* ~/docs/
 mkdir -p ~/logs
-sudo mv ~/scratch/builddocs.log ~/logs/builddocs.log
-sudo mv ~/scratch/logs/* ~/logs/
+mv ~/scratch/builddocs.log ~/logs/builddocs.log
+mv ~/scratch/logs/* ~/logs/

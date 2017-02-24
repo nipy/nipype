@@ -5,7 +5,6 @@ from builtins import open, str
 
 import warnings
 
-from nipype.utils import NUMPY_MMAP
 from ....pipeline import engine as pe
 from ....interfaces import utility as niu
 from ....interfaces import fsl as fsl
@@ -722,6 +721,7 @@ def _prepare_phasediff(in_file):
     import nibabel as nb
     import os
     import numpy as np
+    from nipype.utils import NUMPY_MMAP
     img = nb.load(in_file, mmap=NUMPY_MMAP)
     max_diff = np.max(img.get_data().reshape(-1))
     min_diff = np.min(img.get_data().reshape(-1))
@@ -741,6 +741,7 @@ def _dilate_mask(in_file, iterations=4):
     import nibabel as nb
     import scipy.ndimage as ndimage
     import os
+    from nipype.utils import NUMPY_MMAP
     img = nb.load(in_file, mmap=NUMPY_MMAP)
     img._data = ndimage.binary_dilation(img.get_data(), iterations=iterations)
 
@@ -756,6 +757,7 @@ def _fill_phase(in_file):
     import nibabel as nb
     import os
     import numpy as np
+    from nipype.utils import NUMPY_MMAP
     img = nb.load(in_file, mmap=NUMPY_MMAP)
     dumb_img = nb.Nifti1Image(np.zeros(img.shape), img.affine, img.header)
     out_nii = nb.funcs.concat_images((img, dumb_img))
@@ -772,6 +774,7 @@ def _vsm_remove_mean(in_file, mask_file, in_unwarped):
     import os
     import numpy as np
     import numpy.ma as ma
+    from nipype.utils import NUMPY_MMAP
     img = nb.load(in_file, mmap=NUMPY_MMAP)
     msk = nb.load(mask_file, mmap=NUMPY_MMAP).get_data()
     img_data = img.get_data()
@@ -794,6 +797,7 @@ def _ms2sec(val):
 def _split_dwi(in_file):
     import nibabel as nb
     import os
+    from nipype.utils import NUMPY_MMAP
     out_files = []
     frames = nb.funcs.four_to_three(nb.load(in_file, mmap=NUMPY_MMAP))
     name, fext = os.path.splitext(os.path.basename(in_file))
