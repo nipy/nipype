@@ -96,7 +96,6 @@ def dwi_flirt(name='DWICoregistration', excl_nodiff=False,
     dilate = pe.Node(fsl.maths.MathsCommand(
         nan2zeros=True, args='-kernel sphere 5 -dilM'), name='MskDilate')
     split = pe.Node(fsl.Split(dimension='t'), name='SplitDWIs')
-    pick_ref = pe.Node(niu.Select(), name='Pick_b0')
     n4 = pe.Node(ants.N4BiasFieldCorrection(dimension=3), name='Bias')
     enhb0 = pe.Node(niu.Function(
         input_names=['in_file', 'in_mask', 'clip_limit'],
