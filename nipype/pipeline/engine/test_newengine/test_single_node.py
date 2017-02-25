@@ -71,7 +71,7 @@ def test_singlenode_2(inputs_dict, expected_output):
 
 
 @pytest.mark.parametrize("inputs_dict, expected_output", [
-        ({"a":[3, 1, 8], "b":[0, 1, 2]}, [(["a=3","b=0"], 0), (["a=1","b=1"], 1), (["a=8", "a=2"], 16)]),
+        ({"a":[3, 1, 8], "b":[0, 1, 2]}, [(["a=3","b=0"], 0), (["a=1","b=1"], 1), (["a=8","b=2"], 16)]),
         ({"a":[3, 1, 8], "b":[2]}, [(["a=3","b=2"], 6), (["a=1","b=2"], 2), (["a=8","b=2"], 16)]),
         ])
 def test_single_node_3(inputs_dict, expected_output):
