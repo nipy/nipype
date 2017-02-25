@@ -1,0 +1,4 @@
+{
+  "nipype/pipeline/engine/tests/test_engine.py::test_deep_nested_write_graph_runs": true, 
+  "nipype/pipeline/engine/tests/test_engine.py::test_write_graph_runs": true
+}
