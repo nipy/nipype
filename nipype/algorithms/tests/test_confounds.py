@@ -6,7 +6,8 @@ from io import open
 
 import pytest
 from nipype.testing import example_data
-from nipype.algorithms.confounds import FramewiseDisplacement, ComputeDVARS
+from nipype.algorithms.confounds import FramewiseDisplacement, ComputeDVARS, \
+    _is_outlier
 import numpy as np
 
 
@@ -21,8 +22,9 @@ except ImportError:
 def test_fd(tmpdir):
     tempdir = str(tmpdir)
     ground_truth = np.loadtxt(example_data('fsl_motion_outliers_fd.txt'))
-    fdisplacement = FramewiseDisplacement(in_plots=example_data('fsl_mcflirt_movpar.txt'),
-                                          out_file=tempdir + '/fd.txt')
+    fdisplacement = FramewiseDisplacement(in_file=example_data('fsl_mcflirt_movpar.txt'),
+                                          out_file=tempdir + '/fd.txt',
+                                          parameter_source="FSL")
     res = fdisplacement.run()
 
     with open(res.outputs.out_file) as all_lines:
@@ -63,3 +65,10 @@ def test_dvars(tmpdir):
     assert (np.abs(dv1[:, 1] - ground_truth[:, 1]).sum() / len(dv1)) > 0.05
 
     assert (np.abs(dv1[:, 2] - ground_truth[:, 2]).sum() / len(dv1)) < 0.05
+
+def test_outliers(tmpdir):
+    in_data = np.random.randn(100)
+    in_data[0] += 10
+
+    assert _is_outlier(in_data) == 1
+

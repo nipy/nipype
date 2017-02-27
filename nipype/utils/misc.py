@@ -243,3 +243,15 @@ def unflatten(in_list, prev_structure):
         for item in prev_structure:
             out.append(unflatten(in_list, item))
         return out
+
+
+def normalize_mc_params(params, source):
+    """
+    Normalize a single row of motion parameters to the SPM format.
+    """
+    if source == 'FSL':
+        params = params[[3, 4, 5, 0, 1, 2]]
+    elif source in ('AFNI', 'FSFAST'):
+        params = params[np.asarray([4, 5, 3, 1, 2, 0]) + (len(params) > 6)]
+        params[3:] = params[3:] * np.pi / 180.
+    return params
