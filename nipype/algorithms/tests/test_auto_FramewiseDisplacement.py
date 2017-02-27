@@ -11,7 +11,7 @@ def test_FramewiseDisplacement_inputs():
     ignore_exception=dict(nohash=True,
     usedefault=True,
     ),
-    in_plots=dict(mandatory=True,
+    in_file=dict(mandatory=True,
     ),
     normalize=dict(usedefault=True,
     ),

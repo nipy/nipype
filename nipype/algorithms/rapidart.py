@@ -34,7 +34,7 @@ from ..interfaces.base import (BaseInterface, traits, InputMultiPath,
                                OutputMultiPath, TraitedSpec, File,
                                BaseInterfaceInputSpec, isdefined)
 from ..utils.filemanip import filename_to_list, save_json, split_filename
-from ..utils.misc import find_indices
+from ..utils.misc import find_indices, normalize_mc_params
 from .. import logging, config
 iflogger = logging.getLogger('interface')
 
@@ -46,15 +46,12 @@ def _get_affine_matrix(params, source):
     source : the package that generated the parameters
              supports SPM, AFNI, FSFAST, FSL, NIPY
     """
-    if source == 'FSL':
-        params = params[[3, 4, 5, 0, 1, 2]]
-    elif source in ('AFNI', 'FSFAST'):
-        params = params[np.asarray([4, 5, 3, 1, 2, 0]) + (len(params) > 6)]
-        params[3:] = params[3:] * np.pi / 180.
     if source == 'NIPY':
         # nipy does not store typical euler angles, use nipy to convert
         from nipy.algorithms.registration import to_matrix44
         return to_matrix44(params)
+
+    params = normalize_mc_params(params, source)
     # process for FSL, SPM, AFNI and FSFAST
     rotfunc = lambda x: np.array([[np.cos(x), np.sin(x)],
                                   [-np.sin(x), np.cos(x)]])
