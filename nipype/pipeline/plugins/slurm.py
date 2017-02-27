@@ -15,6 +15,7 @@ from time import sleep
 from ...interfaces.base import CommandLine
 from .base import (SGELikeBatchManagerBase, logger, iflogger, logging)
 
+import subprocess
 
 
 class SLURMPlugin(SGELikeBatchManagerBase):
