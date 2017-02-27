@@ -192,6 +192,39 @@ def test_workflow_wrapper_mapnode():
     outerworkflow.run()
 
 
+def test_workflow_wrapper_iterables_1():
+    """ Test the WorkflowInterface with iterables """
+    wrapped = pe.Node(niu.WorkflowInterface(workflow=merge_workflow),
+                      name='dyniterable')
+    wrapped.iterables = ('a', [10, 12, 14])
+    wrapped.inputs.b = 9
+    res = wrapped.run()
+
+    assert res.outputs == [[10, 9], [12, 9], [14, 9]]
+
+
+def test_workflow_wrapper_iterables_2():
+    """ Test the WorkflowInterface with iterables """
+    wrapped = pe.Node(niu.WorkflowInterface(workflow=merge_workflow),
+                      name='dyniterable')
+
+    wrapped.iterables = [('a', [10, 12]),
+                         ('b', [9, -1])]
+    res = wrapped.run()
+    assert res.outputs == [[10, 9], [10, -1], [12, 9], [12, -1]]
+
+def test_workflow_wrapper_iterables_3():
+    """ Test the WorkflowInterface with iterables """
+    wrapped = pe.Node(niu.WorkflowInterface(workflow=merge_workflow),
+                      name='dyniterable')
+
+    wrapped.iterables = [('a', [10, 12]),
+                         ('b', [9, -1])]
+
+    wrapped.synchronize = True
+    res = wrapped.run()
+    assert res.outputs == [[10, 9], [12, -1]]
+
 def test_workflow_wrapper(tmpdir):
     """ This tests excution nodes with multiple inputs and auxiliary
     function inside the Workflow connect function.
