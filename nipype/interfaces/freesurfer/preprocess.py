@@ -1503,11 +1503,11 @@ class MNIBiasCorrectionInputSpec(FSTraitedSpec):
     # mandatory
     in_file = File(exists=True, mandatory=True, argstr="--i %s",
                    desc="input volume. Input can be any format accepted by mri_convert.")
+    # optional
     out_file = File(argstr="--o %s", name_source=['in_file'],
                     name_template='%s_output', hash_files=False, keep_extension=True,
                     desc="output volume. Output can be any format accepted by mri_convert. " +
                     "If the output format is COR, then the directory must exist.")
-    # optional
     iterations = traits.Int(4, argstr="--n %d",
                             desc="Number of iterations to run nu_correct. Default is 4. This is the number of times " +
                             "that nu_correct is repeated (ie, using the output from the previous run as the input for " +
@@ -1528,7 +1528,7 @@ class MNIBiasCorrectionInputSpec(FSTraitedSpec):
                         desc="Shrink parameter for finer sampling (default is 4)")
 
 class MNIBiasCorrectionOutputSpec(TraitedSpec):
-    out_file = File(desc="output volume")
+    out_file = File(exists=True, desc="output volume")
 
 
 class MNIBiasCorrection(FSCommand):
@@ -1562,11 +1562,6 @@ class MNIBiasCorrection(FSCommand):
     _cmd = "mri_nu_correct.mni"
     input_spec = MNIBiasCorrectionInputSpec
     output_spec = MNIBiasCorrectionOutputSpec
-
-    def _list_outputs(self):
-        outputs = self._outputs().get()
-        outputs["out_file"] = os.path.abspath(self.inputs.out_file)
-        return outputs
 
 
 class WatershedSkullStripInputSpec(FSTraitedSpec):
