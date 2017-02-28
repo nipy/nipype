@@ -166,10 +166,9 @@ class EstimateResponseSHInputSpec(DipyBaseInterfaceInputSpec):
     roi_radius = traits.Int(
         10, usedefault=True, desc=('ROI radius to be used in auto_response'))
     auto = traits.Bool(
-        True, usedefault=True, xor=['recursive'],
-        desc='use the auto_response estimator from dipy')
+        True, usedefault=True, desc='use the auto_response estimator from dipy')
     recursive = traits.Bool(
-        False, usedefault=True, xor=['auto'],
+        False, usedefault=True,
         desc='use the recursive response estimator from dipy')
     response = File(
         'response.txt', usedefault=True, desc=('the output response file'))
