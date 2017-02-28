@@ -13,7 +13,8 @@ Including linear and non-linear image co-registration
 def create_linear_gw_step(name="linear_gw_niftyreg",
                           demean=True,
                           linear_options_hash=None,
-                          use_mask=False):
+                          use_mask=False,
+                          verbose=False):
     """Creates a workflow that perform linear co-registration of a set of images using RegAladin, 
     producing an average image and a set of affine transformation matrices linking each
     of the floating images to the average.
@@ -64,6 +65,8 @@ def create_linear_gw_step(name="linear_gw_niftyreg",
     lin_reg = pe.MapNode(interface=niftyreg.RegAladin(**linear_options_hash),
                          name="lin_reg",
                          iterfield=['flo_file'])
+    if verbose is False:
+        lin_reg.inputs.verbosity_off_flag = True
 
     # Average the images
     ave_ims = pe.Node(interface=niftyreg.RegAverage(), name="ave_ims")
@@ -101,7 +104,8 @@ def create_nonlinear_gw_step(name="nonlinear_gw_niftyreg",
                              demean=True,
                              nonlinear_options_hash=None,
                              initial_affines=False,
-                             use_mask=False):
+                             use_mask=False,
+                             verbose=False):
     """Creates a workflow that perform non-linear co-registrations of a set of images using RegF3d,
     producing an non-linear average image and a set of cpp transformation linking each
     of the floating images to the average.
@@ -160,6 +164,8 @@ def create_nonlinear_gw_step(name="nonlinear_gw_niftyreg",
         nonlin_reg = pe.MapNode(interface=niftyreg.RegF3D(**nonlinear_options_hash),
                                 name="nonlin_reg",
                                 iterfield=['flo_file'])
+    if verbose is False:
+        nonlin_reg.inputs.verbosity_off_flag = True
 
     # Average the images
     ave_ims = pe.Node(interface=niftyreg.RegAverage(), name="ave_ims")
@@ -209,7 +215,8 @@ def create_groupwise_average(name="atlas_creation",
                              itr_non_lin=5,
                              linear_options_hash=None,
                              nonlinear_options_hash=None,
-                             use_mask=False):
+                             use_mask=False,
+                             verbose=False):
     # Create the overall workflow that embeds all the rigid, affine and non-linear components
     pipeline = pe.Workflow(name=name)
 
@@ -250,7 +257,8 @@ def create_groupwise_average(name="atlas_creation",
         # Create the rigid or affine sub-workflow and add it to the relevant list
         w = create_linear_gw_step(name='lin_reg' + str(i),
                                   linear_options_hash=linear_options_hash,
-                                  demean=demean_arg)
+                                  demean=demean_arg,
+                                  verbose=verbose)
         lin_workflows.append(w)
         # Connect up the input data to the workflow
         pipeline.connect(input_node, 'in_files', w, 'input_node.in_files')
@@ -275,7 +283,8 @@ def create_groupwise_average(name="atlas_creation",
         w = create_nonlinear_gw_step(name='nonlin' + str(i),
                                      demean=demean_arg,
                                      initial_affines=initial_affines_arg,
-                                     nonlinear_options_hash=nonlinear_options_hash)
+                                     nonlinear_options_hash=nonlinear_options_hash,
+                                     verbose=verbose)
 
         # Connect up the input data to the workflows
         pipeline.connect(input_node, 'in_files', w, 'input_node.in_files')
