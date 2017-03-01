@@ -40,8 +40,8 @@ class AntsMotionCorrStatsInputSpec(ANTSCommandInputSpec):
 
 class AntsMotionCorrStatsOutputSpec(TraitedSpec):
     ''' Output spec for the antsMotionCorrStats command '''
-    spatial_map = File(exists=True)
-    output = File(exists=True)
+    spatial_map = File(desc="output image of displacement magnitude", exists=True)
+    output = File(desc="CSV file containg motion correction statistics", exists=True)
 
 class AntsMotionCorrStats(ANTSCommand):
     ''' Interface for the antsMotionCorrStats command '''
@@ -73,7 +73,7 @@ class AntsMotionCorrInputSpec(ANTSCommandInputSpec):
         "the dimensionality from the input image."
     )
     dimensionality = traits.Enum(3, 2, argstr='-d %d', usedefault=True,
-                                 position=0, desc=dimension_desc, default=3)
+                                 position=0, desc=dimension_desc)
 
     average_image = File(argstr='-a %s', position=1, exists=False,
                          desc="Average the input time series image.")
@@ -134,9 +134,9 @@ class AntsMotionCorrInputSpec(ANTSCommandInputSpec):
 
 class AntsMotionCorrOutputSpec(TraitedSpec):
     '''Output spec for the antsMotionCorr command'''
-    average_image = File(exists=True, desc='Average of an image')
-    composite_transform = File(desc='Composite transform file')
-    inverse_composite_transform = File(desc='Inverse composite transform file')
+    average_image = File(exists=True, desc="Average of an image")
+    composite_transform = File(desc="Composite transform file")
+    inverse_composite_transform = File(desc="Inverse composite transform file")
     warped_image = File(desc="Outputs warped image")
     inverse_warped_image = File(desc="Outputs the inverse of the warped image")
     save_state = File(desc="The saved registration state to be restored")
