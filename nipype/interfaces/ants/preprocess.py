@@ -201,7 +201,6 @@ class AntsMotionCorr(ANTSCommand):
         if opt == 'output_average_image':
             self.inputs.output_average_image = self._gen_filename("output_average_image")
             return self._format_output()
-        self.inputs.output_average_image = "wat.nii.gz"
         return super(AntsMotionCorr, self)._format_arg(opt, spec, val)
 
     def _format_metric(self):
