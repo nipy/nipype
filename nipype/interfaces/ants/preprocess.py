@@ -76,9 +76,12 @@ class AntsMotionCorrInputSpec(ANTSCommandInputSpec):
     average_image = File(argstr='-a %s', position=1, exists=False,
                          desc="Average the input time series image.")
 
-    output_average_image = traits.File(desc="Filename to save average of input image as.", genfile=True)
+    output_average_image = traits.File(desc="Filename to save average of input image as.",
+                                       genfile=True, hash_files=False, argstr='%s')
 
-    output_transform_prefix = Str()
+    output_transform_prefix = Str(
+        desc="string to prepend to file containg all of the transformation parameters"
+    )
     output_warped_image = Str(desc="Name to save motion corrected image as.")
 
     metric_type = traits.Enum("CC", "MeanSquares", "Demons", "GC", "MI",
@@ -148,7 +151,6 @@ class AntsMotionCorr(ANTSCommand):
     >>> ants_mc.inputs.dimensionality = 3
     >>> ants_mc.inputs.output_transform_prefix = "motcorr"
     >>> ants_mc.inputs.output_warped_image = "warped.nii.gz"
-    >>> ants_mc.inputs.output_average_image = "average_image.nii.gz"
     >>> ants_mc.inputs.metric_type = "GC"
     >>> ants_mc.inputs.fixed_image = "average_image.nii.gz"
     >>> ants_mc.inputs.moving_image = "input.nii.gz"
@@ -197,10 +199,7 @@ class AntsMotionCorr(ANTSCommand):
         if opt == 'transformation_model':
             return self._format_transform()
         if opt == 'output_average_image':
-            if not _extant(self.inputs.output_average_image):
-                self.inputs.output_average_image = self._gen_filename("output_average_image")
-            else:
-                self.inputs.output_average_image = "wat.nii.gz"
+            self.inputs.output_average_image = self._gen_filename("output_average_image")
             return self._format_output()
         self.inputs.output_average_image = "wat.nii.gz"
         return super(AntsMotionCorr, self)._format_arg(opt, spec, val)
