@@ -81,7 +81,7 @@ class AntsMotionCorrInputSpec(ANTSCommandInputSpec):
     output_average_image = traits.Str(desc="Filename to save average of input image as.", argstr="%s")
                                 
     output_transform_prefix = traits.Str()
-    output_warped_image = Str(desc="Name to save motion corrected image as.")
+    output_warped_image = traits.Str(desc="Name to save motion corrected image as.")
 
     metric_type = traits.Enum("CC", "MeanSquares", "Demons", "GC", "MI",
                               "Mattes", argstr="%s")
