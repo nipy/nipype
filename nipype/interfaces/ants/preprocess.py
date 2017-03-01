@@ -12,8 +12,8 @@ import csv
 import math
 import os
  
-from nipype.interfaces.base import BaseInterface, \
-    BaseInterfaceInputSpec, traits, File, TraitedSpec
+from nipype.interfaces.base import (BaseInterface, BaseInterfaceInputSpec,
+                                    traits, File, TraitedSpec)
 from ..base import (BaseInterface, BaseInterfaceInputSpec, TraitedSpec, File,
                     traits, isdefined)
 from .base import ANTSCommand, ANTSCommandInputSpec
@@ -78,15 +78,14 @@ class AntsMotionCorrInputSpec(ANTSCommandInputSpec):
     average_image = File(argstr='-a %s', position=1, exists=False,
                          desc="Average the input time series image.")
 
-    output_average_image = File(hash_files=False, desc="", argstr="%s",
-                                genfile=True, exists=False, usedefault=True)
+    output_average_image = traits.Str(desc="Filename to save average of input image as.", argstr="%s")
+                                
     output_transform_prefix = traits.Str()
-    output_warped_image = File(hash_files=False, desc="",
-                               exists=False)
+    output_warped_image = Str(desc="Name to save motion corrected image as.")
 
     metric_type = traits.Enum("CC", "MeanSquares", "Demons", "GC", "MI",
                               "Mattes", argstr="%s")
-    fixed_image = File(requires=['metric_type'], desc="")
+    fixed_image = File(requires=['metric_type'], desc="Fixed image to do motion correction with respect to.")
     moving_image = File(requires=['metric_type'],
                         desc="This is the 4d image to be motion corrected")
     metric_weight = traits.Float(1.0, requires=['metric_type'])
@@ -120,15 +119,15 @@ class AntsMotionCorrInputSpec(ANTSCommandInputSpec):
     )
 
     use_fixed_reference_image = traits.Bool(
+        True,
         argstr="-u %d",
-        default=True,
         desc=("use a fixed reference image instead of the neighor in the time "
               "series.")
     )
 
     use_scales_estimator = traits.Bool(
+        True,
         argstr="-e %d",
-        default=True,
         desc="use the scale estimator to control optimization."
     )
 
@@ -237,7 +236,6 @@ class AntsMotionCorr(ANTSCommand):
             return "-o {}".format(self.inputs.output_average_image)
         return ""
 
-    # motcorr_avg.nii.gz  motcorrMOCOparams.csv  motcorr.nii.gz
     def _list_outputs(self):
         outputs = self._outputs().get()
         if _extant(self.inputs.output_average_image):
