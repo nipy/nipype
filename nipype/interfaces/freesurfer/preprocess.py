@@ -632,6 +632,10 @@ class ReconAllInputSpec(CommandLineInputSpec):
                         desc="Number of processors to use in parallel")
     parallel = traits.Bool(argstr="-parallel",
                            desc="Enable parallel execution")
+    hires = traits.Bool(argstr="-hires", min_ver='6.0.0',
+                        desc="Conform to minimum voxel size (for voxels < 1mm)")
+    expert = File(exists=True, argstr='-expert %s',
+                  desc="Set parameters using expert file")
     subjects_dir = Directory(exists=True, argstr='-sd %s', hash_files=False,
                              desc='path to subjects directory', genfile=True)
     flags = traits.Str(argstr='%s', desc='additional parameters')
