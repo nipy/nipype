@@ -11,7 +11,7 @@
 import csv
 import math
 import os
- 
+
 from nipype.interfaces.base import (BaseInterface, BaseInterfaceInputSpec,
                                     traits, File, TraitedSpec)
 from ..base import (BaseInterface, BaseInterfaceInputSpec, TraitedSpec, File,
@@ -79,7 +79,7 @@ class AntsMotionCorrInputSpec(ANTSCommandInputSpec):
                          desc="Average the input time series image.")
 
     output_average_image = traits.Str(desc="Filename to save average of input image as.", argstr="%s")
-                                
+
     output_transform_prefix = traits.Str()
     output_warped_image = traits.Str(desc="Name to save motion corrected image as.")
 
