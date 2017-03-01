@@ -78,7 +78,7 @@ class AntsMotionCorrInputSpec(ANTSCommandInputSpec):
     average_image = File(argstr='-a %s', position=1, exists=False,
                          desc="Average the input time series image.")
 
-    output_average_image = traits.Str(desc="Filename to save average of input image as.", argstr="%s")
+    output_average_image = traits.File(desc="Filename to save average of input image as.", genfile=True)
 
     output_transform_prefix = traits.Str()
     output_warped_image = traits.Str(desc="Name to save motion corrected image as.")
@@ -180,10 +180,11 @@ class AntsMotionCorr(ANTSCommand):
 
     def _gen_filename(self, name):
         if name == 'output_average_image':
-            if _extant(self.inputs.average_image):
-                pth, fname, ext = split_filename(self.inputs.average_image)
-            else:
-                pth, fname, ext = split_filename(self.inputs.fixed_image)
+            if _extant(self.inputs.fixed_image):
+                return self.inputs.fixed_image
+            if not _extant(self.inputs.average_image):
+                raise ValueError("Either fixed_image or average_image must be defined")
+            pth, fname, ext = split_filename(self.inputs.average_image)
             new_fname = '{}{}{}'.format(fname, '_avg', ext)
             return os.path.join(pth, new_fname)
         if name == 'ouput_warped_image' and _extant(self.inputs.fixed_image):
@@ -198,8 +199,12 @@ class AntsMotionCorr(ANTSCommand):
         if opt == 'transformation_model':
             return self._format_transform()
         if opt == 'output_average_image':
-            self.inputs.output_average_image = self._gen_filename("output_average_image")
+            if not _extant(self.inputs.output_average_image):
+                self.inputs.output_average_image = self._gen_filename("output_average_image")
+            else:
+                self.inputs.output_average_image = "wat.nii.gz"
             return self._format_output()
+        self.inputs.output_average_image = "wat.nii.gz"
         return super(AntsMotionCorr, self)._format_arg(opt, spec, val)
 
     def _format_metric(self):
