@@ -12,10 +12,8 @@ import csv
 import math
 import os
 
-from nipype.interfaces.base import (BaseInterface, BaseInterfaceInputSpec,
-                                    traits, File, TraitedSpec)
 from ..base import (BaseInterface, BaseInterfaceInputSpec, TraitedSpec, File,
-                    traits, isdefined)
+                    traits, isdefined, Str)
 from .base import ANTSCommand, ANTSCommandInputSpec
 from ...utils.filemanip import split_filename
 
@@ -80,8 +78,8 @@ class AntsMotionCorrInputSpec(ANTSCommandInputSpec):
 
     output_average_image = traits.File(desc="Filename to save average of input image as.", genfile=True)
 
-    output_transform_prefix = traits.Str()
-    output_warped_image = traits.Str(desc="Name to save motion corrected image as.")
+    output_transform_prefix = Str()
+    output_warped_image = Str(desc="Name to save motion corrected image as.")
 
     metric_type = traits.Enum("CC", "MeanSquares", "Demons", "GC", "MI",
                               "Mattes", argstr="%s")
