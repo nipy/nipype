@@ -36,6 +36,8 @@ from nipype.interfaces.utility import Merge, IdentityInterface
 from nipype.workflows.fmri.fsl import (create_featreg_preproc,
                                        create_modelfit_workflow,
                                        create_fixed_effects_flow)
+from nipype.utils import NUMPY_MMAP
+
 
 config.enable_provenance()
 version = 0
@@ -68,7 +70,7 @@ def median(in_files):
     """
     average = None
     for idx, filename in enumerate(filename_to_list(in_files)):
-        img = nb.load(filename)
+        img = nb.load(filename, mmap=NUMPY_MMAP)
         data = np.median(img.get_data(), axis=3)
         if average is None:
             average = data

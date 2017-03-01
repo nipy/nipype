@@ -665,6 +665,7 @@ class ReconAll(CommandLine):
     input_spec = ReconAllInputSpec
     output_spec = ReconAllOutputSpec
     _can_resume = True
+    force_run = False
 
     # Steps are based off of the recon-all tables [0,1] describing, inputs,
     # commands, and outputs of each step of the recon-all process,
@@ -687,7 +688,7 @@ class ReconAll(CommandLine):
                        ], []),
         ('nuintensitycor', ['mri/nu.mgz'], []),
         ('normalization', ['mri/T1.mgz'], []),
-        ('skullstrip', ['mri/talairach_with_skull.lta',
+        ('skullstrip', ['mri/transforms/talairach_with_skull.lta',
                         'mri/brainmask.auto.mgz',
                         'mri/brainmask.mgz'], []),
         ]
@@ -730,6 +731,8 @@ class ReconAll(CommandLine):
                           'surf/lh.sulc', 'surf/rh.sulc',
                           'surf/lh.inflated.H', 'surf/rh.inflated.H',
                           'surf/lh.inflated.K', 'surf/rh.inflated.K'], []),
+            # Undocumented in ReconAllTableStableV5.3
+            ('curvstats', ['stats/lh.curv.stats', 'stats/rh.curv.stats'], []),
             ]
         _autorecon3_steps = [
             ('sphere', ['surf/lh.sphere', 'surf/rh.sphere'], []),
@@ -742,18 +745,29 @@ class ReconAll(CommandLine):
                       'surf/lh.curv.pial', 'surf/rh.curv.pial',
                       'surf/lh.area.pial', 'surf/rh.area.pial',
                       'surf/lh.thickness', 'surf/rh.thickness'], []),
+            # Misnamed outputs in ReconAllTableStableV5.3: ?h.w-c.pct.mgz
+            ('pctsurfcon', ['surf/lh.w-g.pct.mgh', 'surf/rh.w-g.pct.mgh'], []),
+            ('parcstats', ['stats/lh.aparc.stats', 'stats/rh.aparc.stats',
+                           'label/aparc.annot.a2009s.ctab'], []),
             ('cortparc2', ['label/lh.aparc.a2009s.annot',
                            'label/rh.aparc.a2009s.annot'], []),
             ('parcstats2', ['stats/lh.aparc.a2009s.stats',
                             'stats/rh.aparc.a2009s.stats',
-                            'stats/aparc.annot.a2009s.ctab'], []),
+                            'label/aparc.annot.a2009s.ctab'], []),
+            # Undocumented in ReconAllTableStableV5.3
+            ('cortparc3', ['label/lh.aparc.DKTatlas40.annot',
+                           'label/rh.aparc.DKTatlas40.annot'], []),
+            # Undocumented in ReconAllTableStableV5.3
+            ('parcstats3', ['stats/lh.aparc.a2009s.stats',
+                            'stats/rh.aparc.a2009s.stats',
+                            'label/aparc.annot.a2009s.ctab'], []),
             ('cortribbon', ['mri/lh.ribbon.mgz', 'mri/rh.ribbon.mgz',
                             'mri/ribbon.mgz'], []),
             ('segstats', ['stats/aseg.stats'], []),
             ('aparc2aseg', ['mri/aparc+aseg.mgz',
                             'mri/aparc.a2009s+aseg.mgz'], []),
             ('wmparc', ['mri/wmparc.mgz', 'stats/wmparc.stats'], []),
-            ('balabels', ['BA.ctab', 'BA.thresh.ctab'], []),
+            ('balabels', ['label/BA.ctab', 'label/BA.thresh.ctab'], []),
             ('label-exvivo-ec', ['label/lh.entorhinal_exvivo.label',
                                  'label/rh.entorhinal_exvivo.label'], []),
             ]
@@ -807,18 +821,18 @@ class ReconAll(CommandLine):
                       'surf/lh.thickness', 'surf/rh.thickness'], []),
             ('cortribbon', ['mri/lh.ribbon.mgz', 'mri/rh.ribbon.mgz',
                             'mri/ribbon.mgz'], []),
-            ('parcstats', ['stats/lh.aparc.astats', 'stats/rh.aparc.stats',
-                           'stats/aparc.annot.ctab'], []),
+            ('parcstats', ['stats/lh.aparc.stats', 'stats/rh.aparc.stats',
+                           'label/aparc.annot.ctab'], []),
             ('cortparc2', ['label/lh.aparc.a2009s.annot',
                            'label/rh.aparc.a2009s.annot'], []),
             ('parcstats2', ['stats/lh.aparc.a2009s.stats',
                             'stats/rh.aparc.a2009s.stats',
-                            'stats/aparc.annot.a2009s.ctab'], []),
+                            'label/aparc.annot.a2009s.ctab'], []),
             ('cortparc3', ['label/lh.aparc.DKTatlas.annot',
                            'label/rh.aparc.DKTatlas.annot'], []),
             ('parcstats3', ['stats/lh.aparc.DKTatlas.stats',
                             'stats/rh.aparc.DKTatlas.stats',
-                            'stats/aparc.annot.DKTatlas.ctab'], []),
+                            'label/aparc.annot.DKTatlas.ctab'], []),
             ('pctsurfcon', ['surf/lh.w-g.pct.mgh', 'surf/rh.w-g.pct.mgh'], []),
             ('hyporelabel', ['mri/aseg.presurf.hypos.mgz'], []),
             ('aparc2aseg', ['mri/aparc+aseg.mgz',
@@ -827,7 +841,10 @@ class ReconAll(CommandLine):
             ('apas2aseg', ['mri/aseg.mgz'], ['mri/aparc+aseg.mgz']),
             ('segstats', ['stats/aseg.stats'], []),
             ('wmparc', ['mri/wmparc.mgz', 'stats/wmparc.stats'], []),
-            ('balabels', ['BA.ctab', 'BA.thresh.ctab',
+            # Note that this is a very incomplete list; however the ctab
+            # files are last to be touched, so this should be reasonable
+            ('balabels', ['label/BA_exvivo.ctab',
+                          'label/BA_exvivo.thresh.ctab',
                           'label/lh.entorhinal_exvivo.label',
                           'label/rh.entorhinal_exvivo.label'], []),
             ]
@@ -889,20 +906,30 @@ class ReconAll(CommandLine):
         if not isdefined(subjects_dir):
             subjects_dir = self._gen_subjects_dir()
 
+        no_run = True
         flags = []
         for idx, step in enumerate(self._steps):
             step, outfiles, infiles = step
             flag = '-{}'.format(step)
             noflag = '-no{}'.format(step)
-            if flag in cmd or noflag in cmd:
+            if noflag in cmd:
+                continue
+            elif flag in cmd:
+                no_run = False
                 continue
 
             subj_dir = os.path.join(subjects_dir, self.inputs.subject_id)
             if check_depends([os.path.join(subj_dir, f) for f in outfiles],
                              [os.path.join(subj_dir, f) for f in infiles]):
                 flags.append(noflag)
-        cmd += ' ' + ' '.join(flags)
+            else:
+                no_run = False
 
+        if no_run and not self.force_run:
+            iflogger.info('recon-all complete : Not running')
+            return "echo recon-all: nothing to do"
+
+        cmd += ' ' + ' '.join(flags)
         iflogger.info('resume recon-all : %s' % cmd)
         return cmd
 
@@ -944,7 +971,7 @@ class BBRegisterInputSpec(FSTraitedSpec):
 
 class BBRegisterInputSpec6(BBRegisterInputSpec):
     init = traits.Enum('coreg', 'rr', 'spm', 'fsl', 'header', 'best', argstr='--init-%s',
-                       usedefault=True, xor=['init_reg_file'],
+                       xor=['init_reg_file'],
                        desc='initialize registration with mri_coreg, spm, fsl, or header')
 
 
@@ -974,7 +1001,7 @@ class BBRegister(FSCommand):
     """
 
     _cmd = 'bbregister'
-    if LooseVersion(FSVersion) < LooseVersion("6.0.0"):
+    if FSVersion and LooseVersion(FSVersion) < LooseVersion("6.0.0"):
         input_spec = BBRegisterInputSpec
     else:
         input_spec = BBRegisterInputSpec6
@@ -1476,11 +1503,11 @@ class MNIBiasCorrectionInputSpec(FSTraitedSpec):
     # mandatory
     in_file = File(exists=True, mandatory=True, argstr="--i %s",
                    desc="input volume. Input can be any format accepted by mri_convert.")
+    # optional
     out_file = File(argstr="--o %s", name_source=['in_file'],
                     name_template='%s_output', hash_files=False, keep_extension=True,
                     desc="output volume. Output can be any format accepted by mri_convert. " +
                     "If the output format is COR, then the directory must exist.")
-    # optional
     iterations = traits.Int(4, argstr="--n %d",
                             desc="Number of iterations to run nu_correct. Default is 4. This is the number of times " +
                             "that nu_correct is repeated (ie, using the output from the previous run as the input for " +
@@ -1501,7 +1528,7 @@ class MNIBiasCorrectionInputSpec(FSTraitedSpec):
                         desc="Shrink parameter for finer sampling (default is 4)")
 
 class MNIBiasCorrectionOutputSpec(TraitedSpec):
-    out_file = File(desc="output volume")
+    out_file = File(exists=True, desc="output volume")
 
 
 class MNIBiasCorrection(FSCommand):
@@ -1535,11 +1562,6 @@ class MNIBiasCorrection(FSCommand):
     _cmd = "mri_nu_correct.mni"
     input_spec = MNIBiasCorrectionInputSpec
     output_spec = MNIBiasCorrectionOutputSpec
-
-    def _list_outputs(self):
-        outputs = self._outputs().get()
-        outputs["out_file"] = os.path.abspath(self.inputs.out_file)
-        return outputs
 
 
 class WatershedSkullStripInputSpec(FSTraitedSpec):

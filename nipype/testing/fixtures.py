@@ -5,23 +5,36 @@
 """
 Pytest fixtures used in tests.
 """
+from __future__ import print_function, division, unicode_literals, absolute_import
+
 
 import os
 import pytest
 import numpy as np
-
 import nibabel as nb
+
+from io import open
+from builtins import str
+
+from nipype.utils.filemanip import filename_to_list
 from nipype.interfaces.fsl import Info
 from nipype.interfaces.fsl.base import FSLCommand
 
 
-def nifti_image_files(outdir, filelist, shape):
-    for f in filelist:
+def analyze_pair_image_files(outdir, filelist, shape):
+    for f in filename_to_list(filelist):
         hdr = nb.Nifti1Header()
         hdr.set_data_shape(shape)
         img = np.random.random(shape)
-        nb.save(nb.Nifti1Image(img, np.eye(4), hdr),
-                 os.path.join(outdir, f))
+        analyze = nb.AnalyzeImage(img, np.eye(4), hdr)
+        analyze.to_filename(os.path.join(outdir, f))
+
+
+def nifti_image_files(outdir, filelist, shape):
+    for f in filename_to_list(filelist):
+        img = np.random.random(shape)
+        nb.Nifti1Image(img, np.eye(4), None).to_filename(
+            os.path.join(outdir, f))
 
 
 @pytest.fixture()
@@ -31,6 +44,21 @@ def create_files_in_directory(request, tmpdir):
     os.chdir(outdir)
     filelist = ['a.nii', 'b.nii']
     nifti_image_files(outdir, filelist, shape=(3,3,3,4))
+
+    def change_directory():
+        os.chdir(cwd)
+
+    request.addfinalizer(change_directory)
+    return (filelist, outdir)
+
+
+@pytest.fixture()
+def create_analyze_pair_file_in_directory(request, tmpdir):
+    outdir = str(tmpdir)
+    cwd = os.getcwd()
+    os.chdir(outdir)
+    filelist = ['a.hdr']
+    analyze_pair_image_files(outdir, filelist, shape=(3, 3, 3, 4))
 
     def change_directory():
         os.chdir(cwd)
@@ -64,7 +92,7 @@ def create_surf_file_in_directory(request, tmpdir):
     cwd = os.getcwd()
     os.chdir(outdir)
     surf = 'lh.a.nii'
-    nifti_image_files(outdir, filelist=surf, shape=(1,100,1))
+    nifti_image_files(outdir, filelist=surf, shape=(1, 100, 1))
 
     def change_directory():
         os.chdir(cwd)

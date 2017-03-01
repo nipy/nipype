@@ -32,6 +32,7 @@ trailing-spaces:
 
 clean-pyc:
 	find . -name "*.pyc" | xargs rm -f
+	find . -name "__pycache__" -type d | xargs rm -rf
 
 clean-so:
 	find . -name "*.so" | xargs rm -f
@@ -70,7 +71,7 @@ html:
 
 specs:
 	@echo "Checking specs and autogenerating spec tests"
-	python tools/checkspecs.py
+	env PYTHONPATH=".:$(PYTHONPATH)" python tools/checkspecs.py
 
 check: check-before-commit # just a shortcut
 check-before-commit: specs trailing-spaces html test
