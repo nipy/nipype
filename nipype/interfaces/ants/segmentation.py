@@ -1212,10 +1212,13 @@ class KellyKapowskiInputSpec(ANTSCommandInputSpec):
                                                      desc="Maximum number of iterations for estimating the invert \n"
                                                           "displacement field.")
 
-    cortical_thickness = File(argstr='--output "%s"', genfile=True,
+    cortical_thickness = File(argstr='--output "%s"', genfile=True, keep_extension=True,
+                              name_source=["segmentation_image"], name_template='%s_cortical_thickness',
                               desc='Filename for the cortical thickness.', hash_files=False)
 
-    warped_white_matter = File(desc='Filename for the warped white matter file.', hash_files=False)
+    warped_white_matter = File(name_source=["segmentation_image"], keep_extension=True,
+                               name_template='%s_warped_white_matter',
+                               desc='Filename for the warped white matter file.', hash_files=False)
 
 
 class KellyKapowskiOutputSpec(TraitedSpec):
@@ -1244,7 +1247,7 @@ class KellyKapowski(ANTSCommand):
     >>> kk.inputs.number_integration_points = 10
     >>> kk.inputs.thickness_prior_estimate = 10
     >>> kk.cmdline # doctest: +ALLOW_UNICODE
-    "KellyKapowski --convergence "[45,0.0,10]" \
+    u"KellyKapowski --convergence "[45,0.0,10]" \
 --output "[segmentation0_cortical_thickness.nii.gz,segmentation0_warped_white_matter.nii.gz]"  \
 --image-dimensionality 3 --gradient-step 0.025000 \
 --number-of-integration-points 10 \
@@ -1279,12 +1282,6 @@ class KellyKapowski(ANTSCommand):
             skip = []
         skip += ['warped_white_matter', 'gray_matter_label', 'white_matter_label']
         return super(KellyKapowski, self)._parse_inputs(skip=skip)
-
-    def _list_outputs(self):
-        outputs = self._outputs().get()
-        outputs['cortical_thickness']  = os.path.abspath(self._gen_filename('cortical_thickness'))
-        outputs['warped_white_matter'] = os.path.abspath(self._gen_filename('warped_white_matter'))
-        return outputs
 
     def _gen_filename(self, name):
         if name == 'cortical_thickness':
