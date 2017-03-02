@@ -1,12 +1,6 @@
 # -*- coding: utf-8 -*-
 """The ants module provides basic functions for interfacing with ants
     functions.
-
-   Change directory to provide relative paths for doctests
-   >>> import os
-   >>> filepath = os.path.dirname( os.path.realpath( __file__ ) )
-   >>> datadir = os.path.realpath(os.path.join(filepath, '../../testing/data'))
-   >>> os.chdir(datadir)
 """
 import csv
 import math
@@ -181,6 +175,8 @@ class AntsMotionCorr(ANTSCommand):
     Format and description of the affine motion correction parameters can be
     found in this PDF starting on page 555 section 3.9.16 AffineTransform:
     https://itk.org/ItkSoftwareGuide.pdf
+
+    https://github.com/stnava/ANTs/blob/master/Scripts/antsMotionCorrExample
     '''
     _cmd = 'antsMotionCorr'
     input_spec = AntsMotionCorrInputSpec
@@ -188,11 +184,20 @@ class AntsMotionCorr(ANTSCommand):
 
 
     def _gen_filename(self, name):
+        '''
+        If a fixed image is specified we are not going to be outputting
+        a newly created averaged image. The output flag for calls to 
+        antsMotionCorr with a fixed image have a value set for an average 
+        image. In all of the examples this value always matches the fixed 
+        image name.
+        '''
         if name == 'output_average_image':
             if _extant(self.inputs.fixed_image):
                 return self.inputs.fixed_image
             if not _extant(self.inputs.average_image):
                 raise ValueError("Either fixed_image or average_image must be defined")
+            if _extant(self.inputs.output_average_image):
+                return self.inputs.output_average_image
             pth, fname, ext = split_filename(self.inputs.average_image)
             new_fname = '{}{}{}'.format(fname, '_avg', ext)
             return os.path.join(pth, new_fname)
