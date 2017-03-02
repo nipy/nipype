@@ -18,8 +18,8 @@ import re
 import shutil
 
 from ...utils.filemanip import fname_presuffix, split_filename
-from ..base import (TraitedSpec, File, traits, OutputMultiPath, isdefined,
-                    CommandLine, CommandLineInputSpec)
+from ..base import (TraitedSpec, BaseInterface, File, traits, OutputMultiPath,
+                    isdefined, CommandLine, CommandLineInputSpec)
 from .base import (FSCommand, FSTraitedSpec,
                    FSScriptCommand, FSScriptOutputSpec,
                    FSTraitedSpecOpenMP, FSCommandOpenMP)
@@ -2879,3 +2879,64 @@ class Apas2Aseg(FSCommand):
         outputs = self._outputs().get()
         outputs["out_file"] = os.path.abspath(self.inputs.out_file)
         return outputs
+
+
+class ExpertOptionsInputSpec(TraitedSpec):
+    talairach = traits.String(desc="Flags to pass to talairach commands")
+    mri_normalize = traits.String(desc="Flags to pass to mri_normalize commands")
+    mri_watershed = traits.String(desc="Flags to pass to mri_watershed commands")
+    mri_em_register = traits.String(desc="Flags to pass to mri_em_register commands")
+    mri_ca_normalize = traits.String(desc="Flags to pass to mri_ca_normalize commands")
+    mri_ca_register = traits.String(desc="Flags to pass to mri_ca_register commands")
+    mri_remove_neck = traits.String(desc="Flags to pass to mri_remove_neck commands")
+    mri_ca_label = traits.String(desc="Flags to pass to mri_ca_label commands")
+    mri_segstats = traits.String(desc="Flags to pass to mri_segstats commands")
+    mri_mask = traits.String(desc="Flags to pass to mri_mask commands")
+    mri_segment = traits.String(desc="Flags to pass to mri_segment commands")
+    mri_edit_wm_with_aseg = traits.String(desc="Flags to pass to mri_edit_wm_with_aseg commands")
+    mri_pretess = traits.String(desc="Flags to pass to mri_pretess commands")
+    mri_fill = traits.String(desc="Flags to pass to mri_fill commands")
+    mri_tessellate = traits.String(desc="Flags to pass to mri_tessellate commands")
+    mris_smooth = traits.String(desc="Flags to pass to mri_smooth commands")
+    mris_inflate = traits.String(desc="Flags to pass to mri_inflate commands")
+    mris_sphere = traits.String(desc="Flags to pass to mris_sphere commands")
+    mris_fix_topology = traits.String(desc="Flags to pass to mris_fix_topology commands")
+    mris_make_surfaces = traits.String(desc="Flags to pass to mris_make_surfaces commands")
+    mris_surf2vol = traits.String(desc="Flags to pass to mris_surf2vol commands")
+    mris_register = traits.String(desc="Flags to pass to mris_register commands")
+    mrisp_paint = traits.String(desc="Flags to pass to mrisp_paint commands")
+    mris_ca_label = traits.String(desc="Flags to pass to mris_ca_label commands")
+    mris_anatomical_stats = traits.String(desc="Flags to pass to mris_anatomical_stats commands")
+    mri_aparc2aseg = traits.String(desc="Flags to pass to mri_aparc2aseg commands")
+    out_file = File("expert.opts", usedefault=True, desc="Output expert options file")
+
+
+class ExpertOptionsOutputSpec(TraitedSpec):
+    out_file = File(exists=False, desc="Output expert options file")
+
+
+class ExpertOptions(BaseInterface):
+    """
+    Creates expert options file
+    https://surfer.nmr.mgh.harvard.edu/fswiki/recon-all#ExpertOptionsFile
+    """
+    input_spec = ExpertOptionsInputSpec
+    output_spec = ExpertOptionsOutputSpec
+
+    def _list_outputs(self):
+        outputs = self._outputs().get()
+        outputs["out_file"] = os.path.abspath(self.inputs.out_file)
+        return outputs
+
+    def _run_interface(self, runtime):
+        out_file = self.inputs.out_file
+
+        lines = []
+        for binary, args in self.inputs.get().items():
+            if binary == 'out_file' or not isdefined(args):
+                continue
+            lines.append('{} {}\n'.format(binary, args))
+
+        with open(out_file, 'w') as fobj:
+            fobj.write(''.join(lines))
+        return runtime
