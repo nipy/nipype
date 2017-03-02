@@ -293,7 +293,10 @@ class AntsMatrixConversionOutputSpec(TraitedSpec):
 
 
 class AntsMatrixConversion(BaseInterface):
-    ''' Take antsMotionCorr motion output as input, convert to FSL style parameter files'''
+    '''
+    Take antsMotionCorr motion output as input, convert to FSL style
+    parameter files. Currently does not output origin of rotation.
+    '''
     input_spec = AntsMatrixConversionInputSpec
     output_spec = AntsMatrixConversionOutputSpec
 
