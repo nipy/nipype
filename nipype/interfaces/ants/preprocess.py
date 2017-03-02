@@ -198,9 +198,9 @@ class AntsMotionCorr(ANTSCommand):
     def _gen_filename(self, name):
         '''
         If a fixed image is specified we are not going to be outputting
-        a newly created averaged image. The output flag for calls to 
-        antsMotionCorr with a fixed image have a value set for an average 
-        image. In all of the examples this value always matches the fixed 
+        a newly created averaged image. The output flag for calls to
+        antsMotionCorr with a fixed image have a value set for an average
+        image. In all of the examples this value always matches the fixed
         image name.
         '''
         if name == 'output_average_image':
@@ -248,7 +248,7 @@ class AntsMotionCorr(ANTSCommand):
                 and _extant(self.inputs.gradient_step_length)):
             return transform_str.format(self.inputs.transformation_model,
                                         self.inputs.gradient_step_length)
-        return " bad format "
+        raise ValueError("Unable to format transformation_model argument")
 
     def _format_output(self):
         if (_extant(self.inputs.output_transform_prefix)
