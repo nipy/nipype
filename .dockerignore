@@ -23,11 +23,13 @@ src/
 # other
 docs/**/*
 docs/
+.circle/**/*
+.circle/
+circle.yml
 .coverage
 .coveragerc
 codecov.yml
 rtd_requirements.txt
-circle.yml
 Vagrantfile
 .travis.yml
 .noserc
