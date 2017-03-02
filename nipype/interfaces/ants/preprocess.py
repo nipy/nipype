@@ -74,19 +74,28 @@ class AntsMotionCorrInputSpec(ANTSCommandInputSpec):
                                  position=0, desc=dimension_desc)
 
     average_image = File(argstr='-a %s', position=1, exists=False,
-                         desc="Average the input time series image.")
+                         desc="4D image to take an average of.")
 
     output_average_image = traits.File(desc="Filename to save average of input image as.",
                                        genfile=True, hash_files=False, argstr='%s')
 
     output_transform_prefix = Str(
-        desc="string to prepend to file containg all of the transformation parameters"
+        desc="string to prepend to file containg the transformation parameters"
     )
     output_warped_image = Str(desc="Name to save motion corrected image as.")
 
+    metric_type_desc = (
+        "GC : global correlation, CC: ANTS neighborhood cross correlation, "
+        "MI: Mutual information, and Demons: Thirion's Demons "
+        "(modified mean-squares). Note that the metricWeight is currently not "
+        "used. Rather, it is a temporary place holder until multivariate "
+        "metrics are available for a single stage."
+    )
+
     metric_type = traits.Enum("CC", "MeanSquares", "Demons", "GC", "MI",
-                              "Mattes", argstr="%s")
-    fixed_image = File(requires=['metric_type'], desc="Fixed image to do motion correction with respect to.")
+                              "Mattes", argstr="%s", desc=metric_type_desc)
+    fixed_image = File(requires=['metric_type'],
+                       desc="Fixed image to do motion correction with respect to.")
     moving_image = File(requires=['metric_type'],
                         desc="This is the 4d image to be motion corrected")
     metric_weight = traits.Float(1.0, requires=['metric_type'])
@@ -147,7 +156,7 @@ class AntsMotionCorr(ANTSCommand):
     Examples
     -------
     >>> from nipype.interfaces.ants.preprocess import AntsMotionCorr
-    >>> ants_mc = AntsMotionCorr() 
+    >>> ants_mc = AntsMotionCorr()
     >>> ants_mc.inputs.metric_type = 'GC'
     >>> ants_mc.inputs.metric_weight = 1
     >>> ants_mc.inputs.radius_or_bins = 1
