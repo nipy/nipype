@@ -163,7 +163,6 @@ class AntsMotionCorr(ANTSCommand):
     >>> ants_mc.inputs.n_images = 10
     >>> ants_mc.inputs.use_fixed_reference_image = True
     >>> ants_mc.inputs.use_scales_estimator = True
-    >>> ants_mc.inputs.output_average_image = 'wat'
     >>> ants_mc.inputs.output_warped_image = 'warped.nii.gz'
     >>> ants_mc.inputs.output_transform_prefix = 'motcorr'
     >>> ants_mc.inputs.transformation_model = 'Affine'
