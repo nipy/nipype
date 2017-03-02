@@ -33,11 +33,15 @@ logger = logging.getLogger('workflow')
 class Node(object):
     """Defines common attributes and functions for workflows and nodes."""
 
-    def __init__(self, interface, name, mapper, reducer,  base_dir=None):
+    def __init__(self, interface, name, mapper=None, reducer=None, inputs=None,
+                 base_dir=None):
         """ Initialize base parameters of a workflow or node
 
         Parameters
         ----------
+        interface : Interface (mandatory)
+            node specific interface
+
         name : string (mandatory)
             Name of this node. Name must be alphanumeric and not contain any
             special characters (e.g., '.', '@').
@@ -70,6 +74,13 @@ class Node(object):
     def inputs(self):
         """Return the inputs of the underlying interface"""
         return self._interface.inputs
+
+    @inputs.setter
+    def inputs(self, inputs):
+        # Basic idea, though I haven't looked up the actual way to do this:
+        # self._interface.inputs.clear()
+        # self._interface.inputs.update(inputs)
+        pass
 
     @property
     def outputs(self):
