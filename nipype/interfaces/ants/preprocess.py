@@ -149,6 +149,7 @@ class AntsMotionCorr(ANTSCommand):
     '''
     Examples
     -------
+
     >>> from nipype.interfaces.ants.preprocess import AntsMotionCorr
     >>> ants_mc = AntsMotionCorr()
     >>> ants_mc.inputs.metric_type = 'GC'
@@ -171,6 +172,18 @@ class AntsMotionCorr(ANTSCommand):
     >>> ants_mc.inputs.moving_image = "input.nii.gz"
     >>> print(ants_mc.cmdline)
     antsMotionCorr -d 3 -i 10 -m GC[average_image.nii.gz,input.nii.gz,1.0,1,Random,0.05] -n 10 -o [motcorr,warped.nii.gz,average_image.nii.gz] -f 1 -s 0 -t Affine[0.005] -u 1 -e 1
+
+    >>> from nipype.interfaces.ants.preprocess import AntsMotionCorr
+    >>> ants_avg = AntsMotionCorr()
+    >>> ants_avg.inputs.average_image = 'input.nii.gz'
+    >>> ants_avg.inputs.output_average_image = 'avg_out.nii.gz'
+    >>> print(ants_avg.cmdline)
+    antsMotionCorr -d 3 -a input.nii.gz -o avg_out.nii.gz
+
+    >>> ants_avg = AntsMotionCorr()
+    >>> ants_avg.inputs.average_image = 'input.nii.gz'
+    >>> print(ants_avg.cmdline)
+    antsMotionCorr -d 3 -a input.nii.gz -o input_avg.nii.gz
 
     Format and description of the affine motion correction parameters can be
     found in this PDF starting on page 555 section 3.9.16 AffineTransform:
