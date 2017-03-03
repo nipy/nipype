@@ -103,15 +103,15 @@ class AntsMotionCorrInputSpec(ANTSCommandInputSpec):
     gradient_step_length = traits.Float(requires=['transformation_model'],
                                         desc='')
 
-    iterations = traits.List(traits.Int, argstr='-i %d', sep='x',
+    iterations = traits.List(traits.Int, argstr='-i %s', sep='x',
                              desc="Specify the number of iterations at each level.")
 
-    smoothing_sigmas = traits.List(traits.Float, argstr='-s %f', sep='x',
+    smoothing_sigmas = traits.List(traits.Float, argstr='-s %s', sep='x',
                                    desc="Specify the amount of smoothing at each level.")
 
     shrink_factors = traits.List(
         traits.Int,
-        argstr='-f %d',
+        argstr='-f %s',
         sep='x',
         desc=("Specify the shrink factor for the virtual domain (typically "
               "the fixed image) at each level.")
