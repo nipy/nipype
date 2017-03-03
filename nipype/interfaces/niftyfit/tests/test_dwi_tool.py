@@ -33,9 +33,9 @@ def test_dwi_tool():
     test_node.inputs.b0_file = b0_file
     test_node.inputs.dti_flag = True
 
-    cmd_tmp = '{cmd} -b0 {b0} -bval {bval} -bvallowthreshold 10.000000 \
--bvec {bvec} -dti -famap {fa} -logdti2 {log} -mask {mask} -mcmap {mc} \
--mdmap {md} -rgbmap {rgb} -source {in_file} -syn {syn} -v1map {v1}'
+    cmd_tmp = '{cmd} -b0 {b0} -bval {bval} -bvec {bvec} -dti -famap {fa} \
+-logdti2 {log} -mask {mask} -mcmap {mc} -mdmap {md} -rgbmap {rgb} -source \
+{in_file} -syn {syn} -v1map {v1}'
     expected_cmd = cmd_tmp.format(
         cmd=get_custom_path('dwi_tool'),
         in_file=in_file,

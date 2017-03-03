@@ -12,23 +12,27 @@ from .base import get_custom_path, NiftyFitCommand
 
 class FitQt1InputSpec(CommandLineInputSpec):
     """ Input Spec for FitQt1. """
-    desc = 'Filename of the 4D Multi-Echo T1 source image (mandatory)'
+    desc = 'Filename of the 4D Multi-Echo T1 source image.'
     source_file = File(exists=True,
                        desc=desc,
                        argstr='-source %s',
                        mandatory=True,
                        position=0)
 
-    # *** Output options:
-    t1map = File(genfile=True,
-                 argstr='-t1map %s',
-                 desc='Filename of the estimated output T1 map (in ms).')
-    m0map = File(genfile=True,
-                 argstr='-m0map %s',
-                 desc='Filename of the estimated input M0 map.')
-    mcmap = File(genfile=True,
-                 argstr='-mcmap %s',
-                 desc='Filename of the estimated output multi-parameter map.')
+    # Output options:
+    t1map_file = File(genfile=True,
+                      argstr='-t1map %s',
+                      desc='Filename of the estimated output T1 map (in ms).')
+    m0map_file = File(genfile=True,
+                      argstr='-m0map %s',
+                      desc='Filename of the estimated input M0 map.')
+    desc = 'Filename of the estimated output multi-parameter map.'
+    mcmap_file = File(genfile=True,
+                      argstr='-mcmap %s',
+                      desc=desc)
+    comp_file = File(genfile=True,
+                     argstr='-comp %s',
+                     desc='Filename of the estimated multi-component T1 map.')
     desc = 'Filename of the error map (symmetric matrix, [Diag,OffDiag]).'
     error_file = File(genfile=True,
                       argstr='-error %s',
@@ -40,7 +44,7 @@ class FitQt1InputSpec(CommandLineInputSpec):
                     argstr='-res %s',
                     desc='Filename of the model fit residuals')
 
-    # *** Experimental options (Choose those suitable for the model!):
+    # Other options:
     mask = File(exists=True,
                 desc='Filename of image mask.',
                 argstr='-mask %s')
@@ -49,6 +53,19 @@ class FitQt1InputSpec(CommandLineInputSpec):
                  argstr='-prior %s')
     TE = traits.Float(desc='TE Echo Time [0ms!].', argstr='-TE %f')
     TR = traits.Float(desc='TR Repetition Time [10s!].', argstr='-TR %f')
+    # desc = 'Number of components to fit [1] (currently IR/SR only)'
+    # nb_comp = traits.Int(desc=desc, argstr='-nc %d')
+    desc = 'Set LM parameters (initial value, decrease rate) [100,1.2].'
+    lm_val = traits.Tuple(traits.Float, traits.Float,
+                          desc=desc, argstr='-lm %f %f')
+    desc = 'Use Gauss-Newton algorithm [Levenberg-Marquardt].'
+    gn_flag = traits.Bool(desc=desc, argstr='-gn')
+    slice_no = traits.Int(desc='Fit to single slice number.',
+                          argstr='-slice %d')
+    voxel = traits.Tuple(traits.Int, traits.Int, traits.Int,
+                         desc='Fit to single voxel only.',
+                         argstr='-voxel %d %d %d')
+    maxit = traits.Float(desc='NLSQR iterations [100].', argstr='-maxit %f')
 
     # IR options:
     SR = traits.Bool(desc='Saturation Recovery fitting [default].',
@@ -58,22 +75,72 @@ class FitQt1InputSpec(CommandLineInputSpec):
     TIs = traits.List(traits.Float,
                       minlen=3,
                       maxlen=3,
-                      desc='Inversion times for T1 data as a list (in s)',
+                      desc='Inversion times for T1 data [1s,2s,5s].',
                       argstr='-TIs %s',
                       sep=' ')
-    T1Lists = traits.File(exists=True,
-                          argstr='-T1List %s',
-                          desc='Filename of list of pre-defined TIs')
+    TIList = traits.File(exists=True,
+                         argstr='-TIlist %s',
+                         desc='Filename of list of pre-defined TIs.')
+    desc = 'Prefined tissue T1 values for mc-estimation \
+[400-4000ms, log spaced]'
+    T1s = traits.List(traits.Float,
+                      minlen=3,
+                      maxlen=3,
+                      desc=desc,
+                      argstr='-T1s %s',
+                      sep=' ')
+    T1List = traits.File(exists=True,
+                         argstr='-T1list %s',
+                         desc='Filename of list of pre-defined T1s')
+    T1min = traits.List(traits.Float,
+                        minlen=3,
+                        maxlen=3,
+                        desc='Minimum tissue T1 value [400ms].',
+                        argstr='-T1min %s',
+                        sep=' ')
+    T1max = traits.List(traits.Float,
+                        minlen=3,
+                        maxlen=3,
+                        desc='Maximum tissue T1 value [4000ms].',
+                        argstr='-T1max %s',
+                        sep=' ')
 
     # SPGR options
     SPGR = traits.Bool(desc='Spoiled Gradient Echo fitting', argstr='-SPGR')
+    flips = traits.List(traits.Float,
+                        minlen=3,
+                        maxlen=3,
+                        desc='Flip angles',
+                        argstr='-flips %s',
+                        sep=' ')
+    desc = 'Filename of list of pre-defined flip angles (deg).'
+    flips_list = traits.File(exists=True,
+                             argstr='-fliplist %s',
+                             desc=desc)
+    desc = 'Filename of B1 estimate for fitting (or include in prior).'
+    b1map = traits.File(exists=True,
+                        argstr='-b1map %s',
+                        desc=desc)
+
+    # MCMC options:
+    mcout = traits.File(exists=True,
+                        desc='Filename of mc samples (ascii text file)',
+                        argstr='-mcout %s')
+    mcsamples = traits.Int(desc='Number of samples to keep [100].',
+                           argstr='-mcsamples %d')
+    mcmaxit = traits.Int(desc='Number of iterations to run [10,000].',
+                         argstr='-mcmaxit %d')
+    acceptance = traits.Float(desc='Fraction of iterations to accept [0.23].',
+                              argstr='-accpetance %f')
 
 
 class FitQt1OutputSpec(TraitedSpec):
     """ Output Spec for FitQt1. """
-    t1map = File(desc='Filename of the estimated output T1 map (in ms)')
-    m0map = File(desc='Filename of the m0 map')
-    mcmap = File(desc='Filename of the estimated output multi-parameter map')
+    t1map_file = File(desc='Filename of the estimated output T1 map (in ms)')
+    m0map_file = File(desc='Filename of the m0 map')
+    desc = 'Filename of the estimated output multi-parameter map'
+    mcmap_file = File(desc=desc)
+    comp_file = File(desc='Filename of the estimated multi-component T1 map.')
     desc = 'Filename of the error map (symmetric matrix, [Diag,OffDiag])'
     error_file = File(desc=desc)
     syn_file = File(desc='Filename of the synthetic ASL data')
@@ -100,15 +167,18 @@ im1_m0map.nii.gz -mcmap im1_mcmap.nii.gz -error im1_error.nii.gz \
     _suffix = '_fit_qt1'
 
     def _gen_filename(self, name):
-        if name == 't1map':
+        if name == 't1map_file':
             return self._gen_fname(self.inputs.source_file,
                                    suffix='_t1map', ext='.nii.gz')
-        if name == 'm0map':
+        if name == 'm0map_file':
             return self._gen_fname(self.inputs.source_file,
                                    suffix='_m0map', ext='.nii.gz')
-        if name == 'mcmap':
+        if name == 'mcmap_file':
             return self._gen_fname(self.inputs.source_file,
                                    suffix='_mcmap', ext='.nii.gz')
+        if name == 'comp_file':
+            return self._gen_fname(self.inputs.source_file,
+                                   suffix='_comp', ext='.nii.gz')
         if name == 'error_file':
             return self._gen_fname(self.inputs.source_file,
                                    suffix='_error', ext='.nii.gz')
@@ -123,20 +193,25 @@ im1_m0map.nii.gz -mcmap im1_mcmap.nii.gz -error im1_error.nii.gz \
     def _list_outputs(self):
         outputs = self.output_spec().get()
 
-        if isdefined(self.inputs.t1map):
-            outputs['t1map'] = self.inputs.t1map
+        if isdefined(self.inputs.t1map_file):
+            outputs['t1map_file'] = self.inputs.t1map_file
         else:
-            outputs['t1map'] = self._gen_filename('t1map')
+            outputs['t1map_file'] = self._gen_filename('t1map_file')
 
-        if isdefined(self.inputs.m0map):
-            outputs['m0map'] = self.inputs.m0map
+        if isdefined(self.inputs.m0map_file):
+            outputs['m0map_file'] = self.inputs.m0map_file
         else:
-            outputs['m0map'] = self._gen_filename('m0map')
+            outputs['m0map_file'] = self._gen_filename('m0map_file')
 
-        if isdefined(self.inputs.mcmap):
-            outputs['mcmap'] = self.inputs.mcmap
+        if isdefined(self.inputs.mcmap_file):
+            outputs['mcmap_file'] = self.inputs.mcmap_file
         else:
-            outputs['mcmap'] = self._gen_filename('mcmap')
+            outputs['mcmap_file'] = self._gen_filename('mcmap_file')
+
+        if isdefined(self.inputs.comp_file):
+            outputs['comp_file'] = self.inputs.comp_file
+        else:
+            outputs['comp_file'] = self._gen_filename('comp_file')
 
         if isdefined(self.inputs.error_file):
             outputs['error_file'] = self.inputs.error_file

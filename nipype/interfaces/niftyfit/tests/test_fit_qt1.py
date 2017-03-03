@@ -23,11 +23,12 @@ def test_fit_qt1():
     in_file = example_data('im1.nii')
     test_node.inputs.source_file = in_file
 
-    cmd_tmp = '{cmd} -source {in_file} -error {error} -m0map {map0} \
--mcmap {cmap} -res {res} -syn {syn} -t1map {t1map}'
+    cmd_tmp = '{cmd} -source {in_file} -comp {comp} -error {error} -m0map \
+{map0} -mcmap {cmap} -res {res} -syn {syn} -t1map {t1map}'
     expected_cmd = cmd_tmp.format(
         cmd=get_custom_path('fit_qt1'),
         in_file=in_file,
+        comp=os.path.join(os.getcwd(), 'im1_comp.nii.gz'),
         map0=os.path.join(os.getcwd(), 'im1_m0map.nii.gz'),
         error=os.path.join(os.getcwd(), 'im1_error.nii.gz'),
         cmap=os.path.join(os.getcwd(), 'im1_mcmap.nii.gz'),

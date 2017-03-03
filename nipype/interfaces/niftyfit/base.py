@@ -5,6 +5,14 @@
 The niftyfit module provide an interface with the niftyfit software
 developed in TIG, UCL.
 
+Software available at:
+https://cmiclab.cs.ucl.ac.uk/CMIC/NiftyFit-Release
+
+Version used for this version of the interfaces (git):
+
+commit c6232e4c4223c3d19f7a32906409da5af36299a2
+Date:   Fri Jan 6 13:34:02 2017 +0000
+
 Examples
 --------
 See the docstrings of the individual classes for examples.

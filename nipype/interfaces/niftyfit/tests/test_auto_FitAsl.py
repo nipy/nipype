@@ -3,9 +3,7 @@ from ..asl import FitAsl
 
 
 def test_FitAsl_inputs():
-    input_map = dict(ATT=dict(argstr='-ATT %f',
-    ),
-    IRoutput=dict(argstr='-IRoutput %s',
+    input_map = dict(IRoutput=dict(argstr='-IRoutput %s',
     ),
     IRvolume=dict(argstr='-IRvolume %s',
     ),
@@ -63,9 +61,11 @@ def test_FitAsl_inputs():
     ),
     pcasl=dict(argstr='-pcasl',
     ),
-    pv2=dict(argstr='pv2 %d',
+    pv0=dict(argstr='-pv0 %d',
     ),
-    pv3=dict(argstr='pv3 %d',
+    pv2=dict(argstr='-pv2 %d',
+    ),
+    pv3=dict(argstr='-pv3 %d %d %d',
     ),
     pvthreshold=dict(argstr='-pvthreshold',
     ),

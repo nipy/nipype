@@ -28,9 +28,10 @@ def test_fit_dwi():
     test_node.inputs.bval_file = bval_file
     test_node.inputs.bvec_file = bvec_file
 
-    cmd_tmp = '{cmd} -bval {bval} -bvallowthreshold 20.000000 -bvec {bvec} \
--error {error} -famap {fa} -mcmap {mc} -mdmap {md} -res {res} -rgbmap {rgb} \
--rotsform 0 -source {in_file} -syn {syn} -tenmap2 {ten2} -v1map {v1}'
+    cmd_tmp = '{cmd} -bval {bval} -bvec {bvec} -error {error} -famap {fa} \
+-mcmap {mc} -mdmap {md} -nodiff {nodiff} -res {res} -rgbmap {rgb} -rotsform 0 \
+-source {in_file} -syn {syn} -tenmap2 {ten2} -tenmap {ten} -trgbmap {trgb} \
+-v1map {v1}'
     expected_cmd = cmd_tmp.format(
         cmd=get_custom_path('fit_dwi'),
         in_file=in_file,
@@ -40,10 +41,13 @@ def test_fit_dwi():
         fa=os.path.join(os.getcwd(), 'dwifit_famap.nii.gz'),
         mc=os.path.join(os.getcwd(), 'dwifit_mcmap.nii.gz'),
         md=os.path.join(os.getcwd(), 'dwifit_mdmap.nii.gz'),
+        nodiff=os.path.join(os.getcwd(), 'dwifit_no_diff.nii.gz'),
         res=os.path.join(os.getcwd(), 'dwifit_resmap.nii.gz'),
         rgb=os.path.join(os.getcwd(), 'dwifit_rgbmap.nii.gz'),
         syn=os.path.join(os.getcwd(), 'dwifit_syn.nii.gz'),
         ten2=os.path.join(os.getcwd(), 'dwifit_tenmap2.nii.gz'),
-        v1=os.path.join(os.getcwd(), 'dwifit_v1map.nii.gz'))
+        v1=os.path.join(os.getcwd(), 'dwifit_v1map.nii.gz'),
+        trgb=os.path.join(os.getcwd(), 'dwifit_trgbmap.nii.gz'),
+        ten=os.path.join(os.getcwd(), 'dwifit_tenmap.nii.gz'))
 
     assert test_node.cmdline == expected_cmd

@@ -69,8 +69,11 @@ background suppression pulses are included in -eff'
     dTinv2 = traits.Float(desc=desc, argstr='-dTinv2 %f')
 
     # *** Other experimental assumptions:
-    desc = 'Slope and intercept for Arterial Transit Time [0ms/slice 1000ms].'
-    ATT = traits.Float(desc=desc, argstr='-ATT %f')
+
+    # Not programmed yet
+    # desc = 'Slope and intercept for Arterial Transit Time.'
+    # ATT = traits.Float(desc=desc, argstr='-ATT %f')
+
     gmT1 = traits.Float(desc='T1 of GM [1150ms].', argstr='-gmT1 %f')
     gmL = traits.Float(desc='Plasma/GM water partition [0.95ml/g].',
                        argstr='-gmL %f')
@@ -86,8 +89,13 @@ estimation and PV correction {WM,GM,CSF}.'
     seg = traits.File(exists=True, argstr='-seg %s', desc=desc)
     desc = 'Use sigmoid to estimate L from T1: L(T1|gmL,wmL) [Off].'
     sig = traits.Bool(desc=desc, argstr='-sig')
-    pv2 = traits.Int(desc='In plane PV kernel size [3x3].', argstr='pv2 %d')
-    pv3 = traits.Int(desc='3D kernel size [3x3x1].', argstr='pv3 %d')
+    desc = 'Simple PV correction (CBF=vg*CBFg + vw*CBFw, with CBFw=f*CBFg) \
+[0.25].'
+    pv0 = traits.Int(desc=desc, argstr='-pv0 %d')
+    pv2 = traits.Int(desc='In plane PV kernel size [3x3].', argstr='-pv2 %d')
+    pv3 = traits.Tuple(traits.Int, traits.Int, traits.Int,
+                       desc='3D kernel size [3x3x1].',
+                       argstr='-pv3 %d %d %d')
     desc = 'Multiply CBF by this value (e.g. if CL are mislabelled use -1.0).'
     mul = traits.Float(desc=desc, argstr='-mul %f')
     mulgm = traits.Bool(desc='Multiply CBF by segmentation [Off].',
