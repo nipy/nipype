@@ -1212,7 +1212,7 @@ class KellyKapowskiInputSpec(ANTSCommandInputSpec):
                                                      desc="Maximum number of iterations for estimating the invert \n"
                                                           "displacement field.")
 
-    cortical_thickness = File(argstr='--output "%s"', genfile=True, keep_extension=True,
+    cortical_thickness = File(argstr='--output "%s"', keep_extension=True,
                               name_source=["segmentation_image"], name_template='%s_cortical_thickness',
                               desc='Filename for the cortical thickness.', hash_files=False)
 
