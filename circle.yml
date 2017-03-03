@@ -8,6 +8,7 @@ machine:
     DATA_NIPYPE_FSL_COURSE: "${OSF_NIPYPE_URL}/57f472cf9ad5a101f977ecfe"
     DATA_NIPYPE_FSL_FEEDS: "${OSF_NIPYPE_URL}/57f473066c613b01f113e7af"
     SCRATCH: "$HOME/scratch"
+    CODECOV_TOKEN: "ac172a50-8e66-42e5-8822-5373fcf54686"
   services:
     - docker
 

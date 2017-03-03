@@ -1,9 +1,12 @@
 #!/bin/bash
+#
+# Balance nipype testing workflows across CircleCI build nodes
+#
 
-set -o nounset
-set -o xtrace
-
-export CODECOV_TOKEN=ac172a50-8e66-42e5-8822-5373fcf54686
+# Setting      # $ help set
+set -e         # Exit immediately if a command exits with a non-zero status.
+set -u         # Treat unset variables as an error when substituting.
+set -x         # Print command traces before executing command.
 
 if [ "${CIRCLE_NODE_TOTAL:-}" != "4" ]; then
   echo "These tests were designed to be run at 4x parallelism."
