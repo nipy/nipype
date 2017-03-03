@@ -103,19 +103,20 @@ class AntsMotionCorrInputSpec(ANTSCommandInputSpec):
     gradient_step_length = traits.Float(requires=['transformation_model'],
                                         desc='')
 
-    iterations = traits.Int(
-        argstr="-i %d",
-        desc="Specify the number of iterations at each level."
-    )
-    smoothing_sigmas = traits.Int(
-        argstr="-s %d",
-        desc="Specify the amount of smoothing at each level."
-    )
-    shrink_factors = traits.Int(
-        argstr="-f %d",
+    iterations = traits.List(traits.Int, argstr='-i %d', sep='x',
+                             desc="Specify the number of iterations at each level.")
+
+    smoothing_sigmas = traits.List(traits.Float, argstr='-s %f', sep='x',
+                                   desc="Specify the amount of smoothing at each level.")
+
+    shrink_factors = traits.List(
+        traits.Int,
+        argstr='-f %d',
+        sep='x',
         desc=("Specify the shrink factor for the virtual domain (typically "
               "the fixed image) at each level.")
     )
+
     n_images = traits.Int(
         argstr="-n %d",
         desc=("This option sets the number of images to use to construct the "
@@ -135,6 +136,21 @@ class AntsMotionCorrInputSpec(ANTSCommandInputSpec):
         desc="use the scale estimator to control optimization."
     )
 
+    use_estimate_learning_rate_once = traits.Bool(
+        False,
+        argstr="-l %d",
+        desc=("turn on the option that lets you estimate the learning rate "
+              "step size only at the beginning of each level. Useful as a "
+              "second stage of fine-scale registration.")
+    )
+
+    write_displacement = traits.Bool(
+        False,
+        argstr="-w %d",
+        desc="Write the low-dimensional 3D transforms to a 4D displacement field"
+    )
+
+
 
 class AntsMotionCorrOutputSpec(TraitedSpec):
     '''Output spec for the antsMotionCorr command'''
@@ -144,6 +160,8 @@ class AntsMotionCorrOutputSpec(TraitedSpec):
     warped_image = File(desc="Outputs warped image")
     inverse_warped_image = File(desc="Outputs the inverse of the warped image")
     save_state = File(desc="The saved registration state to be restored")
+    displacement_field = File(desc=("4D displacement field that captures the "
+                                    "affine induced motion at each voxel"))
 
 class AntsMotionCorr(ANTSCommand):
     '''
@@ -261,7 +279,8 @@ class AntsMotionCorr(ANTSCommand):
             )
         elif _extant(self.inputs.output_average_image):
             return "-o {}".format(self.inputs.output_average_image)
-        return ""
+        else:
+            raise ValueError("Unable to format output due to lack of inputs.")
 
     def _list_outputs(self):
         outputs = self._outputs().get()
@@ -278,6 +297,11 @@ class AntsMotionCorr(ANTSCommand):
                 self.inputs.output_transform_prefix
             )
             outputs['composite_transform'] = os.path.abspath(fname)
+        if (_extant(self.inputs.write_displacement) and
+                _extant(self.inputs.output_transform_prefix) and
+                self.inputs.write_displacement is True):
+            fname = '{}Warp.nii.gz'.format(self.inputs.output_transform_prefix)
+            outputs['displacement_field'] = os.path.abspath(fname)
         return outputs
 
 class AntsMatrixConversionInputSpec(BaseInterfaceInputSpec):
