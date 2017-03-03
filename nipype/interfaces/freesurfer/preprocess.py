@@ -28,7 +28,6 @@ from ..base import (TraitedSpec, File, traits,
                     Directory, InputMultiPath,
                     OutputMultiPath, CommandLine,
                     CommandLineInputSpec, isdefined)
-from ..traits_extension import DictStrStr
 from .base import (FSCommand, FSTraitedSpec,
                    FSTraitedSpecOpenMP,
                    FSCommandOpenMP, Info)
@@ -635,11 +634,39 @@ class ReconAllInputSpec(CommandLineInputSpec):
                            desc="Enable parallel execution")
     hires = traits.Bool(argstr="-hires", min_ver='6.0.0',
                         desc="Conform to minimum voxel size (for voxels < 1mm)")
-    expert = traits.Either(File(exists=True), DictStrStr, argstr='-expert %s',
+    expert = File(exists=True, argstr='-expert %s',
                   desc="Set parameters using expert file")
     subjects_dir = Directory(exists=True, argstr='-sd %s', hash_files=False,
                              desc='path to subjects directory', genfile=True)
     flags = traits.Str(argstr='%s', desc='additional parameters')
+
+    # Expert options
+    talairach = traits.Str(desc="Flags to pass to talairach commands", xor=['expert'])
+    mri_normalize = traits.Str(desc="Flags to pass to mri_normalize commands", xor=['expert'])
+    mri_watershed = traits.Str(desc="Flags to pass to mri_watershed commands", xor=['expert'])
+    mri_em_register = traits.Str(desc="Flags to pass to mri_em_register commands", xor=['expert'])
+    mri_ca_normalize = traits.Str(desc="Flags to pass to mri_ca_normalize commands", xor=['expert'])
+    mri_ca_register = traits.Str(desc="Flags to pass to mri_ca_register commands", xor=['expert'])
+    mri_remove_neck = traits.Str(desc="Flags to pass to mri_remove_neck commands", xor=['expert'])
+    mri_ca_label = traits.Str(desc="Flags to pass to mri_ca_label commands", xor=['expert'])
+    mri_segstats = traits.Str(desc="Flags to pass to mri_segstats commands", xor=['expert'])
+    mri_mask = traits.Str(desc="Flags to pass to mri_mask commands", xor=['expert'])
+    mri_segment = traits.Str(desc="Flags to pass to mri_segment commands", xor=['expert'])
+    mri_edit_wm_with_aseg = traits.Str(desc="Flags to pass to mri_edit_wm_with_aseg commands", xor=['expert'])
+    mri_pretess = traits.Str(desc="Flags to pass to mri_pretess commands", xor=['expert'])
+    mri_fill = traits.Str(desc="Flags to pass to mri_fill commands", xor=['expert'])
+    mri_tessellate = traits.Str(desc="Flags to pass to mri_tessellate commands", xor=['expert'])
+    mris_smooth = traits.Str(desc="Flags to pass to mri_smooth commands", xor=['expert'])
+    mris_inflate = traits.Str(desc="Flags to pass to mri_inflate commands", xor=['expert'])
+    mris_sphere = traits.Str(desc="Flags to pass to mris_sphere commands", xor=['expert'])
+    mris_fix_topology = traits.Str(desc="Flags to pass to mris_fix_topology commands", xor=['expert'])
+    mris_make_surfaces = traits.Str(desc="Flags to pass to mris_make_surfaces commands", xor=['expert'])
+    mris_surf2vol = traits.Str(desc="Flags to pass to mris_surf2vol commands", xor=['expert'])
+    mris_register = traits.Str(desc="Flags to pass to mris_register commands", xor=['expert'])
+    mrisp_paint = traits.Str(desc="Flags to pass to mrisp_paint commands", xor=['expert'])
+    mris_ca_label = traits.Str(desc="Flags to pass to mris_ca_label commands", xor=['expert'])
+    mris_anatomical_stats = traits.Str(desc="Flags to pass to mris_anatomical_stats commands", xor=['expert'])
+    mri_aparc2aseg = traits.Str(desc="Flags to pass to mri_aparc2aseg commands", xor=['expert'])
 
 
 class ReconAllOutputSpec(FreeSurferSource.output_spec):
@@ -856,6 +883,16 @@ class ReconAll(CommandLine):
 
     _steps = _autorecon1_steps + _autorecon2_steps + _autorecon3_steps
 
+    _binaries = ['talairach', 'mri_normalize', 'mri_watershed',
+                 'mri_em_register', 'mri_ca_normalize', 'mri_ca_register',
+                 'mri_remove_neck', 'mri_ca_label', 'mri_segstats',
+                 'mri_mask', 'mri_segment', 'mri_edit_wm_with_aseg',
+                 'mri_pretess', 'mri_fill', 'mri_tessellate', 'mris_smooth',
+                 'mris_inflate', 'mris_sphere', 'mris_fix_topology',
+                 'mris_make_surfaces', 'mris_surf2vol', 'mris_register',
+                 'mrisp_paint', 'mris_ca_label', 'mris_anatomical_stats',
+                 'mri_aparc2aseg']
+
     def _gen_subjects_dir(self):
         return os.getcwd()
 
@@ -900,17 +937,16 @@ class ReconAll(CommandLine):
         if name == 'T1_files':
             if self._is_resuming():
                 return ''
-        if name == 'expert' and isinstance(value, dict):
-            expert_fname = os.path.abspath('expert.opts')
-            expert = ['{} {}\n'.format(key, val) for key, val in value.items()]
-            with open(expert_fname, 'w') as fobj:
-                fobj.write(''.join(expert))
-            value = expert_fname
         return super(ReconAll, self)._format_arg(name, trait_spec, value)
 
     @property
     def cmdline(self):
         cmd = super(ReconAll, self).cmdline
+
+        # Adds '-expert' flag if expert flags are passed
+        # Mutually exclusive with 'expert' input parameter
+        cmd += self._prep_expert_file()
+
         if not self._is_resuming():
             return cmd
         subjects_dir = self.inputs.subjects_dir
@@ -943,6 +979,24 @@ class ReconAll(CommandLine):
         cmd += ' ' + ' '.join(flags)
         iflogger.info('resume recon-all : %s' % cmd)
         return cmd
+
+    def _prep_expert_file(self):
+        if isdefined(self.inputs.expert):
+            return ''
+
+        lines = []
+        for binary in self._binaries:
+            args = getattr(self.inputs, binary)
+            if isdefined(args):
+                lines.append('{} {}\n'.format(binary, args))
+
+        if lines == []:
+            return ''
+
+        expert_fname = os.path.abspath('expert.opts')
+        with open(expert_fname, 'w') as fobj:
+            fobj.write(''.join(lines))
+        return ' -expert {}'.format(expert_fname)
 
 
 class BBRegisterInputSpec(FSTraitedSpec):
