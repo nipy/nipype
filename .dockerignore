@@ -1,7 +1,34 @@
-.git/
-*.pyc
-*.egg-info
+# python cache
+__pycache__/**/*
 __pycache__
-docker/nipype_*
-docker/test-*
+*.pyc
+
+# python distribution
+build/**/*
+build
+dist/**/*
+dist
+nipype.egg-info/**/*
+nipype.egg-info
+.eggs/**/*
+.eggs
+src/**/*
+src/
+
+# git
+.gitignore
+.git/**/*
+.git
+
+# other
+docs/**/*
+docs/
 .coverage
+.coveragerc
+codecov.yml
+rtd_requirements.txt
+circle.yml
+Vagrantfile
+.travis.yml
+.noserc
+

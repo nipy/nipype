@@ -20,14 +20,18 @@ import os.path as op
 import nibabel as nb
 import numpy as np
 from numpy.polynomial import Legendre
-from scipy import linalg, signal
+from scipy import linalg
 
 from .. import logging
 from ..external.due import BibTeX
 from ..interfaces.base import (traits, TraitedSpec, BaseInterface,
                                BaseInterfaceInputSpec, File, isdefined,
                                InputMultiPath)
+from ..utils import NUMPY_MMAP
+from ..utils.misc import normalize_mc_params
+
 IFLOG = logging.getLogger('interface')
+
 
 class ComputeDVARSInputSpec(BaseInterfaceInputSpec):
     in_file = File(exists=True, mandatory=True, desc='functional data, after HMC')
@@ -49,6 +53,16 @@ class ComputeDVARSInputSpec(BaseInterfaceInputSpec):
                            desc='output figure size')
     figformat = traits.Enum('png', 'pdf', 'svg', usedefault=True,
                             desc='output format for figures')
+    intensity_normalization = traits.Float(1000.0, usedefault=True,
+                              desc='Divide value in each voxel at each timepoint '
+                                   'by the median calculated across all voxels'
+                                   'and timepoints within the mask (if specified)'
+                                   'and then multiply by the value specified by'
+                                   'this parameter. By using the default (1000)' \
+                                   'output DVARS will be expressed in ' \
+                                   'x10 % BOLD units compatible with Power et al.' \
+                                   '2012. Set this to 0 to disable intensity' \
+                                   'normalization altogether.')
 
 
 
@@ -125,11 +139,12 @@ Bradley L. and Petersen, Steven E.},
 
     def _run_interface(self, runtime):
         dvars = compute_dvars(self.inputs.in_file, self.inputs.in_mask,
-                              remove_zerovariance=self.inputs.remove_zerovariance)
+                              remove_zerovariance=self.inputs.remove_zerovariance,
+                              intensity_normalization=self.inputs.intensity_normalization)
 
-        self._results['avg_std'] = float(dvars[0].mean())
-        self._results['avg_nstd'] = float(dvars[1].mean())
-        self._results['avg_vxstd'] = float(dvars[2].mean())
+        (self._results['avg_std'],
+         self._results['avg_nstd'],
+         self._results['avg_vxstd']) = np.mean(dvars, axis=1).astype(float)
 
         tr = None
         if isdefined(self.inputs.series_tr):
@@ -192,7 +207,10 @@ Bradley L. and Petersen, Steven E.},
 
 
 class FramewiseDisplacementInputSpec(BaseInterfaceInputSpec):
-    in_plots = File(exists=True, mandatory=True, desc='motion parameters as written by FSL MCFLIRT')
+    in_file = File(exists=True, mandatory=True, desc='motion parameters')
+    parameter_source = traits.Enum("FSL", "AFNI", "SPM", "FSFAST",
+                                   desc="Source of movement parameters",
+                                   mandatory=True)
     radius = traits.Float(50, usedefault=True,
                           desc='radius in mm to calculate angular FDs, 50mm is the '
                                'default since it is used in Power et al. 2012')
@@ -246,9 +264,12 @@ Bradley L. and Petersen, Steven E.},
     }]
 
     def _run_interface(self, runtime):
-        mpars = np.loadtxt(self.inputs.in_plots)  # mpars is N_t x 6
-        diff = mpars[:-1, :] - mpars[1:, :]
-        diff[:, :3] *= self.inputs.radius
+        mpars = np.loadtxt(self.inputs.in_file)  # mpars is N_t x 6
+        mpars = np.apply_along_axis(func1d=normalize_mc_params,
+                                    axis=1, arr=mpars,
+                                    source=self.inputs.parameter_source)
+        diff = mpars[:-1, :6] - mpars[1:, :6]
+        diff[:, 3:6] *= self.inputs.radius
         fd_res = np.abs(diff).sum(axis=1)
 
         self._results = {
@@ -329,8 +350,8 @@ class CompCor(BaseInterface):
                    }]
 
     def _run_interface(self, runtime):
-        imgseries = nb.load(self.inputs.realigned_file).get_data()
-        mask = nb.load(self.inputs.mask_file).get_data()
+        imgseries = nb.load(self.inputs.realigned_file, mmap=NUMPY_MMAP).get_data()
+        mask = nb.load(self.inputs.mask_file, mmap=NUMPY_MMAP).get_data()
 
         if imgseries.shape[:3] != mask.shape:
             raise ValueError('Inputs for CompCor, func {} and mask {}, do not have matching '
@@ -435,7 +456,7 @@ class TCompCor(CompCor):
     output_spec = TCompCorOutputSpec
 
     def _run_interface(self, runtime):
-        imgseries = nb.load(self.inputs.realigned_file).get_data()
+        imgseries = nb.load(self.inputs.realigned_file, mmap=NUMPY_MMAP).get_data()
 
         if imgseries.ndim != 4:
             raise ValueError('tCompCor expected a 4-D nifti file. Input {} has {} dimensions '
@@ -443,7 +464,7 @@ class TCompCor(CompCor):
                              .format(self.inputs.realigned_file, imgseries.ndim, imgseries.shape))
 
         if isdefined(self.inputs.mask_file):
-            in_mask_data = nb.load(self.inputs.mask_file).get_data()
+            in_mask_data = nb.load(self.inputs.mask_file, mmap=NUMPY_MMAP).get_data()
             imgseries = imgseries[in_mask_data != 0, :]
 
         # From the paper:
@@ -521,9 +542,9 @@ class TSNR(BaseInterface):
     output_spec = TSNROutputSpec
 
     def _run_interface(self, runtime):
-        img = nb.load(self.inputs.in_file[0])
+        img = nb.load(self.inputs.in_file[0], mmap=NUMPY_MMAP)
         header = img.header.copy()
-        vollist = [nb.load(filename) for filename in self.inputs.in_file]
+        vollist = [nb.load(filename, mmap=NUMPY_MMAP) for filename in self.inputs.in_file]
         data = np.concatenate([vol.get_data().reshape(
             vol.get_shape()[:3] + (-1,)) for vol in vollist], axis=3)
         data = np.nan_to_num(data)
@@ -557,6 +578,79 @@ class TSNR(BaseInterface):
         if isdefined(self.inputs.regress_poly):
             outputs['detrended_file'] = op.abspath(self.inputs.detrended_file)
         return outputs
+
+
+class NonSteadyStateDetectorInputSpec(BaseInterfaceInputSpec):
+    in_file = File(exists=True, mandatory=True, desc='4D NIFTI EPI file')
+
+
+class NonSteadyStateDetectorOutputSpec(TraitedSpec):
+    n_volumes_to_discard = traits.Int(desc='Number of non-steady state volumes'
+                                           'detected in the beginning of the scan.')
+
+
+class NonSteadyStateDetector(BaseInterface):
+    """
+    Returns the number of non-steady state volumes detected at the beginning
+    of the scan.
+    """
+
+    input_spec = NonSteadyStateDetectorInputSpec
+    output_spec = NonSteadyStateDetectorOutputSpec
+
+    def _run_interface(self, runtime):
+        in_nii = nb.load(self.inputs.in_plots)
+        global_signal = in_nii.get_data()[:,:,:,:50].mean(axis=0).mean(axis=0).mean(axis=0)
+
+        self._results = {
+            'out_file': _is_outlier(global_signal)
+        }
+
+        return runtime
+
+    def _list_outputs(self):
+        return self._results
+
+def _is_outlier(points, thresh=3.5):
+    """
+    Returns a boolean array with True if points are outliers and False
+    otherwise.
+
+    Parameters:
+    -----------
+        points : An numobservations by numdimensions array of observations
+        thresh : The modified z-score to use as a threshold. Observations with
+            a modified z-score (based on the median absolute deviation) greater
+            than this value will be classified as outliers.
+
+    Returns:
+    --------
+        mask : A numobservations-length boolean array.
+
+    References:
+    ----------
+        Boris Iglewicz and David Hoaglin (1993), "Volume 16: How to Detect and
+        Handle Outliers", The ASQC Basic References in Quality Control:
+        Statistical Techniques, Edward F. Mykytka, Ph.D., Editor.
+    """
+    if len(points.shape) == 1:
+        points = points[:, None]
+    median = np.median(points, axis=0)
+    diff = np.sum((points - median) ** 2, axis=-1)
+    diff = np.sqrt(diff)
+    med_abs_deviation = np.median(diff)
+
+    modified_z_score = 0.6745 * diff / med_abs_deviation
+
+    timepoints_to_discard = 0
+    for i in range(len(modified_z_score)):
+        if modified_z_score[i] <= thresh:
+            break
+        else:
+            timepoints_to_discard += 1
+
+    return timepoints_to_discard
+
 
 def regress_poly(degree, data, remove_mean=True, axis=-1):
     ''' returns data with degree polynomial regressed out.
@@ -592,7 +686,8 @@ def regress_poly(degree, data, remove_mean=True, axis=-1):
     # Back to original shape
     return regressed_data.reshape(datashape)
 
-def compute_dvars(in_file, in_mask, remove_zerovariance=False):
+def compute_dvars(in_file, in_mask, remove_zerovariance=False,
+                  intensity_normalization=1000):
     """
     Compute the :abbr:`DVARS (D referring to temporal
     derivative of timecourses, VARS referring to RMS variance over voxels)`
@@ -626,66 +721,56 @@ research/nichols/scripts/fsl/standardizeddvars.pdf>`_, 2013.
     from nitime.algorithms import AR_est_YW
     import warnings
 
-    func = nb.load(in_file).get_data().astype(np.float32)
-    mask = nb.load(in_mask).get_data().astype(np.uint8)
+    func = nb.load(in_file, mmap=NUMPY_MMAP).get_data().astype(np.float32)
+    mask = nb.load(in_mask, mmap=NUMPY_MMAP).get_data().astype(np.uint8)
 
     if len(func.shape) != 4:
         raise RuntimeError(
             "Input fMRI dataset should be 4-dimensional")
 
-    # Robust standard deviation
-    func_sd = (np.percentile(func, 75, axis=3) -
-               np.percentile(func, 25, axis=3)) / 1.349
-    func_sd[mask <= 0] = 0
-
-    if remove_zerovariance:
-        # Remove zero-variance voxels across time axis
-        mask = zero_remove(func_sd, mask)
-
     idx = np.where(mask > 0)
     mfunc = func[idx[0], idx[1], idx[2], :]
 
-    # Demean
-    mfunc = regress_poly(0, mfunc, remove_mean=True).astype(np.float32)
+    if intensity_normalization != 0:
+        mfunc = (mfunc / np.median(mfunc)) * intensity_normalization
+
+    # Robust standard deviation (we are using "lower" interpolation
+    # because this is what FSL is doing
+    func_sd = (np.percentile(mfunc, 75, axis=1, interpolation="lower") -
+               np.percentile(mfunc, 25, axis=1, interpolation="lower")) / 1.349
+
+    if remove_zerovariance:
+        mfunc = mfunc[func_sd != 0, :]
+        func_sd = func_sd[func_sd != 0]
 
     # Compute (non-robust) estimate of lag-1 autocorrelation
-    ar1 = np.apply_along_axis(AR_est_YW, 1, mfunc, 1)[:, 0]
+    ar1 = np.apply_along_axis(AR_est_YW, 1,
+                              regress_poly(0, mfunc, remove_mean=True).astype(
+                                  np.float32), 1)[:, 0]
 
     # Compute (predicted) standard deviation of temporal difference time series
-    diff_sdhat = np.squeeze(np.sqrt(((1 - ar1) * 2).tolist())) * func_sd[mask > 0].reshape(-1)
+    diff_sdhat = np.squeeze(np.sqrt(((1 - ar1) * 2).tolist())) * func_sd
     diff_sd_mean = diff_sdhat.mean()
 
     # Compute temporal difference time series
     func_diff = np.diff(mfunc, axis=1)
 
     # DVARS (no standardization)
-    dvars_nstd = func_diff.std(axis=0)
+    dvars_nstd = np.sqrt(np.square(func_diff).mean(axis=0))
 
     # standardization
     dvars_stdz = dvars_nstd / diff_sd_mean
 
-    with warnings.catch_warnings(): # catch, e.g., divide by zero errors
+    with warnings.catch_warnings():  # catch, e.g., divide by zero errors
         warnings.filterwarnings('error')
 
         # voxelwise standardization
-        diff_vx_stdz = func_diff / np.array([diff_sdhat] * func_diff.shape[-1]).T
-        dvars_vx_stdz = diff_vx_stdz.std(axis=0, ddof=1)
+        diff_vx_stdz = np.square(
+            func_diff / np.array([diff_sdhat] * func_diff.shape[-1]).T)
+        dvars_vx_stdz = np.sqrt(diff_vx_stdz.mean(axis=0))
 
     return (dvars_stdz, dvars_nstd, dvars_vx_stdz)
 
-def zero_remove(data, mask):
-    """
-    Modify inputted mask to also mask out zero values
-
-    :param numpy.ndarray data: e.g. voxelwise stddev of fMRI dataset, after motion correction
-    :param numpy.ndarray mask: brain mask (same dimensions as data)
-    :return: the mask with any additional zero voxels removed (same dimensions as inputs)
-    :rtype: numpy.ndarray
-
-    """
-    new_mask = mask.copy()
-    new_mask[data == 0] = 0
-    return new_mask
 
 def plot_confound(tseries, figsize, name, units=None,
                   series_tr=None, normalize=False):

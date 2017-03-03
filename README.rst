@@ -117,16 +117,3 @@ Currently Nipype consists of the following files and directories:
   setup.py
     Script for building and installing NIPYPE.
 
-License information
--------------------
-
-We use the 3-clause BSD license; the full license is in the file ``LICENSE`` in
-the nipype distribution.
-
-There are interfaces to some GNU code but these are entirely optional.
-
-All trademarks referenced herein are property of their respective
-holders.
-
-Copyright (c) 2009-2015, NIPY Developers
-All rights reserved.

@@ -353,6 +353,7 @@ def test_mcflirt(setup_flirt):
 def test_fnirt(setup_flirt):
 
     tmpdir, infile, reffile = setup_flirt
+    os.chdir(tmpdir)
     fnirt = fsl.FNIRT()
     assert fnirt.cmd == 'fnirt'
 
@@ -404,64 +405,81 @@ def test_fnirt(setup_flirt):
         fnirt.run()
     fnirt.inputs.in_file = infile
     fnirt.inputs.ref_file = reffile
+    intmap_basename = '%s_intmap' % fsl.FNIRT.intensitymap_file_basename(infile)
+    intmap_image = fsl_name(fnirt, intmap_basename)
+    intmap_txt = '%s.txt' % intmap_basename
+    # doing this to create the file to pass tests for file existence
+    with open(intmap_image, 'w'):
+        pass
+    with open(intmap_txt, 'w'):
+        pass
 
     # test files
-    opt_map = {
-        'affine_file': ('--aff='),
-        'inwarp_file': ('--inwarp='),
-        'in_intensitymap_file': ('--intin='),
-        'config_file': ('--config='),
-        'refmask_file': ('--refmask='),
-        'inmask_file': ('--inmask='),
-        'field_file': ('--fout='),
-        'jacobian_file': ('--jout='),
-        'modulatedref_file': ('--refout='),
-        'out_intensitymap_file': ('--intout='),
-        'log_file': ('--logout=')}
+    opt_map = [
+        ('affine_file', '--aff=%s' % infile, infile),
+        ('inwarp_file', '--inwarp=%s' % infile, infile),
+        ('in_intensitymap_file', '--intin=%s' % intmap_basename, [intmap_image]),
+        ('in_intensitymap_file',
+            '--intin=%s' % intmap_basename,
+            [intmap_image, intmap_txt]),
+        ('config_file', '--config=%s' % infile, infile),
+        ('refmask_file', '--refmask=%s' % infile, infile),
+        ('inmask_file', '--inmask=%s' % infile, infile),
+        ('field_file', '--fout=%s' % infile, infile),
+        ('jacobian_file', '--jout=%s' % infile, infile),
+        ('modulatedref_file', '--refout=%s' % infile, infile),
+        ('out_intensitymap_file',
+            '--intout=%s' % intmap_basename, True),
+        ('out_intensitymap_file', '--intout=%s' % intmap_basename, intmap_image),
+        ('fieldcoeff_file', '--cout=%s' % infile, infile),
+        ('log_file', '--logout=%s' % infile, infile)]
 
-    for name, settings in list(opt_map.items()):
+    for (name, settings, arg) in opt_map:
         fnirt = fsl.FNIRT(in_file=infile,
                           ref_file=reffile,
-                          **{name: infile})
+                          **{name: arg})
 
-        if name in ('config_file', 'affine_file', 'field_file'):
-            cmd = 'fnirt %s%s --in=%s '\
+        if name in ('config_file', 'affine_file', 'field_file', 'fieldcoeff_file'):
+            cmd = 'fnirt %s --in=%s '\
                   '--logout=%s '\
-                  '--ref=%s --iout=%s' % (settings, infile, infile, log,
+                  '--ref=%s --iout=%s' % (settings, infile, log,
                                           reffile, iout)
         elif name in ('refmask_file'):
             cmd = 'fnirt --in=%s '\
                   '--logout=%s --ref=%s '\
-                  '%s%s '\
+                  '%s '\
                   '--iout=%s' % (infile, log,
                                  reffile,
-                                 settings, infile,
+                                 settings,
                                  iout)
         elif name in ('in_intensitymap_file', 'inwarp_file', 'inmask_file', 'jacobian_file'):
             cmd = 'fnirt --in=%s '\
-                  '%s%s '\
+                  '%s '\
                   '--logout=%s --ref=%s '\
                   '--iout=%s' % (infile,
-                                 settings, infile,
+                                 settings,
                                  log,
                                  reffile,
                                  iout)
         elif name in ('log_file'):
             cmd = 'fnirt --in=%s '\
-                  '%s%s --ref=%s '\
+                  '%s --ref=%s '\
                   '--iout=%s' % (infile,
-                                 settings, infile,
+                                 settings,
                                  reffile,
                                  iout)
         else:
             cmd = 'fnirt --in=%s '\
-                  '--logout=%s %s%s '\
+                  '--logout=%s %s '\
                   '--ref=%s --iout=%s' % (infile, log,
-                                          settings, infile,
+                                          settings,
                                           reffile, iout)
 
         assert fnirt.cmdline == cmd
 
+        if name == 'out_intensitymap_file':
+            assert fnirt._list_outputs()['out_intensitymap_file'] == [
+                intmap_image, intmap_txt]
 
 @pytest.mark.skipif(no_fsl(), reason="fsl is not installed")
 def test_applywarp(setup_flirt):

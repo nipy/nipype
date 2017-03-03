@@ -106,7 +106,7 @@ NIBABEL_MIN_VERSION = '2.0.1'
 NETWORKX_MIN_VERSION = '1.7'
 NUMPY_MIN_VERSION = '1.6.2'
 SCIPY_MIN_VERSION = '0.11'
-TRAITS_MIN_VERSION = '4.3'
+TRAITS_MIN_VERSION = '4.6'
 DATEUTIL_MIN_VERSION = '1.5'
 PYTEST_MIN_VERSION = '3.0'
 FUTURE_MIN_VERSION = '0.15.2'
@@ -143,7 +143,6 @@ REQUIRES = [
     'simplejson>=%s' % SIMPLEJSON_MIN_VERSION,
     'prov>=%s' % PROV_MIN_VERSION,
     'click>=%s' % CLICK_MIN_VERSION,
-    'xvfbwrapper',
     'funcsigs',
     'configparser',
     'pytest>=%s' % PYTEST_MIN_VERSION
@@ -165,6 +164,7 @@ EXTRA_REQUIRES = {
     'fmri': ['nitime', 'nilearn', 'dipy', 'nipy', 'matplotlib'],
     'profiler': ['psutil'],
     'duecredit': ['duecredit'],
+    'xvfbwrapper': ['xvfbwrapper'],
     # 'mesh': ['mayavi']  # Enable when it works
 }
 

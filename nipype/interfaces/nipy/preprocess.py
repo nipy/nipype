@@ -16,6 +16,8 @@ import nibabel as nb
 import numpy as np
 
 from ...utils.misc import package_check
+from ...utils import NUMPY_MMAP
+
 from ...utils.filemanip import split_filename, fname_presuffix
 from ..base import (TraitedSpec, BaseInterface, traits,
                     BaseInterfaceInputSpec, isdefined, File,
@@ -61,7 +63,7 @@ class ComputeMask(BaseInterface):
             value = getattr(self.inputs, key)
             if isdefined(value):
                 if key in ['mean_volume', 'reference_volume']:
-                    nii = nb.load(value)
+                    nii = nb.load(value, mmap=NUMPY_MMAP)
                     value = nii.get_data()
                 args[key] = value
 
