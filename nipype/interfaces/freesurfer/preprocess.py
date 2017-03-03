@@ -28,6 +28,7 @@ from ..base import (TraitedSpec, File, traits,
                     Directory, InputMultiPath,
                     OutputMultiPath, CommandLine,
                     CommandLineInputSpec, isdefined)
+from ..traits_extension import DictStrStr
 from .base import (FSCommand, FSTraitedSpec,
                    FSTraitedSpecOpenMP,
                    FSCommandOpenMP, Info)
@@ -634,7 +635,7 @@ class ReconAllInputSpec(CommandLineInputSpec):
                            desc="Enable parallel execution")
     hires = traits.Bool(argstr="-hires", min_ver='6.0.0',
                         desc="Conform to minimum voxel size (for voxels < 1mm)")
-    expert = File(exists=True, argstr='-expert %s',
+    expert = traits.Either(File(exists=True), DictStrStr, argstr='-expert %s',
                   desc="Set parameters using expert file")
     subjects_dir = Directory(exists=True, argstr='-sd %s', hash_files=False,
                              desc='path to subjects directory', genfile=True)
@@ -899,6 +900,12 @@ class ReconAll(CommandLine):
         if name == 'T1_files':
             if self._is_resuming():
                 return ''
+        if name == 'expert' and isinstance(value, dict):
+            expert_fname = os.path.abspath('expert.opts')
+            expert = ['{} {}\n'.format(key, val) for key, val in value.items()]
+            with open(expert_fname, 'w') as fobj:
+                fobj.write(''.join(expert))
+            value = expert_fname
         return super(ReconAll, self)._format_arg(name, trait_spec, value)
 
     @property
