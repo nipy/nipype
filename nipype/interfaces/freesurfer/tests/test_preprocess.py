@@ -98,9 +98,14 @@ def test_mandatory_outvol(create_files_in_directory):
     with pytest.raises(ValueError): mni.cmdline
 
     # test with minimal args
-    mni.inputs.in_file = filelist[0] 
-    assert mni.cmdline == ('mri_nu_correct.mni --i %s --o %s_output.mgz'
-                           % (filelist[0], filelist[0].replace('.mgz', '')))
+    mni.inputs.in_file = filelist[0]
+    base, ext = os.path.splitext(os.path.basename(filelist[0]))
+    if ext == '.gz':
+        base, ext2 = os.path.splitext(base)
+        ext = ext2 + ext
+
+    assert mni.cmdline == (
+        'mri_nu_correct.mni --i %s --o %s_output%s' % (filelist[0], base, ext))
 
     # test with custom outfile
     mni.inputs.out_file = 'new_corrected_file.mgz'
@@ -108,8 +113,8 @@ def test_mandatory_outvol(create_files_in_directory):
                            % (filelist[0]))
 
     # constructor based tests
-    mni2 = freesurfer.MNIBiasCorrection(in_file=filelist[0], 
+    mni2 = freesurfer.MNIBiasCorrection(in_file=filelist[0],
                                         out_file='bias_corrected_output',
                                         iterations=4)
-    assert mni2.cmdline == ('mri_nu_correct.mni --i %s --n 4 --o bias_corrected_output.mgz'
+    assert mni2.cmdline == ('mri_nu_correct.mni --i %s --n 4 --o bias_corrected_output'
                              % filelist[0])
