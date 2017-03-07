@@ -69,10 +69,6 @@ class FitDwiInputSpec(CommandLineInputSpec):
                               argstr='-nodiff %s',
                               genfile=True)
 
-    op_basename = traits.String('dwifit',
-                                desc='Output file basename',
-                                usedefault=True)
-
     # Output options, with templated output names based on the source image
     desc = 'Filename of multi-compartment model parameter map \
 (-ivim,-ball,-nod)'
@@ -114,32 +110,39 @@ class FitDwiInputSpec(CommandLineInputSpec):
 no b-vectors]'
     mono_flag = traits.Bool(desc=desc,
                             argstr='-mono',
+                            position=4,
                             xor=['ivim_flag', 'dti_flag', 'ball_flag',
                                  'ballv_flag', 'nod_flag', 'nodv_flag'])
     ivim_flag = traits.Bool(desc='Fit IVIM model to non-directional data.',
                             argstr='-ivim',
+                            position=4,
                             xor=['mono_flag', 'dti_flag', 'ball_flag',
                                  'ballv_flag', 'nod_flag', 'nodv_flag'])
     desc = 'Fit the tensor model [default with b-vectors].'
     dti_flag = traits.Bool(desc=desc,
                            argstr='-dti',
+                           position=4,
                            xor=['mono_flag', 'ivim_flag', 'ball_flag',
                                 'ballv_flag', 'nod_flag', 'nodv_flag'])
     ball_flag = traits.Bool(desc='Fit the ball and stick model.',
                             argstr='-ball',
+                            position=4,
                             xor=['mono_flag', 'ivim_flag', 'dti_flag',
                                  'ballv_flag', 'nod_flag', 'nodv_flag'])
     desc = 'Fit the ball and stick model with optimised PDD.'
     ballv_flag = traits.Bool(desc=desc,
                              argstr='-ballv',
+                             position=4,
                              xor=['mono_flag', 'ivim_flag', 'dti_flag',
                                   'ball_flag', 'nod_flag', 'nodv_flag'])
     nod_flag = traits.Bool(desc='Fit the NODDI model',
                            argstr='-nod',
+                           position=4,
                            xor=['mono_flag', 'ivim_flag', 'dti_flag',
                                 'ball_flag', 'ballv_flag', 'nodv_flag'])
     nodv_flag = traits.Bool(desc='Fit the NODDI model with optimised PDD',
                             argstr='-nodv',
+                            position=4,
                             xor=['mono_flag', 'ivim_flag', 'dti_flag',
                                  'ball_flag', 'ballv_flag', 'nod_flag'])
 
@@ -241,43 +244,43 @@ dwifit_error.nii.gz'
 
     def _gen_filename(self, name):
         if name == 'mcmap_file':
-            return self._gen_fname(self.inputs.op_basename,
+            return self._gen_fname(self.inputs.source_file,
                                    suffix='_mcmap', ext='.nii.gz')
         if name == 'error_file':
-            return self._gen_fname(self.inputs.op_basename,
+            return self._gen_fname(self.inputs.source_file,
                                    suffix='_error', ext='.nii.gz')
         if name == 'res_file':
-            return self._gen_fname(self.inputs.op_basename,
+            return self._gen_fname(self.inputs.source_file,
                                    suffix='_resmap', ext='.nii.gz')
         if name == 'syn_file':
-            return self._gen_fname(self.inputs.op_basename,
+            return self._gen_fname(self.inputs.source_file,
                                    suffix='_syn', ext='.nii.gz')
         if name == 'nodiff_file':
-            return self._gen_fname(self.inputs.op_basename,
+            return self._gen_fname(self.inputs.source_file,
                                    suffix='_no_diff', ext='.nii.gz')
         if name == 'mdmap_file':
-            return self._gen_fname(self.inputs.op_basename,
+            return self._gen_fname(self.inputs.source_file,
                                    suffix='_mdmap', ext='.nii.gz')
         if name == 'famap_file':
-            return self._gen_fname(self.inputs.op_basename,
+            return self._gen_fname(self.inputs.source_file,
                                    suffix='_famap', ext='.nii.gz')
         if name == 'v1map_file':
-            return self._gen_fname(self.inputs.op_basename,
+            return self._gen_fname(self.inputs.source_file,
                                    suffix='_v1map', ext='.nii.gz')
         if name == 'rgbmap_file':
-            return self._gen_fname(self.inputs.op_basename,
+            return self._gen_fname(self.inputs.source_file,
                                    suffix='_rgbmap', ext='.nii.gz')
         if name == 'tenmap_file':
-            return self._gen_fname(self.inputs.op_basename,
+            return self._gen_fname(self.inputs.source_file,
                                    suffix='_tenmap', ext='.nii.gz')
         if name == 'tenmap2_file':
-            return self._gen_fname(self.inputs.op_basename,
+            return self._gen_fname(self.inputs.source_file,
                                    suffix='_tenmap2', ext='.nii.gz')
         if name == 'mcmap_file':
-            return self._gen_fname(self.inputs.op_basename,
+            return self._gen_fname(self.inputs.source_file,
                                    suffix='_mcmap', ext='.nii.gz')
         if name == 'mcout':
-            return self._gen_fname(self.inputs.op_basename,
+            return self._gen_fname(self.inputs.source_file,
                                    suffix='_mcout', ext='.txt')
         return None
 
@@ -350,32 +353,33 @@ dwifit_error.nii.gz'
 class DwiToolInputSpec(CommandLineInputSpec):
     """ Input Spec for DwiTool. """
     desc = 'The source image containing the fitted model.'
-    source_file = traits.File(exists=True,
+    source_file = traits.File(position=1,
+                              exists=True,
                               desc=desc,
                               argstr='-source %s',
                               mandatory=True)
     desc = 'The file containing the bvalues of the source DWI.'
-    bval_file = traits.File(exists=True,
+    bval_file = traits.File(position=2,
+                            exists=True,
                             desc=desc,
                             argstr='-bval %s',
                             mandatory=True)
     desc = 'The file containing the bvectors of the source DWI.'
-    bvec_file = traits.File(exists=True,
+    bvec_file = traits.File(position=3,
+                            exists=True,
                             desc=desc,
                             argstr='-bvec %s',
                             mandatory=True)
-    mask_file = traits.File(exists=True,
-                            desc='The image mask',
-                            argstr='-mask %s',
-                            mandatory=True)
-    b0_file = traits.File(exists=True,
+    b0_file = traits.File(position=4,
+                          exists=True,
                           desc='The B0 image corresponding to the source DWI',
                           argstr='-b0 %s',
                           mandatory=True)
-
-    op_basename = traits.String('dwitool',
-                                desc='Output file basename',
-                                usedefault=True)
+    mask_file = traits.File(position=5,
+                            exists=True,
+                            desc='The image mask',
+                            argstr='-mask %s',
+                            mandatory=True)
 
     # Output options, with templated output names based on the source image
     desc = 'Filename of multi-compartment model parameter map \
@@ -408,43 +412,51 @@ class DwiToolInputSpec(CommandLineInputSpec):
     desc = 'Input is a single exponential to non-directional data \
 [default with no b-vectors]'
     mono_flag = traits.Bool(desc=desc,
+                            position=6,
                             argstr='-mono',
                             xor=['ivim_flag', 'dti_flag', 'dti_flag2',
                                  'ball_flag', 'ballv_flag', 'nod_flag',
                                  'nodv_flag'])
     desc = 'Inputs is an IVIM model to non-directional data.'
     ivim_flag = traits.Bool(desc=desc,
+                            position=6,
                             argstr='-ivim',
                             xor=['mono_flag', 'dti_flag', 'dti_flag2',
                                  'ball_flag', 'ballv_flag', 'nod_flag',
                                  'nodv_flag'])
     dti_flag = traits.Bool(desc='Input is a tensor model diag/off-diag.',
+                           position=6,
                            argstr='-dti',
                            xor=['mono_flag', 'ivim_flag', 'dti_flag2',
                                 'ball_flag', 'ballv_flag', 'nod_flag',
                                 'nodv_flag'])
     dti_flag2 = traits.Bool(desc='Input is a tensor model lower triangular',
+                            position=6,
                             argstr='-dti2',
                             xor=['mono_flag', 'ivim_flag', 'dti_flag',
                                  'ball_flag', 'ballv_flag', 'nod_flag',
                                  'nodv_flag'])
     ball_flag = traits.Bool(desc='Input is a ball and stick model.',
+                            position=6,
                             argstr='-ball',
                             xor=['mono_flag', 'ivim_flag', 'dti_flag',
                                  'dti_flag2', 'ballv_flag', 'nod_flag',
                                  'nodv_flag'])
     desc = 'Input is a ball and stick model with optimised PDD.'
     ballv_flag = traits.Bool(desc=desc,
+                             position=6,
                              argstr='-ballv',
                              xor=['mono_flag', 'ivim_flag', 'dti_flag',
                                   'dti_flag2', 'ball_flag', 'nod_flag',
                                   'nodv_flag'])
     nod_flag = traits.Bool(desc='Input is a NODDI model',
+                           position=6,
                            argstr='-nod',
                            xor=['mono_flag', 'ivim_flag', 'dti_flag',
                                 'dti_flag2', 'ball_flag', 'ballv_flag',
                                 'nodv_flag'])
     nodv_flag = traits.Bool(desc='Input is a NODDI model with optimised PDD',
+                            position=6,
                             argstr='-nodv',
                             xor=['mono_flag', 'ivim_flag', 'dti_flag',
                                  'dti_flag2', 'ball_flag', 'ballv_flag',
@@ -508,25 +520,25 @@ dwitool_v1map.nii.gz -logdti2 dwitool_logdti2.nii.gz'
 
     def _gen_filename(self, name):
         if name == 'mcmap_file':
-            return self._gen_fname(self.inputs.op_basename,
+            return self._gen_fname(self.inputs.source_file,
                                    suffix='_mcmap', ext='.nii.gz')
         if name == 'syn_file':
-            return self._gen_fname(self.inputs.op_basename,
+            return self._gen_fname(self.inputs.source_file,
                                    suffix='_syn', ext='.nii.gz')
         if name == 'mdmap_file':
-            return self._gen_fname(self.inputs.op_basename,
+            return self._gen_fname(self.inputs.source_file,
                                    suffix='_mdmap', ext='.nii.gz')
         if name == 'famap_file':
-            return self._gen_fname(self.inputs.op_basename,
+            return self._gen_fname(self.inputs.source_file,
                                    suffix='_famap', ext='.nii.gz')
         if name == 'v1map_file':
-            return self._gen_fname(self.inputs.op_basename,
+            return self._gen_fname(self.inputs.source_file,
                                    suffix='_v1map', ext='.nii.gz')
         if name == 'rgbmap_file':
-            return self._gen_fname(self.inputs.op_basename,
+            return self._gen_fname(self.inputs.source_file,
                                    suffix='_rgbmap', ext='.nii.gz')
         if name == 'logdti_file':
-            return self._gen_fname(self.inputs.op_basename,
+            return self._gen_fname(self.inputs.source_file,
                                    suffix='_logdti2', ext='.nii.gz')
         return None
 

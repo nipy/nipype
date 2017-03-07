@@ -27,8 +27,9 @@ def test_fit_dwi():
     test_node.inputs.source_file = in_file
     test_node.inputs.bval_file = bval_file
     test_node.inputs.bvec_file = bvec_file
+    test_node.inputs.dti_flag = True
 
-    cmd_tmp = '{cmd} -source {in_file} -bval {bval} -bvec {bvec} \
+    cmd_tmp = '{cmd} -source {in_file} -bval {bval} -bvec {bvec} -dti \
 -error {error} -famap {fa} -mcmap {mc} -mdmap {md} -nodiff {nodiff} \
 -res {res} -rgbmap {rgb} -syn {syn} -tenmap2 {ten2} \
 -tenmap {ten} -v1map {v1}'
@@ -37,16 +38,16 @@ def test_fit_dwi():
         in_file=in_file,
         bval=bval_file,
         bvec=bvec_file,
-        error=os.path.join(os.getcwd(), 'dwifit_error.nii.gz'),
-        fa=os.path.join(os.getcwd(), 'dwifit_famap.nii.gz'),
-        mc=os.path.join(os.getcwd(), 'dwifit_mcmap.nii.gz'),
-        md=os.path.join(os.getcwd(), 'dwifit_mdmap.nii.gz'),
-        nodiff=os.path.join(os.getcwd(), 'dwifit_no_diff.nii.gz'),
-        res=os.path.join(os.getcwd(), 'dwifit_resmap.nii.gz'),
-        rgb=os.path.join(os.getcwd(), 'dwifit_rgbmap.nii.gz'),
-        syn=os.path.join(os.getcwd(), 'dwifit_syn.nii.gz'),
-        ten2=os.path.join(os.getcwd(), 'dwifit_tenmap2.nii.gz'),
-        v1=os.path.join(os.getcwd(), 'dwifit_v1map.nii.gz'),
-        ten=os.path.join(os.getcwd(), 'dwifit_tenmap.nii.gz'))
+        error=os.path.join(os.getcwd(), 'diffusion_error.nii.gz'),
+        fa=os.path.join(os.getcwd(), 'diffusion_famap.nii.gz'),
+        mc=os.path.join(os.getcwd(), 'diffusion_mcmap.nii.gz'),
+        md=os.path.join(os.getcwd(), 'diffusion_mdmap.nii.gz'),
+        nodiff=os.path.join(os.getcwd(), 'diffusion_no_diff.nii.gz'),
+        res=os.path.join(os.getcwd(), 'diffusion_resmap.nii.gz'),
+        rgb=os.path.join(os.getcwd(), 'diffusion_rgbmap.nii.gz'),
+        syn=os.path.join(os.getcwd(), 'diffusion_syn.nii.gz'),
+        ten2=os.path.join(os.getcwd(), 'diffusion_tenmap2.nii.gz'),
+        v1=os.path.join(os.getcwd(), 'diffusion_v1map.nii.gz'),
+        ten=os.path.join(os.getcwd(), 'diffusion_tenmap.nii.gz'))
 
     assert test_node.cmdline == expected_cmd

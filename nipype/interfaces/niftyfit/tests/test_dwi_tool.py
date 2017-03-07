@@ -33,9 +33,9 @@ def test_dwi_tool():
     test_node.inputs.b0_file = b0_file
     test_node.inputs.dti_flag = True
 
-    cmd_tmp = '{cmd} -b0 {b0} -bval {bval} -bvec {bvec} -dti -famap {fa} \
--logdti2 {log} -mask {mask} -mcmap {mc} -mdmap {md} -rgbmap {rgb} -source \
-{in_file} -syn {syn} -v1map {v1}'
+    cmd_tmp = '{cmd} -source {in_file} -bval {bval} -bvec {bvec} -b0 {b0} \
+-mask {mask} -dti -famap {fa} -logdti2 {log} -mcmap {mc} -mdmap {md} \
+-rgbmap {rgb} -syn {syn} -v1map {v1}'
     expected_cmd = cmd_tmp.format(
         cmd=get_custom_path('dwi_tool'),
         in_file=in_file,
@@ -43,12 +43,12 @@ def test_dwi_tool():
         bvec=bvec_file,
         b0=b0_file,
         mask=mask_file,
-        fa=os.path.join(os.getcwd(), 'dwitool_famap.nii.gz'),
-        log=os.path.join(os.getcwd(), 'dwitool_logdti2.nii.gz'),
-        mc=os.path.join(os.getcwd(), 'dwitool_mcmap.nii.gz'),
-        md=os.path.join(os.getcwd(), 'dwitool_mdmap.nii.gz'),
-        rgb=os.path.join(os.getcwd(), 'dwitool_rgbmap.nii.gz'),
-        syn=os.path.join(os.getcwd(), 'dwitool_syn.nii.gz'),
-        v1=os.path.join(os.getcwd(), 'dwitool_v1map.nii.gz'))
+        fa=os.path.join(os.getcwd(), 'diffusion_famap.nii.gz'),
+        log=os.path.join(os.getcwd(), 'diffusion_logdti2.nii.gz'),
+        mc=os.path.join(os.getcwd(), 'diffusion_mcmap.nii.gz'),
+        md=os.path.join(os.getcwd(), 'diffusion_mdmap.nii.gz'),
+        rgb=os.path.join(os.getcwd(), 'diffusion_rgbmap.nii.gz'),
+        syn=os.path.join(os.getcwd(), 'diffusion_syn.nii.gz'),
+        v1=os.path.join(os.getcwd(), 'diffusion_v1map.nii.gz'))
 
     assert test_node.cmdline == expected_cmd
