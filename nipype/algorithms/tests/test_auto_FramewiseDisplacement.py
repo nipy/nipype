@@ -19,6 +19,8 @@ def test_FramewiseDisplacement_inputs():
     ),
     out_file=dict(usedefault=True,
     ),
+    parameter_source=dict(mandatory=True,
+    ),
     radius=dict(usedefault=True,
     ),
     save_plot=dict(usedefault=True,
