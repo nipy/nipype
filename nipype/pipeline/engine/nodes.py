@@ -370,7 +370,7 @@ class Node(EngineBase):
                 raise
 
             t = time()
-            timeout = float(self._config['execution']['job_finished_timeout'])
+            timeout = float(self.config['execution']['job_finished_timeout'])
             timed_out = True
             while True:
                 try:
