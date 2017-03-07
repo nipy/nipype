@@ -53,8 +53,9 @@ class FitQt1InputSpec(CommandLineInputSpec):
                  argstr='-prior %s')
     TE = traits.Float(desc='TE Echo Time [0ms!].', argstr='-TE %f')
     TR = traits.Float(desc='TR Repetition Time [10s!].', argstr='-TR %f')
-    # desc = 'Number of components to fit [1] (currently IR/SR only)'
-    # nb_comp = traits.Int(desc=desc, argstr='-nc %d')
+    desc = 'Number of components to fit [1] (currently IR/SR only)'
+    # set position to be ahead of TIs
+    nb_comp = traits.Int(desc=desc, position=6, argstr='-nc %d')
     desc = 'Set LM parameters (initial value, decrease rate) [100,1.2].'
     lm_val = traits.Tuple(traits.Float, traits.Float,
                           desc=desc, argstr='-lm %f %f')
@@ -65,7 +66,7 @@ class FitQt1InputSpec(CommandLineInputSpec):
     voxel = traits.Tuple(traits.Int, traits.Int, traits.Int,
                          desc='Fit to single voxel only.',
                          argstr='-voxel %d %d %d')
-    maxit = traits.Float(desc='NLSQR iterations [100].', argstr='-maxit %f')
+    maxit = traits.Int(desc='NLSQR iterations [100].', argstr='-maxit %d')
 
     # IR options:
     SR = traits.Bool(desc='Saturation Recovery fitting [default].',
@@ -73,8 +74,7 @@ class FitQt1InputSpec(CommandLineInputSpec):
     IR = traits.Bool(desc='Inversion Recovery fitting [default].',
                      argstr='-SR')
     TIs = traits.List(traits.Float,
-                      minlen=3,
-                      maxlen=3,
+                      position=14,
                       desc='Inversion times for T1 data [1s,2s,5s].',
                       argstr='-TIs %s',
                       sep=' ')
@@ -83,33 +83,21 @@ class FitQt1InputSpec(CommandLineInputSpec):
                          desc='Filename of list of pre-defined TIs.')
     desc = 'Prefined tissue T1 values for mc-estimation \
 [400-4000ms, log spaced]'
-    T1s = traits.List(traits.Float,
-                      minlen=3,
-                      maxlen=3,
-                      desc=desc,
-                      argstr='-T1s %s',
-                      sep=' ')
+    # T1s = traits.List(traits.Float,
+    #                   desc=desc,
+    #                   argstr='-T1s %s',
+    #                   sep=' ')
     T1List = traits.File(exists=True,
                          argstr='-T1list %s',
                          desc='Filename of list of pre-defined T1s')
-    T1min = traits.List(traits.Float,
-                        minlen=3,
-                        maxlen=3,
-                        desc='Minimum tissue T1 value [400ms].',
-                        argstr='-T1min %s',
-                        sep=' ')
-    T1max = traits.List(traits.Float,
-                        minlen=3,
-                        maxlen=3,
-                        desc='Maximum tissue T1 value [4000ms].',
-                        argstr='-T1max %s',
-                        sep=' ')
+    T1min = traits.Float(desc='Minimum tissue T1 value [400ms].',
+                         argstr='-T1min %f')
+    T1max = traits.Float(desc='Maximum tissue T1 value [4000ms].',
+                         argstr='-T1max %f')
 
     # SPGR options
     SPGR = traits.Bool(desc='Spoiled Gradient Echo fitting', argstr='-SPGR')
     flips = traits.List(traits.Float,
-                        minlen=3,
-                        maxlen=3,
                         desc='Flip angles',
                         argstr='-flips %s',
                         sep=' ')
@@ -131,7 +119,7 @@ class FitQt1InputSpec(CommandLineInputSpec):
     mcmaxit = traits.Int(desc='Number of iterations to run [10,000].',
                          argstr='-mcmaxit %d')
     acceptance = traits.Float(desc='Fraction of iterations to accept [0.23].',
-                              argstr='-accpetance %f')
+                              argstr='-acceptance %f')
 
 
 class FitQt1OutputSpec(TraitedSpec):

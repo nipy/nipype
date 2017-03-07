@@ -28,10 +28,10 @@ def test_fit_dwi():
     test_node.inputs.bval_file = bval_file
     test_node.inputs.bvec_file = bvec_file
 
-    cmd_tmp = '{cmd} -bval {bval} -bvec {bvec} -error {error} -famap {fa} \
--mcmap {mc} -mdmap {md} -nodiff {nodiff} -res {res} -rgbmap {rgb} -rotsform 0 \
--source {in_file} -syn {syn} -tenmap2 {ten2} -tenmap {ten} -trgbmap {trgb} \
--v1map {v1}'
+    cmd_tmp = '{cmd} -source {in_file} -bval {bval} -bvec {bvec} \
+-error {error} -famap {fa} -mcmap {mc} -mdmap {md} -nodiff {nodiff} \
+-res {res} -rgbmap {rgb} -syn {syn} -tenmap2 {ten2} \
+-tenmap {ten} -v1map {v1}'
     expected_cmd = cmd_tmp.format(
         cmd=get_custom_path('fit_dwi'),
         in_file=in_file,
@@ -47,7 +47,6 @@ def test_fit_dwi():
         syn=os.path.join(os.getcwd(), 'dwifit_syn.nii.gz'),
         ten2=os.path.join(os.getcwd(), 'dwifit_tenmap2.nii.gz'),
         v1=os.path.join(os.getcwd(), 'dwifit_v1map.nii.gz'),
-        trgb=os.path.join(os.getcwd(), 'dwifit_trgbmap.nii.gz'),
         ten=os.path.join(os.getcwd(), 'dwifit_tenmap.nii.gz'))
 
     assert test_node.cmdline == expected_cmd

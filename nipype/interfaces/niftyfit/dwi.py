@@ -18,17 +18,20 @@ warnings.filterwarnings('always', category=UserWarning)
 class FitDwiInputSpec(CommandLineInputSpec):
     """ Input Spec for FitDwi. """
     # Inputs options
-    source_file = traits.File(exists=True,
+    source_file = traits.File(position=1,
+                              exists=True,
                               argstr='-source %s',
                               mandatory=True,
                               desc='The source image containing the dwi data.')
     desc = 'The file containing the bvalues of the source DWI.'
-    bval_file = traits.File(exists=True,
+    bval_file = traits.File(position=2,
+                            exists=True,
                             argstr='-bval %s',
                             mandatory=True,
                             desc=desc)
     desc = 'The file containing the bvectors of the source DWI.'
-    bvec_file = traits.File(exists=True,
+    bvec_file = traits.File(position=3,
+                            exists=True,
                             argstr='-bvec %s',
                             mandatory=True,
                             desc=desc)
@@ -49,10 +52,8 @@ class FitDwiInputSpec(CommandLineInputSpec):
                              desc=desc)
     desc = 'Rotate the output tensors according to the q/s form of the image \
 (resulting tensors will be in mm coordinates, default: 0).'
-    rotsform_flag = traits.Int(0,
-                               desc=desc,
-                               argstr='-rotsform %d',
-                               usedefault=True)
+    rotsform_flag = traits.Int(desc=desc,
+                               argstr='-rotsform %d')
 
     # generic output options:
     error_file = traits.File(desc='Filename of parameter error maps.',
@@ -94,10 +95,6 @@ class FitDwiInputSpec(CommandLineInputSpec):
                               argstr='-rgbmap %s',
                               genfile=True,
                               requires=['dti_flag'])
-    desc = 'Filename of true RGB colour-coded FA map (display only).'
-    trgbmap_file = traits.File(desc=desc,
-                               argstr='-trgbmap %s',
-                               genfile=True)
     tenmap_file = traits.File(desc='Filename of tensor map [diag,offdiag].',
                               argstr='-tenmap %s',
                               genfile=True,
@@ -111,9 +108,6 @@ class FitDwiInputSpec(CommandLineInputSpec):
     mcmap_file = traits.File(desc=desc,
                              argstr='-mcmap %s',
                              genfile=True)
-    desc = 'Flag parameter fitting on off for -nod \
-[vin,viso,kappa,S0,theta,phi].'
-    param = traits.List(traits.Bool, minlen=6, maxlen=6, desc=desc)
 
     # Methods options
     desc = 'Fit single exponential to non-directional data [default with \
@@ -211,8 +205,6 @@ class FitDwiOutputSpec(TraitedSpec):
     rgbmap_file = traits.File(desc='Filename of colour FA map')
     tenmap_file = traits.File(desc='Filename of tensor map')
     tenmap2_file = traits.File(desc='Filename of tensor map [lower tri]')
-    desc = 'Filename of true RGB colour-coded FA map (display only).'
-    trgbmap_file = traits.File(desc=desc)
     desc = 'Filename of multi-compartment model parameter map \
 (-ivim,-ball,-nod).'
     mcmap_file = traits.File(desc=desc)
@@ -284,9 +276,6 @@ dwifit_error.nii.gz'
         if name == 'mcmap_file':
             return self._gen_fname(self.inputs.op_basename,
                                    suffix='_mcmap', ext='.nii.gz')
-        if name == 'trgbmap_file':
-            return self._gen_fname(self.inputs.op_basename,
-                                   suffix='_trgbmap', ext='.nii.gz')
         if name == 'mcout':
             return self._gen_fname(self.inputs.op_basename,
                                    suffix='_mcout', ext='.txt')
@@ -349,11 +338,6 @@ dwifit_error.nii.gz'
             outputs['mcmap_file'] = self.inputs.mcmap_file
         else:
             outputs['mcmap_file'] = self._gen_filename('mcmap_file')
-
-        if isdefined(self.inputs.trgbmap_file):
-            outputs['trgbmap_file'] = self.inputs.trgbmap_file
-        else:
-            outputs['trgbmap_file'] = self._gen_filename('trgbmap_file')
 
         if isdefined(self.inputs.mcout):
             outputs['mcout'] = self.inputs.mcout
