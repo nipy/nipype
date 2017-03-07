@@ -133,7 +133,7 @@ def main():
         install_requires=ldict['REQUIRES'],
         setup_requires=['future', 'configparser'],
         provides=ldict['PROVIDES'],
-        packages=find_packages(exclude=['*.tests']),
+        packages=find_packages(),
         package_data={'nipype': testdatafiles},
         scripts=glob('bin/*'),
         cmdclass={'build_py': BuildWithCommitInfoCommand},
