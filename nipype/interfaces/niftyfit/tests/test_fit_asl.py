@@ -23,7 +23,7 @@ def test_seg_em():
     in_file = example_data('im1.nii')
     test_node.inputs.source_file = in_file
 
-    cmd_tmp = '{cmd} -cbf {cbf} -error {error} -source {in_file} -syn {syn}'
+    cmd_tmp = '{cmd} -source {in_file} -cbf {cbf} -error {error} -syn {syn}'
     expected_cmd = cmd_tmp.format(
         cmd=get_custom_path('fit_asl'),
         in_file=in_file,

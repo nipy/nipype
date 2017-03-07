@@ -13,11 +13,11 @@ from .base import get_custom_path, NiftyFitCommand
 class FitQt1InputSpec(CommandLineInputSpec):
     """ Input Spec for FitQt1. """
     desc = 'Filename of the 4D Multi-Echo T1 source image.'
-    source_file = File(exists=True,
+    source_file = File(position=1,
+                       exists=True,
                        desc=desc,
                        argstr='-source %s',
-                       mandatory=True,
-                       position=0)
+                       mandatory=True)
 
     # Output options:
     t1map_file = File(genfile=True,
@@ -45,34 +45,39 @@ class FitQt1InputSpec(CommandLineInputSpec):
                     desc='Filename of the model fit residuals')
 
     # Other options:
-    mask = File(exists=True,
+    mask = File(position=2,
+                exists=True,
                 desc='Filename of image mask.',
                 argstr='-mask %s')
-    prior = File(exists=True,
+    prior = File(position=3,
+                 exists=True,
                  desc='Filename of parameter prior.',
                  argstr='-prior %s')
-    TE = traits.Float(desc='TE Echo Time [0ms!].', argstr='-TE %f')
-    TR = traits.Float(desc='TR Repetition Time [10s!].', argstr='-TR %f')
+    TE = traits.Float(desc='TE Echo Time [0ms!].', argstr='-TE %f',
+                      position=4)
+    TR = traits.Float(desc='TR Repetition Time [10s!].', argstr='-TR %f',
+                      position=5)
     desc = 'Number of components to fit [1] (currently IR/SR only)'
     # set position to be ahead of TIs
     nb_comp = traits.Int(desc=desc, position=6, argstr='-nc %d')
     desc = 'Set LM parameters (initial value, decrease rate) [100,1.2].'
     lm_val = traits.Tuple(traits.Float, traits.Float,
-                          desc=desc, argstr='-lm %f %f')
+                          desc=desc, argstr='-lm %f %f', position=7)
     desc = 'Use Gauss-Newton algorithm [Levenberg-Marquardt].'
-    gn_flag = traits.Bool(desc=desc, argstr='-gn')
+    gn_flag = traits.Bool(desc=desc, argstr='-gn', position=8)
     slice_no = traits.Int(desc='Fit to single slice number.',
-                          argstr='-slice %d')
+                          argstr='-slice %d', position=9)
     voxel = traits.Tuple(traits.Int, traits.Int, traits.Int,
                          desc='Fit to single voxel only.',
-                         argstr='-voxel %d %d %d')
-    maxit = traits.Int(desc='NLSQR iterations [100].', argstr='-maxit %d')
+                         argstr='-voxel %d %d %d', position=10)
+    maxit = traits.Int(desc='NLSQR iterations [100].', argstr='-maxit %d',
+                       position=11)
 
     # IR options:
     SR = traits.Bool(desc='Saturation Recovery fitting [default].',
-                     argstr='-SR')
+                     argstr='-SR', position=12)
     IR = traits.Bool(desc='Inversion Recovery fitting [default].',
-                     argstr='-SR')
+                     argstr='-SR', position=13)
     TIs = traits.List(traits.Float,
                       position=14,
                       desc='Inversion times for T1 data [1s,2s,5s].',

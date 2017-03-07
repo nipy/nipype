@@ -12,7 +12,8 @@ from .base import NiftyFitCommand, get_custom_path
 class FitAslInputSpec(CommandLineInputSpec):
     """ Input Spec for FitAsl. """
     desc = 'Filename of the 4D ASL (control/label) source image (mandatory).'
-    source_file = traits.File(exists=True,
+    source_file = traits.File(position=1,
+                              exists=True,
                               argstr='-source %s',
                               mandatory=True,
                               desc=desc)
@@ -41,7 +42,8 @@ carried out internally).'
     IRoutput = traits.File(exists=True, argstr='-IRoutput %s', desc=desc)
 
     # *** Experimental options (Choose those suitable for the model!):
-    mask = traits.File(exists=True,
+    mask = traits.File(position=2,
+                       exists=True,
                        desc='Filename of image mask.',
                        argstr='-mask %s')
     T1a = traits.Float(desc='T1 of arterial component [1650ms].',
