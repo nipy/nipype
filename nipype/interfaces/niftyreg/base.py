@@ -61,7 +61,7 @@ class PositiveInt(traits.BaseInt):
 
 class NiftyRegCommand(CommandLine):
     """
-    Base support for NiftyReg commands
+    Base support interface for NiftyReg commands.
     """
     _suffix = '_nr'
     _min_version = '1.5.10'

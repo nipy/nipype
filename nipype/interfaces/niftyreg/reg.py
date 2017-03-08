@@ -130,6 +130,13 @@ class RegAladinOutputSpec(TraitedSpec):
 class RegAladin(NiftyRegCommand):
     """Interface for executable reg_aladin from NiftyReg platform.
 
+    Block Matching algorithm for symmetric global registration.
+    Based on Modat et al., "Global image registration using
+    asymmetric block-matching approach"
+    J. Med. Img. 1(2) 024003, 2014, doi: 10.1117/1.JMI.1.2.024003
+
+    For source code, see https://cmiclab.cs.ucl.ac.uk/mmodat/niftyreg
+
     Examples
     --------
     >>> from nipype.interfaces.niftyreg import RegAladin
@@ -353,6 +360,12 @@ class RegF3DOutputSpec(TraitedSpec):
 
 class RegF3D(NiftyRegCommand):
     """Interface for executable reg_f3d from NiftyReg platform.
+
+    Fast Free-Form Deformation (F3D) algorithm for non-rigid registration.
+    Initially based on Modat et al., "Fast Free-Form Deformation using
+    graphics processing units", CMPB, 2010
+
+    For source code, see https://cmiclab.cs.ucl.ac.uk/mmodat/niftyreg
 
     Examples
     --------
