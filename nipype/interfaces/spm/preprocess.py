@@ -235,13 +235,27 @@ class Realign(SPMCommand):
                 outputs['realignment_parameters'].append(
                     fname_presuffix(tmp_imgf, prefix='rp_', suffix='.txt',
                                     use_ext=False))
+
                 if not isinstance(imgf, list) and func_is_3d(imgf):
                     break
         if self.inputs.jobtype == "estimate":
             outputs['realigned_files'] = self.inputs.in_files
         if (self.inputs.jobtype == "estimate" or
                 self.inputs.jobtype == "estwrite"):
-            outputs['modified_in_files'] = self.inputs.in_files
+            outputs['modified_in_files'] = list(self.inputs.in_files)
+
+            ## TODO: this was added, maybe it could be improved
+            for imgf in self.inputs.in_files:
+                if isinstance(imgf, list):
+                    tmp_imgf = imgf[0]
+                else:
+                    tmp_imgf = imgf
+                outputs['modified_in_files'].append(
+                    fname_presuffix(tmp_imgf, suffix='.mat', use_ext=False))
+
+                if not isinstance(imgf, list) and func_is_3d(imgf):
+                    break
+
         if self.inputs.jobtype == "write" or self.inputs.jobtype == "estwrite":
             if isinstance(self.inputs.in_files[0], list):
                 first_image = self.inputs.in_files[0][0]
@@ -677,6 +691,10 @@ class Normalize12(SPMCommand):
             inputfiles = deepcopy(self.inputs.apply_to_files)
             if isdefined(self.inputs.image_to_align):
                 inputfiles.extend([self.inputs.image_to_align])
+
+            # TODO: I changed this, maybe it could be improved
+            inputfiles = [x for x in inputfiles if x[-3:] != 'mat']
+
             einputs[0]['subj']['resample'] = scans_for_fnames(inputfiles)
         jobtype = self.inputs.jobtype
         if jobtype in ['estwrite', 'write']:
@@ -706,13 +724,17 @@ class Normalize12(SPMCommand):
         elif 'write' in self.inputs.jobtype:
             outputs['normalized_files'] = []
             if isdefined(self.inputs.apply_to_files):
-                filelist = filename_to_list(self.inputs.apply_to_files)
+                # TODO: I changed this part
+                filelist = filename_to_list([x for x in self.inputs.apply_to_files if x[-3:] != 'mat'])
+                # filelist = filename_to_list(self.inputs.apply_to_files)
+
                 for f in filelist:
                     if isinstance(f, list):
                         run = [fname_presuffix(in_f, prefix='w') for in_f in f]
                     else:
                         run = [fname_presuffix(f, prefix='w')]
                     outputs['normalized_files'].extend(run)
+
             if isdefined(self.inputs.image_to_align):
                 outputs['normalized_image'] = fname_presuffix(
                     self.inputs.image_to_align, prefix='w')
