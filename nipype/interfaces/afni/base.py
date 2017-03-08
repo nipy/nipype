@@ -162,7 +162,7 @@ class AFNICommand(AFNICommandBase):
 
         # Update num threads estimate from OMP_NUM_THREADS env var
         # Default to 1 if not set
-        os.environ['OMP_NUM_THREADS'] = str(self.num_threads)
+        self.inputs.environ['OMP_NUM_THREADS'] = str(self.num_threads)
 
     def _output_update(self):
         """ i think? updates class private attribute based on instance input
