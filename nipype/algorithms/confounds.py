@@ -208,7 +208,7 @@ Bradley L. and Petersen, Steven E.},
 
 class FramewiseDisplacementInputSpec(BaseInterfaceInputSpec):
     in_file = File(exists=True, mandatory=True, desc='motion parameters')
-    parameter_source = traits.Enum("FSL", "AFNI", "SPM", "FSFAST",
+    parameter_source = traits.Enum("FSL", "AFNI", "SPM", "FSFAST", "NIPY",
                                    desc="Source of movement parameters",
                                    mandatory=True)
     radius = traits.Float(50, usedefault=True,

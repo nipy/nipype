@@ -196,7 +196,8 @@ class SpecifyModelInputSpec(BaseInterfaceInputSpec):
                                             desc='Realignment parameters returned '
                                                  'by motion correction algorithm',
                                             copyfile=False)
-    parameter_source = traits.Enum("SPM", "FSL", "AFNI", "FSFAST", usedefault=True,
+    parameter_source = traits.Enum("SPM", "FSL", "AFNI", "FSFAST", "NIPY",
+                                   usedefault=True,
                                    desc="Source of motion parameters")
     outlier_files = InputMultiPath(File(exists=True),
                                    desc='Files containing scan outlier indices '
