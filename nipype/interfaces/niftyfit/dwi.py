@@ -11,10 +11,6 @@ from ..base import TraitedSpec, traits, isdefined, CommandLineInputSpec
 from .base import NiftyFitCommand, get_custom_path
 
 
-warn = warnings.warn
-warnings.filterwarnings('always', category=UserWarning)
-
-
 class FitDwiInputSpec(CommandLineInputSpec):
     """ Input Spec for FitDwi. """
     # Inputs options
@@ -507,6 +503,8 @@ dwitool_v1map.nii.gz -logdti2 dwitool_logdti2.nii.gz'
     _cmd = get_custom_path('dwi_tool')
     input_spec = DwiToolInputSpec
     output_spec = DwiToolOutputSpec
+    _suffix = '_dwi_tool'
+
     _suffix = '_dwi_tool'
 
     def _format_arg(self, name, trait_spec, value):

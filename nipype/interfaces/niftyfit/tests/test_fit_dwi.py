@@ -9,7 +9,6 @@ import pytest
 
 @skipif(no_niftyfit(cmd='fit_dwi'))
 def test_fit_dwi():
-
     # Create a node object
     test_node = FitDwi()
 
@@ -33,6 +32,7 @@ def test_fit_dwi():
 -error {error} -famap {fa} -mcmap {mc} -mdmap {md} -nodiff {nodiff} \
 -res {res} -rgbmap {rgb} -syn {syn} -tenmap2 {ten2} \
 -tenmap {ten} -v1map {v1}'
+
     expected_cmd = cmd_tmp.format(
         cmd=get_custom_path('fit_dwi'),
         in_file=in_file,

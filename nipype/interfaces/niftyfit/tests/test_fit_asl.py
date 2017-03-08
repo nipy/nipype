@@ -8,8 +8,8 @@ import pytest
 
 
 @skipif(no_niftyfit(cmd='fit_asl'))
-def test_seg_em():
-    # Create a node object
+def test_fit_asl():
+    # Create a reg_aladin object
     test_node = FitAsl()
 
     # Check if the command is properly defined

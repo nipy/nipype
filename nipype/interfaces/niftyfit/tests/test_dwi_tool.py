@@ -9,7 +9,6 @@ import pytest
 
 @skipif(no_niftyfit(cmd='dwi_tool'))
 def test_dwi_tool():
-
     # Create a node object
     test_node = DwiTool()
 
