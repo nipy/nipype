@@ -11,7 +11,6 @@ def test_CreateJacobianDeterminantImage_inputs():
     position=1,
     ),
     doLogJacobian=dict(argstr='%d',
-    mandatory=False,
     position=3,
     ),
     environ=dict(nohash=True,
@@ -35,7 +34,6 @@ def test_CreateJacobianDeterminantImage_inputs():
     terminal_output=dict(nohash=True,
     ),
     useGeometric=dict(argstr='%d',
-    mandatory=False,
     position=4,
     ),
     )
