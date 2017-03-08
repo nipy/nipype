@@ -145,9 +145,9 @@ class CreateJacobianDeterminantImageInputSpec(ANTSCommandInputSpec):
     outputImage = File(argstr='%s', mandatory=True,
                          position=2,
                          desc='output filename')
-    doLogJacobian = traits.Enum(0, 1, argstr='%d', mandatory=False, position=3,
+    doLogJacobian = traits.Enum(0, 1, argstr='%d', position=3,
                           desc='return the log jacobian')
-    useGeometric = traits.Enum(0, 1, argstr='%d', mandatory=False, position=4,
+    useGeometric = traits.Enum(0, 1, argstr='%d', position=4,
                           desc='return the geometric jacobian')
 
 class CreateJacobianDeterminantImageOutputSpec(TraitedSpec):

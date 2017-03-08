@@ -67,6 +67,7 @@ def test_dvars(tmpdir):
     assert (np.abs(dv1[:, 2] - ground_truth[:, 2]).sum() / len(dv1)) < 0.05
 
 def test_outliers(tmpdir):
+    np.random.seed(0)
     in_data = np.random.randn(100)
     in_data[0] += 10
 
