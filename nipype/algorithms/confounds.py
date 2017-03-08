@@ -302,7 +302,7 @@ Bradley L. and Petersen, Steven E.},
 class CompCorInputSpec(BaseInterfaceInputSpec):
     realigned_file = File(exists=True, mandatory=True,
                           desc='already realigned brain image (4D)')
-    mask_file = File(exists=True, desc='mask file that determines ROI (3D)')
+    mask_file = InputMultiPath(File(exists=True, desc='mask file(s) that determines ROI (3D)'))
     components_file = File('components_file.txt', exists=False,
                            usedefault=True,
                            desc='filename to store physiological components')
@@ -351,36 +351,43 @@ class CompCor(BaseInterface):
 
     def _run_interface(self, runtime):
         imgseries = nb.load(self.inputs.realigned_file, mmap=NUMPY_MMAP).get_data()
-        mask = nb.load(self.inputs.mask_file, mmap=NUMPY_MMAP).get_data()
+        components = None
+        
+        for mask_file in self.inputs.mask_file:
+            mask = nb.load(mask_file, mmap=NUMPY_MMAP).get_data()
 
-        if imgseries.shape[:3] != mask.shape:
-            raise ValueError('Inputs for CompCor, func {} and mask {}, do not have matching '
-                             'spatial dimensions ({} and {}, respectively)'
-                             .format(self.inputs.realigned_file, self.inputs.mask_file,
-                                     imgseries.shape[:3], mask.shape))
+            if imgseries.shape[:3] != mask.shape:
+                raise ValueError('Inputs for CompCor, func {} and mask {}, do not have matching '
+                                 'spatial dimensions ({} and {}, respectively)'
+                                 .format(self.inputs.realigned_file, mask_file,
+                                         imgseries.shape[:3], mask.shape))
 
-        voxel_timecourses = imgseries[mask > 0]
-        # Zero-out any bad values
-        voxel_timecourses[np.isnan(np.sum(voxel_timecourses, axis=1)), :] = 0
+            voxel_timecourses = imgseries[mask > 0]
+            # Zero-out any bad values
+            voxel_timecourses[np.isnan(np.sum(voxel_timecourses, axis=1)), :] = 0
 
-        # from paper:
-        # "The constant and linear trends of the columns in the matrix M were
-        # removed [prior to ...]"
-        degree = self.inputs.regress_poly_degree if self.inputs.use_regress_poly else 0
-        voxel_timecourses = regress_poly(degree, voxel_timecourses)
+            # from paper:
+            # "The constant and linear trends of the columns in the matrix M were
+            # removed [prior to ...]"
+            degree = self.inputs.regress_poly_degree if self.inputs.use_regress_poly else 0
+            voxel_timecourses = regress_poly(degree, voxel_timecourses)
 
-        # "Voxel time series from the noise ROI (either anatomical or tSTD) were
-        # placed in a matrix M of size Nxm, with time along the row dimension
-        # and voxels along the column dimension."
-        M = voxel_timecourses.T
+            # "Voxel time series from the noise ROI (either anatomical or tSTD) were
+            # placed in a matrix M of size Nxm, with time along the row dimension
+            # and voxels along the column dimension."
+            M = voxel_timecourses.T
 
-        # "[... were removed] prior to column-wise variance normalization."
-        M = M / self._compute_tSTD(M, 1.)
+            # "[... were removed] prior to column-wise variance normalization."
+            M = M / self._compute_tSTD(M, 1.)
 
-        # "The covariance matrix C = MMT was constructed and decomposed into its
-        # principal components using a singular value decomposition."
-        u, _, _ = linalg.svd(M, full_matrices=False)
-        components = u[:, :self.inputs.num_components]
+            # "The covariance matrix C = MMT was constructed and decomposed into its
+            # principal components using a singular value decomposition."
+            u, _, _ = linalg.svd(M, full_matrices=False)
+            if components is None:
+                components = u[:, :self.inputs.num_components]
+            else:
+                components = np.hstack((components, u[:, :self.inputs.num_components]))
+
         components_file = os.path.join(os.getcwd(), self.inputs.components_file)
 
         self._set_header()
