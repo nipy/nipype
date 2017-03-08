@@ -177,7 +177,7 @@ class RealignOutputSpec(TraitedSpec):
                                              desc=('Estimated translation and '
                                                    'rotation parameters'))
 
-    header_files = OutputMultiPath(traits.Either(
+    estimated_transform_files = OutputMultiPath(traits.Either(
         traits.List(File(exists=True)), File(exists=True)),
         desc='Header information for each volume')
 
@@ -231,7 +231,7 @@ class Realign(SPMCommand):
         if self.inputs.jobtype != "write":
             if isdefined(self.inputs.in_files):
                 outputs['realignment_parameters'] = []
-                outputs['header_files'] = []
+                outputs['estimated_transform_files'] = []
 
             for imgf in self.inputs.in_files:
                 if isinstance(imgf, list):
@@ -242,7 +242,7 @@ class Realign(SPMCommand):
                     fname_presuffix(tmp_imgf, prefix='rp_', suffix='.txt',
                                     use_ext=False))
 
-                outputs['header_files'].append(
+                outputs['estimated_transform_files'].append(
                     fname_presuffix(tmp_imgf, suffix='.mat', use_ext=False))
 
                 if not isinstance(imgf, list) and func_is_3d(imgf):
