@@ -5,8 +5,6 @@
 The dwi module of niftyfit, which wraps the fitting methods in NiftyFit.
 """
 
-import warnings
-
 from ..base import TraitedSpec, traits, isdefined, CommandLineInputSpec
 from .base import NiftyFitCommand, get_custom_path
 
@@ -211,10 +209,15 @@ class FitDwiOutputSpec(TraitedSpec):
 
 
 class FitDwi(NiftyFitCommand):
-    """ Use NiftyFit to perform diffusion model fitting.
+    """Interface for executable fit_dwi from Niftyfit platform.
 
-    TODO: Add functionality to selectivitly generate outputs images
-          as currently all possible images will be generated
+    Use NiftyFit to perform diffusion model fitting.
+
+    Diffusion-weighted MR Fitting.
+    Fits DWI parameter maps to multi-shell, multi-directional data.
+
+    For source code, see https://cmiclab.cs.ucl.ac.uk/CMIC/NiftyFit-Release
+
     Examples
     --------
 
@@ -479,7 +482,13 @@ class DwiToolOutputSpec(TraitedSpec):
 
 
 class DwiTool(NiftyFitCommand):
-    """ Use DwiTool.
+    """Interface for executable dwi_tool from Niftyfit platform.
+
+    Use DwiTool.
+
+    Diffusion-Weighted MR Prediction.
+    Predicts DWI from previously fitted models and calculates model derived
+    maps.
 
     Examples
     --------
@@ -494,7 +503,7 @@ class DwiTool(NiftyFitCommand):
     >>> dwi_tool.inputs.dti_flag = True
     >>> dwi_tool.inputs.rgbmap_file = 'rgb_map.nii.gz'
     >>> dwi_tool.cmdline  # doctest: +SKIP
-    'fit_dwi -source im1.nii.gz -bval im1.val -bvec im1.bvec -dti -mask \
+    'dwi_tool -source im1.nii.gz -bval im1.val -bvec im1.bvec -dti -mask \
 mask.nii.gz -b0 b0.nii.gz -rgbmap rgb_map.nii.gz -syn dwitool_syn.nii.gz \
 -mdmap dwitool_mdmap.nii.gz -famap dwitool_famap.nii.gz -v1map \
 dwitool_v1map.nii.gz -logdti2 dwitool_logdti2.nii.gz'

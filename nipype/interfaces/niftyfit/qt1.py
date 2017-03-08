@@ -141,7 +141,14 @@ class FitQt1OutputSpec(TraitedSpec):
 
 
 class FitQt1(NiftyFitCommand):
-    """ Use NiftyFit to perform Qt1 fitting.
+    """Interface for executable fit_qt1 from Niftyfit platform.
+
+    Use NiftyFit to perform Qt1 fitting.
+
+    T1 Fitting Routine (To inversion recovery or spgr data).
+    Fits single component T1 maps in the first instance.
+
+    For source code, see https://cmiclab.cs.ucl.ac.uk/CMIC/NiftyFit-Release
 
     Examples
     --------
@@ -153,6 +160,7 @@ class FitQt1(NiftyFitCommand):
     'fit_qt1 -source im1.nii.gz -t1map im1_t1map.nii.gz -m0map \
 im1_m0map.nii.gz -mcmap im1_mcmap.nii.gz -error im1_error.nii.gz \
 -syn im1_syn.nii.gz -res im1_res.nii.gz'
+
     """
     _cmd = get_custom_path('fit_qt1')
     input_spec = FitQt1InputSpec

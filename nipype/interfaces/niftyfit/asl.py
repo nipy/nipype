@@ -119,7 +119,14 @@ class FitAslOutputSpec(TraitedSpec):
 
 
 class FitAsl(NiftyFitCommand):
-    """Use NiftyFit to perform ASL fitting.
+    """Interface for executable fit_asl from Niftyfit platform.
+
+    Use NiftyFit to perform ASL fitting.
+
+    ASL fitting routines (following EU Cost Action White Paper recommendations)
+    Fits Cerebral Blood Flow maps in the first instance.
+
+    For source code, see https://cmiclab.cs.ucl.ac.uk/CMIC/NiftyFit-Release
 
     Examples
     --------

@@ -50,7 +50,7 @@ def no_niftyfit(cmd='fit_dwi'):
 
 class NiftyFitCommand(CommandLine):
     """
-    Base support for NiftyFit commands.
+    Base support interface for NiftyFit commands.
     """
     _suffix = '_nf'
 
