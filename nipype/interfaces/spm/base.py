@@ -30,7 +30,7 @@ from scipy.io import savemat
 from ... import logging
 from ...utils import spm_docs as sd, NUMPY_MMAP
 from ..base import (BaseInterface, traits, isdefined, InputMultiPath,
-                    BaseInterfaceInputSpec, Directory, Undefined, File)
+                    BaseInterfaceInputSpec, Directory, Undefined)
 from ..matlab import MatlabCommand
 from ...external.due import due, Doi, BibTeX
 
@@ -219,12 +219,6 @@ class SPMCommandInputSpec(BaseInterfaceInputSpec):
                                desc=('Generate SPM8 and higher '
                                      'compatible jobs')
                                )
-
-    aux_files = InputMultiPath(traits.Either(traits.List(File(exists=True)),
-                                             File(exists=True)),
-                               copyfile=True,
-                               desc='list of filenames to copy to working '
-                                    'folder (eg, mat files)')
 
 
 class SPMCommand(BaseInterface):
