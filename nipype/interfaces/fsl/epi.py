@@ -498,7 +498,6 @@ class Eddy(FSLCommand):
     >>> res = eddy.run() # doctest: +SKIP
 
     """
-    _cmd = 'eddy_openmp'
     input_spec = EddyInputSpec
     output_spec = EddyOutputSpec
 
@@ -507,8 +506,6 @@ class Eddy(FSLCommand):
     def __init__(self, **inputs):
         super(Eddy, self).__init__(**inputs)
         self.inputs.on_trait_change(self._num_threads_update, 'num_threads')
-        if isdefined(self.inputs.use_cuda):
-            self._use_cuda()
         if not isdefined(self.inputs.num_threads):
             self.inputs.num_threads = self._num_threads
         else:
@@ -523,11 +520,10 @@ class Eddy(FSLCommand):
             self.inputs.environ['OMP_NUM_THREADS'] = str(
                 self.inputs.num_threads)
 
-    def _use_cuda(self):
-        if self.inputs.use_cuda:
-            self._cmd = 'eddy_cuda'
-        else:
-            self._cmd = 'eddy_openmp'
+    @property
+    def _cmd(self):
+        cuda = self.inputs.use_cuda
+        return 'eddy_cuda' if isdefined(cuda) and cuda else 'eddy_openmp'
 
     def _format_arg(self, name, spec, value):
         if name == 'in_topup_fieldcoef':
