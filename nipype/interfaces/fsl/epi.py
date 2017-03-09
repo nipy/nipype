@@ -525,9 +525,9 @@ class Eddy(FSLCommand):
 
     def _use_cuda(self):
         if self.inputs.use_cuda:
-            _cmd = 'eddy_cuda'
+            self._cmd = 'eddy_cuda'
         else:
-            _cmd = 'eddy_openmp'
+            self._cmd = 'eddy_openmp'
 
     def _format_arg(self, name, spec, value):
         if name == 'in_topup_fieldcoef':
