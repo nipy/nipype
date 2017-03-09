@@ -34,9 +34,8 @@ RUN conda install python=3.4 && \
     conda update --all -y python=3.4
 
 COPY docker/files/run_* /usr/bin/
-RUN chmod +x /usr/bin/run_*
+RUN chmod +x /usr/bin/run_* && rm -rf /src/nipype
 
-# Re-install nipype
 # Re-install nipype
 COPY . /src/nipype
 RUN cd /src/nipype && \

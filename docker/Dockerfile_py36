@@ -30,4 +30,9 @@ FROM nipype/nipype:latest
 MAINTAINER The nipype developers https://github.com/nipy/nipype
 
 COPY docker/files/run_* /usr/bin/
-RUN chmod +x /usr/bin/run_*
+RUN chmod +x /usr/bin/run_* && rm -rf /src/nipype
+
+# Re-install nipype
+COPY . /src/nipype
+RUN cd /src/nipype && \
+    pip install -e .[all]
