@@ -400,8 +400,9 @@ class FLIRTInputSpec(FSLCommandInputSpec):
                    name_template='%s_flirt.log', desc='output log')
     in_matrix_file = File(argstr='-init %s', desc='input 4x4 affine matrix')
     apply_xfm = traits.Bool(
-        argstr='-applyxfm', requires=['in_matrix_file'],
-        desc='apply transformation supplied by in_matrix_file')
+        argstr='-applyxfm',
+        desc=('apply transformation supplied by in_matrix_file or uses_qform to'
+              ' use the affine matrix stored in the reference header'))
     apply_isoxfm = traits.Float(
         argstr='-applyisoxfm %f', xor=['apply_xfm'],
         desc='as applyxfm but forces isotropic resampling')
@@ -561,13 +562,18 @@ class FLIRT(FSLCommand):
         if isdefined(self.inputs.save_log) and self.inputs.save_log:
             if not isdefined(self.inputs.verbose) or self.inputs.verbose == 0:
                 self.inputs.verbose = 1
+        if isdefined(self.inputs.apply_xfm) and self.inputs.apply_xfm:
+            if not self.inputs.in_matrix_file or not self.inputs.uses_qform:
+                raise RuntimeError('Argument apply_xfm requires in_matrix_file '
+                                   'or uses_qform arguments to run')
         skip.append('save_log')
         return super(FLIRT, self)._parse_inputs(skip=skip)
 
 class ApplyXFMInputSpec(FLIRTInputSpec):
     apply_xfm = traits.Bool(
-        True, argstr='-applyxfm', requires=['in_matrix_file'],
-        desc='apply transformation supplied by in_matrix_file',
+        True, argstr='-applyxfm',
+        desc=('apply transformation supplied by in_matrix_file or uses_qform to'
+              ' use the affine matrix stored in the reference header'),
         usedefault=True)
 
 
