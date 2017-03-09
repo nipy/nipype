@@ -30,7 +30,7 @@ FROM nipype/nipype:latest
 MAINTAINER The nipype developers https://github.com/nipy/nipype
 
 # Downgrade python to 3.4
-RUN conda install python=3.4 && \
+RUN conda install -y python=3.4 && \
     conda update --all -y python=3.4
 
 COPY docker/files/run_* /usr/bin/
