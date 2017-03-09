@@ -36,19 +36,8 @@ RUN conda install python=3.4 && \
 COPY docker/files/run_* /usr/bin/
 RUN chmod +x /usr/bin/run_*
 
-# Replace imglob with a Python3 compatible version
-COPY nipype/external/fsl_imglob.py /usr/bin/fsl_imglob.py
-RUN rm -r ${FSLDIR}/bin/imglob && \
-    chmod +x /usr/bin/fsl_imglob.py && \
-    ln -s /usr/bin/fsl_imglob.py ${FSLDIR}/bin/imglob
-
-# matplotlib cleanups: set default backend, precaching fonts
-RUN sed -i 's/\(backend *: \).*$/\1Agg/g' /usr/local/miniconda/lib/python3.4/site-packages/matplotlib/mpl-data/matplotlibrc && \
-    python -c "from matplotlib import font_manager"
-
 # Re-install nipype
-COPY . /root/src/nipype
-RUN cd /root/src/nipype && \
+# Re-install nipype
+COPY . /src/nipype
+RUN cd /src/nipype && \
     pip install -e .[all]
-
-CMD ["/bin/bash"]

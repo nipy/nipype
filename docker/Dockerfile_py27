@@ -30,18 +30,15 @@ FROM nipype/nipype:latest
 MAINTAINER The nipype developers https://github.com/nipy/nipype
 
 COPY docker/files/run_* /usr/bin/
-RUN chmod +x /usr/bin/run_*
+RUN chmod +x /usr/bin/run_* && rm /usr/bin/fsl_imglob.py
 
 # Downgrade python to 2.7
 # matplotlib cleanups: set default backend, precaching fonts
 RUN conda install python=2.7 && \
-    find /usr/local/miniconda/ -exec chmod 775 {} + && \
-    sed -i 's/\(backend *: \).*$/\1Agg/g' /usr/local/miniconda/lib/python2.7/site-packages/matplotlib/mpl-data/matplotlibrc && \
-    python -c "from matplotlib import font_manager"
+    conda update --all -y python=2.7 && \
+    rm -rf /src/nipype
 
 # Re-install nipype
-COPY . /root/src/nipype
-RUN cd /root/src/nipype && \
+COPY . /src/nipype
+RUN cd /src/nipype && \
     pip install -e .[all]
-
-CMD ["/bin/bash"]

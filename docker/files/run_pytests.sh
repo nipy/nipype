@@ -21,7 +21,7 @@ if [[ "${PYTHON_VERSION}" -lt "30" ]]; then
 fi
 
 # Run tests using pytest
-cd /root/src/nipype/
+cd /src/nipype/
 make clean
 py.test --doctest-modules --cov-report xml:/scratch/coverage_py${PYTHON_VERSION}.xml --cov=nipype nipype
 
@@ -35,4 +35,4 @@ if [[ "${PYTHON_VERSION}" -ge "30" ]]; then
 fi
 
 # Copy crashfiles to scratch
-for i in $(find /root/src/nipype/ -name "crash-*" ); do cp $i /scratch/crashfiles/; done
+for i in $(find /src/nipype/ -name "crash-*" ); do cp $i /scratch/crashfiles/; done

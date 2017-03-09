@@ -165,9 +165,9 @@ ENV MATLABCMD="/opt/mcr/v85/toolbox/matlab" \
 
 
 # Installing and setting up miniconda
-RUN curl -sSLO https://repo.continuum.io/miniconda/Miniconda3-4.2.12-Linux-x86_64.sh && \
-    bash Miniconda3-4.2.12-Linux-x86_64.sh -b -p /usr/local/miniconda && \
-    rm Miniconda3-4.2.12-Linux-x86_64.sh
+RUN curl -sSLO https://repo.continuum.io/miniconda/Miniconda3-4.3.11-Linux-x86_64.sh && \
+    bash Miniconda3-4.3.11-Linux-x86_64.sh -b -p /usr/local/miniconda && \
+    rm Miniconda3-4.3.11-Linux-x86_64.sh
 
 ENV PATH=/usr/local/miniconda/bin:$PATH \
     LANG=C.UTF-8 \
@@ -175,27 +175,29 @@ ENV PATH=/usr/local/miniconda/bin:$PATH \
     ACCEPT_INTEL_PYTHON_EULA=yes
 
 # Installing precomputed python packages
-RUN conda config --add channels conda-forge --add channels intel && \
+RUN conda config --add channels conda-forge && \ #--add channels intel && \
     chmod +x /usr/local/miniconda/bin/* && \
     conda config --set always_yes yes --set changeps1 no && \
     conda update -q conda && \
     chmod +x /usr/local/miniconda/bin/*; sync && \
-    conda install -y mkl=2017.0.1 \
-                     numpy=1.11.2 \
+    conda install -y numpy=1.12.0 \
                      scipy=0.18.1 \
-                     scikit-learn=0.17.1 \
-                     matplotlib=1.5.3 \
-                     pandas=0.19.0 \
+                     scikit-learn=0.18.1 \
+                     matplotlib=2.0.0 \
+                     pandas=0.19.2 \
                      libxml2=2.9.4 \
                      libxslt=1.1.29 \
                      traits=4.6.0 \
-                     psutil=5.0.1 \
-                     icu=58.1 && \
-    find /usr/local/miniconda/ -exec chmod 775 {} +
+                     psutil=5.2.0 \
+                     icu=58.1 \
+                     python=3.6
+
+#                      && \
+#    find /usr/local/miniconda/ -exec chmod 775 {} +
 
 # matplotlib cleanups: set default backend, precaching fonts
-RUN sed -i 's/\(backend *: \).*$/\1Agg/g' /usr/local/miniconda/lib/python3.5/site-packages/matplotlib/mpl-data/matplotlibrc && \
-    python -c "from matplotlib import font_manager"
+#RUN sed -i 's/\(backend *: \).*$/\1Agg/g' /usr/local/miniconda/lib/python3.5/site-packages/matplotlib/mpl-data/matplotlibrc && \
+#    python -c "from matplotlib import font_manager"
 
 # Unless otherwise specified each process should only use one thread - nipype
 # will handle parallelization
@@ -203,18 +205,26 @@ ENV MKL_NUM_THREADS=1 \
     OMP_NUM_THREADS=1
 
 # Installing dev requirements (packages that are not in pypi)
-WORKDIR /root/
+WORKDIR /src/
 COPY requirements.txt requirements.txt
 RUN pip install -r requirements.txt && \
     rm -rf ~/.cache/pip
 
-# Installing nipype
-COPY . /root/src/nipype
-RUN cd /root/src/nipype && \
+# Installing nipype (gcc necessary in 3.6 for now since wheels are unavailable)
+COPY . /src/nipype
+RUN cd /src/nipype && \
+    apt-get -y update && apt-get install -y build-essential && \
     pip install -e .[all] && \
-    rm -rf ~/.cache/pip
+    rm -rf ~/.cache/pip && \
+    apt-get clean
 
-WORKDIR /root/
+# Replace imglob with a Python3 compatible version
+COPY nipype/external/fsl_imglob.py /usr/bin/fsl_imglob.py
+RUN rm -r ${FSLDIR}/bin/imglob && \
+    chmod +x /usr/bin/fsl_imglob.py && \
+    ln -s /usr/bin/fsl_imglob.py ${FSLDIR}/bin/imglob
+
+WORKDIR /src/workdir/
 
 ARG BUILD_DATE
 ARG VCS_REF
@@ -227,3 +237,5 @@ LABEL org.label-schema.build-date=$BUILD_DATE \
       org.label-schema.vcs-url="https://github.com/nipy/nipype" \
       org.label-schema.version=$VERSION \
       org.label-schema.schema-version="1.0"
+
+CMD ["/bin/bash"]
