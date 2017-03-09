@@ -166,10 +166,9 @@ class EstimateResponseSHInputSpec(DipyBaseInterfaceInputSpec):
     roi_radius = traits.Int(
         10, usedefault=True, desc=('ROI radius to be used in auto_response'))
     auto = traits.Bool(
-        True, usedefault=True, desc='use the auto_response estimator from dipy')
+        xor=['recursive'], desc='use the auto_response estimator from dipy')
     recursive = traits.Bool(
-        False, usedefault=True,
-        desc='use the recursive response estimator from dipy')
+        xor=['auto'], desc='use the recursive response estimator from dipy')
     response = File(
         'response.txt', usedefault=True, desc=('the output response file'))
     out_mask = File('wm_mask.nii.gz', usedefault=True, desc='computed wm mask')
