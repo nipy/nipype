@@ -30,7 +30,8 @@ FROM nipype/nipype:latest
 MAINTAINER The nipype developers https://github.com/nipy/nipype
 
 COPY docker/files/run_* /usr/bin/
-RUN chmod +x /usr/bin/run_* && rm /usr/bin/fsl_imglob.py
+RUN chmod +x /usr/bin/run_* && rm /usr/bin/fsl_imglob.py && \
+   mv ${FSLDIR}/bin/imglob.py27 ${FSLDIR}/bin/imglob
 
 # Downgrade python to 2.7
 # matplotlib cleanups: set default backend, precaching fonts

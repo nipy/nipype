@@ -220,7 +220,7 @@ RUN cd /src/nipype && \
 
 # Replace imglob with a Python3 compatible version
 COPY nipype/external/fsl_imglob.py /usr/bin/fsl_imglob.py
-RUN rm -r ${FSLDIR}/bin/imglob && \
+RUN mv ${FSLDIR}/bin/imglob ${FSLDIR}/bin/imglob.py27 && \
     chmod +x /usr/bin/fsl_imglob.py && \
     ln -s /usr/bin/fsl_imglob.py ${FSLDIR}/bin/imglob
 
