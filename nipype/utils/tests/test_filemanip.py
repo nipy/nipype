@@ -306,7 +306,7 @@ def test_check_depends():
     else:
         assert False, "Should raise OSError on missing dependency"
 
-    shutil.rmtree(tmpdir)   
+    shutil.rmtree(tmpdir)
 
 
 def test_json():

@@ -143,7 +143,6 @@ REQUIRES = [
     'simplejson>=%s' % SIMPLEJSON_MIN_VERSION,
     'prov>=%s' % PROV_MIN_VERSION,
     'click>=%s' % CLICK_MIN_VERSION,
-    'xvfbwrapper',
     'funcsigs',
     'configparser',
     'pytest>=%s' % PYTEST_MIN_VERSION
@@ -165,6 +164,7 @@ EXTRA_REQUIRES = {
     'fmri': ['nitime', 'nilearn', 'dipy', 'nipy', 'matplotlib'],
     'profiler': ['psutil'],
     'duecredit': ['duecredit'],
+    'xvfbwrapper': ['xvfbwrapper'],
     # 'mesh': ['mayavi']  # Enable when it works
 }
 
@@ -172,4 +172,3 @@ EXTRA_REQUIRES = {
 EXTRA_REQUIRES['all'] = [val for _, val in list(EXTRA_REQUIRES.items())]
 
 STATUS = 'stable'
-
