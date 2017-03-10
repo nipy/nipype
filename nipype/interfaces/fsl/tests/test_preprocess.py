@@ -569,10 +569,3 @@ def test_first_genfname():
     value = first._gen_fname(name='original_segmentations')
     expected_value = os.path.abspath('segment_all_none_origsegs.nii.gz')
     assert value == expected_value
-
-
-@pytest.mark.skipif(no_fsl(), reason="fsl is not installed")
-def test_deprecation():
-    interface = fsl.ApplyXfm()
-    assert isinstance(interface, fsl.ApplyXFM)
-
