@@ -227,6 +227,14 @@ def test_flirt(setup_flirt):
         flirter.cmdline
     flirter.inputs.reference = reffile
 
+    # Generate outfile and outmatrix
+    pth, fname, ext = split_filename(infile)
+    outfile = fsl_name(flirter, '%s_flirt' % fname)
+    outmat = '%s_flirt.mat' % fname
+    realcmd = 'flirt -in %s -ref %s -out %s -omat %s' % (infile, reffile,
+                                                         outfile, outmat)
+    assert flirter.cmdline == realcmd
+    
     # test apply_xfm option
     axfm = flirter
     axfm.inputs.apply_xfm = True
@@ -235,20 +243,11 @@ def test_flirt(setup_flirt):
     axfm2 = axfm
     # test uses_qform
     axfm.inputs.uses_qform = True
-    assert axfm.cmdline == ('flirt -in %s -ref %s -applyxfm -usesqform' % (
-                            infile, reffile))
+    assert axfm.cmdline == (realcmd += ' -applyxfm -usesqform')
     # test in_matrix_file
     axfm2.inputs.in_matrix_file = reffile
-    assert axfm2.cmdline == ('flirt -in %s -ref %s -applyxfm -init %s' % (
-                            infile, reffile, reffile))
+    assert axfm2.cmdline == (realcmd += ' -applyxfm -init %s' % reffile)
 
-    # Generate outfile and outmatrix
-    pth, fname, ext = split_filename(infile)
-    outfile = fsl_name(flirter, '%s_flirt' % fname)
-    outmat = '%s_flirt.mat' % fname
-    realcmd = 'flirt -in %s -ref %s -out %s -omat %s' % (infile, reffile,
-                                                         outfile, outmat)
-    assert flirter.cmdline == realcmd
 
     _, tmpfile = tempfile.mkstemp(suffix='.nii', dir=tmpdir)
     # Loop over all inputs, set a reasonable value and make sure the
