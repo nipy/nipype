@@ -30,7 +30,8 @@ fmlogger = logging.getLogger("filemanip")
 
 
 related_filetype_sets = [
-    ('.hdr', '.img', '.mat', '.nii'),
+    ('.hdr', '.img', '.mat'),
+    ('.nii', '.mat'),
     ('.BRIK', '.HEAD'),
 ]
 
