@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 from __future__ import division
-from nipype.interfaces.ants.preprocess import AntsMotionCorr
+from nipype.interfaces.ants.preprocess import MotionCorr
 
-def test_AntsMotionCorr_cmd():
-    ants_mc = AntsMotionCorr()
+def test_MotionCorr_cmd():
+    ants_mc = MotionCorr()
     ants_mc.inputs.metric_type = 'GC'
     ants_mc.inputs.metric_weight = 1
     ants_mc.inputs.radius_or_bins = 1
