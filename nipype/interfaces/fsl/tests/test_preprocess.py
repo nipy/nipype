@@ -234,7 +234,7 @@ def test_flirt(setup_flirt):
     realcmd = 'flirt -in %s -ref %s -out %s -omat %s' % (infile, reffile,
                                                          outfile, outmat)
     assert flirter.cmdline == realcmd
-    
+
     # test apply_xfm option
     axfm = flirter
     axfm.inputs.apply_xfm = True
@@ -243,10 +243,10 @@ def test_flirt(setup_flirt):
     axfm2 = axfm
     # test uses_qform
     axfm.inputs.uses_qform = True
-    assert axfm.cmdline == (realcmd += ' -applyxfm -usesqform')
+    assert axfm.cmdline == (realcmd + ' -applyxfm -usesqform')
     # test in_matrix_file
     axfm2.inputs.in_matrix_file = reffile
-    assert axfm2.cmdline == (realcmd += ' -applyxfm -init %s' % reffile)
+    assert axfm2.cmdline == (realcmd + ' -applyxfm -init %s' % reffile)
 
 
     _, tmpfile = tempfile.mkstemp(suffix='.nii', dir=tmpdir)
