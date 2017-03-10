@@ -15,7 +15,7 @@ from ...utils.filemanip import split_filename
 def _extant(field):
     return (field is not None) and isdefined(field)
 
-class AntsMotionCorrStatsInputSpec(ANTSCommandInputSpec):
+class MotionCorrStatsInputSpec(ANTSCommandInputSpec):
     ''' Input spec for the antsMotionCorrStats command '''
     mask = File(argstr="-x %s", mandatory=True,
                 desc="compute displacements within specified mask.")
@@ -30,17 +30,17 @@ class AntsMotionCorrStatsInputSpec(ANTSCommandInputSpec):
     output_spatial_map = File(argstr='-s %s', hash_files=False,
                               desc="File to output displacement magnitude to.")
 
-class AntsMotionCorrStatsOutputSpec(TraitedSpec):
+class MotionCorrStatsOutputSpec(TraitedSpec):
     ''' Output spec for the antsMotionCorrStats command '''
     spatial_map = File(desc="output image of displacement magnitude", exists=True)
     output = File(desc="CSV file containg motion correction statistics", exists=True)
 
-class AntsMotionCorrStats(ANTSCommand):
+class MotionCorrStats(ANTSCommand):
     ''' Interface for the antsMotionCorrStats command '''
 
     _cmd = 'antsMotionCorrStats'
-    input_spec = AntsMotionCorrStatsInputSpec
-    output_spec = AntsMotionCorrStatsOutputSpec
+    input_spec = MotionCorrStatsInputSpec
+    output_spec = MotionCorrStatsOutputSpec
 
     def _gen_filename(self, name):
         if name == 'output':
@@ -57,7 +57,7 @@ class AntsMotionCorrStats(ANTSCommand):
             outputs['output'] = os.path.abspath(self.inputs.output)
         return outputs
 
-class AntsMotionCorrInputSpec(ANTSCommandInputSpec):
+class MotionCorrInputSpec(ANTSCommandInputSpec):
     '''Input spec for the antsMotionCorr command.'''
     dimension_desc = (
         "This option forces the image to be treated as a "
@@ -152,7 +152,7 @@ class AntsMotionCorrInputSpec(ANTSCommandInputSpec):
 
 
 
-class AntsMotionCorrOutputSpec(TraitedSpec):
+class MotionCorrOutputSpec(TraitedSpec):
     '''Output spec for the antsMotionCorr command'''
     average_image = File(exists=True, desc="Average of an image")
     composite_transform = File(desc="Composite transform file")
@@ -163,13 +163,13 @@ class AntsMotionCorrOutputSpec(TraitedSpec):
     displacement_field = File(desc=("4D displacement field that captures the "
                                     "affine induced motion at each voxel"))
 
-class AntsMotionCorr(ANTSCommand):
+class MotionCorr(ANTSCommand):
     '''
     Examples
     -------
 
-    >>> from nipype.interfaces.ants.preprocess import AntsMotionCorr
-    >>> ants_mc = AntsMotionCorr()
+    >>> from nipype.interfaces.ants.preprocess import MotionCorr
+    >>> ants_mc = MotionCorr()
     >>> ants_mc.inputs.metric_type = 'GC'
     >>> ants_mc.inputs.metric_weight = 1
     >>> ants_mc.inputs.radius_or_bins = 1
@@ -191,14 +191,14 @@ class AntsMotionCorr(ANTSCommand):
     >>> print(ants_mc.cmdline)
     antsMotionCorr -d 3 -i 10x3 -m GC[average_image.nii.gz,input.nii.gz,1.0,1,Random,0.05] -n 10 -o [motcorr,warped.nii.gz,average_image.nii.gz] -f 1x1 -s 0.0x0.0 -t Affine[0.005] -u 1 -e 1
 
-    >>> from nipype.interfaces.ants.preprocess import AntsMotionCorr
-    >>> ants_avg = AntsMotionCorr()
+    >>> from nipype.interfaces.ants.preprocess import MotionCorr
+    >>> ants_avg = MotionCorr()
     >>> ants_avg.inputs.average_image = 'input.nii.gz'
     >>> ants_avg.inputs.output_average_image = 'avg_out.nii.gz'
     >>> print(ants_avg.cmdline)
     antsMotionCorr -d 3 -a input.nii.gz -o avg_out.nii.gz
 
-    >>> ants_avg = AntsMotionCorr()
+    >>> ants_avg = MotionCorr()
     >>> ants_avg.inputs.average_image = 'input.nii.gz'
     >>> print(ants_avg.cmdline)
     antsMotionCorr -d 3 -a input.nii.gz -o input_avg.nii.gz
@@ -210,8 +210,8 @@ class AntsMotionCorr(ANTSCommand):
     https://github.com/stnava/ANTs/blob/master/Scripts/antsMotionCorrExample
     '''
     _cmd = 'antsMotionCorr'
-    input_spec = AntsMotionCorrInputSpec
-    output_spec = AntsMotionCorrOutputSpec
+    input_spec = MotionCorrInputSpec
+    output_spec = MotionCorrOutputSpec
 
 
     def _gen_filename(self, name):
@@ -246,7 +246,7 @@ class AntsMotionCorr(ANTSCommand):
         if opt == 'output_average_image':
             self.inputs.output_average_image = self._gen_filename("output_average_image")
             return self._format_output()
-        return super(AntsMotionCorr, self)._format_arg(opt, spec, val)
+        return super(MotionCorr, self)._format_arg(opt, spec, val)
 
     def _format_metric(self):
         metric_str = ("-m {metric_type}[{fixed_image},{moving_image},"
@@ -305,24 +305,24 @@ class AntsMotionCorr(ANTSCommand):
             outputs['displacement_field'] = os.path.abspath(fname)
         return outputs
 
-class AntsMatrixConversionInputSpec(BaseInterfaceInputSpec):
+class Matrix2FSLParamsInputSpec(BaseInterfaceInputSpec):
     matrix = File(
         exists=True,
         desc='Motion crrection matrices to be converted into FSL style motion parameters',
         mandatory=True
     )
 
-class AntsMatrixConversionOutputSpec(TraitedSpec):
+class Matrix2FSLParamsOutputSpec(TraitedSpec):
     parameters = File(exists=True, desc="parameters to be output")
 
 
-class AntsMatrixConversion(BaseInterface):
+class Matrix2FSLParamsConversion(BaseInterface):
     '''
     Take antsMotionCorr motion output as input, convert to FSL style
     parameter files. Currently does not output origin of rotation.
     '''
-    input_spec = AntsMatrixConversionInputSpec
-    output_spec = AntsMatrixConversionOutputSpec
+    input_spec = Matrix2FSLParamsInputSpec
+    output_spec = Matrix2FSLParamsOutputSpec
 
     def _run_interface(self, runtime):
         in_fp = open(self.inputs.matrix)
