@@ -316,7 +316,7 @@ class Matrix2FSLParamsOutputSpec(TraitedSpec):
     parameters = File(exists=True, desc="parameters to be output")
 
 
-class Matrix2FSLParamsConversion(BaseInterface):
+class Matrix2FSLParams(BaseInterface):
     '''
     Take antsMotionCorr motion output as input, convert to FSL style
     parameter files. Currently does not output origin of rotation.
