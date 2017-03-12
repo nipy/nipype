@@ -306,7 +306,7 @@ def test_check_depends():
     else:
         assert False, "Should raise OSError on missing dependency"
 
-    shutil.rmtree(tmpdir)   
+    shutil.rmtree(tmpdir)
 
 
 def test_json():
@@ -324,7 +324,7 @@ def test_json():
         ('/path/test.hdr',  3, ['/path/test.hdr', '/path/test.img', '/path/test.mat']),
         ('/path/test.BRIK', 2, ['/path/test.BRIK', '/path/test.HEAD']),
         ('/path/test.HEAD', 2, ['/path/test.BRIK', '/path/test.HEAD']),
-        ('/path/foo.nii',   1, [])
+        ('/path/foo.nii',   2, ['/path/foo.nii', '/path/foo.mat'])
         ])
 def test_related_files(file, length, expected_files):
     related_files = get_related_files(file)

@@ -48,7 +48,7 @@ def test_FNIRT_inputs():
     sep=',',
     ),
     in_intensitymap_file=dict(argstr='--intin=%s',
-    copyfiles=False,
+    copyfile=False,
     ),
     inmask_file=dict(argstr='--inmask=%s',
     ),
