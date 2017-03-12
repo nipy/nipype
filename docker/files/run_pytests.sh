@@ -23,15 +23,15 @@ fi
 # Run tests using pytest
 cd /root/src/nipype/
 make clean
-py.test -n ${CIRCLE_NCPUS:-4} --doctest-modules --junitxml=/scratch/pytests_py{PYTHON_VERSION}.xml --cov-report xml:/scratch/coverage_py${PYTHON_VERSION}.xml --cov=nipype nipype
+py.test -n ${CIRCLE_NCPUS:-4} --doctest-modules --junitxml=/scratch/pytests_py${PYTHON_VERSION}.xml --cov-report xml:/scratch/coverage_py${PYTHON_VERSION}.xml --cov=nipype nipype
 
 
 # Workaround: run here the profiler tests in python 3
 if [[ "${PYTHON_VERSION}" -ge "30" ]]; then
     echo '[execution]' >> /root/.nipype/nipype.cfg
     echo 'profile_runtime = true' >> /root/.nipype/nipype.cfg
-    py.test -n ${CIRCLE_NCPUS:-4} --junitxml=/scratch/pytests_py{PYTHON_VERSION}_profiler.xml --cov-report xml:/scratch/coverage_py${PYTHON_VERSION}_profiler.xml --cov=nipype nipype/interfaces/tests/test_runtime_profiler.py
-    py.test -n ${CIRCLE_NCPUS:-4} --junitxml=/scratch/pytests_py{PYTHON_VERSION}_multiproc.xml --cov-report xml:/scratch/coverage_py${PYTHON_VERSION}_multiproc.xml --cov=nipype nipype/pipeline/plugins/tests/test_multiproc*.py
+    py.test -n ${CIRCLE_NCPUS:-4} --junitxml=/scratch/pytests_py${PYTHON_VERSION}_profiler.xml --cov-report xml:/scratch/coverage_py${PYTHON_VERSION}_profiler.xml --cov=nipype nipype/interfaces/tests/test_runtime_profiler.py
+    py.test -n ${CIRCLE_NCPUS:-4} --junitxml=/scratch/pytests_py${PYTHON_VERSION}_multiproc.xml --cov-report xml:/scratch/coverage_py${PYTHON_VERSION}_multiproc.xml --cov=nipype nipype/pipeline/plugins/tests/test_multiproc*.py
 fi
 
 # Copy crashfiles to scratch
