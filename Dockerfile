@@ -60,16 +60,16 @@ RUN conda config --add channels conda-forge --add channels intel && \
     conda update -q conda && \
     chmod +x /usr/local/miniconda/bin/*; sync && \
     conda install -y python=${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR} \
-                     mkl=2017.0.1 \
-                     numpy=1.11.2 \
-                     scipy=0.18.1 \
-                     scikit-learn=0.17.1 \
-                     matplotlib=1.5.3 \
-                     pandas=0.19.0 \
-                     libxml2=2.9.4 \
-                     libxslt=1.1.29 \
+                     mkl \
+                     numpy \
+                     scipy \
+                     scikit-learn \
+                     matplotlib \
+                     pandas \
+                     libxml2 \
+                     libxslt \
                      traits=4.6.0 \
-                     psutil=5.0.1 \
+                     psutil \
                      icu=58.1 && \
     find /usr/local/miniconda/ -exec chmod 775 {} +
 
