@@ -33,11 +33,11 @@ dependencies:
     - if [[ ! -d ~/examples/feeds ]]; then wget --retry-connrefused --waitretry=5 --read-timeout=20 --timeout=15 -t 0 -q -O fsl-5.0.9-feeds.tar.gz "${DATA_NIPYPE_FSL_FEEDS}" && tar xzf fsl-5.0.9-feeds.tar.gz -C ~/examples/; fi
     - docker images
     - sed -i -E "s/(__version__ = )'[A-Za-z0-9.-]+'/\1'$CIRCLE_TAG'/" nipype/info.py
-    - e=1 && for i in {1..5}; do docker build -f docker/Dockerfile_base --rm=false -t nipype/base:latest --build-arg BUILD_DATE=`date -u +"%Y-%m-%dT%H:%M:%SZ"` --build-arg VCS_REF=`git rev-parse --short HEAD` --build-arg VERSION=$CIRCLE_TAG . && e=0 && break || sleep 15; done && [ "$e" -eq "0" ] :
+    - e=1 && for i in {1..5}; do docker build -f docker/Dockerfile_base --rm=false -t nipype/base:latest . && e=0 && break || sleep 15; done && [ "$e" -eq "0" ] :
         timeout: 21600
     - e=1 && for i in {1..5}; do docker build --rm=false -t nipype/nipype:latest -t nipype/nipype:py35 --build-arg BUILD_DATE=`date -u +"%Y-%m-%dT%H:%M:%SZ"` --build-arg VCS_REF=`git rev-parse --short HEAD` --build-arg VERSION=$CIRCLE_TAG . && e=0 && break || sleep 15; done && [ "$e" -eq "0" ] :
         timeout: 6000
-    - e=1 && for i in {1..5}; do docker build --rm=false -t nipype/nipype:py27 --build-arg PYTHON_VERSION_MAJOR=2 --build-arg PYTHON_VERSION_MINOR=7 --build-arg BUILD_DATE=`date -u +"%Y-%m-%dT%H:%M:%SZ"` --build-arg VCS_REF=`git rev-parse --short HEAD` --build-arg VERSION=$CIRCLE_TAG . && e=0 && break || sleep 15; done && [ "$e" -eq "0" ] :
+    - e=1 && for i in {1..5}; do docker build --rm=false -t nipype/nipype:py27 --build-arg PYTHON_VERSION_MAJOR=2 --build-arg PYTHON_VERSION_MINOR=7 --build-arg BUILD_DATE=`date -u +"%Y-%m-%dT%H:%M:%SZ"` --build-arg VCS_REF=`git rev-parse --short HEAD` --build-arg VERSION=$CIRCLE_TAG-py27 . && e=0 && break || sleep 15; done && [ "$e" -eq "0" ] :
         timeout: 6000
     - docker save -o $HOME/docker/cache.tar ubuntu:xenial-20161213 nipype/base:latest nipype/nipype:latest nipype/nipype_test:py27 nipype/nipype_test:py35 :
         timeout: 6000
