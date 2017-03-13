@@ -7,6 +7,7 @@ from builtins import open, open
 
 import os
 import tempfile
+from copy import deepcopy
 
 import pytest
 from nipype.utils.filemanip import split_filename, filename_to_list
@@ -236,11 +237,11 @@ def test_flirt(setup_flirt):
     assert flirter.cmdline == realcmd
 
     # test apply_xfm option
-    axfm = flirter
+    axfm = deepcopy(flirter)
     axfm.inputs.apply_xfm = True
     # in_matrix_file or uses_qform must be defined
     with pytest.raises(RuntimeError): axfm.cmdline
-    axfm2 = axfm
+    axfm2 = deepcopy(axfm)
     # test uses_qform
     axfm.inputs.uses_qform = True
     assert axfm.cmdline == (realcmd + ' -applyxfm -usesqform')
