@@ -563,7 +563,7 @@ class FLIRT(FSLCommand):
             if not isdefined(self.inputs.verbose) or self.inputs.verbose == 0:
                 self.inputs.verbose = 1
         if isdefined(self.inputs.apply_xfm) and self.inputs.apply_xfm:
-            if not self.inputs.in_matrix_file or not self.inputs.uses_qform:
+            if not self.inputs.in_matrix_file and not self.inputs.uses_qform:
                 raise RuntimeError('Argument apply_xfm requires in_matrix_file '
                                    'or uses_qform arguments to run')
         skip.append('save_log')
