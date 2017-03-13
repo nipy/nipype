@@ -14,8 +14,7 @@ def test_Level1Design_inputs():
     ),
     model_serial_correlations=dict(mandatory=True,
     ),
-    orthogonalization=dict(mandatory=False,
-    ),
+    orthogonalization=dict(),
     session_info=dict(mandatory=True,
     ),
     )

@@ -17,6 +17,8 @@ def test_ComputeDVARS_inputs():
     ),
     in_mask=dict(mandatory=True,
     ),
+    intensity_normalization=dict(usedefault=True,
+    ),
     remove_zerovariance=dict(usedefault=True,
     ),
     save_all=dict(usedefault=True,
