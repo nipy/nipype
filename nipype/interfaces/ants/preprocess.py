@@ -12,9 +12,6 @@ from .base import ANTSCommand, ANTSCommandInputSpec
 from ...utils.filemanip import split_filename
 
 
-def _extant(field):
-    return (field is not None) and isdefined(field)
-
 class MotionCorrStatsInputSpec(ANTSCommandInputSpec):
     ''' Input spec for the antsMotionCorrStats command '''
     mask = File(argstr="-x %s", mandatory=True,
@@ -49,11 +46,11 @@ class MotionCorrStats(ANTSCommand):
 
     def _list_outputs(self):
         outputs = self._outputs().get()
-        if _extant(self.inputs.output_spatial_map):
+        if isdefined(self.inputs.output_spatial_map):
             outputs['spatial_map'] = (
                 os.path.abspath(self.inputs.output_spatial_map)
             )
-        if _extant(self.inputs.output):
+        if isdefined(self.inputs.output):
             outputs['output'] = os.path.abspath(self.inputs.output)
         return outputs
 
@@ -223,16 +220,16 @@ class MotionCorr(ANTSCommand):
         image name.
         '''
         if name == 'output_average_image':
-            if _extant(self.inputs.fixed_image):
+            if isdefined(self.inputs.fixed_image):
                 return self.inputs.fixed_image
-            if not _extant(self.inputs.average_image):
+            if not isdefined(self.inputs.average_image):
                 raise ValueError("Either fixed_image or average_image must be defined")
-            if _extant(self.inputs.output_average_image):
+            if isdefined(self.inputs.output_average_image):
                 return self.inputs.output_average_image
             pth, fname, ext = split_filename(self.inputs.average_image)
             new_fname = '{}{}{}'.format(fname, '_avg', ext)
             return os.path.join(pth, new_fname)
-        if name == 'ouput_warped_image' and _extant(self.inputs.fixed_image):
+        if name == 'ouput_warped_image' and isdefined(self.inputs.fixed_image):
             pth, fname, ext = split_filename(self.inputs.fixed_image)
             new_fname = '{}{}{}'.format(fname, '_warped', ext)
             return os.path.join(pth, new_fname)
@@ -257,49 +254,49 @@ class MotionCorr(ANTSCommand):
                        "metric_weight", "radius_or_bins", "sampling_strategy",
                        "sampling_percentage"]
         for metric_arg in metric_args:
-            if _extant(getattr(self.inputs, metric_arg)):
+            if isdefined(getattr(self.inputs, metric_arg)):
                 format_args[metric_arg] = getattr(self.inputs, metric_arg)
         return metric_str.format(**format_args)
 
     def _format_transform(self):
         transform_str = "-t {}[{}]"
-        if (_extant(self.inputs.transformation_model)
-                and _extant(self.inputs.gradient_step_length)):
+        if (isdefined(self.inputs.transformation_model)
+                and isdefined(self.inputs.gradient_step_length)):
             return transform_str.format(self.inputs.transformation_model,
                                         self.inputs.gradient_step_length)
         raise ValueError("Unable to format transformation_model argument")
 
     def _format_output(self):
-        if (_extant(self.inputs.output_transform_prefix)
-                and _extant(self.inputs.output_warped_image)
-                and _extant(self.inputs.output_average_image)):
+        if (isdefined(self.inputs.output_transform_prefix)
+                and isdefined(self.inputs.output_warped_image)
+                and isdefined(self.inputs.output_average_image)):
             return "-o [{},{},{}]".format(
                 self.inputs.output_transform_prefix,
                 self.inputs.output_warped_image,
                 self.inputs.output_average_image
             )
-        elif _extant(self.inputs.output_average_image):
+        elif isdefined(self.inputs.output_average_image):
             return "-o {}".format(self.inputs.output_average_image)
         else:
             raise ValueError("Unable to format output due to lack of inputs.")
 
     def _list_outputs(self):
         outputs = self._outputs().get()
-        if _extant(self.inputs.output_average_image):
+        if isdefined(self.inputs.output_average_image):
             outputs['average_image'] = (
                 os.path.abspath(self.inputs.output_average_image)
             )
-        if _extant(self.inputs.output_warped_image):
+        if isdefined(self.inputs.output_warped_image):
             outputs['warped_image'] = (
                 os.path.abspath(self.inputs.output_warped_image)
             )
-        if _extant(self.inputs.output_transform_prefix):
+        if isdefined(self.inputs.output_transform_prefix):
             fname = '{}MOCOparams.csv'.format(
                 self.inputs.output_transform_prefix
             )
             outputs['composite_transform'] = os.path.abspath(fname)
-        if (_extant(self.inputs.write_displacement) and
-                _extant(self.inputs.output_transform_prefix) and
+        if (isdefined(self.inputs.write_displacement) and
+                isdefined(self.inputs.output_transform_prefix) and
                 self.inputs.write_displacement is True):
             fname = '{}Warp.nii.gz'.format(self.inputs.output_transform_prefix)
             outputs['displacement_field'] = os.path.abspath(fname)
