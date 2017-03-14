@@ -118,7 +118,7 @@ The base nipype/nipype image is built as follows::
   docker build -t nipype/nipype .
 
 This base image contains several useful tools (FreeSurfer, AFNI, FSL, ANTs, etc.) and
-a nipype installation, all in Python 3.5.
+a nipype installation, all in Python 3.6.
 It is possible to fetch a built image from the latest master branch of nipype
 using::
 
@@ -136,18 +136,18 @@ to build and run all tests on Python 2.7::
   docker run -it --rm -e FSL_COURSE_DATA="/root/examples/nipype-fsl_course_data" \
                       -v ~/examples:/root/examples:ro \
                       -v ~/scratch:/scratch \
-                      -w /root/src/nipype \
+                      -w /src/nipype \
                       nipype/nipype_test:py27 /usr/bin/run_pytests.sh
 
-For running nipype in Python 3.5::
+For running nipype in Python 3.6::
 
   cd path/to/nipype/
-  docker build -f docker/Dockerfile_py35 -t nipype/nipype_test:py35 .
+  docker build -f docker/Dockerfile_py36 -t nipype/nipype_test:py36 .
   docker run -it --rm -e FSL_COURSE_DATA="/root/examples/nipype-fsl_course_data" \
                       -v ~/examples:/root/examples:ro \
                       -v ~/scratch:/scratch \
-                      -w /root/src/nipype \
-                      nipype/nipype_test:py35 /usr/bin/run_pytests.sh
+                      -w /src/nipype \
+                      nipype/nipype_test:py36 /usr/bin/run_pytests.sh
 
 The last two examples assume that the example data is downladed into ~/examples and
 the ~/scratch folder will be created if it does not exist previously.

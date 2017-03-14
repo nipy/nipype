@@ -29,14 +29,14 @@
 FROM nipype/nipype:latest
 MAINTAINER The nipype developers https://github.com/nipy/nipype
 
-# Replace imglob with a Python3 compatible version
-COPY nipype/external/fsl_imglob.py /usr/bin/fsl_imglob.py
-RUN rm -r ${FSLDIR}/bin/imglob && \
-    chmod +x /usr/bin/fsl_imglob.py && \
-    ln -s /usr/bin/fsl_imglob.py ${FSLDIR}/bin/imglob
+# Downgrade python to 3.5
+RUN conda install -y python=3.5 && \
+    conda update --all -y python=3.5
+
 COPY docker/files/run_* /usr/bin/
-RUN chmod +x /usr/bin/run_*
+RUN chmod +x /usr/bin/run_* && rm -rf /src/nipype
 
-WORKDIR /root
-
-CMD ["/bin/bash"]
+# Re-install nipype
+COPY . /src/nipype
+RUN cd /src/nipype && \
+    pip install -e .[all]

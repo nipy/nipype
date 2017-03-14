@@ -7,7 +7,6 @@ from .. import misc
 
 import pytest
 import numpy.testing as npt
-import mock
 import nibabel as nb
 import numpy as np
 import os
@@ -85,14 +84,9 @@ class TestTSNR():
             'tsnr_file': (2.6, 57.3)
         })
 
-    @mock.patch('warnings.warn')
-    def test_warning(self, mock_warn):
+    def test_warning(self):
         ''' test that usage of misc.TSNR trips a warning to use confounds.TSNR instead '''
-        # run
-        misc.TSNR(in_file=self.in_filenames['in_file'])
-
-        # assert
-        assert True in [args[0].count('confounds') > 0 for _, args, _ in mock_warn.mock_calls]
+        pytest.warns(UserWarning, misc.TSNR, in_file=self.in_filenames['in_file'])
 
     def assert_expected_outputs_poly(self, tsnrresult, expected_ranges):
         assert os.path.basename(tsnrresult.outputs.detrended_file) == \
