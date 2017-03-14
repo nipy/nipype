@@ -913,7 +913,7 @@ class FNIRTOutputSpec(TraitedSpec):
 class FNIRT(FSLCommand):
     """Use FSL FNIRT for non-linear registration.
 
-    For complete details, see the `MCFLIRT Documentation.
+    For complete details, see the `FNIRT Documentation.
     <https://fsl.fmrib.ox.ac.uk/fsl/fslwiki/FNIRT>`_
 
     Examples
@@ -1216,7 +1216,7 @@ class SUSANOutputSpec(TraitedSpec):
 class SUSAN(FSLCommand):
     """ use FSL SUSAN to perform smoothing
 
-    For complete details, see the `MCFLIRT Documentation.
+    For complete details, see the `SUSAN Documentation.
     <https://fsl.fmrib.ox.ac.uk/fsl/fslwiki/SUSAN>`_
 
     Examples
