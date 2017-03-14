@@ -261,22 +261,28 @@ class SpecifyModel(BaseInterface):
     >>> s.inputs.functional_runs = ['functional2.nii', 'functional3.nii']
     >>> s.inputs.time_repetition = 6
     >>> s.inputs.high_pass_filter_cutoff = 128.
-    >>> info = [Bunch(conditions=['cond1'], onsets=[[2, 50, 100, 180]],\
-                      durations=[[1]]), \
-                Bunch(conditions=['cond1'], onsets=[[30, 40, 100, 150]], \
+    >>> info = [Bunch(conditions=['cond1'],
+                      onsets=[[2, 50, 100, 180]],
+                      durations=[[1]]),
+                Bunch(conditions=['cond1'],
+                      onsets=[[30, 40, 100, 150]],
                       durations=[[1]])]
     >>> s.inputs.subject_info = info
 
     Using pmod:
 
-    >>> info = [Bunch(conditions=['cond1', 'cond2'], \
-                      onsets=[[2, 50],[100, 180]], durations=[[0],[0]], \
-                      pmod=[Bunch(name=['amp'], poly=[2], param=[[1, 2]]),\
-                      None]), \
-                Bunch(conditions=['cond1', 'cond2'], \
-                      onsets=[[20, 120],[80, 160]], durations=[[0],[0]], \
-                      pmod=[Bunch(name=['amp'], poly=[2], param=[[1, 2]]), \
-                      None])]
+    >>> info = [Bunch(conditions=['cond1', 'cond2'],
+                      onsets=[[2, 50],[100, 180]],
+                      durations=[[0],[0]],
+                      pmod=[Bunch(name=['amp'], poly=[2],
+                                  param=[[1, 2]]),
+                            None]),
+                Bunch(conditions=['cond1', 'cond2'],
+                      onsets=[[20, 120],[80, 160]],
+                      durations=[[0],[0]],
+                      pmod=[Bunch(name=['amp'], poly=[2],
+                                  param=[[1, 2]]),
+                            None])]
     >>> s.inputs.subject_info = info
 
     """
@@ -442,9 +448,11 @@ class SpecifySPMModel(SpecifyModel):
     >>> s.inputs.functional_runs = ['functional2.nii', 'functional3.nii']
     >>> s.inputs.time_repetition = 6
     >>> s.inputs.concatenate_runs = True
-    >>> info = [Bunch(conditions=['cond1'], onsets=[[2, 50, 100, 180]], \
-                      durations=[[1]]), \
-                Bunch(conditions=['cond1'], onsets=[[30, 40, 100, 150]], \
+    >>> info = [Bunch(conditions=['cond1'],
+                      onsets=[[2, 50, 100, 180]],
+                      durations=[[1]]),
+                Bunch(conditions=['cond1'],
+                      onsets=[[30, 40, 100, 150]],
                       durations=[[1]])]
     >>> s.inputs.subject_info = info
 
@@ -608,9 +616,11 @@ class SpecifySparseModel(SpecifyModel):
     >>> s.inputs.time_acquisition = 2
     >>> s.inputs.high_pass_filter_cutoff = 128.
     >>> s.inputs.model_hrf = True
-    >>> info = [Bunch(conditions=['cond1'], onsets=[[2, 50, 100, 180]], \
-                      durations=[[1]]), \
-                Bunch(conditions=['cond1'], onsets=[[30, 40, 100, 150]], \
+    >>> info = [Bunch(conditions=['cond1'],
+                      onsets=[[2, 50, 100, 180]],
+                      durations=[[1]]),
+                Bunch(conditions=['cond1'],
+                      onsets=[[30, 40, 100, 150]],
                       durations=[[1]])]
     >>> s.inputs.subject_info = info
 
