@@ -23,7 +23,7 @@ def fun3(a, b, **dict):
         ({"a": np.array([3, 4, 5])}, [(["a=3"], 9), (["a=4"], 16), (["a=5"], 25)]),
         ])
 def test_singlenode_1(inputs_dict, expected_output):
-    N  = Node(inputs=inuts_dict, mapper="a", interface=fun1)
+    N  = Node(inputs=inputs_dict, mapper="a", interface=fun1)
     N.run()
     
     for (i, out) in enumerate(N.output["out"]):

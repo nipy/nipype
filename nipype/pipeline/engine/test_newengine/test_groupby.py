@@ -20,7 +20,7 @@ def fun2a(a, **dict):
         ])
 def test_singlenode_groupbyind_1(inputs_dict, expected_output):
     # for now i'm doing only groupByIndex, should I keep the original reducer name?
-    N  = Node(inputs=inuts_dict, mapper="a", groupByInd="a", interface=fun1)
+    N  = Node(inputs=inputs_dict, mapper="a", groupByInd="a", interface=fun1)
     N.run()
     
     # should we have both N.output and N.output_grouped/reduced ??
