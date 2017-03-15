@@ -78,14 +78,14 @@ RUN sed -i 's/\(backend *: \).*$/\1Agg/g' /usr/local/miniconda/lib/python${PYTHO
     python -c "from matplotlib import font_manager"
 
 # Installing dev requirements (packages that are not in pypi)
-WORKDIR /root/
+WORKDIR /src/
 COPY requirements.txt requirements.txt
 RUN pip install -r requirements.txt && \
     rm -rf ~/.cache/pip
 
 # Installing nipype
-COPY . /root/src/nipype
-RUN cd /root/src/nipype && \
+COPY . /src/nipype
+RUN cd /src/nipype && \
     pip install -e .[all] && \
     rm -rf ~/.cache/pip
 
@@ -99,7 +99,7 @@ RUN rm -rf ${FSLDIR}/bin/imglob && \
     chmod +x /usr/bin/fsl_imglob.py && \
     ln -s /usr/bin/fsl_imglob.py ${FSLDIR}/bin/imglob
 
-WORKDIR /root/
+WORKDIR /work/
 
 LABEL org.label-schema.build-date=$BUILD_DATE \
       org.label-schema.name="NIPYPE" \
