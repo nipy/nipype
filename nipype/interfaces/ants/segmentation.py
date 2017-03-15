@@ -1129,12 +1129,30 @@ ants_joint_fusion_posterior_%d.nii.gz, ants_joint_fusion_voting_weight_%d.nii.gz
             retval = ''
             if not isdefined(self.inputs.out_label_fusion):
                 retval = '-o {0}'.format(self.inputs.out_intensity_fusion_name_format)
+        elif opt == 'atlas_image':
+            atlas_image_cmd = " ".join(
+                ['-g [{0}]'.format(", ".join("'%s'" % fn for fn in ai))
+                                   for ai in self.inputs.atlas_image]
+            )
+            retval = atlas_image_cmd
+        elif opt == 'target_image':
+            target_image_cmd = " ".join(
+                ['-t [{0}]'.format(", ".join("'%s'" % fn for fn in ai))
+                                   for ai in self.inputs.target_image]
+            )
+            retval = target_image_cmd
+        elif opt == 'atlas_segmentation_image':
+            assert len(val) == len(self.inputs.atlas_image), "Number of specified " \
+                "segmentations should be identical to the number of atlas image " \
+                "sets {0}!={1}".format(len(val), len(self.inputs.atlas_image))
+
+            atlas_segmentation_image_cmd = " ".join(
+                ['-l {0}'.format(fn) for fn in self.inputs.atlas_segmentation_image]
+            )
+            retval = atlas_segmentation_image_cmd
         else:
-            if opt == 'atlas_segmentation_image':
-                assert len(val) == len(self.inputs.atlas_image), "Number of specified " \
-                    "segmentations should be identical to the number of atlas image " \
-                    "sets {0}!={1}".format(len(val), len(self.inputs.atlas_image))
-            return super(ANTSCommand, self)._format_arg(opt, spec, val)
+
+            return super(AntsJointFusion, self)._format_arg(opt, spec, val)
         return retval
 
     def _list_outputs(self):
