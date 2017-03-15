@@ -304,27 +304,29 @@ class MotionCorr(ANTSCommand):
             outputs['displacement_field'] = os.path.abspath(fname)
         return outputs
 
-class Matrix2FSLParamsInputSpec(BaseInterfaceInputSpec):
-    matrix = File(
+class MotionCorr2FSLParamsInputSpec(BaseInterfaceInputSpec):
+    ants_matrix = File(
         exists=True,
-        desc='Motion crrection matrices to be converted into FSL style motion parameters',
+        desc='Motion correction matrices to be converted into FSL style motion parameters',
         mandatory=True
     )
+    fsl_params = File(name_template='%s.par', name_source='ants_matrix',
+                      desc='FSL parameter file')
 
-class Matrix2FSLParamsOutputSpec(TraitedSpec):
-    parameters = File(exists=True, desc="parameters to be output")
+class MotionCorr2FSLParamsOutputSpec(TraitedSpec):
+    fsl_params = File(exists=True, desc="FSL parameters file to be output")
 
 
-class Matrix2FSLParams(BaseInterface):
+class MotionCorr2FSLParams(BaseInterface):
     '''
-    Take antsMotionCorr motion output as input, convert to FSL style
+    Take antsMotionCorr motion output as input, convert to FSL-style
     parameter files. Currently does not output origin of rotation.
     '''
-    input_spec = Matrix2FSLParamsInputSpec
-    output_spec = Matrix2FSLParamsOutputSpec
+    input_spec = MotionCorr2FSLParamsInputSpec
+    output_spec = MotionCorr2FSLParamsOutputSpec
 
     def _run_interface(self, runtime):
-        in_fp = open(self.inputs.matrix)
+        in_fp = open(self.inputs.ants_matrix)
         in_data = csv.reader(in_fp)
         pars = []
 
@@ -341,18 +343,10 @@ class Matrix2FSLParams(BaseInterface):
             pars.append(parameters.format(param_x, param_y, param_z, float(x[11]), float(x[12]),
                                           float(x[13])))
 
-        pth, fname, _ = split_filename(self.inputs.matrix)
+        pth, fname, _ = split_filename(self.inputs.ants_matrix)
         new_fname = '{}{}'.format(fname, '.par')
-        parameters = os.path.join(pth, new_fname)
-        with open(parameters, mode='wt') as out_fp:
+        fsl_params = os.path.join(pth, new_fname)
+        with open(fsl_params, mode='wt') as out_fp:
             out_fp.write('\n'.join(pars))
         in_fp.close()
         return runtime
-
-    def _list_outputs(self):
-        outputs = self._outputs().get()
-        pth, fname, _ = split_filename(self.inputs.matrix)
-        new_fname = '{}{}'.format(fname, '.par')
-        out_file = os.path.join(pth, new_fname)
-        outputs["parameters"] = out_file
-        return outputs

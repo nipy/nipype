@@ -1,11 +1,11 @@
 import csv
 import os
 
-from nipype.interfaces.ants.preprocess import Matrix2FSLParams
+from nipype.interfaces.ants.preprocess import MotionCorr2FSLParams
 from nipype.utils.tmpdirs import InTemporaryDirectory
 from nipype.utils.filemanip import split_filename
 
-def test_Matrix2FSLParams():
+def test_MotionCorr2FSLParams():
     with InTemporaryDirectory():
         cwd = os.getcwd()
         in_filename = os.path.join(cwd, 'in_file.csv')
@@ -20,8 +20,8 @@ def test_Matrix2FSLParams():
         )
         fp.close()
         # m2p - matrix 2 parameters
-        m2p = Matrix2FSLParams()
-        m2p.inputs.matrix = in_filename
+        m2p = MotionCorr2FSLParams()
+        m2p.inputs.ants_matrix = in_filename
         m2p.run()
 
         pth, fname, _ = split_filename(in_filename)
