@@ -33,11 +33,10 @@
 FROM ubuntu:xenial-20161213
 MAINTAINER The nipype developers https://github.com/nipy/nipype
 
-# Pre-cache neurodebian key, set noninteractive
-COPY docker/files/neurodebian.gpg /root/.neurodebian.gpg
+# Set noninteractive
 ENV DEBIAN_FRONTEND=noninteractive
 
-# Installing curl
+# Installing requirements for freesurfer installation
 RUN apt-get update && \
     apt-get install -y --no-install-recommends curl ca-certificates && \
     apt-get clean && \
@@ -80,9 +79,10 @@ ENV PERL5LIB=$MINC_LIB_DIR/perl5/5.8.5 \
     PATH=$FREESURFER_HOME/bin:$FSFAST_HOME/bin:$FREESURFER_HOME/tktools:$MINC_BIN_DIR:$PATH
 RUN echo "cHJpbnRmICJrcnp5c3p0b2YuZ29yZ29sZXdza2lAZ21haWwuY29tXG41MTcyXG4gKkN2dW12RVYzelRmZ1xuRlM1Si8yYzFhZ2c0RVxuIiA+IC9vcHQvZnJlZXN1cmZlci9saWNlbnNlLnR4dAo=" | base64 -d | sh
 
-# Prepare environment
+# Enable neurodebian
+COPY docker/files/neurodebian.gpg /etc/apt/neurodebian.gpg
 RUN curl -sSL http://neuro.debian.net/lists/xenial.us-ca.full >> /etc/apt/sources.list.d/neurodebian.sources.list && \
-    apt-key add /root/.neurodebian.gpg && \
+    apt-key add /etc/apt/neurodebian.gpg && \
     apt-key adv --refresh-keys --keyserver hkp://ha.pool.sks-keyservers.net 0xA5D32F012649A5A9 || true
 
 # Installing general Debian utilities and Neurodebian packages (FSL, AFNI, git)
@@ -166,5 +166,5 @@ ENV MATLABCMD="/opt/mcr/v85/toolbox/matlab" \
     SPMMCRCMD="/opt/spm12/run_spm12.sh /opt/mcr/v85/ script" \
     FORCE_SPMMCR=1
 
-WORKDIR /root
+WORKDIR /work
 
