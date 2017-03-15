@@ -68,14 +68,14 @@ def report_crash(node, traceback=None, hostname=None):
     if not os.path.exists(crashdir):
         os.makedirs(crashdir)
     crashfile = os.path.join(crashdir, crashfile)
-    if node.config['execution']['text_crashfiles']:
+    if str2bool(node.config['execution']['text_crashfiles']):
         crashfile += '.txt'
     else:
         crashfile += '.pklz'
     logger.info('Saving crash info to %s' % crashfile)
     logger.info(''.join(traceback))
-    if node.config['execution']['text_crashfiles']:
-        crash_to_txt(crashfile, dict(node=node, traceback=traceback))
+    if str2bool(node.config['execution']['text_crashfiles']):
+        crash2txt(crashfile, dict(node=node, traceback=traceback))
     else:
         savepkl(crashfile, dict(node=node, traceback=traceback))
     return crashfile

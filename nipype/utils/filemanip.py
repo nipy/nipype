@@ -540,7 +540,7 @@ def crash2txt(filename, record):
             fp.write('Working directory: {}\n'.format(node.output_dir()))
             fp.write('\n')
             fp.write('Node inputs:\n{}\n'.format(node.inputs))
-        fp.write(record['traceback'])
+        fp.write(''.join(record['traceback']))
 
 
 def savepkl(filename, record):
