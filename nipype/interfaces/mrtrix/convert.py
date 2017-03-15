@@ -7,7 +7,6 @@
     >>> filepath = os.path.dirname( os.path.realpath( __file__ ) )
     >>> datadir = os.path.realpath(os.path.join(filepath, '../../testing/data'))
     >>> os.chdir(datadir)
-
 """
 from __future__ import print_function, division, unicode_literals, absolute_import
 from builtins import open
@@ -166,10 +165,8 @@ class MRTrix2TrackVis(BaseInterface):
     """
     Converts MRtrix (.tck) tract files into TrackVis (.trk) format
     using functions from dipy
-
     Example
     -------
-
     >>> import nipype.interfaces.mrtrix as mrt
     >>> tck2trk = mrt.MRTrix2TrackVis()
     >>> tck2trk.inputs.in_file = 'dwi_CSD_tracked.tck'
