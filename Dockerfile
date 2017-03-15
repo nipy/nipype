@@ -33,11 +33,7 @@
 FROM nipype/base:latest
 MAINTAINER The nipype developers https://github.com/nipy/nipype
 
-ARG BUILD_DATE
-ARG VCS_REF
-ARG VERSION
 ARG PYTHON_VERSION_MAJOR=3
-ARG PYTHON_VERSION_MINOR=5
 
 # Installing and setting up miniconda
 RUN curl -sSLO https://repo.continuum.io/miniconda/Miniconda${PYTHON_VERSION_MAJOR}-4.2.12-Linux-x86_64.sh && \
@@ -54,11 +50,9 @@ ENV PATH=/usr/local/miniconda/bin:$PATH \
 # only use one thread - nipype will handle parallelization
 
 # Installing precomputed python packages
-RUN conda config --add channels conda-forge --add channels intel && \
-    chmod +x /usr/local/miniconda/bin/* && \
-    conda config --set always_yes yes --set changeps1 no && \
-    conda update -q conda && \
-    chmod +x /usr/local/miniconda/bin/*; sync && \
+ARG PYTHON_VERSION_MINOR=5
+RUN conda config --add channels conda-forge; sync && \
+    conda config --set always_yes yes --set changeps1 no; sync && \
     conda install -y python=${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR} \
                      mkl \
                      numpy \
@@ -71,7 +65,7 @@ RUN conda config --add channels conda-forge --add channels intel && \
                      traits=4.6.0 \
                      psutil \
                      icu=58.1 && \
-    find /usr/local/miniconda/ -exec chmod 775 {} +
+    sync;
 
 # matplotlib cleanups: set default backend, precaching fonts
 RUN sed -i 's/\(backend *: \).*$/\1Agg/g' /usr/local/miniconda/lib/python${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR}/site-packages/matplotlib/mpl-data/matplotlibrc && \
@@ -101,6 +95,9 @@ RUN rm -rf ${FSLDIR}/bin/imglob && \
 
 WORKDIR /work/
 
+ARG BUILD_DATE
+ARG VCS_REF
+ARG VERSION
 LABEL org.label-schema.build-date=$BUILD_DATE \
       org.label-schema.name="NIPYPE" \
       org.label-schema.description="NIPYPE - Neuroimaging in Python: Pipelines and Interfaces" \

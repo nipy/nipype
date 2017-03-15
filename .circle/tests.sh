@@ -17,23 +17,23 @@ fi
 # They may need to be rebalanced in the future.
 case ${CIRCLE_NODE_INDEX} in
   0)
-    docker run --rm -it -e FSL_COURSE_DATA="/root/examples/nipype-fsl_course_data" -v $HOME/examples:/root/examples:ro -v $WORKDIR:/work -w /root/src/nipype nipype/nipype:py27 /usr/bin/run_pytests.sh py27 && \
-    docker run --rm -it -e FSL_COURSE_DATA="/root/examples/nipype-fsl_course_data" -v $HOME/examples:/root/examples:ro -v $WORKDIR:/work -w /root/src/nipype nipype/nipype:py35 /usr/bin/run_pytests.sh py35 && \
-    docker run --rm -it -v $WORKDIR:/work -w /root/src/nipype/doc nipype/nipype:py35 /usr/bin/run_builddocs.sh && \
-    docker run --rm -it -v $HOME/examples:/root/examples:ro -v $WORKDIR:/work -w /work nipype/nipype:py35 /usr/bin/run_examples.sh test_spm Linear /root/examples/ workflow3d && \
-    docker run --rm -it -v $HOME/examples:/root/examples:ro -v $WORKDIR:/work -w /work nipype/nipype:py35 /usr/bin/run_examples.sh test_spm Linear /root/examples/ workflow4d
+    docker run --rm -it -e FSL_COURSE_DATA="/data/examples/nipype-fsl_course_data" -v $HOME/examples:/data/examples:ro -v $WORKDIR:/work -w /src/nipype nipype/nipype:py27 /usr/bin/run_pytests.sh py27 && \
+    docker run --rm -it -e FSL_COURSE_DATA="/data/examples/nipype-fsl_course_data" -v $HOME/examples:/data/examples:ro -v $WORKDIR:/work -w /src/nipype nipype/nipype:py35 /usr/bin/run_pytests.sh py35 && \
+    docker run --rm -it -v $WORKDIR:/work -w /src/nipype/doc nipype/nipype:py35 /usr/bin/run_builddocs.sh && \
+    docker run --rm -it -v $HOME/examples:/data/examples:ro -v $WORKDIR:/work -w /work nipype/nipype:py35 /usr/bin/run_examples.sh test_spm Linear /data/examples/ workflow3d && \
+    docker run --rm -it -v $HOME/examples:/data/examples:ro -v $WORKDIR:/work -w /work nipype/nipype:py35 /usr/bin/run_examples.sh test_spm Linear /data/examples/ workflow4d
     ;;
   1)
-    docker run --rm -it -v $HOME/examples:/root/examples:ro -v $WORKDIR:/work -w /work nipype/nipype:py35 /usr/bin/run_examples.sh fmri_spm_dartel Linear /root/examples/ level1 && \
-    docker run --rm -it -v $HOME/examples:/root/examples:ro -v $WORKDIR:/work -w /work nipype/nipype:py35 /usr/bin/run_examples.sh fmri_spm_dartel Linear /root/examples/ l2pipeline
+    docker run --rm -it -v $HOME/examples:/data/examples:ro -v $WORKDIR:/work -w /work nipype/nipype:py35 /usr/bin/run_examples.sh fmri_spm_dartel Linear /data/examples/ level1 && \
+    docker run --rm -it -v $HOME/examples:/data/examples:ro -v $WORKDIR:/work -w /work nipype/nipype:py35 /usr/bin/run_examples.sh fmri_spm_dartel Linear /data/examples/ l2pipeline
     ;;
   2)
-    docker run --rm -it -e NIPYPE_NUMBER_OF_CPUS=4 -v $HOME/examples:/root/examples:ro -v $WORKDIR:/work -w /work nipype/nipype:py27 /usr/bin/run_examples.sh fmri_spm_nested MultiProc /root/examples/ level1 && \
-    docker run --rm -it -e NIPYPE_NUMBER_OF_CPUS=4 -v $HOME/examples:/root/examples:ro -v $WORKDIR:/work -w /work nipype/nipype:py35 /usr/bin/run_examples.sh fmri_spm_nested MultiProc /root/examples/ l2pipeline
+    docker run --rm -it -e NIPYPE_NUMBER_OF_CPUS=4 -v $HOME/examples:/data/examples:ro -v $WORKDIR:/work -w /work nipype/nipype:py27 /usr/bin/run_examples.sh fmri_spm_nested MultiProc /data/examples/ level1 && \
+    docker run --rm -it -e NIPYPE_NUMBER_OF_CPUS=4 -v $HOME/examples:/data/examples:ro -v $WORKDIR:/work -w /work nipype/nipype:py35 /usr/bin/run_examples.sh fmri_spm_nested MultiProc /data/examples/ l2pipeline
     ;;
   3)
-    docker run --rm -it -e NIPYPE_NUMBER_OF_CPUS=4 -v $HOME/examples:/root/examples:ro -v $WORKDIR:/work -w /work nipype/nipype:py35 /usr/bin/run_examples.sh fmri_spm_nested MultiProc /root/examples/ level1 && \
-    docker run --rm -it -v $HOME/examples:/root/examples:ro -v $WORKDIR:/work -w /work nipype/nipype:py35 /usr/bin/run_examples.sh fmri_fsl_feeds Linear /root/examples/ l1pipeline && \
-    docker run --rm -it -v $HOME/examples:/root/examples:ro -v $WORKDIR:/work -w /work nipype/nipype:py35 /usr/bin/run_examples.sh fmri_fsl_reuse Linear /root/examples/ level1_workflow
+    docker run --rm -it -e NIPYPE_NUMBER_OF_CPUS=4 -v $HOME/examples:/data/examples:ro -v $WORKDIR:/work -w /work nipype/nipype:py35 /usr/bin/run_examples.sh fmri_spm_nested MultiProc /data/examples/ level1 && \
+    docker run --rm -it -v $HOME/examples:/data/examples:ro -v $WORKDIR:/work -w /work nipype/nipype:py35 /usr/bin/run_examples.sh fmri_fsl_feeds Linear /data/examples/ l1pipeline && \
+    docker run --rm -it -v $HOME/examples:/data/examples:ro -v $WORKDIR:/work -w /work nipype/nipype:py35 /usr/bin/run_examples.sh fmri_fsl_reuse Linear /data/examples/ level1_workflow
     ;;
 esac
