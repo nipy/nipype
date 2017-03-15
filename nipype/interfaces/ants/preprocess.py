@@ -334,7 +334,7 @@ class MotionCorr2FSLParams(BaseInterface):
         next(in_data)
 
         for x in in_data:
-            mat = numpy.zeroes((3, 3))
+            mat = numpy.zeros((3, 3))
             mat[0] = [x[2], x[3], x[4]]
             mat[1] = [x[5], x[6], x[7]]
             mat[2] = [x[8], x[9], x[10]]
