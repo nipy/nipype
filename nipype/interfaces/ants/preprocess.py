@@ -310,8 +310,6 @@ class MotionCorr2FSLParamsInputSpec(BaseInterfaceInputSpec):
         desc='Motion correction matrices to be converted into FSL style motion parameters',
         mandatory=True
     )
-    fsl_params = File(name_template='%s.par', name_source='ants_matrix',
-                      desc='FSL parameter file')
 
 class MotionCorr2FSLParamsOutputSpec(TraitedSpec):
     fsl_params = File(exists=True, desc="FSL parameters file to be output")
@@ -350,3 +348,11 @@ class MotionCorr2FSLParams(BaseInterface):
             out_fp.write('\n'.join(pars))
         in_fp.close()
         return runtime
+
+    def _list_outputs(self):
+        outputs = self._outputs().get()
+        pth, fname, _ = split_filename(self.inputs.matrix)
+        new_fname = '{}{}'.format(fname, '.par')
+        out_file = os.path.join(pth, new_fname)
+        outputs["parameters"] = out_file
+        return outputs
