@@ -4,7 +4,7 @@
 
 """Top-level namespace for ants."""
 # Preprocessing Programs
-from .preprocess import Matrix2FSLParams, MotionCorr, MotionCorrStats
+from .preprocess import MotionCorr2FSLParams, MotionCorr, MotionCorrStats
 
 # Registraiton programs
 from .registration import ANTS, Registration
