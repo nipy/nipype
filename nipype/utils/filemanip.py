@@ -531,6 +531,18 @@ def loadpkl(infile):
     return unpkl
 
 
+def crash2txt(filename, record):
+    """ Write out plain text crash file """
+    with open(filename, 'w') as fp:
+        if 'node' in record:
+            node = record['node']
+            fp.write('Node: {}\n'.format(node.fullname))
+            fp.write('Working directory: {}\n'.format(node.output_dir()))
+            fp.write('\n')
+            fp.write('Node inputs:\n{}\n'.format(node.inputs))
+        fp.write(record['traceback'])
+
+
 def savepkl(filename, record):
     if filename.endswith('pklz'):
         pkl_file = gzip.open(filename, 'wb')
