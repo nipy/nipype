@@ -351,8 +351,8 @@ class MotionCorr2FSLParams(BaseInterface):
 
     def _list_outputs(self):
         outputs = self._outputs().get()
-        pth, fname, _ = split_filename(self.inputs.matrix)
+        pth, fname, _ = split_filename(self.inputs.ants_matrix)
         new_fname = '{}{}'.format(fname, '.par')
         out_file = os.path.join(pth, new_fname)
-        outputs["parameters"] = out_file
+        outputs["fsl_params"] = out_file
         return outputs
