@@ -3,8 +3,10 @@
     functions.
 """
 import csv
-import math
 import os
+
+from nibabel.eulerangles import mat2euler
+import numpy
 
 from ..base import (BaseInterface, BaseInterfaceInputSpec, TraitedSpec, File,
                     traits, isdefined, Str)
@@ -330,12 +332,13 @@ class Matrix2FSLParams(BaseInterface):
         next(in_data)
 
         for x in in_data:
-            t1 = math.atan2(float(x[7]), float(x[10]))
-            c2 = math.sqrt((float(x[2]) * float(x[2])) + (float(x[3]) * float(x[3])))
-            t2 = math.atan2(-float(x[4]), c2)
-            t3 = math.atan2(float(x[3]), float(x[2]))
+            mat = numpy.zeroes((3, 3))
+            mat[0] = [x[2], x[3], x[4]]
+            mat[1] = [x[5], x[6], x[7]]
+            mat[2] = [x[8], x[9], x[10]]
+            param_z, param_y, param_x = mat2euler(mat)
             parameters = "{:.8f} {:.8f} {:.8f} {:.8f} {:.8f} {:.8f}"
-            pars.append(parameters.format(t1, t2, t3, float(x[11]), float(x[12]),
+            pars.append(parameters.format(param_x, param_y, param_z, float(x[11]), float(x[12]),
                                           float(x[13])))
 
         pth, fname, _ = split_filename(self.inputs.matrix)
