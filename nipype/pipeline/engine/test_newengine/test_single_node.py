@@ -54,7 +54,7 @@ def test_single_node_1b():
     sn = Node(interface=my_function_1, mapper='a', output_name=["out_1"])
     sn.inputs = {"a" : [3, 1, 8]}
     sn.run()
-    assert (sn.outputs["out_1"] == [(["a=3"], 9), (["a=1"], 1), (["a=8"], 64)]).all()
+    assert (sn.outputs["out_1"] == [({"a":3}, 9), ({"a":1}, 1), ({"a":8}, 64)]).all()
 
 
 @pytest.mark.parametrize("inputs_dict, expected_output", [
@@ -71,7 +71,7 @@ def test_singlenode_2(inputs_dict, expected_output):
 
 
 @pytest.mark.parametrize("inputs_dict, expected_output", [
-        ({"a":[3, 1, 8], "b":[0, 1, 2]}, [({"a":3,"b":0}, 0), (["a=1","b=1"], 1), ({"a":8,"b":2}, 16)]),
+        ({"a":[3, 1, 8], "b":[0, 1, 2]}, [({"a":3,"b":0}, 0), ({"a":1,"b":1}, 1), ({"a":8,"b":2}, 16)]),
         ({"a":[3, 1, 8], "b":[2]}, [({"a":3,"b":2}, 6), ({"a":1,"b":2}, 2), ({"a":8,"b":2}, 16)]),
         ])
 def test_single_node_3(inputs_dict, expected_output):
@@ -93,7 +93,7 @@ def test_single_node_3(inputs_dict, expected_output):
            [({"a":1,"b":1}, 1), ({"a":1,"b":2}, 2), ({"a":1,"b":4}, 4)]],
           [[({"a":30,"b":1}, 30), ({"a":30,"b":2}, 60), ({"a":30,"b":4}, 120)],
            [({"a":10,"b":1}, 10), ({"a":10,"b":2}, 20), ({"a":10,"b":4}, 40)]]]),
-        ({"a":[3, 1], "b":[2]}, np.array([[({"a":3,"b":2}, 6)], [({"a":1,"b":2}, 2)]])),
+        ({"a":[3, 1], "b":[2]}, [[({"a":3,"b":2}, 6)], [({"a":1,"b":2}, 2)]]),
         ])
 def test_single_node_4(inputs_dict, expected_output):
     sn = Node(interface=fun3, mapper=['a','b'])
