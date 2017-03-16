@@ -6,9 +6,10 @@ omit =
     nipype/external/*
     nipype/fixes/*
     tools/*
+    doc/*
     */tests/*
 include =
-    tools/run_exaples.py
+    tools/run_examples.py
 
 [report]
 exclude_lines =

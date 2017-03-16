@@ -31,7 +31,7 @@ if [[ "${PYTHON_VERSION}" -ge "30" ]]; then
     echo 'profile_runtime = true' >> ${HOME}/.nipype/nipype.cfg
     py.test -n ${CIRCLE_NCPUS:-1} -v --junitxml=${WORKDIR}/pytests_py${PYTHON_VERSION}_profiler.xml --cov-report xml:${WORKDIR}/coverage_py${PYTHON_VERSION}_profiler.xml /src/nipype/nipype/interfaces/tests/test_runtime_profiler.py && \
     py.test -n ${CIRCLE_NCPUS:-1} -v --junitxml=${WORKDIR}/pytests_py${PYTHON_VERSION}_multiproc.xml --cov-report xml:${WORKDIR}/coverage_py${PYTHON_VERSION}_multiproc.xml /src/nipype/nipype/pipeline/plugins/tests/test_multiproc*.py
-    exit_code=$(( $exit_code + $?))
+    exit_code=$(( $exit_code + $? ))
 fi
 
 find /src/nipype/ -name "crash-*" -exec mv {} ${WORKDIR}/crashfiles/ \;
