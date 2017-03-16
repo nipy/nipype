@@ -11,24 +11,24 @@ def test_MotionCorr2FSLParams():
     with InTemporaryDirectory():
         cwd = os.getcwd()
         fsl_mat_fname = "fsl_style.mat"
-        fp = open(fsl_mat_fname, 'w+')
-        fp.write(
-            "1.000000 0.000000 -0.000935 0.062539\n"
-            "0.000001 0.999999 0.001470 -0.162467\n"
-            "0.000935 -0.001470 0.999999 -0.279038\n"
-            "0.000000 0.000000 0.000000 1.000000\n"
+        fsl_mat = numpy.array(
+            [
+                [1.000000, 0.000000, -0.000935, 0.062539],
+                [0.000001, 0.999999, 0.001470, -0.162467],
+                [0.000935, -0.001470, 0.999999, -0.279038],
+                [0.000000, 0.000000, 0.000000, 1.000000]
+            ]
         )
-        fp.close()
+        numpy.savetxt(fsl_mat_fname, fsl_mat, delimiter=' ')
 
         in_filename = os.path.join(cwd, 'in_file.csv')
-        fp = open(in_filename, 'w+')
-        fp.write("this line is ignored\n")
-        fp.write(
-            "0,-0.99918075422702,1.000000,0.000000,-0.000935,0.000001,"
-            "0.999999,0.001470,0.000935,-0.001470,0.999999,-0.279038,0.062539,"
-            "-0.162467,-0.279038\n"
-        )
-        fp.close()
+        ants_mat = numpy.array([
+            0, -0.99918075422702, 1.000000, 0.000000, -0.000935, 0.000001,
+            0.999999, 0.001470, 0.000935, -0.001470, 0.999999, -0.279038,
+            0.062539, -0.162467, -0.279038
+        ])
+        numpy.savetxt(in_filename, ants_mat, delimiter=',',
+                      header="this line is ignored")
 
         # m2p - matrix 2 parameters
         m2p = MotionCorr2FSLParams()
@@ -47,7 +47,7 @@ def test_MotionCorr2FSLParams():
         orig_params = []
         orig_params.extend(avscale_out.rot_angles)
         orig_params.extend(avscale_out.translations)
-        conv_params = numpy.genfromtext(conv_params_fname, delimeter=' ')
+        conv_params = numpy.genfromtxt(conv_params_fname, delimiter=' ')
         comp = numpy.isclose(conv_params, orig_params)
 
         assert(False not in comp)
