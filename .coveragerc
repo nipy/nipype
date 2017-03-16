@@ -1,11 +1,14 @@
 [run]
 branch = True
 data_file = .coverage
-source = nipype/
+source = .
 omit =
-    external/*
-    fixes/*
+    nipype/external/*
+    nipype/fixes/*
+    tools/*
     */tests/*
+include =
+    tools/run_exaples.py
 
 [report]
 exclude_lines =
