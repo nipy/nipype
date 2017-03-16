@@ -337,9 +337,8 @@ class MotionCorr2FSLParams(BaseInterface):
             mat[1] = [x[5], x[6], x[7]]
             mat[2] = [x[8], x[9], x[10]]
             param_z, param_y, param_x = mat2euler(mat)
-            parameters = "{:.8f} {:.8f} {:.8f} {:.8f} {:.8f} {:.8f}"
-            pars.append(parameters.format(param_x, param_y, param_z, float(x[11]), float(x[12]),
-                                          float(x[13])))
+            pars.append([param_x, param_y, param_z, float(x[11]), float(x[12]),
+                        float(x[13])])
 
         pth, fname, _ = split_filename(self.inputs.ants_matrix)
         new_fname = '{}{}'.format(fname, '.par')
