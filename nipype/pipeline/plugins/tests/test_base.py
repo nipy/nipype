@@ -27,7 +27,7 @@ def test_report_crash():
             mock_node.config = {
                 'execution' : {
                     'crashdump_dir' : '.',
-                    'text_crashfiles' : 'false',
+                    'crashfile_format' : 'pklz',
                 }
             }
 
