@@ -17,23 +17,15 @@ echo "log_to_file = true" >> ${HOME}/.nipype/nipype.cfg
 echo "log_directory = ${WORKDIR}/logs/example_${example_id}" >> ${HOME}/.nipype/nipype.cfg
 
 # Set up coverage
-echo "[run]" >> .coveragerc
-echo "branch = True" >> .coveragerc
-echo "source = /src/nipype" >> .coveragerc
-echo "include = */nipype/*" >> .coveragerc
-echo "omit =" >> .coveragerc
-echo "    */nipype/external/*" >> .coveragerc
-echo "    */nipype/fixes/*" >> .coveragerc
-echo "    */setup.py" >> .coveragerc
+sed -i -E "s/(source = ).*'/\1\/src\/nipype\/nipype/" /src/nipype/.coveragerc
 
-
-parallel=""
 if [ "$2" == "MultiProc" ]; then
-	parallel="--concurrency=multiprocessing"
+	echo "concurrency = multiprocessing" >> /src/nipype/.coveragerc
 fi
 
-coverage run ${parallel} /src/nipype/tools/run_examples.py $@
-test_exit=$?
-coverage xml -o "${WORKDIR}/smoketest_${example_id}.xml"
+coverage run --rcfile=/src/nipype/.coveragerc /src/nipype/tools/run_examples.py $@
+exit_code=$?
 
-exit $test_exit
+coverage xml -o ${WORKDIR}/smoketest_${example_id}.xml || true
+
+exit $exit_code

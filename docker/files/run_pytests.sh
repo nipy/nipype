@@ -21,19 +21,21 @@ if [[ "${PYTHON_VERSION}" -lt "30" ]]; then
     echo 'profile_runtime = true' >> ${HOME}/.nipype/nipype.cfg
 fi
 
-cd /src/nipype/
-make clean
 # Run tests using pytest
-py.test -n ${CIRCLE_NCPUS:-4} --doctest-modules --junitxml=${WORKDIR}/pytests_py${PYTHON_VERSION}.xml --cov-report xml:${WORKDIR}/coverage_py${PYTHON_VERSION}.xml --cov=nipype nipype
-
+py.test -n ${CIRCLE_NCPUS:-1} -v --junitxml=${WORKDIR}/pytests_py${PYTHON_VERSION}.xml --cov-config /src/nipype/.coveragerc --cov-report xml:${WORKDIR}/coverage_py${PYTHON_VERSION}.xml /src/nipype/
+exit_code=$?
 
 # Workaround: run here the profiler tests in python 3
 if [[ "${PYTHON_VERSION}" -ge "30" ]]; then
     echo '[execution]' >> ${HOME}/.nipype/nipype.cfg
     echo 'profile_runtime = true' >> ${HOME}/.nipype/nipype.cfg
-    py.test -n ${CIRCLE_NCPUS:-4} --junitxml=${WORKDIR}/pytests_py${PYTHON_VERSION}_profiler.xml --cov-report xml:${WORKDIR}/coverage_py${PYTHON_VERSION}_profiler.xml --cov=nipype nipype/interfaces/tests/test_runtime_profiler.py
-    py.test -n ${CIRCLE_NCPUS:-4} --junitxml=${WORKDIR}/pytests_py${PYTHON_VERSION}_multiproc.xml --cov-report xml:${WORKDIR}/coverage_py${PYTHON_VERSION}_multiproc.xml --cov=nipype nipype/pipeline/plugins/tests/test_multiproc*.py
+    py.test -n ${CIRCLE_NCPUS:-1} -v --junitxml=${WORKDIR}/pytests_py${PYTHON_VERSION}_profiler.xml --cov-report xml:${WORKDIR}/coverage_py${PYTHON_VERSION}_profiler.xml /src/nipype/nipype/interfaces/tests/test_runtime_profiler.py && \
+    py.test -n ${CIRCLE_NCPUS:-1} -v --junitxml=${WORKDIR}/pytests_py${PYTHON_VERSION}_multiproc.xml --cov-report xml:${WORKDIR}/coverage_py${PYTHON_VERSION}_multiproc.xml /src/nipype/nipype/pipeline/plugins/tests/test_multiproc*.py
+    exit_code = $(( $exit_code + $?))
 fi
 
-# Copy crashfiles to scratch
-find /src/nipype/ -name "crash-*" -exec cp {} ${WORKDIR}/crashfiles/ \;
+find /src/nipype/ -name "crash-*" -exec mv {} ${WORKDIR}/crashfiles/ \;
+
+# Just in case output xml files are misplaced,
+# then circle would not tell the tests failed otherwise
+exit $exit_code
