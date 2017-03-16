@@ -1,5 +1,6 @@
 [run]
 branch = True
+source = nipype
 include = */nipype/*
 omit =
     */nipype/external/*
