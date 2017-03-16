@@ -29,12 +29,13 @@ filemap = dict(cor='cor', mgh='mgh', mgz='mgz', minc='mnc',
                afni='brik', brik='brik', bshort='bshort',
                spm='img', analyze='img', analyze4d='img',
                bfloat='bfloat', nifti1='img', nii='nii',
-               niigz='nii.gz')
+               niigz='nii.gz', gii='gii')
 
 filetypes = ['cor', 'mgh', 'mgz', 'minc', 'analyze',
              'analyze4d', 'spm', 'afni', 'brik', 'bshort',
              'bfloat', 'sdt', 'outline', 'otl', 'gdf',
              'nifti1', 'nii', 'niigz']
+implicit_filetypes = ['gii']
 
 
 def copy2subjdir(cls, in_file, folder=None, basename=None, subject_id=None):
@@ -151,7 +152,8 @@ class SampleToSurfaceInputSpec(FSTraitedSpec):
     frame = traits.Int(argstr="--frame %d", desc="save only one frame (0-based)")
 
     out_file = File(argstr="--o %s", genfile=True, desc="surface file to write")
-    out_type = traits.Enum(filetypes, argstr="--out_type %s", desc="output file type")
+    out_type = traits.Enum(filetypes + implicit_filetypes,
+                           argstr="--out_type %s", desc="output file type")
     hits_file = traits.Either(traits.Bool, File(exists=True), argstr="--srchit %s",
                               desc="save image with number of hits at each voxel")
     hits_type = traits.Enum(filetypes, argstr="--srchit_type", desc="hits file type")
@@ -201,12 +203,6 @@ class SampleToSurface(FSCommand):
     input_spec = SampleToSurfaceInputSpec
     output_spec = SampleToSurfaceOutputSpec
 
-    filemap = dict(cor='cor', mgh='mgh', mgz='mgz', minc='mnc',
-                   afni='brik', brik='brik', bshort='bshort',
-                   spm='img', analyze='img', analyze4d='img',
-                   bfloat='bfloat', nifti1='img', nii='nii',
-                   niigz='nii.gz')
-
     def _format_arg(self, name, spec, value):
         if name == "sampling_method":
             range = self.inputs.sampling_range
@@ -226,6 +222,8 @@ class SampleToSurface(FSCommand):
             return spec.argstr % self.inputs.subject_id
         if name in ["hits_file", "vox_file"]:
             return spec.argstr % self._get_outfilename(name)
+        if name == "out_type" and value in implicit_filetypes:
+            return ""
         return super(SampleToSurface, self)._format_arg(name, spec, value)
 
     def _get_outfilename(self, opt="out_file"):
@@ -233,9 +231,9 @@ class SampleToSurface(FSCommand):
         if not isdefined(outfile) or isinstance(outfile, bool):
             if isdefined(self.inputs.out_type):
                 if opt == "hits_file":
-                    suffix = '_hits.' + self.filemap[self.inputs.out_type]
+                    suffix = '_hits.' + filemap[self.inputs.out_type]
                 else:
-                    suffix = '.' + self.filemap[self.inputs.out_type]
+                    suffix = '.' + filemap[self.inputs.out_type]
             elif opt == "hits_file":
                 suffix = "_hits.mgz"
             else:
