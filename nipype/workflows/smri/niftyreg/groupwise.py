@@ -61,7 +61,7 @@ def create_linear_gw_step(name="linear_gw_niftyreg",
     workflow.base_output_dir = name
 
     # We need to create an input node for the workflow
-    input_node = pe.Node(niu.IdentityInterface(
+    inputnode = pe.Node(niu.IdentityInterface(
         fields=['in_files', 'ref_file', 'rmask_file']),
         name='inputspec')
 
@@ -80,20 +80,20 @@ def create_linear_gw_step(name="linear_gw_niftyreg",
 
     # We have a new average image and the affine
     # transformations, which are returned as an output node.
-    output_node = pe.Node(niu.IdentityInterface(
+    outputnode = pe.Node(niu.IdentityInterface(
         fields=['average_image', 'trans_files']), name='outputspec')
 
     # Connect the inputs to the lin_reg node
     workflow.connect([
-        (input_node, lin_reg, [('ref_file', 'ref_file')]),
-        (input_node, lin_reg, [('in_files', 'flo_file')])
+        (inputnode, lin_reg, [('ref_file', 'ref_file')]),
+        (inputnode, lin_reg, [('in_files', 'flo_file')])
                      ])
     if use_mask:
-        workflow.connect(input_node, 'rmask_file', lin_reg, 'rmask_file')
+        workflow.connect(inputnode, 'rmask_file', lin_reg, 'rmask_file')
 
     if demean:
         workflow.connect([
-            (input_node, ave_ims, [('ref_file', 'demean1_ref_file')]),
+            (inputnode, ave_ims, [('ref_file', 'demean1_ref_file')]),
             (lin_reg, ave_ims, [('avg_output', 'warp_files')])
                      ])
     else:
@@ -101,8 +101,8 @@ def create_linear_gw_step(name="linear_gw_niftyreg",
 
     # Connect up the output node
     workflow.connect([
-        (lin_reg, output_node, [('aff_file', 'trans_files')]),
-        (ave_ims, output_node, [('out_file', 'average_image')])
+        (lin_reg, outputnode, [('aff_file', 'trans_files')]),
+        (ave_ims, outputnode, [('out_file', 'average_image')])
                      ])
 
     return workflow
@@ -155,7 +155,7 @@ def create_nonlinear_gw_step(name="nonlinear_gw_niftyreg",
     workflow.base_output_dir = name
 
     # We need to create an input node for the workflow
-    input_node = pe.Node(niu.IdentityInterface(
+    inputnode = pe.Node(niu.IdentityInterface(
         fields=['in_files',
                 'ref_file',
                 'rmask_file',
@@ -190,41 +190,41 @@ def create_nonlinear_gw_step(name="nonlinear_gw_niftyreg",
 
     # We have a new centered average image, the resampled original images and
     # the affine transformations, which are returned as an output node.
-    output_node = pe.Node(niu.IdentityInterface(
+    outputnode = pe.Node(niu.IdentityInterface(
         fields=['average_image',
                 'trans_files']),
         name='outputspec')
 
     # Connect the inputs to the lin_reg node, which is split over in_files
     workflow.connect([
-        (input_node, nonlin_reg, [('in_files', 'flo_file')]),
-        (input_node, nonlin_reg, [('ref_file', 'ref_file')])
+        (inputnode, nonlin_reg, [('in_files', 'flo_file')]),
+        (inputnode, nonlin_reg, [('ref_file', 'ref_file')])
                      ])
 
     if use_mask:
-        workflow.connect(input_node, 'rmask_file', nonlin_reg, 'rmask_file')
+        workflow.connect(inputnode, 'rmask_file', nonlin_reg, 'rmask_file')
 
     # If we have initial affine transforms, we need to connect them in
     if initial_affines:
-        workflow.connect(input_node, 'input_aff_files', nonlin_reg, 'aff_file')
+        workflow.connect(inputnode, 'input_aff_files', nonlin_reg, 'aff_file')
 
     if demean:
         if 'vel_flag' in nonlinear_options_hash.keys() and \
            nonlinear_options_hash['vel_flag'] is True and \
            initial_affines:
             workflow.connect(
-                input_node, 'ref_file', ave_ims, 'demean3_ref_file')
+                inputnode, 'ref_file', ave_ims, 'demean3_ref_file')
         else:
             workflow.connect(
-                input_node, 'ref_file', ave_ims, 'demean2_ref_file')
+                inputnode, 'ref_file', ave_ims, 'demean2_ref_file')
         workflow.connect(nonlin_reg, 'avg_output', ave_ims, 'warp_files')
     else:
         workflow.connect(nonlin_reg, 'res_file', ave_ims, 'avg_files')
 
     # Connect up the output node
     workflow.connect([
-        (nonlin_reg, output_node, [('cpp_file', 'trans_files')]),
-        (ave_ims, output_node, [('out_file', 'average_image')])
+        (nonlin_reg, outputnode, [('cpp_file', 'trans_files')]),
+        (ave_ims, outputnode, [('out_file', 'average_image')])
                      ])
 
     return workflow
@@ -278,13 +278,13 @@ def create_groupwise_average(name="atlas_creation",
         nonlinear_options_hash = dict()
 
     # Create the input and output node
-    input_node = pe.Node(niu.IdentityInterface(
+    inputnode = pe.Node(niu.IdentityInterface(
         fields=['in_files',
                 'ref_file',
                 'rmask_file']),
         name='inputspec')
 
-    output_node = pe.Node(niu.IdentityInterface(
+    outputnode = pe.Node(niu.IdentityInterface(
         fields=['average_image',
                 'trans_files']),
         name='outputspec')
@@ -316,13 +316,13 @@ def create_groupwise_average(name="atlas_creation",
         lin_workflows.append(wf)
 
         # Connect up the input data to the workflow
-        workflow.connect(input_node, 'in_files', wf, 'inputspec.in_files')
+        workflow.connect(inputnode, 'in_files', wf, 'inputspec.in_files')
         if use_mask:
             workflow.connect(
-                input_node, 'rmask_file', wf, 'inputspec.rmask_file')
+                inputnode, 'rmask_file', wf, 'inputspec.rmask_file')
         # If it exist, connect the previous workflow to the current one
         if i == 0:
-            workflow.connect(input_node, 'ref_file', wf, 'inputspec.ref_file')
+            workflow.connect(inputnode, 'ref_file', wf, 'inputspec.ref_file')
         else:
             workflow.connect(lin_workflows[i - 1], 'outputspec.average_image',
                              wf, 'inputspec.ref_file')
@@ -343,10 +343,10 @@ def create_groupwise_average(name="atlas_creation",
             nonlinear_options_hash=nonlinear_options_hash, verbose=verbose)
 
         # Connect up the input data to the workflows
-        workflow.connect(input_node, 'in_files', wf, 'inputspec.in_files')
+        workflow.connect(inputnode, 'in_files', wf, 'inputspec.in_files')
         if use_mask:
             workflow.connect(
-                input_node, 'rmask_file', wf, 'inputspec.rmask_file')
+                inputnode, 'rmask_file', wf, 'inputspec.rmask_file')
 
         if initial_affines_arg:
             # Take the final linear registration results and use them to
@@ -360,7 +360,7 @@ def create_groupwise_average(name="atlas_creation",
                     lin_workflows[-1], 'outputspec.average_image',
                     wf, 'inputspec.ref_file')
             else:
-                workflow.connect(input_node, 'ref_file',
+                workflow.connect(inputnode, 'ref_file',
                                  wf, 'inputspec.ref_file')
         else:
             workflow.connect(
@@ -378,8 +378,8 @@ def create_groupwise_average(name="atlas_creation",
 
     # Connect the data to return
     workflow.connect([
-        (lw, output_node, [('outputspec.average_image', 'average_image')]),
-        (lw, output_node, [('outputspec.trans_files', 'trans_files')])
+        (lw, outputnode, [('outputspec.average_image', 'average_image')]),
+        (lw, outputnode, [('outputspec.trans_files', 'trans_files')])
                      ])
 
     return workflow
