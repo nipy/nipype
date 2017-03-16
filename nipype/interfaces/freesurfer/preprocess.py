@@ -1028,6 +1028,10 @@ class BBRegisterInputSpec(FSTraitedSpec):
                             desc="force use of nifti rather than analyze with SPM")
     epi_mask = traits.Bool(argstr="--epi-mask",
                            desc="mask out B0 regions in stages 1 and 2")
+    dof = traits.Enum(6, 9, 12, argstr='--%d',
+                      desc='number of transform degrees of freedom')
+    fsldof = traits.Int(argstr='--fsl-dof %d',
+                        desc='degrees of freedom for initial registration (FSL)')
     out_fsl_file = traits.Either(traits.Bool, File, argstr="--fslmat %s",
                                  desc="write the transformation matrix in FSL FLIRT format")
     registered_file = traits.Either(traits.Bool, File, argstr='--o %s',
@@ -1054,9 +1058,8 @@ class BBRegister(FSCommand):
     """Use FreeSurfer bbregister to register a volume to the Freesurfer anatomical.
 
     This program performs within-subject, cross-modal registration using a
-    boundary-based cost function. The registration is constrained to be 6
-    DOF (rigid). It is required that you have an anatomical scan of the
-    subject that has already been recon-all-ed using freesurfer.
+    boundary-based cost function. It is required that you have an anatomical
+    scan of the subject that has already been recon-all-ed using freesurfer.
 
     Examples
     --------
