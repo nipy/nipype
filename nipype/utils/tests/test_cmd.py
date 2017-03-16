@@ -12,7 +12,6 @@ from io import StringIO
 from ...utils import nipype_cmd
 
 PY3 = sys.version_info[0] >= 3
-PY2 = sys.version_info[0] < 2
 
 @contextmanager
 def capture_sys_output():
@@ -35,19 +34,10 @@ class TestNipypeCMD():
 
         exit_exception = cm.value
         assert exit_exception.code == 2
-
-        if PY2:
-            assert stderr.getvalue() == \
-                """usage: nipype_cmd [-h] module interface
+        assert stderr.getvalue() == \
+            """usage: nipype_cmd [-h] module interface
 nipype_cmd: error: too few arguments
 """
-        elif PY3:
-            assert stderr.getvalue() == \
-                """usage: nipype_cmd [-h] module interface
-nipype_cmd: error: the following arguments are required: module, interface
-"""
-
-        assert stdout.getvalue() == ''
 
     def test_main_returns_0_on_help(self):
         with pytest.raises(SystemExit) as cm:
@@ -115,12 +105,7 @@ optional arguments:
                                                        in_file [in_file ...]
                                                        tr"""
 
-        if PY3:
-            error_message += """
-nipype_cmd nipype.interfaces.nipy FmriRealign4d: error: the following arguments are required: in_file, tr
-"""
-        else:
-            error_message += """
+        error_message += """
 nipype_cmd nipype.interfaces.nipy FmriRealign4d: error: too few arguments
 """
 

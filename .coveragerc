@@ -1,5 +1,6 @@
 [run]
 branch = True
+data_file = .coverage
 source = nipype/
 omit =
     external/*

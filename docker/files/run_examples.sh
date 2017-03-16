@@ -17,7 +17,9 @@ echo "log_to_file = true" >> ${HOME}/.nipype/nipype.cfg
 echo "log_directory = ${WORKDIR}/logs/example_${example_id}" >> ${HOME}/.nipype/nipype.cfg
 
 # Set up coverage
+export COVERAGE_PROCESS_START=/src/nipype/.coveragerc
 sed -i -E "s/(source = ).*'/\1\/src\/nipype\/nipype/" /src/nipype/.coveragerc
+sed -i -E "s/(data_file = ).*'/\1\/\/work\/.coverage/" /src/nipype/.coveragerc
 
 if [ "$2" == "MultiProc" ]; then
 	echo "concurrency = multiprocessing" >> /src/nipype/.coveragerc
@@ -26,6 +28,6 @@ fi
 coverage run --rcfile=/src/nipype/.coveragerc /src/nipype/tools/run_examples.py $@
 exit_code=$?
 
-coverage xml -o ${WORKDIR}/smoketest_${example_id}.xml || true
+coverage xml --rcfile=/src/nipype/.coveragerc -o ${WORKDIR}/smoketest_${example_id}.xml || true
 
 exit $exit_code
