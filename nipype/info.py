@@ -5,13 +5,11 @@ docs.  In setup.py in particular, we exec this file, so it cannot import nipy
 from __future__ import print_function, division, unicode_literals, absolute_import
 
 
-# nipype version information.  An empty _version_extra corresponds to a
-# full release.  '.dev' as a _version_extra string means this is a development
+# nipype version information.  An empty version_extra corresponds to a
+# full release.  '.dev' as a version_extra string means this is a development
 # version
-_version_major = 0
-_version_minor = 13
-_version_micro = 0
-_version_extra = '-dev'  # Remove -dev for release
+# Remove -dev for release
+__version__ = '0.13.0-dev'
 
 
 def get_nipype_gitversion():
@@ -43,16 +41,10 @@ def get_nipype_gitversion():
         ver = o.decode().strip().split('-')[-1]
     return ver
 
-if '-dev' in _version_extra:
+if __version__.endswith('-dev'):
     gitversion = get_nipype_gitversion()
     if gitversion:
-        _version_extra = '-' + gitversion + '.dev'
-
-# Format expected by setup.py and doc/source/conf.py: string of form 'X.Y.Z'
-__version__ = '%s.%s.%s%s' % (_version_major,
-                              _version_minor,
-                              _version_micro,
-                              _version_extra)
+        __version__ = __version__.replace('-dev', '-' + gitversion + '.dev')
 
 CLASSIFIERS = ['Development Status :: 5 - Production/Stable',
                'Environment :: Console',
@@ -126,10 +118,11 @@ CLASSIFIERS = CLASSIFIERS
 AUTHOR = 'nipype developers'
 AUTHOR_EMAIL = 'neuroimaging@python.org'
 PLATFORMS = 'OS Independent'
-MAJOR = _version_major
-MINOR = _version_minor
-MICRO = _version_micro
-ISRELEASE = _version_extra == ''
+MAJOR = __version__.split('.')[0]
+MINOR = __version__.split('.')[1]
+MICRO = __version__.replace('-', '.').split('.')[2]
+ISRELEASE = (len(__version__.replace('-', '.').split('.')) == 3 or
+             'post' in __version__.replace('-', '.').split('.')[-1])
 VERSION = __version__
 PROVIDES = ['nipype']
 REQUIRES = [
@@ -151,6 +144,7 @@ REQUIRES = [
 TESTS_REQUIRES = [
     'pytest>=%s' % PYTEST_MIN_VERSION,
     'pytest-cov',
+    'pytest-xdist',
     'mock',
     'codecov',
     'dipy',
