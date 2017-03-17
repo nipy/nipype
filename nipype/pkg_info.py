@@ -4,7 +4,7 @@ from builtins import open
 
 from future import standard_library
 standard_library.install_aliases()
-from configparser import ConfigParser
+import configparser
 
 import os
 import sys
@@ -47,7 +47,10 @@ def pkg_commit_hash(pkg_path):
     pth = os.path.join(pkg_path, COMMIT_INFO_FNAME)
     if not os.path.isfile(pth):
         raise IOError('Missing commit info file %s' % pth)
-    cfg_parser = ConfigParser()
+    if PY3:
+        cfg_parser = configparser.RawConfigParser()
+    else:
+        cfg_parser = configparser.ConfigParser()
     cfg_parser.read(pth)
     archive_subst = cfg_parser.get('commit hash', 'archive_subst_hash')
     if not archive_subst.startswith('$Format'):  # it has been substituted
