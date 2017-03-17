@@ -24,6 +24,7 @@ src/
 # other
 docs/**/*
 docs/
+.cache/
 .circle/**/*
 .circle/
 circle.yml
