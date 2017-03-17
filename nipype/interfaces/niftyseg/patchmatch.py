@@ -75,8 +75,6 @@ class PatchMatchOutputSpec(TraitedSpec):
 class PatchMatch(NiftySegCommand):
     """Interface for executable seg_PatchMatch from NiftySeg platform.
 
-    For an extended help, please read the NiftySeg wiki page at:
-    http://cmictig.cs.ucl.ac.uk/wiki/index.php/NiftySeg
     The database file is a text file and in each line we have a template
     file, a mask with the search region to consider and a file with the
     label to propagate.
@@ -88,6 +86,10 @@ class PatchMatch(NiftySegCommand):
     (XxYxZ voxels) than input image but can have different number of
     volumes than the input image allowing to propagate multiple labels
     in the same execution.
+
+    For source code, see http://cmictig.cs.ucl.ac.uk/wiki/index.php/NiftySeg
+    For Documentation, see:
+        http://cmictig.cs.ucl.ac.uk/wiki/index.php/NiftySeg_documentation
 
     Examples
     --------

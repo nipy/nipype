@@ -87,8 +87,8 @@ class UnaryMathsInput(MathsInput):
 class UnaryMaths(MathsCommand):
     """Interface for executable seg_maths from NiftySeg platform.
 
-    Only the unary mathematical operations.
-    Options from seg_maths in this interface:
+    Interface to use any unary mathematical operations that can be performed
+    with the seg_maths command-line program. See below for those operations:
         -sqrt           Square root of the image.
         -exp            Exponential root of the image.
         -log            Log of the image.
@@ -118,6 +118,10 @@ class UnaryMaths(MathsCommand):
         -scl            Reset scale and slope info.
         -4to5           Flip the 4th and 5th dimension.
         -range          Reset the image range to the min max
+
+    For source code, see http://cmictig.cs.ucl.ac.uk/wiki/index.php/NiftySeg
+    For Documentation, see:
+        http://cmictig.cs.ucl.ac.uk/wiki/index.php/NiftySeg_documentation
 
     Examples
     --------
@@ -169,8 +173,8 @@ class BinaryMathsInput(MathsInput):
 class BinaryMaths(MathsCommand):
     """Interface for executable seg_maths from NiftySeg platform.
 
-    Only the binary mathematical operations.
-    Options from seg_maths in this interface:
+    Interface to use any binary mathematical operations that can be performed
+    with the seg_maths command-line program. See below for those operations:
         -mul    <float/file>    Multiply image <float> value or by other image.
         -div    <float/file>    Divide image by <float> or by other image.
         -add    <float/file>    Add image by <float> or by other image.
@@ -201,6 +205,10 @@ class BinaryMaths(MathsCommand):
                                 save in <output>.
         -splitinter <x/y/z>     Split interleaved slices in direction <x/y/z>
                                 into separate time points
+
+    For source code, see http://cmictig.cs.ucl.ac.uk/wiki/index.php/NiftySeg
+    For Documentation, see:
+        http://cmictig.cs.ucl.ac.uk/wiki/index.php/NiftySeg_documentation
 
     Examples
     --------
@@ -262,8 +270,9 @@ class BinaryMathsInputInteger(MathsInput):
 class BinaryMathsInteger(MathsCommand):
     """Interface for executable seg_maths from NiftySeg platform.
 
-    Only the INT binary mathematical operations (requiring integer values).
-    Options from seg_maths in this interface:
+    Interface to use any integer mathematical operations that can be performed
+    with the seg_maths command-line program. See below for those operations:
+    (requiring integer values)
         -equal  <int>       Get voxels equal to <int>
         -dil    <int>       Dilate the image <int> times (in voxels).
         -ero    <int>       Erode the image <int> times (in voxels).
@@ -271,6 +280,10 @@ class BinaryMathsInteger(MathsCommand):
         -crop   <int>       Crop <int> voxels around each 3D volume.
         -pad    <int>       Pad <int> voxels with NaN value around each 3D
                             volume.
+
+    For source code, see http://cmictig.cs.ucl.ac.uk/wiki/index.php/NiftySeg
+    For Documentation, see:
+        http://cmictig.cs.ucl.ac.uk/wiki/index.php/NiftySeg_documentation
 
     Examples
     --------
@@ -327,8 +340,8 @@ class TupleMathsInput(MathsInput):
 class TupleMaths(MathsCommand):
     """Interface for executable seg_maths from NiftySeg platform.
 
-    Only the tuple mathematical operations.
-    Options from seg_maths in this interface:
+    Interface to use any tuple mathematical operations that can be performed
+    with the seg_maths command-line program. See below for those operations:
         -lncc      <file> <std>    Local CC between current img and <file>
                                 on a kernel with <std>
         -lssd      <file> <std>    Local SSD between current img and <file>
@@ -337,6 +350,10 @@ class TupleMaths(MathsCommand):
                                          <float> percent outliers
         -qlsnorm   <order> <file_norm>   LS normalisation of <order>
                                          between current and <file_norm>
+
+    For source code, see http://cmictig.cs.ucl.ac.uk/wiki/index.php/NiftySeg
+    For Documentation, see:
+        http://cmictig.cs.ucl.ac.uk/wiki/index.php/NiftySeg_documentation
 
     Examples
     --------
@@ -370,9 +387,14 @@ class MergeInput(MathsInput):
 class Merge(MathsCommand):
     """Interface for executable seg_maths from NiftySeg platform.
 
-    Only to merge files using seg_maths:
+    Interface to use the merge operation that can be performed
+    with the seg_maths command-line program. See below for this option:
         -merge  <i> <d> <files>   Merge <i> images and the working image in the
                                   <d> dimension
+
+    For source code, see http://cmictig.cs.ucl.ac.uk/wiki/index.php/NiftySeg
+    For Documentation, see:
+        http://cmictig.cs.ucl.ac.uk/wiki/index.php/NiftySeg_documentation
 
     Examples
     --------

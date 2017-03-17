@@ -52,7 +52,7 @@ def no_niftyseg(cmd='seg_LabFusion'):
 
 class NiftySegCommand(CommandLine):
     """
-    Base support for NiftySeg commands.
+    Base support interface for NiftySeg commands.
     """
     _suffix = '_ns'
 

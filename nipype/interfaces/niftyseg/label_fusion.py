@@ -107,6 +107,10 @@ class LabelFusion(NiftySegCommand):
     """Interface for executable seg_LabelFusion from NiftySeg platform using
     type STEPS as classifier Fusion.
 
+    For source code, see http://cmictig.cs.ucl.ac.uk/wiki/index.php/NiftySeg
+    For Documentation, see:
+        http://cmictig.cs.ucl.ac.uk/wiki/index.php/NiftySeg_documentation
+
     Examples
     --------
     >>> from nipype.interfaces.niftyseg import LabelFusion
@@ -118,7 +122,7 @@ class LabelFusion(NiftySegCommand):
     >>> node.inputs.template_num = 2
     >>> node.inputs.classifier_type = 'STEPS'
     >>> node.cmdline  # doctest: +SKIP
-    'seg_LabelFusion -in im1.nii -STEPS 2.000000 2 im2.nii im3.nii -out \
+    'seg_LabFusion -in im1.nii -STEPS 2.000000 2 im2.nii im3.nii -out \
 im1_steps.nii'
 
     """

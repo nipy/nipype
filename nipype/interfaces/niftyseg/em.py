@@ -107,6 +107,14 @@ class EMOutputSpec(TraitedSpec):
 class EM(NiftySegCommand):
     """Interface for executable seg_EM from NiftySeg platform.
 
+    seg_EM is a general purpose intensity based image segmentation tool. In
+    it's simplest form, it takes in one 2D or 3D image and segments it in n
+    classes.
+
+    For source code, see http://cmictig.cs.ucl.ac.uk/wiki/index.php/NiftySeg
+    For Documentation, see:
+        http://cmictig.cs.ucl.ac.uk/wiki/index.php/NiftySeg_documentation
+
     Examples
     --------
     >>> from nipype.interfaces.niftyseg import EM

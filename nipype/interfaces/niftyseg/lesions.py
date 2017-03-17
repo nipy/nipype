@@ -92,6 +92,10 @@ class FillLesions(NiftySegCommand):
 
     Fill all the masked lesions with WM intensity average.
 
+    For source code, see http://cmictig.cs.ucl.ac.uk/wiki/index.php/NiftySeg
+    For Documentation, see:
+        http://cmictig.cs.ucl.ac.uk/wiki/index.php/NiftySeg_documentation
+
     Examples
     --------
     >>> from nipype.interfaces.niftyseg import FillLesions

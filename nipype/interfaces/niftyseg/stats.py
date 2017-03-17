@@ -83,8 +83,8 @@ class UnaryStats(StatsCommand):
     """
     Interface for executable seg_stats from NiftySeg platform.
 
-    Only the unary statistical operations.
-    Options from seg_stats in this interface:
+    Interface to use any unary statistical operations that can be performed
+    with the seg_stats command-line program. See below for those operations:
         -r          | The range <min max> of all voxels.
         -R          | The robust range (assuming 2% outliers on both sides)
                     | of all voxels
@@ -113,6 +113,10 @@ class UnaryStats(StatsCommand):
 
     Note: All NaN or Inf are ignored for all stats.
           The -m and -t options can be used in conjusction.
+
+    For source code, see http://cmictig.cs.ucl.ac.uk/wiki/index.php/NiftySeg
+    For Documentation, see:
+        http://cmictig.cs.ucl.ac.uk/wiki/index.php/NiftySeg_documentation
 
     Examples
     --------
@@ -154,8 +158,8 @@ class BinaryStats(StatsCommand):
     """
     Interface for executable seg_stats from NiftySeg platform.
 
-    Only the binary statistical operations.
-    Options from seg_stats in this interface:
+    Interface to use any binary statistical operations that can be performed
+    with the seg_stats command-line program. See below for those operations:
         -p <float>      | The <float>th percentile of all voxels intensity
                         | (float=[0,100])
         -sa  <ax>       | Average of all voxels
@@ -172,6 +176,10 @@ class BinaryStats(StatsCommand):
 
     Note: All NaN or Inf are ignored for all stats.
         The -m and -t options can be used in conjusction.
+
+    For source code, see http://cmictig.cs.ucl.ac.uk/wiki/index.php/NiftySeg
+    For Documentation, see:
+        http://cmictig.cs.ucl.ac.uk/wiki/index.php/NiftySeg_documentation
 
     Examples
     --------
