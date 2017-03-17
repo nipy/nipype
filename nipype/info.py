@@ -144,7 +144,6 @@ REQUIRES = [
 TESTS_REQUIRES = [
     'pytest>=%s' % PYTEST_MIN_VERSION,
     'pytest-cov',
-    'pytest-xdist',
     'mock',
     'codecov',
     'dipy',

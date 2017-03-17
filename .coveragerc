@@ -1,7 +1,2 @@
 [run]
 branch = True
-include = */nipype/*
-omit =
-    */nipype/external/*
-    */nipype/fixes/*
-    */setup.py

@@ -24,7 +24,7 @@ dependencies:
     - sudo apt-get -y update && sudo apt-get install -y wget bzip2
     # Create work folder and force group permissions
     - mkdir -p $WORKDIR && sudo setfacl -d -m group:ubuntu:rwx $WORKDIR && sudo setfacl -m group:ubuntu:rwx $WORKDIR
-    - mkdir -p $HOME/docker $HOME/examples $WORKDIR/pytest $WORKDIR/logs
+    - mkdir -p $HOME/docker $HOME/examples $WORKDIR/tests $WORKDIR/crashfiles $WORKDIR/logs ${CIRCLE_TEST_REPORTS}/tests/
   override:
     - if [[ -e $HOME/docker/cache.tar ]]; then docker load --input $HOME/docker/cache.tar; fi :
         timeout: 6000
@@ -49,13 +49,15 @@ test:
         timeout: 7200
         parallel: true
   post:
-    # Send coverage data to codecov.io
-    - bash .circle/codecov.sh
+    # Place reports in the appropriate folder
+    -  cp ${WORKDIR}/tests/*.xml ${CIRCLE_TEST_REPORTS}/tests/
 
 general:
   artifacts:
     - "~/work/docs"
     - "~/work/logs"
+    - "~/work/tests"
+    - "~/work/crashfiles"
 
 deployment:
   production:

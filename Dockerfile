@@ -71,6 +71,20 @@ RUN conda config --add channels conda-forge; sync && \
 RUN sed -i 's/\(backend *: \).*$/\1Agg/g' /usr/local/miniconda/lib/python${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR}/site-packages/matplotlib/mpl-data/matplotlibrc && \
     python -c "from matplotlib import font_manager"
 
+# Install codecov inside container
+RUN curl -so /usr/bin/codecov.io https://codecov.io/bash && \
+    chmod 755 /usr/bin/codecov.io
+
+# Install CI scripts
+COPY docker/files/run_* /usr/bin/
+RUN chmod +x /usr/bin/run_*
+
+# Replace imglob with a Python3 compatible version
+COPY nipype/external/fsl_imglob.py /usr/bin/fsl_imglob.py
+RUN rm -rf ${FSLDIR}/bin/imglob && \
+    chmod +x /usr/bin/fsl_imglob.py && \
+    ln -s /usr/bin/fsl_imglob.py ${FSLDIR}/bin/imglob
+
 # Installing dev requirements (packages that are not in pypi)
 WORKDIR /src/
 COPY requirements.txt requirements.txt
@@ -82,16 +96,6 @@ COPY . /src/nipype
 RUN cd /src/nipype && \
     pip install -e .[all] && \
     rm -rf ~/.cache/pip
-
-# Install CI scripts
-COPY docker/files/run_* /usr/bin/
-RUN chmod +x /usr/bin/run_*
-
-# Replace imglob with a Python3 compatible version
-COPY nipype/external/fsl_imglob.py /usr/bin/fsl_imglob.py
-RUN rm -rf ${FSLDIR}/bin/imglob && \
-    chmod +x /usr/bin/fsl_imglob.py && \
-    ln -s /usr/bin/fsl_imglob.py ${FSLDIR}/bin/imglob
 
 WORKDIR /work/
 
