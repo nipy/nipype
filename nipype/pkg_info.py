@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function, division, unicode_literals, absolute_import
-from builtins import open
 
 from future import standard_library
 standard_library.install_aliases()
@@ -9,6 +8,8 @@ import configparser
 import os
 import sys
 import subprocess
+
+from .info import VERSION
 
 COMMIT_INFO_FNAME = 'COMMIT_INFO.txt'
 PY3 = sys.version_info[0] >= 3
@@ -94,6 +95,7 @@ def get_pkg_info(pkg_path):
         pkg_path=pkg_path,
         commit_source=src,
         commit_hash=hsh,
+        nipype_version=VERSION,
         sys_version=sys.version,
         sys_executable=sys.executable,
         sys_platform=sys.platform,
