@@ -24,7 +24,7 @@ if [[ "${PYTHON_VERSION}" -lt "30" ]]; then
 fi
 
 # Run tests using pytest
-export COVERAGE_FILE=${WORKDIR}/tests/.coverage_py${PYTHON_VERSION}
+export COVERAGE_FILE=${WORKDIR}/tests/.coverage.py${PYTHON_VERSION}
 py.test -v --junitxml=${WORKDIR}/tests/pytests_py${PYTHON_VERSION}.xml --cov nipype --cov-config /src/nipype/.coveragerc --cov-report xml:${WORKDIR}/tests/coverage_py${PYTHON_VERSION}.xml ${TESTPATH}
 exit_code=$?
 
@@ -32,12 +32,12 @@ exit_code=$?
 if [[ "${PYTHON_VERSION}" -ge "30" ]]; then
     echo '[execution]' >> ${HOME}/.nipype/nipype.cfg
     echo 'profile_runtime = true' >> ${HOME}/.nipype/nipype.cfg
-    export COVERAGE_FILE=${WORKDIR}/tests/.coverage_py${PYTHON_VERSION}_extra
+    export COVERAGE_FILE=${WORKDIR}/tests/.coverage.py${PYTHON_VERSION}_extra
     py.test -v --junitxml=${WORKDIR}/tests/pytests_py${PYTHON_VERSION}_extra.xml --cov nipype --cov-report xml:${WORKDIR}/tests/coverage_py${PYTHON_VERSION}_extra.xml /src/nipype/nipype/interfaces/tests/test_runtime_profiler.py /src/nipype/nipype/pipeline/plugins/tests/test_multiproc*.py
     exit_code=$(( $exit_code + $? ))
 fi
 
-find /src/nipype/ -name "crash-*" -exec mv {} ${WORKDIR}/crashfiles/ \;
+find /work -name "crash-*" -maxdepth 1 -exec mv {} ${WORKDIR}/crashfiles/ \;
 
 # Just in case output xml files are misplaced,
 # then circle would not tell the tests failed otherwise

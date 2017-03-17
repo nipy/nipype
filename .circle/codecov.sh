@@ -18,7 +18,3 @@ find "${WORKDIR}/tests/" -name 'coverage*.xml' -maxdepth 1 -print0 | \
 find "${WORKDIR}/tests/" -name 'smoketest*.xml' -maxdepth 1 -print0 | \
   xargs -0 -I file ./codecov.io -f file -t "${CODECOV_TOKEN}" -F smoketests
 
-# Place test and coverage in the tests folder
-mkdir -p ${CIRCLE_TEST_REPORTS}/tests/
-cp ${WORKDIR}/tests/*.xml ${CIRCLE_TEST_REPORTS}/tests/
-
