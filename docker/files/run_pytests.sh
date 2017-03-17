@@ -3,6 +3,8 @@ set -e
 set -x
 set -u
 
+
+TESTPATH=${1:-/src/nipype/}
 WORKDIR=${WORK:-/work}
 PYTHON_VERSION=$( python -c "import sys; print('{}{}'.format(sys.version_info[0], sys.version_info[1]))" )
 
@@ -22,15 +24,16 @@ if [[ "${PYTHON_VERSION}" -lt "30" ]]; then
 fi
 
 # Run tests using pytest
-py.test -n ${CIRCLE_NCPUS:-1} -v --junitxml=${WORKDIR}/pytests_py${PYTHON_VERSION}.xml --cov-config /src/nipype/.coveragerc --cov-report xml:${WORKDIR}/coverage_py${PYTHON_VERSION}.xml /src/nipype/
+export COVERAGE_FILE=${WORKDIR}/.coverage_py${PYTHON_VERSION}
+py.test -v --junitxml=${WORKDIR}/pytests_py${PYTHON_VERSION}.xml --cov nipype --cov-config /src/nipype/.coveragerc --cov-report xml:${WORKDIR}/coverage_py${PYTHON_VERSION}.xml ${TESTPATH}
 exit_code=$?
 
 # Workaround: run here the profiler tests in python 3
 if [[ "${PYTHON_VERSION}" -ge "30" ]]; then
     echo '[execution]' >> ${HOME}/.nipype/nipype.cfg
     echo 'profile_runtime = true' >> ${HOME}/.nipype/nipype.cfg
-    py.test -n ${CIRCLE_NCPUS:-1} -v --junitxml=${WORKDIR}/pytests_py${PYTHON_VERSION}_profiler.xml --cov-report xml:${WORKDIR}/coverage_py${PYTHON_VERSION}_profiler.xml /src/nipype/nipype/interfaces/tests/test_runtime_profiler.py && \
-    py.test -n ${CIRCLE_NCPUS:-1} -v --junitxml=${WORKDIR}/pytests_py${PYTHON_VERSION}_multiproc.xml --cov-report xml:${WORKDIR}/coverage_py${PYTHON_VERSION}_multiproc.xml /src/nipype/nipype/pipeline/plugins/tests/test_multiproc*.py
+    export COVERAGE_FILE=${WORKDIR}/.coverage_py${PYTHON_VERSION}_extra
+    py.test -v --junitxml=${WORKDIR}/pytests_py${PYTHON_VERSION}_extra.xml --cov nipype --cov-report xml:${WORKDIR}/coverage_py${PYTHON_VERSION}_extra.xml /src/nipype/nipype/interfaces/tests/test_runtime_profiler.py /src/nipype/nipype/pipeline/plugins/tests/test_multiproc*.py
     exit_code=$(( $exit_code + $? ))
 fi
 
