@@ -363,7 +363,7 @@ class SurfaceTransformInputSpec(FSTraitedSpec):
     source_type = traits.Enum(filetypes, argstr='--sfmt %s',
                               requires=['source_file'],
                               desc="source file format")
-    target_type = traits.Enum(filetypes, argstr='--tfmt %s',
+    target_type = traits.Enum(filetypes + implicit_filetypes, argstr='--tfmt %s',
                               desc="output format")
     reshape = traits.Bool(argstr="--reshape",
                           desc="reshape output surface to conform with Nifti")
@@ -399,6 +399,11 @@ class SurfaceTransform(FSCommand):
     _cmd = "mri_surf2surf"
     input_spec = SurfaceTransformInputSpec
     output_spec = SurfaceTransformOutputSpec
+
+    def _format_arg(self, name, spec, value):
+        if name == "target_type" and value in implicit_filetypes:
+            return ""
+        return super(SurfaceTransform, self)._format_arg(name, spec, value)
 
     def _list_outputs(self):
         outputs = self._outputs().get()
