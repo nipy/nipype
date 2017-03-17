@@ -11,7 +11,7 @@ from __future__ import print_function, division, unicode_literals, absolute_impo
 _version_major = 0
 _version_minor = 13
 _version_micro = 0
-_version_extra = ''  # Remove -dev for release
+_version_extra = '-dev'  # Remove -dev for release
 
 
 def get_nipype_gitversion():
