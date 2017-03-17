@@ -49,6 +49,8 @@ test:
         timeout: 7200
         parallel: true
   post:
+    # Place reports in the appropriate folder
+    - mkdir -p ${CIRCLE_TEST_REPORTS}/tests/ && cp ${WORKDIR}/tests/*.xml ${CIRCLE_TEST_REPORTS}/tests/
     # Send coverage data to codecov.io
     - bash .circle/codecov.sh
 
@@ -56,6 +58,8 @@ general:
   artifacts:
     - "~/work/docs"
     - "~/work/logs"
+    - "~/work/tests"
+    - "~/work/crashfiles"
 
 deployment:
   production:

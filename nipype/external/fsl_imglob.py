@@ -65,15 +65,8 @@
 #   innovation@isis.ox.ac.uk quoting reference DE/9564.
 from __future__ import print_function
 import sys
-import os
 import glob
-
-setAvailable = True
-if sys.version_info < (2, 4):
-    import sets
-    from sets import Set
-    setAvailable = False
-
+from builtins import range
 
 def usage():
     print("Usage: $0 [-extension/extensions] <list of names>")
@@ -94,45 +87,57 @@ def isImage(input, allExtensions):
 def removeImageExtension(input, allExtensions):
     return isImage(input, allExtensions)[1]
 
-if len(sys.argv) <= 1:
-    usage()
 
-deleteExtensions = True
-primaryExtensions = ['.nii.gz', '.nii', '.hdr.gz', '.hdr']
-secondaryExtensions = ['.img.gz', '.img']
-allExtensions = primaryExtensions+secondaryExtensions
-validExtensions = primaryExtensions
-startingArg = 1
+def main():
+    if len(sys.argv) <= 1:
+        usage()
 
-if sys.argv[1] == "-extensions":
-    validExtensions = allExtensions
-    deleteExtensions = False
-    startingArg = 2
-if sys.argv[1] == "-extension":
-    deleteExtensions = False
-    startingArg = 2
+    if sys.version_info < (2, 4):
+        import sets
+        from sets import Set
+        setAvailable = False
+    else:
+        setAvailable = True
 
-filelist = []
-for arg in range(startingArg, len(sys.argv)):
-    #      if isImage(sys.argv[arg],allExtensions)[0]:          #These enable a "pedantic" style mode currently not used
-    #         filelist.extend(glob.glob(sys.argv[arg]))
-    #      else:
-    #         for currentExtension in validExtensions:
-    #            filelist.extend(glob.glob(sys.argv[arg]+currentExtension))
-    for currentExtension in validExtensions:
-        filelist.extend(
-            glob.glob(removeImageExtension(sys.argv[arg], allExtensions)+currentExtension))
+    deleteExtensions = True
+    primaryExtensions = ['.nii.gz', '.nii', '.hdr.gz', '.hdr']
+    secondaryExtensions = ['.img.gz', '.img']
+    allExtensions = primaryExtensions+secondaryExtensions
+    validExtensions = primaryExtensions
+    startingArg = 1
 
-if deleteExtensions:
+    if sys.argv[1] == "-extensions":
+        validExtensions = allExtensions
+        deleteExtensions = False
+        startingArg = 2
+    if sys.argv[1] == "-extension":
+        deleteExtensions = False
+        startingArg = 2
+
+    filelist = []
+    for arg in range(startingArg, len(sys.argv)):
+        #      if isImage(sys.argv[arg],allExtensions)[0]:          #These enable a "pedantic" style mode currently not used
+        #         filelist.extend(glob.glob(sys.argv[arg]))
+        #      else:
+        #         for currentExtension in validExtensions:
+        #            filelist.extend(glob.glob(sys.argv[arg]+currentExtension))
+        for currentExtension in validExtensions:
+            filelist.extend(
+                glob.glob(removeImageExtension(sys.argv[arg], allExtensions)+currentExtension))
+
+    if deleteExtensions:
+        for file in range(0, len(filelist)):
+            filelist[file] = removeImageExtension(filelist[file], allExtensions)
+    if setAvailable:
+        filelist = list(set(filelist))
+    else:
+        filelist = list(Set(filelist))
+    filelist.sort()
+
     for file in range(0, len(filelist)):
-        filelist[file] = removeImageExtension(filelist[file], allExtensions)
-if setAvailable:
-    filelist = list(set(filelist))
-else:
-    filelist = list(Set(filelist))
-filelist.sort()
+        print(filelist[file], end=' ')
+        if file < len(filelist)-1:
+            print(" ", end=' ')
 
-for file in range(0, len(filelist)):
-    print(filelist[file], end=' ')
-    if file < len(filelist)-1:
-        print(" ", end=' ')
+if __name__ == "__main__":
+    main()
