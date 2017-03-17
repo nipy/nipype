@@ -2,6 +2,7 @@ import os
 
 import numpy
 
+from nipype.interfaces.c3 import C3dAffineTool
 from nipype.interfaces.ants.preprocess import MotionCorr2FSLParams
 from nipype.interfaces.fsl.utils import AvScale
 from nipype.utils.tmpdirs import InTemporaryDirectory
@@ -20,6 +21,15 @@ def test_MotionCorr2FSLParams():
         ]
     )
     numpy.savetxt(fsl_mat_fname, fsl_mat, delimiter=' ')
+
+    c3 = C3dAffineTool()
+    c3.inputs.source_file = fsl_mat_fname
+    c3.inputs.itk_transform = 'affine.txt'
+    c3.inputs.fsl2ras = True
+    c3.run()
+    c3_out = c3.aggregate_outpus()
+
+    # ants = numpy.fromfile('affine.txt')
 
     in_filename = os.path.join(cwd, 'in_file.csv')
     ants_mat = numpy.array([[
