@@ -56,6 +56,7 @@ general:
   artifacts:
     - "~/work/docs"
     - "~/work/logs"
+    - "~/work/tests"
 
 deployment:
   production:

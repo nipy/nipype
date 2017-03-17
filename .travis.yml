@@ -42,7 +42,7 @@ before_install:
 install:
 - travis_retry pip install -e .[$NIPYPE_EXTRAS]
 script:
-- py.test -v --doctest-modules .
+- py.test -v --doctest-modules nipype
 deploy:
   provider: pypi
   user: satra
