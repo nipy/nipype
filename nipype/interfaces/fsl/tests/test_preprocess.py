@@ -7,6 +7,7 @@ from builtins import open, open
 
 import os
 import tempfile
+from copy import deepcopy
 
 import pytest
 from nipype.utils.filemanip import split_filename, filename_to_list
@@ -220,12 +221,13 @@ def test_flirt(setup_flirt):
     flirter = fsl.FLIRT()
     # infile not specified
     with pytest.raises(ValueError):
-        flirter.run()
+        flirter.cmdline
     flirter.inputs.in_file = infile
     # reference not specified
     with pytest.raises(ValueError):
-        flirter.run()
+        flirter.cmdline
     flirter.inputs.reference = reffile
+
     # Generate outfile and outmatrix
     pth, fname, ext = split_filename(infile)
     outfile = fsl_name(flirter, '%s_flirt' % fname)
@@ -233,6 +235,20 @@ def test_flirt(setup_flirt):
     realcmd = 'flirt -in %s -ref %s -out %s -omat %s' % (infile, reffile,
                                                          outfile, outmat)
     assert flirter.cmdline == realcmd
+
+    # test apply_xfm option
+    axfm = deepcopy(flirter)
+    axfm.inputs.apply_xfm = True
+    # in_matrix_file or uses_qform must be defined
+    with pytest.raises(RuntimeError): axfm.cmdline
+    axfm2 = deepcopy(axfm)
+    # test uses_qform
+    axfm.inputs.uses_qform = True
+    assert axfm.cmdline == (realcmd + ' -applyxfm -usesqform')
+    # test in_matrix_file
+    axfm2.inputs.in_matrix_file = reffile
+    assert axfm2.cmdline == (realcmd + ' -applyxfm -init %s' % reffile)
+
 
     _, tmpfile = tempfile.mkstemp(suffix='.nii', dir=tmpdir)
     # Loop over all inputs, set a reasonable value and make sure the
