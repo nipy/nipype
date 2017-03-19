@@ -31,6 +31,7 @@ fmlogger = logging.getLogger("filemanip")
 
 related_filetype_sets = [
     ('.hdr', '.img', '.mat'),
+    ('.nii', '.mat'),
     ('.BRIK', '.HEAD'),
 ]
 
@@ -528,6 +529,18 @@ def loadpkl(infile):
     except UnicodeDecodeError:
         unpkl = pickle.load(pkl_file, fix_imports=True, encoding='utf-8')
     return unpkl
+
+
+def crash2txt(filename, record):
+    """ Write out plain text crash file """
+    with open(filename, 'w') as fp:
+        if 'node' in record:
+            node = record['node']
+            fp.write('Node: {}\n'.format(node.fullname))
+            fp.write('Working directory: {}\n'.format(node.output_dir()))
+            fp.write('\n')
+            fp.write('Node inputs:\n{}\n'.format(node.inputs))
+        fp.write(''.join(record['traceback']))
 
 
 def savepkl(filename, record):

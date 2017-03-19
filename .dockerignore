@@ -1,6 +1,7 @@
 # python cache
-__pycache__/**/*
 __pycache__
+**/__pycache__
+**/*.pyc
 *.pyc
 
 # python distribution
@@ -23,12 +24,14 @@ src/
 # other
 docs/**/*
 docs/
-.coverage
-.coveragerc
-codecov.yml
-rtd_requirements.txt
+.cache/
+.circle/**/*
+.circle/
 circle.yml
+rtd_requirements.txt
 Vagrantfile
 .travis.yml
-.noserc
+.mailmap
 
+# Previous coverage results
+.coverage

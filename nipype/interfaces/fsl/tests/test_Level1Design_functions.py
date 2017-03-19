@@ -12,8 +12,15 @@ def test_level1design():
     contrasts = Undefined
     do_tempfilter = False
     orthogonalization = {}
-    ev_parameters = {"temporalderiv":False}
-    for key, val in [('hrf', 3), ('dgamma', 3), ('gamma', 2), ('none', 0)]:
+    basic_ev_parameters = {'temporalderiv':False}
+    convolution_variants = [
+        ('custom', 7, {'temporalderiv':False, 'bfcustompath':'/some/path'}),
+        ('hrf', 3, basic_ev_parameters),
+        ('dgamma', 3, basic_ev_parameters),
+        ('gamma', 2, basic_ev_parameters),
+        ('none', 0, basic_ev_parameters)
+        ]
+    for key, val, ev_parameters in convolution_variants:
         output_num, output_txt = Level1Design._create_ev_files(l, os.getcwd(),
                                                                runinfo, runidx,
                                                                ev_parameters,

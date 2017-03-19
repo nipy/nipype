@@ -341,6 +341,7 @@ def hmc_pipeline(name='motion_correct'):
         inputnode.in_mask - weights mask of reference image (a file with data \
 range in [0.0, 1.0], indicating the weight of each voxel when computing the \
 metric.
+        inputnode.in_bval - b-values file
         inputnode.in_bvec - gradients file (b-vectors)
         inputnode.ref_num (optional, default=0) index of the b0 volume that \
 should be taken as reference
