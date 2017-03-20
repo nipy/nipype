@@ -520,10 +520,25 @@ class Eddy(FSLCommand):
             self.inputs.environ['OMP_NUM_THREADS'] = str(
                 self.inputs.num_threads)
 
+    @staticmethod
+    def _eddycmd(use_cuda):
+        if 'FSL_BIN' not in os.environ:
+            raise RuntimeError("eddy command requires environment variable "
+                               "FSL_BIN to be set")
+        FSL_BIN = os.environ['FSL_BIN']
+        if use_cuda and os.path.exists(os.path.join(FSL_BIN, 'eddy_cuda')):
+            return 'eddy_cuda'
+        elif os.path.exists(os.path.join(FSL_BIN, 'eddy_openmp')):
+            return 'eddy_openmp'
+        elif os.path.exists(os.path.join(FSL_BIN, 'eddy')):
+            return 'eddy'
+        raise RuntimeError("eddy command not found in FSL_BIN: "
+                           "'{}'".format(FSL_BIN))
+
     @property
     def _cmd(self):
-        cuda = self.inputs.use_cuda
-        return 'eddy_cuda' if isdefined(cuda) and cuda else 'eddy_openmp'
+        return self._eddycmd(isdefined(self.inputs.use_cuda) and
+                             self.inputs.use_cuda)
 
     def _format_arg(self, name, spec, value):
         if name == 'in_topup_fieldcoef':
