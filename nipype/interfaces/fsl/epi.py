@@ -12,7 +12,8 @@ was written to work with FSL version 5.0.4.
     ...                            '../../testing/data'))
     >>> os.chdir(datadir)
 """
-from __future__ import print_function, division, unicode_literals, absolute_import
+from __future__ import print_function, division, unicode_literals, \
+    absolute_import
 from builtins import str
 
 import os
@@ -106,7 +107,7 @@ class PrepareFieldmap(FSLCommand):
             out_file = self.inputs.out_fieldmap
             im = nb.load(out_file, mmap=NUMPY_MMAP)
             dumb_img = nb.Nifti1Image(np.zeros(im.shape), im.affine,
-                                       im.header)
+                                      im.header)
             out_nii = nb.funcs.concat_images((im, dumb_img))
             nb.save(out_nii, out_file)
 
@@ -450,26 +451,25 @@ class EddyInputSpec(FSLCommandInputSpec):
 
 
 class EddyOutputSpec(TraitedSpec):
-    out_corrected = File(exists=True,
-                         desc=('4D image file containing all the corrected '
-                               'volumes'))
-    out_parameter = File(exists=True,
-                         desc=('text file with parameters definining the '
-                               'field and movement for each scan'))
-    out_rotated_bvecs = File(exists=True,
-                             desc=('File containing rotated b-values for all volumes'))
-    out_movement_rms = File(exists=True,
-                            desc=('Summary of the "total movement" in each volume'))
-    out_restricted_movement_rms = File(exists=True,
-                                       desc=('Summary of the "total movement" in each volume '
-                                             'disregarding translation in the PE direction'))
-    out_shell_alignment_parameters = File(exists=True,
-                                          desc=('File containing rigid body movement parameters '
-                                                'between the different shells as estimated by a '
-                                                'post-hoc mutual information based registration'))
-    out_outlier_report = File(exists=True,
-                              desc=('Text-file with a plain language report '
-                                    'on what outlier slices eddy has found'))
+    out_corrected = File(
+        exists=True, desc='4D image file containing all the corrected volumes')
+    out_parameter = File(
+        exists=True, desc=('text file with parameters definining the field and'
+                           'movement for each scan'))
+    out_rotated_bvecs = File(
+        exists=True, desc='File containing rotated b-values for all volumes')
+    out_movement_rms = File(
+        exists=True, desc='Summary of the "total movement" in each volume')
+    out_restricted_movement_rms = File(
+        exists=True, desc=('Summary of the "total movement" in each volume '
+                           'disregarding translation in the PE direction'))
+    out_shell_alignment_parameters = File(
+        exists=True, desc=('File containing rigid body movement parameters '
+                           'between the different shells as estimated by a '
+                           'post-hoc mutual information based registration'))
+    out_outlier_report = File(
+        exists=True, desc=('Text-file with a plain language report on what '
+                           'outlier slices eddy has found'))
 
 
 class Eddy(FSLCommand):
@@ -492,9 +492,9 @@ class Eddy(FSLCommand):
     >>> eddy.inputs.in_bvec  = 'bvecs.scheme'
     >>> eddy.inputs.in_bval  = 'bvals.scheme'
     >>> eddy.cmdline # doctest: +ELLIPSIS +ALLOW_UNICODE
-    'eddy_openmp --acqp=epi_acqp.txt --bvals=bvals.scheme --bvecs=bvecs.scheme \
---imain=epi.nii --index=epi_index.txt --mask=epi_mask.nii \
---out=.../eddy_corrected'
+    'eddy_openmp --acqp=epi_acqp.txt --bvals=bvals.scheme \
+--bvecs=bvecs.scheme --imain=epi.nii --index=epi_index.txt \
+--mask=epi_mask.nii --out=.../eddy_corrected'
     >>> res = eddy.run() # doctest: +SKIP
 
     """
@@ -562,7 +562,8 @@ class Eddy(FSLCommand):
         out_restricted_movement_rms = os.path.abspath(
             '%s.eddy_restricted_movement_rms' % self.inputs.out_base)
         out_shell_alignment_parameters = os.path.abspath(
-            '%s.eddy_post_eddy_shell_alignment_parameters' % self.inputs.out_base)
+            '%s.eddy_post_eddy_shell_alignment_parameters'
+            % self.inputs.out_base)
         out_outlier_report = os.path.abspath(
             '%s.eddy_outlier_report' % self.inputs.out_base)
 
@@ -571,9 +572,11 @@ class Eddy(FSLCommand):
         if os.path.exists(out_movement_rms):
             outputs['out_movement_rms'] = out_movement_rms
         if os.path.exists(out_restricted_movement_rms):
-            outputs['out_restricted_movement_rms'] = out_restricted_movement_rms
+            outputs['out_restricted_movement_rms'] = \
+                out_restricted_movement_rms
         if os.path.exists(out_shell_alignment_parameters):
-            outputs['out_shell_alignment_parameters'] = out_shell_alignment_parameters
+            outputs['out_shell_alignment_parameters'] = \
+                out_shell_alignment_parameters
         if os.path.exists(out_outlier_report):
             outputs['out_outlier_report'] = out_outlier_report
 
