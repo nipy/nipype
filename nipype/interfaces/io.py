@@ -1511,12 +1511,23 @@ class FSSourceOutputSpec(TraitedSpec):
         loc='mri')
     curv = OutputMultiPath(File(exists=True), desc='Maps of surface curvature',
                            loc='surf')
+    avg_curv = OutputMultiPath(
+        File(exists=True), desc='Average atlas curvature, sampled to subject',
+        loc='surf')
     inflated = OutputMultiPath(
         File(exists=True), desc='Inflated surface meshes',
         loc='surf')
     pial = OutputMultiPath(
         File(exists=True), desc='Gray matter/pia mater surface meshes',
         loc='surf')
+    area_pial = OutputMultiPath(
+        File(exists=True),
+        desc='Mean area of triangles each vertex on the pial surface is '
+        'associated with',
+        loc='surf', altkey='area.pial')
+    curv_pial = OutputMultiPath(
+        File(exists=True), desc='Curvature of pial surface',
+        loc='surf', altkey='curv.pial')
     smoothwm = OutputMultiPath(File(exists=True), loc='surf',
                                desc='Smoothed original surface meshes')
     sphere = OutputMultiPath(
@@ -1530,6 +1541,10 @@ class FSSourceOutputSpec(TraitedSpec):
         File(exists=True), desc='Surface maps of cortical volume', loc='surf')
     white = OutputMultiPath(
         File(exists=True), desc='White/gray matter surface meshes',
+        loc='surf')
+    jacobian_white = OutputMultiPath(
+        File(exists=True),
+        desc='Distortion required to register to spherical atlas',
         loc='surf')
     label = OutputMultiPath(
         File(exists=True), desc='Volume and surface label files',
@@ -1590,12 +1605,17 @@ class FreeSurferSource(IOBase):
         elif dirval == 'stats':
             globsuffix = '.stats'
         globprefix = ''
-        if key == 'ribbon' or dirval in ['surf', 'label', 'stats']:
+        if dirval in ('surf', 'label', 'stats'):
+            if self.inputs.hemi != 'both':
+                globprefix = self.inputs.hemi + '.'
+            else:
+                globprefix = '?h.'
+        elif key == 'ribbon':
             if self.inputs.hemi != 'both':
                 globprefix = self.inputs.hemi + '.'
             else:
                 globprefix = '*'
-        if key == 'aseg_stats' or key == 'wmparc_stats':
+        elif key in ('aseg_stats', 'wmparc_stats'):
             globprefix = ''
         keydir = os.path.join(path, dirval)
         if altkey:
