@@ -17,6 +17,7 @@ import os
 import re
 import shutil
 
+from ... import logging
 from ...utils.filemanip import fname_presuffix, split_filename
 from ..base import (TraitedSpec, File, traits, OutputMultiPath, isdefined,
                     CommandLine, CommandLineInputSpec)
@@ -37,6 +38,7 @@ filetypes = ['cor', 'mgh', 'mgz', 'minc', 'analyze',
              'nifti1', 'nii', 'niigz']
 implicit_filetypes = ['gii']
 
+logger = logging.getLogger('interface')
 
 def copy2subjdir(cls, in_file, folder=None, basename=None, subject_id=None):
     """Method to copy an input to the subjects directory"""
@@ -222,8 +224,19 @@ class SampleToSurface(FSCommand):
             return spec.argstr % self.inputs.subject_id
         if name in ["hits_file", "vox_file"]:
             return spec.argstr % self._get_outfilename(name)
-        if name == "out_type" and value in implicit_filetypes:
-            return ""
+        if name == "out_type":
+            if isdefined(self.inputs.out_file):
+                _, base, ext = split_filename(self._get_outfilename())
+                if ext != filemap[value]:
+                    if ext in filemap.values():
+                        raise ValueError(
+                            "Cannot create {} file with extension "
+                            "{}".format(value, ext))
+                    else:
+                        logger.warn("Creating {} file with extension {}: "
+                                    "{}{}".format(value, ext, base, ext))
+            if value in implicit_filetypes:
+                return ""
         return super(SampleToSurface, self)._format_arg(name, spec, value)
 
     def _get_outfilename(self, opt="out_file"):
@@ -401,8 +414,19 @@ class SurfaceTransform(FSCommand):
     output_spec = SurfaceTransformOutputSpec
 
     def _format_arg(self, name, spec, value):
-        if name == "target_type" and value in implicit_filetypes:
-            return ""
+        if name == "target_type":
+            if isdefined(self.inputs.out_file):
+                _, base, ext = split_filename(self._list_outputs()['out_file'])
+                if ext != filemap[value]:
+                    if ext in filemap.values():
+                        raise ValueError(
+                            "Cannot create {} file with extension "
+                            "{}".format(value, ext))
+                    else:
+                        logger.warn("Creating {} file with extension {}: "
+                                    "{}{}".format(value, ext, base, ext))
+            if value in implicit_filetypes:
+                return ""
         return super(SurfaceTransform, self)._format_arg(name, spec, value)
 
     def _list_outputs(self):
