@@ -1478,7 +1478,7 @@ class FSSourceInputSpec(BaseInterfaceInputSpec):
     subjects_dir = Directory(mandatory=True,
                              desc='Freesurfer subjects directory.')
     subject_id = Str(mandatory=True,
-                            desc='Subject name for whom to retrieve data')
+                     desc='Subject name for whom to retrieve data')
     hemi = traits.Enum('both', 'lh', 'rh', usedefault=True,
                        desc='Selects hemisphere specific outputs')
 
@@ -1487,8 +1487,8 @@ class FSSourceOutputSpec(TraitedSpec):
     T1 = File(
         exists=True, desc='Intensity normalized whole-head volume', loc='mri')
     aseg = File(
-        exists=True, desc='Volumetric map of regions from automatic segmentation',
-        loc='mri')
+        exists=True, loc='mri',
+        desc='Volumetric map of regions from automatic segmentation')
     brain = File(
         exists=True, desc='Intensity normalized brain-only volume', loc='mri')
     brainmask = File(
@@ -1507,8 +1507,8 @@ class FSSourceOutputSpec(TraitedSpec):
         loc='mri', altkey='*ribbon')
     wm = File(exists=True, desc='Segmented white-matter volume', loc='mri')
     wmparc = File(
-        exists=True, desc='Aparc parcellation projected into subcortical white matter',
-        loc='mri')
+        exists=True, loc='mri',
+        desc='Aparc parcellation projected into subcortical white matter')
     curv = OutputMultiPath(File(exists=True), desc='Maps of surface curvature',
                            loc='surf')
     avg_curv = OutputMultiPath(
