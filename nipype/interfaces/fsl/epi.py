@@ -21,6 +21,7 @@ import numpy as np
 import nibabel as nb
 import warnings
 
+from ... import logging
 from ...utils.filemanip import split_filename
 from ...utils import NUMPY_MMAP
 
@@ -522,18 +523,20 @@ class Eddy(FSLCommand):
 
     @staticmethod
     def _eddycmd(use_cuda):
-        if 'FSL_BIN' not in os.environ:
-            raise RuntimeError("eddy command requires environment variable "
-                               "FSL_BIN to be set")
-        FSL_BIN = os.environ['FSL_BIN']
-        if use_cuda and os.path.exists(os.path.join(FSL_BIN, 'eddy_cuda')):
-            return 'eddy_cuda'
-        elif os.path.exists(os.path.join(FSL_BIN, 'eddy_openmp')):
-            return 'eddy_openmp'
-        elif os.path.exists(os.path.join(FSL_BIN, 'eddy')):
+        logger = logging.getLogger('interface')
+        if 'FSLDIR' not in os.environ:
+            logger.warn("FSLDIR not set: assuming command 'eddy'")
             return 'eddy'
-        raise RuntimeError("eddy command not found in FSL_BIN: "
-                           "'{}'".format(FSL_BIN))
+
+        FSLDIR = os.environ['FSLDIR']
+        if use_cuda and os.path.exists(os.path.join(FSLDIR, 'eddy_cuda')):
+            return 'eddy_cuda'
+        elif os.path.exists(os.path.join(FSLDIR, 'eddy_openmp')):
+            return 'eddy_openmp'
+        elif not os.path.exists(os.path.join(FSLDIR, 'eddy')):
+            logger.warn("No eddy binary found in FSLDIR; assuming command "
+                        "'eddy'\nFSLDIR: '{}'".format(FSLDIR))
+        return 'eddy'
 
     @property
     def _cmd(self):
