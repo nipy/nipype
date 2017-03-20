@@ -493,9 +493,9 @@ class Eddy(FSLCommand):
     >>> eddy.inputs.in_bvec  = 'bvecs.scheme'
     >>> eddy.inputs.in_bval  = 'bvals.scheme'
     >>> eddy.cmdline # doctest: +ELLIPSIS +ALLOW_UNICODE
-    'eddy_openmp --acqp=epi_acqp.txt --bvals=bvals.scheme \
---bvecs=bvecs.scheme --imain=epi.nii --index=epi_index.txt \
---mask=epi_mask.nii --out=.../eddy_corrected'
+    'eddy --acqp=epi_acqp.txt --bvals=bvals.scheme --bvecs=bvecs.scheme \
+--imain=epi.nii --index=epi_index.txt --mask=epi_mask.nii \
+--out=.../eddy_corrected'
     >>> res = eddy.run() # doctest: +SKIP
 
     """
