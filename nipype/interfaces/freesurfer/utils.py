@@ -2906,3 +2906,41 @@ class Apas2Aseg(FSCommand):
         outputs = self._outputs().get()
         outputs["out_file"] = os.path.abspath(self.inputs.out_file)
         return outputs
+
+
+class MRIsExpandInputSpec(FSTraitedSpec):
+    in_file = File(
+        exists=True, mandatory=True, argstr='%s', position=-3,
+        desc='Surface to expand')
+    distance = traits.Float(
+        mandatory=True, argstr='%g', position=-2,
+        desc='Distance in mm or fraction of cortical thickness')
+    out_file = File(
+        name_template='%s_expanded', name_source='in_file', position=-1,
+        desc='Output surface file')
+    thickness = traits.Bool(
+        argstr='-thickness',
+        desc='Expand by fraction of cortical thickness, not mm')
+
+
+class MRIsExpandOutputSpec(TraitedSpec):
+    out_file = File(desc='Output surface file')
+
+
+class MRIsExpand(FSCommand):
+    """
+    Expands a surface (typically ?h.white) outwards while maintaining
+    smoothness and self-intersection constraints.
+
+    Examples
+    ========
+    >>> from nipype.interfaces.freesurfer import MRIsExpand
+    >>> mris_expand = MRIsExpand(thickness=True, distance=0.5)
+    >>> mris_expand.inputs.in_file = 'lh.white'
+    >>> mris_expand.inputs.out_file = 'lh.graymid'
+    >>> mris_expand.cmdline # doctest: +ALLOW_UNICODE
+    'mris_expand -thickness lh.white 0.5 lh.graymid'
+    """
+    _cmd = 'mris_expand'
+    input_spec = MRIsExpandInputSpec
+    output_spec = MRIsExpandOutputSpec
