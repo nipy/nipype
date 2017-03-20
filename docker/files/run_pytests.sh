@@ -37,8 +37,7 @@ if [[ "${PYTHON_VERSION}" -ge "30" ]]; then
     exit_code=$(( $exit_code + $? ))
 fi
 
-find /work -name "crash-*" -maxdepth 1 -exec mv {} ${WORKDIR}/crashfiles/ \;
+# Collect crashfiles
+find ${WORKDIR} -name "crash-*" -maxdepth 1 -exec mv {} ${WORKDIR}/crashfiles/ \;
 
-# Just in case output xml files are misplaced,
-# then circle would not tell the tests failed otherwise
 exit ${exit_code}
