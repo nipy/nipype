@@ -26,8 +26,8 @@ dependencies:
     # Create work folder and force group permissions
     - mkdir -p $WORKDIR && sudo setfacl -d -m group:ubuntu:rwx $WORKDIR && sudo setfacl -m group:ubuntu:rwx $WORKDIR
     - mkdir -p $HOME/docker $HOME/examples $HOME/bin $WORKDIR/tests $WORKDIR/logs $WORKDIR/crashfiles ${CIRCLE_TEST_REPORTS}/tests/
+    - pip install codecov
   override:
-    - if [[ -e "$HOME/bin/codecov.io" ]]; then curl -so $HOME/bin/codecov https://codecov.io/bash && chmod 755 $HOME/bin/codecov; fi
     - if [[ -e "$HOME/docker/cache.tar" ]]; then docker load --input $HOME/docker/cache.tar; fi :
         timeout: 6000
     - docker images
@@ -54,8 +54,8 @@ test:
     # Place reports in the appropriate folder
     - cp ${WORKDIR}/tests/*.xml ${CIRCLE_TEST_REPORTS}/tests/
     # Send coverage data to codecov.io
-    - ${HOME}/bin/codecov -f "coverage*.xml" -s "${WORKDIR}/tests/" -R "${HOME}/nipype/" -F unittests -v -K
-    - ${HOME}/bin/codecov -f "smoketest*.xml" -s "${WORKDIR}/tests/" -R "${HOME}/nipype/" -F smoketests -v -K
+    - codecov -f "coverage*.xml" -s "${WORKDIR}/tests/" -R "${HOME}/nipype/" -F unittests -v -K
+    - codecov -f "smoketest*.xml" -s "${WORKDIR}/tests/" -R "${HOME}/nipype/" -F smoketests -v -K
 
 general:
   artifacts:
