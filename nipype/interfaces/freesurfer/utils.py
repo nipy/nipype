@@ -2950,6 +2950,12 @@ class MRIsExpandInputSpec(FSTraitedSpec):
     nsurfaces = traits.Int(
         argstr='-N %d',
         desc='Number of surfacces to write during expansion')
+    # # Requires dev version - Re-add when min_ver/max_ver support this
+    # # https://github.com/freesurfer/freesurfer/blob/9730cb9/mris_expand/mris_expand.c
+    # target_intensity = traits.Tuple(
+    #     traits.Float, traits.File(exists=True),
+    #     argstr='-intensity %g %s',
+    #     desc='Tuple of intensity and brain volume to crop to target intensity')
 
 
 class MRIsExpandOutputSpec(TraitedSpec):
