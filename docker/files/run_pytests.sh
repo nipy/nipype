@@ -28,10 +28,6 @@ export COVERAGE_FILE=${WORKDIR}/tests/.coverage.py${PYTHON_VERSION}
 py.test -v --junitxml=${WORKDIR}/tests/pytests_py${PYTHON_VERSION}.xml --cov nipype --cov-config /src/nipype/.coveragerc --cov-report xml:${WORKDIR}/tests/coverage_py${PYTHON_VERSION}.xml ${TESTPATH}
 exit_code=$?
 
-if [ "${CODECOV_TOKEN}" != "" ]; then
-	codecov.io -f ${WORKDIR}/tests/coverage_py${PYTHON_VERSION}.xml -t "${CODECOV_TOKEN}" -F unittests
-fi
-
 # Workaround: run here the profiler tests in python 3
 if [[ "${PYTHON_VERSION}" -ge "30" ]]; then
     echo '[execution]' >> ${HOME}/.nipype/nipype.cfg
@@ -39,12 +35,9 @@ if [[ "${PYTHON_VERSION}" -ge "30" ]]; then
     export COVERAGE_FILE=${WORKDIR}/tests/.coverage.py${PYTHON_VERSION}_extra
     py.test -v --junitxml=${WORKDIR}/tests/pytests_py${PYTHON_VERSION}_extra.xml --cov nipype --cov-report xml:${WORKDIR}/tests/coverage_py${PYTHON_VERSION}_extra.xml /src/nipype/nipype/interfaces/tests/test_runtime_profiler.py /src/nipype/nipype/pipeline/plugins/tests/test_multiproc*.py
     exit_code=$(( $exit_code + $? ))
-
-	if [ "${CODECOV_TOKEN}" != "" ]; then
-		codecov.io -f ${WORKDIR}/tests/coverage_py${PYTHON_VERSION}_extra.xml -t "${CODECOV_TOKEN}" -F unittests
-	fi
 fi
 
 # Collect crashfiles
-find /work -name "crash-*" -maxdepth 1 -exec mv {} ${WORKDIR}/crashfiles/ \;
+find ${WORKDIR} -name "crash-*" -maxdepth 1 -exec mv {} ${WORKDIR}/crashfiles/ \;
+
 exit ${exit_code}
