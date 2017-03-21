@@ -60,8 +60,8 @@ class BuildWithCommitInfoCommand(build_py):
     package for an example.
     """
     def run(self):
-        from configparser import ConfigParser
         import subprocess
+        import configparser
 
         build_py.run(self)
         proc = subprocess.Popen('git rev-parse --short HEAD',
@@ -74,7 +74,10 @@ class BuildWithCommitInfoCommand(build_py):
             repo_commit = repo_commit.decode()
 
         # We write the installation commit even if it's empty
-        cfg_parser = ConfigParser()
+        if PY3:
+            cfg_parser = configparser.RawConfigParser()
+        else:
+            cfg_parser = configparser.ConfigParser()
         cfg_parser.read(pjoin('nipype', 'COMMIT_INFO.txt'))
         cfg_parser.set('commit hash', 'install_hash', repo_commit.strip())
         out_pth = pjoin(self.build_lib, 'nipype', 'COMMIT_INFO.txt')
@@ -97,6 +100,9 @@ def main():
         pjoin('testing', 'data', 'dicomdir', '*'),
         pjoin('testing', 'data', 'bedpostxout', '*'),
         pjoin('testing', 'data', 'tbss_dir', '*'),
+        pjoin('testing', 'data', 'brukerdir', '*'),
+        pjoin('testing', 'data', 'brukerdir', 'pdata', '*'),
+        pjoin('testing', 'data', 'brukerdir', 'pdata', '1', '*'),
         pjoin('workflows', 'data', '*'),
         pjoin('pipeline', 'engine', 'report_template.html'),
         pjoin('external', 'd3.js'),
@@ -130,7 +136,7 @@ def main():
         install_requires=ldict['REQUIRES'],
         setup_requires=['future', 'configparser'],
         provides=ldict['PROVIDES'],
-        packages=find_packages(exclude=['*.tests']),
+        packages=find_packages(),
         package_data={'nipype': testdatafiles},
         scripts=glob('bin/*'),
         cmdclass={'build_py': BuildWithCommitInfoCommand},

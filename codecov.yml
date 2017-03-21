@@ -22,3 +22,7 @@ coverage:
         threshold: 100
         flags:
           - "smoketests"
+  ignore:          # files and folders that will be removed during processing
+    - "nipype/external/*"
+    - "tools/*"
+    - "doc/*"
