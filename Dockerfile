@@ -71,10 +71,6 @@ RUN conda config --add channels conda-forge; sync && \
 RUN sed -i 's/\(backend *: \).*$/\1Agg/g' /usr/local/miniconda/lib/python${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR}/site-packages/matplotlib/mpl-data/matplotlibrc && \
     python -c "from matplotlib import font_manager"
 
-# Install codecov inside container
-RUN curl -so /usr/bin/codecov.io https://codecov.io/bash && \
-    chmod 755 /usr/bin/codecov.io
-
 # Install CI scripts
 COPY docker/files/run_* /usr/bin/
 RUN chmod +x /usr/bin/run_*
