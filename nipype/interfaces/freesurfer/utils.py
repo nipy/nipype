@@ -2916,7 +2916,8 @@ class MRIsExpandInputSpec(FSTraitedSpec):
         mandatory=True, argstr='%g', position=-2,
         desc='Distance in mm or fraction of cortical thickness')
     out_file = File(
-        name_template='%s_expanded', name_source='in_file', position=-1,
+        argstr='%s', position=-1,
+        name_template='%s.expanded', name_source='in_file',
         desc='Output surface file')
     thickness = traits.Bool(
         argstr='-thickness',
@@ -2937,6 +2938,8 @@ class MRIsExpand(FSCommand):
     >>> from nipype.interfaces.freesurfer import MRIsExpand
     >>> mris_expand = MRIsExpand(thickness=True, distance=0.5)
     >>> mris_expand.inputs.in_file = 'lh.white'
+    >>> mris_expand.cmdline # doctest: +ALLOW_UNICODE
+    'mris_expand -thickness lh.white 0.5 lh.expanded'
     >>> mris_expand.inputs.out_file = 'lh.graymid'
     >>> mris_expand.cmdline # doctest: +ALLOW_UNICODE
     'mris_expand -thickness lh.white 0.5 lh.graymid'
