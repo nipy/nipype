@@ -17,7 +17,7 @@ link to a high-res .png.  In LaTeX output, it will include a
 The source code for the workflow may be included as **inline content** to
 the directive `workflow`::
 
-  .. workflow:
+  .. workflow ::
       :graph2use: flat
       :simple_form: no
 
@@ -28,7 +28,7 @@ the directive `workflow`::
 For example, the following graph has been generated inserting the previous
 code block in this documentation:
 
-.. workflow:
+.. workflow ::
   :graph2use: flat
   :simple_form: no
 
