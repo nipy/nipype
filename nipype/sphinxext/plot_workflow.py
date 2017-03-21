@@ -3,23 +3,49 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """
+
+
+:mod:`nipype.sphinxext.plot_workflow` -- Workflow plotting extension
+====================================================================
+
+
 A directive for including a nipype workflow graph in a Sphinx document.
+
+This code is forked from the plot_figure sphinx extension of matplotlib.
 
 By default, in HTML output, `workflow` will include a .png file with a
 link to a high-res .png.  In LaTeX output, it will include a
 .pdf.
 The source code for the workflow may be included as **inline content** to
-the directive::
+the directive `workflow`::
 
-       .. workflow::
-          from mriqc.workflows.anatomical import airmsk_wf
-          wf = airmsk_wf()
+  .. workflow:
+      :graph2use: flat
+      :simple_form: no
+
+      from nipype.workflows.dmri.camino.connectivity_mapping import create_connectivity_pipeline
+      wf = create_connectivity_pipeline()
+
+
+For example, the following graph has been generated inserting the previous
+code block in this documentation:
+
+.. workflow:
+  :graph2use: flat
+  :simple_form: no
+
+  from nipype.workflows.dmri.camino.connectivity_mapping import create_connectivity_pipeline
+  wf = create_connectivity_pipeline()
 
 
 Options
 -------
 
 The ``workflow`` directive supports the following options:
+    graph2use : {'hierarchical', 'colored', 'flat', 'orig', 'exec'}
+        Specify the type of graph to be generated.
+    simple_form: bool
+        Whether the graph will be in detailed or simple form.
     format : {'python', 'doctest'}
         Specify the format of the input
     include-source : bool
@@ -90,8 +116,7 @@ import traceback
 from docutils.parsers.rst import directives
 from docutils.parsers.rst.directives.images import Image
 
-from mriqc.utils.misc import check_folder as mkdirs
-
+from nipype.utils.filemanip import mkdirp
 
 
 try:
@@ -661,9 +686,7 @@ def run(arguments, content, options, state_machine, state, lineno):
         state_machine.insert_input(total_lines, source=source_file_name)
 
     # copy image files to builder's output directory, if necessary
-    if not os.path.exists(dest_dir):
-        mkdirs(dest_dir)
-
+    mkdirp(dest_dir)
     for code_piece, images in results:
         for img in images:
             for fn in img.filenames():

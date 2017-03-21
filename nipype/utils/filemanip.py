@@ -16,6 +16,7 @@ import gzip
 import hashlib
 from hashlib import md5
 import os
+from errno import EEXIST
 import re
 import shutil
 import posixpath
@@ -424,6 +425,18 @@ def copyfiles(filelist, dest, copy=False, create_new=False):
             destfile = copyfile(f, destfile, copy, create_new=create_new)
             newfiles.insert(i, destfile)
     return newfiles
+
+def mkdirp(folder):
+    """
+    Equivalent to bash's mkdir -p
+    """
+    if not os.path.exists(folder):
+        try:
+            os.makedirs(folder)
+        except OSError as exc:
+            if not exc.errno == EEXIST:
+                raise
+    return folder
 
 
 def filename_to_list(filename):
