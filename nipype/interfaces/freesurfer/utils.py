@@ -2912,7 +2912,7 @@ class MRIsExpandInputSpec(FSTraitedSpec):
     # Input spec derived from
     # https://github.com/freesurfer/freesurfer/blob/102e053/mris_expand/mris_expand.c
     in_file = File(
-        exists=True, mandatory=True, argstr='%s', position=-3,
+        exists=True, mandatory=True, argstr='%s', position=-3, copyfile=False,
         desc='Surface to expand')
     distance = traits.Float(
         mandatory=True, argstr='%g', position=-2,
@@ -2920,25 +2920,29 @@ class MRIsExpandInputSpec(FSTraitedSpec):
     out_name = traits.Str(
         'expanded', argstr='%s', position=-1, usedefault=True,
         desc=('Output surface file\n'
-              'If missing "lh." or "rh.", derive from `in_file`'))
+              'If no path, uses directory of `in_file`\n'
+              'If no path AND missing "lh." or "rh.", derive from `in_file`'))
     thickness = traits.Bool(
         argstr='-thickness',
         desc='Expand by fraction of cortical thickness, not mm')
     thickness_name = traits.Str(
-        argstr="-thickness_name %s",
+        argstr="-thickness_name %s", copyfile=False,
         desc=('Name of thickness file (implicit: "thickness")\n'
               'If no path, uses directory of `in_file`\n'
-              'If missing "lh." or "rh.", derive from `in_file`'))
+              'If no path AND missing "lh." or "rh.", derive from `in_file`'))
     navgs = traits.Tuple(
         traits.Int, traits.Int,
         argstr='-navgs %d %d',
         desc=('Tuple of (n_averages, min_averages) parameters '
               '(implicit: (16, 0))'))
     pial = traits.Str(
-        argstr='-pial %s',
+        argstr='-pial %s', copyfile=False,
         desc=('Name of pial file (implicit: "pial")\n'
               'If no path, uses directory of `in_file`\n'
-              'If missing "lh." or "rh.", derive from `in_file`'))
+              'If no path AND missing "lh." or "rh.", derive from `in_file`'))
+    sphere = traits.Str(
+        'sphere', copyfile=False, usedefault=True,
+        desc='WARNING: Do not change this trait')
     spring = traits.Float(argstr='-S %g', desc="Spring term (implicit: 0.05)")
     dt = traits.Float(argstr='-T %g', desc='dt (implicit: 0.25)')
     write_iterations = traits.Int(
@@ -2972,30 +2976,52 @@ class MRIsExpand(FSCommand):
     >>> from nipype.interfaces.freesurfer import MRIsExpand
     >>> mris_expand = MRIsExpand(thickness=True, distance=0.5)
     >>> mris_expand.inputs.in_file = 'lh.white'
-    >>> mris_expand.cmdline # doctest: +ALLOW_UNICODE, +ELLIPSIS
-    'mris_expand -thickness lh.white 0.5 .../lh.expanded'
+    >>> mris_expand.cmdline # doctest: +ALLOW_UNICODE
+    'mris_expand -thickness lh.white 0.5 expanded'
     >>> mris_expand.inputs.out_name = 'graymid'
-    >>> mris_expand.cmdline # doctest: +ALLOW_UNICODE, +ELLIPSIS
-    'mris_expand -thickness lh.white 0.5 .../lh.graymid'
+    >>> mris_expand.cmdline # doctest: +ALLOW_UNICODE
+    'mris_expand -thickness lh.white 0.5 graymid'
     """
     _cmd = 'mris_expand'
     input_spec = MRIsExpandInputSpec
     output_spec = MRIsExpandOutputSpec
 
-    def _format_arg(self, name, spec, value):
-        if name == 'out_name':
-            value = self._list_outputs()['out_file']
-        return super(MRIsExpand, self)._format_arg(name, spec, value)
-
     def _list_outputs(self):
         outputs = self._outputs().get()
-        # Mimic FreeSurfer output filename derivation, but in local directory
-        # if no path specified
-        out_file = self.inputs.out_name
-        path, base = os.path.split(out_file)
-        if path == '' and base[:3] not in ('lh.', 'rh.'):
-            in_file = os.path.basename(self.inputs.in_file)
-            if in_file[:3] in ('lh.', 'rh.'):
-                out_file = os.path.basename(self.inputs.in_file)[:3] + base
-        outputs["out_file"] = os.path.abspath(out_file)
+        outputs['out_file'] = self._associated_file(self.inputs.in_file,
+                                                    self.inputs.out_name)
         return outputs
+
+    def _get_filecopy_info(self):
+        in_file = self.inputs.in_file
+
+        pial = self.inputs.pial
+        if not isdefined(pial):
+            pial = 'pial'
+        self.inputs.pial = self._associated_file(in_file, pial)
+
+        if isdefined(self.inputs.thickness) and self.inputs.thickness:
+            thickness_name = self.inputs.thickness_name
+            if not isdefined(thickness_name):
+                thickness_name = 'thickness'
+            self.inputs.thickness_name = self._associated_file(in_file,
+                                                               thickness_name)
+
+        self.inputs.sphere = self._associated_file(in_file, self.inputs.sphere)
+
+        return super(MRIsExpand, self)._get_filecopy_info()
+
+    @staticmethod
+    def _associated_file(in_file, out_name):
+        """Based on MRIsBuildFileName in freesurfer/utils/mrisurf.c
+
+        Use file prefix to indicate hemisphere, rather than inspecting the
+        surface data structure
+        """
+        path, base = os.path.split(out_name)
+        if path == '':
+            path, in_file = os.path.split(in_file)
+            hemis = ('lh.', 'rh.')
+            if in_file[:3] in hemis and base[:3] not in hemis:
+                base = in_file[:3] + base
+        return os.path.join(path, base)
