@@ -10,6 +10,7 @@ link to a high-res .png.  In LaTeX output, it will include a
 .pdf.
 The source code for the workflow may be included as **inline content** to
 the directive::
+
        .. workflow::
           from mriqc.workflows.anatomical import airmsk_wf
           wf = airmsk_wf()
@@ -38,6 +39,11 @@ target).  These include `alt`, `height`, `width`, `scale`, `align` and
 Configuration options
 ---------------------
 The workflow directive has the following configuration options:
+    graph2use
+        Select a graph type to use
+    simple_form
+        determines if the node name shown in the visualization is either of the form nodename
+        (package) when set to True or nodename.Class.package when set to False.
     wf_include_source
         Default value for the include-source option
     wf_html_show_source_link
@@ -121,6 +127,8 @@ def _option_boolean(arg):
     else:
         raise ValueError('"%s" unknown boolean' % arg)
 
+def _option_graph2use(arg):
+    return directives.choice(arg, ('hierarchical', 'colored', 'flat', 'orig', 'exec'))
 
 def _option_context(arg):
     if arg in [None, 'reset', 'close-figs']:
@@ -183,14 +191,18 @@ def setup(app):
                'format': _option_format,
                'context': _option_context,
                'nofigs': directives.flag,
-               'encoding': directives.encoding
+               'encoding': directives.encoding,
+               'graph2use': _option_graph2use,
+               'simple_form': _option_boolean
                }
 
     app.add_directive('workflow', wf_directive, True, (0, 2, False), **options)
+    app.add_config_value('graph2use', 'hierarchical', 'html')
+    app.add_config_value('simple_form', True, 'html')
     app.add_config_value('wf_pre_code', None, True)
     app.add_config_value('wf_include_source', False, True)
     app.add_config_value('wf_html_show_source_link', True, True)
-    app.add_config_value('wf_formats', ['png', 'hires.png', 'pdf'], True)
+    app.add_config_value('wf_formats', ['png', 'svg', 'pdf'], True)
     app.add_config_value('wf_basedir', None, True)
     app.add_config_value('wf_html_show_formats', True, True)
     app.add_config_value('wf_rcparams', {}, True)
@@ -255,21 +267,6 @@ def remove_coding(text):
 TEMPLATE = """
 {{ source_code }}
 {{ only_html }}
-   {% if source_link or (html_show_formats and not multi_image) %}
-   (
-   {%- if source_link -%}
-   `Source code <{{ source_link }}>`__
-   {%- endif -%}
-   {%- if html_show_formats and not multi_image -%}
-     {%- for img in images -%}
-       {%- for fmt in img.formats -%}
-         {%- if source_link or not loop.first -%}, {% endif -%}
-         `{{ fmt }} <{{ dest_dir }}/{{ img.basename }}.{{ fmt }}>`__
-       {%- endfor -%}
-     {%- endfor -%}
-   {%- endif -%}
-   )
-   {% endif %}
    {% for img in images %}
    .. figure:: {{ build_dir }}/{{ img.basename }}.{{ default_fmt }}
       {% for option in options -%}
@@ -285,6 +282,21 @@ TEMPLATE = """
       {%- endif -%}
       {{ caption }}
    {% endfor %}
+   {% if source_link or (html_show_formats and not multi_image) %}
+   (
+   {%- if source_link -%}
+   `Source code <{{ source_link }}>`__
+   {%- endif -%}
+   {%- if html_show_formats and not multi_image -%}
+     {%- for img in images -%}
+       {%- for fmt in img.formats -%}
+         {%- if source_link or not loop.first -%}, {% endif -%}
+         `{{ fmt }} <{{ dest_dir }}/{{ img.basename }}.{{ fmt }}>`__
+       {%- endfor -%}
+     {%- endfor -%}
+   {%- endif -%}
+   )
+   {% endif %}
 {{ only_latex }}
    {% for img in images %}
    {% if 'pdf' in img.formats -%}
@@ -411,7 +423,6 @@ def run_code(code, code_path, ns=None, function_name=None):
         sys.stdout = stdout
     return ns
 
-
 def get_wf_formats(config):
     default_dpi = {'png': 80, 'hires.png': 200, 'pdf': 200}
     formats = []
@@ -436,15 +447,14 @@ def get_wf_formats(config):
 
 
 def render_figures(code, code_path, output_dir, output_base, context,
-                   function_name, config, context_reset=False,
-                   close_figs=False):
+                   function_name, config, graph2use, simple_form,
+                   context_reset=False, close_figs=False):
     """
     Run a nipype workflow creation script and save the graph in *output_dir*.
     Save the images under *output_dir* with file names derived from
     *output_base*
     """
     formats = get_wf_formats(config)
-
     ns = wf_context if context else {}
     if context_reset:
         wf_context.clear()
@@ -457,11 +467,9 @@ def render_figures(code, code_path, output_dir, output_base, context,
             img_path = img.filename(fmt)
             imgname, ext = os.path.splitext(os.path.basename(img_path))
             ns['wf'].base_dir = output_dir
-            ns['wf'].write_graph(imgname, format=ext[1:])
-
-            src = os.path.join(os.path.dirname(img_path), ns['wf'].name,
-                               os.path.basename(img_path))
-            print(src, img_path)
+            src = ns['wf'].write_graph(imgname, format=ext[1:],
+                                       graph2use=graph2use,
+                                       simple_form=simple_form)
             shutil.move(src, img_path)
         except Exception as err:
             raise GraphError(traceback.format_exc())
@@ -478,6 +486,9 @@ def run(arguments, content, options, state_machine, state, lineno):
 
     formats = get_wf_formats(config)
     default_fmt = formats[0][0]
+
+    graph2use = options.get('graph2use', 'hierarchical')
+    simple_form = options.get('simple_form', True)
 
     options.setdefault('include-source', config.wf_include_source)
     keep_context = 'context' in options
@@ -577,6 +588,8 @@ def run(arguments, content, options, state_machine, state, lineno):
                                  keep_context,
                                  function_name,
                                  config,
+                                 graph2use,
+                                 simple_form,
                                  context_reset=context_opt == 'reset',
                                  close_figs=context_opt == 'close-figs')
         errors = []
