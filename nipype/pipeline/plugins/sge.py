@@ -102,15 +102,14 @@ class QstatSubstitute(object):
     """A wrapper for Qstat to avoid overloading the
     SGE/OGS server with rapid continuous qstat requests"""
 
-    def __init__(self, qstatInstantExecutable='qstat', qstatCachedExecutable='qstat', login=''):
+    def __init__(self, qstat_instant_executable='qstat', qstat_cached_executable='qstat'):
         """
         :param qstat_instant_executable:
         :param qstat_cached_executable:
         """
-        self._qstatInstantExecutable = qstatInstantExecutable
-        self._qstatCachedExecutable = qstatCachedExecutable
-        self._login = login
-        self._OutOfScopeJobs = list()  # Initialize first
+        self._qstat_instant_executable = qstat_instant_executable
+        self._qstat_cached_executable = qstat_cached_executable
+        self._out_of_scope_jobs = list()  # Initialize first
         self._task_dictionary = dict(
         )  # {'taskid': QJobInfo(), .... }  The dictionaryObject
         self._remove_old_jobs()
@@ -150,7 +149,7 @@ class QstatSubstitute(object):
             qacct_retries -= 1
             try:
                 proc = subprocess.Popen(
-                    [thisCommand, '-o', self._login, '-j', str(taskid)],
+                    [this_command, '-o', pwd.getpwuid(os.getuid())[0], '-j', str(taskid)],
                     stdout=subprocess.PIPE,
                     stderr=subprocess.PIPE)
                 qacct_result, _ = proc.communicate()
@@ -252,7 +251,7 @@ class QstatSubstitute(object):
             qstat_retries -= 1
             try:
                 proc = subprocess.Popen(
-                    [thisCommand, '-u', self._login, '-xml', '-s', 'psrz'],
+                    [this_command, '-u', pwd.getpwuid(os.getuid())[0], '-xml', '-s', 'psrz'],
                     stdout=subprocess.PIPE,
                     stderr=subprocess.PIPE)
                 qstat_xml_result, _ = proc.communicate()
@@ -344,9 +343,8 @@ class SGEPlugin(SGELikeBatchManagerBase):
         """
         self._retry_timeout = 2
         self._max_tries = 2
-
-        instantQstat = 'qstat'
-        cachedQstat = 'qstat'
+        instant_qstat = 'qstat'
+        cached_qstat = 'qstat'
 
         if 'plugin_args' in kwargs and kwargs['plugin_args']:
             if 'retry_timeout' in kwargs['plugin_args']:
@@ -356,13 +354,8 @@ class SGEPlugin(SGELikeBatchManagerBase):
             if 'qstatProgramPath' in kwargs['plugin_args']:
                 instant_qstat = kwargs['plugin_args']['qstatProgramPath']
             if 'qstatCachedProgramPath' in kwargs['plugin_args']:
-                cachedQstat = kwargs['plugin_args']['qstatCachedProgramPath']
-            if 'username' in kwargs['plugin_args']:
-                self._login = kwargs['plugin_args']['username']
-            else:
-                self._login = os.getlogin()
-            self._refQstatSubstitute = QstatSubstitute(
-                instantQstat, cachedQstat, self._login)
+                cached_qstat = kwargs['plugin_args']['qstatCachedProgramPath']
+        self._refQstatSubstitute = QstatSubstitute(instant_qstat, cached_qstat)
 
         super(SGEPlugin, self).__init__(template, **kwargs)
 
