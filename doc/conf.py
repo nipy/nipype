@@ -52,6 +52,7 @@ extensions = ['sphinx.ext.todo',
               'numpy_ext.numpydoc',
               'matplotlib.sphinxext.plot_directive',
               'matplotlib.sphinxext.only_directives',
+              'nipype.sphinxext.plot_workflow',
               #'IPython.sphinxext.ipython_directive',
               #'IPython.sphinxext.ipython_console_highlighting'
               ]
