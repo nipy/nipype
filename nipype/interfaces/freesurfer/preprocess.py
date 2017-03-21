@@ -1038,6 +1038,9 @@ class BBRegisterInputSpec6(BBRegisterInputSpec):
     init = traits.Enum('coreg', 'rr', 'spm', 'fsl', 'header', 'best', argstr='--init-%s',
                        xor=['init_reg_file'],
                        desc='initialize registration with mri_coreg, spm, fsl, or header')
+    init_reg_file = File(exists=True, argstr='--init-reg %s',
+                         desc='existing registration file',
+                         xor=['init'])
 
 
 class BBRegisterOutputSpec(TraitedSpec):

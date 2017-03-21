@@ -42,6 +42,7 @@ class Level1DesignInputSpec(BaseInterfaceInputSpec):
             'dgamma'), traits.Dict(traits.Enum('derivs'), traits.Bool)),
         traits.Dict(traits.Enum('gamma'), traits.Dict(
                     traits.Enum('derivs', 'gammasigma', 'gammadelay'))),
+        traits.Dict(traits.Enum('custom'), traits.Dict(traits.Dict(traits.Enum('bfcustompath'), traits.Str))),
         traits.Dict(traits.Enum('none'), traits.Dict()),
         traits.Dict(traits.Enum('none'), traits.Enum(None)),
         mandatory=True,
@@ -49,7 +50,6 @@ class Level1DesignInputSpec(BaseInterfaceInputSpec):
               "{'dgamma': {'derivs': True}}"))
     orthogonalization = traits.Dict(traits.Int, traits.Dict(traits.Int,
         traits.Either(traits.Bool,traits.Int)),
-        mandatory=False,
         desc=("which regressors to make orthogonal e.g., "
               "{1: {0:0,1:0,2:0}, 2: {0:1,1:1,2:0}} to make the second "
               "regressor in a 2-regressor model orthogonal to the first."),
@@ -193,10 +193,21 @@ class Level1Design(BaseInterface):
                             evinfo.insert(j, [onset, cond['duration'][j], amp])
                         else:
                             evinfo.insert(j, [onset, cond['duration'][0], amp])
+                    ev_parameters['cond_file'] = evfname
                     ev_parameters['ev_num'] = num_evs[0]
                     ev_parameters['ev_name'] = name
                     ev_parameters['tempfilt_yn'] = do_tempfilter
-                    ev_parameters['cond_file'] = evfname
+                    if not 'basisorth' in ev_parameters:
+                        ev_parameters['basisorth'] = 1
+                    if not 'basisfnum' in ev_parameters:
+                        ev_parameters['basisfnum'] = 1
+                    try:
+                        ev_parameters['fsldir'] = os.environ['FSLDIR']
+                    except KeyError:
+                        if basis_key == 'flobs':
+                            raise Exception('FSL environment variables not set')
+                        else:
+                            ev_parameters['fsldir'] = '/usr/share/fsl'
                     try:
                         ev_parameters['temporalderiv'] = int(bool(ev_parameters.pop('derivs')))
                     except KeyError:

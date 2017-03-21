@@ -18,6 +18,7 @@ set fmri(shape$ev_num) 2
 # 4 : Gamma basis functions
 # 5 : Sine basis functions
 # 6 : FIR basis functions
+# 7 : Optimal/custom basis functions
 set fmri(convolve$ev_num) 0
 
 # Apply temporal filtering
