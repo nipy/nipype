@@ -25,8 +25,8 @@ dependencies:
     - sudo apt-get -y update && sudo apt-get install -y wget bzip2
     # Create work folder and force group permissions
     - mkdir -p $WORKDIR && sudo setfacl -d -m group:ubuntu:rwx $WORKDIR && sudo setfacl -m group:ubuntu:rwx $WORKDIR
-    - mkdir -p $HOME/docker $HOME/examples $HOME/bin $WORKDIR/tests $WORKDIR/logs $WORKDIR/crashfiles ${CIRCLE_TEST_REPORTS}/tests/
-    - pip install codecov
+    - mkdir -p $HOME/docker $HOME/examples $WORKDIR/tests $WORKDIR/logs $WORKDIR/crashfiles ${CIRCLE_TEST_REPORTS}/tests/
+    - if [[ ! -e "$HOME/bin/codecov" ]]; then mkdir -p $HOME/bin; curl -so $HOME/bin/codecov https://codecov.io/bash && chmod 755 $HOME/bin/codecov; fi
   override:
     - if [[ -e "$HOME/docker/cache.tar" ]]; then docker load --input $HOME/docker/cache.tar; fi :
         timeout: 6000
