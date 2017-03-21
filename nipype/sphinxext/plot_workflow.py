@@ -3,8 +3,6 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """
-
-
 :mod:`nipype.sphinxext.plot_workflow` -- Workflow plotting extension
 ====================================================================
 
@@ -64,6 +62,7 @@ target).  These include `alt`, `height`, `width`, `scale`, `align` and
 
 Configuration options
 ---------------------
+
 The workflow directive has the following configuration options:
     graph2use
         Select a graph type to use
