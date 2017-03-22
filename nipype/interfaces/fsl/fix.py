@@ -1,7 +1,7 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """The fix module provides classes for interfacing with the `FSL FIX
-<http://fsl.fmrib.ox.ac.uk/fsl/fslwiki/FIX/index.html>` command line tools.  
+<http://fsl.fmrib.ox.ac.uk/fsl/fslwiki/FIX/index.html>` command line tools.
 
 This was written to work with FSL version v5.0
 
@@ -80,7 +80,7 @@ class TrainingSetCreatorOutputSpec(TraitedSpec):
     mel_icas_out = OutputMultiPath(Directory(exists=True), copyfile=False,
                               desc='Hand labels for noise vs signal',
                               argstr='%s', position=-1)
-    
+
 
 class TrainingSetCreator(BaseInterface):
     '''Goes through set of provided melodic output directories, to find all
@@ -118,7 +118,7 @@ class TrainingSetCreator(BaseInterface):
 
 
 
-class FeatureExtractorInputSpec(CommandLineInputSpec):    
+class FeatureExtractorInputSpec(CommandLineInputSpec):
     mel_ica = Directory(exists=True, copyfile=False, desc='Melodic output directory or directories',
                         argstr='%s', position=-1)
 
@@ -147,7 +147,7 @@ class TrainingInputSpec(CommandLineInputSpec):
                               desc='Melodic output directories',
                               argstr='%s', position=-1)
 
-    trained_wts_filestem = traits.Str(desc='trained-weights filestem, used for trained_wts_file and output directories', argstr='%s', position=1)  
+    trained_wts_filestem = traits.Str(desc='trained-weights filestem, used for trained_wts_file and output directories', argstr='%s', position=1)
 
     loo = traits.Bool(argstr='-l', desc='full leave-one-out test with classifier training', position=2)
 
@@ -180,19 +180,19 @@ class AccuracyTesterInputSpec(CommandLineInputSpec):
                               desc='Melodic output directories',
                               argstr='%s', position=3, mandatory=True)
 
-    trained_wts_file = File(desc='trained-weights file', argstr='%s', position=1, mandatory=True)  
+    trained_wts_file = File(desc='trained-weights file', argstr='%s', position=1, mandatory=True)
 
-    output_directory = Directory(desc='Path to folder in which to store the results of the accuracy test.', argstr='%s', position=2, mandatory=True)  
+    output_directory = Directory(desc='Path to folder in which to store the results of the accuracy test.', argstr='%s', position=2, mandatory=True)
 
 
 class AccuracyTesterOutputSpec(TraitedSpec):
-    output_directory = Directory(desc='Path to folder in which to store the results of the accuracy test.', argstr='%s', position=1)  
+    output_directory = Directory(desc='Path to folder in which to store the results of the accuracy test.', argstr='%s', position=1)
 
 
 class AccuracyTester(CommandLine):
     '''
     Test the accuracy of an existing training dataset on a set of hand-labelled subjects.
-    Note: This may or may not be working. Couldn't presently not confirm because fix fails on this (even outside of nipype) without leaving an error msg. 
+    Note: This may or may not be working. Couldn't presently not confirm because fix fails on this (even outside of nipype) without leaving an error msg.
     '''
     input_spec = AccuracyTesterInputSpec
     output_spec = AccuracyTesterOutputSpec
@@ -212,7 +212,7 @@ class ClassifierInputSpec(CommandLineInputSpec):
     mel_ica = Directory(exists=True, copyfile=False, desc='Melodic output directory or directories',
                         argstr='%s', position=1)
 
-    trained_wts_file = File(exists=True, desc='trained-weights file', argstr='%s', position=2, mandatory=True, copyfile=False)  
+    trained_wts_file = File(exists=True, desc='trained-weights file', argstr='%s', position=2, mandatory=True, copyfile=False)
 
     thresh = traits.Int(argstr='%d', desc='Threshold for cleanup.', position=-1, mandatory=True)
 
@@ -231,7 +231,7 @@ class Classifier(CommandLine):
     cmd = 'fix -c'
 
     def _gen_artifacts_list_file(self, mel_ica, thresh):
-        
+
         _, trained_wts_file = os.path.split(self.inputs.trained_wts_file)
         trained_wts_filestem = trained_wts_file.split('.')[0]
         filestem = 'fix4melview_' + trained_wts_filestem + '_thr'
@@ -249,10 +249,10 @@ class Classifier(CommandLine):
 
 
 class CleanerInputSpec(CommandLineInputSpec):
-    artifacts_list_file = File(exists=True, argstr='%s', position=1, mandatory=True, desc='Text file listing which ICs are artifacts; can be the output from classification or can be created manually')  
+    artifacts_list_file = File(exists=True, argstr='%s', position=1, mandatory=True, desc='Text file listing which ICs are artifacts; can be the output from classification or can be created manually')
 
-    cleanup_motion = traits.Bool(argstr='-m', 
-                                 desc='cleanup motion confounds, looks for design.fsf for highpass filter cut-off', 
+    cleanup_motion = traits.Bool(argstr='-m',
+                                 desc='cleanup motion confounds, looks for design.fsf for highpass filter cut-off',
                                  position=2)
 
     highpass = traits.Float(argstr='-m -h %f',
@@ -288,7 +288,7 @@ class Cleaner(CommandLine):
         artifacts_list_file = open(artifacts_list_filename, 'r')
         functional_filename, extension = artifacts_list_file.readline().split('.')
         artifacts_list_file_path, artifacts_list_filename = os.path.split(artifacts_list_filename)
-        
+
         return(os.path.join(artifacts_list_file_path, functional_filename + '_clean.nii.gz'))
 
     def _list_outputs(self):
