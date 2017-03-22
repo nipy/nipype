@@ -3,6 +3,8 @@
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 
 """Top-level namespace for ants."""
+# Preprocessing Programs
+from .preprocess import MotionCorr2FSLParams, MotionCorr, MotionCorrStats
 
 # Registraiton programs
 from .registration import ANTS, Registration

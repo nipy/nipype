@@ -3,17 +3,16 @@
     functions.
 """
 import csv
-import math
 import os
+
+from nibabel.eulerangles import mat2euler
+import numpy
 
 from ..base import (BaseInterface, BaseInterfaceInputSpec, TraitedSpec, File,
                     traits, isdefined, Str)
 from .base import ANTSCommand, ANTSCommandInputSpec
 from ...utils.filemanip import split_filename
 
-
-def _extant(field):
-    return (field is not None) and isdefined(field)
 
 class MotionCorrStatsInputSpec(ANTSCommandInputSpec):
     ''' Input spec for the antsMotionCorrStats command '''
@@ -49,11 +48,11 @@ class MotionCorrStats(ANTSCommand):
 
     def _list_outputs(self):
         outputs = self._outputs().get()
-        if _extant(self.inputs.output_spatial_map):
+        if isdefined(self.inputs.output_spatial_map):
             outputs['spatial_map'] = (
                 os.path.abspath(self.inputs.output_spatial_map)
             )
-        if _extant(self.inputs.output):
+        if isdefined(self.inputs.output):
             outputs['output'] = os.path.abspath(self.inputs.output)
         return outputs
 
@@ -223,16 +222,16 @@ class MotionCorr(ANTSCommand):
         image name.
         '''
         if name == 'output_average_image':
-            if _extant(self.inputs.fixed_image):
+            if isdefined(self.inputs.fixed_image):
                 return self.inputs.fixed_image
-            if not _extant(self.inputs.average_image):
+            if not isdefined(self.inputs.average_image):
                 raise ValueError("Either fixed_image or average_image must be defined")
-            if _extant(self.inputs.output_average_image):
+            if isdefined(self.inputs.output_average_image):
                 return self.inputs.output_average_image
             pth, fname, ext = split_filename(self.inputs.average_image)
             new_fname = '{}{}{}'.format(fname, '_avg', ext)
             return os.path.join(pth, new_fname)
-        if name == 'ouput_warped_image' and _extant(self.inputs.fixed_image):
+        if name == 'ouput_warped_image' and isdefined(self.inputs.fixed_image):
             pth, fname, ext = split_filename(self.inputs.fixed_image)
             new_fname = '{}{}{}'.format(fname, '_warped', ext)
             return os.path.join(pth, new_fname)
@@ -257,75 +256,75 @@ class MotionCorr(ANTSCommand):
                        "metric_weight", "radius_or_bins", "sampling_strategy",
                        "sampling_percentage"]
         for metric_arg in metric_args:
-            if _extant(getattr(self.inputs, metric_arg)):
+            if isdefined(getattr(self.inputs, metric_arg)):
                 format_args[metric_arg] = getattr(self.inputs, metric_arg)
         return metric_str.format(**format_args)
 
     def _format_transform(self):
         transform_str = "-t {}[{}]"
-        if (_extant(self.inputs.transformation_model)
-                and _extant(self.inputs.gradient_step_length)):
+        if (isdefined(self.inputs.transformation_model)
+                and isdefined(self.inputs.gradient_step_length)):
             return transform_str.format(self.inputs.transformation_model,
                                         self.inputs.gradient_step_length)
         raise ValueError("Unable to format transformation_model argument")
 
     def _format_output(self):
-        if (_extant(self.inputs.output_transform_prefix)
-                and _extant(self.inputs.output_warped_image)
-                and _extant(self.inputs.output_average_image)):
+        if (isdefined(self.inputs.output_transform_prefix)
+                and isdefined(self.inputs.output_warped_image)
+                and isdefined(self.inputs.output_average_image)):
             return "-o [{},{},{}]".format(
                 self.inputs.output_transform_prefix,
                 self.inputs.output_warped_image,
                 self.inputs.output_average_image
             )
-        elif _extant(self.inputs.output_average_image):
+        elif isdefined(self.inputs.output_average_image):
             return "-o {}".format(self.inputs.output_average_image)
         else:
             raise ValueError("Unable to format output due to lack of inputs.")
 
     def _list_outputs(self):
         outputs = self._outputs().get()
-        if _extant(self.inputs.output_average_image):
+        if isdefined(self.inputs.output_average_image):
             outputs['average_image'] = (
                 os.path.abspath(self.inputs.output_average_image)
             )
-        if _extant(self.inputs.output_warped_image):
+        if isdefined(self.inputs.output_warped_image):
             outputs['warped_image'] = (
                 os.path.abspath(self.inputs.output_warped_image)
             )
-        if _extant(self.inputs.output_transform_prefix):
+        if isdefined(self.inputs.output_transform_prefix):
             fname = '{}MOCOparams.csv'.format(
                 self.inputs.output_transform_prefix
             )
             outputs['composite_transform'] = os.path.abspath(fname)
-        if (_extant(self.inputs.write_displacement) and
-                _extant(self.inputs.output_transform_prefix) and
+        if (isdefined(self.inputs.write_displacement) and
+                isdefined(self.inputs.output_transform_prefix) and
                 self.inputs.write_displacement is True):
             fname = '{}Warp.nii.gz'.format(self.inputs.output_transform_prefix)
             outputs['displacement_field'] = os.path.abspath(fname)
         return outputs
 
-class Matrix2FSLParamsInputSpec(BaseInterfaceInputSpec):
-    matrix = File(
+class MotionCorr2FSLParamsInputSpec(BaseInterfaceInputSpec):
+    ants_matrix = File(
         exists=True,
-        desc='Motion crrection matrices to be converted into FSL style motion parameters',
+        desc='Motion correction matrices to be converted into FSL style motion parameters',
         mandatory=True
     )
 
-class Matrix2FSLParamsOutputSpec(TraitedSpec):
-    parameters = File(exists=True, desc="parameters to be output")
+class MotionCorr2FSLParamsOutputSpec(TraitedSpec):
+    fsl_params = File(exists=True, desc="FSL parameters file to be output")
 
 
-class Matrix2FSLParams(BaseInterface):
+class MotionCorr2FSLParams(BaseInterface):
     '''
-    Take antsMotionCorr motion output as input, convert to FSL style
+    Take antsMotionCorr motion output as input, convert to FSL-style
     parameter files. Currently does not output origin of rotation.
     '''
-    input_spec = Matrix2FSLParamsInputSpec
-    output_spec = Matrix2FSLParamsOutputSpec
+    input_spec = MotionCorr2FSLParamsInputSpec
+    output_spec = MotionCorr2FSLParamsOutputSpec
 
     def _run_interface(self, runtime):
-        in_fp = open(self.inputs.matrix)
+        in_fp = open(self.inputs.ants_matrix)
         in_data = csv.reader(in_fp)
         pars = []
 
@@ -333,26 +332,25 @@ class Matrix2FSLParams(BaseInterface):
         next(in_data)
 
         for x in in_data:
-            t1 = math.atan2(float(x[7]), float(x[10]))
-            c2 = math.sqrt((float(x[2]) * float(x[2])) + (float(x[3]) * float(x[3])))
-            t2 = math.atan2(-float(x[4]), c2)
-            t3 = math.atan2(float(x[3]), float(x[2]))
-            parameters = "{:.8f} {:.8f} {:.8f} {:.8f} {:.8f} {:.8f}"
-            pars.append(parameters.format(t1, t2, t3, float(x[11]), float(x[12]),
-                                          float(x[13])))
+            mat = numpy.zeros((3, 3))
+            mat[0] = [x[2], x[3], x[4]]
+            mat[1] = [x[5], x[6], x[7]]
+            mat[2] = [x[8], x[9], x[10]]
+            param_z, param_y, param_x = mat2euler(mat)
+            pars.append([param_x, param_y, param_z, float(x[11]), float(x[12]),
+                        float(x[13])])
 
-        pth, fname, _ = split_filename(self.inputs.matrix)
+        pth, fname, _ = split_filename(self.inputs.ants_matrix)
         new_fname = '{}{}'.format(fname, '.par')
-        parameters = os.path.join(pth, new_fname)
-        with open(parameters, mode='wt') as out_fp:
-            out_fp.write('\n'.join(pars))
-        in_fp.close()
+        fsl_params_fname = os.path.join(pth, new_fname)
+        fsl_params = numpy.array(pars)
+        numpy.savetxt(fsl_params_fname, fsl_params, delimiter=' ')
         return runtime
 
     def _list_outputs(self):
         outputs = self._outputs().get()
-        pth, fname, _ = split_filename(self.inputs.matrix)
+        pth, fname, _ = split_filename(self.inputs.ants_matrix)
         new_fname = '{}{}'.format(fname, '.par')
         out_file = os.path.join(pth, new_fname)
-        outputs["parameters"] = out_file
+        outputs["fsl_params"] = out_file
         return outputs
