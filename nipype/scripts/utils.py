@@ -63,6 +63,7 @@ def add_args_options(arg_parser, interface):
         args = {}
 
         if spec.is_trait_type(traits.Bool):
+            args["default"] = getattr(inputs, name)
             args["action"] = 'store_true'
 
         if hasattr(spec, "mandatory") and spec.mandatory:
