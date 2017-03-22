@@ -6,7 +6,7 @@ import csv
 import os
 
 from nibabel.eulerangles import mat2euler
-import numpy
+import numpy as np
 
 from ..base import (BaseInterface, BaseInterfaceInputSpec, TraitedSpec, File,
                     traits, isdefined, Str)
@@ -304,8 +304,9 @@ class MotionCorr(ANTSCommand):
             outputs['displacement_field'] = os.path.abspath(fname)
         return outputs
 
+
 class MotionCorr2FSLParamsInputSpec(BaseInterfaceInputSpec):
-    ants_matrix = File(
+    ants_moco = File(
         exists=True,
         desc='Motion correction matrices to be converted into FSL style motion parameters',
         mandatory=True
@@ -323,34 +324,26 @@ class MotionCorr2FSLParams(BaseInterface):
     input_spec = MotionCorr2FSLParamsInputSpec
     output_spec = MotionCorr2FSLParamsOutputSpec
 
-    def _run_interface(self, runtime):
-        in_fp = open(self.inputs.ants_matrix)
-        in_data = csv.reader(in_fp)
-        pars = []
-
-        # Ants motion correction output has a single line header that we ignore
-        next(in_data)
-
-        for x in in_data:
-            mat = numpy.zeros((3, 3))
-            mat[0] = [x[2], x[3], x[4]]
-            mat[1] = [x[5], x[6], x[7]]
-            mat[2] = [x[8], x[9], x[10]]
-            param_z, param_y, param_x = mat2euler(mat)
-            pars.append([param_x, param_y, param_z, float(x[11]), float(x[12]),
-                        float(x[13])])
-
-        pth, fname, _ = split_filename(self.inputs.ants_matrix)
-        new_fname = '{}{}'.format(fname, '.par')
-        fsl_params_fname = os.path.join(pth, new_fname)
-        fsl_params = numpy.array(pars)
-        numpy.savetxt(fsl_params_fname, fsl_params, delimiter=' ')
-        return runtime
+    def __init__(self, **inputs):
+        self._results = {}
+        super(MotionCorr2FSLParams, self).__init__(**inputs)
 
     def _list_outputs(self):
-        outputs = self._outputs().get()
-        pth, fname, _ = split_filename(self.inputs.ants_matrix)
-        new_fname = '{}{}'.format(fname, '.par')
-        out_file = os.path.join(pth, new_fname)
-        outputs["fsl_params"] = out_file
-        return outputs
+        return self._results
+
+    def _run_interface(self, runtime):
+        # Ants motion correction output has a single line header that we ignore
+        in_data = np.loadtxt(self.inputs.ants_moco,
+                             delimiter=',', skiprows=1, dtype=np.float32)[:, 2:]
+        pars = []
+        for row in in_data:
+            mat = row[:9].reshape(3, 3)
+            param_z, param_y, param_x = mat2euler(mat)
+            pars.append([param_x, param_y, param_z] + row[9:].tolist())
+
+        _, fname, _ = split_filename(self.inputs.ants_moco)
+        self._results['fsl_params'] = os.path.abspath('{}_fsl{}'.format(fname, '.par'))
+        np.savetxt(self._results['fsl_params'], pars, delimiter=' ')
+
+        return runtime
+
