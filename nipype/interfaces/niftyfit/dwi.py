@@ -1,172 +1,286 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
-"""The dwi module of niftyfit, which wraps the fitting methods in NiftyFit.
+
+"""
+The dwi module of niftyfit, which wraps the fitting methods in NiftyFit.
 """
 
-from nipype.interfaces.niftyfit.base import NiftyFitCommand, get_custom_path
-from nipype.interfaces.base import (TraitedSpec, File, traits, isdefined,
-                                    CommandLineInputSpec)
+from ..base import TraitedSpec, traits, isdefined, CommandLineInputSpec
+from .base import NiftyFitCommand, get_custom_path
 
 
 class FitDwiInputSpec(CommandLineInputSpec):
-    # Input options
-    source_file = File(exists=True, argstr='-source %s', mandatory=True,
-                       desc='The source image containing the dwi data')
-    bval_file = File(exists=True, argstr='-bval %s', mandatory=True,
-                     desc='The file containing the bvalues of the source DWI')
-    bvec_file = File(exists=True, argstr='-bvec %s', mandatory=True,
-                     desc='The file containing the bvectors of the source DWI')
-    mask_file = File(exists=True, desc='The image mask',
-                     argstr='-mask %s', mandatory=False)
-    prior_file = File(exists=True, argstr='-prior %s', mandatory=False,
-                      desc='Filename of parameter priors for -ball and -nod')
-    rotsform_flag = traits.Int(
-        0, desc='Rotate the output tensors according to the q/s form of \
-the image (resulting tensors will be in mm coordinates, default: 0).',
-        argstr='-rotsform %d', mandatory=False, usedefault=False)
-    bvallowthreshold = traits.Float(
-        20, argstr='-bvallowthreshold %f', mandatory=False, usedefault=False,
-        desc='B-value threshold used for detection of B0 and DWI images \
-[default: 20]')
+    """ Input Spec for FitDwi. """
+    # Inputs options
+    source_file = traits.File(position=1,
+                              exists=True,
+                              argstr='-source %s',
+                              mandatory=True,
+                              desc='The source image containing the dwi data.')
+    desc = 'The file containing the bvalues of the source DWI.'
+    bval_file = traits.File(position=2,
+                            exists=True,
+                            argstr='-bval %s',
+                            mandatory=True,
+                            desc=desc)
+    desc = 'The file containing the bvectors of the source DWI.'
+    bvec_file = traits.File(position=3,
+                            exists=True,
+                            argstr='-bvec %s',
+                            mandatory=True,
+                            desc=desc)
+    te_file = traits.File(exists=True,
+                          argstr='-TE %s',
+                          desc='Filename of TEs (ms).',
+                          xor=['te_file'])
+    te_value = traits.File(exists=True,
+                           argstr='-TE %s',
+                           desc='Value of TEs (ms).',
+                           xor=['te_file'])
+    mask_file = traits.File(exists=True,
+                            desc='The image mask',
+                            argstr='-mask %s')
+    desc = 'Filename of parameter priors for -ball and -nod.'
+    prior_file = traits.File(exists=True,
+                             argstr='-prior %s',
+                             desc=desc)
+    desc = 'Rotate the output tensors according to the q/s form of the image \
+(resulting tensors will be in mm coordinates, default: 0).'
+    rotsform_flag = traits.Int(desc=desc,
+                               argstr='-rotsform %d')
+
+    # generic output options:
+    error_file = traits.File(desc='Filename of parameter error maps.',
+                             argstr='-error %s',
+                             genfile=True)
+    res_file = traits.File(desc='Filename of model residual map.',
+                           argstr='-res %s',
+                           genfile=True)
+    syn_file = traits.File(desc='Filename of synthetic image.',
+                           argstr='-syn %s',
+                           genfile=True)
+    nodiff_file = traits.File(desc='Filename of average no diffusion image.',
+                              argstr='-nodiff %s',
+                              genfile=True)
 
     # Output options, with templated output names based on the source image
-    mcmap_file = File(genfile=True, desc='Filename of multi-compartment model \
-parameter map (-ivim,-ball,-nod)', argstr='-mcmap %s', requires=['nodv_flag'])
-    error_file = File(genfile=True, desc='Filename of parameter error maps',
-                      argstr='-error %s')
-    res_file = File(genfile=True, desc='Filename of model residual map',
-                    argstr='-res %s')
-    syn_file = File(genfile=True, desc='Filename of synthetic image',
-                    argstr='-syn %s')
-    mdmap_file = File(genfile=True, desc='Filename of MD map/ADC',
-                      argstr='-mdmap %s')
-    famap_file = File(genfile=True, desc='Filename of FA map',
-                      argstr='-famap %s')
-    v1map_file = File(genfile=True, desc='Filename of PDD map [x,y,z]',
-                      argstr='-v1map %s')
-    rgbmap_file = File(genfile=True, desc='Filename of colour FA map',
-                       argstr='-rgbmap %s', requires=['dti_flag'])
-    tenmap_file = File(genfile=True, desc='Filename of tensor map in lower \
-triangular format', argstr='-tenmap2 %s', requires=['dti_flag'])
+    desc = 'Filename of multi-compartment model parameter map \
+(-ivim,-ball,-nod)'
+    mcmap_file = traits.File(desc=desc,
+                             argstr='-mcmap %s',
+                             requires=['nodv_flag'],
+                             genfile=True)
+
+    # Model Specific Output options:
+    mdmap_file = traits.File(desc='Filename of MD map/ADC',
+                             argstr='-mdmap %s',
+                             genfile=True)
+    famap_file = traits.File(desc='Filename of FA map',
+                             argstr='-famap %s',
+                             genfile=True)
+    v1map_file = traits.File(desc='Filename of PDD map [x,y,z]',
+                             argstr='-v1map %s',
+                             genfile=True)
+    rgbmap_file = traits.File(desc='Filename of colour-coded FA map',
+                              argstr='-rgbmap %s',
+                              genfile=True,
+                              requires=['dti_flag'])
+    tenmap_file = traits.File(desc='Filename of tensor map [diag,offdiag].',
+                              argstr='-tenmap %s',
+                              genfile=True,
+                              requires=['dti_flag'])
+    tenmap2_file = traits.File(desc='Filename of tensor map [lower tri]',
+                               argstr='-tenmap2 %s',
+                               genfile=True,
+                               requires=['dti_flag'])
+    desc = 'Filename of multi-compartment model parameter map \
+(-ivim,-ball,-nod).'
+    mcmap_file = traits.File(desc=desc,
+                             argstr='-mcmap %s',
+                             genfile=True)
 
     # Methods options
-    mono_flag = traits.Bool(desc='Fit single exponential to non-directional \
-data [default with no b-vectors]', argstr='-mono',
+    desc = 'Fit single exponential to non-directional data [default with \
+no b-vectors]'
+    mono_flag = traits.Bool(desc=desc,
+                            argstr='-mono',
+                            position=4,
                             xor=['ivim_flag', 'dti_flag', 'ball_flag',
                                  'ballv_flag', 'nod_flag', 'nodv_flag'])
     ivim_flag = traits.Bool(desc='Fit IVIM model to non-directional data.',
-                            argstr='-ivim ',
+                            argstr='-ivim',
+                            position=4,
                             xor=['mono_flag', 'dti_flag', 'ball_flag',
                                  'ballv_flag', 'nod_flag', 'nodv_flag'])
-    dti_flag = traits.Bool(
-        desc='Fit the tensor model [default with b-vectors].', argstr='-dti ',
-        xor=['mono_flag', 'ivim_flag', 'ball_flag',
-             'ballv_flag', 'nod_flag', 'nodv_flag'])
+    desc = 'Fit the tensor model [default with b-vectors].'
+    dti_flag = traits.Bool(desc=desc,
+                           argstr='-dti',
+                           position=4,
+                           xor=['mono_flag', 'ivim_flag', 'ball_flag',
+                                'ballv_flag', 'nod_flag', 'nodv_flag'])
     ball_flag = traits.Bool(desc='Fit the ball and stick model.',
-                            argstr='-ball ',
+                            argstr='-ball',
+                            position=4,
                             xor=['mono_flag', 'ivim_flag', 'dti_flag',
                                  'ballv_flag', 'nod_flag', 'nodv_flag'])
-    ballv_flag = traits.Bool(desc='Fit the ball and stick model with optimised \
-PDD.', argstr='-ballv ', xor=['mono_flag', 'ivim_flag', 'dti_flag',
-                              'ball_flag', 'nod_flag', 'nodv_flag'])
-    nod_flag = traits.Bool(desc='Fit the NODDI model', argstr='-nod ',
+    desc = 'Fit the ball and stick model with optimised PDD.'
+    ballv_flag = traits.Bool(desc=desc,
+                             argstr='-ballv',
+                             position=4,
+                             xor=['mono_flag', 'ivim_flag', 'dti_flag',
+                                  'ball_flag', 'nod_flag', 'nodv_flag'])
+    nod_flag = traits.Bool(desc='Fit the NODDI model',
+                           argstr='-nod',
+                           position=4,
                            xor=['mono_flag', 'ivim_flag', 'dti_flag',
                                 'ball_flag', 'ballv_flag', 'nodv_flag'])
     nodv_flag = traits.Bool(desc='Fit the NODDI model with optimised PDD',
-                            argstr='-nodv ',
+                            argstr='-nodv',
+                            position=4,
                             xor=['mono_flag', 'ivim_flag', 'dti_flag',
                                  'ball_flag', 'ballv_flag', 'nod_flag'])
 
     # Experimental options
-    maxit_val = traits.Int(
-        desc='Maximum number of non-linear LSQR iterations [100x2 passes])',
-        argstr='-maxit %i', requires=['gn_flag'])
-    lm_vals = traits.Tuple(
-        traits.Float, traits.Float, argstr='-lm %f $f', requires=['gn_flag'],
-        desc='LM parameters (initial value, decrease rate) [100,1.2]')
-    gn_flag = traits.Bool(
-        desc='Use Gauss-Newton algorithm [Levenberg-Marquardt].',
-        argstr='-gn', xor=['wls_flag'],  default=False)
-    wls_flag = traits.Bool(
-        desc='Use variance-weighted least squares for DTI fitting',
-        argstr='-wls', xor=['gn_flag'], default=False)
-    slice_no = traits.Int(desc='Fit to single slice number',
-                          argstr='-slice %i')
+    desc = 'Maximum number of non-linear LSQR iterations [100x2 passes])'
+    maxit_val = traits.Int(desc=desc, argstr='-maxit %d', requires=['gn_flag'])
+    desc = 'LM parameters (initial value, decrease rate) [100,1.2].'
+    lm_vals = traits.Tuple(traits.Float, traits.Float,
+                           argstr='-lm %f %f',
+                           requires=['gn_flag'],
+                           desc=desc)
+    desc = 'Use Gauss-Newton algorithm [Levenberg-Marquardt].'
+    gn_flag = traits.Bool(desc=desc, argstr='-gn', xor=['wls_flag'])
+    desc = 'Use Variational Bayes fitting with known prior (currently \
+identity covariance...).'
+    vb_flag = traits.Bool(desc=desc, argstr='-vb')
+    cov_file = traits.File(exists=True,
+                           desc='Filename of ithe nc*nc covariance matrix [I]',
+                           argstr='-cov %s')
+    wls_flag = traits.Bool(desc=desc, argstr='-wls', xor=['gn_flag'])
+    desc = 'Use location-weighted least squares for DTI fitting [3x3 Gaussian]'
+    swls_val = traits.Float(desc=desc, argstr='-swls %f')
+    slice_no = traits.Int(desc='Fit to single slice number.',
+                          argstr='-slice %d')
+    voxel = traits.Tuple(traits.Int, traits.Int, traits.Int,
+                         desc='Fit to single voxel only.',
+                         argstr='-voxel %d %d %d')
     diso_val = traits.Float(desc='Isotropic diffusivity for -nod [3e-3]',
                             argstr='-diso %f')
     dpr_val = traits.Float(desc='Parallel diffusivity for -nod [1.7e-3].',
                            argstr='-dpr %f')
-    perf_thr = traits.Float(
-        desc='Threshold for perfusion/diffsuion effects [100].',
-        argstr='-perfusionthreshold %f')
+    wm_t2_val = traits.Float(desc='White matter T2 value [80ms].',
+                             argstr='-wmT2 %f')
+    csf_t2_val = traits.Float(desc='CSF T2 value [400ms].',
+                              argstr='-csfT2 %f')
+    desc = 'Threshold for perfusion/diffsuion effects [100].'
+    perf_thr = traits.Float(desc=desc, argstr='-perfthreshold %f')
+
+    # MCMC options:
+    mcout = traits.File(exists=True,
+                        desc='Filename of mc samples (ascii text file)',
+                        argstr='-mcout %s')
+    mcsamples = traits.Int(desc='Number of samples to keep [100].',
+                           argstr='-mcsamples %d')
+    mcmaxit = traits.Int(desc='Number of iterations to run [10,000].',
+                         argstr='-mcmaxit %d')
+    acceptance = traits.Float(desc='Fraction of iterations to accept [0.23].',
+                              argstr='-accpetance %f')
 
 
-# Output spec
 class FitDwiOutputSpec(TraitedSpec):
-    mcmap_file = File(desc='Filename of multi-compartment model parameter map \
-(-ivim,-ball,-nod)')
-    error_file = File(desc='Filename of parameter error maps')
-    res_file = File(desc='Filename of model residual map')
-    syn_file = File(desc='Filename of synthetic image')
-    mdmap_file = File(desc='Filename of MD map/ADC')
-    famap_file = File(desc='Filename of FA map')
-    v1map_file = File(desc='Filename of PDD map [x,y,z]')
-    rgbmap_file = File(desc='Filename of colour FA map')
-    tenmap_file = File(desc='Filename of tensor map')
+    """ Output Spec for FitDwi. """
+    desc = 'Filename of multi-compartment model parameter map \
+(-ivim,-ball,-nod)'
+    mcmap_file = traits.File(desc=desc)
+    error_file = traits.File(desc='Filename of parameter error maps')
+    res_file = traits.File(desc='Filename of model residual map')
+    syn_file = traits.File(desc='Filename of synthetic image')
+    nodiff_file = traits.File(desc='Filename of average no diffusion image.')
+    mdmap_file = traits.File(desc='Filename of MD map/ADC')
+    famap_file = traits.File(desc='Filename of FA map')
+    v1map_file = traits.File(desc='Filename of PDD map [x,y,z]')
+    rgbmap_file = traits.File(desc='Filename of colour FA map')
+    tenmap_file = traits.File(desc='Filename of tensor map')
+    tenmap2_file = traits.File(desc='Filename of tensor map [lower tri]')
+    desc = 'Filename of multi-compartment model parameter map \
+(-ivim,-ball,-nod).'
+    mcmap_file = traits.File(desc=desc)
+    mcout = traits.File(desc='Filename of mc samples (ascii text file)')
 
 
-# FitDwi function
-# TODO: Add functionality to selectivitly generate outputs images
-# as currently all possible images will be generated
 class FitDwi(NiftyFitCommand):
-    """ Use NiftyFit to perform diffusion model fitting.
+    """Interface for executable fit_dwi from Niftyfit platform.
+
+    Use NiftyFit to perform diffusion model fitting.
+
+    Diffusion-weighted MR Fitting.
+    Fits DWI parameter maps to multi-shell, multi-directional data.
+
+    For source code, see https://cmiclab.cs.ucl.ac.uk/CMIC/NiftyFit-Release
 
     Examples
     --------
 
-    >>> from nipype.interfaces import niftyfit
-    >>> fit_dwi = niftyfit.FitDwi()
-    >>> fit_dwi.inputs.source_file =
-    >>> fit_dwi.inputs.bvec_file =
-    >>> fit_dwi.inputs.bval_file =
+    >>> from nipype.interfaces.niftyfit import FitDwi
+    >>> fit_dwi = FitDwi()
+    >>> fit_dwi.inputs.source_file = 'im1.nii.gz'  # doctest: +SKIP
+    >>> fit_dwi.inputs.bvec_file = 'im1.bval'  # doctest: +SKIP
+    >>> fit_dwi.inputs.bval_file = 'im1.bvec'  # doctest: +SKIP
     >>> fit_dwi.inputs.dti_flag = True
     >>> fit_dwi.inputs.rgbmap_file = 'rgb_map.nii.gz'
-    >>> fit_dwi.run()
+    >>> fit_dwi.cmdline  # doctest: +SKIP
+    'fit_dwi -source im1.nii.gz -bval im1.val -bvec im1.bvec -dti -rgbmap \
+rgb_map.nii.gz -syn dwifit_syn.nii.gz -res dwifit_mcmap.nii.gz\
+-mdmap dwifit_mdmap.nii.gz -famap dwifit_famap.nii.gz -v1map \
+dwifit_v1map.nii.gz -tenmap2 dwifit_tenmap2.nii.gz -rotsform 0 -error \
+dwifit_error.nii.gz'
+
     """
     _cmd = get_custom_path('fit_dwi')
     input_spec = FitDwiInputSpec
     output_spec = FitDwiOutputSpec
-
     _suffix = '_fit_dwi'
 
     def _gen_filename(self, name):
         if name == 'mcmap_file':
-            return self._gen_fname(self.inputs.source_file, suffix='_mcmap',
-                                   ext='.nii.gz')
+            return self._gen_fname(self.inputs.source_file,
+                                   suffix='_mcmap', ext='.nii.gz')
         if name == 'error_file':
-            return self._gen_fname(self.inputs.source_file, suffix='_error',
-                                   ext='.nii.gz')
+            return self._gen_fname(self.inputs.source_file,
+                                   suffix='_error', ext='.nii.gz')
         if name == 'res_file':
-            return self._gen_fname(self.inputs.source_file, suffix='_resmap',
-                                   ext='.nii.gz')
+            return self._gen_fname(self.inputs.source_file,
+                                   suffix='_resmap', ext='.nii.gz')
         if name == 'syn_file':
-            return self._gen_fname(self.inputs.source_file, suffix='_syn',
-                                   ext='.nii.gz')
+            return self._gen_fname(self.inputs.source_file,
+                                   suffix='_syn', ext='.nii.gz')
+        if name == 'nodiff_file':
+            return self._gen_fname(self.inputs.source_file,
+                                   suffix='_no_diff', ext='.nii.gz')
         if name == 'mdmap_file':
-            return self._gen_fname(self.inputs.source_file, suffix='_mdmap',
-                                   ext='.nii.gz')
+            return self._gen_fname(self.inputs.source_file,
+                                   suffix='_mdmap', ext='.nii.gz')
         if name == 'famap_file':
-            return self._gen_fname(self.inputs.source_file, suffix='_famap',
-                                   ext='.nii.gz')
+            return self._gen_fname(self.inputs.source_file,
+                                   suffix='_famap', ext='.nii.gz')
         if name == 'v1map_file':
-            return self._gen_fname(self.inputs.source_file, suffix='_v1map',
-                                   ext='.nii.gz')
+            return self._gen_fname(self.inputs.source_file,
+                                   suffix='_v1map', ext='.nii.gz')
         if name == 'rgbmap_file':
-            return self._gen_fname(self.inputs.source_file, suffix='_rgbmap',
-                                   ext='.nii.gz')
+            return self._gen_fname(self.inputs.source_file,
+                                   suffix='_rgbmap', ext='.nii.gz')
         if name == 'tenmap_file':
-            return self._gen_fname(self.inputs.source_file, suffix='_tenmap2',
-                                   ext='.nii.gz')
+            return self._gen_fname(self.inputs.source_file,
+                                   suffix='_tenmap', ext='.nii.gz')
+        if name == 'tenmap2_file':
+            return self._gen_fname(self.inputs.source_file,
+                                   suffix='_tenmap2', ext='.nii.gz')
+        if name == 'mcmap_file':
+            return self._gen_fname(self.inputs.source_file,
+                                   suffix='_mcmap', ext='.nii.gz')
+        if name == 'mcout':
+            return self._gen_fname(self.inputs.source_file,
+                                   suffix='_mcout', ext='.txt')
         return None
 
     def _list_outputs(self):
@@ -187,7 +301,7 @@ class FitDwi(NiftyFitCommand):
         else:
             outputs['res_file'] = self._gen_filename('res_file')
 
-        if isdefined(self.inputs.mcmap_file):
+        if isdefined(self.inputs.syn_file):
             outputs['syn_file'] = self.inputs.syn_file
         else:
             outputs['syn_file'] = self._gen_filename('syn_file')
@@ -217,130 +331,188 @@ class FitDwi(NiftyFitCommand):
         else:
             outputs['tenmap_file'] = self._gen_filename('tenmap_file')
 
+        if isdefined(self.inputs.tenmap_file):
+            outputs['tenmap2_file'] = self.inputs.tenmap_file
+        else:
+            outputs['tenmap2_file'] = self._gen_filename('tenmap2_file')
+
+        if isdefined(self.inputs.mcmap_file):
+            outputs['mcmap_file'] = self.inputs.mcmap_file
+        else:
+            outputs['mcmap_file'] = self._gen_filename('mcmap_file')
+
+        if isdefined(self.inputs.mcout):
+            outputs['mcout'] = self.inputs.mcout
+        else:
+            outputs['mcout'] = self._gen_filename('mcout')
+
         return outputs
 
 
-# Input spec
 class DwiToolInputSpec(CommandLineInputSpec):
-    # Input options
-    source_file = File(
-        exists=True, desc='The source image containing the fitted model',
-        argstr='-source %s', mandatory=True)
-    bval_file = File(
-        exists=True, desc='The file containing the bvalues of the source DWI',
-        argstr='-bval %s', mandatory=False)
-    bvec_file = File(
-        exists=True, desc='The file containing the bvectors of the source DWI',
-        argstr='-bvec %s', mandatory=False)
-    mask_file = File(exists=True, desc='The image mask',
-                     argstr='-mask %s', mandatory=False)
-    b0_file = File(exists=True, desc='The B0 image corresponding to the',
-                   argstr='-b0 %s', mandatory=False)
+    """ Input Spec for DwiTool. """
+    desc = 'The source image containing the fitted model.'
+    source_file = traits.File(position=1,
+                              exists=True,
+                              desc=desc,
+                              argstr='-source %s',
+                              mandatory=True)
+    desc = 'The file containing the bvalues of the source DWI.'
+    bval_file = traits.File(position=2,
+                            exists=True,
+                            desc=desc,
+                            argstr='-bval %s',
+                            mandatory=True)
+    desc = 'The file containing the bvectors of the source DWI.'
+    bvec_file = traits.File(position=3,
+                            exists=True,
+                            desc=desc,
+                            argstr='-bvec %s',
+                            mandatory=True)
+    b0_file = traits.File(position=4,
+                          exists=True,
+                          desc='The B0 image corresponding to the source DWI',
+                          argstr='-b0 %s',
+                          mandatory=True)
+    mask_file = traits.File(position=5,
+                            exists=True,
+                            desc='The image mask',
+                            argstr='-mask %s',
+                            mandatory=True)
 
     # Output options, with templated output names based on the source image
-    mcmap_file = File(genfile=True, desc='Filename of multi-compartment model \
-parameter map (-ivim,-ball,-nod)', argstr='-mcmap %s')
-    syn_file = File(genfile=True, desc='Filename of synthetic image',
-                    argstr='-syn %s')
-    mdmap_file = File(genfile=True, desc='Filename of MD map/ADC',
-                      argstr='-mdmap %s')
-    famap_file = File(genfile=True, desc='Filename of FA map',
-                      argstr='-famap %s')
-    v1map_file = File(genfile=True, desc='Filename of PDD map [x,y,z]',
-                      argstr='-v1map %s')
-    rgbmap_file = File(genfile=True, desc='Filename of colour FA map',
-                       argstr='-rgbmap %s', requires=['dti_flag'])
-    logdti_file = File(genfile=True, desc='Filename of output logdti map',
-                       argstr='-logdti2 %s', requires=['dti_flag'])
-    bvallowthreshold = traits.Float(
-        10, desc='B-value threshold used for detection of B0 and DWI images \
-[default: 10]', argstr='-bvallowthreshold %f', mandatory=False,
-        usedefault=False)
+    desc = 'Filename of multi-compartment model parameter map \
+(-ivim,-ball,-nod)'
+    mcmap_file = traits.File(desc=desc,
+                             argstr='-mcmap %s',
+                             genfile=True)
+    syn_file = traits.File(desc='Filename of synthetic image',
+                           argstr='-syn %s',
+                           genfile=True)
+    mdmap_file = traits.File(desc='Filename of MD map/ADC',
+                             argstr='-mdmap %s',
+                             genfile=True)
+    famap_file = traits.File(desc='Filename of FA map',
+                             argstr='-famap %s',
+                             genfile=True)
+    v1map_file = traits.File(desc='Filename of PDD map [x,y,z]',
+                             argstr='-v1map %s',
+                             genfile=True)
+    rgbmap_file = traits.File(desc='Filename of colour FA map',
+                              argstr='-rgbmap %s',
+                              requires=['dti_flag'],
+                              genfile=True)
+    logdti_file = traits.File(desc='Filename of output logdti map',
+                              argstr='-logdti2 %s',
+                              requires=['dti_flag'],
+                              genfile=True)
 
     # Methods options
-    mono_flag = traits.Bool(
-        desc='Input is a single exponential to non-directional data \
-[default with no b-vectors]', argstr='-mono',
-        xor=['ivim_flag', 'dti_flag', 'dti_flag2',
-             'ball_flag', 'ballv_flag', 'nod_flag', 'nodv_flag'])
-    ivim_flag = traits.Bool(
-        desc='Inputs is an IVIM model to non-directional data.',
-        argstr='-ivim ', xor=['mono_flag', 'dti_flag', 'dti_flag2',
-                              'ball_flag', 'ballv_flag', 'nod_flag',
-                              'nodv_flag'])
+    desc = 'Input is a single exponential to non-directional data \
+[default with no b-vectors]'
+    mono_flag = traits.Bool(desc=desc,
+                            position=6,
+                            argstr='-mono',
+                            xor=['ivim_flag', 'dti_flag', 'dti_flag2',
+                                 'ball_flag', 'ballv_flag', 'nod_flag',
+                                 'nodv_flag'])
+    desc = 'Inputs is an IVIM model to non-directional data.'
+    ivim_flag = traits.Bool(desc=desc,
+                            position=6,
+                            argstr='-ivim',
+                            xor=['mono_flag', 'dti_flag', 'dti_flag2',
+                                 'ball_flag', 'ballv_flag', 'nod_flag',
+                                 'nodv_flag'])
     dti_flag = traits.Bool(desc='Input is a tensor model diag/off-diag.',
-                           argstr='-dti ',
+                           position=6,
+                           argstr='-dti',
                            xor=['mono_flag', 'ivim_flag', 'dti_flag2',
                                 'ball_flag', 'ballv_flag', 'nod_flag',
                                 'nodv_flag'])
     dti_flag2 = traits.Bool(desc='Input is a tensor model lower triangular',
-                            argstr='-dti2 ',
+                            position=6,
+                            argstr='-dti2',
                             xor=['mono_flag', 'ivim_flag', 'dti_flag',
                                  'ball_flag', 'ballv_flag', 'nod_flag',
                                  'nodv_flag'])
     ball_flag = traits.Bool(desc='Input is a ball and stick model.',
-                            argstr='-ball ',
+                            position=6,
+                            argstr='-ball',
                             xor=['mono_flag', 'ivim_flag', 'dti_flag',
                                  'dti_flag2', 'ballv_flag', 'nod_flag',
                                  'nodv_flag'])
-    ballv_flag = traits.Bool(
-        desc='Input is a ball and stick model with optimised PDD.',
-        argstr='-ballv ', xor=['mono_flag', 'ivim_flag', 'dti_flag',
-                               'dti_flag2', 'ball_flag', 'nod_flag',
-                               'nodv_flag'])
+    desc = 'Input is a ball and stick model with optimised PDD.'
+    ballv_flag = traits.Bool(desc=desc,
+                             position=6,
+                             argstr='-ballv',
+                             xor=['mono_flag', 'ivim_flag', 'dti_flag',
+                                  'dti_flag2', 'ball_flag', 'nod_flag',
+                                  'nodv_flag'])
     nod_flag = traits.Bool(desc='Input is a NODDI model',
-                           argstr='-nod ',
+                           position=6,
+                           argstr='-nod',
                            xor=['mono_flag', 'ivim_flag', 'dti_flag',
                                 'dti_flag2', 'ball_flag', 'ballv_flag',
                                 'nodv_flag'])
     nodv_flag = traits.Bool(desc='Input is a NODDI model with optimised PDD',
-                            argstr='-nodv ',
+                            position=6,
+                            argstr='-nodv',
                             xor=['mono_flag', 'ivim_flag', 'dti_flag',
                                  'dti_flag2', 'ball_flag', 'ballv_flag',
                                  'nod_flag'])
 
     # Experimental options
-    slice_no = traits.Int(desc='Fit to single slice number',
-                          argstr='-slice %i')
     diso_val = traits.Float(desc='Isotropic diffusivity for -nod [3e-3]',
                             argstr='-diso %f')
     dpr_val = traits.Float(desc='Parallel diffusivity for -nod [1.7e-3].',
                            argstr='-dpr %f')
-    perf_thr = traits.Float(desc='Threshold for perfusion/diffsuion effects \
-[100].', argstr='-perfusionthreshold %f')
 
 
-# Output spec
 class DwiToolOutputSpec(TraitedSpec):
-    mcmap_file = File(desc='Filename of multi-compartment model parameter map \
-(-ivim,-ball,-nod)')
-    syn_file = File(desc='Filename of synthetic image')
-    mdmap_file = File(desc='Filename of MD map/ADC')
-    famap_file = File(desc='Filename of FA map')
-    v1map_file = File(desc='Filename of PDD map [x,y,z]')
-    rgbmap_file = File(desc='Filename of colour FA map')
-    logdti_file = File(desc='Filename of output logdti map')
+    """ Output Spec for DwiTool. """
+    desc = 'Filename of multi-compartment model parameter map \
+(-ivim,-ball,-nod)'
+    mcmap_file = traits.File(desc=desc)
+    syn_file = traits.File(desc='Filename of synthetic image')
+    mdmap_file = traits.File(desc='Filename of MD map/ADC')
+    famap_file = traits.File(desc='Filename of FA map')
+    v1map_file = traits.File(desc='Filename of PDD map [x,y,z]')
+    rgbmap_file = traits.File(desc='Filename of colour FA map')
+    logdti_file = traits.File(desc='Filename of output logdti map')
 
 
-# DwiTool command
 class DwiTool(NiftyFitCommand):
-    """ Use DwiTool
+    """Interface for executable dwi_tool from Niftyfit platform.
+
+    Use DwiTool.
+
+    Diffusion-Weighted MR Prediction.
+    Predicts DWI from previously fitted models and calculates model derived
+    maps.
 
     Examples
     --------
 
-    >>> from nipype.interfaces import niftyfit
-    >>> dwi_tool = niftyfit.DwiTool()
-    >>> dwi_tool.inputs.source_file =
-    >>> dwi_tool.inputs.bvec_file =
-    >>> dwi_tool.inputs.bval_file =
+    >>> from nipype.interfaces.niftyfit import DwiTool
+    >>> dwi_tool = DwiTool()
+    >>> dwi_tool.inputs.source_file = 'im1.nii.gz'  # doctest: +SKIP
+    >>> dwi_tool.inputs.bvec_file = 'im1.bval'  # doctest: +SKIP
+    >>> dwi_tool.inputs.bval_file = 'im1.bvec'  # doctest: +SKIP
+    >>> dwi_tool.inputs.mask_file = 'im1.bvec'  # doctest: +SKIP
+    >>> dwi_tool.inputs.b0_file = 'b0.nii.gz'  # doctest: +SKIP
     >>> dwi_tool.inputs.dti_flag = True
     >>> dwi_tool.inputs.rgbmap_file = 'rgb_map.nii.gz'
-    >>> dwi_tool.run()
+    >>> dwi_tool.cmdline  # doctest: +SKIP
+    'dwi_tool -source im1.nii.gz -bval im1.val -bvec im1.bvec -dti -mask \
+mask.nii.gz -b0 b0.nii.gz -rgbmap rgb_map.nii.gz -syn dwitool_syn.nii.gz \
+-mdmap dwitool_mdmap.nii.gz -famap dwitool_famap.nii.gz -v1map \
+dwitool_v1map.nii.gz -logdti2 dwitool_logdti2.nii.gz'
+
     """
     _cmd = get_custom_path('dwi_tool')
     input_spec = DwiToolInputSpec
     output_spec = DwiToolOutputSpec
+    _suffix = '_dwi_tool'
 
     _suffix = '_dwi_tool'
 
@@ -355,26 +527,26 @@ class DwiTool(NiftyFitCommand):
 
     def _gen_filename(self, name):
         if name == 'mcmap_file':
-            return self._gen_fname(self.inputs.source_file, suffix='_mcmap',
-                                   ext='.nii.gz')
+            return self._gen_fname(self.inputs.source_file,
+                                   suffix='_mcmap', ext='.nii.gz')
         if name == 'syn_file':
-            return self._gen_fname(self.inputs.source_file, suffix='_syn',
-                                   ext='.nii.gz')
+            return self._gen_fname(self.inputs.source_file,
+                                   suffix='_syn', ext='.nii.gz')
         if name == 'mdmap_file':
-            return self._gen_fname(self.inputs.source_file, suffix='_mdmap',
-                                   ext='.nii.gz')
+            return self._gen_fname(self.inputs.source_file,
+                                   suffix='_mdmap', ext='.nii.gz')
         if name == 'famap_file':
-            return self._gen_fname(self.inputs.source_file, suffix='_famap',
-                                   ext='.nii.gz')
+            return self._gen_fname(self.inputs.source_file,
+                                   suffix='_famap', ext='.nii.gz')
         if name == 'v1map_file':
-            return self._gen_fname(self.inputs.source_file, suffix='_v1map',
-                                   ext='.nii.gz')
+            return self._gen_fname(self.inputs.source_file,
+                                   suffix='_v1map', ext='.nii.gz')
         if name == 'rgbmap_file':
-            return self._gen_fname(self.inputs.source_file, suffix='_rgbmap',
-                                   ext='.nii.gz')
+            return self._gen_fname(self.inputs.source_file,
+                                   suffix='_rgbmap', ext='.nii.gz')
         if name == 'logdti_file':
-            return self._gen_fname(self.inputs.source_file, suffix='_logdti2',
-                                   ext='.nii.gz')
+            return self._gen_fname(self.inputs.source_file,
+                                   suffix='_logdti2', ext='.nii.gz')
         return None
 
     def _list_outputs(self):
@@ -385,7 +557,7 @@ class DwiTool(NiftyFitCommand):
         else:
             outputs['mcmap_file'] = self._gen_filename('mcmap_file')
 
-        if isdefined(self.inputs.mcmap_file):
+        if isdefined(self.inputs.syn_file):
             outputs['syn_file'] = self.inputs.syn_file
         else:
             outputs['syn_file'] = self._gen_filename('syn_file')

@@ -1,10 +1,10 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 
-
+from nipype.interfaces.niftyreg import (no_niftyreg, get_custom_path,
+                                        RegTransform)
+from nipype.testing import skipif, example_data
 import os
-from nipype.interfaces.niftyreg import (no_niftyreg, get_custom_path, RegTransform)
-from nipype.testing import (assert_equal, skipif, example_data)
 
 
 @skipif(no_niftyreg(cmd='reg_transform'))
@@ -14,16 +14,20 @@ def test_reg_transform_def():
     nr = RegTransform()
 
     # Check if the command is properly defined
-    yield assert_equal, nr.cmd, get_custom_path('reg_transform')
+    assert nr.cmd == get_custom_path('reg_transform')
 
     # Assign some input data
     trans_file = example_data('warpfield.nii')
     nr.inputs.def_input = trans_file
     nr.inputs.omp_core_val = 4
 
-    expected_cmd = get_custom_path('reg_transform') + ' -omp 4 ' +\
-                   '-def ' + trans_file + ' ' + os.getcwd() + os.sep + 'warpfield_trans.nii.gz'
-    yield assert_equal, nr.cmdline, expected_cmd
+    cmd_tmp = '{cmd} -omp 4 -def {trans_file} {out_file}'
+    expected_cmd = cmd_tmp.format(
+        cmd=get_custom_path('reg_transform'),
+        trans_file=trans_file,
+        out_file=os.path.join(os.getcwd(), 'warpfield_trans.nii.gz'))
+
+    assert nr.cmdline == expected_cmd
 
 
 @skipif(no_niftyreg(cmd='reg_transform'))
@@ -33,7 +37,7 @@ def test_reg_transform_def_ref():
     nr = RegTransform()
 
     # Check if the command is properly defined
-    yield assert_equal, nr.cmd, get_custom_path('reg_transform')
+    assert nr.cmd == get_custom_path('reg_transform')
 
     # Assign some input data
     ref_file = example_data('im1.nii')
@@ -42,9 +46,14 @@ def test_reg_transform_def_ref():
     nr.inputs.def_input = trans_file
     nr.inputs.omp_core_val = 4
 
-    expected_cmd = get_custom_path('reg_transform') + ' -ref ' + ref_file + ' -omp 4 ' +\
-                   '-def ' + trans_file + ' ' + os.getcwd() + os.sep + 'warpfield_trans.nii.gz'
-    yield assert_equal, nr.cmdline, expected_cmd
+    cmd_tmp = '{cmd} -ref {ref_file} -omp 4 -def {trans_file} {out_file}'
+    expected_cmd = cmd_tmp.format(
+        cmd=get_custom_path('reg_transform'),
+        ref_file=ref_file,
+        trans_file=trans_file,
+        out_file=os.path.join(os.getcwd(), 'warpfield_trans.nii.gz'))
+
+    assert nr.cmdline == expected_cmd
 
 
 @skipif(no_niftyreg(cmd='reg_transform'))
@@ -54,7 +63,7 @@ def test_reg_transform_comp_nii():
     nr = RegTransform()
 
     # Check if the command is properly defined
-    yield assert_equal, nr.cmd, get_custom_path('reg_transform')
+    assert nr.cmd == get_custom_path('reg_transform')
 
     # Assign some input data
     ref_file = example_data('im1.nii')
@@ -65,9 +74,15 @@ def test_reg_transform_comp_nii():
     nr.inputs.comp_input = trans_file
     nr.inputs.omp_core_val = 4
 
-    expected_cmd = get_custom_path('reg_transform') + ' -ref ' + ref_file + ' -omp 4 ' +\
-                   '-comp ' + trans_file + ' ' + trans2_file + ' ' + os.getcwd() + os.sep + 'warpfield_trans.nii.gz'
-    yield assert_equal, nr.cmdline, expected_cmd
+    cmd_tmp = '{cmd} -ref {ref_file} -omp 4 -comp {trans1} {trans2} {out_file}'
+    expected_cmd = cmd_tmp.format(
+        cmd=get_custom_path('reg_transform'),
+        ref_file=ref_file,
+        trans1=trans_file,
+        trans2=trans2_file,
+        out_file=os.path.join(os.getcwd(), 'warpfield_trans.nii.gz'))
+
+    assert nr.cmdline == expected_cmd
 
 
 @skipif(no_niftyreg(cmd='reg_transform'))
@@ -77,7 +92,7 @@ def test_reg_transform_comp_txt():
     nr = RegTransform()
 
     # Check if the command is properly defined
-    yield assert_equal, nr.cmd, get_custom_path('reg_transform')
+    assert nr.cmd == get_custom_path('reg_transform')
 
     # Assign some input data
     aff1_file = example_data('ants_Affine.txt')
@@ -86,9 +101,14 @@ def test_reg_transform_comp_txt():
     nr.inputs.comp_input = aff1_file
     nr.inputs.omp_core_val = 4
 
-    expected_cmd = get_custom_path('reg_transform') + ' -omp 4 ' +\
-                   '-comp ' + aff1_file + ' ' + aff2_file + ' ' + os.getcwd() + os.sep + 'ants_Affine_trans.txt'
-    yield assert_equal, nr.cmdline, expected_cmd
+    cmd_tmp = '{cmd} -omp 4 -comp {aff1} {aff2} {out_file}'
+    expected_cmd = cmd_tmp.format(
+        cmd=get_custom_path('reg_transform'),
+        aff1=aff1_file,
+        aff2=aff2_file,
+        out_file=os.path.join(os.getcwd(), 'ants_Affine_trans.txt'))
+
+    assert nr.cmdline == expected_cmd
 
 
 @skipif(no_niftyreg(cmd='reg_transform'))
@@ -98,7 +118,7 @@ def test_reg_transform_comp():
     nr = RegTransform()
 
     # Check if the command is properly defined
-    yield assert_equal, nr.cmd, get_custom_path('reg_transform')
+    assert nr.cmd == get_custom_path('reg_transform')
 
     # Assign some input data
     trans_file = example_data('warpfield.nii')
@@ -107,9 +127,14 @@ def test_reg_transform_comp():
     nr.inputs.comp_input = aff_file
     nr.inputs.omp_core_val = 4
 
-    expected_cmd = get_custom_path('reg_transform') + ' -omp 4 ' +\
-                   '-comp ' + aff_file + ' ' + trans_file + ' ' + os.getcwd() + os.sep + 'elastix_trans.nii.gz'
-    yield assert_equal, nr.cmdline, expected_cmd
+    cmd_tmp = '{cmd} -omp 4 -comp {aff} {trans} {out_file}'
+    expected_cmd = cmd_tmp.format(
+        cmd=get_custom_path('reg_transform'),
+        aff=aff_file,
+        trans=trans_file,
+        out_file=os.path.join(os.getcwd(), 'elastix_trans.nii.gz'))
+
+    assert nr.cmdline == expected_cmd
 
 
 @skipif(no_niftyreg(cmd='reg_transform'))
@@ -119,7 +144,7 @@ def test_reg_transform_flirt():
     nr = RegTransform()
 
     # Check if the command is properly defined
-    yield assert_equal, nr.cmd, get_custom_path('reg_transform')
+    assert nr.cmd == get_custom_path('reg_transform')
 
     # Assign some input data
     aff_file = example_data('elastix.txt')
@@ -128,7 +153,12 @@ def test_reg_transform_flirt():
     nr.inputs.flirt_2_nr_input = (aff_file, ref_file, in_file)
     nr.inputs.omp_core_val = 4
 
-    expected_cmd = get_custom_path('reg_transform') + ' -omp 4 ' +\
-                   '-flirtAff2NR ' + '%s %s %s' % (aff_file, ref_file, in_file) + ' ' +\
-                   os.getcwd() + os.sep + 'elastix_trans.txt'
-    yield assert_equal, nr.cmdline, expected_cmd
+    cmd_tmp = '{cmd} -omp 4 -flirtAff2NR {aff} {ref} {in_file} {out_file}'
+    expected_cmd = cmd_tmp.format(
+        cmd=get_custom_path('reg_transform'),
+        aff=aff_file,
+        ref=ref_file,
+        in_file=in_file,
+        out_file=os.path.join(os.getcwd(), 'elastix_trans.txt'))
+
+    assert nr.cmdline == expected_cmd

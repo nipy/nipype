@@ -20,13 +20,13 @@ Import necessary modules from nipype."""
 from __future__ import division
 from builtins import range
 
+import os                                    # system functions
 import nipype.interfaces.io as nio           # Data i/o
 import nipype.interfaces.spm as spm          # spm
 import nipype.interfaces.matlab as mlab      # how to run matlab
 import nipype.interfaces.utility as util     # utility
 import nipype.pipeline.engine as pe          # pypeline engine
 import nipype.algorithms.modelgen as model   # model specification
-import os                                    # system functions
 
 """
 
@@ -114,9 +114,10 @@ using the following function:
 
 def get_vox_dims(volume):
     import nibabel as nb
+    from nipype.utils import NUMPY_MMAP
     if isinstance(volume, list):
         volume = volume[0]
-    nii = nb.load(volume)
+    nii = nb.load(volume, mmap=NUMPY_MMAP)
     hdr = nii.header
     voxdims = hdr.get_zooms()
     return [float(voxdims[0]), float(voxdims[1]), float(voxdims[2])]

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """
@@ -17,9 +18,8 @@ These functions include:
    >>> datadir = os.path.realpath(os.path.join(filepath, '../testing/data'))
    >>> os.chdir(datadir)
 """
-
-from __future__ import division
-from builtins import range
+from __future__ import print_function, division, unicode_literals, absolute_import
+from builtins import open, range, str, bytes
 
 import os
 from copy import deepcopy
@@ -29,12 +29,12 @@ import numpy as np
 from scipy import signal
 import scipy.io as sio
 
-from ..external.six import string_types
+from ..utils import NUMPY_MMAP
 from ..interfaces.base import (BaseInterface, traits, InputMultiPath,
                                OutputMultiPath, TraitedSpec, File,
                                BaseInterfaceInputSpec, isdefined)
 from ..utils.filemanip import filename_to_list, save_json, split_filename
-from ..utils.misc import find_indices
+from ..utils.misc import find_indices, normalize_mc_params
 from .. import logging, config
 iflogger = logging.getLogger('interface')
 
@@ -46,15 +46,12 @@ def _get_affine_matrix(params, source):
     source : the package that generated the parameters
              supports SPM, AFNI, FSFAST, FSL, NIPY
     """
-    if source == 'FSL':
-        params = params[[3, 4, 5, 0, 1, 2]]
-    elif source in ('AFNI', 'FSFAST'):
-        params = params[np.asarray([4, 5, 3, 1, 2, 0]) + (len(params) > 6)]
-        params[3:] = params[3:] * np.pi / 180.
     if source == 'NIPY':
         # nipy does not store typical euler angles, use nipy to convert
         from nipy.algorithms.registration import to_matrix44
         return to_matrix44(params)
+
+    params = normalize_mc_params(params, source)
     # process for FSL, SPM, AFNI and FSFAST
     rotfunc = lambda x: np.array([[np.cos(x), np.sin(x)],
                                   [-np.sin(x), np.cos(x)]])
@@ -281,7 +278,7 @@ class ArtifactDetect(BaseInterface):
         output_dir: string
             output directory in which the files will be generated
         """
-        if isinstance(motionfile, string_types):
+        if isinstance(motionfile, (str, bytes)):
             infile = motionfile
         elif isinstance(motionfile, list):
             infile = motionfile[0]
@@ -352,13 +349,13 @@ class ArtifactDetect(BaseInterface):
             cwd = os.getcwd()
 
         # read in functional image
-        if isinstance(imgfile, string_types):
-            nim = load(imgfile)
+        if isinstance(imgfile, (str, bytes)):
+            nim = load(imgfile, mmap=NUMPY_MMAP)
         elif isinstance(imgfile, list):
             if len(imgfile) == 1:
-                nim = load(imgfile[0])
+                nim = load(imgfile[0], mmap=NUMPY_MMAP)
             else:
-                images = [load(f) for f in imgfile]
+                images = [load(f, mmap=NUMPY_MMAP) for f in imgfile]
                 nim = funcs.concat_images(images)
 
         # compute global intensity signal
@@ -395,7 +392,7 @@ class ArtifactDetect(BaseInterface):
                     mask[:, :, :, t0] = mask_tmp
                     g[t0] = np.nansum(vol * mask_tmp) / np.nansum(mask_tmp)
         elif masktype == 'file':  # uses a mask image to determine intensity
-            maskimg = load(self.inputs.mask_file)
+            maskimg = load(self.inputs.mask_file, mmap=NUMPY_MMAP)
             mask = maskimg.get_data()
             affine = maskimg.affine
             mask = mask > 0.5
@@ -469,10 +466,10 @@ class ArtifactDetect(BaseInterface):
         outliers = np.unique(np.union1d(iidx, np.union1d(tidx, ridx)))
 
         # write output to outputfile
-        np.savetxt(artifactfile, outliers, fmt='%d', delimiter=' ')
-        np.savetxt(intensityfile, g, fmt='%.2f', delimiter=' ')
+        np.savetxt(artifactfile, outliers, fmt=b'%d', delimiter=' ')
+        np.savetxt(intensityfile, g, fmt=b'%.2f', delimiter=' ')
         if self.inputs.use_norm:
-            np.savetxt(normfile, normval, fmt='%.4f', delimiter=' ')
+            np.savetxt(normfile, normval, fmt=b'%.4f', delimiter=' ')
 
         if isdefined(self.inputs.save_plot) and self.inputs.save_plot:
             import matplotlib

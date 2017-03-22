@@ -1,15 +1,16 @@
+# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """Tests for the engine utils module
 """
+from __future__ import print_function, division, unicode_literals, absolute_import
+from builtins import range, open
 
-from builtins import range
 import os
 from copy import deepcopy
-from tempfile import mkdtemp
 from shutil import rmtree
+import pytest
 
-from ....testing import (assert_equal, assert_true, assert_false)
 from ... import engine as pe
 from ....interfaces import base as nib
 from ....interfaces import utility as niu
@@ -44,10 +45,10 @@ def test_identitynode_removal():
     fg = wf._create_flat_graph()
     wf._set_needed_outputs(fg)
     eg = pe.generate_expanded_graph(deepcopy(fg))
-    yield assert_equal, len(eg.nodes()), 8
+    assert len(eg.nodes()) == 8
 
 
-def test_clean_working_directory():
+def test_clean_working_directory(tmpdir):
     class OutputSpec(nib.TraitedSpec):
         files = nib.traits.List(nib.File)
         others = nib.File()
@@ -57,7 +58,7 @@ def test_clean_working_directory():
     outputs = OutputSpec()
     inputs = InputSpec()
 
-    wd = mkdtemp()
+    wd = str(tmpdir)
     filenames = ['file.hdr', 'file.img', 'file.BRIK', 'file.HEAD',
                  '_0x1234.json', 'foo.txt']
     outfiles = []
@@ -71,27 +72,26 @@ def test_clean_working_directory():
     inputs.infile = outfiles[-1]
     needed_outputs = ['files']
     config.set_default_config()
-    yield assert_true, os.path.exists(outfiles[5])
+    assert os.path.exists(outfiles[5])
     config.set_default_config()
     config.set('execution', 'remove_unnecessary_outputs', False)
     out = clean_working_directory(outputs, wd, inputs, needed_outputs,
                                   deepcopy(config._sections))
-    yield assert_true, os.path.exists(outfiles[5])
-    yield assert_equal, out.others, outfiles[5]
+    assert os.path.exists(outfiles[5])
+    assert out.others == outfiles[5]
     config.set('execution', 'remove_unnecessary_outputs', True)
     out = clean_working_directory(outputs, wd, inputs, needed_outputs,
                                   deepcopy(config._sections))
-    yield assert_true, os.path.exists(outfiles[1])
-    yield assert_true, os.path.exists(outfiles[3])
-    yield assert_true, os.path.exists(outfiles[4])
-    yield assert_false, os.path.exists(outfiles[5])
-    yield assert_equal, out.others, nib.Undefined
-    yield assert_equal, len(out.files), 2
+    assert os.path.exists(outfiles[1])
+    assert os.path.exists(outfiles[3])
+    assert os.path.exists(outfiles[4])
+    assert not os.path.exists(outfiles[5])
+    assert out.others == nib.Undefined
+    assert len(out.files) == 2
     config.set_default_config()
-    rmtree(wd)
 
 
-def test_outputs_removal():
+def test_outputs_removal(tmpdir):
 
     def test_function(arg1):
         import os
@@ -105,7 +105,7 @@ def test_outputs_removal():
         fp.close()
         return file1, file2
 
-    out_dir = mkdtemp()
+    out_dir = str(tmpdir)
     n1 = pe.Node(niu.Function(input_names=['arg1'],
                               output_names=['file1', 'file2'],
                               function=test_function),
@@ -115,21 +115,20 @@ def test_outputs_removal():
     n1.config = {'execution': {'remove_unnecessary_outputs': True}}
     n1.config = merge_dict(deepcopy(config._sections), n1.config)
     n1.run()
-    yield assert_true, os.path.exists(os.path.join(out_dir,
-                                                   n1.name,
-                                                   'file1.txt'))
-    yield assert_true, os.path.exists(os.path.join(out_dir,
-                                                   n1.name,
-                                                   'file2.txt'))
+    assert os.path.exists(os.path.join(out_dir,
+                                       n1.name,
+                                       'file1.txt'))
+    assert os.path.exists(os.path.join(out_dir,
+                                       n1.name,
+                                       'file2.txt'))
     n1.needed_outputs = ['file2']
     n1.run()
-    yield assert_false, os.path.exists(os.path.join(out_dir,
-                                                    n1.name,
-                                                    'file1.txt'))
-    yield assert_true, os.path.exists(os.path.join(out_dir,
-                                                   n1.name,
-                                                   'file2.txt'))
-    rmtree(out_dir)
+    assert not os.path.exists(os.path.join(out_dir,
+                                           n1.name,
+                                           'file1.txt'))
+    assert os.path.exists(os.path.join(out_dir,
+                                       n1.name,
+                                       'file2.txt'))
 
 
 class InputSpec(nib.TraitedSpec):
@@ -140,7 +139,7 @@ class OutputSpec(nib.TraitedSpec):
     output1 = nib.traits.List(nib.traits.Int, desc='outputs')
 
 
-class TestInterface(nib.BaseInterface):
+class UtilsTestInterface(nib.BaseInterface):
     input_spec = InputSpec
     output_spec = OutputSpec
 
@@ -154,34 +153,33 @@ class TestInterface(nib.BaseInterface):
         return outputs
 
 
-def test_inputs_removal():
-    out_dir = mkdtemp()
+def test_inputs_removal(tmpdir):
+    out_dir = str(tmpdir)
     file1 = os.path.join(out_dir, 'file1.txt')
     fp = open(file1, 'wt')
     fp.write('dummy_file')
     fp.close()
-    n1 = pe.Node(TestInterface(),
+    n1 = pe.Node(UtilsTestInterface(),
                  base_dir=out_dir,
                  name='testinputs')
     n1.inputs.in_file = file1
     n1.config = {'execution': {'keep_inputs': True}}
     n1.config = merge_dict(deepcopy(config._sections), n1.config)
     n1.run()
-    yield assert_true, os.path.exists(os.path.join(out_dir,
-                                                   n1.name,
-                                                   'file1.txt'))
+    assert os.path.exists(os.path.join(out_dir,
+                                       n1.name,
+                                       'file1.txt'))
     n1.inputs.in_file = file1
     n1.config = {'execution': {'keep_inputs': False}}
     n1.config = merge_dict(deepcopy(config._sections), n1.config)
     n1.overwrite = True
     n1.run()
-    yield assert_false, os.path.exists(os.path.join(out_dir,
-                                                    n1.name,
-                                                    'file1.txt'))
-    rmtree(out_dir)
+    assert not os.path.exists(os.path.join(out_dir,
+                                           n1.name,
+                                           'file1.txt'))
 
 
-def test_outputs_removal_wf():
+def test_outputs_removal_wf(tmpdir):
 
     def test_function(arg1):
         import os
@@ -212,7 +210,7 @@ def test_outputs_removal_wf():
         import os
         return arg
 
-    out_dir = mkdtemp()
+    out_dir = str(tmpdir)
 
     for plugin in ('Linear',):  # , 'MultiProc'):
         n1 = pe.Node(niu.Function(input_names=['arg1'],
@@ -243,37 +241,37 @@ def test_outputs_removal_wf():
             rmtree(os.path.join(wf.base_dir, wf.name))
             wf.run(plugin=plugin)
 
-            yield assert_true, os.path.exists(os.path.join(wf.base_dir,
-                                                           wf.name,
-                                                           n1.name,
-                                                           'file2.txt')) != remove_unnecessary_outputs
-            yield assert_true, os.path.exists(os.path.join(wf.base_dir,
-                                                           wf.name,
-                                                           n1.name,
-                                                           "subdir",
-                                                           'file1.txt')) != remove_unnecessary_outputs
-            yield assert_true, os.path.exists(os.path.join(wf.base_dir,
-                                                           wf.name,
-                                                           n1.name,
-                                                           'file1.txt'))
-            yield assert_true, os.path.exists(os.path.join(wf.base_dir,
-                                                           wf.name,
-                                                           n1.name,
-                                                           'file3.txt')) != remove_unnecessary_outputs
-            yield assert_true, os.path.exists(os.path.join(wf.base_dir,
-                                                           wf.name,
-                                                           n2.name,
-                                                           'file1.txt'))
-            yield assert_true, os.path.exists(os.path.join(wf.base_dir,
-                                                           wf.name,
-                                                           n2.name,
-                                                           'file2.txt'))
-            yield assert_true, os.path.exists(os.path.join(wf.base_dir,
-                                                           wf.name,
-                                                           n2.name,
-                                                           'file3.txt')) != remove_unnecessary_outputs
+            assert os.path.exists(os.path.join(wf.base_dir,
+                                               wf.name,
+                                               n1.name,
+                                               'file2.txt')) != remove_unnecessary_outputs
+            assert os.path.exists(os.path.join(wf.base_dir,
+                                               wf.name,
+                                               n1.name,
+                                               "subdir",
+                                               'file1.txt')) != remove_unnecessary_outputs
+            assert os.path.exists(os.path.join(wf.base_dir,
+                                               wf.name,
+                                               n1.name,
+                                               'file1.txt'))
+            assert os.path.exists(os.path.join(wf.base_dir,
+                                               wf.name,
+                                               n1.name,
+                                               'file3.txt')) != remove_unnecessary_outputs
+            assert os.path.exists(os.path.join(wf.base_dir,
+                                               wf.name,
+                                               n2.name,
+                                               'file1.txt'))
+            assert os.path.exists(os.path.join(wf.base_dir,
+                                               wf.name,
+                                               n2.name,
+                                               'file2.txt'))
+            assert os.path.exists(os.path.join(wf.base_dir,
+                                               wf.name,
+                                               n2.name,
+                                               'file3.txt')) != remove_unnecessary_outputs
 
-        n4 = pe.Node(TestInterface(), name='n4')
+        n4 = pe.Node(UtilsTestInterface(), name='n4')
         wf.connect(n2, "out_file1", n4, "in_file")
 
         def pick_first(l):
@@ -286,20 +284,18 @@ def test_outputs_removal_wf():
                 wf.config = {'execution': {'keep_inputs': keep_inputs, 'remove_unnecessary_outputs': remove_unnecessary_outputs}}
                 rmtree(os.path.join(wf.base_dir, wf.name))
                 wf.run(plugin=plugin)
-                yield assert_true, os.path.exists(os.path.join(wf.base_dir,
-                                                               wf.name,
-                                                               n2.name,
-                                                               'file1.txt'))
-                yield assert_true, os.path.exists(os.path.join(wf.base_dir,
-                                                               wf.name,
-                                                               n2.name,
-                                                               'file2.txt')) != remove_unnecessary_outputs
-                yield assert_true, os.path.exists(os.path.join(wf.base_dir,
-                                                               wf.name,
-                                                               n4.name,
-                                                               'file1.txt')) == keep_inputs
-
-    rmtree(out_dir)
+                assert os.path.exists(os.path.join(wf.base_dir,
+                                                   wf.name,
+                                                   n2.name,
+                                                   'file1.txt'))
+                assert os.path.exists(os.path.join(wf.base_dir,
+                                                   wf.name,
+                                                   n2.name,
+                                                   'file2.txt')) != remove_unnecessary_outputs
+                assert os.path.exists(os.path.join(wf.base_dir,
+                                                   wf.name,
+                                                   n4.name,
+                                                   'file1.txt')) == keep_inputs
 
 
 def fwhm(fwhm):
@@ -322,17 +318,16 @@ def create_wf(name):
     return pipe
 
 
-def test_multi_disconnected_iterable():
-    out_dir = mkdtemp()
+def test_multi_disconnected_iterable(tmpdir):
     metawf = pe.Workflow(name='meta')
-    metawf.base_dir = out_dir
+    metawf.base_dir = str(tmpdir)
     metawf.add_nodes([create_wf('wf%d' % i) for i in range(30)])
     eg = metawf.run(plugin='Linear')
-    yield assert_equal, len(eg.nodes()), 60
-    rmtree(out_dir)
+    assert len(eg.nodes()) == 60
 
-def test_provenance():
-    out_dir = mkdtemp()
+
+def test_provenance(tmpdir):
+    out_dir = str(tmpdir)
     metawf = pe.Workflow(name='meta')
     metawf.base_dir = out_dir
     metawf.add_nodes([create_wf('wf%d' % i) for i in range(1)])
@@ -340,6 +335,57 @@ def test_provenance():
     prov_base = os.path.join(out_dir,
                              'workflow_provenance_test')
     psg = write_workflow_prov(eg, prov_base, format='all')
-    yield assert_equal, len(psg.bundles), 2
-    yield assert_equal, len(psg.get_records()), 7
-    rmtree(out_dir)
+    assert len(psg.bundles) == 2
+    assert len(psg.get_records()) == 7
+
+
+def dummy_func(value):
+    return value + 1
+
+
+def test_mapnode_crash(tmpdir):
+    """Test mapnode crash when stop_on_first_crash is True"""
+    cwd = os.getcwd()
+    node = pe.MapNode(niu.Function(input_names=['WRONG'],
+                                   output_names=['newstring'],
+                                   function=dummy_func),
+                      iterfield=['WRONG'],
+                      name='myfunc')
+    node.inputs.WRONG = ['string{}'.format(i) for i in range(3)]
+    node.config = deepcopy(config._sections)
+    node.config['execution']['stop_on_first_crash'] = True
+    node.base_dir = str(tmpdir)
+    with pytest.raises(TypeError):
+        node.run()
+    os.chdir(cwd)
+
+
+def test_mapnode_crash2(tmpdir):
+    """Test mapnode crash when stop_on_first_crash is False"""
+    cwd = os.getcwd()
+    node = pe.MapNode(niu.Function(input_names=['WRONG'],
+                                   output_names=['newstring'],
+                                   function=dummy_func),
+                      iterfield=['WRONG'],
+                      name='myfunc')
+    node.inputs.WRONG = ['string{}'.format(i) for i in range(3)]
+    node.base_dir = str(tmpdir)
+
+    with pytest.raises(Exception):
+        node.run()
+    os.chdir(cwd)
+
+
+def test_mapnode_crash3(tmpdir):
+    """Test mapnode crash when mapnode is embedded in a workflow"""
+    node = pe.MapNode(niu.Function(input_names=['WRONG'],
+                                   output_names=['newstring'],
+                                   function=dummy_func),
+                      iterfield=['WRONG'],
+                      name='myfunc')
+    node.inputs.WRONG = ['string{}'.format(i) for i in range(3)]
+    wf = pe.Workflow('testmapnodecrash')
+    wf.add_nodes([node])
+    wf.base_dir = str(tmpdir)
+    with pytest.raises(RuntimeError):
+        wf.run(plugin='Linear')

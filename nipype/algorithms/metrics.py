@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 '''
@@ -11,9 +12,8 @@ measures to evaluate results from other processing units.
     >>> os.chdir(datadir)
 
 '''
-from __future__ import division
-from builtins import zip
-from builtins import range
+from __future__ import print_function, division, unicode_literals, absolute_import
+from builtins import zip, range
 
 import os
 import os.path as op
@@ -30,6 +30,8 @@ from ..utils.misc import package_check
 from ..interfaces.base import (BaseInterface, traits, TraitedSpec, File,
                                InputMultiPath,
                                BaseInterfaceInputSpec, isdefined)
+from nipype.utils import NUMPY_MMAP
+
 iflogger = logging.getLogger('interface')
 
 
@@ -410,8 +412,8 @@ class FuzzyOverlap(BaseInterface):
         assert(ncomp == len(self.inputs.in_tst))
         weights = np.ones(shape=ncomp)
 
-        img_ref = np.array([nb.load(fname).get_data() for fname in self.inputs.in_ref])
-        img_tst = np.array([nb.load(fname).get_data() for fname in self.inputs.in_tst])
+        img_ref = np.array([nb.load(fname, mmap=NUMPY_MMAP).get_data() for fname in self.inputs.in_ref])
+        img_tst = np.array([nb.load(fname, mmap=NUMPY_MMAP).get_data() for fname in self.inputs.in_tst])
 
         msk = np.sum(img_ref, axis=0)
         msk[msk > 0] = 1.0

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """Provides interfaces to various commands provided by dcmstack
 
    Change directory to provide relative paths for doctests
@@ -7,13 +8,12 @@
    >>> os.chdir(datadir)
 
 """
-
-from __future__ import absolute_import
+from __future__ import print_function, division, unicode_literals, absolute_import
 
 import os
+from os import path as op
 import string
 import errno
-from os import path as op
 from glob import glob
 
 import nibabel as nb
@@ -23,7 +23,8 @@ from .base import (TraitedSpec, DynamicTraitedSpec,
                    InputMultiPath, File, Directory,
                    traits, BaseInterface)
 from .traits_extension import isdefined, Undefined
-from ..external.six import string_types
+from ..utils import NUMPY_MMAP
+
 
 have_dcmstack = True
 try:
@@ -129,7 +130,7 @@ class DcmStack(NiftiGeneratorBase):
     output_spec = DcmStackOutputSpec
 
     def _get_filelist(self, trait_input):
-        if isinstance(trait_input, string_types):
+        if isinstance(trait_input, (str, bytes)):
             if op.isdir(trait_input):
                 return glob(op.join(trait_input, '*.dcm'))
             else:
@@ -182,7 +183,7 @@ class GroupAndStack(DcmStack):
         stacks = dcmstack.parse_and_stack(src_paths)
 
         self.out_list = []
-        for key, stack in stacks.items():
+        for key, stack in list(stacks.items()):
             nw = NiftiWrapper(stack.to_nifti(embed_meta=True))
             const_meta = nw.meta_ext.get_class_dict(('global', 'const'))
             out_path = self._get_out_path(const_meta)
@@ -258,7 +259,7 @@ class LookupMeta(BaseInterface):
         self._make_name_map()
         nw = NiftiWrapper.from_filename(self.inputs.in_file)
         self.result = {}
-        for meta_key, out_name in self._meta_keys.items():
+        for meta_key, out_name in list(self._meta_keys.items()):
             self.result[out_name] = nw.meta_ext.get_values(meta_key)
 
         return runtime
@@ -357,7 +358,7 @@ class MergeNifti(NiftiGeneratorBase):
     output_spec = MergeNiftiOutputSpec
 
     def _run_interface(self, runtime):
-        niis = [nb.load(fn)
+        niis = [nb.load(fn, mmap=NUMPY_MMAP)
                 for fn in self.inputs.in_files
                 ]
         nws = [NiftiWrapper(nii, make_empty=True)
@@ -365,7 +366,7 @@ class MergeNifti(NiftiGeneratorBase):
                ]
         if self.inputs.sort_order:
             sort_order = self.inputs.sort_order
-            if isinstance(sort_order, string_types):
+            if isinstance(sort_order, (str, bytes)):
                 sort_order = [sort_order]
             nws.sort(key=make_key_func(sort_order))
         if self.inputs.merge_dim == traits.Undefined:

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 
@@ -12,10 +13,10 @@ from .resampling import (ApplyTransforms, ApplyTransformsToPoints, WarpImageMult
 
 # Segmentation Programs
 from .segmentation import (Atropos, LaplacianThickness, N4BiasFieldCorrection, JointFusion, CorticalThickness,
-                           BrainExtraction, DenoiseImage)
+                           BrainExtraction, DenoiseImage, AntsJointFusion)
 
 # Visualization Programs
 from .visualization import ConvertScalarImageToRGB, CreateTiledMosaic
 
 # Utility Programs
-from .utils import AverageAffineTransform, AverageImages, MultiplyImages, JacobianDeterminant
+from .utils import AverageAffineTransform, AverageImages, MultiplyImages, CreateJacobianDeterminantImage

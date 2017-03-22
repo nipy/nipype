@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 
@@ -10,10 +11,11 @@ from ....interfaces import fsl as fsl
 
 
 def tbss1_op_string(in_files):
-    import nibabel as nib
+    import nibabel as nb
+    from nipype.utils import NUMPY_MMAP
     op_strings = []
     for infile in in_files:
-        img = nib.load(infile)
+        img = nb.load(infile, mmap=NUMPY_MMAP)
         dimtup = tuple(d - 2 for d in img.shape)
         dimtup = dimtup[0:3]
         op_str = '-min 1 -ero -roi 1 %d 1 %d 1 %d 0 1' % dimtup

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """The ants module provides basic functions for interfacing with ants functions.
 
    Change directory to provide relative paths for doctests
@@ -7,14 +8,14 @@
    >>> os.chdir(datadir)
 
 """
+from __future__ import print_function, division, unicode_literals, absolute_import
+from builtins import range, str
 
-from builtins import range
-
-from ..base import TraitedSpec, File, traits, InputMultiPath, OutputMultiPath, isdefined
-from ...utils.filemanip import split_filename
-from .base import ANTSCommand, ANTSCommandInputSpec
 import os
-from ...utils.filemanip import copyfile
+from ...external.due import BibTeX
+from ...utils.filemanip import split_filename, copyfile
+from ..base import TraitedSpec, File, traits, InputMultiPath, OutputMultiPath, isdefined
+from .base import ANTSCommand, ANTSCommandInputSpec
 
 
 class AtroposInputSpec(ANTSCommandInputSpec):
@@ -89,11 +90,12 @@ class Atropos(ANTSCommand):
     >>> at.inputs.posterior_formulation = 'Socrates'
     >>> at.inputs.use_mixture_model_proportions = True
     >>> at.inputs.save_posteriors = True
-    >>> at.cmdline
+    >>> at.cmdline # doctest: +ALLOW_UNICODE
     'Atropos --image-dimensionality 3 --icm [1,1] \
 --initialization PriorProbabilityImages[2,priors/priorProbImages%02d.nii,0.8,1e-07] --intensity-image structural.nii \
 --likelihood-model Gaussian --mask-image mask.nii --mrf [0.2,1x1x1] --convergence [5,1e-06] \
 --output [structural_labeled.nii,POSTERIOR_%02d.nii.gz] --posterior-formulation Socrates[1] --use-random-seed 1'
+
     """
     input_spec = AtroposInputSpec
     output_spec = AtroposOutputSpec
@@ -206,7 +208,7 @@ class LaplacianThickness(ANTSCommand):
     >>> cort_thick.inputs.input_wm = 'white_matter.nii.gz'
     >>> cort_thick.inputs.input_gm = 'gray_matter.nii.gz'
     >>> cort_thick.inputs.output_image = 'output_thickness.nii.gz'
-    >>> cort_thick.cmdline
+    >>> cort_thick.cmdline # doctest: +ALLOW_UNICODE
     'LaplacianThickness white_matter.nii.gz gray_matter.nii.gz output_thickness.nii.gz'
 
     """
@@ -288,7 +290,7 @@ class N4BiasFieldCorrection(ANTSCommand):
     >>> n4.inputs.bspline_fitting_distance = 300
     >>> n4.inputs.shrink_factor = 3
     >>> n4.inputs.n_iterations = [50,50,30,20]
-    >>> n4.cmdline
+    >>> n4.cmdline # doctest: +ALLOW_UNICODE
     'N4BiasFieldCorrection --bspline-fitting [ 300 ] \
 -d 3 --input-image structural.nii \
 --convergence [ 50x50x30x20 ] --output structural_corrected.nii \
@@ -296,7 +298,7 @@ class N4BiasFieldCorrection(ANTSCommand):
 
     >>> n4_2 = copy.deepcopy(n4)
     >>> n4_2.inputs.convergence_threshold = 1e-6
-    >>> n4_2.cmdline
+    >>> n4_2.cmdline # doctest: +ALLOW_UNICODE
     'N4BiasFieldCorrection --bspline-fitting [ 300 ] \
 -d 3 --input-image structural.nii \
 --convergence [ 50x50x30x20, 1e-06 ] --output structural_corrected.nii \
@@ -304,7 +306,7 @@ class N4BiasFieldCorrection(ANTSCommand):
 
     >>> n4_3 = copy.deepcopy(n4_2)
     >>> n4_3.inputs.bspline_order = 5
-    >>> n4_3.cmdline
+    >>> n4_3.cmdline # doctest: +ALLOW_UNICODE
     'N4BiasFieldCorrection --bspline-fitting [ 300, 5 ] \
 -d 3 --input-image structural.nii \
 --convergence [ 50x50x30x20, 1e-06 ] --output structural_corrected.nii \
@@ -314,7 +316,7 @@ class N4BiasFieldCorrection(ANTSCommand):
     >>> n4_4.inputs.input_image = 'structural.nii'
     >>> n4_4.inputs.save_bias = True
     >>> n4_4.inputs.dimension = 3
-    >>> n4_4.cmdline
+    >>> n4_4.cmdline # doctest: +ALLOW_UNICODE
     'N4BiasFieldCorrection -d 3 --input-image structural.nii \
 --output [ structural_corrected.nii, structural_bias.nii ]'
     """
@@ -498,12 +500,15 @@ class CorticalThickness(ANTSCommand):
     >>> corticalthickness.inputs.anatomical_image ='T1.nii.gz'
     >>> corticalthickness.inputs.brain_template = 'study_template.nii.gz'
     >>> corticalthickness.inputs.brain_probability_mask ='ProbabilityMaskOfStudyTemplate.nii.gz'
-    >>> corticalthickness.inputs.segmentation_priors = ['BrainSegmentationPrior01.nii.gz', \
-    'BrainSegmentationPrior02.nii.gz', 'BrainSegmentationPrior03.nii.gz', 'BrainSegmentationPrior04.nii.gz']
+    >>> corticalthickness.inputs.segmentation_priors = ['BrainSegmentationPrior01.nii.gz',
+    ...                                                 'BrainSegmentationPrior02.nii.gz',
+    ...                                                 'BrainSegmentationPrior03.nii.gz',
+    ...                                                 'BrainSegmentationPrior04.nii.gz']
     >>> corticalthickness.inputs.t1_registration_template = 'brain_study_template.nii.gz'
-    >>> corticalthickness.cmdline
+    >>> corticalthickness.cmdline # doctest: +ALLOW_UNICODE
     'antsCorticalThickness.sh -a T1.nii.gz -m ProbabilityMaskOfStudyTemplate.nii.gz -e study_template.nii.gz -d 3 \
 -s nii.gz -o antsCT_ -p nipype_priors/BrainSegmentationPrior%02d.nii.gz -t brain_study_template.nii.gz'
+
     """
 
     input_spec = CorticalThicknessInputSpec
@@ -651,6 +656,22 @@ class BrainExtractionInputSpec(ANTSCommandInputSpec):
 class BrainExtractionOutputSpec(TraitedSpec):
     BrainExtractionMask = File(exists=True, desc='brain extraction mask')
     BrainExtractionBrain = File(exists=True, desc='brain extraction image')
+    BrainExtractionCSF = File(exists=True, desc='segmentation mask with only CSF')
+    BrainExtractionGM = File(exists=True, desc='segmentation mask with only grey matter')
+    BrainExtractionInitialAffine = File(exists=True, desc='')
+    BrainExtractionInitialAffineFixed = File(exists=True, desc='')
+    BrainExtractionInitialAffineMoving = File(exists=True, desc='')
+    BrainExtractionLaplacian = File(exists=True, desc='')
+    BrainExtractionPrior0GenericAffine = File(exists=True, desc='')
+    BrainExtractionPrior1InverseWarp = File(exists=True, desc='')
+    BrainExtractionPrior1Warp = File(exists=True, desc='')
+    BrainExtractionPriorWarped = File(exists=True, desc='')
+    BrainExtractionSegmentation = File(exists=True, desc='segmentation mask with CSF, GM, and WM')
+    BrainExtractionTemplateLaplacian = File(exists=True, desc='')
+    BrainExtractionTmp = File(exists=True, desc='')
+    BrainExtractionWM = File(exists=True, desc='segmenration mask with only white matter')
+    N4Corrected0 = File(exists=True, desc='N4 bias field corrected image')
+    N4Truncated0 = File(exists=True, desc='')
 
 
 class BrainExtraction(ANTSCommand):
@@ -663,7 +684,7 @@ class BrainExtraction(ANTSCommand):
     >>> brainextraction.inputs.anatomical_image ='T1.nii.gz'
     >>> brainextraction.inputs.brain_template = 'study_template.nii.gz'
     >>> brainextraction.inputs.brain_probability_mask ='ProbabilityMaskOfStudyTemplate.nii.gz'
-    >>> brainextraction.cmdline
+    >>> brainextraction.cmdline # doctest: +ALLOW_UNICODE
     'antsBrainExtraction.sh -a T1.nii.gz -m ProbabilityMaskOfStudyTemplate.nii.gz -e study_template.nii.gz -d 3 \
 -s nii.gz -o highres001_'
     """
@@ -681,6 +702,72 @@ class BrainExtraction(ANTSCommand):
                                                        self.inputs.out_prefix +
                                                        'BrainExtractionBrain.' +
                                                        self.inputs.image_suffix)
+        if isdefined(self.inputs.keep_temporary_files) and self.inputs.keep_temporary_files != 0:
+            outputs['BrainExtractionCSF'] = os.path.join(
+                os.getcwd(),
+                self.inputs.out_prefix + 'BrainExtractionCSF.' + self.inputs.image_suffix
+            )
+            outputs['BrainExtractionGM'] = os.path.join(
+                os.getcwd(),
+                self.inputs.out_prefix + 'BrainExtractionGM.' + self.inputs.image_suffix
+            )
+            outputs['BrainExtractionInitialAffine'] = os.path.join(
+                os.getcwd(),
+                self.inputs.out_prefix +'BrainExtractionInitialAffine.mat'
+            )
+            outputs['BrainExtractionInitialAffineFixed'] = os.path.join(
+                os.getcwd(),
+                self.inputs.out_prefix + 'BrainExtractionInitialAffineFixed.' + self.inputs.image_suffix
+            )
+            outputs['BrainExtractionInitialAffineMoving'] = os.path.join(
+                os.getcwd(),
+                self.inputs.out_prefix + 'BrainExtractionInitialAffineMoving.' + self.inputs.image_suffix
+            )
+            outputs['BrainExtractionLaplacian'] = os.path.join(
+                os.getcwd(),
+                self.inputs.out_prefix + 'BrainExtractionLaplacian.' + self.inputs.image_suffix
+            )
+            outputs['BrainExtractionPrior0GenericAffine'] = os.path.join(
+                os.getcwd(),
+                self.inputs.out_prefix + 'BrainExtractionPrior0GenericAffine.mat'
+            )
+            outputs['BrainExtractionPrior1InverseWarp'] = os.path.join(
+                os.getcwd(),
+                self.inputs.out_prefix + 'BrainExtractionPrior1InverseWarp.' + self.inputs.image_suffix
+            )
+            outputs['BrainExtractionPrior1Warp'] = os.path.join(
+                os.getcwd(),
+                self.inputs.out_prefix + 'BrainExtractionPrior1Warp.' + self.inputs.image_suffix
+            )
+            outputs['BrainExtractionPriorWarped'] = os.path.join(
+                os.getcwd(),
+                self.inputs.out_prefix + 'BrainExtractionPriorWarped.' + self.inputs.image_suffix
+            )
+            outputs['BrainExtractionSegmentation'] = os.path.join(
+                os.getcwd(),
+                self.inputs.out_prefix + 'BrainExtractionSegmentation.' + self.inputs.image_suffix
+            )
+            outputs['BrainExtractionTemplateLaplacian'] = os.path.join(
+                os.getcwd(),
+                self.inputs.out_prefix + 'BrainExtractionTemplateLaplacian.' + self.inputs.image_suffix
+            )
+            outputs['BrainExtractionTmp'] = os.path.join(
+                os.getcwd(),
+                self.inputs.out_prefix + 'BrainExtractionTmp.' + self.inputs.image_suffix
+            )
+            outputs['BrainExtractionWM'] = os.path.join(
+                os.getcwd(),
+                self.inputs.out_prefix + 'BrainExtractionWM.' + self.inputs.image_suffix
+            )
+            outputs['N4Corrected0'] = os.path.join(
+                os.getcwd(),
+                self.inputs.out_prefix + 'N4Corrected0.' + self.inputs.image_suffix
+            )
+            outputs['N4Truncated0'] = os.path.join(
+                os.getcwd(),
+                self.inputs.out_prefix + 'N4Truncated0.' + self.inputs.image_suffix
+            )
+
         return outputs
 
 
@@ -754,7 +841,7 @@ class JointFusion(ANTSCommand):
     ...                                  'segmentation1.nii.gz',
     ...                                  'segmentation1.nii.gz']
     >>> at.inputs.target_image = 'T1.nii'
-    >>> at.cmdline
+    >>> at.cmdline # doctest: +ALLOW_UNICODE
     'jointfusion 3 1 -m Joint[0.1,2] -tg T1.nii -g im1.nii -g im2.nii -g im3.nii -l segmentation0.nii.gz \
 -l segmentation1.nii.gz -l segmentation1.nii.gz fusion_labelimage_output.nii'
 
@@ -763,7 +850,7 @@ class JointFusion(ANTSCommand):
     >>> at.inputs.beta = 1
     >>> at.inputs.patch_radius = [3,2,1]
     >>> at.inputs.search_radius = [1,2,3]
-    >>> at.cmdline
+    >>> at.cmdline # doctest: +ALLOW_UNICODE
     'jointfusion 3 1 -m Joint[0.5,1] -rp 3x2x1 -rs 1x2x3 -tg T1.nii -g im1.nii -g im2.nii -g im3.nii \
 -l segmentation0.nii.gz -l segmentation1.nii.gz -l segmentation1.nii.gz fusion_labelimage_output.nii'
     """
@@ -828,7 +915,7 @@ class DenoiseImageInputSpec(ANTSCommandInputSpec):
 
 class DenoiseImageOutputSpec(TraitedSpec):
     output_image = File(exists=True)
-    noise_image = File(exists=True)
+    noise_image = File()
 
 
 class DenoiseImage(ANTSCommand):
@@ -840,20 +927,20 @@ class DenoiseImage(ANTSCommand):
     >>> denoise = DenoiseImage()
     >>> denoise.inputs.dimension = 3
     >>> denoise.inputs.input_image = 'im1.nii'
-    >>> denoise.cmdline
+    >>> denoise.cmdline # doctest: +ALLOW_UNICODE
     'DenoiseImage -d 3 -i im1.nii -n Gaussian -o im1_noise_corrected.nii -s 1'
 
     >>> denoise_2 = copy.deepcopy(denoise)
     >>> denoise_2.inputs.output_image = 'output_corrected_image.nii.gz'
     >>> denoise_2.inputs.noise_model = 'Rician'
     >>> denoise_2.inputs.shrink_factor = 2
-    >>> denoise_2.cmdline
+    >>> denoise_2.cmdline # doctest: +ALLOW_UNICODE
     'DenoiseImage -d 3 -i im1.nii -n Rician -o output_corrected_image.nii.gz -s 2'
 
     >>> denoise_3 = DenoiseImage()
     >>> denoise_3.inputs.input_image = 'im1.nii'
     >>> denoise_3.inputs.save_noise = True
-    >>> denoise_3.cmdline
+    >>> denoise_3.cmdline # doctest: +ALLOW_UNICODE
     'DenoiseImage -i im1.nii -n Gaussian -o [ im1_noise_corrected.nii, im1_noise.nii ] -s 1'
     """
     input_spec = DenoiseImageInputSpec
@@ -869,3 +956,376 @@ class DenoiseImage(ANTSCommand):
 
         return super(DenoiseImage,
                      self)._format_arg(name, trait_spec, value)
+
+
+class AntsJointFusionInputSpec(ANTSCommandInputSpec):
+    dimension = traits.Enum(3, 2, 4, argstr='-d %d', usedefault=False,
+                            desc='This option forces the image to be treated '
+                                 'as a specified-dimensional image. If not '
+                                 'specified, the program tries to infer the '
+                                 'dimensionality from the input image.')
+    target_image = traits.List(InputMultiPath(File(exists=True)), argstr='-t %s',
+                                  mandatory=True, desc='The target image (or '
+                                  'multimodal target images) assumed to be '
+                                  'aligned to a common image domain.')
+    atlas_image = traits.List(InputMultiPath(File(exists=True)), argstr="-g %s...",
+                                 mandatory=True, desc='The atlas image (or '
+                                 'multimodal atlas images) assumed to be '
+                                 'aligned to a common image domain.')
+    atlas_segmentation_image = InputMultiPath(File(exists=True), argstr="-l %s...",
+                                  mandatory=True, desc='The atlas segmentation '
+                                  'images. For performing label fusion the number '
+                                  'of specified segmentations should be identical '
+                                  'to the number of atlas image sets.')
+    alpha = traits.Float(default_value=0.1, usedefault=True, argstr='-a %s', desc=('Regularization '
+                         'term added to matrix Mx for calculating the inverse. Default = 0.1'))
+    beta = traits.Float(default_value=2.0, usedefault=True, argstr='-b %s', desc=('Exponent for mapping '
+                      'intensity difference to the joint error. Default = 2.0'))
+    retain_label_posterior_images = traits.Bool(False, argstr='-r', usedefault=True,
+                         requires=['atlas_segmentation_image'],
+                         desc=('Retain label posterior probability images. Requires '
+                               'atlas segmentations to be specified. Default = false'))
+    retain_atlas_voting_images = traits.Bool(False, argstr='-f', usedefault=True,
+                         desc=('Retain atlas voting images. Default = false'))
+    constrain_nonnegative = traits.Bool(False, argstr='-c', usedefault=True,
+                         desc=('Constrain solution to non-negative weights.'))
+    patch_radius = traits.ListInt(minlen=3, maxlen=3, argstr='-p %s',
+                                  desc=('Patch radius for similarity measures.'
+                                        'Default: 2x2x2'))
+    patch_metric = traits.Enum('PC', 'MSQ', argstr='-m %s', usedefault=False,
+                        desc=('Metric to be used in determining the most similar '
+                              'neighborhood patch. Options include Pearson\'s '
+                              'correlation (PC) and mean squares (MSQ). Default = '
+                              'PC (Pearson correlation).'))
+    search_radius = traits.List([3,3,3], minlen=1, maxlen=3, argstr='-s %s', usedefault=True,
+                                   desc=('Search radius for similarity measures. Default = 3x3x3. '
+                                         'One can also specify an image where the value at the '
+                                         'voxel specifies the isotropic search radius at that voxel.'))
+    exclusion_image_label = traits.List(traits.Str(), argstr='-e %s', requires=['exclusion_image'],
+                                       desc=('Specify a label for the exclusion region.'))
+    exclusion_image = traits.List(File(exists=True),
+                                  desc=('Specify an exclusion region for the given label.'))
+    mask_image = File(argstr='-x %s', exists=True, desc='If a mask image '
+                      'is specified, fusion is only performed in the mask region.')
+    out_label_fusion = File(argstr="%s", hash_files=False,
+                            desc='The output label fusion image.')
+    out_intensity_fusion_name_format = traits.Str('antsJointFusionIntensity_%d.nii.gz',
+                                                  argstr="", desc='Optional intensity fusion '
+                                                                  'image file name format.')
+    out_label_post_prob_name_format = traits.Str('antsJointFusionPosterior_%d.nii.gz',
+                                                 requires=['out_label_fusion',
+                                                           'out_intensity_fusion_name_format'],
+                                                 desc='Optional label posterior probability '
+                                                      'image file name format.')
+    out_atlas_voting_weight_name_format = traits.Str('antsJointFusionVotingWeight_%d.nii.gz',
+                                                     requires=['out_label_fusion',
+                                                               'out_intensity_fusion_name_format',
+                                                               'out_label_post_prob_name_format'],
+                                                     desc='Optional atlas voting weight image '
+                                                          'file name format.')
+    verbose = traits.Bool(False, argstr="-v", desc=('Verbose output.'))
+
+
+class AntsJointFusionOutputSpec(TraitedSpec):
+    out_label_fusion = File(exists=True)
+    out_intensity_fusion_name_format = traits.Str()
+    out_label_post_prob_name_format = traits.Str()
+    out_atlas_voting_weight_name_format = traits.Str()
+
+
+class AntsJointFusion(ANTSCommand):
+    """
+    Examples
+    --------
+
+    >>> from nipype.interfaces.ants import AntsJointFusion
+    >>> antsjointfusion = AntsJointFusion()
+    >>> antsjointfusion.inputs.out_label_fusion = 'ants_fusion_label_output.nii'
+    >>> antsjointfusion.inputs.atlas_image = [ ['rc1s1.nii','rc1s2.nii'] ]
+    >>> antsjointfusion.inputs.atlas_segmentation_image = ['segmentation0.nii.gz']
+    >>> antsjointfusion.inputs.target_image = ['im1.nii']
+    >>> antsjointfusion.cmdline # doctest: +ALLOW_UNICODE
+    "antsJointFusion -a 0.1 -g ['rc1s1.nii', 'rc1s2.nii'] -l segmentation0.nii.gz \
+-b 2.0 -o ants_fusion_label_output.nii -s 3x3x3 -t ['im1.nii']"
+
+    >>> antsjointfusion.inputs.target_image = [ ['im1.nii', 'im2.nii'] ]
+    >>> antsjointfusion.cmdline # doctest: +ALLOW_UNICODE
+    "antsJointFusion -a 0.1 -g ['rc1s1.nii', 'rc1s2.nii'] -l segmentation0.nii.gz \
+-b 2.0 -o ants_fusion_label_output.nii -s 3x3x3 -t ['im1.nii', 'im2.nii']"
+
+    >>> antsjointfusion.inputs.atlas_image = [ ['rc1s1.nii','rc1s2.nii'],
+    ...                                        ['rc2s1.nii','rc2s2.nii'] ]
+    >>> antsjointfusion.inputs.atlas_segmentation_image = ['segmentation0.nii.gz',
+    ...                                                    'segmentation1.nii.gz']
+    >>> antsjointfusion.cmdline # doctest: +ALLOW_UNICODE
+    "antsJointFusion -a 0.1 -g ['rc1s1.nii', 'rc1s2.nii'] -g ['rc2s1.nii', 'rc2s2.nii'] \
+-l segmentation0.nii.gz -l segmentation1.nii.gz -b 2.0 -o ants_fusion_label_output.nii \
+-s 3x3x3 -t ['im1.nii', 'im2.nii']"
+
+    >>> antsjointfusion.inputs.dimension = 3
+    >>> antsjointfusion.inputs.alpha = 0.5
+    >>> antsjointfusion.inputs.beta = 1.0
+    >>> antsjointfusion.inputs.patch_radius = [3,2,1]
+    >>> antsjointfusion.inputs.search_radius = [3]
+    >>> antsjointfusion.cmdline # doctest: +ALLOW_UNICODE
+    "antsJointFusion -a 0.5 -g ['rc1s1.nii', 'rc1s2.nii'] -g ['rc2s1.nii', 'rc2s2.nii'] \
+-l segmentation0.nii.gz -l segmentation1.nii.gz -b 1.0 -d 3 -o ants_fusion_label_output.nii \
+-p 3x2x1 -s 3 -t ['im1.nii', 'im2.nii']"
+
+    >>> antsjointfusion.inputs.search_radius = ['mask.nii']
+    >>> antsjointfusion.inputs.verbose = True
+    >>> antsjointfusion.inputs.exclusion_image = ['roi01.nii', 'roi02.nii']
+    >>> antsjointfusion.inputs.exclusion_image_label = ['1','2']
+    >>> antsjointfusion.cmdline # doctest: +ALLOW_UNICODE
+    "antsJointFusion -a 0.5 -g ['rc1s1.nii', 'rc1s2.nii'] -g ['rc2s1.nii', 'rc2s2.nii'] \
+-l segmentation0.nii.gz -l segmentation1.nii.gz -b 1.0 -d 3 -e 1[roi01.nii] -e 2[roi02.nii] \
+-o ants_fusion_label_output.nii -p 3x2x1 -s mask.nii -t ['im1.nii', 'im2.nii'] -v"
+
+    >>> antsjointfusion.inputs.out_label_fusion = 'ants_fusion_label_output.nii'
+    >>> antsjointfusion.inputs.out_intensity_fusion_name_format = 'ants_joint_fusion_intensity_%d.nii.gz'
+    >>> antsjointfusion.inputs.out_label_post_prob_name_format = 'ants_joint_fusion_posterior_%d.nii.gz'
+    >>> antsjointfusion.inputs.out_atlas_voting_weight_name_format = 'ants_joint_fusion_voting_weight_%d.nii.gz'
+    >>> antsjointfusion.cmdline # doctest: +ALLOW_UNICODE
+    "antsJointFusion -a 0.5 -g ['rc1s1.nii', 'rc1s2.nii'] -g ['rc2s1.nii', 'rc2s2.nii'] \
+-l segmentation0.nii.gz -l segmentation1.nii.gz -b 1.0 -d 3 -e 1[roi01.nii] -e 2[roi02.nii]  \
+-o [ants_fusion_label_output.nii, ants_joint_fusion_intensity_%d.nii.gz, \
+ants_joint_fusion_posterior_%d.nii.gz, ants_joint_fusion_voting_weight_%d.nii.gz] \
+-p 3x2x1 -s mask.nii -t ['im1.nii', 'im2.nii'] -v"
+
+    """
+    input_spec = AntsJointFusionInputSpec
+    output_spec = AntsJointFusionOutputSpec
+    _cmd = 'antsJointFusion'
+
+    def _format_arg(self, opt, spec, val):
+        if opt == 'exclusion_image_label':
+            retval = []
+            for ii in range(len(self.inputs.exclusion_image_label)):
+                retval.append('-e {0}[{1}]'.format(
+                    self.inputs.exclusion_image_label[ii],
+                    self.inputs.exclusion_image[ii]))
+            retval = ' '.join(retval)
+        elif opt == 'patch_radius':
+            retval = '-p {0}'.format(self._format_xarray(val))
+        elif opt == 'search_radius':
+            retval = '-s {0}'.format(self._format_xarray(val))
+        elif opt == 'out_label_fusion':
+            if isdefined(self.inputs.out_intensity_fusion_name_format):
+                if isdefined(self.inputs.out_label_post_prob_name_format):
+                    if isdefined(self.inputs.out_atlas_voting_weight_name_format):
+                        retval = '-o [{0}, {1}, {2}, {3}]'.format(self.inputs.out_label_fusion,
+                                                self.inputs.out_intensity_fusion_name_format,
+                                                self.inputs.out_label_post_prob_name_format,
+                                                self.inputs.out_atlas_voting_weight_name_format)
+                    else:
+                        retval = '-o [{0}, {1}, {2}]'.format(self.inputs.out_label_fusion,
+                                                self.inputs.out_intensity_fusion_name_format,
+                                                self.inputs.out_label_post_prob_name_format)
+                else:
+                    retval = '-o [{0}, {1}]'.format(self.inputs.out_label_fusion,
+                                                self.inputs.out_intensity_fusion_name_format)
+            else:
+                retval = '-o {0}'.format(self.inputs.out_label_fusion)
+        elif opt == 'out_intensity_fusion_name_format':
+            retval = ''
+            if not isdefined(self.inputs.out_label_fusion):
+                retval = '-o {0}'.format(self.inputs.out_intensity_fusion_name_format)
+        elif opt == 'atlas_image':
+            atlas_image_cmd = " ".join(
+                ['-g [{0}]'.format(", ".join("'%s'" % fn for fn in ai))
+                                   for ai in self.inputs.atlas_image]
+            )
+            retval = atlas_image_cmd
+        elif opt == 'target_image':
+            target_image_cmd = " ".join(
+                ['-t [{0}]'.format(", ".join("'%s'" % fn for fn in ai))
+                                   for ai in self.inputs.target_image]
+            )
+            retval = target_image_cmd
+        elif opt == 'atlas_segmentation_image':
+            assert len(val) == len(self.inputs.atlas_image), "Number of specified " \
+                "segmentations should be identical to the number of atlas image " \
+                "sets {0}!={1}".format(len(val), len(self.inputs.atlas_image))
+
+            atlas_segmentation_image_cmd = " ".join(
+                ['-l {0}'.format(fn) for fn in self.inputs.atlas_segmentation_image]
+            )
+            retval = atlas_segmentation_image_cmd
+        else:
+
+            return super(AntsJointFusion, self)._format_arg(opt, spec, val)
+        return retval
+
+    def _list_outputs(self):
+        outputs = self._outputs().get()
+        if isdefined(self.inputs.out_label_fusion):
+            outputs['out_label_fusion'] = os.path.abspath(
+                self.inputs.out_label_fusion)
+        if isdefined(self.inputs.out_intensity_fusion_name_format):
+            outputs['out_intensity_fusion_name_format'] = os.path.abspath(
+                self.inputs.out_intensity_fusion_name_format)
+        if isdefined(self.inputs.out_label_post_prob_name_format):
+            outputs['out_label_post_prob_name_format'] = os.path.abspath(
+                self.inputs.out_label_post_prob_name_format)
+        if isdefined(self.inputs.out_atlas_voting_weight_name_format):
+            outputs['out_atlas_voting_weight_name_format'] = os.path.abspath(
+                self.inputs.out_atlas_voting_weight_name_format)
+
+        return outputs
+
+
+class KellyKapowskiInputSpec(ANTSCommandInputSpec):
+    dimension = traits.Enum(3, 2, argstr='--image-dimensionality %d', usedefault=True,
+                            desc='image dimension (2 or 3)')
+
+    segmentation_image = File(exists=True, argstr='--segmentation-image "%s"', mandatory=True,
+                              desc="A segmentation image must be supplied labeling the gray and white matters.\n"
+                                   "Default values = 2 and 3, respectively.",)
+
+    gray_matter_label = traits.Int(2, usedefault=True,
+                                   desc="The label value for the gray matter label in the segmentation_image.")
+
+    white_matter_label = traits.Int(3, usedefault=True,
+                                    desc="The label value for the white matter label in the segmentation_image.")
+
+    gray_matter_prob_image = File(exists=True, argstr='--gray-matter-probability-image "%s"',
+                                  desc="In addition to the segmentation image, a gray matter probability image can be\n"
+                                       "used. If no such image is supplied, one is created using the segmentation image\n"
+                                       "and a variance of 1.0 mm.")
+
+    white_matter_prob_image = File(exists=True, argstr='--white-matter-probability-image "%s"',
+                                   desc="In addition to the segmentation image, a white matter probability image can be\n"
+                                       "used. If no such image is supplied, one is created using the segmentation image\n"
+                                       "and a variance of 1.0 mm.")
+
+    convergence = traits.Str(default="[50,0.001,10]", argstr='--convergence "%s"', usedefault=True,
+                             desc="Convergence is determined by fitting a line to the normalized energy profile of\n"
+                                  "the last N iterations (where N is specified by the window size) and determining\n"
+                                  "the slope which is then compared with the convergence threshold.",)
+
+    thickness_prior_estimate = traits.Float(10, usedefault=True, argstr="--thickness-prior-estimate %f",
+                                            desc="Provides a prior constraint on the final thickness measurement in mm.")
+
+    thickness_prior_image = File(exists=True, argstr='--thickness-prior-image "%s"',
+                                 desc="An image containing spatially varying prior thickness values.")
+
+    gradient_step = traits.Float(0.025, usedefault=True, argstr="--gradient-step %f",
+                                 desc="Gradient step size for the optimization.")
+
+    smoothing_variance = traits.Float(1.0, argstr="--smoothing-variance %f",
+                                      desc="Defines the Gaussian smoothing of the hit and total images.")
+
+    smoothing_velocity_field = traits.Float(1.5, argstr="--smoothing-velocity-field-parameter %f",
+                                            desc="Defines the Gaussian smoothing of the velocity field (default = 1.5).\n"
+                                            "If the b-spline smoothing option is chosen, then this defines the \n"
+                                            "isotropic mesh spacing for the smoothing spline (default = 15).")
+
+    use_bspline_smoothing = traits.Bool(argstr="--use-bspline-smoothing 1",
+                                        desc="Sets the option for B-spline smoothing of the velocity field.")
+
+    number_integration_points = traits.Int(10, argstr="--number-of-integration-points %d",
+                                           desc="Number of compositions of the diffeomorphism per iteration.")
+
+    max_invert_displacement_field_iters = traits.Int(20, argstr="--maximum-number-of-invert-displacement-field-iterations %d",
+                                                     desc="Maximum number of iterations for estimating the invert \n"
+                                                          "displacement field.")
+
+    cortical_thickness = File(argstr='--output "%s"', keep_extension=True,
+                              name_source=["segmentation_image"], name_template='%s_cortical_thickness',
+                              desc='Filename for the cortical thickness.', hash_files=False)
+
+    warped_white_matter = File(name_source=["segmentation_image"], keep_extension=True,
+                               name_template='%s_warped_white_matter',
+                               desc='Filename for the warped white matter file.', hash_files=False)
+
+
+class KellyKapowskiOutputSpec(TraitedSpec):
+    cortical_thickness = File(desc="A thickness map defined in the segmented gray matter.")
+    warped_white_matter = File(desc="A warped white matter image.")
+
+
+class KellyKapowski(ANTSCommand):
+    """ Nipype Interface to ANTs' KellyKapowski, also known as DiReCT.
+
+    DiReCT is a registration based estimate of cortical thickness. It was published
+    in S. R. Das, B. B. Avants, M. Grossman, and J. C. Gee, Registration based
+    cortical thickness measurement, Neuroimage 2009, 45:867--879.
+
+    Examples
+    --------
+    >>> from nipype.interfaces.ants.segmentation import KellyKapowski
+    >>> kk = KellyKapowski()
+    >>> kk.inputs.dimension = 3
+    >>> kk.inputs.segmentation_image = "segmentation0.nii.gz"
+    >>> kk.inputs.convergence = "[45,0.0,10]"
+    >>> kk.inputs.gradient_step = 0.025
+    >>> kk.inputs.smoothing_variance = 1.0
+    >>> kk.inputs.smoothing_velocity_field = 1.5
+    >>> #kk.inputs.use_bspline_smoothing = False
+    >>> kk.inputs.number_integration_points = 10
+    >>> kk.inputs.thickness_prior_estimate = 10
+    >>> kk.cmdline # doctest: +ALLOW_UNICODE
+    u'KellyKapowski --convergence "[45,0.0,10]" \
+--output "[segmentation0_cortical_thickness.nii.gz,segmentation0_warped_white_matter.nii.gz]" \
+--image-dimensionality 3 --gradient-step 0.025000 --number-of-integration-points 10 \
+--segmentation-image "[segmentation0.nii.gz,2,3]" --smoothing-variance 1.000000 \
+--smoothing-velocity-field-parameter 1.500000 --thickness-prior-estimate 10.000000'
+
+    """
+    _cmd = "KellyKapowski"
+    input_spec = KellyKapowskiInputSpec
+    output_spec = KellyKapowskiOutputSpec
+
+    references_ = [{'entry': BibTeX("@book{Das2009867,"
+                                    "author={Sandhitsu R. Das and Brian B. Avants and Murray Grossman and James C. Gee},"
+                                    "title={Registration based cortical thickness measurement.},"
+                                    "journal={NeuroImage},"
+                                    "volume={45},"
+                                    "number={37},"
+                                    "pages={867--879},"
+                                    "year={2009},"
+                                    "issn={1053-8119},"
+                                    "url={http://www.sciencedirect.com/science/article/pii/S1053811908012780},"
+                                    "doi={http://dx.doi.org/10.1016/j.neuroimage.2008.12.016}"
+                                    "}"),
+                    'description': 'The details on the implementation of DiReCT.',
+                    'tags': ['implementation'],
+                    }]
+
+    def _parse_inputs(self, skip=None):
+        if skip is None:
+            skip = []
+        skip += ['warped_white_matter', 'gray_matter_label', 'white_matter_label']
+        return super(KellyKapowski, self)._parse_inputs(skip=skip)
+
+    def _gen_filename(self, name):
+        if name == 'cortical_thickness':
+            output = self.inputs.cortical_thickness
+            if not isdefined(output):
+                _, name, ext = split_filename(self.inputs.segmentation_image)
+                output = name + '_cortical_thickness' + ext
+            return output
+
+        if name == 'warped_white_matter':
+            output = self.inputs.warped_white_matter
+            if not isdefined(output):
+                _, name, ext = split_filename(self.inputs.segmentation_image)
+                output = name + '_warped_white_matter' + ext
+            return output
+
+        return None
+
+    def _format_arg(self, opt, spec, val):
+        if opt == "segmentation_image":
+            newval = '[{0},{1},{2}]'.format(self.inputs.segmentation_image,
+                                            self.inputs.gray_matter_label,
+                                            self.inputs.white_matter_label)
+            return spec.argstr % newval
+
+        if opt == "cortical_thickness":
+            ct = self._gen_filename("cortical_thickness")
+            wm = self._gen_filename("warped_white_matter")
+            newval = '[{},{}]'.format(ct, wm)
+            return spec.argstr % newval
+
+        return super(KellyKapowski, self)._format_arg(opt, spec, val)

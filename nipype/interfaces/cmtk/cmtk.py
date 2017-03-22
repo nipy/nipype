@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """
@@ -8,10 +9,8 @@
     >>> os.chdir(datadir)
 
 """
-
-from __future__ import print_function
-from __future__ import division
-from builtins import range
+from __future__ import print_function, division, unicode_literals, absolute_import
+from builtins import range, open
 
 import pickle
 import os.path as op
@@ -21,11 +20,12 @@ import nibabel as nb
 import networkx as nx
 import scipy.io as sio
 
-from ..base import (BaseInterface, BaseInterfaceInputSpec, traits,
-                    File, TraitedSpec, InputMultiPath, Directory,
-                    OutputMultiPath, isdefined)
-from ...utils.filemanip import split_filename
 from ... import logging
+from ...utils.filemanip import split_filename
+from ...utils import NUMPY_MMAP
+
+from ..base import (BaseInterface, BaseInterfaceInputSpec, traits, File,
+                    TraitedSpec, Directory, OutputMultiPath, isdefined)
 iflogger = logging.getLogger('interface')
 
 
@@ -185,7 +185,7 @@ def cmat(track_file, roi_file, resolution_network_file, matrix_name, matrix_mat_
     fib, hdr = nb.trackvis.read(track_file, False)
     stats['orig_n_fib'] = len(fib)
 
-    roi = nb.load(roi_file)
+    roi = nb.load(roi_file, mmap=NUMPY_MMAP)
     roiData = roi.get_data()
     roiVoxelSize = roi.header.get_zooms()
     (endpoints, endpointsmm) = create_endpoints_array(fib, roiVoxelSize)
@@ -621,7 +621,7 @@ class ROIGen(BaseInterface):
         aparc_aseg_file = self.inputs.aparc_aseg_file
         aparcpath, aparcname, aparcext = split_filename(aparc_aseg_file)
         iflogger.info('Using Aparc+Aseg file: {name}'.format(name=aparcname + aparcext))
-        niiAPARCimg = nb.load(aparc_aseg_file)
+        niiAPARCimg = nb.load(aparc_aseg_file, mmap=NUMPY_MMAP)
         niiAPARCdata = niiAPARCimg.get_data()
         niiDataLabels = np.unique(niiAPARCdata)
         numDataLabels = np.size(niiDataLabels)
@@ -713,9 +713,8 @@ class ROIGen(BaseInterface):
 
         if write_dict:
             iflogger.info('Saving Dictionary File to {path} in Pickle format'.format(path=dict_file))
-            file = open(dict_file, 'w')
-            pickle.dump(labelDict, file)
-            file.close()
+            with open(dict_file, 'w') as f:
+                pickle.dump(labelDict, f)
         return runtime
 
     def _list_outputs(self):
@@ -745,7 +744,7 @@ class ROIGen(BaseInterface):
 def create_nodes(roi_file, resolution_network_file, out_filename):
     G = nx.Graph()
     gp = nx.read_graphml(resolution_network_file)
-    roi_image = nb.load(roi_file)
+    roi_image = nb.load(roi_file, mmap=NUMPY_MMAP)
     roiData = roi_image.get_data()
     nROIs = len(gp.nodes())
     for u, d in gp.nodes_iter(data=True):

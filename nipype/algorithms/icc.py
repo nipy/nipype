@@ -1,12 +1,14 @@
-from __future__ import division
+# -*- coding: utf-8 -*-
+from __future__ import print_function, division, unicode_literals, absolute_import
 from builtins import range
+import os
+import numpy as np
 from numpy import ones, kron, mean, eye, hstack, dot, tile
+import nibabel as nb
 from scipy.linalg import pinv
 from ..interfaces.base import BaseInterfaceInputSpec, TraitedSpec, \
     BaseInterface, traits, File
-import nibabel as nb
-import numpy as np
-import os
+from nipype.utils import NUMPY_MMAP
 
 
 class ICCInputSpec(BaseInterfaceInputSpec):
@@ -36,7 +38,7 @@ class ICC(BaseInterface):
         maskdata = nb.load(self.inputs.mask).get_data()
         maskdata = np.logical_not(np.logical_or(maskdata == 0, np.isnan(maskdata)))
 
-        session_datas = [[nb.load(fname).get_data()[maskdata].reshape(-1, 1) for fname in sessions] for sessions in self.inputs.subjects_sessions]
+        session_datas = [[nb.load(fname, mmap=NUMPY_MMAP).get_data()[maskdata].reshape(-1, 1) for fname in sessions] for sessions in self.inputs.subjects_sessions]
         list_of_sessions = [np.dstack(session_data) for session_data in session_datas]
         all_data = np.hstack(list_of_sessions)
         icc = np.zeros(session_datas[0][0].shape)

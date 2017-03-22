@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # coding: utf-8
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
@@ -7,17 +8,16 @@ Interfaces to perform image registrations and to apply the resulting
 displacement maps to images and points.
 
 """
-
-from __future__ import absolute_import
+from __future__ import print_function, division, unicode_literals, absolute_import
+from builtins import open
 
 import os.path as op
 import re
 
-from ..base import (CommandLine, CommandLineInputSpec, isdefined,
-                    TraitedSpec, File, traits, InputMultiPath)
-from .base import ElastixBaseInputSpec
-
 from ... import logging
+from .base import ElastixBaseInputSpec
+from ..base import CommandLine, TraitedSpec, File, traits, InputMultiPath
+
 logger = logging.getLogger('interface')
 
 
@@ -52,10 +52,10 @@ class Registration(CommandLine):
 
     >>> from nipype.interfaces.elastix import Registration
     >>> reg = Registration()
-    >>> reg.inputs.fixed_image = 'fixed1.nii'  # doctest: +SKIP
-    >>> reg.inputs.moving_image = 'moving1.nii'  # doctest: +SKIP
-    >>> reg.inputs.parameters = ['elastix.txt']  # doctest: +SKIP
-    >>> reg.cmdline  # doctest: +SKIP
+    >>> reg.inputs.fixed_image = 'fixed1.nii'
+    >>> reg.inputs.moving_image = 'moving1.nii'
+    >>> reg.inputs.parameters = ['elastix.txt']
+    >>> reg.cmdline  # doctest: +ALLOW_UNICODE
     'elastix -f fixed1.nii -m moving1.nii -out ./ -p elastix.txt'
 
 
@@ -145,9 +145,9 @@ class ApplyWarp(CommandLine):
 
     >>> from nipype.interfaces.elastix import ApplyWarp
     >>> reg = ApplyWarp()
-    >>> reg.inputs.moving_image = 'moving1.nii'  # doctest: +SKIP
-    >>> reg.inputs.transform_file = 'TransformParameters.0.txt'  # doctest: +SKIP
-    >>> reg.cmdline  # doctest: +SKIP
+    >>> reg.inputs.moving_image = 'moving1.nii'
+    >>> reg.inputs.transform_file = 'TransformParameters.0.txt'
+    >>> reg.cmdline  # doctest: +ALLOW_UNICODE
     'transformix -in moving1.nii -out ./ -tp TransformParameters.0.txt'
 
 
@@ -186,8 +186,8 @@ class AnalyzeWarp(CommandLine):
 
     >>> from nipype.interfaces.elastix import AnalyzeWarp
     >>> reg = AnalyzeWarp()
-    >>> reg.inputs.transform_file = 'TransformParameters.0.txt'  # doctest: +SKIP
-    >>> reg.cmdline  # doctest: +SKIP
+    >>> reg.inputs.transform_file = 'TransformParameters.0.txt'
+    >>> reg.cmdline  # doctest: +ALLOW_UNICODE
     'transformix -def all -jac all -jacmat all -out ./ -tp TransformParameters.0.txt'
 
 
@@ -226,9 +226,9 @@ class PointsWarp(CommandLine):
 
     >>> from nipype.interfaces.elastix import PointsWarp
     >>> reg = PointsWarp()
-    >>> reg.inputs.points_file = 'surf1.vtk'  # doctest: +SKIP
-    >>> reg.inputs.transform_file = 'TransformParameters.0.txt'  # doctest: +SKIP
-    >>> reg.cmdline  # doctest: +SKIP
+    >>> reg.inputs.points_file = 'surf1.vtk'
+    >>> reg.inputs.transform_file = 'TransformParameters.0.txt'
+    >>> reg.cmdline  # doctest: +ALLOW_UNICODE
     'transformix -out ./ -def surf1.vtk -tp TransformParameters.0.txt'
 
 

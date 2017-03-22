@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """Attempt to generate templates for module reference with Sphinx
@@ -17,11 +18,11 @@ files are modules, and therefore which module URIs will be passed to
 
 NOTE: this is a modified version of a script originally shipped with the
 PyMVPA project, which we've adapted for NIPY use.  PyMVPA is an MIT-licensed
-project."""
+project.
+"""
+from __future__ import print_function, division, unicode_literals, absolute_import
+from builtins import object, open
 
-# Stdlib imports
-from __future__ import print_function
-from builtins import object
 import os
 import re
 
@@ -102,11 +103,11 @@ class ApiDocWriter(object):
     def _get_object_name(self, line):
         ''' Get second token in line
         >>> docwriter = ApiDocWriter('sphinx')
-        >>> docwriter._get_object_name("  def func():  ")
-        'func'
-        >>> docwriter._get_object_name("  class Klass(object):  ")
+        >>> docwriter._get_object_name("  def func():  ") # doctest: +ALLOW_UNICODE
+        u'func'
+        >>> docwriter._get_object_name("  class Klass(object):  ") # doctest: +ALLOW_UNICODE
         'Klass'
-        >>> docwriter._get_object_name("  class Klass:  ")
+        >>> docwriter._get_object_name("  class Klass:  ") # doctest: +ALLOW_UNICODE
         'Klass'
         '''
         name = line.split()[1].split('(')[0].strip()

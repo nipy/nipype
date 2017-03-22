@@ -17,6 +17,7 @@ First tell python where to find the appropriate functions.
 
 from __future__ import print_function
 from __future__ import division
+from builtins import str
 from builtins import range
 
 import os                                    # system functions
@@ -105,10 +106,11 @@ Define a function to return the 1 based index of the middle volume
 
 def getmiddlevolume(func):
     from nibabel import load
+    from nipype.utils import NUMPY_MMAP
     funcfile = func
     if isinstance(func, list):
         funcfile = func[0]
-    _, _, _, timepoints = load(funcfile).shape
+    _, _, _, timepoints = load(funcfile, mmap=NUMPY_MMAP).shape
     return int(timepoints / 2) - 1
 
 preproc.connect(inputnode, ('func', getmiddlevolume), extract_ref, 't_min')

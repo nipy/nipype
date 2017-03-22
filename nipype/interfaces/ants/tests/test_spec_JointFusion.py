@@ -1,53 +1,48 @@
+# -*- coding: utf-8 -*-
 from __future__ import division
 from builtins import range
-from nipype.testing import assert_equal, assert_raises, example_data
+from nipype.testing import example_data
 from nipype.interfaces.base import InputMultiPath
 from traits.trait_errors import TraitError
 from nipype.interfaces.ants import JointFusion
-
+import pytest
 
 def test_JointFusion_dimension():
     at = JointFusion()
     set_dimension = lambda d: setattr(at.inputs, 'dimension', int(d))
     for d in range(2, 5):
         set_dimension(d)
-        yield assert_equal, at.inputs.dimension, int(d)
+        assert at.inputs.dimension == int(d)
     for d in [0, 1, 6, 7]:
-        yield assert_raises, TraitError, set_dimension, d
+        with pytest.raises(TraitError):
+            set_dimension(d)
 
-
-def test_JointFusion_modalities():
+@pytest.mark.parametrize("m", range(1, 5))
+def test_JointFusion_modalities(m):
     at = JointFusion()
-    set_modalities = lambda m: setattr(at.inputs, 'modalities', int(m))
-    for m in range(1, 5):
-        set_modalities(m)
-        yield assert_equal, at.inputs.modalities, int(m)
+    setattr(at.inputs, 'modalities', int(m))
+    assert at.inputs.modalities == int(m)
 
-
-def test_JointFusion_method():
+@pytest.mark.parametrize("a, b", [(a,b) for a in range(10) for b in range(10)])
+def test_JointFusion_method(a, b):
     at = JointFusion()
     set_method = lambda a, b: setattr(at.inputs, 'method', 'Joint[%.1f,%d]'.format(a, b))
-    for a in range(10):
-        _a = a / 10.0
-        for b in range(10):
-            set_method(_a, b)
-            # set directly
-            yield assert_equal, at.inputs.method, 'Joint[%.1f,%d]'.format(_a, b)
-            aprime = _a + 0.1
-            bprime = b + 1
-            at.inputs.alpha = aprime
-            at.inputs.beta = bprime
-            # set with alpha/beta
-            yield assert_equal, at.inputs.method, 'Joint[%.1f,%d]'.format(aprime, bprime)
+    _a = a / 10.0
+    set_method(_a, b)
+    # set directly
+    assert at.inputs.method == 'Joint[%.1f,%d]'.format(_a, b)
+    aprime = _a + 0.1
+    bprime = b + 1
+    at.inputs.alpha = aprime
+    at.inputs.beta = bprime
+    # set with alpha/beta
+    assert at.inputs.method == 'Joint[%.1f,%d]'.format(aprime, bprime)
 
-
-def test_JointFusion_radius():
+@pytest.mark.parametrize("attr, x", [(attr, x) for attr in ['patch_radius', 'search_radius'] for x in range(5)])
+def test_JointFusion_radius(attr, x):
     at = JointFusion()
-    set_radius = lambda attr, x, y, z: setattr(at.inputs, attr, [x, y, z])
-    for attr in ['patch_radius', 'search_radius']:
-        for x in range(5):
-            set_radius(attr, x, x + 1, x**x)
-            yield assert_equal, at._format_arg(attr, None, getattr(at.inputs, attr))[4:], '{0}x{1}x{2}'.format(x, x + 1, x**x)
+    setattr(at.inputs, attr, [x, x+1, x**x])
+    assert at._format_arg(attr, None, getattr(at.inputs, attr))[4:] == '{0}x{1}x{2}'.format(x, x + 1, x**x)
 
 
 def test_JointFusion_cmd():
@@ -73,6 +68,7 @@ def test_JointFusion_cmd():
                                                             warped_intensity_images[1],
                                                             segmentation_images[0],
                                                             segmentation_images[1])
-    yield assert_equal, at.cmdline, expected_command
+    assert at.cmdline == expected_command
     # setting intensity or labels with unequal lengths raises error
-    yield assert_raises, AssertionError, at._format_arg, 'warped_intensity_images', InputMultiPath, warped_intensity_images + [example_data('im3.nii')]
+    with pytest.raises(AssertionError):
+        at._format_arg('warped_intensity_images', InputMultiPath, warped_intensity_images + [example_data('im3.nii')])

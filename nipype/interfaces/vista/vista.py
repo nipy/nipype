@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """
@@ -8,12 +9,9 @@
     >>> os.chdir(datadir)
 
 """
+from __future__ import print_function, division, unicode_literals, absolute_import
 
-from nipype.interfaces.base import CommandLineInputSpec, CommandLine, traits, TraitedSpec, File
-from nipype.utils.filemanip import split_filename
-import os
-import os.path as op
-from nipype.interfaces.traits_extension import isdefined
+from ..base import CommandLineInputSpec, CommandLine, TraitedSpec, File
 
 
 class Vnifti2ImageInputSpec(CommandLineInputSpec):
@@ -36,7 +34,7 @@ class Vnifti2Image(CommandLine):
 
     >>> vimage = Vnifti2Image()
     >>> vimage.inputs.in_file = 'image.nii'
-    >>> vimage.cmdline
+    >>> vimage.cmdline # doctest: +ALLOW_UNICODE
     'vnifti2image -in image.nii -out image.v'
     >>> vimage.run()                                       # doctest: +SKIP
     """
@@ -65,7 +63,7 @@ class VtoMat(CommandLine):
 
     >>> vimage = VtoMat()
     >>> vimage.inputs.in_file = 'image.v'
-    >>> vimage.cmdline
+    >>> vimage.cmdline # doctest: +ALLOW_UNICODE
     'vtomat -in image.v -out image.mat'
     >>> vimage.run()                                       # doctest: +SKIP
     """

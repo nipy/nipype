@@ -13,6 +13,7 @@
 .project
 .settings
 .pydevproject
+.eggs
 .idea/
 /documentation.zip
 .DS_Store
@@ -21,3 +22,8 @@ nipype/testing/data/von_errmap.nii.gz
 crash*.pklz
 .coverage
 htmlcov/
+__pycache__/
+*~
+.*.swp
+.ipynb_checkpoints/
+.ruby-version

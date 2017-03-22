@@ -1,145 +1,130 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
+
 """
+Nipype interface for seg_EM.
+
 The em module provides higher-level interfaces to some of the operations
 that can be performed with the seg_em command-line program.
+
+Examples
+--------
+See the docstrings of the individual classes for examples.
 """
+
 import os
 
-from nipype.interfaces.niftyseg.base import NiftySegCommand, get_custom_path
-from nipype.interfaces.base import (TraitedSpec, File, traits, isdefined,
-                                    CommandLineInputSpec, InputMultiPath)
+from ..base import (TraitedSpec, File, traits, isdefined, CommandLineInputSpec,
+                    InputMultiPath)
+from .base import NiftySegCommand, get_custom_path
 
 
 class EMInputSpec(CommandLineInputSpec):
-    """Input Spec for seg_EM."""
-    in_file = File(argstr='-in %s', exists=True, mandatory=True,
-                   desc='Input image to segment', position=4)
+    """Input Spec for EM."""
+    in_file = File(argstr='-in %s',
+                   exists=True,
+                   mandatory=True,
+                   desc='Input image to segment',
+                   position=4)
 
-    mask_file = File(argstr='-mask %s', exists=True,
+    mask_file = File(argstr='-mask %s',
+                     exists=True,
                      desc='Filename of the ROI for label fusion')
+
     # Priors
-    no_prior = traits.Int(argstr='-nopriors %s', mandatory=True,
+    no_prior = traits.Int(argstr='-nopriors %s',
+                          mandatory=True,
                           desc='Number of classes to use without prior',
                           xor=['prior_4D', 'priors'])
-    prior_4D = File(argstr='-prior4D %s', exists=True, mandatory=True,
+
+    prior_4D = File(argstr='-prior4D %s',
+                    exists=True,
+                    mandatory=True,
                     desc='4D file containing the priors',
                     xor=['no_prior', 'priors'])
-    priors = traits.Tuple(
-        traits.Int(), InputMultiPath(), argstr='%s', mandatory=True,
-        desc='The number of priors (n>0) and their filenames.',
-        xor=['no_prior', 'prior_4D'])
+
+    desc = 'The number of priors (n>0) and their filenames.'
+    priors = traits.Tuple(traits.Int(), InputMultiPath(),
+                          argstr='%s',
+                          mandatory=True,
+                          desc=desc,
+                          xor=['no_prior', 'prior_4D'])
 
     # iterations
     max_iter = traits.Int(argstr='-max_iter %s', default=100,
                           desc='Maximum number of iterations')
+
     min_iter = traits.Int(argstr='-min_iter %s', default=0,
                           desc='Minimun number of iterations')
 
     # other options
     bc_order_val = traits.Int(argstr='-bc_order %s', default=3,
                               desc='Polynomial order for the bias field')
+
     mrf_beta_val = traits.Float(argstr='-mrf_beta %s',
                                 desc='Weight of the Markov Random Field')
-    bc_thresh_val = traits.Float(argstr='-bc_thresh %s', default=0,
-                                 desc='Bias field correction will run only if \
-the ratio of improvement is below bc_thresh. (default=0 [OFF])')
-    reg_val = traits.Float(argstr='-reg %s',
-                           desc='Amount of regularization over the diagonal of \
-the covariance matrix [above 1]')
-    outlier_val = traits.Tuple(
-        traits.Float(), traits.Float(), argstr='-outlier %s %s',
-        desc='Outlier detection as in (Van Leemput TMI 2003). \
-<fl1> is the Mahalanobis threshold [recommended between 3 and 7] \
-<fl2> is a convergence ratio below which the outlier detection is \
-going to be done [recommended 0.01]')
-    relax_priors = traits.Tuple(
-        traits.Float(), traits.Float(), argstr='-rf %s %s',
-        desc='Relax Priors [relaxation factor: 0<rf<1 (recommended=0.5), \
-gaussian regularization: gstd>0 (recommended=2.0)] /only 3D/')
+
+    desc = 'Bias field correction will run only if the ratio of improvement \
+is below bc_thresh. (default=0 [OFF])'
+    bc_thresh_val = traits.Float(argstr='-bc_thresh %s', default=0, desc=desc)
+
+    desc = 'Amount of regularization over the diagonal of the covariance \
+matrix [above 1]'
+    reg_val = traits.Float(argstr='-reg %s', desc=desc)
+
+    desc = 'Outlier detection as in (Van Leemput TMI 2003). <fl1> is the \
+Mahalanobis threshold [recommended between 3 and 7] <fl2> is a convergence \
+ratio below which the outlier detection is going to be done [recommended 0.01]'
+    outlier_val = traits.Tuple(traits.Float(), traits.Float(),
+                               argstr='-outlier %s %s',
+                               desc=desc)
+
+    desc = 'Relax Priors [relaxation factor: 0<rf<1 (recommended=0.5), \
+gaussian regularization: gstd>0 (recommended=2.0)] /only 3D/'
+    relax_priors = traits.Tuple(traits.Float(), traits.Float(),
+                                argstr='-rf %s %s',
+                                desc=desc)
 
     # outputs
-    out_file = File(argstr='-out %s', genfile=True, desc='Output segmentation')
-    out_bc_file = File(argstr='-bc_out %s', genfile=True,
+    out_file = File(argstr='-out %s',
+                    genfile=True,
+                    desc='Output segmentation')
+    out_bc_file = File(argstr='-bc_out %s',
+                       genfile=True,
                        desc='Output bias corrected image')
-    out_outlier_file = File(argstr='-out_outlier %s', genfile=True,
+    out_outlier_file = File(argstr='-out_outlier %s',
+                            genfile=True,
                             desc='Output outlierness image')
 
 
 class EMOutputSpec(TraitedSpec):
-    """Output Spec for seg_EM."""
+    """Output Spec for EM."""
     out_file = File(desc="Output segmentation")
     out_bc_file = File(desc="Output bias corrected image")
     out_outlier_file = File(desc='Output outlierness image')
 
 
 class EM(NiftySegCommand):
-    """Interface for seg_EM.
+    """Interface for executable seg_EM from NiftySeg platform.
 
-    EM Statistical Segmentation:
-    Usage ->	seg_EM -in <filename> [OPTIONS]
+    seg_EM is a general purpose intensity based image segmentation tool. In
+    it's simplest form, it takes in one 2D or 3D image and segments it in n
+    classes.
 
-    * * Mandatory * *
+    For source code, see http://cmictig.cs.ucl.ac.uk/wiki/index.php/NiftySeg
+    For Documentation, see:
+        http://cmictig.cs.ucl.ac.uk/wiki/index.php/NiftySeg_documentation
 
-    -in <filename>
-                | Filename of the input image
-    -out <filename>
-                | Filename of the segmented image
-                | The input image should be 2D, 3D or 4D images.
-                | 2D images should be on the XY plane.
-                | 4D images are segmented as if they were multimodal.
+    Examples
+    --------
+    >>> from nipype.interfaces.niftyseg import EM
+    >>> node = EM()
+    >>> node.inputs.in_file = 'im1.nii'  # doctest: +SKIP
+    >>> node.inputs.no_prior = 4
+    >>> node.cmdline  # doctest: +SKIP
+    'seg_EM -in im1.nii -nopriors 4 -bc_out im1_bc_em.nii -out im1_em.nii \
+-out_outlier im1_outlier_em.nii'
 
-        + Select one of the following (mutually exclusive) -
-
-    -priors <n> <fnames>
-                | The number of priors (n>0) and their filenames.
-                | Priors should be registerd to the input image
-    -priors4D <fname>
-                | 4D image with the piors stacked in the 4th dimension.
-                | Priors should be registerd to the input image
-    -nopriors <n>
-                | The number of classes (n>0)
-
-    * * General Options * *
-
-    -mask <filename>
-                | Filename of the brain-mask of the input image
-    -max_iter <int>
-                | Maximum number of iterations (default = 100)
-    -min_iter <int>
-                | Minimum number of iterations (default = 0)
-    -v <int>
-                | Verbose level [0 = off, 1 = on, 2 = debug] (default = 0)
-    -mrf_beta <float>
-                | MRF prior strength [off = 0, max = 1] (default = 0.4)
-    -bc_order <int>
-                | Polynomial order for the bias field [off = 0, max = 5]
-                | (default = 3)
-    -bc_thresh <float>
-                | Bias field correction will run only if the ratio of
-                | improvement is below bc_thresh (default=0 [OFF])
-    -bc_out <filename>
-                | Output the bias corrected image
-    -reg <float>
-                | Amount of regularization over the diagonal of the covariance
-                | matrix [above 1]
-    -outlier <fl1> <fl2>
-                | Outlier detection as in (Van Leemput TMI 2003).
-                | <fl1> is the Mahalanobis threshold
-                | [recommended between 3 and 7]
-                | <fl2> is a convergence ratio below which the outlier
-                | detection is going to be done [recommended 0.01].
-    -out_outlier <filename>
-                | Output outlierness image
-    -rf <rel> <gstd>
-                | Relax Priors [relaxation factor: 0<rf<1 (recommended=0.5),
-                | gaussian regularization: gstd>0 (recommended=2.0)] /only 3D/
-    -MAP <M V M V ...>
-                | MAP formulation: M and V are the parameters
-                | (mean & variance) of the semiconjugate prior over the
-                | class mean
-    --version
-                |Print current source code git hash key and exit
     """
     _cmd = get_custom_path('seg_EM')
     _suffix = '_em'

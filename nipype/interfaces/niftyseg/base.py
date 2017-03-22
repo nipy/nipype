@@ -1,13 +1,18 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
-"""The niftyseg module provides classes for interfacing with `niftyseg
+
+"""
+The niftyseg module provides classes for interfacing with `niftyseg
 <https://sourceforge.net/projects/niftyseg/>`_ command line tools.
 
 These are the base tools for working with niftyseg.
 
-
-Currently these tools are supported:
-
+EM Statistical Segmentation tool is found in niftyseg/em.py
+Fill lesions tool is found in niftyseg/lesions.py
+Mathematical operation tool is found in niftyseg/maths.py
+Patch Match tool is found in niftyseg/patchmatch.py
+Statistical operation tool is found in niftyseg/stats.py
+Label Fusion and CalcTopNcc tools are in niftyseg/steps.py
 
 Examples
 --------
@@ -15,11 +20,12 @@ See the docstrings of the individual classes for examples.
 
 """
 
-import os
-import warnings
-from nipype.interfaces.base import (CommandLine, isdefined)
+from nipype.interfaces.base import CommandLine, isdefined
 from nipype.utils.filemanip import split_filename
+import os
 import subprocess
+import warnings
+
 
 warn = warnings.warn
 warnings.filterwarnings('always', category=UserWarning)
@@ -46,12 +52,11 @@ def no_niftyseg(cmd='seg_LabFusion'):
 
 class NiftySegCommand(CommandLine):
     """
-    Base support for NiftySeg commands.
+    Base support interface for NiftySeg commands.
     """
     _suffix = '_ns'
-    _min_version = '0.9.4'
 
-    def __init__(self, required_version=None, **inputs):
+    def __init__(self, **inputs):
         super(NiftySegCommand, self).__init__(**inputs)
 
     def get_version(self):
@@ -87,8 +92,7 @@ class NiftySegCommand(CommandLine):
 
     def _gen_filename(self, name):
         if name == 'out_file':
-            return self._gen_fname(self.inputs.in_file, suffix=self._suffix,
-                                   ext='.nii.gz')
+            return self._gen_fname(self.inputs.in_file, suffix=self._suffix)
         return None
 
     def _list_outputs(self):

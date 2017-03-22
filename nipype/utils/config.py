@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 '''
@@ -8,20 +9,25 @@ hash_method : content, timestamp
 
 @author: Chris Filo Gorgolewski
 '''
-from future import standard_library
-standard_library.install_aliases()
-from builtins import object
-
-import configparser
-from json import load, dump
+from __future__ import print_function, division, unicode_literals, absolute_import
 import os
 import shutil
 import errno
 from warnings import warn
+from io import StringIO
+from distutils.version import LooseVersion
+from simplejson import load, dump
+import numpy as np
 
+from builtins import str, object, open
+from future import standard_library
+standard_library.install_aliases()
+
+import configparser
 from ..external import portalocker
-from ..external.six import StringIO
 
+
+NUMPY_MMAP = LooseVersion(np.__version__) >= LooseVersion('1.12.0')
 
 # Get home directory in platform-agnostic way
 homedir = os.path.expanduser('~')
@@ -49,14 +55,16 @@ remove_node_directories = false
 remove_unnecessary_outputs = true
 try_hard_link_datasink = true
 single_thread_matlab = true
+crashfile_format = pklz
 stop_on_first_crash = false
 stop_on_first_rerun = false
 use_relative_paths = false
 stop_on_unknown_version = false
 write_provenance = false
 parameterize_dirs = true
-poll_sleep_duration = 60
+poll_sleep_duration = 2
 xvfb_max_wait = 10
+profile_runtime = false
 
 [check]
 interval = 1209600

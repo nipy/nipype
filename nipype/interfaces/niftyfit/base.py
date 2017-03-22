@@ -1,18 +1,29 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
-"""The niftyfit module provide an interface with the niftyfit software
+
+"""
+The niftyfit module provide an interface with the niftyfit software
 developed in TIG, UCL.
+
+Software available at:
+https://cmiclab.cs.ucl.ac.uk/CMIC/NiftyFit-Release
+
+Version used for this version of the interfaces (git):
+
+commit c6232e4c4223c3d19f7a32906409da5af36299a2
+Date:   Fri Jan 6 13:34:02 2017 +0000
 
 Examples
 --------
 See the docstrings of the individual classes for examples.
-
 """
 
 import os
 import warnings
+
 from ..base import CommandLine
-from nipype.utils.filemanip import split_filename
+from ...utils.filemanip import split_filename
+
 
 warn = warnings.warn
 warnings.filterwarnings('always', category=UserWarning)
@@ -39,21 +50,13 @@ def no_niftyfit(cmd='fit_dwi'):
 
 class NiftyFitCommand(CommandLine):
     """
-    Base support for NiftyFit commands.
+    Base support interface for NiftyFit commands.
     """
     _suffix = '_nf'
-    # _min_version = '0.9.4'
 
-    def __init__(self, required_version=None, **inputs):
+    def __init__(self, **inputs):
+        """ Init method calling super. No version to be checked."""
         super(NiftyFitCommand, self).__init__(**inputs)
-        """current_version = self.get_version()
-        if StrictVersion(current_version) < StrictVersion(self._min_version):
-            msg = 'A later version of NiftySeg is required (%s < %s)'
-            raise ValueError(msg % (current_version, self._min_version))
-        if required_version is not None and \
-           StrictVersion(current_version) != StrictVersion(required_version):
-            msg = 'The version of NiftySeg differs from the required (%s!=%s)'
-            raise ValueError(msg % (current_version, required_version))"""
 
     def _gen_fname(self, basename, out_dir=None, suffix=None, ext=None):
         if basename == '':

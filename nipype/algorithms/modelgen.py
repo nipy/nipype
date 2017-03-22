@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """
@@ -17,9 +18,8 @@ These functions include:
    >>> os.chdir(datadir)
 
 """
-
-from __future__ import division
-from builtins import range
+from __future__ import print_function, division, unicode_literals, absolute_import
+from builtins import range, str, bytes, int
 
 from copy import deepcopy
 import os
@@ -28,7 +28,7 @@ from nibabel import load
 import numpy as np
 from scipy.special import gammaln
 
-from ..external.six import string_types
+from ..utils import NUMPY_MMAP
 from ..interfaces.base import (BaseInterface, TraitedSpec, InputMultiPath,
                                traits, File, Bunch, BaseInterfaceInputSpec,
                                isdefined)
@@ -261,22 +261,18 @@ class SpecifyModel(BaseInterface):
     >>> s.inputs.functional_runs = ['functional2.nii', 'functional3.nii']
     >>> s.inputs.time_repetition = 6
     >>> s.inputs.high_pass_filter_cutoff = 128.
-    >>> info = [Bunch(conditions=['cond1'], onsets=[[2, 50, 100, 180]],\
-                      durations=[[1]]), \
-                Bunch(conditions=['cond1'], onsets=[[30, 40, 100, 150]], \
-                      durations=[[1]])]
+    >>> info = [Bunch(conditions=['cond1'], onsets=[[2, 50, 100, 180]], \
+durations=[[1]]), Bunch(conditions=['cond1'], onsets=[[30, 40, 100, 150]], \
+durations=[[1]])]
     >>> s.inputs.subject_info = info
 
     Using pmod:
 
-    >>> info = [Bunch(conditions=['cond1', 'cond2'], \
-                      onsets=[[2, 50],[100, 180]], durations=[[0],[0]], \
-                      pmod=[Bunch(name=['amp'], poly=[2], param=[[1, 2]]),\
-                      None]), \
-                Bunch(conditions=['cond1', 'cond2'], \
-                      onsets=[[20, 120],[80, 160]], durations=[[0],[0]], \
-                      pmod=[Bunch(name=['amp'], poly=[2], param=[[1, 2]]), \
-                      None])]
+    >>> info = [Bunch(conditions=['cond1', 'cond2'], onsets=[[2, 50],[100, 180]], \
+durations=[[0],[0]], pmod=[Bunch(name=['amp'], poly=[2], param=[[1, 2]]), \
+None]), Bunch(conditions=['cond1', 'cond2'], onsets=[[20, 120],[80, 160]], \
+durations=[[0],[0]], pmod=[Bunch(name=['amp'], poly=[2], param=[[1, 2]]), \
+None])]
     >>> s.inputs.subject_info = info
 
     """
@@ -355,7 +351,7 @@ class SpecifyModel(BaseInterface):
             for i, out in enumerate(outliers):
                 numscans = 0
                 for f in filename_to_list(sessinfo[i]['scans']):
-                    shape = load(f).shape
+                    shape = load(f, mmap=NUMPY_MMAP).shape
                     if len(shape) == 3 or shape[3] == 1:
                         iflogger.warning(("You are using 3D instead of 4D "
                                           "files. Are you sure this was "
@@ -443,9 +439,8 @@ class SpecifySPMModel(SpecifyModel):
     >>> s.inputs.time_repetition = 6
     >>> s.inputs.concatenate_runs = True
     >>> info = [Bunch(conditions=['cond1'], onsets=[[2, 50, 100, 180]], \
-                      durations=[[1]]), \
-                Bunch(conditions=['cond1'], onsets=[[30, 40, 100, 150]], \
-                      durations=[[1]])]
+durations=[[1]]), Bunch(conditions=['cond1'], onsets=[[30, 40, 100, 150]], \
+durations=[[1]])]
     >>> s.inputs.subject_info = info
 
     """
@@ -457,8 +452,8 @@ class SpecifySPMModel(SpecifyModel):
         for i, f in enumerate(self.inputs.functional_runs):
             if isinstance(f, list):
                 numscans = len(f)
-            elif isinstance(f, string_types):
-                img = load(f)
+            elif isinstance(f, (str, bytes)):
+                img = load(f, mmap=NUMPY_MMAP)
                 numscans = img.shape[3]
             else:
                 raise Exception('Functional input not specified correctly')
@@ -542,16 +537,20 @@ class SpecifySPMModel(SpecifyModel):
             outliers = [[]]
             for i, filename in enumerate(self.inputs.outlier_files):
                 try:
-                    out = np.loadtxt(filename, dtype=int)
+                    out = np.loadtxt(filename)
                 except IOError:
+                    iflogger.warn('Error reading outliers file %s', filename)
                     out = np.array([])
+
                 if out.size > 0:
+                    iflogger.debug('fname=%s, out=%s, nscans=%d', filename, out, sum(nscans[0:i]))
+                    sumscans = out.astype(int) + sum(nscans[0:i])
+
                     if out.size == 1:
-                        outliers[0].extend([(np.array(out) +
-                                             sum(nscans[0:i])).tolist()])
+                        outliers[0]+= [np.array(sumscans, dtype=int).tolist()]
                     else:
-                        outliers[0].extend((np.array(out) +
-                                            sum(nscans[0:i])).tolist())
+                        outliers[0]+= np.array(sumscans, dtype=int).tolist()
+
         self._sessinfo = self._generate_standard_design(concatlist,
                                                         functional_runs=functional_runs,
                                                         realignment_parameters=realignment_parameters,
@@ -605,9 +604,8 @@ class SpecifySparseModel(SpecifyModel):
     >>> s.inputs.high_pass_filter_cutoff = 128.
     >>> s.inputs.model_hrf = True
     >>> info = [Bunch(conditions=['cond1'], onsets=[[2, 50, 100, 180]], \
-                      durations=[[1]]), \
-                Bunch(conditions=['cond1'], onsets=[[30, 40, 100, 150]], \
-                      durations=[[1]])]
+durations=[[1]]), Bunch(conditions=['cond1'], onsets=[[30, 40, 100, 150]], \
+durations=[[1]])]
     >>> s.inputs.subject_info = info
 
     """
@@ -652,12 +650,12 @@ class SpecifySparseModel(SpecifyModel):
             hrf = spm_hrf(dt * 1e-3)
         reg_scale = 1.0
         if self.inputs.scale_regressors:
-            boxcar = np.zeros((50.0 * 1e3 / dt))
+            boxcar = np.zeros(int(50.0 * 1e3 / dt))
             if self.inputs.stimuli_as_impulses:
-                boxcar[1.0 * 1e3 / dt] = 1.0
+                boxcar[int(1.0 * 1e3 / dt)] = 1.0
                 reg_scale = float(TA / dt)
             else:
-                boxcar[(1.0 * 1e3 / dt):(2.0 * 1e3 / dt)] = 1.0
+                boxcar[int(1.0 * 1e3 / dt):int(2.0 * 1e3 / dt)] = 1.0
             if isdefined(self.inputs.model_hrf) and self.inputs.model_hrf:
                 response = np.convolve(boxcar, hrf)
                 reg_scale = 1.0 / response.max()
@@ -778,7 +776,7 @@ class SpecifySparseModel(SpecifyModel):
             infoout[i].onsets = None
             infoout[i].durations = None
             if info.conditions:
-                img = load(self.inputs.functional_runs[i])
+                img = load(self.inputs.functional_runs[i], mmap=NUMPY_MMAP)
                 nscans = img.shape[3]
                 reg, regnames = self._cond_to_regress(info, nscans)
                 if hasattr(infoout[i], 'regressors') and infoout[i].regressors:

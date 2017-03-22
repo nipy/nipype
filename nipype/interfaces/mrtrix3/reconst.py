@@ -11,16 +11,12 @@
     >>> os.chdir(datadir)
 
 """
+from __future__ import print_function, division, unicode_literals, absolute_import
 
-from __future__ import absolute_import
-import os
 import os.path as op
 
+from ..base import traits, TraitedSpec, File
 from .base import MRTrix3BaseInputSpec, MRTrix3Base
-from ..base import (CommandLineInputSpec, CommandLine, traits, TraitedSpec,
-                    File, InputMultiPath)
-from ..traits_extension import isdefined
-from ...utils.filemanip import split_filename
 
 
 class FitTensorInputSpec(MRTrix3BaseInputSpec):
@@ -62,7 +58,7 @@ class FitTensor(MRTrix3Base):
     >>> tsr.inputs.in_file = 'dwi.mif'
     >>> tsr.inputs.in_mask = 'mask.nii.gz'
     >>> tsr.inputs.grad_fsl = ('bvecs', 'bvals')
-    >>> tsr.cmdline                               # doctest: +ELLIPSIS
+    >>> tsr.cmdline                               # doctest: +ELLIPSIS +ALLOW_UNICODE
     'dwi2tensor -fslgrad bvecs bvals -mask mask.nii.gz dwi.mif dti.mif'
     >>> tsr.run()                                 # doctest: +SKIP
     """
@@ -177,7 +173,7 @@ class EstimateFOD(MRTrix3Base):
     >>> fod.inputs.response = 'response.txt'
     >>> fod.inputs.in_mask = 'mask.nii.gz'
     >>> fod.inputs.grad_fsl = ('bvecs', 'bvals')
-    >>> fod.cmdline                               # doctest: +ELLIPSIS
+    >>> fod.cmdline                               # doctest: +ELLIPSIS +ALLOW_UNICODE
     'dwi2fod -fslgrad bvecs bvals -mask mask.nii.gz dwi.mif response.txt\
  fods.mif'
     >>> fod.run()                                 # doctest: +SKIP

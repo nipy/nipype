@@ -1,6 +1,7 @@
+# -*- coding: utf-8 -*-
 # coding: utf-8
-
-from __future__ import division
+from __future__ import print_function, division, unicode_literals, absolute_import
+from builtins import open, str
 
 import warnings
 
@@ -680,7 +681,7 @@ def _rotate_bvecs(in_bvec, in_matrix):
         bvec = np.matrix(bvecs[:, i])
         rot = np.matrix(np.loadtxt(vol_matrix)[0:3, 0:3])
         new_bvecs[i] = (np.array(rot * bvec.T).T)[0]  # fill each volume with x,y,z as we go along
-    np.savetxt(out_file, np.array(new_bvecs).T, fmt='%0.15f')
+    np.savetxt(out_file, np.array(new_bvecs).T, fmt=b'%0.15f')
     return out_file
 
 
@@ -717,10 +718,11 @@ def _effective_echospacing(dwell_time, pi_factor=1.0):
 
 
 def _prepare_phasediff(in_file):
-    import nibabel as nib
+    import nibabel as nb
     import os
     import numpy as np
-    img = nib.load(in_file)
+    from nipype.utils import NUMPY_MMAP
+    img = nb.load(in_file, mmap=NUMPY_MMAP)
     max_diff = np.max(img.get_data().reshape(-1))
     min_diff = np.min(img.get_data().reshape(-1))
     A = (2.0 * np.pi) / (max_diff - min_diff)
@@ -731,47 +733,50 @@ def _prepare_phasediff(in_file):
     if fext == '.gz':
         name, _ = os.path.splitext(name)
     out_file = os.path.abspath('./%s_2pi.nii.gz' % name)
-    nib.save(nib.Nifti1Image(diff_norm, img.affine, img.header), out_file)
+    nb.save(nb.Nifti1Image(diff_norm, img.affine, img.header), out_file)
     return out_file
 
 
 def _dilate_mask(in_file, iterations=4):
-    import nibabel as nib
+    import nibabel as nb
     import scipy.ndimage as ndimage
     import os
-    img = nib.load(in_file)
+    from nipype.utils import NUMPY_MMAP
+    img = nb.load(in_file, mmap=NUMPY_MMAP)
     img._data = ndimage.binary_dilation(img.get_data(), iterations=iterations)
 
     name, fext = os.path.splitext(os.path.basename(in_file))
     if fext == '.gz':
         name, _ = os.path.splitext(name)
     out_file = os.path.abspath('./%s_dil.nii.gz' % name)
-    nib.save(img, out_file)
+    nb.save(img, out_file)
     return out_file
 
 
 def _fill_phase(in_file):
-    import nibabel as nib
+    import nibabel as nb
     import os
     import numpy as np
-    img = nib.load(in_file)
-    dumb_img = nib.Nifti1Image(np.zeros(img.shape), img.affine, img.header)
-    out_nii = nib.funcs.concat_images((img, dumb_img))
+    from nipype.utils import NUMPY_MMAP
+    img = nb.load(in_file, mmap=NUMPY_MMAP)
+    dumb_img = nb.Nifti1Image(np.zeros(img.shape), img.affine, img.header)
+    out_nii = nb.funcs.concat_images((img, dumb_img))
     name, fext = os.path.splitext(os.path.basename(in_file))
     if fext == '.gz':
         name, _ = os.path.splitext(name)
     out_file = os.path.abspath('./%s_fill.nii.gz' % name)
-    nib.save(out_nii, out_file)
+    nb.save(out_nii, out_file)
     return out_file
 
 
 def _vsm_remove_mean(in_file, mask_file, in_unwarped):
-    import nibabel as nib
+    import nibabel as nb
     import os
     import numpy as np
     import numpy.ma as ma
-    img = nib.load(in_file)
-    msk = nib.load(mask_file).get_data()
+    from nipype.utils import NUMPY_MMAP
+    img = nb.load(in_file, mmap=NUMPY_MMAP)
+    msk = nb.load(mask_file, mmap=NUMPY_MMAP).get_data()
     img_data = img.get_data()
     img_data[msk == 0] = 0
     vsmmag_masked = ma.masked_values(img_data.reshape(-1), 0.0)
@@ -781,7 +786,7 @@ def _vsm_remove_mean(in_file, mask_file, in_unwarped):
     if fext == '.gz':
         name, _ = os.path.splitext(name)
     out_file = os.path.abspath('./%s_demeaned.nii.gz' % name)
-    nib.save(img, out_file)
+    nb.save(img, out_file)
     return out_file
 
 
@@ -790,15 +795,16 @@ def _ms2sec(val):
 
 
 def _split_dwi(in_file):
-    import nibabel as nib
+    import nibabel as nb
     import os
+    from nipype.utils import NUMPY_MMAP
     out_files = []
-    frames = nib.funcs.four_to_three(nib.load(in_file))
+    frames = nb.funcs.four_to_three(nb.load(in_file, mmap=NUMPY_MMAP))
     name, fext = os.path.splitext(os.path.basename(in_file))
     if fext == '.gz':
         name, _ = os.path.splitext(name)
     for i, frame in enumerate(frames):
         out_file = os.path.abspath('./%s_%03d.nii.gz' % (name, i))
-        nib.save(frame, out_file)
+        nb.save(frame, out_file)
         out_files.append(out_file)
     return out_files

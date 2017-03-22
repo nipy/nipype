@@ -1,9 +1,2 @@
 [run]
 branch = True
-source = nipype
-include = */nipype/*
-omit =
-    */nipype/external/*
-    */nipype/workflows/*
-    */nipype/fixes/*
-    */setup.py

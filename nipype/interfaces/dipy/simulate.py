@@ -5,31 +5,19 @@
    >>> datadir = os.path.realpath(os.path.join(filepath, '../../testing/data'))
    >>> os.chdir(datadir)
 """
-
-from __future__ import division
-from builtins import range
-
-import os.path as op
+from __future__ import print_function, division, unicode_literals, absolute_import
 from multiprocessing import (Pool, cpu_count)
+import os.path as op
+from builtins import range
 
 import nibabel as nb
 
-from ..base import (traits, TraitedSpec, BaseInterface, BaseInterfaceInputSpec,
-                    File, InputMultiPath, isdefined)
-from ...utils.misc import package_check
 from ... import logging
-iflogger = logging.getLogger('interface')
-
-have_dipy = True
-try:
-    package_check('dipy', version='0.8.0')
-except Exception as e:
-    have_dipy = False
-else:
-    import numpy as np
-    from dipy.sims.voxel import (multi_tensor, add_noise,
-                                 all_tensor_evecs)
-    from dipy.core.gradients import gradient_table
+from ...utils import NUMPY_MMAP
+from ..base import (traits, TraitedSpec, BaseInterfaceInputSpec,
+                    File, InputMultiPath, isdefined)
+from .base import DipyBaseInterface
+IFLOGGER = logging.getLogger('interface')
 
 
 class SimulateMultiTensorInputSpec(BaseInterfaceInputSpec):
@@ -77,7 +65,7 @@ class SimulateMultiTensorOutputSpec(TraitedSpec):
     out_bval = File(exists=True, desc='simulated b values')
 
 
-class SimulateMultiTensor(BaseInterface):
+class SimulateMultiTensor(DipyBaseInterface):
 
     """
     Interface to MultiTensor model simulator in dipy
@@ -101,6 +89,8 @@ class SimulateMultiTensor(BaseInterface):
     output_spec = SimulateMultiTensorOutputSpec
 
     def _run_interface(self, runtime):
+        from dipy.core.gradients import gradient_table
+
         # Gradient table
         if isdefined(self.inputs.in_bval) and isdefined(self.inputs.in_bvec):
             # Load the gradient strengths and directions
@@ -129,7 +119,7 @@ class SimulateMultiTensor(BaseInterface):
         # Volume fractions of isotropic compartments
         nballs = len(self.inputs.in_vfms)
         vfs = np.squeeze(nb.concat_images(
-            [nb.load(f) for f in self.inputs.in_vfms]).get_data())
+            [nb.load(f, mmap=NUMPY_MMAP) for f in self.inputs.in_vfms]).get_data())
         if nballs == 1:
             vfs = vfs[..., np.newaxis]
         total_vf = np.sum(vfs, axis=3)
@@ -147,7 +137,7 @@ class SimulateMultiTensor(BaseInterface):
         nvox = len(msk[msk > 0])
 
         # Fiber fractions
-        ffsim = nb.concat_images([nb.load(f) for f in self.inputs.in_frac])
+        ffsim = nb.concat_images([nb.load(f, mmap=NUMPY_MMAP) for f in self.inputs.in_frac])
         ffs = np.nan_to_num(np.squeeze(ffsim.get_data()))  # fiber fractions
         ffs = np.clip(ffs, 0., 1.)
         if nsticks == 1:
@@ -190,7 +180,7 @@ class SimulateMultiTensor(BaseInterface):
         dirs = None
         for i in range(nsticks):
             f = self.inputs.in_dirs[i]
-            fd = np.nan_to_num(nb.load(f).get_data())
+            fd = np.nan_to_num(nb.load(f, mmap=NUMPY_MMAP).get_data())
             w = np.linalg.norm(fd, axis=3)[..., np.newaxis]
             w[w < np.finfo(float).eps] = 1.0
             fd /= w
@@ -237,7 +227,7 @@ class SimulateMultiTensor(BaseInterface):
             pool = Pool(processes=n_proc)
 
         # Simulate sticks using dipy
-        iflogger.info(('Starting simulation of %d voxels, %d diffusion'
+        IFLOGGER.info(('Starting simulation of %d voxels, %d diffusion'
                        ' directions.') % (len(args), ndirs))
         result = np.array(pool.map(_compute_voxel, args))
         if np.shape(result)[1] != ndirs:
@@ -280,6 +270,7 @@ def _compute_voxel(args):
     .. [Pierpaoli1996] Pierpaoli et al., Diffusion tensor MR imaging
       of the human brain, Radiology 201:637-648. 1996.
     """
+    from dipy.sims.voxel import multi_tensor
 
     ffs = args['fractions']
     gtab = args['gradients']
@@ -297,7 +288,7 @@ def _compute_voxel(args):
                 angles=args['sticks'], fractions=ffs, snr=snr)
         except Exception as e:
             pass
-            # iflogger.warn('Exception simulating dwi signal: %s' % e)
+            # IFLOGGER.warn('Exception simulating dwi signal: %s' % e)
 
     return signal.tolist()
 

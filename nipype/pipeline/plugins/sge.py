@@ -1,5 +1,7 @@
+# -*- coding: utf-8 -*-
 """Parallel workflow execution via SGE
 """
+from __future__ import print_function, division, unicode_literals, absolute_import
 
 from builtins import object
 
@@ -13,8 +15,8 @@ import xml.dom.minidom
 
 import random
 
+from ...interfaces.base import CommandLine
 from .base import (SGELikeBatchManagerBase, logger, iflogger, logging)
-from nipype.interfaces.base import CommandLine
 
 DEBUGGING_PREFIX = str(int(random.uniform(100, 999)))
 
@@ -49,18 +51,16 @@ class QJobInfo(object):
         self._qsub_command_line = qsub_command_line
 
     def __repr__(self):
-        return str(self._job_num).ljust(8) \
-            + str(self._job_queue_state).ljust(12) \
-            + str(self._job_slots).ljust(3) \
-            + time.strftime("%Y-%m-%dT%H:%M:%S", time.gmtime(self._job_time)).ljust(20) \
-            + str(self._job_queue_name).ljust(8) \
-            + str(self._qsub_command_line)
+        return '{:<8d}{:12}{:<3d}{:20}{:8}{}'.format(
+            self._job_num, self._job_queue_state, self._job_slots,
+            time.strftime("%Y-%m-%dT%H:%M:%S", time.gmtime(self._job_time)),
+            self._job_queue_name, self._qsub_command_line)
 
     def is_initializing(self):
         return self._job_queue_state == "initializing"
 
     def is_zombie(self):
-        return self._job_queue_state == "zombie"
+        return self._job_queue_state == "zombie" or self._job_queue_state == "finished"
 
     def is_running(self):
         return self._job_queue_state == "running"
@@ -102,15 +102,14 @@ class QstatSubstitute(object):
     """A wrapper for Qstat to avoid overloading the
     SGE/OGS server with rapid continuous qstat requests"""
 
-    def __init__(self, qstatInstantExecutable='qstat', qstatCachedExecutable='qstat', login=''):
+    def __init__(self, qstat_instant_executable='qstat', qstat_cached_executable='qstat'):
         """
         :param qstat_instant_executable:
         :param qstat_cached_executable:
         """
-        self._qstatInstantExecutable = qstatInstantExecutable
-        self._qstatCachedExecutable = qstatCachedExecutable
-        self._login = login
-        self._OutOfScopeJobs = list()  # Initialize first
+        self._qstat_instant_executable = qstat_instant_executable
+        self._qstat_cached_executable = qstat_cached_executable
+        self._out_of_scope_jobs = list()  # Initialize first
         self._task_dictionary = dict(
         )  # {'taskid': QJobInfo(), .... }  The dictionaryObject
         self._remove_old_jobs()
@@ -150,7 +149,7 @@ class QstatSubstitute(object):
             qacct_retries -= 1
             try:
                 proc = subprocess.Popen(
-                    [thisCommand, '-o', self._login, '-j', str(taskid)],
+                    [this_command, '-o', pwd.getpwuid(os.getuid())[0], '-j', str(taskid)],
                     stdout=subprocess.PIPE,
                     stderr=subprocess.PIPE)
                 qacct_result, _ = proc.communicate()
@@ -177,10 +176,10 @@ class QstatSubstitute(object):
             except:
                 job_queue_name = "unknown"
             try:
-                job_slots = current_job_element.getElementsByTagName(
-                    'slots')[0].childNodes[0].data
+                job_slots = int(current_job_element.getElementsByTagName(
+                    'slots')[0].childNodes[0].data)
             except:
-                job_slots = "unknown"
+                job_slots = -1
             job_queue_state = current_job_element.getAttribute('state')
             job_num = int(current_job_element.getElementsByTagName(
                 'JB_job_number')[0].childNodes[0].data)
@@ -252,7 +251,7 @@ class QstatSubstitute(object):
             qstat_retries -= 1
             try:
                 proc = subprocess.Popen(
-                    [thisCommand, '-u', self._login, '-xml', '-s', 'psrz'],
+                    [this_command, '-u', pwd.getpwuid(os.getuid())[0], '-xml', '-s', 'psrz'],
                     stdout=subprocess.PIPE,
                     stderr=subprocess.PIPE)
                 qstat_xml_result, _ = proc.communicate()
@@ -313,9 +312,9 @@ def qsub_sanitize_job_name(testjobname):
 
     Numbers and punctuation are  not allowed.
 
-    >>> qsub_sanitize_job_name('01')
+    >>> qsub_sanitize_job_name('01') # doctest: +ALLOW_UNICODE
     'J01'
-    >>> qsub_sanitize_job_name('a01')
+    >>> qsub_sanitize_job_name('a01') # doctest: +ALLOW_UNICODE
     'a01'
     """
     if testjobname[0].isalpha():
@@ -344,9 +343,8 @@ class SGEPlugin(SGELikeBatchManagerBase):
         """
         self._retry_timeout = 2
         self._max_tries = 2
-
-        instantQstat = 'qstat'
-        cachedQstat = 'qstat'
+        instant_qstat = 'qstat'
+        cached_qstat = 'qstat'
 
         if 'plugin_args' in kwargs and kwargs['plugin_args']:
             if 'retry_timeout' in kwargs['plugin_args']:
@@ -356,13 +354,8 @@ class SGEPlugin(SGELikeBatchManagerBase):
             if 'qstatProgramPath' in kwargs['plugin_args']:
                 instant_qstat = kwargs['plugin_args']['qstatProgramPath']
             if 'qstatCachedProgramPath' in kwargs['plugin_args']:
-                cachedQstat = kwargs['plugin_args']['qstatCachedProgramPath']
-            if 'username' in kwargs['plugin_args']:
-                self._login = kwargs['plugin_args']['username']
-            else:
-                self._login = os.getlogin()
-            self._refQstatSubstitute = QstatSubstitute(
-                instantQstat, cachedQstat, self._login)
+                cached_qstat = kwargs['plugin_args']['qstatCachedProgramPath']
+        self._refQstatSubstitute = QstatSubstitute(instant_qstat, cached_qstat)
 
         super(SGEPlugin, self).__init__(template, **kwargs)
 

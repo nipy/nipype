@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # coding: utf-8
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
@@ -55,6 +56,7 @@ def csf_mask(in_file, in_mask, out_file=None):
     from scipy.ndimage import binary_erosion, binary_opening, label
     import scipy.ndimage as nd
     import os.path as op
+    from nipype.utils import NUMPY_MMAP
 
     if out_file is None:
         fname, ext = op.splitext(op.basename(in_file))
@@ -63,12 +65,12 @@ def csf_mask(in_file, in_mask, out_file=None):
             ext = ext2 + ext
         out_file = op.abspath("%s_csfmask%s" % (fname, ext))
 
-    im = nb.load(in_file)
+    im = nb.load(in_file, mmap=NUMPY_MMAP)
     hdr = im.header.copy()
     hdr.set_data_dtype(np.uint8)
     hdr.set_xyzt_units('mm')
     imdata = im.get_data()
-    msk = nb.load(in_mask).get_data()
+    msk = nb.load(in_mask, mmap=NUMPY_MMAP).get_data()
     msk = binary_erosion(msk,
                          structure=np.ones((15, 15, 10))).astype(np.uint8)
     thres = np.percentile(imdata[msk > 0].reshape(-1), 90.0)
@@ -98,6 +100,7 @@ def bg_mask(in_file, in_mask, out_file=None):
     from scipy.ndimage import binary_dilation
     import scipy.ndimage as nd
     import os.path as op
+    from nipype.utils import NUMPY_MMAP
 
     if out_file is None:
         fname, ext = op.splitext(op.basename(in_file))
@@ -106,12 +109,12 @@ def bg_mask(in_file, in_mask, out_file=None):
             ext = ext2 + ext
         out_file = op.abspath("%s_bgmask%s" % (fname, ext))
 
-    im = nb.load(in_file)
+    im = nb.load(in_file, mmap=NUMPY_MMAP)
     hdr = im.header.copy()
     hdr.set_data_dtype(np.uint8)
     hdr.set_xyzt_units('mm')
     imdata = im.get_data()
-    msk = nb.load(in_mask).get_data()
+    msk = nb.load(in_mask, mmap=NUMPY_MMAP).get_data()
     msk = 1 - binary_dilation(msk, structure=np.ones((20, 20, 20)))
     nb.Nifti1Image(msk.astype(np.uint8), im.affine, hdr).to_filename(out_file)
     return out_file

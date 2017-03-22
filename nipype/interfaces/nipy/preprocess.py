@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
     Change directory to provide relative paths for doctests
     >>> import os
@@ -6,14 +7,21 @@
     >>> os.chdir(datadir)
 
 """
+from __future__ import print_function, division, unicode_literals, absolute_import
+from builtins import open
+
 import os
-import warnings
 
 import nibabel as nb
 import numpy as np
 
 from ...utils.misc import package_check
+from ...utils import NUMPY_MMAP
+
 from ...utils.filemanip import split_filename, fname_presuffix
+from ..base import (TraitedSpec, BaseInterface, traits,
+                    BaseInterfaceInputSpec, isdefined, File,
+                    InputMultiPath, OutputMultiPath)
 
 
 have_nipy = True
@@ -26,9 +34,6 @@ else:
     from nipy import save_image, load_image
     nipy_version = nipy.__version__
 
-from ..base import (TraitedSpec, BaseInterface, traits,
-                    BaseInterfaceInputSpec, isdefined, File,
-                    InputMultiPath, OutputMultiPath)
 
 
 class ComputeMaskInputSpec(BaseInterfaceInputSpec):
@@ -58,7 +63,7 @@ class ComputeMask(BaseInterface):
             value = getattr(self.inputs, key)
             if isdefined(value):
                 if key in ['mean_volume', 'reference_volume']:
-                    nii = nb.load(value)
+                    nii = nb.load(value, mmap=NUMPY_MMAP)
                     value = nii.get_data()
                 args[key] = value
 
@@ -145,6 +150,11 @@ class FmriRealign4d(BaseInterface):
     input_spec = FmriRealign4dInputSpec
     output_spec = FmriRealign4dOutputSpec
     keywords = ['slice timing', 'motion correction']
+
+    def __init__(self, **inputs):
+        DeprecationWarning(('Will be deprecated in release 0.13. Please use'
+                            'SpaceTimeRealigner'))
+        BaseInterface.__init__(self, **inputs)
 
     def _run_interface(self, runtime):
         from nipy.algorithms.registration import FmriRealign4d as FR4d

@@ -3,17 +3,22 @@
 
 from nipype.interfaces.niftyseg import (no_niftyseg, get_custom_path,
                                         UnaryStats, BinaryStats)
-from nipype.testing import (assert_equal, skipif, example_data)
+from nipype.testing import skipif, example_data
+import pytest
 
 
 @skipif(no_niftyseg(cmd='seg_stats'))
-def test_seg_stats():
+def test_unary_stats():
 
-    # Create a reg_aladin object
+    # Create a node object
     unarys = UnaryStats()
 
     # Check if the command is properly defined
-    yield assert_equal, unarys.cmd, get_custom_path('seg_stats')
+    assert unarys.cmd == get_custom_path('seg_stats')
+
+    # test raising error with mandatory args absent
+    with pytest.raises(ValueError):
+        unarys.run()
 
     # Assign some input data
     in_file = example_data('im1.nii')
@@ -21,25 +26,32 @@ def test_seg_stats():
     unarys.inputs.operation = 'a'
 
     expected_cmd = '{cmd} {in_file} -a'.format(
-                        cmd=get_custom_path('seg_stats'),
-                        in_file=in_file)
+        cmd=get_custom_path('seg_stats'),
+        in_file=in_file)
 
-    yield assert_equal, unarys.cmdline, expected_cmd
+    assert unarys.cmdline == expected_cmd
 
-    # Create a reg_aladin object
+
+@skipif(no_niftyseg(cmd='seg_stats'))
+def test_binary_stats():
+    # Create a node object
     binarys = BinaryStats()
 
     # Check if the command is properly defined
-    yield assert_equal, binarys.cmd, get_custom_path('seg_stats')
+    assert binarys.cmd == get_custom_path('seg_stats')
+
+    # test raising error with mandatory args absent
+    with pytest.raises(ValueError):
+        binarys.run()
 
     # Assign some input data
     in_file = example_data('im1.nii')
     binarys.inputs.in_file = in_file
-    binarys.inputs.operand_value = 1
+    binarys.inputs.operand_value = 2
     binarys.inputs.operation = 'sa'
 
-    expected_cmd = '{cmd} {in_file} -sa 1.00000000'.format(
-                        cmd=get_custom_path('seg_stats'),
-                        in_file=in_file)
+    expected_cmd = '{cmd} {in_file} -sa 2.00000000'.format(
+        cmd=get_custom_path('seg_stats'),
+        in_file=in_file)
 
-    yield assert_equal, binarys.cmdline, expected_cmd
+    assert binarys.cmdline == expected_cmd

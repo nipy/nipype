@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """The minc module provides classes for interfacing with the `MINC
@@ -7,28 +8,15 @@ module was written to work with MINC version 2.2.00.
 Author: Carlo Hamalainen <carlo@carlo-hamalainen.net>
         http://carlo-hamalainen.net
 """
-
-from ..base import (
-    TraitedSpec,
-    CommandLineInputSpec,
-    CommandLine,
-    StdOutCommandLineInputSpec,
-    StdOutCommandLine,
-    File,
-    Directory,
-    InputMultiPath,
-    OutputMultiPath,
-    traits,
-    isdefined,
-)
-
-import glob
+from __future__ import print_function, division, unicode_literals, absolute_import
+from builtins import object
 import os
 import os.path
-import re
-
 import warnings
-warn = warnings.warn
+
+from ..base import CommandLine
+
+
 warnings.filterwarnings('always', category=UserWarning)
 
 
@@ -121,11 +109,11 @@ def aggregate_filename(files, new_suffix):
 
     >>> from nipype.interfaces.minc.base import aggregate_filename
     >>> f = aggregate_filename(['/tmp/foo1.mnc', '/tmp/foo2.mnc', '/tmp/foo3.mnc'], 'averaged')
-    >>> os.path.split(f)[1] # This has a full path, so just check the filename.
+    >>> os.path.split(f)[1] # This has a full path, so just check the filename. # doctest: +ALLOW_UNICODE
     'foo_averaged.mnc'
 
     >>> f = aggregate_filename(['/tmp/foo1.mnc', '/tmp/blah1.mnc'], 'averaged')
-    >>> os.path.split(f)[1] # This has a full path, so just check the filename.
+    >>> os.path.split(f)[1] # This has a full path, so just check the filename. # doctest: +ALLOW_UNICODE
     'foo1_averaged.mnc'
 
     """

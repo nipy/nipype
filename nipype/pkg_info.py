@@ -1,17 +1,18 @@
+# -*- coding: utf-8 -*-
+from __future__ import print_function, division, unicode_literals, absolute_import
+
 from future import standard_library
 standard_library.install_aliases()
+import configparser
 
 import os
 import sys
 import subprocess
 
-try:
-    from configparser import ConfigParser
-except ImportError:
-    from configparser import ConfigParser  # python 3
+from .info import VERSION
 
 COMMIT_INFO_FNAME = 'COMMIT_INFO.txt'
-
+PY3 = sys.version_info[0] >= 3
 
 def pkg_commit_hash(pkg_path):
     ''' Get short form of commit hash given directory `pkg_path`
@@ -47,7 +48,10 @@ def pkg_commit_hash(pkg_path):
     pth = os.path.join(pkg_path, COMMIT_INFO_FNAME)
     if not os.path.isfile(pth):
         raise IOError('Missing commit info file %s' % pth)
-    cfg_parser = ConfigParser()
+    if PY3:
+        cfg_parser = configparser.RawConfigParser()
+    else:
+        cfg_parser = configparser.ConfigParser()
     cfg_parser.read(pth)
     archive_subst = cfg_parser.get('commit hash', 'archive_subst_hash')
     if not archive_subst.startswith('$Format'):  # it has been substituted
@@ -62,6 +66,8 @@ def pkg_commit_hash(pkg_path):
                             cwd=pkg_path, shell=True)
     repo_commit, _ = proc.communicate()
     if repo_commit:
+        if PY3:
+            repo_commit = repo_commit.decode()
         return 'repository', repo_commit.strip()
     return '(none found)', '<not found>'
 
@@ -89,6 +95,7 @@ def get_pkg_info(pkg_path):
         pkg_path=pkg_path,
         commit_source=src,
         commit_hash=hsh,
+        nipype_version=VERSION,
         sys_version=sys.version,
         sys_executable=sys.executable,
         sys_platform=sys.platform,

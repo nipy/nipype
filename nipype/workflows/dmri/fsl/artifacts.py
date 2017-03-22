@@ -1,7 +1,10 @@
+# -*- coding: utf-8 -*-
 # coding: utf-8
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 from __future__ import division
+
+from nipype.utils import NUMPY_MMAP
 
 from ....interfaces.io import JSONFileGrabber
 from ....interfaces import utility as niu
@@ -234,7 +237,7 @@ def all_fsl_pipeline(name='fsl_all_correct',
         import nibabel as nb
         import os
         out_file = os.path.abspath('index.txt')
-        vols = nb.load(in_file).get_data().shape[-1]
+        vols = nb.load(in_file, mmap=NUMPY_MMAP).get_data().shape[-1]
         np.savetxt(out_file, np.ones((vols,)).T)
         return out_file
 
@@ -338,6 +341,7 @@ def hmc_pipeline(name='motion_correct'):
         inputnode.in_mask - weights mask of reference image (a file with data \
 range in [0.0, 1.0], indicating the weight of each voxel when computing the \
 metric.
+        inputnode.in_bval - b-values file
         inputnode.in_bvec - gradients file (b-vectors)
         inputnode.ref_num (optional, default=0) index of the b0 volume that \
 should be taken as reference
@@ -899,7 +903,7 @@ def _xfm_jacobian(in_xfm):
 def _get_zoom(in_file, enc_dir):
     import nibabel as nb
 
-    zooms = nb.load(in_file).header.get_zooms()
+    zooms = nb.load(in_file, mmap=NUMPY_MMAP).header.get_zooms()
 
     if 'y' in enc_dir:
         return zooms[1]

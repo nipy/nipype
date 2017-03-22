@@ -1,12 +1,17 @@
-from __future__ import division
-from builtins import range
+# -*- coding: utf-8 -*-
+from __future__ import print_function, division, unicode_literals, absolute_import
+from builtins import range, str, bytes
+
 import os
 
 import nibabel as nb
 import numpy as np
 
 from ...utils.misc import package_check
-from ...external.six import string_types
+from ...utils import NUMPY_MMAP
+
+from ..base import (BaseInterface, TraitedSpec, traits, File, OutputMultiPath,
+                    BaseInterfaceInputSpec, isdefined)
 
 have_nipy = True
 try:
@@ -15,7 +20,7 @@ except Exception as e:
     have_nipy = False
 else:
     import nipy.modalities.fmri.design_matrix as dm
-    import nipy.labs.glm.glm as GLM
+    import nipy.modalities.fmri.glm as GLM
 
 if have_nipy:
     try:
@@ -23,8 +28,6 @@ if have_nipy:
     except AttributeError:
         from nipy.modalities.fmri.experimental_paradigm import BlockParadigm
 
-from ..base import (BaseInterface, TraitedSpec, traits, File, OutputMultiPath,
-                    BaseInterfaceInputSpec, isdefined)
 
 
 class FitGLMInputSpec(BaseInterfaceInputSpec):
@@ -84,7 +87,7 @@ class FitGLM(BaseInterface):
         session_info = self.inputs.session_info
 
         functional_runs = self.inputs.session_info[0]['scans']
-        if isinstance(functional_runs, string_types):
+        if isinstance(functional_runs, (str, bytes)):
             functional_runs = [functional_runs]
         nii = nb.load(functional_runs[0])
         data = nii.get_data()
@@ -98,7 +101,7 @@ class FitGLM(BaseInterface):
         del data
 
         for functional_run in functional_runs[1:]:
-            nii = nb.load(functional_run)
+            nii = nb.load(functional_run, mmap=NUMPY_MMAP)
             data = nii.get_data()
             npdata = data.copy()
             del data
@@ -158,7 +161,7 @@ class FitGLM(BaseInterface):
             pylab.close()
             pylab.clf()
 
-        glm = GLM.glm()
+        glm = GLM.GeneralLinearModel()
         glm.fit(timeseries.T, design_matrix, method=self.inputs.method, model=self.inputs.model)
 
         self._beta_file = os.path.abspath("beta.nii")
@@ -266,7 +269,7 @@ class EstimateContrast(BaseInterface):
         else:
             mask = np.ones(beta_nii.shape[:3]) == 1
 
-        glm = GLM.glm()
+        glm = GLM.GeneralLinearModel()
         nii = nb.load(self.inputs.beta)
         glm.beta = beta_nii.get_data().copy()[mask, :].T
         glm.nvbeta = self.inputs.nvbeta

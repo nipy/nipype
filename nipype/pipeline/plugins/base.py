@@ -1,10 +1,10 @@
+# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """Common graph operations for execution
 """
-
-from builtins import range
-from builtins import object
+from __future__ import print_function, division, unicode_literals, absolute_import
+from builtins import range, object, open
 
 from copy import deepcopy
 from glob import glob
@@ -13,6 +13,7 @@ import getpass
 import shutil
 from socket import gethostname
 import sys
+import uuid
 from time import strftime, sleep, time
 from traceback import format_exception, format_exc
 from warnings import warn
@@ -21,13 +22,13 @@ import numpy as np
 import scipy.sparse as ssp
 
 
-from ...utils.filemanip import savepkl, loadpkl
+from ... import logging
+from ...utils.filemanip import savepkl, loadpkl, crash2txt
 from ...utils.misc import str2bool
 from ..engine.utils import (nx, dfs_preorder, topological_sort)
 from ..engine import MapNode
 
 
-from ... import logging
 logger = logging.getLogger('workflow')
 iflogger = logging.getLogger('interface')
 
@@ -57,19 +58,26 @@ def report_crash(node, traceback=None, hostname=None):
                                      exc_traceback)
     timeofcrash = strftime('%Y%m%d-%H%M%S')
     login_name = getpass.getuser()
-    crashfile = 'crash-%s-%s-%s.pklz' % (timeofcrash,
-                                         login_name,
-                                         name)
+    crashfile = 'crash-%s-%s-%s-%s' % (timeofcrash,
+                                            login_name,
+                                            name,
+                                            str(uuid.uuid4()))
     crashdir = node.config['execution']['crashdump_dir']
     if crashdir is None:
         crashdir = os.getcwd()
     if not os.path.exists(crashdir):
         os.makedirs(crashdir)
     crashfile = os.path.join(crashdir, crashfile)
+    if node.config['execution']['crashfile_format'].lower() in ['text', 'txt']:
+        crashfile += '.txt'
+    else:
+        crashfile += '.pklz'
     logger.info('Saving crash info to %s' % crashfile)
     logger.info(''.join(traceback))
-    savepkl(crashfile, dict(node=node, traceback=traceback))
-    # np.savez(crashfile, node=node, traceback=traceback)
+    if node.config['execution']['crashfile_format'].lower() in ['text', 'txt']:
+        crash2txt(crashfile, dict(node=node, traceback=traceback))
+    else:
+        savepkl(crashfile, dict(node=node, traceback=traceback))
     return crashfile
 
 
@@ -143,7 +151,7 @@ try:
     cwd = os.getcwd()
     info = loadpkl(pklfile)
     result = info['node'].run(updatehash=info['updatehash'])
-except Exception, e:
+except Exception as e:
     etype, eval, etr = sys.exc_info()
     traceback = format_exception(etype,eval,etr)
     if info is None or not os.path.exists(info['node'].output_dir()):
@@ -171,9 +179,8 @@ except Exception, e:
 """
     cmdstr = cmdstr % (mpl_backend, pkl_file, batch_dir, node.config, suffix)
     pyscript = os.path.join(batch_dir, 'pyscript_%s.py' % suffix)
-    fp = open(pyscript, 'wt')
-    fp.writelines(cmdstr)
-    fp.close()
+    with open(pyscript, 'wt') as fp:
+        fp.writelines(cmdstr)
     return pyscript
 
 
@@ -235,6 +242,7 @@ class DistributedPluginBase(PluginBase):
         notrun = []
         while np.any(self.proc_done == False) | \
                 np.any(self.proc_pending == True):
+
             toappend = []
             # trigger callbacks for any pending results
             while self.pending_tasks:
@@ -265,9 +273,21 @@ class DistributedPluginBase(PluginBase):
                                             graph=graph)
             else:
                 logger.debug('Not submitting')
-            sleep(float(self._config['execution']['poll_sleep_duration']))
+            self._wait()
+
         self._remove_node_dirs()
         report_nodes_not_run(notrun)
+
+        # close any open resources
+        self._close()
+
+    def _wait(self):
+        sleep(float(self._config['execution']['poll_sleep_duration']))
+
+    def _close(self):
+        # close any open resources, this could raise NotImplementedError
+        # but I didn't want to break other plugins
+        return True
 
     def _get_result(self, taskid):
         raise NotImplementedError
@@ -363,7 +383,7 @@ class DistributedPluginBase(PluginBase):
                     self.proc_done[jobid] = True
                     self.proc_pending[jobid] = True
                     # Send job to task manager and add to pending tasks
-                    logger.info('Executing: %s ID: %d' %
+                    logger.info('Submitting: %s ID: %d' %
                                 (self.procs[jobid]._id, jobid))
                     if self._status_callback:
                         self._status_callback(self.procs[jobid], 'start')
@@ -405,7 +425,7 @@ class DistributedPluginBase(PluginBase):
                                 self.proc_pending[jobid] = False
                             else:
                                 self.pending_tasks.insert(0, (tid, jobid))
-                    logger.info('Finished executing: %s ID: %d' %
+                    logger.info('Finished submitting: %s ID: %d' %
                                 (self.procs[jobid]._id, jobid))
             else:
                 break
@@ -482,7 +502,8 @@ class SGELikeBatchManagerBase(DistributedPluginBase):
             if 'template' in plugin_args:
                 self._template = plugin_args['template']
                 if os.path.isfile(self._template):
-                    self._template = open(self._template).read()
+                    with open(self._template) as tpl_file:
+                        self._template = tpl_file.read()
             if 'qsub_args' in plugin_args:
                 self._qsub_args = plugin_args['qsub_args']
         self._pending = {}
@@ -558,10 +579,8 @@ class SGELikeBatchManagerBase(DistributedPluginBase):
         batchscript = '\n'.join((self._template,
                                  '%s %s' % (sys.executable, pyscript)))
         batchscriptfile = os.path.join(batch_dir, 'batchscript_%s.sh' % name)
-        fp = open(batchscriptfile, 'wt')
-        fp.writelines(batchscript)
-        fp.close()
-        os.chmod(batchscriptfile, 0744)
+        with open(batchscriptfile, 'wt') as fp:
+            fp.writelines(batchscript)
         return self._submit_batchtask(batchscriptfile, node)
 
     def _report_crash(self, node, result=None):
@@ -605,13 +624,15 @@ class GraphPluginBase(PluginBase):
         for keyword in keywords:
             value = getattr(self, "_" + keyword)
             if keyword == "template" and os.path.isfile(value):
-                value = open(value).read()
+                with open(value) as f:
+                    value = f.read()
             if (hasattr(node, "plugin_args") and
                     isinstance(node.plugin_args, dict) and
                     keyword in node.plugin_args):
                 if (keyword == "template" and
                         os.path.isfile(node.plugin_args[keyword])):
-                    tmp_value = open(node.plugin_args[keyword]).read()
+                    with open(node.plugin_args[keyword]) as f:
+                        tmp_value = f.read()
                 else:
                     tmp_value = node.plugin_args[keyword]
 

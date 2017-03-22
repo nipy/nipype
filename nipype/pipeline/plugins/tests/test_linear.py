@@ -1,9 +1,7 @@
+# -*- coding: utf-8 -*-
 import os
 import nipype.interfaces.base as nib
-from tempfile import mkdtemp
-from shutil import rmtree
 
-from nipype.testing import assert_equal
 import nipype.pipeline.engine as pe
 
 
@@ -16,7 +14,7 @@ class OutputSpec(nib.TraitedSpec):
     output1 = nib.traits.List(nib.traits.Int, desc='outputs')
 
 
-class TestInterface(nib.BaseInterface):
+class LinearTestInterface(nib.BaseInterface):
     input_spec = InputSpec
     output_spec = OutputSpec
 
@@ -30,14 +28,12 @@ class TestInterface(nib.BaseInterface):
         return outputs
 
 
-def test_run_in_series():
-    cur_dir = os.getcwd()
-    temp_dir = mkdtemp(prefix='test_engine_')
-    os.chdir(temp_dir)
+def test_run_in_series(tmpdir):
+    os.chdir(str(tmpdir))
 
     pipe = pe.Workflow(name='pipe')
-    mod1 = pe.Node(interface=TestInterface(), name='mod1')
-    mod2 = pe.MapNode(interface=TestInterface(),
+    mod1 = pe.Node(interface=LinearTestInterface(), name='mod1')
+    mod2 = pe.MapNode(interface=LinearTestInterface(),
                       iterfield=['input1'],
                       name='mod2')
     pipe.connect([(mod1, mod2, [('output1', 'input1')])])
@@ -47,6 +43,4 @@ def test_run_in_series():
     names = ['.'.join((node._hierarchy, node.name)) for node in execgraph.nodes()]
     node = execgraph.nodes()[names.index('pipe.mod1')]
     result = node.get_output('output1')
-    yield assert_equal, result, [1, 1]
-    os.chdir(cur_dir)
-    rmtree(temp_dir)
+    assert result == [1, 1]

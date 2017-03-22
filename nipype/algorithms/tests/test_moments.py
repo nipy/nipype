@@ -1,5 +1,5 @@
+# -*- coding: utf-8 -*-
 import numpy as np
-from nipype.testing import assert_true
 import tempfile
 from nipype.algorithms.misc import calc_moments
 
@@ -130,9 +130,9 @@ def test_skew():
         f.write(data)
         f.flush()
         skewness = calc_moments(f.name, 3)
-        yield assert_true, np.allclose(skewness, np.array(
-            [-0.23418937314622, 0.2946365564954823, -0.05781002053540932,
-             -0.3512508282578762, -
-             0.07035664150233077, -
-             0.01935867699166935,
-             0.00483863369427428, 0.21879460029850167]))
+        assert np.allclose(skewness, np.array(
+                [-0.23418937314622, 0.2946365564954823, -0.05781002053540932,
+                  -0.3512508282578762, -
+                  0.07035664150233077, -
+                  0.01935867699166935,
+                  0.00483863369427428, 0.21879460029850167]))

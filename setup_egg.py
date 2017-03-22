@@ -2,9 +2,9 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """Wrapper to run setup.py using setuptools."""
-
+from __future__ import print_function, division, unicode_literals, absolute_import
+from io import open
 import os.path
-from setuptools import setup
 
 ################################################################################
 # Call the setup.py script, injecting the setuptools-specific arguments.

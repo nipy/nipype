@@ -3,9 +3,9 @@
 # rsync -e ssh nipype-0.1-py2.5.egg cburns,nipy@frs.sourceforge.net:/home/frs/project/n/ni/nipy/nipype/nipype-0.1/
 
 PYTHON ?= python
-NOSETESTS ?= nosetests
+NOSETESTS=`which nosetests`
 
-.PHONY: zipdoc sdist egg upload_to_pypi trailing-spaces clean-pyc clean-so clean-build clean-ctags clean in inplace test-code test-doc test-coverage test html specs check-before-commit check
+.PHONY: zipdoc sdist egg upload_to_pypi trailing-spaces clean-pyc clean-so clean-build clean-ctags clean in inplace test-code test-coverage test html specs check-before-commit check
 
 zipdoc: html
 	zip documentation.zip doc/_build/html
@@ -15,8 +15,6 @@ sdist: zipdoc
 	python setup.py sdist
 	@echo "Done building source distribution."
 	# XXX copy documentation.zip to dist directory.
-	# XXX Somewhere the doc/_build directory is removed and causes
-	# this script to fail.
 
 egg: zipdoc
 	@echo "Building egg..."
@@ -34,6 +32,7 @@ trailing-spaces:
 
 clean-pyc:
 	find . -name "*.pyc" | xargs rm -f
+	find . -name "__pycache__" -type d | xargs rm -rf
 
 clean-so:
 	find . -name "*.so" | xargs rm -f
@@ -45,32 +44,34 @@ clean-build:
 clean-ctags:
 	rm -f tags
 
-clean: clean-build clean-pyc clean-so clean-ctags
+clean-doc:
+	rm -rf doc/_build
+
+clean-tests:
+	rm -f .coverage
+
+clean: clean-build clean-pyc clean-so clean-ctags clean-doc clean-tests
 
 in: inplace # just a shortcut
 inplace:
 	$(PYTHON) setup.py build_ext -i
 
 test-code: in
-	$(NOSETESTS) -s nipype --with-doctest
+	py.test --doctest-module nipype
 
-test-doc:
-	$(NOSETESTS) -s --with-doctest --doctest-tests --doctest-extension=rst \
-	--doctest-fixtures=_fixture doc/
-
-test-coverage:
-	$(NOSETESTS) -s --with-doctest --with-coverage --cover-package=nipype \
-	--config=.coveragerc
-
-test: clean test-code
+test-coverage: clean-tests in
+	py.test --doctest-modules --cov-config .coveragerc --cov=nipype nipype
+	
+test: tests # just another name
+tests: clean test-code
 
 html:
 	@echo "building docs"
-	make -C doc clean html
+	make -C doc clean htmlonly
 
 specs:
 	@echo "Checking specs and autogenerating spec tests"
-	python tools/checkspecs.py
+	env PYTHONPATH=".:$(PYTHONPATH)" python tools/checkspecs.py
 
 check: check-before-commit # just a shortcut
 check-before-commit: specs trailing-spaces html test

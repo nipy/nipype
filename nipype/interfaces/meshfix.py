@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """ Fixes meshes:
@@ -9,12 +10,12 @@
     >>> os.chdir(datadir)
 
 """
+from __future__ import print_function, division, unicode_literals, absolute_import
 
-from .base import (CommandLine, CommandLineInputSpec,
-                   traits, TraitedSpec, isdefined,
-                   File)
 import os.path as op
 from ..utils.filemanip import split_filename
+from .base import (CommandLine, CommandLineInputSpec,
+                   traits, TraitedSpec, isdefined, File)
 
 
 class MeshFixInputSpec(CommandLineInputSpec):
@@ -104,7 +105,7 @@ class MeshFix(CommandLine):
     >>> fix.inputs.in_file1 = 'lh-pial.stl'
     >>> fix.inputs.in_file2 = 'rh-pial.stl'
     >>> fix.run()                                    # doctest: +SKIP
-    >>> fix.cmdline
+    >>> fix.cmdline # doctest: +ALLOW_UNICODE
     'meshfix lh-pial.stl rh-pial.stl -o lh-pial_fixed.off'
     """
     _cmd = 'meshfix'
@@ -127,7 +128,7 @@ class MeshFix(CommandLine):
         return outputs
 
     def _gen_filename(self, name):
-        if name is 'out_filename':
+        if name == 'out_filename':
             return self._gen_outfilename()
         else:
             return None

@@ -1,10 +1,10 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 
-
+from nipype.interfaces.niftyreg import no_niftyreg, get_custom_path, RegTools
+from nipype.testing import skipif, example_data
 import os
-from nipype.interfaces.niftyreg import (no_niftyreg, get_custom_path, RegTools)
-from nipype.testing import (assert_equal, skipif, example_data)
+import pytest
 
 
 @skipif(no_niftyreg(cmd='reg_tools'))
@@ -14,7 +14,11 @@ def test_reg_tools_mul():
     nr = RegTools()
 
     # Check if the command is properly defined
-    yield assert_equal, nr.cmd, get_custom_path('reg_tools')
+    assert nr.cmd == get_custom_path('reg_tools')
+
+    # test raising error with mandatory args absent
+    with pytest.raises(ValueError):
+        nr.run()
 
     # Assign some input data
     in_file = example_data('im1.nii')
@@ -22,9 +26,14 @@ def test_reg_tools_mul():
     nr.inputs.mul_val = 4
     nr.inputs.omp_core_val = 4
 
-    expected_cmd = get_custom_path('reg_tools') + ' ' + '-in ' + in_file + ' -mul 4.0 ' +\
-                   '-omp 4 ' + '-out ' + os.getcwd() + os.sep + 'im1_tools.nii.gz'
-    yield assert_equal, nr.cmdline, expected_cmd
+    cmd_tmp = '{cmd} -in {in_file} -mul 4.0 -omp 4 -out {out_file}'
+    expected_cmd = cmd_tmp.format(
+        cmd=get_custom_path('reg_tools'),
+        in_file=in_file,
+        out_file=os.path.join(os.getcwd(), 'im1_tools.nii.gz'))
+
+    assert nr.cmdline == expected_cmd
+
 
 @skipif(no_niftyreg(cmd='reg_tools'))
 def test_reg_tools_iso():
@@ -33,7 +42,11 @@ def test_reg_tools_iso():
     nr = RegTools()
 
     # Check if the command is properly defined
-    yield assert_equal, nr.cmd, get_custom_path('reg_tools')
+    assert nr.cmd == get_custom_path('reg_tools')
+
+    # test raising error with mandatory args absent
+    with pytest.raises(ValueError):
+        nr.run()
 
     # Assign some input data
     in_file = example_data('im1.nii')
@@ -41,6 +54,10 @@ def test_reg_tools_iso():
     nr.inputs.iso_flag = True
     nr.inputs.omp_core_val = 4
 
-    expected_cmd = get_custom_path('reg_tools') + ' ' + '-in ' + in_file + ' -iso ' +\
-                   '-omp 4 ' + '-out ' + os.getcwd() + os.sep + 'im1_tools.nii.gz'
-    yield assert_equal, nr.cmdline, expected_cmd
+    cmd_tmp = '{cmd} -in {in_file} -iso -omp 4 -out {out_file}'
+    expected_cmd = cmd_tmp.format(
+        cmd=get_custom_path('reg_tools'),
+        in_file=in_file,
+        out_file=os.path.join(os.getcwd(), 'im1_tools.nii.gz'))
+
+    assert nr.cmdline == expected_cmd

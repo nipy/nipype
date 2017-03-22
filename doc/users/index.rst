@@ -23,7 +23,7 @@
    plugins
    config_file
    debug
-
+   cli
 
 .. toctree::
    :maxdepth: 1

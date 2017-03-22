@@ -1,6 +1,8 @@
+# -*- coding: utf-8 -*-
+from __future__ import unicode_literals, print_function, absolute_import
 import os
 
-from nipype.testing import skipif
+import pytest
 import nipype.interfaces.fsl as fsl
 import nipype.interfaces.utility as util
 from nipype.interfaces.fsl import no_fsl, no_fsl_course_data
@@ -13,8 +15,8 @@ from nipype.workflows.dmri.fsl.dti import create_bedpostx_pipeline
 from nipype.utils.filemanip import list_to_filename
 
 
-@skipif(no_fsl)
-@skipif(no_fsl_course_data)
+@pytest.mark.skipif(no_fsl(), reason="fsl is not installed")
+@pytest.mark.skipif(no_fsl_course_data(), reason="fsl data not available")
 def test_create_bedpostx_pipeline():
     fsl_course_dir = os.path.abspath(os.environ['FSL_COURSE_DATA'])
 

@@ -47,6 +47,10 @@ Output data can be visualized in the ConnectomeViewer
 First, we import the necessary modules from nipype.
 """
 
+import inspect
+
+import os.path as op                      # system functions
+import cmp                                    # connectome mapper
 import nipype.interfaces.io as nio           # Data i/o
 import nipype.interfaces.utility as util     # utility
 import nipype.pipeline.engine as pe          # pypeline engine
@@ -56,10 +60,6 @@ import nipype.interfaces.camino2trackvis as cam2trk
 import nipype.interfaces.freesurfer as fs    # freesurfer
 import nipype.interfaces.cmtk as cmtk
 import nipype.algorithms.misc as misc
-import inspect
-
-import os.path as op                      # system functions
-import cmp                                    # connectome mapper
 
 """
 We define the following functions to scrape the voxel and data dimensions of the input images. This allows the
@@ -74,9 +74,10 @@ regions.
 
 def get_vox_dims(volume):
     import nibabel as nb
+    from nipype.utils import NUMPY_MMAP
     if isinstance(volume, list):
         volume = volume[0]
-    nii = nb.load(volume)
+    nii = nb.load(volume, mmap=NUMPY_MMAP)
     hdr = nii.header
     voxdims = hdr.get_zooms()
     return [float(voxdims[0]), float(voxdims[1]), float(voxdims[2])]
@@ -84,9 +85,10 @@ def get_vox_dims(volume):
 
 def get_data_dims(volume):
     import nibabel as nb
+    from nipype.utils import NUMPY_MMAP
     if isinstance(volume, list):
         volume = volume[0]
-    nii = nb.load(volume)
+    nii = nb.load(volume, mmap=NUMPY_MMAP)
     hdr = nii.header
     datadims = hdr.get_data_shape()
     return [int(datadims[0]), int(datadims[1]), int(datadims[2])]
@@ -94,7 +96,8 @@ def get_data_dims(volume):
 
 def get_affine(volume):
     import nibabel as nb
-    nii = nb.load(volume)
+    from nipype.utils import NUMPY_MMAP
+    nii = nb.load(volume, mmap=NUMPY_MMAP)
     return nii.affine
 
 

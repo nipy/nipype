@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 from __future__ import division
@@ -27,19 +28,21 @@ def pickfirst(files):
 def pickmiddle(files):
     from nibabel import load
     import numpy as np
+    from nipype.utils import NUMPY_MMAP
     middlevol = []
     for f in files:
-        middlevol.append(int(np.ceil(load(f).shape[3] / 2)))
+        middlevol.append(int(np.ceil(load(f, mmap=NUMPY_MMAP).shape[3] / 2)))
     return middlevol
 
 
 def pickvol(filenames, fileidx, which):
     from nibabel import load
     import numpy as np
+    from nipype.utils import NUMPY_MMAP
     if which.lower() == 'first':
         idx = 0
     elif which.lower() == 'middle':
-        idx = int(np.ceil(load(filenames[fileidx]).shape[3] / 2))
+        idx = int(np.ceil(load(filenames[fileidx], mmap=NUMPY_MMAP).shape[3] / 2))
     elif which.lower() == 'last':
         idx = load(filenames[fileidx]).shape[3] - 1
     else:
@@ -113,6 +116,10 @@ def create_parallelfeat_preproc(name='featpreproc', highpass=True):
     >>> preproc.base_dir = '/tmp'
     >>> preproc.run() # doctest: +SKIP
     """
+    version = 0
+    if fsl.Info.version() and \
+            LooseVersion(fsl.Info.version()) > LooseVersion('5.0.6'):
+        version = 507
 
     featpreproc = pe.Workflow(name=name)
 
@@ -358,7 +365,26 @@ def create_parallelfeat_preproc(name='featpreproc', highpass=True):
                               name='highpass')
         featpreproc.connect(inputnode, ('highpass', highpass_operand), highpass, 'op_string')
         featpreproc.connect(meanscale, 'out_file', highpass, 'in_file')
-        featpreproc.connect(highpass, 'out_file', outputnode, 'highpassed_files')
+
+        if version < 507:
+            featpreproc.connect(highpass, 'out_file', outputnode, 'highpassed_files')
+        else:
+            """
+            Add back the mean removed by the highpass filter operation as of FSL 5.0.7
+            """
+            meanfunc4 = pe.MapNode(interface=fsl.ImageMaths(op_string='-Tmean',
+                                                            suffix='_mean'),
+                                   iterfield=['in_file'],
+                                   name='meanfunc4')
+
+            featpreproc.connect(meanscale, 'out_file', meanfunc4, 'in_file')
+            addmean = pe.MapNode(interface=fsl.BinaryMaths(operation='add'),
+                                 iterfield=['in_file', 'operand_file'],
+                                 name='addmean')
+            featpreproc.connect(highpass, 'out_file', addmean, 'in_file')
+            featpreproc.connect(meanfunc4, 'out_file', addmean, 'operand_file')
+            featpreproc.connect(addmean, 'out_file', outputnode, 'highpassed_files')
+
 
     """
     Generate a mean functional image from the first run
@@ -368,11 +394,8 @@ def create_parallelfeat_preproc(name='featpreproc', highpass=True):
                                                     suffix='_mean'),
                            iterfield=['in_file'],
                            name='meanfunc3')
-    if highpass:
-        featpreproc.connect(highpass, 'out_file', meanfunc3, 'in_file')
-    else:
-        featpreproc.connect(meanscale, 'out_file', meanfunc3, 'in_file')
 
+    featpreproc.connect(meanscale, 'out_file', meanfunc3, 'in_file')
     featpreproc.connect(meanfunc3, 'out_file', outputnode, 'mean')
 
     return featpreproc

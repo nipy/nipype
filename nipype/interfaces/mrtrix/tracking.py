@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """
@@ -8,12 +9,14 @@
     >>> os.chdir(datadir)
 
 """
+from __future__ import print_function, division, unicode_literals, absolute_import
+
 import os
 import os.path as op
 
+from ...utils.filemanip import split_filename
 from ..base import CommandLineInputSpec, CommandLine, traits, TraitedSpec, File
 from ..traits_extension import isdefined
-from ...utils.filemanip import split_filename
 
 
 class FilterTracksInputSpec(CommandLineInputSpec):
@@ -117,7 +120,7 @@ class Tracks2Prob(CommandLine):
         return outputs
 
     def _gen_filename(self, name):
-        if name is 'out_filename':
+        if name == 'out_filename':
             return self._gen_outfilename()
         else:
             return None
@@ -207,7 +210,7 @@ class StreamlineTrack(CommandLine):
     >>> strack.inputs.in_file = 'data.Bfloat'
     >>> strack.inputs.seed_file = 'seed_mask.nii'
     >>> strack.inputs.mask_file = 'mask.nii'
-    >>> strack.cmdline
+    >>> strack.cmdline # doctest: +ALLOW_UNICODE
     'streamtrack -mask mask.nii -seed seed_mask.nii SD_PROB data.Bfloat data_tracked.tck'
     >>> strack.run()                                    # doctest: +SKIP
     """
