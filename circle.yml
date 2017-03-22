@@ -50,12 +50,6 @@ test:
     - bash .circle/tests.sh :
         timeout: 7200
         parallel: true
-  post:
-    # Place reports in the appropriate folder
-    - cp ${WORKDIR}/tests/*.xml ${CIRCLE_TEST_REPORTS}/tests/
-    # Send coverage data to codecov.io
-    - codecov -f "coverage*.xml" -s "${WORKDIR}/tests/" -R "${HOME}/nipype/" -F unittests --env CIRCLE_NODE_INDEX
-    - codecov -f "smoketest*.xml" -s "${WORKDIR}/tests/" -R "${HOME}/nipype/" -F smoketests --env CIRCLE_NODE_INDEX
 
 general:
   artifacts:

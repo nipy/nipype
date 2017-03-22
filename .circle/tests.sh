@@ -37,3 +37,7 @@ case ${CIRCLE_NODE_INDEX} in
     docker run --rm=false -it -v $HOME/examples:/data/examples:ro -v $WORKDIR:/work -w /work nipype/nipype:py35 /usr/bin/run_examples.sh fmri_fsl_reuse Linear /data/examples/ level1_workflow
     ;;
 esac
+
+cp ${WORKDIR}/tests/*.xml ${CIRCLE_TEST_REPORTS}/tests/
+codecov -f "coverage*.xml" -s "${WORKDIR}/tests/" -R "${HOME}/nipype/" -F unittests -e CIRCLE_NODE_INDEX
+codecov -f "smoketest*.xml" -s "${WORKDIR}/tests/" -R "${HOME}/nipype/" -F smoketests -e CIRCLE_NODE_INDEX
