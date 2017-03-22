@@ -54,8 +54,8 @@ test:
     # Place reports in the appropriate folder
     - cp ${WORKDIR}/tests/*.xml ${CIRCLE_TEST_REPORTS}/tests/
     # Send coverage data to codecov.io
-    - codecov -f "coverage*.xml" -s "${WORKDIR}/tests/" -R "${HOME}/nipype/" -F unittests -v -K
-    - codecov -f "smoketest*.xml" -s "${WORKDIR}/tests/" -R "${HOME}/nipype/" -F smoketests -v -K
+    - codecov -f "coverage*.xml" -s "${WORKDIR}/tests/" -R "${HOME}/nipype/" -F unittests --env CIRCLE_NODE_INDEX
+    - codecov -f "smoketest*.xml" -s "${WORKDIR}/tests/" -R "${HOME}/nipype/" -F smoketests --env CIRCLE_NODE_INDEX
 
 general:
   artifacts:
