@@ -21,7 +21,6 @@ import numpy as np
 import nibabel as nb
 import warnings
 
-from ... import logging
 from ...utils.filemanip import split_filename
 from ...utils import NUMPY_MMAP
 
@@ -492,13 +491,20 @@ class Eddy(FSLCommand):
     >>> eddy.inputs.in_acqp  = 'epi_acqp.txt'
     >>> eddy.inputs.in_bvec  = 'bvecs.scheme'
     >>> eddy.inputs.in_bval  = 'bvals.scheme'
+    >>> eddy.inputs.use_cuda = True
     >>> eddy.cmdline # doctest: +ELLIPSIS +ALLOW_UNICODE
-    'eddy --acqp=epi_acqp.txt --bvals=bvals.scheme --bvecs=bvecs.scheme \
+    'eddy_cuda --acqp=epi_acqp.txt --bvals=bvals.scheme --bvecs=bvecs.scheme \
 --imain=epi.nii --index=epi_index.txt --mask=epi_mask.nii \
 --out=.../eddy_corrected'
+    >>> eddy.inputs.use_cuda = False
+    >>> eddy.cmdline # doctest: +ELLIPSIS +ALLOW_UNICODE
+    'eddy_openmp --acqp=epi_acqp.txt --bvals=bvals.scheme \
+--bvecs=bvecs.scheme --imain=epi.nii --index=epi_index.txt \
+--mask=epi_mask.nii --out=.../eddy_corrected'
     >>> res = eddy.run() # doctest: +SKIP
 
     """
+    _cmd = 'eddy_openmp'
     input_spec = EddyInputSpec
     output_spec = EddyOutputSpec
 
@@ -511,6 +517,9 @@ class Eddy(FSLCommand):
             self.inputs.num_threads = self._num_threads
         else:
             self._num_threads_update()
+        self.inputs.on_trait_change(self._use_cuda, 'use_cuda')
+        if isdefined(self.inputs.use_cuda):
+            self._use_cuda()
 
     def _num_threads_update(self):
         self._num_threads = self.inputs.num_threads
@@ -521,27 +530,22 @@ class Eddy(FSLCommand):
             self.inputs.environ['OMP_NUM_THREADS'] = str(
                 self.inputs.num_threads)
 
-    @staticmethod
-    def _eddycmd(use_cuda):
-        logger = logging.getLogger('interface')
-        if 'FSLDIR' not in os.environ:
-            logger.warn("FSLDIR not set: assuming command 'eddy'")
-            return 'eddy'
+    def _use_cuda(self):
+        self._cmd = 'eddy_cuda' if self.inputs.use_cuda else 'eddy_openmp'
 
-        FSLDIR = os.environ['FSLDIR']
-        if use_cuda and os.path.exists(os.path.join(FSLDIR, 'eddy_cuda')):
-            return 'eddy_cuda'
-        elif os.path.exists(os.path.join(FSLDIR, 'eddy_openmp')):
-            return 'eddy_openmp'
-        elif not os.path.exists(os.path.join(FSLDIR, 'eddy')):
-            logger.warn("No eddy binary found in FSLDIR; assuming command "
-                        "'eddy'\nFSLDIR: '{}'".format(FSLDIR))
-        return 'eddy'
+    def _run_interface(self, runtime):
+        # If 'eddy_openmp' is missing, use 'eddy'
+        FSLDIR = os.getenv('FSLDIR', '')
+        cmd = self._cmd
+        if all((FSLDIR != '',
+                cmd == 'eddy_openmp',
+                not os.path.exists(os.path.join(FSLDIR, cmd)))):
+            self._cmd = 'eddy'
+        runtime = super(Eddy, self)._run_interface(runtime)
 
-    @property
-    def _cmd(self):
-        return self._eddycmd(isdefined(self.inputs.use_cuda) and
-                             self.inputs.use_cuda)
+        # Restore command to avoid side-effects
+        self._cmd = cmd
+        return runtime
 
     def _format_arg(self, name, spec, value):
         if name == 'in_topup_fieldcoef':
