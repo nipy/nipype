@@ -430,12 +430,12 @@ def mkdirp(folder):
     """
     Equivalent to bash's mkdir -p
     """
-    if not os.path.exists(folder):
-        try:
-            os.makedirs(folder)
-        except OSError as exc:
-            if not exc.errno == EEXIST:
-                raise
+    try:
+        os.makedirs(folder)
+    except OSError as exc:
+        if exc.errno != EEXIST or not os.path.isdir(folder):
+            raise
+
     return folder
 
 
