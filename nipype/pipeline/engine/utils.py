@@ -1018,20 +1018,18 @@ def export_graph(graph_in, base_dir=None, show=False, use_execgraph=False,
                                suffix='_detailed.dot',
                                use_ext=False,
                                newpath=base_dir)
-    logger.info('Creating detailed dot file: %s' % outfname)
     _write_detailed_dot(graph, outfname)
     cmd = 'dot -T%s -O %s' % (format, outfname)
     res = CommandLine(cmd, terminal_output='allatonce').run()
     if res.runtime.returncode:
         logger.warn('dot2png: %s', res.runtime.stderr)
     pklgraph = _create_dot_graph(graph, show_connectinfo, simple_form)
-    outfname = fname_presuffix(dotfilename,
-                               suffix='.dot',
-                               use_ext=False,
-                               newpath=base_dir)
-    nx.drawing.nx_pydot.write_dot(pklgraph, outfname)
-    logger.info('Creating dot file: %s' % outfname)
-    cmd = 'dot -T%s -O %s' % (format, outfname)
+    simplefname = fname_presuffix(dotfilename,
+                                  suffix='.dot',
+                                  use_ext=False,
+                                  newpath=base_dir)
+    nx.drawing.nx_pydot.write_dot(pklgraph, simplefname)
+    cmd = 'dot -T%s -O %s' % (format, simplefname)
     res = CommandLine(cmd, terminal_output='allatonce').run()
     if res.runtime.returncode:
         logger.warn('dot2png: %s', res.runtime.stderr)
@@ -1040,6 +1038,10 @@ def export_graph(graph_in, base_dir=None, show=False, use_execgraph=False,
         nx.draw(pklgraph, pos)
         if show_connectinfo:
             nx.draw_networkx_edge_labels(pklgraph, pos)
+
+    if format != 'dot':
+        outfname += '.%s' % format
+    return outfname
 
 
 def format_dot(dotfilename, format=None):
@@ -1052,8 +1054,10 @@ def format_dot(dotfilename, format=None):
             raise IOError("Cannot draw directed graph; executable 'dot' is unavailable")
         else:
             raise ioe
-    else:
-        logger.info('Converting dotfile: %s to %s format' % (dotfilename, format))
+
+    if format != 'dot':
+        dotfilename += '.%s' % format
+    return dotfilename
 
 
 def make_output_dir(outdir):
