@@ -60,6 +60,8 @@ def add_args_options(arg_parser, interface):
     inputs = interface.input_spec()
     for name, spec in sorted(interface.inputs.traits(transient=None).items()):
         desc = "\n".join(interface._get_trait_desc(inputs, name, spec))[len(name) + 2:]
+        # Escape any % signs with a %
+        desc = desc.replace('%', '%%')
         args = {}
 
         if spec.is_trait_type(traits.Bool):
