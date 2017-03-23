@@ -110,12 +110,11 @@ from __future__ import print_function, division, absolute_import, unicode_litera
 
 import sys, os, shutil, io, re, textwrap
 from os.path import relpath
+from errno import EEXIST
 import traceback
 
 from docutils.parsers.rst import directives
 from docutils.parsers.rst.directives.images import Image
-
-from nipype.utils.filemanip import mkdirp
 
 
 try:
@@ -133,6 +132,22 @@ align = Image.align
 
 PY2 = sys.version_info[0] == 2
 PY3 = sys.version_info[0] == 3
+
+def _mkdirp(folder):
+    """
+    Equivalent to bash's mkdir -p
+    """
+    if sys.version_info > (3, 4, 1):
+        os.makedirs(folder, exist_ok=True)
+        return folder
+
+    try:
+        os.makedirs(folder)
+    except OSError as exc:
+        if exc.errno != EEXIST or not os.path.isdir(folder):
+            raise
+
+    return folder
 
 
 def wf_directive(name, arguments, options, content, lineno,
@@ -685,7 +700,7 @@ def run(arguments, content, options, state_machine, state, lineno):
         state_machine.insert_input(total_lines, source=source_file_name)
 
     # copy image files to builder's output directory, if necessary
-    mkdirp(dest_dir)
+    _mkdirp(dest_dir)
     for code_piece, images in results:
         for img in images:
             for fn in img.filenames():
