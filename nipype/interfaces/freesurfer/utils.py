@@ -2906,3 +2906,122 @@ class Apas2Aseg(FSCommand):
         outputs = self._outputs().get()
         outputs["out_file"] = os.path.abspath(self.inputs.out_file)
         return outputs
+
+
+class MRIsExpandInputSpec(FSTraitedSpec):
+    # Input spec derived from
+    # https://github.com/freesurfer/freesurfer/blob/102e053/mris_expand/mris_expand.c
+    in_file = File(
+        exists=True, mandatory=True, argstr='%s', position=-3, copyfile=False,
+        desc='Surface to expand')
+    distance = traits.Float(
+        mandatory=True, argstr='%g', position=-2,
+        desc='Distance in mm or fraction of cortical thickness')
+    out_name = traits.Str(
+        'expanded', argstr='%s', position=-1, usedefault=True,
+        desc=('Output surface file\n'
+              'If no path, uses directory of `in_file`\n'
+              'If no path AND missing "lh." or "rh.", derive from `in_file`'))
+    thickness = traits.Bool(
+        argstr='-thickness',
+        desc='Expand by fraction of cortical thickness, not mm')
+    thickness_name = traits.Str(
+        argstr="-thickness_name %s", copyfile=False,
+        desc=('Name of thickness file (implicit: "thickness")\n'
+              'If no path, uses directory of `in_file`\n'
+              'If no path AND missing "lh." or "rh.", derive from `in_file`'))
+    navgs = traits.Tuple(
+        traits.Int, traits.Int,
+        argstr='-navgs %d %d',
+        desc=('Tuple of (n_averages, min_averages) parameters '
+              '(implicit: (16, 0))'))
+    pial = traits.Str(
+        argstr='-pial %s', copyfile=False,
+        desc=('Name of pial file (implicit: "pial")\n'
+              'If no path, uses directory of `in_file`\n'
+              'If no path AND missing "lh." or "rh.", derive from `in_file`'))
+    sphere = traits.Str(
+        'sphere', copyfile=False, usedefault=True,
+        desc='WARNING: Do not change this trait')
+    spring = traits.Float(argstr='-S %g', desc="Spring term (implicit: 0.05)")
+    dt = traits.Float(argstr='-T %g', desc='dt (implicit: 0.25)')
+    write_iterations = traits.Int(
+        argstr='-W %d',
+        desc='Write snapshots of expansion every N iterations')
+    smooth_averages = traits.Int(
+        argstr='-A %d',
+        desc='Smooth surface with N iterations after expansion')
+    nsurfaces = traits.Int(
+        argstr='-N %d',
+        desc='Number of surfacces to write during expansion')
+    # # Requires dev version - Re-add when min_ver/max_ver support this
+    # # https://github.com/freesurfer/freesurfer/blob/9730cb9/mris_expand/mris_expand.c
+    # target_intensity = traits.Tuple(
+    #     traits.Float, traits.File(exists=True),
+    #     argstr='-intensity %g %s',
+    #     desc='Tuple of intensity and brain volume to crop to target intensity')
+
+
+class MRIsExpandOutputSpec(TraitedSpec):
+    out_file = File(desc='Output surface file')
+
+
+class MRIsExpand(FSCommand):
+    """
+    Expands a surface (typically ?h.white) outwards while maintaining
+    smoothness and self-intersection constraints.
+
+    Examples
+    ========
+    >>> from nipype.interfaces.freesurfer import MRIsExpand
+    >>> mris_expand = MRIsExpand(thickness=True, distance=0.5)
+    >>> mris_expand.inputs.in_file = 'lh.white'
+    >>> mris_expand.cmdline # doctest: +ALLOW_UNICODE
+    'mris_expand -thickness lh.white 0.5 expanded'
+    >>> mris_expand.inputs.out_name = 'graymid'
+    >>> mris_expand.cmdline # doctest: +ALLOW_UNICODE
+    'mris_expand -thickness lh.white 0.5 graymid'
+    """
+    _cmd = 'mris_expand'
+    input_spec = MRIsExpandInputSpec
+    output_spec = MRIsExpandOutputSpec
+
+    def _list_outputs(self):
+        outputs = self._outputs().get()
+        outputs['out_file'] = self._associated_file(self.inputs.in_file,
+                                                    self.inputs.out_name)
+        return outputs
+
+    def _get_filecopy_info(self):
+        in_file = self.inputs.in_file
+
+        pial = self.inputs.pial
+        if not isdefined(pial):
+            pial = 'pial'
+        self.inputs.pial = self._associated_file(in_file, pial)
+
+        if isdefined(self.inputs.thickness) and self.inputs.thickness:
+            thickness_name = self.inputs.thickness_name
+            if not isdefined(thickness_name):
+                thickness_name = 'thickness'
+            self.inputs.thickness_name = self._associated_file(in_file,
+                                                               thickness_name)
+
+        self.inputs.sphere = self._associated_file(in_file, self.inputs.sphere)
+
+        return super(MRIsExpand, self)._get_filecopy_info()
+
+    @staticmethod
+    def _associated_file(in_file, out_name):
+        """Based on MRIsBuildFileName in freesurfer/utils/mrisurf.c
+
+        Use file prefix to indicate hemisphere, rather than inspecting the
+        surface data structure
+        """
+        path, base = os.path.split(out_name)
+        if path == '':
+            path, in_file = os.path.split(in_file)
+            hemis = ('lh.', 'rh.')
+            if in_file[:3] in hemis and base[:3] not in hemis:
+                base = in_file[:3] + base
+        return os.path.join(path, base)
