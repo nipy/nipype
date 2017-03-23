@@ -5,13 +5,22 @@
 import csv
 import os
 
-from nibabel.eulerangles import mat2euler
 import numpy as np
+import nibabel as nb
+from nibabel.eulerangles import mat2euler
 
 from ..base import (BaseInterface, BaseInterfaceInputSpec, TraitedSpec, File,
                     traits, isdefined, Str)
 from .base import ANTSCommand, ANTSCommandInputSpec
 from ...utils.filemanip import split_filename
+
+
+ITK_TFM_HEADER = "#Insight Transform File V1.0"
+ITK_TFM_TPL = """\
+#Transform {tf_id}
+Transform: {tf_type}
+Parameters: {tf_params}
+FixedParameters: {fixed_params}""".format
 
 
 class MotionCorrStatsInputSpec(ANTSCommandInputSpec):
@@ -161,6 +170,7 @@ class MotionCorrOutputSpec(TraitedSpec):
     save_state = File(desc="The saved registration state to be restored")
     displacement_field = File(desc=("4D displacement field that captures the "
                                     "affine induced motion at each voxel"))
+    out_tfm = File(desc='write transforms in the Insight transform format')
 
 class MotionCorr(ANTSCommand):
     '''
@@ -212,6 +222,10 @@ class MotionCorr(ANTSCommand):
     input_spec = MotionCorrInputSpec
     output_spec = MotionCorrOutputSpec
 
+    def _run_interface(self, runtime):
+        runtime = super(MotionCorr, self)._run_interface(runtime)
+
+        return runtime
 
     def _gen_filename(self, name):
         '''
@@ -347,3 +361,43 @@ class MotionCorr2FSLParams(BaseInterface):
 
         return runtime
 
+def moco2itk(in_csv, in_reference, out_file=None):
+    """
+    Generates an Insight Transform File V1.0 from the motion correction
+    CSV file.
+
+    Would be replaced if finally `this issue <https://github.com/stnava/ANTs/issues/419>`_
+    is fixed.
+
+    """
+    from scipy.ndimage.measurements import center_of_mass
+
+    movpar = np.loadtxt(in_csv, dtype=float, skiprows=1,
+                        delimiter=',')[2:]
+
+    nii = nb.load(in_reference)
+
+    # Convert first to RAS, then to LPS
+    cmfixed = np.diag([-1, -1, 1, 1]).dot(nii.affine).dot(
+        list(center_of_mass(nii.get_data())) + [1])
+
+    tf_type = ('AffineTransform_double_3_3' if movpar.shape[1] == 12
+               else 'Euler3DTransform_double_3_3')
+
+    xfm_file = [ITK_TFM_HEADER]
+    for i, param in enumerate(movpar):
+        xfm_file.append(ITK_TFM_TPL(
+            tf_id=i, tf_type=tf_type,
+            tf_params=' '.join(['%.8f' % p for p in param]),
+            fixed_params=' '.join(['%.8f' % p for p in cmfixed[:3]])
+        ))
+    xfm_file += ['']
+
+    if out_file is None:
+        _, fname, _ = split_filename(in_reference)
+        out_file = os.path.abspath('{}_ants.tfm'.format(fname))
+
+    with open(out_file, 'w') as outfh:
+        outfh.write("\n".join(xfm_file))
+
+    return out_file
