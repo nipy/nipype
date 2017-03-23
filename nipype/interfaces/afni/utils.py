@@ -1230,6 +1230,116 @@ class To3D(AFNICommand):
     output_spec = AFNICommandOutputSpec
 
 
+class UnifizeInputSpec(AFNICommandInputSpec):
+    in_file = File(
+        desc='input file to 3dUnifize',
+        argstr='-input %s',
+        position=-1,
+        mandatory=True,
+        exists=True,
+        copyfile=False)
+    out_file = File(
+        name_template='%s_unif',
+        desc='output image file name',
+        argstr='-prefix %s',
+        name_source='in_file')
+    t2 = traits.Bool(
+        desc='Treat the input as if it were T2-weighted, rather than '
+             'T1-weighted. This processing is done simply by inverting '
+             'the image contrast, processing it as if that result were '
+             'T1-weighted, and then re-inverting the results '
+             'counts of voxel overlap, i.e., each voxel will contain the '
+             'number of masks that it is set in.',
+        argstr='-T2')
+    gm = traits.Bool(
+        desc='Also scale to unifize \'gray matter\' = lower intensity voxels '
+             '(to aid in registering images from different scanners).',
+        argstr='-GM')
+    urad = traits.Float(
+        desc='Sets the radius (in voxels) of the ball used for the sneaky '
+             'trick. Default value is 18.3, and should be changed '
+             'proportionally if the dataset voxel size differs significantly '
+             'from 1 mm.',
+        argstr='-Urad %s')
+    ssave = File(
+        name_template='%s_scale',
+        desc='output file name to save the scale factor used at each voxel ',
+        argstr='-ssave %s')
+    no_duplo = traits.Bool(
+        desc='Do NOT use the \'duplo down\' step; this can be useful for '
+             'lower resolution datasets.',
+        argstr='-noduplo')
+    epi = traits.Bool(
+        desc='Assume the input dataset is a T2 (or T2*) weighted EPI time '
+             'series. After computing the scaling, apply it to ALL volumes '
+             '(TRs) in the input dataset. That is, a given voxel will be '
+             'scaled by the same factor at each TR. '
+             'This option also implies \'-noduplo\' and \'-T2\'.'
+             'This option turns off \'-GM\' if you turned it on.',
+        argstr='-EPI',
+        requires=['no_duplo', 't2'],
+        xor=['gm'])
+
+
+class UnifizeOutputSpec(TraitedSpec):
+    out_file = File(desc='unifized file',
+                    exists=True)
+
+
+class Unifize(AFNICommand):
+    """3dUnifize - for uniformizing image intensity
+
+    * The input dataset is supposed to be a T1-weighted volume,
+      possibly already skull-stripped (e.g., via 3dSkullStrip).
+      However, this program can be a useful step to take BEFORE
+      3dSkullStrip, since the latter program can fail if the input
+      volume is strongly shaded -- 3dUnifize will (mostly) remove
+      such shading artifacts.
+
+    * The output dataset has the white matter (WM) intensity approximately
+      uniformized across space, and scaled to peak at about 1000.
+
+    * The output dataset is always stored in float format!
+
+    * If the input dataset has more than 1 sub-brick, only sub-brick
+      #0 will be processed!
+
+    * Want to correct EPI datasets for nonuniformity?
+      You can try the new and experimental [Mar 2017] '-EPI' option.
+
+    * Method: Obi-Wan's personal variant of Ziad's sneaky trick.
+      (If you want to know what his trick is, you'll have to ask him, or
+       read Obi-Wan's source code [which is a world of ecstasy and exaltation],
+       or just read all the way to the end of this help output.)
+
+    * The principal motive for this program is for use in an image
+      registration script, and it may or may not be useful otherwise.
+
+    * This program replaces the older (and very different) 3dUniformize,
+      which is no longer maintained and may sublimate at any moment.
+      (In other words, we do not recommend the use of 3dUniformize.)
+
+    For complete details, see the `3dUnifize Documentation.
+    <https://afni.nimh.nih.gov/pub../pub/dist/doc/program_help/3dUnifize.html>`_
+
+    Examples
+    ========
+
+    >>> from nipype.interfaces import afni
+    >>> unifize = afni.Unifize()
+    >>> unifize.inputs.in_file = 't1.nii'
+    >>> unifize.inputs.out_file = 't1_unifized.nii'
+    >>> unifize.cmdline  # doctest: +ALLOW_UNICODE
+    '3dUnifize -prefix t1_unifized.nii -input t1.nii'
+    >>> res = unifize.run()  # doctest: +SKIP
+
+    """
+
+    _cmd = '3dUnifize'
+    input_spec = UnifizeInputSpec
+    output_spec = UnifizeOutputSpec
+
+
 class ZCutUpInputSpec(AFNICommandInputSpec):
     in_file = File(
         desc='input file to 3dZcutup',
