@@ -1327,10 +1327,10 @@ class Unifize(AFNICommand):
 
     >>> from nipype.interfaces import afni
     >>> unifize = afni.Unifize()
-    >>> unifize.inputs.in_file = 't1.nii'
-    >>> unifize.inputs.out_file = 't1_unifized.nii'
+    >>> unifize.inputs.in_file = 'structural.nii'
+    >>> unifize.inputs.out_file = 'structural_unifized.nii'
     >>> unifize.cmdline  # doctest: +ALLOW_UNICODE
-    '3dUnifize -prefix t1_unifized.nii -input t1.nii'
+    '3dUnifize -prefix structural_unifized.nii -input structural.nii'
     >>> res = unifize.run()  # doctest: +SKIP
 
     """
