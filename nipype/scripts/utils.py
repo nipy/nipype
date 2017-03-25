@@ -68,13 +68,35 @@ def add_args_options(arg_parser, interface):
             args["default"] = getattr(inputs, name)
             args["action"] = 'store_true'
 
+        # current support is for simple trait types
+        if not spec.inner_traits:
+            trait_type = type(spec.trait_type.default_value)
+            if trait_type in (str, int, float):
+                args["type"] = trait_type
+        elif len(spec.inner_traits) == 1:
+            trait_type = type(spec.inner_traits[0].trait_type.default_value)
+            if trait_type in (bool, str, int, float):
+                args["type"] = trait_type
+
         if hasattr(spec, "mandatory") and spec.mandatory:
             if spec.is_trait_type(InputMultiPath):
                 args["nargs"] = "+"
+            elif spec.is_trait_type(traits.List):
+                if (spec.trait_type.minlen == spec.trait_type.maxlen) and \
+                        spec.trait_type.maxlen:
+                    args["nargs"] = spec.trait_type.maxlen
+                else:
+                    args["nargs"] = "+"
             arg_parser.add_argument(name, help=desc, **args)
         else:
             if spec.is_trait_type(InputMultiPath):
                 args["nargs"] = "*"
+            elif spec.is_trait_type(traits.List):
+                if (spec.trait_type.minlen == spec.trait_type.maxlen) and \
+                        spec.trait_type.maxlen:
+                    args["nargs"] = spec.trait_type.maxlen
+                else:
+                    args["nargs"] = "*"
             arg_parser.add_argument("--%s" % name, dest=name,
                                     help=desc, **args)
     return arg_parser
