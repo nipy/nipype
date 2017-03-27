@@ -25,13 +25,8 @@ fi
 coverage run /src/nipype/tools/run_examples.py $@
 exit_code=$?
 
-# Generate coverage report and submit if token is defined
+# Collect crashfiles and generate xml report
 coverage xml -o ${WORKDIR}/tests/smoketest_${example_id}.xml
-if [ "${CODECOV_TOKEN}" != "" ]; then
-	codecov.io -f ${WORKDIR}/tests/smoketest_${example_id}.xml -t "${CODECOV_TOKEN}" -F smoketests
-fi
-
-# Collect crashfiles
 find /work -name "crash-*" -maxdepth 1 -exec mv {} ${WORKDIR}/crashfiles/ \;
 exit $exit_code
 

@@ -39,6 +39,8 @@
    mipav
    nipypecmd
    aws
+   resource_sched_profiler
+   sphinx_ext
 
 
 

@@ -17,6 +17,7 @@ dependencies:
     - "~/docker"
     - "~/examples"
     - "~/.apt-cache"
+    - "~/bin"
 
   pre:
     # Let CircleCI cache the apt archive
@@ -24,9 +25,10 @@ dependencies:
     - sudo apt-get -y update && sudo apt-get install -y wget bzip2
     # Create work folder and force group permissions
     - mkdir -p $WORKDIR && sudo setfacl -d -m group:ubuntu:rwx $WORKDIR && sudo setfacl -m group:ubuntu:rwx $WORKDIR
-    - mkdir -p $HOME/docker $HOME/examples $WORKDIR/tests $WORKDIR/crashfiles $WORKDIR/logs ${CIRCLE_TEST_REPORTS}/tests/
+    - mkdir -p $HOME/docker $HOME/examples $WORKDIR/tests $WORKDIR/logs $WORKDIR/crashfiles ${CIRCLE_TEST_REPORTS}/tests/
+    - if [[ ! -e "$HOME/bin/codecov" ]]; then mkdir -p $HOME/bin; curl -so $HOME/bin/codecov https://codecov.io/bash && chmod 755 $HOME/bin/codecov; fi
   override:
-    - if [[ -e $HOME/docker/cache.tar ]]; then docker load --input $HOME/docker/cache.tar; fi :
+    - if [[ -e "$HOME/docker/cache.tar" ]]; then docker load --input $HOME/docker/cache.tar; fi :
         timeout: 6000
     - docker images
     - docker pull nipype/base:latest
@@ -48,9 +50,6 @@ test:
     - bash .circle/tests.sh :
         timeout: 7200
         parallel: true
-  post:
-    # Place reports in the appropriate folder
-    -  cp ${WORKDIR}/tests/*.xml ${CIRCLE_TEST_REPORTS}/tests/
 
 general:
   artifacts:
