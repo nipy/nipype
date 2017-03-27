@@ -10,6 +10,8 @@ Requires Packages to be installed
 """
 from __future__ import print_function, division, unicode_literals, absolute_import
 from future import standard_library
+from py.path import ImportMismatchError
+
 standard_library.install_aliases()
 from builtins import range, object, open, str, bytes
 
@@ -1215,6 +1217,29 @@ class BaseInterface(Interface):
         iflogger.debug('saving inputs {}', inputs)
         with open(json_file, 'w' if PY3 else 'wb') as fhandle:
             json.dump(inputs, fhandle, indent=4, ensure_ascii=False)
+
+
+class MKLInterfaceInputSpec(BaseInterfaceInputSpec):
+    mkl_num_threads = traits.Int(1, usedafult=True, nohash=True,
+                                 desc="Number of threads to use if mkl-service "
+                                      "package is installed.")
+
+
+class MKLInterface(BaseInterface):
+    """Interfaces that control number of threads available via MKL.
+    """
+
+    def _run_interface(self, runtime):
+        try:
+            import mkl
+        except ImportError:
+            iflogger.warning("mkl-service package not found - cannot control "
+                             "number of threads")
+            return runtime
+        else:
+            mkl.set_num_threads(self.inputs.mkl_num_threads)
+            self.num_threads = self.inputs.mkl_num_threads
+            return runtime
 
 
 class Stream(object):

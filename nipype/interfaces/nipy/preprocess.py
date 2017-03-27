@@ -21,7 +21,9 @@ from ...utils import NUMPY_MMAP
 from ...utils.filemanip import split_filename, fname_presuffix
 from ..base import (TraitedSpec, BaseInterface, traits,
                     BaseInterfaceInputSpec, isdefined, File,
-                    InputMultiPath, OutputMultiPath)
+                    InputMultiPath, OutputMultiPath, MKLInterface,
+                    MKLInterfaceInputSpec
+                    )
 
 
 have_nipy = True
@@ -207,7 +209,7 @@ class FmriRealign4d(BaseInterface):
         return outputs
 
 
-class SpaceTimeRealignerInputSpec(BaseInterfaceInputSpec):
+class SpaceTimeRealignerInputSpec(MKLInterfaceInputSpec):
 
     in_file = InputMultiPath(File(exists=True),
                              mandatory=True, min_ver='0.4.0.dev',
@@ -246,7 +248,7 @@ class SpaceTimeRealignerOutputSpec(TraitedSpec):
                                      "euler angles"))
 
 
-class SpaceTimeRealigner(BaseInterface):
+class SpaceTimeRealigner(MKLInterface):
     """Simultaneous motion and slice timing correction algorithm
 
     If slice_times is not specified, this algorithm performs spatial motion
@@ -290,6 +292,7 @@ class SpaceTimeRealigner(BaseInterface):
         return nipy_version
 
     def _run_interface(self, runtime):
+        runtime = super(SpaceTimeRealigner, self)._run_interface()
         all_ims = [load_image(fname) for fname in self.inputs.in_file]
 
         if not isdefined(self.inputs.slice_times):
