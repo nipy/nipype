@@ -43,12 +43,11 @@ class EMInputSpec(CommandLineInputSpec):
                     desc='4D file containing the priors',
                     xor=['no_prior', 'priors'])
 
-    desc = 'The number of priors (n>0) and their filenames.'
-    priors = traits.Tuple(traits.Int(), InputMultiPath(),
-                          argstr='%s',
-                          mandatory=True,
-                          desc=desc,
-                          xor=['no_prior', 'prior_4D'])
+    desc = 'List of priors filepaths.'
+    priors = InputMultiPath(argstr='%s',
+                            mandatory=True,
+                            desc=desc,
+                            xor=['no_prior', 'prior_4D'])
 
     # iterations
     max_iter = traits.Int(argstr='-max_iter %s', default=100,
@@ -134,14 +133,8 @@ class EM(NiftySegCommand):
     def _format_arg(self, opt, spec, val):
         """Convert input to appropriate format for seg_EM."""
         if opt == 'priors':
-            if self.inputs.priors[0] != len(self.inputs.priors[1]):
-                # error
-                msg = "Priors options not set properly: number of files(%d) \
-different than the number of file paths given (%d)"
-                raise Exception(msg % (self.inputs.priors[0],
-                                       len(self.inputs.priors[1])))
-            return '-priors %d %s' % (self.inputs.priors[0],
-                                      ' '.join(self.inputs.priors[1]))
+            _nb_priors = len(self.inputs.priors)
+            return '-priors %d %s' % (_nb_priors, ' '.join(self.inputs.priors))
         else:
             return super(EM, self)._format_arg(opt, spec, val)
 
