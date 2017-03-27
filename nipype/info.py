@@ -9,12 +9,11 @@ from __future__ import print_function, division, unicode_literals, absolute_impo
 # full release.  '.dev' as a version_extra string means this is a development
 # version
 # Remove -dev for release
-__version__ = '0.13.0'
+__version__ = '0.13.0-dev'
 
 
 def get_nipype_gitversion():
     """Nipype version as reported by the last commit in git
-
     Returns
     -------
     None or str
@@ -65,12 +64,10 @@ description = 'Neuroimaging in Python: Pipelines and Interfaces'
 long_description = """========================================================
 NIPYPE: Neuroimaging in Python: Pipelines and Interfaces
 ========================================================
-
 Current neuroimaging software offer users an incredible opportunity to \
 analyze data using a variety of different algorithms. However, this has \
 resulted in a heterogeneous collection of specialized applications \
 without transparent interoperability or a uniform operating interface.
-
 *Nipype*, an open-source, community-developed initiative under the \
 umbrella of NiPy_, is a Python project that provides a uniform interface \
 to existing neuroimaging software and facilitates interaction between \
@@ -82,9 +79,7 @@ between packages, and reduces the learning curve necessary to use different \
 packages. Nipype is creating a collaborative platform for neuroimaging software \
 development in a high-level language and addressing limitations of existing \
 pipeline systems.
-
 *Nipype* allows you to:
-
 * easily interact with tools from different software packages
 * combine processing steps from different software packages
 * develop new workflows faster by reusing common steps from old ones
