@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 
@@ -16,6 +17,9 @@ See the docstrings of the individual classes for examples.
 
 """
 
+from __future__ import print_function, division, \
+    unicode_literals, absolute_import
+from builtins import property, super
 from distutils.version import StrictVersion
 import os
 import subprocess
@@ -82,7 +86,7 @@ class NiftyRegCommand(CommandLine):
         if no_niftyreg(cmd=self.cmd):
             return None
         exec_cmd = ''.join((self.cmd, ' -v'))
-        return subprocess.check_output(exec_cmd, shell=True).strip('\n')
+        return subprocess.check_output(exec_cmd, shell=True).strip()
 
     @property
     def version(self):
@@ -110,7 +114,8 @@ class NiftyRegCommand(CommandLine):
     def _gen_filename(self, name):
         if name == 'out_file':
             return self._gen_fname(self.inputs.in_file,
-                                   suffix=self._suffix, ext='.nii.gz')
+                                   suffix=self._suffix,
+                                   ext='.nii.gz')
         return None
 
     def _list_outputs(self):

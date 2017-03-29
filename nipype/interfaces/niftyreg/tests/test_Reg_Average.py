@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 
@@ -21,7 +22,7 @@ def test_reg_average_avg_nii():
     two_file = example_data('im2.nii')
     three_file = example_data('im3.nii')
     nr.inputs.avg_files = [one_file, two_file, three_file]
-    nr.cmdline
+    generated_cmd = nr.cmdline
 
     # Read the reg_average_cmd
     reg_average_cmd = os.path.join(os.getcwd(), 'reg_average_cmd')
@@ -39,7 +40,7 @@ def test_reg_average_avg_nii():
     expected_cmd = ('%s --cmd_file %s'
                     % (get_custom_path('reg_average'), reg_average_cmd))
 
-    assert nr.cmdline == expected_cmd
+    assert generated_cmd == expected_cmd
 
 
 @skipif(no_niftyreg(cmd='reg_average'))
@@ -56,7 +57,7 @@ def test_reg_average_avg_txt():
     two_file = example_data('ants_Affine.txt')
     three_file = example_data('elastix.txt')
     nr.inputs.avg_files = [one_file, two_file, three_file]
-    nr.cmdline
+    generated_cmd = nr.cmdline
 
     # Read the reg_average_cmd
     reg_average_cmd = os.path.join(os.getcwd(), 'reg_average_cmd')
@@ -74,7 +75,7 @@ def test_reg_average_avg_txt():
     expected_cmd = ('%s --cmd_file %s'
                     % (get_custom_path('reg_average'), reg_average_cmd))
 
-    assert nr.cmdline == expected_cmd
+    assert generated_cmd == expected_cmd
 
 
 @skipif(no_niftyreg(cmd='reg_average'))
@@ -91,7 +92,7 @@ def test_reg_average_avg_lts():
     two_file = example_data('ants_Affine.txt')
     three_file = example_data('elastix.txt')
     nr.inputs.avg_lts_files = [one_file, two_file, three_file]
-    nr.cmdline
+    generated_cmd = nr.cmdline
 
     # Read the reg_average_cmd
     reg_average_cmd = os.path.join(os.getcwd(), 'reg_average_cmd')
@@ -109,7 +110,7 @@ def test_reg_average_avg_lts():
     expected_cmd = ('%s --cmd_file %s'
                     % (get_custom_path('reg_average'), reg_average_cmd))
 
-    assert nr.cmdline == expected_cmd
+    assert generated_cmd == expected_cmd
 
 
 @skipif(no_niftyreg(cmd='reg_average'))
@@ -133,7 +134,7 @@ def test_reg_average_avg_ref():
                             trans2_file, two_file,
                             trans3_file, three_file]
     nr.inputs.avg_ref_file = ref_file
-    nr.cmdline
+    generated_cmd = nr.cmdline
 
     # Read the reg_average_cmd
     reg_average_cmd = os.path.join(os.getcwd(), 'reg_average_cmd')
@@ -152,7 +153,7 @@ def test_reg_average_avg_ref():
     expected_cmd = ('%s --cmd_file %s'
                     % (get_custom_path('reg_average'), reg_average_cmd))
 
-    assert nr.cmdline == expected_cmd
+    assert generated_cmd == expected_cmd
 
 
 @skipif(no_niftyreg(cmd='reg_average'))
@@ -179,7 +180,7 @@ def test_reg_average_demean3():
                             aff2_file, trans2_file, two_file,
                             aff3_file, trans3_file, three_file]
     nr.inputs.demean3_ref_file = ref_file
-    nr.cmdline
+    generated_cmd = nr.cmdline
 
     # Read the reg_average_cmd
     reg_average_cmd = os.path.join(os.getcwd(), 'reg_average_cmd')
@@ -200,4 +201,4 @@ def test_reg_average_demean3():
     expected_cmd = ('%s --cmd_file %s'
                     % (get_custom_path('reg_average'), reg_average_cmd))
 
-    assert nr.cmdline == expected_cmd
+    assert generated_cmd == expected_cmd
