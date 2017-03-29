@@ -17,9 +17,9 @@ See the docstrings of the individual classes for examples.
 
 """
 
-from __future__ import print_function, division, \
-    unicode_literals, absolute_import
-from builtins import property, super
+from __future__ import (print_function, division, unicode_literals,
+                        absolute_import)
+from builtins import property, super, str
 from distutils.version import StrictVersion
 import os
 import subprocess
@@ -72,7 +72,7 @@ class NiftyRegCommand(CommandLine):
 
     def __init__(self, required_version=None, **inputs):
         super(NiftyRegCommand, self).__init__(**inputs)
-        cur_version = self.get_version()
+        cur_version = self.get_version().decode("utf-8")
         if StrictVersion(cur_version) < StrictVersion(self._min_version):
             err = 'A later version of Niftyreg is required (%s < %s)'
             raise ValueError(err % (cur_version, self._min_version))

@@ -35,7 +35,7 @@ def test_reg_average_avg_nii():
                                                           'avg_out.nii.gz'),
                                              one_file, two_file, three_file)
 
-    assert argv == expected_argv
+    assert argv.decode('utf-8') == expected_argv
 
     expected_cmd = ('%s --cmd_file %s'
                     % (get_custom_path('reg_average'), reg_average_cmd))
@@ -70,7 +70,7 @@ def test_reg_average_avg_txt():
                                                           'avg_out.txt'),
                                              one_file, two_file, three_file)
 
-    assert argv == expected_argv
+    assert argv.decode('utf-8') == expected_argv
 
     expected_cmd = ('%s --cmd_file %s'
                     % (get_custom_path('reg_average'), reg_average_cmd))
@@ -105,7 +105,7 @@ def test_reg_average_avg_lts():
                         os.path.join(os.getcwd(), 'avg_out.txt'),
                         one_file, two_file, three_file))
 
-    assert argv == expected_argv
+    assert argv.decode('utf-8') == expected_argv
 
     expected_cmd = ('%s --cmd_file %s'
                     % (get_custom_path('reg_average'), reg_average_cmd))
@@ -148,7 +148,7 @@ def test_reg_average_avg_ref():
                         ref_file, trans1_file, one_file, trans2_file, two_file,
                         trans3_file, three_file))
 
-    assert argv == expected_argv
+    assert argv.decode('utf-8') == expected_argv
 
     expected_cmd = ('%s --cmd_file %s'
                     % (get_custom_path('reg_average'), reg_average_cmd))
@@ -196,7 +196,7 @@ def test_reg_average_demean3():
                         aff2_file, trans2_file, two_file,
                         aff3_file, trans3_file, three_file))
 
-    assert argv == expected_argv
+    assert argv.decode('utf-8') == expected_argv
 
     expected_cmd = ('%s --cmd_file %s'
                     % (get_custom_path('reg_average'), reg_average_cmd))
