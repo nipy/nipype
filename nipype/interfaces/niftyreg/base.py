@@ -72,7 +72,11 @@ class NiftyRegCommand(CommandLine):
 
     def __init__(self, required_version=None, **inputs):
         super(NiftyRegCommand, self).__init__(**inputs)
-        cur_version = self.get_version().decode("utf-8")
+        cur_version = self.get_version()
+        if not cur_version:
+            raise Exception('Niftyreg not found')
+        # Decoding to string:
+        cur_version = cur_version.decode("utf-8")
         if StrictVersion(cur_version) < StrictVersion(self._min_version):
             err = 'A later version of Niftyreg is required (%s < %s)'
             raise ValueError(err % (cur_version, self._min_version))
