@@ -421,6 +421,8 @@ connected.
                 base_dir = self.base_dir
                 if self.name:
                     base_dir = op.join(base_dir, self.name)
+            elif self.name:
+                base_dir =  self.name
             else:
                 base_dir = os.getcwd()
         base_dir = make_output_dir(base_dir)
