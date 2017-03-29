@@ -4,6 +4,7 @@
 The stats module provides higher-level interfaces to some of the operations
 that can be performed with the niftysegstats (seg_stats) command-line program.
 """
+from __future__ import print_function
 import numpy as np
 
 from ..base import TraitedSpec, File, traits, CommandLineInputSpec
@@ -48,7 +49,7 @@ class StatsCommand(NiftySegCommand):
     def _parse_stdout(self, stdout):
         out = []
         for string_line in stdout.split("\n"):
-            print('parsing line ' + string_line)
+            print('parsing line {0}'.format(string_line))
             if string_line.startswith('#'):
                 continue
             if len(string_line) <= 1:

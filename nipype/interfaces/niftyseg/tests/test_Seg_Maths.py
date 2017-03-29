@@ -156,7 +156,4 @@ def test_merge():
         f2=file2,
         out_file=os.path.join(os.getcwd(), 'im1_merged.nii'))
 
-    print merge.cmdline
-    print '\n'
-    print expected_cmd
     assert merge.cmdline == expected_cmd
