@@ -23,6 +23,8 @@ def test_SpecifySPMModel_inputs():
     ),
     output_units=dict(usedefault=True,
     ),
+    parameter_source=dict(usedefault=True,
+    ),
     realignment_parameters=dict(copyfile=False,
     ),
     subject_info=dict(mandatory=True,
