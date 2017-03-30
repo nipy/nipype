@@ -89,17 +89,17 @@ class Function(IOBase):
                                     'function objects defined interactively '
                                     'in a python session')
                 else:
-                    if inputs is None:
+                    if input_names is None:
                         fninfo = function.func_code
             elif isinstance(function, (str, bytes)):
                 self.inputs.function_str = function
-                if inputs is None:
+                if input_names is None:
                     fninfo = create_function_from_source(
                         function, imports).func_code
             else:
                 raise Exception('Unknown type of function')
-            if inputs is None:
-                inputs = fninfo.co_varnames[:fninfo.co_argcount]
+            if input_names is None:
+                input_names = fninfo.co_varnames[:fninfo.co_argcount]
         self.inputs.on_trait_change(self._set_function_string,
                                     'function_str')
         self._input_names = filename_to_list(input_names)
@@ -125,7 +125,7 @@ class Function(IOBase):
             input_names = fninfo.co_varnames[:fninfo.co_argcount]
             new_names = set(input_names) - set(self._input_names)
             add_traits(self.inputs, list(new_names))
-            self._input_names = new_names
+            self._input_names.extend(new_names)
 
     def _add_output_traits(self, base):
         undefined_traits = {}
