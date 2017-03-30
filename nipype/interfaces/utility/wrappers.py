@@ -90,12 +90,12 @@ class Function(IOBase):
                                     'in a python session')
                 else:
                     if input_names is None:
-                        fninfo = function.func_code
+                        fninfo = function.__code__
             elif isinstance(function, (str, bytes)):
                 self.inputs.function_str = function
                 if input_names is None:
                     fninfo = create_function_from_source(
-                        function, imports).func_code
+                        function, imports).__code__
             else:
                 raise Exception('Unknown type of function')
             if input_names is None:
@@ -114,11 +114,11 @@ class Function(IOBase):
         if name == 'function_str':
             if hasattr(new, '__call__'):
                 function_source = getsource(new)
-                fninfo = new.func_code
+                fninfo = new.__code__
             elif isinstance(new, (str, bytes)):
                 function_source = new
                 fninfo = create_function_from_source(
-                    new, self.imports).func_code
+                    new, self.imports).__code__
             self.inputs.trait_set(trait_change_notify=False,
                                   **{'%s' % name: function_source})
             # Update input traits
