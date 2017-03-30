@@ -148,7 +148,7 @@ class RegAladin(NiftyRegCommand):
     >>> node.inputs.ref_file = 'ref.nii.gz' # doctest: +SKIP
     >>> node.inputs.flo_file = 'flo.nii.gz' # doctest: +SKIP
     >>> node.inputs.rmask_file = 'rmask.nii.gz' # doctest: +SKIP
-    >>> node.inputs.omp_core_val = 4
+    >>> node.inputs.omp_core_val = 4  # doctest: +SKIP
     >>> node.cmdline  # doctest: +SKIP
     'reg_aladin -aff flo_aff.txt -flo flo.nii.gz -omp 4 -ref ref.nii.gz \
 -rmask rmask.nii.gz -res flo_res.nii.gz'
@@ -374,11 +374,11 @@ class RegF3D(NiftyRegCommand):
     Examples
     --------
     >>> from nipype.interfaces.niftyreg import RegF3D
-    >>> node = RegF3D()
+    >>> node = RegF3D()  # doctest: +SKIP
     >>> node.inputs.ref_file = 'ref.nii.gz' # doctest: +SKIP
     >>> node.inputs.flo_file = 'flo.nii.gz' # doctest: +SKIP
     >>> node.inputs.rmask_file = 'rmask.nii.gz' # doctest: +SKIP
-    >>> node.inputs.omp_core_val = 4
+    >>> node.inputs.omp_core_val = 4  # doctest: +SKIP
     >>> node.cmdline  # doctest: +SKIP
     'reg_f3d -be 0.100000 -cpp flo_cpp.nii.gz -flo flo.nii.gz -le 0.100000 \
 -omp 4 -ref ref.nii.gz -res flo_res.nii.gz -rmask rmask.nii.gz -vel'
