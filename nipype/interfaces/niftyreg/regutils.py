@@ -95,12 +95,12 @@ class RegResample(NiftyRegCommand):
     Examples
     --------
     >>> from nipype.interfaces.niftyreg import RegResample
-    >>> node = RegResample()
+    >>> node = RegResample()  # doctest: +SKIP
     >>> node.inputs.ref_file = 'ref.nii.gz'  # doctest: +SKIP
     >>> node.inputs.flo_file = 'flo.nii.gz'  # doctest: +SKIP
     >>> node.inputs.trans_file = 'warpfield.nii.gz'  # doctest: +SKIP
-    >>> node.inputs.inter_val = 'LIN'
-    >>> node.inputs.omp_core_val = 4
+    >>> node.inputs.inter_val = 'LIN'  # doctest: +SKIP
+    >>> node.inputs.omp_core_val = 4  # doctest: +SKIP
     >>> node.cmdline  # doctest: +SKIP
     'reg_resample -flo flo.nii.gz -inter 1 -omp 4 -ref ref.nii.gz -trans \
 warpfield.nii.gz -res flo_res.nii.gz'
@@ -168,10 +168,10 @@ class RegJacobian(NiftyRegCommand):
     Examples
     --------
     >>> from nipype.interfaces.niftyreg import RegJacobian
-    >>> node = RegJacobian()
+    >>> node = RegJacobian()  # doctest: +SKIP
     >>> node.inputs.ref_file = 'ref.nii.gz'  # doctest: +SKIP
     >>> node.inputs.trans_file = 'warpfield.nii.gz'  # doctest: +SKIP
-    >>> node.inputs.omp_core_val = 4
+    >>> node.inputs.omp_core_val = 4  # doctest: +SKIP
     >>> node.cmdline  # doctest: +SKIP
     'reg_jacobian -omp 4 -ref ref.nii.gz -trans warpfield.nii.gz -jac \
 warpfield_jac.nii.gz'
@@ -289,10 +289,10 @@ class RegTools(NiftyRegCommand):
     Examples
     --------
     >>> from nipype.interfaces.niftyreg import RegTools
-    >>> node = RegTools()
+    >>> node = RegTools()  # doctest: +SKIP
     >>> node.inputs.in_file = 'im1.nii.gz'  # doctest: +SKIP
-    >>> node.inputs.mul_val = 4
-    >>> node.inputs.omp_core_val = 4
+    >>> node.inputs.mul_val = 4  # doctest: +SKIP
+    >>> node.inputs.omp_core_val = 4   # doctest: +SKIP
     >>> node.cmdline  # doctest: +SKIP
     'reg_tools -in im1.nii.gz -mul 4.0 -omp 4 -out im1_tools.nii.gz'
 
@@ -396,7 +396,7 @@ class RegAverage(NiftyRegCommand):
     Examples
     --------
     >>> from nipype.interfaces.niftyreg import RegAverage
-    >>> node = RegAverage()
+    >>> node = RegAverage()  # doctest: +SKIP
     >>> one_file = 'im1.nii'
     >>> two_file = 'im2.nii'
     >>> three_file = 'im3.nii'
@@ -598,9 +598,9 @@ class RegTransform(NiftyRegCommand):
     Examples
     --------
     >>> from nipype.interfaces.niftyreg import RegResample
-    >>> node = RegTransform()
+    >>> node = RegTransform()  # doctest: +SKIP
     >>> node.inputs.def_input = 'warpfield.nii'  # doctest: +SKIP
-    >>> node.inputs.omp_core_val = 4
+    >>> node.inputs.omp_core_val = 4  # doctest: +SKIP
     >>> node.cmdline  # doctest: +SKIP
     'reg_transform -omp 4 -def warpfield.nii warpfield_trans.nii.gz'
 
@@ -710,11 +710,11 @@ class RegMeasure(NiftyRegCommand):
     Examples
     --------
     >>> from nipype.interfaces.niftyreg import RegMeasure
-    >>> node = RegMeasure()
+    >>> node = RegMeasure()  # doctest: +SKIP
     >>> node.inputs.ref_file = 'im1.nii'  # doctest: +SKIP
     >>> node.inputs.flo_file = 'im2.nii'  # doctest: +SKIP
-    >>> node.inputs.measure_type = 'lncc'
-    >>> node.inputs.omp_core_val = 4
+    >>> node.inputs.measure_type = 'lncc'  # doctest: +SKIP
+    >>> node.inputs.omp_core_val = 4  # doctest: +SKIP
     >>> node.cmdline  # doctest: +SKIP
     'reg_measure -flo {flo} -lncc -omp 4 -out {out} -ref {ref}'
 

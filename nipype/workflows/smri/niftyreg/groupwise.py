@@ -50,7 +50,7 @@ def create_linear_gw_step(name="linear_gw_niftyreg",
     -------
 
     >>> from nipype.workflows.smri.niftyreg import create_linear_gw_step
-    >>> lgw = create_linear_gw_step('my_linear_coreg')
+    >>> lgw = create_linear_gw_step('my_linear_coreg')  # doctest: +SKIP
     >>> lgw.inputs.inputspec.in_files = ['file1.nii.gz', 'file2.nii.gz']  \
 # doctest: +SKIP
     >>> lgw.inputs.inputspec.ref_file = ['ref.nii.gz']  # doctest: +SKIP

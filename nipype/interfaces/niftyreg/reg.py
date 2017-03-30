@@ -144,7 +144,7 @@ class RegAladin(NiftyRegCommand):
     Examples
     --------
     >>> from nipype.interfaces.niftyreg import RegAladin
-    >>> node = RegAladin()
+    >>> node = RegAladin()  # doctest: +SKIP
     >>> node.inputs.ref_file = 'ref.nii.gz' # doctest: +SKIP
     >>> node.inputs.flo_file = 'flo.nii.gz' # doctest: +SKIP
     >>> node.inputs.rmask_file = 'rmask.nii.gz' # doctest: +SKIP
