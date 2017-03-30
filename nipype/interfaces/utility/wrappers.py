@@ -65,11 +65,12 @@ class Function(IOBase):
         Parameters
         ----------
 
-        input_names: single str or list
+        input_names: single str or list or None
             names corresponding to function inputs
+            if ``None``, derive input names from function argument names
         output_names: single str or list
-            names corresponding to function outputs.
-            has to match the number of outputs
+            names corresponding to function outputs (default: 'out').
+            if list of length > 1, has to match the number of outputs
         function : callable
             callable python object. must be able to execute in an
             isolated namespace (possibly in concert with the ``imports``
