@@ -91,7 +91,7 @@ class Function(IOBase):
                 else:
                     if inputs is None:
                         fninfo = function.func_code
-            elif isinstance(function, string_types):
+            elif isinstance(function, (str, bytes)):
                 self.inputs.function_str = function
                 if inputs is None:
                     fninfo = create_function_from_source(
@@ -115,7 +115,7 @@ class Function(IOBase):
             if hasattr(new, '__call__'):
                 function_source = getsource(new)
                 fninfo = new.func_code
-            elif isinstance(new, string_types):
+            elif isinstance(new, (str, bytes)):
                 function_source = new
                 fninfo = create_function_from_source(
                     new, self.imports).func_code
