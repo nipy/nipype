@@ -4,6 +4,12 @@
 """
 The QT1 module of niftyfit, which wraps the Multi-Echo T1 fitting methods
 in NiftyFit.
+
+Change directory to provide relative paths for doctests
+    >>> import os
+    >>> filepath = os.path.dirname( os.path.realpath( __file__ ) )
+    >>> datadir = os.path.realpath(os.path.join(filepath, '../../testing/data'))
+    >>> os.chdir(datadir)
 """
 
 from ..base import TraitedSpec, File, traits, isdefined, CommandLineInputSpec
@@ -53,10 +59,10 @@ class FitQt1InputSpec(CommandLineInputSpec):
                  exists=True,
                  desc='Filename of parameter prior.',
                  argstr='-prior %s')
-    TE = traits.Float(desc='TE Echo Time [0ms!].', argstr='-TE %f',
-                      position=4)
-    TR = traits.Float(desc='TR Repetition Time [10s!].', argstr='-TR %f',
-                      position=5)
+    te_value = traits.Float(desc='TE Echo Time [0ms!].', argstr='-TE %f',
+                            position=4)
+    tr_value = traits.Float(desc='TR Repetition Time [10s!].', argstr='-TR %f',
+                            position=5)
     desc = 'Number of components to fit [1] (currently IR/SR only)'
     # set position to be ahead of TIs
     nb_comp = traits.Int(desc=desc, position=6, argstr='-nc %d')
@@ -74,34 +80,28 @@ class FitQt1InputSpec(CommandLineInputSpec):
                        position=11)
 
     # IR options:
-    SR = traits.Bool(desc='Saturation Recovery fitting [default].',
-                     argstr='-SR', position=12)
-    IR = traits.Bool(desc='Inversion Recovery fitting [default].',
-                     argstr='-SR', position=13)
-    TIs = traits.List(traits.Float,
+    sr_flag = traits.Bool(desc='Saturation Recovery fitting [default].',
+                          argstr='-SR', position=12)
+    ir_flag = traits.Bool(desc='Inversion Recovery fitting [default].',
+                          argstr='-IR', position=13)
+    tis = traits.List(traits.Float,
                       position=14,
                       desc='Inversion times for T1 data [1s,2s,5s].',
                       argstr='-TIs %s',
                       sep=' ')
-    TIList = traits.File(exists=True,
-                         argstr='-TIlist %s',
-                         desc='Filename of list of pre-defined TIs.')
-    desc = 'Prefined tissue T1 values for mc-estimation \
-[400-4000ms, log spaced]'
-    # T1s = traits.List(traits.Float,
-    #                   desc=desc,
-    #                   argstr='-T1s %s',
-    #                   sep=' ')
-    T1List = traits.File(exists=True,
-                         argstr='-T1list %s',
-                         desc='Filename of list of pre-defined T1s')
-    T1min = traits.Float(desc='Minimum tissue T1 value [400ms].',
+    tis_list = traits.File(exists=True,
+                           argstr='-TIlist %s',
+                           desc='Filename of list of pre-defined TIs.')
+    t1_list = traits.File(exists=True,
+                          argstr='-T1list %s',
+                          desc='Filename of list of pre-defined T1s')
+    t1min = traits.Float(desc='Minimum tissue T1 value [400ms].',
                          argstr='-T1min %f')
-    T1max = traits.Float(desc='Maximum tissue T1 value [4000ms].',
+    t1max = traits.Float(desc='Maximum tissue T1 value [4000ms].',
                          argstr='-T1max %f')
 
     # SPGR options
-    SPGR = traits.Bool(desc='Spoiled Gradient Echo fitting', argstr='-SPGR')
+    spgr = traits.Bool(desc='Spoiled Gradient Echo fitting', argstr='-SPGR')
     flips = traits.List(traits.Float,
                         desc='Flip angles',
                         argstr='-flips %s',
@@ -155,11 +155,11 @@ class FitQt1(NiftyFitCommand):
 
     >>> from nipype.interfaces.niftyfit import FitQt1
     >>> fit_qt1 = FitQt1()
-    >>> fit_qt1.inputs.source_file = 'im1.nii.gz'  # doctest: +SKIP
+    >>> fit_qt1.inputs.source_file = 'TI4D.nii.gz'
     >>> fit_qt1.cmdline  # doctest: +SKIP
-    'fit_qt1 -source im1.nii.gz -t1map im1_t1map.nii.gz -m0map \
-im1_m0map.nii.gz -mcmap im1_mcmap.nii.gz -error im1_error.nii.gz \
--syn im1_syn.nii.gz -res im1_res.nii.gz'
+    'fit_qt1 -source TI4D.nii.gz -t1map TI4D_t1map.nii.gz -m0map \
+TI4D_m0map.nii.gz -mcmap TI4D_mcmap.nii.gz -error TI4D_error.nii.gz \
+-syn TI4D_syn.nii.gz -res TI4D_res.nii.gz'
 
     """
     _cmd = get_custom_path('fit_qt1')

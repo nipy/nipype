@@ -3,6 +3,12 @@
 
 """
 The ASL module of niftyfit, which wraps the fitting methods in NiftyFit.
+
+Change directory to provide relative paths for doctests
+    >>> import os
+    >>> filepath = os.path.dirname( os.path.realpath( __file__ ) )
+    >>> datadir = os.path.realpath(os.path.join(filepath, '../../testing/data'))
+    >>> os.chdir(datadir)
 """
 
 from ..base import TraitedSpec, traits, isdefined, CommandLineInputSpec
@@ -37,19 +43,19 @@ class FitAslInputSpec(CommandLineInputSpec):
     m0mape = traits.File(exists=True, argstr='-m0mape %s', desc=desc)
     desc = 'Filename of a [1,2,5]s Inversion Recovery volume (T1/M0 fitting \
 carried out internally).'
-    IRvolume = traits.File(exists=True, argstr='-IRvolume %s', desc=desc)
+    ir_volume = traits.File(exists=True, argstr='-IRvolume %s', desc=desc)
     desc = 'Output of [1,2,5]s Inversion Recovery fitting.'
-    IRoutput = traits.File(exists=True, argstr='-IRoutput %s', desc=desc)
+    ir_output = traits.File(exists=True, argstr='-IRoutput %s', desc=desc)
 
     # *** Experimental options (Choose those suitable for the model!):
     mask = traits.File(position=2,
                        exists=True,
                        desc='Filename of image mask.',
                        argstr='-mask %s')
-    T1a = traits.Float(desc='T1 of arterial component [1650ms].',
-                       argstr='-T1a %f')
+    t1_art_cmp = traits.Float(desc='T1 of arterial component [1650ms].',
+                              argstr='-T1a %f')
     desc = 'Single plasma/tissue partition coefficient [0.9ml/g].'
-    L = traits.Float(desc=desc, argstr='-L %f')
+    plasma_coeff = traits.Float(desc=desc, argstr='-L %f')
     desc = 'Labelling efficiency [0.99 (pasl), 0.85 (pcasl)], ensure any \
 background suppression pulses are included in -eff'
     eff = traits.Float(desc=desc, argstr='-eff %f')
@@ -58,17 +64,17 @@ background suppression pulses are included in -eff'
     out = traits.Float(desc=desc, argstr='-out %f')
 
     # *** PCASL options (Choose those suitable for the model!):
-    PLD = traits.Float(desc='Post Labelling Delay [2000ms].', argstr='-PLD %f')
-    LDD = traits.Float(desc='Labelling Duration [1800ms].', argstr='-LDD %f')
+    pld = traits.Float(desc='Post Labelling Delay [2000ms].', argstr='-PLD %f')
+    ldd = traits.Float(desc='Labelling Duration [1800ms].', argstr='-LDD %f')
     desc = 'Difference in labelling delay per slice [0.0 ms/slice.'
-    dPLD = traits.Float(desc=desc, argstr='-dPLD %f')
+    dpld = traits.Float(desc=desc, argstr='-dPLD %f')
 
     # *** PASL options (Choose those suitable for the model!):
-    Tinv1 = traits.Float(desc='Saturation pulse time [800ms].',
-                         argstr='-Tinv1 %f')
-    Tinv2 = traits.Float(desc='Inversion time [2000ms].', argstr='-Tinv2 %f')
+    t_inv1 = traits.Float(desc='Saturation pulse time [800ms].',
+                          argstr='-Tinv1 %f')
+    t_inv2 = traits.Float(desc='Inversion time [2000ms].', argstr='-Tinv2 %f')
     desc = 'Difference in inversion time per slice [0ms/slice].'
-    dTinv2 = traits.Float(desc=desc, argstr='-dTinv2 %f')
+    dt_inv2 = traits.Float(desc=desc, argstr='-dTinv2 %f')
 
     # *** Other experimental assumptions:
 
@@ -76,14 +82,14 @@ background suppression pulses are included in -eff'
     # desc = 'Slope and intercept for Arterial Transit Time.'
     # ATT = traits.Float(desc=desc, argstr='-ATT %f')
 
-    gmT1 = traits.Float(desc='T1 of GM [1150ms].', argstr='-gmT1 %f')
-    gmL = traits.Float(desc='Plasma/GM water partition [0.95ml/g].',
-                       argstr='-gmL %f')
-    gmTTT = traits.Float(desc='Time to GM [ATT+0ms].', argstr='-gmTTT %f')
-    wmT1 = traits.Float(desc='T1 of WM [800ms].', argstr='-wmT1 %f')
-    wmL = traits.Float(desc='Plasma/WM water partition [0.82ml/g].',
-                       argstr='-wmL %f')
-    wmTTT = traits.Float(desc='Time to WM [ATT+0ms].', argstr='-wmTTT %f')
+    gm_t1 = traits.Float(desc='T1 of GM [1150ms].', argstr='-gmT1 %f')
+    gm_plasma = traits.Float(desc='Plasma/GM water partition [0.95ml/g].',
+                             argstr='-gmL %f')
+    gm_ttt = traits.Float(desc='Time to GM [ATT+0ms].', argstr='-gmTTT %f')
+    wm_t1 = traits.Float(desc='T1 of WM [800ms].', argstr='-wmT1 %f')
+    wm_plasma = traits.Float(desc='Plasma/WM water partition [0.82ml/g].',
+                             argstr='-wmL %f')
+    wm_ttt = traits.Float(desc='Time to WM [ATT+0ms].', argstr='-wmTTT %f')
 
     # *** Segmentation options:
     desc = 'Filename of the 4D segmentation (in ASL space) for L/T1 \
@@ -103,7 +109,7 @@ estimation and PV correction {WM,GM,CSF}.'
     mulgm = traits.Bool(desc='Multiply CBF by segmentation [Off].',
                         argstr='-sig')
     desc = 'Set PV threshold for switching off LSQR [O.05].'
-    pvthreshold = traits.Bool(desc=desc, argstr='-pvthreshold')
+    pv_threshold = traits.Bool(desc=desc, argstr='-pvthreshold')
     segstyle = traits.Bool(desc='Set CBF as [gm,wm] not [wm,gm].',
                            argstr='-segstyle')
 
@@ -130,11 +136,11 @@ class FitAsl(NiftyFitCommand):
 
     Examples
     --------
-    >>> from nipype.interfaces.niftyfit import FitAsl
-    >>> node = FitAsl()
-    >>> node.inputs.source_file = "asl.nii.gz"  # doctest: +SKIP
+    >>> from nipype.interfaces import niftyfit
+    >>> node = niftyfit.FitAsl()
+    >>> node.inputs.source_file = 'asl.nii.gz'
     >>> node.cmdline  # doctest: +SKIP
-    'fit_asl -source asl.nii -cbf asl_cbf.nii.gz -error asl_error.nii.gz \
+    'fit_asl -source asl.nii.gz -cbf asl_cbf.nii.gz -error asl_error.nii.gz \
 -syn asl_syn.nii.gz'
 
     """

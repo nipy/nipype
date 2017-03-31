@@ -3,6 +3,12 @@
 
 """
 The dwi module of niftyfit, which wraps the fitting methods in NiftyFit.
+
+Change directory to provide relative paths for doctests
+    >>> import os
+    >>> filepath = os.path.dirname( os.path.realpath( __file__ ) )
+    >>> datadir = os.path.realpath(os.path.join(filepath, '../../testing/data'))
+    >>> os.chdir(datadir)
 """
 
 from ..base import TraitedSpec, traits, isdefined, CommandLineInputSpec
@@ -46,8 +52,8 @@ class FitDwiInputSpec(CommandLineInputSpec):
                              desc=desc)
     desc = 'Rotate the output tensors according to the q/s form of the image \
 (resulting tensors will be in mm coordinates, default: 0).'
-    rotsform_flag = traits.Int(desc=desc,
-                               argstr='-rotsform %d')
+    rot_sform_flag = traits.Int(desc=desc,
+                                argstr='-rotsform %d')
 
     # generic output options:
     error_file = traits.File(desc='Filename of parameter error maps.',
@@ -221,16 +227,15 @@ class FitDwi(NiftyFitCommand):
     Examples
     --------
 
-    >>> from nipype.interfaces.niftyfit import FitDwi
-    >>> fit_dwi = FitDwi()
-    >>> fit_dwi.inputs.source_file = 'im1.nii.gz'  # doctest: +SKIP
-    >>> fit_dwi.inputs.bvec_file = 'im1.bval'  # doctest: +SKIP
-    >>> fit_dwi.inputs.bval_file = 'im1.bvec'  # doctest: +SKIP
-    >>> fit_dwi.inputs.dti_flag = True
-    >>> fit_dwi.inputs.rgbmap_file = 'rgb_map.nii.gz'
+    >>> from nipype.interfaces import niftyfit
+    >>> fit_dwi = niftyfit.FitDwi(dti_flag=True)
+    >>> fit_dwi.inputs.source_file = 'dwi.nii.gz'
+    >>> fit_dwi.inputs.bvec_file = 'bvals'
+    >>> fit_dwi.inputs.bval_file = 'bvecs'
+    >>> fit_dwi.inputs.rgbmap_file = 'rgb.nii.gz'
     >>> fit_dwi.cmdline  # doctest: +SKIP
-    'fit_dwi -source im1.nii.gz -bval im1.val -bvec im1.bvec -dti -rgbmap \
-rgb_map.nii.gz -syn dwifit_syn.nii.gz -res dwifit_mcmap.nii.gz\
+    'fit_dwi -source dwi.nii.gz -bval bvals -bvec bvecs -dti -rgbmap \
+rgb.nii.gz -syn dwifit_syn.nii.gz -res dwifit_mcmap.nii.gz\
 -mdmap dwifit_mdmap.nii.gz -famap dwifit_famap.nii.gz -v1map \
 dwifit_v1map.nii.gz -tenmap2 dwifit_tenmap2.nii.gz -rotsform 0 -error \
 dwifit_error.nii.gz'
@@ -493,14 +498,13 @@ class DwiTool(NiftyFitCommand):
     Examples
     --------
 
-    >>> from nipype.interfaces.niftyfit import DwiTool
-    >>> dwi_tool = DwiTool()
-    >>> dwi_tool.inputs.source_file = 'im1.nii.gz'  # doctest: +SKIP
-    >>> dwi_tool.inputs.bvec_file = 'im1.bval'  # doctest: +SKIP
-    >>> dwi_tool.inputs.bval_file = 'im1.bvec'  # doctest: +SKIP
-    >>> dwi_tool.inputs.mask_file = 'im1.bvec'  # doctest: +SKIP
-    >>> dwi_tool.inputs.b0_file = 'b0.nii.gz'  # doctest: +SKIP
-    >>> dwi_tool.inputs.dti_flag = True
+    >>> from nipype.interfaces import niftyfit
+    >>> dwi_tool = niftyfit.DwiTool(dti_flag=True)
+    >>> dwi_tool.inputs.source_file = 'dwi.nii.gz'
+    >>> dwi_tool.inputs.bvec_file = 'bvals'
+    >>> dwi_tool.inputs.bval_file = 'bvecs'
+    >>> dwi_tool.inputs.mask_file = 'mask.nii.gz'
+    >>> dwi_tool.inputs.b0_file = 'b0.nii.gz'
     >>> dwi_tool.inputs.rgbmap_file = 'rgb_map.nii.gz'
     >>> dwi_tool.cmdline  # doctest: +SKIP
     'dwi_tool -source im1.nii.gz -bval im1.val -bvec im1.bvec -dti -mask \
@@ -512,8 +516,6 @@ dwitool_v1map.nii.gz -logdti2 dwitool_logdti2.nii.gz'
     _cmd = get_custom_path('dwi_tool')
     input_spec = DwiToolInputSpec
     output_spec = DwiToolOutputSpec
-    _suffix = '_dwi_tool'
-
     _suffix = '_dwi_tool'
 
     def _format_arg(self, name, trait_spec, value):

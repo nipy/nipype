@@ -101,7 +101,7 @@ def test_FitDwi_inputs():
     genfile=True,
     requires=['dti_flag'],
     ),
-    rotsform_flag=dict(argstr='-rotsform %d',
+    rot_sform_flag=dict(argstr='-rotsform %d',
     ),
     slice_no=dict(argstr='-slice %d',
     ),
