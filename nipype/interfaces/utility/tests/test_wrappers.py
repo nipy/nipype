@@ -8,6 +8,12 @@ import pytest
 from nipype.interfaces import utility
 import nipype.pipeline.engine as pe
 
+concat_sort = """\
+def concat_sort(in_arrays):
+    import numpy as np
+    all_vals = np.concatenate([arr.flatten() for arr in in_arrays])
+    return np.sort(all_vals)
+"""
 
 def test_function(tmpdir):
     os.chdir(str(tmpdir))
@@ -27,6 +33,12 @@ def test_function(tmpdir):
     f2 = pe.MapNode(utility.Function(function=increment_array), name='increment_array', iterfield=['in_array'])
 
     wf.connect(f1, 'random_array', f2, 'in_array')
+
+    f3 = pe.Node(
+        utility.Function(function=concat_sort),
+        name="concat_sort")
+
+    wf.connect(f2, 'out', f3, 'in_arrays')
     wf.run()
 
 
