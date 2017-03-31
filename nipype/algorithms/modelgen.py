@@ -33,6 +33,7 @@ from ..interfaces.base import (BaseInterface, TraitedSpec, InputMultiPath,
                                traits, File, Bunch, BaseInterfaceInputSpec,
                                isdefined)
 from ..utils.filemanip import filename_to_list
+from ..utils.misc import normalize_mc_params
 from .. import config, logging
 iflogger = logging.getLogger('interface')
 
@@ -195,6 +196,9 @@ class SpecifyModelInputSpec(BaseInterfaceInputSpec):
                                             desc='Realignment parameters returned '
                                                  'by motion correction algorithm',
                                             copyfile=False)
+    parameter_source = traits.Enum("SPM", "FSL", "AFNI", "FSFAST", "NIPY",
+                                   usedefault=True,
+                                   desc="Source of motion parameters")
     outlier_files = InputMultiPath(File(exists=True),
                                    desc='Files containing scan outlier indices '
                                         'that should be tossed',
@@ -392,8 +396,10 @@ None])
         realignment_parameters = []
         if isdefined(self.inputs.realignment_parameters):
             for parfile in self.inputs.realignment_parameters:
-                realignment_parameters.append(np.loadtxt(parfile))
-
+                realignment_parameters.append(
+                    np.apply_along_axis(func1d=normalize_mc_params,
+                                        axis=1, arr=np.loadtxt(parfile),
+                                        source=self.inputs.parameter_source))
         outliers = []
         if isdefined(self.inputs.outlier_files):
             for filename in self.inputs.outlier_files:
@@ -556,7 +562,9 @@ class SpecifySPMModel(SpecifyModel):
         if isdefined(self.inputs.realignment_parameters):
             realignment_parameters = []
             for parfile in self.inputs.realignment_parameters:
-                mc = np.loadtxt(parfile)
+                mc = np.apply_along_axis(func1d=normalize_mc_params,
+                                         axis=1, arr=np.loadtxt(parfile),
+                                         source=self.inputs.parameter_source)
                 if not realignment_parameters:
                     realignment_parameters.insert(0, mc)
                 else:
