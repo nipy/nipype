@@ -1,9 +1,17 @@
 # -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
+
 """The regutils module provides classes for interfacing with the `niftyreg
 <http://niftyreg.sourceforge.net>`_ utility command line tools.
-The interfaces were written to work with niftyreg version 1.4
+
+The interfaces were written to work with niftyreg version 1.5.10
+
+Change directory to provide relative paths for doctests
+    >>> import os
+    >>> filepath = os.path.dirname( os.path.realpath( __file__ ) )
+    >>> datadir = os.path.realpath(os.path.join(filepath, '../../testing/data'))
+    >>> os.chdir(datadir)
 """
 
 from __future__ import print_function, division, \
