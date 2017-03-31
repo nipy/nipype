@@ -100,6 +100,9 @@ Citation
       url          = {http://dx.doi.org/10.5281/zenodo.50186}
     }
 
+If you are a Nipype contributor and your name is not mentioned above please submit
+a Pull Request modifying `.zenodo.json` file.
+
 When publishing results obtained using Nipype we strongly encourage citing the above reference to give credit to all
 Nipype contributors. However, if for some reason the journal you are publishing with does not allow you do cite software
 this way you can use the initial paper published in 2011 (see below).
