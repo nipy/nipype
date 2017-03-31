@@ -10,6 +10,12 @@ that can be performed with the seg_FillLesions command-line program.
 Examples
 --------
 See the docstrings of the individual classes for examples.
+
+Change directory to provide relative paths for doctests
+    >>> import os
+    >>> filepath = os.path.dirname( os.path.realpath( __file__ ) )
+    >>> datadir = os.path.realpath(os.path.join(filepath, '../../testing/data'))
+    >>> os.chdir(datadir)
 """
 
 import os
@@ -98,10 +104,10 @@ class FillLesions(NiftySegCommand):
 
     Examples
     --------
-    >>> from nipype.interfaces.niftyseg import FillLesions
-    >>> node = FillLesions()
-    >>> node.inputs.in_file = 'im1.nii'  # doctest: +SKIP
-    >>> node.inputs.lesion_mask = 'im2.nii'  # doctest: +SKIP
+    >>> from nipype.interfaces import niftyseg
+    >>> node = niftyseg.FillLesions()
+    >>> node.inputs.in_file = 'im1.nii'
+    >>> node.inputs.lesion_mask = 'im2.nii'
     >>> node.cmdline  # doctest: +SKIP
     'seg_FillLesions -i im1.nii -l im2.nii -o im1_lesions_filled.nii'
 

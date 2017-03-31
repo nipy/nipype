@@ -5,12 +5,13 @@ from nipype.interfaces.niftyseg import (no_niftyseg, get_custom_path,
                                         UnaryMaths, BinaryMaths,
                                         BinaryMathsInteger, TupleMaths,
                                         Merge)
-from nipype.testing import skipif, example_data
+from nipype.testing import example_data
 import os
 import pytest
 
 
-@skipif(no_niftyseg(cmd='seg_maths'))
+@pytest.mark.skipif(no_niftyseg(cmd='seg_maths'),
+                    reason="niftyseg is not installed")
 def test_unary_maths():
 
     # Create a node object
@@ -37,7 +38,8 @@ def test_unary_maths():
     assert unarym.cmdline == expected_cmd
 
 
-@skipif(no_niftyseg(cmd='seg_maths'))
+@pytest.mark.skipif(no_niftyseg(cmd='seg_maths'),
+                    reason="niftyseg is not installed")
 def test_binary_maths():
 
     # Create a node object
@@ -66,7 +68,8 @@ def test_binary_maths():
     assert binarym.cmdline == expected_cmd
 
 
-@skipif(no_niftyseg(cmd='seg_maths'))
+@pytest.mark.skipif(no_niftyseg(cmd='seg_maths'),
+                    reason="niftyseg is not installed")
 def test_int_binary_maths():
 
     # Create a node object
@@ -94,7 +97,8 @@ def test_int_binary_maths():
     assert ibinarym.cmdline == expected_cmd
 
 
-@skipif(no_niftyseg(cmd='seg_maths'))
+@pytest.mark.skipif(no_niftyseg(cmd='seg_maths'),
+                    reason="niftyseg is not installed")
 def test_tuple_maths():
 
     # Create a node object
@@ -126,7 +130,8 @@ def test_tuple_maths():
     assert tuplem.cmdline == expected_cmd
 
 
-@skipif(no_niftyseg(cmd='seg_maths'))
+@pytest.mark.skipif(no_niftyseg(cmd='seg_maths'),
+                    reason="niftyseg is not installed")
 def test_merge():
 
     # Create a node object

@@ -3,12 +3,13 @@
 
 from nipype.interfaces.niftyseg import (no_niftyseg, get_custom_path,
                                         FillLesions)
-from nipype.testing import skipif, example_data
+from nipype.testing import example_data
 import os
 import pytest
 
 
-@skipif(no_niftyseg(cmd='seg_FillLesions'))
+@pytest.mark.skipif(no_niftyseg(cmd='seg_FillLesions'),
+                    reason="niftyseg is not installed")
 def test_seg_filllesions():
 
     # Create a node object
@@ -28,9 +29,10 @@ def test_seg_filllesions():
     seg_fill.inputs.lesion_mask = lesion_mask
 
     expected_cmd = '{cmd} -i {in_file} -l {lesion_mask} -o {out_file}'.format(
-                cmd=get_custom_path('seg_FillLesions'),
-                in_file=in_file,
-                lesion_mask=lesion_mask,
-                out_file=os.path.join(os.getcwd(), 'im1_lesions_filled.nii'))
+        cmd=get_custom_path('seg_FillLesions'),
+        in_file=in_file,
+        lesion_mask=lesion_mask,
+        out_file=os.path.join(os.getcwd(), 'im1_lesions_filled.nii')
+    )
 
     assert seg_fill.cmdline == expected_cmd

@@ -4,6 +4,12 @@
 """
 The fusion module provides higher-level interfaces to some of the operations
 that can be performed with the seg_LabFusion command-line program.
+
+Change directory to provide relative paths for doctests
+    >>> import os
+    >>> filepath = os.path.dirname( os.path.realpath( __file__ ) )
+    >>> datadir = os.path.realpath(os.path.join(filepath, '../../testing/data'))
+    >>> os.chdir(datadir)
 """
 
 from builtins import str
@@ -114,12 +120,12 @@ class LabelFusion(NiftySegCommand):
 
     Examples
     --------
-    >>> from nipype.interfaces.niftyseg import LabelFusion
-    >>> node = LabelFusion()
-    >>> node.inputs.in_file = 'im1.nii'  # doctest: +SKIP
+    >>> from nipype.interfaces import niftyseg
+    >>> node = niftyseg.LabelFusion()
+    >>> node.inputs.in_file = 'im1.nii'
     >>> node.inputs.kernel_size = 2.0
-    >>> node.inputs.file_to_seg = 'im2.nii'  # doctest: +SKIP
-    >>> node.inputs.template_file = 'im3.nii'  # doctest: +SKIP
+    >>> node.inputs.file_to_seg = 'im2.nii'
+    >>> node.inputs.template_file = 'im3.nii'
     >>> node.inputs.template_num = 2
     >>> node.inputs.classifier_type = 'STEPS'
     >>> node.cmdline  # doctest: +SKIP
@@ -277,11 +283,11 @@ class CalcTopNCC(NiftySegCommand):
 
     Examples
     --------
-    >>> from nipype.interfaces.niftyseg import CalcTopNCC
-    >>> node = CalcTopNCC()
-    >>> node.inputs.in_file = 'im1.nii'  # doctest: +SKIP
+    >>> from nipype.interfaces import niftyseg
+    >>> node = niftyseg.CalcTopNCC()
+    >>> node.inputs.in_file = 'im1.nii'
     >>> node.inputs.num_templates = 2
-    >>> node.inputs.in_templates = ['im2.nii', 'im3.nii']  # doctest: +SKIP
+    >>> node.inputs.in_templates = ['im2.nii', 'im3.nii']
     >>> node.inputs.top_templates = 1
     >>> node.cmdline  # doctest: +SKIP
     'seg_CalcTopNCC -target im1.nii -templates 2 im2.nii im3.nii -n 1'

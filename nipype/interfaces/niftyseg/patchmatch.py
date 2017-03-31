@@ -1,8 +1,15 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
+
 """
 The fusion module provides higher-level interfaces to some of the operations
 that can be performed with the seg_DetectLesions command-line program.
+
+Change directory to provide relative paths for doctests
+    >>> import os
+    >>> filepath = os.path.dirname( os.path.realpath( __file__ ) )
+    >>> datadir = os.path.realpath(os.path.join(filepath, '../../testing/data'))
+    >>> os.chdir(datadir)
 """
 import os
 import warnings
@@ -93,11 +100,11 @@ class PatchMatch(NiftySegCommand):
 
     Examples
     --------
-    >>> from nipype.interfaces.niftyseg import PatchMatch
-    >>> node = PatchMatch()
-    >>> node.inputs.in_file = 'im1.nii'  # doctest: +SKIP
-    >>> node.inputs.mask_file = 'im2.nii'  # doctest: +SKIP
-    >>> node.inputs.database_file = 'db.xml'  # doctest: +SKIP
+    >>> from nipype.interfaces import niftyseg
+    >>> node = niftyseg.PatchMatch()
+    >>> node.inputs.in_file = 'im1.nii'
+    >>> node.inputs.mask_file = 'im2.nii'
+    >>> node.inputs.database_file = 'db.xml'
     >>> node.cmdline  # doctest: +SKIP
     'seg_PatchMatch -i im1.nii -m im2.nii -db db.xml -o im1_pm.nii'
 

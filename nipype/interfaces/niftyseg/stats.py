@@ -1,8 +1,15 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
+
 """
 The stats module provides higher-level interfaces to some of the operations
-that can be performed with the niftysegstats (seg_stats) command-line program.
+that can be performed with the niftyseg stats (seg_stats) command-line program.
+
+Change directory to provide relative paths for doctests
+    >>> import os
+    >>> filepath = os.path.dirname( os.path.realpath( __file__ ) )
+    >>> datadir = os.path.realpath(os.path.join(filepath, '../../testing/data'))
+    >>> os.chdir(datadir)
 """
 from __future__ import print_function
 import numpy as np
@@ -121,9 +128,9 @@ class UnaryStats(StatsCommand):
 
     Examples
     --------
-    >>> from nipype.interfaces.niftyseg import UnaryStats
-    >>> node = UnaryStats()
-    >>> node.inputs.in_file = 'im1.nii'  # doctest: +SKIP
+    >>> from nipype.interfaces import niftyseg
+    >>> node = niftyseg.UnaryStats()
+    >>> node.inputs.in_file = 'im1.nii'
     >>> node.inputs.operation = 'v'
     >>> node.cmdline  # doctest: +SKIP
     'seg_stats im1.nii -v'
@@ -184,9 +191,9 @@ class BinaryStats(StatsCommand):
 
     Examples
     --------
-    >>> from nipype.interfaces.niftyseg import BinaryStats
-    >>> node = BinaryStats()
-    >>> node.inputs.in_file = 'im1.nii'  # doctest: +SKIP
+    >>> from nipype.interfaces import niftyseg
+    >>> node = niftyseg.BinaryStats()
+    >>> node.inputs.in_file = 'im1.nii'
     >>> node.inputs.operation = 'sa'
     >>> node.inputs.operand_value = 2.0
     >>> node.cmdline  # doctest: +SKIP

@@ -2,12 +2,13 @@
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 
 from nipype.interfaces.niftyseg import no_niftyseg, get_custom_path, PatchMatch
-from nipype.testing import skipif, example_data
+from nipype.testing import example_data
 import os
 import pytest
 
 
-@skipif(no_niftyseg(cmd='seg_PatchMatch'))
+@pytest.mark.skipif(no_niftyseg(cmd='seg_PatchMatch'),
+                    reason="niftyseg is not installed")
 def test_seg_patchmatch():
 
     # Create a node object
@@ -30,10 +31,11 @@ def test_seg_patchmatch():
 
     cmd_tmp = '{cmd} -i {in_file} -m {mask_file} -db {db} -o {out_file}'
     expected_cmd = cmd_tmp.format(
-                        cmd=get_custom_path('seg_PatchMatch'),
-                        in_file=in_file,
-                        mask_file=mask_file,
-                        db=db_file,
-                        out_file=os.path.join(os.getcwd(), 'im1_pm.nii'))
+        cmd=get_custom_path('seg_PatchMatch'),
+        in_file=in_file,
+        mask_file=mask_file,
+        db=db_file,
+        out_file=os.path.join(os.getcwd(), 'im1_pm.nii')
+    )
 
     assert seg_patchmatch.cmdline == expected_cmd

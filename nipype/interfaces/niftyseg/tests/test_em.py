@@ -2,12 +2,13 @@
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 
 from nipype.interfaces.niftyseg import no_niftyseg, get_custom_path, EM
-from nipype.testing import skipif, example_data
+from nipype.testing import example_data
 import os
 import pytest
 
 
-@skipif(no_niftyseg(cmd='seg_EM'))
+@pytest.mark.skipif(no_niftyseg(cmd='seg_EM'),
+                    reason="niftyseg is not installed")
 def test_seg_em():
 
     # Create a node object
@@ -32,6 +33,7 @@ def test_seg_em():
         in_file=in_file,
         out_file=os.path.join(os.getcwd(), 'im1_em.nii'),
         bc_out=os.path.join(os.getcwd(), 'im1_bc_em.nii'),
-        out_outlier=os.path.join(os.getcwd(), 'im1_outlier_em.nii'))
+        out_outlier=os.path.join(os.getcwd(), 'im1_outlier_em.nii')
+    )
 
     assert seg_em.cmdline == expected_cmd
