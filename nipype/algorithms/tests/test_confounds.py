@@ -7,7 +7,7 @@ from io import open
 import pytest
 from nipype.testing import example_data
 from nipype.algorithms.confounds import FramewiseDisplacement, ComputeDVARS, \
-    _is_outlier
+    is_outlier
 import numpy as np
 
 
