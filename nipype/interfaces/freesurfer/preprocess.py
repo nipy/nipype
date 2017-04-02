@@ -1012,7 +1012,7 @@ class BBRegisterInputSpec(FSTraitedSpec):
     init_reg_file = File(exists=True, argstr='--init-reg %s',
                          desc='existing registration file',
                          xor=['init'], mandatory=True)
-    contrast_type = traits.Enum('t1', 't2', argstr='--%s',
+    contrast_type = traits.Enum('t1', 't2', 'bold', argstr='--%s',
                                 desc='contrast type of image',
                                 mandatory=True)
     intermediate_file = File(exists=True, argstr="--int %s",
