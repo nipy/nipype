@@ -409,7 +409,7 @@ class RegAverage(NiftyRegCommand):
     >>> two_file = 'im2.nii'
     >>> three_file = 'im3.nii'
     >>> node.inputs.avg_files = [one_file, two_file, three_file]
-    >>> node.cmdline
+    >>> node.cmdline  # doctest: +ALLOW_UNICODE
     'reg_average --cmd_file reg_average_cmd'
 
     """
