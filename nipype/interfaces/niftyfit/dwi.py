@@ -233,12 +233,12 @@ class FitDwi(NiftyFitCommand):
     >>> fit_dwi.inputs.bvec_file = 'bvals'
     >>> fit_dwi.inputs.bval_file = 'bvecs'
     >>> fit_dwi.inputs.rgbmap_file = 'rgb.nii.gz'
-    >>> fit_dwi.cmdline  # doctest: +SKIP
+    >>> fit_dwi.cmdline  # doctest: +ELLIPSIS +ALLOW_UNICODE
     'fit_dwi -source dwi.nii.gz -bval bvals -bvec bvecs -dti -rgbmap \
-rgb.nii.gz -syn dwifit_syn.nii.gz -res dwifit_mcmap.nii.gz\
--mdmap dwifit_mdmap.nii.gz -famap dwifit_famap.nii.gz -v1map \
-dwifit_v1map.nii.gz -tenmap2 dwifit_tenmap2.nii.gz -rotsform 0 -error \
-dwifit_error.nii.gz'
+rgb.nii.gz -syn .../dwifit_syn.nii.gz -res .../dwifit_mcmap.nii.gz\
+-mdmap .../dwifit_mdmap.nii.gz -famap .../dwifit_famap.nii.gz -v1map \
+.../dwifit_v1map.nii.gz -tenmap2 .../dwifit_tenmap2.nii.gz -rotsform 0 -error \
+.../dwifit_error.nii.gz'
 
     """
     _cmd = get_custom_path('fit_dwi')
@@ -506,11 +506,11 @@ class DwiTool(NiftyFitCommand):
     >>> dwi_tool.inputs.mask_file = 'mask.nii.gz'
     >>> dwi_tool.inputs.b0_file = 'b0.nii.gz'
     >>> dwi_tool.inputs.rgbmap_file = 'rgb_map.nii.gz'
-    >>> dwi_tool.cmdline  # doctest: +SKIP
+    >>> dwi_tool.cmdline  # doctest: +ELLIPSIS +ALLOW_UNICODE
     'dwi_tool -source im1.nii.gz -bval im1.val -bvec im1.bvec -dti -mask \
-mask.nii.gz -b0 b0.nii.gz -rgbmap rgb_map.nii.gz -syn dwitool_syn.nii.gz \
--mdmap dwitool_mdmap.nii.gz -famap dwitool_famap.nii.gz -v1map \
-dwitool_v1map.nii.gz -logdti2 dwitool_logdti2.nii.gz'
+mask.nii.gz -b0 b0.nii.gz -rgbmap rgb_map.nii.gz -syn .../dwitool_syn.nii.gz \
+-mdmap .../dwitool_mdmap.nii.gz -famap .../dwitool_famap.nii.gz -v1map \
+.../dwitool_v1map.nii.gz -logdti2 .../dwitool_logdti2.nii.gz'
 
     """
     _cmd = get_custom_path('dwi_tool')
