@@ -185,10 +185,6 @@ def test_reg_average():
     # Check if the command is properly defined
     assert nr_average.cmd == get_custom_path('reg_average')
 
-    # test raising error with mandatory args absent
-    with pytest.raises(ValueError):
-        nr_average.run()
-
     # Average niis
     one_file = example_data('im1.nii')
     two_file = example_data('im2.nii')
