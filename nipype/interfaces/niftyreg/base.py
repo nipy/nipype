@@ -72,19 +72,33 @@ class NiftyRegCommand(CommandLine):
 
     def __init__(self, required_version=None, **inputs):
         super(NiftyRegCommand, self).__init__(**inputs)
-        cur_version = self.get_version()
-        if not cur_version:
+        self.required_version = required_version
+        _version = self.get_version()
+        if _version:
+            _version = _version.decode("utf-8")
+            if StrictVersion(_version) < StrictVersion(self._min_version):
+                warn = 'A later version of Niftyreg is required (%s < %s)'
+                print(warn % (_version, self._min_version))
+            if required_version is not None:
+                if StrictVersion(_version) != StrictVersion(required_version):
+                    warn = 'The version of NiftyReg differs from the required'
+                    warn += '(%s != %s)'
+                    print(warn % (_version, required_version))
+
+    def check_version(self):
+        _version = self.get_version()
+        if not _version:
             raise Exception('Niftyreg not found')
         # Decoding to string:
-        cur_version = cur_version.decode("utf-8")
-        if StrictVersion(cur_version) < StrictVersion(self._min_version):
+        _version = _version.decode("utf-8")
+        if StrictVersion(_version) < StrictVersion(self._min_version):
             err = 'A later version of Niftyreg is required (%s < %s)'
-            raise ValueError(err % (cur_version, self._min_version))
-        if required_version is not None:
-            if StrictVersion(cur_version) != StrictVersion(required_version):
+            raise ValueError(err % (_version, self._min_version))
+        if self.required_version:
+            if StrictVersion(_version) != StrictVersion(self.required_version):
                 err = 'The version of NiftyReg differs from the required'
                 err += '(%s != %s)'
-                raise ValueError(err % (cur_version, required_version))
+                raise ValueError(err % (_version, self.required_version))
 
     def get_version(self):
         if no_niftyreg(cmd=self.cmd):
