@@ -108,8 +108,8 @@ class FillLesions(NiftySegCommand):
     >>> node = niftyseg.FillLesions()
     >>> node.inputs.in_file = 'im1.nii'
     >>> node.inputs.lesion_mask = 'im2.nii'
-    >>> node.cmdline  # doctest: +SKIP
-    'seg_FillLesions -i im1.nii -l im2.nii -o im1_lesions_filled.nii'
+    >>> node.cmdline  # doctest: +ELLIPSIS +ALLOW_UNICODE
+    'seg_FillLesions -i im1.nii -l im2.nii -o .../im1_lesions_filled.nii'
 
     """
     _cmd = get_custom_path('seg_FillLesions')

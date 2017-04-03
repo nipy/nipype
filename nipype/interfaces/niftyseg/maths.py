@@ -136,8 +136,8 @@ class UnaryMaths(MathsCommand):
     >>> node.inputs.in_file = 'im1.nii'
     >>> node.inputs.operation = 'sqrt'
     >>> node.inputs.output_datatype = 'float'
-    >>> node.cmdline  # doctest: +SKIP
-    'seg_maths im1.nii -sqrt -odt float im1_sqrt.nii.gz'
+    >>> node.cmdline  # doctest: +ELLIPSIS +ALLOW_UNICODE
+    'seg_maths im1.nii -sqrt -odt float .../im1_sqrt.nii.gz'
 
     """
     input_spec = UnaryMathsInput
@@ -224,8 +224,8 @@ class BinaryMaths(MathsCommand):
     >>> node.inputs.operation = 'sub'
     >>> node.inputs.operand_file = 'im2.nii'
     >>> node.inputs.output_datatype = 'float'
-    >>> node.cmdline  # doctest: +SKIP
-    'seg_maths im1.nii -odt float -sub im2.nii im1_sub.nii.gz'
+    >>> node.cmdline  # doctest: +ELLIPSIS +ALLOW_UNICODE
+    'seg_maths im1.nii -odt float -sub im2.nii .../im1_sub.nii.gz'
 
     """
     input_spec = BinaryMathsInput
@@ -299,8 +299,8 @@ class BinaryMathsInteger(MathsCommand):
     >>> node.inputs.operation = 'dil'
     >>> node.inputs.operand_value = 2
     >>> node.inputs.output_datatype = 'float'
-    >>> node.cmdline  # doctest: +SKIP
-    'seg_maths im1.nii -dil 2 im1_dil.nii -odt float'
+    >>> node.cmdline  # doctest: +ELLIPSIS +ALLOW_UNICODE
+    'seg_maths im1.nii -dil 2 .../im1_dil.nii -odt float'
 
     """
     input_spec = BinaryMathsInputInteger
@@ -370,8 +370,8 @@ class TupleMaths(MathsCommand):
     >>> node.inputs.operand_file1 = 'im2.nii'
     >>> node.inputs.operand_value2 = 2.0
     >>> node.inputs.output_datatype = 'float'
-    >>> node.cmdline  # doctest: +SKIP
-    'seg_maths im1.nii -lncc im2.nii 2.00000000 im1_lncc.nii -odt float'
+    >>> node.cmdline  # doctest: +ELLIPSIS +ALLOW_UNICODE
+    'seg_maths im1.nii -lncc im2.nii 2.00000000 .../im1_lncc.nii -odt float'
 
     """
     input_spec = TupleMathsInput
@@ -411,8 +411,9 @@ class Merge(MathsCommand):
     >>> node.inputs.merge_files = files
     >>> node.inputs.dimension = 2
     >>> node.inputs.output_datatype = 'float'
-    >>> node.cmdline  # doctest: +SKIP
-    'seg_maths im1.nii -merge 2 2 im2.nii im3.nii -odt float im1_merged.nii'
+    >>> node.cmdline  # doctest: +ELLIPSIS +ALLOW_UNICODE
+    'seg_maths im1.nii -merge 2 2 im2.nii im3.nii -odt float \
+.../im1_merged.nii'
 
     """
     input_spec = MergeInput

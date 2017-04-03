@@ -105,8 +105,8 @@ class PatchMatch(NiftySegCommand):
     >>> node.inputs.in_file = 'im1.nii'
     >>> node.inputs.mask_file = 'im2.nii'
     >>> node.inputs.database_file = 'db.xml'
-    >>> node.cmdline  # doctest: +SKIP
-    'seg_PatchMatch -i im1.nii -m im2.nii -db db.xml -o im1_pm.nii'
+    >>> node.cmdline  # doctest: +ELLIPSIS +ALLOW_UNICODE
+    'seg_PatchMatch -i im1.nii -m im2.nii -db db.xml -o .../im1_pm.nii'
 
     """
     _cmd = get_custom_path('seg_PatchMatch')

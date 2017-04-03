@@ -126,9 +126,9 @@ class EM(NiftySegCommand):
     >>> node = niftyseg.EM()
     >>> node.inputs.in_file = 'im1.nii'
     >>> node.inputs.no_prior = 4
-    >>> node.cmdline  # doctest: +SKIP
-    'seg_EM -in im1.nii -nopriors 4 -bc_out im1_bc_em.nii -out im1_em.nii \
--out_outlier im1_outlier_em.nii'
+    >>> node.cmdline  # doctest: +ELLIPSIS +ALLOW_UNICODE
+    'seg_EM -in im1.nii -nopriors 4 -bc_out .../im1_bc_em.nii \
+-out .../im1_em.nii -out_outlier .../im1_outlier_em.nii'
 
     """
     _cmd = get_custom_path('seg_EM')

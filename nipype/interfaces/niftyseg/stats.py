@@ -132,7 +132,7 @@ class UnaryStats(StatsCommand):
     >>> node = niftyseg.UnaryStats()
     >>> node.inputs.in_file = 'im1.nii'
     >>> node.inputs.operation = 'v'
-    >>> node.cmdline  # doctest: +SKIP
+    >>> node.cmdline  # doctest: +ALLOW_UNICODE
     'seg_stats im1.nii -v'
 
     """
@@ -196,7 +196,7 @@ class BinaryStats(StatsCommand):
     >>> node.inputs.in_file = 'im1.nii'
     >>> node.inputs.operation = 'sa'
     >>> node.inputs.operand_value = 2.0
-    >>> node.cmdline  # doctest: +SKIP
+    >>> node.cmdline  # doctest: +ALLOW_UNICODE
     'seg_stats im1.nii -sa 2'
 
     """
