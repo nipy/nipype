@@ -104,14 +104,14 @@ class RegResample(NiftyRegCommand):
     --------
     >>> from nipype.interfaces import niftyreg
     >>> node = niftyreg.RegResample()
-    >>> node.inputs.ref_file = 'ref.nii.gz'
-    >>> node.inputs.flo_file = 'flo.nii.gz'
-    >>> node.inputs.trans_file = 'warpfield.nii.gz'
+    >>> node.inputs.ref_file = 'im1.nii'
+    >>> node.inputs.flo_file = 'im2.nii'
+    >>> node.inputs.trans_file = 'warpfield.nii'
     >>> node.inputs.inter_val = 'LIN'
     >>> node.inputs.omp_core_val = 4
     >>> node.cmdline  # doctest: +ELLIPSIS +ALLOW_UNICODE
-    'reg_resample -flo flo.nii.gz -inter 1 -omp 4 -ref ref.nii.gz -trans \
-warpfield.nii.gz -res .../flo_res.nii.gz'
+    'reg_resample -flo im2.nii.gz -inter 1 -omp 4 -ref im1.nii -trans \
+warpfield.nii -res .../im2_res.nii.gz'
 
     """
     _cmd = get_custom_path('reg_resample')
@@ -177,11 +177,11 @@ class RegJacobian(NiftyRegCommand):
     --------
     >>> from nipype.interfaces import niftyreg
     >>> node = niftyreg.RegJacobian()
-    >>> node.inputs.ref_file = 'ref.nii.gz'
-    >>> node.inputs.trans_file = 'warpfield.nii.gz'
+    >>> node.inputs.ref_file = 'im1.nii'
+    >>> node.inputs.trans_file = 'warpfield.nii'
     >>> node.inputs.omp_core_val = 4
     >>> node.cmdline  # doctest: +ELLIPSIS +ALLOW_UNICODE
-    'reg_jacobian -omp 4 -ref ref.nii.gz -trans warpfield.nii.gz -jac \
+    'reg_jacobian -omp 4 -ref im1.nii -trans warpfield.nii -jac \
 .../warpfield_jac.nii.gz'
 
     """
@@ -298,11 +298,11 @@ class RegTools(NiftyRegCommand):
     --------
     >>> from nipype.interfaces import niftyreg
     >>> node = niftyreg.RegTools()
-    >>> node.inputs.in_file = 'im1.nii.gz'
+    >>> node.inputs.in_file = 'im1.nii'
     >>> node.inputs.mul_val = 4
     >>> node.inputs.omp_core_val = 4
     >>> node.cmdline  # doctest: +ELLIPSIS +ALLOW_UNICODE
-    'reg_tools -in im1.nii.gz -mul 4.0 -omp 4 -out .../im1_tools.nii.gz'
+    'reg_tools -in im1.nii -mul 4.0 -omp 4 -out .../im1_tools.nii.gz'
 
     """
     _cmd = get_custom_path('reg_tools')

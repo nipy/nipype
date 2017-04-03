@@ -151,13 +151,13 @@ class RegAladin(NiftyRegCommand):
     --------
     >>> from nipype.interfaces import niftyreg
     >>> node = niftyreg.RegAladin()
-    >>> node.inputs.ref_file = 'ref.nii.gz'
-    >>> node.inputs.flo_file = 'flo.nii.gz'
-    >>> node.inputs.rmask_file = 'rmask.nii.gz'
+    >>> node.inputs.ref_file = 'im1.nii'
+    >>> node.inputs.flo_file = 'im2.nii'
+    >>> node.inputs.rmask_file = 'mask.nii'
     >>> node.inputs.omp_core_val = 4
     >>> node.cmdline  # doctest: +ELLIPSIS +ALLOW_UNICODE
-    'reg_aladin -aff .../flo_aff.txt -flo flo.nii.gz -omp 4 -ref ref.nii.gz \
--rmask rmask.nii.gz -res .../flo_res.nii.gz'
+    'reg_aladin -aff .../im2_aff.txt -flo im2.nii -omp 4 -ref im1.nii \
+-rmask mask.nii -res .../im2_res.nii.gz'
 
     """
     _cmd = get_custom_path('reg_aladin')
@@ -381,13 +381,13 @@ class RegF3D(NiftyRegCommand):
     --------
     >>> from nipype.interfaces import niftyreg
     >>> node = niftyreg.RegF3D()
-    >>> node.inputs.ref_file = 'ref.nii.gz'
-    >>> node.inputs.flo_file = 'flo.nii.gz'
-    >>> node.inputs.rmask_file = 'rmask.nii.gz'
+    >>> node.inputs.ref_file = 'im1.nii'
+    >>> node.inputs.flo_file = 'im2.nii'
+    >>> node.inputs.rmask_file = 'mask.nii'
     >>> node.inputs.omp_core_val = 4
     >>> node.cmdline  # doctest: +ELLIPSIS +ALLOW_UNICODE
-    'reg_f3d -be 0.100000 -cpp .../flo_cpp.nii.gz -flo flo.nii.gz -le \
-0.100000 -omp 4 -ref ref.nii.gz -res .../flo_res.nii.gz -rmask rmask.nii.gz \
+    'reg_f3d -be 0.100000 -cpp .../im2_cpp.nii.gz -flo im2.nii -le \
+0.100000 -omp 4 -ref im1.nii -res .../flo_res.nii.gz -rmask mask.nii \
 -vel'
 
     """
