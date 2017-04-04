@@ -1,6 +1,8 @@
 Upcoming Release
 =====================
 
+* ENH: Sphinx extension to plot workflows (https://github.com/nipy/nipype/pull/1896)
+* ENH: Added non-steady state detector for EPI data (https://github.com/nipy/nipype/pull/1839)
 * ENH: Enable new BBRegister init options for FSv6+ (https://github.com/nipy/nipype/pull/1811)
 * REF: Splits nipype.interfaces.utility into base, csv, and wrappers (https://github.com/nipy/nipype/pull/1828)
 * FIX: Makespec now runs with nipype in current directory (https://github.com/nipy/nipype/pull/1813)
@@ -21,7 +23,7 @@ Upcoming Release
 
 0.13.0-rc1 (January 4, 2017)
 ===============================
- 
+
 * FIX: Compatibility with traits 4.6 (https://github.com/nipy/nipype/pull/1770)
 * FIX: Multiproc deadlock (https://github.com/nipy/nipype/pull/1756)
 * TST: Replace nose and unittest with pytest (https://github.com/nipy/nipype/pull/1722, https://github.com/nipy/nipype/pull/1751)

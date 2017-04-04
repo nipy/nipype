@@ -27,7 +27,8 @@ from ..external.due import BibTeX
 from ..interfaces.base import (traits, TraitedSpec, BaseInterface,
                                BaseInterfaceInputSpec, File, isdefined,
                                InputMultiPath)
-from nipype.utils import NUMPY_MMAP
+from ..utils import NUMPY_MMAP
+from ..utils.misc import normalize_mc_params
 
 IFLOG = logging.getLogger('interface')
 
@@ -206,7 +207,10 @@ Bradley L. and Petersen, Steven E.},
 
 
 class FramewiseDisplacementInputSpec(BaseInterfaceInputSpec):
-    in_plots = File(exists=True, mandatory=True, desc='motion parameters as written by FSL MCFLIRT')
+    in_file = File(exists=True, mandatory=True, desc='motion parameters')
+    parameter_source = traits.Enum("FSL", "AFNI", "SPM", "FSFAST", "NIPY",
+                                   desc="Source of movement parameters",
+                                   mandatory=True)
     radius = traits.Float(50, usedefault=True,
                           desc='radius in mm to calculate angular FDs, 50mm is the '
                                'default since it is used in Power et al. 2012')
@@ -260,9 +264,12 @@ Bradley L. and Petersen, Steven E.},
     }]
 
     def _run_interface(self, runtime):
-        mpars = np.loadtxt(self.inputs.in_plots)  # mpars is N_t x 6
-        diff = mpars[:-1, :] - mpars[1:, :]
-        diff[:, :3] *= self.inputs.radius
+        mpars = np.loadtxt(self.inputs.in_file)  # mpars is N_t x 6
+        mpars = np.apply_along_axis(func1d=normalize_mc_params,
+                                    axis=1, arr=mpars,
+                                    source=self.inputs.parameter_source)
+        diff = mpars[:-1, :6] - mpars[1:, :6]
+        diff[:, 3:6] *= self.inputs.radius
         fd_res = np.abs(diff).sum(axis=1)
 
         self._results = {
@@ -571,6 +578,79 @@ class TSNR(BaseInterface):
         if isdefined(self.inputs.regress_poly):
             outputs['detrended_file'] = op.abspath(self.inputs.detrended_file)
         return outputs
+
+
+class NonSteadyStateDetectorInputSpec(BaseInterfaceInputSpec):
+    in_file = File(exists=True, mandatory=True, desc='4D NIFTI EPI file')
+
+
+class NonSteadyStateDetectorOutputSpec(TraitedSpec):
+    n_volumes_to_discard = traits.Int(desc='Number of non-steady state volumes'
+                                           'detected in the beginning of the scan.')
+
+
+class NonSteadyStateDetector(BaseInterface):
+    """
+    Returns the number of non-steady state volumes detected at the beginning
+    of the scan.
+    """
+
+    input_spec = NonSteadyStateDetectorInputSpec
+    output_spec = NonSteadyStateDetectorOutputSpec
+
+    def _run_interface(self, runtime):
+        in_nii = nb.load(self.inputs.in_file)
+        global_signal = in_nii.get_data()[:,:,:,:50].mean(axis=0).mean(axis=0).mean(axis=0)
+
+        self._results = {
+            'n_volumes_to_discard': _is_outlier(global_signal)
+        }
+
+        return runtime
+
+    def _list_outputs(self):
+        return self._results
+
+def is_outlier(points, thresh=3.5):
+    """
+    Returns a boolean array with True if points are outliers and False
+    otherwise.
+
+    Parameters:
+    -----------
+        points : An numobservations by numdimensions array of observations
+        thresh : The modified z-score to use as a threshold. Observations with
+            a modified z-score (based on the median absolute deviation) greater
+            than this value will be classified as outliers.
+
+    Returns:
+    --------
+        mask : A numobservations-length boolean array.
+
+    References:
+    ----------
+        Boris Iglewicz and David Hoaglin (1993), "Volume 16: How to Detect and
+        Handle Outliers", The ASQC Basic References in Quality Control:
+        Statistical Techniques, Edward F. Mykytka, Ph.D., Editor.
+    """
+    if len(points.shape) == 1:
+        points = points[:, None]
+    median = np.median(points, axis=0)
+    diff = np.sum((points - median) ** 2, axis=-1)
+    diff = np.sqrt(diff)
+    med_abs_deviation = np.median(diff)
+
+    modified_z_score = 0.6745 * diff / med_abs_deviation
+
+    timepoints_to_discard = 0
+    for i in range(len(modified_z_score)):
+        if modified_z_score[i] <= thresh:
+            break
+        else:
+            timepoints_to_discard += 1
+
+    return timepoints_to_discard
+
 
 def regress_poly(degree, data, remove_mean=True, axis=-1):
     ''' returns data with degree polynomial regressed out.

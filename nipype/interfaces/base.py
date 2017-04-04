@@ -1844,7 +1844,7 @@ class CommandLine(BaseInterface):
                 # special treatment for files
                 try:
                     _, base, source_ext = split_filename(source)
-                except AttributeError:
+                except (AttributeError, TypeError):
                     base = source
             else:
                 if name in chain:
