@@ -512,7 +512,7 @@ class DwiTool(NiftyFitCommand):
 -mask mask.nii.gz -dti -famap .../dwi_famap.nii.gz \
 -logdti2 .../dwi_logdti2.nii.gz -mcmap .../dwi_mcmap.nii.gz \
 -mdmap .../dwi_mdmap.nii.gz -rgbmap rgb_map.nii.gz -syn .../dwi_syn.nii.gz \
--v1map .../dwitool_v1map.nii.gz '
+-v1map .../dwi_v1map.nii.gz '
 
     """
     _cmd = get_custom_path('dwi_tool')
