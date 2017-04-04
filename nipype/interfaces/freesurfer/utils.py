@@ -2912,8 +2912,9 @@ class MRIsExpandInputSpec(FSTraitedSpec):
     # Input spec derived from
     # https://github.com/freesurfer/freesurfer/blob/102e053/mris_expand/mris_expand.c
     in_file = File(
-        exists=True, mandatory=True, argstr='%s', position=-3, copyfile=False,
-        desc='Surface to expand')
+        exists=True, mandatory=True, argstr='%s', position=-3,
+        desc=('Surface to expand\n'
+              'Must be in reconstructed subject directory for interface to run'))
     distance = traits.Float(
         mandatory=True, argstr='%g', position=-2,
         desc='Distance in mm or fraction of cortical thickness')
@@ -2926,7 +2927,7 @@ class MRIsExpandInputSpec(FSTraitedSpec):
         argstr='-thickness',
         desc='Expand by fraction of cortical thickness, not mm')
     thickness_name = traits.Str(
-        argstr="-thickness_name %s", copyfile=False,
+        argstr="-thickness_name %s",
         desc=('Name of thickness file (implicit: "thickness")\n'
               'If no path, uses directory of `in_file`\n'
               'If no path AND missing "lh." or "rh.", derive from `in_file`'))
@@ -2936,13 +2937,10 @@ class MRIsExpandInputSpec(FSTraitedSpec):
         desc=('Tuple of (n_averages, min_averages) parameters '
               '(implicit: (16, 0))'))
     pial = traits.Str(
-        argstr='-pial %s', copyfile=False,
+        argstr='-pial %s',
         desc=('Name of pial file (implicit: "pial")\n'
               'If no path, uses directory of `in_file`\n'
               'If no path AND missing "lh." or "rh.", derive from `in_file`'))
-    sphere = traits.Str(
-        'sphere', copyfile=False, usedefault=True,
-        desc='WARNING: Do not change this trait')
     spring = traits.Float(argstr='-S %g', desc="Spring term (implicit: 0.05)")
     dt = traits.Float(argstr='-T %g', desc='dt (implicit: 0.25)')
     write_iterations = traits.Int(
@@ -2988,26 +2986,16 @@ class MRIsExpand(FSCommand):
 
     def _list_outputs(self):
         outputs = self._outputs().get()
-        outputs['out_file'] = self._associated_file(self.inputs.in_file,
-                                                    self.inputs.out_name)
+        outputs['out_file'] = self.inputs.out_name
         return outputs
 
     def _get_filecopy_info(self):
         in_file = self.inputs.in_file
 
-        pial = self.inputs.pial
-        if not isdefined(pial):
-            pial = 'pial'
-        self.inputs.pial = self._associated_file(in_file, pial)
-
-        if isdefined(self.inputs.thickness) and self.inputs.thickness:
-            thickness_name = self.inputs.thickness_name
-            if not isdefined(thickness_name):
-                thickness_name = 'thickness'
-            self.inputs.thickness_name = self._associated_file(in_file,
-                                                               thickness_name)
-
-        self.inputs.sphere = self._associated_file(in_file, self.inputs.sphere)
+        out_name = self.inputs.out_name
+        if out_name[0] not in "./":
+            fs_name = self._associated_file(in_file, out_name)
+            self.inputs.out_name = os.path.abspath(os.path.basename(fs_name))
 
         return super(MRIsExpand, self)._get_filecopy_info()
 
