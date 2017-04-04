@@ -982,7 +982,8 @@ def _transpose_iterables(fields, values):
 
 
 def export_graph(graph_in, base_dir=None, show=False, use_execgraph=False,
-                 show_connectinfo=False, dotfilename='graph.dot', format='png',
+                 show_connectinfo=False, dotfilename='graph.dot',
+                 format='html',
                  simple_form=True):
     """ Displays the graph layout of the pipeline
 
@@ -1019,20 +1020,22 @@ def export_graph(graph_in, base_dir=None, show=False, use_execgraph=False,
                                use_ext=False,
                                newpath=base_dir)
     _write_detailed_dot(graph, outfname)
+    format_dot(outfname)
+
     cmd = 'dot -T%s -O %s' % (format, outfname)
     res = CommandLine(cmd, terminal_output='allatonce').run()
     if res.runtime.returncode:
         logger.warn('dot2png: %s', res.runtime.stderr)
+
+
     pklgraph = _create_dot_graph(graph, show_connectinfo, simple_form)
     simplefname = fname_presuffix(dotfilename,
                                   suffix='.dot',
                                   use_ext=False,
                                   newpath=base_dir)
     nx.drawing.nx_pydot.write_dot(pklgraph, simplefname)
-    cmd = 'dot -T%s -O %s' % (format, simplefname)
-    res = CommandLine(cmd, terminal_output='allatonce').run()
-    if res.runtime.returncode:
-        logger.warn('dot2png: %s', res.runtime.stderr)
+    format_dot(simplefname)
+
     if show:
         pos = nx.graphviz_layout(pklgraph, prog='dot')
         nx.draw(pklgraph, pos)
@@ -1046,17 +1049,32 @@ def export_graph(graph_in, base_dir=None, show=False, use_execgraph=False,
 
 def format_dot(dotfilename, format=None):
     """Dump a directed graph (Linux only; install via `brew` on OSX)"""
-    cmd = 'dot -T%s -O \'%s\'' % (format, dotfilename)
-    try:
-        CommandLine(cmd).run()
-    except IOError as ioe:
-        if "could not be found" in str(ioe):
-            raise IOError("Cannot draw directed graph; executable 'dot' is unavailable")
-        else:
-            raise ioe
 
+    viz_template = """
+<html>                                                                                               
+<body>                                                                                               
+<script src="https://github.com/mdaines/viz.js/releases/download/v1.7.1/viz.js">                     
+</script>                                                                                            
+                                                                                                     
+<script>                                                                                             
+var dot_str = `{dot_str}`                                                                                                   
+                                                                                                     
+image = Viz(dot_str, {{format: "png-image-element" }});                                                 
+document.body.appendChild(image);                                                                    
+</script>                                                                                            
+</body>                                                                                              
+</html>
+"""
     if format != 'dot':
-        dotfilename += '.%s' % format
+        dot_str = None
+        with open(dotfilename, 'rt') as fp:
+            dot_str = fp.read()
+        if dot_str is not None:
+            dotfilename += '.html'
+            with open(dotfilename, 'wt') as fp:
+                fp.write(viz_template.format(dot_str=dot_str))
+        else:
+            raise ValueError('graph does not complain info')
     return dotfilename
 
 
