@@ -137,7 +137,7 @@ class UnaryMaths(MathsCommand):
     >>> node.inputs.operation = 'sqrt'
     >>> node.inputs.output_datatype = 'float'
     >>> node.cmdline  # doctest: +ELLIPSIS +ALLOW_UNICODE
-    'seg_maths im1.nii -sqrt -odt float .../im1_sqrt.nii.gz'
+    'seg_maths im1.nii -sqrt -odt float .../im1_sqrt.nii'
 
     """
     input_spec = UnaryMathsInput
@@ -225,7 +225,7 @@ class BinaryMaths(MathsCommand):
     >>> node.inputs.operand_file = 'im2.nii'
     >>> node.inputs.output_datatype = 'float'
     >>> node.cmdline  # doctest: +ELLIPSIS +ALLOW_UNICODE
-    'seg_maths im1.nii -odt float -sub im2.nii .../im1_sub.nii.gz'
+    'seg_maths im1.nii -sub im2.nii -odt float .../im1_sub.nii'
 
     """
     input_spec = BinaryMathsInput
@@ -300,7 +300,7 @@ class BinaryMathsInteger(MathsCommand):
     >>> node.inputs.operand_value = 2
     >>> node.inputs.output_datatype = 'float'
     >>> node.cmdline  # doctest: +ELLIPSIS +ALLOW_UNICODE
-    'seg_maths im1.nii -dil 2 .../im1_dil.nii -odt float'
+    'seg_maths im1.nii -dil 2 -odt float .../im1_dil.nii'
 
     """
     input_spec = BinaryMathsInputInteger
@@ -371,7 +371,7 @@ class TupleMaths(MathsCommand):
     >>> node.inputs.operand_value2 = 2.0
     >>> node.inputs.output_datatype = 'float'
     >>> node.cmdline  # doctest: +ELLIPSIS +ALLOW_UNICODE
-    'seg_maths im1.nii -lncc im2.nii 2.00000000 .../im1_lncc.nii -odt float'
+    'seg_maths im1.nii -lncc im2.nii 2.00000000 -odt float .../im1_lncc.nii'
 
     """
     input_spec = TupleMathsInput

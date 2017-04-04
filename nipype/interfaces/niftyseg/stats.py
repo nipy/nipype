@@ -197,7 +197,7 @@ class BinaryStats(StatsCommand):
     >>> node.inputs.operation = 'sa'
     >>> node.inputs.operand_value = 2.0
     >>> node.cmdline  # doctest: +ALLOW_UNICODE
-    'seg_stats im1.nii -sa 2'
+    'seg_stats im1.nii -sa 2.00000000'
 
     """
     input_spec = BinaryStatsInput
