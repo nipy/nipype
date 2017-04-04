@@ -23,14 +23,10 @@ from builtins import property, super
 from distutils.version import StrictVersion
 import os
 import subprocess
-import warnings
+from warnings import warn
 
 from ..base import CommandLine, isdefined, traits
 from ...utils.filemanip import split_filename
-
-
-warn = warnings.warn
-warnings.filterwarnings('always', category=UserWarning)
 
 
 def get_custom_path(command):
@@ -77,13 +73,13 @@ class NiftyRegCommand(CommandLine):
         if _version:
             _version = _version.decode("utf-8")
             if StrictVersion(_version) < StrictVersion(self._min_version):
-                warn = 'A later version of Niftyreg is required (%s < %s)'
-                print(warn % (_version, self._min_version))
+                msg = 'A later version of Niftyreg is required (%s < %s)'
+                warn(msg % (_version, self._min_version))
             if required_version is not None:
                 if StrictVersion(_version) != StrictVersion(required_version):
-                    warn = 'The version of NiftyReg differs from the required'
-                    warn += '(%s != %s)'
-                    print(warn % (_version, required_version))
+                    msg = 'The version of NiftyReg differs from the required'
+                    msg += '(%s != %s)'
+                    warn(msg % (_version, self.required_version))
 
     def check_version(self):
         _version = self.get_version()

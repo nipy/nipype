@@ -157,7 +157,7 @@ class RegAladin(NiftyRegCommand):
     >>> node.inputs.omp_core_val = 4
     >>> node.cmdline  # doctest: +ELLIPSIS +ALLOW_UNICODE
     'reg_aladin -aff .../im2_aff.txt -flo im2.nii -omp 4 -ref im1.nii \
--rmask mask.nii -res .../im2_res.nii.gz'
+-res .../im2_res.nii.gz -rmask mask.nii'
 
     """
     _cmd = get_custom_path('reg_aladin')
@@ -386,9 +386,8 @@ class RegF3D(NiftyRegCommand):
     >>> node.inputs.rmask_file = 'mask.nii'
     >>> node.inputs.omp_core_val = 4
     >>> node.cmdline  # doctest: +ELLIPSIS +ALLOW_UNICODE
-    'reg_f3d -be 0.100000 -cpp .../im2_cpp.nii.gz -flo im2.nii -le \
-0.100000 -omp 4 -ref im1.nii -res .../flo_res.nii.gz -rmask mask.nii \
--vel'
+    'reg_f3d -cpp .../im2_cpp.nii.gz -flo im2.nii -omp 4 -ref im1.nii \
+-res .../flo_res.nii.gz -rmask mask.nii'
 
     """
     _cmd = get_custom_path('reg_f3d')

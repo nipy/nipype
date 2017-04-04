@@ -110,7 +110,7 @@ class RegResample(NiftyRegCommand):
     >>> node.inputs.inter_val = 'LIN'
     >>> node.inputs.omp_core_val = 4
     >>> node.cmdline  # doctest: +ELLIPSIS +ALLOW_UNICODE
-    'reg_resample -flo im2.nii.gz -inter 1 -omp 4 -ref im1.nii -trans \
+    'reg_resample -flo im2.nii -inter 1 -omp 4 -ref im1.nii -trans \
 warpfield.nii -res .../im2_res.nii.gz'
 
     """
@@ -409,8 +409,8 @@ class RegAverage(NiftyRegCommand):
     >>> two_file = 'im2.nii'
     >>> three_file = 'im3.nii'
     >>> node.inputs.avg_files = [one_file, two_file, three_file]
-    >>> node.cmdline  # doctest: +ALLOW_UNICODE
-    'reg_average --cmd_file reg_average_cmd'
+    >>> node.cmdline  # doctest: +ELLIPSIS +ALLOW_UNICODE
+    'reg_average --cmd_file .../reg_average_cmd'
 
     """
     _cmd = get_custom_path('reg_average')
