@@ -373,18 +373,15 @@ class DwiToolInputSpec(CommandLineInputSpec):
     bvec_file = traits.File(position=3,
                             exists=True,
                             desc=desc,
-                            argstr='-bvec %s',
-                            mandatory=True)
+                            argstr='-bvec %s')
     b0_file = traits.File(position=4,
                           exists=True,
                           desc='The B0 image corresponding to the source DWI',
-                          argstr='-b0 %s',
-                          mandatory=True)
+                          argstr='-b0 %s')
     mask_file = traits.File(position=5,
                             exists=True,
                             desc='The image mask',
-                            argstr='-mask %s',
-                            mandatory=True)
+                            argstr='-mask %s')
 
     # Output options, with templated output names based on the source image
     desc = 'Filename of multi-compartment model parameter map \
@@ -392,8 +389,10 @@ class DwiToolInputSpec(CommandLineInputSpec):
     mcmap_file = traits.File(desc=desc,
                              argstr='-mcmap %s',
                              genfile=True)
-    syn_file = traits.File(desc='Filename of synthetic image',
+    desc = 'Filename of synthetic image. Requires: bvec_file/b0_file.'
+    syn_file = traits.File(desc=desc,
                            argstr='-syn %s',
+                           requires=['bvec_file', 'b0_file'],
                            genfile=True)
     mdmap_file = traits.File(desc='Filename of MD map/ADC',
                              argstr='-mdmap %s',
@@ -404,11 +403,11 @@ class DwiToolInputSpec(CommandLineInputSpec):
     v1map_file = traits.File(desc='Filename of PDD map [x,y,z]',
                              argstr='-v1map %s',
                              genfile=True)
-    rgbmap_file = traits.File(desc='Filename of colour FA map',
+    rgbmap_file = traits.File(desc='Filename of colour FA map.',
                               argstr='-rgbmap %s',
                               requires=['dti_flag'],
                               genfile=True)
-    logdti_file = traits.File(desc='Filename of output logdti map',
+    logdti_file = traits.File(desc='Filename of output logdti map.',
                               argstr='-logdti2 %s',
                               requires=['dti_flag'],
                               genfile=True)
@@ -512,7 +511,7 @@ class DwiTool(NiftyFitCommand):
 -mask mask.nii.gz -dti -famap .../dwi_famap.nii.gz \
 -logdti2 .../dwi_logdti2.nii.gz -mcmap .../dwi_mcmap.nii.gz \
 -mdmap .../dwi_mdmap.nii.gz -rgbmap rgb_map.nii.gz -syn .../dwi_syn.nii.gz \
--v1map .../dwi_v1map.nii.gz '
+-v1map .../dwi_v1map.nii.gz'
 
     """
     _cmd = get_custom_path('dwi_tool')
@@ -525,8 +524,9 @@ class DwiTool(NiftyFitCommand):
             if not isdefined(self.inputs.bvec_file) or \
                not isdefined(self.inputs.b0_file):
                 return ""
-            else:
-                return trait_spec.argstr % value
+        if name in ['logdti_file', 'rgbmap_file'] and \
+           not isdefined(self.inputs.dti_flag):
+            return ""
         return super(DwiTool, self)._format_arg(name, trait_spec, value)
 
     def _gen_filename(self, name):
@@ -561,10 +561,12 @@ class DwiTool(NiftyFitCommand):
         else:
             outputs['mcmap_file'] = self._gen_filename('mcmap_file')
 
-        if isdefined(self.inputs.syn_file):
-            outputs['syn_file'] = self.inputs.syn_file
-        else:
-            outputs['syn_file'] = self._gen_filename('syn_file')
+        if isdefined(self.inputs.bvec_file) and \
+           isdefined(self.inputs.b0_file):
+            if isdefined(self.inputs.syn_file):
+                outputs['syn_file'] = self.inputs.syn_file
+            else:
+                outputs['syn_file'] = self._gen_filename('syn_file')
 
         if isdefined(self.inputs.mdmap_file):
             outputs['mdmap_file'] = self.inputs.mdmap_file
@@ -581,14 +583,15 @@ class DwiTool(NiftyFitCommand):
         else:
             outputs['v1map_file'] = self._gen_filename('v1map_file')
 
-        if isdefined(self.inputs.rgbmap_file):
-            outputs['rgbmap_file'] = self.inputs.rgbmap_file
-        else:
-            outputs['rgbmap_file'] = self._gen_filename('rgbmap_file')
+        if isdefined(self.inputs.dti_flag):
+            if isdefined(self.inputs.rgbmap_file):
+                outputs['rgbmap_file'] = self.inputs.rgbmap_file
+            else:
+                outputs['rgbmap_file'] = self._gen_filename('rgbmap_file')
 
-        if isdefined(self.inputs.logdti_file):
-            outputs['logdti_file'] = self.inputs.logdti_file
-        else:
-            outputs['logdti_file'] = self._gen_filename('logdti_file')
+            if isdefined(self.inputs.logdti_file):
+                outputs['logdti_file'] = self.inputs.logdti_file
+            else:
+                outputs['logdti_file'] = self._gen_filename('logdti_file')
 
         return outputs
