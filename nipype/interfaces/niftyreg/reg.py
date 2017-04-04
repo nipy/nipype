@@ -387,7 +387,7 @@ class RegF3D(NiftyRegCommand):
     >>> node.inputs.omp_core_val = 4
     >>> node.cmdline  # doctest: +ELLIPSIS +ALLOW_UNICODE
     'reg_f3d -cpp .../im2_cpp.nii.gz -flo im2.nii -omp 4 -ref im1.nii \
--res .../flo_res.nii.gz -rmask mask.nii'
+-res .../im2_res.nii.gz -rmask mask.nii'
 
     """
     _cmd = get_custom_path('reg_f3d')
