@@ -230,15 +230,16 @@ class FitDwi(NiftyFitCommand):
     >>> from nipype.interfaces import niftyfit
     >>> fit_dwi = niftyfit.FitDwi(dti_flag=True)
     >>> fit_dwi.inputs.source_file = 'dwi.nii.gz'
-    >>> fit_dwi.inputs.bvec_file = 'bvals'
-    >>> fit_dwi.inputs.bval_file = 'bvecs'
+    >>> fit_dwi.inputs.bvec_file = 'bvecs'
+    >>> fit_dwi.inputs.bval_file = 'bvals'
     >>> fit_dwi.inputs.rgbmap_file = 'rgb.nii.gz'
     >>> fit_dwi.cmdline  # doctest: +ELLIPSIS +ALLOW_UNICODE
-    'fit_dwi -source dwi.nii.gz -bval bvals -bvec bvecs -dti -rgbmap \
-rgb.nii.gz -syn .../dwifit_syn.nii.gz -res .../dwifit_mcmap.nii.gz\
--mdmap .../dwifit_mdmap.nii.gz -famap .../dwifit_famap.nii.gz -v1map \
-.../dwifit_v1map.nii.gz -tenmap2 .../dwifit_tenmap2.nii.gz -rotsform 0 -error \
-.../dwifit_error.nii.gz'
+    'fit_dwi -source dwi.nii.gz -bval bvals -bvec bvecs -dti \
+-error .../dwi_error.nii.gz -famap .../dwi_famap.nii.gz \
+-mcmap .../dwi_mcmap.nii.gz -mdmap .../dwi_mdmap.nii.gz \
+-nodiff .../dwi_no_diff.nii.gz -res .../dwi_resmap.nii.gz \
+-rgbmap rgb.nii.gz -syn .../dwi_syn.nii.gz -tenmap2 .../dwi_tenmap2.nii.gz \
+-tenmap .../dwi_tenmap.nii.gz -v1map .../dwi_v1map.nii.gz'
 
     """
     _cmd = get_custom_path('fit_dwi')
@@ -501,16 +502,17 @@ class DwiTool(NiftyFitCommand):
     >>> from nipype.interfaces import niftyfit
     >>> dwi_tool = niftyfit.DwiTool(dti_flag=True)
     >>> dwi_tool.inputs.source_file = 'dwi.nii.gz'
-    >>> dwi_tool.inputs.bvec_file = 'bvals'
-    >>> dwi_tool.inputs.bval_file = 'bvecs'
+    >>> dwi_tool.inputs.bvec_file = 'bvecs'
+    >>> dwi_tool.inputs.bval_file = 'bvals'
     >>> dwi_tool.inputs.mask_file = 'mask.nii.gz'
     >>> dwi_tool.inputs.b0_file = 'b0.nii.gz'
     >>> dwi_tool.inputs.rgbmap_file = 'rgb_map.nii.gz'
     >>> dwi_tool.cmdline  # doctest: +ELLIPSIS +ALLOW_UNICODE
-    'dwi_tool -source im1.nii.gz -bval im1.val -bvec im1.bvec -dti -mask \
-mask.nii.gz -b0 b0.nii.gz -rgbmap rgb_map.nii.gz -syn .../dwitool_syn.nii.gz \
--mdmap .../dwitool_mdmap.nii.gz -famap .../dwitool_famap.nii.gz -v1map \
-.../dwitool_v1map.nii.gz -logdti2 .../dwitool_logdti2.nii.gz'
+    'dwi_tool -source dwi.nii.gz -bval bvals -bvec bvecs -b0 b0.nii.gz \
+-mask mask.nii.gz -dti -famap .../dwi_famap.nii.gz \
+-logdti2 .../dwi_logdti2.nii.gz -mcmap .../dwi_mcmap.nii.gz \
+-mdmap .../dwi_mdmap.nii.gz -rgbmap rgb_map.nii.gz -syn .../dwi_syn.nii.gz \
+-v1map .../dwitool_v1map.nii.gz '
 
     """
     _cmd = get_custom_path('dwi_tool')

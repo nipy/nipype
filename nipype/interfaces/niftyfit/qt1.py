@@ -157,9 +157,10 @@ class FitQt1(NiftyFitCommand):
     >>> fit_qt1 = FitQt1()
     >>> fit_qt1.inputs.source_file = 'TI4D.nii.gz'
     >>> fit_qt1.cmdline  # doctest: +ELLIPSIS +ALLOW_UNICODE
-    'fit_qt1 -source TI4D.nii.gz -t1map .../TI4D_t1map.nii.gz -m0map \
-.../TI4D_m0map.nii.gz -mcmap .../TI4D_mcmap.nii.gz -error \
-.../TI4D_error.nii.gz -syn .../TI4D_syn.nii.gz -res .../TI4D_res.nii.gz'
+    'fit_qt1 -source TI4D.nii.gz -comp .../TI4D_comp.nii.gz \
+-error .../TI4D_error.nii.gz -m0map .../TI4D_m0map.nii.gz \
+-mcmap .../TI4D_mcmap.nii.gz -res .../TI4D_res.nii.gz \
+-syn .../TI4D_syn.nii.gz -t1map .../TI4D_t1map.nii.gz'
 
     """
     _cmd = get_custom_path('fit_qt1')
