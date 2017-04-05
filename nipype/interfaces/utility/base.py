@@ -101,6 +101,8 @@ class MergeInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
                        desc='direction in which to merge, hstack requires same number of elements in each input')
     no_flatten = traits.Bool(False, usedefault=True,
                              desc='append to outlist instead of extending in vstack mode')
+    ravel_inputs = traits.Bool(False, usedefault=True,
+                               desc='ravel inputs with no_flatten is False')
 
 
 class MergeOutputSpec(TraitedSpec):
@@ -141,6 +143,13 @@ class Merge(IOBase):
     >>> merge.inputs.in1 = [1, [2, 5], 3]
     >>> out = merge.run()
     >>> out.outputs.out
+    [1, [2, 5], 3]
+
+    >>> merge = Merge()   # Or Merge(1)
+    >>> merge.inputs.in1 = [1, [2, 5], 3]
+    >>> merge.inputs.ravel_inputs = True
+    >>> out = merge.run()
+    >>> out.outputs.out
     [1, 2, 5, 3]
 
     >>> merge = Merge()   # Or Merge(1)
@@ -176,7 +185,10 @@ class Merge(IOBase):
         if self.inputs.axis == 'vstack':
             for value in values:
                 if isinstance(value, list) and not self.inputs.no_flatten:
-                    out.extend(_ravel(value))
+                    if self.inputs.ravel_inputs:
+                        out.extend(_ravel(value))
+                    else:
+                        out.extend(value)
                 else:
                     out.append(value)
         else:
