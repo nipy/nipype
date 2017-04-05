@@ -158,37 +158,7 @@ class FSLCommand(CommandLine):
     input_spec = FSLCommandInputSpec
     _output_type = None
 
-    references_ = [{'entry': BibTeX('@article{WoolrichJbabdiPatenaudeChappellMakniBehrens'
-                                    'BeckmannJenkinsonSmith2009,'
-                                    'author={M.W. Woolrich, S. Jbabdi, B. Patenaude, M. Chappell, '
-                                    'S. Makni, T. Behrens, C. Beckmann, M. Jenkinson, and S.M. Smith},'
-                                    'title={Bayesian analysis of neuroimaging data in FSL},'
-                                    'journal={NeuroImage},'
-                                    'volume={45},'
-                                    'number={1},'
-                                    'pages={S173-186},'
-                                    'year={2009},'
-                                    '}'),
-                    'tags': ['implementation'],
-                    },
-                   {'entry': BibTeX('@article{SmithJenkinsonWoolrichBeckmannBehrensJohansen'
-                                    'BergBannisterDeLucaDrobnjakFlitneyNiazySaundersVickers'
-                                    'ZhangDeStefanoBradyMatthews2004,'
-                                    'author={S.M. Smith, M. Jenkinson, M.W. Woolrich, C.F. Beckmann, '
-                                    'T.E.J. Behrens, H. Johansen-Berg, P.R. Bannister, M. De Luca, '
-                                    'I. Drobnjak, D.E. Flitney, R. Niazy, J. Saunders, J. Vickers, '
-                                    'Y. Zhang, N. De Stefano, J.M. Brady, and P.M. Matthews},'
-                                    'title={Advances in functional and structural MR image analysis '
-                                    'and implementation as FSL},'
-                                    'journal={NeuroImage},'
-                                    'volume={23},'
-                                    'number={S1},'
-                                    'pages={208-219},'
-                                    'year={2004},'
-                                    '}'),
-                    'tags': ['implementation'],
-                    },
-                   {'entry': BibTeX('@article{JenkinsonBeckmannBehrensWoolrichSmith2012,'
+    references_ = [{'entry': BibTeX('@article{JenkinsonBeckmannBehrensWoolrichSmith2012,'
                                     'author={M. Jenkinson, C.F. Beckmann, T.E. Behrens, '
                                     'M.W. Woolrich, and S.M. Smith},'
                                     'title={FSL},'
