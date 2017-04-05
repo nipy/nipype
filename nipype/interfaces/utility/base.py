@@ -139,20 +139,20 @@ class Merge(IOBase):
     >>> out.outputs.out
     [1, 2, 5, 3]
 
-    >>> merge = Merge()   # Or Merge(1)
+    >>> merge = Merge(1)
     >>> merge.inputs.in1 = [1, [2, 5], 3]
     >>> out = merge.run()
     >>> out.outputs.out
     [1, [2, 5], 3]
 
-    >>> merge = Merge()   # Or Merge(1)
+    >>> merge = Merge(1)
     >>> merge.inputs.in1 = [1, [2, 5], 3]
     >>> merge.inputs.ravel_inputs = True
     >>> out = merge.run()
     >>> out.outputs.out
     [1, 2, 5, 3]
 
-    >>> merge = Merge()   # Or Merge(1)
+    >>> merge = Merge(1)
     >>> merge.inputs.in1 = [1, [2, 5], 3]
     >>> merge.inputs.no_flatten = True
     >>> out = merge.run()
@@ -162,7 +162,7 @@ class Merge(IOBase):
     input_spec = MergeInputSpec
     output_spec = MergeOutputSpec
 
-    def __init__(self, numinputs=1, **inputs):
+    def __init__(self, numinputs=0, **inputs):
         super(Merge, self).__init__(**inputs)
         self._numinputs = numinputs
         if numinputs >= 1:
