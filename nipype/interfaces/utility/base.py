@@ -185,10 +185,8 @@ class Merge(IOBase):
         if self.inputs.axis == 'vstack':
             for value in values:
                 if isinstance(value, list) and not self.inputs.no_flatten:
-                    if self.inputs.ravel_inputs:
-                        out.extend(_ravel(value))
-                    else:
-                        out.extend(value)
+                    out.extend(_ravel(value) if self.inputs.ravel_inputs else
+                               value)
                 else:
                     out.append(value)
         else:
