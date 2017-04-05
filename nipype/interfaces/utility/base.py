@@ -102,7 +102,7 @@ class MergeInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
     no_flatten = traits.Bool(False, usedefault=True,
                              desc='append to outlist instead of extending in vstack mode')
     ravel_inputs = traits.Bool(False, usedefault=True,
-                               desc='ravel inputs with no_flatten is False')
+                               desc='ravel inputs when no_flatten is False')
 
 
 class MergeOutputSpec(TraitedSpec):
