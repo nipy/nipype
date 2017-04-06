@@ -12,6 +12,7 @@ standard_library.install_aliases()
 
 import sys
 import pickle
+import subprocess
 import gzip
 import hashlib
 from hashlib import md5
@@ -237,6 +238,30 @@ def hash_timestamp(afile):
     return md5hex
 
 
+def _on_cifs(fname):
+    """ Checks whether a PATH is on a CIFS filesystem mounted in a POSIX
+    host (i.e., has the "mount" command).
+
+    CIFS shares are how Docker mounts Windows host directories into containers.
+    CIFS has partial support for symlinks that can break, causing misleading
+    errors, so this test is used to disable them on such systems.
+    """
+    exit_code, output = subprocess.getstatusoutput("mount")
+    # Not POSIX
+    if exit_code != 0:
+        return False
+
+    # (path, fstype) tuples, sorted by path length (longest first)
+    paths_types = sorted((line.split()[2:5:2] for line in output.splitlines()),
+                         key=lambda x: len(x[0]),
+                         reverse=True)
+    # Only the first match counts
+    for fspath, fstype in paths_types:
+        if fname.startswith(fspath):
+            return fstype == 'cifs'
+    return False
+
+
 def copyfile(originalfile, newfile, copy=False, create_new=False,
              hashmethod=None, use_hardlink=False,
              copy_related_files=True):
@@ -287,6 +312,10 @@ def copyfile(originalfile, newfile, copy=False, create_new=False,
 
     if hashmethod is None:
         hashmethod = config.get('execution', 'hash_method').lower()
+
+    # Don't try creating symlinks on CIFS
+    if _on_cifs(newfile):
+        copy = True
 
     # Existing file
     # -------------
