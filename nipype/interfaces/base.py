@@ -774,7 +774,7 @@ class BaseInterface(Interface):
                             self.__class__.__name__)
 
         self.inputs = self.input_spec(**inputs)
-        self.estimated_memory_gb = 0
+        self.estimated_memory_gb = 0.25
         self.num_threads = 1
 
         if from_file is not None:
