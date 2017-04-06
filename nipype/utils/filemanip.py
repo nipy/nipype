@@ -238,7 +238,37 @@ def hash_timestamp(afile):
     return md5hex
 
 
-def _on_cifs(fname):
+def _generate_cifs_table():
+    """Construct a reverse-length ordered list of mount points that
+    fall under a CIFS mount.
+
+    This precomputation allows efficient checking for whether a given path
+    would be on a CIFS filesystem.
+
+    On systems without a ``mount`` command, or with no CIFS mounts, returns an
+    empty list.
+    """
+    exit_code, output = subprocess.getstatusoutput("mount")
+    # Not POSIX
+    if exit_code != 0:
+        return []
+
+    # (path, fstype) tuples, sorted by path length (longest first)
+    mount_info = sorted((line.split()[2:5:2] for line in output.splitlines()),
+                        key=lambda x: len(x[0]),
+                        reverse=True)
+    cifs_paths = [path for path, fstype in mount_info if fstype == 'cifs']
+    if cifs_paths == []:
+        return []
+
+    return [mount for mount in mount_info
+            if any(mount[0].startswith(path) for path in cifs_paths)]
+
+
+_cifs_table = _generate_cifs_table()
+
+
+def on_cifs(fname):
     """ Checks whether a PATH is on a CIFS filesystem mounted in a POSIX
     host (i.e., has the "mount" command).
 
@@ -246,17 +276,8 @@ def _on_cifs(fname):
     CIFS has partial support for symlinks that can break, causing misleading
     errors, so this test is used to disable them on such systems.
     """
-    exit_code, output = subprocess.getstatusoutput("mount")
-    # Not POSIX
-    if exit_code != 0:
-        return False
-
-    # (path, fstype) tuples, sorted by path length (longest first)
-    paths_types = sorted((line.split()[2:5:2] for line in output.splitlines()),
-                         key=lambda x: len(x[0]),
-                         reverse=True)
     # Only the first match counts
-    for fspath, fstype in paths_types:
+    for fspath, fstype in _cifs_table:
         if fname.startswith(fspath):
             return fstype == 'cifs'
     return False
@@ -314,7 +335,7 @@ def copyfile(originalfile, newfile, copy=False, create_new=False,
         hashmethod = config.get('execution', 'hash_method').lower()
 
     # Don't try creating symlinks on CIFS
-    if _on_cifs(newfile):
+    if copy is False and on_cifs(newfile):
         copy = True
 
     # Existing file
