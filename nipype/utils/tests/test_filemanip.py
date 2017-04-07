@@ -349,7 +349,7 @@ def test_cifs_check():
                     ('/', False)]
 
     orig_table = _cifs_table[:]
-    _cifs_table.clear()
+    _cifs_table[:] = []
 
     for target, _ in cifs_targets:
         assert on_cifs(target) is False
@@ -358,5 +358,5 @@ def test_cifs_check():
     for target, expected in cifs_targets:
         assert on_cifs(target) is expected
 
-    _cifs_table.clear()
+    _cifs_table[:] = []
     _cifs_table.extend(orig_table)
