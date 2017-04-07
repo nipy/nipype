@@ -239,7 +239,7 @@ def hash_timestamp(afile):
 
 
 def _generate_cifs_table():
-    """Construct a reverse-length ordered list of mount points that
+    """Construct a reverse-length-ordered list of mount points that
     fall under a CIFS mount.
 
     This precomputation allows efficient checking for whether a given path
@@ -258,8 +258,6 @@ def _generate_cifs_table():
                         key=lambda x: len(x[0]),
                         reverse=True)
     cifs_paths = [path for path, fstype in mount_info if fstype == 'cifs']
-    if cifs_paths == []:
-        return []
 
     return [mount for mount in mount_info
             if any(mount[0].startswith(path) for path in cifs_paths)]
@@ -269,14 +267,19 @@ _cifs_table = _generate_cifs_table()
 
 
 def on_cifs(fname):
-    """ Checks whether a PATH is on a CIFS filesystem mounted in a POSIX
-    host (i.e., has the "mount" command).
+    """ Checks whether a file path is on a CIFS filesystem mounted in a POSIX
+    host (i.e., has the ``mount`` command).
 
-    CIFS shares are how Docker mounts Windows host directories into containers.
-    CIFS has partial support for symlinks that can break, causing misleading
-    errors, so this test is used to disable them on such systems.
+    On Windows, Docker mounts host directories into containers through CIFS
+    shares, which has support for Minshall+French symlinks, or text files that
+    the CIFS driver exposes to the OS as symlinks.
+    We have found that under concurrent access to the filesystem, this feature
+    can result in failures to create or read recently-created symlinks,
+    leading to inconsistent behavior and ``FileNotFoundError``s.
+
+    This check is written to support disabling symlinks on CIFS shares.
     """
-    # Only the first match counts
+    # Only the first match (most recent parent) counts
     for fspath, fstype in _cifs_table:
         if fname.startswith(fspath):
             return fstype == 'cifs'
