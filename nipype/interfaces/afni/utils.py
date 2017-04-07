@@ -1239,10 +1239,8 @@ class UnifizeInputSpec(AFNICommandInputSpec):
         exists=True,
         copyfile=False)
     out_file = File(
-        name_template='%s_unif',
         desc='output image file name',
-        argstr='-prefix %s',
-        name_source='in_file')
+        argstr='-prefix %s')
     t2 = traits.Bool(
         desc='Treat the input as if it were T2-weighted, rather than '
              'T1-weighted. This processing is done simply by inverting '
@@ -1261,8 +1259,7 @@ class UnifizeInputSpec(AFNICommandInputSpec):
              'proportionally if the dataset voxel size differs significantly '
              'from 1 mm.',
         argstr='-Urad %s')
-    ssave = File(
-        name_template='%s_scale',
+    scale_file = File(
         desc='output file name to save the scale factor used at each voxel ',
         argstr='-ssave %s')
     no_duplo = traits.Bool(
@@ -1282,8 +1279,8 @@ class UnifizeInputSpec(AFNICommandInputSpec):
 
 
 class UnifizeOutputSpec(TraitedSpec):
-    out_file = File(desc='unifized file',
-                    exists=True)
+    scale_file = File(desc='scale factor file')
+    out_file = File(desc='unifized file', exists=True)
 
 
 class Unifize(AFNICommand):
@@ -1307,11 +1304,6 @@ class Unifize(AFNICommand):
     * Want to correct EPI datasets for nonuniformity?
       You can try the new and experimental [Mar 2017] '-EPI' option.
 
-    * Method: Obi-Wan's personal variant of Ziad's sneaky trick.
-      (If you want to know what his trick is, you'll have to ask him, or
-       read Obi-Wan's source code [which is a world of ecstasy and exaltation],
-       or just read all the way to the end of this help output.)
-
     * The principal motive for this program is for use in an image
       registration script, and it may or may not be useful otherwise.
 
@@ -1320,7 +1312,7 @@ class Unifize(AFNICommand):
       (In other words, we do not recommend the use of 3dUniformize.)
 
     For complete details, see the `3dUnifize Documentation.
-    <https://afni.nimh.nih.gov/pub../pub/dist/doc/program_help/3dUnifize.html>`_
+    <https://afni.nimh.nih.gov/pub/dist/doc/program_help/3dUnifize.html>`_
 
     Examples
     ========
