@@ -954,6 +954,54 @@ class MRIsConvert(FSCommand):
         return name + ext + "_converted." + self.inputs.out_datatype
 
 
+class MRIsCombineInputSpec(FSTraitedSpec):
+    """
+    Uses Freesurfer's mris_convert to combine two surface files into one.
+    """
+    in_file1 = File(exists=True, mandatory=True, position=0,
+                    argstr='--combinesurfs %s',
+                    desc='File to be combined with in_file2')
+    in_file2 = File(exists=True, mandatory=True, position=1,
+                    argstr='%s',
+                    desc='File to be combined with in_file1')
+    out_file = File(argstr='%s', position=-1, genfile=True,
+                    mandatory=True,
+                    desc='Output filename. Combined surfaces from in_file1 and '
+                         'in_file2.')
+
+
+class MRIsCombineOutputSpec(TraitedSpec):
+    """
+    Uses Freesurfer's mris_convert to combine two surface files into one.
+    """
+    out_file = File(exists=True, desc='Output filename. Combined surfaces from '
+                                      'in_file1 and in_file2.')
+
+
+class MRIsCombine(FSCommand):
+    """
+    Uses Freesurfer's mris_convert to combine two surface files into one.
+
+    For complete details, see the `mris_convert Documentation.
+    <https://surfer.nmr.mgh.harvard.edu/fswiki/mris_convert>`_
+
+    Example
+    -------
+
+    >>> import nipype.interfaces.freesurfer as fs
+    >>> mris = fs.MRIsConvert()
+    >>> mris.inputs.in_file1 = 'lh.pial'
+    >>> mris.inputs.in_file2 = 'rh.pial'
+    >>> mris.inputs.out_file = 'bh.pial'
+    >>> mris.cmdline  # doctest: +ALLOW_UNICODE
+    'mris_convert --combine_surfs lh.pial rh.pial bh.pial'
+    >>> mris.run()  # doctest: +SKIP
+    """
+    _cmd = 'mris_convert'
+    input_spec = MRIsCombineInputSpec
+    output_spec = MRIsCombineOutputSpec
+
+
 class MRITessellateInputSpec(FSTraitedSpec):
     """
     Uses Freesurfer's mri_tessellate to create surfaces by tessellating a given input volume
