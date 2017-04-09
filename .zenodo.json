@@ -39,6 +39,10 @@
         "orcid": "0000-0002-3982-4416"
       },
       {
+        "affiliation": "Shattuck Lab, UCLA Brain Mapping Center",
+        "name": "Wong, Jason"
+      },
+      {
         "affiliation": "Mayo Clinic, Neurology, Rochester, MN, USA",
         "name": "Dayan, Michael",
         "orcid": "0000-0002-2666-0969"
@@ -302,8 +306,8 @@
       },
       {
         "affiliation": "MIT",
-        "name": "Goncalves, Mathias", 
-      }
+        "name": "Goncalves, Mathias"
+      },
       {
         "affiliation": "MIT, HMS",
         "name": "Ghosh, Satrajit",
