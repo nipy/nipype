@@ -1003,7 +1003,11 @@ class MRIsCombine(FSCommand):
     
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        outputs['out_file'] = self.inputs.out_file
+        if any(self.inputs.out_file.startswith(pre) for pre in ['lh.', 'rh.']):
+            outputs['out_file'] = self.inputs.out_file
+        else:
+            outputs['out_file'] = 'rh.' + self.inputs.out_file
+        
         return outputs
 
 
