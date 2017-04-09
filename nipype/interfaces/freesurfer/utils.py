@@ -1004,6 +1004,7 @@ class MRIsCombine(FSCommand):
     def _list_outputs(self):
         outputs = self.output_spec().get()
         outputs['out_file'] = self.inputs.out_file
+        return outputs
 
 
 class MRITessellateInputSpec(FSTraitedSpec):
