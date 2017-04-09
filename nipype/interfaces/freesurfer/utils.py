@@ -989,25 +989,25 @@ class MRIsCombine(FSCommand):
     -------
 
     >>> import nipype.interfaces.freesurfer as fs
-    >>> mris = fs.MRIsConvert()
+    >>> mris = fs.MRIsCombine()
     >>> mris.inputs.in_file1 = 'lh.pial'
     >>> mris.inputs.in_file2 = 'rh.pial'
-    >>> mris.inputs.out_file = 'bh.pial'
+    >>> mris.inputs.out_file = 'out.stl'
     >>> mris.cmdline  # doctest: +ALLOW_UNICODE
-    'mris_convert --combine_surfs lh.pial rh.pial bh.pial'
+    'mris_convert --combinesurfs lh.pial rh.pial out.stl'
     >>> mris.run()  # doctest: +SKIP
     """
     _cmd = 'mris_convert'
     input_spec = MRIsCombineInputSpec
     output_spec = MRIsCombineOutputSpec
-    
+
     def _list_outputs(self):
         outputs = self.output_spec().get()
         if any(self.inputs.out_file.startswith(pre) for pre in ['lh.', 'rh.']):
             outputs['out_file'] = self.inputs.out_file
         else:
             outputs['out_file'] = 'lh.' + self.inputs.out_file
-        
+
         return outputs
 
 
