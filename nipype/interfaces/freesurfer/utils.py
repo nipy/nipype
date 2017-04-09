@@ -958,10 +958,10 @@ class MRIsCombineInputSpec(FSTraitedSpec):
     """
     Uses Freesurfer's mris_convert to combine two surface files into one.
     """
-    in_file1 = File(exists=True, mandatory=True, position=0,
+    in_file1 = File(exists=True, mandatory=True, position=1,
                     argstr='--combinesurfs %s',
                     desc='File to be combined with in_file2')
-    in_file2 = File(exists=True, mandatory=True, position=1,
+    in_file2 = File(exists=True, mandatory=True, position=2,
                     argstr='%s',
                     desc='File to be combined with in_file1')
     out_file = File(argstr='%s', position=-1, genfile=True,
