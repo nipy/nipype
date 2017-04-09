@@ -1000,6 +1000,10 @@ class MRIsCombine(FSCommand):
     _cmd = 'mris_convert'
     input_spec = MRIsCombineInputSpec
     output_spec = MRIsCombineOutputSpec
+    
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        outputs['out_file'] = self.inputs.out_file
 
 
 class MRITessellateInputSpec(FSTraitedSpec):
