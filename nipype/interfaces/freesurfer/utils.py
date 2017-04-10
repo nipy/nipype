@@ -958,16 +958,12 @@ class MRIsCombineInputSpec(FSTraitedSpec):
     """
     Uses Freesurfer's mris_convert to combine two surface files into one.
     """
-    in_file1 = File(exists=True, mandatory=True, position=1,
-                    argstr='--combinesurfs %s',
-                    desc='File to be combined with in_file2')
-    in_file2 = File(exists=True, mandatory=True, position=2,
-                    argstr='%s',
-                    desc='File to be combined with in_file1')
+    in_files = traits.List(File(Exists=True), maxlen=2, minlen=2,
+                           mandatory=True, position=1, argstr='--combinesurfs %s',
+                           desc='Two surfaces to be combined.')
     out_file = File(argstr='%s', position=-1, genfile=True,
                     mandatory=True,
-                    desc='Output filename. Combined surfaces from in_file1 and '
-                         'in_file2.')
+                    desc='Output filename. Combined surfaces from in_files.')
 
 
 class MRIsCombineOutputSpec(TraitedSpec):
@@ -975,7 +971,7 @@ class MRIsCombineOutputSpec(TraitedSpec):
     Uses Freesurfer's mris_convert to combine two surface files into one.
     """
     out_file = File(exists=True, desc='Output filename. Combined surfaces from '
-                                      'in_file1 and in_file2.')
+                                      'in_files.')
 
 
 class MRIsCombine(FSCommand):
@@ -990,11 +986,10 @@ class MRIsCombine(FSCommand):
 
     >>> import nipype.interfaces.freesurfer as fs
     >>> mris = fs.MRIsCombine()
-    >>> mris.inputs.in_file1 = 'lh.pial'
-    >>> mris.inputs.in_file2 = 'rh.pial'
-    >>> mris.inputs.out_file = 'out.stl'
+    >>> mris.inputs.in_files = ['lh.pial', 'rh.pial']
+    >>> mris.inputs.out_file = 'bh.pial'
     >>> mris.cmdline  # doctest: +ALLOW_UNICODE
-    'mris_convert --combinesurfs lh.pial rh.pial out.stl'
+    'mris_convert --combinesurfs lh.pial rh.pial bh.pial'
     >>> mris.run()  # doctest: +SKIP
     """
     _cmd = 'mris_convert'
@@ -1002,6 +997,12 @@ class MRIsCombine(FSCommand):
     output_spec = MRIsCombineOutputSpec
 
     def _list_outputs(self):
+        """
+        If the output file is not specified starting with 'lh.' or 'rh.',
+        FreeSurfer prepends 'lh.' to the filename. It never adds 'rh.', even if
+        both input files are from the right hemisphere. Output out_file must be
+        adjusted to accommodate this.
+        """
         outputs = self.output_spec().get()
         if any(self.inputs.out_file.startswith(pre) for pre in ['lh.', 'rh.']):
             outputs['out_file'] = self.inputs.out_file
