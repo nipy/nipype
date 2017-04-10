@@ -39,6 +39,7 @@ from ..utils.provenance import write_provenance
 from ..utils.misc import is_container, trim, str2bool
 from ..utils.filemanip import (md5, hash_infile, FileNotFoundError, hash_timestamp,
                                split_filename, to_str)
+import traitlets
 from .traits_extension import (
     traits, Undefined, TraitDictObject, TraitListObject, TraitError, isdefined,
     File, Directory, DictStrStr, has_metadata, ImageFile)
@@ -66,6 +67,7 @@ __docformat__ = 'restructuredtext'
 class Str(traits.Unicode):
     pass
 
+# TODO dj: do I need traitlets.Str? can I use just traitlets.Unicode? 
 traits.Str = Str
 
 class NipypeInterfaceError(Exception):
@@ -335,7 +337,7 @@ class InterfaceResult(object):
         return self._version
 
 
-class BaseTraitedSpec(traits.HasTraits):
+class BaseTraitedSpec(traitlets.HasTraits):
     """Provide a few methods necessary to support nipype interface api
 
     The inputs attribute of interfaces call certain methods that are not

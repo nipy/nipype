@@ -22,6 +22,7 @@ from builtins import filter, object, str, bytes
 import os
 
 # perform all external trait imports here
+import traitlets 
 import traits
 if traits.__version__ < '3.7.0':
     raise ImportError('Traits version 3.7.0 or higher must be installed')
@@ -34,7 +35,8 @@ from traits.api import BaseUnicode
 from traits.api import Unicode
 
 DictStrStr = traits.Dict((bytes, str), (bytes, str))
-Str = Unicode
+# TODO dj: is it used anywhere???
+Str = traitlets.Unicode
 
 class BaseFile(BaseUnicode):
     """ Defines a trait whose value must be the name of a file.
