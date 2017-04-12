@@ -516,7 +516,8 @@ head-motion correction)
 
 
 def sdc_fmb(name='fmb_correction', interp='Linear',
-            fugue_params=dict(smooth3d=2.0)):
+            fugue_params=dict(smooth3d=2.0),
+            fmm2b0=antreg_fmm2b0() ):
     """
     SDC stands for susceptibility distortion correction. FMB stands for
     fieldmap-based.
@@ -593,27 +594,7 @@ def sdc_fmb(name='fmb_correction', interp='Linear',
         input_names=['in_file', 'index'], output_names=['out_file'],
         function=time_avg), name='Baseline')
 
-    fmm2b0 = pe.Node(ants.Registration(output_warped_image=True),
-                     name="FMm_to_B0")
-    fmm2b0.inputs.transforms = ['Rigid'] * 2
-    fmm2b0.inputs.transform_parameters = [(1.0,)] * 2
-    fmm2b0.inputs.number_of_iterations = [[50], [20]]
-    fmm2b0.inputs.dimension = 3
-    fmm2b0.inputs.metric = ['Mattes', 'Mattes']
-    fmm2b0.inputs.metric_weight = [1.0] * 2
-    fmm2b0.inputs.radius_or_number_of_bins = [64, 64]
-    fmm2b0.inputs.sampling_strategy = ['Regular', 'Random']
-    fmm2b0.inputs.sampling_percentage = [None, 0.2]
-    fmm2b0.inputs.convergence_threshold = [1.e-5, 1.e-8]
-    fmm2b0.inputs.convergence_window_size = [20, 10]
-    fmm2b0.inputs.smoothing_sigmas = [[6.0], [2.0]]
-    fmm2b0.inputs.sigma_units = ['vox'] * 2
-    fmm2b0.inputs.shrink_factors = [[6], [1]]  # ,[1] ]
-    fmm2b0.inputs.use_estimate_learning_rate_once = [True] * 2
-    fmm2b0.inputs.use_histogram_matching = [True] * 2
-    fmm2b0.inputs.initial_moving_transform_com = 0
-    fmm2b0.inputs.collapse_output_transforms = True
-    fmm2b0.inputs.winsorize_upper_quantile = 0.995
+    #fmm2b0 = antreg_fmm2b0(ant_params)
 
     applyxfm = pe.Node(ants.ApplyTransforms(
         dimension=3, interpolation=interp), name='FMp_to_B0')
@@ -913,3 +894,54 @@ def _get_zoom(in_file, enc_dir):
         return zooms[2]
     else:
         raise ValueError('Wrong encoding direction string')
+
+def antreg_fmm2b0(alternatives=dict()):
+    """
+    This creates a pipeline node for ants registration with input defaults
+    appropriate for sdc_fmb(). Alternative or additional settings can be provided
+    as a dictionary.
+
+    Example
+    -------
+
+    >>> from nipype.workflows.dmri.fsl.artifacts import sdc_fmb
+    >>> fmm2b0 = antreg_fmm2b0({'initial_moving_transform_com': 1})
+    >>> fmb = sdc_fmb(fmm2b0=fmm2b0)
+    >>> fmb.inputs.inputnode.in_file = 'diffusion.nii'
+    >>> fmb.inputs.inputnode.in_ref = list(range(0, 30, 6))
+    >>> fmb.inputs.inputnode.in_mask = 'mask.nii'
+    >>> fmb.inputs.inputnode.bmap_mag = 'magnitude.nii'
+    >>> fmb.inputs.inputnode.bmap_pha = 'phase.nii'
+    >>> fmb.inputs.inputnode.settings = 'epi_param.txt'
+    >>> fmb.run() # doctest: +SKIP
+
+
+    """
+    fmm2b0 = pe.Node(ants.Registration(output_warped_image=True),
+                     name="FMm_to_B0")
+    defaults={
+       'transforms' : ['Rigid'] * 2,
+       'transform_parameters': [(1.0,)] * 2,
+       'number_of_iterations': [[50], [20]],
+       'dimension': 3,
+       'metric': ['Mattes', 'Mattes'],
+       'metric_weight': [1.0] * 2,
+       'radius_or_number_of_bins': [64, 64],
+       'sampling_strategy': ['Regular', 'Random'],
+       'sampling_percentage': [None, 0.2],
+       'convergence_threshold': [1.e-5, 1.e-8],
+       'convergence_window_size': [20, 10],
+       'smoothing_sigmas': [[6.0], [2.0]],
+       'sigma_units': ['vox'] * 2,
+       'shrink_factors': [[6], [1]],  # ,[1] ]
+       'use_estimate_learning_rate_once': [True] * 2,
+       'use_histogram_matching': [True] * 2,
+       'initial_moving_transform_com': 0,
+       'collapse_output_transforms': True,
+       'winsorize_upper_quantile': 0.995,
+    }
+    defaults.update(alternatives)
+    for k,v in defaults.iteritems():
+       setattr(fmm2b0.inputs,k,v)
+
+    return(fmm2b0)
