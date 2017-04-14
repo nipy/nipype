@@ -904,7 +904,7 @@ def antreg_fmm2b0(alternatives=dict()):
     Example
     -------
 
-    >>> from nipype.workflows.dmri.fsl.artifacts import sdc_fmb
+    >>> from nipype.workflows.dmri.fsl.artifacts import sdc_fmb, antreg_fmm2b0
     >>> fmm2b0 = antreg_fmm2b0({'initial_moving_transform_com': 1})
     >>> fmb = sdc_fmb(fmm2b0=fmm2b0)
     >>> fmb.inputs.inputnode.in_file = 'diffusion.nii'
