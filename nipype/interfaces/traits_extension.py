@@ -23,22 +23,17 @@ import os
 
 # perform all external trait imports here
 import traitlets 
-import traits
-if traits.__version__ < '3.7.0':
-    raise ImportError('Traits version 3.7.0 or higher must be installed')
+
 import traits.api as traits
-from traits.trait_handlers import TraitDictObject, TraitListObject
 from traits.trait_errors import TraitError
 from traits.trait_base import _Undefined, class_of
 
-from traits.api import BaseUnicode
-from traits.api import Unicode
 
-DictStrStr = traits.Dict((bytes, str), (bytes, str))
+DictStrStr = traitlets.Dict((bytes, str), (bytes, str))
 # TODO dj: is it used anywhere???
 Str = traitlets.Unicode
 
-class BaseFile(BaseUnicode):
+class BaseFile(traitlets.Unicode):
     """ Defines a trait whose value must be the name of a file.
     """
 
@@ -78,6 +73,8 @@ class BaseFile(BaseUnicode):
         super(BaseFile, self).__init__(value, **metadata)
 
     def validate(self, object, name, value):
+        # dj TODO: not sure about the "fast validator" in traitlets
+        # dj TODO: but traits.BaseUnicode also don't use the fast validator
         """ Validates that a specified value is valid for this trait.
 
             Note: The 'fast validator' version performs this check in C.
@@ -136,7 +133,7 @@ class File (BaseFile):
 # -------------------------------------------------------------------------------
 
 
-class BaseDirectory (BaseUnicode):
+class BaseDirectory (traitlets.Unicode):
     """
     Defines a trait whose value must be the name of a directory.
     """
