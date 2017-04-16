@@ -211,7 +211,7 @@ class Level1Design(BaseInterface):
                     try:
                         ev_parameters['temporalderiv'] = int(bool(ev_parameters.pop('derivs')))
                     except KeyError:
-                        pass
+                        ev_parameters['temporalderiv'] = False
                     if ev_parameters['temporalderiv']:
                         evname.append(name + 'TD')
                         num_evs[1] += 1
@@ -395,7 +395,7 @@ class Level1Design(BaseInterface):
                         try:
                             ev_parameters['temporalderiv'] = int(bool(ev_parameters.pop('derivs')))
                         except KeyError:
-                            pass
+                            ev_parameters['temporalderiv'] = False
                         if ev_parameters['temporalderiv']:
                             evname.append(name + 'TD')
                     outputs['ev_files'][runno].append(
