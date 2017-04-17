@@ -37,16 +37,17 @@ class Level1DesignInputSpec(BaseInterfaceInputSpec):
                               desc=('Session specific information generated '
                                     'by ``modelgen.SpecifyModel``'))
     bases = traits.Either(
-        traits.Dict(traits.Enum(
-            'dgamma'), traits.Dict(traits.Enum('derivs'), traits.Bool)),
+        traits.Dict(traits.Enum('dgamma'), traits.Dict(
+            traits.Enum('derivs'), traits.Bool)),
         traits.Dict(traits.Enum('gamma'), traits.Dict(
-                    traits.Enum('derivs', 'gammasigma', 'gammadelay'))),
-        traits.Dict(traits.Enum('custom'), traits.Dict(traits.Dict(traits.Enum('bfcustompath'), traits.Str))),
+            traits.Enum('derivs', 'gammasigma', 'gammadelay'))),
+        traits.Dict(traits.Enum('custom'), traits.Dict(
+            traits.Enum('bfcustompath'), traits.Str)),
         traits.Dict(traits.Enum('none'), traits.Dict()),
         traits.Dict(traits.Enum('none'), traits.Enum(None)),
         mandatory=True,
         desc=("name of basis function and options e.g., "
-              "{'dgamma': {'derivs': True}}"))
+              "{'dgamma': {'derivs': True}}"),)
     orthogonalization = traits.Dict(traits.Int, traits.Dict(traits.Int,
         traits.Either(traits.Bool,traits.Int)),
         desc=("which regressors to make orthogonal e.g., "
@@ -210,7 +211,7 @@ class Level1Design(BaseInterface):
                     try:
                         ev_parameters['temporalderiv'] = int(bool(ev_parameters.pop('derivs')))
                     except KeyError:
-                        pass
+                        ev_parameters['temporalderiv'] = False
                     if ev_parameters['temporalderiv']:
                         evname.append(name + 'TD')
                         num_evs[1] += 1
@@ -394,7 +395,7 @@ class Level1Design(BaseInterface):
                         try:
                             ev_parameters['temporalderiv'] = int(bool(ev_parameters.pop('derivs')))
                         except KeyError:
-                            pass
+                            ev_parameters['temporalderiv'] = False
                         if ev_parameters['temporalderiv']:
                             evname.append(name + 'TD')
                     outputs['ev_files'][runno].append(
