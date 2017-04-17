@@ -21,7 +21,7 @@ from ... import logging
 from ...utils.filemanip import fname_presuffix, split_filename
 from ..base import (TraitedSpec, File, traits, OutputMultiPath, isdefined,
                     CommandLine, CommandLineInputSpec)
-from .base import (FSCommand, FSTraitedSpec,
+from .base import (FSCommand, FSTraitedSpec, FSSurfaceCommand,
                    FSScriptCommand, FSScriptOutputSpec,
                    FSTraitedSpecOpenMP, FSCommandOpenMP)
 __docformat__ = 'restructuredtext'
@@ -974,7 +974,7 @@ class MRIsCombineOutputSpec(TraitedSpec):
                                       'in_files.')
 
 
-class MRIsCombine(FSCommand):
+class MRIsCombine(FSSurfaceCommand):
     """
     Uses Freesurfer's mris_convert to combine two surface files into one.
 
@@ -997,19 +997,28 @@ class MRIsCombine(FSCommand):
     output_spec = MRIsCombineOutputSpec
 
     def _list_outputs(self):
-        """
-        If the output file is not specified starting with 'lh.' or 'rh.',
-        FreeSurfer prepends 'lh.' to the filename. It never adds 'rh.', even if
-        both input files are from the right hemisphere. Output out_file must be
-        adjusted to accommodate this.
-        """
-        outputs = self.output_spec().get()
-        if any(self.inputs.out_file.startswith(pre) for pre in ['lh.', 'rh.']):
-            outputs['out_file'] = self.inputs.out_file
-        else:
-            outputs['out_file'] = 'lh.' + self.inputs.out_file
-
+        outputs = self._outputs().get()
+        outputs['out_file'] = self._associated_file(self.inputs.in_files[0],
+                                                    self.inputs.out_file)
         return outputs
+
+    @staticmethod
+    def _associated_file(in_file, out_name):
+        """Unlike the standard _associated_file, which uses the prefix from
+        in_file, in MRIsCombine, it uses 'lh.' as the prefix for the output
+        file no matter what the inputs are.
+        """
+        path, base = os.path.split(out_name)
+        if path == '':
+            _, in_file = os.path.split(in_file)
+            hemis = ('lh.', 'rh.')
+            if base[:3] not in hemis:
+                base = 'lh.' + base
+        return os.path.abspath(os.path.join(path, base))
+
+    def _normalize_filenames(self):
+        if isdefined(self.inputs.out_file):
+            self.inputs.out_file = os.path.abspath(self.inputs.out_file)
 
 
 class MRITessellateInputSpec(FSTraitedSpec):
