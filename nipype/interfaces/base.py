@@ -39,7 +39,7 @@ from ..utils.provenance import write_provenance
 from ..utils.misc import is_container, trim, str2bool
 from ..utils.filemanip import (md5, hash_infile, FileNotFoundError, hash_timestamp,
                                split_filename, to_str)
-import traitlets
+import traitlets, pdb
 from .traits_extension import (
     traits, Undefined, TraitDictObject, TraitListObject, TraitError, isdefined,
     File, Directory, DictStrStr, has_metadata, ImageFile)
@@ -365,26 +365,34 @@ class BaseTraitedSpec(traitlets.HasTraits):
         # therefore these args were being ignored.
         # super(TraitedSpec, self).__init__(*args, **kwargs)
         super(BaseTraitedSpec, self).__init__(**kwargs)
-        traits.push_exception_handler(reraise_exceptions=True)
+        # dj TODO: not sure if in traitlets
+        #traits.push_exception_handler(reraise_exceptions=True)
         undefined_traits = {}
-        for trait in self.copyable_trait_names():
+        for trait in self.class_trait_names():
             if not self.traits()[trait].usedefault:
                 undefined_traits[trait] = Undefined
-        self.trait_set(trait_change_notify=False, **undefined_traits)
+        #self.trait_set(trait_change_notify=False, **undefined_traits)#dj remove
+        self.trait_change_notify = False
+        for (key,val) in undefined_traits.items():
+            self.key = val
         self._generate_handlers()
-        self.trait_set(**kwargs)
+        #self.set(**kwargs)
+        for (key, val) in kwargs.items():
+            self.key = val
+
 
     def items(self):
         """ Name, trait generator for user modifiable traits
         """
-        for name in sorted(self.copyable_trait_names()):
+        for name in sorted(self.class_trait_names()):
             yield name, self.traits()[name]
 
     def __repr__(self):
         """ Return a well-formatted representation of the traits """
         outstr = []
-        for name, value in sorted(self.trait_get().items()):
-            outstr.append('%s = %s' % (name, value))
+        #for name, value in sorted(self.trait_get().items()):
+        for name in sorted(self.class_trait_names()):
+            outstr.append('%s = %s' % (name, self.__getattribute__(name)))
         return '\n{}\n'.format('\n'.join(outstr))
 
     def _generate_handlers(self):
@@ -490,7 +498,11 @@ class BaseTraitedSpec(traitlets.HasTraits):
         Augments the trait get function to return a dictionary without
         notification handles
         """
-        out = super(BaseTraitedSpec, self).get(**kwargs)
+        #pdb.set_trace()
+        #out = super(BaseTraitedSpec, self).get(**kwargs)
+        out = {}
+        for key in self.class_trait_names():
+            out[key] = self.__getattribute__(key)
         out = self._clean_container(out, Undefined)
         return out
 
@@ -508,7 +520,9 @@ class BaseTraitedSpec(traitlets.HasTraits):
     def _clean_container(self, object, undefinedval=None, skipundefined=False):
         """Convert a traited obejct into a pure python representation.
         """
-        if isinstance(object, TraitDictObject) or isinstance(object, dict):
+        # dj TODO: it's not enough to check isinstance(object, dict) ?
+        # if isinstance(object, TraitDictObject) or isinstance(object, dict):
+        if isinstance(object, dict):
             out = {}
             for key, val in list(object.items()):
                 if isdefined(val):
@@ -516,8 +530,10 @@ class BaseTraitedSpec(traitlets.HasTraits):
                 else:
                     if not skipundefined:
                         out[key] = undefinedval
-        elif (isinstance(object, TraitListObject) or
-                isinstance(object, list) or isinstance(object, tuple)):
+        # dj TODO: the same as in dict
+        #elif (isinstance(object, TraitListObject) or
+        #        isinstance(object, list) or isinstance(object, tuple)):
+        elif (isinstance(object, list) or isinstance(object, tuple)): 
             out = []
             for val in object:
                 if isdefined(val):
