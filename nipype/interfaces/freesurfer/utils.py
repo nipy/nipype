@@ -1015,7 +1015,6 @@ class MRIsCombine(FSSurfaceCommand):
         """
         path, base = os.path.split(out_name)
         if path == '':
-            _, in_file = os.path.split(in_file)
             hemis = ('lh.', 'rh.')
             if base[:3] not in hemis:
                 base = 'lh.' + base
