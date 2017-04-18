@@ -22,11 +22,13 @@ from builtins import filter, object, str, bytes
 import os
 
 # perform all external trait imports here
-import traitlets 
+import traitlets, pdb 
 
 import traits.api as traits
+from traits.trait_handlers import TraitDictObject, TraitListObject
 from traits.trait_errors import TraitError
-from traits.trait_base import _Undefined, class_of
+from traits.trait_base import _Undefined
+
 
 
 DictStrStr = traitlets.Dict((bytes, str), (bytes, str))
@@ -72,14 +74,14 @@ class BaseFile(traitlets.Unicode):
 
         super(BaseFile, self).__init__(value, **metadata)
 
-    def validate(self, object, name, value):
+    def validate(self, object, value):
         # dj TODO: not sure about the "fast validator" in traitlets
         # dj TODO: but traits.BaseUnicode also don't use the fast validator
         """ Validates that a specified value is valid for this trait.
 
             Note: The 'fast validator' version performs this check in C.
         """
-        validated_value = super(BaseFile, self).validate(object, name, value)
+        validated_value = super(BaseFile, self).validate(object, value)
         if not self.exists:
             return validated_value
         elif os.path.isfile(value):
@@ -90,7 +92,7 @@ class BaseFile(traitlets.Unicode):
                      ' \'{}\' does not exist.'.format(name, class_of(object),
                                                       self.info_text, value))
 
-        self.error(object, name, value)
+        self.error(object, value)
 
 
 class File (BaseFile):
@@ -98,7 +100,8 @@ class File (BaseFile):
     Defines a trait whose value must be the name of a file.
     Disables the default C-level fast validator.
     """
-
+    # dj TODO: does this class change anything comparing to BaseFile?
+    # dj TODO: can I remove?
     def __init__(self, value='', filter=None, auto_set=False,
                  entries=0, exists=False, **metadata):
         """ Creates a File trait.
@@ -169,23 +172,24 @@ class BaseDirectory (traitlets.Unicode):
 
         super(BaseDirectory, self).__init__(value, **metadata)
 
-    def validate(self, object, name, value):
+    def validate(self, object, value):
         """ Validates that a specified value is valid for this trait.
 
             Note: The 'fast validator' version performs this check in C.
         """
+        pdb.set_trace()
         if isinstance(value, (str, bytes)):
             if not self.exists:
                 return value
             if os.path.isdir(value):
                 return value
             else:
-                raise TraitError(
-                    args='The trait \'{}\' of {} instance is {}, but the path '
-                         ' \'{}\' does not exist.'.format(name,
-                                    class_of(object), self.info_text, value))
+                raise traitlets.TraitError(
+                    args='The trait \'{}\' of a/an {} instance is {}, but the path '
+                         ' \'{}\' does not exist.'.format(name, object,
+                                                          self.info_text, value))
 
-        self.error(object, name, value)
+        self.error(object, value)
 
 
 class Directory (BaseDirectory):
