@@ -981,6 +981,11 @@ class MRIsCombine(FSSurfaceCommand):
     For complete details, see the `mris_convert Documentation.
     <https://surfer.nmr.mgh.harvard.edu/fswiki/mris_convert>`_
 
+    If given an out_file that does not begin with 'lh.' or 'rh.',
+    mris_convert will prepend 'lh.' to the file name.
+    To avoid this behavior, consider setting out_file = './<filename>', or
+    leaving out_file blank.
+
     Example
     -------
 

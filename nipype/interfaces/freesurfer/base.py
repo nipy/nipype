@@ -169,17 +169,14 @@ class FSSurfaceCommand(FSCommand):
     output filename. Output out_file must be adjusted to accommodate this.
     By including the full path in the filename, we can also avoid this behavior.
     """
-    def __init__(self, **inputs):
-        super(FSSurfaceCommand, self).__init__(**inputs)
-
     def _get_filecopy_info(self):
-        """Filename normalization routine to perform only when run in Node
-        context
-        """
         self._normalize_filenames()
         return super(FSSurfaceCommand, self)._get_filecopy_info()
 
     def _normalize_filenames(self):
+        """Filename normalization routine to perform only when run in Node
+        context
+        """
         pass
 
     @staticmethod
@@ -188,10 +185,12 @@ class FSSurfaceCommand(FSCommand):
 
         Use in_file prefix to indicate hemisphere for out_name, rather than
         inspecting the surface data structure.
+        Also, output to in_file's directory if path information not provided
+        for out_name.
         """
         path, base = os.path.split(out_name)
         if path == '':
-            _, in_file = os.path.split(in_file)
+            path, in_file = os.path.split(in_file)
             hemis = ('lh.', 'rh.')
             if in_file[:3] in hemis and base[:3] not in hemis:
                 base = in_file[:3] + base
