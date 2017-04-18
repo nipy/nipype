@@ -217,6 +217,15 @@ class Realign(SPMCommand):
         """validate spm realign options if set to None ignore
         """
         einputs = super(Realign, self)._parse_inputs()
+        is_gz = lambda x: x.endswith('.gz')
+        if isdefined(self.inputs.in_files):
+            if isinstance(self.inputs.in_files, list):
+                for imgf in self.inputs.in_files:
+                    if is_gz(imgf):
+                        raise TypeError('Input files must be uncompressed')
+            else:
+                if is_gz(self.inputs.in_files):
+                    raise TypeError('Input files must be uncompressed')
         return [{'%s' % (self.inputs.jobtype): einputs[0]}]
 
     def _list_outputs(self):
