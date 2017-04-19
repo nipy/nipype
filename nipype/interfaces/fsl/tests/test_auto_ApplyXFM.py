@@ -10,7 +10,6 @@ def test_ApplyXFM_inputs():
     xor=['apply_xfm'],
     ),
     apply_xfm=dict(argstr='-applyxfm',
-    requires=['in_matrix_file'],
     usedefault=True,
     ),
     args=dict(argstr='%s',

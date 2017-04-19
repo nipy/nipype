@@ -137,8 +137,15 @@ Execution
     schedulers the default is set to 2 seconds.
 
 *xvfb_max_wait*
-    Maximum time (in seconds) to wait for Xvfb to start, if the _redirect_x parameter of an Interface is True.
+    Maximum time (in seconds) to wait for Xvfb to start, if the _redirect_x
+    parameter of an Interface is True.
 
+*crashfile_format*
+    This option controls the file type of any crashfile generated. Pklz
+    crashfiles allow interactive debugging and rerunning of nodes, while text
+    crashfiles allow portability across machines and shorter load time.
+    (possible values: ``pklz`` and ``txt``; default value: ``pklz``)
+    
 Example
 ~~~~~~~
 

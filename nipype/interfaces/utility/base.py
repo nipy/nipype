@@ -99,15 +99,33 @@ class IdentityInterface(IOBase):
 class MergeInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
     axis = traits.Enum('vstack', 'hstack', usedefault=True,
                        desc='direction in which to merge, hstack requires same number of elements in each input')
-    no_flatten = traits.Bool(False, usedefault=True, desc='append to outlist instead of extending in vstack mode')
+    no_flatten = traits.Bool(False, usedefault=True,
+                             desc='append to outlist instead of extending in vstack mode')
+    ravel_inputs = traits.Bool(False, usedefault=True,
+                               desc='ravel inputs when no_flatten is False')
 
 
 class MergeOutputSpec(TraitedSpec):
     out = traits.List(desc='Merged output')
 
 
+def _ravel(in_val):
+    if not isinstance(in_val, list):
+        return in_val
+    flat_list = []
+    for val in in_val:
+        raveled_val = _ravel(val)
+        if isinstance(raveled_val, list):
+            flat_list.extend(raveled_val)
+        else:
+            flat_list.append(raveled_val)
+    return flat_list
+
+
 class Merge(IOBase):
     """Basic interface class to merge inputs into a single list
+
+    ``Merge(1)`` will merge a list of lists
 
     Examples
     --------
@@ -121,6 +139,25 @@ class Merge(IOBase):
     >>> out.outputs.out
     [1, 2, 5, 3]
 
+    >>> merge = Merge(1)
+    >>> merge.inputs.in1 = [1, [2, 5], 3]
+    >>> out = merge.run()
+    >>> out.outputs.out
+    [1, [2, 5], 3]
+
+    >>> merge = Merge(1)
+    >>> merge.inputs.in1 = [1, [2, 5], 3]
+    >>> merge.inputs.ravel_inputs = True
+    >>> out = merge.run()
+    >>> out.outputs.out
+    [1, 2, 5, 3]
+
+    >>> merge = Merge(1)
+    >>> merge.inputs.in1 = [1, [2, 5], 3]
+    >>> merge.inputs.no_flatten = True
+    >>> out = merge.run()
+    >>> out.outputs.out
+    [[1, [2, 5], 3]]
     """
     input_spec = MergeInputSpec
     output_spec = MergeOutputSpec
@@ -128,26 +165,34 @@ class Merge(IOBase):
     def __init__(self, numinputs=0, **inputs):
         super(Merge, self).__init__(**inputs)
         self._numinputs = numinputs
-        add_traits(self.inputs, ['in%d' % (i + 1) for i in range(numinputs)])
+        if numinputs >= 1:
+            input_names = ['in%d' % (i + 1) for i in range(numinputs)]
+        else:
+            input_names = []
+        add_traits(self.inputs, input_names)
 
     def _list_outputs(self):
         outputs = self._outputs().get()
         out = []
-        if self.inputs.axis == 'vstack':
-            for idx in range(self._numinputs):
-                value = getattr(self.inputs, 'in%d' % (idx + 1))
-                if isdefined(value):
-                    if isinstance(value, list) and not self.inputs.no_flatten:
-                        out.extend(value)
-                    else:
-                        out.append(value)
+
+        if self._numinputs < 1:
+            return outputs
         else:
-            for i in range(len(filename_to_list(self.inputs.in1))):
-                out.insert(i, [])
-                for j in range(self._numinputs):
-                    out[i].append(filename_to_list(getattr(self.inputs, 'in%d' % (j + 1)))[i])
-        if out:
-            outputs['out'] = out
+            getval = lambda idx: getattr(self.inputs, 'in%d' % (idx + 1))
+            values = [getval(idx) for idx in range(self._numinputs)
+                      if isdefined(getval(idx))]
+
+        if self.inputs.axis == 'vstack':
+            for value in values:
+                if isinstance(value, list) and not self.inputs.no_flatten:
+                    out.extend(_ravel(value) if self.inputs.ravel_inputs else
+                               value)
+                else:
+                    out.append(value)
+        else:
+            lists = [filename_to_list(val) for val in values]
+            out = [[val[i] for val in lists] for i in range(len(lists[0]))]
+        outputs['out'] = out
         return outputs
 
 

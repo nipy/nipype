@@ -209,7 +209,8 @@ def test_namesource(setup_file):
                        position=2)
         doo = nib.File(exists=True, argstr="%s", position=1)
         goo = traits.Int(argstr="%d", position=4)
-        poo = nib.File(name_source=['goo'], hash_files=False, argstr="%s", position=3)
+        poo = nib.File(name_source=['goo'], hash_files=False, argstr="%s",
+                       position=3)
 
     class TestName(nib.CommandLine):
         _cmd = "mycommand"
@@ -218,6 +219,7 @@ def test_namesource(setup_file):
     testobj.inputs.doo = tmp_infile
     testobj.inputs.goo = 99
     assert '%s_generated' % nme in testobj.cmdline
+    assert '%d_generated' % testobj.inputs.goo in testobj.cmdline
     testobj.inputs.moo = "my_%s_template"
     assert 'my_%s_template' % nme in testobj.cmdline
 
