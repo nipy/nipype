@@ -23,16 +23,21 @@ import numpy as np
 from ...utils.filemanip import (fname_presuffix, filename_to_list,
                                 list_to_filename, split_filename)
 from ..base import (OutputMultiPath, TraitedSpec, isdefined,
-                    traits, InputMultiPath, File)
+                    traits, InputMultiPath, File, ImageFile)
 from .base import (SPMCommand, scans_for_fname, func_is_3d,
                    scans_for_fnames, SPMCommandInputSpec)
 
 __docformat__ = 'restructuredtext'
 
 
+
 class SliceTimingInputSpec(SPMCommandInputSpec):
-    in_files = InputMultiPath(traits.Either(traits.List(File(exists=True)),
-                                            File(exists=True)), field='scans',
+    in_files = InputMultiPath(traits.Either(traits.List(ImageFile(
+                                                             exists=True,
+                                                             compressed=False)),
+                                            ImageFile(exists=True,
+                                                      compressed=False)),
+                                            field='scans',
                               desc='list of filenames to apply slice timing',
                               mandatory=True, copyfile=False)
     num_slices = traits.Int(field='nslices',
@@ -116,8 +121,10 @@ class SliceTiming(SPMCommand):
 
 
 class RealignInputSpec(SPMCommandInputSpec):
-    in_files = InputMultiPath(traits.Either(traits.List(File(exists=True)),
-                                            File(exists=True)), field='data',
+    in_files = InputMultiPath(traits.Either(traits.List(ImageFile(exists=True,
+                                                            compressed=False)),
+                                            ImageFile(exists=True,
+                                            compressed=False)), field='data',
                               mandatory=True, copyfile=True,
                               desc='list of filenames to realign')
     jobtype = traits.Enum('estwrite', 'estimate', 'write',
@@ -217,15 +224,6 @@ class Realign(SPMCommand):
         """validate spm realign options if set to None ignore
         """
         einputs = super(Realign, self)._parse_inputs()
-        is_gz = lambda x: x.endswith('.gz')
-        if isdefined(self.inputs.in_files):
-            if isinstance(self.inputs.in_files, list):
-                for imgf in self.inputs.in_files:
-                    if is_gz(imgf):
-                        raise TypeError('Input files must be uncompressed')
-            else:
-                if is_gz(self.inputs.in_files):
-                    raise TypeError('Input files must be uncompressed')
         return [{'%s' % (self.inputs.jobtype): einputs[0]}]
 
     def _list_outputs(self):
@@ -279,11 +277,12 @@ class Realign(SPMCommand):
 
 
 class CoregisterInputSpec(SPMCommandInputSpec):
-    target = File(exists=True, field='ref', mandatory=True,
-                  desc='reference file to register to', copyfile=False)
-    source = InputMultiPath(File(exists=True), field='source',
-                            desc='file to register to target', copyfile=True,
-                            mandatory=True)
+    target = ImageFile(exists=True, compressed=False, mandatory=True,
+                  field='ref', desc='reference file to register to',
+                  copyfile=False)
+    source = InputMultiPath(ImageFile(exists=True, compressed=False),
+                            field='source', desc='file to register to target',
+                            copyfile=True, mandatory=True)
     jobtype = traits.Enum('estwrite', 'estimate', 'write',
                           desc='one of: estimate, write, estwrite',
                           usedefault=True)
@@ -401,9 +400,9 @@ class NormalizeInputSpec(SPMCommandInputSpec):
                     desc='template file to normalize to',
                     mandatory=True, xor=['parameter_file'],
                     copyfile=False)
-    source = InputMultiPath(File(exists=True), field='subj.source',
+    source = InputMultiPath(ImageFile(exists=True, compressed=False),
+                            field='subj.source', xor=['parameter_file'],
                             desc='file to normalize to template',
-                            xor=['parameter_file'],
                             mandatory=True, copyfile=True)
     jobtype = traits.Enum('estwrite', 'est', 'write', usedefault=True,
                           desc='Estimate, Write or do both')
@@ -564,18 +563,19 @@ class Normalize(SPMCommand):
 
 
 class Normalize12InputSpec(SPMCommandInputSpec):
-    image_to_align = File(exists=True, field='subj.vol',
+    image_to_align = ImageFile(exists=True, compressed=False, field='subj.vol',
                           desc=('file to estimate normalization parameters '
                                 'with'),
                           xor=['deformation_file'],
                           mandatory=True, copyfile=True)
     apply_to_files = InputMultiPath(
-        traits.Either(File(exists=True), traits.List(File(exists=True))),
+        traits.Either(ImageFile(exists=True, compressed=False),
+                      traits.List(ImageFile(exists=True, compressed=False))),
         field='subj.resample',
         desc='files to apply transformation to',
         copyfile=True)
-    deformation_file = File(field='subj.def', mandatory=True,
-                            xor=['image_to_align', 'tpm'],
+    deformation_file = ImageFile(field='subj.def', mandatory=True,
+                            compressed=False, xor=['image_to_align', 'tpm'],
                             desc=('file y_*.nii containing 3 deformation '
                                   'fields for the deformation in x, y and z '
                                   'dimension'),
@@ -730,7 +730,7 @@ class Normalize12(SPMCommand):
 
 
 class SegmentInputSpec(SPMCommandInputSpec):
-    data = InputMultiPath(File(exists=True), field='data',
+    data = InputMultiPath(ImageFile(exists=True, compressed=False), field='data',
                           desc='one scan per subject',
                           copyfile=False, mandatory=True)
     gm_output_type = traits.List(traits.Bool(), minlen=3, maxlen=3,
@@ -899,7 +899,7 @@ class Segment(SPMCommand):
 
 
 class NewSegmentInputSpec(SPMCommandInputSpec):
-    channel_files = InputMultiPath(File(exists=True),
+    channel_files = InputMultiPath(ImageFile(exists=True, compressed=False),
                                    desc="A list of files to be segmented",
                                    field='channel', copyfile=False,
                                    mandatory=True)
@@ -911,7 +911,8 @@ class NewSegmentInputSpec(SPMCommandInputSpec):
             - which maps to save (Corrected, Field) - a tuple of two boolean values""",
                                 field='channel')
     tissues = traits.List(
-        traits.Tuple(traits.Tuple(File(exists=True), traits.Int()),
+        traits.Tuple(traits.Tuple(ImageFile(exists=True, compressed=False),
+                                  traits.Int()),
                      traits.Int(), traits.Tuple(traits.Bool, traits.Bool),
                      traits.Tuple(traits.Bool, traits.Bool)),
         desc="""A list of tuples (one per tissue) with the following fields:
@@ -1102,8 +1103,8 @@ class NewSegment(SPMCommand):
 
 
 class SmoothInputSpec(SPMCommandInputSpec):
-    in_files = InputMultiPath(File(exists=True), field='data',
-                              desc='list of files to smooth',
+    in_files = InputMultiPath(ImageFile(exists=True, compressed=False),
+                              field='data', desc='list of files to smooth',
                               mandatory=True, copyfile=False)
     fwhm = traits.Either(traits.List(traits.Float(), minlen=3, maxlen=3),
                          traits.Float(), field='fwhm',
@@ -1165,7 +1166,8 @@ class Smooth(SPMCommand):
 
 
 class DARTELInputSpec(SPMCommandInputSpec):
-    image_files = traits.List(traits.List(File(exists=True)),
+    image_files = traits.List(traits.List(ImageFile(exists=True,
+                                                    compressed=False)),
                               desc="A list of files to be segmented",
                               field='warp.images', copyfile=False,
                               mandatory=True)
@@ -1281,15 +1283,14 @@ class DARTEL(SPMCommand):
 
 
 class DARTELNorm2MNIInputSpec(SPMCommandInputSpec):
-    template_file = File(exists=True,
-                         desc="DARTEL template",
-                         field='mni_norm.template', copyfile=False,
-                         mandatory=True)
-    flowfield_files = InputMultiPath(File(exists=True),
+    template_file = ImageFile(exists=True, compressed=False,
+                         desc="DARTEL template", field='mni_norm.template',
+                         copyfile=False, mandatory=True)
+    flowfield_files = InputMultiPath(ImageFile(exists=True, compressed=False),
                                      desc="DARTEL flow fields u_rc1*",
                                      field='mni_norm.data.subjs.flowfields',
                                      mandatory=True)
-    apply_to_files = InputMultiPath(File(exists=True),
+    apply_to_files = InputMultiPath(ImageFile(exists=True, compressed=False),
                                     desc="Files to apply the transform to",
                                     field='mni_norm.data.subjs.images',
                                     mandatory=True, copyfile=False)
@@ -1379,11 +1380,11 @@ class DARTELNorm2MNI(SPMCommand):
 
 
 class CreateWarpedInputSpec(SPMCommandInputSpec):
-    image_files = InputMultiPath(File(exists=True),
+    image_files = InputMultiPath(ImageFile(exists=True, compressed=False),
                                  desc="A list of files to be warped",
                                  field='crt_warped.images', copyfile=False,
                                  mandatory=True)
-    flowfield_files = InputMultiPath(File(exists=True),
+    flowfield_files = InputMultiPath(ImageFile(exists=True, compressed=False),
                                      desc="DARTEL flow fields u_rc1*",
                                      field='crt_warped.flowfields',
                                      copyfile=False,
@@ -1449,10 +1450,10 @@ class CreateWarped(SPMCommand):
 
 
 class ApplyDeformationFieldInputSpec(SPMCommandInputSpec):
-    in_files = InputMultiPath(File(exists=True), mandatory=True,
-                              field='fnames')
+    in_files = InputMultiPath(ImageFile(exists=True, compressed=False),
+                              mandatory=True, field='fnames')
     deformation_field = File(exists=True, mandatory=True, field='comp{1}.def')
-    reference_volume = File(exists=True, mandatory=True,
+    reference_volume = ImageFile(exists=True, mandatory=True, compressed=False,
                             field='comp{2}.id.space')
     interp = traits.Range(low=0, high=7, field='interp',
                           desc='degree of b-spline used for interpolation')
@@ -1495,12 +1496,12 @@ class ApplyDeformations(SPMCommand):
 class VBMSegmentInputSpec(SPMCommandInputSpec):
 
     in_files = InputMultiPath(
-        File(exists=True),
+        ImageFile(exists=True, compressed=False),
         desc="A list of files to be segmented",
         field='estwrite.data', copyfile=False, mandatory=True)
 
-    tissues = File(
-        exists=True, field='estwrite.tpm',
+    tissues = ImageFile(
+        exists=True, compressed=False, field='estwrite.tpm',
         desc='tissue probability map')
     gaussians_per_class = traits.Tuple(
         (2, 2, 2, 3, 4, 2), *([traits.Int()] * 6),
@@ -1527,8 +1528,8 @@ class VBMSegmentInputSpec(SPMCommandInputSpec):
 
     spatial_normalization = traits.Enum(
         'high', 'low', usedefault=True,)
-    dartel_template = File(
-        exists=True,
+    dartel_template = ImageFile(
+        exists=True, compressed=False,
         field='estwrite.extopts.dartelwarp.normhigh.darteltpm')
     use_sanlm_denoising_filter = traits.Range(
         0, 2, 2, usedefault=True, field='estwrite.extopts.sanlm',

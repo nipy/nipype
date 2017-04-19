@@ -218,6 +218,38 @@ class Directory (BaseDirectory):
         super(Directory, self).__init__(value, auto_set, entries, exists,
                                         **metadata)
 
+class ImageFile(File):
+    """ Defines a trait of specific neuroimaging files """
+
+    def __init__(self, value='', filter=None, auto_set=False, entries=0,
+                 exists=False, types=['nii', 'hdr', 'img'], compressed=True,
+                 **metadata):
+        """ Trait handles neuroimaging files.
+
+        Parameters
+        ----------
+        types : list
+            The accepted file-types
+        compressed : boolean
+            Indicates whether the file-type can compressed
+        """
+        self.types = types
+        self.compressed = compressed
+        super(ImageFile, self).__init__(value, filter, auto_set, entries,
+                                        exists, **metadata)
+
+    def validate(self, object, name, value):
+        """ Validates that a specified value is valid for this trait.
+        """
+        validated_value = super(ImageFile, self).validate(object, name, value)
+        if validated_value and self.types:
+            if self.compressed:
+                self.types.extend([x + '.gz' for x in self.types])
+            if not any(validated_value.endswith(x) for x in self.types):
+                raise TraitError(
+                    args="{} is not included in allowed types: {}".format(
+                        validated_value, ','.join(self.types)))
+        return validated_value
 
 """
 The functions that pop-up the Traits GUIs, edit_traits and
