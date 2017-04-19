@@ -365,20 +365,20 @@ class BaseTraitedSpec(traitlets.HasTraits):
         # therefore these args were being ignored.
         # super(TraitedSpec, self).__init__(*args, **kwargs)
         super(BaseTraitedSpec, self).__init__(**kwargs)
-        # dj TODO: not sure if in traitlets
+        # dj TODO: it shouldn't be needed with traitlets (Satra)
         #traits.push_exception_handler(reraise_exceptions=True)
         undefined_traits = {}
+        pdb.set_trace()
+        # dj TODO: not sure if I should keep usedefault 
         for trait in self.class_trait_names():
             if not self.traits()[trait].usedefault:
                 undefined_traits[trait] = Undefined
+        # dj TODO: i don't think we have to use it; commented for now
         #self.trait_set(trait_change_notify=False, **undefined_traits)#dj remove
-        self.trait_change_notify = False
-        for (key,val) in undefined_traits.items():
-            self.key = val
         self._generate_handlers()
         #self.set(**kwargs)
         for (key, val) in kwargs.items():
-            self.key = val
+            self.__setattr__(key, val)
 
 
     def items(self):

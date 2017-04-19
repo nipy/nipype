@@ -30,8 +30,8 @@ from traits.trait_errors import TraitError
 from traits.trait_base import _Undefined
 
 
-
-DictStrStr = traitlets.Dict((bytes, str), (bytes, str))
+# dj TODO: left traits.Dict for now, had error: 'Dict' object is not callable
+DictStrStr = traits.Dict((bytes, str), (bytes, str))
 # TODO dj: is it used anywhere???
 Str = traitlets.Unicode
 
