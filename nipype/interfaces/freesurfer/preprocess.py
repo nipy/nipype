@@ -41,6 +41,8 @@ _ver = Info.version()
 if _ver:
     if 'dev' in _ver:
         FSVersion = _ver.rstrip().split('-')[-1] + '.dev'
+        if '.' not in _ver:
+            FSVersion = "6.0.0." + FSVersion
     else:
         FSVersion = _ver.rstrip().split('-v')[-1]
 
