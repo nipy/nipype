@@ -21,7 +21,7 @@ from ... import logging
 from ...utils.filemanip import fname_presuffix, split_filename
 from ..base import (TraitedSpec, File, traits, OutputMultiPath, isdefined,
                     CommandLine, CommandLineInputSpec)
-from .base import (FSCommand, FSTraitedSpec,
+from .base import (FSCommand, FSTraitedSpec, FSSurfaceCommand,
                    FSScriptCommand, FSScriptOutputSpec,
                    FSTraitedSpecOpenMP, FSCommandOpenMP)
 __docformat__ = 'restructuredtext'
@@ -952,6 +952,77 @@ class MRIsConvert(FSCommand):
             _, name, ext = split_filename(self.inputs.in_file)
 
         return name + ext + "_converted." + self.inputs.out_datatype
+
+
+class MRIsCombineInputSpec(FSTraitedSpec):
+    """
+    Uses Freesurfer's mris_convert to combine two surface files into one.
+    """
+    in_files = traits.List(File(Exists=True), maxlen=2, minlen=2,
+                           mandatory=True, position=1, argstr='--combinesurfs %s',
+                           desc='Two surfaces to be combined.')
+    out_file = File(argstr='%s', position=-1, genfile=True,
+                    mandatory=True,
+                    desc='Output filename. Combined surfaces from in_files.')
+
+
+class MRIsCombineOutputSpec(TraitedSpec):
+    """
+    Uses Freesurfer's mris_convert to combine two surface files into one.
+    """
+    out_file = File(exists=True, desc='Output filename. Combined surfaces from '
+                                      'in_files.')
+
+
+class MRIsCombine(FSSurfaceCommand):
+    """
+    Uses Freesurfer's mris_convert to combine two surface files into one.
+
+    For complete details, see the `mris_convert Documentation.
+    <https://surfer.nmr.mgh.harvard.edu/fswiki/mris_convert>`_
+
+    If given an out_file that does not begin with 'lh.' or 'rh.',
+    mris_convert will prepend 'lh.' to the file name.
+    To avoid this behavior, consider setting out_file = './<filename>', or
+    leaving out_file blank.
+
+    Example
+    -------
+
+    >>> import nipype.interfaces.freesurfer as fs
+    >>> mris = fs.MRIsCombine()
+    >>> mris.inputs.in_files = ['lh.pial', 'rh.pial']
+    >>> mris.inputs.out_file = 'bh.pial'
+    >>> mris.cmdline  # doctest: +ALLOW_UNICODE
+    'mris_convert --combinesurfs lh.pial rh.pial bh.pial'
+    >>> mris.run()  # doctest: +SKIP
+    """
+    _cmd = 'mris_convert'
+    input_spec = MRIsCombineInputSpec
+    output_spec = MRIsCombineOutputSpec
+
+    def _list_outputs(self):
+        outputs = self._outputs().get()
+        outputs['out_file'] = self._associated_file(self.inputs.in_files[0],
+                                                    self.inputs.out_file)
+        return outputs
+
+    @staticmethod
+    def _associated_file(in_file, out_name):
+        """Unlike the standard _associated_file, which uses the prefix from
+        in_file, in MRIsCombine, it uses 'lh.' as the prefix for the output
+        file no matter what the inputs are.
+        """
+        path, base = os.path.split(out_name)
+        if path == '':
+            hemis = ('lh.', 'rh.')
+            if base[:3] not in hemis:
+                base = 'lh.' + base
+        return os.path.abspath(os.path.join(path, base))
+
+    def _normalize_filenames(self):
+        if isdefined(self.inputs.out_file):
+            self.inputs.out_file = os.path.abspath(self.inputs.out_file)
 
 
 class MRITessellateInputSpec(FSTraitedSpec):
