@@ -162,8 +162,44 @@ class FSCommand(CommandLine):
                 return ver.rstrip().split('-v')[-1]
 
 
+class FSSurfaceCommand(FSCommand):
+    """Support for FreeSurfer surface-related functions.
+    For some functions, if the output file is not specified starting with
+    'lh.' or 'rh.', FreeSurfer prepends the prefix from the input file to the
+    output filename. Output out_file must be adjusted to accommodate this.
+    By including the full path in the filename, we can also avoid this behavior.
+    """
+    def _get_filecopy_info(self):
+        self._normalize_filenames()
+        return super(FSSurfaceCommand, self)._get_filecopy_info()
+
+    def _normalize_filenames(self):
+        """Filename normalization routine to perform only when run in Node
+        context
+        """
+        pass
+
+    @staticmethod
+    def _associated_file(in_file, out_name):
+        """Based on MRIsBuildFileName in freesurfer/utils/mrisurf.c
+
+        Use in_file prefix to indicate hemisphere for out_name, rather than
+        inspecting the surface data structure.
+        Also, output to in_file's directory if path information not provided
+        for out_name.
+        """
+        path, base = os.path.split(out_name)
+        if path == '':
+            path, in_file = os.path.split(in_file)
+            hemis = ('lh.', 'rh.')
+            if in_file[:3] in hemis and base[:3] not in hemis:
+                base = in_file[:3] + base
+        return os.path.abspath(os.path.join(path, base))
+
+
 class FSScriptCommand(FSCommand):
-    """ Support for Freesurfer script commands with log inputs.terminal_output """
+    """ Support for Freesurfer script commands with log inputs.terminal_output
+    """
     _terminal_output = 'file'
     _always_run = False
 
