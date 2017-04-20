@@ -120,6 +120,8 @@ def test_FitDwi_inputs():
     te_value=dict(argstr='-TE %s',
     xor=['te_file'],
     ),
+    ten_type=dict(usedefault=True,
+    ),
     tenmap2_file=dict(argstr='-tenmap2 %s',
     genfile=True,
     requires=['dti_flag'],

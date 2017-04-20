@@ -33,8 +33,7 @@ def test_fit_dwi():
 
     cmd_tmp = '{cmd} -source {in_file} -bval {bval} -bvec {bvec} -dti \
 -error {error} -famap {fa} -mcmap {mc} -mdmap {md} -nodiff {nodiff} \
--res {res} -rgbmap {rgb} -syn {syn} -tenmap2 {ten2} \
--tenmap {ten} -v1map {v1}'
+-res {res} -rgbmap {rgb} -syn {syn} -tenmap2 {ten2}  -v1map {v1}'
 
     expected_cmd = cmd_tmp.format(
         cmd=get_custom_path('fit_dwi'),
@@ -50,9 +49,10 @@ def test_fit_dwi():
         rgb=os.path.join(os.getcwd(), 'dwi_rgbmap.nii.gz'),
         syn=os.path.join(os.getcwd(), 'dwi_syn.nii.gz'),
         ten2=os.path.join(os.getcwd(), 'dwi_tenmap2.nii.gz'),
-        v1=os.path.join(os.getcwd(), 'dwi_v1map.nii.gz'),
-        ten=os.path.join(os.getcwd(), 'dwi_tenmap.nii.gz'))
+        v1=os.path.join(os.getcwd(), 'dwi_v1map.nii.gz'))
 
+    print(fit_dwi.cmdline)
+    print(expected_cmd)
     assert fit_dwi.cmdline == expected_cmd
 
 

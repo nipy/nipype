@@ -91,6 +91,12 @@ class FitDwiInputSpec(CommandLineInputSpec):
                               argstr='-rgbmap %s',
                               genfile=True,
                               requires=['dti_flag'])
+
+    desc = 'Use lower triangular (tenmap2) or diagonal, off-diagonal tensor \
+format'
+    ten_type = traits.Enum('lower-tri', 'diag-off-diag', desc=desc,
+                           usedefault=True)
+
     tenmap_file = traits.File(desc='Filename of tensor map [diag,offdiag].',
                               argstr='-tenmap %s',
                               genfile=True,
@@ -238,14 +244,21 @@ class FitDwi(NiftyFitCommand):
 -error .../dwi_error.nii.gz -famap .../dwi_famap.nii.gz \
 -mcmap .../dwi_mcmap.nii.gz -mdmap .../dwi_mdmap.nii.gz \
 -nodiff .../dwi_no_diff.nii.gz -res .../dwi_resmap.nii.gz \
--rgbmap rgb.nii.gz -syn .../dwi_syn.nii.gz -tenmap2 .../dwi_tenmap2.nii.gz \
--tenmap .../dwi_tenmap.nii.gz -v1map .../dwi_v1map.nii.gz'
+-rgbmap rgb.nii.gz -syn .../dwi_syn.nii.gz -tenmap2 .../dwi_tenmap2.nii.gz  \
+-v1map .../dwi_v1map.nii.gz'
 
     """
     _cmd = get_custom_path('fit_dwi')
     input_spec = FitDwiInputSpec
     output_spec = FitDwiOutputSpec
     _suffix = '_fit_dwi'
+
+    def _format_arg(self, name, trait_spec, value):
+        if name == 'tenmap_file' and self.inputs.ten_type != 'diag-off-diag':
+            return ""
+        if name == 'tenmap2_file' and self.inputs.ten_type != 'lower-tri':
+            return ""
+        return super(FitDwi, self)._format_arg(name, trait_spec, value)
 
     def _gen_filename(self, name):
         if name == 'mcmap_file':
@@ -337,8 +350,8 @@ class FitDwi(NiftyFitCommand):
         else:
             outputs['tenmap_file'] = self._gen_filename('tenmap_file')
 
-        if isdefined(self.inputs.tenmap_file):
-            outputs['tenmap2_file'] = self.inputs.tenmap_file
+        if isdefined(self.inputs.tenmap2_file):
+            outputs['tenmap2_file'] = self.inputs.tenmap2_file
         else:
             outputs['tenmap2_file'] = self._gen_filename('tenmap2_file')
 
