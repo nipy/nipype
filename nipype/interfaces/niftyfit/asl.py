@@ -11,7 +11,7 @@ Change directory to provide relative paths for doctests
     >>> os.chdir(datadir)
 """
 
-from ..base import TraitedSpec, traits, isdefined, CommandLineInputSpec
+from ..base import TraitedSpec, traits, CommandLineInputSpec
 from .base import NiftyFitCommand, get_custom_path
 
 
@@ -28,11 +28,17 @@ class FitAslInputSpec(CommandLineInputSpec):
 
     # *** Output options:
     desc = 'Filename of the Cerebral Blood Flow map (in ml/100g/min).'
-    cbf_file = traits.File(genfile=True, argstr='-cbf %s', desc=desc)
+    cbf_file = traits.File(name_source=['source_file'],
+                           name_template='%s_cbf.nii.gz',
+                           argstr='-cbf %s', desc=desc)
     desc = 'Filename of the CBF error map.'
-    error_file = traits.File(genfile=True, argstr='-error %s', desc=desc)
+    error_file = traits.File(name_source=['source_file'],
+                             name_template='%s_error.nii.gz',
+                             argstr='-error %s', desc=desc)
     desc = 'Filename of the synthetic ASL data.'
-    syn_file = traits.File(genfile=True, argstr='-syn %s', desc=desc)
+    syn_file = traits.File(name_source=['source_file'],
+                           name_template='%s_syn.nii.gz',
+                           argstr='-syn %s', desc=desc)
 
     # *** Input options (see also fit_qt1 for generic T1 fitting):
     desc = 'Filename of the estimated input T1 map (in ms).'
@@ -139,44 +145,12 @@ class FitAsl(NiftyFitCommand):
     >>> from nipype.interfaces import niftyfit
     >>> node = niftyfit.FitAsl()
     >>> node.inputs.source_file = 'asl.nii.gz'
-    >>> node.cmdline  # doctest: +ELLIPSIS +ALLOW_UNICODE
-    'fit_asl -source asl.nii.gz -cbf .../asl_cbf.nii.gz -error \
-.../asl_error.nii.gz -syn .../asl_syn.nii.gz'
+    >>> node.cmdline    # doctest: +ALLOW_UNICODE
+    'fit_asl -source asl.nii.gz -cbf asl_cbf.nii.gz -error asl_error.nii.gz \
+-syn asl_syn.nii.gz'
 
     """
     _cmd = get_custom_path('fit_asl')
     input_spec = FitAslInputSpec
     output_spec = FitAslOutputSpec
     _suffix = '_fit_asl'
-
-    def _gen_filename(self, name):
-        if name == 'error_file':
-            return self._gen_fname(self.inputs.source_file,
-                                   suffix='_error', ext='.nii.gz')
-        if name == 'syn_file':
-            return self._gen_fname(self.inputs.source_file,
-                                   suffix='_syn', ext='.nii.gz')
-        if name == 'cbf_file':
-            return self._gen_fname(self.inputs.source_file,
-                                   suffix='_cbf', ext='.nii.gz')
-        return None
-
-    def _list_outputs(self):
-        outputs = self.output_spec().get()
-
-        if isdefined(self.inputs.error_file):
-            outputs['error_file'] = self.inputs.error_file
-        else:
-            outputs['error_file'] = self._gen_filename('error_file')
-
-        if isdefined(self.inputs.syn_file):
-            outputs['syn_file'] = self.inputs.syn_file
-        else:
-            outputs['syn_file'] = self._gen_filename('syn_file')
-
-        if isdefined(self.inputs.cbf_file):
-            outputs['cbf_file'] = self.inputs.cbf_file
-        else:
-            outputs['cbf_file'] = self._gen_filename('cbf_file')
-
-        return outputs

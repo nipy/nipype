@@ -12,7 +12,7 @@ Change directory to provide relative paths for doctests
     >>> os.chdir(datadir)
 """
 
-from ..base import TraitedSpec, File, traits, isdefined, CommandLineInputSpec
+from ..base import TraitedSpec, File, traits, CommandLineInputSpec
 from .base import get_custom_path, NiftyFitCommand
 
 
@@ -26,27 +26,34 @@ class FitQt1InputSpec(CommandLineInputSpec):
                        mandatory=True)
 
     # Output options:
-    t1map_file = File(genfile=True,
+    t1map_file = File(name_source=['source_file'],
+                      name_template='%s_t1map.nii.gz',
                       argstr='-t1map %s',
                       desc='Filename of the estimated output T1 map (in ms).')
-    m0map_file = File(genfile=True,
+    m0map_file = File(name_source=['source_file'],
+                      name_template='%s_m0map.nii.gz',
                       argstr='-m0map %s',
                       desc='Filename of the estimated input M0 map.')
     desc = 'Filename of the estimated output multi-parameter map.'
-    mcmap_file = File(genfile=True,
+    mcmap_file = File(name_source=['source_file'],
+                      name_template='%s_mcmap.nii.gz',
                       argstr='-mcmap %s',
                       desc=desc)
-    comp_file = File(genfile=True,
+    comp_file = File(name_source=['source_file'],
+                     name_template='%s_comp.nii.gz',
                      argstr='-comp %s',
                      desc='Filename of the estimated multi-component T1 map.')
     desc = 'Filename of the error map (symmetric matrix, [Diag,OffDiag]).'
-    error_file = File(genfile=True,
+    error_file = File(name_source=['source_file'],
+                      name_template='%s_error.nii.gz',
                       argstr='-error %s',
                       desc=desc)
-    syn_file = File(genfile=True,
+    syn_file = File(name_source=['source_file'],
+                    name_template='%s_syn.nii.gz',
                     argstr='-syn %s',
                     desc='Filename of the synthetic ASL data.')
-    res_file = File(genfile=True,
+    res_file = File(name_source=['source_file'],
+                    name_template='%s_res.nii.gz',
                     argstr='-res %s',
                     desc='Filename of the model fit residuals')
 
@@ -156,78 +163,13 @@ class FitQt1(NiftyFitCommand):
     >>> from nipype.interfaces.niftyfit import FitQt1
     >>> fit_qt1 = FitQt1()
     >>> fit_qt1.inputs.source_file = 'TI4D.nii.gz'
-    >>> fit_qt1.cmdline  # doctest: +ELLIPSIS +ALLOW_UNICODE
-    'fit_qt1 -source TI4D.nii.gz -comp .../TI4D_comp.nii.gz \
--error .../TI4D_error.nii.gz -m0map .../TI4D_m0map.nii.gz \
--mcmap .../TI4D_mcmap.nii.gz -res .../TI4D_res.nii.gz \
--syn .../TI4D_syn.nii.gz -t1map .../TI4D_t1map.nii.gz'
+    >>> fit_qt1.cmdline  # doctest: +ALLOW_UNICODE
+    'fit_qt1 -source TI4D.nii.gz -comp TI4D_comp.nii.gz \
+-error TI4D_error.nii.gz -m0map TI4D_m0map.nii.gz -mcmap TI4D_mcmap.nii.gz \
+-res TI4D_res.nii.gz -syn TI4D_syn.nii.gz -t1map TI4D_t1map.nii.gz'
 
     """
     _cmd = get_custom_path('fit_qt1')
     input_spec = FitQt1InputSpec
     output_spec = FitQt1OutputSpec
     _suffix = '_fit_qt1'
-
-    def _gen_filename(self, name):
-        if name == 't1map_file':
-            return self._gen_fname(self.inputs.source_file,
-                                   suffix='_t1map', ext='.nii.gz')
-        if name == 'm0map_file':
-            return self._gen_fname(self.inputs.source_file,
-                                   suffix='_m0map', ext='.nii.gz')
-        if name == 'mcmap_file':
-            return self._gen_fname(self.inputs.source_file,
-                                   suffix='_mcmap', ext='.nii.gz')
-        if name == 'comp_file':
-            return self._gen_fname(self.inputs.source_file,
-                                   suffix='_comp', ext='.nii.gz')
-        if name == 'error_file':
-            return self._gen_fname(self.inputs.source_file,
-                                   suffix='_error', ext='.nii.gz')
-        if name == 'syn_file':
-            return self._gen_fname(self.inputs.source_file,
-                                   suffix='_syn', ext='.nii.gz')
-        if name == 'res_file':
-            return self._gen_fname(self.inputs.source_file,
-                                   suffix='_res', ext='.nii.gz')
-        return None
-
-    def _list_outputs(self):
-        outputs = self.output_spec().get()
-
-        if isdefined(self.inputs.t1map_file):
-            outputs['t1map_file'] = self.inputs.t1map_file
-        else:
-            outputs['t1map_file'] = self._gen_filename('t1map_file')
-
-        if isdefined(self.inputs.m0map_file):
-            outputs['m0map_file'] = self.inputs.m0map_file
-        else:
-            outputs['m0map_file'] = self._gen_filename('m0map_file')
-
-        if isdefined(self.inputs.mcmap_file):
-            outputs['mcmap_file'] = self.inputs.mcmap_file
-        else:
-            outputs['mcmap_file'] = self._gen_filename('mcmap_file')
-
-        if isdefined(self.inputs.comp_file):
-            outputs['comp_file'] = self.inputs.comp_file
-        else:
-            outputs['comp_file'] = self._gen_filename('comp_file')
-
-        if isdefined(self.inputs.error_file):
-            outputs['error_file'] = self.inputs.error_file
-        else:
-            outputs['error_file'] = self._gen_filename('error_file')
-
-        if isdefined(self.inputs.syn_file):
-            outputs['syn_file'] = self.inputs.syn_file
-        else:
-            outputs['syn_file'] = self._gen_filename('syn_file')
-
-        if isdefined(self.inputs.res_file):
-            outputs['res_file'] = self.inputs.res_file
-        else:
-            outputs['res_file'] = self._gen_filename('res_file')
-
-        return outputs

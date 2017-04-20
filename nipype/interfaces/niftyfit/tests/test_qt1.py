@@ -2,7 +2,6 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 
-import os
 import pytest
 
 from nipype.interfaces.niftyfit import no_niftyfit, get_custom_path, FitQt1
@@ -32,13 +31,13 @@ def test_fit_qt1():
     expected_cmd = cmd_tmp.format(
         cmd=get_custom_path('fit_qt1'),
         in_file=in_file,
-        comp=os.path.join(os.getcwd(), 'TI4D_comp.nii.gz'),
-        map0=os.path.join(os.getcwd(), 'TI4D_m0map.nii.gz'),
-        error=os.path.join(os.getcwd(), 'TI4D_error.nii.gz'),
-        cmap=os.path.join(os.getcwd(), 'TI4D_mcmap.nii.gz'),
-        res=os.path.join(os.getcwd(), 'TI4D_res.nii.gz'),
-        t1map=os.path.join(os.getcwd(), 'TI4D_t1map.nii.gz'),
-        syn=os.path.join(os.getcwd(), 'TI4D_syn.nii.gz')
+        comp='TI4D_comp.nii.gz',
+        map0='TI4D_m0map.nii.gz',
+        error='TI4D_error.nii.gz',
+        cmap='TI4D_mcmap.nii.gz',
+        res='TI4D_res.nii.gz',
+        t1map='TI4D_t1map.nii.gz',
+        syn='TI4D_syn.nii.gz',
     )
 
     assert fit_qt1.cmdline == expected_cmd
@@ -54,13 +53,13 @@ def test_fit_qt1():
     expected_cmd = cmd_tmp.format(
         cmd=get_custom_path('fit_qt1'),
         in_file=in_file,
-        comp=os.path.join(os.getcwd(), 'TI4D_comp.nii.gz'),
-        map0=os.path.join(os.getcwd(), 'TI4D_m0map.nii.gz'),
-        error=os.path.join(os.getcwd(), 'TI4D_error.nii.gz'),
-        cmap=os.path.join(os.getcwd(), 'TI4D_mcmap.nii.gz'),
-        res=os.path.join(os.getcwd(), 'TI4D_res.nii.gz'),
-        t1map=os.path.join(os.getcwd(), 'TI4D_t1map.nii.gz'),
-        syn=os.path.join(os.getcwd(), 'TI4D_syn.nii.gz')
+        comp='TI4D_comp.nii.gz',
+        map0='TI4D_m0map.nii.gz',
+        error='TI4D_error.nii.gz',
+        cmap='TI4D_mcmap.nii.gz',
+        res='TI4D_res.nii.gz',
+        t1map='TI4D_t1map.nii.gz',
+        syn='TI4D_syn.nii.gz',
     )
 
     assert fit_qt1_2.cmdline == expected_cmd
@@ -76,13 +75,13 @@ def test_fit_qt1():
     expected_cmd = cmd_tmp.format(
         cmd=get_custom_path('fit_qt1'),
         in_file=in_file,
-        comp=os.path.join(os.getcwd(), 'TI4D_comp.nii.gz'),
-        map0=os.path.join(os.getcwd(), 'TI4D_m0map.nii.gz'),
-        error=os.path.join(os.getcwd(), 'TI4D_error.nii.gz'),
-        cmap=os.path.join(os.getcwd(), 'TI4D_mcmap.nii.gz'),
-        res=os.path.join(os.getcwd(), 'TI4D_res.nii.gz'),
-        t1map=os.path.join(os.getcwd(), 'TI4D_t1map.nii.gz'),
-        syn=os.path.join(os.getcwd(), 'TI4D_syn.nii.gz')
+        comp='TI4D_comp.nii.gz',
+        map0='TI4D_m0map.nii.gz',
+        error='TI4D_error.nii.gz',
+        cmap='TI4D_mcmap.nii.gz',
+        res='TI4D_res.nii.gz',
+        t1map='TI4D_t1map.nii.gz',
+        syn='TI4D_syn.nii.gz',
     )
 
     assert fit_qt1_3.cmdline == expected_cmd

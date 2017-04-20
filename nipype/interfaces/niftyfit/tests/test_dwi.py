@@ -1,11 +1,11 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 
+import pytest
+
 from nipype.interfaces.niftyfit import (no_niftyfit, get_custom_path, FitDwi,
                                         DwiTool)
 from nipype.testing import example_data
-import os
-import pytest
 
 
 @pytest.mark.skipif(no_niftyfit(cmd='fit_dwi'),
@@ -32,27 +32,26 @@ def test_fit_dwi():
     fit_dwi.inputs.dti_flag = True
 
     cmd_tmp = '{cmd} -source {in_file} -bval {bval} -bvec {bvec} -dti \
--error {error} -famap {fa} -mcmap {mc} -mdmap {md} -nodiff {nodiff} \
--res {res} -rgbmap {rgb} -syn {syn} -tenmap2 {ten2}  -v1map {v1}'
+-error {error} -famap {fa} -mcmap {mc} -mcout {mcout} -mdmap {md} -nodiff \
+{nodiff} -res {res} -rgbmap {rgb} -syn {syn} -tenmap2 {ten2}  -v1map {v1}'
 
     expected_cmd = cmd_tmp.format(
         cmd=get_custom_path('fit_dwi'),
         in_file=in_file,
         bval=bval_file,
         bvec=bvec_file,
-        error=os.path.join(os.getcwd(), 'dwi_error.nii.gz'),
-        fa=os.path.join(os.getcwd(), 'dwi_famap.nii.gz'),
-        mc=os.path.join(os.getcwd(), 'dwi_mcmap.nii.gz'),
-        md=os.path.join(os.getcwd(), 'dwi_mdmap.nii.gz'),
-        nodiff=os.path.join(os.getcwd(), 'dwi_no_diff.nii.gz'),
-        res=os.path.join(os.getcwd(), 'dwi_resmap.nii.gz'),
-        rgb=os.path.join(os.getcwd(), 'dwi_rgbmap.nii.gz'),
-        syn=os.path.join(os.getcwd(), 'dwi_syn.nii.gz'),
-        ten2=os.path.join(os.getcwd(), 'dwi_tenmap2.nii.gz'),
-        v1=os.path.join(os.getcwd(), 'dwi_v1map.nii.gz'))
+        error='dwi_error.nii.gz',
+        fa='dwi_famap.nii.gz',
+        mc='dwi_mcmap.nii.gz',
+        md='dwi_mdmap.nii.gz',
+        nodiff='dwi_no_diff.nii.gz',
+        res='dwi_resmap.nii.gz',
+        rgb='dwi_rgbmap.nii.gz',
+        syn='dwi_syn.nii.gz',
+        ten2='dwi_tenmap2.nii.gz',
+        v1='dwi_v1map.nii.gz',
+        mcout='dwi_mcout.txt')
 
-    print(fit_dwi.cmdline)
-    print(expected_cmd)
     assert fit_dwi.cmdline == expected_cmd
 
 
@@ -93,12 +92,12 @@ def test_dwi_tool():
         bvec=bvec_file,
         b0=b0_file,
         mask=mask_file,
-        fa=os.path.join(os.getcwd(), 'dwi_famap.nii.gz'),
-        log=os.path.join(os.getcwd(), 'dwi_logdti2.nii.gz'),
-        mc=os.path.join(os.getcwd(), 'dwi_mcmap.nii.gz'),
-        md=os.path.join(os.getcwd(), 'dwi_mdmap.nii.gz'),
-        rgb=os.path.join(os.getcwd(), 'dwi_rgbmap.nii.gz'),
-        syn=os.path.join(os.getcwd(), 'dwi_syn.nii.gz'),
-        v1=os.path.join(os.getcwd(), 'dwi_v1map.nii.gz'))
+        fa='dwi_famap.nii.gz',
+        log='dwi_logdti2.nii.gz',
+        mc='dwi_mcmap.nii.gz',
+        md='dwi_mdmap.nii.gz',
+        rgb='dwi_rgbmap.nii.gz',
+        syn='dwi_syn.nii.gz',
+        v1='dwi_v1map.nii.gz')
 
     assert dwi_tool.cmdline == expected_cmd

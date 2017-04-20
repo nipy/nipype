@@ -2,7 +2,6 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 
-import os
 import pytest
 
 from nipype.interfaces.niftyfit import no_niftyfit, get_custom_path, FitAsl
@@ -32,9 +31,9 @@ def test_fit_asl():
     expected_cmd = cmd_tmp.format(
         cmd=get_custom_path('fit_asl'),
         in_file=in_file,
-        cbf=os.path.join(os.getcwd(), 'asl_cbf.nii.gz'),
-        error=os.path.join(os.getcwd(), 'asl_error.nii.gz'),
-        syn=os.path.join(os.getcwd(), 'asl_syn.nii.gz')
+        cbf='asl_cbf.nii.gz',
+        error='asl_error.nii.gz',
+        syn='asl_syn.nii.gz',
     )
 
     assert fit_asl.cmdline == expected_cmd
@@ -57,9 +56,9 @@ def test_fit_asl():
         in_file=in_file,
         t1map=t1map,
         seg=seg,
-        cbf=os.path.join(os.getcwd(), 'asl_cbf.nii.gz'),
-        error=os.path.join(os.getcwd(), 'asl_error.nii.gz'),
-        syn=os.path.join(os.getcwd(), 'asl_syn.nii.gz')
+        cbf='asl_cbf.nii.gz',
+        error='asl_error.nii.gz',
+        syn='asl_syn.nii.gz',
     )
 
     assert fit_asl2.cmdline == expected_cmd
