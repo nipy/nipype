@@ -29,6 +29,8 @@ from .dti import (BEDPOSTX, XFibres, DTIFit,
                   TractSkeleton, MakeDyadicVectors, BEDPOSTX5, XFibres5)
 from .maths import (ChangeDataType, Threshold, MeanImage, ApplyMask,
                     IsotropicSmooth, TemporalFilter, DilateImage, ErodeImage,
-                    SpatialFilter, UnaryMaths, BinaryMaths, MultiImageMaths)
+                    SpatialFilter, UnaryMaths, BinaryMaths, MultiImageMaths,
+                    MaxnImage, MinImage, MedianImage, PercentileImage,
+                    AR1Image)
 
 from .possum import B0Calc

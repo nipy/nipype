@@ -36,13 +36,9 @@ from .utils import copy2subjdir
 __docformat__ = 'restructuredtext'
 iflogger = logging.getLogger('interface')
 
-FSVersion = "0"
-_ver = Info.version()
-if _ver:
-    if 'dev' in _ver:
-        FSVersion = _ver.rstrip().split('-')[-1] + '.dev'
-    else:
-        FSVersion = _ver.rstrip().split('-v')[-1]
+# Keeping this to avoid breaking external programs that depend on it, but
+# this should not be used internally
+FSVersion = Info.looseversion()
 
 
 class ParseDICOMDirInputSpec(FSTraitedSpec):
@@ -724,7 +720,7 @@ class ReconAll(CommandLine):
                         'mri/brainmask.auto.mgz',
                         'mri/brainmask.mgz'], []),
         ]
-    if LooseVersion(FSVersion) < LooseVersion("6.0.0"):
+    if Info.looseversion() < LooseVersion("6.0.0"):
         _autorecon2_steps = [
             ('gcareg', ['mri/transforms/talairach.lta'], []),
             ('canorm', ['mri/norm.mgz'], []),
@@ -1072,7 +1068,7 @@ class BBRegister(FSCommand):
     """
 
     _cmd = 'bbregister'
-    if FSVersion and LooseVersion(FSVersion) < LooseVersion("6.0.0"):
+    if LooseVersion('0.0.0') < Info.looseversion() < LooseVersion("6.0.0"):
         input_spec = BBRegisterInputSpec
     else:
         input_spec = BBRegisterInputSpec6
