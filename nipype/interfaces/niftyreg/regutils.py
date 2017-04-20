@@ -206,7 +206,8 @@ class RegToolsInputSpec(CommandLineInputSpec):
                    mandatory=True)
 
     # Output file path
-    out_file = File(genfile=True,
+    out_file = File(name_source=['in_file'],
+                    name_template='%s_tools.nii.gz',
                     desc='The output file name',
                     argstr='-out %s')
 
@@ -301,8 +302,8 @@ class RegTools(NiftyRegCommand):
     >>> node.inputs.in_file = 'im1.nii'
     >>> node.inputs.mul_val = 4
     >>> node.inputs.omp_core_val = 4
-    >>> node.cmdline  # doctest: +ELLIPSIS +ALLOW_UNICODE
-    'reg_tools -in im1.nii -mul 4.0 -omp 4 -out .../im1_tools.nii.gz'
+    >>> node.cmdline  # doctest: +ALLOW_UNICODE
+    'reg_tools -in im1.nii -mul 4.0 -omp 4 -out im1_tools.nii.gz'
 
     """
     _cmd = get_custom_path('reg_tools')

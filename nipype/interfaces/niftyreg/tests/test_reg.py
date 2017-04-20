@@ -2,11 +2,11 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 
+import pytest
+
 from nipype.interfaces.niftyreg import (no_niftyreg, get_custom_path,
                                         RegAladin, RegF3D)
 from nipype.testing import example_data
-import os
-import pytest
 
 
 @pytest.mark.skipif(
@@ -37,11 +37,12 @@ def test_reg_aladin():
 -rmask {rmask}'
     expected_cmd = cmd_tmp.format(
         cmd=get_custom_path('reg_aladin'),
-        aff=os.path.join(os.getcwd(), 'im2_aff.txt'),
+        aff='im2_aff.txt',
         flo=flo_file,
         ref=ref_file,
-        res=os.path.join(os.getcwd(), 'im2_res.nii.gz'),
-        rmask=rmask_file)
+        res='im2_res.nii.gz',
+        rmask=rmask_file,
+    )
 
     assert nr_aladin.cmdline == expected_cmd
 
@@ -77,10 +78,11 @@ def test_reg_f3d():
 -ref {ref} -res {res} -rmask {rmask} -vel'
     expected_cmd = cmd_tmp.format(
         cmd=get_custom_path('reg_f3d'),
-        cpp=os.path.join(os.getcwd(), 'im2_cpp.nii.gz'),
+        cpp='im2_cpp.nii.gz',
         flo=flo_file,
         ref=ref_file,
-        res=os.path.join(os.getcwd(), 'im2_res.nii.gz'),
-        rmask=rmask_file)
+        res='im2_res.nii.gz',
+        rmask=rmask_file,
+    )
 
     assert nr_f3d.cmdline == expected_cmd

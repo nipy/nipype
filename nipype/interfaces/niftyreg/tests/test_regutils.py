@@ -156,7 +156,7 @@ def test_reg_tools_mul():
     expected_cmd = cmd_tmp.format(
         cmd=get_custom_path('reg_tools'),
         in_file=in_file,
-        out_file=os.path.join(os.getcwd(), 'im1_tools.nii.gz'))
+        out_file='im1_tools.nii.gz')
 
     assert nr_tools.cmdline == expected_cmd
 
@@ -169,7 +169,7 @@ def test_reg_tools_mul():
     expected_cmd = cmd_tmp.format(
         cmd=get_custom_path('reg_tools'),
         in_file=in_file,
-        out_file=os.path.join(os.getcwd(), 'im1_tools.nii.gz'))
+        out_file='im1_tools.nii.gz')
 
     assert nr_tools_2.cmdline == expected_cmd
 

@@ -120,11 +120,13 @@ class RegAladinInputSpec(CommandLineInputSpec):
                               argstr='-omp %i')
 
     # Affine output transformation matrix file
-    aff_file = File(genfile=True,
+    aff_file = File(name_source=['flo_file'],
+                    name_template='%s_aff.txt',
                     desc='The output affine matrix file',
                     argstr='-aff %s')
     # Result warped image file
-    res_file = File(genfile=True,
+    res_file = File(name_source=['flo_file'],
+                    name_template='%s_res.nii.gz',
                     desc='The affine transformed floating image',
                     argstr='-res %s')
 
@@ -155,35 +157,17 @@ class RegAladin(NiftyRegCommand):
     >>> node.inputs.flo_file = 'im2.nii'
     >>> node.inputs.rmask_file = 'mask.nii'
     >>> node.inputs.omp_core_val = 4
-    >>> node.cmdline  # doctest: +ELLIPSIS +ALLOW_UNICODE
-    'reg_aladin -aff .../im2_aff.txt -flo im2.nii -omp 4 -ref im1.nii \
--res .../im2_res.nii.gz -rmask mask.nii'
+    >>> node.cmdline  # doctest: +ALLOW_UNICODE
+    'reg_aladin -aff im2_aff.txt -flo im2.nii -omp 4 -ref im1.nii \
+-res im2_res.nii.gz -rmask mask.nii'
 
     """
     _cmd = get_custom_path('reg_aladin')
     input_spec = RegAladinInputSpec
     output_spec = RegAladinOutputSpec
 
-    def _gen_filename(self, name):
-        if name == 'aff_file':
-            return self._gen_fname(self.inputs.flo_file,
-                                   suffix='_aff', ext='.txt')
-        if name == 'res_file':
-            return self._gen_fname(self.inputs.flo_file,
-                                   suffix='_res', ext='.nii.gz')
-        return None
-
     def _list_outputs(self):
-        outputs = self.output_spec().get()
-
-        if isdefined(self.inputs.aff_file):
-            outputs['aff_file'] = self.inputs.aff_file
-        else:
-            outputs['aff_file'] = self._gen_filename('aff_file')
-        if isdefined(self.inputs.res_file):
-            outputs['res_file'] = self.inputs.aff_file
-        else:
-            outputs['res_file'] = self._gen_filename('res_file')
+        outputs = super(RegAladin, self)._list_outputs()
 
         # Make a list of the linear transformation file and the input image
         aff = os.path.abspath(outputs['aff_file'])
@@ -349,11 +333,13 @@ time point'
                               argstr='-omp %i')
 
     # Output CPP image file
-    cpp_file = File(genfile=True,
+    cpp_file = File(name_source=['flo_file'],
+                    name_template='%s_cpp.nii.gz',
                     desc='The output CPP file',
                     argstr='-cpp %s')
     # Output warped image file
-    res_file = File(genfile=True,
+    res_file = File(name_source=['flo_file'],
+                    name_template='%s_res.nii.gz',
                     desc='The output resampled image',
                     argstr='-res %s')
 
@@ -385,9 +371,9 @@ class RegF3D(NiftyRegCommand):
     >>> node.inputs.flo_file = 'im2.nii'
     >>> node.inputs.rmask_file = 'mask.nii'
     >>> node.inputs.omp_core_val = 4
-    >>> node.cmdline  # doctest: +ELLIPSIS +ALLOW_UNICODE
-    'reg_f3d -cpp .../im2_cpp.nii.gz -flo im2.nii -omp 4 -ref im1.nii \
--res .../im2_res.nii.gz -rmask mask.nii'
+    >>> node.cmdline  # doctest: +ALLOW_UNICODE
+    'reg_f3d -cpp im2_cpp.nii.gz -flo im2.nii -omp 4 -ref im1.nii \
+-res im2_res.nii.gz -rmask mask.nii'
 
     """
     _cmd = get_custom_path('reg_f3d')
@@ -399,26 +385,8 @@ class RegF3D(NiftyRegCommand):
         dn, bn, _ = split_filename(in_file)
         return os.path.join(dn, bn)
 
-    def _gen_filename(self, name):
-        if name == 'res_file':
-            return self._gen_fname(self.inputs.flo_file,
-                                   suffix='_res', ext='.nii.gz')
-        if name == 'cpp_file':
-            return self._gen_fname(self.inputs.flo_file,
-                                   suffix='_cpp', ext='.nii.gz')
-
     def _list_outputs(self):
-        outputs = self.output_spec().get()
-
-        if isdefined(self.inputs.res_file):
-            outputs['res_file'] = self.inputs.res_file
-        else:
-            outputs['res_file'] = self._gen_filename('res_file')
-
-        if isdefined(self.inputs.cpp_file):
-            outputs['cpp_file'] = self.inputs.cpp_file
-        else:
-            outputs['cpp_file'] = self._gen_filename('cpp_file')
+        outputs = super(RegF3D, self)._list_outputs()
 
         if self.inputs.vel_flag is True:
             res_name = self._remove_extension(outputs['res_file'])
@@ -436,4 +404,5 @@ class RegF3D(NiftyRegCommand):
             cpp_file = os.path.abspath(outputs['cpp_file'])
             flo_file = os.path.abspath(self.inputs.flo_file)
             outputs['avg_output'] = '%s %s' % (cpp_file, flo_file)
+
         return outputs
