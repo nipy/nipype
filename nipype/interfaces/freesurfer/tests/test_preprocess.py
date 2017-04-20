@@ -7,7 +7,7 @@ import pytest
 from nipype.testing.fixtures import create_files_in_directory
 
 from nipype.interfaces import freesurfer
-from nipype.interfaces.freesurfer.preprocess import FSVersion
+from nipype.interfaces.freesurfer import Info
 from nipype import LooseVersion
 
 
@@ -138,7 +138,7 @@ def test_bbregister(create_files_in_directory):
     bbr.inputs.contrast_type = 't2'
 
     # Check that 'init' is mandatory in FS < 6, but not in 6+
-    if LooseVersion(FSVersion) < LooseVersion("6.0.0"):
+    if Info.looseversion() < LooseVersion("6.0.0"):
         with pytest.raises(ValueError):
             bbr.cmdline
     else:

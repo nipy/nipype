@@ -17,15 +17,16 @@ See the docstrings for the individual classes for 'working' examples.
 from __future__ import print_function, division, unicode_literals, absolute_import
 from builtins import open, object, str
 
-
 import os
 
+from ... import LooseVersion
 from ...utils.filemanip import fname_presuffix
 from ..base import (CommandLine, Directory,
                     CommandLineInputSpec, isdefined,
                     traits, TraitedSpec, File)
 
 __docformat__ = 'restructuredtext'
+
 
 class Info(object):
     """ Freesurfer subject directory and version information.
@@ -64,6 +65,41 @@ class Info(object):
         version = fid.readline()
         fid.close()
         return version
+
+    @classmethod
+    def looseversion(cls):
+        """ Return a comparable version object
+
+        If no version found, use LooseVersion('0.0.0')
+        """
+        ver = cls.version()
+        if ver is None:
+            return LooseVersion('0.0.0')
+
+        vinfo = ver.rstrip().split('-')
+        try:
+            int(vinfo[-1], 16)
+        except ValueError:
+            githash = ''
+        else:
+            githash = '.' + vinfo[-1]
+
+        # As of FreeSurfer v6.0.0, the final component is a githash
+        if githash:
+            if vinfo[3] == 'dev':
+                # This will need updating when v6.0.1 comes out
+                vstr = '6.0.0-dev' + githash
+            elif vinfo[5][0] == 'v':
+                vstr = vinfo[5][1:]
+            else:
+                raise RuntimeError('Unknown version string: ' + ver)
+        # Retain pre-6.0.0 heuristics
+        elif 'dev' in ver:
+            vstr = vinfo[-1] + '-dev'
+        else:
+            vstr = ver.rstrip().split('-v')[-1]
+
+        return LooseVersion(vstr)
 
     @classmethod
     def subjectsdir(cls):
@@ -154,12 +190,9 @@ class FSCommand(CommandLine):
 
     @property
     def version(self):
-        ver = Info.version()
-        if ver:
-            if 'dev' in ver:
-                return ver.rstrip().split('-')[-1] + '.dev'
-            else:
-                return ver.rstrip().split('-v')[-1]
+        ver = Info.looseversion()
+        if ver > LooseVersion("0.0.0"):
+            return ver.vstring
 
 
 class FSSurfaceCommand(FSCommand):
