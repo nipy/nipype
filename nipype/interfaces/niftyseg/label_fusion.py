@@ -114,6 +114,23 @@ class LabelFusion(NiftySegCommand):
     """Interface for executable seg_LabelFusion from NiftySeg platform using
     type STEPS as classifier Fusion.
 
+    This executable implements 4 fusion strategies (-STEPS, -STAPLE, -MV or
+    - SBA), all of them using either a global (-GNCC), ROI-based (-ROINCC),
+    local (-LNCC) or no image similarity (-ALL). Combinations of fusion
+    algorithms and similarity metrics give rise to different variants of known
+    algorithms. As an example, using LNCC and MV as options will run a locally
+    weighted voting strategy with LNCC derived weights, while using STAPLE and
+    LNCC is equivalent to running STEPS as per its original formulation.
+    A few other options pertaining the use of an MRF (-MRF beta), the initial
+    sensitivity and specificity estimates and the use of only non-consensus
+    voxels (-unc) for the STAPLE and STEPS algorithm. All processing can be
+    masked (-mask), greatly reducing memory consumption.
+
+    As an example, the command to use STEPS should be:
+    seg_LabFusion -in 4D_Propragated_Labels_to_fuse.nii -out \
+    FusedSegmentation.nii -STEPS 2 15 TargetImage.nii \
+    4D_Propagated_Intensities.nii
+
     For source code, see http://cmictig.cs.ucl.ac.uk/wiki/index.php/NiftySeg
     For Documentation, see:
         http://cmictig.cs.ucl.ac.uk/wiki/index.php/NiftySeg_documentation

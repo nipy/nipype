@@ -48,6 +48,16 @@ class StatsOutput(TraitedSpec):
 class StatsCommand(NiftySegCommand):
     """
     Base Command Interface for seg_stats interfaces.
+
+    The executable seg_stats enables the estimation of image statistics on
+    continuous voxel intensities (average, standard deviation, min/max, robust
+    range, percentiles, sum, probabilistic volume, entropy, etc) either over
+    the full image or on a per slice basis (slice axis can be specified),
+    statistics over voxel coordinates (location of max, min and centre of
+    mass, bounding box, etc) and statistics over categorical images (e.g. per
+    region volume, count, average, Dice scores, etc). These statistics are
+    robust to the presence of NaNs, and can be constrained by a mask and/or
+    thresholded at a certain level.
     """
     _cmd = get_custom_path('seg_stats')
     input_spec = StatsInput
