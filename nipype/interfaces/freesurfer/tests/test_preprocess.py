@@ -154,3 +154,9 @@ def test_bbregister(create_files_in_directory):
                            '--reg {base}_bbreg_fsaverage.dat '
                            '--mov {full} --s fsaverage'.format(
                             full=filelist[0], base=base))
+
+def test_FSVersion():
+    """Check that FSVersion is a string that can be compared with LooseVersion
+    """
+    assert isinstance(freesurfer.preprocess.FSVersion, str)
+    assert LooseVersion(freesurfer.preprocess.FSVersion) >= LooseVersion("0")
