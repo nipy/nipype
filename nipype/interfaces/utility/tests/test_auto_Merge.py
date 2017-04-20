@@ -11,6 +11,8 @@ def test_Merge_inputs():
     ),
     no_flatten=dict(usedefault=True,
     ),
+    ravel_inputs=dict(usedefault=True,
+    ),
     )
     inputs = Merge.input_spec()
 
