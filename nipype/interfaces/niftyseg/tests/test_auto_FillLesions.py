@@ -44,6 +44,8 @@ def test_FillLesions_inputs():
     mandatory=False,
     ),
     out_file=dict(argstr='-o %s',
+    name_source=['in_file'],
+    name_template='%s_lesions_filled.nii.gz',
     position=3,
     ),
     search=dict(argstr='-search %f',

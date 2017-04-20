@@ -1,11 +1,11 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 
+import pytest
+
 from nipype.interfaces.niftyseg import (no_niftyseg, get_custom_path,
                                         FillLesions)
 from nipype.testing import example_data
-import os
-import pytest
 
 
 @pytest.mark.skipif(no_niftyseg(cmd='seg_FillLesions'),
@@ -32,7 +32,7 @@ def test_seg_filllesions():
         cmd=get_custom_path('seg_FillLesions'),
         in_file=in_file,
         lesion_mask=lesion_mask,
-        out_file=os.path.join(os.getcwd(), 'im1_lesions_filled.nii')
+        out_file='im1_lesions_filled.nii.gz',
     )
 
     assert seg_fill.cmdline == expected_cmd

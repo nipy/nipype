@@ -18,9 +18,7 @@ Change directory to provide relative paths for doctests
     >>> os.chdir(datadir)
 """
 
-import os
-
-from ..base import (TraitedSpec, File, traits, isdefined, CommandLineInputSpec,
+from ..base import (TraitedSpec, File, traits, CommandLineInputSpec,
                     InputMultiPath)
 from .base import NiftySegCommand, get_custom_path
 
@@ -91,14 +89,17 @@ gaussian regularization: gstd>0 (recommended=2.0)] /only 3D/'
                                 desc=desc)
 
     # outputs
-    out_file = File(argstr='-out %s',
-                    genfile=True,
+    out_file = File(name_source=['in_file'],
+                    name_template='%s_em.nii.gz',
+                    argstr='-out %s',
                     desc='Output segmentation')
-    out_bc_file = File(argstr='-bc_out %s',
-                       genfile=True,
+    out_bc_file = File(name_source=['in_file'],
+                       name_template='%s_bc_em.nii.gz',
+                       argstr='-bc_out %s',
                        desc='Output bias corrected image')
-    out_outlier_file = File(argstr='-out_outlier %s',
-                            genfile=True,
+    out_outlier_file = File(name_source=['in_file'],
+                            name_template='%s_outlier_em.nii.gz',
+                            argstr='-out_outlier %s',
                             desc='Output outlierness image')
 
 
@@ -126,9 +127,9 @@ class EM(NiftySegCommand):
     >>> node = niftyseg.EM()
     >>> node.inputs.in_file = 'im1.nii'
     >>> node.inputs.no_prior = 4
-    >>> node.cmdline  # doctest: +ELLIPSIS +ALLOW_UNICODE
-    'seg_EM -in im1.nii -nopriors 4 -bc_out .../im1_bc_em.nii \
--out .../im1_em.nii -out_outlier .../im1_outlier_em.nii'
+    >>> node.cmdline  # doctest: +ALLOW_UNICODE
+    'seg_EM -in im1.nii -nopriors 4 -bc_out im1_bc_em.nii.gz \
+-out im1_em.nii.gz -out_outlier im1_outlier_em.nii.gz'
 
     """
     _cmd = get_custom_path('seg_EM')
@@ -143,32 +144,3 @@ class EM(NiftySegCommand):
             return '-priors %d %s' % (_nb_priors, ' '.join(self.inputs.priors))
         else:
             return super(EM, self)._format_arg(opt, spec, val)
-
-    def _list_outputs(self):
-        outputs = self.output_spec().get()
-        outputs['out_file'] = self.inputs.out_file
-        if not isdefined(self.inputs.out_file):
-            outputs['out_file'] = self._gen_fname(self.inputs.in_file,
-                                                  suffix=self._suffix)
-        outputs['out_file'] = os.path.abspath(outputs['out_file'])
-        outputs['out_bc_file'] = self.inputs.out_bc_file
-        if not isdefined(self.inputs.out_bc_file):
-            outputs['out_bc_file'] = self._gen_fname(
-                    self.inputs.in_file, suffix=('_bc%s' % self._suffix))
-        outputs['out_bc_file'] = os.path.abspath(outputs['out_bc_file'])
-        outputs['out_outlier_file'] = self.inputs.out_outlier_file
-        if not isdefined(self.inputs.out_outlier_file):
-            outputs['out_outlier_file'] = self._gen_fname(
-                    self.inputs.in_file, suffix=('_outlier%s' % self._suffix))
-        outputs['out_outlier_file'] = os.path.abspath(
-                    outputs['out_outlier_file'])
-        return outputs
-
-    def _gen_filename(self, name):
-        if name == 'out_file':
-            return self._list_outputs()['out_file']
-        if name == 'out_bc_file':
-            return self._list_outputs()['out_bc_file']
-        if name == 'out_outlier_file':
-            return self._list_outputs()['out_outlier_file']
-        return None

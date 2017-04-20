@@ -1,10 +1,10 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 
+import pytest
+
 from nipype.interfaces.niftyseg import no_niftyseg, get_custom_path, EM
 from nipype.testing import example_data
-import os
-import pytest
 
 
 @pytest.mark.skipif(no_niftyseg(cmd='seg_EM'),
@@ -31,9 +31,9 @@ def test_seg_em():
     expected_cmd = cmd_tmp.format(
         cmd=get_custom_path('seg_EM'),
         in_file=in_file,
-        out_file=os.path.join(os.getcwd(), 'im1_em.nii'),
-        bc_out=os.path.join(os.getcwd(), 'im1_bc_em.nii'),
-        out_outlier=os.path.join(os.getcwd(), 'im1_outlier_em.nii')
+        out_file='im1_em.nii.gz',
+        bc_out='im1_bc_em.nii.gz',
+        out_outlier='im1_outlier_em.nii.gz',
     )
 
     assert seg_em.cmdline == expected_cmd

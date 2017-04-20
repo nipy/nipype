@@ -38,16 +38,17 @@ class PatchMatchInputSpec(CommandLineInputSpec):
                      position=2)
 
     database_file = File(argstr='-db %s',
-                         genfile=True,
+                         exists=True,
                          mandatory=True,
                          desc='Database with the segmentations',
                          position=3)
 
     # Output file name
-    out_file = File(desc='The output filename of the patchmatch results',
+    out_file = File(name_source=['in_file'],
+                    name_template='%s_pm.nii.gz',
+                    desc='The output filename of the patchmatch results',
                     argstr='-o %s',
-                    position=4,
-                    genfile=True)
+                    position=4)
 
     # Optional arguments
     patch_size = traits.Int(desc="Patch size, #voxels",
@@ -105,25 +106,11 @@ class PatchMatch(NiftySegCommand):
     >>> node.inputs.in_file = 'im1.nii'
     >>> node.inputs.mask_file = 'im2.nii'
     >>> node.inputs.database_file = 'db.xml'
-    >>> node.cmdline  # doctest: +ELLIPSIS +ALLOW_UNICODE
-    'seg_PatchMatch -i im1.nii -m im2.nii -db db.xml -o .../im1_pm.nii'
+    >>> node.cmdline  # doctest: +ALLOW_UNICODE
+    'seg_PatchMatch -i im1.nii -m im2.nii -db db.xml -o im1_pm.nii.gz'
 
     """
     _cmd = get_custom_path('seg_PatchMatch')
     input_spec = PatchMatchInputSpec
     output_spec = PatchMatchOutputSpec
     _suffix = '_pm'
-
-    def _list_outputs(self):
-        outputs = self.output_spec().get()
-        outputs['out_file'] = self.inputs.out_file
-        if not isdefined(self.inputs.out_file):
-            outputs['out_file'] = self._gen_fname(self.inputs.in_file,
-                                                  suffix=self._suffix)
-        outputs['out_file'] = os.path.abspath(outputs['out_file'])
-        return outputs
-
-    def _gen_filename(self, name):
-        if name == 'out_file':
-            return self._list_outputs()['out_file']
-        return None

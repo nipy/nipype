@@ -18,10 +18,9 @@ Change directory to provide relative paths for doctests
     >>> os.chdir(datadir)
 """
 
-import os
 import warnings
 
-from ..base import TraitedSpec, File, traits, isdefined, CommandLineInputSpec
+from ..base import TraitedSpec, File, traits, CommandLineInputSpec
 from .base import NiftySegCommand, get_custom_path
 
 
@@ -39,7 +38,9 @@ class FillLesionsInputSpec(CommandLineInputSpec):
                        desc='Lesion mask', position=2)
 
     # Output file name
-    out_file = File(desc='The output filename of the fill lesions results',
+    out_file = File(name_source=['in_file'],
+                    name_template='%s_lesions_filled.nii.gz',
+                    desc='The output filename of the fill lesions results',
                     argstr='-o %s', position=3)
 
     # Optional arguments
@@ -108,31 +109,10 @@ class FillLesions(NiftySegCommand):
     >>> node = niftyseg.FillLesions()
     >>> node.inputs.in_file = 'im1.nii'
     >>> node.inputs.lesion_mask = 'im2.nii'
-    >>> node.cmdline  # doctest: +ELLIPSIS +ALLOW_UNICODE
-    'seg_FillLesions -i im1.nii -l im2.nii -o .../im1_lesions_filled.nii'
+    >>> node.cmdline  # doctest: +ALLOW_UNICODE
+    'seg_FillLesions -i im1.nii -l im2.nii -o im1_lesions_filled.nii.gz'
 
     """
     _cmd = get_custom_path('seg_FillLesions')
     input_spec = FillLesionsInputSpec
     output_spec = FillLesionsOutputSpec
-
-    def _list_outputs(self):
-        outputs = self.output_spec().get()
-        outputs['out_file'] = self.inputs.out_file
-        if not isdefined(self.inputs.out_file):
-            outputs['out_file'] = self._gen_filename('out_file')
-        outputs['out_file'] = os.path.abspath(outputs['out_file'])
-        return outputs
-
-    def _parse_inputs(self, skip=None):
-        """Set non-mandatory inputs if not given by user."""
-        skip = []
-        if not isdefined(self.inputs.out_file):
-            self.inputs.out_file = self._gen_filename('out_file')
-        return super(FillLesions, self)._parse_inputs(skip=skip)
-
-    def _gen_filename(self, name):
-        if name == 'out_file':
-            return self._gen_fname(self.inputs.in_file,
-                                   suffix='_lesions_filled')
-        return None

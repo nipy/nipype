@@ -1,10 +1,10 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 
+import pytest
+
 from nipype.interfaces.niftyseg import no_niftyseg, get_custom_path, PatchMatch
 from nipype.testing import example_data
-import os
-import pytest
 
 
 @pytest.mark.skipif(no_niftyseg(cmd='seg_PatchMatch'),
@@ -35,7 +35,7 @@ def test_seg_patchmatch():
         in_file=in_file,
         mask_file=mask_file,
         db=db_file,
-        out_file=os.path.join(os.getcwd(), 'im1_pm.nii')
+        out_file='im1_pm.nii.gz',
     )
 
     assert seg_patchmatch.cmdline == expected_cmd

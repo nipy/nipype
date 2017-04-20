@@ -17,7 +17,6 @@ Change directory to provide relative paths for doctests
     >>> datadir = os.path.realpath(os.path.join(filepath, '../../testing/data'))
     >>> os.chdir(datadir)
 """
-import os
 
 from ..base import (TraitedSpec, File, traits, isdefined, CommandLineInputSpec,
                     NipypeInterfaceError)
@@ -71,6 +70,7 @@ class MathsCommand(NiftySegCommand):
     _cmd = get_custom_path('seg_maths')
     input_spec = MathsInput
     output_spec = MathsOutput
+    _suffix = '_maths'
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
@@ -79,11 +79,11 @@ class MathsCommand(NiftySegCommand):
         if suffix != '_merged' and isdefined(self.inputs.operation):
             suffix = '_' + self.inputs.operation
 
-        outputs['out_file'] = self.inputs.out_file
-        if not isdefined(self.inputs.out_file):
+        if isdefined(self.inputs.out_file):
+            outputs['out_file'] = self.inputs.out_file
+        else:
             outputs['out_file'] = self._gen_fname(self.inputs.in_file,
                                                   suffix=suffix)
-        outputs['out_file'] = os.path.abspath(outputs['out_file'])
         return outputs
 
     def _gen_filename(self, name):
@@ -149,8 +149,8 @@ class UnaryMaths(MathsCommand):
     >>> node.inputs.in_file = 'im1.nii'
     >>> node.inputs.operation = 'sqrt'
     >>> node.inputs.output_datatype = 'float'
-    >>> node.cmdline  # doctest: +ELLIPSIS +ALLOW_UNICODE
-    'seg_maths im1.nii -sqrt -odt float .../im1_sqrt.nii'
+    >>> node.cmdline  # doctest: +ALLOW_UNICODE
+    'seg_maths im1.nii -sqrt -odt float im1_sqrt.nii'
 
     """
     input_spec = UnaryMathsInput
@@ -237,8 +237,8 @@ class BinaryMaths(MathsCommand):
     >>> node.inputs.operation = 'sub'
     >>> node.inputs.operand_file = 'im2.nii'
     >>> node.inputs.output_datatype = 'float'
-    >>> node.cmdline  # doctest: +ELLIPSIS +ALLOW_UNICODE
-    'seg_maths im1.nii -sub im2.nii -odt float .../im1_sub.nii'
+    >>> node.cmdline  # doctest: +ALLOW_UNICODE
+    'seg_maths im1.nii -sub im2.nii -odt float im1_sub.nii'
 
     """
     input_spec = BinaryMathsInput
@@ -256,19 +256,12 @@ class BinaryMaths(MathsCommand):
         return super(BinaryMaths, self)._format_arg(opt, spec, val)
 
     def _list_outputs(self):
-        outputs = self.output_spec().get()
-        self._suffix = '_' + self.inputs.operation
+        outputs = super(BinaryMaths, self)._list_outputs()
 
-        outputs['out_file'] = self.inputs.out_file
-        if not isdefined(self.inputs.out_file):
-            if isdefined(self.inputs.operation) and \
-               self.inputs.operation == 'hdr_copy':
-                outputs['out_file'] = self._gen_fname(self.inputs.operand_file,
-                                                      suffix=self._suffix)
-            else:
-                outputs['out_file'] = self._gen_fname(self.inputs.in_file,
-                                                      suffix=self._suffix)
-        outputs['out_file'] = os.path.abspath(outputs['out_file'])
+        if self.inputs.operation == 'hdr_copy':
+            outputs['out_file'] = self._gen_fname(
+                self.inputs.operand_file,
+                suffix='_{0}'.format(self.inputs.operation))
         return outputs
 
 
@@ -312,8 +305,8 @@ class BinaryMathsInteger(MathsCommand):
     >>> node.inputs.operation = 'dil'
     >>> node.inputs.operand_value = 2
     >>> node.inputs.output_datatype = 'float'
-    >>> node.cmdline  # doctest: +ELLIPSIS +ALLOW_UNICODE
-    'seg_maths im1.nii -dil 2 -odt float .../im1_dil.nii'
+    >>> node.cmdline  # doctest: +ALLOW_UNICODE
+    'seg_maths im1.nii -dil 2 -odt float im1_dil.nii'
 
     """
     input_spec = BinaryMathsInputInteger
@@ -383,8 +376,8 @@ class TupleMaths(MathsCommand):
     >>> node.inputs.operand_file1 = 'im2.nii'
     >>> node.inputs.operand_value2 = 2.0
     >>> node.inputs.output_datatype = 'float'
-    >>> node.cmdline  # doctest: +ELLIPSIS +ALLOW_UNICODE
-    'seg_maths im1.nii -lncc im2.nii 2.00000000 -odt float .../im1_lncc.nii'
+    >>> node.cmdline  # doctest: +ALLOW_UNICODE
+    'seg_maths im1.nii -lncc im2.nii 2.00000000 -odt float im1_lncc.nii'
 
     """
     input_spec = TupleMathsInput
@@ -424,9 +417,9 @@ class Merge(MathsCommand):
     >>> node.inputs.merge_files = files
     >>> node.inputs.dimension = 2
     >>> node.inputs.output_datatype = 'float'
-    >>> node.cmdline  # doctest: +ELLIPSIS +ALLOW_UNICODE
+    >>> node.cmdline  # doctest: +ALLOW_UNICODE
     'seg_maths im1.nii -merge 2 2 im2.nii im3.nii -odt float \
-.../im1_merged.nii'
+im1_merged.nii'
 
     """
     input_spec = MergeInput
