@@ -255,8 +255,8 @@ class CleanerInputSpec(CommandLineInputSpec):
                                  desc='cleanup motion confounds, looks for design.fsf for highpass filter cut-off',
                                  position=2)
 
-    highpass = traits.Float(argstr='-m -h %f',
-                            desc='cleanup motion confounds', value=100, position=2)
+    highpass = traits.Float(100, argstr='-m -h %f', usedefault=True,
+                            desc='cleanup motion confounds', position=2)
 
     aggressive = traits.Bool(argstr='-A',
                              desc='Apply aggressive (full variance) cleanup, instead of the default less-aggressive (unique variance) cleanup.', position=3)
