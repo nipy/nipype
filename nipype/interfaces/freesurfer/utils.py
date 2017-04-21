@@ -976,15 +976,17 @@ class MRIsCombineOutputSpec(TraitedSpec):
 
 class MRIsCombine(FSSurfaceCommand):
     """
-    Uses Freesurfer's mris_convert to combine two surface files into one.
+    Uses Freesurfer's ``mris_convert`` to combine two surface files into one.
 
     For complete details, see the `mris_convert Documentation.
     <https://surfer.nmr.mgh.harvard.edu/fswiki/mris_convert>`_
 
-    If given an out_file that does not begin with 'lh.' or 'rh.',
-    mris_convert will prepend 'lh.' to the file name.
-    To avoid this behavior, consider setting out_file = './<filename>', or
+    If given an ``out_file`` that does not begin with ``'lh.'`` or ``'rh.'``,
+    ``mris_convert`` will prepend ``'lh.'`` to the file name.
+    To avoid this behavior, consider setting ``out_file = './<filename>'``, or
     leaving out_file blank.
+
+    In a Node/Workflow, ``out_file`` is interpreted literally.
 
     Example
     -------
@@ -1003,24 +1005,21 @@ class MRIsCombine(FSSurfaceCommand):
 
     def _list_outputs(self):
         outputs = self._outputs().get()
-        outputs['out_file'] = self._associated_file(self.inputs.in_files[0],
-                                                    self.inputs.out_file)
+
+        # mris_convert --combinesurfs uses lh. as the default prefix
+        # regardless of input file names, except when path info is
+        # specified
+        path, base = os.path.split(self.inputs.out_file)
+        if path == '' and base[:3] not in ('lh.', 'rh.'):
+            base = 'lh.' + base
+        outputs['out_file'] = os.path.abspath(os.path.join(path, base))
+
         return outputs
 
-    @staticmethod
-    def _associated_file(in_file, out_name):
-        """Unlike the standard _associated_file, which uses the prefix from
-        in_file, in MRIsCombine, it uses 'lh.' as the prefix for the output
-        file no matter what the inputs are.
-        """
-        path, base = os.path.split(out_name)
-        if path == '':
-            hemis = ('lh.', 'rh.')
-            if base[:3] not in hemis:
-                base = 'lh.' + base
-        return os.path.abspath(os.path.join(path, base))
-
     def _normalize_filenames(self):
+        """ In a Node context, interpret out_file as a literal path to
+        reduce surprise.
+        """
         if isdefined(self.inputs.out_file):
             self.inputs.out_file = os.path.abspath(self.inputs.out_file)
 
