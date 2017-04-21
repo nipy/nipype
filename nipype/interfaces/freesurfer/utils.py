@@ -3000,11 +3000,6 @@ class MRIsExpandInputSpec(FSTraitedSpec):
         desc=('Name of thickness file (implicit: "thickness")\n'
               'If no path, uses directory of `in_file`\n'
               'If no path AND missing "lh." or "rh.", derive from `in_file`'))
-    navgs = traits.Tuple(
-        traits.Int, traits.Int,
-        argstr='-navgs %d %d',
-        desc=('Tuple of (n_averages, min_averages) parameters '
-              '(implicit: (16, 0))'))
     pial = traits.Str(
         argstr='-pial %s', copyfile=False,
         desc=('Name of pial file (implicit: "pial")\n'
@@ -3026,6 +3021,11 @@ class MRIsExpandInputSpec(FSTraitedSpec):
         desc='Number of surfacces to write during expansion')
     # # Requires dev version - Re-add when min_ver/max_ver support this
     # # https://github.com/freesurfer/freesurfer/blob/9730cb9/mris_expand/mris_expand.c
+    # navgs = traits.Tuple(
+    #     traits.Int, traits.Int,
+    #     argstr='-navgs %d %d',
+    #     desc=('Tuple of (n_averages, min_averages) parameters '
+    #           '(implicit: (16, 0))'))
     # target_intensity = traits.Tuple(
     #     traits.Float, traits.File(exists=True),
     #     argstr='-intensity %g %s',
