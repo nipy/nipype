@@ -25,7 +25,7 @@ import os
 import subprocess
 from warnings import warn
 
-from ..base import CommandLine, isdefined, traits
+from ..base import CommandLine, isdefined
 from ...utils.filemanip import split_filename
 
 
@@ -46,25 +46,12 @@ def no_niftyreg(cmd='reg_f3d'):
     return True
 
 
-class PositiveInt(traits.BaseInt):
-    # Define the default value
-    default_value = 0
-    # Describe the trait type
-    info_text = 'A positive integer'
-
-    def validate(self, obj, name, value):
-        value = super(PositiveInt, self).validate(obj, name, value)
-        if (value >= 0) == 1:
-            return value
-        self.error(obj, name, value)
-
-
 class NiftyRegCommand(CommandLine):
     """
     Base support interface for NiftyReg commands.
     """
     _suffix = '_nr'
-    _min_version = '1.5.10'
+    _min_version = '1.5.30'
 
     def __init__(self, required_version=None, **inputs):
         super(NiftyRegCommand, self).__init__(**inputs)
@@ -110,6 +97,13 @@ class NiftyRegCommand(CommandLine):
         if self.get_version() is None:
             return False
         return True
+
+    def _run_interface(self, runtime):
+        # Update num threads estimate from OMP_NUM_THREADS env var
+        # Default to 1 if not set
+        if not isdefined(self.inputs.environ['OMP_NUM_THREADS']):
+            self.inputs.environ['OMP_NUM_THREADS'] = self.num_threads
+        return super(NiftyRegCommand, self)._run_interface(runtime)
 
     def _gen_fname(self, basename, out_dir=None, suffix=None, ext=None):
         if basename == '':

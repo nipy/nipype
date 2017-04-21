@@ -22,7 +22,7 @@ import os
 import warnings
 
 from ..base import TraitedSpec, File, traits, isdefined, CommandLineInputSpec
-from .base import get_custom_path, NiftyRegCommand, PositiveInt
+from .base import get_custom_path, NiftyRegCommand
 from ...utils.filemanip import split_filename
 
 
@@ -65,14 +65,14 @@ class RegAladinInputSpec(CommandLineInputSpec):
                       desc='The input floating mask',
                       argstr='-fmask %s')
     # Maximum number of iterations
-    maxit_val = PositiveInt(desc='Maximum number of iterations',
-                            argstr='-maxit %d')
+    maxit_val = traits.Range(desc='Maximum number of iterations',
+                             argstr='-maxit %d', low=0)
     # Multiresolution levels
-    ln_val = PositiveInt(desc='Number of resolution levels to create',
-                         argstr='-ln %d')
+    ln_val = traits.Range(desc='Number of resolution levels to create',
+                          argstr='-ln %d', low=0)
     # Number of resolution levels to process
-    lp_val = PositiveInt(desc='Number of resolution levels to perform',
-                         argstr='-lp %d')
+    lp_val = traits.Range(desc='Number of resolution levels to perform',
+                          argstr='-lp %d', low=0)
     # Smoothing to apply on reference image
     desc = 'Amount of smoothing to apply to reference image'
     smoo_r_val = traits.Float(desc=desc,
@@ -90,10 +90,11 @@ class RegAladinInputSpec(CommandLineInputSpec):
     cog_flag = traits.Bool(desc=desc,
                            argstr='-cog')
     # Percent of blocks that are considered active.
-    v_val = PositiveInt(desc='Percent of blocks that are active',
-                        argstr='-pv %d')
+    v_val = traits.Range(desc='Percent of blocks that are active',
+                         argstr='-pv %d', low=0)
     # Percent of inlier blocks
-    i_val = PositiveInt(desc='Percent of inlier blocks', argstr='-pi %d')
+    i_val = traits.Range(desc='Percent of inlier blocks', argstr='-pi %d',
+                         low=0)
     # Lower threshold on reference image
     ref_low_val = traits.Float(desc='Lower threshold value on reference image',
                                argstr='-refLowThr %f')
@@ -226,19 +227,19 @@ class RegF3DInputSpec(CommandLineInputSpec):
 
     # Lower threshold for reference image
     desc = 'Lower threshold for reference image at the specified time point'
-    rlwth2_thr_val = traits.Tuple(PositiveInt, traits.Float,
+    rlwth2_thr_val = traits.Tuple(traits.Range(low=0), traits.Float,
                                   desc=desc, argstr='-rLwTh %d %f')
     # Upper threshold for reference image
     desc = 'Upper threshold for reference image at the specified time point'
-    rupth2_thr_val = traits.Tuple(PositiveInt, traits.Float,
+    rupth2_thr_val = traits.Tuple(traits.Range(low=0), traits.Float,
                                   desc=desc, argstr='-rUpTh %d %f')
     # Lower threshold for reference image
     desc = 'Lower threshold for floating image at the specified time point'
-    flwth2_thr_val = traits.Tuple(PositiveInt, traits.Float,
+    flwth2_thr_val = traits.Tuple(traits.Range(low=0), traits.Float,
                                   desc=desc, argstr='-fLwTh %d %f')
     # Upper threshold for reference image
     desc = 'Upper threshold for floating image at the specified time point'
-    fupth2_thr_val = traits.Tuple(PositiveInt, traits.Float,
+    fupth2_thr_val = traits.Tuple(traits.Range(low=0), traits.Float,
                                   desc=desc, argstr='-fUpTh %d %f')
 
     # Final grid spacing along the 3 axes
@@ -263,33 +264,33 @@ only'
     desc = 'use NMI even when other options are specified'
     nmi_flag = traits.Bool(argstr='--nmi', desc=desc)
     desc = 'Number of bins in the histogram for reference image'
-    rbn_val = PositiveInt(desc=desc, argstr='--rbn %d')
+    rbn_val = traits.Range(low=0, desc=desc, argstr='--rbn %d')
     desc = 'Number of bins in the histogram for reference image'
-    fbn_val = PositiveInt(desc=desc, argstr='--fbn %d')
+    fbn_val = traits.Range(low=0, desc=desc, argstr='--fbn %d')
     desc = 'Number of bins in the histogram for reference image for given \
 time point'
-    rbn2_val = traits.Tuple(PositiveInt, PositiveInt,
+    rbn2_val = traits.Tuple(traits.Range(low=0), traits.Range(low=0),
                             desc=desc, argstr='-rbn %d %d')
 
     desc = 'Number of bins in the histogram for reference image for given \
 time point'
-    fbn2_val = traits.Tuple(PositiveInt, PositiveInt,
+    fbn2_val = traits.Tuple(traits.Range(low=0), traits.Range(low=0),
                             desc=desc, argstr='-fbn %d %d')
 
     lncc_val = traits.Float(desc='SD of the Gaussian for computing LNCC',
                             argstr='--lncc %f')
     desc = 'SD of the Gaussian for computing LNCC for a given time point'
-    lncc2_val = traits.Tuple(PositiveInt, traits.Float,
+    lncc2_val = traits.Tuple(traits.Range(low=0), traits.Float,
                              desc=desc, argstr='-lncc %d %f')
 
     ssd_flag = traits.Bool(desc='Use SSD as the similarity measure',
                            argstr='--ssd')
     desc = 'Use SSD as the similarity measure for a given time point'
-    ssd2_flag = PositiveInt(desc=desc, argstr='-ssd %d')
+    ssd2_flag = traits.Range(low=0, desc=desc, argstr='-ssd %d')
     kld_flag = traits.Bool(desc='Use KL divergence as the similarity measure',
                            argstr='--kld')
     desc = 'Use KL divergence as the similarity measure for a given time point'
-    kld2_flag = PositiveInt(desc=desc, argstr='-kld %d')
+    kld2_flag = traits.Range(low=0, desc=desc, argstr='-kld %d')
     amc_flag = traits.Bool(desc='Use additive NMI', argstr='-amc')
 
     nox_flag = traits.Bool(desc="Don't optimise in x direction",
@@ -300,18 +301,18 @@ time point'
                            argstr='-noz')
 
     # Optimization options
-    maxit_val = PositiveInt(desc='Maximum number of iterations per level',
-                            argstr='-maxit %d')
-    ln_val = PositiveInt(desc='Number of resolution levels to create',
-                         argstr='-ln %d')
-    lp_val = PositiveInt(desc='Number of resolution levels to perform',
-                         argstr='-lp %d')
+    maxit_val = traits.Range(low=0, argstr='-maxit %d',
+                             desc='Maximum number of iterations per level')
+    ln_val = traits.Range(low=0, argstr='-ln %d',
+                          desc='Number of resolution levels to create')
+    lp_val = traits.Range(low=0, argstr='-lp %d',
+                          desc='Number of resolution levels to perform')
     nopy_flag = traits.Bool(desc='Do not use the multiresolution approach',
                             argstr='-nopy')
     noconj_flag = traits.Bool(desc='Use simple GD optimization',
                               argstr='-noConj')
     desc = 'Add perturbation steps after each optimization step'
-    pert_val = PositiveInt(desc=desc, argstr='-pert %d')
+    pert_val = traits.Range(low=0, desc=desc, argstr='-pert %d')
 
     # F3d2 options
     vel_flag = traits.Bool(desc='Use velocity field integration',
