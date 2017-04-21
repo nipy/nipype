@@ -38,7 +38,7 @@ iflogger = logging.getLogger('interface')
 
 # Keeping this to avoid breaking external programs that depend on it, but
 # this should not be used internally
-FSVersion = Info.looseversion()
+FSVersion = Info.looseversion().vstring
 
 
 class ParseDICOMDirInputSpec(FSTraitedSpec):
