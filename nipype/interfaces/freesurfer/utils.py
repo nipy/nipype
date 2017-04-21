@@ -3037,7 +3037,7 @@ class MRIsExpandOutputSpec(TraitedSpec):
     out_file = File(desc='Output surface file')
 
 
-class MRIsExpand(FSCommand):
+class MRIsExpand(FSSurfaceCommand):
     """
     Expands a surface (typically ?h.white) outwards while maintaining
     smoothness and self-intersection constraints.
@@ -3063,7 +3063,9 @@ class MRIsExpand(FSCommand):
                                                     self.inputs.out_name)
         return outputs
 
-    def _get_filecopy_info(self):
+    def _normalize_filenames(self):
+        """ Find full paths for pial, thickness and sphere files for copying
+        """
         in_file = self.inputs.in_file
 
         pial = self.inputs.pial
@@ -3079,20 +3081,3 @@ class MRIsExpand(FSCommand):
                                                                thickness_name)
 
         self.inputs.sphere = self._associated_file(in_file, self.inputs.sphere)
-
-        return super(MRIsExpand, self)._get_filecopy_info()
-
-    @staticmethod
-    def _associated_file(in_file, out_name):
-        """Based on MRIsBuildFileName in freesurfer/utils/mrisurf.c
-
-        Use file prefix to indicate hemisphere, rather than inspecting the
-        surface data structure
-        """
-        path, base = os.path.split(out_name)
-        if path == '':
-            path, in_file = os.path.split(in_file)
-            hemis = ('lh.', 'rh.')
-            if in_file[:3] in hemis and base[:3] not in hemis:
-                base = in_file[:3] + base
-        return os.path.join(path, base)
