@@ -149,8 +149,8 @@ class UnaryMaths(MathsCommand):
     >>> node.inputs.in_file = 'im1.nii'
     >>> node.inputs.operation = 'sqrt'
     >>> node.inputs.output_datatype = 'float'
-    >>> node.cmdline  # doctest: +ALLOW_UNICODE
-    'seg_maths im1.nii -sqrt -odt float im1_sqrt.nii'
+    >>> node.cmdline  # doctest: +ELLIPSIS +ALLOW_UNICODE
+    'seg_maths im1.nii -sqrt -odt float .../im1_sqrt.nii'
 
     """
     input_spec = UnaryMathsInput
@@ -237,8 +237,8 @@ class BinaryMaths(MathsCommand):
     >>> node.inputs.operation = 'sub'
     >>> node.inputs.operand_file = 'im2.nii'
     >>> node.inputs.output_datatype = 'float'
-    >>> node.cmdline  # doctest: +ALLOW_UNICODE
-    'seg_maths im1.nii -sub im2.nii -odt float im1_sub.nii'
+    >>> node.cmdline  # doctest: +ELLIPSIS +ALLOW_UNICODE
+    'seg_maths im1.nii -sub im2.nii -odt float .../im1_sub.nii'
 
     """
     input_spec = BinaryMathsInput
@@ -305,8 +305,8 @@ class BinaryMathsInteger(MathsCommand):
     >>> node.inputs.operation = 'dil'
     >>> node.inputs.operand_value = 2
     >>> node.inputs.output_datatype = 'float'
-    >>> node.cmdline  # doctest: +ALLOW_UNICODE
-    'seg_maths im1.nii -dil 2 -odt float im1_dil.nii'
+    >>> node.cmdline  # doctest: +ELLIPSIS +ALLOW_UNICODE
+    'seg_maths im1.nii -dil 2 -odt float .../im1_dil.nii'
 
     """
     input_spec = BinaryMathsInputInteger
@@ -376,8 +376,8 @@ class TupleMaths(MathsCommand):
     >>> node.inputs.operand_file1 = 'im2.nii'
     >>> node.inputs.operand_value2 = 2.0
     >>> node.inputs.output_datatype = 'float'
-    >>> node.cmdline  # doctest: +ALLOW_UNICODE
-    'seg_maths im1.nii -lncc im2.nii 2.00000000 -odt float im1_lncc.nii'
+    >>> node.cmdline  # doctest: +ELLIPSIS +ALLOW_UNICODE
+    'seg_maths im1.nii -lncc im2.nii 2.00000000 -odt float .../im1_lncc.nii'
 
     """
     input_spec = TupleMathsInput
@@ -417,9 +417,9 @@ class Merge(MathsCommand):
     >>> node.inputs.merge_files = files
     >>> node.inputs.dimension = 2
     >>> node.inputs.output_datatype = 'float'
-    >>> node.cmdline  # doctest: +ALLOW_UNICODE
+    >>> node.cmdline  # doctest: +ELLIPSIS +ALLOW_UNICODE
     'seg_maths im1.nii -merge 2 2 im2.nii im3.nii -odt float \
-im1_merged.nii'
+.../im1_merged.nii'
 
     """
     input_spec = MergeInput
