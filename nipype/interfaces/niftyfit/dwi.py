@@ -249,9 +249,9 @@ class FitDwi(NiftyFitCommand):
     >>> fit_dwi.cmdline  # doctest: +ALLOW_UNICODE
     'fit_dwi -source dwi.nii.gz -bval bvals -bvec bvecs -dti \
 -error dwi_error.nii.gz -famap dwi_famap.nii.gz -mcmap dwi_mcmap.nii.gz \
--mdmap dwi_mdmap.nii.gz -nodiff dwi_no_diff.nii.gz -res dwi_resmap.nii.gz \
--rgbmap rgb.nii.gz -syn dwi_syn.nii.gz -tenmap2 dwi_tenmap2.nii.gz  \
--v1map dwi_v1map.nii.gz'
+-mcout dwi_mcout.txt -mdmap dwi_mdmap.nii.gz -nodiff dwi_no_diff.nii.gz \
+-res dwi_resmap.nii.gz -rgbmap rgb.nii.gz -syn dwi_syn.nii.gz \
+-tenmap2 dwi_tenmap2.nii.gz  -v1map dwi_v1map.nii.gz'
 
     """
     _cmd = get_custom_path('fit_dwi')
