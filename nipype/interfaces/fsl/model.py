@@ -24,6 +24,7 @@ from nibabel import load
 from ... import LooseVersion
 from ...utils.filemanip import list_to_filename, filename_to_list
 from ...utils.misc import human_order_sorted
+from ...external.due import BibTeX
 from ..base import (load_template, File, traits, isdefined,
                     TraitedSpec, BaseInterface, Directory,
                     InputMultiPath, OutputMultiPath,
@@ -931,14 +932,14 @@ class FLAMEO(FSLCommand):
     Initialize FLAMEO with no options, assigning them when calling run:
 
     >>> from nipype.interfaces import fsl
-    >>> import os
-    >>> flameo = fsl.FLAMEO(cope_file='cope.nii.gz', \
-                            var_cope_file='varcope.nii.gz', \
-                            cov_split_file='cov_split.mat', \
-                            design_file='design.mat', \
-                            t_con_file='design.con', \
-                            mask_file='mask.nii', \
-                            run_mode='fe')
+    >>> flameo = fsl.FLAMEO()
+    >>> flameo.inputs.cope_file = 'cope.nii.gz'
+    >>> flameo.inputs.var_cope_file = 'varcope.nii.gz'
+    >>> flameo.inputs.cov_split_file = 'cov_split.mat'
+    >>> flameo.inputs.design_file = 'design.mat'
+    >>> flameo.inputs.t_con_file = 'design.con'
+    >>> flameo.inputs.mask_file = 'mask.nii'
+    >>> flameo.inputs.run_mode = 'fe'
     >>> flameo.cmdline # doctest: +ALLOW_UNICODE
     'flameo --copefile=cope.nii.gz --covsplitfile=cov_split.mat --designfile=design.mat --ld=stats --maskfile=mask.nii --runmode=fe --tcontrastsfile=design.con --varcopefile=varcope.nii.gz'
 
@@ -947,6 +948,28 @@ class FLAMEO(FSLCommand):
     _cmd = 'flameo'
     input_spec = FLAMEOInputSpec
     output_spec = FLAMEOOutputSpec
+
+    references_ = [{'entry': BibTeX('@article{BeckmannJenkinsonSmith2003,'
+                                    'author={C.F. Beckmann, M. Jenkinson, and S.M. Smith},'
+                                    'title={General multilevel linear modeling for group analysis in FMRI.},'
+                                    'journal={NeuroImage},'
+                                    'volume={20},'
+                                    'pages={1052-1063},'
+                                    'year={2003},'
+                                    '}'),
+                    'tags': ['method'],
+                    },
+                   {'entry': BibTeX('@article{WoolrichBehrensBeckmannJenkinsonSmith2004,'
+                                    'author={M.W. Woolrich, T.E. Behrens, '
+                                    'C.F. Beckmann, M. Jenkinson, and S.M. Smith},'
+                                    'title={Multilevel linear modelling for FMRI group analysis using Bayesian inference.},'
+                                    'journal={NeuroImage},'
+                                    'volume={21},'
+                                    'pages={1732-1747},'
+                                    'year={2004},'
+                                    '}'),
+                    'tags': ['method'],
+                    }]
 
     # ohinds: 2010-04-06
     def _run_interface(self, runtime):
