@@ -470,6 +470,14 @@ class EddyOutputSpec(TraitedSpec):
     out_outlier_report = File(
         exists=True, desc=('Text-file with a plain language report on what '
                            'outlier slices eddy has found'))
+    out_outlier_map = File(exists=True,
+                           desc=('Outlier volume, slice matrix'))
+    out_outlier_n_sd_map = File(exists=True,
+                                desc='Outlier volume, slice matrix, n of \
+standard deviations mean from prediction')
+    out_outlier_n_sqr_sd_map = File(exists=True,
+                                    desc='Outlier volume, slice matrix, n of \
+standard deviations rms difference from prediction')
 
 
 class Eddy(FSLCommand):
@@ -573,6 +581,9 @@ class Eddy(FSLCommand):
             % self.inputs.out_base)
         out_outlier_report = os.path.abspath(
             '%s.eddy_outlier_report' % self.inputs.out_base)
+        out_outlier_map = os.path.abspath('%s.eddy_outlier_map' % self.inputs.out_base)
+        out_outlier_n_sd_map = os.path.abspath('%s.eddy_outlier_n_stdev_map' % self.inputs.out_base)
+        out_outlier_n_sqr_sd_map = os.path.abspath('%s.eddy_outlier_n_sqr_stdev_map' % self.inputs.out_base)
 
         if os.path.exists(out_rotated_bvecs):
             outputs['out_rotated_bvecs'] = out_rotated_bvecs
@@ -586,7 +597,12 @@ class Eddy(FSLCommand):
                 out_shell_alignment_parameters
         if os.path.exists(out_outlier_report):
             outputs['out_outlier_report'] = out_outlier_report
-
+        if os.path.exists(out_outlier_map):
+            outputs['out_outlier_map'] = out_outlier_map
+        if os.path.exists(out_outlier_n_sd_map):
+            outputs['out_outlier_n_sd_map'] = out_outlier_n_sd_map
+        if os.path.exists(out_outlier_n_sqr_sd_map):
+            outputs['out_outlier_n_sqr_sd_map'] = out_outlier_n_sqr_sd_map
         return outputs
 
 
