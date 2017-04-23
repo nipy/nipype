@@ -632,6 +632,8 @@ class ReconAllInputSpec(CommandLineInputSpec):
                         desc="Conform to minimum voxel size (for voxels < 1mm)")
     expert = File(exists=True, argstr='-expert %s',
                   desc="Set parameters using expert file")
+    xopts = traits.Enum("use", "clean", "overwrite", argstr='-xopts-%s',
+                        desc="Use, delete or overwrite existing expert options file")
     subjects_dir = Directory(exists=True, argstr='-sd %s', hash_files=False,
                              desc='path to subjects directory', genfile=True)
     flags = traits.Str(argstr='%s', desc='additional parameters')
@@ -1001,10 +1003,29 @@ class ReconAll(CommandLine):
         if lines == []:
             return ''
 
+        contents = ''.join(lines)
+        if not isdefined(self.inputs.xopts) and \
+                self.get_expert_file() == contents:
+            return ' -xopts-use'
+
         expert_fname = os.path.abspath('expert.opts')
         with open(expert_fname, 'w') as fobj:
-            fobj.write(''.join(lines))
+            fobj.write(contents)
         return ' -expert {}'.format(expert_fname)
+
+    def _get_expert_file(self):
+        # Read pre-existing options file, if it exists
+        if isdefined(self.inputs.subjects_dir):
+            subjects_dir = self.inputs.subjects_dir
+        else:
+            subjects_dir = self._gen_subjects_dir()
+
+        xopts_file = os.path.join(subjects_dir, self.inputs.subject_id,
+                                  'scripts', 'expert-options')
+        if not os.path.exists(xopts_file):
+            return ''
+        with open(xopts_file, 'r') as fobj:
+            return fobj.read()
 
 
 class BBRegisterInputSpec(FSTraitedSpec):

@@ -98,6 +98,8 @@ def test_ReconAll_inputs():
     use_T2=dict(argstr='-T2pial',
     min_ver='5.3.0',
     ),
+    xopts=dict(argstr='-xopts-%s',
+    ),
     )
     inputs = ReconAll.input_spec()
 
