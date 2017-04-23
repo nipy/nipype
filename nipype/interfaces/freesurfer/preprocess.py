@@ -949,10 +949,22 @@ class ReconAll(CommandLine):
         if not isdefined(subjects_dir):
             subjects_dir = self._gen_subjects_dir()
 
+        # Check only relevant steps
+        directive = self.inputs.directive
+        if not isdefined(directive):
+            steps = []
+        elif directive == 'autorecon1':
+            steps = self._autorecon1_steps
+        elif directive.startswith('autorecon2'):
+            steps = self._autorecon2_steps
+        elif directive == 'autorecon3':
+            steps = self._autorecon3_steps
+        else:
+            steps = self._steps
+
         no_run = True
         flags = []
-        for idx, step in enumerate(self._steps):
-            step, outfiles, infiles = step
+        for step, outfiles, infiles in steps:
             flag = '-{}'.format(step)
             noflag = '-no{}'.format(step)
             if noflag in cmd:
