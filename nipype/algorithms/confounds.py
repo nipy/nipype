@@ -471,7 +471,7 @@ class TCompCor(CompCor):
                              .format(self.inputs.realigned_file, imgseries.ndim, imgseries.shape))
 
         if isdefined(self.inputs.mask_file):
-            in_mask_data = nb.load(self.inputs.mask_file, mmap=NUMPY_MMAP).get_data()
+            in_mask_data = nb.load(self.inputs.mask_file[0], mmap=NUMPY_MMAP).get_data()
             imgseries = imgseries[in_mask_data != 0, :]
 
         # From the paper:
