@@ -630,6 +630,22 @@ class ReconAllInputSpec(CommandLineInputSpec):
                            desc="Enable parallel execution")
     hires = traits.Bool(argstr="-hires", min_ver='6.0.0',
                         desc="Conform to minimum voxel size (for voxels < 1mm)")
+    mprage = traits.Bool(argstr='-mprage',
+                         desc=('Assume scan parameters are MGH MP-RAGE '
+                               'protocol, which produces darker gray matter'))
+    big_ventricles = traits.Bool(argstr='-bigventricles',
+                                 desc=('For use in subjects with enlarged '
+                                       'ventricles'))
+    brainstem = traits.Bool(argstr='-brainstem-structures',
+                            desc='Segment brainstem structures')
+    hippocampal_subfields_T1 = traits.Bool(
+        argstr='-hippocampal-subfields-T1', min_ver='6.0.0',
+        desc='segment hippocampal subfields using input T1 scan')
+    hippocampal_subfields_T2 = traits.Tuple(
+        File(exists=True), traits.Str(),
+        argstr='-hippocampal-subfields-T2 %s %s', min_ver='6.0.0',
+        desc=('segment hippocampal subfields using T2 scan, identified by '
+              'ID (may be combined with hippocampal_subfields_T1)'))
     expert = File(exists=True, argstr='-expert %s',
                   desc="Set parameters using expert file")
     xopts = traits.Enum("use", "clean", "overwrite", argstr='-xopts-%s',
@@ -935,6 +951,13 @@ class ReconAll(CommandLine):
         if name == 'T1_files':
             if self._is_resuming():
                 return ''
+        if name == 'hippocampal_subfields_T1' and \
+                isdefined(self.inputs.hippocampal_subfields_T2):
+            return ''
+        if all((name == 'hippocampal_subfields_T2',
+                isdefined(self.inputs.hippocampal_subfields_T1) and
+                self.inputs.hippocampal_subfields_T1)):
+            trait_spec.argstr = trait_spec.argstr.replace('T2', 'T1T2')
         return super(ReconAll, self)._format_arg(name, trait_spec, value)
 
     @property
