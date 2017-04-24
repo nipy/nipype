@@ -45,48 +45,47 @@ class FillLesionsInputSpec(CommandLineInputSpec):
 
     # Optional arguments
     desc = "Dilate the mask <int> times (in voxels, by default 0)"
-    in_dilation = traits.Int(desc=desc, argstr='-dil %d', mandatory=False)
+    in_dilation = traits.Int(desc=desc, argstr='-dil %d')
 
     desc = 'Percentage of minimum number of voxels between patches <float> \
 (by default 0.5).'
-    match = traits.Float(desc=desc, argstr='-match %f', mandatory=False)
+    match = traits.Float(desc=desc, argstr='-match %f')
 
     desc = 'Minimum percentage of valid voxels in target patch <float> \
 (by default 0).'
-    search = traits.Float(desc=desc, argstr='-search %f', mandatory=False)
+    search = traits.Float(desc=desc, argstr='-search %f')
 
     desc = 'Smoothing by <float> (in minimal 6-neighbourhood voxels \
 (by default 0.1)).'
-    smooth = traits.Float(desc=desc, argstr='-smo %f', mandatory=False)
+    smooth = traits.Float(desc=desc, argstr='-smo %f')
 
     desc = 'Search regions size respect biggest patch size (by default 4).'
-    size = traits.Int(desc=desc, argstr='-size %d', mandatory=False)
+    size = traits.Int(desc=desc, argstr='-size %d')
 
     desc = 'Patch cardinality weighting factor (by default 2).'
-    cwf = traits.Float(desc=desc, argstr='-cwf %f', mandatory=False)
+    cwf = traits.Float(desc=desc, argstr='-cwf %f')
 
     desc = 'Give a binary mask with the valid search areas.'
-    bin_mask = File(desc=desc, argstr='-mask %s', mandatory=False)
+    bin_mask = File(desc=desc, argstr='-mask %s')
 
     desc = "Guizard et al. (FIN 2015) method, it doesn't include the \
 multiresolution/hierarchical inpainting part, this part needs to be done \
 with some external software such as reg_tools and reg_resample from NiftyReg. \
 By default it uses the method presented in Prados et al. (Neuroimage 2016)."
-    other = traits.Bool(desc=desc, argstr='-other', mandatory=False)
+    other = traits.Bool(desc=desc, argstr='-other')
+
+    use_2d = traits.Bool(desc='Uses 2D patches in the Z axis, by default 3D.',
+                         argstr='-2D')
 
     debug = traits.Bool(desc='Save all intermidium files (by default OFF).',
-                        argstr='-debug', mandatory=False)
+                        argstr='-debug')
 
     desc = 'Set output <datatype> (char, short, int, uchar, ushort, uint, \
 float, double).'
-    out_datatype = traits.String(desc=desc, argstr='-odt %s', mandatory=False)
+    out_datatype = traits.String(desc=desc, argstr='-odt %s')
 
     verbose = traits.Bool(desc='Verbose (by default OFF).',
-                          argstr='-v', mandatory=False)
-
-    # Set the number of omp thread to use
-    omp_core = traits.Int(desc='Number of openmp thread to use. Default: 4',
-                          argstr='-omp %d')
+                          argstr='-v')
 
 
 class FillLesionsOutputSpec(TraitedSpec):
