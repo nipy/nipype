@@ -1,7 +1,6 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 
-import os
 import pytest
 
 from nipype.interfaces.niftyseg import (no_niftyseg, get_custom_path,
@@ -41,7 +40,7 @@ def test_seg_lab_fusion():
         in_file=in_file,
         file_to_seg=file_to_seg,
         template_file=template_file,
-        out_file=os.path.join(os.getcwd(), 'im1_steps.nii')
+        out_file='im1_steps.nii',
     )
 
     assert steps.cmdline == expected_cmd
@@ -62,7 +61,7 @@ def test_seg_lab_fusion():
         in_file=in_file,
         file_to_seg=file_to_seg,
         template_file=template_file,
-        out_file=os.path.join(os.getcwd(), 'im1_staple.nii')
+        out_file='im1_staple.nii',
     )
 
     assert staple.cmdline == expected_cmd
@@ -84,7 +83,7 @@ def test_seg_lab_fusion():
         in_file=in_file,
         file_to_seg=file_to_seg,
         template_file=template_file,
-        out_file=os.path.join(os.getcwd(), 'im1_mv.nii')
+        out_file='im1_mv.nii',
     )
 
     assert mv_node.cmdline == expected_cmd
@@ -118,7 +117,7 @@ def test_seg_calctopncc():
         cmd=get_custom_path('seg_CalcTopNCC'),
         in_file=in_file,
         file1=file1,
-        file2=file2
+        file2=file2,
     )
 
     assert calctopncc.cmdline == expected_cmd

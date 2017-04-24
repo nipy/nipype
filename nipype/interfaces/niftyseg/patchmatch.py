@@ -11,10 +11,10 @@ Change directory to provide relative paths for doctests
     >>> datadir = os.path.realpath(os.path.join(filepath, '../../testing/data'))
     >>> os.chdir(datadir)
 """
-import os
+
 import warnings
 
-from ..base import TraitedSpec, File, traits, isdefined, CommandLineInputSpec
+from ..base import TraitedSpec, File, traits, CommandLineInputSpec
 from .base import NiftySegCommand, get_custom_path
 
 

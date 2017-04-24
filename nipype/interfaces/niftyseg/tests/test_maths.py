@@ -1,7 +1,6 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 
-import os
 import pytest
 
 from nipype.interfaces.niftyseg import (no_niftyseg, get_custom_path,
@@ -34,7 +33,7 @@ def test_unary_maths():
     expected_cmd = '{cmd} {in_file} -otsu -odt float {out_file}'.format(
         cmd=get_custom_path('seg_maths'),
         in_file=in_file,
-        out_file=os.path.join(os.getcwd(), 'im1_otsu.nii'))
+        out_file='im1_otsu.nii')
 
     assert unarym.cmdline == expected_cmd
 
@@ -64,7 +63,7 @@ def test_binary_maths():
     expected_cmd = cmd_tmp.format(
         cmd=get_custom_path('seg_maths'),
         in_file=in_file,
-        out_file=os.path.join(os.getcwd(), 'im1_sub.nii'))
+        out_file='im1_sub.nii')
 
     assert binarym.cmdline == expected_cmd
 
@@ -93,7 +92,7 @@ def test_int_binary_maths():
     expected_cmd = '{cmd} {in_file} -dil 2 -odt float {out_file}'.format(
         cmd=get_custom_path('seg_maths'),
         in_file=in_file,
-        out_file=os.path.join(os.getcwd(), 'im1_dil.nii'))
+        out_file='im1_dil.nii')
 
     assert ibinarym.cmdline == expected_cmd
 
@@ -126,7 +125,7 @@ def test_tuple_maths():
         cmd=get_custom_path('seg_maths'),
         in_file=in_file,
         op=op_file,
-        out_file=os.path.join(os.getcwd(), 'im1_lncc.nii'))
+        out_file='im1_lncc.nii')
 
     assert tuplem.cmdline == expected_cmd
 
@@ -160,6 +159,6 @@ def test_merge():
         in_file=in_file,
         f1=file1,
         f2=file2,
-        out_file=os.path.join(os.getcwd(), 'im1_merged.nii'))
+        out_file='im1_merged.nii')
 
     assert merge.cmdline == expected_cmd

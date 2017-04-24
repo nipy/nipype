@@ -19,7 +19,7 @@ import warnings
 from ..base import (TraitedSpec, File, traits, isdefined, CommandLineInputSpec,
                     NipypeInterfaceError)
 from .base import NiftySegCommand, get_custom_path
-from ...utils.filemanip import load_json, save_json
+from ...utils.filemanip import load_json, save_json, split_filename
 
 
 warn = warnings.warn
@@ -46,7 +46,8 @@ class LabelFusionInput(CommandLineInputSpec):
                      desc='Filename of the ROI for label fusion')
 
     out_file = File(argstr='-out %s',
-                    genfile=True,
+                    name_source=['in_file'],
+                    name_template='%s',
                     desc='Output consensus segmentation')
 
     prob_flag = traits.Bool(desc='Probabilistic/Fuzzy segmented image',
@@ -145,9 +146,9 @@ class LabelFusion(NiftySegCommand):
     >>> node.inputs.template_file = 'im3.nii'
     >>> node.inputs.template_num = 2
     >>> node.inputs.classifier_type = 'STEPS'
-    >>> node.cmdline  # doctest: +ELLIPSIS +ALLOW_UNICODE
+    >>> node.cmdline  # doctest: +ALLOW_UNICODE
     'seg_LabFusion -in im1.nii -STEPS 2.000000 2 im2.nii im3.nii -out \
-.../im1_steps.nii'
+im1_steps.nii'
 
     """
     _cmd = get_custom_path('seg_LabFusion')
@@ -246,19 +247,11 @@ when 'classifier_type' is set to '%s' and 'sm_ranking' is set to '%s'."
                                         self.inputs.file_to_seg,
                                         self.inputs.template_file)
 
-    def _list_outputs(self):
-        outputs = self.output_spec().get()
-        if isdefined(self.inputs.out_file):
-            outputs['out_file'] = self.inputs.out_file
-        else:
-            outputs['out_file'] = self._gen_filename('out_file')
-        return outputs
-
-    def _gen_filename(self, name):
-        _suffix = '_%s' % self.inputs.classifier_type.lower()
-        if name == 'out_file':
-            return self._gen_fname(self.inputs.in_file, suffix=_suffix)
-        return None
+    def _overload_extension(self, value, name=None):
+        path, base, _ = split_filename(value)
+        _, _, ext = split_filename(self.inputs.in_file)
+        suffix = self.inputs.classifier_type.lower()
+        return os.path.join(path, '{0}_{1}{2}'.format(base, suffix, ext))
 
 
 class CalcTopNCCInputSpec(CommandLineInputSpec):
