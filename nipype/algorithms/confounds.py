@@ -352,7 +352,7 @@ class CompCor(BaseInterface):
     def _run_interface(self, runtime):
         imgseries = nb.load(self.inputs.realigned_file, mmap=NUMPY_MMAP).get_data()
         components = None
-        
+
         for mask_file in self.inputs.mask_file:
             mask = nb.load(mask_file, mmap=NUMPY_MMAP).get_data()
 
@@ -441,7 +441,7 @@ class TCompCorInputSpec(CompCorInputSpec):
 
 class TCompCorOutputSpec(CompCorInputSpec):
     # and all the fields in CompCorInputSpec
-    high_variance_mask = File(exists=True, desc="voxels excedding the variance threshold")
+    high_variance_mask = InputMultiPath(File(exists=True, desc="voxels excedding the variance threshold"))
 
 class TCompCor(CompCor):
     '''
