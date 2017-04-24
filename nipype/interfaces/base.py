@@ -368,11 +368,12 @@ class BaseTraitedSpec(traitlets.HasTraits):
         # dj TODO: it shouldn't be needed with traitlets (Satra)
         #traits.push_exception_handler(reraise_exceptions=True)
         undefined_traits = {}
-        pdb.set_trace()
+        #pdb.set_trace()
         # dj TODO: not sure if I should keep usedefault 
-        for trait in self.class_trait_names():
-            if not self.traits()[trait].usedefault:
-                undefined_traits[trait] = Undefined
+        #for trait in self.class_trait_names():
+        #    if not self.traits()[trait].usedefault:
+        #        undefined_traits[trait] = Undefined
+
         # dj TODO: i don't think we have to use it; commented for now
         #self.trait_set(trait_change_notify=False, **undefined_traits)#dj remove
         self._generate_handlers()
@@ -399,6 +400,8 @@ class BaseTraitedSpec(traitlets.HasTraits):
         """Find all traits with the 'xor' metadata and attach an event
         handler to them.
         """
+        #dj TODO: to trzeba zmieniac np. w freesurfer/preprocess.py
+        #dj TODO: zeby byl tag, a tu metadata
         has_xor = dict(xor=lambda t: t is not None)
         xors = self.trait_names(**has_xor)
         for elem in xors:
@@ -408,6 +411,8 @@ class BaseTraitedSpec(traitlets.HasTraits):
         for elem in deprecated:
             self.on_trait_change(self._deprecated_warn, elem)
 
+    # dj TODO: don't see test for *_warn
+    # dj TODO: chyba powinna miec forme (name, old, new, self)
     def _xor_warn(self, obj, name, old, new):
         """ Generates warnings for xor traits
         """
@@ -499,6 +504,8 @@ class BaseTraitedSpec(traitlets.HasTraits):
         notification handles
         """
         #pdb.set_trace()
+        #dj TOODO: not sure if this is not more complicated in traits
+        # dj TODO: recur?
         #out = super(BaseTraitedSpec, self).get(**kwargs)
         out = {}
         for key in self.class_trait_names():
@@ -513,7 +520,12 @@ class BaseTraitedSpec(traitlets.HasTraits):
         any traits. The dictionary does not contain any attributes that
         were Undefined
         """
-        out = super(BaseTraitedSpec, self).get(**kwargs)
+        #dj TODO: traitlets doesn't have get
+        # out = super(BaseTraitedSpec, self).get(**kwargs) 
+        out = {}
+        for key in self.class_trait_names():
+            out[key] = self.__getattribute__(key)
+        out = self._clean_container(out, Undefined)
         out = self._clean_container(out, skipundefined=True)
         return out
 
