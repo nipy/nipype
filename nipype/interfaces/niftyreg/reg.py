@@ -21,8 +21,8 @@ from builtins import staticmethod
 import os
 import warnings
 
-from ..base import TraitedSpec, File, traits, isdefined, CommandLineInputSpec
-from .base import get_custom_path, NiftyRegCommand
+from ..base import TraitedSpec, File, traits, isdefined
+from .base import get_custom_path, NiftyRegCommand, NiftyRegCommandInputSpec
 from ...utils.filemanip import split_filename
 
 
@@ -30,7 +30,7 @@ warn = warnings.warn
 warnings.filterwarnings('always', category=UserWarning)
 
 
-class RegAladinInputSpec(CommandLineInputSpec):
+class RegAladinInputSpec(NiftyRegCommandInputSpec):
     """ Input Spec for RegAladin. """
     # Input reference file
     ref_file = File(exists=True,
@@ -116,9 +116,6 @@ class RegAladinInputSpec(CommandLineInputSpec):
     # Verbosity off
     verbosity_off_flag = traits.Bool(argstr='-voff',
                                      desc='Turn off verbose output')
-    # Set the number of omp thread to use
-    omp_core_val = traits.Int(desc='Number of openmp thread to use',
-                              argstr='-omp %i')
 
     # Affine output transformation matrix file
     aff_file = File(name_source=['flo_file'],
@@ -177,7 +174,7 @@ class RegAladin(NiftyRegCommand):
         return outputs
 
 
-class RegF3DInputSpec(CommandLineInputSpec):
+class RegF3DInputSpec(NiftyRegCommandInputSpec):
     """ Input Spec for RegF3D. """
     # Input reference file
     ref_file = File(exists=True,
@@ -329,9 +326,6 @@ time point'
     # verbosity off
     verbosity_off_flag = traits.Bool(argstr='-voff',
                                      desc='Turn off verbose output')
-    # Set the number of omp thread to use
-    omp_core_val = traits.Int(desc='Number of openmp thread to use',
-                              argstr='-omp %i')
 
     # Output CPP image file
     cpp_file = File(name_source=['flo_file'],

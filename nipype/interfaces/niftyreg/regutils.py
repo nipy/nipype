@@ -20,8 +20,8 @@ from builtins import len, open, property, super
 import warnings
 import os
 
-from ..base import TraitedSpec, File, traits, isdefined, CommandLineInputSpec
-from .base import get_custom_path, NiftyRegCommand
+from ..base import TraitedSpec, File, traits, isdefined
+from .base import get_custom_path, NiftyRegCommand, NiftyRegCommandInputSpec
 from ...utils.filemanip import split_filename
 
 
@@ -29,7 +29,7 @@ warn = warnings.warn
 warnings.filterwarnings('always', category=UserWarning)
 
 
-class RegResampleInputSpec(CommandLineInputSpec):
+class RegResampleInputSpec(NiftyRegCommandInputSpec):
     """ Input Spec for RegResample. """
     # Input reference file
     ref_file = File(exists=True,
@@ -53,7 +53,8 @@ class RegResampleInputSpec(CommandLineInputSpec):
                        desc='Type of output')
 
     # Output file name
-    out_file = File(genfile=True,
+    out_file = File(name_source=['flo_file'],
+                    name_template='%s',
                     argstr='%s',
                     position=-1,
                     desc='The output filename of the transformed image')
@@ -80,10 +81,6 @@ lower resolution'
 estimating the PSF [0]'
     psf_alg = traits.Enum(0, 1, argstr='-psf_alg %d', desc=desc)
 
-    # Set the number of omp thread to use
-    omp_core_val = traits.Int(desc='Number of openmp thread to use',
-                              argstr='-omp %d')
-
 
 class RegResampleOutputSpec(TraitedSpec):
     """ Output Spec for RegResample. """
@@ -109,9 +106,9 @@ class RegResample(NiftyRegCommand):
     >>> node.inputs.trans_file = 'warpfield.nii'
     >>> node.inputs.inter_val = 'LIN'
     >>> node.inputs.omp_core_val = 4
-    >>> node.cmdline  # doctest: +ELLIPSIS +ALLOW_UNICODE
+    >>> node.cmdline  # doctest: +ALLOW_UNICODE
     'reg_resample -flo im2.nii -inter 1 -omp 4 -ref im1.nii -trans \
-warpfield.nii -res .../im2_res.nii.gz'
+warpfield.nii -res im2_res.nii.gz'
 
     """
     _cmd = get_custom_path('reg_resample')
@@ -126,15 +123,13 @@ warpfield.nii -res .../im2_res.nii.gz'
         else:
             return super(RegResample, self)._format_arg(name, spec, value)
 
-    def _gen_filename(self, name):
-        if name == 'out_file':
-            return self._gen_fname(self.inputs.flo_file,
-                                   suffix='_%s' % self.inputs.type,
-                                   ext='.nii.gz')
-        return None
+    def _overload_extension(self, value, name=None):
+        path, base, _ = split_filename(value)
+        suffix = self.inputs.type
+        return os.path.join(path, '{0}_{1}.nii.gz'.format(base, suffix))
 
 
-class RegJacobianInputSpec(CommandLineInputSpec):
+class RegJacobianInputSpec(NiftyRegCommandInputSpec):
     """ Input Spec for RegJacobian. """
     # Reference file name
     desc = 'Reference/target file (required if specifying CPP transformations.'
@@ -151,13 +146,11 @@ class RegJacobianInputSpec(CommandLineInputSpec):
                        argstr='-%s',
                        position=-2,
                        desc='Type of jacobian outcome')
-    out_file = File(genfile=True,
+    out_file = File(name_source=['trans_file'],
+                    name_template='%s',
                     desc='The output jacobian determinant file name',
                     argstr='%s',
                     position=-1)
-    # Set the number of omp thread to use
-    omp_core_val = traits.Int(desc='Number of openmp thread to use',
-                              argstr='-omp %i')
 
 
 class RegJacobianOutputSpec(TraitedSpec):
@@ -180,24 +173,22 @@ class RegJacobian(NiftyRegCommand):
     >>> node.inputs.ref_file = 'im1.nii'
     >>> node.inputs.trans_file = 'warpfield.nii'
     >>> node.inputs.omp_core_val = 4
-    >>> node.cmdline  # doctest: +ELLIPSIS +ALLOW_UNICODE
+    >>> node.cmdline  # doctest: +ALLOW_UNICODE
     'reg_jacobian -omp 4 -ref im1.nii -trans warpfield.nii -jac \
-.../warpfield_jac.nii.gz'
+warpfield_jac.nii.gz'
 
     """
     _cmd = get_custom_path('reg_jacobian')
     input_spec = RegJacobianInputSpec
     output_spec = RegJacobianOutputSpec
 
-    def _gen_filename(self, name):
-        if name == 'out_file':
-            return self._gen_fname(self.inputs.trans_file,
-                                   suffix='_%s' % self.inputs.type,
-                                   ext='.nii.gz')
-        return None
+    def _overload_extension(self, value, name=None):
+        path, base, _ = split_filename(value)
+        suffix = self.inputs.type
+        return os.path.join(path, '{0}_{1}.nii.gz'.format(base, suffix))
 
 
-class RegToolsInputSpec(CommandLineInputSpec):
+class RegToolsInputSpec(NiftyRegCommandInputSpec):
     """ Input Spec for RegTools. """
     # Input image file
     in_file = File(exists=True,
@@ -276,10 +267,6 @@ class RegToolsInputSpec(CommandLineInputSpec):
                              desc=desc,
                              argstr='-smoG %f %f %f')
 
-    # Set the number of omp thread to use
-    omp_core_val = traits.Int(desc='Number of openmp thread to use',
-                              argstr='-omp %i')
-
 
 class RegToolsOutputSpec(TraitedSpec):
     """ Output Spec for RegTools. """
@@ -312,7 +299,7 @@ class RegTools(NiftyRegCommand):
     _suffix = '_tools'
 
 
-class RegAverageInputSpec(CommandLineInputSpec):
+class RegAverageInputSpec(NiftyRegCommandInputSpec):
     """ Input Spec for RegAverage. """
     avg_files = traits.List(File(exist=True),
                             position=1,
@@ -424,10 +411,11 @@ class RegAverage(NiftyRegCommand):
             if isdefined(self.inputs.avg_lts_files):
                 return self._gen_fname(self._suffix, ext='.txt')
             elif isdefined(self.inputs.avg_files):
-                _, _, ext = split_filename(self.inputs.avg_files[0])
-                if ext not in ['.nii', '.nii.gz', '.hdr', '.img', '.img.gz']:
-                    return self._gen_fname(self._suffix, ext=ext)
+                _, _, _ext = split_filename(self.inputs.avg_files[0])
+                if _ext not in ['.nii', '.nii.gz', '.hdr', '.img', '.img.gz']:
+                    return self._gen_fname(self._suffix, ext=_ext)
             return self._gen_fname(self._suffix, ext='.nii.gz')
+
         return None
 
     @property
@@ -440,7 +428,7 @@ class RegAverage(NiftyRegCommand):
         return '%s --cmd_file %s' % (self.cmd, reg_average_cmd)
 
 
-class RegTransformInputSpec(CommandLineInputSpec):
+class RegTransformInputSpec(NiftyRegCommandInputSpec):
     """ Input Spec for RegTransform. """
     ref1_file = File(exists=True,
                      desc='The input reference/target image',
@@ -584,15 +572,10 @@ transformation'
                     argstr='%s',
                     desc='transformation file to write')
 
-    # Set the number of omp thread to use
-    omp_core_val = traits.Int(desc='Number of openmp thread to use',
-                              argstr='-omp %i')
-
 
 class RegTransformOutputSpec(TraitedSpec):
     """ Output Spec for RegTransform. """
-    desc = 'Output File (transformation in any format)'
-    out_file = File(exists=True, desc=desc)
+    out_file = File(desc='Output File (transformation in any format)')
 
 
 class RegTransform(NiftyRegCommand):
@@ -679,7 +662,7 @@ class RegTransform(NiftyRegCommand):
         return outputs
 
 
-class RegMeasureInputSpec(CommandLineInputSpec):
+class RegMeasureInputSpec(NiftyRegCommandInputSpec):
     """ Input Spec for RegMeasure. """
     # Input reference file
     ref_file = File(exists=True,
@@ -695,12 +678,10 @@ class RegMeasureInputSpec(CommandLineInputSpec):
                                mandatory=True,
                                argstr='-%s',
                                desc='Measure of similarity to compute')
-    out_file = File(genfile=True,
+    out_file = File(name_source=['flo_file'],
+                    name_template='%s',
                     argstr='-out %s',
                     desc='The output text file containing the measure')
-    # Set the number of omp thread to use
-    omp_core_val = traits.Int(desc='Number of openmp thread to use',
-                              argstr='-omp %i')
 
 
 class RegMeasureOutputSpec(TraitedSpec):
@@ -723,17 +704,15 @@ class RegMeasure(NiftyRegCommand):
     >>> node.inputs.flo_file = 'im2.nii'
     >>> node.inputs.measure_type = 'lncc'
     >>> node.inputs.omp_core_val = 4
-    >>> node.cmdline  # doctest: +ELLIPSIS +ALLOW_UNICODE
-    'reg_measure -flo im2.nii -lncc -omp 4 -out .../im2_lncc.txt -ref im1.nii'
+    >>> node.cmdline  # doctest: +ALLOW_UNICODE
+    'reg_measure -flo im2.nii -lncc -omp 4 -out im2_lncc.txt -ref im1.nii'
 
     """
     _cmd = get_custom_path('reg_measure')
     input_spec = RegMeasureInputSpec
     output_spec = RegMeasureOutputSpec
 
-    def _gen_filename(self, name):
-        if name == 'out_file':
-            return self._gen_fname(self.inputs.flo_file,
-                                   suffix='_%s' % self.inputs.measure_type,
-                                   ext='.txt')
-        return None
+    def _overload_extension(self, value, name=None):
+        path, base, _ = split_filename(value)
+        suffix = self.inputs.measure_type
+        return os.path.join(path, '{0}_{1}.txt'.format(base, suffix))

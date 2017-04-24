@@ -42,6 +42,8 @@ def test_RegAverage_inputs():
     ignore_exception=dict(nohash=True,
     usedefault=True,
     ),
+    omp_core_val=dict(argstr='-omp %i',
+    ),
     out_file=dict(argstr='%s',
     genfile=True,
     position=0,

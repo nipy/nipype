@@ -42,7 +42,7 @@ def test_reg_resample_res():
         flo=flo_file,
         ref=ref_file,
         trans=trans_file,
-        res=os.path.join(os.getcwd(), 'im2_res.nii.gz'))
+        res='im2_res.nii.gz')
 
     assert nr_resample.cmdline == expected_cmd
 
@@ -62,7 +62,7 @@ def test_reg_resample_res():
         flo=flo_file,
         ref=ref_file,
         trans=trans_file,
-        blank=os.path.join(os.getcwd(), 'im2_blank.nii.gz'))
+        blank='im2_blank.nii.gz')
 
     assert nr_resample_2.cmdline == expected_cmd
 
@@ -94,7 +94,7 @@ def test_reg_jacobian_jac():
         cmd=get_custom_path('reg_jacobian'),
         ref=ref_file,
         trans=trans_file,
-        jac=os.path.join(os.getcwd(), 'warpfield_jac.nii.gz'))
+        jac='warpfield_jac.nii.gz')
 
     assert nr_jacobian.cmdline == expected_cmd
 
@@ -110,7 +110,7 @@ def test_reg_jacobian_jac():
         cmd=get_custom_path('reg_jacobian'),
         ref=ref_file,
         trans=trans_file,
-        jac=os.path.join(os.getcwd(), 'warpfield_jacM.nii.gz'))
+        jac='warpfield_jacM.nii.gz')
 
     assert nr_jacobian_2.cmdline == expected_cmd
 
@@ -126,7 +126,7 @@ def test_reg_jacobian_jac():
         cmd=get_custom_path('reg_jacobian'),
         ref=ref_file,
         trans=trans_file,
-        jac=os.path.join(os.getcwd(), 'warpfield_jacL.nii.gz'))
+        jac='warpfield_jacL.nii.gz')
 
     assert nr_jacobian_3.cmdline == expected_cmd
 
@@ -453,7 +453,7 @@ def test_reg_measure():
     expected_cmd = cmd_tmp.format(
         cmd=get_custom_path('reg_measure'),
         flo=flo_file,
-        out=os.path.join(os.getcwd(), 'im2_lncc.txt'),
+        out='im2_lncc.txt',
         ref=ref_file)
 
     assert nr_measure.cmdline == expected_cmd
