@@ -85,6 +85,11 @@ class BaseFile(BaseUnicode):
             return validated_value
         elif os.path.isfile(value):
             return validated_value
+        else:
+            raise TraitError(
+                args='The trait \'{}\' of {} instance is {}, but the path '
+                     ' \'{}\' does not exist.'.format(name, class_of(object),
+                                                      self.info_text, value))
 
         self.error(object, name, value)
 
@@ -218,37 +223,67 @@ class Directory (BaseDirectory):
         super(Directory, self).__init__(value, auto_set, entries, exists,
                                         **metadata)
 
+# lists of tuples
+# each element consists of :
+# - uncompressed (tuple[0]) extension
+# - compressed (tuple[1]) extension
+img_fmt_types = {
+        'nifti1': [('.nii', '.nii.gz'),
+                   (('.hdr', '.img'), ('.hdr', '.img.gz'))],
+        'mgh': [('.mgh', '.mgz'), ('.mgh', '.mgh.gz')],
+        'nifti2': [('.nii', '.nii.gz'),
+                   (('.hdr', '.img'), ('.hdr', '.img.gz'))],
+        'cifti2': [('.nii', '.nii.gz'),
+                   (('.hdr', '.img'), ('.hdr', '.img.gz'))],
+        'DICOM': [('.dcm', '.dcm'), ('.IMA', '.IMA'), ('.tar', '.tar.gz')],
+        'nrrd': [('.nrrd', 'nrrd'), ('nhdr', 'nhdr')],
+        'afni': [('.HEAD', '.HEAD'), ('.BRIK', '.BRIK')]
+        }
+
 class ImageFile(File):
     """ Defines a trait of specific neuroimaging files """
 
     def __init__(self, value='', filter=None, auto_set=False, entries=0,
-                 exists=False, types=['nii', 'hdr', 'img'], compressed=True,
+                 exists=False, types=[], compressed=True, extensions=[],
                  **metadata):
         """ Trait handles neuroimaging files.
 
         Parameters
         ----------
         types : list
-            The accepted file-types
+            Strings of file format types accepted
         compressed : boolean
-            Indicates whether the file-type can compressed
+            Indicates whether the file format can compressed
         """
         self.types = types
         self.compressed = compressed
+        self.exts = extensions
         super(ImageFile, self).__init__(value, filter, auto_set, entries,
                                         exists, **metadata)
+
+    def grab_exts(self, exts=[]):
+        for fmt in self.types:
+            if fmt in img_fmt_types:
+                exts.extend(sum([[u for u in y[0]] if isinstance(y[0], tuple)
+                            else [y[0]] for y in img_fmt_types[fmt]], []))
+                if self.compressed:
+                    exts.extend(sum([[u for u in y[-1]] if isinstance(y[-1], tuple)
+                                else [y[-1]] for y in img_fmt_types[fmt]], []))
+            else:
+                raise AttributeError('Information has not been added for format'
+                                     'type {} yet.'.format(fmt))
+        return list(set(exts))
 
     def validate(self, object, name, value):
         """ Validates that a specified value is valid for this trait.
         """
         validated_value = super(ImageFile, self).validate(object, name, value)
         if validated_value and self.types:
-            if self.compressed:
-                self.types.extend([x + '.gz' for x in self.types])
-            if not any(validated_value.endswith(x) for x in self.types):
+            self.exts = self.grab_exts(self.exts)
+            if not any(validated_value.endswith(x) for x in self.exts):
                 raise TraitError(
                     args="{} is not included in allowed types: {}".format(
-                        validated_value, ','.join(self.types)))
+                        validated_value, ','.join(self.exts)))
         return validated_value
 
 """
