@@ -378,6 +378,8 @@ class RegistrationInputSpec(ANTSCommandInputSpec):
     winsorize_lower_quantile = traits.Range(
         low=0.0, high=1.0, value=0.0, argstr='%s', usedefault=True, desc="The Lower quantile to clip image ranges")
 
+    verbose = traits.Bool(argstr='-v', default=False)
+
 
 class RegistrationOutputSpec(TraitedSpec):
     forward_transforms = traits.List(
