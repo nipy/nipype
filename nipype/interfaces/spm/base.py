@@ -30,7 +30,7 @@ from scipy.io import savemat
 from ... import logging
 from ...utils import spm_docs as sd, NUMPY_MMAP
 from ..base import (BaseInterface, traits, isdefined, InputMultiPath,
-                    BaseInterfaceInputSpec, Directory, Undefined)
+                    BaseInterfaceInputSpec, Directory, Undefined, ImageFile)
 from ..matlab import MatlabCommand
 from ...external.due import due, Doi, BibTeX
 
@@ -532,3 +532,27 @@ class SPMCommand(BaseInterface):
         if postscript is not None:
             mscript += postscript
         return mscript
+
+class ImageFileSPM(ImageFile):
+    """
+    Defines an ImageFile trait specific to SPM interfaces.
+    """
+
+    def __init__(self, value='', filter=None, auto_set=False, entries=0,
+                 exists=False, types=['nifti1', 'nifti2'], extensions=[],
+                 allow_compressed=False, **metadata):
+        """ Trait handles neuroimaging files.
+
+        Parameters
+        ----------
+        types : list
+            Strings of file format types accepted
+        compressed : boolean
+            Indicates whether the file format can compressed
+        """
+        self.types = types
+        self.compressed = compressed
+        self.exts = extensions
+        super(ImageFileSPM, self).__init__(value, filter, auto_set, entries,
+                                           exists, types, allow_compressed,
+                                           extensions, **metadata)

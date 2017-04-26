@@ -178,14 +178,13 @@ class BaseDirectory (BaseUnicode):
         if isinstance(value, (str, bytes)):
             if not self.exists:
                 return value
-
             if os.path.isdir(value):
                 return value
             else:
                 raise TraitError(
                     args='The trait \'{}\' of {} instance is {}, but the path '
-                         ' \'{}\' does not exist.'.format(name, class_of(object),
-                                                          self.info_text, value))
+                         ' \'{}\' does not exist.'.format(name,
+                                    class_of(object), self.info_text, value))
 
         self.error(object, name, value)
 
@@ -231,11 +230,10 @@ img_fmt_types = {
         'nifti1': [('.nii', '.nii.gz'),
                    (('.hdr', '.img'), ('.hdr', '.img.gz'))],
         'mgh': [('.mgh', '.mgz'), ('.mgh', '.mgh.gz')],
-        'nifti2': [('.nii', '.nii.gz'),
-                   (('.hdr', '.img'), ('.hdr', '.img.gz'))],
-        'cifti2': [('.nii', '.nii.gz'),
-                   (('.hdr', '.img'), ('.hdr', '.img.gz'))],
-        'DICOM': [('.dcm', '.dcm'), ('.IMA', '.IMA'), ('.tar', '.tar.gz')],
+        'nifti2': [('.nii', '.nii.gz')],
+        'cifti2': [('.nii', '.nii.gz')],
+        'gifti': [('.gii', '.gii.gz')],
+        'dicom': [('.dcm', '.dcm'), ('.IMA', '.IMA'), ('.tar', '.tar.gz')],
         'nrrd': [('.nrrd', 'nrrd'), ('nhdr', 'nhdr')],
         'afni': [('.HEAD', '.HEAD'), ('.BRIK', '.BRIK')]
         }
@@ -244,7 +242,7 @@ class ImageFile(File):
     """ Defines a trait of specific neuroimaging files """
 
     def __init__(self, value='', filter=None, auto_set=False, entries=0,
-                 exists=False, types=[], compressed=True, extensions=[],
+                 exists=False, types=[], allow_compressed=True, extensions=[],
                  **metadata):
         """ Trait handles neuroimaging files.
 
@@ -256,22 +254,25 @@ class ImageFile(File):
             Indicates whether the file format can compressed
         """
         self.types = types
-        self.compressed = compressed
+        self.allow_compressed = allow_compressed
         self.exts = extensions
         super(ImageFile, self).__init__(value, filter, auto_set, entries,
                                         exists, **metadata)
 
     def grab_exts(self, exts=[]):
+        # TODO: file type validation
         for fmt in self.types:
             if fmt in img_fmt_types:
                 exts.extend(sum([[u for u in y[0]] if isinstance(y[0], tuple)
                             else [y[0]] for y in img_fmt_types[fmt]], []))
-                if self.compressed:
-                    exts.extend(sum([[u for u in y[-1]] if isinstance(y[-1], tuple)
-                                else [y[-1]] for y in img_fmt_types[fmt]], []))
+                if self.allow_compressed:
+                    exts.extend(sum([[u for u in y[-1]] if isinstance(y[-1],
+                    tuple) else [y[-1]] for y in img_fmt_types[fmt]], []))
             else:
                 raise AttributeError('Information has not been added for format'
-                                     'type {} yet.'.format(fmt))
+                                     ' type {} yet. Supported formats include: '
+                                     '{}'.format('hello',
+                                     ', '.join(img_fmt_types.keys())))
         return list(set(exts))
 
     def validate(self, object, name, value):
