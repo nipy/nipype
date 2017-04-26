@@ -551,7 +551,7 @@ class ImageFileSPM(ImageFile):
             Indicates whether the file format can compressed
         """
         self.types = types
-        self.compressed = compressed
+        self.allow_compressed = allow_compressed
         self.exts = extensions
         super(ImageFileSPM, self).__init__(value, filter, auto_set, entries,
                                            exists, types, allow_compressed,
