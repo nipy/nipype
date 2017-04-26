@@ -22,6 +22,7 @@ from __future__ import (print_function, division, unicode_literals,
 from builtins import property, super
 from distutils.version import StrictVersion
 import os
+import shutil
 import subprocess
 from warnings import warn
 
@@ -30,20 +31,17 @@ from ...utils.filemanip import split_filename
 
 
 def get_custom_path(command):
-    try:
-        specific_dir = os.environ['NIFTYREGDIR']
-        command = os.path.join(specific_dir, command)
-        return command
-    except KeyError:
-        return command
+    return os.path.join(os.getenv('NIFTYREGDIR', ''), command)
 
 
 def no_niftyreg(cmd='reg_f3d'):
-    if True in [os.path.isfile(os.path.join(path, cmd)) and
-                os.access(os.path.join(path, cmd), os.X_OK)
-                for path in os.environ["PATH"].split(os.pathsep)]:
-        return False
-    return True
+    try:
+        return shutil.which(cmd) is None
+    except AttributeError:  # Python < 3.3
+        return not any(
+            [os.path.isfile(os.path.join(path, cmd)) and
+             os.access(os.path.join(path, cmd), os.X_OK)
+             for path in os.environ["PATH"].split(os.pathsep)])
 
 
 class NiftyRegCommandInputSpec(CommandLineInputSpec):
@@ -101,9 +99,7 @@ class NiftyRegCommand(CommandLine):
         return self.get_version()
 
     def exists(self):
-        if self.get_version() is None:
-            return False
-        return True
+        return not self.get_version() is None
 
     def _run_interface(self, runtime):
         # Update num threads estimate from OMP_NUM_THREADS env var
