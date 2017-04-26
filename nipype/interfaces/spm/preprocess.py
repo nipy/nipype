@@ -34,7 +34,7 @@ __docformat__ = 'restructuredtext'
 class SliceTimingInputSpec(SPMCommandInputSpec):
     in_files = InputMultiPath(traits.Either(traits.List(ImageFileSPM(
                                                              exists=True)),
-                                            ImageFileSPM(exists=True),
+                                            ImageFileSPM(exists=True)),
                                             field='scans',
                               desc='list of filenames to apply slice timing',
                               mandatory=True, copyfile=False)
