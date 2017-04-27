@@ -99,7 +99,7 @@ class NiftyRegCommand(CommandLine):
         return self.get_version()
 
     def exists(self):
-        return not self.get_version() is None
+        return self.get_version() is not None
 
     def _run_interface(self, runtime):
         # Update num threads estimate from OMP_NUM_THREADS env var
