@@ -2432,8 +2432,7 @@ class QwarpPlusMinus(CommandLine):
     >>> qwarp.inputs.nopadWARP = True
     >>> qwarp.inputs.base_file = 'sub-01_dir-RL_epi.nii.gz'
     >>> qwarp.cmdline  # doctest: +ALLOW_UNICODE
-    '3dQwarp -prefix Qwarp.nii.gz -plusminus -source sub-01_dir-LR_epi.nii.gz 
-    -base sub-01_dir-RL_epi.nii.gz'
+    '3dQwarp -prefix Qwarp.nii.gz -plusminus -base sub-01_dir-RL_epi.nii.gz -nopadWARP -source sub-01_dir-LR_epi.nii.gz'
     >>> res = warp.run()  # doctest: +SKIP
     
     """
