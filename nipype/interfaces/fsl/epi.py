@@ -246,7 +246,8 @@ class TOPUP(FSLCommand):
     >>> topup.cmdline # doctest: +ELLIPSIS +ALLOW_UNICODE
     'topup --config=b02b0.cnf --datain=topup_encoding.txt \
 --imain=b0_b0rev.nii --out=b0_b0rev_base --iout=b0_b0rev_corrected.nii.gz \
---fout=b0_b0rev_field.nii.gz --logout=b0_b0rev_topup.log'
+--fout=b0_b0rev_field.nii.gz --jacout=jac --logout=b0_b0rev_topup.log \
+--dfout=warpfield'
     >>> res = topup.run() # doctest: +SKIP
 
     """
