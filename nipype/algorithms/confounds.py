@@ -432,7 +432,7 @@ class CompCor(BaseInterface):
 
     def _list_outputs(self):
         outputs = self._outputs().get()
-        outputs['components_file'] = self.inputs.components_file
+        outputs['components_file'] = os.path.abspath(self.inputs.components_file)
         return outputs
 
     def _compute_tSTD(self, M, x, axis=0):
@@ -498,9 +498,9 @@ class TCompCor(CompCor):
 
     input_spec = TCompCorInputSpec
     output_spec = TCompCorOutputSpec
-    _out_masks = []
 
     def _run_interface(self, runtime):
+        _out_masks = []
         imgseries = nb.load(self.inputs.realigned_file,
                             mmap=NUMPY_MMAP).get_data()
 
@@ -564,7 +564,7 @@ class TCompCor(CompCor):
                     self.inputs.realigned_file).affine).to_filename(mask_file)
                 IFLOG.debug('tCompcor computed and saved mask of shape {} to '
                             'mask_file {}'.format(mask.shape, mask_file))
-                self._out_masks.append(mask_file)
+                _out_masks.append(mask_file)
                 self._set_header('tCompCor')
 
         else:
@@ -581,10 +581,11 @@ class TCompCor(CompCor):
                   nb.load(self.inputs.realigned_file).affine).to_filename(mask_file)
             IFLOG.debug('tCompcor computed and saved mask of shape {} to mask_file '
                         '{}'.format(mask.shape, mask_file))
-            self._out_masks.append(mask_file)
+            _out_masks.append(mask_file)
             self._set_header('tCompCor')
 
-        self.inputs.mask_files = self._out_masks
+        self.inputs.mask_files = _out_masks
+        print(self.inputs.mask_files)
         super(TCompCor, self)._run_interface(runtime)
         return runtime
 
