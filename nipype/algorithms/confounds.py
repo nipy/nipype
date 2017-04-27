@@ -369,61 +369,60 @@ class CompCor(BaseInterface):
                                ' {} instead').format(self.inputs.mask_files[0])
                 self.inputs.mask_files = self.inputs.mask_files[0]
 
-        if isdefined(self.inputs.mask_files):
-            for mask_file in self.inputs.mask_files:
-                mask = nb.load(mask_file, mmap=NUMPY_MMAP).get_data()
+        for mask_file in self.inputs.mask_files:
+            mask = nb.load(mask_file, mmap=NUMPY_MMAP).get_data()
 
-                if imgseries.shape[:3] != mask.shape:
-                    raise ValueError('Inputs for CompCor, func {} and mask {}, '
-                                     'do not have matching spatial dimensions '
-                                     '({} and {}, respectively)'.format(
-                                     self.inputs.realigned_file, mask_file,
-                                     imgseries.shape[:3], mask.shape))
+            if imgseries.shape[:3] != mask.shape:
+                raise ValueError('Inputs for CompCor, func {} and mask {}, '
+                                 'do not have matching spatial dimensions '
+                                 '({} and {}, respectively)'.format(
+                                 self.inputs.realigned_file, mask_file,
+                                 imgseries.shape[:3], mask.shape))
 
-                if (isdefined(self.inputs.merge_method) and
-                  self.merge_method != 'none' and
-                  len(self.inputs.mask_files > 1)):
-                    if mask_file == self.inputs.mask_files[0]:
-                        new_mask = mask
-                        continue
-                else:
-                    if self.inputs.merge_method == 'union':
-                        new_mask = np.logical_or(new_mask, mask).astype(int)
-                    elif self.inputs.merge_method == 'intersect':
-                        new_mask = np.logical_and(new_mask, mask).astype(int)
-
-                        if mask_file != self.inputs.mask_files[-1]:
-                            continue
-                        else: # merge complete
-                            mask = new_mask
-
-            voxel_timecourses = imgseries[mask > 0]
-            # Zero-out any bad values
-            voxel_timecourses[np.isnan(np.sum(voxel_timecourses, axis=1)), :] = 0
-
-            # from paper:
-            # "The constant and linear trends of the columns in the matrix M were
-            # removed [prior to ...]"
-            degree = (self.inputs.regress_poly_degree if
-                      self.inputs.use_regress_poly else 0)
-            voxel_timecourses = regress_poly(degree, voxel_timecourses)
-
-            # "Voxel time series from the noise ROI (either anatomical or tSTD) were
-            # placed in a matrix M of size Nxm, with time along the row dimension
-            # and voxels along the column dimension."
-            M = voxel_timecourses.T
-
-            # "[... were removed] prior to column-wise variance normalization."
-            M = M / self._compute_tSTD(M, 1.)
-
-            # "The covariance matrix C = MMT was constructed and decomposed into its
-            # principal components using a singular value decomposition."
-            u, _, _ = linalg.svd(M, full_matrices=False)
-            if components is None:
-                components = u[:, :self.inputs.num_components]
+            if (isdefined(self.inputs.merge_method) and
+              self.merge_method != 'none' and
+              len(self.inputs.mask_files > 1)):
+                if mask_file == self.inputs.mask_files[0]:
+                    new_mask = mask
+                    continue
             else:
-                components = np.hstack((components,
-                                        u[:, :self.inputs.num_components]))
+                if self.inputs.merge_method == 'union':
+                    new_mask = np.logical_or(new_mask, mask).astype(int)
+                elif self.inputs.merge_method == 'intersect':
+                    new_mask = np.logical_and(new_mask, mask).astype(int)
+
+                    if mask_file != self.inputs.mask_files[-1]:
+                        continue
+                    else: # merge complete
+                        mask = new_mask
+
+        voxel_timecourses = imgseries[mask > 0]
+        # Zero-out any bad values
+        voxel_timecourses[np.isnan(np.sum(voxel_timecourses, axis=1)), :] = 0
+
+        # from paper:
+        # "The constant and linear trends of the columns in the matrix M were
+        # removed [prior to ...]"
+        degree = (self.inputs.regress_poly_degree if
+                  self.inputs.use_regress_poly else 0)
+        voxel_timecourses = regress_poly(degree, voxel_timecourses)
+
+        # "Voxel time series from the noise ROI (either anatomical or tSTD) were
+        # placed in a matrix M of size Nxm, with time along the row dimension
+        # and voxels along the column dimension."
+        M = voxel_timecourses.T
+
+        # "[... were removed] prior to column-wise variance normalization."
+        M = M / self._compute_tSTD(M, 1.)
+
+        # "The covariance matrix C = MMT was constructed and decomposed into its
+        # principal components using a singular value decomposition."
+        u, _, _ = linalg.svd(M, full_matrices=False)
+        if components is None:
+            components = u[:, :self.inputs.num_components]
+        else:
+            components = np.hstack((components,
+                                    u[:, :self.inputs.num_components]))
 
         components_file = os.path.join(os.getcwd(), self.inputs.components_file)
         self._set_header()
