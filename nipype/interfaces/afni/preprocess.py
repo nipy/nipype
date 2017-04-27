@@ -2369,7 +2369,7 @@ class QwarpPlusMinusInputSpec(CommandLineInputSpec):
                              'values, the first fraction is used for '
                              'progressively blurring the base image and the '
                              'second for the source image.',
-                        argstr='-pblur %g',
+                        argstr='-pblur %s',
                         minlen=1,
                         maxlen=2)
     blur = traits.List(traits.Float(),
@@ -2383,7 +2383,7 @@ class QwarpPlusMinusInputSpec(CommandLineInputSpec):
                             "filtering, rather than Gaussian blurring.  This "
                             "type of filtering will better preserve edges, "
                             "which can be important in alignment.",
-                       argstr='-blur %g',
+                       argstr='-blur %s',
                        minlen=1,
                        maxlen=2)
     noweight = traits.Bool(
