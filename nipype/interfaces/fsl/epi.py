@@ -423,6 +423,32 @@ class EddyInputSpec(FSLCommandInputSpec):
     flm = traits.Enum('linear', 'quadratic', 'cubic', argstr='--flm=%s',
                       desc='First level EC model')
 
+    slm = traits.Enum('none', 'linear', 'quadratic', argstr='--slm=%s',
+                      desc='Second level EC model')
+
+    fep = traits.Bool(False, argstr='--fep',
+                      desc='Fill empty planes in x- or y-directions')
+
+    interp = traits.Enum('spline', 'trilinear', argstr='--interp=%s',
+                         desc='Interpolation model for estimation step')
+
+    nvoxhp = traits.Int(1000, argstr='--nvoxhp=%s',
+                        desc=('# of voxels used to estimate the '
+                              'hyperparameters'))
+
+    fudge_factor = traits.Float(10.0, argstr='--ff=%s',
+                                desc=('Fudge factor for hyperparameter '
+                                      'error variance'))
+
+    dont_sep_offs_move = traits.Bool(False, argstr='--dont_sep_offs_move',
+                                     desc=('Do NOT attempt to separate '
+                                           'field offset from subject '
+                                           'movement'))
+
+    dont_peas = traits.Bool(False, argstr='--dont_peas',
+                           desc="Do NOT perform a post-eddy alignment of "
+                                "shells")
+
     fwhm = traits.Float(desc=('FWHM for conditioning filter when estimating '
                               'the parameters'), argstr='--fwhm=%s')
 
