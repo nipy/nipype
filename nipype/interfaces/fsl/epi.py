@@ -26,7 +26,7 @@ from ...utils import NUMPY_MMAP
 
 from ..base import (traits, TraitedSpec, InputMultiPath, File,
                     isdefined)
-from .base import FSLCommand, FSLCommandInputSpec
+from .base import FSLCommand, FSLCommandInputSpec, Info
 
 
 class PrepareFieldmapInputSpec(FSLCommandInputSpec):
@@ -140,6 +140,13 @@ class TOPUPInputSpec(FSLCommandInputSpec):
     out_field = File(argstr='--fout=%s', hash_files=False,
                      name_source=['in_file'], name_template='%s_field',
                      desc='name of image file with field (Hz)')
+    out_warp_prefix = traits.Str("warpfield", argstr='--dfout=%s', hash_files=False,
+                                 desc='prefix for the warpfield images (in mm)',
+                                 usedefault=True)
+    out_jac_prefix = traits.Str("jac", argstr='--jacout=%s',
+                                 hash_files=False,
+                                 desc='prefix for the warpfield images',
+                                 usedefault=True)
     out_corrected = File(argstr='--iout=%s', hash_files=False,
                          name_source=['in_file'], name_template='%s_corrected',
                          desc='name of 4D image file with unwarped images')
@@ -212,6 +219,8 @@ class TOPUPOutputSpec(TraitedSpec):
     out_movpar = File(exists=True, desc='movpar.txt output file')
     out_enc_file = File(desc='encoding directions file output for applytopup')
     out_field = File(desc='name of image file with field (Hz)')
+    out_warps = traits.List(File(exists=True), desc='warpfield images')
+    out_jacs = traits.List(File(exists=True), desc='Jacobian images')
     out_corrected = File(desc='name of 4D image file with unwarped images')
     out_logfile = File(desc='name of log-file')
 
@@ -269,6 +278,13 @@ class TOPUP(FSLCommand):
                                                    cwd=base_path)
         outputs['out_movpar'] = self._gen_fname(base, suffix='_movpar',
                                                 ext='.txt', cwd=base_path)
+        n_vols = nb.load(self.inputs.in_file).shape[-1]
+
+        outputs['out_warps'] = [os.path.abspath(self.inputs.out_warp_prefix + "_%02d" % (i+1) + Info.output_type_to_ext(self.inputs.output_type)) for i in range(n_vols)]
+        outputs['out_jacs'] = [os.path.abspath(
+            self.inputs.out_jac_prefix + "_%02d" % (
+            i + 1) + Info.output_type_to_ext(self.inputs.output_type)) for i in
+                                range(n_vols)]
 
         if isdefined(self.inputs.encoding_direction):
             outputs['out_enc_file'] = self._get_encfilename()
