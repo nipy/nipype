@@ -2438,8 +2438,8 @@ class QwarpPlusMinus(CommandLine):
     
     """
     _cmd = '3dQwarp -prefix Qwarp.nii.gz -plusminus'
-    input_spec = QwarpInputSpec
-    output_spec = QwarpOutputSpec
+    input_spec = QwarpPlusMinusInputSpec
+    output_spec = QwarpPlusMinusOutputSpec
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
