@@ -1546,6 +1546,9 @@ class FSSourceOutputSpec(TraitedSpec):
         File(exists=True),
         desc='Distortion required to register to spherical atlas',
         loc='surf')
+    graymid = OutputMultiPath(
+        File(exists=True), desc='Graymid/midthickness surface meshes',
+        loc='surf', altkey=['graymid', 'midthickness'])
     label = OutputMultiPath(
         File(exists=True), desc='Volume and surface label files',
         loc='label', altkey='*label')
@@ -1617,12 +1620,12 @@ class FreeSurferSource(IOBase):
                 globprefix = '*'
         elif key in ('aseg_stats', 'wmparc_stats'):
             globprefix = ''
-        keydir = os.path.join(path, dirval)
-        if altkey:
-            key = altkey
-        globpattern = os.path.join(
-            keydir, ''.join((globprefix, key, globsuffix)))
-        return [os.path.abspath(f) for f in glob.glob(globpattern)]
+        keys = filename_to_list(altkey) if altkey else [key]
+        globfmt = os.path.join(path, dirval,
+                               ''.join((globprefix, '{}', globsuffix)))
+        return [os.path.abspath(f)
+                for key in keys
+                for f in glob.glob(globfmt.format(key))]
 
     def _list_outputs(self):
         subjects_dir = self.inputs.subjects_dir
