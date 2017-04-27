@@ -1041,7 +1041,8 @@ def export_graph(graph_in, base_dir=None, show=False, use_execgraph=False,
 
     if format != 'dot':
         outfname += '.%s' % format
-    return outfname
+        simplefname += '.%s' % format
+    return simplefname if simple_form else outfname
 
 
 def format_dot(dotfilename, format=None):

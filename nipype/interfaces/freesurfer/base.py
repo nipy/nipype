@@ -216,10 +216,11 @@ class FSSurfaceCommand(FSCommand):
     def _associated_file(in_file, out_name):
         """Based on MRIsBuildFileName in freesurfer/utils/mrisurf.c
 
+        If no path information is provided for out_name, use path and
+        hemisphere (if also unspecified) from in_file to determine the path
+        of the associated file.
         Use in_file prefix to indicate hemisphere for out_name, rather than
         inspecting the surface data structure.
-        Also, output to in_file's directory if path information not provided
-        for out_name.
         """
         path, base = os.path.split(out_name)
         if path == '':
@@ -227,7 +228,7 @@ class FSSurfaceCommand(FSCommand):
             hemis = ('lh.', 'rh.')
             if in_file[:3] in hemis and base[:3] not in hemis:
                 base = in_file[:3] + base
-        return os.path.abspath(os.path.join(path, base))
+        return os.path.join(path, base)
 
 
 class FSScriptCommand(FSCommand):

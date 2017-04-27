@@ -8,8 +8,10 @@ import pytest
 from nipype.testing.fixtures import (create_files_in_directory_plus_dummy_file,
                                      create_surf_file_in_directory)
 
+from nipype.pipeline import engine as pe
+from nipype.interfaces import freesurfer as fs
 from nipype.interfaces.base import TraitError
-import nipype.interfaces.freesurfer as fs
+from nipype.interfaces.io import FreeSurferSource
 
 
 @pytest.mark.skipif(fs.no_freesurfer(), reason="freesurfer is not installed")
@@ -159,3 +161,52 @@ def test_surfshots(create_files_in_directory_plus_dummy_file):
         os.environ["DISPLAY"] = hold_display
     except KeyError:
         pass
+
+
+@pytest.mark.skipif(fs.no_freesurfer(), reason="freesurfer is not installed")
+def test_mrisexpand(tmpdir):
+    fssrc = FreeSurferSource(subjects_dir=fs.Info.subjectsdir(),
+                             subject_id='fsaverage', hemi='lh')
+
+    fsavginfo = fssrc.run().outputs.get()
+
+    # dt=60 to ensure very short runtime
+    expand_if = fs.MRIsExpand(in_file=fsavginfo['smoothwm'],
+                              out_name='expandtmp',
+                              distance=1,
+                              dt=60)
+
+    expand_nd = pe.Node(
+        fs.MRIsExpand(in_file=fsavginfo['smoothwm'],
+                      out_name='expandtmp',
+                      distance=1,
+                      dt=60),
+        name='expand_node')
+
+    # Interfaces should have same command line at instantiation
+    orig_cmdline = 'mris_expand -T 60 {} 1 expandtmp'.format(fsavginfo['smoothwm'])
+    assert expand_if.cmdline == orig_cmdline
+    assert expand_nd.interface.cmdline == orig_cmdline
+
+    # Run both interfaces
+    if_res = expand_if.run()
+    nd_res = expand_nd.run()
+
+    # Commandlines differ
+    node_cmdline = 'mris_expand -T 60 -pial {cwd}/lh.pial {cwd}/lh.smoothwm ' \
+        '1 expandtmp'.format(cwd=nd_res.runtime.cwd)
+    assert if_res.runtime.cmdline == orig_cmdline
+    assert nd_res.runtime.cmdline == node_cmdline
+
+    # Check output
+    if_out_file = if_res.outputs.get()['out_file']
+    nd_out_file = nd_res.outputs.get()['out_file']
+    # Same filename
+    assert op.basename(if_out_file) == op.basename(nd_out_file)
+    # Interface places output in source directory
+    assert op.dirname(if_out_file) == op.dirname(fsavginfo['smoothwm'])
+    # Node places output in working directory
+    assert op.dirname(nd_out_file) == nd_res.runtime.cwd
+
+    # Remove test surface
+    os.unlink(if_out_file)
