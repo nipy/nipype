@@ -278,13 +278,16 @@ class TOPUP(FSLCommand):
                                                    cwd=base_path)
         outputs['out_movpar'] = self._gen_fname(base, suffix='_movpar',
                                                 ext='.txt', cwd=base_path)
-        n_vols = nb.load(self.inputs.in_file).shape[-1]
 
-        outputs['out_warps'] = [os.path.abspath(self.inputs.out_warp_prefix + "_%02d" % (i+1) + Info.output_type_to_ext(self.inputs.output_type)) for i in range(n_vols)]
-        outputs['out_jacs'] = [os.path.abspath(
-            self.inputs.out_jac_prefix + "_%02d" % (
-            i + 1) + Info.output_type_to_ext(self.inputs.output_type)) for i in
-                                range(n_vols)]
+        n_vols = nb.load(self.inputs.in_file).shape[-1]
+        ext = Info.output_type_to_ext(self.inputs.output_type)
+        fmt = os.path.abspath('{prefix}_{i:02d}{ext}').format
+        outputs['out_warps'] = [
+            fmt(prefix=self.inputs.out_warp_prefix, i=i, ext=ext)
+            for i in range(1, n_vols + 1)]
+        outputs['out_jacs'] = [
+            fmt(prefix=self.inputs.out_jac_prefix, i=i, ext=ext)
+            for i in range(1, n_vols + 1)]
 
         if isdefined(self.inputs.encoding_direction):
             outputs['out_enc_file'] = self._get_encfilename()
