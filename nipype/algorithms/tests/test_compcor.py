@@ -28,7 +28,7 @@ class TestCompCor():
         mask = np.ones(self.fake_data.shape[:3])
         mask[0, 0, 0] = 0
         mask[0, 0, 1] = 0
-        self.mask_file = utils.save_toy_nii(mask, self.filenames['masknii'])
+        self.mask_files = utils.save_toy_nii(mask, self.filenames['masknii'])
 
     def test_compcor(self):
         expected_components = [['-0.1989607212', '-0.5753813646'],
@@ -37,10 +37,10 @@ class TestCompCor():
                                ['0.4206466244', '-0.3361270124'],
                                ['-0.1246655485', '-0.1235705610']]
 
-        self.run_cc(CompCor(realigned_file=self.realigned_file, mask_file=self.mask_file),
+        self.run_cc(CompCor(realigned_file=self.realigned_file, mask_files=self.mask_files),
                     expected_components)
 
-        self.run_cc(ACompCor(realigned_file=self.realigned_file, mask_file=self.mask_file,
+        self.run_cc(ACompCor(realigned_file=self.realigned_file, mask_files=self.mask_files,
                              components_file='acc_components_file'),
                     expected_components, 'aCompCor')
 
@@ -62,7 +62,7 @@ class TestCompCor():
         assert num_nonmasked_voxels == 1
 
     def test_compcor_no_regress_poly(self):
-        self.run_cc(CompCor(realigned_file=self.realigned_file, mask_file=self.mask_file,
+        self.run_cc(CompCor(realigned_file=self.realigned_file, mask_files=self.mask_files,
                             use_regress_poly=False), [['0.4451946442', '-0.7683311482'],
                                                       ['-0.4285129505', '-0.0926034137'],
                                                       ['0.5721540256', '0.5608764842'],
@@ -77,12 +77,12 @@ class TestCompCor():
         assert nb.load('mask.nii').get_data().shape == asymmetric_shape[:3]
 
     def test_compcor_bad_input_shapes(self):
-        shape_less_than = (1, 2, 2, 5) # dim 0 is < dim 0 of self.mask_file (2)
-        shape_more_than = (3, 3, 3, 5) # dim 0 is > dim 0 of self.mask_file (2)
+        shape_less_than = (1, 2, 2, 5) # dim 0 is < dim 0 of self.mask_files (2)
+        shape_more_than = (3, 3, 3, 5) # dim 0 is > dim 0 of self.mask_files (2)
 
         for data_shape in (shape_less_than, shape_more_than):
             data_file = utils.save_toy_nii(np.zeros(data_shape), 'temp.nii')
-            interface = CompCor(realigned_file=data_file, mask_file=self.mask_file)
+            interface = CompCor(realigned_file=data_file, mask_files=self.mask_files)
             with pytest.raises(ValueError, message="Dimension mismatch"): interface.run()
 
     def test_tcompcor_bad_input_dim(self):
