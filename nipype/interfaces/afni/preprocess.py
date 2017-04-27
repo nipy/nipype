@@ -2349,59 +2349,95 @@ class Warp(AFNICommand):
     output_spec = AFNICommandOutputSpec
 
 
-class QwarpInputSpec(CommandLineInputSpec):
+class QwarpPlusMinusInputSpec(CommandLineInputSpec):
     source_file = File(
-        desc='',
+        desc='Source image (opposite phase encoding direction than base image).',
         argstr='-source %s',
         mandatory=True,
         exists=True,
         copyfile=False)
     base_file = File(
-        desc='',
+        desc='Base image (opposite phase encoding direction than source image).',
         argstr='-base %s',
         mandatory=True,
         exists=True,
         copyfile=False)
-    plusminus = traits.Bool(
-        desc='',
-        argstr='-plusminus')
-    pmNAMES = traits.List(traits.Str(),
-                          desc='',
-                          argstr='-pmNAMES %')
     pblur = traits.List(traits.Float(),
-                        desc='',
-                        argstr='-pblur %s')
+                        desc='The fraction of the patch size that'
+                             'is used for the progressive blur by providing a '
+                             'value between 0 and 0.25.  If you provide TWO '
+                             'values, the first fraction is used for '
+                             'progressively blurring the base image and the '
+                             'second for the source image.',
+                        argstr='-pblur %g',
+                        minlen=1,
+                        maxlen=2)
     blur = traits.List(traits.Float(),
-                       desc='',
-                       argstr='-blur %s')
+                       desc="Gaussian blur the input images by (FWHM) voxels "
+                            "before doing the alignment (the output dataset "
+                            "will not be blurred). The default is 2.345 (for "
+                            "no good reason). Optionally, you can provide 2 "
+                            "values, and then the first one is applied to the "
+                            "base volume, the second to the source volume. A "
+                            "negative blur radius means to use 3D median "
+                            "filtering, rather than Gaussian blurring.  This "
+                            "type of filtering will better preserve edges, "
+                            "which can be important in alignment.",
+                       argstr='-blur %g',
+                       minlen=1,
+                       maxlen=2)
     noweight = traits.Bool(
-        desc='',
+        desc='If you want a binary weight (the old default), use this option.'
+             'That is, each voxel in the base volume automask will be'
+             'weighted the same in the computation of the cost functional.',
         argstr='-noweight')
     minpatch = traits.Int(
-        desc='',
+        desc="Set the minimum patch size for warp searching to 'mm' voxels.",
         argstr='-minpatch %d')
     nopadWARP = traits.Bool(
-        desc='',
+        desc='If for some reason you require the warp volume to'
+             'match the base volume, then use this option to have the output'
+             'WARP dataset(s) truncated.',
         argstr='-nopadWARP')
 
 
-class QwarpOutputSpec(TraitedSpec):
+class QwarpPlusMinusOutputSpec(TraitedSpec):
     warped_source = File(
-        desc='',
+        desc='Undistorted source file.',
         exists=True)
     warped_base = File(
-        desc='',
+        desc='Undistorted source file.',
         exists=True)
     source_warp = File(
-        desc='',
+        desc="Field suceptibility correction warp (in 'mm') for source image.",
         exists=True)
     base_warp = File(
-        desc='',
+        desc="Field suceptibility correction warp (in 'mm') for base image.",
         exists=True)
 
 
-class Qwarp(CommandLine):
-    _cmd = '3dQwarp -prefix Qwarp.nii.gz'
+class QwarpPlusMinus(CommandLine):
+    """A version of 3dQwarp for performing field susceptibility correction 
+    using two images with opposing phase encoding directions.
+
+    For complete details, see the `3dQwarp Documentation.
+    <https://afni.nimh.nih.gov/pub/dist/doc/program_help/3dQwarp.html>`_
+
+    Examples
+    ========
+
+    >>> from nipype.interfaces import afni
+    >>> qwarp = afni.QwarpPlusMinus()
+    >>> qwarp.inputs.source_file = 'sub-01_dir-LR_epi.nii.gz'
+    >>> qwarp.inputs.nopadWARP = True
+    >>> qwarp.inputs.base_file = 'sub-01_dir-RL_epi.nii.gz'
+    >>> qwarp.cmdline  # doctest: +ALLOW_UNICODE
+    '3dQwarp -prefix Qwarp.nii.gz -plusminus -source sub-01_dir-LR_epi.nii.gz 
+    -base sub-01_dir-RL_epi.nii.gz'
+    >>> res = warp.run()  # doctest: +SKIP
+    
+    """
+    _cmd = '3dQwarp -prefix Qwarp.nii.gz -plusminus'
     input_spec = QwarpInputSpec
     output_spec = QwarpOutputSpec
 
