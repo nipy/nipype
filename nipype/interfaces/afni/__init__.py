@@ -15,7 +15,7 @@ from .preprocess import (Allineate, Automask, AutoTcorrelate,
                          Maskave, Means, OutlierCount,
                          QualityIndex, ROIStats, Retroicor,
                          Seg, SkullStrip, TCorr1D, TCorrMap, TCorrelate,
-                         TShift, Volreg, Warp)
+                         TShift, Volreg, Warp, Qwarp)
 from .svm import (SVMTest, SVMTrain)
 from .utils import (AFNItoNIFTI, Autobox, BrickStat, Calc, Copy,
                     Eval, FWHMx,

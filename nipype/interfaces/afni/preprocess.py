@@ -2347,3 +2347,69 @@ class Warp(AFNICommand):
     _cmd = '3dWarp'
     input_spec = WarpInputSpec
     output_spec = AFNICommandOutputSpec
+
+
+class QwarpInputSpec(CommandLineInputSpec):
+    source_file = File(
+        desc='',
+        argstr='-source %s',
+        mandatory=True,
+        exists=True,
+        copyfile=False)
+    base_file = File(
+        desc='',
+        argstr='-base %s',
+        mandatory=True,
+        exists=True,
+        copyfile=False)
+    plusminus = traits.Bool(
+        desc='',
+        argstr='-plusminus')
+    pmNAMES = traits.List(traits.Str(),
+                          desc='',
+                          argstr='-pmNAMES %')
+    pblur = traits.List(traits.Float(),
+                        desc='',
+                        argstr='-pblur %s')
+    blur = traits.List(traits.Float(),
+                       desc='',
+                       argstr='-blur %s')
+    noweight = traits.Bool(
+        desc='',
+        argstr='-noweight')
+    minpatch = traits.Int(
+        desc='',
+        argstr='-minpatch %d')
+    nopadWARP = traits.Bool(
+        desc='',
+        argstr='-nopadWARP')
+
+
+class QwarpOutputSpec(TraitedSpec):
+    warped_source = File(
+        desc='',
+        exists=True)
+    warped_base = File(
+        desc='',
+        exists=True)
+    source_warp = File(
+        desc='',
+        exists=True)
+    base_warp = File(
+        desc='',
+        exists=True)
+
+
+class Qwarp(CommandLine):
+    _cmd = '3dQwarp -prefix Qwarp.nii.gz'
+    input_spec = QwarpInputSpec
+    output_spec = QwarpOutputSpec
+
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        outputs['warped_source'] = os.path.abspath("Qwarp_PLUS.nii.gz")
+        outputs['warped_base'] = os.path.abspath("Qwarp_MINUS.nii.gz")
+        outputs['source_warp'] = os.path.abspath("Qwarp_PLUS_WARP.nii.gz")
+        outputs['base_warp'] = os.path.abspath("Qwarp_MINUS_WARP.nii.gz")
+
+        return outputs
