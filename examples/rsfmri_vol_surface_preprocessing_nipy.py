@@ -66,7 +66,7 @@ from nipype import Workflow, Node, MapNode
 
 from nipype.algorithms.rapidart import ArtifactDetect
 from nipype.algorithms.misc import TSNR
-from nipype.algorithms.compcor import ACompCor
+from nipype.algorithms.confounds import ACompCor
 from nipype.interfaces.utility import Rename, Merge, IdentityInterface
 from nipype.utils.filemanip import filename_to_list
 from nipype.interfaces.io import DataSink, FreeSurferSource
@@ -75,7 +75,7 @@ import nipype.interfaces.freesurfer as fs
 import numpy as np
 import scipy as sp
 import nibabel as nb
-from nipype.utils import NUMPY_MMAP
+from nipype.utils.config import NUMPY_MMAP
 
 imports = ['import os',
            'import nibabel as nb',
