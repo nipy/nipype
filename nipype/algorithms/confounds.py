@@ -308,10 +308,11 @@ class CompCorInputSpec(BaseInterfaceInputSpec):
     mask_files = InputMultiPath(File(exists=True,
         desc='One or more mask files that determines ROI (3D)'))
     merge_method = traits.Enum('union', 'intersect', 'none', xor=['mask_index'],
+        requires=['mask_files'],
         desc='Merge method if multiple masks are present - `union` aggregates '
         'all masks, `intersect` computes the truth value of all masks, `none` '
         'performs CompCor on each mask individually')
-    mask_index = traits.Range(0, value=0, xor=['merge_method'], usedefault=True,
+    mask_index = traits.Range(0, xor=['merge_method'], requires=['mask_files'],
         desc='Position of mask in `mask_files` to use - first is the default')
     components_file = File('components_file.txt', exists=False, usedefault=True,
         desc='filename to store physiological components')
@@ -363,6 +364,11 @@ class CompCor(BaseInterface):
         imgseries = nb.load(self.inputs.realigned_file,
                             mmap=NUMPY_MMAP).get_data()
         components = None
+
+        if isdefined(self.inputs.mask_files) or isdefined(self.inputs.mask_file):
+            if (not isdefined(self.inputs.mask_index) and
+              not isdefined(self.inputs.merge_method)):
+                self.inputs.mask_index = 0
 
         if isdefined(self.inputs.mask_index):
             if self.inputs.mask_index < len(self.inputs.mask_files):
@@ -519,6 +525,9 @@ class TCompCor(CompCor):
                             imgseries.shape))
 
         if isdefined(self.inputs.mask_files):
+            if (not isdefined(self.inputs.mask_index) and
+              not isdefined(self.inputs.merge_method)):
+                self.inputs.mask_index = 0
             if isdefined(self.inputs.mask_index):
                 if self.inputs.mask_index < len(self.inputs.mask_files):
                     self.inputs.mask_files = [

@@ -110,8 +110,7 @@ class TestCompCor():
         for method in ['union', 'intersect']:
             TCompCor(realigned_file=self.realigned_file,
                      mask_files=self.mask_files,
-                     merge_method=method,
-                     mask_index=Undefined).run()
+                     merge_method=method).run()
             if method == 'union':
                 assert np.array_equal(nb.load('mask.nii').get_data(),
                                      ([[[0,0],[0,0]],[[0,0],[1,0]]]))
@@ -120,7 +119,6 @@ class TestCompCor():
                                       ([[[0,0],[0,0]],[[0,1],[0,0]]]))
 
     def test_tcompcor_index_mask(self):
-        print(len(self.mask_files))
         TCompCor(realigned_file=self.realigned_file,
                  mask_files=self.mask_files,
                  mask_index=1).run()
