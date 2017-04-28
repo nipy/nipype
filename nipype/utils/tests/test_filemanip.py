@@ -15,6 +15,7 @@ from ...testing import TempFATFS
 from ...utils.filemanip import (save_json, load_json,
                                 fname_presuffix, fnames_presuffix,
                                 hash_rename, check_forhash,
+                                _cifs_table, on_cifs,
                                 copyfile, copyfiles,
                                 filename_to_list, list_to_filename,
                                 check_depends,
@@ -334,3 +335,28 @@ def test_related_files(file, length, expected_files):
     for ef in expected_files:
         assert ef in related_files
 
+
+def test_cifs_check():
+    assert isinstance(_cifs_table, list)
+    assert isinstance(on_cifs('/'), bool)
+    fake_table = [('/scratch/tmp', 'ext4'), ('/scratch', 'cifs')]
+    cifs_targets = [('/scratch/tmp/x/y', False),
+                    ('/scratch/tmp/x', False),
+                    ('/scratch/x/y', True),
+                    ('/scratch/x', True),
+                    ('/x/y', False),
+                    ('/x', False),
+                    ('/', False)]
+
+    orig_table = _cifs_table[:]
+    _cifs_table[:] = []
+
+    for target, _ in cifs_targets:
+        assert on_cifs(target) is False
+
+    _cifs_table.extend(fake_table)
+    for target, expected in cifs_targets:
+        assert on_cifs(target) is expected
+
+    _cifs_table[:] = []
+    _cifs_table.extend(orig_table)

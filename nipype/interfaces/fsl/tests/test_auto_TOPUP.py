@@ -54,6 +54,14 @@ def test_TOPUP_inputs():
     name_source=['in_file'],
     name_template='%s_field',
     ),
+    out_warp_prefix=dict(argstr='--dfout=%s',
+    hash_files=False,
+    usedefault=True,
+    ),
+    out_jac_prefix=dict(argstr='--jacout=%s',
+    hash_files=False,
+    usedefault=True,
+    ),
     out_logfile=dict(argstr='--logout=%s',
     hash_files=False,
     keep_extension=True,
@@ -98,6 +106,8 @@ def test_TOPUP_outputs():
     out_fieldcoef=dict(),
     out_logfile=dict(),
     out_movpar=dict(),
+    out_warps=dict(),
+    out_jacs=dict(),
     )
     outputs = TOPUP.output_spec()
 

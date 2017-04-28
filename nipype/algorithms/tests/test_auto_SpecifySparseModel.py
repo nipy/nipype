@@ -20,6 +20,8 @@ def test_SpecifySparseModel_inputs():
     model_hrf=dict(),
     outlier_files=dict(copyfile=False,
     ),
+    parameter_source=dict(usedefault=True,
+    ),
     realignment_parameters=dict(copyfile=False,
     ),
     save_plot=dict(),
