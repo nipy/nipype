@@ -108,6 +108,11 @@ class NiftyRegCommand(CommandLine):
             self.inputs.environ['OMP_NUM_THREADS'] = self.num_threads
         return super(NiftyRegCommand, self)._run_interface(runtime)
 
+    def _format_arg(self, name, spec, value):
+        if name == 'omp_core_val':
+            self.numthreads = value
+        return super(NiftyRegCommand, self)._format_arg(name, spec, value)
+
     def _gen_fname(self, basename, out_dir=None, suffix=None, ext=None):
         if basename == '':
             msg = 'Unable to generate filename for command %s. ' % self.cmd
