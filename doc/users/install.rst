@@ -42,10 +42,11 @@ use the following command::
 
   pip install nipype[all]
 
-Available options are::
+While `all` installs everything, one can also install select components as
+listed below::
 
     'doc': ['Sphinx>=1.4', 'matplotlib', 'pydotplus'],
-    'tests': TESTS_REQUIRES,
+    'tests': ['pytest-cov', 'codecov'],
     'nipy': ['nitime', 'nilearn', 'dipy', 'nipy', 'matplotlib'],
     'profiler': ['psutil'],
     'duecredit': ['duecredit'],
