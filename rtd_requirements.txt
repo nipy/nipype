@@ -11,6 +11,6 @@ funcsigs
 configparser
 pytest>=3.0
 mock
-pytdotplus
+pydotplus
 psutil
 matplotlib
