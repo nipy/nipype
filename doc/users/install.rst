@@ -9,18 +9,17 @@ This page covers the necessary steps to install Nipype.
 Nipype for users
 ----------------
 
+Using docker
+~~~~~~~~~~~~
+
+You can follow the `Nipype tutorial <https://miykael.github.io/nipype_tutorial/>`_
+
 Using conda
 ~~~~~~~~~~~
 
-Installing nipype from the conda-forge channel can be achieved by adding conda-forge to your channels with::
+Installing nipype from the conda-forge channel can be achieved by::
 
-  conda config --add channels conda-forge
-
-
-Once the conda-forge channel has been enabled, nipype can be installed with::
-
-  conda install nipype
-
+  conda install --channel conda-forge nipype
 
 It is possible to list all of the versions of nipype available on your platform with::
 
@@ -36,17 +35,21 @@ The installation process is similar to other Python packages.
 
 If you already have a Python environment set up, you can do::
 
-  easy_install nipype
-
-or::
-
   pip install nipype
 
-
 If you want to install all the optional features of ``nipype``,
-use the following command (only for ``nipype>=0.13``)::
+use the following command::
 
   pip install nipype[all]
+
+Available options are::
+
+    'doc': ['Sphinx>=1.4', 'matplotlib', 'pydotplus'],
+    'tests': TESTS_REQUIRES,
+    'nipy': ['nitime', 'nilearn', 'dipy', 'nipy', 'matplotlib'],
+    'profiler': ['psutil'],
+    'duecredit': ['duecredit'],
+    'xvfbwrapper': ['xvfbwrapper'],
 
 
 Debian and Ubuntu
@@ -59,11 +62,14 @@ manager.
 Mac OS X
 ~~~~~~~~
 
-The easiest way to get nipype running on Mac OS X is to install Anaconda_ or
-Canopy_ and then add nipype by executing::
+The easiest way to get nipype running on Mac OS X is to install Miniconda_ and
+follow the instructions above. If you have a non-conda environment you can
+install nipype by typing::
 
-  easy_install nipype
+  pip install nipype
 
+Note that the above procedure may require availability of gcc on your system
+path to compile the traits package.
 
 From source
 ~~~~~~~~~~~
@@ -79,7 +85,7 @@ If you downloaded the source distribution named something
 like ``nipype-x.y.tar.gz``, then unpack the tarball, change into the
 ``nipype-x.y`` directory and install nipype using::
 
-    python setup.py install
+    pip install .
 
 **Note:** Depending on permissions you may need to use ``sudo``.
 
@@ -87,39 +93,34 @@ like ``nipype-x.y.tar.gz``, then unpack the tarball, change into the
 Testing the install
 -------------------
 
-The best way to test the install is checking nipype's version ::
+The best way to test the install is checking nipype's version and then running
+the tests::
 
     python -c "import nipype; print(nipype.__version__)"
-
+    python -c "import nipype; nipype.test()"
 
 Installation for developers
 ---------------------------
 
 Developers should start `here <../devel/testing_nipype.html>`_.
 
-
 Recommended Software
-------------
+--------------------
 
 Strong Recommendations
 ~~~~~~~~~~~~~~~~~~~~~~
 
-IPython_ 0.10.2 - 1.0.0
-  Interactive python environment. This is necessary for some parallel
-  components of the pipeline engine.
+IPython_
+  Interactive python environment.
 
-Matplotlib_ 1.0 - 1.2
+Matplotlib_
   Plotting library
-
-`RDFLib <http://rdflib.readthedocs.org/en/latest/>`_ 4.1
-  RDFLibrary required for provenance export as RDF
 
 Sphinx_ 1.1
   Required for building the documentation
 
 `Graphviz <http://www.graphviz.org/>`_
-  Required for building the documentation. The python wrapper package (``graphviz``)
-  and the program itself both need to be installed.
+  Required for building the documentation.
 
 Interface Dependencies
 ~~~~~~~~~~~~~~~~~~~~~~
@@ -148,7 +149,7 @@ Slicer_
   3.6 or later
 
 Nipy_
-  0.1.2+20110404 or later
+  0.4 or later
 
 Nitime_
   (optional)
