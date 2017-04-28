@@ -302,6 +302,9 @@ Bradley L. and Petersen, Steven E.},
 class CompCorInputSpec(BaseInterfaceInputSpec):
     realigned_file = File(exists=True, mandatory=True,
         desc='already realigned brain image (4D)')
+    mask_file = InputMultiPath(File(exists=True, deprecated='0.13',
+        new_name='mask_files',
+        desc='One or more mask files that determines ROI (3D)'))
     mask_files = InputMultiPath(File(exists=True,
         desc='One or more mask files that determines ROI (3D)'))
     merge_method = traits.Enum('union', 'intersect', 'none', xor=['mask_index'],
@@ -355,19 +358,21 @@ class CompCor(BaseInterface):
                     'tags': ['method', 'implementation']
                    }]
 
-    def _run_interface(self, runtime):
+    def _run_interface(self, runtime, tCompCor_mask=False):
+
         imgseries = nb.load(self.inputs.realigned_file,
                             mmap=NUMPY_MMAP).get_data()
         components = None
 
-        if isdefined(self.inputs.mask_index) and self.inputs.mask_index:
+        if isdefined(self.inputs.mask_index):
             if self.inputs.mask_index < len(self.inputs.mask_files):
                 self.inputs.mask_files = [
                     self.inputs.mask_files[self.inputs.mask_index]]
             else:
-                RuntimeWarning('Mask index exceeded number of masks, using mask'
-                               ' {} instead').format(self.inputs.mask_files[0])
                 self.inputs.mask_files = self.inputs.mask_files[0]
+                if not tCompCor_mask:
+                    RuntimeWarning('Mask index exceeded number of masks, using '
+                            'mask {} instead'.format(self.inputs.mask_files[0]))
 
         for mask_file in self.inputs.mask_files:
             mask = nb.load(mask_file, mmap=NUMPY_MMAP).get_data()
@@ -380,16 +385,16 @@ class CompCor(BaseInterface):
                                  imgseries.shape[:3], mask.shape))
 
             if (isdefined(self.inputs.merge_method) and
-              self.merge_method != 'none' and
-              len(self.inputs.mask_files > 1)):
+              self.inputs.merge_method != 'none' and
+              len(self.inputs.mask_files) > 1):
                 if mask_file == self.inputs.mask_files[0]:
                     new_mask = mask
                     continue
-            else:
-                if self.inputs.merge_method == 'union':
-                    new_mask = np.logical_or(new_mask, mask).astype(int)
-                elif self.inputs.merge_method == 'intersect':
-                    new_mask = np.logical_and(new_mask, mask).astype(int)
+                else:
+                    if self.inputs.merge_method == 'union':
+                        new_mask = np.logical_or(new_mask, mask).astype(int)
+                    elif self.inputs.merge_method == 'intersect':
+                        new_mask = np.logical_and(new_mask, mask).astype(int)
 
                     if mask_file != self.inputs.mask_files[-1]:
                         continue
@@ -500,9 +505,12 @@ class TCompCor(CompCor):
     output_spec = TCompCorOutputSpec
 
     def _run_interface(self, runtime):
+
         _out_masks = []
-        imgseries = nb.load(self.inputs.realigned_file,
-                            mmap=NUMPY_MMAP).get_data()
+        img = nb.load(self.inputs.realigned_file, mmap=NUMPY_MMAP)
+        imgseries = img.get_data()
+        aff = img.affine
+
 
         if imgseries.ndim != 4:
             raise ValueError('tCompCor expected a 4-D nifti file. Input {} has '
@@ -511,29 +519,30 @@ class TCompCor(CompCor):
                             imgseries.shape))
 
         if isdefined(self.inputs.mask_files):
-            if isdefined(self.inputs.mask_index) and self.inputs.mask_index:
+            if isdefined(self.inputs.mask_index):
                 if self.inputs.mask_index < len(self.inputs.mask_files):
                     self.inputs.mask_files = [
                         self.inputs.mask_files[self.inputs.mask_index]]
                 else:
                     RuntimeWarning('Mask index exceeded number of masks, using '
-                        'mask {} instead').format(self.inputs.mask_files[0])
+                        'mask {} instead'.format(self.inputs.mask_files[0]))
                     self.inputs.mask_files = self.inputs.mask_files[0]
 
             for i, mask_file in enumerate(self.inputs.mask_files, 1):
                 in_mask = nb.load(mask_file, mmap=NUMPY_MMAP).get_data()
                 if (isdefined(self.inputs.merge_method) and
-                  self.merge_method != 'none' and
-                  len(self.inputs.mask_files > 1)):
+                  self.inputs.merge_method != 'none' and
+                  len(self.inputs.mask_files) > 1):
                     if mask_file == self.inputs.mask_files[0]:
                         new_mask = in_mask
                         continue
-                else:
-                    if self.inputs.merge_method == 'union':
-                        new_mask = np.logical_or(new_mask, in_mask).astype(int)
-                    elif self.inputs.merge_method == 'intersect':
-                        new_mask = np.logical_and(new_mask, in_mask).astype(int)
-
+                    else:
+                        if self.inputs.merge_method == 'union':
+                            new_mask = np.logical_or(new_mask,
+                                                     in_mask).astype(int)
+                        elif self.inputs.merge_method == 'intersect':
+                            new_mask = np.logical_and(new_mask,
+                                                      in_mask).astype(int)
                         if mask_file != self.inputs.mask_files[-1]:
                             continue
                         else: # merge complete
@@ -559,9 +568,11 @@ class TCompCor(CompCor):
                 mask_data = np.zeros_like(in_mask)
                 mask_data[in_mask != 0] = mask
                 # save mask
-                mask_file = os.path.abspath('mask{}.nii'.format(i))
-                nb.Nifti1Image(mask_data, nb.load(
-                    self.inputs.realigned_file).affine).to_filename(mask_file)
+                if self.inputs.merge_method == 'none':
+                    mask_file = os.path.abspath('mask{}.nii'.format(i))
+                else:
+                    mask_file = os.path.abspath('mask.nii')
+                nb.Nifti1Image(mask_data, aff).to_filename(mask_file)
                 IFLOG.debug('tCompcor computed and saved mask of shape {} to '
                             'mask_file {}'.format(mask.shape, mask_file))
                 _out_masks.append(mask_file)
@@ -577,16 +588,14 @@ class TCompCor(CompCor):
 
             # save mask
             mask_file = os.path.abspath('mask.nii')
-            nb.Nifti1Image(mask_data,
-                  nb.load(self.inputs.realigned_file).affine).to_filename(mask_file)
-            IFLOG.debug('tCompcor computed and saved mask of shape {} to mask_file '
-                        '{}'.format(mask.shape, mask_file))
+            nb.Nifti1Image(mask_data, aff).to_filename(mask_file)
+            IFLOG.debug('tCompcor computed and saved mask of shape {} to '
+                        'mask_file {}'.format(mask.shape, mask_file))
             _out_masks.append(mask_file)
             self._set_header('tCompCor')
 
         self.inputs.mask_files = _out_masks
-        print(self.inputs.mask_files)
-        super(TCompCor, self)._run_interface(runtime)
+        super(TCompCor, self)._run_interface(runtime, tCompCor_mask=True)
         return runtime
 
     def _list_outputs(self):
