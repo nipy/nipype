@@ -208,7 +208,7 @@ Bradley L. and Petersen, Steven E.},
 
 class FramewiseDisplacementInputSpec(BaseInterfaceInputSpec):
     in_file = File(exists=True, mandatory=True, desc='motion parameters')
-    parameter_source = traits.Enum("FSL", "AFNI", "SPM", "FSFAST",
+    parameter_source = traits.Enum("FSL", "AFNI", "SPM", "FSFAST", "NIPY",
                                    desc="Source of movement parameters",
                                    mandatory=True)
     radius = traits.Float(50, usedefault=True,
@@ -599,11 +599,11 @@ class NonSteadyStateDetector(BaseInterface):
     output_spec = NonSteadyStateDetectorOutputSpec
 
     def _run_interface(self, runtime):
-        in_nii = nb.load(self.inputs.in_plots)
+        in_nii = nb.load(self.inputs.in_file)
         global_signal = in_nii.get_data()[:,:,:,:50].mean(axis=0).mean(axis=0).mean(axis=0)
 
         self._results = {
-            'out_file': _is_outlier(global_signal)
+            'n_volumes_to_discard': _is_outlier(global_signal)
         }
 
         return runtime
@@ -611,7 +611,7 @@ class NonSteadyStateDetector(BaseInterface):
     def _list_outputs(self):
         return self._results
 
-def _is_outlier(points, thresh=3.5):
+def is_outlier(points, thresh=3.5):
     """
     Returns a boolean array with True if points are outliers and False
     otherwise.

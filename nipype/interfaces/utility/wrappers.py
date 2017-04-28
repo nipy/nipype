@@ -58,18 +58,19 @@ class Function(IOBase):
     input_spec = FunctionInputSpec
     output_spec = DynamicTraitedSpec
 
-    def __init__(self, input_names, output_names, function=None, imports=None,
-                 **inputs):
+    def __init__(self, input_names=None, output_names='out', function=None,
+                 imports=None, **inputs):
         """
 
         Parameters
         ----------
 
-        input_names: single str or list
+        input_names: single str or list or None
             names corresponding to function inputs
+            if ``None``, derive input names from function argument names
         output_names: single str or list
-            names corresponding to function outputs.
-            has to match the number of outputs
+            names corresponding to function outputs (default: 'out').
+            if list of length > 1, has to match the number of outputs
         function : callable
             callable python object. must be able to execute in an
             isolated namespace (possibly in concert with the ``imports``
@@ -88,10 +89,18 @@ class Function(IOBase):
                     raise Exception('Interface Function does not accept '
                                     'function objects defined interactively '
                                     'in a python session')
+                else:
+                    if input_names is None:
+                        fninfo = function.__code__
             elif isinstance(function, (str, bytes)):
                 self.inputs.function_str = function
+                if input_names is None:
+                    fninfo = create_function_from_source(
+                        function, imports).__code__
             else:
                 raise Exception('Unknown type of function')
+            if input_names is None:
+                input_names = fninfo.co_varnames[:fninfo.co_argcount]
         self.inputs.on_trait_change(self._set_function_string,
                                     'function_str')
         self._input_names = filename_to_list(input_names)
@@ -106,10 +115,18 @@ class Function(IOBase):
         if name == 'function_str':
             if hasattr(new, '__call__'):
                 function_source = getsource(new)
+                fninfo = new.__code__
             elif isinstance(new, (str, bytes)):
                 function_source = new
+                fninfo = create_function_from_source(
+                    new, self.imports).__code__
             self.inputs.trait_set(trait_change_notify=False,
                                   **{'%s' % name: function_source})
+            # Update input traits
+            input_names = fninfo.co_varnames[:fninfo.co_argcount]
+            new_names = set(input_names) - set(self._input_names)
+            add_traits(self.inputs, list(new_names))
+            self._input_names.extend(new_names)
 
     def _add_output_traits(self, base):
         undefined_traits = {}

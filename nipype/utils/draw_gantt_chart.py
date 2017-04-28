@@ -5,18 +5,18 @@
 callback_log.log_nodes_cb()
 """
 from __future__ import print_function, division, unicode_literals, absolute_import
-from builtins import str, range, open
-
-# Py2 compat: http://python-future.org/compatible_idioms.html#collections-counter-and-ordereddict
-from future import standard_library
-standard_library.install_aliases()
-from collections import OrderedDict
 
 # Import packages
+import sys
 import random
 import datetime
 import simplejson as json
 from dateutil import parser
+from builtins import str, range, open
+# Py2 compat: http://python-future.org/compatible_idioms.html#collections-counter-and-ordereddict
+from future import standard_library
+standard_library.install_aliases()
+from collections import OrderedDict
 
 # Pandas
 try:
@@ -25,6 +25,8 @@ except ImportError:
     print('Pandas not found; in order for full functionality of this module '\
           'install the pandas package')
     pass
+
+PY3 = sys.version_info[0] > 2
 
 def create_event_dict(start_time, nodes_list):
     '''
@@ -57,10 +59,10 @@ def create_event_dict(start_time, nodes_list):
         runtime_memory_gb = node.get('runtime_memory_gb', 0.0)
 
         # Init and format event-based nodes
-        node['estimated_threads'] =  estimated_threads
-        node['estimated_memory_gb'] =  estimated_memory_gb
-        node['runtime_threads'] =  runtime_threads
-        node['runtime_memory_gb'] =  runtime_memory_gb
+        node['estimated_threads'] = estimated_threads
+        node['estimated_memory_gb'] = estimated_memory_gb
+        node['runtime_threads'] = runtime_threads
+        node['runtime_memory_gb'] = runtime_memory_gb
         start_node = node
         finish_node = copy.deepcopy(node)
         start_node['event'] = 'start'
@@ -71,7 +73,7 @@ def create_event_dict(start_time, nodes_list):
         finish_delta = (node['finish'] - start_time).total_seconds()
 
         # Populate dictionary
-        if events.has_key(start_delta) or events.has_key(finish_delta):
+        if events.get(start_delta) or events.get(finish_delta):
             err_msg = 'Event logged twice or events started at exact same time!'
             raise KeyError(err_msg)
         events[start_delta] = start_node
@@ -186,22 +188,22 @@ def calculate_resource_timeseries(events, resource):
     all_res = 0.0
 
     # Iterate through the events
-    for tdelta, event in sorted(events.items()):
+    for _, event in sorted(events.items()):
         if event['event'] == "start":
             if resource in event and event[resource] != 'Unknown':
                 all_res += float(event[resource])
-            current_time = event['start'];
+            current_time = event['start']
         elif event['event'] == "finish":
             if resource in event and event[resource] != 'Unknown':
                 all_res -= float(event[resource])
-            current_time = event['finish'];
+            current_time = event['finish']
         res[current_time] = all_res
 
     # Formulate the pandas timeseries
     time_series = pd.Series(data=list(res.values()), index=list(res.keys()))
     # Downsample where there is only value-diff
     ts_diff = time_series.diff()
-    time_series = time_series[ts_diff!=0]
+    time_series = time_series[ts_diff != 0]
 
     # Return the new time series
     return time_series
@@ -235,7 +237,7 @@ def draw_lines(start, total_duration, minute_scale, scale):
     result = ''
     next_line = 220
     next_time = start
-    num_lines = ((total_duration // 60) // minute_scale) + 2
+    num_lines = int(((total_duration // 60) // minute_scale) + 2)
 
     # Iterate through the lines and create html line markers string
     for line in range(num_lines):
@@ -362,8 +364,13 @@ def draw_resource_bar(start_time, finish_time, time_series, space_between_minute
     space_between_minutes = space_between_minutes / scale
 
     # Iterate through time series
+    if PY3:
+        ts_items = time_series.items()
+    else:
+        ts_items = time_series.iteritems()
+
     ts_len = len(time_series)
-    for idx, (ts_start, amount) in enumerate(time_series.items()):
+    for idx, (ts_start, amount) in enumerate(ts_items):
         if idx < ts_len-1:
             ts_end = time_series.index[idx+1]
         else:
@@ -559,26 +566,30 @@ def generate_gantt_chart(logfile, cores, minute_scale=10,
     runtime_mem_ts = calculate_resource_timeseries(events, 'runtime_memory_gb')
     # Plot gantt chart
     resource_offset = 120 + 30*cores
-    html_string += draw_resource_bar(start_node['start'], last_node['finish'], estimated_mem_ts,
-                                     space_between_minutes, minute_scale, '#90BBD7', resource_offset*2+120, 'Memory')
-    html_string += draw_resource_bar(start_node['start'], last_node['finish'], runtime_mem_ts,
-                                     space_between_minutes, minute_scale, '#03969D', resource_offset*2+120, 'Memory')
+    html_string += draw_resource_bar(
+        start_node['start'], last_node['finish'], estimated_mem_ts,
+        space_between_minutes, minute_scale, '#90BBD7', resource_offset*2+120, 'Memory')
+    html_string += draw_resource_bar(
+        start_node['start'], last_node['finish'], runtime_mem_ts,
+        space_between_minutes, minute_scale, '#03969D', resource_offset*2+120, 'Memory')
 
     # Get threads timeseries
     estimated_threads_ts = calculate_resource_timeseries(events, 'estimated_threads')
     runtime_threads_ts = calculate_resource_timeseries(events, 'runtime_threads')
     # Plot gantt chart
-    html_string += draw_resource_bar(start_node['start'], last_node['finish'], estimated_threads_ts,
-                                     space_between_minutes, minute_scale, '#90BBD7', resource_offset, 'Threads')
-    html_string += draw_resource_bar(start_node['start'], last_node['finish'], runtime_threads_ts,
-                                     space_between_minutes, minute_scale, '#03969D', resource_offset, 'Threads')
+    html_string += draw_resource_bar(
+        start_node['start'], last_node['finish'], estimated_threads_ts,
+        space_between_minutes, minute_scale, '#90BBD7', resource_offset, 'Threads')
+    html_string += draw_resource_bar(
+        start_node['start'], last_node['finish'], runtime_threads_ts,
+        space_between_minutes, minute_scale, '#03969D', resource_offset, 'Threads')
 
     #finish html
-    html_string+= '''
+    html_string += '''
         </div>
     </body>'''
 
     #save file
-    html_file = open(logfile + '.html', 'wb')
-    html_file.write(html_string)
-    html_file.close()
+    with open(logfile + '.html', 'w' if PY3 else 'wb') as html_file:
+        html_file.write(html_string)
+

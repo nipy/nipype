@@ -19,8 +19,7 @@ class ANTSInputSpec(ANTSCommandInputSpec):
     dimension = traits.Enum(3, 2, argstr='%d', usedefault=False,
                             position=1, desc='image dimension (2 or 3)')
     fixed_image = InputMultiPath(File(exists=True), mandatory=True,
-                                 desc=('image to apply transformation to (generally a coregistered '
-                                       'functional)'))
+                                 desc=('image to which the moving image is warped'))
     moving_image = InputMultiPath(File(exists=True), argstr='%s',
                                   mandatory=True,
                                   desc=('image to apply transformation to (generally a coregistered '
@@ -378,6 +377,8 @@ class RegistrationInputSpec(ANTSCommandInputSpec):
         low=0.0, high=1.0, value=1.0, argstr='%s', usedefault=True, desc="The Upper quantile to clip image ranges")
     winsorize_lower_quantile = traits.Range(
         low=0.0, high=1.0, value=0.0, argstr='%s', usedefault=True, desc="The Lower quantile to clip image ranges")
+
+    verbose = traits.Bool(argstr='-v', default=False)
 
 
 class RegistrationOutputSpec(TraitedSpec):

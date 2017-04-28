@@ -10,7 +10,6 @@ def test_FLIRT_inputs():
     xor=['apply_xfm'],
     ),
     apply_xfm=dict(argstr='-applyxfm',
-    requires=['in_matrix_file'],
     ),
     args=dict(argstr='%s',
     ),

@@ -21,7 +21,7 @@ from .utils import (SampleToSurface, SurfaceSmooth, SurfaceTransform, Surface2Vo
                     MRIFill, MRIsInflate, Sphere, FixTopology, EulerNumber,
                     RemoveIntersection, MakeSurfaces, Curvature, CurvatureStats,
                     Jacobian, MRIsCalc, VolumeMask, ParcellationStats, Contrast,
-                    RelabelHypointensities, Aparc2Aseg, Apas2Aseg)
+                    RelabelHypointensities, Aparc2Aseg, Apas2Aseg, MRIsExpand, MRIsCombine)
 from .longitudinal import (RobustTemplate, FuseSegmentations)
 from .registration import (MPRtoMNI305, RegisterAVItoTalairach, EMRegister, Register,
                            Paint)

@@ -6,6 +6,7 @@ import os
 import pytest
 
 from nipype.interfaces import utility
+from nipype.interfaces.base import isdefined
 import nipype.pipeline.engine as pe
 
 
@@ -49,3 +50,31 @@ def test_split(tmpdir, args, expected):
     res = node.run()
     assert res.outputs.out1 == expected[0]
     assert res.outputs.out2 == expected[1]
+
+
+@pytest.mark.parametrize("args, kwargs, in_lists, expected", [
+        ([3], {}, [0, [1, 2], [3, 4, 5]], [0, 1, 2, 3, 4, 5]),
+        ([0], {}, None, None),
+        ([], {}, [], []),
+        ([], {}, [0, [1, 2], [3, 4, 5]], [0, [1, 2], [3, 4, 5]]),
+        ([3], {'axis': 'hstack'}, [[0], [1, 2], [3, 4, 5]], [[0, 1, 3]]),
+        ([3], {'axis': 'hstack'}, [[0, 1], [2, 3], [4, 5]],
+         [[0, 2, 4], [1, 3, 5]]),
+        ([3], {'axis': 'hstack'}, [[0, 1], [2, 3], [4, 5]],
+         [[0, 2, 4], [1, 3, 5]]),
+        ])
+def test_merge(tmpdir, args, kwargs, in_lists, expected):
+    os.chdir(str(tmpdir))
+
+    node = pe.Node(utility.Merge(*args, **kwargs), name='merge')
+
+    numinputs = args[0] if args else 0
+    if numinputs >= 1:
+        for i in range(1, numinputs + 1):
+            setattr(node.inputs, 'in{:d}'.format(i), in_lists[i - 1])
+
+    res = node.run()
+    if numinputs < 1:
+        assert not isdefined(res.outputs.out)
+    else:
+        assert res.outputs.out == expected

@@ -174,6 +174,98 @@ class MaxImage(MathsCommand):
     _suffix = "_max"
 
 
+class PercentileImageInput(MathsInput):
+
+    dimension = traits.Enum("T", "X", "Y", "Z", usedefault=True,
+                            argstr="-%sperc", position=4,
+                            desc="dimension to percentile across")
+    perc = traits.Range(low=0, high=100, usedefault=False,
+                        argstr="%f", position=5,
+                        desc=("nth percentile (0-100) of FULL RANGE "
+                              "across dimension"))
+
+
+class PercentileImage(MathsCommand):
+    """Use fslmaths to generate a percentile image across a given dimension.
+
+    Examples
+    --------
+    >>> from nipype.interfaces.fsl.maths import MaxImage
+    >>> percer = PercentileImage()
+    >>> percer.inputs.in_file = "functional.nii"  # doctest: +SKIP
+    >>> percer.dimension = "T"
+    >>> percer.perc = 90
+    >>> percer.cmdline  # doctest: +SKIP
+    'fslmaths functional.nii -Tperc 90 functional_perc.nii'
+
+    """
+    input_spec = PercentileImageInput
+    _suffix = "_perc"
+
+
+class MaxnImageInput(MathsInput):
+
+    dimension = traits.Enum("T", "X", "Y", "Z", usedefault=True,
+                            argstr="-%smaxn", position=4,
+                            desc="dimension to index max across")
+
+
+class MaxnImage(MathsCommand):
+    """Use fslmaths to generate an image of index of max across
+    a given dimension.
+
+    """
+    input_spec = MaxnImageInput
+    _suffix = "_maxn"
+
+
+class MinImageInput(MathsInput):
+
+    dimension = traits.Enum("T", "X", "Y", "Z", usedefault=True,
+                            argstr="-%smin", position=4,
+                            desc="dimension to min across")
+
+
+class MinImage(MathsCommand):
+    """Use fslmaths to generate a minimum image across a given dimension.
+
+    """
+    input_spec = MinImageInput
+    _suffix = "_min"
+
+
+class MedianImageInput(MathsInput):
+
+    dimension = traits.Enum("T", "X", "Y", "Z", usedefault=True,
+                            argstr="-%smedian", position=4,
+                            desc="dimension to median across")
+
+
+class MedianImage(MathsCommand):
+    """Use fslmaths to generate a median image across a given dimension.
+
+    """
+    input_spec = MedianImageInput
+    _suffix = "_median"
+
+
+class AR1ImageInput(MathsInput):
+
+    dimension = traits.Enum("T", "X", "Y", "Z", usedefault=True,
+                            argstr="-%sar1", position=4,
+                            desc=("dimension to find AR(1) coefficient"
+                                  "across"))
+
+
+class AR1Image(MathsCommand):
+    """Use fslmaths to generate an AR1 coefficient image across a
+    given dimension. (Should use -odt float and probably demean first)
+
+    """
+    input_spec = AR1ImageInput
+    _suffix = "_ar1"
+
+
 class IsotropicSmoothInput(MathsInput):
 
     fwhm = traits.Float(mandatory=True, xor=["sigma"],

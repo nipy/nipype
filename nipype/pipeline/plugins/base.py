@@ -23,7 +23,7 @@ import scipy.sparse as ssp
 
 
 from ... import logging
-from ...utils.filemanip import savepkl, loadpkl
+from ...utils.filemanip import savepkl, loadpkl, crash2txt
 from ...utils.misc import str2bool
 from ..engine.utils import (nx, dfs_preorder, topological_sort)
 from ..engine import MapNode
@@ -58,7 +58,7 @@ def report_crash(node, traceback=None, hostname=None):
                                      exc_traceback)
     timeofcrash = strftime('%Y%m%d-%H%M%S')
     login_name = getpass.getuser()
-    crashfile = 'crash-%s-%s-%s-%s.pklz' % (timeofcrash,
+    crashfile = 'crash-%s-%s-%s-%s' % (timeofcrash,
                                             login_name,
                                             name,
                                             str(uuid.uuid4()))
@@ -68,10 +68,16 @@ def report_crash(node, traceback=None, hostname=None):
     if not os.path.exists(crashdir):
         os.makedirs(crashdir)
     crashfile = os.path.join(crashdir, crashfile)
+    if node.config['execution']['crashfile_format'].lower() in ['text', 'txt']:
+        crashfile += '.txt'
+    else:
+        crashfile += '.pklz'
     logger.info('Saving crash info to %s' % crashfile)
     logger.info(''.join(traceback))
-    savepkl(crashfile, dict(node=node, traceback=traceback))
-    # np.savez(crashfile, node=node, traceback=traceback)
+    if node.config['execution']['crashfile_format'].lower() in ['text', 'txt']:
+        crash2txt(crashfile, dict(node=node, traceback=traceback))
+    else:
+        savepkl(crashfile, dict(node=node, traceback=traceback))
     return crashfile
 
 

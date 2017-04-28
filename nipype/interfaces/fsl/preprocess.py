@@ -118,15 +118,17 @@ class BET(FSLCommand):
     """Use FSL BET command for skull stripping.
 
     For complete details, see the `BET Documentation.
-    <http://www.fmrib.ox.ac.uk/fsl/bet2/index.html>`_
+    <https://fsl.fmrib.ox.ac.uk/fsl/fslwiki/BET/UserGuide>`_
 
     Examples
     --------
     >>> from nipype.interfaces import fsl
-    >>> from nipype.testing import  example_data
     >>> btr = fsl.BET()
-    >>> btr.inputs.in_file = example_data('structural.nii')
+    >>> btr.inputs.in_file = 'structural.nii'
     >>> btr.inputs.frac = 0.7
+    >>> btr.inputs.out_file = 'brain_anat.nii'
+    >>> btr.cmdline  # doctest: +ALLOW_UNICODE
+    'bet structural.nii brain_anat.nii -f 0.70'
     >>> res = btr.run() # doctest: +SKIP
 
     """
@@ -275,7 +277,7 @@ class FASTOutputSpec(TraitedSpec):
 
     mixeltype = File(desc="path/name of mixeltype volume file _mixeltype")
 
-    partial_volume_map = File(desc="path/name of partial volume file _pveseg")
+    partial_volume_map = File(desc='path/name of partial volume file _pveseg')
     partial_volume_files = OutputMultiPath(File(
         desc='path/name of partial volumes files one for each class, _pve_x'))
 
@@ -288,18 +290,17 @@ class FAST(FSLCommand):
     """ Use FSL FAST for segmenting and bias correction.
 
     For complete details, see the `FAST Documentation.
-    <http://www.fmrib.ox.ac.uk/fsl/fast4/index.html>`_
+    <https://fsl.fmrib.ox.ac.uk/fsl/fslwiki/FAST>`_
 
     Examples
     --------
     >>> from nipype.interfaces import fsl
-    >>> from nipype.testing import example_data
-
-    Assign options through the ``inputs`` attribute:
-
     >>> fastr = fsl.FAST()
-    >>> fastr.inputs.in_files = example_data('structural.nii')
-    >>> out = fastr.run() #doctest: +SKIP
+    >>> fastr.inputs.in_files = 'structural.nii'
+    >>> fastr.inputs.out_basename = 'fast_'
+    >>> fastr.cmdline  # doctest: +ALLOW_UNICODE
+    'fast -o fast_ -S 1 structural.nii'
+    >>> out = fastr.run()  # doctest: +SKIP
 
     """
     _cmd = 'fast'
@@ -308,12 +309,12 @@ class FAST(FSLCommand):
 
     def _format_arg(self, name, spec, value):
         # first do what should be done in general
-        formated = super(FAST, self)._format_arg(name, spec, value)
+        formatted = super(FAST, self)._format_arg(name, spec, value)
         if name == 'in_files':
             # FAST needs the -S parameter value to correspond to the number
             # of input images, otherwise it will ignore all but the first
-            formated = "-S %d %s" % (len(value), formated)
-        return formated
+            formatted = "-S %d %s" % (len(value), formatted)
+        return formatted
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
@@ -400,8 +401,9 @@ class FLIRTInputSpec(FSLCommandInputSpec):
                    name_template='%s_flirt.log', desc='output log')
     in_matrix_file = File(argstr='-init %s', desc='input 4x4 affine matrix')
     apply_xfm = traits.Bool(
-        argstr='-applyxfm', requires=['in_matrix_file'],
-        desc='apply transformation supplied by in_matrix_file')
+        argstr='-applyxfm',
+        desc=('apply transformation supplied by in_matrix_file or uses_qform to'
+              ' use the affine matrix stored in the reference header'))
     apply_isoxfm = traits.Float(
         argstr='-applyisoxfm %f', xor=['apply_xfm'],
         desc='as applyxfm but forces isotropic resampling')
@@ -526,7 +528,7 @@ class FLIRT(FSLCommand):
     """Use FSL FLIRT for coregistration.
 
     For complete details, see the `FLIRT Documentation.
-    <http://www.fmrib.ox.ac.uk/fsl/flirt/index.html>`_
+    <https://fsl.fmrib.ox.ac.uk/fsl/fslwiki/FLIRT>`_
 
     To print out the command line help, use:
         fsl.FLIRT().inputs_help()
@@ -561,13 +563,18 @@ class FLIRT(FSLCommand):
         if isdefined(self.inputs.save_log) and self.inputs.save_log:
             if not isdefined(self.inputs.verbose) or self.inputs.verbose == 0:
                 self.inputs.verbose = 1
+        if isdefined(self.inputs.apply_xfm) and self.inputs.apply_xfm:
+            if not self.inputs.in_matrix_file and not self.inputs.uses_qform:
+                raise RuntimeError('Argument apply_xfm requires in_matrix_file '
+                                   'or uses_qform arguments to run')
         skip.append('save_log')
         return super(FLIRT, self)._parse_inputs(skip=skip)
 
 class ApplyXFMInputSpec(FLIRTInputSpec):
     apply_xfm = traits.Bool(
-        True, argstr='-applyxfm', requires=['in_matrix_file'],
-        desc='apply transformation supplied by in_matrix_file',
+        True, argstr='-applyxfm',
+        desc=('apply transformation supplied by in_matrix_file or uses_qform to'
+              ' use the affine matrix stored in the reference header'),
         usedefault=True)
 
 
@@ -642,7 +649,7 @@ class MCFLIRTOutputSpec(TraitedSpec):
     out_file = File(exists=True, desc="motion-corrected timeseries")
     variance_img = File(exists=True, desc="variance image")
     std_img = File(exists=True, desc="standard deviation image")
-    mean_img = File(exists=True, desc="mean timeseries image")
+    mean_img = File(exists=True, desc="mean timeseries image (if mean_vol=True)")
     par_file = File(exists=True, desc="text-file with motion parameters")
     mat_file = OutputMultiPath(File(
         exists=True), desc="transformation matrices")
@@ -655,14 +662,18 @@ class MCFLIRT(FSLCommand):
     """Use FSL MCFLIRT to do within-modality motion correction.
 
     For complete details, see the `MCFLIRT Documentation.
-    <http://www.fmrib.ox.ac.uk/fsl/mcflirt/index.html>`_
+    <https://fsl.fmrib.ox.ac.uk/fsl/fslwiki/MCFLIRT>`_
 
     Examples
     --------
     >>> from nipype.interfaces import fsl
-    >>> from nipype.testing import example_data
-    >>> mcflt = fsl.MCFLIRT(in_file=example_data('functional.nii'), cost='mutualinfo')
-    >>> res = mcflt.run() # doctest: +SKIP
+    >>> mcflt = fsl.MCFLIRT()
+    >>> mcflt.inputs.in_file = 'functional.nii'
+    >>> mcflt.inputs.cost = 'mutualinfo'
+    >>> mcflt.inputs.out_file = 'moco.nii'
+    >>> mcflt.cmdline # doctest: +ALLOW_UNICODE
+    'mcflirt -in functional.nii -cost mutualinfo -out moco.nii'
+    >>> res = mcflt.run()  # doctest: +SKIP
 
     """
     _cmd = 'mcflirt'
@@ -907,6 +918,9 @@ class FNIRTOutputSpec(TraitedSpec):
 
 class FNIRT(FSLCommand):
     """Use FSL FNIRT for non-linear registration.
+
+    For complete details, see the `FNIRT Documentation.
+    <https://fsl.fmrib.ox.ac.uk/fsl/fslwiki/FNIRT>`_
 
     Examples
     --------
@@ -1207,6 +1221,9 @@ class SUSANOutputSpec(TraitedSpec):
 
 class SUSAN(FSLCommand):
     """ use FSL SUSAN to perform smoothing
+
+    For complete details, see the `SUSAN Documentation.
+    <https://fsl.fmrib.ox.ac.uk/fsl/fslwiki/SUSAN>`_
 
     Examples
     --------
