@@ -1028,7 +1028,7 @@ class ReconAll(CommandLine):
 
         contents = ''.join(lines)
         if not isdefined(self.inputs.xopts) and \
-                self.get_expert_file() == contents:
+                self._get_expert_file() == contents:
             return ' -xopts-use'
 
         expert_fname = os.path.abspath('expert.opts')

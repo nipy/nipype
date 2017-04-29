@@ -7,10 +7,9 @@
     >>> filepath = os.path.dirname( os.path.realpath( __file__ ) )
     >>> datadir = os.path.realpath(os.path.join(filepath, '../../testing/data'))
     >>> os.chdir(datadir)
-
 """
 from __future__ import print_function, division, unicode_literals, absolute_import
-from builtins import open
+from io import open
 
 import os.path as op
 import nibabel as nb
@@ -55,10 +54,11 @@ def read_mrtrix_tracks(in_file, as_generator=True):
 
 
 def read_mrtrix_header(in_file):
-    fileobj = open(in_file, 'r')
+    fileobj = open(in_file, 'rb')
     header = {}
     iflogger.info('Reading header data...')
     for line in fileobj:
+        line = line.decode()
         if line == 'END\n':
             iflogger.info('Reached the end of the header!')
             break
@@ -78,7 +78,7 @@ def read_mrtrix_header(in_file):
 def read_mrtrix_streamlines(in_file, header, as_generator=True):
     offset = header['offset']
     stream_count = header['count']
-    fileobj = open(in_file, 'r')
+    fileobj = open(in_file, 'rb')
     fileobj.seek(offset)
     endianness = native_code
     f4dt = np.dtype(endianness + 'f4')
@@ -138,9 +138,14 @@ def read_mrtrix_streamlines(in_file, header, as_generator=True):
             if n_streams == stream_count:
                 iflogger.info('100% : {n} tracks read'.format(n=n_streams))
                 raise StopIteration
-            if n_streams % int(stream_count / 100) == 0:
-                percent = int(float(n_streams) / float(stream_count) * 100)
-                iflogger.info('{p}% : {n} tracks read'.format(p=percent, n=n_streams))
+            try:
+                if n_streams % int(stream_count / 100) == 0:
+                    percent = int(float(n_streams) / float(stream_count) * 100)
+                    iflogger.info('{p}% : {n} tracks read'.format(p=percent,
+                                                                  n=n_streams))
+            except ZeroDivisionError:
+                iflogger.info('{} stream read out of {}'.format(n_streams,
+                                                                stream_count))
     track_points, nonfinite_list = points_per_track(offset)
     fileobj.seek(offset)
     streamlines = track_gen(track_points)
@@ -166,10 +171,8 @@ class MRTrix2TrackVis(BaseInterface):
     """
     Converts MRtrix (.tck) tract files into TrackVis (.trk) format
     using functions from dipy
-
     Example
     -------
-
     >>> import nipype.interfaces.mrtrix as mrt
     >>> tck2trk = mrt.MRTrix2TrackVis()
     >>> tck2trk.inputs.in_file = 'dwi_CSD_tracked.tck'
