@@ -1,6 +1,7 @@
 Upcoming Release
 =====================
 
+* ENH: Add interface to antsAffineInitializer (https://github.com/nipy/nipype/pull/1980)
 * ENH: AFNI motion parameter support for FrameWiseDisplacement (https://github.com/nipy/nipype/pull/1840)
 * ENH: Add ANTs KellyKapowski interface (https://github.com/nipy/nipype/pull/1845)
 * FIX: AFNI interface bug setting OMP_NUM_THREADS to 1 (https://github.com/nipy/nipype/pull/1728)
