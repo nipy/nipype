@@ -633,7 +633,7 @@ class Normalize12(SPMCommand):
     Spatial normalisation is now done via the segmentation routine (which was
     known as ``New Segment`` in SPM8). Note that the normalisation in SPM12
     is done towards a file containing multiple tissue probability maps, which
-    was not the cass in SPM8.
+    was not the case in SPM8.
 
     http://www.fil.ion.ucl.ac.uk/spm/doc/manual.pdf#page=49
 

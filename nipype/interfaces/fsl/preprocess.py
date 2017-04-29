@@ -649,7 +649,7 @@ class MCFLIRTOutputSpec(TraitedSpec):
     out_file = File(exists=True, desc="motion-corrected timeseries")
     variance_img = File(exists=True, desc="variance image")
     std_img = File(exists=True, desc="standard deviation image")
-    mean_img = File(exists=True, desc="mean timeseries image")
+    mean_img = File(exists=True, desc="mean timeseries image (if mean_vol=True)")
     par_file = File(exists=True, desc="text-file with motion parameters")
     mat_file = OutputMultiPath(File(
         exists=True), desc="transformation matrices")

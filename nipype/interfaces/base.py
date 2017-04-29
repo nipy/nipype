@@ -1387,8 +1387,8 @@ def _get_ram_mb(pid, pyfunc=False):
 def get_max_resources_used(pid, mem_mb, num_threads, pyfunc=False):
     """Function to get the RAM and threads usage of a process
 
-    Paramters
-    ---------
+    Parameters
+    ----------
     pid : integer
         the process ID of process to profile
     mem_mb : float
