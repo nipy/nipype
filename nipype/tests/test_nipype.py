@@ -8,6 +8,6 @@ def test_nipype_info():
         exception_not_raised = False
     assert exception_not_raised
 
-def test_fail_always():
-    assert False
+# def test_fail_always():
+#     assert False
 
