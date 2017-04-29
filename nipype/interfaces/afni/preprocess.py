@@ -2406,7 +2406,7 @@ class QwarpPlusMinusOutputSpec(TraitedSpec):
         desc='Undistorted source file.',
         exists=True)
     warped_base = File(
-        desc='Undistorted source file.',
+        desc='Undistorted base file.',
         exists=True)
     source_warp = File(
         desc="Field suceptibility correction warp (in 'mm') for source image.",
