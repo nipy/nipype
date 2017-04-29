@@ -19,4 +19,5 @@ from .segmentation import (Atropos, LaplacianThickness, N4BiasFieldCorrection, J
 from .visualization import ConvertScalarImageToRGB, CreateTiledMosaic
 
 # Utility Programs
-from .utils import AverageAffineTransform, AverageImages, MultiplyImages, CreateJacobianDeterminantImage
+from .utils import (AverageAffineTransform, AverageImages, MultiplyImages,
+                    CreateJacobianDeterminantImage, AffineInitializer)

@@ -440,6 +440,30 @@ class InterfaceHelpWriter(object):
             if not api_str:
                 continue
             # write out to file
+            mvalues = m.split('.')
+            if len(mvalues) > 3:
+                index_prefix = '.'.join(mvalues[1:3])
+                index_dir = os.path.join(outdir,
+                                         index_prefix)
+                index_file = index_dir + self.rst_extension
+                if not os.path.exists(index_dir):
+                    os.makedirs(index_dir)
+                    header = """.. AUTO-GENERATED FILE -- DO NOT EDIT!
+
+{name}
+{underline}
+
+.. toctree::
+   :maxdepth: 1
+   :glob:
+
+   {name}/*
+                    """.format(name=index_prefix,
+                               underline='='*len(index_prefix))
+                    with open(index_file, 'wt') as fp:
+                        fp.write(header)
+                m = os.path.join(index_prefix,
+                                 '.'.join(mvalues[3:]))
             outfile = os.path.join(outdir,
                                    m + self.rst_extension)
             fileobj = open(outfile, 'wt')
