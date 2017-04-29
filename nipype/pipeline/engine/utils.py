@@ -1019,20 +1019,22 @@ def export_graph(graph_in, base_dir=None, show=False, use_execgraph=False,
                                use_ext=False,
                                newpath=base_dir)
     _write_detailed_dot(graph, outfname)
-    cmd = 'dot -T%s -O %s' % (format, outfname)
-    res = CommandLine(cmd, terminal_output='allatonce').run()
-    if res.runtime.returncode:
-        logger.warn('dot2png: %s', res.runtime.stderr)
+    if format != 'dot':
+        cmd = 'dot -T%s -O %s' % (format, outfname)
+        res = CommandLine(cmd, terminal_output='allatonce').run()
+        if res.runtime.returncode:
+            logger.warn('dot2png: %s', res.runtime.stderr)
     pklgraph = _create_dot_graph(graph, show_connectinfo, simple_form)
     simplefname = fname_presuffix(dotfilename,
                                   suffix='.dot',
                                   use_ext=False,
                                   newpath=base_dir)
     nx.drawing.nx_pydot.write_dot(pklgraph, simplefname)
-    cmd = 'dot -T%s -O %s' % (format, simplefname)
-    res = CommandLine(cmd, terminal_output='allatonce').run()
-    if res.runtime.returncode:
-        logger.warn('dot2png: %s', res.runtime.stderr)
+    if format != 'dot':
+        cmd = 'dot -T%s -O %s' % (format, simplefname)
+        res = CommandLine(cmd, terminal_output='allatonce').run()
+        if res.runtime.returncode:
+            logger.warn('dot2png: %s', res.runtime.stderr)
     if show:
         pos = nx.graphviz_layout(pklgraph, prog='dot')
         nx.draw(pklgraph, pos)
@@ -1045,18 +1047,17 @@ def export_graph(graph_in, base_dir=None, show=False, use_execgraph=False,
     return simplefname if simple_form else outfname
 
 
-def format_dot(dotfilename, format=None):
+def format_dot(dotfilename, format='png'):
     """Dump a directed graph (Linux only; install via `brew` on OSX)"""
-    cmd = 'dot -T%s -O \'%s\'' % (format, dotfilename)
-    try:
-        CommandLine(cmd).run()
-    except IOError as ioe:
-        if "could not be found" in str(ioe):
-            raise IOError("Cannot draw directed graph; executable 'dot' is unavailable")
-        else:
-            raise ioe
-
     if format != 'dot':
+        cmd = 'dot -T%s -O \'%s\'' % (format, dotfilename)
+        try:
+            CommandLine(cmd).run()
+        except IOError as ioe:
+            if "could not be found" in str(ioe):
+                raise IOError("Cannot draw directed graph; executable 'dot' is unavailable")
+            else:
+                raise ioe
         dotfilename += '.%s' % format
     return dotfilename
 

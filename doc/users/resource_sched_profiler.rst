@@ -1,8 +1,8 @@
 .. _resource_sched_profiler:
 
-============================================
+=============================================
 Resource Scheduling and Profiling with Nipype
-============================================
+=============================================
 The latest version of Nipype supports system resource scheduling and profiling.
 These features allows users to ensure high throughput of their data processing
 while also controlling the amount of computing resources a given workflow will
