@@ -6,8 +6,10 @@ def test_BBRegister_inputs():
     input_map_5_3 = dict(
         args=dict(argstr='%s',),
         contrast_type=dict(argstr='--%s', mandatory=True,),
+        dof=dict(argstr='--%d',),
         environ=dict(nohash=True, usedefault=True,),
         epi_mask=dict(argstr='--epi-mask',),
+        fsldof=dict(argstr='--fsl-dof %d',),
         ignore_exception=dict(nohash=True, usedefault=True,),
         init=dict(argstr='--init-%s', mandatory=True, xor=['init_reg_file'],),
         init_reg_file=dict(argstr='--init-reg %s', mandatory=True, xor=['init'],),
@@ -26,8 +28,10 @@ def test_BBRegister_inputs():
     input_map_6_0 = dict(
         args=dict(argstr='%s',),
         contrast_type=dict(argstr='--%s', mandatory=True,),
+        dof=dict(argstr='--%d',),
         environ=dict(nohash=True, usedefault=True,),
         epi_mask=dict(argstr='--epi-mask',),
+        fsldof=dict(argstr='--fsl-dof %d',),
         ignore_exception=dict(nohash=True, usedefault=True,),
         init=dict(argstr='--init-%s', xor=['init_reg_file'],),
         init_reg_file=dict(argstr='--init-reg %s', xor=['init'],),

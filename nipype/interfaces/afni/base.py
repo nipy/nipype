@@ -3,7 +3,7 @@
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """Provide interface to AFNI commands."""
 from __future__ import print_function, division, unicode_literals, absolute_import
-from builtins import object, str, bytes
+from builtins import object, str
 from future.utils import raise_from
 
 import os
@@ -13,6 +13,7 @@ from ... import logging
 from ...utils.filemanip import split_filename
 from ..base import (
     CommandLine, traits, CommandLineInputSpec, isdefined, File, TraitedSpec)
+from ...external.due import BibTeX
 
 # Use nipype's logging system
 IFLOGGER = logging.getLogger('interface')
@@ -147,6 +148,32 @@ class AFNICommand(AFNICommandBase):
     """Shared options for several AFNI commands """
     input_spec = AFNICommandInputSpec
     _outputtype = None
+
+    references_ = [{'entry': BibTeX('@article{Cox1996,'
+                                    'author={R.W. Cox},'
+                                    'title={AFNI: software for analysis and '
+                                    'visualization of functional magnetic '
+                                    'resonance neuroimages},'
+                                    'journal={Computers and Biomedical research},'
+                                    'volume={29},'
+                                    'number={3},'
+                                    'pages={162-173},'
+                                    'year={1996},'
+                                    '}'),
+                    'tags': ['implementation'],
+                    },
+                   {'entry': BibTeX('@article{CoxHyde1997,'
+                                    'author={R.W. Cox and J.S. Hyde},'
+                                    'title={Software tools for analysis and '
+                                    'visualization of fMRI data},'
+                                    'journal={NMR in Biomedicine},'
+                                    'volume={10},'
+                                    'number={45},'
+                                    'pages={171-178},'
+                                    'year={1997},'
+                                    '}'),
+                    'tags': ['implementation'],
+                    }]
 
     def __init__(self, **inputs):
         super(AFNICommand, self).__init__(**inputs)

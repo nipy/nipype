@@ -24,6 +24,7 @@ from ...utils.filemanip import (load_json, save_json, split_filename)
 from ..base import (
     CommandLineInputSpec, CommandLine, Directory, TraitedSpec,
     traits, isdefined, File, InputMultiPath, Undefined, Str)
+from ...external.due import BibTeX
 
 from .base import (
     AFNICommandBase, AFNICommand, AFNICommandInputSpec, AFNICommandOutputSpec)
@@ -115,7 +116,8 @@ class AutoboxInputSpec(AFNICommandInputSpec):
         desc='Number of extra voxels to pad on each side of box')
     out_file = File(
         argstr='-prefix %s',
-        name_source='in_file')
+        name_source='in_file',
+        name_template='%s_autobox')
     no_clustering = traits.Bool(
         argstr='-noclust',
         desc='Don\'t do any clustering to find box. Any non-zero voxel will '
@@ -151,7 +153,7 @@ class Autobox(AFNICommand):
     >>> abox.inputs.in_file = 'structural.nii'
     >>> abox.inputs.padding = 5
     >>> abox.cmdline  # doctest: +ALLOW_UNICODE
-    '3dAutobox -input structural.nii -prefix structural_generated -npad 5'
+    '3dAutobox -input structural.nii -prefix structural_autobox -npad 5'
     >>> res = abox.run()  # doctest: +SKIP
 
     """
@@ -161,7 +163,7 @@ class Autobox(AFNICommand):
     output_spec = AutoboxOutputSpec
 
     def aggregate_outputs(self, runtime=None, needed_outputs=None):
-        outputs = self._outputs()
+        outputs = super(Autobox, self).aggregate_outputs(runtime, needed_outputs)
         pattern = 'x=(?P<x_min>-?\d+)\.\.(?P<x_max>-?\d+)  '\
                   'y=(?P<y_min>-?\d+)\.\.(?P<y_max>-?\d+)  '\
                   'z=(?P<z_min>-?\d+)\.\.(?P<z_max>-?\d+)'
@@ -172,13 +174,8 @@ class Autobox(AFNICommand):
                 for k in list(d.keys()):
                     d[k] = int(d[k])
                 outputs.set(**d)
-        outputs.set(out_file=self._gen_filename('out_file'))
         return outputs
 
-    def _gen_filename(self, name):
-        if name == 'out_file' and (not isdefined(self.inputs.out_file)):
-            return Undefined
-        return super(Autobox, self)._gen_filename(name)
 
 
 class BrickStatInputSpec(CommandLineInputSpec):
@@ -698,6 +695,16 @@ class FWHMx(AFNICommandBase):
     _cmd = '3dFWHMx'
     input_spec = FWHMxInputSpec
     output_spec = FWHMxOutputSpec
+    
+    references_ = [{'entry': BibTeX('@article{CoxReynoldsTaylor2016,'
+                                    'author={R.W. Cox, R.C. Reynolds, and P.A. Taylor},'
+                                    'title={AFNI and clustering: false positive rates redux},'
+                                    'journal={bioRxiv},'
+                                    'year={2016},'
+                                    '}'),
+                    'tags': ['method'],
+                    },
+                   ]
     _acf = True
 
     def _parse_inputs(self, skip=None):

@@ -127,3 +127,4 @@ class SLURMPlugin(SGELikeBatchManagerBase):
         self._pending[taskid] = node.output_dir()
         logger.debug('submitted sbatch task: %d for node %s' % (taskid, node._id))
         return taskid
+

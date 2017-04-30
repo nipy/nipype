@@ -677,7 +677,8 @@ def test_write_graph_runs(tmpdir):
             mod2 = pe.Node(interface=EngineTestInterface(), name='mod2')
             pipe.connect([(mod1, mod2, [('output1', 'input1')])])
             try:
-                pipe.write_graph(graph2use=graph, simple_form=simple)
+                pipe.write_graph(graph2use=graph, simple_form=simple,
+                                 format='dot')
             except Exception:
                 assert False, \
                     'Failed to plot {} {} graph'.format(
@@ -708,7 +709,8 @@ def test_deep_nested_write_graph_runs(tmpdir):
             mod1 = pe.Node(interface=EngineTestInterface(), name='mod1')
             parent.add_nodes([mod1])
             try:
-                pipe.write_graph(graph2use=graph, simple_form=simple)
+                pipe.write_graph(graph2use=graph, simple_form=simple,
+                                 format='dot')
             except Exception as e:
                 assert False, \
                     'Failed to plot {} {} deep graph: {!s}'.format(

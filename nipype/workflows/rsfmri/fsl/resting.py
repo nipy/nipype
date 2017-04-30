@@ -138,7 +138,7 @@ def create_resting_preproc(name='restpreproc', base_dir=None):
     restpreproc.connect(realigner, 'outputspec.realigned_file',
                         compcor, 'realigned_file')
     restpreproc.connect(threshold_stddev, 'out_file',
-                        compcor, 'mask_file')
+                        compcor, 'mask_files')
     restpreproc.connect(inputnode, 'num_noise_components',
                         compcor, 'num_components')
     restpreproc.connect(tsnr, 'detrended_file',
