@@ -585,7 +585,7 @@ class TCompCor(CompCor):
                     mask_file = os.path.abspath('mask.nii')
                 nb.Nifti1Image(mask_data, aff).to_filename(mask_file)
                 IFLOG.debug('tCompcor computed and saved mask of shape {} to '
-                            'mask_file {}'.format(mask.shape, mask_file))
+                            'mask file {}'.format(mask.shape, mask_file))
                 _out_masks.append(mask_file)
                 self._set_header('tCompCor')
 
@@ -601,7 +601,7 @@ class TCompCor(CompCor):
             mask_file = os.path.abspath('mask.nii')
             nb.Nifti1Image(mask_data, aff).to_filename(mask_file)
             IFLOG.debug('tCompcor computed and saved mask of shape {} to '
-                        'mask_file {}'.format(mask.shape, mask_file))
+                        'mask file {}'.format(mask.shape, mask_file))
             _out_masks.append(mask_file)
             self._set_header('tCompCor')
 
