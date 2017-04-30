@@ -330,7 +330,7 @@ class CompCorOutputSpec(TraitedSpec):
         desc='text file containing the noise components')
 
 class CompCor(BaseInterface):
-    '''
+    """
     Interface with core CompCor computation, used in aCompCor and tCompCor
 
     Example
@@ -342,7 +342,8 @@ class CompCor(BaseInterface):
     >>> ccinterface.inputs.num_components = 1
     >>> ccinterface.inputs.use_regress_poly = True
     >>> ccinterface.inputs.regress_poly_degree = 2
-    '''
+    
+    """
     input_spec = CompCorInputSpec
     output_spec = CompCorOutputSpec
     references_ = [{'entry': BibTeX("@article{compcor_2007,"
@@ -465,8 +466,11 @@ class CompCor(BaseInterface):
 
 
 class ACompCor(CompCor):
-    ''' Anatomical compcor; for input/output, see CompCor.
-    If the mask provided is an anatomical mask, CompCor == ACompCor '''
+    """
+    Anatomical compcor: for inputs and outputs, see CompCor.
+    When the mask provided is an anatomical mask, then CompCor
+    is equivalent to ACompCor.
+    """
 
     def __init__(self, *args, **kwargs):
         ''' exactly the same as compcor except the header '''
@@ -492,7 +496,7 @@ class TCompCorOutputSpec(CompCorInputSpec):
                          desc="voxels excedding the variance threshold"))
 
 class TCompCor(CompCor):
-    '''
+    """
     Interface for tCompCor. Computes a ROI mask based on variance of voxels.
 
     Example
@@ -505,7 +509,8 @@ class TCompCor(CompCor):
     >>> ccinterface.inputs.use_regress_poly = True
     >>> ccinterface.inputs.regress_poly_degree = 2
     >>> ccinterface.inputs.percentile_threshold = .03
-    '''
+    
+    """
 
     input_spec = TCompCorInputSpec
     output_spec = TCompCorOutputSpec
@@ -634,7 +639,8 @@ class TSNROutputSpec(TraitedSpec):
 
 
 class TSNR(BaseInterface):
-    """Computes the time-course SNR for a time series
+    """
+    Computes the time-course SNR for a time series
 
     Typically you want to run this on a realigned time-series.
 
@@ -719,80 +725,6 @@ class NonSteadyStateDetector(BaseInterface):
     def _list_outputs(self):
         return self._results
 
-def is_outlier(points, thresh=3.5):
-    """
-    Returns a boolean array with True if points are outliers and False
-    otherwise.
-
-    Parameters:
-    -----------
-        points : An numobservations by numdimensions array of observations
-        thresh : The modified z-score to use as a threshold. Observations with
-            a modified z-score (based on the median absolute deviation) greater
-            than this value will be classified as outliers.
-
-    Returns:
-    --------
-        mask : A numobservations-length boolean array.
-
-    References:
-    ----------
-        Boris Iglewicz and David Hoaglin (1993), "Volume 16: How to Detect and
-        Handle Outliers", The ASQC Basic References in Quality Control:
-        Statistical Techniques, Edward F. Mykytka, Ph.D., Editor.
-    """
-    if len(points.shape) == 1:
-        points = points[:, None]
-    median = np.median(points, axis=0)
-    diff = np.sum((points - median) ** 2, axis=-1)
-    diff = np.sqrt(diff)
-    med_abs_deviation = np.median(diff)
-
-    modified_z_score = 0.6745 * diff / med_abs_deviation
-
-    timepoints_to_discard = 0
-    for i in range(len(modified_z_score)):
-        if modified_z_score[i] <= thresh:
-            break
-        else:
-            timepoints_to_discard += 1
-
-    return timepoints_to_discard
-
-
-def regress_poly(degree, data, remove_mean=True, axis=-1):
-    ''' returns data with degree polynomial regressed out.
-    Be default it is calculated along the last axis (usu. time).
-    If remove_mean is True (default), the data is demeaned (i.e. degree 0).
-    If remove_mean is false, the data is not.
-    '''
-    IFLOG.debug('Performing polynomial regression on data of shape ' + str(data.shape))
-
-    datashape = data.shape
-    timepoints = datashape[axis]
-
-    # Rearrange all voxel-wise time-series in rows
-    data = data.reshape((-1, timepoints))
-
-    # Generate design matrix
-    X = np.ones((timepoints, 1)) # quick way to calc degree 0
-    for i in range(degree):
-        polynomial_func = Legendre.basis(i + 1)
-        value_array = np.linspace(-1, 1, timepoints)
-        X = np.hstack((X, polynomial_func(value_array)[:, np.newaxis]))
-
-    # Calculate coefficients
-    betas = np.linalg.pinv(X).dot(data.T)
-
-    # Estimation
-    if remove_mean:
-        datahat = X.dot(betas).T
-    else: # disregard the first layer of X, which is degree 0
-        datahat = X[:, 1:].dot(betas[1:, ...]).T
-    regressed_data = data - datahat
-
-    # Back to original shape
-    return regressed_data.reshape(datashape)
 
 def compute_dvars(in_file, in_mask, remove_zerovariance=False,
                   intensity_normalization=1000):
@@ -921,3 +853,78 @@ def plot_confound(tseries, figsize, name, units=None,
     ax.set_ylim(ylim)
     ax.set_yticklabels([])
     return fig
+
+def is_outlier(points, thresh=3.5):
+    """
+    Returns a boolean array with True if points are outliers and False
+    otherwise.
+
+    :param nparray points: an numobservations by numdimensions numpy array of observations
+    :param float thresh: the modified z-score to use as a threshold. Observations with
+        a modified z-score (based on the median absolute deviation) greater
+        than this value will be classified as outliers.
+
+    :return: A bolean mask, of size numobservations-length array.
+
+    .. note:: References
+
+        Boris Iglewicz and David Hoaglin (1993), "Volume 16: How to Detect and
+        Handle Outliers", The ASQC Basic References in Quality Control:
+        Statistical Techniques, Edward F. Mykytka, Ph.D., Editor.
+
+    """
+    if len(points.shape) == 1:
+        points = points[:, None]
+    median = np.median(points, axis=0)
+    diff = np.sum((points - median) ** 2, axis=-1)
+    diff = np.sqrt(diff)
+    med_abs_deviation = np.median(diff)
+
+    modified_z_score = 0.6745 * diff / med_abs_deviation
+
+    timepoints_to_discard = 0
+    for i in range(len(modified_z_score)):
+        if modified_z_score[i] <= thresh:
+            break
+        else:
+            timepoints_to_discard += 1
+
+    return timepoints_to_discard
+
+
+def regress_poly(degree, data, remove_mean=True, axis=-1):
+    """
+    Returns data with degree polynomial regressed out.
+
+    :param bool remove_mean: whether or not demean data (i.e. degree 0),
+    :param int axis: numpy array axes along which regression is performed
+
+    """
+    IFLOG.debug('Performing polynomial regression on data of shape ' + str(data.shape))
+
+    datashape = data.shape
+    timepoints = datashape[axis]
+
+    # Rearrange all voxel-wise time-series in rows
+    data = data.reshape((-1, timepoints))
+
+    # Generate design matrix
+    X = np.ones((timepoints, 1)) # quick way to calc degree 0
+    for i in range(degree):
+        polynomial_func = Legendre.basis(i + 1)
+        value_array = np.linspace(-1, 1, timepoints)
+        X = np.hstack((X, polynomial_func(value_array)[:, np.newaxis]))
+
+    # Calculate coefficients
+    betas = np.linalg.pinv(X).dot(data.T)
+
+    # Estimation
+    if remove_mean:
+        datahat = X.dot(betas).T
+    else: # disregard the first layer of X, which is degree 0
+        datahat = X[:, 1:].dot(betas[1:, ...]).T
+    regressed_data = data - datahat
+
+    # Back to original shape
+    return regressed_data.reshape(datashape)
+
