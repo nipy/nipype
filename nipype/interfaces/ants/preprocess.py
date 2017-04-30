@@ -31,7 +31,8 @@ class MotionCorrStatsInputSpec(ANTSCommandInputSpec):
         argstr="-m %s", mandatory=True,
         desc="motion correction parameter file to calculate statistics on"
     )
-    output = File(argstr="-o %s", hash_files=False, genfile=True,
+    output = File(name_source=['moco'], name_template='%s_fd.csv', keep_ext=False,
+                  argstr="-o %s", hash_files=False,
                   desc="csv file to output calculated statistics into")
     framewise = traits.Bool(argstr="-f %d",
                             desc="do framwise summarywise stats")
@@ -44,16 +45,24 @@ class MotionCorrStatsOutputSpec(TraitedSpec):
     output = File(desc="CSV file containg motion correction statistics", exists=True)
 
 class MotionCorrStats(ANTSCommand):
-    ''' Interface for the antsMotionCorrStats command '''
+    """
+    Interface for the antsMotionCorrStats command
+
+    Example
+    -------
+
+    >>> from nipype.interfaces.ants import MotionCorrStats
+    >>> stats = MotionCorrStats(framewise=True)
+    >>> stats.inputs.mask = 'brain_mask.nii'
+    >>> stats.inputs.moco = 'ants_moco.csv'
+    >>> stats.cmdline  # doctest: +ALLOW_UNICODE
+    'antsMotionCorrStats -f 1 -x brain_mask.nii -m ants_moco.csv -o ants_moco_fd.csv'
+
+    """
 
     _cmd = 'antsMotionCorrStats'
     input_spec = MotionCorrStatsInputSpec
     output_spec = MotionCorrStatsOutputSpec
-
-    def _gen_filename(self, name):
-        if name == 'output':
-            return "frame_displacement.csv"
-        return None
 
     def _list_outputs(self):
         outputs = self._outputs().get()
@@ -61,19 +70,18 @@ class MotionCorrStats(ANTSCommand):
             outputs['spatial_map'] = (
                 os.path.abspath(self.inputs.output_spatial_map)
             )
-        if isdefined(self.inputs.output):
-            outputs['output'] = os.path.abspath(self.inputs.output)
         return outputs
 
 class MotionCorrInputSpec(ANTSCommandInputSpec):
     '''Input spec for the antsMotionCorr command.'''
-    dimension_desc = (
-        "This option forces the image to be treated as a "
-        "specified-dimensional image. If not specified, N4 tries to infer "
-        "the dimensionality from the input image."
-    )
-    dimensionality = traits.Enum(3, 2, argstr='-d %d', usedefault=True,
-                                 position=0, desc=dimension_desc)
+
+    dimensionality = traits.Enum(
+        3, 2, argstr='-d %d', usedefault=True, position=0,
+        desc=(
+            "This option forces the image to be treated as a "
+            "specified-dimensional image. If not specified, N4 tries to infer "
+            "the dimensionality from the input image."
+    ))
 
     average_image = File(argstr='-a %s', position=1, exists=False,
                          desc="4D image to take an average of.")
@@ -82,20 +90,18 @@ class MotionCorrInputSpec(ANTSCommandInputSpec):
                                        genfile=True, hash_files=False, argstr='%s')
 
     output_transform_prefix = Str(
-        desc="string to prepend to file containg the transformation parameters"
+        '', desc="string to prepend to file containg the transformation parameters"
     )
     output_warped_image = Str(desc="Name to save motion corrected image as.")
-
-    metric_type_desc = (
-        "GC : global correlation, CC: ANTS neighborhood cross correlation, "
-        "MI: Mutual information, and Demons: Thirion's Demons "
-        "(modified mean-squares). Note that the metricWeight is currently not "
-        "used. Rather, it is a temporary place holder until multivariate "
-        "metrics are available for a single stage."
-    )
-
-    metric_type = traits.Enum("CC", "MeanSquares", "Demons", "GC", "MI",
-                              "Mattes", argstr="%s", desc=metric_type_desc)
+    metric_type = traits.Enum(
+        "CC", "MeanSquares", "Demons", "GC", "MI", "Mattes", argstr="%s",
+        desc=(
+            "GC : global correlation, CC: ANTS neighborhood cross correlation, "
+            "MI: Mutual information, and Demons: Thirion's Demons "
+            "(modified mean-squares). Note that the metricWeight is currently not "
+            "used. Rather, it is a temporary place holder until multivariate "
+            "metrics are available for a single stage."
+    ))
     fixed_image = File(requires=['metric_type'],
                        desc="Fixed image to do motion correction with respect to.")
     moving_image = File(requires=['metric_type'],
@@ -158,6 +164,10 @@ class MotionCorrInputSpec(ANTSCommandInputSpec):
         desc="Write the low-dimensional 3D transforms to a 4D displacement field"
     )
 
+    out_composite_transform = File(
+        name_source=['output_transform_prefix'], name_template='%sMOCOparams.csv',
+        output_name='composite_transform', desc='output file containing head-motion transforms')
+
 
 
 class MotionCorrOutputSpec(TraitedSpec):
@@ -174,6 +184,12 @@ class MotionCorrOutputSpec(TraitedSpec):
 
 class MotionCorr(ANTSCommand):
     '''
+    Format and description of the affine motion correction parameters can be
+    found in this PDF starting on page 555 section 3.9.16 AffineTransform:
+    https://itk.org/ItkSoftwareGuide.pdf
+
+    https://github.com/stnava/ANTs/blob/master/Scripts/antsMotionCorrExample
+
     Examples
     -------
 
@@ -197,35 +213,26 @@ class MotionCorr(ANTSCommand):
     >>> ants_mc.inputs.gradient_step_length = 0.005
     >>> ants_mc.inputs.fixed_image = "average_image.nii.gz"
     >>> ants_mc.inputs.moving_image = "input.nii.gz"
-    >>> print(ants_mc.cmdline)
-    antsMotionCorr -d 3 -i 10x3 -m GC[average_image.nii.gz,input.nii.gz,1.0,1,Random,0.05] -n 10 -o [motcorr,warped.nii.gz,average_image.nii.gz] -f 1x1 -s 0.0x0.0 -t Affine[0.005] -u 1 -e 1
+    >>> ants_mc.cmdline  # doctest: +ALLOW_UNICODE
+    'antsMotionCorr -d 3 -i 10x3 -m GC[average_image.nii.gz,input.nii.gz,1.0,1,Random,0.05] -n\
+ 10 -o [motcorr,warped.nii.gz,average_image.nii.gz] -f 1x1 -s 0.0x0.0 -t Affine[0.005] -u 1 -e 1'
 
     >>> from nipype.interfaces.ants.preprocess import MotionCorr
     >>> ants_avg = MotionCorr()
     >>> ants_avg.inputs.average_image = 'input.nii.gz'
     >>> ants_avg.inputs.output_average_image = 'avg_out.nii.gz'
-    >>> print(ants_avg.cmdline)
-    antsMotionCorr -d 3 -a input.nii.gz -o avg_out.nii.gz
+    >>> ants_mc.cmdline  # doctest: +ALLOW_UNICODE
+    'antsMotionCorr -d 3 -a input.nii.gz -o avg_out.nii.gz'
 
     >>> ants_avg = MotionCorr()
     >>> ants_avg.inputs.average_image = 'input.nii.gz'
-    >>> print(ants_avg.cmdline)
-    antsMotionCorr -d 3 -a input.nii.gz -o input_avg.nii.gz
+    >>> ants_mc.cmdline  # doctest: +ALLOW_UNICODE
+    'antsMotionCorr -d 3 -a input.nii.gz -o input_avg.nii.gz'
 
-    Format and description of the affine motion correction parameters can be
-    found in this PDF starting on page 555 section 3.9.16 AffineTransform:
-    https://itk.org/ItkSoftwareGuide.pdf
-
-    https://github.com/stnava/ANTs/blob/master/Scripts/antsMotionCorrExample
     '''
     _cmd = 'antsMotionCorr'
     input_spec = MotionCorrInputSpec
     output_spec = MotionCorrOutputSpec
-
-    def _run_interface(self, runtime):
-        runtime = super(MotionCorr, self)._run_interface(runtime)
-
-        return runtime
 
     def _gen_filename(self, name):
         '''
@@ -306,11 +313,6 @@ class MotionCorr(ANTSCommand):
             outputs['warped_image'] = (
                 os.path.abspath(self.inputs.output_warped_image)
             )
-        if isdefined(self.inputs.output_transform_prefix):
-            fname = '{}MOCOparams.csv'.format(
-                self.inputs.output_transform_prefix
-            )
-            outputs['composite_transform'] = os.path.abspath(fname)
         if (isdefined(self.inputs.write_displacement) and
                 isdefined(self.inputs.output_transform_prefix) and
                 self.inputs.write_displacement is True):
