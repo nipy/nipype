@@ -64,7 +64,8 @@ class NiftyRegCommand(CommandLine):
         _version = self.get_version()
         if _version:
             _version = _version.decode("utf-8")
-            if StrictVersion(_version) < StrictVersion(self._min_version):
+            if self._min_version is not None and \
+               StrictVersion(_version) < StrictVersion(self._min_version):
                 msg = 'A later version of Niftyreg is required (%s < %s)'
                 warn(msg % (_version, self._min_version))
             if required_version is not None:

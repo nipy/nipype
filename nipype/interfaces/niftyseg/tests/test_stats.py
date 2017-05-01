@@ -3,9 +3,8 @@
 
 import pytest
 
-from nipype.interfaces.niftyreg import no_nifty_package
-from nipype.interfaces.niftyseg import (get_custom_path, UnaryStats,
-                                        BinaryStats)
+from nipype.interfaces.niftyreg import no_nifty_package, get_custom_path
+from nipype.interfaces.niftyseg import UnaryStats, BinaryStats
 from nipype.testing import example_data
 
 
@@ -17,7 +16,8 @@ def test_unary_stats():
     unarys = UnaryStats()
 
     # Check if the command is properly defined
-    assert unarys.cmd == get_custom_path('seg_stats')
+    cmd = get_custom_path('seg_stats', env_dir='NIFTYSEGDIR')
+    assert unarys.cmd == cmd
 
     # test raising error with mandatory args absent
     with pytest.raises(ValueError):
@@ -29,7 +29,7 @@ def test_unary_stats():
     unarys.inputs.operation = 'a'
 
     expected_cmd = '{cmd} {in_file} -a'.format(
-        cmd=get_custom_path('seg_stats'),
+        cmd=cmd,
         in_file=in_file)
 
     assert unarys.cmdline == expected_cmd
@@ -43,7 +43,8 @@ def test_binary_stats():
     binarys = BinaryStats()
 
     # Check if the command is properly defined
-    assert binarys.cmd == get_custom_path('seg_stats')
+    cmd = get_custom_path('seg_stats', env_dir='NIFTYSEGDIR')
+    assert binarys.cmd == cmd
 
     # test raising error with mandatory args absent
     with pytest.raises(ValueError):
@@ -56,7 +57,7 @@ def test_binary_stats():
     binarys.inputs.operation = 'sa'
 
     expected_cmd = '{cmd} {in_file} -sa 2.00000000'.format(
-        cmd=get_custom_path('seg_stats'),
+        cmd=cmd,
         in_file=in_file)
 
     assert binarys.cmdline == expected_cmd

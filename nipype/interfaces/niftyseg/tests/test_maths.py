@@ -3,9 +3,8 @@
 
 import pytest
 
-from nipype.interfaces.niftyreg import no_nifty_package
-from nipype.interfaces.niftyseg import (get_custom_path,
-                                        UnaryMaths, BinaryMaths,
+from nipype.interfaces.niftyreg import no_nifty_package, get_custom_path
+from nipype.interfaces.niftyseg import (UnaryMaths, BinaryMaths,
                                         BinaryMathsInteger, TupleMaths,
                                         Merge)
 from nipype.testing import example_data
@@ -19,7 +18,8 @@ def test_unary_maths():
     unarym = UnaryMaths()
 
     # Check if the command is properly defined
-    assert unarym.cmd == get_custom_path('seg_maths')
+    cmd = get_custom_path('seg_maths', env_dir='NIFTYSEGDIR')
+    assert unarym.cmd == cmd
 
     # test raising error with mandatory args absent
     with pytest.raises(ValueError):
@@ -32,7 +32,7 @@ def test_unary_maths():
     unarym.inputs.output_datatype = 'float'
 
     expected_cmd = '{cmd} {in_file} -otsu -odt float {out_file}'.format(
-        cmd=get_custom_path('seg_maths'),
+        cmd=cmd,
         in_file=in_file,
         out_file='im1_otsu.nii')
 
@@ -47,7 +47,8 @@ def test_binary_maths():
     binarym = BinaryMaths()
 
     # Check if the command is properly defined
-    assert binarym.cmd == get_custom_path('seg_maths')
+    cmd = get_custom_path('seg_maths', env_dir='NIFTYSEGDIR')
+    assert binarym.cmd == cmd
 
     # test raising error with mandatory args absent
     with pytest.raises(ValueError):
@@ -62,7 +63,7 @@ def test_binary_maths():
 
     cmd_tmp = '{cmd} {in_file} -sub 2.00000000 -odt float {out_file}'
     expected_cmd = cmd_tmp.format(
-        cmd=get_custom_path('seg_maths'),
+        cmd=cmd,
         in_file=in_file,
         out_file='im1_sub.nii')
 
@@ -77,7 +78,8 @@ def test_int_binary_maths():
     ibinarym = BinaryMathsInteger()
 
     # Check if the command is properly defined
-    assert ibinarym.cmd == get_custom_path('seg_maths')
+    cmd = get_custom_path('seg_maths', env_dir='NIFTYSEGDIR')
+    assert ibinarym.cmd == cmd
 
     # test raising error with mandatory args absent
     with pytest.raises(ValueError):
@@ -91,7 +93,7 @@ def test_int_binary_maths():
     ibinarym.inputs.output_datatype = 'float'
 
     expected_cmd = '{cmd} {in_file} -dil 2 -odt float {out_file}'.format(
-        cmd=get_custom_path('seg_maths'),
+        cmd=cmd,
         in_file=in_file,
         out_file='im1_dil.nii')
 
@@ -106,7 +108,8 @@ def test_tuple_maths():
     tuplem = TupleMaths()
 
     # Check if the command is properly defined
-    assert tuplem.cmd == get_custom_path('seg_maths')
+    cmd = get_custom_path('seg_maths', env_dir='NIFTYSEGDIR')
+    assert tuplem.cmd == cmd
 
     # test raising error with mandatory args absent
     with pytest.raises(ValueError):
@@ -123,7 +126,7 @@ def test_tuple_maths():
 
     cmd_tmp = '{cmd} {in_file} -lncc {op} 2.00000000 -odt float {out_file}'
     expected_cmd = cmd_tmp.format(
-        cmd=get_custom_path('seg_maths'),
+        cmd=cmd,
         in_file=in_file,
         op=op_file,
         out_file='im1_lncc.nii')
@@ -139,7 +142,8 @@ def test_merge():
     merge = Merge()
 
     # Check if the command is properly defined
-    assert merge.cmd == get_custom_path('seg_maths')
+    cmd = get_custom_path('seg_maths', env_dir='NIFTYSEGDIR')
+    assert merge.cmd == cmd
 
     # test raising error with mandatory args absent
     with pytest.raises(ValueError):
@@ -156,7 +160,7 @@ def test_merge():
 
     cmd_tmp = '{cmd} {in_file} -merge 2 2 {f1} {f2} -odt float {out_file}'
     expected_cmd = cmd_tmp.format(
-        cmd=get_custom_path('seg_maths'),
+        cmd=cmd,
         in_file=in_file,
         f1=file1,
         f2=file2,

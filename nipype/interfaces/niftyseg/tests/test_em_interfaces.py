@@ -3,8 +3,8 @@
 
 import pytest
 
-from nipype.interfaces.niftyreg import no_nifty_package
-from nipype.interfaces.niftyseg import get_custom_path, EM
+from nipype.interfaces.niftyreg import no_nifty_package, get_custom_path
+from nipype.interfaces.niftyseg import EM
 from nipype.testing import example_data
 
 
@@ -16,7 +16,8 @@ def test_seg_em():
     seg_em = EM()
 
     # Check if the command is properly defined
-    assert seg_em.cmd == get_custom_path('seg_EM')
+    cmd = get_custom_path('seg_EM', env_dir='NIFTYSEGDIR')
+    assert seg_em.cmd == cmd
 
     # test raising error with mandatory args absent
     with pytest.raises(ValueError):
@@ -30,7 +31,7 @@ def test_seg_em():
     cmd_tmp = '{cmd} -in {in_file} -nopriors 4 -bc_out {bc_out} -out \
 {out_file} -out_outlier {out_outlier}'
     expected_cmd = cmd_tmp.format(
-        cmd=get_custom_path('seg_EM'),
+        cmd=cmd,
         in_file=in_file,
         out_file='im1_em.nii.gz',
         bc_out='im1_bc_em.nii.gz',

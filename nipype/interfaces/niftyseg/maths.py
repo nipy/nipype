@@ -22,7 +22,8 @@ import os
 
 from ..base import (TraitedSpec, File, traits, isdefined, CommandLineInputSpec,
                     NipypeInterfaceError)
-from ..niftyreg.base import NiftyRegCommand, get_custom_path
+from .base import NiftySegCommand
+from ..niftyreg.base import get_custom_path
 from ...utils.filemanip import split_filename
 
 
@@ -53,7 +54,7 @@ class MathsOutput(TraitedSpec):
     out_file = File(desc='image written after calculations')
 
 
-class MathsCommand(NiftyRegCommand):
+class MathsCommand(NiftySegCommand):
     """
     Base Command Interface for seg_maths interfaces.
 

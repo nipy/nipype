@@ -18,7 +18,8 @@ import warnings
 
 from ..base import (TraitedSpec, File, traits, isdefined, CommandLineInputSpec,
                     NipypeInterfaceError)
-from ..niftyreg.base import get_custom_path, NiftyRegCommand
+from .base import NiftySegCommand
+from ..niftyreg.base import get_custom_path
 from ...utils.filemanip import load_json, save_json, split_filename
 
 
@@ -111,7 +112,7 @@ class LabelFusionOutput(TraitedSpec):
     out_file = File(exists=True, desc='image written after calculations')
 
 
-class LabelFusion(NiftyRegCommand):
+class LabelFusion(NiftySegCommand):
     """Interface for executable seg_LabelFusion from NiftySeg platform using
     type STEPS as classifier Fusion.
 
@@ -288,7 +289,7 @@ class CalcTopNCCOutputSpec(TraitedSpec):
     out_files = traits.Any(File(exists=True))
 
 
-class CalcTopNCC(NiftyRegCommand):
+class CalcTopNCC(NiftySegCommand):
     """Interface for executable seg_CalcTopNCC from NiftySeg platform.
 
     Examples

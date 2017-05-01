@@ -3,8 +3,8 @@
 
 import pytest
 
-from nipype.interfaces.niftyreg import no_nifty_package
-from nipype.interfaces.niftyseg import get_custom_path, PatchMatch
+from nipype.interfaces.niftyreg import no_nifty_package, get_custom_path
+from nipype.interfaces.niftyseg import PatchMatch
 from nipype.testing import example_data
 
 
@@ -16,7 +16,8 @@ def test_seg_patchmatch():
     seg_patchmatch = PatchMatch()
 
     # Check if the command is properly defined
-    assert seg_patchmatch.cmd == get_custom_path('seg_PatchMatch')
+    cmd = get_custom_path('seg_PatchMatch', env_dir='NIFTYSEGDIR')
+    assert seg_patchmatch.cmd == cmd
 
     # test raising error with mandatory args absent
     with pytest.raises(ValueError):
@@ -32,7 +33,7 @@ def test_seg_patchmatch():
 
     cmd_tmp = '{cmd} -i {in_file} -m {mask_file} -db {db} -o {out_file}'
     expected_cmd = cmd_tmp.format(
-        cmd=get_custom_path('seg_PatchMatch'),
+        cmd=cmd,
         in_file=in_file,
         mask_file=mask_file,
         db=db_file,

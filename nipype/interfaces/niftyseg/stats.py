@@ -15,7 +15,8 @@ from __future__ import print_function
 import numpy as np
 
 from ..base import TraitedSpec, File, traits, CommandLineInputSpec
-from ..niftyreg.base import NiftyRegCommand, get_custom_path
+from .base import NiftySegCommand
+from ..niftyreg.base import get_custom_path
 
 
 class StatsInput(CommandLineInputSpec):
@@ -45,7 +46,7 @@ class StatsOutput(TraitedSpec):
     output = traits.Array(desc='Output array from seg_stats')
 
 
-class StatsCommand(NiftyRegCommand):
+class StatsCommand(NiftySegCommand):
     """
     Base Command Interface for seg_stats interfaces.
 

@@ -20,7 +20,8 @@ Change directory to provide relative paths for doctests
 
 from ..base import (TraitedSpec, File, traits, CommandLineInputSpec,
                     InputMultiPath)
-from ..niftyreg.base import NiftyRegCommand, get_custom_path
+from .base import NiftySegCommand
+from ..niftyreg.base import get_custom_path
 
 
 class EMInputSpec(CommandLineInputSpec):
@@ -109,7 +110,7 @@ class EMOutputSpec(TraitedSpec):
     out_outlier_file = File(desc='Output outlierness image')
 
 
-class EM(NiftyRegCommand):
+class EM(NiftySegCommand):
     """Interface for executable seg_EM from NiftySeg platform.
 
     seg_EM is a general purpose intensity based image segmentation tool. In

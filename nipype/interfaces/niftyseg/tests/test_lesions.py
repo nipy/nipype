@@ -3,8 +3,8 @@
 
 import pytest
 
-from nipype.interfaces.niftyreg import no_nifty_package
-from nipype.interfaces.niftyseg import get_custom_path, FillLesions
+from nipype.interfaces.niftyreg import no_nifty_package, get_custom_path
+from nipype.interfaces.niftyseg import FillLesions
 from nipype.testing import example_data
 
 
@@ -16,7 +16,8 @@ def test_seg_filllesions():
     seg_fill = FillLesions()
 
     # Check if the command is properly defined
-    assert seg_fill.cmd == get_custom_path('seg_FillLesions')
+    cmd = get_custom_path('seg_FillLesions', env_dir='NIFTYSEGDIR')
+    assert seg_fill.cmd == cmd
 
     # test raising error with mandatory args absent
     with pytest.raises(ValueError):
@@ -29,7 +30,7 @@ def test_seg_filllesions():
     seg_fill.inputs.lesion_mask = lesion_mask
 
     expected_cmd = '{cmd} -i {in_file} -l {lesion_mask} -o {out_file}'.format(
-        cmd=get_custom_path('seg_FillLesions'),
+        cmd=cmd,
         in_file=in_file,
         lesion_mask=lesion_mask,
         out_file='im1_lesions_filled.nii.gz',

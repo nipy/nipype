@@ -15,7 +15,8 @@ Change directory to provide relative paths for doctests
 import warnings
 
 from ..base import TraitedSpec, File, traits, CommandLineInputSpec
-from ..niftyreg.base import NiftyRegCommand, get_custom_path
+from .base import NiftySegCommand
+from ..niftyreg.base import get_custom_path
 
 
 warn = warnings.warn
@@ -80,7 +81,7 @@ class PatchMatchOutputSpec(TraitedSpec):
     out_file = File(desc="Output segmentation")
 
 
-class PatchMatch(NiftyRegCommand):
+class PatchMatch(NiftySegCommand):
     """Interface for executable seg_PatchMatch from NiftySeg platform.
 
     The database file is a text file and in each line we have a template

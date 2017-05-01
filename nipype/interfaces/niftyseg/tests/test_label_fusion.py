@@ -3,8 +3,8 @@
 
 import pytest
 
-from nipype.interfaces.niftyreg import no_nifty_package
-from nipype.interfaces.niftyseg import get_custom_path, LabelFusion, CalcTopNCC
+from nipype.interfaces.niftyreg import no_nifty_package, get_custom_path
+from nipype.interfaces.niftyseg import LabelFusion, CalcTopNCC
 from nipype.testing import example_data
 
 
@@ -16,7 +16,8 @@ def test_seg_lab_fusion():
     steps = LabelFusion()
 
     # Check if the command is properly defined
-    assert steps.cmd == get_custom_path('seg_LabFusion')
+    cmd = get_custom_path('seg_LabFusion', env_dir='NIFTYSEGDIR')
+    assert steps.cmd == cmd
 
     # test raising error with mandatory args absent
     with pytest.raises(ValueError):
@@ -36,7 +37,7 @@ def test_seg_lab_fusion():
     cmd_tmp = '{cmd} -in {in_file} -STEPS 2.000000 2 {file_to_seg} \
 {template_file} -out {out_file}'
     expected_cmd = cmd_tmp.format(
-        cmd=get_custom_path('seg_LabFusion'),
+        cmd=cmd,
         in_file=in_file,
         file_to_seg=file_to_seg,
         template_file=template_file,
@@ -57,7 +58,7 @@ def test_seg_lab_fusion():
 
     cmd_tmp = '{cmd} -in {in_file} -STAPLE -ALL -out {out_file}'
     expected_cmd = cmd_tmp.format(
-        cmd=get_custom_path('seg_LabFusion'),
+        cmd=cmd,
         in_file=in_file,
         file_to_seg=file_to_seg,
         template_file=template_file,
@@ -79,7 +80,7 @@ def test_seg_lab_fusion():
     cmd_tmp = '{cmd} -in {in_file} -MV -ROINCC 2 2 {file_to_seg} \
 {template_file} -out {out_file}'
     expected_cmd = cmd_tmp.format(
-        cmd=get_custom_path('seg_LabFusion'),
+        cmd=cmd,
         in_file=in_file,
         file_to_seg=file_to_seg,
         template_file=template_file,
@@ -97,7 +98,8 @@ def test_seg_calctopncc():
     calctopncc = CalcTopNCC()
 
     # Check if the command is properly defined
-    assert calctopncc.cmd == get_custom_path('seg_CalcTopNCC')
+    cmd = get_custom_path('seg_CalcTopNCC', env_dir='NIFTYSEGDIR')
+    assert calctopncc.cmd == cmd
 
     # test raising error with mandatory args absent
     with pytest.raises(ValueError):
@@ -114,7 +116,7 @@ def test_seg_calctopncc():
 
     cmd_tmp = '{cmd} -target {in_file} -templates 2 {file1} {file2} -n 1'
     expected_cmd = cmd_tmp.format(
-        cmd=get_custom_path('seg_CalcTopNCC'),
+        cmd=cmd,
         in_file=in_file,
         file1=file1,
         file2=file2,
