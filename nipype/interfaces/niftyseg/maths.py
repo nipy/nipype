@@ -22,7 +22,7 @@ import os
 
 from ..base import (TraitedSpec, File, traits, isdefined, CommandLineInputSpec,
                     NipypeInterfaceError)
-from .base import NiftySegCommand, get_custom_path
+from ..niftyreg.base import NiftyRegCommand, get_custom_path
 from ...utils.filemanip import split_filename
 
 
@@ -40,10 +40,9 @@ class MathsInput(CommandLineInputSpec):
                     argstr='%s',
                     desc='image to write')
 
-    _dtypes = ['float', 'char', 'int', 'short', 'double', 'input']
-
     desc = 'datatype to use for output (default uses input type)'
-    output_datatype = traits.Enum(*_dtypes,
+    output_datatype = traits.Enum('float', 'char', 'int', 'short',
+                                  'double', 'input',
                                   position=-3,
                                   argstr='-odt %s',
                                   desc=desc)
@@ -54,7 +53,7 @@ class MathsOutput(TraitedSpec):
     out_file = File(desc='image written after calculations')
 
 
-class MathsCommand(NiftySegCommand):
+class MathsCommand(NiftyRegCommand):
     """
     Base Command Interface for seg_maths interfaces.
 
@@ -71,7 +70,7 @@ class MathsCommand(NiftySegCommand):
     into several 3D images, to estimating the maximum, minimum and average
     over all time-points, etc.
     """
-    _cmd = get_custom_path('seg_maths')
+    _cmd = get_custom_path('seg_maths', env_dir='NIFTYSEGDIR')
     input_spec = MathsInput
     output_spec = MathsOutput
     _suffix = '_maths'

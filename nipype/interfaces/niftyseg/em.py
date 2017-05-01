@@ -20,7 +20,7 @@ Change directory to provide relative paths for doctests
 
 from ..base import (TraitedSpec, File, traits, CommandLineInputSpec,
                     InputMultiPath)
-from .base import NiftySegCommand, get_custom_path
+from ..niftyreg.base import NiftyRegCommand, get_custom_path
 
 
 class EMInputSpec(CommandLineInputSpec):
@@ -47,10 +47,9 @@ class EMInputSpec(CommandLineInputSpec):
                     desc='4D file containing the priors',
                     xor=['no_prior', 'priors'])
 
-    desc = 'List of priors filepaths.'
     priors = InputMultiPath(argstr='%s',
                             mandatory=True,
-                            desc=desc,
+                            desc='List of priors filepaths.',
                             xor=['no_prior', 'prior_4D'])
 
     # iterations
@@ -110,7 +109,7 @@ class EMOutputSpec(TraitedSpec):
     out_outlier_file = File(desc='Output outlierness image')
 
 
-class EM(NiftySegCommand):
+class EM(NiftyRegCommand):
     """Interface for executable seg_EM from NiftySeg platform.
 
     seg_EM is a general purpose intensity based image segmentation tool. In
@@ -132,7 +131,7 @@ class EM(NiftySegCommand):
 -out im1_em.nii.gz -out_outlier im1_outlier_em.nii.gz'
 
     """
-    _cmd = get_custom_path('seg_EM')
+    _cmd = get_custom_path('seg_EM', env_dir='NIFTYSEGDIR')
     _suffix = '_em'
     input_spec = EMInputSpec
     output_spec = EMOutputSpec

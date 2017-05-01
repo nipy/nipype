@@ -3,11 +3,12 @@
 
 import pytest
 
-from nipype.interfaces.niftyseg import no_niftyseg, get_custom_path, EM
+from nipype.interfaces.niftyreg import no_nifty_package
+from nipype.interfaces.niftyseg import get_custom_path, EM
 from nipype.testing import example_data
 
 
-@pytest.mark.skipif(no_niftyseg(cmd='seg_EM'),
+@pytest.mark.skipif(no_nifty_package(cmd='seg_EM'),
                     reason="niftyseg is not installed")
 def test_seg_em():
 

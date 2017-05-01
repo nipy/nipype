@@ -3,11 +3,12 @@
 
 import pytest
 
-from nipype.interfaces.niftyseg import no_niftyseg, get_custom_path, PatchMatch
+from nipype.interfaces.niftyreg import no_nifty_package
+from nipype.interfaces.niftyseg import get_custom_path, PatchMatch
 from nipype.testing import example_data
 
 
-@pytest.mark.skipif(no_niftyseg(cmd='seg_PatchMatch'),
+@pytest.mark.skipif(no_nifty_package(cmd='seg_PatchMatch'),
                     reason="niftyseg is not installed")
 def test_seg_patchmatch():
 

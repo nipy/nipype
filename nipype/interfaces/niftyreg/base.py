@@ -30,11 +30,11 @@ from ..base import CommandLine, isdefined, CommandLineInputSpec, traits
 from ...utils.filemanip import split_filename
 
 
-def get_custom_path(command):
-    return os.path.join(os.getenv('NIFTYREGDIR', ''), command)
+def get_custom_path(command, env_dir='NIFTYREGDIR'):
+    return os.path.join(os.getenv(env_dir, ''), command)
 
 
-def no_niftyreg(cmd='reg_f3d'):
+def no_nifty_package(cmd='reg_f3d'):
     try:
         return shutil.which(cmd) is None
     except AttributeError:  # Python < 3.3
@@ -89,7 +89,7 @@ class NiftyRegCommand(CommandLine):
                 raise ValueError(err % (_version, self.required_version))
 
     def get_version(self):
-        if no_niftyreg(cmd=self.cmd):
+        if no_nifty_package(cmd=self.cmd):
             return None
         exec_cmd = ''.join((self.cmd, ' -v'))
         return subprocess.check_output(exec_cmd, shell=True).strip()

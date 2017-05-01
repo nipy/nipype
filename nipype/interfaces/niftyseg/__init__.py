@@ -8,7 +8,6 @@ The niftyseg module provides classes for interfacing with the `NIFTYSEG
 Top-level namespace for niftyseg.
 """
 
-from .base import no_niftyseg, get_custom_path
 from .em import EM
 from .label_fusion import LabelFusion, CalcTopNCC
 from .lesions import FillLesions

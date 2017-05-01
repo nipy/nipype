@@ -21,7 +21,7 @@ Change directory to provide relative paths for doctests
 import warnings
 
 from ..base import TraitedSpec, File, traits, CommandLineInputSpec
-from .base import NiftySegCommand, get_custom_path
+from ..niftyreg.base import NiftyRegCommand, get_custom_path
 
 
 warn = warnings.warn
@@ -93,7 +93,7 @@ class FillLesionsOutputSpec(TraitedSpec):
     out_file = File(desc="Output segmentation")
 
 
-class FillLesions(NiftySegCommand):
+class FillLesions(NiftyRegCommand):
     """Interface for executable seg_FillLesions from NiftySeg platform.
 
     Fill all the masked lesions with WM intensity average.
@@ -112,6 +112,6 @@ class FillLesions(NiftySegCommand):
     'seg_FillLesions -i im1.nii -l im2.nii -o im1_lesions_filled.nii.gz'
 
     """
-    _cmd = get_custom_path('seg_FillLesions')
+    _cmd = get_custom_path('seg_FillLesions', env_dir='NIFTYSEGDIR')
     input_spec = FillLesionsInputSpec
     output_spec = FillLesionsOutputSpec

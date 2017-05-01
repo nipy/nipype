@@ -3,12 +3,12 @@
 
 import pytest
 
-from nipype.interfaces.niftyseg import (no_niftyseg, get_custom_path,
-                                        FillLesions)
+from nipype.interfaces.niftyreg import no_nifty_package
+from nipype.interfaces.niftyseg import get_custom_path, FillLesions
 from nipype.testing import example_data
 
 
-@pytest.mark.skipif(no_niftyseg(cmd='seg_FillLesions'),
+@pytest.mark.skipif(no_nifty_package(cmd='seg_FillLesions'),
                     reason="niftyseg is not installed")
 def test_seg_filllesions():
 

@@ -18,7 +18,7 @@ import warnings
 
 from ..base import (TraitedSpec, File, traits, isdefined, CommandLineInputSpec,
                     NipypeInterfaceError)
-from .base import NiftySegCommand, get_custom_path
+from ..niftyreg.base import get_custom_path, NiftyRegCommand
 from ...utils.filemanip import load_json, save_json, split_filename
 
 
@@ -111,7 +111,7 @@ class LabelFusionOutput(TraitedSpec):
     out_file = File(exists=True, desc='image written after calculations')
 
 
-class LabelFusion(NiftySegCommand):
+class LabelFusion(NiftyRegCommand):
     """Interface for executable seg_LabelFusion from NiftySeg platform using
     type STEPS as classifier Fusion.
 
@@ -151,7 +151,7 @@ class LabelFusion(NiftySegCommand):
 im1_steps.nii'
 
     """
-    _cmd = get_custom_path('seg_LabFusion')
+    _cmd = get_custom_path('seg_LabFusion', env_dir='NIFTYSEGDIR')
     input_spec = LabelFusionInput
     output_spec = LabelFusionOutput
     _suffix = '_label_fused'
@@ -197,7 +197,7 @@ when 'classifier_type' is set to 'STEPS'."
             return None
 
         if ranking == 'ALL':
-            return '-%s' % ranking
+            return '-ALL'
 
         if not isdefined(self.inputs.template_file):
             err = "LabelFusion requires a value for input 'tramplate_file' \
@@ -288,7 +288,7 @@ class CalcTopNCCOutputSpec(TraitedSpec):
     out_files = traits.Any(File(exists=True))
 
 
-class CalcTopNCC(NiftySegCommand):
+class CalcTopNCC(NiftyRegCommand):
     """Interface for executable seg_CalcTopNCC from NiftySeg platform.
 
     Examples
@@ -303,7 +303,7 @@ class CalcTopNCC(NiftySegCommand):
     'seg_CalcTopNCC -target im1.nii -templates 2 im2.nii im3.nii -n 1'
 
     """
-    _cmd = get_custom_path('seg_CalcTopNCC')
+    _cmd = get_custom_path('seg_CalcTopNCC', env_dir='NIFTYSEGDIR')
     _suffix = '_topNCC'
     input_spec = CalcTopNCCInputSpec
     output_spec = CalcTopNCCOutputSpec
@@ -312,7 +312,7 @@ class CalcTopNCC(NiftySegCommand):
         outputs = self._outputs()
         # local caching for backward compatibility
         outfile = os.path.join(os.getcwd(), 'CalcTopNCC.json')
-        if runtime is None:
+        if runtime is None or not runtime.stdout:
             try:
                 out_files = load_json(outfile)['files']
             except IOError:

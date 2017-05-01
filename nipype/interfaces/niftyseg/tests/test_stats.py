@@ -3,12 +3,13 @@
 
 import pytest
 
-from nipype.interfaces.niftyseg import (no_niftyseg, get_custom_path,
-                                        UnaryStats, BinaryStats)
+from nipype.interfaces.niftyreg import no_nifty_package
+from nipype.interfaces.niftyseg import (get_custom_path, UnaryStats,
+                                        BinaryStats)
 from nipype.testing import example_data
 
 
-@pytest.mark.skipif(no_niftyseg(cmd='seg_stats'),
+@pytest.mark.skipif(no_nifty_package(cmd='seg_stats'),
                     reason="niftyseg is not installed")
 def test_unary_stats():
     """ Test for the seg_stats interfaces """
@@ -34,7 +35,7 @@ def test_unary_stats():
     assert unarys.cmdline == expected_cmd
 
 
-@pytest.mark.skipif(no_niftyseg(cmd='seg_stats'),
+@pytest.mark.skipif(no_nifty_package(cmd='seg_stats'),
                     reason="niftyseg is not installed")
 def test_binary_stats():
     """ Test for the seg_stats interfaces """
