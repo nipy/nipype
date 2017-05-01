@@ -72,6 +72,8 @@ def test_Registration_inputs():
     ),
     output_warped_image=dict(hash_files=False,
     ),
+    profiling=dict(usedefault=True,
+    ),
     radius_bins_item_trait=dict(),
     radius_bins_stage_trait=dict(),
     radius_or_number_of_bins=dict(requires=['metric_weight'],
@@ -125,10 +127,12 @@ def test_Registration_inputs():
 
 def test_Registration_outputs():
     output_map = dict(composite_transform=dict(),
+    elapsed_time=dict(),
     forward_invert_flags=dict(),
     forward_transforms=dict(),
     inverse_composite_transform=dict(),
     inverse_warped_image=dict(),
+    metric_value=dict(),
     reverse_invert_flags=dict(),
     reverse_transforms=dict(),
     save_state=dict(),

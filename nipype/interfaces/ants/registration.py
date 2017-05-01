@@ -379,6 +379,8 @@ class RegistrationInputSpec(ANTSCommandInputSpec):
         low=0.0, high=1.0, value=0.0, argstr='%s', usedefault=True, desc="The Lower quantile to clip image ranges")
 
     verbose = traits.Bool(argstr='-v', default=False)
+    profiling = traits.Bool(True, usedefault=True,
+                            desc='generate profiling output fields')
 
 
 class RegistrationOutputSpec(TraitedSpec):
@@ -395,6 +397,8 @@ class RegistrationOutputSpec(TraitedSpec):
     warped_image = File(desc="Outputs warped image")
     inverse_warped_image = File(desc="Outputs the inverse of the warped image")
     save_state = File(desc="The saved registration state to be restored")
+    metric_value = traits.Float(desc='the final value of metric')
+    elapsed_time = traits.Float(desc='the total elapsed time as reported by ANTs')
 
 
 class Registration(ANTSCommand):
@@ -647,6 +651,24 @@ class Registration(ANTSCommand):
     output_spec = RegistrationOutputSpec
     _quantilesDone = False
     _linear_transform_names = ['Rigid', 'Affine', 'Translation', 'CompositeAffine', 'Similarity']
+
+    def _run_interface(self, runtime, correct_return_codes=(0,)):
+        runtime = super(Registration, self)._run_interface(runtime)
+
+        # Parse some profiling info
+        if self.inputs.profiling:
+            lines = runtime.stdout.split('\n')
+            for l in lines[::-1]:
+                # This should be the last line
+                if l.strip().startswith('Total elapsed time:'):
+                    setattr(self, '_elapsed_time', float(
+                        l.strip().replace('Total elapsed time: ', '')))
+                elif 'DIAGNOSTIC' in l:
+                    setattr(self, '_metric_value', float(
+                        l.split(',')[2]))
+                    break
+
+        return runtime
 
     def _format_metric(self, index):
         """
@@ -981,4 +1003,7 @@ class Registration(ANTSCommand):
             outputs['inverse_warped_image'] = os.path.abspath(inv_out_filename)
         if len(self.inputs.save_state):
             outputs['save_state'] = os.path.abspath(self.inputs.save_state)
+        if self.inputs.profiling:
+            outputs['metric_value'] = getattr(self, '_metric_value')
+            outputs['elapsed_time'] = getattr(self, '_elapsed_time')
         return outputs
