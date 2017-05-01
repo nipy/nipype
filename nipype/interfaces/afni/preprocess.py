@@ -26,7 +26,7 @@ from .base import (
 
 
 class CentralityInputSpec(AFNICommandInputSpec):
-    """Common input spec class for all centrality-related commmands
+    """Common input spec class for all centrality-related commands
     """
 
     mask = File(
