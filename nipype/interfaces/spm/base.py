@@ -539,7 +539,7 @@ class ImageFileSPM(ImageFile):
     """
 
     def __init__(self, value='', filter=None, auto_set=False, entries=0,
-                 exists=False, types=['nifti1', 'nifti2'], extensions=[],
+                 exists=False, types=['nifti1', 'nifti2'],
                  allow_compressed=False, **metadata):
         """ Trait handles neuroimaging files.
 
@@ -552,7 +552,6 @@ class ImageFileSPM(ImageFile):
         """
         self.types = types
         self.allow_compressed = allow_compressed
-        self.exts = extensions
         super(ImageFileSPM, self).__init__(value, filter, auto_set, entries,
                                            exists, types, allow_compressed,
-                                           extensions, **metadata)
+                                           **metadata)

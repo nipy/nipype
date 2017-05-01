@@ -242,8 +242,7 @@ class ImageFile(File):
     """ Defines a trait of specific neuroimaging files """
 
     def __init__(self, value='', filter=None, auto_set=False, entries=0,
-                 exists=False, types=[], allow_compressed=True, extensions=[],
-                 **metadata):
+                 exists=False, types=[], allow_compressed=True, **metadata):
         """ Trait handles neuroimaging files.
 
         Parameters
@@ -255,12 +254,12 @@ class ImageFile(File):
         """
         self.types = types
         self.allow_compressed = allow_compressed
-        self.exts = extensions
         super(ImageFile, self).__init__(value, filter, auto_set, entries,
                                         exists, **metadata)
 
-    def grab_exts(self, exts=[]):
+    def grab_exts(self):
         # TODO: file type validation
+        exts = []
         for fmt in self.types:
             if fmt in img_fmt_types:
                 exts.extend(sum([[u for u in y[0]] if isinstance(y[0], tuple)
@@ -271,7 +270,7 @@ class ImageFile(File):
             else:
                 raise AttributeError('Information has not been added for format'
                                      ' type {} yet. Supported formats include: '
-                                     '{}'.format('hello',
+                                     '{}'.format(fmt,
                                      ', '.join(img_fmt_types.keys())))
         return list(set(exts))
 
@@ -280,11 +279,11 @@ class ImageFile(File):
         """
         validated_value = super(ImageFile, self).validate(object, name, value)
         if validated_value and self.types:
-            self.exts = self.grab_exts(self.exts)
-            if not any(validated_value.endswith(x) for x in self.exts):
+            self._exts = self.grab_exts()
+            if not any(validated_value.endswith(x) for x in self._exts):
                 raise TraitError(
                     args="{} is not included in allowed types: {}".format(
-                        validated_value, ','.join(self.exts)))
+                        validated_value, ', '.join(self._exts)))
         return validated_value
 
 """
