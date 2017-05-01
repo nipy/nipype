@@ -652,6 +652,11 @@ class Registration(ANTSCommand):
     _quantilesDone = False
     _linear_transform_names = ['Rigid', 'Affine', 'Translation', 'CompositeAffine', 'Similarity']
 
+    def __init__(self, **inputs):
+        super(Registration, self).__init__(**inputs)
+        self._elapsed_time = 0.0
+        self._metric_value = 0.0
+
     def _run_interface(self, runtime, correct_return_codes=(0,)):
         runtime = super(Registration, self)._run_interface(runtime)
 
@@ -661,11 +666,10 @@ class Registration(ANTSCommand):
             for l in lines[::-1]:
                 # This should be the last line
                 if l.strip().startswith('Total elapsed time:'):
-                    setattr(self, '_elapsed_time', float(
-                        l.strip().replace('Total elapsed time: ', '')))
+                    self._elapsed_time = float(l.strip().replace(
+                        'Total elapsed time: ', ''))
                 elif 'DIAGNOSTIC' in l:
-                    setattr(self, '_metric_value', float(
-                        l.split(',')[2]))
+                    self._metric_value = float(l.split(',')[2])
                     break
 
         return runtime
@@ -1004,6 +1008,6 @@ class Registration(ANTSCommand):
         if len(self.inputs.save_state):
             outputs['save_state'] = os.path.abspath(self.inputs.save_state)
         if self.inputs.profiling:
-            outputs['metric_value'] = getattr(self, '_metric_value')
-            outputs['elapsed_time'] = getattr(self, '_elapsed_time')
+            outputs['metric_value'] = self._metric_value
+            outputs['elapsed_time'] = self._elapsed_time
         return outputs
