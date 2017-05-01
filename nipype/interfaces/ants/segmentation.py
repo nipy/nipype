@@ -692,6 +692,33 @@ class BrainExtraction(ANTSCommand):
     output_spec = BrainExtractionOutputSpec
     _cmd = 'antsBrainExtraction.sh'
 
+    def _run_interface(self, runtime, correct_return_codes=(0,)):
+        out_environ = self._get_environ()
+        if out_environ.get('ANTSPATH') is None:
+            runtime.environ.update(out_environ)
+            executable_name = self.cmd.split()[0]
+            exist_val, cmd_path = _exists_in_path(executable_name,
+                                                  runtime.environ)
+            if not exist_val:
+                raise IOError("command '%s' could not be found on host %s" %
+                              (self.cmd.split()[0], runtime.hostname))
+
+            runtime.environ.update({'ANTSPATH': cmd_path})
+
+        runtime = super(BrainExtraction, self)._run_interface(runtime)
+
+        if 'we cant find the N4 program' in runtime.stdout:
+            errmsg = ('antsBrainExtraction.sh requires the environment variable '
+                      'ANTSPATH to be defined')
+            if runtime.stderr is None:
+                runtime.stderr = errmsg
+            else:
+                runtime.stderr += '\n' + errmsg
+            runtime.returncode = 1
+            self.raise_exception(runtime)
+
+        return runtime
+
     def _list_outputs(self):
         outputs = self._outputs().get()
         outputs['BrainExtractionMask'] = os.path.join(os.getcwd(),
