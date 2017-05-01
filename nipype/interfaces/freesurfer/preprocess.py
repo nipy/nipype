@@ -630,8 +630,26 @@ class ReconAllInputSpec(CommandLineInputSpec):
                            desc="Enable parallel execution")
     hires = traits.Bool(argstr="-hires", min_ver='6.0.0',
                         desc="Conform to minimum voxel size (for voxels < 1mm)")
+    mprage = traits.Bool(argstr='-mprage',
+                         desc=('Assume scan parameters are MGH MP-RAGE '
+                               'protocol, which produces darker gray matter'))
+    big_ventricles = traits.Bool(argstr='-bigventricles',
+                                 desc=('For use in subjects with enlarged '
+                                       'ventricles'))
+    brainstem = traits.Bool(argstr='-brainstem-structures',
+                            desc='Segment brainstem structures')
+    hippocampal_subfields_T1 = traits.Bool(
+        argstr='-hippocampal-subfields-T1', min_ver='6.0.0',
+        desc='segment hippocampal subfields using input T1 scan')
+    hippocampal_subfields_T2 = traits.Tuple(
+        File(exists=True), traits.Str(),
+        argstr='-hippocampal-subfields-T2 %s %s', min_ver='6.0.0',
+        desc=('segment hippocampal subfields using T2 scan, identified by '
+              'ID (may be combined with hippocampal_subfields_T1)'))
     expert = File(exists=True, argstr='-expert %s',
                   desc="Set parameters using expert file")
+    xopts = traits.Enum("use", "clean", "overwrite", argstr='-xopts-%s',
+                        desc="Use, delete or overwrite existing expert options file")
     subjects_dir = Directory(exists=True, argstr='-sd %s', hash_files=False,
                              desc='path to subjects directory', genfile=True)
     flags = traits.Str(argstr='%s', desc='additional parameters')
@@ -933,6 +951,13 @@ class ReconAll(CommandLine):
         if name == 'T1_files':
             if self._is_resuming():
                 return ''
+        if name == 'hippocampal_subfields_T1' and \
+                isdefined(self.inputs.hippocampal_subfields_T2):
+            return ''
+        if all((name == 'hippocampal_subfields_T2',
+                isdefined(self.inputs.hippocampal_subfields_T1) and
+                self.inputs.hippocampal_subfields_T1)):
+            trait_spec.argstr = trait_spec.argstr.replace('T2', 'T1T2')
         return super(ReconAll, self)._format_arg(name, trait_spec, value)
 
     @property
@@ -949,10 +974,22 @@ class ReconAll(CommandLine):
         if not isdefined(subjects_dir):
             subjects_dir = self._gen_subjects_dir()
 
+        # Check only relevant steps
+        directive = self.inputs.directive
+        if not isdefined(directive):
+            steps = []
+        elif directive == 'autorecon1':
+            steps = self._autorecon1_steps
+        elif directive.startswith('autorecon2'):
+            steps = self._autorecon2_steps
+        elif directive == 'autorecon3':
+            steps = self._autorecon3_steps
+        else:
+            steps = self._steps
+
         no_run = True
         flags = []
-        for idx, step in enumerate(self._steps):
-            step, outfiles, infiles = step
+        for step, outfiles, infiles in steps:
             flag = '-{}'.format(step)
             noflag = '-no{}'.format(step)
             if noflag in cmd:
@@ -989,10 +1026,29 @@ class ReconAll(CommandLine):
         if lines == []:
             return ''
 
+        contents = ''.join(lines)
+        if not isdefined(self.inputs.xopts) and \
+                self._get_expert_file() == contents:
+            return ' -xopts-use'
+
         expert_fname = os.path.abspath('expert.opts')
         with open(expert_fname, 'w') as fobj:
-            fobj.write(''.join(lines))
+            fobj.write(contents)
         return ' -expert {}'.format(expert_fname)
+
+    def _get_expert_file(self):
+        # Read pre-existing options file, if it exists
+        if isdefined(self.inputs.subjects_dir):
+            subjects_dir = self.inputs.subjects_dir
+        else:
+            subjects_dir = self._gen_subjects_dir()
+
+        xopts_file = os.path.join(subjects_dir, self.inputs.subject_id,
+                                  'scripts', 'expert-options')
+        if not os.path.exists(xopts_file):
+            return ''
+        with open(xopts_file, 'r') as fobj:
+            return fobj.read()
 
 
 class BBRegisterInputSpec(FSTraitedSpec):

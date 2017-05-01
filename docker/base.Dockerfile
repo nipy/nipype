@@ -100,6 +100,8 @@ RUN apt-get update && \
                     apt-utils \
                     fusefat \
                     make \
+                    # Added g++ to compile dipy in py3.6
+                    g++=4:5.3.1-1ubuntu1 \
                     ruby=1:2.3.0+1 && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*

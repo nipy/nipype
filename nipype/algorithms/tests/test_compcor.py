@@ -8,6 +8,7 @@ import numpy as np
 import pytest
 from ...testing import utils
 from ..confounds import CompCor, TCompCor, ACompCor
+from ...interfaces.base import Undefined
 
 
 class TestCompCor():
@@ -15,6 +16,7 @@ class TestCompCor():
 
     filenames = {'functionalnii': 'compcorfunc.nii',
                  'masknii': 'compcormask.nii',
+                 'masknii2': 'compcormask2.nii',
                  'components_file': None}
 
     @pytest.fixture(autouse=True)
@@ -28,7 +30,15 @@ class TestCompCor():
         mask = np.ones(self.fake_data.shape[:3])
         mask[0, 0, 0] = 0
         mask[0, 0, 1] = 0
-        self.mask_file = utils.save_toy_nii(mask, self.filenames['masknii'])
+        mask1 = utils.save_toy_nii(mask, self.filenames['masknii'])
+
+        other_mask = np.ones(self.fake_data.shape[:3])
+        other_mask[0, 1, 0] = 0
+        other_mask[1, 1, 0] = 0
+        mask2 = utils.save_toy_nii(other_mask, self.filenames['masknii2'])
+
+        self.mask_files = [mask1, mask2]
+
 
     def test_compcor(self):
         expected_components = [['-0.1989607212', '-0.5753813646'],
@@ -37,16 +47,19 @@ class TestCompCor():
                                ['0.4206466244', '-0.3361270124'],
                                ['-0.1246655485', '-0.1235705610']]
 
-        self.run_cc(CompCor(realigned_file=self.realigned_file, mask_file=self.mask_file),
-                    expected_components)
+        self.run_cc(CompCor(realigned_file=self.realigned_file,
+                            mask_files=self.mask_files),
+                            expected_components)
 
-        self.run_cc(ACompCor(realigned_file=self.realigned_file, mask_file=self.mask_file,
+        self.run_cc(ACompCor(realigned_file=self.realigned_file,
+                             mask_files=self.mask_files,
                              components_file='acc_components_file'),
-                    expected_components, 'aCompCor')
+                             expected_components, 'aCompCor')
 
 
     def test_tcompcor(self):
-        ccinterface = TCompCor(realigned_file=self.realigned_file, percentile_threshold=0.75)
+        ccinterface = TCompCor(realigned_file=self.realigned_file,
+                               percentile_threshold=0.75)
         self.run_cc(ccinterface, [['-0.1114536190', '-0.4632908609'],
                                   ['0.4566907310', '0.6983205193'],
                                   ['-0.7132557407', '0.1340170559'],
@@ -62,27 +75,29 @@ class TestCompCor():
         assert num_nonmasked_voxels == 1
 
     def test_compcor_no_regress_poly(self):
-        self.run_cc(CompCor(realigned_file=self.realigned_file, mask_file=self.mask_file,
-                            use_regress_poly=False), [['0.4451946442', '-0.7683311482'],
-                                                      ['-0.4285129505', '-0.0926034137'],
-                                                      ['0.5721540256', '0.5608764842'],
-                                                      ['-0.5367548139', '0.0059943226'],
-                                                      ['-0.0520809054', '0.2940637551']])
+        self.run_cc(CompCor(realigned_file=self.realigned_file,
+                    mask_files=self.mask_files,
+                    use_regress_poly=False), [['0.4451946442', '-0.7683311482'],
+                                              ['-0.4285129505', '-0.0926034137'],
+                                              ['0.5721540256', '0.5608764842'],
+                                              ['-0.5367548139', '0.0059943226'],
+                                              ['-0.0520809054', '0.2940637551']])
 
     def test_tcompcor_asymmetric_dim(self):
         asymmetric_shape = (2, 3, 4, 5)
-        asymmetric_data = utils.save_toy_nii(np.zeros(asymmetric_shape), 'asymmetric.nii')
+        asymmetric_data = utils.save_toy_nii(np.zeros(asymmetric_shape),
+                                            'asymmetric.nii')
 
         TCompCor(realigned_file=asymmetric_data).run()
         assert nb.load('mask.nii').get_data().shape == asymmetric_shape[:3]
 
     def test_compcor_bad_input_shapes(self):
-        shape_less_than = (1, 2, 2, 5) # dim 0 is < dim 0 of self.mask_file (2)
-        shape_more_than = (3, 3, 3, 5) # dim 0 is > dim 0 of self.mask_file (2)
+        shape_less_than = (1, 2, 2, 5) # dim 0 is < dim 0 of self.mask_files (2)
+        shape_more_than = (3, 3, 3, 5) # dim 0 is > dim 0 of self.mask_files (2)
 
         for data_shape in (shape_less_than, shape_more_than):
             data_file = utils.save_toy_nii(np.zeros(data_shape), 'temp.nii')
-            interface = CompCor(realigned_file=data_file, mask_file=self.mask_file)
+            interface = CompCor(realigned_file=data_file, mask_files=self.mask_files)
             with pytest.raises(ValueError, message="Dimension mismatch"): interface.run()
 
     def test_tcompcor_bad_input_dim(self):
@@ -90,6 +105,25 @@ class TestCompCor():
         data_file = utils.save_toy_nii(np.zeros(bad_dims), 'temp.nii')
         interface = TCompCor(realigned_file=data_file)
         with pytest.raises(ValueError, message='Not a 4D file'): interface.run()
+
+    def test_tcompcor_merge_intersect_masks(self):
+        for method in ['union', 'intersect']:
+            TCompCor(realigned_file=self.realigned_file,
+                     mask_files=self.mask_files,
+                     merge_method=method).run()
+            if method == 'union':
+                assert np.array_equal(nb.load('mask.nii').get_data(),
+                                     ([[[0,0],[0,0]],[[0,0],[1,0]]]))
+            if method == 'intersect':
+                assert np.array_equal(nb.load('mask.nii').get_data(),
+                                      ([[[0,0],[0,0]],[[0,1],[0,0]]]))
+
+    def test_tcompcor_index_mask(self):
+        TCompCor(realigned_file=self.realigned_file,
+                 mask_files=self.mask_files,
+                 mask_index=1).run()
+        assert np.array_equal(nb.load('mask.nii').get_data(),
+                            ([[[0,0],[0,0]],[[0,1],[0,0]]]))
 
     def run_cc(self, ccinterface, expected_components, expected_header='CompCor'):
         # run
