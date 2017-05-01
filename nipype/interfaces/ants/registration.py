@@ -379,7 +379,7 @@ class RegistrationInputSpec(ANTSCommandInputSpec):
         low=0.0, high=1.0, value=0.0, argstr='%s', usedefault=True, desc="The Lower quantile to clip image ranges")
 
     verbose = traits.Bool(argstr='-v', default=False)
-    profiling = traits.Bool(True, usedefault=True,
+    profiling = traits.Bool(False, usedefault=True,
                             desc='generate profiling output fields')
 
 
