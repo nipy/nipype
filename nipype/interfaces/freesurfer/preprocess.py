@@ -717,6 +717,38 @@ class ReconAll(CommandLine):
     >>> reconall.inputs.flags = ["-cw256", "-qcache"]
     >>> reconall.cmdline # doctest: +ALLOW_UNICODE
     'recon-all -all -i structural.nii -cw256 -qcache -subjid foo -sd .'
+
+    Hemisphere may be specified regardless of directive:
+
+    >>> reconall.inputs.flags = []
+    >>> reconall.inputs.hemi = 'lh'
+    >>> reconall.cmdline # doctest: +ALLOW_UNICODE
+    'recon-all -all -i structural.nii -hemi lh -subjid foo -sd .'
+
+    ``-autorecon-hemi`` uses the ``-hemi`` input to specify the hemisphere
+    to operate upon:
+
+    >>> reconall.inputs.directive = 'autorecon-hemi'
+    >>> reconall.cmdline # doctest: +ALLOW_UNICODE
+    'recon-all -autorecon-hemi lh -i structural.nii -subjid foo -sd .'
+
+    Hippocampal subfields can accept T1 and T2 images:
+
+    >>> reconall_subfields = ReconAll()
+    >>> reconall_subfields.inputs.subject_id = 'foo'
+    >>> reconall_subfields.inputs.directive = 'all'
+    >>> reconall_subfields.inputs.subjects_dir = '.'
+    >>> reconall_subfields.inputs.T1_files = 'structural.nii'
+    >>> reconall_subfields.inputs.hippocampal_subfields_T1 = True
+    >>> reconall_subfields.cmdline # doctest: +ALLOW_UNICODE
+    'recon-all -all -i structural.nii -subjid foo -hippocampal-subfields-T1 -sd .'
+    >>> reconall_subfields.inputs.hippocampal_subfields_T2 = (
+    ... 'structural.nii', 'test')
+    >>> reconall_subfields.cmdline # doctest: +ALLOW_UNICODE
+    'recon-all -all -i structural.nii -subjid foo -hippocampal-subfields-T1T2 structural.nii test -sd .'
+    >>> reconall_subfields.inputs.hippocampal_subfields_T1 = False
+    >>> reconall_subfields.cmdline # doctest: +ALLOW_UNICODE
+    'recon-all -all -i structural.nii -subjid foo -hippocampal-subfields-T2 structural.nii test -sd .'
     """
 
     _cmd = 'recon-all'
