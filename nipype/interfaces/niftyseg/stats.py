@@ -130,21 +130,34 @@ class UnaryStats(StatsCommand):
         -xdim       | Output the voxel dimention in the x direction.
                     | Replace x with y/z for other directions.
 
-    Note: All NaN or Inf are ignored for all stats.
-          The -m and -t options can be used in conjusction.
-
     For source code, see http://cmictig.cs.ucl.ac.uk/wiki/index.php/NiftySeg
     For Documentation, see:
         http://cmictig.cs.ucl.ac.uk/wiki/index.php/NiftySeg_documentation
 
     Examples
     --------
+    >>> import copy
     >>> from nipype.interfaces import niftyseg
-    >>> node = niftyseg.UnaryStats()
-    >>> node.inputs.in_file = 'im1.nii'
-    >>> node.inputs.operation = 'v'
-    >>> node.cmdline  # doctest: +ALLOW_UNICODE
+    >>> unary = niftyseg.UnaryStats()
+    >>> unary.inputs.in_file = 'im1.nii'
+    >>> # Test v operation
+    >>> unary_v = copy.deepcopy(unary)
+    >>> unary_v.inputs.operation = 'v'
+    >>> unary_v.cmdline  # doctest: +ALLOW_UNICODE
     'seg_stats im1.nii -v'
+    >>> unary_v.run()  # doctest: +SKIP
+    >>> # Test vl operation
+    >>> unary_vl = copy.deepcopy(unary)
+    >>> unary_vl.inputs.operation = 'vl'
+    >>> unary_vl.cmdline  # doctest: +ALLOW_UNICODE
+    'seg_stats im1.nii -vl'
+    >>> unary_vl.run()  # doctest: +SKIP
+    >>> # Test x operation
+    >>> unary_x = copy.deepcopy(unary)
+    >>> unary_x.inputs.operation = 'x'
+    >>> unary_x.cmdline  # doctest: +ALLOW_UNICODE
+    'seg_stats im1.nii -x'
+    >>> unary_x.run()  # doctest: +SKIP
 
     """
     input_spec = UnaryStatsInput
@@ -193,22 +206,40 @@ class BinaryStats(StatsCommand):
         -Vl <csv>       | Volume of each integer label <in>. Save to <csv>file.
         -Nl <csv>       | Count of each label <in>. Save to <csv> file.
 
-    Note: All NaN or Inf are ignored for all stats.
-        The -m and -t options can be used in conjusction.
-
     For source code, see http://cmictig.cs.ucl.ac.uk/wiki/index.php/NiftySeg
     For Documentation, see:
         http://cmictig.cs.ucl.ac.uk/wiki/index.php/NiftySeg_documentation
 
     Examples
     --------
+    >>> import copy
     >>> from nipype.interfaces import niftyseg
-    >>> node = niftyseg.BinaryStats()
-    >>> node.inputs.in_file = 'im1.nii'
-    >>> node.inputs.operation = 'sa'
-    >>> node.inputs.operand_value = 2.0
-    >>> node.cmdline  # doctest: +ALLOW_UNICODE
+    >>> binary = niftyseg.BinaryStats()
+    >>> binary.inputs.in_file = 'im1.nii'
+    >>> # Test sa operation
+    >>> binary_sa = copy.deepcopy(binary)
+    >>> binary_sa = niftyseg.BinaryStats()
+    >>> binary_sa.inputs.operation = 'sa'
+    >>> binary_sa.inputs.operand_value = 2.0
+    >>> binary_sa.cmdline  # doctest: +ALLOW_UNICODE
     'seg_stats im1.nii -sa 2.00000000'
+    >>> binary_sa.run()  # doctest: +SKIP
+    >>> # Test ncc operation
+    >>> binary_ncc = copy.deepcopy(binary)
+    >>> binary_ncc = niftyseg.BinaryStats()
+    >>> binary_ncc.inputs.operation = 'ncc'
+    >>> binary_ncc.inputs.operand_file = 'im2.nii'
+    >>> binary_ncc.cmdline  # doctest: +ALLOW_UNICODE
+    'seg_stats im1.nii -ncc im2.nii'
+    >>> binary_ncc.run()  # doctest: +SKIP
+    >>> # Test Nl operation
+    >>> binary_nl = copy.deepcopy(binary)
+    >>> binary_nl = niftyseg.BinaryStats()
+    >>> binary_nl.inputs.operation = 'Nl'
+    >>> binary_nl.inputs.operand_file = 'output.csv'
+    >>> binary_nl.cmdline  # doctest: +ALLOW_UNICODE
+    'seg_stats im1.nii -Nl output.csv'
+    >>> binary_nl.run()  # doctest: +SKIP
 
     """
     input_spec = BinaryStatsInput

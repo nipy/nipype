@@ -139,13 +139,41 @@ class UnaryMaths(MathsCommand):
 
     Examples
     --------
+    >>> import copy
     >>> from nipype.interfaces import niftyseg
-    >>> node = niftyseg.UnaryMaths()
-    >>> node.inputs.in_file = 'im1.nii'
-    >>> node.inputs.operation = 'sqrt'
-    >>> node.inputs.output_datatype = 'float'
-    >>> node.cmdline  # doctest: +ALLOW_UNICODE
+    >>> unary = niftyseg.UnaryMaths()
+    >>> unary.inputs.output_datatype = 'float'
+    >>> unary.inputs.in_file = 'im1.nii'
+    >>> # Test sqrt operation
+    >>> unary_sqrt = copy.deepcopy(unary)
+    >>> unary_sqrt.inputs.operation = 'sqrt'
+    >>> unary_sqrt.cmdline  # doctest: +ALLOW_UNICODE
     'seg_maths im1.nii -sqrt -odt float im1_sqrt.nii'
+    >>> unary_sqrt.run()  # doctest: +SKIP
+    >>> # Test sqrt operation
+    >>> unary_abs = copy.deepcopy(unary)
+    >>> unary_abs.inputs.operation = 'abs'
+    >>> unary_abs.cmdline  # doctest: +ALLOW_UNICODE
+    'seg_maths im1.nii -abs -odt float im1_abs.nii'
+    >>> unary_abs.run()  # doctest: +SKIP
+    >>> # Test bin operation
+    >>> unary_bin = copy.deepcopy(unary)
+    >>> unary_bin.inputs.operation = 'bin'
+    >>> unary_bin.cmdline  # doctest: +ALLOW_UNICODE
+    'seg_maths im1.nii -bin -odt float im1_bin.nii'
+    >>> unary_bin.run()  # doctest: +SKIP
+    >>> # Test otsu operation
+    >>> unary_otsu = copy.deepcopy(unary)
+    >>> unary_otsu.inputs.operation = 'otsu'
+    >>> unary_otsu.cmdline  # doctest: +ALLOW_UNICODE
+    'seg_maths im1.nii -otsu -odt float im1_otsu.nii'
+    >>> unary_otsu.run()  # doctest: +SKIP
+    >>> # Test isnan operation
+    >>> unary_isnan = copy.deepcopy(unary)
+    >>> unary_isnan.inputs.operation = 'isnan'
+    >>> unary_isnan.cmdline  # doctest: +ALLOW_UNICODE
+    'seg_maths im1.nii -isnan -odt float im1_isnan.nii'
+    >>> unary_isnan.run()  # doctest: +SKIP
 
     """
     input_spec = UnaryMathsInput
@@ -226,27 +254,70 @@ class BinaryMaths(MathsCommand):
 
     Examples
     --------
+    >>> import copy
     >>> from nipype.interfaces import niftyseg
-    >>> node = niftyseg.BinaryMaths()
-    >>> node.inputs.in_file = 'im1.nii'
-    >>> node.inputs.operation = 'sub'
-    >>> node.inputs.operand_file = 'im2.nii'
-    >>> node.inputs.output_datatype = 'float'
-    >>> node.cmdline  # doctest: +ALLOW_UNICODE
+    >>> binary = niftyseg.BinaryMaths()
+    >>> binary.inputs.in_file = 'im1.nii'
+    >>> binary.inputs.output_datatype = 'float'
+    >>> # Test sub operation
+    >>> binary_sub = copy.deepcopy(binary)
+    >>> binary_sub.inputs.operation = 'sub'
+    >>> binary_sub.inputs.operand_file = 'im2.nii'
+    >>> binary_sub.cmdline  # doctest: +ALLOW_UNICODE
     'seg_maths im1.nii -sub im2.nii -odt float im1_sub.nii'
+    >>> binary_sub.run()  # doctest: +SKIP
+    >>> # Test mul operation
+    >>> binary_mul = copy.deepcopy(binary)
+    >>> binary_mul.inputs.operation = 'mul'
+    >>> binary_mul.inputs.operand_value = 2.0
+    >>> binary_mul.cmdline  # doctest: +ALLOW_UNICODE
+    'seg_maths im1.nii -mul 2.0 -odt float im1_mul.nii'
+    >>> binary_mul.run()  # doctest: +SKIP
+    >>> # Test llsnorm operation
+    >>> binary_llsnorm = copy.deepcopy(binary)
+    >>> binary_llsnorm.inputs.operation = 'llsnorm'
+    >>> binary_llsnorm.inputs.operand_file = 'im2.nii'
+    >>> binary_llsnorm.cmdline  # doctest: +ALLOW_UNICODE
+    'seg_maths im1.nii -llsnorm im2.nii -odt float im1_llsnorm.nii'
+    >>> binary_llsnorm.run()  # doctest: +SKIP
+    >>> # Test splitinter operation
+    >>> binary_splitinter = copy.deepcopy(binary)
+    >>> binary_splitinter.inputs.operation = 'llsnorm'
+    >>> binary_splitinter.inputs.operand_str = 'z'
+    >>> binary_splitinter.cmdline  # doctest: +ALLOW_UNICODE
+    'seg_maths im1.nii -splitinter z -odt float im1_splitinter.nii'
+    >>> binary_splitinter.run()  # doctest: +SKIP
 
     """
     input_spec = BinaryMathsInput
 
     def _format_arg(self, opt, spec, val):
         """Convert input to appropriate format for seg_maths."""
-        if opt == 'operand_value' and float(val) == 0.0:
-            return '0'
-
         if opt == 'operand_str' and self.inputs.operation != 'splitinter':
             err = 'operand_str set but with an operation different than \
 "splitinter"'
             raise NipypeInterfaceError(err)
+
+        if opt == 'operation':
+            # Only float
+            if val in ['pow', 'thr', 'uthr', 'smo', 'edge', 'sobel3', 'sobel5',
+                       'smol']:
+                if not isdefined(self.inputs.operand_value):
+                    err = 'operand_value not set for {0}.'.format(val)
+                    raise NipypeInterfaceError(err)
+            # only files
+            elif val in ['min', 'llsnorm', 'masknan', 'hdr_copy']:
+                if not isdefined(self.inputs.operand_file):
+                    err = 'operand_file not set for {0}.'.format(val)
+                    raise NipypeInterfaceError(err)
+            # splitinter:
+            elif val == 'splitinter':
+                if not isdefined(self.inputs.operand_str):
+                    err = 'operand_str not set for splitinter.'
+                    raise NipypeInterfaceError(err)
+
+        if opt == 'operand_value' and float(val) == 0.0:
+            return '0'
 
         return super(BinaryMaths, self)._format_arg(opt, spec, val)
 
@@ -293,14 +364,32 @@ class BinaryMathsInteger(MathsCommand):
 
     Examples
     --------
+    >>> import copy
     >>> from nipype.interfaces.niftyseg import BinaryMathsInteger
-    >>> node = BinaryMathsInteger()
-    >>> node.inputs.in_file = 'im1.nii'
-    >>> node.inputs.operation = 'dil'
-    >>> node.inputs.operand_value = 2
-    >>> node.inputs.output_datatype = 'float'
-    >>> node.cmdline  # doctest: +ALLOW_UNICODE
+    >>> binaryi = BinaryMathsInteger()
+    >>> binaryi.inputs.in_file = 'im1.nii'
+    >>> binaryi.inputs.output_datatype = 'float'
+    >>> # Test dil operation
+    >>> binaryi_dil = copy.deepcopy(binaryi)
+    >>> binaryi_dil.inputs.operation = 'dil'
+    >>> binaryi_dil.inputs.operand_value = 2
+    >>> binaryi_dil.cmdline  # doctest: +ALLOW_UNICODE
     'seg_maths im1.nii -dil 2 -odt float im1_dil.nii'
+    >>> binaryi_dil.run()  # doctest: +SKIP
+    >>> # Test dil operation
+    >>> binaryi_ero = copy.deepcopy(binaryi)
+    >>> binaryi_ero.inputs.operation = 'ero'
+    >>> binaryi_ero.inputs.operand_value = 1
+    >>> binaryi_ero.cmdline  # doctest: +ALLOW_UNICODE
+    'seg_maths im1.nii -ero 1 -odt float im1_ero.nii'
+    >>> binaryi_ero.run()  # doctest: +SKIP
+    >>> # Test pad operation
+    >>> binaryi_pad = copy.deepcopy(binaryi)
+    >>> binaryi_pad.inputs.operation = 'pad'
+    >>> binaryi_pad.inputs.operand_value = 4
+    >>> binaryi_pad.cmdline  # doctest: +ALLOW_UNICODE
+    'seg_maths im1.nii -pad 4 -odt float im1_pad.nii'
+    >>> binaryi_pad.run()  # doctest: +SKIP
 
     """
     input_spec = BinaryMathsInputInteger
@@ -308,7 +397,7 @@ class BinaryMathsInteger(MathsCommand):
 
 class TupleMathsInput(MathsInput):
     """Input Spec for seg_maths Tuple operations."""
-    operation = traits.Enum('lncc', 'lssd', 'lltsnorm', 'qlsnorm',
+    operation = traits.Enum('lncc', 'lssd', 'lltsnorm',
                             mandatory=True,
                             argstr='-%s',
                             position=4,
@@ -354,8 +443,6 @@ class TupleMaths(MathsCommand):
                                 on a kernel with <std>
         -lltsnorm  <file_norm> <float>   Linear LTS normalisation assuming
                                          <float> percent outliers
-        -qlsnorm   <order> <file_norm>   LS normalisation of <order>
-                                         between current and <file_norm>
 
     For source code, see http://cmictig.cs.ucl.ac.uk/wiki/index.php/NiftySeg
     For Documentation, see:
@@ -363,16 +450,38 @@ class TupleMaths(MathsCommand):
 
     Examples
     --------
+    >>> import copy
     >>> from nipype.interfaces import niftyseg
-    >>> node = niftyseg.TupleMaths()
-    >>> node.inputs.in_file = 'im1.nii'
-    >>> node.inputs.operation = 'lncc'
-    >>> node.inputs.operand_file1 = 'im2.nii'
-    >>> node.inputs.operand_value2 = 2.0
-    >>> node.inputs.output_datatype = 'float'
-    >>> node.cmdline  # doctest: +ALLOW_UNICODE
-    'seg_maths im1.nii -lncc im2.nii 2.00000000 -odt float im1_lncc.nii'
+    >>> tuple = niftyseg.TupleMaths()
+    >>> tuple.inputs.in_file = 'im1.nii'
+    >>> tuple.inputs.output_datatype = 'float'
 
+    >>> # Test lncc operation
+    >>> tuple_lncc = copy.deepcopy(binary)
+    >>> tuple_lncc.inputs.operation = 'lncc'
+    >>> tuple_lncc.inputs.operand_file1 = 'im2.nii'
+    >>> tuple_lncc.inputs.operand_value2 = 2.0
+    >>> tuple_lncc.cmdline  # doctest: +ALLOW_UNICODE
+    'seg_maths im1.nii -lncc im2.nii 2.00000000 -odt float im1_lncc.nii'
+    >>> tuple_lncc.run()  # doctest: +SKIP
+
+    >>> # Test lssd operation
+    >>> tuple_lssd = copy.deepcopy(binary)
+    >>> tuple_lssd.inputs.operation = 'lssd'
+    >>> tuple_lssd.inputs.operand_file1 = 'im2.nii'
+    >>> tuple_lssd.inputs.operand_value2 = 1.0
+    >>> tuple_lssd.cmdline  # doctest: +ALLOW_UNICODE
+    'seg_maths im1.nii -lssd im2.nii 1.00000000 -odt float im1_lssd.nii'
+    >>> tuple_lssd.run()  # doctest: +SKIP
+
+    >>> # Test lltsnorm operation
+    >>> tuple_lltsnorm = copy.deepcopy(binary)
+    >>> tuple_lltsnorm.inputs.operation = 'lltsnorm'
+    >>> tuple_lltsnorm.inputs.operand_file1 = 'im2.nii'
+    >>> tuple_lltsnorm.inputs.operand_value2 = 0.01
+    >>> tuple_lltsnorm.cmdline  # doctest: +ALLOW_UNICODE
+    'seg_maths im1.nii -lltsnorm im2.nii 0.01 -odt float im1_lltsnorm.nii'
+    >>> tuple_lltsnorm.run()  # doctest: +SKIP
     """
     input_spec = TupleMathsInput
 
