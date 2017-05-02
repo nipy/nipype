@@ -29,7 +29,7 @@ Previous versions:  `0.12.0 <http://nipype.readthedocs.io/en/0.12.0/>`_ `0.11.0 
             :maxdepth: 2
 
             users/index
-            
+
          .. toctree::
             :maxdepth: 1
 

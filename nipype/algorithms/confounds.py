@@ -306,28 +306,28 @@ class CompCorInputSpec(BaseInterfaceInputSpec):
     realigned_file = File(exists=True, mandatory=True,
                           desc='already realigned brain image (4D)')
     mask_files = InputMultiPath(File(exists=True),
-                                desc=('One or more mask files that determines ' 
+                                desc=('One or more mask files that determines '
                                       'ROI (3D)'))
     merge_method = traits.Enum('union', 'intersect', 'none', xor=['mask_index'],
                                requires=['mask_files'],
-                               desc=('Merge method if multiple masks are ' 
-                                     'present - `union` aggregates all masks, ' 
-                                     '`intersect` computes the truth value of ' 
-                                     'all masks, `none` performs CompCor on ' 
+                               desc=('Merge method if multiple masks are '
+                                     'present - `union` aggregates all masks, '
+                                     '`intersect` computes the truth value of '
+                                     'all masks, `none` performs CompCor on '
                                      'each mask individually'))
     mask_index = traits.Range(low=0, xor=['merge_method'],
                               requires=['mask_files'],
-                              desc=('Position of mask in `mask_files` to use - ' 
+                              desc=('Position of mask in `mask_files` to use - '
                                     'first is the default'))
     components_file = File('components_file.txt', exists=False, usedefault=True,
                            desc='Filename to store physiological components')
     num_components = traits.Int(6, usedefault=True) # 6 for BOLD, 4 for ASL
     use_regress_poly = traits.Bool(True, usedefault=True,
-                                   desc=('use polynomial regression ' 
+                                   desc=('use polynomial regression '
                                          'pre-component extraction'))
     regress_poly_degree = traits.Range(low=1, default=1, usedefault=True,
                                        desc='the degree polynomial to use')
-    header = traits.Str(desc=('the desired header for the output tsv file (one ' 
+    header = traits.Str(desc=('the desired header for the output tsv file (one '
                               'column). If undefined, will default to '
                               '"CompCor"'))
 
@@ -350,7 +350,7 @@ class CompCor(BaseInterface):
     >>> ccinterface.inputs.num_components = 1
     >>> ccinterface.inputs.use_regress_poly = True
     >>> ccinterface.inputs.regress_poly_degree = 2
-    
+
     """
     input_spec = CompCorInputSpec
     output_spec = CompCorOutputSpec
@@ -473,7 +473,7 @@ class TCompCor(CompCor):
     >>> ccinterface.inputs.use_regress_poly = True
     >>> ccinterface.inputs.regress_poly_degree = 2
     >>> ccinterface.inputs.percentile_threshold = .03
-    
+
     """
 
     input_spec = TCompCorInputSpec
@@ -829,16 +829,16 @@ def regress_poly(degree, data, remove_mean=True, axis=-1):
 
 def combine_mask_files(mask_files, mask_method=None, mask_index=None):
     """Combines input mask files into a single nibabel image
-    
+
     A helper function for CompCor
-    
+
     mask_files: a list
         one or more binary mask files
     mask_method: enum ('union', 'intersect', 'none')
         determines how to combine masks
     mask_index: an integer
         determines which file to return (mutually exclusive with mask_method)
-        
+
     returns: a list of nibabel images
     """
 
@@ -879,16 +879,16 @@ def combine_mask_files(mask_files, mask_method=None, mask_index=None):
 
 def compute_noise_components(imgseries, mask_images, degree, num_components):
     """Compute the noise components from the imgseries for each mask
-    
+
     imgseries: a nibabel img
     mask_images: a list of nibabel images
     degree: order of polynomial used to remove trends from the timeseries
     num_components: number of noise components to return
-    
+
     returns:
-    
-    components: a numpy array 
-    
+
+    components: a numpy array
+
     """
     components = None
     for img in mask_images:

@@ -88,9 +88,6 @@ def test_Eddy_inputs():
 def test_Eddy_outputs():
     output_map = dict(out_corrected=dict(),
     out_movement_rms=dict(),
-    out_outlier_map=dict(),
-    out_outlier_n_sd_map=dict(),
-    out_outlier_n_sqr_sd_map=dict(),
     out_outlier_report=dict(),
     out_parameter=dict(),
     out_restricted_movement_rms=dict(),

@@ -2417,7 +2417,7 @@ class QwarpPlusMinusOutputSpec(TraitedSpec):
 
 
 class QwarpPlusMinus(CommandLine):
-    """A version of 3dQwarp for performing field susceptibility correction 
+    """A version of 3dQwarp for performing field susceptibility correction
     using two images with opposing phase encoding directions.
 
     For complete details, see the `3dQwarp Documentation.
@@ -2434,7 +2434,7 @@ class QwarpPlusMinus(CommandLine):
     >>> qwarp.cmdline  # doctest: +ALLOW_UNICODE
     '3dQwarp -prefix Qwarp.nii.gz -plusminus -base sub-01_dir-RL_epi.nii.gz -nopadWARP -source sub-01_dir-LR_epi.nii.gz'
     >>> res = warp.run()  # doctest: +SKIP
-    
+
     """
     _cmd = '3dQwarp -prefix Qwarp.nii.gz -plusminus'
     input_spec = QwarpPlusMinusInputSpec

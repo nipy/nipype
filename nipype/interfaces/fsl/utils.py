@@ -73,7 +73,7 @@ class RobustFOVInputSpec(FSLCommandInputSpec):
     brainsize = traits.Int(desc=('size of brain in z-dimension (default '
                                  '170mm/150mm)'),
                            argstr='-b %d')
-    out_transform = File(desc=("Transformation matrix in_file to out_roi "  
+    out_transform = File(desc=("Transformation matrix in_file to out_roi "
                                "output name"),
                          argstr="-m %s",
                          name_source=['in_file'], hash_files=False,
@@ -83,17 +83,17 @@ class RobustFOVInputSpec(FSLCommandInputSpec):
 class RobustFOVOutputSpec(TraitedSpec):
     out_roi = File(exists=True, desc="ROI volume output name")
     out_transform = File(exists=True,
-                         desc=("Transformation matrix in_file to out_roi " 
+                         desc=("Transformation matrix in_file to out_roi "
                                "output name"))
 
 
 class RobustFOV(FSLCommand):
     """Automatically crops an image removing lower head and neck.
-    
-    Interface is stable 5.0.0 to 5.0.9, but default brainsize changed from 
+
+    Interface is stable 5.0.0 to 5.0.9, but default brainsize changed from
     150mm to 170mm.
     """
-    
+
     _cmd = 'robustfov'
     input_spec = RobustFOVInputSpec
     output_spec = RobustFOVOutputSpec
