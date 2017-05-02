@@ -70,7 +70,7 @@ class TestCompCor():
         ccinterface = TCompCor(realigned_file=self.realigned_file)
         ccinterface.run()
 
-        mask = nb.load('mask.nii').get_data()
+        mask = nb.load('mask_000.nii.gz').get_data()
         num_nonmasked_voxels = np.count_nonzero(mask)
         assert num_nonmasked_voxels == 1
 
@@ -89,7 +89,7 @@ class TestCompCor():
                                             'asymmetric.nii')
 
         TCompCor(realigned_file=asymmetric_data).run()
-        assert nb.load('mask.nii').get_data().shape == asymmetric_shape[:3]
+        assert nb.load('mask_000.nii.gz').get_data().shape == asymmetric_shape[:3]
 
     def test_compcor_bad_input_shapes(self):
         shape_less_than = (1, 2, 2, 5) # dim 0 is < dim 0 of self.mask_files (2)
@@ -112,17 +112,17 @@ class TestCompCor():
                      mask_files=self.mask_files,
                      merge_method=method).run()
             if method == 'union':
-                assert np.array_equal(nb.load('mask.nii').get_data(),
+                assert np.array_equal(nb.load('mask_000.nii.gz').get_data(),
                                      ([[[0,0],[0,0]],[[0,0],[1,0]]]))
             if method == 'intersect':
-                assert np.array_equal(nb.load('mask.nii').get_data(),
+                assert np.array_equal(nb.load('mask_000.nii.gz').get_data(),
                                       ([[[0,0],[0,0]],[[0,1],[0,0]]]))
 
     def test_tcompcor_index_mask(self):
         TCompCor(realigned_file=self.realigned_file,
                  mask_files=self.mask_files,
                  mask_index=1).run()
-        assert np.array_equal(nb.load('mask.nii').get_data(),
+        assert np.array_equal(nb.load('mask_000.nii.gz').get_data(),
                             ([[[0,0],[0,0]],[[0,1],[0,0]]]))
 
     def run_cc(self, ccinterface, expected_components, expected_header='CompCor'):
@@ -142,7 +142,8 @@ class TestCompCor():
             components_data = [line.split('\t') for line in components_file]
 
             header = components_data.pop(0) # the first item will be '#', we can throw it out
-            expected_header = [expected_header + str(i) for i in range(expected_n_components)]
+            expected_header = [expected_header + '{:02d}'.format(i) for i in
+                               range(expected_n_components)]
             for i, heading in enumerate(header):
                 assert expected_header[i] in heading
 
