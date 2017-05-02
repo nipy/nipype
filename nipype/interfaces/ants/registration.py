@@ -518,10 +518,12 @@ class Registration(ANTSCommand):
     >>> outputs = reg4._list_outputs()
     >>> pprint.pprint(outputs)  # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE +ALLOW_UNICODE
     {'composite_transform': '.../nipype/testing/data/output_Composite.h5',
+     'elapsed_time': <undefined>,
      'forward_invert_flags': [],
      'forward_transforms': [],
      'inverse_composite_transform': '.../nipype/testing/data/output_InverseComposite.h5',
      'inverse_warped_image': <undefined>,
+     'metric_value': <undefined>,
      'reverse_invert_flags': [],
      'reverse_transforms': [],
      'save_state': '.../nipype/testing/data/trans.mat',
@@ -543,11 +545,13 @@ class Registration(ANTSCommand):
     >>> outputs = reg4b._list_outputs()
     >>> pprint.pprint(outputs)  # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE +ALLOW_UNICODE
     {'composite_transform': <undefined>,
+     'metric_value': <undefined>,
      'forward_invert_flags': [False, False],
      'forward_transforms': ['.../nipype/testing/data/output_0GenericAffine.mat',
      '.../nipype/testing/data/output_1Warp.nii.gz'],
      'inverse_composite_transform': <undefined>,
      'inverse_warped_image': <undefined>,
+     'metric_value': <undefined>,
      'reverse_invert_flags': [True, False],
      'reverse_transforms': ['.../nipype/testing/data/output_0GenericAffine.mat', \
 '.../nipype/testing/data/output_1InverseWarp.nii.gz'],
