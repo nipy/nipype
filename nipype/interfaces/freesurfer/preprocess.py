@@ -611,10 +611,18 @@ class Resample(FSCommand):
 class ReconAllInputSpec(CommandLineInputSpec):
     subject_id = traits.Str("recon_all", argstr='-subjid %s',
                             desc='subject name', usedefault=True)
-    directive = traits.Enum('all', 'autorecon1', 'autorecon2', 'autorecon2-cp',
-                            'autorecon2-wm', 'autorecon2-inflate1',
-                            'autorecon2-perhemi', 'autorecon3', 'localGI',
-                            'qcache', argstr='-%s', desc='process directive',
+    directive = traits.Enum('all', 'autorecon1',
+                            # autorecon2 variants
+                            'autorecon2', 'autorecon2-volonly',
+                            'autorecon2-perhemi', 'autorecon2-inflate1',
+                            'autorecon2-cp', 'autorecon2-wm',
+                            # autorecon3 variants
+                            'autorecon3', 'autorecon3-T2pial',
+                            # Mix of autorecon2 and autorecon3 steps
+                            'autorecon-pial', 'autorecon-hemi',
+                            # Not "multi-stage flags"
+                            'localGI', 'qcache',
+                            argstr='-%s', desc='process directive',
                             usedefault=True, position=0)
     hemi = traits.Enum('lh', 'rh', desc='hemisphere to process',
                        argstr="-hemi %s")
@@ -963,6 +971,15 @@ class ReconAll(CommandLine):
                 isdefined(self.inputs.hippocampal_subfields_T1) and
                 self.inputs.hippocampal_subfields_T1)):
             trait_spec.argstr = trait_spec.argstr.replace('T2', 'T1T2')
+        if name == 'directive' and value == 'autorecon-hemi':
+            if not isdefined(self.inputs.hemi):
+                raise ValueError("Directive 'autorecon-hemi' requires hemi "
+                                 "input to be set")
+            value += ' ' + self.inputs.hemi
+        if all((name == 'hemi',
+                isdefined(self.inputs.directive) and
+                self.inputs.directive == 'autorecon-hemi')):
+            return ''
         return super(ReconAll, self)._format_arg(name, trait_spec, value)
 
     @property
