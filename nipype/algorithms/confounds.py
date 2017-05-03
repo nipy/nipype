@@ -307,18 +307,21 @@ class CompCorInputSpec(BaseInterfaceInputSpec):
                           desc='already realigned brain image (4D)')
     mask_files = InputMultiPath(File(exists=True),
                                 desc=('One or more mask files that determines '
-                                      'ROI (3D)'))
+                                      'ROI (3D). When more that one file is '
+                                      'provided `merge_method` or ' 
+                                      '`merge_index` must be provided'))
     merge_method = traits.Enum('union', 'intersect', 'none', xor=['mask_index'],
                                requires=['mask_files'],
                                desc=('Merge method if multiple masks are '
-                                     'present - `union` aggregates all masks, '
-                                     '`intersect` computes the truth value of '
-                                     'all masks, `none` performs CompCor on '
+                                     'present - `union` uses voxels included in' 
+                                     ' at least one input mask, `intersect` '
+                                     'uses only voxels present in all input ' 
+                                     'masks, `none` performs CompCor on '
                                      'each mask individually'))
     mask_index = traits.Range(low=0, xor=['merge_method'],
                               requires=['mask_files'],
                               desc=('Position of mask in `mask_files` to use - '
-                                    'first is the default'))
+                                    'first is the default.'))
     components_file = traits.Str('components_file.txt', usedefault=True,
                            desc='Filename to store physiological components')
     num_components = traits.Int(6, usedefault=True) # 6 for BOLD, 4 for ASL
@@ -327,9 +330,9 @@ class CompCorInputSpec(BaseInterfaceInputSpec):
                                          'pre-component extraction'))
     regress_poly_degree = traits.Range(low=1, default=1, usedefault=True,
                                        desc='the degree polynomial to use')
-    header = traits.Str(desc=('the desired header for the output tsv file (one '
-                              'column). If undefined, will default to '
-                              '"CompCor"'))
+    header_prefix = traits.Str(desc=('the desired header for the output tsv ' 
+                                     'file (one column). If undefined, will ' 
+                                     'default to "CompCor"'))
 
 
 class CompCorOutputSpec(TraitedSpec):
@@ -419,8 +422,8 @@ class CompCor(BaseInterface):
 
     def _make_headers(self, num_col):
         headers = []
-        header = self.inputs.header if isdefined(self.inputs.header) else \
-            self._header
+        header = self.inputs.header_prefix if \
+            isdefined(self.inputs.header_prefix) else self._header
         for i in range(num_col):
             headers.append(header + '{:02d}'.format(i))
         return '\t'.join(headers)
@@ -844,7 +847,12 @@ def combine_mask_files(mask_files, mask_method=None, mask_index=None):
 
     if isdefined(mask_index) or not isdefined(mask_method):
         if not isdefined(mask_index):
-            mask_index = 0
+            if len(mask_files) == 1:
+                mask_index = 0
+            else:
+                raise ValueError(('When more than one mask file is provided, ' 
+                                  'one of merge_method or mask_index must be ' 
+                                  'set'))
         if mask_index < len(mask_files):
             mask = nb.load(mask_files[mask_index], mmap=NUMPY_MMAP)
             return [mask]
