@@ -38,8 +38,8 @@ from ..utils.misc import is_container, trim, str2bool
 from ..utils.filemanip import (md5, hash_infile, FileNotFoundError, hash_timestamp,
                                split_filename, to_str)
 from .traits_extension import (
-    traits, Undefined, TraitDictObject, TraitListObject, TraitError, isdefined, File,
-    Directory, DictStrStr, has_metadata)
+    traits, Undefined, TraitDictObject, TraitListObject, TraitError, isdefined,
+    File, Directory, DictStrStr, has_metadata, ImageFile)
 from ..external.due import due
 
 runtime_profile = str2bool(config.get('execution', 'profile_runtime'))
