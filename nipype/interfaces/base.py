@@ -63,13 +63,14 @@ if runtime_profile:
 
 __docformat__ = 'restructuredtext'
 
+# dj TODO: should remove
+# will use traitlets.Unicode
+#class Str(traits.Unicode):
+#    pass
 
-class Str(traits.Unicode):
-    pass
+#traits.Str = Str
 
-# TODO dj: do I need traitlets.Str? can I use just traitlets.Unicode? 
-traits.Str = Str
-
+# dj : pomyslec, czy potrzebne
 class NipypeInterfaceError(Exception):
     def __init__(self, value):
         self.value = value
@@ -119,6 +120,7 @@ def load_template(name):
     return template
 
 
+# dj NOTE: doesn't use traits
 class Bunch(object):
     """Dictionary-like class that provides attribute-style access to it's items.
 
@@ -296,6 +298,7 @@ class Bunch(object):
             p.end_group(6, ')')
 
 
+# dj NOTES: doesnt use traits
 class InterfaceResult(object):
     """Object that contains the results of running a particular Interface.
 
@@ -367,9 +370,9 @@ class BaseTraitedSpec(traitlets.HasTraits):
         super(BaseTraitedSpec, self).__init__(**kwargs)
         # dj TODO: it shouldn't be needed with traitlets (Satra)
         #traits.push_exception_handler(reraise_exceptions=True)
-        undefined_traits = {}
         #pdb.set_trace()
         # dj TODO: not sure if I should keep usedefault 
+        #undefined_traits = {}
         #for trait in self.class_trait_names():
         #    if not self.traits()[trait].usedefault:
         #        undefined_traits[trait] = Undefined

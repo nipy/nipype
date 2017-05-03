@@ -90,19 +90,19 @@ def test_TraitedSpec():
         foo = traitlets.Int(None, allow_none=True)
         goo = traitlets.Float().tag(usedefault=True)
 
-    pdb.set_trace()
+    #pdb.set_trace()
     assert spec().foo is None
     assert spec().goo == 0.0
     specfunc = lambda x: spec(hoo=x)
     aa = specfunc(1)
-    pdb.set_trace()
+    #pdb.set_trace()
     # dj: dlaczego to powinno dawac trait error? to rozumiem, ze jest definiowane w klasie?
     # to daje error: super(BaseTraitedSpec, self).__init__(**kwargs)
     #with pytest.raises(nib.traits.TraitError): specfunc(1)
     infields = spec(foo=1)
     hashval = ([('foo', 1), ('goo', '0.0000000000')], 'e89433b8c9141aa0fda2f8f4d662c047')
     # dj TODO:
-    #assert infields.get_hashval() == hashval
+    assert infields.get_hashval() == hashval
     assert infields.__repr__() == '\nfoo = 1\ngoo = 0.0\n'
 
 
