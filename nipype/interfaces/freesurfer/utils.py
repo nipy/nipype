@@ -21,7 +21,7 @@ from ... import logging
 from ...utils.filemanip import fname_presuffix, split_filename
 from ..base import (TraitedSpec, File, traits, OutputMultiPath, isdefined,
                     CommandLine, CommandLineInputSpec)
-from .base import (FSCommand, FSTraitedSpec,
+from .base import (FSCommand, FSTraitedSpec, FSSurfaceCommand,
                    FSScriptCommand, FSScriptOutputSpec,
                    FSTraitedSpecOpenMP, FSCommandOpenMP)
 __docformat__ = 'restructuredtext'
@@ -952,6 +952,76 @@ class MRIsConvert(FSCommand):
             _, name, ext = split_filename(self.inputs.in_file)
 
         return name + ext + "_converted." + self.inputs.out_datatype
+
+
+class MRIsCombineInputSpec(FSTraitedSpec):
+    """
+    Uses Freesurfer's mris_convert to combine two surface files into one.
+    """
+    in_files = traits.List(File(Exists=True), maxlen=2, minlen=2,
+                           mandatory=True, position=1, argstr='--combinesurfs %s',
+                           desc='Two surfaces to be combined.')
+    out_file = File(argstr='%s', position=-1, genfile=True,
+                    mandatory=True,
+                    desc='Output filename. Combined surfaces from in_files.')
+
+
+class MRIsCombineOutputSpec(TraitedSpec):
+    """
+    Uses Freesurfer's mris_convert to combine two surface files into one.
+    """
+    out_file = File(exists=True, desc='Output filename. Combined surfaces from '
+                                      'in_files.')
+
+
+class MRIsCombine(FSSurfaceCommand):
+    """
+    Uses Freesurfer's ``mris_convert`` to combine two surface files into one.
+
+    For complete details, see the `mris_convert Documentation.
+    <https://surfer.nmr.mgh.harvard.edu/fswiki/mris_convert>`_
+
+    If given an ``out_file`` that does not begin with ``'lh.'`` or ``'rh.'``,
+    ``mris_convert`` will prepend ``'lh.'`` to the file name.
+    To avoid this behavior, consider setting ``out_file = './<filename>'``, or
+    leaving out_file blank.
+
+    In a Node/Workflow, ``out_file`` is interpreted literally.
+
+    Example
+    -------
+
+    >>> import nipype.interfaces.freesurfer as fs
+    >>> mris = fs.MRIsCombine()
+    >>> mris.inputs.in_files = ['lh.pial', 'rh.pial']
+    >>> mris.inputs.out_file = 'bh.pial'
+    >>> mris.cmdline  # doctest: +ALLOW_UNICODE
+    'mris_convert --combinesurfs lh.pial rh.pial bh.pial'
+    >>> mris.run()  # doctest: +SKIP
+    """
+    _cmd = 'mris_convert'
+    input_spec = MRIsCombineInputSpec
+    output_spec = MRIsCombineOutputSpec
+
+    def _list_outputs(self):
+        outputs = self._outputs().get()
+
+        # mris_convert --combinesurfs uses lh. as the default prefix
+        # regardless of input file names, except when path info is
+        # specified
+        path, base = os.path.split(self.inputs.out_file)
+        if path == '' and base[:3] not in ('lh.', 'rh.'):
+            base = 'lh.' + base
+        outputs['out_file'] = os.path.abspath(os.path.join(path, base))
+
+        return outputs
+
+    def _normalize_filenames(self):
+        """ In a Node context, interpret out_file as a literal path to
+        reduce surprise.
+        """
+        if isdefined(self.inputs.out_file):
+            self.inputs.out_file = os.path.abspath(self.inputs.out_file)
 
 
 class MRITessellateInputSpec(FSTraitedSpec):
@@ -2930,11 +3000,6 @@ class MRIsExpandInputSpec(FSTraitedSpec):
         desc=('Name of thickness file (implicit: "thickness")\n'
               'If no path, uses directory of `in_file`\n'
               'If no path AND missing "lh." or "rh.", derive from `in_file`'))
-    navgs = traits.Tuple(
-        traits.Int, traits.Int,
-        argstr='-navgs %d %d',
-        desc=('Tuple of (n_averages, min_averages) parameters '
-              '(implicit: (16, 0))'))
     pial = traits.Str(
         argstr='-pial %s', copyfile=False,
         desc=('Name of pial file (implicit: "pial")\n'
@@ -2956,6 +3021,11 @@ class MRIsExpandInputSpec(FSTraitedSpec):
         desc='Number of surfacces to write during expansion')
     # # Requires dev version - Re-add when min_ver/max_ver support this
     # # https://github.com/freesurfer/freesurfer/blob/9730cb9/mris_expand/mris_expand.c
+    # navgs = traits.Tuple(
+    #     traits.Int, traits.Int,
+    #     argstr='-navgs %d %d',
+    #     desc=('Tuple of (n_averages, min_averages) parameters '
+    #           '(implicit: (16, 0))'))
     # target_intensity = traits.Tuple(
     #     traits.Float, traits.File(exists=True),
     #     argstr='-intensity %g %s',
@@ -2966,7 +3036,7 @@ class MRIsExpandOutputSpec(TraitedSpec):
     out_file = File(desc='Output surface file')
 
 
-class MRIsExpand(FSCommand):
+class MRIsExpand(FSSurfaceCommand):
     """
     Expands a surface (typically ?h.white) outwards while maintaining
     smoothness and self-intersection constraints.
@@ -2992,7 +3062,9 @@ class MRIsExpand(FSCommand):
                                                     self.inputs.out_name)
         return outputs
 
-    def _get_filecopy_info(self):
+    def _normalize_filenames(self):
+        """ Find full paths for pial, thickness and sphere files for copying
+        """
         in_file = self.inputs.in_file
 
         pial = self.inputs.pial
@@ -3008,20 +3080,3 @@ class MRIsExpand(FSCommand):
                                                                thickness_name)
 
         self.inputs.sphere = self._associated_file(in_file, self.inputs.sphere)
-
-        return super(MRIsExpand, self)._get_filecopy_info()
-
-    @staticmethod
-    def _associated_file(in_file, out_name):
-        """Based on MRIsBuildFileName in freesurfer/utils/mrisurf.c
-
-        Use file prefix to indicate hemisphere, rather than inspecting the
-        surface data structure
-        """
-        path, base = os.path.split(out_name)
-        if path == '':
-            path, in_file = os.path.split(in_file)
-            hemis = ('lh.', 'rh.')
-            if in_file[:3] in hemis and base[:3] not in hemis:
-                base = in_file[:3] + base
-        return os.path.join(path, base)

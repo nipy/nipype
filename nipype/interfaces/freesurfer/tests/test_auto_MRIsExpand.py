@@ -23,8 +23,6 @@ def test_MRIsExpand_inputs():
     mandatory=True,
     position=-3,
     ),
-    navgs=dict(argstr='-navgs %d %d',
-    ),
     nsurfaces=dict(argstr='-N %d',
     ),
     out_name=dict(argstr='%s',

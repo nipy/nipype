@@ -79,7 +79,8 @@ class Node(EngineBase):
 
     def __init__(self, interface, name, iterables=None, itersource=None,
                  synchronize=False, overwrite=None, needed_outputs=None,
-                 run_without_submitting=False, **kwargs):
+                 run_without_submitting=False, n_procs=1, mem_gb=None,
+                 **kwargs):
         """
         Parameters
         ----------
@@ -168,6 +169,11 @@ class Node(EngineBase):
         self.input_source = {}
         self.needed_outputs = []
         self.plugin_args = {}
+
+        self._interface.num_threads = n_procs
+        if mem_gb is not None:
+            self._interface.estimated_memory_gb = mem_gb
+
         if needed_outputs:
             self.needed_outputs = sorted(needed_outputs)
         self._got_inputs = False

@@ -19,6 +19,8 @@ def test_SpecifyModel_inputs():
     ),
     outlier_files=dict(copyfile=False,
     ),
+    parameter_source=dict(usedefault=True,
+    ),
     realignment_parameters=dict(copyfile=False,
     ),
     subject_info=dict(mandatory=True,

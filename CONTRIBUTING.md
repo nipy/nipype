@@ -20,6 +20,7 @@
   * adding more information about what may have caused the error.
     Raise a new exception using ``raise_from(NewException("message"), oldException)`` from ``future``.
     Do not log this, as it creates redundant/confusing logs.
+* If you are new to the project don't forget to add your name and affiliation to the `.zenodo.json` file.
 
 ## Contributing issues
 

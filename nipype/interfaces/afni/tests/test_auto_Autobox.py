@@ -20,6 +20,7 @@ def test_Autobox_inputs():
     ),
     out_file=dict(argstr='-prefix %s',
     name_source='in_file',
+    name_template='%s_autobox',
     ),
     outputtype=dict(),
     padding=dict(argstr='-npad %d',

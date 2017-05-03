@@ -50,7 +50,7 @@ ENV PATH=/usr/local/miniconda/bin:$PATH \
 # only use one thread - nipype will handle parallelization
 
 # Installing precomputed python packages
-ARG PYTHON_VERSION_MINOR=5
+ARG PYTHON_VERSION_MINOR=6
 RUN conda config --add channels conda-forge; sync && \
     conda config --set always_yes yes --set changeps1 no; sync && \
     conda install -y python=${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR} \

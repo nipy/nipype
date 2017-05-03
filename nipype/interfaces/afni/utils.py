@@ -24,6 +24,7 @@ from ...utils.filemanip import (load_json, save_json, split_filename)
 from ..base import (
     CommandLineInputSpec, CommandLine, Directory, TraitedSpec,
     traits, isdefined, File, InputMultiPath, Undefined, Str)
+from ...external.due import BibTeX
 
 from .base import (
     AFNICommandBase, AFNICommand, AFNICommandInputSpec, AFNICommandOutputSpec)
@@ -694,6 +695,16 @@ class FWHMx(AFNICommandBase):
     _cmd = '3dFWHMx'
     input_spec = FWHMxInputSpec
     output_spec = FWHMxOutputSpec
+    
+    references_ = [{'entry': BibTeX('@article{CoxReynoldsTaylor2016,'
+                                    'author={R.W. Cox, R.C. Reynolds, and P.A. Taylor},'
+                                    'title={AFNI and clustering: false positive rates redux},'
+                                    'journal={bioRxiv},'
+                                    'year={2016},'
+                                    '}'),
+                    'tags': ['method'],
+                    },
+                   ]
     _acf = True
 
     def _parse_inputs(self, skip=None):

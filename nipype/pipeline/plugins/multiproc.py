@@ -231,11 +231,12 @@ class MultiProcPlugin(DistributedPluginBase):
                 busy_processors += self.procs[jobid]._interface.num_threads
 
             else:
-                raise ValueError("Resources required by jobid %d (%f GB, %d threads)"
-                                 "exceed what is available on the system (%f GB, %d threads)"%(jobid,
-                    self.procs[jobid].__interface.estimated_memory_gb,
-                    self.procs[jobid].__interface.num_threads,
-                    self.memory_gb,self.processors))
+                raise ValueError(
+                    "Resources required by jobid {0} ({3}GB, {4} threads) exceed what is "
+                    "available on the system ({1}GB, {2} threads)".format(
+                        jobid, self.memory_gb, self.processors,
+                        self.procs[jobid]._interface.estimated_memory_gb,
+                        self.procs[jobid]._interface.num_threads))
 
         free_memory_gb = self.memory_gb - busy_memory_gb
         free_processors = self.processors - busy_processors
