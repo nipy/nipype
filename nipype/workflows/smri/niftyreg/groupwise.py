@@ -1,12 +1,10 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 
-'''
-This file provides some common registration routines useful for a variety of
-pipelines.
-
-Including linear and non-linear image co-registration
-'''
+"""
+Example of registration workflows using niftyreg, useful for a variety of
+pipelines. Including linear and non-linear image co-registration
+"""
 
 from builtins import str, range
 import nipype.interfaces.utility as niu
@@ -20,7 +18,7 @@ def create_linear_gw_step(name="linear_gw_niftyreg",
                           use_mask=False,
                           verbose=False):
     """
-    Creates a workflow that perform linear co-registration of a set of images
+    Creates a workflow that performs linear co-registration of a set of images
     using RegAladin, producing an average image and a set of affine
     transformation matrices linking each of the floating images to the average.
 
@@ -38,6 +36,7 @@ def create_linear_gw_step(name="linear_gw_niftyreg",
         outputspec.aff_files - The affine transformation files
 
     Optional arguments::
+
         linear_options_hash - An options dictionary containing a list of
                               parameters for RegAladin that take
         the same form as given in the interface (default None)
@@ -51,8 +50,8 @@ def create_linear_gw_step(name="linear_gw_niftyreg",
 
     >>> from nipype.workflows.smri.niftyreg import create_linear_gw_step
     >>> lgw = create_linear_gw_step('my_linear_coreg')  # doctest: +SKIP
-    >>> lgw.inputs.inputspec.in_files = ['file1.nii.gz', 'file2.nii.gz']  \
-# doctest: +SKIP
+    >>> lgw.inputs.inputspec.in_files = [
+    ...     'file1.nii.gz', 'file2.nii.gz']  # doctest: +SKIP
     >>> lgw.inputs.inputspec.ref_file = ['ref.nii.gz']  # doctest: +SKIP
     >>> lgw.run()  # doctest: +SKIP
 
@@ -121,6 +120,7 @@ def create_nonlinear_gw_step(name="nonlinear_gw_niftyreg",
     cpp transformation linking each of the floating images to the average.
 
     Inputs::
+
         inputspec.in_files - The input files to be registered
         inputspec.ref_file - The initial reference image that the input files
                               are registered to
@@ -134,6 +134,7 @@ def create_nonlinear_gw_step(name="nonlinear_gw_niftyreg",
         outputspec.cpp_files - The bspline transformation files
 
     Optional arguments::
+
         nonlinear_options_hash - An options dictionary containing a list of
                                  parameters for RegAladin that take the
         same form as given in the interface (default None)
@@ -144,8 +145,8 @@ def create_nonlinear_gw_step(name="nonlinear_gw_niftyreg",
     -------
     >>> from nipype.workflows.smri.niftyreg import create_nonlinear_gw_step
     >>> nlc = create_nonlinear_gw_step('nonlinear_coreg')  # doctest: +SKIP
-    >>> nlc.inputs.inputspec.in_files = ['file1.nii.gz', 'file2.nii.gz']  \
-# doctest: +SKIP
+    >>> nlc.inputs.inputspec.in_files = [
+    ...     'file1.nii.gz', 'file2.nii.gz']  # doctest: +SKIP
     >>> nlc.inputs.inputspec.ref_file = ['ref.nii.gz']  # doctest: +SKIP
     >>> nlc.run()  # doctest: +SKIP
 
@@ -246,6 +247,7 @@ def create_groupwise_average(name="atlas_creation",
     non-linear components.
 
     Inputs::
+
         inputspec.in_files - The input files to be registered
         inputspec.ref_file - The initial reference image that the input files
                               are registered to
@@ -258,12 +260,14 @@ def create_groupwise_average(name="atlas_creation",
         outputspec.average_image - The average image
         outputspec.cpp_files - The bspline transformation files
 
+
     Example
     -------
+
     >>> from nipype.workflows.smri.niftyreg import create_groupwise_average
     >>> node = create_groupwise_average('groupwise_av')  # doctest: +SKIP
-    >>> node.inputs.inputspec.in_files = ['file1.nii.gz', 'file2.nii.gz']  \
-# doctest: +SKIP
+    >>> node.inputs.inputspec.in_files = [
+    ...     'file1.nii.gz', 'file2.nii.gz']  # doctest: +SKIP
     >>> node.inputs.inputspec.ref_file = ['ref.nii.gz']  # doctest: +SKIP
     >>> node.inputs.inputspec.rmask_file = ['mask.nii.gz']  # doctest: +SKIP
     >>> node.run()  # doctest: +SKIP
@@ -384,3 +388,4 @@ def create_groupwise_average(name="atlas_creation",
                      ])
 
     return workflow
+
