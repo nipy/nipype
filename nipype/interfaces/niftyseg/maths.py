@@ -271,7 +271,7 @@ class BinaryMaths(MathsCommand):
     >>> binary_mul.inputs.operation = 'mul'
     >>> binary_mul.inputs.operand_value = 2.0
     >>> binary_mul.cmdline  # doctest: +ALLOW_UNICODE
-    'seg_maths im1.nii -mul 2.0 -odt float im1_mul.nii'
+    'seg_maths im1.nii -mul 2.00000000 -odt float im1_mul.nii'
     >>> binary_mul.run()  # doctest: +SKIP
     >>> # Test llsnorm operation
     >>> binary_llsnorm = copy.deepcopy(binary)
@@ -457,7 +457,7 @@ class TupleMaths(MathsCommand):
     >>> tuple.inputs.output_datatype = 'float'
 
     >>> # Test lncc operation
-    >>> tuple_lncc = copy.deepcopy(binary)
+    >>> tuple_lncc = copy.deepcopy(tuple)
     >>> tuple_lncc.inputs.operation = 'lncc'
     >>> tuple_lncc.inputs.operand_file1 = 'im2.nii'
     >>> tuple_lncc.inputs.operand_value2 = 2.0
@@ -466,7 +466,7 @@ class TupleMaths(MathsCommand):
     >>> tuple_lncc.run()  # doctest: +SKIP
 
     >>> # Test lssd operation
-    >>> tuple_lssd = copy.deepcopy(binary)
+    >>> tuple_lssd = copy.deepcopy(tuple)
     >>> tuple_lssd.inputs.operation = 'lssd'
     >>> tuple_lssd.inputs.operand_file1 = 'im2.nii'
     >>> tuple_lssd.inputs.operand_value2 = 1.0
@@ -475,7 +475,7 @@ class TupleMaths(MathsCommand):
     >>> tuple_lssd.run()  # doctest: +SKIP
 
     >>> # Test lltsnorm operation
-    >>> tuple_lltsnorm = copy.deepcopy(binary)
+    >>> tuple_lltsnorm = copy.deepcopy(tuple)
     >>> tuple_lltsnorm.inputs.operation = 'lltsnorm'
     >>> tuple_lltsnorm.inputs.operand_file1 = 'im2.nii'
     >>> tuple_lltsnorm.inputs.operand_value2 = 0.01

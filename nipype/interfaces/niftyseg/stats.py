@@ -218,7 +218,6 @@ class BinaryStats(StatsCommand):
     >>> binary.inputs.in_file = 'im1.nii'
     >>> # Test sa operation
     >>> binary_sa = copy.deepcopy(binary)
-    >>> binary_sa = niftyseg.BinaryStats()
     >>> binary_sa.inputs.operation = 'sa'
     >>> binary_sa.inputs.operand_value = 2.0
     >>> binary_sa.cmdline  # doctest: +ALLOW_UNICODE
@@ -226,7 +225,6 @@ class BinaryStats(StatsCommand):
     >>> binary_sa.run()  # doctest: +SKIP
     >>> # Test ncc operation
     >>> binary_ncc = copy.deepcopy(binary)
-    >>> binary_ncc = niftyseg.BinaryStats()
     >>> binary_ncc.inputs.operation = 'ncc'
     >>> binary_ncc.inputs.operand_file = 'im2.nii'
     >>> binary_ncc.cmdline  # doctest: +ALLOW_UNICODE
@@ -234,7 +232,6 @@ class BinaryStats(StatsCommand):
     >>> binary_ncc.run()  # doctest: +SKIP
     >>> # Test Nl operation
     >>> binary_nl = copy.deepcopy(binary)
-    >>> binary_nl = niftyseg.BinaryStats()
     >>> binary_nl.inputs.operation = 'Nl'
     >>> binary_nl.inputs.operand_file = 'output.csv'
     >>> binary_nl.cmdline  # doctest: +ALLOW_UNICODE
