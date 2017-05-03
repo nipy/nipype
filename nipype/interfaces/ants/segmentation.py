@@ -14,7 +14,8 @@ from builtins import range, str
 import os
 from ...external.due import BibTeX
 from ...utils.filemanip import split_filename, copyfile
-from ..base import TraitedSpec, File, traits, InputMultiPath, OutputMultiPath, isdefined
+from ..base import (TraitedSpec, File, traits, InputMultiPath, OutputMultiPath, isdefined,
+                    _exists_in_path)
 from .base import ANTSCommand, ANTSCommandInputSpec
 
 
@@ -691,6 +692,40 @@ class BrainExtraction(ANTSCommand):
     input_spec = BrainExtractionInputSpec
     output_spec = BrainExtractionOutputSpec
     _cmd = 'antsBrainExtraction.sh'
+
+    def _run_interface(self, runtime, correct_return_codes=(0,)):
+        # antsBrainExtraction.sh requires ANTSPATH to be defined
+        out_environ = self._get_environ()
+        if out_environ.get('ANTSPATH') is None:
+            runtime.environ.update(out_environ)
+            executable_name = self.cmd.split()[0]
+            exist_val, cmd_path = _exists_in_path(executable_name, runtime.environ)
+            if not exist_val:
+                raise IOError("command '%s' could not be found on host %s" %
+                              (self.cmd.split()[0], runtime.hostname))
+
+            # Set the environment variable if found
+            runtime.environ.update({'ANTSPATH': os.path.dirname(cmd_path)})
+
+        runtime = super(BrainExtraction, self)._run_interface(runtime)
+
+        # Still, double-check if it didn't found N4
+        if 'we cant find' in runtime.stdout:
+            for line in runtime.stdout.split('\n'):
+                if line.strip().startswith('we cant find'):
+                    tool = line.strip().replace('we cant find the', '').split(' ')[0]
+                    break
+
+            errmsg = ('antsBrainExtraction.sh requires %s the environment variable '
+                      'ANTSPATH to be defined' % tool)
+            if runtime.stderr is None:
+                runtime.stderr = errmsg
+            else:
+                runtime.stderr += '\n' + errmsg
+            runtime.returncode = 1
+            self.raise_exception(runtime)
+
+        return runtime
 
     def _list_outputs(self):
         outputs = self._outputs().get()
