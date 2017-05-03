@@ -6,7 +6,7 @@ from ..confounds import TCompCor
 def test_TCompCor_inputs():
     input_map = dict(components_file=dict(usedefault=True,
     ),
-    header=dict(),
+    header_prefix=dict(),
     ignore_exception=dict(nohash=True,
     usedefault=True,
     ),
@@ -36,28 +36,8 @@ def test_TCompCor_inputs():
 
 
 def test_TCompCor_outputs():
-    output_map = dict(components_file=dict(usedefault=True,
-    ),
-    header=dict(),
+    output_map = dict(components_file=dict(),
     high_variance_masks=dict(),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
-    mask_files=dict(),
-    mask_index=dict(requires=['mask_files'],
-    xor=['merge_method'],
-    ),
-    merge_method=dict(requires=['mask_files'],
-    xor=['mask_index'],
-    ),
-    num_components=dict(usedefault=True,
-    ),
-    realigned_file=dict(mandatory=True,
-    ),
-    regress_poly_degree=dict(usedefault=True,
-    ),
-    use_regress_poly=dict(usedefault=True,
-    ),
     )
     outputs = TCompCor.output_spec()
 

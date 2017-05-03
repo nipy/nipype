@@ -6,7 +6,7 @@ from ..confounds import ACompCor
 def test_ACompCor_inputs():
     input_map = dict(components_file=dict(usedefault=True,
     ),
-    header=dict(),
+    header_prefix=dict(),
     ignore_exception=dict(nohash=True,
     usedefault=True,
     ),
