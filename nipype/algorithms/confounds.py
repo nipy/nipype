@@ -458,8 +458,8 @@ class TCompCorInputSpec(CompCorInputSpec):
 class TCompCorOutputSpec(CompCorOutputSpec):
     # and all the fields in CompCorOutputSpec
     high_variance_masks = OutputMultiPath(File(exists=True),
-                                          desc=("voxels excedding the variance "
-                                                "threshold"))
+                                          desc=(("voxels exceeding the variance"
+                                                 " threshold")))
 
 
 class TCompCor(CompCor):
@@ -754,6 +754,7 @@ def plot_confound(tseries, figsize, name, units=None,
     ax.set_ylim(ylim)
     ax.set_yticklabels([])
     return fig
+
 
 def is_outlier(points, thresh=3.5):
     """
