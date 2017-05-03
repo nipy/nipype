@@ -652,7 +652,7 @@ class ReconAllInputSpec(CommandLineInputSpec):
                         desc="Use, delete or overwrite existing expert options file")
     subjects_dir = Directory(exists=True, argstr='-sd %s', hash_files=False,
                              desc='path to subjects directory', genfile=True)
-    flags = traits.Str(argstr='%s', desc='additional parameters')
+    flags = InputMultiPath(traits.Str, argstr='%s', desc='additional parameters')
 
     # Expert options
     talairach = traits.Str(desc="Flags to pass to talairach commands", xor=['expert'])
@@ -703,7 +703,12 @@ class ReconAll(CommandLine):
     >>> reconall.inputs.T1_files = 'structural.nii'
     >>> reconall.cmdline # doctest: +ALLOW_UNICODE
     'recon-all -all -i structural.nii -subjid foo -sd .'
-
+    >>> reconall.inputs.flags = "-qcache"
+    >>> reconall.cmdline # doctest: +ALLOW_UNICODE
+    'recon-all -all -i structural.nii -qcache -subjid foo -sd .'
+    >>> reconall.inputs.flags = ["-cw256", "-qcache"]
+    >>> reconall.cmdline # doctest: +ALLOW_UNICODE
+    'recon-all -all -i structural.nii -cw256 -qcache -subjid foo -sd .'
     """
 
     _cmd = 'recon-all'
