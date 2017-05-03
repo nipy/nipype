@@ -14,7 +14,7 @@ import os
 class ICA_AROMAInputSpec(CommandLineInputSpec):
     feat_dir = Directory(exists=True, mandatory=True,
                         argstr='-feat %s', 
-                        xor=['in_file','mat_file','fnirt_warp_file','motion_parameters'],
+                        xor=['in_file', 'mat_file', 'fnirt_warp_file', 'motion_parameters'],
                         desc='If a feat directory exists and temporal filtering '
                         'has not been run yet, ICA_AROMA can use the files in '
                         'this directory.')
