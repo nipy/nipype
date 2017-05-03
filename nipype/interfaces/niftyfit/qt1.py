@@ -13,7 +13,8 @@ Change directory to provide relative paths for doctests
 """
 
 from ..base import TraitedSpec, File, traits, CommandLineInputSpec
-from .base import get_custom_path, NiftyFitCommand
+from .base import NiftyFitCommand
+from ..niftyreg.base import get_custom_path
 
 
 class FitQt1InputSpec(CommandLineInputSpec):
@@ -169,7 +170,7 @@ class FitQt1(NiftyFitCommand):
 -res TI4D_res.nii.gz -syn TI4D_syn.nii.gz -t1map TI4D_t1map.nii.gz'
 
     """
-    _cmd = get_custom_path('fit_qt1')
+    _cmd = get_custom_path('fit_qt1', env_dir='NIFTYFITDIR')
     input_spec = FitQt1InputSpec
     output_spec = FitQt1OutputSpec
     _suffix = '_fit_qt1'

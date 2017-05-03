@@ -9,6 +9,5 @@ Top-level namespace for niftyfit.
 """
 
 from .asl import FitAsl
-from .base import no_niftyfit, get_custom_path
 from .dwi import FitDwi, DwiTool
 from .qt1 import FitQt1

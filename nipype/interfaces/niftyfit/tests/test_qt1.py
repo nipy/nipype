@@ -4,11 +4,12 @@
 
 import pytest
 
-from nipype.interfaces.niftyfit import no_niftyfit, get_custom_path, FitQt1
+from nipype.interfaces.niftyfit import FitQt1
+from nipype.interfaces.niftyreg import no_nifty_package, get_custom_path
 from nipype.testing import example_data
 
 
-@pytest.mark.skipif(no_niftyfit(cmd='fit_qt1'),
+@pytest.mark.skipif(no_nifty_package(cmd='fit_qt1'),
                     reason="niftyfit is not installed")
 def test_fit_qt1():
     """ Testing FitQt1 interface."""
@@ -16,7 +17,8 @@ def test_fit_qt1():
     fit_qt1 = FitQt1()
 
     # Check if the command is properly defined
-    assert fit_qt1.cmd == get_custom_path('fit_qt1')
+    cmd = get_custom_path('fit_qt1', env_dir='NIFTYFITDIR')
+    assert fit_qt1.cmd == cmd
 
     # test raising error with mandatory args absent
     with pytest.raises(ValueError):
@@ -29,7 +31,7 @@ def test_fit_qt1():
     cmd_tmp = '{cmd} -source {in_file} -comp {comp} -error {error} -m0map \
 {map0} -mcmap {cmap} -res {res} -syn {syn} -t1map {t1map}'
     expected_cmd = cmd_tmp.format(
-        cmd=get_custom_path('fit_qt1'),
+        cmd=cmd,
         in_file=in_file,
         comp='TI4D_comp.nii.gz',
         map0='TI4D_m0map.nii.gz',
@@ -51,7 +53,7 @@ def test_fit_qt1():
 -comp {comp} -error {error} -m0map {map0} -mcmap {cmap} -res {res} \
 -syn {syn} -t1map {t1map}'
     expected_cmd = cmd_tmp.format(
-        cmd=get_custom_path('fit_qt1'),
+        cmd=cmd,
         in_file=in_file,
         comp='TI4D_comp.nii.gz',
         map0='TI4D_m0map.nii.gz',
@@ -73,7 +75,7 @@ def test_fit_qt1():
 -flips 2.0 4.0 8.0 -m0map {map0} -mcmap {cmap} -res {res} -SPGR -syn {syn} \
 -t1map {t1map}'
     expected_cmd = cmd_tmp.format(
-        cmd=get_custom_path('fit_qt1'),
+        cmd=cmd,
         in_file=in_file,
         comp='TI4D_comp.nii.gz',
         map0='TI4D_m0map.nii.gz',

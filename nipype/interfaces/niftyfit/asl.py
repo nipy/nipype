@@ -12,7 +12,8 @@ Change directory to provide relative paths for doctests
 """
 
 from ..base import TraitedSpec, traits, CommandLineInputSpec
-from .base import NiftyFitCommand, get_custom_path
+from .base import NiftyFitCommand
+from ..niftyreg.base import get_custom_path
 
 
 class FitAslInputSpec(CommandLineInputSpec):
@@ -31,14 +32,14 @@ class FitAslInputSpec(CommandLineInputSpec):
     cbf_file = traits.File(name_source=['source_file'],
                            name_template='%s_cbf.nii.gz',
                            argstr='-cbf %s', desc=desc)
-    desc = 'Filename of the CBF error map.'
     error_file = traits.File(name_source=['source_file'],
                              name_template='%s_error.nii.gz',
-                             argstr='-error %s', desc=desc)
-    desc = 'Filename of the synthetic ASL data.'
+                             argstr='-error %s',
+                             desc='Filename of the CBF error map.')
     syn_file = traits.File(name_source=['source_file'],
                            name_template='%s_syn.nii.gz',
-                           argstr='-syn %s', desc=desc)
+                           argstr='-syn %s',
+                           desc='Filename of the synthetic ASL data.')
 
     # *** Input options (see also fit_qt1 for generic T1 fitting):
     desc = 'Filename of the estimated input T1 map (in ms).'
@@ -150,7 +151,7 @@ class FitAsl(NiftyFitCommand):
 -syn asl_syn.nii.gz'
 
     """
-    _cmd = get_custom_path('fit_asl')
+    _cmd = get_custom_path('fit_asl', env_dir='NIFTYFITDIR')
     input_spec = FitAslInputSpec
     output_spec = FitAslOutputSpec
     _suffix = '_fit_asl'

@@ -29,25 +29,6 @@ warn = warnings.warn
 warnings.filterwarnings('always', category=UserWarning)
 
 
-def get_custom_path(command):
-    """Get path of niftyfit."""
-    try:
-        specific_dir = os.environ['NIFTYFITDIR']
-        command = os.path.join(specific_dir, command)
-        return command
-    except KeyError:
-        return command
-
-
-def no_niftyfit(cmd='fit_dwi'):
-    """Check if niftyfit is installed."""
-    if True in [os.path.isfile(os.path.join(path, cmd)) and
-                os.access(os.path.join(path, cmd), os.X_OK)
-                for path in os.environ["PATH"].split(os.pathsep)]:
-        return False
-    return True
-
-
 class NiftyFitCommand(CommandLine):
     """
     Base support interface for NiftyFit commands.

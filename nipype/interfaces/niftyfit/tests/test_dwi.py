@@ -3,12 +3,12 @@
 
 import pytest
 
-from nipype.interfaces.niftyfit import (no_niftyfit, get_custom_path, FitDwi,
-                                        DwiTool)
+from nipype.interfaces.niftyfit import FitDwi, DwiTool
+from nipype.interfaces.niftyreg import no_nifty_package, get_custom_path
 from nipype.testing import example_data
 
 
-@pytest.mark.skipif(no_niftyfit(cmd='fit_dwi'),
+@pytest.mark.skipif(no_nifty_package(cmd='fit_dwi'),
                     reason="niftyfit is not installed")
 def test_fit_dwi():
     """ Testing FitDwi interface."""
@@ -16,7 +16,8 @@ def test_fit_dwi():
     fit_dwi = FitDwi()
 
     # Check if the command is properly defined
-    assert fit_dwi.cmd == get_custom_path('fit_dwi')
+    cmd = get_custom_path('fit_dwi', env_dir='NIFTYFITDIR')
+    assert fit_dwi.cmd == cmd
 
     # test raising error with mandatory args absent
     with pytest.raises(ValueError):
@@ -36,7 +37,7 @@ def test_fit_dwi():
 {nodiff} -res {res} -rgbmap {rgb} -syn {syn} -tenmap2 {ten2}  -v1map {v1}'
 
     expected_cmd = cmd_tmp.format(
-        cmd=get_custom_path('fit_dwi'),
+        cmd=cmd,
         in_file=in_file,
         bval=bval_file,
         bvec=bvec_file,
@@ -55,7 +56,7 @@ def test_fit_dwi():
     assert fit_dwi.cmdline == expected_cmd
 
 
-@pytest.mark.skipif(no_niftyfit(cmd='dwi_tool'),
+@pytest.mark.skipif(no_nifty_package(cmd='dwi_tool'),
                     reason="niftyfit is not installed")
 def test_dwi_tool():
     """ Testing DwiTool interface."""
@@ -63,7 +64,8 @@ def test_dwi_tool():
     dwi_tool = DwiTool()
 
     # Check if the command is properly defined
-    assert dwi_tool.cmd == get_custom_path('dwi_tool')
+    cmd = get_custom_path('dwi_tool', env_dir='NIFTYFITDIR')
+    assert dwi_tool.cmd == cmd
 
     # test raising error with mandatory args absent
     with pytest.raises(ValueError):
@@ -86,7 +88,7 @@ def test_dwi_tool():
 -mask {mask} -dti -famap {fa} -logdti2 {log} -mcmap {mc} -mdmap {md} \
 -rgbmap {rgb} -syn {syn} -v1map {v1}'
     expected_cmd = cmd_tmp.format(
-        cmd=get_custom_path('dwi_tool'),
+        cmd=cmd,
         in_file=in_file,
         bval=bval_file,
         bvec=bvec_file,

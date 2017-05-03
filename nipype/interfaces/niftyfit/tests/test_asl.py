@@ -4,11 +4,12 @@
 
 import pytest
 
-from nipype.interfaces.niftyfit import no_niftyfit, get_custom_path, FitAsl
+from nipype.interfaces.niftyfit import FitAsl
+from nipype.interfaces.niftyreg import no_nifty_package, get_custom_path
 from nipype.testing import example_data
 
 
-@pytest.mark.skipif(no_niftyfit(cmd='fit_asl'),
+@pytest.mark.skipif(no_nifty_package(cmd='fit_asl'),
                     reason="niftyfit is not installed")
 def test_fit_asl():
     """ Testing FitAsl interface."""
@@ -16,7 +17,8 @@ def test_fit_asl():
     fit_asl = FitAsl()
 
     # Check if the command is properly defined
-    assert fit_asl.cmd == get_custom_path('fit_asl')
+    cmd = get_custom_path('fit_asl', env_dir='NIFTYFIT_DIR')
+    assert fit_asl.cmd == cmd
 
     # test raising error with mandatory args absent
     with pytest.raises(ValueError):
@@ -29,7 +31,7 @@ def test_fit_asl():
 
     cmd_tmp = '{cmd} -source {in_file} -cbf {cbf} -error {error} -syn {syn}'
     expected_cmd = cmd_tmp.format(
-        cmd=get_custom_path('fit_asl'),
+        cmd=cmd,
         in_file=in_file,
         cbf='asl_cbf.nii.gz',
         error='asl_error.nii.gz',
@@ -52,7 +54,7 @@ def test_fit_asl():
     cmd_tmp = '{cmd} -source {in_file} -cbf {cbf} -error {error} \
 -seg {seg} -sig -syn {syn} -t1map {t1map}'
     expected_cmd = cmd_tmp.format(
-        cmd=get_custom_path('fit_asl'),
+        cmd=cmd,
         in_file=in_file,
         t1map=t1map,
         seg=seg,

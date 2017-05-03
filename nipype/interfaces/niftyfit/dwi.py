@@ -12,7 +12,8 @@ Change directory to provide relative paths for doctests
 """
 
 from ..base import TraitedSpec, traits, isdefined, CommandLineInputSpec
-from .base import NiftyFitCommand, get_custom_path
+from .base import NiftyFitCommand
+from ..niftyreg.base import get_custom_path
 
 
 class FitDwiInputSpec(CommandLineInputSpec):
@@ -254,7 +255,7 @@ class FitDwi(NiftyFitCommand):
 -tenmap2 dwi_tenmap2.nii.gz  -v1map dwi_v1map.nii.gz'
 
     """
-    _cmd = get_custom_path('fit_dwi')
+    _cmd = get_custom_path('fit_dwi', env_dir='NIFTYFITDIR')
     input_spec = FitDwiInputSpec
     output_spec = FitDwiOutputSpec
     _suffix = '_fit_dwi'
@@ -430,7 +431,7 @@ class DwiTool(NiftyFitCommand):
 -syn dwi_syn.nii.gz -v1map dwi_v1map.nii.gz'
 
     """
-    _cmd = get_custom_path('dwi_tool')
+    _cmd = get_custom_path('dwi_tool', env_dir='NIFTYFITDIR')
     input_spec = DwiToolInputSpec
     output_spec = DwiToolOutputSpec
     _suffix = '_dwi_tool'
