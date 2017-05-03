@@ -319,7 +319,7 @@ class CompCorInputSpec(BaseInterfaceInputSpec):
                               requires=['mask_files'],
                               desc=('Position of mask in `mask_files` to use - '
                                     'first is the default'))
-    components_file = File('components_file.txt', exists=False, usedefault=True,
+    components_file = traits.Str('components_file.txt', usedefault=True,
                            desc='Filename to store physiological components')
     num_components = traits.Int(6, usedefault=True) # 6 for BOLD, 4 for ASL
     use_regress_poly = traits.Bool(True, usedefault=True,
@@ -452,8 +452,8 @@ class TCompCorInputSpec(CompCorInputSpec):
                                         'with the highest variance are used.')
 
 
-class TCompCorOutputSpec(CompCorInputSpec):
-    # and all the fields in CompCorInputSpec
+class TCompCorOutputSpec(CompCorOutputSpec):
+    # and all the fields in CompCorOutputSpec
     high_variance_masks = OutputMultiPath(File(exists=True),
                                           desc=("voxels excedding the variance "
                                                 "threshold"))

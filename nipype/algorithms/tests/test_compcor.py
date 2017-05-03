@@ -8,7 +8,6 @@ import numpy as np
 import pytest
 from ...testing import utils
 from ..confounds import CompCor, TCompCor, ACompCor
-from ...interfaces.base import Undefined
 
 
 class TestCompCor():
