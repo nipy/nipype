@@ -282,7 +282,7 @@ class BinaryMaths(MathsCommand):
     >>> binary_llsnorm.run()  # doctest: +SKIP
     >>> # Test splitinter operation
     >>> binary_splitinter = copy.deepcopy(binary)
-    >>> binary_splitinter.inputs.operation = 'llsnorm'
+    >>> binary_splitinter.inputs.operation = 'splitinter'
     >>> binary_splitinter.inputs.operand_str = 'z'
     >>> binary_splitinter.cmdline  # doctest: +ALLOW_UNICODE
     'seg_maths im1.nii -splitinter z -odt float im1_splitinter.nii'
@@ -480,7 +480,8 @@ class TupleMaths(MathsCommand):
     >>> tuple_lltsnorm.inputs.operand_file1 = 'im2.nii'
     >>> tuple_lltsnorm.inputs.operand_value2 = 0.01
     >>> tuple_lltsnorm.cmdline  # doctest: +ALLOW_UNICODE
-    'seg_maths im1.nii -lltsnorm im2.nii 0.01 -odt float im1_lltsnorm.nii'
+    'seg_maths im1.nii -lltsnorm im2.nii 0.01000000 -odt float \
+im1_lltsnorm.nii'
     >>> tuple_lltsnorm.run()  # doctest: +SKIP
     """
     input_spec = TupleMathsInput
