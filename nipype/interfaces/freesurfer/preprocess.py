@@ -741,14 +741,14 @@ class ReconAll(CommandLine):
     >>> reconall_subfields.inputs.T1_files = 'structural.nii'
     >>> reconall_subfields.inputs.hippocampal_subfields_T1 = True
     >>> reconall_subfields.cmdline # doctest: +ALLOW_UNICODE
-    'recon-all -all -i structural.nii -subjid foo -hippocampal-subfields-T1 -sd .'
+    'recon-all -all -i structural.nii -hippocampal-subfields-T1 -subjid foo -sd .'
     >>> reconall_subfields.inputs.hippocampal_subfields_T2 = (
     ... 'structural.nii', 'test')
     >>> reconall_subfields.cmdline # doctest: +ALLOW_UNICODE
-    'recon-all -all -i structural.nii -subjid foo -hippocampal-subfields-T1T2 structural.nii test -sd .'
+    'recon-all -all -i structural.nii -hippocampal-subfields-T1T2 structural.nii test -subjid foo -sd .'
     >>> reconall_subfields.inputs.hippocampal_subfields_T1 = False
     >>> reconall_subfields.cmdline # doctest: +ALLOW_UNICODE
-    'recon-all -all -i structural.nii -subjid foo -hippocampal-subfields-T2 structural.nii test -sd .'
+    'recon-all -all -i structural.nii -hippocampal-subfields-T2 structural.nii test -subjid foo -sd .'
     """
 
     _cmd = 'recon-all'
@@ -995,14 +995,15 @@ class ReconAll(CommandLine):
     def _format_arg(self, name, trait_spec, value):
         if name == 'T1_files':
             if self._is_resuming():
-                return ''
+                return None
         if name == 'hippocampal_subfields_T1' and \
                 isdefined(self.inputs.hippocampal_subfields_T2):
-            return ''
+            return None
         if all((name == 'hippocampal_subfields_T2',
                 isdefined(self.inputs.hippocampal_subfields_T1) and
                 self.inputs.hippocampal_subfields_T1)):
-            trait_spec.argstr = trait_spec.argstr.replace('T2', 'T1T2')
+            argstr = trait_spec.argstr.replace('T2', 'T1T2')
+            return argstr % value
         if name == 'directive' and value == 'autorecon-hemi':
             if not isdefined(self.inputs.hemi):
                 raise ValueError("Directive 'autorecon-hemi' requires hemi "
@@ -1011,7 +1012,7 @@ class ReconAll(CommandLine):
         if all((name == 'hemi',
                 isdefined(self.inputs.directive) and
                 self.inputs.directive == 'autorecon-hemi')):
-            return ''
+            return None
         return super(ReconAll, self)._format_arg(name, trait_spec, value)
 
     @property
