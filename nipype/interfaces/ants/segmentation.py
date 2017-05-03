@@ -710,9 +710,14 @@ class BrainExtraction(ANTSCommand):
         runtime = super(BrainExtraction, self)._run_interface(runtime)
 
         # Still, double-check if it didn't found N4
-        if 'we cant find the N4 program' in runtime.stdout:
-            errmsg = ('antsBrainExtraction.sh requires the environment variable '
-                      'ANTSPATH to be defined')
+        if 'we cant find' in runtime.stdout:
+            for line in runtime.stdout.split('\n'):
+                if line.strip().startswith('we cant find'):
+                    tool = line.strip().replace('we cant find the', '').split(' ')[0]
+                    break
+
+            errmsg = ('antsBrainExtraction.sh requires %s the environment variable '
+                      'ANTSPATH to be defined' % tool)
             if runtime.stderr is None:
                 runtime.stderr = errmsg
             else:
