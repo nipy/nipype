@@ -83,13 +83,7 @@ class ICA_AROMA(CommandLine):
     >>> AROMA_obj.inputs.denoise_type='both'
     >>> AROMA_obj.inputs.out_dir='ICA_testout'
     >>> AROMA_obj.cmdline
-    'ICA_AROMA.py -den both 
-    -warp /home/james/dev/nipype/nipype/testing/data/warpfield.nii 
-    -i /home/james/dev/nipype/nipype/testing/data/functional.nii 
-    -m /home/james/dev/nipype/nipype/testing/data/mask.nii.gz 
-    -affmat /home/james/dev/nipype/nipype/testing/data/func_to_struct.mat 
-    -mc /home/james/dev/nipype/nipype/testing/data/functional.par 
-    -o ICA_testout'
+    u'ICA_AROMA.py -den both -warp /home/travis/build/nipy/nipype/nipype/testing/data/warpfield.nii -i /home/travis/build/nipy/nipype/nipype/testing/data/functional.nii -m /home/travis/build/nipy/nipype/nipype/testing/data/mask.nii.gz -affmat /home/travis/build/nipy/nipype/nipype/testing/data/func_to_struct.mat -mc /home/travis/build/nipy/nipype/nipype/testing/data/functional.par -o ICA_testout'
 
     """
     _cmd = 'ICA_AROMA.py'
