@@ -55,10 +55,10 @@ class ICA_AROMAInputSpec(CommandLineInputSpec):
                                '-both: both aggressive and non-aggressive denoising (two outputs)')
 
 class ICA_AROMAOutputSpec(TraitedSpec):
-    aggr_denoised_file=File(exists=True, 
-                           desc='if generated: aggressively denoised volume')
-    nonaggr_denoised_file=File(exists=True,
-                              desc='if generated: non aggressively denoised volume' )
+    aggr_denoised_file = File(exists=True, 
+                              desc='if generated: aggressively denoised volume')
+    nonaggr_denoised_file = File(exists=True,
+                                 desc='if generated: non aggressively denoised volume' )
     out_dir = Directory(exists=True, 
                         desc='directory contains (in addition to the denoised files): '
                         'melodic.ica + classified_motion_components + '
@@ -66,7 +66,7 @@ class ICA_AROMAOutputSpec(TraitedSpec):
    
 class ICA_AROMA(CommandLine):
     """
-    Interface for the ICA_AROMA.py script (v0.3 beta).
+    Interface for the ICA_AROMA.py script.
     
     ICA-AROMA (i.e. 'ICA-based Automatic Removal Of Motion Artifacts') concerns 
     a data-driven method to identify and remove motion-related independent
@@ -74,10 +74,7 @@ class ICA_AROMA(CommandLine):
     set of theoretically motivated features, preventing the need for classifier
     re-training and therefore providing direct and easy applicability. 
 
-
     See link for further documentation: https://github.com/rhr-pruim/ICA-AROMA
-
-
 
     Example
     -------
@@ -88,13 +85,12 @@ class ICA_AROMA(CommandLine):
     >>> AROMA_obj.inputs.in_file = 'functional.nii'
     >>> AROMA_obj.inputs.mat_file = 'func_to_struct.mat'
     >>> AROMA_obj.inputs.fnirt_warp_file = 'warpfield.nii'
-    >>> AROMA_obj.inputs.motion_parameters = 'functional.par'
+    >>> AROMA_obj.inputs.motion_parameters = 'fsl_mcflirt_movpar.txt'
     >>> AROMA_obj.inputs.mask = 'mask.nii.gz'
     >>> AROMA_obj.inputs.denoise_type = 'both'
     >>> AROMA_obj.inputs.out_dir = 'ICA_testout'
     >>> AROMA_obj.cmdline # doctest: +ALLOW_UNICODE
-    'ICA_AROMA.py -den both -warp warpfield.nii -i functional.nii -m mask.nii.gz \
-    -affmat func_to_struct.mat -mc fsl_mcflirt_movpar.txt -o ICA_testout'
+    'ICA_AROMA.py -den both -warp warpfield.nii -i functional.nii -m mask.nii.gz -affmat func_to_struct.mat -mc fsl_mcflirt_movpar.txt -o ICA_testout'
     """
     _cmd = 'ICA_AROMA.py'
     input_spec = ICA_AROMAInputSpec
