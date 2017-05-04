@@ -48,10 +48,10 @@ class ICA_AROMAInputSpec(CommandLineInputSpec):
                              desc='motion parameters file')
     denoise_type = traits.Enum('nonaggr', 'aggr', 'both', 'no', usedefault=True,
                                mandatory=True, argstr='-den %s',
-                               desc='Type of denoising strategy: '
-                               '-none: only classification, no denoising '
-                               '-nonaggr (default): non-aggresssive denoising, i.e. partial component regression '
-                               '-aggr: aggressive denoising, i.e. full component regression '
+                               desc='Type of denoising strategy:\n'
+                               '-none: only classification, no denoising\n'
+                               '-nonaggr (default): non-aggresssive denoising, i.e. partial component regression\n'
+                               '-aggr: aggressive denoising, i.e. full component regression\n'
                                '-both: both aggressive and non-aggressive denoising (two outputs)')
 
 class ICA_AROMAOutputSpec(TraitedSpec):
