@@ -302,9 +302,6 @@ Bradley L. and Petersen, Steven E.},
 class CompCorInputSpec(BaseInterfaceInputSpec):
     realigned_file = File(exists=True, mandatory=True,
         desc='already realigned brain image (4D)')
-    mask_file = InputMultiPath(File(exists=True, deprecated='0.13',
-        new_name='mask_files',
-        desc='One or more mask files that determines ROI (3D)'))
     mask_files = InputMultiPath(File(exists=True,
         desc='One or more mask files that determines ROI (3D)'))
     merge_method = traits.Enum('union', 'intersect', 'none', xor=['mask_index'],
@@ -342,7 +339,7 @@ class CompCor(BaseInterface):
     >>> ccinterface.inputs.num_components = 1
     >>> ccinterface.inputs.use_regress_poly = True
     >>> ccinterface.inputs.regress_poly_degree = 2
-    
+
     """
     input_spec = CompCorInputSpec
     output_spec = CompCorOutputSpec
@@ -366,7 +363,7 @@ class CompCor(BaseInterface):
                             mmap=NUMPY_MMAP).get_data()
         components = None
 
-        if isdefined(self.inputs.mask_files) or isdefined(self.inputs.mask_file):
+        if isdefined(self.inputs.mask_files):
             if (not isdefined(self.inputs.mask_index) and
               not isdefined(self.inputs.merge_method)):
                 self.inputs.mask_index = 0
@@ -509,7 +506,7 @@ class TCompCor(CompCor):
     >>> ccinterface.inputs.use_regress_poly = True
     >>> ccinterface.inputs.regress_poly_degree = 2
     >>> ccinterface.inputs.percentile_threshold = .03
-    
+
     """
 
     input_spec = TCompCorInputSpec
@@ -588,7 +585,7 @@ class TCompCor(CompCor):
                     mask_file = os.path.abspath('mask.nii')
                 nb.Nifti1Image(mask_data, aff).to_filename(mask_file)
                 IFLOG.debug('tCompcor computed and saved mask of shape {} to '
-                            'mask_file {}'.format(mask.shape, mask_file))
+                            'mask file {}'.format(mask.shape, mask_file))
                 _out_masks.append(mask_file)
                 self._set_header('tCompCor')
 
@@ -604,7 +601,7 @@ class TCompCor(CompCor):
             mask_file = os.path.abspath('mask.nii')
             nb.Nifti1Image(mask_data, aff).to_filename(mask_file)
             IFLOG.debug('tCompcor computed and saved mask of shape {} to '
-                        'mask_file {}'.format(mask.shape, mask_file))
+                        'mask file {}'.format(mask.shape, mask_file))
             _out_masks.append(mask_file)
             self._set_header('tCompCor')
 
@@ -927,4 +924,3 @@ def regress_poly(degree, data, remove_mean=True, axis=-1):
 
     # Back to original shape
     return regressed_data.reshape(datashape)
-
