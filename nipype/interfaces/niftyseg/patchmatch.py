@@ -8,7 +8,8 @@ that can be performed with the seg_DetectLesions command-line program.
 Change directory to provide relative paths for doctests
     >>> import os
     >>> filepath = os.path.dirname( os.path.realpath( __file__ ) )
-    >>> datadir = os.path.realpath(os.path.join(filepath, '../../testing/data'))
+    >>> datadir = os.path.realpath(os.path.join(filepath, '../../testing/\
+data'))
     >>> os.chdir(datadir)
 """
 
@@ -96,9 +97,9 @@ class PatchMatch(NiftySegCommand):
     volumes than the input image allowing to propagate multiple labels
     in the same execution.
 
-    For source code, see http://cmictig.cs.ucl.ac.uk/wiki/index.php/NiftySeg
-    For Documentation, see:
-        http://cmictig.cs.ucl.ac.uk/wiki/index.php/NiftySeg_documentation
+    `Source code <http://cmictig.cs.ucl.ac.uk/wiki/index.php/NiftySeg>`_ |
+    `Documentation <http://cmictig.cs.ucl.ac.uk/wiki/index.php/\
+NiftySeg_documentation>`_
 
     Examples
     --------

@@ -14,7 +14,8 @@ See the docstrings of the individual classes for examples.
 Change directory to provide relative paths for doctests
     >>> import os
     >>> filepath = os.path.dirname( os.path.realpath( __file__ ) )
-    >>> datadir = os.path.realpath(os.path.join(filepath, '../../testing/data'))
+    >>> datadir = os.path.realpath(os.path.join(filepath, '../../testing/\
+data'))
     >>> os.chdir(datadir)
 """
 
@@ -117,9 +118,9 @@ class EM(NiftySegCommand):
     it's simplest form, it takes in one 2D or 3D image and segments it in n
     classes.
 
-    For source code, see http://cmictig.cs.ucl.ac.uk/wiki/index.php/NiftySeg
-    For Documentation, see:
-        http://cmictig.cs.ucl.ac.uk/wiki/index.php/NiftySeg_documentation
+    `Source code <http://cmictig.cs.ucl.ac.uk/wiki/index.php/NiftySeg>`_ |
+    `Documentation <http://cmictig.cs.ucl.ac.uk/wiki/index.php/\
+NiftySeg_documentation>`_
 
     Examples
     --------
