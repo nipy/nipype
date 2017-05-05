@@ -145,7 +145,7 @@ Execution
     crashfiles allow interactive debugging and rerunning of nodes, while text
     crashfiles allow portability across machines and shorter load time.
     (possible values: ``pklz`` and ``txt``; default value: ``pklz``)
-    
+
 Example
 ~~~~~~~
 

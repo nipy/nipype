@@ -386,6 +386,10 @@ class BaseTraitedSpec(traits.HasTraits):
         """Find all traits with the 'xor' metadata and attach an event
         handler to them.
         """
+        has_xor = dict(xor=lambda t: t is not None)
+        xors = self.trait_names(**has_xor)
+        for elem in xors:
+            self.on_trait_change(self._xor_warn, elem)
         has_deprecation = dict(deprecated=lambda t: t is not None)
         deprecated = self.trait_names(**has_deprecation)
         for elem in deprecated:

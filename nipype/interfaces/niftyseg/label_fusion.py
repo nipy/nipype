@@ -133,7 +133,7 @@ class LabelFusion(NiftySegCommand):
     FusedSegmentation.nii -STEPS 2 15 TargetImage.nii \
     4D_Propagated_Intensities.nii
 
-    `Source code <http://cmictig.cs.ucl.ac.uk/wiki/index.php/NiftySeg>`_ | 
+    `Source code <http://cmictig.cs.ucl.ac.uk/wiki/index.php/NiftySeg>`_ |
     `Documentation <http://cmictig.cs.ucl.ac.uk/wiki/index.php/NiftySeg_documentation>`_
 
     Examples
@@ -278,7 +278,6 @@ class CalcTopNCCInputSpec(CommandLineInputSpec):
 
     mask_file = File(argstr='-mask %s',
                      exists=True,
-                     mandatory=False,
                      desc='Filename of the ROI for label fusion')
 
 

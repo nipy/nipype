@@ -695,7 +695,7 @@ class FWHMx(AFNICommandBase):
     _cmd = '3dFWHMx'
     input_spec = FWHMxInputSpec
     output_spec = FWHMxOutputSpec
-    
+
     references_ = [{'entry': BibTeX('@article{CoxReynoldsTaylor2016,'
                                     'author={R.W. Cox, R.C. Reynolds, and P.A. Taylor},'
                                     'title={AFNI and clustering: false positive rates redux},'

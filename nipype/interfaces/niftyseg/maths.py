@@ -103,7 +103,7 @@ class UnaryMaths(MathsCommand):
 
     Interface to use any unary mathematical operations that can be performed
     with the seg_maths command-line program. See below for those operations::
-    
+
         -sqrt           Square root of the image.
         -exp            Exponential root of the image.
         -log            Log of the image.
@@ -134,7 +134,7 @@ class UnaryMaths(MathsCommand):
         -4to5           Flip the 4th and 5th dimension.
         -range          Reset the image range to the min max
 
-    `Source code <http://cmictig.cs.ucl.ac.uk/wiki/index.php/NiftySeg>`_ | 
+    `Source code <http://cmictig.cs.ucl.ac.uk/wiki/index.php/NiftySeg>`_ |
     `Documentation <http://cmictig.cs.ucl.ac.uk/wiki/index.php/NiftySeg_documentation>`_
 
     Examples
@@ -217,7 +217,7 @@ class BinaryMaths(MathsCommand):
 
     Interface to use any binary mathematical operations that can be performed
     with the seg_maths command-line program. See below for those operations::
-    
+
         -mul    <float/file>    Multiply image <float> value or by other image.
         -div    <float/file>    Divide image by <float> or by other image.
         -add    <float/file>    Add image by <float> or by other image.
@@ -249,7 +249,7 @@ class BinaryMaths(MathsCommand):
         -splitinter <x/y/z>     Split interleaved slices in direction <x/y/z>
                                 into separate time points
 
-    `Source code <http://cmictig.cs.ucl.ac.uk/wiki/index.php/NiftySeg>`_ | 
+    `Source code <http://cmictig.cs.ucl.ac.uk/wiki/index.php/NiftySeg>`_ |
     `Documentation <http://cmictig.cs.ucl.ac.uk/wiki/index.php/NiftySeg_documentation>`_
 
     Examples
@@ -349,7 +349,7 @@ class BinaryMathsInteger(MathsCommand):
 
     Interface to use any integer mathematical operations that can be performed
     with the seg_maths command-line program. See below for those operations::
-    
+
         (requiring integer values)
         -equal  <int>       Get voxels equal to <int>
         -dil    <int>       Dilate the image <int> times (in voxels).
@@ -359,7 +359,7 @@ class BinaryMathsInteger(MathsCommand):
         -pad    <int>       Pad <int> voxels with NaN value around each 3D
                             volume.
 
-    `Source code <http://cmictig.cs.ucl.ac.uk/wiki/index.php/NiftySeg>`_ | 
+    `Source code <http://cmictig.cs.ucl.ac.uk/wiki/index.php/NiftySeg>`_ |
     `Documentation <http://cmictig.cs.ucl.ac.uk/wiki/index.php/NiftySeg_documentation>`_
 
     Examples
@@ -437,7 +437,7 @@ class TupleMaths(MathsCommand):
 
     Interface to use any tuple mathematical operations that can be performed
     with the seg_maths command-line program. See below for those operations::
-    
+
         -lncc      <file> <std>    Local CC between current img and <file>
                                 on a kernel with <std>
         -lssd      <file> <std>    Local SSD between current img and <file>
@@ -445,7 +445,7 @@ class TupleMaths(MathsCommand):
         -lltsnorm  <file_norm> <float>   Linear LTS normalisation assuming
                                          <float> percent outliers
 
-    `Source code <http://cmictig.cs.ucl.ac.uk/wiki/index.php/NiftySeg>`_ | 
+    `Source code <http://cmictig.cs.ucl.ac.uk/wiki/index.php/NiftySeg>`_ |
     `Documentation <http://cmictig.cs.ucl.ac.uk/wiki/index.php/NiftySeg_documentation>`_
 
     Examples
@@ -505,11 +505,11 @@ class Merge(MathsCommand):
 
     Interface to use the merge operation that can be performed
     with the seg_maths command-line program. See below for this option::
-    
+
         -merge  <i> <d> <files>   Merge <i> images and the working image in the
                                   <d> dimension
 
-    `Source code <http://cmictig.cs.ucl.ac.uk/wiki/index.php/NiftySeg>`_ | 
+    `Source code <http://cmictig.cs.ucl.ac.uk/wiki/index.php/NiftySeg>`_ |
     `Documentation <http://cmictig.cs.ucl.ac.uk/wiki/index.php/NiftySeg_documentation>`_
 
     Examples

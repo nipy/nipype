@@ -99,7 +99,7 @@ class FillLesions(NiftySegCommand):
 
     Fill all the masked lesions with WM intensity average.
 
-    `Source code <http://cmictig.cs.ucl.ac.uk/wiki/index.php/NiftySeg>`_ | 
+    `Source code <http://cmictig.cs.ucl.ac.uk/wiki/index.php/NiftySeg>`_ |
     `Documentation <http://cmictig.cs.ucl.ac.uk/wiki/index.php/NiftySeg_documentation>`_
 
     Examples
