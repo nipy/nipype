@@ -89,7 +89,7 @@ To enable the tests depending on these data, just unpack the targz file and set 
 variable to point to that folder.
 
 Xfail tests
-~~~~~~~~~~
+~~~~~~~~~~~
 
 Some tests are expect to fail until the code will be changed or for other reasons.
 

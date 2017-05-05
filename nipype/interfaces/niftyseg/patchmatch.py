@@ -96,9 +96,8 @@ class PatchMatch(NiftySegCommand):
     volumes than the input image allowing to propagate multiple labels
     in the same execution.
 
-    For source code, see http://cmictig.cs.ucl.ac.uk/wiki/index.php/NiftySeg
-    For Documentation, see:
-        http://cmictig.cs.ucl.ac.uk/wiki/index.php/NiftySeg_documentation
+    `Source code <http://cmictig.cs.ucl.ac.uk/wiki/index.php/NiftySeg>`_ | 
+    `Documentation <http://cmictig.cs.ucl.ac.uk/wiki/index.php/NiftySeg_documentation>`_
 
     Examples
     --------
