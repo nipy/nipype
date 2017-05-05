@@ -11,7 +11,8 @@ The interfaces were written to work with niftyreg version 1.5.10
 Change directory to provide relative paths for doctests
     >>> import os
     >>> filepath = os.path.dirname( os.path.realpath( __file__ ) )
-    >>> datadir = os.path.realpath(os.path.join(filepath, '../../testing/data'))
+    >>> datadir = os.path.realpath(os.path.join(filepath, '../../testing/\
+data'))
     >>> os.chdir(datadir)
 """
 
@@ -145,7 +146,7 @@ class RegAladin(NiftyRegCommand):
     asymmetric block-matching approach"
     J. Med. Img. 1(2) 024003, 2014, doi: 10.1117/1.JMI.1.2.024003
 
-    For source code, see https://cmiclab.cs.ucl.ac.uk/mmodat/niftyreg
+    `Source code <https://cmiclab.cs.ucl.ac.uk/mmodat/niftyreg>`_
 
     Examples
     --------
@@ -356,7 +357,7 @@ class RegF3D(NiftyRegCommand):
     Initially based on Modat et al., "Fast Free-Form Deformation using
     graphics processing units", CMPB, 2010
 
-    For source code, see https://cmiclab.cs.ucl.ac.uk/mmodat/niftyreg
+    `Source code <https://cmiclab.cs.ucl.ac.uk/mmodat/niftyreg>`_
 
     Examples
     --------

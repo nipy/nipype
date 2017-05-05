@@ -7,7 +7,8 @@ The dwi module of niftyfit, which wraps the fitting methods in NiftyFit.
 Change directory to provide relative paths for doctests
     >>> import os
     >>> filepath = os.path.dirname( os.path.realpath( __file__ ) )
-    >>> datadir = os.path.realpath(os.path.join(filepath, '../../testing/data'))
+    >>> datadir = os.path.realpath(os.path.join(filepath, '../../testing/\
+data'))
     >>> os.chdir(datadir)
 """
 
@@ -236,7 +237,7 @@ class FitDwi(NiftyFitCommand):
     Diffusion-weighted MR Fitting.
     Fits DWI parameter maps to multi-shell, multi-directional data.
 
-    For source code, see https://cmiclab.cs.ucl.ac.uk/CMIC/NiftyFit-Release
+    `Source code <https://cmiclab.cs.ucl.ac.uk/CMIC/NiftyFit-Release>`_
 
     Examples
     --------
@@ -412,6 +413,8 @@ class DwiTool(NiftyFitCommand):
     Diffusion-Weighted MR Prediction.
     Predicts DWI from previously fitted models and calculates model derived
     maps.
+
+    `Source code <https://cmiclab.cs.ucl.ac.uk/CMIC/NiftyFit-Release>`_
 
     Examples
     --------

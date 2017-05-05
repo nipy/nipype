@@ -7,7 +7,8 @@ The ASL module of niftyfit, which wraps the fitting methods in NiftyFit.
 Change directory to provide relative paths for doctests
     >>> import os
     >>> filepath = os.path.dirname( os.path.realpath( __file__ ) )
-    >>> datadir = os.path.realpath(os.path.join(filepath, '../../testing/data'))
+    >>> datadir = os.path.realpath(os.path.join(filepath, '../../testing/\
+data'))
     >>> os.chdir(datadir)
 """
 
@@ -139,7 +140,7 @@ class FitAsl(NiftyFitCommand):
     ASL fitting routines (following EU Cost Action White Paper recommendations)
     Fits Cerebral Blood Flow maps in the first instance.
 
-    For source code, see https://cmiclab.cs.ucl.ac.uk/CMIC/NiftyFit-Release
+    `Source code <https://cmiclab.cs.ucl.ac.uk/CMIC/NiftyFit-Release>`_
 
     Examples
     --------
