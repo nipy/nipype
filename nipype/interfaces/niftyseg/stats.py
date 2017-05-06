@@ -29,14 +29,12 @@ class StatsInput(CommandLineInputSpec):
 
     # Constrains
     mask_file = File(exists=True,
-                     mandatory=False,
                      position=-2,
                      argstr='-m %s',
                      desc='statistics within the masked area')
 
     desc = 'Only estimate statistics if voxel is larger than <float>'
     larger_voxel = traits.Float(argstr='-t %f',
-                                mandatory=False,
                                 position=-3,
                                 desc=desc)
 
@@ -103,7 +101,8 @@ class UnaryStats(StatsCommand):
     Interface for executable seg_stats from NiftySeg platform.
 
     Interface to use any unary statistical operations that can be performed
-    with the seg_stats command-line program. See below for those operations:
+    with the seg_stats command-line program. See below for those operations::
+
         -r          | The range <min max> of all voxels.
         -R          | The robust range (assuming 2% outliers on both sides)
                     | of all voxels
@@ -130,9 +129,8 @@ class UnaryStats(StatsCommand):
         -xdim       | Output the voxel dimention in the x direction.
                     | Replace x with y/z for other directions.
 
-    For source code, see http://cmictig.cs.ucl.ac.uk/wiki/index.php/NiftySeg
-    For Documentation, see:
-        http://cmictig.cs.ucl.ac.uk/wiki/index.php/NiftySeg_documentation
+    `Source code <http://cmictig.cs.ucl.ac.uk/wiki/index.php/NiftySeg>`_ |
+    `Documentation <http://cmictig.cs.ucl.ac.uk/wiki/index.php/NiftySeg_documentation>`_
 
     Examples
     --------
@@ -191,7 +189,8 @@ class BinaryStats(StatsCommand):
     Interface for executable seg_stats from NiftySeg platform.
 
     Interface to use any binary statistical operations that can be performed
-    with the seg_stats command-line program. See below for those operations:
+    with the seg_stats command-line program. See below for those operations::
+
         -p <float>      | The <float>th percentile of all voxels intensity
                         | (float=[0,100])
         -sa  <ax>       | Average of all voxels
@@ -206,9 +205,8 @@ class BinaryStats(StatsCommand):
         -Vl <csv>       | Volume of each integer label <in>. Save to <csv>file.
         -Nl <csv>       | Count of each label <in>. Save to <csv> file.
 
-    For source code, see http://cmictig.cs.ucl.ac.uk/wiki/index.php/NiftySeg
-    For Documentation, see:
-        http://cmictig.cs.ucl.ac.uk/wiki/index.php/NiftySeg_documentation
+    `Source code <http://cmictig.cs.ucl.ac.uk/wiki/index.php/NiftySeg>`_ |
+    `Documentation <http://cmictig.cs.ucl.ac.uk/wiki/index.php/NiftySeg_documentation>`_
 
     Examples
     --------
