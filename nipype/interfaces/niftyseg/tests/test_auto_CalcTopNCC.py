@@ -21,7 +21,6 @@ def test_CalcTopNCC_inputs():
     position=3,
     ),
     mask_file=dict(argstr='-mask %s',
-    mandatory=False,
     ),
     num_templates=dict(argstr='-templates %s',
     mandatory=True,

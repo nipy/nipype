@@ -390,10 +390,6 @@ class BaseTraitedSpec(traits.HasTraits):
         xors = self.trait_names(**has_xor)
         for elem in xors:
             self.on_trait_change(self._xor_warn, elem)
-        has_requires = dict(requires=lambda t: t is not None)
-        requires = self.trait_names(**has_requires)
-        for elem in requires:
-            self.on_trait_change(self._requires_warn, elem)
         has_deprecation = dict(deprecated=lambda t: t is not None)
         deprecated = self.trait_names(**has_deprecation)
         for elem in deprecated:
