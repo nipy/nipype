@@ -1,5 +1,15 @@
-#ICA_AROMA pulled from: https://github.com/rhr-pruim/ICA-AROMA
-#This assumes ICA_AROMA.py is already installed and callable via $PATH
+# -*- coding: utf-8 -*-
+# emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
+# vi: set ft=python sts=4 ts=4 sw=4 et:
+"""This commandline module provides classes for interfacing with the 
+`ICA-AROMA.py<https://github.com/rhr-pruim/ICA-AROMA>`_ command line tool. 
+    Change directory to provide relative paths for doctests
+    >>> import os
+    >>> filepath = os.path.dirname(os.path.realpath(__file__))
+    >>> datadir = os.path.realpath(os.path.join(filepath,
+    ...                            '../../testing/data'))
+    >>> os.chdir(datadir)
+"""
 from nipype.interfaces.base import (
     TraitedSpec,
     CommandLineInputSpec,
