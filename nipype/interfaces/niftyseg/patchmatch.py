@@ -54,27 +54,22 @@ class PatchMatchInputSpec(CommandLineInputSpec):
 
     # Optional arguments
     patch_size = traits.Int(desc="Patch size, #voxels",
-                            argstr='-size %i',
-                            mandatory=False)
+                            argstr='-size %i')
 
     desc = "Constrained search area size, number of times bigger than the \
 patchsize"
     cs_size = traits.Int(desc=desc,
-                         argstr='-cs %i',
-                         mandatory=False)
+                         argstr='-cs %i')
 
     match_num = traits.Int(desc="Number of better matching",
-                           argstr='-match %i',
-                           mandatory=False)
+                           argstr='-match %i')
 
     pm_num = traits.Int(desc="Number of patchmatch executions",
-                        argstr='-pm %i',
-                        mandatory=False)
+                        argstr='-pm %i')
 
     desc = "Number of iterations for the patchmatch algorithm"
     it_num = traits.Int(desc=desc,
-                        argstr='-it %i',
-                        mandatory=False)
+                        argstr='-it %i')
 
 
 class PatchMatchOutputSpec(TraitedSpec):
@@ -98,8 +93,7 @@ class PatchMatch(NiftySegCommand):
     in the same execution.
 
     `Source code <http://cmictig.cs.ucl.ac.uk/wiki/index.php/NiftySeg>`_ |
-    `Documentation <http://cmictig.cs.ucl.ac.uk/wiki/index.php/\
-NiftySeg_documentation>`_
+    `Documentation <http://cmictig.cs.ucl.ac.uk/wiki/index.php/NiftySeg_documentation>`_
 
     Examples
     --------

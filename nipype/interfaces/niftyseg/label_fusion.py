@@ -135,8 +135,7 @@ class LabelFusion(NiftySegCommand):
     4D_Propagated_Intensities.nii
 
     `Source code <http://cmictig.cs.ucl.ac.uk/wiki/index.php/NiftySeg>`_ |
-    `Documentation <http://cmictig.cs.ucl.ac.uk/wiki/index.php/\
-NiftySeg_documentation>`_
+    `Documentation <http://cmictig.cs.ucl.ac.uk/wiki/index.php/NiftySeg_documentation>`_
 
     Examples
     --------
@@ -149,8 +148,7 @@ NiftySeg_documentation>`_
     >>> node.inputs.template_num = 2
     >>> node.inputs.classifier_type = 'STEPS'
     >>> node.cmdline  # doctest: +ALLOW_UNICODE
-    'seg_LabFusion -in im1.nii -STEPS 2.000000 2 im2.nii im3.nii -out \
-im1_steps.nii'
+    'seg_LabFusion -in im1.nii -STEPS 2.000000 2 im2.nii im3.nii -out im1_steps.nii'
 
     """
     _cmd = get_custom_path('seg_LabFusion', env_dir='NIFTYSEGDIR')
@@ -281,7 +279,6 @@ class CalcTopNCCInputSpec(CommandLineInputSpec):
 
     mask_file = File(argstr='-mask %s',
                      exists=True,
-                     mandatory=False,
                      desc='Filename of the ROI for label fusion')
 
 

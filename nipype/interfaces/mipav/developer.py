@@ -658,7 +658,7 @@ class MedicAlgorithmSPECTRE2010(SEMLikeCommandLine):
 category: Developer Tools
 
 description: Simple Paradigm for Extra-Cranial Tissue REmoval
-################################################
+
 Algorithm Version: 1.6
 GUI Version: 1.10
 
