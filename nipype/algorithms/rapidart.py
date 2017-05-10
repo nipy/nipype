@@ -330,6 +330,8 @@ class ArtifactDetect(BaseInterface):
         return outputs
 
     def _plot_outliers_with_wave(self, wave, outliers, name):
+        import matplotlib
+        matplotlib.use(config.get("execution", "matplotlib_backend"))
         import matplotlib.pyplot as plt
         plt.plot(wave)
         plt.ylim([wave.min(), wave.max()])

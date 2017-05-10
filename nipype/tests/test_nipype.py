@@ -7,3 +7,7 @@ def test_nipype_info():
     except Exception as e:
         exception_not_raised = False
     assert exception_not_raised
+
+# def test_fail_always():
+#     assert False
+

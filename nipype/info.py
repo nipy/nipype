@@ -55,6 +55,7 @@ CLASSIFIERS = ['Development Status :: 5 - Production/Stable',
                'Programming Language :: Python :: 2.7',
                'Programming Language :: Python :: 3.4',
                'Programming Language :: Python :: 3.5',
+               'Programming Language :: Python :: 3.6',
                'Topic :: Scientific/Engineering']
 
 description = 'Neuroimaging in Python: Pipelines and Interfaces'
@@ -94,16 +95,16 @@ pipeline systems.
 """
 
 # versions
-NIBABEL_MIN_VERSION = '2.0.1'
+NIBABEL_MIN_VERSION = '2.1.0'
 NETWORKX_MIN_VERSION = '1.7'
 NUMPY_MIN_VERSION = '1.6.2'
 SCIPY_MIN_VERSION = '0.11'
 TRAITS_MIN_VERSION = '4.6'
 DATEUTIL_MIN_VERSION = '1.5'
 PYTEST_MIN_VERSION = '3.0'
-FUTURE_MIN_VERSION = '0.15.2'
+FUTURE_MIN_VERSION = '0.16.0'
 SIMPLEJSON_MIN_VERSION = '3.8.0'
-PROV_MIN_VERSION = '1.4.0'
+PROV_MIN_VERSION = '1.5.0'
 CLICK_MIN_VERSION = '6.6.0'
 
 NAME = 'nipype'
@@ -138,23 +139,20 @@ REQUIRES = [
     'click>=%s' % CLICK_MIN_VERSION,
     'funcsigs',
     'configparser',
-    'pytest>=%s' % PYTEST_MIN_VERSION
+    'pytest>=%s' % PYTEST_MIN_VERSION,
+    'mock',
+    'pydotplus'
 ]
 
 TESTS_REQUIRES = [
-    'pytest>=%s' % PYTEST_MIN_VERSION,
     'pytest-cov',
-    'mock',
-    'codecov',
-    'dipy',
-    'nipy',
-    'matplotlib'
+    'codecov'
 ]
 
 EXTRA_REQUIRES = {
     'doc': ['Sphinx>=1.4', 'matplotlib', 'pydotplus'],
     'tests': TESTS_REQUIRES,
-    'fmri': ['nitime', 'nilearn', 'dipy', 'nipy', 'matplotlib'],
+    'nipy': ['nitime', 'nilearn', 'dipy', 'nipy', 'matplotlib'],
     'profiler': ['psutil'],
     'duecredit': ['duecredit'],
     'xvfbwrapper': ['xvfbwrapper'],

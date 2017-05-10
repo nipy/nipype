@@ -209,10 +209,7 @@ class Level1Design(BaseInterface):
                             raise Exception('FSL environment variables not set')
                         else:
                             ev_parameters['fsldir'] = '/usr/share/fsl'
-                    try:
-                        ev_parameters['temporalderiv'] = int(bool(ev_parameters.pop('derivs')))
-                    except KeyError:
-                        ev_parameters['temporalderiv'] = False
+                    ev_parameters['temporalderiv'] = bool(ev_parameters.get('derivs', False))
                     if ev_parameters['temporalderiv']:
                         evname.append(name + 'TD')
                         num_evs[1] += 1
@@ -393,10 +390,7 @@ class Level1Design(BaseInterface):
                         cwd, 'ev_%s_%d_%d.txt' % (name, runno,
                                                   len(evname)))
                     if field == 'cond':
-                        try:
-                            ev_parameters['temporalderiv'] = int(bool(ev_parameters.pop('derivs')))
-                        except KeyError:
-                            ev_parameters['temporalderiv'] = False
+                        ev_parameters['temporalderiv'] = bool(ev_parameters.get('derivs', False))
                         if ev_parameters['temporalderiv']:
                             evname.append(name + 'TD')
                     outputs['ev_files'][runno].append(

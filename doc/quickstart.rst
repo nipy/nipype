@@ -11,34 +11,30 @@ Downloading and installing
    :maxdepth: 1
 
    users/install
-   users/vagrant
 
 Beginner's guide
 ================
 
-Beginner's tutorials (IPython Notebooks). `Available here`__
+Michael Notter's Nipype tutorial. `Available here`__
 
-Michael Notter's Nipype guide. `Available here`__
+__ https://miykael.github.io/nipype_tutorial/
 
-Dissecting Nipype Workflows. `Available here`__
+Nipype workshop materials
+=========================
 
-Introductory slides [older]. `Available here`__
+Self-assessment questionnaire with links to learning about each piece. `Available here`__
 
-__ https://github.com/mwaskom/nipype_concepts
-__ http://miykael.github.com/nipype-beginner-s-guide/index.html
-__ http://slideviewer.herokuapp.com/url/raw.github.com/nipy/nipype/master/examples/nipype_tutorial.ipynb?theme=sky
-__ http://satra.github.com/intro2nipype
+Lecture slides `Available here`__
 
-User guides
-===========
+__ http://nipy.org/workshops/2017-03-boston/review.html
+__ http://nipy.org/workshops/2017-03-boston/index.html
 
-.. toctree::
-   :maxdepth: 1
+`Docker containers <https://hub.docker.com/r/nipype/workshops/tags/>`_
 
-   users/interface_tutorial
-   users/pipeline_tutorial
-   users/plugins
-   users/debug
+`Github project for lectures <https://github.com/nipy/workshops/tree/gh-pages/2017-03-boston>`_
+`Github project for dockerfiles + notebooks <https://github.com/nipy/workshops/tree/master/170327-nipype>`_
+
+`All notebooks visualized <http://nbviewer.jupyter.org/github/nipy/workshops/tree/master/170327-nipype/notebooks/>`_
 
 Developer guides
 ================
@@ -47,16 +43,6 @@ Developer guides
    :maxdepth: 1
 
    devel/writing_custom_interfaces
-   devel/gitwash/index
 
 .. include:: links_names.txt
 
-Useful links for beginners
-===========================
-
-Getting started with Python - Tutorials. `Available here`__
-
-Python for Beginners `Available here`__
-
-   __ http://www.codecademy.com/en/tracks/python
-   __ https://www.python.org/about/gettingstarted/

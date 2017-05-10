@@ -38,8 +38,8 @@ from ..utils.misc import is_container, trim, str2bool
 from ..utils.filemanip import (md5, hash_infile, FileNotFoundError, hash_timestamp,
                                split_filename, to_str)
 from .traits_extension import (
-    traits, Undefined, TraitDictObject, TraitListObject, TraitError, isdefined, File,
-    Directory, DictStrStr, has_metadata)
+    traits, Undefined, TraitDictObject, TraitListObject, TraitError, isdefined,
+    File, Directory, DictStrStr, has_metadata, ImageFile)
 from ..external.due import due
 
 runtime_profile = str2bool(config.get('execution', 'profile_runtime'))
@@ -390,10 +390,6 @@ class BaseTraitedSpec(traits.HasTraits):
         xors = self.trait_names(**has_xor)
         for elem in xors:
             self.on_trait_change(self._xor_warn, elem)
-        has_requires = dict(requires=lambda t: t is not None)
-        requires = self.trait_names(**has_requires)
-        for elem in requires:
-            self.on_trait_change(self._requires_warn, elem)
         has_deprecation = dict(deprecated=lambda t: t is not None)
         deprecated = self.trait_names(**has_deprecation)
         for elem in deprecated:
@@ -774,7 +770,7 @@ class BaseInterface(Interface):
                             self.__class__.__name__)
 
         self.inputs = self.input_spec(**inputs)
-        self.estimated_memory_gb = 1
+        self.estimated_memory_gb = 0.25
         self.num_threads = 1
 
         if from_file is not None:
