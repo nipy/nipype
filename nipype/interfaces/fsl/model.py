@@ -390,7 +390,7 @@ class Level1Design(BaseInterface):
                         cwd, 'ev_%s_%d_%d.txt' % (name, runno,
                                                   len(evname)))
                     if field == 'cond':
-                        ev_parameters['temporalderiv'] = bool(ev_parameters.get('derivs', False))
+                        ev_parameters['temporalderiv'] = int(bool(ev_parameters.get('derivs', False)))
                         if ev_parameters['temporalderiv']:
                             evname.append(name + 'TD')
                     outputs['ev_files'][runno].append(
