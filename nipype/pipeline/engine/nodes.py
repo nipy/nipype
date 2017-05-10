@@ -34,6 +34,7 @@ from shutil import rmtree
 import sys
 from tempfile import mkdtemp
 from hashlib import sha1
+from time import time
 
 from ... import config, logging
 from ...utils.misc import (flatten, unflatten, str2bool)
@@ -373,7 +374,22 @@ class Node(EngineBase):
             except:
                 os.remove(hashfile_unfinished)
                 raise
-            shutil.move(hashfile_unfinished, hashfile)
+
+            t = time()
+            timeout = float(self.config['execution']['job_finished_timeout'])
+            timed_out = True
+            while True:
+                try:
+                    shutil.move(hashfile_unfinished, hashfile)
+                    timed_out = False
+                    break
+                except Exception as e:
+                    if (time() - t) < timeout:
+                        logger.debug(e)
+                    else:
+                        raise
+                sleep(2)
+
             self.write_report(report_type='postexec', cwd=outdir)
         else:
             if not op.exists(op.join(outdir, '_inputs.pklz')):
