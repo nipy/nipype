@@ -2982,7 +2982,7 @@ class MRIsExpandInputSpec(FSTraitedSpec):
     # Input spec derived from
     # https://github.com/freesurfer/freesurfer/blob/102e053/mris_expand/mris_expand.c
     in_file = File(
-        exists=True, mandatory=True, argstr='%s', position=-3, copyfile=False,
+        exists=True, mandatory=True, argstr='%s', position=-3, copyfile=True,
         desc='Surface to expand')
     distance = traits.Float(
         mandatory=True, argstr='%g', position=-2,
@@ -2996,17 +2996,17 @@ class MRIsExpandInputSpec(FSTraitedSpec):
         argstr='-thickness',
         desc='Expand by fraction of cortical thickness, not mm')
     thickness_name = traits.Str(
-        argstr="-thickness_name %s", copyfile=False,
+        argstr="-thickness_name %s", copyfile=True,
         desc=('Name of thickness file (implicit: "thickness")\n'
               'If no path, uses directory of `in_file`\n'
               'If no path AND missing "lh." or "rh.", derive from `in_file`'))
     pial = traits.Str(
-        argstr='-pial %s', copyfile=False,
+        argstr='-pial %s', copyfile=True,
         desc=('Name of pial file (implicit: "pial")\n'
               'If no path, uses directory of `in_file`\n'
               'If no path AND missing "lh." or "rh.", derive from `in_file`'))
     sphere = traits.Str(
-        'sphere', copyfile=False, usedefault=True,
+        'sphere', copyfile=True, usedefault=True,
         desc='WARNING: Do not change this trait')
     spring = traits.Float(argstr='-S %g', desc="Spring term (implicit: 0.05)")
     dt = traits.Float(argstr='-T %g', desc='dt (implicit: 0.25)')
