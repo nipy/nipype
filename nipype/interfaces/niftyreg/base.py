@@ -105,8 +105,11 @@ class NiftyRegCommand(CommandLine):
     def _run_interface(self, runtime):
         # Update num threads estimate from OMP_NUM_THREADS env var
         # Default to 1 if not set
-        if not isdefined(self.inputs.environ['OMP_NUM_THREADS']):
-            self.inputs.environ['OMP_NUM_THREADS'] = self.num_threads
+        omp_key = 'OMP_NUM_THREADS'
+        if omp_key in os.environ:
+            self.inputs.environ[omp_key] = os.environ[omp_key]
+        else:
+            self.inputs.environ[omp_key] = str(self.num_threads)
         return super(NiftyRegCommand, self)._run_interface(runtime)
 
     def _format_arg(self, name, spec, value):
