@@ -14,7 +14,8 @@ See the docstrings of the individual classes for examples.
 Change directory to provide relative paths for doctests
     >>> import os
     >>> filepath = os.path.dirname( os.path.realpath( __file__ ) )
-    >>> datadir = os.path.realpath(os.path.join(filepath, '../../testing/data'))
+    >>> datadir = os.path.realpath(os.path.join(filepath, '../../testing/\
+data'))
     >>> os.chdir(datadir)
 """
 
@@ -102,37 +103,58 @@ class UnaryMaths(MathsCommand):
     """Interface for executable seg_maths from NiftySeg platform.
 
     Interface to use any unary mathematical operations that can be performed
-    with the seg_maths command-line program. See below for those operations::
 
-        -sqrt           Square root of the image.
-        -exp            Exponential root of the image.
-        -log            Log of the image.
-        -recip          Reciprocal (1/I) of the image.
-        -abs            Absolute value of the image.
-        -bin            Binarise the image.
-        -otsu           Otsu thresholding of the current image.
-        -lconcomp       Take the largest connected component
-        -concomp6       Label the different connected components with a 6NN
-                        kernel
-        -concomp26      Label the different connected components with a 26NN
-                        kernel
-        -fill           Fill holes in binary object (e.g. fill ventricle in
-                        brain mask).
-        -euc            Euclidean distance trasnform
-        -tpmax          Get the time point with the highest value (binarise 4D
-                        probabilities)
-        -tmean          Mean value of all time points.
-        -tmax           Max value of all time points.
-        -tmin           Mean value of all time points.
-        -splitlab       Split the integer labels into multiple timepoints
-        -removenan      Remove all NaNs and replace then with 0
-        -isnan          Binary image equal to 1 if the value is NaN and 0
-                        otherwise
-        -subsamp2       Subsample the image by 2 using NN sampling (qform and
-                        sform scaled)
-        -scl            Reset scale and slope info.
-        -4to5           Flip the 4th and 5th dimension.
-        -range          Reset the image range to the min max
+    with the seg_maths command-line program.
+
+    See below for those operations::
+
+    sqrt - Square root of the image).
+
+    exp - Exponential root of the image.
+
+    log - Log of the image.
+
+    recip - Reciprocal (1/I) of the image.
+
+    abs - Absolute value of the image.
+
+    bin - Binarise the image.
+
+    otsu - Otsu thresholding of the current image.
+
+    lconcomp - Take the largest connected component
+
+    concomp6 - Label the different connected components with a 6NN kernel
+
+    concomp26 - Label the different connected components with a 26NN kernel
+
+    fill - Fill holes in binary object (e.g. fill ventricle in brain mask).
+
+    euc - Euclidean distance trasnform
+
+    tpmax - Get the time point with the highest value (binarise 4D \
+probabilities)
+
+    tmean - Mean value of all time points.
+
+    tmax - Max value of all time points.
+
+    tmin - Mean value of all time points.
+
+    splitlab - Split the integer labels into multiple timepoints
+
+    removenan - Remove all NaNs and replace then with 0
+
+    isnan - Binary image equal to 1 if the value is NaN and 0 otherwise
+
+    subsamp2 - Subsample the image by 2 using NN sampling (qform and sform \
+scaled)
+
+    scl  - Reset scale and slope info.
+
+    4to5 - Flip the 4th and 5th dimension.
+
+    range - Reset the image range to the min max.
 
     `Source code <http://cmictig.cs.ucl.ac.uk/wiki/index.php/NiftySeg>`_ |
     `Documentation <http://cmictig.cs.ucl.ac.uk/wiki/index.php/NiftySeg_documentation>`_
@@ -216,38 +238,55 @@ class BinaryMaths(MathsCommand):
     """Interface for executable seg_maths from NiftySeg platform.
 
     Interface to use any binary mathematical operations that can be performed
-    with the seg_maths command-line program. See below for those operations::
 
-        -mul    <float/file>    Multiply image <float> value or by other image.
-        -div    <float/file>    Divide image by <float> or by other image.
-        -add    <float/file>    Add image by <float> or by other image.
-        -sub    <float/file>    Subtract image by <float> or by other image.
-        -pow    <float>         Image to the power of <float>.
-        -thr    <float>         Threshold the image below <float>.
-        -uthr   <float>         Threshold image above <float>.
-        -smo    <float>         Gaussian smoothing by std <float> (in voxels
-                                and up to 4-D).
-        -edge   <float>         Calculate the edges of the image using a
-                                threshold <float>.
-        -sobel3 <float>         Calculate the edges of all timepoints using a
-                                Sobel filter with a 3x3x3 kernel and applying
-                                <float> gaussian smoothing.
-        -sobel5 <float>         Calculate the edges of all timepoints using a
-                                Sobel filter with a 5x5x5 kernel and applying
-                                <float> gaussian smoothing.
-        -min    <file>          Get the min per voxel between <current> and
-                                <file>.
-        -smol   <float>         Gaussian smoothing of a 3D label image.
-        -geo    <float/file>    Geodesic distance according to the speed
-                                function <float/file>
-        -llsnorm  <file_norm>   Linear LS normalisation between current and
-                                <file_norm>
-        -masknan <file_norm>    Assign everything outside the mask (mask==0)
-                                with NaNs
-        -hdr_copy <file>        Copy header from working image to <file> and
-                                save in <output>.
-        -splitinter <x/y/z>     Split interleaved slices in direction <x/y/z>
-                                into separate time points
+    with the seg_maths command-line program.
+
+    See below for those operations::
+
+    mul - <float/file> - Multiply image <float> value or by other image.
+
+    div - <float/file> - Divide image by <float> or by other image.
+
+    add - <float/file> - Add image by <float> or by other image.
+
+    sub - <float/file> - Subtract image by <float> or by other image.
+
+    pow - <float> - Image to the power of <float>.
+
+    thr - <float> - Threshold the image below <float>.
+
+    uthr - <float> - Threshold image above <float>.
+
+    smo - <float> - Gaussian smoothing by std <float> (in voxels and up to \
+4-D).
+
+    edge - <float> - Calculate the edges of the image using a threshold <\
+float>.
+
+    sobel3 - <float> - Calculate the edges of all timepoints using a Sobel \
+filter with a 3x3x3 kernel and applying <float> gaussian smoothing.
+
+    sobel5 - <float> - Calculate the edges of all timepoints using a Sobel \
+filter with a 5x5x5 kernel and applying <float> gaussian smoothing.
+
+    min - <file> - Get the min per voxel between <current> and <file>.
+
+    smol - <float> - Gaussian smoothing of a 3D label image.
+
+    geo - <float/file> - Geodesic distance according to the speed function \
+<float/file>
+
+    llsnorm  <file_norm> - Linear LS normalisation between current and \
+<file_norm>
+
+    masknan <file_norm> - Assign everything outside the mask (mask==0) \
+with NaNs
+
+    hdr_copy <file> - Copy header from working image to <file> and save in \
+<output>.
+
+    splitinter <x/y/z> - Split interleaved slices in direction <x/y/z> into \
+separate time points
 
     `Source code <http://cmictig.cs.ucl.ac.uk/wiki/index.php/NiftySeg>`_ |
     `Documentation <http://cmictig.cs.ucl.ac.uk/wiki/index.php/NiftySeg_documentation>`_
@@ -348,16 +387,22 @@ class BinaryMathsInteger(MathsCommand):
     """Interface for executable seg_maths from NiftySeg platform.
 
     Interface to use any integer mathematical operations that can be performed
-    with the seg_maths command-line program. See below for those operations::
 
-        (requiring integer values)
-        -equal  <int>       Get voxels equal to <int>
-        -dil    <int>       Dilate the image <int> times (in voxels).
-        -ero    <int>       Erode the image <int> times (in voxels).
-        -tp     <int>       Extract time point <int>
-        -crop   <int>       Crop <int> voxels around each 3D volume.
-        -pad    <int>       Pad <int> voxels with NaN value around each 3D
-                            volume.
+    with the seg_maths command-line program.
+
+    See below for those operations:: (requiring integer values)
+
+    equal - <int> - Get voxels equal to <int>
+
+    dil - <int>  - Dilate the image <int> times (in voxels).
+
+    ero - <int> - Erode the image <int> times (in voxels).
+
+    tp - <int> - Extract time point <int>
+
+    crop - <int> - Crop <int> voxels around each 3D volume.
+
+    pad - <int> -  Pad <int> voxels with NaN value around each 3D volume.
 
     `Source code <http://cmictig.cs.ucl.ac.uk/wiki/index.php/NiftySeg>`_ |
     `Documentation <http://cmictig.cs.ucl.ac.uk/wiki/index.php/NiftySeg_documentation>`_
@@ -436,14 +481,19 @@ class TupleMaths(MathsCommand):
     """Interface for executable seg_maths from NiftySeg platform.
 
     Interface to use any tuple mathematical operations that can be performed
-    with the seg_maths command-line program. See below for those operations::
 
-        -lncc      <file> <std>    Local CC between current img and <file>
-                                on a kernel with <std>
-        -lssd      <file> <std>    Local SSD between current img and <file>
-                                on a kernel with <std>
-        -lltsnorm  <file_norm> <float>   Linear LTS normalisation assuming
-                                         <float> percent outliers
+    with the seg_maths command-line program.
+
+    See below for those operations::
+
+    lncc <file> <std> Local CC between current img and <file> on a kernel \
+with <std>
+
+    lssd <file> <std> Local SSD between current img and <file> on a kernel \
+with <std>
+
+    lltsnorm <file_norm> <float>  Linear LTS normalisation assuming <float> \
+percent outliers
 
     `Source code <http://cmictig.cs.ucl.ac.uk/wiki/index.php/NiftySeg>`_ |
     `Documentation <http://cmictig.cs.ucl.ac.uk/wiki/index.php/NiftySeg_documentation>`_
@@ -504,10 +554,13 @@ class Merge(MathsCommand):
     """Interface for executable seg_maths from NiftySeg platform.
 
     Interface to use the merge operation that can be performed
-    with the seg_maths command-line program. See below for this option::
 
-        -merge  <i> <d> <files>   Merge <i> images and the working image in the
-                                  <d> dimension
+    with the seg_maths command-line program.
+
+    See below for this option::
+
+    merge  <i> <d> <files>  Merge <i> images and the working image in the \
+<d> dimension
 
     `Source code <http://cmictig.cs.ucl.ac.uk/wiki/index.php/NiftySeg>`_ |
     `Documentation <http://cmictig.cs.ucl.ac.uk/wiki/index.php/NiftySeg_documentation>`_

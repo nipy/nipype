@@ -8,7 +8,8 @@ that can be performed with the niftyseg stats (seg_stats) command-line program.
 Change directory to provide relative paths for doctests
     >>> import os
     >>> filepath = os.path.dirname( os.path.realpath( __file__ ) )
-    >>> datadir = os.path.realpath(os.path.join(filepath, '../../testing/data'))
+    >>> datadir = os.path.realpath(os.path.join(filepath, '../../testing/\
+data'))
     >>> os.chdir(datadir)
 """
 from __future__ import print_function
@@ -101,33 +102,47 @@ class UnaryStats(StatsCommand):
     Interface for executable seg_stats from NiftySeg platform.
 
     Interface to use any unary statistical operations that can be performed
-    with the seg_stats command-line program. See below for those operations::
 
-        -r          | The range <min max> of all voxels.
-        -R          | The robust range (assuming 2% outliers on both sides)
-                    | of all voxels
-        -a          | Average of all voxels
-        -s          | Standard deviation of all voxels
-        -v          | Volume of all voxels above 0 (<# voxels> *
-                    | <volume per voxel>)
-        -vl         | Volume of each integer label (<# voxels per label> *
-                    | <volume per voxel>)
-        -vp         | Volume of all probabilsitic voxels (sum(<in>) *
-                    | <volume per voxel>)
-        -n          | Count of all voxels above 0 (<# voxels>)
-        -np         | Sum of all fuzzy voxels (sum(<in>))
-        -e          | Entropy of all voxels
-        -ne         | Normalized entropy of all voxels
-        -x          | Location (i j k x y z) of the smallest value in the image
-        -X          | Location (i j k x y z) of the largest value in the image
-        -c          | Location (i j k x y z) of the centre of mass of the
-                    | object
-        -B          | Bounding box of all nonzero voxels
-                    | [ xmin xsize ymin ysize zmin zsize ]
-        -xvox       | Output the number of voxels in the x direction.
-                    | Replace x with y/z for other directions.
-        -xdim       | Output the voxel dimention in the x direction.
-                    | Replace x with y/z for other directions.
+    with the seg_stats command-line program.
+
+    See below for those operations::
+
+    r - The range <min max> of all voxels.
+
+    R - The robust range (assuming 2% outliers on both sides) of all voxels
+
+    a - Average of all voxels
+
+    s - Standard deviation of all voxels
+
+    v - Volume of all voxels above 0 (<# voxels> * <volume per voxel>)
+
+    vl - Volume of each integer label (<# voxels per label> * \
+<volume per voxel>)
+
+    vp - Volume of all probabilsitic voxels (sum(<in>) * <volume per voxel>)
+
+    n - Count of all voxels above 0 (<# voxels>)
+
+    np - Sum of all fuzzy voxels (sum(<in>))
+
+    e - Entropy of all voxels
+
+    ne - Normalized entropy of all voxels
+
+    x - Location (i j k x y z) of the smallest value in the image
+
+    X - Location (i j k x y z) of the largest value in the image
+
+    c - Location (i j k x y z) of the centre of mass of the object
+
+    B - Bounding box of all nonzero voxels [ xmin xsize ymin ysize zmin zsize ]
+
+    xvox - Output the number of voxels in the x direction. Replace x with \
+y/z for other directions.
+
+    xdim - Output the voxel dimention in the x direction. Replace x with \
+y/z for other directions.
 
     `Source code <http://cmictig.cs.ucl.ac.uk/wiki/index.php/NiftySeg>`_ |
     `Documentation <http://cmictig.cs.ucl.ac.uk/wiki/index.php/NiftySeg_documentation>`_
@@ -189,21 +204,33 @@ class BinaryStats(StatsCommand):
     Interface for executable seg_stats from NiftySeg platform.
 
     Interface to use any binary statistical operations that can be performed
-    with the seg_stats command-line program. See below for those operations::
 
-        -p <float>      | The <float>th percentile of all voxels intensity
-                        | (float=[0,100])
-        -sa  <ax>       | Average of all voxels
-        -ss  <ax>       | Standard deviation of all voxels
-        -svp <ax>       | Volume of all probabilsitic voxels (sum(<in>) *
-                        | <volume per voxel>)
-        -al <in2>       | Average value in <in> for each label in <in2>
-        -d <in2>        | Calculate the Dice score between all classes in <in>
-                        | and <in2>
-        -ncc <in2>      | Normalized cross correlation between <in> and <in2>
-        -nmi <in2>      | Normalized Mutual Information between <in> and <in2>
-        -Vl <csv>       | Volume of each integer label <in>. Save to <csv>file.
-        -Nl <csv>       | Count of each label <in>. Save to <csv> file.
+    with the seg_stats command-line program.
+
+    See below for those operations::
+
+    p - <float> - The <float>th percentile of all voxels intensity \
+(float=[0,100])
+
+    sa - <ax> - Average of all voxels
+
+    ss - <ax> - Standard deviation of all voxels
+
+    svp - <ax> - Volume of all probabilsitic voxels (sum(<in>) * \
+<volume per voxel>)
+
+    al - <in2> - Average value in <in> for each label in <in2>
+
+    d - <in2> - Calculate the Dice score between all classes in <in>\
+and <in2>
+
+    ncc - <in2> - Normalized cross correlation between <in> and <in2>
+
+    nmi - <in2> - Normalized Mutual Information between <in> and <in2>
+
+    Vl - <csv> - Volume of each integer label <in>. Save to <csv>file.
+
+    Nl - <csv> - Count of each label <in>. Save to <csv> file.
 
     `Source code <http://cmictig.cs.ucl.ac.uk/wiki/index.php/NiftySeg>`_ |
     `Documentation <http://cmictig.cs.ucl.ac.uk/wiki/index.php/NiftySeg_documentation>`_
