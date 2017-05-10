@@ -1375,7 +1375,7 @@ class OutlierCountInputSpec(CommandLineInputSpec):
         name_template='%s_outliers',
         argstr='-save %s',
         name_source=['in_file'],
-        output_name='out_outliers',
+        output_name='outliers_file',
         keep_extension=True,
         desc='output image file name')
     polort = traits.Int(
@@ -1387,7 +1387,7 @@ class OutlierCountInputSpec(CommandLineInputSpec):
         argstr='-legendre',
         desc='use Legendre polynomials')
     out_file = File(
-        name_template='%s_outliers',
+        name_template='%s_stdout',
         name_source=['in_file'],
         argstr='> %s',
         keep_extension=False,
@@ -1396,13 +1396,11 @@ class OutlierCountInputSpec(CommandLineInputSpec):
 
 
 class OutlierCountOutputSpec(TraitedSpec):
-    out_outliers = File(
-        exists=True,
+    outliers_file = File(
+        exists = True,
         desc='output image file name')
     out_file = File(
-        name_template='%s_tqual',
-        name_source=['in_file'],
-        argstr='> %s',
+        exists = True,
         keep_extension=False,
         position=-1,
         desc='capture standard output')
@@ -1411,20 +1409,16 @@ class OutlierCountOutputSpec(TraitedSpec):
 class OutlierCount(CommandLine):
     """Calculates number of 'outliers' a 3D+time dataset, at each
     time point, and writes the results to stdout.
-
     For complete details, see the `3dToutcount Documentation
     <https://afni.nimh.nih.gov/pub/dist/doc/program_help/3dToutcount.html>`_
-
     Examples
     ========
-
     >>> from nipype.interfaces import afni
     >>> toutcount = afni.OutlierCount()
     >>> toutcount.inputs.in_file = 'functional.nii'
     >>> toutcount.cmdline  # doctest: +ELLIPSIS +ALLOW_UNICODE
     '3dToutcount functional.nii > functional_outliers'
     >>> res = toutcount.run()  # doctest: +SKIP
-
     """
 
     _cmd = '3dToutcount'
@@ -1434,16 +1428,24 @@ class OutlierCount(CommandLine):
     def _parse_inputs(self, skip=None):
         if skip is None:
             skip = []
-
-        if not self.inputs.save_outliers:
+        if self.inputs.save_outliers == False:
             skip += ['outliers_file']
         return super(OutlierCount, self)._parse_inputs(skip)
-
+    
     def _list_outputs(self):
-        outputs = self.output_spec().get()
-        if self.inputs.save_outliers:
-            outputs['out_outliers'] = op.abspath(self.inputs.outliers_file)
-        outputs['out_file'] = op.abspath(self.inputs.out_file)
+        cwd = os.getcwd()
+        outputs = {}
+        if isdefined(self.inputs.outliers_file) and self.inputs.save_outliers == True:            
+            outputs['outliers_file'] = cwd + '/' + self.inputs.outliers_file
+        elif self.inputs.save_outliers == True:
+            file, ext = op.split(self.inputs.in_file)[1].split(os.extsep,1)
+            outputs['outliers_file'] = cwd + '/' + file + '_outliers.' + ext
+        if isdefined(self.inputs.out_file):
+            outputs['out_file'] = cwd + '/' + self.inputs.out_file
+        else:
+            file, ext = op.split(self.inputs.in_file)[1].split(os.extsep,1)
+            outputs['out_file'] = cwd + '/' + file + '_stdout'
+            
         return outputs
 
 
