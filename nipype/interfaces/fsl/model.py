@@ -1494,6 +1494,16 @@ class MELODICInputSpec(FSLCommandInputSpec):
         argstr="--sep_whiten", desc="switch on separate whitening")
     sep_vn = traits.Bool(
         argstr="--sep_vn", desc="switch off joined variance normalization")
+    migp = traits.Bool(
+        argstr="--migp", desc="switch on MIGP data reduction")
+    migpN = traits.Int(
+        argstr="--migpN %d",
+        desc="number of internal Eigenmaps")
+    migp_shuffle = traits.Bool(
+        argstr="--migp_shuffle", desc="randomise MIGP file order (default: TRUE)")
+    migp_factor = traits.Int(
+        argstr="--migp_factor %d",
+        desc="Internal Factor of mem-threshold relative to number of Eigenmaps (default: 2)")
     num_ICs = traits.Int(
         argstr="-n %d",
         desc="number of IC's to extract (for deflation approach)")
