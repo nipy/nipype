@@ -19,6 +19,7 @@ def test_RegMeasure_inputs():
     mandatory=True,
     ),
     omp_core_val=dict(argstr='-omp %i',
+    usedefault=True,
     ),
     out_file=dict(argstr='-out %s',
     name_source=['flo_file'],

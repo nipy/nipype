@@ -46,6 +46,7 @@ def test_RegAladin_inputs():
     nosym_flag=dict(argstr='-noSym',
     ),
     omp_core_val=dict(argstr='-omp %i',
+    usedefault=True,
     ),
     platform_val=dict(argstr='-platf %i',
     ),

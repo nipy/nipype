@@ -18,6 +18,7 @@ def test_RegResample_inputs():
     inter_val=dict(argstr='-inter %d',
     ),
     omp_core_val=dict(argstr='-omp %i',
+    usedefault=True,
     ),
     out_file=dict(argstr='%s',
     name_source=['flo_file'],
