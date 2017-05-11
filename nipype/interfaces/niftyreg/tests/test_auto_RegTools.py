@@ -34,6 +34,7 @@ def test_RegTools_inputs():
     noscl_flag=dict(argstr='-noscl',
     ),
     omp_core_val=dict(argstr='-omp %i',
+    usedefault=True,
     ),
     out_file=dict(argstr='-out %s',
     name_source=['in_file'],

@@ -76,6 +76,7 @@ def test_RegF3D_inputs():
     noz_flag=dict(argstr='-noz',
     ),
     omp_core_val=dict(argstr='-omp %i',
+    usedefault=True,
     ),
     pad_val=dict(argstr='-pad %f',
     ),
