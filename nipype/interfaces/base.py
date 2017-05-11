@@ -413,7 +413,7 @@ class BaseTraitedSpec(traitlets.HasTraits):
             if self.trait_metadata(tr_name, "requires"):
                 self.on_trait_change(self._requires_warn, tr_name)
             if self.trait_metadata(tr_name, "deprecated"):
-                self.on_trait_change(self._deprecated_warn, elem)
+                self.on_trait_change(self._deprecated_warn, tr_name)
 
 
     # dj: in traitlets the handler signature is different...
@@ -438,6 +438,7 @@ class BaseTraitedSpec(traitlets.HasTraits):
                            'which is already set') % (name, trait_name)
                     raise IOError(msg)
 
+
     def _requires_warn(self, name, old, new):
         """Part of the xor behavior
         """
@@ -445,44 +446,49 @@ class BaseTraitedSpec(traitlets.HasTraits):
             trait_spec = self.traits()[name]
             msg = None
             for trait_name in trait_spec.metadata["requires"]:
-                pdb.set_trace()
                 if not getattr(self, trait_name):
                     if not msg:
                         msg = 'Input %s requires inputs: %s' \
                             % (name, ', '.join(trait_spec.metadata["requires"]))
-            pdb.set_trace()
+        
             if msg:  # only one requires warning at a time.
                 warn(msg)
 
-    def _deprecated_warn(self, obj, name, old, new):
+    def _deprecated_warn(self, name, old, new):
         """Checks if a user assigns a value to a deprecated trait
         """
         if isdefined(new):
+            #pdb.set_trace()
             trait_spec = self.traits()[name]
             msg1 = ('Input %s in interface %s is deprecated.' %
                     (name,
                      self.__class__.__name__.split('InputSpec')[0]))
             msg2 = ('Will be removed or raise an error as of release %s'
-                    % trait_spec.deprecated)
-            if trait_spec.new_name:
-                if trait_spec.new_name not in self.copyable_trait_names():
-                    raise TraitError(msg1 + ' Replacement trait %s not found' %
-                                     trait_spec.new_name)
-                msg3 = 'It has been replaced by %s.' % trait_spec.new_name
+                    %  trait_spec.metadata["deprecated"])
+            if "new_name" in trait_spec.metadata:
+                if trait_spec.metadata["new_name"] not in self.trait_names():
+                    raise traitlets.TraitError(msg1 + ' Replacement trait %s not found' %
+                                     trait_spec.metadata["new_name"])
+                msg3 = 'It has been replaced by %s.' % trait_spec.metadata["new_name"]
             else:
                 msg3 = ''
             msg = ' '.join((msg1, msg2, msg3))
-            if Version(str(trait_spec.deprecated)) < self.package_version:
-                raise TraitError(msg)
+            if Version(str(trait_spec.metadata["deprecated"])) < self.package_version:
+                raise traitlets.TraitError(msg)
             else:
-                if trait_spec.new_name:
+                if trait_spec.metadata["new_name"]:
                     msg += 'Unsetting old value %s; setting new value %s.' % (
-                        name, trait_spec.new_name)
+                        name, trait_spec.metadata["new_name"])
                 warn(msg)
-                if trait_spec.new_name:
-                    self.trait_set(trait_change_notify=False,
-                                   **{'%s' % name: Undefined,
-                                      '%s' % trait_spec.new_name: new})
+                if trait_spec.metadata["new_name"]:
+                    
+                    # dj TOTHINK: do i have to add trait_change_notify=False
+                    self.__setattr__(name, None)
+                    self.__setattr__(trait_spec.metadata["new_name"], new)
+                    # dj TODO: should write trait_set, but has to include tags!
+                    #self.trait_set(trait_change_notify=False,
+                    #               **{'%s' % name: Undefined,
+                    #                  '%s' % trait_spec.metadata["new_name"]: new})
 
     def _hash_infile(self, adict, key):
         """ Inject file hashes into adict[key]"""
@@ -1219,7 +1225,7 @@ class BaseInterface(Interface):
                 try:
                     setattr(outputs, key, val)
                     _ = getattr(outputs, key)
-                except TraitError as error:
+                except traitlets.TraitError as error:
                     if hasattr(error, 'info') and \
                             error.info.startswith("an existing"):
                         msg = ("File/Directory '%s' not found for %s output "
