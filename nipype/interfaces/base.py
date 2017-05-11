@@ -65,8 +65,8 @@ __docformat__ = 'restructuredtext'
 
 # dj TODO: should remove
 # will use traitlets.Unicode
-#class Str(traits.Unicode):
-#    pass
+class Str(traits.Unicode):
+    pass
 
 #traits.Str = Str
 
@@ -403,47 +403,54 @@ class BaseTraitedSpec(traitlets.HasTraits):
         """Find all traits with the 'xor' metadata and attach an event
         handler to them.
         """
-        #dj TODO: to trzeba zmieniac np. w freesurfer/preprocess.py
-        #dj TODO: zeby byl tag, a tu metadata
-        has_xor = dict(xor=lambda t: t is not None)
-        xors = self.trait_names(**has_xor)
-        for elem in xors:
-            self.on_trait_change(self._xor_warn, elem)
-        has_deprecation = dict(deprecated=lambda t: t is not None)
-        deprecated = self.trait_names(**has_deprecation)
-        for elem in deprecated:
-            self.on_trait_change(self._deprecated_warn, elem)
+        #dj TODO: traitlets uses tag, it has to be changed everywhere
+        # dj TOTHINK: can I do it without loop? what is an easier way to access tag/metadata
+        for tr_name in self.trait_names():
+            if self.trait_metadata(tr_name, "xor"):
+                #dj TODO:  deprecation of the on_trait_change in traitlets, 
+                #dj TODO: it should use observe
+                self.on_trait_change(self._xor_warn, tr_name)
+            if self.trait_metadata(tr_name, "requires"):
+                self.on_trait_change(self._requires_warn, tr_name)
+            if self.trait_metadata(tr_name, "deprecated"):
+                self.on_trait_change(self._deprecated_warn, elem)
 
-    # dj TODO: don't see test for *_warn
-    # dj TODO: chyba powinna miec forme (name, old, new, self)
-    def _xor_warn(self, obj, name, old, new):
+
+    # dj: in traitlets the handler signature is different...
+    def _xor_warn(self, name, old, new):
         """ Generates warnings for xor traits
         """
         if isdefined(new):
             trait_spec = self.traits()[name]
             # for each xor, set to default_value
-            for trait_name in trait_spec.xor:
+            # dj NOTE: self.trait_metadata(name, "xor") gives the same 
+            for trait_name in trait_spec.metadata["xor"]: 
                 if trait_name == name:
                     # skip ourself
                     continue
-                if isdefined(getattr(self, trait_name)):
-                    self.trait_set(trait_change_notify=False,
-                                   **{'%s' % name: Undefined})
+                # dj: I'm checking if it's not NONE
+                if getattr(self, trait_name):
+                    # dj TOASK: do we need to set to Undefined, 
+                    # dj TOASK: it's not enought to raise error?
+                    #self.trait_set(trait_change_notify=False,
+                    #               **{'%s' % name: Undefined})
                     msg = ('Input "%s" is mutually exclusive with input "%s", '
                            'which is already set') % (name, trait_name)
                     raise IOError(msg)
 
-    def _requires_warn(self, obj, name, old, new):
+    def _requires_warn(self, name, old, new):
         """Part of the xor behavior
         """
         if isdefined(new):
             trait_spec = self.traits()[name]
             msg = None
-            for trait_name in trait_spec.requires:
-                if not isdefined(getattr(self, trait_name)):
+            for trait_name in trait_spec.metadata["requires"]:
+                pdb.set_trace()
+                if not getattr(self, trait_name):
                     if not msg:
                         msg = 'Input %s requires inputs: %s' \
-                            % (name, ', '.join(trait_spec.requires))
+                            % (name, ', '.join(trait_spec.metadata["requires"]))
+            pdb.set_trace()
             if msg:  # only one requires warning at a time.
                 warn(msg)
 
@@ -568,14 +575,19 @@ class BaseTraitedSpec(traitlets.HasTraits):
                     out = undefinedval
         return out
 
+    # TODO dj: doesn't work for now. trailets doesn't have "trait" method
+    # TODO dj: and I'm not sure about metadata itself
+    # TODO dj: it looks, this is used only in get_hashval
     def has_metadata(self, name, metadata, value=None, recursive=True):
         """
         Return has_metadata for the requested trait name in this
         interface
         """
+        #pdb.set_trace()
         return has_metadata(self.trait(name).trait_type, metadata, value,
                             recursive)
 
+    # dj TODO: has_metadata doesn't work for now, so this also doesn'work
     def get_hashval(self, hash_method=None):
         """Return a dictionary of our items with hashes for each file.
 
@@ -599,10 +611,12 @@ class BaseTraitedSpec(traitlets.HasTraits):
 
         dict_withhash = []
         dict_nofilename = []
+        #pdb.set_trace()
         for name, val in sorted(self.get().items()):
-            if not isdefined(val) or self.has_metadata(name, "nohash", True):
+            # dj TODO: has_metadata doesn't work for now
+            #if not isdefined(val) or self.has_metadata(name, "nohash", True):
                 # skip undefined traits and traits with nohash=True
-                continue
+            #    continue
 
             hash_files = (not self.has_metadata(name, "hash_files", False) and not
                           self.has_metadata(name, "name_source"))
@@ -612,6 +626,7 @@ class BaseTraitedSpec(traitlets.HasTraits):
             dict_withhash.append((name,
                                   self._get_sorteddict(val, True, hash_method=hash_method,
                                                        hash_files=hash_files)))
+            #pdb.set_trace()
         return dict_withhash, md5(to_str(dict_nofilename).encode()).hexdigest()
 
 

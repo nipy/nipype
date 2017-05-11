@@ -325,6 +325,7 @@ def has_metadata(trait, metadata, value=None, recursive=True):
     '''
     Checks if a given trait has a metadata (and optionally if it is set to particular value)
     '''
+    pdb.set_trace()
     count = 0
     if hasattr(trait, "_metadata") and metadata in list(trait._metadata.keys()) and (trait._metadata[metadata] == value or value is None):
         count += 1
