@@ -1,5 +1,5 @@
 0.13.0 (May 11, 2017)
-============================
+=====================
 
 * ENH: Multi-stage recon-all directives (https://github.com/nipy/nipype/pull/1991)
 * FIX: FEAT "folder does not exist" error (https://github.com/nipy/nipype/pull/2000)
