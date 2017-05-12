@@ -174,9 +174,9 @@ def test_deprecation():
             foo = traitlets.Int().tag(deprecated='0.1')
         spec_instance = DeprecationSpec1()
         set_foo = lambda: setattr(spec_instance, 'foo', 1)
-        with pytest.raises(traitlets.TraitError): set_foo()
+        with pytest.raises(traitlets.TraitError): 
+            set_foo()
         assert len(w) == 0, 'no warnings, just errors'
-
 
     with warnings.catch_warnings(record=True) as w:
         warnings.filterwarnings('always', '', UserWarning)
@@ -185,7 +185,8 @@ def test_deprecation():
             foo = traitlets.Int().tag(deprecated='100', new_name='bar')
         spec_instance = DeprecationSpec2()
         set_foo = lambda: setattr(spec_instance, 'foo', 1)
-        with pytest.raises(traitlets.TraitError): set_foo()
+        with pytest.raises(traitlets.TraitError): 
+            set_foo()
         assert len(w) == 0, 'no warnings, just errors'
 
 
@@ -196,15 +197,9 @@ def test_deprecation():
             foo = traitlets.Int(allow_none=True).tag(deprecated='1000', new_name='bar')
             bar = traitlets.Int(allow_none=True)
         spec_instance = DeprecationSpec3()
-        not_raised = True
-        try:
-            spec_instance.foo = 1
-        except traitlets.TraitError:
-            not_raised = False
-        assert not_raised
-        #dj TODO: doesn't give warning
-        #pdb.set_trace()
-        #assert len(w) == 1, 'deprecated warning 1 %s' % [w1.message for w1 in w]
+        # dj NOTE: din't understand the try/except block, removed
+        spec_instance.foo = 1
+        assert len(w) == 1, 'deprecated warning 1 %s' % [w1.message for w1 in w]
 
     with warnings.catch_warnings(record=True) as w:
         warnings.filterwarnings('always', '', UserWarning)
@@ -213,16 +208,13 @@ def test_deprecation():
             foo = traitlets.Int(allow_none=True).tag(deprecated='1000', new_name='bar')
             bar = traitlets.Int(allow_none=True)
         spec_instance = DeprecationSpec3()
-        not_raised = True
-        try:
-            spec_instance.foo = 1
-        except traitlets.TraitError:
-            not_raised = False
-        assert not_raised
+        #pdb.set_trace()
+        # dj NOTE: din't understand the try/except block, removed
+        spec_instance.foo = 1
         assert spec_instance.foo is None
         assert spec_instance.bar == 1
         #dj TODO: this gives me 2 warnings
-        #assert len(w) == 1, 'deprecated warning 2 %s' % [w1.message for w1 in w]
+        assert len(w) == 1, 'deprecated warning 2 %s' % [w1.message for w1 in w]
 
 @pytest.mark.xfail(reason="dj: WIP")
 def test_namesource(setup_file):

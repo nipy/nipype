@@ -457,8 +457,8 @@ class BaseTraitedSpec(traitlets.HasTraits):
     def _deprecated_warn(self, name, old, new):
         """Checks if a user assigns a value to a deprecated trait
         """
-        if isdefined(new):
-            #pdb.set_trace()
+        # dj NOTE: so it doesn't go to the loop when new is None
+        if new:
             trait_spec = self.traits()[name]
             msg1 = ('Input %s in interface %s is deprecated.' %
                     (name,
@@ -477,12 +477,13 @@ class BaseTraitedSpec(traitlets.HasTraits):
                 raise traitlets.TraitError(msg)
             else:
                 if trait_spec.metadata["new_name"]:
-                    msg += 'Unsetting old value %s; setting new value %s.' % (
+                    msg += ' Unsetting old value %s; setting new value %s.' % (
                         name, trait_spec.metadata["new_name"])
                 warn(msg)
                 if trait_spec.metadata["new_name"]:
                     
-                    # dj TOTHINK: do i have to add trait_change_notify=False
+                    # dj TOTHINK: do i have to add trait_change_notify=False?
+                    # dj TOTHINK: if new=None it won't get to the loop
                     self.__setattr__(name, None)
                     self.__setattr__(trait_spec.metadata["new_name"], new)
                     # dj TODO: should write trait_set, but has to include tags!
