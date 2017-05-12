@@ -316,9 +316,9 @@ _Undefined.__len__ = length
 
 Undefined = _Undefined()
 
-
+# dj NOTE: for now, everywhere where undefined was used I'm changing to None
 def isdefined(object):
-    return not isinstance(object, _Undefined)
+    return object is not None
 
 
 def has_metadata(trait, metadata, value=None, recursive=True):

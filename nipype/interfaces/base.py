@@ -428,8 +428,7 @@ class BaseTraitedSpec(traitlets.HasTraits):
                 if trait_name == name:
                     # skip ourself
                     continue
-                # dj: I'm checking if it's not NONE
-                if getattr(self, trait_name):
+                if isdefined(getattr(self, trait_name)):
                     # dj TOASK: do we need to set to Undefined, 
                     # dj TOASK: it's not enought to raise error?
                     #self.trait_set(trait_change_notify=False,
@@ -446,7 +445,7 @@ class BaseTraitedSpec(traitlets.HasTraits):
             trait_spec = self.traits()[name]
             msg = None
             for trait_name in trait_spec.metadata["requires"]:
-                if not getattr(self, trait_name):
+                if not isdefined(getattr(self, trait_name)):
                     if not msg:
                         msg = 'Input %s requires inputs: %s' \
                             % (name, ', '.join(trait_spec.metadata["requires"]))
@@ -458,7 +457,7 @@ class BaseTraitedSpec(traitlets.HasTraits):
         """Checks if a user assigns a value to a deprecated trait
         """
         # dj NOTE: so it doesn't go to the loop when new is None
-        if new:
+        if isdefined(new):
             trait_spec = self.traits()[name]
             msg1 = ('Input %s in interface %s is deprecated.' %
                     (name,
