@@ -190,6 +190,7 @@ def test_reg_average():
     two_file = example_data('im2.nii')
     three_file = example_data('im3.nii')
     nr_average.inputs.avg_files = [one_file, two_file, three_file]
+    nr_average.inputs.omp_core_val = 1
     generated_cmd = nr_average.cmdline
 
     # Read the reg_average_cmd
@@ -198,10 +199,10 @@ def test_reg_average():
         argv = f_obj.read()
     os.remove(reg_average_cmd)
 
-    expected_argv = '%s %s -avg %s %s %s' % (get_custom_path('reg_average'),
-                                             os.path.join(os.getcwd(),
-                                                          'avg_out.nii.gz'),
-                                             one_file, two_file, three_file)
+    expected_argv = '%s %s -avg %s %s %s -omp 1' % (
+        get_custom_path('reg_average'),
+        os.path.join(os.getcwd(), 'avg_out.nii.gz'),
+        one_file, two_file, three_file)
 
     assert argv.decode('utf-8') == expected_argv
 
@@ -217,6 +218,7 @@ def test_reg_average():
     two_file = example_data('ants_Affine.txt')
     three_file = example_data('elastix.txt')
     nr_average_2.inputs.avg_files = [one_file, two_file, three_file]
+    nr_average_2.inputs.omp_core_val = 1
     generated_cmd = nr_average_2.cmdline
 
     # Read the reg_average_cmd
@@ -225,10 +227,10 @@ def test_reg_average():
         argv = f_obj.read()
     os.remove(reg_average_cmd)
 
-    expected_argv = '%s %s -avg %s %s %s' % (get_custom_path('reg_average'),
-                                             os.path.join(os.getcwd(),
-                                                          'avg_out.txt'),
-                                             one_file, two_file, three_file)
+    expected_argv = '%s %s -avg %s %s %s -omp 1' % (
+        get_custom_path('reg_average'),
+        os.path.join(os.getcwd(), 'avg_out.txt'),
+        one_file, two_file, three_file)
 
     assert argv.decode('utf-8') == expected_argv
 
@@ -238,6 +240,7 @@ def test_reg_average():
     two_file = example_data('ants_Affine.txt')
     three_file = example_data('elastix.txt')
     nr_average_3.inputs.avg_lts_files = [one_file, two_file, three_file]
+    nr_average_3.inputs.omp_core_val = 1
     generated_cmd = nr_average_3.cmdline
 
     # Read the reg_average_cmd
@@ -246,7 +249,7 @@ def test_reg_average():
         argv = f_obj.read()
     os.remove(reg_average_cmd)
 
-    expected_argv = ('%s %s -avg_lts %s %s %s'
+    expected_argv = ('%s %s -avg_lts %s %s %s -omp 1'
                      % (get_custom_path('reg_average'),
                         os.path.join(os.getcwd(), 'avg_out.txt'),
                         one_file, two_file, three_file))
@@ -266,6 +269,7 @@ def test_reg_average():
                                       trans2_file, two_file,
                                       trans3_file, three_file]
     nr_average_4.inputs.avg_ref_file = ref_file
+    nr_average_4.inputs.omp_core_val = 1
     generated_cmd = nr_average_4.cmdline
 
     # Read the reg_average_cmd
@@ -274,7 +278,7 @@ def test_reg_average():
         argv = f_obj.read()
     os.remove(reg_average_cmd)
 
-    expected_argv = ('%s %s -avg_tran %s %s %s %s %s %s %s'
+    expected_argv = ('%s %s -avg_tran %s -omp 1 %s %s %s %s %s %s'
                      % (get_custom_path('reg_average'),
                         os.path.join(os.getcwd(), 'avg_out.nii.gz'),
                         ref_file, trans1_file, one_file, trans2_file, two_file,
@@ -298,6 +302,7 @@ def test_reg_average():
                                       aff2_file, trans2_file, two_file,
                                       aff3_file, trans3_file, three_file]
     nr_average_5.inputs.demean3_ref_file = ref_file
+    nr_average_5.inputs.omp_core_val = 1
     generated_cmd = nr_average_5.cmdline
 
     # Read the reg_average_cmd
@@ -306,7 +311,7 @@ def test_reg_average():
         argv = f_obj.read()
     os.remove(reg_average_cmd)
 
-    expected_argv = ('%s %s -demean3 %s %s %s %s %s %s %s %s %s %s'
+    expected_argv = ('%s %s -demean3 %s -omp 1 %s %s %s %s %s %s %s %s %s'
                      % (get_custom_path('reg_average'),
                         os.path.join(os.getcwd(), 'avg_out.nii.gz'),
                         ref_file,

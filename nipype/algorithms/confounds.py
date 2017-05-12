@@ -308,14 +308,14 @@ class CompCorInputSpec(BaseInterfaceInputSpec):
     mask_files = InputMultiPath(File(exists=True),
                                 desc=('One or more mask files that determines '
                                       'ROI (3D). When more that one file is '
-                                      'provided `merge_method` or ' 
+                                      'provided `merge_method` or '
                                       '`merge_index` must be provided'))
     merge_method = traits.Enum('union', 'intersect', 'none', xor=['mask_index'],
                                requires=['mask_files'],
                                desc=('Merge method if multiple masks are '
-                                     'present - `union` uses voxels included in' 
+                                     'present - `union` uses voxels included in'
                                      ' at least one input mask, `intersect` '
-                                     'uses only voxels present in all input ' 
+                                     'uses only voxels present in all input '
                                      'masks, `none` performs CompCor on '
                                      'each mask individually'))
     mask_index = traits.Range(low=0, xor=['merge_method'],
@@ -330,8 +330,8 @@ class CompCorInputSpec(BaseInterfaceInputSpec):
                                          'pre-component extraction'))
     regress_poly_degree = traits.Range(low=1, default=1, usedefault=True,
                                        desc='the degree polynomial to use')
-    header_prefix = traits.Str(desc=('the desired header for the output tsv ' 
-                                     'file (one column). If undefined, will ' 
+    header_prefix = traits.Str(desc=('the desired header for the output tsv '
+                                     'file (one column). If undefined, will '
                                      'default to "CompCor"'))
 
 
@@ -851,8 +851,8 @@ def combine_mask_files(mask_files, mask_method=None, mask_index=None):
             if len(mask_files) == 1:
                 mask_index = 0
             else:
-                raise ValueError(('When more than one mask file is provided, ' 
-                                  'one of merge_method or mask_index must be ' 
+                raise ValueError(('When more than one mask file is provided, '
+                                  'one of merge_method or mask_index must be '
                                   'set'))
         if mask_index < len(mask_files):
             mask = nb.load(mask_files[mask_index], mmap=NUMPY_MMAP)

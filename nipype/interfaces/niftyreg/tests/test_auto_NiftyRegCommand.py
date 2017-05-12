@@ -12,6 +12,9 @@ def test_NiftyRegCommand_inputs():
     ignore_exception=dict(nohash=True,
     usedefault=True,
     ),
+    omp_core_val=dict(argstr='-omp %i',
+    usedefault=True,
+    ),
     terminal_output=dict(nohash=True,
     ),
     )

@@ -57,6 +57,7 @@ def test_RegTransform_inputs():
     xor=['def_input', 'disp_input', 'flow_input', 'comp_input', 'upd_s_form_input', 'inv_aff_input', 'inv_nrr_input', 'half_input', 'aff_2_rig_input', 'flirt_2_nr_input'],
     ),
     omp_core_val=dict(argstr='-omp %i',
+    usedefault=True,
     ),
     out_file=dict(argstr='%s',
     genfile=True,

@@ -43,6 +43,7 @@ def test_RegAverage_inputs():
     usedefault=True,
     ),
     omp_core_val=dict(argstr='-omp %i',
+    usedefault=True,
     ),
     out_file=dict(argstr='%s',
     genfile=True,

@@ -13,6 +13,7 @@ def test_RegJacobian_inputs():
     usedefault=True,
     ),
     omp_core_val=dict(argstr='-omp %i',
+    usedefault=True,
     ),
     out_file=dict(argstr='%s',
     name_source=['trans_file'],

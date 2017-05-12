@@ -209,7 +209,7 @@ class Level1Design(BaseInterface):
                             raise Exception('FSL environment variables not set')
                         else:
                             ev_parameters['fsldir'] = '/usr/share/fsl'
-                    ev_parameters['temporalderiv'] = bool(ev_parameters.get('derivs', False))
+                    ev_parameters['temporalderiv'] = int(bool(ev_parameters.get('derivs', False)))
                     if ev_parameters['temporalderiv']:
                         evname.append(name + 'TD')
                         num_evs[1] += 1
@@ -390,7 +390,7 @@ class Level1Design(BaseInterface):
                         cwd, 'ev_%s_%d_%d.txt' % (name, runno,
                                                   len(evname)))
                     if field == 'cond':
-                        ev_parameters['temporalderiv'] = bool(ev_parameters.get('derivs', False))
+                        ev_parameters['temporalderiv'] = int(bool(ev_parameters.get('derivs', False)))
                         if ev_parameters['temporalderiv']:
                             evname.append(name + 'TD')
                     outputs['ev_files'][runno].append(
@@ -1494,6 +1494,16 @@ class MELODICInputSpec(FSLCommandInputSpec):
         argstr="--sep_whiten", desc="switch on separate whitening")
     sep_vn = traits.Bool(
         argstr="--sep_vn", desc="switch off joined variance normalization")
+    migp = traits.Bool(
+        argstr="--migp", desc="switch on MIGP data reduction")
+    migpN = traits.Int(
+        argstr="--migpN %d",
+        desc="number of internal Eigenmaps")
+    migp_shuffle = traits.Bool(
+        argstr="--migp_shuffle", desc="randomise MIGP file order (default: TRUE)")
+    migp_factor = traits.Int(
+        argstr="--migp_factor %d",
+        desc="Internal Factor of mem-threshold relative to number of Eigenmaps (default: 2)")
     num_ICs = traits.Int(
         argstr="-n %d",
         desc="number of IC's to extract (for deflation approach)")
