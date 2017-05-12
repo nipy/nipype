@@ -1,18 +1,17 @@
 .. _install:
 
-======================
- Download and install
-======================
+====================
+Download and install
+====================
 
 This page covers the necessary steps to install Nipype.
-
-Nipype for users
-----------------
 
 Using docker
 ~~~~~~~~~~~~
 
 You can follow the `Nipype tutorial <https://miykael.github.io/nipype_tutorial/>`_
+
+or use this docker container: `docker pull nipype/nipype`
 
 Using conda
 ~~~~~~~~~~~
@@ -75,7 +74,7 @@ path to compile the traits package.
 From source
 ~~~~~~~~~~~
 
-The current release is found here: `<https://github.com/nipy/nipype/releases/latest>`_.
+The most recent release is found here: `<https://github.com/nipy/nipype/releases/latest>`_.
 
 The development version: [`zip <http://github.com/nipy/nipype/zipball/master>`__ `tar.gz
 <http://github.com/nipy/nipype/tarball/master>`__]
@@ -100,69 +99,19 @@ the tests::
     python -c "import nipype; print(nipype.__version__)"
     python -c "import nipype; nipype.test()"
 
+Interface Dependencies
+~~~~~~~~~~~~~~~~~~~~~~
+
+Nipype provides wrappers around many neuroimaging tools and contains some
+algorithms. These tools will need to be installed for Nipype to run. You can
+create containers with different versions of these tools installed using
+`Neurodocker <https://github.com/kaczmarj/neurodocker>`_
+
 Installation for developers
 ---------------------------
 
 Developers should start `here <../devel/testing_nipype.html>`_.
 
-Recommended Software
---------------------
-
-Strong Recommendations
-~~~~~~~~~~~~~~~~~~~~~~
-
-IPython_
-  Interactive python environment.
-
-Matplotlib_
-  Plotting library
-
-Sphinx_ 1.1
-  Required for building the documentation
-
-`Graphviz <http://www.graphviz.org/>`_
-  Required for building the documentation.
-
-Interface Dependencies
-~~~~~~~~~~~~~~~~~~~~~~
-
-You might not need some of the following packages, depending on what exactly you
-want to use nipype for. If you do need any of them, install nipype's wrapper package
-(``nipype.interfaces``), then install the programs separately onto your computer, just
-like you would install any other app.
-
-FSL_
-  4.1.0 or later
-
-matlab_
-  2008a or later
-
-SPM_
-  SPM5 or later
-
-FreeSurfer_
-  FreeSurfer v4.0.0 or later
-
-AFNI_
-  2009_12_31_1431 or later
-
-Slicer_
-  3.6 or later
-
-Nipy_
-  0.4 or later
-
-Nitime_
-  (optional)
-
-ANTS_
-
-MRtrix_ and MRtrix3_
-
-Camino_
-
-Camino2Trackvis_
-
-ConnectomeViewer_
+Developers can also use this docker container: `docker pull nipype/nipype:master`
 
 .. include:: ../links_names.txt
