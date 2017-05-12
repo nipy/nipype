@@ -283,7 +283,7 @@ def test_reg_average():
                         os.path.join(os.getcwd(), 'avg_out.nii.gz'),
                         ref_file, trans1_file, one_file, trans2_file, two_file,
                         trans3_file, three_file))
-    
+
     assert argv.decode('utf-8') == expected_argv
 
     # Test Reg Average: demean3

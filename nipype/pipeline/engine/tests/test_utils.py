@@ -343,7 +343,7 @@ def dummy_func(value):
     return value + 1
 
 
-@pytest.mark.skipif(sys.version_info < (3,0), 
+@pytest.mark.skipif(sys.version_info < (3,0),
                    reason="the famous segfault #1788")
 def test_mapnode_crash(tmpdir):
     """Test mapnode crash when stop_on_first_crash is True"""

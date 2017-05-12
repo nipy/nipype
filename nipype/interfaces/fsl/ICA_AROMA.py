@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
-"""This commandline module provides classes for interfacing with the 
-`ICA-AROMA.py<https://github.com/rhr-pruim/ICA-AROMA>`_ command line tool. 
+"""This commandline module provides classes for interfacing with the
+`ICA-AROMA.py<https://github.com/rhr-pruim/ICA-AROMA>`_ command line tool.
     Change directory to provide relative paths for doctests
     >>> import os
     >>> filepath = os.path.dirname(os.path.realpath(__file__))
@@ -23,18 +23,18 @@ import os
 
 class ICA_AROMAInputSpec(CommandLineInputSpec):
     feat_dir = Directory(exists=True, mandatory=True,
-                         argstr='-feat %s', 
+                         argstr='-feat %s',
                          xor=['in_file', 'mat_file', 'fnirt_warp_file', 'motion_parameters'],
                          desc='If a feat directory exists and temporal filtering '
                          'has not been run yet, ICA_AROMA can use the files in '
                          'this directory.')
-    in_file = File(exists=True, mandatory=True, 
-                   argstr='-i %s', xor=['feat_dir'], 
+    in_file = File(exists=True, mandatory=True,
+                   argstr='-i %s', xor=['feat_dir'],
                    desc='volume to be denoised')
     out_dir = Directory('out', mandatory=True,
-                        argstr='-o %s',  
+                        argstr='-o %s',
                         desc='output directory')
-    mask = File(exists=True, argstr='-m %s', xor=['feat_dir'], 
+    mask = File(exists=True, argstr='-m %s', xor=['feat_dir'],
                 desc='path/name volume mask')
     dim = traits.Int(argstr='-dim %d',
                      desc='Dimensionality reduction when running '
@@ -65,31 +65,31 @@ class ICA_AROMAInputSpec(CommandLineInputSpec):
                                '-both: both aggressive and non-aggressive denoising (two outputs)')
 
 class ICA_AROMAOutputSpec(TraitedSpec):
-    aggr_denoised_file = File(exists=True, 
+    aggr_denoised_file = File(exists=True,
                               desc='if generated: aggressively denoised volume')
     nonaggr_denoised_file = File(exists=True,
                                  desc='if generated: non aggressively denoised volume' )
-    out_dir = Directory(exists=True, 
+    out_dir = Directory(exists=True,
                         desc='directory contains (in addition to the denoised files): '
                         'melodic.ica + classified_motion_components + '
                         'classification_overview + feature_scores + melodic_ic_mni)')
-   
+
 class ICA_AROMA(CommandLine):
     """
     Interface for the ICA_AROMA.py script.
-    
-    ICA-AROMA (i.e. 'ICA-based Automatic Removal Of Motion Artifacts') concerns 
+
+    ICA-AROMA (i.e. 'ICA-based Automatic Removal Of Motion Artifacts') concerns
     a data-driven method to identify and remove motion-related independent
     components from fMRI data. To that end it exploits a small, but robust
     set of theoretically motivated features, preventing the need for classifier
-    re-training and therefore providing direct and easy applicability. 
+    re-training and therefore providing direct and easy applicability.
 
     See link for further documentation: https://github.com/rhr-pruim/ICA-AROMA
 
     Example
     -------
 
-    >>> from nipype.interfaces.fsl import ICA_AROMA 
+    >>> from nipype.interfaces.fsl import ICA_AROMA
     >>> from nipype.testing import example_data
     >>> AROMA_obj = ICA_AROMA.ICA_AROMA()
     >>> AROMA_obj.inputs.in_file = 'functional.nii'
@@ -114,5 +114,5 @@ class ICA_AROMA(CommandLine):
             outputs['aggr_denoised_file'] = os.path.join(out_dir, 'denoised_func_data_aggr.nii.gz')
         if self.inputs.denoise_type in ('nonaggr', 'both'):
             outputs['nonaggr_denoised_file'] = os.path.join(out_dir, 'denoised_func_data_nonaggr.nii.gz')
-        
+
         return outputs
