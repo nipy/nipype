@@ -4,6 +4,7 @@ docs.  In setup.py in particular, we exec this file, so it cannot import nipy
 """
 from __future__ import print_function, division, unicode_literals, absolute_import
 
+import sys
 
 # nipype version information.  An empty version_extra corresponds to a
 # full release.  '.dev' as a version_extra string means this is a development
@@ -138,11 +139,13 @@ REQUIRES = [
     'prov>=%s' % PROV_MIN_VERSION,
     'click>=%s' % CLICK_MIN_VERSION,
     'funcsigs',
-    'configparser',
     'pytest>=%s' % PYTEST_MIN_VERSION,
     'mock',
     'pydotplus'
 ]
+
+if sys.version_info <= (3, 4):
+    REQUIRES.append('configparser')
 
 TESTS_REQUIRES = [
     'pytest-cov',
