@@ -9,7 +9,7 @@ from __future__ import print_function, division, unicode_literals, absolute_impo
 # full release.  '.dev' as a version_extra string means this is a development
 # version
 # Remove -dev for release
-__version__ = '0.13.0'
+__version__ = '1.0.0-dev'
 
 
 def get_nipype_gitversion():
