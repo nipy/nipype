@@ -324,12 +324,7 @@
       "workflow",
       "pipeline"
     ],
-    "license": "Apache-2.0",
-      {
-        "identifier": "10.3389/fninf.2011.00013",
-        "relation": "isNewVersionOf",
-        "scheme": "doi"
-      }
+    "license": "Apache-2.0"
     ],
     "upload_type": "software"
   }
