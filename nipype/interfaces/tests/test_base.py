@@ -164,57 +164,60 @@ def test_TraitedSpec_logic():
     with pytest.raises(IOError): set_bar()
 
 
+
+class DeprecationSpec1(nib.TraitedSpec):
+    foo = traitlets.Int().tag(deprecated='0.1')
+
+class DeprecationSpec2(nib.TraitedSpec):
+    foo = traitlets.Int().tag(deprecated='100', new_name='bar')
+
+class DeprecationSpec3(nib.TraitedSpec):
+    foo = traitlets.Int(allow_none=True).tag(deprecated='1000', new_name='bar')
+    bar = traitlets.Int(allow_none=True)
+
+
 #dj TOASK: I want to rewrite/split the test, but want to be sure:
 #dj TOASK: should some of those tests really check if there is absolutely no warnings??
-def test_deprecation():
+@pytest.mark.parametrize("DeprecationClass, excinfo_secondpart", [
+        (DeprecationSpec1, 'Will be removed or raise an error'),
+        (DeprecationSpec2, 'Replacement trait bar not found')
+        ])
+def test_deprecation_1(DeprecationClass, excinfo_secondpart):
     with warnings.catch_warnings(record=True) as w:
         warnings.filterwarnings('always', '', UserWarning)
 
-        class DeprecationSpec1(nib.TraitedSpec):
-            foo = traitlets.Int().tag(deprecated='0.1')
-        spec_instance = DeprecationSpec1()
+        spec_instance = DeprecationClass()
         set_foo = lambda: setattr(spec_instance, 'foo', 1)
-        with pytest.raises(traitlets.TraitError): 
+        with pytest.raises(traitlets.TraitError) as excinfo: 
             set_foo()
-        assert len(w) == 0, 'no warnings, just errors'
-
-    with warnings.catch_warnings(record=True) as w:
-        warnings.filterwarnings('always', '', UserWarning)
-
-        class DeprecationSpec2(nib.TraitedSpec):
-            foo = traitlets.Int().tag(deprecated='100', new_name='bar')
-        spec_instance = DeprecationSpec2()
-        set_foo = lambda: setattr(spec_instance, 'foo', 1)
-        with pytest.raises(traitlets.TraitError): 
-            set_foo()
+        assert 'Input foo in interface %s is deprecated.' % DeprecationClass.__name__ in str(excinfo.value)
+        assert excinfo_secondpart in str(excinfo.value)
         assert len(w) == 0, 'no warnings, just errors'
 
 
+def test_deprecation_2():
     with warnings.catch_warnings(record=True) as w:
         warnings.filterwarnings('always', '', UserWarning)
 
-        class DeprecationSpec3(nib.TraitedSpec):
-            foo = traitlets.Int(allow_none=True).tag(deprecated='1000', new_name='bar')
-            bar = traitlets.Int(allow_none=True)
         spec_instance = DeprecationSpec3()
         # dj NOTE: din't understand the try/except block, removed
         spec_instance.foo = 1
         assert len(w) == 1, 'deprecated warning 1 %s' % [w1.message for w1 in w]
+        assert "Unsetting old value foo; setting new value bar" in str(w[0].message)
 
+def test_deprecation_3():
     with warnings.catch_warnings(record=True) as w:
         warnings.filterwarnings('always', '', UserWarning)
 
-        class DeprecationSpec3(nib.TraitedSpec):
-            foo = traitlets.Int(allow_none=True).tag(deprecated='1000', new_name='bar')
-            bar = traitlets.Int(allow_none=True)
         spec_instance = DeprecationSpec3()
         #pdb.set_trace()
         # dj NOTE: din't understand the try/except block, removed
         spec_instance.foo = 1
         assert spec_instance.foo is None
         assert spec_instance.bar == 1
-        #dj TODO: this gives me 2 warnings
         assert len(w) == 1, 'deprecated warning 2 %s' % [w1.message for w1 in w]
+        assert "Unsetting old value foo; setting new value bar"in str(w[0].message)
+
 
 @pytest.mark.xfail(reason="dj: WIP")
 def test_namesource(setup_file):
