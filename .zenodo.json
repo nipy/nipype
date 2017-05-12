@@ -325,12 +325,6 @@
       "pipeline"
     ],
     "license": "Apache-2.0",
-    "related_identifiers": [
-      {
-        "identifier": "https://github.com/nipy/nipype/tree/0.12.0-rc1",
-        "relation": "isSupplementTo",
-        "scheme": "url"
-      },
       {
         "identifier": "10.3389/fninf.2011.00013",
         "relation": "isNewVersionOf",
