@@ -141,7 +141,6 @@ def main():
         provides=ldict['PROVIDES'],
         packages=find_packages(),
         package_data={'nipype': testdatafiles},
-        scripts=glob('bin/*'),
         cmdclass={'build_py': BuildWithCommitInfoCommand},
         tests_require=ldict['TESTS_REQUIRES'],
         zip_safe=False,
