@@ -1118,7 +1118,6 @@ class MapNode(Node):
                         overwrite=self.overwrite,
                         needed_outputs=self.needed_outputs,
                         run_without_submitting=self.run_without_submitting,
-                        config=self.config,
                         base_dir=op.join(cwd, 'mapflow'),
                         name=nodename)
             node.plugin_args = self.plugin_args
@@ -1131,6 +1130,7 @@ class MapNode(Node):
                     fieldvals = filename_to_list(getattr(self.inputs, field))
                 logger.debug('setting input %d %s %s', i, field, fieldvals[i])
                 setattr(node.inputs, field, fieldvals[i])
+            node.config = self.config
             yield i, node
 
     def _node_runner(self, nodes, updatehash=False):
