@@ -64,24 +64,27 @@ class BaseFile(traitlets.Unicode):
         -------------
         *value* or ''
         """
+
         self.filter = filter
         self.auto_set = auto_set
         self.entries = entries
         self.exists = exists
-
+        #pdb.set_trace()
         if exists:
             self.info_text = 'an existing file name'
 
         super(BaseFile, self).__init__(value, **metadata)
 
     def validate(self, object, value):
-        # dj TODO: not sure about the "fast validator" in traitlets
-        # dj TODO: but traits.BaseUnicode also don't use the fast validator
+        # dj NOTE: not sure about the "fast validator" in traitlets
+        # dj NOTE: but traits.BaseUnicode also don't use the fast validator
         """ Validates that a specified value is valid for this trait.
 
             Note: The 'fast validator' version performs this check in C.
         """
+        #pdb.set_trace()
         validated_value = super(BaseFile, self).validate(object, value)
+        pdb.set_trace()
         if not self.exists:
             return validated_value
         elif os.path.isfile(value):

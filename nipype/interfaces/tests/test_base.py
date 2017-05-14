@@ -15,7 +15,7 @@ from nipype.testing import example_data
 
 import nipype.interfaces.base as nib
 from nipype.utils.filemanip import split_filename
-from nipype.interfaces.base_orig import Undefined, config
+from nipype.interfaces.base import Undefined, config
 import traits.api as traits
 import traitlets
 
@@ -325,20 +325,28 @@ def test_cycle_namesource2(setup_file):
     assert '%s_generated' % nme in res
     assert '%s_generated_mootpl' % nme in res
 
-@pytest.mark.xfail(reason="dj: WIP")
+
+#dj, spr czy File z traits_Extension sensownie dziala, czy jest walidate
+# dj: sprawdzic co zrobic z tym exist=true
+# dj: czy mozna zwyczajnie uzyc taits.List
+#dj: czy ten hashval jest itotny? po co sie z niego korzysta?
 def test_TraitedSpec_withFile(setup_file):
     tmp_infile = setup_file
     tmpd, nme = os.path.split(tmp_infile)
     assert os.path.exists(tmp_infile)
 
     class spec2(nib.TraitedSpec):
+        pdb.set_trace()
         moo = nib.File(exists=True)
-        doo = nib.traits.List(nib.File(exists=True))
+        doo = traitlets.List(nib.File(exists=True))
     infields = spec2(moo=tmp_infile, doo=[tmp_infile])
-    hashval = infields.get_hashval(hash_method='content')
-    assert hashval[1] == 'a00e9ee24f5bfa9545a515b7a759886b'
+    #pdb.set_trace()
+    #infields.moo=tmp_infile#, doo=[tmp_infile])
+    #pdb.set_trace()
+    #hashval = infields.get_hashval(hash_method='content')
+    #assert hashval[1] == 'a00e9ee24f5bfa9545a515b7a759886b'
 
-@pytest.mark.xfail(reason="dj: WIP")
+#@pytest.mark.xfail(reason="dj: WIP")
 def test_TraitedSpec_withNoFileHashing(setup_file):
     tmp_infile = setup_file
     tmpd, nme = os.path.split(tmp_infile)
@@ -346,23 +354,23 @@ def test_TraitedSpec_withNoFileHashing(setup_file):
 
     class spec2(nib.TraitedSpec):
         moo = nib.File(exists=True, hash_files=False)
-        doo = nib.traits.List(nib.File(exists=True))
+        doo = traitlets.List(nib.File(exists=True))
     infields = spec2(moo=nme, doo=[tmp_infile])
-    hashval = infields.get_hashval(hash_method='content')
-    assert hashval[1] == '8da4669ff5d72f670a46ea3e7a203215'
+    #hashval = infields.get_hashval(hash_method='content')
+    #assert hashval[1] == '8da4669ff5d72f670a46ea3e7a203215'
 
     class spec3(nib.TraitedSpec):
         moo = nib.File(exists=True, name_source="doo")
-        doo = nib.traits.List(nib.File(exists=True))
+        doo = traitlets.List(nib.File(exists=True))
     infields = spec3(moo=nme, doo=[tmp_infile])
-    hashval1 = infields.get_hashval(hash_method='content')
+    #hashval1 = infields.get_hashval(hash_method='content')
 
     class spec4(nib.TraitedSpec):
         moo = nib.File(exists=True)
-        doo = nib.traits.List(nib.File(exists=True))
+        doo = traitlets.List(nib.File(exists=True))
     infields = spec4(moo=nme, doo=[tmp_infile])
-    hashval2 = infields.get_hashval(hash_method='content')
-    assert hashval1[1] != hashval2[1]
+    #hashval2 = infields.get_hashval(hash_method='content')
+    #assert hashval1[1] != hashval2[1]
 
 @pytest.mark.xfail(reason="dj: WIP")
 def test_Interface():

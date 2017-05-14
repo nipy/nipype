@@ -367,8 +367,10 @@ class BaseTraitedSpec(traitlets.HasTraits):
         # arguments.  HasTraits does not define an __init__ and
         # therefore these args were being ignored.
         # super(TraitedSpec, self).__init__(*args, **kwargs)
+        #pdb.set_trace()
         super(BaseTraitedSpec, self).__init__(**kwargs)
-        # dj TODO: it shouldn't be needed with traitlets (Satra)
+        #pdb.set_trace()
+       # dj TODO: it shouldn't be needed with traitlets (Satra)
         #traits.push_exception_handler(reraise_exceptions=True)
         #pdb.set_trace()
         # dj TODO: not sure if I should keep usedefault 
@@ -711,12 +713,14 @@ class DynamicTraitedSpec(BaseTraitedSpec):
         return dup
 
 
+# dj NOTE: this class is the same as BaseTraitedSpec 
 class TraitedSpec(BaseTraitedSpec):
     """ Create a subclass with strict traits.
 
     This is used in 90% of the cases.
     """
-    _ = traits.Disallow
+    #_ = traits.Disallow
+    pass
 
 
 class Interface(object):
