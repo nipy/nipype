@@ -35,9 +35,12 @@ DictStrStr = traits.Dict((bytes, str), (bytes, str))
 # TODO dj: is it used anywhere???
 Str = traitlets.Unicode
 
+
+
 class BaseFile(traitlets.Unicode):
     """ Defines a trait whose value must be the name of a file.
     """
+    # dj TOTHINK: I'm not sure why this class is called by pytest before any test
 
     # A description of the type of value this trait accepts:
     info_text = 'a file name'
@@ -72,7 +75,7 @@ class BaseFile(traitlets.Unicode):
         #pdb.set_trace()
         if exists:
             self.info_text = 'an existing file name'
-
+        #pdb.set_trace()
         super(BaseFile, self).__init__(value, **metadata)
 
     def validate(self, object, value):
@@ -82,9 +85,8 @@ class BaseFile(traitlets.Unicode):
 
             Note: The 'fast validator' version performs this check in C.
         """
-        #pdb.set_trace()
+
         validated_value = super(BaseFile, self).validate(object, value)
-        pdb.set_trace()
         if not self.exists:
             return validated_value
         elif os.path.isfile(value):
@@ -180,7 +182,7 @@ class BaseDirectory (traitlets.Unicode):
 
             Note: The 'fast validator' version performs this check in C.
         """
-        pdb.set_trace()
+        #pdb.set_trace()
         if isinstance(value, (str, bytes)):
             if not self.exists:
                 return value
@@ -328,7 +330,7 @@ def has_metadata(trait, metadata, value=None, recursive=True):
     '''
     Checks if a given trait has a metadata (and optionally if it is set to particular value)
     '''
-    pdb.set_trace()
+    #pdb.set_trace()
     count = 0
     if hasattr(trait, "_metadata") and metadata in list(trait._metadata.keys()) and (trait._metadata[metadata] == value or value is None):
         count += 1

@@ -178,6 +178,7 @@ class DeprecationSpec3(nib.TraitedSpec):
 
 #dj TOASK: I want to rewrite/split the test, but want to be sure:
 #dj TOASK: should some of those tests really check if there is absolutely no warnings??
+
 @pytest.mark.parametrize("DeprecationClass, excinfo_secondpart", [
         (DeprecationSpec1, 'Will be removed or raise an error'),
         (DeprecationSpec2, 'Replacement trait bar not found')
@@ -337,15 +338,11 @@ def test_TraitedSpec_withFile(setup_file):
     assert os.path.exists(tmp_infile)
 
     class spec2(nib.TraitedSpec):
-        pdb.set_trace()
         moo = nib.File(exists=True)
         doo = traitlets.List(nib.File(exists=True))
     infields = spec2(moo=tmp_infile, doo=[tmp_infile])
-    #pdb.set_trace()
-    #infields.moo=tmp_infile#, doo=[tmp_infile])
-    #pdb.set_trace()
-    #hashval = infields.get_hashval(hash_method='content')
-    #assert hashval[1] == 'a00e9ee24f5bfa9545a515b7a759886b'
+    hashval = infields.get_hashval(hash_method='content')
+    assert hashval[1] == 'a00e9ee24f5bfa9545a515b7a759886b'
 
 @pytest.mark.xfail(reason="dj: WIP")
 def test_TraitedSpec_withNoFileHashing(setup_file):

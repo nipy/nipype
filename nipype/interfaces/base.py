@@ -70,6 +70,7 @@ class Str(traits.Unicode):
 
 #traits.Str = Str
 
+
 # dj : pomyslec, czy potrzebne
 class NipypeInterfaceError(Exception):
     def __init__(self, value):
@@ -591,8 +592,8 @@ class BaseTraitedSpec(traitlets.HasTraits):
         Return has_metadata for the requested trait name in this
         interface
         """
-        #pdb.set_trace()
-        return has_metadata(self.trait(name).trait_type, metadata, value,
+        # dj NOTE: looks like self.traits()[name] gives trait_type (from traits) 
+        return has_metadata(self.traits()[name], metadata, value,
                             recursive)
 
     # dj TODO: has_metadata doesn't work for now, so this also doesn'work
@@ -725,6 +726,7 @@ class TraitedSpec(BaseTraitedSpec):
     pass
 
 
+#dj: ta klasa nie ma nic z trait
 class Interface(object):
     """This is an abstract definition for Interface objects.
 
@@ -798,7 +800,7 @@ class Interface(object):
 
 
 class BaseInterfaceInputSpec(TraitedSpec):
-    ignore_exception = traits.Bool(False, desc="Print an error message instead \
+    ignore_exception = traitlets.Bool(False, desc="Print an error message instead \
 of throwing an exception in case the interface fails to run", usedefault=True,
                                    nohash=True)
 
