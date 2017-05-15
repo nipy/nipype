@@ -44,7 +44,7 @@ RUN apt-get update && \
 
 WORKDIR /opt
 # Installing freesurfer -- do it first so that it is cached early
-RUN curl -sSL https://surfer.nmr.mgh.harvard.edu/pub/dist/freesurfer/6.0.0/freesurfer-Linux-centos6_x86_64-stable-pub-v6.0.0.tar.gz | tar zxv -C /opt \
+RUN curl -sSL https://www.dropbox.com/s/0ldeovrmh26vabq/recon-all-freesurfer6.min.tgz?dl=0 | tar zxv -C /opt \
     --exclude='freesurfer/trctrain' \
     --exclude='freesurfer/subjects/fsaverage_sym' \
     --exclude='freesurfer/subjects/fsaverage3' \
