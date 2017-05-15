@@ -123,7 +123,7 @@ ENV FSLDIR=/usr/share/fsl/5.0 \
 # Installing and setting up ANTs
 RUN mkdir -p /opt/ants && \
     curl -sSL "https://www.dropbox.com/s/2f4sui1z6lcgyek/ANTs-Linux-centos5_x86_64-v2.2.0-0740f91.tar.gz?dl=1" \
-    | tar -xjC /opt/ants --strip-components 1
+    | tar -xzC /opt/ants --strip-components 1
 
 ENV ANTSPATH=/opt/ants \
     PATH=$ANTSPATH:$PATH
