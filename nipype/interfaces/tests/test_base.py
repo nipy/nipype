@@ -99,8 +99,8 @@ def test_TraitedSpec():
 
     infields = spec(foo=1)
     # dj TODO: get_hashval doesn't work yet
-    #hashval = ([('foo', 1), ('goo', '0.0000000000')], 'e89433b8c9141aa0fda2f8f4d662c047')
-    #assert infields.get_hashval() == hashval
+    hashval = ([('foo', 1), ('goo', '0.0000000000')], 'e89433b8c9141aa0fda2f8f4d662c047')
+    assert infields.get_hashval() == hashval
     assert infields.__repr__() == '\nfoo = 1\ngoo = 0.0\n'
 
 
@@ -328,10 +328,6 @@ def test_cycle_namesource2(setup_file):
     assert '%s_generated_mootpl' % nme in res
 
 
-#dj, spr czy File z traits_Extension sensownie dziala, czy jest walidate
-# dj: sprawdzic co zrobic z tym exist=true
-# dj: czy mozna zwyczajnie uzyc taits.List
-#dj: czy ten hashval jest itotny? po co sie z niego korzysta?
 def test_TraitedSpec_withFile(setup_file):
     tmp_infile = setup_file
     tmpd, nme = os.path.split(tmp_infile)
