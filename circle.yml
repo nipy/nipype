@@ -27,22 +27,35 @@ dependencies:
     - mkdir -p $WORKDIR && sudo setfacl -d -m group:ubuntu:rwx $WORKDIR && sudo setfacl -m group:ubuntu:rwx $WORKDIR
     - mkdir -p $HOME/docker $HOME/examples $WORKDIR/tests $WORKDIR/logs $WORKDIR/crashfiles ${CIRCLE_TEST_REPORTS}/tests/
     - if [[ ! -e "$HOME/bin/codecov" ]]; then mkdir -p $HOME/bin; curl -so $HOME/bin/codecov https://codecov.io/bash && chmod 755 $HOME/bin/codecov; fi
-  override:
-    - if [[ -e "$HOME/docker/cache.tar" ]]; then docker load --input $HOME/docker/cache.tar; fi :
+    - docker load --input $HOME/docker/cache.tar || true :
         timeout: 6000
-    - docker images
-    - docker pull nipype/base:latest
+  override:
+    # Get data
     - if [[ ! -d ~/examples/nipype-tutorial ]]; then wget --retry-connrefused --waitretry=5 --read-timeout=20 --timeout=15 -t 0 -q -O nipype-tutorial.tar.bz2 "${DATA_NIPYPE_TUTORIAL_URL}" && tar xjf nipype-tutorial.tar.bz2 -C ~/examples/; fi
     - if [[ ! -d ~/examples/nipype-fsl_course_data ]]; then wget --retry-connrefused --waitretry=5 --read-timeout=20 --timeout=15 -t 0 -q -O nipype-fsl_course_data.tar.gz "${DATA_NIPYPE_FSL_COURSE}" && tar xzf nipype-fsl_course_data.tar.gz -C ~/examples/; fi
     - if [[ ! -d ~/examples/feeds ]]; then wget --retry-connrefused --waitretry=5 --read-timeout=20 --timeout=15 -t 0 -q -O fsl-5.0.9-feeds.tar.gz "${DATA_NIPYPE_FSL_FEEDS}" && tar xzf fsl-5.0.9-feeds.tar.gz -C ~/examples/; fi
     - if [ "$CIRCLE_TAG" != "" ]; then sed -i -E "s/(__version__ = )'[A-Za-z0-9.-]+'/\1'$CIRCLE_TAG'/" nipype/info.py; fi
-#     - e=1 && for i in {1..5}; do docker build -f docker/base.Dockerfile --rm=false -t nipype/base:latest . && e=0 && break || sleep 15; done && [ "$e" -eq "0" ] :
-#         timeout: 21600
-    - e=1 && for i in {1..5}; do docker build --rm=false -t nipype/nipype:latest -t nipype/nipype:py36 --build-arg BUILD_DATE=`date -u +"%Y-%m-%dT%H:%M:%SZ"` --build-arg VCS_REF=`git rev-parse --short HEAD` --build-arg VERSION=$CIRCLE_TAG . && e=0 && break || sleep 15; done && [ "$e" -eq "0" ] :
+    # Docker
+    - docker images
+    - ? |
+        e=1 && for i in {1..5}; do
+            docker build --rm=false -f docker/base.Dockerfile -t nipype/base:latest . && e=0 && break || sleep 15;
+        done && [ "$e" -eq "0" ]
+      :
+        timeout: 21600
+    - ? |
+        e=1 && for i in {1..5}; do
+            docker build --rm=false -t nipype/nipype:latest -t nipype/nipype:py36 --build-arg BUILD_DATE=`date -u +"%Y-%m-%dT%H:%M:%SZ"` --build-arg VCS_REF=`git rev-parse --short HEAD` --build-arg VERSION=$CIRCLE_TAG . && e=0 && break || sleep 15;
+        done && [ "$e" -eq "0" ]
+      :
         timeout: 6000
-    - e=1 && for i in {1..5}; do docker build --rm=false -t nipype/nipype:py27 --build-arg PYTHON_VERSION_MAJOR=2 --build-arg PYTHON_VERSION_MINOR=7 --build-arg BUILD_DATE=`date -u +"%Y-%m-%dT%H:%M:%SZ"` --build-arg VCS_REF=`git rev-parse --short HEAD` --build-arg VERSION=$CIRCLE_TAG-py27 . && e=0 && break || sleep 15; done && [ "$e" -eq "0" ] :
+    - ? |
+        e=1 && for i in {1..5}; do
+            docker build --rm=false -t nipype/nipype:py27 --build-arg PYTHON_VERSION_MAJOR=2 --build-arg PYTHON_VERSION_MINOR=7 --build-arg BUILD_DATE=`date -u +"%Y-%m-%dT%H:%M:%SZ"` --build-arg VCS_REF=`git rev-parse --short HEAD` --build-arg VERSION=$CIRCLE_TAG-py27 . && e=0 && break || sleep 15;
+        done && [ "$e" -eq "0" ]
+      :
         timeout: 6000
-    - docker save -o $HOME/docker/cache.tar nipype/base:latest nipype/nipype:py36 nipype/nipype:py27 :
+    - docker save -o $HOME/docker/cache.tar ubuntu:xenial-20161213 nipype/base:latest nipype/nipype:py36 nipype/nipype:py27 :
         timeout: 6000
 
 test:
