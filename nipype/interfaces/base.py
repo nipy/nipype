@@ -621,10 +621,9 @@ class BaseTraitedSpec(traitlets.HasTraits):
         dict_nofilename = []
         #pdb.set_trace()
         for name, val in sorted(self.get().items()):
-            # dj TODO: has_metadata doesn't work for now
-            #if not isdefined(val) or self.has_metadata(name, "nohash", True):
+            if not isdefined(val) or self.has_metadata(name, "nohash", True):
                 # skip undefined traits and traits with nohash=True
-            #    continue
+                continue
 
             hash_files = (not self.has_metadata(name, "hash_files", False) and not
                           self.has_metadata(name, "name_source"))
@@ -661,12 +660,14 @@ class BaseTraitedSpec(traitlets.HasTraits):
             if isdefined(objekt):
                 if (hash_files and isinstance(objekt, (str, bytes)) and
                         os.path.isfile(objekt)):
+                    # dj: dla file wchodzi chyba zawsze tu, has method moze byc content
                     if hash_method is None:
                         hash_method = config.get('execution', 'hash_method')
 
                     if hash_method.lower() == 'timestamp':
                         hash = hash_timestamp(objekt)
                     elif hash_method.lower() == 'content':
+                        #dj: uzywa hashy z 'crypto' module
                         hash = hash_infile(objekt)
                     else:
                         raise Exception("Unknown hash method: %s" % hash_method)
@@ -677,6 +678,7 @@ class BaseTraitedSpec(traitlets.HasTraits):
                 elif isinstance(objekt, float):
                     out = FLOAT_FORMAT(objekt)
                 else:
+                    #dj: jak jest intem to wchodzi tu, czyli zwraca swoja wartosc
                     out = objekt
         return out
 

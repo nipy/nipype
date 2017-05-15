@@ -219,7 +219,7 @@ def test_deprecation_3():
         assert "Unsetting old value foo; setting new value bar"in str(w[0].message)
 
 
-@pytest.mark.xfail(reason="dj: WIP")
+#@pytest.mark.xfail(reason="dj: WIP")
 def test_namesource(setup_file):
     tmp_infile = setup_file
     tmpd, nme, ext = split_filename(tmp_infile)
@@ -228,13 +228,14 @@ def test_namesource(setup_file):
         moo = nib.File(name_source=['doo'], hash_files=False, argstr="%s",
                        position=2)
         doo = nib.File(exists=True, argstr="%s", position=1)
-        goo = traits.Int(argstr="%d", position=4)
+        goo = traitlets.Int(argstr="%d", position=4)
         poo = nib.File(name_source=['goo'], hash_files=False, argstr="%s",
                        position=3)
 
     class TestName(nib.CommandLine):
         _cmd = "mycommand"
         input_spec = spec2
+    pdb.set_trace()
     testobj = TestName()
     testobj.inputs.doo = tmp_infile
     testobj.inputs.goo = 99
@@ -346,7 +347,7 @@ def test_TraitedSpec_withFile(setup_file):
     #hashval = infields.get_hashval(hash_method='content')
     #assert hashval[1] == 'a00e9ee24f5bfa9545a515b7a759886b'
 
-#@pytest.mark.xfail(reason="dj: WIP")
+@pytest.mark.xfail(reason="dj: WIP")
 def test_TraitedSpec_withNoFileHashing(setup_file):
     tmp_infile = setup_file
     tmpd, nme = os.path.split(tmp_infile)
