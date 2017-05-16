@@ -48,7 +48,7 @@ WORKDIR /opt
 # 3. Install FreeSurfer v6.0 (minimized with reprozip):
 #    https://github.com/freesurfer/freesurfer/issues/70
 #-----------------------------------------------------------------------------
-RUN curl -sSL https://dl.dropbox.com/s/y3hvbdgfu4pfad8/recon-all-freesurfer6-1.min.tgz?dl=0 | tar zx -C /opt
+RUN curl -sSL https://dl.dropbox.com/s/pbaisn6m5qpi9uu/recon-all-freesurfer6-2.min.tgz?dl=0 | tar zx -C /opt
 ENV FS_OVERRIDE=0 \
     OS=Linux \
     FSF_OUTPUT_FORMAT=nii.gz \
