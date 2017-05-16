@@ -1247,7 +1247,8 @@ class UnifizeInputSpec(AFNICommandInputSpec):
         copyfile=False)
     out_file = File(
         desc='output image file name',
-        argstr='-prefix %s')
+        argstr='-prefix %s',
+        name_source='in_file')
     t2 = traits.Bool(
         desc='Treat the input as if it were T2-weighted, rather than '
              'T1-weighted. This processing is done simply by inverting '
