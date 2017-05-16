@@ -593,6 +593,7 @@ class BaseTraitedSpec(traitlets.HasTraits):
         interface
         """
         # dj NOTE: looks like self.traits()[name] gives trait_type (from traits) 
+        #pdb.set_trace()
         return has_metadata(self.traits()[name], metadata, value,
                             recursive)
 

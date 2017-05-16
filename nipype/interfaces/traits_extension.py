@@ -330,10 +330,10 @@ def has_metadata(trait, metadata, value=None, recursive=True):
     '''
     Checks if a given trait has a metadata (and optionally if it is set to particular value)
     '''
-    #pdb.set_trace()
     count = 0
-    if hasattr(trait, "_metadata") and metadata in list(trait._metadata.keys()) and (trait._metadata[metadata] == value or value is None):
+    if hasattr(trait, "metadata") and metadata in list(trait.metadata.keys()) and (trait.metadata[metadata] == value or value is None):
         count += 1
+        #pdb.set_trace()
     if recursive:
         if hasattr(trait, 'inner_traits'):
             for inner_trait in trait.inner_traits():
@@ -341,5 +341,5 @@ def has_metadata(trait, metadata, value=None, recursive=True):
         if hasattr(trait, 'handlers') and trait.handlers is not None:
             for handler in trait.handlers:
                 count += has_metadata(handler, metadata, recursive)
-
+    #if count > 0: pdb.set_trace()
     return count > 0
