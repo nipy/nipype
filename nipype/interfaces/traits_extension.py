@@ -30,10 +30,15 @@ from traits.trait_errors import TraitError
 from traits.trait_base import _Undefined
 
 
-# dj TODO: left traits.Dict for now, had error: 'Dict' object is not callable
-DictStrStr = traits.Dict((bytes, str), (bytes, str))
+# dj NOTE: `key_trait` must be a Trait or None
+# dj NOTE: when `value_trait` is a tuple, it doesn't give error, but just doesn't check the type
+# dj TODO: create an issue! 
+# dj NOTE: so either we created DictBytByt if needed, or write some extra class
+
+DictStrStr = traitlets.Dict(value_trait=traitlets.Unicode(), key_trait=traitlets.Unicode())
+
 # TODO dj: is it used anywhere???
-Str = traitlets.Unicode
+#Str = traitlets.Unicode
 
 
 

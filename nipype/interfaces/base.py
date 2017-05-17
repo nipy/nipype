@@ -65,7 +65,7 @@ __docformat__ = 'restructuredtext'
 
 # dj TODO: should remove
 # will use traitlets.Unicode
-class Str(traits.Unicode):
+class Str(traitlets.Unicode):
     pass
 
 #traits.Str = Str
@@ -626,7 +626,8 @@ class BaseTraitedSpec(traitlets.HasTraits):
             if not isdefined(val) or self.has_metadata(name, "nohash", True):
                 # skip undefined traits and traits with nohash=True
                 continue
-
+            
+            # dj TODO: hash_file shoule be remove, only part hash_file=True (Satra)
             hash_files = (not self.has_metadata(name, "hash_files", False) and not
                           self.has_metadata(name, "name_source"))
             dict_nofilename.append((name,
@@ -685,6 +686,8 @@ class BaseTraitedSpec(traitlets.HasTraits):
         return out
 
 
+# dj TOASK: I understand that this won't be used anymore (Satra)
+# dj TOASK: also the only test for this was mark as skip
 class DynamicTraitedSpec(BaseTraitedSpec):
     """ A subclass to handle dynamic traits
 
@@ -1669,18 +1672,22 @@ def get_dependencies(name, environ):
 
 class CommandLineInputSpec(BaseInterfaceInputSpec):
     args = Str(argstr='%s', desc='Additional parameters to the command')
-    environ = DictStrStr(desc='Environment variables', usedefault=True,
-                                nohash=True)
+    pdb.set_trace()
+    # dj: nijak nie dziala...
+    environ = DictStrStr.tag(
+        desc='Environment variables', usedefault=True,
+        nohash=True)
+    pdb.set_trace()
     # This input does not have a "usedefault=True" so the set_default_terminal_output()
     # method would work
-    terminal_output = traits.Enum('stream', 'allatonce', 'file', 'none',
-                                  desc=('Control terminal output: `stream` - '
-                                        'displays to terminal immediately (default), '
-                                        '`allatonce` - waits till command is '
-                                        'finished to display output, `file` - '
-                                        'writes output to file, `none` - output'
-                                        ' is ignored'),
-                                  nohash=True)
+    terminal_output = traitlets.Enum(['stream', 'allatonce', 'file', 'none']).tag(
+        desc=('Control terminal output: `stream` - '
+              'displays to terminal immediately (default), '
+              '`allatonce` - waits till command is '
+              'finished to display output, `file` - '
+              'writes output to file, `none` - output'
+              ' is ignored'),
+        nohash=True)
 
 
 class CommandLine(BaseInterface):

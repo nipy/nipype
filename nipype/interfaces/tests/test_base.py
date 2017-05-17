@@ -176,9 +176,8 @@ class DeprecationSpec3(nib.TraitedSpec):
     bar = traitlets.Int(allow_none=True)
 
 
-#dj TOASK: I want to rewrite/split the test, but want to be sure:
-#dj TOASK: should some of those tests really check if there is absolutely no warnings??
 
+#dj TOASK: should some of those tests check if there is absolutely no warnings??
 @pytest.mark.parametrize("DeprecationClass, excinfo_secondpart", [
         (DeprecationSpec1, 'Will be removed or raise an error'),
         (DeprecationSpec2, 'Replacement trait bar not found')
@@ -220,8 +219,8 @@ def test_deprecation_3():
         assert "Unsetting old value foo; setting new value bar"in str(w[0].message)
 
 
-#@pytest.mark.xfail(reason="dj: WIP")
 def test_namesource(setup_file):
+    pdb.set_trace()
     tmp_infile = setup_file
     tmpd, nme, ext = split_filename(tmp_infile)
 
