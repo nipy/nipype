@@ -181,7 +181,7 @@ class CreateJacobianDeterminantImage(ANTSCommand):
         return outputs
 
 
-class AffineInitializerInputSpec(CommandLineInputSpec):
+class AffineInitializerInputSpec(ANTSCommandInputSpec):
     dimension = traits.Enum(3, 2, usedefault=True, position=0, argstr='%s',
                             desc='dimension')
     fixed_image = File(exists=True, mandatory=True, position=1, argstr='%s',
@@ -207,7 +207,7 @@ class AffineInitializerOutputSpec(TraitedSpec):
     out_file = File(desc='output transform file')
 
 
-class AffineInitializer(CommandLine):
+class AffineInitializer(ANTSCommand):
     """
     Initialize an affine transform (as in antsBrainExtraction.sh)
 
