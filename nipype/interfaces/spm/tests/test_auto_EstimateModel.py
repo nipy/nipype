@@ -23,6 +23,8 @@ def test_EstimateModel_inputs():
     use_v8struct=dict(min_ver='8',
     usedefault=True,
     ),
+    write_residuals=dict(field='write_residuals',
+    ),
     )
     inputs = EstimateModel.input_spec()
 
@@ -36,6 +38,7 @@ def test_EstimateModel_outputs():
     beta_images=dict(),
     mask_image=dict(),
     residual_image=dict(),
+    residual_images=dict(),
     spm_mat_file=dict(),
     )
     outputs = EstimateModel.output_spec()

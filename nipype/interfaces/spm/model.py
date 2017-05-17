@@ -179,25 +179,27 @@ class Level1Design(SPMCommand):
 
 class EstimateModelInputSpec(SPMCommandInputSpec):
     spm_mat_file = File(exists=True, field='spmmat',
-                        desc='absolute path to SPM.mat',
-                        copyfile=True,
-                        mandatory=True)
-    estimation_method = traits.Dict(traits.Enum('Classical', 'Bayesian2',
-                                                'Bayesian'),
-                                    field='method',
-                                    desc=('Classical, Bayesian2, '
-                                          'Bayesian (dict)'),
-                                    mandatory=True)
-    flags = traits.Str(desc='optional arguments (opt)')
+        copyfile=True, mandatory=True,
+        desc='Absolute path to SPM.mat')
+    estimation_method = traits.Dict(
+        traits.Enum('Classical', 'Bayesian2', 'Bayesian'),
+        field='method', mandatory=True,
+        desc=('Dictionary of either Classical: 1, Bayesian: 1, '
+              'or Bayesian2: 1 (dict)'))
+    write_residuals = traits.Bool(field='write_residuals',
+        desc="Write individual residual images")
+    flags = traits.Dict(desc='Additional arguments')
 
 
 class EstimateModelOutputSpec(TraitedSpec):
     mask_image = File(exists=True,
-                      desc='binary mask to constrain estimation')
+        desc='binary mask to constrain estimation')
     beta_images = OutputMultiPath(File(exists=True),
-                                  desc='design parameter estimates')
+        desc='design parameter estimates')
     residual_image = File(exists=True,
-                          desc='Mean-squared image of the residuals')
+        desc='Mean-squared image of the residuals')
+    residual_images = OutputMultiPath(File(exists=True),
+        desc="individual residual images (requires `write_residuals`")
     RPVimage = File(exists=True, desc='Resels per voxel image')
     spm_mat_file = File(exists=True, desc='Updated SPM mat file')
 
@@ -225,7 +227,7 @@ class EstimateModel(SPMCommand):
             return np.array([str(val)], dtype=object)
         if opt == 'estimation_method':
             if isinstance(val, (str, bytes)):
-                return {'%s' % val: 1}
+                return {'{}'.format(val): 1}
             else:
                 return val
         return super(EstimateModel, self)._format_arg(opt, spec, val)
@@ -235,7 +237,8 @@ class EstimateModel(SPMCommand):
         """
         einputs = super(EstimateModel, self)._parse_inputs(skip=('flags'))
         if isdefined(self.inputs.flags):
-            einputs[0].update(self.inputs.flags)
+            einputs[0].update({flag: val for (flag, val) in
+                               self.inputs.flags.items()})
         return einputs
 
     def _list_outputs(self):
@@ -262,6 +265,9 @@ class EstimateModel(SPMCommand):
             rpv = os.path.join(pth, 'RPV.nii')
         else:
             rpv = os.path.join(pth, 'RPV.img')
+        if self.inputs.write_residuals:
+            outres = [x for x in glob(os.path.join(pth, 'Res_*'))]
+            outputs['residual_images'] = outres
         outputs['RPVimage'] = rpv
         spm = os.path.join(pth, 'SPM.mat')
         outputs['spm_mat_file'] = spm
