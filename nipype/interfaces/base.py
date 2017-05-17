@@ -352,6 +352,7 @@ class BaseTraitedSpec(traits.HasTraits):
     XXX Reconsider this in the long run, but it seems like the best
     solution to move forward on the refactoring.
     """
+    package_version = nipype_version
 
     def __init__(self, **kwargs):
         """ Initialize handlers and inputs"""
@@ -444,7 +445,7 @@ class BaseTraitedSpec(traits.HasTraits):
             else:
                 msg3 = ''
             msg = ' '.join((msg1, msg2, msg3))
-            if LooseVersion(str(trait_spec.deprecated)) < nipype_version:
+            if LooseVersion(str(trait_spec.deprecated)) < self.package_version:
                 raise TraitError(msg)
             else:
                 if trait_spec.new_name:
