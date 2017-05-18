@@ -15,6 +15,7 @@ def test_BBRegister_inputs():
         init_reg_file=dict(argstr='--init-reg %s', mandatory=True, xor=['init'],),
         intermediate_file=dict(argstr='--int %s',),
         out_fsl_file=dict(argstr='--fslmat %s',),
+        out_lta_file=dict(argstr='--lta %s', min_ver='5.2.0',),
         out_reg_file=dict(argstr='--reg %s', genfile=True,),
         reg_frame=dict(argstr='--frame %d', xor=['reg_middle_frame'],),
         reg_middle_frame=dict(argstr='--mid-frame', xor=['reg_frame'],),
@@ -37,6 +38,7 @@ def test_BBRegister_inputs():
         init_reg_file=dict(argstr='--init-reg %s', xor=['init'],),
         intermediate_file=dict(argstr='--int %s',),
         out_fsl_file=dict(argstr='--fslmat %s',),
+        out_lta_file=dict(argstr='--lta %s', min_ver='5.2.0',),
         out_reg_file=dict(argstr='--reg %s', genfile=True,),
         reg_frame=dict(argstr='--frame %d', xor=['reg_middle_frame'],),
         reg_middle_frame=dict(argstr='--mid-frame', xor=['reg_frame'],),
@@ -62,6 +64,7 @@ def test_BBRegister_inputs():
 def test_BBRegister_outputs():
     output_map = dict(min_cost_file=dict(),
                       out_fsl_file=dict(),
+                      out_lta_file=dict(),
                       out_reg_file=dict(),
                       registered_file=dict(),
                       )
