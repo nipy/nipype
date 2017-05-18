@@ -107,6 +107,7 @@ class ICA_AROMA(CommandLine):
     output_spec = ICA_AROMAOutputSpec
 
     def _list_outputs(self):
+        outputs = self.output_spec().get()
         out_dir = os.path.abspath(self.inputs.out_dir)
         outputs['out_dir'] = out_dir
 
