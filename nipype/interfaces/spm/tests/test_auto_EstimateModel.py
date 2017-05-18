@@ -34,8 +34,13 @@ def test_EstimateModel_inputs():
 
 
 def test_EstimateModel_outputs():
-    output_map = dict(RPVimage=dict(),
+    output_map = dict(ARcoef=dict(),
+    Cbetas=dict(),
+    RPVimage=dict(),
+    SDbetas=dict(),
+    SDerror=dict(),
     beta_images=dict(),
+    labels=dict(),
     mask_image=dict(),
     residual_image=dict(),
     residual_images=dict(),

@@ -29,7 +29,7 @@ from ...utils.filemanip import (filename_to_list, list_to_filename,
 from ..base import (Bunch, traits, TraitedSpec, File, Directory,
                     OutputMultiPath, InputMultiPath, isdefined)
 from .base import (SPMCommand, SPMCommandInputSpec,
-                   scans_for_fnames)
+                   scans_for_fnames, ImageFileSPM)
 
 __docformat__ = 'restructuredtext'
 logger = logging.getLogger('interface')
@@ -192,16 +192,25 @@ class EstimateModelInputSpec(SPMCommandInputSpec):
 
 
 class EstimateModelOutputSpec(TraitedSpec):
-    mask_image = File(exists=True,
+    mask_image = ImageFileSPM(exists=True,
         desc='binary mask to constrain estimation')
-    beta_images = OutputMultiPath(File(exists=True),
+    beta_images = OutputMultiPath(ImageFileSPM(exists=True),
         desc='design parameter estimates')
-    residual_image = File(exists=True,
+    residual_image = ImageFileSPM(exists=True,
         desc='Mean-squared image of the residuals')
-    residual_images = OutputMultiPath(File(exists=True),
+    residual_images = OutputMultiPath(ImageFileSPM(exists=True),
         desc="individual residual images (requires `write_residuals`")
-    RPVimage = File(exists=True, desc='Resels per voxel image')
+    RPVimage = ImageFileSPM(exists=True, desc='Resels per voxel image')
     spm_mat_file = File(exists=True, desc='Updated SPM mat file')
+    labels = ImageFileSPM(exists=True, desc="label file")
+    SDerror = OutputMultiPath(ImageFileSPM(exists=True),
+        desc="Images of the standard deviation of the error")
+    ARcoef = OutputMultiPath(ImageFileSPM(exists=True),
+        desc="Images of the AR coefficient")
+    Cbetas = OutputMultiPath(ImageFileSPM(exists=True),
+        desc="Images of the parameter posteriors")
+    SDbetas = OutputMultiPath(ImageFileSPM(exists=True),
+        desc="Images of the standard deviation of parameter posteriors")
 
 
 class EstimateModel(SPMCommand):
@@ -213,6 +222,7 @@ class EstimateModel(SPMCommand):
     --------
     >>> est = EstimateModel()
     >>> est.inputs.spm_mat_file = 'SPM.mat'
+    >>> est.inputs.estimation_method = {'Classical': 1}
     >>> est.run() # doctest: +SKIP
     """
     input_spec = EstimateModelInputSpec
@@ -243,34 +253,37 @@ class EstimateModel(SPMCommand):
 
     def _list_outputs(self):
         outputs = self._outputs().get()
-        pth, _ = os.path.split(self.inputs.spm_mat_file)
-        spm12 = '12' in self.version.split('.')[0]
-        if spm12:
-            mask = os.path.join(pth, 'mask.nii')
-        else:
-            mask = os.path.join(pth, 'mask.img')
-        outputs['mask_image'] = mask
+        pth = os.path.dirname(self.inputs.spm_mat_file)
+        outtype = 'nii' if '12' in self.version.split('.')[0] else 'img'
         spm = sio.loadmat(self.inputs.spm_mat_file, struct_as_record=False)
-        betas = []
-        for vbeta in spm['SPM'][0, 0].Vbeta[0]:
-            betas.append(str(os.path.join(pth, vbeta.fname[0])))
-        if betas:
-            outputs['beta_images'] = betas
-        if spm12:
-            resms = os.path.join(pth, 'ResMS.nii')
-        else:
-            resms = os.path.join(pth, 'ResMS.img')
-        outputs['residual_image'] = resms
-        if spm12:
-            rpv = os.path.join(pth, 'RPV.nii')
-        else:
-            rpv = os.path.join(pth, 'RPV.img')
-        if self.inputs.write_residuals:
-            outres = [x for x in glob(os.path.join(pth, 'Res_*'))]
-            outputs['residual_images'] = outres
-        outputs['RPVimage'] = rpv
-        spm = os.path.join(pth, 'SPM.mat')
-        outputs['spm_mat_file'] = spm
+
+        betas = [vbeta.fname[0] for vbeta in spm['SPM'][0, 0].Vbeta[0]]
+        if ('Bayesian' in self.inputs.estimation_method.keys() or
+            'Bayesian2' in self.inputs.estimation_method.keys()):
+            outputs['labels'] = os.path.join(pth,
+                                            'labels.{}'.format(outtype))
+            outputs['SDerror'] = glob(os.path.join(pth, 'Sess*_SDerror*'))
+            outputs['ARcoef'] = glob(os.path.join(pth, 'Sess*_AR_*'))
+            if betas:
+                outputs['Cbetas'] = [os.path.join(pth, 'C{}'.format(beta))
+                                            for beta in betas]
+                outputs['SDbetas'] = [os.path.join(pth, 'SD{}'.format(beta))
+                                            for beta in betas]
+
+        if 'Classical' in self.inputs.estimation_method.keys():
+            outputs['residual_image'] = os.path.join(pth,
+                                            'ResMS.{}'.format(outtype))
+            outputs['RPVimage'] =  os.path.join(pth,
+                                            'RPV.{}'.format(outtype))
+            if self.inputs.write_residuals:
+                outputs['residual_images'] = glob(os.path.join(pth, 'Res_*'))
+            if betas:
+                outputs['beta_images'] = [os.path.join(pth, beta)
+                                            for beta in betas]
+
+        outputs['mask_image'] = os.path.join(pth,
+                                            'mask.{}'.format(outtype))
+        outputs['spm_mat_file'] = os.path.join(pth, 'SPM.mat')
         return outputs
 
 
