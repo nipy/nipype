@@ -55,7 +55,7 @@ dependencies:
         done && [ "$e" -eq "0" ]
       :
         timeout: 6000
-    - docker save ubuntu:xenial-20161213 nipype/base:latest nipype/nipype:py36 nipype/nipype:py27 | gzip > -o $HOME/docker/cache.tar.gz :
+    - docker save ubuntu:xenial-20161213 nipype/base:latest nipype/nipype:py36 nipype/nipype:py27 && gzip -9 $HOME/docker/cache.tar :
         timeout: 6000
 
 test:
