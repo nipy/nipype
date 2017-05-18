@@ -1112,9 +1112,14 @@ class MapNode(Node):
             nitems = len(filename_to_list(getattr(self.inputs, self.iterfield[0])))
         for i in range(nitems):
             nodename = '_' + self.name + str(i)
-            node = Node(deepcopy(self._interface), name=nodename)
-            node.overwrite = self.overwrite
-            node.run_without_submitting = self.run_without_submitting
+            node = Node(deepcopy(self._interface),
+                        n_procs=self._interface.num_threads,
+                        mem_gb=self._interface.estimated_memory_gb,
+                        overwrite=self.overwrite,
+                        needed_outputs=self.needed_outputs,
+                        run_without_submitting=self.run_without_submitting,
+                        base_dir=op.join(cwd, 'mapflow'),
+                        name=nodename)
             node.plugin_args = self.plugin_args
             node._interface.inputs.set(
                 **deepcopy(self._interface.inputs.get()))
@@ -1126,7 +1131,6 @@ class MapNode(Node):
                 logger.debug('setting input %d %s %s', i, field, fieldvals[i])
                 setattr(node.inputs, field, fieldvals[i])
             node.config = self.config
-            node.base_dir = op.join(cwd, 'mapflow')
             yield i, node
 
     def _node_runner(self, nodes, updatehash=False):

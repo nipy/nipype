@@ -44,39 +44,25 @@ RUN apt-get update && \
 
 WORKDIR /opt
 # Installing freesurfer -- do it first so that it is cached early
-RUN curl -sSL https://surfer.nmr.mgh.harvard.edu/pub/dist/freesurfer/6.0.0/freesurfer-Linux-centos6_x86_64-stable-pub-v6.0.0.tar.gz | tar zxv -C /opt \
-    --exclude='freesurfer/trctrain' \
-    --exclude='freesurfer/subjects/fsaverage_sym' \
-    --exclude='freesurfer/subjects/fsaverage3' \
-    --exclude='freesurfer/subjects/fsaverage4' \
-    --exclude='freesurfer/subjects/fsaverage5' \
-    --exclude='freesurfer/subjects/fsaverage6' \
-    --exclude='freesurfer/subjects/cvs_avg35' \
-    --exclude='freesurfer/subjects/cvs_avg35_inMNI152' \
-    --exclude='freesurfer/subjects/bert' \
-    --exclude='freesurfer/subjects/V1_average' \
-    --exclude='freesurfer/average/mult-comp-cor' \
-    --exclude='freesurfer/lib/cuda' \
-    --exclude='freesurfer/lib/qt'
-
-ENV FSL_DIR=/usr/share/fsl/5.0 \
+#-----------------------------------------------------------------------------
+# 3. Install FreeSurfer v6.0 (minimized with reprozip):
+#    https://github.com/freesurfer/freesurfer/issues/70
+#-----------------------------------------------------------------------------
+RUN curl -sSL https://dl.dropbox.com/s/pbaisn6m5qpi9uu/recon-all-freesurfer6-2.min.tgz?dl=0 | tar zx -C /opt
+ENV FS_OVERRIDE=0 \
     OS=Linux \
-    FS_OVERRIDE=0 \
-    FIX_VERTEX_AREA= \
     FSF_OUTPUT_FORMAT=nii.gz \
+    FIX_VERTEX_AREA=\
     FREESURFER_HOME=/opt/freesurfer
-ENV SUBJECTS_DIR=$FREESURFER_HOME/subjects \
-    FUNCTIONALS_DIR=$FREESURFER_HOME/sessions \
-    MNI_DIR=$FREESURFER_HOME/mni \
-    LOCAL_DIR=$FREESURFER_HOME/local \
-    FSFAST_HOME=$FREESURFER_HOME/fsfast \
-    MINC_BIN_DIR=$FREESURFER_HOME/mni/bin \
-    MINC_LIB_DIR=$FREESURFER_HOME/mni/lib \
-    MNI_DATAPATH=$FREESURFER_HOME/mni/data \
-    FMRI_ANALYSIS_DIR=$FREESURFER_HOME/fsfast
-ENV PERL5LIB=$MINC_LIB_DIR/perl5/5.8.5 \
-    MNI_PERL5LIB=$MINC_LIB_DIR/perl5/5.8.5 \
-    PATH=$FREESURFER_HOME/bin:$FSFAST_HOME/bin:$FREESURFER_HOME/tktools:$MINC_BIN_DIR:$PATH
+ENV MNI_DIR=$FREESURFER_HOME/mni \
+    SUBJECTS_DIR=$FREESURFER_HOME/subjects
+ENV PERL5LIB=$MNI_DIR/share/perl5 \
+    MNI_PERL5LIB=$MNI_DIR/share/perl5 \
+    MINC_BIN_DIR=$MNI_DIR/bin \
+    MINC_LIB_DIR=$MNI_DIR/lib \
+    MNI_DATAPATH=$MNI_DIR/data
+ENV PATH=$FREESURFER_HOME/bin:$FREESURFER_HOME/tktools:$MINC_BIN_DIR:$PATH
+ENV FSL_DIR=/usr/share/fsl/5.0
 RUN echo "cHJpbnRmICJrcnp5c3p0b2YuZ29yZ29sZXdza2lAZ21haWwuY29tXG41MTcyXG4gKkN2dW12RVYzelRmZ1xuRlM1Si8yYzFhZ2c0RVxuIiA+IC9vcHQvZnJlZXN1cmZlci9saWNlbnNlLnR4dAo=" | base64 -d | sh
 
 # Enable neurodebian
@@ -122,8 +108,8 @@ ENV FSLDIR=/usr/share/fsl/5.0 \
 
 # Installing and setting up ANTs
 RUN mkdir -p /opt/ants && \
-    curl -sSL "https://github.com/stnava/ANTs/releases/download/v2.1.0/Linux_Ubuntu14.04.tar.bz2" \
-    | tar -xjC /opt/ants --strip-components 1
+    curl -sSL "https://dl.dropbox.com/s/2f4sui1z6lcgyek/ANTs-Linux-centos5_x86_64-v2.2.0-0740f91.tar.gz?dl=0" \
+    | tar -zx -C /opt
 
 ENV ANTSPATH=/opt/ants \
     PATH=$ANTSPATH:$PATH
