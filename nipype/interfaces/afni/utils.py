@@ -24,6 +24,7 @@ from ...utils.filemanip import (load_json, save_json, split_filename)
 from ..base import (
     CommandLineInputSpec, CommandLine, Directory, TraitedSpec,
     traits, isdefined, File, InputMultiPath, Undefined, Str)
+from ...external.due import BibTeX
 
 from .base import (
     AFNICommandBase, AFNICommand, AFNICommandInputSpec, AFNICommandOutputSpec)
@@ -694,6 +695,16 @@ class FWHMx(AFNICommandBase):
     _cmd = '3dFWHMx'
     input_spec = FWHMxInputSpec
     output_spec = FWHMxOutputSpec
+
+    references_ = [{'entry': BibTeX('@article{CoxReynoldsTaylor2016,'
+                                    'author={R.W. Cox, R.C. Reynolds, and P.A. Taylor},'
+                                    'title={AFNI and clustering: false positive rates redux},'
+                                    'journal={bioRxiv},'
+                                    'year={2016},'
+                                    '}'),
+                    'tags': ['method'],
+                    },
+                   ]
     _acf = True
 
     def _parse_inputs(self, skip=None):
@@ -1224,6 +1235,109 @@ class To3D(AFNICommand):
     _cmd = 'to3d'
     input_spec = To3DInputSpec
     output_spec = AFNICommandOutputSpec
+
+
+class UnifizeInputSpec(AFNICommandInputSpec):
+    in_file = File(
+        desc='input file to 3dUnifize',
+        argstr='-input %s',
+        position=-1,
+        mandatory=True,
+        exists=True,
+        copyfile=False)
+    out_file = File(
+        desc='output image file name',
+        argstr='-prefix %s',
+        name_source='in_file')
+    t2 = traits.Bool(
+        desc='Treat the input as if it were T2-weighted, rather than '
+             'T1-weighted. This processing is done simply by inverting '
+             'the image contrast, processing it as if that result were '
+             'T1-weighted, and then re-inverting the results '
+             'counts of voxel overlap, i.e., each voxel will contain the '
+             'number of masks that it is set in.',
+        argstr='-T2')
+    gm = traits.Bool(
+        desc='Also scale to unifize \'gray matter\' = lower intensity voxels '
+             '(to aid in registering images from different scanners).',
+        argstr='-GM')
+    urad = traits.Float(
+        desc='Sets the radius (in voxels) of the ball used for the sneaky '
+             'trick. Default value is 18.3, and should be changed '
+             'proportionally if the dataset voxel size differs significantly '
+             'from 1 mm.',
+        argstr='-Urad %s')
+    scale_file = File(
+        desc='output file name to save the scale factor used at each voxel ',
+        argstr='-ssave %s')
+    no_duplo = traits.Bool(
+        desc='Do NOT use the \'duplo down\' step; this can be useful for '
+             'lower resolution datasets.',
+        argstr='-noduplo')
+    epi = traits.Bool(
+        desc='Assume the input dataset is a T2 (or T2*) weighted EPI time '
+             'series. After computing the scaling, apply it to ALL volumes '
+             '(TRs) in the input dataset. That is, a given voxel will be '
+             'scaled by the same factor at each TR. '
+             'This option also implies \'-noduplo\' and \'-T2\'.'
+             'This option turns off \'-GM\' if you turned it on.',
+        argstr='-EPI',
+        requires=['no_duplo', 't2'],
+        xor=['gm'])
+
+
+class UnifizeOutputSpec(TraitedSpec):
+    scale_file = File(desc='scale factor file')
+    out_file = File(desc='unifized file', exists=True)
+
+
+class Unifize(AFNICommand):
+    """3dUnifize - for uniformizing image intensity
+
+    * The input dataset is supposed to be a T1-weighted volume,
+      possibly already skull-stripped (e.g., via 3dSkullStrip).
+      However, this program can be a useful step to take BEFORE
+      3dSkullStrip, since the latter program can fail if the input
+      volume is strongly shaded -- 3dUnifize will (mostly) remove
+      such shading artifacts.
+
+    * The output dataset has the white matter (WM) intensity approximately
+      uniformized across space, and scaled to peak at about 1000.
+
+    * The output dataset is always stored in float format!
+
+    * If the input dataset has more than 1 sub-brick, only sub-brick
+      #0 will be processed!
+
+    * Want to correct EPI datasets for nonuniformity?
+      You can try the new and experimental [Mar 2017] '-EPI' option.
+
+    * The principal motive for this program is for use in an image
+      registration script, and it may or may not be useful otherwise.
+
+    * This program replaces the older (and very different) 3dUniformize,
+      which is no longer maintained and may sublimate at any moment.
+      (In other words, we do not recommend the use of 3dUniformize.)
+
+    For complete details, see the `3dUnifize Documentation.
+    <https://afni.nimh.nih.gov/pub/dist/doc/program_help/3dUnifize.html>`_
+
+    Examples
+    ========
+
+    >>> from nipype.interfaces import afni
+    >>> unifize = afni.Unifize()
+    >>> unifize.inputs.in_file = 'structural.nii'
+    >>> unifize.inputs.out_file = 'structural_unifized.nii'
+    >>> unifize.cmdline  # doctest: +ALLOW_UNICODE
+    '3dUnifize -prefix structural_unifized.nii -input structural.nii'
+    >>> res = unifize.run()  # doctest: +SKIP
+
+    """
+
+    _cmd = '3dUnifize'
+    input_spec = UnifizeInputSpec
+    output_spec = UnifizeOutputSpec
 
 
 class ZCutUpInputSpec(AFNICommandInputSpec):

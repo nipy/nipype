@@ -89,7 +89,7 @@ To enable the tests depending on these data, just unpack the targz file and set 
 variable to point to that folder.
 
 Xfail tests
-~~~~~~~~~~
+~~~~~~~~~~~
 
 Some tests are expect to fail until the code will be changed or for other reasons.
 
@@ -109,16 +109,17 @@ Testing Nipype using Docker
 
 As of :code:`nipype-0.13`, Nipype is tested inside Docker containers. First, install the
 `Docker Engine <https://docs.docker.com/engine/installation/>`_.
-Nipype has one base docker image called nipype/nipype, and several additional test images
+Nipype has one base docker image called nipype/base:latest, and several additional test images
 for various Python versions.
 
-The base nipype/nipype image is built as follows::
+The base nipype image is built as follows::
 
   cd path/to/nipype/
-  docker build -t nipype/nipype .
+  docker build -t nipype/base:latest -f docker/base.Dockerfile .
 
-This base image contains several useful tools (FreeSurfer, AFNI, FSL, ANTs, etc.) and
-a nipype installation, all in Python 3.5.
+This base image contains several useful tools (FreeSurfer, AFNI, FSL, ANTs, etc.),
+but not nipype.
+
 It is possible to fetch a built image from the latest master branch of nipype
 using::
 
@@ -128,26 +129,15 @@ using::
 The docker run command will then open the container and offer a bash shell for the
 developer.
 
-The additional test images have several test scripts installed. For instance,
-to build and run all tests on Python 2.7::
+For building a continer for running nipype in Python 3.6::
 
   cd path/to/nipype/
-  docker build -f docker/Dockerfile_py27 -t nipype/nipype_test:py27 .
+  docker build -f Dockerfile -t nipype/nipype_test:py36 .
   docker run -it --rm -e FSL_COURSE_DATA="/root/examples/nipype-fsl_course_data" \
                       -v ~/examples:/root/examples:ro \
                       -v ~/scratch:/scratch \
                       -w /root/src/nipype \
-                      nipype/nipype_test:py27 /usr/bin/run_pytests.sh
+                      nipype/nipype_test:py36 /usr/bin/run_pytests.sh
 
-For running nipype in Python 3.5::
-
-  cd path/to/nipype/
-  docker build -f docker/Dockerfile_py35 -t nipype/nipype_test:py35 .
-  docker run -it --rm -e FSL_COURSE_DATA="/root/examples/nipype-fsl_course_data" \
-                      -v ~/examples:/root/examples:ro \
-                      -v ~/scratch:/scratch \
-                      -w /root/src/nipype \
-                      nipype/nipype_test:py35 /usr/bin/run_pytests.sh
-
-The last two examples assume that the example data is downladed into ~/examples and
+The last examples assume that the example data is downladed into ~/examples and
 the ~/scratch folder will be created if it does not exist previously.

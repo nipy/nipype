@@ -40,4 +40,6 @@ fi
 # Collect crashfiles
 find ${WORKDIR} -name "crash-*" -maxdepth 1 -exec mv {} ${WORKDIR}/crashfiles/ \;
 
+echo "Unit tests finished with exit code ${exit_code}"
 exit ${exit_code}
+

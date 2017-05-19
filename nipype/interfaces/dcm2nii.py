@@ -309,7 +309,10 @@ class Dcm2niix(CommandLine):
                 else:
                     pass
                 if out_file:
-                    files.append(out_file + ".nii.gz")
+                    if self.inputs.compress == 'n':
+                        files.append(out_file + ".nii")
+                    else:
+                        files.append(out_file + ".nii.gz")
                     if self.inputs.bids_format:
                         bids.append(out_file + ".json")
                     continue

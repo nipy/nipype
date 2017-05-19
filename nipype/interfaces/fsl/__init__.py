@@ -19,16 +19,17 @@ from .utils import (AvScale, Smooth, Merge, ExtractROI, Split, ImageMaths, Image
                     SwapDimensions, PowerSpectrum, Reorient2Std,
                     Complex, InvWarp, WarpUtils, ConvertWarp, WarpPoints,
                     WarpPointsToStd, RobustFOV, CopyGeom, MotionOutliers)
-
 from .epi import (PrepareFieldmap, TOPUP, ApplyTOPUP, Eddy, EPIDeWarp,
                   SigLoss, EddyCorrect, EpiReg)
-
 from .dti import (BEDPOSTX, XFibres, DTIFit,
                   ProbTrackX, ProbTrackX2,
                   VecReg, ProjThresh, FindTheBiggest, DistanceMap,
                   TractSkeleton, MakeDyadicVectors, BEDPOSTX5, XFibres5)
 from .maths import (ChangeDataType, Threshold, MeanImage, ApplyMask,
                     IsotropicSmooth, TemporalFilter, DilateImage, ErodeImage,
-                    SpatialFilter, UnaryMaths, BinaryMaths, MultiImageMaths)
-
+                    SpatialFilter, UnaryMaths, BinaryMaths, MultiImageMaths,
+                    MaxnImage, MinImage, MedianImage, PercentileImage,
+                    AR1Image)
 from .possum import B0Calc
+from .fix import (AccuracyTester, Classifier, Cleaner, FeatureExtractor,
+                  Training, TrainingSetCreator)

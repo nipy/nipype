@@ -113,22 +113,30 @@ from os.path import relpath
 from errno import EEXIST
 import traceback
 
-from docutils.parsers.rst import directives
-from docutils.parsers.rst.directives.images import Image
-
+missing_imports = []
+try:
+    from docutils.parsers.rst import directives
+    from docutils.parsers.rst.directives.images import Image
+    align = Image.align
+except ImportError as e:
+    missing_imports = [str(e)]
 
 try:
     # Sphinx depends on either Jinja or Jinja2
     import jinja2
     def format_template(template, **kw):
         return jinja2.Template(template).render(**kw)
-except ImportError:
-    import jinja
-    def format_template(template, **kw):
-        return jinja.from_string(template, **kw)
+except ImportError as e:
+    missing_imports.append(str(e))
+    try:
+        import jinja
+        def format_template(template, **kw):
+            return jinja.from_string(template, **kw)
+        missing_imports.pop()
+    except ImportError as e:
+        missing_imports.append(str(e))
 
 from builtins import str, bytes
-align = Image.align
 
 PY2 = sys.version_info[0] == 2
 PY3 = sys.version_info[0] == 3
@@ -152,7 +160,10 @@ def _mkdirp(folder):
 
 def wf_directive(name, arguments, options, content, lineno,
                    content_offset, block_text, state, state_machine):
-    return run(arguments, content, options, state_machine, state, lineno)
+    if len(missing_imports) == 0:
+        return run(arguments, content, options, state_machine, state, lineno)
+    else:
+        raise ImportError('\n'.join(missing_imports))
 wf_directive.__doc__ = __doc__
 
 def _option_boolean(arg):

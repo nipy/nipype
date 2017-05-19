@@ -1,13 +1,14 @@
 # -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
+from builtins import str
 import os
 
 import pytest
 from nipype.testing.fixtures import create_files_in_directory
 
 from nipype.interfaces import freesurfer
-from nipype.interfaces.freesurfer.preprocess import FSVersion
+from nipype.interfaces.freesurfer import Info
 from nipype import LooseVersion
 
 
@@ -138,7 +139,7 @@ def test_bbregister(create_files_in_directory):
     bbr.inputs.contrast_type = 't2'
 
     # Check that 'init' is mandatory in FS < 6, but not in 6+
-    if LooseVersion(FSVersion) < LooseVersion("6.0.0"):
+    if Info.looseversion() < LooseVersion("6.0.0"):
         with pytest.raises(ValueError):
             bbr.cmdline
     else:
@@ -154,3 +155,9 @@ def test_bbregister(create_files_in_directory):
                            '--reg {base}_bbreg_fsaverage.dat '
                            '--mov {full} --s fsaverage'.format(
                             full=filelist[0], base=base))
+
+def test_FSVersion():
+    """Check that FSVersion is a string that can be compared with LooseVersion
+    """
+    assert isinstance(freesurfer.preprocess.FSVersion, str)
+    assert LooseVersion(freesurfer.preprocess.FSVersion) >= LooseVersion("0")

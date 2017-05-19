@@ -6,7 +6,7 @@
 from __future__ import print_function, division, unicode_literals, absolute_import
 from builtins import range, open
 
-import os
+import os, sys
 from copy import deepcopy
 from shutil import rmtree
 import pytest
@@ -343,6 +343,8 @@ def dummy_func(value):
     return value + 1
 
 
+@pytest.mark.skipif(sys.version_info < (3,0),
+                   reason="the famous segfault #1788")
 def test_mapnode_crash(tmpdir):
     """Test mapnode crash when stop_on_first_crash is True"""
     cwd = os.getcwd()
@@ -360,6 +362,8 @@ def test_mapnode_crash(tmpdir):
     os.chdir(cwd)
 
 
+@pytest.mark.skipif(sys.version_info < (3,0),
+                   reason="the famous segfault #1788")
 def test_mapnode_crash2(tmpdir):
     """Test mapnode crash when stop_on_first_crash is False"""
     cwd = os.getcwd()
@@ -376,6 +380,8 @@ def test_mapnode_crash2(tmpdir):
     os.chdir(cwd)
 
 
+@pytest.mark.skipif(sys.version_info < (3,0),
+                   reason="the famous segfault #1788")
 def test_mapnode_crash3(tmpdir):
     """Test mapnode crash when mapnode is embedded in a workflow"""
     node = pe.MapNode(niu.Function(input_names=['WRONG'],

@@ -56,14 +56,11 @@ def test_split(tmpdir, args, expected):
         ([3], {}, [0, [1, 2], [3, 4, 5]], [0, 1, 2, 3, 4, 5]),
         ([0], {}, None, None),
         ([], {}, [], []),
-        ([], {}, [0, [1, 2], [3, 4, 5]], [0, 1, 2, 3, 4, 5]),
+        ([], {}, [0, [1, 2], [3, 4, 5]], [0, [1, 2], [3, 4, 5]]),
         ([3], {'axis': 'hstack'}, [[0], [1, 2], [3, 4, 5]], [[0, 1, 3]]),
         ([3], {'axis': 'hstack'}, [[0, 1], [2, 3], [4, 5]],
          [[0, 2, 4], [1, 3, 5]]),
         ([3], {'axis': 'hstack'}, [[0, 1], [2, 3], [4, 5]],
-         [[0, 2, 4], [1, 3, 5]]),
-        ([1], {'axis': 'hstack'}, [[0], [1, 2], [3, 4, 5]], [[0, 1, 3]]),
-        ([1], {'axis': 'hstack'}, [[0, 1], [2, 3], [4, 5]],
          [[0, 2, 4], [1, 3, 5]]),
         ])
 def test_merge(tmpdir, args, kwargs, in_lists, expected):
@@ -71,10 +68,8 @@ def test_merge(tmpdir, args, kwargs, in_lists, expected):
 
     node = pe.Node(utility.Merge(*args, **kwargs), name='merge')
 
-    numinputs = args[0] if args else 1
-    if numinputs == 1:
-        node.inputs.in_lists = in_lists
-    elif numinputs > 1:
+    numinputs = args[0] if args else 0
+    if numinputs >= 1:
         for i in range(1, numinputs + 1):
             setattr(node.inputs, 'in{:d}'.format(i), in_lists[i - 1])
 
