@@ -391,15 +391,14 @@ class N4BiasFieldCorrection(ANTSCommand):
         runtime = super(N4BiasFieldCorrection, self)._run_interface(
             runtime, correct_return_codes)
 
-        if self.inputs.copy_header:
+        if self.inputs.copy_header and runtime.returncode in correct_return_codes:
             import nibabel as nb
-            refnii = nb.load(self.inputs.input_image)
-            hdr = refnii.header.copy()
+            in_img = nb.load(self.inputs.input_image)
             out_file = self._gen_filename('output_image')
-            nii = nb.load(out_file)
-            hdr.set_data_dtype(nii.header.get_data_dtype())
-            nb.Nifti1Image(nii.get_data(), refnii.affine, hdr).to_filename(
-                out_file)
+            out_img = nb.load(out_file, mmap=False)
+            new_img = out_img.__class__(out_img.get_data(), in_img.affine, in_img.header)
+            new_img.set_data_dtype(out_img.get_data_dtype())
+            new_img.to_filename(out_file)
 
         return runtime
 
