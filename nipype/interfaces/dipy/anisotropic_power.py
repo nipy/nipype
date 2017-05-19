@@ -60,7 +60,10 @@ class APMQball(DipyDiffusionInterface):
         # Fit it
         model = shm.QballModel(gtab,8)
         sphere = get_sphere('symmetric724')
-        peaks = peaks_from_model(model=model, data=data, relative_peak_threshold=.5, min_separation_angle=25, sphere=sphere, mask=mask)
+        peaks = peaks_from_model(model=model, data=data,
+                                 relative_peak_threshold=.5,
+                                 min_separation_angle=25,
+                                 sphere=sphere, mask=mask)
         apm = shm.anisotropic_power(peaks.shm_coeff)
         out_file = self._gen_filename('apm')
         nb.Nifti1Image(apm.astype("float32"), affine).to_filename(out_file)
