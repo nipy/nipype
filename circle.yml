@@ -27,7 +27,7 @@ dependencies:
     - mkdir -p $WORKDIR && sudo setfacl -d -m group:ubuntu:rwx $WORKDIR && sudo setfacl -m group:ubuntu:rwx $WORKDIR
     - mkdir -p $HOME/docker $HOME/examples $WORKDIR/tests $WORKDIR/logs $WORKDIR/crashfiles ${CIRCLE_TEST_REPORTS}/tests/
     - if [[ ! -e "$HOME/bin/codecov" ]]; then mkdir -p $HOME/bin; curl -so $HOME/bin/codecov https://codecov.io/bash && chmod 755 $HOME/bin/codecov; fi
-    - gzcat $HOME/docker/cache.tar.gz | docker load || true :
+    - gunzip $HOME/docker/cache.tar.gz && docker load --input $HOME/docker/cache.tar || true :
         timeout: 6000
   override:
     # Get data
