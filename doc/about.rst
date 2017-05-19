@@ -13,13 +13,13 @@ Citation
    Gorgolewski, Krzysztof J.; Esteban, Oscar; Burns, Christopher; Ziegler, Erik; Pinsard, Basile; Madison, Cindee; Waskom, Michael;
    Ellis, David Gage; Clark, Dav; Wong, Jason; Dayan, Michael; Manhães-Savio, Alexandre; Notter, Michael Philipp; Johnson, Hans;
    Dewey, Blake E; Halchenko, Yaroslav O.; Hamalainen, Carlo; Keshavan, Anisha; Clark, Daniel; Huntenburg, Julia M.; Hanke, Michael;
-   Nichols, B. Nolan; Wassermann , Demian; Eshaghi, Arman; Markiewicz, Christopher J.; Varoquaux, Gael; Acland, Benjamin; 
+   Nichols, B. Nolan; Wassermann , Demian; Eshaghi, Arman; Markiewicz, Christopher J.; Varoquaux, Gael; Acland, Benjamin;
    Forbes, Jessica; Rokem, Ariel; Kong, Xiang-Zhen; Gramfort, Alexandre; Kleesiek, Jens; Schaefer, Alexander; Sikka, Sharad;
    Perez-Guevara, Martin Felipe; Glatard, Tristan; Iqbal, Shariq; Liu, Siqi; Welch, David; Sharp, Paul; Warner, Joshua; Kastman, Erik;
    Lampe, Leonie; Perkins, L. Nathan; Craddock, R. Cameron; Küttner, René; Bielievtsov, Dmytro; Geisler, Daniel; Gerhard, Stephan;
    Liem, Franziskus; Linkersdörfer, Janosch; Margulies, Daniel S.; Andberg, Sami Kristian; Stadler, Jörg; Steele, Christopher John;
    Broderick, William; Cipollini, Ben; Cooper, Gavin; Floren, Andrew; Huang, Lijie; Gonzalez, Ivan; McNamee, Daniel;
-   Papadopoulos Orfanos, Dimitri; Pellman, John; Triplett, William; Goncalves, Mathias; Durnez, Joke; Ghosh, Satrajit (2017). Nipype: 
+   Papadopoulos Orfanos, Dimitri; Pellman, John; Triplett, William; Goncalves, Mathias; Durnez, Joke; Ghosh, Satrajit (2017). Nipype:
    a flexible, lightweight and extensible neuroimaging data processing framework in Python.
    0.13.0 Zenodo. `10.5281/zenodo.50186 <http://dx.doi.org/10.5281/zenodo.575897>`_
 
@@ -94,7 +94,7 @@ Citation
 			  Goncalves, Mathias and
 			  Durnez, Joke and
 			  Ghosh, Satrajit},
-	  title        = {{Nipype: a flexible, lightweight and extensible 
+	  title        = {{Nipype: a flexible, lightweight and extensible
 			   neuroimaging data processing framework in Python.
 			   0.13.0}},
 	  month        = may,

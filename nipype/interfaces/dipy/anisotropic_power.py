@@ -28,7 +28,7 @@ class APMQballOutputSpec(TraitedSpec):
 
 class APMQball(DipyDiffusionInterface):
     """
-    Calculates the anisotropic power map 
+    Calculates the anisotropic power map
 
     Example
     -------
