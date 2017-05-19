@@ -392,16 +392,21 @@ class N4BiasFieldCorrection(ANTSCommand):
             runtime, correct_return_codes)
 
         if self.inputs.copy_header and runtime.returncode in correct_return_codes:
-            import nibabel as nb
-            in_img = nb.load(self.inputs.input_image)
-            out_file = self._gen_filename('output_image')
-            out_img = nb.load(out_file, mmap=False)
-            new_img = out_img.__class__(out_img.get_data(), in_img.affine, in_img.header)
-            new_img.set_data_dtype(out_img.get_data_dtype())
-            new_img.to_filename(out_file)
+            self._copy_header(self._gen_filename('output_image'))
+            if self.inputs.save_bias or isdefined(self.inputs.bias_image):
+                self._copy_header(self._gen_filename('bias_image'))
 
         return runtime
 
+    def _copy_header(self, fname):
+        """Copy header from input image to an output image"""
+        import nibabel as nb
+        in_img = nb.load(self.inputs.input_image)
+        out_img = nb.load(fname, mmap=False)
+        new_img = out_img.__class__(out_img.get_data(), in_img.affine,
+                                    in_img.header)
+        new_img.set_data_dtype(out_img.get_data_dtype())
+        new_img.to_filename(fname)
 
 
 class CorticalThicknessInputSpec(ANTSCommandInputSpec):
