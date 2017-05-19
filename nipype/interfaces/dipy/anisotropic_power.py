@@ -16,6 +16,7 @@ from .base import DipyDiffusionInterface, DipyBaseInterfaceInputSpec
 
 IFLOGGER = logging.getLogger('interface')
 
+
 class APMQballInputSpec(DipyBaseInterfaceInputSpec):
     mask_file = File(exists=True,
                      desc='An optional brain mask')
@@ -23,6 +24,7 @@ class APMQballInputSpec(DipyBaseInterfaceInputSpec):
 
 class APMQballOutputSpec(TraitedSpec):
     out_file = File(exists=True)
+
 
 class APMQball(DipyDiffusionInterface):
     """
@@ -43,9 +45,8 @@ class APMQball(DipyDiffusionInterface):
 
     def _run_interface(self, runtime):
         from dipy.reconst import shm
-        from dipy.io.utils import nifti1_symmat
-	from dipy.data import get_sphere
-	from dipy.reconst.peaks import peaks_from_model
+        from dipy.data import get_sphere
+        from dipy.reconst.peaks import peaks_from_model
 
         gtab = self._get_gradient_table()
 
@@ -58,14 +59,12 @@ class APMQball(DipyDiffusionInterface):
 
         # Fit it
         model = shm.QballModel(gtab,8)
-	sphere = get_sphere('symmetric724')
-        fit = model.fit(data, mask)
-	peaks = peaks_from_model(model=model, data=data, relative_peak_threshold=.5, min_separation_angle=25, sphere=sphere, mask=mask)
+        sphere = get_sphere('symmetric724')
+        peaks = peaks_from_model(model=model, data=data, relative_peak_threshold=.5, min_separation_angle=25, sphere=sphere, mask=mask)
         apm = shm.anisotropic_power(peaks.shm_coeff)
-	out_file = self._gen_filename('apm')
-	nb.Nifti1Image(apm.astype("float32"), affine).to_filename(out_file)
+        out_file = self._gen_filename('apm')
+        nb.Nifti1Image(apm.astype("float32"), affine).to_filename(out_file)
         IFLOGGER.info('APM qball image saved as {i}'.format(i=out_file))
-
 
         return runtime
 
