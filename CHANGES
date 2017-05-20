@@ -1,5 +1,18 @@
-Upcoming Release
-================
+0.13.1 (May 20, 2017)
+=====================
+
+* FIX: Make release compatible with conda-forge build process (https://github.com/nipy/nipype/pull/2017)
+* ENH: Update some minimum versions in compliance with Debian Jessie (https://github.com/nipy/nipype/pull/2017)
+* ENH: Circle builds use cached docker layers (https://github.com/nipy/nipype/pull/2017)
+* ENH: Base docker to use FS6 and ANTS 2.2.0 (https://github.com/nipy/nipype/pull/2024)
+* FIX: Mailmap and contributor acknowledgment (https://github.com/nipy/nipype/pull/2017)
+* FIX: Preserve node properties in sub nodes of MapNode (https://github.com/nipy/nipype/pull/2019)
+* FIX: Fix interfaces 3DUnifize, ICA_AROMA, BinaryMaths, RegAverage, BBRegister,
+  AffineInitializer (https://github.com/nipy/nipype/pull/2025, https://github.com/nipy/nipype/pull/2027,
+  https://github.com/nipy/nipype/pull/2036, https://github.com/nipy/nipype/pull/2037,
+  https://github.com/nipy/nipype/pull/2031, https://github.com/nipy/nipype/pull/2010)
+* ENH: Add Anisotropic Power interface (https://github.com/nipy/nipype/pull/2039)
+* FIX: Bayesian estimation in SPM (https://github.com/nipy/nipype/pull/2030)
 
 0.13.0 (May 11, 2017)
 =====================

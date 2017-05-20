@@ -13,6 +13,9 @@ You can follow the `Nipype tutorial <https://miykael.github.io/nipype_tutorial/>
 
 or use this docker container: `docker pull nipype/nipype`
 
+or if you want to build custom docker containers with specific versions of
+software see `Neurodocker <https://github.com/kaczmarj/neurodocker>`_
+
 Using conda
 ~~~~~~~~~~~
 
