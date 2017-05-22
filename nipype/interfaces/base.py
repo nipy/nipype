@@ -368,9 +368,9 @@ class BaseTraitedSpec(traitlets.HasTraits):
         # arguments.  HasTraits does not define an __init__ and
         # therefore these args were being ignored.
         # super(TraitedSpec, self).__init__(*args, **kwargs)
-        #pdb.set_trace()
+        pdb.set_trace()
         super(BaseTraitedSpec, self).__init__(**kwargs)
-        #pdb.set_trace()
+        pdb.set_trace()
        # dj TODO: it shouldn't be needed with traitlets (Satra)
         #traits.push_exception_handler(reraise_exceptions=True)
         #pdb.set_trace()
@@ -386,6 +386,8 @@ class BaseTraitedSpec(traitlets.HasTraits):
         #self.set(**kwargs)
         for (key, val) in kwargs.items():
             self.__setattr__(key, val)
+        pdb.set_trace()
+        pass
 
 
     def items(self):
@@ -419,7 +421,7 @@ class BaseTraitedSpec(traitlets.HasTraits):
                 self.on_trait_change(self._deprecated_warn, tr_name)
 
 
-    # dj: in traitlets the handler signature is different...
+    # dj NOTE: in traitlets the handler signature is different...
     def _xor_warn(self, name, old, new):
         """ Generates warnings for xor traits
         """
@@ -551,7 +553,7 @@ class BaseTraitedSpec(traitlets.HasTraits):
     def _clean_container(self, object, undefinedval=None, skipundefined=False):
         """Convert a traited obejct into a pure python representation.
         """
-        # dj TODO: it's not enough to check isinstance(object, dict) ?
+        # dj TODO: it's not enough to check isinstance(object, dict) ? NIE!!
         # if isinstance(object, TraitDictObject) or isinstance(object, dict):
         if isinstance(object, dict):
             out = {}
@@ -584,20 +586,17 @@ class BaseTraitedSpec(traitlets.HasTraits):
                     out = undefinedval
         return out
 
-    # TODO dj: doesn't work for now. trailets doesn't have "trait" method
-    # TODO dj: and I'm not sure about metadata itself
-    # TODO dj: it looks, this is used only in get_hashval
+
     def has_metadata(self, name, metadata, value=None, recursive=True):
         """
         Return has_metadata for the requested trait name in this
         interface
         """
         # dj NOTE: looks like self.traits()[name] gives trait_type (from traits) 
-        #pdb.set_trace()
         return has_metadata(self.traits()[name], metadata, value,
                             recursive)
 
-    # dj TODO: has_metadata doesn't work for now, so this also doesn'work
+
     def get_hashval(self, hash_method=None):
         """Return a dictionary of our items with hashes for each file.
 
@@ -621,7 +620,6 @@ class BaseTraitedSpec(traitlets.HasTraits):
 
         dict_withhash = []
         dict_nofilename = []
-        #pdb.set_trace()
         for name, val in sorted(self.get().items()):
             if not isdefined(val) or self.has_metadata(name, "nohash", True):
                 # skip undefined traits and traits with nohash=True
@@ -636,7 +634,6 @@ class BaseTraitedSpec(traitlets.HasTraits):
             dict_withhash.append((name,
                                   self._get_sorteddict(val, True, hash_method=hash_method,
                                                        hash_files=hash_files)))
-            #pdb.set_trace()
         return dict_withhash, md5(to_str(dict_nofilename).encode()).hexdigest()
 
 
@@ -663,14 +660,13 @@ class BaseTraitedSpec(traitlets.HasTraits):
             if isdefined(objekt):
                 if (hash_files and isinstance(objekt, (str, bytes)) and
                         os.path.isfile(objekt)):
-                    # dj: dla file wchodzi chyba zawsze tu, has method moze byc content
                     if hash_method is None:
                         hash_method = config.get('execution', 'hash_method')
 
                     if hash_method.lower() == 'timestamp':
                         hash = hash_timestamp(objekt)
                     elif hash_method.lower() == 'content':
-                        #dj: uzywa hashy z 'crypto' module
+                        #dj:  'crypto' module
                         hash = hash_infile(objekt)
                     else:
                         raise Exception("Unknown hash method: %s" % hash_method)
@@ -687,6 +683,7 @@ class BaseTraitedSpec(traitlets.HasTraits):
 
 
 # dj TOASK: I understand that this won't be used anymore (Satra)
+# dj TOASK: it was needed only because of deepcopy (?)
 # dj TOASK: also the only test for this was mark as skip
 class DynamicTraitedSpec(BaseTraitedSpec):
     """ A subclass to handle dynamic traits
@@ -730,7 +727,7 @@ class TraitedSpec(BaseTraitedSpec):
     pass
 
 
-#dj: ta klasa nie ma nic z trait
+#dj: no trait
 class Interface(object):
     """This is an abstract definition for Interface objects.
 
@@ -804,6 +801,7 @@ class Interface(object):
 
 
 class BaseInterfaceInputSpec(TraitedSpec):
+    pdb.set_trace()
     ignore_exception = traitlets.Bool(False, desc="Print an error message instead \
 of throwing an exception in case the interface fails to run", usedefault=True,
                                    nohash=True)
@@ -837,9 +835,8 @@ class BaseInterface(Interface):
         if not self.input_spec:
             raise Exception('No input_spec in class: %s' %
                             self.__class__.__name__)
-
         self.inputs = self.input_spec(**inputs)
-        self.estimated_memory_gb = 0.25
+        self.estimated_memory_gb = 1
         self.num_threads = 1
 
         if from_file is not None:
@@ -1671,13 +1668,12 @@ def get_dependencies(name, environ):
 
 
 class CommandLineInputSpec(BaseInterfaceInputSpec):
-    args = Str(argstr='%s', desc='Additional parameters to the command')
     pdb.set_trace()
-    # dj: nijak nie dziala...
+    args = Str(argstr='%s', desc='Additional parameters to the command')
+    # dj: does it work?
     environ = DictStrStr.tag(
         desc='Environment variables', usedefault=True,
         nohash=True)
-    pdb.set_trace()
     # This input does not have a "usedefault=True" so the set_default_terminal_output()
     # method would work
     terminal_output = traitlets.Enum(['stream', 'allatonce', 'file', 'none']).tag(
@@ -1725,13 +1721,15 @@ class CommandLine(BaseInterface):
     '11c37f97649cd61627f4afe5136af8c0'
 
     """
-    input_spec = CommandLineInputSpec
+    input_spec = CommandLineInputSpec #dj: gives an error if  no input_spec 
     _cmd = None
     _version = None
     _terminal_output = 'stream'
 
     def __init__(self, command=None, **inputs):
-        super(CommandLine, self).__init__(**inputs)
+        pdb.set_trace() #dj: input_spec = "spec2"
+        super(CommandLine, self).__init__(**inputs) #dj: gives max rec 
+        pdb.set_trace()
         self._environ = None
         if not hasattr(self, '_cmd'):
             self._cmd = None
@@ -1745,6 +1743,7 @@ class CommandLine(BaseInterface):
             self.inputs.terminal_output = self._terminal_output
         else:
             self._terminal_output_update()
+
 
     def _terminal_output_update(self):
         self._terminal_output = self.inputs.terminal_output

@@ -98,7 +98,6 @@ def test_TraitedSpec():
     #with pytest.raises(nib.traits.TraitError): specfunc(1)
 
     infields = spec(foo=1)
-    # dj TODO: get_hashval doesn't work yet
     hashval = ([('foo', 1), ('goo', '0.0000000000')], 'e89433b8c9141aa0fda2f8f4d662c047')
     assert infields.get_hashval() == hashval
     assert infields.__repr__() == '\nfoo = 1\ngoo = 0.0\n'
@@ -159,7 +158,7 @@ def test_TraitedSpec_logic():
     with pytest.warns(UserWarning): 
         myif.inputs.kung_bar = 2
 
-    # dj: this test can't be earlier, since bar is set regardless the error
+    # dj NOTE: this test can't be earlier, since bar is set regardless the error
     set_bar = lambda: setattr(myif.inputs, 'bar', 1)    
     with pytest.raises(IOError): set_bar()
 
@@ -219,30 +218,45 @@ def test_deprecation_3():
         assert "Unsetting old value foo; setting new value bar"in str(w[0].message)
 
 
-def test_namesource(setup_file):
+# dj TODO: just testing a single class, remove at the end (?)
+def test_temp_namesource():
+    class spec2(nib.CommandLineInputSpec):
+        goo = traitlets.Int()#.tag(argstr="%d", position=4)                                          
     pdb.set_trace()
+    ms = spec2()
+    pdb.set_trace()
+    ms.goo #dj: ms gives "RecursionError", but ms.goo = 0
+
+
+
+def test_namesource(setup_file):
     tmp_infile = setup_file
     tmpd, nme, ext = split_filename(tmp_infile)
 
+
     class spec2(nib.CommandLineInputSpec):
-        moo = nib.File(name_source=['doo'], hash_files=False, argstr="%s",
-                       position=2)
-        doo = nib.File(exists=True, argstr="%s", position=1)
-        goo = traitlets.Int(argstr="%d", position=4)
-        poo = nib.File(name_source=['goo'], hash_files=False, argstr="%s",
-                       position=3)
+        #moo = nib.File().tag(name_source=['doo'], hash_files=False, argstr="%s",
+        #                     position=2)
+        #doo = nib.File(exists=True)#.tag(argstr="%s", position=1)
+        goo = traitlets.Int()#.tag(argstr="%d", position=4)
+        #poo = nib.File().tag(name_source=['goo'], hash_files=False, argstr="%s",
+        #                     position=3)
 
     class TestName(nib.CommandLine):
         _cmd = "mycommand"
+        #dj: input_spec has to be defined
+        pdb.set_trace()
         input_spec = spec2
     pdb.set_trace()
-    testobj = TestName()
-    testobj.inputs.doo = tmp_infile
+    testobj = TestName() #dj: goes to l.387 
+    pdb.set_trace()
+    #testobj.inputs.doo = tmp_infile 
     testobj.inputs.goo = 99
-    assert '%s_generated' % nme in testobj.cmdline
-    assert '%d_generated' % testobj.inputs.goo in testobj.cmdline
-    testobj.inputs.moo = "my_%s_template"
-    assert 'my_%s_template' % nme in testobj.cmdline
+    pdb.set_trace()
+    #assert '%s_generated' % nme in testobj.cmdline
+    #assert '%d_generated' % testobj.inputs.goo in testobj.cmdline
+    #testobj.inputs.moo = "my_%s_template"
+    #assert 'my_%s_template' % nme in testobj.cmdline
 
 @pytest.mark.xfail(reason="dj: WIP")
 def test_chained_namesource(setup_file):
@@ -335,7 +349,10 @@ def test_TraitedSpec_withFile(setup_file):
     class spec2(nib.TraitedSpec):
         moo = nib.File(exists=True)
         doo = traitlets.List(nib.File(exists=True))
-    infields = spec2(moo=tmp_infile, doo=[tmp_infile])
+    pdb.set_trace()
+    infields = spec2()#moo=tmp_infile, doo=[tmp_infile])
+    infields.moo = tmp_infile
+    infields.doo=[tmp_infile]
     hashval = infields.get_hashval(hash_method='content')
     assert hashval[1] == 'a00e9ee24f5bfa9545a515b7a759886b'
 
@@ -659,7 +676,7 @@ def test_Commandline():
     assert ci6._parse_inputs()[0] == 'filename'
     nib.CommandLine.input_spec = nib.CommandLineInputSpec
 
-@pytest.mark.xfail(reason="dj: WIP")
+#@pytest.mark.xfail(reason="dj: WIP")
 def test_Commandline_environ():
     from nipype import config
     config.set_default_config()
