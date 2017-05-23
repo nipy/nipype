@@ -171,9 +171,7 @@ class Autobox(AFNICommand):
             m = re.search(pattern, line)
             if m:
                 d = m.groupdict()
-                for k in list(d.keys()):
-                    d[k] = int(d[k])
-                outputs.set(**d)
+                outputs.trait_set(**{k, int(d[k]) for k in d.keys()})
         return outputs
 
 
