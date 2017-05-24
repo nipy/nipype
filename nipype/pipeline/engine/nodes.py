@@ -489,14 +489,14 @@ class Node(EngineBase):
                 outputs = result.outputs.get()
             except TypeError:
                 outputs = result.outputs.dictcopy()  # outputs was a bunch
-            result.outputs.trait_set(**modify_paths(outputs, relative=True,
-                                                    basedir=cwd))
+            result.outputs.set(**modify_paths(outputs, relative=True,
+                                              basedir=cwd))
 
         savepkl(resultsfile, result)
         logger.debug('saved results in %s', resultsfile)
 
         if result.outputs:
-            result.outputs.trait_set(**outputs)
+            result.outputs.set(**outputs)
 
     def _load_resultfile(self, cwd):
         """Load results if it exists in cwd
@@ -543,9 +543,9 @@ class Node(EngineBase):
                     except TypeError:
                         outputs = result.outputs.dictcopy()  # outputs == Bunch
                     try:
-                        result.outputs.trait_set(**modify_paths(outputs,
-                                                                relative=False,
-                                                                basedir=cwd))
+                        result.outputs.set(**modify_paths(outputs,
+                                                          relative=False,
+                                                          basedir=cwd))
                     except FileNotFoundError:
                         logger.debug('conversion to full path results in '
                                      'non existent file')
