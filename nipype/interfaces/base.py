@@ -368,9 +368,9 @@ class BaseTraitedSpec(traitlets.HasTraits):
         # arguments.  HasTraits does not define an __init__ and
         # therefore these args were being ignored.
         # super(TraitedSpec, self).__init__(*args, **kwargs)
-        pdb.set_trace()
+        #pdb.set_trace()
         super(BaseTraitedSpec, self).__init__(**kwargs)
-        pdb.set_trace()
+        #pdb.set_trace()
        # dj TODO: it shouldn't be needed with traitlets (Satra)
         #traits.push_exception_handler(reraise_exceptions=True)
         #pdb.set_trace()
@@ -384,9 +384,10 @@ class BaseTraitedSpec(traitlets.HasTraits):
         #self.trait_set(trait_change_notify=False, **undefined_traits)#dj remove
         self._generate_handlers()
         #self.set(**kwargs)
+        #dj TODO: write set method
         for (key, val) in kwargs.items():
             self.__setattr__(key, val)
-        pdb.set_trace()
+        #pdb.set_trace()
         pass
 
 
@@ -546,7 +547,8 @@ class BaseTraitedSpec(traitlets.HasTraits):
         out = {}
         for key in self.class_trait_names():
             out[key] = self.__getattribute__(key)
-        out = self._clean_container(out, Undefined)
+        # dj TOTHINK: why did I add it????!!! i guess it's not needed
+        #out = self._clean_container(out, None)
         out = self._clean_container(out, skipundefined=True)
         return out
 
@@ -579,6 +581,7 @@ class BaseTraitedSpec(traitlets.HasTraits):
             if isinstance(object, tuple):
                 out = tuple(out)
         else:
+            #pdb.set_trace()
             if isdefined(object):
                 out = object
             else:
@@ -801,10 +804,10 @@ class Interface(object):
 
 
 class BaseInterfaceInputSpec(TraitedSpec):
-    pdb.set_trace()
-    ignore_exception = traitlets.Bool(False, desc="Print an error message instead \
+    #pdb.set_trace()
+    ignore_exception = traitlets.Bool(False).tag(desc="Print an error message instead \
 of throwing an exception in case the interface fails to run", usedefault=True,
-                                   nohash=True)
+                                                 nohash=True)
 
 
 class BaseInterface(Interface):
@@ -832,6 +835,7 @@ class BaseInterface(Interface):
     references_ = []
 
     def __init__(self, from_file=None, **inputs):
+        #pdb.set_trace()
         if not self.input_spec:
             raise Exception('No input_spec in class: %s' %
                             self.__class__.__name__)
@@ -850,7 +854,7 @@ class BaseInterface(Interface):
     def help(cls, returnhelp=False):
         """ Prints class help
         """
-
+        #pdb.set_trace()
         if cls.__doc__:
             # docstring = cls.__doc__.split('\n')
             # docstring = [trim(line, '') for line in docstring]
@@ -882,32 +886,31 @@ class BaseInterface(Interface):
 
     @classmethod
     def _get_trait_desc(self, inputs, name, spec):
-        desc = spec.desc
-        xor = spec.xor
-        requires = spec.requires
-        argstr = spec.argstr
 
         manhelpstr = ['\t%s' % name]
 
-        type_info = spec.full_info(inputs, name, None)
+        type_info = spec.info_text #dj:is it enough?? inputs is not used anymore
 
         default = ''
-        if spec.usedefault:
-            default = ', nipype default value: %s' % str(spec.default_value()[1])
+        # dj TODO: the meaning of default_value is different!!
+        if "usedefault" in spec.metadata:
+            default = ', nipype default value: %s' % str(spec.default_value)
         line = "(%s%s)" % (type_info, default)
 
         manhelpstr = wrap(line, 70,
                           initial_indent=manhelpstr[0] + ': ',
                           subsequent_indent='\t\t ')
 
-        if desc:
+        if "desc" in spec.metadata:
+            desc = spec.metadata["desc"]
             for line in desc.split('\n'):
                 line = re.sub("\s+", " ", line)
                 manhelpstr += wrap(line, 70,
                                    initial_indent='\t\t',
                                    subsequent_indent='\t\t')
 
-        if argstr:
+        if "argstr" in spec.metadata:
+            argstr = spec.metadata["argstr"]
             pos = spec.position
             if pos is not None:
                 manhelpstr += wrap('flag: %s, position: %s' % (argstr, pos), 70,
@@ -918,13 +921,15 @@ class BaseInterface(Interface):
                                    initial_indent='\t\t',
                                    subsequent_indent='\t\t')
 
-        if xor:
+        if "xor" in spec.metadata:
+            xor = spec.metadata["xor"]
             line = '%s' % ', '.join(xor)
             manhelpstr += wrap(line, 70,
                                initial_indent='\t\tmutually_exclusive: ',
                                subsequent_indent='\t\t ')
 
-        if requires:
+        if "requires" in spec.metadata:
+            requires = spec.metadata["requires"]
             others = [field for field in requires if field != name]
             line = '%s' % ', '.join(others)
             manhelpstr += wrap(line, 70,
@@ -953,11 +958,12 @@ class BaseInterface(Interface):
             if name in mandatory_items:
                 continue
             opthelpstr += cls._get_trait_desc(inputs, name, spec)
-
+            
         if manhelpstr:
             helpstr += manhelpstr
         if opthelpstr:
             helpstr += opthelpstr
+
         return helpstr
 
     @classmethod
@@ -993,42 +999,44 @@ class BaseInterface(Interface):
         metadata = dict(copyfile=lambda t: t is not None)
         for name, spec in sorted(cls.input_spec().traits(**metadata).items()):
             info.append(dict(key=name,
-                             copy=spec.copyfile))
+                             copy=spec.metadata["copyfile"]))
         return info
 
+    #dj TOTHINK: what is a difference between requires and mandatory
     def _check_requires(self, spec, name, value):
         """ check if required inputs are satisfied
         """
-        if spec.requires:
+        if "requires" in spec.metadata:
             values = [not isdefined(getattr(self.inputs, field))
-                      for field in spec.requires]
+                      for field in spec.metadata["requires"]]
             if any(values) and isdefined(value):
                 msg = ("%s requires a value for input '%s' because one of %s "
                        "is set. For a list of required inputs, see %s.help()" %
                        (self.__class__.__name__, name,
-                        ', '.join(spec.requires), self.__class__.__name__))
+                        ', '.join(spec.metadata["requires"]), self.__class__.__name__))
                 raise ValueError(msg)
 
     def _check_xor(self, spec, name, value):
         """ check if mutually exclusive inputs are satisfied
         """
-        if spec.xor:
+        if "xor" in spec.metadata:
             values = [isdefined(getattr(self.inputs, field))
-                      for field in spec.xor]
+                      for field in spec.metadata["xor"]]
             if not any(values) and not isdefined(value):
                 msg = ("%s requires a value for one of the inputs '%s'. "
                        "For a list of required inputs, see %s.help()" %
-                       (self.__class__.__name__, ', '.join(spec.xor),
+                       (self.__class__.__name__, ', '.join(spec.metadata["xor"]),
                         self.__class__.__name__))
                 raise ValueError(msg)
 
     def _check_mandatory_inputs(self):
         """ Raises an exception if a mandatory input is Undefined
         """
-        for name, spec in list(self.inputs.traits(mandatory=True).items()):
+        #dj TODO: doest work without list in py2?
+        for name, spec in self.inputs.traits(mandatory=True).items():
             value = getattr(self.inputs, name)
             self._check_xor(spec, name, value)
-            if not isdefined(value) and spec.xor is None:
+            if not isdefined(value) and "xor" not in spec.metadata:
                 msg = ("%s requires a value for input '%s'. "
                        "For a list of required inputs, see %s.help()" %
                        (self.__class__.__name__, name, self.__class__.__name__))
@@ -1039,6 +1047,7 @@ class BaseInterface(Interface):
                                                   transient=None).items()):
             self._check_requires(spec, name, getattr(self.inputs, name))
 
+    # dj NOTE: this was not checking the max ver
     def _check_version_requirements(self, trait_object, raise_exception=True):
         """ Raises an exception on version mismatch
         """
@@ -1046,11 +1055,10 @@ class BaseInterface(Interface):
         # check minimum version
         check = dict(min_ver=lambda t: t is not None)
         names = trait_object.trait_names(**check)
-
         if names and self.version:
             version = LooseVersion(str(self.version))
             for name in names:
-                min_ver = LooseVersion(str(trait_object.traits()[name].min_ver))
+                min_ver = LooseVersion(str(trait_object.traits()[name].metadata["min_ver"]))
                 if min_ver > version:
                     unavailable_traits.append(name)
                     if not isdefined(getattr(trait_object, name)):
@@ -1059,10 +1067,13 @@ class BaseInterface(Interface):
                         raise Exception('Trait %s (%s) (version %s < required %s)' %
                                         (name, self.__class__.__name__,
                                          version, min_ver))
-            check = dict(max_ver=lambda t: t is not None)
-            names = trait_object.trait_names(**check)
+
+        check = dict(max_ver=lambda t: t is not None)
+        names = trait_object.trait_names(**check)
+        if names and self.version:
+            version = LooseVersion(str(self.version))
             for name in names:
-                max_ver = LooseVersion(str(trait_object.traits()[name].max_ver))
+                max_ver = LooseVersion(str(trait_object.traits()[name].metadata["max_ver"]))
                 if max_ver < version:
                     unavailable_traits.append(name)
                     if not isdefined(getattr(trait_object, name)):
@@ -1126,7 +1137,14 @@ class BaseInterface(Interface):
         results :  an InterfaceResult object containing a copy of the instance
         that was executed, provenance information and, if successful, results
         """
+<<<<<<< 5b03db11afc31d431f8976402ed5eb19674dbd89
         self.inputs.trait_set(**inputs)
+=======
+        # dj TODO: write set method
+        for (key, val) in inputs.items():
+            self.__setattr__(key, val)
+        #self.inputs.set(**inputs)
+>>>>>>> all tests for BaseInterface work; _check_version_requirements bug
         self._check_mandatory_inputs()
         self._check_version_requirements(self.inputs)
         interface = self.__class__
@@ -1273,6 +1291,7 @@ class BaseInterface(Interface):
         """
         A convenient way to save current inputs to a JSON file.
         """
+        #pdb.set_trace()
         inputs = self.inputs.get_traitsfree()
         iflogger.debug('saving inputs {}', inputs)
         with open(json_file, 'w' if PY3 else 'wb') as fhandle:
@@ -1668,7 +1687,7 @@ def get_dependencies(name, environ):
 
 
 class CommandLineInputSpec(BaseInterfaceInputSpec):
-    pdb.set_trace()
+    #pdb.set_trace()
     args = Str(argstr='%s', desc='Additional parameters to the command')
     # dj: does it work?
     environ = DictStrStr.tag(
@@ -1727,9 +1746,9 @@ class CommandLine(BaseInterface):
     _terminal_output = 'stream'
 
     def __init__(self, command=None, **inputs):
-        pdb.set_trace() #dj: input_spec = "spec2"
+        #pdb.set_trace() #dj: input_spec = "spec2"
         super(CommandLine, self).__init__(**inputs) #dj: gives max rec 
-        pdb.set_trace()
+        #pdb.set_trace()
         self._environ = None
         if not hasattr(self, '_cmd'):
             self._cmd = None

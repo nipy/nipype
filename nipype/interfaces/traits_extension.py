@@ -90,7 +90,7 @@ class BaseFile(traitlets.Unicode):
 
             Note: The 'fast validator' version performs this check in C.
         """
-        pdb.set_trace()
+        #pdb.set_trace()
         validated_value = super(BaseFile, self).validate(object, value)
         #pdb.set_trace()
         if not self.exists:

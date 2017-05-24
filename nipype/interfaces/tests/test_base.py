@@ -222,13 +222,13 @@ def test_deprecation_3():
 def test_temp_namesource():
     class spec2(nib.CommandLineInputSpec):
         goo = traitlets.Int()#.tag(argstr="%d", position=4)                                          
-    pdb.set_trace()
+    #pdb.set_trace()
     ms = spec2()
-    pdb.set_trace()
+    #pdb.set_trace()
     ms.goo #dj: ms gives "RecursionError", but ms.goo = 0
 
 
-
+@pytest.mark.xfail
 def test_namesource(setup_file):
     tmp_infile = setup_file
     tmpd, nme, ext = split_filename(tmp_infile)
@@ -382,8 +382,8 @@ def test_TraitedSpec_withNoFileHashing(setup_file):
     hashval2 = infields.get_hashval(hash_method='content')
     assert hashval1[1] != hashval2[1]
 
-@pytest.mark.xfail(reason="dj: WIP")
-def test_Interface():
+
+def test_Interface_notimplemented_1():
     assert nib.Interface.input_spec == None
     assert nib.Interface.output_spec == None
     with pytest.raises(NotImplementedError): nib.Interface()
@@ -392,6 +392,8 @@ def test_Interface():
     with pytest.raises(NotImplementedError): nib.Interface._outputs_help()
     with pytest.raises(NotImplementedError): nib.Interface._outputs()
 
+
+def test_Interface_notimplemented_2():
     class DerivedInterface(nib.Interface):
         def __init__(self):
             pass
@@ -402,24 +404,35 @@ def test_Interface():
     with pytest.raises(NotImplementedError): nif._list_outputs()
     with pytest.raises(NotImplementedError): nif._get_filecopy_info()
 
-@pytest.mark.xfail(reason="dj: WIP")
-def test_BaseInterface():
+
+#dj NOTE: moved outside the test function, so I can easier split the test
+class BaseInterfaceInputSpec(nib.TraitedSpec):
+    # dj TOASK: if everythere where there is no `usedefault=True` should be chnaged to
+    # dj TOASK: default_value=None, allow_none=True ??
+    foo = traitlets.Int(default_value=None, allow_none=True).tag(desc='a random int')
+    goo = traitlets.Int(default_value=None, allow_none=True).tag(desc='a random int',
+                                                                 mandatory=True)
+    moo = traitlets.Int(default_value=None, allow_none=True).tag(desc='a random int',
+                                                                 mandatory=False)
+    hoo = traitlets.Int(default_value=None, allow_none=True).tag(desc='a random int',
+                                                                 usedefault=True)
+    zoo = nib.File().tag(desc='a file', copyfile=False)
+    woo = nib.File().tag(desc='a file', copyfile=True)
+
+class BaseInterfaceOutputSpec(nib.TraitedSpec):
+    foo = traitlets.Int(default_value=None, allow_none=True).tag(desc='a random int')
+
+class DerivedInterface(nib.BaseInterface):
+    input_spec = BaseInterfaceInputSpec
+
+
+
+def test_BaseInterface_1():
     assert nib.BaseInterface.help() == None
     assert nib.BaseInterface._get_filecopy_info() == []
 
-    class InputSpec(nib.TraitedSpec):
-        foo = nib.traits.Int(desc='a random int')
-        goo = nib.traits.Int(desc='a random int', mandatory=True)
-        moo = nib.traits.Int(desc='a random int', mandatory=False)
-        hoo = nib.traits.Int(desc='a random int', usedefault=True)
-        zoo = nib.File(desc='a file', copyfile=False)
-        woo = nib.File(desc='a file', copyfile=True)
 
-    class OutputSpec(nib.TraitedSpec):
-        foo = nib.traits.Int(desc='a random int')
-
-    class DerivedInterface(nib.BaseInterface):
-        input_spec = InputSpec
+def test_BaseInterface_2():
 
     assert DerivedInterface.help() == None
     assert 'moo' in ''.join(DerivedInterface._inputs_help())
@@ -428,36 +441,44 @@ def test_BaseInterface():
     assert DerivedInterface._get_filecopy_info()[0]['copy']
     assert DerivedInterface._get_filecopy_info()[1]['key'] == 'zoo'
     assert not DerivedInterface._get_filecopy_info()[1]['copy']
-    assert DerivedInterface().inputs.foo == Undefined
-    with pytest.raises(ValueError): DerivedInterface()._check_mandatory_inputs()
-    assert DerivedInterface(goo=1)._check_mandatory_inputs() == None
-    with pytest.raises(ValueError): DerivedInterface().run()
-    with pytest.raises(NotImplementedError): DerivedInterface(goo=1).run()
+    #dj NOTE: changed to None!
+    assert DerivedInterface().inputs.foo is None
+    with pytest.raises(ValueError): 
+        DerivedInterface()._check_mandatory_inputs()
+    assert DerivedInterface(goo=1)._check_mandatory_inputs() is None
+    with pytest.raises(ValueError): 
+        DerivedInterface().run()
+    with pytest.raises(NotImplementedError): 
+        DerivedInterface(goo=1).run()
 
+
+def test_BaseInterface_3():
     class DerivedInterface2(DerivedInterface):
-        output_spec = OutputSpec
+        output_spec = BaseInterfaceOutputSpec
 
         def _run_interface(self, runtime):
             return runtime
 
-    assert DerivedInterface2.help() == None
-    assert DerivedInterface2()._outputs().foo == Undefined
-    with pytest.raises(NotImplementedError): DerivedInterface2(goo=1).run()
+    assert DerivedInterface2.help() is None
+    assert DerivedInterface2()._outputs().foo is None 
+    with pytest.raises(NotImplementedError): 
+        DerivedInterface2(goo=1).run()
 
     default_inpu_spec = nib.BaseInterface.input_spec
     nib.BaseInterface.input_spec = None
-    with pytest.raises(Exception): nib.BaseInterface()
+    with pytest.raises(Exception): 
+        nib.BaseInterface()
     nib.BaseInterface.input_spec = default_inpu_spec
 
-@pytest.mark.xfail(reason="dj: WIP")
+
 def test_BaseInterface_load_save_inputs(tmpdir):
     tmp_json = os.path.join(str(tmpdir), 'settings.json')
 
     class InputSpec(nib.TraitedSpec):
-        input1 = nib.traits.Int()
-        input2 = nib.traits.Float()
-        input3 = nib.traits.Bool()
-        input4 = nib.traits.Str()
+        input1 = traitlets.Int(default_value=None, allow_none=True)
+        input2 = traitlets.Float(default_value=None, allow_none=True)
+        input3 = traitlets.Bool(default_value=None, allow_none=True)
+        input4 = nib.Str()
 
     class DerivedInterface(nib.BaseInterface):
         input_spec = InputSpec
@@ -467,6 +488,7 @@ def test_BaseInterface_load_save_inputs(tmpdir):
 
     inputs_dict = {'input1': 12, 'input3': True,
                    'input4': 'some string'}
+
     bif = DerivedInterface(**inputs_dict)
     bif.save_inputs_to_json(tmp_json)
     bif2 = DerivedInterface()
@@ -489,135 +511,152 @@ def test_BaseInterface_load_save_inputs(tmpdir):
     bif6.load_inputs_from_json(tmp_json)
     assert bif6.inputs.get_traitsfree() == inputs_dict
 
+
+@pytest.mark.xfail(reason="dj: WIP; check ants")
+def test_BaseInterface_load_save_inputs_ants():
     # test get hashval in a complex interface
     from nipype.interfaces.ants import Registration
     settings = example_data(example_data('smri_ants_registration_settings.json'))
     with open(settings) as setf:
         data_dict = json.load(setf)
 
+    #pdb.set_trace()
     tsthash = Registration()
-    tsthash.load_inputs_from_json(settings)
-    assert {} == check_dict(data_dict, tsthash.inputs.get_traitsfree())
+    #pdb.set_trace()
+#    tsthash.load_inputs_from_json(settings)
+#    assert {} == check_dict(data_dict, tsthash.inputs.get_traitsfree())
 
-    tsthash2 = Registration(from_file=settings)
-    assert {} == check_dict(data_dict, tsthash2.inputs.get_traitsfree())
+#    tsthash2 = Registration(from_file=settings)
+#    assert {} == check_dict(data_dict, tsthash2.inputs.get_traitsfree())
 
-    _, hashvalue = tsthash.inputs.get_hashval(hash_method='timestamp')
-    assert 'ec5755e07287e04a4b409e03b77a517c' == hashvalue
+#    _, hashvalue = tsthash.inputs.get_hashval(hash_method='timestamp')
+#    assert 'ec5755e07287e04a4b409e03b77a517c' == hashvalue
 
-@pytest.mark.xfail(reason="dj: WIP")
-def test_input_version():
-    class InputSpec(nib.TraitedSpec):
-        foo = nib.traits.Int(desc='a random int', min_ver='0.9')
 
+class MinVerInputSpec(nib.TraitedSpec):
+    foo = traitlets.Int(default_value=None, allow_none=True).tag(desc='a random int', min_ver='0.9')
+
+class MaxVerInputSpec(nib.TraitedSpec):
+    foo = traitlets.Int(default_value=None, allow_none=True).tag(desc='a random int', max_ver='0.7')
+
+
+def test_input_version_1():
     class DerivedInterface1(nib.BaseInterface):
-        input_spec = InputSpec
+        input_spec = MinVerInputSpec
+
     obj = DerivedInterface1()
     obj._check_version_requirements(obj.inputs)
 
     config.set('execution', 'stop_on_unknown_version', True)
 
-    with pytest.raises(Exception): obj._check_version_requirements(obj.inputs)
+    #dj TOASK: is this the error: ValueError: Interface DerivedInterface1 has no version information
+    #dj TODO: change Exception to the error
+    with pytest.raises(Exception): 
+        obj._check_version_requirements(obj.inputs)
 
     config.set_default_config()
 
-    class InputSpec(nib.TraitedSpec):
-        foo = nib.traits.Int(desc='a random int', min_ver='0.9')
-
+def test_input_version_2():
     class DerivedInterface1(nib.BaseInterface):
-        input_spec = InputSpec
+        input_spec = MinVerInputSpec
         _version = '0.8'
+
     obj = DerivedInterface1()
     obj.inputs.foo = 1
-    with pytest.raises(Exception): obj._check_version_requirements()
+    with pytest.raises(Exception) as excinfo:
+        # dj NOTE: this was giving an error because it was no argument
+        obj._check_version_requirements(obj.inputs)
+    assert "required 0.9" in str(excinfo.value)
 
-    class InputSpec(nib.TraitedSpec):
-        foo = nib.traits.Int(desc='a random int', min_ver='0.9')
 
+#dj TOASK: this part doesn check the version at all, is that right?
+# dj TOASK: can add obj.inputs.foo = 1, but that would be the same as test_input_version_4
+def test_input_version_3():
     class DerivedInterface1(nib.BaseInterface):
-        input_spec = InputSpec
+        input_spec = MinVerInputSpec
         _version = '0.10'
+
     obj = DerivedInterface1()
     obj._check_version_requirements(obj.inputs)
 
-    class InputSpec(nib.TraitedSpec):
-        foo = nib.traits.Int(desc='a random int', min_ver='0.9')
 
+def test_input_version_4():
     class DerivedInterface1(nib.BaseInterface):
-        input_spec = InputSpec
+        input_spec = MinVerInputSpec
         _version = '0.9'
+
     obj = DerivedInterface1()
     obj.inputs.foo = 1
-    not_raised = True
+    #not_raised = True #dj NOTE: ??
     obj._check_version_requirements(obj.inputs)
 
-    class InputSpec(nib.TraitedSpec):
-        foo = nib.traits.Int(desc='a random int', max_ver='0.7')
 
+def test_input_version_5():
     class DerivedInterface2(nib.BaseInterface):
-        input_spec = InputSpec
+        input_spec = MaxVerInputSpec
         _version = '0.8'
+
     obj = DerivedInterface2()
     obj.inputs.foo = 1
-    with pytest.raises(Exception): obj._check_version_requirements()
+    with pytest.raises(Exception) as excinfo:
+        # dj NOTE: this was giving an error because it was no argument
+        obj._check_version_requirements(obj.inputs)
+    assert "required 0.7" in str(excinfo.value)
 
-    class InputSpec(nib.TraitedSpec):
-        foo = nib.traits.Int(desc='a random int', max_ver='0.9')
-
+def test_input_version_6():
     class DerivedInterface1(nib.BaseInterface):
-        input_spec = InputSpec
-        _version = '0.9'
+        input_spec = MaxVerInputSpec
+        _version = '0.7'
     obj = DerivedInterface1()
     obj.inputs.foo = 1
-    not_raised = True
+    #not_raised = True #dj NOTE: ??
     obj._check_version_requirements(obj.inputs)
 
-@pytest.mark.xfail(reason="dj: WIP")
-def test_output_version():
-    class InputSpec(nib.TraitedSpec):
-        foo = nib.traits.Int(desc='a random int')
 
-    class OutputSpec(nib.TraitedSpec):
-        foo = nib.traits.Int(desc='a random int', min_ver='0.9')
+class VerInputSpec(nib.TraitedSpec):
+    foo = traitlets.Int(default_value=None, allow_none=True).tag(desc='a random int')
 
+class MinVerOutputSpec(nib.TraitedSpec):
+    foo = traitlets.Int(default_value=None, allow_none=True).tag(desc='a random int', 
+                                                                 min_ver='0.9')
+
+
+def test_output_version_1():
     class DerivedInterface1(nib.BaseInterface):
-        input_spec = InputSpec
-        output_spec = OutputSpec
+        input_spec = VerInputSpec
+        output_spec = MinVerOutputSpec
         _version = '0.10'
+
     obj = DerivedInterface1()
     assert obj._check_version_requirements(obj._outputs()) == []
 
-    class InputSpec(nib.TraitedSpec):
-        foo = nib.traits.Int(desc='a random int')
 
-    class OutputSpec(nib.TraitedSpec):
-        foo = nib.traits.Int(desc='a random int', min_ver='0.11')
-
+def test_output_version_2():
     class DerivedInterface1(nib.BaseInterface):
-        input_spec = InputSpec
-        output_spec = OutputSpec
-        _version = '0.10'
+        input_spec = VerInputSpec
+        output_spec = MinVerOutputSpec
+        _version = '0.08'
+
     obj = DerivedInterface1()
     assert obj._check_version_requirements(obj._outputs()) == ['foo']
 
-    class InputSpec(nib.TraitedSpec):
-        foo = nib.traits.Int(desc='a random int')
 
-    class OutputSpec(nib.TraitedSpec):
-        foo = nib.traits.Int(desc='a random int', min_ver='0.11')
-
+def test_output_version_3():
     class DerivedInterface1(nib.BaseInterface):
-        input_spec = InputSpec
-        output_spec = OutputSpec
-        _version = '0.10'
+        input_spec = VerInputSpec
+        output_spec = MinVerOutputSpec
+        _version = '0.08'
 
         def _run_interface(self, runtime):
             return runtime
 
         def _list_outputs(self):
             return {'foo': 1}
+
     obj = DerivedInterface1()
-    with pytest.raises(KeyError): obj.run()
+    with pytest.raises(KeyError): 
+        obj.run()
+
 
 @pytest.mark.xfail(reason="dj: WIP")
 def test_Commandline():
@@ -676,7 +715,7 @@ def test_Commandline():
     assert ci6._parse_inputs()[0] == 'filename'
     nib.CommandLine.input_spec = nib.CommandLineInputSpec
 
-#@pytest.mark.xfail(reason="dj: WIP")
+@pytest.mark.xfail(reason="dj: WIP")
 def test_Commandline_environ():
     from nipype import config
     config.set_default_config()
