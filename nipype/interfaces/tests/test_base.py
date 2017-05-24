@@ -215,7 +215,7 @@ def test_deprecation_3():
         assert spec_instance.foo is None
         assert spec_instance.bar == 1
         assert len(w) == 1, 'deprecated warning 2 %s' % [w1.message for w1 in w]
-        assert "Unsetting old value foo; setting new value bar"in str(w[0].message)
+        assert "Unsetting old value foo; setting new value bar" in str(w[0].message)
 
 
 # dj TODO: just testing a single class, remove at the end (?)
@@ -349,10 +349,8 @@ def test_TraitedSpec_withFile(setup_file):
     class spec2(nib.TraitedSpec):
         moo = nib.File(exists=True)
         doo = traitlets.List(nib.File(exists=True))
-    pdb.set_trace()
-    infields = spec2()#moo=tmp_infile, doo=[tmp_infile])
-    infields.moo = tmp_infile
-    infields.doo=[tmp_infile]
+
+    infields = spec2(moo=tmp_infile, doo=[tmp_infile])
     hashval = infields.get_hashval(hash_method='content')
     assert hashval[1] == 'a00e9ee24f5bfa9545a515b7a759886b'
 
@@ -422,10 +420,6 @@ class BaseInterfaceInputSpec(nib.TraitedSpec):
 class BaseInterfaceOutputSpec(nib.TraitedSpec):
     foo = traitlets.Int(default_value=None, allow_none=True).tag(desc='a random int')
 
-class DerivedInterface(nib.BaseInterface):
-    input_spec = BaseInterfaceInputSpec
-
-
 
 def test_BaseInterface_1():
     assert nib.BaseInterface.help() == None
@@ -433,6 +427,8 @@ def test_BaseInterface_1():
 
 
 def test_BaseInterface_2():
+    class DerivedInterface(nib.BaseInterface):
+        input_spec = BaseInterfaceInputSpec
 
     assert DerivedInterface.help() == None
     assert 'moo' in ''.join(DerivedInterface._inputs_help())
@@ -453,6 +449,9 @@ def test_BaseInterface_2():
 
 
 def test_BaseInterface_3():
+    class DerivedInterface(nib.BaseInterface):
+        input_spec = BaseInterfaceInputSpec
+
     class DerivedInterface2(DerivedInterface):
         output_spec = BaseInterfaceOutputSpec
 
@@ -603,6 +602,7 @@ def test_input_version_5():
         obj._check_version_requirements(obj.inputs)
     assert "required 0.7" in str(excinfo.value)
 
+
 def test_input_version_6():
     class DerivedInterface1(nib.BaseInterface):
         input_spec = MaxVerInputSpec
@@ -613,14 +613,14 @@ def test_input_version_6():
     obj._check_version_requirements(obj.inputs)
 
 
+
 class VerInputSpec(nib.TraitedSpec):
     foo = traitlets.Int(default_value=None, allow_none=True).tag(desc='a random int')
 
 class MinVerOutputSpec(nib.TraitedSpec):
     foo = traitlets.Int(default_value=None, allow_none=True).tag(desc='a random int', 
-                                                                 min_ver='0.9')
-
-
+                            
+                                     min_ver='0.9')
 def test_output_version_1():
     class DerivedInterface1(nib.BaseInterface):
         input_spec = VerInputSpec

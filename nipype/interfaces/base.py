@@ -71,7 +71,7 @@ class Str(traitlets.Unicode):
 #traits.Str = Str
 
 
-# dj : pomyslec, czy potrzebne
+# dj TOTHINK: do i need it?
 class NipypeInterfaceError(Exception):
     def __init__(self, value):
         self.value = value
@@ -581,7 +581,6 @@ class BaseTraitedSpec(traitlets.HasTraits):
             if isinstance(object, tuple):
                 out = tuple(out)
         else:
-            #pdb.set_trace()
             if isdefined(object):
                 out = object
             else:
@@ -680,7 +679,7 @@ class BaseTraitedSpec(traitlets.HasTraits):
                 elif isinstance(objekt, float):
                     out = FLOAT_FORMAT(objekt)
                 else:
-                    #dj: jak jest intem to wchodzi tu, czyli zwraca swoja wartosc
+                    #dj: for int it gives just value
                     out = objekt
         return out
 
@@ -854,7 +853,6 @@ class BaseInterface(Interface):
     def help(cls, returnhelp=False):
         """ Prints class help
         """
-        #pdb.set_trace()
         if cls.__doc__:
             # docstring = cls.__doc__.split('\n')
             # docstring = [trim(line, '') for line in docstring]
@@ -1291,7 +1289,6 @@ class BaseInterface(Interface):
         """
         A convenient way to save current inputs to a JSON file.
         """
-        #pdb.set_trace()
         inputs = self.inputs.get_traitsfree()
         iflogger.debug('saving inputs {}', inputs)
         with open(json_file, 'w' if PY3 else 'wb') as fhandle:
