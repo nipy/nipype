@@ -367,7 +367,7 @@ class BaseTraitedSpec(traits.HasTraits):
                 undefined_traits[trait] = Undefined
         self.trait_set(trait_change_notify=False, **undefined_traits)
         self._generate_handlers()
-        self.set(**kwargs)
+        self.trait_set(**kwargs)
 
     def items(self):
         """ Name, trait generator for user modifiable traits
@@ -650,7 +650,7 @@ class DynamicTraitedSpec(BaseTraitedSpec):
                 pass
         # clone twice
         dup = self.clone_traits(memo=memo)
-        dup.set(**dup_dict)
+        dup.trait_set(**dup_dict)
         return dup
 
 
@@ -1060,7 +1060,7 @@ class BaseInterface(Interface):
         results :  an InterfaceResult object containing a copy of the instance
         that was executed, provenance information and, if successful, results
         """
-        self.inputs.set(**inputs)
+        self.inputs.trait_set(**inputs)
         self._check_mandatory_inputs()
         self._check_version_requirements(self.inputs)
         interface = self.__class__

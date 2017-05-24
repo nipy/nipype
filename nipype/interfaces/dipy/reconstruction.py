@@ -74,8 +74,8 @@ class RESTORE(DipyDiffusionInterface):
         import gc
 
         img = nb.load(self.inputs.in_file)
-        hdr = img.get_header().copy()
-        affine = img.get_affine()
+        hdr = img.header.copy()
+        affine = img.affine
         data = img.get_data()
         gtab = self._get_gradient_table()
 
@@ -210,14 +210,14 @@ class EstimateResponseSH(DipyDiffusionInterface):
 
         img = nb.load(self.inputs.in_file)
         imref = nb.four_to_three(img)[0]
-        affine = img.get_affine()
+        affine = img.affine
 
         if isdefined(self.inputs.in_mask):
             msk = nb.load(self.inputs.in_mask).get_data()
             msk[msk > 0] = 1
             msk[msk < 0] = 0
         else:
-            msk = np.ones(imref.get_shape())
+            msk = np.ones(imref.shape)
 
         data = img.get_data().astype(np.float32)
         gtab = self._get_gradient_table()
@@ -326,15 +326,15 @@ class CSD(DipyDiffusionInterface):
 
         img = nb.load(self.inputs.in_file)
         imref = nb.four_to_three(img)[0]
-        affine = img.get_affine()
+        affine = img.affine
 
         if isdefined(self.inputs.in_mask):
             msk = nb.load(self.inputs.in_mask).get_data()
         else:
-            msk = np.ones(imref.get_shape())
+            msk = np.ones(imref.shape)
 
         data = img.get_data().astype(np.float32)
-        hdr = imref.get_header().copy()
+        hdr = imref.header.copy()
 
         gtab = self._get_gradient_table()
         resp_file = np.loadtxt(self.inputs.response)
@@ -359,7 +359,7 @@ class CSD(DipyDiffusionInterface):
         if self.inputs.save_fods:
             sphere = get_sphere('symmetric724')
             fods = csd_fit.odf(sphere)
-            nb.Nifti1Image(fods.astype(np.float32), img.get_affine(),
+            nb.Nifti1Image(fods.astype(np.float32), img.affine,
                            None).to_filename(self._gen_filename('fods'))
 
         return runtime
