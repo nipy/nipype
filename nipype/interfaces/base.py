@@ -2020,7 +2020,7 @@ class CommandLine(BaseInterface):
         final_args = {}
         metadata = dict(argstr=lambda t: t is not None)
         for name, spec in sorted(self.inputs.traits(**metadata).items()):
-             if skip and name in skip:
+            if skip and name in skip:
                 continue
             value = getattr(self.inputs, name)
             if "name_source" in spec.metadata:
