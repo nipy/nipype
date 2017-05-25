@@ -794,6 +794,7 @@ def check_dict(ref_dict, tst_dict):
             failed_dict[key] = (value, newval)
     return failed_dict
 
+@pytest.mark.xfail(reason="dj:WIP")
 def test_ImageFile():
     x = nib.BaseInterface().inputs
 

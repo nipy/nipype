@@ -31,6 +31,7 @@ from textwrap import wrap
 from warnings import warn
 import simplejson as json
 from dateutil.parser import parse as parseutc
+#dj TODO
 from packaging.version import Version
 import collections
 
@@ -1124,14 +1125,10 @@ class BaseInterface(Interface):
         results :  an InterfaceResult object containing a copy of the instance
         that was executed, provenance information and, if successful, results
         """
-<<<<<<< 5b03db11afc31d431f8976402ed5eb19674dbd89
-        self.inputs.trait_set(**inputs)
-=======
         # dj TODO: write set method
         for (key, val) in inputs.items():
             self.__setattr__(key, val)
         #self.inputs.set(**inputs)
->>>>>>> all tests for BaseInterface work; _check_version_requirements bug
         self._check_mandatory_inputs()
         self._check_version_requirements(self.inputs)
         interface = self.__class__
