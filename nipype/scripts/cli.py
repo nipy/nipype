@@ -15,6 +15,7 @@ from .utils import (CONTEXT_SETTINGS,
                     PythonModule,
                     check_not_none,)
 
+from .. import __version__
 
 # declare the CLI group
 @click.group(context_settings=CONTEXT_SETTINGS)
@@ -151,6 +152,10 @@ def run(ctx, module, interface, list, help):
             args = iface_parser.parse_args(args=ctx.args)
             run_instance(node, args)
 
+@cli.command(context_settings=CONTEXT_SETTINGS)
+def version():
+    """Print current version of Nipype."""
+    click.echo(__version__)
 
 @cli.group()
 def convert():
