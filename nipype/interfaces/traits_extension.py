@@ -45,7 +45,6 @@ DictStrStr = traitlets.Dict(value_trait=traitlets.Unicode(), key_trait=traitlets
 class BaseFile(traitlets.Unicode):
     """ Defines a trait whose value must be the name of a file.
     """
-    # dj TOTHINK: I'm not sure why this class is called by pytest before any test
 
     # A description of the type of value this trait accepts:
     info_text = 'a file name'
@@ -77,10 +76,8 @@ class BaseFile(traitlets.Unicode):
         self.auto_set = auto_set
         self.entries = entries
         self.exists = exists
-        #pdb.set_trace()
         if exists:
             self.info_text = 'an existing file name'
-        #pdb.set_trace()
         super(BaseFile, self).__init__(value, **metadata)
 
     def validate(self, object, value):
@@ -328,7 +325,7 @@ _Undefined.__len__ = length
 Undefined = _Undefined()
 
 # dj NOTE: for now, everywhere where undefined was used I'm changing to None
-# dj NOTE: had to add additinonal part for list and str (is it enough?)
+# dj NOTE: had to add additinonal part for list and str(is it enough?)
 def isdefined(object):
     if type(object) is list:
         return object != []

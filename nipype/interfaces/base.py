@@ -550,7 +550,7 @@ class BaseTraitedSpec(traitlets.HasTraits):
     def _clean_container(self, object, undefinedval=None, skipundefined=False):
         """Convert a traited obejct into a pure python representation.
         """
-        # dj TODO: it's not enough to check isinstance(object, dict) ? NIE!!
+        # dj TODO: no traitlets dict are used, should I add
         # if isinstance(object, TraitDictObject) or isinstance(object, dict):
         if isinstance(object, dict):
             out = {}
@@ -560,7 +560,7 @@ class BaseTraitedSpec(traitlets.HasTraits):
                 else:
                     if not skipundefined:
                         out[key] = undefinedval
-        # dj TODO: the same as in dict
+        # dj TODO: should I add traitlets.list??
         #elif (isinstance(object, TraitListObject) or
         #        isinstance(object, list) or isinstance(object, tuple)):
         elif (isinstance(object, list) or isinstance(object, tuple)): 
@@ -589,7 +589,6 @@ class BaseTraitedSpec(traitlets.HasTraits):
         Return has_metadata for the requested trait name in this
         interface
         """
-        # dj NOTE: looks like self.traits()[name] gives trait_type (from traits) 
         return has_metadata(self.traits()[name], metadata, value,
                             recursive)
 
@@ -673,14 +672,12 @@ class BaseTraitedSpec(traitlets.HasTraits):
                 elif isinstance(objekt, float):
                     out = FLOAT_FORMAT(objekt)
                 else:
-                    #dj: for int it gives just value
                     out = objekt
         return out
 
 
 # dj TOASK: I understand that this won't be used anymore (Satra)
 # dj TOASK: it was needed only because of deepcopy (?)
-# dj TOASK: also the only test for this was mark as skip
 class DynamicTraitedSpec(BaseTraitedSpec):
     """ A subclass to handle dynamic traits
 
@@ -714,6 +711,7 @@ class DynamicTraitedSpec(BaseTraitedSpec):
 
 
 # dj NOTE: this class is the same as BaseTraitedSpec 
+#dj TODO: one class shuld be removed
 class TraitedSpec(BaseTraitedSpec):
     """ Create a subclass with strict traits.
 
@@ -723,7 +721,6 @@ class TraitedSpec(BaseTraitedSpec):
     pass
 
 
-#dj: no trait
 class Interface(object):
     """This is an abstract definition for Interface objects.
 
@@ -992,7 +989,7 @@ class BaseInterface(Interface):
                              copy=spec.metadata["copyfile"]))
         return info
 
-    #dj TOTHINK: what is a difference between requires and mandatory
+    #dj TOTHINK: requires vs mandatory
     def _check_requires(self, spec, name, value):
         """ check if required inputs are satisfied
         """
@@ -1022,7 +1019,7 @@ class BaseInterface(Interface):
     def _check_mandatory_inputs(self):
         """ Raises an exception if a mandatory input is Undefined
         """
-        #dj TODO: doest work without list in py2?
+        #dj TODO: does it work without list in py2?
         for name, spec in self.inputs.traits(mandatory=True).items():
             value = getattr(self.inputs, name)
             self._check_xor(spec, name, value)

@@ -123,15 +123,15 @@ def test_TraitedSpec_logic():
     class spec3(nib.TraitedSpec):
         _xor_inputs = ('foo', 'bar')
 
-        foo = traitlets.Int(default_value=None, allow_none=True).tag(xor=_xor_inputs)
-                             #desc='foo or bar, not both') #dj TODO: in help??
-        bar = traitlets.Int(default_value=None, allow_none=True).tag(xor=_xor_inputs)
-                             #desc='bar or foo, not both') #dj TODO
+        foo = traitlets.Int(default_value=None, allow_none=True).tag(xor=_xor_inputs, 
+                                               desc='foo or bar, not both') #dj TODO: desc in help??
+        bar = traitlets.Int(default_value=None, allow_none=True).tag(xor=_xor_inputs, 
+                                                                     desc='bar or foo, not both')
         
-        # dj TOASK:  what is the use of "position"?
-        kung = traitlets.Float(default_value=None, allow_none=True).tag(requires=('foo',)).tag(position=0)
-                                #desc='kung foo') #dj TODO
-        kung_bar = traitlets.Float(default_value=None, allow_none=True).tag(requires=('bar',)).tag(position=0)
+        kung = traitlets.Float(default_value=None, allow_none=True).tag(requires=('foo',), 
+                                                position=0, desc='kung foo') 
+        kung_bar = traitlets.Float(default_value=None, allow_none=True).tag(requires=('bar',), 
+                                                                            position=0)
 
 
     class out3(nib.TraitedSpec):
@@ -176,7 +176,7 @@ class DeprecationSpec3(nib.TraitedSpec):
 
 
 
-#dj TOASK: should some of those tests check if there is absolutely no warnings??
+#dj TOASK: should some of those tests ONLY check if there is absolutely no warnings??
 @pytest.mark.parametrize("DeprecationClass, excinfo_secondpart", [
         (DeprecationSpec1, 'Will be removed or raise an error'),
         (DeprecationSpec2, 'Replacement trait bar not found')
@@ -243,7 +243,7 @@ def test_namesource(setup_file):
         _cmd = "mycommand"
         input_spec = spec2
 
-    testobj = TestName() #dj: goes to l.387 
+    testobj = TestName()
     testobj.inputs.doo = tmp_infile 
     testobj.inputs.goo = 99
     assert '%s_generated' % nme in testobj.cmdline
@@ -533,7 +533,7 @@ def test_input_version_1():
 
     config.set('execution', 'stop_on_unknown_version', True)
 
-    #dj TOASK: is this the error: ValueError: Interface DerivedInterface1 has no version information
+    #dj TOASK: is this the expected error: ValueError: Interface DerivedInterface1 has no version information
     #dj TODO: change Exception to the error
     with pytest.raises(Exception): 
         obj._check_version_requirements(obj.inputs)
@@ -571,7 +571,6 @@ def test_input_version_4():
 
     obj = DerivedInterface1()
     obj.inputs.foo = 1
-    #not_raised = True #dj NOTE: ??
     obj._check_version_requirements(obj.inputs)
 
 
@@ -583,7 +582,7 @@ def test_input_version_5():
     obj = DerivedInterface2()
     obj.inputs.foo = 1
     with pytest.raises(Exception) as excinfo:
-        # dj NOTE: this was giving an error because it was no argument
+        # dj NOTE: this was giving an error only because it was no argument
         obj._check_version_requirements(obj.inputs)
     assert "required 0.7" in str(excinfo.value)
 
@@ -594,7 +593,6 @@ def test_input_version_6():
         _version = '0.7'
     obj = DerivedInterface1()
     obj.inputs.foo = 1
-    #not_raised = True #dj NOTE: ??
     obj._check_version_requirements(obj.inputs)
 
 
