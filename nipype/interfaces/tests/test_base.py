@@ -221,54 +221,47 @@ def test_deprecation_3():
 # dj TODO: just testing a single class, remove at the end (?)
 def test_temp_namesource():
     class spec2(nib.CommandLineInputSpec):
-        goo = traitlets.Int()#.tag(argstr="%d", position=4)                                          
-    #pdb.set_trace()
+        goo = traitlets.Int()
     ms = spec2()
-    #pdb.set_trace()
-    ms.goo #dj: ms gives "RecursionError", but ms.goo = 0
+    assert ms.goo == 0
 
 
-@pytest.mark.xfail
 def test_namesource(setup_file):
     tmp_infile = setup_file
     tmpd, nme, ext = split_filename(tmp_infile)
 
 
     class spec2(nib.CommandLineInputSpec):
-        #moo = nib.File().tag(name_source=['doo'], hash_files=False, argstr="%s",
-        #                     position=2)
-        #doo = nib.File(exists=True)#.tag(argstr="%s", position=1)
-        goo = traitlets.Int()#.tag(argstr="%d", position=4)
-        #poo = nib.File().tag(name_source=['goo'], hash_files=False, argstr="%s",
-        #                     position=3)
+        moo = nib.File().tag(name_source=['doo'], hash_files=False, argstr="%s",
+                             position=2)
+        doo = nib.File(exists=True).tag(argstr="%s", position=1)
+        goo = traitlets.Int().tag(argstr="%d", position=4)
+        poo = nib.File().tag(name_source=['goo'], hash_files=False, argstr="%s",
+                             position=3)
 
     class TestName(nib.CommandLine):
         _cmd = "mycommand"
-        #dj: input_spec has to be defined
-        pdb.set_trace()
         input_spec = spec2
-    pdb.set_trace()
-    testobj = TestName() #dj: goes to l.387 
-    pdb.set_trace()
-    #testobj.inputs.doo = tmp_infile 
-    testobj.inputs.goo = 99
-    pdb.set_trace()
-    #assert '%s_generated' % nme in testobj.cmdline
-    #assert '%d_generated' % testobj.inputs.goo in testobj.cmdline
-    #testobj.inputs.moo = "my_%s_template"
-    #assert 'my_%s_template' % nme in testobj.cmdline
 
-@pytest.mark.xfail(reason="dj: WIP")
+    testobj = TestName() #dj: goes to l.387 
+    testobj.inputs.doo = tmp_infile 
+    testobj.inputs.goo = 99
+    assert '%s_generated' % nme in testobj.cmdline
+    assert '%d_generated' % testobj.inputs.goo in testobj.cmdline
+    testobj.inputs.moo = "my_%s_template"
+    assert 'my_%s_template' % nme in testobj.cmdline
+
+
 def test_chained_namesource(setup_file):
     tmp_infile = setup_file
     tmpd, nme, ext = split_filename(tmp_infile)
 
     class spec2(nib.CommandLineInputSpec):
-        doo = nib.File(exists=True, argstr="%s", position=1)
-        moo = nib.File(name_source=['doo'], hash_files=False, argstr="%s",
-                       position=2, name_template='%s_mootpl')
-        poo = nib.File(name_source=['moo'], hash_files=False,
-                       argstr="%s", position=3)
+        doo = nib.File(exists=True).tag(argstr="%s", position=1)
+        moo = nib.File().tag(name_source=['doo'], hash_files=False, argstr="%s",
+                             position=2, name_template='%s_mootpl')
+        poo = nib.File().tag(name_source=['moo'], hash_files=False,
+                             argstr="%s", position=3)
 
     class TestName(nib.CommandLine):
         _cmd = "mycommand"
@@ -281,18 +274,18 @@ def test_chained_namesource(setup_file):
     assert '%s_mootpl ' % nme in res
     assert '%s_mootpl_generated' % nme in res
 
-@pytest.mark.xfail(reason="dj: WIP")
+
 def test_cycle_namesource1(setup_file):
     tmp_infile = setup_file
     tmpd, nme, ext = split_filename(tmp_infile)
 
     class spec3(nib.CommandLineInputSpec):
-        moo = nib.File(name_source=['doo'], hash_files=False, argstr="%s",
-                       position=1, name_template='%s_mootpl')
-        poo = nib.File(name_source=['moo'], hash_files=False,
-                       argstr="%s", position=2)
-        doo = nib.File(name_source=['poo'], hash_files=False,
-                       argstr="%s", position=3)
+        moo = nib.File().tag(name_source=['doo'], hash_files=False, argstr="%s",
+                             position=1, name_template='%s_mootpl')
+        poo = nib.File().tag(name_source=['moo'], hash_files=False,
+                             argstr="%s", position=2)
+        doo = nib.File().tag(name_source=['poo'], hash_files=False,
+                             argstr="%s", position=3)
 
     class TestCycle(nib.CommandLine):
         _cmd = "mycommand"
@@ -300,25 +293,22 @@ def test_cycle_namesource1(setup_file):
 
     # Check that an exception is raised
     to0 = TestCycle()
-    not_raised = True
-    try:
-        to0.cmdline
-    except nib.NipypeInterfaceError:
-        not_raised = False
-    assert not not_raised
 
-@pytest.mark.xfail(reason="dj: WIP")
+    with pytest.raises(nib.NipypeInterfaceError):
+        to0.cmdline
+
+
 def test_cycle_namesource2(setup_file):
     tmp_infile = setup_file
     tmpd, nme, ext = split_filename(tmp_infile)
 
     class spec3(nib.CommandLineInputSpec):
-        moo = nib.File(name_source=['doo'], hash_files=False, argstr="%s",
-                       position=1, name_template='%s_mootpl')
-        poo = nib.File(name_source=['moo'], hash_files=False,
-                       argstr="%s", position=2)
-        doo = nib.File(name_source=['poo'], hash_files=False,
-                       argstr="%s", position=3)
+        moo = nib.File().tag(name_source=['doo'], hash_files=False, argstr="%s",
+                             position=1, name_template='%s_mootpl')
+        poo = nib.File().tag(name_source=['moo'], hash_files=False,
+                             argstr="%s", position=2)
+        doo = nib.File().tag(name_source=['poo'], hash_files=False,
+                             argstr="%s", position=3)
 
     class TestCycle(nib.CommandLine):
         _cmd = "mycommand"
@@ -328,14 +318,9 @@ def test_cycle_namesource2(setup_file):
     to1 = TestCycle()
     to1.inputs.poo = tmp_infile
 
-    not_raised = True
-    try:
-        res = to1.cmdline
-    except nib.NipypeInterfaceError:
-        not_raised = False
-    print(res)
+    #dj NOTE: not sure if I understood the try/except block, but removed
+    res = to1.cmdline
 
-    assert not_raised
     assert '%s' % tmp_infile in res
     assert '%s_generated' % nme in res
     assert '%s_generated_mootpl' % nme in res
@@ -522,8 +507,8 @@ def test_BaseInterface_load_save_inputs_ants():
     #pdb.set_trace()
     tsthash = Registration()
     #pdb.set_trace()
-#    tsthash.load_inputs_from_json(settings)
-#    assert {} == check_dict(data_dict, tsthash.inputs.get_traitsfree())
+    tsthash.load_inputs_from_json(settings)
+    assert {} == check_dict(data_dict, tsthash.inputs.get_traitsfree())
 
 #    tsthash2 = Registration(from_file=settings)
 #    assert {} == check_dict(data_dict, tsthash2.inputs.get_traitsfree())
@@ -658,29 +643,42 @@ def test_output_version_3():
         obj.run()
 
 
-@pytest.mark.xfail(reason="dj: WIP")
-def test_Commandline():
-    with pytest.raises(Exception): nib.CommandLine()
+def test_Commandline_1():
+    with pytest.raises(Exception) as excinfo:
+        nib.CommandLine()
+    assert str(excinfo.value) == "Missing command"
+
+#dj TODO: pytes.param
+def test_Commandline_2():
     ci = nib.CommandLine(command='which')
     assert ci.cmd == 'which'
-    assert ci.inputs.args == Undefined
+    assert ci.inputs.args is None
+
     ci2 = nib.CommandLine(command='which', args='ls')
     assert ci2.cmdline == 'which ls'
+
     ci3 = nib.CommandLine(command='echo')
     ci3.inputs.environ = {'MYENV': 'foo'}
     res = ci3.run()
     assert res.runtime.environ['MYENV'] == 'foo'
     assert res.outputs == None
 
+
+def test_Commandline_3():
     class CommandLineInputSpec1(nib.CommandLineInputSpec):
-        foo = nib.Str(argstr='%s', desc='a str')
-        goo = nib.traits.Bool(argstr='-g', desc='a bool', position=0)
-        hoo = nib.traits.List(argstr='-l %s', desc='a list')
-        moo = nib.traits.List(argstr='-i %d...', desc='a repeated list',
-                              position=-1)
-        noo = nib.traits.Int(argstr='-x %d', desc='an int')
-        roo = nib.traits.Str(desc='not on command line')
-        soo = nib.traits.Bool(argstr="-soo")
+        foo = traitlets.Unicode(default_value=None, allow_none=True).tag(argstr='%s', desc='a str')
+        goo = traitlets.Bool(default_value=None, allow_none=True).tag(argstr='-g', 
+                                                                      desc='a bool', position=0)
+        # dj NOTE: the default_value is actually [default_value], so it's not None
+        hoo = traitlets.List(default_value=None).tag(argstr='-l %s', 
+                                                                      desc='a list')
+        moo = traitlets.List(default_value=None, allow_none=True).tag(argstr='-i %d...', 
+                                                                      desc='a repeated list',
+                                                                      position=-1)
+        noo = traitlets.Int(default_value=None, allow_none=True).tag(argstr='-x %d', desc='an int')
+        roo = traitlets.Unicode(default_value=None, allow_none=True).tag(desc='not on command line')
+        soo = traitlets.Bool(default_value=None, allow_none=True).tag(argstr="-soo")
+
     nib.CommandLine.input_spec = CommandLineInputSpec1
     ci4 = nib.CommandLine(command='cmd')
     ci4.inputs.foo = 'foo'
@@ -699,11 +697,14 @@ def test_Commandline():
     cmd = ci4._parse_inputs()
     assert '-soo' in ' '.join(cmd)
 
+
+def test_Commandline_4():
     class CommandLineInputSpec2(nib.CommandLineInputSpec):
-        foo = nib.File(argstr='%s', desc='a str', genfile=True)
+        foo = nib.File().tag(argstr='%s', desc='a str', genfile=True)
     nib.CommandLine.input_spec = CommandLineInputSpec2
     ci5 = nib.CommandLine(command='cmd')
-    with pytest.raises(NotImplementedError): ci5._parse_inputs()
+    with pytest.raises(NotImplementedError): 
+        ci5._parse_inputs()
 
     class DerivedClass(nib.CommandLine):
         input_spec = CommandLineInputSpec2
@@ -715,7 +716,7 @@ def test_Commandline():
     assert ci6._parse_inputs()[0] == 'filename'
     nib.CommandLine.input_spec = nib.CommandLineInputSpec
 
-@pytest.mark.xfail(reason="dj: WIP")
+
 def test_Commandline_environ():
     from nipype import config
     config.set_default_config()
@@ -730,7 +731,7 @@ def test_Commandline_environ():
     res = ci3.run()
     assert res.runtime.environ['DISPLAY'] == ':2'
 
-@pytest.mark.xfail(reason="dj: WIP")
+
 def test_CommandLine_output(setup_file):
     tmp_infile = setup_file
     tmpd, name = os.path.split(tmp_infile)
@@ -753,7 +754,7 @@ def test_CommandLine_output(setup_file):
     res = ci.run()
     assert 'stdout.nipype' in res.runtime.stdout
 
-@pytest.mark.xfail(reason="dj: WIP")
+
 def test_global_CommandLine_output(setup_file):
     tmp_infile = setup_file
     tmpd, name = os.path.split(tmp_infile)

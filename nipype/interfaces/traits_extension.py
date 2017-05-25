@@ -328,8 +328,15 @@ _Undefined.__len__ = length
 Undefined = _Undefined()
 
 # dj NOTE: for now, everywhere where undefined was used I'm changing to None
+# dj NOTE: had to add additinonal part for list and str (is it enough?)
 def isdefined(object):
-    return object is not None
+    if type(object) is list:
+        return object != []
+    elif type(object) is str:
+        return object != ''
+    else:
+        return object is not None
+
 
 
 def has_metadata(trait, metadata, value=None, recursive=True):

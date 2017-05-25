@@ -368,12 +368,9 @@ class BaseTraitedSpec(traitlets.HasTraits):
         # arguments.  HasTraits does not define an __init__ and
         # therefore these args were being ignored.
         # super(TraitedSpec, self).__init__(*args, **kwargs)
-        #pdb.set_trace()
         super(BaseTraitedSpec, self).__init__(**kwargs)
-        #pdb.set_trace()
        # dj TODO: it shouldn't be needed with traitlets (Satra)
         #traits.push_exception_handler(reraise_exceptions=True)
-        #pdb.set_trace()
         # dj TODO: not sure if I should keep usedefault 
         #undefined_traits = {}
         #for trait in self.class_trait_names():
@@ -387,8 +384,7 @@ class BaseTraitedSpec(traitlets.HasTraits):
         #dj TODO: write set method
         for (key, val) in kwargs.items():
             self.__setattr__(key, val)
-        #pdb.set_trace()
-        pass
+
 
 
     def items(self):
@@ -525,7 +521,6 @@ class BaseTraitedSpec(traitlets.HasTraits):
         Augments the trait get function to return a dictionary without
         notification handles
         """
-        #pdb.set_trace()
         #dj TOODO: not sure if this is not more complicated in traits
         # dj TODO: recur?
         #out = super(BaseTraitedSpec, self).get(**kwargs)
@@ -668,7 +663,6 @@ class BaseTraitedSpec(traitlets.HasTraits):
                     if hash_method.lower() == 'timestamp':
                         hash = hash_timestamp(objekt)
                     elif hash_method.lower() == 'content':
-                        #dj:  'crypto' module
                         hash = hash_infile(objekt)
                     else:
                         raise Exception("Unknown hash method: %s" % hash_method)
@@ -803,7 +797,6 @@ class Interface(object):
 
 
 class BaseInterfaceInputSpec(TraitedSpec):
-    #pdb.set_trace()
     ignore_exception = traitlets.Bool(False).tag(desc="Print an error message instead \
 of throwing an exception in case the interface fails to run", usedefault=True,
                                                  nohash=True)
@@ -834,7 +827,6 @@ class BaseInterface(Interface):
     references_ = []
 
     def __init__(self, from_file=None, **inputs):
-        #pdb.set_trace()
         if not self.input_spec:
             raise Exception('No input_spec in class: %s' %
                             self.__class__.__name__)
@@ -1530,7 +1522,6 @@ def run_command(runtime, output=None, timeout=0.01, redirect_x=False):
 
     The returned runtime contains a merged stdout+stderr log with timestamps
     """
-
     # Init logger
     logger = logging.getLogger('workflow')
 
@@ -1576,7 +1567,6 @@ def run_command(runtime, output=None, timeout=0.01, redirect_x=False):
     mem_mb = 0
     num_threads = 1
     interval = .5
-
     if output == 'stream':
         streams = [Stream('stdout', proc.stdout), Stream('stderr', proc.stderr)]
 
@@ -1610,7 +1600,6 @@ def run_command(runtime, output=None, timeout=0.01, redirect_x=False):
             result[stream._name] = [r[2] for r in rows]
         temp.sort()
         result['merged'] = [r[1] for r in temp]
-
     if output == 'allatonce':
         if runtime_profile:
             while proc.returncode is None:
@@ -1648,7 +1637,6 @@ def run_command(runtime, output=None, timeout=0.01, redirect_x=False):
         result['stdout'] = []
         result['stderr'] = []
         result['merged'] = ''
-
     setattr(runtime, 'runtime_memory_gb', mem_mb/1024.0)
     setattr(runtime, 'runtime_threads', num_threads)
     runtime.stderr = '\n'.join(result['stderr'])
@@ -1682,17 +1670,30 @@ def get_dependencies(name, environ):
     o, e = proc.communicate()
     return o.rstrip()
 
+# dj TOTHINK: this also gives a recur. error if there is no def_val
+# dj TODO: it won't be probably used anywhere, so should remove
+class EnumUnicode(traitlets.TraitType):
+    info_text = "tests for terminal_output"
+    default_value=None
+    allow_none=True
+
+    def validate(self, obj, value):
+        if value in ['stream', 'allatonce', 'file', 'none']:
+            return value
+        self.error(obj, value)
 
 class CommandLineInputSpec(BaseInterfaceInputSpec):
-    #pdb.set_trace()
-    args = Str(argstr='%s', desc='Additional parameters to the command')
-    # dj: does it work?
+    args = traitlets.Unicode(default_value=None, allow_none=True).tag(argstr='%s', 
+                                      desc='Additional parameters to the command')
     environ = DictStrStr.tag(
         desc='Environment variables', usedefault=True,
         nohash=True)
+
     # This input does not have a "usedefault=True" so the set_default_terminal_output()
     # method would work
-    terminal_output = traitlets.Enum(['stream', 'allatonce', 'file', 'none']).tag(
+# dj NOTE: that was gving me a recursion error; default_value had to be added
+    terminal_output = traitlets.Enum(['stream', 'allatonce', 'file', 'none'],
+                                     default_value=None, allow_none=True).tag(
         desc=('Control terminal output: `stream` - '
               'displays to terminal immediately (default), '
               '`allatonce` - waits till command is '
@@ -1737,15 +1738,13 @@ class CommandLine(BaseInterface):
     '11c37f97649cd61627f4afe5136af8c0'
 
     """
-    input_spec = CommandLineInputSpec #dj: gives an error if  no input_spec 
+    input_spec = CommandLineInputSpec 
     _cmd = None
     _version = None
     _terminal_output = 'stream'
 
     def __init__(self, command=None, **inputs):
-        #pdb.set_trace() #dj: input_spec = "spec2"
-        super(CommandLine, self).__init__(**inputs) #dj: gives max rec 
-        #pdb.set_trace()
+        super(CommandLine, self).__init__(**inputs) 
         self._environ = None
         if not hasattr(self, '_cmd'):
             self._cmd = None
@@ -1875,17 +1874,18 @@ class CommandLine(BaseInterface):
         if runtime.returncode is None or \
                 runtime.returncode not in correct_return_codes:
             self.raise_exception(runtime)
-
         return runtime
+
 
     def _format_arg(self, name, trait_spec, value):
         """A helper function for _parse_inputs
 
         Formats a trait containing argstr metadata
         """
-        argstr = trait_spec.argstr
+        argstr = trait_spec.metadata["argstr"]
         iflogger.debug('%s_%s' % (name, str(value)))
-        if trait_spec.is_trait_type(traits.Bool) and "%" not in argstr:
+        #dj NOTE: checking only Bool and List, TraitCompound is not used in nipype
+        if isinstance(trait_spec, traitlets.Bool) and "%" not in argstr:
             if value:
                 # Boolean options have no format string. Just append options
                 # if True.
@@ -1894,9 +1894,8 @@ class CommandLine(BaseInterface):
                 return None
         # traits.Either turns into traits.TraitCompound and does not have any
         # inner_traits
-        elif trait_spec.is_trait_type(traits.List) \
-            or (trait_spec.is_trait_type(traits.TraitCompound) and
-                isinstance(value, list)):
+            
+        elif isinstance(trait_spec, traitlets.List):
             # This is a bit simple-minded at present, and should be
             # construed as the default. If more sophisticated behavior
             # is needed, it can be accomplished with metadata (e.g.
@@ -1906,8 +1905,9 @@ class CommandLine(BaseInterface):
             # Depending on whether we stick with traitlets, and whether or
             # not we beef up traitlets.List, we may want to put some
             # type-checking code here as well
-            sep = trait_spec.sep
-            if sep is None:
+            if "sep" in trait_spec.metadata and trait_spec.metadata["sep"] is not None:
+                sep = trait_spec.metadata["sep"]
+            else:
                 sep = ' '
             if argstr.endswith('...'):
 
@@ -1922,24 +1922,31 @@ class CommandLine(BaseInterface):
             # Append options using format string.
             return argstr % value
 
+    #dj TODO: review changes, probabbly it can be done better 
     def _filename_from_source(self, name, chain=None):
         if chain is None:
             chain = []
-
-        trait_spec = self.inputs.trait(name)
+        trait_spec = self.inputs.traits()[name]
         retval = getattr(self.inputs, name)
         source_ext = None
         if not isdefined(retval) or "%s" in retval:
-            if not trait_spec.name_source:
+            if ("name_source" not in trait_spec.metadata) or (trait_spec.metadata["name_source"] 
+                                                              is None):
                 return retval
             if isdefined(retval) and "%s" in retval:
                 name_template = retval
+            elif "name_template" in trait_spec.metadata:
+                name_template = trait_spec.metadata["name_template"]
             else:
-                name_template = trait_spec.name_template
+                name_template = None
             if not name_template:
                 name_template = "%s_generated"
+                
+            if "name_source" in trait_spec.metadata:
+                ns = trait_spec.metadata["name_source"]
+            else:
+                ns = None
 
-            ns = trait_spec.name_source
             while isinstance(ns, (list, tuple)):
                 if len(ns) > 1:
                     iflogger.warn('Only one name_source per trait is allowed')
@@ -1973,7 +1980,7 @@ class CommandLine(BaseInterface):
             chain = None
             retval = name_template % base
             _, _, ext = split_filename(retval)
-            if trait_spec.keep_extension and (ext or source_ext):
+            if "keep_extension" in trait_spec.metadata and trait_spec.metadata["keep_extension"] and (ext or source_ext):
                 if (ext is None or not ext) and source_ext:
                     retval = retval + source_ext
             else:
@@ -2016,22 +2023,21 @@ class CommandLine(BaseInterface):
         final_args = {}
         metadata = dict(argstr=lambda t: t is not None)
         for name, spec in sorted(self.inputs.traits(**metadata).items()):
-            if skip and name in skip:
+             if skip and name in skip:
                 continue
             value = getattr(self.inputs, name)
-            if spec.name_source:
+            if "name_source" in spec.metadata:
                 value = self._filename_from_source(name)
-            elif spec.genfile:
+            elif "genfile" in spec.metadata:
                 if not isdefined(value) or value is None:
                     value = self._gen_filename(name)
-
             if not isdefined(value):
                 continue
             arg = self._format_arg(name, spec, value)
             if arg is None:
                 continue
-            pos = spec.position
-            if pos is not None:
+            if "position" in spec.metadata and spec.metadata["position"] is not None:
+                pos = spec.metadata["position"]
                 if int(pos) >= 0:
                     initial_args[pos] = arg
                 else:
