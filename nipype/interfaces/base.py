@@ -31,6 +31,7 @@ from textwrap import wrap
 from warnings import warn
 import simplejson as json
 from dateutil.parser import parse as parseutc
+from packaging.version import Version
 
 from .. import config, logging, LooseVersion, __version__
 from ..utils.provenance import write_provenance
@@ -43,7 +44,7 @@ from .traits_extension import (
 from ..external.due import due
 
 runtime_profile = str2bool(config.get('execution', 'profile_runtime'))
-nipype_version = LooseVersion(__version__)
+nipype_version = Version(__version__)
 iflogger = logging.getLogger('interface')
 
 FLOAT_FORMAT = '{:.10f}'.format
@@ -352,6 +353,7 @@ class BaseTraitedSpec(traits.HasTraits):
     XXX Reconsider this in the long run, but it seems like the best
     solution to move forward on the refactoring.
     """
+    package_version = nipype_version
 
     def __init__(self, **kwargs):
         """ Initialize handlers and inputs"""
@@ -367,7 +369,7 @@ class BaseTraitedSpec(traits.HasTraits):
                 undefined_traits[trait] = Undefined
         self.trait_set(trait_change_notify=False, **undefined_traits)
         self._generate_handlers()
-        self.set(**kwargs)
+        self.trait_set(**kwargs)
 
     def items(self):
         """ Name, trait generator for user modifiable traits
@@ -444,7 +446,7 @@ class BaseTraitedSpec(traits.HasTraits):
             else:
                 msg3 = ''
             msg = ' '.join((msg1, msg2, msg3))
-            if LooseVersion(str(trait_spec.deprecated)) < nipype_version:
+            if Version(str(trait_spec.deprecated)) < self.package_version:
                 raise TraitError(msg)
             else:
                 if trait_spec.new_name:
@@ -650,7 +652,7 @@ class DynamicTraitedSpec(BaseTraitedSpec):
                 pass
         # clone twice
         dup = self.clone_traits(memo=memo)
-        dup.set(**dup_dict)
+        dup.trait_set(**dup_dict)
         return dup
 
 
@@ -1060,7 +1062,7 @@ class BaseInterface(Interface):
         results :  an InterfaceResult object containing a copy of the instance
         that was executed, provenance information and, if successful, results
         """
-        self.inputs.set(**inputs)
+        self.inputs.trait_set(**inputs)
         self._check_mandatory_inputs()
         self._check_version_requirements(self.inputs)
         interface = self.__class__

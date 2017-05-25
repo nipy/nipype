@@ -45,7 +45,7 @@ def get_nipype_gitversion():
 if __version__.endswith('-dev'):
     gitversion = get_nipype_gitversion()
     if gitversion:
-        __version__ = __version__.replace('-dev', '-' + gitversion + '.dev')
+        __version__ = '{}+{}'.format(__version__, gitversion)
 
 CLASSIFIERS = ['Development Status :: 5 - Production/Stable',
                'Environment :: Console',
@@ -141,7 +141,8 @@ REQUIRES = [
     'funcsigs',
     'pytest>=%s' % PYTEST_MIN_VERSION,
     'mock',
-    'pydotplus'
+    'pydotplus',
+    'packaging',
 ]
 
 if sys.version_info <= (3, 4):

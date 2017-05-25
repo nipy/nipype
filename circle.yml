@@ -1,4 +1,6 @@
 machine:
+  pre:
+    - curl -sSL https://s3.amazonaws.com/circle-downloads/install-circleci-docker.sh | bash -s -- 1.10.0
   environment:
     OSF_NIPYPE_URL: "https://files.osf.io/v1/resources/nefdp/providers/osfstorage"
     DATA_NIPYPE_TUTORIAL_URL: "${OSF_NIPYPE_URL}/57f4739cb83f6901ed94bf21"

@@ -33,6 +33,9 @@ NIPYPE: Neuroimaging in Python: Pipelines and Interfaces
 .. image:: https://img.shields.io/badge/gitter-join%20chat%20%E2%86%92-brightgreen.svg?style=flat
     :target: http://gitter.im/nipy/nipype
     :alt: Chat
+    
+.. image:: https://zenodo.org/badge/DOI/10.5281/zenodo.581704.svg
+   :target: https://doi.org/10.5281/zenodo.581704
 
 Current neuroimaging software offer users an incredible opportunity to
 analyze data using a variety of different algorithms. However, this has
