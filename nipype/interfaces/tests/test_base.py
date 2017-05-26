@@ -794,20 +794,35 @@ def check_dict(ref_dict, tst_dict):
             failed_dict[key] = (value, newval)
     return failed_dict
 
-@pytest.mark.xfail(reason="dj:WIP")
+
+# dj TOASK: had to change the structure of the test
+# dj TOASK: do you really want to use ImageFile as it was used in the original test?
 def test_ImageFile():
-    x = nib.BaseInterface().inputs
 
-    # setup traits
-    x.add_trait('nifti', nib.ImageFile(types=['nifti1', 'dicom']))
-    x.add_trait('anytype', nib.ImageFile())
-    x.add_trait('newtype', nib.ImageFile(types=['nifti10']))
-    x.add_trait('nocompress', nib.ImageFile(types=['mgh'],
-                                            allow_compressed=False))
+    class MySpec(nib.TraitedSpec):
+        nifti = nib.ImageFile(types=['nifti1', 'dicom'])
+        anytype = nib.ImageFile()
+        newtype = nib.ImageFile(types=['nifti10'])
+        nocompress = nib.ImageFile(types=['mgh'], allow_compressed=False)
 
-    with pytest.raises(nib.TraitError): x.nifti = 'test.mgz'
+    class MyInterface(nib.BaseInterface):
+        input_spec = MySpec
+
+
+    x = MyInterface().inputs
+
+    with pytest.raises(nib.TraitError) as excinfo: 
+        x.nifti = 'test.mgz'
+    assert "test.mgz is not included in allowed types" in str(excinfo.value)
     x.nifti = 'test.nii'
+
     x.anytype = 'test.xml'
-    with pytest.raises(AttributeError): x.newtype = 'test.nii'
-    with pytest.raises(nib.TraitError): x.nocompress = 'test.nii.gz'
+
+    with pytest.raises(AttributeError) as excinfo:
+        x.newtype = 'test.nii'
+    assert "Information has not been added for format" in str(excinfo.value)
+
+    with pytest.raises(nib.TraitError) as excinfo: 
+        x.nocompress = 'test.nii.gz'
+    assert "test.nii.gz is not included in allowed types" in str(excinfo.value)
     x.nocompress = 'test.mgh'

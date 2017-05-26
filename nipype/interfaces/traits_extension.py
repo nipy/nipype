@@ -109,7 +109,7 @@ class File (BaseFile):
     Disables the default C-level fast validator.
     """
     # dj TODO: does this class change anything comparing to BaseFile?
-    # dj TODO: can I remove?
+    # dj TODO: can I remove the class?
     def __init__(self, value='', filter=None, auto_set=False,
                  entries=0, exists=False, **metadata):
         """ Creates a File trait.
@@ -200,6 +200,7 @@ class BaseDirectory (traitlets.Unicode):
         self.error(object, value)
 
 
+# dj TOASK: can I remove it? Not sure about this C-level validator
 class Directory (BaseDirectory):
     """
     Defines a trait whose value must be the name of a directory.
@@ -269,6 +270,7 @@ class ImageFile(File):
                                         exists, **metadata)
 
     def grab_exts(self):
+        # dj TOASK: is it finished or not??
         # TODO: file type validation
         exts = []
         for fmt in self.types:
@@ -285,10 +287,10 @@ class ImageFile(File):
                                      ', '.join(img_fmt_types.keys())))
         return list(set(exts))
 
-    def validate(self, object, name, value):
+    def validate(self, object, value):
         """ Validates that a specified value is valid for this trait.
         """
-        validated_value = super(ImageFile, self).validate(object, name, value)
+        validated_value = super(ImageFile, self).validate(object, value)
         if validated_value and self.types:
             self._exts = self.grab_exts()
             if not any(validated_value.endswith(x) for x in self._exts):
