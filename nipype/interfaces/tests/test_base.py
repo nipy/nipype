@@ -795,21 +795,34 @@ def check_dict(ref_dict, tst_dict):
     return failed_dict
 
 
-# dj TOASK: had to change the structure of the test
-# dj TOASK: do you really want to use ImageFile as it was used in the original test?
-def test_ImageFile():
 
-    class MySpec(nib.TraitedSpec):
+def image_inputs():
+    class ImSpec(nib.TraitedSpec):
         nifti = nib.ImageFile(types=['nifti1', 'dicom'])
         anytype = nib.ImageFile()
         newtype = nib.ImageFile(types=['nifti10'])
         nocompress = nib.ImageFile(types=['mgh'], allow_compressed=False)
 
-    class MyInterface(nib.BaseInterface):
-        input_spec = MySpec
+    class ImInterface(nib.BaseInterface):
+        input_spec = ImSpec
+        
+    return ImInterface().inputs
 
+def image_inputs_dynam():
+    inp = nib.BaseInterface().inputs
+    # setup traits
+    inp.add_traits(nifti=nib.ImageFile(types=['nifti1', 'dicom']))
+    inp.add_traits(anytype=nib.ImageFile())
+    inp.add_traits(newtype=nib.ImageFile(types=['nifti10']))
+    inp.add_traits(nocompress=nib.ImageFile(types=['mgh'],
+                                          allow_compressed=False))
+    return inp
 
-    x = MyInterface().inputs
+#dj NOTE: testing for dynamical and non-dynamical version 
+@pytest.mark.parametrize("inp_fun", [image_inputs, image_inputs_dynam])
+def test_ImageFile(inp_fun):
+
+    x = inp_fun()
 
     with pytest.raises(nib.TraitError) as excinfo: 
         x.nifti = 'test.mgz'
@@ -826,3 +839,4 @@ def test_ImageFile():
         x.nocompress = 'test.nii.gz'
     assert "test.nii.gz is not included in allowed types" in str(excinfo.value)
     x.nocompress = 'test.mgh'
+
