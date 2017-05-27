@@ -44,7 +44,7 @@ def test_ICA_AROMA_inputs():
     xor=['feat_dir'],
     ),
     out_dir=dict(argstr='-o %s',
-    mandatory=True,
+    genfile=True,
     ),
     terminal_output=dict(nohash=True,
     ),
