@@ -2042,11 +2042,11 @@ class CommandLine(BaseInterface):
         last_args = [arg for pos, arg in sorted(final_args.items())]
         return first_args + all_args + last_args
 
-
+# dj TODO: haven't tested yet, no tests in taste_base 
 class StdOutCommandLineInputSpec(CommandLineInputSpec):
     out_file = File(argstr="> %s", position=-1, genfile=True)
 
-
+# dj TODO: haven't tested yet, no tests in taste_base
 class StdOutCommandLine(CommandLine):
     input_spec = StdOutCommandLineInputSpec
 
@@ -2059,7 +2059,7 @@ class StdOutCommandLine(CommandLine):
     def _gen_outfilename(self):
         raise NotImplementedError
 
-
+# dj TODO: haven't tested yet, no tests in taste_base 
 class MpiCommandLineInputSpec(CommandLineInputSpec):
     use_mpi = traits.Bool(False,
                           desc="Whether or not to run the command with mpiexec",
@@ -2069,6 +2069,8 @@ class MpiCommandLineInputSpec(CommandLineInputSpec):
                          "SGE)")
 
 
+# dj TODO: haven't tested yet, no tests in taste_base
+# dj TOASK: it's not used anywhere, can I remove?
 class MpiCommandLine(CommandLine):
     """Implements functionality to interact with command line programs
     that can be run with MPI (i.e. using 'mpiexec').
@@ -2100,6 +2102,7 @@ class MpiCommandLine(CommandLine):
         return ' '.join(result)
 
 
+# dj TODO: haven't tested yet, no tests in taste_base 
 class SEMLikeCommandLine(CommandLine):
     """In SEM derived interface all outputs have corresponding inputs.
     However, some SEM commands create outputs that are not defined in the XML.
@@ -2139,6 +2142,7 @@ class SEMLikeCommandLine(CommandLine):
         return super(SEMLikeCommandLine, self)._format_arg(name, spec, value)
 
 
+# dj TODO: haven't tested yet, no tests in taste_base 
 class MultiPath(traits.List):
     """ Abstract class - shared functionality of input and output MultiPath
     """
@@ -2172,7 +2176,7 @@ class MultiPath(traits.List):
 
         self.error(object, name, value)
 
-
+# dj TODO: haven't tested yet, no tests in taste_base 
 class OutputMultiPath(MultiPath):
     """ Implements a user friendly traits that accepts one or more
     paths to files or directories. This is the output version which
@@ -2218,7 +2222,7 @@ class OutputMultiPath(MultiPath):
     def set(self, object, name, value):
         self.set_value(object, name, value)
 
-
+# dj TODO: haven't tested yet, no tests in taste_base 
 class InputMultiPath(MultiPath):
     """ Implements a user friendly traits that accepts one or more
     paths to files or directories. This is the input version which

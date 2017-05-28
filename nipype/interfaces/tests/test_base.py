@@ -340,6 +340,25 @@ def test_TraitedSpec_withFile(setup_file):
     assert hashval[1] == 'a00e9ee24f5bfa9545a515b7a759886b'
 
 
+@pytest.mark.parametrize("class_name, name", 
+                         [(nib.File, "file"), (nib.Directory, "directory")])
+def test_TraitedSpec_withFileOrDirectory_traiterror(class_name, name):
+
+    class spec(nib.TraitedSpec):
+        moo = class_name()
+        doo = class_name(exists=True)
+
+    with pytest.raises(traitlets.TraitError) as excinfo:
+        infields = spec(moo=3)
+    pdb.set_trace()
+    assert "a spec instance must be a {} name".format(name) in str(excinfo.value)
+    spec(moo="some_string")
+
+    with pytest.raises(traitlets.TraitError) as excinfo:
+        infields = spec(doo="some_string")
+    assert "a spec instance must be an existing {} name".format(name) in str(excinfo.value)
+
+
 def test_TraitedSpec_withNoFileHashing(setup_file):
     tmp_infile = setup_file
     tmpd, nme = os.path.split(tmp_infile)
@@ -824,7 +843,11 @@ def test_ImageFile(inp_fun):
 
     x = inp_fun()
 
-    with pytest.raises(nib.TraitError) as excinfo: 
+    with pytest.raises(traitlets.TraitError) as excinfo:
+        x.nifti = 3
+    assert "instance must be a file name" in str(excinfo.value)
+
+    with pytest.raises(traitlets.TraitError) as excinfo: 
         x.nifti = 'test.mgz'
     assert "test.mgz is not included in allowed types" in str(excinfo.value)
     x.nifti = 'test.nii'
@@ -835,7 +858,7 @@ def test_ImageFile(inp_fun):
         x.newtype = 'test.nii'
     assert "Information has not been added for format" in str(excinfo.value)
 
-    with pytest.raises(nib.TraitError) as excinfo: 
+    with pytest.raises(traitlets.TraitError) as excinfo: 
         x.nocompress = 'test.nii.gz'
     assert "test.nii.gz is not included in allowed types" in str(excinfo.value)
     x.nocompress = 'test.mgh'

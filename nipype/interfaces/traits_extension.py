@@ -87,6 +87,7 @@ class BaseFile(traitlets.Unicode):
 
             Note: The 'fast validator' version performs this check in C.
         """
+        # dj TODO: something wrong with object
         #pdb.set_trace()
         validated_value = super(BaseFile, self).validate(object, value)
         #pdb.set_trace()
@@ -94,11 +95,6 @@ class BaseFile(traitlets.Unicode):
             return validated_value
         elif os.path.isfile(value):
             return validated_value
-        else:
-            raise TraitError(
-                args='The trait \'{}\' of {} instance is {}, but the path '
-                     ' \'{}\' does not exist.'.format(name, class_of(object),
-                                                      self.info_text, value))
 
         self.error(object, value)
 
@@ -143,7 +139,7 @@ class File (BaseFile):
 #  'BaseDirectory' and 'Directory' traits:
 # -------------------------------------------------------------------------------
 
-
+# dj TODO: no tests for BaseDirectory or Directory
 class BaseDirectory (traitlets.Unicode):
     """
     Defines a trait whose value must be the name of a directory.
@@ -185,18 +181,11 @@ class BaseDirectory (traitlets.Unicode):
 
             Note: The 'fast validator' version performs this check in C.
         """
-        #pdb.set_trace()
         if isinstance(value, (str, bytes)):
             if not self.exists:
                 return value
             if os.path.isdir(value):
                 return value
-            else:
-                raise traitlets.TraitError(
-                    args='The trait \'{}\' of a/an {} instance is {}, but the path '
-                         ' \'{}\' does not exist.'.format(name, object,
-                                                          self.info_text, value))
-
         self.error(object, value)
 
 
@@ -294,8 +283,8 @@ class ImageFile(File):
         if validated_value and self.types:
             self._exts = self.grab_exts()
             if not any(validated_value.endswith(x) for x in self._exts):
-                raise TraitError(
-                    args="{} is not included in allowed types: {}".format(
+                raise traitlets.TraitError(
+                    "{} is not included in allowed types: {}".format(
                         validated_value, ', '.join(self._exts)))
         return validated_value
 
