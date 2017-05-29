@@ -41,6 +41,7 @@ from ..utils.misc import is_container, trim, str2bool
 from ..utils.filemanip import (md5, hash_infile, FileNotFoundError, hash_timestamp,
                                split_filename, to_str)
 import traitlets, pdb
+#dj TODO: clean it! other scripts import from base.py, so can't remove it now
 from .traits_extension import (
     traits, Undefined, TraitDictObject, TraitListObject, TraitError, isdefined,
     File, Directory, DictStrStr, has_metadata, ImageFile)
@@ -381,11 +382,13 @@ class BaseTraitedSpec(traitlets.HasTraits):
         # dj TODO: i don't think we have to use it; commented for now
         #self.trait_set(trait_change_notify=False, **undefined_traits)#dj remove
         self._generate_handlers()
-        #self.set(**kwargs)
-        #dj TODO: write set method
+        self.set(**kwargs) 
+
+
+    # dj TODO: is it ok, or has to include tag
+    def set(self, **kwargs):
         for (key, val) in kwargs.items():
             self.__setattr__(key, val)
-
 
 
     def items(self):
@@ -485,10 +488,10 @@ class BaseTraitedSpec(traitlets.HasTraits):
                 if trait_spec.metadata["new_name"]:
                     
                     # dj TOTHINK: do i have to add trait_change_notify=False?
+                    # dj TODO: if yes, can I do it with set_trait?
                     # dj TOTHINK: if new=None it won't get to the loop
-                    self.__setattr__(name, None)
-                    self.__setattr__(trait_spec.metadata["new_name"], new)
-                    # dj TODO: should write trait_set, but has to include tags!
+                    self.set_trait(name, None)
+                    self.set_trait(trait_spec.metadata["new_name"], new)
                     #self.trait_set(trait_change_notify=False,
                     #               **{'%s' % name: Undefined,
                     #                  '%s' % trait_spec.metadata["new_name"]: new})
@@ -1125,10 +1128,8 @@ class BaseInterface(Interface):
         results :  an InterfaceResult object containing a copy of the instance
         that was executed, provenance information and, if successful, results
         """
-        # dj TODO: write set method
-        for (key, val) in inputs.items():
-            self.__setattr__(key, val)
-        #self.inputs.set(**inputs)
+        # dj NOTE: the set method might need some chaages
+        self.inputs.set(**inputs)
         self._check_mandatory_inputs()
         self._check_version_requirements(self.inputs)
         interface = self.__class__

@@ -209,7 +209,6 @@ def test_deprecation_3():
         warnings.filterwarnings('always', '', UserWarning)
 
         spec_instance = DeprecationSpec3()
-        #pdb.set_trace()
         # dj NOTE: din't understand the try/except block, removed
         spec_instance.foo = 1
         assert spec_instance.foo is None
@@ -350,7 +349,6 @@ def test_TraitedSpec_withFileOrDirectory_traiterror(class_name, name):
 
     with pytest.raises(traitlets.TraitError) as excinfo:
         infields = spec(moo=3)
-    pdb.set_trace()
     assert "a spec instance must be a {} name".format(name) in str(excinfo.value)
     spec(moo="some_string")
 
@@ -523,9 +521,7 @@ def test_BaseInterface_load_save_inputs_ants():
     with open(settings) as setf:
         data_dict = json.load(setf)
 
-    #pdb.set_trace()
     tsthash = Registration()
-    #pdb.set_trace()
     tsthash.load_inputs_from_json(settings)
     assert {} == check_dict(data_dict, tsthash.inputs.get_traitsfree())
 
