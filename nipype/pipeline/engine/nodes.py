@@ -561,7 +561,7 @@ class Node(EngineBase):
             logger.debug('aggregating results')
             if attribute_error:
                 old_inputs = loadpkl(op.join(cwd, '_inputs.pklz'))
-                self.inputs.set(**old_inputs)
+                self.inputs.trait_set(**old_inputs)
             if not isinstance(self, MapNode):
                 self._copyfiles_to_wd(cwd, True, linksonly=True)
                 aggouts = self._interface.aggregate_outputs(
@@ -1121,7 +1121,7 @@ class MapNode(Node):
                         base_dir=op.join(cwd, 'mapflow'),
                         name=nodename)
             node.plugin_args = self.plugin_args
-            node._interface.inputs.set(
+            node._interface.inputs.trait_set(
                 **deepcopy(self._interface.inputs.get()))
             for field in self.iterfield:
                 if self.nested:
@@ -1246,7 +1246,7 @@ class MapNode(Node):
         old_inputs = self._inputs.get()
         self._inputs = self._create_dynamic_traits(self._interface.inputs,
                                                    fields=self.iterfield)
-        self._inputs.set(**old_inputs)
+        self._inputs.trait_set(**old_inputs)
         super(MapNode, self)._get_inputs()
 
     def _check_iterfield(self):
