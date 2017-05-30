@@ -1389,7 +1389,7 @@ class GCORInputSpec(CommandLineInputSpec):
         exists=True,
         copyfile=False)
 
-    in_mask = File(
+    mask = File(
         desc='mask dataset, for restricting the computation',
         argstr='-mask %s',
         exists=True,
