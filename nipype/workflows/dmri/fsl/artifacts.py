@@ -236,6 +236,7 @@ def all_fsl_pipeline(name='fsl_all_correct',
         import numpy as np
         import nibabel as nb
         import os
+        from nipype.utils import NUMPY_MMAP
         out_file = os.path.abspath('index.txt')
         vols = nb.load(in_file, mmap=NUMPY_MMAP).get_data().shape[-1]
         np.savetxt(out_file, np.ones((vols,)).T)
