@@ -32,7 +32,7 @@ def test_bunch_attribute():
     b = nib.Bunch(a=1, b=[2, 3], c=None)
     assert b.a == 1
     assert b.b == [2, 3]
-    assert b.c == None
+    assert b.c is None
 
 
 def test_bunch_repr():
@@ -384,8 +384,8 @@ def test_TraitedSpec_withNoFileHashing(setup_file):
 
 
 def test_Interface_notimplemented_1():
-    assert nib.Interface.input_spec == None
-    assert nib.Interface.output_spec == None
+    assert nib.Interface.input_spec is None
+    assert nib.Interface.output_spec is None
     with pytest.raises(NotImplementedError): nib.Interface()
     with pytest.raises(NotImplementedError): nib.Interface.help()
     with pytest.raises(NotImplementedError): nib.Interface._inputs_help()
@@ -424,7 +424,9 @@ class BaseInterfaceOutputSpec(nib.TraitedSpec):
 
 
 def test_BaseInterface_1():
-    assert nib.BaseInterface.help() == None
+    pdb.set_trace()
+    assert nib.BaseInterface.help() is None
+    pdb.set_trace()
     assert nib.BaseInterface._get_filecopy_info() == []
 
 
@@ -432,9 +434,9 @@ def test_BaseInterface_2():
     class DerivedInterface(nib.BaseInterface):
         input_spec = BaseInterfaceInputSpec
 
-    assert DerivedInterface.help() == None
+    assert DerivedInterface.help() is None
     assert 'moo' in ''.join(DerivedInterface._inputs_help())
-    assert DerivedInterface()._outputs() == None
+    assert DerivedInterface()._outputs() is None
     assert DerivedInterface._get_filecopy_info()[0]['key'] == 'woo'
     assert DerivedInterface._get_filecopy_info()[0]['copy']
     assert DerivedInterface._get_filecopy_info()[1]['key'] == 'zoo'
@@ -674,7 +676,7 @@ def test_Commandline_2():
     ci3.inputs.environ = {'MYENV': 'foo'}
     res = ci3.run()
     assert res.runtime.environ['MYENV'] == 'foo'
-    assert res.outputs == None
+    assert res.outputs is None
 
 
 def test_Commandline_3():
