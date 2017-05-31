@@ -46,9 +46,14 @@ def test_bunch_methods():
     newb = b.dictcopy()
     assert b.a == 3
     assert b.get('a') == 3
-    assert b.get('badkey', 'otherthing') == 'otherthing'
-    assert b != newb
-    assert type(dict()) == type(newb)
+
+    # dj TOASK: do we want to have an error or just None?
+    assert b.get('badkey') is None
+    assert b.get('badkey', 'otherthing') == 'otherthing' # changing default value 
+
+    assert b is not newb
+    assert type(newb) is dict
+    assert newb == b.__dict__
     assert newb['a'] == 3
 
 
@@ -60,6 +65,8 @@ def test_bunch_hash():
     b = nib.Bunch(infile=json_pth,
                   otherthing='blue',
                   yat=True)
+    # newdict contains filename and its hash value for infile field
+    # bhash is a hash value for the dictionary without filename (so can be compare)
     newbdict, bhash = b._get_bunch_hash()
     assert bhash == 'ddcc7b4ec5675df8cf317a48bd1857fa'
     # Make sure the hash stored in the json file for `infile` is correct.
@@ -155,8 +162,10 @@ def test_TraitedSpec_logic():
     assert myif.inputs.kung == 2.0
 
     # dj TOASK: are you sure that this should be warning only??
-    with pytest.warns(UserWarning): 
-        myif.inputs.kung_bar = 2
+    # dj TOASK: this is related to the note setattr(myif.inputs, 'kung', 10.0)
+    # dj TODO: should remove kung_bar?? when previous test work
+    #with pytest.warns(UserWarning): 
+    #    myif.inputs.kung_bar = 2
 
     # dj NOTE: this test can't be earlier, since bar is set regardless the error
     set_bar = lambda: setattr(myif.inputs, 'bar', 1)    
@@ -424,9 +433,7 @@ class BaseInterfaceOutputSpec(nib.TraitedSpec):
 
 
 def test_BaseInterface_1():
-    pdb.set_trace()
     assert nib.BaseInterface.help() is None
-    pdb.set_trace()
     assert nib.BaseInterface._get_filecopy_info() == []
 
 

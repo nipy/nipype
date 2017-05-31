@@ -73,7 +73,7 @@ class Str(traitlets.Unicode):
 #traits.Str = Str
 
 
-# dj TOTHINK: do i need it?
+# dj TOASK: nipype almost doest use it, should we remove?
 class NipypeInterfaceError(Exception):
     def __init__(self, value):
         self.value = value
@@ -123,7 +123,6 @@ def load_template(name):
     return template
 
 
-# dj NOTE: doesn't use traits
 class Bunch(object):
     """Dictionary-like class that provides attribute-style access to it's items.
 
@@ -230,6 +229,7 @@ class Bunch(object):
             file_list.append((afile, md5hex))
         return file_list
 
+    # dj TOASK: about XXX
     def _get_bunch_hash(self):
         """Return a dictionary of our items with hashes for each file.
 
@@ -416,6 +416,7 @@ class BaseTraitedSpec(traitlets.HasTraits):
                 #dj TODO:  deprecation of the on_trait_change in traitlets, 
                 #dj TODO: it should use observe
                 self.on_trait_change(self._xor_warn, tr_name)
+            # dj TOASK: it was not checked before (added a test - should be a warning only??)
             if self.trait_metadata(tr_name, "requires"):
                 self.on_trait_change(self._requires_warn, tr_name)
             if self.trait_metadata(tr_name, "deprecated"):
@@ -443,7 +444,7 @@ class BaseTraitedSpec(traitlets.HasTraits):
                            'which is already set') % (name, trait_name)
                     raise IOError(msg)
 
-
+    # dj NOTE: this was not used anywhere
     def _requires_warn(self, name, old, new):
         """Part of the xor behavior
         """
@@ -995,7 +996,7 @@ class BaseInterface(Interface):
                              copy=spec.metadata["copyfile"]))
         return info
 
-    #dj TOTHINK: requires vs mandatory
+
     def _check_requires(self, spec, name, value):
         """ check if required inputs are satisfied
         """
