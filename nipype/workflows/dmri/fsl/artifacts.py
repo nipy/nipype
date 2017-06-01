@@ -4,8 +4,6 @@
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 from __future__ import division
 
-from nipype.utils import NUMPY_MMAP
-
 from ....interfaces.io import JSONFileGrabber
 from ....interfaces import utility as niu
 from ....interfaces import ants
@@ -903,6 +901,7 @@ def _xfm_jacobian(in_xfm):
 
 def _get_zoom(in_file, enc_dir):
     import nibabel as nb
+    from nipype.utils import NUMPY_MMAP
 
     zooms = nb.load(in_file, mmap=NUMPY_MMAP).header.get_zooms()
 

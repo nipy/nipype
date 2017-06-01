@@ -24,7 +24,7 @@ import re
 import pickle
 from functools import reduce
 import numpy as np
-from nipype.utils.misc import package_check
+from ...utils.misc import package_check
 
 package_check('networkx', '1.3')
 

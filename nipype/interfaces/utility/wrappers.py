@@ -19,7 +19,7 @@ standard_library.install_aliases()
 
 from builtins import str, bytes
 
-from nipype import logging
+from ... import logging
 from ..base import (traits, DynamicTraitedSpec, Undefined, isdefined, runtime_profile,
                     BaseInterfaceInputSpec)
 from ..io import IOBase, add_traits

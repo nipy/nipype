@@ -54,7 +54,7 @@ outgraph = fix_pipeline.run()
 
 """
 
-from nipype.interfaces.base import (
+from ..base import (
     TraitedSpec,
     CommandLineInputSpec,
     CommandLine,
@@ -64,11 +64,8 @@ from nipype.interfaces.base import (
     BaseInterfaceInputSpec,
     traits
 )
-from nipype.interfaces.traits_extension import (
-    Directory,
-    File,
-    isdefined
-)
+from ..traits_extension import Directory, File, isdefined
+
 import os
 
 class TrainingSetCreatorInputSpec(BaseInterfaceInputSpec):

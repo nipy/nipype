@@ -16,8 +16,8 @@ Examples
 See the docstrings of the individual classes for examples.
 """
 
-from nipype.interfaces.niftyreg.base import no_nifty_package
-from nipype.interfaces.niftyfit.base import NiftyFitCommand
+from ..niftyreg.base import no_nifty_package
+from ..niftyfit.base import NiftyFitCommand
 import subprocess
 import warnings
 

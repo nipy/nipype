@@ -7,9 +7,9 @@ pipelines. Including linear and non-linear image co-registration
 """
 
 from builtins import str, range
-import nipype.interfaces.utility as niu
-import nipype.interfaces.niftyreg as niftyreg
-import nipype.pipeline.engine as pe
+from ....interfaces import utility as niu
+from ....interfaces import niftyreg as niftyreg
+from ....pipeline import engine as pe
 
 
 def create_linear_gw_step(name="linear_gw_niftyreg",

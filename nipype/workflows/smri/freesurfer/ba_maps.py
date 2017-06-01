@@ -1,11 +1,10 @@
 # -*- coding: utf-8 -*-
 import os
-import nipype
-from nipype.interfaces.utility import Function,IdentityInterface
-import nipype.pipeline.engine as pe  # pypeline engine
-from nipype.interfaces.freesurfer import *
-from nipype.interfaces.io import DataGrabber
-from nipype.interfaces.utility import Merge
+from ....interfaces.utility import Function, IdentityInterface
+from ....pipeline import engine as pe  # pypeline engine
+from ....interfaces.freesurfer import *
+from ....interfaces.io import DataGrabber
+from ....interfaces.utility import Merge
 
 def create_ba_maps_wf(name="Brodmann_Area_Maps", th3=True, exvivo=True,
                       entorhinal=True):
