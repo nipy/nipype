@@ -9,6 +9,8 @@ from ....interfaces import utility as niu
 from ....interfaces import ants
 from ....interfaces import fsl
 from ....pipeline import engine as pe
+from ...data import get_flirt_schedule
+
 from .utils import (b0_indices, time_avg, apply_all_corrections, b0_average,
                     hmc_split, dwi_flirt, eddy_rotate_bvecs, rotate_bvecs,
                     insert_mat, extract_bval, recompose_dwi, recompose_xfm,
@@ -352,8 +354,6 @@ should be taken as reference
         outputnode.out_xfms - list of transformation matrices
 
     """
-    from nipype.workflows.data import get_flirt_schedule
-
     params = dict(dof=6, bgvalue=0, save_log=True, no_search=True,
                   # cost='mutualinfo', cost_func='mutualinfo', bins=64,
                   schedule=get_flirt_schedule('hmc'))
@@ -454,7 +454,6 @@ head-motion correction)
         outputnode.out_xfms - list of transformation matrices
     """
 
-    from nipype.workflows.data import get_flirt_schedule
     params = dict(dof=12, no_search=True, interp='spline', bgvalue=0,
                   schedule=get_flirt_schedule('ecc'))
     # cost='normmi', cost_func='normmi', bins=64,
