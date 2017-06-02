@@ -1,19 +1,7 @@
 # -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
-"""This module contains Trait classes that we've pulled from the
-traits source and fixed due to various bugs.  File and Directory are
-redefined as the release version had dependencies on TraitsUI, which
-we do not want Nipype to depend on.  At least not yet.
-
-Undefined class was missing the __len__ operator, causing edit_traits
-and configure_traits to fail on List objects.  Even though we don't
-require TraitsUI, this bug was the only thing preventing us from
-popping up GUIs which users like.
-
-These bugs have been in Traits v3.3.0 and v3.2.1.  We have reported
-all of these bugs and they've been fixed in enthought svn repository
-(usually by Robert Kern).
+"""This module contains ... 
 
 """
 from __future__ import print_function, division, unicode_literals, absolute_import
@@ -27,7 +15,6 @@ import traitlets, pdb
 import traits.api as traits
 from traits.trait_handlers import TraitDictObject, TraitListObject
 from traits.trait_errors import TraitError
-from traits.trait_base import _Undefined
 
 
 # dj NOTE: `key_trait` must be a Trait or None
@@ -211,32 +198,8 @@ class ImageFile(File):
                         validated_value, ', '.join(self._exts)))
         return validated_value
 
-"""
-The functions that pop-up the Traits GUIs, edit_traits and
-configure_traits, were failing because all of our inputs default to
-Undefined deep and down in traits/ui/wx/list_editor.py it checks for
-the len() of the elements of the list.  The _Undefined class in traits
-does not define the __len__ method and would error.  I tried defining
-our own Undefined and even sublassing Undefined, but both of those
-failed with a TraitError in our initializer when we assign the
-Undefined to the inputs because of an incompatible type:
-
-TraitError: The 'vertical_gradient' trait of a BetInputSpec instance must be a float, but a value of <undefined> <class 'nipype.interfaces.traits._Undefined'> was specified.
-
-So... in order to keep the same type but add the missing method, I
-monkey patched.
-"""
-
-
-def length(self):
-    return 0
-
-##########################################################################
-# Apply monkeypatch here
-_Undefined.__len__ = length
-##########################################################################
-
-Undefined = _Undefined()
+# dj TODO: remove! have to remove all imports first
+Undefined = "will be removed"#_Undefined()
 
 # dj NOTE: for now, everywhere where undefined was used I'm changing to None
 # dj NOTE: had to add additinonal part for list (is it enough?)

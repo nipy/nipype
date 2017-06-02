@@ -351,6 +351,7 @@ class TraitedSpec(traitlets.HasTraits):
 
     new metadata:
 
+    #dj TODO: remove usedefault
     * usedefault : set this to True if the default value of the trait should be
       used. Unless this is set, the attributes are set to traits.Undefined
 
@@ -532,7 +533,8 @@ class TraitedSpec(traitlets.HasTraits):
         out = {}
         for key in self.class_trait_names():
             out[key] = self.__getattribute__(key)
-        out = self._clean_container(out, Undefined)
+        # dj TODO: check if the default value for undefinedval is OK
+        out = self._clean_container(out)
         return out
 
     def get_traitsfree(self, **kwargs):
