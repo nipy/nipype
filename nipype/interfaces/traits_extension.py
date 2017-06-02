@@ -42,7 +42,7 @@ DictStrStr = traitlets.Dict(value_trait=traitlets.Unicode(), key_trait=traitlets
 
 
 
-class BaseFile(traitlets.Unicode):
+class File(traitlets.Unicode):
     """ Defines a trait whose value must be the name of a file.
     """
 
@@ -69,7 +69,7 @@ class BaseFile(traitlets.Unicode):
 
         Default Value
         -------------
-        *value* or ''
+        *value* or None
         """
 
         self.filter = filter
@@ -78,19 +78,13 @@ class BaseFile(traitlets.Unicode):
         self.exists = exists
         if exists:
             self.info_text = 'an existing file name'
-        super(BaseFile, self).__init__(value, allow_none=True, **metadata)
+        super(File, self).__init__(value, allow_none=True, **metadata)
 
     def validate(self, object, value):
-        # dj NOTE: not sure about the "fast validator" in traitlets
-        # dj NOTE: but traits.BaseUnicode also don't use the fast validator
         """ Validates that a specified value is valid for this trait.
 
-            Note: The 'fast validator' version performs this check in C.
         """
-        # dj TODO: something wrong with object
-        #pdb.set_trace()
-        validated_value = super(BaseFile, self).validate(object, value)
-        #pdb.set_trace()
+        validated_value = super(File, self).validate(object, value)
         if not self.exists:
             return validated_value
         elif os.path.isfile(value):
@@ -99,48 +93,12 @@ class BaseFile(traitlets.Unicode):
         self.error(object, value)
 
 
-class File (BaseFile):
-    """
-    Defines a trait whose value must be the name of a file.
-    Disables the default C-level fast validator.
-    """
-    # dj TODO: does this class change anything comparing to BaseFile?
-    # dj TODO: can I remove the class?
-    def __init__(self, value=None, filter=None, auto_set=False,
-                 entries=0, exists=False, **metadata):
-        """ Creates a File trait.
-
-        Parameters
-        ----------
-        value : string
-            The default value for the trait
-        filter : string
-            A wildcard string to filter filenames in the file dialog box used by
-            the attribute trait editor.
-        auto_set : boolean
-            Indicates whether the file editor updates the trait value after
-            every key stroke.
-        exists : boolean
-            Indicates whether the trait value must be an existing file or
-            not.
-
-        Default Value
-        -------------
-        *value* or ''
-        """
-        # if not exists:
-        #     # Define the C-level fast validator to use:
-        #     fast_validate = (11, str)
-
-        super(File, self).__init__(value, filter, auto_set, entries, exists,
-                                   **metadata)
-
 # -------------------------------------------------------------------------------
-#  'BaseDirectory' and 'Directory' traits:
+#  'Directory' traits:
 # -------------------------------------------------------------------------------
 
 # dj TODO: no tests for BaseDirectory or Directory
-class BaseDirectory (traitlets.Unicode):
+class Directory (traitlets.Unicode):
     """
     Defines a trait whose value must be the name of a directory.
     """
@@ -148,55 +106,7 @@ class BaseDirectory (traitlets.Unicode):
     # A description of the type of value this trait accepts:
     info_text = 'a directory name'
 
-    def __init__(self, value='', auto_set=False, entries=0,
-                 exists=False, **metadata):
-        """ Creates a BaseDirectory trait.
-
-        Parameters
-        ----------
-        value : string
-            The default value for the trait
-        auto_set : boolean
-            Indicates whether the directory editor updates the trait value
-            after every key stroke.
-        exists : boolean
-            Indicates whether the trait value must be an existing directory or
-            not.
-
-        Default Value
-        -------------
-        *value* or ''
-        """
-        self.entries = entries
-        self.auto_set = auto_set
-        self.exists = exists
-
-        if exists:
-            self.info_text = 'an existing directory name'
-
-        super(BaseDirectory, self).__init__(value, **metadata)
-
-    def validate(self, object, value):
-        """ Validates that a specified value is valid for this trait.
-
-            Note: The 'fast validator' version performs this check in C.
-        """
-        if isinstance(value, (str, bytes)):
-            if not self.exists:
-                return value
-            if os.path.isdir(value):
-                return value
-        self.error(object, value)
-
-
-# dj TOASK: can I remove it? Not sure about this C-level validator
-class Directory (BaseDirectory):
-    """
-    Defines a trait whose value must be the name of a directory.
-    Disables the default C-level fast validator.
-    """
-
-    def __init__(self, value='', auto_set=False, entries=0,
+    def __init__(self, value=None, auto_set=False, entries=0,
                  exists=False, **metadata):
         """ Creates a Directory trait.
 
@@ -213,15 +123,28 @@ class Directory (BaseDirectory):
 
         Default Value
         -------------
-        *value* or ''
+        *value* or None
         """
-        # Define the C-level fast validator to use if the directory existence
-        # test is not required:
-        # if not exists:
-        #     self.fast_validate = (11, str)
+        self.entries = entries
+        self.auto_set = auto_set
+        self.exists = exists
 
-        super(Directory, self).__init__(value, auto_set, entries, exists,
-                                        **metadata)
+        if exists:
+            self.info_text = 'an existing directory name'
+
+        super(Directory, self).__init__(value, **metadata)
+
+    def validate(self, object, value):
+        """ Validates that a specified value is valid for this trait.
+
+        """
+        if isinstance(value, (str, bytes)):
+            if not self.exists:
+                return value
+            if os.path.isdir(value):
+                return value
+        self.error(object, value)
+
 
 # lists of tuples
 # each element consists of :
