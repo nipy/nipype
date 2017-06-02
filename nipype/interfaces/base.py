@@ -343,7 +343,7 @@ class InterfaceResult(object):
         return self._version
 
 
-class BaseTraitedSpec(traitlets.HasTraits):
+class TraitedSpec(traitlets.HasTraits):
     """Provide a few methods necessary to support nipype interface api
 
     The inputs attribute of interfaces call certain methods that are not
@@ -370,7 +370,7 @@ class BaseTraitedSpec(traitlets.HasTraits):
         # arguments.  HasTraits does not define an __init__ and
         # therefore these args were being ignored.
         # super(TraitedSpec, self).__init__(*args, **kwargs)
-        super(BaseTraitedSpec, self).__init__(**kwargs)
+        super(TraitedSpec, self).__init__(**kwargs)
        # dj TODO: it shouldn't be needed with traitlets (Satra)
         #traits.push_exception_handler(reraise_exceptions=True)
         # dj TODO: not sure if I should keep usedefault 
@@ -528,7 +528,7 @@ class BaseTraitedSpec(traitlets.HasTraits):
         """
         #dj TOODO: not sure if this is not more complicated in traits
         # dj TODO: recur?
-        #out = super(BaseTraitedSpec, self).get(**kwargs)
+        #out = super(TraitedSpec, self).get(**kwargs)
         out = {}
         for key in self.class_trait_names():
             out[key] = self.__getattribute__(key)
@@ -543,7 +543,7 @@ class BaseTraitedSpec(traitlets.HasTraits):
         were Undefined
         """
         #dj TODO: traitlets doesn't have get
-        # out = super(BaseTraitedSpec, self).get(**kwargs) 
+        # out = super(TraitedSpec, self).get(**kwargs) 
         out = {}
         for key in self.class_trait_names():
             out[key] = self.__getattribute__(key)
@@ -681,48 +681,8 @@ class BaseTraitedSpec(traitlets.HasTraits):
         return out
 
 
-# dj TOASK: I understand that this won't be used anymore (Satra)
-# dj TOASK: it was needed only because of deepcopy (?)
-class DynamicTraitedSpec(BaseTraitedSpec):
-    """ A subclass to handle dynamic traits
-
-    This class is a workaround for add_traits and clone_traits not
-    functioning well together.
-    """
-
-    def __deepcopy__(self, memo):
-        """ bug in deepcopy for HasTraits results in weird cloning behavior for
-        added traits
-        """
-        id_self = id(self)
-        if id_self in memo:
-            return memo[id_self]
-        dup_dict = deepcopy(self.get(), memo)
-        # access all keys
-        for key in self.copyable_trait_names():
-            if key in self.__dict__.keys():
-                _ = getattr(self, key)
-        # clone once
-        dup = self.clone_traits(memo=memo)
-        for key in self.copyable_trait_names():
-            try:
-                _ = getattr(dup, key)
-            except:
-                pass
-        # clone twice
-        dup = self.clone_traits(memo=memo)
-        dup.trait_set(**dup_dict)
-        return dup
-
-
-# dj NOTE: this class is the same as BaseTraitedSpec 
-#dj TODO: one class shuld be removed
-class TraitedSpec(BaseTraitedSpec):
-    """ Create a subclass with strict traits.
-
-    This is used in 90% of the cases.
-    """
-    #_ = traits.Disallow
+# dj TODO: will be removed, but have to clean other nipype files first
+class DynamicTraitedSpec(TraitedSpec):
     pass
 
 

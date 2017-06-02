@@ -110,21 +110,6 @@ def test_TraitedSpec():
     assert infields.__repr__() == '\nfoo = 1\ngoo = 0.0\n'
 
 
-# dj TOASK: why are we skipping this guy?
-@pytest.mark.skip
-def test_TraitedSpec_dynamic():
-    from pickle import dumps, loads
-    a = nib.BaseTraitedSpec()
-    a.add_trait('foo', nib.traits.Int)
-    a.foo = 1
-    assign_a = lambda: setattr(a, 'foo', 'a')
-    with pytest.raises(Exception): assign_a
-    pkld_a = dumps(a)
-    unpkld_a = loads(pkld_a)
-    assign_a_again = lambda: setattr(unpkld_a, 'foo', 'a')
-    with pytest.raises(Exception): assign_a_again
-
-
 def test_TraitedSpec_logic():
 
     class spec3(nib.TraitedSpec):
