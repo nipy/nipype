@@ -49,7 +49,7 @@ class BaseFile(traitlets.Unicode):
     # A description of the type of value this trait accepts:
     info_text = 'a file name'
 
-    def __init__(self, value='', filter=None, auto_set=False,
+    def __init__(self, value=None, filter=None, auto_set=False,
                  entries=0, exists=False, **metadata):
         """ Creates a File trait.
 
@@ -78,7 +78,7 @@ class BaseFile(traitlets.Unicode):
         self.exists = exists
         if exists:
             self.info_text = 'an existing file name'
-        super(BaseFile, self).__init__(value, **metadata)
+        super(BaseFile, self).__init__(value, allow_none=True, **metadata)
 
     def validate(self, object, value):
         # dj NOTE: not sure about the "fast validator" in traitlets
@@ -106,7 +106,7 @@ class File (BaseFile):
     """
     # dj TODO: does this class change anything comparing to BaseFile?
     # dj TODO: can I remove the class?
-    def __init__(self, value='', filter=None, auto_set=False,
+    def __init__(self, value=None, filter=None, auto_set=False,
                  entries=0, exists=False, **metadata):
         """ Creates a File trait.
 
@@ -316,12 +316,10 @@ _Undefined.__len__ = length
 Undefined = _Undefined()
 
 # dj NOTE: for now, everywhere where undefined was used I'm changing to None
-# dj NOTE: had to add additinonal part for list and str(is it enough?)
+# dj NOTE: had to add additinonal part for list (is it enough?)
 def isdefined(object):
     if type(object) is list:
         return object != []
-    elif type(object) is str:
-        return object != ''
     else:
         return object is not None
 

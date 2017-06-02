@@ -358,12 +358,12 @@ def test_TraitedSpec_withFileOrDirectory_traiterror(class_name, name):
 
     with pytest.raises(traitlets.TraitError) as excinfo:
         infields = spec(moo=3)
-    assert "a spec instance must be a {} name".format(name) in str(excinfo.value)
+    assert "instance expected a {} name".format(name) in str(excinfo.value)
     spec(moo="some_string")
 
     with pytest.raises(traitlets.TraitError) as excinfo:
         infields = spec(doo="some_string")
-    assert "a spec instance must be an existing {} name".format(name) in str(excinfo.value)
+    assert "instance expected an existing {} name".format(name) in str(excinfo.value)
 
 
 def test_TraitedSpec_withNoFileHashing(setup_file):
@@ -850,7 +850,7 @@ def test_ImageFile(inp_fun):
 
     with pytest.raises(traitlets.TraitError) as excinfo:
         x.nifti = 3
-    assert "instance must be a file name" in str(excinfo.value)
+    assert "instance expected a file name" in str(excinfo.value)
 
     with pytest.raises(traitlets.TraitError) as excinfo: 
         x.nifti = 'test.mgz'
