@@ -10,6 +10,7 @@
     ...                            '../../testing/data'))
     >>> os.chdir(datadir)
 """
+
 from __future__ import print_function, division, unicode_literals, absolute_import
 from ..base import (TraitedSpec, CommandLineInputSpec, CommandLine,
                     File, Directory, traits)
@@ -26,7 +27,7 @@ class ICA_AROMAInputSpec(CommandLineInputSpec):
     in_file = File(exists=True, mandatory=True,
                    argstr='-i %s', xor=['feat_dir'],
                    desc='volume to be denoised')
-    out_dir = Directory('out', mandatory=True,
+    out_dir = Directory('out', genfile=True,
                         argstr='-o %s',
                         desc='output directory')
     mask = File(exists=True, argstr='-m %s', xor=['feat_dir'],
@@ -103,12 +104,20 @@ class ICA_AROMA(CommandLine):
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        out_dir = os.path.abspath(self.inputs.out_dir)
-        outputs['out_dir'] = out_dir
-
+        if isdefined(self.inputs.out_dir):
+            outputs['out_dir'] = os.path.abspath(self.inputs.out_dir)
+        else:
+            outputs['out_dir'] = self._gen_filename('out_dir')
+        out_dir = outputs['out_dir']
+        
         if self.inputs.denoise_type in ('aggr', 'both'):
             outputs['aggr_denoised_file'] = os.path.join(out_dir, 'denoised_func_data_aggr.nii.gz')
         if self.inputs.denoise_type in ('nonaggr', 'both'):
             outputs['nonaggr_denoised_file'] = os.path.join(out_dir, 'denoised_func_data_nonaggr.nii.gz')
-
         return outputs
+
+    def _gen_filename(self, name):
+        if name == 'out_dir':
+            return os.getcwd()
+
+    
