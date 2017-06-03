@@ -10,16 +10,11 @@
     ...                            '../../testing/data'))
     >>> os.chdir(datadir)
 """
-from nipype.interfaces.base import (
-    TraitedSpec,
-    CommandLineInputSpec,
-    CommandLine,
-    File,
-    Directory,
-    traits,
-    OutputMultiPath
-)
+from __future__ import print_function, division, unicode_literals, absolute_import
+from ..base import (TraitedSpec, CommandLineInputSpec, CommandLine,
+                    File, Directory, traits)
 import os
+
 
 class ICA_AROMAInputSpec(CommandLineInputSpec):
     feat_dir = Directory(exists=True, mandatory=True,

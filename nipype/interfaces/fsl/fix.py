@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """The fix module provides classes for interfacing with the `FSL FIX
@@ -53,8 +54,9 @@ fix_pipeline.write_graph()
 outgraph = fix_pipeline.run()
 
 """
+from __future__ import print_function, division, unicode_literals, absolute_import
 
-from nipype.interfaces.base import (
+from ..base import (
     TraitedSpec,
     CommandLineInputSpec,
     CommandLine,
@@ -64,12 +66,9 @@ from nipype.interfaces.base import (
     BaseInterfaceInputSpec,
     traits
 )
-from nipype.interfaces.traits_extension import (
-    Directory,
-    File,
-    isdefined
-)
+from ..traits_extension import Directory, File, isdefined
 import os
+
 
 class TrainingSetCreatorInputSpec(BaseInterfaceInputSpec):
     mel_icas_in = InputMultiPath(Directory(exists=True), copyfile=False,
