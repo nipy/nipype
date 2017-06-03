@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from __future__ import print_function, division, unicode_literals, absolute_import
 from ....pipeline import engine as pe
 from ....interfaces import freesurfer as fs
 from ....interfaces import utility as niu
@@ -206,7 +207,6 @@ def create_reconall_workflow(name="ReconAll", plugin_args=None):
                   awk_file=None,
                   rb_date=None):
         """Set optional configurations to the default"""
-        from nipype.workflows.smri.freesurfer.utils import getdefaultconfig
         def checkarg(arg, default):
             """Returns the value if defined; otherwise default"""
             if arg:

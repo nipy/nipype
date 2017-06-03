@@ -354,6 +354,16 @@ class RegistrationInputSpec(ANTSCommandInputSpec):
                                                                   ),
                                                      )
                                        )
+    restrict_deformation = traits.List(
+        traits.List(traits.Enum(0, 1)),
+        desc=("This option allows the user to restrict the optimization of "
+              "the displacement field, translation, rigid or affine transform "
+              "on a per-component basis. For example, if one wants to limit "
+              "the deformation or rotation of 3-D volume to the  first two "
+              "dimensions, this is possible by specifying a weight vector of "
+              "'1x1x0' for a deformation field or '1x1x0x1x1x0' for a rigid "
+              "transformation.  Low-dimensional restriction only works if "
+              "there are no preceding transformations."))
     # Convergence flags
     number_of_iterations = traits.List(traits.List(traits.Int()))
     smoothing_sigmas = traits.List(traits.List(traits.Float()), mandatory=True)
@@ -770,6 +780,9 @@ class Registration(ANTSCommand):
                 else:
                     histval = self.inputs.use_histogram_matching[ii]
                 retval.append('--use-histogram-matching %d' % histval)
+            if isdefined(self.inputs.restrict_deformation):
+                retval.append('--restrict-deformation %s' %
+                              self._format_xarray(self.inputs.restrict_deformation[ii]))
         return " ".join(retval)
 
     def _get_outputfilenames(self, inverse=False):

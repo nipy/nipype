@@ -13,7 +13,8 @@ from __future__ import print_function, division, unicode_literals, absolute_impo
 import os
 
 from .base import TraitedSpec, CommandLineInputSpec, CommandLine, File, isdefined, traits
-from ..external.due import due, Doi, BibTeX
+from ..utils.filemanip import fname_presuffix
+from ..external.due import BibTeX
 
 pvc_methods = ['GTM',
                'IY',
@@ -200,8 +201,6 @@ class PETPVC(CommandLine):
             New filename based on given parameters.
 
         """
-        from nipype.utils.filemanip import fname_presuffix
-
         if basename == '':
             msg = 'Unable to generate filename for command %s. ' % self.cmd
             msg += 'basename is not set!'

@@ -49,8 +49,13 @@ class PBSPlugin(SGELikeBatchManagerBase):
                              environ=dict(os.environ),
                              terminal_output='allatonce',
                              ignore_exception=True).run()
+        stderr = result.runtime.stderr
         errmsg = 'Unknown Job Id'  # %s' % taskid
-        return errmsg not in result.runtime.stderr
+        success = 'Job has finished'
+        if success in e:  # Fix for my PBS
+            return False
+        else:
+            return errmsg not in e
 
     def _submit_batchtask(self, scriptfile, node):
         cmd = CommandLine('qsub', environ=dict(os.environ),

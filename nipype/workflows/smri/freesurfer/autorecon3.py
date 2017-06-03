@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
-from nipype.interfaces.utility import IdentityInterface, Merge, Function
-import nipype.pipeline.engine as pe  # pypeline engine
-from nipype.interfaces.freesurfer import *
+from __future__ import print_function, division, unicode_literals, absolute_import
+from ....interfaces.utility import IdentityInterface, Merge, Function
+from ....pipeline import engine as pe
+from ....interfaces.freesurfer import *
 from .ba_maps import create_ba_maps_wf
-from nipype.interfaces.io import DataGrabber
+from ....interfaces.io import DataGrabber
 
 def create_AutoRecon3(name="AutoRecon3", qcache=False, plugin_args=None,
                       th3=True, exvivo=True, entorhinal=True, fsvernum=5.3):
