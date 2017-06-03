@@ -79,6 +79,7 @@ def test_Registration_inputs():
     ),
     restore_state=dict(argstr='--restore-state %s',
     ),
+    restrict_deformation=dict(),
     sampling_percentage=dict(requires=['sampling_strategy'],
     ),
     sampling_percentage_item_trait=dict(),
