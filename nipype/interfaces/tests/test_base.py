@@ -95,7 +95,7 @@ def test_TraitedSpec():
 
     class spec(nib.TraitedSpec):
         foo = traitlets.Int(None, allow_none=True)
-        goo = traitlets.Float().tag(usedefault=True)
+        goo = traitlets.Float()
 
     assert spec().foo is None
     assert spec().goo == 0.0
@@ -403,13 +403,13 @@ def test_Interface_notimplemented_2():
 class BaseInterfaceInputSpec(nib.TraitedSpec):
     # dj TOASK: if everythere where there is no `usedefault=True` should be chnaged to
     # dj TOASK: default_value=None, allow_none=True ??
+    # dj : and if I have usedefault=True, i will simply not set default_value=None
     foo = traitlets.Int(default_value=None, allow_none=True).tag(desc='a random int')
     goo = traitlets.Int(default_value=None, allow_none=True).tag(desc='a random int',
                                                                  mandatory=True)
     moo = traitlets.Int(default_value=None, allow_none=True).tag(desc='a random int',
                                                                  mandatory=False)
-    hoo = traitlets.Int(default_value=None, allow_none=True).tag(desc='a random int',
-                                                                 usedefault=True)
+    hoo = traitlets.Int().tag(desc='a random int')
     zoo = nib.File().tag(desc='a file', copyfile=False)
     woo = nib.File().tag(desc='a file', copyfile=True)
 

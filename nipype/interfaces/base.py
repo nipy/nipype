@@ -372,13 +372,8 @@ class TraitedSpec(traitlets.HasTraits):
         # therefore these args were being ignored.
         # super(TraitedSpec, self).__init__(*args, **kwargs)
         super(TraitedSpec, self).__init__(**kwargs)
-       # dj TODO: it shouldn't be needed with traitlets (Satra)
+       # dj NOTE: it shouldn't be needed with traitlets (Satra)
         #traits.push_exception_handler(reraise_exceptions=True)
-        # dj TODO: not sure if I should keep usedefault 
-        #undefined_traits = {}
-        #for trait in self.class_trait_names():
-        #    if not self.traits()[trait].usedefault:
-        #        undefined_traits[trait] = Undefined
 
         # dj TODO: i don't think we have to use it; commented for now
         #self.trait_set(trait_change_notify=False, **undefined_traits)#dj remove
@@ -761,9 +756,8 @@ class Interface(object):
 
 
 class BaseInterfaceInputSpec(TraitedSpec):
-    ignore_exception = traitlets.Bool(False).tag(desc="Print an error message instead \
-of throwing an exception in case the interface fails to run", usedefault=True,
-                                                 nohash=True)
+    ignore_exception = traitlets.Bool().tag(desc="Print an error message instead \
+of throwing an exception in case the interface fails to run", nohash=True)
 
 
 class BaseInterface(Interface):
@@ -847,9 +841,9 @@ class BaseInterface(Interface):
         type_info = spec.info_text #dj:is it enough?? inputs is not used anymore
 
         default = ''
-        # dj TODO: the meaning of default_value is different!!
-        if "usedefault" in spec.metadata:
-            default = ', nipype default value: %s' % str(spec.default_value)
+        # dj TOASK: you always have some default_value (either one set by trles or in the code)
+        # dj TOASK: not sure if the "default_value" name should be used or something else
+        default = ', nipype default value: %s' % str(spec.default_value)
         line = "(%s%s)" % (type_info, default)
 
         manhelpstr = wrap(line, 70,
@@ -1646,8 +1640,7 @@ class CommandLineInputSpec(BaseInterfaceInputSpec):
     args = traitlets.Unicode(default_value=None, allow_none=True).tag(argstr='%s', 
                                       desc='Additional parameters to the command')
     environ = DictStrStr.tag(
-        desc='Environment variables', usedefault=True,
-        nohash=True)
+        desc='Environment variables', nohash=True)
 
     # This input does not have a "usedefault=True" so the set_default_terminal_output()
     # method would work
