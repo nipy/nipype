@@ -412,9 +412,6 @@ class TraitedSpec(traitlets.HasTraits):
                 #dj TODO:  deprecation of the on_trait_change in traitlets, 
                 #dj TODO: it should use observe
                 self.on_trait_change(self._xor_warn, tr_name)
-            # dj TOASK: it was not checked before (added a test - should be a warning only??)
-            if self.trait_metadata(tr_name, "requires"):
-                self.on_trait_change(self._requires_warn, tr_name)
             if self.trait_metadata(tr_name, "deprecated"):
                 self.on_trait_change(self._deprecated_warn, tr_name)
 
@@ -440,21 +437,6 @@ class TraitedSpec(traitlets.HasTraits):
                            'which is already set') % (name, trait_name)
                     raise IOError(msg)
 
-    # dj NOTE: this was not used anywhere
-    def _requires_warn(self, name, old, new):
-        """Part of the xor behavior
-        """
-        if isdefined(new):
-            trait_spec = self.traits()[name]
-            msg = None
-            for trait_name in trait_spec.metadata["requires"]:
-                if not isdefined(getattr(self, trait_name)):
-                    if not msg:
-                        msg = 'Input %s requires inputs: %s' \
-                            % (name, ', '.join(trait_spec.metadata["requires"]))
-        
-            if msg:  # only one requires warning at a time.
-                warn(msg)
 
     def _deprecated_warn(self, name, old, new):
         """Checks if a user assigns a value to a deprecated trait

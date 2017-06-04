@@ -139,11 +139,6 @@ def test_TraitedSpec_logic():
                      "foo or bar, not both\n\t\tmutually_exclusive: foo, bar"]:
         assert str_help in myif.help(returnhelp=True)
 
-    # dj TOASK: this is my old note, it also didn't raise error with traits!
-    # dj TOASK: can change it to pytest.warns or the code has to be changed
-    # NOTE_dj, FAIL: I don't get a TypeError, only a UserWarning
-    #with pytest.raises(TypeError):
-    #    setattr(myif.inputs, 'kung', 10.0)
     myif.inputs.foo = 1
     assert myif.inputs.foo == 1
 
