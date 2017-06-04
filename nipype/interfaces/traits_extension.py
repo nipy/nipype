@@ -21,8 +21,8 @@ from traits.trait_errors import TraitError
 # dj NOTE: when `value_trait` is a tuple, it doesn't give error, but just doesn't check the type
 # dj TODO: create an issue! 
 # dj NOTE: so either we created DictBytByt if needed, or write some extra class
-
-DictStrStr = traitlets.Dict(value_trait=traitlets.Unicode(), key_trait=traitlets.Unicode())
+# dj NOTE: at the end decided to move completely (it's used in one place)
+#DictStrStr = traitlets.Dict(value_trait=traitlets.Unicode(), key_trait=traitlets.Unicode())
 
 # TODO dj: is it used anywhere???
 #Str = traitlets.Unicode

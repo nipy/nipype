@@ -44,7 +44,7 @@ import traitlets, pdb
 #dj TODO: clean it! other scripts import from base.py, so can't remove it now
 from .traits_extension import (
     traits, Undefined, TraitDictObject, TraitListObject, TraitError, isdefined,
-    File, Directory, DictStrStr, has_metadata, ImageFile)
+    File, Directory, has_metadata, ImageFile)
 from ..external.due import due
 
 runtime_profile = str2bool(config.get('execution', 'profile_runtime'))
@@ -756,8 +756,8 @@ class Interface(object):
 
 
 class BaseInterfaceInputSpec(TraitedSpec):
-    ignore_exception = traitlets.Bool().tag(desc="Print an error message instead \
-of throwing an exception in case the interface fails to run", nohash=True)
+    ignore_exception = traitlets.Bool(help="Print an error message instead \
+of throwing an exception in case the interface fails to run").tag(nohash=True)
 
 
 class BaseInterface(Interface):
@@ -849,8 +849,9 @@ class BaseInterface(Interface):
         manhelpstr = wrap(line, 70,
                           initial_indent=manhelpstr[0] + ': ',
                           subsequent_indent='\t\t ')
-        if "desc" in spec.metadata:
-            desc = spec.metadata["desc"]
+        
+        if spec.help != "":
+            desc = spec.help
             for line in desc.split('\n'):
                 line = re.sub("\s+", " ", line)
                 manhelpstr += wrap(line, 70,
@@ -859,8 +860,8 @@ class BaseInterface(Interface):
 
         if "argstr" in spec.metadata:
             argstr = spec.metadata["argstr"]
-            pos = spec.position
-            if pos is not None:
+            if "position" in spec.metadata:
+                pos = spec.metadata["position"]
                 manhelpstr += wrap('flag: %s, position: %s' % (argstr, pos), 70,
                                    initial_indent='\t\t',
                                    subsequent_indent='\t\t')
@@ -1637,23 +1638,22 @@ class EnumUnicode(traitlets.TraitType):
         self.error(obj, value)
 
 class CommandLineInputSpec(BaseInterfaceInputSpec):
-    args = traitlets.Unicode(default_value=None, allow_none=True).tag(argstr='%s', 
-                                      desc='Additional parameters to the command')
-    environ = DictStrStr.tag(
-        desc='Environment variables', nohash=True)
+    args = traitlets.Unicode(default_value=None, allow_none=True,
+                             help='Additional parameters to the command').tag(argstr='%s')
+    environ = traitlets.Dict(value_trait=traitlets.Unicode(), key_trait=traitlets.Unicode(),
+                             help='Environment variables').tag(nohash=True)
 
     # This input does not have a "usedefault=True" so the set_default_terminal_output()
     # method would work
 # dj NOTE: that was gving me a recursion error; default_value had to be added
     terminal_output = traitlets.Enum(['stream', 'allatonce', 'file', 'none'],
-                                     default_value=None, allow_none=True).tag(
-        desc=('Control terminal output: `stream` - '
-              'displays to terminal immediately (default), '
-              '`allatonce` - waits till command is '
-              'finished to display output, `file` - '
-              'writes output to file, `none` - output'
-              ' is ignored'),
-        nohash=True)
+                                     default_value=None, allow_none=True,
+                                     help=('Control terminal output: `stream` - '
+                                           'displays to terminal immediately (default), '
+                                           '`allatonce` - waits till command is '
+                                           'finished to display output, `file` - '
+                                           'writes output to file, `none` - output'
+                                           ' is ignored')).tag(nohash=True)
 
 
 class CommandLine(BaseInterface):

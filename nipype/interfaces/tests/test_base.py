@@ -115,13 +115,12 @@ def test_TraitedSpec_logic():
     class spec3(nib.TraitedSpec):
         _xor_inputs = ('foo', 'bar')
 
-        foo = traitlets.Int(default_value=None, allow_none=True).tag(xor=_xor_inputs, 
-                                               desc='foo or bar, not both') #dj TODO: desc in help??
-        bar = traitlets.Int(default_value=None, allow_none=True).tag(xor=_xor_inputs, 
-                                                                     desc='bar or foo, not both')
-        
-        kung = traitlets.Float(default_value=None, allow_none=True).tag(requires=('foo',), 
-                                                position=0, desc='kung foo') 
+        foo = traitlets.Int(default_value=None, allow_none=True, help='foo or bar, not both').tag(
+            xor=_xor_inputs) 
+        bar = traitlets.Int(default_value=None, allow_none=True, help='bar or foo, not both').tag(
+            xor=_xor_inputs)         
+        kung = traitlets.Float(default_value=None, allow_none=True, help='kung foo').tag(
+            requires=('foo',), position=0)
         kung_bar = traitlets.Float(default_value=None, allow_none=True).tag(requires=('bar',), 
                                                                             position=0)
 
@@ -134,6 +133,11 @@ def test_TraitedSpec_logic():
         output_spec = out3
 
     myif = MyInterface()
+
+    # testing help (xor)
+    for str_help in ["bar or foo, not both\n\t\tmutually_exclusive: foo, bar",
+                     "foo or bar, not both\n\t\tmutually_exclusive: foo, bar"]:
+        assert str_help in myif.help(returnhelp=True)
 
     # dj TOASK: this is my old note, it also didn't raise error with traits!
     # dj TOASK: can change it to pytest.warns or the code has to be changed
@@ -237,6 +241,10 @@ def test_namesource(setup_file):
         input_spec = spec2
 
     testobj = TestName()
+    # testing help (args)
+    for str_help in ["flag: %s\n", "flag: %d, position: 4"]:
+        assert str_help in testobj.help(returnhelp=True)
+    
     testobj.inputs.doo = tmp_infile 
     testobj.inputs.goo = 99
     assert '%s_generated' % nme in testobj.cmdline
@@ -404,17 +412,16 @@ class BaseInterfaceInputSpec(nib.TraitedSpec):
     # dj TOASK: if everythere where there is no `usedefault=True` should be chnaged to
     # dj TOASK: default_value=None, allow_none=True ??
     # dj : and if I have usedefault=True, i will simply not set default_value=None
-    foo = traitlets.Int(default_value=None, allow_none=True).tag(desc='a random int')
-    goo = traitlets.Int(default_value=None, allow_none=True).tag(desc='a random int',
-                                                                 mandatory=True)
-    moo = traitlets.Int(default_value=None, allow_none=True).tag(desc='a random int',
-                                                                 mandatory=False)
-    hoo = traitlets.Int().tag(desc='a random int')
-    zoo = nib.File().tag(desc='a file', copyfile=False)
-    woo = nib.File().tag(desc='a file', copyfile=True)
+    foo = traitlets.Int(default_value=None, allow_none=True, help='a random int')
+    goo = traitlets.Int(default_value=None, allow_none=True, help='a random int').tag(mandatory=True)
+    moo = traitlets.Int(default_value=None, allow_none=True, help='a random int').tag(
+        mandatory=False)
+    hoo = traitlets.Int(help='a random int')
+    zoo = nib.File(help='a file').tag(copyfile=False)
+    woo = nib.File(help='a file').tag(copyfile=True)
 
 class BaseInterfaceOutputSpec(nib.TraitedSpec):
-    foo = traitlets.Int(default_value=None, allow_none=True).tag(desc='a random int')
+    foo = traitlets.Int(default_value=None, allow_none=True, help='a random int')
 
 
 def test_BaseInterface_1():
@@ -427,6 +434,12 @@ def test_BaseInterface_2():
         input_spec = BaseInterfaceInputSpec
 
     assert DerivedInterface.help() is None
+    #testing help
+    for str_help in ["[Mandatory]\n\tgoo: (an int, nipype default value: None)",
+                     "[Optional]\n\tfoo: (an int, nipype default value: None)",
+                     "Outputs::\n\n\tNone"]:
+        assert str_help in DerivedInterface.help(returnhelp=True)
+
     assert 'moo' in ''.join(DerivedInterface._inputs_help())
     assert DerivedInterface()._outputs() is None
     assert DerivedInterface._get_filecopy_info()[0]['key'] == 'woo'
@@ -527,10 +540,10 @@ def test_BaseInterface_load_save_inputs_ants():
 
 
 class MinVerInputSpec(nib.TraitedSpec):
-    foo = traitlets.Int(default_value=None, allow_none=True).tag(desc='a random int', min_ver='0.9')
+    foo = traitlets.Int(default_value=None, allow_none=True, help='a random int').tag(min_ver='0.9')
 
 class MaxVerInputSpec(nib.TraitedSpec):
-    foo = traitlets.Int(default_value=None, allow_none=True).tag(desc='a random int', max_ver='0.7')
+    foo = traitlets.Int(default_value=None, allow_none=True, help='a random int').tag(max_ver='0.7')
 
 
 def test_input_version_1():
@@ -607,12 +620,10 @@ def test_input_version_6():
 
 
 class VerInputSpec(nib.TraitedSpec):
-    foo = traitlets.Int(default_value=None, allow_none=True).tag(desc='a random int')
+    foo = traitlets.Int(default_value=None, allow_none=True, help='a random int')
 
 class MinVerOutputSpec(nib.TraitedSpec):
-    foo = traitlets.Int(default_value=None, allow_none=True).tag(desc='a random int', 
-                            
-                                     min_ver='0.9')
+    foo = traitlets.Int(default_value=None, allow_none=True, help='a random int').tag(min_ver='0.9')
 def test_output_version_1():
     class DerivedInterface1(nib.BaseInterface):
         input_spec = VerInputSpec
@@ -673,17 +684,15 @@ def test_Commandline_2():
 
 def test_Commandline_3():
     class CommandLineInputSpec1(nib.CommandLineInputSpec):
-        foo = traitlets.Unicode(default_value=None, allow_none=True).tag(argstr='%s', desc='a str')
-        goo = traitlets.Bool(default_value=None, allow_none=True).tag(argstr='-g', 
-                                                                      desc='a bool', position=0)
+        foo = traitlets.Unicode(default_value=None, allow_none=True, help='a str').tag(argstr='%s')
+        goo = traitlets.Bool(default_value=None, allow_none=True, help='a bool').tag(argstr='-g', 
+                                                                                     position=0)
         # dj NOTE: the default_value is actually [default_value], so it's not None
-        hoo = traitlets.List(default_value=None).tag(argstr='-l %s', 
-                                                                      desc='a list')
-        moo = traitlets.List(default_value=None, allow_none=True).tag(argstr='-i %d...', 
-                                                                      desc='a repeated list',
-                                                                      position=-1)
-        noo = traitlets.Int(default_value=None, allow_none=True).tag(argstr='-x %d', desc='an int')
-        roo = traitlets.Unicode(default_value=None, allow_none=True).tag(desc='not on command line')
+        hoo = traitlets.List(default_value=None, allow_none=True, help='a list').tag(argstr='-l %s') 
+        moo = traitlets.List(default_value=None, allow_none=True, help='a repeated list').tag(
+            argstr='-i %d...', position=-1)
+        noo = traitlets.Int(default_value=None, allow_none=True, help='an int').tag(argstr='-x %d')
+        roo = traitlets.Unicode(default_value=None, allow_none=True, help='not on command line')
         soo = traitlets.Bool(default_value=None, allow_none=True).tag(argstr="-soo")
 
     nib.CommandLine.input_spec = CommandLineInputSpec1
@@ -707,7 +716,7 @@ def test_Commandline_3():
 
 def test_Commandline_4():
     class CommandLineInputSpec2(nib.CommandLineInputSpec):
-        foo = nib.File().tag(argstr='%s', desc='a str', genfile=True)
+        foo = nib.File().tag(argstr='%s', genfile=True)
     nib.CommandLine.input_spec = CommandLineInputSpec2
     ci5 = nib.CommandLine(command='cmd')
     with pytest.raises(NotImplementedError): 
