@@ -1819,7 +1819,7 @@ class RandomiseInputSpec(FSLCommandInputSpec):
     in_file = File(exists=True, desc='4D input file', argstr='-i %s',
                    position=0, mandatory=True)
     base_name = traits.Str(
-        'tbss_', desc='the rootname that all generated files will have',
+        'randomise', desc='the rootname that all generated files will have',
         argstr='-o "%s"', position=1, usedefault=True)
     design_mat = File(
         exists=True, desc='design matrix file', argstr='-d %s', position=2)
@@ -1866,9 +1866,9 @@ class RandomiseInputSpec(FSLCommandInputSpec):
     var_smooth = traits.Int(
         argstr='-v %d', desc='use variance smoothing (std is in mm)')
     c_thresh = traits.Float(
-        argstr='-c %.2f', desc='carry out cluster-based thresholding')
+        argstr='-c %.1f', desc='carry out cluster-based thresholding')
     cm_thresh = traits.Float(
-        argstr='-C %.2f', desc='carry out cluster-mass-based thresholding')
+        argstr='-C %.1f', desc='carry out cluster-mass-based thresholding')
     f_c_thresh = traits.Float(
         argstr='-F %.2f', desc='carry out f cluster thresholding')
     f_cm_thresh = traits.Float(
@@ -1912,7 +1912,7 @@ class Randomise(FSLCommand):
     >>> import nipype.interfaces.fsl as fsl
     >>> rand = fsl.Randomise(in_file='allFA.nii', mask = 'mask.nii', tcon='design.con', design_mat='design.mat')
     >>> rand.cmdline # doctest: +ALLOW_UNICODE
-    'randomise -i allFA.nii -o "tbss_" -d design.mat -t design.con -m mask.nii'
+    'randomise -i allFA.nii -o "randomise" -d design.mat -t design.con -m mask.nii'
 
     """
 
