@@ -858,3 +858,87 @@ def test_ImageFile(inp_fun):
     assert "test.nii.gz is not included in allowed types" in str(excinfo.value)
     x.nocompress = 'test.mgh'
 
+
+# dj TODO: the simplest test for StdOutCommandLine, any suggestions??
+def test_StdOutCommandLine():
+
+    class spec(nib.StdOutCommandLineInputSpec):
+        doo = traitlets.Int(default_value=None, allow_none=True)
+
+
+    class TestName(nib.StdOutCommandLine):
+        _cmd = "mycommand"
+        input_spec = spec
+
+    testobj = TestName(doo=3)
+
+    assert testobj.inputs.doo == 3
+    assert "out_file" in testobj.inputs.traits() 
+    
+    assert testobj.cmd == "mycommand"
+    with pytest.raises(NotImplementedError):
+        testobj.cmdline
+
+
+
+# dj TOASK: a new tests for SEMLikeCommandLine - 
+# dj TOASK: are these the expected results?? traits version gave similar results
+# dj TOASK: other tests suggestions? 
+
+def test_SEMLikeCommandLine_1():
+    
+    class SEMLikeInpSpec(nib.CommandLineInputSpec):
+        foo = traitlets.Unicode()
+        doo = traitlets.Unicode()
+
+    class SEMLikeOutSpec(nib.TraitedSpec):
+        foo = traitlets.Unicode()
+
+    class TestName(nib.SEMLikeCommandLine):
+        _cmd = "mycommand"
+        input_spec = SEMLikeInpSpec
+        output_spec = SEMLikeOutSpec
+
+    testobj = TestName()
+
+    assert "foo" in testobj._list_outputs()
+
+
+def test_SEMLikeCommandLine_2():
+
+    class SEMLikeInpSpec(nib.CommandLineInputSpec):
+        foo = traitlets.Int()
+        doo = traitlets.Int()
+
+    class SEMLikeOutSpec(nib.TraitedSpec):
+        foo = traitlets.Int()
+
+    class TestName(nib.SEMLikeCommandLine):
+        _cmd = "mycommand"
+        input_spec = SEMLikeInpSpec
+        output_spec = SEMLikeOutSpec
+
+    testobj = TestName()
+
+    with pytest.raises(AttributeError) as excinfo:
+        testobj._list_outputs()
+    assert "'int' object has no attribute 'startswith'" == str(excinfo.value)
+
+def test_SEMLikeCommandLine_3():
+
+    class SEMLikeInpSpec(nib.CommandLineInputSpec):
+        doo = traitlets.Int()
+
+    class SEMLikeOutSpec(nib.TraitedSpec):
+        foo = traitlets.Int()
+
+    class TestName(nib.SEMLikeCommandLine):
+        _cmd = "mycommand"
+        input_spec = SEMLikeInpSpec
+        output_spec = SEMLikeOutSpec
+
+    testobj = TestName()
+
+    with pytest.raises(AttributeError) as excinfo:
+        testobj._list_outputs()
+    assert "'SEMLikeInpSpec' object has no attribute 'foo'" == str(excinfo.value)

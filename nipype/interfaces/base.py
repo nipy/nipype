@@ -1985,7 +1985,7 @@ class CommandLine(BaseInterface):
 
 # dj TODO: haven't tested yet, no tests in taste_base 
 class StdOutCommandLineInputSpec(CommandLineInputSpec):
-    out_file = File(argstr="> %s", position=-1, genfile=True)
+    out_file = File().tag(argstr="> %s", position=-1, genfile=True)
 
 # dj TODO: haven't tested yet, no tests in taste_base
 class StdOutCommandLine(CommandLine):
