@@ -524,6 +524,7 @@ def test_BaseInterface_load_save_inputs_ants():
         data_dict = json.load(setf)
 
     tsthash = Registration()
+    # dj TODO: tsthash.inputs has no all list; check the test after changing ants!
     tsthash.load_inputs_from_json(settings)
     assert {} == check_dict(data_dict, tsthash.inputs.get_traitsfree())
 
