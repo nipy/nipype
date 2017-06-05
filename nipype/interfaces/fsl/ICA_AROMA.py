@@ -13,7 +13,7 @@
 
 from __future__ import print_function, division, unicode_literals, absolute_import
 from ..base import (TraitedSpec, CommandLineInputSpec, CommandLine,
-                    File, Directory, traits)
+                    File, Directory, traits, isdefined)
 import os
 
 
@@ -109,7 +109,7 @@ class ICA_AROMA(CommandLine):
         else:
             outputs['out_dir'] = self._gen_filename('out_dir')
         out_dir = outputs['out_dir']
-        
+
         if self.inputs.denoise_type in ('aggr', 'both'):
             outputs['aggr_denoised_file'] = os.path.join(out_dir, 'denoised_func_data_aggr.nii.gz')
         if self.inputs.denoise_type in ('nonaggr', 'both'):
@@ -119,5 +119,3 @@ class ICA_AROMA(CommandLine):
     def _gen_filename(self, name):
         if name == 'out_dir':
             return os.getcwd()
-
-    
