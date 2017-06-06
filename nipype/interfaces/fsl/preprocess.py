@@ -549,13 +549,15 @@ class FLIRT(FSLCommand):
     _cmd = 'flirt'
     input_spec = FLIRTInputSpec
     output_spec = FLIRTOutputSpec
+    _log_written = False
 
     def aggregate_outputs(self, runtime=None, needed_outputs=None):
         outputs = super(FLIRT, self).aggregate_outputs(
             runtime=runtime, needed_outputs=needed_outputs)
-        if isdefined(self.inputs.save_log) and self.inputs.save_log:
+        if self.inputs.save_log and not self._log_written:
             with open(outputs.out_log, "a") as text_file:
                 text_file.write(runtime.stdout + '\n')
+            self._log_written = True
         return outputs
 
     def _parse_inputs(self, skip=None):
