@@ -13,7 +13,7 @@
 
 from __future__ import print_function, division, unicode_literals, absolute_import
 from ..base import (TraitedSpec, CommandLineInputSpec, CommandLine,
-                    File, Directory, traits)
+                    File, Directory, traits, isdefined)
 import os
 
 
@@ -119,5 +119,3 @@ class ICA_AROMA(CommandLine):
     def _gen_filename(self, name):
         if name == 'out_dir':
             return os.getcwd()
-
-
