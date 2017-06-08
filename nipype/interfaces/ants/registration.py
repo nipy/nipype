@@ -219,12 +219,14 @@ class RegistrationInputSpec(ANTSCommandInputSpec):
                             usedefault=True, desc='image dimension (2 or 3)')
     fixed_image = InputMultiPath(File(exists=True), mandatory=True,
                                  desc='image to apply transformation to (generally a coregistered functional)')
-    fixed_image_mask = File(argstr='%s', exists=True,
-                            desc='mask used to limit metric sampling region of the fixed image')
+    fixed_image_mask = InputMultiPath(
+        traits.Either('NULL', File(exists=True)),
+        desc='mask used to limit metric sampling region of the fixed image')
     moving_image = InputMultiPath(File(exists=True), mandatory=True,
                                   desc='image to apply transformation to (generally a coregistered functional)')
-    moving_image_mask = File(requires=['fixed_image_mask'],
-                             exists=True, desc='mask used to limit metric sampling region of the moving image')
+    moving_image_mask = InputMultiPath(
+        traits.Either('NULL', File(exists=True)),
+        desc='mask used to limit metric sampling region of the moving image')
 
     save_state = File(argstr='--save-state %s', exists=False,
                       desc='Filename for saving the internal restorable state of the registration')
@@ -783,6 +785,20 @@ class Registration(ANTSCommand):
             if isdefined(self.inputs.restrict_deformation):
                 retval.append('--restrict-deformation %s' %
                               self._format_xarray(self.inputs.restrict_deformation[ii]))
+            if any((isdefined(self.inputs.fixed_image_mask),
+                    isdefined(self.inputs.moving_image_mask))):
+                if isdefined(self.inputs.fixed_image_mask):
+                    fixed_masks = filename_to_list(self.inputs.fixed_image_mask)
+                    fixed_mask = fixed_mask[ii if len(fixed_masks) > 1 else 0]
+                else:
+                    fixed_mask = 'NULL'
+
+                if isdefined(self.inputs.moving_image_mask):
+                    moving_masks = filename_to_list(self.inputs.moving_image_mask)
+                    moving_mask = moving_mask[ii if len(moving_masks) > 1 else 0]
+                else:
+                    moving_mask = 'NULL'
+                retval.append('--masks [ %s, %s ]' % (fixed_mask, moving_mask))
         return " ".join(retval)
 
     def _get_outputfilenames(self, inverse=False):
@@ -827,13 +843,7 @@ class Registration(ANTSCommand):
                                                              self.inputs.winsorize_upper_quantile)
 
     def _format_arg(self, opt, spec, val):
-        if opt == 'fixed_image_mask':
-            if isdefined(self.inputs.moving_image_mask):
-                return '--masks [ %s, %s ]' % (self.inputs.fixed_image_mask,
-                                               self.inputs.moving_image_mask)
-            else:
-                return '--masks %s' % self.inputs.fixed_image_mask
-        elif opt == 'transforms':
+        if opt == 'transforms':
             return self._format_registration()
         elif opt == 'initial_moving_transform':
             do_invert_transform = self.inputs.invert_initial_moving_transform \
