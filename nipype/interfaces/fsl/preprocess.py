@@ -549,26 +549,29 @@ class FLIRT(FSLCommand):
     _cmd = 'flirt'
     input_spec = FLIRTInputSpec
     output_spec = FLIRTOutputSpec
+    _log_written = False
 
     def aggregate_outputs(self, runtime=None, needed_outputs=None):
         outputs = super(FLIRT, self).aggregate_outputs(
             runtime=runtime, needed_outputs=needed_outputs)
-        if isdefined(self.inputs.save_log) and self.inputs.save_log:
+        if self.inputs.save_log and not self._log_written:
             with open(outputs.out_log, "a") as text_file:
                 text_file.write(runtime.stdout + '\n')
+            self._log_written = True
         return outputs
 
     def _parse_inputs(self, skip=None):
-        skip = []
-        if isdefined(self.inputs.save_log) and self.inputs.save_log:
-            if not isdefined(self.inputs.verbose) or self.inputs.verbose == 0:
-                self.inputs.verbose = 1
-        if isdefined(self.inputs.apply_xfm) and self.inputs.apply_xfm:
-            if not self.inputs.in_matrix_file and not self.inputs.uses_qform:
-                raise RuntimeError('Argument apply_xfm requires in_matrix_file '
-                                   'or uses_qform arguments to run')
+        if skip is None:
+            skip = []
+        if self.inputs.save_log and not self.inputs.verbose:
+            self.inputs.verbose = 1
+        if self.inputs.apply_xfm and not (self.inputs.in_matrix_file or
+                                          self.inputs.uses_qform):
+            raise RuntimeError('Argument apply_xfm requires in_matrix_file or '
+                               'uses_qform arguments to run')
         skip.append('save_log')
         return super(FLIRT, self)._parse_inputs(skip=skip)
+
 
 class ApplyXFMInputSpec(FLIRTInputSpec):
     apply_xfm = traits.Bool(
