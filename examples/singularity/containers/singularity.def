@@ -1,0 +1,17 @@
+Bootstrap: docker
+From: alpine
+
+%setup
+  mkdir $SINGULARITY_ROOTFS/opt
+  cp script.sh $SINGULARITY_ROOTFS/opt/
+
+%post
+  chmod o+x /opt/script.sh
+  mkdir /input
+  mkdir /output
+  mkdir /working
+  exit 0
+
+%runscript
+  echo "Help, I'm trapped in a container"
+  /opt/script.sh $@
