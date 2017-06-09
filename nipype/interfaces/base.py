@@ -1983,11 +1983,11 @@ class CommandLine(BaseInterface):
         last_args = [arg for pos, arg in sorted(final_args.items())]
         return first_args + all_args + last_args
 
-# dj TODO: haven't tested yet, no tests in taste_base 
+# dj NOTE: didn't have any tests in test_base 
 class StdOutCommandLineInputSpec(CommandLineInputSpec):
     out_file = File().tag(argstr="> %s", position=-1, genfile=True)
 
-# dj TODO: haven't tested yet, no tests in taste_base
+# dj NOTE: didn't have any tests in test_base
 class StdOutCommandLine(CommandLine):
     input_spec = StdOutCommandLineInputSpec
 
@@ -2001,8 +2001,7 @@ class StdOutCommandLine(CommandLine):
         raise NotImplementedError
 
 
-
-# dj TODO: haven't tested yet, no tests in taste_base 
+# dj NOTE: didn't have any tests in test_base
 class SEMLikeCommandLine(CommandLine):
     """In SEM derived interface all outputs have corresponding inputs.
     However, some SEM commands create outputs that are not defined in the XML.
@@ -2042,42 +2041,66 @@ class SEMLikeCommandLine(CommandLine):
         return super(SEMLikeCommandLine, self)._format_arg(name, spec, value)
 
 
-# dj TODO: haven't tested yet, no tests in taste_base 
+# dj NOTE: created a temporary class MultiPath_new (will me renamed after I change interfaces 
+# dj NOTE: that are using it) otherwise pytest gave me an error (due to __init__.py)
 class MultiPath(traits.List):
+    pass
+
+# dj NOTE: didn't have any tests in test_base
+# dj TOASK: other new trait types are in traits_extension - should we move it there?
+class MultiPath_new(traitlets.List):
     """ Abstract class - shared functionality of input and output MultiPath
     """
+    # dj TOASK: is this default value ok?
+    default_value = None
+    allow_none = True
 
-    def validate(self, object, name, value):
-
+    # dj TOASK: should we check if value is a filename or a list of file names?
+    def validate(self, object, value):
+        # dj TODO: check if this still ok, I added this in 2139 
         # want to treat range and other sequences (except str) as list
         if not isinstance(value, (str, bytes)) and isinstance(value, collections.Sequence):
             value  = list(value)
 
-        if not isdefined(value) or \
-                (isinstance(value, list) and len(value) == 0):
-            return Undefined
 
+        # dj NOTE: for now isdefined([]) gives false, so OR part not needed 
+        # dj NOTE: not sure if that won't be change
+        #if not isdefined(value) or \
+        #        (isinstance(value, list) and len(value) == 0):
+        if not isdefined(value):
+            return None
         newvalue = value
 
         if not isinstance(value, list) \
-            or (self.inner_traits() and
-                isinstance(self.inner_traits()[0].trait_type,
-                           traits.List) and not
-                isinstance(self.inner_traits()[0].trait_type,
-                           InputMultiPath) and
-                isinstance(value, list) and
-                value and not
-                isinstance(value[0], list)):
+                :
+            # dj TOASK: traitlets doesnt have inner_traits, not sure how t change
+            # dj TOASK: should I check if isinstance(value, traitlets.List)??
+            # dj TODO: come back to this once I run tests for interfaces that use MultiPath
+            # or (self.inner_traits() and
+            #    isinstance(self.inner_traits()[0].trait_type,
+            #               traits.List) and not
+            #    isinstance(self.inner_traits()[0].trait_type,
+            #               InputMultiPath) and
+            #    isinstance(value, list) and
+            #    value and not
+            #    isinstance(value[0], list)):
             newvalue = [value]
-        value = super(MultiPath, self).validate(object, name, newvalue)
+
+        value = super(MultiPath_new, self).validate(object, newvalue)
 
         if len(value) > 0:
             return value
 
-        self.error(object, name, value)
+        # dj TOASK: when this error should be raised? can't think about an example
+        self.error(object, value)
 
-# dj TODO: haven't tested yet, no tests in taste_base 
+
+# dj TODO: remove and rename _new class
 class OutputMultiPath(MultiPath):
+    pass
+
+# dj TODO: didn't have any tests in taste_base 
+class OutputMultiPath_new(MultiPath_new):
     """ Implements a user friendly traits that accepts one or more
     paths to files or directories. This is the output version which
     return a single string whenever possible (when it was set to a
@@ -2110,20 +2133,29 @@ class OutputMultiPath(MultiPath):
 
     """
 
-    def get(self, object, name):
-        value = self.get_value(object, name)
-        if len(value) == 0:
+    # dj NOTE: method has different signature (hope this will work for other tests)
+    def get(self, object, cls=None):
+        value = super(OutputMultiPath_new, self).get(object, cls)
+        if value is None:
+            return None
+        elif len(value) == 0:
             return Undefined
         elif len(value) == 1:
             return value[0]
         else:
             return value
 
-    def set(self, object, name, value):
-        self.set_value(object, name, value)
+    def set(self, object, value):
+        # dj NOTE: no set_value method in traitlets
+        super(OutputMultiPath_new, self).set(object, value)
 
-# dj TODO: haven't tested yet, no tests in taste_base 
+
+# dj TODO: remove and rename _new class 
 class InputMultiPath(MultiPath):
+    pass
+
+# dj TOASK: the same as MultiPath - should we keep both? somehthing should be added here? 
+class InputMultiPath_new(MultiPath_new):
     """ Implements a user friendly traits that accepts one or more
     paths to files or directories. This is the input version which
     always returns a list. Default value of this trait

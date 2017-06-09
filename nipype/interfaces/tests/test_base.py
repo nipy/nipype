@@ -924,6 +924,7 @@ def test_SEMLikeCommandLine_2():
         testobj._list_outputs()
     assert "'int' object has no attribute 'startswith'" == str(excinfo.value)
 
+
 def test_SEMLikeCommandLine_3():
 
     class SEMLikeInpSpec(nib.CommandLineInputSpec):
@@ -942,3 +943,70 @@ def test_SEMLikeCommandLine_3():
     with pytest.raises(AttributeError) as excinfo:
         testobj._list_outputs()
     assert "'SEMLikeInpSpec' object has no attribute 'foo'" == str(excinfo.value)
+
+
+# dj TODO: change MultiPath_new to MultiPath at the end
+# dj TOASK: any suggestion about tests? 
+# dj TOASK: are those are expected outpus??
+def test_MultiPath():
+
+    class spec(nib.TraitedSpec):
+        goo = nib.MultiPath_new()
+
+    mp = spec()
+ 
+    assert mp.goo is None
+
+    mp.goo = None
+    assert mp.goo is None
+
+    mp.goo = []
+    assert mp.goo is None
+
+    mp.goo = 4
+    assert mp.goo == [4]
+
+    mp.goo = "text"
+    assert mp.goo == ["text"]
+
+    mp.goo = ["text"]
+    assert mp.goo == ["text"]
+
+    mp.goo = ["text1", "text2"]
+    assert mp.goo == ["text1", "text2"]
+
+    # dj TOASK: is this really expected?
+    mp.goo = {}
+    assert mp.goo == [{}]
+
+    mp.goo = ()
+    assert mp.goo == [()]
+
+
+
+# dj TODO: change OutputMultiPath_new to OutputMultiPath at the end
+# dj TOASK: any suggestion about tests?
+# dj TOASK: are those are expected outpus??
+def test_OutputMultiPath():
+
+    class spec(nib.TraitedSpec):
+        goo = nib.OutputMultiPath_new()
+
+    mp = spec()
+
+    assert mp.goo is None
+
+    mp.goo = None
+    assert mp.goo is None
+
+    mp.goo = []
+    assert mp.goo is None
+
+    mp.goo = "text"
+    assert mp.goo == "text"
+
+    mp.goo = ["text"]
+    assert mp.goo == "text"
+
+    mp.goo = ["text1", "text2"]
+    assert mp.goo == ["text1", "text2"]
