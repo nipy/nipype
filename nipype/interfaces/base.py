@@ -782,7 +782,6 @@ class BaseInterface(Interface):
 
 
     @classmethod
-    #dj TOASK: the allhelp is not tested, returnhelp is always False
     def help(cls, returnhelp=False):
         """ Prints class help
         """
@@ -816,7 +815,6 @@ class BaseInterface(Interface):
         return helpstr
 
     @classmethod
-    # dj TODO: test
     def _get_trait_desc(self, inputs, name, spec):
         manhelpstr = ['\t%s' % name]
 
@@ -869,7 +867,6 @@ class BaseInterface(Interface):
         return manhelpstr
 
     @classmethod
-    # dj TODO: test
     def _inputs_help(cls):
         """ Prints description for input parameters
         """
@@ -899,7 +896,6 @@ class BaseInterface(Interface):
         return helpstr
 
     @classmethod
-    #dj TODO: test
     def _outputs_help(cls):
         """ Prints description for output parameters
         """
