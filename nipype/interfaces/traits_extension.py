@@ -190,8 +190,6 @@ class ImageFile(File):
                         validated_value, ', '.join(self._exts)))
         return validated_value
 
-# dj TODO: remove! have to remove all imports first
-#Undefined = "will be removed"#_Undefined()
 
 # dj NOTE: for now, everywhere where undefined was used I'm changing to None
 # dj NOTE: had to add additinonal part for list (is it enough?)
@@ -212,10 +210,13 @@ def has_metadata(trait, metadata, value=None, recursive=True):
         count += 1
     if recursive:
         # dj TODO: there is no inner_traits in traitlets!!
-        if hasattr(trait, 'inner_traits'):
-            for inner_trait in trait.inner_traits():
-                count += has_metadata(inner_trait.trait_type, metadata, recursive)
-        if hasattr(trait, 'handlers') and trait.handlers is not None:
-            for handler in trait.handlers:
-                count += has_metadata(handler, metadata, recursive)
+        if hasattr(trait, '_trait'):
+            # dj TOASK: you can define a trait type for traitlets containers
+            # dj TOASK: but it will be a trait type, not a list of traits
+            inner_trait = trait._trait
+            count += has_metadata(inner_trait, metadata, recursive)
+        # dj TOASK: not sure about "handlers"? couldn't find in traits library
+        #if hasattr(trait, 'handlers') and trait.handlers is not None:
+        #    for handler in trait.handlers:
+        #        count += has_metadata(handler, metadata, recursive)
     return count > 0

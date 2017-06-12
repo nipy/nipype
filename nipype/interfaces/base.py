@@ -592,10 +592,11 @@ class TraitedSpec(traitlets.HasTraits):
         dict_withhash = []
         dict_nofilename = []
         for name, val in sorted(self.get().items()):
+            pdb.set_trace()
             if not isdefined(val) or self.has_metadata(name, "nohash", True):
                 # skip undefined traits and traits with nohash=True
                 continue
-            
+            pdb.set_trace()
             # dj TODO: hash_file shoule be remove, only part hash_file=True (Satra)
             hash_files = (not self.has_metadata(name, "hash_files", False) and not
                           self.has_metadata(name, "name_source"))
