@@ -2024,15 +2024,9 @@ class SEMLikeCommandLine(CommandLine):
         return super(SEMLikeCommandLine, self)._format_arg(name, spec, value)
 
 
-# dj NOTE: created a temporary class MultiPath_new (will me renamed after I change interfaces 
-# dj NOTE: that are using it) otherwise pytest gave me an error (due to __init__.py)
-#class MultiPath(traits.List):
-#    pass
-
-# dj NOTE: didn't have any tests in test_base
 # dj TOASK: other new trait types are in traits_extension - should we move it there?
-class MultiPath(traitlets.List):
-    """ Abstract class - shared functionality of input and output MultiPath
+class MultiObject(traitlets.List):
+    """ Abstract class - shared functionality of input and output MultiObject
     """
     # dj TOASK: is this default value ok?
     default_value = None
@@ -2069,7 +2063,7 @@ class MultiPath(traitlets.List):
             #    isinstance(value[0], list)):
             newvalue = [value]
 
-        value = super(MultiPath, self).validate(object, newvalue)
+        value = super(MultiObject, self).validate(object, newvalue)
 
         if len(value) > 0:
             return value
@@ -2078,7 +2072,7 @@ class MultiPath(traitlets.List):
         self.error(object, value)
 
 
-class OutputMultiPath(MultiPath):
+class OutputMultiObject(MultiObject):
     """ Implements a user friendly traits that accepts one or more
     paths to files or directories. This is the output version which
     return a single string whenever possible (when it was set to a
@@ -2090,9 +2084,9 @@ class OutputMultiPath(MultiPath):
 
     XXX This needs to be vetted by somebody who understands traits
 
-    >>> from nipype.interfaces.base import OutputMultiPath
+    >>> from nipype.interfaces.base import OutputMultiObject
     >>> class A(TraitedSpec):
-    ...     foo = OutputMultiPath(File(exists=False))
+    ...     foo = OutputMultiObject(File(exists=False))
     >>> a = A()
     >>> a.foo
     <undefined>
@@ -2113,7 +2107,7 @@ class OutputMultiPath(MultiPath):
 
     # dj NOTE: method has different signature (hope this will work for other tests)
     def get(self, object, cls=None):
-        value = super(OutputMultiPath, self).get(object, cls)
+        value = super(OutputMultiObject, self).get(object, cls)
         if value is None:
             return None
         elif len(value) == 0:
@@ -2123,13 +2117,9 @@ class OutputMultiPath(MultiPath):
         else:
             return value
 
-    def set(self, object, value):
-        # dj NOTE: no set_value method in traitlets
-        super(OutputMultiPath, self).set(object, value)
 
-
-# dj TOASK: the same as MultiPath - should we keep both? somehthing should be added here? 
-class InputMultiPath(MultiPath):
+# dj TOASK: the same as MultiObject - should we keep both? somehthing should be added here? 
+class InputMultiObject(MultiObject):
     """ Implements a user friendly traits that accepts one or more
     paths to files or directories. This is the input version which
     always returns a list. Default value of this trait
@@ -2140,9 +2130,9 @@ class InputMultiPath(MultiPath):
 
     XXX This needs to be vetted by somebody who understands traits
 
-    >>> from nipype.interfaces.base import InputMultiPath
+    >>> from nipype.interfaces.base import InputMultiObject
     >>> class A(TraitedSpec):
-    ...     foo = InputMultiPath(File(exists=False))
+    ...     foo = InputMultiObject(File(exists=False))
     >>> a = A()
     >>> a.foo
     <undefined>

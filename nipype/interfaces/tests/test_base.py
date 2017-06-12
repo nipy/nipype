@@ -946,10 +946,10 @@ def test_SEMLikeCommandLine_3():
 
 # dj TOASK: any suggestion about tests? 
 # dj TOASK: are those are expected outpus??
-def test_MultiPath():
+def test_MultiObject():
 
     class spec(nib.TraitedSpec):
-        goo = nib.MultiPath()
+        goo = nib.MultiObject()
 
     mp = spec()
  
@@ -983,10 +983,10 @@ def test_MultiPath():
 
 # dj TOASK: any suggestion about tests?
 # dj TOASK: are those are expected outpus??
-def test_OutputMultiPath():
+def test_OutputMultiObject():
 
     class spec(nib.TraitedSpec):
-        goo = nib.OutputMultiPath()
+        goo = nib.OutputMultiObject()
 
     mp = spec()
 
