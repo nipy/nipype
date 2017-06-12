@@ -15,8 +15,7 @@ from nipype.testing import example_data
 
 import nipype.interfaces.base as nib
 from nipype.utils.filemanip import split_filename
-from nipype.interfaces.base import Undefined, config
-import traits.api as traits
+from nipype.interfaces.base import config
 import traitlets
 
 @pytest.mark.parametrize("args", [
@@ -481,7 +480,7 @@ def test_BaseInterface_load_save_inputs(tmpdir):
         input1 = traitlets.Int(default_value=None, allow_none=True)
         input2 = traitlets.Float(default_value=None, allow_none=True)
         input3 = traitlets.Bool(default_value=None, allow_none=True)
-        input4 = nib.Str()
+        input4 = traitlets.Unicode()
 
     class DerivedInterface(nib.BaseInterface):
         input_spec = InputSpec
@@ -945,13 +944,12 @@ def test_SEMLikeCommandLine_3():
     assert "'SEMLikeInpSpec' object has no attribute 'foo'" == str(excinfo.value)
 
 
-# dj TODO: change MultiPath_new to MultiPath at the end
 # dj TOASK: any suggestion about tests? 
 # dj TOASK: are those are expected outpus??
 def test_MultiPath():
 
     class spec(nib.TraitedSpec):
-        goo = nib.MultiPath_new()
+        goo = nib.MultiPath()
 
     mp = spec()
  
@@ -983,14 +981,12 @@ def test_MultiPath():
     assert mp.goo == [()]
 
 
-
-# dj TODO: change OutputMultiPath_new to OutputMultiPath at the end
 # dj TOASK: any suggestion about tests?
 # dj TOASK: are those are expected outpus??
 def test_OutputMultiPath():
 
     class spec(nib.TraitedSpec):
-        goo = nib.OutputMultiPath_new()
+        goo = nib.OutputMultiPath()
 
     mp = spec()
 

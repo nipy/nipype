@@ -12,10 +12,6 @@ import os
 # perform all external trait imports here
 import traitlets, pdb 
 
-import traits.api as traits
-from traits.trait_handlers import TraitDictObject, TraitListObject
-from traits.trait_errors import TraitError
-
 
 # dj NOTE: `key_trait` must be a Trait or None
 # dj NOTE: when `value_trait` is a tuple, it doesn't give error, but just doesn't check the type
@@ -23,10 +19,6 @@ from traits.trait_errors import TraitError
 # dj NOTE: so either we created DictBytByt if needed, or write some extra class
 # dj NOTE: at the end decided to move completely (it's used in one place)
 #DictStrStr = traitlets.Dict(value_trait=traitlets.Unicode(), key_trait=traitlets.Unicode())
-
-# TODO dj: is it used anywhere???
-#Str = traitlets.Unicode
-
 
 
 class File(traitlets.Unicode):
@@ -199,7 +191,7 @@ class ImageFile(File):
         return validated_value
 
 # dj TODO: remove! have to remove all imports first
-Undefined = "will be removed"#_Undefined()
+#Undefined = "will be removed"#_Undefined()
 
 # dj NOTE: for now, everywhere where undefined was used I'm changing to None
 # dj NOTE: had to add additinonal part for list (is it enough?)

@@ -41,9 +41,7 @@ from ..utils.misc import is_container, trim, str2bool
 from ..utils.filemanip import (md5, hash_infile, FileNotFoundError, hash_timestamp,
                                split_filename, to_str)
 import traitlets, pdb
-#dj TODO: clean it! other scripts import from base.py, so can't remove it now
-from .traits_extension import (
-    traits, Undefined, TraitDictObject, TraitListObject, TraitError, isdefined,
+from .traits_extension import (isdefined,
     File, Directory, has_metadata, ImageFile)
 from ..external.due import due
 
@@ -64,13 +62,6 @@ if runtime_profile:
         runtime_profile = False
 
 __docformat__ = 'restructuredtext'
-
-# dj TODO: should remove
-# will use traitlets.Unicode
-class Str(traitlets.Unicode):
-    pass
-
-#traits.Str = Str
 
 
 # dj TOASK: nipype almost doest use it, should we remove?
@@ -614,6 +605,7 @@ class TraitedSpec(traitlets.HasTraits):
             dict_withhash.append((name,
                                   self._get_sorteddict(val, True, hash_method=hash_method,
                                                        hash_files=hash_files)))
+
         return dict_withhash, md5(to_str(dict_nofilename).encode()).hexdigest()
 
 
@@ -658,11 +650,6 @@ class TraitedSpec(traitlets.HasTraits):
                 else:
                     out = objekt
         return out
-
-
-# dj TODO: will be removed, but have to clean other nipype files first
-class DynamicTraitedSpec(TraitedSpec):
-    pass
 
 
 class Interface(object):
@@ -2039,12 +2026,12 @@ class SEMLikeCommandLine(CommandLine):
 
 # dj NOTE: created a temporary class MultiPath_new (will me renamed after I change interfaces 
 # dj NOTE: that are using it) otherwise pytest gave me an error (due to __init__.py)
-class MultiPath(traits.List):
-    pass
+#class MultiPath(traits.List):
+#    pass
 
 # dj NOTE: didn't have any tests in test_base
 # dj TOASK: other new trait types are in traits_extension - should we move it there?
-class MultiPath_new(traitlets.List):
+class MultiPath(traitlets.List):
     """ Abstract class - shared functionality of input and output MultiPath
     """
     # dj TOASK: is this default value ok?
@@ -2082,7 +2069,7 @@ class MultiPath_new(traitlets.List):
             #    isinstance(value[0], list)):
             newvalue = [value]
 
-        value = super(MultiPath_new, self).validate(object, newvalue)
+        value = super(MultiPath, self).validate(object, newvalue)
 
         if len(value) > 0:
             return value
@@ -2091,12 +2078,7 @@ class MultiPath_new(traitlets.List):
         self.error(object, value)
 
 
-# dj TODO: remove and rename _new class
 class OutputMultiPath(MultiPath):
-    pass
-
-# dj TODO: didn't have any tests in taste_base 
-class OutputMultiPath_new(MultiPath_new):
     """ Implements a user friendly traits that accepts one or more
     paths to files or directories. This is the output version which
     return a single string whenever possible (when it was set to a
@@ -2131,11 +2113,11 @@ class OutputMultiPath_new(MultiPath_new):
 
     # dj NOTE: method has different signature (hope this will work for other tests)
     def get(self, object, cls=None):
-        value = super(OutputMultiPath_new, self).get(object, cls)
+        value = super(OutputMultiPath, self).get(object, cls)
         if value is None:
             return None
         elif len(value) == 0:
-            return Undefined
+            return None
         elif len(value) == 1:
             return value[0]
         else:
@@ -2143,15 +2125,11 @@ class OutputMultiPath_new(MultiPath_new):
 
     def set(self, object, value):
         # dj NOTE: no set_value method in traitlets
-        super(OutputMultiPath_new, self).set(object, value)
+        super(OutputMultiPath, self).set(object, value)
 
-
-# dj TODO: remove and rename _new class 
-class InputMultiPath(MultiPath):
-    pass
 
 # dj TOASK: the same as MultiPath - should we keep both? somehthing should be added here? 
-class InputMultiPath_new(MultiPath_new):
+class InputMultiPath(MultiPath):
     """ Implements a user friendly traits that accepts one or more
     paths to files or directories. This is the input version which
     always returns a list. Default value of this trait
