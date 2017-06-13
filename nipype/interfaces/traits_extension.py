@@ -197,6 +197,8 @@ def isdefined(object):
     if type(object) is list:
         return object != []
     else:
+        # dj NOTE!: if you use traitlets.Int() (and not traitlets.Int(default_value=None, allow_none=True))
+        # dj NOTE!: a default value will be 0 and isdefined will return True even if you don't sepcify value
         return object is not None
 
 

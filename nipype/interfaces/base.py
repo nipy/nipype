@@ -490,43 +490,34 @@ class TraitedSpec(traitlets.HasTraits):
         return file_list
 
     def get(self, **kwargs):
-        """ Returns traited class as a dict
-
-        Augments the trait get function to return a dictionary without
-        notification handles
+        """ Returns traited class as a dict without any notification handles
         """
-        #dj TOODO: not sure if this is not more complicated in traits
-        # dj TODO: recur?
+        #dj NOTE: traitlets doesn't have get
         #out = super(TraitedSpec, self).get(**kwargs)
         out = {}
         for key in self.class_trait_names():
             out[key] = self.__getattribute__(key)
-        # dj TODO: check if the default value for undefinedval is OK
+        # dj NOTE: traitlets would give <class 'list'> for type(out[key_list])
+        # dj NOTE: so ._clean_container(out) shouldn't be needed
+        # dj NOTE: the only problem is that if isdefined(trles.List) = False
+        # dj NOTE: then out[key] returns an empty list, not None 
         out = self._clean_container(out)
         return out
 
-    def get_traitsfree(self, **kwargs):
-        """ Returns traited class as a dict
-
-        Augments the trait get function to return a dictionary without
-        any traits. The dictionary does not contain any attributes that
-        were Undefined
+    # dj NOTE: suggesting change od the name, comparing the `get` method
+    # dj NOTE: this method removes undefined inputs only
+    def get_skipundefined(self, **kwargs):
+        """ Returns traited class as a dict.
+        The dictionary does not contain any attributes that were undefined.
         """
-        #dj TODO: traitlets doesn't have get
-        # out = super(TraitedSpec, self).get(**kwargs) 
-        out = {}
-        for key in self.class_trait_names():
-            out[key] = self.__getattribute__(key)
-        # dj TOTHINK: why did I add it????!!! i guess it's not needed
-        #out = self._clean_container(out, None)
+        out = self.get(**kwargs)
         out = self._clean_container(out, skipundefined=True)
         return out
+
 
     def _clean_container(self, object, undefinedval=None, skipundefined=False):
         """Convert a traited obejct into a pure python representation.
         """
-        # dj TODO: no traitlets dict are used, should I add
-        # if isinstance(object, TraitDictObject) or isinstance(object, dict):
         if isinstance(object, dict):
             out = {}
             for key, val in list(object.items()):
@@ -535,9 +526,6 @@ class TraitedSpec(traitlets.HasTraits):
                 else:
                     if not skipundefined:
                         out[key] = undefinedval
-        # dj TODO: should I add traitlets.list??
-        #elif (isinstance(object, TraitListObject) or
-        #        isinstance(object, list) or isinstance(object, tuple)):
         elif (isinstance(object, list) or isinstance(object, tuple)): 
             out = []
             for val in object:
@@ -590,24 +578,22 @@ class TraitedSpec(traitlets.HasTraits):
         """
 
         dict_withhash = []
-        dict_nofilename = []
+        list_nofilename = []
         for name, val in sorted(self.get().items()):
-            pdb.set_trace()
             if not isdefined(val) or self.has_metadata(name, "nohash", True):
                 # skip undefined traits and traits with nohash=True
                 continue
-            pdb.set_trace()
             # dj TODO: hash_file shoule be remove, only part hash_file=True (Satra)
             hash_files = (not self.has_metadata(name, "hash_files", False) and not
                           self.has_metadata(name, "name_source"))
-            dict_nofilename.append((name,
+            list_nofilename.append((name,
                                     self._get_sorteddict(val, hash_method=hash_method,
                                                          hash_files=hash_files)))
             dict_withhash.append((name,
                                   self._get_sorteddict(val, True, hash_method=hash_method,
                                                        hash_files=hash_files)))
 
-        return dict_withhash, md5(to_str(dict_nofilename).encode()).hexdigest()
+        return dict_withhash, md5(to_str(list_nofilename).encode()).hexdigest()
 
 
     def _get_sorteddict(self, objekt, dictwithhash=False, hash_method=None,
@@ -1080,7 +1066,7 @@ class BaseInterface(Interface):
             runtime.duration = (timediff.days * 86400 + timediff.seconds +
                                 timediff.microseconds / 100000.)
             results = InterfaceResult(interface, runtime,
-                                      inputs=self.inputs.get_traitsfree(),
+                                      inputs=self.inputs.get_skipundefined(),
                                       outputs=outputs)
             prov_record = None
             if str2bool(config.get('execution', 'write_provenance')):
@@ -1115,7 +1101,7 @@ class BaseInterface(Interface):
             runtime.traceback_args = e.args
             inputs = None
             try:
-                inputs = self.inputs.get_traitsfree()
+                inputs = self.inputs.get_skipundefined()
             except Exception as e:
                 pass
             results = InterfaceResult(interface, runtime, inputs=inputs)
@@ -1191,7 +1177,7 @@ class BaseInterface(Interface):
 
         def_inputs = []
         if not overwrite:
-            def_inputs = list(self.inputs.get_traitsfree().keys())
+            def_inputs = list(self.inputs.get_skipundefined().keys())
 
         new_inputs = list(set(list(inputs_dict.keys())) - set(def_inputs))
         for key in new_inputs:
@@ -1202,7 +1188,7 @@ class BaseInterface(Interface):
         """
         A convenient way to save current inputs to a JSON file.
         """
-        inputs = self.inputs.get_traitsfree()
+        inputs = self.inputs.get_skipundefined()
         iflogger.debug('saving inputs {}', inputs)
         with open(json_file, 'w' if PY3 else 'wb') as fhandle:
             json.dump(inputs, fhandle, indent=4, ensure_ascii=False)

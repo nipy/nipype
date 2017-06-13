@@ -414,6 +414,7 @@ class BaseInterfaceInputSpec(nib.TraitedSpec):
     zoo = nib.File(help='a file').tag(copyfile=False)
     woo = nib.File(help='a file').tag(copyfile=True)
 
+
 class BaseInterfaceOutputSpec(nib.TraitedSpec):
     foo = traitlets.Int(default_value=None, allow_none=True, help='a random int')
 
@@ -473,6 +474,38 @@ def test_BaseInterface_3():
     nib.BaseInterface.input_spec = default_inpu_spec
 
 
+@pytest.mark.parametrize("inp, get_skip_output, get_full_output", [
+        # dj NOTE!: this give the same output as the second example, is that ok??
+        ({}, {'inp_int2': 0}, 
+         {'inp_int1': None, 'inp_int2': 0, 'inp_str': None, 'inp_lst1': None, 'inp_lst2': None}),
+        ({'inp_int2': 0}, {'inp_int2': 0},
+         {'inp_int1': None, 'inp_int2': 0, 'inp_str': None, 'inp_lst1': None, 'inp_lst2': None}),
+        # dj NOTE!: inp_lst1 will be treated as undefined
+        ({'inp_lst1': []}, {'inp_int2': 0},
+         {'inp_int1': None, 'inp_int2': 0, 'inp_str': None, 'inp_lst1': None, 'inp_lst2': None}),
+        ({'inp_int1': 2, 'inp_int2': 2, 'inp_str': "text"}, {'inp_int1': 2,'inp_int2': 2, 'inp_str': "text"},
+         {'inp_int1': 2, 'inp_int2': 2, 'inp_str': "text", 'inp_lst1': None, 'inp_lst2': None}),
+        ({'inp_int1': 2, 'inp_int2': 2, 'inp_lst1': [1,2,3]}, {'inp_int1': 2,'inp_int2': 2, 'inp_lst1': [1,2,3]},
+         {'inp_int1': 2, 'inp_int2': 2, 'inp_str': None, 'inp_lst1': [1,2,3], 'inp_lst2': None}),
+        ({'inp_int1': 2, 'inp_int2': 2, 'inp_lst2': [1,2,3]}, {'inp_int1': 2,'inp_int2': 2, 'inp_lst2': [1,2,3]},
+         {'inp_int1': 2, 'inp_int2': 2, 'inp_str': None, 'inp_lst1': None, 'inp_lst2': [1,2,3]}),
+        ])
+def test_BaseInterface_get(inp, get_skip_output, get_full_output):
+    class BaseInterfaceInputSpec(nib.TraitedSpec):
+        inp_int1 = traitlets.Int(default_value=None, allow_none=True)
+        inp_int2 = traitlets.Int()
+        inp_str = traitlets.Unicode(default_value=None, allow_none=True)
+        inp_lst1 = traitlets.List(default_value=None, allow_none=True)
+        inp_lst2 = traitlets.List()
+
+    class DerivedInterface(nib.BaseInterface):
+        input_spec = BaseInterfaceInputSpec
+
+    di = DerivedInterface(**inp)
+    assert di.inputs.get() == get_full_output
+    assert di.inputs.get_skipundefined() == get_skip_output
+
+
 def test_BaseInterface_load_save_inputs(tmpdir):
     tmp_json = os.path.join(str(tmpdir), 'settings.json')
 
@@ -495,23 +528,23 @@ def test_BaseInterface_load_save_inputs(tmpdir):
     bif.save_inputs_to_json(tmp_json)
     bif2 = DerivedInterface()
     bif2.load_inputs_from_json(tmp_json)
-    assert bif2.inputs.get_traitsfree() == inputs_dict
+    assert bif2.inputs.get_skipundefined() == inputs_dict
 
     bif3 = DerivedInterface(from_file=tmp_json)
-    assert bif3.inputs.get_traitsfree() == inputs_dict
+    assert bif3.inputs.get_skipundefined() == inputs_dict
 
     inputs_dict2 = inputs_dict.copy()
     inputs_dict2.update({'input4': 'some other string'})
     bif4 = DerivedInterface(from_file=tmp_json, input4=inputs_dict2['input4'])
-    assert bif4.inputs.get_traitsfree() == inputs_dict2
+    assert bif4.inputs.get_skipundefined() == inputs_dict2
 
     bif5 = DerivedInterface(input4=inputs_dict2['input4'])
     bif5.load_inputs_from_json(tmp_json, overwrite=False)
-    assert bif5.inputs.get_traitsfree() == inputs_dict2
+    assert bif5.inputs.get_skipundefined() == inputs_dict2
 
     bif6 = DerivedInterface(input4=inputs_dict2['input4'])
     bif6.load_inputs_from_json(tmp_json)
-    assert bif6.inputs.get_traitsfree() == inputs_dict
+    assert bif6.inputs.get_skipundefined() == inputs_dict
 
 
 @pytest.mark.xfail(reason="dj: WIP; check ants")
@@ -525,7 +558,7 @@ def test_BaseInterface_load_save_inputs_ants():
     tsthash = Registration()
     # dj TODO: tsthash.inputs has no all list; check the test after changing ants!
     tsthash.load_inputs_from_json(settings)
-    assert {} == check_dict(data_dict, tsthash.inputs.get_traitsfree())
+    assert {} == check_dict(data_dict, tsthash.inputs.get_skipundefined())
 
 #    tsthash2 = Registration(from_file=settings)
 #    assert {} == check_dict(data_dict, tsthash2.inputs.get_traitsfree())
