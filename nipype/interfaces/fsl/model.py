@@ -222,6 +222,9 @@ class Level1Design(BaseInterface):
                     orthogonal = int(orthogonalization[i][j])
                 except (KeyError, TypeError, ValueError, IndexError):
                     orthogonal = 0
+                if orthogonal = 1 and not ev_ortho.substitute(c0=i,c1=0,orthogonal=1) in ev_txt:
+                    ev_txt += ev_ortho.substitute(c0=i,c1=0,orthogonal=1)
+                    ev_txt += "\n"
                 ev_txt += ev_ortho.substitute(
                     c0=i, c1=j, orthogonal=orthogonal)
                 ev_txt += "\n"
