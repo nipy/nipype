@@ -577,23 +577,23 @@ class TraitedSpec(traitlets.HasTraits):
 
         """
 
-        dict_withhash = []
+        list_withhash = []
         list_nofilename = []
         for name, val in sorted(self.get().items()):
             if not isdefined(val) or self.has_metadata(name, "nohash", True):
                 # skip undefined traits and traits with nohash=True
                 continue
-            # dj TODO: hash_file shoule be remove, only part hash_file=True (Satra)
-            hash_files = (not self.has_metadata(name, "hash_files", False) and not
-                          self.has_metadata(name, "name_source"))
+            # dj NOTE: since I chanedg Files withhash_file=False to Unicode, 
+            # dj NOTE: not self.has_metadata(name, "hash_files", False) should be 
+            # dj NOTE: always True for those traits. If this enough?
+            hash_files = (not self.has_metadata(name, "name_source"))
             list_nofilename.append((name,
                                     self._get_sorteddict(val, hash_method=hash_method,
                                                          hash_files=hash_files)))
-            dict_withhash.append((name,
+            list_withhash.append((name,
                                   self._get_sorteddict(val, True, hash_method=hash_method,
                                                        hash_files=hash_files)))
-
-        return dict_withhash, md5(to_str(list_nofilename).encode()).hexdigest()
+        return list_withhash, md5(to_str(list_nofilename).encode()).hexdigest()
 
 
     def _get_sorteddict(self, objekt, dictwithhash=False, hash_method=None,

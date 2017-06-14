@@ -223,12 +223,12 @@ def test_namesource(setup_file):
 
 
     class spec2(nib.CommandLineInputSpec):
-        moo = nib.File().tag(name_source=['doo'], hash_files=False, argstr="%s",
-                             position=2)
+        moo = traitlets.Unicode(default_value=None, allow_none=True).tag(name_source=['doo'], 
+                                                                         argstr="%s", position=2)
         doo = nib.File(exists=True).tag(argstr="%s", position=1)
-        goo = traitlets.Int().tag(argstr="%d", position=4)
-        poo = nib.File().tag(name_source=['goo'], hash_files=False, argstr="%s",
-                             position=3)
+        goo = traitlets.Int(default_value=None, allow_none=True).tag(argstr="%d", position=4)
+        poo =  traitlets.Unicode(default_value=None, allow_none=True).tag(name_source=['goo'], 
+                                                                          argstr="%s", position=3)
 
     class TestName(nib.CommandLine):
         _cmd = "mycommand"
@@ -238,13 +238,15 @@ def test_namesource(setup_file):
     # testing help (args)
     for str_help in ["flag: %s\n", "flag: %d, position: 4"]:
         assert str_help in testobj.help(returnhelp=True)
-    
     testobj.inputs.doo = tmp_infile 
     testobj.inputs.goo = 99
     assert '%s_generated' % nme in testobj.cmdline
     assert '%d_generated' % testobj.inputs.goo in testobj.cmdline
     testobj.inputs.moo = "my_%s_template"
     assert 'my_%s_template' % nme in testobj.cmdline
+
+    #dj ASK: if this how moo should be represented in list_withhash and list_nofilename?
+    assert ('moo', 'my_%s_template')  in testobj.inputs.get_hashval()[0]
 
 
 def test_chained_namesource(setup_file):
@@ -253,10 +255,10 @@ def test_chained_namesource(setup_file):
 
     class spec2(nib.CommandLineInputSpec):
         doo = nib.File(exists=True).tag(argstr="%s", position=1)
-        moo = nib.File().tag(name_source=['doo'], hash_files=False, argstr="%s",
-                             position=2, name_template='%s_mootpl')
-        poo = nib.File().tag(name_source=['moo'], hash_files=False,
-                             argstr="%s", position=3)
+        moo =  traitlets.Unicode(default_value=None, allow_none=True).tag(name_source=['doo'], 
+                             argstr="%s", position=2, name_template='%s_mootpl')
+        poo =  traitlets.Unicode(default_value=None, allow_none=True).tag(name_source=['moo'], 
+                                                                     argstr="%s", position=3)
 
     class TestName(nib.CommandLine):
         _cmd = "mycommand"
@@ -275,12 +277,12 @@ def test_cycle_namesource1(setup_file):
     tmpd, nme, ext = split_filename(tmp_infile)
 
     class spec3(nib.CommandLineInputSpec):
-        moo = nib.File().tag(name_source=['doo'], hash_files=False, argstr="%s",
-                             position=1, name_template='%s_mootpl')
-        poo = nib.File().tag(name_source=['moo'], hash_files=False,
-                             argstr="%s", position=2)
-        doo = nib.File().tag(name_source=['poo'], hash_files=False,
-                             argstr="%s", position=3)
+        moo = traitlets.Unicode(default_value=None, allow_none=True).tag(name_source=['doo'],
+                                argstr="%s", position=1, name_template='%s_mootpl')
+        poo = traitlets.Unicode(default_value=None, allow_none=True).tag(name_source=['moo'],
+                                argstr="%s", position=2)
+        doo = traitlets.Unicode(default_value=None, allow_none=True).tag(name_source=['poo'],
+                                argstr="%s", position=3)
 
     class TestCycle(nib.CommandLine):
         _cmd = "mycommand"
@@ -298,12 +300,12 @@ def test_cycle_namesource2(setup_file):
     tmpd, nme, ext = split_filename(tmp_infile)
 
     class spec3(nib.CommandLineInputSpec):
-        moo = nib.File().tag(name_source=['doo'], hash_files=False, argstr="%s",
-                             position=1, name_template='%s_mootpl')
-        poo = nib.File().tag(name_source=['moo'], hash_files=False,
-                             argstr="%s", position=2)
-        doo = nib.File().tag(name_source=['poo'], hash_files=False,
-                             argstr="%s", position=3)
+        moo = traitlets.Unicode(default_value=None, allow_none=True).tag(name_source=['doo'],
+                                argstr="%s", position=1, name_template='%s_mootpl')
+        poo = traitlets.Unicode(default_value=None, allow_none=True).tag(name_source=['moo'],
+                                argstr="%s", position=2)
+        doo = traitlets.Unicode(default_value=None, allow_none=True).tag(name_source=['poo'],
+                                argstr="%s", position=3)
 
     class TestCycle(nib.CommandLine):
         _cmd = "mycommand"
@@ -359,11 +361,17 @@ def test_TraitedSpec_withNoFileHashing(setup_file):
     assert os.path.exists(tmp_infile)
 
     class spec2(nib.TraitedSpec):
-        moo = nib.File(exists=True, hash_files=False)
+        #moo = nib.File(exists=True, hash_files=False)
+        moo = traitlets.Unicode(default_value=None, allow_none=True)
         doo = traitlets.List(nib.File(exists=True))
     infields = spec2(moo=nme, doo=[tmp_infile])
     hashval = infields.get_hashval(hash_method='content')
-    assert hashval[1] == '8da4669ff5d72f670a46ea3e7a203215'
+    # dj NOTE: i've changed the hash, since the list_withhash contains now
+    # dj NOTE: the name of the file and hash value (since moo is unicode now)
+    # dj NOTE: see the second assert for hashval[0][1]
+    # dj ASK: is that how it should be?
+    assert hashval[1] == 'a00e9ee24f5bfa9545a515b7a759886b'
+    assert hashval[0][1] == ('moo', ('foo.txt', '25f9e794323b453885f5181f1b624d0b'))
 
     class spec3(nib.TraitedSpec):
         moo = nib.File(exists=True).tag(name_source="doo")
