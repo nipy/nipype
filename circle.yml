@@ -74,6 +74,8 @@ deployment:
     tag: /.*/
     commands:
       # Deploy to docker hub
+      - if [[ -n "$DOCKER_PASS" ]]; then docker login -e $DOCKER_EMAIL -u $DOCKER_USER -p $DOCKER_PASS && docker push nipype/base:latest; fi :
+          timeout: 21600
       - if [[ -n "$DOCKER_PASS" ]]; then docker login -e $DOCKER_EMAIL -u $DOCKER_USER -p $DOCKER_PASS && docker push nipype/nipype:latest; fi :
           timeout: 21600
       - if [[ -n "$DOCKER_PASS" ]]; then docker login -e $DOCKER_EMAIL -u $DOCKER_USER -p $DOCKER_PASS && docker tag nipype/nipype nipype/nipype:$CIRCLE_TAG && docker push nipype/nipype:$CIRCLE_TAG; fi :
