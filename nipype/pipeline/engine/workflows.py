@@ -57,7 +57,6 @@ from .utils import (generate_expanded_graph, modify_paths,
 
 from .base import EngineBase
 from .nodes import Node, MapNode
-from .. import plugins
 
 package_check('networkx', '1.3')
 logger = logging.getLogger('workflow')
@@ -558,8 +557,16 @@ connected.
         if not isinstance(plugin, (str, bytes)):
             runner = plugin
         else:
-            SelectedPlugin = getattr(plugins, '%sPlugin' % plugin)
-            runner = SelectedPlugin(plugin_args=plugin_args)
+            name = '.'.join(__name__.split('.')[:-2] + ['plugins'])
+            try:
+                __import__(name)
+            except ImportError:
+                msg = 'Could not import plugin module: %s' % name
+                logger.error(msg)
+                raise ImportError(msg)
+            else:
+                plugin_mod = getattr(sys.modules[name], '%sPlugin' % plugin)
+                runner = plugin_mod(plugin_args=plugin_args)
         flatgraph = self._create_flat_graph()
         self.config = merge_dict(deepcopy(config._sections), self.config)
         if 'crashdump_dir' in self.config:
