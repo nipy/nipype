@@ -76,7 +76,7 @@ RUN apt-get update && \
     apt-get install -y --no-install-recommends \
                     fsl-core=5.0.9-1~nd+1+nd16.04+1 \
                     fsl-mni152-templates=5.0.7-2 \
-                    afni=16.2.07~dfsg.1-2~nd16.04+1 \
+                    afni=16.2.07~dfsg.1-5~nd16.04+1 \
                     bzip2 \
                     ca-certificates \
                     xvfb \
