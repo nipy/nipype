@@ -381,14 +381,14 @@ class TraitedSpec(traitlets.HasTraits):
     def items(self):
         """ Name, trait generator for user modifiable traits
         """
-        for name in sorted(self.class_trait_names()):
+        for name in sorted(self.trait_values().keys()):
             yield name, self.traits()[name]
 
     def __repr__(self):
         """ Return a well-formatted representation of the traits """
         outstr = []
         #for name, value in sorted(self.trait_get().items()):
-        for name in sorted(self.class_trait_names()):
+        for name in sorted(self.trait_values().keys()):
             outstr.append('%s = %s' % (name, self.__getattribute__(name)))
         return '\n{}\n'.format('\n'.join(outstr))
 
@@ -495,7 +495,7 @@ class TraitedSpec(traitlets.HasTraits):
         #dj NOTE: traitlets doesn't have get
         #out = super(TraitedSpec, self).get(**kwargs)
         out = {}
-        for key in self.class_trait_names():
+        for key in self.trait_values().keys():
             out[key] = self.__getattribute__(key)
         # dj NOTE: traitlets would give <class 'list'> for type(out[key_list])
         # dj NOTE: so ._clean_container(out) shouldn't be needed
@@ -1631,7 +1631,7 @@ class CommandLine(BaseInterface):
     >>> cli.cmdline # doctest: +ALLOW_UNICODE
     'ls -al'
 
-    >>> pprint.pprint(cli.inputs.trait_get())  # doctest: +NORMALIZE_WHITESPACE +ALLOW_UNICODE
+    >>> pprint.pprint(cli.inputs.trait_values())  # doctest: +NORMALIZE_WHITESPACE +ALLOW_UNICODE
     {'args': '-al',
      'environ': {'DISPLAY': ':1'},
      'ignore_exception': False,
@@ -2075,8 +2075,8 @@ class OutputMultiObject(MultiObject):
     >>> class A(TraitedSpec):
     ...     foo = OutputMultiObject(File(exists=False))
     >>> a = A()
-    >>> a.foo
-    <undefined>
+    >>> a.foo is None
+    True
 
     >>> a.foo = '/software/temp/foo.txt'
     >>> a.foo # doctest: +ALLOW_UNICODE
@@ -2121,8 +2121,8 @@ class InputMultiObject(MultiObject):
     >>> class A(TraitedSpec):
     ...     foo = InputMultiObject(File(exists=False))
     >>> a = A()
-    >>> a.foo
-    <undefined>
+    >>> a.foo is None
+    True
 
     >>> a.foo = '/software/temp/foo.txt'
     >>> a.foo # doctest: +ALLOW_UNICODE
