@@ -88,26 +88,11 @@ class NipypeConfig(object):
     def __init__(self, *args, **kwargs):
         self._config = configparser.ConfigParser()
         config_dir = os.path.expanduser('~/.nipype')
-        mkdir_p(config_dir)
-        old_config_file = os.path.expanduser('~/.nipype.cfg')
-        new_config_file = os.path.join(config_dir, 'nipype.cfg')
-        # To be deprecated in two releases
-        if os.path.exists(old_config_file):
-            if os.path.exists(new_config_file):
-                msg = ("Detected presence of both old (%s, used by versions "
-                       "< 0.5.2) and new (%s) config files.  This version will "
-                       "proceed with the new one. We advise to merge settings "
-                       "and remove old config file if you are not planning to "
-                       "use previous releases of nipype.") % (old_config_file,
-                                                              new_config_file)
-                warn(msg)
-            else:
-                warn("Moving old config file from: %s to %s" % (old_config_file,
-                                                                new_config_file))
-                shutil.move(old_config_file, new_config_file)
+        config_file = os.path.join(config_dir, 'nipype.cfg')
         self.data_file = os.path.join(config_dir, 'nipype.json')
         self._config.readfp(StringIO(default_cfg))
-        self._config.read([new_config_file, old_config_file, 'nipype.cfg'])
+        if os.path.exists(config_dir):
+            self._config.read([config_file, 'nipype.cfg'])
 
     def set_default_config(self):
         self._config.readfp(StringIO(default_cfg))
@@ -164,6 +149,10 @@ class NipypeConfig(object):
             with open(self.data_file, 'rt') as file:
                 portalocker.lock(file, portalocker.LOCK_EX)
                 datadict = load(file)
+        else:
+            dirname = os.path.dirname(self.data_file)
+            if not os.path.exists(dirname):
+                mkdir_p(dirname)
         with open(self.data_file, 'wt') as file:
             portalocker.lock(file, portalocker.LOCK_EX)
             datadict[key] = value
