@@ -48,13 +48,13 @@ class Info(object):
 
             for line in res.splitlines():
                 if line.startswith('ANTs Version: '):
-                    v_string = line.split()[2]
+                    v_string, githash = line.split()[2].split('-')
                     break
             else:
                 return None
 
             # 2.2.0-equivalent version string
-            if LooseVersion(v_string) >= LooseVersion('2.1.0.post789-g0740f'):
+            if 'post' in v_string and LooseVersion(v_string) >= LooseVersion('2.1.0.post789'):
                 self._version = '2.2.0'
             else:
                 self._version = '.'.join(v_string.split('.')[:3])
