@@ -46,7 +46,13 @@ class Info(object):
             except OSError:
                 return None
 
-            v_string = res.splitlines()[0].split(': ')[1]
+            for line in res.splitlines():
+                if line.startswith('ANTs Version: '):
+                    v_string = line.split()[2]
+                    break
+            else:
+                return None
+
             # 2.2.0-equivalent version string
             if LooseVersion(v_string) >= LooseVersion('2.1.0.post789-g0740f'):
                 self._version = '2.2.0'
