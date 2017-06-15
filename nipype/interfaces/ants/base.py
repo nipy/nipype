@@ -4,8 +4,12 @@
 """The ants module provides basic functions for interfacing with ANTS tools."""
 from __future__ import print_function, division, unicode_literals, absolute_import
 from builtins import str
+
+import os
+import subprocess
+
 # Local imports
-from ... import logging
+from ... import logging, LooseVersion
 from ..base import CommandLine, CommandLineInputSpec, traits, isdefined
 logger = logging.getLogger('interface')
 
@@ -23,6 +27,33 @@ LOCAL_DEFAULT_NUMBER_OF_THREADS = 1
 #  num_threads, then respect that no matter what SGE tries to limit.
 PREFERED_ITKv4_THREAD_LIMIT_VARIABLE = 'NSLOTS'
 ALT_ITKv4_THREAD_LIMIT_VARIABLE = 'ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS'
+
+
+class Info(object):
+    _version = None
+
+    @property
+    def version(self):
+        if self._version is None:
+            try:
+                basedir = os.environ['ANTSPATH']
+            except KeyError:
+                return None
+
+            cmd = os.path.join(basedir, 'antsRegistration')
+            try:
+                res = subprocess.check_output([cmd, '--version']).decode('utf-8')
+            except OSError:
+                return None
+
+            v_string = res.splitlines()[0].split(': ')[1]
+            # 2.2.0-equivalent version string
+            if LooseVersion(v_string) >= LooseVersion('2.1.0.post789-g0740f'):
+                self._version = '2.2.0'
+            else:
+                self._version = '.'.join(v_string.split('.')[:3])
+
+        return self._version
 
 
 class ANTSCommandInputSpec(CommandLineInputSpec):
@@ -84,3 +115,7 @@ class ANTSCommand(CommandLine):
         <instance>.inputs.num_threads
         """
         cls._num_threads = num_threads
+
+    @property
+    def version(self):
+        return Info().version
