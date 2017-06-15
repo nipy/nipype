@@ -221,12 +221,14 @@ class RegistrationInputSpec(ANTSCommandInputSpec):
                                  desc='image to apply transformation to (generally a coregistered functional)')
     fixed_image_mask = InputMultiPath(
         traits.Either('NULL', File(exists=True)),
-        desc='mask used to limit metric sampling region of the fixed image')
+        desc='mask used to limit metric sampling region of the fixed image '
+        '(Use "NULL" to omit a mask at a given stage)')
     moving_image = InputMultiPath(File(exists=True), mandatory=True,
                                   desc='image to apply transformation to (generally a coregistered functional)')
     moving_image_mask = InputMultiPath(
         traits.Either('NULL', File(exists=True)),
-        desc='mask used to limit metric sampling region of the moving image')
+        desc='mask used to limit metric sampling region of the moving image '
+        '(Use "NULL" to omit a mask at a given stage)')
 
     save_state = File(argstr='--save-state %s', exists=False,
                       desc='Filename for saving the internal restorable state of the registration')
