@@ -48,18 +48,18 @@ class Info(object):
 
             for line in res.splitlines():
                 if line.startswith('ANTs Version: '):
-                    v_string, githash = line.split()[2].split('-')
+                    self._version = line.split()[2]
                     break
             else:
                 return None
 
-            # 2.2.0-equivalent version string
-            if 'post' in v_string and LooseVersion(v_string) >= LooseVersion('2.1.0.post789'):
-                self._version = '2.2.0'
-            else:
-                self._version = '.'.join(v_string.split('.')[:3])
+        v_string, githash = self._version.split('-')
 
-        return self._version
+        # 2.2.0-equivalent version string
+        if 'post' in v_string and LooseVersion(v_string) >= LooseVersion('2.1.0.post789'):
+            return '2.2.0'
+        else:
+            return '.'.join(v_string.split('.')[:3])
 
 
 class ANTSCommandInputSpec(CommandLineInputSpec):
