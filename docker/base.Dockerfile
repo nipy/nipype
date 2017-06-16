@@ -77,6 +77,7 @@ RUN apt-get update && \
                     fsl-core \
                     fsl-mni152-templates \
                     afni \
+                    ants \
                     bzip2 \
                     xvfb \
                     git \
@@ -103,23 +104,16 @@ ENV FSLDIR=/usr/share/fsl/5.0 \
     AFNI_IMSAVE_WARNINGS=NO \
     AFNI_TTATLAS_DATASET=/usr/share/afni/atlases \
     AFNI_PLUGINPATH=/usr/lib/afni/plugins \
-    PATH=/usr/lib/fsl/5.0:/usr/lib/afni/bin:$PATH
-
-# Installing and setting up ANTs
-RUN mkdir -p /opt/ants && \
-    curl -sSL "https://dl.dropbox.com/s/2f4sui1z6lcgyek/ANTs-Linux-centos5_x86_64-v2.2.0-0740f91.tar.gz?dl=0" \
-    | tar -zx -C /opt
-
-ENV ANTSPATH=/opt/ants \
-    PATH=$ANTSPATH:$PATH
+    ANTSPATH=/usr/lib/ants
+ENV PATH=/usr/lib/fsl/5.0:/usr/lib/afni/bin:$ANTSPATH:$PATH
 
 # Installing and setting up c3d
 RUN mkdir -p /opt/c3d && \
     curl -sSL "http://downloads.sourceforge.net/project/c3d/c3d/1.0.0/c3d-1.0.0-Linux-x86_64.tar.gz" \
     | tar -xzC /opt/c3d --strip-components 1
 
-ENV C3DPATH=/opt/c3d/ \
-    PATH=$C3DPATH/bin:$PATH
+ENV C3DPATH=/opt/c3d/
+ENV PATH=$C3DPATH/bin:$PATH
 
 # Install fake-S3
 ENV GEM_HOME /usr/lib/ruby/gems/2.3
