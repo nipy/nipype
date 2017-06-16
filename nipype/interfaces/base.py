@@ -273,6 +273,7 @@ class Bunch(object):
         sorted_dict = to_str(sorted(dict_nofilename.items()))
         return dict_withhash, md5(sorted_dict.encode()).hexdigest()
 
+    # dj TOASK: not tested? anyone is using it? should we import pretty?
     def __pretty__(self, p, cycle):
         """Support for the pretty module
 

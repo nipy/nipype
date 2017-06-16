@@ -33,6 +33,13 @@ def test_bunch_attribute():
     assert b.b == [2, 3]
     assert b.c is None
 
+def test_bunch_set():
+    b = nib.Bunch(a=1, b=[2, 3], c=None)
+    b.set(c="str", a=3)
+    assert b.a == 3
+    assert b.b == [2, 3]
+    assert b.c == "str"
+
 
 def test_bunch_repr():
     b = nib.Bunch(b=2, c=3, a=dict(n=1, m=2))
@@ -56,12 +63,13 @@ def test_bunch_methods():
     assert newb['a'] == 3
 
 
-def test_bunch_hash():
+@pytest.mark.parametrize("infile_inp", ["json_pth", "[json_pth]"])
+def test_bunch_hash(infile_inp):
     # NOTE: Since the path to the json file is included in the Bunch,
     # the hash will be unique to each machine.
     pth = os.path.split(os.path.abspath(__file__))[0]
     json_pth = os.path.join(pth, 'realign_json.json')
-    b = nib.Bunch(infile=json_pth,
+    b = nib.Bunch(infile=eval(infile_inp),
                   otherthing='blue',
                   yat=True)
     # newdict contains filename and its hash value for infile field
@@ -74,6 +82,7 @@ def test_bunch_hash():
         jshash.update(fp.read().encode('utf-8'))
     assert newbdict['infile'][0][1] == jshash.hexdigest()
     assert newbdict['yat'] == True
+    assert newbdict['otherthing'] == 'blue'
 
 
 @pytest.fixture(scope="module")
