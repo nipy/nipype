@@ -1672,7 +1672,6 @@ class CommandLine(BaseInterface):
         update the output type for any existing instances.  For these,
         assign the <instance>.inputs.terminal_output.
         """
-
         if output_type in ['stream', 'allatonce', 'file', 'none']:
             cls._terminal_output = output_type
         else:
@@ -1723,20 +1722,22 @@ class CommandLine(BaseInterface):
             out_environ.update(self.inputs.environ)
         return out_environ
 
-    def version_from_command(self, flag='-v'):
-        cmdname = self.cmd.split()[0]
-        env = dict(os.environ)
-        if _exists_in_path(cmdname, env):
-            out_environ = self._get_environ()
-            env.update(out_environ)
-            proc = subprocess.Popen(' '.join((cmdname, flag)),
-                                    shell=True,
-                                    env=env,
-                                    stdout=subprocess.PIPE,
-                                    stderr=subprocess.PIPE,
-                                    )
-            o, e = proc.communicate()
-            return o
+
+    # dj ASK: nothing uses it; will remove if noone stops me
+    #def version_from_command(self, flag='-v'):
+    #    cmdname = self.cmd.split()[0]
+    #    env = dict(os.environ)
+    #if _exists_in_path(cmdname, env):
+    #        out_environ = self._get_environ()
+    #        env.update(out_environ)
+    #        proc = subprocess.Popen(' '.join((cmdname, flag)),
+    #                                shell=True,
+    #                                env=env,
+    #                                stdout=subprocess.PIPE,
+    #                                stderr=subprocess.PIPE,
+    #                                )
+    #        o, e = proc.communicate()
+    #        return o
 
     def _run_wrapper(self, runtime):
         runtime = self._run_interface(runtime)
@@ -1823,6 +1824,7 @@ class CommandLine(BaseInterface):
             return argstr % value
 
     #dj TODO: review changes, probabbly it can be done better 
+    # dj TODO: check when this is being called and if it's possible "name_source" not in trait_spec.metadata 
     def _filename_from_source(self, name, chain=None):
         if chain is None:
             chain = []
@@ -1893,6 +1895,8 @@ class CommandLine(BaseInterface):
     def _overload_extension(self, value, name=None):
         return value
 
+    # dj TOASK: this method is almost not tested (i.e. gives always None)
+    # dj TOASK: is that right that _list_outputs returns outputs only if name_source?? 
     def _list_outputs(self):
         metadata = dict(name_source=lambda t: t is not None)
         traits = self.inputs.traits(**metadata)
@@ -1996,6 +2000,7 @@ class SEMLikeCommandLine(CommandLine):
                         outputs[name] = os.path.abspath(corresponding_input)
         return outputs
 
+    # dj ASK: this was not tested before and now it can't find _outputs_filenames
     def _format_arg(self, name, spec, value):
         if name in list(self._outputs_filenames.keys()):
             if isinstance(value, bool):
@@ -2092,6 +2097,7 @@ class OutputMultiObject(MultiObject):
         value = super(OutputMultiObject, self).get(object, cls)
         if value is None:
             return None
+        # dj NOTE: i think an empty list would be changed to None in validate anyway
         elif len(value) == 0:
             return None
         elif len(value) == 1:

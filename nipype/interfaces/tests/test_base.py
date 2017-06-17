@@ -272,7 +272,6 @@ def test_namesource(setup_file):
     assert ('moo', 'my_%s_template')  in testobj.inputs.get_hashval()[0]
 
 
-
 def test_chained_namesource(setup_file):
     tmp_infile = setup_file
     tmpd, nme, ext = split_filename(tmp_infile)
@@ -741,7 +740,6 @@ def test_Commandline_2():
 
     ci2 = nib.CommandLine(command='which', args='ls')
     assert ci2.cmdline == 'which ls'
-
     ci3 = nib.CommandLine(command='echo')
     ci3.inputs.environ = {'MYENV': 'foo'}
     res = ci3.run()
@@ -758,22 +756,26 @@ def test_Commandline_3():
         hoo = traitlets.List(default_value=None, allow_none=True, help='a list').tag(argstr='-l %s') 
         moo = traitlets.List(default_value=None, allow_none=True, help='a repeated list').tag(
             argstr='-i %d...', position=-1)
+        mooo = traitlets.List(default_value=None, allow_none=True, help='a repeated list').tag(
+            argstr='-i %d...', position=-2, sep=" AND ")
         noo = traitlets.Int(default_value=None, allow_none=True, help='an int').tag(argstr='-x %d')
         roo = traitlets.Unicode(default_value=None, allow_none=True, help='not on command line')
         soo = traitlets.Bool(default_value=None, allow_none=True).tag(argstr="-soo")
 
     nib.CommandLine.input_spec = CommandLineInputSpec1
-    ci4 = nib.CommandLine(command='cmd')
+    ci4 = nib.CommandLine(command='which')
     ci4.inputs.foo = 'foo'
     ci4.inputs.goo = True
     ci4.inputs.hoo = ['a', 'b']
     ci4.inputs.moo = [1, 2, 3]
+    ci4.inputs.mooo = [1, 2, 3]
     ci4.inputs.noo = 0
     ci4.inputs.roo = 'hello'
     ci4.inputs.soo = False
     cmd = ci4._parse_inputs()
     assert cmd[0] == '-g'
     assert cmd[-1] == '-i 1 -i 2 -i 3'
+    assert cmd[-2] == '-i 1 AND -i 2 AND -i 3'
     assert 'hello' not in ' '.join(cmd)
     assert '-soo' not in ' '.join(cmd)
     ci4.inputs.soo = True
@@ -880,6 +882,9 @@ def test_global_CommandLine_output(setup_file):
     assert name in res.runtime.stdout
     assert os.path.exists(tmp_infile)
     nib.CommandLine.set_default_terminal_output('allatonce')
+    with pytest.raises(AttributeError) as excinfo:
+        nib.CommandLine.set_default_terminal_output('wrong_terminal')
+    assert "Invalid terminal output_type" in str(excinfo.value)
     ci = nib.CommandLine(command='ls -l')
     res = ci.run()
     assert res.runtime.merged == ''
@@ -1005,7 +1010,7 @@ def test_SEMLikeCommandLine_1():
         output_spec = SEMLikeOutSpec
 
     testobj = TestName()
-
+    testobj.cmdline
     assert "foo" in testobj._list_outputs()
 
 
@@ -1048,6 +1053,26 @@ def test_SEMLikeCommandLine_3():
     with pytest.raises(AttributeError) as excinfo:
         testobj._list_outputs()
     assert "'SEMLikeInpSpec' object has no attribute 'foo'" == str(excinfo.value)
+
+
+@pytest.mark.xfail(reason="this is a new test for _format_arg, don't know how it should be changed")
+def test_SEMLikeCommandline_4():
+    class SEMLikeInpSpec(nib.CommandLineInputSpec):
+        foo = traitlets.Unicode(default_value=None, allow_none=True, help='a str').tag(argstr='%s')
+        goo = traitlets.Bool(default_value=None, allow_none=True, help='a bool').tag(argstr='-g',
+                                                                                     position=0)
+
+    class TestName(nib.SEMLikeCommandLine):
+        _cmd = "mycommand"
+        input_spec = SEMLikeInpSpec
+        
+    testobj = TestName()
+    testobj.inputs.foo = 'foo'
+    testobj.inputs.goo = True
+
+    testobj.cmdline
+    #dj TODO: add asserts once it works
+
 
 
 # dj TOASK: any suggestion about tests? 
