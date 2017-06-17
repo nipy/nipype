@@ -155,6 +155,7 @@ def test_TraitedSpec_logic():
 
     myif = MyInterface()
 
+
     # testing help (xor)
     for str_help in ["bar or foo, not both\n\t\tmutually_exclusive: foo, bar",
                      "foo or bar, not both\n\t\tmutually_exclusive: foo, bar"]:
@@ -269,6 +270,7 @@ def test_namesource(setup_file):
 
     #dj ASK: if this how moo should be represented in list_withhash and list_nofilename?
     assert ('moo', 'my_%s_template')  in testobj.inputs.get_hashval()[0]
+
 
 
 def test_chained_namesource(setup_file):
@@ -798,6 +800,39 @@ def test_Commandline_4():
     nib.CommandLine.input_spec = nib.CommandLineInputSpec
 
 
+
+def test_Commandline_checkreq():
+    class spec(nib.CommandLineInputSpec):
+        bar = traitlets.Int(default_value=None, allow_none=True)
+        kung_bar = traitlets.Float(default_value=None, allow_none=True).tag(requires=('bar',))
+
+    class DerivedClass(nib.CommandLine):
+        input_spec = spec
+
+    with pytest.raises(ValueError) as excinfo:
+        ci2 = DerivedClass(command='cmd', kung_bar=3.4)
+        ci2.cmdline
+    assert "DerivedClass requires a value for input 'bar' because one of kung_bar is set." \
+        in str(excinfo.value)
+
+
+def test_Commandline_checkmandxor():
+    class spec(nib.CommandLineInputSpec):
+        bar = traitlets.Int(default_value=None, allow_none=True).tag(mandatory=True, xor=("bar", "goo"))
+        goo = traitlets.Int(default_value=None, allow_none=True).tag(mandatory=True, xor=("bar", "goo"))
+
+    class DerivedClass(nib.CommandLine):
+        input_spec = spec
+
+    with pytest.raises(ValueError) as excinfo:
+        ci2 = DerivedClass(command='cmd')
+        ci2.cmdline
+    assert "DerivedClass requires a value for one of the inputs 'bar, goo'." \
+        in str(excinfo.value)
+
+
+
+
 def test_Commandline_environ():
     from nipype import config
     config.set_default_config()
@@ -834,6 +869,7 @@ def test_CommandLine_output(setup_file):
     ci = nib.CommandLine(command='ls -l')
     res = ci.run()
     assert 'stdout.nipype' in res.runtime.stdout
+
 
 
 def test_global_CommandLine_output(setup_file):

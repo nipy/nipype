@@ -918,10 +918,11 @@ class BaseInterface(Interface):
             values = [not isdefined(getattr(self.inputs, field))
                       for field in spec.metadata["requires"]]
             if any(values) and isdefined(value):
+                # dj NOTE: i think the order was wrong
                 msg = ("%s requires a value for input '%s' because one of %s "
                        "is set. For a list of required inputs, see %s.help()" %
-                       (self.__class__.__name__, name,
-                        ', '.join(spec.metadata["requires"]), self.__class__.__name__))
+                       (self.__class__.__name__, ', '.join(spec.metadata["requires"]),
+                        name, self.__class__.__name__))
                 raise ValueError(msg)
 
     def _check_xor(self, spec, name, value):
@@ -940,7 +941,6 @@ class BaseInterface(Interface):
     def _check_mandatory_inputs(self):
         """ Raises an exception if a mandatory input is Undefined
         """
-        #dj TODO: does it work without list in py2?
         for name, spec in self.inputs.traits(mandatory=True).items():
             value = getattr(self.inputs, name)
             self._check_xor(spec, name, value)
@@ -1197,6 +1197,7 @@ class BaseInterface(Interface):
         iflogger.debug('saving inputs {}', inputs)
         with open(json_file, 'w' if PY3 else 'wb') as fhandle:
             json.dump(inputs, fhandle, indent=4, ensure_ascii=False)
+
 
 
 class Stream(object):
@@ -1582,17 +1583,6 @@ def get_dependencies(name, environ):
     o, e = proc.communicate()
     return o.rstrip()
 
-# dj TOTHINK: this also gives a recur. error if there is no def_val
-# dj TODO: it won't be probably used anywhere, so should remove
-class EnumUnicode(traitlets.TraitType):
-    info_text = "tests for terminal_output"
-    default_value=None
-    allow_none=True
-
-    def validate(self, obj, value):
-        if value in ['stream', 'allatonce', 'file', 'none']:
-            return value
-        self.error(obj, value)
 
 class CommandLineInputSpec(BaseInterfaceInputSpec):
     args = traitlets.Unicode(default_value=None, allow_none=True,
