@@ -118,6 +118,19 @@ def test_TraitedSpec():
     assert infields.__repr__() == '\nfoo = 1\ngoo = 0.0\n'
 
 
+# dj NOTE: this is new test, hope that the hash is correct
+def test_TraitedSpec_1():
+    class spec(nib.TraitedSpec):
+        foo = traitlets.Dict(None, allow_none=True)
+        goo = traitlets.Int(default_value=None, allow_none=True)
+    
+    infields = spec(foo={"d":2, "g":3}, goo=1)
+    hashval = infields.get_hashval()
+    assert hashval[1] == '54a882e072c067c1ea9fd656fd27a593'
+    assert ('foo', [('d', 2), ('g', 3)]) in hashval[0]
+    assert ('goo', 1) in hashval[0]
+
+
 def test_TraitedSpec_logic():
 
     class spec3(nib.TraitedSpec):
@@ -344,6 +357,13 @@ def test_TraitedSpec_withFile(setup_file):
     infields = spec2(moo=tmp_infile, doo=[tmp_infile])
     hashval = infields.get_hashval(hash_method='content')
     assert hashval[1] == 'a00e9ee24f5bfa9545a515b7a759886b'
+
+    # should give the same hash
+    infields = spec2(moo=tmp_infile, doo=[None])
+    infields.doo = [tmp_infile]
+    hashval = infields.get_hashval(hash_method='content')
+    assert hashval[1] == 'a00e9ee24f5bfa9545a515b7a759886b'
+
 
 
 @pytest.mark.parametrize("class_name, name", 

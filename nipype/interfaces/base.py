@@ -293,7 +293,6 @@ class Bunch(object):
             p.end_group(6, ')')
 
 
-# dj NOTES: doesnt use traits
 class InterfaceResult(object):
     """Object that contains the results of running a particular Interface.
 
@@ -467,28 +466,33 @@ class TraitedSpec(traitlets.HasTraits):
                     #               **{'%s' % name: Undefined,
                     #                  '%s' % trait_spec.metadata["new_name"]: new})
 
-    def _hash_infile(self, adict, key):
-        """ Inject file hashes into adict[key]"""
-        stuff = adict[key]
-        if not is_container(stuff):
-            stuff = [stuff]
-        file_list = []
-        for afile in stuff:
-            if is_container(afile):
-                hashlist = self._hash_infile({'infiles': afile}, 'infiles')
-                hash = [val[1] for val in hashlist]
-            else:
-                if config.get('execution',
-                              'hash_method').lower() == 'timestamp':
-                    hash = hash_timestamp(afile)
-                elif config.get('execution',
-                                'hash_method').lower() == 'content':
-                    hash = hash_infile(afile)
-                else:
-                    raise Exception("Unknown hash method: %s" %
-                                    config.get('execution', 'hash_method'))
-            file_list.append((afile, hash))
-        return file_list
+    
+    # dj NOTE: it's not being used 
+    # dj NOTE: _get_sorteddict method uses hash_infile from ..utils.filemanip
+    # dj NOTE: either change this or remove this method completely
+    #def _hash_infile(self, adict, key):
+    #    """ Inject file hashes into adict[key]"""
+    #    stuff = adict[key]
+    #    if not is_container(stuff):
+    #        stuff = [stuff]
+    #    file_list = []
+    #    for afile in stuff:
+    #        if is_container(afile):
+    #            hashlist = self._hash_infile({'infiles': afile}, 'infiles')
+    #            hash = [val[1] for val in hashlist]
+    #        else:
+    #            if config.get('execution',
+    #                          'hash_method').lower() == 'timestamp':
+    #                hash = hash_timestamp(afile)
+    #            elif config.get('execution',
+    #                            'hash_method').lower() == 'content':
+    #                hash = hash_infile(afile)
+    #            else:
+    #                raise Exception("Unknown hash method: %s" %
+    #                                config.get('execution', 'hash_method'))
+    #        file_list.append((afile, hash))
+    #    return file_list
+
 
     def get(self, **kwargs):
         """ Returns traited class as a dict without any notification handles
@@ -527,7 +531,7 @@ class TraitedSpec(traitlets.HasTraits):
                 else:
                     if not skipundefined:
                         out[key] = undefinedval
-        elif (isinstance(object, list) or isinstance(object, tuple)): 
+        elif (isinstance(object, list) or isinstance(object, tuple)):
             out = []
             for val in object:
                 if isdefined(val):
