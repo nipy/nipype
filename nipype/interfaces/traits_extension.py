@@ -161,7 +161,6 @@ class ImageFile(File):
                                         exists, **metadata)
 
     def grab_exts(self):
-        # dj TOASK: is it finished or not??
         # TODO: file type validation
         exts = []
         for fmt in self.types:
@@ -192,7 +191,9 @@ class ImageFile(File):
 
 
 # dj NOTE: for now, everywhere where undefined was used I'm changing to None
-# dj NOTE: had to add additinonal part for list (is it enough?)
+# dj NOTE: had to add additinonal part for list, since traitlets gives `[]` as 
+# dj NOTE: a default value even if I ask for None
+# dj TOASK: is it ok, or should I create a special trait??
 def isdefined(object):
     if type(object) is list:
         return object != []
@@ -217,7 +218,7 @@ def has_metadata(trait, metadata, value=None, recursive=True):
             # dj TOASK: but it will be a trait type, not a list of traits
             inner_trait = trait._trait
             count += has_metadata(inner_trait, metadata, recursive)
-        # dj TOASK: not sure about "handlers"? couldn't find in traits library
+        # dj TOASK: not sure about "handlers"? couldn't find it in traits library
         #if hasattr(trait, 'handlers') and trait.handlers is not None:
         #    for handler in trait.handlers:
         #        count += has_metadata(handler, metadata, recursive)

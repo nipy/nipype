@@ -31,7 +31,6 @@ from textwrap import wrap
 from warnings import warn
 import simplejson as json
 from dateutil.parser import parse as parseutc
-#dj TODO
 from packaging.version import Version
 import collections
 
@@ -342,7 +341,7 @@ class TraitedSpec(traitlets.HasTraits):
 
     new metadata:
 
-    #dj TODO: remove usedefault
+    #dj TODO: change 
     * usedefault : set this to True if the default value of the trait should be
       used. Unless this is set, the attributes are set to traits.Undefined
 
@@ -372,7 +371,7 @@ class TraitedSpec(traitlets.HasTraits):
         self.set(**kwargs) 
 
 
-    # dj TODO: is it ok, or has to include tag
+    # dj TODO: is it ok, or has to include tags?
     def set(self, **kwargs):
         for (key, val) in kwargs.items():
             self.__setattr__(key, val)
@@ -387,7 +386,6 @@ class TraitedSpec(traitlets.HasTraits):
     def __repr__(self):
         """ Return a well-formatted representation of the traits """
         outstr = []
-        #for name, value in sorted(self.trait_get().items()):
         for name in sorted(self.trait_values().keys()):
             outstr.append('%s = %s' % (name, self.__getattribute__(name)))
         return '\n{}\n'.format('\n'.join(outstr))
@@ -457,7 +455,7 @@ class TraitedSpec(traitlets.HasTraits):
                 warn(msg)
                 if trait_spec.metadata["new_name"]:
                     
-                    # dj TOTHINK: do i have to add trait_change_notify=False?
+                    # dj TOASK: do i need trait_change_notify=False?
                     # dj TODO: if yes, can I do it with set_trait?
                     # dj TOTHINK: if new=None it won't get to the loop
                     self.set_trait(name, None)
@@ -469,7 +467,7 @@ class TraitedSpec(traitlets.HasTraits):
     
     # dj NOTE: it's not being used 
     # dj NOTE: _get_sorteddict method uses hash_infile from ..utils.filemanip
-    # dj NOTE: either change this or remove this method completely
+    # dj NOTE: will remove if no one stops me
     #def _hash_infile(self, adict, key):
     #    """ Inject file hashes into adict[key]"""
     #    stuff = adict[key]
@@ -498,7 +496,6 @@ class TraitedSpec(traitlets.HasTraits):
         """ Returns traited class as a dict without any notification handles
         """
         #dj NOTE: traitlets doesn't have get
-        #out = super(TraitedSpec, self).get(**kwargs)
         out = {}
         for key in self.trait_values().keys():
             out[key] = self.__getattribute__(key)
@@ -509,7 +506,7 @@ class TraitedSpec(traitlets.HasTraits):
         out = self._clean_container(out)
         return out
 
-    # dj NOTE: suggesting change od the name, comparing the `get` method
+    # dj NOTE: suggesting the name change, comparing the `get` method
     # dj NOTE: this method removes undefined inputs only
     def get_skipundefined(self, **kwargs):
         """ Returns traited class as a dict.
@@ -797,7 +794,7 @@ class BaseInterface(Interface):
     def _get_trait_desc(self, inputs, name, spec):
         manhelpstr = ['\t%s' % name]
 
-        type_info = spec.info_text #dj:is it enough?? inputs is not used anymore
+        type_info = spec.info_text
 
         default = ''
         # dj TOASK: you always have some default_value (either one set by trles or in the code)
@@ -1045,7 +1042,6 @@ class BaseInterface(Interface):
         results :  an InterfaceResult object containing a copy of the instance
         that was executed, provenance information and, if successful, results
         """
-        # dj NOTE: the set method might need some chaages
         self.inputs.set(**inputs)
         self._check_mandatory_inputs()
         self._check_version_requirements(self.inputs)
@@ -1592,7 +1588,7 @@ class CommandLineInputSpec(BaseInterfaceInputSpec):
 
     # This input does not have a "usedefault=True" so the set_default_terminal_output()
     # method would work
-# dj NOTE: that was gving me a recursion error; default_value had to be added
+# dj NOTE: that was giving me a recursion error; default_value had to be added
     terminal_output = traitlets.Enum(['stream', 'allatonce', 'file', 'none'],
                                      default_value=None, allow_none=True,
                                      help=('Control terminal output: `stream` - '
@@ -1824,7 +1820,7 @@ class CommandLine(BaseInterface):
             return argstr % value
 
     #dj TODO: review changes, probabbly it can be done better 
-    # dj TODO: check when this is being called and if it's possible "name_source" not in trait_spec.metadata 
+    # dj TODO: check when this is being called and if it's possible '"name_source" not in trait_spec.metadata' 
     def _filename_from_source(self, name, chain=None):
         if chain is None:
             chain = []
@@ -1952,11 +1948,11 @@ class CommandLine(BaseInterface):
         last_args = [arg for pos, arg in sorted(final_args.items())]
         return first_args + all_args + last_args
 
-# dj NOTE: didn't have any tests in test_base 
+
 class StdOutCommandLineInputSpec(CommandLineInputSpec):
     out_file = File().tag(argstr="> %s", position=-1, genfile=True)
 
-# dj NOTE: didn't have any tests in test_base
+
 class StdOutCommandLine(CommandLine):
     input_spec = StdOutCommandLineInputSpec
 
@@ -1970,7 +1966,6 @@ class StdOutCommandLine(CommandLine):
         raise NotImplementedError
 
 
-# dj NOTE: didn't have any tests in test_base
 class SEMLikeCommandLine(CommandLine):
     """In SEM derived interface all outputs have corresponding inputs.
     However, some SEM commands create outputs that are not defined in the XML.
@@ -2019,7 +2014,6 @@ class MultiObject(traitlets.List):
     default_value = None
     allow_none = True
 
-    # dj TOASK: should we check if value is a filename or a list of file names?
     def validate(self, object, value):
         # dj TODO: check if this still ok, I added this in 2139 
         # want to treat range and other sequences (except str) as list
@@ -2028,26 +2022,23 @@ class MultiObject(traitlets.List):
 
 
         # dj NOTE: for now isdefined([]) gives false, so OR part not needed 
-        # dj NOTE: not sure if that won't be change
+        # dj NOTE: not sure if this will stay or I'll have to change it
         #if not isdefined(value) or \
         #        (isinstance(value, list) and len(value) == 0):
         if not isdefined(value):
             return None
         newvalue = value
 
+        # dj TOASK: traitlets doesnt have inner_traits, not sure if changes are ok
         if not isinstance(value, list) \
-                :
-            # dj TOASK: traitlets doesnt have inner_traits, not sure how t change
-            # dj TOASK: should I check if isinstance(value, traitlets.List)??
-            # dj TODO: come back to this once I run tests for interfaces that use MultiPath
-            # or (self.inner_traits() and
-            #    isinstance(self.inner_traits()[0].trait_type,
-            #               traits.List) and not
-            #    isinstance(self.inner_traits()[0].trait_type,
-            #               InputMultiPath) and
-            #    isinstance(value, list) and
-            #    value and not
-            #    isinstance(value[0], list)):
+             or (self._trait and
+                isinstance(self._trait,
+                           traitlets.List) and not
+                isinstance(self._trait,
+                           InputMultiPath) and
+                isinstance(value, list) and
+                value and not
+                isinstance(value[0], list)):
             newvalue = [value]
 
         value = super(MultiObject, self).validate(object, newvalue)

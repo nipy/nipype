@@ -167,12 +167,6 @@ def test_TraitedSpec_logic():
     myif.inputs.kung = 2
     assert myif.inputs.kung == 2.0
 
-    # dj TOASK: are you sure that this should be warning only??
-    # dj TOASK: this is related to the note setattr(myif.inputs, 'kung', 10.0)
-    # dj TODO: should remove kung_bar?? when previous test work
-    #with pytest.warns(UserWarning): 
-    #    myif.inputs.kung_bar = 2
-
     # dj NOTE: this test can't be earlier, since bar is set regardless the error
     set_bar = lambda: setattr(myif.inputs, 'bar', 1)    
     with pytest.raises(IOError): set_bar()
@@ -191,7 +185,7 @@ class DeprecationSpec3(nib.TraitedSpec):
 
 
 
-#dj TOASK: should some of those tests ONLY check if there is absolutely no warnings??
+#dj TOASK: some of those tests check ONLY if there are no warnings??
 @pytest.mark.parametrize("DeprecationClass, excinfo_secondpart", [
         (DeprecationSpec1, 'Will be removed or raise an error'),
         (DeprecationSpec2, 'Replacement trait bar not found')
@@ -268,7 +262,7 @@ def test_namesource(setup_file):
     testobj.inputs.moo = "my_%s_template"
     assert 'my_%s_template' % nme in testobj.cmdline
 
-    #dj ASK: if this how moo should be represented in list_withhash and list_nofilename?
+    #dj TOASK: if this how moo should be represented in list_withhash and list_nofilename?
     assert ('moo', 'my_%s_template')  in testobj.inputs.get_hashval()[0]
 
 
@@ -399,7 +393,7 @@ def test_TraitedSpec_withNoFileHashing(setup_file):
     # dj NOTE: i've changed the hash, since the list_withhash contains now
     # dj NOTE: the name of the file and hash value (since moo is unicode now)
     # dj NOTE: see the second assert for hashval[0][1]
-    # dj ASK: is that how it should be?
+    # dj TOASK: is that how it should be?
     assert hashval[1] == 'a00e9ee24f5bfa9545a515b7a759886b'
     assert hashval[0][1] == ('moo', ('foo.txt', '25f9e794323b453885f5181f1b624d0b'))
 
@@ -439,11 +433,8 @@ def test_Interface_notimplemented_2():
     with pytest.raises(NotImplementedError): nif._get_filecopy_info()
 
 
-#dj NOTE: moved outside the test function, so I can easier split the test
+
 class BaseInterfaceInputSpec(nib.TraitedSpec):
-    # dj TOASK: if everythere where there is no `usedefault=True` should be chnaged to
-    # dj TOASK: default_value=None, allow_none=True ??
-    # dj : and if I have usedefault=True, i will simply not set default_value=None
     foo = traitlets.Int(default_value=None, allow_none=True, help='a random int')
     goo = traitlets.Int(default_value=None, allow_none=True, help='a random int').tag(mandatory=True)
     moo = traitlets.Int(default_value=None, allow_none=True, help='a random int').tag(
