@@ -1256,8 +1256,10 @@ class SelectFiles(IOBase):
         infields = []
         for name, template in list(templates.items()):
             for _, field_name, _, _ in string.Formatter().parse(template):
-                if field_name is not None and field_name not in infields:
-                    infields.append(field_name)
+                if field_name is not None:
+                    field_name = re.match("\w+", field_name).group()
+                    if field_name not in infields:
+                        infields.append(field_name)
 
         self._infields = infields
         self._outfields = list(templates)
