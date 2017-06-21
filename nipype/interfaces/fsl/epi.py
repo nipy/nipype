@@ -293,7 +293,7 @@ class TOPUP(FSLCommand):
         outputs['out_jacs'] = [
             fmt(prefix=self.inputs.out_jac_prefix, i=i, ext=ext)
             for i in range(1, n_vols + 1)]
-        output['out_mats'] = [
+        outputs['out_mats'] = [
             fmt(prefix=self.inputs.out_mat_prefix, i=i, ext=".mat")
             for i in range(1, n_vols + 1)]
 
