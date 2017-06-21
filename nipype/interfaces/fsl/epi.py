@@ -224,6 +224,7 @@ class TOPUPOutputSpec(TraitedSpec):
     out_field = File(desc='name of image file with field (Hz)')
     out_warps = traits.List(File(exists=True), desc='warpfield images')
     out_jacs = traits.List(File(exists=True), desc='Jacobian images')
+    out_mats = traits.List(File(exists=True), desc='realignment matrices')
     out_corrected = File(desc='name of 4D image file with unwarped images')
     out_logfile = File(desc='name of log-file')
 
