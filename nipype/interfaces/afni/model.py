@@ -88,10 +88,10 @@ class DeconvolveInputSpec(AFNICommandInputSpec):
              'This method is just a faster and simpler way to '
              'include a lot of baseline regressors in one step. ',
         argstr='ortvec %s')
-    x1d = File(
+    x1D = File(
         desc='save out X matrix',
         argstr='-x1D %s')
-    x1d_stop = traits.Bool(
+    x1D_stop = traits.Bool(
         desc='stop running after writing .xmat.1D file',
         argstr='-x1D_stop')
     bucket = File(
@@ -155,7 +155,7 @@ class DeconvolveInputSpec(AFNICommandInputSpec):
                      Str(desc='GLT label')),
         desc='general linear test (i.e., contrast) labels',
         argstr='-glt_label %d %s',
-        requires=['glt_sym'])
+        requires=['gltsym'])
 
 
 class Deconvolve(AFNICommand):
@@ -169,13 +169,13 @@ class Deconvolve(AFNICommand):
 
     >>> from nipype.interfaces import afni
     >>> deconvolve = afni.Deconvolve()
-    >>> deconvolve.inputs.in_file = 'functional.nii'
+    >>> deconvolve.inputs.in_files = ['functional.nii']
     >>> deconvolve.inputs.bucket = 'output.nii'
     >>> deconvolve.inputs.x1D = 'output.1D'
-    >>> stim_times = [(1, 'stims1.txt', 'SPMG1(4)'), (2, 'stims2.txt', 'SPMG2(4)')]
+    >>> stim_times = [(1, 'timeseries.txt', 'SPMG1(4)'), (2, 'timeseries.txt', 'SPMG2(4)')]
     >>> deconvolve.inputs.stim_times = stim_times
     >>> deconvolve.cmdline  # doctest: +ALLOW_UNICODE
-    '3dDeconvolve -input functional.nii -bucket output.nii -x1D output -stim_times 1 stims1.txt SPMG1(4) 2 stims2.txt SPMG2(4)'
+    '3dDeconvolve -input functional.nii -bucket output.nii -x1D output -stim_times 1 timeseries.txt SPMG1(4) 2 timeseries.txt SPMG2(4)'
     >>> res = deconvolve.run()  # doctest: +SKIP
     """
 
@@ -203,11 +203,11 @@ class Deconvolve(AFNICommand):
         if name in ['stim_times', 'stim_labels']:
             arg = ''
             for st in value:
-                arg += trait_spec.argstr % value
+                arg += trait_spec.argstr % st
             arg = arg.rstrip()
             return arg
 
         if name == 'stim_times':
             self.inputs.num_stimts = len(value)
-        elif name == 'glt_sym':
+        elif name == 'gltsym':
             self.inputs.num_glt = len(value)
