@@ -119,6 +119,9 @@ def main():
     with open(ver_file) as infofile:
         exec(infofile.read(), globals(), ldict)
 
+    SETUP_REQUIRES = ['future']
+    if sys.version_info <= (3, 4):
+        SETUP_REQUIRES.append('configparser')
     setup(
         name=ldict['NAME'],
         maintainer=ldict['MAINTAINER'],
@@ -134,14 +137,12 @@ def main():
         platforms=ldict['PLATFORMS'],
         version=ldict['VERSION'],
         install_requires=ldict['REQUIRES'],
-        setup_requires=['future', 'configparser'],
+        setup_requires=SETUP_REQUIRES,
         provides=ldict['PROVIDES'],
         packages=find_packages(),
         package_data={'nipype': testdatafiles},
-        scripts=glob('bin/*'),
         cmdclass={'build_py': BuildWithCommitInfoCommand},
         tests_require=ldict['TESTS_REQUIRES'],
-        test_suite='nose.collector',
         zip_safe=False,
         extras_require=ldict['EXTRA_REQUIRES'],
         entry_points='''

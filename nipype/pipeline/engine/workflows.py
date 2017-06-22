@@ -557,7 +557,7 @@ connected.
         if not isinstance(plugin, (str, bytes)):
             runner = plugin
         else:
-            name = 'nipype.pipeline.plugins'
+            name = '.'.join(__name__.split('.')[:-2] + ['plugins'])
             try:
                 __import__(name)
             except ImportError:

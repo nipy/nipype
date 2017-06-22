@@ -418,6 +418,16 @@ class RegAverage(NiftyRegCommand):
 
         return None
 
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+
+        if isdefined(self.inputs.out_file):
+            outputs['out_file'] = self.inputs.out_file
+        else:
+            outputs['out_file'] = self._gen_filename('out_file')
+
+        return outputs
+
     @property
     def cmdline(self):
         """ Rewrite the cmdline to write options in text_file."""
