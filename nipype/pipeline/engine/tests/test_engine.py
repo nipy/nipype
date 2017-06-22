@@ -486,6 +486,28 @@ def test_mapnode_nested(tmpdir):
     assert "can only concatenate list" in str(excinfo.value)
 
 
+def test_mapnode_expansion(tmpdir):
+    os.chdir(str(tmpdir))
+    from nipype import MapNode, Function
+
+    def func1(in1):
+        return in1 + 1
+
+    mapnode = MapNode(Function(function=func1),
+                      iterfield='in1',
+                      name='mapnode')
+    mapnode.inputs.in1 = [1, 2]
+    mapnode.interface.num_threads = 2
+    mapnode.interface.estimated_memory_gb = 2
+
+    for idx, node in mapnode._make_nodes():
+        for attr in ('overwrite', 'run_without_submitting', 'plugin_args'):
+            assert getattr(node, attr) == getattr(mapnode, attr)
+        for attr in ('num_threads', 'estimated_memory_gb'):
+            assert (getattr(node._interface, attr) ==
+                    getattr(mapnode._interface, attr))
+
+
 def test_node_hash(tmpdir):
     wd = str(tmpdir)
     os.chdir(wd)

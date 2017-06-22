@@ -886,7 +886,8 @@ class ReconAll(CommandLine):
             ('avgcurv', ['surf/lh.avg_curv'], []),
             ('cortparc', ['label/lh.aparc.annot'], []),
             ('pial', ['surf/lh.pial', 'surf/lh.curv.pial',
-                      'surf/lh.area.pial', 'surf/lh.thickness'], []),
+                      'surf/lh.area.pial', 'surf/lh.thickness',
+                      'surf/lh.white'], []),
             ('parcstats', ['stats/lh.aparc.stats'], []),
             ('cortparc2', ['label/lh.aparc.a2009s.annot'], []),
             ('parcstats2', ['stats/lh.aparc.a2009s.stats'], []),
@@ -1154,6 +1155,8 @@ class BBRegisterInputSpec(FSTraitedSpec):
                         desc='degrees of freedom for initial registration (FSL)')
     out_fsl_file = traits.Either(traits.Bool, File, argstr="--fslmat %s",
                                  desc="write the transformation matrix in FSL FLIRT format")
+    out_lta_file = traits.Either(traits.Bool, File, argstr="--lta %s", min_ver='5.2.0',
+                                 desc="write the transformation matrix in LTA format")
     registered_file = traits.Either(traits.Bool, File, argstr='--o %s',
                                     desc='output warped sourcefile either True or filename')
 
@@ -1170,6 +1173,7 @@ class BBRegisterInputSpec6(BBRegisterInputSpec):
 class BBRegisterOutputSpec(TraitedSpec):
     out_reg_file = File(exists=True, desc='Output registration file')
     out_fsl_file = File(desc='Output FLIRT-style registration file')
+    out_lta_file = File(desc='Output LTA-style registration file')
     min_cost_file = File(exists=True, desc='Output registration minimum cost file')
     registered_file = File(desc='Registered and resampled source file')
 
@@ -1218,6 +1222,16 @@ class BBRegister(FSCommand):
             else:
                 outputs['registered_file'] = op.abspath(_in.registered_file)
 
+        if isdefined(_in.out_lta_file):
+            if isinstance(_in.out_fsl_file, bool):
+                suffix = '_bbreg_%s.lta' % _in.subject_id
+                out_lta_file = fname_presuffix(_in.source_file,
+                                               suffix=suffix,
+                                               use_ext=False)
+                outputs['out_lta_file'] = out_lta_file
+            else:
+                outputs['out_lta_file'] = op.abspath(_in.out_lta_file)
+
         if isdefined(_in.out_fsl_file):
             if isinstance(_in.out_fsl_file, bool):
                 suffix = '_bbreg_%s.mat' % _in.subject_id
@@ -1233,7 +1247,7 @@ class BBRegister(FSCommand):
 
     def _format_arg(self, name, spec, value):
 
-        if name in ['registered_file', 'out_fsl_file']:
+        if name in ['registered_file', 'out_fsl_file', 'out_lta_file']:
             if isinstance(value, bool):
                 fname = self._list_outputs()[name]
             else:

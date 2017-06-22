@@ -361,12 +361,13 @@ separate time points
         return super(BinaryMaths, self)._format_arg(opt, spec, val)
 
     def _overload_extension(self, value, name=None):
-        path = super(BinaryMaths, self)._overload_extension(value, name)
         if self.inputs.operation == 'hdr_copy':
+            path, base, _ = split_filename(value)
             _, base, ext = split_filename(self.inputs.operand_file)
             suffix = self.inputs.operation
-            path = os.path.join(path, '{0}{1}{2}'.format(base, suffix, ext))
-        return path
+            return os.path.join(path, '{0}{1}{2}'.format(base, suffix, ext))
+        else:
+            return super(BinaryMaths, self)._overload_extension(value, name)
 
 
 class BinaryMathsInputInteger(MathsInput):

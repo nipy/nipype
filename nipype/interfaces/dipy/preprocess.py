@@ -13,6 +13,8 @@ import os.path as op
 import nibabel as nb
 import numpy as np
 
+from ...utils import NUMPY_MMAP
+
 from ... import logging
 from ..base import (traits, TraitedSpec, File, isdefined)
 from .base import DipyBaseInterface
@@ -179,7 +181,6 @@ def resample_proxy(in_file, order=3, new_zooms=None, out_file=None):
     Performs regridding of an image to set isotropic voxel sizes using dipy.
     """
     from dipy.align.reslice import reslice
-    from nipype.utils import NUMPY_MMAP
 
     if out_file is None:
         fname, fext = op.splitext(op.basename(in_file))
@@ -223,7 +224,6 @@ def nlmeans_proxy(in_file, settings,
     from dipy.denoise.nlmeans import nlmeans
     from scipy.ndimage.morphology import binary_erosion
     from scipy import ndimage
-    from nipype.utils import NUMPY_MMAP
 
     if out_file is None:
         fname, fext = op.splitext(op.basename(in_file))

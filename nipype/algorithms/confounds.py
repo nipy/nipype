@@ -398,7 +398,7 @@ class CompCor(BaseInterface):
         if len(mask_images) == 0:
             img = nb.Nifti1Image(np.ones(imgseries.shape[:3], dtype=np.bool),
                                  affine=imgseries.affine,
-                                 header=imgseries.get_header())
+                                 header=imgseries.header)
             mask_images = [img]
 
         mask_images = self._process_masks(mask_images, imgseries.get_data())
@@ -501,7 +501,7 @@ class TCompCor(CompCor):
             mask_data = np.zeros_like(mask)
             mask_data[mask != 0] = tSTD >= threshold_std
             out_image = nb.Nifti1Image(mask_data, affine=img.affine,
-                                       header=img.get_header())
+                                       header=img.header)
 
             # save mask
             mask_file = os.path.abspath('mask_{:03d}.nii.gz'.format(i))
@@ -561,7 +561,7 @@ class TSNR(BaseInterface):
         header = img.header.copy()
         vollist = [nb.load(filename, mmap=NUMPY_MMAP) for filename in self.inputs.in_file]
         data = np.concatenate([vol.get_data().reshape(
-            vol.get_shape()[:3] + (-1,)) for vol in vollist], axis=3)
+            vol.shape[:3] + (-1,)) for vol in vollist], axis=3)
         data = np.nan_to_num(data)
 
         if data.dtype.kind == 'i':
@@ -570,18 +570,18 @@ class TSNR(BaseInterface):
 
         if isdefined(self.inputs.regress_poly):
             data = regress_poly(self.inputs.regress_poly, data, remove_mean=False)
-            img = nb.Nifti1Image(data, img.get_affine(), header)
+            img = nb.Nifti1Image(data, img.affine, header)
             nb.save(img, op.abspath(self.inputs.detrended_file))
 
         meanimg = np.mean(data, axis=3)
         stddevimg = np.std(data, axis=3)
         tsnr = np.zeros_like(meanimg)
         tsnr[stddevimg > 1.e-3] = meanimg[stddevimg > 1.e-3] / stddevimg[stddevimg > 1.e-3]
-        img = nb.Nifti1Image(tsnr, img.get_affine(), header)
+        img = nb.Nifti1Image(tsnr, img.affine, header)
         nb.save(img, op.abspath(self.inputs.tsnr_file))
-        img = nb.Nifti1Image(meanimg, img.get_affine(), header)
+        img = nb.Nifti1Image(meanimg, img.affine, header)
         nb.save(img, op.abspath(self.inputs.mean_file))
-        img = nb.Nifti1Image(stddevimg, img.get_affine(), header)
+        img = nb.Nifti1Image(stddevimg, img.affine, header)
         nb.save(img, op.abspath(self.inputs.stddev_file))
         return runtime
 
@@ -872,7 +872,7 @@ def combine_mask_files(mask_files, mask_method=None, mask_index=None):
             if mask is None:
                 mask = img.get_data() > 0
             np.logical_or(mask, img.get_data() > 0, mask)
-        img = nb.Nifti1Image(mask, img.affine, header=img.get_header())
+        img = nb.Nifti1Image(mask, img.affine, header=img.header)
         return [img]
 
     if mask_method == 'intersect':
@@ -882,7 +882,7 @@ def combine_mask_files(mask_files, mask_method=None, mask_index=None):
             if mask is None:
                 mask = img.get_data() > 0
             np.logical_and(mask, img.get_data() > 0, mask)
-        img = nb.Nifti1Image(mask, img.affine, header=img.get_header())
+        img = nb.Nifti1Image(mask, img.affine, header=img.header)
         return [img]
 
 
