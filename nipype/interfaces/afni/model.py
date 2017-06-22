@@ -150,8 +150,8 @@ class DeconvolveInputSpec(AFNICommandInputSpec):
         Str(desc='symbolic general linear test'),
         desc='general linear tests (i.e., contrasts) using symbolic '
              'conventions',
-        argstr='-gltsym %s...')
-    glt_labels = traits.List(
+        argstr='-gltsym \'%s\'...')
+    glt_label = traits.List(
         traits.Tuple(traits.Int(desc='k-th general linear test'),
                      Str(desc='GLT label')),
         desc='general linear test (i.e., contrast) labels',
@@ -177,6 +177,20 @@ class Deconvolve(AFNICommand):
     >>> deconvolve.inputs.stim_times = stim_times
     >>> deconvolve.cmdline  # doctest: +ALLOW_UNICODE
     '3dDeconvolve -input functional.nii functional2.nii -num_stimts 2 -bucket output.nii -stim_times 1 timeseries.txt SPMG1(4) -stim_times 2 timeseries.txt SPMG2(4) -x1D output.1D'
+    >>> res = deconvolve.run()  # doctest: +SKIP
+
+    >>> from nipype.interfaces import afni
+    >>> deconvolve = afni.Deconvolve()
+    >>> deconvolve.inputs.in_files = ['functional.nii', 'functional2.nii']
+    >>> deconvolve.inputs.out_file = 'output.nii'
+    >>> deconvolve.inputs.x1D = 'output.1D'
+    >>> stim_times = [(1, 'timeseries.txt', 'SPMG1(4)'), (2, 'timeseries.txt', 'SPMG2(4)')]
+    >>> deconvolve.inputs.stim_times = stim_times
+    >>> deconvolve.inputs.stim_label = [(1, 'Houses'), (2, 'Apartments')]
+    >>> deconvolve.inputs.gltsym = [('SYM: +Houses -Apartments')]
+    >>> deconvolve.inputs.glt_label = [(1, 'Houses-Apartments')]
+    >>> deconvolve.cmdline  # doctest: +ALLOW_UNICODE
+    "3dDeconvolve -glt_label 1 Houses-Apartments -gltsym 'SYM: +Houses -Apartments' -input functional.nii functional2.nii -num_glt 1 -num_stimts 2 -bucket output.nii -stim_label 1 Houses -stim_label 2 Apartments -stim_times 1 timeseries.txt SPMG1(4) -stim_times 2 timeseries.txt SPMG2(4) -x1D output.1D"
     >>> res = deconvolve.run()  # doctest: +SKIP
     """
 
