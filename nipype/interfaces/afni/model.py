@@ -50,7 +50,6 @@ class DeconvolveInputSpec(AFNICommandInputSpec):
         argstr='-input %s',
         mandatory=True,
         copyfile=False,
-        position=0,
         sep=" ")
     mask = File(
         desc='filename of 3D mask dataset; '
@@ -177,13 +176,22 @@ class Deconvolve(AFNICommand):
     >>> stim_times = [(1, 'timeseries.txt', 'SPMG1(4)'), (2, 'timeseries.txt', 'SPMG2(4)')]
     >>> deconvolve.inputs.stim_times = stim_times
     >>> deconvolve.cmdline  # doctest: +ALLOW_UNICODE
-    '3dDeconvolve -input functional.nii functional2.nii -bucket output.nii -stim_times 1 timeseries.txt SPMG1(4) -stim_times 2 timeseries.txt SPMG2(4) -x1D output.1D'
+    '3dDeconvolve -input functional.nii functional2.nii -num_stimts 2 -bucket output.nii -stim_times 1 timeseries.txt SPMG1(4) -stim_times 2 timeseries.txt SPMG2(4) -x1D output.1D'
     >>> res = deconvolve.run()  # doctest: +SKIP
     """
 
     _cmd = '3dDeconvolve'
     input_spec = DeconvolveInputSpec
     output_spec = AFNICommandOutputSpec
+
+    def _parse_inputs(self, skip=None):
+        if skip is None:
+            skip = []
+        if len(self.inputs.stim_times) and not isdefined(self.inputs.num_stimts):
+            self.inputs.num_stimts = len(self.inputs.stim_times)
+        if len(self.inputs.gltsym) and not isdefined(self.inputs.num_glt):
+            self.inputs.num_glt = len(self.inputs.gltsym)
+        return super(Deconvolve, self)._parse_inputs(skip)
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
