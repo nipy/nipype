@@ -49,7 +49,9 @@ class DeconvolveInputSpec(AFNICommandInputSpec):
              '   with a multi-column 1D time series file.',
         argstr='-input %s',
         mandatory=True,
-        copyfile=False)
+        copyfile=False,
+        position=0,
+        sep=" ")
     mask = File(
         desc='filename of 3D mask dataset; '
              'Only data time series from within the mask '
@@ -94,7 +96,7 @@ class DeconvolveInputSpec(AFNICommandInputSpec):
     x1D_stop = traits.Bool(
         desc='stop running after writing .xmat.1D file',
         argstr='-x1D_stop')
-    bucket = File(
+    out_file = File(
         desc='output statistics file',
         argstr='-bucket %s')
     jobs = traits.Int(
@@ -138,23 +140,23 @@ class DeconvolveInputSpec(AFNICommandInputSpec):
                      Str(desc='model')),
         desc='Generate the k-th response model from a set of stimulus times'
              ' given in file \'tname\'.',
-        argstr='-stim_times %d %s %s')
+        argstr='-stim_times %d %s %s...')
     stim_label = traits.List(
         traits.Tuple(traits.Int(desc='k-th input stimulus'),
                      Str(desc='stimulus label')),
         desc='label for kth input stimulus',
-        argstr='-stim_label %d %s',
+        argstr='-stim_label %d %s...',
         requires=['stim_times'])
     gltsym = traits.List(
         Str(desc='symbolic general linear test'),
         desc='general linear tests (i.e., contrasts) using symbolic '
              'conventions',
-        argstr='-gltsym %s')
+        argstr='-gltsym %s...')
     glt_labels = traits.List(
         traits.Tuple(traits.Int(desc='k-th general linear test'),
                      Str(desc='GLT label')),
         desc='general linear test (i.e., contrast) labels',
-        argstr='-glt_label %d %s',
+        argstr='-glt_label %d %s...',
         requires=['gltsym'])
 
 
@@ -169,13 +171,13 @@ class Deconvolve(AFNICommand):
 
     >>> from nipype.interfaces import afni
     >>> deconvolve = afni.Deconvolve()
-    >>> deconvolve.inputs.in_files = ['functional.nii']
-    >>> deconvolve.inputs.bucket = 'output.nii'
+    >>> deconvolve.inputs.in_files = ['functional.nii', 'functional2.nii']
+    >>> deconvolve.inputs.out_file = 'output.nii'
     >>> deconvolve.inputs.x1D = 'output.1D'
     >>> stim_times = [(1, 'timeseries.txt', 'SPMG1(4)'), (2, 'timeseries.txt', 'SPMG2(4)')]
     >>> deconvolve.inputs.stim_times = stim_times
     >>> deconvolve.cmdline  # doctest: +ALLOW_UNICODE
-    '3dDeconvolve -input functional.nii -bucket output.nii -x1D output -stim_times 1 timeseries.txt SPMG1(4) 2 timeseries.txt SPMG2(4)'
+    '3dDeconvolve -input functional.nii functional2.nii -bucket output.nii -stim_times 1 timeseries.txt SPMG1(4) -stim_times 2 timeseries.txt SPMG2(4) -x1D output.1D'
     >>> res = deconvolve.run()  # doctest: +SKIP
     """
 
@@ -191,23 +193,5 @@ class Deconvolve(AFNICommand):
             else:
                 outputs['x1D'] = self.inputs.x1D
 
-        outputs['bucket'] = self.inputs.bucket
+        outputs['out_file'] = self.inputs.out_file
         return outputs
-
-    def _format_arg(self, name, trait_spec, value):
-        """
-        Argument num_glt is defined automatically from the number of contrasts
-        desired (defined by the length of glt_sym). No effort has been made to
-        make this compatible with glt.
-        """
-        if name in ['stim_times', 'stim_labels']:
-            arg = ''
-            for st in value:
-                arg += trait_spec.argstr % st
-            arg = arg.rstrip()
-            return arg
-
-        if name == 'stim_times':
-            self.inputs.num_stimts = len(value)
-        elif name == 'gltsym':
-            self.inputs.num_glt = len(value)
