@@ -241,7 +241,6 @@ class Deconvolve(AFNICommand):
         _gen_fname_opts = {}
         _gen_fname_opts['basename'] = self.inputs.out_file
         _gen_fname_opts['cwd'] = os.getcwd()
-
         outputs['reml_script'] = self._gen_fname(suffix='.REML_cmd', **_gen_fname_opts)
         outputs['out_file'] = self.inputs.out_file
         return outputs
