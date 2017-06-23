@@ -253,7 +253,7 @@ class RemlfitInputSpec(AFNICommandInputSpec):
         File(
             exists=True),
         desc='Read time series dataset',
-        argstr='-input %s',
+        argstr='-input "%s"',
         mandatory=True,
         copyfile=False,
         sep=" ")
@@ -340,12 +340,7 @@ class Remlfit(AFNICommand):
     def _parse_inputs(self, skip=None):
         if skip is None:
             skip = []
-        skip += ['in_files']
-        # we'll have to deal with input ourselves because AFNI might want
-        # everything into double quotes
-        inputs = super(Remlfit, self)._parse_inputs(skip)
-        inputs = [u'-input "{0}"'.format(' '.join(self.inputs.in_files))] + inputs
-        return inputs
+        return super(Remlfit, self)._parse_inputs(skip)
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
