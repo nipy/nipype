@@ -21,4 +21,4 @@ from .utils import (AFNItoNIFTI, Autobox, BrickStat, Calc, Copy,
                     Eval, FWHMx,
                     MaskTool, Merge, Notes, Refit, Resample, TCat, TStat, To3D,
                     Unifize, ZCutUp, GCOR,)
-from .model import(Deconvolve)
+from .model import (Deconvolve, Remlfit)
