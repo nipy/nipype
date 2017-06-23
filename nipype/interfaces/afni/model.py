@@ -245,3 +245,109 @@ class Deconvolve(AFNICommand):
         outputs['reml_script'] = self._gen_fname(suffix='.REML_cmd', **_gen_fname_opts)
         outputs['out_file'] = self.inputs.out_file
         return outputs
+
+
+class RemlfitInputSpec(AFNICommandInputSpec):
+    # mandatory files
+    in_files = InputMultiPath(
+        File(
+            exists=True),
+        desc='Read time series dataset',
+        argstr='-input %s',
+        mandatory=True,
+        copyfile=False,
+        sep=" ")
+    matrix = File(
+        desc='Read the design matrix, which should have been output from '
+             '3dDeconvolve via the \'-x1D\' option',
+        argstr='-matrix %s',
+        mandatory=True)
+    # "Semi-Hidden Alternative Ways to Define the Matrix"
+    polort = traits.Int(
+        desc='If no -matrix option is given, AND no -matim option, '
+             'create a matrix with Legendre polynomial regressors'
+             'up to order P.  The default value is P=0, which'
+             'produces a matrix with a single column of all ones',
+        argstr='-polort %d',
+        xor=['matrix'])
+    matim = traits.File(
+        desc='Read a standard .1D file as the matrix.'
+             '** N.B.: You can use only Col as a name in GLTs'
+             'with these nonstandard matrix input methods,'
+             'since the other names come from the -matrix file.'
+             ' ** These mutually exclusive options are ignored if -matrix'
+             'is used.',
+        argstr='-matim %s',
+        xor=['matrix'])
+    # Other arguments
+    mask = File(
+        desc='filename of 3D mask dataset; '
+             'Only data time series from within the mask '
+             'will be analyzed; results for voxels outside '
+             'the mask will be set to zero.',
+        argstr='-mask %s',
+        exists=True)
+    automask = traits.Bool(
+        usedefault=True,
+        argstr='-automask',
+        desc='Build a mask automatically from input data '
+             '(will be slow for long time series datasets)')
+    fout = traits.Bool(
+        desc='output F-statistic for each stimulus',
+        argstr='-fout')
+    rout = traits.Bool(
+        desc='output the R^2 statistic for each stimulus',
+        argstr='-rout')
+    tout = traits.Bool(
+        desc='output the T-statistic for each stimulus'
+             '[if you use -Rbuck and do not give any of -fout, -tout,]'
+             'or -rout, then the program assumes -fout is activated.]',
+        argstr='-tout')
+    nofdr = traits.Bool(
+        desc='do NOT add FDR curve data to bucket datasets '
+             '[FDR curves can take a long time if -tout is used]',
+        argstr='-noFDR')
+    out_file = File(
+        desc='output statistics file',
+        argstr='-Rbuck %s')
+
+
+class Remlfit(AFNICommand):
+    """Performs Generalized least squares time series fit with Restricted
+    Maximum Likelihood (REML) estimation of the temporal auto-correlation
+    structure.
+
+    For complete details, see the `3dREMLfit Documentation.
+    <https://afni.nimh.nih.gov/pub/dist/doc/program_help/3dREMLfit.html>`_
+
+    Examples
+    ========
+
+    >>> from nipype.interfaces import afni
+    >>> remlfit = afni.Remlfit()
+    >>> remlfit.inputs.in_files = ['functional.nii', 'functional2.nii']
+    >>> remlfit.inputs.out_file = 'output.nii'
+    >>> remlfit.inputs.matrix = 'output.1D'
+    >>> remlfit.cmdline  # doctest: +ALLOW_UNICODE
+    '3dREMLfit -input "functional.nii functional2.nii" -matrix output.1D -Rbuck output.nii'
+    >>> res = remlfit.run()  # doctest: +SKIP
+    """
+
+    _cmd = '3dREMLfit'
+    input_spec = RemlfitInputSpec
+    output_spec = AFNICommandOutputSpec
+
+    def _parse_inputs(self, skip=None):
+        if skip is None:
+            skip = []
+        skip += ['in_files']
+        # we'll have to deal with input ourselves because AFNI might want
+        # everything into double quotes
+        inputs = super(Remlfit, self)._parse_inputs(skip)
+        inputs = [u'-input "{0}"'.format(' '.join(self.inputs.in_files))] + inputs
+        return inputs
+
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        outputs['out_file'] = self.inputs.out_file
+        return outputs
