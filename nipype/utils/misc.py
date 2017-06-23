@@ -3,7 +3,7 @@
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """Miscellaneous utility functions
 """
-from __future__ import print_function, division, unicode_literals, absolute_import
+from __future__ import division, unicode_literals, absolute_import
 from future import standard_library
 standard_library.install_aliases()
 from builtins import next, str
@@ -91,7 +91,6 @@ def create_function_from_source(function_source, imports=None):
                 exec(statement, ns)
             import_keys = list(ns.keys())
         exec(function_source, ns)
-
     except Exception as e:
         msg = '\nError executing function:\n %s\n' % function_source
         msg += '\n'.join(["Functions in connection strings have to be standalone.",
