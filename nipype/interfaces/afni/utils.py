@@ -1047,11 +1047,11 @@ class Notes(CommandLine):
         return outputs
 
 
-class NwarpApply(CommandLineInputSpec):
-    source = traits.Either(File(exists=True), traits.List(File(exists=True)),
+class NwarpApplyInputSpec(CommandLineInputSpec):
+    in_file = traits.Either(File(exists=True), traits.List(File(exists=True)),
         mandatory=True,
         argstr='-nwarp %s',
-        desc='the name of the dataset to be warped ''
+        desc='the name of the dataset to be warped '
             'can be multiple datasets')
     warp = traits.Either(File(exists=True), traits.List(File(exists=True)),
         desc='the name of the warp dataset. '
@@ -1064,7 +1064,61 @@ class NwarpApply(CommandLineInputSpec):
     master = traits.File(exists=True,
         desc='the name of the master dataset, which defines the output grid',
         argstr='-master %s')
-############################################################
+    interp = traits.Enum('NN','nearestneighbour','nearestneighbor','linear',
+        'trilinear','cubic','tricubic','quintic','triquintic','wsinc5',
+        desc='defines interpolation method to use during warp',
+        argstr='-interp %s',
+        default='wsinc5')
+    ainterp = traits.Enum('NN','nearestneighbour','nearestneighbor','linear',
+        'trilinear','cubic','tricubic','quintic','triquintic','wsinc5',
+        desc='specify a different interpolation method than might '
+            'be used for the warp',
+        argstr='-ainterp %s',
+        default='wsinc5')
+    out_file = File(
+        name_template='%s_Nwarp',
+        desc='output image file name',
+        argstr='-prefix %s',
+        name_source='in_file')
+    short = traits.Bool(
+        desc='Write output dataset using 16-bit short integers, rather than '
+            'the usual 32-bit floats.',
+        argstr='-short')
+    quiet = traits.Bool(
+        desc='don\'t be verbose :(',
+        argstr='-quiet',
+        xor=['verb'])
+    verb = traits.Bool(
+        desc='be extra verbose :)',
+        argstr='-verb',
+        xor=['quiet'])
+
+class NwarpApply(AFNICommandBase):
+    """Program to apply a nonlinear 3D warp saved from 3dQwarp
+    (or 3dNwarpCat, etc.) to a 3D dataset, to produce a warped
+    version of the source dataset.
+
+    For complete details, see the `3dNwarpApply Documentation.
+    <https://afni.nimh.nih.gov/pub/dist/doc/program_help/3dNwarpApply.html>`_
+
+    Examples
+    ========
+
+    >>> from nipype.interfaces import afni
+    >>> nwarp = afni.NwarpApply()
+    >>> nwarp.inputs.in_file = 'Fred+orig'
+    >>> nwarp.inputs.master = 'NWARP'
+    >>> nwarp.inputs.warp = ['Fred_WARP+tlrc', 'Fred.Xaff12.1D']
+    >>> nwarp.cmdline  # doctest: +ALLOW_UNICODE
+    '3dNwarpApply -prefix Fred_final -source Fred+orig -master NWARP -nwarp 'Fred_WARP+tlrc Fred.Xaff12.1D''
+    >>> res = nwarp.run()  # doctest: +SKIP
+
+    """
+    _cmd = '3dNwarpApply'
+    input_spec = NwarpApplyInputSpec
+    output_spec = AFNICommandOutputSpec
+
+
 
 class RefitInputSpec(CommandLineInputSpec):
     in_file = File(
