@@ -212,6 +212,20 @@ class Deconvolve(AFNICommand):
     >>> deconvolve.cmdline  # doctest: +ALLOW_UNICODE
     '3dDeconvolve -input functional.nii functional2.nii -num_stimts 2 -bucket output.nii -stim_times 1 timeseries.txt SPMG1(4) -stim_times 2 timeseries.txt SPMG2(4) -x1D output.1D'
     >>> res = deconvolve.run()  # doctest: +SKIP
+
+    >>> from nipype.interfaces import afni
+    >>> deconvolve = afni.Deconvolve()
+    >>> deconvolve.inputs.in_files = ['functional.nii', 'functional2.nii']
+    >>> deconvolve.inputs.out_file = 'output.nii'
+    >>> deconvolve.inputs.x1D = 'output.1D'
+    >>> stim_times = [(1, 'timeseries.txt', 'SPMG1(4)'), (2, 'timeseries.txt', 'SPMG2(4)')]
+    >>> deconvolve.inputs.stim_times = stim_times
+    >>> deconvolve.inputs.stim_label = [(1, 'Houses'), (2, 'Apartments')]
+    >>> deconvolve.inputs.gltsym = [('+Houses -Apartments')]
+    >>> deconvolve.inputs.glt_label = [(1, 'Houses_Apartments')]
+    >>> deconvolve.cmdline  # doctest: +ALLOW_UNICODE
+    "3dDeconvolve -glt_label 1 Houses_Apartments -gltsym SYM: +Houses -Apartments -input functional.nii functional2.nii -num_glt 1 -num_stimts 2 -bucket output.nii -stim_label 1 Houses -stim_label 2 Apartments -stim_times 1 timeseries.txt SPMG1(4) -stim_times 2 timeseries.txt SPMG2(4) -x1D output.1D"
+    >>> res = deconvolve.run()  # doctest: +SKIP
     """
 
     _cmd = '3dDeconvolve'
