@@ -17,7 +17,7 @@ from .preprocess import (Allineate, Automask, AutoTcorrelate,
                          Seg, SkullStrip, TCorr1D, TCorrMap, TCorrelate,
                          TShift, Volreg, Warp, QwarpPlusMinus)
 from .svm import (SVMTest, SVMTrain)
-from .utils import (AFNItoNIFTI, Autobox, BrickStat, Calc, Copy,
+from .utils import (AFNItoNIFTI, Autobox, BrickStat, Calc, Copy, Edge3,
                     Eval, FWHMx,
                     MaskTool, Merge, Notes, Refit, Resample, TCat, TStat, To3D,
                     Unifize, ZCutUp, GCOR, Zcat, Zeropad)

@@ -1381,6 +1381,35 @@ def _get_ram_mb(pid, pyfunc=False):
     return mem_mb
 
 
+def _canonicalize_env(env):
+    """Windows requires that environment be dicts with bytes as keys and values
+    This function converts any unicode entries for Windows only, returning the
+    dictionary untouched in other environments.
+
+    Parameters
+    ----------
+    env : dict
+        environment dictionary with unicode or bytes keys and values
+
+    Returns
+    -------
+    env : dict
+        Windows: environment dictionary with bytes keys and values
+        Other: untouched input ``env``
+    """
+    if os.name != 'nt':
+        return env
+
+    out_env = {}
+    for key, val in env:
+        if not isinstance(key, bytes):
+            key = key.encode('utf-8')
+        if not isinstance(val, bytes):
+            val = key.encode('utf-8')
+        out_env[key] = val
+    return out_env
+
+
 # Get max resources used for process
 def get_max_resources_used(pid, mem_mb, num_threads, pyfunc=False):
     """Function to get the RAM and threads usage of a process
@@ -1435,6 +1464,8 @@ def run_command(runtime, output=None, timeout=0.01, redirect_x=False):
             raise RuntimeError('Xvfb was not found, X redirection aborted')
         cmdline = 'xvfb-run -a ' + cmdline
 
+    env = _canonicalize_env(runtime.environ)
+
     default_encoding = locale.getdefaultlocale()[1]
     if default_encoding is None:
         default_encoding = 'UTF-8'
@@ -1449,14 +1480,14 @@ def run_command(runtime, output=None, timeout=0.01, redirect_x=False):
                                 stderr=stderr,
                                 shell=True,
                                 cwd=runtime.cwd,
-                                env=runtime.environ)
+                                env=env)
     else:
         proc = subprocess.Popen(cmdline,
                                 stdout=PIPE,
                                 stderr=PIPE,
                                 shell=True,
                                 cwd=runtime.cwd,
-                                env=runtime.environ)
+                                env=env)
     result = {}
     errfile = os.path.join(runtime.cwd, 'stderr.nipype')
     outfile = os.path.join(runtime.cwd, 'stdout.nipype')
