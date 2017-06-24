@@ -217,7 +217,7 @@ class Deconvolve(AFNICommand):
     >>> deconvolve.inputs.gltsym = [('+Houses -Apartments')]
     >>> deconvolve.inputs.glt_label = [(1, 'Houses_Apartments')]
     >>> deconvolve.cmdline  # doctest: +ALLOW_UNICODE
-    '3dDeconvolve -num_stimts 2 -num_glt 1 -glt_label 1 Houses_Apartments -gltsym SYM: +Houses -Apartments -input functional.nii functional2.nii -bucket output.nii -stim_label 1 Houses -stim_label 2 Apartments -stim_times 1 timeseries.txt SPMG1(4) -stim_times 2 timeseries.txt SPMG2(4) -x1D output.1D'
+    "3dDeconvolve -num_stimts 2 -num_glt 1 -glt_label 1 Houses_Apartments -gltsym 'SYM: +Houses -Apartments' -input functional.nii functional2.nii -bucket output.nii -stim_label 1 Houses -stim_label 2 Apartments -stim_times 1 timeseries.txt 'SPMG1(4)' -stim_times 2 timeseries.txt 'SPMG2(4)' -x1D output.1D"
     >>> res = deconvolve.run()  # doctest: +SKIP
     """
 
