@@ -64,24 +64,29 @@ class AllineateInputSpec(AFNICommandInputSpec):
         desc='output file from 3dAllineate',
         argstr='-prefix %s',
         position=-2,
-        name_source='%s_allineate',
         genfile=True)
     out_param_file = File(
         argstr='-1Dparam_save %s',
-        desc='Save the warp parameters in ASCII (.1D) format.')
+        desc='Save the warp parameters in ASCII (.1D) format.',
+        xor=['in_param_file'])
     in_param_file = File(
         exists=True,
         argstr='-1Dparam_apply %s',
         desc='Read warp parameters from file and apply them to '
-             'the source dataset, and produce a new dataset')
+             'the source dataset, and produce a new dataset',
+        xor=['out_param_file'])
     out_matrix = File(
         argstr='-1Dmatrix_save %s',
-        desc='Save the transformation matrix for each volume.')
+        desc='Save the transformation matrix for each volume.',
+        xor=['in_matrix'])
     in_matrix = File(
         desc='matrix to align input file',
         argstr='-1Dmatrix_apply %s',
-        position=-3)
-
+        position=-3,
+        xor=['out_matrix'])
+    overwrite = traits.Bool(
+        desc='overwrite output file if it already exists',
+        argstr='-overwrite')
     _cost_funcs = [
         'leastsq', 'ls',
         'mutualinfo', 'mi',
@@ -250,8 +255,10 @@ class AllineateInputSpec(AFNICommandInputSpec):
 
 
 class AllineateOutputSpec(TraitedSpec):
-    out_file = File(desc='output image file name')
-    matrix = File(desc='matrix to align input file')
+    out_file = File(exists=True, desc='output image file name')
+    out_matrix = File(exists=True, desc='matrix to align input file')
+    out_param_file = File(exists=True, desc='warp parameters')
+    out_weight_file = File(exists=True, desc='weight volume')
 
 
 class Allineate(AFNICommand):
@@ -271,7 +278,6 @@ class Allineate(AFNICommand):
     >>> allineate.cmdline  # doctest: +ALLOW_UNICODE
     '3dAllineate -1Dmatrix_apply cmatrix.mat -prefix functional_allineate.nii -source functional.nii'
     >>> res = allineate.run()  # doctest: +SKIP
-
     """
 
     _cmd = '3dAllineate'
@@ -285,21 +291,23 @@ class Allineate(AFNICommand):
         return super(Allineate, self)._format_arg(name, trait_spec, value)
 
     def _list_outputs(self):
-        outputs = self.output_spec().get()
+        outputs = self._outputs().get()
         if not isdefined(self.inputs.out_file):
-            outputs['out_file'] = self._gen_filename(self.inputs.in_file,
-                                                     suffix=self.inputs.suffix)
+            outputs['out_file'] = self._gen_fname(self.inputs.in_file,
+                                                  suffix='_allineate.nii')
         else:
             outputs['out_file'] = os.path.abspath(self.inputs.out_file)
 
         if isdefined(self.inputs.out_matrix):
-            outputs['matrix'] = os.path.abspath(os.path.join(os.getcwd(),\
-                                         self.inputs.out_matrix +'.aff12.1D'))
+            outputs['out_matrix'] = os.path.abspath(os.path.join(os.getcwd(),
+                                                    self.inputs.out_matrix +
+                                                    '.aff12.1D'))
         return outputs
 
     def _gen_filename(self, name):
         if name == 'out_file':
             return self._list_outputs()[name]
+        return None
 
 
 class AutoTcorrelateInputSpec(AFNICommandInputSpec):
@@ -358,6 +366,7 @@ class AutoTcorrelate(AFNICommand):
     '3dAutoTcorrelate -eta2 -mask mask.nii -mask_only_targets -prefix functional_similarity_matrix.1D -polort -1 functional.nii'
     >>> res = corr.run()  # doctest: +SKIP
     """
+
     input_spec = AutoTcorrelateInputSpec
     output_spec = AFNICommandOutputSpec
     _cmd = '3dAutoTcorrelate'

@@ -39,8 +39,10 @@ def test_Allineate_inputs():
     ),
     in_matrix=dict(argstr='-1Dmatrix_apply %s',
     position=-3,
+    xor=['out_matrix'],
     ),
     in_param_file=dict(argstr='-1Dparam_apply %s',
+    xor=['out_param_file'],
     ),
     interpolation=dict(argstr='-interp %s',
     ),
@@ -64,16 +66,19 @@ def test_Allineate_inputs():
     ),
     out_file=dict(argstr='-prefix %s',
     genfile=True,
-    name_source='%s_allineate',
     position=-2,
     ),
     out_matrix=dict(argstr='-1Dmatrix_save %s',
+    xor=['in_matrix'],
     ),
     out_param_file=dict(argstr='-1Dparam_save %s',
+    xor=['in_param_file'],
     ),
     out_weight_file=dict(argstr='-wtprefix %s',
     ),
     outputtype=dict(),
+    overwrite=dict(argstr='-overwrite',
+    ),
     reference=dict(argstr='-base %s',
     ),
     replacebase=dict(argstr='-replacebase',
@@ -113,8 +118,10 @@ def test_Allineate_inputs():
 
 
 def test_Allineate_outputs():
-    output_map = dict(matrix=dict(),
-    out_file=dict(),
+    output_map = dict(out_file=dict(),
+    out_matrix=dict(),
+    out_param_file=dict(),
+    out_weight_file=dict(),
     )
     outputs = Allineate.output_spec()
 
