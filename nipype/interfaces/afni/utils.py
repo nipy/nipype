@@ -356,14 +356,14 @@ class Calc(AFNICommand):
 
 
 class CatInputSpec(AFNICommandInputSpec):
-    in_files = traits.List(File(exists=True), argstr="%s", position=2,
-                           mandatory=True)
+    in_files = traits.List(File(exists=True), argstr="%s",
+                           mandatory=True, position=-2)
     out_file = File(
-        name_template='%s_catout.1D',
+        argstr='> %s',
+        default='catout.1d',
         desc='output (concatenated) file name',
-        argstr='%s',
         position=-1,
-        name_source='in_file')
+        mandatory=True)
     omitconst = traits.Bool(
         desc='Omit columns that are identically constant from output.',
         argstr='-nonconst')
@@ -419,10 +419,11 @@ class Cat(AFNICommand):
 
     >>> from nipype.interfaces import afni
     >>> cat1d = afni.Cat()
+    >>> cat1d.inputs.sel = "'[0,2]'"
     >>> cat1d.inputs.in_files = ['f1.1D', 'f2.1D']
-    >>> cat1d.inputs.sel = '\'[0,2]\''
+    >>> cat1d.inputs.out_file = 'catout.1d'
     >>> cat1d.cmdline  # doctest: +ALLOW_UNICODE
-    '1dcat -sel '[0,2]' f1.1D f2.1D'
+    "1dcat -sel '[0,2]' f1.1D f2.1D > catout.1d"
     >>> res = cat1d.run()  # doctest: +SKIP
 
     """
@@ -430,6 +431,7 @@ class Cat(AFNICommand):
     _cmd = '1dcat'
     input_spec = CatInputSpec
     output_spec = AFNICommandOutputSpec
+
 
 class CopyInputSpec(AFNICommandInputSpec):
     in_file = File(
@@ -1050,12 +1052,12 @@ class Notes(CommandLine):
 class NwarpApplyInputSpec(CommandLineInputSpec):
     in_file = traits.Either(File(exists=True), traits.List(File(exists=True)),
         mandatory=True,
-        argstr='-nwarp %s',
+        argstr='-source %s',
         desc='the name of the dataset to be warped '
             'can be multiple datasets')
-    warp = traits.Either(File(exists=True), traits.List(File(exists=True)),
+    warp = traits.String(
         desc='the name of the warp dataset. '
-             'multiple warps can be concatenated',
+             'multiple warps can be concatenated (make sure they exist)',
         argstr='-nwarp %s',
         mandatory=True)
     inv_warp = traits.Bool(
@@ -1108,9 +1110,9 @@ class NwarpApply(AFNICommandBase):
     >>> nwarp = afni.NwarpApply()
     >>> nwarp.inputs.in_file = 'Fred+orig'
     >>> nwarp.inputs.master = 'NWARP'
-    >>> nwarp.inputs.warp = ['Fred_WARP+tlrc', 'Fred.Xaff12.1D']
+    >>> nwarp.inputs.warp = "'Fred_WARP+tlrc Fred.Xaff12.1D'"
     >>> nwarp.cmdline  # doctest: +ALLOW_UNICODE
-    '3dNwarpApply -prefix Fred_final -source Fred+orig -master NWARP -nwarp 'Fred_WARP+tlrc Fred.Xaff12.1D''
+    "3dNwarpApply -source Fred+orig -master NWARP -prefix Fred+orig_Nwarp -nwarp \'Fred_WARP+tlrc Fred.Xaff12.1D\'"
     >>> res = nwarp.run()  # doctest: +SKIP
 
     """
