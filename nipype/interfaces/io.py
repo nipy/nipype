@@ -71,7 +71,7 @@ def copytree(src, dst, use_hardlink=False):
     try:
         os.makedirs(dst)
     except OSError as why:
-        if 'File exists' in str(why):
+        if 'File exists' in why.strerror:
             pass
         else:
             raise why
@@ -86,7 +86,7 @@ def copytree(src, dst, use_hardlink=False):
                 copyfile(srcname, dstname, True, hashmethod='content',
                          use_hardlink=use_hardlink)
         except (IOError, os.error) as why:
-            errors.append((srcname, dstname, str(why)))
+            errors.append((srcname, dstname, why.strerror))
         # catch the Error from the recursive copytree so that we can
         # continue with other files
         except Exception as err:
@@ -687,7 +687,7 @@ class DataSink(IOBase):
                 try:
                     os.makedirs(outdir)
                 except OSError as inst:
-                    if 'File exists' in str(inst):
+                    if 'File exists' in inst.strerror:
                         pass
                     else:
                         raise(inst)
@@ -738,7 +738,7 @@ class DataSink(IOBase):
                         try:
                             os.makedirs(path)
                         except OSError as inst:
-                            if 'File exists' in str(inst):
+                            if 'File exists' in inst.strerror:
                                 pass
                             else:
                                 raise(inst)
