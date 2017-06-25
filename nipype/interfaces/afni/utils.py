@@ -1534,3 +1534,165 @@ class GCOR(CommandLine):
 
     def _list_outputs(self):
         return {'out': getattr(self, '_gcor')}
+
+class ZcatInputSpec(AFNICommandInputSpec):
+    in_files = InputMultiPath(
+        File(
+            desc='input files to 3dZcat',
+            exists=True),
+        argstr='%s',
+        position=-1,
+        mandatory=True,
+        copyfile=False)
+    out_file = File(
+        name_template='zcat',
+        desc='output dataset prefix name (default \'zcat\')',
+        argstr='-prefix %s')
+    datum = traits.Enum(
+        'byte','short','float',
+        argstr='-datum %s',
+        desc='specify data type for output. Valid types are \'byte\', '
+             '\'short\' and \'float\'.')
+    verb = traits.Bool(
+        desc='print out some verbositiness as the program proceeds.',
+        argstr='-verb')
+    fscale = traits.Bool(
+        desc='Force scaling of the output to the maximum integer '
+             'range.  This only has effect if the output datum is '
+             'byte or short (either forced or defaulted). This '
+             'option is sometimes necessary to eliminate '
+             'unpleasant truncation artifacts.',
+        argstr='-fscale',
+        xor=['nscale'])
+    nscale = traits.Bool(
+        desc='Don\'t do any scaling on output to byte or short '
+             'datasets. This may be especially useful when '
+             'operating on mask datasets whose output values '
+             'are only 0\'s and 1\'s.',
+        argstr='-nscale',
+        xor=['fscale'])
+
+class Zcat(AFNICommand):
+    """Copies an image of one type to an image of the same
+    or different type using 3dZcat command
+
+    For complete details, see the `3dZcat Documentation.
+    <https://afni.nimh.nih.gov/pub/dist/doc/program_help/3dZcat.html>`_
+
+    Examples
+    ========
+
+    >>> from nipype.interfaces import afni
+    >>> zcat = afni.Zcat()
+    >>> zcat.inputs.in_files = ['functional2.nii', 'functional3.nii']
+    >>> zcat.inputs.out_file = 'cat_functional.nii'
+    >>> zcat.cmdline  # doctest: +ALLOW_UNICODE
+    '3dZcat -prefix cat_functional.nii functional2.nii functional3.nii'
+    >>> res = zcat.run()  # doctest: +SKIP
+    """
+
+    _cmd = '3dZcat'
+    input_spec = ZcatInputSpec
+    output_spec = AFNICommandOutputSpec
+
+class ZeropadInputSpec(AFNICommandInputSpec):
+    in_files = File(
+        desc='input dataset',
+        argstr='%s',
+        position=-1,
+        mandatory=True,
+        exists=True,
+        copyfile=False)
+    out_file = File(
+        name_template='zeropad',
+        desc='output dataset prefix name (default \'zeropad\')',
+        argstr='-prefix %s')
+    I = traits.Int(
+        desc='adds \'n\' planes of zero at the Inferior edge',
+        argstr='-I %i',
+        xor=['master'])
+    S = traits.Int(
+        desc='adds \'n\' planes of zero at the Superior edge',
+        argstr='-S %i',
+        xor=['master'])
+    A = traits.Int(
+        desc='adds \'n\' planes of zero at the Anterior edge',
+        argstr='-A %i',
+        xor=['master'])
+    P = traits.Int(
+        desc='adds \'n\' planes of zero at the Posterior edge',
+        argstr='-P %i',
+        xor=['master'])
+    L = traits.Int(
+        desc='adds \'n\' planes of zero at the Left edge',
+        argstr='-L %i',
+        xor=['master'])
+    R = traits.Int(
+        desc='adds \'n\' planes of zero at the Right edge',
+        argstr='-R %i',
+        xor=['master'])
+    z = traits.Int(
+        desc='adds \'n\' planes of zero on EACH of the '
+             'dataset z-axis (slice-direction) faces',
+        argstr='-z %i',
+        xor=['master'])
+    RL = traits.Int(desc='specify that planes should be added or cut '
+                         'symmetrically to make the resulting volume have'
+                         'N slices in the right-left direction',
+                    argstr='-RL %i',
+                    xor=['master'])
+    AP = traits.Int(desc='specify that planes should be added or cut '
+                         'symmetrically to make the resulting volume have'
+                         'N slices in the anterior-posterior direction',
+                    argstr='-AP %i',
+                    xor=['master'])
+    IS = traits.Int(desc='specify that planes should be added or cut '
+                         'symmetrically to make the resulting volume have'
+                         'N slices in the inferior-superior direction',
+                    argstr='-IS %i',
+                    xor=['master'])
+    mm = traits.Bool(desc='pad counts \'n\' are in mm instead of slices, '
+                          'where each \'n\' is an integer and at least \'n\' '
+                          'mm of slices will be added/removed; e.g., n =  3 '
+                          'and slice thickness = 2.5 mm ==> 2 slices added',
+                     argstr='-mm',
+                     xor=['master'])
+    master = traits.File(desc='match the volume described in dataset '
+                              '\'mset\', where mset must have the same '
+                              'orientation and grid spacing as dataset to be '
+                              'padded. the goal of -master is to make the '
+                              'output dataset from 3dZeropad match the '
+                              'spatial \'extents\' of mset by adding or '
+                              'subtracting slices as needed. You can\'t use '
+                              '-I,-S,..., or -mm with -master',
+                         argstr='-master %s',
+                         xor=['I', 'S', 'A', 'P', 'L', 'R', 'z',
+                              'RL', 'AP', 'IS', 'mm'])
+
+class Zeropad(AFNICommand):
+    """Adds planes of zeros to a dataset (i.e., pads it out).
+
+    For complete details, see the `3dZeropad Documentation.
+    <https://afni.nimh.nih.gov/pub/dist/doc/program_help/3dZeropad.html>`_
+
+    Examples
+    ========
+
+    >>> from nipype.interfaces import afni
+    >>> zeropad = afni.Zeropad()
+    >>> zeropad.inputs.in_files = 'functional.nii'
+    >>> zeropad.inputs.out_file = 'pad_functional.nii'
+    >>> zeropad.inputs.I = 10
+    >>> zeropad.inputs.S = 10
+    >>> zeropad.inputs.A = 10
+    >>> zeropad.inputs.P = 10
+    >>> zeropad.inputs.R = 10
+    >>> zeropad.inputs.L = 10
+    >>> zeropad.cmdline  # doctest: +ALLOW_UNICODE
+    '3dZeropad -A 10 -I 10 -L 10 -P 10 -R 10 -S 10 -prefix pad_functional.nii functional.nii'
+    >>> res = zeropad.run()  # doctest: +SKIP
+    """
+
+    _cmd = '3dZeropad'
+    input_spec = ZeropadInputSpec
+    output_spec = AFNICommandOutputSpec

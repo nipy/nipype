@@ -20,5 +20,5 @@ from .svm import (SVMTest, SVMTrain)
 from .utils import (AFNItoNIFTI, Autobox, BrickStat, Calc, Copy, Edge3,
                     Eval, FWHMx,
                     MaskTool, Merge, Notes, Refit, Resample, TCat, TStat, To3D,
-                    Unifize, ZCutUp, GCOR,)
+                    Unifize, ZCutUp, GCOR, Zcat, Zeropad)
 from .model import (Deconvolve, Remlfit)
