@@ -760,6 +760,7 @@ class BaseInterface(Interface):
     This class cannot be instantiated.
 
     """
+    input_spec = BaseInterfaceInputSpec
     _version = None
     _additional_metadata = []
     _redirect_x = False
