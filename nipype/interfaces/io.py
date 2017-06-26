@@ -86,7 +86,7 @@ def copytree(src, dst, use_hardlink=False):
                 copyfile(srcname, dstname, True, hashmethod='content',
                          use_hardlink=use_hardlink)
         except (IOError, os.error) as why:
-            errors.append((srcname, dstname, why.strerror))
+            errors.append((srcname, dstname, str(why)))
         # catch the Error from the recursive copytree so that we can
         # continue with other files
         except Exception as err:
