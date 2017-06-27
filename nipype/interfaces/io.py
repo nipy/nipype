@@ -2439,9 +2439,13 @@ class SSHDataGrabber(DataGrabber):
                     isdefined(self.inputs.field_template) and \
                     key in self.inputs.field_template:
                 template = self.inputs.field_template[key]
+
             if not args:
+                # Connect over SSH
                 client = self._get_ssh_client()
                 sftp = client.open_sftp()
+
+                # Get the files in the base dir, and filter for desired files
                 sftp.chdir(self.inputs.base_directory)
                 filelist = sftp.listdir()
                 if self.inputs.template_expression == 'fnmatch':
@@ -2451,7 +2455,9 @@ class SSHDataGrabber(DataGrabber):
                     filelist = list(filter(regexp.match, filelist))
                 else:
                     raise ValueError('template_expression value invalid')
+
                 if len(filelist) == 0:
+                    # no files
                     msg = 'Output key: %s Template: %s returned no files' % (
                         key, template)
                     if self.inputs.raise_on_empty:
@@ -2459,12 +2465,16 @@ class SSHDataGrabber(DataGrabber):
                     else:
                         warn(msg)
                 else:
+                    # found files, sort and save to outputs
                     if self.inputs.sort_filelist:
                         filelist = human_order_sorted(filelist)
                     outputs[key] = list_to_filename(filelist)
+
+                # actually download the files, if desired
                 if self.inputs.download_files:
                     for f in filelist:
                         sftp.get(f, f)
+
             for argnum, arglist in enumerate(args):
                 maxlen = 1
                 for arg in arglist:
@@ -2498,9 +2508,13 @@ class SSHDataGrabber(DataGrabber):
                                 e.message +
                                 ": Template %s failed to convert with args %s"
                                 % (template, str(tuple(argtuple))))
+
+                    # Connect over SSH
                     client = self._get_ssh_client()
                     sftp = client.open_sftp()
                     sftp.chdir(self.inputs.base_directory)
+
+                    # Get all files in the dir, and filter for desired files
                     filledtemplate_dir = os.path.dirname(filledtemplate)
                     filledtemplate_base = os.path.basename(filledtemplate)
                     filelist = sftp.listdir(filledtemplate_dir)
@@ -2512,18 +2526,24 @@ class SSHDataGrabber(DataGrabber):
                         outfiles = list(filter(regexp.match, filelist))
                     else:
                         raise ValueError('template_expression value invalid')
+
                     if len(outfiles) == 0:
                         msg = 'Output key: %s Template: %s returned no files' % (
                             key, filledtemplate)
+
+                        # no files
                         if self.inputs.raise_on_empty:
                             raise IOError(msg)
                         else:
                             warn(msg)
                         outputs[key].append(None)
                     else:
+                        # found files, sort and save to outputs
                         if self.inputs.sort_filelist:
                             outfiles = human_order_sorted(outfiles)
                         outputs[key].append(list_to_filename(outfiles))
+
+                        # actually download the files, if desired
                         if self.inputs.download_files:
                             for f in outfiles:
                                 try:
@@ -2532,10 +2552,16 @@ class SSHDataGrabber(DataGrabber):
                                 except IOError:
                                     iflogger.info('remote file %s not found',
                                                   f)
+
+            # disclude where there was any invalid matches
             if any([val is None for val in outputs[key]]):
                 outputs[key] = []
+
+            # no outputs is None, not empty list
             if len(outputs[key]) == 0:
                 outputs[key] = None
+
+            # one output is the item, not a list
             elif len(outputs[key]) == 1:
                 outputs[key] = outputs[key][0]
 
