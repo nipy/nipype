@@ -5,6 +5,7 @@ from __future__ import print_function, unicode_literals
 from builtins import str, zip, range, open
 from future import standard_library
 import os
+import copy
 import simplejson
 import glob
 import shutil
@@ -36,6 +37,12 @@ try:
     from botocore.utils import fix_s3_host
 except ImportError:
     noboto3 = True
+
+try:
+    import paramiko
+    no_paramiko = False
+except ImportError:
+    no_paramiko = True
 
 # Check for fakes3
 standard_library.install_aliases()
@@ -611,3 +618,45 @@ def test_bids_infields_outfields(tmpdir):
     bg = nio.BIDSDataGrabber()
     for outfield in ['anat', 'func']:
         assert outfield in bg._outputs().traits()
+
+
+@pytest.mark.skipif(no_paramiko, reason="paramiko library is not available")
+def test_SSHDataGrabber(tmpdir):
+    """Test SSHDataGrabber by connecting to localhost and finding this test
+    file.
+    """
+    old_cwd = tmpdir.chdir()
+
+    # ssh client that connects to localhost, current user, regardless of
+    # ~/.ssh/config
+    def _mock_get_ssh_client(self):
+        proxy = None
+        client = paramiko.SSHClient()
+        client.load_system_host_keys()
+        client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+        client.connect('localhost', username=os.getenv('USER'), sock=proxy)
+        return client
+    MockSSHDataGrabber = copy.copy(nio.SSHDataGrabber)
+    MockSSHDataGrabber._get_ssh_client = _mock_get_ssh_client
+
+    this_dir = os.path.dirname(__file__)
+    this_file = os.path.basename(__file__)
+    this_test = this_file[:-3] # without .py
+
+    ssh_grabber = MockSSHDataGrabber(infields=['test'],
+                                     outfields=['test_file'])
+    # ssh_grabber.base_dir = str(tmpdir)
+    ssh_grabber.inputs.base_directory = this_dir
+    ssh_grabber.inputs.hostname = 'localhost'
+    ssh_grabber.inputs.field_template = dict(test_file='%s.py')
+    ssh_grabber.inputs.template = ''
+    ssh_grabber.inputs.template_args = dict(test_file=[['test']])
+    ssh_grabber.inputs.test = this_test
+    ssh_grabber.inputs.sort_filelist = True
+
+    runtime = ssh_grabber.run()
+
+    # did we successfully get this file?
+    assert runtime.outputs.test_file == str(tmpdir.join(this_file))
+
+    old_cwd.chdir()
