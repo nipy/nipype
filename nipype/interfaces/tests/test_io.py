@@ -622,10 +622,15 @@ def test_bids_infields_outfields(tmpdir):
 
 @pytest.mark.skipif(no_paramiko, reason="paramiko library is not available")
 def test_SSHDataGrabber(tmpdir):
-    """Test SSHDataGrabber by connecting to localhost and finding this test
-    file.
+    """Test SSHDataGrabber by connecting to localhost and collecting some data.
     """
     old_cwd = tmpdir.chdir()
+
+    source_dir = tmpdir.mkdir('source')
+    source_hdr = source_dir.join('somedata.hdr')
+    source_dat = source_dir.join('somedata.img')
+    source_hdr.ensure() # create
+    source_dat.ensure() # create
 
     # ssh client that connects to localhost, current user, regardless of
     # ~/.ssh/config
@@ -639,24 +644,24 @@ def test_SSHDataGrabber(tmpdir):
     MockSSHDataGrabber = copy.copy(nio.SSHDataGrabber)
     MockSSHDataGrabber._get_ssh_client = _mock_get_ssh_client
 
-    this_dir = os.path.dirname(__file__)
-    this_file = os.path.basename(__file__)
-    this_test = this_file[:-3] # without .py
-
+    # grabber to get files from source_dir matching test.hdr
     ssh_grabber = MockSSHDataGrabber(infields=['test'],
                                      outfields=['test_file'])
-    # ssh_grabber.base_dir = str(tmpdir)
-    ssh_grabber.inputs.base_directory = this_dir
+    ssh_grabber.inputs.base_directory = str(source_dir)
     ssh_grabber.inputs.hostname = 'localhost'
-    ssh_grabber.inputs.field_template = dict(test_file='%s.py')
+    ssh_grabber.inputs.field_template = dict(test_file='%s.hdr')
     ssh_grabber.inputs.template = ''
     ssh_grabber.inputs.template_args = dict(test_file=[['test']])
-    ssh_grabber.inputs.test = this_test
+    ssh_grabber.inputs.test = 'somedata'
     ssh_grabber.inputs.sort_filelist = True
 
     runtime = ssh_grabber.run()
 
-    # did we successfully get this file?
-    assert runtime.outputs.test_file == str(tmpdir.join(this_file))
+    # did we successfully get the header?
+    assert runtime.outputs.test_file == str(tmpdir.join(source_hdr.basename))
+    # did we successfully get the data?
+    assert (tmpdir.join(source_hdr.basename) # header file
+            .new(ext='.img') # data file
+            .check(file=True, exists=True)) # exists?
 
     old_cwd.chdir()
