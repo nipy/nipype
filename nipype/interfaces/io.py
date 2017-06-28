@@ -31,6 +31,7 @@ import os.path as op
 import shutil
 import subprocess
 import re
+import copy
 import tempfile
 from os.path import join, dirname
 from warnings import warn
@@ -38,7 +39,9 @@ from warnings import warn
 import sqlite3
 
 from .. import config, logging
-from ..utils.filemanip import copyfile, list_to_filename, filename_to_list
+from ..utils.filemanip import (
+    copyfile, list_to_filename, filename_to_list,
+    get_related_files, related_filetype_sets)
 from ..utils.misc import human_order_sorted, str2bool
 from .base import (
     TraitedSpec, traits, Str, File, Directory, BaseInterface, InputMultiPath,
@@ -2422,12 +2425,12 @@ class SSHDataGrabber(DataGrabber):
         # Get all files in the dir, and filter for desired files
         template_dir = os.path.dirname(template)
         template_base = os.path.basename(template)
-        filelist = sftp.listdir(template_dir)
+        every_file_in_dir = sftp.listdir(template_dir)
         if self.inputs.template_expression == 'fnmatch':
-            outfiles = fnmatch.filter(filelist, template_base)
+            outfiles = fnmatch.filter(every_file_in_dir, template_base)
         elif self.inputs.template_expression == 'regexp':
             regexp = re.compile(template_base)
-            outfiles = list(filter(regexp.match, filelist))
+            outfiles = list(filter(regexp.match, every_file_in_dir))
         else:
             raise ValueError('template_expression value invalid')
 
@@ -2450,7 +2453,18 @@ class SSHDataGrabber(DataGrabber):
 
             # actually download the files, if desired
             if self.inputs.download_files:
-                for f in outfiles:
+                files_to_download = copy.copy(outfiles) # make sure new list!
+
+                # check to see if there are any related files to download
+                for file_to_download in files_to_download:
+                    related_to_current = get_related_files(
+                        file_to_download, include_this_file=False)
+                    existing_related_not_downloading = [
+                        f for f in related_to_current
+                        if f in every_file_in_dir and f not in files_to_download]
+                    files_to_download.extend(existing_related_not_downloading)
+
+                for f in files_to_download:
                     try:
                         sftp.get(os.path.join(template_dir, f), f)
                     except IOError:
