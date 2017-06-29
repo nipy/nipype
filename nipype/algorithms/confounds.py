@@ -337,6 +337,9 @@ class CompCorInputSpec(BaseInterfaceInputSpec):
         False, usedefault=True,
         desc='Use cosine basis to remove low-frequency trends pre-component '
              'extraction')
+    repetition_time = traits.Float(
+        desc='Repetition time (TR) of series - derived from image header if '
+             'unspecified')
     save_hpf_basis = traits.Either(
         traits.Bool, File, requires=['high_pass_filter'],
         desc='Save high pass filter basis as text file')
@@ -398,10 +401,10 @@ class CompCor(BaseInterface):
                             mmap=NUMPY_MMAP)
 
         if len(imgseries.shape) != 4:
-            raise ValueError('tCompCor expected a 4-D nifti file. Input {} has '
-                            '{} dimensions (shape {})'.format(
-                            self.inputs.realigned_file, len(imgseries.shape),
-                            imgseries.shape))
+            raise ValueError('{} expected a 4-D nifti file. Input {} has '
+                             '{} dimensions (shape {})'.format(
+                                self._header, self.inputs.realigned_file,
+                                len(imgseries.shape), imgseries.shape))
 
         if len(mask_images) == 0:
             img = nb.Nifti1Image(np.ones(imgseries.shape[:3], dtype=np.bool),
@@ -411,9 +414,27 @@ class CompCor(BaseInterface):
 
         mask_images = self._process_masks(mask_images, imgseries.get_data())
 
+        TR = 0
+        if self.inputs.high_pass_filter:
+            if isdefined(self.inputs.repetition_time):
+                TR = self.inputs.repetition_time
+            else:
+                # Derive TR from NIfTI header, if possible
+                try:
+                    TR = imgseries.header.get_zooms()[3]
+                    if self.inputs.get_xyzt_units()[1] == 'msec':
+                        TR /= 1000
+                except AttributeError, IndexError:
+                    pass
+
+                if TR == 0:
+                    raise ValueError(
+                        '{} cannot detect repetition time from image - '
+                        'Set the repetition_time input'.format(self._header))
+
         components, hpf_basis = compute_noise_components(
             imgseries.get_data(), mask_images, degree,
-            self.inputs.num_components, self.inputs.high_pass_filter)
+            self.inputs.num_components, self.inputs.high_pass_filter, TR)
 
         components_file = os.path.join(os.getcwd(), self.inputs.components_file)
         np.savetxt(components_file, components, fmt=b"%.10f", delimiter='\t',
@@ -928,7 +949,7 @@ def combine_mask_files(mask_files, mask_method=None, mask_index=None):
 
 
 def compute_noise_components(imgseries, mask_images, degree, num_components,
-                             high_pass_filter=False):
+                             high_pass_filter=False, repetition_time=0):
     """Compute the noise components from the imgseries for each mask
 
     imgseries: a nibabel img
@@ -960,7 +981,8 @@ def compute_noise_components(imgseries, mask_images, degree, num_components,
         if high_pass_filter:
             # If degree == 0, remove mean in same pass
             voxel_timecourses, hpf_basis = cosine_filter(
-                voxel_timecourses, 2.5, remove_mean=(degree == 0))
+                voxel_timecourses, repetition_time,
+                remove_mean=(degree == 0))
 
         # from paper:
         # "The constant and linear trends of the columns in the matrix M were
