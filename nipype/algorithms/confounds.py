@@ -841,18 +841,19 @@ def cosine_filter(data, timestep, remove_mean=False, axis=-1):
 
     data = data.reshape((-1, timepoints))
 
-    design_matrix = dmtx_light(timestep * np.arange(timepoints))
+    frametimes = timestep * np.arange(timepoints)
+    design_matrix = _full_rank(_cosine_drift(128, frametimes))[0]
 
-    X = np.hstack(np.ones((timepoints, 1)), design_matrix)
-    betas = np.linalg.lstsq(X, data)[0]
+    betas = np.linalg.lstsq(design_matrix, data.T)[0]
 
     if not remove_mean:
-        X = X[:, 1:]
-        betas = betas[1:]
+        X = design_matrix[:, :-1]
+        betas = betas[:-1]
 
-    residuals = data - X.dot(betas)
+    residuals = data - X.dot(betas).T
 
-    return residuals, design_matrix
+    # Return non-constant regressors
+    return residuals.reshape(datashape), design_matrix[:, :-1]
 
 
 
@@ -956,7 +957,9 @@ def compute_noise_components(imgseries, mask_images, degree, num_components,
     mask_images: a list of nibabel images
     degree: order of polynomial used to remove trends from the timeseries
     num_components: number of noise components to return
-    high_pass_filter: 
+    high_pass_filter: high-pass-filter data with discrete cosine basis
+                      (run before polynomial detrend)
+    repetition_time: time (in sec) between volume acquisitions
 
     returns:
 
@@ -1017,3 +1020,68 @@ def _compute_tSTD(M, x, axis=0):
     stdM[stdM == 0] = x
     stdM[np.isnan(stdM)] = x
     return stdM
+
+
+# _cosine_drift and _full_rank copied from nipy/modalities/fmri/design_matrix
+#
+# Nipy release: 0.4.1
+
+def _cosine_drift(period_cut, frametimes):
+    """Create a cosine drift matrix with periods greater or equals to period_cut
+
+    Parameters
+    ----------
+    period_cut: float
+         Cut period of the low-pass filter (in sec)
+    frametimes: array of shape(nscans)
+         The sampling times (in sec)
+
+    Returns
+    -------
+    cdrift:  array of shape(n_scans, n_drifts)
+             cosin drifts plus a constant regressor at cdrift[:,0]
+
+    Ref: http://en.wikipedia.org/wiki/Discrete_cosine_transform DCT-II
+    """
+    len_tim = len(frametimes)
+    n_times = np.arange(len_tim)
+    hfcut = 1./ period_cut # input parameter is the period
+
+    dt = frametimes[1] - frametimes[0] # frametimes.max() should be (len_tim-1)*dt
+    order = int(np.floor(2*len_tim*hfcut*dt)) # s.t. hfcut = 1/(2*dt) yields len_tim
+    cdrift = np.zeros((len_tim, order))
+    nfct = np.sqrt(2.0/len_tim)
+
+    for k in range(1, order):
+        cdrift[:,k-1] = nfct * np.cos((np.pi/len_tim)*(n_times + .5)*k)
+
+    cdrift[:,order-1] = 1. # or 1./sqrt(len_tim) to normalize
+    return cdrift
+
+
+
+def _full_rank(X, cmax=1e15):
+    """
+    This function possibly adds a scalar matrix to X
+    to guarantee that the condition number is smaller than a given threshold.
+
+    Parameters
+    ----------
+    X: array of shape(nrows, ncols)
+    cmax=1.e-15, float tolerance for condition number
+
+    Returns
+    -------
+    X: array of shape(nrows, ncols) after regularization
+    cmax=1.e-15, float tolerance for condition number
+    """
+    U, s, V = np.linalg.svd(X, 0)
+    smax, smin = s.max(), s.min()
+    c = smax / smin
+    if c < cmax:
+        return X, c
+    warn('Matrix is singular at working precision, regularizing...')
+    lda = (smax - cmax * smin) / (cmax - 1)
+    s = s + lda
+    X = np.dot(U, np.dot(np.diag(s), V))
+    return X, cmax
