@@ -1535,6 +1535,68 @@ class GCOR(CommandLine):
     def _list_outputs(self):
         return {'out': getattr(self, '_gcor')}
 
+class AxializeInputSpec(AFNICommandInputSpec):
+    in_file = File(
+        desc='input file to 3daxialize',
+        argstr='%s',
+        position=-2,
+        mandatory=True,
+        exists=True,
+        copyfile=False)
+    out_file = File(
+        name_template='%s_axialize',
+        desc='output image file name',
+        argstr='-prefix %s',
+        name_source='in_file')
+    verb = traits.Bool(
+        desc='Print out a progerss report',
+        argstr='-verb')
+    sagittal = traits.Bool(
+        desc='Do sagittal slice order [-orient ASL]',
+        argstr='-sagittal',
+        xor=['coronal', 'axial'])
+    coronal = traits.Bool(
+        desc='Do coronal slice order  [-orient RSA]',
+        argstr='-coronal',
+        xor=['sagittal', 'axial'])
+    axial = traits.Bool(
+        desc='Do axial slice order    [-orient RAI]'
+             'This is the default AFNI axial order, and'
+             'is the one currently required by the'
+             'volume rendering plugin; this is also'
+             'the default orientation output by this'
+             "program (hence the program's name).",
+        argstr='-axial',
+        xor=['coronal', 'sagittal'])
+    orientation = Str(
+        desc='new orientation code',
+        argstr='-orient %s')
+    
+
+class Axialize(AFNICommand):
+    """Read in a dataset and write it out as a new dataset
+         with the data brick oriented as axial slices.
+
+    For complete details, see the `3dcopy Documentation.
+    <https://afni.nimh.nih.gov/pub/dist/doc/program_help/3daxialize.html>`_
+
+    Examples
+    ========
+    >>> from nipype.interfaces import afni
+    >>> axial3d = afni.Axialize()
+    >>> axial3d.inputs.in_file = 'functional.nii'
+    >>> axial3d.inputs.out_file = 'axialized.nii'
+    >>> axial3d.cmdline  # doctest: +ALLOW_UNICODE
+    '3daxialize -prefix axialized.nii functional.nii'
+    >>> res = axial3d.run()  # doctest: +SKIP
+
+    """
+
+    _cmd = '3daxialize'
+    input_spec = AxializeInputSpec
+    output_spec = AFNICommandOutputSpec
+   
+
 class ZcatInputSpec(AFNICommandInputSpec):
     in_files = InputMultiPath(
         File(
