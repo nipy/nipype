@@ -294,11 +294,9 @@ class Deconvolve(AFNICommand):
             else:
                 outputs['x1D'] = os.path.abspath(self.inputs.x1D)
         else:
-            outputs['x1D'] = self._gen_fname(**_gen_fname_opts,
-                                             suffix='.xmat.1D')
+            outputs['x1D'] = self._gen_fname(suffix='.xmat.1D', **_gen_fname_opts)
 
-        outputs['reml_script'] = self._gen_fname(**_gen_fname_opts,
-                                                 suffix='.REML_cmd')
+        outputs['reml_script'] = self._gen_fname(suffix='.REML_cmd', **_gen_fname_opts)
         outputs['out_file'] = os.path.abspath(self.inputs.out_file)
 
         return outputs
