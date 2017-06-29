@@ -163,7 +163,8 @@ EXTRA_REQUIRES = {
     'profiler': ['psutil>=5.0'],
     'duecredit': ['duecredit'],
     'xvfbwrapper': ['xvfbwrapper'],
-    'pybids': ['pybids']
+    'pybids': ['pybids'],
+    'ssh': ['paramiko'],
     # 'mesh': ['mayavi']  # Enable when it works
 }
 
