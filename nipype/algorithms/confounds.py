@@ -323,7 +323,7 @@ class CompCorInputSpec(BaseInterfaceInputSpec):
                               desc=('Position of mask in `mask_files` to use - '
                                     'first is the default.'))
     components_file = traits.Str('components_file.txt', usedefault=True,
-                           desc='Filename to store physiological components')
+                                 desc='Filename to store physiological components')
     num_components = traits.Int(6, usedefault=True) # 6 for BOLD, 4 for ASL
     use_regress_poly = traits.Bool(True, usedefault=True,
                                    desc=('use polynomial regression '
@@ -333,11 +333,19 @@ class CompCorInputSpec(BaseInterfaceInputSpec):
     header_prefix = traits.Str(desc=('the desired header for the output tsv '
                                      'file (one column). If undefined, will '
                                      'default to "CompCor"'))
+    high_pass_filter = traits.Bool(
+        False, usedefault=True,
+        desc='Use cosine basis to remove low-frequency trends pre-component '
+             'extraction')
+    save_hpf_basis = traits.Either(
+        traits.Bool, File, requires=['high_pass_filter'],
+        desc='Save high pass filter basis as text file')
 
 
 class CompCorOutputSpec(TraitedSpec):
     components_file = File(exists=True,
                            desc='text file containing the noise components')
+    hpf_basis_file = File(desc='text file containing high-pass filter basis')
 
 
 class CompCor(BaseInterface):
@@ -403,13 +411,18 @@ class CompCor(BaseInterface):
 
         mask_images = self._process_masks(mask_images, imgseries.get_data())
 
-        components = compute_noise_components(imgseries.get_data(),
-                                              mask_images, degree,
-                                              self.inputs.num_components)
+        components, hpf_basis = compute_noise_components(
+            imgseries.get_data(), mask_images, degree,
+            self.inputs.num_components, self.inputs.high_pass_filter)
 
         components_file = os.path.join(os.getcwd(), self.inputs.components_file)
         np.savetxt(components_file, components, fmt=b"%.10f", delimiter='\t',
                    header=self._make_headers(components.shape[1]), comments='')
+
+        if self.inputs.save_hpf_basis:
+            hpf_basis_file = self._list_outputs()['hpf_basis_file']
+            np.savetxt(hpf_basis_file, hpf_basis, fmt=b'%.10f', delimiter='\t')
+
         return runtime
 
     def _process_masks(self, mask_images, timeseries=None):
@@ -418,6 +431,13 @@ class CompCor(BaseInterface):
     def _list_outputs(self):
         outputs = self._outputs().get()
         outputs['components_file'] = os.path.abspath(self.inputs.components_file)
+
+        save_hpf_basis = self.inputs.save_hpf_basis
+        if save_hpf_basis:
+            if isinstance(save_hpf_basis, bool):
+                save_hpf_basis = os.path.abspath('hpf_basis.txt')
+            outputs['save_hpf_basis'] = save_hpf_basis
+
         return outputs
 
     def _make_headers(self, num_col):
@@ -794,6 +814,27 @@ def is_outlier(points, thresh=3.5):
     return timepoints_to_discard
 
 
+def cosine_filter(data, timestep, remove_mean=False, axis=-1):
+    datashape = data.shape
+    timepoints = datashape[axis]
+
+    data = data.reshape((-1, timepoints))
+
+    design_matrix = dmtx_light(timestep * np.arange(timepoints))
+
+    X = np.hstack(np.ones((timepoints, 1)), design_matrix)
+    betas = np.linalg.lstsq(X, data)[0]
+
+    if not remove_mean:
+        X = X[:, 1:]
+        betas = betas[1:]
+
+    residuals = data - X.dot(betas)
+
+    return residuals, design_matrix
+
+
+
 def regress_poly(degree, data, remove_mean=True, axis=-1):
     """
     Returns data with degree polynomial regressed out.
@@ -886,13 +927,15 @@ def combine_mask_files(mask_files, mask_method=None, mask_index=None):
         return [img]
 
 
-def compute_noise_components(imgseries, mask_images, degree, num_components):
+def compute_noise_components(imgseries, mask_images, degree, num_components,
+                             high_pass_filter=False):
     """Compute the noise components from the imgseries for each mask
 
     imgseries: a nibabel img
     mask_images: a list of nibabel images
     degree: order of polynomial used to remove trends from the timeseries
     num_components: number of noise components to return
+    high_pass_filter: 
 
     returns:
 
@@ -900,6 +943,7 @@ def compute_noise_components(imgseries, mask_images, degree, num_components):
 
     """
     components = None
+    hpf_basis = None
     for img in mask_images:
         mask = img.get_data().astype(np.bool)
         if imgseries.shape[:3] != mask.shape:
@@ -913,10 +957,16 @@ def compute_noise_components(imgseries, mask_images, degree, num_components):
         # Zero-out any bad values
         voxel_timecourses[np.isnan(np.sum(voxel_timecourses, axis=1)), :] = 0
 
+        if high_pass_filter:
+            # If degree == 0, remove mean in same pass
+            voxel_timecourses, hpf_basis = cosine_filter(
+                voxel_timecourses, 2.5, remove_mean=(degree == 0))
+
         # from paper:
         # "The constant and linear trends of the columns in the matrix M were
         # removed [prior to ...]"
-        voxel_timecourses = regress_poly(degree, voxel_timecourses)
+        if degree > 0 or not high_pass_filter:
+            voxel_timecourses = regress_poly(degree, voxel_timecourses)
 
         # "Voxel time series from the noise ROI (either anatomical or tSTD) were
         # placed in a matrix M of size Nxm, with time along the row dimension
@@ -936,7 +986,7 @@ def compute_noise_components(imgseries, mask_images, degree, num_components):
                                     u[:, :num_components]))
     if components is None and num_components > 0:
         raise ValueError('No components found')
-    return components
+    return components, hpf_basis
 
 
 def _compute_tSTD(M, x, axis=0):
