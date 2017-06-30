@@ -7,6 +7,8 @@ def test_TCompCor_inputs():
     input_map = dict(components_file=dict(usedefault=True,
     ),
     header_prefix=dict(),
+    high_pass_filter=dict(usedefault=True,
+    ),
     ignore_exception=dict(nohash=True,
     usedefault=True,
     ),
@@ -25,6 +27,9 @@ def test_TCompCor_inputs():
     ),
     regress_poly_degree=dict(usedefault=True,
     ),
+    repetition_time=dict(),
+    save_hpf_basis=dict(requires=['high_pass_filter'],
+    ),
     use_regress_poly=dict(usedefault=True,
     ),
     )
@@ -38,6 +43,7 @@ def test_TCompCor_inputs():
 def test_TCompCor_outputs():
     output_map = dict(components_file=dict(),
     high_variance_masks=dict(),
+    hpf_basis_file=dict(),
     )
     outputs = TCompCor.output_spec()
 
