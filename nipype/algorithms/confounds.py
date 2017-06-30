@@ -1048,7 +1048,8 @@ def _cosine_drift(period_cut, frametimes):
     hfcut = 1./ period_cut # input parameter is the period
 
     dt = frametimes[1] - frametimes[0] # frametimes.max() should be (len_tim-1)*dt
-    order = int(np.floor(2*len_tim*hfcut*dt)) # s.t. hfcut = 1/(2*dt) yields len_tim
+    # If series is too short, return constant regressor
+    order = max(int(np.floor(2*len_tim*hfcut*dt)), 1) # s.t. hfcut = 1/(2*dt) yields len_tim
     cdrift = np.zeros((len_tim, order))
     nfct = np.sqrt(2.0/len_tim)
 
