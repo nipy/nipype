@@ -842,19 +842,18 @@ def cosine_filter(data, timestep, remove_mean=False, axis=-1):
     data = data.reshape((-1, timepoints))
 
     frametimes = timestep * np.arange(timepoints)
-    design_matrix = _full_rank(_cosine_drift(128, frametimes))[0]
+    X = _full_rank(_cosine_drift(128, frametimes))[0]
+    non_constant_regressors = X[:, :-1]
 
-    betas = np.linalg.lstsq(design_matrix, data.T)[0]
+    betas = np.linalg.lstsq(X, data.T)[0]
 
     if not remove_mean:
-        X = design_matrix[:, :-1]
+        X = X[:, :-1]
         betas = betas[:-1]
 
     residuals = data - X.dot(betas).T
 
-    # Return non-constant regressors
-    return residuals.reshape(datashape), design_matrix[:, :-1]
-
+    return residuals.reshape(datashape), non_constant_regressors
 
 
 def regress_poly(degree, data, remove_mean=True, axis=-1):
