@@ -457,7 +457,7 @@ class CompCor(BaseInterface):
         if save_hpf_basis:
             if isinstance(save_hpf_basis, bool):
                 save_hpf_basis = os.path.abspath('hpf_basis.txt')
-            outputs['save_hpf_basis'] = save_hpf_basis
+            outputs['hpf_basis_file'] = save_hpf_basis
 
         return outputs
 
