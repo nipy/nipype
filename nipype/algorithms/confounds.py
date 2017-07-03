@@ -337,6 +337,9 @@ class CompCorInputSpec(BaseInterfaceInputSpec):
         False, usedefault=True,
         desc='Use cosine basis to remove low-frequency trends pre-component '
              'extraction')
+    high_pass_cutoff = traits.Float(
+        128, usedefault=True, requires=['high_pass_filter'],
+        desc='Cutoff (in seconds) for high-pass filter')
     repetition_time = traits.Float(
         desc='Repetition time (TR) of series - derived from image header if '
              'unspecified')
@@ -835,14 +838,14 @@ def is_outlier(points, thresh=3.5):
     return timepoints_to_discard
 
 
-def cosine_filter(data, timestep, remove_mean=False, axis=-1):
+def cosine_filter(data, timestep, period_cut, remove_mean=False, axis=-1):
     datashape = data.shape
     timepoints = datashape[axis]
 
     data = data.reshape((-1, timepoints))
 
     frametimes = timestep * np.arange(timepoints)
-    X = _full_rank(_cosine_drift(128, frametimes))[0]
+    X = _full_rank(_cosine_drift(period_cut, frametimes))[0]
     non_constant_regressors = X[:, :-1]
 
     betas = np.linalg.lstsq(X, data.T)[0]
@@ -984,7 +987,7 @@ def compute_noise_components(imgseries, mask_images, degree, num_components,
             # If degree == 0, remove mean in same pass
             voxel_timecourses, hpf_basis = cosine_filter(
                 voxel_timecourses, repetition_time,
-                remove_mean=(degree == 0))
+                self.inputs.high_pass_cutoff, remove_mean=(degree == 0))
 
         # from paper:
         # "The constant and linear trends of the columns in the matrix M were
