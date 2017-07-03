@@ -464,11 +464,9 @@ class CompCor(BaseInterface):
         return outputs
 
     def _make_headers(self, num_col):
-        headers = []
         header = self.inputs.header_prefix if \
             isdefined(self.inputs.header_prefix) else self._header
-        for i in range(num_col):
-            headers.append(header + '{:02d}'.format(i))
+        headers = ['{}{:02d}'.format(header, i) for i in range(num_col)]
         return '\t'.join(headers)
 
 
