@@ -442,7 +442,9 @@ class CompCor(BaseInterface):
 
         if self.inputs.save_hpf_basis:
             hpf_basis_file = self._list_outputs()['hpf_basis_file']
-            np.savetxt(hpf_basis_file, hpf_basis, fmt=b'%.10f', delimiter='\t')
+            header = ['cos{:02d}'.format(i) for i in range(hpf_basis.shape[1])]
+            np.savetxt(hpf_basis_file, hpf_basis, fmt=b'%.10f', delimiter='\t',
+                       header='\t'.join(header), comments='')
 
         return runtime
 
@@ -456,7 +458,7 @@ class CompCor(BaseInterface):
         save_hpf_basis = self.inputs.save_hpf_basis
         if save_hpf_basis:
             if isinstance(save_hpf_basis, bool):
-                save_hpf_basis = os.path.abspath('hpf_basis.txt')
+                save_hpf_basis = os.path.abspath('hpf_basis.tsv')
             outputs['hpf_basis_file'] = save_hpf_basis
 
         return outputs
