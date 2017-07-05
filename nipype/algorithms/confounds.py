@@ -846,7 +846,7 @@ def cosine_filter(data, timestep, period_cut, remove_mean=False, axis=-1):
 
     frametimes = timestep * np.arange(timepoints)
     X = _full_rank(_cosine_drift(period_cut, frametimes))[0]
-    non_constant_regressors = X[:, :-1]
+    non_constant_regressors = X[:, :-1] if X.shape[1] > 1 else np.array([])
 
     betas = np.linalg.lstsq(X, data.T)[0]
 
