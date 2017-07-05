@@ -325,7 +325,11 @@ class CompCorInputSpec(BaseInterfaceInputSpec):
     components_file = traits.Str('components_file.txt', usedefault=True,
                                  desc='Filename to store physiological components')
     num_components = traits.Int(6, usedefault=True) # 6 for BOLD, 4 for ASL
-    use_regress_poly = traits.Bool(True, usedefault=True, xor=['high_pass_filter'],
+    pre_filter = traits.Enum('polynomial', 'cosine', False, usedefault=True,
+                             desc='Detrend time series prior to component '
+                                  'extraction')
+    use_regress_poly = traits.Bool(True,
+                                   deprecated='0.15.0', new_name='pre_filter',
                                    desc=('use polynomial regression '
                                          'pre-component extraction'))
     regress_poly_degree = traits.Range(low=1, default=1, usedefault=True,
@@ -333,25 +337,20 @@ class CompCorInputSpec(BaseInterfaceInputSpec):
     header_prefix = traits.Str(desc=('the desired header for the output tsv '
                                      'file (one column). If undefined, will '
                                      'default to "CompCor"'))
-    high_pass_filter = traits.Bool(
-        False, xor=['use_regress_poly'],
-        desc='Use cosine basis to remove low-frequency trends pre-component '
-             'extraction')
     high_pass_cutoff = traits.Float(
-        128, usedefault=True, requires=['high_pass_filter'],
-        desc='Cutoff (in seconds) for high-pass filter')
+        128, usedefault=True,
+        desc='Cutoff (in seconds) for "cosine" pre-filter')
     repetition_time = traits.Float(
         desc='Repetition time (TR) of series - derived from image header if '
              'unspecified')
-    save_hpf_basis = traits.Either(
-        traits.Bool, File, requires=['high_pass_filter'],
-        desc='Save high pass filter basis as text file')
+    save_pre_filter = traits.Either(
+        traits.Bool, File, desc='Save pre-filter basis as text file')
 
 
 class CompCorOutputSpec(TraitedSpec):
     components_file = File(exists=True,
                            desc='text file containing the noise components')
-    hpf_basis_file = File(desc='text file containing high-pass filter basis')
+    pre_filter_file = File(desc='text file containing high-pass filter basis')
 
 
 class CompCor(BaseInterface):
@@ -397,11 +396,14 @@ class CompCor(BaseInterface):
                                              self.inputs.merge_method,
                                              self.inputs.mask_index)
 
-        degree = (self.inputs.regress_poly_degree if
-                  self.inputs.use_regress_poly else 0)
+        if self.inputs.use_regress_poly:
+            self.inputs.pre_filter = 'polynomial'
 
-        imgseries = nb.load(self.inputs.realigned_file,
-                            mmap=NUMPY_MMAP)
+        # Degree 0 == remove mean; see compute_noise_components
+        degree = (self.inputs.regress_poly_degree if
+                  self.inputs.pre_filter == 'polynomial' else 0)
+
+        imgseries = nb.load(self.inputs.realigned_file, mmap=NUMPY_MMAP)
 
         if len(imgseries.shape) != 4:
             raise ValueError('{} expected a 4-D nifti file. Input {} has '
@@ -435,20 +437,22 @@ class CompCor(BaseInterface):
                         '{} cannot detect repetition time from image - '
                         'Set the repetition_time input'.format(self._header))
 
-        components, hpf_basis = compute_noise_components(
-            imgseries.get_data(), mask_images, degree,
-            self.inputs.num_components, self.inputs.high_pass_filter,
-            self.inputs.high_pass_cutoff, TR)
+        components, filter_basis = compute_noise_components(
+            imgseries.get_data(), mask_images, self.inputs.num_components,
+            self.inputs.pre_filter, degree, self.inputs.high_pass_cutoff, TR)
 
         components_file = os.path.join(os.getcwd(), self.inputs.components_file)
         np.savetxt(components_file, components, fmt=b"%.10f", delimiter='\t',
                    header=self._make_headers(components.shape[1]), comments='')
 
-        if self.inputs.save_hpf_basis:
-            hpf_basis_file = self._list_outputs()['hpf_basis_file']
-            header = ['cos{:02d}'.format(i) for i in range(hpf_basis.shape[1])]
-            np.savetxt(hpf_basis_file, hpf_basis, fmt=b'%.10f', delimiter='\t',
-                       header='\t'.join(header), comments='')
+        if self.inputs.pre_filter and self.inputs.save_pre_filter:
+            pre_filter_file = self._list_outputs()['pre_filter_file']
+            ftype = {'polynomial': 'poly',
+                     'cosine': 'cos'}[self.inputs.pre_filter]
+            header = ['{}{:02d}'.format(ftype, i)
+                      for i in range(filter_basis.shape[1])]
+            np.savetxt(pre_filter_file, filter_basis, fmt=b'%.10f',
+                       delimiter='\t', header='\t'.join(header), comments='')
 
         return runtime
 
@@ -459,11 +463,11 @@ class CompCor(BaseInterface):
         outputs = self._outputs().get()
         outputs['components_file'] = os.path.abspath(self.inputs.components_file)
 
-        save_hpf_basis = self.inputs.save_hpf_basis
-        if save_hpf_basis:
-            if isinstance(save_hpf_basis, bool):
-                save_hpf_basis = os.path.abspath('hpf_basis.tsv')
-            outputs['hpf_basis_file'] = save_hpf_basis
+        save_pre_filter = self.inputs.save_pre_filter
+        if save_pre_filter:
+            if isinstance(save_pre_filter, bool):
+                save_pre_filter = os.path.abspath('pre_filter.tsv')
+            outputs['pre_filter_file'] = save_pre_filter
 
         return outputs
 
@@ -518,7 +522,7 @@ class TCompCor(CompCor):
     >>> ccinterface.inputs.realigned_file = 'functional.nii'
     >>> ccinterface.inputs.mask_files = 'mask.nii'
     >>> ccinterface.inputs.num_components = 1
-    >>> ccinterface.inputs.use_regress_poly = True
+    >>> ccinterface.inputs.pre_filter = 'polynomial'
     >>> ccinterface.inputs.regress_poly_degree = 2
     >>> ccinterface.inputs.percentile_threshold = .03
 
@@ -883,6 +887,8 @@ def regress_poly(degree, data, remove_mean=True, axis=-1):
         value_array = np.linspace(-1, 1, timepoints)
         X = np.hstack((X, polynomial_func(value_array)[:, np.newaxis]))
 
+    non_constant_regressors = X[:, :-1] if X.shape[1] > 1 else np.array([])
+
     # Calculate coefficients
     betas = np.linalg.pinv(X).dot(data.T)
 
@@ -894,7 +900,7 @@ def regress_poly(degree, data, remove_mean=True, axis=-1):
     regressed_data = data - datahat
 
     # Back to original shape
-    return regressed_data.reshape(datashape)
+    return regressed_data.reshape(datashape), non_constant_regressors
 
 
 def combine_mask_files(mask_files, mask_method=None, mask_index=None):
@@ -952,9 +958,9 @@ def combine_mask_files(mask_files, mask_method=None, mask_index=None):
         return [img]
 
 
-def compute_noise_components(imgseries, mask_images, degree, num_components,
-                             high_pass_filter=False, period_cut=128,
-                             repetition_time=0):
+def compute_noise_components(imgseries, mask_images, num_components,
+                             filter_type, degree, period_cut,
+                             repetition_time):
     """Compute the noise components from the imgseries for each mask
 
     imgseries: a nibabel img
@@ -972,7 +978,7 @@ def compute_noise_components(imgseries, mask_images, degree, num_components,
 
     """
     components = None
-    hpf_basis = None
+    basis = None
     for img in mask_images:
         mask = img.get_data().astype(np.bool)
         if imgseries.shape[:3] != mask.shape:
@@ -986,15 +992,16 @@ def compute_noise_components(imgseries, mask_images, degree, num_components,
         # Zero-out any bad values
         voxel_timecourses[np.isnan(np.sum(voxel_timecourses, axis=1)), :] = 0
 
-        # Use either cosine or Legendre-polynomial detrending
-        if high_pass_filter:
-            voxel_timecourses, hpf_basis = cosine_filter(
+        # Currently support Legendre-polynomial or cosine or detrending
+        # With no filter, the mean is nonetheless removed (poly w/ degree 0)
+        if filter_type == 'cosine':
+            voxel_timecourses, basis = cosine_filter(
                 voxel_timecourses, repetition_time, period_cut)
-        else:
+        elif filter_type in ('polynomial', False):
             # from paper:
             # "The constant and linear trends of the columns in the matrix M were
             # removed [prior to ...]"
-            voxel_timecourses = regress_poly(degree, voxel_timecourses)
+            voxel_timecourses, basis = regress_poly(degree, voxel_timecourses)
 
         # "Voxel time series from the noise ROI (either anatomical or tSTD) were
         # placed in a matrix M of size Nxm, with time along the row dimension
@@ -1014,7 +1021,7 @@ def compute_noise_components(imgseries, mask_images, degree, num_components,
                                     u[:, :num_components]))
     if components is None and num_components > 0:
         raise ValueError('No components found')
-    return components, hpf_basis
+    return components, basis
 
 
 def _compute_tSTD(M, x, axis=0):
