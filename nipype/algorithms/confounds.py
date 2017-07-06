@@ -667,7 +667,7 @@ class NonSteadyStateDetector(BaseInterface):
         global_signal = in_nii.get_data()[:,:,:,:50].mean(axis=0).mean(axis=0).mean(axis=0)
 
         self._results = {
-            'n_volumes_to_discard': _is_outlier(global_signal)
+            'n_volumes_to_discard': is_outlier(global_signal)
         }
 
         return runtime
