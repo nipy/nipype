@@ -364,7 +364,7 @@ class CompCor(BaseInterface):
     >>> ccinterface.inputs.realigned_file = 'functional.nii'
     >>> ccinterface.inputs.mask_files = 'mask.nii'
     >>> ccinterface.inputs.num_components = 1
-    >>> ccinterface.inputs.use_regress_poly = True
+    >>> ccinterface.inputs.pre_filter = 'polynomial'
     >>> ccinterface.inputs.regress_poly_degree = 2
 
     """
