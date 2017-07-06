@@ -420,7 +420,7 @@ class CompCor(BaseInterface):
         mask_images = self._process_masks(mask_images, imgseries.get_data())
 
         TR = 0
-        if self.inputs.high_pass_filter:
+        if self.inputs.pre_filter == 'cosine':
             if isdefined(self.inputs.repetition_time):
                 TR = self.inputs.repetition_time
             else:
@@ -965,27 +965,34 @@ def compute_noise_components(imgseries, mask_images, num_components,
 
     imgseries: a nibabel img
     mask_images: a list of nibabel images
-    degree: order of polynomial used to remove trends from the timeseries
     num_components: number of noise components to return
-    high_pass_filter: high-pass-filter data with discrete cosine basis
-                      (run before polynomial detrend)
+    filter_type: type off filter to apply to time series before computing
+                 noise components.
+        'polynomial' - Legendre polynomial basis
+        'cosine' - Discrete cosine (DCT) basis
+        False - None (mean-removal only)
+
+    Filter options:
+
+    degree: order of polynomial used to remove trends from the timeseries
+    period_cut: minimum period (in sec) for DCT high-pass filter
     repetition_time: time (in sec) between volume acquisitions
 
     returns:
 
     components: a numpy array
-    hpf_basis: a numpy array, if high_pass_filter is True, else None
+    basis: a numpy array containing the (non-constant) filter regressors
 
     """
     components = None
-    basis = None
+    basis = np.array([])
     for img in mask_images:
         mask = img.get_data().astype(np.bool)
         if imgseries.shape[:3] != mask.shape:
-            raise ValueError('Inputs for CompCor, timeseries and mask, '
-                             'do not have matching spatial dimensions '
-                             '({} and {}, respectively)'.format(
-                imgseries.shape[:3], mask.shape))
+            raise ValueError(
+                'Inputs for CompCor, timeseries and mask, do not have '
+                'matching spatial dimensions ({} and {}, respectively)'.format(
+                    imgseries.shape[:3], mask.shape))
 
         voxel_timecourses = imgseries[mask, :]
 
@@ -1035,6 +1042,7 @@ def _compute_tSTD(M, x, axis=0):
 # _cosine_drift and _full_rank copied from nipy/modalities/fmri/design_matrix
 #
 # Nipy release: 0.4.1
+# Modified for smooth integration in CompCor classes
 
 def _cosine_drift(period_cut, frametimes):
     """Create a cosine drift matrix with periods greater or equals to period_cut
@@ -1055,20 +1063,21 @@ def _cosine_drift(period_cut, frametimes):
     """
     len_tim = len(frametimes)
     n_times = np.arange(len_tim)
-    hfcut = 1./ period_cut # input parameter is the period
+    hfcut = 1. / period_cut  # input parameter is the period
 
-    dt = frametimes[1] - frametimes[0] # frametimes.max() should be (len_tim-1)*dt
+    # frametimes.max() should be (len_tim-1)*dt
+    dt = frametimes[1] - frametimes[0]
+    # hfcut = 1/(2*dt) yields len_time
     # If series is too short, return constant regressor
-    order = max(int(np.floor(2*len_tim*hfcut*dt)), 1) # s.t. hfcut = 1/(2*dt) yields len_tim
+    order = max(int(np.floor(2*len_tim*hfcut*dt)), 1)
     cdrift = np.zeros((len_tim, order))
     nfct = np.sqrt(2.0/len_tim)
 
     for k in range(1, order):
-        cdrift[:,k-1] = nfct * np.cos((np.pi/len_tim)*(n_times + .5)*k)
+        cdrift[:, k-1] = nfct * np.cos((np.pi / len_tim) * (n_times + .5) * k)
 
-    cdrift[:,order-1] = 1. # or 1./sqrt(len_tim) to normalize
+    cdrift[:, order-1] = 1.  # or 1./sqrt(len_tim) to normalize
     return cdrift
-
 
 
 def _full_rank(X, cmax=1e15):
@@ -1091,7 +1100,7 @@ def _full_rank(X, cmax=1e15):
     c = smax / smin
     if c < cmax:
         return X, c
-    warn('Matrix is singular at working precision, regularizing...')
+    IFLOG.warn('Matrix is singular at working precision, regularizing...')
     lda = (smax - cmax * smin) / (cmax - 1)
     s = s + lda
     X = np.dot(U, np.dot(np.diag(s), V))
