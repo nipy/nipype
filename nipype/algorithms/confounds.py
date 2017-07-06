@@ -543,7 +543,7 @@ class TCompCor(CompCor):
         for i, img in enumerate(mask_images):
             mask = img.get_data().astype(np.bool)
             imgseries = timeseries[mask, :]
-            imgseries = regress_poly(2, imgseries)
+            imgseries = regress_poly(2, imgseries)[0]
             tSTD = _compute_tSTD(imgseries, 0, axis=-1)
             threshold_std = np.percentile(tSTD, np.round(100. *
                            (1. - self.inputs.percentile_threshold)).astype(int))
@@ -618,7 +618,7 @@ class TSNR(BaseInterface):
             data = data.astype(np.float32)
 
         if isdefined(self.inputs.regress_poly):
-            data = regress_poly(self.inputs.regress_poly, data, remove_mean=False)
+            data = regress_poly(self.inputs.regress_poly, data, remove_mean=False)[0]
             img = nb.Nifti1Image(data, img.affine, header)
             nb.save(img, op.abspath(self.inputs.detrended_file))
 
@@ -734,9 +734,10 @@ research/nichols/scripts/fsl/standardizeddvars.pdf>`_, 2013.
         func_sd = func_sd[func_sd != 0]
 
     # Compute (non-robust) estimate of lag-1 autocorrelation
-    ar1 = np.apply_along_axis(AR_est_YW, 1,
-                              regress_poly(0, mfunc, remove_mean=True).astype(
-                                  np.float32), 1)[:, 0]
+    ar1 = np.apply_along_axis(
+        AR_est_YW, 1,
+        regress_poly(0, mfunc, remove_mean=True)[0].astype(np.float32),
+        1)[:, 0]
 
     # Compute (predicted) standard deviation of temporal difference time series
     diff_sdhat = np.squeeze(np.sqrt(((1 - ar1) * 2).tolist())) * func_sd
