@@ -449,8 +449,8 @@ class CompCor(BaseInterface):
             pre_filter_file = self._list_outputs()['pre_filter_file']
             ftype = {'polynomial': 'poly',
                      'cosine': 'cos'}[self.inputs.pre_filter]
-            header = ['{}{:02d}'.format(ftype, i)
-                      for i in range(filter_basis.shape[1])]
+            ncols = filter_basis.shape[1] if filter_basis.size > 0 else 0
+            header = ['{}{:02d}'.format(ftype, i) for i in range(ncols)]
             np.savetxt(pre_filter_file, filter_basis, fmt=b'%.10f',
                        delimiter='\t', header='\t'.join(header), comments='')
 
