@@ -119,8 +119,6 @@ def use_resources(num_threads, num_gb):
 
 
 # Test case for the run function
-@pytest.mark.skipif(sys.version_info < (3, 0),
-                    reason="Disabled until https://github.com/nipy/nipype/issues/1692 is resolved")
 class TestRuntimeProfiler():
     '''
     This class is a test case for the runtime profiler

@@ -5,7 +5,9 @@ from __future__ import unicode_literals
 from builtins import open
 
 import os
-from tempfile import mkstemp
+import time
+from tempfile import mkstemp, mkdtemp
+import shutil
 import warnings
 
 import pytest
@@ -13,8 +15,10 @@ from ...testing import TempFATFS
 from ...utils.filemanip import (save_json, load_json,
                                 fname_presuffix, fnames_presuffix,
                                 hash_rename, check_forhash,
+                                _cifs_table, on_cifs,
                                 copyfile, copyfiles,
                                 filename_to_list, list_to_filename,
+                                check_depends,
                                 split_filename, get_related_files)
 
 import numpy as np
@@ -271,6 +275,41 @@ def test_list_to_filename(list, expected):
     assert x == expected
 
 
+def test_check_depends():
+    def touch(fname):
+        with open(fname, 'a'):
+            os.utime(fname, None)
+
+    tmpdir = mkdtemp()
+
+    dependencies = [os.path.join(tmpdir, str(i)) for i in range(3)]
+    targets = [os.path.join(tmpdir, str(i)) for i in range(3, 6)]
+
+    # Targets newer than dependencies
+    for dep in dependencies:
+        touch(dep)
+    time.sleep(1)
+    for tgt in targets:
+        touch(tgt)
+    assert check_depends(targets, dependencies)
+
+    # Targets older than newest dependency
+    time.sleep(1)
+    touch(dependencies[0])
+    assert not check_depends(targets, dependencies)
+
+    # Missing dependency
+    os.unlink(dependencies[0])
+    try:
+        check_depends(targets, dependencies)
+    except OSError as e:
+        pass
+    else:
+        assert False, "Should raise OSError on missing dependency"
+
+    shutil.rmtree(tmpdir)
+
+
 def test_json():
     # Simple roundtrip test of json files, just a sanity check.
     adict = dict(a='one', c='three', b='two')
@@ -286,7 +325,7 @@ def test_json():
         ('/path/test.hdr',  3, ['/path/test.hdr', '/path/test.img', '/path/test.mat']),
         ('/path/test.BRIK', 2, ['/path/test.BRIK', '/path/test.HEAD']),
         ('/path/test.HEAD', 2, ['/path/test.BRIK', '/path/test.HEAD']),
-        ('/path/foo.nii',   1, [])
+        ('/path/foo.nii',   2, ['/path/foo.nii', '/path/foo.mat'])
         ])
 def test_related_files(file, length, expected_files):
     related_files = get_related_files(file)
@@ -296,3 +335,28 @@ def test_related_files(file, length, expected_files):
     for ef in expected_files:
         assert ef in related_files
 
+
+def test_cifs_check():
+    assert isinstance(_cifs_table, list)
+    assert isinstance(on_cifs('/'), bool)
+    fake_table = [('/scratch/tmp', 'ext4'), ('/scratch', 'cifs')]
+    cifs_targets = [('/scratch/tmp/x/y', False),
+                    ('/scratch/tmp/x', False),
+                    ('/scratch/x/y', True),
+                    ('/scratch/x', True),
+                    ('/x/y', False),
+                    ('/x', False),
+                    ('/', False)]
+
+    orig_table = _cifs_table[:]
+    _cifs_table[:] = []
+
+    for target, _ in cifs_targets:
+        assert on_cifs(target) is False
+
+    _cifs_table.extend(fake_table)
+    for target, expected in cifs_targets:
+        assert on_cifs(target) is expected
+
+    _cifs_table[:] = []
+    _cifs_table.extend(orig_table)

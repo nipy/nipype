@@ -14,10 +14,12 @@ def select_volume(filename, which):
     """
     from nibabel import load
     import numpy as np
+    from nipype.utils import NUMPY_MMAP
+
     if which.lower() == 'first':
         idx = 0
     elif which.lower() == 'middle':
-        idx = int(np.ceil(load(filename).shape[3] / 2))
+        idx = int(np.ceil(load(filename, mmap=NUMPY_MMAP).shape[3] / 2))
     else:
         raise Exception('unknown value for volume selection : %s' % which)
     return idx
@@ -136,7 +138,7 @@ def create_resting_preproc(name='restpreproc', base_dir=None):
     restpreproc.connect(realigner, 'outputspec.realigned_file',
                         compcor, 'realigned_file')
     restpreproc.connect(threshold_stddev, 'out_file',
-                        compcor, 'mask_file')
+                        compcor, 'mask_files')
     restpreproc.connect(inputnode, 'num_noise_components',
                         compcor, 'num_components')
     restpreproc.connect(tsnr, 'detrended_file',

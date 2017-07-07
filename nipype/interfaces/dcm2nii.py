@@ -304,12 +304,15 @@ class Dcm2niix(CommandLine):
                         bvals.append(out_file + ".bval")
                         find_b = False
                 # next scan will have bvals/bvecs
-                elif 'DTI gradients' in line or 'DTI gradient directions' in line:
+                elif 'DTI gradients' in line or 'DTI gradient directions' in line or 'DTI vectors' in line:
                     find_b = True
                 else:
                     pass
                 if out_file:
-                    files.append(out_file + ".nii.gz")
+                    if self.inputs.compress == 'n':
+                        files.append(out_file + ".nii")
+                    else:
+                        files.append(out_file + ".nii.gz")
                     if self.inputs.bids_format:
                         bids.append(out_file + ".json")
                     continue

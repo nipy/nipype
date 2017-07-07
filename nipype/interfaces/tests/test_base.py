@@ -156,15 +156,6 @@ def test_deprecation():
         with pytest.raises(nib.TraitError): set_foo()
         assert len(w) == 0, 'no warnings, just errors'
 
-    with warnings.catch_warnings(record=True) as w:
-        warnings.filterwarnings('always', '', UserWarning)
-
-        class DeprecationSpec1numeric(nib.TraitedSpec):
-            foo = nib.traits.Int(deprecated='0.1')
-        spec_instance = DeprecationSpec1numeric()
-        set_foo = lambda: setattr(spec_instance, 'foo', 1)
-        with pytest.raises(nib.TraitError): set_foo()
-        assert len(w) == 0, 'no warnings, just errors'
 
     with warnings.catch_warnings(record=True) as w:
         warnings.filterwarnings('always', '', UserWarning)
@@ -218,7 +209,8 @@ def test_namesource(setup_file):
                        position=2)
         doo = nib.File(exists=True, argstr="%s", position=1)
         goo = traits.Int(argstr="%d", position=4)
-        poo = nib.File(name_source=['goo'], hash_files=False, argstr="%s", position=3)
+        poo = nib.File(name_source=['goo'], hash_files=False, argstr="%s",
+                       position=3)
 
     class TestName(nib.CommandLine):
         _cmd = "mycommand"
@@ -227,6 +219,7 @@ def test_namesource(setup_file):
     testobj.inputs.doo = tmp_infile
     testobj.inputs.goo = 99
     assert '%s_generated' % nme in testobj.cmdline
+    assert '%d_generated' % testobj.inputs.goo in testobj.cmdline
     testobj.inputs.moo = "my_%s_template"
     assert 'my_%s_template' % nme in testobj.cmdline
 
@@ -725,3 +718,19 @@ def check_dict(ref_dict, tst_dict):
             failed_dict[key] = (value, newval)
     return failed_dict
 
+def test_ImageFile():
+    x = nib.BaseInterface().inputs
+
+    # setup traits
+    x.add_trait('nifti', nib.ImageFile(types=['nifti1', 'dicom']))
+    x.add_trait('anytype', nib.ImageFile())
+    x.add_trait('newtype', nib.ImageFile(types=['nifti10']))
+    x.add_trait('nocompress', nib.ImageFile(types=['mgh'],
+                                            allow_compressed=False))
+
+    with pytest.raises(nib.TraitError): x.nifti = 'test.mgz'
+    x.nifti = 'test.nii'
+    x.anytype = 'test.xml'
+    with pytest.raises(AttributeError): x.newtype = 'test.nii'
+    with pytest.raises(nib.TraitError): x.nocompress = 'test.nii.gz'
+    x.nocompress = 'test.mgh'

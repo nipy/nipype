@@ -12,7 +12,8 @@ from __future__ import print_function, division, unicode_literals, absolute_impo
 import os
 
 from ...utils.filemanip import split_filename
-from ..base import TraitedSpec, File, traits, isdefined, InputMultiPath
+from ..base import (TraitedSpec, File, traits, isdefined, InputMultiPath,
+                    CommandLine, CommandLineInputSpec)
 from .base import ANTSCommand, ANTSCommandInputSpec
 
 
@@ -145,9 +146,9 @@ class CreateJacobianDeterminantImageInputSpec(ANTSCommandInputSpec):
     outputImage = File(argstr='%s', mandatory=True,
                          position=2,
                          desc='output filename')
-    doLogJacobian = traits.Enum(0, 1, argstr='%d', mandatory=False, position=3,
+    doLogJacobian = traits.Enum(0, 1, argstr='%d', position=3,
                           desc='return the log jacobian')
-    useGeometric = traits.Enum(0, 1, argstr='%d', mandatory=False, position=4,
+    useGeometric = traits.Enum(0, 1, argstr='%d', position=4,
                           desc='return the geometric jacobian')
 
 class CreateJacobianDeterminantImageOutputSpec(TraitedSpec):
@@ -178,3 +179,49 @@ class CreateJacobianDeterminantImage(ANTSCommand):
         outputs['jacobian_image'] = os.path.abspath(
             self.inputs.outputImage)
         return outputs
+
+
+class AffineInitializerInputSpec(ANTSCommandInputSpec):
+    dimension = traits.Enum(3, 2, usedefault=True, position=0, argstr='%s',
+                            desc='dimension')
+    fixed_image = File(exists=True, mandatory=True, position=1, argstr='%s',
+                       desc='reference image')
+    moving_image = File(exists=True, mandatory=True, position=2, argstr='%s',
+                        desc='moving image')
+    out_file = File('transform.mat', usedefault=True, position=3, argstr='%s',
+                    desc='output transform file')
+    # Defaults in antsBrainExtraction.sh -> 15 0.1 0 10
+    search_factor = traits.Float(15.0, usedefault=True, position=4, argstr='%f',
+                                 desc='increments (degrees) for affine search')
+    radian_fraction = traits.Range(0.0, 1.0, value=0.1, usedefault=True, position=5,
+                                   argstr='%f', desc='search this arc +/- principal axes')
+    principal_axes = traits.Bool(
+        False, usedefault=True, position=6, argstr='%d',
+        desc='whether the rotation is searched around an initial principal axis alignment.')
+    local_search = traits.Int(
+        10, usedefault=True, position=7, argstr='%d',
+        desc=' determines if a local optimization is run at each search point for the set '
+             'number of iterations')
+
+class AffineInitializerOutputSpec(TraitedSpec):
+    out_file = File(desc='output transform file')
+
+
+class AffineInitializer(ANTSCommand):
+    """
+    Initialize an affine transform (as in antsBrainExtraction.sh)
+
+    >>> from nipype.interfaces.ants import AffineInitializer
+    >>> init = AffineInitializer()
+    >>> init.inputs.fixed_image = 'fixed1.nii'
+    >>> init.inputs.moving_image = 'moving1.nii'
+    >>> init.cmdline # doctest: +ALLOW_UNICODE
+    'antsAffineInitializer 3 fixed1.nii moving1.nii transform.mat 15.000000 0.100000 0 10'
+
+    """
+    _cmd = 'antsAffineInitializer'
+    input_spec = AffineInitializerInputSpec
+    output_spec = AffineInitializerOutputSpec
+
+    def _list_outputs(self):
+        return {'out_file': os.path.abspath(self.inputs.out_file)}

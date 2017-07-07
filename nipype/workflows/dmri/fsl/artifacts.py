@@ -2,13 +2,15 @@
 # coding: utf-8
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
-from __future__ import division
+from __future__ import print_function, division, unicode_literals, absolute_import
 
 from ....interfaces.io import JSONFileGrabber
 from ....interfaces import utility as niu
 from ....interfaces import ants
 from ....interfaces import fsl
 from ....pipeline import engine as pe
+from ...data import get_flirt_schedule
+
 from .utils import (b0_indices, time_avg, apply_all_corrections, b0_average,
                     hmc_split, dwi_flirt, eddy_rotate_bvecs, rotate_bvecs,
                     insert_mat, extract_bval, recompose_dwi, recompose_xfm,
@@ -234,8 +236,9 @@ def all_fsl_pipeline(name='fsl_all_correct',
         import numpy as np
         import nibabel as nb
         import os
+        from nipype.utils import NUMPY_MMAP
         out_file = os.path.abspath('index.txt')
-        vols = nb.load(in_file).get_data().shape[-1]
+        vols = nb.load(in_file, mmap=NUMPY_MMAP).get_data().shape[-1]
         np.savetxt(out_file, np.ones((vols,)).T)
         return out_file
 
@@ -339,6 +342,7 @@ def hmc_pipeline(name='motion_correct'):
         inputnode.in_mask - weights mask of reference image (a file with data \
 range in [0.0, 1.0], indicating the weight of each voxel when computing the \
 metric.
+        inputnode.in_bval - b-values file
         inputnode.in_bvec - gradients file (b-vectors)
         inputnode.ref_num (optional, default=0) index of the b0 volume that \
 should be taken as reference
@@ -350,8 +354,6 @@ should be taken as reference
         outputnode.out_xfms - list of transformation matrices
 
     """
-    from nipype.workflows.data import get_flirt_schedule
-
     params = dict(dof=6, bgvalue=0, save_log=True, no_search=True,
                   # cost='mutualinfo', cost_func='mutualinfo', bins=64,
                   schedule=get_flirt_schedule('hmc'))
@@ -452,7 +454,6 @@ head-motion correction)
         outputnode.out_xfms - list of transformation matrices
     """
 
-    from nipype.workflows.data import get_flirt_schedule
     params = dict(dof=12, no_search=True, interp='spline', bgvalue=0,
                   schedule=get_flirt_schedule('ecc'))
     # cost='normmi', cost_func='normmi', bins=64,
@@ -899,8 +900,9 @@ def _xfm_jacobian(in_xfm):
 
 def _get_zoom(in_file, enc_dir):
     import nibabel as nb
+    from nipype.utils import NUMPY_MMAP
 
-    zooms = nb.load(in_file).header.get_zooms()
+    zooms = nb.load(in_file, mmap=NUMPY_MMAP).header.get_zooms()
 
     if 'y' in enc_dir:
         return zooms[1]

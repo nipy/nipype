@@ -24,6 +24,7 @@ from ...utils.filemanip import (load_json, save_json, split_filename)
 from ..base import (
     CommandLineInputSpec, CommandLine, Directory, TraitedSpec,
     traits, isdefined, File, InputMultiPath, Undefined, Str)
+from ...external.due import BibTeX
 
 from .base import (
     AFNICommandBase, AFNICommand, AFNICommandInputSpec, AFNICommandOutputSpec)
@@ -115,7 +116,8 @@ class AutoboxInputSpec(AFNICommandInputSpec):
         desc='Number of extra voxels to pad on each side of box')
     out_file = File(
         argstr='-prefix %s',
-        name_source='in_file')
+        name_source='in_file',
+        name_template='%s_autobox')
     no_clustering = traits.Bool(
         argstr='-noclust',
         desc='Don\'t do any clustering to find box. Any non-zero voxel will '
@@ -151,7 +153,7 @@ class Autobox(AFNICommand):
     >>> abox.inputs.in_file = 'structural.nii'
     >>> abox.inputs.padding = 5
     >>> abox.cmdline  # doctest: +ALLOW_UNICODE
-    '3dAutobox -input structural.nii -prefix structural_generated -npad 5'
+    '3dAutobox -input structural.nii -prefix structural_autobox -npad 5'
     >>> res = abox.run()  # doctest: +SKIP
 
     """
@@ -161,7 +163,7 @@ class Autobox(AFNICommand):
     output_spec = AutoboxOutputSpec
 
     def aggregate_outputs(self, runtime=None, needed_outputs=None):
-        outputs = self._outputs()
+        outputs = super(Autobox, self).aggregate_outputs(runtime, needed_outputs)
         pattern = 'x=(?P<x_min>-?\d+)\.\.(?P<x_max>-?\d+)  '\
                   'y=(?P<y_min>-?\d+)\.\.(?P<y_max>-?\d+)  '\
                   'z=(?P<z_min>-?\d+)\.\.(?P<z_max>-?\d+)'
@@ -169,16 +171,8 @@ class Autobox(AFNICommand):
             m = re.search(pattern, line)
             if m:
                 d = m.groupdict()
-                for k in list(d.keys()):
-                    d[k] = int(d[k])
-                outputs.set(**d)
-        outputs.set(out_file=self._gen_filename('out_file'))
+                outputs.trait_set(**{k: int(d[k]) for k in d.keys()})
         return outputs
-
-    def _gen_filename(self, name):
-        if name == 'out_file' and (not isdefined(self.inputs.out_file)):
-            return Undefined
-        return super(Autobox, self)._gen_filename(name)
 
 
 class BrickStatInputSpec(CommandLineInputSpec):
@@ -397,6 +391,99 @@ class Copy(AFNICommand):
 
     _cmd = '3dcopy'
     input_spec = CopyInputSpec
+    output_spec = AFNICommandOutputSpec
+
+
+class Edge3InputSpec(AFNICommandInputSpec):
+    in_file = File(
+        desc='input file to 3dedge3',
+        argstr='-input %s',
+        position=0,
+        mandatory=True,
+        exists=True,
+        copyfile=False)
+    out_file = File(
+        desc='output image file name',
+        position=-1,
+        argstr='-prefix %s')
+    datum = traits.Enum(
+        'byte','short','float',
+        argstr='-datum %s',
+        desc='specify data type for output. Valid types are \'byte\', '
+             '\'short\' and \'float\'.')
+    fscale = traits.Bool(
+        desc='Force scaling of the output to the maximum integer range.',
+        argstr='-fscale',
+        xor=['gscale', 'nscale', 'scale_floats'])
+    gscale = traits.Bool(
+        desc='Same as \'-fscale\', but also forces each output sub-brick to '
+             'to get the same scaling factor.',
+        argstr='-gscale',
+        xor=['fscale', 'nscale', 'scale_floats'])
+    nscale = traits.Bool(
+        desc='Don\'t do any scaling on output to byte or short datasets.',
+        argstr='-nscale',
+        xor=['fscale', 'gscale', 'scale_floats'])
+    scale_floats = traits.Float(
+        desc='Multiply input by VAL, but only if the input datum is '
+             'float. This is needed when the input dataset '
+             'has a small range, like 0 to 2.0 for instance. '
+             'With such a range, very few edges are detected due to '
+             'what I suspect to be truncation problems. '
+             'Multiplying such a dataset by 10000 fixes the problem '
+             'and the scaling is undone at the output.',
+        argstr='-scale_floats %f',
+        xor=['fscale', 'gscale', 'nscale'])
+    verbose = traits.Bool(
+        desc='Print out some information along the way.',
+        argstr='-verbose')
+
+
+class Edge3(AFNICommand):
+    """Does 3D Edge detection using the library 3DEdge
+    by Gregoire Malandain (gregoire.malandain@sophia.inria.fr).
+
+    For complete details, see the `3dedge3 Documentation.
+    <https://afni.nimh.nih.gov/pub/dist/doc/program_help/3dedge3.html>`_
+
+    references_ = [{'entry': BibTeX('@article{Deriche1987,'
+                                    'author={R. Deriche},'
+                                    'title={Optimal edge detection using recursive filtering},'
+                                    'journal={International Journal of Computer Vision},'
+                                    'volume={2},',
+                                    'pages={167-187},'
+                                    'year={1987},'
+                                    '}'),
+                    'tags': ['method'],
+                    },
+                   {'entry': BibTeX('@article{MongaDericheMalandainCocquerez1991,'
+                                    'author={O. Monga, R. Deriche, G. Malandain, J.P. Cocquerez},'
+                                    'title={Recursive filtering and edge tracking: two primary tools for 3D edge detection},'
+                                    'journal={Image and vision computing},'
+                                    'volume={9},',
+                                    'pages={203-214},'
+                                    'year={1991},'
+                                    '}'),
+                    'tags': ['method'],
+                    },
+                   ]
+
+    Examples
+    ========
+
+    >>> from nipype.interfaces import afni
+    >>> edge3 = afni.Edge3()
+    >>> edge3.inputs.in_file = 'functional.nii'
+    >>> edge3.inputs.out_file = 'edges.nii'
+    >>> edge3.inputs.datum = 'byte'
+    >>> edge3.cmdline  # doctest: +ALLOW_UNICODE
+    '3dedge3 -input functional.nii -datum byte -prefix edges.nii'
+    >>> res = edge3.run()  # doctest: +SKIP
+
+    """
+
+    _cmd = '3dedge3'
+    input_spec = Edge3InputSpec
     output_spec = AFNICommandOutputSpec
 
 
@@ -698,6 +785,16 @@ class FWHMx(AFNICommandBase):
     _cmd = '3dFWHMx'
     input_spec = FWHMxInputSpec
     output_spec = FWHMxOutputSpec
+
+    references_ = [{'entry': BibTeX('@article{CoxReynoldsTaylor2016,'
+                                    'author={R.W. Cox, R.C. Reynolds, and P.A. Taylor},'
+                                    'title={AFNI and clustering: false positive rates redux},'
+                                    'journal={bioRxiv},'
+                                    'year={2016},'
+                                    '}'),
+                    'tags': ['method'],
+                    },
+                   ]
     _acf = True
 
     def _parse_inputs(self, skip=None):
@@ -1230,6 +1327,109 @@ class To3D(AFNICommand):
     output_spec = AFNICommandOutputSpec
 
 
+class UnifizeInputSpec(AFNICommandInputSpec):
+    in_file = File(
+        desc='input file to 3dUnifize',
+        argstr='-input %s',
+        position=-1,
+        mandatory=True,
+        exists=True,
+        copyfile=False)
+    out_file = File(
+        desc='output image file name',
+        argstr='-prefix %s',
+        name_source='in_file')
+    t2 = traits.Bool(
+        desc='Treat the input as if it were T2-weighted, rather than '
+             'T1-weighted. This processing is done simply by inverting '
+             'the image contrast, processing it as if that result were '
+             'T1-weighted, and then re-inverting the results '
+             'counts of voxel overlap, i.e., each voxel will contain the '
+             'number of masks that it is set in.',
+        argstr='-T2')
+    gm = traits.Bool(
+        desc='Also scale to unifize \'gray matter\' = lower intensity voxels '
+             '(to aid in registering images from different scanners).',
+        argstr='-GM')
+    urad = traits.Float(
+        desc='Sets the radius (in voxels) of the ball used for the sneaky '
+             'trick. Default value is 18.3, and should be changed '
+             'proportionally if the dataset voxel size differs significantly '
+             'from 1 mm.',
+        argstr='-Urad %s')
+    scale_file = File(
+        desc='output file name to save the scale factor used at each voxel ',
+        argstr='-ssave %s')
+    no_duplo = traits.Bool(
+        desc='Do NOT use the \'duplo down\' step; this can be useful for '
+             'lower resolution datasets.',
+        argstr='-noduplo')
+    epi = traits.Bool(
+        desc='Assume the input dataset is a T2 (or T2*) weighted EPI time '
+             'series. After computing the scaling, apply it to ALL volumes '
+             '(TRs) in the input dataset. That is, a given voxel will be '
+             'scaled by the same factor at each TR. '
+             'This option also implies \'-noduplo\' and \'-T2\'.'
+             'This option turns off \'-GM\' if you turned it on.',
+        argstr='-EPI',
+        requires=['no_duplo', 't2'],
+        xor=['gm'])
+
+
+class UnifizeOutputSpec(TraitedSpec):
+    scale_file = File(desc='scale factor file')
+    out_file = File(desc='unifized file', exists=True)
+
+
+class Unifize(AFNICommand):
+    """3dUnifize - for uniformizing image intensity
+
+    * The input dataset is supposed to be a T1-weighted volume,
+      possibly already skull-stripped (e.g., via 3dSkullStrip).
+      However, this program can be a useful step to take BEFORE
+      3dSkullStrip, since the latter program can fail if the input
+      volume is strongly shaded -- 3dUnifize will (mostly) remove
+      such shading artifacts.
+
+    * The output dataset has the white matter (WM) intensity approximately
+      uniformized across space, and scaled to peak at about 1000.
+
+    * The output dataset is always stored in float format!
+
+    * If the input dataset has more than 1 sub-brick, only sub-brick
+      #0 will be processed!
+
+    * Want to correct EPI datasets for nonuniformity?
+      You can try the new and experimental [Mar 2017] '-EPI' option.
+
+    * The principal motive for this program is for use in an image
+      registration script, and it may or may not be useful otherwise.
+
+    * This program replaces the older (and very different) 3dUniformize,
+      which is no longer maintained and may sublimate at any moment.
+      (In other words, we do not recommend the use of 3dUniformize.)
+
+    For complete details, see the `3dUnifize Documentation.
+    <https://afni.nimh.nih.gov/pub/dist/doc/program_help/3dUnifize.html>`_
+
+    Examples
+    ========
+
+    >>> from nipype.interfaces import afni
+    >>> unifize = afni.Unifize()
+    >>> unifize.inputs.in_file = 'structural.nii'
+    >>> unifize.inputs.out_file = 'structural_unifized.nii'
+    >>> unifize.cmdline  # doctest: +ALLOW_UNICODE
+    '3dUnifize -prefix structural_unifized.nii -input structural.nii'
+    >>> res = unifize.run()  # doctest: +SKIP
+
+    """
+
+    _cmd = '3dUnifize'
+    input_spec = UnifizeInputSpec
+    output_spec = UnifizeOutputSpec
+
+
 class ZCutUpInputSpec(AFNICommandInputSpec):
     in_file = File(
         desc='input file to 3dZcutup',
@@ -1270,4 +1470,291 @@ class ZCutUp(AFNICommand):
 
     _cmd = '3dZcutup'
     input_spec = ZCutUpInputSpec
+    output_spec = AFNICommandOutputSpec
+
+
+class GCORInputSpec(CommandLineInputSpec):
+    in_file = File(
+        desc='input dataset to compute the GCOR over',
+        argstr='-input %s',
+        position=-1,
+        mandatory=True,
+        exists=True,
+        copyfile=False)
+
+    mask = File(
+        desc='mask dataset, for restricting the computation',
+        argstr='-mask %s',
+        exists=True,
+        copyfile=False)
+
+    nfirst = traits.Int(0, argstr='-nfirst %d',
+                        desc='specify number of initial TRs to ignore')
+    no_demean = traits.Bool(False, argstr='-no_demean',
+                            desc='do not (need to) demean as first step')
+
+
+class GCOROutputSpec(TraitedSpec):
+    out = traits.Float(desc='global correlation value')
+
+
+class GCOR(CommandLine):
+    """
+    Computes the average correlation between every voxel
+    and ever other voxel, over any give mask.
+
+
+    For complete details, see the `@compute_gcor Documentation.
+    <https://afni.nimh.nih.gov/pub/dist/doc/program_help/@compute_gcor.html>`_
+
+    Examples
+    ========
+
+    >>> from nipype.interfaces import afni
+    >>> gcor = afni.GCOR()
+    >>> gcor.inputs.in_file = 'structural.nii'
+    >>> gcor.inputs.nfirst = 4
+    >>> gcor.cmdline  # doctest: +ALLOW_UNICODE
+    '@compute_gcor -nfirst 4 -input structural.nii'
+    >>> res = gcor.run()  # doctest: +SKIP
+
+    """
+
+    _cmd = '@compute_gcor'
+    input_spec = GCORInputSpec
+    output_spec = GCOROutputSpec
+
+    def _run_interface(self, runtime):
+        runtime = super(GCOR, self)._run_interface(runtime)
+
+        gcor_line = [line.strip() for line in runtime.stdout.split('\n')
+                     if line.strip().startswith('GCOR = ')][-1]
+        setattr(self, '_gcor', float(gcor_line[len('GCOR = '):]))
+        return runtime
+
+    def _list_outputs(self):
+        return {'out': getattr(self, '_gcor')}
+
+class AxializeInputSpec(AFNICommandInputSpec):
+    in_file = File(
+        desc='input file to 3daxialize',
+        argstr='%s',
+        position=-2,
+        mandatory=True,
+        exists=True,
+        copyfile=False)
+    out_file = File(
+        name_template='%s_axialize',
+        desc='output image file name',
+        argstr='-prefix %s',
+        name_source='in_file')
+    verb = traits.Bool(
+        desc='Print out a progerss report',
+        argstr='-verb')
+    sagittal = traits.Bool(
+        desc='Do sagittal slice order [-orient ASL]',
+        argstr='-sagittal',
+        xor=['coronal', 'axial'])
+    coronal = traits.Bool(
+        desc='Do coronal slice order  [-orient RSA]',
+        argstr='-coronal',
+        xor=['sagittal', 'axial'])
+    axial = traits.Bool(
+        desc='Do axial slice order    [-orient RAI]'
+             'This is the default AFNI axial order, and'
+             'is the one currently required by the'
+             'volume rendering plugin; this is also'
+             'the default orientation output by this'
+             "program (hence the program's name).",
+        argstr='-axial',
+        xor=['coronal', 'sagittal'])
+    orientation = Str(
+        desc='new orientation code',
+        argstr='-orient %s')
+    
+
+class Axialize(AFNICommand):
+    """Read in a dataset and write it out as a new dataset
+         with the data brick oriented as axial slices.
+
+    For complete details, see the `3dcopy Documentation.
+    <https://afni.nimh.nih.gov/pub/dist/doc/program_help/3daxialize.html>`_
+
+    Examples
+    ========
+    >>> from nipype.interfaces import afni
+    >>> axial3d = afni.Axialize()
+    >>> axial3d.inputs.in_file = 'functional.nii'
+    >>> axial3d.inputs.out_file = 'axialized.nii'
+    >>> axial3d.cmdline  # doctest: +ALLOW_UNICODE
+    '3daxialize -prefix axialized.nii functional.nii'
+    >>> res = axial3d.run()  # doctest: +SKIP
+
+    """
+
+    _cmd = '3daxialize'
+    input_spec = AxializeInputSpec
+    output_spec = AFNICommandOutputSpec
+   
+
+class ZcatInputSpec(AFNICommandInputSpec):
+    in_files = InputMultiPath(
+        File(
+            desc='input files to 3dZcat',
+            exists=True),
+        argstr='%s',
+        position=-1,
+        mandatory=True,
+        copyfile=False)
+    out_file = File(
+        name_template='zcat',
+        desc='output dataset prefix name (default \'zcat\')',
+        argstr='-prefix %s')
+    datum = traits.Enum(
+        'byte','short','float',
+        argstr='-datum %s',
+        desc='specify data type for output. Valid types are \'byte\', '
+             '\'short\' and \'float\'.')
+    verb = traits.Bool(
+        desc='print out some verbositiness as the program proceeds.',
+        argstr='-verb')
+    fscale = traits.Bool(
+        desc='Force scaling of the output to the maximum integer '
+             'range.  This only has effect if the output datum is '
+             'byte or short (either forced or defaulted). This '
+             'option is sometimes necessary to eliminate '
+             'unpleasant truncation artifacts.',
+        argstr='-fscale',
+        xor=['nscale'])
+    nscale = traits.Bool(
+        desc='Don\'t do any scaling on output to byte or short '
+             'datasets. This may be especially useful when '
+             'operating on mask datasets whose output values '
+             'are only 0\'s and 1\'s.',
+        argstr='-nscale',
+        xor=['fscale'])
+
+class Zcat(AFNICommand):
+    """Copies an image of one type to an image of the same
+    or different type using 3dZcat command
+
+    For complete details, see the `3dZcat Documentation.
+    <https://afni.nimh.nih.gov/pub/dist/doc/program_help/3dZcat.html>`_
+
+    Examples
+    ========
+
+    >>> from nipype.interfaces import afni
+    >>> zcat = afni.Zcat()
+    >>> zcat.inputs.in_files = ['functional2.nii', 'functional3.nii']
+    >>> zcat.inputs.out_file = 'cat_functional.nii'
+    >>> zcat.cmdline  # doctest: +ALLOW_UNICODE
+    '3dZcat -prefix cat_functional.nii functional2.nii functional3.nii'
+    >>> res = zcat.run()  # doctest: +SKIP
+    """
+
+    _cmd = '3dZcat'
+    input_spec = ZcatInputSpec
+    output_spec = AFNICommandOutputSpec
+
+class ZeropadInputSpec(AFNICommandInputSpec):
+    in_files = File(
+        desc='input dataset',
+        argstr='%s',
+        position=-1,
+        mandatory=True,
+        exists=True,
+        copyfile=False)
+    out_file = File(
+        name_template='zeropad',
+        desc='output dataset prefix name (default \'zeropad\')',
+        argstr='-prefix %s')
+    I = traits.Int(
+        desc='adds \'n\' planes of zero at the Inferior edge',
+        argstr='-I %i',
+        xor=['master'])
+    S = traits.Int(
+        desc='adds \'n\' planes of zero at the Superior edge',
+        argstr='-S %i',
+        xor=['master'])
+    A = traits.Int(
+        desc='adds \'n\' planes of zero at the Anterior edge',
+        argstr='-A %i',
+        xor=['master'])
+    P = traits.Int(
+        desc='adds \'n\' planes of zero at the Posterior edge',
+        argstr='-P %i',
+        xor=['master'])
+    L = traits.Int(
+        desc='adds \'n\' planes of zero at the Left edge',
+        argstr='-L %i',
+        xor=['master'])
+    R = traits.Int(
+        desc='adds \'n\' planes of zero at the Right edge',
+        argstr='-R %i',
+        xor=['master'])
+    z = traits.Int(
+        desc='adds \'n\' planes of zero on EACH of the '
+             'dataset z-axis (slice-direction) faces',
+        argstr='-z %i',
+        xor=['master'])
+    RL = traits.Int(desc='specify that planes should be added or cut '
+                         'symmetrically to make the resulting volume have'
+                         'N slices in the right-left direction',
+                    argstr='-RL %i',
+                    xor=['master'])
+    AP = traits.Int(desc='specify that planes should be added or cut '
+                         'symmetrically to make the resulting volume have'
+                         'N slices in the anterior-posterior direction',
+                    argstr='-AP %i',
+                    xor=['master'])
+    IS = traits.Int(desc='specify that planes should be added or cut '
+                         'symmetrically to make the resulting volume have'
+                         'N slices in the inferior-superior direction',
+                    argstr='-IS %i',
+                    xor=['master'])
+    mm = traits.Bool(desc='pad counts \'n\' are in mm instead of slices, '
+                          'where each \'n\' is an integer and at least \'n\' '
+                          'mm of slices will be added/removed; e.g., n =  3 '
+                          'and slice thickness = 2.5 mm ==> 2 slices added',
+                     argstr='-mm',
+                     xor=['master'])
+    master = traits.File(desc='match the volume described in dataset '
+                              '\'mset\', where mset must have the same '
+                              'orientation and grid spacing as dataset to be '
+                              'padded. the goal of -master is to make the '
+                              'output dataset from 3dZeropad match the '
+                              'spatial \'extents\' of mset by adding or '
+                              'subtracting slices as needed. You can\'t use '
+                              '-I,-S,..., or -mm with -master',
+                         argstr='-master %s',
+                         xor=['I', 'S', 'A', 'P', 'L', 'R', 'z',
+                              'RL', 'AP', 'IS', 'mm'])
+
+class Zeropad(AFNICommand):
+    """Adds planes of zeros to a dataset (i.e., pads it out).
+
+    For complete details, see the `3dZeropad Documentation.
+    <https://afni.nimh.nih.gov/pub/dist/doc/program_help/3dZeropad.html>`_
+
+    Examples
+    ========
+
+    >>> from nipype.interfaces import afni
+    >>> zeropad = afni.Zeropad()
+    >>> zeropad.inputs.in_files = 'functional.nii'
+    >>> zeropad.inputs.out_file = 'pad_functional.nii'
+    >>> zeropad.inputs.I = 10
+    >>> zeropad.inputs.S = 10
+    >>> zeropad.inputs.A = 10
+    >>> zeropad.inputs.P = 10
+    >>> zeropad.inputs.R = 10
+    >>> zeropad.inputs.L = 10
+    >>> zeropad.cmdline  # doctest: +ALLOW_UNICODE
+    '3dZeropad -A 10 -I 10 -L 10 -P 10 -R 10 -S 10 -prefix pad_functional.nii functional.nii'
+    >>> res = zeropad.run()  # doctest: +SKIP
+    """
+
+    _cmd = '3dZeropad'
+    input_spec = ZeropadInputSpec
     output_spec = AFNICommandOutputSpec

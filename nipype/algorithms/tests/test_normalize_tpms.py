@@ -14,13 +14,14 @@ import nibabel as nb
 import nipype.testing as nit
 
 from nipype.algorithms.misc import normalize_tpms
+from nipype.utils import NUMPY_MMAP
 
 
 def test_normalize_tpms(tmpdir):
     tempdir = str(tmpdir)
 
     in_mask = example_data('tpms_msk.nii.gz')
-    mskdata = nb.load(in_mask).get_data()
+    mskdata = nb.load(in_mask, mmap=NUMPY_MMAP).get_data()
     mskdata[mskdata > 0.0] = 1.0
 
     mapdata = []
@@ -32,7 +33,7 @@ def test_normalize_tpms(tmpdir):
         filename = os.path.join(tempdir, 'modtpm_%02d.nii.gz' % i)
         out_files.append(os.path.join(tempdir, 'normtpm_%02d.nii.gz' % i))
 
-        im = nb.load(mapname)
+        im = nb.load(mapname, mmap=NUMPY_MMAP)
         data = im.get_data()
         mapdata.append(data.copy())
 
@@ -45,7 +46,7 @@ def test_normalize_tpms(tmpdir):
     sumdata = np.zeros_like(mskdata)
 
     for i, tstfname in enumerate(out_files):
-        normdata = nb.load(tstfname).get_data()
+        normdata = nb.load(tstfname, mmap=NUMPY_MMAP).get_data()
         sumdata += normdata
         assert np.all(normdata[mskdata == 0] == 0)
         assert np.allclose(normdata, mapdata[i])

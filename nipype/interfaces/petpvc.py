@@ -13,7 +13,8 @@ from __future__ import print_function, division, unicode_literals, absolute_impo
 import os
 
 from .base import TraitedSpec, CommandLineInputSpec, CommandLine, File, isdefined, traits
-
+from ..utils.filemanip import fname_presuffix
+from ..external.due import BibTeX
 
 pvc_methods = ['GTM',
                'IY',
@@ -71,8 +72,6 @@ class PETPVC(CommandLine):
     "A review of partial volume correction techniques for emission tomography
     and their applications in neurology, cardiology and oncology," Phys. Med.
     Biol., vol. 57, no. 21, p. R119, 2012.
-
-    There is a publication waiting to be accepted for this software tool.
 
     Its command line help shows this:
 
@@ -148,6 +147,23 @@ class PETPVC(CommandLine):
     output_spec = PETPVCOutputSpec
     _cmd = 'petpvc'
 
+    references_ = [{'entry': BibTeX("@article{0031-9155-61-22-7975,"
+                                    "author={Benjamin A Thomas and Vesna Cuplov and Alexandre Bousse and "
+                                             "Adriana Mendes and Kris Thielemans and Brian F Hutton and Kjell Erlandsson},"
+                                    "title={PETPVC: a toolbox for performing partial volume correction "
+                                            "techniques in positron emission tomography},"
+                                    "journal={Physics in Medicine and Biology},"
+                                    "volume={61},"
+                                    "number={22},"
+                                    "pages={7975},"
+                                    "url={http://stacks.iop.org/0031-9155/61/i=22/a=7975},"
+                                    "doi={http://dx.doi.org/10.1088/0031-9155/61/22/7975},"
+                                    "year={2016},"
+                                    "}"),
+                    'description': 'PETPVC software implementation publication',
+                    'tags': ['implementation'],
+                    }]
+
     def _list_outputs(self):
         outputs = self.output_spec().get()
         outputs['out_file'] = self.inputs.out_file
@@ -185,8 +201,6 @@ class PETPVC(CommandLine):
             New filename based on given parameters.
 
         """
-        from nipype.utils.filemanip import fname_presuffix
-
         if basename == '':
             msg = 'Unable to generate filename for command %s. ' % self.cmd
             msg += 'basename is not set!'

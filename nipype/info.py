@@ -4,14 +4,13 @@ docs.  In setup.py in particular, we exec this file, so it cannot import nipy
 """
 from __future__ import print_function, division, unicode_literals, absolute_import
 
+import sys
 
-# nipype version information.  An empty _version_extra corresponds to a
-# full release.  '.dev' as a _version_extra string means this is a development
+# nipype version information.  An empty version_extra corresponds to a
+# full release.  '.dev' as a version_extra string means this is a development
 # version
-_version_major = 0
-_version_minor = 13
-_version_micro = 0
-_version_extra = '-dev'  # Remove -dev for release
+# Remove -dev for release
+__version__ = '1.0.0-dev'
 
 
 def get_nipype_gitversion():
@@ -20,7 +19,7 @@ def get_nipype_gitversion():
     Returns
     -------
     None or str
-      Version of NiPype according to git.
+      Version of Nipype according to git.
     """
     import os
     import subprocess
@@ -43,16 +42,10 @@ def get_nipype_gitversion():
         ver = o.decode().strip().split('-')[-1]
     return ver
 
-if '-dev' in _version_extra:
+if __version__.endswith('-dev'):
     gitversion = get_nipype_gitversion()
     if gitversion:
-        _version_extra = '-' + gitversion + '.dev'
-
-# Format expected by setup.py and doc/source/conf.py: string of form 'X.Y.Z'
-__version__ = '%s.%s.%s%s' % (_version_major,
-                              _version_minor,
-                              _version_micro,
-                              _version_extra)
+        __version__ = '{}+{}'.format(__version__, gitversion)
 
 CLASSIFIERS = ['Development Status :: 5 - Production/Stable',
                'Environment :: Console',
@@ -63,6 +56,7 @@ CLASSIFIERS = ['Development Status :: 5 - Production/Stable',
                'Programming Language :: Python :: 2.7',
                'Programming Language :: Python :: 3.4',
                'Programming Language :: Python :: 3.5',
+               'Programming Language :: Python :: 3.6',
                'Topic :: Scientific/Engineering']
 
 description = 'Neuroimaging in Python: Pipelines and Interfaces'
@@ -102,16 +96,16 @@ pipeline systems.
 """
 
 # versions
-NIBABEL_MIN_VERSION = '2.0.1'
-NETWORKX_MIN_VERSION = '1.7'
-NUMPY_MIN_VERSION = '1.6.2'
-SCIPY_MIN_VERSION = '0.11'
-TRAITS_MIN_VERSION = '4.3'
-DATEUTIL_MIN_VERSION = '1.5'
+NIBABEL_MIN_VERSION = '2.1.0'
+NETWORKX_MIN_VERSION = '1.9'
+NUMPY_MIN_VERSION = '1.8.2'
+SCIPY_MIN_VERSION = '0.14'
+TRAITS_MIN_VERSION = '4.6'
+DATEUTIL_MIN_VERSION = '2.2'
 PYTEST_MIN_VERSION = '3.0'
-FUTURE_MIN_VERSION = '0.15.2'
+FUTURE_MIN_VERSION = '0.16.0'
 SIMPLEJSON_MIN_VERSION = '3.8.0'
-PROV_MIN_VERSION = '1.4.0'
+PROV_MIN_VERSION = '1.5.0'
 CLICK_MIN_VERSION = '6.6.0'
 
 NAME = 'nipype'
@@ -126,10 +120,11 @@ CLASSIFIERS = CLASSIFIERS
 AUTHOR = 'nipype developers'
 AUTHOR_EMAIL = 'neuroimaging@python.org'
 PLATFORMS = 'OS Independent'
-MAJOR = _version_major
-MINOR = _version_minor
-MICRO = _version_micro
-ISRELEASE = _version_extra == ''
+MAJOR = __version__.split('.')[0]
+MINOR = __version__.split('.')[1]
+MICRO = __version__.replace('-', '.').split('.')[2]
+ISRELEASE = (len(__version__.replace('-', '.').split('.')) == 3 or
+             'post' in __version__.replace('-', '.').split('.')[-1])
 VERSION = __version__
 PROVIDES = ['nipype']
 REQUIRES = [
@@ -143,28 +138,28 @@ REQUIRES = [
     'simplejson>=%s' % SIMPLEJSON_MIN_VERSION,
     'prov>=%s' % PROV_MIN_VERSION,
     'click>=%s' % CLICK_MIN_VERSION,
-    'xvfbwrapper',
     'funcsigs',
-    'configparser',
+    'pytest>=%s' % PYTEST_MIN_VERSION,
+    'mock',
+    'pydotplus',
+    'packaging',
 ]
 
+if sys.version_info <= (3, 4):
+    REQUIRES.append('configparser')
+
 TESTS_REQUIRES = [
-    'pytest>=%s' % PYTEST_MIN_VERSION,
-    'pytest-raisesregexp',
     'pytest-cov',
-    'mock',
-    'codecov',
-    'dipy',
-    'nipy',
-    'matplotlib'
+    'codecov'
 ]
 
 EXTRA_REQUIRES = {
-    'doc': ['Sphinx>=0.3', 'matplotlib', 'pydotplus'],
+    'doc': ['Sphinx>=1.4', 'matplotlib', 'pydotplus'],
     'tests': TESTS_REQUIRES,
-    'fmri': ['nitime', 'nilearn', 'dipy', 'nipy', 'matplotlib'],
+    'nipy': ['nitime', 'nilearn', 'dipy', 'nipy', 'matplotlib'],
     'profiler': ['psutil'],
     'duecredit': ['duecredit'],
+    'xvfbwrapper': ['xvfbwrapper'],
     # 'mesh': ['mayavi']  # Enable when it works
 }
 
@@ -172,4 +167,3 @@ EXTRA_REQUIRES = {
 EXTRA_REQUIRES['all'] = [val for _, val in list(EXTRA_REQUIRES.items())]
 
 STATUS = 'stable'
-

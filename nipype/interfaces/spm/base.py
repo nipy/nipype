@@ -28,9 +28,9 @@ from scipy.io import savemat
 
 # Local imports
 from ... import logging
-from ...utils import spm_docs as sd
+from ...utils import spm_docs as sd, NUMPY_MMAP
 from ..base import (BaseInterface, traits, isdefined, InputMultiPath,
-                    BaseInterfaceInputSpec, Directory, Undefined)
+                    BaseInterfaceInputSpec, Directory, Undefined, ImageFile)
 from ..matlab import MatlabCommand
 from ...external.due import due, Doi, BibTeX
 
@@ -45,7 +45,7 @@ def func_is_3d(in_file):
     if isinstance(in_file, list):
         return func_is_3d(in_file[0])
     else:
-        img = load(in_file)
+        img = load(in_file, mmap=NUMPY_MMAP)
         shape = img.shape
         if len(shape) == 3 or (len(shape) == 4 and shape[3] == 1):
             return True
@@ -73,7 +73,7 @@ def scans_for_fname(fname):
         for sno, f in enumerate(fname):
             scans[sno] = '%s,1' % f
         return scans
-    img = load(fname)
+    img = load(fname, mmap=NUMPY_MMAP)
     if len(img.shape) == 3:
         return np.array(('%s,1' % fname,), dtype=object)
     else:
@@ -532,3 +532,26 @@ class SPMCommand(BaseInterface):
         if postscript is not None:
             mscript += postscript
         return mscript
+
+class ImageFileSPM(ImageFile):
+    """
+    Defines an ImageFile trait specific to SPM interfaces.
+    """
+
+    def __init__(self, value='', filter=None, auto_set=False, entries=0,
+                 exists=False, types=['nifti1', 'nifti2'],
+                 allow_compressed=False, **metadata):
+        """ Trait handles neuroimaging files.
+
+        Parameters
+        ----------
+        types : list
+            Strings of file format types accepted
+        compressed : boolean
+            Indicates whether the file format can compressed
+        """
+        self.types = types
+        self.allow_compressed = allow_compressed
+        super(ImageFileSPM, self).__init__(value, filter, auto_set, entries,
+                                           exists, types, allow_compressed,
+                                           **metadata)

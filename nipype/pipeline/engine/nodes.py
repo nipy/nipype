@@ -36,7 +36,7 @@ from tempfile import mkdtemp
 from hashlib import sha1
 
 from ... import config, logging
-from ...utils.misc import (flatten, unflatten, package_check, str2bool)
+from ...utils.misc import (flatten, unflatten, str2bool)
 from ...utils.filemanip import (save_json, FileNotFoundError,
                                 filename_to_list, list_to_filename,
                                 copyfiles, fnames_presuffix, loadpkl,
@@ -54,7 +54,6 @@ from .utils import (generate_expanded_graph, modify_paths,
                     get_print_name, merge_dict, evaluate_connect_function)
 from .base import EngineBase
 
-package_check('networkx', '1.3')
 logger = logging.getLogger('workflow')
 
 class Node(EngineBase):
@@ -80,7 +79,8 @@ class Node(EngineBase):
 
     def __init__(self, interface, name, iterables=None, itersource=None,
                  synchronize=False, overwrite=None, needed_outputs=None,
-                 run_without_submitting=False, **kwargs):
+                 run_without_submitting=False, n_procs=1, mem_gb=None,
+                 **kwargs):
         """
         Parameters
         ----------
@@ -169,6 +169,11 @@ class Node(EngineBase):
         self.input_source = {}
         self.needed_outputs = []
         self.plugin_args = {}
+
+        self._interface.num_threads = n_procs
+        if mem_gb is not None:
+            self._interface.estimated_memory_gb = mem_gb
+
         if needed_outputs:
             self.needed_outputs = sorted(needed_outputs)
         self._got_inputs = False
@@ -392,7 +397,7 @@ class Node(EngineBase):
             - Otherwise, return the parameterization unchanged.
         """
         if len(param) > 32:
-            return sha1(param).hexdigest()
+            return sha1(param.encode()).hexdigest()
         else:
             return param
 
@@ -522,7 +527,8 @@ class Node(EngineBase):
                 # Was this pickle created with Python 2.x?
                 pickle.load(pkl_file, fix_imports=True, encoding='utf-8')
                 logger.warn('Successfully loaded pickle in compatibility mode')
-            except (traits.TraitError, AttributeError, ImportError) as err:
+            except (traits.TraitError, AttributeError, ImportError,
+                    EOFError) as err:
                 if isinstance(err, (AttributeError, ImportError)):
                     attribute_error = True
                     logger.debug('attribute error: %s probably using '
@@ -555,7 +561,7 @@ class Node(EngineBase):
             logger.debug('aggregating results')
             if attribute_error:
                 old_inputs = loadpkl(op.join(cwd, '_inputs.pklz'))
-                self.inputs.set(**old_inputs)
+                self.inputs.trait_set(**old_inputs)
             if not isinstance(self, MapNode):
                 self._copyfiles_to_wd(cwd, True, linksonly=True)
                 aggouts = self._interface.aggregate_outputs(
@@ -606,6 +612,7 @@ class Node(EngineBase):
             try:
                 result = self._interface.run()
             except Exception as msg:
+                self._save_results(result, cwd)
                 self._result.runtime.stderr = msg
                 raise
 
@@ -1105,11 +1112,16 @@ class MapNode(Node):
             nitems = len(filename_to_list(getattr(self.inputs, self.iterfield[0])))
         for i in range(nitems):
             nodename = '_' + self.name + str(i)
-            node = Node(deepcopy(self._interface), name=nodename)
-            node.overwrite = self.overwrite
-            node.run_without_submitting = self.run_without_submitting
+            node = Node(deepcopy(self._interface),
+                        n_procs=self._interface.num_threads,
+                        mem_gb=self._interface.estimated_memory_gb,
+                        overwrite=self.overwrite,
+                        needed_outputs=self.needed_outputs,
+                        run_without_submitting=self.run_without_submitting,
+                        base_dir=op.join(cwd, 'mapflow'),
+                        name=nodename)
             node.plugin_args = self.plugin_args
-            node._interface.inputs.set(
+            node._interface.inputs.trait_set(
                 **deepcopy(self._interface.inputs.get()))
             for field in self.iterfield:
                 if self.nested:
@@ -1119,19 +1131,20 @@ class MapNode(Node):
                 logger.debug('setting input %d %s %s', i, field, fieldvals[i])
                 setattr(node.inputs, field, fieldvals[i])
             node.config = self.config
-            node.base_dir = op.join(cwd, 'mapflow')
             yield i, node
 
     def _node_runner(self, nodes, updatehash=False):
+        old_cwd = os.getcwd()
         for i, node in nodes:
             err = None
             try:
                 node.run(updatehash=updatehash)
-            except Exception as err:
+            except Exception as this_err:
+                err = this_err
                 if str2bool(self.config['execution']['stop_on_first_crash']):
-                    self._result = node.result
                     raise
             finally:
+                os.chdir(old_cwd)
                 yield i, node, err
 
     def _collate_results(self, nodes):
@@ -1233,7 +1246,7 @@ class MapNode(Node):
         old_inputs = self._inputs.get()
         self._inputs = self._create_dynamic_traits(self._interface.inputs,
                                                    fields=self.iterfield)
-        self._inputs.set(**old_inputs)
+        self._inputs.trait_set(**old_inputs)
         super(MapNode, self)._get_inputs()
 
     def _check_iterfield(self):
@@ -1274,7 +1287,6 @@ class MapNode(Node):
                 nitems = len(filename_to_list(getattr(self.inputs,
                                                       self.iterfield[0])))
             nodenames = ['_' + self.name + str(i) for i in range(nitems)]
-            # map-reduce formulation
             self._collate_results(self._node_runner(self._make_nodes(cwd),
                                                     updatehash=updatehash))
             self._save_results(self._result, cwd)

@@ -22,7 +22,6 @@ import locale
 import os
 import re
 import platform
-from socket import getfqdn
 from string import Template
 import select
 import subprocess
@@ -32,6 +31,7 @@ from textwrap import wrap
 from warnings import warn
 import simplejson as json
 from dateutil.parser import parse as parseutc
+from packaging.version import Version
 
 from .. import config, logging, LooseVersion, __version__
 from ..utils.provenance import write_provenance
@@ -39,12 +39,12 @@ from ..utils.misc import is_container, trim, str2bool
 from ..utils.filemanip import (md5, hash_infile, FileNotFoundError, hash_timestamp,
                                split_filename, to_str)
 from .traits_extension import (
-    traits, Undefined, TraitDictObject, TraitListObject, TraitError, isdefined, File,
-    Directory, DictStrStr, has_metadata)
+    traits, Undefined, TraitDictObject, TraitListObject, TraitError, isdefined,
+    File, Directory, DictStrStr, has_metadata, ImageFile)
 from ..external.due import due
 
 runtime_profile = str2bool(config.get('execution', 'profile_runtime'))
-nipype_version = LooseVersion(__version__)
+nipype_version = Version(__version__)
 iflogger = logging.getLogger('interface')
 
 FLOAT_FORMAT = '{:.10f}'.format
@@ -353,6 +353,7 @@ class BaseTraitedSpec(traits.HasTraits):
     XXX Reconsider this in the long run, but it seems like the best
     solution to move forward on the refactoring.
     """
+    package_version = nipype_version
 
     def __init__(self, **kwargs):
         """ Initialize handlers and inputs"""
@@ -368,7 +369,7 @@ class BaseTraitedSpec(traits.HasTraits):
                 undefined_traits[trait] = Undefined
         self.trait_set(trait_change_notify=False, **undefined_traits)
         self._generate_handlers()
-        self.set(**kwargs)
+        self.trait_set(**kwargs)
 
     def items(self):
         """ Name, trait generator for user modifiable traits
@@ -391,10 +392,6 @@ class BaseTraitedSpec(traits.HasTraits):
         xors = self.trait_names(**has_xor)
         for elem in xors:
             self.on_trait_change(self._xor_warn, elem)
-        has_requires = dict(requires=lambda t: t is not None)
-        requires = self.trait_names(**has_requires)
-        for elem in requires:
-            self.on_trait_change(self._requires_warn, elem)
         has_deprecation = dict(deprecated=lambda t: t is not None)
         deprecated = self.trait_names(**has_deprecation)
         for elem in deprecated:
@@ -449,7 +446,7 @@ class BaseTraitedSpec(traits.HasTraits):
             else:
                 msg3 = ''
             msg = ' '.join((msg1, msg2, msg3))
-            if LooseVersion(str(trait_spec.deprecated)) < nipype_version:
+            if Version(str(trait_spec.deprecated)) < self.package_version:
                 raise TraitError(msg)
             else:
                 if trait_spec.new_name:
@@ -644,7 +641,8 @@ class DynamicTraitedSpec(BaseTraitedSpec):
         dup_dict = deepcopy(self.get(), memo)
         # access all keys
         for key in self.copyable_trait_names():
-            _ = getattr(self, key)
+            if key in self.__dict__.keys():
+                _ = getattr(self, key)
         # clone once
         dup = self.clone_traits(memo=memo)
         for key in self.copyable_trait_names():
@@ -654,7 +652,7 @@ class DynamicTraitedSpec(BaseTraitedSpec):
                 pass
         # clone twice
         dup = self.clone_traits(memo=memo)
-        dup.set(**dup_dict)
+        dup.trait_set(**dup_dict)
         return dup
 
 
@@ -774,7 +772,7 @@ class BaseInterface(Interface):
                             self.__class__.__name__)
 
         self.inputs = self.input_spec(**inputs)
-        self.estimated_memory_gb = 1
+        self.estimated_memory_gb = 0.25
         self.num_threads = 1
 
         if from_file is not None:
@@ -1064,7 +1062,7 @@ class BaseInterface(Interface):
         results :  an InterfaceResult object containing a copy of the instance
         that was executed, provenance information and, if successful, results
         """
-        self.inputs.set(**inputs)
+        self.inputs.trait_set(**inputs)
         self._check_mandatory_inputs()
         self._check_version_requirements(self.inputs)
         interface = self.__class__
@@ -1079,7 +1077,7 @@ class BaseInterface(Interface):
                         startTime=dt.isoformat(dt.utcnow()),
                         endTime=None,
                         platform=platform.platform(),
-                        hostname=getfqdn(),
+                        hostname=platform.node(),
                         version=self.version)
         try:
             runtime = self._run_wrapper(runtime)
@@ -1383,12 +1381,41 @@ def _get_ram_mb(pid, pyfunc=False):
     return mem_mb
 
 
+def _canonicalize_env(env):
+    """Windows requires that environment be dicts with bytes as keys and values
+    This function converts any unicode entries for Windows only, returning the
+    dictionary untouched in other environments.
+
+    Parameters
+    ----------
+    env : dict
+        environment dictionary with unicode or bytes keys and values
+
+    Returns
+    -------
+    env : dict
+        Windows: environment dictionary with bytes keys and values
+        Other: untouched input ``env``
+    """
+    if os.name != 'nt':
+        return env
+
+    out_env = {}
+    for key, val in env:
+        if not isinstance(key, bytes):
+            key = key.encode('utf-8')
+        if not isinstance(val, bytes):
+            val = key.encode('utf-8')
+        out_env[key] = val
+    return out_env
+
+
 # Get max resources used for process
 def get_max_resources_used(pid, mem_mb, num_threads, pyfunc=False):
     """Function to get the RAM and threads usage of a process
 
-    Paramters
-    ---------
+    Parameters
+    ----------
     pid : integer
         the process ID of process to profile
     mem_mb : float
@@ -1437,6 +1464,8 @@ def run_command(runtime, output=None, timeout=0.01, redirect_x=False):
             raise RuntimeError('Xvfb was not found, X redirection aborted')
         cmdline = 'xvfb-run -a ' + cmdline
 
+    env = _canonicalize_env(runtime.environ)
+
     default_encoding = locale.getdefaultlocale()[1]
     if default_encoding is None:
         default_encoding = 'UTF-8'
@@ -1451,14 +1480,14 @@ def run_command(runtime, output=None, timeout=0.01, redirect_x=False):
                                 stderr=stderr,
                                 shell=True,
                                 cwd=runtime.cwd,
-                                env=runtime.environ)
+                                env=env)
     else:
         proc = subprocess.Popen(cmdline,
                                 stdout=PIPE,
                                 stderr=PIPE,
                                 shell=True,
                                 cwd=runtime.cwd,
-                                env=runtime.environ)
+                                env=env)
     result = {}
     errfile = os.path.join(runtime.cwd, 'stderr.nipype')
     outfile = os.path.join(runtime.cwd, 'stdout.nipype')
@@ -1844,7 +1873,7 @@ class CommandLine(BaseInterface):
                 # special treatment for files
                 try:
                     _, base, source_ext = split_filename(source)
-                except AttributeError:
+                except (AttributeError, TypeError):
                     base = source
             else:
                 if name in chain:

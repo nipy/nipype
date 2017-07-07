@@ -12,8 +12,10 @@ from __future__ import print_function, division, unicode_literals, absolute_impo
 from builtins import range, str
 
 import os
+from ...external.due import BibTeX
 from ...utils.filemanip import split_filename, copyfile
-from ..base import TraitedSpec, File, traits, InputMultiPath, OutputMultiPath, isdefined
+from ..base import (TraitedSpec, File, traits, InputMultiPath, OutputMultiPath, isdefined,
+                    _exists_in_path)
 from .base import ANTSCommand, ANTSCommandInputSpec
 
 
@@ -257,6 +259,9 @@ class N4BiasFieldCorrectionInputSpec(ANTSCommandInputSpec):
                                   ' to file.'), xor=['bias_image'])
     bias_image = File(desc='Filename for the estimated bias.',
                       hash_files=False)
+    copy_header = traits.Bool(False, mandatory=True, usedefault=True,
+                              desc='copy headers of the original image into the '
+                                   'output (corrected) file')
 
 
 class N4BiasFieldCorrectionOutputSpec(TraitedSpec):
@@ -381,6 +386,27 @@ class N4BiasFieldCorrection(ANTSCommand):
             outputs['bias_image'] = os.path.abspath(
                 self._gen_filename('bias_image'))
         return outputs
+
+    def _run_interface(self, runtime, correct_return_codes=(0,)):
+        runtime = super(N4BiasFieldCorrection, self)._run_interface(
+            runtime, correct_return_codes)
+
+        if self.inputs.copy_header and runtime.returncode in correct_return_codes:
+            self._copy_header(self._gen_filename('output_image'))
+            if self.inputs.save_bias or isdefined(self.inputs.bias_image):
+                self._copy_header(self._gen_filename('bias_image'))
+
+        return runtime
+
+    def _copy_header(self, fname):
+        """Copy header from input image to an output image"""
+        import nibabel as nb
+        in_img = nb.load(self.inputs.input_image)
+        out_img = nb.load(fname, mmap=False)
+        new_img = out_img.__class__(out_img.get_data(), in_img.affine,
+                                    in_img.header)
+        new_img.set_data_dtype(out_img.get_data_dtype())
+        new_img.to_filename(fname)
 
 
 class CorticalThicknessInputSpec(ANTSCommandInputSpec):
@@ -655,6 +681,22 @@ class BrainExtractionInputSpec(ANTSCommandInputSpec):
 class BrainExtractionOutputSpec(TraitedSpec):
     BrainExtractionMask = File(exists=True, desc='brain extraction mask')
     BrainExtractionBrain = File(exists=True, desc='brain extraction image')
+    BrainExtractionCSF = File(exists=True, desc='segmentation mask with only CSF')
+    BrainExtractionGM = File(exists=True, desc='segmentation mask with only grey matter')
+    BrainExtractionInitialAffine = File(exists=True, desc='')
+    BrainExtractionInitialAffineFixed = File(exists=True, desc='')
+    BrainExtractionInitialAffineMoving = File(exists=True, desc='')
+    BrainExtractionLaplacian = File(exists=True, desc='')
+    BrainExtractionPrior0GenericAffine = File(exists=True, desc='')
+    BrainExtractionPrior1InverseWarp = File(exists=True, desc='')
+    BrainExtractionPrior1Warp = File(exists=True, desc='')
+    BrainExtractionPriorWarped = File(exists=True, desc='')
+    BrainExtractionSegmentation = File(exists=True, desc='segmentation mask with CSF, GM, and WM')
+    BrainExtractionTemplateLaplacian = File(exists=True, desc='')
+    BrainExtractionTmp = File(exists=True, desc='')
+    BrainExtractionWM = File(exists=True, desc='segmenration mask with only white matter')
+    N4Corrected0 = File(exists=True, desc='N4 bias field corrected image')
+    N4Truncated0 = File(exists=True, desc='')
 
 
 class BrainExtraction(ANTSCommand):
@@ -675,6 +717,40 @@ class BrainExtraction(ANTSCommand):
     output_spec = BrainExtractionOutputSpec
     _cmd = 'antsBrainExtraction.sh'
 
+    def _run_interface(self, runtime, correct_return_codes=(0,)):
+        # antsBrainExtraction.sh requires ANTSPATH to be defined
+        out_environ = self._get_environ()
+        if out_environ.get('ANTSPATH') is None:
+            runtime.environ.update(out_environ)
+            executable_name = self.cmd.split()[0]
+            exist_val, cmd_path = _exists_in_path(executable_name, runtime.environ)
+            if not exist_val:
+                raise IOError("command '%s' could not be found on host %s" %
+                              (self.cmd.split()[0], runtime.hostname))
+
+            # Set the environment variable if found
+            runtime.environ.update({'ANTSPATH': os.path.dirname(cmd_path)})
+
+        runtime = super(BrainExtraction, self)._run_interface(runtime)
+
+        # Still, double-check if it didn't found N4
+        if 'we cant find' in runtime.stdout:
+            for line in runtime.stdout.split('\n'):
+                if line.strip().startswith('we cant find'):
+                    tool = line.strip().replace('we cant find the', '').split(' ')[0]
+                    break
+
+            errmsg = ('antsBrainExtraction.sh requires %s the environment variable '
+                      'ANTSPATH to be defined' % tool)
+            if runtime.stderr is None:
+                runtime.stderr = errmsg
+            else:
+                runtime.stderr += '\n' + errmsg
+            runtime.returncode = 1
+            self.raise_exception(runtime)
+
+        return runtime
+
     def _list_outputs(self):
         outputs = self._outputs().get()
         outputs['BrainExtractionMask'] = os.path.join(os.getcwd(),
@@ -685,6 +761,72 @@ class BrainExtraction(ANTSCommand):
                                                        self.inputs.out_prefix +
                                                        'BrainExtractionBrain.' +
                                                        self.inputs.image_suffix)
+        if isdefined(self.inputs.keep_temporary_files) and self.inputs.keep_temporary_files != 0:
+            outputs['BrainExtractionCSF'] = os.path.join(
+                os.getcwd(),
+                self.inputs.out_prefix + 'BrainExtractionCSF.' + self.inputs.image_suffix
+            )
+            outputs['BrainExtractionGM'] = os.path.join(
+                os.getcwd(),
+                self.inputs.out_prefix + 'BrainExtractionGM.' + self.inputs.image_suffix
+            )
+            outputs['BrainExtractionInitialAffine'] = os.path.join(
+                os.getcwd(),
+                self.inputs.out_prefix +'BrainExtractionInitialAffine.mat'
+            )
+            outputs['BrainExtractionInitialAffineFixed'] = os.path.join(
+                os.getcwd(),
+                self.inputs.out_prefix + 'BrainExtractionInitialAffineFixed.' + self.inputs.image_suffix
+            )
+            outputs['BrainExtractionInitialAffineMoving'] = os.path.join(
+                os.getcwd(),
+                self.inputs.out_prefix + 'BrainExtractionInitialAffineMoving.' + self.inputs.image_suffix
+            )
+            outputs['BrainExtractionLaplacian'] = os.path.join(
+                os.getcwd(),
+                self.inputs.out_prefix + 'BrainExtractionLaplacian.' + self.inputs.image_suffix
+            )
+            outputs['BrainExtractionPrior0GenericAffine'] = os.path.join(
+                os.getcwd(),
+                self.inputs.out_prefix + 'BrainExtractionPrior0GenericAffine.mat'
+            )
+            outputs['BrainExtractionPrior1InverseWarp'] = os.path.join(
+                os.getcwd(),
+                self.inputs.out_prefix + 'BrainExtractionPrior1InverseWarp.' + self.inputs.image_suffix
+            )
+            outputs['BrainExtractionPrior1Warp'] = os.path.join(
+                os.getcwd(),
+                self.inputs.out_prefix + 'BrainExtractionPrior1Warp.' + self.inputs.image_suffix
+            )
+            outputs['BrainExtractionPriorWarped'] = os.path.join(
+                os.getcwd(),
+                self.inputs.out_prefix + 'BrainExtractionPriorWarped.' + self.inputs.image_suffix
+            )
+            outputs['BrainExtractionSegmentation'] = os.path.join(
+                os.getcwd(),
+                self.inputs.out_prefix + 'BrainExtractionSegmentation.' + self.inputs.image_suffix
+            )
+            outputs['BrainExtractionTemplateLaplacian'] = os.path.join(
+                os.getcwd(),
+                self.inputs.out_prefix + 'BrainExtractionTemplateLaplacian.' + self.inputs.image_suffix
+            )
+            outputs['BrainExtractionTmp'] = os.path.join(
+                os.getcwd(),
+                self.inputs.out_prefix + 'BrainExtractionTmp.' + self.inputs.image_suffix
+            )
+            outputs['BrainExtractionWM'] = os.path.join(
+                os.getcwd(),
+                self.inputs.out_prefix + 'BrainExtractionWM.' + self.inputs.image_suffix
+            )
+            outputs['N4Corrected0'] = os.path.join(
+                os.getcwd(),
+                self.inputs.out_prefix + 'N4Corrected0.' + self.inputs.image_suffix
+            )
+            outputs['N4Truncated0'] = os.path.join(
+                os.getcwd(),
+                self.inputs.out_prefix + 'N4Truncated0.' + self.inputs.image_suffix
+            )
+
         return outputs
 
 
@@ -1047,12 +1189,30 @@ ants_joint_fusion_posterior_%d.nii.gz, ants_joint_fusion_voting_weight_%d.nii.gz
             retval = ''
             if not isdefined(self.inputs.out_label_fusion):
                 retval = '-o {0}'.format(self.inputs.out_intensity_fusion_name_format)
+        elif opt == 'atlas_image':
+            atlas_image_cmd = " ".join(
+                ['-g [{0}]'.format(", ".join("'%s'" % fn for fn in ai))
+                                   for ai in self.inputs.atlas_image]
+            )
+            retval = atlas_image_cmd
+        elif opt == 'target_image':
+            target_image_cmd = " ".join(
+                ['-t [{0}]'.format(", ".join("'%s'" % fn for fn in ai))
+                                   for ai in self.inputs.target_image]
+            )
+            retval = target_image_cmd
+        elif opt == 'atlas_segmentation_image':
+            assert len(val) == len(self.inputs.atlas_image), "Number of specified " \
+                "segmentations should be identical to the number of atlas image " \
+                "sets {0}!={1}".format(len(val), len(self.inputs.atlas_image))
+
+            atlas_segmentation_image_cmd = " ".join(
+                ['-l {0}'.format(fn) for fn in self.inputs.atlas_segmentation_image]
+            )
+            retval = atlas_segmentation_image_cmd
         else:
-            if opt == 'atlas_segmentation_image':
-                assert len(val) == len(self.inputs.atlas_image), "Number of specified " \
-                    "segmentations should be identical to the number of atlas image " \
-                    "sets {0}!={1}".format(len(val), len(self.inputs.atlas_image))
-            return super(ANTSCommand, self)._format_arg(opt, spec, val)
+
+            return super(AntsJointFusion, self)._format_arg(opt, spec, val)
         return retval
 
     def _list_outputs(self):
@@ -1071,3 +1231,160 @@ ants_joint_fusion_posterior_%d.nii.gz, ants_joint_fusion_voting_weight_%d.nii.gz
                 self.inputs.out_atlas_voting_weight_name_format)
 
         return outputs
+
+
+class KellyKapowskiInputSpec(ANTSCommandInputSpec):
+    dimension = traits.Enum(3, 2, argstr='--image-dimensionality %d', usedefault=True,
+                            desc='image dimension (2 or 3)')
+
+    segmentation_image = File(exists=True, argstr='--segmentation-image "%s"', mandatory=True,
+                              desc="A segmentation image must be supplied labeling the gray and white matters.\n"
+                                   "Default values = 2 and 3, respectively.",)
+
+    gray_matter_label = traits.Int(2, usedefault=True,
+                                   desc="The label value for the gray matter label in the segmentation_image.")
+
+    white_matter_label = traits.Int(3, usedefault=True,
+                                    desc="The label value for the white matter label in the segmentation_image.")
+
+    gray_matter_prob_image = File(exists=True, argstr='--gray-matter-probability-image "%s"',
+                                  desc="In addition to the segmentation image, a gray matter probability image can be\n"
+                                       "used. If no such image is supplied, one is created using the segmentation image\n"
+                                       "and a variance of 1.0 mm.")
+
+    white_matter_prob_image = File(exists=True, argstr='--white-matter-probability-image "%s"',
+                                   desc="In addition to the segmentation image, a white matter probability image can be\n"
+                                       "used. If no such image is supplied, one is created using the segmentation image\n"
+                                       "and a variance of 1.0 mm.")
+
+    convergence = traits.Str(default="[50,0.001,10]", argstr='--convergence "%s"', usedefault=True,
+                             desc="Convergence is determined by fitting a line to the normalized energy profile of\n"
+                                  "the last N iterations (where N is specified by the window size) and determining\n"
+                                  "the slope which is then compared with the convergence threshold.",)
+
+    thickness_prior_estimate = traits.Float(10, usedefault=True, argstr="--thickness-prior-estimate %f",
+                                            desc="Provides a prior constraint on the final thickness measurement in mm.")
+
+    thickness_prior_image = File(exists=True, argstr='--thickness-prior-image "%s"',
+                                 desc="An image containing spatially varying prior thickness values.")
+
+    gradient_step = traits.Float(0.025, usedefault=True, argstr="--gradient-step %f",
+                                 desc="Gradient step size for the optimization.")
+
+    smoothing_variance = traits.Float(1.0, argstr="--smoothing-variance %f",
+                                      desc="Defines the Gaussian smoothing of the hit and total images.")
+
+    smoothing_velocity_field = traits.Float(1.5, argstr="--smoothing-velocity-field-parameter %f",
+                                            desc="Defines the Gaussian smoothing of the velocity field (default = 1.5).\n"
+                                            "If the b-spline smoothing option is chosen, then this defines the \n"
+                                            "isotropic mesh spacing for the smoothing spline (default = 15).")
+
+    use_bspline_smoothing = traits.Bool(argstr="--use-bspline-smoothing 1",
+                                        desc="Sets the option for B-spline smoothing of the velocity field.")
+
+    number_integration_points = traits.Int(10, argstr="--number-of-integration-points %d",
+                                           desc="Number of compositions of the diffeomorphism per iteration.")
+
+    max_invert_displacement_field_iters = traits.Int(20, argstr="--maximum-number-of-invert-displacement-field-iterations %d",
+                                                     desc="Maximum number of iterations for estimating the invert \n"
+                                                          "displacement field.")
+
+    cortical_thickness = File(argstr='--output "%s"', keep_extension=True,
+                              name_source=["segmentation_image"], name_template='%s_cortical_thickness',
+                              desc='Filename for the cortical thickness.', hash_files=False)
+
+    warped_white_matter = File(name_source=["segmentation_image"], keep_extension=True,
+                               name_template='%s_warped_white_matter',
+                               desc='Filename for the warped white matter file.', hash_files=False)
+
+
+class KellyKapowskiOutputSpec(TraitedSpec):
+    cortical_thickness = File(desc="A thickness map defined in the segmented gray matter.")
+    warped_white_matter = File(desc="A warped white matter image.")
+
+
+class KellyKapowski(ANTSCommand):
+    """ Nipype Interface to ANTs' KellyKapowski, also known as DiReCT.
+
+    DiReCT is a registration based estimate of cortical thickness. It was published
+    in S. R. Das, B. B. Avants, M. Grossman, and J. C. Gee, Registration based
+    cortical thickness measurement, Neuroimage 2009, 45:867--879.
+
+    Examples
+    --------
+    >>> from nipype.interfaces.ants.segmentation import KellyKapowski
+    >>> kk = KellyKapowski()
+    >>> kk.inputs.dimension = 3
+    >>> kk.inputs.segmentation_image = "segmentation0.nii.gz"
+    >>> kk.inputs.convergence = "[45,0.0,10]"
+    >>> kk.inputs.gradient_step = 0.025
+    >>> kk.inputs.smoothing_variance = 1.0
+    >>> kk.inputs.smoothing_velocity_field = 1.5
+    >>> #kk.inputs.use_bspline_smoothing = False
+    >>> kk.inputs.number_integration_points = 10
+    >>> kk.inputs.thickness_prior_estimate = 10
+    >>> kk.cmdline # doctest: +ALLOW_UNICODE
+    u'KellyKapowski --convergence "[45,0.0,10]" \
+--output "[segmentation0_cortical_thickness.nii.gz,segmentation0_warped_white_matter.nii.gz]" \
+--image-dimensionality 3 --gradient-step 0.025000 --number-of-integration-points 10 \
+--segmentation-image "[segmentation0.nii.gz,2,3]" --smoothing-variance 1.000000 \
+--smoothing-velocity-field-parameter 1.500000 --thickness-prior-estimate 10.000000'
+
+    """
+    _cmd = "KellyKapowski"
+    input_spec = KellyKapowskiInputSpec
+    output_spec = KellyKapowskiOutputSpec
+
+    references_ = [{'entry': BibTeX("@book{Das2009867,"
+                                    "author={Sandhitsu R. Das and Brian B. Avants and Murray Grossman and James C. Gee},"
+                                    "title={Registration based cortical thickness measurement.},"
+                                    "journal={NeuroImage},"
+                                    "volume={45},"
+                                    "number={37},"
+                                    "pages={867--879},"
+                                    "year={2009},"
+                                    "issn={1053-8119},"
+                                    "url={http://www.sciencedirect.com/science/article/pii/S1053811908012780},"
+                                    "doi={http://dx.doi.org/10.1016/j.neuroimage.2008.12.016}"
+                                    "}"),
+                    'description': 'The details on the implementation of DiReCT.',
+                    'tags': ['implementation'],
+                    }]
+
+    def _parse_inputs(self, skip=None):
+        if skip is None:
+            skip = []
+        skip += ['warped_white_matter', 'gray_matter_label', 'white_matter_label']
+        return super(KellyKapowski, self)._parse_inputs(skip=skip)
+
+    def _gen_filename(self, name):
+        if name == 'cortical_thickness':
+            output = self.inputs.cortical_thickness
+            if not isdefined(output):
+                _, name, ext = split_filename(self.inputs.segmentation_image)
+                output = name + '_cortical_thickness' + ext
+            return output
+
+        if name == 'warped_white_matter':
+            output = self.inputs.warped_white_matter
+            if not isdefined(output):
+                _, name, ext = split_filename(self.inputs.segmentation_image)
+                output = name + '_warped_white_matter' + ext
+            return output
+
+        return None
+
+    def _format_arg(self, opt, spec, val):
+        if opt == "segmentation_image":
+            newval = '[{0},{1},{2}]'.format(self.inputs.segmentation_image,
+                                            self.inputs.gray_matter_label,
+                                            self.inputs.white_matter_label)
+            return spec.argstr % newval
+
+        if opt == "cortical_thickness":
+            ct = self._gen_filename("cortical_thickness")
+            wm = self._gen_filename("warped_white_matter")
+            newval = '[{},{}]'.format(ct, wm)
+            return spec.argstr % newval
+
+        return super(KellyKapowski, self)._format_arg(opt, spec, val)

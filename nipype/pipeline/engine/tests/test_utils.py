@@ -6,9 +6,10 @@
 from __future__ import print_function, division, unicode_literals, absolute_import
 from builtins import range, open
 
-import os
+import os, sys
 from copy import deepcopy
 from shutil import rmtree
+import pytest
 
 from ... import engine as pe
 from ....interfaces import base as nib
@@ -337,3 +338,60 @@ def test_provenance(tmpdir):
     assert len(psg.bundles) == 2
     assert len(psg.get_records()) == 7
 
+
+def dummy_func(value):
+    return value + 1
+
+
+@pytest.mark.skipif(sys.version_info < (3,0),
+                   reason="the famous segfault #1788")
+def test_mapnode_crash(tmpdir):
+    """Test mapnode crash when stop_on_first_crash is True"""
+    cwd = os.getcwd()
+    node = pe.MapNode(niu.Function(input_names=['WRONG'],
+                                   output_names=['newstring'],
+                                   function=dummy_func),
+                      iterfield=['WRONG'],
+                      name='myfunc')
+    node.inputs.WRONG = ['string{}'.format(i) for i in range(3)]
+    node.config = deepcopy(config._sections)
+    node.config['execution']['stop_on_first_crash'] = True
+    node.base_dir = str(tmpdir)
+    with pytest.raises(TypeError):
+        node.run()
+    os.chdir(cwd)
+
+
+@pytest.mark.skipif(sys.version_info < (3,0),
+                   reason="the famous segfault #1788")
+def test_mapnode_crash2(tmpdir):
+    """Test mapnode crash when stop_on_first_crash is False"""
+    cwd = os.getcwd()
+    node = pe.MapNode(niu.Function(input_names=['WRONG'],
+                                   output_names=['newstring'],
+                                   function=dummy_func),
+                      iterfield=['WRONG'],
+                      name='myfunc')
+    node.inputs.WRONG = ['string{}'.format(i) for i in range(3)]
+    node.base_dir = str(tmpdir)
+
+    with pytest.raises(Exception):
+        node.run()
+    os.chdir(cwd)
+
+
+@pytest.mark.skipif(sys.version_info < (3,0),
+                   reason="the famous segfault #1788")
+def test_mapnode_crash3(tmpdir):
+    """Test mapnode crash when mapnode is embedded in a workflow"""
+    node = pe.MapNode(niu.Function(input_names=['WRONG'],
+                                   output_names=['newstring'],
+                                   function=dummy_func),
+                      iterfield=['WRONG'],
+                      name='myfunc')
+    node.inputs.WRONG = ['string{}'.format(i) for i in range(3)]
+    wf = pe.Workflow('testmapnodecrash')
+    wf.add_nodes([node])
+    wf.base_dir = str(tmpdir)
+    with pytest.raises(RuntimeError):
+        wf.run(plugin='Linear')

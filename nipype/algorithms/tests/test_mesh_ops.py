@@ -34,8 +34,6 @@ def test_ident_distances(tmpdir):
 @pytest.mark.skipif(VTKInfo.no_tvtk(), reason="tvtk is not installed")
 def test_trans_distances(tmpdir):
     tempdir = str(tmpdir)
-    os.chdir(tempdir)
-
     from ...interfaces.vtkbase import tvtk
 
     in_surf = example_data('surf01.vtk')
@@ -57,10 +55,10 @@ def test_trans_distances(tmpdir):
     dist.inputs.surface2 = warped_surf
     dist.inputs.out_file = os.path.join(tempdir, 'distance.npy')
     res = dist.run()
-    npt.assert_almost_equal(res.outputs.distance, np.linalg.norm(inc), 4)
+    assert np.allclose(res.outputs.distance, np.linalg.norm(inc), 4)
     dist.inputs.weighting = 'area'
     res = dist.run()
-    npt.assert_almost_equal(res.outputs.distance, np.linalg.norm(inc), 4)
+    assert np.allclose(res.outputs.distance, np.linalg.norm(inc), 4)
 
 
 @pytest.mark.skipif(VTKInfo.no_tvtk(), reason="tvtk is not installed")

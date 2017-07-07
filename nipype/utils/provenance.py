@@ -11,7 +11,7 @@ from copy import deepcopy
 from pickle import dumps
 import os
 import getpass
-from socket import getfqdn
+import platform
 from uuid import uuid1
 import simplejson as json
 
@@ -133,7 +133,9 @@ def safe_encode(x, as_literal=True):
         if isinstance(x, bytes):
             x = str(x, 'utf-8')
         if os.path.exists(x):
-            value = 'file://{}{}'.format(getfqdn(), x)
+            if x[0] != os.pathsep:
+                x = os.path.abspath(x)
+            value = 'file://{}{}'.format(platform.node().lower(), x)
             if not as_literal:
                 return value
             try:

@@ -1,20 +1,18 @@
 cache:
-- apt
+  apt: true
+
 language: python
 python:
 - 2.7
 - 3.4
 - 3.5
+- 3.6
 env:
 - INSTALL_DEB_DEPENDECIES=true NIPYPE_EXTRAS="doc,tests,fmri,profiler"
 - INSTALL_DEB_DEPENDECIES=false NIPYPE_EXTRAS="doc,tests,fmri,profiler"
 - INSTALL_DEB_DEPENDECIES=true NIPYPE_EXTRAS="doc,tests,fmri,profiler,duecredit"
 before_install:
-- function bef_inst {
-  wget http://repo.continuum.io/miniconda/Miniconda${TRAVIS_PYTHON_VERSION:0:1}-latest-Linux-x86_64.sh
-  -O /home/travis/.cache/miniconda.sh &&
-  bash /home/travis/.cache/miniconda.sh -b -p /home/travis/miniconda &&
-  export PATH=/home/travis/miniconda/bin:$PATH &&
+- function apt_inst {
   if $INSTALL_DEB_DEPENDECIES; then sudo rm -rf /dev/shm; fi &&
   if $INSTALL_DEB_DEPENDECIES; then sudo ln -s /run/shm /dev/shm; fi &&
   bash <(wget -q -O- http://neuro.debian.net/_files/neurodebian-travis.sh) &&
@@ -26,25 +24,26 @@ before_install:
     source /etc/fsl/fsl.sh;
     source /etc/afni/afni.sh;
     export FSLOUTPUTTYPE=NIFTI_GZ; fi }
-- travis_retry bef_inst
-install:
-#  Add install of vtk and mayavi to test mesh (disabled): conda install -y vtk mayavi &&
-- function inst {
+- function conda_inst {
+  export CONDA_HOME=$HOME/conda &&
+  wget https://repo.continuum.io/miniconda/Miniconda${TRAVIS_PYTHON_VERSION:0:1}-latest-Linux-x86_64.sh
+    -O /home/travis/.cache/conda.sh &&
+  bash /home/travis/.cache/conda.sh -b -p ${CONDA_HOME} &&
+  export PATH=${CONDA_HOME}/bin:$PATH &&
+  hash -r &&
+  conda config --set always_yes yes --set changeps1 no &&
+  conda update -q conda &&
+  conda install python=${TRAVIS_PYTHON_VERSION} &&
   conda config --add channels conda-forge &&
-  conda update --yes conda &&
-  conda update --all -y python=$TRAVIS_PYTHON_VERSION &&
-  conda install -y nipype &&
-  rm -r /home/travis/miniconda/lib/python${TRAVIS_PYTHON_VERSION}/site-packages/nipype* &&
-  pip install -r requirements.txt &&
-  pip install -e .[$NIPYPE_EXTRAS] &&
-  export COVERAGE_PROCESS_START=$(pwd)/.coveragerc &&
-  export COVERAGE_DATA_FILE=$(pwd)/.coverage &&
-  echo "data_file = ${COVERAGE_DATA_FILE}" >> ${COVERAGE_PROCESS_START}; }
-- travis_retry inst
+  conda install -y nipype icu &&
+  rm -r ${CONDA_HOME}/lib/python${TRAVIS_PYTHON_VERSION}/site-packages/nipype*; }
+#  Add install of vtk and mayavi to test mesh (disabled): conda install -y vtk mayavi
+- travis_retry apt_inst
+- travis_retry conda_inst
+install:
+- travis_retry pip install -e .[$NIPYPE_EXTRAS]
 script:
-- py.test --doctest-modules --cov=nipype nipype
-after_success:
-- bash <(curl -s https://codecov.io/bash) -t ac172a50-8e66-42e5-8822-5373fcf54686 -cF unittests
+- py.test -v --doctest-modules nipype
 deploy:
   provider: pypi
   user: satra

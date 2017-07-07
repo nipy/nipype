@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import absolute_import
 
-from nipype.utils.onetime import OneTimeProperty, setattr_on_read
-from nipype.utils.tmpdirs import TemporaryDirectory, InTemporaryDirectory
+from .config import NUMPY_MMAP
+from .onetime import OneTimeProperty, setattr_on_read
+from .tmpdirs import TemporaryDirectory, InTemporaryDirectory

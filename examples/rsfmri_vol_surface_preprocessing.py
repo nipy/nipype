@@ -76,6 +76,7 @@ import numpy as np
 import scipy as sp
 import nibabel as nb
 
+
 imports = ['import os',
            'import nibabel as nb',
            'import numpy as np',
@@ -117,9 +118,10 @@ def median(in_files):
     """
     import numpy as np
     import nibabel as nb
+    from nipype.utils import NUMPY_MMAP
     average = None
     for idx, filename in enumerate(filename_to_list(in_files)):
-        img = nb.load(filename)
+        img = nb.load(filename, mmap=NUMPY_MMAP)
         data = np.median(img.get_data(), axis=3)
         if average is None:
             average = data
@@ -145,11 +147,12 @@ def bandpass_filter(files, lowpass_freq, highpass_freq, fs):
     from nipype.utils.filemanip import split_filename, list_to_filename
     import numpy as np
     import nibabel as nb
+    from nipype.utils import NUMPY_MMAP
     out_files = []
     for filename in filename_to_list(files):
         path, name, ext = split_filename(filename)
         out_file = os.path.join(os.getcwd(), name + '_bp' + ext)
-        img = nb.load(filename)
+        img = nb.load(filename, mmap=NUMPY_MMAP)
         timepoints = img.shape[-1]
         F = np.zeros((timepoints))
         lowidx = int(timepoints / 2) + 1
@@ -260,11 +263,12 @@ def extract_noise_components(realigned_file, mask_file, num_components=5,
     from scipy.linalg.decomp_svd import svd
     import numpy as np
     import nibabel as nb
+    from nipype.utils import NUMPY_MMAP
     import os
-    imgseries = nb.load(realigned_file)
+    imgseries = nb.load(realigned_file, mmap=NUMPY_MMAP)
     components = None
     for filename in filename_to_list(mask_file):
-        mask = nb.load(filename).get_data()
+        mask = nb.load(filename, mmap=NUMPY_MMAP).get_data()
         if len(np.nonzero(mask > 0)[0]) == 0:
             continue
         voxel_timecourses = imgseries.get_data()[mask > 0]
@@ -329,10 +333,11 @@ def extract_subrois(timeseries_file, label_file, indices):
     """
     from nipype.utils.filemanip import split_filename
     import nibabel as nb
+    from nipype.utils import NUMPY_MMAP
     import os
-    img = nb.load(timeseries_file)
+    img = nb.load(timeseries_file, mmap=NUMPY_MMAP)
     data = img.get_data()
-    roiimg = nb.load(label_file)
+    roiimg = nb.load(label_file, mmap=NUMPY_MMAP)
     rois = roiimg.get_data()
     prefix = split_filename(timeseries_file)[1]
     out_ts_file = os.path.join(os.getcwd(), '%s_subcortical_ts.txt' % prefix)
@@ -352,8 +357,9 @@ def combine_hemi(left, right):
     """
     import os
     import numpy as np
-    lh_data = nb.load(left).get_data()
-    rh_data = nb.load(right).get_data()
+    from nipype.utils import NUMPY_MMAP
+    lh_data = nb.load(left, mmap=NUMPY_MMAP).get_data()
+    rh_data = nb.load(right, mmap=NUMPY_MMAP).get_data()
 
     indices = np.vstack((1000000 + np.arange(0, lh_data.shape[0])[:, None],
                          2000000 + np.arange(0, rh_data.shape[0])[:, None]))

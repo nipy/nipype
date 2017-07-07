@@ -2,17 +2,7 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """The testing directory contains a small set of imaging files to be
-used for doctests only.  More thorough tests and example data will be
-stored in a nipy data packages that you can download separately.
-
-.. note:
-
-   We use the ``nose`` testing framework for tests.
-
-   Nose is a dependency for the tests, but should not be a dependency
-   for running the algorithms in the NIPY library.  This file should
-   import without nose being present on the python path.
-
+used for doctests only.
 """
 
 import os
@@ -28,7 +18,7 @@ transfm = funcfile
 
 
 from . import decorators as dec
-from .utils import skip_if_no_package, package_check, TempFATFS
+from .utils import package_check, TempFATFS
 
 skipif = dec.skipif
 

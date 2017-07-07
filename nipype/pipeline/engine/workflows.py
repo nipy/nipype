@@ -200,11 +200,16 @@ Trying to connect %s:%s to %s:%s but input '%s' of node '%s' is already
 connected.
 """ % (srcnode, source, destnode, dest, dest, destnode))
                 if not (hasattr(destnode, '_interface') and
-                        '.io' in str(destnode._interface.__class__)):
+                            ('.io' in str(destnode._interface.__class__) or
+                                any(['.io' in str(val) for val in
+                                     destnode._interface.__class__.__bases__]))
+                        ):
                     if not destnode._check_inputs(dest):
                         not_found.append(['in', destnode.name, dest])
                 if not (hasattr(srcnode, '_interface') and
-                        '.io' in str(srcnode._interface.__class__)):
+                            ('.io' in str(srcnode._interface.__class__)
+                             or any(['.io' in str(val) for val in
+                                     srcnode._interface.__class__.__bases__]))):
                     if isinstance(source, tuple):
                         # handles the case that source is specified
                         # with a function
@@ -420,19 +425,26 @@ connected.
                 base_dir = os.getcwd()
         base_dir = make_output_dir(base_dir)
         if graph2use in ['hierarchical', 'colored']:
+            if self.name[:1].isdigit(): # these graphs break if int
+                raise ValueError('{} graph failed, workflow name cannot begin '
+                                 'with a number'.format(graph2use))
             dotfilename = op.join(base_dir, dotfilename)
             self.write_hierarchical_dotfile(dotfilename=dotfilename,
                                             colored=graph2use == "colored",
                                             simple_form=simple_form)
-            format_dot(dotfilename, format=format)
+            outfname = format_dot(dotfilename, format=format)
         else:
             graph = self._graph
             if graph2use in ['flat', 'exec']:
                 graph = self._create_flat_graph()
             if graph2use == 'exec':
                 graph = generate_expanded_graph(deepcopy(graph))
-            export_graph(graph, base_dir, dotfilename=dotfilename,
-                         format=format, simple_form=simple_form)
+            outfname = export_graph(graph, base_dir, dotfilename=dotfilename,
+                                    format=format, simple_form=simple_form)
+
+        logger.info('Generated workflow graph: %s (graph2use=%s, simple_form=%s).' % (
+            outfname, graph2use, simple_form))
+        return outfname
 
     def write_hierarchical_dotfile(self, dotfilename=None, colored=False,
                                    simple_form=True):
@@ -545,7 +557,7 @@ connected.
         if not isinstance(plugin, (str, bytes)):
             runner = plugin
         else:
-            name = 'nipype.pipeline.plugins'
+            name = '.'.join(__name__.split('.')[:-2] + ['plugins'])
             try:
                 __import__(name)
             except ImportError:

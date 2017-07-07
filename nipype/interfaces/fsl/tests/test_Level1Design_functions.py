@@ -10,12 +10,22 @@ def test_level1design():
                           'duration':[10, 10]}],regress=[])
     runidx = 0
     contrasts = Undefined
-    usetd = False
     do_tempfilter = False
-    for key, val in [('hrf', 3), ('dgamma', 3), ('gamma', 2), ('none', 0)]:
+    orthogonalization = {}
+    basic_ev_parameters = {'temporalderiv':False}
+    convolution_variants = [
+        ('custom', 7, {'temporalderiv':False, 'bfcustompath':'/some/path'}),
+        ('hrf', 3, basic_ev_parameters),
+        ('dgamma', 3, basic_ev_parameters),
+        ('gamma', 2, basic_ev_parameters),
+        ('none', 0, basic_ev_parameters)
+        ]
+    for key, val, ev_parameters in convolution_variants:
         output_num, output_txt = Level1Design._create_ev_files(l, os.getcwd(),
                                                                runinfo, runidx,
-                                                               usetd, contrasts,
+                                                               ev_parameters,
+                                                               orthogonalization,
+                                                               contrasts,
                                                                do_tempfilter,
                                                                key)
         assert "set fmri(convolve1) {0}".format(val) in output_txt

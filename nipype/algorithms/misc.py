@@ -34,6 +34,8 @@ from ..interfaces.base import (BaseInterface, traits, TraitedSpec, File,
                                BaseInterfaceInputSpec, isdefined,
                                DynamicTraitedSpec, Undefined)
 from ..utils.filemanip import fname_presuffix, split_filename
+from ..utils import NUMPY_MMAP
+
 from . import confounds
 
 iflogger = logging.getLogger('interface')
@@ -140,7 +142,7 @@ class SimpleThreshold(BaseInterface):
 
     def _run_interface(self, runtime):
         for fname in self.inputs.volumes:
-            img = nb.load(fname)
+            img = nb.load(fname, mmap=NUMPY_MMAP)
             data = np.array(img.get_data())
 
             active_map = data > self.inputs.threshold
@@ -196,7 +198,7 @@ class ModifyAffine(BaseInterface):
 
     def _run_interface(self, runtime):
         for fname in self.inputs.volumes:
-            img = nb.load(fname)
+            img = nb.load(fname, mmap=NUMPY_MMAP)
 
             affine = img.affine
             affine = np.dot(self.inputs.transformation_matrix, affine)
@@ -245,7 +247,7 @@ class CreateNifti(BaseInterface):
         else:
             affine = None
 
-        with open(self.inputs.header_file, 'rb') as data_file:
+        with open(self.inputs.data_file, 'rb') as data_file:
             data = hdr.data_from_fileobj(data_file)
 
         img = nb.Nifti1Image(data, affine, hdr)
@@ -1158,7 +1160,7 @@ def normalize_tpms(in_files, in_mask=None, out_files=[]):
     Returns the input tissue probability maps (tpms, aka volume fractions)
     normalized to sum up 1.0 at each voxel within the mask.
     """
-    import nibabel as nib
+    import nibabel as nb
     import numpy as np
     import os.path as op
 
@@ -1174,7 +1176,7 @@ def normalize_tpms(in_files, in_mask=None, out_files=[]):
             out_file = op.abspath('%s_norm_%02d%s' % (fname, i, fext))
             out_files += [out_file]
 
-    imgs = [nib.load(fim) for fim in in_files]
+    imgs = [nb.load(fim, mmap=NUMPY_MMAP) for fim in in_files]
 
     if len(in_files) == 1:
         img_data = imgs[0].get_data()
@@ -1182,7 +1184,7 @@ def normalize_tpms(in_files, in_mask=None, out_files=[]):
         hdr = imgs[0].header.copy()
         hdr['data_type'] = 16
         hdr.set_data_dtype(np.float32)
-        nib.save(nib.Nifti1Image(img_data.astype(np.float32), imgs[0].affine,
+        nb.save(nb.Nifti1Image(img_data.astype(np.float32), imgs[0].affine,
                                  hdr), out_files[0])
         return out_files[0]
 
@@ -1195,7 +1197,7 @@ def normalize_tpms(in_files, in_mask=None, out_files=[]):
     msk[weights <= 0] = 0
 
     if in_mask is not None:
-        msk = nib.load(in_mask).get_data()
+        msk = nb.load(in_mask, mmap=NUMPY_MMAP).get_data()
         msk[msk <= 0] = 0
         msk[msk > 0] = 1
 
@@ -1207,7 +1209,7 @@ def normalize_tpms(in_files, in_mask=None, out_files=[]):
         hdr = imgs[i].header.copy()
         hdr['data_type'] = 16
         hdr.set_data_dtype('float32')
-        nib.save(nib.Nifti1Image(probmap.astype(np.float32), imgs[i].affine,
+        nb.save(nb.Nifti1Image(probmap.astype(np.float32), imgs[i].affine,
                                  hdr), out_file)
 
     return out_files
@@ -1225,7 +1227,7 @@ def split_rois(in_file, mask=None, roishape=None):
     if roishape is None:
         roishape = (10, 10, 1)
 
-    im = nb.load(in_file)
+    im = nb.load(in_file, mmap=NUMPY_MMAP)
     imshape = im.shape
     dshape = imshape[:3]
     nvols = imshape[-1]
@@ -1233,7 +1235,7 @@ def split_rois(in_file, mask=None, roishape=None):
     droishape = (roishape[0], roishape[1], roishape[2], nvols)
 
     if mask is not None:
-        mask = nb.load(mask).get_data()
+        mask = nb.load(mask, mmap=NUMPY_MMAP).get_data()
         mask[mask > 0] = 1
         mask[mask < 1] = 0
     else:
@@ -1271,9 +1273,9 @@ def split_rois(in_file, mask=None, roishape=None):
         np.savez(iname, (nzels[0][first:last],))
 
         if fill > 0:
-            droi = np.vstack((droi, np.zeros((fill, nvols), dtype=np.float32)))
+            droi = np.vstack((droi, np.zeros((int(fill), int(nvols)), dtype=np.float32)))
             partialmsk = np.ones((roisize,), dtype=np.uint8)
-            partialmsk[-fill:] = 0
+            partialmsk[-int(fill):] = 0
             partname = op.abspath('partialmask.nii.gz')
             nb.Nifti1Image(partialmsk.reshape(roishape), None,
                            None).to_filename(partname)
@@ -1314,7 +1316,7 @@ def merge_rois(in_files, in_idxs, in_ref,
         except:
             pass
 
-    ref = nb.load(in_ref)
+    ref = nb.load(in_ref, mmap=NUMPY_MMAP)
     aff = ref.affine
     hdr = ref.header.copy()
     rsh = ref.shape
@@ -1335,7 +1337,7 @@ def merge_rois(in_files, in_idxs, in_ref,
         for cname, iname in zip(in_files, in_idxs):
             f = np.load(iname)
             idxs = np.squeeze(f['arr_0'])
-            cdata = nb.load(cname).get_data().reshape(-1, ndirs)
+            cdata = nb.load(cname, mmap=NUMPY_MMAP).get_data().reshape(-1, ndirs)
             nels = len(idxs)
             idata = (idxs, )
             try:
@@ -1363,15 +1365,15 @@ def merge_rois(in_files, in_idxs, in_ref,
             idxs = np.squeeze(f['arr_0'])
 
             for d, fname in enumerate(nii):
-                data = nb.load(fname).get_data().reshape(-1)
-                cdata = nb.load(cname).get_data().reshape(-1, ndirs)[:, d]
+                data = nb.load(fname, mmap=NUMPY_MMAP).get_data().reshape(-1)
+                cdata = nb.load(cname, mmap=NUMPY_MMAP).get_data().reshape(-1, ndirs)[:, d]
                 nels = len(idxs)
                 idata = (idxs, )
                 data[idata] = cdata[0:nels]
                 nb.Nifti1Image(data.reshape(rsh[:3]),
                                aff, hdr).to_filename(fname)
 
-        imgs = [nb.load(im) for im in nii]
+        imgs = [nb.load(im, mmap=NUMPY_MMAP) for im in nii]
         allim = nb.concat_images(imgs)
         allim.to_filename(out_file)
 

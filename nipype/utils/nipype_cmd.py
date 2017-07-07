@@ -50,19 +50,8 @@ def run_instance(interface, options):
     print("setting function inputs")
 
     for input_name, _ in list(interface.inputs.items()):
-        if getattr(options, input_name) != None:
+        if getattr(options, input_name) is not None:
             value = getattr(options, input_name)
-            if not isinstance(value, bool):
-                # traits cannot cast from string to float or int
-                try:
-                    value = float(value)
-                except:
-                    pass
-                # try to cast string input to boolean
-                try:
-                    value = str2bool(value)
-                except:
-                    pass
             try:
                 setattr(interface.inputs, input_name,
                         value)

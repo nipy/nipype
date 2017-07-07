@@ -12,6 +12,7 @@ standard_library.install_aliases()
 
 import sys
 import pickle
+import subprocess
 import gzip
 import hashlib
 from hashlib import md5
@@ -31,6 +32,7 @@ fmlogger = logging.getLogger("filemanip")
 
 related_filetype_sets = [
     ('.hdr', '.img', '.mat'),
+    ('.nii', '.mat'),
     ('.BRIK', '.HEAD'),
 ]
 
@@ -236,6 +238,54 @@ def hash_timestamp(afile):
     return md5hex
 
 
+def _generate_cifs_table():
+    """Construct a reverse-length-ordered list of mount points that
+    fall under a CIFS mount.
+
+    This precomputation allows efficient checking for whether a given path
+    would be on a CIFS filesystem.
+
+    On systems without a ``mount`` command, or with no CIFS mounts, returns an
+    empty list.
+    """
+    exit_code, output = subprocess.getstatusoutput("mount")
+    # Not POSIX
+    if exit_code != 0:
+        return []
+
+    # (path, fstype) tuples, sorted by path length (longest first)
+    mount_info = sorted((line.split()[2:5:2] for line in output.splitlines()),
+                        key=lambda x: len(x[0]),
+                        reverse=True)
+    cifs_paths = [path for path, fstype in mount_info if fstype == 'cifs']
+
+    return [mount for mount in mount_info
+            if any(mount[0].startswith(path) for path in cifs_paths)]
+
+
+_cifs_table = _generate_cifs_table()
+
+
+def on_cifs(fname):
+    """ Checks whether a file path is on a CIFS filesystem mounted in a POSIX
+    host (i.e., has the ``mount`` command).
+
+    On Windows, Docker mounts host directories into containers through CIFS
+    shares, which has support for Minshall+French symlinks, or text files that
+    the CIFS driver exposes to the OS as symlinks.
+    We have found that under concurrent access to the filesystem, this feature
+    can result in failures to create or read recently-created symlinks,
+    leading to inconsistent behavior and ``FileNotFoundError``s.
+
+    This check is written to support disabling symlinks on CIFS shares.
+    """
+    # Only the first match (most recent parent) counts
+    for fspath, fstype in _cifs_table:
+        if fname.startswith(fspath):
+            return fstype == 'cifs'
+    return False
+
+
 def copyfile(originalfile, newfile, copy=False, create_new=False,
              hashmethod=None, use_hardlink=False,
              copy_related_files=True):
@@ -286,6 +336,10 @@ def copyfile(originalfile, newfile, copy=False, create_new=False,
 
     if hashmethod is None:
         hashmethod = config.get('execution', 'hash_method').lower()
+
+    # Don't try creating symlinks on CIFS
+    if copy is False and on_cifs(newfile):
+        copy = True
 
     # Existing file
     # -------------
@@ -447,6 +501,19 @@ def list_to_filename(filelist):
     else:
         return filelist[0]
 
+
+def check_depends(targets, dependencies):
+    """Return true if all targets exist and are newer than all dependencies.
+
+    An OSError will be raised if there are missing dependencies.
+    """
+    tgts = filename_to_list(targets)
+    deps = filename_to_list(dependencies)
+    return all(map(os.path.exists, tgts)) and \
+        min(map(os.path.getmtime, tgts)) > \
+        max(list(map(os.path.getmtime, deps)) + [0])
+
+
 def save_json(filename, data):
     """Save data to a json file
 
@@ -515,6 +582,18 @@ def loadpkl(infile):
     except UnicodeDecodeError:
         unpkl = pickle.load(pkl_file, fix_imports=True, encoding='utf-8')
     return unpkl
+
+
+def crash2txt(filename, record):
+    """ Write out plain text crash file """
+    with open(filename, 'w') as fp:
+        if 'node' in record:
+            node = record['node']
+            fp.write('Node: {}\n'.format(node.fullname))
+            fp.write('Working directory: {}\n'.format(node.output_dir()))
+            fp.write('\n')
+            fp.write('Node inputs:\n{}\n'.format(node.inputs))
+        fp.write(''.join(record['traceback']))
 
 
 def savepkl(filename, record):

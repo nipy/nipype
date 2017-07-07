@@ -1,41 +1,20 @@
 # -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
+from builtins import str
 import os
-from shutil import rmtree
-import nibabel as nif
-import numpy as np
-from tempfile import mkdtemp
+
 import pytest
-import nipype.interfaces.freesurfer as freesurfer
+from nipype.testing.fixtures import create_files_in_directory
 
-
-@pytest.fixture()
-def create_files_in_directory(request):
-    outdir = os.path.realpath(mkdtemp())
-    cwd = os.getcwd()
-    os.chdir(outdir)
-    filelist = ['a.nii', 'b.nii']
-    for f in filelist:
-        hdr = nif.Nifti1Header()
-        shape = (3, 3, 3, 4)
-        hdr.set_data_shape(shape)
-        img = np.random.random(shape)
-        nif.save(nif.Nifti1Image(img, np.eye(4), hdr),
-                 os.path.join(outdir, f))
-
-    def clean_directory():
-        if os.path.exists(outdir):
-            rmtree(outdir)
-        os.chdir(cwd)
-
-    request.addfinalizer(clean_directory)
-    return (filelist, outdir, cwd)
+from nipype.interfaces import freesurfer
+from nipype.interfaces.freesurfer import Info
+from nipype import LooseVersion
 
 
 @pytest.mark.skipif(freesurfer.no_freesurfer(), reason="freesurfer is not installed")
 def test_robustregister(create_files_in_directory):
-    filelist, outdir, cwd = create_files_in_directory
+    filelist, outdir = create_files_in_directory
 
     reg = freesurfer.RobustRegister()
 
@@ -62,7 +41,7 @@ def test_robustregister(create_files_in_directory):
 
 @pytest.mark.skipif(freesurfer.no_freesurfer(), reason="freesurfer is not installed")
 def test_fitmsparams(create_files_in_directory):
-    filelist, outdir, cwd = create_files_in_directory
+    filelist, outdir = create_files_in_directory
 
     fit = freesurfer.FitMSParams()
 
@@ -85,7 +64,7 @@ def test_fitmsparams(create_files_in_directory):
 
 @pytest.mark.skipif(freesurfer.no_freesurfer(), reason="freesurfer is not installed")
 def test_synthesizeflash(create_files_in_directory):
-    filelist, outdir, cwd = create_files_in_directory
+    filelist, outdir = create_files_in_directory
 
     syn = freesurfer.SynthesizeFLASH()
 
@@ -109,3 +88,76 @@ def test_synthesizeflash(create_files_in_directory):
     syn2 = freesurfer.SynthesizeFLASH(t1_image=filelist[0], pd_image=filelist[1], flip_angle=20, te=5, tr=25)
     assert syn2.cmdline == ('mri_synthesize 25.00 20.00 5.000 %s %s %s'
                             % (filelist[0], filelist[1], os.path.join(outdir, 'synth-flash_20.mgz')))
+
+@pytest.mark.skipif(freesurfer.no_freesurfer(), reason="freesurfer is not installed")
+def test_mandatory_outvol(create_files_in_directory):
+    filelist, outdir = create_files_in_directory
+    mni = freesurfer.MNIBiasCorrection()
+
+    # make sure command gets called
+    assert mni.cmd == "mri_nu_correct.mni"
+
+    # test raising error with mandatory args absent
+    with pytest.raises(ValueError): mni.cmdline
+
+    # test with minimal args
+    mni.inputs.in_file = filelist[0]
+    base, ext = os.path.splitext(os.path.basename(filelist[0]))
+    if ext == '.gz':
+        base, ext2 = os.path.splitext(base)
+        ext = ext2 + ext
+
+    assert mni.cmdline == (
+        'mri_nu_correct.mni --i %s --o %s_output%s' % (filelist[0], base, ext))
+
+    # test with custom outfile
+    mni.inputs.out_file = 'new_corrected_file.mgz'
+    assert mni.cmdline == ('mri_nu_correct.mni --i %s --o new_corrected_file.mgz'
+                           % (filelist[0]))
+
+    # constructor based tests
+    mni2 = freesurfer.MNIBiasCorrection(in_file=filelist[0],
+                                        out_file='bias_corrected_output',
+                                        iterations=4)
+    assert mni2.cmdline == ('mri_nu_correct.mni --i %s --n 4 --o bias_corrected_output'
+                             % filelist[0])
+
+@pytest.mark.skipif(freesurfer.no_freesurfer(), reason="freesurfer is not installed")
+def test_bbregister(create_files_in_directory):
+    filelist, outdir = create_files_in_directory
+    bbr = freesurfer.BBRegister()
+
+    # make sure command gets called
+    assert bbr.cmd == "bbregister"
+
+    # test raising error with mandatory args absent
+    with pytest.raises(ValueError):
+        bbr.cmdline
+
+    bbr.inputs.subject_id = 'fsaverage'
+    bbr.inputs.source_file = filelist[0]
+    bbr.inputs.contrast_type = 't2'
+
+    # Check that 'init' is mandatory in FS < 6, but not in 6+
+    if Info.looseversion() < LooseVersion("6.0.0"):
+        with pytest.raises(ValueError):
+            bbr.cmdline
+    else:
+        bbr.cmdline
+
+    bbr.inputs.init = 'fsl'
+
+    base, ext = os.path.splitext(os.path.basename(filelist[0]))
+    if ext == '.gz':
+        base, _ = os.path.splitext(base)
+
+    assert bbr.cmdline == ('bbregister --t2 --init-fsl '
+                           '--reg {base}_bbreg_fsaverage.dat '
+                           '--mov {full} --s fsaverage'.format(
+                            full=filelist[0], base=base))
+
+def test_FSVersion():
+    """Check that FSVersion is a string that can be compared with LooseVersion
+    """
+    assert isinstance(freesurfer.preprocess.FSVersion, str)
+    assert LooseVersion(freesurfer.preprocess.FSVersion) >= LooseVersion("0")

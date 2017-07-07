@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
@@ -24,7 +23,7 @@ import re
 import pickle
 from functools import reduce
 import numpy as np
-from nipype.utils.misc import package_check
+from ...utils.misc import package_check
 
 package_check('networkx', '1.3')
 
@@ -1018,42 +1017,48 @@ def export_graph(graph_in, base_dir=None, show=False, use_execgraph=False,
                                suffix='_detailed.dot',
                                use_ext=False,
                                newpath=base_dir)
-    logger.info('Creating detailed dot file: %s' % outfname)
     _write_detailed_dot(graph, outfname)
-    cmd = 'dot -T%s -O %s' % (format, outfname)
-    res = CommandLine(cmd, terminal_output='allatonce').run()
-    if res.runtime.returncode:
-        logger.warn('dot2png: %s', res.runtime.stderr)
+    if format != 'dot':
+        cmd = 'dot -T%s -O %s' % (format, outfname)
+        res = CommandLine(cmd, terminal_output='allatonce').run()
+        if res.runtime.returncode:
+            logger.warn('dot2png: %s', res.runtime.stderr)
     pklgraph = _create_dot_graph(graph, show_connectinfo, simple_form)
-    outfname = fname_presuffix(dotfilename,
-                               suffix='.dot',
-                               use_ext=False,
-                               newpath=base_dir)
-    nx.drawing.nx_pydot.write_dot(pklgraph, outfname)
-    logger.info('Creating dot file: %s' % outfname)
-    cmd = 'dot -T%s -O %s' % (format, outfname)
-    res = CommandLine(cmd, terminal_output='allatonce').run()
-    if res.runtime.returncode:
-        logger.warn('dot2png: %s', res.runtime.stderr)
+    simplefname = fname_presuffix(dotfilename,
+                                  suffix='.dot',
+                                  use_ext=False,
+                                  newpath=base_dir)
+    nx.drawing.nx_pydot.write_dot(pklgraph, simplefname)
+    if format != 'dot':
+        cmd = 'dot -T%s -O %s' % (format, simplefname)
+        res = CommandLine(cmd, terminal_output='allatonce').run()
+        if res.runtime.returncode:
+            logger.warn('dot2png: %s', res.runtime.stderr)
     if show:
         pos = nx.graphviz_layout(pklgraph, prog='dot')
         nx.draw(pklgraph, pos)
         if show_connectinfo:
             nx.draw_networkx_edge_labels(pklgraph, pos)
 
+    if format != 'dot':
+        outfname += '.%s' % format
+        simplefname += '.%s' % format
+    return simplefname if simple_form else outfname
 
-def format_dot(dotfilename, format=None):
+
+def format_dot(dotfilename, format='png'):
     """Dump a directed graph (Linux only; install via `brew` on OSX)"""
-    cmd = 'dot -T%s -O \'%s\'' % (format, dotfilename)
-    try:
-        CommandLine(cmd).run()
-    except IOError as ioe:
-        if "could not be found" in str(ioe):
-            raise IOError("Cannot draw directed graph; executable 'dot' is unavailable")
-        else:
-            raise ioe
-    else:
-        logger.info('Converting dotfile: %s to %s format' % (dotfilename, format))
+    if format != 'dot':
+        cmd = 'dot -T%s -O \'%s\'' % (format, dotfilename)
+        try:
+            CommandLine(cmd).run()
+        except IOError as ioe:
+            if "could not be found" in str(ioe):
+                raise IOError("Cannot draw directed graph; executable 'dot' is unavailable")
+            else:
+                raise ioe
+        dotfilename += '.%s' % format
+    return dotfilename
 
 
 def make_output_dir(outdir):

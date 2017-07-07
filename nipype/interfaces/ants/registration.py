@@ -11,6 +11,7 @@ from __future__ import print_function, division, unicode_literals, absolute_impo
 from builtins import range, str
 import os
 
+from ...utils.filemanip import filename_to_list
 from ..base import TraitedSpec, File, Str, traits, InputMultiPath, isdefined
 from .base import ANTSCommand, ANTSCommandInputSpec
 
@@ -19,8 +20,7 @@ class ANTSInputSpec(ANTSCommandInputSpec):
     dimension = traits.Enum(3, 2, argstr='%d', usedefault=False,
                             position=1, desc='image dimension (2 or 3)')
     fixed_image = InputMultiPath(File(exists=True), mandatory=True,
-                                 desc=('image to apply transformation to (generally a coregistered '
-                                       'functional)'))
+                                 desc=('image to which the moving image is warped'))
     moving_image = InputMultiPath(File(exists=True), argstr='%s',
                                   mandatory=True,
                                   desc=('image to apply transformation to (generally a coregistered '
@@ -220,12 +220,22 @@ class RegistrationInputSpec(ANTSCommandInputSpec):
                             usedefault=True, desc='image dimension (2 or 3)')
     fixed_image = InputMultiPath(File(exists=True), mandatory=True,
                                  desc='image to apply transformation to (generally a coregistered functional)')
-    fixed_image_mask = File(argstr='%s', exists=True,
-                            desc='mask used to limit metric sampling region of the fixed image')
+    fixed_image_mask = File(
+        exists=True, argstr='%s', max_ver='2.1.0', xor=['fixed_image_masks'],
+        desc='mask used to limit metric sampling region of the fixed image')
+    fixed_image_masks = InputMultiPath(
+        traits.Either('NULL', File(exists=True)), min_ver='2.2.0', xor=['fixed_image_mask'],
+        desc='mask used to limit metric sampling region of the fixed image '
+        '(Use "NULL" to omit a mask at a given stage)')
     moving_image = InputMultiPath(File(exists=True), mandatory=True,
                                   desc='image to apply transformation to (generally a coregistered functional)')
-    moving_image_mask = File(requires=['fixed_image_mask'],
-                             exists=True, desc='mask used to limit metric sampling region of the moving image')
+    moving_image_mask = File(
+        exists=True, requires=['fixed_image_mask'], max_ver='2.1.0', xor=['moving_image_masks'],
+        desc='mask used to limit metric sampling region of the moving image')
+    moving_image_masks = InputMultiPath(
+        traits.Either('NULL', File(exists=True)), min_ver='2.2.0', xor=['moving_image_mask'],
+        desc='mask used to limit metric sampling region of the moving image '
+        '(Use "NULL" to omit a mask at a given stage)')
 
     save_state = File(argstr='--save-state %s', exists=False,
                       desc='Filename for saving the internal restorable state of the registration')
@@ -355,6 +365,16 @@ class RegistrationInputSpec(ANTSCommandInputSpec):
                                                                   ),
                                                      )
                                        )
+    restrict_deformation = traits.List(
+        traits.List(traits.Enum(0, 1)),
+        desc=("This option allows the user to restrict the optimization of "
+              "the displacement field, translation, rigid or affine transform "
+              "on a per-component basis. For example, if one wants to limit "
+              "the deformation or rotation of 3-D volume to the  first two "
+              "dimensions, this is possible by specifying a weight vector of "
+              "'1x1x0' for a deformation field or '1x1x0x1x1x0' for a rigid "
+              "transformation.  Low-dimensional restriction only works if "
+              "there are no preceding transformations."))
     # Convergence flags
     number_of_iterations = traits.List(traits.List(traits.Int()))
     smoothing_sigmas = traits.List(traits.List(traits.Float()), mandatory=True)
@@ -378,6 +398,8 @@ class RegistrationInputSpec(ANTSCommandInputSpec):
         low=0.0, high=1.0, value=1.0, argstr='%s', usedefault=True, desc="The Upper quantile to clip image ranges")
     winsorize_lower_quantile = traits.Range(
         low=0.0, high=1.0, value=0.0, argstr='%s', usedefault=True, desc="The Lower quantile to clip image ranges")
+
+    verbose = traits.Bool(argstr='-v', default=False)
 
 
 class RegistrationOutputSpec(TraitedSpec):
@@ -637,6 +659,20 @@ class Registration(ANTSCommand):
 --metric Mattes[ fixed1.nii, moving1.nii, 1, 32 ] --convergence [ 100x50x30, 1e-09, 20 ] \
 --smoothing-sigmas 2.0x1.0x0.0vox --shrink-factors 3x2x1 --use-estimate-learning-rate-once 1 \
 --use-histogram-matching 1 --winsorize-image-intensities [ 0.0, 1.0 ]  --write-composite-transform 1'
+
+    >>> # Test masking
+    >>> reg9 = copy.deepcopy(reg)
+    >>> reg9.inputs.fixed_image_masks = ['NULL', 'fixed1.nii']
+    >>> reg9.cmdline # doctest: +ALLOW_UNICODE
+    'antsRegistration --collapse-output-transforms 0 --dimensionality 3 --initial-moving-transform [ trans.mat, 1 ] \
+--initialize-transforms-per-stage 0 --interpolation Linear --output [ output_, output_warped_image.nii.gz ] \
+--transform Affine[ 2.0 ] --metric Mattes[ fixed1.nii, moving1.nii, 1, 32, Random, 0.05 ] \
+--convergence [ 1500x200, 1e-08, 20 ] --smoothing-sigmas 1.0x0.0vox --shrink-factors 2x1 \
+--use-estimate-learning-rate-once 1 --use-histogram-matching 1 --masks [ NULL, NULL ] \
+--transform SyN[ 0.25, 3.0, 0.0 ] --metric Mattes[ fixed1.nii, moving1.nii, 1, 32 ] \
+--convergence [ 100x50x30, 1e-09, 20 ] --smoothing-sigmas 2.0x1.0x0.0vox --shrink-factors 3x2x1 \
+--use-estimate-learning-rate-once 1 --use-histogram-matching 1 --masks [ fixed1.nii, NULL ] \
+--winsorize-image-intensities [ 0.0, 1.0 ]  --write-composite-transform 1'
     """
     DEF_SAMPLING_STRATEGY = 'None'
     """The default sampling strategy argument."""
@@ -769,6 +805,23 @@ class Registration(ANTSCommand):
                 else:
                     histval = self.inputs.use_histogram_matching[ii]
                 retval.append('--use-histogram-matching %d' % histval)
+            if isdefined(self.inputs.restrict_deformation):
+                retval.append('--restrict-deformation %s' %
+                              self._format_xarray(self.inputs.restrict_deformation[ii]))
+            if any((isdefined(self.inputs.fixed_image_masks),
+                    isdefined(self.inputs.moving_image_masks))):
+                if isdefined(self.inputs.fixed_image_masks):
+                    fixed_masks = filename_to_list(self.inputs.fixed_image_masks)
+                    fixed_mask = fixed_masks[ii if len(fixed_masks) > 1 else 0]
+                else:
+                    fixed_mask = 'NULL'
+
+                if isdefined(self.inputs.moving_image_masks):
+                    moving_masks = filename_to_list(self.inputs.moving_image_masks)
+                    moving_mask = moving_masks[ii if len(moving_masks) > 1 else 0]
+                else:
+                    moving_mask = 'NULL'
+                retval.append('--masks [ %s, %s ]' % (fixed_mask, moving_mask))
         return " ".join(retval)
 
     def _get_outputfilenames(self, inverse=False):

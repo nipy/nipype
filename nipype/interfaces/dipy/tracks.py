@@ -177,10 +177,10 @@ class StreamlineTractography(DipyBaseInterface):
 
         img = nb.load(self.inputs.in_file)
         imref = nb.four_to_three(img)[0]
-        affine = img.get_affine()
+        affine = img.affine
 
         data = img.get_data().astype(np.float32)
-        hdr = imref.get_header().copy()
+        hdr = imref.header.copy()
         hdr.set_data_dtype(np.float32)
         hdr['data_type'] = 16
 
@@ -222,7 +222,7 @@ class StreamlineTractography(DipyBaseInterface):
             msk[msk > 0] = 1
             msk[msk < 0] = 0
         else:
-            msk = np.ones(imref.get_shape())
+            msk = np.ones(imref.shape)
 
         gfa = peaks.gfa * msk
         seeds = self.inputs.num_seeds

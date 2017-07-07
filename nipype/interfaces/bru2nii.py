@@ -43,7 +43,7 @@ class Bru2(CommandLine):
     >>> converter = Bru2()
     >>> converter.inputs.input_dir = "brukerdir"
     >>> converter.cmdline  # doctest: +ELLIPSIS +ALLOW_UNICODE
-    'Bru2 -o .../nipype/nipype/testing/data/brukerdir brukerdir'
+    'Bru2 -o .../nipype/testing/data/brukerdir brukerdir'
     """
     input_spec = Bru2InputSpec
     output_spec = Bru2OutputSpec
@@ -52,7 +52,7 @@ class Bru2(CommandLine):
     def _list_outputs(self):
         outputs = self._outputs().get()
         if isdefined(self.inputs.output_filename):
-            output_filename1 = self.inputs.output_filename
+            output_filename1 = os.path.abspath(self.inputs.output_filename)
         else:
             output_filename1 = self._gen_filename('output_filename')
         outputs["nii_file"] = output_filename1+".nii"
