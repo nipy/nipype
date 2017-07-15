@@ -18,8 +18,6 @@ class DaskPlugin(PluginBase):
     """
 
     def __init__(self, plugin_args=None):
-        if IPython_not_loaded:
-            raise ImportError('Please install ipyparallel to use this plugin.')
         super(DaskPlugin, self).__init__(plugin_args=plugin_args)
         valid_args = ('scheduler_file', 'scheduler_ip')
         self.client_args = {arg: plugin_args[arg]
