@@ -11,6 +11,7 @@ import sys
 from traceback import format_exception
 from functools import partial
 import dask
+from dask.dot import dot_graph
 import dask.distributed as dd
 
 from .base import PluginBase
@@ -75,4 +76,5 @@ class DaskPlugin(PluginBase):
             dask_graph[node.fullname] = (partial(run_node, node, updatehash),
                                          parents)
 
+        dot_graph(dask_graph)
         dask.get(dask_graph, leafs)
