@@ -8,9 +8,9 @@ Parallel workflow execution via dask
 from __future__ import print_function, division, unicode_literals, absolute_import
 
 import sys
+import os
 from traceback import format_exception
 from functools import partial
-import dask
 from dask.dot import dot_graph
 import dask.distributed as dd
 
@@ -36,6 +36,15 @@ def run_node(node, updatehash, *args):
 
     # Init variables
     result = dict(result=None, traceback=None)
+
+    if hasattr(node, 'get_subnodes'):
+        subnodes = node.get_subnodes()
+        dask_graph = {
+            snode.fullname: (partial(run_node, snode, updatehash), [])
+            for snode in subnodes}
+        client = dd.get_client()
+        dd.secede()
+        res = client.get(dask_graph, list(dask_graph.keys()))
 
     # Try and execute the node via node.run()
     try:
@@ -77,4 +86,4 @@ class DaskPlugin(PluginBase):
                                          parents)
 
         dot_graph(dask_graph)
-        dask.get(dask_graph, leafs)
+        self.daskclient.get(dask_graph, leafs)
