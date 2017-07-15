@@ -10,6 +10,7 @@ from __future__ import print_function, division, unicode_literals, absolute_impo
 import sys
 from traceback import format_exception
 from functools import partial
+import dask
 import dask.distributed as dd
 
 from .base import PluginBase
@@ -54,11 +55,12 @@ class DaskPlugin(PluginBase):
 
     def __init__(self, plugin_args=None):
         super(DaskPlugin, self).__init__(plugin_args=plugin_args)
+        if plugin_args is None:
+            plugin_args = {}
         valid_args = ('scheduler_file', 'scheduler_ip')
         client_args = {arg: plugin_args[arg]
                        for arg in valid_args if arg in plugin_args}
         self.daskclient = dd.Client(**client_args)
-        self.dask_get = dd.get
 
     def run(self, graph, config, updatehash=False):
         edges = graph.edges()
@@ -67,10 +69,10 @@ class DaskPlugin(PluginBase):
         for node in graph.nodes():
             parents = [edge[0].fullname for edge in edges if edge[1] is node]
             edges = [edge for edge in edges if edge[1] is not node]
-            if graph.succesors(node) == []:
+            if graph.successors(node) == []:
                 leafs.append(node.fullname)
 
             dask_graph[node.fullname] = (partial(run_node, node, updatehash),
                                          parents)
 
-        self.dask_get(dask_graph, leafs)
+        dask.get(dask_graph, leafs)
