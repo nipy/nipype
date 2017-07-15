@@ -41,9 +41,12 @@ def run_node(node, updatehash, *args):
         dask_graph = {
             snode.fullname: (partial(run_node, snode, updatehash), [])
             for snode in subnodes}
+        resources = {snode.fullname: {'MEM': snode._interface.estimated_memory_gb,
+                                      'CPU': snode._interface.num_threads}
+                     for snode in subnodes}
         client = dd.get_client()
         dd.secede()  # Give up our worker status
-        client.get(dask_graph, list(dask_graph.keys()))  # Wait
+        client.get(dask_graph, list(dask_graph.keys()), resources=resources)  # Wait
         # Fall of the end, to let MapNode collate and save results
 
     # Try and execute the node via node.run()
@@ -75,6 +78,7 @@ class DaskPlugin(PluginBase):
     def run(self, graph, config, updatehash=False):
         edges = graph.edges()
         dask_graph = {}
+        resources = {}
         leafs = []
         for node in graph.nodes():
             parents = [edge[0].fullname for edge in edges if edge[1] is node]
@@ -84,6 +88,8 @@ class DaskPlugin(PluginBase):
 
             dask_graph[node.fullname] = (partial(run_node, node, updatehash),
                                          parents)
+            resources[node.fullname] = {'MEM': node._interface.estimated_memory_gb,
+                                        'CPU': node._interface.num_threads}
 
         dot_graph(dask_graph)
-        self.daskclient.get(dask_graph, leafs)
+        self.daskclient.get(dask_graph, leafs, resources=resources)
