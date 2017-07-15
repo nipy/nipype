@@ -51,7 +51,10 @@ class DaskPlugin(PluginBase):
 
     def __init__(self, plugin_args=None):
         super(DaskPlugin, self).__init__(plugin_args=plugin_args)
-        self.client = dd.client(**plugin_args)
+        valid_args = ('scheduler_file', 'scheduler_ip')
+        client_args = {arg: plugin_args[arg]
+                       for arg in valid_args if arg in plugin_args}
+        self.daskclient = dd.Client(**client_args)
         self.dask_get = dd.get
 
     def run(self, graph, config, updatehash=False):
