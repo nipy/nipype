@@ -7,9 +7,9 @@ def increment(x):
     return x + 1
 
 if __name__ == '__main__':
-    sq = pe.Node(niu.Function(function=square), name='sq')
-    inc = pe.Node(niu.Function(function=increment), name='inc')
-    sq.inputs.x = 5
+    sq = pe.MapNode(niu.Function(function=square), iterfield=['x'], name='sq')
+    sq.inputs.x = [5, 4, 3]
+    inc = pe.MapNode(niu.Function(function=increment), iterfield=['x'], name='inc')
     wf = pe.Workflow(name='fun_wf', base_dir='/tmp')
     wf.connect([(sq, inc, [('out', 'x')])])
     wf.run(plugin='Dask')
