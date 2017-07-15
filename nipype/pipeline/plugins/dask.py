@@ -63,11 +63,14 @@ class DaskPlugin(PluginBase):
     def run(self, graph, config, updatehash=False):
         edges = graph.edges()
         dask_graph = {}
+        leafs = []
         for node in graph.nodes():
             parents = [edge[0].fullname for edge in edges if edge[1] is node]
             edges = [edge for edge in edges if edge[1] is not node]
+            if graph.succesors(node) == []:
+                leafs.append(node.fullname)
 
             dask_graph[node.fullname] = (partial(run_node, node, updatehash),
                                          parents)
 
-        self.dask_get(dask_graph, 'final')
+        self.dask_get(dask_graph, leafs)
