@@ -8,7 +8,6 @@ Parallel workflow execution via dask
 from __future__ import print_function, division, unicode_literals, absolute_import
 
 import sys
-import os
 from traceback import format_exception
 from functools import partial
 from dask.dot import dot_graph
@@ -35,7 +34,7 @@ def run_node(node, updatehash, *args):
     """
 
     # Init variables
-    result = dict(result=None, traceback=None)
+    result = {'traceback': None}
 
     if hasattr(node, 'get_subnodes'):
         subnodes = node.get_subnodes()
@@ -43,8 +42,9 @@ def run_node(node, updatehash, *args):
             snode.fullname: (partial(run_node, snode, updatehash), [])
             for snode in subnodes}
         client = dd.get_client()
-        dd.secede()
-        res = client.get(dask_graph, list(dask_graph.keys()))
+        dd.secede()  # Give up our worker status
+        client.get(dask_graph, list(dask_graph.keys()))  # Wait
+        # Fall of the end, to let MapNode collate and save results
 
     # Try and execute the node via node.run()
     try:
