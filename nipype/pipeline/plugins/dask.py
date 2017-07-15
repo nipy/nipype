@@ -7,6 +7,9 @@ Parallel workflow execution via dask
 """
 from __future__ import print_function, division, unicode_literals, absolute_import
 
+import sys
+from traceback import format_exception
+from functools import partial
 import dask.distributed as dd
 
 from .base import PluginBase
@@ -64,6 +67,7 @@ class DaskPlugin(PluginBase):
             parents = [edge[0].fullname for edge in edges if edge[1] is node]
             edges = [edge for edge in edges if edge[1] is not node]
 
-            dask_graph[node.fullname] = (partial(run_node, node, updatehash), parents)
+            dask_graph[node.fullname] = (partial(run_node, node, updatehash),
+                                         parents)
 
         self.dask_get(dask_graph, 'final')
