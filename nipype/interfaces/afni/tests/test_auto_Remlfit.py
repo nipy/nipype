@@ -8,7 +8,6 @@ def test_Remlfit_inputs():
     ),
     addbase=dict(argstr='-addbase %s',
     copyfile=False,
-    exists=True,
     sep=' ',
     ),
     args=dict(argstr='%s',

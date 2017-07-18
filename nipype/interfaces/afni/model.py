@@ -360,7 +360,6 @@ class RemlfitInputSpec(AFNICommandInputSpec):
              'option. Each column in the specified file(s) will be appended '
              'to the matrix. File(s) must have at least as many rows as the '
              'matrix does.',
-        exists=True,
         copyfile=False,
         sep=" ",
         argstr='-addbase %s')
