@@ -1615,13 +1615,13 @@ class FreeSurferSource(IOBase):
                 globprefix = self.inputs.hemi + '.'
             else:
                 globprefix = '?h.'
+            if key in ('aseg_stats', 'wmparc_stats'):
+                globprefix = ''
         elif key == 'ribbon':
             if self.inputs.hemi != 'both':
                 globprefix = self.inputs.hemi + '.'
             else:
                 globprefix = '*'
-        elif key in ('aseg_stats', 'wmparc_stats'):
-            globprefix = ''
         keys = filename_to_list(altkey) if altkey else [key]
         globfmt = os.path.join(path, dirval,
                                ''.join((globprefix, '{}', globsuffix)))
