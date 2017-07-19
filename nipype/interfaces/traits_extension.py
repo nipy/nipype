@@ -223,3 +223,121 @@ def has_metadata(trait, metadata, value=None, recursive=True):
         #    for handler in trait.handlers:
         #        count += has_metadata(handler, metadata, recursive)
     return count > 0
+
+
+class MultiObject(traitlets.List):
+    """ Abstract class - shared functionality of input and output MultiObject                                                              
+    """
+    # dj TOASK: is this default value ok?
+    default_value = None
+    allow_none = True
+
+    def validate(self, object, value):
+        # dj NOTE: for now isdefined([]) gives false, so OR part not needed
+        # dj NOTE: not sure if this will stay or I'll have to change it
+        #if not isdefined(value) or \
+        #        (isinstance(value, list) and len(value) == 0):
+        if not isdefined(value):
+            return None
+        newvalue = value
+
+        # dj TOASK: traitlets doesnt have inner_traits, not sure if changes are ok
+        if not isinstance(value, list) \
+             or (self._trait and
+                isinstance(self._trait,
+                           traitlets.List) and not
+                isinstance(self._trait,
+                           InputMultiPath) and
+                isinstance(value, list) and
+                value and not
+                isinstance(value[0], list)):
+            newvalue = [value]
+
+        value = super(MultiObject, self).validate(object, newvalue)
+
+        if len(value) > 0:
+            return value
+
+        # dj TOASK: when this error should be raised? can't think about an example
+        self.error(object, value)
+
+
+class OutputMultiObject(MultiObject):
+    """ Implements a user friendly traits that accepts one or more
+    paths to files or directories. This is the output version which
+    return a single string whenever possible (when it was set to a
+    single value or a list of length 1). Default value of this trait
+    is _Undefined. It does not accept empty lists.
+
+    XXX This should only be used as a final resort. We should stick to
+    established Traits to the extent possible.
+
+    XXX This needs to be vetted by somebody who understands traits
+
+    >>> from nipype.interfaces.base import OutputMultiObject
+    >>> class A(TraitedSpec):
+    ...     foo = OutputMultiObject(File(exists=False))
+    >>> a = A()
+    >>> a.foo is None
+    True
+
+    >>> a.foo = '/software/temp/foo.txt'
+    >>> a.foo # doctest: +ALLOW_UNICODE
+    '/software/temp/foo.txt'
+
+    >>> a.foo = ['/software/temp/foo.txt']
+    >>> a.foo # doctest: +ALLOW_UNICODE
+    '/software/temp/foo.txt'
+
+    >>> a.foo = ['/software/temp/foo.txt', '/software/temp/goo.txt']
+    >>> a.foo # doctest: +ALLOW_UNICODE
+    ['/software/temp/foo.txt', '/software/temp/goo.txt']
+    """
+
+    # dj NOTE: method has different signature (hope this will work for other tests)
+    def get(self, object, cls=None):
+        value = super(OutputMultiObject, self).get(object, cls)
+        if value is None:
+            return None
+        # dj NOTE: i think an empty list would be changed to None in validate anyway
+        elif len(value) == 0:
+            return None
+        elif len(value) == 1:
+            return value[0]
+        else:
+            return value
+
+
+# dj TOASK: the same as MultiObject - should we keep both? somehthing should be added here?
+class InputMultiObject(MultiObject):
+    """ Implements a user friendly traits that accepts one or more
+    paths to files or directories. This is the input version which
+    always returns a list. Default value of this trait
+    is _Undefined. It does not accept empty lists.
+
+    XXX This should only be used as a final resort. We should stick to
+    established Traits to the extent possible.
+
+    XXX This needs to be vetted by somebody who understands traits
+
+    >>> from nipype.interfaces.base import InputMultiObject
+    >>> class A(TraitedSpec):
+    ...     foo = InputMultiObject(File(exists=False))
+    >>> a = A()
+    >>> a.foo is None
+    True
+
+    >>> a.foo = '/software/temp/foo.txt'
+    >>> a.foo # doctest: +ALLOW_UNICODE
+    ['/software/temp/foo.txt']
+
+    >>> a.foo = ['/software/temp/foo.txt']
+    >>> a.foo # doctest: +ALLOW_UNICODE
+    ['/software/temp/foo.txt']
+
+    >>> a.foo = ['/software/temp/foo.txt', '/software/temp/goo.txt']
+    >>> a.foo # doctest: +ALLOW_UNICODE 
+    ['/software/temp/foo.txt', '/software/temp/goo.txt']
+
+    """
+    pass
