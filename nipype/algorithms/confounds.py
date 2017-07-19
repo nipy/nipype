@@ -420,10 +420,10 @@ class CompCor(BaseInterface):
                                  header=imgseries.header)
             mask_images = [img]
 
-        nvols = self.inputs.ignore_initial_volumes
-        if nvols:
+        skip_vols = self.inputs.ignore_initial_volumes
+        if skip_vols:
             imgseries = imgseries.__class__(
-                img.series.get_data()[..., nvols:], imgseries.affine,
+                img.series.get_data()[..., skip_vols:], imgseries.affine,
                 imgseries.header)
 
         mask_images = self._process_masks(mask_images, imgseries.get_data())
@@ -450,15 +450,15 @@ class CompCor(BaseInterface):
             imgseries.get_data(), mask_images, self.inputs.num_components,
             self.inputs.pre_filter, degree, self.inputs.high_pass_cutoff, TR)
 
-        if nvols:
+        if skip_vols:
             old_comp, old_basis = components, filter_basis
-            nrows = nvols + components.shape[0]
+            nrows = skip_vols + components.shape[0]
             components = np.zeros((nrows, components.shape[1]),
                                   dtype=components.dtype)
-            components[nvols:] = old_comp
+            components[skip_vols:] = old_comp
             filter_basis = np.zeros((nrows, filter_basis.shape[1]),
                                     dtype=filter_basis.dtype)
-            filter_basis[nvols:] = old_basis
+            filter_basis[skip_vols:] = old_basis
 
         components_file = os.path.join(os.getcwd(), self.inputs.components_file)
         np.savetxt(components_file, components, fmt=b"%.10f", delimiter='\t',
@@ -470,12 +470,12 @@ class CompCor(BaseInterface):
                      'cosine': 'cos'}[self.inputs.pre_filter]
             ncols = filter_basis.shape[1] if filter_basis.size > 0 else 0
             header = ['{}{:02d}'.format(ftype, i) for i in range(ncols)]
-            if nvols:
-                ss_col = np.zeros((components.shape[0], 1),
-                                  dtype=filter_basis.dtype)
-                ss_col[:nvols] = 1
-                filter_basis = np.hstack((filter_basis, ss_col))
-                header.append('SteadyState')
+            if skip_vols:
+                ss_cols = np.eye(components.shape[0], skip_vols,
+                                 dtype=filter_basis.dtype)
+                filter_basis = np.hstack((filter_basis, ss_cols))
+                header.extend(['SteadyState{:02d}'.format(i)
+                               for i in range(skip_vols)])
             np.savetxt(pre_filter_file, filter_basis, fmt=b'%.10f',
                        delimiter='\t', header='\t'.join(header), comments='')
 
