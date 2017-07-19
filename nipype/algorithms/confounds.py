@@ -345,6 +345,9 @@ class CompCorInputSpec(BaseInterfaceInputSpec):
              'unspecified')
     save_pre_filter = traits.Either(
         traits.Bool, File, desc='Save pre-filter basis as text file')
+    ignore_initial_volumes = traits.Range(
+        low=0, usedefault=True,
+        desc='Number of volumes at start of series to ignore')
 
 
 class CompCorOutputSpec(TraitedSpec):
@@ -417,6 +420,12 @@ class CompCor(BaseInterface):
                                  header=imgseries.header)
             mask_images = [img]
 
+        nvols = self.inputs.ignore_initial_volumes
+        if nvols:
+            imgseries = imgseries.__class__(
+                img.series.get_data()[..., nvols:], imgseries.affine,
+                imgseries.header)
+
         mask_images = self._process_masks(mask_images, imgseries.get_data())
 
         TR = 0
@@ -451,6 +460,14 @@ class CompCor(BaseInterface):
                      'cosine': 'cos'}[self.inputs.pre_filter]
             ncols = filter_basis.shape[1] if filter_basis.size > 0 else 0
             header = ['{}{:02d}'.format(ftype, i) for i in range(ncols)]
+            if nvols:
+                nrows = filter_basis.shape[0] if filter_basis.size > 0 else 0
+                old_basis = filter_basis
+                filter_basis = np.zeros((nrows + nvols, ncols + 1),
+                                        dtype=filter_basis.dtype)
+                filter_basis[nvols:, :-1] = old_basis
+                filter_basis[:nvols, -1] = 1
+                header.append('SteadyState')
             np.savetxt(pre_filter_file, filter_basis, fmt=b'%.10f',
                        delimiter='\t', header='\t'.join(header), comments='')
 
