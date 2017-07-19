@@ -71,7 +71,7 @@ def copytree(src, dst, use_hardlink=False):
     try:
         os.makedirs(dst)
     except OSError as why:
-        if 'File exists' in why:
+        if 'File exists' in why.strerror:
             pass
         else:
             raise why
@@ -687,7 +687,7 @@ class DataSink(IOBase):
                 try:
                     os.makedirs(outdir)
                 except OSError as inst:
-                    if 'File exists' in inst:
+                    if 'File exists' in inst.strerror:
                         pass
                     else:
                         raise(inst)
@@ -738,7 +738,7 @@ class DataSink(IOBase):
                         try:
                             os.makedirs(path)
                         except OSError as inst:
-                            if 'File exists' in inst:
+                            if 'File exists' in inst.strerror:
                                 pass
                             else:
                                 raise(inst)
@@ -1256,8 +1256,10 @@ class SelectFiles(IOBase):
         infields = []
         for name, template in list(templates.items()):
             for _, field_name, _, _ in string.Formatter().parse(template):
-                if field_name is not None and field_name not in infields:
-                    infields.append(field_name)
+                if field_name is not None:
+                    field_name = re.match("\w+", field_name).group()
+                    if field_name not in infields:
+                        infields.append(field_name)
 
         self._infields = infields
         self._outfields = list(templates)
@@ -1613,13 +1615,13 @@ class FreeSurferSource(IOBase):
                 globprefix = self.inputs.hemi + '.'
             else:
                 globprefix = '?h.'
+            if key in ('aseg_stats', 'wmparc_stats'):
+                globprefix = ''
         elif key == 'ribbon':
             if self.inputs.hemi != 'both':
                 globprefix = self.inputs.hemi + '.'
             else:
                 globprefix = '*'
-        elif key in ('aseg_stats', 'wmparc_stats'):
-            globprefix = ''
         keys = filename_to_list(altkey) if altkey else [key]
         globfmt = os.path.join(path, dirval,
                                ''.join((globprefix, '{}', globsuffix)))

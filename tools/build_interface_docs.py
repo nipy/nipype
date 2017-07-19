@@ -42,7 +42,7 @@ if __name__ == '__main__':
                                        ]
     docwriter.class_skip_patterns += ['AFNICommand',
                                       'ANTS',
-                                      'FSL',
+                                      'FSLCommand',
                                       'FS',
                                       'Info',
                                       '^SPM',

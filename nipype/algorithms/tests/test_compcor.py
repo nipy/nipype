@@ -80,7 +80,7 @@ class TestCompCor():
         self.run_cc(CompCor(realigned_file=self.realigned_file,
                             mask_files=self.mask_files,
                             mask_index=0,
-                            use_regress_poly=False),
+                            pre_filter=False),
                     [['0.4451946442', '-0.7683311482'],
                      ['-0.4285129505', '-0.0926034137'],
                      ['0.5721540256', '0.5608764842'],
