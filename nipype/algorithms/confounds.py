@@ -450,6 +450,16 @@ class CompCor(BaseInterface):
             imgseries.get_data(), mask_images, self.inputs.num_components,
             self.inputs.pre_filter, degree, self.inputs.high_pass_cutoff, TR)
 
+        if nvols:
+            old_comp, old_basis = components, filter_basis
+            nrows = nvols + components.shape[0]
+            components = np.zeros((nrows, components.shape[1]),
+                                  dtype=components.dtype)
+            components[nvols:] = old_comp
+            filter_basis = np.zeros((nrows, filter_basis.shape[1]),
+                                    dtype=filter_basis.dtype)
+            filter_basis[nvols:] = old_basis
+
         components_file = os.path.join(os.getcwd(), self.inputs.components_file)
         np.savetxt(components_file, components, fmt=b"%.10f", delimiter='\t',
                    header=self._make_headers(components.shape[1]), comments='')
@@ -461,12 +471,10 @@ class CompCor(BaseInterface):
             ncols = filter_basis.shape[1] if filter_basis.size > 0 else 0
             header = ['{}{:02d}'.format(ftype, i) for i in range(ncols)]
             if nvols:
-                nrows = filter_basis.shape[0] if filter_basis.size > 0 else 0
-                old_basis = filter_basis
-                filter_basis = np.zeros((nrows + nvols, ncols + 1),
-                                        dtype=filter_basis.dtype)
-                filter_basis[nvols:, :-1] = old_basis
-                filter_basis[:nvols, -1] = 1
+                ss_col = np.zeros((components.shape[0], 1),
+                                  dtype=filter_basis.dtype)
+                ss_col[:nvols] = 1
+                filter_basis = np.hstack((filter_basis, ss_col))
                 header.append('SteadyState')
             np.savetxt(pre_filter_file, filter_basis, fmt=b'%.10f',
                        delimiter='\t', header='\t'.join(header), comments='')
