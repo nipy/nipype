@@ -371,7 +371,7 @@ class CatInputSpec(AFNICommandInputSpec):
         desc='Keep only columns that are marked as \'free\' in the '
              '3dAllineate header from \'-1Dparam_save\'. '
              'If there is no such header, all columns are kept.',
-        argst='-nonfixed')
+        argstr='-nonfixed')
     out_format = traits.Enum(
         'int','nice','double','fint','cint',
         argstr='-form %s',
