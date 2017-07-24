@@ -232,7 +232,7 @@ def all_fsl_pipeline(name='fsl_all_correct',
     outputnode = pe.Node(niu.IdentityInterface(
         fields=['out_file', 'out_mask', 'out_bvec']), name='outputnode')
 
-    def _gen_index(in_file):
+    def gen_index(in_file):
         import numpy as np
         import nibabel as nb
         import os
@@ -242,6 +242,9 @@ def all_fsl_pipeline(name='fsl_all_correct',
         np.savetxt(out_file, np.ones((vols,)).T)
         return out_file
 
+    gen_idx = pe.Node(niu.Function(
+        input_names=['in_file'], output_names=['out_file'],
+        function=gen_index), name='gen_index')
     avg_b0_0 = pe.Node(niu.Function(
         input_names=['in_dwi', 'in_bval'], output_names=['out_file'],
         function=b0_average), name='b0_avg_pre')
@@ -272,10 +275,11 @@ def all_fsl_pipeline(name='fsl_all_correct',
                     ('topup.out_fieldcoef', 'in_topup_fieldcoef'),
                     ('topup.out_movpar', 'in_topup_movpar')]),
         (bet_dwi0, ecc, [('mask_file', 'in_mask')]),
+        (inputnode, gen_idx, [('in_file', 'in_file')]),
         (inputnode, ecc, [('in_file', 'in_file'),
-                          (('in_file', _gen_index), 'in_index'),
                           ('in_bval', 'in_bval'),
                           ('in_bvec', 'in_bvec')]),
+        (gen_idx, ecc, [('out_file', 'in_index')]),
         (inputnode, rot_bvec, [('in_bvec', 'in_bvec')]),
         (ecc, rot_bvec, [('out_parameter', 'eddy_params')]),
         (ecc, avg_b0_1, [('out_corrected', 'in_dwi')]),
