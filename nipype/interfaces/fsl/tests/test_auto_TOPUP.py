@@ -110,6 +110,7 @@ def test_TOPUP_outputs():
     out_fieldcoef=dict(),
     out_jacs=dict(),
     out_logfile=dict(),
+    out_mats=dict(),
     out_movpar=dict(),
     out_warps=dict(),
     )
