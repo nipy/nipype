@@ -360,6 +360,26 @@ class CompCor(BaseInterface):
     """
     Interface with core CompCor computation, used in aCompCor and tCompCor
 
+    CompCor provides three pre-filter options, all of which include per-voxel
+    mean removal:
+      - polynomial: Legendre polynomial basis
+      - cosine: Discrete cosine basis
+      - False: mean-removal only
+
+    In the case of ``polynomial`` and ``cosine`` filters, a pre-filter file may
+    be saved with a row for each volume/timepoint, and a column for each
+    non-constant regressor.
+    If no non-constant (mean-removal) columns are used, this file may be empty.
+
+    If ``ignore_initial_volumes`` is set, then the specified number of initial
+    volumes are excluded both from pre-filtering and CompCor component
+    extraction.
+    Each column in the components and pre-filter files are prefixe with zeros
+    for each excluded volume so that the number of rows continues to match the
+    number of volumes in the input file.
+    In addition, for each excluded volume, a column is added to the pre-filter
+    file with a 1 in the corresponding row.
+
     Example
     -------
 
