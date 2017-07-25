@@ -443,7 +443,7 @@ class CompCor(BaseInterface):
         skip_vols = self.inputs.ignore_initial_volumes
         if skip_vols:
             imgseries = imgseries.__class__(
-                img.series.get_data()[..., skip_vols:], imgseries.affine,
+                imgseries.get_data()[..., skip_vols:], imgseries.affine,
                 imgseries.header)
 
         mask_images = self._process_masks(mask_images, imgseries.get_data())
