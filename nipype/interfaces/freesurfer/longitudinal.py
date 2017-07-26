@@ -18,13 +18,14 @@ import os
 from ... import logging
 from ..base import (TraitedSpec, File, traits,
                     InputMultiPath, OutputMultiPath, isdefined)
-from .base import FSCommand, FSTraitedSpec
+from .base import (FSCommand, FSTraitedSpec, FSCommandOpenMP,
+                   FSTraitedSpecOpenMP)
 
 __docformat__ = 'restructuredtext'
 iflogger = logging.getLogger('interface')
 
 
-class RobustTemplateInputSpec(FSTraitedSpec):
+class RobustTemplateInputSpec(FSTraitedSpecOpenMP):
     # required
     in_files = InputMultiPath(File(exists=True), mandatory=True, argstr='--mov %s',
                              desc='input movable volumes to be aligned to common mean/median template')
@@ -72,7 +73,7 @@ class RobustTemplateOutputSpec(TraitedSpec):
         File(exists=True), desc="output final intensity scales")
 
 
-class RobustTemplate(FSCommand):
+class RobustTemplate(FSCommandOpenMP):
     """ construct an unbiased robust template for longitudinal volumes
 
     Examples
