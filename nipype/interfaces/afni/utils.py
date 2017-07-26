@@ -270,6 +270,91 @@ class BrickStat(AFNICommandBase):
 
         return outputs
 
+class BucketInputSpec(AFNICommandInputSpec):
+    in_file = traits.List(
+        traits.Tuple(
+            (File(
+                exists=True,
+                desc='input file',
+                copyfile=False),
+            traits.Str(argstr="'%s'")),
+            artstr="%s%s"),
+        position=-1,
+        mandatory=True,
+        argstr="%s",
+        desc='List of tuples of input datasets and subbrick selection strings'
+            'as described in more detail in the following afni help string'
+            'Input dataset specified using one of these forms:'
+            '   \'prefix+view\', \'prefix+view.HEAD\', or \'prefix+view.BRIK\'.'
+            'You can also add a sub-brick selection list after the end of the'
+            'dataset name.  This allows only a subset of the sub-bricks to be'
+            'included into the output (by default, all of the input dataset'
+            'is copied into the output).  A sub-brick selection list looks like'
+            'one of the following forms:'
+            '  fred+orig[5]                     ==> use only sub-brick #5'
+            '  fred+orig[5,9,17]                ==> use #5, #9, and #17'
+            '  fred+orig[5..8]     or [5-8]     ==> use #5, #6, #7, and #8'
+            '  fred+orig[5..13(2)] or [5-13(2)] ==> use #5, #7, #9, #11, and #13'
+            'Sub-brick indexes start at 0.  You can use the character \'$\''
+            'to indicate the last sub-brick in a dataset; for example, you'
+            'can select every third sub-brick by using the selection list'
+            '  fred+orig[0..$(3)]'
+            'N.B.: The sub-bricks are output in the order specified, which may'
+            ' not be the order in the original datasets.  For example, using'
+            '  fred+orig[0..$(2),1..$(2)]'
+            ' will cause the sub-bricks in fred+orig to be output into the'
+            ' new dataset in an interleaved fashion.  Using'
+            '  fred+orig[$..0]'
+            ' will reverse the order of the sub-bricks in the output.'
+            'N.B.: Bucket datasets have multiple sub-bricks, but do NOT have'
+            ' a time dimension.  You can input sub-bricks from a 3D+time dataset'
+            ' into a bucket dataset.  You can use the \'3dinfo\' program to see'
+            ' how many sub-bricks a 3D+time or a bucket dataset contains.'
+            'N.B.: In non-bucket functional datasets (like the \'fico\' datasets'
+            ' output by FIM, or the \'fitt\' datasets output by 3dttest), sub-brick'
+            ' [0] is the \'intensity\' and sub-brick [1] is the statistical parameter'
+            ' used as a threshold.  Thus, to create a bucket dataset using the'
+            ' intensity from dataset A and the threshold from dataset B, and'
+            ' calling the output dataset C, you would type'
+            '    3dbucket -prefix C -fbuc \'A+orig[0]\' -fbuc \'B+orig[1]\''
+            'WARNING: using this program, it is possible to create a dataset that'
+            '         has different basic datum types for different sub-bricks'
+            '         (e.g., shorts for brick 0, floats for brick 1).'
+            '         Do NOT do this!  Very few AFNI programs will work correctly'
+            '         with such datasets!')
+    out_file = File(
+        argstr='-prefix %s',
+        name_template='buck')
+
+
+class Bucket(AFNICommand):
+    """Concatenate sub-bricks from input datasets into one big
+    'bucket' dataset.
+
+    For complete details, see the `3dbucket Documentation.
+    <https://afni.nimh.nih.gov/pub/dist/doc/program_help/3dbucket.html>`_
+
+    Examples
+    ========
+
+    >>> from nipype.interfaces import afni
+    >>> bucket = afni.Bucket()
+    >>> bucket.inputs.in_file = [('functional.nii',"{2..$}"), ('functional.nii',"{1}")]
+    >>> bucket.inputs.out_file = 'vr_base'
+    >>> bucket.cmdline # doctest: +ALLOW_UNICODE
+    "3dbucket -prefix vr_base functional.nii'{2..$}' functional.nii'{1}'"
+    >>> res = bucket.run()  # doctest: +SKIP
+
+    """
+
+    _cmd = '3dbucket'
+    input_spec = BucketInputSpec
+    output_spec = AFNICommandOutputSpec
+
+    def _format_arg(self, name, spec, value):
+        if name == 'in_file':
+            return spec.argstr%(' '.join([i[0]+"'"+i[1]+"'" for i in value]))
+        return super(Bucket, self)._format_arg(name, spec, value)
 
 class CalcInputSpec(AFNICommandInputSpec):
     in_file_a = File(
