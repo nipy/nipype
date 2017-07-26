@@ -432,7 +432,104 @@ class Automask(AFNICommand):
     input_spec = AutomaskInputSpec
     output_spec = AutomaskOutputSpec
 
+class AutoTLRCInputSpec(CommandLineInputSpec):
+    outputtype = traits.Enum('AFNI', list(Info.ftypes.keys()),
+                             desc='AFNI output filetype')
+    in_file = File(
+        desc='Original anatomical volume (+orig).'
+             'The skull is removed by this script'
+             'unless instructed otherwise (-no_ss).',
+        argstr='-input %s',
+        mandatory=True,
+        exists=True,
+        copyfile=False)
+    base = traits.Str(  
+        desc = '              Reference anatomical volume'
+                '              Usually this volume is in some standard space like'
+                '              TLRC or MNI space and with afni dataset view of'
+                '              (+tlrc).'
+                '              Preferably, this reference volume should have had'
+                '              the skull removed but that is not mandatory.'
+                '              AFNI\'s distribution contains several templates.'
+                '              For a longer list, use "whereami -show_templates"'
+                'TT_N27+tlrc --> Single subject, skull stripped volume.'
+                '             This volume is also known as '
+                '             N27_SurfVol_NoSkull+tlrc elsewhere in '
+                '             AFNI and SUMA land.'
+                '             (www.loni.ucla.edu, www.bic.mni.mcgill.ca)'
+                '             This template has a full set of FreeSurfer'
+                '             (surfer.nmr.mgh.harvard.edu)'
+                '             surface models that can be used in SUMA. '
+                '             For details, see Talairach-related link:'
+                '             https://afni.nimh.nih.gov/afni/suma'
+                'TT_icbm452+tlrc --> Average volume of 452 normal brains.'
+                '                 Skull Stripped. (www.loni.ucla.edu)'
+                'TT_avg152T1+tlrc --> Average volume of 152 normal brains.'
+                '                 Skull Stripped.(www.bic.mni.mcgill.ca)'
+                'TT_EPI+tlrc --> EPI template from spm2, masked as TT_avg152T1'
+                '                TT_avg152 and TT_EPI volume sources are from'
+                '                SPM\'s distribution. (www.fil.ion.ucl.ac.uk/spm/)'
+                'If you do not specify a path for the template, the script'
+                'will attempt to locate the template AFNI\'s binaries directory.'
+                'NOTE: These datasets have been slightly modified from'
+                '      their original size to match the standard TLRC'
+                '      dimensions (Jean Talairach and Pierre Tournoux'
+                '      Co-Planar Stereotaxic Atlas of the Human Brain'
+                '      Thieme Medical Publishers, New York, 1988). '
+                '      That was done for internal consistency in AFNI.'
+                '      You may use the original form of these'
+                '      volumes if you choose but your TLRC coordinates'
+                '      will not be consistent with AFNI\'s TLRC database'
+                '      (San Antonio Talairach Daemon database), for example.',
+        mandatory = True,
+        argstr='-base %s')
+    no_ss = traits.Bool(
+        desc='Do not strip skull of input data set'
+            '(because skull has already been removed'
+            'or because template still has the skull)'
+            'NOTE: The -no_ss option is not all that optional.'
+            '   Here is a table of when you should and should not use -no_ss'
+            '                  Template          Template'
+            '                  WITH skull        WITHOUT skull'
+            '   Dset.'
+            '   WITH skull      -no_ss            xxx '
+            '   '
+            '   WITHOUT skull   No Cigar          -no_ss'
+            '   '
+            '   Template means: Your template of choice'
+            '   Dset. means: Your anatomical dataset'
+            '   -no_ss means: Skull stripping should not be attempted on Dset'
+            '   xxx means: Don\'t put anything, the script will strip Dset'
+            '   No Cigar means: Don\'t try that combination, it makes no sense.',
+        argstr='-no_ss')
 
+class AutoTLRC(AFNICommand):
+    """A minmal wrapper for the AutoTLRC script
+    The only option currently supported is no_ss.
+    For complete details, see the `3dQwarp Documentation.
+    <https://afni.nimh.nih.gov/pub/dist/doc/program_help/@auto_tlrc.html>`_
+
+    Examples
+    ========
+    >>> from nipype.interfaces import afni
+    >>> autoTLRC = afni.AutoTLRC()
+    >>> autoTLRC.inputs.in_file = 'structural.nii'
+    >>> autoTLRC.inputs.no_ss = True
+    >>> autoTLRC.inputs.base = "TT_N27+tlrc"
+    >>> autoTLRC.cmdline # doctest: +ALLOW_UNICODE
+    '@auto_tlrc -base TT_N27+tlrc -input structural.nii -no_ss'
+    >>> res = autoTLRC.run()  # doctest: +SKIP
+
+    """
+    _cmd = '@auto_tlrc'
+    input_spec = AutoTLRCInputSpec
+    output_spec = AFNICommandOutputSpec
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        ext = '.HEAD'
+        outputs['out_file'] = os.path.abspath(self._gen_fname(self.inputs.in_file, suffix='+tlrc')+ext)
+        return outputs
+    
 class BandpassInputSpec(AFNICommandInputSpec):
     in_file = File(
         desc='input file to 3dBandpass',

@@ -9,6 +9,7 @@ Top-level namespace for afni.
 
 from .base import Info
 from .preprocess import (Allineate, Automask, AutoTcorrelate,
+                         AutoTLRC,
                          Bandpass, BlurInMask, BlurToFWHM,
                          ClipLevel, DegreeCentrality, Despike,
                          Detrend, ECM, Fim, Fourier, Hist, LFCD,
