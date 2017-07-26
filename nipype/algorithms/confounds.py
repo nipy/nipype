@@ -471,14 +471,11 @@ class CompCor(BaseInterface):
             self.inputs.pre_filter, degree, self.inputs.high_pass_cutoff, TR)
 
         if skip_vols:
-            old_comp, old_basis = components, filter_basis
+            old_comp = components
             nrows = skip_vols + components.shape[0]
             components = np.zeros((nrows, components.shape[1]),
                                   dtype=components.dtype)
             components[skip_vols:] = old_comp
-            filter_basis = np.zeros((nrows, filter_basis.shape[1]),
-                                    dtype=filter_basis.dtype)
-            filter_basis[skip_vols:] = old_basis
 
         components_file = os.path.join(os.getcwd(), self.inputs.components_file)
         np.savetxt(components_file, components, fmt=b"%.10f", delimiter='\t',
@@ -491,9 +488,12 @@ class CompCor(BaseInterface):
             ncols = filter_basis.shape[1] if filter_basis.size > 0 else 0
             header = ['{}{:02d}'.format(ftype, i) for i in range(ncols)]
             if skip_vols:
-                ss_cols = np.eye(components.shape[0], skip_vols,
-                                 dtype=filter_basis.dtype)
-                filter_basis = np.hstack((filter_basis, ss_cols))
+                old_basis = filter_basis
+                nrows = filter_basis.shape[0] if filter_basis.size > 0 else 0
+                filter_basis = np.zeros((nrows + skip_vols, ncols + skip_vols),
+                                        dtype=filter_basis.dtype)
+                filter_basis[skip_vols:, :ncols] = old_basis
+                filter_basis[:skip_vols, -skip_vols:] = np.eye(skip_vols)
                 header.extend(['SteadyState{:02d}'.format(i)
                                for i in range(skip_vols)])
             np.savetxt(pre_filter_file, filter_basis, fmt=b'%.10f',
