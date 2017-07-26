@@ -53,7 +53,8 @@ class Info(object):
             else:
                 return None
 
-        v_string, githash = self._version.split('-')
+        # -githash may or may not be appended
+        v_string = self._version.split('-')[0]
 
         # 2.2.0-equivalent version string
         if 'post' in v_string and LooseVersion(v_string) >= LooseVersion('2.1.0.post789'):
