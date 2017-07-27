@@ -213,7 +213,6 @@ class AllineateInputSpec(AFNICommandInputSpec):
     in_file = File(
         desc='input file to 3dAllineate',
         argstr='-source %s',
-        position=-1,
         mandatory=True,
         exists=True,
         copyfile=False)
@@ -225,9 +224,10 @@ class AllineateInputSpec(AFNICommandInputSpec):
     out_file = File(
         desc='output file from 3dAllineate',
         argstr='-prefix %s',
-        position=-2,
-        name_source='%s_allineate',
-        genfile=True)
+        name_source='in_file',
+        name_template='%s_allineate',
+        genfile=True,
+        xors=['allcostx'])
     out_param_file = File(
         argstr='-1Dparam_save %s',
         desc='Save the warp parameters in ASCII (.1D) format.')
@@ -241,8 +241,14 @@ class AllineateInputSpec(AFNICommandInputSpec):
         desc='Save the transformation matrix for each volume.')
     in_matrix = File(
         desc='matrix to align input file',
-        argstr='-1Dmatrix_apply %s',
-        position=-3)
+        argstr='-1Dmatrix_apply %s')
+    # TODO: implement sensible xors for allcostx and suppres prefix in command when allcosx is used
+    allcostx= File(
+        desc='Compute and print ALL available cost functionals for the un-warped inputs'
+             'AND THEN QUIT. If you use this option none of the other expected outputs will be produced',
+        argstr='-allcostx |& tee %s',
+        position=-1,
+        xors=['out_file'])
 
     _cost_funcs = [
         'leastsq', 'ls',
@@ -414,6 +420,7 @@ class AllineateInputSpec(AFNICommandInputSpec):
 class AllineateOutputSpec(TraitedSpec):
     out_file = File(desc='output image file name')
     matrix = File(desc='matrix to align input file')
+    allcostx = File(desc='Compute and print ALL available cost functionals for the un-warped inputs')
 
 
 class Allineate(AFNICommand):
@@ -431,9 +438,17 @@ class Allineate(AFNICommand):
     >>> allineate.inputs.out_file = 'functional_allineate.nii'
     >>> allineate.inputs.in_matrix = 'cmatrix.mat'
     >>> allineate.cmdline  # doctest: +ALLOW_UNICODE
-    '3dAllineate -1Dmatrix_apply cmatrix.mat -prefix functional_allineate.nii -source functional.nii'
+    '3dAllineate -source functional.nii -1Dmatrix_apply cmatrix.mat -prefix functional_allineate.nii'
     >>> res = allineate.run()  # doctest: +SKIP
 
+    >>> from nipype.interfaces import afni
+    >>> allineate = afni.Allineate()
+    >>> allineate.inputs.in_file = 'functional.nii'
+    >>> allineate.inputs.reference = 'structural.nii'
+    >>> allineate.inputs.allcostx = 'out.allcostX.txt'
+    >>> allineate.cmdline  # doctest: +ALLOW_UNICODE
+    '3dAllineate -source functional.nii -prefix functional_allineate -base structural.nii -allcostx |& tee out.allcostX.txt'
+    >>> res = allineate.run()  # doctest: +SKIP
     """
 
     _cmd = '3dAllineate'
@@ -457,6 +472,10 @@ class Allineate(AFNICommand):
         if isdefined(self.inputs.out_matrix):
             outputs['matrix'] = os.path.abspath(os.path.join(os.getcwd(),\
                                          self.inputs.out_matrix +'.aff12.1D'))
+
+        if isdefined(self.inputs.allcostX):
+            outputs['allcostX'] = os.path.abspath(os.path.join(os.getcwd(),\
+                                         self.inputs.allcostx))
         return outputs
 
     def _gen_filename(self, name):
@@ -1520,14 +1539,17 @@ class MeansInputSpec(AFNICommandInputSpec):
     in_file_a = File(
         desc='input file to 3dMean',
         argstr='%s',
-        position=0,
+        position=-2,
         mandatory=True,
         exists=True)
     in_file_b = File(
         desc='another input file to 3dMean',
         argstr='%s',
-        position=1,
+        position=-1,
         exists=True)
+    datum = traits.Str(
+        desc='Sets the data type of the output dataset',
+        argstr='-datum %s')
     out_file = File(
         name_template='%s_mean',
         desc='output image file name',
@@ -1574,7 +1596,16 @@ class Means(AFNICommand):
     >>> means.inputs.in_file_b = 'im2.nii'
     >>> means.inputs.out_file =  'output.nii'
     >>> means.cmdline  # doctest: +ALLOW_UNICODE
-    '3dMean im1.nii im2.nii -prefix output.nii'
+    '3dMean -prefix output.nii im1.nii im2.nii'
+    >>> res = means.run()  # doctest: +SKIP
+
+    >>> from nipype.interfaces import afni
+    >>> means = afni.Means()
+    >>> means.inputs.in_file_a = 'im1.nii'
+    >>> means.inputs.out_file =  'output.nii'
+    >>> means.inputs.datum = 'short'
+    >>> means.cmdline  # doctest: +ALLOW_UNICODE
+    '3dMean -datum short -prefix output.nii im1.nii'
     >>> res = means.run()  # doctest: +SKIP
 
     """
