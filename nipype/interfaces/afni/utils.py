@@ -564,7 +564,6 @@ class CatMatvec(AFNICommand):
     'cat_matvec structural.BRIK::WARP_DATA -I  > warp.anat.Xat.1D'
     >>> res = cmv.run()  # doctest: +SKIP
 
-
     """
 
     _cmd = 'cat_matvec'
