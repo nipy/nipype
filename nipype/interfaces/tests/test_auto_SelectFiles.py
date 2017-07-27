@@ -5,6 +5,8 @@ from ..io import SelectFiles
 
 def test_SelectFiles_inputs():
     input_map = dict(base_directory=dict(),
+    directory_mode=dict(usedefault=True,
+    ),
     force_lists=dict(usedefault=True,
     ),
     ignore_exception=dict(nohash=True,
