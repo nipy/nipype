@@ -2491,6 +2491,10 @@ class VolregInputSpec(AFNICommandInputSpec):
         argstr='-1Dmatrix_save %s',
         keep_extension=True,
         name_source='in_file')
+    interp = traits.Enum(
+        ('Fourier', 'cubic', 'heptic', 'quintic','linear'),
+        desc='spatial interpolation methods [default = heptic]',
+        argstr='-%s')
 
 
 class VolregOutputSpec(TraitedSpec):
@@ -2525,6 +2529,20 @@ class Volreg(AFNICommand):
     >>> volreg.inputs.outputtype = 'NIFTI'
     >>> volreg.cmdline  # doctest: +ELLIPSIS +ALLOW_UNICODE
     '3dvolreg -Fourier -twopass -1Dfile functional.1D -1Dmatrix_save functional.aff12.1D -prefix functional_volreg.nii -zpad 4 -maxdisp1D functional_md.1D functional.nii'
+    >>> res = volreg.run()  # doctest: +SKIP
+
+    >>> from nipype.interfaces import afni
+    >>> volreg = afni.Volreg()
+    >>> volreg.inputs.in_file = 'functional.nii'
+    >>> volreg.inputs.interp = 'cubic'
+    >>> volreg.inputs.verbose = True
+    >>> volreg.inputs.zpad = 1
+    >>> volreg.inputs.basefile = 'functional.nii'
+    >>> volreg.inputs.out_file = 'rm.epi.volreg.r1'
+    >>> volreg.inputs.oned_file = 'dfile.r1.1D'
+    >>> volreg.inputs.oned_matrix_save = 'mat.r1.tshift+orig.1D'
+    >>> volreg.cmdline
+    '3dvolreg -cubic -1Dfile dfile.r1.1D -1Dmatrix_save mat.r1.tshift+orig.1D -prefix rm.epi.volreg.r1 -verbose -base functional.nii -zpad 1 -maxdisp1D functional_md.1D functional.nii'
     >>> res = volreg.run()  # doctest: +SKIP
 
     """
