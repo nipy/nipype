@@ -517,6 +517,64 @@ class Cat(AFNICommand):
     input_spec = CatInputSpec
     output_spec = AFNICommandOutputSpec
 
+class CatMatvecInputSpec(AFNICommandInputSpec):
+    in_file = traits.List(
+        traits.Tuple(traits.Str(), traits.Str()),
+        descr="list of tuples of mfiles and associated opkeys",
+        mandatory=True,
+        argstr="%s",
+        position=-2)
+    out_file = File(
+        descr="File to write concattenated matvecs to",
+        argstr=" > %s",
+        position=-1,
+        mandatory=True)
+    matrix = traits.Bool(
+        descr="indicates that the resulting matrix will"
+               "be written to outfile in the 'MATRIX(...)' format (FORM 3)."
+               "This feature could be used, with clever scripting, to input"
+               "a matrix directly on the command line to program 3dWarp.",
+        argstr="-MATRIX",
+        xor=['oneline','fourXfour'])
+    oneline = traits.Bool(
+        descr="indicates that the resulting matrix"
+              "will simply be written as 12 numbers on one line.",
+        argstr="-ONELINE",
+        xor=['matrix','fourXfour'])
+    fourxfour = traits.Bool(
+        descr="Output matrix in augmented form (last row is 0 0 0 1)"
+              "This option does not work with -MATRIX or -ONELINE",
+        argstr="-4x4",
+        xor=['matrix','oneline'])
+
+class CatMatvec(AFNICommand):
+    """Catenates 3D rotation+shift matrix+vector transformations.
+
+    For complete details, see the `cat_matvec Documentation.
+    <https://afni.nimh.nih.gov/pub/dist/doc/program_help/cat_matvec.html>`_
+
+    Examples
+    ========
+
+    >>> from nipype.interfaces import afni
+    >>> cmv = afni.CatMatvec()
+    >>> cmv.inputs.in_file = [('structural.BRIK::WARP_DATA','I')]
+    >>> cmv.inputs.out_file = 'warp.anat.Xat.1D'
+    >>> cmv.cmdline  # doctest: +ALLOW_UNICODE
+    'cat_matvec structural.BRIK::WARP_DATA -I  > warp.anat.Xat.1D'
+    >>> res = cmv.run()  # doctest: +SKIP
+
+
+    """
+
+    _cmd = 'cat_matvec'
+    input_spec = CatMatvecInputSpec
+    output_spec = AFNICommandOutputSpec
+
+    def _format_arg(self, name, spec, value):
+        if name == 'in_file':
+            return spec.argstr%(' '.join([i[0]+' -'+i[1] for i in value]))
+        return super(CatMatvec, self)._format_arg(name, spec, value)
 
 class CopyInputSpec(AFNICommandInputSpec):
     in_file = File(
