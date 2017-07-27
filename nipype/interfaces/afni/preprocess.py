@@ -227,7 +227,7 @@ class AllineateInputSpec(AFNICommandInputSpec):
         name_source='in_file',
         name_template='%s_allineate',
         genfile=True,
-        xors=['allcostx'])
+        xor=['allcostx'])
     out_param_file = File(
         argstr='-1Dparam_save %s',
         desc='Save the warp parameters in ASCII (.1D) format.')
@@ -248,7 +248,7 @@ class AllineateInputSpec(AFNICommandInputSpec):
              'AND THEN QUIT. If you use this option none of the other expected outputs will be produced',
         argstr='-allcostx |& tee %s',
         position=-1,
-        xors=['out_file'])
+        xor=['out_file'])
 
     _cost_funcs = [
         'leastsq', 'ls',

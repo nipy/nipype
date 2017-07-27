@@ -25,7 +25,7 @@ from ..base import (
     CommandLineInputSpec, CommandLine, Directory, TraitedSpec,
     traits, isdefined, File, InputMultiPath, Undefined, Str)
 from ...external.due import BibTeX
-
+from distutils import spawn
 from .base import (
     AFNICommandBase, AFNICommand, AFNICommandInputSpec, AFNICommandOutputSpec)
 
@@ -1494,6 +1494,94 @@ class NwarpApply(AFNICommandBase):
     input_spec = NwarpApplyInputSpec
     output_spec = AFNICommandOutputSpec
 
+class OneDToolPyInputSpec(AFNICommandInputSpec):
+    in_file = File(
+        desc='input file to OneDTool',
+        argstr='-infile %s',
+        mandatory=True,
+        exists=True)
+    py27_path = File(
+        desc='Path to Python 2.7 executable for running afni python scripts',
+        argstr='%s '+spawn.find_executable('1d_tool.py'),
+        exists=True,
+        default='/opt/miniconda/envs/py27/bin/python',
+        usedefault=True,
+        position=0
+        )
+    set_nruns = traits.Int(
+        desc='treat the input data as if it has nruns',
+        argstr='-set_nruns %d')
+    derivative = traits.Bool(
+        desc='take the temporal derivative of each vector (done as first backward difference)',
+        argstr='-derivative')
+    demean = traits.Bool(
+        desc='demean each run (new mean of each run = 0.0)',
+        argstr='-demean')
+    out_file = File(
+        desc='write the current 1D data to FILE',
+        argstr='-write %s',
+        xor=['show_cormat_warnings'])
+    show_censor_count = traits.Bool(
+        desc='display the total number of censored TRs  Note : if input is a valid xmat.1D dataset,'
+             'then the count will come from the header.  Otherwise the input is assumed to be a binary censor'
+              'file, and zeros are simply counted.',
+        argstr="-show_censor_count")
+    censor_motion = traits.Tuple(
+        (traits.Float(),File()),
+        desc='Tuple of motion limit and outfile prefix. need to also set set_nruns -r set_run_lengths',
+        argstr="-censor_motion %f %s")
+    censor_prev_TR = traits.Bool(
+        desc='for each censored TR, also censor previous',
+        argstr='-censor_prev_TR')
+    show_trs_uncensored = traits.Enum('comma','space','encoded','verbose',
+        desc='display a list of TRs which were not censored in the specified style',
+        argstr='-show_trs_uncensored %s')
+    show_cormat_warnings = traits.File(
+        desc='Write cormat warnings to a file',
+        argstr="-show_cormat_warnings |& tee %s",
+        default="out.cormat_warn.txt",
+        usedefault=False,
+        position=-1,
+        xor=['out_file'])
+    show_indices_interest = traits.Bool(
+        desc="display column indices for regs of interest",
+        argstr="-show_indices_interest")
+    show_trs_run = traits.Int(
+        desc="restrict -show_trs_[un]censored to the given 1-based run",
+        argstr="-show_trs_run %d")
+
+class OneDToolPyOutputSpec(AFNICommandOutputSpec):
+    out_file = File(desc='output of 1D_tool.py')
+
+class OneDToolPy(AFNICommandBase):
+    """This program is meant to read/manipulate/write/diagnose 1D datasets.
+    Input can be specified using AFNI sub-brick[]/time{} selectors.
+
+    >>> from nipype.interfaces import afni
+    >>> odt = afni.OneDToolPy()
+    >>> odt.inputs.in_file = 'f1.1D'
+    >>> odt.inputs.py27_path = "/opt/miniconda/envs/py27/bin/python"
+    >>> odt.inputs.set_nruns = 3
+    >>> odt.inputs.demean = True
+    >>> odt.inputs.out_file = 'motion_dmean.1D'
+    >>> odt.cmdline # doctest: +ALLOW_UNICODE
+    'echo "" &&  /opt/miniconda/envs/py27/bin/python /root/abin/1d_tool.py -demean -infile f1.1D -write motion_dmean.1D -set_nruns 3'
+     >>> res = odt.run()  # doctest: +SKIP
+"""
+
+    _cmd = 'echo "" && '
+
+    input_spec = OneDToolPyInputSpec
+    output_spec = OneDToolPyOutputSpec
+
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+
+        if isdefined(self.inputs.out_file):
+            outputs['out_file']=os.path.join(os.getcwd(), self.inputs.out_file)
+        if isdefined(self.inputs.show_cormat_warnings):
+            outputs['out_file']=os.path.join(os.getcwd(), self.inputs.show_cormat_warnings)
+        return outputs
 
 class RefitInputSpec(CommandLineInputSpec):
     in_file = File(
