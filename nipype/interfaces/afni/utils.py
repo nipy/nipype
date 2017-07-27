@@ -391,6 +391,9 @@ class CalcInputSpec(AFNICommandInputSpec):
         requires=['start_idx'])
     single_idx = traits.Int(
         desc='volume index for in_file_a')
+    overwrite = traits.Bool(
+        desc='overwrite output',
+        argstr='-overwrite')
     other = File(
         desc='other options',
         argstr='')
@@ -415,6 +418,16 @@ class Calc(AFNICommand):
     >>> calc.cmdline  # doctest: +ELLIPSIS +ALLOW_UNICODE
     '3dcalc -a functional.nii -b functional2.nii -expr "a*b" -prefix functional_calc.nii.gz'
     >>> res = calc.run()  # doctest: +SKIP
+
+    >>> from nipype.interfaces import afni
+    >>> calc = afni.Calc()
+    >>> calc.inputs.in_file_a = 'functional.nii'
+    >>> calc.inputs.expr = '1'
+    >>> calc.inputs.out_file = 'rm.epi.all1'
+    >>> calc.inputs.overwrite = True
+    >>> calc.cmdline # doctest: +ALLOW_UNICODE
+    '3dcalc -a functional.nii -expr "1" -prefix rm.epi.all1 -overwrite'
+    >>> res = calc.run() # doctest: +SKIP
 
     """
 
