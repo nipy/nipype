@@ -29,6 +29,61 @@ from ...external.due import BibTeX
 from .base import (
     AFNICommandBase, AFNICommand, AFNICommandInputSpec, AFNICommandOutputSpec)
 
+class ABoverlapInputSpec(AFNICommandInputSpec):
+    in_file_a = File(
+        desc='input file A',
+        argstr='%s',
+        position=-3,
+        mandatory=True,
+        exists=True,
+        copyfile=False)
+    in_file_b = File(
+        desc='input file B',
+        argstr='%s',
+        position=-2,
+        mandatory=True,
+        exists=True,
+        copyfile=False)
+    out_file = File(
+        desc='collect output to a file',
+        argstr=' |& tee %s',
+        position=-1)
+    no_automask = traits.Bool(
+        desc='consider input datasets as masks',
+        argstr='-no_automask')
+    quiet = traits.Bool(
+        desc='be as quiet as possible (without being entirely mute)',
+        argstr='-quiet')
+    verb = traits.Bool(
+        desc='print out some progress reports (to stderr)',
+        argstr='-verb')
+
+
+class ABoverlap(AFNICommand):
+    """Output (to screen) is a count of various things about how
+    the automasks of datasets A and B overlap or don't overlap.
+
+    For complete details, see the `3dABoverlap Documentation.
+    <https://afni.nimh.nih.gov/pub/dist/doc/program_help/3dABoverlap.html>`_
+
+    Examples
+    ========
+
+    >>> from nipype.interfaces import afni
+    >>> aboverlap = afni.ABoverlap()
+    >>> aboverlap.inputs.in_file_a = 'functional.nii'
+    >>> aboverlap.inputs.in_file_b = 'structural.nii'
+    >>> aboverlap.inputs.out_file =  'out.mask_ae_overlap.txt'
+    >>> aboverlap.cmdline  # doctest: +ALLOW_UNICODE
+    '3dABoverlap functional.nii structural.nii  |& tee out.mask_ae_overlap.txt'
+    >>> res = aboverlap.run()  # doctest: +SKIP
+
+    """
+
+    _cmd = '3dABoverlap'
+    input_spec = ABoverlapInputSpec
+    output_spec = AFNICommandOutputSpec
+
 
 class AFNItoNIFTIInputSpec(AFNICommandInputSpec):
     in_file = File(
@@ -646,6 +701,76 @@ class Copy(AFNICommand):
     input_spec = CopyInputSpec
     output_spec = AFNICommandOutputSpec
 
+class DotInputSpec(AFNICommandInputSpec):
+    in_files = traits.List(
+        (File()),
+        desc="list of input files, possibly with subbrick selectors",
+        argstr="%s ...",
+        position=-2)
+    out_file = File(
+        desc='collect output to a file',
+        argstr=' |& tee %s',
+        position=-1)
+    mask = File(
+        desc='Use this dataset as a mask',
+        argstr='-mask %s')
+    mrange = traits.Tuple((traits.Float(),traits.Float()),
+        desc='Means to further restrict the voxels from \'mset\' so that'
+             'only those mask values within this range (inclusive) willbe used.',
+        argstr='-mrange %s %s')
+    demean = traits.Bool(
+        desc='Remove the mean from each volume prior to computing the correlation',
+        argstr='-demean')
+    docor = traits.Bool(
+        desc='Return the correlation coefficient (default).',
+        argstr='-docor')
+    dodot = traits.Bool(
+        desc='Return the dot product (unscaled).',
+        argstr='-dodot')
+    docoef = traits.Bool(
+        desc='Return the least square fit coefficients {{a,b}} so that dset2 is approximately a + b*dset1',
+        argstr='-docoef')
+    dosums = traits.Bool(
+        desc='Return the 6 numbers xbar=<x> ybar=<y> <(x-xbar)^2> <(y-ybar)^2> <(x-xbar)(y-ybar)> and the correlation coefficient.',
+        argstr='-dosums')
+    dodice = traits.Bool(
+        desc='Return the Dice coefficient (the Sorensen-Dice index).',
+        argstr='-dodice')
+    doeta2 = traits.Bool(
+        desc='Return eta-squared (Cohen, NeuroImage 2008).',
+        argstr='-doeta2')
+    full = traits.Bool(
+        desc='Compute the whole matrix. A waste of time, but handy for parsing.',
+        argstr='-full')
+    show_labels = traits.Bool(
+        desc='Print sub-brick labels to help identify what is being correlated. This option is useful when'
+              'you have more than 2 sub-bricks at input.',
+        argstr='-show_labels')
+    upper = traits.Bool(
+        desc='Compute upper triangular matrix',
+        argstr='-upper')
+
+class Dot(AFNICommand):
+    """Correlation coefficient between sub-brick pairs.
+    All datasets in in_files list will be concatenated.
+    You can use sub-brick selectors in the file specification.
+    Note: This program is not efficient when more than two subbricks are input.
+    For complete details, see the `3ddot Documentation.
+    <https://afni.nimh.nih.gov/pub/dist/doc/program_help/3ddot.html>`_
+
+    >>> from nipype.interfaces import afni
+    >>> dot = afni.Dot()
+    >>> dot.inputs.in_files = ['functional.nii[0]', 'structural.nii']
+    >>> dot.inputs.dodice = True
+    >>> dot.inputs.out_file = 'out.mask_ae_dice.txt'
+    >>> dot.cmdline  # doctest: +ALLOW_UNICODE
+    '3dDot -dodice functional.nii[0]  structural.nii   |& tee out.mask_ae_dice.txt'
+    >>> res = copy3d.run()  # doctest: +SKIP
+
+    """
+    _cmd='3dDot'
+    input_spec = DotInputSpec
+    output_spec = AFNICommandOutputSpec
 
 class Edge3InputSpec(AFNICommandInputSpec):
     in_file = File(

@@ -18,8 +18,8 @@ from .preprocess import (AlignEpiAnatPy,Allineate, Automask,
                          Seg, SkullStrip, TCorr1D, TCorrMap, TCorrelate,
                          TShift, Volreg, Warp, QwarpPlusMinus, Qwarp)
 from .svm import (SVMTest, SVMTrain)
-from .utils import (AFNItoNIFTI, Autobox, Axialize, BrickStat, Bucket,
-                    Calc, Cat, CatMatvec, Copy,
+from .utils import (ABoverlap, AFNItoNIFTI, Autobox, Axialize, BrickStat, Bucket,
+                    Calc, Cat, CatMatvec, Copy, Dot,
                     Edge3, Eval, FWHMx, MaskTool, Merge, Notes, NwarpApply,
                     Refit, Resample, TCat, TStat, To3D, Unifize, ZCutUp, GCOR,
                     Zcat, Zeropad)
