@@ -291,17 +291,30 @@ class Allineate(AFNICommand):
         return super(Allineate, self)._format_arg(name, trait_spec, value)
 
     def _list_outputs(self):
-        outputs = self._outputs().get()
-        if not isdefined(self.inputs.out_file):
-            outputs['out_file'] = self._gen_fname(self.inputs.in_file,
-                                                  suffix='_allineate.nii')
-        else:
-            outputs['out_file'] = os.path.abspath(self.inputs.out_file)
+        outputs = self.output_spec().get()
 
-        if isdefined(self.inputs.out_matrix):
-            outputs['out_matrix'] = os.path.abspath(os.path.join(os.getcwd(),
-                                                    self.inputs.out_matrix +
-                                                    '.aff12.1D'))
+        if self.inputs.out_file:
+            outputs['out_file'] = op.abspath(self.inputs.out_file)
+
+        if self.inputs.out_weight_file:
+            outputs['out_weight_file'] = op.abspath(self.inputs.out_weight_file)
+
+        if self.inputs.out_matrix:
+            path, base, ext = split_filename(self.inputs.out_matrix)
+            if ext.lower() not in ['.1d', '.1D']:
+                outputs['out_matrix'] = self._gen_fname(self.inputs.out_matrix,
+                                                        suffix='.aff12.1D')
+            else:
+                outputs['out_matrix'] = op.abspath(self.inputs.out_matrix)
+
+        if self.inputs.out_param_file:
+            path, base, ext = split_filename(self.inputs.out_param_file)
+            if ext.lower() not in ['.1d', '.1D']:
+                outputs['out_param_file'] = self._gen_fname(self.inputs.out_param_file,
+                                                            suffix='.param.1D')
+            else:
+                outputs['out_param_file'] = op.abspath(self.inputs.out_param_file)
+
         return outputs
 
     def _gen_filename(self, name):
