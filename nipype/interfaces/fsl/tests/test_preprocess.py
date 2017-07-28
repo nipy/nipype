@@ -393,7 +393,8 @@ def test_fnirt(setup_flirt):
               ('in_fwhm', '--infwhm', [4, 2, 2, 0], '4,2,2,0'),
               ('apply_refmask', '--applyrefmask', [0, 0, 1, 1], '0,0,1,1'),
               ('apply_inmask', '--applyinmask', [0, 0, 0, 1], '0,0,0,1'),
-              ('regularization_lambda', '--lambda', [0.5, 0.75], '0.5,0.75')]
+              ('regularization_lambda', '--lambda', [0.5, 0.75], '0.5,0.75'),
+              ('intensity_mapping_model', '--intmod', 'global_non_linear', 'global_non_linear')]
     for item, flag, val, strval in params:
         fnirt = fsl.FNIRT(in_file=infile,
                           ref_file=reffile,
@@ -406,7 +407,7 @@ def test_fnirt(setup_flirt):
                   ' %s=%s --ref=%s'\
                   ' --iout=%s' % (infile, log,
                                   flag, strval, reffile, iout)
-        elif item in ('in_fwhm'):
+        elif item in ('in_fwhm', 'intensity_mapping_model'):
             cmd = 'fnirt --in=%s %s=%s --logout=%s '\
                   '--ref=%s --iout=%s' % (infile, flag,
                                           strval, log, reffile, iout)

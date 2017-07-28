@@ -877,7 +877,7 @@ class FNIRTInputSpec(FSLCommandInputSpec):
         desc=('If true, ref image is used to calculate derivatives. '
               'Default false'))
     intensity_mapping_model = traits.Enum(
-        'none', 'global_linear', 'global_non_linear'
+        'none', 'global_linear', 'global_non_linear',
         'local_linear', 'global_non_linear_with_bias',
         'local_non_linear', argstr='--intmod=%s',
         desc='Model for intensity-mapping')
