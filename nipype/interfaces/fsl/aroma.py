@@ -87,7 +87,7 @@ class ICA_AROMA(CommandLine):
 
     >>> from nipype.interfaces.fsl import ICA_AROMA
     >>> from nipype.testing import example_data
-    >>> AROMA_obj = ICA_AROMA.ICA_AROMA()
+    >>> AROMA_obj = ICA_AROMA()
     >>> AROMA_obj.inputs.in_file = 'functional.nii'
     >>> AROMA_obj.inputs.mat_file = 'func_to_struct.mat'
     >>> AROMA_obj.inputs.fnirt_warp_file = 'warpfield.nii'
