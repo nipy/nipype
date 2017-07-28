@@ -12,6 +12,8 @@ def test_TCompCor_inputs():
     ignore_exception=dict(nohash=True,
     usedefault=True,
     ),
+    ignore_initial_volumes=dict(usedefault=True,
+    ),
     mask_files=dict(),
     mask_index=dict(requires=['mask_files'],
     xor=['merge_method'],
