@@ -489,10 +489,11 @@ class CompCor(BaseInterface):
             header = ['{}{:02d}'.format(ftype, i) for i in range(ncols)]
             if skip_vols:
                 old_basis = filter_basis
-                nrows = filter_basis.shape[0] if filter_basis.size > 0 else 0
-                filter_basis = np.zeros((nrows + skip_vols, ncols + skip_vols),
+                # nrows defined above
+                filter_basis = np.zeros((nrows, ncols + skip_vols),
                                         dtype=filter_basis.dtype)
-                filter_basis[skip_vols:, :ncols] = old_basis
+                if old_basis.size > 0:
+                    filter_basis[skip_vols:, :ncols] = old_basis
                 filter_basis[:skip_vols, -skip_vols:] = np.eye(skip_vols)
                 header.extend(['NonSteadyStateOutlier{:02d}'.format(i)
                                for i in range(skip_vols)])
