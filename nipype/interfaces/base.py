@@ -2072,7 +2072,10 @@ class MultiPath(traits.List):
                 isinstance(value, list) and
                 value and not
                 isinstance(value[0], list)):
-            newvalue = [value]
+            if isinstance(value, range):
+                newvalue = list(value)
+            else:
+                newvalue = [value]
         value = super(MultiPath, self).validate(object, name, newvalue)
 
         if len(value) > 0:
