@@ -42,14 +42,15 @@ class RobustTemplateInputSpec(FSTraitedSpecOpenMP):
         desc='set outlier sensitivity manually (e.g. "--sat 4.685" ). Higher '
              'values mean less sensitivity.')
     # optional
-    transform_outputs = InputMultiPath(
-        File(exists=False), argstr='--lta %s',
+    transform_outputs = traits.Either(
+        InputMultiPath(File(exists=False)), traits.Bool, argstr='--lta %s',
         desc='output xforms to template (for each input)')
     intensity_scaling = traits.Bool(
         default_value=False, argstr='--iscale',
         desc='allow also intensity scaling (default off)')
-    scaled_intensity_outputs = InputMultiPath(
-        File(exists=False), argstr='--iscaleout %s',
+    scaled_intensity_outputs = traits.Either(
+        InputMultiPath(File(exists=False)), traits.Bool,
+        argstr='--iscaleout %s',
         desc='final intensity scales (will activate --iscale)')
     subsample_threshold = traits.Int(
         argstr='--subsample %d',
@@ -126,18 +127,26 @@ class RobustTemplate(FSCommandOpenMP):
         if name == 'average_metric':
             # return enumeration value
             return spec.argstr % {"mean": 0, "median": 1}[value]
+        if name in ('transform_outputs', 'scaled_intensity_outputs'):
+            value = self._list_outputs()[name]
         return super(RobustTemplate, self)._format_arg(name, spec, value)
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        outputs['out_file'] = os.path.abspath(
-            self.inputs.out_file)
+        outputs['out_file'] = os.path.abspath(self.inputs.out_file)
+        n_files = len(self.inputs.in_files)
+        fmt = '{}{:02d}.{}' if n_files > 9 else '{}{:d}.{}'
         if isdefined(self.inputs.transform_outputs):
-            outputs['transform_outputs'] = [os.path.abspath(
-                x) for x in self.inputs.transform_outputs]
+            fnames = self.inputs.transform_outputs
+            if fnames is True:
+                fnames = [fmt.format('tp', i, 'lta') for i in range(n_files)]
+            outputs['transform_outputs'] = [os.path.abspath(x) for x in fnames]
         if isdefined(self.inputs.scaled_intensity_outputs):
-            outputs['scaled_intensity_outputs'] = [os.path.abspath(
-                x) for x in self.inputs.scaled_intensity_outputs]
+            fnames = self.inputs.scaled_intensity_outputs
+            if fnames is True:
+                fnames = [fmt.format('is', i, 'txt') for i in range(n_files)]
+            outputs['scaled_intensity_outputs'] = [os.path.abspath(x)
+                                                   for x in fnames]
         return outputs
 
 
