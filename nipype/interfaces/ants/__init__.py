@@ -5,7 +5,7 @@
 """Top-level namespace for ants."""
 
 # Registraiton programs
-from .registration import ANTS, Registration
+from .registration import ANTS, Registration, MeasureImageSimilarity
 
 # Resampling Programs
 from .resampling import (ApplyTransforms, ApplyTransformsToPoints, WarpImageMultiTransform,
