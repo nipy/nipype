@@ -2059,15 +2059,18 @@ class MultiPath(traits.List):
     """
 
     def validate(self, object, name, value):
+
+        # want to treat range and other sequences (except str) as list
+        if not isinstance(value, str) and isinstance(value, collections.Sequence):
+            value  = list(value)
+
         if not isdefined(value) or \
                 (isinstance(value, list) and len(value) == 0):
             return Undefined
+
         newvalue = value
 
-        if isinstance(value, collections.Sequence):
-            newvalue  = list(value)
-
-        if not isinstance(value, collections.Sequence) \
+        if not isinstance(value, list) \
             or (self.inner_traits() and
                 isinstance(self.inner_traits()[0].trait_type,
                            traits.List) and not
