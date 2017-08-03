@@ -2061,7 +2061,7 @@ class MultiPath(traits.List):
     def validate(self, object, name, value):
 
         # want to treat range and other sequences (except str) as list
-        if not isinstance(value, str) and isinstance(value, collections.Sequence):
+        if not isinstance(value, (str, bytes)) and isinstance(value, collections.Sequence):
             value  = list(value)
 
         if not isdefined(value) or \
