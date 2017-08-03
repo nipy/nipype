@@ -32,6 +32,7 @@ from warnings import warn
 import simplejson as json
 from dateutil.parser import parse as parseutc
 from packaging.version import Version
+import collections
 
 from .. import config, logging, LooseVersion, __version__
 from ..utils.provenance import write_provenance
@@ -2063,7 +2064,10 @@ class MultiPath(traits.List):
             return Undefined
         newvalue = value
 
-        if not isinstance(value, list) \
+        if isinstance(value, collections.Sequence):
+            newvalue  = list(value)
+
+        if not isinstance(value, collections.Sequence) \
             or (self.inner_traits() and
                 isinstance(self.inner_traits()[0].trait_type,
                            traits.List) and not
@@ -2072,10 +2076,7 @@ class MultiPath(traits.List):
                 isinstance(value, list) and
                 value and not
                 isinstance(value[0], list)):
-            if isinstance(value, range):
-                newvalue = list(value)
-            else:
-                newvalue = [value]
+            newvalue = [value]
         value = super(MultiPath, self).validate(object, name, newvalue)
 
         if len(value) > 0:
