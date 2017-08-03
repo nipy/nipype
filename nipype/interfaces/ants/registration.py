@@ -1034,3 +1034,125 @@ class Registration(ANTSCommand):
         if len(self.inputs.save_state):
             outputs['save_state'] = os.path.abspath(self.inputs.save_state)
         return outputs
+
+
+class MeasureImageSimilarityInputSpec(ANTSCommandInputSpec):
+    dimension = traits.Enum(
+         2, 3, 4,
+         argstr='--dimensionality %d', position=1,
+         desc='Dimensionality of the fixed/moving image pair',
+         )
+    fixed_image = File(
+         exists=True, mandatory=True,
+         desc='Image to which the moving image is warped',
+         )
+    moving_image = File(
+         exists=True, mandatory=True,
+         desc='Image to apply transformation to (generally a coregistered functional)',
+         )
+    metric = traits.Enum(
+         "CC", "MI", "Mattes", "MeanSquares", "Demons", "GC",
+         argstr="%s", mandatory=True,
+         )
+    metric_weight = traits.Float(
+         requires=['metric'], default=1.0, usedefault=True,
+         desc='The "metricWeight" variable is not used.',
+         )
+    radius_or_number_of_bins = traits.Int(
+         requires=['metric'], mandatory=True,
+         desc='The number of bins in each stage for the MI and Mattes metric, '
+         'or the radius for other metrics',
+         )
+    sampling_strategy = traits.Enum(
+         "None", "Regular", "Random",
+         requires=['metric'], default="None", usedefault=True,
+         desc='Manner of choosing point set over which to optimize the metric. '
+         'Defaults to "None" (i.e. a dense sampling of one sample per voxel).'
+         )
+    sampling_percentage = traits.Either(
+         traits.Range(low=0.0, high=1.0),
+         requires=['metric'], mandatory=True,
+         desc='Percentage of points accessible to the sampling strategy over which '
+         'to optimize the metric.'
+         )
+    fixed_image_mask = File(
+        exists=True, argstr='%s',
+        desc='mask used to limit metric sampling region of the fixed image',
+        )
+    moving_image_mask = File(
+        exists=True, requires=['fixed_image_mask'],
+        desc='mask used to limit metric sampling region of the moving image',
+        )
+
+
+class MeasureImageSimilarityOutputSpec(TraitedSpec):
+    similarity = traits.Float()
+
+
+class MeasureImageSimilarity(ANTSCommand):
+    """
+
+
+    Examples
+    --------
+
+    >>> from nipype.interfaces.ants import MeasureImageSimilarity
+    >>> sim = MeasureImageSimilarity()
+    >>> sim.inputs.dimension = 3
+    >>> sim.inputs.metric = 'MI'
+    >>> sim.inputs.fixed_image = 'T1.nii'
+    >>> sim.inputs.moving_image = 'resting.nii'
+    >>> sim.inputs.metric_weight = 1.0
+    >>> sim.inputs.radius_or_number_of_bins = 5
+    >>> sim.inputs.sampling_strategy = 'Regular'
+    >>> sim.inputs.sampling_percentage = 1.0
+    >>> sim.inputs.fixed_image_mask = 'mask.nii'
+    >>> sim.inputs.moving_image_mask = 'mask.nii.gz'
+    >>> sim.cmdline # doctest: +ALLOW_UNICODE
+    u'MeasureImageSimilarity --dimensionality 3 --masks ["mask.nii","mask.nii.gz"] \
+--metric MI["T1.nii","resting.nii",1.0,5,Regular,1.0]'
+    """
+    _cmd = 'MeasureImageSimilarity'
+    input_spec = MeasureImageSimilarityInputSpec
+    output_spec = MeasureImageSimilarityOutputSpec
+
+    def _metric_constructor(self):
+        retval = '--metric {metric}["{fixed_image}","{moving_image}",{metric_weight},'\
+        '{radius_or_number_of_bins},{sampling_strategy},{sampling_percentage}]'\
+        .format(
+            metric=self.inputs.metric,
+            fixed_image=self.inputs.fixed_image,
+            moving_image=self.inputs.moving_image,
+            metric_weight=self.inputs.metric_weight,
+            radius_or_number_of_bins=self.inputs.radius_or_number_of_bins,
+            sampling_strategy=self.inputs.sampling_strategy,
+            sampling_percentage=self.inputs.sampling_percentage,
+        )
+        return retval
+
+    def _mask_constructor(self):
+        if self.inputs.moving_image_mask:
+            retval = '--masks ["{fixed_image_mask}","{moving_image_mask}"]'\
+            .format(
+                fixed_image_mask=self.inputs.fixed_image_mask,
+                moving_image_mask=self.inputs.moving_image_mask,
+            )
+        else:
+            retval = '--masks "{fixed_image_mask}"'\
+            .format(
+                fixed_image_mask=self.inputs.fixed_image_mask,
+            )
+        return retval
+
+    def _format_arg(self, opt, spec, val):
+        if opt == 'metric':
+            return self._metric_constructor()
+        elif opt == 'fixed_image_mask':
+            return self._mask_constructor()
+        return super(MeasureImageSimilarity, self)._format_arg(opt, spec, val)
+
+    def aggregate_outputs(self, runtime=None, needed_outputs=None):
+        outputs = self._outputs()
+        stdout = runtime.stdout.split('\n')
+        outputs.similarity = float(stdout[0])
+        return outputs

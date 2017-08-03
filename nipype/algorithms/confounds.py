@@ -483,8 +483,8 @@ class CompCor(BaseInterface):
 
         if self.inputs.pre_filter and self.inputs.save_pre_filter:
             pre_filter_file = self._list_outputs()['pre_filter_file']
-            ftype = {'polynomial': 'poly',
-                     'cosine': 'cos'}[self.inputs.pre_filter]
+            ftype = {'polynomial': 'Legendre',
+                     'cosine': 'Cosine'}[self.inputs.pre_filter]
             ncols = filter_basis.shape[1] if filter_basis.size > 0 else 0
             header = ['{}{:02d}'.format(ftype, i) for i in range(ncols)]
             if skip_vols:
@@ -494,7 +494,7 @@ class CompCor(BaseInterface):
                                         dtype=filter_basis.dtype)
                 filter_basis[skip_vols:, :ncols] = old_basis
                 filter_basis[:skip_vols, -skip_vols:] = np.eye(skip_vols)
-                header.extend(['SteadyState{:02d}'.format(i)
+                header.extend(['NonSteadyStateOutlier{:02d}'.format(i)
                                for i in range(skip_vols)])
             np.savetxt(pre_filter_file, filter_basis, fmt=b'%.10f',
                        delimiter='\t', header='\t'.join(header), comments='')
