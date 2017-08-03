@@ -457,18 +457,20 @@ def test_mapnode_iterfield_check():
 
 
 @pytest.mark.parametrize("x_inp, f_exp", [
-        (3, [9]), ([2, 3], [4, 9]), ((2,3), [4,9]), (range(3), [0, 1, 4])
+        (3, [6]), ([2, 3], [4, 6]), ((2, 3), [4, 6]),
+        (range(3), [0, 2, 4]),
+         ("Str", ["StrStr"]), (["Str1", "Str2"], ["Str1Str1", "Str2Str2"])
         ])
 def test_mapnode_iterfield_type(x_inp, f_exp):
     from nipype import MapNode, Function
-    def square_func(x):
-        return x ** 2
-    square = Function(["x"], ["f_x"], square_func)
+    def double_func(x):
+        return 2 * x
+    double = Function(["x"], ["f_x"], double_func)
 
-    square_node = MapNode(square, name="square", iterfield=["x"])
-    square_node.inputs.x = x_inp
+    double_node = MapNode(double, name="double", iterfield=["x"])
+    double_node.inputs.x = x_inp
 
-    res  = square_node.run()
+    res  = double_node.run()
     assert res.outputs.f_x == f_exp
 
 
