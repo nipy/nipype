@@ -16,6 +16,7 @@ from .preprocess import (AlignEpiAnatPy,Allineate, Automask,
                          Maskave, Means, OutlierCount,
                          QualityIndex, ROIStats, Retroicor,
                          Seg, SkullStrip, TCorr1D, TCorrMap, TCorrelate,
+                         TNorm,
                          TShift, Volreg, Warp, QwarpPlusMinus, Qwarp)
 from .svm import (SVMTest, SVMTrain)
 from .utils import (ABoverlap, AFNItoNIFTI, Autobox, Axialize, BrickStat, Bucket,
