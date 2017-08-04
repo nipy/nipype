@@ -866,7 +866,6 @@ class S3DataGrabber(IOBase):
                     raise ValueError(msg)
 
         outputs = {}
-
         # get list of all files in s3 bucket
         conn = boto.connect_s3(anon=self.inputs.anon)
         bkt = conn.get_bucket(self.inputs.bucket)
