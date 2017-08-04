@@ -144,12 +144,14 @@ class RobustTemplate(FSCommandOpenMP):
         if isdefined(self.inputs.transform_outputs):
             fnames = self.inputs.transform_outputs
             if fnames is True:
-                fnames = [fmt.format('tp', i, 'lta') for i in range(n_files)]
+                fnames = [fmt.format('tp', i + 1, 'lta')
+                          for i in range(n_files)]
             outputs['transform_outputs'] = [os.path.abspath(x) for x in fnames]
         if isdefined(self.inputs.scaled_intensity_outputs):
             fnames = self.inputs.scaled_intensity_outputs
             if fnames is True:
-                fnames = [fmt.format('is', i, 'txt') for i in range(n_files)]
+                fnames = [fmt.format('is', i + 1, 'txt')
+                          for i in range(n_files)]
             outputs['scaled_intensity_outputs'] = [os.path.abspath(x)
                                                    for x in fnames]
         return outputs
