@@ -108,8 +108,13 @@ class RobustTemplate(FSCommandOpenMP):
     ...                                      'functional.lta']
     >>> template.inputs.scaled_intensity_outputs = ['structural-iscale.txt',
     ...                                             'functional-iscale.txt']
-    >>> template.cmdline    #doctest: +NORMALIZE_WHITESPACE +ALLOW_UNICODE
-    'mri_robust_template --satit --average 0 --fixtp --mov structural.nii functional.nii --inittp 1 --noit --template T1.nii --iscaleout structural-iscale.txt functional-iscale.txt --subsample 200 --lta structural.lta functional.lta'
+    >>> template.cmdline    #doctest: +NORMALIZE_WHITESPACE +ALLOW_UNICODE +ELLIPSIS
+    'mri_robust_template --satit --average 0 --fixtp --mov structural.nii functional.nii --inittp 1 --noit --template T1.nii --iscaleout .../structural-iscale.txt .../functional-iscale.txt --subsample 200 --lta .../structural.lta .../functional.lta'
+
+    >>> template.inputs.transform_outputs = True
+    >>> template.inputs.scaled_intensity_outputs = True
+    >>> template.cmdline    #doctest: +NORMALIZE_WHITESPACE +ALLOW_UNICODE +ELLIPSIS
+    'mri_robust_template --satit --average 0 --fixtp --mov structural.nii functional.nii --inittp 1 --noit --template T1.nii --iscaleout .../is1.txt .../is2.txt --subsample 200 --lta .../tp1.lta .../tp2.lta'
 
     >>> template.run()  #doctest: +SKIP
 
