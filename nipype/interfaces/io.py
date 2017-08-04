@@ -866,10 +866,11 @@ class S3DataGrabber(IOBase):
                     raise ValueError(msg)
 
         outputs = {}
+
         # get list of all files in s3 bucket
         conn = boto.connect_s3(anon=self.inputs.anon)
         bkt = conn.get_bucket(self.inputs.bucket)
-        bkt_files = list(k.key for k in bkt.list())
+        bkt_files = list(k.key for k in bkt.list(prefix=self.inputs.bucket_path))
 
         # keys are outfields, args are template args for the outfield
         for key, args in list(self.inputs.template_args.items()):
