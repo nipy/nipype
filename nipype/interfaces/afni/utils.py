@@ -1581,6 +1581,8 @@ class OneDToolPy(AFNICommandBase):
             outputs['out_file']=os.path.join(os.getcwd(), self.inputs.out_file)
         if isdefined(self.inputs.show_cormat_warnings):
             outputs['out_file']=os.path.join(os.getcwd(), self.inputs.show_cormat_warnings)
+        if isdefined(self.inputs.censor_motion):
+            outputs['out_file']=os.path.join(os.getcwd(), self.inputs.censor_motion[1])
         return outputs
 
 class RefitInputSpec(CommandLineInputSpec):
