@@ -2629,7 +2629,7 @@ class Volreg(AFNICommand):
     >>> volreg.inputs.out_file = 'rm.epi.volreg.r1'
     >>> volreg.inputs.oned_file = 'dfile.r1.1D'
     >>> volreg.inputs.oned_matrix_save = 'mat.r1.tshift+orig.1D'
-    >>> volreg.cmdline
+    >>> volreg.cmdline # doctest: +ALLOW_UNICODE
     '3dvolreg -cubic -1Dfile dfile.r1.1D -1Dmatrix_save mat.r1.tshift+orig.1D -prefix rm.epi.volreg.r1 -verbose -base functional.nii -zpad 1 -maxdisp1D functional_md.1D functional.nii'
     >>> res = volreg.run()  # doctest: +SKIP
 
