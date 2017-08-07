@@ -25,9 +25,9 @@ from ..base import (
     CommandLineInputSpec, CommandLine, Directory, TraitedSpec,
     traits, isdefined, File, InputMultiPath, Undefined, Str)
 from ...external.due import BibTeX
-from distutils import spawn
 from .base import (
-    AFNICommandBase, AFNICommand, AFNICommandInputSpec, AFNICommandOutputSpec)
+    AFNICommandBase, AFNICommand, AFNICommandInputSpec, AFNICommandOutputSpec,
+    AFNIPythonCommandInputSpec, AFNIPythonCommand)
 
 class ABoverlapInputSpec(AFNICommandInputSpec):
     in_file_a = File(
@@ -330,7 +330,6 @@ class BucketInputSpec(AFNICommandInputSpec):
         traits.Tuple(
             (File(
                 exists=True,
-                desc='input file',
                 copyfile=False),
             traits.Str(argstr="'%s'")),
             artstr="%s%s"),
@@ -768,7 +767,7 @@ class Dot(AFNICommand):
     >>> res = copy3d.run()  # doctest: +SKIP
 
     """
-    _cmd='3dDot'
+    _cmd = '3dDot'
     input_spec = DotInputSpec
     output_spec = AFNICommandOutputSpec
 
@@ -785,7 +784,7 @@ class Edge3InputSpec(AFNICommandInputSpec):
         position=-1,
         argstr='-prefix %s')
     datum = traits.Enum(
-        'byte','short','float',
+        'byte', 'short', 'float',
         argstr='-datum %s',
         desc='specify data type for output. Valid types are \'byte\', '
              '\'short\' and \'float\'.')
@@ -1494,20 +1493,12 @@ class NwarpApply(AFNICommandBase):
     input_spec = NwarpApplyInputSpec
     output_spec = AFNICommandOutputSpec
 
-class OneDToolPyInputSpec(AFNICommandInputSpec):
+class OneDToolPyInputSpec(AFNIPythonCommandInputSpec):
     in_file = File(
         desc='input file to OneDTool',
         argstr='-infile %s',
         mandatory=True,
         exists=True)
-    py27_path = File(
-        desc='Path to Python 2.7 executable for running afni python scripts',
-        argstr='%s '+spawn.find_executable('1d_tool.py'),
-        exists=True,
-        default='/opt/miniconda/envs/py27/bin/python',
-        usedefault=True,
-        position=0
-        )
     set_nruns = traits.Int(
         desc='treat the input data as if it has nruns',
         argstr='-set_nruns %d')
@@ -1553,23 +1544,22 @@ class OneDToolPyInputSpec(AFNICommandInputSpec):
 class OneDToolPyOutputSpec(AFNICommandOutputSpec):
     out_file = File(desc='output of 1D_tool.py')
 
-class OneDToolPy(AFNICommandBase):
+class OneDToolPy(AFNIPythonCommand):
     """This program is meant to read/manipulate/write/diagnose 1D datasets.
     Input can be specified using AFNI sub-brick[]/time{} selectors.
 
     >>> from nipype.interfaces import afni
     >>> odt = afni.OneDToolPy()
     >>> odt.inputs.in_file = 'f1.1D'
-    >>> odt.inputs.py27_path = "/opt/miniconda/envs/py27/bin/python"
     >>> odt.inputs.set_nruns = 3
     >>> odt.inputs.demean = True
     >>> odt.inputs.out_file = 'motion_dmean.1D'
     >>> odt.cmdline # doctest: +ALLOW_UNICODE
-    'echo "" &&  /opt/miniconda/envs/py27/bin/python /root/abin/1d_tool.py -demean -infile f1.1D -write motion_dmean.1D -set_nruns 3'
+    'python2 /usr/lib/afni/bin/1d_tool.py -demean -infile f1.1D -write motion_dmean.1D -set_nruns 3'
      >>> res = odt.run()  # doctest: +SKIP
 """
 
-    _cmd = 'echo "" && '
+    _cmd = '1d_tool.py'
 
     input_spec = OneDToolPyInputSpec
     output_spec = OneDToolPyOutputSpec

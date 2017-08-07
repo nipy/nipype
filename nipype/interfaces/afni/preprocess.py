@@ -14,7 +14,6 @@ from builtins import open
 
 import os
 import os.path as op
-from distutils import spawn
 
 from ...utils.filemanip import (load_json, save_json, split_filename)
 from ..base import (
@@ -23,7 +22,7 @@ from ..base import (
 
 from .base import (
     AFNICommandBase, AFNICommand, AFNICommandInputSpec, AFNICommandOutputSpec,
-    Info, no_afni)
+    AFNIPythonCommandInputSpec, AFNIPythonCommand, Info, no_afni)
 
 
 class CentralityInputSpec(AFNICommandInputSpec):
@@ -47,17 +46,7 @@ class CentralityInputSpec(AFNICommandInputSpec):
         desc='Mask the dataset to target brain-only voxels',
         argstr='-automask')
 
-class AlignEpiAnatPyInputSpec(CommandLineInputSpec):
-    outputtype = traits.Enum('AFNI', list(Info.ftypes.keys()),
-                             desc='AFNI output filetype')
-    py27_path = File(
-        desc='Path to Python 2.7 executable for running afni python scripts',
-        argstr='%s '+spawn.find_executable('align_epi_anat.py'),
-        exists=True,
-        #default='/opt/miniconda/envs/py27/bin/python',
-        mandatory=True,
-        position=0
-        )
+class AlignEpiAnatPyInputSpec(AFNIPythonCommandInputSpec):
     in_file = File(
         desc='EPI dataset to align',
         argstr='-epi %s',
@@ -70,13 +59,14 @@ class AlignEpiAnatPyInputSpec(CommandLineInputSpec):
         mandatory=True,
         exists=True,
         copyfile=False)
-    epi_base = traits.Str(
+    epi_base = traits.Either(
+        traits.Range(low=0),
+        traits.Enum('mean', 'median', 'max'),
         desc='the epi base used in alignment'
              'should be one of (0/mean/median/max/subbrick#)',
         mandatory=True,
         argstr='-epi_base %s')
     anat2epi = traits.Bool(
-        default = True,
         desc='align anatomical to EPI dataset (default)',
         argstr='-anat2epi')
     epi2anat = traits.Bool(
@@ -86,23 +76,29 @@ class AlignEpiAnatPyInputSpec(CommandLineInputSpec):
         desc='save skull-stripped (not aligned)',
         argstr='-save_skullstrip')
     suffix = traits.Str(
+        '_al',
         desc='append suffix to the original anat/epi dataset to use'
              'in the resulting dataset names (default is "_al")',
+        usedefault=True,
         argstr='-suffix %s')
-    epi_strip = traits.Enum(('3dSkullStrip','3dAutomask','None'),
-        desc='method to mask brain in EPI data' 
+    epi_strip = traits.Enum(
+        ('3dSkullStrip', '3dAutomask', 'None'),
+        desc='method to mask brain in EPI data'
              'should be one of[3dSkullStrip]/3dAutomask/None)',
         argstr='-epi_strip %s')
-    volreg = traits.Enum(('on','off'),
+    volreg = traits.Enum(
+        'on', 'off',
+        usedefault=True,
         desc='do volume registration on EPI dataset before alignment'
              'should be \'on\' or \'off\', defaults to \'on\'',
-        default='on',
         argstr='-volreg %s')
-    tshift = traits.Enum(('on','off'),
+    tshift = traits.Enum(
+        'on', 'off',
+        usedefault=True,
         desc='do time shifting of EPI dataset before alignment'
              'should be \'on\' or \'off\', defaults to \'on\'',
-        default='on',
         argstr='-tshift %s')
+
 
 class AlignEpiAnatPyOutputSpec(TraitedSpec):
     anat_al_orig = File(
@@ -129,8 +125,8 @@ class AlignEpiAnatPyOutputSpec(TraitedSpec):
     skullstrip = File(
         desc="skull-stripped (not aligned) volume")
 
-class AlignEpiAnatPy(AFNICommand):
-    """align EPI to anatomical datasets or vice versa
+class AlignEpiAnatPy(AFNIPythonCommand):
+    """Align EPI to anatomical datasets or vice versa
     This Python script computes the alignment between two datasets, typically
     an EPI and an anatomical structural dataset, and applies the resulting
     transformation to one or the other to bring them into alignment.
@@ -165,19 +161,18 @@ class AlignEpiAnatPy(AFNICommand):
     ========
     >>> from nipype.interfaces import afni
     >>> al_ea = afni.AlignEpiAnatPy()
-    >>> al_ea.inputs.py27_path = "/opt/miniconda/envs/py27/bin/python"
     >>> al_ea.inputs.anat = "structural.nii"
     >>> al_ea.inputs.in_file = "functional.nii"
-    >>> al_ea.inputs.epi_base = '0'
+    >>> al_ea.inputs.epi_base = 0
     >>> al_ea.inputs.epi_strip = '3dAutomask'
     >>> al_ea.inputs.volreg = 'off'
     >>> al_ea.inputs.tshift = 'off'
     >>> al_ea.inputs.save_skullstrip = True
     >>> al_ea.cmdline # doctest: +ALLOW_UNICODE
-    'echo "" &&  /opt/miniconda/envs/py27/bin/python /root/abin/align_epi_anat.py -anat structural.nii -epi_base 0 -epi_strip 3dAutomask -epi functional.nii -save_skullstrip -tshift off -volreg off'
+    'python2 /usr/lib/afni/bin/align_epi_anat.py -anat structural.nii -epi_base 0 -epi_strip 3dAutomask -epi functional.nii -save_skullstrip -suffix _al -tshift off -volreg off'
     >>> res = allineate.run()  # doctest: +SKIP
     """
-    _cmd = 'echo "" && '
+    _cmd = 'align_epi_anat.py'
     input_spec = AlignEpiAnatPyInputSpec
     output_spec = AlignEpiAnatPyOutputSpec
 
@@ -185,28 +180,29 @@ class AlignEpiAnatPy(AFNICommand):
         outputs = self.output_spec().get()
         anat_prefix = ''.join(self._gen_fname(self.inputs.anat).split('+')[:-1])
         epi_prefix = ''.join(self._gen_fname(self.inputs.in_file).split('+')[:-1])
-        ext = '.HEAD'
-        matext='.1D'
-        if not isdefined(self.inputs.suffix):
-            suffix = '_al'
+        outputtype = self.inputs.outputtype
+        if outputtype == 'AFNI':
+            ext = '.HEAD' 
         else:
-            suffix = '_'+self.inputs.suffix
+            Info.output_type_to_ext(outputtype)
+        matext = '.1D'
+        suffix = self.inputs.suffix
         if self.inputs.anat2epi:
-            outputs['anat_al_orig'] = os.path.abspath(self._gen_fname(anat_prefix, suffix=suffix+'+orig')+ext)
-            outputs['anat_al_mat'] = os.path.abspath(self._gen_fname(anat_prefix, suffix=suffix+'_mat.aff12')+matext)
+            outputs['anat_al_orig'] = self._gen_fname(anat_prefix, suffix=suffix+'+orig', ext=ext)
+            outputs['anat_al_mat'] = self._gen_fname(anat_prefix, suffix=suffix+'_mat.aff12', ext=matext)
         if self.inputs.epi2anat:
-            outputs['epi_al_orig'] = os.path.abspath(self._gen_fname(epi_prefix, suffix=suffix+'+orig')+ext)
-            outputs['epi_al_mat'] = os.path.abspath(self._gen_fname(epi_prefix, suffix=suffix+'_mat.aff12')+matext)
+            outputs['epi_al_orig'] = self._gen_fname(epi_prefix, suffix=suffix+'+orig', ext=ext)
+            outputs['epi_al_mat'] = self._gen_fname(epi_prefix, suffix=suffix+'_mat.aff12', ext=matext)
         if self.inputs.volreg == 'on':
-            outputs['epi_vr_al_mat'] = os.path.abspath(self._gen_fname(epi_prefix, suffix='_vr'+suffix+'_mat.aff12')+matext)
+            outputs['epi_vr_al_mat'] = self._gen_fname(epi_prefix, suffix='_vr'+suffix+'_mat.aff12', ext=matext)
             if self.inputs.tshift == 'on':
-                outputs['epi_vr_motion'] = os.path.abspath(self._gen_fname(epi_prefix, suffix='tsh_vr_motion')+matext)
+                outputs['epi_vr_motion'] = self._gen_fname(epi_prefix, suffix='tsh_vr_motion', ext=matext)
             elif self.inputs.tshift == 'off':
-                outputs['epi_vr_motion'] = os.path.abspath(self._gen_fname(epi_prefix, suffix='vr_motion')+matext)
+                outputs['epi_vr_motion'] = self._gen_fname(epi_prefix, suffix='vr_motion', ext=matext)
         if self.inputs.volreg == 'on' and self.inputs.epi2anat:
-            outputs['epi_reg_al_mat']= os.path.abspath(self._gen_fname(epi_prefix, suffix='_reg'+suffix+'_mat.aff12')+matext)
+            outputs['epi_reg_al_mat'] = self._gen_fname(epi_prefix, suffix='_reg'+suffix+'_mat.aff12', ext=matext)
         if self.inputs.save_skullstrip:
-            outputs.skullstrip = os.path.abspath(self._gen_fname(anat_prefix, suffix='_ns'+'+orig')+ext)
+            outputs.skullstrip = self._gen_fname(anat_prefix, suffix='_ns'+'+orig', ext=ext)
         return outputs
 
 class AllineateInputSpec(AFNICommandInputSpec):
