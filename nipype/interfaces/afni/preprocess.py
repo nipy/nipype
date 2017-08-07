@@ -2438,8 +2438,8 @@ class TNorm(AFNICommand):
     """Shifts voxel time series from input so that seperate slices are aligned
     to the same temporal origin.
 
-    For complete details, see the `3dTshift Documentation.
-    <https://afni.nimh.nih.gov/pub/dist/doc/program_help/3dTshift.html>`_
+    For complete details, see the `3dTnorm Documentation.
+    <https://afni.nimh.nih.gov/pub/dist/doc/program_help/3dTnorm.html>`_
 
     Examples
     ========
