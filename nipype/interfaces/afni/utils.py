@@ -1748,6 +1748,60 @@ class TCat(AFNICommand):
     input_spec = TCatInputSpec
     output_spec = AFNICommandOutputSpec
 
+class TCatSBInputSpec(AFNICommandInputSpec):
+    in_files = traits.List(
+        traits.Tuple(File(exists=True),Str()),
+        desc='List of tuples of file names and subbrick selectors as strings.'
+             'Don\'t forget to protect the single quotes in the subbrick selector'
+             'so the contents are protected from the command line interpreter.',
+        argstr='%s%s ...',
+        position=-1,
+        mandatory=True,
+        copyfile=False)
+    out_file = File(
+        desc='output image file name',
+        argstr='-prefix %s',
+        genfile=True)
+    rlt = traits.Enum(
+        '', '+', '++',
+        argstr='-rlt%s',
+        desc='Remove linear trends in each voxel time series loaded from each '
+             'input dataset, SEPARATELY. Option -rlt removes the least squares '
+             'fit of \'a+b*t\' to each voxel time series. Option -rlt+ adds '
+             'dataset mean back in. Option -rlt++ adds overall mean of all '
+             'dataset timeseries back in.',
+        position=1)
+
+
+class TCatSubBrick(AFNICommand):
+    """Hopefully a temporary function to allow sub-brick selection until
+    afni file managment is improved.
+
+    For complete details, see the `3dTcat Documentation.
+    <https://afni.nimh.nih.gov/pub/dist/doc/program_help/3dTcat.html>`_
+
+    Examples
+    ========
+
+    >>> from nipype.interfaces import afni
+    >>> tcsb = afni.TCatSubBrick()
+    >>> tcsb.inputs.in_files = [('functional.nii', "'{2..$}'"), ('functional2.nii', "'{2..$}'")]
+    >>> tcsb.inputs.out_file= 'functional_tcat.nii'
+    >>> tcsb.inputs.rlt = '+'
+    >>> tcsb.cmdline  # doctest: +ALLOW_UNICODE +NORMALIZE_WHITESPACE
+    "3dTcat -rlt+ -prefix functional_tcat.nii functional.nii'{2..$}' functional2.nii'{2..$}' "
+    >>> res = tcsb.run()  # doctest: +SKIP
+
+    """
+
+    _cmd = '3dTcat'
+    input_spec = TCatSBInputSpec
+    output_spec = AFNICommandOutputSpec
+
+    def _gen_filename(self, name):
+        if name == 'out_file':
+            return self._gen_fname(self.inputs.in_files[0][0], suffix='_tcat')
+
 
 class TStatInputSpec(AFNICommandInputSpec):
     in_file = File(
