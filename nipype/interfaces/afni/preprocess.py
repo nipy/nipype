@@ -168,8 +168,8 @@ class AlignEpiAnatPy(AFNIPythonCommand):
     >>> al_ea.inputs.volreg = 'off'
     >>> al_ea.inputs.tshift = 'off'
     >>> al_ea.inputs.save_skullstrip = True
-    >>> al_ea.cmdline # doctest: +ALLOW_UNICODE
-    'python2 /usr/lib/afni/bin/align_epi_anat.py -anat structural.nii -epi_base 0 -epi_strip 3dAutomask -epi functional.nii -save_skullstrip -suffix _al -tshift off -volreg off'
+    >>> al_ea.cmdline # doctest: +ALLOW_UNICODE +ELLIPSIS
+    'python2 ...align_epi_anat.py -anat structural.nii -epi_base 0 -epi_strip 3dAutomask -epi functional.nii -save_skullstrip -suffix _al -tshift off -volreg off'
     >>> res = allineate.run()  # doctest: +SKIP
     """
     _cmd = 'align_epi_anat.py'

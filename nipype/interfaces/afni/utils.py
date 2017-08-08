@@ -1554,8 +1554,8 @@ class OneDToolPy(AFNIPythonCommand):
     >>> odt.inputs.set_nruns = 3
     >>> odt.inputs.demean = True
     >>> odt.inputs.out_file = 'motion_dmean.1D'
-    >>> odt.cmdline # doctest: +ALLOW_UNICODE
-    'python2 /usr/lib/afni/bin/1d_tool.py -demean -infile f1.1D -write motion_dmean.1D -set_nruns 3'
+    >>> odt.cmdline # doctest: +ALLOW_UNICODE +ELLIPSIS
+    'python2 ...1d_tool.py -demean -infile f1.1D -write motion_dmean.1D -set_nruns 3'
      >>> res = odt.run()  # doctest: +SKIP
 """
 
