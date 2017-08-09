@@ -7,6 +7,7 @@ standard_library.install_aliases()
 from builtins import next
 
 import pytest
+import sys
 
 from nipype.utils.misc import (container_to_string, getsource,
                                create_function_from_source, str2bool, flatten,
@@ -81,3 +82,11 @@ def test_flatten():
 
     back = unflatten([], [])
     assert back == []
+
+@pytest.mark.skipif(sys.version_info[0] > 2, reason="test unicode in functions")
+def test_func_py2():
+    def is_string():
+        return isinstance('string', str)
+
+    wrapped_func = create_function_from_source(getsource(is_string))
+    assert is_string() == wrapped_func()
