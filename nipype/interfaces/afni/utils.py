@@ -191,6 +191,26 @@ class BrickStatInputSpec(CommandLineInputSpec):
         desc='print the minimum value in dataset',
         argstr='-min',
         position=1)
+    slow = traits.Bool(
+        desc='read the whole dataset to find the min and max values',
+        argstr='-slow')
+    max = traits.Bool(
+        desc='print the maximum value in the dataset',
+        argstr='-max')
+    mean = traits.Bool(
+        desc='print the mean value in the dataset',
+        argstr='-mean')
+    sum = traits.Bool(
+        desc='print the sum of values in the dataset',
+        argstr='-sum')
+    var = traits.Bool(
+        desc='print the variance in the dataset',
+        argstr='-var')
+    percentile = traits.Tuple(traits.Float, traits.Float, traits.Float,
+        desc='p0 ps p1 write the percentile values starting '
+             'at p0% and ending at p1% at a step of ps%. '
+             'only one sub-brick is accepted.',
+        argstr='-percentile %.3f %.3f %.3f')
 
 
 class BrickStatOutputSpec(TraitedSpec):
@@ -333,6 +353,84 @@ class Calc(AFNICommand):
         """
         return super(Calc, self)._parse_inputs(
             skip=('start_idx', 'stop_idx', 'other'))
+
+
+class CatInputSpec(AFNICommandInputSpec):
+    in_files = traits.List(File(exists=True), argstr="%s",
+                           mandatory=True, position=-2)
+    out_file = File(
+        argstr='> %s',
+        default='catout.1d',
+        desc='output (concatenated) file name',
+        position=-1,
+        mandatory=True)
+    omitconst = traits.Bool(
+        desc='Omit columns that are identically constant from output.',
+        argstr='-nonconst')
+    keepfree = traits.Bool(
+        desc='Keep only columns that are marked as \'free\' in the '
+             '3dAllineate header from \'-1Dparam_save\'. '
+             'If there is no such header, all columns are kept.',
+        argstr='-nonfixed')
+    out_format = traits.Enum(
+        'int','nice','double','fint','cint',
+        argstr='-form %s',
+        desc='specify data type for output. Valid types are \'int\', '
+             '\'nice\', \'double\', \'fint\', and \'cint\'.',
+        xor=['out_int','out_nice','out_double','out_fint','out_cint'])
+    stack = traits.Bool(
+        desc='Stack the columns of the resultant matrix in the output.',
+        argstr='-stack')
+    sel = traits.Str(
+        desc='Apply the same column/row selection string to all filenames '
+            'on the command line.',
+        argstr='-sel %s')
+    out_int = traits.Bool(
+        desc='specifiy int data type for output',
+        argstr='-i',
+        xor=['out_format','out_nice','out_double','out_fint','out_cint'])
+    out_nice = traits.Bool(
+        desc='specifiy nice data type for output',
+        argstr='-n',
+        xor=['out_format','out_int','out_double','out_fint','out_cint'])
+    out_double = traits.Bool(
+        desc='specifiy double data type for output',
+        argstr='-d',
+        xor=['out_format','out_nice','out_int','out_fint','out_cint'])
+    out_fint = traits.Bool(
+        desc='specifiy int, rounded down, data type for output',
+        argstr='-f',
+        xor=['out_format','out_nice','out_double','out_int','out_cint'])
+    out_cint = traits.Bool(
+        desc='specifiy int, rounded up, data type for output',
+        xor=['out_format','out_nice','out_double','out_fint','out_int'])
+
+
+class Cat(AFNICommand):
+    """1dcat takes as input one or more 1D files, and writes out a 1D file
+    containing the side-by-side concatenation of all or a subset of the
+    columns from the input files.
+
+    For complete details, see the `1dcat Documentation.
+    <https://afni.nimh.nih.gov/pub/dist/doc/program_help/1dcat.html>`_
+
+    Examples
+    ========
+
+    >>> from nipype.interfaces import afni
+    >>> cat1d = afni.Cat()
+    >>> cat1d.inputs.sel = "'[0,2]'"
+    >>> cat1d.inputs.in_files = ['f1.1D', 'f2.1D']
+    >>> cat1d.inputs.out_file = 'catout.1d'
+    >>> cat1d.cmdline  # doctest: +ALLOW_UNICODE
+    "1dcat -sel '[0,2]' f1.1D f2.1D > catout.1d"
+    >>> res = cat1d.run()  # doctest: +SKIP
+
+    """
+
+    _cmd = '1dcat'
+    input_spec = CatInputSpec
+    output_spec = AFNICommandOutputSpec
 
 
 class CopyInputSpec(AFNICommandInputSpec):
@@ -1044,6 +1142,79 @@ class Notes(CommandLine):
         return outputs
 
 
+class NwarpApplyInputSpec(CommandLineInputSpec):
+    in_file = traits.Either(File(exists=True), traits.List(File(exists=True)),
+        mandatory=True,
+        argstr='-source %s',
+        desc='the name of the dataset to be warped '
+            'can be multiple datasets')
+    warp = traits.String(
+        desc='the name of the warp dataset. '
+             'multiple warps can be concatenated (make sure they exist)',
+        argstr='-nwarp %s',
+        mandatory=True)
+    inv_warp = traits.Bool(
+        desc='After the warp specified in \'-nwarp\' is computed, invert it',
+        argstr='-iwarp')
+    master = traits.File(exists=True,
+        desc='the name of the master dataset, which defines the output grid',
+        argstr='-master %s')
+    interp = traits.Enum('NN','nearestneighbour','nearestneighbor','linear',
+        'trilinear','cubic','tricubic','quintic','triquintic','wsinc5',
+        desc='defines interpolation method to use during warp',
+        argstr='-interp %s',
+        default='wsinc5')
+    ainterp = traits.Enum('NN','nearestneighbour','nearestneighbor','linear',
+        'trilinear','cubic','tricubic','quintic','triquintic','wsinc5',
+        desc='specify a different interpolation method than might '
+            'be used for the warp',
+        argstr='-ainterp %s',
+        default='wsinc5')
+    out_file = File(
+        name_template='%s_Nwarp',
+        desc='output image file name',
+        argstr='-prefix %s',
+        name_source='in_file')
+    short = traits.Bool(
+        desc='Write output dataset using 16-bit short integers, rather than '
+            'the usual 32-bit floats.',
+        argstr='-short')
+    quiet = traits.Bool(
+        desc='don\'t be verbose :(',
+        argstr='-quiet',
+        xor=['verb'])
+    verb = traits.Bool(
+        desc='be extra verbose :)',
+        argstr='-verb',
+        xor=['quiet'])
+
+
+class NwarpApply(AFNICommandBase):
+    """Program to apply a nonlinear 3D warp saved from 3dQwarp
+    (or 3dNwarpCat, etc.) to a 3D dataset, to produce a warped
+    version of the source dataset.
+
+    For complete details, see the `3dNwarpApply Documentation.
+    <https://afni.nimh.nih.gov/pub/dist/doc/program_help/3dNwarpApply.html>`_
+
+    Examples
+    ========
+
+    >>> from nipype.interfaces import afni
+    >>> nwarp = afni.NwarpApply()
+    >>> nwarp.inputs.in_file = 'Fred+orig'
+    >>> nwarp.inputs.master = 'NWARP'
+    >>> nwarp.inputs.warp = "'Fred_WARP+tlrc Fred.Xaff12.1D'"
+    >>> nwarp.cmdline  # doctest: +ALLOW_UNICODE
+    "3dNwarpApply -source Fred+orig -master NWARP -prefix Fred+orig_Nwarp -nwarp \'Fred_WARP+tlrc Fred.Xaff12.1D\'"
+    >>> res = nwarp.run()  # doctest: +SKIP
+
+    """
+    _cmd = '3dNwarpApply'
+    input_spec = NwarpApplyInputSpec
+    output_spec = AFNICommandOutputSpec
+
+
 class RefitInputSpec(CommandLineInputSpec):
     in_file = File(
         desc='input file to 3drefit',
@@ -1534,3 +1705,227 @@ class GCOR(CommandLine):
 
     def _list_outputs(self):
         return {'out': getattr(self, '_gcor')}
+
+class AxializeInputSpec(AFNICommandInputSpec):
+    in_file = File(
+        desc='input file to 3daxialize',
+        argstr='%s',
+        position=-2,
+        mandatory=True,
+        exists=True,
+        copyfile=False)
+    out_file = File(
+        name_template='%s_axialize',
+        desc='output image file name',
+        argstr='-prefix %s',
+        name_source='in_file')
+    verb = traits.Bool(
+        desc='Print out a progerss report',
+        argstr='-verb')
+    sagittal = traits.Bool(
+        desc='Do sagittal slice order [-orient ASL]',
+        argstr='-sagittal',
+        xor=['coronal', 'axial'])
+    coronal = traits.Bool(
+        desc='Do coronal slice order  [-orient RSA]',
+        argstr='-coronal',
+        xor=['sagittal', 'axial'])
+    axial = traits.Bool(
+        desc='Do axial slice order    [-orient RAI]'
+             'This is the default AFNI axial order, and'
+             'is the one currently required by the'
+             'volume rendering plugin; this is also'
+             'the default orientation output by this'
+             "program (hence the program's name).",
+        argstr='-axial',
+        xor=['coronal', 'sagittal'])
+    orientation = Str(
+        desc='new orientation code',
+        argstr='-orient %s')
+
+
+class Axialize(AFNICommand):
+    """Read in a dataset and write it out as a new dataset
+         with the data brick oriented as axial slices.
+
+    For complete details, see the `3dcopy Documentation.
+    <https://afni.nimh.nih.gov/pub/dist/doc/program_help/3daxialize.html>`_
+
+    Examples
+    ========
+    >>> from nipype.interfaces import afni
+    >>> axial3d = afni.Axialize()
+    >>> axial3d.inputs.in_file = 'functional.nii'
+    >>> axial3d.inputs.out_file = 'axialized.nii'
+    >>> axial3d.cmdline  # doctest: +ALLOW_UNICODE
+    '3daxialize -prefix axialized.nii functional.nii'
+    >>> res = axial3d.run()  # doctest: +SKIP
+
+    """
+
+    _cmd = '3daxialize'
+    input_spec = AxializeInputSpec
+    output_spec = AFNICommandOutputSpec
+
+
+class ZcatInputSpec(AFNICommandInputSpec):
+    in_files = InputMultiPath(
+        File(
+            desc='input files to 3dZcat',
+            exists=True),
+        argstr='%s',
+        position=-1,
+        mandatory=True,
+        copyfile=False)
+    out_file = File(
+        name_template='zcat',
+        desc='output dataset prefix name (default \'zcat\')',
+        argstr='-prefix %s')
+    datum = traits.Enum(
+        'byte','short','float',
+        argstr='-datum %s',
+        desc='specify data type for output. Valid types are \'byte\', '
+             '\'short\' and \'float\'.')
+    verb = traits.Bool(
+        desc='print out some verbositiness as the program proceeds.',
+        argstr='-verb')
+    fscale = traits.Bool(
+        desc='Force scaling of the output to the maximum integer '
+             'range.  This only has effect if the output datum is '
+             'byte or short (either forced or defaulted). This '
+             'option is sometimes necessary to eliminate '
+             'unpleasant truncation artifacts.',
+        argstr='-fscale',
+        xor=['nscale'])
+    nscale = traits.Bool(
+        desc='Don\'t do any scaling on output to byte or short '
+             'datasets. This may be especially useful when '
+             'operating on mask datasets whose output values '
+             'are only 0\'s and 1\'s.',
+        argstr='-nscale',
+        xor=['fscale'])
+
+class Zcat(AFNICommand):
+    """Copies an image of one type to an image of the same
+    or different type using 3dZcat command
+
+    For complete details, see the `3dZcat Documentation.
+    <https://afni.nimh.nih.gov/pub/dist/doc/program_help/3dZcat.html>`_
+
+    Examples
+    ========
+
+    >>> from nipype.interfaces import afni
+    >>> zcat = afni.Zcat()
+    >>> zcat.inputs.in_files = ['functional2.nii', 'functional3.nii']
+    >>> zcat.inputs.out_file = 'cat_functional.nii'
+    >>> zcat.cmdline  # doctest: +ALLOW_UNICODE
+    '3dZcat -prefix cat_functional.nii functional2.nii functional3.nii'
+    >>> res = zcat.run()  # doctest: +SKIP
+    """
+
+    _cmd = '3dZcat'
+    input_spec = ZcatInputSpec
+    output_spec = AFNICommandOutputSpec
+
+class ZeropadInputSpec(AFNICommandInputSpec):
+    in_files = File(
+        desc='input dataset',
+        argstr='%s',
+        position=-1,
+        mandatory=True,
+        exists=True,
+        copyfile=False)
+    out_file = File(
+        name_template='zeropad',
+        desc='output dataset prefix name (default \'zeropad\')',
+        argstr='-prefix %s')
+    I = traits.Int(
+        desc='adds \'n\' planes of zero at the Inferior edge',
+        argstr='-I %i',
+        xor=['master'])
+    S = traits.Int(
+        desc='adds \'n\' planes of zero at the Superior edge',
+        argstr='-S %i',
+        xor=['master'])
+    A = traits.Int(
+        desc='adds \'n\' planes of zero at the Anterior edge',
+        argstr='-A %i',
+        xor=['master'])
+    P = traits.Int(
+        desc='adds \'n\' planes of zero at the Posterior edge',
+        argstr='-P %i',
+        xor=['master'])
+    L = traits.Int(
+        desc='adds \'n\' planes of zero at the Left edge',
+        argstr='-L %i',
+        xor=['master'])
+    R = traits.Int(
+        desc='adds \'n\' planes of zero at the Right edge',
+        argstr='-R %i',
+        xor=['master'])
+    z = traits.Int(
+        desc='adds \'n\' planes of zero on EACH of the '
+             'dataset z-axis (slice-direction) faces',
+        argstr='-z %i',
+        xor=['master'])
+    RL = traits.Int(desc='specify that planes should be added or cut '
+                         'symmetrically to make the resulting volume have'
+                         'N slices in the right-left direction',
+                    argstr='-RL %i',
+                    xor=['master'])
+    AP = traits.Int(desc='specify that planes should be added or cut '
+                         'symmetrically to make the resulting volume have'
+                         'N slices in the anterior-posterior direction',
+                    argstr='-AP %i',
+                    xor=['master'])
+    IS = traits.Int(desc='specify that planes should be added or cut '
+                         'symmetrically to make the resulting volume have'
+                         'N slices in the inferior-superior direction',
+                    argstr='-IS %i',
+                    xor=['master'])
+    mm = traits.Bool(desc='pad counts \'n\' are in mm instead of slices, '
+                          'where each \'n\' is an integer and at least \'n\' '
+                          'mm of slices will be added/removed; e.g., n =  3 '
+                          'and slice thickness = 2.5 mm ==> 2 slices added',
+                     argstr='-mm',
+                     xor=['master'])
+    master = traits.File(desc='match the volume described in dataset '
+                              '\'mset\', where mset must have the same '
+                              'orientation and grid spacing as dataset to be '
+                              'padded. the goal of -master is to make the '
+                              'output dataset from 3dZeropad match the '
+                              'spatial \'extents\' of mset by adding or '
+                              'subtracting slices as needed. You can\'t use '
+                              '-I,-S,..., or -mm with -master',
+                         argstr='-master %s',
+                         xor=['I', 'S', 'A', 'P', 'L', 'R', 'z',
+                              'RL', 'AP', 'IS', 'mm'])
+
+class Zeropad(AFNICommand):
+    """Adds planes of zeros to a dataset (i.e., pads it out).
+
+    For complete details, see the `3dZeropad Documentation.
+    <https://afni.nimh.nih.gov/pub/dist/doc/program_help/3dZeropad.html>`_
+
+    Examples
+    ========
+
+    >>> from nipype.interfaces import afni
+    >>> zeropad = afni.Zeropad()
+    >>> zeropad.inputs.in_files = 'functional.nii'
+    >>> zeropad.inputs.out_file = 'pad_functional.nii'
+    >>> zeropad.inputs.I = 10
+    >>> zeropad.inputs.S = 10
+    >>> zeropad.inputs.A = 10
+    >>> zeropad.inputs.P = 10
+    >>> zeropad.inputs.R = 10
+    >>> zeropad.inputs.L = 10
+    >>> zeropad.cmdline  # doctest: +ALLOW_UNICODE
+    '3dZeropad -A 10 -I 10 -L 10 -P 10 -R 10 -S 10 -prefix pad_functional.nii functional.nii'
+    >>> res = zeropad.run()  # doctest: +SKIP
+    """
+
+    _cmd = '3dZeropad'
+    input_spec = ZeropadInputSpec
+    output_spec = AFNICommandOutputSpec

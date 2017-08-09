@@ -323,9 +323,13 @@ class CompCorInputSpec(BaseInterfaceInputSpec):
                               desc=('Position of mask in `mask_files` to use - '
                                     'first is the default.'))
     components_file = traits.Str('components_file.txt', usedefault=True,
-                           desc='Filename to store physiological components')
+                                 desc='Filename to store physiological components')
     num_components = traits.Int(6, usedefault=True) # 6 for BOLD, 4 for ASL
-    use_regress_poly = traits.Bool(True, usedefault=True,
+    pre_filter = traits.Enum('polynomial', 'cosine', False, usedefault=True,
+                             desc='Detrend time series prior to component '
+                                  'extraction')
+    use_regress_poly = traits.Bool(True,
+                                   deprecated='0.15.0', new_name='pre_filter',
                                    desc=('use polynomial regression '
                                          'pre-component extraction'))
     regress_poly_degree = traits.Range(low=1, default=1, usedefault=True,
@@ -333,16 +337,48 @@ class CompCorInputSpec(BaseInterfaceInputSpec):
     header_prefix = traits.Str(desc=('the desired header for the output tsv '
                                      'file (one column). If undefined, will '
                                      'default to "CompCor"'))
+    high_pass_cutoff = traits.Float(
+        128, usedefault=True,
+        desc='Cutoff (in seconds) for "cosine" pre-filter')
+    repetition_time = traits.Float(
+        desc='Repetition time (TR) of series - derived from image header if '
+             'unspecified')
+    save_pre_filter = traits.Either(
+        traits.Bool, File, desc='Save pre-filter basis as text file')
+    ignore_initial_volumes = traits.Range(
+        low=0, usedefault=True,
+        desc='Number of volumes at start of series to ignore')
 
 
 class CompCorOutputSpec(TraitedSpec):
     components_file = File(exists=True,
                            desc='text file containing the noise components')
+    pre_filter_file = File(desc='text file containing high-pass filter basis')
 
 
 class CompCor(BaseInterface):
     """
     Interface with core CompCor computation, used in aCompCor and tCompCor
+
+    CompCor provides three pre-filter options, all of which include per-voxel
+    mean removal:
+      - polynomial: Legendre polynomial basis
+      - cosine: Discrete cosine basis
+      - False: mean-removal only
+
+    In the case of ``polynomial`` and ``cosine`` filters, a pre-filter file may
+    be saved with a row for each volume/timepoint, and a column for each
+    non-constant regressor.
+    If no non-constant (mean-removal) columns are used, this file may be empty.
+
+    If ``ignore_initial_volumes`` is set, then the specified number of initial
+    volumes are excluded both from pre-filtering and CompCor component
+    extraction.
+    Each column in the components and pre-filter files are prefixe with zeros
+    for each excluded volume so that the number of rows continues to match the
+    number of volumes in the input file.
+    In addition, for each excluded volume, a column is added to the pre-filter
+    file with a 1 in the corresponding row.
 
     Example
     -------
@@ -351,7 +387,7 @@ class CompCor(BaseInterface):
     >>> ccinterface.inputs.realigned_file = 'functional.nii'
     >>> ccinterface.inputs.mask_files = 'mask.nii'
     >>> ccinterface.inputs.num_components = 1
-    >>> ccinterface.inputs.use_regress_poly = True
+    >>> ccinterface.inputs.pre_filter = 'polynomial'
     >>> ccinterface.inputs.regress_poly_degree = 2
 
     """
@@ -383,17 +419,20 @@ class CompCor(BaseInterface):
                                              self.inputs.merge_method,
                                              self.inputs.mask_index)
 
-        degree = (self.inputs.regress_poly_degree if
-                  self.inputs.use_regress_poly else 0)
+        if self.inputs.use_regress_poly:
+            self.inputs.pre_filter = 'polynomial'
 
-        imgseries = nb.load(self.inputs.realigned_file,
-                            mmap=NUMPY_MMAP)
+        # Degree 0 == remove mean; see compute_noise_components
+        degree = (self.inputs.regress_poly_degree if
+                  self.inputs.pre_filter == 'polynomial' else 0)
+
+        imgseries = nb.load(self.inputs.realigned_file, mmap=NUMPY_MMAP)
 
         if len(imgseries.shape) != 4:
-            raise ValueError('tCompCor expected a 4-D nifti file. Input {} has '
-                            '{} dimensions (shape {})'.format(
-                            self.inputs.realigned_file, len(imgseries.shape),
-                            imgseries.shape))
+            raise ValueError('{} expected a 4-D nifti file. Input {} has '
+                             '{} dimensions (shape {})'.format(
+                                self._header, self.inputs.realigned_file,
+                                len(imgseries.shape), imgseries.shape))
 
         if len(mask_images) == 0:
             img = nb.Nifti1Image(np.ones(imgseries.shape[:3], dtype=np.bool),
@@ -401,15 +440,66 @@ class CompCor(BaseInterface):
                                  header=imgseries.header)
             mask_images = [img]
 
+        skip_vols = self.inputs.ignore_initial_volumes
+        if skip_vols:
+            imgseries = imgseries.__class__(
+                imgseries.get_data()[..., skip_vols:], imgseries.affine,
+                imgseries.header)
+
         mask_images = self._process_masks(mask_images, imgseries.get_data())
 
-        components = compute_noise_components(imgseries.get_data(),
-                                              mask_images, degree,
-                                              self.inputs.num_components)
+        TR = 0
+        if self.inputs.pre_filter == 'cosine':
+            if isdefined(self.inputs.repetition_time):
+                TR = self.inputs.repetition_time
+            else:
+                # Derive TR from NIfTI header, if possible
+                try:
+                    TR = imgseries.header.get_zooms()[3]
+                    if imgseries.get_xyzt_units()[1] == 'msec':
+                        TR /= 1000
+                except (AttributeError, IndexError):
+                    TR = 0
+
+                if TR == 0:
+                    raise ValueError(
+                        '{} cannot detect repetition time from image - '
+                        'Set the repetition_time input'.format(self._header))
+
+        components, filter_basis = compute_noise_components(
+            imgseries.get_data(), mask_images, self.inputs.num_components,
+            self.inputs.pre_filter, degree, self.inputs.high_pass_cutoff, TR)
+
+        if skip_vols:
+            old_comp = components
+            nrows = skip_vols + components.shape[0]
+            components = np.zeros((nrows, components.shape[1]),
+                                  dtype=components.dtype)
+            components[skip_vols:] = old_comp
 
         components_file = os.path.join(os.getcwd(), self.inputs.components_file)
         np.savetxt(components_file, components, fmt=b"%.10f", delimiter='\t',
                    header=self._make_headers(components.shape[1]), comments='')
+
+        if self.inputs.pre_filter and self.inputs.save_pre_filter:
+            pre_filter_file = self._list_outputs()['pre_filter_file']
+            ftype = {'polynomial': 'Legendre',
+                     'cosine': 'Cosine'}[self.inputs.pre_filter]
+            ncols = filter_basis.shape[1] if filter_basis.size > 0 else 0
+            header = ['{}{:02d}'.format(ftype, i) for i in range(ncols)]
+            if skip_vols:
+                old_basis = filter_basis
+                # nrows defined above
+                filter_basis = np.zeros((nrows, ncols + skip_vols),
+                                        dtype=filter_basis.dtype)
+                if old_basis.size > 0:
+                    filter_basis[skip_vols:, :ncols] = old_basis
+                filter_basis[:skip_vols, -skip_vols:] = np.eye(skip_vols)
+                header.extend(['NonSteadyStateOutlier{:02d}'.format(i)
+                               for i in range(skip_vols)])
+            np.savetxt(pre_filter_file, filter_basis, fmt=b'%.10f',
+                       delimiter='\t', header='\t'.join(header), comments='')
+
         return runtime
 
     def _process_masks(self, mask_images, timeseries=None):
@@ -418,14 +508,19 @@ class CompCor(BaseInterface):
     def _list_outputs(self):
         outputs = self._outputs().get()
         outputs['components_file'] = os.path.abspath(self.inputs.components_file)
+
+        save_pre_filter = self.inputs.save_pre_filter
+        if save_pre_filter:
+            if isinstance(save_pre_filter, bool):
+                save_pre_filter = os.path.abspath('pre_filter.tsv')
+            outputs['pre_filter_file'] = save_pre_filter
+
         return outputs
 
     def _make_headers(self, num_col):
-        headers = []
         header = self.inputs.header_prefix if \
             isdefined(self.inputs.header_prefix) else self._header
-        for i in range(num_col):
-            headers.append(header + '{:02d}'.format(i))
+        headers = ['{}{:02d}'.format(header, i) for i in range(num_col)]
         return '\t'.join(headers)
 
 
@@ -473,7 +568,7 @@ class TCompCor(CompCor):
     >>> ccinterface.inputs.realigned_file = 'functional.nii'
     >>> ccinterface.inputs.mask_files = 'mask.nii'
     >>> ccinterface.inputs.num_components = 1
-    >>> ccinterface.inputs.use_regress_poly = True
+    >>> ccinterface.inputs.pre_filter = 'polynomial'
     >>> ccinterface.inputs.regress_poly_degree = 2
     >>> ccinterface.inputs.percentile_threshold = .03
 
@@ -494,7 +589,7 @@ class TCompCor(CompCor):
         for i, img in enumerate(mask_images):
             mask = img.get_data().astype(np.bool)
             imgseries = timeseries[mask, :]
-            imgseries = regress_poly(2, imgseries)
+            imgseries = regress_poly(2, imgseries)[0]
             tSTD = _compute_tSTD(imgseries, 0, axis=-1)
             threshold_std = np.percentile(tSTD, np.round(100. *
                            (1. - self.inputs.percentile_threshold)).astype(int))
@@ -569,7 +664,7 @@ class TSNR(BaseInterface):
             data = data.astype(np.float32)
 
         if isdefined(self.inputs.regress_poly):
-            data = regress_poly(self.inputs.regress_poly, data, remove_mean=False)
+            data = regress_poly(self.inputs.regress_poly, data, remove_mean=False)[0]
             img = nb.Nifti1Image(data, img.affine, header)
             nb.save(img, op.abspath(self.inputs.detrended_file))
 
@@ -618,7 +713,7 @@ class NonSteadyStateDetector(BaseInterface):
         global_signal = in_nii.get_data()[:,:,:,:50].mean(axis=0).mean(axis=0).mean(axis=0)
 
         self._results = {
-            'n_volumes_to_discard': _is_outlier(global_signal)
+            'n_volumes_to_discard': is_outlier(global_signal)
         }
 
         return runtime
@@ -685,9 +780,10 @@ research/nichols/scripts/fsl/standardizeddvars.pdf>`_, 2013.
         func_sd = func_sd[func_sd != 0]
 
     # Compute (non-robust) estimate of lag-1 autocorrelation
-    ar1 = np.apply_along_axis(AR_est_YW, 1,
-                              regress_poly(0, mfunc, remove_mean=True).astype(
-                                  np.float32), 1)[:, 0]
+    ar1 = np.apply_along_axis(
+        AR_est_YW, 1,
+        regress_poly(0, mfunc, remove_mean=True)[0].astype(np.float32),
+        1)[:, 0]
 
     # Compute (predicted) standard deviation of temporal difference time series
     diff_sdhat = np.squeeze(np.sqrt(((1 - ar1) * 2).tolist())) * func_sd
@@ -794,6 +890,27 @@ def is_outlier(points, thresh=3.5):
     return timepoints_to_discard
 
 
+def cosine_filter(data, timestep, period_cut, remove_mean=True, axis=-1):
+    datashape = data.shape
+    timepoints = datashape[axis]
+
+    data = data.reshape((-1, timepoints))
+
+    frametimes = timestep * np.arange(timepoints)
+    X = _full_rank(_cosine_drift(period_cut, frametimes))[0]
+    non_constant_regressors = X[:, :-1] if X.shape[1] > 1 else np.array([])
+
+    betas = np.linalg.lstsq(X, data.T)[0]
+
+    if not remove_mean:
+        X = X[:, :-1]
+        betas = betas[:-1]
+
+    residuals = data - X.dot(betas).T
+
+    return residuals.reshape(datashape), non_constant_regressors
+
+
 def regress_poly(degree, data, remove_mean=True, axis=-1):
     """
     Returns data with degree polynomial regressed out.
@@ -817,6 +934,8 @@ def regress_poly(degree, data, remove_mean=True, axis=-1):
         value_array = np.linspace(-1, 1, timepoints)
         X = np.hstack((X, polynomial_func(value_array)[:, np.newaxis]))
 
+    non_constant_regressors = X[:, :-1] if X.shape[1] > 1 else np.array([])
+
     # Calculate coefficients
     betas = np.linalg.pinv(X).dot(data.T)
 
@@ -828,7 +947,7 @@ def regress_poly(degree, data, remove_mean=True, axis=-1):
     regressed_data = data - datahat
 
     # Back to original shape
-    return regressed_data.reshape(datashape)
+    return regressed_data.reshape(datashape), non_constant_regressors
 
 
 def combine_mask_files(mask_files, mask_method=None, mask_index=None):
@@ -886,37 +1005,57 @@ def combine_mask_files(mask_files, mask_method=None, mask_index=None):
         return [img]
 
 
-def compute_noise_components(imgseries, mask_images, degree, num_components):
+def compute_noise_components(imgseries, mask_images, num_components,
+                             filter_type, degree, period_cut,
+                             repetition_time):
     """Compute the noise components from the imgseries for each mask
 
     imgseries: a nibabel img
     mask_images: a list of nibabel images
-    degree: order of polynomial used to remove trends from the timeseries
     num_components: number of noise components to return
+    filter_type: type off filter to apply to time series before computing
+                 noise components.
+        'polynomial' - Legendre polynomial basis
+        'cosine' - Discrete cosine (DCT) basis
+        False - None (mean-removal only)
+
+    Filter options:
+
+    degree: order of polynomial used to remove trends from the timeseries
+    period_cut: minimum period (in sec) for DCT high-pass filter
+    repetition_time: time (in sec) between volume acquisitions
 
     returns:
 
     components: a numpy array
+    basis: a numpy array containing the (non-constant) filter regressors
 
     """
     components = None
+    basis = np.array([])
     for img in mask_images:
         mask = img.get_data().astype(np.bool)
         if imgseries.shape[:3] != mask.shape:
-            raise ValueError('Inputs for CompCor, timeseries and mask, '
-                             'do not have matching spatial dimensions '
-                             '({} and {}, respectively)'.format(
-                imgseries.shape[:3], mask.shape))
+            raise ValueError(
+                'Inputs for CompCor, timeseries and mask, do not have '
+                'matching spatial dimensions ({} and {}, respectively)'.format(
+                    imgseries.shape[:3], mask.shape))
 
         voxel_timecourses = imgseries[mask, :]
 
         # Zero-out any bad values
         voxel_timecourses[np.isnan(np.sum(voxel_timecourses, axis=1)), :] = 0
 
-        # from paper:
-        # "The constant and linear trends of the columns in the matrix M were
-        # removed [prior to ...]"
-        voxel_timecourses = regress_poly(degree, voxel_timecourses)
+        # Currently support Legendre-polynomial or cosine or detrending
+        # With no filter, the mean is nonetheless removed (poly w/ degree 0)
+        if filter_type == 'cosine':
+            voxel_timecourses, basis = cosine_filter(
+                voxel_timecourses, repetition_time, period_cut)
+        elif filter_type in ('polynomial', False):
+            # from paper:
+            # "The constant and linear trends of the columns in the matrix M were
+            # removed [prior to ...]"
+            voxel_timecourses, basis = regress_poly(degree, voxel_timecourses)
 
         # "Voxel time series from the noise ROI (either anatomical or tSTD) were
         # placed in a matrix M of size Nxm, with time along the row dimension
@@ -936,7 +1075,7 @@ def compute_noise_components(imgseries, mask_images, degree, num_components):
                                     u[:, :num_components]))
     if components is None and num_components > 0:
         raise ValueError('No components found')
-    return components
+    return components, basis
 
 
 def _compute_tSTD(M, x, axis=0):
@@ -945,3 +1084,71 @@ def _compute_tSTD(M, x, axis=0):
     stdM[stdM == 0] = x
     stdM[np.isnan(stdM)] = x
     return stdM
+
+
+# _cosine_drift and _full_rank copied from nipy/modalities/fmri/design_matrix
+#
+# Nipy release: 0.4.1
+# Modified for smooth integration in CompCor classes
+
+def _cosine_drift(period_cut, frametimes):
+    """Create a cosine drift matrix with periods greater or equals to period_cut
+
+    Parameters
+    ----------
+    period_cut: float
+         Cut period of the low-pass filter (in sec)
+    frametimes: array of shape(nscans)
+         The sampling times (in sec)
+
+    Returns
+    -------
+    cdrift:  array of shape(n_scans, n_drifts)
+             cosin drifts plus a constant regressor at cdrift[:,0]
+
+    Ref: http://en.wikipedia.org/wiki/Discrete_cosine_transform DCT-II
+    """
+    len_tim = len(frametimes)
+    n_times = np.arange(len_tim)
+    hfcut = 1. / period_cut  # input parameter is the period
+
+    # frametimes.max() should be (len_tim-1)*dt
+    dt = frametimes[1] - frametimes[0]
+    # hfcut = 1/(2*dt) yields len_time
+    # If series is too short, return constant regressor
+    order = max(int(np.floor(2*len_tim*hfcut*dt)), 1)
+    cdrift = np.zeros((len_tim, order))
+    nfct = np.sqrt(2.0/len_tim)
+
+    for k in range(1, order):
+        cdrift[:, k-1] = nfct * np.cos((np.pi / len_tim) * (n_times + .5) * k)
+
+    cdrift[:, order-1] = 1.  # or 1./sqrt(len_tim) to normalize
+    return cdrift
+
+
+def _full_rank(X, cmax=1e15):
+    """
+    This function possibly adds a scalar matrix to X
+    to guarantee that the condition number is smaller than a given threshold.
+
+    Parameters
+    ----------
+    X: array of shape(nrows, ncols)
+    cmax=1.e-15, float tolerance for condition number
+
+    Returns
+    -------
+    X: array of shape(nrows, ncols) after regularization
+    cmax=1.e-15, float tolerance for condition number
+    """
+    U, s, V = np.linalg.svd(X, 0)
+    smax, smin = s.max(), s.min()
+    c = smax / smin
+    if c < cmax:
+        return X, c
+    IFLOG.warn('Matrix is singular at working precision, regularizing...')
+    lda = (smax - cmax * smin) / (cmax - 1)
+    s = s + lda
+    X = np.dot(U, np.dot(np.diag(s), V))
+    return X, cmax
