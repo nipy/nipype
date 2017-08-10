@@ -21,21 +21,20 @@ def test_func_to_str_err():
     bad_src = "obbledygobbledygook"
     with pytest.raises(RuntimeError): create_function_from_source(bad_src)
 
+def _print_statement():
+    try:
+        exec('print ""')
+        return True
+    except SyntaxError:
+        return False
+
 @pytest.mark.skipif(sys.version_info[0] > 2, reason="breaks python 3")
 def test_func_py2():
     def is_string():
         return isinstance('string', str)
 
-    def print_statement():
-    # test python 2 compatibility
-        try:
-            exec('print ""')
-            return True
-        except SyntaxError:
-            return False
-
     wrapped_func = create_function_from_source(getsource(is_string))
     assert is_string() == wrapped_func()
 
-    wrapped_func2 = create_function_from_source(getsource(print_statement))
+    wrapped_func2 = create_function_from_source(getsource(_print_statement))
     assert wrapped_func2()
