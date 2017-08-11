@@ -28,13 +28,14 @@ def _print_statement():
     except SyntaxError:
         return False
 
-@pytest.mark.skipif(sys.version_info[0] > 2, reason="breaks python 3")
-def test_func_py2():
+def test_func_string():
     def is_string():
         return isinstance('string', str)
 
     wrapped_func = create_function_from_source(getsource(is_string))
     assert is_string() == wrapped_func()
 
-    wrapped_func2 = create_function_from_source(getsource(_print_statement))
-    assert wrapped_func2()
+@pytest.mark.skipif(sys.version_info[0] > 2, reason="breaks python 3")
+def test_func_print_py2():
+    wrapped_func = create_function_from_source(getsource(_print_statement))
+    assert wrapped_func()
