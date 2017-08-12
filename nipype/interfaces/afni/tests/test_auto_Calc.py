@@ -33,6 +33,8 @@ def test_Calc_inputs():
     name_template='%s_calc',
     ),
     outputtype=dict(),
+    overwrite=dict(argstr='-overwrite',
+    ),
     single_idx=dict(),
     start_idx=dict(requires=['stop_idx'],
     ),

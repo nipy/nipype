@@ -25,9 +25,64 @@ from ..base import (
     CommandLineInputSpec, CommandLine, Directory, TraitedSpec,
     traits, isdefined, File, InputMultiPath, Undefined, Str)
 from ...external.due import BibTeX
-
 from .base import (
-    AFNICommandBase, AFNICommand, AFNICommandInputSpec, AFNICommandOutputSpec)
+    AFNICommandBase, AFNICommand, AFNICommandInputSpec, AFNICommandOutputSpec,
+    AFNIPythonCommandInputSpec, AFNIPythonCommand)
+
+class ABoverlapInputSpec(AFNICommandInputSpec):
+    in_file_a = File(
+        desc='input file A',
+        argstr='%s',
+        position=-3,
+        mandatory=True,
+        exists=True,
+        copyfile=False)
+    in_file_b = File(
+        desc='input file B',
+        argstr='%s',
+        position=-2,
+        mandatory=True,
+        exists=True,
+        copyfile=False)
+    out_file = File(
+        desc='collect output to a file',
+        argstr=' |& tee %s',
+        position=-1)
+    no_automask = traits.Bool(
+        desc='consider input datasets as masks',
+        argstr='-no_automask')
+    quiet = traits.Bool(
+        desc='be as quiet as possible (without being entirely mute)',
+        argstr='-quiet')
+    verb = traits.Bool(
+        desc='print out some progress reports (to stderr)',
+        argstr='-verb')
+
+
+class ABoverlap(AFNICommand):
+    """Output (to screen) is a count of various things about how
+    the automasks of datasets A and B overlap or don't overlap.
+
+    For complete details, see the `3dABoverlap Documentation.
+    <https://afni.nimh.nih.gov/pub/dist/doc/program_help/3dABoverlap.html>`_
+
+    Examples
+    ========
+
+    >>> from nipype.interfaces import afni
+    >>> aboverlap = afni.ABoverlap()
+    >>> aboverlap.inputs.in_file_a = 'functional.nii'
+    >>> aboverlap.inputs.in_file_b = 'structural.nii'
+    >>> aboverlap.inputs.out_file =  'out.mask_ae_overlap.txt'
+    >>> aboverlap.cmdline  # doctest: +ALLOW_UNICODE
+    '3dABoverlap functional.nii structural.nii  |& tee out.mask_ae_overlap.txt'
+    >>> res = aboverlap.run()  # doctest: +SKIP
+
+    """
+
+    _cmd = '3dABoverlap'
+    input_spec = ABoverlapInputSpec
+    output_spec = AFNICommandOutputSpec
 
 
 class AFNItoNIFTIInputSpec(AFNICommandInputSpec):
@@ -270,6 +325,90 @@ class BrickStat(AFNICommandBase):
 
         return outputs
 
+class BucketInputSpec(AFNICommandInputSpec):
+    in_file = traits.List(
+        traits.Tuple(
+            (File(
+                exists=True,
+                copyfile=False),
+            traits.Str(argstr="'%s'")),
+            artstr="%s%s"),
+        position=-1,
+        mandatory=True,
+        argstr="%s",
+        desc='List of tuples of input datasets and subbrick selection strings'
+            'as described in more detail in the following afni help string'
+            'Input dataset specified using one of these forms:'
+            '   \'prefix+view\', \'prefix+view.HEAD\', or \'prefix+view.BRIK\'.'
+            'You can also add a sub-brick selection list after the end of the'
+            'dataset name.  This allows only a subset of the sub-bricks to be'
+            'included into the output (by default, all of the input dataset'
+            'is copied into the output).  A sub-brick selection list looks like'
+            'one of the following forms:'
+            '  fred+orig[5]                     ==> use only sub-brick #5'
+            '  fred+orig[5,9,17]                ==> use #5, #9, and #17'
+            '  fred+orig[5..8]     or [5-8]     ==> use #5, #6, #7, and #8'
+            '  fred+orig[5..13(2)] or [5-13(2)] ==> use #5, #7, #9, #11, and #13'
+            'Sub-brick indexes start at 0.  You can use the character \'$\''
+            'to indicate the last sub-brick in a dataset; for example, you'
+            'can select every third sub-brick by using the selection list'
+            '  fred+orig[0..$(3)]'
+            'N.B.: The sub-bricks are output in the order specified, which may'
+            ' not be the order in the original datasets.  For example, using'
+            '  fred+orig[0..$(2),1..$(2)]'
+            ' will cause the sub-bricks in fred+orig to be output into the'
+            ' new dataset in an interleaved fashion.  Using'
+            '  fred+orig[$..0]'
+            ' will reverse the order of the sub-bricks in the output.'
+            'N.B.: Bucket datasets have multiple sub-bricks, but do NOT have'
+            ' a time dimension.  You can input sub-bricks from a 3D+time dataset'
+            ' into a bucket dataset.  You can use the \'3dinfo\' program to see'
+            ' how many sub-bricks a 3D+time or a bucket dataset contains.'
+            'N.B.: In non-bucket functional datasets (like the \'fico\' datasets'
+            ' output by FIM, or the \'fitt\' datasets output by 3dttest), sub-brick'
+            ' [0] is the \'intensity\' and sub-brick [1] is the statistical parameter'
+            ' used as a threshold.  Thus, to create a bucket dataset using the'
+            ' intensity from dataset A and the threshold from dataset B, and'
+            ' calling the output dataset C, you would type'
+            '    3dbucket -prefix C -fbuc \'A+orig[0]\' -fbuc \'B+orig[1]\''
+            'WARNING: using this program, it is possible to create a dataset that'
+            '         has different basic datum types for different sub-bricks'
+            '         (e.g., shorts for brick 0, floats for brick 1).'
+            '         Do NOT do this!  Very few AFNI programs will work correctly'
+            '         with such datasets!')
+    out_file = File(
+        argstr='-prefix %s',
+        name_template='buck')
+
+
+class Bucket(AFNICommand):
+    """Concatenate sub-bricks from input datasets into one big
+    'bucket' dataset.
+
+    For complete details, see the `3dbucket Documentation.
+    <https://afni.nimh.nih.gov/pub/dist/doc/program_help/3dbucket.html>`_
+
+    Examples
+    ========
+
+    >>> from nipype.interfaces import afni
+    >>> bucket = afni.Bucket()
+    >>> bucket.inputs.in_file = [('functional.nii',"{2..$}"), ('functional.nii',"{1}")]
+    >>> bucket.inputs.out_file = 'vr_base'
+    >>> bucket.cmdline # doctest: +ALLOW_UNICODE
+    "3dbucket -prefix vr_base functional.nii'{2..$}' functional.nii'{1}'"
+    >>> res = bucket.run()  # doctest: +SKIP
+
+    """
+
+    _cmd = '3dbucket'
+    input_spec = BucketInputSpec
+    output_spec = AFNICommandOutputSpec
+
+    def _format_arg(self, name, spec, value):
+        if name == 'in_file':
+            return spec.argstr%(' '.join([i[0]+"'"+i[1]+"'" for i in value]))
+        return super(Bucket, self)._format_arg(name, spec, value)
 
 class CalcInputSpec(AFNICommandInputSpec):
     in_file_a = File(
@@ -306,6 +445,9 @@ class CalcInputSpec(AFNICommandInputSpec):
         requires=['start_idx'])
     single_idx = traits.Int(
         desc='volume index for in_file_a')
+    overwrite = traits.Bool(
+        desc='overwrite output',
+        argstr='-overwrite')
     other = File(
         desc='other options',
         argstr='')
@@ -330,6 +472,16 @@ class Calc(AFNICommand):
     >>> calc.cmdline  # doctest: +ELLIPSIS +ALLOW_UNICODE
     '3dcalc -a functional.nii -b functional2.nii -expr "a*b" -prefix functional_calc.nii.gz'
     >>> res = calc.run()  # doctest: +SKIP
+
+    >>> from nipype.interfaces import afni
+    >>> calc = afni.Calc()
+    >>> calc.inputs.in_file_a = 'functional.nii'
+    >>> calc.inputs.expr = '1'
+    >>> calc.inputs.out_file = 'rm.epi.all1'
+    >>> calc.inputs.overwrite = True
+    >>> calc.cmdline # doctest: +ALLOW_UNICODE
+    '3dcalc -a functional.nii -expr "1" -prefix rm.epi.all1 -overwrite'
+    >>> res = calc.run() # doctest: +SKIP
 
     """
 
@@ -432,6 +584,63 @@ class Cat(AFNICommand):
     input_spec = CatInputSpec
     output_spec = AFNICommandOutputSpec
 
+class CatMatvecInputSpec(AFNICommandInputSpec):
+    in_file = traits.List(
+        traits.Tuple(traits.Str(), traits.Str()),
+        descr="list of tuples of mfiles and associated opkeys",
+        mandatory=True,
+        argstr="%s",
+        position=-2)
+    out_file = File(
+        descr="File to write concattenated matvecs to",
+        argstr=" > %s",
+        position=-1,
+        mandatory=True)
+    matrix = traits.Bool(
+        descr="indicates that the resulting matrix will"
+               "be written to outfile in the 'MATRIX(...)' format (FORM 3)."
+               "This feature could be used, with clever scripting, to input"
+               "a matrix directly on the command line to program 3dWarp.",
+        argstr="-MATRIX",
+        xor=['oneline','fourXfour'])
+    oneline = traits.Bool(
+        descr="indicates that the resulting matrix"
+              "will simply be written as 12 numbers on one line.",
+        argstr="-ONELINE",
+        xor=['matrix','fourXfour'])
+    fourxfour = traits.Bool(
+        descr="Output matrix in augmented form (last row is 0 0 0 1)"
+              "This option does not work with -MATRIX or -ONELINE",
+        argstr="-4x4",
+        xor=['matrix','oneline'])
+
+class CatMatvec(AFNICommand):
+    """Catenates 3D rotation+shift matrix+vector transformations.
+
+    For complete details, see the `cat_matvec Documentation.
+    <https://afni.nimh.nih.gov/pub/dist/doc/program_help/cat_matvec.html>`_
+
+    Examples
+    ========
+
+    >>> from nipype.interfaces import afni
+    >>> cmv = afni.CatMatvec()
+    >>> cmv.inputs.in_file = [('structural.BRIK::WARP_DATA','I')]
+    >>> cmv.inputs.out_file = 'warp.anat.Xat.1D'
+    >>> cmv.cmdline  # doctest: +ALLOW_UNICODE
+    'cat_matvec structural.BRIK::WARP_DATA -I  > warp.anat.Xat.1D'
+    >>> res = cmv.run()  # doctest: +SKIP
+
+    """
+
+    _cmd = 'cat_matvec'
+    input_spec = CatMatvecInputSpec
+    output_spec = AFNICommandOutputSpec
+
+    def _format_arg(self, name, spec, value):
+        if name == 'in_file':
+            return spec.argstr%(' '.join([i[0]+' -'+i[1] for i in value]))
+        return super(CatMatvec, self)._format_arg(name, spec, value)
 
 class CopyInputSpec(AFNICommandInputSpec):
     in_file = File(
@@ -491,6 +700,76 @@ class Copy(AFNICommand):
     input_spec = CopyInputSpec
     output_spec = AFNICommandOutputSpec
 
+class DotInputSpec(AFNICommandInputSpec):
+    in_files = traits.List(
+        (File()),
+        desc="list of input files, possibly with subbrick selectors",
+        argstr="%s ...",
+        position=-2)
+    out_file = File(
+        desc='collect output to a file',
+        argstr=' |& tee %s',
+        position=-1)
+    mask = File(
+        desc='Use this dataset as a mask',
+        argstr='-mask %s')
+    mrange = traits.Tuple((traits.Float(),traits.Float()),
+        desc='Means to further restrict the voxels from \'mset\' so that'
+             'only those mask values within this range (inclusive) willbe used.',
+        argstr='-mrange %s %s')
+    demean = traits.Bool(
+        desc='Remove the mean from each volume prior to computing the correlation',
+        argstr='-demean')
+    docor = traits.Bool(
+        desc='Return the correlation coefficient (default).',
+        argstr='-docor')
+    dodot = traits.Bool(
+        desc='Return the dot product (unscaled).',
+        argstr='-dodot')
+    docoef = traits.Bool(
+        desc='Return the least square fit coefficients {{a,b}} so that dset2 is approximately a + b*dset1',
+        argstr='-docoef')
+    dosums = traits.Bool(
+        desc='Return the 6 numbers xbar=<x> ybar=<y> <(x-xbar)^2> <(y-ybar)^2> <(x-xbar)(y-ybar)> and the correlation coefficient.',
+        argstr='-dosums')
+    dodice = traits.Bool(
+        desc='Return the Dice coefficient (the Sorensen-Dice index).',
+        argstr='-dodice')
+    doeta2 = traits.Bool(
+        desc='Return eta-squared (Cohen, NeuroImage 2008).',
+        argstr='-doeta2')
+    full = traits.Bool(
+        desc='Compute the whole matrix. A waste of time, but handy for parsing.',
+        argstr='-full')
+    show_labels = traits.Bool(
+        desc='Print sub-brick labels to help identify what is being correlated. This option is useful when'
+              'you have more than 2 sub-bricks at input.',
+        argstr='-show_labels')
+    upper = traits.Bool(
+        desc='Compute upper triangular matrix',
+        argstr='-upper')
+
+class Dot(AFNICommand):
+    """Correlation coefficient between sub-brick pairs.
+    All datasets in in_files list will be concatenated.
+    You can use sub-brick selectors in the file specification.
+    Note: This program is not efficient when more than two subbricks are input.
+    For complete details, see the `3ddot Documentation.
+    <https://afni.nimh.nih.gov/pub/dist/doc/program_help/3ddot.html>`_
+
+    >>> from nipype.interfaces import afni
+    >>> dot = afni.Dot()
+    >>> dot.inputs.in_files = ['functional.nii[0]', 'structural.nii']
+    >>> dot.inputs.dodice = True
+    >>> dot.inputs.out_file = 'out.mask_ae_dice.txt'
+    >>> dot.cmdline  # doctest: +ALLOW_UNICODE
+    '3dDot -dodice functional.nii[0]  structural.nii   |& tee out.mask_ae_dice.txt'
+    >>> res = copy3d.run()  # doctest: +SKIP
+
+    """
+    _cmd = '3dDot'
+    input_spec = DotInputSpec
+    output_spec = AFNICommandOutputSpec
 
 class Edge3InputSpec(AFNICommandInputSpec):
     in_file = File(
@@ -505,7 +784,7 @@ class Edge3InputSpec(AFNICommandInputSpec):
         position=-1,
         argstr='-prefix %s')
     datum = traits.Enum(
-        'byte','short','float',
+        'byte', 'short', 'float',
         argstr='-datum %s',
         desc='specify data type for output. Valid types are \'byte\', '
              '\'short\' and \'float\'.')
@@ -1214,6 +1493,87 @@ class NwarpApply(AFNICommandBase):
     input_spec = NwarpApplyInputSpec
     output_spec = AFNICommandOutputSpec
 
+class OneDToolPyInputSpec(AFNIPythonCommandInputSpec):
+    in_file = File(
+        desc='input file to OneDTool',
+        argstr='-infile %s',
+        mandatory=True,
+        exists=True)
+    set_nruns = traits.Int(
+        desc='treat the input data as if it has nruns',
+        argstr='-set_nruns %d')
+    derivative = traits.Bool(
+        desc='take the temporal derivative of each vector (done as first backward difference)',
+        argstr='-derivative')
+    demean = traits.Bool(
+        desc='demean each run (new mean of each run = 0.0)',
+        argstr='-demean')
+    out_file = File(
+        desc='write the current 1D data to FILE',
+        argstr='-write %s',
+        xor=['show_cormat_warnings'])
+    show_censor_count = traits.Bool(
+        desc='display the total number of censored TRs  Note : if input is a valid xmat.1D dataset,'
+             'then the count will come from the header.  Otherwise the input is assumed to be a binary censor'
+              'file, and zeros are simply counted.',
+        argstr="-show_censor_count")
+    censor_motion = traits.Tuple(
+        (traits.Float(),File()),
+        desc='Tuple of motion limit and outfile prefix. need to also set set_nruns -r set_run_lengths',
+        argstr="-censor_motion %f %s")
+    censor_prev_TR = traits.Bool(
+        desc='for each censored TR, also censor previous',
+        argstr='-censor_prev_TR')
+    show_trs_uncensored = traits.Enum('comma','space','encoded','verbose',
+        desc='display a list of TRs which were not censored in the specified style',
+        argstr='-show_trs_uncensored %s')
+    show_cormat_warnings = traits.File(
+        desc='Write cormat warnings to a file',
+        argstr="-show_cormat_warnings |& tee %s",
+        default="out.cormat_warn.txt",
+        usedefault=False,
+        position=-1,
+        xor=['out_file'])
+    show_indices_interest = traits.Bool(
+        desc="display column indices for regs of interest",
+        argstr="-show_indices_interest")
+    show_trs_run = traits.Int(
+        desc="restrict -show_trs_[un]censored to the given 1-based run",
+        argstr="-show_trs_run %d")
+
+class OneDToolPyOutputSpec(AFNICommandOutputSpec):
+    out_file = File(desc='output of 1D_tool.py')
+
+class OneDToolPy(AFNIPythonCommand):
+    """This program is meant to read/manipulate/write/diagnose 1D datasets.
+    Input can be specified using AFNI sub-brick[]/time{} selectors.
+
+    >>> from nipype.interfaces import afni
+    >>> odt = afni.OneDToolPy()
+    >>> odt.inputs.in_file = 'f1.1D'
+    >>> odt.inputs.set_nruns = 3
+    >>> odt.inputs.demean = True
+    >>> odt.inputs.out_file = 'motion_dmean.1D'
+    >>> odt.cmdline # doctest: +ALLOW_UNICODE +ELLIPSIS
+    'python2 ...1d_tool.py -demean -infile f1.1D -write motion_dmean.1D -set_nruns 3'
+     >>> res = odt.run()  # doctest: +SKIP
+"""
+
+    _cmd = '1d_tool.py'
+
+    input_spec = OneDToolPyInputSpec
+    output_spec = OneDToolPyOutputSpec
+
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+
+        if isdefined(self.inputs.out_file):
+            outputs['out_file']=os.path.join(os.getcwd(), self.inputs.out_file)
+        if isdefined(self.inputs.show_cormat_warnings):
+            outputs['out_file']=os.path.join(os.getcwd(), self.inputs.show_cormat_warnings)
+        if isdefined(self.inputs.censor_motion):
+            outputs['out_file']=os.path.join(os.getcwd(), self.inputs.censor_motion[1])
+        return outputs
 
 class RefitInputSpec(CommandLineInputSpec):
     in_file = File(
@@ -1387,6 +1747,60 @@ class TCat(AFNICommand):
     _cmd = '3dTcat'
     input_spec = TCatInputSpec
     output_spec = AFNICommandOutputSpec
+
+class TCatSBInputSpec(AFNICommandInputSpec):
+    in_files = traits.List(
+        traits.Tuple(File(exists=True),Str()),
+        desc='List of tuples of file names and subbrick selectors as strings.'
+             'Don\'t forget to protect the single quotes in the subbrick selector'
+             'so the contents are protected from the command line interpreter.',
+        argstr='%s%s ...',
+        position=-1,
+        mandatory=True,
+        copyfile=False)
+    out_file = File(
+        desc='output image file name',
+        argstr='-prefix %s',
+        genfile=True)
+    rlt = traits.Enum(
+        '', '+', '++',
+        argstr='-rlt%s',
+        desc='Remove linear trends in each voxel time series loaded from each '
+             'input dataset, SEPARATELY. Option -rlt removes the least squares '
+             'fit of \'a+b*t\' to each voxel time series. Option -rlt+ adds '
+             'dataset mean back in. Option -rlt++ adds overall mean of all '
+             'dataset timeseries back in.',
+        position=1)
+
+
+class TCatSubBrick(AFNICommand):
+    """Hopefully a temporary function to allow sub-brick selection until
+    afni file managment is improved.
+
+    For complete details, see the `3dTcat Documentation.
+    <https://afni.nimh.nih.gov/pub/dist/doc/program_help/3dTcat.html>`_
+
+    Examples
+    ========
+
+    >>> from nipype.interfaces import afni
+    >>> tcsb = afni.TCatSubBrick()
+    >>> tcsb.inputs.in_files = [('functional.nii', "'{2..$}'"), ('functional2.nii', "'{2..$}'")]
+    >>> tcsb.inputs.out_file= 'functional_tcat.nii'
+    >>> tcsb.inputs.rlt = '+'
+    >>> tcsb.cmdline  # doctest: +ALLOW_UNICODE +NORMALIZE_WHITESPACE
+    "3dTcat -rlt+ -prefix functional_tcat.nii functional.nii'{2..$}' functional2.nii'{2..$}' "
+    >>> res = tcsb.run()  # doctest: +SKIP
+
+    """
+
+    _cmd = '3dTcat'
+    input_spec = TCatSBInputSpec
+    output_spec = AFNICommandOutputSpec
+
+    def _gen_filename(self, name):
+        if name == 'out_file':
+            return self._gen_fname(self.inputs.in_files[0][0], suffix='_tcat')
 
 
 class TStatInputSpec(AFNICommandInputSpec):

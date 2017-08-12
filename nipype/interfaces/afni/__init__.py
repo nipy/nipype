@@ -8,17 +8,21 @@ Top-level namespace for afni.
 """
 
 from .base import Info
-from .preprocess import (Allineate, Automask, AutoTcorrelate,
+from .preprocess import (AlignEpiAnatPy, Allineate, Automask,
+                         AutoTcorrelate, AutoTLRC,
                          Bandpass, BlurInMask, BlurToFWHM,
                          ClipLevel, DegreeCentrality, Despike,
                          Detrend, ECM, Fim, Fourier, Hist, LFCD,
                          Maskave, Means, OutlierCount,
                          QualityIndex, ROIStats, Retroicor,
                          Seg, SkullStrip, TCorr1D, TCorrMap, TCorrelate,
+                         TNorm,
                          TShift, Volreg, Warp, QwarpPlusMinus, Qwarp)
 from .svm import (SVMTest, SVMTrain)
-from .utils import (AFNItoNIFTI, Autobox, Axialize, BrickStat, Calc, Cat, Copy,
+from .utils import (ABoverlap, AFNItoNIFTI, Autobox, Axialize, BrickStat,
+                    Bucket, Calc, Cat, CatMatvec, Copy, Dot,
                     Edge3, Eval, FWHMx, MaskTool, Merge, Notes, NwarpApply,
-                    Refit, Resample, TCat, TStat, To3D, Unifize, ZCutUp, GCOR,
+                    OneDToolPy,
+                    Refit, Resample, TCat, TCatSubBrick, TStat, To3D, Unifize, ZCutUp, GCOR,
                     Zcat, Zeropad)
 from .model import (Deconvolve, Remlfit)

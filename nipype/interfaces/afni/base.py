@@ -8,6 +8,7 @@ from future.utils import raise_from
 
 import os
 from sys import platform
+from distutils import spawn
 
 from ... import logging
 from ...utils.filemanip import split_filename, fname_presuffix
@@ -143,7 +144,6 @@ class AFNICommandInputSpec(CommandLineInputSpec):
 class AFNICommandOutputSpec(TraitedSpec):
     out_file = File(desc='output file',
                     exists=True)
-
 
 class AFNICommand(AFNICommandBase):
     """Shared options for several AFNI commands """
@@ -283,3 +283,23 @@ def no_afni():
     if Info.version() is None:
         return True
     return False
+
+
+class AFNIPythonCommandInputSpec(CommandLineInputSpec):
+    outputtype = traits.Enum('AFNI', list(Info.ftypes.keys()),
+                             desc='AFNI output filetype')
+    py27_path = traits.Either('python2', File(exists=True),
+        usedefault=True,
+        default='python2')
+
+class AFNIPythonCommand(AFNICommand):
+    @property
+    def cmd(self):
+        if spawn.find_executable(super(AFNIPythonCommand, self).cmd) is not None:
+            return spawn.find_executable(super(AFNIPythonCommand, self).cmd)
+        else:
+            return super(AFNIPythonCommand, self).cmd
+
+    @property
+    def cmdline(self):
+        return "{} {}".format(self.inputs.py27_path, super(AFNIPythonCommand, self).cmdline)
