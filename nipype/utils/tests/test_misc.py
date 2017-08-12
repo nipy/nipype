@@ -8,9 +8,8 @@ from builtins import next
 
 import pytest
 
-from nipype.utils.misc import (container_to_string, getsource,
-                               create_function_from_source, str2bool, flatten,
-                               unflatten)
+from nipype.utils.misc import (container_to_string, str2bool,
+                               flatten, unflatten)
 
 
 def test_cont_to_str():
@@ -33,26 +32,6 @@ def test_cont_to_str():
     # int.  Integers are not the main intent of this function, but see
     # no reason why they shouldn't work.
     assert (container_to_string(123) == '123')
-
-
-def _func1(x):
-    return x**3
-
-
-def test_func_to_str():
-
-    def func1(x):
-        return x**2
-
-    # Should be ok with both functions!
-    for f in _func1, func1:
-        f_src = getsource(f)
-        f_recreated = create_function_from_source(f_src)
-        assert f(2.3) == f_recreated(2.3)
-
-def test_func_to_str_err():
-    bad_src = "obbledygobbledygook"
-    with pytest.raises(RuntimeError): create_function_from_source(bad_src)
 
 
 @pytest.mark.parametrize("string, expected", [
