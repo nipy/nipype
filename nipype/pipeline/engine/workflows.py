@@ -36,8 +36,8 @@ import networkx as nx
 
 
 from ... import config, logging
-from ...utils.misc import (unflatten, package_check, str2bool)
-from ...utils.functions import (getsource, create_function_from_source)
+from ...utils.misc import (unflatten, package_check, str2bool,
+                               getsource, create_function_from_source)
 from ...interfaces.base import (traits, InputMultiPath, CommandLine,
                                 Undefined, TraitedSpec, DynamicTraitedSpec,
                                 Bunch, InterfaceResult, md5, Interface,
