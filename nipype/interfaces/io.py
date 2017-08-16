@@ -2436,8 +2436,7 @@ class SSHDataGrabber(DataGrabber):
 
         if len(outfiles) == 0:
             # no files
-            msg = 'Output key: %s Template: %s returned no files' % (
-                key, template)
+            msg = 'Output template: %s returned no files' % template
             if self.inputs.raise_on_empty:
                 raise IOError(msg)
             else:
