@@ -497,7 +497,7 @@ class Deface(SPMCommand):
     --------
     >>> import nipype.interfaces.spm.utils as spmu
     >>> deface = spmu.Deface()
-    >>> deface.inputs.in_file = 'anat.nii'
+    >>> deface.inputs.in_file = 'structural.nii'
     >>> deface.run()
 
     """
