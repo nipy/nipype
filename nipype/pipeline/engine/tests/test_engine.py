@@ -456,6 +456,24 @@ def test_mapnode_iterfield_check():
     with pytest.raises(ValueError): mod1._check_iterfield()
 
 
+@pytest.mark.parametrize("x_inp, f_exp", [
+        (3, [6]), ([2, 3], [4, 6]), ((2, 3), [4, 6]),
+        (range(3), [0, 2, 4]),
+         ("Str", ["StrStr"]), (["Str1", "Str2"], ["Str1Str1", "Str2Str2"])
+        ])
+def test_mapnode_iterfield_type(x_inp, f_exp):
+    from nipype import MapNode, Function
+    def double_func(x):
+        return 2 * x
+    double = Function(["x"], ["f_x"], double_func)
+
+    double_node = MapNode(double, name="double", iterfield=["x"])
+    double_node.inputs.x = x_inp
+
+    res  = double_node.run()
+    assert res.outputs.f_x == f_exp
+
+
 def test_mapnode_nested(tmpdir):
     os.chdir(str(tmpdir))
     from nipype import MapNode, Function

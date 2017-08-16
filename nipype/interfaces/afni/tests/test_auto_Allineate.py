@@ -4,7 +4,11 @@ from ..preprocess import Allineate
 
 
 def test_Allineate_inputs():
-    input_map = dict(args=dict(argstr='%s',
+    input_map = dict(allcostx=dict(argstr='-allcostx |& tee %s',
+    position=-1,
+    xor=['out_file'],
+    ),
+    args=dict(argstr='%s',
     ),
     autobox=dict(argstr='-autobox',
     ),
@@ -35,7 +39,6 @@ def test_Allineate_inputs():
     in_file=dict(argstr='-source %s',
     copyfile=False,
     mandatory=True,
-    position=-1,
     ),
     in_matrix=dict(argstr='-1Dmatrix_apply %s',
     position=-3,
@@ -66,7 +69,9 @@ def test_Allineate_inputs():
     ),
     out_file=dict(argstr='-prefix %s',
     genfile=True,
-    position=-2,
+    name_source='in_file',
+    name_template='%s_allineate',
+    xor=['allcostx'],
     ),
     out_matrix=dict(argstr='-1Dmatrix_save %s',
     xor=['in_matrix'],
@@ -118,7 +123,8 @@ def test_Allineate_inputs():
 
 
 def test_Allineate_outputs():
-    output_map = dict(out_file=dict(),
+    output_map = dict(allcostx=dict(),
+    out_file=dict(),
     out_matrix=dict(),
     out_param_file=dict(),
     out_weight_file=dict(),

@@ -22,7 +22,7 @@ from ..base import (
 
 from .base import (
     AFNICommandBase, AFNICommand, AFNICommandInputSpec, AFNICommandOutputSpec,
-    Info, no_afni)
+    AFNIPythonCommandInputSpec, AFNIPythonCommand, Info, no_afni)
 
 
 class CentralityInputSpec(AFNICommandInputSpec):
@@ -46,12 +46,169 @@ class CentralityInputSpec(AFNICommandInputSpec):
         desc='Mask the dataset to target brain-only voxels',
         argstr='-automask')
 
+class AlignEpiAnatPyInputSpec(AFNIPythonCommandInputSpec):
+    in_file = File(
+        desc='EPI dataset to align',
+        argstr='-epi %s',
+        mandatory=True,
+        exists=True,
+        copyfile=False)
+    anat = File(
+        desc='name of structural dataset',
+        argstr='-anat %s',
+        mandatory=True,
+        exists=True,
+        copyfile=False)
+    epi_base = traits.Either(
+        traits.Range(low=0),
+        traits.Enum('mean', 'median', 'max'),
+        desc='the epi base used in alignment'
+             'should be one of (0/mean/median/max/subbrick#)',
+        mandatory=True,
+        argstr='-epi_base %s')
+    anat2epi = traits.Bool(
+        desc='align anatomical to EPI dataset (default)',
+        argstr='-anat2epi')
+    epi2anat = traits.Bool(
+        desc='align EPI to anatomical dataset',
+        argstr='-epi2anat')
+    save_skullstrip = traits.Bool(
+        desc='save skull-stripped (not aligned)',
+        argstr='-save_skullstrip')
+    suffix = traits.Str(
+        '_al',
+        desc='append suffix to the original anat/epi dataset to use'
+             'in the resulting dataset names (default is "_al")',
+        usedefault=True,
+        argstr='-suffix %s')
+    epi_strip = traits.Enum(
+        ('3dSkullStrip', '3dAutomask', 'None'),
+        desc='method to mask brain in EPI data'
+             'should be one of[3dSkullStrip]/3dAutomask/None)',
+        argstr='-epi_strip %s')
+    volreg = traits.Enum(
+        'on', 'off',
+        usedefault=True,
+        desc='do volume registration on EPI dataset before alignment'
+             'should be \'on\' or \'off\', defaults to \'on\'',
+        argstr='-volreg %s')
+    tshift = traits.Enum(
+        'on', 'off',
+        usedefault=True,
+        desc='do time shifting of EPI dataset before alignment'
+             'should be \'on\' or \'off\', defaults to \'on\'',
+        argstr='-tshift %s')
+
+
+class AlignEpiAnatPyOutputSpec(TraitedSpec):
+    anat_al_orig = File(
+        desc="A version of the anatomy that is aligned to the EPI")
+    epi_al_orig = File(
+        desc="A version of the EPI dataset aligned to the anatomy")
+    epi_tlrc_al = File(
+        desc="A version of the EPI dataset aligned to a standard template")
+    anat_al_mat = File(
+        desc="matrix to align anatomy to the EPI")
+    epi_al_mat = File(
+        desc="matrix to align EPI to anatomy")
+    epi_vr_al_mat = File(
+        desc="matrix to volume register EPI")
+    epi_reg_al_mat = File(
+        desc="matrix to volume register and align epi to anatomy")
+    epi_al_tlrc_mat = File(
+        desc="matrix to volume register and align epi"
+             "to anatomy and put into standard space")
+    epi_vr_motion = File(
+        desc="motion parameters from EPI time-series"
+             "registration (tsh included in name if slice"
+             "timing correction is also included).")
+    skullstrip = File(
+        desc="skull-stripped (not aligned) volume")
+
+class AlignEpiAnatPy(AFNIPythonCommand):
+    """Align EPI to anatomical datasets or vice versa
+    This Python script computes the alignment between two datasets, typically
+    an EPI and an anatomical structural dataset, and applies the resulting
+    transformation to one or the other to bring them into alignment.
+
+    This script computes the transforms needed to align EPI and
+    anatomical datasets using a cost function designed for this purpose. The
+    script combines multiple transformations, thereby minimizing the amount of
+    interpolation applied to the data.
+
+    Basic Usage:
+      align_epi_anat.py -anat anat+orig -epi epi+orig -epi_base 5
+
+    The user must provide EPI and anatomical datasets and specify the EPI
+    sub-brick to use as a base in the alignment.
+
+    Internally, the script always aligns the anatomical to the EPI dataset,
+    and the resulting transformation is saved to a 1D file.
+    As a user option, the inverse of this transformation may be applied to the
+    EPI dataset in order to align it to the anatomical data instead.
+
+    This program generates several kinds of output in the form of datasets
+    and transformation matrices which can be applied to other datasets if
+    needed. Time-series volume registration, oblique data transformations and
+    Talairach (standard template) transformations will be combined as needed
+    and requested (with options to turn on and off each of the steps) in
+    order to create the aligned datasets.
+
+    For complete details, see the `align_epi_anat.py' Documentation.
+    <https://afni.nimh.nih.gov/pub/dist/doc/program_help/align_epi_anat.py.html>`_
+
+    Examples
+    ========
+    >>> from nipype.interfaces import afni
+    >>> al_ea = afni.AlignEpiAnatPy()
+    >>> al_ea.inputs.anat = "structural.nii"
+    >>> al_ea.inputs.in_file = "functional.nii"
+    >>> al_ea.inputs.epi_base = 0
+    >>> al_ea.inputs.epi_strip = '3dAutomask'
+    >>> al_ea.inputs.volreg = 'off'
+    >>> al_ea.inputs.tshift = 'off'
+    >>> al_ea.inputs.save_skullstrip = True
+    >>> al_ea.cmdline # doctest: +ALLOW_UNICODE +ELLIPSIS
+    'python2 ...align_epi_anat.py -anat structural.nii -epi_base 0 -epi_strip 3dAutomask -epi functional.nii -save_skullstrip -suffix _al -tshift off -volreg off'
+    >>> res = allineate.run()  # doctest: +SKIP
+    """
+    _cmd = 'align_epi_anat.py'
+    input_spec = AlignEpiAnatPyInputSpec
+    output_spec = AlignEpiAnatPyOutputSpec
+
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        anat_prefix = ''.join(self._gen_fname(self.inputs.anat).split('+')[:-1])
+        epi_prefix = ''.join(self._gen_fname(self.inputs.in_file).split('+')[:-1])
+        outputtype = self.inputs.outputtype
+        if outputtype == 'AFNI':
+            ext = '.HEAD'
+        else:
+            Info.output_type_to_ext(outputtype)
+        matext = '.1D'
+        suffix = self.inputs.suffix
+        if self.inputs.anat2epi:
+            outputs['anat_al_orig'] = self._gen_fname(anat_prefix, suffix=suffix+'+orig', ext=ext)
+            outputs['anat_al_mat'] = self._gen_fname(anat_prefix, suffix=suffix+'_mat.aff12', ext=matext)
+        if self.inputs.epi2anat:
+            outputs['epi_al_orig'] = self._gen_fname(epi_prefix, suffix=suffix+'+orig', ext=ext)
+            outputs['epi_al_mat'] = self._gen_fname(epi_prefix, suffix=suffix+'_mat.aff12', ext=matext)
+        if self.inputs.volreg == 'on':
+            outputs['epi_vr_al_mat'] = self._gen_fname(epi_prefix, suffix='_vr'+suffix+'_mat.aff12', ext=matext)
+            if self.inputs.tshift == 'on':
+                outputs['epi_vr_motion'] = self._gen_fname(epi_prefix, suffix='tsh_vr_motion', ext=matext)
+            elif self.inputs.tshift == 'off':
+                outputs['epi_vr_motion'] = self._gen_fname(epi_prefix, suffix='vr_motion', ext=matext)
+        if self.inputs.volreg == 'on' and self.inputs.epi2anat:
+            outputs['epi_reg_al_mat'] = self._gen_fname(epi_prefix, suffix='_reg'+suffix+'_mat.aff12', ext=matext)
+        if self.inputs.save_skullstrip:
+            outputs.skullstrip = self._gen_fname(anat_prefix, suffix='_ns'+'+orig', ext=ext)
+        return outputs
 
 class AllineateInputSpec(AFNICommandInputSpec):
     in_file = File(
         desc='input file to 3dAllineate',
         argstr='-source %s',
-        position=-1,
         mandatory=True,
         exists=True,
         copyfile=False)
@@ -63,8 +220,10 @@ class AllineateInputSpec(AFNICommandInputSpec):
     out_file = File(
         desc='output file from 3dAllineate',
         argstr='-prefix %s',
-        position=-2,
-        genfile=True)
+        name_source='in_file',
+        name_template='%s_allineate',
+        genfile=True,
+        xor=['allcostx'])
     out_param_file = File(
         argstr='-1Dparam_save %s',
         desc='Save the warp parameters in ASCII (.1D) format.',
@@ -87,6 +246,15 @@ class AllineateInputSpec(AFNICommandInputSpec):
     overwrite = traits.Bool(
         desc='overwrite output file if it already exists',
         argstr='-overwrite')
+
+    # TODO: implement sensible xors for allcostx and suppres prefix in command when allcosx is used
+    allcostx= File(
+        desc='Compute and print ALL available cost functionals for the un-warped inputs'
+             'AND THEN QUIT. If you use this option none of the other expected outputs will be produced',
+        argstr='-allcostx |& tee %s',
+        position=-1,
+        xor=['out_file'])
+
     _cost_funcs = [
         'leastsq', 'ls',
         'mutualinfo', 'mi',
@@ -259,6 +427,7 @@ class AllineateOutputSpec(TraitedSpec):
     out_matrix = File(exists=True, desc='matrix to align input file')
     out_param_file = File(exists=True, desc='warp parameters')
     out_weight_file = File(exists=True, desc='weight volume')
+    allcostx = File(desc='Compute and print ALL available cost functionals for the un-warped inputs')
 
 
 class Allineate(AFNICommand):
@@ -276,7 +445,16 @@ class Allineate(AFNICommand):
     >>> allineate.inputs.out_file = 'functional_allineate.nii'
     >>> allineate.inputs.in_matrix = 'cmatrix.mat'
     >>> allineate.cmdline  # doctest: +ALLOW_UNICODE
-    '3dAllineate -1Dmatrix_apply cmatrix.mat -prefix functional_allineate.nii -source functional.nii'
+    '3dAllineate -source functional.nii -1Dmatrix_apply cmatrix.mat -prefix functional_allineate.nii'
+    >>> res = allineate.run()  # doctest: +SKIP
+
+    >>> from nipype.interfaces import afni
+    >>> allineate = afni.Allineate()
+    >>> allineate.inputs.in_file = 'functional.nii'
+    >>> allineate.inputs.reference = 'structural.nii'
+    >>> allineate.inputs.allcostx = 'out.allcostX.txt'
+    >>> allineate.cmdline  # doctest: +ALLOW_UNICODE
+    '3dAllineate -source functional.nii -prefix functional_allineate -base structural.nii -allcostx |& tee out.allcostX.txt'
     >>> res = allineate.run()  # doctest: +SKIP
     """
 
@@ -315,6 +493,9 @@ class Allineate(AFNICommand):
             else:
                 outputs['out_param_file'] = op.abspath(self.inputs.out_param_file)
 
+        if isdefined(self.inputs.allcostX):
+            outputs['allcostX'] = os.path.abspath(os.path.join(os.getcwd(),\
+                                         self.inputs.allcostx))
         return outputs
 
     def _gen_filename(self, name):
@@ -454,6 +635,103 @@ class Automask(AFNICommand):
     input_spec = AutomaskInputSpec
     output_spec = AutomaskOutputSpec
 
+class AutoTLRCInputSpec(CommandLineInputSpec):
+    outputtype = traits.Enum('AFNI', list(Info.ftypes.keys()),
+                             desc='AFNI output filetype')
+    in_file = File(
+        desc='Original anatomical volume (+orig).'
+             'The skull is removed by this script'
+             'unless instructed otherwise (-no_ss).',
+        argstr='-input %s',
+        mandatory=True,
+        exists=True,
+        copyfile=False)
+    base = traits.Str(
+        desc = '              Reference anatomical volume'
+                '              Usually this volume is in some standard space like'
+                '              TLRC or MNI space and with afni dataset view of'
+                '              (+tlrc).'
+                '              Preferably, this reference volume should have had'
+                '              the skull removed but that is not mandatory.'
+                '              AFNI\'s distribution contains several templates.'
+                '              For a longer list, use "whereami -show_templates"'
+                'TT_N27+tlrc --> Single subject, skull stripped volume.'
+                '             This volume is also known as '
+                '             N27_SurfVol_NoSkull+tlrc elsewhere in '
+                '             AFNI and SUMA land.'
+                '             (www.loni.ucla.edu, www.bic.mni.mcgill.ca)'
+                '             This template has a full set of FreeSurfer'
+                '             (surfer.nmr.mgh.harvard.edu)'
+                '             surface models that can be used in SUMA. '
+                '             For details, see Talairach-related link:'
+                '             https://afni.nimh.nih.gov/afni/suma'
+                'TT_icbm452+tlrc --> Average volume of 452 normal brains.'
+                '                 Skull Stripped. (www.loni.ucla.edu)'
+                'TT_avg152T1+tlrc --> Average volume of 152 normal brains.'
+                '                 Skull Stripped.(www.bic.mni.mcgill.ca)'
+                'TT_EPI+tlrc --> EPI template from spm2, masked as TT_avg152T1'
+                '                TT_avg152 and TT_EPI volume sources are from'
+                '                SPM\'s distribution. (www.fil.ion.ucl.ac.uk/spm/)'
+                'If you do not specify a path for the template, the script'
+                'will attempt to locate the template AFNI\'s binaries directory.'
+                'NOTE: These datasets have been slightly modified from'
+                '      their original size to match the standard TLRC'
+                '      dimensions (Jean Talairach and Pierre Tournoux'
+                '      Co-Planar Stereotaxic Atlas of the Human Brain'
+                '      Thieme Medical Publishers, New York, 1988). '
+                '      That was done for internal consistency in AFNI.'
+                '      You may use the original form of these'
+                '      volumes if you choose but your TLRC coordinates'
+                '      will not be consistent with AFNI\'s TLRC database'
+                '      (San Antonio Talairach Daemon database), for example.',
+        mandatory = True,
+        argstr='-base %s')
+    no_ss = traits.Bool(
+        desc='Do not strip skull of input data set'
+            '(because skull has already been removed'
+            'or because template still has the skull)'
+            'NOTE: The -no_ss option is not all that optional.'
+            '   Here is a table of when you should and should not use -no_ss'
+            '                  Template          Template'
+            '                  WITH skull        WITHOUT skull'
+            '   Dset.'
+            '   WITH skull      -no_ss            xxx '
+            '   '
+            '   WITHOUT skull   No Cigar          -no_ss'
+            '   '
+            '   Template means: Your template of choice'
+            '   Dset. means: Your anatomical dataset'
+            '   -no_ss means: Skull stripping should not be attempted on Dset'
+            '   xxx means: Don\'t put anything, the script will strip Dset'
+            '   No Cigar means: Don\'t try that combination, it makes no sense.',
+        argstr='-no_ss')
+
+class AutoTLRC(AFNICommand):
+    """A minmal wrapper for the AutoTLRC script
+    The only option currently supported is no_ss.
+    For complete details, see the `3dQwarp Documentation.
+    <https://afni.nimh.nih.gov/pub/dist/doc/program_help/@auto_tlrc.html>`_
+
+    Examples
+    ========
+    >>> from nipype.interfaces import afni
+    >>> autoTLRC = afni.AutoTLRC()
+    >>> autoTLRC.inputs.in_file = 'structural.nii'
+    >>> autoTLRC.inputs.no_ss = True
+    >>> autoTLRC.inputs.base = "TT_N27+tlrc"
+    >>> autoTLRC.cmdline # doctest: +ALLOW_UNICODE
+    '@auto_tlrc -base TT_N27+tlrc -input structural.nii -no_ss'
+    >>> res = autoTLRC.run()  # doctest: +SKIP
+
+    """
+    _cmd = '@auto_tlrc'
+    input_spec = AutoTLRCInputSpec
+    output_spec = AFNICommandOutputSpec
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        ext = '.HEAD'
+        outputs['out_file'] = os.path.abspath(self._gen_fname(self.inputs.in_file, suffix='+tlrc')+ext)
+        return outputs
 
 class BandpassInputSpec(AFNICommandInputSpec):
     in_file = File(
@@ -1283,14 +1561,17 @@ class MeansInputSpec(AFNICommandInputSpec):
     in_file_a = File(
         desc='input file to 3dMean',
         argstr='%s',
-        position=0,
+        position=-2,
         mandatory=True,
         exists=True)
     in_file_b = File(
         desc='another input file to 3dMean',
         argstr='%s',
-        position=1,
+        position=-1,
         exists=True)
+    datum = traits.Str(
+        desc='Sets the data type of the output dataset',
+        argstr='-datum %s')
     out_file = File(
         name_template='%s_mean',
         desc='output image file name',
@@ -1337,7 +1618,16 @@ class Means(AFNICommand):
     >>> means.inputs.in_file_b = 'im2.nii'
     >>> means.inputs.out_file =  'output.nii'
     >>> means.cmdline  # doctest: +ALLOW_UNICODE
-    '3dMean im1.nii im2.nii -prefix output.nii'
+    '3dMean -prefix output.nii im1.nii im2.nii'
+    >>> res = means.run()  # doctest: +SKIP
+
+    >>> from nipype.interfaces import afni
+    >>> means = afni.Means()
+    >>> means.inputs.in_file_a = 'im1.nii'
+    >>> means.inputs.out_file =  'output.nii'
+    >>> means.inputs.datum = 'short'
+    >>> means.cmdline  # doctest: +ALLOW_UNICODE
+    '3dMean -datum short -prefix output.nii im1.nii'
     >>> res = means.run()  # doctest: +SKIP
 
     """
@@ -2134,6 +2424,67 @@ class TCorrelate(AFNICommand):
     output_spec = AFNICommandOutputSpec
 
 
+class TNormInputSpec(AFNICommandInputSpec):
+    in_file = File(
+        desc='input file to 3dTNorm',
+        argstr='%s',
+        position=-1,
+        mandatory=True,
+        exists=True,
+        copyfile=False)
+    out_file = File(
+        name_template='%s_tnorm',
+        desc='output image file name',
+        argstr='-prefix %s',
+        name_source='in_file')
+    norm2 = traits.Bool(
+        desc='L2 normalize (sum of squares = 1) [DEFAULT]',
+        argstr='-norm2')
+    normR = traits.Bool(
+        desc='normalize so sum of squares = number of time points * e.g., so RMS = 1.',
+        argstr='-normR')
+    norm1 = traits.Bool(
+        desc='L1 normalize (sum of absolute values = 1)',
+        argstr='-norm1')
+    normx = traits.Bool(
+        desc='Scale so max absolute value = 1 (L_infinity norm)',
+        argstr='-normx')
+    polort = traits.Int(
+        desc="""Detrend with polynomials of order p before normalizing
+               [DEFAULT = don't do this]
+             * Use '-polort 0' to remove the mean, for example""",
+        argstr='-polort %s')
+    L1fit = traits.Bool(
+        desc="""Detrend with L1 regression (L2 is the default)
+             * This option is here just for the hell of it""",
+        argstr='-L1fit')
+
+
+class TNorm(AFNICommand):
+    """Shifts voxel time series from input so that seperate slices are aligned
+    to the same temporal origin.
+
+    For complete details, see the `3dTnorm Documentation.
+    <https://afni.nimh.nih.gov/pub/dist/doc/program_help/3dTnorm.html>`_
+
+    Examples
+    ========
+
+    >>> from nipype.interfaces import afni
+    >>> tnorm = afni.TNorm()
+    >>> tnorm.inputs.in_file = 'functional.nii'
+    >>> tnorm.inputs.norm2 = True
+    >>> tnorm.inputs.out_file = 'rm.errts.unit errts+tlrc'
+    >>> tnorm.cmdline  # doctest: +ALLOW_UNICODE
+    '3dTnorm -norm2 -prefix rm.errts.unit errts+tlrc functional.nii'
+    >>> res = tshift.run()  # doctest: +SKIP
+
+    """
+    _cmd = '3dTnorm'
+    input_spec = TNormInputSpec
+    output_spec = AFNICommandOutputSpec
+
+
 class TShiftInputSpec(AFNICommandInputSpec):
     in_file = File(
         desc='input file to 3dTShift',
@@ -2254,6 +2605,10 @@ class VolregInputSpec(AFNICommandInputSpec):
         argstr='-1Dmatrix_save %s',
         keep_extension=True,
         name_source='in_file')
+    interp = traits.Enum(
+        ('Fourier', 'cubic', 'heptic', 'quintic','linear'),
+        desc='spatial interpolation methods [default = heptic]',
+        argstr='-%s')
 
 
 class VolregOutputSpec(TraitedSpec):
@@ -2288,6 +2643,20 @@ class Volreg(AFNICommand):
     >>> volreg.inputs.outputtype = 'NIFTI'
     >>> volreg.cmdline  # doctest: +ELLIPSIS +ALLOW_UNICODE
     '3dvolreg -Fourier -twopass -1Dfile functional.1D -1Dmatrix_save functional.aff12.1D -prefix functional_volreg.nii -zpad 4 -maxdisp1D functional_md.1D functional.nii'
+    >>> res = volreg.run()  # doctest: +SKIP
+
+    >>> from nipype.interfaces import afni
+    >>> volreg = afni.Volreg()
+    >>> volreg.inputs.in_file = 'functional.nii'
+    >>> volreg.inputs.interp = 'cubic'
+    >>> volreg.inputs.verbose = True
+    >>> volreg.inputs.zpad = 1
+    >>> volreg.inputs.basefile = 'functional.nii'
+    >>> volreg.inputs.out_file = 'rm.epi.volreg.r1'
+    >>> volreg.inputs.oned_file = 'dfile.r1.1D'
+    >>> volreg.inputs.oned_matrix_save = 'mat.r1.tshift+orig.1D'
+    >>> volreg.cmdline # doctest: +ALLOW_UNICODE
+    '3dvolreg -cubic -1Dfile dfile.r1.1D -1Dmatrix_save mat.r1.tshift+orig.1D -prefix rm.epi.volreg.r1 -verbose -base functional.nii -zpad 1 -maxdisp1D functional_md.1D functional.nii'
     >>> res = volreg.run()  # doctest: +SKIP
 
     """
