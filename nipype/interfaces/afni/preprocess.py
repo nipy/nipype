@@ -2547,6 +2547,11 @@ class VolregInputSpec(AFNICommandInputSpec):
         argstr='-base %s',
         position=-6,
         exists=True)
+    in_weight_file = File(
+        desc='File for input weighting volume',
+        argstr="-weight '%s[0]'",
+        exists=True)
+
     zpad = traits.Int(
         desc='Zeropad around the edges by \'n\' voxels during rotations',
         argstr='-zpad %d',
