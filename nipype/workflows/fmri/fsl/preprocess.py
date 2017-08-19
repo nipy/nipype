@@ -20,6 +20,16 @@ def getthreshop(thresh):
 
 def pickrun(files, whichrun):
     """pick file from list of files"""
+
+    filemap = {'first': 0, 'last': -1, 'middle' :len(files) // 2}
+
+    if isinstance(whichrun, str):
+        if whichrun not in filemap.keys():
+            raise(KeyError, 'Sorry, whichrun must be either integer index'
+                            'or string in form of "first", "last" or "middle')
+        else:
+            return files[filemap[whichrun]]
+
     if isinstance(files, list):
         return files[whichrun]
     else:
