@@ -32,6 +32,7 @@ from warnings import warn
 import simplejson as json
 from dateutil.parser import parse as parseutc
 from packaging.version import Version
+import collections
 
 from .. import config, logging, LooseVersion, __version__
 from ..utils.provenance import write_provenance
@@ -2058,9 +2059,15 @@ class MultiPath(traits.List):
     """
 
     def validate(self, object, name, value):
+
+        # want to treat range and other sequences (except str) as list
+        if not isinstance(value, (str, bytes)) and isinstance(value, collections.Sequence):
+            value  = list(value)
+
         if not isdefined(value) or \
                 (isinstance(value, list) and len(value) == 0):
             return Undefined
+
         newvalue = value
 
         if not isinstance(value, list) \

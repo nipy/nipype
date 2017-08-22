@@ -869,7 +869,7 @@ class S3DataGrabber(IOBase):
         # get list of all files in s3 bucket
         conn = boto.connect_s3(anon=self.inputs.anon)
         bkt = conn.get_bucket(self.inputs.bucket)
-        bkt_files = list(k.key for k in bkt.list())
+        bkt_files = list(k.key for k in bkt.list(prefix=self.inputs.bucket_path))
 
         # keys are outfields, args are template args for the outfield
         for key, args in list(self.inputs.template_args.items()):
@@ -948,12 +948,11 @@ class S3DataGrabber(IOBase):
         # We must convert to the local location specified
         # and download the files.
         for key,val in outputs.items():
-            #This will basically be either list-like or string-like:
-            #if it has the __iter__ attribute, it's list-like (list,
-            #tuple, numpy array) and we iterate through each of its
-            #values. If it doesn't, it's string-like (string,
-            #unicode), and we convert that value directly.
-            if hasattr(val,'__iter__'):
+            # This will basically be either list-like or string-like:
+            # if it's an instance of a list, we'll iterate through it.
+            # If it isn't, it's string-like (string, unicode), we
+            # convert that value directly.
+            if isinstance(val, (list, tuple, set)):
                 for i,path in enumerate(val):
                     outputs[key][i] = self.s3tolocal(path, bkt)
             else:

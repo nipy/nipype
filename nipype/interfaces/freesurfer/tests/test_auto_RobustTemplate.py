@@ -33,6 +33,7 @@ def test_RobustTemplate_inputs():
     ),
     no_iteration=dict(argstr='--noit',
     ),
+    num_threads=dict(),
     out_file=dict(argstr='--template %s',
     mandatory=True,
     usedefault=True,
