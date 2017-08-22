@@ -700,8 +700,13 @@ connected.
         for node in nodes:
             if node.name in node_names:
                 idx = node_names.index(node.name)
-                if node_lineage[idx] in [node._hierarchy, self.name]:
-                    raise IOError('Duplicate node name %s found.' % node.name)
+                try:
+                    this_node_lineage = node_lineage[idx]
+                except IndexError:
+                    raise IOError('Duplicate node name "%s" found.' % node.name)
+                else:
+                    if this_node_lineage in [node._hierarchy, self.name]:
+                        raise IOError('Duplicate node name "%s" found.' % node.name)
             else:
                 node_names.append(node.name)
 
