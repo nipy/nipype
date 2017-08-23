@@ -219,6 +219,7 @@ def has_metadata(trait, metadata, value=None, recursive=True):
             inner_trait = trait._trait
             count += has_metadata(inner_trait, metadata, recursive)
         # dj TOASK: not sure about "handlers"? couldn't find it in traits library
+        # dj: cant find also in base.py, are we planning to use it?
         #if hasattr(trait, 'handlers') and trait.handlers is not None:
         #    for handler in trait.handlers:
         #        count += has_metadata(handler, metadata, recursive)
@@ -235,6 +236,7 @@ class MultiObject(traitlets.List):
     def validate(self, object, value):
         # dj NOTE: for now isdefined([]) gives false, so OR part not needed
         # dj NOTE: not sure if this will stay or I'll have to change it
+        # dj NOTE: might need to revert if I change isdefined for lists
         #if not isdefined(value) or \
         #        (isinstance(value, list) and len(value) == 0):
         if not isdefined(value):

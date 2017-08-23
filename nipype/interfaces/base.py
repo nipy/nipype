@@ -63,7 +63,7 @@ if runtime_profile:
 __docformat__ = 'restructuredtext'
 
 
-# dj TOASK: nipype almost doest use it, should we remove?
+# dj NOTE: nipype almost doest use it
 class NipypeInterfaceError(Exception):
     def __init__(self, value):
         self.value = value
