@@ -33,7 +33,7 @@ from ..interfaces.base import (BaseInterface, traits, TraitedSpec, File,
                                InputMultiPath, OutputMultiPath,
                                BaseInterfaceInputSpec, isdefined,
                                DynamicTraitedSpec, Undefined)
-from ..utils.filemanip import fname_presuffix, split_filename
+from ..utils.filemanip import fname_presuffix, split_filename, filename_to_list
 from ..utils import NUMPY_MMAP
 
 from . import confounds
@@ -1378,6 +1378,51 @@ def merge_rois(in_files, in_idxs, in_ref,
         allim.to_filename(out_file)
 
     return out_file
+
+
+class CalculateMedianInputSpec(BaseInterfaceInputSpec):
+    in_file = InputMultiPath(File(exists=True, mandatory=True,
+      desc="One or more realigned Nifti 4D timeseries"))
+    median_file = traits.Str('median.nii.gz', usedefault=True,
+      desc="Filename to store median image")
+
+class CalculateMedianOutputSpec(TraitedSpec):
+    median_file = File(exists=True)
+
+class CalculateMedian(BaseInterface):
+    """
+    Computes an average of the median across one or more 4D Nifti timeseries
+
+    Example
+    -------
+
+    >>> from nipype.algorithms.misc import CalculateMedian
+    >>> mean = CalculateMedian()
+    >>> mean.inputs.in_file = 'functional.nii'
+    >>> mean.run() # doctest: +SKIP
+
+    """
+    input_spec = CalculateMedianInputSpec
+    output_spec = CalculateMedianOutputSpec
+
+    def _run_interface(self, runtime):
+        total = None
+        for idx, fname in enumerate(filename_to_list(self.inputs.in_file)):
+            img = nb.load(fname, mmap=NUMPY_MMAP)
+            data = np.median(img.get_data(), axis=3)
+            if total is None:
+                total = data
+            else:
+                total += data
+        median_img = nb.Nifti1Image(total/(idx + 1), img.affine, img.header)
+        filename = os.path.join(os.getcwd(), self.inputs.median_file)
+        median_img.to_filename(filename)
+        return runtime
+
+    def _list_outputs(self):
+        outputs = self._outputs().get()
+        outputs['median_file'] = os.path.abspath(self.inputs.median_file)
+        return outputs
 
 
 # Deprecated interfaces ------------------------------------------------------
