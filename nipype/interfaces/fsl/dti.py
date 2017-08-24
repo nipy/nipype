@@ -926,6 +926,8 @@ class ProbTrackX2(ProbTrackX):
         else:
             out_dir = self.inputs.out_dir
 
+        outputs['way_total'] = os.path.abspath(os.path.join(out_dir, 'waytotal'))
+
         if isdefined(self.inputs.omatrix1):
             outputs['network_matrix'] = os.path.abspath(os.path.join(out_dir, 'matrix_seeds_to_all_targets'))
             outputs['matrix1_dot'] = os.path.abspath(os.path.join(out_dir, 'fdt_matrix1.dot'))
