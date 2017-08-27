@@ -67,13 +67,13 @@ def fix_keys_for_gexf(orig):
         newnodedata.update(orig.nodes[node])
         if 'dn_fsname' in orig.nodes[node]:
             newnodedata['label'] = orig.nodes[node]['dn_fsname']
-        ntwk.add_node(str(node), newnodedata)
+        ntwk.add_node(str(node), **newnodedata)
         if 'dn_position' in ntwk.nodes[str(node)] and 'dn_position' in newnodedata:
             ntwk.nodes[str(node)]['dn_position'] = str(newnodedata['dn_position'])
     for edge in edges:
         data = {}
         data = orig.edge[edge[0]][edge[1]]
-        ntwk.add_edge(str(edge[0]), str(edge[1]), data)
+        ntwk.add_edge(str(edge[0]), str(edge[1]), **data)
         if 'fiber_length_mean' in ntwk.edge[str(edge[0])][str(edge[1])]:
             ntwk.edge[str(edge[0])][str(edge[1])]['fiber_length_mean'] = str(data['fiber_length_mean'])
         if 'fiber_length_std' in ntwk.edge[str(edge[0])][str(edge[1])]:
@@ -134,14 +134,14 @@ def average_networks(in_files, ntwk_res_file, group_id):
                     current = {}
                     current = ntwk.edge[edge[0]][edge[1]]
                     data = add_dicts_by_key(current, data)
-                ntwk.add_edge(edge[0], edge[1], data)
+                ntwk.add_edge(edge[0], edge[1], **data)
             nodes = list(nodes())
             for node in nodes:
                 data = {}
                 data = ntwk.nodes[node]
                 if 'value' in tmp.nodes[node]:
                     data['value'] = data['value'] + tmp.nodes[node]['value']
-                ntwk.add_node(node, data)
+                ntwk.add_node(node, **data)
 
         # Divides each value by the number of files
         nodes = list(ntwk.nodes())
@@ -156,7 +156,7 @@ def average_networks(in_files, ntwk_res_file, group_id):
             if 'value' in data:
                 newdata['value'] = data['value'] / len(in_files)
                 ntwk.nodes[node]['value'] = newdata
-            avg_ntwk.add_node(node, newdata)
+            avg_ntwk.add_node(node, **newdata)
 
         edge_dict = {}
         edge_dict['count'] = np.zeros((avg_ntwk.number_of_nodes(),
@@ -168,7 +168,7 @@ def average_networks(in_files, ntwk_res_file, group_id):
                     if not key == 'count':
                         data[key] = data[key] / len(in_files)
                 ntwk.edge[edge[0]][edge[1]] = data
-                avg_ntwk.add_edge(edge[0], edge[1], data)
+                avg_ntwk.add_edge(edge[0], edge[1], **data)
             edge_dict['count'][edge[0] - 1][edge[1] - 1] = ntwk.edge[edge[0]][edge[1]]['count']
 
         iflogger.info('After thresholding, the average network has has {n} edges'.format(n=avg_ntwk.number_of_edges()))
@@ -323,7 +323,7 @@ def add_node_data(node_array, ntwk):
         if not int(idx) == 0:
             newdata['value'] = node_array[int(idx) - 1]
             data.update(newdata)
-            node_ntwk.add_node(int(idx), data)
+            node_ntwk.add_node(int(idx), **data)
     return node_ntwk
 
 
@@ -339,7 +339,7 @@ def add_edge_data(edge_array, ntwk, above=0, below=0):
                         old_edge_dict = edge_ntwk.edge[x + 1][y + 1]
                         edge_ntwk.remove_edge(x + 1, y + 1)
                         data.update(old_edge_dict)
-                    edge_ntwk.add_edge(x + 1, y + 1, data)
+                    edge_ntwk.add_edge(x + 1, y + 1, **data)
     return edge_ntwk
 
 

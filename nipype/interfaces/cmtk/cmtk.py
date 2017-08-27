@@ -219,7 +219,7 @@ def cmat(track_file, roi_file, resolution_network_file, matrix_name, matrix_mat_
     else:
         G = nx.Graph()
         for u, d in gp.nodes(data=True):
-            G.add_node(int(u), d)
+            G.add_node(int(u), **d)
             # compute a position for the node based on the mean position of the
             # ROI in voxel coordinates (segmentation volume )
             xyz = tuple(np.mean(np.where(np.flipud(roiData) == int(d["dn_correspondence_id"])), axis=1))
@@ -319,7 +319,7 @@ def cmat(track_file, roi_file, resolution_network_file, matrix_name, matrix_mat_
             di['fiber_length_median'] = 0
             di['fiber_length_std'] = 0
         if not u == v:  # Fix for self loop problem
-            G.add_edge(u, v, di)
+            G.add_edge(u, v, **di)
             if 'fiblist' in d:
                 numfib.add_edge(u, v, weight=di['number_of_fibers'])
                 fibmean.add_edge(u, v, weight=di['fiber_length_mean'])
@@ -748,7 +748,7 @@ def create_nodes(roi_file, resolution_network_file, out_filename):
     roiData = roi_image.get_data()
     nROIs = len(gp.nodes())
     for u, d in gp.nodes(data=True):
-        G.add_node(int(u), d)
+        G.add_node(int(u), **d)
         xyz = tuple(np.mean(np.where(np.flipud(roiData) == int(d["dn_correspondence_id"])), axis=1))
         G.nodes[int(u)]['dn_position'] = tuple([xyz[0], xyz[2], -xyz[1]])
     nx.write_gpickle(G, out_filename)
