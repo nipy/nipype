@@ -847,7 +847,7 @@ def generate_expanded_graph(graph_in):
                             logger.debug("Qualified the %s -> %s join field"
                                          " %s as %s." %
                                          (in_node, jnode, dest_field, slot_field))
-                    graph_in.add_edge(in_node, jnode, newdata)
+                    graph_in.add_edge(in_node, jnode, **newdata)
                     logger.debug("Connected the join node %s subgraph to the"
                                  " expanded join point %s" % (jnode, in_node))
 
@@ -1289,8 +1289,8 @@ def write_workflow_prov(graph, filename=None, format='all'):
     # add dependencies (edges)
     # Process->Process
     for idx, edgeinfo in enumerate(graph.in_edges()):
-        ps.g.wasStartedBy(processes[nodes.index(edgeinfo[1])],
-                          starter=processes[nodes.index(edgeinfo[0])])
+        ps.g.wasStartedBy(processes[list(nodes).index(edgeinfo[1])],
+                          starter=processes[list(nodes).index(edgeinfo[0])])
 
     # write provenance
     ps.write_provenance(filename, format=format)
