@@ -214,16 +214,16 @@ def cmat(track_file, roi_file, resolution_network_file, matrix_name, matrix_mat_
     nROIs = len(gp.nodes())
 
     # add node information from parcellation
-    if 'dn_position' in gp.node[gp.nodes()[0]]:
+    if 'dn_position' in gp.nodes[list(gp.nodes())[0]]:
         G = gp.copy()
     else:
         G = nx.Graph()
-        for u, d in gp.nodes_iter(data=True):
+        for u, d in gp.nodes(data=True):
             G.add_node(int(u), d)
             # compute a position for the node based on the mean position of the
             # ROI in voxel coordinates (segmentation volume )
             xyz = tuple(np.mean(np.where(np.flipud(roiData) == int(d["dn_correspondence_id"])), axis=1))
-            G.node[int(u)]['dn_position'] = tuple([xyz[0], xyz[2], -xyz[1]])
+            G.nodes[int(u)]['dn_position'] = tuple([xyz[0], xyz[2], -xyz[1]])
 
     if intersections:
         iflogger.info("Filtering tractography from intersections")
@@ -304,7 +304,7 @@ def cmat(track_file, roi_file, resolution_network_file, matrix_name, matrix_mat_
     fibmean = numfib.copy()
     fibmedian = numfib.copy()
     fibdev = numfib.copy()
-    for u, v, d in G.edges_iter(data=True):
+    for u, v, d in G.edges(data=True):
         G.remove_edge(u, v)
         di = {}
         if 'fiblist' in d:
@@ -747,10 +747,10 @@ def create_nodes(roi_file, resolution_network_file, out_filename):
     roi_image = nb.load(roi_file, mmap=NUMPY_MMAP)
     roiData = roi_image.get_data()
     nROIs = len(gp.nodes())
-    for u, d in gp.nodes_iter(data=True):
+    for u, d in gp.nodes(data=True):
         G.add_node(int(u), d)
         xyz = tuple(np.mean(np.where(np.flipud(roiData) == int(d["dn_correspondence_id"])), axis=1))
-        G.node[int(u)]['dn_position'] = tuple([xyz[0], xyz[2], -xyz[1]])
+        G.nodes[int(u)]['dn_position'] = tuple([xyz[0], xyz[2], -xyz[1]])
     nx.write_gpickle(G, out_filename)
     return out_filename
 
