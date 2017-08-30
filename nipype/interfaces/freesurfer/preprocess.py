@@ -1277,7 +1277,15 @@ class ApplyVolTransformInputSpec(FSTraitedSpec):
     fs_target = traits.Bool(argstr='--fstarg', xor=_targ_xor, mandatory=True,
                             requires=['reg_file'],
                             desc='use orig.mgz from subject in regfile as target')
-    _reg_xor = ('reg_file', 'fsl_reg_file', 'xfm_reg_file', 'reg_header', 'subject')
+    _reg_xor = ('reg_file', 'lta_file', 'lta_inv_file', 'fsl_reg_file', 'xfm_reg_file',
+                'reg_header', 'mni_152_reg', 'subject')
+    reg_file = File(exists=True, xor=_reg_xor, argstr='--reg %s',
+                    mandatory=True,
+                    desc='tkRAS-to-tkRAS matrix   (tkregister2 format)')
+    lta_file = File(exists=True, xor=_reg_xor, argstr='--lta %s',
+                    mandatory=True, desc='Linear Transform Array file')
+    lta_inv_file = File(exists=True, xor=_reg_xor, argstr='--lta-inv %s',
+                        mandatory=True, desc='LTA, invert')
     reg_file = File(exists=True, xor=_reg_xor, argstr='--reg %s',
                     mandatory=True,
                     desc='tkRAS-to-tkRAS matrix   (tkregister2 format)')
@@ -1290,8 +1298,9 @@ class ApplyVolTransformInputSpec(FSTraitedSpec):
     reg_header = traits.Bool(xor=_reg_xor, argstr='--regheader',
                              mandatory=True,
                              desc='ScannerRAS-to-ScannerRAS matrix = identity')
-    subject = traits.Str(xor=_reg_xor, argstr='--s %s',
-                         mandatory=True,
+    mni_152_reg = traits.Bool(xor=_reg_xor, argstr='--regheader', mandatory=True,
+                              desc='target MNI152 space')
+    subject = traits.Str(xor=_reg_xor, argstr='--s %s', mandatory=True,
                          desc='set matrix = identity and use subject for any templates')
     inverse = traits.Bool(desc='sample from target to source',
                           argstr='--inv')
