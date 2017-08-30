@@ -40,7 +40,6 @@ def test_ArtifactDetect_inputs():
     usedefault=True,
     ),
     use_norm=dict(requires=['norm_threshold'],
-    usedefault=True,
     ),
     zintensity_threshold=dict(mandatory=True,
     ),

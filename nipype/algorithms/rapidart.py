@@ -165,10 +165,9 @@ class ArtifactDetectInputSpec(BaseInterfaceInputSpec):
                                       desc=("Use differences between successive motion (first element)"
                                             "and intensity paramter (second element) estimates in order"
                                             "to determine outliers.  (default is [True, False])"))
-    use_norm = traits.Bool(True, requires=['norm_threshold'],
+    use_norm = traits.Bool(requires=['norm_threshold'],
                            desc=("Uses a composite of the motion parameters in "
-                                 "order to determine outliers."),
-                           usedefault=True)
+                                 "order to determine outliers."))
     norm_threshold = traits.Float(desc=("Threshold to use to detect motion-rela"
                                         "ted outliers when composite motion is "
                                         "being used"), mandatory=True,
@@ -307,7 +306,7 @@ class ArtifactDetect(BaseInterface):
         outputs['intensity_files'] = []
         outputs['statistic_files'] = []
         outputs['mask_files'] = []
-        if isdefined(self.inputs.use_norm) and self.inputs.use_norm:
+        if isdefined(self.inputs.norm_threshold):
             outputs['norm_files'] = []
             if self.inputs.bound_by_brainmask:
                 outputs['displacement_files'] = []
@@ -321,7 +320,7 @@ class ArtifactDetect(BaseInterface):
             outputs['intensity_files'].insert(i, intensityfile)
             outputs['statistic_files'].insert(i, statsfile)
             outputs['mask_files'].insert(i, maskfile)
-            if isdefined(self.inputs.use_norm) and self.inputs.use_norm:
+            if isdefined(self.inputs.norm_threshold):
                 outputs['norm_files'].insert(i, normfile)
                 if self.inputs.bound_by_brainmask:
                     outputs['displacement_files'].insert(i, displacementfile)
@@ -427,7 +426,7 @@ class ArtifactDetect(BaseInterface):
         mask_img = Nifti1Image(mask.astype(np.uint8), affine)
         mask_img.to_filename(maskfile)
 
-        if self.inputs.use_norm:
+        if isdefined(self.inputs.norm_threshold):
             brain_pts = None
             if self.inputs.bound_by_brainmask:
                 voxel_coords = np.nonzero(mask)
@@ -470,7 +469,7 @@ class ArtifactDetect(BaseInterface):
         # write output to outputfile
         np.savetxt(artifactfile, outliers, fmt=b'%d', delimiter=' ')
         np.savetxt(intensityfile, g, fmt=b'%.2f', delimiter=' ')
-        if self.inputs.use_norm:
+        if isdefined(self.inputs.norm_threshold):
             np.savetxt(normfile, normval, fmt=b'%.4f', delimiter=' ')
 
         if isdefined(self.inputs.save_plot) and self.inputs.save_plot:
@@ -478,12 +477,12 @@ class ArtifactDetect(BaseInterface):
             matplotlib.use(config.get("execution", "matplotlib_backend"))
             import matplotlib.pyplot as plt
             fig = plt.figure()
-            if isdefined(self.inputs.use_norm) and self.inputs.use_norm:
+            if isdefined(self.inputs.norm_threshold):
                 plt.subplot(211)
             else:
                 plt.subplot(311)
             self._plot_outliers_with_wave(gz, iidx, 'Intensity')
-            if isdefined(self.inputs.use_norm) and self.inputs.use_norm:
+            if isdefined(self.inputs.norm_threshold):
                 plt.subplot(212)
                 self._plot_outliers_with_wave(normval, np.union1d(tidx, ridx),
                                               'Norm (mm)')
@@ -521,7 +520,7 @@ class ArtifactDetect(BaseInterface):
                                  'std': np.std(gz, axis=0).tolist()},
                                 ]},
                  ]
-        if self.inputs.use_norm:
+        if isdefined(self.inputs.norm_threshold):
             stats.insert(3, {'motion_norm':
                              {'mean': np.mean(normval, axis=0).tolist(),
                               'min': np.min(normval, axis=0).tolist(),
