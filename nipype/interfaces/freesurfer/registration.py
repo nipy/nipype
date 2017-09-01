@@ -372,7 +372,8 @@ class MRICoregInputSpec(FSTraitedSpec):
                                      desc='turn off coordinate dithering')
     no_intensity_dithering = traits.Bool(argstr='--no-intensity-dither',
                                          desc='turn off intensity dithering')
-    # Skipping: --sep
+    sep = traits.List(argstr='--sep %s...', minlen=1, maxlen=2,
+                      desc='set spatial scales, in voxels (default [2, 4])')
     initial_translation = traits.Tuple(
         traits.Float, traits.Float, traits.Float, argstr='--trans %g %g %g',
         desc='initial translation in mm (implies no_cras0)')
@@ -444,6 +445,16 @@ class MRICoreg(FSCommand):
     >>> coreg.inputs.reference_mask = False
     >>> coreg.cmdline # doctest: +ALLOW_UNICODE +ELLIPSIS
     'mri_coreg --s fsaverage --no-ref-mask --lta .../registration.lta --ref fixed1.nii --mov moving1.nii --sd .'
+
+    Spatial scales may be specified as a list of one or two separations:
+
+    >>> coreg.inputs.sep = [4]
+    >>> coreg.cmdline # doctest: +ALLOW_UNICODE +ELLIPSIS
+    'mri_coreg --s fsaverage --no-ref-mask --lta .../registration.lta --ref fixed1.nii --sep 4 --mov moving1.nii --sd .'
+
+    >>> coreg.inputs.sep = [4, 5]
+    >>> coreg.cmdline # doctest: +ALLOW_UNICODE +ELLIPSIS
+    'mri_coreg --s fsaverage --no-ref-mask --lta .../registration.lta --ref fixed1.nii --sep 4 --sep 5 --mov moving1.nii --sd .'
     """
 
     _cmd = 'mri_coreg'

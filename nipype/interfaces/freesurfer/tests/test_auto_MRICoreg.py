@@ -66,6 +66,8 @@ def test_MRICoreg_inputs():
     ),
     saturation_threshold=dict(argstr='--sat %g',
     ),
+    sep=dict(argstr='--sep %s...',
+    ),
     source_file=dict(argstr='--mov %s',
     copyfile=False,
     mandatory=True,
