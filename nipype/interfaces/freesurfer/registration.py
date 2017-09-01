@@ -344,7 +344,7 @@ class MRICoregInputSpec(FSTraitedSpec):
     source_file = File(argstr='--mov %s', desc='source file to be registered',
                        mandatory=True, copyfile=False)
     reference_file = File(argstr='--ref %s', desc='reference (target) file',
-                          mandatory=True, copyfile=False)
+                          mandatory=True, copyfile=False, xor=['subject_id'])
     out_lta_file = traits.Either(True, File, argstr='--lta %s', default=True,
                                  usedefault=True,
                                  desc='output registration file (LTA format)')
@@ -356,7 +356,8 @@ class MRICoregInputSpec(FSTraitedSpec):
     subjects_dir = Directory(exists=True, argstr='--sd %s',
                              desc='FreeSurfer SUBJECTS_DIR')
     subject_id = traits.Str(
-        argstr='--s %s', position=1,
+        argstr='--s %s', position=1, mandatory=True, xor=['reference_file'],
+        requires=['subjects_dir'],
         desc='freesurfer subject ID (implies ``reference_mask == '
              'aparc+aseg.mgz`` unless otherwise specified)')
     dof = traits.Enum(6, 9, 12, argstr='--dof %d',
