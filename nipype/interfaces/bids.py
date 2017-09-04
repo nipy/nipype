@@ -22,7 +22,12 @@ from .base import (traits,
                    Str,
                    Undefined)
 
-from bids.grabbids import BIDSLayout
+try:
+    from bids.grabbids import BIDSLayout
+except ImportError:
+    have_pybids = False
+else:
+    have_pybids = True
 
 
 class BIDSDataGrabberInputSpec(DynamicTraitedSpec):
@@ -117,6 +122,9 @@ class BIDSDataGrabber(BaseInterface):
         self.inputs.trait_set(trait_change_notify=False, **undefined_traits)
 
     def _run_interface(self, runtime):
+        if not have_pybids:
+            raise ImportError("The BIDSEventsGrabber interface requires pybids."
+                              " Please make sure it is installed.")
         return runtime
 
     def _list_outputs(self):
