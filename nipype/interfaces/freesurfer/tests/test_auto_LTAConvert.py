@@ -45,6 +45,8 @@ def test_LTAConvert_inputs():
     ),
     out_reg=dict(argstr='--outreg %s',
     ),
+    out_itk=dict(argstr='--outitk %s',
+    ),
     source_file=dict(argstr='--src %s',
     ),
     target_conform=dict(argstr='--trgconform',
