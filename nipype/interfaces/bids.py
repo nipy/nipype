@@ -8,8 +8,9 @@
 
     Change directory to provide relative paths for doctests
     >>> import os
-    >>> filepath = os.path.dirname( os.path.realpath( __file__ ) )
-    >>> datadir = os.path.realpath(os.path.join(filepath, '../testing/data'))
+    >>> import bids
+    >>> filepath = os.path.realpath(os.path.dirname(bids.__file__))
+    >>> datadir = os.path.realpath(os.path.join(filepath, 'grabbids/tests/data/'))
     >>> os.chdir(datadir)
 
 """
@@ -51,7 +52,7 @@ class BIDSDataGrabber(BaseInterface):
         >>> bg = BIDSDataGrabber()
         >>> bg.inputs.base_dir = 'ds005/'
         >>> results = bg.run()
-        >>> pprint.pprint(len(results.outputs.outfield)) # doctest: +ALLOW_UNICODE
+        >>> len(results.outputs.outfield) # doctest: +ALLOW_UNICODE
         116
 
         Using dynamically created, user-defined input fields,
