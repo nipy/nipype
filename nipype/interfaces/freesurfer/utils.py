@@ -3110,6 +3110,8 @@ class LTAConvertInputSpec(CommandLineInputSpec):
                             desc='output transform in MNI/XFM format')
     out_reg = traits.Either(traits.Bool, File, argstr='--outreg %s',
                             desc='output transform in reg dat format')
+    out_itk = traits.Either(traits.Bool, File, argstr='--outitk %s',
+                            desc='output transform in ITK format')
     # Optional flags
     invert = traits.Bool(argstr='--invert')
     ltavox2vox = traits.Bool(argstr='--ltavox2vox', requires=['out_lta'])
@@ -3124,6 +3126,7 @@ class LTAConvertOutputSpec(TraitedSpec):
     out_fsl = File(exists=True, desc='output transform in FSL format')
     out_mni = File(exists=True, desc='output transform in MNI/XFM format')
     out_reg = File(exists=True, desc='output transform in reg dat format')
+    out_itk = File(exists=True, desc='output transform in ITK format')
 
 
 class LTAConvert(CommandLine):
@@ -3146,7 +3149,8 @@ class LTAConvert(CommandLine):
     def _list_outputs(self):
         outputs = self.output_spec().get()
         for name, default in (('out_lta', 'out.lta'), ('out_fsl', 'out.mat'),
-                              ('out_mni', 'out.xfm'), ('out_reg', 'out.dat')):
+                              ('out_mni', 'out.xfm'), ('out_reg', 'out.dat'),
+                              ('out_itk', 'out.txt')):
             attr = getattr(self.inputs, name)
             if attr:
                 fname = default if attr is True else attr
