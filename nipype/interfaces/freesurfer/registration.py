@@ -442,20 +442,23 @@ class MRICoreg(FSCommand):
 
     If passing a subject ID, the reference mask may be disabled:
 
+    >>> coreg = MRICoreg()
+    >>> coreg.inputs.source_file = 'moving1.nii'
+    >>> coreg.inputs.subjects_dir = '.'
     >>> coreg.inputs.subject_id = 'fsaverage'
     >>> coreg.inputs.reference_mask = False
     >>> coreg.cmdline # doctest: +ALLOW_UNICODE +ELLIPSIS
-    'mri_coreg --s fsaverage --no-ref-mask --lta .../registration.lta --ref fixed1.nii --mov moving1.nii --sd .'
+    'mri_coreg --s fsaverage --no-ref-mask --lta .../registration.lta --mov moving1.nii --sd .'
 
     Spatial scales may be specified as a list of one or two separations:
 
     >>> coreg.inputs.sep = [4]
     >>> coreg.cmdline # doctest: +ALLOW_UNICODE +ELLIPSIS
-    'mri_coreg --s fsaverage --no-ref-mask --lta .../registration.lta --ref fixed1.nii --sep 4 --mov moving1.nii --sd .'
+    'mri_coreg --s fsaverage --no-ref-mask --lta .../registration.lta --sep 4 --mov moving1.nii --sd .'
 
     >>> coreg.inputs.sep = [4, 5]
     >>> coreg.cmdline # doctest: +ALLOW_UNICODE +ELLIPSIS
-    'mri_coreg --s fsaverage --no-ref-mask --lta .../registration.lta --ref fixed1.nii --sep 4 --sep 5 --mov moving1.nii --sd .'
+    'mri_coreg --s fsaverage --no-ref-mask --lta .../registration.lta --sep 4 --sep 5 --mov moving1.nii --sd .'
     """
 
     _cmd = 'mri_coreg'
