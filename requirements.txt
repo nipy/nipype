@@ -13,5 +13,4 @@ configparser
 pytest>=3.0
 mock
 pydotplus
-pybids==0.3
 packaging
