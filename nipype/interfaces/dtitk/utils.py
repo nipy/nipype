@@ -1,6 +1,6 @@
 __author__ = 'kjordan'
 
-from nipype.interfaces.base import TraitedSpec, CommandLineInputSpec, File, \
+from ..base import TraitedSpec, CommandLineInputSpec, File, \
     traits, isdefined, split_filename
 import os
 from .base import CommandLineDtitk

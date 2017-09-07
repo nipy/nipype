@@ -1,8 +1,8 @@
-from nipype.interfaces.base import TraitedSpec, CommandLineInputSpec, \
+from ..base import TraitedSpec, CommandLineInputSpec, \
     traits, isdefined
-from nipype.utils.filemanip import fname_presuffix
+from ...utils.filemanip import fname_presuffix
 import os
-from base import CommandLineDtitk
+from .base import CommandLineDtitk
 
 
 class RigidInputSpec(CommandLineInputSpec):
