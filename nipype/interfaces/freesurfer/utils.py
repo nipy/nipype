@@ -3084,7 +3084,7 @@ class MRIsExpand(FSSurfaceCommand):
 
 class LTAConvertInputSpec(CommandLineInputSpec):
     # Inputs
-    _in_xor = ('in_lta', 'in_fsl', 'in_mni', 'in_reg', 'in_niftyreg')
+    _in_xor = ('in_lta', 'in_fsl', 'in_mni', 'in_reg', 'in_niftyreg', 'in_itk')
     in_lta = traits.Either(
         File(exists=True), 'identity.nofile', argstr='--inlta %s',
         mandatory=True, xor=_in_xor, desc='input transform of LTA type')
@@ -3100,6 +3100,9 @@ class LTAConvertInputSpec(CommandLineInputSpec):
     in_niftyreg = File(
         exists=True, argstr='--inniftyreg %s', mandatory=True, xor=_in_xor,
         desc='input transform of Nifty Reg type (inverse RAS2RAS)')
+    in_itk = File(
+        exists=True, argstr='--initk %s', mandatory=True, xor=_in_xor,
+        desc='input transform of ITK type')
     # Outputs
     out_lta = traits.Either(
         traits.Bool, File, argstr='--outlta %s',
