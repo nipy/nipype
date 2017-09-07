@@ -68,6 +68,7 @@ def test_LTAConvert_outputs():
     out_lta=dict(),
     out_mni=dict(),
     out_reg=dict(),
+    out_itk=dict(),
     )
     outputs = LTAConvert.output_spec()
 
