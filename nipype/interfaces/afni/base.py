@@ -8,9 +8,11 @@ from future.utils import raise_from
 
 import os
 from sys import platform
+from distutils import spawn
 
 from ... import logging
-from ...utils.filemanip import split_filename
+from ...utils.filemanip import split_filename, fname_presuffix
+
 from ..base import (
     CommandLine, traits, CommandLineInputSpec, isdefined, File, TraitedSpec)
 from ...external.due import BibTeX
@@ -70,7 +72,7 @@ class Info(object):
         return tuple(v)
 
     @classmethod
-    def outputtype_to_ext(cls, outputtype):
+    def output_type_to_ext(cls, outputtype):
         """Get the file extension for the given output type.
 
         Parameters
@@ -142,7 +144,6 @@ class AFNICommandInputSpec(CommandLineInputSpec):
 class AFNICommandOutputSpec(TraitedSpec):
     out_file = File(desc='output file',
                     exists=True)
-
 
 class AFNICommand(AFNICommandBase):
     """Shared options for several AFNI commands """
@@ -217,7 +218,7 @@ class AFNICommand(AFNICommandBase):
 
     def _overload_extension(self, value, name=None):
         path, base, _ = split_filename(value)
-        return os.path.join(path, base + Info.outputtype_to_ext(self.inputs.outputtype))
+        return os.path.join(path, base + Info.output_type_to_ext(self.inputs.outputtype))
 
     def _list_outputs(self):
         outputs = super(AFNICommand, self)._list_outputs()
@@ -231,9 +232,74 @@ class AFNICommand(AFNICommandBase):
                         outputs[name] = outputs[name] + "+orig.BRIK"
         return outputs
 
+    def _gen_fname(self, basename, cwd=None, suffix=None, change_ext=True,
+                   ext=None):
+        """Generate a filename based on the given parameters.
+
+        The filename will take the form: cwd/basename<suffix><ext>.
+        If change_ext is True, it will use the extentions specified in
+        <instance>intputs.output_type.
+
+        Parameters
+        ----------
+        basename : str
+            Filename to base the new filename on.
+        cwd : str
+            Path to prefix to the new filename. (default is os.getcwd())
+        suffix : str
+            Suffix to add to the `basename`.  (defaults is '' )
+        change_ext : bool
+            Flag to change the filename extension to the FSL output type.
+            (default True)
+
+        Returns
+        -------
+        fname : str
+            New filename based on given parameters.
+
+        """
+
+        if basename == '':
+            msg = 'Unable to generate filename for command %s. ' % self.cmd
+            msg += 'basename is not set!'
+            raise ValueError(msg)
+        if cwd is None:
+            cwd = os.getcwd()
+        if ext is None:
+            ext = Info.output_type_to_ext(self.inputs.outputtype)
+        if change_ext:
+            if suffix:
+                suffix = ''.join((suffix, ext))
+            else:
+                suffix = ext
+        if suffix is None:
+            suffix = ''
+        fname = fname_presuffix(basename, suffix=suffix,
+                                use_ext=False, newpath=cwd)
+        return fname
 
 def no_afni():
     """ Checks if AFNI is available """
     if Info.version() is None:
         return True
     return False
+
+
+class AFNIPythonCommandInputSpec(CommandLineInputSpec):
+    outputtype = traits.Enum('AFNI', list(Info.ftypes.keys()),
+                             desc='AFNI output filetype')
+    py27_path = traits.Either('python2', File(exists=True),
+        usedefault=True,
+        default='python2')
+
+class AFNIPythonCommand(AFNICommand):
+    @property
+    def cmd(self):
+        if spawn.find_executable(super(AFNIPythonCommand, self).cmd) is not None:
+            return spawn.find_executable(super(AFNIPythonCommand, self).cmd)
+        else:
+            return super(AFNIPythonCommand, self).cmd
+
+    @property
+    def cmdline(self):
+        return "{} {}".format(self.inputs.py27_path, super(AFNIPythonCommand, self).cmdline)

@@ -4,6 +4,7 @@ docs.  In setup.py in particular, we exec this file, so it cannot import nipy
 """
 from __future__ import print_function, division, unicode_literals, absolute_import
 
+import sys
 
 # nipype version information.  An empty version_extra corresponds to a
 # full release.  '.dev' as a version_extra string means this is a development
@@ -18,7 +19,7 @@ def get_nipype_gitversion():
     Returns
     -------
     None or str
-      Version of NiPype according to git.
+      Version of Nipype according to git.
     """
     import os
     import subprocess
@@ -44,7 +45,7 @@ def get_nipype_gitversion():
 if __version__.endswith('-dev'):
     gitversion = get_nipype_gitversion()
     if gitversion:
-        __version__ = __version__.replace('-dev', '-' + gitversion + '.dev')
+        __version__ = '{}+{}'.format(__version__, gitversion)
 
 CLASSIFIERS = ['Development Status :: 5 - Production/Stable',
                'Environment :: Console',
@@ -96,15 +97,15 @@ pipeline systems.
 
 # versions
 NIBABEL_MIN_VERSION = '2.1.0'
-NETWORKX_MIN_VERSION = '1.7'
-NUMPY_MIN_VERSION = '1.6.2'
-SCIPY_MIN_VERSION = '0.11'
+NETWORKX_MIN_VERSION = '1.9'
+NUMPY_MIN_VERSION = '1.8.2'
+SCIPY_MIN_VERSION = '0.14'
 TRAITS_MIN_VERSION = '4.6'
-DATEUTIL_MIN_VERSION = '1.5'
+DATEUTIL_MIN_VERSION = '2.2'
 PYTEST_MIN_VERSION = '3.0'
 FUTURE_MIN_VERSION = '0.16.0'
 SIMPLEJSON_MIN_VERSION = '3.8.0'
-PROV_MIN_VERSION = '1.5.0'
+PROV_VERSION = '1.5.0'
 CLICK_MIN_VERSION = '6.6.0'
 
 NAME = 'nipype'
@@ -135,14 +136,17 @@ REQUIRES = [
     'traits>=%s' % TRAITS_MIN_VERSION,
     'future>=%s' % FUTURE_MIN_VERSION,
     'simplejson>=%s' % SIMPLEJSON_MIN_VERSION,
-    'prov>=%s' % PROV_MIN_VERSION,
+    'prov==%s' % PROV_VERSION,
     'click>=%s' % CLICK_MIN_VERSION,
     'funcsigs',
-    'configparser',
     'pytest>=%s' % PYTEST_MIN_VERSION,
     'mock',
-    'pydotplus'
+    'pydotplus',
+    'packaging',
 ]
+
+if sys.version_info <= (3, 4):
+    REQUIRES.append('configparser')
 
 TESTS_REQUIRES = [
     'pytest-cov',

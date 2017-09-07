@@ -3080,3 +3080,76 @@ class MRIsExpand(FSSurfaceCommand):
                                                                thickness_name)
 
         self.inputs.sphere = self._associated_file(in_file, self.inputs.sphere)
+
+
+class LTAConvertInputSpec(CommandLineInputSpec):
+    # Inputs
+    _in_xor = ('in_lta', 'in_fsl', 'in_mni', 'in_reg', 'in_niftyreg')
+    in_lta = traits.Either(
+        File(exists=True), 'identity.nofile', argstr='--inlta %s',
+        mandatory=True, xor=_in_xor, desc='input transform of LTA type')
+    in_fsl = File(
+        exists=True, argstr='--infsl %s', mandatory=True, xor=_in_xor,
+        desc='input transform of FSL type')
+    in_mni = File(
+        exists=True, argstr='--inmni %s', mandatory=True, xor=_in_xor,
+        desc='input transform of MNI/XFM type')
+    in_reg = File(
+        exists=True, argstr='--inreg %s', mandatory=True, xor=_in_xor,
+        desc='input transform of TK REG type (deprecated format)')
+    in_niftyreg = File(
+        exists=True, argstr='--inniftyreg %s', mandatory=True, xor=_in_xor,
+        desc='input transform of Nifty Reg type (inverse RAS2RAS)')
+    # Outputs
+    out_lta = traits.Either(
+        traits.Bool, File, argstr='--outlta %s',
+        desc='output linear transform (LTA Freesurfer format)')
+    out_fsl = traits.Either(traits.Bool, File, argstr='--outfsl %s',
+                            desc='output transform in FSL format')
+    out_mni = traits.Either(traits.Bool, File, argstr='--outmni %s',
+                            desc='output transform in MNI/XFM format')
+    out_reg = traits.Either(traits.Bool, File, argstr='--outreg %s',
+                            desc='output transform in reg dat format')
+    # Optional flags
+    invert = traits.Bool(argstr='--invert')
+    ltavox2vox = traits.Bool(argstr='--ltavox2vox', requires=['out_lta'])
+    source_file = File(exists=True, argstr='--src %s')
+    target_file = File(exists=True, argstr='--trg %s')
+    target_conform = traits.Bool(argstr='--trgconform')
+
+
+class LTAConvertOutputSpec(TraitedSpec):
+    out_lta = File(exists=True,
+                   desc='output linear transform (LTA Freesurfer format)')
+    out_fsl = File(exists=True, desc='output transform in FSL format')
+    out_mni = File(exists=True, desc='output transform in MNI/XFM format')
+    out_reg = File(exists=True, desc='output transform in reg dat format')
+
+
+class LTAConvert(CommandLine):
+    """Convert different transformation formats.
+    Some formats may require you to pass an image if the geometry information
+    is missing form the transform file format.
+
+    For complete details, see the `lta_convert documentation.
+    <https://ftp.nmr.mgh.harvard.edu/pub/docs/html/lta_convert.help.xml.html>`_
+    """
+    input_spec = LTAConvertInputSpec
+    output_spec = LTAConvertOutputSpec
+    _cmd = 'lta_convert'
+
+    def _format_arg(self, name, spec, value):
+        if name.startswith('out_') and value is True:
+            value = self._list_outputs()[name]
+        return super(LTAConvert, self)._format_arg(name, spec, value)
+
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        for name, default in (('out_lta', 'out.lta'), ('out_fsl', 'out.mat'),
+                              ('out_mni', 'out.xfm'), ('out_reg', 'out.dat')):
+            attr = getattr(self.inputs, name)
+            if attr:
+                fname = default if attr is True else attr
+                outputs[name] = os.path.abspath(fname)
+
+        return outputs

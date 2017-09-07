@@ -743,13 +743,15 @@ def _dilate_mask(in_file, iterations=4):
     import os
     from nipype.utils import NUMPY_MMAP
     img = nb.load(in_file, mmap=NUMPY_MMAP)
-    img._data = ndimage.binary_dilation(img.get_data(), iterations=iterations)
+    dilated_img = img.__class__(ndimage.binary_dilation(img.get_data(),
+                                                        iterations=iterations),
+                                img.affine, img.header)
 
     name, fext = os.path.splitext(os.path.basename(in_file))
     if fext == '.gz':
         name, _ = os.path.splitext(name)
     out_file = os.path.abspath('./%s_dil.nii.gz' % name)
-    nb.save(img, out_file)
+    nb.save(dilated_img, out_file)
     return out_file
 
 
@@ -781,12 +783,13 @@ def _vsm_remove_mean(in_file, mask_file, in_unwarped):
     img_data[msk == 0] = 0
     vsmmag_masked = ma.masked_values(img_data.reshape(-1), 0.0)
     vsmmag_masked = vsmmag_masked - vsmmag_masked.mean()
-    img._data = vsmmag_masked.reshape(img.shape)
+    masked_img = img.__class__(vsmmag_masked.reshape(img.shape),
+                               img.affine, img.header)
     name, fext = os.path.splitext(os.path.basename(in_file))
     if fext == '.gz':
         name, _ = os.path.splitext(name)
     out_file = os.path.abspath('./%s_demeaned.nii.gz' % name)
-    nb.save(img, out_file)
+    nb.save(masked_img, out_file)
     return out_file
 
 

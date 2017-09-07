@@ -66,7 +66,6 @@ class StatsCommand(NiftySegCommand):
     def _parse_stdout(self, stdout):
         out = []
         for string_line in stdout.split("\n"):
-            print('parsing line {0}'.format(string_line))
             if string_line.startswith('#'):
                 continue
             if len(string_line) <= 1:
@@ -76,8 +75,7 @@ class StatsCommand(NiftySegCommand):
         return np.array(out).squeeze()
 
     def _run_interface(self, runtime):
-        print('parsing output in run_interface')
-        new_runtime = super(UnaryStats, self)._run_interface(runtime)
+        new_runtime = super(StatsCommand, self)._run_interface(runtime)
         self.output = self._parse_stdout(new_runtime.stdout)
         return new_runtime
 

@@ -1,7 +1,6 @@
 machine:
   pre:
-    - sudo curl -L -o /usr/bin/docker 'https://s3-external-1.amazonaws.com/circle-downloads/docker-1.9.1-circleci'
-    - sudo chmod 0755 /usr/bin/docker
+    - curl -sSL https://s3.amazonaws.com/circle-downloads/install-circleci-docker.sh | bash -s -- 1.10.0
   environment:
     OSF_NIPYPE_URL: "https://files.osf.io/v1/resources/nefdp/providers/osfstorage"
     DATA_NIPYPE_TUTORIAL_URL: "${OSF_NIPYPE_URL}/57f4739cb83f6901ed94bf21"
@@ -17,7 +16,6 @@ dependencies:
     - "~/docker"
     - "~/examples"
     - "~/.apt-cache"
-    - "~/bin"
 
   pre:
     # Let CircleCI cache the apt archive
@@ -27,7 +25,7 @@ dependencies:
     - mkdir -p $WORKDIR && sudo setfacl -d -m group:ubuntu:rwx $WORKDIR && sudo setfacl -m group:ubuntu:rwx $WORKDIR
     - mkdir -p $HOME/docker $HOME/examples $WORKDIR/tests $WORKDIR/logs $WORKDIR/crashfiles ${CIRCLE_TEST_REPORTS}/tests/
     - if [[ ! -e "$HOME/bin/codecov" ]]; then mkdir -p $HOME/bin; curl -so $HOME/bin/codecov https://codecov.io/bash && chmod 755 $HOME/bin/codecov; fi
-    - docker load --input $HOME/docker/cache.tar || true :
+    - (cd $HOME/docker && gzip -d cache.tar.gz && docker load --input $HOME/docker/cache.tar) || true :
         timeout: 6000
   override:
     # Get data
@@ -55,7 +53,7 @@ dependencies:
         done && [ "$e" -eq "0" ]
       :
         timeout: 6000
-    - docker save -o $HOME/docker/cache.tar ubuntu:xenial-20161213 nipype/base:latest nipype/nipype:py36 nipype/nipype:py27 :
+    - docker save -o $HOME/docker/cache.tar ubuntu:xenial-20161213 nipype/base:latest nipype/nipype:py36 && (cd $HOME/docker && gzip cache.tar) :
         timeout: 6000
 
 test:
@@ -76,6 +74,8 @@ deployment:
     tag: /.*/
     commands:
       # Deploy to docker hub
+      - if [[ -n "$DOCKER_PASS" ]]; then docker login -e $DOCKER_EMAIL -u $DOCKER_USER -p $DOCKER_PASS && docker push nipype/base:latest; fi :
+          timeout: 21600
       - if [[ -n "$DOCKER_PASS" ]]; then docker login -e $DOCKER_EMAIL -u $DOCKER_USER -p $DOCKER_PASS && docker push nipype/nipype:latest; fi :
           timeout: 21600
       - if [[ -n "$DOCKER_PASS" ]]; then docker login -e $DOCKER_EMAIL -u $DOCKER_USER -p $DOCKER_PASS && docker tag nipype/nipype nipype/nipype:$CIRCLE_TAG && docker push nipype/nipype:$CIRCLE_TAG; fi :

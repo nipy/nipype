@@ -19,9 +19,9 @@ standard_library.install_aliases()
 
 from builtins import str, bytes
 
-from nipype import logging
+from ... import logging
 from ..base import (traits, DynamicTraitedSpec, Undefined, isdefined, runtime_profile,
-                    BaseInterfaceInputSpec)
+                    BaseInterfaceInputSpec, get_max_resources_used)
 from ..io import IOBase, add_traits
 from ...utils.filemanip import filename_to_list
 from ...utils.misc import getsource, create_function_from_source
@@ -138,7 +138,6 @@ class Function(IOBase):
 
     def _run_interface(self, runtime):
         # Get workflow logger for runtime profile error reporting
-        from nipype import logging
         logger = logging.getLogger('workflow')
 
         # Create function handle
@@ -163,7 +162,6 @@ class Function(IOBase):
 
         # Profile resources if set
         if runtime_profile:
-            from nipype.interfaces.base import get_max_resources_used
             import multiprocessing
             # Init communication queue and proc objs
             queue = multiprocessing.Queue()

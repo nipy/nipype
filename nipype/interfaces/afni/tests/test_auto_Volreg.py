@@ -22,6 +22,8 @@ def test_Volreg_inputs():
     mandatory=True,
     position=-1,
     ),
+    interp=dict(argstr='-%s',
+    ),
     md1d_file=dict(argstr='-maxdisp1D %s',
     keep_extension=True,
     name_source='in_file',

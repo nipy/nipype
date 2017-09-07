@@ -64,6 +64,10 @@ def test_TOPUP_inputs():
     name_source=['in_file'],
     name_template='%s_topup.log',
     ),
+    out_mat_prefix=dict(argstr='--rbmout=%s',
+    hash_files=False,
+    usedefault=True,
+    ),
     out_warp_prefix=dict(argstr='--dfout=%s',
     hash_files=False,
     usedefault=True,
@@ -106,6 +110,7 @@ def test_TOPUP_outputs():
     out_fieldcoef=dict(),
     out_jacs=dict(),
     out_logfile=dict(),
+    out_mats=dict(),
     out_movpar=dict(),
     out_warps=dict(),
     )

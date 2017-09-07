@@ -34,7 +34,7 @@ from ..interfaces.base import (BaseInterface, traits, TraitedSpec, File,
                                BaseInterfaceInputSpec, isdefined,
                                DynamicTraitedSpec, Undefined)
 from ..utils.filemanip import fname_presuffix, split_filename
-from nipype.utils import NUMPY_MMAP
+from ..utils import NUMPY_MMAP
 
 from . import confounds
 

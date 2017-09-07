@@ -74,22 +74,22 @@ RUN curl -sSL http://neuro.debian.net/lists/xenial.us-ca.full >> /etc/apt/source
 # Installing general Debian utilities and Neurodebian packages (FSL, AFNI, git)
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
-                    fsl-core=5.0.9-1~nd+1+nd16.04+1 \
-                    fsl-mni152-templates=5.0.7-2 \
-                    afni=16.2.07~dfsg.1-2~nd16.04+1 \
+                    fsl-core \
+                    fsl-mni152-templates \
+                    afni \
+                    ants \
                     bzip2 \
-                    ca-certificates \
                     xvfb \
-                    git=1:2.7.4-0ubuntu1 \
-                    graphviz=2.38.0-12ubuntu2 \
+                    git \
+                    graphviz \
                     unzip \
                     apt-utils \
                     fusefat \
                     make \
                     file \
                     # Added g++ to compile dipy in py3.6
-                    g++=4:5.3.1-1ubuntu1 \
-                    ruby=1:2.3.0+1 && \
+                    g++ \
+                    ruby && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
@@ -104,23 +104,16 @@ ENV FSLDIR=/usr/share/fsl/5.0 \
     AFNI_IMSAVE_WARNINGS=NO \
     AFNI_TTATLAS_DATASET=/usr/share/afni/atlases \
     AFNI_PLUGINPATH=/usr/lib/afni/plugins \
-    PATH=/usr/lib/fsl/5.0:/usr/lib/afni/bin:$PATH
-
-# Installing and setting up ANTs
-RUN mkdir -p /opt/ants && \
-    curl -sSL "https://dl.dropbox.com/s/2f4sui1z6lcgyek/ANTs-Linux-centos5_x86_64-v2.2.0-0740f91.tar.gz?dl=0" \
-    | tar -zx -C /opt
-
-ENV ANTSPATH=/opt/ants \
-    PATH=$ANTSPATH:$PATH
+    ANTSPATH=/usr/lib/ants
+ENV PATH=/usr/lib/fsl/5.0:/usr/lib/afni/bin:$ANTSPATH:$PATH
 
 # Installing and setting up c3d
 RUN mkdir -p /opt/c3d && \
     curl -sSL "http://downloads.sourceforge.net/project/c3d/c3d/1.0.0/c3d-1.0.0-Linux-x86_64.tar.gz" \
     | tar -xzC /opt/c3d --strip-components 1
 
-ENV C3DPATH=/opt/c3d/ \
-    PATH=$C3DPATH/bin:$PATH
+ENV C3DPATH=/opt/c3d/
+ENV PATH=$C3DPATH/bin:$PATH
 
 # Install fake-S3
 ENV GEM_HOME /usr/lib/ruby/gems/2.3
