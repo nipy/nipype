@@ -21,7 +21,54 @@ import traitlets, pdb
 #DictStrStr = traitlets.Dict(value_trait=traitlets.Unicode(), key_trait=traitlets.Unicode())
 
 
-class File(traitlets.Unicode):
+class Int(traitlets.Int):
+    allow_none = True
+    default_value = None
+    info_text = "an int with default_value = None"
+
+class Float(traitlets.Float):
+    allow_none = True
+    default_value = None
+    info_text = "a float with default_value = None"
+
+
+class List(traitlets.List):
+    allow_none = True
+    default_value = None
+    info_text = "a list with default_value = None"
+
+
+class Enum(traitlets.Enum):
+    allow_none = True
+    default_value = None
+    info_text = "an enumerate with default_value = None"
+
+
+class Dict(traitlets.Dict):
+    allow_none = True
+    default_value = None
+    info_text = "a dictionary with default_value = None"
+
+
+class Bool(traitlets.Bool):
+    allow_none = True
+    default_value = None
+    info_text = "a boolean with default_value = None"
+
+
+class Unicode(traitlets.Unicode):
+    allow_none = True
+    default_value = None
+    info_text = "an unicode string with default_value = None"
+
+
+class Int(traitlets.Int):
+    allow_none = True
+    default_value = None
+    info_text = "an int with default_value = None"
+
+
+class File(Unicode):
     """ Defines a trait whose value must be the name of a file.
     """
 
@@ -77,7 +124,7 @@ class File(traitlets.Unicode):
 # -------------------------------------------------------------------------------
 
 
-class Directory (traitlets.Unicode):
+class Directory (Unicode):
     """
     Defines a trait whose value must be the name of a directory.
     """
@@ -191,16 +238,8 @@ class ImageFile(File):
 
 
 # dj NOTE: for now, everywhere where undefined was used I'm changing to None
-# dj NOTE: had to add additinonal part for list, since traitlets gives `[]` as 
-# dj NOTE: a default value even if I ask for None
-# dj TOASK: is it ok, or should I create a special trait??
 def isdefined(object):
-    if type(object) is list:
-        return object != []
-    else:
-        # dj NOTE!: if you use traitlets.Int() (and not traitlets.Int(default_value=None, allow_none=True))
-        # dj NOTE!: a default value will be 0 and isdefined will return True even if you don't sepcify value
-        return object is not None
+    return object is not None
 
 
 
@@ -226,17 +265,13 @@ def has_metadata(trait, metadata, value=None, recursive=True):
     return count > 0
 
 
-class MultiObject(traitlets.List):
+class MultiObject(List):
     """ Abstract class - shared functionality of input and output MultiObject                                                              
     """
-    # dj TOASK: is this default value ok?
-    default_value = None
-    allow_none = True
+    info_text = "a Multi Object with default_value = None"
 
     def validate(self, object, value):
-        # dj NOTE: for now isdefined([]) gives false, so OR part not needed
-        # dj NOTE: not sure if this will stay or I'll have to change it
-        # dj NOTE: might need to revert if I change isdefined for lists
+        # dj NOTE: for now I'm accepting an empty list, is that ok?
         #if not isdefined(value) or \
         #        (isinstance(value, list) and len(value) == 0):
         if not isdefined(value):
@@ -257,10 +292,10 @@ class MultiObject(traitlets.List):
 
         value = super(MultiObject, self).validate(object, newvalue)
 
-        if len(value) > 0:
+        # dj TOASK: i changed it so [] is ok, if this is how you would liek to stay?
+        if len(value) >= 0:
             return value
 
-        # dj TOASK: when this error should be raised? can't think about an example
         self.error(object, value)
 
 
@@ -301,7 +336,7 @@ class OutputMultiObject(MultiObject):
         value = super(OutputMultiObject, self).get(object, cls)
         if value is None:
             return None
-        # dj NOTE: i think an empty list would be changed to None in validate anyway
+        # dj TOASK: if we treat an emty list as a normal list, what shoule be returned in get?
         elif len(value) == 0:
             return None
         elif len(value) == 1:

@@ -41,7 +41,8 @@ from ..utils.filemanip import (md5, hash_infile, FileNotFoundError, hash_timesta
                                split_filename, to_str)
 import traitlets, pdb
 from .traits_extension import (isdefined, File, Directory, has_metadata, ImageFile, 
-                               MultiObject, OutputMultiObject, InputMultiObject)
+                               MultiObject, OutputMultiObject, InputMultiObject,
+                               Int, Float, List, Enum, Dict, Bool, Unicode)
 from ..external.due import due
 
 runtime_profile = str2bool(config.get('execution', 'profile_runtime'))
@@ -714,7 +715,7 @@ class Interface(object):
 
 
 class BaseInterfaceInputSpec(TraitedSpec):
-    ignore_exception = traitlets.Bool(help="Print an error message instead \
+    ignore_exception = Bool(help="Print an error message instead \
 of throwing an exception in case the interface fails to run").tag(nohash=True)
 
 
@@ -797,8 +798,6 @@ class BaseInterface(Interface):
         type_info = spec.info_text
 
         default = ''
-        # dj TOASK: you always have some default_value (either one set by trles or in the code)
-        # dj TOASK: not sure if the "default_value" name should be used or something else
         default = ', nipype default value: %s' % str(spec.default_value)
         line = "(%s%s)" % (type_info, default)
 
@@ -1581,22 +1580,19 @@ def get_dependencies(name, environ):
 
 
 class CommandLineInputSpec(BaseInterfaceInputSpec):
-    args = traitlets.Unicode(default_value=None, allow_none=True,
-                             help='Additional parameters to the command').tag(argstr='%s')
-    environ = traitlets.Dict(value_trait=traitlets.Unicode(), key_trait=traitlets.Unicode(),
-                             help='Environment variables').tag(nohash=True)
+    args = Unicode(help='Additional parameters to the command').tag(argstr='%s')
+    environ = Dict(value_trait=Unicode(), key_trait=Unicode(),
+                   help='Environment variables').tag(nohash=True)
 
     # This input does not have a "usedefault=True" so the set_default_terminal_output()
     # method would work
-# dj NOTE: that was giving me a recursion error; default_value had to be added
-    terminal_output = traitlets.Enum(['stream', 'allatonce', 'file', 'none'],
-                                     default_value=None, allow_none=True,
-                                     help=('Control terminal output: `stream` - '
-                                           'displays to terminal immediately (default), '
-                                           '`allatonce` - waits till command is '
-                                           'finished to display output, `file` - '
-                                           'writes output to file, `none` - output'
-                                           ' is ignored')).tag(nohash=True)
+    terminal_output = Enum(['stream', 'allatonce', 'file', 'none'],
+                           help=('Control terminal output: `stream` - '
+                                 'displays to terminal immediately (default), '
+                                 '`allatonce` - waits till command is '
+                                 'finished to display output, `file` - '
+                                 'writes output to file, `none` - output'
+                                 ' is ignored')).tag(nohash=True)
 
 
 class CommandLine(BaseInterface):
@@ -1782,7 +1778,7 @@ class CommandLine(BaseInterface):
         argstr = trait_spec.metadata["argstr"]
         iflogger.debug('%s_%s' % (name, str(value)))
         #dj NOTE: checking only Bool and List, TraitCompound is not used in nipype
-        if isinstance(trait_spec, traitlets.Bool) and "%" not in argstr:
+        if isinstance(trait_spec, Bool) and "%" not in argstr:
             if value:
                 # Boolean options have no format string. Just append options
                 # if True.
@@ -1792,7 +1788,7 @@ class CommandLine(BaseInterface):
         # traits.Either turns into traits.TraitCompound and does not have any
         # inner_traits
             
-        elif isinstance(trait_spec, traitlets.List):
+        elif isinstance(trait_spec, List):
             # This is a bit simple-minded at present, and should be
             # construed as the default. If more sophisticated behavior
             # is needed, it can be accomplished with metadata (e.g.

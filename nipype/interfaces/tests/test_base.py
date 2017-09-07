@@ -102,17 +102,17 @@ def test_TraitedSpec():
     assert nib.TraitedSpec().__repr__() == '\n\n'
 
     class spec(nib.TraitedSpec):
-        foo = traitlets.Int(None, allow_none=True)
-        goo = traitlets.Float()
+        foo = nib.Int()
+        goo = nib.Float()
 
     assert spec().foo is None
-    assert spec().goo == 0.0
+    assert spec().goo is None
 
     # dj NOTE/TODO: this will not give an error, don't have Disallow
     #specfunc = lambda x: spec(hoo=x)
     #with pytest.raises(nib.traits.TraitError): specfunc(1)
 
-    infields = spec(foo=1)
+    infields = spec(foo=1, goo=0.)
     hashval = ([('foo', 1), ('goo', '0.0000000000')], 'e89433b8c9141aa0fda2f8f4d662c047')
     assert infields.get_hashval() == hashval
     assert infields.__repr__() == '\nfoo = 1\ngoo = 0.0\n'
@@ -121,8 +121,8 @@ def test_TraitedSpec():
 # dj NOTE: this is new test, hope that the hash is correct
 def test_TraitedSpec_1():
     class spec(nib.TraitedSpec):
-        foo = traitlets.Dict(None, allow_none=True)
-        goo = traitlets.Int(default_value=None, allow_none=True)
+        foo = nib.Dict()
+        goo = nib.Int()
     
     infields = spec(foo={"d":2, "g":3}, goo=1)
     hashval = infields.get_hashval()
@@ -136,18 +136,14 @@ def test_TraitedSpec_logic():
     class spec3(nib.TraitedSpec):
         _xor_inputs = ('foo', 'bar')
 
-        foo = traitlets.Int(default_value=None, allow_none=True, help='foo or bar, not both').tag(
-            xor=_xor_inputs) 
-        bar = traitlets.Int(default_value=None, allow_none=True, help='bar or foo, not both').tag(
-            xor=_xor_inputs)         
-        kung = traitlets.Float(default_value=None, allow_none=True, help='kung foo').tag(
-            requires=('foo',), position=0)
-        kung_bar = traitlets.Float(default_value=None, allow_none=True).tag(requires=('bar',), 
-                                                                            position=0)
+        foo = nib.Int(help='foo or bar, not both').tag(xor=_xor_inputs)
+        bar = nib.Int(help='bar or foo, not both').tag(xor=_xor_inputs)
+        kung = nib.Float(help='kung foo').tag(requires=('foo',), position=0)
+        kung_bar = nib.Float().tag(requires=('bar',), position=0)
 
 
     class out3(nib.TraitedSpec):
-        output = traitlets.Int(default_value=None, allow_none=True)
+        output = nib.Int()
 
     class MyInterface(nib.BaseInterface):
         input_spec = spec3
@@ -174,14 +170,14 @@ def test_TraitedSpec_logic():
 
 
 class DeprecationSpec1(nib.TraitedSpec):
-    foo = traitlets.Int().tag(deprecated='0.1')
+    foo = nib.Int().tag(deprecated='0.1')
 
 class DeprecationSpec2(nib.TraitedSpec):
-    foo = traitlets.Int().tag(deprecated='100', new_name='bar')
+    foo = nib.Int().tag(deprecated='100', new_name='bar')
 
 class DeprecationSpec3(nib.TraitedSpec):
-    foo = traitlets.Int(allow_none=True).tag(deprecated='1000', new_name='bar')
-    bar = traitlets.Int(allow_none=True)
+    foo = nib.Int().tag(deprecated='1000', new_name='bar')
+    bar = nib.Int()
 
 
 
@@ -229,8 +225,8 @@ def test_deprecation_3():
 # dj TODO: just testing a single class, remove at the end (?)
 def test_temp_namesource():
     class spec2(nib.CommandLineInputSpec):
-        goo = traitlets.Int()
-    ms = spec2()
+        goo = nib.Int()
+    ms = spec2(goo=0)
     assert ms.goo == 0
 
 
@@ -240,12 +236,10 @@ def test_namesource(setup_file):
 
 
     class spec2(nib.CommandLineInputSpec):
-        moo = traitlets.Unicode(default_value=None, allow_none=True).tag(name_source=['doo'], 
-                                                                         argstr="%s", position=2)
+        moo = nib.Unicode().tag(name_source=['doo'], argstr="%s", position=2)
         doo = nib.File(exists=True).tag(argstr="%s", position=1)
-        goo = traitlets.Int(default_value=None, allow_none=True).tag(argstr="%d", position=4)
-        poo =  traitlets.Unicode(default_value=None, allow_none=True).tag(name_source=['goo'], 
-                                                                          argstr="%s", position=3)
+        goo = nib.Int().tag(argstr="%d", position=4)
+        poo = nib.Unicode().tag(name_source=['goo'], argstr="%s", position=3)
 
     class TestName(nib.CommandLine):
         _cmd = "mycommand"
@@ -272,10 +266,9 @@ def test_chained_namesource(setup_file):
 
     class spec2(nib.CommandLineInputSpec):
         doo = nib.File(exists=True).tag(argstr="%s", position=1)
-        moo =  traitlets.Unicode(default_value=None, allow_none=True).tag(name_source=['doo'], 
+        moo = nib.Unicode().tag(name_source=['doo'], 
                              argstr="%s", position=2, name_template='%s_mootpl')
-        poo =  traitlets.Unicode(default_value=None, allow_none=True).tag(name_source=['moo'], 
-                                                                     argstr="%s", position=3)
+        poo = nib.Unicode().tag(name_source=['moo'], argstr="%s", position=3)
 
     class TestName(nib.CommandLine):
         _cmd = "mycommand"
@@ -294,12 +287,10 @@ def test_cycle_namesource1(setup_file):
     tmpd, nme, ext = split_filename(tmp_infile)
 
     class spec3(nib.CommandLineInputSpec):
-        moo = traitlets.Unicode(default_value=None, allow_none=True).tag(name_source=['doo'],
+        moo = nib.Unicode().tag(name_source=['doo'],
                                 argstr="%s", position=1, name_template='%s_mootpl')
-        poo = traitlets.Unicode(default_value=None, allow_none=True).tag(name_source=['moo'],
-                                argstr="%s", position=2)
-        doo = traitlets.Unicode(default_value=None, allow_none=True).tag(name_source=['poo'],
-                                argstr="%s", position=3)
+        poo = nib.Unicode().tag(name_source=['moo'], argstr="%s", position=2)
+        doo = nib.Unicode().tag(name_source=['poo'], argstr="%s", position=3)
 
     class TestCycle(nib.CommandLine):
         _cmd = "mycommand"
@@ -317,11 +308,11 @@ def test_cycle_namesource2(setup_file):
     tmpd, nme, ext = split_filename(tmp_infile)
 
     class spec3(nib.CommandLineInputSpec):
-        moo = traitlets.Unicode(default_value=None, allow_none=True).tag(name_source=['doo'],
+        moo = nib.Unicode().tag(name_source=['doo'],
                                 argstr="%s", position=1, name_template='%s_mootpl')
-        poo = traitlets.Unicode(default_value=None, allow_none=True).tag(name_source=['moo'],
+        poo = nib.Unicode().tag(name_source=['moo'],
                                 argstr="%s", position=2)
-        doo = traitlets.Unicode(default_value=None, allow_none=True).tag(name_source=['poo'],
+        doo = nib.Unicode().tag(name_source=['poo'],
                                 argstr="%s", position=3)
 
     class TestCycle(nib.CommandLine):
@@ -347,7 +338,7 @@ def test_TraitedSpec_withFile(setup_file):
 
     class spec2(nib.TraitedSpec):
         moo = nib.File(exists=True)
-        doo = traitlets.List(nib.File(exists=True))
+        doo = nib.List(nib.File(exists=True))
 
     infields = spec2(moo=tmp_infile, doo=[tmp_infile])
     hashval = infields.get_hashval(hash_method='content')
@@ -385,9 +376,8 @@ def test_TraitedSpec_withNoFileHashing(setup_file):
     assert os.path.exists(tmp_infile)
 
     class spec2(nib.TraitedSpec):
-        #moo = nib.File(exists=True, hash_files=False)
-        moo = traitlets.Unicode(default_value=None, allow_none=True)
-        doo = traitlets.List(nib.File(exists=True))
+        moo = nib.Unicode()
+        doo = nib.List(nib.File(exists=True))
     infields = spec2(moo=nme, doo=[tmp_infile])
     hashval = infields.get_hashval(hash_method='content')
     # dj NOTE: i've changed the hash, since the list_withhash contains now
@@ -399,13 +389,13 @@ def test_TraitedSpec_withNoFileHashing(setup_file):
 
     class spec3(nib.TraitedSpec):
         moo = nib.File(exists=True).tag(name_source="doo")
-        doo = traitlets.List(nib.File(exists=True))
+        doo = nib.List(nib.File(exists=True))
     infields = spec3(moo=nme, doo=[tmp_infile])
     hashval1 = infields.get_hashval(hash_method='content')
 
     class spec4(nib.TraitedSpec):
         moo = nib.File(exists=True)
-        doo = traitlets.List(nib.File(exists=True))
+        doo = nib.List(nib.File(exists=True))
     infields = spec4(moo=nme, doo=[tmp_infile])
     hashval2 = infields.get_hashval(hash_method='content')
     assert hashval1[1] != hashval2[1]
@@ -435,17 +425,15 @@ def test_Interface_notimplemented_2():
 
 
 class BaseInterfaceInputSpec(nib.TraitedSpec):
-    foo = traitlets.Int(default_value=None, allow_none=True, help='a random int')
-    goo = traitlets.Int(default_value=None, allow_none=True, help='a random int').tag(mandatory=True)
-    moo = traitlets.Int(default_value=None, allow_none=True, help='a random int').tag(
-        mandatory=False)
-    hoo = traitlets.Int(help='a random int')
+    foo = nib.Int(help='a random int')
+    goo = nib.Int(help='a random int').tag(mandatory=True)
+    moo = nib.Int(help='a random int').tag(mandatory=False)
     zoo = nib.File(help='a file').tag(copyfile=False)
     woo = nib.File(help='a file').tag(copyfile=True)
 
 
 class BaseInterfaceOutputSpec(nib.TraitedSpec):
-    foo = traitlets.Int(default_value=None, allow_none=True, help='a random int')
+    foo = nib.Int(help='a random int')
 
 
 def test_BaseInterface_1():
@@ -459,8 +447,8 @@ def test_BaseInterface_2():
 
     assert DerivedInterface.help() is None
     #testing help
-    for str_help in ["[Mandatory]\n\tgoo: (an int, nipype default value: None)",
-                     "[Optional]\n\tfoo: (an int, nipype default value: None)",
+    for str_help in ["[Mandatory]\n\tgoo: (an int with default_value = None, nipype default value: None)",
+                     "[Optional]\n\tfoo: (an int with default_value = None, nipype default value: None)",
                      "Outputs::\n\n\tNone"]:
         assert str_help in DerivedInterface.help(returnhelp=True)
 
@@ -470,7 +458,6 @@ def test_BaseInterface_2():
     assert DerivedInterface._get_filecopy_info()[0]['copy']
     assert DerivedInterface._get_filecopy_info()[1]['key'] == 'zoo'
     assert not DerivedInterface._get_filecopy_info()[1]['copy']
-    #dj NOTE: changed to None!
     assert DerivedInterface().inputs.foo is None
     with pytest.raises(ValueError): 
         DerivedInterface()._check_mandatory_inputs()
@@ -504,28 +491,20 @@ def test_BaseInterface_3():
 
 
 @pytest.mark.parametrize("inp, get_skip_output, get_full_output", [
-        # dj NOTE!: this give the same output as the second example, is that ok??
-        ({}, {'inp_int2': 0}, 
-         {'inp_int1': None, 'inp_int2': 0, 'inp_str': None, 'inp_lst1': None, 'inp_lst2': None}),
-        ({'inp_int2': 0}, {'inp_int2': 0},
-         {'inp_int1': None, 'inp_int2': 0, 'inp_str': None, 'inp_lst1': None, 'inp_lst2': None}),
-        # dj NOTE!: inp_lst1 will be treated as undefined
-        ({'inp_lst1': []}, {'inp_int2': 0},
-         {'inp_int1': None, 'inp_int2': 0, 'inp_str': None, 'inp_lst1': None, 'inp_lst2': None}),
-        ({'inp_int1': 2, 'inp_int2': 2, 'inp_str': "text"}, {'inp_int1': 2,'inp_int2': 2, 'inp_str': "text"},
-         {'inp_int1': 2, 'inp_int2': 2, 'inp_str': "text", 'inp_lst1': None, 'inp_lst2': None}),
-        ({'inp_int1': 2, 'inp_int2': 2, 'inp_lst1': [1,2,3]}, {'inp_int1': 2,'inp_int2': 2, 'inp_lst1': [1,2,3]},
-         {'inp_int1': 2, 'inp_int2': 2, 'inp_str': None, 'inp_lst1': [1,2,3], 'inp_lst2': None}),
-        ({'inp_int1': 2, 'inp_int2': 2, 'inp_lst2': [1,2,3]}, {'inp_int1': 2,'inp_int2': 2, 'inp_lst2': [1,2,3]},
-         {'inp_int1': 2, 'inp_int2': 2, 'inp_str': None, 'inp_lst1': None, 'inp_lst2': [1,2,3]}),
+        ({}, {}, 
+         {'inp_int1': None, 'inp_str': None, 'inp_lst1': None}),
+        ({'inp_int1': 0}, {'inp_int1': 0},
+         {'inp_int1': 0, 'inp_str': None, 'inp_lst1': None}),
+        ({'inp_int1': 2, 'inp_str': "text"}, {'inp_int1': 2, 'inp_str': "text"},
+         {'inp_int1': 2, 'inp_str': "text", 'inp_lst1': None}),
+        ({'inp_int1': 2, 'inp_lst1': [1,2,3]}, {'inp_int1': 2, 'inp_lst1': [1,2,3]},
+         {'inp_int1': 2, 'inp_str': None, 'inp_lst1': [1,2,3]}),
         ])
 def test_BaseInterface_get(inp, get_skip_output, get_full_output):
     class BaseInterfaceInputSpec(nib.TraitedSpec):
-        inp_int1 = traitlets.Int(default_value=None, allow_none=True)
-        inp_int2 = traitlets.Int()
-        inp_str = traitlets.Unicode(default_value=None, allow_none=True)
-        inp_lst1 = traitlets.List(default_value=None, allow_none=True)
-        inp_lst2 = traitlets.List()
+        inp_int1 = nib.Int()
+        inp_str = nib.Unicode()
+        inp_lst1 = nib.List()
 
     class DerivedInterface(nib.BaseInterface):
         input_spec = BaseInterfaceInputSpec
@@ -539,10 +518,10 @@ def test_BaseInterface_load_save_inputs(tmpdir):
     tmp_json = os.path.join(str(tmpdir), 'settings.json')
 
     class InputSpec(nib.TraitedSpec):
-        input1 = traitlets.Int(default_value=None, allow_none=True)
-        input2 = traitlets.Float(default_value=None, allow_none=True)
-        input3 = traitlets.Bool(default_value=None, allow_none=True)
-        input4 = traitlets.Unicode()
+        input1 = nib.Int()
+        input2 = nib.Float()
+        input3 = nib.Bool()
+        input4 = nib.Unicode()
 
     class DerivedInterface(nib.BaseInterface):
         input_spec = InputSpec
@@ -597,10 +576,10 @@ def test_BaseInterface_load_save_inputs_ants():
 
 
 class MinVerInputSpec(nib.TraitedSpec):
-    foo = traitlets.Int(default_value=None, allow_none=True, help='a random int').tag(min_ver='0.9')
+    foo = nib.Int(help='a random int').tag(min_ver='0.9')
 
 class MaxVerInputSpec(nib.TraitedSpec):
-    foo = traitlets.Int(default_value=None, allow_none=True, help='a random int').tag(max_ver='0.7')
+    foo = nib.Int(help='a random int').tag(max_ver='0.7')
 
 
 def test_input_version_1():
@@ -677,10 +656,10 @@ def test_input_version_6():
 
 
 class VerInputSpec(nib.TraitedSpec):
-    foo = traitlets.Int(default_value=None, allow_none=True, help='a random int')
+    foo = nib.Int(help='a random int')
 
 class MinVerOutputSpec(nib.TraitedSpec):
-    foo = traitlets.Int(default_value=None, allow_none=True, help='a random int').tag(min_ver='0.9')
+    foo = nib.Int(help='a random int').tag(min_ver='0.9')
 def test_output_version_1():
     class DerivedInterface1(nib.BaseInterface):
         input_spec = VerInputSpec
@@ -740,18 +719,15 @@ def test_Commandline_2():
 
 def test_Commandline_3():
     class CommandLineInputSpec1(nib.CommandLineInputSpec):
-        foo = traitlets.Unicode(default_value=None, allow_none=True, help='a str').tag(argstr='%s')
-        goo = traitlets.Bool(default_value=None, allow_none=True, help='a bool').tag(argstr='-g', 
-                                                                                     position=0)
-        # dj NOTE: the default_value is actually [default_value], so it's not None
-        hoo = traitlets.List(default_value=None, allow_none=True, help='a list').tag(argstr='-l %s') 
-        moo = traitlets.List(default_value=None, allow_none=True, help='a repeated list').tag(
-            argstr='-i %d...', position=-1)
-        mooo = traitlets.List(default_value=None, allow_none=True, help='a repeated list').tag(
-            argstr='-i %d...', position=-2, sep=" AND ")
-        noo = traitlets.Int(default_value=None, allow_none=True, help='an int').tag(argstr='-x %d')
-        roo = traitlets.Unicode(default_value=None, allow_none=True, help='not on command line')
-        soo = traitlets.Bool(default_value=None, allow_none=True).tag(argstr="-soo")
+        foo = nib.Unicode(help='a str').tag(argstr='%s')
+        goo = nib.Bool(help='a bool').tag(argstr='-g', position=0)
+        # dj NOTE: nib.List has default_value is None, not [] as in trailets.List
+        hoo = nib.List(help='a list').tag(argstr='-l %s') 
+        moo = nib.List(help='a repeated list').tag(argstr='-i %d...', position=-1)
+        mooo = nib.List(help='a repeated list').tag(argstr='-i %d...', position=-2, sep=" AND ")
+        noo = nib.Int(help='an int').tag(argstr='-x %d')
+        roo = nib.Unicode(help='not on command line')
+        soo = nib.Bool().tag(argstr="-soo")
 
     nib.CommandLine.input_spec = CommandLineInputSpec1
     ci4 = nib.CommandLine(command='which')
@@ -796,8 +772,8 @@ def test_Commandline_4():
 
 def test_Commandline_checkreq():
     class spec(nib.CommandLineInputSpec):
-        bar = traitlets.Int(default_value=None, allow_none=True)
-        kung_bar = traitlets.Float(default_value=None, allow_none=True).tag(requires=('bar',))
+        bar = nib.Int()
+        kung_bar = nib.Float().tag(requires=('bar',))
 
     class DerivedClass(nib.CommandLine):
         input_spec = spec
@@ -811,8 +787,8 @@ def test_Commandline_checkreq():
 
 def test_Commandline_checkmandxor():
     class spec(nib.CommandLineInputSpec):
-        bar = traitlets.Int(default_value=None, allow_none=True).tag(mandatory=True, xor=("bar", "goo"))
-        goo = traitlets.Int(default_value=None, allow_none=True).tag(mandatory=True, xor=("bar", "goo"))
+        bar = nib.Int().tag(mandatory=True, xor=("bar", "goo"))
+        goo = nib.Int().tag(mandatory=True, xor=("bar", "goo"))
 
     class DerivedClass(nib.CommandLine):
         input_spec = spec
@@ -834,7 +810,7 @@ def test_Commandline_environ():
     assert res.runtime.environ['DISPLAY'] == ':1'
     config.set('execution', 'display_variable', ':3')
     res = ci3.run()
-    assert not 'DISPLAY' in ci3.inputs.environ
+    assert ci3.inputs.environ is None
     assert res.runtime.environ['DISPLAY'] == ':3'
     ci3.inputs.environ = {'DISPLAY': ':2'}
     res = ci3.run()
@@ -964,7 +940,7 @@ def test_ImageFile(inp_fun):
 def test_StdOutCommandLine():
 
     class spec(nib.StdOutCommandLineInputSpec):
-        doo = traitlets.Int(default_value=None, allow_none=True)
+        doo = nib.Int()
 
 
     class TestName(nib.StdOutCommandLine):
@@ -989,11 +965,11 @@ def test_StdOutCommandLine():
 def test_SEMLikeCommandLine_1():
     
     class SEMLikeInpSpec(nib.CommandLineInputSpec):
-        foo = traitlets.Unicode()
-        doo = traitlets.Unicode()
+        foo = nib.Unicode()
+        doo = nib.Unicode()
 
     class SEMLikeOutSpec(nib.TraitedSpec):
-        foo = traitlets.Unicode()
+        foo = nib.Unicode()
 
     class TestName(nib.SEMLikeCommandLine):
         _cmd = "mycommand"
@@ -1008,31 +984,10 @@ def test_SEMLikeCommandLine_1():
 def test_SEMLikeCommandLine_2():
 
     class SEMLikeInpSpec(nib.CommandLineInputSpec):
-        foo = traitlets.Int()
-        doo = traitlets.Int()
+        doo = nib.Int()
 
     class SEMLikeOutSpec(nib.TraitedSpec):
-        foo = traitlets.Int()
-
-    class TestName(nib.SEMLikeCommandLine):
-        _cmd = "mycommand"
-        input_spec = SEMLikeInpSpec
-        output_spec = SEMLikeOutSpec
-
-    testobj = TestName()
-
-    with pytest.raises(AttributeError) as excinfo:
-        testobj._list_outputs()
-    assert "'int' object has no attribute 'startswith'" == str(excinfo.value)
-
-
-def test_SEMLikeCommandLine_3():
-
-    class SEMLikeInpSpec(nib.CommandLineInputSpec):
-        doo = traitlets.Int()
-
-    class SEMLikeOutSpec(nib.TraitedSpec):
-        foo = traitlets.Int()
+        foo = nib.Int()
 
     class TestName(nib.SEMLikeCommandLine):
         _cmd = "mycommand"
@@ -1047,11 +1002,10 @@ def test_SEMLikeCommandLine_3():
 
 
 @pytest.mark.xfail(reason="this is a new test for _format_arg, don't know how it should be changed")
-def test_SEMLikeCommandline_4():
+def test_SEMLikeCommandline_3():
     class SEMLikeInpSpec(nib.CommandLineInputSpec):
-        foo = traitlets.Unicode(default_value=None, allow_none=True, help='a str').tag(argstr='%s')
-        goo = traitlets.Bool(default_value=None, allow_none=True, help='a bool').tag(argstr='-g',
-                                                                                     position=0)
+        foo = nib.Unicode(help='a str').tag(argstr='%s')
+        goo = nib.Bool(help='a bool').tag(argstr='-g', position=0)
 
     class TestName(nib.SEMLikeCommandLine):
         _cmd = "mycommand"
@@ -1080,8 +1034,9 @@ def test_MultiObject():
     mp.goo = None
     assert mp.goo is None
 
+    # dj TOASK: this is now treated as a perfectly fine list (shoudl it stay?)
     mp.goo = []
-    assert mp.goo is None
+    assert mp.goo == []
 
     mp.goo = 4
     assert mp.goo == [4]
