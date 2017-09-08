@@ -7,7 +7,7 @@
 from __future__ import print_function, division, unicode_literals, absolute_import
 
 from builtins import filter, object, str, bytes
-import os
+import os, sys
 
 # perform all external trait imports here
 import traitlets, pdb 
@@ -22,14 +22,30 @@ import traitlets, pdb
 
 
 class Int(traitlets.Int):
+    info_text = "an int with default_value = None"
+    # dj NOTE: this default_value will be used since default_value=traitlets.Undefined in __init__
+    # dj NOTE:  traitlets.Init.default_value == 0, so has to be overwritten
     allow_none = True
     default_value = None
-    info_text = "an int with default_value = None"
+
+    def __init__(self, default_value=traitlets.Undefined, allow_none=False,
+                 read_only=None, help=None, config=None, **kwargs):
+        super(Int, self).__init__(default_value=default_value, allow_none=allow_none,
+                                  read_only=read_only, help=help, config=config)
+        self.tag(**kwargs)
+
 
 class Float(traitlets.Float):
     allow_none = True
     default_value = None
     info_text = "a float with default_value = None"
+
+    def __init__(self, default_value=traitlets.Undefined, allow_none=False,
+                 read_only=None, help=None, config=None, **kwargs):
+        super(Float, self).__init__(default_value=default_value, allow_none=allow_none,
+                                    read_only=read_only, help=help, config=config)
+        self.tag(**kwargs)
+
 
 
 class List(traitlets.List):
@@ -37,11 +53,23 @@ class List(traitlets.List):
     default_value = None
     info_text = "a list with default_value = None"
 
+    def __init__(self, trait=None, default_value=None, minlen=0, maxlen=sys.maxsize, kw=None,
+                 read_only=None, help=None, config=None, **kwargs):
+        super(List, self).__init__(trait=trait, default_value=default_value, minlen=0, maxlen=maxlen,
+                                   kw=kw, read_only=read_only, help=help, config=config)
+        self.tag(**kwargs)
+
 
 class Enum(traitlets.Enum):
     allow_none = True
     default_value = None
     info_text = "an enumerate with default_value = None"
+
+    def __init__(self, values, default_value=traitlets.Undefined, allow_none=False,
+                 read_only=None, help=None, config=None, **kwargs):
+        super(Enum, self).__init__(values=values, default_value=default_value, allow_none=allow_none,
+                                   read_only=read_only, help=help, config=config)
+        self.tag(**kwargs)
 
 
 class Dict(traitlets.Dict):
@@ -49,11 +77,26 @@ class Dict(traitlets.Dict):
     default_value = None
     info_text = "a dictionary with default_value = None"
 
+    def __init__(self, value_trait=None, per_key_traits=None, key_trait=None,
+                 default_value=traitlets.Undefined, kw=None,
+                 read_only=None, help=None, config=None, **kwargs):
+        super(Dict, self).__init__(value_trait=value_trait, per_key_traits=per_key_traits,
+                                   key_trait=key_trait, default_value=default_value,
+                                   kw=kw, read_only=read_only,
+                                   help=help, config=config)
+        self.tag(**kwargs)
+
 
 class Bool(traitlets.Bool):
     allow_none = True
     default_value = None
     info_text = "a boolean with default_value = None"
+
+    def __init__(self, default_value=traitlets.Undefined, allow_none=False,
+                 read_only=None, help=None, config=None, **kwargs):
+        super(Bool, self).__init__(default_value=default_value, allow_none=allow_none,
+                                   read_only=read_only, help=help, config=config)
+        self.tag(**kwargs)
 
 
 class Unicode(traitlets.Unicode):
@@ -61,11 +104,11 @@ class Unicode(traitlets.Unicode):
     default_value = None
     info_text = "an unicode string with default_value = None"
 
-
-class Int(traitlets.Int):
-    allow_none = True
-    default_value = None
-    info_text = "an int with default_value = None"
+    def __init__(self, default_value=traitlets.Undefined, allow_none=False, 
+                 read_only=None, help=None, config=None, **kwargs):
+        super(Unicode, self).__init__(default_value=default_value, allow_none=allow_none, 
+                                      read_only=read_only, help=help, config=config)
+        self.tag(**kwargs)
 
 
 class File(Unicode):
@@ -104,7 +147,7 @@ class File(Unicode):
         self.exists = exists
         if exists:
             self.info_text = 'an existing file name'
-        super(File, self).__init__(value, allow_none=True, **metadata)
+        super(File, self).__init__(default_value=value, allow_none=True, **metadata)
 
     def validate(self, object, value):
         """ Validates that a specified value is valid for this trait.
@@ -158,7 +201,7 @@ class Directory (Unicode):
         if exists:
             self.info_text = 'an existing directory name'
 
-        super(Directory, self).__init__(value, **metadata)
+        super(Directory, self).__init__(default_value=value, **metadata)
 
     def validate(self, object, value):
         """ Validates that a specified value is valid for this trait.

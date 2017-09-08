@@ -137,10 +137,8 @@ def test_TraitedSpec_logic():
         _xor_inputs = ('foo', 'bar')
 
         foo = nib.Int(help='foo or bar, not both').tag(xor=_xor_inputs)
-        bar = nib.Int(help='bar or foo, not both').tag(xor=_xor_inputs)
+        bar = nib.Int(help='bar or foo, not both', xor=_xor_inputs)
         kung = nib.Float(help='kung foo').tag(requires=('foo',), position=0)
-        kung_bar = nib.Float().tag(requires=('bar',), position=0)
-
 
     class out3(nib.TraitedSpec):
         output = nib.Int()
@@ -150,7 +148,6 @@ def test_TraitedSpec_logic():
         output_spec = out3
 
     myif = MyInterface()
-
 
     # testing help (xor)
     for str_help in ["bar or foo, not both\n\t\tmutually_exclusive: foo, bar",
@@ -168,7 +165,6 @@ def test_TraitedSpec_logic():
     with pytest.raises(IOError): set_bar()
 
 
-
 class DeprecationSpec1(nib.TraitedSpec):
     foo = nib.Int().tag(deprecated='0.1')
 
@@ -178,7 +174,6 @@ class DeprecationSpec2(nib.TraitedSpec):
 class DeprecationSpec3(nib.TraitedSpec):
     foo = nib.Int().tag(deprecated='1000', new_name='bar')
     bar = nib.Int()
-
 
 
 #dj TOASK: some of those tests check ONLY if there are no warnings??
@@ -427,9 +422,9 @@ def test_Interface_notimplemented_2():
 class BaseInterfaceInputSpec(nib.TraitedSpec):
     foo = nib.Int(help='a random int')
     goo = nib.Int(help='a random int').tag(mandatory=True)
-    moo = nib.Int(help='a random int').tag(mandatory=False)
+    moo = nib.Int(help='a random int', mandatory=False)
     zoo = nib.File(help='a file').tag(copyfile=False)
-    woo = nib.File(help='a file').tag(copyfile=True)
+    woo = nib.File(help='a file', copyfile=True)
 
 
 class BaseInterfaceOutputSpec(nib.TraitedSpec):
@@ -576,7 +571,7 @@ def test_BaseInterface_load_save_inputs_ants():
 
 
 class MinVerInputSpec(nib.TraitedSpec):
-    foo = nib.Int(help='a random int').tag(min_ver='0.9')
+    foo = nib.Int(help='a random int', min_ver='0.9')
 
 class MaxVerInputSpec(nib.TraitedSpec):
     foo = nib.Int(help='a random int').tag(max_ver='0.7')
@@ -769,11 +764,16 @@ def test_Commandline_4():
     nib.CommandLine.input_spec = nib.CommandLineInputSpec
 
 
+class SpecTag(nib.CommandLineInputSpec):
+    bar = nib.Int()
+    kung_bar = nib.Float().tag(requires=('bar',))
 
-def test_Commandline_checkreq():
-    class spec(nib.CommandLineInputSpec):
-        bar = nib.Int()
-        kung_bar = nib.Float().tag(requires=('bar',))
+class SpecNoTag(nib.CommandLineInputSpec):
+    bar = nib.Int()
+    kung_bar = nib.Float(requires=('bar',))
+
+@pytest.mark.parametrize("spec", [SpecTag, SpecNoTag])
+def test_Commandline_checkreq(spec):
 
     class DerivedClass(nib.CommandLine):
         input_spec = spec
@@ -785,10 +785,16 @@ def test_Commandline_checkreq():
         in str(excinfo.value)
 
 
-def test_Commandline_checkmandxor():
-    class spec(nib.CommandLineInputSpec):
-        bar = nib.Int().tag(mandatory=True, xor=("bar", "goo"))
-        goo = nib.Int().tag(mandatory=True, xor=("bar", "goo"))
+class SpecTag(nib.CommandLineInputSpec):
+    bar = nib.Int().tag(mandatory=True, xor=("bar", "goo"))
+    goo = nib.Int().tag(mandatory=True, xor=("bar", "goo"))
+
+class SpecNoTag(nib.CommandLineInputSpec):
+    bar = nib.Int(mandatory=True, xor=("bar", "goo"))
+    goo = nib.Int(mandatory=True, xor=("bar", "goo"))
+
+@pytest.mark.parametrize("spec", [SpecTag, SpecNoTag])
+def test_Commandline_checkmandxor(spec):
 
     class DerivedClass(nib.CommandLine):
         input_spec = spec
@@ -798,8 +804,6 @@ def test_Commandline_checkmandxor():
         ci2.cmdline
     assert "DerivedClass requires a value for one of the inputs 'bar, goo'." \
         in str(excinfo.value)
-
-
 
 
 def test_Commandline_environ():
