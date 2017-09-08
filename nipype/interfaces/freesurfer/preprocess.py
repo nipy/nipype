@@ -1159,6 +1159,8 @@ class BBRegisterInputSpec(FSTraitedSpec):
                                  desc="write the transformation matrix in LTA format")
     registered_file = traits.Either(traits.Bool, File, argstr='--o %s',
                                     desc='output warped sourcefile either True or filename')
+    init_cost_file = traits.Either(traits.Bool, File, argstr='--initcost %s',
+                                   desc='output initial registration cost file')
 
 
 class BBRegisterInputSpec6(BBRegisterInputSpec):
@@ -1172,10 +1174,11 @@ class BBRegisterInputSpec6(BBRegisterInputSpec):
 
 class BBRegisterOutputSpec(TraitedSpec):
     out_reg_file = File(exists=True, desc='Output registration file')
-    out_fsl_file = File(desc='Output FLIRT-style registration file')
-    out_lta_file = File(desc='Output LTA-style registration file')
+    out_fsl_file = File(exists=True, desc='Output FLIRT-style registration file')
+    out_lta_file = File(exists=True, desc='Output LTA-style registration file')
     min_cost_file = File(exists=True, desc='Output registration minimum cost file')
-    registered_file = File(desc='Registered and resampled source file')
+    init_cost_file = File(exists=True, desc='Output initial registration cost file')
+    registered_file = File(exists=True, desc='Registered and resampled source file')
 
 
 class BBRegister(FSCommand):
@@ -1242,17 +1245,19 @@ class BBRegister(FSCommand):
             else:
                 outputs['out_fsl_file'] = op.abspath(_in.out_fsl_file)
 
+        if isdefined(_in.init_cost_file):
+            if isinstance(_in.out_fsl_file, bool):
+                outputs['init_cost_file'] = outputs['out_reg_file'] + '.initcost'
+            else:
+                outputs['init_cost_file'] = op.abspath(_in.init_cost_file)
+
         outputs['min_cost_file'] = outputs['out_reg_file'] + '.mincost'
         return outputs
 
     def _format_arg(self, name, spec, value):
-
-        if name in ['registered_file', 'out_fsl_file', 'out_lta_file']:
-            if isinstance(value, bool):
-                fname = self._list_outputs()[name]
-            else:
-                fname = value
-            return spec.argstr % fname
+        if name in ('registered_file', 'out_fsl_file', 'out_lta_file',
+                    'init_cost_file') and isinstance(value, bool):
+            value = self._list_outputs()[name]
         return super(BBRegister, self)._format_arg(name, spec, value)
 
     def _gen_filename(self, name):
