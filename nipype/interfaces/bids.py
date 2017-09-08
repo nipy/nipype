@@ -29,6 +29,7 @@ except ImportError:
 else:
     have_pybids = True
 
+from warnings import warn
 
 class BIDSDataGrabberInputSpec(DynamicTraitedSpec):
     base_dir = traits.Directory(exists=True,
@@ -37,6 +38,9 @@ class BIDSDataGrabberInputSpec(DynamicTraitedSpec):
     output_query = traits.Dict(key_trait=Str,
                                value_trait=traits.Dict,
                                desc='Queries for outfield outputs')
+    raise_on_empty = traits.Bool(True, usedefault=True,
+                                 desc='Generate exception if list is empty '
+                                 'for a given field')
     return_type = traits.Enum('filename', 'namedtuple', usedefault=True)
 
 
@@ -58,7 +62,7 @@ class BIDSDataGrabber(BaseInterface):
         >>> bg.inputs.base_dir = 'ds005/'
         >>> results = bg.run()
         >>> len(results.outputs.outfield) # doctest: +ALLOW_UNICODE
-        116
+        135
 
         Using dynamically created, user-defined input fields,
         filter files based on BIDS entities.
@@ -99,8 +103,8 @@ class BIDSDataGrabber(BaseInterface):
             Indicates the input fields to be dynamically created
 
         outfields: list of str
-            Indicates output fields to be dynamically created
-
+            Indicates output fields to be dynamically created.
+            If no matching items, returns Undefined.
         """
         if not outfields:
             outfields = []
@@ -150,7 +154,18 @@ class BIDSDataGrabber(BaseInterface):
 
         outputs = {}
         for key, query in self.inputs.output_query.items():
-            outputs[key] = layout.get(
-                **dict(query.items() | filters.items()),
-                return_type='file')
+            args = query.copy()
+            args.update(filters)
+            filelist = layout.get(return_type='file',
+                                      **args)
+            if len(filelist) == 0:
+                msg = 'Output key: %s returned no files' % (
+                    key)
+                if self.inputs.raise_on_empty:
+                    raise IOError(msg)
+                else:
+                    warn(msg)
+                    filelist = Undefined
+            else:
+                outputs[key] = filelist
         return outputs
