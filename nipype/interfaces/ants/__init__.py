@@ -20,4 +20,5 @@ from .visualization import ConvertScalarImageToRGB, CreateTiledMosaic
 
 # Utility Programs
 from .utils import (AverageAffineTransform, AverageImages, MultiplyImages,
-                    CreateJacobianDeterminantImage, AffineInitializer)
+                    CreateJacobianDeterminantImage, AffineInitializer,
+                    ComposeMultiTransform)

@@ -225,3 +225,46 @@ class AffineInitializer(ANTSCommand):
 
     def _list_outputs(self):
         return {'out_file': os.path.abspath(self.inputs.out_file)}
+   
+
+class ComposeMultiTransformInputSpec(ANTSCommandInputSpec):
+    dimension = traits.Enum(3, 2, argstr='%d', usedefault=True, mandatory=True,
+                            position=0, desc='image dimension (2 or 3)')
+    output_transform = File(argstr='%s', mandatory=True, position=1,
+                                   desc='Outputfname.txt: the name of the resulting transform.')
+    reference_image = File(argstr='%s', mandatory=False, position=2,
+                                   desc='Reference image (only necessary when output is warpfield)')
+    transforms = InputMultiPath(File(exists=True), argstr='%s', mandatory=True,
+                                position=3, desc='transforms to average')
+
+
+class ComposeMultiTransformOutputSpec(TraitedSpec):
+    output_transform = File(exists=True, desc='Composed transform file')
+
+
+class ComposeMultiTransform(ANTSCommand):
+    """
+    Examples
+    --------
+    >>> from nipype.interfaces.ants import ComposeMultiTransform
+    >>> compose = ComposeMultiTransform()
+    >>> compose_transform.inputs.dimension = 3
+    >>> compose_transform.inputs.transforms = ['struct_to_template.mat', 'func_to_struct.mat']
+    >>> compose_transform.inputs.output_transform = 'func_to_template.mat'
+    >>> compose_transform.cmdline # doctest: +ALLOW_UNICODE
+    'TODO TODO TODO'
+    """
+    _cmd = 'ComposeMultiTransform'
+    input_spec = ComposeMultiTransformInputSpec
+    output_spec = ComposeMultiTransformOutputSpec
+
+    def _format_arg(self, opt, spec, val):
+        return super(ComposeMultiTransform, self)._format_arg(opt, spec, val)
+
+    def _list_outputs(self):
+        outputs = self._outputs().get()
+        outputs['output_transform'] = os.path.abspath(
+            self.inputs.output_transform)
+        return outputs
+
+
