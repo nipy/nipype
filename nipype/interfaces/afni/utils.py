@@ -602,12 +602,12 @@ class CatMatvecInputSpec(AFNICommandInputSpec):
                "This feature could be used, with clever scripting, to input"
                "a matrix directly on the command line to program 3dWarp.",
         argstr="-MATRIX",
-        xor=['oneline','fourXfour'])
+        xor=['oneline', 'fourxfour'])
     oneline = traits.Bool(
         descr="indicates that the resulting matrix"
               "will simply be written as 12 numbers on one line.",
         argstr="-ONELINE",
-        xor=['matrix','fourXfour'])
+        xor=['matrix', 'fourxfour'])
     fourxfour = traits.Bool(
         descr="Output matrix in augmented form (last row is 0 0 0 1)"
               "This option does not work with -MATRIX or -ONELINE",
