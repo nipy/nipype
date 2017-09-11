@@ -26,7 +26,7 @@ from nipype.utils.filemanip import filename_to_list
 import nipype.pipeline.engine as pe
 import nipype.algorithms.modelgen as model
 import nipype.algorithms.rapidart as ra
-from nipype.algorithms.misc import TSNR
+from nipype.algorithms.misc import TSNR, CalculateMedian
 from nipype.interfaces.c3 import C3dAffineTool
 from nipype.interfaces import fsl, Function, ants, freesurfer as fs
 import nipype.interfaces.io as nio
@@ -54,33 +54,6 @@ imports = [
     'from nipype.utils.filemanip import filename_to_list, list_to_filename, split_filename',
     'from scipy.special import legendre'
 ]
-
-def median(in_files):
-    """Computes an average of the median of each realigned timeseries
-
-    Parameters
-    ----------
-
-    in_files: one or more realigned Nifti 4D time series
-
-    Returns
-    -------
-
-    out_file: a 3D Nifti file
-    """
-    average = None
-    for idx, filename in enumerate(filename_to_list(in_files)):
-        img = nb.load(filename, mmap=NUMPY_MMAP)
-        data = np.median(img.get_data(), axis=3)
-        if average is None:
-            average = data
-        else:
-            average = average + data
-    median_img = nb.Nifti1Image(average / float(idx + 1), img.affine,
-                                img.header)
-    filename = os.path.join(os.getcwd(), 'median.nii.gz')
-    median_img.to_filename(filename)
-    return filename
 
 
 def create_reg_workflow(name='registration'):
@@ -818,11 +791,7 @@ def analyze_openfmri_dataset(data_dir, subject=None, model_id=None,
     wf.connect(preproc, "outputspec.realigned_files", tsnr, "in_file")
 
     # Compute the median image across runs
-    calc_median = Node(Function(input_names=['in_files'],
-                                output_names=['median_file'],
-                                function=median,
-                                imports=imports),
-                       name='median')
+    calc_median = Node(CalculateMedian(), name='median')
     wf.connect(tsnr, 'detrended_file', calc_median, 'in_files')
 
     """

@@ -67,7 +67,7 @@ mlab.MatlabCommand.set_default_matlab_cmd("matlab -nodisplay")
 # mlab.MatlabCommand.set_default_paths('/software/matlab/spm12')
 
 from nipype.algorithms.rapidart import ArtifactDetect
-from nipype.algorithms.misc import TSNR
+from nipype.algorithms.misc import TSNR, CalculateMedian
 from nipype.interfaces.utility import Rename, Merge, IdentityInterface
 from nipype.utils.filemanip import filename_to_list
 from nipype.interfaces.io import DataSink, FreeSurferSource
@@ -623,11 +623,7 @@ def create_workflow(files,
     wf.connect(slice_timing, 'timecorrected_files', tsnr, 'in_file')
 
     # Compute the median image across runs
-    calc_median = Node(Function(input_names=['in_files'],
-                                output_names=['median_file'],
-                                function=median,
-                                imports=imports),
-                       name='median')
+    calc_median = Node(CalculateMedian(), name='median')
     wf.connect(tsnr, 'detrended_file', calc_median, 'in_files')
 
     """Segment and Register

@@ -65,7 +65,7 @@ fsl.FSLCommand.set_default_output_type('NIFTI_GZ')
 from nipype import Workflow, Node, MapNode
 
 from nipype.algorithms.rapidart import ArtifactDetect
-from nipype.algorithms.misc import TSNR
+from nipype.algorithms.misc import TSNR, CalculateMedian
 from nipype.algorithms.confounds import ACompCor
 from nipype.interfaces.utility import Rename, Merge, IdentityInterface
 from nipype.utils.filemanip import filename_to_list
@@ -556,11 +556,7 @@ def create_workflow(files,
     wf.connect(realign, "out_file", tsnr, "in_file")
 
     # Compute the median image across runs
-    calc_median = Node(Function(input_names=['in_files'],
-                                output_names=['median_file'],
-                                function=median,
-                                imports=imports),
-                       name='median')
+    calc_median = Node(CalculateMedian(), name='median')
     wf.connect(tsnr, 'detrended_file', calc_median, 'in_files')
 
     """Segment and Register
