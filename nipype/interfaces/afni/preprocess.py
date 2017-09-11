@@ -313,7 +313,7 @@ class AllineateInputSpec(AFNICommandInputSpec):
         desc='Use a two pass alignment strategy for all volumes, searching '
              'for a large rotation+shift and then refining the alignment.')
     two_blur = traits.Float(
-        argstr='-twoblur',
+        argstr='-twoblur %f',
         desc='Set the blurring radius for the first pass in mm.')
     two_first = traits.Bool(
         argstr='-twofirst',
@@ -392,6 +392,18 @@ class AllineateInputSpec(AFNICommandInputSpec):
              'EPI slices, and the base as comprising anatomically '
              '\'true\' images.  Only phase-encoding direction image '
              'shearing and scaling will be allowed with this option.')
+    maxrot = traits.Float(
+        argstr='-maxrot %f',
+        desc='Maximum allowed rotation in degrees.')
+    maxshf = traits.Float(
+        argstr='-maxshf %f',
+        desc='Maximum allowed shift in mm.')
+    maxscl = traits.Float(
+        argstr='-maxscl %f',
+        desc='Maximum allowed scaling factor.')
+    maxshr = traits.Float(
+        argstr='-maxshr %f',
+        desc='Maximum allowed shearing factor.')
     master = File(
         exists=True,
         argstr='-master %s',
