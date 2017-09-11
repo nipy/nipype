@@ -119,7 +119,7 @@ class AlignEpiAnatPyOutputSpec(TraitedSpec):
         desc="matrix to volume register and align epi"
              "to anatomy and put into standard space")
     epi_vr_motion = File(
-        desc="motion parameters from EPI time-series" 
+        desc="motion parameters from EPI time-series"
              "registration (tsh included in name if slice"
              "timing correction is also included).")
     skullstrip = File(
@@ -131,20 +131,20 @@ class AlignEpiAnatPy(AFNIPythonCommand):
     an EPI and an anatomical structural dataset, and applies the resulting
     transformation to one or the other to bring them into alignment.
 
-    This script computes the transforms needed to align EPI and  
-    anatomical datasets using a cost function designed for this purpose. The  
-    script combines multiple transformations, thereby minimizing the amount of 
+    This script computes the transforms needed to align EPI and
+    anatomical datasets using a cost function designed for this purpose. The
+    script combines multiple transformations, thereby minimizing the amount of
     interpolation applied to the data.
-    
+
     Basic Usage:
       align_epi_anat.py -anat anat+orig -epi epi+orig -epi_base 5
-    
+
     The user must provide EPI and anatomical datasets and specify the EPI
-    sub-brick to use as a base in the alignment.  
+    sub-brick to use as a base in the alignment.
 
     Internally, the script always aligns the anatomical to the EPI dataset,
-    and the resulting transformation is saved to a 1D file. 
-    As a user option, the inverse of this transformation may be applied to the 
+    and the resulting transformation is saved to a 1D file.
+    As a user option, the inverse of this transformation may be applied to the
     EPI dataset in order to align it to the anatomical data instead.
 
     This program generates several kinds of output in the form of datasets
@@ -182,7 +182,7 @@ class AlignEpiAnatPy(AFNIPythonCommand):
         epi_prefix = ''.join(self._gen_fname(self.inputs.in_file).split('+')[:-1])
         outputtype = self.inputs.outputtype
         if outputtype == 'AFNI':
-            ext = '.HEAD' 
+            ext = '.HEAD'
         else:
             Info.output_type_to_ext(outputtype)
         matext = '.1D'
@@ -620,7 +620,7 @@ class AutoTLRCInputSpec(CommandLineInputSpec):
         mandatory=True,
         exists=True,
         copyfile=False)
-    base = traits.Str(  
+    base = traits.Str(
         desc = '              Reference anatomical volume'
                 '              Usually this volume is in some standard space like'
                 '              TLRC or MNI space and with afni dataset view of'
@@ -706,7 +706,7 @@ class AutoTLRC(AFNICommand):
         ext = '.HEAD'
         outputs['out_file'] = os.path.abspath(self._gen_fname(self.inputs.in_file, suffix='+tlrc')+ext)
         return outputs
-    
+
 class BandpassInputSpec(AFNICommandInputSpec):
     in_file = File(
         desc='input file to 3dBandpass',
