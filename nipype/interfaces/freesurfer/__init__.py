@@ -24,4 +24,4 @@ from .utils import (SampleToSurface, SurfaceSmooth, SurfaceTransform, Surface2Vo
                     RelabelHypointensities, Aparc2Aseg, Apas2Aseg, MRIsExpand, MRIsCombine)
 from .longitudinal import (RobustTemplate, FuseSegmentations)
 from .registration import (MPRtoMNI305, RegisterAVItoTalairach, EMRegister, Register,
-                           Paint)
+                           Paint, MRICoreg)
