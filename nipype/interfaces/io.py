@@ -37,11 +37,14 @@ import sqlite3
 from .. import config, logging
 from ..utils.filemanip import copyfile, list_to_filename, filename_to_list
 from ..utils.misc import human_order_sorted, str2bool
-from .base import (
-    TraitedSpec, traits, Str, File, Directory, BaseInterface, InputMultiPath,
-    isdefined, OutputMultiPath, DynamicTraitedSpec, Undefined, BaseInterfaceInputSpec)
 from .bids_utils import BIDSDataGrabber
-
+from .base import (
+    isdefined, TraitedSpec, BaseInterface, BaseInterfaceInputSpec, File, Directory,
+    Unicode, Tuple, List, Dict, Any, Bool, InputMultiObject, OutputMultiObject,
+    Int, Enum)
+#    TraitedSpec, traits, Str, File, Directory, BaseInterface, InputMultiPath,
+#    isdefined, OutputMultiPath, DynamicTraitedSpec, Undefined, BaseInterfaceInputSpec)
+import traitlets, pdb #dj TOOD: should be remove (?)
 try:
     import pyxnat
 except:
@@ -102,12 +105,12 @@ def add_traits(base, names, trait_type=None):
     All traits are set to Undefined by default
     """
     if trait_type is None:
-        trait_type = traits.Any
+        trait_type = Any
     undefined_traits = {}
     for key in names:
-        base.add_trait(key, trait_type)
-        undefined_traits[key] = Undefined
-    base.trait_set(trait_change_notify=False, **undefined_traits)
+        base.add_traits(**{key:trait_type})
+        undefined_traits[key] = None
+    base.set(trait_change_notify=False, **undefined_traits)
     # access each trait
     for key in names:
         _ = getattr(base, key)
@@ -172,48 +175,48 @@ class ProgressPercentage(object):
 
 
 # DataSink inputs
-class DataSinkInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
+class DataSinkInputSpec(BaseInterfaceInputSpec):
     '''
     '''
 
     # Init inputspec data attributes
     base_directory = Directory(
         desc='Path to the base directory for storing data.')
-    container = Str(
+    container = Unicode(
         desc='Folder within base directory in which to store output')
-    parameterization = traits.Bool(True, usedefault=True,
+    parameterization = Bool(True, usedefault=True,
                                    desc='store output in parametrized structure')
     strip_dir = Directory(desc='path to strip out of filename')
-    substitutions = InputMultiPath(traits.Tuple(Str, Str),
-                                   desc=('List of 2-tuples reflecting string '
-                                         'to substitute and string to replace '
-                                         'it with'))
+    substitutions = InputMultiObject(Tuple(Unicode, Unicode), 
+                                     desc=('List of 2-tuples reflecting string '
+                                           'to substitute and string to replace '
+                                           'it with'))
     regexp_substitutions = \
-        InputMultiPath(traits.Tuple(Str, Str),
-                       desc=('List of 2-tuples reflecting a pair of a '\
-                             'Python regexp pattern and a replacement '\
-                             'string. Invoked after string `substitutions`'))
+        InputMultiObject(Tuple(Unicode, Unicode),
+                         desc=('List of 2-tuples reflecting a pair of a '\
+                                   'Python regexp pattern and a replacement '\
+                                   'string. Invoked after string `substitutions`'))
 
-    _outputs = traits.Dict(Str, value={}, usedefault=True)
-    remove_dest_dir = traits.Bool(False, usedefault=True,
+    _outputs = Dict(key_trait=Unicode(), default_value={})
+    remove_dest_dir = Bool(False, usedefault=True,
                                   desc='remove dest directory when copying dirs')
 
     # AWS S3 data attributes
-    creds_path = Str(desc='Filepath to AWS credentials file for S3 bucket '\
+    creds_path = Unicode(desc='Filepath to AWS credentials file for S3 bucket '\
                                  'access; if not specified, the credentials will '\
                                  'be taken from the AWS_ACCESS_KEY_ID and '\
                                  'AWS_SECRET_ACCESS_KEY environment variables')
-    encrypt_bucket_keys = traits.Bool(desc='Flag indicating whether to use S3 '\
+    encrypt_bucket_keys = Bool(desc='Flag indicating whether to use S3 '\
                                         'server-side AES-256 encryption')
     # Set this if user wishes to override the bucket with their own
-    bucket = traits.Any(desc='Boto3 S3 bucket for manual override of bucket')
+    bucket = Any(desc='Boto3 S3 bucket for manual override of bucket')
     # Set this if user wishes to have local copy of files as well
-    local_copy = Str(desc='Copy files locally as well as to S3 bucket')
+    local_copy = Unicode(desc='Copy files locally as well as to S3 bucket')
 
     # Set call-able inputs attributes
     def __setattr__(self, key, value):
 
-        if key not in self.copyable_trait_names():
+        if key not in self.trait_names():
             if not isdefined(value):
                 super(DataSinkInputSpec, self).__setattr__(key, value)
             self._outputs[key] = value
@@ -227,7 +230,7 @@ class DataSinkInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
 class DataSinkOutputSpec(TraitedSpec):
 
     # Init out file
-    out_file = traits.Any(desc='datasink output')
+    out_file = Any(desc='datasink output')
 
 
 # Custom DataSink class
@@ -305,17 +308,16 @@ class DataSink(IOBase):
         infields : list of str
             Indicates the input fields to be dynamically created
         """
-
         super(DataSink, self).__init__(**kwargs)
         undefined_traits = {}
         # used for mandatory inputs check
         self._infields = infields
         if infields:
             for key in infields:
-                self.inputs.add_trait(key, traits.Any)
-                self.inputs._outputs[key] = Undefined
-                undefined_traits[key] = Undefined
-        self.inputs.trait_set(trait_change_notify=False, **undefined_traits)
+                self.inputs.add_traits(**{key:Any()})
+                self.inputs._outputs[key] = None
+                undefined_traits[key] = None
+        self.inputs.set(trait_change_notify=False, **undefined_traits)
         if force_run:
             self._always_run = True
 
@@ -764,28 +766,28 @@ class DataSink(IOBase):
         return outputs
 
 
-class S3DataGrabberInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
-    anon = traits.Bool(False, usedefault=True,
+class S3DataGrabberInputSpec(BaseInterfaceInputSpec):
+    anon = Bool(False, usedefault=True,
                        desc='Use anonymous connection to s3.  If this is set to True, boto may print' +
                             ' a urlopen error, but this does not prevent data from being downloaded.')
-    region = Str('us-east-1', usedefault=True,
+    region = Unicode('us-east-1', usedefault=True,
                         desc='Region of s3 bucket')
-    bucket = Str(mandatory=True,
+    bucket = Unicode(mandatory=True,
                         desc='Amazon S3 bucket where your data is stored')
-    bucket_path = Str('', usedefault=True,
+    bucket_path = Unicode('', usedefault=True,
                              desc='Location within your bucket for subject data.')
     local_directory = Directory(exists=True,
                                 desc='Path to the local directory for subject data to be downloaded '
                                 'and accessed. Should be on HDFS for Spark jobs.')
-    raise_on_empty = traits.Bool(True, usedefault=True,
+    raise_on_empty = Bool(True, usedefault=True,
                                  desc='Generate exception if list is empty for a given field')
-    sort_filelist = traits.Bool(mandatory=True,
+    sort_filelist = Bool(mandatory=True,
                                 desc='Sort the filelist that matches the template')
-    template = Str(mandatory=True,
+    template = Unicode(mandatory=True,
                           desc='Layout used to get files. Relative to bucket_path if defined.'
                                'Uses regex rather than glob style formatting.')
-    template_args = traits.Dict(key_trait=Str,
-                                value_trait=traits.List(traits.List),
+    template_args = Dict(key_trait=Unicode(),
+                                value_trait=List(List),
                                 desc='Information to plug into template')
 
 
@@ -803,7 +805,7 @@ class S3DataGrabber(IOBase):
 
     """
     input_spec = S3DataGrabberInputSpec
-    output_spec = DynamicTraitedSpec
+    output_spec = TraitedSpec
     _always_run = True
 
     def __init__(self, infields=None, outfields=None, **kwargs):
@@ -828,13 +830,12 @@ class S3DataGrabber(IOBase):
         self._outfields = outfields
         if infields:
             for key in infields:
-                self.inputs.add_trait(key, traits.Any)
-                undefined_traits[key] = Undefined
+                self.inputs.add_traits(**{key:Any()})
+                undefined_traits[key] = None
         # add ability to insert field specific templates
-        self.inputs.add_trait('field_template',
-                              traits.Dict(traits.Enum(outfields),
+        self.inputs.add_traits(field_template=Dict(Enum(outfields),
                                           desc="arguments that fit into template"))
-        undefined_traits['field_template'] = Undefined
+        undefined_traits['field_template'] = None
         if not isdefined(self.inputs.template_args):
             self.inputs.template_args = {}
         for key in outfields:
@@ -844,13 +845,13 @@ class S3DataGrabber(IOBase):
                 else:
                     self.inputs.template_args[key] = []
 
-        self.inputs.trait_set(trait_change_notify=False, **undefined_traits)
+        self.inputs.set(trait_change_notify=False, **undefined_traits)
 
     def _add_output_traits(self, base):
         """
         S3 specific: Downloads relevant files to a local folder specified
 
-        Using traits.Any instead out OutputMultiPath till add_trait bug
+        Using traits.Any instead out OutputMultiObject till add_trait bug
         is fixed.
         """
         return add_traits(base, list(self.inputs.template_args.keys()))
@@ -982,17 +983,17 @@ class S3DataGrabber(IOBase):
         return localpath
 
 
-class DataGrabberInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
+class DataGrabberInputSpec(BaseInterfaceInputSpec):
     base_directory = Directory(exists=True,
                                desc='Path to the base directory consisting of subject data.')
-    raise_on_empty = traits.Bool(True, usedefault=True,
+    raise_on_empty = Bool(True, usedefault=True,
                                  desc='Generate exception if list is empty for a given field')
-    sort_filelist = traits.Bool(mandatory=True,
+    sort_filelist = Bool(mandatory=True,
                                 desc='Sort the filelist that matches the template')
-    template = Str(mandatory=True,
+    template = Unicode(mandatory=True,
                           desc='Layout used to get files. relative to base directory if defined')
-    template_args = traits.Dict(key_trait=Str,
-                                value_trait=traits.List(traits.List),
+    template_args = Dict(key_trait=Unicode,
+                                value_trait=List(List),
                                 desc='Information to plug into template')
 
 
@@ -1048,7 +1049,7 @@ class DataGrabber(IOBase):
 
     """
     input_spec = DataGrabberInputSpec
-    output_spec = DynamicTraitedSpec
+    output_spec = TraitedSpec
     _always_run = True
 
     def __init__(self, infields=None, outfields=None, **kwargs):
@@ -1073,13 +1074,12 @@ class DataGrabber(IOBase):
         self._outfields = outfields
         if infields:
             for key in infields:
-                self.inputs.add_trait(key, traits.Any)
-                undefined_traits[key] = Undefined
+                self.inputs.add_traits(**{key:Any()})
+                undefined_traits[key] = None
         # add ability to insert field specific templates
-        self.inputs.add_trait('field_template',
-                              traits.Dict(traits.Enum(outfields),
-                                          desc="arguments that fit into template"))
-        undefined_traits['field_template'] = Undefined
+        self.inputs.add_traits(field_template=Dict(Enum(outfields),
+                                                   desc="arguments that fit into template"))
+        undefined_traits['field_template'] = None
         if not isdefined(self.inputs.template_args):
             self.inputs.template_args = {}
         for key in outfields:
@@ -1089,12 +1089,12 @@ class DataGrabber(IOBase):
                 else:
                     self.inputs.template_args[key] = []
 
-        self.inputs.trait_set(trait_change_notify=False, **undefined_traits)
+        self.inputs.set(trait_change_notify=False, **undefined_traits)
 
     def _add_output_traits(self, base):
         """
 
-        Using traits.Any instead out OutputMultiPath till add_trait bug
+        Using traits.Any instead out OutputMultiObject till add_trait bug
         is fixed.
         """
         return add_traits(base, list(self.inputs.template_args.keys()))
@@ -1183,16 +1183,15 @@ class DataGrabber(IOBase):
         return outputs
 
 
-class SelectFilesInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
+class SelectFilesInputSpec(BaseInterfaceInputSpec):
 
     base_directory = Directory(exists=True,
                                desc="Root path common to templates.")
-    sort_filelist = traits.Bool(True, usedefault=True,
+    sort_filelist = Bool(True, usedefault=True,
                                 desc="When matching mutliple files, return them in sorted order.")
-    raise_on_empty = traits.Bool(True, usedefault=True,
+    raise_on_empty = Bool(True, usedefault=True,
                                  desc="Raise an exception if a template pattern matches no files.")
-    force_lists = traits.Either(traits.Bool(), traits.List(Str()),
-                                default=False, usedefault=True,
+    force_lists = traitlets.Union([Bool(), List(Unicode())],  default_value=None,
                                 desc=("Whether to return outputs as a list even when only one file "
                                       "matches the template. Either a boolean that applies to all "
                                       "output fields or a list of output field names to coerce to "
@@ -1231,7 +1230,7 @@ class SelectFiles(IOBase):
 
     """
     input_spec = SelectFilesInputSpec
-    output_spec = DynamicTraitedSpec
+    output_spec = TraitedSpec
     _always_run = True
 
     def __init__(self, templates, **kwargs):
@@ -1268,9 +1267,9 @@ class SelectFiles(IOBase):
         # Add the dynamic input fields
         undefined_traits = {}
         for field in infields:
-            self.inputs.add_trait(field, traits.Any)
-            undefined_traits[field] = Undefined
-        self.inputs.trait_set(trait_change_notify=False, **undefined_traits)
+            self.inputs.add_traits(**{field:Any()})
+            undefined_traits[field] = None
+        self.inputs.set(trait_change_notify=False, **undefined_traits)
 
     def _add_output_traits(self, base):
         """Add the dynamic output fields"""
@@ -1329,23 +1328,22 @@ class SelectFiles(IOBase):
         return outputs
 
 
-class DataFinderInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
-    root_paths = traits.Either(traits.List(),
-                               Str(),
+class DataFinderInputSpec(BaseInterfaceInputSpec):
+    root_paths = traitlets.Union([List(),Unicode()],
                                mandatory=True,)
-    match_regex = Str('(.+)',
+    match_regex = Unicode('(.+)',
                              usedefault=True,
                              desc=("Regular expression for matching "
                                    "paths."))
-    ignore_regexes = traits.List(desc=("List of regular expressions, "
+    ignore_regexes = List(desc=("List of regular expressions, "
                                        "if any match the path it will be "
                                        "ignored.")
                                  )
-    max_depth = traits.Int(desc="The maximum depth to search beneath "
+    max_depth = Int(desc="The maximum depth to search beneath "
                            "the root_paths")
-    min_depth = traits.Int(desc="The minimum depth to search beneath "
+    min_depth = Int(desc="The minimum depth to search beneath "
                            "the root paths")
-    unpack_single = traits.Bool(False,
+    unpack_single = Bool(False,
                                 usedefault=True,
                                 desc="Unpack single results from list")
 
@@ -1386,7 +1384,7 @@ class DataFinder(IOBase):
     """
 
     input_spec = DataFinderInputSpec
-    output_spec = DynamicTraitedSpec
+    output_spec = TraitedSpec
     _always_run = True
 
     def _match_path(self, target_path):
@@ -1411,15 +1409,15 @@ class DataFinder(IOBase):
         if isinstance(self.inputs.root_paths, (str, bytes)):
             self.inputs.root_paths = [self.inputs.root_paths]
         self.match_regex = re.compile(self.inputs.match_regex)
-        if self.inputs.max_depth is Undefined:
+        if self.inputs.max_depth is None:
             max_depth = None
         else:
             max_depth = self.inputs.max_depth
-        if self.inputs.min_depth is Undefined:
+        if self.inputs.min_depth is None:
             min_depth = 0
         else:
             min_depth = self.inputs.min_depth
-        if self.inputs.ignore_regexes is Undefined:
+        if self.inputs.ignore_regexes is None:
             self.ignore_regexes = []
         else:
             self.ignore_regexes = \
@@ -1479,9 +1477,9 @@ class DataFinder(IOBase):
 class FSSourceInputSpec(BaseInterfaceInputSpec):
     subjects_dir = Directory(mandatory=True,
                              desc='Freesurfer subjects directory.')
-    subject_id = Str(mandatory=True,
+    subject_id = Unicode(mandatory=True,
                      desc='Subject name for whom to retrieve data')
-    hemi = traits.Enum('both', 'lh', 'rh', usedefault=True,
+    hemi = Enum('both', 'lh', 'rh', usedefault=True,
                        desc='Selects hemisphere specific outputs')
 
 
@@ -1504,80 +1502,80 @@ class FSSourceOutputSpec(TraitedSpec):
                 loc='mri')
     rawavg = File(exists=True, desc='Volume formed by averaging input images',
                   loc='mri')
-    ribbon = OutputMultiPath(
+    ribbon = OutputMultiObject(
         File(exists=True), desc='Volumetric maps of cortical ribbons',
         loc='mri', altkey='*ribbon')
     wm = File(exists=True, desc='Segmented white-matter volume', loc='mri')
     wmparc = File(
         exists=True, loc='mri',
         desc='Aparc parcellation projected into subcortical white matter')
-    curv = OutputMultiPath(File(exists=True), desc='Maps of surface curvature',
+    curv = OutputMultiObject(File(exists=True), desc='Maps of surface curvature',
                            loc='surf')
-    avg_curv = OutputMultiPath(
+    avg_curv = OutputMultiObject(
         File(exists=True), desc='Average atlas curvature, sampled to subject',
         loc='surf')
-    inflated = OutputMultiPath(
+    inflated = OutputMultiObject(
         File(exists=True), desc='Inflated surface meshes',
         loc='surf')
-    pial = OutputMultiPath(
+    pial = OutputMultiObject(
         File(exists=True), desc='Gray matter/pia mater surface meshes',
         loc='surf')
-    area_pial = OutputMultiPath(
+    area_pial = OutputMultiObject(
         File(exists=True),
         desc='Mean area of triangles each vertex on the pial surface is '
         'associated with',
         loc='surf', altkey='area.pial')
-    curv_pial = OutputMultiPath(
+    curv_pial = OutputMultiObject(
         File(exists=True), desc='Curvature of pial surface',
         loc='surf', altkey='curv.pial')
-    smoothwm = OutputMultiPath(File(exists=True), loc='surf',
+    smoothwm = OutputMultiObject(File(exists=True), loc='surf',
                                desc='Smoothed original surface meshes')
-    sphere = OutputMultiPath(
+    sphere = OutputMultiObject(
         File(exists=True), desc='Spherical surface meshes',
         loc='surf')
-    sulc = OutputMultiPath(
+    sulc = OutputMultiObject(
         File(exists=True), desc='Surface maps of sulcal depth', loc='surf')
-    thickness = OutputMultiPath(File(exists=True), loc='surf',
+    thickness = OutputMultiObject(File(exists=True), loc='surf',
                                 desc='Surface maps of cortical thickness')
-    volume = OutputMultiPath(
+    volume = OutputMultiObject(
         File(exists=True), desc='Surface maps of cortical volume', loc='surf')
-    white = OutputMultiPath(
+    white = OutputMultiObject(
         File(exists=True), desc='White/gray matter surface meshes',
         loc='surf')
-    jacobian_white = OutputMultiPath(
+    jacobian_white = OutputMultiObject(
         File(exists=True),
         desc='Distortion required to register to spherical atlas',
         loc='surf')
-    graymid = OutputMultiPath(
+    graymid = OutputMultiObject(
         File(exists=True), desc='Graymid/midthickness surface meshes',
         loc='surf', altkey=['graymid', 'midthickness'])
-    label = OutputMultiPath(
+    label = OutputMultiObject(
         File(exists=True), desc='Volume and surface label files',
         loc='label', altkey='*label')
-    annot = OutputMultiPath(File(exists=True), desc='Surface annotation files',
+    annot = OutputMultiObject(File(exists=True), desc='Surface annotation files',
                             loc='label', altkey='*annot')
-    aparc_aseg = OutputMultiPath(
+    aparc_aseg = OutputMultiObject(
         File(exists=True), loc='mri', altkey='aparc*aseg',
         desc='Aparc parcellation projected into aseg volume')
-    sphere_reg = OutputMultiPath(
+    sphere_reg = OutputMultiObject(
         File(exists=True), loc='surf', altkey='sphere.reg',
         desc='Spherical registration file')
-    aseg_stats = OutputMultiPath(File(exists=True), loc='stats', altkey='aseg',
+    aseg_stats = OutputMultiObject(File(exists=True), loc='stats', altkey='aseg',
                                  desc='Automated segmentation statistics file')
-    wmparc_stats = OutputMultiPath(
+    wmparc_stats = OutputMultiObject(
         File(exists=True), loc='stats', altkey='wmparc',
         desc='White matter parcellation statistics file')
-    aparc_stats = OutputMultiPath(
+    aparc_stats = OutputMultiObject(
         File(exists=True), loc='stats', altkey='aparc',
         desc='Aparc parcellation statistics files')
-    BA_stats = OutputMultiPath(File(exists=True), loc='stats', altkey='BA',
+    BA_stats = OutputMultiObject(File(exists=True), loc='stats', altkey='BA',
                                desc='Brodmann Area statistics files')
-    aparc_a2009s_stats = OutputMultiPath(
+    aparc_a2009s_stats = OutputMultiObject(
         File(exists=True), loc='stats', altkey='aparc.a2009s',
         desc='Aparc a2009s parcellation statistics files')
-    curv_stats = OutputMultiPath(File(exists=True), loc='stats', altkey='curv',
+    curv_stats = OutputMultiObject(File(exists=True), loc='stats', altkey='curv',
                                  desc='Curvature statistics files')
-    entorhinal_exvivo_stats = OutputMultiPath(
+    entorhinal_exvivo_stats = OutputMultiObject(
         File(exists=True), loc='stats', altkey='entorhinal_exvivo',
         desc='Entorhinal exvivo statistics files')
 
@@ -1643,29 +1641,30 @@ class FreeSurferSource(IOBase):
         return outputs
 
 
-class XNATSourceInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
+class XNATSourceInputSpec(BaseInterfaceInputSpec):
 
-    query_template = Str(
+    query_template = Unicode(
         mandatory=True,
         desc=('Layout used to get files. Relative to base '
               'directory if defined')
     )
-
-    query_template_args = traits.Dict(
-        Str,
-        traits.List(traits.List),
-        value=dict(outfiles=[]), usedefault=True,
+#DJ: zmienic wszystkie Dict; wywalic stringi z add_trait??
+    query_template_args = Dict(
+        key_trait=Unicode(),
+        value_trait=List(List),
+        default_value=dict(outfiles=[]), 
         desc='Information to plug into template'
     )
 
-    server = Str(
+    server = Unicode(
         mandatory=True,
         requires=['user', 'pwd'],
         xor=['config']
     )
 
-    user = Str()
-    pwd = traits.Password()
+    user = Unicode()
+    # dj NOTE, traits.Password -> Unicode, ok ?
+    pwd = Unicode()
     config = File(mandatory=True, xor=['server'])
 
     cache_dir = Directory(desc='Cache directory')
@@ -1705,7 +1704,7 @@ class XNATSource(IOBase):
 
     """
     input_spec = XNATSourceInputSpec
-    output_spec = DynamicTraitedSpec
+    output_spec = TraitedSpec
 
     def __init__(self, infields=None, outfields=None, **kwargs):
         """
@@ -1726,28 +1725,26 @@ class XNATSource(IOBase):
         self._infields = infields
         if infields:
             for key in infields:
-                self.inputs.add_trait(key, traits.Any)
-                undefined_traits[key] = Undefined
+                self.inputs.add_traits(**{key:Any()})
+                undefined_traits[key] = None
             self.inputs.query_template_args['outfiles'] = [infields]
         if outfields:
             # add ability to insert field specific templates
-            self.inputs.add_trait(
-                'field_template',
-                traits.Dict(traits.Enum(outfields),
-                            desc="arguments that fit into query_template")
+            self.inputs.add_traits(field_template=Dict(key_trait=Enum(outfields),
+                                  desc="arguments that fit into query_template")
             )
-            undefined_traits['field_template'] = Undefined
+            undefined_traits['field_template'] = None
             # self.inputs.remove_trait('query_template_args')
             outdict = {}
             for key in outfields:
                 outdict[key] = []
             self.inputs.query_template_args = outdict
-        self.inputs.trait_set(trait_change_notify=False, **undefined_traits)
+        self.inputs.set(trait_change_notify=False, **undefined_traits)
 
     def _add_output_traits(self, base):
         """
 
-        Using traits.Any instead out OutputMultiPath till add_trait bug
+        Using traits.Any instead out OutputMultiObject till add_trait bug
         is fixed.
         """
         return add_traits(base, list(self.inputs.query_template_args.keys()))
@@ -1857,50 +1854,51 @@ class XNATSource(IOBase):
         return outputs
 
 
-class XNATSinkInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
+class XNATSinkInputSpec(BaseInterfaceInputSpec):
 
-    _outputs = traits.Dict(Str, value={}, usedefault=True)
+    _outputs = Dict(key_trait=Unicode, default_value={})
 
-    server = Str(mandatory=True,
+    server = Unicode(mandatory=True,
                         requires=['user', 'pwd'],
                         xor=['config']
                         )
 
-    user = Str()
-    pwd = traits.Password()
+    user = Unicode()
+    # dj NOTE: changed traits.Password to Unicode, is it ok?
+    pwd = Unicode()
     config = File(mandatory=True, xor=['server'])
     cache_dir = Directory(desc='')
 
-    project_id = Str(
+    project_id = Unicode(
         desc='Project in which to store the outputs', mandatory=True)
 
-    subject_id = Str(
+    subject_id = Unicode(
         desc='Set to subject id', mandatory=True)
 
-    experiment_id = Str(
+    experiment_id = Unicode(
         desc='Set to workflow name', mandatory=True)
 
-    assessor_id = Str(
+    assessor_id = Unicode(
         desc=('Option to customize ouputs representation in XNAT - '
               'assessor level will be used with specified id'),
         xor=['reconstruction_id']
     )
 
-    reconstruction_id = Str(
+    reconstruction_id = Unicode(
         desc=('Option to customize ouputs representation in XNAT - '
               'reconstruction level will be used with specified id'),
         xor=['assessor_id']
     )
 
-    share = traits.Bool(False,
-                        desc=('Option to share the subjects from the original project'
-                              'instead of creating new ones when possible - the created '
-                              'experiments are then shared back to the original project'
-                              ),
-                        usedefault=True)
+    share = Bool(False,
+                 desc=('Option to share the subjects from the original project'
+                       'instead of creating new ones when possible - the created '
+                       'experiments are then shared back to the original project'
+                       ),
+                 usedefault=True)
 
     def __setattr__(self, key, value):
-        if key not in self.copyable_trait_names():
+        if key not in self.trait_names():
             self._outputs[key] = value
         else:
             super(XNATSinkInputSpec, self).__setattr__(key, value)
@@ -2084,9 +2082,9 @@ def push_provenance():
     pass
 
 
-class SQLiteSinkInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
+class SQLiteSinkInputSpec(BaseInterfaceInputSpec):
     database_file = File(exists=True, mandatory=True)
-    table_name = Str(mandatory=True)
+    table_name = Unicode(mandatory=True)
 
 
 class SQLiteSink(IOBase):
@@ -2132,17 +2130,17 @@ class SQLiteSink(IOBase):
         return None
 
 
-class MySQLSinkInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
-    host = Str('localhost', mandatory=True,
+class MySQLSinkInputSpec(BaseInterfaceInputSpec):
+    host = Unicode('localhost', mandatory=True,
                       requires=['username', 'password'],
                       xor=['config'], usedefault=True)
     config = File(mandatory=True, xor=['host'],
                   desc="MySQL Options File (same format as my.cnf)")
-    database_name = Str(
+    database_name = Unicode(
         mandatory=True, desc='Otherwise known as the schema name')
-    table_name = Str(mandatory=True)
-    username = Str()
-    password = Str()
+    table_name = Unicode(mandatory=True)
+    username = Unicode()
+    password = Unicode()
 
 
 class MySQLSink(IOBase):
@@ -2193,17 +2191,18 @@ class MySQLSink(IOBase):
 
 
 class SSHDataGrabberInputSpec(DataGrabberInputSpec):
-    hostname = Str(mandatory=True, desc='Server hostname.')
-    username = Str(desc='Server username.')
-    password = traits.Password(desc='Server password.')
-    download_files = traits.Bool(True, usedefault=True,
-                                 desc='If false it will return the file names without downloading them')
-    base_directory = Str(mandatory=True,
-                                desc='Path to the base directory consisting of subject data.')
-    template_expression = traits.Enum(['fnmatch', 'regexp'], usedefault=True,
-                                      desc='Use either fnmatch or regexp to express templates')
-    ssh_log_to_file = Str('', usedefault=True,
-                                 desc='If set SSH commands will be logged to the given file')
+    hostname = Unicode(mandatory=True, desc='Server hostname.')
+    username = Unicode(desc='Server username.')
+    # dj NOTE: traits.Password -> Unicode(), ok?
+    password = Unicode(desc='Server password.')
+    download_files = Bool(True, usedefault=True,
+                          desc='If false it will return the file names without downloading them')
+    base_directory = Unicode(mandatory=True,
+                             desc='Path to the base directory consisting of subject data.')
+    template_expression = Enum(['fnmatch', 'regexp'], usedefault=True,
+                               desc='Use either fnmatch or regexp to express templates')
+    ssh_log_to_file = Unicode('', usedefault=True,
+                              desc='If set SSH commands will be logged to the given file')
 
 
 class SSHDataGrabber(DataGrabber):
@@ -2268,7 +2267,7 @@ class SSHDataGrabber(DataGrabber):
 
     """
     input_spec = SSHDataGrabberInputSpec
-    output_spec = DynamicTraitedSpec
+    output_spec = TraitedSpec
     _always_run = False
 
     def __init__(self, infields=None, outfields=None, **kwargs):
@@ -2453,10 +2452,10 @@ class SSHDataGrabber(DataGrabber):
         return client
 
 
-class JSONFileGrabberInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
+class JSONFileGrabberInputSpec(BaseInterfaceInputSpec):
     in_file = File(exists=True, desc='JSON source file')
-    defaults = traits.Dict(desc=('JSON dictionary that sets default output'
-                                 'values, overridden by values found in in_file'))
+    defaults = Dict(desc=('JSON dictionary that sets default output'
+                          'values, overridden by values found in in_file'))
 
 
 class JSONFileGrabber(IOBase):
@@ -2483,7 +2482,7 @@ class JSONFileGrabber(IOBase):
 
     """
     input_spec = JSONFileGrabberInputSpec
-    output_spec = DynamicTraitedSpec
+    output_spec = TraitedSpec
     _always_run = True
 
     def _list_outputs(self):
@@ -2509,16 +2508,17 @@ class JSONFileGrabber(IOBase):
         return outputs
 
 
-class JSONFileSinkInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
+class JSONFileSinkInputSpec(BaseInterfaceInputSpec):
     out_file = File(desc='JSON sink file')
-    in_dict = traits.Dict(value={}, usedefault=True,
-                          desc='input JSON dictionary')
-    _outputs = traits.Dict(value={}, usedefault=True)
-
+    in_dict = Dict(default_value={},
+                   desc='input JSON dictionary')
+    _outputs = Dict(default_value={})
     def __setattr__(self, key, value):
-        if key not in self.copyable_trait_names():
+        #super(JSONFileSinkInputSpec, self).__setattr__(key, value) #dj: why did I add it??
+        if key not in self.trait_names():
             if not isdefined(value):
                 super(JSONFileSinkInputSpec, self).__setattr__(key, value)
+            #pdb.set_trace()
             self._outputs[key] = value
         else:
             if key in self._outputs:
@@ -2563,15 +2563,16 @@ class JSONFileSink(IOBase):
     output_spec = JSONFileSinkOutputSpec
 
     def __init__(self, infields=[], force_run=True, **inputs):
+        #pdb.set_trace()
         super(JSONFileSink, self).__init__(**inputs)
         self._input_names = infields
-
+        #pdb.set_trace()
         undefined_traits = {}
         for key in infields:
-            self.inputs.add_trait(key, traits.Any)
-            self.inputs._outputs[key] = Undefined
-            undefined_traits[key] = Undefined
-        self.inputs.trait_set(trait_change_notify=False, **undefined_traits)
+            self.inputs.add_traits(**{key:Any()})
+            self.inputs._outputs[key] = None
+            undefined_traits[key] = None
+        self.inputs.set(trait_change_notify=False, **undefined_traits)
 
         if force_run:
             self._always_run = True
