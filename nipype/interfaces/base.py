@@ -42,7 +42,7 @@ from ..utils.filemanip import (md5, hash_infile, FileNotFoundError, hash_timesta
 import traitlets, pdb
 from .traits_extension import (isdefined, File, Directory, has_metadata, ImageFile, 
                                MultiObject, OutputMultiObject, InputMultiObject,
-                               Int, Float, List, Enum, Dict, Bool, Unicode)
+                               Int, Float, List, Tuple, Enum, Dict, Bool, Unicode, Any)
 from ..external.due import due
 
 runtime_profile = str2bool(config.get('execution', 'profile_runtime'))
