@@ -28,7 +28,7 @@ class Int(traitlets.Int):
     allow_none = True
     default_value = None
 
-    def __init__(self, default_value=traitlets.Undefined, allow_none=False,
+    def __init__(self, default_value=None, allow_none=False,
                  read_only=None, help=None, config=None, **kwargs):
         super(Int, self).__init__(default_value=default_value, allow_none=allow_none,
                                   read_only=read_only, help=help, config=config)
@@ -40,7 +40,7 @@ class Float(traitlets.Float):
     default_value = None
     info_text = "a float with default_value = None"
 
-    def __init__(self, default_value=traitlets.Undefined, allow_none=False,
+    def __init__(self, default_value=None, allow_none=False,
                  read_only=None, help=None, config=None, **kwargs):
         super(Float, self).__init__(default_value=default_value, allow_none=allow_none,
                                     read_only=read_only, help=help, config=config)
@@ -50,7 +50,7 @@ class Float(traitlets.Float):
 
 class List(traitlets.List):
     allow_none = True
-    default_value = None
+    default_value = None #dj I need it
     info_text = "a list with default_value = None"
 
     def __init__(self, trait=None, default_value=None, minlen=0, maxlen=sys.maxsize, kw=None,
@@ -64,7 +64,7 @@ class Tuple(traitlets.Tuple):
     allow_none = True
     default_value = None
     info_text = "a list with default_value = None"
-
+    # dj TODO: Tuple will not take default_value=None, not sure how should this be changed
     def __init__(self, *traits, default_value=traitlets.Undefined, kw=None,
                  read_only=None, help=None, config=None, **kwargs):
         super(Tuple, self).__init__(*traits, default_value=default_value,
@@ -77,7 +77,7 @@ class Enum(traitlets.Enum):
     default_value = None
     info_text = "an enumerate with default_value = None"
 
-    def __init__(self, values, default_value=traitlets.Undefined, allow_none=False,
+    def __init__(self, values, default_value=None, allow_none=False,
                  read_only=None, help=None, config=None, **kwargs):
         super(Enum, self).__init__(values=values, default_value=default_value, allow_none=allow_none,
                                    read_only=read_only, help=help, config=config)
@@ -87,7 +87,7 @@ class Enum(traitlets.Enum):
 class Dict(traitlets.Dict):
     allow_none = True
     # dj TODO: should review default_value in all classes, check if I can overwrite! write tests!!
-    #default_value = None #dj don't need i guess
+    default_value = None #dj don't need i guess
     info_text = "a dictionary with default_value = None"
 
     def __init__(self, value_trait=None, per_key_traits=None, key_trait=None,
@@ -105,7 +105,7 @@ class Bool(traitlets.Bool):
     default_value = None
     info_text = "a boolean with default_value = None"
 
-    def __init__(self, default_value=traitlets.Undefined, allow_none=False,
+    def __init__(self, default_value=None, allow_none=False,
                  read_only=None, help=None, config=None, **kwargs):
         super(Bool, self).__init__(default_value=default_value, allow_none=allow_none,
                                    read_only=read_only, help=help, config=config)
@@ -117,7 +117,7 @@ class Unicode(traitlets.Unicode):
     default_value = None
     info_text = "an unicode string with default_value = None"
 
-    def __init__(self, default_value=traitlets.Undefined, allow_none=False, 
+    def __init__(self, default_value=None, allow_none=False, 
                  read_only=None, help=None, config=None, **kwargs):
         super(Unicode, self).__init__(default_value=default_value, allow_none=allow_none, 
                                       read_only=read_only, help=help, config=config)
@@ -129,7 +129,7 @@ class Any(traitlets.Any):
     default_value = None
     info_text = "a boolean with default_value = None"
 
-    def __init__(self, default_value=traitlets.Undefined, allow_none=False,
+    def __init__(self, default_value=None, allow_none=False,
                  read_only=None, help=None, config=None, **kwargs):
         super(Any, self).__init__(default_value=default_value, allow_none=allow_none,
                                    read_only=read_only, help=help, config=config)
@@ -203,7 +203,8 @@ class Directory (Unicode):
 
     def __init__(self, value=None, auto_set=False, entries=0,
                  exists=False, **metadata):
-        """ Creates a Directory trait.
+        """ 
+        Creates a Directory trait.
 
         Parameters
         ----------
