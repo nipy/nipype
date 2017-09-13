@@ -60,6 +60,18 @@ class List(traitlets.List):
         self.tag(**kwargs)
 
 
+class Tuple(traitlets.Tuple):
+    allow_none = True
+    default_value = None
+    info_text = "a list with default_value = None"
+
+    def __init__(self, *traits, default_value=traitlets.Undefined, kw=None,
+                 read_only=None, help=None, config=None, **kwargs):
+        super(Tuple, self).__init__(*traits, default_value=default_value,
+                                   kw=kw, read_only=read_only, help=help, config=config)
+        self.tag(**kwargs)
+
+
 class Enum(traitlets.Enum):
     allow_none = True
     default_value = None
@@ -74,11 +86,12 @@ class Enum(traitlets.Enum):
 
 class Dict(traitlets.Dict):
     allow_none = True
-    default_value = None
+    # dj TODO: should review default_value in all classes, check if I can overwrite! write tests!!
+    #default_value = None #dj don't need i guess
     info_text = "a dictionary with default_value = None"
 
     def __init__(self, value_trait=None, per_key_traits=None, key_trait=None,
-                 default_value=traitlets.Undefined, kw=None,
+                 default_value=None, kw=None,
                  read_only=None, help=None, config=None, **kwargs):
         super(Dict, self).__init__(value_trait=value_trait, per_key_traits=per_key_traits,
                                    key_trait=key_trait, default_value=default_value,
@@ -109,6 +122,19 @@ class Unicode(traitlets.Unicode):
         super(Unicode, self).__init__(default_value=default_value, allow_none=allow_none, 
                                       read_only=read_only, help=help, config=config)
         self.tag(**kwargs)
+
+
+class Any(traitlets.Any):
+    allow_none = True
+    default_value = None
+    info_text = "a boolean with default_value = None"
+
+    def __init__(self, default_value=traitlets.Undefined, allow_none=False,
+                 read_only=None, help=None, config=None, **kwargs):
+        super(Any, self).__init__(default_value=default_value, allow_none=allow_none,
+                                   read_only=read_only, help=help, config=config)
+        self.tag(**kwargs)
+
 
 
 class File(Unicode):
@@ -327,7 +353,7 @@ class MultiObject(List):
                 isinstance(self._trait,
                            traitlets.List) and not
                 isinstance(self._trait,
-                           InputMultiPath) and
+                           InputMultiObject) and
                 isinstance(value, list) and
                 value and not
                 isinstance(value[0], list)):
