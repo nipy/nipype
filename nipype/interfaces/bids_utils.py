@@ -44,7 +44,7 @@ class BIDSDataGrabberInputSpec(DynamicTraitedSpec):
     raise_on_empty = traits.Bool(True, usedefault=True,
                                  desc='Generate exception if list is empty '
                                  'for a given field')
-    return_type = traits.Enum('filename', 'namedtuple', usedefault=True)
+    return_type = traits.Enum('file', 'namedtuple', usedefault=True)
 
 
 class BIDSDataGrabber(BaseInterface):
@@ -164,6 +164,6 @@ class BIDSDataGrabber(BaseInterface):
                 else:
                     LOGGER.warning(msg)
                     filelist = Undefined
-                    
+
             outputs[key] = filelist
         return outputs
