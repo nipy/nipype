@@ -2,21 +2,22 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """ Set of interfaces that allow interaction with BIDS data. Currently
-    available interfaces are:
+available interfaces are:
 
-    BIDSDataGrabber: Query data from BIDS dataset using pybids grabbids.
+BIDSDataGrabber: Query data from BIDS dataset using pybids grabbids.
 
-    Change directory to provide relative paths for doctests
-    >>> import os
-    >>> import bids
-    >>> filepath = os.path.realpath(os.path.dirname(bids.__file__))
-    >>> datadir = os.path.realpath(os.path.join(filepath, 'grabbids/tests/data/'))
-    >>> os.chdir(datadir)
+Change directory to provide relative paths for doctests
+>>> import os
+>>> import bids
+>>> filepath = os.path.realpath(os.path.dirname(bids.__file__))
+>>> datadir = os.path.realpath(os.path.join(filepath, 'grabbids/tests/data/'))
+>>> os.chdir(datadir)
 
 """
 
 from .base import (traits,
                    DynamicTraitedSpec,
+                   Directory,
                    BaseInterface,
                    isdefined,
                    Str,
@@ -32,9 +33,9 @@ else:
 from warnings import warn
 
 class BIDSDataGrabberInputSpec(DynamicTraitedSpec):
-    base_dir = traits.Directory(exists=True,
-                                desc='Path to BIDS Directory.',
-                                mandatory=True)
+    base_dir = Directory(exists=True,
+                         desc='Path to BIDS Directory.',
+                         mandatory=True)
     output_query = traits.Dict(key_trait=Str,
                                value_trait=traits.Dict,
                                desc='Queries for outfield outputs')
@@ -47,49 +48,49 @@ class BIDSDataGrabberInputSpec(DynamicTraitedSpec):
 class BIDSDataGrabber(BaseInterface):
 
     """ BIDS datagrabber module that wraps around pybids to allow arbitrary
-        querying of BIDS datasets.
+    querying of BIDS datasets.
 
-        Examples
-        --------
+    Examples
+    --------
 
-        >>> from nipype.interfaces.bids import BIDSDataGrabber
-        >>> from os.path import basename
-        >>> import pprint
+    >>> from nipype.interfaces.bids import BIDSDataGrabber
+    >>> from os.path import basename
+    >>> import pprint
 
-        Select all files from a BIDS project
+    Select all files from a BIDS project
 
-        >>> bg = BIDSDataGrabber()
-        >>> bg.inputs.base_dir = 'ds005/'
-        >>> results = bg.run()
-        >>> len(results.outputs.outfield) # doctest: +ALLOW_UNICODE
-        135
+    >>> bg = BIDSDataGrabber()
+    >>> bg.inputs.base_dir = 'ds005/'
+    >>> results = bg.run()
+    >>> len(results.outputs.outfield) # doctest: +ALLOW_UNICODE
+    135
 
-        Using dynamically created, user-defined input fields,
-        filter files based on BIDS entities.
+    Using dynamically created, user-defined input fields,
+    filter files based on BIDS entities.
 
-        >>> bg = BIDSDataGrabber(infields = ['subject', 'run'])
-        >>> bg.inputs.base_dir = 'ds005/'
-        >>> bg.inputs.subject = '01'
-        >>> bg.inputs.run = '01'
-        >>> results = bg.run()
-        >>> basename(results.outputs.outfield[0]) # doctest: +ALLOW_UNICODE
-        'sub-01_task-mixedgamblestask_run-01_bold.nii.gz'
+    >>> bg = BIDSDataGrabber(infields = ['subject', 'run'])
+    >>> bg.inputs.base_dir = 'ds005/'
+    >>> bg.inputs.subject = '01'
+    >>> bg.inputs.run = '01'
+    >>> results = bg.run()
+    >>> basename(results.outputs.outfield[0]) # doctest: +ALLOW_UNICODE
+    'sub-01_task-mixedgamblestask_run-01_bold.nii.gz'
 
-        Using user-defined output fields, return different types of outputs,
-        filtered on common entities
-        filter files based on BIDS entities.
+    Using user-defined output fields, return different types of outputs,
+    filtered on common entities
+    filter files based on BIDS entities.
 
-        >>> bg = BIDSDataGrabber(infields = ['subject'], outfields = ['func', 'anat'])
-        >>> bg.inputs.base_dir = 'ds005/'
-        >>> bg.inputs.subject = '01'
-        >>> bg.inputs.output_query['func'] = dict(modality='func')
-        >>> bg.inputs.output_query['anat'] = dict(modality='anat')
-        >>> results = bg.run()
-        >>> basename(results.outputs.func[0]) # doctest: +ALLOW_UNICODE
-        'sub-01_task-mixedgamblestask_run-01_bold.nii.gz'
+    >>> bg = BIDSDataGrabber(infields = ['subject'], outfields = ['func', 'anat'])
+    >>> bg.inputs.base_dir = 'ds005/'
+    >>> bg.inputs.subject = '01'
+    >>> bg.inputs.output_query['func'] = dict(modality='func')
+    >>> bg.inputs.output_query['anat'] = dict(modality='anat')
+    >>> results = bg.run()
+    >>> basename(results.outputs.func[0]) # doctest: +ALLOW_UNICODE
+    'sub-01_task-mixedgamblestask_run-01_bold.nii.gz'
 
-        >>> basename(results.outputs.anat[0]) # doctest: +ALLOW_UNICODE
-        'sub-01_T1w.nii.gz'
+    >>> basename(results.outputs.anat[0]) # doctest: +ALLOW_UNICODE
+    'sub-01_T1w.nii.gz'
     """
     input_spec = BIDSDataGrabberInputSpec
     output_spec = DynamicTraitedSpec
