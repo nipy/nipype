@@ -148,8 +148,4 @@ ENV MATLABCMD="/opt/mcr/v85/toolbox/matlab" \
     SPMMCRCMD="/opt/spm12/run_spm12.sh /opt/mcr/v85/ script" \
     FORCE_SPMMCR=1
 
-# Install pybids
-RUN git clone https://github.com/INCF/pybids.git
-RUN pip install -e .
-
 WORKDIR /work

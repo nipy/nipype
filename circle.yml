@@ -27,6 +27,8 @@ dependencies:
     - if [[ ! -e "$HOME/bin/codecov" ]]; then mkdir -p $HOME/bin; curl -so $HOME/bin/codecov https://codecov.io/bash && chmod 755 $HOME/bin/codecov; fi
     - (cd $HOME/docker && gzip -d cache.tar.gz && docker load --input $HOME/docker/cache.tar) || true :
         timeout: 6000
+    - git clone https://github.com/INCF/pybids.git && cd pybids && python setup.py develop
+
   override:
     # Get data
     - if [[ ! -d ~/examples/nipype-tutorial ]]; then wget --retry-connrefused --waitretry=5 --read-timeout=20 --timeout=15 -t 0 -q -O nipype-tutorial.tar.bz2 "${DATA_NIPYPE_TUTORIAL_URL}" && tar xjf nipype-tutorial.tar.bz2 -C ~/examples/; fi
