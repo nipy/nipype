@@ -164,6 +164,6 @@ class BIDSDataGrabber(BaseInterface):
                 else:
                     LOGGER.warning(msg)
                     filelist = Undefined
-            else:
-                outputs[key] = filelist
+                    
+            outputs[key] = filelist
         return outputs
