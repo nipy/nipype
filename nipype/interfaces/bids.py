@@ -14,7 +14,7 @@ Change directory to provide relative paths for doctests
 >>> os.chdir(datadir)
 
 """
-
+from .. import logging
 from .base import (traits,
                    DynamicTraitedSpec,
                    Directory,
@@ -30,7 +30,7 @@ except ImportError:
 else:
     have_pybids = True
 
-from warnings import warn
+LOGGER = logging.getLogger('workflows')
 
 class BIDSDataGrabberInputSpec(DynamicTraitedSpec):
     base_dir = Directory(exists=True,
@@ -165,7 +165,7 @@ class BIDSDataGrabber(BaseInterface):
                 if self.inputs.raise_on_empty:
                     raise IOError(msg)
                 else:
-                    warn(msg)
+                    LOGGER.warning(msg)
                     filelist = Undefined
             else:
                 outputs[key] = filelist
