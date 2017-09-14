@@ -14,6 +14,7 @@ Change directory to provide relative paths for doctests
 >>> os.chdir(datadir)
 
 """
+from os.path import join, dirname
 from .. import logging
 from .base import (traits,
                    DynamicTraitedSpec,
@@ -24,7 +25,8 @@ from .base import (traits,
                    Undefined)
 
 try:
-    from bids.grabbids import BIDSLayout
+    from bids import grabbids as gb
+    import json
 except ImportError:
     have_pybids = False
 else:
@@ -57,40 +59,34 @@ class BIDSDataGrabber(BaseInterface):
     >>> from os.path import basename
     >>> import pprint
 
-    Select all files from a BIDS project
+    By default, the BIDSDataGrabber fetches anatomical and functional images
+    from a project, and makes BIDS entities (e.g. subject) available for
+    filtering outputs.
 
     >>> bg = BIDSDataGrabber()
     >>> bg.inputs.base_dir = 'ds005/'
-    >>> results = bg.run()
-    >>> len(results.outputs.outfield) # doctest: +ALLOW_UNICODE
-    135
-
-    Using dynamically created, user-defined input fields,
-    filter files based on BIDS entities.
-
-    >>> bg = BIDSDataGrabber(infields = ['subject', 'run'])
-    >>> bg.inputs.base_dir = 'ds005/'
     >>> bg.inputs.subject = '01'
-    >>> bg.inputs.run = '01'
     >>> results = bg.run()
-    >>> basename(results.outputs.outfield[0]) # doctest: +ALLOW_UNICODE
-    'sub-01_task-mixedgamblestask_run-01_bold.nii.gz'
+    >>> basename(results.outputs.anat[0]) # doctest: +ALLOW_UNICODE
+    'sub-01_T1w.nii.gz'
 
-    Using user-defined output fields, return different types of outputs,
-    filtered on common entities
-    filter files based on BIDS entities.
-
-    >>> bg = BIDSDataGrabber(infields = ['subject'], outfields = ['func', 'anat'])
-    >>> bg.inputs.base_dir = 'ds005/'
-    >>> bg.inputs.subject = '01'
-    >>> bg.inputs.output_query['func'] = dict(modality='func')
-    >>> bg.inputs.output_query['anat'] = dict(modality='anat')
-    >>> results = bg.run()
     >>> basename(results.outputs.func[0]) # doctest: +ALLOW_UNICODE
     'sub-01_task-mixedgamblestask_run-01_bold.nii.gz'
 
-    >>> basename(results.outputs.anat[0]) # doctest: +ALLOW_UNICODE
-    'sub-01_T1w.nii.gz'
+
+    Dynamically created, user-defined output fields can also be defined to
+    return different types of outputs from the same project. All outputs
+    are filtered on common entities, which can be explicitly defined as
+    infields.
+
+    >>> bg = BIDSDataGrabber(infields = ['subject'], outfields = ['dwi'])
+    >>> bg.inputs.base_dir = 'ds005/'
+    >>> bg.inputs.subject = '01'
+    >>> bg.inputs.output_query['dwi'] = dict(modality='dwi')
+    >>> results = bg.run()
+    >>> basename(results.outputs.dwi[0]) # doctest: +ALLOW_UNICODE
+    'sub-01_dwi.nii.gz'
+
     """
     input_spec = BIDSDataGrabberInputSpec
     output_spec = DynamicTraitedSpec
@@ -107,51 +103,53 @@ class BIDSDataGrabber(BaseInterface):
             Indicates output fields to be dynamically created.
             If no matching items, returns Undefined.
         """
-        if not outfields:
-            outfields = []
-        if not infields:
-            infields = []
-
         super(BIDSDataGrabber, self).__init__(**kwargs)
-        undefined_traits = {}
-        # used for mandatory inputs check
+        if not have_pybids:
+            raise ImportError("The BIDSEventsGrabber interface requires pybids."
+                              " Please make sure it is installed.")
+
+        # If outfields is None use anat and func as default
+        if outfields is None:
+            outfields = ['func', 'anat']
+            self.inputs.output_query = {
+                "func": {"modality": "func"},
+                "anat": {"modality": "anat"}}
+        else:
+            self.inputs.output_query = {}
+
+        # If infields is None, use all BIDS entities
+        if infields is None:
+            bids_config = join(dirname(gb.__file__), 'config', 'bids.json')
+            bids_config = json.load(open(bids_config, 'r'))
+            infields = [i['name'] for i in bids_config['entities']]
+
         self._infields = infields
         self._outfields = outfields
+
+        # used for mandatory inputs check
+        undefined_traits = {}
         for key in infields:
             self.inputs.add_trait(key, traits.Any)
             undefined_traits[key] = Undefined
 
-        if not isdefined(self.inputs.output_query):
-            self.inputs.output_query = {}
-
         self.inputs.trait_set(trait_change_notify=False, **undefined_traits)
 
     def _run_interface(self, runtime):
-        if not have_pybids:
-            raise ImportError("The BIDSEventsGrabber interface requires pybids."
-                              " Please make sure it is installed.")
         return runtime
 
     def _list_outputs(self):
-        if not self._outfields:
-            self._outfields = ['outfield']
-            self.inputs.output_query = {'outfield' : {}}
-        else:
-            for key in self._outfields:
-                if key not in self.inputs.output_query:
-                    raise ValueError("Define query for all outputs")
+        layout = gb.BIDSLayout(self.inputs.base_dir)
 
+        for key in self._outfields:
+            if key not in self.inputs.output_query:
+                raise ValueError("Define query for all outputs")
+
+        # If infield is not given nm input value, silently ignore
+        filters = {}
         for key in self._infields:
             value = getattr(self.inputs, key)
-            if not isdefined(value):
-                msg = "%s requires a value for input '%s' because" \
-                      " it was listed in 'infields'" % \
-                    (self.__class__.__name__, key)
-                raise ValueError(msg)
-
-        layout = BIDSLayout(self.inputs.base_dir)
-
-        filters = {i: getattr(self.inputs, i) for i in self._infields}
+            if isdefined(value):
+                filters[key] = value
 
         outputs = {}
         for key, query in self.inputs.output_query.items():
