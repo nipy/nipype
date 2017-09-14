@@ -154,7 +154,7 @@ class BIDSDataGrabber(BaseInterface):
         for key, query in self.inputs.output_query.items():
             args = query.copy()
             args.update(filters)
-            filelist = layout.get(return_type='file',
+            filelist = layout.get(return_type=self.inputs.return_type,
                                       **args)
             if len(filelist) == 0:
                 msg = 'Output key: %s returned no files' % (
