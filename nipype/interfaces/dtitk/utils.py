@@ -111,7 +111,7 @@ class TVAdjustVoxSpTask(CommandLineDtitk):
 
 
 class SVAdjustVoxSpInputSpec(CommandLineInputSpec):
-    in_volume = traits.Str(desc="image to resample", exists=True,
+    in_file = traits.Str(desc="image to resample", exists=True,
                            mandatory=True, position=0, argstr="-in %s")
     in_target = traits.Str(desc='target volume', exists=True, mandatory=False,
                            position=2, argstr="-target %s")
@@ -164,7 +164,7 @@ class SVAdjustVoxSpTask(CommandLineDtitk):
 
 
 class TVResampleInputSpec(CommandLineInputSpec):
-    in_tensor = traits.Str(desc="image to resample", exists=True,
+    in_file = traits.Str(desc="image to resample", exists=True,
                            mandatory=True, position=0, argstr="-in %s")
     in_arraysz = traits.Str(desc='resampled array size', exists=True,
                             mandatory=False, position=1, argstr="-size %s")
@@ -215,7 +215,7 @@ class TVResampleTask(CommandLineDtitk):
 
 
 class SVResampleInputSpec(CommandLineInputSpec):
-    in_volume = traits.Str(desc="image to resample", exists=True,
+    in_file = traits.Str(desc="image to resample", exists=True,
                            mandatory=True, position=0, argstr="-in %s")
     in_arraysz = traits.Str(desc='resampled array size', exists=True,
                             mandatory=False, position=1, \
@@ -267,7 +267,7 @@ class SVResampleTask(CommandLineDtitk):
 
 
 class TVtoolInputSpec(CommandLineInputSpec):
-    in_tensor = traits.Str(desc="image to resample", exists=True,
+    in_file = traits.Str(desc="image to resample", exists=True,
                            mandatory=False, position=0, argstr="-in %s")
     in_flag = traits.Enum('fa', 'tr', 'ad', 'rd', 'pd', 'rgb', exists=True,
                           mandatory=False, position=1, argstr="-%s", desc='')
@@ -314,7 +314,7 @@ class TVtoolTask(CommandLineDtitk):
 
 
 class BinThreshInputSpec(CommandLineInputSpec):
-    in_image = traits.Str(desc='', exists=True, mandatory=False, position=0,
+    in_file = traits.Str(desc='', exists=True, mandatory=False, position=0,
                           argstr="%s")
     out_path = traits.Str(desc='', exists=True, mandatory=False, position=1,
                           argstr="%s")
