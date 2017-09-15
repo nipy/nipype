@@ -867,7 +867,6 @@ class Registration(ANTSCommand):
 
     def _get_initial_transform_filenames(self):
         retval = ['--initial-moving-transform']
-        #retval = []
         for ii in range(len(self.inputs.initial_moving_transform)):
             if isdefined(self.inputs.invert_initial_moving_transform):
                 if len(self.inputs.initial_moving_transform) == len(self.inputs.invert_initial_moving_transform):
@@ -879,7 +878,7 @@ class Registration(ANTSCommand):
                     raise Exception(("ERROR: The useInverse list must have the same number "
                                      "of entries as the transformsFileName list."))
             else:
-                retval.append("--initial-moving-transform [%s, 0] " % self.inputs.initial_moving_transform[ii])
+                retval.append("[%s, 0] " % self.inputs.initial_moving_transform[ii])
         return " ".join(retval)
 
     def _format_arg(self, opt, spec, val):
@@ -959,7 +958,7 @@ class Registration(ANTSCommand):
 
         # invert_initial_moving_transform should be always defined, even if
         # there's no initial transform
-        invert_initial_moving_transform = False
+        invert_initial_moving_transform = [False] * len(self.inputs.initial_moving_transform)
         if isdefined(self.inputs.invert_initial_moving_transform):
             invert_initial_moving_transform = self.inputs.invert_initial_moving_transform
 
@@ -976,8 +975,8 @@ class Registration(ANTSCommand):
                     outputs['forward_transforms'] += self.inputs.initial_moving_transform
                     outputs['forward_invert_flags'] += invert_initial_moving_transform
                     outputs['reverse_transforms'] =  self.inputs.initial_moving_transform + outputs['reverse_transforms']
-                    outputs['reverse_invert_flags'] =  [not e for e in self.inputs.invert_initial_moving_transform] +  outputs['reverse_invert_flags'] # Prepend
-                    transform_count += 1
+                    outputs['reverse_invert_flags'] =  [not e for e in invert_initial_moving_transform] +  outputs['reverse_invert_flags'] # Prepend
+                    transform_count += len(self.inputs.initial_moving_transform)
                 elif isdefined(self.inputs.initial_moving_transform_com):
                     forward_filename, forward_inversemode = self._output_filenames(
                         self.inputs.output_transform_prefix,
