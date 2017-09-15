@@ -1963,6 +1963,103 @@ class To3D(AFNICommand):
     output_spec = AFNICommandOutputSpec
 
 
+class UndumpInputSpec(AFNICommandInputSpec):
+    in_file = File(
+        desc='input file to 3dUndump, whose geometry will determine'
+             'the geometry of the output',
+        argstr='-master %s',
+        position=-1,
+        mandatory=True,
+        exists=True,
+        copyfile=False)
+    out_file = File(
+        desc='output image file name',
+        argstr='-prefix %s',
+        name_source='in_file')
+    mask_file = File(
+        desc='mask image file name. Only voxels that are nonzero in the mask '
+             'can be set.',
+        argstr='-mask %s')
+    datatype = traits.Enum(
+        'short', 'float', 'byte',
+        desc='set output file datatype',
+        argstr='-datum %s')
+    default_value = traits.Float(
+        desc='default value stored in each input voxel that does not have '
+             'a value supplied in the input file',
+        argstr='-dval %f')
+    fill_value = traits.Float(
+        desc='value, used for each voxel in the output dataset that is NOT '
+             'listed in the input file',
+        argstr='-fval %f')
+    coordinates_specification = traits.Enum(
+        'ijk', 'xyz',
+        desc='Coordinates in the input file as index triples (i, j, k) '
+             'or spatial coordinates (x, y, z) in mm',
+        argstr='-%s')
+    srad = traits.Float(
+        desc='radius in mm of the sphere that will be filled about each input '
+             '(x,y,z) or (i,j,k) voxel. If the radius is not given, or is 0, '
+             'then each input data line sets the value in only one voxel.',
+        argstr='-srad -%f')
+    srad = traits.Tuple(
+        traits.Enum('R', 'L'), traits.Enum('A', 'P'), traits.Enum('I', 'S'),
+        desc='radius in mm of the sphere that will be filled about each input '
+             '(x,y,z) or (i,j,k) voxel. If the radius is not given, or is 0, '
+             'then each input data line sets the value in only one voxel.',
+        argstr='-srad -%f')
+    head_only = traits.Bool(
+        desc='create only the .HEAD file which gets exploited by '
+             'the AFNI matlab library function New_HEAD.m',
+        argstr='-head_only')
+
+
+class UndumpOutputSpec(TraitedSpec):
+    out_file = File(desc='assembled file', exists=True)
+
+
+class Undump(AFNICommand):
+    """3dUndump - Assembles a 3D dataset from an ASCII list of coordinates and
+    (optionally) values.
+
+     The input file(s) are ASCII files, with one voxel specification per
+     line.  A voxel specification is 3 numbers (-ijk or -xyz coordinates),
+     with an optional 4th number giving the voxel value.  For example:
+
+     1 2 3
+     3 2 1 5
+     5.3 6.2 3.7
+     // this line illustrates a comment
+
+     The first line puts a voxel (with value given by '-dval') at point
+     (1,2,3).  The second line puts a voxel (with value 5) at point (3,2,1).
+     The third line puts a voxel (with value given by '-dval') at point
+     (5.3,6.2,3.7).  If -ijk is in effect, and fractional coordinates
+     are given, they will be rounded to the nearest integers; for example,
+     the third line would be equivalent to (i,j,k) = (5,6,4).
+
+
+    For complete details, see the `3dUndump Documentation.
+    <https://afni.nimh.nih.gov/pub/dist/doc/program_help/3dUndump.html>`_
+
+    Examples
+    ========
+
+    >>> from nipype.interfaces import afni
+    >>> unndump = afni.Undump()
+    >>> unndump.inputs.in_file = 'structural.nii'
+    >>> unndump.inputs.out_file = 'structural_undumped.nii'
+    >>> unndump.cmdline  # doctest: +ALLOW_UNICODE
+    '3dUnifize -prefix structural_unifized.nii -master structural.nii'
+    >>> res = unndump.run()  # doctest: +SKIP
+
+    """
+
+    _cmd = '3dUndump'
+    input_spec = UndumpInputSpec
+    output_spec = UndumpOutputSpec
+
+
 class UnifizeInputSpec(AFNICommandInputSpec):
     in_file = File(
         desc='input file to 3dUnifize',
