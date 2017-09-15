@@ -225,7 +225,7 @@ class AffineInitializer(ANTSCommand):
 
     def _list_outputs(self):
         return {'out_file': os.path.abspath(self.inputs.out_file)}
-   
+
 
 class ComposeMultiTransformInputSpec(ANTSCommandInputSpec):
     dimension = traits.Enum(3, 2, argstr='%d', usedefault=True, mandatory=True,
@@ -247,12 +247,12 @@ class ComposeMultiTransform(ANTSCommand):
     Examples
     --------
     >>> from nipype.interfaces.ants import ComposeMultiTransform
-    >>> compose = ComposeMultiTransform()
+    >>> compose_transform = ComposeMultiTransform()
     >>> compose_transform.inputs.dimension = 3
     >>> compose_transform.inputs.transforms = ['struct_to_template.mat', 'func_to_struct.mat']
     >>> compose_transform.inputs.output_transform = 'func_to_template.mat'
     >>> compose_transform.cmdline # doctest: +ALLOW_UNICODE
-    'TODO TODO TODO'
+    'ComposeMultiTransform 3 func_to_template.mat struct_to_template.mat func_to_struct.mat'
     """
     _cmd = 'ComposeMultiTransform'
     input_spec = ComposeMultiTransformInputSpec
