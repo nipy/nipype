@@ -29,7 +29,7 @@ class TVAdjustOriginTask(CommandLineDtitk):
     >>> import nipype.interfaces.dtitk as dtitk
     >>> node = dtitk.TVAdjustOriginTask()
     >>> node.inputs.in_file = 'diffusion.nii'
-    >>> node.run()
+    >>> node.run() # doctest: +SKIP
     """
 
     input_spec = TVAdjustOriginInputSpec
@@ -82,7 +82,7 @@ class TVAdjustVoxSpTask(CommandLineDtitk):
     >>> import nipype.interfaces.dtitk as dtitk
     >>> node = dtitk.TVAdjustVoxSpTask()
     >>> node.inputs.in_file = 'diffusion.nii'
-    >>> node.run()
+    >>> node.run() # doctest: +SKIP
     """
     input_spec = TVAdjustVoxSpInputSpec
     output_spec = TVAdjustVoxSpOutputSpec
@@ -138,7 +138,7 @@ class SVAdjustVoxSpTask(CommandLineDtitk):
         >>> import nipype.interfaces.dtitk as dtitk
         >>> node = dtitk.SVAdjustVoxSpTask()
         >>> node.inputs.in_file = 'diffusion.nii'
-        >>> node.run()
+        >>> node.run() # doctest: +SKIP
         """
     input_spec = SVAdjustVoxSpInputSpec
     output_spec = SVAdjustVoxSpOutputSpec
@@ -165,14 +165,15 @@ class SVAdjustVoxSpTask(CommandLineDtitk):
 
 class TVResampleInputSpec(CommandLineInputSpec):
     in_file = traits.Str(desc="image to resample", exists=True,
-                           mandatory=True, position=0, argstr="-in %s")
+                         mandatory=True, position=0, argstr="-in %s")
     in_arraysz = traits.Str(desc='resampled array size', exists=True,
                             mandatory=False, position=1, argstr="-size %s")
     in_voxsz = traits.Str(desc='resampled voxel size', exists=True,
                           mandatory=False, position=2, argstr="-vsize %s")
     out_path = traits.Str(desc='output path', exists=True, mandatory=False,
-                          position=3, argstr="-out %s", name_source="in_volume",
-                          name_template="%s_resampled.nii.gz" )
+                          position=3, argstr="-out %s",
+                          name_source="in_volume",
+                          name_template="%s_resampled.nii.gz")
 
 
 class TVResampleOutputSpec(TraitedSpec):
@@ -189,7 +190,7 @@ class TVResampleTask(CommandLineDtitk):
         >>> import nipype.interfaces.dtitk as dtitk
         >>> node = dtitk.TVResampleTask()
         >>> node.inputs.in_file = 'diffusion.nii'
-        >>> node.run()
+        >>> node.run() # doctest: +SKIP
         """
     input_spec = TVResampleInputSpec
     output_spec = TVResampleOutputSpec
@@ -241,7 +242,7 @@ class SVResampleTask(CommandLineDtitk):
         >>> import nipype.interfaces.dtitk as dtitk
         >>> node = dtitk.SVResampleTask()
         >>> node.inputs.in_file = 'diffusion.nii'
-        >>> node.run()
+        >>> node.run() # doctest: +SKIP
         """
     input_spec = SVResampleInputSpec
     output_spec = SVResampleOutputSpec
@@ -288,7 +289,7 @@ class TVtoolTask(CommandLineDtitk):
         >>> node = dtitk.TVtoolTask()
         >>> node.inputs.in_file = 'diffusion.nii'
         >>> node.inputs.in_flag = 'fa'
-        >>> node.run()
+        >>> node.run() # doctest: +SKIP
         """
     input_spec = TVtoolInputSpec
     output_spec = TVtoolOutputSpec
@@ -338,7 +339,7 @@ class BinThreshTask(CommandLineDtitk):
         >>> node = dtitk.BinThreshTask()
         >>> node.inputs.in_file = 'diffusion.nii'
         >>> node.inputs.in_numbers = '0 100 1 0'
-        >>> node.run()
+        >>> node.run() # doctest: +SKIP
         """
 
     input_spec = BinThreshInputSpec

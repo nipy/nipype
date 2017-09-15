@@ -33,7 +33,7 @@ class RigidTask(CommandLineDtitk):
         >>> node.inputs.fixed_file = 'diffusion.nii'
         >>> node.inputs.moving_file = 'diffusion.nii'
         >>> node.inputs.similarity_metric = 'EDS'
-        >>> node.run()
+        >>> node.run() # doctest: +SKIP
         """
     input_spec = RigidInputSpec
     output_spec = RigidOutputSpec
@@ -79,7 +79,7 @@ class AffineTask(CommandLineDtitk):
             >>> node.inputs.in_fixed_tensor = 'diffusion.nii'
             >>> node.inputs.in_moving_txt = 'dirs.txt'
             >>> node.inputs.in_similarity_metric = 'EDS'
-            >>> node.run()
+            >>> node.run() # doctest: +SKIP
             """
 
     input_spec = AffineInputSpec
@@ -126,7 +126,7 @@ class DiffeoTask(CommandLineDtitk):
                 >>> node.inputs.in_moving_txt = 'dirs.txt'
                 >>> node.inputs.in_mask = 'mask.nii'
                 >>> node.inputs.in_numbers = '6 0.002'
-                >>> node.run()
+                >>> node.run() # doctest: +SKIP
                 """
     input_spec = DiffeoInputSpec
     output_spec = DiffeoOutputSpec
@@ -166,7 +166,7 @@ class ComposeXfmTask(CommandLineDtitk):
                 >>> node = dtitk.ComposeXfmTask()
                 >>> node.inputs.in_df = 'ants_Warp.nii.gz'
                 >>> node.inputs.in_aff= 'ants_Affine.txt'
-                >>> node.run()
+                >>> node.run() # doctest: +SKIP
                 """
     input_spec = ComposeXfmInputSpec
     output_spec = ComposeXfmOutputSpec
@@ -206,7 +206,7 @@ class diffeoSymTensor3DVolTask(CommandLineDtitk):
                 >>> node = dtitk.diffeoSymTensor3DVolTask()
                 >>> node.inputs.in_tensor = 'diffusion.nii'
                 >>> node.inputs.in_xfm = 'ants_Warp.nii.gz'
-                >>> node.run()
+                >>> node.run() # doctest: +SKIP
                 """
 
     input_spec = diffeoSymTensor3DVolInputSpec
@@ -246,7 +246,7 @@ class affSymTensor3DVolTask(CommandLineDtitk):
                 >>> node = dtitk.affSymTensor3DVolTask()
                 >>> node.inputs.in_tensor = 'diffusion.nii'
                 >>> node.inputs.in_xfm = 'ants_Affine.txt'
-                >>> node.run()
+                >>> node.run() # doctest: +SKIP
                 """
     input_spec = affSymTensor3DVolInputSpec
     output_spec = affSymTensor3DVolOutputSpec
@@ -284,7 +284,7 @@ class affScalarVolTask(CommandLineDtitk):
                 >>> node = dtitk.affScalarVolTask()
                 >>> node.inputs.in_volume = 'fa.nii.gz'
                 >>> node.inputs.in_xfm = 'ants_Affine.txt'
-                >>> node.run()
+                >>> node.run() # doctest: +SKIP
                 """
     input_spec = affScalarVolInputSpec
     output_spec = affScalarVolOutputSpec
@@ -331,7 +331,7 @@ class diffeoScalarVolTask(CommandLineDtitk):
                 >>> node = dtitk.diffeoScalarVolTask()
                 >>> node.inputs.in_tensor = 'fa.nii.gz'
                 >>> node.inputs.in_xfm = 'ants_Warp.nii.gz'
-                >>> node.run()
+                >>> node.run() # doctest: +SKIP
                 """
 
     input_spec = diffeoScalarVolInputSpec
