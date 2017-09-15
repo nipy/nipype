@@ -220,32 +220,37 @@ class AllineateInputSpec(AFNICommandInputSpec):
     out_file = File(
         desc='output file from 3dAllineate',
         argstr='-prefix %s',
-        name_source='in_file',
-        name_template='%s_allineate',
         genfile=True,
         xor=['allcostx'])
     out_param_file = File(
         argstr='-1Dparam_save %s',
-        desc='Save the warp parameters in ASCII (.1D) format.')
+        desc='Save the warp parameters in ASCII (.1D) format.',
+        xor=['in_param_file','allcostx'])
     in_param_file = File(
         exists=True,
         argstr='-1Dparam_apply %s',
         desc='Read warp parameters from file and apply them to '
-             'the source dataset, and produce a new dataset')
+             'the source dataset, and produce a new dataset',
+        xor=['out_param_file'])
     out_matrix = File(
         argstr='-1Dmatrix_save %s',
-        desc='Save the transformation matrix for each volume.')
+        desc='Save the transformation matrix for each volume.',
+        xor=['in_matrix','allcostx'])
     in_matrix = File(
         desc='matrix to align input file',
-        argstr='-1Dmatrix_apply %s')
-    # TODO: implement sensible xors for allcostx and suppres prefix in command when allcosx is used
+        argstr='-1Dmatrix_apply %s',
+        position=-3,
+        xor=['out_matrix'])
+    overwrite = traits.Bool(
+        desc='overwrite output file if it already exists',
+        argstr='-overwrite')
+
     allcostx= File(
         desc='Compute and print ALL available cost functionals for the un-warped inputs'
              'AND THEN QUIT. If you use this option none of the other expected outputs will be produced',
         argstr='-allcostx |& tee %s',
         position=-1,
-        xor=['out_file'])
-
+        xor=['out_file', 'out_matrix', 'out_param_file', 'out_weight_file'])
     _cost_funcs = [
         'leastsq', 'ls',
         'mutualinfo', 'mi',
@@ -308,7 +313,7 @@ class AllineateInputSpec(AFNICommandInputSpec):
         desc='Use a two pass alignment strategy for all volumes, searching '
              'for a large rotation+shift and then refining the alignment.')
     two_blur = traits.Float(
-        argstr='-twoblur',
+        argstr='-twoblur %f',
         desc='Set the blurring radius for the first pass in mm.')
     two_first = traits.Bool(
         argstr='-twofirst',
@@ -356,7 +361,8 @@ class AllineateInputSpec(AFNICommandInputSpec):
              'Must be defined on the same grid as the base dataset')
     out_weight_file = traits.File(
         argstr='-wtprefix %s',
-        desc='Write the weight volume to disk as a dataset')
+        desc='Write the weight volume to disk as a dataset',
+        xor=['allcostx'])
     source_mask = File(
         exists=True,
         argstr='-source_mask %s',
@@ -386,6 +392,18 @@ class AllineateInputSpec(AFNICommandInputSpec):
              'EPI slices, and the base as comprising anatomically '
              '\'true\' images.  Only phase-encoding direction image '
              'shearing and scaling will be allowed with this option.')
+    maxrot = traits.Float(
+        argstr='-maxrot %f',
+        desc='Maximum allowed rotation in degrees.')
+    maxshf = traits.Float(
+        argstr='-maxshf %f',
+        desc='Maximum allowed shift in mm.')
+    maxscl = traits.Float(
+        argstr='-maxscl %f',
+        desc='Maximum allowed scaling factor.')
+    maxshr = traits.Float(
+        argstr='-maxshr %f',
+        desc='Maximum allowed shearing factor.')
     master = File(
         exists=True,
         argstr='-master %s',
@@ -414,8 +432,10 @@ class AllineateInputSpec(AFNICommandInputSpec):
 
 
 class AllineateOutputSpec(TraitedSpec):
-    out_file = File(desc='output image file name')
-    matrix = File(desc='matrix to align input file')
+    out_file = File(exists=True, desc='output image file name')
+    out_matrix = File(exists=True, desc='matrix to align input file')
+    out_param_file = File(exists=True, desc='warp parameters')
+    out_weight_file = File(exists=True, desc='weight volume')
     allcostx = File(desc='Compute and print ALL available cost functionals for the un-warped inputs')
 
 
@@ -434,7 +454,7 @@ class Allineate(AFNICommand):
     >>> allineate.inputs.out_file = 'functional_allineate.nii'
     >>> allineate.inputs.in_matrix = 'cmatrix.mat'
     >>> allineate.cmdline  # doctest: +ALLOW_UNICODE
-    '3dAllineate -source functional.nii -1Dmatrix_apply cmatrix.mat -prefix functional_allineate.nii'
+    '3dAllineate -source functional.nii -prefix functional_allineate.nii -1Dmatrix_apply cmatrix.mat'
     >>> res = allineate.run()  # doctest: +SKIP
 
     >>> from nipype.interfaces import afni
@@ -443,7 +463,7 @@ class Allineate(AFNICommand):
     >>> allineate.inputs.reference = 'structural.nii'
     >>> allineate.inputs.allcostx = 'out.allcostX.txt'
     >>> allineate.cmdline  # doctest: +ALLOW_UNICODE
-    '3dAllineate -source functional.nii -prefix functional_allineate -base structural.nii -allcostx |& tee out.allcostX.txt'
+    '3dAllineate -source functional.nii -base structural.nii -allcostx |& tee out.allcostX.txt'
     >>> res = allineate.run()  # doctest: +SKIP
     """
 
@@ -459,24 +479,38 @@ class Allineate(AFNICommand):
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        if not isdefined(self.inputs.out_file):
-            outputs['out_file'] = self._gen_filename(self.inputs.in_file,
-                                                     suffix=self.inputs.suffix)
-        else:
-            outputs['out_file'] = os.path.abspath(self.inputs.out_file)
 
-        if isdefined(self.inputs.out_matrix):
-            outputs['matrix'] = os.path.abspath(os.path.join(os.getcwd(),\
-                                         self.inputs.out_matrix +'.aff12.1D'))
+        if self.inputs.out_file:
+            outputs['out_file'] = op.abspath(self.inputs.out_file)
 
-        if isdefined(self.inputs.allcostX):
-            outputs['allcostX'] = os.path.abspath(os.path.join(os.getcwd(),\
+        if self.inputs.out_weight_file:
+            outputs['out_weight_file'] = op.abspath(self.inputs.out_weight_file)
+
+        if self.inputs.out_matrix:
+            path, base, ext = split_filename(self.inputs.out_matrix)
+            if ext.lower() not in ['.1d', '.1D']:
+                outputs['out_matrix'] = self._gen_fname(self.inputs.out_matrix,
+                                                        suffix='.aff12.1D')
+            else:
+                outputs['out_matrix'] = op.abspath(self.inputs.out_matrix)
+
+        if self.inputs.out_param_file:
+            path, base, ext = split_filename(self.inputs.out_param_file)
+            if ext.lower() not in ['.1d', '.1D']:
+                outputs['out_param_file'] = self._gen_fname(self.inputs.out_param_file,
+                                                            suffix='.param.1D')
+            else:
+                outputs['out_param_file'] = op.abspath(self.inputs.out_param_file)
+
+        if isdefined(self.inputs.allcostx):
+            outputs['allcostX'] = os.path.abspath(os.path.join(os.getcwd(),
                                          self.inputs.allcostx))
         return outputs
 
     def _gen_filename(self, name):
         if name == 'out_file':
             return self._list_outputs()[name]
+        return None
 
 
 class AutoTcorrelateInputSpec(AFNICommandInputSpec):
@@ -535,6 +569,7 @@ class AutoTcorrelate(AFNICommand):
     '3dAutoTcorrelate -eta2 -mask mask.nii -mask_only_targets -prefix functional_similarity_matrix.1D -polort -1 functional.nii'
     >>> res = corr.run()  # doctest: +SKIP
     """
+
     input_spec = AutoTcorrelateInputSpec
     output_spec = AFNICommandOutputSpec
     _cmd = '3dAutoTcorrelate'

@@ -1,4 +1,4 @@
-numpy>=1.6.2
+numpy>=1.9.0
 scipy>=0.11
 networkx>=1.7
 traits>=4.6
