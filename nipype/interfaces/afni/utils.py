@@ -2050,7 +2050,7 @@ class Undump(AFNICommand):
     >>> unndump.inputs.in_file = 'structural.nii'
     >>> unndump.inputs.out_file = 'structural_undumped.nii'
     >>> unndump.cmdline  # doctest: +ALLOW_UNICODE
-    '3dUnifize -prefix structural_unifized.nii -master structural.nii'
+    '3dUndump -prefix structural_undumped.nii -master structural.nii'
     >>> res = unndump.run()  # doctest: +SKIP
 
     """
