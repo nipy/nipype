@@ -18,6 +18,7 @@ set fmri(shape$ev_num) 3
 # 4 : Gamma basis functions
 # 5 : Sine basis functions
 # 6 : FIR basis functions
+# 7 : Optimal/custom basis functions
 set fmri(convolve$ev_num) 2
 
 # Convolve phase
@@ -33,7 +34,7 @@ set fmri(deriv_yn$ev_num) $temporalderiv
 set fmri(custom$ev_num) "$cond_file"
 
 # Gamma sigma
-set fmri(gammasigma$ev_num) 3
+set fmri(gammasigma$ev_num) $gammasigma
 
 # Gamma delay
-set fmri(gammadelay$ev_num) 6
+set fmri(gammadelay$ev_num) $gammadelay

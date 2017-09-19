@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """The fsl module provides classes for interfacing with the `FSL
@@ -24,18 +25,18 @@ Examples
 See the docstrings of the individual classes for examples.
 
 """
+from __future__ import print_function, division, unicode_literals, absolute_import
+from builtins import open, object
 
 from glob import glob
 import os
-import warnings
 
-from ...utils.filemanip import fname_presuffix, split_filename, copyfile
-from ..base import (traits, isdefined,
-                    CommandLine, CommandLineInputSpec, TraitedSpec,
-                    File, Directory, InputMultiPath, OutputMultiPath)
+from ... import logging
+from ...utils.filemanip import fname_presuffix
+from ..base import traits, isdefined, CommandLine, CommandLineInputSpec
+from ...external.due import BibTeX
 
-warn = warnings.warn
-warnings.filterwarnings('always', category=UserWarning)
+LOGGER = logging.getLogger('interface')
 
 
 class Info(object):
@@ -112,8 +113,8 @@ class Info(object):
         try:
             return os.environ['FSLOUTPUTTYPE']
         except KeyError:
-            warnings.warn(('FSL environment variables not set. setting output '
-                           'type to NIFTI'))
+            LOGGER.warn('FSLOUTPUTTYPE environment variable is not set. '
+                        'Setting FSLOUTPUTTYPE=NIFTI')
             return 'NIFTI'
 
     @staticmethod
@@ -145,7 +146,7 @@ class FSLCommandInputSpec(CommandLineInputSpec):
     -------
     fsl.ExtractRoi(tmin=42, tsize=1, output_type='NIFTI')
     """
-    output_type = traits.Enum('NIFTI', Info.ftypes.keys(),
+    output_type = traits.Enum('NIFTI', list(Info.ftypes.keys()),
                               desc='FSL output type')
 
 
@@ -156,6 +157,18 @@ class FSLCommand(CommandLine):
 
     input_spec = FSLCommandInputSpec
     _output_type = None
+
+    references_ = [{'entry': BibTeX('@article{JenkinsonBeckmannBehrensWoolrichSmith2012,'
+                                    'author={M. Jenkinson, C.F. Beckmann, T.E. Behrens, '
+                                    'M.W. Woolrich, and S.M. Smith},'
+                                    'title={FSL},'
+                                    'journal={NeuroImage},'
+                                    'volume={62},'
+                                    'pages={782-790},'
+                                    'year={2012},'
+                                    '}'),
+                    'tags': ['implementation'],
+                    }]
 
     def __init__(self, **inputs):
         super(FSLCommand, self).__init__(**inputs)
@@ -263,4 +276,5 @@ def no_fsl():
 
 def no_fsl_course_data():
     """check if fsl_course data is present"""
-    return not ('FSL_COURSE_DATA' in os.environ and os.path.isdir(os.path.abspath(os.environ['FSL_COURSE_DATA'])))
+    return not ('FSL_COURSE_DATA' in os.environ and
+                os.path.isdir(os.path.abspath(os.environ['FSL_COURSE_DATA'])))

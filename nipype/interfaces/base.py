@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """
@@ -7,67 +8,78 @@ Exaples  FSL, matlab/SPM , afni
 
 Requires Packages to be installed
 """
+from __future__ import print_function, division, unicode_literals, absolute_import
+from future import standard_library
+standard_library.install_aliases()
+from builtins import range, object, open, str, bytes
 
-from ConfigParser import NoOptionError
+from configparser import NoOptionError
 from copy import deepcopy
 import datetime
+from datetime import datetime as dt
 import errno
+import locale
 import os
 import re
 import platform
-from socket import getfqdn
 from string import Template
 import select
 import subprocess
 import sys
+import time
 from textwrap import wrap
-from datetime import datetime as dt
-from dateutil.parser import parse as parseutc
 from warnings import warn
-from nipype.external import six
+import simplejson as json
+from dateutil.parser import parse as parseutc
+from packaging.version import Version
+import collections
 
-
-from .traits_extension import (traits, Undefined, TraitDictObject,
-                               TraitListObject, TraitError,
-                               isdefined, File, Directory,
-                               has_metadata)
-from ..utils.filemanip import (md5, hash_infile, FileNotFoundError,
-                               hash_timestamp, save_json,
-                               split_filename)
-from ..utils.misc import is_container, trim, str2bool
+from .. import config, logging, LooseVersion, __version__
 from ..utils.provenance import write_provenance
-from .. import config, logging, LooseVersion
-from .. import __version__
-import random, time, fnmatch
+from ..utils.misc import is_container, trim, str2bool
+from ..utils.filemanip import (md5, hash_infile, FileNotFoundError, hash_timestamp,
+                               split_filename, to_str)
+from .traits_extension import (
+    traits, Undefined, TraitDictObject, TraitListObject, TraitError, isdefined,
+    File, Directory, DictStrStr, has_metadata, ImageFile)
+from ..external.due import due
 
-nipype_version = LooseVersion(__version__)
-
+runtime_profile = str2bool(config.get('execution', 'profile_runtime'))
+nipype_version = Version(__version__)
 iflogger = logging.getLogger('interface')
 
+FLOAT_FORMAT = '{:.10f}'.format
+PY35 = sys.version_info >= (3, 5)
+PY3 = sys.version_info[0] > 2
+
+if runtime_profile:
+    try:
+        import psutil
+    except ImportError as exc:
+        iflogger.info('Unable to import packages needed for runtime profiling. '\
+                    'Turning off runtime profiler. Reason: %s' % exc)
+        runtime_profile = False
 
 __docformat__ = 'restructuredtext'
+
+
+class Str(traits.Unicode):
+    pass
+
+traits.Str = Str
 
 class NipypeInterfaceError(Exception):
     def __init__(self, value):
         self.value = value
+
     def __str__(self):
-        return repr(self.value)
-
-
-def _unlock_display(ndisplay):
-    lockf = os.path.join('/tmp', '.X%d-lock' % ndisplay)
-    try:
-        os.remove(lockf)
-    except:
-        return False
-
-    return True
+        return '{}'.format(self.value)
 
 def _exists_in_path(cmd, environ):
-    '''
+    """
     Based on a code snippet from
      http://orip.org/2009/08/python-checking-if-executable-exists-in.html
-    '''
+    """
 
     if 'PATH' in environ:
         input_environ = environ.get("PATH")
@@ -81,6 +93,7 @@ def _exists_in_path(cmd, environ):
             if os.path.exists(filename):
                 return True, filename
     return False, None
+
 
 def load_template(name):
     """Load a template from the script_templates directory
@@ -115,10 +128,10 @@ class Bunch(object):
     --------
     >>> from nipype.interfaces.base import Bunch
     >>> inputs = Bunch(infile='subj.nii', fwhm=6.0, register_to_mean=True)
-    >>> inputs
+    >>> inputs # doctest: +ALLOW_UNICODE
     Bunch(fwhm=6.0, infile='subj.nii', register_to_mean=True)
     >>> inputs.register_to_mean = False
-    >>> inputs
+    >>> inputs # doctest: +ALLOW_UNICODE
     Bunch(fwhm=6.0, infile='subj.nii', register_to_mean=False)
 
 
@@ -130,6 +143,8 @@ class Bunch(object):
            Items", Python Cookbook, 2nd Ed, Chapter 4.18, 2005.
 
     """
+
+
     def __init__(self, *args, **kwargs):
         self.__dict__.update(*args, **kwargs)
 
@@ -141,21 +156,21 @@ class Bunch(object):
 
     def items(self):
         """iterates over bunch attributes as key, value pairs"""
-        return self.__dict__.items()
+        return list(self.__dict__.items())
 
     def iteritems(self):
         """iterates over bunch attributes as key, value pairs"""
         warn('iteritems is deprecated, use items instead')
-        return self.items()
+        return list(self.items())
 
     def get(self, *args):
-        '''Support dictionary get() functionality
-        '''
+        """Support dictionary get() functionality
+        """
         return self.__dict__.get(*args)
 
     def set(self, **kwargs):
-        '''Support dictionary get() functionality
-        '''
+        """Support dictionary get() functionality
+        """
         return self.__dict__.update(**kwargs)
 
     def dictcopy(self):
@@ -196,13 +211,12 @@ class Bunch(object):
         for afile in stuff:
             if os.path.isfile(afile):
                 md5obj = md5()
-                fp = file(afile, 'rb')
-                while True:
-                    data = fp.read(8192)
-                    if not data:
-                        break
-                    md5obj.update(data)
-                fp.close()
+                with open(afile, 'rb') as fp:
+                    while True:
+                        data = fp.read(8192)
+                        if not data:
+                            break
+                        md5obj.update(data)
                 md5hex = md5obj.hexdigest()
             else:
                 md5hex = None
@@ -231,7 +245,7 @@ class Bunch(object):
         """
 
         infile_list = []
-        for key, val in self.items():
+        for key, val in list(self.items()):
             if is_container(val):
                 # XXX - SG this probably doesn't catch numpy arrays
                 # containing embedded file names either.
@@ -245,7 +259,7 @@ class Bunch(object):
             else:
                 item = val
             try:
-                if os.path.isfile(item):
+                if isinstance(item, str) and os.path.isfile(item):
                     infile_list.append(key)
             except TypeError:
                 # `item` is not a file or string.
@@ -258,13 +272,13 @@ class Bunch(object):
         # Sort the items of the dictionary, before hashing the string
         # representation so we get a predictable order of the
         # dictionary.
-        sorted_dict = str(sorted(dict_nofilename.items()))
-        return (dict_withhash, md5(sorted_dict).hexdigest())
+        sorted_dict = to_str(sorted(dict_nofilename.items()))
+        return dict_withhash, md5(sorted_dict.encode()).hexdigest()
 
     def __pretty__(self, p, cycle):
-        '''Support for the pretty module
+        """Support for the pretty module
 
-        pretty is included in ipython.externals for ipython > 0.10'''
+        pretty is included in ipython.externals for ipython > 0.10"""
         if cycle:
             p.text('Bunch(...)')
         else:
@@ -340,13 +354,14 @@ class BaseTraitedSpec(traits.HasTraits):
     XXX Reconsider this in the long run, but it seems like the best
     solution to move forward on the refactoring.
     """
+    package_version = nipype_version
 
     def __init__(self, **kwargs):
         """ Initialize handlers and inputs"""
         # NOTE: In python 2.6, object.__init__ no longer accepts input
         # arguments.  HasTraits does not define an __init__ and
         # therefore these args were being ignored.
-        #super(TraitedSpec, self).__init__(*args, **kwargs)
+        # super(TraitedSpec, self).__init__(*args, **kwargs)
         super(BaseTraitedSpec, self).__init__(**kwargs)
         traits.push_exception_handler(reraise_exceptions=True)
         undefined_traits = {}
@@ -355,7 +370,7 @@ class BaseTraitedSpec(traits.HasTraits):
                 undefined_traits[trait] = Undefined
         self.trait_set(trait_change_notify=False, **undefined_traits)
         self._generate_handlers()
-        self.set(**kwargs)
+        self.trait_set(**kwargs)
 
     def items(self):
         """ Name, trait generator for user modifiable traits
@@ -368,7 +383,7 @@ class BaseTraitedSpec(traits.HasTraits):
         outstr = []
         for name, value in sorted(self.trait_get().items()):
             outstr.append('%s = %s' % (name, value))
-        return '\n' + '\n'.join(outstr) + '\n'
+        return '\n{}\n'.format('\n'.join(outstr))
 
     def _generate_handlers(self):
         """Find all traits with the 'xor' metadata and attach an event
@@ -378,10 +393,6 @@ class BaseTraitedSpec(traits.HasTraits):
         xors = self.trait_names(**has_xor)
         for elem in xors:
             self.on_trait_change(self._xor_warn, elem)
-        has_requires = dict(requires=lambda t: t is not None)
-        requires = self.trait_names(**has_requires)
-        for elem in requires:
-            self.on_trait_change(self._requires_warn, elem)
         has_deprecation = dict(deprecated=lambda t: t is not None)
         deprecated = self.trait_names(**has_deprecation)
         for elem in deprecated:
@@ -415,7 +426,7 @@ class BaseTraitedSpec(traits.HasTraits):
                     if not msg:
                         msg = 'Input %s requires inputs: %s' \
                             % (name, ', '.join(trait_spec.requires))
-            if msg:
+            if msg:  # only one requires warning at a time.
                 warn(msg)
 
     def _deprecated_warn(self, obj, name, old, new):
@@ -436,13 +447,14 @@ class BaseTraitedSpec(traits.HasTraits):
             else:
                 msg3 = ''
             msg = ' '.join((msg1, msg2, msg3))
-            if LooseVersion(str(trait_spec.deprecated)) < nipype_version:
+            if Version(str(trait_spec.deprecated)) < self.package_version:
                 raise TraitError(msg)
             else:
+                if trait_spec.new_name:
+                    msg += 'Unsetting old value %s; setting new value %s.' % (
+                        name, trait_spec.new_name)
                 warn(msg)
                 if trait_spec.new_name:
-                    warn('Unsetting %s and setting %s.' % (name,
-                                                           trait_spec.new_name))
                     self.trait_set(trait_change_notify=False,
                                    **{'%s' % name: Undefined,
                                       '%s' % trait_spec.new_name: new})
@@ -496,14 +508,14 @@ class BaseTraitedSpec(traits.HasTraits):
         """
         if isinstance(object, TraitDictObject) or isinstance(object, dict):
             out = {}
-            for key, val in object.items():
+            for key, val in list(object.items()):
                 if isdefined(val):
                     out[key] = self._clean_container(val, undefinedval)
                 else:
                     if not skipundefined:
                         out[key] = undefinedval
-        elif (isinstance(object, TraitListObject) or isinstance(object, list)
-              or isinstance(object, tuple)):
+        elif (isinstance(object, TraitListObject) or
+                isinstance(object, list) or isinstance(object, tuple)):
             out = []
             for val in object:
                 if isdefined(val):
@@ -522,6 +534,14 @@ class BaseTraitedSpec(traits.HasTraits):
                 if not skipundefined:
                     out = undefinedval
         return out
+
+    def has_metadata(self, name, metadata, value=None, recursive=True):
+        """
+        Return has_metadata for the requested trait name in this
+        interface
+        """
+        return has_metadata(self.trait(name).trait_type, metadata, value,
+                            recursive)
 
     def get_hashval(self, hash_method=None):
         """Return a dictionary of our items with hashes for each file.
@@ -547,62 +567,61 @@ class BaseTraitedSpec(traits.HasTraits):
         dict_withhash = []
         dict_nofilename = []
         for name, val in sorted(self.get().items()):
-            if isdefined(val):
-                trait = self.trait(name)
-                if has_metadata(trait.trait_type, "nohash", True):
-                    continue
-                hash_files = (not has_metadata(trait.trait_type, "hash_files",
-                                               False)
-                              and not has_metadata(trait.trait_type,
-                                                   "name_source"))
-                dict_nofilename.append((name,
-                    self._get_sorteddict(val, hash_method=hash_method,
-                                         hash_files=hash_files)))
-                dict_withhash.append((name,
-                    self._get_sorteddict(val, True, hash_method=hash_method,
-                                         hash_files=hash_files)))
-        return dict_withhash, md5(str(dict_nofilename)).hexdigest()
+            if not isdefined(val) or self.has_metadata(name, "nohash", True):
+                # skip undefined traits and traits with nohash=True
+                continue
 
-    def _get_sorteddict(self, object, dictwithhash=False, hash_method=None,
+            hash_files = (not self.has_metadata(name, "hash_files", False) and not
+                          self.has_metadata(name, "name_source"))
+            dict_nofilename.append((name,
+                                    self._get_sorteddict(val, hash_method=hash_method,
+                                                         hash_files=hash_files)))
+            dict_withhash.append((name,
+                                  self._get_sorteddict(val, True, hash_method=hash_method,
+                                                       hash_files=hash_files)))
+        return dict_withhash, md5(to_str(dict_nofilename).encode()).hexdigest()
+
+
+    def _get_sorteddict(self, objekt, dictwithhash=False, hash_method=None,
                         hash_files=True):
-        if isinstance(object, dict):
+        if isinstance(objekt, dict):
             out = []
-            for key, val in sorted(object.items()):
+            for key, val in sorted(objekt.items()):
                 if isdefined(val):
                     out.append((key,
-                        self._get_sorteddict(val, dictwithhash,
-                                             hash_method=hash_method,
-                                             hash_files=hash_files)))
-        elif isinstance(object, (list, tuple)):
+                                self._get_sorteddict(val, dictwithhash,
+                                                     hash_method=hash_method,
+                                                     hash_files=hash_files)))
+        elif isinstance(objekt, (list, tuple)):
             out = []
-            for val in object:
+            for val in objekt:
                 if isdefined(val):
                     out.append(self._get_sorteddict(val, dictwithhash,
                                                     hash_method=hash_method,
                                                     hash_files=hash_files))
-            if isinstance(object, tuple):
+            if isinstance(objekt, tuple):
                 out = tuple(out)
         else:
-            if isdefined(object):
-                if (hash_files and isinstance(object, six.string_types) and
-                        os.path.isfile(object)):
+            if isdefined(objekt):
+                if (hash_files and isinstance(objekt, (str, bytes)) and
+                        os.path.isfile(objekt)):
                     if hash_method is None:
                         hash_method = config.get('execution', 'hash_method')
 
                     if hash_method.lower() == 'timestamp':
-                        hash = hash_timestamp(object)
+                        hash = hash_timestamp(objekt)
                     elif hash_method.lower() == 'content':
-                        hash = hash_infile(object)
+                        hash = hash_infile(objekt)
                     else:
                         raise Exception("Unknown hash method: %s" % hash_method)
                     if dictwithhash:
-                        out = (object, hash)
+                        out = (objekt, hash)
                     else:
                         out = hash
-                elif isinstance(object, float):
-                    out = '%.10f' % object
+                elif isinstance(objekt, float):
+                    out = FLOAT_FORMAT(objekt)
                 else:
-                    out = object
+                    out = objekt
         return out
 
 
@@ -612,6 +631,7 @@ class DynamicTraitedSpec(BaseTraitedSpec):
     This class is a workaround for add_traits and clone_traits not
     functioning well together.
     """
+
     def __deepcopy__(self, memo):
         """ bug in deepcopy for HasTraits results in weird cloning behavior for
         added traits
@@ -622,7 +642,8 @@ class DynamicTraitedSpec(BaseTraitedSpec):
         dup_dict = deepcopy(self.get(), memo)
         # access all keys
         for key in self.copyable_trait_names():
-            _ = getattr(self, key)
+            if key in self.__dict__.keys():
+                _ = getattr(self, key)
         # clone once
         dup = self.clone_traits(memo=memo)
         for key in self.copyable_trait_names():
@@ -632,7 +653,7 @@ class DynamicTraitedSpec(BaseTraitedSpec):
                 pass
         # clone twice
         dup = self.clone_traits(memo=memo)
-        dup.set(**dup_dict)
+        dup.trait_set(**dup_dict)
         return dup
 
 
@@ -655,15 +676,15 @@ class Interface(object):
     input_spec = None  # A traited input specification
     output_spec = None  # A traited output specification
 
-    _can_resume = False  # defines if the interface can reuse partial results
-                         # after interruption
+    # defines if the interface can reuse partial results after interruption
+    _can_resume = False
 
     @property
     def can_resume(self):
         return self._can_resume
 
-    _always_run = False  # should the interface be always run even if the
-                         # inputs were not changed?
+    # should the interface be always run even if the inputs were not changed?
+    _always_run = False
 
     @property
     def always_run(self):
@@ -744,12 +765,23 @@ class BaseInterface(Interface):
     _version = None
     _additional_metadata = []
     _redirect_x = False
+    references_ = []
 
-    def __init__(self, **inputs):
+    def __init__(self, from_file=None, **inputs):
         if not self.input_spec:
             raise Exception('No input_spec in class: %s' %
                             self.__class__.__name__)
+
         self.inputs = self.input_spec(**inputs)
+        self.estimated_memory_gb = 0.25
+        self.num_threads = 1
+
+        if from_file is not None:
+            self.load_inputs_from_json(from_file, overwrite=True)
+
+            for name, value in list(inputs.items()):
+                setattr(self.inputs, name, value)
+
 
     @classmethod
     def help(cls, returnhelp=False):
@@ -757,18 +789,33 @@ class BaseInterface(Interface):
         """
 
         if cls.__doc__:
-            #docstring = cls.__doc__.split('\n')
-            #docstring = [trim(line, '') for line in docstring]
+            # docstring = cls.__doc__.split('\n')
+            # docstring = [trim(line, '') for line in docstring]
             docstring = trim(cls.__doc__).split('\n') + ['']
         else:
             docstring = ['']
 
         allhelp = '\n'.join(docstring + cls._inputs_help() + [''] +
-                            cls._outputs_help() + [''])
+                            cls._outputs_help() + [''] +
+                            cls._refs_help() + [''])
         if returnhelp:
             return allhelp
         else:
             print(allhelp)
+
+    @classmethod
+    def _refs_help(cls):
+        """ Prints interface references.
+        """
+        if not cls.references_:
+            return []
+
+        helpstr = ['References::']
+
+        for r in cls.references_:
+            helpstr += ['{}'.format(r['entry'])]
+
+        return helpstr
 
     @classmethod
     def _get_trait_desc(self, inputs, name, spec):
@@ -787,7 +834,7 @@ class BaseInterface(Interface):
         line = "(%s%s)" % (type_info, default)
 
         manhelpstr = wrap(line, 70,
-                          initial_indent=manhelpstr[0]+': ',
+                          initial_indent=manhelpstr[0] + ': ',
                           subsequent_indent='\t\t ')
 
         if desc:
@@ -829,7 +876,7 @@ class BaseInterface(Interface):
         helpstr = ['Inputs::']
 
         inputs = cls.input_spec()
-        if len(inputs.traits(transient=None).items()) == 0:
+        if len(list(inputs.traits(transient=None).items())) == 0:
             helpstr += ['', '\tNone']
             return helpstr
 
@@ -856,7 +903,7 @@ class BaseInterface(Interface):
         """
         helpstr = ['Outputs::', '']
         if cls.output_spec:
-            outputs = cls.output_spec()
+            outputs = cls.output_spec()  #pylint: disable=E1102
             for name, spec in sorted(outputs.traits(transient=None).items()):
                 helpstr += cls._get_trait_desc(outputs, name, spec)
         if len(helpstr) == 2:
@@ -868,7 +915,8 @@ class BaseInterface(Interface):
         """
         outputs = None
         if self.output_spec:
-            outputs = self.output_spec()
+            outputs = self.output_spec()  #pylint: disable=E1102
+
         return outputs
 
     @classmethod
@@ -914,7 +962,7 @@ class BaseInterface(Interface):
     def _check_mandatory_inputs(self):
         """ Raises an exception if a mandatory input is Undefined
         """
-        for name, spec in self.inputs.traits(mandatory=True).items():
+        for name, spec in list(self.inputs.traits(mandatory=True).items()):
             value = getattr(self.inputs, name)
             self._check_xor(spec, name, value)
             if not isdefined(value) and spec.xor is None:
@@ -924,8 +972,8 @@ class BaseInterface(Interface):
                 raise ValueError(msg)
             if isdefined(value):
                 self._check_requires(spec, name, value)
-        for name, spec in self.inputs.traits(mandatory=None,
-                                             transient=None).items():
+        for name, spec in list(self.inputs.traits(mandatory=None,
+                                                  transient=None).items()):
             self._check_requires(spec, name, getattr(self.inputs, name))
 
     def _check_version_requirements(self, trait_object, raise_exception=True):
@@ -935,11 +983,9 @@ class BaseInterface(Interface):
         # check minimum version
         check = dict(min_ver=lambda t: t is not None)
         names = trait_object.trait_names(**check)
-        
-        if names:
+
+        if names and self.version:
             version = LooseVersion(str(self.version))
-            if not version:
-                return
             for name in names:
                 min_ver = LooseVersion(str(trait_object.traits()[name].min_ver))
                 if min_ver > version:
@@ -975,7 +1021,10 @@ class BaseInterface(Interface):
 
             vdisp = Xvfb(nolisten='tcp')
             vdisp.start()
-            vdisp_num = vdisp.vdisplay_num
+            try:
+                vdisp_num = vdisp.new_display
+            except AttributeError:  # outdated version of xvfbwrapper
+                vdisp_num = vdisp.vdisplay_num
 
             iflogger.info('Redirecting X to :%d' % vdisp_num)
             runtime.environ['DISPLAY'] = ':%d' % vdisp_num
@@ -983,14 +1032,7 @@ class BaseInterface(Interface):
         runtime = self._run_interface(runtime)
 
         if self._redirect_x:
-            if sysdisplay is None:
-                os.unsetenv('DISPLAY')
-            else:
-                os.environ['DISPLAY'] = sysdisplay
-
-            iflogger.info('Freeing X :%d' % vdisp_num)
             vdisp.stop()
-            _unlock_display(vdisp_num)
 
         return runtime
 
@@ -998,6 +1040,13 @@ class BaseInterface(Interface):
         """ Core function that executes interface
         """
         raise NotImplementedError
+
+    def _duecredit_cite(self):
+        """ Add the interface references to the duecredit citations
+        """
+        for r in self.references_:
+            r['path'] = self.__module__
+            due.cite(**r)
 
     def run(self, **inputs):
         """Execute this interface.
@@ -1014,12 +1063,14 @@ class BaseInterface(Interface):
         results :  an InterfaceResult object containing a copy of the instance
         that was executed, provenance information and, if successful, results
         """
-        self.inputs.set(**inputs)
+        self.inputs.trait_set(**inputs)
         self._check_mandatory_inputs()
         self._check_version_requirements(self.inputs)
         interface = self.__class__
+        self._duecredit_cite()
+
         # initialize provenance tracking
-        env = deepcopy(os.environ.data)
+        env = deepcopy(dict(os.environ))
         runtime = Bunch(cwd=os.getcwd(),
                         returncode=None,
                         duration=None,
@@ -1027,15 +1078,15 @@ class BaseInterface(Interface):
                         startTime=dt.isoformat(dt.utcnow()),
                         endTime=None,
                         platform=platform.platform(),
-                        hostname=getfqdn(),
+                        hostname=platform.node(),
                         version=self.version)
         try:
             runtime = self._run_wrapper(runtime)
             outputs = self.aggregate_outputs(runtime)
             runtime.endTime = dt.isoformat(dt.utcnow())
             timediff = parseutc(runtime.endTime) - parseutc(runtime.startTime)
-            runtime.duration = timediff.days * 86400 + timediff.seconds + \
-                timediff.microseconds/100000.
+            runtime.duration = (timediff.days * 86400 + timediff.seconds +
+                                timediff.microseconds / 100000.)
             results = InterfaceResult(interface, runtime,
                                       inputs=self.inputs.get_traitsfree(),
                                       outputs=outputs)
@@ -1043,11 +1094,11 @@ class BaseInterface(Interface):
             if str2bool(config.get('execution', 'write_provenance')):
                 prov_record = write_provenance(results)
             results.provenance = prov_record
-        except Exception, e:
+        except Exception as e:
             runtime.endTime = dt.isoformat(dt.utcnow())
             timediff = parseutc(runtime.endTime) - parseutc(runtime.startTime)
-            runtime.duration = timediff.days * 86400 + timediff.seconds + \
-                timediff.microseconds/100000.
+            runtime.duration = (timediff.days * 86400 + timediff.seconds +
+                                timediff.microseconds / 100000.)
             if len(e.args) == 0:
                 e.args = ("")
 
@@ -1055,25 +1106,25 @@ class BaseInterface(Interface):
 
             if config.has_option('logging', 'interface_level') and \
                     config.get('logging', 'interface_level').lower() == 'debug':
-                inputs_str = "Inputs:" + str(self.inputs) + "\n"
+                inputs_str = "\nInputs:" + str(self.inputs) + "\n"
             else:
                 inputs_str = ''
 
-            if len(e.args) == 1 and isinstance(e.args[0], six.string_types):
+            if len(e.args) == 1 and isinstance(e.args[0], (str, bytes)):
                 e.args = (e.args[0] + " ".join([message, inputs_str]),)
             else:
                 e.args += (message, )
                 if inputs_str != '':
                     e.args += (inputs_str, )
 
-            #exception raising inhibition for special cases
+            # exception raising inhibition for special cases
             import traceback
             runtime.traceback = traceback.format_exc()
             runtime.traceback_args = e.args
             inputs = None
             try:
                 inputs = self.inputs.get_traitsfree()
-            except Exception, e:
+            except Exception as e:
                 pass
             results = InterfaceResult(interface, runtime, inputs=inputs)
             prov_record = None
@@ -1109,7 +1160,7 @@ class BaseInterface(Interface):
             if outputs:
                 _unavailable_outputs = \
                     self._check_version_requirements(self._outputs())
-            for key, val in predicted_outputs.items():
+            for key, val in list(predicted_outputs.items()):
                 if needed_outputs and key not in needed_outputs:
                     continue
                 if key in _unavailable_outputs:
@@ -1120,7 +1171,7 @@ class BaseInterface(Interface):
                 try:
                     setattr(outputs, key, val)
                     _ = getattr(outputs, key)
-                except TraitError, error:
+                except TraitError as error:
                     if hasattr(error, 'info') and \
                             error.info.startswith("an existing"):
                         msg = ("File/Directory '%s' not found for %s output "
@@ -1138,6 +1189,32 @@ class BaseInterface(Interface):
                                  self.__class__.__name__)
         return self._version
 
+    def load_inputs_from_json(self, json_file, overwrite=True):
+        """
+        A convenient way to load pre-set inputs from a JSON file.
+        """
+
+        with open(json_file) as fhandle:
+            inputs_dict = json.load(fhandle)
+
+        def_inputs = []
+        if not overwrite:
+            def_inputs = list(self.inputs.get_traitsfree().keys())
+
+        new_inputs = list(set(list(inputs_dict.keys())) - set(def_inputs))
+        for key in new_inputs:
+            if hasattr(self.inputs, key):
+                setattr(self.inputs, key, inputs_dict[key])
+
+    def save_inputs_to_json(self, json_file):
+        """
+        A convenient way to save current inputs to a JSON file.
+        """
+        inputs = self.inputs.get_traitsfree()
+        iflogger.debug('saving inputs {}', inputs)
+        with open(json_file, 'w' if PY3 else 'wb') as fhandle:
+            json.dump(inputs, fhandle, indent=4, ensure_ascii=False)
+
 
 class Stream(object):
     """Function to capture stdout and stderr streams with timestamps
@@ -1151,6 +1228,9 @@ class Stream(object):
         self._buf = ''
         self._rows = []
         self._lastidx = 0
+        self.default_encoding = locale.getdefaultlocale()[1]
+        if self.default_encoding is None:
+            self.default_encoding = 'UTF-8'
 
     def fileno(self):
         "Pass-through for file descriptor."
@@ -1165,7 +1245,7 @@ class Stream(object):
     def _read(self, drain):
         "Read from the file descriptor"
         fd = self.fileno()
-        buf = os.read(fd, 4096)
+        buf = os.read(fd, 4096).decode(self.default_encoding)
         if not buf and not self._buf:
             return None
         if '\n' not in buf:
@@ -1190,49 +1270,241 @@ class Stream(object):
         self._lastidx = len(self._rows)
 
 
+# Get number of threads for process
+def _get_num_threads(proc):
+    """Function to get the number of threads a process is using
+    NOTE: If
+
+    Parameters
+    ----------
+    proc : psutil.Process instance
+        the process to evaluate thead usage of
+
+    Returns
+    -------
+    num_threads : int
+        the number of threads that the process is using
+    """
+
+    # Import packages
+    import psutil
+
+    # If process is running
+    if proc.status() == psutil.STATUS_RUNNING:
+        num_threads = proc.num_threads()
+    elif proc.num_threads() > 1:
+        tprocs = [psutil.Process(thr.id) for thr in proc.threads()]
+        alive_tprocs = [tproc for tproc in tprocs if tproc.status() == psutil.STATUS_RUNNING]
+        num_threads = len(alive_tprocs)
+    else:
+        num_threads = 1
+
+    # Try-block for errors
+    try:
+        child_threads = 0
+        # Iterate through child processes and get number of their threads
+        for child in proc.children(recursive=True):
+            # Leaf process
+            if len(child.children()) == 0:
+                # If process is running, get its number of threads
+                if child.status() == psutil.STATUS_RUNNING:
+                    child_thr = child.num_threads()
+                # If its not necessarily running, but still multi-threaded
+                elif child.num_threads() > 1:
+                    # Cast each thread as a process and check for only running
+                    tprocs = [psutil.Process(thr.id) for thr in child.threads()]
+                    alive_tprocs = [tproc for tproc in tprocs if tproc.status() == psutil.STATUS_RUNNING]
+                    child_thr = len(alive_tprocs)
+                # Otherwise, no threads are running
+                else:
+                    child_thr = 0
+                # Increment child threads
+                child_threads += child_thr
+    # Catch any NoSuchProcess errors
+    except psutil.NoSuchProcess:
+        pass
+
+    # Number of threads is max between found active children and parent
+    num_threads = max(child_threads, num_threads)
+
+    # Return number of threads found
+    return num_threads
+
+
+# Get ram usage of process
+def _get_ram_mb(pid, pyfunc=False):
+    """Function to get the RAM usage of a process and its children
+
+    Parameters
+    ----------
+    pid : integer
+        the PID of the process to get RAM usage of
+    pyfunc : boolean (optional); default=False
+        a flag to indicate if the process is a python function;
+        when Pythons are multithreaded via multiprocess or threading,
+        children functions include their own memory + parents. if this
+        is set, the parent memory will removed from children memories
+
+    Reference: http://ftp.dev411.com/t/python/python-list/095thexx8g/multiprocessing-forking-memory-usage
+
+    Returns
+    -------
+    mem_mb : float
+        the memory RAM in MB utilized by the process PID
+    """
+
+    # Import packages
+    import psutil
+
+    # Init variables
+    _MB = 1024.0**2
+
+    # Try block to protect against any dying processes in the interim
+    try:
+        # Init parent
+        parent = psutil.Process(pid)
+        # Get memory of parent
+        parent_mem = parent.memory_info().rss
+        mem_mb = parent_mem/_MB
+
+        # Iterate through child processes
+        for child in parent.children(recursive=True):
+            child_mem = child.memory_info().rss
+            if pyfunc:
+                child_mem -= parent_mem
+            mem_mb += child_mem/_MB
+
+    # Catch if process dies, return gracefully
+    except psutil.NoSuchProcess:
+        pass
+
+    # Return memory
+    return mem_mb
+
+
+def _canonicalize_env(env):
+    """Windows requires that environment be dicts with bytes as keys and values
+    This function converts any unicode entries for Windows only, returning the
+    dictionary untouched in other environments.
+
+    Parameters
+    ----------
+    env : dict
+        environment dictionary with unicode or bytes keys and values
+
+    Returns
+    -------
+    env : dict
+        Windows: environment dictionary with bytes keys and values
+        Other: untouched input ``env``
+    """
+    if os.name != 'nt':
+        return env
+
+    out_env = {}
+    for key, val in env:
+        if not isinstance(key, bytes):
+            key = key.encode('utf-8')
+        if not isinstance(val, bytes):
+            val = key.encode('utf-8')
+        out_env[key] = val
+    return out_env
+
+
+# Get max resources used for process
+def get_max_resources_used(pid, mem_mb, num_threads, pyfunc=False):
+    """Function to get the RAM and threads usage of a process
+
+    Parameters
+    ----------
+    pid : integer
+        the process ID of process to profile
+    mem_mb : float
+        the high memory watermark so far during process execution (in MB)
+    num_threads: int
+        the high thread watermark so far during process execution
+
+    Returns
+    -------
+    mem_mb : float
+        the new high memory watermark of process (MB)
+    num_threads : float
+        the new high thread watermark of process
+    """
+
+    # Import packages
+    import psutil
+
+    try:
+        mem_mb = max(mem_mb, _get_ram_mb(pid, pyfunc=pyfunc))
+        num_threads = max(num_threads, _get_num_threads(psutil.Process(pid)))
+    except Exception as exc:
+        iflogger.info('Could not get resources used by process. Error: %s'\
+                      % exc)
+
+    # Return resources
+    return mem_mb, num_threads
+
+
 def run_command(runtime, output=None, timeout=0.01, redirect_x=False):
     """Run a command, read stdout and stderr, prefix with timestamp.
 
     The returned runtime contains a merged stdout+stderr log with timestamps
     """
-    PIPE = subprocess.PIPE
 
+    # Init logger
+    logger = logging.getLogger('workflow')
+
+    # Init variables
+    PIPE = subprocess.PIPE
     cmdline = runtime.cmdline
+
     if redirect_x:
         exist_xvfb, _ = _exists_in_path('xvfb-run', runtime.environ)
         if not exist_xvfb:
             raise RuntimeError('Xvfb was not found, X redirection aborted')
         cmdline = 'xvfb-run -a ' + cmdline
 
+    env = _canonicalize_env(runtime.environ)
+
+    default_encoding = locale.getdefaultlocale()[1]
+    if default_encoding is None:
+        default_encoding = 'UTF-8'
     if output == 'file':
         errfile = os.path.join(runtime.cwd, 'stderr.nipype')
         outfile = os.path.join(runtime.cwd, 'stdout.nipype')
-        stderr = open(errfile, 'wt')
-        stdout = open(outfile, 'wt')
+        stderr = open(errfile, 'wb')  # t=='text'===default
+        stdout = open(outfile, 'wb')
 
         proc = subprocess.Popen(cmdline,
                                 stdout=stdout,
                                 stderr=stderr,
                                 shell=True,
                                 cwd=runtime.cwd,
-                                env=runtime.environ)
+                                env=env)
     else:
         proc = subprocess.Popen(cmdline,
                                 stdout=PIPE,
                                 stderr=PIPE,
                                 shell=True,
                                 cwd=runtime.cwd,
-                                env=runtime.environ)
+                                env=env)
     result = {}
     errfile = os.path.join(runtime.cwd, 'stderr.nipype')
     outfile = os.path.join(runtime.cwd, 'stdout.nipype')
+
+    # Init variables for memory profiling
+    mem_mb = 0
+    num_threads = 1
+    interval = .5
+
     if output == 'stream':
         streams = [Stream('stdout', proc.stdout), Stream('stderr', proc.stderr)]
 
         def _process(drain=0):
             try:
                 res = select.select(streams, [], [], timeout)
-            except select.error, e:
+            except select.error as e:
                 iflogger.info(str(e))
                 if e[0] == errno.EINTR:
                     return
@@ -1241,10 +1513,13 @@ def run_command(runtime, output=None, timeout=0.01, redirect_x=False):
             else:
                 for stream in res[0]:
                     stream.read(drain)
-
         while proc.returncode is None:
+            if runtime_profile:
+                mem_mb, num_threads = \
+                    get_max_resources_used(proc.pid, mem_mb, num_threads)
             proc.poll()
             _process()
+            time.sleep(interval)
         _process(drain=1)
 
         # collect results, merge and return
@@ -1256,23 +1531,47 @@ def run_command(runtime, output=None, timeout=0.01, redirect_x=False):
             result[stream._name] = [r[2] for r in rows]
         temp.sort()
         result['merged'] = [r[1] for r in temp]
+
     if output == 'allatonce':
+        if runtime_profile:
+            while proc.returncode is None:
+                mem_mb, num_threads = \
+                    get_max_resources_used(proc.pid, mem_mb, num_threads)
+                proc.poll()
+                time.sleep(interval)
         stdout, stderr = proc.communicate()
+        stdout = stdout.decode(default_encoding)
+        stderr = stderr.decode(default_encoding)
         result['stdout'] = stdout.split('\n')
         result['stderr'] = stderr.split('\n')
         result['merged'] = ''
     if output == 'file':
+        if runtime_profile:
+            while proc.returncode is None:
+                mem_mb, num_threads = \
+                    get_max_resources_used(proc.pid, mem_mb, num_threads)
+                proc.poll()
+                time.sleep(interval)
         ret_code = proc.wait()
         stderr.flush()
         stdout.flush()
-        result['stdout'] = [line.strip() for line in open(outfile).readlines()]
-        result['stderr'] = [line.strip() for line in open(errfile).readlines()]
+        result['stdout'] = [line.decode(default_encoding).strip() for line in open(outfile, 'rb').readlines()]
+        result['stderr'] = [line.decode(default_encoding).strip() for line in open(errfile, 'rb').readlines()]
         result['merged'] = ''
     if output == 'none':
+        if runtime_profile:
+            while proc.returncode is None:
+                mem_mb, num_threads = \
+                    get_max_resources_used(proc.pid, mem_mb, num_threads)
+                proc.poll()
+                time.sleep(interval)
         proc.communicate()
         result['stdout'] = []
         result['stderr'] = []
         result['merged'] = ''
+
+    setattr(runtime, 'runtime_memory_gb', mem_mb/1024.0)
+    setattr(runtime, 'runtime_threads', num_threads)
     runtime.stderr = '\n'.join(result['stderr'])
     runtime.stdout = '\n'.join(result['stdout'])
     runtime.merged = result['merged']
@@ -1306,8 +1605,8 @@ def get_dependencies(name, environ):
 
 
 class CommandLineInputSpec(BaseInterfaceInputSpec):
-    args = traits.Str(argstr='%s', desc='Additional parameters to the command')
-    environ = traits.DictStrStr(desc='Environment variables', usedefault=True,
+    args = Str(argstr='%s', desc='Additional parameters to the command')
+    environ = DictStrStr(desc='Environment variables', usedefault=True,
                                 nohash=True)
     # This input does not have a "usedefault=True" so the set_default_terminal_output()
     # method would work
@@ -1337,22 +1636,25 @@ class CommandLine(BaseInterface):
 
     Examples
     --------
-
+    >>> import pprint
     >>> from nipype.interfaces.base import CommandLine
     >>> cli = CommandLine(command='ls', environ={'DISPLAY': ':1'})
     >>> cli.inputs.args = '-al'
-    >>> cli.cmdline
+    >>> cli.cmdline # doctest: +ALLOW_UNICODE
     'ls -al'
 
-    >>> cli.inputs.trait_get() # doctest: +NORMALIZE_WHITESPACE
-    {'ignore_exception': False, 'terminal_output': 'stream',
-     'environ': {'DISPLAY': ':1'}, 'args': '-al'}
+    >>> pprint.pprint(cli.inputs.trait_get())  # doctest: +NORMALIZE_WHITESPACE +ALLOW_UNICODE
+    {'args': '-al',
+     'environ': {'DISPLAY': ':1'},
+     'ignore_exception': False,
+     'terminal_output': 'stream'}
 
-    >>> cli.inputs.get_hashval()
-    ([('args', '-al')], '11c37f97649cd61627f4afe5136af8c0')
+    >>> cli.inputs.get_hashval()[0][0] # doctest: +ALLOW_UNICODE
+    ('args', '-al')
+    >>> cli.inputs.get_hashval()[1] # doctest: +ALLOW_UNICODE
+    '11c37f97649cd61627f4afe5136af8c0'
 
     """
-
     input_spec = CommandLineInputSpec
     _cmd = None
     _version = None
@@ -1408,11 +1710,10 @@ class CommandLine(BaseInterface):
         return ' '.join(allargs)
 
     def raise_exception(self, runtime):
-        message = "Command:\n" + runtime.cmdline + "\n"
-        message += "Standard output:\n" + runtime.stdout + "\n"
-        message += "Standard error:\n" + runtime.stderr + "\n"
-        message += "Return code: " + str(runtime.returncode)
-        raise RuntimeError(message)
+        raise RuntimeError(
+            ('Command:\n{cmdline}\nStandard output:\n{stdout}\n'
+             'Standard error:\n{stderr}\nReturn code: {returncode}').format(
+                 **runtime.dictcopy()))
 
     @classmethod
     def help(cls, returnhelp=False):
@@ -1440,8 +1741,8 @@ class CommandLine(BaseInterface):
 
     def version_from_command(self, flag='-v'):
         cmdname = self.cmd.split()[0]
-        if _exists_in_path(cmdname):
-            env = deepcopy(os.environ.data)
+        env = dict(os.environ)
+        if _exists_in_path(cmdname, env):
             out_environ = self._get_environ()
             env.update(out_environ)
             proc = subprocess.Popen(' '.join((cmdname, flag)),
@@ -1457,7 +1758,7 @@ class CommandLine(BaseInterface):
         runtime = self._run_interface(runtime)
         return runtime
 
-    def _run_interface(self, runtime, correct_return_codes=[0]):
+    def _run_interface(self, runtime, correct_return_codes=(0,)):
         """Execute command via subprocess
 
         Parameters
@@ -1479,7 +1780,7 @@ class CommandLine(BaseInterface):
         exist_val, cmd_path = _exists_in_path(executable_name,
                                               runtime.environ)
         if not exist_val:
-            raise IOError("%s could not be found on host %s" %
+            raise IOError("command '%s' could not be found on host %s" %
                           (self.cmd.split()[0], runtime.hostname))
         setattr(runtime, 'command_path', cmd_path)
         setattr(runtime, 'dependencies', get_dependencies(executable_name,
@@ -1487,7 +1788,7 @@ class CommandLine(BaseInterface):
         runtime = run_command(runtime, output=self.inputs.terminal_output,
                               redirect_x=self._redirect_x)
         if runtime.returncode is None or \
-                        runtime.returncode not in correct_return_codes:
+                runtime.returncode not in correct_return_codes:
             self.raise_exception(runtime)
 
         return runtime
@@ -1509,8 +1810,8 @@ class CommandLine(BaseInterface):
         # traits.Either turns into traits.TraitCompound and does not have any
         # inner_traits
         elif trait_spec.is_trait_type(traits.List) \
-            or (trait_spec.is_trait_type(traits.TraitCompound)
-                and isinstance(value, list)):
+            or (trait_spec.is_trait_type(traits.TraitCompound) and
+                isinstance(value, list)):
             # This is a bit simple-minded at present, and should be
             # construed as the default. If more sophisticated behavior
             # is needed, it can be accomplished with metadata (e.g.
@@ -1542,7 +1843,7 @@ class CommandLine(BaseInterface):
 
         trait_spec = self.inputs.trait(name)
         retval = getattr(self.inputs, name)
-
+        source_ext = None
         if not isdefined(retval) or "%s" in retval:
             if not trait_spec.name_source:
                 return retval
@@ -1554,14 +1855,15 @@ class CommandLine(BaseInterface):
                 name_template = "%s_generated"
 
             ns = trait_spec.name_source
-            while isinstance(ns, list):
+            while isinstance(ns, (list, tuple)):
                 if len(ns) > 1:
                     iflogger.warn('Only one name_source per trait is allowed')
                 ns = ns[0]
 
-            if not isinstance(ns, six.string_types):
-                raise ValueError(('name_source of \'%s\' trait sould be an '
-                                 'input trait name') % name)
+            if not isinstance(ns, (str, bytes)):
+                raise ValueError(
+                    'name_source of \'{}\' trait should be an input trait '
+                    'name, but a type {} object was found'.format(name, type(ns)))
 
             if isdefined(getattr(self.inputs, ns)):
                 name_source = ns
@@ -1571,8 +1873,8 @@ class CommandLine(BaseInterface):
 
                 # special treatment for files
                 try:
-                    _, base, _ = split_filename(source)
-                except AttributeError:
+                    _, base, source_ext = split_filename(source)
+                except (AttributeError, TypeError):
                     base = source
             else:
                 if name in chain:
@@ -1580,14 +1882,17 @@ class CommandLine(BaseInterface):
 
                 chain.append(name)
                 base = self._filename_from_source(ns, chain)
+                if isdefined(base):
+                    _, _, source_ext = split_filename(base)
 
             chain = None
             retval = name_template % base
             _, _, ext = split_filename(retval)
-            if trait_spec.keep_extension and ext:
-                return retval
-            return self._overload_extension(retval, name)
-
+            if trait_spec.keep_extension and (ext or source_ext):
+                if (ext is None or not ext) and source_ext:
+                    retval = retval + source_ext
+            else:
+                retval = self._overload_extension(retval, name)
         return retval
 
     def _gen_filename(self, name):
@@ -1600,8 +1905,8 @@ class CommandLine(BaseInterface):
         metadata = dict(name_source=lambda t: t is not None)
         traits = self.inputs.traits(**metadata)
         if traits:
-            outputs = self.output_spec().get()
-            for name, trait_spec in traits.iteritems():
+            outputs = self.output_spec().get()  #pylint: disable=E1102
+            for name, trait_spec in list(traits.items()):
                 out_name = name
                 if trait_spec.output_name is not None:
                     out_name = trait_spec.output_name
@@ -1629,10 +1934,12 @@ class CommandLine(BaseInterface):
             if skip and name in skip:
                 continue
             value = getattr(self.inputs, name)
-            if spec.genfile or spec.name_source:
+            if spec.name_source:
                 value = self._filename_from_source(name)
-                if not isdefined(value):
+            elif spec.genfile:
+                if not isdefined(value) or value is None:
                     value = self._gen_filename(name)
+
             if not isdefined(value):
                 continue
             arg = self._format_arg(name, spec, value)
@@ -1640,7 +1947,7 @@ class CommandLine(BaseInterface):
                 continue
             pos = spec.position
             if pos is not None:
-                if pos >= 0:
+                if int(pos) >= 0:
                     initial_args[pos] = arg
                 else:
                     final_args[pos] = arg
@@ -1659,7 +1966,7 @@ class StdOutCommandLine(CommandLine):
     input_spec = StdOutCommandLineInputSpec
 
     def _gen_filename(self, name):
-        if name is 'out_file':
+        if name == 'out_file':
             return self._gen_outfilename()
         else:
             return None
@@ -1678,7 +1985,7 @@ class MpiCommandLineInputSpec(CommandLineInputSpec):
 
 
 class MpiCommandLine(CommandLine):
-    '''Implements functionality to interact with command line programs
+    """Implements functionality to interact with command line programs
     that can be run with MPI (i.e. using 'mpiexec').
 
     Examples
@@ -1686,14 +1993,14 @@ class MpiCommandLine(CommandLine):
     >>> from nipype.interfaces.base import MpiCommandLine
     >>> mpi_cli = MpiCommandLine(command='my_mpi_prog')
     >>> mpi_cli.inputs.args = '-v'
-    >>> mpi_cli.cmdline
+    >>> mpi_cli.cmdline # doctest: +ALLOW_UNICODE
     'my_mpi_prog -v'
 
     >>> mpi_cli.inputs.use_mpi = True
     >>> mpi_cli.inputs.n_procs = 8
-    >>> mpi_cli.cmdline
+    >>> mpi_cli.cmdline # doctest: +ALLOW_UNICODE
     'mpiexec -n 8 my_mpi_prog -v'
-    '''
+    """
     input_spec = MpiCommandLineInputSpec
 
     @property
@@ -1716,16 +2023,17 @@ class SEMLikeCommandLine(CommandLine):
     used but only for the reduced (by excluding those that do not have
     corresponding inputs list of outputs.
     """
+
     def _list_outputs(self):
-        outputs = self.output_spec().get()
+        outputs = self.output_spec().get()  #pylint: disable=E1102
         return self._outputs_from_inputs(outputs)
 
     def _outputs_from_inputs(self, outputs):
-        for name in outputs.keys():
+        for name in list(outputs.keys()):
             corresponding_input = getattr(self.inputs, name)
             if isdefined(corresponding_input):
                 if (isinstance(corresponding_input, bool) and
-                            corresponding_input):
+                        corresponding_input):
                     outputs[name] = \
                         os.path.abspath(self._outputs_filenames[name])
                 else:
@@ -1737,7 +2045,7 @@ class SEMLikeCommandLine(CommandLine):
         return outputs
 
     def _format_arg(self, name, spec, value):
-        if name in self._outputs_filenames.keys():
+        if name in list(self._outputs_filenames.keys()):
             if isinstance(value, bool):
                 if value:
                     value = os.path.abspath(self._outputs_filenames[name])
@@ -1751,19 +2059,26 @@ class MultiPath(traits.List):
     """
 
     def validate(self, object, name, value):
+
+        # want to treat range and other sequences (except str) as list
+        if not isinstance(value, (str, bytes)) and isinstance(value, collections.Sequence):
+            value  = list(value)
+
         if not isdefined(value) or \
                 (isinstance(value, list) and len(value) == 0):
             return Undefined
+
         newvalue = value
 
         if not isinstance(value, list) \
-            or (self.inner_traits()
-                and isinstance(self.inner_traits()[0].trait_type, traits.List)
-                and not isinstance(self.inner_traits()[0].trait_type,
-                                   InputMultiPath)
-                and isinstance(value, list)
-                and value
-                and not isinstance(value[0], list)):
+            or (self.inner_traits() and
+                isinstance(self.inner_traits()[0].trait_type,
+                           traits.List) and not
+                isinstance(self.inner_traits()[0].trait_type,
+                           InputMultiPath) and
+                isinstance(value, list) and
+                value and not
+                isinstance(value[0], list)):
             newvalue = [value]
         value = super(MultiPath, self).validate(object, name, newvalue)
 
@@ -1793,15 +2108,15 @@ class OutputMultiPath(MultiPath):
     <undefined>
 
     >>> a.foo = '/software/temp/foo.txt'
-    >>> a.foo
+    >>> a.foo # doctest: +ALLOW_UNICODE
     '/software/temp/foo.txt'
 
     >>> a.foo = ['/software/temp/foo.txt']
-    >>> a.foo
+    >>> a.foo # doctest: +ALLOW_UNICODE
     '/software/temp/foo.txt'
 
     >>> a.foo = ['/software/temp/foo.txt', '/software/temp/goo.txt']
-    >>> a.foo
+    >>> a.foo # doctest: +ALLOW_UNICODE
     ['/software/temp/foo.txt', '/software/temp/goo.txt']
 
     """
@@ -1838,15 +2153,15 @@ class InputMultiPath(MultiPath):
     <undefined>
 
     >>> a.foo = '/software/temp/foo.txt'
-    >>> a.foo
+    >>> a.foo # doctest: +ALLOW_UNICODE
     ['/software/temp/foo.txt']
 
     >>> a.foo = ['/software/temp/foo.txt']
-    >>> a.foo
+    >>> a.foo # doctest: +ALLOW_UNICODE
     ['/software/temp/foo.txt']
 
     >>> a.foo = ['/software/temp/foo.txt', '/software/temp/goo.txt']
-    >>> a.foo
+    >>> a.foo # doctest: +ALLOW_UNICODE
     ['/software/temp/foo.txt', '/software/temp/goo.txt']
 
     """

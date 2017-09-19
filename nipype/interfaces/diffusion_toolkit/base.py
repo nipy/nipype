@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """The dtk module provides basic functions for interfacing with
@@ -12,9 +13,13 @@ Examples
 See the docstrings for the individual classes for 'working' examples.
 
 """
-__docformat__ = 'restructuredtext'
+from __future__ import print_function, division, unicode_literals, absolute_import
+from builtins import object
 import re
-from nipype.interfaces.base import CommandLine
+from ..base import CommandLine
+
+__docformat__ = 'restructuredtext'
+
 
 class Info(object):
     """ Handle dtk output type and version information.

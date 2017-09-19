@@ -1,0 +1,28 @@
+coverage:
+  range: "0...100"
+  status:
+    patch:
+      default:
+        target: 0
+        threshold: 100
+    project:
+      default:
+        target: 0
+        threshold: 100
+      patch:
+        target: 0
+        threshold: 100
+      unittests:
+        target: 0
+        threshold: 100
+        flags:
+          - "unittests"
+      smoketests:
+        target: 0
+        threshold: 100
+        flags:
+          - "smoketests"
+  ignore:          # files and folders that will be removed during processing
+    - "nipype/external/*"
+    - "tools/*"
+    - "doc/*"

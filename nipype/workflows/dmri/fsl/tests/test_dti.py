@@ -1,6 +1,8 @@
+# -*- coding: utf-8 -*-
+from __future__ import unicode_literals, print_function, absolute_import
 import os
 
-from nipype.testing import skipif
+import pytest
 import nipype.interfaces.fsl as fsl
 import nipype.interfaces.utility as util
 from nipype.interfaces.fsl import no_fsl, no_fsl_course_data
@@ -13,8 +15,8 @@ from nipype.workflows.dmri.fsl.dti import create_bedpostx_pipeline
 from nipype.utils.filemanip import list_to_filename
 
 
-@skipif(no_fsl)
-@skipif(no_fsl_course_data)
+@pytest.mark.skipif(no_fsl(), reason="fsl is not installed")
+@pytest.mark.skipif(no_fsl_course_data(), reason="fsl data not available")
 def test_create_bedpostx_pipeline():
     fsl_course_dir = os.path.abspath(os.environ['FSL_COURSE_DATA'])
 
@@ -51,6 +53,7 @@ def test_create_bedpostx_pipeline():
     nipype_bedpostx.inputs.xfibres.sample_every = 1
     nipype_bedpostx.inputs.xfibres.cnlinear = True
     nipype_bedpostx.inputs.xfibres.seed = 0
+    nipype_bedpostx.inputs.xfibres.model = 2
 
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")
@@ -64,6 +67,7 @@ def test_create_bedpostx_pipeline():
     original_bedpostx.inputs.n_jumps = 1
     original_bedpostx.inputs.sample_every = 1
     original_bedpostx.inputs.seed = 0
+    original_bedpostx.inputs.model = 2
 
     test_f1 = pe.Node(util.AssertEqual(), name="mean_f1_test")
 
@@ -76,10 +80,9 @@ def test_create_bedpostx_pipeline():
                       (slice_dwi, original_bedpostx, [("roi_file", "dwi")]),
                       (slice_dwi, nipype_bedpostx, [("roi_file", "inputnode.dwi")]),
 
-                      (nipype_bedpostx, test_f1, [(("outputnode.mean_fsamples",list_to_filename), "volume1")]),
+                      (nipype_bedpostx, test_f1, [(("outputnode.mean_fsamples", list_to_filename), "volume1")]),
                       (original_bedpostx, test_f1, [("mean_fsamples", "volume2")]),
                       ])
 
     pipeline.run(plugin='Linear')
     shutil.rmtree(pipeline.base_dir)
-

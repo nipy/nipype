@@ -55,7 +55,7 @@ Execution
 	Should the input files be checked for changes using their content (slow, but
 	100% accurate) or just their size and modification date (fast, but
 	potentially prone to errors)? (possible values: ``content`` and
-	``timestamp``; default value: ``content``)
+	``timestamp``; default value: ``timestamp``)
 
 *keep_inputs*
     Ensures that all inputs that are created in the nodes working directory are
@@ -88,7 +88,7 @@ Execution
 	When the DataSink is used to produce an orginized output file outside
 	of nipypes internal cache structure, a file system hard link will be
 	attempted first. A hard link allow multiple file paths to point to the
-	same physical storage location on disk if the condisions allow. By
+	same physical storage location on disk if the conditions allow. By
 	refering to the same physical file on disk (instead of copying files
 	byte-by-byte) we can avoid unnecessary data duplication.  If hard links
 	are not supported for the source or destination paths specified, then
@@ -134,10 +134,17 @@ Execution
 *poll_sleep_duration*
     This controls how long the job submission loop will sleep between submitting
     all pending jobs and checking for job completion. To be nice to cluster
-    schedulers the default is set to 60 seconds.
+    schedulers the default is set to 2 seconds.
 
 *xvfb_max_wait*
-    Maximum time (in seconds) to wait for Xvfb to start, if the _redirect_x parameter of an Interface is True.
+    Maximum time (in seconds) to wait for Xvfb to start, if the _redirect_x
+    parameter of an Interface is True.
+
+*crashfile_format*
+    This option controls the file type of any crashfile generated. Pklz
+    crashfiles allow interactive debugging and rerunning of nodes, while text
+    crashfiles allow portability across machines and shorter load time.
+    (possible values: ``pklz`` and ``txt``; default value: ``pklz``)
 
 Example
 ~~~~~~~

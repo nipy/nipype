@@ -11,17 +11,11 @@
     >>> os.chdir(datadir)
 
 """
-import os
-import os.path as op
-
-from nipype.interfaces.base import (
-    CommandLineInputSpec, CommandLine, traits, TraitedSpec, File,
-    InputMultiPath)
-
-from nipype.utils.filemanip import split_filename
-from nipype.interfaces.traits_extension import isdefined
+from __future__ import print_function, division, unicode_literals, absolute_import
 
 from ... import logging
+from ..traits_extension import isdefined
+from ..base import (CommandLineInputSpec, CommandLine, traits, File)
 logger = logging.getLogger('interface')
 
 

@@ -11,15 +11,12 @@
     >>> os.chdir(datadir)
 
 """
-import os
+from __future__ import print_function, division, unicode_literals, absolute_import
+
 import os.path as op
 
-from base import MRTrix3BaseInputSpec, MRTrix3Base
-from nipype.interfaces.base import (
-    CommandLineInputSpec, CommandLine, traits, TraitedSpec, File)
-
-from nipype.utils.filemanip import split_filename
-from nipype.interfaces.traits_extension import isdefined
+from ..base import traits, TraitedSpec, File
+from .base import MRTrix3BaseInputSpec, MRTrix3Base
 
 
 class TractographyInputSpec(MRTrix3BaseInputSpec):
@@ -230,7 +227,7 @@ class Tractography(MRTrix3Base):
     >>> tk.inputs.in_file = 'fods.mif'
     >>> tk.inputs.roi_mask = 'mask.nii.gz'
     >>> tk.inputs.seed_sphere = (80, 100, 70, 10)
-    >>> tk.cmdline                               # doctest: +ELLIPSIS
+    >>> tk.cmdline                               # doctest: +ELLIPSIS +ALLOW_UNICODE
     'tckgen -algorithm iFOD2 -mask mask.nii.gz -seed_sphere \
 80.000000,100.000000,70.000000,10.000000 fods.mif tracked.tck'
     >>> tk.run()                                 # doctest: +SKIP

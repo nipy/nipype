@@ -9,9 +9,14 @@ Documentation
    :Release: |version|
    :Date: |today|
 
-Previous versions:  `0.10.0 <http://nipy.org/nipype/0.10.0>`_ `0.9.2 <http://nipy.org/nipype/0.9.2>`_
+Previous versions:  `0.13.1 <http://nipype.readthedocs.io/en/0.13.1/>`_ `0.12.1 <http://nipype.readthedocs.io/en/0.12.1/>`_
+
 
 .. container:: doc2
+
+  .. admonition:: Michael Notter's Nipype guide
+
+    Be sure to read `Michael's excellent tutorials <https://miykael.github.io/nipype_tutorial/>`_.
 
   .. admonition:: Guides
 
@@ -24,10 +29,12 @@ Previous versions:  `0.10.0 <http://nipy.org/nipype/0.10.0>`_ `0.9.2 <http://nip
             :maxdepth: 2
 
             users/index
+
          .. toctree::
             :maxdepth: 1
 
             changes
+
        * Developer
 
          .. toctree::

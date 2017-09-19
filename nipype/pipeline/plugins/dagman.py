@@ -1,5 +1,8 @@
+# -*- coding: utf-8 -*-
 """Parallel workflow execution via Condor DAGMan
 """
+from __future__ import print_function, division, unicode_literals, absolute_import
+from builtins import open
 
 import os
 import sys
@@ -8,7 +11,6 @@ import time
 from warnings import warn
 
 from .base import (GraphPluginBase, logger)
-
 from ...interfaces.base import CommandLine
 
 
@@ -49,9 +51,11 @@ error = %(basename)s.err
 log = %(basename)s.log
 getenv = True
 """
+
     def _get_str_or_file(self, arg):
         if os.path.isfile(arg):
-            content = open(arg).read()
+            with open(arg) as f:
+                content = f.read()
         else:
             content = arg
         return content
@@ -75,8 +79,8 @@ getenv = True
              ('_block', 'block', False),
              ('_dagman_args', 'dagman_args', '')):
             if 'plugin_args' in kwargs \
-                and not kwargs['plugin_args'] is None \
-                and id_ in kwargs['plugin_args']:
+                    and not kwargs['plugin_args'] is None \
+                    and id_ in kwargs['plugin_args']:
                     if id_ == 'wrapper_cmd':
                         val = os.path.abspath(kwargs['plugin_args'][id_])
                     elif id_ == 'block':
@@ -86,7 +90,7 @@ getenv = True
             setattr(self, var, val)
         # TODO remove after some time
         if 'plugin_args' in kwargs \
-            and not kwargs['plugin_args'] is None:
+                and not kwargs['plugin_args'] is None:
             plugin_args = kwargs['plugin_args']
             if 'template' in plugin_args:
                 warn("the 'template' argument is deprecated, use 'initial_specs' instead")
@@ -113,9 +117,9 @@ getenv = True
                                     "wrapper_args"])
                 # add required slots to the template
                 template = '%s\n%s\n%s\nqueue\n' % (
-                                '%(initial_specs)s',
-                                template,
-                                '%(override_specs)s')
+                    '%(initial_specs)s',
+                    template,
+                    '%(override_specs)s')
                 batch_dir, name = os.path.split(pyscript)
                 name = '.'.join(name.split('.')[:-1])
                 specs = dict(
@@ -125,13 +129,13 @@ getenv = True
                     nodescript=pyscript,
                     basename=os.path.join(batch_dir, name),
                     override_specs=override_specs
-                    )
-                if not wrapper_cmd is None:
+                )
+                if wrapper_cmd is not None:
                     specs['executable'] = wrapper_cmd
                     specs['nodescript'] = \
-                            '%s %s %s' % (wrapper_args % specs, # give access to variables
-                                          sys.executable,
-                                          pyscript)
+                        '%s %s %s' % (wrapper_args % specs,  # give access to variables
+                                      sys.executable,
+                                      pyscript)
                 submitspec = template % specs
                 # write submit spec for this job
                 submitfile = os.path.join(batch_dir,
@@ -149,7 +153,7 @@ getenv = True
                                      % (' '.join([str(i) for i in parents]),
                                         child))
         # hand over DAG to condor_dagman
-        cmd = CommandLine('condor_submit_dag', environ=os.environ.data,
+        cmd = CommandLine('condor_submit_dag', environ=dict(os.environ),
                           terminal_output='allatonce')
         # needs -update_submit or re-running a workflow will fail
         cmd.inputs.args = '%s -update_submit %s' % (self._dagman_args,

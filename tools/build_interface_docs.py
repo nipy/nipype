@@ -3,18 +3,19 @@
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """Script to auto-generate interface docs.
 """
+from __future__ import print_function, unicode_literals
 # stdlib imports
 import os
 import sys
 
-#*****************************************************************************
+# *****************************************************************************
 if __name__ == '__main__':
     nipypepath = os.path.abspath('..')
-    sys.path.insert(1,nipypepath)
+    sys.path.insert(1, nipypepath)
     # local imports
     from interfacedocgen import InterfaceHelpWriter
     package = 'nipype'
-    outdir = os.path.join('interfaces','generated')
+    outdir = os.path.join('interfaces', 'generated')
     docwriter = InterfaceHelpWriter(package)
     # Packages that should not be included in generated API docs.
     docwriter.package_skip_patterns += ['\.external$',
@@ -23,6 +24,7 @@ if __name__ == '__main__':
                                         '\.pipeline',
                                         '\.testing',
                                         '\.caching',
+                                        '\.scripts',
                                         ]
     # Modules that should not be included in generated API docs.
     docwriter.module_skip_patterns += ['\.version$',
@@ -35,11 +37,12 @@ if __name__ == '__main__':
                                        '\.interfaces\.traits',
                                        '\.pipeline\.alloy$',
                                        '\.pipeline\.s3_node_wrapper$',
-                                       '.\testing',
+                                       '\.testing',
+                                       '\.scripts',
                                        ]
-    docwriter.class_skip_patterns += ['AFNI',
+    docwriter.class_skip_patterns += ['AFNICommand',
                                       'ANTS',
-                                      'FSL',
+                                      'FSLCommand',
                                       'FS',
                                       'Info',
                                       '^SPM',
@@ -53,4 +56,4 @@ if __name__ == '__main__':
                                       ]
     docwriter.write_api_docs(outdir)
     docwriter.write_index(outdir, 'gen', relative_to='interfaces')
-    print '%d files written' % len(docwriter.written_modules)
+    print('%d files written' % len(docwriter.written_modules))

@@ -1,57 +1,86 @@
+machine:
+  pre:
+    - curl -sSL https://s3.amazonaws.com/circle-downloads/install-circleci-docker.sh | bash -s -- 1.10.0
+  environment:
+    OSF_NIPYPE_URL: "https://files.osf.io/v1/resources/nefdp/providers/osfstorage"
+    DATA_NIPYPE_TUTORIAL_URL: "${OSF_NIPYPE_URL}/57f4739cb83f6901ed94bf21"
+    DATA_NIPYPE_FSL_COURSE: "${OSF_NIPYPE_URL}/57f472cf9ad5a101f977ecfe"
+    DATA_NIPYPE_FSL_FEEDS: "${OSF_NIPYPE_URL}/57f473066c613b01f113e7af"
+    WORKDIR: "$HOME/work"
+    CODECOV_TOKEN: "ac172a50-8e66-42e5-8822-5373fcf54686"
+  services:
+    - docker
+
 dependencies:
   cache_directories:
-    - "~/examples/data"
-    - "~/examples/fsdata"
-    - "~/examples/feeds"
-    - "~/mcr"
-    - "~/spm12"
-    - "~/examples/fsl_course_data"
+    - "~/docker"
+    - "~/examples"
+    - "~/.apt-cache"
+
+  pre:
+    # Let CircleCI cache the apt archive
+    - mkdir -p ~/.apt-cache/partial && sudo rm -rf /var/cache/apt/archives && sudo ln -s ~/.apt-cache /var/cache/apt/archives
+    - sudo apt-get -y update && sudo apt-get install -y wget bzip2
+    # Create work folder and force group permissions
+    - mkdir -p $WORKDIR && sudo setfacl -d -m group:ubuntu:rwx $WORKDIR && sudo setfacl -m group:ubuntu:rwx $WORKDIR
+    - mkdir -p $HOME/docker $HOME/examples $WORKDIR/tests $WORKDIR/logs $WORKDIR/crashfiles ${CIRCLE_TEST_REPORTS}/tests/
+    - if [[ ! -e "$HOME/bin/codecov" ]]; then mkdir -p $HOME/bin; curl -so $HOME/bin/codecov https://codecov.io/bash && chmod 755 $HOME/bin/codecov; fi
+    - (cd $HOME/docker && gzip -d cache.tar.gz && docker load --input $HOME/docker/cache.tar) || true :
+        timeout: 6000
   override:
-    - pip install --upgrade pip
-    - pip install -e .
-    - pip install matplotlib sphinx ipython
-    - if [[ ! -d ~/examples/data ]]; then wget "http://tcpdiag.dl.sourceforge.net/project/nipy/nipype/nipype-0.2/nipype-tutorial.tar.bz2"; tar jxvf nipype-tutorial.tar.bz2; mkdir ~/examples; mv nipype-tutorial/* ~/examples/; fi
-    # we download this manually because CircleCI does not cache apt
-    - if [[ ! -d ~/examples/feeds ]]; then wget "http://fsl.fmrib.ox.ac.uk/fsldownloads/fsl-5.0.8-feeds.tar.gz"; tar zxvf fsl-5.0.8-feeds.tar.gz; mv feeds ~/examples/; fi
-    - if [[ ! -d ~/examples/fsl_course_data ]]; then wget -c "http://fsl.fmrib.ox.ac.uk/fslcourse/fdt1.tar.gz" ; wget -c "http://fsl.fmrib.ox.ac.uk/fslcourse/fdt2.tar.gz"; wget -c "http://fsl.fmrib.ox.ac.uk/fslcourse/tbss.tar.gz"; mkdir ~/examples/fsl_course_data; tar zxvf fdt1.tar.gz -C ~/examples/fsl_course_data; tar zxvf fdt2.tar.gz -C ~/examples/fsl_course_data; tar zxvf tbss.tar.gz -C ~/examples/fsl_course_data; fi
-    - wget -O- http://neuro.debian.net/lists/trusty.us-nh.full | sudo tee /etc/apt/sources.list.d/neurodebian.sources.list
-    - sudo apt-key adv --recv-keys --keyserver hkp://pgp.mit.edu:80 0xA5D32F012649A5A9
-    - sudo apt-get update -y; sudo apt-get install -y fsl-core fsl-atlases
-    - bash ~/nipype/tools/install_spm_mcr.sh
-    - mkdir -p ~/.nipype && echo "[logging]" > ~/.nipype/nipype.cfg && echo "workflow_level = DEBUG" >> ~/.nipype/nipype.cfg && echo "interface_level = DEBUG" >> ~/.nipype/nipype.cfg && echo "filemanip_level = DEBUG" >> ~/.nipype/nipype.cfg
+    # Get data
+    - if [[ ! -d ~/examples/nipype-tutorial ]]; then wget --retry-connrefused --waitretry=5 --read-timeout=20 --timeout=15 -t 0 -q -O nipype-tutorial.tar.bz2 "${DATA_NIPYPE_TUTORIAL_URL}" && tar xjf nipype-tutorial.tar.bz2 -C ~/examples/; fi
+    - if [[ ! -d ~/examples/nipype-fsl_course_data ]]; then wget --retry-connrefused --waitretry=5 --read-timeout=20 --timeout=15 -t 0 -q -O nipype-fsl_course_data.tar.gz "${DATA_NIPYPE_FSL_COURSE}" && tar xzf nipype-fsl_course_data.tar.gz -C ~/examples/; fi
+    - if [[ ! -d ~/examples/feeds ]]; then wget --retry-connrefused --waitretry=5 --read-timeout=20 --timeout=15 -t 0 -q -O fsl-5.0.9-feeds.tar.gz "${DATA_NIPYPE_FSL_FEEDS}" && tar xzf fsl-5.0.9-feeds.tar.gz -C ~/examples/; fi
+    - if [ "$CIRCLE_TAG" != "" ]; then sed -i -E "s/(__version__ = )'[A-Za-z0-9.-]+'/\1'$CIRCLE_TAG'/" nipype/info.py; fi
+    # Docker
+    - docker images
+    - ? |
+        e=1 && for i in {1..5}; do
+            docker build --rm=false -f docker/base.Dockerfile -t nipype/base:latest . && e=0 && break || sleep 15;
+        done && [ "$e" -eq "0" ]
+      :
+        timeout: 21600
+    - ? |
+        e=1 && for i in {1..5}; do
+            docker build --rm=false -t nipype/nipype:latest -t nipype/nipype:py36 --build-arg BUILD_DATE=`date -u +"%Y-%m-%dT%H:%M:%SZ"` --build-arg VCS_REF=`git rev-parse --short HEAD` --build-arg VERSION=$CIRCLE_TAG . && e=0 && break || sleep 15;
+        done && [ "$e" -eq "0" ]
+      :
+        timeout: 6000
+    - ? |
+        e=1 && for i in {1..5}; do
+            docker build --rm=false -t nipype/nipype:py27 --build-arg PYTHON_VERSION_MAJOR=2 --build-arg PYTHON_VERSION_MINOR=7 --build-arg BUILD_DATE=`date -u +"%Y-%m-%dT%H:%M:%SZ"` --build-arg VCS_REF=`git rev-parse --short HEAD` --build-arg VERSION=$CIRCLE_TAG-py27 . && e=0 && break || sleep 15;
+        done && [ "$e" -eq "0" ]
+      :
+        timeout: 6000
+    - docker save -o $HOME/docker/cache.tar ubuntu:xenial-20161213 nipype/base:latest nipype/nipype:py36 && (cd $HOME/docker && gzip cache.tar) :
+        timeout: 6000
+
 test:
   override:
-    - . /usr/share/fsl/5.0/etc/fslconf/fsl.sh && nosetests --with-doctest --logging-level=DEBUG --verbosity=3:
-        environment:
-          SPMMCRCMD: "$HOME/spm12/run_spm12.sh $HOME/mcr/v85/ script"
-          FORCE_SPMMCR: 1
-          FSL_COURSE_DATA: "$HOME/examples/fsl_course_data"
-        timeout: 2600
-    - set -o pipefail && cd doc && make html 2>&1 | tee ~/log.txt
-    - cat ~/log.txt && if grep -q "ERROR" ~/log.txt; then false; else true; fi
-    - . /usr/share/fsl/5.0/etc/fslconf/fsl.sh && python ~/nipype/tools/run_examples.py test_spm Linear workflow3d workflow4d:
-        pwd: ../examples
-        environment:
-          SPMMCRCMD: "$HOME/spm12/run_spm12.sh $HOME/mcr/v85/ script"
-          FORCE_SPMMCR: 1
-        timeout: 1600
-    - . /usr/share/fsl/5.0/etc/fslconf/fsl.sh && python ~/nipype/tools/run_examples.py fmri_fsl_feeds Linear l1pipeline:
-        pwd: ../examples
-    - . /usr/share/fsl/5.0/etc/fslconf/fsl.sh && python ~/nipype/tools/run_examples.py fmri_spm_dartel Linear level1 l2pipeline:
-        pwd: ../examples
-        environment:
-          SPMMCRCMD: "$HOME/spm12/run_spm12.sh $HOME/mcr/v85/ script"
-          FORCE_SPMMCR: 1
-        timeout: 1600
-    - . /usr/share/fsl/5.0/etc/fslconf/fsl.sh && python ~/nipype/tools/run_examples.py fmri_fsl_reuse Linear level1_workflow:
-        pwd: ../examples
-    - . /usr/share/fsl/5.0/etc/fslconf/fsl.sh && python ~/nipype/tools/run_examples.py fmri_spm_nested Linear level1 l2pipeline:
-        pwd: ../examples
-        environment:
-          SPMMCRCMD: "$HOME/spm12/run_spm12.sh $HOME/mcr/v85/ script"
-          FORCE_SPMMCR: 1
+    - bash .circle/tests.sh :
+        timeout: 7200
+        parallel: true
 
 general:
   artifacts:
-    - "doc/_build/html"
-    - "~/log.txt"
+    - "~/work/docs"
+    - "~/work/logs"
+    - "~/work/tests"
+    - "~/work/crashfiles"
+
+deployment:
+  production:
+    tag: /.*/
+    commands:
+      # Deploy to docker hub
+      - if [[ -n "$DOCKER_PASS" ]]; then docker login -e $DOCKER_EMAIL -u $DOCKER_USER -p $DOCKER_PASS && docker push nipype/base:latest; fi :
+          timeout: 21600
+      - if [[ -n "$DOCKER_PASS" ]]; then docker login -e $DOCKER_EMAIL -u $DOCKER_USER -p $DOCKER_PASS && docker push nipype/nipype:latest; fi :
+          timeout: 21600
+      - if [[ -n "$DOCKER_PASS" ]]; then docker login -e $DOCKER_EMAIL -u $DOCKER_USER -p $DOCKER_PASS && docker tag nipype/nipype nipype/nipype:$CIRCLE_TAG && docker push nipype/nipype:$CIRCLE_TAG; fi :
+          timeout: 21600
+
+# Automatic deployment to Pypi:
+#       - printf "[distutils]\nindex-servers =\n    pypi\n\n[pypi]\nusername:$PYPI_USER\npassword:$PYPI_PASS\n" > ~/.pypirc
+#       - python setup.py sdist upload -r pypi

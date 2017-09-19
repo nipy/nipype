@@ -8,8 +8,8 @@ NIPYPE: Neuroimaging in Python: Pipelines and Interfaces
 .. image:: https://circleci.com/gh/nipy/nipype/tree/master.svg?style=svg
   :target: https://circleci.com/gh/nipy/nipype/tree/master
 
-.. image:: https://coveralls.io/repos/nipy/nipype/badge.png
-  :target: https://coveralls.io/r/nipy/nipype
+.. image:: https://codecov.io/gh/nipy/nipype/branch/master/graph/badge.svg
+  :target: https://codecov.io/gh/nipy/nipype
 
 .. image:: https://www.codacy.com/project/badge/182f27944c51474490b369d0a23e2f32
   :target: https://www.codacy.com/app/krzysztof-gorgolewski/nipy_nipype
@@ -17,10 +17,6 @@ NIPYPE: Neuroimaging in Python: Pipelines and Interfaces
 .. image:: https://img.shields.io/pypi/v/nipype.svg
     :target: https://pypi.python.org/pypi/nipype/
     :alt: Latest Version
-
-.. image:: https://img.shields.io/pypi/dm/nipype.svg
-    :target: https://pypi.python.org/pypi/nipype/
-    :alt: Downloads
 
 .. image:: https://img.shields.io/pypi/pyversions/nipype.svg
     :target: https://pypi.python.org/pypi/nipype/
@@ -33,6 +29,13 @@ NIPYPE: Neuroimaging in Python: Pipelines and Interfaces
 .. image:: https://img.shields.io/pypi/l/nipype.svg
     :target: https://pypi.python.org/pypi/nipype/
     :alt: License
+
+.. image:: https://img.shields.io/badge/gitter-join%20chat%20%E2%86%92-brightgreen.svg?style=flat
+    :target: http://gitter.im/nipy/nipype
+    :alt: Chat
+
+.. image:: https://zenodo.org/badge/DOI/10.5281/zenodo.581704.svg
+   :target: https://doi.org/10.5281/zenodo.581704
 
 Current neuroimaging software offer users an incredible opportunity to
 analyze data using a variety of different algorithms. However, this has
@@ -77,11 +80,9 @@ Information specific to Nipype is located here::
 Support and Communication
 -------------------------
 
-If you have a problem or would like to ask a question about how to do something in Nipype please submit a question
-to `NeuroStars.org <http://neurostars.org>`_ with a *nipype* tag. `NeuroStars.org <http://neurostars.org>`_  is a platform similar to StackOverflow but dedicated to neuroinformatics. All previous Nipype questions are available here::
-
-       http://neurostars.org/t/nipype/
-
+If you have a problem or would like to ask a question about how to do something in Nipype please open an issue to
+`NeuroStars.org <http://neurostars.org>`_ with a *nipype* tag. `NeuroStars.org <http://neurostars.org>`_  is a
+platform similar to StackOverflow but dedicated to neuroinformatics.
 
 To participate in the Nipype development related discussions please use the following mailing list::
 
@@ -119,16 +120,3 @@ Currently Nipype consists of the following files and directories:
   setup.py
     Script for building and installing NIPYPE.
 
-License information
--------------------
-
-We use the 3-clause BSD license; the full license is in the file ``LICENSE`` in
-the nipype distribution.
-
-There are interfaces to some GNU code but these are entirely optional.
-
-All trademarks referenced herein are property of their respective
-holders.
-
-Copyright (c) 2009-2015, NIPY Developers
-All rights reserved.

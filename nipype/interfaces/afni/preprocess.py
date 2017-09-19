@@ -1,6 +1,7 @@
+# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
-# vi: set ft = python sts = 4 ts = 4 sw = 4 et:
-"""Afni preprocessing interfaces
+# vi: set ft=python sts=4 ts=4 sw=4 et:
+"""AFNI preprocessing interfaces
 
     Change directory to provide relative paths for doctests
     >>> import os
@@ -8,361 +9,542 @@
     >>> datadir = os.path.realpath(os.path.join(filepath, '../../testing/data'))
     >>> os.chdir(datadir)
 """
-import warnings
+from __future__ import print_function, division, unicode_literals, absolute_import
+from builtins import open
 
 import os
-import re
+import os.path as op
 
-from ..base import (Directory, TraitedSpec,
-                    traits, isdefined, File, InputMultiPath, Undefined)
 from ...utils.filemanip import (load_json, save_json, split_filename)
-from nipype.utils.filemanip import fname_presuffix
-from .base import AFNICommand, AFNICommandInputSpec,\
-    AFNICommandOutputSpec
-from nipype.interfaces.base import CommandLineInputSpec, CommandLine,\
-    OutputMultiPath
+from ..base import (
+    CommandLineInputSpec, CommandLine, TraitedSpec,
+    traits, isdefined, File, InputMultiPath, Undefined, Str)
 
-warn = warnings.warn
-warnings.filterwarnings('always', category=UserWarning)
-
-
-class To3DInputSpec(AFNICommandInputSpec):
-    out_file = File(name_template="%s", desc='output image file name',
-                    argstr='-prefix %s', name_source=["in_folder"])
-    in_folder = Directory(desc='folder with DICOM images to convert',
-                          argstr='%s/*.dcm',
-                          position=-1,
-                          mandatory=True,
-                          exists=True)
-
-    filetype = traits.Enum('spgr', 'fse', 'epan', 'anat', 'ct', 'spct',
-                           'pet', 'mra', 'bmap', 'diff',
-                           'omri', 'abuc', 'fim', 'fith', 'fico', 'fitt', 'fift',
-                           'fizt', 'fict', 'fibt',
-                           'fibn', 'figt', 'fipt',
-                           'fbuc', argstr='-%s', desc='type of datafile being converted')
-
-    skipoutliers = traits.Bool(desc='skip the outliers check',
-                               argstr='-skip_outliers')
-
-    assumemosaic = traits.Bool(desc='assume that Siemens image is mosaic',
-                               argstr='-assume_dicom_mosaic')
-
-    datatype = traits.Enum('short', 'float', 'byte', 'complex',
-                           desc='set output file datatype', argstr='-datum %s')
-
-    funcparams = traits.Str(desc='parameters for functional data',
-                            argstr='-time:zt %s alt+z2')
+from .base import (
+    AFNICommandBase, AFNICommand, AFNICommandInputSpec, AFNICommandOutputSpec,
+    AFNIPythonCommandInputSpec, AFNIPythonCommand, Info, no_afni)
 
 
-class To3D(AFNICommand):
-    """Create a 3D dataset from 2D image files using AFNI to3d command
+class CentralityInputSpec(AFNICommandInputSpec):
+    """Common input spec class for all centrality-related commands
+    """
 
-    For complete details, see the `to3d Documentation
-    <http://afni.nimh.nih.gov/pub/dist/doc/program_help/to3d.html>`_
+    mask = File(
+        desc='mask file to mask input data',
+        argstr='-mask %s',
+        exists=True)
+    thresh = traits.Float(
+        desc='threshold to exclude connections where corr <= thresh',
+        argstr='-thresh %f')
+    polort = traits.Int(
+        desc='',
+        argstr='-polort %d')
+    autoclip = traits.Bool(
+        desc='Clip off low-intensity regions in the dataset',
+        argstr='-autoclip')
+    automask = traits.Bool(
+        desc='Mask the dataset to target brain-only voxels',
+        argstr='-automask')
+
+class AlignEpiAnatPyInputSpec(AFNIPythonCommandInputSpec):
+    in_file = File(
+        desc='EPI dataset to align',
+        argstr='-epi %s',
+        mandatory=True,
+        exists=True,
+        copyfile=False)
+    anat = File(
+        desc='name of structural dataset',
+        argstr='-anat %s',
+        mandatory=True,
+        exists=True,
+        copyfile=False)
+    epi_base = traits.Either(
+        traits.Range(low=0),
+        traits.Enum('mean', 'median', 'max'),
+        desc='the epi base used in alignment'
+             'should be one of (0/mean/median/max/subbrick#)',
+        mandatory=True,
+        argstr='-epi_base %s')
+    anat2epi = traits.Bool(
+        desc='align anatomical to EPI dataset (default)',
+        argstr='-anat2epi')
+    epi2anat = traits.Bool(
+        desc='align EPI to anatomical dataset',
+        argstr='-epi2anat')
+    save_skullstrip = traits.Bool(
+        desc='save skull-stripped (not aligned)',
+        argstr='-save_skullstrip')
+    suffix = traits.Str(
+        '_al',
+        desc='append suffix to the original anat/epi dataset to use'
+             'in the resulting dataset names (default is "_al")',
+        usedefault=True,
+        argstr='-suffix %s')
+    epi_strip = traits.Enum(
+        ('3dSkullStrip', '3dAutomask', 'None'),
+        desc='method to mask brain in EPI data'
+             'should be one of[3dSkullStrip]/3dAutomask/None)',
+        argstr='-epi_strip %s')
+    volreg = traits.Enum(
+        'on', 'off',
+        usedefault=True,
+        desc='do volume registration on EPI dataset before alignment'
+             'should be \'on\' or \'off\', defaults to \'on\'',
+        argstr='-volreg %s')
+    tshift = traits.Enum(
+        'on', 'off',
+        usedefault=True,
+        desc='do time shifting of EPI dataset before alignment'
+             'should be \'on\' or \'off\', defaults to \'on\'',
+        argstr='-tshift %s')
+
+
+class AlignEpiAnatPyOutputSpec(TraitedSpec):
+    anat_al_orig = File(
+        desc="A version of the anatomy that is aligned to the EPI")
+    epi_al_orig = File(
+        desc="A version of the EPI dataset aligned to the anatomy")
+    epi_tlrc_al = File(
+        desc="A version of the EPI dataset aligned to a standard template")
+    anat_al_mat = File(
+        desc="matrix to align anatomy to the EPI")
+    epi_al_mat = File(
+        desc="matrix to align EPI to anatomy")
+    epi_vr_al_mat = File(
+        desc="matrix to volume register EPI")
+    epi_reg_al_mat = File(
+        desc="matrix to volume register and align epi to anatomy")
+    epi_al_tlrc_mat = File(
+        desc="matrix to volume register and align epi"
+             "to anatomy and put into standard space")
+    epi_vr_motion = File(
+        desc="motion parameters from EPI time-series"
+             "registration (tsh included in name if slice"
+             "timing correction is also included).")
+    skullstrip = File(
+        desc="skull-stripped (not aligned) volume")
+
+class AlignEpiAnatPy(AFNIPythonCommand):
+    """Align EPI to anatomical datasets or vice versa
+    This Python script computes the alignment between two datasets, typically
+    an EPI and an anatomical structural dataset, and applies the resulting
+    transformation to one or the other to bring them into alignment.
+
+    This script computes the transforms needed to align EPI and
+    anatomical datasets using a cost function designed for this purpose. The
+    script combines multiple transformations, thereby minimizing the amount of
+    interpolation applied to the data.
+
+    Basic Usage:
+      align_epi_anat.py -anat anat+orig -epi epi+orig -epi_base 5
+
+    The user must provide EPI and anatomical datasets and specify the EPI
+    sub-brick to use as a base in the alignment.
+
+    Internally, the script always aligns the anatomical to the EPI dataset,
+    and the resulting transformation is saved to a 1D file.
+    As a user option, the inverse of this transformation may be applied to the
+    EPI dataset in order to align it to the anatomical data instead.
+
+    This program generates several kinds of output in the form of datasets
+    and transformation matrices which can be applied to other datasets if
+    needed. Time-series volume registration, oblique data transformations and
+    Talairach (standard template) transformations will be combined as needed
+    and requested (with options to turn on and off each of the steps) in
+    order to create the aligned datasets.
+
+    For complete details, see the `align_epi_anat.py' Documentation.
+    <https://afni.nimh.nih.gov/pub/dist/doc/program_help/align_epi_anat.py.html>`_
+
+    Examples
+    ========
+    >>> from nipype.interfaces import afni
+    >>> al_ea = afni.AlignEpiAnatPy()
+    >>> al_ea.inputs.anat = "structural.nii"
+    >>> al_ea.inputs.in_file = "functional.nii"
+    >>> al_ea.inputs.epi_base = 0
+    >>> al_ea.inputs.epi_strip = '3dAutomask'
+    >>> al_ea.inputs.volreg = 'off'
+    >>> al_ea.inputs.tshift = 'off'
+    >>> al_ea.inputs.save_skullstrip = True
+    >>> al_ea.cmdline # doctest: +ALLOW_UNICODE +ELLIPSIS
+    'python2 ...align_epi_anat.py -anat structural.nii -epi_base 0 -epi_strip 3dAutomask -epi functional.nii -save_skullstrip -suffix _al -tshift off -volreg off'
+    >>> res = allineate.run()  # doctest: +SKIP
+    """
+    _cmd = 'align_epi_anat.py'
+    input_spec = AlignEpiAnatPyInputSpec
+    output_spec = AlignEpiAnatPyOutputSpec
+
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        anat_prefix = ''.join(self._gen_fname(self.inputs.anat).split('+')[:-1])
+        epi_prefix = ''.join(self._gen_fname(self.inputs.in_file).split('+')[:-1])
+        outputtype = self.inputs.outputtype
+        if outputtype == 'AFNI':
+            ext = '.HEAD'
+        else:
+            Info.output_type_to_ext(outputtype)
+        matext = '.1D'
+        suffix = self.inputs.suffix
+        if self.inputs.anat2epi:
+            outputs['anat_al_orig'] = self._gen_fname(anat_prefix, suffix=suffix+'+orig', ext=ext)
+            outputs['anat_al_mat'] = self._gen_fname(anat_prefix, suffix=suffix+'_mat.aff12', ext=matext)
+        if self.inputs.epi2anat:
+            outputs['epi_al_orig'] = self._gen_fname(epi_prefix, suffix=suffix+'+orig', ext=ext)
+            outputs['epi_al_mat'] = self._gen_fname(epi_prefix, suffix=suffix+'_mat.aff12', ext=matext)
+        if self.inputs.volreg == 'on':
+            outputs['epi_vr_al_mat'] = self._gen_fname(epi_prefix, suffix='_vr'+suffix+'_mat.aff12', ext=matext)
+            if self.inputs.tshift == 'on':
+                outputs['epi_vr_motion'] = self._gen_fname(epi_prefix, suffix='tsh_vr_motion', ext=matext)
+            elif self.inputs.tshift == 'off':
+                outputs['epi_vr_motion'] = self._gen_fname(epi_prefix, suffix='vr_motion', ext=matext)
+        if self.inputs.volreg == 'on' and self.inputs.epi2anat:
+            outputs['epi_reg_al_mat'] = self._gen_fname(epi_prefix, suffix='_reg'+suffix+'_mat.aff12', ext=matext)
+        if self.inputs.save_skullstrip:
+            outputs.skullstrip = self._gen_fname(anat_prefix, suffix='_ns'+'+orig', ext=ext)
+        return outputs
+
+class AllineateInputSpec(AFNICommandInputSpec):
+    in_file = File(
+        desc='input file to 3dAllineate',
+        argstr='-source %s',
+        mandatory=True,
+        exists=True,
+        copyfile=False)
+    reference = File(
+        exists=True,
+        argstr='-base %s',
+        desc='file to be used as reference, the first volume will be used if '
+             'not given the reference will be the first volume of in_file.')
+    out_file = File(
+        desc='output file from 3dAllineate',
+        argstr='-prefix %s',
+        genfile=True,
+        xor=['allcostx'])
+    out_param_file = File(
+        argstr='-1Dparam_save %s',
+        desc='Save the warp parameters in ASCII (.1D) format.',
+        xor=['in_param_file','allcostx'])
+    in_param_file = File(
+        exists=True,
+        argstr='-1Dparam_apply %s',
+        desc='Read warp parameters from file and apply them to '
+             'the source dataset, and produce a new dataset',
+        xor=['out_param_file'])
+    out_matrix = File(
+        argstr='-1Dmatrix_save %s',
+        desc='Save the transformation matrix for each volume.',
+        xor=['in_matrix','allcostx'])
+    in_matrix = File(
+        desc='matrix to align input file',
+        argstr='-1Dmatrix_apply %s',
+        position=-3,
+        xor=['out_matrix'])
+    overwrite = traits.Bool(
+        desc='overwrite output file if it already exists',
+        argstr='-overwrite')
+
+    allcostx= File(
+        desc='Compute and print ALL available cost functionals for the un-warped inputs'
+             'AND THEN QUIT. If you use this option none of the other expected outputs will be produced',
+        argstr='-allcostx |& tee %s',
+        position=-1,
+        xor=['out_file', 'out_matrix', 'out_param_file', 'out_weight_file'])
+    _cost_funcs = [
+        'leastsq', 'ls',
+        'mutualinfo', 'mi',
+        'corratio_mul', 'crM',
+        'norm_mutualinfo', 'nmi',
+        'hellinger', 'hel',
+        'corratio_add', 'crA',
+        'corratio_uns', 'crU']
+
+    cost = traits.Enum(
+        *_cost_funcs,
+        argstr='-cost %s',
+        desc='Defines the \'cost\' function that defines the matching between '
+             'the source and the base')
+    _interp_funcs = [
+        'nearestneighbour', 'linear', 'cubic', 'quintic', 'wsinc5']
+    interpolation = traits.Enum(
+        *_interp_funcs[:-1],
+        argstr='-interp %s',
+        desc='Defines interpolation method to use during matching')
+    final_interpolation = traits.Enum(
+        *_interp_funcs,
+        argstr='-final %s',
+        desc='Defines interpolation method used to create the output dataset')
+
+    #   TECHNICAL OPTIONS (used for fine control of the program):
+    nmatch = traits.Int(
+        argstr='-nmatch %d',
+        desc='Use at most n scattered points to match the datasets.')
+    no_pad = traits.Bool(
+        argstr='-nopad',
+        desc='Do not use zero-padding on the base image.')
+    zclip = traits.Bool(
+        argstr='-zclip',
+        desc='Replace negative values in the input datasets (source & base) '
+             'with zero.')
+    convergence = traits.Float(
+        argstr='-conv %f',
+        desc='Convergence test in millimeters (default 0.05mm).')
+    usetemp = traits.Bool(
+        argstr='-usetemp',
+        desc='temporary file use')
+    check = traits.List(
+        traits.Enum(*_cost_funcs),
+        argstr='-check %s',
+        desc='After cost functional optimization is done, start at the final '
+             'parameters and RE-optimize using this new cost functions. If '
+             'the results are too different, a warning message will be '
+             'printed. However, the final parameters from the original '
+             'optimization will be used to create the output dataset.')
+
+    #      ** PARAMETERS THAT AFFECT THE COST OPTIMIZATION STRATEGY **
+    one_pass = traits.Bool(
+        argstr='-onepass',
+        desc='Use only the refining pass -- do not try a coarse resolution '
+             'pass first.  Useful if you know that only small amounts of '
+             'image alignment are needed.')
+    two_pass = traits.Bool(
+        argstr='-twopass',
+        desc='Use a two pass alignment strategy for all volumes, searching '
+             'for a large rotation+shift and then refining the alignment.')
+    two_blur = traits.Float(
+        argstr='-twoblur %f',
+        desc='Set the blurring radius for the first pass in mm.')
+    two_first = traits.Bool(
+        argstr='-twofirst',
+        desc='Use -twopass on the first image to be registered, and '
+             'then on all subsequent images from the source dataset, '
+             'use results from the first image\'s coarse pass to start '
+             'the fine pass.')
+    two_best = traits.Int(
+        argstr='-twobest %d',
+        desc='In the coarse pass, use the best \'bb\' set of initial'
+             'points to search for the starting point for the fine'
+             'pass.  If bb==0, then no search is made for the best'
+             'starting point, and the identity transformation is'
+             'used as the starting point.  [Default=5; min=0 max=11]')
+    fine_blur = traits.Float(
+        argstr='-fineblur %f',
+        desc='Set the blurring radius to use in the fine resolution '
+             'pass to \'x\' mm.  A small amount (1-2 mm?) of blurring at '
+             'the fine step may help with convergence, if there is '
+             'some problem, especially if the base volume is very noisy. '
+             '[Default == 0 mm = no blurring at the final alignment pass]')
+    center_of_mass = Str(
+        argstr='-cmass%s',
+        desc='Use the center-of-mass calculation to bracket the shifts.')
+    autoweight = Str(
+        argstr='-autoweight%s',
+        desc='Compute a weight function using the 3dAutomask '
+             'algorithm plus some blurring of the base image.')
+    automask = traits.Int(
+        argstr='-automask+%d',
+        desc='Compute a mask function, set a value for dilation or 0.')
+    autobox = traits.Bool(
+        argstr='-autobox',
+        desc='Expand the -automask function to enclose a rectangular '
+             'box that holds the irregular mask.')
+    nomask = traits.Bool(
+        argstr='-nomask',
+        desc='Don\'t compute the autoweight/mask; if -weight is not '
+             'also used, then every voxel will be counted equally.')
+    weight_file = File(
+        argstr='-weight %s',
+        exists=True,
+        desc='Set the weighting for each voxel in the base dataset; '
+             'larger weights mean that voxel count more in the cost function. '
+             'Must be defined on the same grid as the base dataset')
+    out_weight_file = traits.File(
+        argstr='-wtprefix %s',
+        desc='Write the weight volume to disk as a dataset',
+        xor=['allcostx'])
+    source_mask = File(
+        exists=True,
+        argstr='-source_mask %s',
+        desc='mask the input dataset')
+    source_automask = traits.Int(
+        argstr='-source_automask+%d',
+        desc='Automatically mask the source dataset with dilation or 0.')
+    warp_type = traits.Enum(
+        'shift_only', 'shift_rotate', 'shift_rotate_scale', 'affine_general',
+        argstr='-warp %s',
+        desc='Set the warp type.')
+    warpfreeze = traits.Bool(
+        argstr='-warpfreeze',
+        desc='Freeze the non-rigid body parameters after first volume.')
+    replacebase = traits.Bool(
+        argstr='-replacebase',
+        desc='If the source has more than one volume, then after the first '
+             'volume is aligned to the base.')
+    replacemeth = traits.Enum(
+        *_cost_funcs,
+        argstr='-replacemeth %s',
+        desc='After first volume is aligned, switch method for later volumes. '
+             'For use with \'-replacebase\'.')
+    epi = traits.Bool(
+        argstr='-EPI',
+        desc='Treat the source dataset as being composed of warped '
+             'EPI slices, and the base as comprising anatomically '
+             '\'true\' images.  Only phase-encoding direction image '
+             'shearing and scaling will be allowed with this option.')
+    maxrot = traits.Float(
+        argstr='-maxrot %f',
+        desc='Maximum allowed rotation in degrees.')
+    maxshf = traits.Float(
+        argstr='-maxshf %f',
+        desc='Maximum allowed shift in mm.')
+    maxscl = traits.Float(
+        argstr='-maxscl %f',
+        desc='Maximum allowed scaling factor.')
+    maxshr = traits.Float(
+        argstr='-maxshr %f',
+        desc='Maximum allowed shearing factor.')
+    master = File(
+        exists=True,
+        argstr='-master %s',
+        desc='Write the output dataset on the same grid as this file.')
+    newgrid = traits.Float(
+        argstr='-newgrid %f',
+        desc='Write the output dataset using isotropic grid spacing in mm.')
+
+    # Non-linear experimental
+    _nwarp_types = ['bilinear',
+                    'cubic', 'quintic', 'heptic', 'nonic',
+                    'poly3', 'poly5', 'poly7', 'poly9']  # same non-hellenistic
+    nwarp = traits.Enum(
+        *_nwarp_types,
+        argstr='-nwarp %s',
+        desc='Experimental nonlinear warping: bilinear or legendre poly.')
+    _dirs = ['X', 'Y', 'Z', 'I', 'J', 'K']
+    nwarp_fixmot = traits.List(
+        traits.Enum(*_dirs),
+        argstr='-nwarp_fixmot%s',
+        desc='To fix motion along directions.')
+    nwarp_fixdep = traits.List(
+        traits.Enum(*_dirs),
+        argstr='-nwarp_fixdep%s',
+        desc='To fix non-linear warp dependency along directions.')
+
+
+class AllineateOutputSpec(TraitedSpec):
+    out_file = File(exists=True, desc='output image file name')
+    out_matrix = File(exists=True, desc='matrix to align input file')
+    out_param_file = File(exists=True, desc='warp parameters')
+    out_weight_file = File(exists=True, desc='weight volume')
+    allcostx = File(desc='Compute and print ALL available cost functionals for the un-warped inputs')
+
+
+class Allineate(AFNICommand):
+    """Program to align one dataset (the 'source') to a base dataset
+
+    For complete details, see the `3dAllineate Documentation.
+    <https://afni.nimh.nih.gov/pub/dist/doc/program_help/3dAllineate.html>`_
 
     Examples
     ========
 
     >>> from nipype.interfaces import afni
-    >>> To3D = afni.To3D()
-    >>> To3D.inputs.datatype = 'float'
-    >>> To3D.inputs.in_folder = '.'
-    >>> To3D.inputs.out_file = 'dicomdir.nii'
-    >>> To3D.inputs.filetype = "anat"
-    >>> To3D.cmdline #doctest: +ELLIPSIS
-    'to3d -datum float -anat -prefix dicomdir.nii ./*.dcm'
-    >>> res = To3D.run() #doctest: +SKIP
+    >>> allineate = afni.Allineate()
+    >>> allineate.inputs.in_file = 'functional.nii'
+    >>> allineate.inputs.out_file = 'functional_allineate.nii'
+    >>> allineate.inputs.in_matrix = 'cmatrix.mat'
+    >>> allineate.cmdline  # doctest: +ALLOW_UNICODE
+    '3dAllineate -source functional.nii -prefix functional_allineate.nii -1Dmatrix_apply cmatrix.mat'
+    >>> res = allineate.run()  # doctest: +SKIP
 
-   """
-
-    _cmd = 'to3d'
-    input_spec = To3DInputSpec
-    output_spec = AFNICommandOutputSpec
-
-
-class TShiftInputSpec(AFNICommandInputSpec):
-    in_file = File(desc='input file to 3dTShift',
-                   argstr='%s',
-                   position=-1,
-                   mandatory=True,
-                   exists=True,
-                   copyfile=False)
-
-    out_file = File(name_template="%s_tshift", desc='output image file name',
-                    argstr='-prefix %s', name_source="in_file")
-
-    tr = traits.Str(desc='manually set the TR' +
-                    'You can attach suffix "s" for seconds or "ms" for milliseconds.',
-                    argstr='-TR %s')
-
-    tzero = traits.Float(desc='align each slice to given time offset',
-                         argstr='-tzero %s',
-                         xor=['tslice'])
-
-    tslice = traits.Int(desc='align each slice to time offset of given slice',
-                        argstr='-slice %s',
-                        xor=['tzero'])
-
-    ignore = traits.Int(desc='ignore the first set of points specified',
-                        argstr='-ignore %s')
-
-    interp = traits.Enum(('Fourier', 'linear', 'cubic', 'quintic', 'heptic'),
-                         desc='different interpolation methods (see 3dTShift for details)' +
-                         ' default = Fourier', argstr='-%s')
-
-    tpattern = traits.Str(desc='use specified slice time pattern rather than one in header',
-                                    argstr='-tpattern %s')
-
-    rlt = traits.Bool(desc='Before shifting, remove the mean and linear trend',
-                      argstr="-rlt")
-
-    rltplus = traits.Bool(desc='Before shifting,' +
-                          ' remove the mean and linear trend and ' +
-                          'later put back the mean',
-                          argstr="-rlt+")
-
-
-class TShift(AFNICommand):
-    """Shifts voxel time series from input
-    so that seperate slices are aligned to the same
-    temporal origin
-
-    For complete details, see the `3dTshift Documentation.
-    <http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dTshift.html>
-
-    Examples
-    ========
-
-    >>> from nipype.interfaces import afni as afni
-    >>> tshift = afni.TShift()
-    >>> tshift.inputs.in_file = 'functional.nii'
-    >>> tshift.inputs.tpattern = 'alt+z'
-    >>> tshift.inputs.tzero = 0.0
-    >>> tshift.cmdline #doctest:
-    '3dTshift -prefix functional_tshift -tpattern alt+z -tzero 0.0 functional.nii'
-    >>> res = tshift.run()   # doctest: +SKIP
-
+    >>> from nipype.interfaces import afni
+    >>> allineate = afni.Allineate()
+    >>> allineate.inputs.in_file = 'functional.nii'
+    >>> allineate.inputs.reference = 'structural.nii'
+    >>> allineate.inputs.allcostx = 'out.allcostX.txt'
+    >>> allineate.cmdline  # doctest: +ALLOW_UNICODE
+    '3dAllineate -source functional.nii -base structural.nii -allcostx |& tee out.allcostX.txt'
+    >>> res = allineate.run()  # doctest: +SKIP
     """
 
-    _cmd = '3dTshift'
-    input_spec = TShiftInputSpec
-    output_spec = AFNICommandOutputSpec
+    _cmd = '3dAllineate'
+    input_spec = AllineateInputSpec
+    output_spec = AllineateOutputSpec
 
-
-class RefitInputSpec(CommandLineInputSpec):
-    in_file = File(desc='input file to 3drefit',
-                   argstr='%s',
-                   position=-1,
-                   mandatory=True,
-                   exists=True,
-                   copyfile=True)
-
-    deoblique = traits.Bool(desc='replace current transformation' +
-                            ' matrix with cardinal matrix',
-                            argstr='-deoblique')
-
-    xorigin = traits.Str(desc='x distance for edge voxel offset',
-                         argstr='-xorigin %s')
-
-    yorigin = traits.Str(desc='y distance for edge voxel offset',
-                         argstr='-yorigin %s')
-    zorigin = traits.Str(desc='z distance for edge voxel offset',
-                         argstr='-zorigin %s')
-
-    xdel = traits.Float(desc='new x voxel dimension in mm',
-                        argstr='-xdel %f')
-
-    ydel = traits.Float(desc='new y voxel dimension in mm',
-                        argstr='-ydel %f')
-
-    zdel = traits.Float(desc='new z voxel dimension in mm',
-                        argstr='-zdel %f')
-
-    space = traits.Enum('TLRC', 'MNI', 'ORIG',
-                        argstr='-space %s',
-                        desc='Associates the dataset with a specific' +
-                         ' template type, e.g. TLRC, MNI, ORIG')
-
-
-class Refit(CommandLine):
-    """Changes some of the information inside a 3D dataset's header
-
-    For complete details, see the `3drefit Documentation.
-    <http://afni.nimh.nih.gov/pub/dist/doc/program_help/3drefit.html>
-
-    Examples
-    ========
-
-    >>> from nipype.interfaces import afni as afni
-    >>> refit = afni.Refit()
-    >>> refit.inputs.in_file = 'structural.nii'
-    >>> refit.inputs.deoblique = True
-    >>> refit.cmdline
-    '3drefit -deoblique structural.nii'
-    >>> res = refit.run() # doctest: +SKIP
-
-    """
-
-    _cmd = '3drefit'
-    input_spec = RefitInputSpec
-    output_spec = AFNICommandOutputSpec
+    def _format_arg(self, name, trait_spec, value):
+        if name == 'nwarp_fixmot' or name == 'nwarp_fixdep':
+            arg = ' '.join([trait_spec.argstr % v for v in value])
+            return arg
+        return super(Allineate, self)._format_arg(name, trait_spec, value)
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        outputs["out_file"] = os.path.abspath(self.inputs.in_file)
+
+        if self.inputs.out_file:
+            outputs['out_file'] = op.abspath(self.inputs.out_file)
+
+        if self.inputs.out_weight_file:
+            outputs['out_weight_file'] = op.abspath(self.inputs.out_weight_file)
+
+        if self.inputs.out_matrix:
+            path, base, ext = split_filename(self.inputs.out_matrix)
+            if ext.lower() not in ['.1d', '.1D']:
+                outputs['out_matrix'] = self._gen_fname(self.inputs.out_matrix,
+                                                        suffix='.aff12.1D')
+            else:
+                outputs['out_matrix'] = op.abspath(self.inputs.out_matrix)
+
+        if self.inputs.out_param_file:
+            path, base, ext = split_filename(self.inputs.out_param_file)
+            if ext.lower() not in ['.1d', '.1D']:
+                outputs['out_param_file'] = self._gen_fname(self.inputs.out_param_file,
+                                                            suffix='.param.1D')
+            else:
+                outputs['out_param_file'] = op.abspath(self.inputs.out_param_file)
+
+        if isdefined(self.inputs.allcostx):
+            outputs['allcostX'] = os.path.abspath(os.path.join(os.getcwd(),
+                                         self.inputs.allcostx))
         return outputs
 
-
-class WarpInputSpec(AFNICommandInputSpec):
-
-    in_file = File(desc='input file to 3dWarp',
-                   argstr='%s',
-                   position=-1,
-                   mandatory=True,
-                   exists=True,
-                   copyfile=False)
-
-    out_file = File(name_template="%s_warp", desc='output image file name',
-                    argstr='-prefix %s', name_source="in_file")
-
-    tta2mni = traits.Bool(desc='transform dataset from Talairach to MNI152',
-                          argstr='-tta2mni')
-
-    mni2tta = traits.Bool(desc='transform dataset from MNI152 to Talaraich',
-                          argstr='-mni2tta')
-
-    matparent = File(desc="apply transformation from 3dWarpDrive",
-                     argstr="-matparent %s",
-                     exists=True)
-
-    deoblique = traits.Bool(desc='transform dataset from oblique to cardinal',
-                            argstr='-deoblique')
-
-    interp = traits.Enum(('linear', 'cubic', 'NN', 'quintic'),
-                         desc='spatial interpolation methods [default = linear]',
-                         argstr='-%s')
-
-    gridset = File(desc="copy grid of specified dataset",
-                   argstr="-gridset %s",
-                   exists=True)
-
-    newgrid = traits.Float(desc="specify grid of this size (mm)",
-                           argstr="-newgrid %f")
-
-    zpad = traits.Int(desc="pad input dataset with N planes" +
-                      " of zero on all sides.",
-                      argstr="-zpad %d")
-
-
-class Warp(AFNICommand):
-    """Use 3dWarp for spatially transforming a dataset
-
-    For complete details, see the `3dWarp Documentation.
-    <http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dWarp.html>`_
-
-    Examples
-    ========
-
-    >>> from nipype.interfaces import afni as afni
-    >>> warp = afni.Warp()
-    >>> warp.inputs.in_file = 'structural.nii'
-    >>> warp.inputs.deoblique = True
-    >>> warp.inputs.out_file = "trans.nii.gz"
-    >>> warp.cmdline
-    '3dWarp -deoblique -prefix trans.nii.gz structural.nii'
-
-    >>> warp_2 = afni.Warp()
-    >>> warp_2.inputs.in_file = 'structural.nii'
-    >>> warp_2.inputs.newgrid = 1.0
-    >>> warp_2.inputs.out_file = "trans.nii.gz"
-    >>> warp_2.cmdline
-    '3dWarp -newgrid 1.000000 -prefix trans.nii.gz structural.nii'
-
-    """
-
-    _cmd = '3dWarp'
-    input_spec = WarpInputSpec
-    output_spec = AFNICommandOutputSpec
-
-
-class ResampleInputSpec(AFNICommandInputSpec):
-
-    in_file = File(desc='input file to 3dresample',
-                   argstr='-inset %s',
-                   position=-1,
-                   mandatory=True,
-                   exists=True,
-                   copyfile=False)
-
-    out_file = File(name_template="%s_resample", desc='output image file name',
-                    argstr='-prefix %s', name_source="in_file")
-
-    orientation = traits.Str(desc='new orientation code',
-                             argstr='-orient %s')
-
-    resample_mode = traits.Enum('NN', 'Li', 'Cu', 'Bk',
-                                argstr='-rmode %s',
-                                desc="resampling method from set {'NN', 'Li', 'Cu', 'Bk'}.  These are for 'Nearest Neighbor', 'Linear', 'Cubic' and 'Blocky' interpolation, respectively. Default is NN.")
-
-    voxel_size = traits.Tuple(*[traits.Float()]*3,
-                              argstr='-dxyz %f %f %f',
-                              desc="resample to new dx, dy and dz")
-
-    master = traits.File(argstr='-master %s',
-                         desc='align dataset grid to a reference file')
-
-
-class Resample(AFNICommand):
-    """Resample or reorient an image using AFNI 3dresample command
-
-    For complete details, see the `3dresample Documentation.
-    <http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dresample.html>`_
-
-    Examples
-    ========
-
-    >>> from nipype.interfaces import afni as afni
-    >>> resample = afni.Resample()
-    >>> resample.inputs.in_file = 'functional.nii'
-    >>> resample.inputs.orientation= 'RPI'
-    >>> resample.inputs.outputtype = "NIFTI"
-    >>> resample.cmdline
-    '3dresample -orient RPI -prefix functional_resample.nii -inset functional.nii'
-    >>> res = resample.run() # doctest: +SKIP
-
-    """
-
-    _cmd = '3dresample'
-    input_spec = ResampleInputSpec
-    output_spec = AFNICommandOutputSpec
+    def _gen_filename(self, name):
+        if name == 'out_file':
+            return self._list_outputs()[name]
+        return None
 
 
 class AutoTcorrelateInputSpec(AFNICommandInputSpec):
-    in_file = File(desc='timeseries x space (volume or surface) file',
-                   argstr='%s',
-                   position=-1,
-                   mandatory=True,
-                   exists=True,
-                   copyfile=False)
-
+    in_file = File(
+        desc='timeseries x space (volume or surface) file',
+        argstr='%s',
+        position=-1,
+        mandatory=True,
+        exists=True,
+        copyfile=False)
     polort = traits.Int(
         desc='Remove polynomical trend of order m or -1 for no detrending',
-        argstr="-polort %d")
-    eta2 = traits.Bool(desc='eta^2 similarity',
-                       argstr="-eta2")
-    mask = File(exists=True, desc="mask of voxels",
-                argstr="-mask %s")
-    mask_only_targets = traits.Bool(desc="use mask only on targets voxels",
-                                    argstr="-mask_only_targets",
-                                    xor=['mask_source'])
-    mask_source = File(exists=True,
-                        desc="mask for source voxels",
-                        argstr="-mask_source %s",
-                        xor=['mask_only_targets'])
-
-    out_file = File(name_template="%s_similarity_matrix.1D", desc='output image file name',
-                    argstr='-prefix %s', name_source="in_file")
+        argstr='-polort %d')
+    eta2 = traits.Bool(
+        desc='eta^2 similarity',
+        argstr='-eta2')
+    mask = File(
+        exists=True,
+        desc='mask of voxels',
+        argstr='-mask %s')
+    mask_only_targets = traits.Bool(
+        desc='use mask only on targets voxels',
+        argstr='-mask_only_targets',
+        xor=['mask_source'])
+    mask_source = File(
+        exists=True,
+        desc='mask for source voxels',
+        argstr='-mask_source %s',
+        xor=['mask_only_targets'])
+    out_file = File(
+        name_template='%s_similarity_matrix.1D',
+        desc='output image file name',
+        argstr='-prefix %s',
+        name_source='in_file')
 
 
 class AutoTcorrelate(AFNICommand):
@@ -370,199 +552,91 @@ class AutoTcorrelate(AFNICommand):
     pair of voxels in the input dataset, and stores the output into a
     new anatomical bucket dataset [scaled to shorts to save memory space].
 
+    For complete details, see the `3dAutoTcorrelate Documentation.
+    <https://afni.nimh.nih.gov/pub/dist/doc/program_help/3dAutoTcorrelate.html>`_
+
     Examples
     ========
 
-    >>> from nipype.interfaces import afni as afni
+    >>> from nipype.interfaces import afni
     >>> corr = afni.AutoTcorrelate()
     >>> corr.inputs.in_file = 'functional.nii'
     >>> corr.inputs.polort = -1
     >>> corr.inputs.eta2 = True
     >>> corr.inputs.mask = 'mask.nii'
     >>> corr.inputs.mask_only_targets = True
-    >>> corr.cmdline # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
+    >>> corr.cmdline  # doctest: +ELLIPSIS +NORMALIZE_WHITESPACE +ALLOW_UNICODE
     '3dAutoTcorrelate -eta2 -mask mask.nii -mask_only_targets -prefix functional_similarity_matrix.1D -polort -1 functional.nii'
-    >>> res = corr.run() # doctest: +SKIP
+    >>> res = corr.run()  # doctest: +SKIP
     """
+
     input_spec = AutoTcorrelateInputSpec
     output_spec = AFNICommandOutputSpec
     _cmd = '3dAutoTcorrelate'
 
     def _overload_extension(self, value, name=None):
         path, base, ext = split_filename(value)
-        if ext.lower() not in [".1d", ".nii.gz", ".nii"]:
-            ext = ext + ".1D"
+        if ext.lower() not in ['.1d', '.1D', '.nii.gz', '.nii']:
+            ext = ext + '.1D'
         return os.path.join(path, base + ext)
 
 
-class TStatInputSpec(AFNICommandInputSpec):
-    in_file = File(desc='input file to 3dTstat',
-                   argstr='%s',
-                   position=-1,
-                   mandatory=True,
-                   exists=True,
-                   copyfile=False)
-
-    out_file = File(name_template="%s_tstat", desc='output image file name',
-                    argstr='-prefix %s', name_source="in_file")
-
-    mask = File(desc='mask file',
-                argstr='-mask %s',
-                exists=True)
-    options = traits.Str(desc='selected statistical output',
-                         argstr='%s')
-
-
-class TStat(AFNICommand):
-    """Compute voxel-wise statistics using AFNI 3dTstat command
-
-    For complete details, see the `3dTstat Documentation.
-    <http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dTstat.html>`_
-
-    Examples
-    ========
-
-    >>> from nipype.interfaces import afni as afni
-    >>> tstat = afni.TStat()
-    >>> tstat.inputs.in_file = 'functional.nii'
-    >>> tstat.inputs.args= '-mean'
-    >>> tstat.inputs.out_file = "stats"
-    >>> tstat.cmdline
-    '3dTstat -mean -prefix stats functional.nii'
-    >>> res = tstat.run() # doctest: +SKIP
-
-    """
-
-    _cmd = '3dTstat'
-    input_spec = TStatInputSpec
-    output_spec = AFNICommandOutputSpec
-
-
-class DetrendInputSpec(AFNICommandInputSpec):
-    in_file = File(desc='input file to 3dDetrend',
-                   argstr='%s',
-                   position=-1,
-                   mandatory=True,
-                   exists=True,
-                   copyfile=False)
-
-    out_file = File(name_template="%s_detrend", desc='output image file name',
-                    argstr='-prefix %s', name_source="in_file")
-
-
-class Detrend(AFNICommand):
-    """This program removes components from voxel time series using
-    linear least squares
-
-    For complete details, see the `3dDetrend Documentation.
-    <http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dDetrend.html>`_
-
-    Examples
-    ========
-
-    >>> from nipype.interfaces import afni as afni
-    >>> detrend = afni.Detrend()
-    >>> detrend.inputs.in_file = 'functional.nii'
-    >>> detrend.inputs.args = '-polort 2'
-    >>> detrend.inputs.outputtype = "AFNI"
-    >>> detrend.cmdline
-    '3dDetrend -polort 2 -prefix functional_detrend functional.nii'
-    >>> res = detrend.run() # doctest: +SKIP
-
-    """
-
-    _cmd = '3dDetrend'
-    input_spec = DetrendInputSpec
-    output_spec = AFNICommandOutputSpec
-
-
-class DespikeInputSpec(AFNICommandInputSpec):
-    in_file = File(desc='input file to 3dDespike',
-                   argstr='%s',
-                   position=-1,
-                   mandatory=True,
-                   exists=True,
-                   copyfile=False)
-
-    out_file = File(name_template="%s_despike", desc='output image file name',
-                    argstr='-prefix %s', name_source="in_file")
-
-
-class Despike(AFNICommand):
-    """Removes 'spikes' from the 3D+time input dataset
-
-    For complete details, see the `3dDespike Documentation.
-    <http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dDespike.html>`_
-
-    Examples
-    ========
-
-    >>> from nipype.interfaces import afni as afni
-    >>> despike = afni.Despike()
-    >>> despike.inputs.in_file = 'functional.nii'
-    >>> despike.cmdline
-    '3dDespike -prefix functional_despike functional.nii'
-    >>> res = despike.run() # doctest: +SKIP
-
-    """
-
-    _cmd = '3dDespike'
-    input_spec = DespikeInputSpec
-    output_spec = AFNICommandOutputSpec
-
-
 class AutomaskInputSpec(AFNICommandInputSpec):
-    in_file = File(desc='input file to 3dAutomask',
-                   argstr='%s',
-                   position=-1,
-                   mandatory=True,
-                   exists=True,
-                   copyfile=False)
-
-    out_file = File(name_template="%s_mask", desc='output image file name',
-                    argstr='-prefix %s', name_source="in_file")
-
-    brain_file = File(name_template="%s_masked",
-                      desc="output file from 3dAutomask",
-                      argstr='-apply_prefix %s',
-                      name_source="in_file")
-
-    clfrac = traits.Float(desc='sets the clip level fraction' +
-                          ' (must be 0.1-0.9). ' +
-                          'A small value will tend to make the mask larger [default = 0.5].',
-                          argstr="-clfrac %s")
-
-    dilate = traits.Int(desc='dilate the mask outwards',
-                        argstr="-dilate %s")
-
-    erode = traits.Int(desc='erode the mask inwards',
-                       argstr="-erode %s")
+    in_file = File(
+        desc='input file to 3dAutomask',
+        argstr='%s',
+        position=-1,
+        mandatory=True,
+        exists=True,
+        copyfile=False)
+    out_file = File(
+        name_template='%s_mask',
+        desc='output image file name',
+        argstr='-prefix %s',
+        name_source='in_file')
+    brain_file = File(
+        name_template='%s_masked',
+        desc='output file from 3dAutomask',
+        argstr='-apply_prefix %s',
+        name_source='in_file')
+    clfrac = traits.Float(
+        desc='sets the clip level fraction (must be 0.1-0.9). A small value '
+             'will tend to make the mask larger [default = 0.5].',
+        argstr='-clfrac %s')
+    dilate = traits.Int(
+        desc='dilate the mask outwards',
+        argstr='-dilate %s')
+    erode = traits.Int(
+        desc='erode the mask inwards',
+        argstr='-erode %s')
 
 
 class AutomaskOutputSpec(TraitedSpec):
-    out_file = File(desc='mask file',
-                    exists=True)
-
-    brain_file = File(desc='brain file (skull stripped)', exists=True)
+    out_file = File(
+        desc='mask file',
+        exists=True)
+    brain_file = File(
+        desc='brain file (skull stripped)',
+        exists=True)
 
 
 class Automask(AFNICommand):
     """Create a brain-only mask of the image using AFNI 3dAutomask command
 
     For complete details, see the `3dAutomask Documentation.
-    <http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dAutomask.html>`_
+    <https://afni.nimh.nih.gov/pub/dist/doc/program_help/3dAutomask.html>`_
 
     Examples
     ========
 
-    >>> from nipype.interfaces import afni as afni
+    >>> from nipype.interfaces import afni
     >>> automask = afni.Automask()
     >>> automask.inputs.in_file = 'functional.nii'
     >>> automask.inputs.dilate = 1
-    >>> automask.inputs.outputtype = "NIFTI"
-    >>> automask.cmdline #doctest: +ELLIPSIS
+    >>> automask.inputs.outputtype = 'NIFTI'
+    >>> automask.cmdline  # doctest: +ELLIPSIS +ALLOW_UNICODE
     '3dAutomask -apply_prefix functional_masked.nii -dilate 1 -prefix functional_mask.nii functional.nii'
-    >>> res = automask.run() # doctest: +SKIP
+    >>> res = automask.run()  # doctest: +SKIP
 
     """
 
@@ -570,210 +644,103 @@ class Automask(AFNICommand):
     input_spec = AutomaskInputSpec
     output_spec = AutomaskOutputSpec
 
-
-class VolregInputSpec(AFNICommandInputSpec):
-
-    in_file = File(desc='input file to 3dvolreg',
-                   argstr='%s',
-                   position=-1,
-                   mandatory=True,
-                   exists=True,
-                   copyfile=False)
-    out_file = File(name_template="%s_volreg", desc='output image file name',
-                    argstr='-prefix %s', name_source="in_file")
-    basefile = File(desc='base file for registration',
-                    argstr='-base %s',
-                    position=-6,
-                    exists=True)
-    zpad = traits.Int(desc='Zeropad around the edges' +
-                      ' by \'n\' voxels during rotations',
-                      argstr='-zpad %d',
-                      position=-5)
-    md1d_file = File(name_template='%s_md.1D', desc='max displacement output file',
-                    argstr='-maxdisp1D %s', name_source="in_file",
-                    keep_extension=True, position=-4)
-    oned_file = File(name_template='%s.1D', desc='1D movement parameters output file',
-                     argstr='-1Dfile %s',
-                     name_source="in_file",
-                     keep_extension=True)
-    verbose = traits.Bool(desc='more detailed description of the process',
-                          argstr='-verbose')
-    timeshift = traits.Bool(desc='time shift to mean slice time offset',
-                            argstr='-tshift 0')
-    copyorigin = traits.Bool(desc='copy base file origin coords to output',
-                             argstr='-twodup')
-    oned_matrix_save = File(name_template='%s.aff12.1D',
-                            desc='Save the matrix transformation',
-                            argstr='-1Dmatrix_save %s',
-                            keep_extension=True,
-                            name_source="in_file")
-
-
-class VolregOutputSpec(TraitedSpec):
-    out_file = File(desc='registered file', exists=True)
-    md1d_file = File(desc='max displacement info file', exists=True)
-    oned_file = File(desc='movement parameters info file', exists=True)
-    oned_matrix_save = File(desc='matrix transformation from base to input', exists=True)
-
-
-class Volreg(AFNICommand):
-    """Register input volumes to a base volume using AFNI 3dvolreg command
-
-    For complete details, see the `3dvolreg Documentation.
-    <http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dvolreg.html>`_
-
-    Examples
-    ========
-
-    >>> from nipype.interfaces import afni as afni
-    >>> volreg = afni.Volreg()
-    >>> volreg.inputs.in_file = 'functional.nii'
-    >>> volreg.inputs.args = '-Fourier -twopass'
-    >>> volreg.inputs.zpad = 4
-    >>> volreg.inputs.outputtype = "NIFTI"
-    >>> volreg.cmdline #doctest: +ELLIPSIS
-    '3dvolreg -Fourier -twopass -1Dfile functional.1D -1Dmatrix_save functional.aff12.1D -prefix functional_volreg.nii -zpad 4 -maxdisp1D functional_md.1D functional.nii'
-    >>> res = volreg.run() # doctest: +SKIP
-
-    """
-
-    _cmd = '3dvolreg'
-    input_spec = VolregInputSpec
-    output_spec = VolregOutputSpec
-
-
-class MergeInputSpec(AFNICommandInputSpec):
-    in_files = InputMultiPath(
-        File(desc='input file to 3dmerge', exists=True),
-        argstr='%s',
-        position=-1,
+class AutoTLRCInputSpec(CommandLineInputSpec):
+    outputtype = traits.Enum('AFNI', list(Info.ftypes.keys()),
+                             desc='AFNI output filetype')
+    in_file = File(
+        desc='Original anatomical volume (+orig).'
+             'The skull is removed by this script'
+             'unless instructed otherwise (-no_ss).',
+        argstr='-input %s',
         mandatory=True,
+        exists=True,
         copyfile=False)
-    out_file = File(name_template="%s_merge", desc='output image file name',
-                    argstr='-prefix %s', name_source="in_file")
-    doall = traits.Bool(desc='apply options to all sub-bricks in dataset',
-                        argstr='-doall')
-    blurfwhm = traits.Int(desc='FWHM blur value (mm)',
-                          argstr='-1blur_fwhm %d',
-                          units='mm')
+    base = traits.Str(
+        desc = '              Reference anatomical volume'
+                '              Usually this volume is in some standard space like'
+                '              TLRC or MNI space and with afni dataset view of'
+                '              (+tlrc).'
+                '              Preferably, this reference volume should have had'
+                '              the skull removed but that is not mandatory.'
+                '              AFNI\'s distribution contains several templates.'
+                '              For a longer list, use "whereami -show_templates"'
+                'TT_N27+tlrc --> Single subject, skull stripped volume.'
+                '             This volume is also known as '
+                '             N27_SurfVol_NoSkull+tlrc elsewhere in '
+                '             AFNI and SUMA land.'
+                '             (www.loni.ucla.edu, www.bic.mni.mcgill.ca)'
+                '             This template has a full set of FreeSurfer'
+                '             (surfer.nmr.mgh.harvard.edu)'
+                '             surface models that can be used in SUMA. '
+                '             For details, see Talairach-related link:'
+                '             https://afni.nimh.nih.gov/afni/suma'
+                'TT_icbm452+tlrc --> Average volume of 452 normal brains.'
+                '                 Skull Stripped. (www.loni.ucla.edu)'
+                'TT_avg152T1+tlrc --> Average volume of 152 normal brains.'
+                '                 Skull Stripped.(www.bic.mni.mcgill.ca)'
+                'TT_EPI+tlrc --> EPI template from spm2, masked as TT_avg152T1'
+                '                TT_avg152 and TT_EPI volume sources are from'
+                '                SPM\'s distribution. (www.fil.ion.ucl.ac.uk/spm/)'
+                'If you do not specify a path for the template, the script'
+                'will attempt to locate the template AFNI\'s binaries directory.'
+                'NOTE: These datasets have been slightly modified from'
+                '      their original size to match the standard TLRC'
+                '      dimensions (Jean Talairach and Pierre Tournoux'
+                '      Co-Planar Stereotaxic Atlas of the Human Brain'
+                '      Thieme Medical Publishers, New York, 1988). '
+                '      That was done for internal consistency in AFNI.'
+                '      You may use the original form of these'
+                '      volumes if you choose but your TLRC coordinates'
+                '      will not be consistent with AFNI\'s TLRC database'
+                '      (San Antonio Talairach Daemon database), for example.',
+        mandatory = True,
+        argstr='-base %s')
+    no_ss = traits.Bool(
+        desc='Do not strip skull of input data set'
+            '(because skull has already been removed'
+            'or because template still has the skull)'
+            'NOTE: The -no_ss option is not all that optional.'
+            '   Here is a table of when you should and should not use -no_ss'
+            '                  Template          Template'
+            '                  WITH skull        WITHOUT skull'
+            '   Dset.'
+            '   WITH skull      -no_ss            xxx '
+            '   '
+            '   WITHOUT skull   No Cigar          -no_ss'
+            '   '
+            '   Template means: Your template of choice'
+            '   Dset. means: Your anatomical dataset'
+            '   -no_ss means: Skull stripping should not be attempted on Dset'
+            '   xxx means: Don\'t put anything, the script will strip Dset'
+            '   No Cigar means: Don\'t try that combination, it makes no sense.',
+        argstr='-no_ss')
 
-
-class Merge(AFNICommand):
-    """Merge or edit volumes using AFNI 3dmerge command
-
-    For complete details, see the `3dmerge Documentation.
-    <http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dmerge.html>`_
-
-    Examples
-    ========
-
-    >>> from nipype.interfaces import afni as afni
-    >>> merge = afni.Merge()
-    >>> merge.inputs.in_files = ['functional.nii', 'functional2.nii']
-    >>> merge.inputs.blurfwhm = 4
-    >>> merge.inputs.doall = True
-    >>> merge.inputs.out_file = 'e7.nii'
-    >>> res = merge.run() # doctest: +SKIP
-
-    """
-
-    _cmd = '3dmerge'
-    input_spec = MergeInputSpec
-    output_spec = AFNICommandOutputSpec
-
-
-class CopyInputSpec(AFNICommandInputSpec):
-    in_file = File(desc='input file to 3dcopy',
-                   argstr='%s',
-                   position=-2,
-                   mandatory=True,
-                   exists=True,
-                   copyfile=False)
-    out_file = File(name_template="%s_copy", desc='output image file name',
-                    argstr='%s', position=-1, name_source="in_file")
-
-
-class Copy(AFNICommand):
-    """Copies an image of one type to an image of the same
-    or different type using 3dcopy command
-
-    For complete details, see the `3dcopy Documentation.
-    <http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dcopy.html>`_
-
-    Examples
-    ========
-
-    >>> from nipype.interfaces import afni as afni
-    >>> copy3d = afni.Copy()
-    >>> copy3d.inputs.in_file = 'functional.nii'
-    >>> copy3d.cmdline
-    '3dcopy functional.nii functional_copy'
-
-    >>> from copy import deepcopy
-    >>> copy3d_2 = deepcopy(copy3d)
-    >>> copy3d_2.inputs.outputtype = 'NIFTI'
-    >>> copy3d_2.cmdline
-    '3dcopy functional.nii functional_copy.nii'
-
-    >>> copy3d_3 = deepcopy(copy3d)
-    >>> copy3d_3.inputs.outputtype = 'NIFTI_GZ'
-    >>> copy3d_3.cmdline
-    '3dcopy functional.nii functional_copy.nii.gz'
-
-    >>> copy3d_4 = deepcopy(copy3d)
-    >>> copy3d_4.inputs.out_file = 'new_func.nii'
-    >>> copy3d_4.cmdline
-    '3dcopy functional.nii new_func.nii'
-    """
-
-    _cmd = '3dcopy'
-    input_spec = CopyInputSpec
-    output_spec = AFNICommandOutputSpec
-
-
-class FourierInputSpec(AFNICommandInputSpec):
-    in_file = File(desc='input file to 3dFourier',
-                   argstr='%s',
-                   position=-1,
-                   mandatory=True,
-                   exists=True,
-                   copyfile=False)
-    out_file = File(name_template="%s_fourier", desc='output image file name',
-                    argstr='-prefix %s', name_source="in_file")
-    lowpass = traits.Float(desc='lowpass',
-                           argstr='-lowpass %f',
-                           position=0,
-                           mandatory=True)
-    highpass = traits.Float(desc='highpass',
-                            argstr='-highpass %f',
-                            position=1,
-                            mandatory=True)
-
-
-class Fourier(AFNICommand):
-    """Program to lowpass and/or highpass each voxel time series in a
-    dataset, via the FFT
-
-    For complete details, see the `3dFourier Documentation.
-    <http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dfourier.html>`_
+class AutoTLRC(AFNICommand):
+    """A minmal wrapper for the AutoTLRC script
+    The only option currently supported is no_ss.
+    For complete details, see the `3dQwarp Documentation.
+    <https://afni.nimh.nih.gov/pub/dist/doc/program_help/@auto_tlrc.html>`_
 
     Examples
     ========
-
-    >>> from nipype.interfaces import afni as afni
-    >>> fourier = afni.Fourier()
-    >>> fourier.inputs.in_file = 'functional.nii'
-    >>> fourier.inputs.args = '-retrend'
-    >>> fourier.inputs.highpass = 0.005
-    >>> fourier.inputs.lowpass = 0.1
-    >>> res = fourier.run() # doctest: +SKIP
+    >>> from nipype.interfaces import afni
+    >>> autoTLRC = afni.AutoTLRC()
+    >>> autoTLRC.inputs.in_file = 'structural.nii'
+    >>> autoTLRC.inputs.no_ss = True
+    >>> autoTLRC.inputs.base = "TT_N27+tlrc"
+    >>> autoTLRC.cmdline # doctest: +ALLOW_UNICODE
+    '@auto_tlrc -base TT_N27+tlrc -input structural.nii -no_ss'
+    >>> res = autoTLRC.run()  # doctest: +SKIP
 
     """
-
-    _cmd = '3dFourier'
-    input_spec = FourierInputSpec
+    _cmd = '@auto_tlrc'
+    input_spec = AutoTLRCInputSpec
     output_spec = AFNICommandOutputSpec
-
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        ext = '.HEAD'
+        outputs['out_file'] = os.path.abspath(self._gen_fname(self.inputs.in_file, suffix='+tlrc')+ext)
+        return outputs
 
 class BandpassInputSpec(AFNICommandInputSpec):
     in_file = File(
@@ -807,57 +774,54 @@ class BandpassInputSpec(AFNICommandInputSpec):
         exists=True)
     despike = traits.Bool(
         argstr='-despike',
-        desc="""Despike each time series before other processing.
-                  ++ Hopefully, you don't actually need to do this,
-                     which is why it is optional.""")
+        desc='Despike each time series before other processing. Hopefully, '
+             'you don\'t actually need to do this, which is why it is '
+             'optional.')
     orthogonalize_file = InputMultiPath(
         File(exists=True),
-        argstr="-ort %s",
-        desc="""Also orthogonalize input to columns in f.1D
-                   ++ Multiple '-ort' options are allowed.""")
+        argstr='-ort %s',
+        desc='Also orthogonalize input to columns in f.1D. Multiple \'-ort\' '
+             'options are allowed.')
     orthogonalize_dset = File(
         exists=True,
-        argstr="-dsort %s",
-        desc="""Orthogonalize each voxel to the corresponding
-                   voxel time series in dataset 'fset', which must
-                   have the same spatial and temporal grid structure
-                   as the main input dataset.
-                   ++ At present, only one '-dsort' option is allowed.""")
+        argstr='-dsort %s',
+        desc='Orthogonalize each voxel to the corresponding voxel time series '
+             'in dataset \'fset\', which must have the same spatial and '
+             'temporal grid structure as the main input dataset. At present, '
+             'only one \'-dsort\' option is allowed.')
     no_detrend = traits.Bool(
         argstr='-nodetrend',
-        desc="""Skip the quadratic detrending of the input that
-                    occurs before the FFT-based bandpassing.
-                   ++ You would only want to do this if the dataset
-                      had been detrended already in some other program.""")
+        desc='Skip the quadratic detrending of the input that occurs before '
+             'the FFT-based bandpassing. You would only want to do this if '
+             'the dataset had been detrended already in some other program.')
     tr = traits.Float(
-        argstr="-dt %f",
-        desc="set time step (TR) in sec [default=from dataset header]")
+        argstr='-dt %f',
+        desc='Set time step (TR) in sec [default=from dataset header].')
     nfft = traits.Int(
         argstr='-nfft %d',
-        desc="set the FFT length [must be a legal value]")
+        desc='Set the FFT length [must be a legal value].')
     normalize = traits.Bool(
         argstr='-norm',
-        desc="""Make all output time series have L2 norm = 1
-                   ++ i.e., sum of squares = 1""")
+        desc='Make all output time series have L2 norm = 1 (i.e., sum of '
+             'squares = 1).')
     automask = traits.Bool(
         argstr='-automask',
-        desc="Create a mask from the input dataset")
+        desc='Create a mask from the input dataset.')
     blur = traits.Float(
         argstr='-blur %f',
-        desc="""Blur (inside the mask only) with a filter
-                    width (FWHM) of 'fff' millimeters.""")
+        desc='Blur (inside the mask only) with a filter width (FWHM) of '
+             '\'fff\' millimeters.')
     localPV = traits.Float(
         argstr='-localPV %f',
-        desc="""Replace each vector by the local Principal Vector
-                    (AKA first singular vector) from a neighborhood
-                    of radius 'rrr' millimiters.
-                   ++ Note that the PV time series is L2 normalized.
-                   ++ This option is mostly for Bob Cox to have fun with.""")
+        desc='Replace each vector by the local Principal Vector (AKA first '
+             'singular vector) from a neighborhood of radius \'rrr\' '
+             'millimeters. Note that the PV time series is L2 normalized. '
+             'This option is mostly for Bob Cox to have fun with.')
     notrans = traits.Bool(
         argstr='-notrans',
-        desc="""Don't check for initial positive transients in the data:
-                   ++ The test is a little slow, so skipping it is OK,
-                   if you KNOW the data time series are transient-free.""")
+        desc='Don\'t check for initial positive transients in the data. '
+             'The test is a little slow, so skipping it is OK, if you KNOW '
+             'the data time series are transient-free.')
 
 
 class Bandpass(AFNICommand):
@@ -865,773 +829,26 @@ class Bandpass(AFNICommand):
     dataset, offering more/different options than Fourier
 
     For complete details, see the `3dBandpass Documentation.
-    <http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dbandpass.html>`_
+    <https://afni.nimh.nih.gov/pub/dist/doc/program_help/3dBandpass.html>`_
 
     Examples
     ========
 
-    >>> from nipype.interfaces import afni as afni
+    >>> from nipype.interfaces import afni
     >>> from nipype.testing import  example_data
     >>> bandpass = afni.Bandpass()
-    >>> bandpass.inputs.in_file = example_data('functional.nii')
+    >>> bandpass.inputs.in_file = 'functional.nii'
     >>> bandpass.inputs.highpass = 0.005
     >>> bandpass.inputs.lowpass = 0.1
-    >>> res = bandpass.run() # doctest: +SKIP
+    >>> bandpass.cmdline  # doctest: +ALLOW_UNICODE
+    '3dBandpass -prefix functional_bp 0.005000 0.100000 functional.nii'
+    >>> res = bandpass.run()  # doctest: +SKIP
 
     """
 
     _cmd = '3dBandpass'
     input_spec = BandpassInputSpec
     output_spec = AFNICommandOutputSpec
-
-
-class ZCutUpInputSpec(AFNICommandInputSpec):
-    in_file = File(desc='input file to 3dZcutup',
-                   argstr='%s',
-                   position=-1,
-                   mandatory=True,
-                   exists=True,
-                   copyfile=False)
-    out_file = File(name_template="%s_zcupup", desc='output image file name',
-                    argstr='-prefix %s', name_source="in_file")
-    keep = traits.Str(desc='slice range to keep in output',
-                      argstr='-keep %s')
-
-
-class ZCutUp(AFNICommand):
-    """Cut z-slices from a volume using AFNI 3dZcutup command
-
-    For complete details, see the `3dZcutup Documentation.
-    <http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dZcutup.html>`_
-
-    Examples
-    ========
-
-    >>> from nipype.interfaces import afni as afni
-    >>> zcutup = afni.ZCutUp()
-    >>> zcutup.inputs.in_file = 'functional.nii'
-    >>> zcutup.inputs.out_file = 'functional_zcutup.nii'
-    >>> zcutup.inputs.keep= '0 10'
-    >>> res = zcutup.run() # doctest: +SKIP
-
-    """
-
-    _cmd = '3dZcutup'
-    input_spec = ZCutUpInputSpec
-    output_spec = AFNICommandOutputSpec
-
-
-class AllineateInputSpec(AFNICommandInputSpec):
-    in_file = File(desc='input file to 3dAllineate',
-                   argstr='-source %s',
-                   position=-1,
-                   mandatory=True,
-                   exists=True,
-                   copyfile=False)
-    reference = File(
-        exists=True,
-        argstr='-base %s',
-        desc="""file to be used as reference, the first volume will be used
-if not given the reference will be the first volume of in_file.""")
-    out_file = File(
-        desc='output file from 3dAllineate',
-        argstr='-prefix %s',
-        position=-2,
-        name_source='%s_allineate',
-        genfile=True)
-
-    out_param_file = File(
-        argstr='-1Dparam_save %s',
-        desc='Save the warp parameters in ASCII (.1D) format.')
-    in_param_file = File(
-        exists=True,
-        argstr='-1Dparam_apply %s',
-        desc="""Read warp parameters from file and apply them to
-                  the source dataset, and produce a new dataset""")
-    out_matrix = File(
-        argstr='-1Dmatrix_save %s',
-        desc='Save the transformation matrix for each volume.')
-    in_matrix = File(desc='matrix to align input file',
-                     argstr='-1Dmatrix_apply %s',
-                     position=-3)
-
-    _cost_funcs = [
-        'leastsq', 'ls',
-        'mutualinfo', 'mi',
-        'corratio_mul', 'crM',
-        'norm_mutualinfo', 'nmi',
-        'hellinger', 'hel',
-        'corratio_add', 'crA',
-        'corratio_uns', 'crU']
-
-    cost = traits.Enum(
-        *_cost_funcs, argstr='-cost %s',
-        desc="""Defines the 'cost' function that defines the matching
-                between the source and the base""")
-    _interp_funcs = [
-        'nearestneighbour', 'linear', 'cubic', 'quintic', 'wsinc5']
-    interpolation = traits.Enum(
-        *_interp_funcs[:-1], argstr='-interp %s',
-        desc='Defines interpolation method to use during matching')
-    final_interpolation = traits.Enum(
-        *_interp_funcs, argstr='-final %s',
-        desc='Defines interpolation method used to create the output dataset')
-
-    #   TECHNICAL OPTIONS (used for fine control of the program):
-    nmatch = traits.Int(
-        argstr='-nmatch %d',
-        desc='Use at most n scattered points to match the datasets.')
-    no_pad = traits.Bool(
-        argstr='-nopad',
-        desc='Do not use zero-padding on the base image.')
-    zclip = traits.Bool(
-        argstr='-zclip',
-        desc='Replace negative values in the input datasets (source & base) with zero.')
-    convergence = traits.Float(
-        argstr='-conv %f',
-        desc='Convergence test in millimeters (default 0.05mm).')
-    usetemp = traits.Bool(argstr='-usetemp', desc='temporary file use')
-    check = traits.List(
-        traits.Enum(*_cost_funcs), argstr='-check %s',
-        desc="""After cost functional optimization is done, start at the
-                final parameters and RE-optimize using this new cost functions.
-                If the results are too different, a warning message will be
-                printed.  However, the final parameters from the original
-                optimization will be used to create the output dataset.""")
-
-    #      ** PARAMETERS THAT AFFECT THE COST OPTIMIZATION STRATEGY **
-    one_pass = traits.Bool(
-        argstr='-onepass',
-        desc="""Use only the refining pass -- do not try a coarse
-                resolution pass first.  Useful if you know that only
-                small amounts of image alignment are needed.""")
-    two_pass = traits.Bool(
-        argstr='-twopass',
-        desc="""Use a two pass alignment strategy for all volumes, searching
-              for a large rotation+shift and then refining the alignment.""")
-    two_blur = traits.Float(
-        argstr='-twoblur',
-        desc='Set the blurring radius for the first pass in mm.')
-    two_first = traits.Bool(
-        argstr='-twofirst',
-        desc="""Use -twopass on the first image to be registered, and
-               then on all subsequent images from the source dataset,
-               use results from the first image's coarse pass to start
-               the fine pass.""")
-    two_best = traits.Int(
-        argstr='-twobest %d',
-        desc="""In the coarse pass, use the best 'bb' set of initial
-               points to search for the starting point for the fine
-               pass.  If bb==0, then no search is made for the best
-               starting point, and the identity transformation is
-               used as the starting point.  [Default=5; min=0 max=11]""")
-    fine_blur = traits.Float(
-        argstr='-fineblur %f',
-        desc="""Set the blurring radius to use in the fine resolution
-               pass to 'x' mm.  A small amount (1-2 mm?) of blurring at
-               the fine step may help with convergence, if there is
-               some problem, especially if the base volume is very noisy.
-               [Default == 0 mm = no blurring at the final alignment pass]""")
-
-    center_of_mass = traits.Str(
-        argstr='-cmass%s',
-        desc='Use the center-of-mass calculation to bracket the shifts.')
-    autoweight = traits.Str(
-        argstr='-autoweight%s',
-        desc="""Compute a weight function using the 3dAutomask
-               algorithm plus some blurring of the base image.""")
-    automask = traits.Int(
-        argstr='-automask+%d',
-        desc="""Compute a mask function, set a value for dilation or 0.""")
-    autobox = traits.Bool(
-        argstr='-autobox',
-        desc="""Expand the -automask function to enclose a rectangular
-                box that holds the irregular mask.""")
-    nomask = traits.Bool(
-        argstr='-nomask',
-        desc="""Don't compute the autoweight/mask; if -weight is not
-                also used, then every voxel will be counted equally.""")
-    weight_file = File(
-        argstr='-weight %s', exists=True,
-        desc="""Set the weighting for each voxel in the base dataset;
-                larger weights mean that voxel count more in the cost function.
-                Must be defined on the same grid as the base dataset""")
-    out_weight_file = traits.File(
-        argstr='-wtprefix %s',
-        desc="""Write the weight volume to disk as a dataset""")
-
-    source_mask = File(
-        exists=True, argstr='-source_mask %s',
-        desc='mask the input dataset')
-    source_automask = traits.Int(
-        argstr='-source_automask+%d',
-        desc='Automatically mask the source dataset with dilation or 0.')
-    warp_type = traits.Enum(
-        'shift_only', 'shift_rotate', 'shift_rotate_scale', 'affine_general',
-        argstr='-warp %s',
-        desc='Set the warp type.')
-    warpfreeze = traits.Bool(
-        argstr='-warpfreeze',
-        desc='Freeze the non-rigid body parameters after first volume.')
-    replacebase = traits.Bool(
-        argstr='-replacebase',
-        desc="""If the source has more than one volume, then after the first
-                volume is aligned to the base""")
-    replacemeth = traits.Enum(
-        *_cost_funcs,
-        argstr='-replacemeth %s',
-        desc="""After first volume is aligned, switch method for later volumes.
-                For use with '-replacebase'.""")
-    epi = traits.Bool(
-        argstr='-EPI',
-        desc="""Treat the source dataset as being composed of warped
-                EPI slices, and the base as comprising anatomically
-                'true' images.  Only phase-encoding direction image
-                shearing and scaling will be allowed with this option.""")
-    master = File(
-        exists=True, argstr='-master %s',
-        desc='Write the output dataset on the same grid as this file')
-    newgrid = traits.Float(
-        argstr='-newgrid %f',
-        desc='Write the output dataset using isotropic grid spacing in mm')
-
-    # Non-linear experimental
-    _nwarp_types = ['bilinear',
-                    'cubic', 'quintic', 'heptic', 'nonic',
-                    'poly3', 'poly5', 'poly7',  'poly9']  # same non-hellenistic
-    nwarp = traits.Enum(
-        *_nwarp_types, argstr='-nwarp %s',
-        desc='Experimental nonlinear warping: bilinear or legendre poly.')
-    _dirs = ['X', 'Y', 'Z', 'I', 'J', 'K']
-    nwarp_fixmot = traits.List(
-        traits.Enum(*_dirs),
-        argstr='-nwarp_fixmot%s',
-        desc='To fix motion along directions.')
-    nwarp_fixdep = traits.List(
-        traits.Enum(*_dirs),
-        argstr='-nwarp_fixdep%s',
-        desc='To fix non-linear warp dependency along directions.')
-
-
-class AllineateOutputSpec(TraitedSpec):
-    out_file = File(desc='output image file name')
-    matrix = File(desc='matrix to align input file')
-
-
-class Allineate(AFNICommand):
-    """Program to align one dataset (the 'source') to a base dataset
-
-    For complete details, see the `3dAllineate Documentation.
-    <http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dAllineate.html>`_
-
-    Examples
-    ========
-
-    >>> from nipype.interfaces import afni as afni
-    >>> allineate = afni.Allineate()
-    >>> allineate.inputs.in_file = 'functional.nii'
-    >>> allineate.inputs.out_file= 'functional_allineate.nii'
-    >>> allineate.inputs.in_matrix= 'cmatrix.mat'
-    >>> res = allineate.run() # doctest: +SKIP
-
-    """
-
-    _cmd = '3dAllineate'
-    input_spec = AllineateInputSpec
-    output_spec = AllineateOutputSpec
-
-    def _format_arg(self, name, trait_spec, value):
-        if name == 'nwarp_fixmot' or name == 'nwarp_fixdep':
-            arg = ' '.join([trait_spec.argstr % v for v in value])
-            return arg
-        return super(Allineate, self)._format_arg(name, trait_spec, value)
-
-    def _list_outputs(self):
-        outputs = self.output_spec().get()
-        if not isdefined(self.inputs.out_file):
-            outputs['out_file'] = self._gen_filename(self.inputs.in_file,
-                                                  suffix=self.inputs.suffix)
-        else:
-            outputs['out_file'] = os.path.abspath(self.inputs.out_file)
-        return outputs
-
-    def _gen_filename(self, name):
-        if name == 'out_file':
-            return self._list_outputs()[name]
-
-
-class MaskaveInputSpec(AFNICommandInputSpec):
-    in_file = File(desc='input file to 3dmaskave',
-                   argstr='%s',
-                   position=-2,
-                   mandatory=True,
-                   exists=True,
-                   copyfile=False)
-    out_file = File(name_template="%s_maskave.1D", desc='output image file name',
-                    keep_extension=True,
-                    argstr="> %s", name_source="in_file", position=-1)
-    mask = File(desc='matrix to align input file',
-                argstr='-mask %s',
-                position=1,
-                exists=True)
-    quiet = traits.Bool(desc='matrix to align input file',
-                        argstr='-quiet',
-                        position=2)
-
-
-class Maskave(AFNICommand):
-    """Computes average of all voxels in the input dataset
-    which satisfy the criterion in the options list
-
-    For complete details, see the `3dmaskave Documentation.
-    <http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dmaskave.html>`_
-
-    Examples
-    ========
-
-    >>> from nipype.interfaces import afni as afni
-    >>> maskave = afni.Maskave()
-    >>> maskave.inputs.in_file = 'functional.nii'
-    >>> maskave.inputs.mask= 'seed_mask.nii'
-    >>> maskave.inputs.quiet= True
-    >>> maskave.cmdline #doctest: +ELLIPSIS
-    '3dmaskave -mask seed_mask.nii -quiet functional.nii > functional_maskave.1D'
-    >>> res = maskave.run() # doctest: +SKIP
-
-    """
-
-    _cmd = '3dmaskave'
-    input_spec = MaskaveInputSpec
-    output_spec = AFNICommandOutputSpec
-
-
-class SkullStripInputSpec(AFNICommandInputSpec):
-    in_file = File(desc='input file to 3dSkullStrip',
-                   argstr='-input %s',
-                   position=1,
-                   mandatory=True,
-                   exists=True,
-                   copyfile=False)
-    out_file = File(name_template="%s_skullstrip", desc='output image file name',
-                    argstr='-prefix %s', name_source="in_file")
-
-
-class SkullStrip(AFNICommand):
-    """A program to extract the brain from surrounding
-    tissue from MRI T1-weighted images
-
-    For complete details, see the `3dSkullStrip Documentation.
-    <http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dSkullStrip.html>`_
-
-    Examples
-    ========
-
-    >>> from nipype.interfaces import afni as afni
-    >>> skullstrip = afni.SkullStrip()
-    >>> skullstrip.inputs.in_file = 'functional.nii'
-    >>> skullstrip.inputs.args = '-o_ply'
-    >>> res = skullstrip.run() # doctest: +SKIP
-
-    """
-    _cmd = '3dSkullStrip'
-    input_spec = SkullStripInputSpec
-    output_spec = AFNICommandOutputSpec
-
-
-class TCatInputSpec(AFNICommandInputSpec):
-    in_files = InputMultiPath(
-        File(exists=True),
-        desc='input file to 3dTcat',
-        argstr=' %s',
-        position=-1,
-        mandatory=True,
-        copyfile=False)
-    out_file = File(name_template="%s_tcat", desc='output image file name',
-                    argstr='-prefix %s', name_source="in_files")
-    rlt = traits.Str(desc='options', argstr='-rlt%s', position=1)
-
-
-class TCat(AFNICommand):
-    """Concatenate sub-bricks from input datasets into
-    one big 3D+time dataset
-
-    For complete details, see the `3dTcat Documentation.
-    <http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dTcat.html>`_
-
-    Examples
-    ========
-
-    >>> from nipype.interfaces import afni as afni
-    >>> tcat = afni.TCat()
-    >>> tcat.inputs.in_files = ['functional.nii', 'functional2.nii']
-    >>> tcat.inputs.out_file= 'functional_tcat.nii'
-    >>> tcat.inputs.rlt = '+'
-    >>> res = tcat.run() # doctest: +SKIP
-
-    """
-
-    _cmd = '3dTcat'
-    input_spec = TCatInputSpec
-    output_spec = AFNICommandOutputSpec
-
-
-class FimInputSpec(AFNICommandInputSpec):
-    in_file = File(desc='input file to 3dfim+',
-                   argstr=' -input %s',
-                   position=1,
-                   mandatory=True,
-                   exists=True,
-                   copyfile=False)
-    out_file = File(name_template="%s_fim", desc='output image file name',
-                    argstr='-bucket %s', name_source="in_file")
-    ideal_file = File(desc='ideal time series file name',
-                      argstr='-ideal_file %s',
-                      position=2,
-                      mandatory=True,
-                      exists=True)
-    fim_thr = traits.Float(desc='fim internal mask threshold value',
-                           argstr='-fim_thr %f', position=3)
-    out = traits.Str(desc='Flag to output the specified parameter',
-                     argstr='-out %s', position=4)
-
-
-class Fim(AFNICommand):
-    """Program to calculate the cross-correlation of
-    an ideal reference waveform with the measured FMRI
-    time series for each voxel
-
-    For complete details, see the `3dfim+ Documentation.
-    <http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dfim+.html>`_
-
-    Examples
-    ========
-
-    >>> from nipype.interfaces import afni as afni
-    >>> fim = afni.Fim()
-    >>> fim.inputs.in_file = 'functional.nii'
-    >>> fim.inputs.ideal_file= 'seed.1D'
-    >>> fim.inputs.out_file = 'functional_corr.nii'
-    >>> fim.inputs.out = 'Correlation'
-    >>> fim.inputs.fim_thr = 0.0009
-    >>> res = fim.run() # doctest: +SKIP
-
-    """
-
-    _cmd = '3dfim+'
-    input_spec = FimInputSpec
-    output_spec = AFNICommandOutputSpec
-
-
-class TCorrelateInputSpec(AFNICommandInputSpec):
-    xset = File(desc='input xset',
-                argstr=' %s',
-                position=-2,
-                mandatory=True,
-                exists=True,
-                copyfile=False)
-    yset = File(desc='input yset',
-                argstr=' %s',
-                position=-1,
-                mandatory=True,
-                exists=True,
-                copyfile=False)
-    out_file = File(name_template="%s_tcorr", desc='output image file name',
-                    argstr='-prefix %s', name_source="xset")
-    pearson = traits.Bool(desc='Correlation is the normal' +
-                          ' Pearson correlation coefficient',
-                          argstr='-pearson',
-                          position=1)
-    polort = traits.Int(desc='Remove polynomical trend of order m',
-                        argstr='-polort %d', position=2)
-
-
-class TCorrelate(AFNICommand):
-    """Computes the correlation coefficient between corresponding voxel
-    time series in two input 3D+time datasets 'xset' and 'yset'
-
-    For complete details, see the `3dTcorrelate Documentation.
-    <http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dTcorrelate.html>`_
-
-    Examples
-    ========
-
-    >>> from nipype.interfaces import afni as afni
-    >>> tcorrelate = afni.TCorrelate()
-    >>> tcorrelate.inputs.xset= 'u_rc1s1_Template.nii'
-    >>> tcorrelate.inputs.yset = 'u_rc1s2_Template.nii'
-    >>> tcorrelate.inputs.out_file = 'functional_tcorrelate.nii.gz'
-    >>> tcorrelate.inputs.polort = -1
-    >>> tcorrelate.inputs.pearson = True
-    >>> res = tcarrelate.run() # doctest: +SKIP
-
-    """
-
-    _cmd = '3dTcorrelate'
-    input_spec = TCorrelateInputSpec
-    output_spec = AFNICommandOutputSpec
-
-
-class TCorr1DInputSpec(AFNICommandInputSpec):
-    xset = File(desc = '3d+time dataset input',
-                  argstr = ' %s',
-                  position = -2,
-                  mandatory = True,
-                  exists = True,
-                  copyfile=False)
-    y_1d = File(desc = '1D time series file input',
-                   argstr = ' %s',
-                   position = -1,
-                   mandatory = True,
-                   exists = True)
-    out_file = File(desc = 'output filename prefix',
-                   name_template='%s_correlation.nii.gz',
-                   argstr = '-prefix %s',
-                   name_source = 'xset',
-                   keep_extension = True)
-    pearson = traits.Bool(desc='Correlation is the normal' +
-                   ' Pearson correlation coefficient',
-                   argstr=' -pearson',
-                   xor=['spearman','quadrant','ktaub'],
-                   position=1)
-    spearman = traits.Bool(desc='Correlation is the' +
-                   ' Spearman (rank) correlation coefficient',
-                   argstr=' -spearman',
-                   xor=['pearson','quadrant','ktaub'],
-                   position=1)
-    quadrant = traits.Bool(desc='Correlation is the' +
-                   ' quadrant correlation coefficient',
-                   argstr=' -quadrant',
-                   xor=['pearson','spearman','ktaub'],
-                   position=1)
-    ktaub = traits.Bool(desc='Correlation is the' +
-                   ' Kendall\'s tau_b correlation coefficient',
-                   argstr=' -ktaub',
-                   xor=['pearson','spearman','quadrant'],
-                   position=1)
-
-
-
-class TCorr1DOutputSpec(TraitedSpec):
-    out_file = File(desc = 'output file containing correlations',
-                    exists = True)
-
-
-class TCorr1D(AFNICommand):
-    """Computes the correlation coefficient between each voxel time series
-    in the input 3D+time dataset.
-    For complete details, see the `3dTcorr1D Documentation.
-    <http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dTcorr1D.html>`_
-
-    >>> from nipype.interfaces import afni as afni
-    >>> tcorr1D = afni.TCorr1D()
-    >>> tcorr1D.inputs.xset= 'u_rc1s1_Template.nii'
-    >>> tcorr1D.inputs.y_1d = 'seed.1D'
-    >>> tcorr1D.cmdline
-    '3dTcorr1D -prefix u_rc1s1_Template_correlation.nii.gz  u_rc1s1_Template.nii  seed.1D'
-    >>> res = tcorr1D.run() # doctest: +SKIP
-    """
-
-    _cmd = '3dTcorr1D'
-    input_spec = TCorr1DInputSpec
-    output_spec = TCorr1DOutputSpec
-
-
-class BrickStatInputSpec(AFNICommandInputSpec):
-    in_file = File(desc='input file to 3dmaskave',
-                   argstr='%s',
-                   position=-1,
-                   mandatory=True,
-                   exists=True)
-
-    mask = File(desc='-mask dset = use dset as mask to include/exclude voxels',
-                argstr='-mask %s',
-                position=2,
-                exists=True)
-
-    min = traits.Bool(desc='print the minimum value in dataset',
-                      argstr='-min',
-                      position=1)
-
-
-class BrickStatOutputSpec(TraitedSpec):
-    min_val = traits.Float(desc='output')
-
-
-class BrickStat(AFNICommand):
-    """Compute maximum and/or minimum voxel values of an input dataset
-
-    For complete details, see the `3dBrickStat Documentation.
-    <http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dBrickStat.html>`_
-
-    Examples
-    ========
-
-    >>> from nipype.interfaces import afni as afni
-    >>> brickstat = afni.BrickStat()
-    >>> brickstat.inputs.in_file = 'functional.nii'
-    >>> brickstat.inputs.mask = 'skeleton_mask.nii.gz'
-    >>> brickstat.inputs.min = True
-    >>> res = brickstat.run() # doctest: +SKIP
-
-    """
-    _cmd = '3dBrickStat'
-    input_spec = BrickStatInputSpec
-    output_spec = BrickStatOutputSpec
-
-    def aggregate_outputs(self, runtime=None, needed_outputs=None):
-
-        outputs = self._outputs()
-
-        outfile = os.path.join(os.getcwd(), 'stat_result.json')
-
-        if runtime is None:
-            try:
-                min_val = load_json(outfile)['stat']
-            except IOError:
-                return self.run().outputs
-        else:
-            min_val = []
-            for line in runtime.stdout.split('\n'):
-                if line:
-                    values = line.split()
-                    if len(values) > 1:
-                        min_val.append([float(val) for val in values])
-                    else:
-                        min_val.extend([float(val) for val in values])
-
-            if len(min_val) == 1:
-                min_val = min_val[0]
-            save_json(outfile, dict(stat=min_val))
-        outputs.min_val = min_val
-
-        return outputs
-
-
-class ROIStatsInputSpec(CommandLineInputSpec):
-    in_file = File(desc='input file to 3dROIstats',
-                   argstr='%s',
-                   position=-1,
-                   mandatory=True,
-                   exists=True)
-
-    mask = File(desc='input mask',
-                argstr='-mask %s',
-                position=3,
-                exists=True)
-
-    mask_f2short = traits.Bool(
-        desc='Tells the program to convert a float mask ' +
-        'to short integers, by simple rounding.',
-        argstr='-mask_f2short',
-        position=2)
-
-    quiet = traits.Bool(desc='execute quietly',
-                        argstr='-quiet',
-                        position=1)
-
-    terminal_output = traits.Enum('allatonce',
-                                  desc=('Control terminal output:'
-                                        '`allatonce` - waits till command is '
-                                        'finished to display output'),
-                                  nohash=True, mandatory=True, usedefault=True)
-
-
-class ROIStatsOutputSpec(TraitedSpec):
-    stats =  File(desc='output tab separated values file', exists=True)
-
-
-class ROIStats(CommandLine):
-    """Display statistics over masked regions
-
-    For complete details, see the `3dROIstats Documentation.
-    <http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dROIstats.html>`_
-
-    Examples
-    ========
-
-    >>> from nipype.interfaces import afni as afni
-    >>> roistats = afni.ROIStats()
-    >>> roistats.inputs.in_file = 'functional.nii'
-    >>> roistats.inputs.mask = 'skeleton_mask.nii.gz'
-    >>> roistats.inputs.quiet=True
-    >>> res = roistats.run() # doctest: +SKIP
-
-    """
-    _cmd = '3dROIstats'
-    input_spec = ROIStatsInputSpec
-    output_spec = ROIStatsOutputSpec
-
-    def aggregate_outputs(self, runtime=None, needed_outputs=None):
-        outputs = self._outputs()
-        output_filename = "roi_stats.csv"
-        f = open(output_filename, "w")
-        f.write(runtime.stdout)
-        f.close()
-
-        outputs.stats = os.path.abspath(output_filename)
-        return outputs
-
-
-class CalcInputSpec(AFNICommandInputSpec):
-    in_file_a = File(desc='input file to 3dcalc',
-                     argstr='-a %s', position=0, mandatory=True, exists=True)
-    in_file_b = File(desc='operand file to 3dcalc',
-                     argstr=' -b %s', position=1, exists=True)
-    in_file_c = File(desc='operand file to 3dcalc',
-                     argstr=' -c %s', position=2, exists=True)
-    out_file = File(name_template="%s_calc", desc='output image file name',
-                    argstr='-prefix %s', name_source="in_file_a")
-    expr = traits.Str(desc='expr', argstr='-expr "%s"', position=3,
-                      mandatory=True)
-    start_idx = traits.Int(desc='start index for in_file_a',
-                           requires=['stop_idx'])
-    stop_idx = traits.Int(desc='stop index for in_file_a',
-                          requires=['start_idx'])
-    single_idx = traits.Int(desc='volume index for in_file_a')
-    other = File(desc='other options', argstr='')
-
-
-class Calc(AFNICommand):
-    """This program does voxel-by-voxel arithmetic on 3D datasets
-
-    For complete details, see the `3dcalc Documentation.
-    <http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dcalc.html>`_
-
-    Examples
-    ========
-
-    >>> from nipype.interfaces import afni as afni
-    >>> calc = afni.Calc()
-    >>> calc.inputs.in_file_a = 'functional.nii'
-    >>> calc.inputs.in_file_b = 'functional2.nii'
-    >>> calc.inputs.expr='a*b'
-    >>> calc.inputs.out_file =  'functional_calc.nii.gz'
-    >>> calc.inputs.outputtype = "NIFTI"
-    >>> calc.cmdline #doctest: +ELLIPSIS
-    '3dcalc -a functional.nii  -b functional2.nii -expr "a*b" -prefix functional_calc.nii.gz'
-
-    """
-
-    _cmd = '3dcalc'
-    input_spec = CalcInputSpec
-    output_spec = AFNICommandOutputSpec
-
-    def _format_arg(self, name, trait_spec, value):
-        if name == 'in_file_a':
-            arg = trait_spec.argstr % value
-            if isdefined(self.inputs.start_idx):
-                arg += '[%d..%d]' % (self.inputs.start_idx,
-                                     self.inputs.stop_idx)
-            if isdefined(self.inputs.single_idx):
-                arg += '[%d]' % (self.inputs.single_idx)
-            return arg
-        return super(Calc, self)._format_arg(name, trait_spec, value)
-
-    def _parse_inputs(self, skip=None):
-        """Skip the arguments without argstr metadata
-        """
-        return super(Calc, self)._parse_inputs(
-            skip=('start_idx', 'stop_idx', 'other'))
 
 
 class BlurInMaskInputSpec(AFNICommandInputSpec):
@@ -1642,13 +859,19 @@ class BlurInMaskInputSpec(AFNICommandInputSpec):
         mandatory=True,
         exists=True,
         copyfile=False)
-    out_file = File(name_template='%s_blur', desc='output to the file', argstr='-prefix %s',
-                    name_source='in_file', position=-1)
+    out_file = File(
+        name_template='%s_blur',
+        desc='output to the file',
+        argstr='-prefix %s',
+        name_source='in_file',
+        position=-1)
     mask = File(
-        desc='Mask dataset, if desired.  Blurring will occur only within the mask.  Voxels NOT in the mask will be set to zero in the output.',
+        desc='Mask dataset, if desired.  Blurring will occur only within the '
+             'mask. Voxels NOT in the mask will be set to zero in the output.',
         argstr='-mask %s')
     multimask = File(
-        desc='Multi-mask dataset -- each distinct nonzero value in dataset will be treated as a separate mask for blurring purposes.',
+        desc='Multi-mask dataset -- each distinct nonzero value in dataset '
+             'will be treated as a separate mask for blurring purposes.',
         argstr='-Mmask %s')
     automask = traits.Bool(
         desc='Create an automask from the input dataset.',
@@ -1658,31 +881,36 @@ class BlurInMaskInputSpec(AFNICommandInputSpec):
         argstr='-FWHM %f',
         mandatory=True)
     preserve = traits.Bool(
-        desc='Normally, voxels not in the mask will be set to zero in the output.  If you want the original values in the dataset to be preserved in the output, use this option.',
+        desc='Normally, voxels not in the mask will be set to zero in the '
+             'output. If you want the original values in the dataset to be '
+             'preserved in the output, use this option.',
         argstr='-preserve')
     float_out = traits.Bool(
         desc='Save dataset as floats, no matter what the input data type is.',
         argstr='-float')
-    options = traits.Str(desc='options', argstr='%s', position=2)
+    options = Str(
+        desc='options',
+        argstr='%s',
+        position=2)
 
 
 class BlurInMask(AFNICommand):
-    """ Blurs a dataset spatially inside a mask.  That's all.  Experimental.
+    """Blurs a dataset spatially inside a mask.  That's all.  Experimental.
 
     For complete details, see the `3dBlurInMask Documentation.
-    <http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dBlurInMask.html>
+    <https://afni.nimh.nih.gov/pub/dist/doc/program_help/3dBlurInMask.html>`_
 
     Examples
     ========
 
-    >>> from nipype.interfaces import afni as afni
+    >>> from nipype.interfaces import afni
     >>> bim = afni.BlurInMask()
     >>> bim.inputs.in_file = 'functional.nii'
     >>> bim.inputs.mask = 'mask.nii'
     >>> bim.inputs.fwhm = 5.0
-    >>> bim.cmdline #doctest: +ELLIPSIS
+    >>> bim.cmdline  # doctest: +ELLIPSIS +ALLOW_UNICODE
     '3dBlurInMask -input functional.nii -FWHM 5.000000 -mask mask.nii -prefix functional_blur'
-    >>> res = bim.run()   # doctest: +SKIP
+    >>> res = bim.run()  # doctest: +SKIP
 
     """
 
@@ -1691,209 +919,1051 @@ class BlurInMask(AFNICommand):
     output_spec = AFNICommandOutputSpec
 
 
-class TCorrMapInputSpec(AFNICommandInputSpec):
-    in_file = File(exists=True, argstr='-input %s', mandatory=True, copyfile=False)
-    seeds = File(exists=True, argstr='-seed %s', xor=('seeds_width'))
-    mask = File(exists=True, argstr='-mask %s')
-    automask = traits.Bool(argstr='-automask')
-    polort = traits.Int(argstr='-polort %d')
-    bandpass = traits.Tuple((traits.Float(), traits.Float()),
-                            argstr='-bpass %f %f')
-    regress_out_timeseries = traits.File(exists=True, argstr='-ort %s')
-    blur_fwhm = traits.Float(argstr='-Gblur %f')
-    seeds_width = traits.Float(argstr='-Mseed %f', xor=('seeds'))
-
-    # outputs
-    mean_file = File(argstr='-Mean %s', suffix='_mean', name_source="in_file")
-    zmean = File(argstr='-Zmean %s', suffix='_zmean', name_source="in_file")
-    qmean = File(argstr='-Qmean %s', suffix='_qmean', name_source="in_file")
-    pmean = File(argstr='-Pmean %s', suffix='_pmean', name_source="in_file")
-
-    _thresh_opts = ('absolute_threshold',
-                    'var_absolute_threshold',
-                    'var_absolute_threshold_normalize')
-    thresholds = traits.List(traits.Int())
-    absolute_threshold = File(
-        argstr='-Thresh %f %s', suffix='_thresh',
-        name_source="in_file", xor=_thresh_opts)
-    var_absolute_threshold = File(
-        argstr='-VarThresh %f %f %f %s', suffix='_varthresh',
-        name_source="in_file", xor=_thresh_opts)
-    var_absolute_threshold_normalize = File(
-        argstr='-VarThreshN %f %f %f %s', suffix='_varthreshn',
-        name_source="in_file", xor=_thresh_opts)
-
-    correlation_maps = File(
-        argstr='-CorrMap %s', name_source="in_file")
-    correlation_maps_masked = File(
-        argstr='-CorrMask %s', name_source="in_file")
-
-    _expr_opts = ('average_expr', 'average_expr_nonzero', 'sum_expr')
-    expr = traits.Str()
-    average_expr = File(
-        argstr='-Aexpr %s %s', suffix='_aexpr',
-        name_source='in_file', xor=_expr_opts)
-    average_expr_nonzero = File(
-        argstr='-Cexpr %s %s', suffix='_cexpr',
-        name_source='in_file', xor=_expr_opts)
-    sum_expr = File(
-        argstr='-Sexpr %s %s', suffix='_sexpr',
-        name_source='in_file', xor=_expr_opts)
-    histogram_bin_numbers = traits.Int()
-    histogram = File(
-        name_source='in_file', argstr='-Hist %d %s', suffix='_hist')
+class BlurToFWHMInputSpec(AFNICommandInputSpec):
+    in_file = File(
+        desc='The dataset that will be smoothed',
+        argstr='-input %s',
+        mandatory=True,
+        exists=True)
+    automask = traits.Bool(
+        desc='Create an automask from the input dataset.',
+        argstr='-automask')
+    fwhm = traits.Float(
+        desc='Blur until the 3D FWHM reaches this value (in mm)',
+        argstr='-FWHM %f')
+    fwhmxy = traits.Float(
+        desc='Blur until the 2D (x,y)-plane FWHM reaches this value (in mm)',
+        argstr='-FWHMxy %f')
+    blurmaster = File(
+        desc='The dataset whose smoothness controls the process.',
+        argstr='-blurmaster %s',
+        exists=True)
+    mask = File(
+        desc='Mask dataset, if desired. Voxels NOT in mask will be set to zero '
+             'in output.',
+        argstr='-blurmaster %s',
+        exists=True)
 
 
-class TCorrMapOutputSpec(TraitedSpec):
+class BlurToFWHM(AFNICommand):
+    """Blurs a 'master' dataset until it reaches a specified FWHM smoothness
+    (approximately).
 
-    mean_file = File()
-    zmean = File()
-    qmean = File()
-    pmean = File()
-    absolute_threshold = File()
-    var_absolute_threshold = File()
-    var_absolute_threshold_normalize = File()
-    correlation_maps = File()
-    correlation_maps_masked = File()
-    average_expr = File()
-    average_expr_nonzero = File()
-    sum_expr = File()
-    histogram = File()
-
-
-class TCorrMap(AFNICommand):
-    """ For each voxel time series, computes the correlation between it
-    and all other voxels, and combines this set of values into the
-    output dataset(s) in some way.
-
-    For complete details, see the `3dTcorrMap Documentation.
-    <http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dTcorrMap.html>
+    For complete details, see the `3dBlurToFWHM Documentation
+    <https://afni.nimh.nih.gov/pub/dist/doc/program_help/3dBlurToFWHM.html>`_
 
     Examples
     ========
 
-    >>> from nipype.interfaces import afni as afni
-    >>> tcm = afni.TCorrMap()
-    >>> tcm.inputs.in_file = 'functional.nii'
-    >>> tcm.inputs.mask = 'mask.nii'
-    >>> tcm.mean_file = '%s_meancorr.nii'
-    >>> res = tcm.run()   # doctest: +SKIP
+    >>> from nipype.interfaces import afni
+    >>> blur = afni.preprocess.BlurToFWHM()
+    >>> blur.inputs.in_file = 'epi.nii'
+    >>> blur.inputs.fwhm = 2.5
+    >>> blur.cmdline  # doctest: +ELLIPSIS +ALLOW_UNICODE
+    '3dBlurToFWHM -FWHM 2.500000 -input epi.nii -prefix epi_afni'
+    >>> res = blur.run()  # doctest: +SKIP
 
     """
-
-    _cmd = '3dTcorrMap'
-    input_spec = TCorrMapInputSpec
-    output_spec = TCorrMapOutputSpec
-    _additional_metadata = ['suffix']
-
-    def _format_arg(self, name, trait_spec, value):
-        if name in self.inputs._thresh_opts:
-            return trait_spec.argstr % self.inputs.thresholds + [value]
-        elif name in self.inputs._expr_opts:
-            return trait_spec.argstr % (self.inputs.expr, value)
-        elif name == 'histogram':
-            return trait_spec.argstr % (self.inputs.histogram_bin_numbers,
-                                        value)
-        else:
-            return super(TCorrMap, self)._format_arg(name, trait_spec, value)
-
-class AutoboxInputSpec(AFNICommandInputSpec):
-    in_file = File(exists=True, mandatory=True, argstr='-input %s',
-                   desc='input file', copyfile=False)
-    padding = traits.Int(
-        argstr='-npad %d',
-        desc='Number of extra voxels to pad on each side of box')
-    out_file = File(argstr="-prefix %s", name_source="in_file")
-    no_clustering = traits.Bool(
-        argstr='-noclust',
-        desc="""Don't do any clustering to find box. Any non-zero
-                voxel will be preserved in the cropped volume.
-                The default method uses some clustering to find the
-                cropping box, and will clip off small isolated blobs.""")
+    _cmd = '3dBlurToFWHM'
+    input_spec = BlurToFWHMInputSpec
+    output_spec = AFNICommandOutputSpec
 
 
-class AutoboxOuputSpec(TraitedSpec):  # out_file not mandatory
-    x_min = traits.Int()
-    x_max = traits.Int()
-    y_min = traits.Int()
-    y_max = traits.Int()
-    z_min = traits.Int()
-    z_max = traits.Int()
+class ClipLevelInputSpec(CommandLineInputSpec):
+    in_file = File(
+        desc='input file to 3dClipLevel',
+        argstr='%s',
+        position=-1,
+        mandatory=True,
+        exists=True)
+    mfrac = traits.Float(
+        desc='Use the number ff instead of 0.50 in the algorithm',
+        argstr='-mfrac %s',
+        position=2)
+    doall = traits.Bool(
+        desc='Apply the algorithm to each sub-brick separately.',
+        argstr='-doall',
+        position=3,
+        xor=('grad'))
+    grad = traits.File(
+        desc='Also compute a \'gradual\' clip level as a function of voxel '
+             'position, and output that to a dataset.',
+        argstr='-grad %s',
+        position=3,
+        xor=('doall'))
 
-    out_file = File(desc='output file')
+
+class ClipLevelOutputSpec(TraitedSpec):
+    clip_val = traits.Float(desc='output')
 
 
-class Autobox(AFNICommand):
-    """ Computes size of a box that fits around the volume.
-    Also can be used to crop the volume to that box.
+class ClipLevel(AFNICommandBase):
+    """Estimates the value at which to clip the anatomical dataset so
+       that background regions are set to zero.
 
-    For complete details, see the `3dAutobox Documentation.
-    <http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dAutobox.html>
+    For complete details, see the `3dClipLevel Documentation.
+    <https://afni.nimh.nih.gov/pub/dist/doc/program_help/3dClipLevel.html>`_
 
     Examples
     ========
 
-    >>> from nipype.interfaces import afni as afni
-    >>> abox = afni.Autobox()
-    >>> abox.inputs.in_file = 'structural.nii'
-    >>> abox.inputs.padding = 5
-    >>> res = abox.run()   # doctest: +SKIP
+    >>> from nipype.interfaces.afni import preprocess
+    >>> cliplevel = preprocess.ClipLevel()
+    >>> cliplevel.inputs.in_file = 'anatomical.nii'
+    >>> cliplevel.cmdline  # doctest: +ALLOW_UNICODE
+    '3dClipLevel anatomical.nii'
+    >>> res = cliplevel.run()  # doctest: +SKIP
 
     """
-
-    _cmd = '3dAutobox'
-    input_spec = AutoboxInputSpec
-    output_spec = AutoboxOuputSpec
+    _cmd = '3dClipLevel'
+    input_spec = ClipLevelInputSpec
+    output_spec = ClipLevelOutputSpec
 
     def aggregate_outputs(self, runtime=None, needed_outputs=None):
+
         outputs = self._outputs()
-        pattern = 'x=(?P<x_min>-?\d+)\.\.(?P<x_max>-?\d+)  y=(?P<y_min>-?\d+)\.\.(?P<y_max>-?\d+)  z=(?P<z_min>-?\d+)\.\.(?P<z_max>-?\d+)'
-        for line in runtime.stderr.split('\n'):
-            m = re.search(pattern, line)
-            if m:
-                d = m.groupdict()
-                for k in d.keys():
-                    d[k] = int(d[k])
-                outputs.set(**d)
-        outputs.set(out_file=self._gen_filename('out_file'))
+
+        outfile = os.path.join(os.getcwd(), 'stat_result.json')
+
+        if runtime is None:
+            try:
+                clip_val = load_json(outfile)['stat']
+            except IOError:
+                return self.run().outputs
+        else:
+            clip_val = []
+            for line in runtime.stdout.split('\n'):
+                if line:
+                    values = line.split()
+                    if len(values) > 1:
+                        clip_val.append([float(val) for val in values])
+                    else:
+                        clip_val.extend([float(val) for val in values])
+
+            if len(clip_val) == 1:
+                clip_val = clip_val[0]
+            save_json(outfile, dict(stat=clip_val))
+        outputs.clip_val = clip_val
+
         return outputs
 
-    def _gen_filename(self, name):
-        if name == 'out_file' and (not isdefined(self.inputs.out_file)):
-            return Undefined
-        return super(Autobox, self)._gen_filename(name)
 
-class RetroicorInputSpec(AFNICommandInputSpec):
-    in_file = File(desc='input file to 3dretroicor',
+class DegreeCentralityInputSpec(CentralityInputSpec):
+    """DegreeCentrality inputspec
+    """
+
+    in_file = File(
+        desc='input file to 3dDegreeCentrality',
+        argstr='%s',
+        position=-1,
+        mandatory=True,
+        exists=True,
+        copyfile=False)
+    sparsity = traits.Float(
+        desc='only take the top percent of connections',
+        argstr='-sparsity %f')
+    oned_file = Str(
+        desc='output filepath to text dump of correlation matrix',
+        argstr='-out1D %s')
+
+
+class DegreeCentralityOutputSpec(AFNICommandOutputSpec):
+    """DegreeCentrality outputspec
+    """
+
+    oned_file = File(
+        desc='The text output of the similarity matrix computed after '
+             'thresholding with one-dimensional and ijk voxel indices, '
+             'correlations, image extents, and affine matrix.')
+
+
+class DegreeCentrality(AFNICommand):
+    """Performs degree centrality on a dataset using a given maskfile
+    via 3dDegreeCentrality
+
+    For complete details, see the `3dDegreeCentrality Documentation.
+    <https://afni.nimh.nih.gov/pub/dist/doc/program_help/3dDegreeCentrality.html>`_
+
+    Examples
+    ========
+
+    >>> from nipype.interfaces import afni
+    >>> degree = afni.DegreeCentrality()
+    >>> degree.inputs.in_file = 'functional.nii'
+    >>> degree.inputs.mask = 'mask.nii'
+    >>> degree.inputs.sparsity = 1 # keep the top one percent of connections
+    >>> degree.inputs.out_file = 'out.nii'
+    >>> degree.cmdline  # doctest: +ALLOW_UNICODE
+    '3dDegreeCentrality -mask mask.nii -prefix out.nii -sparsity 1.000000 functional.nii'
+    >>> res = degree.run()  # doctest: +SKIP
+
+    """
+
+    _cmd = '3dDegreeCentrality'
+    input_spec = DegreeCentralityInputSpec
+    output_spec = DegreeCentralityOutputSpec
+
+    # Re-define generated inputs
+    def _list_outputs(self):
+        # Import packages
+        import os
+
+        # Update outputs dictionary if oned file is defined
+        outputs = super(DegreeCentrality, self)._list_outputs()
+        if self.inputs.oned_file:
+            outputs['oned_file'] = os.path.abspath(self.inputs.oned_file)
+
+        return outputs
+
+
+class DespikeInputSpec(AFNICommandInputSpec):
+    in_file = File(
+        desc='input file to 3dDespike',
+        argstr='%s',
+        position=-1,
+        mandatory=True,
+        exists=True,
+        copyfile=False)
+    out_file = File(
+        name_template='%s_despike',
+        desc='output image file name',
+        argstr='-prefix %s',
+        name_source='in_file')
+
+
+class Despike(AFNICommand):
+    """Removes 'spikes' from the 3D+time input dataset
+
+    For complete details, see the `3dDespike Documentation.
+    <https://afni.nimh.nih.gov/pub/dist/doc/program_help/3dDespike.html>`_
+
+    Examples
+    ========
+
+    >>> from nipype.interfaces import afni
+    >>> despike = afni.Despike()
+    >>> despike.inputs.in_file = 'functional.nii'
+    >>> despike.cmdline  # doctest: +ALLOW_UNICODE
+    '3dDespike -prefix functional_despike functional.nii'
+    >>> res = despike.run()  # doctest: +SKIP
+
+    """
+
+    _cmd = '3dDespike'
+    input_spec = DespikeInputSpec
+    output_spec = AFNICommandOutputSpec
+
+
+class DetrendInputSpec(AFNICommandInputSpec):
+    in_file = File(
+        desc='input file to 3dDetrend',
+        argstr='%s',
+        position=-1,
+        mandatory=True,
+        exists=True,
+        copyfile=False)
+    out_file = File(
+        name_template='%s_detrend',
+        desc='output image file name',
+        argstr='-prefix %s',
+        name_source='in_file')
+
+
+class Detrend(AFNICommand):
+    """This program removes components from voxel time series using
+    linear least squares
+
+    For complete details, see the `3dDetrend Documentation.
+    <https://afni.nimh.nih.gov/pub/dist/doc/program_help/3dDetrend.html>`_
+
+    Examples
+    ========
+
+    >>> from nipype.interfaces import afni
+    >>> detrend = afni.Detrend()
+    >>> detrend.inputs.in_file = 'functional.nii'
+    >>> detrend.inputs.args = '-polort 2'
+    >>> detrend.inputs.outputtype = 'AFNI'
+    >>> detrend.cmdline  # doctest: +ALLOW_UNICODE
+    '3dDetrend -polort 2 -prefix functional_detrend functional.nii'
+    >>> res = detrend.run()  # doctest: +SKIP
+
+    """
+
+    _cmd = '3dDetrend'
+    input_spec = DetrendInputSpec
+    output_spec = AFNICommandOutputSpec
+
+
+class ECMInputSpec(CentralityInputSpec):
+    """ECM inputspec
+    """
+
+    in_file = File(
+        desc='input file to 3dECM',
+        argstr='%s',
+        position=-1,
+        mandatory=True,
+        exists=True,
+        copyfile=False)
+    sparsity = traits.Float(
+        desc='only take the top percent of connections',
+        argstr='-sparsity %f')
+    full = traits.Bool(
+        desc='Full power method; enables thresholding; automatically selected '
+             'if -thresh or -sparsity are set',
+        argstr='-full')
+    fecm = traits.Bool(
+        desc='Fast centrality method; substantial speed increase but cannot '
+             'accomodate thresholding; automatically selected if -thresh or '
+             '-sparsity are not set',
+        argstr='-fecm')
+    shift = traits.Float(
+        desc='shift correlation coefficients in similarity matrix to enforce '
+             'non-negativity, s >= 0.0; default = 0.0 for -full, 1.0 for -fecm',
+        argstr='-shift %f')
+    scale = traits.Float(
+        desc='scale correlation coefficients in similarity matrix to after '
+             'shifting, x >= 0.0; default = 1.0 for -full, 0.5 for -fecm',
+        argstr='-scale %f')
+    eps = traits.Float(
+        desc='sets the stopping criterion for the power iteration; '
+             'l2|v_old - v_new| < eps*|v_old|; default = 0.001',
+        argstr='-eps %f')
+    max_iter = traits.Int(
+        desc='sets the maximum number of iterations to use in the power '
+             'iteration; default = 1000',
+        argstr='-max_iter %d')
+    memory = traits.Float(
+        desc='Limit memory consumption on system by setting the amount of GB '
+             'to limit the algorithm to; default = 2GB',
+        argstr='-memory %f')
+
+
+class ECM(AFNICommand):
+    """Performs degree centrality on a dataset using a given maskfile
+    via the 3dECM command
+
+    For complete details, see the `3dECM Documentation.
+    <https://afni.nimh.nih.gov/pub/dist/doc/program_help/3dECM.html>`_
+
+    Examples
+    ========
+
+    >>> from nipype.interfaces import afni
+    >>> ecm = afni.ECM()
+    >>> ecm.inputs.in_file = 'functional.nii'
+    >>> ecm.inputs.mask = 'mask.nii'
+    >>> ecm.inputs.sparsity = 0.1 # keep top 0.1% of connections
+    >>> ecm.inputs.out_file = 'out.nii'
+    >>> ecm.cmdline  # doctest: +ALLOW_UNICODE
+    '3dECM -mask mask.nii -prefix out.nii -sparsity 0.100000 functional.nii'
+    >>> res = ecm.run()  # doctest: +SKIP
+
+    """
+
+    _cmd = '3dECM'
+    input_spec = ECMInputSpec
+    output_spec = AFNICommandOutputSpec
+
+
+class FimInputSpec(AFNICommandInputSpec):
+    in_file = File(
+        desc='input file to 3dfim+',
+        argstr='-input %s',
+        position=1,
+        mandatory=True,
+        exists=True,
+        copyfile=False)
+    out_file = File(
+        name_template='%s_fim',
+        desc='output image file name',
+        argstr='-bucket %s',
+        name_source='in_file')
+    ideal_file = File(
+        desc='ideal time series file name',
+        argstr='-ideal_file %s',
+        position=2,
+        mandatory=True,
+        exists=True)
+    fim_thr = traits.Float(
+        desc='fim internal mask threshold value',
+        argstr='-fim_thr %f',
+        position=3)
+    out = Str(
+        desc='Flag to output the specified parameter',
+        argstr='-out %s',
+        position=4)
+
+
+class Fim(AFNICommand):
+    """Program to calculate the cross-correlation of an ideal reference
+    waveform with the measured FMRI time series for each voxel.
+
+    For complete details, see the `3dfim+ Documentation.
+    <https://afni.nimh.nih.gov/pub/dist/doc/program_help/3dfim+.html>`_
+
+    Examples
+    ========
+
+    >>> from nipype.interfaces import afni
+    >>> fim = afni.Fim()
+    >>> fim.inputs.in_file = 'functional.nii'
+    >>> fim.inputs.ideal_file= 'seed.1D'
+    >>> fim.inputs.out_file = 'functional_corr.nii'
+    >>> fim.inputs.out = 'Correlation'
+    >>> fim.inputs.fim_thr = 0.0009
+    >>> fim.cmdline  # doctest: +ALLOW_UNICODE
+    '3dfim+ -input functional.nii -ideal_file seed.1D -fim_thr 0.000900 -out Correlation -bucket functional_corr.nii'
+    >>> res = fim.run()  # doctest: +SKIP
+
+    """
+
+    _cmd = '3dfim+'
+    input_spec = FimInputSpec
+    output_spec = AFNICommandOutputSpec
+
+
+class FourierInputSpec(AFNICommandInputSpec):
+    in_file = File(
+        desc='input file to 3dFourier',
+        argstr='%s',
+        position=-1,
+        mandatory=True,
+        exists=True,
+        copyfile=False)
+    out_file = File(
+        name_template='%s_fourier',
+        desc='output image file name',
+        argstr='-prefix %s',
+        name_source='in_file')
+    lowpass = traits.Float(
+        desc='lowpass',
+        argstr='-lowpass %f',
+        mandatory=True)
+    highpass = traits.Float(
+        desc='highpass',
+        argstr='-highpass %f',
+        mandatory=True)
+    retrend = traits.Bool(
+        desc='Any mean and linear trend are removed before filtering. This '
+             'will restore the trend after filtering.',
+        argstr='-retrend')
+
+
+class Fourier(AFNICommand):
+    """Program to lowpass and/or highpass each voxel time series in a
+    dataset, via the FFT
+
+    For complete details, see the `3dFourier Documentation.
+    <https://afni.nimh.nih.gov/pub/dist/doc/program_help/3dFourier.html>`_
+
+    Examples
+    ========
+
+    >>> from nipype.interfaces import afni
+    >>> fourier = afni.Fourier()
+    >>> fourier.inputs.in_file = 'functional.nii'
+    >>> fourier.inputs.retrend = True
+    >>> fourier.inputs.highpass = 0.005
+    >>> fourier.inputs.lowpass = 0.1
+    >>> fourier.cmdline  # doctest: +ALLOW_UNICODE
+    '3dFourier -highpass 0.005000 -lowpass 0.100000 -prefix functional_fourier -retrend functional.nii'
+    >>> res = fourier.run()  # doctest: +SKIP
+
+    """
+
+    _cmd = '3dFourier'
+    input_spec = FourierInputSpec
+    output_spec = AFNICommandOutputSpec
+
+
+class HistInputSpec(CommandLineInputSpec):
+    in_file = File(
+        desc='input file to 3dHist',
+        argstr='-input %s',
+        position=1,
+        mandatory=True,
+        exists=True,
+        copyfile=False)
+    out_file = File(
+        desc='Write histogram to niml file with this prefix',
+        name_template='%s_hist',
+        keep_extension=False,
+        argstr='-prefix %s',
+        name_source=['in_file'])
+    showhist = traits.Bool(
+        False,
+        usedefault=True,
+        desc='write a text visual histogram',
+        argstr='-showhist')
+    out_show = File(
+        name_template='%s_hist.out',
+        desc='output image file name',
+        keep_extension=False,
+        argstr='> %s',
+        name_source='in_file',
+        position=-1)
+    mask = File(
+        desc='matrix to align input file',
+        argstr='-mask %s',
+        exists=True)
+    nbin = traits.Int(
+        desc='number of bins',
+        argstr='-nbin %d')
+    max_value = traits.Float(
+        argstr='-max %f',
+        desc='maximum intensity value')
+    min_value = traits.Float(
+        argstr='-min %f',
+        desc='minimum intensity value')
+    bin_width = traits.Float(
+        argstr='-binwidth %f',
+        desc='bin width')
+
+
+class HistOutputSpec(TraitedSpec):
+    out_file = File(desc='output file', exists=True)
+    out_show = File(desc='output visual histogram')
+
+
+class Hist(AFNICommandBase):
+    """Computes average of all voxels in the input dataset
+    which satisfy the criterion in the options list
+
+    For complete details, see the `3dHist Documentation.
+    <https://afni.nimh.nih.gov/pub/dist/doc/program_help/3dHist.html>`_
+
+    Examples
+    ========
+
+    >>> from nipype.interfaces import afni
+    >>> hist = afni.Hist()
+    >>> hist.inputs.in_file = 'functional.nii'
+    >>> hist.cmdline  # doctest: +ALLOW_UNICODE
+    '3dHist -input functional.nii -prefix functional_hist'
+    >>> res = hist.run()  # doctest: +SKIP
+
+    """
+
+    _cmd = '3dHist'
+    input_spec = HistInputSpec
+    output_spec = HistOutputSpec
+    _redirect_x = True
+
+    def __init__(self, **inputs):
+        super(Hist, self).__init__(**inputs)
+        if not no_afni():
+            version = Info.version()
+
+            # As of AFNI 16.0.00, redirect_x is not needed
+            if isinstance(version[0], int) and version[0] > 15:
+                self._redirect_x = False
+
+    def _parse_inputs(self, skip=None):
+        if not self.inputs.showhist:
+            if skip is None:
+                skip = []
+            skip += ['out_show']
+        return super(Hist, self)._parse_inputs(skip=skip)
+
+
+    def _list_outputs(self):
+        outputs = super(Hist, self)._list_outputs()
+        outputs['out_file'] += '.niml.hist'
+        if not self.inputs.showhist:
+            outputs['out_show'] = Undefined
+        return outputs
+
+
+class LFCDInputSpec(CentralityInputSpec):
+    """LFCD inputspec
+    """
+
+    in_file = File(desc='input file to 3dLFCD',
                    argstr='%s',
                    position=-1,
                    mandatory=True,
                    exists=True,
                    copyfile=False)
-    out_file = File(desc='output image file name', argstr='-prefix %s', mandatory=True, position=1)
-    card = File(desc='1D cardiac data file for cardiac correction',
-                argstr='-card %s',
-                position=-2,
-                exists=True)
-    resp = File(desc='1D respiratory waveform data for correction',
-                argstr='-resp %s',
-                position=-3,
-                exists=True)
-    threshold = traits.Int(desc='Threshold for detection of R-wave peaks in input (Make sure it is above the background noise level, Try 3/4 or 4/5 times range plus minimum)',
-                           argstr='-threshold %d',
-                           position=-4)
-    order = traits.Int(desc='The order of the correction (2 is typical)',
-                       argstr='-order %s',
-                       position=-5)
 
-    cardphase = File(desc='Filename for 1D cardiac phase output',
-                     argstr='-cardphase %s',
-                     position=-6,
-                     hash_files=False)
-    respphase = File(desc='Filename for 1D resp phase output',
-                     argstr='-respphase %s',
-                     position=-7,
-                     hash_files=False)
+
+class LFCD(AFNICommand):
+    """Performs degree centrality on a dataset using a given maskfile
+    via the 3dLFCD command
+
+    For complete details, see the `3dLFCD Documentation.
+    <https://afni.nimh.nih.gov/pub/dist/doc/program_help/3dLFCD.html>`_
+
+    Examples
+    ========
+
+    >>> from nipype.interfaces import afni
+    >>> lfcd = afni.LFCD()
+    >>> lfcd.inputs.in_file = 'functional.nii'
+    >>> lfcd.inputs.mask = 'mask.nii'
+    >>> lfcd.inputs.thresh = 0.8 # keep all connections with corr >= 0.8
+    >>> lfcd.inputs.out_file = 'out.nii'
+    >>> lfcd.cmdline  # doctest: +ALLOW_UNICODE
+    '3dLFCD -mask mask.nii -prefix out.nii -thresh 0.800000 functional.nii'
+    >>> res = lfcd.run()  # doctest: +SKIP
+    """
+
+    _cmd = '3dLFCD'
+    input_spec = LFCDInputSpec
+    output_spec = AFNICommandOutputSpec
+
+
+class MaskaveInputSpec(AFNICommandInputSpec):
+    in_file = File(
+        desc='input file to 3dmaskave',
+        argstr='%s',
+        position=-2,
+        mandatory=True,
+        exists=True,
+        copyfile=False)
+    out_file = File(
+        name_template='%s_maskave.1D',
+        desc='output image file name',
+        keep_extension=True,
+        argstr='> %s',
+        name_source='in_file',
+        position=-1)
+    mask = File(
+        desc='matrix to align input file',
+        argstr='-mask %s',
+        position=1,
+        exists=True)
+    quiet = traits.Bool(
+        desc='matrix to align input file',
+        argstr='-quiet',
+        position=2)
+
+
+class Maskave(AFNICommand):
+    """Computes average of all voxels in the input dataset
+    which satisfy the criterion in the options list
+
+    For complete details, see the `3dmaskave Documentation.
+    <https://afni.nimh.nih.gov/pub/dist/doc/program_help/3dmaskave.html>`_
+
+    Examples
+    ========
+
+    >>> from nipype.interfaces import afni
+    >>> maskave = afni.Maskave()
+    >>> maskave.inputs.in_file = 'functional.nii'
+    >>> maskave.inputs.mask= 'seed_mask.nii'
+    >>> maskave.inputs.quiet= True
+    >>> maskave.cmdline  # doctest: +ELLIPSIS +ALLOW_UNICODE
+    '3dmaskave -mask seed_mask.nii -quiet functional.nii > functional_maskave.1D'
+    >>> res = maskave.run()  # doctest: +SKIP
+
+    """
+
+    _cmd = '3dmaskave'
+    input_spec = MaskaveInputSpec
+    output_spec = AFNICommandOutputSpec
+
+
+class MeansInputSpec(AFNICommandInputSpec):
+    in_file_a = File(
+        desc='input file to 3dMean',
+        argstr='%s',
+        position=-2,
+        mandatory=True,
+        exists=True)
+    in_file_b = File(
+        desc='another input file to 3dMean',
+        argstr='%s',
+        position=-1,
+        exists=True)
+    datum = traits.Str(
+        desc='Sets the data type of the output dataset',
+        argstr='-datum %s')
+    out_file = File(
+        name_template='%s_mean',
+        desc='output image file name',
+        argstr='-prefix %s',
+        name_source='in_file_a')
+    scale = Str(
+        desc='scaling of output',
+        argstr='-%sscale')
+    non_zero = traits.Bool(
+        desc='use only non-zero values',
+        argstr='-non_zero')
+    std_dev = traits.Bool(
+        desc='calculate std dev',
+        argstr='-stdev')
+    sqr = traits.Bool(
+        desc='mean square instead of value',
+        argstr='-sqr')
+    summ = traits.Bool(
+        desc='take sum, (not average)',
+        argstr='-sum')
+    count = traits.Bool(
+        desc='compute count of non-zero voxels',
+        argstr='-count')
+    mask_inter = traits.Bool(
+        desc='create intersection mask',
+        argstr='-mask_inter')
+    mask_union = traits.Bool(
+        desc='create union mask',
+        argstr='-mask_union')
+
+
+class Means(AFNICommand):
+    """Takes the voxel-by-voxel mean of all input datasets using 3dMean
+
+    For complete details, see the `3dMean Documentation.
+    <https://afni.nimh.nih.gov/pub/dist/doc/program_help/3dMean.html>`_
+
+    Examples
+    ========
+
+    >>> from nipype.interfaces import afni
+    >>> means = afni.Means()
+    >>> means.inputs.in_file_a = 'im1.nii'
+    >>> means.inputs.in_file_b = 'im2.nii'
+    >>> means.inputs.out_file =  'output.nii'
+    >>> means.cmdline  # doctest: +ALLOW_UNICODE
+    '3dMean -prefix output.nii im1.nii im2.nii'
+    >>> res = means.run()  # doctest: +SKIP
+
+    >>> from nipype.interfaces import afni
+    >>> means = afni.Means()
+    >>> means.inputs.in_file_a = 'im1.nii'
+    >>> means.inputs.out_file =  'output.nii'
+    >>> means.inputs.datum = 'short'
+    >>> means.cmdline  # doctest: +ALLOW_UNICODE
+    '3dMean -datum short -prefix output.nii im1.nii'
+    >>> res = means.run()  # doctest: +SKIP
+
+    """
+
+    _cmd = '3dMean'
+    input_spec = MeansInputSpec
+    output_spec = AFNICommandOutputSpec
+
+
+class OutlierCountInputSpec(CommandLineInputSpec):
+    in_file = File(
+        argstr='%s',
+        mandatory=True,
+        exists=True,
+        position=-2,
+        desc='input dataset')
+    mask = File(
+        exists=True,
+        argstr='-mask %s',
+        xor=['autoclip', 'automask'],
+        desc='only count voxels within the given mask')
+    qthr = traits.Range(
+        value=1e-3,
+        low=0.0,
+        high=1.0,
+        argstr='-qthr %.5f',
+        desc='indicate a value for q to compute alpha')
+    autoclip = traits.Bool(
+        False,
+        usedefault=True,
+        argstr='-autoclip',
+        xor=['in_file'],
+        desc='clip off small voxels')
+    automask = traits.Bool(
+        False,
+        usedefault=True,
+        argstr='-automask',
+        xor=['in_file'],
+        desc='clip off small voxels')
+    fraction = traits.Bool(
+        False,
+        usedefault=True,
+        argstr='-fraction',
+        desc='write out the fraction of masked voxels which are outliers at '
+             'each timepoint')
+    interval = traits.Bool(
+        False,
+        usedefault=True,
+        argstr='-range',
+        desc='write out the median + 3.5 MAD of outlier count with each '
+             'timepoint')
+    save_outliers = traits.Bool(
+        False,
+        usedefault=True,
+        desc='enables out_file option')
+    outliers_file = File(
+        name_template='%s_outliers',
+        argstr='-save %s',
+        name_source=['in_file'],
+        output_name='out_outliers',
+        keep_extension=True,
+        desc='output image file name')
+    polort = traits.Int(
+        argstr='-polort %d',
+        desc='detrend each voxel timeseries with polynomials')
+    legendre = traits.Bool(
+        False,
+        usedefault=True,
+        argstr='-legendre',
+        desc='use Legendre polynomials')
+    out_file = File(
+        name_template='%s_outliers',
+        name_source=['in_file'],
+        argstr='> %s',
+        keep_extension=False,
+        position=-1,
+        desc='capture standard output')
+
+
+class OutlierCountOutputSpec(TraitedSpec):
+    out_outliers = File(
+        exists=True,
+        desc='output image file name')
+    out_file = File(
+        name_template='%s_tqual',
+        name_source=['in_file'],
+        argstr='> %s',
+        keep_extension=False,
+        position=-1,
+        desc='capture standard output')
+
+
+class OutlierCount(CommandLine):
+    """Calculates number of 'outliers' a 3D+time dataset, at each
+    time point, and writes the results to stdout.
+
+    For complete details, see the `3dToutcount Documentation
+    <https://afni.nimh.nih.gov/pub/dist/doc/program_help/3dToutcount.html>`_
+
+    Examples
+    ========
+
+    >>> from nipype.interfaces import afni
+    >>> toutcount = afni.OutlierCount()
+    >>> toutcount.inputs.in_file = 'functional.nii'
+    >>> toutcount.cmdline  # doctest: +ELLIPSIS +ALLOW_UNICODE
+    '3dToutcount functional.nii > functional_outliers'
+    >>> res = toutcount.run()  # doctest: +SKIP
+
+    """
+
+    _cmd = '3dToutcount'
+    input_spec = OutlierCountInputSpec
+    output_spec = OutlierCountOutputSpec
+
+    def _parse_inputs(self, skip=None):
+        if skip is None:
+            skip = []
+
+        if not self.inputs.save_outliers:
+            skip += ['outliers_file']
+        return super(OutlierCount, self)._parse_inputs(skip)
+
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        if self.inputs.save_outliers:
+            outputs['out_outliers'] = op.abspath(self.inputs.outliers_file)
+        outputs['out_file'] = op.abspath(self.inputs.out_file)
+        return outputs
+
+
+class QualityIndexInputSpec(CommandLineInputSpec):
+    in_file = File(
+        argstr='%s',
+        mandatory=True,
+        exists=True,
+        position=-2,
+        desc='input dataset')
+    mask = File(
+        exists=True,
+        argstr='-mask %s',
+        xor=['autoclip', 'automask'],
+        desc='compute correlation only across masked voxels')
+    spearman = traits.Bool(
+        False,
+        usedefault=True,
+        argstr='-spearman',
+        desc='Quality index is 1 minus the Spearman (rank) correlation '
+             'coefficient of each sub-brick with the median sub-brick. '
+             '(default).')
+    quadrant = traits.Bool(
+        False,
+        usedefault=True,
+        argstr='-quadrant',
+        desc='Similar to -spearman, but using 1 minus the quadrant correlation '
+             'coefficient as the quality index.')
+    autoclip = traits.Bool(
+        False,
+        usedefault=True,
+        argstr='-autoclip',
+        xor=['mask'],
+        desc='clip off small voxels')
+    automask = traits.Bool(
+        False,
+        usedefault=True,
+        argstr='-automask',
+        xor=['mask'],
+        desc='clip off small voxels')
+    clip = traits.Float(
+        argstr='-clip %f',
+        desc='clip off values below')
+    interval = traits.Bool(
+        False,
+        usedefault=True,
+        argstr='-range',
+        desc='write out the median + 3.5 MAD of outlier count with each '
+             'timepoint')
+    out_file = File(
+        name_template='%s_tqual',
+        name_source=['in_file'],
+        argstr='> %s',
+        keep_extension=False,
+        position=-1,
+        desc='capture standard output')
+
+
+class QualityIndexOutputSpec(TraitedSpec):
+    out_file = File(desc='file containing the captured standard output')
+
+
+class QualityIndex(CommandLine):
+    """Computes a `quality index' for each sub-brick in a 3D+time dataset.
+    The output is a 1D time series with the index for each sub-brick.
+    The results are written to stdout.
+
+    For complete details, see the `3dTqual Documentation
+    <https://afni.nimh.nih.gov/pub/dist/doc/program_help/3dTqual.html>`_
+
+    Examples
+    ========
+
+    >>> from nipype.interfaces import afni
+    >>> tqual = afni.QualityIndex()
+    >>> tqual.inputs.in_file = 'functional.nii'
+    >>> tqual.cmdline  # doctest: +ELLIPSIS +ALLOW_UNICODE
+    '3dTqual functional.nii > functional_tqual'
+    >>> res = tqual.run()  # doctest: +SKIP
+
+    """
+    _cmd = '3dTqual'
+    input_spec = QualityIndexInputSpec
+    output_spec = QualityIndexOutputSpec
+
+
+class ROIStatsInputSpec(CommandLineInputSpec):
+    in_file = File(
+        desc='input file to 3dROIstats',
+        argstr='%s',
+        position=-1,
+        mandatory=True,
+        exists=True)
+    mask = File(
+        desc='input mask',
+        argstr='-mask %s',
+        position=3,
+        exists=True)
+    mask_f2short = traits.Bool(
+        desc='Tells the program to convert a float mask to short integers, '
+             'by simple rounding.',
+        argstr='-mask_f2short',
+        position=2)
+    quiet = traits.Bool(
+        desc='execute quietly',
+        argstr='-quiet',
+        position=1)
+    terminal_output = traits.Enum(
+        'allatonce',
+        desc='Control terminal output:`allatonce` - waits till command is '
+             'finished to display output',
+        nohash=True,
+        mandatory=True,
+        usedefault=True)
+
+
+class ROIStatsOutputSpec(TraitedSpec):
+    stats = File(
+        desc='output tab separated values file',
+        exists=True)
+
+
+class ROIStats(AFNICommandBase):
+    """Display statistics over masked regions
+
+    For complete details, see the `3dROIstats Documentation.
+    <https://afni.nimh.nih.gov/pub/dist/doc/program_help/3dROIstats.html>`_
+
+    Examples
+    ========
+
+    >>> from nipype.interfaces import afni
+    >>> roistats = afni.ROIStats()
+    >>> roistats.inputs.in_file = 'functional.nii'
+    >>> roistats.inputs.mask = 'skeleton_mask.nii.gz'
+    >>> roistats.inputs.quiet = True
+    >>> roistats.cmdline  # doctest: +ALLOW_UNICODE
+    '3dROIstats -quiet -mask skeleton_mask.nii.gz functional.nii'
+    >>> res = roistats.run()  # doctest: +SKIP
+
+    """
+    _cmd = '3dROIstats'
+    input_spec = ROIStatsInputSpec
+    output_spec = ROIStatsOutputSpec
+
+    def aggregate_outputs(self, runtime=None, needed_outputs=None):
+        outputs = self._outputs()
+        output_filename = 'roi_stats.csv'
+        with open(output_filename, 'w') as f:
+          f.write(runtime.stdout)
+
+        outputs.stats = os.path.abspath(output_filename)
+        return outputs
+
+
+class RetroicorInputSpec(AFNICommandInputSpec):
+    in_file = File(
+        desc='input file to 3dretroicor',
+        argstr='%s',
+        position=-1,
+        mandatory=True,
+        exists=True,
+        copyfile=False)
+    out_file = File(
+        name_template='%s_retroicor',
+        name_source=['in_file'],
+        desc='output image file name',
+        argstr='-prefix %s',
+        position=1)
+    card = File(
+        desc='1D cardiac data file for cardiac correction',
+        argstr='-card %s',
+        position=-2,
+        exists=True)
+    resp = File(
+        desc='1D respiratory waveform data for correction',
+        argstr='-resp %s',
+        position=-3,
+        exists=True)
+    threshold = traits.Int(
+        desc='Threshold for detection of R-wave peaks in input (Make sure it '
+             'is above the background noise level, Try 3/4 or 4/5 times range '
+             'plus minimum)',
+        argstr='-threshold %d',
+        position=-4)
+    order = traits.Int(
+        desc='The order of the correction (2 is typical)',
+        argstr='-order %s',
+        position=-5)
+    cardphase = File(
+        desc='Filename for 1D cardiac phase output',
+        argstr='-cardphase %s',
+        position=-6,
+        hash_files=False)
+    respphase = File(
+        desc='Filename for 1D resp phase output',
+        argstr='-respphase %s',
+        position=-7,
+        hash_files=False)
 
 
 class Retroicor(AFNICommand):
@@ -1915,165 +1985,1509 @@ class Retroicor(AFNICommand):
     motion correction).
 
     For complete details, see the `3dretroicor Documentation.
-    <http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dretroicor.html>`_
+    <https://afni.nimh.nih.gov/pub/dist/doc/program_help/3dretroicor.html>`_
 
     Examples
     ========
-    >>> from nipype.interfaces import afni as afni
+    >>> from nipype.interfaces import afni
     >>> ret = afni.Retroicor()
     >>> ret.inputs.in_file = 'functional.nii'
     >>> ret.inputs.card = 'mask.1D'
     >>> ret.inputs.resp = 'resp.1D'
-    >>> res = ret.run()   # doctest: +SKIP
+    >>> ret.inputs.outputtype = 'NIFTI'
+    >>> ret.cmdline  # doctest: +ALLOW_UNICODE
+    '3dretroicor -prefix functional_retroicor.nii -resp resp.1D -card mask.1D functional.nii'
+    >>> res = ret.run()  # doctest: +SKIP
+
     """
 
     _cmd = '3dretroicor'
     input_spec = RetroicorInputSpec
     output_spec = AFNICommandOutputSpec
 
+    def _format_arg(self, name, trait_spec, value):
+        if name == 'in_file':
+            if not isdefined(self.inputs.card) and not isdefined(self.inputs.resp):
+                return None
+        return super(Retroicor, self)._format_arg(name, trait_spec, value)
 
-class AFNItoNIFTIInputSpec(AFNICommandInputSpec):
-    in_file = File(desc='input file to 3dAFNItoNIFTI',
+
+class SegInputSpec(CommandLineInputSpec):
+    in_file = File(
+        desc='ANAT is the volume to segment',
+        argstr='-anat %s',
+        position=-1,
+        mandatory=True,
+        exists=True,
+        copyfile=True)
+    mask = traits.Either(
+        traits.Enum('AUTO'),
+        File(exists=True),
+        desc='only non-zero voxels in mask are analyzed. mask can either be a '
+             'dataset or the string "AUTO" which would use AFNI\'s automask '
+             'function to create the mask.',
+        argstr='-mask %s',
+        position=-2,
+        mandatory=True)
+    blur_meth = traits.Enum(
+        'BFT', 'BIM',
+        argstr='-blur_meth %s',
+        desc='set the blurring method for bias field estimation')
+    bias_fwhm = traits.Float(
+        desc='The amount of blurring used when estimating the field bias with '
+             'the Wells method',
+        argstr='-bias_fwhm %f')
+    classes = Str(
+        desc='CLASS_STRING is a semicolon delimited string of class labels',
+        argstr='-classes %s')
+    bmrf = traits.Float(
+        desc='Weighting factor controlling spatial homogeneity of the '
+             'classifications',
+        argstr='-bmrf %f')
+    bias_classes = Str(
+        desc='A semicolon delimited string of classes that contribute to the '
+             'estimation of the bias field',
+        argstr='-bias_classes %s')
+    prefix = Str(
+        desc='the prefix for the output folder containing all output volumes',
+        argstr='-prefix %s')
+    mixfrac = Str(
+        desc='MIXFRAC sets up the volume-wide (within mask) tissue fractions '
+             'while initializing the segmentation (see IGNORE for exception)',
+        argstr='-mixfrac %s')
+    mixfloor = traits.Float(
+        desc='Set the minimum value for any class\'s mixing fraction',
+        argstr='-mixfloor %f')
+    main_N = traits.Int(
+        desc='Number of iterations to perform.',
+        argstr='-main_N %d')
+
+
+class Seg(AFNICommandBase):
+    """3dSeg segments brain volumes into tissue classes. The program allows
+    for adding a variety of global and voxelwise priors. However for the
+    moment, only mixing fractions and MRF are documented.
+
+    For complete details, see the `3dSeg Documentation.
+    <https://afni.nimh.nih.gov/pub/dist/doc/program_help/3dSeg.html>`_
+
+    Examples
+    ========
+
+    >>> from nipype.interfaces.afni import preprocess
+    >>> seg = preprocess.Seg()
+    >>> seg.inputs.in_file = 'structural.nii'
+    >>> seg.inputs.mask = 'AUTO'
+    >>> seg.cmdline  # doctest: +ALLOW_UNICODE
+    '3dSeg -mask AUTO -anat structural.nii'
+    >>> res = seg.run()  # doctest: +SKIP
+
+    """
+
+    _cmd = '3dSeg'
+    input_spec = SegInputSpec
+    output_spec = AFNICommandOutputSpec
+
+    def aggregate_outputs(self, runtime=None, needed_outputs=None):
+
+        import glob
+
+        outputs = self._outputs()
+
+        if isdefined(self.inputs.prefix):
+            outfile = os.path.join(os.getcwd(), self.inputs.prefix, 'Classes+*.BRIK')
+        else:
+            outfile = os.path.join(os.getcwd(), 'Segsy', 'Classes+*.BRIK')
+
+        outputs.out_file = glob.glob(outfile)[0]
+
+        return outputs
+
+
+class SkullStripInputSpec(AFNICommandInputSpec):
+    in_file = File(
+        desc='input file to 3dSkullStrip',
+        argstr='-input %s',
+        position=1,
+        mandatory=True,
+        exists=True,
+        copyfile=False)
+    out_file = File(
+        name_template='%s_skullstrip',
+        desc='output image file name',
+        argstr='-prefix %s',
+        name_source='in_file')
+
+
+class SkullStrip(AFNICommand):
+    """A program to extract the brain from surrounding tissue from MRI
+    T1-weighted images.
+    TODO Add optional arguments.
+
+    For complete details, see the `3dSkullStrip Documentation.
+    <https://afni.nimh.nih.gov/pub/dist/doc/program_help/3dSkullStrip.html>`_
+
+    Examples
+    ========
+
+    >>> from nipype.interfaces import afni
+    >>> skullstrip = afni.SkullStrip()
+    >>> skullstrip.inputs.in_file = 'functional.nii'
+    >>> skullstrip.inputs.args = '-o_ply'
+    >>> skullstrip.cmdline  # doctest: +ALLOW_UNICODE
+    '3dSkullStrip -input functional.nii -o_ply -prefix functional_skullstrip'
+    >>> res = skullstrip.run()  # doctest: +SKIP
+
+    """
+    _cmd = '3dSkullStrip'
+    _redirect_x = True
+    input_spec = SkullStripInputSpec
+    output_spec = AFNICommandOutputSpec
+
+    def __init__(self, **inputs):
+        super(SkullStrip, self).__init__(**inputs)
+        if not no_afni():
+            v = Info.version()
+
+            # As of AFNI 16.0.00, redirect_x is not needed
+            if isinstance(v[0], int) and v[0] > 15:
+                self._redirect_x = False
+
+
+class TCorr1DInputSpec(AFNICommandInputSpec):
+    xset = File(
+        desc='3d+time dataset input',
+        argstr=' %s',
+        position=-2,
+        mandatory=True,
+        exists=True,
+        copyfile=False)
+    y_1d = File(
+        desc='1D time series file input',
+        argstr=' %s',
+        position=-1,
+        mandatory=True,
+        exists=True)
+    out_file = File(
+        desc='output filename prefix',
+        name_template='%s_correlation.nii.gz',
+        argstr='-prefix %s',
+        name_source='xset',
+        keep_extension=True)
+    pearson = traits.Bool(
+        desc='Correlation is the normal Pearson correlation coefficient',
+        argstr=' -pearson',
+        xor=['spearman', 'quadrant', 'ktaub'],
+        position=1)
+    spearman = traits.Bool(
+        desc='Correlation is the Spearman (rank) correlation coefficient',
+        argstr=' -spearman',
+        xor=['pearson', 'quadrant', 'ktaub'],
+        position=1)
+    quadrant = traits.Bool(
+        desc='Correlation is the quadrant correlation coefficient',
+        argstr=' -quadrant',
+        xor=['pearson', 'spearman', 'ktaub'],
+        position=1)
+    ktaub = traits.Bool(
+        desc='Correlation is the Kendall\'s tau_b correlation coefficient',
+        argstr=' -ktaub',
+        xor=['pearson', 'spearman', 'quadrant'],
+        position=1)
+
+
+class TCorr1DOutputSpec(TraitedSpec):
+    out_file = File(desc='output file containing correlations',
+                    exists=True)
+
+
+class TCorr1D(AFNICommand):
+    """Computes the correlation coefficient between each voxel time series
+    in the input 3D+time dataset.
+
+    For complete details, see the `3dTcorr1D Documentation.
+    <https://afni.nimh.nih.gov/pub/dist/doc/program_help/3dTcorr1D.html>`_
+
+    >>> from nipype.interfaces import afni
+    >>> tcorr1D = afni.TCorr1D()
+    >>> tcorr1D.inputs.xset= 'u_rc1s1_Template.nii'
+    >>> tcorr1D.inputs.y_1d = 'seed.1D'
+    >>> tcorr1D.cmdline  # doctest: +ALLOW_UNICODE
+    '3dTcorr1D -prefix u_rc1s1_Template_correlation.nii.gz  u_rc1s1_Template.nii  seed.1D'
+    >>> res = tcorr1D.run()  # doctest: +SKIP
+
+    """
+
+    _cmd = '3dTcorr1D'
+    input_spec = TCorr1DInputSpec
+    output_spec = TCorr1DOutputSpec
+
+
+class TCorrMapInputSpec(AFNICommandInputSpec):
+    in_file = File(
+        exists=True,
+        argstr='-input %s',
+        mandatory=True,
+        copyfile=False)
+    seeds = File(
+        exists=True,
+        argstr='-seed %s',
+        xor=('seeds_width'))
+    mask = File(
+        exists=True,
+        argstr='-mask %s')
+    automask = traits.Bool(
+        argstr='-automask')
+    polort = traits.Int(
+        argstr='-polort %d')
+    bandpass = traits.Tuple(
+        (traits.Float(), traits.Float()),
+        argstr='-bpass %f %f')
+    regress_out_timeseries = traits.File(
+        exists=True,
+        argstr='-ort %s')
+    blur_fwhm = traits.Float(
+        argstr='-Gblur %f')
+    seeds_width = traits.Float(
+        argstr='-Mseed %f',
+        xor=('seeds'))
+
+    # outputs
+    mean_file = File(
+        argstr='-Mean %s',
+        suffix='_mean',
+        name_source='in_file')
+    zmean = File(
+        argstr='-Zmean %s',
+        suffix='_zmean',
+        name_source='in_file')
+    qmean = File(
+        argstr='-Qmean %s',
+        suffix='_qmean',
+        name_source='in_file')
+    pmean = File(
+        argstr='-Pmean %s',
+        suffix='_pmean',
+        name_source='in_file')
+
+    _thresh_opts = ('absolute_threshold',
+                    'var_absolute_threshold',
+                    'var_absolute_threshold_normalize')
+    thresholds = traits.List(
+        traits.Int())
+    absolute_threshold = File(
+        argstr='-Thresh %f %s',
+        suffix='_thresh',
+        name_source='in_file',
+        xor=_thresh_opts)
+    var_absolute_threshold = File(
+        argstr='-VarThresh %f %f %f %s',
+        suffix='_varthresh',
+        name_source='in_file',
+        xor=_thresh_opts)
+    var_absolute_threshold_normalize = File(
+        argstr='-VarThreshN %f %f %f %s',
+        suffix='_varthreshn',
+        name_source='in_file',
+        xor=_thresh_opts)
+
+    correlation_maps = File(
+        argstr='-CorrMap %s',
+        name_source='in_file')
+    correlation_maps_masked = File(
+        argstr='-CorrMask %s',
+        name_source='in_file')
+
+    _expr_opts = ('average_expr', 'average_expr_nonzero', 'sum_expr')
+    expr = Str()
+    average_expr = File(
+        argstr='-Aexpr %s %s',
+        suffix='_aexpr',
+        name_source='in_file',
+        xor=_expr_opts)
+    average_expr_nonzero = File(
+        argstr='-Cexpr %s %s',
+        suffix='_cexpr',
+        name_source='in_file',
+        xor=_expr_opts)
+    sum_expr = File(
+        argstr='-Sexpr %s %s',
+        suffix='_sexpr',
+        name_source='in_file',
+        xor=_expr_opts)
+    histogram_bin_numbers = traits.Int()
+    histogram = File(
+        name_source='in_file',
+        argstr='-Hist %d %s',
+        suffix='_hist')
+
+
+class TCorrMapOutputSpec(TraitedSpec):
+    mean_file = File()
+    zmean = File()
+    qmean = File()
+    pmean = File()
+    absolute_threshold = File()
+    var_absolute_threshold = File()
+    var_absolute_threshold_normalize = File()
+    correlation_maps = File()
+    correlation_maps_masked = File()
+    average_expr = File()
+    average_expr_nonzero = File()
+    sum_expr = File()
+    histogram = File()
+
+
+class TCorrMap(AFNICommand):
+    """For each voxel time series, computes the correlation between it
+    and all other voxels, and combines this set of values into the
+    output dataset(s) in some way.
+
+    For complete details, see the `3dTcorrMap Documentation.
+    <https://afni.nimh.nih.gov/pub/dist/doc/program_help/3dTcorrMap.html>`_
+
+    Examples
+    ========
+
+    >>> from nipype.interfaces import afni
+    >>> tcm = afni.TCorrMap()
+    >>> tcm.inputs.in_file = 'functional.nii'
+    >>> tcm.inputs.mask = 'mask.nii'
+    >>> tcm.mean_file = 'functional_meancorr.nii'
+    >>> tcm.cmdline  # doctest: +ALLOW_UNICODE +SKIP
+    '3dTcorrMap -input functional.nii -mask mask.nii -Mean functional_meancorr.nii'
+    >>> res = tcm.run()  # doctest: +SKIP
+
+    """
+
+    _cmd = '3dTcorrMap'
+    input_spec = TCorrMapInputSpec
+    output_spec = TCorrMapOutputSpec
+    _additional_metadata = ['suffix']
+
+    def _format_arg(self, name, trait_spec, value):
+        if name in self.inputs._thresh_opts:
+            return trait_spec.argstr % self.inputs.thresholds + [value]
+        elif name in self.inputs._expr_opts:
+            return trait_spec.argstr % (self.inputs.expr, value)
+        elif name == 'histogram':
+            return trait_spec.argstr % (self.inputs.histogram_bin_numbers,
+                                        value)
+        else:
+            return super(TCorrMap, self)._format_arg(name, trait_spec, value)
+
+
+class TCorrelateInputSpec(AFNICommandInputSpec):
+    xset = File(
+        desc='input xset',
+        argstr='%s',
+        position=-2,
+        mandatory=True,
+        exists=True,
+        copyfile=False)
+    yset = File(
+        desc='input yset',
         argstr='%s',
         position=-1,
         mandatory=True,
         exists=True,
         copyfile=False)
-    out_file = File(name_template="%s.nii", desc='output image file name',
-                    argstr='-prefix %s', name_source="in_file")
-    hash_files = False
+    out_file = File(
+        name_template='%s_tcorr',
+        desc='output image file name',
+        argstr='-prefix %s',
+        name_source='xset')
+    pearson = traits.Bool(
+        desc='Correlation is the normal Pearson correlation coefficient',
+        argstr='-pearson')
+    polort = traits.Int(
+        desc='Remove polynomical trend of order m',
+        argstr='-polort %d')
 
-class AFNItoNIFTI(AFNICommand):
-    """Changes AFNI format files to NIFTI format using 3dAFNItoNIFTI
 
-    see AFNI Documentation: <http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dAFNItoNIFTI.html>
-    this can also convert 2D or 1D data, which you can numpy.squeeze() to remove extra dimensions
+class TCorrelate(AFNICommand):
+    """Computes the correlation coefficient between corresponding voxel
+    time series in two input 3D+time datasets 'xset' and 'yset'
+
+    For complete details, see the `3dTcorrelate Documentation.
+    <https://afni.nimh.nih.gov/pub/dist/doc/program_help/3dTcorrelate.html>`_
 
     Examples
     ========
 
-    >>> from nipype.interfaces import afni as afni
-    >>> a2n = afni.AFNItoNIFTI()
-    >>> a2n.inputs.in_file = 'afni_output.3D'
-    >>> a2n.inputs.out_file =  'afni_output.nii'
-    >>> a2n.cmdline
-    '3dAFNItoNIFTI -prefix afni_output.nii afni_output.3D'
+    >>> from nipype.interfaces import afni
+    >>> tcorrelate = afni.TCorrelate()
+    >>> tcorrelate.inputs.xset= 'u_rc1s1_Template.nii'
+    >>> tcorrelate.inputs.yset = 'u_rc1s2_Template.nii'
+    >>> tcorrelate.inputs.out_file = 'functional_tcorrelate.nii.gz'
+    >>> tcorrelate.inputs.polort = -1
+    >>> tcorrelate.inputs.pearson = True
+    >>> tcorrelate.cmdline  # doctest: +ALLOW_UNICODE
+    '3dTcorrelate -prefix functional_tcorrelate.nii.gz -pearson -polort -1 u_rc1s1_Template.nii u_rc1s2_Template.nii'
+    >>> res = tcarrelate.run()  # doctest: +SKIP
 
     """
 
-    _cmd = '3dAFNItoNIFTI'
-    input_spec = AFNItoNIFTIInputSpec
+    _cmd = '3dTcorrelate'
+    input_spec = TCorrelateInputSpec
     output_spec = AFNICommandOutputSpec
 
-    def _overload_extension(self, value):
-        path, base, ext = split_filename(value)
-        if ext.lower() not in [".1d", ".nii.gz", ".1D"]:
-            ext = ext + ".nii"
-        return os.path.join(path, base + ext)
+
+class TNormInputSpec(AFNICommandInputSpec):
+    in_file = File(
+        desc='input file to 3dTNorm',
+        argstr='%s',
+        position=-1,
+        mandatory=True,
+        exists=True,
+        copyfile=False)
+    out_file = File(
+        name_template='%s_tnorm',
+        desc='output image file name',
+        argstr='-prefix %s',
+        name_source='in_file')
+    norm2 = traits.Bool(
+        desc='L2 normalize (sum of squares = 1) [DEFAULT]',
+        argstr='-norm2')
+    normR = traits.Bool(
+        desc='normalize so sum of squares = number of time points * e.g., so RMS = 1.',
+        argstr='-normR')
+    norm1 = traits.Bool(
+        desc='L1 normalize (sum of absolute values = 1)',
+        argstr='-norm1')
+    normx = traits.Bool(
+        desc='Scale so max absolute value = 1 (L_infinity norm)',
+        argstr='-normx')
+    polort = traits.Int(
+        desc="""Detrend with polynomials of order p before normalizing
+               [DEFAULT = don't do this]
+             * Use '-polort 0' to remove the mean, for example""",
+        argstr='-polort %s')
+    L1fit = traits.Bool(
+        desc="""Detrend with L1 regression (L2 is the default)
+             * This option is here just for the hell of it""",
+        argstr='-L1fit')
+
+
+class TNorm(AFNICommand):
+    """Shifts voxel time series from input so that seperate slices are aligned
+    to the same temporal origin.
+
+    For complete details, see the `3dTnorm Documentation.
+    <https://afni.nimh.nih.gov/pub/dist/doc/program_help/3dTnorm.html>`_
+
+    Examples
+    ========
+
+    >>> from nipype.interfaces import afni
+    >>> tnorm = afni.TNorm()
+    >>> tnorm.inputs.in_file = 'functional.nii'
+    >>> tnorm.inputs.norm2 = True
+    >>> tnorm.inputs.out_file = 'rm.errts.unit errts+tlrc'
+    >>> tnorm.cmdline  # doctest: +ALLOW_UNICODE
+    '3dTnorm -norm2 -prefix rm.errts.unit errts+tlrc functional.nii'
+    >>> res = tshift.run()  # doctest: +SKIP
+
+    """
+    _cmd = '3dTnorm'
+    input_spec = TNormInputSpec
+    output_spec = AFNICommandOutputSpec
+
+
+class TShiftInputSpec(AFNICommandInputSpec):
+    in_file = File(
+        desc='input file to 3dTShift',
+        argstr='%s',
+        position=-1,
+        mandatory=True,
+        exists=True,
+        copyfile=False)
+    out_file = File(
+        name_template='%s_tshift',
+        desc='output image file name',
+        argstr='-prefix %s',
+        name_source='in_file')
+    tr = Str(
+        desc='manually set the TR. You can attach suffix "s" for seconds '
+             'or "ms" for milliseconds.',
+        argstr='-TR %s')
+    tzero = traits.Float(
+        desc='align each slice to given time offset',
+        argstr='-tzero %s',
+        xor=['tslice'])
+    tslice = traits.Int(
+        desc='align each slice to time offset of given slice',
+        argstr='-slice %s',
+        xor=['tzero'])
+    ignore = traits.Int(
+        desc='ignore the first set of points specified',
+        argstr='-ignore %s')
+    interp = traits.Enum(
+        ('Fourier', 'linear', 'cubic', 'quintic', 'heptic'),
+        desc='different interpolation methods (see 3dTShift for details) '
+             'default = Fourier',
+        argstr='-%s')
+    tpattern = Str(
+        desc='use specified slice time pattern rather than one in header',
+        argstr='-tpattern %s')
+    rlt = traits.Bool(
+        desc='Before shifting, remove the mean and linear trend',
+        argstr='-rlt')
+    rltplus = traits.Bool(
+        desc='Before shifting, remove the mean and linear trend and later put '
+             'back the mean',
+        argstr='-rlt+')
+
+
+class TShift(AFNICommand):
+    """Shifts voxel time series from input so that seperate slices are aligned
+    to the same temporal origin.
+
+    For complete details, see the `3dTshift Documentation.
+    <https://afni.nimh.nih.gov/pub/dist/doc/program_help/3dTshift.html>`_
+
+    Examples
+    ========
+
+    >>> from nipype.interfaces import afni
+    >>> tshift = afni.TShift()
+    >>> tshift.inputs.in_file = 'functional.nii'
+    >>> tshift.inputs.tpattern = 'alt+z'
+    >>> tshift.inputs.tzero = 0.0
+    >>> tshift.cmdline  # doctest: +ALLOW_UNICODE
+    '3dTshift -prefix functional_tshift -tpattern alt+z -tzero 0.0 functional.nii'
+    >>> res = tshift.run()  # doctest: +SKIP
+
+    """
+    _cmd = '3dTshift'
+    input_spec = TShiftInputSpec
+    output_spec = AFNICommandOutputSpec
+
+
+class VolregInputSpec(AFNICommandInputSpec):
+    in_file = File(
+        desc='input file to 3dvolreg',
+        argstr='%s',
+        position=-1,
+        mandatory=True,
+        exists=True,
+        copyfile=False)
+    out_file = File(
+        name_template='%s_volreg',
+        desc='output image file name',
+        argstr='-prefix %s',
+        name_source='in_file')
+    basefile = File(
+        desc='base file for registration',
+        argstr='-base %s',
+        position=-6,
+        exists=True)
+    zpad = traits.Int(
+        desc='Zeropad around the edges by \'n\' voxels during rotations',
+        argstr='-zpad %d',
+        position=-5)
+    md1d_file = File(
+        name_template='%s_md.1D',
+        desc='max displacement output file',
+        argstr='-maxdisp1D %s',
+        name_source='in_file',
+        keep_extension=True,
+        position=-4)
+    oned_file = File(
+        name_template='%s.1D',
+        desc='1D movement parameters output file',
+        argstr='-1Dfile %s',
+        name_source='in_file',
+        keep_extension=True)
+    verbose = traits.Bool(
+        desc='more detailed description of the process',
+        argstr='-verbose')
+    timeshift = traits.Bool(
+        desc='time shift to mean slice time offset',
+        argstr='-tshift 0')
+    copyorigin = traits.Bool(
+        desc='copy base file origin coords to output',
+        argstr='-twodup')
+    oned_matrix_save = File(
+        name_template='%s.aff12.1D',
+        desc='Save the matrix transformation',
+        argstr='-1Dmatrix_save %s',
+        keep_extension=True,
+        name_source='in_file')
+    interp = traits.Enum(
+        ('Fourier', 'cubic', 'heptic', 'quintic','linear'),
+        desc='spatial interpolation methods [default = heptic]',
+        argstr='-%s')
+
+
+class VolregOutputSpec(TraitedSpec):
+    out_file = File(
+        desc='registered file',
+        exists=True)
+    md1d_file = File(
+        desc='max displacement info file',
+        exists=True)
+    oned_file = File(
+        desc='movement parameters info file',
+        exists=True)
+    oned_matrix_save = File(
+        desc='matrix transformation from base to input',
+        exists=True)
+
+
+class Volreg(AFNICommand):
+    """Register input volumes to a base volume using AFNI 3dvolreg command
+
+    For complete details, see the `3dvolreg Documentation.
+    <https://afni.nimh.nih.gov/pub/dist/doc/program_help/3dvolreg.html>`_
+
+    Examples
+    ========
+
+    >>> from nipype.interfaces import afni
+    >>> volreg = afni.Volreg()
+    >>> volreg.inputs.in_file = 'functional.nii'
+    >>> volreg.inputs.args = '-Fourier -twopass'
+    >>> volreg.inputs.zpad = 4
+    >>> volreg.inputs.outputtype = 'NIFTI'
+    >>> volreg.cmdline  # doctest: +ELLIPSIS +ALLOW_UNICODE
+    '3dvolreg -Fourier -twopass -1Dfile functional.1D -1Dmatrix_save functional.aff12.1D -prefix functional_volreg.nii -zpad 4 -maxdisp1D functional_md.1D functional.nii'
+    >>> res = volreg.run()  # doctest: +SKIP
+
+    >>> from nipype.interfaces import afni
+    >>> volreg = afni.Volreg()
+    >>> volreg.inputs.in_file = 'functional.nii'
+    >>> volreg.inputs.interp = 'cubic'
+    >>> volreg.inputs.verbose = True
+    >>> volreg.inputs.zpad = 1
+    >>> volreg.inputs.basefile = 'functional.nii'
+    >>> volreg.inputs.out_file = 'rm.epi.volreg.r1'
+    >>> volreg.inputs.oned_file = 'dfile.r1.1D'
+    >>> volreg.inputs.oned_matrix_save = 'mat.r1.tshift+orig.1D'
+    >>> volreg.cmdline # doctest: +ALLOW_UNICODE
+    '3dvolreg -cubic -1Dfile dfile.r1.1D -1Dmatrix_save mat.r1.tshift+orig.1D -prefix rm.epi.volreg.r1 -verbose -base functional.nii -zpad 1 -maxdisp1D functional_md.1D functional.nii'
+    >>> res = volreg.run()  # doctest: +SKIP
+
+    """
+
+    _cmd = '3dvolreg'
+    input_spec = VolregInputSpec
+    output_spec = VolregOutputSpec
+
+
+class WarpInputSpec(AFNICommandInputSpec):
+    in_file = File(
+        desc='input file to 3dWarp',
+        argstr='%s',
+        position=-1,
+        mandatory=True,
+        exists=True,
+        copyfile=False)
+    out_file = File(
+        name_template='%s_warp',
+        desc='output image file name',
+        argstr='-prefix %s',
+        name_source='in_file')
+    tta2mni = traits.Bool(
+        desc='transform dataset from Talairach to MNI152',
+        argstr='-tta2mni')
+    mni2tta = traits.Bool(
+        desc='transform dataset from MNI152 to Talaraich',
+        argstr='-mni2tta')
+    matparent = File(
+        desc='apply transformation from 3dWarpDrive',
+        argstr='-matparent %s',
+        exists=True)
+    deoblique = traits.Bool(
+        desc='transform dataset from oblique to cardinal',
+        argstr='-deoblique')
+    interp = traits.Enum(
+        ('linear', 'cubic', 'NN', 'quintic'),
+        desc='spatial interpolation methods [default = linear]',
+        argstr='-%s')
+    gridset = File(
+        desc='copy grid of specified dataset',
+        argstr='-gridset %s',
+        exists=True)
+    newgrid = traits.Float(
+        desc='specify grid of this size (mm)',
+        argstr='-newgrid %f')
+    zpad = traits.Int(
+        desc='pad input dataset with N planes of zero on all sides.',
+        argstr='-zpad %d')
+
+
+class Warp(AFNICommand):
+    """Use 3dWarp for spatially transforming a dataset
+
+    For complete details, see the `3dWarp Documentation.
+    <https://afni.nimh.nih.gov/pub/dist/doc/program_help/3dWarp.html>`_
+
+    Examples
+    ========
+
+    >>> from nipype.interfaces import afni
+    >>> warp = afni.Warp()
+    >>> warp.inputs.in_file = 'structural.nii'
+    >>> warp.inputs.deoblique = True
+    >>> warp.inputs.out_file = 'trans.nii.gz'
+    >>> warp.cmdline  # doctest: +ALLOW_UNICODE
+    '3dWarp -deoblique -prefix trans.nii.gz structural.nii'
+    >>> res = warp.run()  # doctest: +SKIP
+
+    >>> warp_2 = afni.Warp()
+    >>> warp_2.inputs.in_file = 'structural.nii'
+    >>> warp_2.inputs.newgrid = 1.0
+    >>> warp_2.inputs.out_file = 'trans.nii.gz'
+    >>> warp_2.cmdline  # doctest: +ALLOW_UNICODE
+    '3dWarp -newgrid 1.000000 -prefix trans.nii.gz structural.nii'
+    >>> res = warp_2.run()  # doctest: +SKIP
+
+    """
+    _cmd = '3dWarp'
+    input_spec = WarpInputSpec
+    output_spec = AFNICommandOutputSpec
+
+
+class QwarpPlusMinusInputSpec(CommandLineInputSpec):
+    source_file = File(
+        desc='Source image (opposite phase encoding direction than base image).',
+        argstr='-source %s',
+        mandatory=True,
+        exists=True,
+        copyfile=False)
+    base_file = File(
+        desc='Base image (opposite phase encoding direction than source image).',
+        argstr='-base %s',
+        mandatory=True,
+        exists=True,
+        copyfile=False)
+    pblur = traits.List(
+        traits.Float(),
+        desc='The fraction of the patch size that'
+             'is used for the progressive blur by providing a '
+             'value between 0 and 0.25.  If you provide TWO '
+             'values, the first fraction is used for '
+             'progressively blurring the base image and the '
+             'second for the source image.',
+        argstr='-pblur %s',
+        minlen=1,
+        maxlen=2)
+    blur = traits.List(
+        traits.Float(),
+        desc="Gaussian blur the input images by (FWHM) voxels "
+            "before doing the alignment (the output dataset "
+            "will not be blurred). The default is 2.345 (for "
+            "no good reason). Optionally, you can provide 2 "
+            "values, and then the first one is applied to the "
+            "base volume, the second to the source volume. A "
+            "negative blur radius means to use 3D median "
+            "filtering, rather than Gaussian blurring.  This "
+            "type of filtering will better preserve edges, "
+            "which can be important in alignment.",
+        argstr='-blur %s',
+        minlen=1,
+        maxlen=2)
+    noweight = traits.Bool(
+        desc='If you want a binary weight (the old default), use this option.'
+             'That is, each voxel in the base volume automask will be'
+             'weighted the same in the computation of the cost functional.',
+        argstr='-noweight')
+    minpatch = traits.Int(
+        desc="Set the minimum patch size for warp searching to 'mm' voxels.",
+        argstr='-minpatch %d')
+    nopadWARP = traits.Bool(
+        desc='If for some reason you require the warp volume to'
+             'match the base volume, then use this option to have the output'
+             'WARP dataset(s) truncated.',
+        argstr='-nopadWARP')
+
+
+class QwarpPlusMinusOutputSpec(TraitedSpec):
+    warped_source = File(
+        desc='Undistorted source file.',
+        exists=True)
+    warped_base = File(
+        desc='Undistorted base file.',
+        exists=True)
+    source_warp = File(
+        desc="Field suceptibility correction warp (in 'mm') for source image.",
+        exists=True)
+    base_warp = File(
+        desc="Field suceptibility correction warp (in 'mm') for base image.",
+        exists=True)
+
+
+class QwarpPlusMinus(CommandLine):
+    """A version of 3dQwarp for performing field susceptibility correction
+    using two images with opposing phase encoding directions.
+
+    For complete details, see the `3dQwarp Documentation.
+    <https://afni.nimh.nih.gov/pub/dist/doc/program_help/3dQwarp.html>`_
+
+    Examples
+    ========
+
+    >>> from nipype.interfaces import afni
+    >>> qwarp = afni.QwarpPlusMinus()
+    >>> qwarp.inputs.source_file = 'sub-01_dir-LR_epi.nii.gz'
+    >>> qwarp.inputs.nopadWARP = True
+    >>> qwarp.inputs.base_file = 'sub-01_dir-RL_epi.nii.gz'
+    >>> qwarp.cmdline  # doctest: +ALLOW_UNICODE
+    '3dQwarp -prefix Qwarp.nii.gz -plusminus -base sub-01_dir-RL_epi.nii.gz -nopadWARP -source sub-01_dir-LR_epi.nii.gz'
+    >>> res = warp.run()  # doctest: +SKIP
+
+    """
+    _cmd = '3dQwarp -prefix Qwarp.nii.gz -plusminus'
+    input_spec = QwarpPlusMinusInputSpec
+    output_spec = QwarpPlusMinusOutputSpec
+
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        outputs['warped_source'] = os.path.abspath("Qwarp_PLUS.nii.gz")
+        outputs['warped_base'] = os.path.abspath("Qwarp_MINUS.nii.gz")
+        outputs['source_warp'] = os.path.abspath("Qwarp_PLUS_WARP.nii.gz")
+        outputs['base_warp'] = os.path.abspath("Qwarp_MINUS_WARP.nii.gz")
+
+        return outputs
+
+
+class QwarpInputSpec(AFNICommandInputSpec):
+    in_file = File(
+        desc='Source image (opposite phase encoding direction than base image).',
+        argstr='-source %s',
+        mandatory=True,
+        exists=True,
+        copyfile=False)
+    base_file = File(
+        desc='Base image (opposite phase encoding direction than source image).',
+        argstr='-base %s',
+        mandatory=True,
+        exists=True,
+        copyfile=False)
+    out_file = File(argstr='-prefix %s',
+                    name_template='%s_QW',
+                    name_source=['in_file'],
+                    genfile=True,
+                    desc='out_file ppp'
+                         'Sets the prefix for the output datasets.'
+                         '* The source dataset is warped to match the base'
+                         'and gets prefix \'ppp\'. (Except if \'-plusminus\' is used.)'
+                         '* The final interpolation to this output dataset is'
+                         'done using the \'wsinc5\' method.  See the output of'
+                         ' 3dAllineate -HELP'
+                         '(in the "Modifying \'-final wsinc5\'" section) for'
+                         'the lengthy technical details.'
+                         '* The 3D warp used is saved in a dataset with'
+                         'prefix \'ppp_WARP\' -- this dataset can be used'
+                         'with 3dNwarpApply and 3dNwarpCat, for example.'
+                         '* To be clear, this is the warp from source dataset'
+                         ' coordinates to base dataset coordinates, where the'
+                         ' values at each base grid point are the xyz displacments'
+                         ' needed to move that grid point\'s xyz values to the'
+                         ' corresponding xyz values in the source dataset:'
+                         '   base( (x,y,z) + WARP(x,y,z) ) matches source(x,y,z)'
+                         ' Another way to think of this warp is that it \'pulls\''
+                         ' values back from source space to base space.'
+                         '* 3dNwarpApply would use \'ppp_WARP\' to transform datasets'
+                         'aligned with the source dataset to be aligned with the'
+                         'base dataset.'
+                         '** If you do NOT want this warp saved, use the option \'-nowarp\'.'
+                         '-->> (However, this warp is usually the most valuable possible output!)'
+                         '* If you want to calculate and save the inverse 3D warp,'
+                         'use the option \'-iwarp\'.  This inverse warp will then be'
+                         'saved in a dataset with prefix \'ppp_WARPINV\'.'
+                         '* This inverse warp could be used to transform data from base'
+                         'space to source space, if you need to do such an operation.'
+                         '* You can easily compute the inverse later, say by a command like'
+                         ' 3dNwarpCat -prefix Z_WARPINV \'INV(Z_WARP+tlrc)\''
+                         'or the inverse can be computed as needed in 3dNwarpApply, like'
+                         ' 3dNwarpApply -nwarp \'INV(Z_WARP+tlrc)\' -source Dataset.nii ...')
+    resample = traits.Bool(
+        desc='This option simply resamples the source dataset to match the'
+             'base dataset grid.  You can use this if the two datasets'
+             'overlap well (as seen in the AFNI GUI), but are not on the'
+             'same 3D grid.'
+             '* If they don\'t overlap well, allineate them first'
+             '* The reampling here is done with the'
+             '\'wsinc5\' method, which has very little blurring artifact.'
+             '* If the base and source datasets ARE on the same 3D grid,'
+             'then the -resample option will be ignored.'
+             '* You CAN use -resample with these 3dQwarp options:'
+             '-plusminus  -inilev  -iniwarp  -duplo',
+        argstr='-resample')
+    nowarp = traits.Bool(
+        desc='Do not save the _WARP file.',
+        argstr='-nowarp')
+    iwarp = traits.Bool(
+        desc='Do compute and save the _WARPINV file.',
+        argstr='-iwarp',
+        xor=['plusminus'])
+    pear = traits.Bool(
+        desc='Use strict Pearson correlation for matching.'
+             '* Not usually recommended, since the \'clipped Pearson\' method'
+             'used by default will reduce the impact of outlier values.',
+        argstr='-pear')
+    noneg = traits.Bool(
+        desc='Replace negative values in either input volume with 0.'
+             '* If there ARE negative input values, and you do NOT use -noneg,'
+             'then strict Pearson correlation will be used, since the \'clipped\''
+             'method only is implemented for non-negative volumes.'
+             '* \'-noneg\' is not the default, since there might be situations where'
+             'you want to align datasets with positive and negative values mixed.'
+             '* But, in many cases, the negative values in a dataset are just the'
+             'result of interpolation artifacts (or other peculiarities), and so'
+             'they should be ignored.  That is what \'-noneg\' is for.',
+        argstr='-noneg')
+    nopenalty = traits.Bool(
+        desc='Replace negative values in either input volume with 0.'
+             '* If there ARE negative input values, and you do NOT use -noneg,'
+             'then strict Pearson correlation will be used, since the \'clipped\''
+             'method only is implemented for non-negative volumes.'
+             '* \'-noneg\' is not the default, since there might be situations where'
+             'you want to align datasets with positive and negative values mixed.'
+             '* But, in many cases, the negative values in a dataset are just the'
+             'result of interpolation artifacts (or other peculiarities), and so'
+             'they should be ignored. That is what \'-noneg\' is for.',
+        argstr='-nopenalty')
+    penfac = traits.Float(
+        desc='Use this value to weight the penalty.'
+             'The default value is 1.Larger values mean the'
+             'penalty counts more, reducing grid distortions,'
+             'insha\'Allah; \'-nopenalty\' is the same as \'-penfac 0\'.'
+             ' -->>* [23 Sep 2013] -- Zhark increased the default value of'
+             ' the penalty by a factor of 5, and also made it get'
+             ' progressively larger with each level of refinement.'
+             ' Thus, warping results will vary from earlier instances'
+             ' of 3dQwarp.'
+             ' * The progressive increase in the penalty at higher levels'
+             ' means that the \'cost function\' can actually look like the'
+             ' alignment is getting worse when the levels change.'
+             ' * IF you wish to turn off this progression, for whatever'
+             ' reason (e.g., to keep compatibility with older results),'
+             ' use the option \'-penold\'.To be completely compatible with'
+             ' the older 3dQwarp, you\'ll also have to use \'-penfac 0.2\'.',
+        argstr='-penfac %f')
+    noweight = traits.Bool(
+        desc='If you want a binary weight (the old default), use this option.'
+             'That is, each voxel in the base volume automask will be'
+             'weighted the same in the computation of the cost functional.',
+        argstr='-noweight')
+    weight = File(
+        desc='Instead of computing the weight from the base dataset,'
+             'directly input the weight volume from dataset \'www\'.'
+             '* Useful if you know what over parts of the base image you'
+             'want to emphasize or de-emphasize the matching functional.',
+        argstr='-weight %s',
+        exists=True)
+    wball = traits.List(
+        traits.Int(),
+        desc='-wball x y z r f'
+             'Enhance automatic weight from \'-useweight\' by a factor'
+             'of 1+f*Gaussian(FWHM=r) centered in the base image at'
+             'DICOM coordinates (x,y,z) and with radius \'r\'. The'
+             'goal of this option is to try and make the alignment'
+             'better in a specific part of the brain.'
+             '* Example:  -wball 0 14 6 30 40'
+             'to emphasize the thalamic area (in MNI/Talairach space).'
+             '* The \'r\' parameter must be positive!'
+             '* The \'f\' parameter must be between 1 and 100 (inclusive).'
+             '* \'-wball\' does nothing if you input your own weight'
+             'with the \'-weight\' option.'
+             '* \'-wball\' does change the binary weight created by'
+             'the \'-noweight\' option.'
+             '* You can only use \'-wball\' once in a run of 3dQwarp.'
+             '*** The effect of \'-wball\' is not dramatic.  The example'
+             'above makes the average brain image across a collection'
+             'of subjects a little sharper in the thalamic area, which'
+             'might have some small value.  If you care enough about'
+             'alignment to use \'-wball\', then you should examine the'
+             'results from 3dQwarp for each subject, to see if the'
+             'alignments are good enough for your purposes.',
+        argstr='-wball %s',
+        minlen=5,
+        maxlen=5)
+    traits.Tuple(
+        (traits.Float(), traits.Float()),
+        argstr='-bpass %f %f')
+    wmask = traits.Tuple(
+        (File(exists=True), traits.Float()),
+        desc='-wmask ws f'
+             'Similar to \'-wball\', but here, you provide a dataset \'ws\''
+             'that indicates where to increase the weight.'
+             '* The \'ws\' dataset must be on the same 3D grid as the base dataset.'
+             '* \'ws\' is treated as a mask -- it only matters where it'
+             'is nonzero -- otherwise, the values inside are not used.'
+             '* After \'ws\' comes the factor \'f\' by which to increase the'
+             'automatically computed weight.  Where \'ws\' is nonzero,'
+             'the weighting will be multiplied by (1+f).'
+             '* As with \'-wball\', the factor \'f\' should be between 1 and 100.'
+             '* You cannot use \'-wball\' and \'-wmask\' together!',
+        argstr='-wpass %s %f')
+    out_weight_file = traits.File(
+        argstr='-wtprefix %s',
+        desc='Write the weight volume to disk as a dataset')
+    blur = traits.List(
+        traits.Float(),
+        desc='Gaussian blur the input images by \'bb\' (FWHM) voxels before'
+             'doing the alignment (the output dataset will not be blurred).'
+             'The default is 2.345 (for no good reason).'
+             '* Optionally, you can provide 2 values for \'bb\', and then'
+             'the first one is applied to the base volume, the second'
+             'to the source volume.'
+             '-->>* e.g., \'-blur 0 3\' to skip blurring the base image'
+             '(if the base is a blurry template, for example).'
+             '* A negative blur radius means to use 3D median filtering,'
+             'rather than Gaussian blurring.  This type of filtering will'
+             'better preserve edges, which can be important in alignment.'
+             '* If the base is a template volume that is already blurry,'
+             'you probably don\'t want to blur it again, but blurring'
+             'the source volume a little is probably a good idea, to'
+             'help the program avoid trying to match tiny features.'
+             '* Note that -duplo will blur the volumes some extra'
+             'amount for the initial small-scale warping, to make'
+             'that phase of the program converge more rapidly.',
+        argstr='-blur %s',
+        minlen=1,
+        maxlen=2)
+    pblur = traits.List(
+        traits.Float(),
+        desc='Use progressive blurring; that is, for larger patch sizes,'
+             'the amount of blurring is larger.  The general idea is to'
+             'avoid trying to match finer details when the patch size'
+             'and incremental warps are coarse.  When \'-blur\' is used'
+             'as well, it sets a minimum amount of blurring that will'
+             'be used. [06 Aug 2014 -- \'-pblur\' may become the default someday].'
+             '* You can optionally give the fraction of the patch size that'
+             'is used for the progressive blur by providing a value between'
+             '0 and 0.25 after \'-pblur\'.  If you provide TWO values, the'
+             'the first fraction is used for progressively blurring the'
+             'base image and the second for the source image.  The default'
+             'parameters when just \'-pblur\' is given is the same as giving'
+             'the options as \'-pblur 0.09 0.09\'.'
+             '* \'-pblur\' is useful when trying to match 2 volumes with high'
+             'amounts of detail; e.g, warping one subject\'s brain image to'
+             'match another\'s, or trying to warp to match a detailed template.'
+             '* Note that using negative values with \'-blur\' means that the'
+             'progressive blurring will be done with median filters, rather'
+             'than Gaussian linear blurring.'
+             '-->>*** The combination of the -allineate and -pblur options will make'
+             'the results of using 3dQwarp to align to a template somewhat'
+             'less sensitive to initial head position and scaling.',
+        argstr='-pblur %s',
+        minlen=1,
+        maxlen=2)
+    emask = File(
+        desc='Here, \'ee\' is a dataset to specify a mask of voxels'
+             'to EXCLUDE from the analysis -- all voxels in \'ee\''
+             'that are NONZERO will not be used in the alignment.'
+             '* The base image always automasked -- the emask is'
+             'extra, to indicate voxels you definitely DON\'T want'
+             'included in the matching process, even if they are'
+             'inside the brain.',
+        argstr='-emask %s',
+        exists=True,
+        copyfile=False)
+    noXdis = traits.Bool(
+        desc='Warp will not displace in x directoin',
+        argstr='-noXdis')
+    noYdis = traits.Bool(
+        desc='Warp will not displace in y directoin',
+        argstr='-noYdis')
+    noZdis = traits.Bool(
+        desc='Warp will not displace in z directoin',
+        argstr='-noZdis')
+    iniwarp = traits.List(
+        File(exists=True, copyfile=False),
+        desc='A dataset with an initial nonlinear warp to use.'
+             '* If this option is not used, the initial warp is the identity.'
+             '* You can specify a catenation of warps (in quotes) here, as in'
+             'program 3dNwarpApply.'
+             '* As a special case, if you just input an affine matrix in a .1D'
+             'file, that will work also -- it is treated as giving the initial'
+             'warp via the string "IDENT(base_dataset) matrix_file.aff12.1D".'
+             '* You CANNOT use this option with -duplo !!'
+             '* -iniwarp is usually used with -inilev to re-start 3dQwarp from'
+             'a previous stopping point.',
+        argstr='-iniwarp %s',
+        xor=['duplo'])
+    inilev = traits.Int(
+        desc='The initial refinement \'level\' at which to start.'
+             '* Usually used with -iniwarp; CANNOT be used with -duplo.'
+             '* The combination of -inilev and -iniwarp lets you take the'
+             'results of a previous 3dQwarp run and refine them further:'
+             'Note that the source dataset in the second run is the SAME as'
+             'in the first run.  If you don\'t see why this is necessary,'
+             'then you probably need to seek help from an AFNI guru.',
+        argstr='-inlev %d',
+        xor=['duplo'])
+    minpatch = traits.Int(
+        desc='* The value of mm should be an odd integer.'
+             '* The default value of mm is 25.'
+             '* For more accurate results than mm=25, try 19 or 13.'
+             '* The smallest allowed patch size is 5.'
+             '* You may want stop at a larger patch size (say 7 or 9) and use'
+             'the -Qfinal option to run that final level with quintic warps,'
+             'which might run faster and provide the same degree of warp detail.'
+             '* Trying to make two different brain volumes match in fine detail'
+             'is usually a waste of time, especially in humans.  There is too'
+             'much variability in anatomy to match gyrus to gyrus accurately.'
+             'For this reason, the default minimum patch size is 25 voxels.'
+             'Using a smaller \'-minpatch\' might try to force the warp to'
+             'match features that do not match, and the result can be useless'
+             'image distortions -- another reason to LOOK AT THE RESULTS.',
+        argstr='-minpatch %d')
+    maxlev = traits.Int(
+        desc='The initial refinement \'level\' at which to start.'
+             '* Usually used with -iniwarp; CANNOT be used with -duplo.'
+             '* The combination of -inilev and -iniwarp lets you take the'
+             'results of a previous 3dQwarp run and refine them further:'
+             'Note that the source dataset in the second run is the SAME as'
+             'in the first run.  If you don\'t see why this is necessary,'
+             'then you probably need to seek help from an AFNI guru.',
+        argstr='-maxlev %d',
+        xor=['duplo'],
+        position=-1)
+    gridlist = File(
+        desc='This option provides an alternate way to specify the patch'
+             'grid sizes used in the warp optimization process. \'gl\' is'
+             'a 1D file with a list of patches to use -- in most cases,'
+             'you will want to use it in the following form:'
+             '-gridlist \'1D: 0 151 101 75 51\''
+             '* Here, a 0 patch size means the global domain. Patch sizes'
+             'otherwise should be odd integers >= 5.'
+             '* If you use the \'0\' patch size again after the first position,'
+             'you will actually get an iteration at the size of the'
+             'default patch level 1, where the patch sizes are 75% of'
+             'the volume dimension.  There is no way to force the program'
+             'to literally repeat the sui generis step of lev=0.'
+             '* You cannot use -gridlist with -duplo or -plusminus!',
+        argstr='-gridlist %s',
+        exists=True,
+        copyfile=False,
+        xor=['duplo', 'plusminus'])
+    allsave = traits.Bool(
+        desc='This option lets you save the output warps from each level'
+             'of the refinement process.  Mostly used for experimenting.'
+             '* Cannot be used with -nopadWARP, -duplo, or -plusminus.'
+             '* Will only save all the outputs if the program terminates'
+             'normally -- if it crashes, or freezes, then all these'
+             'warps are lost.',
+        argstr='-allsave',
+        xor=['nopadWARP', 'duplo', 'plusminus'])
+    duplo = traits.Bool(
+        desc='Start off with 1/2 scale versions of the volumes,'
+             'for getting a speedy coarse first alignment.'
+             '* Then scales back up to register the full volumes.'
+             'The goal is greater speed, and it seems to help this'
+             'positively piggish program to be more expeditious.'
+             '* However, accuracy is somewhat lower with \'-duplo\','
+             'for reasons that currenly elude Zhark; for this reason,'
+             'the Emperor does not usually use \'-duplo\'.',
+        argstr='-duplo',
+        xor=['gridlist', 'maxlev', 'inilev', 'iniwarp', 'plusminus', 'allsave'])
+    workhard = traits.Bool(
+        desc='Iterate more times, which can help when the volumes are'
+             'hard to align at all, or when you hope to get a more precise'
+             'alignment.'
+             '* Slows the program down (possibly a lot), of course.'
+             '* When you combine \'-workhard\'  with \'-duplo\', only the'
+             'full size volumes get the extra iterations.'
+             '* For finer control over which refinement levels work hard,'
+             'you can use this option in the form (for example)'
+             ' -workhard:4:7'
+             'which implies the extra iterations will be done at levels'
+             '4, 5, 6, and 7, but not otherwise.'
+             '* You can also use \'-superhard\' to iterate even more, but'
+             'this extra option will REALLY slow things down.'
+             '-->>* Under most circumstances, you should not need to use either'
+             '-workhard or -superhard.'
+             '-->>* The fastest way to register to a template image is via the'
+             '-duplo option, and without the -workhard or -superhard options.'
+             '-->>* If you use this option in the form \'-Workhard\' (first letter'
+             'in upper case), then the second iteration at each level is'
+             'done with quintic polynomial warps.',
+        argstr='-workhard',
+        xor=['boxopt', 'ballopt'])
+    Qfinal = traits.Bool(
+        desc='At the finest patch size (the final level), use Hermite'
+             'quintic polynomials for the warp instead of cubic polynomials.'
+             '* In a 3D \'patch\', there are 2x2x2x3=24 cubic polynomial basis'
+             'function parameters over which to optimize (2 polynomials'
+             'dependent on each of the x,y,z directions, and 3 different'
+             'directions of displacement).'
+             '* There are 3x3x3x3=81 quintic polynomial parameters per patch.'
+             '* With -Qfinal, the final level will have more detail in'
+             'the allowed warps, at the cost of yet more CPU time.'
+             '* However, no patch below 7x7x7 in size will be done with quintic'
+             'polynomials.'
+             '* This option is also not usually needed, and is experimental.',
+        argstr='-Qfinal')
+    Qonly = traits.Bool(
+        desc='Use Hermite quintic polynomials at all levels.'
+             '* Very slow (about 4 times longer).  Also experimental.'
+             '* Will produce a (discrete representation of a) C2 warp.',
+        argstr='-Qonly')
+    plusminus = traits.Bool(
+        desc='Normally, the warp displacements dis(x) are defined to match'
+             'base(x) to source(x+dis(x)).  With this option, the match'
+             'is between base(x-dis(x)) and source(x+dis(x)) -- the two'
+             'images \'meet in the middle\'.'
+             '* One goal is to mimic the warping done to MRI EPI data by'
+             'field inhomogeneities, when registering between a \'blip up\''
+             'and a \'blip down\' down volume, which will have opposite'
+             'distortions.'
+             '* Define Wp(x) = x+dis(x) and Wm(x) = x-dis(x).  Then since'
+             'base(Wm(x)) matches source(Wp(x)), by substituting INV(Wm(x))'
+             'wherever we see x, we have base(x) matches source(Wp(INV(Wm(x))));'
+             'that is, the warp V(x) that one would get from the \'usual\' way'
+             'of running 3dQwarp is V(x) = Wp(INV(Wm(x))).'
+             '* Conversely, we can calculate Wp(x) in terms of V(x) as follows:'
+             'If V(x) = x + dv(x), define Vh(x) = x + dv(x)/2;'
+             'then Wp(x) = V(INV(Vh(x)))'
+             '* With the above formulas, it is possible to compute Wp(x) from'
+             'V(x) and vice-versa, using program 3dNwarpCalc.  The requisite'
+             'commands are left as an exercise for the aspiring AFNI Jedi Master.'
+             '* You can use the semi-secret \'-pmBASE\' option to get the V(x)'
+             'warp and the source dataset warped to base space, in addition to'
+             'the Wp(x) \'_PLUS\' and Wm(x) \'_MINUS\' warps.'
+             '-->>* Alas: -plusminus does not work with -duplo or -allineate :-('
+             '* However, you can use -iniwarp with -plusminus :-)'
+             '-->>* The outputs have _PLUS (from the source dataset) and _MINUS'
+             '(from the base dataset) in their filenames, in addition to'
+             'the prefix.  The -iwarp option, if present, will be ignored.',
+        argstr='-plusminus',
+        xor=['duplo', 'allsave', 'iwarp'])
+    nopad = traits.Bool(
+        desc='Do NOT use zero-padding on the 3D base and source images.'
+             '[Default == zero-pad, if needed]'
+             '* The underlying model for deformations goes to zero at the'
+             'edge of the volume being warped.  However, if there is'
+             'significant data near an edge of the volume, then it won\'t'
+             'get displaced much, and so the results might not be good.'
+             '* Zero padding is designed as a way to work around this potential'
+             'problem.  You should NOT need the \'-nopad\' option for any'
+             'reason that Zhark can think of, but it is here to be symmetrical'
+             'with 3dAllineate.'
+             '* Note that the output (warped from source) dataset will be on the'
+             'base dataset grid whether or not zero-padding is allowed.  However,'
+             'unless you use the following option, allowing zero-padding (i.e.,'
+             'the default operation) will make the output WARP dataset(s) be'
+             'on a larger grid (also see \'-expad\' below).',
+        argstr='-nopad')
+    nopadWARP = traits.Bool(
+        desc='If for some reason you require the warp volume to'
+             'match the base volume, then use this option to have the output'
+             'WARP dataset(s) truncated.',
+        argstr='-nopadWARP',
+        xor=['allsave', 'expad'])
+    expad = traits.Int(
+        desc='This option instructs the program to pad the warp by an extra'
+             '\'EE\' voxels (and then 3dQwarp starts optimizing it).'
+             '* This option is seldom needed, but can be useful if you'
+             'might later catenate the nonlinear warp -- via 3dNwarpCat --'
+             'with an affine transformation that contains a large shift.'
+             'Under that circumstance, the nonlinear warp might be shifted'
+             'partially outside its original grid, so expanding that grid'
+             'can avoid this problem.'
+             '* Note that this option perforce turns off \'-nopadWARP\'.',
+        argstr='-expad %d',
+        xor=['nopadWARP'])
+    ballopt = traits.Bool(
+        desc='Normally, the incremental warp parameters are optimized inside'
+             'a rectangular \'box\' (24 dimensional for cubic patches, 81 for'
+             'quintic patches), whose limits define the amount of distortion'
+             'allowed at each step.  Using \'-ballopt\' switches these limits'
+             'to be applied to a \'ball\' (interior of a hypersphere), which'
+             'can allow for larger incremental displacements.  Use this'
+             'option if you think things need to be able to move farther.',
+        argstr='-ballopt',
+        xor=['workhard', 'boxopt'])
+    baxopt = traits.Bool(
+        desc='Use the \'box\' optimization limits instead of the \'ball\''
+             '[this is the default at present].'
+             '* Note that if \'-workhard\' is used, then ball and box optimization'
+             'are alternated in the different iterations at each level, so'
+             'these two options have no effect in that case.',
+        argstr='-boxopt',
+        xor=['workhard', 'ballopt'])
+    verb = traits.Bool(
+        desc='more detailed description of the process',
+        argstr='-verb',
+        xor=['quiet'])
+    quiet = traits.Bool(
+        desc='Cut out most of the fun fun fun progress messages :-(',
+        argstr='-quiet',
+        xor=['verb'])
+    # Hidden and semi-hidden options
+    overwrite = traits.Bool(
+        desc='Overwrite outputs',
+        argstr='-overwrite')
+    lpc = traits.Bool(
+        desc='Local Pearson minimization (i.e., EPI-T1 registration)'
+             'This option has not be extensively tested'
+             'If you use \'-lpc\', then \'-maxlev 0\' is automatically set.'
+             'If you want to go to more refined levels, you can set \'-maxlev\''
+             'This should be set up to have lpc as the second to last argument'
+             'and maxlev as the second to last argument, as needed by AFNI'
+             'Using maxlev > 1 is not recommended for EPI-T1 alignment.',
+        argstr='-lpc',
+        xor=['nmi', 'mi', 'hel', 'lpa', 'pear'],
+        position=-2)
+    lpa = traits.Bool(
+        desc='Local Pearson maximization'
+             'This option has not be extensively tested',
+        argstr='-lpa',
+        xor=['nmi', 'mi', 'lpc', 'hel', 'pear'])
+    hel = traits.Bool(
+        desc='Hellinger distance: a matching function for the adventurous'
+             'This option has NOT be extensively tested for usefullness'
+             'and should be considered experimental at this infundibulum.',
+        argstr='-hel',
+        xor=['nmi', 'mi', 'lpc', 'lpa', 'pear'])
+    mi = traits.Bool(
+        desc='Mutual Information: a matching function for the adventurous'
+             'This option has NOT be extensively tested for usefullness'
+             'and should be considered experimental at this infundibulum.',
+        argstr='-mi',
+        xor=['mi', 'hel', 'lpc', 'lpa', 'pear'])
+    nmi = traits.Bool(
+        desc='Normalized Mutual Information: a matching function for the adventurous'
+             'This option has NOT be extensively tested for usefullness'
+             'and should be considered experimental at this infundibulum.',
+        argstr='-nmi',
+        xor=['nmi', 'hel', 'lpc', 'lpa', 'pear'])
+
+
+
+class QwarpOutputSpec(TraitedSpec):
+    warped_source = File(
+        desc='Warped source file. If plusminus is used, this is the undistorted'
+             'source file.')
+    warped_base = File(desc='Undistorted base file.')
+    source_warp = File(
+        desc="Displacement in mm for the source image."
+             "If plusminus is used this is the field suceptibility correction"
+             "warp (in 'mm') for source image.")
+    base_warp = File(
+        desc="Displacement in mm for the base image."
+             "If plus minus is used, this is the field suceptibility correction"
+             "warp (in 'mm') for base image. This is only output if plusminus"
+             "or iwarp options are passed")
+    weights = File(
+        desc="Auto-computed weight volume.")
+
+
+class Qwarp(AFNICommand):
+    """A version of 3dQwarp
+    Allineate your images prior to passing them to this workflow.
+
+    For complete details, see the `3dQwarp Documentation.
+    <https://afni.nimh.nih.gov/pub/dist/doc/program_help/3dQwarp.html>`_
+
+    Examples
+    ========
+
+    >>> from nipype.interfaces import afni
+    >>> qwarp = afni.Qwarp()
+    >>> qwarp.inputs.in_file = 'sub-01_dir-LR_epi.nii.gz'
+    >>> qwarp.inputs.nopadWARP = True
+    >>> qwarp.inputs.base_file = 'sub-01_dir-RL_epi.nii.gz'
+    >>> qwarp.inputs.plusminus = True
+    >>> qwarp.cmdline  # doctest: +ALLOW_UNICODE
+    '3dQwarp -base sub-01_dir-RL_epi.nii.gz -source sub-01_dir-LR_epi.nii.gz -nopadWARP -prefix sub-01_dir-LR_epi_QW -plusminus'
+    >>> res = qwarp.run()  # doctest: +SKIP
+
+    >>> from nipype.interfaces import afni
+    >>> qwarp = afni.Qwarp()
+    >>> qwarp.inputs.in_file = 'structural.nii'
+    >>> qwarp.inputs.base_file = 'mni.nii'
+    >>> qwarp.inputs.resample = True
+    >>> qwarp.cmdline  # doctest: +ALLOW_UNICODE
+    '3dQwarp -base mni.nii -source structural.nii -prefix structural_QW -resample'
+    >>> res = qwarp.run()  # doctest: +SKIP
+
+    >>> from nipype.interfaces import afni
+    >>> qwarp = afni.Qwarp()
+    >>> qwarp.inputs.in_file = 'structural.nii'
+    >>> qwarp.inputs.base_file = 'epi.nii'
+    >>> qwarp.inputs.out_file = 'anatSSQ.nii.gz'
+    >>> qwarp.inputs.resample = True
+    >>> qwarp.inputs.lpc = True
+    >>> qwarp.inputs.verb = True
+    >>> qwarp.inputs.iwarp = True
+    >>> qwarp.inputs.blur = [0,3]
+    >>> qwarp.cmdline  # doctest: +ALLOW_UNICODE
+    '3dQwarp -base epi.nii -blur 0.0 3.0 -source structural.nii -iwarp -prefix anatSSQ.nii.gz -resample -verb -lpc'
+    >>> res = qwarp.run()  # doctest: +SKIP
+
+    >>> from nipype.interfaces import afni
+    >>> qwarp = afni.Qwarp()
+    >>> qwarp.inputs.in_file = 'structural.nii'
+    >>> qwarp.inputs.base_file = 'mni.nii'
+    >>> qwarp.inputs.duplo = True
+    >>> qwarp.inputs.blur = [0,3]
+    >>> qwarp.cmdline  # doctest: +ALLOW_UNICODE
+    '3dQwarp -base mni.nii -blur 0.0 3.0 -duplo -source structural.nii -prefix structural_QW'
+    >>> res = qwarp.run()  # doctest: +SKIP
+
+    >>> from nipype.interfaces import afni
+    >>> qwarp = afni.Qwarp()
+    >>> qwarp.inputs.in_file = 'structural.nii'
+    >>> qwarp.inputs.base_file = 'mni.nii'
+    >>> qwarp.inputs.duplo = True
+    >>> qwarp.inputs.minpatch = 25
+    >>> qwarp.inputs.blur = [0,3]
+    >>> qwarp.inputs.out_file = 'Q25'
+    >>> qwarp.cmdline  # doctest: +ALLOW_UNICODE
+    '3dQwarp -base mni.nii -blur 0.0 3.0 -duplo -source structural.nii -minpatch 25 -prefix Q25'
+    >>> res = qwarp.run()  # doctest: +SKIP
+    >>> qwarp2 = afni.Qwarp()
+    >>> qwarp2.inputs.in_file = 'structural.nii'
+    >>> qwarp2.inputs.base_file = 'mni.nii'
+    >>> qwarp2.inputs.blur = [0,2]
+    >>> qwarp2.inputs.out_file = 'Q11'
+    >>> qwarp2.inputs.inilev = 7
+    >>> qwarp2.inputs.iniwarp = ['Q25_warp+tlrc.HEAD']
+    >>> qwarp2.cmdline  # doctest: +ALLOW_UNICODE
+    '3dQwarp -base mni.nii -blur 0.0 2.0 -source structural.nii -inlev 7 -iniwarp Q25_warp+tlrc.HEAD -prefix Q11'
+    >>> res2 = qwarp2.run()  # doctest: +SKIP
+    """
+    _cmd = '3dQwarp'
+    input_spec = QwarpInputSpec
+    output_spec = QwarpOutputSpec
+
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+
+        if not isdefined(self.inputs.out_file):
+            prefix = self._gen_fname(self.inputs.in_file, suffix='_QW')
+            ext = '.HEAD'
+        else:
+            prefix = self.inputs.out_file
+            ext_ind = max([prefix.lower().rfind('.nii.gz'),
+                           prefix.lower().rfind('.nii.')])
+            if ext_ind == -1:
+                ext = '.HEAD'
+            else:
+                ext = prefix[ext_ind:]
+        print(ext,"ext")
+        outputs['warped_source'] = os.path.abspath(self._gen_fname(prefix, suffix='+tlrc')+ext)
+        if not self.inputs.nowarp:
+            outputs['source_warp'] = os.path.abspath(self._gen_fname(prefix, suffix='_WARP+tlrc')+ext)
+        if self.inputs.iwarp:
+            outputs['base_warp'] = os.path.abspath(self._gen_fname(prefix, suffix='_WARPINV+tlrc')+ext)
+        if isdefined(self.inputs.out_weight_file):
+            outputs['weights'] = os.path.abspath(self.inputs.out_weight_file)
+
+        if self.inputs.plusminus:
+            outputs['warped_source'] = os.path.abspath(self._gen_fname(prefix, suffix='_PLUS+tlrc')+ext)
+            outputs['warped_base'] = os.path.abspath(self._gen_fname(prefix, suffix='_MINUS+tlrc')+ext)
+            outputs['source_warp'] = os.path.abspath(self._gen_fname(prefix, suffix='_PLUS_WARP+tlrc')+ext)
+            outputs['base_warp'] = os.path.abspath(self._gen_fname(prefix, suffix='_MINUS_WARP+tlrc',)+ext)
+
+        return outputs
 
     def _gen_filename(self, name):
-        return os.path.abspath(super(AFNItoNIFTI, self)._gen_filename(name))
-
-class EvalInputSpec(AFNICommandInputSpec):
-    in_file_a = File(desc='input file to 1deval',
-                     argstr='-a %s', position=0, mandatory=True, exists=True)
-    in_file_b = File(desc='operand file to 1deval',
-                     argstr=' -b %s', position=1, exists=True)
-    in_file_c = File(desc='operand file to 1deval',
-                     argstr=' -c %s', position=2, exists=True)
-    out_file = File(name_template="%s_calc", desc='output image file name',
-                    argstr='-prefix %s', name_source="in_file_a")
-    out1D = traits.Bool(desc="output in 1D",
-                    argstr='-1D')
-    expr = traits.Str(desc='expr', argstr='-expr "%s"', position=3,
-                      mandatory=True)
-    start_idx = traits.Int(desc='start index for in_file_a',
-                           requires=['stop_idx'])
-    stop_idx = traits.Int(desc='stop index for in_file_a',
-                          requires=['start_idx'])
-    single_idx = traits.Int(desc='volume index for in_file_a')
-    other = File(desc='other options', argstr='')
-
-class Eval(AFNICommand):
-    """Evaluates an expression that may include columns of data from one or more text files
-
-    see AFNI Documentation: <http://afni.nimh.nih.gov/pub/dist/doc/program_help/1deval.html>
-
-    Examples
-    ========
-
-    >>> from nipype.interfaces import afni as afni
-    >>> eval = afni.Eval()
-    >>> eval.inputs.in_file_a = 'seed.1D'
-    >>> eval.inputs.in_file_b = 'resp.1D'
-    >>> eval.inputs.expr='a*b'
-    >>> eval.inputs.out1D = True
-    >>> eval.inputs.out_file =  'data_calc.1D'
-    >>> calc.cmdline #doctest: +SKIP
-    '3deval -a timeseries1.1D  -b timeseries2.1D -expr "a*b" -1D -prefix data_calc.1D'
-
-    """
-
-    _cmd = '1deval'
-    input_spec = EvalInputSpec
-    output_spec = AFNICommandOutputSpec
-
-    def _format_arg(self, name, trait_spec, value):
-        if name == 'in_file_a':
-            arg = trait_spec.argstr % value
-            if isdefined(self.inputs.start_idx):
-                arg += '[%d..%d]' % (self.inputs.start_idx,
-                                     self.inputs.stop_idx)
-            if isdefined(self.inputs.single_idx):
-                arg += '[%d]' % (self.inputs.single_idx)
-            return arg
-        return super(Eval, self)._format_arg(name, trait_spec, value)
-
-    def _parse_inputs(self, skip=None):
-        """Skip the arguments without argstr metadata
-        """
-        return super(Eval, self)._parse_inputs(
-            skip=('start_idx', 'stop_idx', 'out1D', 'other'))
-
-class MeansInputSpec(AFNICommandInputSpec):
-    in_file_a = File(desc='input file to 3dMean',
-        argstr='%s',
-        position=0,
-        mandatory=True,
-        exists=True)
-    in_file_b = File(desc='another input file to 3dMean',
-        argstr='%s',
-        position=1,
-        exists=True)
-    out_file = File(name_template="%s_mean", desc='output image file name',
-                    argstr='-prefix %s', name_source="in_file_a")
-    scale = traits.Str(desc='scaling of output', argstr='-%sscale')
-    non_zero = traits.Bool(desc='use only non-zero values', argstr='-non_zero')
-    std_dev = traits.Bool(desc='calculate std dev', argstr='-stdev')
-    sqr = traits.Bool(desc='mean square instead of value', argstr='-sqr')
-    summ = traits.Bool(desc='take sum, (not average)', argstr='-sum')
-    count = traits.Bool(desc='compute count of non-zero voxels', argstr='-count')
-    mask_inter = traits.Bool(desc='create intersection mask', argstr='-mask_inter')
-    mask_union = traits.Bool(desc='create union mask', argstr='-mask_union')
-
-class Means(AFNICommand):
-    """Takes the voxel-by-voxel mean of all input datasets using 3dMean
-
-    see AFNI Documentation: <http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dMean.html>
-
-    Examples
-    ========
-
-    >>> from nipype.interfaces import afni as afni
-    >>> means = afni.Means()
-    >>> means.inputs.in_file_a = 'im1.nii'
-    >>> means.inputs.in_file_b = 'im2.nii'
-    >>> means.inputs.out_file =  'output.nii'
-    >>> means.cmdline
-    '3dMean im1.nii im2.nii -prefix output.nii'
-
-    """
-
-    _cmd = '3dMean'
-    input_spec = MeansInputSpec
-    output_spec = AFNICommandOutputSpec
+        if name == 'out_file':
+            return self._gen_fname(self.inputs.source_file, suffix='_QW')

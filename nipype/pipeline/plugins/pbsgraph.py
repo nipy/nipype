@@ -1,13 +1,14 @@
 """Parallel workflow execution via PBS/Torque
 """
+from __future__ import print_function, division, unicode_literals, absolute_import
+from builtins import open
 
 import os
 import sys
 
-from .base import (GraphPluginBase, logger)
-
 from ...interfaces.base import CommandLine
 from .sgegraph import SGEGraphPlugin
+from .base import logger
 
 
 class PBSGraphPlugin(SGEGraphPlugin):
@@ -53,7 +54,7 @@ class PBSGraphPlugin(SGEGraphPlugin):
                 fp.writelines('job%05d=`qsub %s %s %s`\n' % (idx, deps,
                                                              qsub_args,
                                                              batchscriptfile))
-        cmd = CommandLine('sh', environ=os.environ.data,
+        cmd = CommandLine('sh', environ=dict(os.environ),
                           terminal_output='allatonce')
         cmd.inputs.args = '%s' % submitjobsfile
         cmd.run()

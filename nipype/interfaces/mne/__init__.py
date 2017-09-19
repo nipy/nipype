@@ -1,1 +1,2 @@
-from nipype.interfaces.mne.base import WatershedBEM
+# -*- coding: utf-8 -*-
+from .base import WatershedBEM

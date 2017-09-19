@@ -11,15 +11,14 @@
     >>> os.chdir(datadir)
 
 """
+from __future__ import print_function, division, unicode_literals, absolute_import
+
 import os
 import os.path as op
 
-from base import MRTrix3BaseInputSpec, MRTrix3Base
-from nipype.interfaces.base import (
-    CommandLineInputSpec, CommandLine, traits, TraitedSpec, File)
-
-from nipype.utils.filemanip import split_filename
-from nipype.interfaces.traits_extension import isdefined
+from ..traits_extension import isdefined
+from ..base import (CommandLineInputSpec, traits, TraitedSpec, File)
+from .base import MRTrix3Base
 
 
 class BuildConnectomeInputSpec(CommandLineInputSpec):
@@ -97,7 +96,7 @@ class BuildConnectome(MRTrix3Base):
     >>> mat = mrt.BuildConnectome()
     >>> mat.inputs.in_file = 'tracks.tck'
     >>> mat.inputs.in_parc = 'aparc+aseg.nii'
-    >>> mat.cmdline                               # doctest: +ELLIPSIS
+    >>> mat.cmdline                               # doctest: +ELLIPSIS +ALLOW_UNICODE
     'tck2connectome tracks.tck aparc+aseg.nii connectome.csv'
     >>> mat.run()                                 # doctest: +SKIP
     """
@@ -156,7 +155,7 @@ class LabelConfig(MRTrix3Base):
     >>> labels = mrt.LabelConfig()
     >>> labels.inputs.in_file = 'aparc+aseg.nii'
     >>> labels.inputs.in_config = 'mrtrix3_labelconfig.txt'
-    >>> labels.cmdline                               # doctest: +ELLIPSIS
+    >>> labels.cmdline                               # doctest: +ELLIPSIS +ALLOW_UNICODE
     'labelconfig aparc+aseg.nii mrtrix3_labelconfig.txt parcellation.mif'
     >>> labels.run()                                 # doctest: +SKIP
     """

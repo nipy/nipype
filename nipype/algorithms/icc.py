@@ -1,16 +1,20 @@
+# -*- coding: utf-8 -*-
+from __future__ import print_function, division, unicode_literals, absolute_import
+from builtins import range
+import os
+import numpy as np
 from numpy import ones, kron, mean, eye, hstack, dot, tile
+import nibabel as nb
 from scipy.linalg import pinv
 from ..interfaces.base import BaseInterfaceInputSpec, TraitedSpec, \
     BaseInterface, traits, File
-import nibabel as nb
-import numpy as np
-import os
+from ..utils import NUMPY_MMAP
 
 
 class ICCInputSpec(BaseInterfaceInputSpec):
     subjects_sessions = traits.List(traits.List(File(exists=True)),
-                           desc="n subjects m sessions 3D stat files",
-                           mandatory=True)
+                                    desc="n subjects m sessions 3D stat files",
+                                    mandatory=True)
     mask = File(exists=True, mandatory=True)
 
 
@@ -34,7 +38,7 @@ class ICC(BaseInterface):
         maskdata = nb.load(self.inputs.mask).get_data()
         maskdata = np.logical_not(np.logical_or(maskdata == 0, np.isnan(maskdata)))
 
-        session_datas = [[nb.load(fname).get_data()[maskdata].reshape(-1, 1) for fname in sessions] for sessions in self.inputs.subjects_sessions]
+        session_datas = [[nb.load(fname, mmap=NUMPY_MMAP).get_data()[maskdata].reshape(-1, 1) for fname in sessions] for sessions in self.inputs.subjects_sessions]
         list_of_sessions = [np.dstack(session_data) for session_data in session_datas]
         all_data = np.hstack(list_of_sessions)
         icc = np.zeros(session_datas[0][0].shape)
@@ -44,22 +48,22 @@ class ICC(BaseInterface):
 
         for x in range(icc.shape[0]):
             Y = all_data[x, :, :]
-            icc[x], subject_var[x], session_var[x],  session_F[x], _, _ = ICC_rep_anova(Y)
+            icc[x], subject_var[x], session_var[x], session_F[x], _, _ = ICC_rep_anova(Y)
 
         nim = nb.load(self.inputs.subjects_sessions[0][0])
-        new_data = np.zeros(nim.get_shape())
+        new_data = np.zeros(nim.shape)
         new_data[maskdata] = icc.reshape(-1,)
-        new_img = nb.Nifti1Image(new_data, nim.get_affine(), nim.get_header())
+        new_img = nb.Nifti1Image(new_data, nim.affine, nim.header)
         nb.save(new_img, 'icc_map.nii')
 
-        new_data = np.zeros(nim.get_shape())
+        new_data = np.zeros(nim.shape)
         new_data[maskdata] = session_var.reshape(-1,)
-        new_img = nb.Nifti1Image(new_data, nim.get_affine(), nim.get_header())
+        new_img = nb.Nifti1Image(new_data, nim.affine, nim.header)
         nb.save(new_img, 'session_var_map.nii')
 
-        new_data = np.zeros(nim.get_shape())
+        new_data = np.zeros(nim.shape)
         new_data[maskdata] = subject_var.reshape(-1,)
-        new_img = nb.Nifti1Image(new_data, nim.get_affine(), nim.get_header())
+        new_img = nb.Nifti1Image(new_data, nim.affine, nim.header)
         nb.save(new_img, 'subject_var_map.nii')
 
         return runtime
@@ -122,7 +126,7 @@ def ICC_rep_anova(Y):
     # ICC(3,1) = (mean square subjeT - mean square error) / (mean square subjeT + (k-1)*-mean square error)
     ICC = (MSR - MSE) / (MSR + dfc * MSE)
 
-    e_var = MSE #variance of error
-    r_var = (MSR - MSE)/nb_conditions #variance between subjects
+    e_var = MSE  # variance of error
+    r_var = (MSR - MSE) / nb_conditions  # variance between subjects
 
     return ICC, r_var, e_var, session_effect_F, dfc, dfe

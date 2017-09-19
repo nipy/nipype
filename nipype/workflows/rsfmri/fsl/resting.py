@@ -1,52 +1,29 @@
+# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
+from __future__ import print_function, division, unicode_literals, absolute_import
+from builtins import str
 
-import nipype.interfaces.fsl as fsl          # fsl
-from nipype.algorithms.misc import TSNR
-import nipype.interfaces.utility as util     # utility
-import nipype.pipeline.engine as pe          # pypeline engine
-
-def extract_noise_components(realigned_file, noise_mask_file, num_components):
-    """Derive components most reflective of physiological noise
-    """
-    import os
-    from nibabel import load
-    import numpy as np
-    import scipy as sp
-    imgseries = load(realigned_file)
-    components = None
-    mask = load(noise_mask_file).get_data()
-    voxel_timecourses = imgseries.get_data()[mask > 0]
-    voxel_timecourses[np.isnan(np.sum(voxel_timecourses, axis=1)), :] = 0
-    # remove mean and normalize by variance
-    # voxel_timecourses.shape == [nvoxels, time]
-    X = voxel_timecourses.T
-    stdX = np.std(X, axis=0)
-    stdX[stdX == 0] = 1.
-    stdX[np.isnan(stdX)] = 1.
-    stdX[np.isinf(stdX)] = 1.
-    X = (X - np.mean(X, axis=0))/stdX
-    u, _, _ = sp.linalg.svd(X, full_matrices=False)
-    if components is None:
-        components = u[:, :num_components]
-    else:
-        components = np.hstack((components, u[:, :num_components]))
-    components_file = os.path.join(os.getcwd(), 'noise_components.txt')
-    np.savetxt(components_file, components, fmt="%.10f")
-    return components_file
+from ....interfaces import fsl as fsl          # fsl
+from ....interfaces import utility as util     # utility
+from ....pipeline import engine as pe          # pypeline engine
+from ....algorithms import confounds
 
 def select_volume(filename, which):
     """Return the middle index of a file
     """
     from nibabel import load
     import numpy as np
+    from nipype.utils import NUMPY_MMAP
+
     if which.lower() == 'first':
         idx = 0
     elif which.lower() == 'middle':
-        idx = int(np.ceil(load(filename).get_shape()[3]/2))
+        idx = int(np.ceil(load(filename, mmap=NUMPY_MMAP).shape[3] / 2))
     else:
-        raise Exception('unknown value for volume selection : %s'%which)
+        raise Exception('unknown value for volume selection : %s' % which)
     return idx
+
 
 def create_realign_flow(name='realign'):
     """Realign a time series to the middle volume using spline interpolation
@@ -67,9 +44,9 @@ def create_realign_flow(name='realign'):
                                                                  ]),
                         name='inputspec')
     outputnode = pe.Node(interface=util.IdentityInterface(fields=[
-                                                               'realigned_file',
-                                                                 ]),
-                        name='outputspec')
+        'realigned_file',
+    ]),
+        name='outputspec')
     realigner = pe.Node(fsl.MCFLIRT(save_mats=True, stats_imgs=True),
                         name='realigner')
     splitter = pe.Node(fsl.Split(dimension='t'), name='splitter')
@@ -89,7 +66,8 @@ def create_realign_flow(name='realign'):
     realignflow.connect(joiner, 'merged_file', outputnode, 'realigned_file')
     return realignflow
 
-def create_resting_preproc(name='restpreproc'):
+
+def create_resting_preproc(name='restpreproc', base_dir=None):
     """Create a "resting" time series preprocessing workflow
 
     The noise removal is based on Behzadi et al. (2007)
@@ -121,7 +99,7 @@ def create_resting_preproc(name='restpreproc'):
 
     """
 
-    restpreproc = pe.Workflow(name=name)
+    restpreproc = pe.Workflow(name=name, base_dir=base_dir)
 
     # Define nodes
     inputnode = pe.Node(interface=util.IdentityInterface(fields=['func',
@@ -131,22 +109,19 @@ def create_resting_preproc(name='restpreproc'):
                                                                  ]),
                         name='inputspec')
     outputnode = pe.Node(interface=util.IdentityInterface(fields=[
-                                                              'noise_mask_file',
-                                                              'filtered_file',
-                                                              ]),
-                     name='outputspec')
+        'noise_mask_file',
+        'filtered_file',
+    ]),
+        name='outputspec')
     slicetimer = pe.Node(fsl.SliceTimer(), name='slicetimer')
     realigner = create_realign_flow()
-    tsnr = pe.Node(TSNR(regress_poly=2), name='tsnr')
+    tsnr = pe.Node(confounds.TSNR(regress_poly=2), name='tsnr')
     getthresh = pe.Node(interface=fsl.ImageStats(op_string='-p 98'),
-                           name='getthreshold')
+                        name='getthreshold')
     threshold_stddev = pe.Node(fsl.Threshold(), name='threshold')
-    compcor = pe.Node(util.Function(input_names=['realigned_file',
-                                                 'noise_mask_file',
-                                                 'num_components'],
-                                     output_names=['noise_components'],
-                                     function=extract_noise_components),
-                       name='compcorr')
+    compcor = pe.Node(confounds.ACompCor(components_file="noise_components.txt",
+                                         pre_filter=False),
+                      name='compcor')
     remove_noise = pe.Node(fsl.FilterRegressor(filter_all=True),
                            name='remove_noise')
     bandpass_filter = pe.Node(fsl.TemporalFilter(),
@@ -163,12 +138,12 @@ def create_resting_preproc(name='restpreproc'):
     restpreproc.connect(realigner, 'outputspec.realigned_file',
                         compcor, 'realigned_file')
     restpreproc.connect(threshold_stddev, 'out_file',
-                        compcor, 'noise_mask_file')
+                        compcor, 'mask_files')
     restpreproc.connect(inputnode, 'num_noise_components',
                         compcor, 'num_components')
     restpreproc.connect(tsnr, 'detrended_file',
                         remove_noise, 'in_file')
-    restpreproc.connect(compcor, 'noise_components',
+    restpreproc.connect(compcor, 'components_file',
                         remove_noise, 'design_file')
     restpreproc.connect(inputnode, 'highpass_sigma',
                         bandpass_filter, 'highpass_sigma')

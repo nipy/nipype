@@ -2,15 +2,16 @@
 settings in setup.py, the nipy top-level docstring, and for building the
 docs.  In setup.py in particular, we exec this file, so it cannot import nipy
 """
+from __future__ import print_function, division, unicode_literals, absolute_import
 
+import sys
 
-# nipy version information.  An empty _version_extra corresponds to a
-# full release.  '.dev' as a _version_extra string means this is a development
+# nipype version information.  An empty version_extra corresponds to a
+# full release.  '.dev' as a version_extra string means this is a development
 # version
-_version_major = 0
-_version_minor = 11
-_version_micro = 0
-_version_extra = '' # switch to -dev for non release
+# Remove -dev for release
+__version__ = '1.0.0-dev'
+
 
 def get_nipype_gitversion():
     """Nipype version as reported by the last commit in git
@@ -18,7 +19,7 @@ def get_nipype_gitversion():
     Returns
     -------
     None or str
-      Version of NiPype according to git.
+      Version of Nipype according to git.
     """
     import os
     import subprocess
@@ -38,56 +39,51 @@ def get_nipype_gitversion():
     except Exception:
         pass
     else:
-        ver = o.strip().split('-')[-1]
+        ver = o.decode().strip().split('-')[-1]
     return ver
 
-if '-dev' in _version_extra:
+if __version__.endswith('-dev'):
     gitversion = get_nipype_gitversion()
     if gitversion:
-        _version_extra = '-' + gitversion + '.dev'
+        __version__ = '{}+{}'.format(__version__, gitversion)
 
-# Format expected by setup.py and doc/source/conf.py: string of form "X.Y.Z"
-__version__ = "%s.%s.%s%s" % (_version_major,
-                              _version_minor,
-                              _version_micro,
-                              _version_extra)
+CLASSIFIERS = ['Development Status :: 5 - Production/Stable',
+               'Environment :: Console',
+               'Intended Audience :: Science/Research',
+               'License :: OSI Approved :: Apache Software License',
+               'Operating System :: MacOS :: MacOS X',
+               'Operating System :: POSIX :: Linux',
+               'Programming Language :: Python :: 2.7',
+               'Programming Language :: Python :: 3.4',
+               'Programming Language :: Python :: 3.5',
+               'Programming Language :: Python :: 3.6',
+               'Topic :: Scientific/Engineering']
 
-CLASSIFIERS = ["Development Status :: 5 - Production/Stable",
-               "Environment :: Console",
-               "Intended Audience :: Science/Research",
-               "License :: OSI Approved :: BSD License",
-               "Operating System :: MacOS :: MacOS X",
-               "Operating System :: POSIX :: Linux",
-               "Programming Language :: Python :: 2.7",
-               "Topic :: Scientific/Engineering"]
-
-description  = 'Neuroimaging in Python: Pipelines and Interfaces'
+description = 'Neuroimaging in Python: Pipelines and Interfaces'
 
 # Note: this long_description is actually a copy/paste from the top-level
 # README.txt, so that it shows up nicely on PyPI.  So please remember to edit
 # it only in one place and sync it correctly.
-long_description = \
-"""
-========================================================
+long_description = """========================================================
 NIPYPE: Neuroimaging in Python: Pipelines and Interfaces
 ========================================================
 
-Current neuroimaging software offer users an incredible opportunity to
-analyze data using a variety of different algorithms. However, this has
-resulted in a heterogeneous collection of specialized applications
+Current neuroimaging software offer users an incredible opportunity to \
+analyze data using a variety of different algorithms. However, this has \
+resulted in a heterogeneous collection of specialized applications \
 without transparent interoperability or a uniform operating interface.
 
-*Nipype*, an open-source, community-developed initiative under the
-umbrella of NiPy_, is a Python project that provides a uniform interface
-to existing neuroimaging software and facilitates interaction between
-these packages within a single workflow. Nipype provides an environment
-that encourages interactive exploration of algorithms from different
-packages (e.g., ANTS, SPM, FSL, FreeSurfer, Camino, MRtrix, MNE, AFNI, BRAINS,
-Slicer), eases the design of workflows within and between packages, and
-reduces the learning curve necessary to use different packages. Nipype is
-creating a collaborative platform for neuroimaging software development
-in a high-level language and addressing limitations of existing pipeline
-systems.
+*Nipype*, an open-source, community-developed initiative under the \
+umbrella of NiPy_, is a Python project that provides a uniform interface \
+to existing neuroimaging software and facilitates interaction between \
+these packages within a single workflow. Nipype provides an environment \
+that encourages interactive exploration of algorithms from different \
+packages (e.g., AFNI, ANTS, BRAINS, BrainSuite, Camino, FreeSurfer, FSL, MNE, \
+MRtrix, MNE, Nipy, Slicer, SPM), eases the design of workflows within and \
+between packages, and reduces the learning curve necessary to use different \
+packages. Nipype is creating a collaborative platform for neuroimaging software \
+development in a high-level language and addressing limitations of existing \
+pipeline systems.
 
 *Nipype* allows you to:
 
@@ -100,44 +96,74 @@ systems.
 """
 
 # versions
-NIBABEL_MIN_VERSION = '2.0.1'
-NETWORKX_MIN_VERSION = '1.7'
-NUMPY_MIN_VERSION = '1.6.2'
-SCIPY_MIN_VERSION = '0.11'
-TRAITS_MIN_VERSION = '4.3'
-DATEUTIL_MIN_VERSION = '1.5'
-NOSE_MIN_VERSION = '1.2'
+NIBABEL_MIN_VERSION = '2.1.0'
+NETWORKX_MIN_VERSION = '1.9'
+NUMPY_MIN_VERSION = '1.9.0'
+SCIPY_MIN_VERSION = '0.14'
+TRAITS_MIN_VERSION = '4.6'
+DATEUTIL_MIN_VERSION = '2.2'
+PYTEST_MIN_VERSION = '3.0'
+FUTURE_MIN_VERSION = '0.16.0'
+SIMPLEJSON_MIN_VERSION = '3.8.0'
+PROV_VERSION = '1.5.0'
+CLICK_MIN_VERSION = '6.6.0'
 
-NAME                = 'nipype'
-MAINTAINER          = "nipype developers"
-MAINTAINER_EMAIL    = "neuroimaging@python.org"
-DESCRIPTION         = description
-LONG_DESCRIPTION    = long_description
-URL                 = "http://nipy.org/nipype"
-DOWNLOAD_URL        = "http://github.com/nipy/nipype/archives/master"
-LICENSE             = "BSD license"
-CLASSIFIERS         = CLASSIFIERS
-AUTHOR              = "nipype developers"
-AUTHOR_EMAIL        = "neuroimaging@python.org"
-PLATFORMS           = "OS Independent"
-MAJOR               = _version_major
-MINOR               = _version_minor
-MICRO               = _version_micro
-ISRELEASE           = _version_extra == ''
-VERSION             = __version__
-PROVIDES            = ['nipype']
-REQUIRES            = ["nibabel (>=%s)" % NIBABEL_MIN_VERSION,
-                       "networkx (>=%s)" % NETWORKX_MIN_VERSION,
-                       "numpy (>=%s)" % NUMPY_MIN_VERSION,
-                       "python-dateutil (>=%s)" % DATEUTIL_MIN_VERSION,
-                       "scipy (>=%s)" % SCIPY_MIN_VERSION,
-                       "traits (>=%s)" % TRAITS_MIN_VERSION,
-                       "nose (>=%s)" % NOSE_MIN_VERSION]
-REQUIRES            = ["nibabel>=%s" % NIBABEL_MIN_VERSION,
-                       "networkx>=%s" % NETWORKX_MIN_VERSION,
-                       "numpy>=%s" % NUMPY_MIN_VERSION,
-                       "python-dateutil>=%s" % DATEUTIL_MIN_VERSION,
-                       "scipy>=%s" % SCIPY_MIN_VERSION,
-                       "traits>=%s" % TRAITS_MIN_VERSION,
-                       "nose>=%s" % NOSE_MIN_VERSION]
-STATUS              = 'stable'
+NAME = 'nipype'
+MAINTAINER = 'nipype developers'
+MAINTAINER_EMAIL = 'neuroimaging@python.org'
+DESCRIPTION = description
+LONG_DESCRIPTION = long_description
+URL = 'http://nipy.org/nipype'
+DOWNLOAD_URL = 'http://github.com/nipy/nipype/archives/master'
+LICENSE = 'Apache License, 2.0'
+CLASSIFIERS = CLASSIFIERS
+AUTHOR = 'nipype developers'
+AUTHOR_EMAIL = 'neuroimaging@python.org'
+PLATFORMS = 'OS Independent'
+MAJOR = __version__.split('.')[0]
+MINOR = __version__.split('.')[1]
+MICRO = __version__.replace('-', '.').split('.')[2]
+ISRELEASE = (len(__version__.replace('-', '.').split('.')) == 3 or
+             'post' in __version__.replace('-', '.').split('.')[-1])
+VERSION = __version__
+PROVIDES = ['nipype']
+REQUIRES = [
+    'nibabel>=%s' % NIBABEL_MIN_VERSION,
+    'networkx>=%s' % NETWORKX_MIN_VERSION,
+    'numpy>=%s' % NUMPY_MIN_VERSION,
+    'python-dateutil>=%s' % DATEUTIL_MIN_VERSION,
+    'scipy>=%s' % SCIPY_MIN_VERSION,
+    'traits>=%s' % TRAITS_MIN_VERSION,
+    'future>=%s' % FUTURE_MIN_VERSION,
+    'simplejson>=%s' % SIMPLEJSON_MIN_VERSION,
+    'prov==%s' % PROV_VERSION,
+    'click>=%s' % CLICK_MIN_VERSION,
+    'funcsigs',
+    'pytest>=%s' % PYTEST_MIN_VERSION,
+    'mock',
+    'pydotplus',
+    'packaging',
+]
+
+if sys.version_info <= (3, 4):
+    REQUIRES.append('configparser')
+
+TESTS_REQUIRES = [
+    'pytest-cov',
+    'codecov'
+]
+
+EXTRA_REQUIRES = {
+    'doc': ['Sphinx>=1.4', 'matplotlib', 'pydotplus'],
+    'tests': TESTS_REQUIRES,
+    'nipy': ['nitime', 'nilearn', 'dipy', 'nipy', 'matplotlib'],
+    'profiler': ['psutil'],
+    'duecredit': ['duecredit'],
+    'xvfbwrapper': ['xvfbwrapper'],
+    # 'mesh': ['mayavi']  # Enable when it works
+}
+
+# Enable a handle to install all extra dependencies at once
+EXTRA_REQUIRES['all'] = [val for _, val in list(EXTRA_REQUIRES.items())]
+
+STATUS = 'stable'

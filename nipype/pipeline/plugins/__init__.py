@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 
@@ -5,6 +6,7 @@ from .debug import DebugPlugin
 from .linear import LinearPlugin
 from .ipythonx import IPythonXPlugin
 from .pbs import PBSPlugin
+from .oar import OARPlugin
 from .sge import SGEPlugin
 from .condor import CondorPlugin
 from .dagman import CondorDAGManPlugin
@@ -16,3 +18,6 @@ from .sgegraph import SGEGraphPlugin
 from .lsf import LSFPlugin
 from .slurm import SLURMPlugin
 from .slurmgraph import SLURMGraphPlugin
+
+from .callback_log import log_nodes_cb
+from . import  semaphore_singleton

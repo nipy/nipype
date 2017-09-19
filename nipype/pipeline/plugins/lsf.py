@@ -1,15 +1,14 @@
+# -*- coding: utf-8 -*-
 """Parallel workflow execution via LSF
 """
+from __future__ import print_function, division, unicode_literals, absolute_import
 
 import os
-
-from .base import (SGELikeBatchManagerBase, logger, iflogger, logging)
-
-from nipype.interfaces.base import CommandLine
-
+import re
 from time import sleep
 
-import re
+from .base import (SGELikeBatchManagerBase, logger, iflogger, logging)
+from ...interfaces.base import CommandLine
 
 
 class LSFPlugin(SGELikeBatchManagerBase):
@@ -34,7 +33,7 @@ class LSFPlugin(SGELikeBatchManagerBase):
         if 'plugin_args' in kwargs and kwargs['plugin_args']:
             if 'retry_timeout' in kwargs['plugin_args']:
                 self._retry_timeout = kwargs['plugin_args']['retry_timeout']
-            if  'max_tries' in kwargs['plugin_args']:
+            if 'max_tries' in kwargs['plugin_args']:
                 self._max_tries = kwargs['plugin_args']['max_tries']
             if 'bsub_args' in kwargs['plugin_args']:
                 self._bsub_args = kwargs['plugin_args']['bsub_args']
@@ -60,7 +59,7 @@ class LSFPlugin(SGELikeBatchManagerBase):
             return True
 
     def _submit_batchtask(self, scriptfile, node):
-        cmd = CommandLine('bsub', environ=os.environ.data,
+        cmd = CommandLine('bsub', environ=dict(os.environ),
                           terminal_output='allatonce')
         path = os.path.dirname(scriptfile)
         bsubargs = ''
@@ -77,11 +76,11 @@ class LSFPlugin(SGELikeBatchManagerBase):
         if '-e' not in bsubargs:
             bsubargs = '%s -e %s' % (bsubargs, scriptfile + ".log")  # -e error file
         if node._hierarchy:
-            jobname = '.'.join((os.environ.data['LOGNAME'],
+            jobname = '.'.join((dict(os.environ)['LOGNAME'],
                                 node._hierarchy,
                                 node._id))
         else:
-            jobname = '.'.join((os.environ.data['LOGNAME'],
+            jobname = '.'.join((dict(os.environ)['LOGNAME'],
                                 node._id))
         jobnameitems = jobname.split('.')
         jobnameitems.reverse()
@@ -96,7 +95,7 @@ class LSFPlugin(SGELikeBatchManagerBase):
         while True:
             try:
                 result = cmd.run()
-            except Exception, e:
+            except Exception as e:
                 if tries < self._max_tries:
                     tries += 1
                     sleep(

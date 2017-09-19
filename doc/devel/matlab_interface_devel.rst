@@ -93,7 +93,7 @@ By subclassing **MatlabCommand** for your main class, and **MatlabInputSpec** fo
             >>> hello = HelloWorld()
             >>> hello.inputs.name = 'hello_world'
             >>> out = hello.run()
-            >>> print out.outputs.matlab_output
+            >>> print(out.outputs.matlab_output)
             """
             input_spec = HelloWorldInputSpec
             output_spec = HelloWorldOutputSpec
