@@ -27,7 +27,6 @@ dependencies:
     - if [[ ! -e "$HOME/bin/codecov" ]]; then mkdir -p $HOME/bin; curl -so $HOME/bin/codecov https://codecov.io/bash && chmod 755 $HOME/bin/codecov; fi
     - (cd $HOME/docker && gzip -d cache.tar.gz && docker load --input $HOME/docker/cache.tar) || true :
         timeout: 6000
-    - git clone https://github.com/INCF/pybids.git && cd pybids && python setup.py develop
 
   override:
     # Get data
