@@ -12,7 +12,7 @@ def test_BinThreshTask_inputs():
     ignore_exception=dict(nohash=True,
     usedefault=True,
     ),
-    in_image=dict(argstr='%s',
+    in_file=dict(argstr='%s',
     exists=True,
     mandatory=False,
     position=0,
