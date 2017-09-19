@@ -1,0 +1,22 @@
+{
+  "nipype/algorithms/tests/test_tsnr.py": true, 
+  "nipype/interfaces/dtitk/tests/test_auto_AffineTask.py": true, 
+  "nipype/interfaces/dtitk/tests/test_auto_BinThreshTask.py": true, 
+  "nipype/interfaces/dtitk/tests/test_auto_CommandLineDtitk.py": true, 
+  "nipype/interfaces/dtitk/tests/test_auto_ComposeXfmTask.py": true, 
+  "nipype/interfaces/dtitk/tests/test_auto_DiffeoTask.py": true, 
+  "nipype/interfaces/dtitk/tests/test_auto_RigidTask.py": true, 
+  "nipype/interfaces/dtitk/tests/test_auto_SVAdjustVoxSpTask.py": true, 
+  "nipype/interfaces/dtitk/tests/test_auto_SVResampleTask.py": true, 
+  "nipype/interfaces/dtitk/tests/test_auto_TVAdjustOriginTask.py": true, 
+  "nipype/interfaces/dtitk/tests/test_auto_TVAdjustVoxSpTask.py": true, 
+  "nipype/interfaces/dtitk/tests/test_auto_TVResampleTask.py": true, 
+  "nipype/interfaces/dtitk/tests/test_auto_TVtoolTask.py": true, 
+  "nipype/interfaces/dtitk/tests/test_auto_affScalarVolTask.py": true, 
+  "nipype/interfaces/dtitk/tests/test_auto_affSymTensor3DVolTask.py": true, 
+  "nipype/interfaces/dtitk/tests/test_auto_diffeoScalarVolTask.py": true, 
+  "nipype/interfaces/dtitk/tests/test_auto_diffeoSymTensor3DVolTask.py": true, 
+  "nipype/pipeline/plugins/tests/test_base.py": true, 
+  "nipype/testing/tests/test_utils.py": true, 
+  "nipype/workflows/rsfmri/fsl/tests/test_resting.py": true
+}

@@ -26,7 +26,7 @@ import os
 
 from ... import logging
 from ...utils.filemanip import fname_presuffix
-from ..base import traits, CommandLine
+from ..base import CommandLine
 from nipype.interfaces.fsl.base import Info
 
 LOGGER = logging.getLogger('interface')

@@ -41,7 +41,8 @@ class RigidTask(CommandLineDtitk):
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        outputs['out_file_xfm'] = self.inputs.in_file.replace('.nii.gz', '.aff')
+        outputs['out_file_xfm'] = self.inputs.in_file.replace('.nii.gz',
+                                                              '.aff')
         outputs['out_file'] = self.inputs.in_file.replace('.nii.gz',
                                                           '_aff.nii.gz')
         return outputs
@@ -55,8 +56,8 @@ class AffineInputSpec(CommandLineInputSpec):
         desc="moving list of diffusion tensor image paths", exists=True,
         mandatory=False, position=1, argstr="%s")
     in_similarity_metric = traits.Enum('EDS', 'GDS', 'DDS', 'NMI', exists=True,
-                                       mandatory=False, position=3, argstr="%s",
-                                       desc = "similarity metric")
+                                       mandatory=False, position=3,
+                                       argstr="%s", desc="similarity metric")
     in_usetrans_flag = traits.Enum('--useTrans', '', exists=True,
                                    mandatory=False, position=4, argstr="%s",
                                    desc="initialize using rigid transform??")
@@ -88,10 +89,10 @@ class AffineTask(CommandLineDtitk):
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        outputs['out_file_xfm'] = self.inputs.in_fixed_tensor.replace('.nii.gz',
-                                                                      '.aff')
-        outputs['out_file'] = self.inputs.in_fixed_tensor.replace('.nii.gz',
-                                                                  '_aff.nii.gz')
+        outputs['out_file_xfm'] = self.inputs.in_fixed_tensor.replace(
+            '.nii.gz', '.aff')
+        outputs['out_file'] = self.inputs.in_fixed_tensor.replace(
+            '.nii.gz', '_aff.nii.gz')
         return outputs
 
 
@@ -135,7 +136,7 @@ class DiffeoTask(CommandLineDtitk):
     def _list_outputs(self):
         outputs = self.output_spec().get()
         outputs['out_file_xfm'] = self.inputs.in_fixed_tensor.replace(
-            '.nii.gz','_aff_diffeo.df.nii.gz')
+            '.nii.gz', '_aff_diffeo.df.nii.gz')
         outputs['out_file'] = self.inputs.in_fixed_tensor.replace(
             '.nii.gz', '_aff_diffeo.nii.gz')
         return outputs
@@ -182,7 +183,8 @@ class ComposeXfmTask(CommandLineDtitk):
 class diffeoSymTensor3DVolInputSpec(CommandLineInputSpec):
     in_tensor = traits.Str(desc='moving tensor', exists=True, mandatory=False,
                            position=0, argstr="-in %s")
-    in_xfm = traits.Str(desc='transform to apply', exists=True, mandatory=False,
+    in_xfm = traits.Str(desc='transform to apply', exists=True,
+                        mandatory=False,
                         position=1, argstr="-trans %s")
     in_target = traits.Str(desc='', exists=True, mandatory=False, position=2,
                            argstr="-target %s")
@@ -222,8 +224,8 @@ class diffeoSymTensor3DVolTask(CommandLineDtitk):
 class affSymTensor3DVolInputSpec(CommandLineInputSpec):
     in_tensor = traits.Str(desc='moving tensor', exists=True, mandatory=False,
                            position=0, argstr="-in %s")
-    in_xfm = traits.Str(desc='transform to apply', exists=True, mandatory=False,
-                        position=1, argstr="-trans %s")
+    in_xfm = traits.Str(desc='transform to apply', exists=True,
+                        mandatory=False, position=1, argstr="-trans %s")
     in_target = traits.Str(desc='', exists=True, mandatory=False, position=2,
                            argstr="-target %s")
     out_path = traits.Str(desc='', exists=True, mandatory=False, position=3,
@@ -261,7 +263,8 @@ class affSymTensor3DVolTask(CommandLineDtitk):
 class affScalarVolInputSpec(CommandLineInputSpec):
     in_volume = traits.Str(desc='moving volume', exists=True, mandatory=False,
                            position=0, argstr="-in %s")
-    in_xfm = traits.Str(desc='transform to apply', exists=True, mandatory=False,
+    in_xfm = traits.Str(desc='transform to apply', exists=True,
+                        mandatory=False,
                         position=1, argstr="-trans %s")
     in_target = traits.Str(desc='', position=2, argstr="-target %s")
     out_path = traits.Str(desc='', mandatory=False, position=3,
@@ -299,7 +302,8 @@ class affScalarVolTask(CommandLineDtitk):
 class diffeoScalarVolInputSpec(CommandLineInputSpec):
     in_volume = traits.Str(desc='moving volume', exists=True, mandatory=False,
                            position=0, argstr="-in %s")
-    in_xfm = traits.Str(desc='transform to apply', exists=True, mandatory=False,
+    in_xfm = traits.Str(desc='transform to apply', exists=True,
+                        mandatory=False,
                         position=2, argstr="-trans %s")
     in_target = traits.Str(desc='', exists=True, mandatory=False, position=3,
                            argstr="-target %s")
@@ -329,7 +333,7 @@ class diffeoScalarVolTask(CommandLineDtitk):
 
                 >>> import nipype.interfaces.dtitk as dtitk
                 >>> node = dtitk.diffeoScalarVolTask()
-                >>> node.inputs.in_tensor = 'fa.nii.gz'
+                >>> node.inputs.in_volume = 'fa.nii.gz'
                 >>> node.inputs.in_xfm = 'ants_Warp.nii.gz'
                 >>> node.run() # doctest: +SKIP
                 """
@@ -343,6 +347,7 @@ class diffeoScalarVolTask(CommandLineDtitk):
         if not isdefined(self.inputs.out_path):
             self.inputs.out_path = fname_presuffix(self.inputs.in_volume,
                                                    suffix="_diffeoxfmd",
-                                                   newpath=os.path.abspath("."))
+                                                   newpath=os.path.abspath(
+                                                        "."))
         outputs['out_file'] = os.path.abspath(self.inputs.out_path)
         return outputs

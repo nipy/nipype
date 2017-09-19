@@ -1,7 +1,7 @@
 __author__ = 'kjordan'
 
 from ..base import TraitedSpec, CommandLineInputSpec, File, \
-    traits, isdefined, split_filename
+    traits, isdefined
 import os
 from .base import CommandLineDtitk
 
@@ -44,8 +44,8 @@ class TVAdjustOriginTask(CommandLineDtitk):
             outputs["out_file"] = self._gen_fname(self.inputs.in_file,
                                                   suffix=self._suffix,
                                                   ext='.'+'.'.join(
-                                                      self.inputs.in_file.split(
-                                                          ".")[1:]))
+                                                      self.inputs.in_file.
+                                                      split(".")[1:]))
         outputs["out_file"] = os.path.abspath(outputs["out_file"])
         return outputs
 
@@ -96,8 +96,8 @@ class TVAdjustVoxSpTask(CommandLineDtitk):
             outputs["out_file"] = self._gen_fname(self.inputs.in_file,
                                                   suffix=self._suffix,
                                                   ext='.'+'.'.join(
-                                                      self.inputs.in_file.split(
-                                                          ".")[1:]))
+                                                      self.inputs.in_file.
+                                                      split(".")[1:]))
         outputs["out_file"] = os.path.abspath(outputs["out_file"])
         return outputs
 
@@ -112,13 +112,14 @@ class TVAdjustVoxSpTask(CommandLineDtitk):
 
 class SVAdjustVoxSpInputSpec(CommandLineInputSpec):
     in_file = traits.Str(desc="image to resample", exists=True,
-                           mandatory=True, position=0, argstr="-in %s")
+                         mandatory=True, position=0, argstr="-in %s")
     in_target = traits.Str(desc='target volume', exists=True, mandatory=False,
                            position=2, argstr="-target %s")
     in_voxsz = traits.Str(desc='resampled voxel size', exists=True,
                           mandatory=False, position=3, argstr="-vsize %s")
     out_path = traits.Str(desc='output path', exists=True, mandatory=False,
-                          position=1, argstr="-out %s", name_source="in_volume",
+                          position=1, argstr="-out %s",
+                          name_source="in_file",
                           name_template='%s_origmvd.nii.gz')
     origin = traits.Str(desc='xyz voxel size', exists=True, mandatory=False,
                         position=4, argstr='-origin %s')
@@ -152,8 +153,8 @@ class SVAdjustVoxSpTask(CommandLineDtitk):
             outputs["out_file"] = self._gen_fname(self.inputs.in_file,
                                                   suffix=self._suffix,
                                                   ext='.' + '.'.join(
-                                                      self.inputs.in_file.split(
-                                                          ".")[1:]))
+                                                      self.inputs.in_file.
+                                                      plit(".")[1:]))
         outputs["out_file"] = os.path.abspath(outputs["out_file"])
         return outputs
 
@@ -172,7 +173,7 @@ class TVResampleInputSpec(CommandLineInputSpec):
                           mandatory=False, position=2, argstr="-vsize %s")
     out_path = traits.Str(desc='output path', exists=True, mandatory=False,
                           position=3, argstr="-out %s",
-                          name_source="in_volume",
+                          name_source="in_file",
                           name_template="%s_resampled.nii.gz")
 
 
@@ -204,8 +205,8 @@ class TVResampleTask(CommandLineDtitk):
             outputs["out_file"] = self._gen_fname(self.inputs.in_file,
                                                   suffix=self._suffix,
                                                   ext='.' + '.'.join(
-                                                      self.inputs.in_file.split(
-                                                          ".")[1:]))
+                                                      self.inputs.in_file.
+                                                      split(".")[1:]))
         outputs["out_file"] = os.path.abspath(outputs["out_file"])
         return outputs
 
@@ -217,14 +218,15 @@ class TVResampleTask(CommandLineDtitk):
 
 class SVResampleInputSpec(CommandLineInputSpec):
     in_file = traits.Str(desc="image to resample", exists=True,
-                           mandatory=True, position=0, argstr="-in %s")
+                         mandatory=True, position=0, argstr="-in %s")
     in_arraysz = traits.Str(desc='resampled array size', exists=True,
-                            mandatory=False, position=1, \
+                            mandatory=False, position=1,
                             argstr="-size %s")
     in_voxsz = traits.Str(desc='resampled voxel size', exists=True,
                           mandatory=False, position=2, argstr="-vsize %s")
     out_path = traits.Str(desc='output path', exists=True, mandatory=False,
-                          position=3, argstr="-out %s", name_source="in_volume",
+                          position=3, argstr="-out %s",
+                          name_source="in_file",
                           name_template="%s_resampled.nii.gz")
 
 
@@ -256,8 +258,8 @@ class SVResampleTask(CommandLineDtitk):
             outputs["out_file"] = self._gen_fname(self.inputs.in_file,
                                                   suffix=self._suffix,
                                                   ext='.' + '.'.join(
-                                                      self.inputs.in_file.split(
-                                                          ".")[1:]))
+                                                      self.inputs.in_file.
+                                                      split(".")[1:]))
         outputs["out_file"] = os.path.abspath(outputs["out_file"])
         return outputs
 
@@ -269,7 +271,7 @@ class SVResampleTask(CommandLineDtitk):
 
 class TVtoolInputSpec(CommandLineInputSpec):
     in_file = traits.Str(desc="image to resample", exists=True,
-                           mandatory=False, position=0, argstr="-in %s")
+                         mandatory=False, position=0, argstr="-in %s")
     in_flag = traits.Enum('fa', 'tr', 'ad', 'rd', 'pd', 'rgb', exists=True,
                           mandatory=False, position=1, argstr="-%s", desc='')
 
@@ -303,8 +305,8 @@ class TVtoolTask(CommandLineDtitk):
             outputs["out_file"] = self._gen_fname(self.inputs.in_file,
                                                   suffix=_suffix,
                                                   ext='.' + '.'.join(
-                                                      self.inputs.in_file.split(
-                                                          ".")[1:]))
+                                                      self.inputs.in_file.
+                                                      split(".")[1:]))
         outputs["out_file"] = os.path.abspath(outputs["out_file"])
         return outputs
 
@@ -316,7 +318,7 @@ class TVtoolTask(CommandLineDtitk):
 
 class BinThreshInputSpec(CommandLineInputSpec):
     in_file = traits.Str(desc='', exists=True, mandatory=False, position=0,
-                          argstr="%s")
+                         argstr="%s")
     out_path = traits.Str(desc='', exists=True, mandatory=False, position=1,
                           argstr="%s")
     in_numbers = traits.Str(desc='LB UB inside_value outside_value',
@@ -354,8 +356,8 @@ class BinThreshTask(CommandLineDtitk):
             outputs["out_file"] = self._gen_fname(self.inputs.in_file,
                                                   suffix=self._suffix,
                                                   ext='.'+'.'.join(
-                                                      self.inputs.in_file.split(
-                                                          ".")[1:]))
+                                                    self.inputs.in_file.
+                                                    split(".")[1:]))
         outputs["out_file"] = os.path.abspath(outputs["out_file"])
         return outputs
 
