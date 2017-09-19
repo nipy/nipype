@@ -19,7 +19,7 @@ def getthreshop(thresh):
 def pickrun(files, whichrun):
     """pick file from list of files"""
 
-    filemap = {'first': 0, 'last': -1, 'middle' :len(files) // 2}
+    filemap = {'first': 0, 'last': -1, 'middle': len(files) // 2}
 
     if isinstance(whichrun, str):
         if whichrun not in filemap.keys():
