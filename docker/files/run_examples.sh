@@ -12,7 +12,7 @@ mkdir -p ${HOME}/.nipype ${WORKDIR}/logs/example_${example_id} ${WORKDIR}/tests 
 echo "[logging]" > ${HOME}/.nipype/nipype.cfg
 echo "workflow_level = DEBUG" >> ${HOME}/.nipype/nipype.cfg
 echo "interface_level = DEBUG" >> ${HOME}/.nipype/nipype.cfg
-echo "filemanip_level = DEBUG" >> ${HOME}/.nipype/nipype.cfg
+echo "utils_level = DEBUG" >> ${HOME}/.nipype/nipype.cfg
 echo "log_to_file = true" >> ${HOME}/.nipype/nipype.cfg
 echo "log_directory = ${WORKDIR}/logs/example_${example_id}" >> ${HOME}/.nipype/nipype.cfg
 

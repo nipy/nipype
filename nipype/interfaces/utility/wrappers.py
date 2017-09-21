@@ -20,21 +20,13 @@ standard_library.install_aliases()
 from builtins import str, bytes
 
 from ... import logging
-from ..base import (traits, DynamicTraitedSpec, Undefined, isdefined, runtime_profile,
-                    BaseInterfaceInputSpec, get_max_resources_used)
+from ..base import (traits, DynamicTraitedSpec, Undefined, isdefined,
+                    BaseInterfaceInputSpec)
 from ..io import IOBase, add_traits
 from ...utils.filemanip import filename_to_list
 from ...utils.misc import getsource, create_function_from_source
 
 logger = logging.getLogger('interface')
-if runtime_profile:
-    try:
-        import psutil
-    except ImportError as exc:
-        logger.info('Unable to import packages needed for runtime profiling. '\
-                    'Turning off runtime profiler. Reason: %s' % exc)
-        runtime_profile = False
-
 
 class FunctionInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
     function_str = traits.Str(mandatory=True, desc='code for function')
@@ -137,8 +129,8 @@ class Function(IOBase):
         return base
 
     def _run_interface(self, runtime):
-        # Get workflow logger for runtime profile error reporting
-        logger = logging.getLogger('workflow')
+        # Check profiling
+        from ..utils.profiler import runtime_profile
 
         # Create function handle
         function_handle = create_function_from_source(self.inputs.function_str,
@@ -163,6 +155,7 @@ class Function(IOBase):
         # Profile resources if set
         if runtime_profile:
             import multiprocessing
+            from ..utils.profiler import get_max_resources_used
             # Init communication queue and proc objs
             queue = multiprocessing.Queue()
             proc = multiprocessing.Process(target=_function_handle_wrapper,

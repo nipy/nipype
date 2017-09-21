@@ -46,8 +46,7 @@ from ...utils.filemanip import (save_json, FileNotFoundError,
 from ...interfaces.base import (traits, InputMultiPath, CommandLine,
                                 Undefined, TraitedSpec, DynamicTraitedSpec,
                                 Bunch, InterfaceResult, md5, Interface,
-                                TraitDictObject, TraitListObject, isdefined,
-                                runtime_profile)
+                                TraitDictObject, TraitListObject, isdefined)
 from .utils import (generate_expanded_graph, modify_paths,
                     export_graph, make_output_dir, write_workflow_prov,
                     clean_working_directory, format_dot, topological_sort,
@@ -690,6 +689,7 @@ class Node(EngineBase):
         self.inputs.update(**opts)
 
     def write_report(self, report_type=None, cwd=None):
+        from ...utils.profiler import runtime_profile
         if not str2bool(self.config['execution']['create_report']):
             return
         report_dir = op.join(cwd, '_report')

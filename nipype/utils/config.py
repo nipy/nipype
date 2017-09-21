@@ -34,7 +34,7 @@ homedir = os.path.expanduser('~')
 default_cfg = """
 [logging]
 workflow_level = INFO
-filemanip_level = INFO
+utils_level = INFO
 interface_level = INFO
 log_to_file = false
 log_directory = %s

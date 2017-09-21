@@ -16,9 +16,10 @@ Logging
 *workflow_level*
 	How detailed the logs regarding workflow should be (possible values:
 	``INFO`` and ``DEBUG``; default value: ``INFO``)
-*filemanip_level*
-	How detailed the logs regarding file operations (for example overwriting
-	warning) should be (possible values: ``INFO`` and ``DEBUG``; default value:
+*utils_level*
+	How detailed the logs regarding nipype utils like file operations 
+	(for example overwriting warning) or the resource profiler should be 
+	(possible values: ``INFO`` and ``DEBUG``; default value:
 	``INFO``)
 *interface_level*
 	How detailed the logs regarding interface execution should be (possible

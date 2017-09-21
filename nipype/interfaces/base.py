@@ -44,22 +44,12 @@ from .traits_extension import (
     File, Directory, DictStrStr, has_metadata, ImageFile)
 from ..external.due import due
 
-runtime_profile = str2bool(config.get('execution', 'profile_runtime'))
 nipype_version = Version(__version__)
 iflogger = logging.getLogger('interface')
 
 FLOAT_FORMAT = '{:.10f}'.format
 PY35 = sys.version_info >= (3, 5)
 PY3 = sys.version_info[0] > 2
-
-if runtime_profile:
-    try:
-        import psutil
-    except ImportError as exc:
-        iflogger.info('Unable to import packages needed for runtime profiling. '\
-                    'Turning off runtime profiler. Reason: %s' % exc)
-        runtime_profile = False
-
 __docformat__ = 'restructuredtext'
 
 
@@ -1270,118 +1260,6 @@ class Stream(object):
         self._lastidx = len(self._rows)
 
 
-# Get number of threads for process
-def _get_num_threads(proc):
-    """Function to get the number of threads a process is using
-    NOTE: If
-
-    Parameters
-    ----------
-    proc : psutil.Process instance
-        the process to evaluate thead usage of
-
-    Returns
-    -------
-    num_threads : int
-        the number of threads that the process is using
-    """
-
-    # Import packages
-    import psutil
-
-    # If process is running
-    if proc.status() == psutil.STATUS_RUNNING:
-        num_threads = proc.num_threads()
-    elif proc.num_threads() > 1:
-        tprocs = [psutil.Process(thr.id) for thr in proc.threads()]
-        alive_tprocs = [tproc for tproc in tprocs if tproc.status() == psutil.STATUS_RUNNING]
-        num_threads = len(alive_tprocs)
-    else:
-        num_threads = 1
-
-    # Try-block for errors
-    try:
-        child_threads = 0
-        # Iterate through child processes and get number of their threads
-        for child in proc.children(recursive=True):
-            # Leaf process
-            if len(child.children()) == 0:
-                # If process is running, get its number of threads
-                if child.status() == psutil.STATUS_RUNNING:
-                    child_thr = child.num_threads()
-                # If its not necessarily running, but still multi-threaded
-                elif child.num_threads() > 1:
-                    # Cast each thread as a process and check for only running
-                    tprocs = [psutil.Process(thr.id) for thr in child.threads()]
-                    alive_tprocs = [tproc for tproc in tprocs if tproc.status() == psutil.STATUS_RUNNING]
-                    child_thr = len(alive_tprocs)
-                # Otherwise, no threads are running
-                else:
-                    child_thr = 0
-                # Increment child threads
-                child_threads += child_thr
-    # Catch any NoSuchProcess errors
-    except psutil.NoSuchProcess:
-        pass
-
-    # Number of threads is max between found active children and parent
-    num_threads = max(child_threads, num_threads)
-
-    # Return number of threads found
-    return num_threads
-
-
-# Get ram usage of process
-def _get_ram_mb(pid, pyfunc=False):
-    """Function to get the RAM usage of a process and its children
-
-    Parameters
-    ----------
-    pid : integer
-        the PID of the process to get RAM usage of
-    pyfunc : boolean (optional); default=False
-        a flag to indicate if the process is a python function;
-        when Pythons are multithreaded via multiprocess or threading,
-        children functions include their own memory + parents. if this
-        is set, the parent memory will removed from children memories
-
-    Reference: http://ftp.dev411.com/t/python/python-list/095thexx8g/multiprocessing-forking-memory-usage
-
-    Returns
-    -------
-    mem_mb : float
-        the memory RAM in MB utilized by the process PID
-    """
-
-    # Import packages
-    import psutil
-
-    # Init variables
-    _MB = 1024.0**2
-
-    # Try block to protect against any dying processes in the interim
-    try:
-        # Init parent
-        parent = psutil.Process(pid)
-        # Get memory of parent
-        parent_mem = parent.memory_info().rss
-        mem_mb = parent_mem/_MB
-
-        # Iterate through child processes
-        for child in parent.children(recursive=True):
-            child_mem = child.memory_info().rss
-            if pyfunc:
-                child_mem -= parent_mem
-            mem_mb += child_mem/_MB
-
-    # Catch if process dies, return gracefully
-    except psutil.NoSuchProcess:
-        pass
-
-    # Return memory
-    return mem_mb
-
-
 def _canonicalize_env(env):
     """Windows requires that environment be dicts with bytes as keys and values
     This function converts any unicode entries for Windows only, returning the
@@ -1411,53 +1289,18 @@ def _canonicalize_env(env):
     return out_env
 
 
-# Get max resources used for process
-def get_max_resources_used(pid, mem_mb, num_threads, pyfunc=False):
-    """Function to get the RAM and threads usage of a process
-
-    Parameters
-    ----------
-    pid : integer
-        the process ID of process to profile
-    mem_mb : float
-        the high memory watermark so far during process execution (in MB)
-    num_threads: int
-        the high thread watermark so far during process execution
-
-    Returns
-    -------
-    mem_mb : float
-        the new high memory watermark of process (MB)
-    num_threads : float
-        the new high thread watermark of process
-    """
-
-    # Import packages
-    import psutil
-
-    try:
-        mem_mb = max(mem_mb, _get_ram_mb(pid, pyfunc=pyfunc))
-        num_threads = max(num_threads, _get_num_threads(psutil.Process(pid)))
-    except Exception as exc:
-        iflogger.info('Could not get resources used by process. Error: %s'\
-                      % exc)
-
-    # Return resources
-    return mem_mb, num_threads
-
-
 def run_command(runtime, output=None, timeout=0.01, redirect_x=False):
     """Run a command, read stdout and stderr, prefix with timestamp.
 
     The returned runtime contains a merged stdout+stderr log with timestamps
     """
-
-    # Init logger
-    logger = logging.getLogger('workflow')
+    # Check profiling
+    from ..utils.profiler import get_max_resources_used, runtime_profile
 
     # Init variables
     PIPE = subprocess.PIPE
     cmdline = runtime.cmdline
+
 
     if redirect_x:
         exist_xvfb, _ = _exists_in_path('xvfb-run', runtime.environ)

@@ -33,11 +33,11 @@ class Logging(object):
                             stream=sys.stdout)
         # logging.basicConfig(stream=sys.stdout)
         self._logger = logging.getLogger('workflow')
-        self._fmlogger = logging.getLogger('filemanip')
+        self._utlogger = logging.getLogger('utils')
         self._iflogger = logging.getLogger('interface')
 
         self.loggers = {'workflow': self._logger,
-                        'filemanip': self._fmlogger,
+                        'utils': self._utlogger,
                         'interface': self._iflogger}
         self._hdlr = None
         self.update_logging(self._config)
@@ -53,14 +53,14 @@ class Logging(object):
         formatter = logging.Formatter(fmt=self.fmt, datefmt=self.datefmt)
         hdlr.setFormatter(formatter)
         self._logger.addHandler(hdlr)
-        self._fmlogger.addHandler(hdlr)
+        self._utlogger.addHandler(hdlr)
         self._iflogger.addHandler(hdlr)
         self._hdlr = hdlr
 
     def disable_file_logging(self):
         if self._hdlr:
             self._logger.removeHandler(self._hdlr)
-            self._fmlogger.removeHandler(self._hdlr)
+            self._utlogger.removeHandler(self._hdlr)
             self._iflogger.removeHandler(self._hdlr)
             self._hdlr = None
 
@@ -69,8 +69,8 @@ class Logging(object):
         self.disable_file_logging()
         self._logger.setLevel(logging.getLevelName(config.get('logging',
                                                               'workflow_level')))
-        self._fmlogger.setLevel(logging.getLevelName(config.get('logging',
-                                                                'filemanip_level')))
+        self._utlogger.setLevel(logging.getLevelName(config.get('logging',
+                                                                'utils_level')))
         self._iflogger.setLevel(logging.getLevelName(config.get('logging',
                                                                 'interface_level')))
         if str2bool(config.get('logging', 'log_to_file')):
