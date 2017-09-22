@@ -47,7 +47,7 @@ use the following command::
 While `all` installs everything, one can also install select components as
 listed below::
 
-    'doc': ['Sphinx>=1.4', 'matplotlib', 'pydotplus'],
+    'doc': ['Sphinx>=1.4', 'matplotlib', 'pydotplus', 'pydot>=1.2.3'],
     'tests': ['pytest-cov', 'codecov'],
     'nipy': ['nitime', 'nilearn', 'dipy', 'nipy', 'matplotlib'],
     'profiler': ['psutil'],

@@ -37,7 +37,6 @@ from nipype.utils.misc import package_check
 
 package_check('numpy', '1.3', 'tutorial1')
 package_check('scipy', '0.7', 'tutorial1')
-package_check('networkx', '1.0', 'tutorial1')
 package_check('IPython', '0.10', 'tutorial1')
 
 """The nipype tutorial contains data for two subjects.  Subject data

@@ -1,6 +1,6 @@
 numpy>=1.6.2
 scipy>=0.11
-networkx>=1.7
+networkx>=1.9
 traits>=4.6
 python-dateutil>=1.5
 nibabel>=2.1.0
@@ -12,6 +12,7 @@ configparser
 pytest>=3.0
 mock
 pydotplus
+pydot>=1.2.3
 psutil
 matplotlib
 packaging
