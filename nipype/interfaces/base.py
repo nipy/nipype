@@ -24,7 +24,7 @@ import re
 import platform
 from string import Template
 import select
-import subprocess
+import subprocess as sp
 import sys
 import time
 from textwrap import wrap
@@ -51,6 +51,9 @@ FLOAT_FORMAT = '{:.10f}'.format
 PY35 = sys.version_info >= (3, 5)
 PY3 = sys.version_info[0] > 2
 __docformat__ = 'restructuredtext'
+
+if sys.version_info < (3, 3):
+    setattr(sp, 'DEVNULL', os.devnull)
 
 
 class Str(traits.Unicode):
@@ -1053,6 +1056,13 @@ class BaseInterface(Interface):
         results :  an InterfaceResult object containing a copy of the instance
         that was executed, provenance information and, if successful, results
         """
+        from ..utils.profiler import runtime_profile
+
+        force_raise = not (
+            hasattr(self.inputs, 'ignore_exception') and
+            isdefined(self.inputs.ignore_exception) and
+            self.inputs.ignore_exception
+        )
         self.inputs.trait_set(**inputs)
         self._check_mandatory_inputs()
         self._check_version_requirements(self.inputs)
@@ -1070,66 +1080,59 @@ class BaseInterface(Interface):
                         platform=platform.platform(),
                         hostname=platform.node(),
                         version=self.version)
+
+        proc_prof = None
+        if runtime_profile:
+            ifpid = '%d' % os.getpid()
+            fname = os.path.abspath('.prof-%s_freq-%0.3f' % (ifpid, 1))
+            proc_prof = sp.Popen(
+                ['nipype_mprof', ifpid, '-o', fname, '-f', '1'],
+                cwd=os.getcwd(),
+                stdout=sp.DEVNULL,
+                stderr=sp.DEVNULL,
+                preexec_fn=os.setsid
+            )
+            iflogger.debug('Started runtime profiler monitor (PID=%d) to file "%s"',
+                           proc_prof.pid, fname)
+
+        # Grab inputs now, as they should not change during execution
+        inputs = self.inputs.get_traitsfree()
+        outputs = None
         try:
             runtime = self._run_wrapper(runtime)
             outputs = self.aggregate_outputs(runtime)
-            runtime.endTime = dt.isoformat(dt.utcnow())
-            timediff = parseutc(runtime.endTime) - parseutc(runtime.startTime)
-            runtime.duration = (timediff.days * 86400 + timediff.seconds +
-                                timediff.microseconds / 100000.)
-            results = InterfaceResult(interface, runtime,
-                                      inputs=self.inputs.get_traitsfree(),
-                                      outputs=outputs)
-            prov_record = None
-            if str2bool(config.get('execution', 'write_provenance')):
-                prov_record = write_provenance(results)
-            results.provenance = prov_record
         except Exception as e:
-            runtime.endTime = dt.isoformat(dt.utcnow())
-            timediff = parseutc(runtime.endTime) - parseutc(runtime.startTime)
-            runtime.duration = (timediff.days * 86400 + timediff.seconds +
-                                timediff.microseconds / 100000.)
-            if len(e.args) == 0:
-                e.args = ("")
-
-            message = "\nInterface %s failed to run." % self.__class__.__name__
-
-            if config.has_option('logging', 'interface_level') and \
-                    config.get('logging', 'interface_level').lower() == 'debug':
-                inputs_str = "\nInputs:" + str(self.inputs) + "\n"
-            else:
-                inputs_str = ''
-
-            if len(e.args) == 1 and isinstance(e.args[0], (str, bytes)):
-                e.args = (e.args[0] + " ".join([message, inputs_str]),)
-            else:
-                e.args += (message, )
-                if inputs_str != '':
-                    e.args += (inputs_str, )
-
-            # exception raising inhibition for special cases
             import traceback
-            runtime.traceback = traceback.format_exc()
-            runtime.traceback_args = e.args
-            inputs = None
-            try:
-                inputs = self.inputs.get_traitsfree()
-            except Exception as e:
-                pass
-            results = InterfaceResult(interface, runtime, inputs=inputs)
-            prov_record = None
-            if str2bool(config.get('execution', 'write_provenance')):
-                try:
-                    prov_record = write_provenance(results)
-                except Exception:
-                    prov_record = None
-            results.provenance = prov_record
-            if hasattr(self.inputs, 'ignore_exception') and \
-                    isdefined(self.inputs.ignore_exception) and \
-                    self.inputs.ignore_exception:
-                pass
-            else:
-                raise
+            # Retrieve the maximum info fast
+            setattr(runtime, 'traceback', traceback.format_exc())
+            # Gather up the exception arguments and append nipype info.
+            exc_args = e.args if getattr(e, 'args') else tuple()
+            exc_args += ('An exception of type %s occurred while running interface %s.' %
+                         (type(e).__name__, self.__class__.__name__), )
+            if config.get('logging', 'interface_level', 'info').lower() == 'debug':
+                exc_args += ('Inputs: %s' % str(self.inputs),)
+
+            setattr(runtime, 'traceback_args', ('\n'.join(exc_args),))
+
+        # Fill in runtime times
+        runtime = _tearup_runtime(runtime)
+        results = InterfaceResult(interface, runtime, inputs=inputs, outputs=outputs)
+
+        # Add provenance (if required)
+        results.provenance = None
+        if str2bool(config.get('execution', 'write_provenance', 'false')):
+            # Provenance will throw a warning if something went wrong
+            results.provenance = write_provenance(results)
+
+        # Make sure runtime profiler is shut down
+        if runtime_profile:
+            import signal
+            os.killpg(os.getpgid(proc_prof.pid), signal.SIGINT)
+            iflogger.debug('Killing runtime profiler monitor (PID=%d)', proc_prof.pid)
+
+        if force_raise and getattr(runtime, 'traceback', None):
+            raise NipypeInterfaceError('Fatal error:\n%s\n\n%s' %
+                                       (runtime.traceback, runtime.traceback_args))
         return results
 
     def _list_outputs(self):
@@ -1294,13 +1297,10 @@ def run_command(runtime, output=None, timeout=0.01, redirect_x=False):
 
     The returned runtime contains a merged stdout+stderr log with timestamps
     """
-    # Check profiling
-    from ..utils.profiler import get_max_resources_used, runtime_profile
 
     # Init variables
-    PIPE = subprocess.PIPE
+    PIPE = sp.PIPE
     cmdline = runtime.cmdline
-
 
     if redirect_x:
         exist_xvfb, _ = _exists_in_path('xvfb-run', runtime.environ)
@@ -1319,27 +1319,22 @@ def run_command(runtime, output=None, timeout=0.01, redirect_x=False):
         stderr = open(errfile, 'wb')  # t=='text'===default
         stdout = open(outfile, 'wb')
 
-        proc = subprocess.Popen(cmdline,
-                                stdout=stdout,
-                                stderr=stderr,
-                                shell=True,
-                                cwd=runtime.cwd,
-                                env=env)
+        proc = sp.Popen(cmdline,
+                        stdout=stdout,
+                        stderr=stderr,
+                        shell=True,
+                        cwd=runtime.cwd,
+                        env=env)
     else:
-        proc = subprocess.Popen(cmdline,
-                                stdout=PIPE,
-                                stderr=PIPE,
-                                shell=True,
-                                cwd=runtime.cwd,
-                                env=env)
+        proc = sp.Popen(cmdline,
+                        stdout=PIPE,
+                        stderr=PIPE,
+                        shell=True,
+                        cwd=runtime.cwd,
+                        env=env)
     result = {}
     errfile = os.path.join(runtime.cwd, 'stderr.nipype')
     outfile = os.path.join(runtime.cwd, 'stdout.nipype')
-
-    # Init variables for memory profiling
-    mem_mb = 0
-    num_threads = 1
-    interval = .5
 
     if output == 'stream':
         streams = [Stream('stdout', proc.stdout), Stream('stderr', proc.stderr)]
@@ -1356,13 +1351,11 @@ def run_command(runtime, output=None, timeout=0.01, redirect_x=False):
             else:
                 for stream in res[0]:
                     stream.read(drain)
+
         while proc.returncode is None:
-            if runtime_profile:
-                mem_mb, num_threads = \
-                    get_max_resources_used(proc.pid, mem_mb, num_threads)
             proc.poll()
             _process()
-            time.sleep(interval)
+
         _process(drain=1)
 
         # collect results, merge and return
@@ -1376,12 +1369,6 @@ def run_command(runtime, output=None, timeout=0.01, redirect_x=False):
         result['merged'] = [r[1] for r in temp]
 
     if output == 'allatonce':
-        if runtime_profile:
-            while proc.returncode is None:
-                mem_mb, num_threads = \
-                    get_max_resources_used(proc.pid, mem_mb, num_threads)
-                proc.poll()
-                time.sleep(interval)
         stdout, stderr = proc.communicate()
         stdout = stdout.decode(default_encoding)
         stderr = stderr.decode(default_encoding)
@@ -1389,32 +1376,20 @@ def run_command(runtime, output=None, timeout=0.01, redirect_x=False):
         result['stderr'] = stderr.split('\n')
         result['merged'] = ''
     if output == 'file':
-        if runtime_profile:
-            while proc.returncode is None:
-                mem_mb, num_threads = \
-                    get_max_resources_used(proc.pid, mem_mb, num_threads)
-                proc.poll()
-                time.sleep(interval)
         ret_code = proc.wait()
         stderr.flush()
         stdout.flush()
-        result['stdout'] = [line.decode(default_encoding).strip() for line in open(outfile, 'rb').readlines()]
-        result['stderr'] = [line.decode(default_encoding).strip() for line in open(errfile, 'rb').readlines()]
+        result['stdout'] = [line.decode(default_encoding).strip()
+                            for line in open(outfile, 'rb').readlines()]
+        result['stderr'] = [line.decode(default_encoding).strip()
+                            for line in open(errfile, 'rb').readlines()]
         result['merged'] = ''
     if output == 'none':
-        if runtime_profile:
-            while proc.returncode is None:
-                mem_mb, num_threads = \
-                    get_max_resources_used(proc.pid, mem_mb, num_threads)
-                proc.poll()
-                time.sleep(interval)
         proc.communicate()
         result['stdout'] = []
         result['stderr'] = []
         result['merged'] = ''
 
-    setattr(runtime, 'runtime_memory_gb', mem_mb/1024.0)
-    setattr(runtime, 'runtime_threads', num_threads)
     runtime.stderr = '\n'.join(result['stderr'])
     runtime.stdout = '\n'.join(result['stdout'])
     runtime.merged = result['merged']
@@ -1428,19 +1403,19 @@ def get_dependencies(name, environ):
     Uses otool on darwin, ldd on linux. Currently doesn't support windows.
 
     """
-    PIPE = subprocess.PIPE
+    PIPE = sp.PIPE
     if sys.platform == 'darwin':
-        proc = subprocess.Popen('otool -L `which %s`' % name,
-                                stdout=PIPE,
-                                stderr=PIPE,
-                                shell=True,
-                                env=environ)
+        proc = sp.Popen('otool -L `which %s`' % name,
+                        stdout=PIPE,
+                        stderr=PIPE,
+                        shell=True,
+                        env=environ)
     elif 'linux' in sys.platform:
-        proc = subprocess.Popen('ldd `which %s`' % name,
-                                stdout=PIPE,
-                                stderr=PIPE,
-                                shell=True,
-                                env=environ)
+        proc = sp.Popen('ldd `which %s`' % name,
+                        stdout=PIPE,
+                        stderr=PIPE,
+                        shell=True,
+                        env=environ)
     else:
         return 'Platform %s not supported' % sys.platform
     o, e = proc.communicate()
@@ -1588,12 +1563,12 @@ class CommandLine(BaseInterface):
         if _exists_in_path(cmdname, env):
             out_environ = self._get_environ()
             env.update(out_environ)
-            proc = subprocess.Popen(' '.join((cmdname, flag)),
-                                    shell=True,
-                                    env=env,
-                                    stdout=subprocess.PIPE,
-                                    stderr=subprocess.PIPE,
-                                    )
+            proc = sp.Popen(' '.join((cmdname, flag)),
+                            shell=True,
+                            env=env,
+                            stdout=sp.PIPE,
+                            stderr=sp.PIPE,
+            )
             o, e = proc.communicate()
             return o
 
@@ -2009,3 +1984,10 @@ class InputMultiPath(MultiPath):
 
     """
     pass
+
+def _tearup_runtime(runtime):
+    runtime.endTime = dt.isoformat(dt.utcnow())
+    timediff = parseutc(runtime.endTime) - parseutc(runtime.startTime)
+    runtime.duration = (timediff.days * 86400 + timediff.seconds +
+                        timediff.microseconds / 1e6)
+    return runtime

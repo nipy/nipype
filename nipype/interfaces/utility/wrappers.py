@@ -129,22 +129,9 @@ class Function(IOBase):
         return base
 
     def _run_interface(self, runtime):
-        # Check profiling
-        from ...utils.profiler import runtime_profile
-
         # Create function handle
         function_handle = create_function_from_source(self.inputs.function_str,
                                                       self.imports)
-
-        # Wrapper for running function handle in multiprocessing.Process
-        # Can catch exceptions and report output via multiprocessing.Queue
-        def _function_handle_wrapper(queue, **kwargs):
-            try:
-                out = function_handle(**kwargs)
-                queue.put(out)
-            except Exception as exc:
-                queue.put(exc)
-
         # Get function args
         args = {}
         for name in self._input_names:
@@ -152,38 +139,7 @@ class Function(IOBase):
             if isdefined(value):
                 args[name] = value
 
-        # Profile resources if set
-        if runtime_profile:
-            import multiprocessing
-            from ..utils.profiler import get_max_resources_used
-            # Init communication queue and proc objs
-            queue = multiprocessing.Queue()
-            proc = multiprocessing.Process(target=_function_handle_wrapper,
-                                           args=(queue,), kwargs=args)
-
-            # Init memory and threads before profiling
-            mem_mb = 0
-            num_threads = 0
-
-            # Start process and profile while it's alive
-            proc.start()
-            while proc.is_alive():
-                mem_mb, num_threads = \
-                    get_max_resources_used(proc.pid, mem_mb, num_threads,
-                                           pyfunc=True)
-
-            # Get result from process queue
-            out = queue.get()
-            # If it is an exception, raise it
-            if isinstance(out, Exception):
-                raise out
-
-            # Function ran successfully, populate runtime stats
-            setattr(runtime, 'runtime_memory_gb', mem_mb / 1024.0)
-            setattr(runtime, 'runtime_threads', num_threads)
-        else:
-            out = function_handle(**args)
-
+        out = function_handle(**args)
         if len(self._output_names) == 1:
             self._out[self._output_names[0]] = out
         else:
