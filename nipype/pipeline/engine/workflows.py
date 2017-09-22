@@ -36,7 +36,7 @@ import networkx as nx
 
 
 from ... import config, logging
-from ...utils.misc import (unflatten, package_check, str2bool,
+from ...utils.misc import (unflatten, str2bool,
                                getsource, create_function_from_source)
 from ...interfaces.base import (traits, InputMultiPath, CommandLine,
                                 Undefined, TraitedSpec, DynamicTraitedSpec,
@@ -58,7 +58,6 @@ from .utils import (generate_expanded_graph, modify_paths,
 from .base import EngineBase
 from .nodes import Node, MapNode
 
-package_check('networkx', '1.3')
 logger = logging.getLogger('workflow')
 
 class Workflow(EngineBase):

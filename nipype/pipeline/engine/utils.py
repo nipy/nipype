@@ -23,10 +23,7 @@ import re
 import pickle
 from functools import reduce
 import numpy as np
-from ...utils.misc import package_check
 from distutils.version import LooseVersion
-
-package_check('networkx', '1.3')
 
 import networkx as nx
 
