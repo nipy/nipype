@@ -11,7 +11,7 @@ funcsigs
 configparser
 pytest>=3.0
 mock
-pydotplus
+pydot
 psutil
 matplotlib
 packaging

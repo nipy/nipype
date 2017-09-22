@@ -141,7 +141,7 @@ REQUIRES = [
     'funcsigs',
     'pytest>=%s' % PYTEST_MIN_VERSION,
     'mock',
-    'pydotplus',
+    'pydot',
     'packaging',
 ]
 
@@ -154,7 +154,7 @@ TESTS_REQUIRES = [
 ]
 
 EXTRA_REQUIRES = {
-    'doc': ['Sphinx>=1.4', 'matplotlib', 'pydotplus'],
+    'doc': ['Sphinx>=1.4', 'matplotlib', 'pydot'],
     'tests': TESTS_REQUIRES,
     'nipy': ['nitime', 'nilearn', 'dipy', 'nipy', 'matplotlib'],
     'profiler': ['psutil'],

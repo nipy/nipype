@@ -12,5 +12,5 @@ funcsigs
 configparser
 pytest>=3.0
 mock
-pydotplus
+pydot
 packaging
