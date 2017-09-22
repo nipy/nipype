@@ -148,6 +148,7 @@ def main():
         entry_points='''
            [console_scripts]
            nipypecli=nipype.scripts.cli:cli
+           nipype_mprof=nipype.utils.profiler:main
         '''
     )
 

@@ -2,7 +2,7 @@
 # @Author: oesteban
 # @Date:   2017-09-21 15:50:37
 # @Last Modified by:   oesteban
-# @Last Modified time: 2017-09-21 17:33:39
+# @Last Modified time: 2017-09-21 18:03:32
 """
 Utilities to keep track of performance
 """
@@ -53,7 +53,7 @@ def get_max_resources_used(pid, mem_mb, num_threads, pyfunc=False):
 
     try:
         mem_mb = max(mem_mb, _get_ram_mb(pid, pyfunc=pyfunc))
-        num_threads = max(num_threads, _get_num_threads(psutil.Process(pid)))
+        num_threads = max(num_threads, _get_num_threads(pid))
     except Exception as exc:
         proflogger = logging.getLogger('profiler')
         proflogger.info('Could not get resources used by process. Error: %s', exc)
@@ -62,14 +62,14 @@ def get_max_resources_used(pid, mem_mb, num_threads, pyfunc=False):
 
 
 # Get number of threads for process
-def _get_num_threads(proc):
+def _get_num_threads(pid):
     """
     Function to get the number of threads a process is using
 
     Parameters
     ----------
-    proc : psutil.Process instance
-        the process to evaluate thead usage of
+    pid : integer
+        the process ID of process to profile
 
     Returns
     -------
@@ -78,6 +78,7 @@ def _get_num_threads(proc):
 
     """
 
+    proc = psutil.Process(pid)
     # If process is running
     if proc.status() == psutil.STATUS_RUNNING:
         num_threads = proc.num_threads()
@@ -170,3 +171,30 @@ multiprocessing-forking-memory-usage
 
     # Return memory
     return mem_mb
+
+
+def main():
+    """
+    A minimal entry point to measure any process using psutil
+    """
+    import sys
+    wait = None
+    if len(sys.argv) > 2:
+        wait = float(sys.argv[2])
+
+    _probe_loop(int(sys.argv[1]), wait=wait)
+
+
+def _probe_loop(pid, wait=None):
+    from time import sleep
+
+    if wait is None:
+        wait = 5
+
+    while True:
+        print('mem=%f cpus=%d' % (_get_ram_mb(pid), _get_num_threads(pid)))
+        sleep(wait)
+
+
+if __name__ == "__main__":
+    main()
