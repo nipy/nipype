@@ -2,7 +2,11 @@
 # @Author: oesteban
 # @Date:   2017-09-21 15:50:37
 # @Last Modified by:   oesteban
-# @Last Modified time: 2017-09-21 17:18:40
+# @Last Modified time: 2017-09-21 17:33:39
+"""
+Utilities to keep track of performance
+"""
+from __future__ import print_function, division, unicode_literals, absolute_import
 
 try:
     import psutil
