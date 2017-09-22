@@ -130,7 +130,7 @@ class Function(IOBase):
 
     def _run_interface(self, runtime):
         # Check profiling
-        from ..utils.profiler import runtime_profile
+        from ...utils.profiler import runtime_profile
 
         # Create function handle
         function_handle = create_function_from_source(self.inputs.function_str,

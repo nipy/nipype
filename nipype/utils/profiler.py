@@ -2,7 +2,7 @@
 # @Author: oesteban
 # @Date:   2017-09-21 15:50:37
 # @Last Modified by:   oesteban
-# @Last Modified time: 2017-09-21 16:43:42
+# @Last Modified time: 2017-09-21 17:18:40
 
 try:
     import psutil
@@ -42,6 +42,10 @@ def get_max_resources_used(pid, mem_mb, num_threads, pyfunc=False):
     num_threads : float
         the new high thread watermark of process
     """
+
+    if not runtime_profile:
+        raise RuntimeError('Attempted to measure resources with '
+                           '"profile_runtime" set off.')
 
     try:
         mem_mb = max(mem_mb, _get_ram_mb(pid, pyfunc=pyfunc))

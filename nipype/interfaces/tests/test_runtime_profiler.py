@@ -11,12 +11,9 @@ from __future__ import print_function, division, unicode_literals, absolute_impo
 from builtins import open, str
 
 # Import packages
-from nipype.interfaces.base import (traits, CommandLine, CommandLineInputSpec,
-                                    runtime_profile)
 import pytest
-import sys
-
-run_profile = runtime_profile
+from nipype.utils.profiler import runtime_profile as run_profile
+from nipype.interfaces.base import (traits, CommandLine, CommandLineInputSpec)
 
 if run_profile:
     try:
@@ -39,7 +36,7 @@ class UseResourcesInputSpec(CommandLineInputSpec):
     num_gb = traits.Float(desc='Number of GB of RAM to use',
                           argstr='-g %f')
     num_threads = traits.Int(desc='Number of threads to use',
-                          argstr='-p %d')
+                             argstr='-p %d')
 
 
 # UseResources interface
