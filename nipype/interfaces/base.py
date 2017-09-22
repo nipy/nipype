@@ -1081,19 +1081,19 @@ class BaseInterface(Interface):
                         hostname=platform.node(),
                         version=self.version)
 
-        proc_prof = None
+        mon_sp = None
         if runtime_profile:
             ifpid = '%d' % os.getpid()
-            fname = os.path.abspath('.prof-%s_freq-%0.3f' % (ifpid, 1))
-            proc_prof = sp.Popen(
-                ['nipype_mprof', ifpid, '-o', fname, '-f', '1'],
+            mon_fname = os.path.abspath('.prof-%s_freq-%0.3f' % (ifpid, 1))
+            mon_sp = sp.Popen(
+                ['nipype_mprof', ifpid, '-o', mon_fname, '-f', '1'],
                 cwd=os.getcwd(),
                 stdout=sp.DEVNULL,
                 stderr=sp.DEVNULL,
                 preexec_fn=os.setsid
             )
             iflogger.debug('Started runtime profiler monitor (PID=%d) to file "%s"',
-                           proc_prof.pid, fname)
+                           mon_sp.pid, mon_fname)
 
         # Grab inputs now, as they should not change during execution
         inputs = self.inputs.get_traitsfree()
@@ -1127,8 +1127,19 @@ class BaseInterface(Interface):
         # Make sure runtime profiler is shut down
         if runtime_profile:
             import signal
-            os.killpg(os.getpgid(proc_prof.pid), signal.SIGINT)
-            iflogger.debug('Killing runtime profiler monitor (PID=%d)', proc_prof.pid)
+            import numpy as np
+            os.killpg(os.getpgid(mon_sp.pid), signal.SIGINT)
+            iflogger.debug('Killing runtime profiler monitor (PID=%d)', mon_sp.pid)
+
+            # Read .prof file in and set runtime values
+            mem_peak_gb = None
+            nthreads_max = None
+            vals = np.loadtxt(mon_fname, delimiter=',')
+            if vals:
+                mem_peak_gb, nthreads = vals.max(0).astype(float).tolist()
+
+            setattr(runtime, 'mem_peak_gb', mem_peak_gb / 1024)
+            setattr(runtime, 'nthreads_max', int(nthreads_max))
 
         if force_raise and getattr(runtime, 'traceback', None):
             raise NipypeInterfaceError('Fatal error:\n%s\n\n%s' %
