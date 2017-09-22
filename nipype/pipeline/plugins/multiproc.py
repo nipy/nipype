@@ -242,7 +242,7 @@ class MultiProcPlugin(DistributedPluginBase):
         free_processors = self.processors - busy_processors
 
         # Check all jobs without dependency not run
-        jobids = np.flatnonzero((self.proc_done == False) & \
+        jobids = np.flatnonzero((self.proc_done is False) &
                                 (self.depidx.sum(axis=0) == 0).__array__())
 
         # Sort jobs ready to run first by memory and then by number of threads
@@ -251,14 +251,15 @@ class MultiProcPlugin(DistributedPluginBase):
                         key=lambda item: (self.procs[item]._interface.estimated_memory_gb,
                                           self.procs[item]._interface.num_threads))
 
-        if str2bool(config.get('execution', 'profile_runtime')):
+        profile_runtime = str2bool(config.get('execution', 'profile_runtime', 'false'))
+        if profile_runtime:
             logger.debug('Free memory (GB): %d, Free processors: %d',
                          free_memory_gb, free_processors)
 
         # While have enough memory and processors for first job
         # Submit first job on the list
         for jobid in jobids:
-            if str2bool(config.get('execution', 'profile_runtime')):
+            if profile_runtime:
                 logger.debug('Next Job: %d, memory (GB): %d, threads: %d' \
                              % (jobid,
                                 self.procs[jobid]._interface.estimated_memory_gb,

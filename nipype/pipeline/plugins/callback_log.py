@@ -26,41 +26,29 @@ def log_nodes_cb(node, status):
         status info to the callback logger
     """
 
+    if status != 'end':
+        return
+
     # Import packages
-    import datetime
     import logging
     import json
 
-    # Check runtime profile stats
-    if node.result is not None:
-        try:
-            runtime = node.result.runtime
-            runtime_memory_gb = runtime.runtime_memory_gb
-            runtime_threads = runtime.runtime_threads
-        except AttributeError:
-            runtime_memory_gb = runtime_threads = 'Unknown'
-    else:
-        runtime_memory_gb = runtime_threads = 'N/A'
-
     # Init variables
     logger = logging.getLogger('callback')
-    status_dict = {'name' : node.name,
-                   'id' : node._id,
-                   'estimated_memory_gb' : node._interface.estimated_memory_gb,
-                   'num_threads' : node._interface.num_threads}
+    status_dict = {
+        'name': node.name,
+        'id': node._id,
+        'start': getattr(node.result.runtime, 'startTime'),
+        'finish': getattr(node.result.runtime, 'endTime'),
+        'runtime_threads': getattr(
+            node.result.runtime, 'nthreads_max', 'N/A'),
+        'runtime_memory_gb': getattr(
+            node.result.runtime, 'mem_peak_gb', 'N/A'),
+        'estimated_memory_gb': node._interface.estimated_memory_gb,
+        'num_threads': node._interface.num_threads,
+    }
 
-    # Check status and write to log
-    # Start
-    if status == 'start':
-        status_dict['start'] = str(datetime.datetime.now())
-    # End
-    elif status == 'end':
-        status_dict['finish'] = str(datetime.datetime.now())
-        status_dict['runtime_threads'] = runtime_threads
-        status_dict['runtime_memory_gb'] = runtime_memory_gb
-    # Other
-    else:
-        status_dict['finish'] = str(datetime.datetime.now())
+    if status_dict['start'] is None or status_dict['end'] is None:
         status_dict['error'] = True
 
     # Dump string to log

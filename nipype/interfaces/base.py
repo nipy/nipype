@@ -1115,7 +1115,10 @@ class BaseInterface(Interface):
             setattr(runtime, 'traceback_args', ('\n'.join(exc_args),))
 
         # Fill in runtime times
-        runtime = _tearup_runtime(runtime)
+        runtime.endTime = dt.isoformat(dt.utcnow())
+        timediff = parseutc(runtime.endTime) - parseutc(runtime.startTime)
+        runtime.duration = (timediff.days * 86400 + timediff.seconds +
+                            timediff.microseconds / 1e6)
         results = InterfaceResult(interface, runtime, inputs=inputs, outputs=outputs)
 
         # Add provenance (if required)
@@ -1995,10 +1998,3 @@ class InputMultiPath(MultiPath):
 
     """
     pass
-
-def _tearup_runtime(runtime):
-    runtime.endTime = dt.isoformat(dt.utcnow())
-    timediff = parseutc(runtime.endTime) - parseutc(runtime.startTime)
-    runtime.duration = (timediff.days * 86400 + timediff.seconds +
-                        timediff.microseconds / 1e6)
-    return runtime

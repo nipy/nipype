@@ -188,10 +188,8 @@ class PluginBase(object):
     """Base class for plugins"""
 
     def __init__(self, plugin_args=None):
-        if plugin_args and 'status_callback' in plugin_args:
-            self._status_callback = plugin_args['status_callback']
-        else:
-            self._status_callback = None
+        if plugin_args:
+            self._status_callback = plugin_args.get('status_callback')
         return
 
     def run(self, graph, config, updatehash=False):
@@ -601,8 +599,8 @@ class GraphPluginBase(PluginBase):
     """
 
     def __init__(self, plugin_args=None):
-        if plugin_args and 'status_callback' in plugin_args:
-            warn('status_callback not supported for Graph submission plugins')
+        if plugin_args and plugin_args.get('status_callback'):
+            logger.warning('status_callback not supported for Graph submission plugins')
         super(GraphPluginBase, self).__init__(plugin_args=plugin_args)
 
     def run(self, graph, config, updatehash=False):
