@@ -1457,7 +1457,7 @@ class Hist(AFNICommandBase):
             version = Info.version()
 
             # As of AFNI 16.0.00, redirect_x is not needed
-            if isinstance(version[0], int) and version[0] > 15:
+            if version[0] > 2015:
                 self._redirect_x = False
 
     def _parse_inputs(self, skip=None):
@@ -2150,7 +2150,7 @@ class SkullStrip(AFNICommand):
             v = Info.version()
 
             # As of AFNI 16.0.00, redirect_x is not needed
-            if isinstance(v[0], int) and v[0] > 15:
+            if v[0] > 2015:
                 self._redirect_x = False
 
 

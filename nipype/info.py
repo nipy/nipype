@@ -107,6 +107,7 @@ FUTURE_MIN_VERSION = '0.16.0'
 SIMPLEJSON_MIN_VERSION = '3.8.0'
 PROV_VERSION = '1.5.0'
 CLICK_MIN_VERSION = '6.6.0'
+PYDOT_MIN_VERSION = '1.2.3'
 
 NAME = 'nipype'
 MAINTAINER = 'nipype developers'
@@ -142,6 +143,7 @@ REQUIRES = [
     'pytest>=%s' % PYTEST_MIN_VERSION,
     'mock',
     'pydotplus',
+    'pydot>=%s' % PYDOT_MIN_VERSION,
     'packaging',
 ]
 
@@ -154,7 +156,7 @@ TESTS_REQUIRES = [
 ]
 
 EXTRA_REQUIRES = {
-    'doc': ['Sphinx>=1.4', 'matplotlib', 'pydotplus'],
+    'doc': ['Sphinx>=1.4', 'matplotlib', 'pydotplus', 'pydot>=1.2.3'],
     'tests': TESTS_REQUIRES,
     'nipy': ['nitime', 'nilearn', 'dipy', 'nipy', 'matplotlib'],
     'profiler': ['psutil'],
