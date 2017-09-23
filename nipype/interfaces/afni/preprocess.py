@@ -1428,23 +1428,23 @@ class HistOutputSpec(TraitedSpec):
 
 
 class Hist(AFNICommandBase):
-    """Computes average of all voxels in the input dataset
-    which satisfy the criterion in the options list
+    # """Computes average of all voxels in the input dataset
+    # which satisfy the criterion in the options list
 
-    For complete details, see the `3dHist Documentation.
-    <https://afni.nimh.nih.gov/pub/dist/doc/program_help/3dHist.html>`_
+    # For complete details, see the `3dHist Documentation.
+    # <https://afni.nimh.nih.gov/pub/dist/doc/program_help/3dHist.html>`_
 
-    Examples
-    ========
+    # Examples
+    # ========
 
-    >>> from nipype.interfaces import afni
-    >>> hist = afni.Hist()
-    >>> hist.inputs.in_file = 'functional.nii'
-    >>> hist.cmdline  # doctest: +ALLOW_UNICODE
-    '3dHist -input functional.nii -prefix functional_hist'
-    >>> res = hist.run()  # doctest: +SKIP
+    # >>> from nipype.interfaces import afni
+    # >>> hist = afni.Hist()
+    # >>> hist.inputs.in_file = 'functional.nii'
+    # >>> hist.cmdline  # doctest: +ALLOW_UNICODE
+    # '3dHist -input functional.nii -prefix functional_hist'
+    # >>> res = hist.run()  # doctest: +SKIP
 
-    """
+    # """
 
     _cmd = '3dHist'
     input_spec = HistInputSpec
