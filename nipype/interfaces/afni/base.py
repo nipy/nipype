@@ -10,7 +10,7 @@ import os
 from sys import platform
 from distutils import spawn
 
-from ... import logging
+from ... import logging, LooseVersion
 from ...utils.filemanip import split_filename, fname_presuffix
 
 from ..base import (
@@ -44,32 +44,25 @@ class Info(object):
 
         """
         try:
-            clout = CommandLine(command='afni_vcheck',
+            clout = CommandLine(command='afni --version',
                                 terminal_output='allatonce').run()
-
-            # Try to parse the version number
-            currv = clout.runtime.stdout.split('\n')[1].split('=', 1)[1].strip()
         except IOError:
             # If afni_vcheck is not present, return None
-            IFLOGGER.warn('afni_vcheck executable not found.')
+            IFLOGGER.warn('afni executable not found.')
             return None
-        except RuntimeError as e:
-            # If AFNI is outdated, afni_vcheck throws error.
-            # Show new version, but parse current anyways.
-            currv = str(e).split('\n')[4].split('=', 1)[1].strip()
-            nextv = str(e).split('\n')[6].split('=', 1)[1].strip()
-            IFLOGGER.warn(
-                'AFNI is outdated, detected version %s and %s is available.' % (currv, nextv))
 
-        if currv.startswith('AFNI_'):
-            currv = currv[5:]
+        version_stamp = clout.runtime.stdout.split('\n')[0].split('Version ')[1]
+        if version_stamp.startswith('AFNI'):
+            version_stamp = version_stamp.split('AFNI_')[1]
+        elif version_stamp.startswith('Debian'):
+            version_stamp = version_stamp.split('Debian-')[1].split('~')[0]
+        else:
+            return None
 
-        v = currv.split('.')
-        try:
-            v = [int(n) for n in v]
-        except ValueError:
-            return currv
-        return tuple(v)
+        version = LooseVersion(version_stamp.replace('_', '.')).version[:3]
+        if version[0] < 1000:
+            version[0] = version[0] + 2000
+        return tuple(version)
 
     @classmethod
     def output_type_to_ext(cls, outputtype):

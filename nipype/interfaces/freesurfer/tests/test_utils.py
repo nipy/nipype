@@ -188,18 +188,16 @@ def test_mrisexpand(tmpdir):
     assert expand_if.cmdline == orig_cmdline
     assert expand_nd.interface.cmdline == orig_cmdline
 
-    # Run both interfaces
-    if_res = expand_if.run()
+    # Run Node interface
     nd_res = expand_nd.run()
 
     # Commandlines differ
     node_cmdline = 'mris_expand -T 60 -pial {cwd}/lh.pial {cwd}/lh.smoothwm ' \
         '1 expandtmp'.format(cwd=nd_res.runtime.cwd)
-    assert if_res.runtime.cmdline == orig_cmdline
     assert nd_res.runtime.cmdline == node_cmdline
 
     # Check output
-    if_out_file = if_res.outputs.get()['out_file']
+    if_out_file = expand_if._list_outputs()['out_file']
     nd_out_file = nd_res.outputs.get()['out_file']
     # Same filename
     assert op.basename(if_out_file) == op.basename(nd_out_file)
@@ -207,6 +205,3 @@ def test_mrisexpand(tmpdir):
     assert op.dirname(if_out_file) == op.dirname(fsavginfo['smoothwm'])
     # Node places output in working directory
     assert op.dirname(nd_out_file) == nd_res.runtime.cwd
-
-    # Remove test surface
-    os.unlink(if_out_file)
