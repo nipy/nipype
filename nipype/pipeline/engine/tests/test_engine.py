@@ -316,7 +316,7 @@ def test_disconnect():
     flow1 = pe.Workflow(name='test')
     flow1.connect(a, 'a', b, 'a')
     flow1.disconnect(a, 'a', b, 'a')
-    assert flow1._graph.edges() == []
+    assert list(flow1._graph.edges()) == []
 
 
 def test_doubleconnect():
@@ -637,7 +637,7 @@ def test_mapnode_json(tmpdir):
     n1.inputs.in1 = [1]
     eg = w1.run()
 
-    node = eg.nodes()[0]
+    node = list(eg.nodes())[0]
     outjson = glob(os.path.join(node.output_dir(), '_0x*.json'))
     assert len(outjson) == 1
 
