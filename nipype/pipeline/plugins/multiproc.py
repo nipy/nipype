@@ -7,7 +7,6 @@ Support for child processes running as non-daemons based on
 http://stackoverflow.com/a/8963618/1183453
 """
 from __future__ import print_function, division, unicode_literals, absolute_import
-from builtins import open
 
 # Import packages
 from multiprocessing import Process, Pool, cpu_count, pool
@@ -109,11 +108,6 @@ class MultiProcPlugin(DistributedPluginBase):
     def __init__(self, plugin_args=None):
         # Init variables and instance attributes
         super(MultiProcPlugin, self).__init__(plugin_args=plugin_args)
-
-        if plugin_args is None:
-            plugin_args = {}
-        self.plugin_args = plugin_args
-
         self._taskresult = {}
         self._task_obj = {}
         self._taskid = 0

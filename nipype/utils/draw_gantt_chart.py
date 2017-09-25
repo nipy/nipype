@@ -406,7 +406,7 @@ def generate_gantt_chart(logfile, cores, minute_scale=10,
     -----
     # import logging
     # import logging.handlers
-    # from nipype.pipeline.plugins.callback_log import log_nodes_cb
+    # from nipype.utils.profiler import log_nodes_cb
 
     # log_filename = 'callback.log'
     # logger = logging.getLogger('callback')

@@ -2,7 +2,7 @@
 # @Author: oesteban
 # @Date:   2017-09-21 15:50:37
 # @Last Modified by:   oesteban
-# @Last Modified time: 2017-09-25 10:06:54
+# @Last Modified time: 2017-09-25 15:06:56
 """
 Utilities to keep track of performance
 """
@@ -15,6 +15,7 @@ except ImportError as exc:
 
 from .. import config, logging
 from .misc import str2bool
+from builtins import open
 
 proflogger = logging.getLogger('utils')
 
@@ -24,7 +25,53 @@ if runtime_profile and psutil is None:
                     'necessary package "psutil" could not be imported.')
     runtime_profile = False
 
-from builtins import open
+
+# Log node stats function
+def log_nodes_cb(node, status):
+    """Function to record node run statistics to a log file as json
+    dictionaries
+
+    Parameters
+    ----------
+    node : nipype.pipeline.engine.Node
+        the node being logged
+    status : string
+        acceptable values are 'start', 'end'; otherwise it is
+        considered and error
+
+    Returns
+    -------
+    None
+        this function does not return any values, it logs the node
+        status info to the callback logger
+    """
+
+    if status != 'end':
+        return
+
+    # Import packages
+    import logging
+    import json
+
+    status_dict = {
+        'name': node.name,
+        'id': node._id,
+        'start': getattr(node.result.runtime, 'startTime'),
+        'finish': getattr(node.result.runtime, 'endTime'),
+        'duration': getattr(node.result.runtime, 'duration'),
+        'runtime_threads': getattr(
+            node.result.runtime, 'nthreads_max', 'N/A'),
+        'runtime_memory_gb': getattr(
+            node.result.runtime, 'mem_peak_gb', 'N/A'),
+        'estimated_memory_gb': node._interface.estimated_memory_gb,
+        'num_threads': node._interface.num_threads,
+    }
+
+    if status_dict['start'] is None or status_dict['finish'] is None:
+        status_dict['error'] = True
+
+    # Dump string to log
+    logging.getLogger('callback').debug(json.dumps(status_dict))
 
 
 # Get total system RAM

@@ -58,9 +58,9 @@ def report_crash(node, traceback=None, hostname=None):
     timeofcrash = strftime('%Y%m%d-%H%M%S')
     login_name = getpass.getuser()
     crashfile = 'crash-%s-%s-%s-%s' % (timeofcrash,
-                                            login_name,
-                                            name,
-                                            str(uuid.uuid4()))
+                                       login_name,
+                                       name,
+                                       str(uuid.uuid4()))
     crashdir = node.config['execution']['crashdump_dir']
     if crashdir is None:
         crashdir = os.getcwd()
@@ -142,7 +142,8 @@ try:
         from collections import OrderedDict
     config_dict=%s
     config.update_config(config_dict)
-    ## Only configure matplotlib if it was successfully imported, matplotlib is an optional component to nipype
+    ## Only configure matplotlib if it was successfully imported,
+    ## matplotlib is an optional component to nipype
     if can_import_matplotlib:
         config.update_matplotlib()
     logging.update_logging(config)
@@ -189,6 +190,7 @@ class PluginBase(object):
     def __init__(self, plugin_args=None):
         if plugin_args is None:
             plugin_args = {}
+        self.plugin_args = plugin_args
 
         self._status_callback = plugin_args.get('status_callback')
         return
@@ -222,9 +224,7 @@ class DistributedPluginBase(PluginBase):
         self.mapnodesubids = None
         self.proc_done = None
         self.proc_pending = None
-        self.max_jobs = np.inf
-        if plugin_args and 'max_jobs' in plugin_args:
-            self.max_jobs = plugin_args['max_jobs']
+        self.max_jobs = self.plugin_args.get('max_jobs', np.inf)
 
     def run(self, graph, config, updatehash=False):
         """Executes a pre-defined pipeline using distributed approaches

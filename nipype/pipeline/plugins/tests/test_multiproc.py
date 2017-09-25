@@ -6,8 +6,7 @@ from multiprocessing import cpu_count
 import nipype.interfaces.base as nib
 from nipype.utils import draw_gantt_chart
 import nipype.pipeline.engine as pe
-from nipype.pipeline.plugins.callback_log import log_nodes_cb
-from nipype.pipeline.plugins.multiproc import get_system_total_memory_gb
+from nipype.utils.profiler import log_nodes_cb, get_system_total_memory_gb
 
 
 class InputSpec(nib.TraitedSpec):

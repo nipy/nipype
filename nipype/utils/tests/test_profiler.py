@@ -230,7 +230,7 @@ class TestRuntimeProfiler():
 
         import nipype.pipeline.engine as pe
         import nipype.interfaces.utility as util
-        from nipype.pipeline.plugins.callback_log import log_nodes_cb
+        from nipype.utils.profiler import log_nodes_cb
 
         # Init variables
         base_dir = tempfile.mkdtemp()
@@ -305,7 +305,7 @@ class TestRuntimeProfiler():
 
         import nipype.pipeline.engine as pe
         import nipype.interfaces.utility as util
-        from nipype.pipeline.plugins.callback_log import log_nodes_cb
+        from nipype.utils.profiler import log_nodes_cb
 
         # Init variables
         base_dir = tempfile.mkdtemp()
