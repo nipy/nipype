@@ -2,7 +2,7 @@
 # @Author: oesteban
 # @Date:   2017-09-21 15:50:37
 # @Last Modified by:   oesteban
-# @Last Modified time: 2017-09-25 16:34:23
+# @Last Modified time: 2017-09-25 16:37:02
 """
 Utilities to keep track of performance
 """
@@ -20,11 +20,11 @@ from builtins import open
 
 proflogger = logging.getLogger('utils')
 
-runtime_profile = str2bool(config.get('execution', 'resource_monitor'))
-if runtime_profile and psutil is None:
+resource_monitor = str2bool(config.get('execution', 'resource_monitor'))
+if resource_monitor and psutil is None:
     proflogger.warn('Switching "resource_monitor" off: the option was on, but the '
                     'necessary package "psutil" could not be imported.')
-    runtime_profile = False
+    resource_monitor = False
 
 
 class ResourceMonitor(threading.Thread):
@@ -153,7 +153,7 @@ def get_max_resources_used(pid, mem_mb, num_threads, pyfunc=False):
         the new high thread watermark of process
     """
 
-    if not runtime_profile:
+    if not resource_monitor:
         raise RuntimeError('Attempted to measure resources with '
                            '"resource_monitor" set off.')
 

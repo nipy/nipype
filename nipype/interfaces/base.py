@@ -1055,7 +1055,7 @@ class BaseInterface(Interface):
         results :  an InterfaceResult object containing a copy of the instance
         that was executed, provenance information and, if successful, results
         """
-        from ..utils.profiler import runtime_profile, ResourceMonitor
+        from ..utils.profiler import resource_monitor, ResourceMonitor
 
         force_raise = not (
             hasattr(self.inputs, 'ignore_exception') and
@@ -1083,7 +1083,7 @@ class BaseInterface(Interface):
                         version=self.version)
 
         mon_sp = None
-        if runtime_profile:
+        if resource_monitor:
             mon_freq = config.get('execution', 'resource_monitor_frequency', 1)
             proc_pid = os.getpid()
             mon_fname = os.path.abspath('.prof-%d_freq-%0.3f' % (proc_pid, mon_freq))
@@ -1127,7 +1127,7 @@ class BaseInterface(Interface):
                 results.provenance = write_provenance(results)
 
             # Make sure runtime profiler is shut down
-            if runtime_profile:
+            if resource_monitor:
                 import numpy as np
                 mon_sp.stop()
 

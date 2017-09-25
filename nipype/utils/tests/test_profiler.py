@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
-# test_runtime_profiler.py
+# test_profiler.py
 #
 # Author: Daniel Clark, 2016
 
 """
-Module to unit test the runtime_profiler in nipype
+Module to unit test the resource_monitor in nipype
 """
 
 from __future__ import print_function, division, unicode_literals, absolute_import
@@ -12,7 +12,7 @@ from builtins import open, str
 
 # Import packages
 import pytest
-from nipype.utils.profiler import runtime_profile as run_profile
+from nipype.utils.profiler import resource_monitor as run_profile
 from nipype.interfaces.base import (traits, CommandLine, CommandLineInputSpec)
 
 if run_profile:

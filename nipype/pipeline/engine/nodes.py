@@ -689,7 +689,7 @@ class Node(EngineBase):
         self.inputs.update(**opts)
 
     def write_report(self, report_type=None, cwd=None):
-        from ...utils.profiler import runtime_profile
+        from ...utils.profiler import resource_monitor
         if not str2bool(self.config['execution']['create_report']):
             return
         report_dir = op.join(cwd, '_report')
@@ -727,7 +727,7 @@ class Node(EngineBase):
             rst_dict = {'hostname': self.result.runtime.hostname,
                         'duration': self.result.runtime.duration}
             # Try and insert memory/threads usage if available
-            if runtime_profile:
+            if resource_monitor:
                 rst_dict['runtime_memory_gb'] = getattr(self.result.runtime, 'mem_peak_gb')
                 rst_dict['runtime_threads'] = getattr(self.result.runtime, 'nthreads_max')
 
