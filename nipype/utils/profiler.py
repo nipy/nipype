@@ -2,7 +2,7 @@
 # @Author: oesteban
 # @Date:   2017-09-21 15:50:37
 # @Last Modified by:   oesteban
-# @Last Modified time: 2017-09-22 09:28:21
+# @Last Modified time: 2017-09-25 10:06:54
 """
 Utilities to keep track of performance
 """
@@ -25,6 +25,35 @@ if runtime_profile and psutil is None:
     runtime_profile = False
 
 from builtins import open
+
+
+# Get total system RAM
+def get_system_total_memory_gb():
+    """
+    Function to get the total RAM of the running system in GB
+    """
+
+    # Import packages
+    import os
+    import sys
+
+    # Get memory
+    if 'linux' in sys.platform:
+        with open('/proc/meminfo', 'r') as f_in:
+            meminfo_lines = f_in.readlines()
+            mem_total_line = [line for line in meminfo_lines
+                              if 'MemTotal' in line][0]
+            mem_total = float(mem_total_line.split()[1])
+            memory_gb = mem_total / (1024.0**2)
+    elif 'darwin' in sys.platform:
+        mem_str = os.popen('sysctl hw.memsize').read().strip().split(' ')[-1]
+        memory_gb = float(mem_str) / (1024.0**3)
+    else:
+        err_msg = 'System platform: %s is not supported'
+        raise Exception(err_msg)
+
+    # Return memory
+    return memory_gb
 
 
 # Get max resources used for process

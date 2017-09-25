@@ -239,12 +239,12 @@ class DistributedPluginBase(PluginBase):
         self.mapnodesubids = {}
         # setup polling - TODO: change to threaded model
         notrun = []
-        while np.any(self.proc_done == False) | \
-                np.any(self.proc_pending == True):
 
+        while not np.all(self.proc_done) or np.any(self.proc_pending):
             toappend = []
             # trigger callbacks for any pending results
             while self.pending_tasks:
+                logger.info('Processing %d pending tasks.', len(self.pending_tasks))
                 taskid, jobid = self.pending_tasks.pop()
                 try:
                     result = self._get_result(taskid)
@@ -263,6 +263,8 @@ class DistributedPluginBase(PluginBase):
                               'traceback': format_exc()}
                     notrun.append(self._clean_queue(jobid, graph,
                                                     result=result))
+
+            logger.debug('Appending %d new tasks.' % len(toappend))
             if toappend:
                 self.pending_tasks.extend(toappend)
             num_jobs = len(self.pending_tasks)
@@ -348,7 +350,7 @@ class DistributedPluginBase(PluginBase):
     def _send_procs_to_workers(self, updatehash=False, graph=None):
         """ Sends jobs to workers
         """
-        while np.any(self.proc_done == False):
+        while not np.all(self.proc_done):
             num_jobs = len(self.pending_tasks)
             if np.isinf(self.max_jobs):
                 slots = None

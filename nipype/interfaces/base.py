@@ -1070,6 +1070,8 @@ class BaseInterface(Interface):
         self._duecredit_cite()
 
         # initialize provenance tracking
+        store_provenance = str2bool(config.get(
+            'execution', 'write_provenance', 'false'))
         env = deepcopy(dict(os.environ))
         runtime = Bunch(cwd=os.getcwd(),
                         returncode=None,
@@ -1112,41 +1114,45 @@ class BaseInterface(Interface):
             if config.get('logging', 'interface_level', 'info').lower() == 'debug':
                 exc_args += ('Inputs: %s' % str(self.inputs),)
 
-            setattr(runtime, 'traceback_args', ('\n'.join(exc_args),))
+            setattr(runtime, 'traceback_args',
+                    ('\n'.join(['%s' % arg for arg in exc_args]),))
 
-        # Fill in runtime times
-        runtime.endTime = dt.isoformat(dt.utcnow())
-        timediff = parseutc(runtime.endTime) - parseutc(runtime.startTime)
-        runtime.duration = (timediff.days * 86400 + timediff.seconds +
-                            timediff.microseconds / 1e6)
-        results = InterfaceResult(interface, runtime, inputs=inputs, outputs=outputs)
+            if force_raise:
+                raise
+        finally:
+            # This needs to be done always
+            runtime.endTime = dt.isoformat(dt.utcnow())
+            timediff = parseutc(runtime.endTime) - parseutc(runtime.startTime)
+            runtime.duration = (timediff.days * 86400 + timediff.seconds +
+                                timediff.microseconds / 1e6)
+            results = InterfaceResult(interface, runtime, inputs=inputs, outputs=outputs,
+                                      provenance=None)
 
-        # Add provenance (if required)
-        results.provenance = None
-        if str2bool(config.get('execution', 'write_provenance', 'false')):
-            # Provenance will throw a warning if something went wrong
-            results.provenance = write_provenance(results)
+            # Add provenance (if required)
+            if store_provenance:
+                # Provenance will only throw a warning if something went wrong
+                results.provenance = write_provenance(results)
 
-        # Make sure runtime profiler is shut down
-        if runtime_profile:
-            import signal
-            import numpy as np
-            os.killpg(os.getpgid(mon_sp.pid), signal.SIGINT)
-            iflogger.debug('Killing runtime profiler monitor (PID=%d)', mon_sp.pid)
+            # Make sure runtime profiler is shut down
+            if runtime_profile:
+                import signal
+                import numpy as np
+                os.killpg(os.getpgid(mon_sp.pid), signal.SIGINT)
+                iflogger.debug('Killing runtime profiler monitor (PID=%d)', mon_sp.pid)
 
-            # Read .prof file in and set runtime values
-            mem_peak_gb = None
-            nthreads_max = None
-            vals = np.loadtxt(mon_fname, delimiter=',')
-            if vals:
-                mem_peak_gb, nthreads = vals.max(0).astype(float).tolist()
+                # Read .prof file in and set runtime values
+                mem_peak_gb = None
+                nthreads_max = None
+                vals = np.loadtxt(mon_fname, delimiter=',')
+                if vals:
+                    mem_peak_gb, nthreads = vals.max(0).astype(float).tolist()
 
-            setattr(runtime, 'mem_peak_gb', mem_peak_gb / 1024)
-            setattr(runtime, 'nthreads_max', int(nthreads_max))
+                setattr(runtime, 'mem_peak_gb', mem_peak_gb / 1024)
+                setattr(runtime, 'nthreads_max', int(nthreads_max))
 
-        if force_raise and getattr(runtime, 'traceback', None):
-            raise NipypeInterfaceError('Fatal error:\n%s\n\n%s' %
-                                       (runtime.traceback, runtime.traceback_args))
+        # if force_raise and getattr(runtime, 'traceback', None):
+        #     raise NipypeInterfaceError('Fatal error:\n%s\n\n%s' %
+        #                                (runtime.traceback, runtime.traceback_args))
         return results
 
     def _list_outputs(self):

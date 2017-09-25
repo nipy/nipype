@@ -105,7 +105,7 @@ class Info(object):
         '''Grab an image from the standard location.
 
         Could be made more fancy to allow for more relocatability'''
-        clout = CommandLine('which afni',
+        clout = CommandLine('which afni', ignore_exception=True,
                             terminal_output='allatonce').run()
         if clout.runtime.returncode is not 0:
             return None

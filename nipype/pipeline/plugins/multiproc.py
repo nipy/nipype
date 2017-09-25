@@ -20,11 +20,13 @@ import numpy as np
 
 from ... import logging, config
 from ...utils.misc import str2bool
+from ...utils.profiler import get_system_total_memory_gb
 from ..engine import MapNode
 from .base import (DistributedPluginBase, report_crash)
 
 # Init logger
 logger = logging.getLogger('workflow')
+
 
 # Run node
 def run_node(node, updatehash, taskid):
@@ -44,6 +46,10 @@ def run_node(node, updatehash, taskid):
         dictionary containing the node runtime results and stats
     """
 
+    from nipype import logging
+    logger = logging.getLogger('workflow')
+
+    logger.debug('run_node called on %s', node.name)
     # Init variables
     result = dict(result=None, traceback=None, taskid=taskid)
 
@@ -77,34 +83,6 @@ class NonDaemonPool(pool.Pool):
     Process = NonDaemonProcess
 
 
-# Get total system RAM
-def get_system_total_memory_gb():
-    """Function to get the total RAM of the running system in GB
-    """
-
-    # Import packages
-    import os
-    import sys
-
-    # Get memory
-    if 'linux' in sys.platform:
-        with open('/proc/meminfo', 'r') as f_in:
-            meminfo_lines = f_in.readlines()
-            mem_total_line = [line for line in meminfo_lines \
-                              if 'MemTotal' in line][0]
-            mem_total = float(mem_total_line.split()[1])
-            memory_gb = mem_total/(1024.0**2)
-    elif 'darwin' in sys.platform:
-        mem_str = os.popen('sysctl hw.memsize').read().strip().split(' ')[-1]
-        memory_gb = float(mem_str)/(1024.0**3)
-    else:
-        err_msg = 'System platform: %s is not supported'
-        raise Exception(err_msg)
-
-    # Return memory
-    return memory_gb
-
-
 class MultiProcPlugin(DistributedPluginBase):
     """Execute workflow with multiprocessing, not sending more jobs at once
     than the system can support.
@@ -131,36 +109,29 @@ class MultiProcPlugin(DistributedPluginBase):
     def __init__(self, plugin_args=None):
         # Init variables and instance attributes
         super(MultiProcPlugin, self).__init__(plugin_args=plugin_args)
+
+        if plugin_args is None:
+            plugin_args = {}
+        self.plugin_args = plugin_args
+
         self._taskresult = {}
         self._task_obj = {}
         self._taskid = 0
-        non_daemon = True
-        self.plugin_args = plugin_args
-        self.processors = cpu_count()
-        self.memory_gb = get_system_total_memory_gb()*0.9 # 90% of system memory
-
-        self._timeout=2.0
+        self._timeout = 2.0
         self._event = threading.Event()
 
-
-
-        # Check plugin args
-        if self.plugin_args:
-            if 'non_daemon' in self.plugin_args:
-                non_daemon = plugin_args['non_daemon']
-            if 'n_procs' in self.plugin_args:
-                self.processors = self.plugin_args['n_procs']
-            if 'memory_gb' in self.plugin_args:
-                self.memory_gb = self.plugin_args['memory_gb']
-
-        logger.debug("MultiProcPlugin starting %d threads in pool"%(self.processors))
+        # Read in options or set defaults.
+        non_daemon = self.plugin_args.get('non_daemon', True)
+        self.processors = self.plugin_args.get('n_procs', cpu_count())
+        self.memory_gb = self.plugin_args.get('memory_gb',  # Allocate 90% of system memory
+                                              get_system_total_memory_gb() * 0.9)
 
         # Instantiate different thread pools for non-daemon processes
-        if non_daemon:
-            # run the execution using the non-daemon pool subclass
-            self.pool = NonDaemonPool(processes=self.processors)
-        else:
-            self.pool = Pool(processes=self.processors)
+        logger.debug('MultiProcPlugin starting in "%sdaemon" mode (n_procs=%d, mem_gb=%0.2f)',
+                     'non' if non_daemon else '', self.processors, self.memory_gb)
+        self.pool = (NonDaemonPool(processes=self.processors)
+                     if non_daemon else Pool(processes=self.processors))
+
 
     def _wait(self):
         if len(self.pending_tasks) > 0:
@@ -172,15 +143,11 @@ class MultiProcPlugin(DistributedPluginBase):
             self._event.clear()
 
     def _async_callback(self, args):
-        self._taskresult[args['taskid']]=args
+        self._taskresult[args['taskid']] = args
         self._event.set()
 
     def _get_result(self, taskid):
-        if taskid not in self._taskresult:
-            result=None
-        else:
-            result=self._taskresult[taskid]
-        return result
+        return self._taskresult.get(taskid)
 
     def _report_crash(self, node, result=None):
         if result and result['traceback']:
@@ -217,16 +184,15 @@ class MultiProcPlugin(DistributedPluginBase):
         executing_now = []
 
         # Check to see if a job is available
-        currently_running_jobids = np.flatnonzero((self.proc_pending == True) & \
-                                (self.depidx.sum(axis=0) == 0).__array__())
+        currently_running_jobids = np.flatnonzero(
+            self.proc_pending & (self.depidx.sum(axis=0) == 0).__array__())
 
         # Check available system resources by summing all threads and memory used
         busy_memory_gb = 0
         busy_processors = 0
         for jobid in currently_running_jobids:
             if self.procs[jobid]._interface.estimated_memory_gb <= self.memory_gb and \
-                            self.procs[jobid]._interface.num_threads <= self.processors:
-
+               self.procs[jobid]._interface.num_threads <= self.processors:
                 busy_memory_gb += self.procs[jobid]._interface.estimated_memory_gb
                 busy_processors += self.procs[jobid]._interface.num_threads
 
@@ -242,7 +208,7 @@ class MultiProcPlugin(DistributedPluginBase):
         free_processors = self.processors - busy_processors
 
         # Check all jobs without dependency not run
-        jobids = np.flatnonzero((self.proc_done is False) &
+        jobids = np.flatnonzero((self.proc_done == False) &
                                 (self.depidx.sum(axis=0) == 0).__array__())
 
         # Sort jobs ready to run first by memory and then by number of threads
@@ -301,9 +267,8 @@ class MultiProcPlugin(DistributedPluginBase):
                         hash_exists, _, _, _ = self.procs[
                             jobid].hash_exists()
                         logger.debug('Hash exists %s' % str(hash_exists))
-                        if (hash_exists and (self.procs[jobid].overwrite == False or
-                                             (self.procs[jobid].overwrite == None and
-                                              not self.procs[jobid]._interface.always_run))):
+                        if hash_exists and not self.procs[jobid].overwrite and \
+                           not self.procs[jobid]._interface.always_run:
                             self._task_finished_cb(jobid)
                             self._remove_node_dirs()
                             continue

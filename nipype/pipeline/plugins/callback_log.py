@@ -40,6 +40,7 @@ def log_nodes_cb(node, status):
         'id': node._id,
         'start': getattr(node.result.runtime, 'startTime'),
         'finish': getattr(node.result.runtime, 'endTime'),
+        'duration': getattr(node.result.runtime, 'duration'),
         'runtime_threads': getattr(
             node.result.runtime, 'nthreads_max', 'N/A'),
         'runtime_memory_gb': getattr(
@@ -48,7 +49,7 @@ def log_nodes_cb(node, status):
         'num_threads': node._interface.num_threads,
     }
 
-    if status_dict['start'] is None or status_dict['end'] is None:
+    if status_dict['start'] is None or status_dict['finish'] is None:
         status_dict['error'] = True
 
     # Dump string to log

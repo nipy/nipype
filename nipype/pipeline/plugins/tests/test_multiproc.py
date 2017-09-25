@@ -1,14 +1,14 @@
 # -*- coding: utf-8 -*-
 import logging
-import os, sys
+import os
 from multiprocessing import cpu_count
 
 import nipype.interfaces.base as nib
 from nipype.utils import draw_gantt_chart
-import pytest
 import nipype.pipeline.engine as pe
 from nipype.pipeline.plugins.callback_log import log_nodes_cb
 from nipype.pipeline.plugins.multiproc import get_system_total_memory_gb
+
 
 class InputSpec(nib.TraitedSpec):
     input1 = nib.traits.Int(desc='a random int')
@@ -31,6 +31,7 @@ class MultiprocTestInterface(nib.BaseInterface):
         outputs = self._outputs().get()
         outputs['output1'] = [1, self.inputs.input1]
         return outputs
+
 
 def test_run_multiproc(tmpdir):
     os.chdir(str(tmpdir))
@@ -82,8 +83,8 @@ def find_metrics(nodes, last_node):
     from dateutil.parser import parse
     import datetime
 
-    start = nodes[0]['start']
-    total_duration = int((last_node['finish'] - start).total_seconds())
+    start = parse(nodes[0]['start'])
+    total_duration = max(int((parse(last_node['finish']) - start).total_seconds()), 1)
 
     total_memory = []
     total_threads = []
@@ -100,8 +101,8 @@ def find_metrics(nodes, last_node):
         x = now
 
         for j in range(start_index, len(nodes)):
-            node_start = nodes[j]['start']
-            node_finish = nodes[j]['finish']
+            node_start = parse(nodes[j]['start'])
+            node_finish = parse(nodes[j]['finish'])
 
             if node_start < x and node_finish > x:
                 total_memory[i] += float(nodes[j]['estimated_memory_gb'])
@@ -115,8 +116,10 @@ def find_metrics(nodes, last_node):
 
     return total_memory, total_threads
 
-def test_no_more_memory_than_specified():
-    LOG_FILENAME = 'callback.log'
+
+def test_no_more_memory_than_specified(tmpdir):
+    tmpdir.chdir()
+    LOG_FILENAME = tmpdir.join('callback.log').strpath
     my_logger = logging.getLogger('callback')
     my_logger.setLevel(logging.DEBUG)
 
@@ -146,10 +149,9 @@ def test_no_more_memory_than_specified():
              plugin_args={'memory_gb': max_memory,
                           'status_callback': log_nodes_cb})
 
-
     nodes = draw_gantt_chart.log_to_dict(LOG_FILENAME)
     last_node = nodes[-1]
-    #usage in every second
+    # usage in every second
     memory, threads = find_metrics(nodes, last_node)
 
     result = True
@@ -172,6 +174,7 @@ def test_no_more_memory_than_specified():
         "using more threads than system has (threads is not specified by user)"
 
     os.remove(LOG_FILENAME)
+
 
 def test_no_more_threads_than_specified():
     LOG_FILENAME = 'callback.log'
@@ -205,7 +208,7 @@ def test_no_more_threads_than_specified():
 
     nodes = draw_gantt_chart.log_to_dict(LOG_FILENAME)
     last_node = nodes[-1]
-    #usage in every second
+    # usage in every second
     memory, threads = find_metrics(nodes, last_node)
 
     result = True
