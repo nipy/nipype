@@ -2,12 +2,13 @@
 # @Author: oesteban
 # @Date:   2017-09-21 15:50:37
 # @Last Modified by:   oesteban
-# @Last Modified time: 2017-09-25 15:06:56
+# @Last Modified time: 2017-09-25 16:34:23
 """
 Utilities to keep track of performance
 """
 from __future__ import print_function, division, unicode_literals, absolute_import
 
+import threading
 try:
     import psutil
 except ImportError as exc:
@@ -19,11 +20,38 @@ from builtins import open
 
 proflogger = logging.getLogger('utils')
 
-runtime_profile = str2bool(config.get('execution', 'profile_runtime'))
+runtime_profile = str2bool(config.get('execution', 'resource_monitor'))
 if runtime_profile and psutil is None:
-    proflogger.warn('Switching "profile_runtime" off: the option was on, but the '
+    proflogger.warn('Switching "resource_monitor" off: the option was on, but the '
                     'necessary package "psutil" could not be imported.')
     runtime_profile = False
+
+
+class ResourceMonitor(threading.Thread):
+    def __init__(self, pid, freq=5, fname=None):
+        if freq <= 0:
+            raise RuntimeError('Frequency (%0.2fs) cannot be lower than zero' % freq)
+
+        if fname is None:
+            fname = '.nipype.prof'
+
+        self._pid = pid
+        self._log = open(fname, 'w')
+        self._freq = freq
+        threading.Thread.__init__(self)
+        self._event = threading.Event()
+
+    def stop(self):
+        self._event.set()
+        self._log.close()
+        self.join()
+
+    def run(self):
+        while not self._event.is_set():
+            self._log.write('%f,%d\n' % (_get_ram_mb(self._pid),
+                                         _get_num_threads(self._pid)))
+            self._log.flush()
+            self._event.wait(self._freq)
 
 
 # Log node stats function
@@ -127,7 +155,7 @@ def get_max_resources_used(pid, mem_mb, num_threads, pyfunc=False):
 
     if not runtime_profile:
         raise RuntimeError('Attempted to measure resources with '
-                           '"profile_runtime" set off.')
+                           '"resource_monitor" set off.')
 
     try:
         mem_mb = max(mem_mb, _get_ram_mb(pid, pyfunc=pyfunc))

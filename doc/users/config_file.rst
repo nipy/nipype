@@ -147,6 +147,13 @@ Execution
     crashfiles allow portability across machines and shorter load time.
     (possible values: ``pklz`` and ``txt``; default value: ``pklz``)
 
+*resource_monitor*
+    Enables monitoring the resources occupation.
+
+*resource_monitor_frequency*
+    Sampling period (in seconds) between measurements of resources (memory, cpus) 
+    being used by an interface. Requires ``resource_monitor`` to be ``true``.
+
 Example
 ~~~~~~~
 

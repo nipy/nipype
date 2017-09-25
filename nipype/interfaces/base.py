@@ -1055,7 +1055,7 @@ class BaseInterface(Interface):
         results :  an InterfaceResult object containing a copy of the instance
         that was executed, provenance information and, if successful, results
         """
-        from ..utils.profiler import runtime_profile
+        from ..utils.profiler import runtime_profile, ResourceMonitor
 
         force_raise = not (
             hasattr(self.inputs, 'ignore_exception') and
@@ -1084,17 +1084,11 @@ class BaseInterface(Interface):
 
         mon_sp = None
         if runtime_profile:
-            ifpid = '%d' % os.getpid()
-            mon_fname = os.path.abspath('.prof-%s_freq-%0.3f' % (ifpid, 1))
-            mon_sp = sp.Popen(
-                ['nipype_mprof', ifpid, '-o', mon_fname, '-f', '1'],
-                cwd=os.getcwd(),
-                stdout=sp.DEVNULL,
-                stderr=sp.DEVNULL,
-                preexec_fn=os.setsid
-            )
-            iflogger.debug('Started runtime profiler monitor (PID=%d) to file "%s"',
-                           mon_sp.pid, mon_fname)
+            mon_freq = config.get('execution', 'resource_monitor_frequency', 1)
+            proc_pid = os.getpid()
+            mon_fname = os.path.abspath('.prof-%d_freq-%0.3f' % (proc_pid, mon_freq))
+            mon_sp = ResourceMonitor(proc_pid, freq=mon_freq, fname=mon_fname)
+            mon_sp.start()
 
         # Grab inputs now, as they should not change during execution
         inputs = self.inputs.get_traitsfree()
@@ -1134,20 +1128,18 @@ class BaseInterface(Interface):
 
             # Make sure runtime profiler is shut down
             if runtime_profile:
-                import signal
                 import numpy as np
-                os.killpg(os.getpgid(mon_sp.pid), signal.SIGINT)
-                iflogger.debug('Killing runtime profiler monitor (PID=%d)', mon_sp.pid)
+                mon_sp.stop()
+
+                setattr(runtime, 'mem_peak_gb', None)
+                setattr(runtime, 'nthreads_max', None)
 
                 # Read .prof file in and set runtime values
-                mem_peak_gb = None
-                nthreads_max = None
                 vals = np.loadtxt(mon_fname, delimiter=',')
                 if vals:
                     mem_peak_gb, nthreads = vals.max(0).astype(float).tolist()
-
-                setattr(runtime, 'mem_peak_gb', mem_peak_gb / 1024)
-                setattr(runtime, 'nthreads_max', int(nthreads_max))
+                    setattr(runtime, 'mem_peak_gb', mem_peak_gb / 1024)
+                    setattr(runtime, 'nthreads_max', int(nthreads))
 
         return results
 

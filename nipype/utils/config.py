@@ -64,7 +64,7 @@ write_provenance = false
 parameterize_dirs = true
 poll_sleep_duration = 2
 xvfb_max_wait = 10
-profile_runtime = false
+resource_monitor = false
 
 [check]
 interval = 1209600

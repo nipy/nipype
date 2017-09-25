@@ -131,7 +131,7 @@ class MultiProcPlugin(DistributedPluginBase):
         if len(self.pending_tasks) > 0:
             if self._config['execution']['poll_sleep_duration']:
                 self._timeout = float(self._config['execution']['poll_sleep_duration'])
-            sig_received=self._event.wait(self._timeout)
+            sig_received = self._event.wait(self._timeout)
             if not sig_received:
                 logger.debug('MultiProcPlugin timeout before signal received. Deadlock averted??')
             self._event.clear()
@@ -211,15 +211,15 @@ class MultiProcPlugin(DistributedPluginBase):
                         key=lambda item: (self.procs[item]._interface.estimated_memory_gb,
                                           self.procs[item]._interface.num_threads))
 
-        profile_runtime = str2bool(config.get('execution', 'profile_runtime', 'false'))
-        if profile_runtime:
+        resource_monitor = str2bool(config.get('execution', 'resource_monitor', 'false'))
+        if resource_monitor:
             logger.debug('Free memory (GB): %d, Free processors: %d',
                          free_memory_gb, free_processors)
 
         # While have enough memory and processors for first job
         # Submit first job on the list
         for jobid in jobids:
-            if profile_runtime:
+            if resource_monitor:
                 logger.debug('Next Job: %d, memory (GB): %d, threads: %d' \
                              % (jobid,
                                 self.procs[jobid]._interface.estimated_memory_gb,
