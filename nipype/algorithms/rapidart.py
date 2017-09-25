@@ -101,10 +101,10 @@ def _calc_norm(mc, use_differences, source, brain_pts=None):
 
     affines = [_get_affine_matrix(mc[i, :], source)
                for i in range(mc.shape[0])]
-    return _calc_norm_affine(affines, use_differences, source, brain_pts)
+    return _calc_norm_affine(affines, use_differences, brain_pts)
 
 
-def _calc_norm_affine(affines, use_differences, source, brain_pts=None):
+def _calc_norm_affine(affines, use_differences, brain_pts=None):
     """Calculates the maximum overall displacement of the midpoints
     of the faces of a cube due to translation and rotation.
 
