@@ -148,8 +148,10 @@ def _calc_norm_affine(affines, use_differences, source, brain_pts=None):
                                  np.diff(newpos, n=1, axis=0)), axis=0)
         for i in range(newpos.shape[0]):
             normdata[i] = \
-                np.max(np.sqrt(np.sum(np.reshape(np.power(np.abs(newpos[i, :]), 2),
-                                                 (3, all_pts.shape[1])), axis=0)))
+                np.max(np.sqrt(np.sum(
+                    np.reshape(np.power(np.abs(newpos[i, :]), 2),
+                               (3, all_pts.shape[1])),
+                    axis=0)))
     else:
         newpos = np.abs(signal.detrend(newpos, axis=0, type='constant'))
         normdata = np.sqrt(np.mean(np.power(newpos, 2), axis=1))
