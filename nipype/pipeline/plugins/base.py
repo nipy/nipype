@@ -16,7 +16,6 @@ import sys
 import uuid
 from time import strftime, sleep, time
 from traceback import format_exception, format_exc
-from warnings import warn
 
 import numpy as np
 import scipy.sparse as ssp
