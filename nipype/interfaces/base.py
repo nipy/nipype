@@ -59,7 +59,9 @@ if sys.version_info < (3, 3):
 class Str(traits.Unicode):
     pass
 
+
 traits.Str = Str
+
 
 class NipypeInterfaceError(Exception):
     def __init__(self, value):
@@ -67,6 +69,7 @@ class NipypeInterfaceError(Exception):
 
     def __str__(self):
         return '{}'.format(self.value)
+
 
 def _exists_in_path(cmd, environ):
     """
@@ -136,7 +139,6 @@ class Bunch(object):
            Items", Python Cookbook, 2nd Ed, Chapter 4.18, 2005.
 
     """
-
 
     def __init__(self, *args, **kwargs):
         self.__dict__.update(*args, **kwargs)
@@ -574,7 +576,6 @@ class BaseTraitedSpec(traits.HasTraits):
                                                        hash_files=hash_files)))
         return dict_withhash, md5(to_str(dict_nofilename).encode()).hexdigest()
 
-
     def _get_sorteddict(self, objekt, dictwithhash=False, hash_method=None,
                         hash_files=True):
         if isinstance(objekt, dict):
@@ -775,7 +776,6 @@ class BaseInterface(Interface):
             for name, value in list(inputs.items()):
                 setattr(self.inputs, name, value)
 
-
     @classmethod
     def help(cls, returnhelp=False):
         """ Prints class help
@@ -896,7 +896,7 @@ class BaseInterface(Interface):
         """
         helpstr = ['Outputs::', '']
         if cls.output_spec:
-            outputs = cls.output_spec()  #pylint: disable=E1102
+            outputs = cls.output_spec()  # pylint: disable=E1102
             for name, spec in sorted(outputs.traits(transient=None).items()):
                 helpstr += cls._get_trait_desc(outputs, name, spec)
         if len(helpstr) == 2:
@@ -908,7 +908,7 @@ class BaseInterface(Interface):
         """
         outputs = None
         if self.output_spec:
-            outputs = self.output_spec()  #pylint: disable=E1102
+            outputs = self.output_spec()  # pylint: disable=E1102
 
         return outputs
 
@@ -1004,7 +1004,6 @@ class BaseInterface(Interface):
         return unavailable_traits
 
     def _run_wrapper(self, runtime):
-        sysdisplay = os.getenv('DISPLAY')
         if self._redirect_x:
             try:
                 from xvfbwrapper import Xvfb
@@ -1180,7 +1179,7 @@ class BaseInterface(Interface):
                                                       self.__class__.__name__))
                 try:
                     setattr(outputs, key, val)
-                    _ = getattr(outputs, key)
+                    getattr(outputs, key)
                 except TraitError as error:
                     if hasattr(error, 'info') and \
                             error.info.startswith("an existing"):
@@ -1393,7 +1392,7 @@ def run_command(runtime, output=None, timeout=0.01, redirect_x=False):
         result['stderr'] = stderr.split('\n')
         result['merged'] = ''
     if output == 'file':
-        ret_code = proc.wait()
+        proc.wait()
         stderr.flush()
         stdout.flush()
         result['stdout'] = [line.decode(default_encoding).strip()
@@ -1442,7 +1441,7 @@ def get_dependencies(name, environ):
 class CommandLineInputSpec(BaseInterfaceInputSpec):
     args = Str(argstr='%s', desc='Additional parameters to the command')
     environ = DictStrStr(desc='Environment variables', usedefault=True,
-                                nohash=True)
+                         nohash=True)
     # This input does not have a "usedefault=True" so the set_default_terminal_output()
     # method would work
     terminal_output = traits.Enum('stream', 'allatonce', 'file', 'none',
@@ -1585,7 +1584,7 @@ class CommandLine(BaseInterface):
                             env=env,
                             stdout=sp.PIPE,
                             stderr=sp.PIPE,
-            )
+                            )
             o, e = proc.communicate()
             return o
 
@@ -1740,7 +1739,7 @@ class CommandLine(BaseInterface):
         metadata = dict(name_source=lambda t: t is not None)
         traits = self.inputs.traits(**metadata)
         if traits:
-            outputs = self.output_spec().get()  #pylint: disable=E1102
+            outputs = self.output_spec().get()  # pylint: disable=E1102
             for name, trait_spec in list(traits.items()):
                 out_name = name
                 if trait_spec.output_name is not None:
@@ -1788,8 +1787,8 @@ class CommandLine(BaseInterface):
                     final_args[pos] = arg
             else:
                 all_args.append(arg)
-        first_args = [arg for pos, arg in sorted(initial_args.items())]
-        last_args = [arg for pos, arg in sorted(final_args.items())]
+        first_args = [el for _, el in sorted(initial_args.items())]
+        last_args = [el for _, el in sorted(final_args.items())]
         return first_args + all_args + last_args
 
 
@@ -1860,7 +1859,7 @@ class SEMLikeCommandLine(CommandLine):
     """
 
     def _list_outputs(self):
-        outputs = self.output_spec().get()  #pylint: disable=E1102
+        outputs = self.output_spec().get()  # pylint: disable=E1102
         return self._outputs_from_inputs(outputs)
 
     def _outputs_from_inputs(self, outputs):
@@ -1897,7 +1896,7 @@ class MultiPath(traits.List):
 
         # want to treat range and other sequences (except str) as list
         if not isinstance(value, (str, bytes)) and isinstance(value, collections.Sequence):
-            value  = list(value)
+            value = list(value)
 
         if not isdefined(value) or \
                 (isinstance(value, list) and len(value) == 0):
