@@ -188,8 +188,10 @@ class PluginBase(object):
     """Base class for plugins"""
 
     def __init__(self, plugin_args=None):
-        if plugin_args:
-            self._status_callback = plugin_args.get('status_callback')
+        if plugin_args is None:
+            plugin_args = {}
+
+        self._status_callback = plugin_args.get('status_callback')
         return
 
     def run(self, graph, config, updatehash=False):
