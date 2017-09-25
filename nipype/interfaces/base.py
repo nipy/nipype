@@ -1150,9 +1150,6 @@ class BaseInterface(Interface):
                 setattr(runtime, 'mem_peak_gb', mem_peak_gb / 1024)
                 setattr(runtime, 'nthreads_max', int(nthreads_max))
 
-        # if force_raise and getattr(runtime, 'traceback', None):
-        #     raise NipypeInterfaceError('Fatal error:\n%s\n\n%s' %
-        #                                (runtime.traceback, runtime.traceback_args))
         return results
 
     def _list_outputs(self):
