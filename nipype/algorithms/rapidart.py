@@ -136,20 +136,6 @@ def _calc_norm(mc, use_differences, source, brain_pts=None):
     return normdata, displacement
 
 
-def _nanmean(a, axis=None):
-    """Return the mean excluding items that are nan
-
-    >>> a = [1, 2, np.nan]
-    >>> _nanmean(a)
-    1.5
-
-    """
-    if axis:
-        return np.nansum(a, axis) / np.sum(1 - np.isnan(a), axis)
-    else:
-        return np.nansum(a) / np.sum(1 - np.isnan(a))
-
-
 class ArtifactDetectInputSpec(BaseInterfaceInputSpec):
     realigned_files = InputMultiPath(File(exists=True),
                                      desc="Names of realigned functional data files",
@@ -376,11 +362,11 @@ class ArtifactDetect(BaseInterface):
                     vol = data[:, :, :, t0]
                     # Use an SPM like approach
                     mask_tmp = vol > \
-                        (_nanmean(vol) / self.inputs.global_threshold)
+                        (np.nanmean(vol) / self.inputs.global_threshold)
                     mask = mask * mask_tmp
                 for t0 in range(timepoints):
                     vol = data[:, :, :, t0]
-                    g[t0] = _nanmean(vol[mask])
+                    g[t0] = np.nanmean(vol[mask])
                 if len(find_indices(mask)) < (np.prod((x, y, z)) / 10):
                     intersect_mask = False
                     g = np.zeros((timepoints, 1))
@@ -390,7 +376,7 @@ class ArtifactDetect(BaseInterface):
                 for t0 in range(timepoints):
                     vol = data[:, :, :, t0]
                     mask_tmp = vol > \
-                        (_nanmean(vol) / self.inputs.global_threshold)
+                        (np.nanmean(vol) / self.inputs.global_threshold)
                     mask[:, :, :, t0] = mask_tmp
                     g[t0] = np.nansum(vol * mask_tmp) / np.nansum(mask_tmp)
         elif masktype == 'file':  # uses a mask image to determine intensity
@@ -400,15 +386,15 @@ class ArtifactDetect(BaseInterface):
             mask = mask > 0.5
             for t0 in range(timepoints):
                 vol = data[:, :, :, t0]
-                g[t0] = _nanmean(vol[mask])
+                g[t0] = np.nanmean(vol[mask])
         elif masktype == 'thresh':  # uses a fixed signal threshold
             for t0 in range(timepoints):
                 vol = data[:, :, :, t0]
                 mask = vol > self.inputs.mask_threshold
-                g[t0] = _nanmean(vol[mask])
+                g[t0] = np.nanmean(vol[mask])
         else:
             mask = np.ones((x, y, z))
-            g = _nanmean(data[mask > 0, :], 1)
+            g = np.nanmean(data[mask > 0, :], 1)
 
         # compute normalized intensity values
         gz = signal.detrend(g, axis=0)  # detrend the signal
