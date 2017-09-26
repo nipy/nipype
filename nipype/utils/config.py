@@ -11,21 +11,24 @@ hash_method : content, timestamp
 '''
 from __future__ import print_function, division, unicode_literals, absolute_import
 import os
-import shutil
 import errno
 from warnings import warn
 from io import StringIO
 from distutils.version import LooseVersion
-from simplejson import load, dump
+import configparser
 import numpy as np
 
 from builtins import str, object, open
+
+from simplejson import load, dump
+from ..external import portalocker
 from future import standard_library
 standard_library.install_aliases()
 
-import configparser
-from ..external import portalocker
 
+CONFIG_DEPRECATIONS = {
+    'profile_runtime': ('resource_monitor', '1.13.2'),
+}
 
 NUMPY_MMAP = LooseVersion(np.__version__) >= LooseVersion('1.12.0')
 
@@ -115,6 +118,13 @@ class NipypeConfig(object):
         self._config.set('logging', 'log_directory', log_dir)
 
     def get(self, section, option, default=None):
+        if option in CONFIG_DEPRECATIONS:
+            msg = ('Config option "%s" has been deprecated as of nipype %s. Please use '
+                   '"%s" instead.') % (option, CONFIG_DEPRECATIONS[option][1],
+                                       CONFIG_DEPRECATIONS[option][0])
+            warn(msg)
+            option = CONFIG_DEPRECATIONS[option][0]
+
         if self._config.has_option(section, option):
             return self._config.get(section, option)
         return default
@@ -122,6 +132,13 @@ class NipypeConfig(object):
     def set(self, section, option, value):
         if isinstance(value, bool):
             value = str(value)
+
+        if option in CONFIG_DEPRECATIONS:
+            msg = ('Config option "%s" has been deprecated as of nipype %s. Please use '
+                   '"%s" instead.') % (option, CONFIG_DEPRECATIONS[option][1],
+                                       CONFIG_DEPRECATIONS[option][0])
+            warn(msg)
+            option = CONFIG_DEPRECATIONS[option][0]
 
         return self._config.set(section, option, value)
 

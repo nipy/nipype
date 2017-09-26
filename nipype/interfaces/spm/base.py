@@ -159,7 +159,7 @@ class Info(object):
             return None
 
         use_mcr = use_mcr or 'FORCE_SPMMCR' in os.environ
-        matlab_cmd = (os.getenv('SPMMCRCMD') or
+        matlab_cmd = ((use_mcr and os.getenv('SPMMCRCMD')) or
                       os.getenv('MATLABCMD') or
                       'matlab -nodesktop -nosplash')
 

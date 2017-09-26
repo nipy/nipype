@@ -696,9 +696,9 @@ def test_serial_input(tmpdir):
     assert n1.num_subnodes() == len(n1.inputs.in1)
 
     # test running the workflow on default conditions
-    # w1.run(plugin='MultiProc')
+    w1.run(plugin='MultiProc')
 
-    # # test output of num_subnodes method when serial is True
+    # test output of num_subnodes method when serial is True
     n1._serial = True
     assert n1.num_subnodes() == 1
 

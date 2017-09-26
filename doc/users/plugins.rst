@@ -75,7 +75,8 @@ Optional arguments::
   processors/threads will be automatically detected
 
   memory_gb : Total memory available to be shared by all simultaneous tasks
-  currently running, if not set it will be automatically estimated.
+  currently running, if not set it will be automatically set to 90\% of
+  system RAM.
 
   raise_insufficient : Raise exception when the estimated resources of a node
   exceed the total amount of resources available (memory and threads), when

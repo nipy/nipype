@@ -52,9 +52,6 @@ PY35 = sys.version_info >= (3, 5)
 PY3 = sys.version_info[0] > 2
 __docformat__ = 'restructuredtext'
 
-if sys.version_info < (3, 3):
-    setattr(sp, 'DEVNULL', os.devnull)
-
 
 class Str(traits.Unicode):
     pass
@@ -1057,11 +1054,7 @@ class BaseInterface(Interface):
         """
         from ..utils.profiler import resource_monitor, ResourceMonitor
 
-        force_raise = not (
-            hasattr(self.inputs, 'ignore_exception') and
-            isdefined(self.inputs.ignore_exception) and
-            self.inputs.ignore_exception
-        )
+        force_raise = not getattr(self.inputs, 'ignore_exception', False)
         self.inputs.trait_set(**inputs)
         self._check_mandatory_inputs()
         self._check_version_requirements(self.inputs)
@@ -1363,6 +1356,7 @@ def run_command(runtime, output=None, timeout=0.01, redirect_x=False):
         while proc.returncode is None:
             proc.poll()
             _process()
+            time.sleep(interval)
 
         _process(drain=1)
 

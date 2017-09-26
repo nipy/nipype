@@ -17,8 +17,8 @@ Logging
 	How detailed the logs regarding workflow should be (possible values:
 	``INFO`` and ``DEBUG``; default value: ``INFO``)
 *utils_level*
-	How detailed the logs regarding nipype utils like file operations 
-	(for example overwriting warning) or the resource profiler should be 
+	How detailed the logs regarding nipype utils, like file operations
+	(for example overwriting warning) or the resource profiler, should be
 	(possible values: ``INFO`` and ``DEBUG``; default value:
 	``INFO``)
 *interface_level*
@@ -148,10 +148,11 @@ Execution
     (possible values: ``pklz`` and ``txt``; default value: ``pklz``)
 
 *resource_monitor*
-    Enables monitoring the resources occupation.
+    Enables monitoring the resources occupation (possible values: ``true`` and
+    ``false``; default value: ``false``)
 
 *resource_monitor_frequency*
-    Sampling period (in seconds) between measurements of resources (memory, cpus) 
+    Sampling period (in seconds) between measurements of resources (memory, cpus)
     being used by an interface. Requires ``resource_monitor`` to be ``true``.
 
 Example

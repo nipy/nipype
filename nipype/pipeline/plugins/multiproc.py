@@ -124,8 +124,7 @@ class MultiProcPlugin(DistributedPluginBase):
         # Instantiate different thread pools for non-daemon processes
         logger.debug('MultiProcPlugin starting in "%sdaemon" mode (n_procs=%d, mem_gb=%0.2f)',
                      'non' if non_daemon else '', self.processors, self.memory_gb)
-        self.pool = (NonDaemonPool(processes=self.processors)
-                     if non_daemon else Pool(processes=self.processors))
+        self.pool = (NonDaemonPool if non_daemon else Pool)(processes=self.processors)
 
     # def _wait(self):
     #     if len(self.pending_tasks) > 0:
@@ -234,7 +233,7 @@ class MultiProcPlugin(DistributedPluginBase):
 
             if self.procs[jobid]._interface.estimated_memory_gb <= free_memory_gb and \
                self.procs[jobid]._interface.num_threads <= free_processors:
-                logger.info('Executing: %s ID: %d' %(self.procs[jobid]._id, jobid))
+                logger.info('Executing: %s ID: %d' % (self.procs[jobid]._id, jobid))
                 executing_now.append(self.procs[jobid])
 
                 if isinstance(self.procs[jobid], MapNode):
@@ -265,11 +264,13 @@ class MultiProcPlugin(DistributedPluginBase):
                 if str2bool(self.procs[jobid].config['execution']['local_hash_check']):
                     logger.debug('checking hash locally')
                     try:
-                        hash_exists, _, _, _ = self.procs[
-                            jobid].hash_exists()
-                        logger.debug('Hash exists %s' % str(hash_exists))
-                        if hash_exists and not self.procs[jobid].overwrite and \
-                           not self.procs[jobid]._interface.always_run:
+                        hash_exists, _, _, _ = self.procs[jobid].hash_exists()
+                        overwrite = self.procs[jobid].overwrite
+                        always_run = self.procs[jobid]._interface.always_run
+                        if (hash_exists and (overwrite is False or
+                                             (overwrite is None and not always_run))):
+                            logger.debug('Skipping cached node %s with ID %s.',
+                                         self.procs[jobid]._id, jobid)
                             self._task_finished_cb(jobid)
                             self._remove_node_dirs()
                             continue
@@ -280,7 +281,8 @@ class MultiProcPlugin(DistributedPluginBase):
                         self._clean_queue(jobid, graph)
                         self.proc_pending[jobid] = False
                         continue
-                logger.debug('Finished checking hash')
+                    finally:
+                        logger.debug('Finished checking hash')
 
                 if self.procs[jobid].run_without_submitting:
                     logger.debug('Running node %s on master thread',
@@ -291,8 +293,9 @@ class MultiProcPlugin(DistributedPluginBase):
                         etype, eval, etr = sys.exc_info()
                         traceback = format_exception(etype, eval, etr)
                         report_crash(self.procs[jobid], traceback=traceback)
-                    self._task_finished_cb(jobid)
-                    self._remove_node_dirs()
+                    finally:
+                        self._task_finished_cb(jobid)
+                        self._remove_node_dirs()
 
                 else:
                     logger.debug('MultiProcPlugin submitting %s', str(jobid))
