@@ -149,4 +149,3 @@ ENV MATLABCMD="/opt/mcr/v85/toolbox/matlab" \
     FORCE_SPMMCR=1
 
 WORKDIR /work
-
