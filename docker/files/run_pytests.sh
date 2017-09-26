@@ -33,7 +33,7 @@ if [[ "${PYTHON_VERSION}" -ge "30" ]]; then
     echo '[execution]' >> ${HOME}/.nipype/nipype.cfg
     echo 'resource_monitor = true' >> ${HOME}/.nipype/nipype.cfg
     export COVERAGE_FILE=${WORKDIR}/tests/.coverage.py${PYTHON_VERSION}_extra
-    py.test -v --junitxml=${WORKDIR}/tests/pytests_py${PYTHON_VERSION}_extra.xml --cov nipype --cov-report xml:${WORKDIR}/tests/coverage_py${PYTHON_VERSION}_extra.xml /src/nipype/nipype/utils/tests/test_runtime_monitor.py /src/nipype/nipype/pipeline/plugins/tests/test_multiproc*.py
+    py.test -v --junitxml=${WORKDIR}/tests/pytests_py${PYTHON_VERSION}_extra.xml --cov nipype --cov-report xml:${WORKDIR}/tests/coverage_py${PYTHON_VERSION}_extra.xml /src/nipype/nipype/utils/tests/test_profiler.py /src/nipype/nipype/pipeline/plugins/tests/test_multiproc*.py
     exit_code=$(( $exit_code + $? ))
 fi
 
