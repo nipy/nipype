@@ -2,13 +2,14 @@
 # @Author: oesteban
 # @Date:   2017-09-21 15:50:37
 # @Last Modified by:   oesteban
-# @Last Modified time: 2017-09-26 09:12:36
+# @Last Modified time: 2017-09-26 10:56:03
 """
 Utilities to keep track of performance
 """
 from __future__ import print_function, division, unicode_literals, absolute_import
 
 import threading
+from time import time
 try:
     import psutil
 except ImportError as exc:
@@ -26,6 +27,9 @@ if resource_monitor and psutil is None:
                     'necessary package "psutil" could not be imported.')
     resource_monitor = False
 
+# Init variables
+_MB = 1024.0**2
+
 
 class ResourceMonitor(threading.Thread):
     def __init__(self, pid, freq=5, fname=None):
@@ -37,6 +41,8 @@ class ResourceMonitor(threading.Thread):
 
         self._pid = pid
         self._log = open(fname, 'w')
+        self._log.write('%s,0.0,0\n' % time())
+        self._log.flush()
         self._freq = freq
         threading.Thread.__init__(self)
         self._event = threading.Event()
@@ -52,11 +58,15 @@ class ResourceMonitor(threading.Thread):
             try:
                 ram = _get_ram_mb(self._pid)
                 cpus = _get_num_threads(self._pid)
-            except psutil.NoSuchProcess:
-                self.stop()
+                if all(ram is not None, cpus is not None):
+                    self._log.write('%s,%f,%d\n' % (time(), ram, cpus))
+                    self._log.flush()
+            except ValueError as e:
+                if e.args == ('I/O operation on closed file.',):
+                    pass
+            except Exception:
+                pass
 
-            self._log.write('%f,%d\n' % (ram, cpus))
-            self._log.flush()
             self._event.wait(self._freq)
 
 
@@ -190,37 +200,40 @@ def _get_num_threads(pid):
 
     """
 
-    proc = psutil.Process(pid)
-    # If process is running
-    if proc.status() == psutil.STATUS_RUNNING:
-        num_threads = proc.num_threads()
-    elif proc.num_threads() > 1:
-        tprocs = [psutil.Process(thr.id) for thr in proc.threads()]
-        alive_tprocs = [tproc for tproc in tprocs if tproc.status() == psutil.STATUS_RUNNING]
-        num_threads = len(alive_tprocs)
-    else:
-        num_threads = 1
+    try:
+        proc = psutil.Process(pid)
+        # If process is running
+        if proc.status() == psutil.STATUS_RUNNING:
+            num_threads = proc.num_threads()
+        elif proc.num_threads() > 1:
+            tprocs = [psutil.Process(thr.id) for thr in proc.threads()]
+            alive_tprocs = [tproc for tproc in tprocs if tproc.status() == psutil.STATUS_RUNNING]
+            num_threads = len(alive_tprocs)
+        else:
+            num_threads = 1
 
-    child_threads = 0
-    # Iterate through child processes and get number of their threads
-    for child in proc.children(recursive=True):
-        # Leaf process
-        if len(child.children()) == 0:
-            # If process is running, get its number of threads
-            if child.status() == psutil.STATUS_RUNNING:
-                child_thr = child.num_threads()
-            # If its not necessarily running, but still multi-threaded
-            elif child.num_threads() > 1:
-                # Cast each thread as a process and check for only running
-                tprocs = [psutil.Process(thr.id) for thr in child.threads()]
-                alive_tprocs = [tproc for tproc in tprocs
-                                if tproc.status() == psutil.STATUS_RUNNING]
-                child_thr = len(alive_tprocs)
-            # Otherwise, no threads are running
-            else:
-                child_thr = 0
-            # Increment child threads
-            child_threads += child_thr
+        child_threads = 0
+        # Iterate through child processes and get number of their threads
+        for child in proc.children(recursive=True):
+            # Leaf process
+            if len(child.children()) == 0:
+                # If process is running, get its number of threads
+                if child.status() == psutil.STATUS_RUNNING:
+                    child_thr = child.num_threads()
+                # If its not necessarily running, but still multi-threaded
+                elif child.num_threads() > 1:
+                    # Cast each thread as a process and check for only running
+                    tprocs = [psutil.Process(thr.id) for thr in child.threads()]
+                    alive_tprocs = [tproc for tproc in tprocs
+                                    if tproc.status() == psutil.STATUS_RUNNING]
+                    child_thr = len(alive_tprocs)
+                # Otherwise, no threads are running
+                else:
+                    child_thr = 0
+                # Increment child threads
+                child_threads += child_thr
+    except psutil.NoSuchProcess:
+        return None
 
     # Number of threads is max between found active children and parent
     num_threads = max(child_threads, num_threads)
@@ -253,21 +266,20 @@ multiprocessing-forking-memory-usage
         the memory RAM in MB utilized by the process PID
 
     """
-
-    # Init variables
-    _MB = 1024.0**2
-
-    # Init parent
-    parent = psutil.Process(pid)
-    # Get memory of parent
-    parent_mem = parent.memory_info().rss
-    mem_mb = parent_mem / _MB
-    # Iterate through child processes
-    for child in parent.children(recursive=True):
-        child_mem = child.memory_info().rss
-        if pyfunc:
-            child_mem -= parent_mem
-        mem_mb += child_mem / _MB
+    try:
+        # Init parent
+        parent = psutil.Process(pid)
+        # Get memory of parent
+        parent_mem = parent.memory_info().rss
+        mem_mb = parent_mem / _MB
+        # Iterate through child processes
+        for child in parent.children(recursive=True):
+            child_mem = child.memory_info().rss
+            if pyfunc:
+                child_mem -= parent_mem
+            mem_mb += child_mem / _MB
+    except psutil.NoSuchProcess:
+        return None
 
     # Return memory
     return mem_mb

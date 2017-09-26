@@ -1092,7 +1092,7 @@ class BaseInterface(Interface):
         except Exception as e:
             import traceback
             # Retrieve the maximum info fast
-            setattr(runtime, 'traceback', traceback.format_exc())
+            runtime.traceback = traceback.format_exc()
             # Gather up the exception arguments and append nipype info.
             exc_args = e.args if getattr(e, 'args') else tuple()
             exc_args += ('An exception of type %s occurred while running interface %s.' %
@@ -1100,8 +1100,7 @@ class BaseInterface(Interface):
             if config.get('logging', 'interface_level', 'info').lower() == 'debug':
                 exc_args += ('Inputs: %s' % str(self.inputs),)
 
-            setattr(runtime, 'traceback_args',
-                    ('\n'.join(['%s' % arg for arg in exc_args]),))
+            runtime.traceback_args = ('\n'.join(['%s' % arg for arg in exc_args]),)
 
             if force_raise:
                 raise
@@ -1130,7 +1129,7 @@ class BaseInterface(Interface):
                 # Read .prof file in and set runtime values
                 vals = np.loadtxt(mon_fname, delimiter=',')
                 if vals.tolist():
-                    mem_peak_gb, nthreads = vals.max(0).astype(float).tolist()
+                    mem_peak_gb, nthreads = np.atleast_2d(vals).max(0).astype(float).tolist()
                     runtime.mem_peak_gb = mem_peak_gb / 1024
                     runtime.nthreads_max = int(nthreads)
 
