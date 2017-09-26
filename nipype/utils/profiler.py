@@ -2,7 +2,7 @@
 # @Author: oesteban
 # @Date:   2017-09-21 15:50:37
 # @Last Modified by:   oesteban
-# @Last Modified time: 2017-09-26 10:56:03
+# @Last Modified time: 2017-09-26 15:05:24
 """
 Utilities to keep track of performance
 """
@@ -40,33 +40,30 @@ class ResourceMonitor(threading.Thread):
             fname = '.nipype.prof'
 
         self._pid = pid
-        self._log = open(fname, 'w')
-        self._log.write('%s,0.0,0\n' % time())
-        self._log.flush()
+        self._fname = fname
         self._freq = freq
+
+        self._log = open(self._fname, 'w')
+        print('%s,0.0,0' % time(), file=self._log)
+        self._log.flush()
         threading.Thread.__init__(self)
         self._event = threading.Event()
 
     def stop(self):
         if not self._event.is_set():
             self._event.set()
-            self._log.close()
             self.join()
+            self._log.flush()
+            self._log.close()
 
     def run(self):
         while not self._event.is_set():
-            try:
-                ram = _get_ram_mb(self._pid)
-                cpus = _get_num_threads(self._pid)
-                if all(ram is not None, cpus is not None):
-                    self._log.write('%s,%f,%d\n' % (time(), ram, cpus))
-                    self._log.flush()
-            except ValueError as e:
-                if e.args == ('I/O operation on closed file.',):
-                    pass
-            except Exception:
-                pass
-
+            ram = _get_ram_mb(self._pid)
+            cpus = _get_num_threads(self._pid)
+            if ram is not None and cpus is not None:
+                print('%s,%f,%d' % (time(), ram, cpus),
+                      file=self._log)
+                self._log.flush()
             self._event.wait(self._freq)
 
 

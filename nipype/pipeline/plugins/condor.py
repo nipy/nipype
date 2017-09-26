@@ -46,6 +46,7 @@ class CondorPlugin(SGELikeBatchManagerBase):
 
     def _is_pending(self, taskid):
         cmd = CommandLine('condor_q',
+                          resource_monitor=False,
                           terminal_output='allatonce')
         cmd.inputs.args = '%d' % taskid
         # check condor cluster
@@ -59,6 +60,7 @@ class CondorPlugin(SGELikeBatchManagerBase):
 
     def _submit_batchtask(self, scriptfile, node):
         cmd = CommandLine('condor_qsub', environ=dict(os.environ),
+                          resource_monitor=False,
                           terminal_output='allatonce')
         path = os.path.dirname(scriptfile)
         qsubargs = ''

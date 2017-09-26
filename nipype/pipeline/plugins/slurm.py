@@ -62,6 +62,7 @@ class SLURMPlugin(SGELikeBatchManagerBase):
         #  subprocess.Popen requires taskid to be a string
         res = CommandLine('squeue',
                           args=' '.join(['-j', '%s' % taskid]),
+                          resource_monitor=False,
                           terminal_output='allatonce').run()
         return res.runtime.stdout.find(str(taskid)) > -1
 
@@ -72,6 +73,7 @@ class SLURMPlugin(SGELikeBatchManagerBase):
         formatting/processing
         """
         cmd = CommandLine('sbatch', environ=dict(os.environ),
+                          resource_monitor=False,
                           terminal_output='allatonce')
         path = os.path.dirname(scriptfile)
 

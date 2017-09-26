@@ -1022,7 +1022,8 @@ def export_graph(graph_in, base_dir=None, show=False, use_execgraph=False,
     _write_detailed_dot(graph, outfname)
     if format != 'dot':
         cmd = 'dot -T%s -O %s' % (format, outfname)
-        res = CommandLine(cmd, terminal_output='allatonce').run()
+        res = CommandLine(cmd, terminal_output='allatonce',
+                          resource_monitor=False).run()
         if res.runtime.returncode:
             logger.warn('dot2png: %s', res.runtime.stderr)
     pklgraph = _create_dot_graph(graph, show_connectinfo, simple_form)
@@ -1033,7 +1034,8 @@ def export_graph(graph_in, base_dir=None, show=False, use_execgraph=False,
     nx.drawing.nx_pydot.write_dot(pklgraph, simplefname)
     if format != 'dot':
         cmd = 'dot -T%s -O %s' % (format, simplefname)
-        res = CommandLine(cmd, terminal_output='allatonce').run()
+        res = CommandLine(cmd, terminal_output='allatonce',
+                          resource_monitor=False).run()
         if res.runtime.returncode:
             logger.warn('dot2png: %s', res.runtime.stderr)
     if show:
@@ -1053,7 +1055,7 @@ def format_dot(dotfilename, format='png'):
     if format != 'dot':
         cmd = 'dot -T%s -O \'%s\'' % (format, dotfilename)
         try:
-            CommandLine(cmd).run()
+            CommandLine(cmd, resource_monitor=False).run()
         except IOError as ioe:
             if "could not be found" in str(ioe):
                 raise IOError("Cannot draw directed graph; executable 'dot' is unavailable")

@@ -45,6 +45,7 @@ class Info(object):
         """
         try:
             clout = CommandLine(command='afni --version',
+                                resource_monitor=False,
                                 terminal_output='allatonce').run()
         except IOError:
             # If afni_vcheck is not present, return None
@@ -105,7 +106,9 @@ class Info(object):
         '''Grab an image from the standard location.
 
         Could be made more fancy to allow for more relocatability'''
-        clout = CommandLine('which afni', ignore_exception=True,
+        clout = CommandLine('which afni',
+                            ignore_exception=True,
+                            resource_monitor=False,
                             terminal_output='allatonce').run()
         if clout.runtime.returncode is not 0:
             return None

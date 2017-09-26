@@ -29,7 +29,7 @@ from scipy.io import savemat
 # Local imports
 from ... import logging
 from ...utils import spm_docs as sd, NUMPY_MMAP
-from ..base import (BaseInterface, CommandLine, traits, isdefined, InputMultiPath,
+from ..base import (BaseInterface, traits, isdefined, InputMultiPath,
                     BaseInterfaceInputSpec, Directory, Undefined, ImageFile)
 from ..matlab import MatlabCommand
 from ...external.due import due, Doi, BibTeX
@@ -152,18 +152,13 @@ class Info(object):
             returns None of path not found
         """
 
-        # Test if matlab is installed, exit quickly if not.
-        clout = CommandLine('which matlab', ignore_exception=True,
-                            terminal_output='allatonce').run()
-        if clout.runtime.returncode is not 0:
-            return None
-
         use_mcr = use_mcr or 'FORCE_SPMMCR' in os.environ
         matlab_cmd = ((use_mcr and os.getenv('SPMMCRCMD')) or
                       os.getenv('MATLABCMD') or
                       'matlab -nodesktop -nosplash')
 
-        mlab = MatlabCommand(matlab_cmd=matlab_cmd)
+        mlab = MatlabCommand(matlab_cmd=matlab_cmd,
+                             resource_monitor=False)
         mlab.inputs.mfile = False
         if paths:
             mlab.inputs.paths = paths
@@ -280,7 +275,8 @@ class SPMCommand(BaseInterface):
         # and can be set only during init
         self.mlab = MatlabCommand(matlab_cmd=self.inputs.matlab_cmd,
                                   mfile=self.inputs.mfile,
-                                  paths=self.inputs.paths)
+                                  paths=self.inputs.paths,
+                                  resource_monitor=False)
         self.mlab.inputs.script_file = 'pyscript_%s.m' % \
             self.__class__.__name__.split('.')[-1].lower()
         if isdefined(self.inputs.use_mcr) and self.inputs.use_mcr:

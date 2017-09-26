@@ -45,6 +45,7 @@ class LSFPlugin(SGELikeBatchManagerBase):
         finished and is ready to be checked for completeness. So return True if status is either 'PEND'
         or 'RUN'"""
         cmd = CommandLine('bjobs',
+                          resource_monitor=False,
                           terminal_output='allatonce')
         cmd.inputs.args = '%d' % taskid
         # check lsf task
@@ -60,6 +61,7 @@ class LSFPlugin(SGELikeBatchManagerBase):
 
     def _submit_batchtask(self, scriptfile, node):
         cmd = CommandLine('bsub', environ=dict(os.environ),
+                          resource_monitor=False,
                           terminal_output='allatonce')
         path = os.path.dirname(scriptfile)
         bsubargs = ''

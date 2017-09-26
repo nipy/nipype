@@ -729,9 +729,12 @@ class Interface(object):
 
 
 class BaseInterfaceInputSpec(TraitedSpec):
-    ignore_exception = traits.Bool(False, desc="Print an error message instead \
-of throwing an exception in case the interface fails to run", usedefault=True,
-                                   nohash=True)
+    ignore_exception = traits.Bool(False, usedefault=True, nohash=True,
+                                   desc='Print an error message instead of throwing an exception '
+                                        'in case the interface fails to run')
+    resource_monitor = traits.Bool(True, usedefault=True, nohash=True,
+                                   desc='Disable the resource monitor for this interface '
+                                        '(overloads the default nipype config).')
 
 
 class BaseInterface(Interface):
@@ -1054,6 +1057,7 @@ class BaseInterface(Interface):
         """
         from ..utils.profiler import resource_monitor, ResourceMonitor
 
+        enable_rm = resource_monitor and self.inputs.resource_monitor
         force_raise = not getattr(self.inputs, 'ignore_exception', False)
         self.inputs.trait_set(**inputs)
         self._check_mandatory_inputs()
@@ -1076,10 +1080,12 @@ class BaseInterface(Interface):
                         version=self.version)
 
         mon_sp = None
-        if resource_monitor:
+        if enable_rm:
             mon_freq = config.get('execution', 'resource_monitor_frequency', 1)
             proc_pid = os.getpid()
             mon_fname = os.path.abspath('.prof-%d_freq-%0.3f' % (proc_pid, mon_freq))
+            iflogger.debug('Creating a ResourceMonitor on a %s interface: %s',
+                           self.__class__.__name__, mon_fname)
             mon_sp = ResourceMonitor(proc_pid, freq=mon_freq, fname=mon_fname)
             mon_sp.start()
 
@@ -1119,7 +1125,7 @@ class BaseInterface(Interface):
                 results.provenance = write_provenance(results)
 
             # Make sure runtime profiler is shut down
-            if resource_monitor:
+            if enable_rm:
                 import numpy as np
                 mon_sp.stop()
 
@@ -1129,7 +1135,7 @@ class BaseInterface(Interface):
                 # Read .prof file in and set runtime values
                 vals = np.loadtxt(mon_fname, delimiter=',')
                 if vals.tolist():
-                    mem_peak_gb, nthreads = np.atleast_2d(vals).max(0).astype(float).tolist()
+                    _, mem_peak_gb, nthreads = np.atleast_2d(vals).max(0).astype(float).tolist()
                     runtime.mem_peak_gb = mem_peak_gb / 1024
                     runtime.nthreads_max = int(nthreads)
 
