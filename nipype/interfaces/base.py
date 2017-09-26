@@ -1356,7 +1356,7 @@ def run_command(runtime, output=None, timeout=0.01, redirect_x=False):
         while proc.returncode is None:
             proc.poll()
             _process()
-            time.sleep(interval)
+            time.sleep(0)
 
         _process(drain=1)
 
