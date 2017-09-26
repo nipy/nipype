@@ -1124,15 +1124,15 @@ class BaseInterface(Interface):
                 import numpy as np
                 mon_sp.stop()
 
-                setattr(runtime, 'mem_peak_gb', None)
-                setattr(runtime, 'nthreads_max', None)
+                runtime.mem_peak_gb = None
+                runtime.nthreads_max = None
 
                 # Read .prof file in and set runtime values
                 vals = np.loadtxt(mon_fname, delimiter=',')
-                if vals:
+                if vals.tolist():
                     mem_peak_gb, nthreads = vals.max(0).astype(float).tolist()
-                    setattr(runtime, 'mem_peak_gb', mem_peak_gb / 1024)
-                    setattr(runtime, 'nthreads_max', int(nthreads))
+                    runtime.mem_peak_gb = mem_peak_gb / 1024
+                    runtime.nthreads_max = int(nthreads)
 
         return results
 
