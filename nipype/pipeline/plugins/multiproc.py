@@ -112,13 +112,14 @@ class MultiProcPlugin(DistributedPluginBase):
         self._task_obj = {}
         self._taskid = 0
         self._timeout = 2.0
-        self._event = threading.Event()
+        # self._event = threading.Event()
 
         # Read in options or set defaults.
         non_daemon = self.plugin_args.get('non_daemon', True)
         self.processors = self.plugin_args.get('n_procs', cpu_count())
         self.memory_gb = self.plugin_args.get('memory_gb',  # Allocate 90% of system memory
                                               get_system_total_memory_gb() * 0.9)
+        self.raise_insufficient = self.plugin_args.get('raise_insufficient', True)
 
         # Instantiate different thread pools for non-daemon processes
         logger.debug('MultiProcPlugin starting in "%sdaemon" mode (n_procs=%d, mem_gb=%0.2f)',
@@ -126,19 +127,18 @@ class MultiProcPlugin(DistributedPluginBase):
         self.pool = (NonDaemonPool(processes=self.processors)
                      if non_daemon else Pool(processes=self.processors))
 
-
-    def _wait(self):
-        if len(self.pending_tasks) > 0:
-            if self._config['execution']['poll_sleep_duration']:
-                self._timeout = float(self._config['execution']['poll_sleep_duration'])
-            sig_received = self._event.wait(self._timeout)
-            if not sig_received:
-                logger.debug('MultiProcPlugin timeout before signal received. Deadlock averted??')
-            self._event.clear()
+    # def _wait(self):
+    #     if len(self.pending_tasks) > 0:
+    #         if self._config['execution']['poll_sleep_duration']:
+    #             self._timeout = float(self._config['execution']['poll_sleep_duration'])
+    #         sig_received = self._event.wait(self._timeout)
+    #         if not sig_received:
+    #             logger.debug('MultiProcPlugin timeout before signal received. Deadlock averted??')
+    #         self._event.clear()
 
     def _async_callback(self, args):
         self._taskresult[args['taskid']] = args
-        self._event.set()
+        # self._event.set()
 
     def _get_result(self, taskid):
         return self._taskresult.get(taskid)
@@ -185,18 +185,25 @@ class MultiProcPlugin(DistributedPluginBase):
         busy_memory_gb = 0
         busy_processors = 0
         for jobid in currently_running_jobids:
-            if self.procs[jobid]._interface.estimated_memory_gb <= self.memory_gb and \
-               self.procs[jobid]._interface.num_threads <= self.processors:
-                busy_memory_gb += self.procs[jobid]._interface.estimated_memory_gb
-                busy_processors += self.procs[jobid]._interface.num_threads
+            est_mem_gb = self.procs[jobid]._interface.estimated_memory_gb
+            est_num_th = self.procs[jobid]._interface.num_threads
 
-            else:
-                raise ValueError(
-                    "Resources required by jobid {0} ({3}GB, {4} threads) exceed what is "
-                    "available on the system ({1}GB, {2} threads)".format(
-                        jobid, self.memory_gb, self.processors,
-                        self.procs[jobid]._interface.estimated_memory_gb,
-                        self.procs[jobid]._interface.num_threads))
+            if est_mem_gb > self.memory_gb:
+                logger.warning(
+                    'Job %s - Estimated memory (%0.2fGB) exceeds the total amount'
+                    ' available (%0.2fGB).', self.procs[jobid].name, est_mem_gb, self.memory_gb)
+                if self.raise_insufficient:
+                    raise RuntimeError('Insufficient resources available for job')
+
+            if est_num_th > self.processors:
+                logger.warning(
+                    'Job %s - Requested %d threads, but only %d are available.',
+                    self.procs[jobid].name, est_num_th, self.processors)
+                if self.raise_insufficient:
+                    raise RuntimeError('Insufficient resources available for job')
+
+            busy_memory_gb += min(est_mem_gb, self.memory_gb)
+            busy_processors += min(est_num_th, self.processors)
 
         free_memory_gb = self.memory_gb - busy_memory_gb
         free_processors = self.processors - busy_processors
@@ -276,8 +283,8 @@ class MultiProcPlugin(DistributedPluginBase):
                 logger.debug('Finished checking hash')
 
                 if self.procs[jobid].run_without_submitting:
-                    logger.debug('Running node %s on master thread' \
-                                 % self.procs[jobid])
+                    logger.debug('Running node %s on master thread',
+                                 self.procs[jobid])
                     try:
                         self.procs[jobid].run()
                     except Exception:
@@ -288,7 +295,7 @@ class MultiProcPlugin(DistributedPluginBase):
                     self._remove_node_dirs()
 
                 else:
-                    logger.debug('MultiProcPlugin submitting %s' % str(jobid))
+                    logger.debug('MultiProcPlugin submitting %s', str(jobid))
                     tid = self._submit_job(deepcopy(self.procs[jobid]),
                                            updatehash=updatehash)
                     if tid is None:
