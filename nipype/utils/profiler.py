@@ -2,7 +2,7 @@
 # @Author: oesteban
 # @Date:   2017-09-21 15:50:37
 # @Last Modified by:   oesteban
-# @Last Modified time: 2017-09-25 16:37:02
+# @Last Modified time: 2017-09-26 09:12:36
 """
 Utilities to keep track of performance
 """
@@ -42,14 +42,20 @@ class ResourceMonitor(threading.Thread):
         self._event = threading.Event()
 
     def stop(self):
-        self._event.set()
-        self._log.close()
-        self.join()
+        if not self._event.is_set():
+            self._event.set()
+            self._log.close()
+            self.join()
 
     def run(self):
         while not self._event.is_set():
-            self._log.write('%f,%d\n' % (_get_ram_mb(self._pid),
-                                         _get_num_threads(self._pid)))
+            try:
+                ram = _get_ram_mb(self._pid)
+                cpus = _get_num_threads(self._pid)
+            except psutil.NoSuchProcess:
+                self.stop()
+
+            self._log.write('%f,%d\n' % (ram, cpus))
             self._log.flush()
             self._event.wait(self._freq)
 
