@@ -2,7 +2,7 @@
 # @Author: oesteban
 # @Date:   2017-09-21 15:50:37
 # @Last Modified by:   oesteban
-# @Last Modified time: 2017-09-26 15:05:24
+# @Last Modified time: 2017-09-27 12:57:50
 """
 Utilities to keep track of performance
 """
@@ -53,6 +53,10 @@ class ResourceMonitor(threading.Thread):
         if not self._event.is_set():
             self._event.set()
             self.join()
+            ram = _get_ram_mb(self._pid) or 0
+            cpus = _get_num_threads(self._pid) or 0
+            print('%s,%f,%d' % (time(), ram, cpus),
+                  file=self._log)
             self._log.flush()
             self._log.close()
 
