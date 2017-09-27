@@ -15,16 +15,6 @@ import pytest
 from nipype.utils.profiler import resource_monitor as run_profile
 from nipype.interfaces.base import (traits, CommandLine, CommandLineInputSpec)
 
-if run_profile:
-    try:
-        import psutil
-        skip_profile_msg = 'Run profiler tests'
-    except ImportError as exc:
-        skip_profile_msg = 'Missing python packages for runtime profiling, skipping...\n'\
-                           'Error: %s' % exc
-        run_profile = False
-else:
-    skip_profile_msg = 'Not running profiler'
 
 # UseResources inputspec
 class UseResourcesInputSpec(CommandLineInputSpec):
@@ -160,17 +150,17 @@ class TestRuntimeProfiler():
         # Iterate through all combos
         for num_gb in np.arange(0.25, ram_gb_range+ram_gb_step, ram_gb_step):
             # Cmd-level
-            cmd_start_str, cmd_fin_str = self._run_cmdline_workflow(num_gb, num_threads)
-            cmd_start_ts = json.loads(cmd_start_str)['start']
-            cmd_node_stats = json.loads(cmd_fin_str)
+            cmd_node_str = self._run_cmdline_workflow(num_gb, num_threads)
+            cmd_node_stats = json.loads(cmd_node_str)
+            cmd_start_ts = cmd_node_stats['start']
             cmd_runtime_threads = int(cmd_node_stats['runtime_threads'])
             cmd_runtime_gb = float(cmd_node_stats['runtime_memory_gb'])
             cmd_finish_ts = cmd_node_stats['finish']
 
             # Func-level
-            func_start_str, func_fin_str = self._run_function_workflow(num_gb, num_threads)
-            func_start_ts = json.loads(func_start_str)['start']
-            func_node_stats = json.loads(func_fin_str)
+            func_node_str = self._run_function_workflow(num_gb, num_threads)
+            func_node_stats = json.loads(func_node_str)
+            func_start_ts = func_node_stats['start']
             func_runtime_threads = int(func_node_stats['runtime_threads'])
             func_runtime_gb = float(func_node_stats['runtime_memory_gb'])
             func_finish_ts = func_node_stats['finish']
@@ -238,6 +228,7 @@ class TestRuntimeProfiler():
 
         # Init logger
         logger = logging.getLogger('callback')
+        logger.propagate = False
         logger.setLevel(logging.DEBUG)
         handler = logging.FileHandler(log_file)
         logger.addHandler(handler)
@@ -271,14 +262,14 @@ class TestRuntimeProfiler():
         # Get runtime stats from log file
         with open(log_file, 'r') as log_handle:
             lines = log_handle.readlines()
-            start_str = lines[0].rstrip('\n')
-            finish_str = lines[1].rstrip('\n')
+
+        node_str = lines[0].rstrip('\n')
 
         # Delete wf base dir
         shutil.rmtree(base_dir)
 
         # Return runtime stats
-        return start_str, finish_str
+        return node_str
 
     # Test node
     def _run_function_workflow(self, num_gb, num_threads):
@@ -350,17 +341,15 @@ class TestRuntimeProfiler():
         # Get runtime stats from log file
         with open(log_file, 'r') as log_handle:
             lines = log_handle.readlines()
-            start_str = lines[0].rstrip('\n')
-            finish_str = lines[1].rstrip('\n')
 
         # Delete wf base dir
         shutil.rmtree(base_dir)
 
         # Return runtime stats
-        return start_str, finish_str
+        return lines[0].rstrip('\n')
 
     # Test resources were used as expected in cmdline interface
-    @pytest.mark.skipif(run_profile == False, reason=skip_profile_msg)
+    @pytest.mark.skipif(run_profile is False, reason='resources monitor is disabled')
     def test_cmdline_profiling(self):
         '''
         Test runtime profiler correctly records workflow RAM/CPUs consumption
@@ -376,9 +365,9 @@ class TestRuntimeProfiler():
         num_threads = self.num_threads
 
         # Run workflow and get stats
-        start_str, finish_str = self._run_cmdline_workflow(num_gb, num_threads)
+        node_str = self._run_cmdline_workflow(num_gb, num_threads)
         # Get runtime stats as dictionary
-        node_stats = json.loads(finish_str)
+        node_stats = json.loads(node_str)
 
         # Read out runtime stats
         runtime_gb = float(node_stats['runtime_memory_gb'])
@@ -401,8 +390,8 @@ class TestRuntimeProfiler():
         assert abs(expected_runtime_threads - runtime_threads) <= 1, threads_err
 
     # Test resources were used as expected
-    @pytest.mark.skipif(True, reason="https://github.com/nipy/nipype/issues/1663")
-    @pytest.mark.skipif(run_profile == False, reason=skip_profile_msg)
+    # @pytest.mark.skipif(True, reason="https://github.com/nipy/nipype/issues/1663")
+    @pytest.mark.skipif(run_profile is False, reason='resources monitor is disabled')
     def test_function_profiling(self):
         '''
         Test runtime profiler correctly records workflow RAM/CPUs consumption
@@ -418,9 +407,9 @@ class TestRuntimeProfiler():
         num_threads = self.num_threads
 
         # Run workflow and get stats
-        start_str, finish_str = self._run_function_workflow(num_gb, num_threads)
+        node_str = self._run_function_workflow(num_gb, num_threads)
         # Get runtime stats as dictionary
-        node_stats = json.loads(finish_str)
+        node_stats = json.loads(node_str)
 
         # Read out runtime stats
         runtime_gb = float(node_stats['runtime_memory_gb'])
@@ -441,5 +430,3 @@ class TestRuntimeProfiler():
         # Assert runtime stats are what was input
         assert runtime_gb_err <= allowed_gb_err, mem_err
         assert abs(expected_runtime_threads - runtime_threads) <= 1, threads_err
-
-
