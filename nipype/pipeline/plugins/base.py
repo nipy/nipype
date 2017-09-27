@@ -361,7 +361,7 @@ class DistributedPluginBase(PluginBase):
                 break
             # Check to see if a job is available
             jobids = np.flatnonzero(
-                ~self.proc_done & (np.sum(self.depidx, axis=0) == 0))
+                ~self.proc_done & (self.depidx.sum(axis=0) == 0).__array__())
 
             if len(jobids) > 0:
                 # send all available jobs
@@ -478,7 +478,8 @@ class DistributedPluginBase(PluginBase):
         """Removes directories whose outputs have already been used up
         """
         if str2bool(self._config['execution']['remove_node_directories']):
-            for idx in np.nonzero(np.sum(self.refidx, axis=1) == 0)[0]:
+            for idx in np.nonzero(
+                                 (self.refidx.sum(axis=1) == 0).__array__())[0]:
                 if idx in self.mapnodesubids:
                     continue
                 if self.proc_done[idx] and (not self.proc_pending[idx]):

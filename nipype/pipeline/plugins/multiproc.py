@@ -200,7 +200,7 @@ class MultiProcPlugin(DistributedPluginBase):
 
         # Check all jobs without dependency not run
         jobids = np.flatnonzero(
-            ~self.proc_done & (np.sum(self.depidx, axis=0) == 0))
+            ~self.proc_done & (self.depidx.sum(axis=0) == 0).__array__())
 
         # Sort jobs ready to run first by memory and then by number of threads
         # The most resource consuming jobs run first
