@@ -16,6 +16,11 @@ echo "utils_level = DEBUG" >> ${HOME}/.nipype/nipype.cfg
 echo "log_to_file = true" >> ${HOME}/.nipype/nipype.cfg
 echo "log_directory = ${WORKDIR}/logs/example_${example_id}" >> ${HOME}/.nipype/nipype.cfg
 
+if [[ "${NIPYPE_RESOURCE_MONITOR}" == "1" ]]; then
+    echo '[execution]' >> ${HOME}/.nipype/nipype.cfg
+    echo 'resource_monitor = true' >> ${HOME}/.nipype/nipype.cfg
+fi
+
 # Set up coverage
 export COVERAGE_FILE=${WORKDIR}/tests/.coverage.${example_id}
 if [ "$2" == "MultiProc" ]; then
