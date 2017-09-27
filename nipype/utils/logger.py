@@ -77,8 +77,6 @@ class Logging(object):
                                                                 'utils_level')))
         self._iflogger.setLevel(logging.getLevelName(config.get('logging',
                                                                 'interface_level')))
-        self._fmlogger.setLevel(logging.getLevelName(config.get('logging',
-                                                                'filemanip_level')))
         if str2bool(config.get('logging', 'log_to_file')):
             self.enable_file_logging()
 
