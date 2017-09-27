@@ -1057,7 +1057,7 @@ class BaseInterface(Interface):
         """
         from ..utils.profiler import resource_monitor, ResourceMonitor
 
-        enable_rm = resource_monitor and self.inputs.resource_monitor
+        enable_rm = resource_monitor and getattr(self.inputs, 'resource_monitor', True)
         force_raise = not getattr(self.inputs, 'ignore_exception', False)
         self.inputs.trait_set(**inputs)
         self._check_mandatory_inputs()
