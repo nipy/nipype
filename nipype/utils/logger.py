@@ -6,6 +6,7 @@ from builtins import object
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 
 import logging
+from warnings import warn
 import os
 import sys
 from .misc import str2bool
@@ -15,7 +16,6 @@ try:
         RFHandler
 except ImportError:
     # Next 2 lines are optional:  issue a warning to the user
-    from warnings import warn
     warn("ConcurrentLogHandler not installed. Using builtin log handler")
     from logging.handlers import RotatingFileHandler as RFHandler
 
@@ -34,10 +34,12 @@ class Logging(object):
         # logging.basicConfig(stream=sys.stdout)
         self._logger = logging.getLogger('workflow')
         self._utlogger = logging.getLogger('utils')
+        self._fmlogger = logging.getLogger('filemanip')
         self._iflogger = logging.getLogger('interface')
 
         self.loggers = {'workflow': self._logger,
                         'utils': self._utlogger,
+                        'filemanip': self._fmlogger,
                         'interface': self._iflogger}
         self._hdlr = None
         self.update_logging(self._config)
@@ -55,6 +57,7 @@ class Logging(object):
         self._logger.addHandler(hdlr)
         self._utlogger.addHandler(hdlr)
         self._iflogger.addHandler(hdlr)
+        self._fmlogger.addHandler(hdlr)
         self._hdlr = hdlr
 
     def disable_file_logging(self):
@@ -62,6 +65,7 @@ class Logging(object):
             self._logger.removeHandler(self._hdlr)
             self._utlogger.removeHandler(self._hdlr)
             self._iflogger.removeHandler(self._hdlr)
+            self._fmlogger.removeHandler(self._hdlr)
             self._hdlr = None
 
     def update_logging(self, config):
@@ -73,10 +77,15 @@ class Logging(object):
                                                                 'utils_level')))
         self._iflogger.setLevel(logging.getLevelName(config.get('logging',
                                                                 'interface_level')))
+        self._fmlogger.setLevel(logging.getLevelName(config.get('logging',
+                                                                'filemanip_level')))
         if str2bool(config.get('logging', 'log_to_file')):
             self.enable_file_logging()
 
     def getLogger(self, name):
+        if name == 'filemanip':
+            warn('The "filemanip" logger has been deprecated and replaced by '
+                 'the "utils" logger as of nipype 1.13.2')
         if name in self.loggers:
             return self.loggers[name]
         return None
