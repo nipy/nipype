@@ -1197,8 +1197,6 @@ class SelectFilesInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
               "matches the template. Either a boolean that applies to all "
               "output fields or a list of output field names to coerce to "
               " a list"))
-    directory_mode = traits.Bool(False, usedefault=True,
-        desc="Return only directories.")
 
 
 class SelectFiles(IOBase):
@@ -1298,6 +1296,10 @@ class SelectFiles(IOBase):
 
         for field, template in list(self._templates.items()):
 
+            find_dirs = False
+            if template[-1] == os.sep:
+                find_dirs = True
+
             # Build the full template path
             if isdefined(self.inputs.base_directory):
                 template = op.abspath(op.join(
@@ -1305,8 +1307,8 @@ class SelectFiles(IOBase):
             else:
                 template = op.abspath(template)
 
-            if self.inputs.directory_mode:
-                # return only directories
+            # re-add separator if searching exclusively for directories
+            if find_dirs:
                 template += os.sep
 
             # Fill in the template and glob for files
