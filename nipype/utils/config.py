@@ -67,7 +67,6 @@ write_provenance = false
 parameterize_dirs = true
 poll_sleep_duration = 2
 xvfb_max_wait = 10
-resource_monitor = false
 
 [check]
 interval = 1209600
@@ -191,3 +190,6 @@ class NipypeConfig(object):
     def enable_provenance(self):
         self._config.set('execution', 'write_provenance', 'true')
         self._config.set('execution', 'hash_method', 'content')
+
+    def enable_resource_monitor(self):
+        self._config.set('execution', 'resource_monitor', 'true')

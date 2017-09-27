@@ -21,7 +21,7 @@ from builtins import open
 
 proflogger = logging.getLogger('utils')
 
-resource_monitor = str2bool(config.get('execution', 'resource_monitor'))
+resource_monitor = str2bool(config.get('execution', 'resource_monitor', 'false'))
 if resource_monitor and psutil is None:
     proflogger.warn('Switching "resource_monitor" off: the option was on, but the '
                     'necessary package "psutil" could not be imported.')
