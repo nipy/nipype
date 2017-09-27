@@ -1296,6 +1296,51 @@ def write_workflow_prov(graph, filename=None, format='all'):
     return ps.g
 
 
+def write_workflow_resources(graph, filename=None):
+    import simplejson as json
+    if not filename:
+        filename = os.path.join(os.getcwd(), 'resource_monitor.json')
+
+    big_dict = {
+        'time': [],
+        'name': [],
+        'interface': [],
+        'mem_gb': [],
+        'cpus': [],
+        'mapnode': [],
+        'params': [],
+    }
+
+    for idx, node in enumerate(graph.nodes()):
+        nodename = node.fullname
+        classname = node._interface.__class__.__name__
+
+        params = ''
+        if node.parameterization:
+            params = '_'.join(['{}'.format(p)
+                              for p in node.parameterization])
+
+        rt_list = node.result.runtime
+        if not isinstance(rt_list, list):
+            rt_list = [rt_list]
+
+        for subidx, runtime in enumerate(rt_list):
+            nsamples = len(runtime.prof_dict['time'])
+
+            for key in ['time', 'mem_gb', 'cpus']:
+                big_dict[key] += runtime.prof_dict[key]
+
+            big_dict['interface'] += [classname] * nsamples
+            big_dict['name'] += [nodename] * nsamples
+            big_dict['mapnode'] += [subidx] * nsamples
+            big_dict['params'] += [params] * nsamples
+
+    with open(filename, 'w') as rsf:
+        json.dump(big_dict, rsf)
+
+    return filename
+
+
 def topological_sort(graph, depth_first=False):
     """Returns a depth first sorted order if depth_first is True
     """
