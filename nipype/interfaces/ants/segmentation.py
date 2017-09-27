@@ -238,9 +238,9 @@ class LaplacianThickness(ANTSCommand):
 
 
 class N4BiasFieldCorrectionInputSpec(ANTSCommandInputSpec):
-    dimension = traits.Enum(3, 2, argstr='-d %d',
+    dimension = traits.Enum(3, 2, 4, argstr='-d %d',
                             usedefault=True,
-                            desc='image dimension (2 or 3)')
+                            desc='image dimension (2, 3 or 4)')
     input_image = File(argstr='--input-image %s', mandatory=True,
                        desc=('image to apply transformation to (generally a '
                              'coregistered functional)'))

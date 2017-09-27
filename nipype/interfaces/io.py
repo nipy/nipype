@@ -40,6 +40,7 @@ from ..utils.misc import human_order_sorted, str2bool
 from .base import (
     TraitedSpec, traits, Str, File, Directory, BaseInterface, InputMultiPath,
     isdefined, OutputMultiPath, DynamicTraitedSpec, Undefined, BaseInterfaceInputSpec)
+from .bids_utils import BIDSDataGrabber
 
 try:
     import pyxnat

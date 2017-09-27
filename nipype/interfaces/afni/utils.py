@@ -602,12 +602,12 @@ class CatMatvecInputSpec(AFNICommandInputSpec):
                "This feature could be used, with clever scripting, to input"
                "a matrix directly on the command line to program 3dWarp.",
         argstr="-MATRIX",
-        xor=['oneline','fourXfour'])
+        xor=['oneline', 'fourxfour'])
     oneline = traits.Bool(
         descr="indicates that the resulting matrix"
               "will simply be written as 12 numbers on one line.",
         argstr="-ONELINE",
-        xor=['matrix','fourXfour'])
+        xor=['matrix', 'fourxfour'])
     fourxfour = traits.Bool(
         descr="Output matrix in augmented form (last row is 0 0 0 1)"
               "This option does not work with -MATRIX or -ONELINE",
@@ -1595,6 +1595,11 @@ class RefitInputSpec(CommandLineInputSpec):
     zorigin = Str(
         desc='z distance for edge voxel offset',
         argstr='-zorigin %s')
+    duporigin_file = File(
+        argstr='-duporigin %s',
+        exists=True,
+        desc='Copies the xorigin, yorigin, and zorigin values from the header '
+             'of the given dataset')
     xdel = traits.Float(
         desc='new x voxel dimension in mm',
         argstr='-xdel %f')
@@ -1609,6 +1614,46 @@ class RefitInputSpec(CommandLineInputSpec):
         argstr='-space %s',
         desc='Associates the dataset with a specific template type, e.g. '
              'TLRC, MNI, ORIG')
+    atrcopy = traits.Tuple(
+        traits.File(exists=True), traits.Str(),
+        argstr='-atrcopy %s %s',
+        desc='Copy AFNI header attribute from the given file into the header '
+             'of the dataset(s) being modified. For more information on AFNI '
+             'header attributes, see documentation file README.attributes. '
+             'More than one \'-atrcopy\' option can be used. For AFNI '
+             'advanced users only. Do NOT use -atrcopy or -atrstring with '
+             'other modification options. See also -copyaux.')
+    atrstring = traits.Tuple(
+        traits.Str(), traits.Str(),
+        argstr='-atrstring %s %s',
+        desc='Copy the last given string into the dataset(s) being modified, '
+             'giving it the attribute name given by the last string.'
+             'To be safe, the last string should be in quotes.')
+    atrfloat = traits.Tuple(
+        traits.Str(), traits.Str(),
+        argstr='-atrfloat %s %s',
+        desc='Create or modify floating point attributes. '
+             'The input values may be specified as a single string in quotes '
+             'or as a 1D filename or string, example '
+             '\'1 0.2 0 0 -0.2 1 0 0 0 0 1 0\' or '
+             'flipZ.1D or \'1D:1,0.2,2@0,-0.2,1,2@0,2@0,1,0\'')
+    atrint = traits.Tuple(
+        traits.Str(), traits.Str(),
+        argstr='-atrint %s %s',
+        desc='Create or modify integer attributes. '
+             'The input values may be specified as a single string in quotes '
+             'or as a 1D filename or string, example '
+             '\'1 0 0 0 0 1 0 0 0 0 1 0\' or '
+             'flipZ.1D or \'1D:1,0,2@0,-0,1,2@0,2@0,1,0\'')
+    saveatr = traits.Bool(
+        argstr='-saveatr',
+        desc='(default) Copy the attributes that are known to AFNI into '
+             'the dset->dblk structure thereby forcing changes to known '
+             'attributes to be present in the output. This option only makes '
+             'sense with -atrcopy.')
+    nosaveatr = traits.Bool(
+        argstr='-nosaveatr',
+        desc='Opposite of -saveatr')
 
 
 class Refit(AFNICommandBase):
@@ -1628,6 +1673,12 @@ class Refit(AFNICommandBase):
     '3drefit -deoblique structural.nii'
     >>> res = refit.run()  # doctest: +SKIP
 
+    >>> refit_2 = afni.Refit()
+    >>> refit_2.inputs.in_file = 'structural.nii'
+    >>> refit_2.inputs.atrfloat = ("IJK_TO_DICOM_REAL", "'1 0.2 0 0 -0.2 1 0 0 0 0 1 0'")
+    >>> refit_2.cmdline  # doctest: +ALLOW_UNICODE
+    "3drefit -atrfloat IJK_TO_DICOM_REAL '1 0.2 0 0 -0.2 1 0 0 0 0 1 0' structural.nii"
+    >>> res = refit_2.run()  # doctest: +SKIP
     """
     _cmd = '3drefit'
     input_spec = RefitInputSpec
@@ -1910,6 +1961,103 @@ class To3D(AFNICommand):
     _cmd = 'to3d'
     input_spec = To3DInputSpec
     output_spec = AFNICommandOutputSpec
+
+
+class UndumpInputSpec(AFNICommandInputSpec):
+    in_file = File(
+        desc='input file to 3dUndump, whose geometry will determine'
+             'the geometry of the output',
+        argstr='-master %s',
+        position=-1,
+        mandatory=True,
+        exists=True,
+        copyfile=False)
+    out_file = File(
+        desc='output image file name',
+        argstr='-prefix %s',
+        name_source='in_file')
+    mask_file = File(
+        desc='mask image file name. Only voxels that are nonzero in the mask '
+             'can be set.',
+        argstr='-mask %s')
+    datatype = traits.Enum(
+        'short', 'float', 'byte',
+        desc='set output file datatype',
+        argstr='-datum %s')
+    default_value = traits.Float(
+        desc='default value stored in each input voxel that does not have '
+             'a value supplied in the input file',
+        argstr='-dval %f')
+    fill_value = traits.Float(
+        desc='value, used for each voxel in the output dataset that is NOT '
+             'listed in the input file',
+        argstr='-fval %f')
+    coordinates_specification = traits.Enum(
+        'ijk', 'xyz',
+        desc='Coordinates in the input file as index triples (i, j, k) '
+             'or spatial coordinates (x, y, z) in mm',
+        argstr='-%s')
+    srad = traits.Float(
+        desc='radius in mm of the sphere that will be filled about each input '
+             '(x,y,z) or (i,j,k) voxel. If the radius is not given, or is 0, '
+             'then each input data line sets the value in only one voxel.',
+        argstr='-srad -%f')
+    srad = traits.Tuple(
+        traits.Enum('R', 'L'), traits.Enum('A', 'P'), traits.Enum('I', 'S'),
+        desc='radius in mm of the sphere that will be filled about each input '
+             '(x,y,z) or (i,j,k) voxel. If the radius is not given, or is 0, '
+             'then each input data line sets the value in only one voxel.',
+        argstr='-srad -%f')
+    head_only = traits.Bool(
+        desc='create only the .HEAD file which gets exploited by '
+             'the AFNI matlab library function New_HEAD.m',
+        argstr='-head_only')
+
+
+class UndumpOutputSpec(TraitedSpec):
+    out_file = File(desc='assembled file', exists=True)
+
+
+class Undump(AFNICommand):
+    """3dUndump - Assembles a 3D dataset from an ASCII list of coordinates and
+    (optionally) values.
+
+     The input file(s) are ASCII files, with one voxel specification per
+     line.  A voxel specification is 3 numbers (-ijk or -xyz coordinates),
+     with an optional 4th number giving the voxel value.  For example:
+
+     1 2 3
+     3 2 1 5
+     5.3 6.2 3.7
+     // this line illustrates a comment
+
+     The first line puts a voxel (with value given by '-dval') at point
+     (1,2,3).  The second line puts a voxel (with value 5) at point (3,2,1).
+     The third line puts a voxel (with value given by '-dval') at point
+     (5.3,6.2,3.7).  If -ijk is in effect, and fractional coordinates
+     are given, they will be rounded to the nearest integers; for example,
+     the third line would be equivalent to (i,j,k) = (5,6,4).
+
+
+    For complete details, see the `3dUndump Documentation.
+    <https://afni.nimh.nih.gov/pub/dist/doc/program_help/3dUndump.html>`_
+
+    Examples
+    ========
+
+    >>> from nipype.interfaces import afni
+    >>> unndump = afni.Undump()
+    >>> unndump.inputs.in_file = 'structural.nii'
+    >>> unndump.inputs.out_file = 'structural_undumped.nii'
+    >>> unndump.cmdline  # doctest: +ALLOW_UNICODE
+    '3dUndump -prefix structural_undumped.nii -master structural.nii'
+    >>> res = unndump.run()  # doctest: +SKIP
+
+    """
+
+    _cmd = '3dUndump'
+    input_spec = UndumpInputSpec
+    output_spec = UndumpOutputSpec
 
 
 class UnifizeInputSpec(AFNICommandInputSpec):

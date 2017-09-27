@@ -11,6 +11,7 @@ env:
 - INSTALL_DEB_DEPENDECIES=true NIPYPE_EXTRAS="doc,tests,fmri,profiler"
 - INSTALL_DEB_DEPENDECIES=false NIPYPE_EXTRAS="doc,tests,fmri,profiler"
 - INSTALL_DEB_DEPENDECIES=true NIPYPE_EXTRAS="doc,tests,fmri,profiler,duecredit"
+- INSTALL_DEB_DEPENDECIES=true NIPYPE_EXTRAS="doc,tests,fmri,profiler" PIP_FLAGS="--pre"
 before_install:
 - function apt_inst {
   if $INSTALL_DEB_DEPENDECIES; then sudo rm -rf /dev/shm; fi &&
@@ -36,12 +37,17 @@ before_install:
   conda install python=${TRAVIS_PYTHON_VERSION} &&
   conda config --add channels conda-forge &&
   conda install -y nipype icu &&
-  rm -r ${CONDA_HOME}/lib/python${TRAVIS_PYTHON_VERSION}/site-packages/nipype*; }
+  rm -r ${CONDA_HOME}/lib/python${TRAVIS_PYTHON_VERSION}/site-packages/nipype*;
+  pushd $HOME;
+  git clone https://github.com/INCF/pybids.git;
+  cd pybids;
+  pip install -e .;
+  popd; }
 #  Add install of vtk and mayavi to test mesh (disabled): conda install -y vtk mayavi
 - travis_retry apt_inst
 - travis_retry conda_inst
 install:
-- travis_retry pip install -e .[$NIPYPE_EXTRAS]
+- travis_retry pip install $PIP_FLAGS -e .[$NIPYPE_EXTRAS]
 script:
 - py.test -v --doctest-modules nipype
 deploy:
