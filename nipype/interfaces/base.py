@@ -732,9 +732,6 @@ class BaseInterfaceInputSpec(TraitedSpec):
     ignore_exception = traits.Bool(False, usedefault=True, nohash=True,
                                    desc='Print an error message instead of throwing an exception '
                                         'in case the interface fails to run')
-    resource_monitor = traits.Bool(True, usedefault=True, nohash=True,
-                                   desc='Disable the resource monitor for this interface '
-                                        '(overloads the default nipype config).')
 
 
 class BaseInterface(Interface):
@@ -760,8 +757,9 @@ class BaseInterface(Interface):
     _additional_metadata = []
     _redirect_x = False
     references_ = []
+    resource_monitor = True
 
-    def __init__(self, from_file=None, **inputs):
+    def __init__(self, from_file=None, resource_monitor=None, **inputs):
         if not self.input_spec:
             raise Exception('No input_spec in class: %s' %
                             self.__class__.__name__)
@@ -769,6 +767,9 @@ class BaseInterface(Interface):
         self.inputs = self.input_spec(**inputs)
         self.estimated_memory_gb = 0.25
         self.num_threads = 1
+
+        if resource_monitor is not None:
+            self.resource_monitor = resource_monitor
 
         if from_file is not None:
             self.load_inputs_from_json(from_file, overwrite=True)
@@ -1057,7 +1058,7 @@ class BaseInterface(Interface):
         """
         from ..utils.profiler import resource_monitor, ResourceMonitor
 
-        enable_rm = resource_monitor and getattr(self.inputs, 'resource_monitor', True)
+        enable_rm = resource_monitor and self.resource_monitor
         force_raise = not getattr(self.inputs, 'ignore_exception', False)
         self.inputs.trait_set(**inputs)
         self._check_mandatory_inputs()
@@ -1081,7 +1082,7 @@ class BaseInterface(Interface):
 
         mon_sp = None
         if enable_rm:
-            mon_freq = config.get('execution', 'resource_monitor_frequency', 1)
+            mon_freq = float(config.get('execution', 'resource_monitor_frequency', 1))
             proc_pid = os.getpid()
             mon_fname = os.path.abspath('.prof-%d_freq-%0.3f' % (proc_pid, mon_freq))
             iflogger.debug('Creating a ResourceMonitor on a %s interface: %s',
@@ -1159,6 +1160,7 @@ class BaseInterface(Interface):
     def aggregate_outputs(self, runtime=None, needed_outputs=None):
         """ Collate expected outputs and check for existence
         """
+
         predicted_outputs = self._list_outputs()
         outputs = self._outputs()
         if predicted_outputs:
@@ -1176,15 +1178,13 @@ class BaseInterface(Interface):
                                                       self.__class__.__name__))
                 try:
                     setattr(outputs, key, val)
-                    getattr(outputs, key)
                 except TraitError as error:
-                    if hasattr(error, 'info') and \
-                            error.info.startswith("an existing"):
+                    if getattr(error, 'info', 'default').startswith('an existing'):
                         msg = ("File/Directory '%s' not found for %s output "
                                "'%s'." % (val, self.__class__.__name__, key))
                         raise FileNotFoundError(msg)
-                    else:
-                        raise error
+                    raise error
+
         return outputs
 
     @property
@@ -1368,7 +1368,6 @@ def run_command(runtime, output=None, timeout=0.01, redirect_x=False):
         while proc.returncode is None:
             proc.poll()
             _process()
-            time.sleep(0)
 
         _process(drain=1)
 
@@ -1479,7 +1478,6 @@ class CommandLine(BaseInterface):
     {'args': '-al',
      'environ': {'DISPLAY': ':1'},
      'ignore_exception': False,
-     'resource_monitor': True,
      'terminal_output': 'stream'}
 
     >>> cli.inputs.get_hashval()[0][0] # doctest: +ALLOW_UNICODE

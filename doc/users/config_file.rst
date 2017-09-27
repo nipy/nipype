@@ -24,7 +24,7 @@ Logging
 *interface_level*
     How detailed the logs regarding interface execution should be (possible
     values: ``INFO`` and ``DEBUG``; default value: ``INFO``)
-*filemanip_level* (deprecated as of 0.13.2)
+*filemanip_level* (deprecated as of 1.0)
     How detailed the logs regarding file operations (for example overwriting
     warning) should be (possible values: ``INFO`` and ``DEBUG``)
 *log_to_file*
@@ -157,6 +157,7 @@ Execution
 *resource_monitor_frequency*
     Sampling period (in seconds) between measurements of resources (memory, cpus)
     being used by an interface. Requires ``resource_monitor`` to be ``true``.
+    (default value: ``1``)
 
 Example
 ~~~~~~~
