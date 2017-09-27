@@ -207,9 +207,9 @@ class DistributedPluginBase(PluginBase):
         """Initialize runtime attributes to none
 
         procs: list (N) of underlying interface elements to be processed
-        proc_done: a boolean vector (N) signifying whether a process has been
+        proc_done: a boolean numpy array (N) signifying whether a process has been
             executed
-        proc_pending: a boolean vector (N) signifying whether a
+        proc_pending: a boolean numpy array (N) signifying whether a
             process is currently running. Note: A process is finished only when
             both proc_done==True and
         proc_pending==False
@@ -360,14 +360,14 @@ class DistributedPluginBase(PluginBase):
             if (num_jobs >= self.max_jobs) or (slots == 0):
                 break
             # Check to see if a job is available
-            jobids = np.flatnonzero((self.proc_done == False) &
-                                    (self.depidx.sum(axis=0) == 0).__array__())
+            jobids = np.flatnonzero(
+                ~self.proc_done & ~np.sum(self.depidx, axis=0).astype(bool))
+
             if len(jobids) > 0:
                 # send all available jobs
-                if slots:
-                    logger.info('Pending[%d] Submitting[%d] jobs Slots[%d]' % (num_jobs, len(jobids[:slots]), slots))
-                else:
-                    logger.info('Pending[%d] Submitting[%d] jobs Slots[inf]' % (num_jobs, len(jobids)))
+                logger.info('Pending[%d] Submitting[%d] jobs Slots[%d]',
+                            num_jobs, len(jobids[:slots]), slots or 'inf')
+
                 for jobid in jobids[:slots]:
                     if isinstance(self.procs[jobid], MapNode):
                         try:
@@ -478,8 +478,7 @@ class DistributedPluginBase(PluginBase):
         """Removes directories whose outputs have already been used up
         """
         if str2bool(self._config['execution']['remove_node_directories']):
-            for idx in np.nonzero(
-                                 (self.refidx.sum(axis=1) == 0).__array__())[0]:
+            for idx in np.nonzero(np.sum(self.refidx, axis=1) == 0)[0]:
                 if idx in self.mapnodesubids:
                     continue
                 if self.proc_done[idx] and (not self.proc_pending[idx]):
