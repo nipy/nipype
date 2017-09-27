@@ -1135,9 +1135,16 @@ class BaseInterface(Interface):
                 # Read .prof file in and set runtime values
                 vals = np.loadtxt(mon_fname, delimiter=',')
                 if vals.tolist():
-                    _, mem_peak_gb, nthreads = np.atleast_2d(vals).max(0).astype(float).tolist()
-                    runtime.mem_peak_gb = mem_peak_gb / 1024
+                    vals = np.atleast_2d(vals)
+                    _, mem_peak_mb, nthreads = vals.max(0).astype(float).tolist()
+                    runtime.mem_peak_gb = mem_peak_mb / 1024
                     runtime.nthreads_max = int(nthreads)
+
+                    runtime.prof_dict = {
+                        'time': vals[:, 0].tolist(),
+                        'mem_gb': (vals[:, 1] / 1024).tolist(),
+                        'cpus': vals[:, 2].astype(int).tolist(),
+                    }
 
         return results
 
