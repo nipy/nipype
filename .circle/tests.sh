@@ -30,8 +30,8 @@ case ${CIRCLE_NODE_INDEX} in
     exitcode=$?
     ;;
   2)
-    docker run --rm=false -it -e NIPYPE_NUMBER_OF_CPUS=4 -e NIPYPE_RESOURCE_MONITOR=1 -v $HOME/examples:/data/examples:ro -v $WORKDIR:/work -w /work nipype/nipype:py27 /usr/bin/run_examples.sh fmri_spm_nested MultiProc /data/examples/ level1 && \
-    docker run --rm=false -it -e NIPYPE_NUMBER_OF_CPUS=4 -e NIPYPE_RESOURCE_MONITOR=1 -v $HOME/examples:/data/examples:ro -v $WORKDIR:/work -w /work nipype/nipype:py36 /usr/bin/run_examples.sh fmri_spm_nested MultiProc /data/examples/ l2pipeline
+    docker run --rm=false -it -e NIPYPE_NUMBER_OF_CPUS=4 -v $HOME/examples:/data/examples:ro -v $WORKDIR:/work -w /work nipype/nipype:py36 /usr/bin/run_examples.sh fmri_spm_nested MultiProc /data/examples/ level1 && \
+    docker run --rm=false -it -e NIPYPE_NUMBER_OF_CPUS=4 -e NIPYPE_RESOURCE_MONITOR=1 -v $HOME/examples:/data/examples:ro -v $WORKDIR:/work -w /work nipype/nipype:py27 /usr/bin/run_examples.sh fmri_spm_nested MultiProc /data/examples/ l2pipeline
     exitcode=$?
     ;;
   3)
