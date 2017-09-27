@@ -1472,6 +1472,7 @@ class CommandLine(BaseInterface):
     {'args': '-al',
      'environ': {'DISPLAY': ':1'},
      'ignore_exception': False,
+     'resource_monitor': True,
      'terminal_output': 'stream'}
 
     >>> cli.inputs.get_hashval()[0][0] # doctest: +ALLOW_UNICODE
