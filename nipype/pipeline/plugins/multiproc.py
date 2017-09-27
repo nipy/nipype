@@ -10,7 +10,6 @@ from __future__ import print_function, division, unicode_literals, absolute_impo
 
 # Import packages
 from multiprocessing import Process, Pool, cpu_count, pool
-import threading
 from traceback import format_exception
 import sys
 
@@ -83,7 +82,8 @@ class NonDaemonPool(pool.Pool):
 
 
 class MultiProcPlugin(DistributedPluginBase):
-    """Execute workflow with multiprocessing, not sending more jobs at once
+    """
+    Execute workflow with multiprocessing, not sending more jobs at once
     than the system can support.
 
     The plugin_args input to run can be used to control the multiprocessing
@@ -102,6 +102,8 @@ class MultiProcPlugin(DistributedPluginBase):
     - non_daemon : boolean flag to execute as non-daemon processes
     - n_procs: maximum number of threads to be executed in parallel
     - memory_gb: maximum memory (in GB) that can be used at once.
+    - raise_insufficient: raise error if the requested resources for
+        a node over the maximum `n_procs` and/or `memory_gb`.
 
     """
 
@@ -112,7 +114,6 @@ class MultiProcPlugin(DistributedPluginBase):
         self._task_obj = {}
         self._taskid = 0
         self._timeout = 2.0
-        # self._event = threading.Event()
 
         # Read in options or set defaults.
         non_daemon = self.plugin_args.get('non_daemon', True)
@@ -126,18 +127,8 @@ class MultiProcPlugin(DistributedPluginBase):
                      'non' if non_daemon else '', self.processors, self.memory_gb)
         self.pool = (NonDaemonPool if non_daemon else Pool)(processes=self.processors)
 
-    # def _wait(self):
-    #     if len(self.pending_tasks) > 0:
-    #         if self._config['execution']['poll_sleep_duration']:
-    #             self._timeout = float(self._config['execution']['poll_sleep_duration'])
-    #         sig_received = self._event.wait(self._timeout)
-    #         if not sig_received:
-    #             logger.debug('MultiProcPlugin timeout before signal received. Deadlock averted??')
-    #         self._event.clear()
-
     def _async_callback(self, args):
         self._taskresult[args['taskid']] = args
-        # self._event.set()
 
     def _get_result(self, taskid):
         return self._taskresult.get(taskid)
@@ -178,7 +169,8 @@ class MultiProcPlugin(DistributedPluginBase):
 
         # Check to see if a job is available
         currently_running_jobids = np.flatnonzero(
-            self.proc_pending & (self.depidx.sum(axis=0) == 0).__array__())
+            np.array(self.proc_pending, dtype=bool) & ~self.depidx.sum(axis=0).astype(bool)
+        )
 
         # Check available system resources by summing all threads and memory used
         busy_memory_gb = 0
@@ -210,6 +202,8 @@ class MultiProcPlugin(DistributedPluginBase):
         # Check all jobs without dependency not run
         jobids = np.flatnonzero((self.proc_done == False) &
                                 (self.depidx.sum(axis=0) == 0).__array__())
+        # jobids = np.flatnonzero(~np.array(self.proc_done, dtype=bool) &
+        #                         (self.depidx.sum(axis=0) == 0))
 
         # Sort jobs ready to run first by memory and then by number of threads
         # The most resource consuming jobs run first
@@ -226,10 +220,9 @@ class MultiProcPlugin(DistributedPluginBase):
         # Submit first job on the list
         for jobid in jobids:
             if resource_monitor:
-                logger.debug('Next Job: %d, memory (GB): %d, threads: %d' \
-                             % (jobid,
-                                self.procs[jobid]._interface.estimated_memory_gb,
-                                self.procs[jobid]._interface.num_threads))
+                logger.debug('Next Job: %d, memory (GB): %d, threads: %d',
+                             jobid, self.procs[jobid]._interface.estimated_memory_gb,
+                             self.procs[jobid]._interface.num_threads)
 
             if self.procs[jobid]._interface.estimated_memory_gb <= free_memory_gb and \
                self.procs[jobid]._interface.num_threads <= free_processors:
