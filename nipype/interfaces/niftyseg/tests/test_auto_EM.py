@@ -58,6 +58,9 @@ def test_EM_inputs():
     ),
     relax_priors=dict(argstr='-rf %s %s',
     ),
+    resource_monitor=dict(nohash=True,
+    usedefault=True,
+    ),
     terminal_output=dict(nohash=True,
     ),
     )

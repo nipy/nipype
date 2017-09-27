@@ -28,6 +28,9 @@ def test_BRAINSLmkTransform_inputs():
     outputResampledVolume=dict(argstr='--outputResampledVolume %s',
     hash_files=False,
     ),
+    resource_monitor=dict(nohash=True,
+    usedefault=True,
+    ),
     terminal_output=dict(nohash=True,
     ),
     )

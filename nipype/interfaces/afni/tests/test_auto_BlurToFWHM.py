@@ -30,6 +30,9 @@ def test_BlurToFWHM_inputs():
     name_template='%s_afni',
     ),
     outputtype=dict(),
+    resource_monitor=dict(nohash=True,
+    usedefault=True,
+    ),
     terminal_output=dict(nohash=True,
     ),
     )

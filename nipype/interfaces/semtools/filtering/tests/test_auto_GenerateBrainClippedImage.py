@@ -21,6 +21,9 @@ def test_GenerateBrainClippedImage_inputs():
     outputFileName=dict(argstr='--outputFileName %s',
     hash_files=False,
     ),
+    resource_monitor=dict(nohash=True,
+    usedefault=True,
+    ),
     terminal_output=dict(nohash=True,
     ),
     )

@@ -13,6 +13,9 @@ def test_FuzzyOverlap_inputs():
     ),
     out_file=dict(usedefault=True,
     ),
+    resource_monitor=dict(nohash=True,
+    usedefault=True,
+    ),
     weighting=dict(usedefault=True,
     ),
     )

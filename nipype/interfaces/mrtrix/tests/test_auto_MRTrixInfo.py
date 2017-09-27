@@ -16,6 +16,9 @@ def test_MRTrixInfo_inputs():
     mandatory=True,
     position=-2,
     ),
+    resource_monitor=dict(nohash=True,
+    usedefault=True,
+    ),
     terminal_output=dict(nohash=True,
     ),
     )

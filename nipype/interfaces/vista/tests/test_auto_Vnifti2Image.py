@@ -26,6 +26,9 @@ def test_Vnifti2Image_inputs():
     name_template='%s.v',
     position=-1,
     ),
+    resource_monitor=dict(nohash=True,
+    usedefault=True,
+    ),
     terminal_output=dict(nohash=True,
     ),
     )

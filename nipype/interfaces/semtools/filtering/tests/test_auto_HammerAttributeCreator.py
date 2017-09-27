@@ -24,6 +24,9 @@ def test_HammerAttributeCreator_inputs():
     ),
     outputVolumeBase=dict(argstr='--outputVolumeBase %s',
     ),
+    resource_monitor=dict(nohash=True,
+    usedefault=True,
+    ),
     terminal_output=dict(nohash=True,
     ),
     )

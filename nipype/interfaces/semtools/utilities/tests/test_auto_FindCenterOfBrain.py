@@ -50,6 +50,9 @@ def test_FindCenterOfBrain_inputs():
     ),
     otsuPercentileThreshold=dict(argstr='--otsuPercentileThreshold %f',
     ),
+    resource_monitor=dict(nohash=True,
+    usedefault=True,
+    ),
     terminal_output=dict(nohash=True,
     ),
     )

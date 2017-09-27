@@ -16,6 +16,9 @@ def test_StdOutCommandLine_inputs():
     genfile=True,
     position=-1,
     ),
+    resource_monitor=dict(nohash=True,
+    usedefault=True,
+    ),
     terminal_output=dict(nohash=True,
     ),
     )

@@ -9,6 +9,9 @@ def test_NonSteadyStateDetector_inputs():
     ),
     in_file=dict(mandatory=True,
     ),
+    resource_monitor=dict(nohash=True,
+    usedefault=True,
+    ),
     )
     inputs = NonSteadyStateDetector.input_spec()
 

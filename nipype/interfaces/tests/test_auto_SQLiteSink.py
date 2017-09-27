@@ -9,6 +9,9 @@ def test_SQLiteSink_inputs():
     ignore_exception=dict(nohash=True,
     usedefault=True,
     ),
+    resource_monitor=dict(nohash=True,
+    usedefault=True,
+    ),
     table_name=dict(mandatory=True,
     ),
     )

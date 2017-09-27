@@ -25,6 +25,9 @@ def test_NetworkXMetrics_inputs():
     ),
     out_pickled_extra_measures=dict(usedefault=True,
     ),
+    resource_monitor=dict(nohash=True,
+    usedefault=True,
+    ),
     treat_as_weighted_graph=dict(usedefault=True,
     ),
     )

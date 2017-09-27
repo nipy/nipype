@@ -11,6 +11,9 @@ def test_Select_inputs():
     ),
     inlist=dict(mandatory=True,
     ),
+    resource_monitor=dict(nohash=True,
+    usedefault=True,
+    ),
     )
     inputs = Select.input_spec()
 

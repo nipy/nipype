@@ -19,6 +19,9 @@ def test_GenerateLabelMapFromProbabilityMap_inputs():
     outputLabelVolume=dict(argstr='--outputLabelVolume %s',
     hash_files=False,
     ),
+    resource_monitor=dict(nohash=True,
+    usedefault=True,
+    ),
     terminal_output=dict(nohash=True,
     ),
     )

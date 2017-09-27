@@ -31,6 +31,9 @@ def test_TensorMetrics_inputs():
     ),
     out_fa=dict(argstr='-fa %s',
     ),
+    resource_monitor=dict(nohash=True,
+    usedefault=True,
+    ),
     terminal_output=dict(nohash=True,
     ),
     )

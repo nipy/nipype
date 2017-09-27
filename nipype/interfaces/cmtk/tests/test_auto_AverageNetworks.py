@@ -14,6 +14,9 @@ def test_AverageNetworks_inputs():
     out_gexf_groupavg=dict(),
     out_gpickled_groupavg=dict(),
     resolution_network_file=dict(),
+    resource_monitor=dict(nohash=True,
+    usedefault=True,
+    ),
     )
     inputs = AverageNetworks.input_spec()
 

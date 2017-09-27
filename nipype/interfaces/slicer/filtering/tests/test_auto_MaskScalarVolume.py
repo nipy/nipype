@@ -26,6 +26,9 @@ def test_MaskScalarVolume_inputs():
     ),
     replace=dict(argstr='--replace %d',
     ),
+    resource_monitor=dict(nohash=True,
+    usedefault=True,
+    ),
     terminal_output=dict(nohash=True,
     ),
     )

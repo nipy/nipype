@@ -21,6 +21,9 @@ def test_BRAINSLandmarkInitializer_inputs():
     outputTransformFilename=dict(argstr='--outputTransformFilename %s',
     hash_files=False,
     ),
+    resource_monitor=dict(nohash=True,
+    usedefault=True,
+    ),
     terminal_output=dict(nohash=True,
     ),
     )

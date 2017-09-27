@@ -21,6 +21,9 @@ def test_CoherenceAnalyzer_inputs():
     ),
     output_csv_file=dict(),
     output_figure_file=dict(),
+    resource_monitor=dict(nohash=True,
+    usedefault=True,
+    ),
     )
     inputs = CoherenceAnalyzer.input_spec()
 

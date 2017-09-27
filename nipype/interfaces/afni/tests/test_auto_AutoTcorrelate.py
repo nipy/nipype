@@ -34,6 +34,9 @@ def test_AutoTcorrelate_inputs():
     outputtype=dict(),
     polort=dict(argstr='-polort %d',
     ),
+    resource_monitor=dict(nohash=True,
+    usedefault=True,
+    ),
     terminal_output=dict(nohash=True,
     ),
     )

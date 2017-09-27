@@ -34,6 +34,9 @@ def test_HARDIMat_inputs():
     ),
     reference_file=dict(argstr='-ref %s',
     ),
+    resource_monitor=dict(nohash=True,
+    usedefault=True,
+    ),
     terminal_output=dict(nohash=True,
     ),
     )

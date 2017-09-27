@@ -22,6 +22,9 @@ def test_AutoTLRC_inputs():
     no_ss=dict(argstr='-no_ss',
     ),
     outputtype=dict(),
+    resource_monitor=dict(nohash=True,
+    usedefault=True,
+    ),
     terminal_output=dict(nohash=True,
     ),
     )

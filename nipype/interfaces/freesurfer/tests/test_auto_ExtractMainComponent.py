@@ -21,6 +21,9 @@ def test_ExtractMainComponent_inputs():
     name_template='%s.maincmp',
     position=2,
     ),
+    resource_monitor=dict(nohash=True,
+    usedefault=True,
+    ),
     terminal_output=dict(nohash=True,
     ),
     )

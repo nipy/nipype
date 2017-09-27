@@ -25,6 +25,9 @@ def test_OtsuThresholdImageFilter_inputs():
     ),
     outsideValue=dict(argstr='--outsideValue %d',
     ),
+    resource_monitor=dict(nohash=True,
+    usedefault=True,
+    ),
     terminal_output=dict(nohash=True,
     ),
     )

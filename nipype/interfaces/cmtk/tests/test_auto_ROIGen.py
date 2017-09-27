@@ -17,6 +17,9 @@ def test_ROIGen_inputs():
     ),
     out_roi_file=dict(genfile=True,
     ),
+    resource_monitor=dict(nohash=True,
+    usedefault=True,
+    ),
     use_freesurfer_LUT=dict(xor=['LUT_file'],
     ),
     )

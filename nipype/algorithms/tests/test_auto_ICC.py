@@ -9,6 +9,9 @@ def test_ICC_inputs():
     ),
     mask=dict(mandatory=True,
     ),
+    resource_monitor=dict(nohash=True,
+    usedefault=True,
+    ),
     subjects_sessions=dict(mandatory=True,
     ),
     )

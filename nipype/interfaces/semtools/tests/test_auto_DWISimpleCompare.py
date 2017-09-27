@@ -18,6 +18,9 @@ def test_DWISimpleCompare_inputs():
     ),
     inputVolume2=dict(argstr='--inputVolume2 %s',
     ),
+    resource_monitor=dict(nohash=True,
+    usedefault=True,
+    ),
     terminal_output=dict(nohash=True,
     ),
     )

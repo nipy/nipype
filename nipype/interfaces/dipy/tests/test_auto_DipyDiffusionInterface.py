@@ -16,6 +16,9 @@ def test_DipyDiffusionInterface_inputs():
     in_file=dict(mandatory=True,
     ),
     out_prefix=dict(),
+    resource_monitor=dict(nohash=True,
+    usedefault=True,
+    ),
     )
     inputs = DipyDiffusionInterface.input_spec()
 

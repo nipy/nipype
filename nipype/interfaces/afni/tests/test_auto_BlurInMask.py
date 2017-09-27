@@ -39,6 +39,9 @@ def test_BlurInMask_inputs():
     outputtype=dict(),
     preserve=dict(argstr='-preserve',
     ),
+    resource_monitor=dict(nohash=True,
+    usedefault=True,
+    ),
     terminal_output=dict(nohash=True,
     ),
     )

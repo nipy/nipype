@@ -26,6 +26,9 @@ def test_MRMultiply_inputs():
     quiet=dict(argstr='-quiet',
     position=1,
     ),
+    resource_monitor=dict(nohash=True,
+    usedefault=True,
+    ),
     terminal_output=dict(nohash=True,
     ),
     )

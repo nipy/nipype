@@ -18,6 +18,9 @@ def test_MeshWarpMaths_inputs():
     ),
     out_warp=dict(usedefault=True,
     ),
+    resource_monitor=dict(nohash=True,
+    usedefault=True,
+    ),
     )
     inputs = MeshWarpMaths.input_spec()
 

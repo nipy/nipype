@@ -15,6 +15,9 @@ def test_Level1Design_inputs():
     model_serial_correlations=dict(mandatory=True,
     ),
     orthogonalization=dict(),
+    resource_monitor=dict(nohash=True,
+    usedefault=True,
+    ),
     session_info=dict(mandatory=True,
     ),
     )

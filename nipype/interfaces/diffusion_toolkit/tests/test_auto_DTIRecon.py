@@ -36,6 +36,9 @@ def test_DTIRecon_inputs():
     output_type=dict(argstr='-ot %s',
     usedefault=True,
     ),
+    resource_monitor=dict(nohash=True,
+    usedefault=True,
+    ),
     terminal_output=dict(nohash=True,
     ),
     )

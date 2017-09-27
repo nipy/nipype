@@ -16,6 +16,9 @@ def test_EditTransform_inputs():
     output_type=dict(argstr='ResultImagePixelType',
     ),
     reference_image=dict(),
+    resource_monitor=dict(nohash=True,
+    usedefault=True,
+    ),
     transform_file=dict(mandatory=True,
     ),
     )

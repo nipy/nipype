@@ -16,6 +16,9 @@ def test_PickAtlas_inputs():
     labels=dict(mandatory=True,
     ),
     output_file=dict(),
+    resource_monitor=dict(nohash=True,
+    usedefault=True,
+    ),
     )
     inputs = PickAtlas.input_spec()
 

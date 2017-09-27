@@ -11,6 +11,9 @@ def test_CalculateMedian_inputs():
     median_file=dict(),
     median_per_file=dict(usedefault=True,
     ),
+    resource_monitor=dict(nohash=True,
+    usedefault=True,
+    ),
     )
     inputs = CalculateMedian.input_spec()
 

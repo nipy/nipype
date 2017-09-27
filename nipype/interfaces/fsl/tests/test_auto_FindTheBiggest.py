@@ -22,6 +22,9 @@ def test_FindTheBiggest_inputs():
     position=2,
     ),
     output_type=dict(),
+    resource_monitor=dict(nohash=True,
+    usedefault=True,
+    ),
     terminal_output=dict(nohash=True,
     ),
     )

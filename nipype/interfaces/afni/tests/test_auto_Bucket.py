@@ -20,6 +20,9 @@ def test_Bucket_inputs():
     name_template='buck',
     ),
     outputtype=dict(),
+    resource_monitor=dict(nohash=True,
+    usedefault=True,
+    ),
     terminal_output=dict(nohash=True,
     ),
     )

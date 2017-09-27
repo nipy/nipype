@@ -23,6 +23,9 @@ def test_gtractClipAnisotropy_inputs():
     outputVolume=dict(argstr='--outputVolume %s',
     hash_files=False,
     ),
+    resource_monitor=dict(nohash=True,
+    usedefault=True,
+    ),
     terminal_output=dict(nohash=True,
     ),
     )

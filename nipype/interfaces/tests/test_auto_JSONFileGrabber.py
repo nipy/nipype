@@ -9,6 +9,9 @@ def test_JSONFileGrabber_inputs():
     usedefault=True,
     ),
     in_file=dict(),
+    resource_monitor=dict(nohash=True,
+    usedefault=True,
+    ),
     )
     inputs = JSONFileGrabber.input_spec()
 

@@ -44,6 +44,9 @@ def test_DualRegression_inputs():
     usedefault=True,
     ),
     output_type=dict(),
+    resource_monitor=dict(nohash=True,
+    usedefault=True,
+    ),
     terminal_output=dict(nohash=True,
     ),
     )

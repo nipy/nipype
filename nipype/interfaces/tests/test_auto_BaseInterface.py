@@ -7,6 +7,9 @@ def test_BaseInterface_inputs():
     input_map = dict(ignore_exception=dict(nohash=True,
     usedefault=True,
     ),
+    resource_monitor=dict(nohash=True,
+    usedefault=True,
+    ),
     )
     inputs = BaseInterface.input_spec()
 

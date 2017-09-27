@@ -12,6 +12,9 @@ def test_SelectFiles_inputs():
     ),
     raise_on_empty=dict(usedefault=True,
     ),
+    resource_monitor=dict(nohash=True,
+    usedefault=True,
+    ),
     sort_filelist=dict(usedefault=True,
     ),
     )

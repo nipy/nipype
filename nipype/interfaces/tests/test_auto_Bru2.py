@@ -25,6 +25,9 @@ def test_Bru2_inputs():
     output_filename=dict(argstr='-o %s',
     genfile=True,
     ),
+    resource_monitor=dict(nohash=True,
+    usedefault=True,
+    ),
     terminal_output=dict(nohash=True,
     ),
     )

@@ -23,6 +23,9 @@ def test_VtoMat_inputs():
     name_template='%s.mat',
     position=-1,
     ),
+    resource_monitor=dict(nohash=True,
+    usedefault=True,
+    ),
     terminal_output=dict(nohash=True,
     ),
     )

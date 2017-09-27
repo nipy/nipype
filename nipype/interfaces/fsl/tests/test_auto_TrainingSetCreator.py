@@ -11,6 +11,9 @@ def test_TrainingSetCreator_inputs():
     copyfile=False,
     position=-1,
     ),
+    resource_monitor=dict(nohash=True,
+    usedefault=True,
+    ),
     )
     inputs = TrainingSetCreator.input_spec()
 

@@ -9,6 +9,9 @@ def test_Function_inputs():
     ignore_exception=dict(nohash=True,
     usedefault=True,
     ),
+    resource_monitor=dict(nohash=True,
+    usedefault=True,
+    ),
     )
     inputs = Function.input_spec()
 

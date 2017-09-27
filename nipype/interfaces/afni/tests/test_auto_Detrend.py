@@ -22,6 +22,9 @@ def test_Detrend_inputs():
     name_template='%s_detrend',
     ),
     outputtype=dict(),
+    resource_monitor=dict(nohash=True,
+    usedefault=True,
+    ),
     terminal_output=dict(nohash=True,
     ),
     )

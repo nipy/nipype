@@ -29,6 +29,9 @@ def test_Quickshear_inputs():
     name_template='%s_defaced',
     position=3,
     ),
+    resource_monitor=dict(nohash=True,
+    usedefault=True,
+    ),
     terminal_output=dict(nohash=True,
     ),
     )

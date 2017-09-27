@@ -12,6 +12,9 @@ def test_JSONFileSink_inputs():
     in_dict=dict(usedefault=True,
     ),
     out_file=dict(),
+    resource_monitor=dict(nohash=True,
+    usedefault=True,
+    ),
     )
     inputs = JSONFileSink.input_spec()
 

@@ -13,6 +13,9 @@ def test_SlicerCommandLine_inputs():
     usedefault=True,
     ),
     module=dict(),
+    resource_monitor=dict(nohash=True,
+    usedefault=True,
+    ),
     terminal_output=dict(nohash=True,
     ),
     )

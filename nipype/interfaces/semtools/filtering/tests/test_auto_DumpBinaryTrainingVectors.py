@@ -16,6 +16,9 @@ def test_DumpBinaryTrainingVectors_inputs():
     ),
     inputVectorFilename=dict(argstr='--inputVectorFilename %s',
     ),
+    resource_monitor=dict(nohash=True,
+    usedefault=True,
+    ),
     terminal_output=dict(nohash=True,
     ),
     )

@@ -28,6 +28,9 @@ def test_VotingBinaryHoleFillingImageFilter_inputs():
     radius=dict(argstr='--radius %s',
     sep=',',
     ),
+    resource_monitor=dict(nohash=True,
+    usedefault=True,
+    ),
     terminal_output=dict(nohash=True,
     ),
     )

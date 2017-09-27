@@ -40,6 +40,9 @@ def test_ApplyTOPUP_inputs():
     name_template='%s_corrected',
     ),
     output_type=dict(),
+    resource_monitor=dict(nohash=True,
+    usedefault=True,
+    ),
     terminal_output=dict(nohash=True,
     ),
     )

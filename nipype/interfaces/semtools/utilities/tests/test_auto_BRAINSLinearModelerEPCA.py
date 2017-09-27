@@ -16,6 +16,9 @@ def test_BRAINSLinearModelerEPCA_inputs():
     ),
     numberOfThreads=dict(argstr='--numberOfThreads %d',
     ),
+    resource_monitor=dict(nohash=True,
+    usedefault=True,
+    ),
     terminal_output=dict(nohash=True,
     ),
     )

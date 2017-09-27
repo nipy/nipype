@@ -15,6 +15,9 @@ def test_TrackDensityMap_inputs():
     points_space=dict(usedefault=True,
     ),
     reference=dict(),
+    resource_monitor=dict(nohash=True,
+    usedefault=True,
+    ),
     voxel_dims=dict(),
     )
     inputs = TrackDensityMap.input_spec()

@@ -27,6 +27,9 @@ def test_Merge_inputs():
     name_template='%s_merge',
     ),
     outputtype=dict(),
+    resource_monitor=dict(nohash=True,
+    usedefault=True,
+    ),
     terminal_output=dict(nohash=True,
     ),
     )

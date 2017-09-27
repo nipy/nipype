@@ -39,6 +39,9 @@ def test_PicoPDFs_inputs():
     position=4,
     usedefault=True,
     ),
+    resource_monitor=dict(nohash=True,
+    usedefault=True,
+    ),
     terminal_output=dict(nohash=True,
     ),
     )

@@ -22,6 +22,9 @@ def test_Despike_inputs():
     name_template='%s_despike',
     ),
     outputtype=dict(),
+    resource_monitor=dict(nohash=True,
+    usedefault=True,
+    ),
     terminal_output=dict(nohash=True,
     ),
     )

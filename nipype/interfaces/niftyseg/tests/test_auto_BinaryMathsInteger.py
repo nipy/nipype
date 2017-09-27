@@ -32,6 +32,9 @@ def test_BinaryMathsInteger_inputs():
     output_datatype=dict(argstr='-odt %s',
     position=-3,
     ),
+    resource_monitor=dict(nohash=True,
+    usedefault=True,
+    ),
     terminal_output=dict(nohash=True,
     ),
     )

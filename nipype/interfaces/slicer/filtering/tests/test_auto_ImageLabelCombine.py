@@ -24,6 +24,9 @@ def test_ImageLabelCombine_inputs():
     ignore_exception=dict(nohash=True,
     usedefault=True,
     ),
+    resource_monitor=dict(nohash=True,
+    usedefault=True,
+    ),
     terminal_output=dict(nohash=True,
     ),
     )

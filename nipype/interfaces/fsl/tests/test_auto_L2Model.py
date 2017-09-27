@@ -9,6 +9,9 @@ def test_L2Model_inputs():
     ),
     num_copes=dict(mandatory=True,
     ),
+    resource_monitor=dict(nohash=True,
+    usedefault=True,
+    ),
     )
     inputs = L2Model.input_spec()
 

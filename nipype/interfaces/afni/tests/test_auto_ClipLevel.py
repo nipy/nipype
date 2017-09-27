@@ -27,6 +27,9 @@ def test_ClipLevel_inputs():
     mfrac=dict(argstr='-mfrac %s',
     position=2,
     ),
+    resource_monitor=dict(nohash=True,
+    usedefault=True,
+    ),
     terminal_output=dict(nohash=True,
     ),
     )

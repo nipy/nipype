@@ -30,6 +30,9 @@ def test_ComputeEigensystem_inputs():
     outputdatatype=dict(argstr='-outputdatatype %s',
     usedefault=True,
     ),
+    resource_monitor=dict(nohash=True,
+    usedefault=True,
+    ),
     terminal_output=dict(nohash=True,
     ),
     )

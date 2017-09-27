@@ -37,6 +37,9 @@ def test_SimulateMultiTensor_inputs():
     ),
     out_mask=dict(usedefault=True,
     ),
+    resource_monitor=dict(nohash=True,
+    usedefault=True,
+    ),
     snr=dict(usedefault=True,
     ),
     )

@@ -13,6 +13,9 @@ def test_Merge_inputs():
     ),
     ravel_inputs=dict(usedefault=True,
     ),
+    resource_monitor=dict(nohash=True,
+    usedefault=True,
+    ),
     )
     inputs = Merge.input_spec()
 

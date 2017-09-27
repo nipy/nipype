@@ -13,6 +13,9 @@ def test_StimulusCorrelation_inputs():
     ),
     realignment_parameters=dict(mandatory=True,
     ),
+    resource_monitor=dict(nohash=True,
+    usedefault=True,
+    ),
     spm_mat_file=dict(mandatory=True,
     ),
     )

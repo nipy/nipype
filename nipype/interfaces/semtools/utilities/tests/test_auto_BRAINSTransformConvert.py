@@ -26,6 +26,9 @@ def test_BRAINSTransformConvert_inputs():
     ),
     referenceVolume=dict(argstr='--referenceVolume %s',
     ),
+    resource_monitor=dict(nohash=True,
+    usedefault=True,
+    ),
     terminal_output=dict(nohash=True,
     ),
     )

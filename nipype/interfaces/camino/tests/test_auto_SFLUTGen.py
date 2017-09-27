@@ -39,6 +39,9 @@ def test_SFLUTGen_inputs():
     pdf=dict(argstr='-pdf %s',
     usedefault=True,
     ),
+    resource_monitor=dict(nohash=True,
+    usedefault=True,
+    ),
     terminal_output=dict(nohash=True,
     ),
     )

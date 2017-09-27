@@ -30,6 +30,9 @@ def test_BRAINSCreateLabelMapFromProbabilityMaps_inputs():
     priorLabelCodes=dict(argstr='--priorLabelCodes %s',
     sep=',',
     ),
+    resource_monitor=dict(nohash=True,
+    usedefault=True,
+    ),
     terminal_output=dict(nohash=True,
     ),
     )

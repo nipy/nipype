@@ -18,6 +18,9 @@ def test_RESTORE_inputs():
     in_mask=dict(),
     noise_mask=dict(),
     out_prefix=dict(),
+    resource_monitor=dict(nohash=True,
+    usedefault=True,
+    ),
     )
     inputs = RESTORE.input_spec()
 

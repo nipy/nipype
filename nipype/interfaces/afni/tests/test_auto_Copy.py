@@ -23,6 +23,9 @@ def test_Copy_inputs():
     position=-1,
     ),
     outputtype=dict(),
+    resource_monitor=dict(nohash=True,
+    usedefault=True,
+    ),
     terminal_output=dict(nohash=True,
     ),
     )

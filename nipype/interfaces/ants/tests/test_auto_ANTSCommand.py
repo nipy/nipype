@@ -15,6 +15,9 @@ def test_ANTSCommand_inputs():
     num_threads=dict(nohash=True,
     usedefault=True,
     ),
+    resource_monitor=dict(nohash=True,
+    usedefault=True,
+    ),
     terminal_output=dict(nohash=True,
     ),
     )

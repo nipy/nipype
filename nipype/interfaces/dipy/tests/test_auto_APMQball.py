@@ -17,6 +17,9 @@ def test_APMQball_inputs():
     ),
     mask_file=dict(),
     out_prefix=dict(),
+    resource_monitor=dict(nohash=True,
+    usedefault=True,
+    ),
     )
     inputs = APMQball.input_spec()
 

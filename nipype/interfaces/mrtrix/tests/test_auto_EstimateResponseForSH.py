@@ -36,6 +36,9 @@ def test_EstimateResponseForSH_inputs():
     ),
     quiet=dict(argstr='-quiet',
     ),
+    resource_monitor=dict(nohash=True,
+    usedefault=True,
+    ),
     terminal_output=dict(nohash=True,
     ),
     )

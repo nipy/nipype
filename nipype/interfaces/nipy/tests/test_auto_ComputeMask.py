@@ -13,6 +13,9 @@ def test_ComputeMask_inputs():
     mean_volume=dict(mandatory=True,
     ),
     reference_volume=dict(),
+    resource_monitor=dict(nohash=True,
+    usedefault=True,
+    ),
     )
     inputs = ComputeMask.input_spec()
 

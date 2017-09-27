@@ -24,6 +24,9 @@ def test_GCOR_inputs():
     ),
     no_demean=dict(argstr='-no_demean',
     ),
+    resource_monitor=dict(nohash=True,
+    usedefault=True,
+    ),
     terminal_output=dict(nohash=True,
     ),
     )

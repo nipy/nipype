@@ -20,6 +20,9 @@ def test_DataSink_inputs():
     regexp_substitutions=dict(),
     remove_dest_dir=dict(usedefault=True,
     ),
+    resource_monitor=dict(nohash=True,
+    usedefault=True,
+    ),
     strip_dir=dict(),
     substitutions=dict(),
     )

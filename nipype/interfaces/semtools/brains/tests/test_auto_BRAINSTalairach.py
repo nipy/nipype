@@ -40,6 +40,9 @@ def test_BRAINSTalairach_inputs():
     outputGrid=dict(argstr='--outputGrid %s',
     hash_files=False,
     ),
+    resource_monitor=dict(nohash=True,
+    usedefault=True,
+    ),
     terminal_output=dict(nohash=True,
     ),
     )

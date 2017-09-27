@@ -39,6 +39,9 @@ def test_PercentileImage_inputs():
     position=5,
     usedefault=False,
     ),
+    resource_monitor=dict(nohash=True,
+    usedefault=True,
+    ),
     terminal_output=dict(nohash=True,
     ),
     )

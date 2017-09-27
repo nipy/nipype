@@ -34,6 +34,9 @@ def test_Registration_inputs():
     parameters=dict(argstr='-p %s...',
     mandatory=True,
     ),
+    resource_monitor=dict(nohash=True,
+    usedefault=True,
+    ),
     terminal_output=dict(nohash=True,
     ),
     )

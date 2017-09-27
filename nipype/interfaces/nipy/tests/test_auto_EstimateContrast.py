@@ -22,6 +22,9 @@ def test_EstimateContrast_inputs():
     ),
     reg_names=dict(mandatory=True,
     ),
+    resource_monitor=dict(nohash=True,
+    usedefault=True,
+    ),
     s2=dict(mandatory=True,
     ),
     )

@@ -31,6 +31,9 @@ def test_BRAINSSnapShotWriter_inputs():
     outputFilename=dict(argstr='--outputFilename %s',
     hash_files=False,
     ),
+    resource_monitor=dict(nohash=True,
+    usedefault=True,
+    ),
     terminal_output=dict(nohash=True,
     ),
     )

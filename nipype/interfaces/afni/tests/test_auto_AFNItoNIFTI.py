@@ -33,6 +33,9 @@ def test_AFNItoNIFTI_inputs():
     outputtype=dict(),
     pure=dict(argstr='-pure',
     ),
+    resource_monitor=dict(nohash=True,
+    usedefault=True,
+    ),
     terminal_output=dict(nohash=True,
     ),
     )

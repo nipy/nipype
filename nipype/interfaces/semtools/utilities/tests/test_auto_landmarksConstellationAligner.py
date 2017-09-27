@@ -17,6 +17,9 @@ def test_landmarksConstellationAligner_inputs():
     outputLandmarksPaired=dict(argstr='--outputLandmarksPaired %s',
     hash_files=False,
     ),
+    resource_monitor=dict(nohash=True,
+    usedefault=True,
+    ),
     terminal_output=dict(nohash=True,
     ),
     )

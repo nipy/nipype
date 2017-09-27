@@ -37,6 +37,9 @@ def test_MultiImageMaths_inputs():
     position=-1,
     ),
     output_type=dict(),
+    resource_monitor=dict(nohash=True,
+    usedefault=True,
+    ),
     terminal_output=dict(nohash=True,
     ),
     )

@@ -27,6 +27,9 @@ def test_DistanceMap_inputs():
     mask_file=dict(argstr='--mask=%s',
     ),
     output_type=dict(),
+    resource_monitor=dict(nohash=True,
+    usedefault=True,
+    ),
     terminal_output=dict(nohash=True,
     ),
     )

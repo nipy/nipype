@@ -28,6 +28,9 @@ def test_RegMeasure_inputs():
     ref_file=dict(argstr='-ref %s',
     mandatory=True,
     ),
+    resource_monitor=dict(nohash=True,
+    usedefault=True,
+    ),
     terminal_output=dict(nohash=True,
     ),
     )

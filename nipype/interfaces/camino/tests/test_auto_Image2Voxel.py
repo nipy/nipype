@@ -24,6 +24,9 @@ def test_Image2Voxel_inputs():
     position=2,
     usedefault=True,
     ),
+    resource_monitor=dict(nohash=True,
+    usedefault=True,
+    ),
     terminal_output=dict(nohash=True,
     ),
     )

@@ -24,6 +24,9 @@ def test_DT2NIfTI_inputs():
     genfile=True,
     position=2,
     ),
+    resource_monitor=dict(nohash=True,
+    usedefault=True,
+    ),
     terminal_output=dict(nohash=True,
     ),
     )

@@ -11,6 +11,9 @@ def test_AddCSVRow_inputs():
     ),
     in_file=dict(mandatory=True,
     ),
+    resource_monitor=dict(nohash=True,
+    usedefault=True,
+    ),
     )
     inputs = AddCSVRow.input_spec()
 

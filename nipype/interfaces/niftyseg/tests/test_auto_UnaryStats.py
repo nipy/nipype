@@ -26,6 +26,9 @@ def test_UnaryStats_inputs():
     mandatory=True,
     position=4,
     ),
+    resource_monitor=dict(nohash=True,
+    usedefault=True,
+    ),
     terminal_output=dict(nohash=True,
     ),
     )

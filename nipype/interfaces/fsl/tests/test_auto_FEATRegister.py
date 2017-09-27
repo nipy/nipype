@@ -13,6 +13,9 @@ def test_FEATRegister_inputs():
     ),
     reg_image=dict(mandatory=True,
     ),
+    resource_monitor=dict(nohash=True,
+    usedefault=True,
+    ),
     )
     inputs = FEATRegister.input_spec()
 

@@ -28,6 +28,9 @@ def test_ReplaceFSwithFIRST_inputs():
     position=-1,
     usedefault=True,
     ),
+    resource_monitor=dict(nohash=True,
+    usedefault=True,
+    ),
     terminal_output=dict(nohash=True,
     ),
     )

@@ -20,6 +20,9 @@ def test_AvScale_inputs():
     ref_file=dict(argstr='%s',
     position=-1,
     ),
+    resource_monitor=dict(nohash=True,
+    usedefault=True,
+    ),
     terminal_output=dict(nohash=True,
     ),
     )

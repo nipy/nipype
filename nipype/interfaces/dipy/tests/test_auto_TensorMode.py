@@ -17,6 +17,9 @@ def test_TensorMode_inputs():
     ),
     mask_file=dict(),
     out_prefix=dict(),
+    resource_monitor=dict(nohash=True,
+    usedefault=True,
+    ),
     )
     inputs = TensorMode.input_spec()
 

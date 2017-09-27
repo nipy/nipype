@@ -21,6 +21,9 @@ def test_SignalExtraction_inputs():
     ),
     out_file=dict(usedefault=True,
     ),
+    resource_monitor=dict(nohash=True,
+    usedefault=True,
+    ),
     )
     inputs = SignalExtraction.input_spec()
 

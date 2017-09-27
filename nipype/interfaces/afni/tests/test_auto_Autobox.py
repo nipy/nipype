@@ -25,6 +25,9 @@ def test_Autobox_inputs():
     outputtype=dict(),
     padding=dict(argstr='-npad %d',
     ),
+    resource_monitor=dict(nohash=True,
+    usedefault=True,
+    ),
     terminal_output=dict(nohash=True,
     ),
     )

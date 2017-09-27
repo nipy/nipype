@@ -19,6 +19,9 @@ def test_ShuffleVectorsModule_inputs():
     ),
     resampleProportion=dict(argstr='--resampleProportion %f',
     ),
+    resource_monitor=dict(nohash=True,
+    usedefault=True,
+    ),
     terminal_output=dict(nohash=True,
     ),
     )

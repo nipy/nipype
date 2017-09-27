@@ -34,6 +34,9 @@ def test_TNorm_inputs():
     outputtype=dict(),
     polort=dict(argstr='-polort %s',
     ),
+    resource_monitor=dict(nohash=True,
+    usedefault=True,
+    ),
     terminal_output=dict(nohash=True,
     ),
     )

@@ -19,6 +19,9 @@ def test_GrayscaleGrindPeakImageFilter_inputs():
     hash_files=False,
     position=-1,
     ),
+    resource_monitor=dict(nohash=True,
+    usedefault=True,
+    ),
     terminal_output=dict(nohash=True,
     ),
     )

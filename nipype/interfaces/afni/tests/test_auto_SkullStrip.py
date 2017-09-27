@@ -22,6 +22,9 @@ def test_SkullStrip_inputs():
     name_template='%s_skullstrip',
     ),
     outputtype=dict(),
+    resource_monitor=dict(nohash=True,
+    usedefault=True,
+    ),
     terminal_output=dict(nohash=True,
     ),
     )

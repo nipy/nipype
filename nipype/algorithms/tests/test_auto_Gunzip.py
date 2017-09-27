@@ -9,6 +9,9 @@ def test_Gunzip_inputs():
     ),
     in_file=dict(mandatory=True,
     ),
+    resource_monitor=dict(nohash=True,
+    usedefault=True,
+    ),
     )
     inputs = Gunzip.input_spec()
 

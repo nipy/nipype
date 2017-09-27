@@ -12,6 +12,9 @@ def test_MultipleRegressDesign_inputs():
     ),
     regressors=dict(mandatory=True,
     ),
+    resource_monitor=dict(nohash=True,
+    usedefault=True,
+    ),
     )
     inputs = MultipleRegressDesign.input_spec()
 

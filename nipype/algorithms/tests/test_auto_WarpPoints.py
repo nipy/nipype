@@ -17,6 +17,9 @@ def test_WarpPoints_inputs():
     ),
     points=dict(mandatory=True,
     ),
+    resource_monitor=dict(nohash=True,
+    usedefault=True,
+    ),
     warp=dict(mandatory=True,
     ),
     )

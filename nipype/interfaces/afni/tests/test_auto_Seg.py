@@ -39,6 +39,9 @@ def test_Seg_inputs():
     ),
     prefix=dict(argstr='-prefix %s',
     ),
+    resource_monitor=dict(nohash=True,
+    usedefault=True,
+    ),
     terminal_output=dict(nohash=True,
     ),
     )

@@ -14,6 +14,9 @@ def test_Trim_inputs():
     in_file=dict(mandatory=True,
     ),
     out_file=dict(),
+    resource_monitor=dict(nohash=True,
+    usedefault=True,
+    ),
     suffix=dict(usedefault=True,
     ),
     )

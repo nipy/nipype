@@ -24,6 +24,9 @@ def test_gtractInvertBSplineTransform_inputs():
     outputTransform=dict(argstr='--outputTransform %s',
     hash_files=False,
     ),
+    resource_monitor=dict(nohash=True,
+    usedefault=True,
+    ),
     terminal_output=dict(nohash=True,
     ),
     )

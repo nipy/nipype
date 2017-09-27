@@ -11,6 +11,9 @@ def test_CreateNodes_inputs():
     ),
     resolution_network_file=dict(mandatory=True,
     ),
+    resource_monitor=dict(nohash=True,
+    usedefault=True,
+    ),
     roi_file=dict(mandatory=True,
     ),
     )

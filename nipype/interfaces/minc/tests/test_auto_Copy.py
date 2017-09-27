@@ -29,6 +29,9 @@ def test_Copy_inputs():
     real_values=dict(argstr='-real_values',
     xor=('pixel_values', 'real_values'),
     ),
+    resource_monitor=dict(nohash=True,
+    usedefault=True,
+    ),
     terminal_output=dict(nohash=True,
     ),
     )

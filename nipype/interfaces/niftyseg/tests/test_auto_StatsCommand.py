@@ -22,6 +22,9 @@ def test_StatsCommand_inputs():
     mask_file=dict(argstr='-m %s',
     position=-2,
     ),
+    resource_monitor=dict(nohash=True,
+    usedefault=True,
+    ),
     terminal_output=dict(nohash=True,
     ),
     )
