@@ -169,8 +169,7 @@ class MultiProcPlugin(DistributedPluginBase):
 
         # Check to see if a job is available
         currently_running_jobids = np.flatnonzero(
-            np.array(self.proc_pending, dtype=bool) & ~self.depidx.sum(axis=0).astype(bool)
-        )
+            ~self.proc_pending & ~np.sum(self.depidx, axis=0).astype(bool))
 
         # Check available system resources by summing all threads and memory used
         busy_memory_gb = 0
@@ -200,10 +199,8 @@ class MultiProcPlugin(DistributedPluginBase):
         free_processors = self.processors - busy_processors
 
         # Check all jobs without dependency not run
-        jobids = np.flatnonzero((self.proc_done == False) &
-                                (self.depidx.sum(axis=0) == 0).__array__())
-        # jobids = np.flatnonzero(~np.array(self.proc_done, dtype=bool) &
-        #                         (self.depidx.sum(axis=0) == 0))
+        jobids = np.flatnonzero(
+            ~self.proc_done & ~np.sum(self.depidx, axis=0).astype(bool))
 
         # Sort jobs ready to run first by memory and then by number of threads
         # The most resource consuming jobs run first
