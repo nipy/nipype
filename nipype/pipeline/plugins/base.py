@@ -361,7 +361,7 @@ class DistributedPluginBase(PluginBase):
                 break
             # Check to see if a job is available
             jobids = np.flatnonzero(
-                ~self.proc_done & ~np.sum(self.depidx, axis=0).astype(bool))
+                ~self.proc_done & (np.sum(self.depidx, axis=0) == 0))
 
             if len(jobids) > 0:
                 # send all available jobs
