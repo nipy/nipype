@@ -19,6 +19,7 @@ echo "log_directory = ${WORKDIR}/logs/example_${example_id}" >> ${HOME}/.nipype/
 if [[ "${NIPYPE_RESOURCE_MONITOR:-0}" == "1" ]]; then
     echo '[execution]' >> ${HOME}/.nipype/nipype.cfg
     echo 'resource_monitor = true' >> ${HOME}/.nipype/nipype.cfg
+    echo 'resource_monitor_frequency = 3' >> ${HOME}/.nipype/nipype.cfg
 fi
 
 # Set up coverage
