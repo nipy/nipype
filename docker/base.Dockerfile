@@ -109,7 +109,7 @@ ENV PATH=/usr/lib/fsl/5.0:/usr/lib/afni/bin:$ANTSPATH:$PATH
 
 # Installing and setting up c3d
 RUN mkdir -p /opt/c3d && \
-    curl -sSL "http://downloads.sourceforge.net/project/c3d/c3d/1.0.0/c3d-1.0.0-Linux-x86_64.tar.gz" \
+    curl -sSL "https://files.osf.io/v1/resources/nefdp/providers/osfstorage/59ca96a9b83f69025d6b8985?action=download&version=1&direct" \
     | tar -xzC /opt/c3d --strip-components 1
 
 ENV C3DPATH=/opt/c3d/
