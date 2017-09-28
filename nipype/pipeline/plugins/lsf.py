@@ -7,9 +7,10 @@ import os
 import re
 from time import sleep
 
-from .base import (SGELikeBatchManagerBase, logger, iflogger, logging)
+from .base import (SGELikeBatchManagerBase, logger, logging)
+from ... import logging
 from ...interfaces.base import CommandLine
-
+iflogger = logging.getLogger('interface')
 
 class LSFPlugin(SGELikeBatchManagerBase):
     """Execute using LSF Cluster Submission

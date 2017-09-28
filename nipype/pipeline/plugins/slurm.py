@@ -12,8 +12,11 @@ import os
 import re
 from time import sleep
 
+from ... import logging
 from ...interfaces.base import CommandLine
-from .base import (SGELikeBatchManagerBase, logger, iflogger, logging)
+from .base import (SGELikeBatchManagerBase, logger, logging)
+
+iflogger = logging.getLogger('interface')
 
 
 

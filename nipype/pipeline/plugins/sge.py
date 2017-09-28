@@ -15,9 +15,10 @@ import xml.dom.minidom
 
 import random
 
+from ... import logging
 from ...interfaces.base import CommandLine
-from .base import (SGELikeBatchManagerBase, logger, iflogger, logging)
-
+from .base import (SGELikeBatchManagerBase, logger, logging)
+iflogger = logging.getLogger('interface')
 DEBUGGING_PREFIX = str(int(random.uniform(100, 999)))
 
 

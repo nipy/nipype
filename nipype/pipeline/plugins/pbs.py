@@ -8,8 +8,10 @@ import os
 from time import sleep
 
 from ...interfaces.base import CommandLine
-from .base import (SGELikeBatchManagerBase, logger, iflogger, logging)
+from ... import logging
+from .base import (SGELikeBatchManagerBase, logger, logging)
 
+iflogger = logging.getLogger('interface')
 
 
 class PBSPlugin(SGELikeBatchManagerBase):

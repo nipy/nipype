@@ -10,9 +10,10 @@ from time import sleep
 import subprocess
 import simplejson as json
 
-from .base import (SGELikeBatchManagerBase, logger, iflogger, logging)
+from .base import (SGELikeBatchManagerBase, logger, logging)
+from ... import logging
 from ...interfaces.base import CommandLine
-
+iflogger = logging.getLogger('interface')
 
 class OARPlugin(SGELikeBatchManagerBase):
     """Execute using OAR
