@@ -9,188 +9,44 @@ from builtins import range, object, open
 from copy import deepcopy
 from glob import glob
 import os
-import getpass
 import shutil
-from socket import gethostname
 import sys
-import uuid
-from time import strftime, sleep, time
-from traceback import format_exception, format_exc
+from time import sleep, time
+from traceback import format_exc
 
 import numpy as np
 import scipy.sparse as ssp
 
-
 from ... import logging
-from ...utils.filemanip import savepkl, loadpkl, crash2txt
+from ...utils.filemanip import loadpkl
 from ...utils.misc import str2bool
 from ..engine.utils import (nx, dfs_preorder, topological_sort)
 from ..engine import MapNode
-
+from .tools import report_crash, report_nodes_not_run, create_pyscript
 
 logger = logging.getLogger('workflow')
-iflogger = logging.getLogger('interface')
-
-
-def report_crash(node, traceback=None, hostname=None):
-    """Writes crash related information to a file
-    """
-    name = node._id
-    if node.result and hasattr(node.result, 'runtime') and \
-            node.result.runtime:
-        if isinstance(node.result.runtime, list):
-            host = node.result.runtime[0].hostname
-        else:
-            host = node.result.runtime.hostname
-    else:
-        if hostname:
-            host = hostname
-        else:
-            host = gethostname()
-    message = ['Node %s failed to run on host %s.' % (name,
-                                                      host)]
-    logger.error(message)
-    if not traceback:
-        exc_type, exc_value, exc_traceback = sys.exc_info()
-        traceback = format_exception(exc_type,
-                                     exc_value,
-                                     exc_traceback)
-    timeofcrash = strftime('%Y%m%d-%H%M%S')
-    login_name = getpass.getuser()
-    crashfile = 'crash-%s-%s-%s-%s' % (timeofcrash,
-                                       login_name,
-                                       name,
-                                       str(uuid.uuid4()))
-    crashdir = node.config['execution']['crashdump_dir']
-    if crashdir is None:
-        crashdir = os.getcwd()
-    if not os.path.exists(crashdir):
-        os.makedirs(crashdir)
-    crashfile = os.path.join(crashdir, crashfile)
-    if node.config['execution']['crashfile_format'].lower() in ['text', 'txt']:
-        crashfile += '.txt'
-    else:
-        crashfile += '.pklz'
-    logger.info('Saving crash info to %s' % crashfile)
-    logger.info(''.join(traceback))
-    if node.config['execution']['crashfile_format'].lower() in ['text', 'txt']:
-        crash2txt(crashfile, dict(node=node, traceback=traceback))
-    else:
-        savepkl(crashfile, dict(node=node, traceback=traceback))
-    return crashfile
-
-
-def report_nodes_not_run(notrun):
-    """List nodes that crashed with crashfile info
-
-    Optionally displays dependent nodes that weren't executed as a result of
-    the crash.
-    """
-    if notrun:
-        logger.info("***********************************")
-        for info in notrun:
-            logger.error("could not run node: %s" %
-                         '.'.join((info['node']._hierarchy,
-                                   info['node']._id)))
-            logger.info("crashfile: %s" % info['crashfile'])
-            logger.debug("The following dependent nodes were not run")
-            for subnode in info['dependents']:
-                logger.debug(subnode._id)
-        logger.info("***********************************")
-        raise RuntimeError(('Workflow did not execute cleanly. '
-                            'Check log for details'))
-
-
-def create_pyscript(node, updatehash=False, store_exception=True):
-    # pickle node
-    timestamp = strftime('%Y%m%d_%H%M%S')
-    if node._hierarchy:
-        suffix = '%s_%s_%s' % (timestamp, node._hierarchy, node._id)
-        batch_dir = os.path.join(node.base_dir,
-                                 node._hierarchy.split('.')[0],
-                                 'batch')
-    else:
-        suffix = '%s_%s' % (timestamp, node._id)
-        batch_dir = os.path.join(node.base_dir, 'batch')
-    if not os.path.exists(batch_dir):
-        os.makedirs(batch_dir)
-    pkl_file = os.path.join(batch_dir, 'node_%s.pklz' % suffix)
-    savepkl(pkl_file, dict(node=node, updatehash=updatehash))
-    mpl_backend = node.config["execution"]["matplotlib_backend"]
-    # create python script to load and trap exception
-    cmdstr = """import os
-import sys
-
-can_import_matplotlib = True #Silently allow matplotlib to be ignored
-try:
-    import matplotlib
-    matplotlib.use('%s')
-except ImportError:
-    can_import_matplotlib = False
-    pass
-
-from nipype import config, logging
-from nipype.utils.filemanip import loadpkl, savepkl
-from socket import gethostname
-from traceback import format_exception
-info = None
-pklfile = '%s'
-batchdir = '%s'
-from nipype.utils.filemanip import loadpkl, savepkl
-try:
-    if not sys.version_info < (2, 7):
-        from collections import OrderedDict
-    config_dict=%s
-    config.update_config(config_dict)
-    ## Only configure matplotlib if it was successfully imported,
-    ## matplotlib is an optional component to nipype
-    if can_import_matplotlib:
-        config.update_matplotlib()
-    logging.update_logging(config)
-    traceback=None
-    cwd = os.getcwd()
-    info = loadpkl(pklfile)
-    result = info['node'].run(updatehash=info['updatehash'])
-except Exception as e:
-    etype, eval, etr = sys.exc_info()
-    traceback = format_exception(etype,eval,etr)
-    if info is None or not os.path.exists(info['node'].output_dir()):
-        result = None
-        resultsfile = os.path.join(batchdir, 'crashdump_%s.pklz')
-    else:
-        result = info['node'].result
-        resultsfile = os.path.join(info['node'].output_dir(),
-                               'result_%%s.pklz'%%info['node'].name)
-"""
-    if store_exception:
-        cmdstr += """
-    savepkl(resultsfile, dict(result=result, hostname=gethostname(),
-                              traceback=traceback))
-"""
-    else:
-        cmdstr += """
-    if info is None:
-        savepkl(resultsfile, dict(result=result, hostname=gethostname(),
-                              traceback=traceback))
-    else:
-        from nipype.pipeline.plugins.base import report_crash
-        report_crash(info['node'], traceback, gethostname())
-    raise Exception(e)
-"""
-    cmdstr = cmdstr % (mpl_backend, pkl_file, batch_dir, node.config, suffix)
-    pyscript = os.path.join(batch_dir, 'pyscript_%s.py' % suffix)
-    with open(pyscript, 'wt') as fp:
-        fp.writelines(cmdstr)
-    return pyscript
 
 
 class PluginBase(object):
-    """Base class for plugins"""
+    """
+    Base class for plugins
+
+    Execution plugin API
+    ====================
+
+    Current status::
+
+        class plugin_runner(PluginBase):
+
+            def run(graph, config, updatehash)
+
+    """
 
     def __init__(self, plugin_args=None):
         if plugin_args is None:
             plugin_args = {}
         self.plugin_args = plugin_args
+        self._config = None
 
         self._status_callback = plugin_args.get('status_callback')
         return
@@ -226,11 +82,17 @@ class DistributedPluginBase(PluginBase):
         self.proc_pending = None
         self.max_jobs = self.plugin_args.get('max_jobs', np.inf)
 
+    def _prerun_check(self, graph):
+        """Stub."""
+
     def run(self, graph, config, updatehash=False):
-        """Executes a pre-defined pipeline using distributed approaches
+        """
+        Executes a pre-defined pipeline using distributed approaches
         """
         logger.info("Running in parallel.")
         self._config = config
+
+        self._prerun_check(graph)
         # Generate appropriate structures for worker-manager model
         self._generate_dependency_list(graph)
         self.pending_tasks = []
@@ -297,7 +159,12 @@ class DistributedPluginBase(PluginBase):
         raise NotImplementedError
 
     def _report_crash(self, node, result=None):
-        raise NotImplementedError
+        tb = None
+        if result is not None:
+            node._result = getattr(result, 'result')
+            tb = getattr(result, 'traceback')
+            node._traceback = tb
+        return report_crash(node, traceback=tb)
 
     def _clear_task(self, taskid):
         raise NotImplementedError
@@ -583,15 +450,6 @@ class SGELikeBatchManagerBase(DistributedPluginBase):
         with open(batchscriptfile, 'wt') as fp:
             fp.writelines(batchscript)
         return self._submit_batchtask(batchscriptfile, node)
-
-    def _report_crash(self, node, result=None):
-        if result and result['traceback']:
-            node._result = result['result']
-            node._traceback = result['traceback']
-            return report_crash(node,
-                                traceback=result['traceback'])
-        else:
-            return report_crash(node)
 
     def _clear_task(self, taskid):
         del self._pending[taskid]

@@ -20,7 +20,7 @@ from ... import logging, config
 from ...utils.misc import str2bool
 from ...utils.profiler import get_system_total_memory_gb
 from ..engine import MapNode
-from .base import (DistributedPluginBase, report_crash)
+from .base import DistributedPluginBase
 
 # Init logger
 logger = logging.getLogger('workflow')
@@ -133,28 +133,17 @@ class MultiProcPlugin(DistributedPluginBase):
     def _get_result(self, taskid):
         return self._taskresult.get(taskid)
 
-    def _report_crash(self, node, result=None):
-        if result and result['traceback']:
-            node._result = result['result']
-            node._traceback = result['traceback']
-            return report_crash(node,
-                                traceback=result['traceback'])
-        else:
-            return report_crash(node)
-
     def _clear_task(self, taskid):
         del self._task_obj[taskid]
 
     def _submit_job(self, node, updatehash=False):
         self._taskid += 1
-        if hasattr(node.inputs, 'terminal_output'):
-            if node.inputs.terminal_output == 'stream':
-                node.inputs.terminal_output = 'allatonce'
+        if getattr(node.inputs, 'terminal_output') == 'stream':
+            node.inputs.terminal_output = 'allatonce'
 
-        self._task_obj[self._taskid] = \
-            self.pool.apply_async(run_node,
-                                  (node, updatehash, self._taskid),
-                                  callback=self._async_callback)
+        self._task_obj[self._taskid] = self.pool.apply_async(
+            run_node, (node, updatehash, self._taskid),
+            callback=self._async_callback)
         return self._taskid
 
     def _close(self):
@@ -162,8 +151,10 @@ class MultiProcPlugin(DistributedPluginBase):
         return True
 
     def _send_procs_to_workers(self, updatehash=False, graph=None):
-        """ Sends jobs to workers when system resources are available.
-            Check memory (gb) and cores usage before running jobs.
+        """
+        Sends jobs to workers when system resources are available.
+        Check memory (gb) and cores usage before running jobs.
+
         """
         executing_now = []
 
@@ -176,7 +167,6 @@ class MultiProcPlugin(DistributedPluginBase):
         busy_processors = 0
         for jobid in currently_running_jobids:
             est_mem_gb = self.procs[jobid]._interface.estimated_memory_gb
-            est_num_th = self.procs[jobid]._interface.num_threads
 
             if est_mem_gb > self.memory_gb:
                 logger.warning(
@@ -185,6 +175,7 @@ class MultiProcPlugin(DistributedPluginBase):
                 if self.raise_insufficient:
                     raise RuntimeError('Insufficient resources available for job')
 
+            est_num_th = self.procs[jobid]._interface.num_threads
             if est_num_th > self.processors:
                 logger.warning(
                     'Job %s - Requested %d threads, but only %d are available.',
@@ -232,7 +223,7 @@ class MultiProcPlugin(DistributedPluginBase):
                     except Exception:
                         etype, eval, etr = sys.exc_info()
                         traceback = format_exception(etype, eval, etr)
-                        report_crash(self.procs[jobid], traceback=traceback)
+                        self._report_crash(self.procs[jobid], traceback=traceback)
                         self._clean_queue(jobid, graph)
                         self.proc_pending[jobid] = False
                         continue
@@ -267,7 +258,7 @@ class MultiProcPlugin(DistributedPluginBase):
                     except Exception:
                         etype, eval, etr = sys.exc_info()
                         traceback = format_exception(etype, eval, etr)
-                        report_crash(self.procs[jobid], traceback=traceback)
+                        self._report_crash(self.procs[jobid], traceback=traceback)
                         self._clean_queue(jobid, graph)
                         self.proc_pending[jobid] = False
                         continue
@@ -282,7 +273,7 @@ class MultiProcPlugin(DistributedPluginBase):
                     except Exception:
                         etype, eval, etr = sys.exc_info()
                         traceback = format_exception(etype, eval, etr)
-                        report_crash(self.procs[jobid], traceback=traceback)
+                        self._report_crash(self.procs[jobid], traceback=traceback)
                     finally:
                         self._task_finished_cb(jobid)
                         self._remove_node_dirs()
