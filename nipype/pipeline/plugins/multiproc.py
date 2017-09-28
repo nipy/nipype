@@ -104,7 +104,11 @@ class MultiProcPlugin(DistributedPluginBase):
     - n_procs: maximum number of threads to be executed in parallel
     - memory_gb: maximum memory (in GB) that can be used at once.
     - raise_insufficient: raise error if the requested resources for
-        a node over the maximum `n_procs` and/or `memory_gb`.
+        a node over the maximum `n_procs` and/or `memory_gb`
+        (default is ``True``).
+    - scheduler: sort jobs topologically (``'tsort'``, default value)
+        or prioritize jobs by, first, memory consumption and, second,
+        number of threads (``'mem_thread'`` option).
 
     """
 
