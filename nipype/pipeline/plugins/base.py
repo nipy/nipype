@@ -126,16 +126,15 @@ class DistributedPluginBase(PluginBase):
                     notrun.append(self._clean_queue(jobid, graph,
                                                     result=result))
 
-            logger.debug('Appending %d new tasks.' % len(toappend))
             if toappend:
                 self.pending_tasks.extend(toappend)
             num_jobs = len(self.pending_tasks)
-            logger.debug('Number of pending tasks: %d' % num_jobs)
+            logger.debug('Tasks currently running (%d).', num_jobs)
             if num_jobs < self.max_jobs:
                 self._send_procs_to_workers(updatehash=updatehash,
                                             graph=graph)
             else:
-                logger.debug('Not submitting')
+                logger.debug('Not submitting (max jobs reached)')
             self._wait()
 
         self._remove_node_dirs()
