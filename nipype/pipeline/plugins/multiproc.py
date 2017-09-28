@@ -179,8 +179,8 @@ class MultiProcPlugin(DistributedPluginBase):
         free_memory_gb = self.memory_gb
         free_processors = self.processors
         for _, jobid in running_tasks:
-            free_memory_gb -= min(self.procs[jobid].get_mem_gb(), free_memory_gb)
-            free_processors -= min(self.procs[jobid].get_n_procs(), free_processors)
+            free_memory_gb -= min(self.procs[jobid].mem_gb, free_memory_gb)
+            free_processors -= min(self.procs[jobid].n_procs, free_processors)
 
         return free_memory_gb, free_processors
 
