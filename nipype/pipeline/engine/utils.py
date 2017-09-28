@@ -1335,7 +1335,7 @@ def write_workflow_resources(graph, filename=None):
             big_dict['mapnode'] += [subidx] * nsamples
             big_dict['params'] += [params] * nsamples
 
-    with open(filename, 'w') as rsf:
+    with open(filename, 'wt') as rsf:
         json.dump(big_dict, rsf)
 
     return filename
