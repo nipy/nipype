@@ -55,6 +55,7 @@ from .base import EngineBase
 
 logger = logging.getLogger('workflow')
 
+
 class Node(EngineBase):
     """Wraps interface objects for use in pipeline
 
@@ -78,7 +79,7 @@ class Node(EngineBase):
 
     def __init__(self, interface, name, iterables=None, itersource=None,
                  synchronize=False, overwrite=None, needed_outputs=None,
-                 run_without_submitting=False, n_procs=1, mem_gb=0.25,
+                 run_without_submitting=False, n_procs=1, mem_gb=0.20,
                  **kwargs):
         """
         Parameters
@@ -199,6 +200,26 @@ class Node(EngineBase):
     def outputs(self):
         """Return the output fields of the underlying interface"""
         return self._interface._outputs()
+
+    @property
+    def mem_gb(self):
+        """Get estimated memory (GB)"""
+        if hasattr(self._interface, 'estimated_memory_gb'):
+            self._mem_gb = self._interface.estimated_memory_gb
+            logger.warning('Setting "estimated_memory_gb" on Interfaces has been '
+                           'deprecated as of nipype 1.0, please use Node.mem_gb.')
+            del self._interface.estimated_memory_gb
+        return self._mem_gb
+
+    @property
+    def n_procs(self):
+        """Get estimated number of processes"""
+        if hasattr(self._interface, 'num_threads'):
+            self._n_procs = self._interface.num_threads
+            logger.warning('Setting "num_threads" on Interfaces has been '
+                           'deprecated as of nipype 1.0, please use Node.n_procs')
+            del self._interface.num_threads
+        return self._n_procs
 
     def output_dir(self):
         """Return the location of the output directory for the node"""
@@ -685,24 +706,6 @@ class Node(EngineBase):
             if execute and linksonly:
                 rmtree(outdir)
 
-    def get_mem_gb(self):
-        """Get estimated memory (GB)"""
-        if hasattr(self._interface, 'estimated_memory_gb'):
-            self._mem_gb = self._interface.estimated_memory_gb
-            logger.warning('Setting "estimated_memory_gb" on Interfaces has been '
-                           'deprecated as of nipype 1.0')
-            del self._interface.estimated_memory_gb
-        return self._mem_gb
-
-    def get_n_procs(self):
-        """Get estimated number of processes"""
-        if hasattr(self._interface, 'num_threads'):
-            self._n_procs = self._interface.num_threads
-            logger.warning('Setting "num_threads" on Interfaces has been '
-                           'deprecated as of nipype 1.0')
-            del self._interface.num_threads
-        return self._n_procs
-
     def update(self, **opts):
         self.inputs.update(**opts)
 
@@ -1129,8 +1132,8 @@ class MapNode(Node):
         for i in range(nitems):
             nodename = '_' + self.name + str(i)
             node = Node(deepcopy(self._interface),
-                        n_procs=self.get_n_procs(),
-                        mem_gb=self.get_mem_gb(),
+                        n_procs=self.n_procs,
+                        mem_gb=self.mem_gb,
                         overwrite=self.overwrite,
                         needed_outputs=self.needed_outputs,
                         run_without_submitting=self.run_without_submitting,

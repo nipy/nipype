@@ -31,15 +31,6 @@ class PluginBase(object):
     """
     Base class for plugins
 
-    Execution plugin API
-    ====================
-
-    Current status::
-
-        class plugin_runner(PluginBase):
-
-            def run(graph, config, updatehash)
-
     """
 
     def __init__(self, plugin_args=None):
@@ -47,11 +38,21 @@ class PluginBase(object):
             plugin_args = {}
         self.plugin_args = plugin_args
         self._config = None
-
         self._status_callback = plugin_args.get('status_callback')
-        return
 
     def run(self, graph, config, updatehash=False):
+        """
+        The core plugin member that should be implemented by
+        all plugins.
+
+        graph: a networkx, flattened :abbr:`DAG (Directed Acyclic Graph)`
+          to be executed
+
+        config: a nipype.config object
+
+        updatehash:
+
+        """
         raise NotImplementedError
 
 
@@ -63,9 +64,9 @@ class DistributedPluginBase(PluginBase):
         """Initialize runtime attributes to none
 
         procs: list (N) of underlying interface elements to be processed
-        proc_done: a boolean numpy array (N) signifying whether a process has been
+        proc_done: a boolean numpy array (N,) signifying whether a process has been
             executed
-        proc_pending: a boolean numpy array (N) signifying whether a
+        proc_pending: a boolean numpy array (N,) signifying whether a
             process is currently running. Note: A process is finished only when
             both proc_done==True and
         proc_pending==False
@@ -84,7 +85,7 @@ class DistributedPluginBase(PluginBase):
         self.max_jobs = self.plugin_args.get('max_jobs', np.inf)
 
     def _prerun_check(self, graph):
-        """Stub."""
+        """Stub method to validate/massage graph and nodes before running"""
 
     def run(self, graph, config, updatehash=False):
         """
@@ -227,9 +228,10 @@ class DistributedPluginBase(PluginBase):
             logger.debug('Slots available: %s' % slots)
             if (num_jobs >= self.max_jobs) or (slots == 0):
                 break
-            # Check to see if a job is available
-            jobids = np.flatnonzero(
-                ~self.proc_done & (self.depidx.sum(axis=0) == 0).__array__())
+
+            # Check to see if a job is available (jobs without dependencies not run)
+            # See https://github.com/nipy/nipype/pull/2200#discussion_r141605722
+            jobids = np.nonzero(~self.proc_done & (self.depidx.sum(0) == 0))[1]
 
             if len(jobids) > 0:
                 # send all available jobs

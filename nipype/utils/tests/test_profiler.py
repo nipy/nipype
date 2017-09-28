@@ -13,7 +13,7 @@ from builtins import open, str
 # Import packages
 import pytest
 from nipype.utils.profiler import resource_monitor as run_profile
-from nipype.interfaces.base import (traits, CommandLine, CommandLineInputSpec)
+from nipype.interfaces.base import traits, CommandLine, CommandLineInputSpec
 
 
 # UseResources inputspec

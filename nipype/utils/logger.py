@@ -83,7 +83,7 @@ class Logging(object):
     def getLogger(self, name):
         if name == 'filemanip':
             warn('The "filemanip" logger has been deprecated and replaced by '
-                 'the "utils" logger as of nipype 1.13.2')
+                 'the "utils" logger as of nipype 1.0')
         if name in self.loggers:
             return self.loggers[name]
         return None

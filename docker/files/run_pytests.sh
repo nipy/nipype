@@ -38,7 +38,7 @@ if [[ "${PYTHON_VERSION}" -ge "30" ]]; then
 fi
 
 # Collect crashfiles
-find ${WORKDIR} -name "crash-*" -maxdepth 1 -exec mv {} ${WORKDIR}/crashfiles/ \;
+find ${WORKDIR} -maxdepth 1 -name "crash-*" -exec mv {} ${WORKDIR}/crashfiles/ \;
 
 echo "Unit tests finished with exit code ${exit_code}"
 exit ${exit_code}

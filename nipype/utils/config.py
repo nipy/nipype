@@ -27,7 +27,8 @@ standard_library.install_aliases()
 
 
 CONFIG_DEPRECATIONS = {
-    'profile_runtime': ('resource_monitor', '1.13.2'),
+    'profile_runtime': ('resource_monitor', '1.0'),
+    'filemanip_level': ('utils_level', '1.0'),
 }
 
 NUMPY_MMAP = LooseVersion(np.__version__) >= LooseVersion('1.12.0')
@@ -95,6 +96,13 @@ class NipypeConfig(object):
         self._config.readfp(StringIO(default_cfg))
         if os.path.exists(config_dir):
             self._config.read([config_file, 'nipype.cfg'])
+
+        for option in CONFIG_DEPRECATIONS:
+            if self._config.has_option(option):
+                new_option = CONFIG_DEPRECATIONS[option][0]
+                if not self._config.has_option(new_option):
+                    # Warn implicit in get
+                    self._config.set(new_option, self._config.get(option))
 
     def set_default_config(self):
         self._config.readfp(StringIO(default_cfg))

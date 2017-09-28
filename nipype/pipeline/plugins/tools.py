@@ -19,6 +19,7 @@ from ...utils.filemanip import savepkl, crash2txt
 
 logger = logging.getLogger('workflow')
 
+
 def report_crash(node, traceback=None, hostname=None):
     """Writes crash related information to a file
     """

@@ -17,7 +17,7 @@ import random
 
 from ... import logging
 from ...interfaces.base import CommandLine
-from .base import (SGELikeBatchManagerBase, logger, logging)
+from .base import SGELikeBatchManagerBase, logger
 iflogger = logging.getLogger('interface')
 DEBUGGING_PREFIX = str(int(random.uniform(100, 999)))
 

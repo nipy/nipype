@@ -10,7 +10,7 @@ import uuid
 import time
 from warnings import warn
 
-from .base import (GraphPluginBase, logger)
+from .base import GraphPluginBase, logger
 from ...interfaces.base import CommandLine
 
 

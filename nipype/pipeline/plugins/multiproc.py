@@ -16,7 +16,7 @@ import sys
 from copy import deepcopy
 import numpy as np
 
-from ... import logging, config
+from ... import logging
 from ...utils.misc import str2bool
 from ...utils.profiler import get_system_total_memory_gb
 from ..engine import MapNode
@@ -155,8 +155,8 @@ class MultiProcPlugin(DistributedPluginBase):
         tasks_mem_gb = []
         tasks_num_th = []
         for node in graph.nodes():
-            tasks_mem_gb.append(node.get_mem_gb())
-            tasks_num_th.append(node.get_n_procs())
+            tasks_mem_gb.append(node.mem_gb)
+            tasks_num_th.append(node.n_procs)
 
         if np.any(np.array(tasks_mem_gb) > self.memory_gb):
             logger.warning(
@@ -179,8 +179,8 @@ class MultiProcPlugin(DistributedPluginBase):
         free_memory_gb = self.memory_gb
         free_processors = self.processors
         for _, jobid in running_tasks:
-            free_memory_gb -= min(self.procs[jobid].get_mem_gb(), self.memory_gb)
-            free_processors -= min(self.procs[jobid].get_n_procs(), self.processors)
+            free_memory_gb -= min(self.procs[jobid].get_mem_gb(), free_memory_gb)
+            free_processors -= min(self.procs[jobid].get_n_procs(), free_processors)
 
         return free_memory_gb, free_processors
 
@@ -189,7 +189,9 @@ class MultiProcPlugin(DistributedPluginBase):
         Sends jobs to workers when system resources are available.
         """
 
-        # Check all jobs without dependency not run
+        # Check to see if a job is available (jobs without dependencies not run)
+        # See https://github.com/nipy/nipype/pull/2200#discussion_r141605722
+        jobids = np.nonzero(~self.proc_done & (self.depidx.sum(0) == 0))[1]
         jobids = np.flatnonzero(
             ~self.proc_done & (self.depidx.sum(axis=0) == 0).__array__())
 
@@ -197,12 +199,11 @@ class MultiProcPlugin(DistributedPluginBase):
         free_memory_gb, free_processors = self._check_resources(self.pending_tasks)
 
         logger.info('Currently running %d tasks, and %d jobs ready. '
-                     'Free memory (GB): %0.2f/%0.2f, Free processors: %d/%d',
-                     len(self.pending_tasks), len(jobids),
-                     free_memory_gb, self.memory_gb, free_processors, self.processors)
+                    'Free memory (GB): %0.2f/%0.2f, Free processors: %d/%d',
+                    len(self.pending_tasks), len(jobids),
+                    free_memory_gb, self.memory_gb, free_processors, self.processors)
 
-
-        if (len(jobids) + len(self.pending_tasks)) == 0:
+        if len(jobids) + len(self.pending_tasks) == 0:
             logger.debug('No tasks are being run, and no jobs can '
                          'be submitted to the queue. Potential deadlock')
             return
@@ -210,8 +211,8 @@ class MultiProcPlugin(DistributedPluginBase):
         # Sort jobs ready to run first by memory and then by number of threads
         # The most resource consuming jobs run first
         # jobids = sorted(jobids,
-        #                 key=lambda item: (self.procs[item]._get_mem_gb(),
-        #                                   self.procs[item]._get_n_procs()))
+        #                 key=lambda item: (self.procs[item]._mem_gb,
+        #                                   self.procs[item]._n_procs))
 
         # While have enough memory and processors for first job
         # Submit first job on the list
@@ -232,8 +233,8 @@ class MultiProcPlugin(DistributedPluginBase):
                         continue
 
             # Check requirements of this job
-            next_job_gb = min(self.procs[jobid].get_mem_gb(), self.memory_gb)
-            next_job_th = min(self.procs[jobid].get_n_procs(), self.processors)
+            next_job_gb = min(self.procs[jobid].mem_gb, self.memory_gb)
+            next_job_th = min(self.procs[jobid].n_procs, self.processors)
 
             # If node does not fit, skip at this moment
             if next_job_th > free_processors or next_job_gb > free_memory_gb:
@@ -257,8 +258,8 @@ class MultiProcPlugin(DistributedPluginBase):
                     hash_exists, _, _, _ = self.procs[jobid].hash_exists()
                     overwrite = self.procs[jobid].overwrite
                     always_run = self.procs[jobid]._interface.always_run
-                    if (hash_exists and (overwrite is False or
-                                         (overwrite is None and not always_run))):
+                    if hash_exists and (overwrite is False or
+                                        overwrite is None and not always_run):
                         logger.debug('Skipping cached node %s with ID %s.',
                                      self.procs[jobid]._id, jobid)
                         self._task_finished_cb(jobid)

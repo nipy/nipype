@@ -2,7 +2,7 @@
 # @Author: oesteban
 # @Date:   2017-09-21 15:50:37
 # @Last Modified by:   oesteban
-# @Last Modified time: 2017-09-27 12:57:50
+# @Last Modified time: 2017-09-28 09:56:05
 """
 Utilities to keep track of performance
 """
@@ -108,8 +108,8 @@ def log_nodes_cb(node, status):
             node.result.runtime, 'nthreads_max', 'N/A'),
         'runtime_memory_gb': getattr(
             node.result.runtime, 'mem_peak_gb', 'N/A'),
-        'estimated_memory_gb': node.get_mem_gb(),
-        'num_threads': node.get_n_procs(),
+        'estimated_memory_gb': node.mem_gb,
+        'num_threads': node.n_procs,
     }
 
     if status_dict['start'] is None or status_dict['finish'] is None:

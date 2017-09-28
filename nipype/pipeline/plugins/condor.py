@@ -8,8 +8,9 @@ from time import sleep
 
 from ...interfaces.base import CommandLine
 from ... import logging
-from .base import (SGELikeBatchManagerBase, logger, logging)
+from .base import SGELikeBatchManagerBase, logger
 iflogger = logging.getLogger('interface')
+
 
 class CondorPlugin(SGELikeBatchManagerBase):
     """Execute using Condor

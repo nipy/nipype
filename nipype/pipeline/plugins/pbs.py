@@ -7,9 +7,9 @@ from builtins import str, open
 import os
 from time import sleep
 
-from ...interfaces.base import CommandLine
 from ... import logging
-from .base import (SGELikeBatchManagerBase, logger, logging)
+from ...interfaces.base import CommandLine
+from .base import SGELikeBatchManagerBase, logger
 
 iflogger = logging.getLogger('interface')
 

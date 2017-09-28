@@ -33,6 +33,6 @@ exit_code=$?
 
 # Collect crashfiles and generate xml report
 coverage xml -o ${WORKDIR}/tests/smoketest_${example_id}.xml
-find /work -name "crash-*" -maxdepth 1 -exec mv {} ${WORKDIR}/crashfiles/ \;
+find /work -maxdepth 1 -name "crash-*" -exec mv {} ${WORKDIR}/crashfiles/ \;
 exit $exit_code
 

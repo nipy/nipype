@@ -751,13 +751,26 @@ class BaseInterface(Interface):
 
     This class cannot be instantiated.
 
+
+    Relevant Interface attributes
+    -----------------------------
+
+    ``input_spec`` points to the traited class for the inputs
+    ``output_spec`` points to the traited class for the outputs
+    ``_redirect_x`` should be set to ``True`` when the interface requires
+      connecting to a ``$DISPLAY`` (default is ``False``).
+    ``resource_monitor`` if ``False`` prevents resource-monitoring this
+      interface, if ``True`` monitoring will be enabled IFF the general
+      Nipype config is set on (``resource_monitor = true``).
+
+
     """
     input_spec = BaseInterfaceInputSpec
     _version = None
     _additional_metadata = []
     _redirect_x = False
     references_ = []
-    resource_monitor = True
+    resource_monitor = True  # Enabled for this interface IFF enabled in the config
 
     def __init__(self, from_file=None, resource_monitor=None, **inputs):
         if not self.input_spec:
@@ -1133,7 +1146,7 @@ class BaseInterface(Interface):
 
                 # Read .prof file in and set runtime values
                 vals = np.loadtxt(mon_fname, delimiter=',')
-                if vals.tolist():
+                if vals.size:
                     vals = np.atleast_2d(vals)
                     _, mem_peak_mb, nthreads = vals.max(0).astype(float).tolist()
                     runtime.mem_peak_gb = mem_peak_mb / 1024
@@ -1310,7 +1323,6 @@ def run_command(runtime, output=None, timeout=0.01, redirect_x=False):
     """
 
     # Init variables
-    PIPE = sp.PIPE
     cmdline = runtime.cmdline
 
     if redirect_x:
@@ -1338,8 +1350,8 @@ def run_command(runtime, output=None, timeout=0.01, redirect_x=False):
                         env=env)
     else:
         proc = sp.Popen(cmdline,
-                        stdout=PIPE,
-                        stderr=PIPE,
+                        stdout=sp.PIPE,
+                        stderr=sp.PIPE,
                         shell=True,
                         cwd=runtime.cwd,
                         env=env)
@@ -1414,17 +1426,16 @@ def get_dependencies(name, environ):
     Uses otool on darwin, ldd on linux. Currently doesn't support windows.
 
     """
-    PIPE = sp.PIPE
     if sys.platform == 'darwin':
         proc = sp.Popen('otool -L `which %s`' % name,
-                        stdout=PIPE,
-                        stderr=PIPE,
+                        stdout=sp.PIPE,
+                        stderr=sp.PIPE,
                         shell=True,
                         env=environ)
     elif 'linux' in sys.platform:
         proc = sp.Popen('ldd `which %s`' % name,
-                        stdout=PIPE,
-                        stderr=PIPE,
+                        stdout=sp.PIPE,
+                        stderr=sp.PIPE,
                         shell=True,
                         env=environ)
     else:
