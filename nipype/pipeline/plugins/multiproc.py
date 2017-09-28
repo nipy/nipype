@@ -208,14 +208,9 @@ class MultiProcPlugin(DistributedPluginBase):
                          'be submitted to the queue. Potential deadlock')
             return
 
-        # Sort jobs ready to run first by memory and then by number of threads
-        # The most resource consuming jobs run first
-        # jobids = sorted(jobids,
-        #                 key=lambda item: (self.procs[item]._mem_gb,
-        #                                   self.procs[item]._n_procs))
+        jobids = self._sort_jobs(jobids, scheduler=self.plugin_args.get('scheduler'))
 
-        # While have enough memory and processors for first job
-        # Submit first job on the list
+        # Submit jobs
         for jobid in jobids:
             # First expand mapnodes
             if isinstance(self.procs[jobid], MapNode):
@@ -302,3 +297,9 @@ class MultiProcPlugin(DistributedPluginBase):
                 self.proc_pending[jobid] = False
             else:
                 self.pending_tasks.insert(0, (tid, jobid))
+
+    def _sort_jobs(self, jobids, scheduler='tsort'):
+        if scheduler == 'mem_thread':
+            return sorted(jobids, key=lambda item: (
+                self.procs[item].mem_gb, self.procs[item].n_procs))
+        return jobids
