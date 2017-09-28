@@ -16,8 +16,10 @@ echo "utils_level = DEBUG" >> ${HOME}/.nipype/nipype.cfg
 echo "log_to_file = true" >> ${HOME}/.nipype/nipype.cfg
 echo "log_directory = ${WORKDIR}/logs/example_${example_id}" >> ${HOME}/.nipype/nipype.cfg
 
+echo '[execution]' >> ${HOME}/.nipype/nipype.cfg
+echo 'crashfile_format = txt' >> ${HOME}/.nipype/nipype.cfg
+
 if [[ "${NIPYPE_RESOURCE_MONITOR:-0}" == "1" ]]; then
-    echo '[execution]' >> ${HOME}/.nipype/nipype.cfg
     echo 'resource_monitor = true' >> ${HOME}/.nipype/nipype.cfg
     echo 'resource_monitor_frequency = 3' >> ${HOME}/.nipype/nipype.cfg
 fi
