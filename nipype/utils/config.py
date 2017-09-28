@@ -99,12 +99,11 @@ class NipypeConfig(object):
 
         for option in CONFIG_DEPRECATIONS:
             for section in ['execution', 'logging']:
-                if self._config.has_option(section, option):
+                if self.has_option(section, option):
                     new_option = CONFIG_DEPRECATIONS[option][0]
-                    if not self._config.has_option(section, new_option):
+                    if not self.has_option(section, new_option):
                         # Warn implicit in get
-                        self._config.set(section, new_option,
-                                         self._config.get(option))
+                        self.set(section, new_option, self.get(section, option))
 
     def set_default_config(self):
         self._config.readfp(StringIO(default_cfg))
