@@ -37,7 +37,6 @@ import sqlite3
 from .. import config, logging
 from ..utils.filemanip import copyfile, list_to_filename, filename_to_list
 from ..utils.misc import human_order_sorted, str2bool
-from .bids_utils import BIDSDataGrabber
 from .base import (
     isdefined, TraitedSpec, BaseInterface, BaseInterfaceInputSpec, File, Directory,
     Unicode, Tuple, List, Dict, Any, Bool, InputMultiObject, OutputMultiObject,
