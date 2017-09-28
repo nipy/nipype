@@ -20,8 +20,7 @@ echo "log_directory = ${WORKDIR}/logs/py${PYTHON_VERSION}" >> ${HOME}/.nipype/ni
 echo '[execution]' >> ${HOME}/.nipype/nipype.cfg
 echo 'crashfile_format = txt' >> ${HOME}/.nipype/nipype.cfg
 
-# Enable resource_monitor tests only for python 2.7
-if [[ "${PYTHON_VERSION}" -lt "30" ]]; then
+if [[ "${NIPYPE_RESOURCE_MONITOR:-0}" == "1" ]]; then
     echo 'resource_monitor = true' >> ${HOME}/.nipype/nipype.cfg
 fi
 
@@ -29,14 +28,6 @@ fi
 export COVERAGE_FILE=${WORKDIR}/tests/.coverage.py${PYTHON_VERSION}
 py.test -v --junitxml=${WORKDIR}/tests/pytests_py${PYTHON_VERSION}.xml --cov nipype --cov-config /src/nipype/.coveragerc --cov-report xml:${WORKDIR}/tests/coverage_py${PYTHON_VERSION}.xml ${TESTPATH}
 exit_code=$?
-
-# Workaround: run here the profiler tests in python 3
-if [[ "${PYTHON_VERSION}" -ge "30" ]]; then
-    echo 'resource_monitor = true' >> ${HOME}/.nipype/nipype.cfg
-    export COVERAGE_FILE=${WORKDIR}/tests/.coverage.py${PYTHON_VERSION}_extra
-    py.test -v --junitxml=${WORKDIR}/tests/pytests_py${PYTHON_VERSION}_extra.xml --cov nipype --cov-report xml:${WORKDIR}/tests/coverage_py${PYTHON_VERSION}_extra.xml /src/nipype/nipype/utils/tests/test_profiler.py /src/nipype/nipype/pipeline/plugins/tests/test_multiproc*.py
-    exit_code=$(( $exit_code + $? ))
-fi
 
 # Collect crashfiles
 find ${WORKDIR} -maxdepth 1 -name "crash-*" -exec mv {} ${WORKDIR}/crashfiles/ \;

@@ -2,7 +2,7 @@
 # @Author: oesteban
 # @Date:   2017-09-21 15:50:37
 # @Last Modified by:   oesteban
-# @Last Modified time: 2017-09-28 09:56:05
+# @Last Modified time: 2017-09-28 13:11:03
 """
 Utilities to keep track of performance
 """
@@ -17,7 +17,7 @@ except ImportError as exc:
 
 from .. import config, logging
 from .misc import str2bool
-from builtins import open
+from builtins import open, range
 
 proflogger = logging.getLogger('utils')
 
@@ -284,3 +284,50 @@ multiprocessing-forking-memory-usage
 
     # Return memory
     return mem_mb
+
+
+# Spin multiple threads
+def _use_resources(n_procs, mem_gb):
+    '''
+    Function to execute multiple use_gb_ram functions in parallel
+    '''
+    # from multiprocessing import Process
+    from threading import Thread
+    import sys
+
+    def _use_gb_ram(mem_gb):
+        """A test function to consume mem_gb GB of RAM"""
+
+        # Getsize of one character string
+        bsize = sys.getsizeof('  ') - sys.getsizeof(' ')
+        boffset = sys.getsizeof('')
+
+        num_bytes = int(mem_gb * (1024**3))
+        # Eat mem_gb GB of memory for 1 second
+        gb_str = ' ' * ((num_bytes - boffset) // bsize)
+
+        assert sys.getsizeof(gb_str) == num_bytes
+
+        # Spin CPU
+        ctr = 0
+        while ctr < 30e6:
+            ctr += 1
+
+        # Clear memory
+        del ctr
+        del gb_str
+
+    # Build thread list
+    thread_list = []
+    for idx in range(n_procs):
+        thread = Thread(target=_use_gb_ram, args=(mem_gb / n_procs,),
+                        name='thread-%d' % idx)
+        thread_list.append(thread)
+
+    # Run multi-threaded
+    print('Using %.3f GB of memory over %d sub-threads...' % (mem_gb, n_procs))
+    for thread in thread_list:
+        thread.start()
+
+    for thread in thread_list:
+        thread.join()

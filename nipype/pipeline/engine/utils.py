@@ -37,6 +37,7 @@ from ...utils.provenance import ProvStore, pm, nipype_ns, get_id
 
 from ... import logging, config
 logger = logging.getLogger('workflow')
+PY3 = sys.version_info[0] > 2
 
 try:
     dfs_preorder = nx.dfs_preorder
@@ -1320,7 +1321,13 @@ def write_workflow_resources(graph, filename=None):
             params = '_'.join(['{}'.format(p)
                               for p in node.parameterization])
 
-        rt_list = node.result.runtime
+        try:
+            rt_list = node.result.runtime
+        except Exception:
+            logger.warning('Could not access runtime info for node %s'
+                           ' (%s interface)', nodename, classname)
+            continue
+
         if not isinstance(rt_list, list):
             rt_list = [rt_list]
 
@@ -1335,7 +1342,7 @@ def write_workflow_resources(graph, filename=None):
             big_dict['mapnode'] += [subidx] * nsamples
             big_dict['params'] += [params] * nsamples
 
-    with open(filename, 'wt') as rsf:
+    with open(filename, 'w' if PY3 else 'wb') as rsf:
         json.dump(big_dict, rsf, ensure_ascii=False)
 
     return filename

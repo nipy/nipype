@@ -160,8 +160,8 @@ class DistributedPluginBase(PluginBase):
     def _report_crash(self, node, result=None):
         tb = None
         if result is not None:
-            node._result = getattr(result, 'result')
-            tb = getattr(result, 'traceback')
+            node._result = result['result']
+            tb = result['traceback']
             node._traceback = tb
         return report_crash(node, traceback=tb)
 
