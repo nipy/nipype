@@ -196,7 +196,7 @@ class MultiProcPlugin(DistributedPluginBase):
         # Check available system resources by summing all threads and memory used
         free_memory_gb, free_processors = self._check_resources(self.pending_tasks)
 
-        logger.debug('Currently running %d tasks, and %d jobs ready. '
+        logger.info('Currently running %d tasks, and %d jobs ready. '
                      'Free memory (GB): %0.2f/%0.2f, Free processors: %d/%d',
                      len(self.pending_tasks), len(jobids),
                      free_memory_gb, self.memory_gb, free_processors, self.processors)

@@ -105,7 +105,7 @@ class DistributedPluginBase(PluginBase):
             toappend = []
             # trigger callbacks for any pending results
             while self.pending_tasks:
-                logger.info('Processing %d pending tasks.', len(self.pending_tasks))
+                logger.debug('Processing %d pending tasks.', len(self.pending_tasks))
                 taskid, jobid = self.pending_tasks.pop()
                 try:
                     result = self._get_result(taskid)
@@ -168,7 +168,7 @@ class DistributedPluginBase(PluginBase):
         raise NotImplementedError
 
     def _clean_queue(self, jobid, graph, result=None):
-        logger.info('Clearing %d from queue', jobid)
+        logger.debug('Clearing %d from queue', jobid)
 
         if self._status_callback:
             self._status_callback(self.procs[jobid], 'exception')
@@ -194,8 +194,8 @@ class DistributedPluginBase(PluginBase):
         self.mapnodes.append(jobid)
         mapnodesubids = self.procs[jobid].get_subnodes()
         numnodes = len(mapnodesubids)
-        logger.info('Adding %d jobs for mapnode %s' % (numnodes,
-                                                       self.procs[jobid]._id))
+        logger.debug('Adding %d jobs for mapnode %s',
+                     numnodes, self.procs[jobid]._id)
         for i in range(numnodes):
             self.mapnodesubids[self.depidx.shape[0] + i] = jobid
         self.procs.extend(mapnodesubids)
