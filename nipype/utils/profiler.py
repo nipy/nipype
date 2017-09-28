@@ -108,8 +108,8 @@ def log_nodes_cb(node, status):
             node.result.runtime, 'nthreads_max', 'N/A'),
         'runtime_memory_gb': getattr(
             node.result.runtime, 'mem_peak_gb', 'N/A'),
-        'estimated_memory_gb': node._interface.estimated_memory_gb,
-        'num_threads': node._interface.num_threads,
+        'estimated_memory_gb': node.get_mem_gb(),
+        'num_threads': node.get_n_procs(),
     }
 
     if status_dict['start'] is None or status_dict['finish'] is None:

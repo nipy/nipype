@@ -246,8 +246,8 @@ class TestRuntimeProfiler():
 
         # Resources used node
         resource_node = pe.Node(UseResources(), name='resource_node')
-        resource_node.interface.estimated_memory_gb = num_gb
-        resource_node.interface.num_threads = num_threads
+        resource_node._mem_gb = num_gb
+        resource_node._n_procs = num_threads
 
         # Connect workflow
         wf.connect(input_node, 'num_gb', resource_node, 'num_gb')
@@ -325,8 +325,8 @@ class TestRuntimeProfiler():
                                               output_names=[],
                                               function=use_resources),
                                 name='resource_node')
-        resource_node.interface.estimated_memory_gb = num_gb
-        resource_node.interface.num_threads = num_threads
+        resource_node._mem_gb = num_gb
+        resource_node._n_procs = num_threads
 
         # Connect workflow
         wf.connect(input_node, 'num_gb', resource_node, 'num_gb')

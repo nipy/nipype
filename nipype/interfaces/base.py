@@ -765,8 +765,6 @@ class BaseInterface(Interface):
                             self.__class__.__name__)
 
         self.inputs = self.input_spec(**inputs)
-        self.estimated_memory_gb = 0.25
-        self.num_threads = 1
 
         if resource_monitor is not None:
             self.resource_monitor = resource_monitor

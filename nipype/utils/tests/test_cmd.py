@@ -104,7 +104,6 @@ optional arguments:
                                                        [--between_loops [BETWEEN_LOOPS [BETWEEN_LOOPS ...]]]
                                                        [--ignore_exception]
                                                        [--loops [LOOPS [LOOPS ...]]]
-                                                       [--resource_monitor]
                                                        [--slice_order SLICE_ORDER]
                                                        [--speedup [SPEEDUP [SPEEDUP ...]]]
                                                        [--start START]

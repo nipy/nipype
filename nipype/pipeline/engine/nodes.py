@@ -78,7 +78,7 @@ class Node(EngineBase):
 
     def __init__(self, interface, name, iterables=None, itersource=None,
                  synchronize=False, overwrite=None, needed_outputs=None,
-                 run_without_submitting=False, n_procs=1, mem_gb=None,
+                 run_without_submitting=False, n_procs=1, mem_gb=0.25,
                  **kwargs):
         """
         Parameters
@@ -169,9 +169,8 @@ class Node(EngineBase):
         self.needed_outputs = []
         self.plugin_args = {}
 
-        self._interface.num_threads = n_procs
-        if mem_gb is not None:
-            self._interface.estimated_memory_gb = mem_gb
+        self._n_procs = n_procs
+        self._mem_gb = mem_gb
 
         if needed_outputs:
             self.needed_outputs = sorted(needed_outputs)
@@ -270,6 +269,7 @@ class Node(EngineBase):
             Update the hash stored in the output directory
         """
         # check to see if output directory and hash exist
+
         if self.config is None:
             self.config = deepcopy(config._sections)
         else:
@@ -684,6 +684,24 @@ class Node(EngineBase):
                     setattr(self.inputs, info['key'], newfiles)
             if execute and linksonly:
                 rmtree(outdir)
+
+    def get_mem_gb(self):
+        """Get estimated memory (GB)"""
+        if hasattr(self._interface, 'estimated_memory_gb'):
+            self._mem_gb = self._interface.estimated_memory_gb
+            logger.warning('Setting "estimated_memory_gb" on Interfaces has been '
+                           'deprecated as of nipype 1.0')
+            del self._interface.estimated_memory_gb
+        return self._mem_gb
+
+    def get_n_procs(self):
+        """Get estimated number of processes"""
+        if hasattr(self._interface, 'num_threads'):
+            self._n_procs = self._interface.num_threads
+            logger.warning('Setting "num_threads" on Interfaces has been '
+                           'deprecated as of nipype 1.0')
+            del self._interface.num_threads
+        return self._n_procs
 
     def update(self, **opts):
         self.inputs.update(**opts)
@@ -1111,8 +1129,8 @@ class MapNode(Node):
         for i in range(nitems):
             nodename = '_' + self.name + str(i)
             node = Node(deepcopy(self._interface),
-                        n_procs=self._interface.num_threads,
-                        mem_gb=self._interface.estimated_memory_gb,
+                        n_procs=self.get_n_procs(),
+                        mem_gb=self.get_mem_gb(),
                         overwrite=self.overwrite,
                         needed_outputs=self.needed_outputs,
                         run_without_submitting=self.run_without_submitting,

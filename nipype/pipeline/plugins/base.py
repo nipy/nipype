@@ -80,6 +80,7 @@ class DistributedPluginBase(PluginBase):
         self.mapnodesubids = None
         self.proc_done = None
         self.proc_pending = None
+        self.pending_tasks = []
         self.max_jobs = self.plugin_args.get('max_jobs', np.inf)
 
     def _prerun_check(self, graph):
@@ -95,8 +96,6 @@ class DistributedPluginBase(PluginBase):
         self._prerun_check(graph)
         # Generate appropriate structures for worker-manager model
         self._generate_dependency_list(graph)
-        self.pending_tasks = []
-        self.readytorun = []
         self.mapnodes = []
         self.mapnodesubids = {}
         # setup polling - TODO: change to threaded model
@@ -110,6 +109,11 @@ class DistributedPluginBase(PluginBase):
                 taskid, jobid = self.pending_tasks.pop()
                 try:
                     result = self._get_result(taskid)
+                except Exception:
+                    notrun.append(self._clean_queue(
+                        jobid, graph, result={'result': None,
+                                              'traceback': format_exc()}))
+                else:
                     if result:
                         if result['traceback']:
                             notrun.append(self._clean_queue(jobid, graph,
@@ -120,11 +124,6 @@ class DistributedPluginBase(PluginBase):
                         self._clear_task(taskid)
                     else:
                         toappend.insert(0, (taskid, jobid))
-                except Exception:
-                    result = {'result': None,
-                              'traceback': format_exc()}
-                    notrun.append(self._clean_queue(jobid, graph,
-                                                    result=result))
 
             if toappend:
                 self.pending_tasks.extend(toappend)
@@ -169,12 +168,15 @@ class DistributedPluginBase(PluginBase):
         raise NotImplementedError
 
     def _clean_queue(self, jobid, graph, result=None):
+        logger.info('Clearing %d from queue', jobid)
+
+        if self._status_callback:
+            self._status_callback(self.procs[jobid], 'exception')
+
         if str2bool(self._config['execution']['stop_on_first_crash']):
             raise RuntimeError("".join(result['traceback']))
         crashfile = self._report_crash(self.procs[jobid],
                                        result=result)
-        if self._status_callback:
-            self._status_callback(self.procs[jobid], 'exception')
         if jobid in self.mapnodesubids:
             # remove current jobid
             self.proc_pending[jobid] = False

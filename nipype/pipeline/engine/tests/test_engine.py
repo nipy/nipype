@@ -513,17 +513,17 @@ def test_mapnode_expansion(tmpdir):
 
     mapnode = MapNode(Function(function=func1),
                       iterfield='in1',
-                      name='mapnode')
+                      name='mapnode',
+                      n_procs=2,
+                      mem_gb=2)
     mapnode.inputs.in1 = [1, 2]
-    mapnode.interface.num_threads = 2
-    mapnode.interface.estimated_memory_gb = 2
 
     for idx, node in mapnode._make_nodes():
         for attr in ('overwrite', 'run_without_submitting', 'plugin_args'):
             assert getattr(node, attr) == getattr(mapnode, attr)
-        for attr in ('num_threads', 'estimated_memory_gb'):
-            assert (getattr(node._interface, attr) ==
-                    getattr(mapnode._interface, attr))
+        for attr in ('_n_procs', '_mem_gb'):
+            assert (getattr(node, attr) ==
+                    getattr(mapnode, attr))
 
 
 def test_node_hash(tmpdir):
