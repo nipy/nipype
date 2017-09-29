@@ -1095,10 +1095,9 @@ class BaseInterface(Interface):
         if enable_rm:
             mon_freq = float(config.get('execution', 'resource_monitor_frequency', 1))
             proc_pid = os.getpid()
-            mon_fname = os.path.abspath('.prof-%d_freq-%0.3f' % (proc_pid, mon_freq))
-            iflogger.debug('Creating a ResourceMonitor on a %s interface: %s',
-                           self.__class__.__name__, mon_fname)
-            mon_sp = ResourceMonitor(proc_pid, freq=mon_freq, fname=mon_fname)
+            iflogger.debug('Creating a ResourceMonitor on a %s interface, PID=%d.',
+                           self.__class__.__name__, proc_pid)
+            mon_sp = ResourceMonitor(proc_pid, freq=mon_freq)
             mon_sp.start()
 
         # Grab inputs now, as they should not change during execution
@@ -1145,7 +1144,7 @@ class BaseInterface(Interface):
                 runtime.nthreads_max = None
 
                 # Read .prof file in and set runtime values
-                vals = np.loadtxt(mon_fname, delimiter=',')
+                vals = np.loadtxt(mon_sp.logfile, delimiter=',')
                 if vals.size:
                     vals = np.atleast_2d(vals)
                     _, mem_peak_mb, nthreads = vals.max(0).astype(float).tolist()

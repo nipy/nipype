@@ -2,7 +2,7 @@
 # @Author: oesteban
 # @Date:   2017-09-21 15:50:37
 # @Last Modified by:   oesteban
-# @Last Modified time: 2017-09-28 13:11:03
+# @Last Modified time: 2017-09-29 16:42:27
 """
 Utilities to keep track of performance
 """
@@ -33,41 +33,44 @@ _MB = 1024.0**2
 
 class ResourceMonitor(threading.Thread):
     def __init__(self, pid, freq=5, fname=None):
-        if freq <= 0:
-            raise RuntimeError('Frequency (%0.2fs) cannot be lower than zero' % freq)
+        if freq < 0.2:
+            raise RuntimeError('Frequency (%0.2fs) cannot be lower than 0.2s' % freq)
 
         if fname is None:
-            fname = '.nipype.prof'
+            fname = '.proc-%d_time-%s_freq-%0.2f' % (pid, time(), freq)
 
         self._pid = pid
         self._fname = fname
         self._freq = freq
 
-        self._log = open(self._fname, 'w')
-        print('%s,0.0,0' % time(), file=self._log)
-        self._log.flush()
+        self._logfile = open(self._fname, 'w')
+        self._sample()
+
         threading.Thread.__init__(self)
         self._event = threading.Event()
+
+    @property
+    def fname(self):
+        return self._fname
 
     def stop(self):
         if not self._event.is_set():
             self._event.set()
             self.join()
-            ram = _get_ram_mb(self._pid) or 0
-            cpus = _get_num_threads(self._pid) or 0
-            print('%s,%f,%d' % (time(), ram, cpus),
-                  file=self._log)
-            self._log.flush()
-            self._log.close()
+            self._sample()
+            self._logfile.flush()
+            self._logfile.close()
+
+    def _sample(self):
+        ram = _get_ram_mb(self._pid) or 0
+        cpus = _get_num_threads(self._pid) or 0
+        print('%s,%f,%d' % (time(), ram, cpus),
+              file=self._logfile)
+        self._logfile.flush()
 
     def run(self):
         while not self._event.is_set():
-            ram = _get_ram_mb(self._pid)
-            cpus = _get_num_threads(self._pid)
-            if ram is not None and cpus is not None:
-                print('%s,%f,%d' % (time(), ram, cpus),
-                      file=self._log)
-                self._log.flush()
+            self._sample()
             self._event.wait(self._freq)
 
 
