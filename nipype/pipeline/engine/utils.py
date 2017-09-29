@@ -1082,7 +1082,7 @@ def make_output_dir(outdir):
     except OSError:
             logger.debug("Problem creating %s", outdir)
             if not os.path.exists(outdir):
-               raise OSError('Could not create %s', outdir)
+                raise OSError('Could not create %s' % outdir)
     return outdir
 
 
@@ -1269,7 +1269,7 @@ def write_workflow_prov(graph, filename=None, format='all'):
                 ps.g.add_bundle(sub_bundle)
                 bundle_entity = ps.g.entity(sub_bundle.identifier,
                                             other_attributes={'prov:type':
-                                                               pm.PROV_BUNDLE})
+                                                              pm.PROV_BUNDLE})
                 ps.g.wasGeneratedBy(bundle_entity, process)
         else:
             process.add_attributes({pm.PROV["type"]: nipype_ns["Node"]})
@@ -1282,7 +1282,7 @@ def write_workflow_prov(graph, filename=None, format='all'):
             ps.g.add_bundle(result_bundle)
             bundle_entity = ps.g.entity(result_bundle.identifier,
                                         other_attributes={'prov:type':
-                                                              pm.PROV_BUNDLE})
+                                                          pm.PROV_BUNDLE})
             ps.g.wasGeneratedBy(bundle_entity, process)
         processes.append(process)
 
