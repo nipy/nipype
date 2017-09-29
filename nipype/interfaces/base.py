@@ -1144,7 +1144,7 @@ class BaseInterface(Interface):
                 runtime.nthreads_max = None
 
                 # Read .prof file in and set runtime values
-                vals = np.loadtxt(mon_sp.logfile, delimiter=',')
+                vals = np.loadtxt(mon_sp.fname, delimiter=',')
                 if vals.size:
                     vals = np.atleast_2d(vals)
                     _, mem_peak_mb, nthreads = vals.max(0).astype(float).tolist()
