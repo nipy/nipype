@@ -1467,7 +1467,7 @@ class FSSourceInputSpec(BaseInterfaceInputSpec):
                              desc='Freesurfer subjects directory.')
     subject_id = Unicode(mandatory=True,
                      desc='Subject name for whom to retrieve data')
-    hemi = Enum('both', 'lh', 'rh',
+    hemi = Enum(['both', 'lh', 'rh'], default_value="both",
                        desc='Selects hemisphere specific outputs')
 
 
@@ -2187,7 +2187,7 @@ class SSHDataGrabberInputSpec(DataGrabberInputSpec):
                           desc='If false it will return the file names without downloading them')
     base_directory = Unicode(mandatory=True,
                              desc='Path to the base directory consisting of subject data.')
-    template_expression = Enum(['fnmatch', 'regexp'], 
+    template_expression = Enum(['fnmatch', 'regexp'], default_value='fnmatch',
                                desc='Use either fnmatch or regexp to express templates')
     ssh_log_to_file = Unicode('',
                               desc='If set SSH commands will be logged to the given file')
