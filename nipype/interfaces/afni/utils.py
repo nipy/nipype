@@ -656,7 +656,7 @@ class CenterMassInputSpec(CommandLineInputSpec):
          name_template='%s_cm.out',
          keep_extension=False,
          descr="File to write center of mass to",
-         argstr=" > %s",
+         argstr="> %s",
          position=-1)
     mask_file = File(
         desc='Only voxels with nonzero values in the provided mask will be '
@@ -681,7 +681,7 @@ class CenterMassInputSpec(CommandLineInputSpec):
              'v1, v2, etc. This option is handy for getting ROI centers of '
              'mass.',
         argstr='-roi_vals %s')
-    automask = traits.Bool(
+    all_rois = traits.Bool(
         desc='Don\'t bother listing the values of ROIs you want: The program '
              'will find all of them and produce a full list',
         argstr='-all_rois')
@@ -693,8 +693,10 @@ class CenterMassOutputSpec(TraitedSpec):
         desc='output file')
     cm_file = File(
         desc='file with the center of mass coordinates')
-    cm = traits.Tuple(
-        traits.Float(), traits.Float(), traits.Float(),
+    cm = traits.Either(
+        traits.Tuple(traits.Float(), traits.Float(), traits.Float()),
+        traits.List(traits.Tuple(traits.Float(), traits.Float(),
+                                 traits.Float())),
         desc='center of mass')
 
 
@@ -716,10 +718,10 @@ class CenterMass(AFNICommandBase):
     >>> from nipype.interfaces import afni
     >>> cm = afni.CenterMass()
     >>> cm.inputs.in_file = 'structural.nii'
-    >>> cm.inputs.out_file = 'cm.txt'
-    >>> cm.inputs.set_cm = (0, 0, 0)
+    >>> cm.inputs.cm_file = 'cm.txt'
+    >>> cm.inputs.roi_vals = [2, 10]
     >>> cm.cmdline  # doctest: +ALLOW_UNICODE
-    '3dcm -set 0 0 0 structural.nii > cm.txt'
+    '3dCM -roi_vals 2 10 structural.nii > cm.txt'
     >>> res = 3dcm.run()  # doctest: +SKIP
     """
 
@@ -732,7 +734,10 @@ class CenterMass(AFNICommandBase):
         outputs['out_file'] = os.path.abspath(self.inputs.in_file)
         outputs['cm_file'] = os.path.abspath(self.inputs.cm_file)
         sout = np.loadtxt(outputs['cm_file'])  # pylint: disable=E1101
-        outputs['cm'] = tuple(sout)
+        if len(sout) > 1:
+            outputs['cm'] = [tuple(s) for s in sout]
+        else:
+            outputs['cm'] = tuple(sout)
         return outputs
 
 
