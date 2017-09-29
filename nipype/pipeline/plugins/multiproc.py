@@ -251,27 +251,9 @@ class MultiProcPlugin(DistributedPluginBase):
             self.proc_done[jobid] = True
             self.proc_pending[jobid] = True
 
-            if str2bool(self.procs[jobid].config['execution']['local_hash_check']):
-                logger.debug('checking hash locally')
-                try:
-                    hash_exists, _, _, _ = self.procs[jobid].hash_exists()
-                    overwrite = self.procs[jobid].overwrite
-                    always_run = self.procs[jobid]._interface.always_run
-                    if hash_exists and (overwrite is False or
-                                        overwrite is None and not always_run):
-                        logger.debug('Skipping cached node %s with ID %s.',
-                                     self.procs[jobid]._id, jobid)
-                        self._task_finished_cb(jobid)
-                        self._remove_node_dirs()
-                        continue
-                except Exception:
-                    traceback = format_exception(*sys.exc_info())
-                    self._report_crash(self.procs[jobid], traceback=traceback)
-                    self._clean_queue(jobid, graph)
-                    self.proc_pending[jobid] = False
-                    continue
-                finally:
-                    logger.debug('Finished checking hash')
+            # If cached just retrieve it, don't run
+            if self._local_hash_check(jobid, graph):
+                continue
 
             if self.procs[jobid].run_without_submitting:
                 logger.debug('Running node %s on master thread',
