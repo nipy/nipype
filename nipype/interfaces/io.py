@@ -183,8 +183,7 @@ class DataSinkInputSpec(BaseInterfaceInputSpec):
         desc='Path to the base directory for storing data.')
     container = Unicode(
         desc='Folder within base directory in which to store output')
-    parameterization = Bool(True, usedefault=True,
-                                   desc='store output in parametrized structure')
+    parameterization = Bool(True, desc='store output in parametrized structure')
     strip_dir = Directory(desc='path to strip out of filename')
     substitutions = InputMultiObject(Tuple(Unicode, Unicode), 
                                      desc=('List of 2-tuples reflecting string '
@@ -197,8 +196,7 @@ class DataSinkInputSpec(BaseInterfaceInputSpec):
                                    'string. Invoked after string `substitutions`'))
 
     _outputs = Dict(key_trait=Unicode(), default_value={})
-    remove_dest_dir = Bool(False, usedefault=True,
-                                  desc='remove dest directory when copying dirs')
+    remove_dest_dir = Bool(False, desc='remove dest directory when copying dirs')
 
     # AWS S3 data attributes
     creds_path = Unicode(desc='Filepath to AWS credentials file for S3 bucket '\
@@ -766,20 +764,17 @@ class DataSink(IOBase):
 
 
 class S3DataGrabberInputSpec(BaseInterfaceInputSpec):
-    anon = Bool(False, usedefault=True,
-                       desc='Use anonymous connection to s3.  If this is set to True, boto may print' +
-                            ' a urlopen error, but this does not prevent data from being downloaded.')
+    anon = Bool(False, desc='Use anonymous connection to s3.  If this is set to True, boto may print' +
+                ' a urlopen error, but this does not prevent data from being downloaded.')
     region = Unicode('us-east-1', usedefault=True,
                         desc='Region of s3 bucket')
     bucket = Unicode(mandatory=True,
                         desc='Amazon S3 bucket where your data is stored')
-    bucket_path = Unicode('', usedefault=True,
-                             desc='Location within your bucket for subject data.')
+    bucket_path = Unicode('', desc='Location within your bucket for subject data.')
     local_directory = Directory(exists=True,
                                 desc='Path to the local directory for subject data to be downloaded '
                                 'and accessed. Should be on HDFS for Spark jobs.')
-    raise_on_empty = Bool(True, usedefault=True,
-                                 desc='Generate exception if list is empty for a given field')
+    raise_on_empty = Bool(True, desc='Generate exception if list is empty for a given field')
     sort_filelist = Bool(mandatory=True,
                                 desc='Sort the filelist that matches the template')
     template = Unicode(mandatory=True,
@@ -985,8 +980,7 @@ class S3DataGrabber(IOBase):
 class DataGrabberInputSpec(BaseInterfaceInputSpec):
     base_directory = Directory(exists=True,
                                desc='Path to the base directory consisting of subject data.')
-    raise_on_empty = Bool(True, usedefault=True,
-                                 desc='Generate exception if list is empty for a given field')
+    raise_on_empty = Bool(True, desc='Generate exception if list is empty for a given field')
     sort_filelist = Bool(mandatory=True,
                                 desc='Sort the filelist that matches the template')
     template = Unicode(mandatory=True,
@@ -1186,11 +1180,9 @@ class SelectFilesInputSpec(BaseInterfaceInputSpec):
 
     base_directory = Directory(exists=True,
                                desc="Root path common to templates.")
-    sort_filelist = Bool(True, usedefault=True,
-                                desc="When matching mutliple files, return them in sorted order.")
-    raise_on_empty = Bool(True, usedefault=True,
-                                 desc="Raise an exception if a template pattern matches no files.")
-    force_lists = traitlets.Union([Bool(), List(Unicode())],  default_value=None,
+    sort_filelist = Bool(True, desc="When matching mutliple files, return them in sorted order.")
+    raise_on_empty = Bool(True, desc="Raise an exception if a template pattern matches no files.")
+    force_lists = traitlets.Union([Bool(), List(Unicode())], default_value=False,  
                                 desc=("Whether to return outputs as a list even when only one file "
                                       "matches the template. Either a boolean that applies to all "
                                       "output fields or a list of output field names to coerce to "
@@ -1280,7 +1272,7 @@ class SelectFiles(IOBase):
         info = dict([(k, v) for k, v in list(self.inputs.__dict__.items())
                      if k in self._infields])
 
-        force_lists = self.inputs.force_lists
+        force_lists = self.inputs.force_lists 
         if isinstance(force_lists, bool):
             force_lists = self._outfields if force_lists else []
         bad_fields = set(force_lists) - set(self._outfields)
@@ -1331,7 +1323,6 @@ class DataFinderInputSpec(BaseInterfaceInputSpec):
     root_paths = traitlets.Union([List(),Unicode()],
                                mandatory=True,)
     match_regex = Unicode('(.+)',
-                             usedefault=True,
                              desc=("Regular expression for matching "
                                    "paths."))
     ignore_regexes = List(desc=("List of regular expressions, "
@@ -1342,9 +1333,7 @@ class DataFinderInputSpec(BaseInterfaceInputSpec):
                            "the root_paths")
     min_depth = Int(desc="The minimum depth to search beneath "
                            "the root paths")
-    unpack_single = Bool(False,
-                                usedefault=True,
-                                desc="Unpack single results from list")
+    unpack_single = Bool(False, desc="Unpack single results from list")
 
 
 class DataFinder(IOBase):
@@ -1478,7 +1467,7 @@ class FSSourceInputSpec(BaseInterfaceInputSpec):
                              desc='Freesurfer subjects directory.')
     subject_id = Unicode(mandatory=True,
                      desc='Subject name for whom to retrieve data')
-    hemi = Enum('both', 'lh', 'rh', usedefault=True,
+    hemi = Enum('both', 'lh', 'rh',
                        desc='Selects hemisphere specific outputs')
 
 
@@ -1893,8 +1882,8 @@ class XNATSinkInputSpec(BaseInterfaceInputSpec):
                  desc=('Option to share the subjects from the original project'
                        'instead of creating new ones when possible - the created '
                        'experiments are then shared back to the original project'
-                       ),
-                 usedefault=True)
+                       ))
+
 
     def __setattr__(self, key, value):
         if key not in self.trait_names():
@@ -2132,7 +2121,7 @@ class SQLiteSink(IOBase):
 class MySQLSinkInputSpec(BaseInterfaceInputSpec):
     host = Unicode('localhost', mandatory=True,
                       requires=['username', 'password'],
-                      xor=['config'], usedefault=True)
+                      xor=['config'])
     config = File(mandatory=True, xor=['host'],
                   desc="MySQL Options File (same format as my.cnf)")
     database_name = Unicode(
@@ -2194,13 +2183,13 @@ class SSHDataGrabberInputSpec(DataGrabberInputSpec):
     username = Unicode(desc='Server username.')
     # dj NOTE: traits.Password -> Unicode(), ok?
     password = Unicode(desc='Server password.')
-    download_files = Bool(True, usedefault=True,
+    download_files = Bool(True,
                           desc='If false it will return the file names without downloading them')
     base_directory = Unicode(mandatory=True,
                              desc='Path to the base directory consisting of subject data.')
-    template_expression = Enum(['fnmatch', 'regexp'], usedefault=True,
+    template_expression = Enum(['fnmatch', 'regexp'], 
                                desc='Use either fnmatch or regexp to express templates')
-    ssh_log_to_file = Unicode('', usedefault=True,
+    ssh_log_to_file = Unicode('',
                               desc='If set SSH commands will be logged to the given file')
 
 
