@@ -1269,9 +1269,9 @@ class SelectFiles(IOBase):
     def _list_outputs(self):
         """Find the files and expose them as interface outputs."""
         outputs = {}
-        info = dict([(k, v) for k, v in list(self.inputs.__dict__.items())
+        # dj: I believe '_trait_values' has to be added to get what it is in traits
+        info = dict([(k, v) for k, v in list(self.inputs.__dict__['_trait_values'].items())
                      if k in self._infields])
-
         force_lists = self.inputs.force_lists 
         if isinstance(force_lists, bool):
             force_lists = self._outfields if force_lists else []

@@ -715,7 +715,7 @@ class Interface(object):
 
 
 class BaseInterfaceInputSpec(TraitedSpec):
-    ignore_exception = Bool(help="Print an error message instead \
+    ignore_exception = Bool(default_value=False, help="Print an error message instead \
 of throwing an exception in case the interface fails to run").tag(nohash=True)
 
 
