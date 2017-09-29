@@ -57,21 +57,40 @@ class PluginBase(object):
 
 
 class DistributedPluginBase(PluginBase):
-    """Execute workflow with a distribution engine
+    """
+    Execute workflow with a distribution engine
+
+    Relevant class attributes
+    -------------------------
+
+    procs: list (N) of underlying interface elements to be processed
+    proc_done: a boolean numpy array (N,) signifying whether a process has been
+        submitted for execution
+    proc_pending: a boolean numpy array (N,) signifying whether a
+        process is currently running.
+    depidx: a boolean matrix (NxN) storing the dependency structure accross
+        processes. Process dependencies are derived from each column.
+
+    Combinations of ``proc_done`` and ``proc_pending``
+    --------------------------------------------------
+
+    +------------+---------------+--------------------------------+
+    | proc_done  | proc_pending  | outcome                        |
+    +============+===============+================================+
+    | True       | False         | Process is finished            |
+    +------------+---------------+--------------------------------+
+    | True       | True          | Process is currently being run |
+    +------------+---------------+--------------------------------+
+    | False      | False         | Process is queued              |
+    +------------+---------------+--------------------------------+
+    | False      | True          | INVALID COMBINATION            |
+    +------------+---------------+--------------------------------+
     """
 
     def __init__(self, plugin_args=None):
-        """Initialize runtime attributes to none
+        """
+        Initialize runtime attributes to none
 
-        procs: list (N) of underlying interface elements to be processed
-        proc_done: a boolean numpy array (N,) signifying whether a process has been
-            executed
-        proc_pending: a boolean numpy array (N,) signifying whether a
-            process is currently running. Note: A process is finished only when
-            both proc_done==True and
-        proc_pending==False
-        depidx: a boolean matrix (NxN) storing the dependency structure accross
-            processes. Process dependencies are derived from each column.
         """
         super(DistributedPluginBase, self).__init__(plugin_args=plugin_args)
         self.procs = None
@@ -87,12 +106,16 @@ class DistributedPluginBase(PluginBase):
     def _prerun_check(self, graph):
         """Stub method to validate/massage graph and nodes before running"""
 
+    def _postrun_check(self):
+        """Stub method to close any open resources"""
+
     def run(self, graph, config, updatehash=False):
         """
         Executes a pre-defined pipeline using distributed approaches
         """
         logger.info("Running in parallel.")
         self._config = config
+        poll_sleep_secs = float(config['execution']['poll_sleep_duration'])
 
         self._prerun_check(graph)
         # Generate appropriate structures for worker-manager model
@@ -107,12 +130,14 @@ class DistributedPluginBase(PluginBase):
             # See https://github.com/nipy/nipype/pull/2200#discussion_r141605722
             jobs_ready = np.nonzero(~self.proc_done & (self.depidx.sum(0) == 0))[1]
 
-            logger.info('Progress: %d jobs, %d/%d/%d/%d (done/running/pending/ready).',
+            logger.info('Progress: %d jobs, %d/%d/%d (done/running/ready),'
+                        ' %d/%d (pending_tasks/waiting).',
                         len(self.proc_done),
-                        np.sum(self.proc_done & ~self.proc_pending),
+                        np.sum(self.proc_done ^ self.proc_pending),
                         np.sum(self.proc_done & self.proc_pending),
+                        len(jobs_ready),
                         len(self.pending_tasks),
-                        len(jobs_ready))
+                        np.sum(~self.proc_done & ~self.proc_pending))
             toappend = []
             # trigger callbacks for any pending results
             while self.pending_tasks:
@@ -139,27 +164,21 @@ class DistributedPluginBase(PluginBase):
             if toappend:
                 self.pending_tasks.extend(toappend)
             num_jobs = len(self.pending_tasks)
-            logger.debug('Tasks currently running (%d).', num_jobs)
+            logger.debug('Tasks currently running: %d. Pending: %d.', num_jobs,
+                         np.sum(self.proc_done & self.proc_pending))
             if num_jobs < self.max_jobs:
                 self._send_procs_to_workers(updatehash=updatehash,
                                             graph=graph)
             else:
                 logger.debug('Not submitting (max jobs reached)')
-            self._wait()
+
+            sleep(poll_sleep_secs)
 
         self._remove_node_dirs()
         report_nodes_not_run(notrun)
 
         # close any open resources
-        self._close()
-
-    def _wait(self):
-        sleep(float(self._config['execution']['poll_sleep_duration']))
-
-    def _close(self):
-        # close any open resources, this could raise NotImplementedError
-        # but I didn't want to break other plugins
-        return True
+        self._postrun_check()
 
     def _get_result(self, taskid):
         raise NotImplementedError

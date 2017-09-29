@@ -118,7 +118,6 @@ class MultiProcPlugin(DistributedPluginBase):
         self._taskresult = {}
         self._task_obj = {}
         self._taskid = 0
-        self._timeout = 2.0
 
         # Read in options or set defaults.
         non_daemon = self.plugin_args.get('non_daemon', True)
@@ -151,11 +150,8 @@ class MultiProcPlugin(DistributedPluginBase):
             callback=self._async_callback)
         return self._taskid
 
-    def _close(self):
-        self.pool.close()
-        return True
-
     def _prerun_check(self, graph):
+        """Check if any node exeeds the available resources"""
         tasks_mem_gb = []
         tasks_num_th = []
         for node in graph.nodes():
@@ -175,6 +171,9 @@ class MultiProcPlugin(DistributedPluginBase):
                 self.processors)
             if self.raise_insufficient:
                 raise RuntimeError('Insufficient resources available for job')
+
+    def _postrun_check(self):
+        self.pool.close()
 
     def _check_resources(self, running_tasks):
         """
@@ -241,9 +240,9 @@ class MultiProcPlugin(DistributedPluginBase):
 
             free_memory_gb -= next_job_gb
             free_processors -= next_job_th
-            logger.info('Allocating %s ID=%d (%0.2fGB, %d threads). Free: %0.2fGB, %d threads.',
-                        self.procs[jobid]._id, jobid, next_job_gb, next_job_th,
-                        free_memory_gb, free_processors)
+            logger.debug('Allocating %s ID=%d (%0.2fGB, %d threads). Free: %0.2fGB, %d threads.',
+                         self.procs[jobid]._id, jobid, next_job_gb, next_job_th,
+                         free_memory_gb, free_processors)
 
             # change job status in appropriate queues
             self.proc_done[jobid] = True
