@@ -103,10 +103,19 @@ class DistributedPluginBase(PluginBase):
         notrun = []
 
         while not np.all(self.proc_done) or np.any(self.proc_pending):
+            # Check to see if a job is available (jobs without dependencies not run)
+            # See https://github.com/nipy/nipype/pull/2200#discussion_r141605722
+            jobs_ready = np.nonzero(~self.proc_done & (self.depidx.sum(0) == 0))[1]
+
+            logger.info('Progress: %d jobs, %d/%d/%d/%d (done/running/pending/ready).',
+                        len(self.proc_done),
+                        np.sum(self.proc_done & ~self.proc_pending),
+                        np.sum(self.proc_done & self.proc_pending),
+                        len(self.pending_tasks),
+                        len(jobs_ready))
             toappend = []
             # trigger callbacks for any pending results
             while self.pending_tasks:
-                logger.debug('Processing %d pending tasks.', len(self.pending_tasks))
                 taskid, jobid = self.pending_tasks.pop()
                 try:
                     result = self._get_result(taskid)
@@ -124,6 +133,7 @@ class DistributedPluginBase(PluginBase):
                             self._remove_node_dirs()
                         self._clear_task(taskid)
                     else:
+                        assert self.proc_done[jobid] and self.proc_pending[jobid]
                         toappend.insert(0, (taskid, jobid))
 
             if toappend:
