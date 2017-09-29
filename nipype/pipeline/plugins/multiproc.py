@@ -196,8 +196,6 @@ class MultiProcPlugin(DistributedPluginBase):
         # Check to see if a job is available (jobs without dependencies not run)
         # See https://github.com/nipy/nipype/pull/2200#discussion_r141605722
         jobids = np.nonzero(~self.proc_done & (self.depidx.sum(0) == 0))[1]
-        jobids = np.flatnonzero(
-            ~self.proc_done & (self.depidx.sum(axis=0) == 0).__array__())
 
         # Check available system resources by summing all threads and memory used
         free_memory_gb, free_processors = self._check_resources(self.pending_tasks)
