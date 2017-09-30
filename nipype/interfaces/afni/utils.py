@@ -642,6 +642,106 @@ class CatMatvec(AFNICommand):
             return spec.argstr%(' '.join([i[0]+' -'+i[1] for i in value]))
         return super(CatMatvec, self)._format_arg(name, spec, value)
 
+
+class CenterMassInputSpec(CommandLineInputSpec):
+    in_file = File(
+        desc='input file to 3dCM',
+        argstr='%s',
+        position=-2,
+        mandatory=True,
+        exists=True,
+        copyfile=True)
+    cm_file = File(
+         name_source='in_file',
+         name_template='%s_cm.out',
+         hash_files=False,
+         keep_extension=False,
+         descr="File to write center of mass to",
+         argstr="> %s",
+         position=-1)
+    mask_file = File(
+        desc='Only voxels with nonzero values in the provided mask will be '
+             'averaged.',
+        argstr='-mask %s',
+        exists=True)
+    automask = traits.Bool(
+        desc='Generate the mask automatically',
+        argstr='-automask')
+    set_cm = traits.Tuple(
+        (traits.Float(), traits.Float(), traits.Float()),
+        desc='After computing the center of mass, set the origin fields in '
+             'the header so that the center of mass will be at (x,y,z) in '
+             'DICOM coords.',
+        argstr='-set %f %f %f')
+    local_ijk = traits.Bool(
+        desc='Output values as (i,j,k) in local orienation',
+        argstr='-local_ijk')
+    roi_vals = traits.List(
+        traits.Int,
+        desc='Compute center of mass for each blob with voxel value of v0, '
+             'v1, v2, etc. This option is handy for getting ROI centers of '
+             'mass.',
+        argstr='-roi_vals %s')
+    all_rois = traits.Bool(
+        desc='Don\'t bother listing the values of ROIs you want: The program '
+             'will find all of them and produce a full list',
+        argstr='-all_rois')
+
+
+class CenterMassOutputSpec(TraitedSpec):
+    out_file = File(
+        exists=True,
+        desc='output file')
+    cm_file = File(
+        desc='file with the center of mass coordinates')
+    cm = traits.Either(
+        traits.Tuple(traits.Float(), traits.Float(), traits.Float()),
+        traits.List(traits.Tuple(traits.Float(), traits.Float(),
+                                 traits.Float())),
+        desc='center of mass')
+
+
+class CenterMass(AFNICommandBase):
+    """Computes center of mass using 3dCM command
+
+    .. note::
+
+      By default, the output is (x,y,z) values in DICOM coordinates. But
+      as of Dec, 2016, there are now command line switches for other options.
+
+
+    For complete details, see the `3dCM Documentation.
+    <https://afni.nimh.nih.gov/pub/dist/doc/program_help/3dCM.html>`_
+
+    Examples
+    ========
+
+    >>> from nipype.interfaces import afni
+    >>> cm = afni.CenterMass()
+    >>> cm.inputs.in_file = 'structural.nii'
+    >>> cm.inputs.cm_file = 'cm.txt'
+    >>> cm.inputs.roi_vals = [2, 10]
+    >>> cm.cmdline  # doctest: +ALLOW_UNICODE
+    '3dCM -roi_vals 2 10 structural.nii > cm.txt'
+    >>> res = 3dcm.run()  # doctest: +SKIP
+    """
+
+    _cmd = '3dCM'
+    input_spec = CenterMassInputSpec
+    output_spec = CenterMassOutputSpec
+
+    def _list_outputs(self):
+        outputs = super(CenterMass, self)._list_outputs()
+        outputs['out_file'] = os.path.abspath(self.inputs.in_file)
+        outputs['cm_file'] = os.path.abspath(self.inputs.cm_file)
+        sout = np.loadtxt(outputs['cm_file'])  # pylint: disable=E1101
+        if len(sout) > 1:
+            outputs['cm'] = [tuple(s) for s in sout]
+        else:
+            outputs['cm'] = tuple(sout)
+        return outputs
+
+
 class CopyInputSpec(AFNICommandInputSpec):
     in_file = File(
         desc='input file to 3dcopy',
