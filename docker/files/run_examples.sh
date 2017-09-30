@@ -33,8 +33,10 @@ fi
 coverage run /src/nipype/tools/run_examples.py $@
 exit_code=$?
 
+if [[ "${NIPYPE_RESOURCE_MONITOR:-0}" == "1" ]]; then
+	cp resource_monitor.json 2>/dev/null ${WORKDIR}/logs/example_${example_id}/ || :
+fi
 # Collect crashfiles and generate xml report
 coverage xml -o ${WORKDIR}/tests/smoketest_${example_id}.xml
 find /work -maxdepth 1 -name "crash-*" -exec mv {} ${WORKDIR}/crashfiles/ \;
 exit $exit_code
-
