@@ -654,6 +654,7 @@ class CenterMassInputSpec(CommandLineInputSpec):
     cm_file = File(
          name_source='in_file',
          name_template='%s_cm.out',
+         hash_files=False,
          keep_extension=False,
          descr="File to write center of mass to",
          argstr="> %s",

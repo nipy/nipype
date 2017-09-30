@@ -12,6 +12,7 @@ def test_CenterMass_inputs():
     ),
     cm_file=dict(argstr='> %s',
     descr='File to write center of mass to',
+    hash_files=False,
     keep_extension=False,
     name_source='in_file',
     name_template='%s_cm.out',
