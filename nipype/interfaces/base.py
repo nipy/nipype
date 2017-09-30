@@ -8,7 +8,7 @@ Exaples  FSL, matlab/SPM , afni
 
 Requires Packages to be installed
 """
-from __future__ import print_function, division, unicode_literals, absolute_import
+from __future__ import print_function, division, absolute_import
 from future import standard_library
 standard_library.install_aliases()
 from builtins import range, object, open, str, bytes
@@ -771,6 +771,16 @@ class BaseInterface(Interface):
         if not self.input_spec:
             raise Exception('No input_spec in class: %s' %
                             self.__class__.__name__)
+
+        if isinstance(self.input_spec, dict):
+            self.input_spec = type("AnonyomousInputSpec",
+                                   (BaseInterfaceInputSpec,),
+                                   self.input_spec)
+
+        if isinstance(self.output_spec, dict):
+            self.output_spec = type("AnonyomousOutputSpec",
+                                    (TraitedSpec,),
+                                    self.output_spec)
 
         self.inputs = self.input_spec(**inputs)
         self.estimated_memory_gb = 0.25
