@@ -15,16 +15,16 @@ try:
 except ImportError as exc:
     psutil = None
 
+from builtins import open, range
 from .. import config, logging
 from .misc import str2bool
-from builtins import open, range
 
 proflogger = logging.getLogger('utils')
 
 resource_monitor = str2bool(config.get('execution', 'resource_monitor', 'false'))
 if resource_monitor and psutil is None:
-    proflogger.warn('Switching "resource_monitor" off: the option was on, but the '
-                    'necessary package "psutil" could not be imported.')
+    proflogger.warning('Switching "resource_monitor" off: the option was on, but the '
+                       'necessary package "psutil" could not be imported.')
     resource_monitor = False
 
 # Init variables
@@ -32,28 +32,40 @@ _MB = 1024.0**2
 
 
 class ResourceMonitor(threading.Thread):
-    def __init__(self, pid, freq=5, fname=None):
+    """
+    A ``Thread`` to monitor a specific PID with a certain frequence
+    to a file
+    """
+
+    def __init__(self, pid, freq=5, fname=None, python=True):
+        # Make sure psutil is imported
+        import psutil
+
         if freq < 0.2:
             raise RuntimeError('Frequency (%0.2fs) cannot be lower than 0.2s' % freq)
 
         if fname is None:
             fname = '.proc-%d_time-%s_freq-%0.2f' % (pid, time(), freq)
-
-        self._pid = pid
         self._fname = fname
-        self._freq = freq
-
         self._logfile = open(self._fname, 'w')
-        self._sample()
+        self._freq = freq
+        self._python = python
 
+        # Leave process initialized and make first sample
+        self._process = psutil.Process(pid)
+        self._sample(cpu_interval=0.2)
+
+        # Start thread
         threading.Thread.__init__(self)
         self._event = threading.Event()
 
     @property
     def fname(self):
+        """Get/set the internal filename"""
         return self._fname
 
     def stop(self):
+        """Stop monitoring"""
         if not self._event.is_set():
             self._event.set()
             self.join()
@@ -61,14 +73,32 @@ class ResourceMonitor(threading.Thread):
             self._logfile.flush()
             self._logfile.close()
 
-    def _sample(self):
-        ram = _get_ram_mb(self._pid) or 0
-        cpus = _get_num_threads(self._pid) or 0
-        print('%s,%f,%d' % (time(), ram, cpus),
+    def _sample(self, cpu_interval=None):
+        cpu = 0.0
+        mem = 0.0
+        try:
+            with self._process.oneshot():
+                cpu += self._process.cpu_percent(interval=cpu_interval)
+                mem += self._process.memory_info().rss
+        except psutil.NoSuchProcess:
+            pass
+
+        # parent_mem = mem
+        # Iterate through child processes and get number of their threads
+        for child in self._process.children(recursive=True):
+            try:
+                with child.oneshot():
+                    cpu += child.cpu_percent()
+                    mem += child.memory_info().rss
+            except psutil.NoSuchProcess:
+                pass
+
+        print('%f,%f,%f' % (time(), (mem / _MB), cpu),
               file=self._logfile)
         self._logfile.flush()
 
     def run(self):
+        """Core monitoring function, called by start()"""
         while not self._event.is_set():
             self._sample()
             self._event.wait(self._freq)
@@ -181,8 +211,7 @@ def get_max_resources_used(pid, mem_mb, num_threads, pyfunc=False):
         mem_mb = max(mem_mb, _get_ram_mb(pid, pyfunc=pyfunc))
         num_threads = max(num_threads, _get_num_threads(pid))
     except Exception as exc:
-        proflogger = logging.getLogger('profiler')
-        proflogger.info('Could not get resources used by process. Error: %s', exc)
+        proflogger.info('Could not get resources used by process.\n%s', exc)
 
     return mem_mb, num_threads
 
@@ -289,48 +318,49 @@ multiprocessing-forking-memory-usage
     return mem_mb
 
 
+def _use_cpu(x):
+    ctr = 0
+    while ctr < 1e7:
+        ctr += 1
+        x*x
+
 # Spin multiple threads
 def _use_resources(n_procs, mem_gb):
-    '''
+    """
     Function to execute multiple use_gb_ram functions in parallel
-    '''
-    # from multiprocessing import Process
-    from threading import Thread
+    """
+    import os
     import sys
+    import psutil
+    from multiprocessing import Pool
+    from nipype import logging
+    from nipype.utils.profiler import _use_cpu
+
+    iflogger = logging.getLogger('interface')
+
+    # Getsize of one character string
+    BSIZE = sys.getsizeof('  ') - sys.getsizeof(' ')
+    BOFFSET = sys.getsizeof('')
+    _GB = 1024.0**3
 
     def _use_gb_ram(mem_gb):
         """A test function to consume mem_gb GB of RAM"""
-
-        # Getsize of one character string
-        bsize = sys.getsizeof('  ') - sys.getsizeof(' ')
-        boffset = sys.getsizeof('')
-
-        num_bytes = int(mem_gb * (1024**3))
+        num_bytes = int(mem_gb * _GB)
         # Eat mem_gb GB of memory for 1 second
-        gb_str = ' ' * ((num_bytes - boffset) // bsize)
-
+        gb_str = ' ' * ((num_bytes - BOFFSET) // BSIZE)
         assert sys.getsizeof(gb_str) == num_bytes
+        return gb_str
 
-        # Spin CPU
-        ctr = 0
-        while ctr < 30e6:
-            ctr += 1
+    # Measure the amount of memory this process already holds
+    p = psutil.Process(os.getpid())
+    mem_offset = p.memory_info().rss / _GB
+    big_str = _use_gb_ram(mem_gb - mem_offset)
+    _use_cpu(5)
+    mem_total = p.memory_info().rss / _GB
+    del big_str
+    iflogger.info('[%d] Memory offset %0.2fGB, total %0.2fGB', os.getpid(), mem_offset, mem_total)
 
-        # Clear memory
-        del ctr
-        del gb_str
-
-    # Build thread list
-    thread_list = []
-    for idx in range(n_procs):
-        thread = Thread(target=_use_gb_ram, args=(mem_gb / n_procs,),
-                        name='thread-%d' % idx)
-        thread_list.append(thread)
-
-    # Run multi-threaded
-    print('Using %.3f GB of memory over %d sub-threads...' % (mem_gb, n_procs))
-    for thread in thread_list:
-        thread.start()
-
-    for thread in thread_list:
-        thread.join()
+    if n_procs > 1:
+        pool = Pool(n_procs)
+        pool.map(_use_cpu, range(n_procs))
+    return True
