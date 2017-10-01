@@ -138,7 +138,7 @@ def log_nodes_cb(node, status):
         'finish': getattr(node.result.runtime, 'endTime'),
         'duration': getattr(node.result.runtime, 'duration'),
         'runtime_threads': getattr(
-            node.result.runtime, 'nthreads_max', 'N/A'),
+            node.result.runtime, 'cpu_percent', 'N/A'),
         'runtime_memory_gb': getattr(
             node.result.runtime, 'mem_peak_gb', 'N/A'),
         'estimated_memory_gb': node.mem_gb,

@@ -749,8 +749,8 @@ class Node(EngineBase):
                         'duration': self.result.runtime.duration}
             # Try and insert memory/threads usage if available
             if resource_monitor:
-                rst_dict['runtime_memory_gb'] = getattr(self.result.runtime, 'mem_peak_gb')
-                rst_dict['runtime_threads'] = getattr(self.result.runtime, 'nthreads_max')
+                rst_dict['mem_peak_gb'] = self.result.runtime.mem_peak_gb
+                rst_dict['cpu_percent'] = self.result.runtime.cpu_percent
 
             if hasattr(self.result.runtime, 'cmdline'):
                 rst_dict['command'] = self.result.runtime.cmdline
