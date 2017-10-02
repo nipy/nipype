@@ -204,6 +204,10 @@ class MultiProcPlugin(DistributedPluginBase):
                     len(self.pending_tasks), len(jobids),
                     free_memory_gb, self.memory_gb, free_processors, self.processors)
 
+        if free_memory_gb < 0.01 or free_processors == 0:
+            logger.debug('No resources available')
+            return
+
         if len(jobids) + len(self.pending_tasks) == 0:
             logger.debug('No tasks are being run, and no jobs can '
                          'be submitted to the queue. Potential deadlock')
