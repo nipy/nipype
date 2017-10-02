@@ -175,8 +175,8 @@ class Node(EngineBase):
 
         self._mem_gb = mem_gb
         self._n_procs = n_procs
-        if hasattr(self.inputs, 'num_threads') and self._n_procs is not None:
-            self.inputs.num_threads = self._n_procs
+        if hasattr(self._interface.inputs, 'num_threads') and self._n_procs is not None:
+            self._interface.inputs.num_threads = self._n_procs
 
         if needed_outputs:
             self.needed_outputs = sorted(needed_outputs)
@@ -221,8 +221,9 @@ class Node(EngineBase):
         """Get the estimated number of processes/threads"""
         if self._n_procs is not None:
             return self._n_procs
-        elif hasattr(self.inputs, 'num_threads') and isdefined(self.inputs.num_threads):
-            return self.inputs.num_threads
+        elif hasattr(self._interface.inputs, 'num_threads') and isdefined(
+            self._interface.inputs.num_threads):
+            return self._interface.inputs.num_threads
         else:
             return 1
 
