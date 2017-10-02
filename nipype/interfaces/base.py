@@ -1146,8 +1146,8 @@ class BaseInterface(Interface):
                 vals = np.loadtxt(mon_sp.fname, delimiter=',')
                 if vals.size:
                     vals = np.atleast_2d(vals)
-                    runtime.mem_peak_gb = float(vals[:, 1].max() / 1024)
-                    runtime.cpu_percent = float(vals[:, 2].max())
+                    runtime.mem_peak_gb = vals[:, 1].max() / 1024
+                    runtime.cpu_percent = vals[:, 2].max()
 
                     runtime.prof_dict = {
                         'time': vals[:, 0].tolist(),
