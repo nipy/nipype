@@ -595,7 +595,7 @@ connected.
             logger.info('Provenance file prefix: %s' % prov_base)
             write_workflow_prov(execgraph, prov_base, format='all')
 
-        if str2bool(self.config['execution'].get('resource_monitor', 'false')):
+        if config.resource_monitor:
             write_workflow_resources(execgraph)
         return execgraph
 

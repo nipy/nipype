@@ -2,7 +2,7 @@
 # @Author: oesteban
 # @Date:   2017-09-21 15:50:37
 # @Last Modified by:   oesteban
-# @Last Modified time: 2017-09-29 16:42:27
+# @Last Modified time: 2017-10-02 15:44:29
 """
 Utilities to keep track of performance
 """
@@ -17,15 +17,9 @@ except ImportError as exc:
 
 from builtins import open, range
 from .. import config, logging
-from .misc import str2bool
 
 proflogger = logging.getLogger('utils')
-
-resource_monitor = str2bool(config.get('execution', 'resource_monitor', 'false'))
-if resource_monitor and psutil is None:
-    proflogger.warning('Switching "resource_monitor" off: the option was on, but the '
-                       'necessary package "psutil" could not be imported.')
-    resource_monitor = False
+resource_monitor = config.resource_monitor
 
 # Init variables
 _MB = 1024.0**2

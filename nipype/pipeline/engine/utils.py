@@ -1298,6 +1298,10 @@ def write_workflow_prov(graph, filename=None, format='all'):
 
 
 def write_workflow_resources(graph, filename=None):
+    """
+    Generate a JSON file with profiling traces that can be loaded
+    in a pandas DataFrame or processed with JavaScript like D3.js
+    """
     import simplejson as json
     if not filename:
         filename = os.path.join(os.getcwd(), 'resource_monitor.json')

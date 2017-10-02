@@ -18,11 +18,13 @@ from distutils.version import LooseVersion
 import configparser
 import numpy as np
 
-from builtins import str, object, open
+from builtins import bytes, str, object, open
 
 from simplejson import load, dump
-from ..external import portalocker
 from future import standard_library
+from ..external import portalocker
+from .misc import str2bool
+
 standard_library.install_aliases()
 
 
@@ -96,6 +98,7 @@ class NipypeConfig(object):
         config_file = os.path.join(config_dir, 'nipype.cfg')
         self.data_file = os.path.join(config_dir, 'nipype.json')
         self._config.readfp(StringIO(default_cfg))
+        self._resource_monitor = None
         if os.path.exists(config_dir):
             self._config.read([config_file, 'nipype.cfg'])
 
@@ -202,5 +205,41 @@ class NipypeConfig(object):
         self._config.set('execution', 'write_provenance', 'true')
         self._config.set('execution', 'hash_method', 'content')
 
+    @property
+    def resource_monitor(self):
+        """Check if resource_monitor is available"""
+        if self._resource_monitor is not None:
+            return self._resource_monitor
+
+        # Cache config from nipype config
+        self.resource_monitor = self._config.get(
+            'execution', 'resource_monitor') or False
+        return self._resource_monitor
+
+    @resource_monitor.setter
+    def resource_monitor(self, value):
+        # Accept string true/false values
+        if isinstance(value, (str, bytes)):
+            value = str2bool(value.lower())
+
+        if value is False:
+            self._resource_monitor = False
+        elif value is True:
+            if not self._resource_monitor:
+                # Before setting self._resource_monitor check psutil availability
+                self._resource_monitor = False
+                try:
+                    import psutil
+                    self._resource_monitor = LooseVersion(
+                        psutil.__version__) >= LooseVersion('5.0')
+                except ImportError:
+                    pass
+                finally:
+                    if not self._resource_monitor:
+                        warn('Could not enable the resource monitor: psutil>=5.0'
+                             ' could not be imported.')
+                    self._config.set('execution', 'resource_monitor',
+                                     ('%s' % self._resource_monitor).lower())
+
     def enable_resource_monitor(self):
-        self._config.set('execution', 'resource_monitor', 'true')
+        self.resource_monitor = True
