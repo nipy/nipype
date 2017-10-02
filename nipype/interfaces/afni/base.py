@@ -201,7 +201,9 @@ class AFNICommand(AFNICommandBase):
     def __init__(self, **inputs):
         super(AFNICommand, self).__init__(**inputs)
         self.inputs.on_trait_change(self._output_update, 'outputtype')
-        self.inputs.on_trait_change(self._nthreads_update, 'num_threads')
+
+        if hasattr(self.inputs, 'num_threads'):
+            self.inputs.on_trait_change(self._nthreads_update, 'num_threads')
 
         if self._outputtype is None:
             self._outputtype = Info.outputtype()
