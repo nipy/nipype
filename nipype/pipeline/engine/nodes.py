@@ -208,7 +208,7 @@ class Node(EngineBase):
             self._mem_gb = self._interface.estimated_memory_gb
             logger.warning('Setting "estimated_memory_gb" on Interfaces has been '
                            'deprecated as of nipype 1.0, please use Node.mem_gb.')
-            del self._interface.estimated_memory_gb
+
         return self._mem_gb
 
     @property
@@ -218,7 +218,10 @@ class Node(EngineBase):
             self._n_procs = self._interface.num_threads
             logger.warning('Setting "num_threads" on Interfaces has been '
                            'deprecated as of nipype 1.0, please use Node.n_procs')
-            del self._interface.num_threads
+
+        if hasattr(self._interface.inputs, 'num_threads') and isdefined(
+            self._interface.inputs.num_threads):
+            self._n_procs = self._interface.inputs.num_threads
         return self._n_procs
 
     def output_dir(self):
