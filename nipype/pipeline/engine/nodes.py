@@ -79,7 +79,7 @@ class Node(EngineBase):
 
     def __init__(self, interface, name, iterables=None, itersource=None,
                  synchronize=False, overwrite=None, needed_outputs=None,
-                 run_without_submitting=False, n_procs=1, mem_gb=0.20,
+                 run_without_submitting=False, n_procs=None, mem_gb=0.20,
                  **kwargs):
         """
         Parameters
@@ -153,12 +153,15 @@ class Node(EngineBase):
         if 'base_dir' in kwargs:
             base_dir = kwargs['base_dir']
         super(Node, self).__init__(name, base_dir)
+
+        # Make sure an interface is set, and that it is an Interface
         if interface is None:
             raise IOError('Interface must be provided')
         if not isinstance(interface, Interface):
             raise IOError('interface must be an instance of an Interface')
         self._interface = interface
         self.name = name
+
         self._result = None
         self.iterables = iterables
         self.synchronize = synchronize
@@ -170,8 +173,10 @@ class Node(EngineBase):
         self.needed_outputs = []
         self.plugin_args = {}
 
-        self._n_procs = n_procs
         self._mem_gb = mem_gb
+        self._n_procs = n_procs
+        if hasattr(self.inputs, 'num_threads') and self._n_procs is not None:
+            self.inputs.num_threads = self._n_procs
 
         if needed_outputs:
             self.needed_outputs = sorted(needed_outputs)
@@ -213,16 +218,22 @@ class Node(EngineBase):
 
     @property
     def n_procs(self):
-        """Get estimated number of processes"""
-        if hasattr(self._interface, 'num_threads'):
-            self._n_procs = self._interface.num_threads
-            logger.warning('Setting "num_threads" on Interfaces has been '
-                           'deprecated as of nipype 1.0, please use Node.n_procs')
+        """Get the estimated number of processes/threads"""
+        if self._n_procs is not None:
+            return self._n_procs
+        elif hasattr(self.inputs, 'num_threads') and isdefined(self.inputs.num_threads):
+            return self.inputs.num_threads
+        else:
+            return 1
 
-        if hasattr(self._interface.inputs, 'num_threads') and isdefined(
-            self._interface.inputs.num_threads):
-            self._n_procs = self._interface.inputs.num_threads
-        return self._n_procs
+    @n_procs.setter
+    def n_procs(self, value):
+        """Set an estimated number of processes/threads"""
+        self._n_procs = value
+
+        # Overwrite interface's dynamic input of num_threads
+        if hasattr(self._interface.inputs, 'num_threads'):
+            self._interface.inputs.num_threads = self._n_procs
 
     def output_dir(self):
         """Return the location of the output directory for the node"""
