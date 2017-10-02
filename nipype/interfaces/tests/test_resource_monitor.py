@@ -1,8 +1,7 @@
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
-# test_profiler.py
-#
-# Author: Daniel Clark, 2016
-
+# emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
+# vi: set ft=python sts=4 ts=4 sw=4 et:
 """
 Module to unit test the resource_monitor in nipype
 """
@@ -17,7 +16,6 @@ from nipype.interfaces.base import traits, CommandLine, CommandLineInputSpec
 from nipype.interfaces import utility as niu
 
 
-# UseResources inputspec
 class UseResourcesInputSpec(CommandLineInputSpec):
     mem_gb = traits.Float(desc='Number of GB of RAM to use',
                           argstr='-g %f', mandatory=True)
@@ -25,11 +23,10 @@ class UseResourcesInputSpec(CommandLineInputSpec):
                          argstr='-p %d', mandatory=True)
 
 
-# UseResources interface
 class UseResources(CommandLine):
-    '''
+    """
     use_resources cmd interface
-    '''
+    """
     from nipype import __path__
     # Init attributes
     input_spec = UseResourcesInputSpec
@@ -48,10 +45,10 @@ class UseResources(CommandLine):
 @pytest.mark.skipif(run_profile is False, reason='resources monitor is disabled')
 @pytest.mark.parametrize("mem_gb,n_procs", [(0.5, 3), (2.2, 8), (0.8, 4), (1.5, 1)])
 def test_cmdline_profiling(tmpdir, mem_gb, n_procs):
-    '''
+    """
     Test runtime profiler correctly records workflow RAM/CPUs consumption
     of a CommandLine-derived interface
-    '''
+    """
     from nipype import config
     config.set('execution', 'resource_monitor_frequency', '0.2')  # Force sampling fast
 
@@ -67,10 +64,10 @@ def test_cmdline_profiling(tmpdir, mem_gb, n_procs):
 @pytest.mark.skipif(run_profile is False, reason='resources monitor is disabled')
 @pytest.mark.parametrize("mem_gb,n_procs", [(0.5, 3), (2.2, 8), (0.8, 4), (1.5, 1)])
 def test_function_profiling(tmpdir, mem_gb, n_procs):
-    '''
+    """
     Test runtime profiler correctly records workflow RAM/CPUs consumption
     of a Function interface
-    '''
+    """
     from nipype import config
     config.set('execution', 'resource_monitor_frequency', '0.2')  # Force sampling fast
 
@@ -80,5 +77,5 @@ def test_function_profiling(tmpdir, mem_gb, n_procs):
     iface.inputs.n_procs = n_procs
     result = iface.run()
 
-    # assert abs(mem_gb - result.runtime.mem_peak_gb) < 0.3, 'estimated memory error above .3GB'
+    assert abs(mem_gb - result.runtime.mem_peak_gb) < 0.3, 'estimated memory error above .3GB'
     assert int(result.runtime.cpu_percent / 100 + 0.2) >= n_procs

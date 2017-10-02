@@ -101,7 +101,6 @@ def load_template(name):
     template : string.Template
 
     """
-
     full_fname = os.path.join(os.path.dirname(__file__),
                               'script_templates', name)
     template_file = open(full_fname)

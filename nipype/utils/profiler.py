@@ -358,7 +358,8 @@ def _use_resources(n_procs, mem_gb):
     _use_cpu(5)
     mem_total = p.memory_info().rss / _GB
     del big_str
-    iflogger.info('[%d] Memory offset %0.2fGB, total %0.2fGB', os.getpid(), mem_offset, mem_total)
+    iflogger.info('[%d] Memory offset %0.2fGB, total %0.2fGB',
+                  os.getpid(), mem_offset, mem_total)
 
     if n_procs > 1:
         pool = Pool(n_procs)
