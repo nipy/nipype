@@ -20,7 +20,7 @@ from .preprocess import (AlignEpiAnatPy, Allineate, Automask,
                          TShift, Volreg, Warp, QwarpPlusMinus, Qwarp)
 from .svm import (SVMTest, SVMTrain)
 from .utils import (ABoverlap, AFNItoNIFTI, Autobox, Axialize, BrickStat,
-                    Bucket, Calc, Cat, CatMatvec, Copy, Dot,
+                    Bucket, Calc, Cat, CatMatvec, CenterMass, Copy, Dot,
                     Edge3, Eval, FWHMx, MaskTool, Merge, Notes, NwarpApply,
                     OneDToolPy,
                     Refit, Resample, TCat, TCatSubBrick, TStat, To3D, Unifize,
