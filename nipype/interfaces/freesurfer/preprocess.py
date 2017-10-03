@@ -1461,8 +1461,9 @@ class RobustRegisterInputSpec(FSTraitedSpec):
                        desc='volume to be registered')
     target_file = File(mandatory=True, argstr='--dst %s',
                        desc='target volume for the registration')
-    out_reg_file = File(genfile=True, argstr='--lta %s',
-                        desc='registration file to write')
+    out_reg_file = traits.Either(
+        True, File, default=True, usedefault=True, argstr='--lta %s',
+        desc='registration file; either True or filename')
     registered_file = traits.Either(traits.Bool, File, argstr='--warp %s',
                                     desc='registered image; either True or filename')
     weights_file = traits.Either(traits.Bool, File, argstr='--weights %s',
@@ -1551,24 +1552,20 @@ class RobustRegister(FSCommand):
     output_spec = RobustRegisterOutputSpec
 
     def _format_arg(self, name, spec, value):
-        for option in ["registered_file", "weights_file", "half_source", "half_targ",
-                       "half_weights", "half_source_xfm", "half_targ_xfm"]:
-            if name == option:
-                if isinstance(value, bool):
-                    fname = self._list_outputs()[name]
-                else:
-                    fname = value
-                return spec.argstr % fname
+        options = ("out_reg_file", "registered_file", "weights_file",
+                   "half_source", "half_targ", "half_weights",
+                   "half_source_xfm", "half_targ_xfm")
+        if name in options and isinstance(value, bool):
+            value = self._list_outputs()[name]
         return super(RobustRegister, self)._format_arg(name, spec, value)
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        outputs['out_reg_file'] = self.inputs.out_reg_file
-        if not isdefined(self.inputs.out_reg_file) and self.inputs.source_file:
-            outputs['out_reg_file'] = fname_presuffix(self.inputs.source_file,
-                                                      suffix='_robustreg.lta', use_ext=False)
-        prefices = dict(src=self.inputs.source_file, trg=self.inputs.target_file)
-        suffices = dict(registered_file=("src", "_robustreg", True),
+        cwd = os.getcwd()
+        prefices = dict(src=self.inputs.source_file,
+                        trg=self.inputs.target_file)
+        suffices = dict(out_reg_file=("src", "_robustreg.lta", False),
+                        registered_file=("src", "_robustreg", True),
                         weights_file=("src", "_robustweights", True),
                         half_source=("src", "_halfway", True),
                         half_targ=("trg", "_halfway", True),
@@ -1577,20 +1574,15 @@ class RobustRegister(FSCommand):
                         half_targ_xfm=("trg", "_robustxfm.lta", False))
         for name, sufftup in list(suffices.items()):
             value = getattr(self.inputs, name)
-            if isdefined(value):
-                if isinstance(value, bool):
+            if value:
+                if value is True:
                     outputs[name] = fname_presuffix(prefices[sufftup[0]],
                                                     suffix=sufftup[1],
-                                                    newpath=os.getcwd(),
+                                                    newpath=cwd,
                                                     use_ext=sufftup[2])
                 else:
-                    outputs[name] = value
+                    outputs[name] = os.path.abspath(value)
         return outputs
-
-    def _gen_filename(self, name):
-        if name == 'out_reg_file':
-            return self._list_outputs()[name]
-        return None
 
 
 class FitMSParamsInputSpec(FSTraitedSpec):
