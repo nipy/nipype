@@ -1562,8 +1562,8 @@ class RobustRegister(FSCommand):
     >>> reg.inputs.target_file = 'T1.nii'
     >>> reg.inputs.auto_sens = True
     >>> reg.inputs.init_orient = True
-    >>> reg.cmdline # doctest: +ALLOW_UNICODE
-    'mri_robust_register --satit --initorient --lta structural_robustreg.lta --mov structural.nii --dst T1.nii'
+    >>> reg.cmdline # doctest: +ALLOW_UNICODE +ELLIPSIS
+    'mri_robust_register --satit --initorient --lta .../structural_robustreg.lta --mov structural.nii --dst T1.nii'
 
     References
     ----------
