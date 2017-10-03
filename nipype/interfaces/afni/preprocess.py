@@ -353,12 +353,13 @@ class AllineateInputSpec(AFNICommandInputSpec):
         argstr='-nomask',
         desc='Don\'t compute the autoweight/mask; if -weight is not '
              'also used, then every voxel will be counted equally.')
-    weight_file = File(
+    weight = traits.Either(
+        File(exists=True), traits.Float(),
         argstr='-weight %s',
-        exists=True,
         desc='Set the weighting for each voxel in the base dataset; '
              'larger weights mean that voxel count more in the cost function. '
-             'Must be defined on the same grid as the base dataset')
+             'If an image file is given, the volume must be defined on the '
+             'same grid as the base dataset')
     out_weight_file = traits.File(
         argstr='-wtprefix %s',
         desc='Write the weight volume to disk as a dataset',

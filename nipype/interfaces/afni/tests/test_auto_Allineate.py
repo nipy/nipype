@@ -117,7 +117,7 @@ def test_Allineate_inputs():
     ),
     warpfreeze=dict(argstr='-warpfreeze',
     ),
-    weight_file=dict(argstr='-weight %s',
+    weight=dict(argstr='-weight %s',
     ),
     zclip=dict(argstr='-zclip',
     ),
