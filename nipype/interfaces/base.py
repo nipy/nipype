@@ -1699,8 +1699,9 @@ class CommandLine(BaseInterface):
 
     def _get_environ(self):
         if isdefined(self.inputs.environ):
-            out_environ.update(self.inputs.environ)
-        return out_environ
+            return self.inputs.environ
+        else:
+            return {}
 
     def version_from_command(self, flag='-v'):
         cmdname = self.cmd.split()[0]
