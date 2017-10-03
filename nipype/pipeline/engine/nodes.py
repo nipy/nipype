@@ -314,7 +314,7 @@ class Node(EngineBase):
             self._get_inputs()
             self._got_inputs = True
         outdir = self.output_dir()
-        logger.info("Executing node %s in dir: %s", self._id, outdir)
+        logger.info("Executing node %s in dir: %s", self.fullname, outdir)
         if op.exists(outdir):
             logger.debug('Output dir: %s', to_str(os.listdir(outdir)))
         hash_info = self.hash_exists(updatehash=updatehash)
@@ -630,9 +630,10 @@ class Node(EngineBase):
                 runtime=runtime,
                 inputs=self._interface.inputs.get_traitsfree())
             self._result = result
-            logger.debug('Executing node')
             if copyfiles:
                 self._copyfiles_to_wd(cwd, execute)
+
+            message = 'Running a "%s" interface'
             if issubclass(self._interface.__class__, CommandLine):
                 try:
                     cmd = self._interface.cmdline
@@ -640,10 +641,10 @@ class Node(EngineBase):
                     self._result.runtime.stderr = msg
                     raise
                 cmdfile = op.join(cwd, 'command.txt')
-                fd = open(cmdfile, 'wt')
-                fd.writelines(cmd + "\n")
-                fd.close()
-                logger.info('Running: %s' % cmd)
+                with open(cmdfile, 'wt') as fd:
+                    print(cmd + "\n", file=fd)
+                message += ', a CommandLine Interface with command:\n%s' % cmd
+            logger.info(message + '.', self._interface.__class__.__name__)
             try:
                 result = self._interface.run()
             except Exception as msg:

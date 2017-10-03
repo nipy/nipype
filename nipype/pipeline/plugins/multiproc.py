@@ -17,7 +17,6 @@ from copy import deepcopy
 import numpy as np
 
 from ... import logging
-from ...utils.misc import str2bool
 from ...utils.profiler import get_system_total_memory_gb
 from ..engine import MapNode
 from .base import DistributedPluginBase
@@ -44,10 +43,6 @@ def run_node(node, updatehash, taskid):
         dictionary containing the node runtime results and stats
     """
 
-    from nipype import logging
-    logger = logging.getLogger('workflow')
-
-    logger.debug('run_node called on %s', node.name)
     # Init variables
     result = dict(result=None, traceback=None, taskid=taskid)
 
@@ -148,6 +143,9 @@ class MultiProcPlugin(DistributedPluginBase):
         self._task_obj[self._taskid] = self.pool.apply_async(
             run_node, (node, updatehash, self._taskid),
             callback=self._async_callback)
+
+        logger.debug('MultiProc submitted task %s (taskid=%d).',
+                     node.fullname, self._taskid)
         return self._taskid
 
     def _prerun_check(self, graph):
@@ -245,7 +243,7 @@ class MultiProcPlugin(DistributedPluginBase):
             free_memory_gb -= next_job_gb
             free_processors -= next_job_th
             logger.debug('Allocating %s ID=%d (%0.2fGB, %d threads). Free: %0.2fGB, %d threads.',
-                         self.procs[jobid]._id, jobid, next_job_gb, next_job_th,
+                         self.procs[jobid].fullname, jobid, next_job_gb, next_job_th,
                          free_memory_gb, free_processors)
 
             # change job status in appropriate queues
@@ -274,7 +272,6 @@ class MultiProcPlugin(DistributedPluginBase):
 
             # Task should be submitted to workers
             # Send job to task manager and add to pending tasks
-            logger.debug('MultiProc submitting job ID %d', jobid)
             if self._status_callback:
                 self._status_callback(self.procs[jobid], 'start')
             tid = self._submit_job(deepcopy(self.procs[jobid]),
