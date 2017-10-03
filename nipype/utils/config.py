@@ -202,14 +202,16 @@ class NipypeConfig(object):
             Xvfb = namedtuple('Xvfb', ['vdisplay_num', 'stop'])
             self._display = Xvfb(ndisp, _mock)
             return sysdisplay
-
         else:
+            # If $DISPLAY is empty, it confuses Xvfb so unset
+            if sysdisplay == '':
+                del os.environ['DISPLAY']
             try:
                 from xvfbwrapper import Xvfb
             except ImportError:
                 raise RuntimeError(
                     'A display server was required, but $DISPLAY is not defined '
-                    ' and Xvfb could not be imported.')
+                    'and Xvfb could not be imported.')
 
             self._display = Xvfb(nolisten='tcp')
             self._display.start()

@@ -39,3 +39,11 @@ def test_display_noconfig_nosystem(monkeypatch):
         config._config.remove_option('execution', 'display_variable')
     monkeypatch.delitem(os.environ, 'DISPLAY', raising=False)
     assert int(config.get_display().split(':')[-1]) > 80
+
+def test_display_empty(monkeypatch):
+    """Check that when no display is specified, a virtual Xvfb is used"""
+    config._display = None
+    if config.has_option('execution', 'display_variable'):
+        config._config.remove_option('execution', 'display_variable')
+    monkeypatch.setitem(os.environ, 'DISPLAY', '')
+    assert int(config.get_display().split(':')[-1]) > 80
