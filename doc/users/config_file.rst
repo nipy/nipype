@@ -69,12 +69,17 @@ Execution
 	``false``; default value: ``true``)
 
 *display_variable*
-	What ``DISPLAY`` variable should all command line interfaces be
-	run with. This is useful if you are using `xnest
-	<http://www.x.org/archive/X11R7.5/doc/man/man1/Xnest.1.html>`_
+	What ``$DISPLAY`` environment variable should utilize those interfaces
+	that require an X server. These interfaces should have  the attribute
+	``_redirect_x = True``. This option is very useful when the system has
+	an X server listening in the default port 6000, but ``$DISPLAY`` is
+	not defined. In that case, set ``display_variable = :0``. Similarly,
+	it can be used to point X-based interfaces to other servers, like VNC,
+	`xnest <http://www.x.org/archive/X11R7.5/doc/man/man1/Xnest.1.html>`_
 	or `Xvfb <http://www.x.org/archive/X11R6.8.1/doc/Xvfb.1.html>`_
 	and you would like to redirect all spawned windows to
-	it. (possible values: any X server address; default value: not
+	it. If not set, nipype will try to configure a new virtual server using
+	Xvfb. (possible values: any X server address; default value: not
 	set)
 
 *remove_unnecessary_outputs*
