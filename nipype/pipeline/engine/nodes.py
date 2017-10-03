@@ -1147,8 +1147,8 @@ class MapNode(Node):
         for i in range(nitems):
             nodename = '_' + self.name + str(i)
             node = Node(deepcopy(self._interface),
-                        n_procs=self.n_procs,
-                        mem_gb=self.mem_gb,
+                        n_procs=self._n_procs,
+                        mem_gb=self._mem_gb,
                         overwrite=self.overwrite,
                         needed_outputs=self.needed_outputs,
                         run_without_submitting=self.run_without_submitting,
