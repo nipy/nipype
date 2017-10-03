@@ -53,7 +53,7 @@ def test_RobustRegister_inputs():
     no_multi=dict(argstr='--nomulti',
     ),
     out_reg_file=dict(argstr='--lta %s',
-    genfile=True,
+    usedefault=True,
     ),
     outlier_limit=dict(argstr='--wlimit %.3f',
     ),
