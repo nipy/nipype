@@ -11,21 +11,19 @@ hash_method : content, timestamp
 '''
 from __future__ import print_function, division, unicode_literals, absolute_import
 import os
-import shutil
 import errno
-from warnings import warn
+import atexit
 from io import StringIO
 from distutils.version import LooseVersion
 from simplejson import load, dump
 import numpy as np
 
 from builtins import str, object, open
+from ..external import portalocker
+import configparser
+
 from future import standard_library
 standard_library.install_aliases()
-
-import configparser
-from ..external import portalocker
-
 
 NUMPY_MMAP = LooseVersion(np.__version__) >= LooseVersion('1.12.0')
 
@@ -194,6 +192,7 @@ class NipypeConfig(object):
         sysdisplay = sysdisplay or os.getenv('DISPLAY')
         if sysdisplay:
             from collections import namedtuple
+
             def _mock():
                 pass
 
@@ -222,3 +221,16 @@ class NipypeConfig(object):
 
             if hasattr(self._display, 'new_display'):
                 return ':%d' % self._display.new_display
+
+    def stop_display(self):
+        """Closes the display if started"""
+        if self._display is not None:
+            self._display.stop()
+
+
+@atexit.register
+def free_display():
+    from nipype import config
+    from nipype import logging
+    config.stop_display()
+    logging.getLogger('interface').info('Closing display (if virtual)')
