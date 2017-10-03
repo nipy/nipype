@@ -46,6 +46,7 @@ def get_info():
     """Returns package information"""
     return _get_pkg_info(os.path.dirname(__file__))
 
-from .pipeline import Node, MapNode, JoinNode, Workflow
-from .interfaces import (DataGrabber, DataSink, SelectFiles,
-                         IdentityInterface, Rename, Function, Select, Merge)
+# dj TODO: restore imports
+#from .pipeline import Node, MapNode, JoinNode, Workflow
+#from .interfaces import (DataGrabber, DataSink, SelectFiles,
+#                         IdentityInterface, Rename, Function, Select, Merge)

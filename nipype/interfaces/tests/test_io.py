@@ -16,7 +16,8 @@ from collections import namedtuple
 import pytest
 import nipype
 import nipype.interfaces.io as nio
-from nipype.interfaces.base import Undefined
+#from nipype.interfaces.base import Undefined
+import pdb
 
 # Check for boto
 noboto = False
@@ -47,16 +48,16 @@ from tempfile import mkstemp, mkdtemp
 
 def test_datagrabber():
     dg = nio.DataGrabber()
-    assert dg.inputs.template == Undefined
-    assert dg.inputs.base_directory == Undefined
+    assert dg.inputs.template is None
+    assert dg.inputs.base_directory is None
     assert dg.inputs.template_args == {'outfiles': []}
 
 
 @pytest.mark.skipif(noboto, reason="boto library is not available")
 def test_s3datagrabber():
     dg = nio.S3DataGrabber()
-    assert dg.inputs.template == Undefined
-    assert dg.inputs.local_directory == Undefined
+    assert dg.inputs.template is None
+    assert dg.inputs.local_directory is None
     assert dg.inputs.template_args == {'outfiles': []}
 
 
@@ -167,8 +168,8 @@ def test_datagrabber_order(tmpdir):
 def test_datasink():
     ds = nio.DataSink()
     assert ds.inputs.parameterization
-    assert ds.inputs.base_directory == Undefined
-    assert ds.inputs.strip_dir == Undefined
+    assert ds.inputs.base_directory is None
+    assert ds.inputs.strip_dir is None
     assert ds.inputs._outputs == {}
 
     ds = nio.DataSink(base_directory='foo')
@@ -404,12 +405,11 @@ def test_datafinder_unpack(tmpdir):
 def test_freesurfersource():
     fss = nio.FreeSurferSource()
     assert fss.inputs.hemi == 'both'
-    assert fss.inputs.subject_id == Undefined
-    assert fss.inputs.subjects_dir == Undefined
+    assert fss.inputs.subject_id is None
+    assert fss.inputs.subjects_dir is None
 
 
 def test_jsonsink_input(tmpdir):
-
     ds = nio.JSONFileSink()
     assert ds.inputs._outputs == {}
 
