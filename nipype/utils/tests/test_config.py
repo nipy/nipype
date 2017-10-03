@@ -3,8 +3,21 @@
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 from __future__ import print_function, division, unicode_literals, absolute_import
 import os
+import sys
 import pytest
 from nipype import config
+from mock import MagicMock
+from builtins import object
+
+try:
+    import xvfbwrapper
+    has_Xvfb = True
+except ImportError:
+    has_Xvfb = False
+
+xvfbpatch = MagicMock()
+xvfbpatch.Xvfb.return_value = MagicMock(vdisplay_num=2010)
+
 
 @pytest.mark.parametrize('dispnum', range(5))
 def test_display_config(monkeypatch, dispnum):
@@ -15,6 +28,7 @@ def test_display_config(monkeypatch, dispnum):
     monkeypatch.delitem(os.environ, 'DISPLAY', raising=False)
     assert config.get_display() == config.get('execution', 'display_variable')
 
+
 @pytest.mark.parametrize('dispnum', range(5))
 def test_display_system(monkeypatch, dispnum):
     """Check that when only a $DISPLAY is defined, it is used"""
@@ -24,6 +38,7 @@ def test_display_system(monkeypatch, dispnum):
     monkeypatch.setitem(os.environ, 'DISPLAY', dispstr)
     assert config.get_display() == dispstr
 
+
 def test_display_config_and_system(monkeypatch):
     """Check that when only both config and $DISPLAY are defined, the config takes precedence"""
     config._display = None
@@ -32,18 +47,64 @@ def test_display_config_and_system(monkeypatch):
     monkeypatch.setitem(os.environ, 'DISPLAY', dispstr)
     assert config.get_display() == dispstr
 
-def test_display_noconfig_nosystem(monkeypatch):
+
+def test_display_noconfig_nosystem_patched(monkeypatch):
     """Check that when no display is specified, a virtual Xvfb is used"""
     config._display = None
     if config.has_option('execution', 'display_variable'):
         config._config.remove_option('execution', 'display_variable')
     monkeypatch.delitem(os.environ, 'DISPLAY', raising=False)
-    assert int(config.get_display().split(':')[-1]) > 80
+    monkeypatch.setitem(sys.modules, 'xvfbwrapper', xvfbpatch)
+    assert config.get_display() == ":2010"
 
-def test_display_empty(monkeypatch):
+
+def test_display_empty_patched(monkeypatch):
     """Check that when no display is specified, a virtual Xvfb is used"""
     config._display = None
     if config.has_option('execution', 'display_variable'):
         config._config.remove_option('execution', 'display_variable')
     monkeypatch.setitem(os.environ, 'DISPLAY', '')
-    assert int(config.get_display().split(':')[-1]) > 80
+    monkeypatch.setitem(sys.modules, 'xvfbwrapper', xvfbpatch)
+    assert config.get_display() == ':2010'
+
+
+def test_display_noconfig_nosystem_notinstalled(monkeypatch):
+    """Check that when no display is specified, a virtual Xvfb is used"""
+    config._display = None
+    if config.has_option('execution', 'display_variable'):
+        config._config.remove_option('execution', 'display_variable')
+    monkeypatch.delitem(os.environ, 'DISPLAY', raising=False)
+    monkeypatch.setitem(sys.modules, 'xvfbwrapper', None)
+    with pytest.raises(RuntimeError):
+        config.get_display()
+
+
+def test_display_empty_notinstalled(monkeypatch):
+    """Check that when no display is specified, a virtual Xvfb is used"""
+    config._display = None
+    if config.has_option('execution', 'display_variable'):
+        config._config.remove_option('execution', 'display_variable')
+    monkeypatch.setitem(os.environ, 'DISPLAY', '')
+    monkeypatch.setitem(sys.modules, 'xvfbwrapper', None)
+    with pytest.raises(RuntimeError):
+        config.get_display()
+
+
+@pytest.mark.skipif(not has_Xvfb, reason='xvfbwrapper not installed')
+def test_display_noconfig_nosystem_installed(monkeypatch):
+    """Check that when no display is specified, a virtual Xvfb is used"""
+    config._display = None
+    if config.has_option('execution', 'display_variable'):
+        config._config.remove_option('execution', 'display_variable')
+    monkeypatch.delitem(os.environ, 'DISPLAY', raising=False)
+    assert int(config.get_display().split(':')[-1]) > 1000
+
+
+@pytest.mark.skipif(not has_Xvfb, reason='xvfbwrapper not installed')
+def test_display_empty_installed(monkeypatch):
+    """Check that when no display is specified, a virtual Xvfb is used"""
+    config._display = None
+    if config.has_option('execution', 'display_variable'):
+        config._config.remove_option('execution', 'display_variable')
+    monkeypatch.setitem(os.environ, 'DISPLAY', '')
+    assert int(config.get_display().split(':')[-1]) > 1000

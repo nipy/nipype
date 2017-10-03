@@ -217,8 +217,8 @@ class NipypeConfig(object):
             self._display.start()
 
             # Older versions of Xvfb used vdisplay_num
-            if hasattr(self._display, 'new_display'):
-                setattr(self._display, 'vdisplay_num',
-                        self._display.new_display)
+            if hasattr(self._display, 'vdisplay_num'):
+                return ':%d' % self._display.vdisplay_num
 
-            return ':%d' % self._display.vdisplay_num
+            if hasattr(self._display, 'new_display'):
+                return ':%d' % self._display.new_display
