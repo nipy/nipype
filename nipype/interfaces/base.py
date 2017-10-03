@@ -1010,32 +1010,6 @@ class BaseInterface(Interface):
                                          version, max_ver))
         return unavailable_traits
 
-    def _run_wrapper(self, runtime):
-        sysdisplay = os.getenv('DISPLAY')
-        if self._redirect_x:
-            try:
-                from xvfbwrapper import Xvfb
-            except ImportError:
-                iflogger.error('Xvfb wrapper could not be imported')
-                raise
-
-            vdisp = Xvfb(nolisten='tcp')
-            vdisp.start()
-            try:
-                vdisp_num = vdisp.new_display
-            except AttributeError:  # outdated version of xvfbwrapper
-                vdisp_num = vdisp.vdisplay_num
-
-            iflogger.info('Redirecting X to :%d' % vdisp_num)
-            runtime.environ['DISPLAY'] = ':%d' % vdisp_num
-
-        runtime = self._run_interface(runtime)
-
-        if self._redirect_x:
-            vdisp.stop()
-
-        return runtime
-
     def _run_interface(self, runtime):
         """ Core function that executes interface
         """
@@ -1071,6 +1045,9 @@ class BaseInterface(Interface):
 
         # initialize provenance tracking
         env = deepcopy(dict(os.environ))
+        if self._redirect_x:
+            env['DISPLAY'] = config.get_display()
+
         runtime = Bunch(cwd=os.getcwd(),
                         returncode=None,
                         duration=None,
@@ -1080,8 +1057,9 @@ class BaseInterface(Interface):
                         platform=platform.platform(),
                         hostname=platform.node(),
                         version=self.version)
+
         try:
-            runtime = self._run_wrapper(runtime)
+            runtime = self._run_interface(runtime)
             outputs = self.aggregate_outputs(runtime)
             runtime.endTime = dt.isoformat(dt.utcnow())
             timediff = parseutc(runtime.endTime) - parseutc(runtime.startTime)
@@ -1446,7 +1424,7 @@ def get_max_resources_used(pid, mem_mb, num_threads, pyfunc=False):
     return mem_mb, num_threads
 
 
-def run_command(runtime, output=None, timeout=0.01, redirect_x=False):
+def run_command(runtime, output=None, timeout=0.01):
     """Run a command, read stdout and stderr, prefix with timestamp.
 
     The returned runtime contains a merged stdout+stderr log with timestamps
@@ -1458,13 +1436,6 @@ def run_command(runtime, output=None, timeout=0.01, redirect_x=False):
     # Init variables
     PIPE = subprocess.PIPE
     cmdline = runtime.cmdline
-
-    if redirect_x:
-        exist_xvfb, _ = _exists_in_path('xvfb-run', runtime.environ)
-        if not exist_xvfb:
-            raise RuntimeError('Xvfb was not found, X redirection aborted')
-        cmdline = 'xvfb-run -a ' + cmdline
-
     env = _canonicalize_env(runtime.environ)
 
     default_encoding = locale.getdefaultlocale()[1]
@@ -1727,14 +1698,6 @@ class CommandLine(BaseInterface):
             print(allhelp)
 
     def _get_environ(self):
-        out_environ = {}
-        if not self._redirect_x:
-            try:
-                display_var = config.get('execution', 'display_variable')
-                out_environ = {'DISPLAY': display_var}
-            except NoOptionError:
-                pass
-        iflogger.debug(out_environ)
         if isdefined(self.inputs.environ):
             out_environ.update(self.inputs.environ)
         return out_environ
@@ -1753,10 +1716,6 @@ class CommandLine(BaseInterface):
                                     )
             o, e = proc.communicate()
             return o
-
-    def _run_wrapper(self, runtime):
-        runtime = self._run_interface(runtime)
-        return runtime
 
     def _run_interface(self, runtime, correct_return_codes=(0,)):
         """Execute command via subprocess
@@ -1785,8 +1744,7 @@ class CommandLine(BaseInterface):
         setattr(runtime, 'command_path', cmd_path)
         setattr(runtime, 'dependencies', get_dependencies(executable_name,
                                                           runtime.environ))
-        runtime = run_command(runtime, output=self.inputs.terminal_output,
-                              redirect_x=self._redirect_x)
+        runtime = run_command(runtime, output=self.inputs.terminal_output)
         if runtime.returncode is None or \
                 runtime.returncode not in correct_return_codes:
             self.raise_exception(runtime)

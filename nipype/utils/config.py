@@ -44,7 +44,6 @@ log_rotate = 4
 [execution]
 create_report = true
 crashdump_dir = %s
-display_variable = :1
 hash_method = timestamp
 job_finished_timeout = 5
 keep_inputs = false
@@ -82,7 +81,8 @@ def mkdir_p(path):
 
 
 class NipypeConfig(object):
-    """Base nipype config class
+    """
+    Base nipype config class
     """
 
     def __init__(self, *args, **kwargs):
@@ -91,6 +91,7 @@ class NipypeConfig(object):
         config_file = os.path.join(config_dir, 'nipype.cfg')
         self.data_file = os.path.join(config_dir, 'nipype.json')
         self._config.readfp(StringIO(default_cfg))
+        self._display = None
         if os.path.exists(config_dir):
             self._config.read([config_file, 'nipype.cfg'])
 
@@ -172,3 +173,50 @@ class NipypeConfig(object):
     def enable_provenance(self):
         self._config.set('execution', 'write_provenance', 'true')
         self._config.set('execution', 'hash_method', 'content')
+
+    def get_display(self):
+        """Returns the first display available"""
+
+        # Check if an Xorg server is listening
+        # import subprocess as sp
+        # if not hasattr(sp, 'DEVNULL'):
+        #     setattr(sp, 'DEVNULL', os.devnull)
+        # x_listening = bool(sp.call('ps au | grep -v grep | grep -i xorg',
+        #                    shell=True, stdout=sp.DEVNULL))
+
+        if self._display is not None:
+            return ':%d' % self._display.vdisplay_num
+
+        sysdisplay = None
+        if self._config.has_option('execution', 'display_variable'):
+            sysdisplay = self._config.get('execution', 'display_variable')
+
+        sysdisplay = sysdisplay or os.getenv('DISPLAY')
+        if sysdisplay:
+            from collections import namedtuple
+            def _mock():
+                pass
+
+            # Store a fake Xvfb object
+            ndisp = int(sysdisplay.split(':')[-1])
+            Xvfb = namedtuple('Xvfb', ['vdisplay_num', 'stop'])
+            self._display = Xvfb(ndisp, _mock)
+            return sysdisplay
+
+        else:
+            try:
+                from xvfbwrapper import Xvfb
+            except ImportError:
+                raise RuntimeError(
+                    'A display server was required, but $DISPLAY is not defined '
+                    ' and Xvfb could not be imported.')
+
+            self._display = Xvfb(nolisten='tcp')
+            self._display.start()
+
+            # Older versions of Xvfb used vdisplay_num
+            if hasattr(self._display, 'new_display'):
+                setattr(self._display, 'vdisplay_num',
+                        self._display.new_display)
+
+            return ':%d' % self._display.vdisplay_num
