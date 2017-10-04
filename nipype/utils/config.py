@@ -13,25 +13,18 @@ from __future__ import print_function, division, unicode_literals, absolute_impo
 import os
 import errno
 import atexit
+from warnings import warn
 from io import StringIO
 from distutils.version import LooseVersion
 import configparser
 import numpy as np
 
-<<<<<<< HEAD
-from builtins import str, object, open
-from ..external import portalocker
-import configparser
-
-from future import standard_library
-standard_library.install_aliases()
-=======
 from builtins import bytes, str, object, open
-
 from simplejson import load, dump
 from future import standard_library
-from ..external import portalocker
+
 from .misc import str2bool
+from ..external import portalocker
 
 standard_library.install_aliases()
 
@@ -40,7 +33,6 @@ CONFIG_DEPRECATIONS = {
     'profile_runtime': ('resource_monitor', '1.0'),
     'filemanip_level': ('utils_level', '1.0'),
 }
->>>>>>> upstream/master
 
 NUMPY_MMAP = LooseVersion(np.__version__) >= LooseVersion('1.12.0')
 
@@ -97,9 +89,7 @@ def mkdir_p(path):
 
 
 class NipypeConfig(object):
-    """
-    Base nipype config class
-    """
+    """Base nipype config class"""
 
     def __init__(self, *args, **kwargs):
         self._config = configparser.ConfigParser()
@@ -107,11 +97,9 @@ class NipypeConfig(object):
         config_file = os.path.join(config_dir, 'nipype.cfg')
         self.data_file = os.path.join(config_dir, 'nipype.json')
         self._config.readfp(StringIO(default_cfg))
-<<<<<<< HEAD
         self._display = None
-=======
         self._resource_monitor = None
->>>>>>> upstream/master
+
         if os.path.exists(config_dir):
             self._config.read([config_file, 'nipype.cfg'])
 
@@ -127,8 +115,7 @@ class NipypeConfig(object):
         self._config.readfp(StringIO(default_cfg))
 
     def enable_debug_mode(self):
-        """Enables debug configuration
-        """
+        """Enables debug configuration"""
         self._config.set('execution', 'stop_on_first_crash', 'true')
         self._config.set('execution', 'remove_unnecessary_outputs', 'false')
         self._config.set('execution', 'keep_inputs', 'true')
@@ -144,6 +131,7 @@ class NipypeConfig(object):
         self._config.set('logging', 'log_directory', log_dir)
 
     def get(self, section, option, default=None):
+        """Get an option"""
         if option in CONFIG_DEPRECATIONS:
             msg = ('Config option "%s" has been deprecated as of nipype %s. Please use '
                    '"%s" instead.') % (option, CONFIG_DEPRECATIONS[option][1],
@@ -156,6 +144,7 @@ class NipypeConfig(object):
         return default
 
     def set(self, section, option, value):
+        """Set new value on option"""
         if isinstance(value, bool):
             value = str(value)
 
@@ -169,9 +158,11 @@ class NipypeConfig(object):
         return self._config.set(section, option, value)
 
     def getboolean(self, section, option):
+        """Get a boolean option from section"""
         return self._config.getboolean(section, option)
 
     def has_option(self, section, option):
+        """Check if option exists in section"""
         return self._config.has_option(section, option)
 
     @property
@@ -179,6 +170,7 @@ class NipypeConfig(object):
         return self._config._sections
 
     def get_data(self, key):
+        """Read options file"""
         if not os.path.exists(self.data_file):
             return None
         with open(self.data_file, 'rt') as file:
@@ -189,6 +181,7 @@ class NipypeConfig(object):
         return None
 
     def save_data(self, key, value):
+        """Store config flie"""
         datadict = {}
         if os.path.exists(self.data_file):
             with open(self.data_file, 'rt') as file:
@@ -204,6 +197,7 @@ class NipypeConfig(object):
             dump(datadict, file)
 
     def update_config(self, config_dict):
+        """Extend internal dictionary with config_dict"""
         for section in ['execution', 'logging', 'check']:
             if section in config_dict:
                 for key, val in list(config_dict[section].items()):
@@ -211,14 +205,55 @@ class NipypeConfig(object):
                         self._config.set(section, key, str(val))
 
     def update_matplotlib(self):
+        """Set backend on matplotlib from options"""
         import matplotlib
         matplotlib.use(self.get('execution', 'matplotlib_backend'))
 
     def enable_provenance(self):
+        """Sets provenance storing on"""
         self._config.set('execution', 'write_provenance', 'true')
         self._config.set('execution', 'hash_method', 'content')
 
-<<<<<<< HEAD
+    @property
+    def resource_monitor(self):
+        """Check if resource_monitor is available"""
+        if self._resource_monitor is not None:
+            return self._resource_monitor
+
+        # Cache config from nipype config
+        self.resource_monitor = self._config.get(
+            'execution', 'resource_monitor') or False
+        return self._resource_monitor
+
+    @resource_monitor.setter
+    def resource_monitor(self, value):
+        # Accept string true/false values
+        if isinstance(value, (str, bytes)):
+            value = str2bool(value.lower())
+
+        if value is False:
+            self._resource_monitor = False
+        elif value is True:
+            if not self._resource_monitor:
+                # Before setting self._resource_monitor check psutil availability
+                self._resource_monitor = False
+                try:
+                    import psutil
+                    self._resource_monitor = LooseVersion(
+                        psutil.__version__) >= LooseVersion('5.0')
+                except ImportError:
+                    pass
+                finally:
+                    if not self._resource_monitor:
+                        warn('Could not enable the resource monitor: psutil>=5.0'
+                             ' could not be imported.')
+                    self._config.set('execution', 'resource_monitor',
+                                     ('%s' % self._resource_monitor).lower())
+
+    def enable_resource_monitor(self):
+        """Sets the resource monitor on"""
+        self.resource_monitor = True
+
     def get_display(self):
         """Returns the first display available"""
 
@@ -277,47 +312,8 @@ class NipypeConfig(object):
 
 @atexit.register
 def free_display():
+    """Stop virtual display (if it is up)"""
     from nipype import config
     from nipype import logging
     config.stop_display()
     logging.getLogger('interface').info('Closing display (if virtual)')
-=======
-    @property
-    def resource_monitor(self):
-        """Check if resource_monitor is available"""
-        if self._resource_monitor is not None:
-            return self._resource_monitor
-
-        # Cache config from nipype config
-        self.resource_monitor = self._config.get(
-            'execution', 'resource_monitor') or False
-        return self._resource_monitor
-
-    @resource_monitor.setter
-    def resource_monitor(self, value):
-        # Accept string true/false values
-        if isinstance(value, (str, bytes)):
-            value = str2bool(value.lower())
-
-        if value is False:
-            self._resource_monitor = False
-        elif value is True:
-            if not self._resource_monitor:
-                # Before setting self._resource_monitor check psutil availability
-                self._resource_monitor = False
-                try:
-                    import psutil
-                    self._resource_monitor = LooseVersion(
-                        psutil.__version__) >= LooseVersion('5.0')
-                except ImportError:
-                    pass
-                finally:
-                    if not self._resource_monitor:
-                        warn('Could not enable the resource monitor: psutil>=5.0'
-                             ' could not be imported.')
-                    self._config.set('execution', 'resource_monitor',
-                                     ('%s' % self._resource_monitor).lower())
-
-    def enable_resource_monitor(self):
-        self.resource_monitor = True
->>>>>>> upstream/master
