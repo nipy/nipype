@@ -3,24 +3,23 @@
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 from __future__ import print_function, unicode_literals
 from future import standard_library
-standard_library.install_aliases()
-
-from builtins import open, str, bytes
+from builtins import open, str
 import os
 import warnings
 import simplejson as json
 
 import pytest
+import traits.api as traits
 from nipype.testing import example_data
-
 import nipype.interfaces.base as nib
 from nipype.utils.filemanip import split_filename
 from nipype.interfaces.base import Undefined, config
-import traits.api as traits
+standard_library.install_aliases()
+
 
 @pytest.mark.parametrize("args", [
-        {},
-        {'a' : 1, 'b' : [2, 3]}
+    {},
+    {'a': 1, 'b': [2, 3]}
 ])
 def test_bunch(args):
     b = nib.Bunch(**args)
@@ -31,7 +30,7 @@ def test_bunch_attribute():
     b = nib.Bunch(a=1, b=[2, 3], c=None)
     assert b.a == 1
     assert b.b == [2, 3]
-    assert b.c == None
+    assert b.c is None
 
 
 def test_bunch_repr():
@@ -66,7 +65,7 @@ def test_bunch_hash():
     with open(json_pth, 'r') as fp:
         jshash.update(fp.read().encode('utf-8'))
     assert newbdict['infile'][0][1] == jshash.hexdigest()
-    assert newbdict['yat'] == True
+    assert newbdict['yat'] is True
 
 
 @pytest.fixture(scope="module")
@@ -654,49 +653,88 @@ def test_Commandline_environ():
     assert res.runtime.environ['DISPLAY'] == ':2'
 
 
-def test_CommandLine_output(setup_file):
-    tmp_infile = setup_file
-    tmpd, name = os.path.split(tmp_infile)
-    assert os.path.exists(tmp_infile)
+def test_CommandLine_output(tmpdir):
+    # Create a file
+    name = 'foo.txt'
+    tmpdir.chdir()
+    tmpdir.join(name).write('foo')
+
     ci = nib.CommandLine(command='ls -l')
     ci.terminal_output = 'allatonce'
     res = ci.run()
     assert res.runtime.merged == ''
     assert name in res.runtime.stdout
+
+    # Check stdout is written
     ci = nib.CommandLine(command='ls -l')
-    ci.terminal_output = 'file'
+    ci.terminal_output = 'file_stdout'
     res = ci.run()
-    assert 'stdout.nipype' in res.runtime.stdout
-    assert isinstance(res.runtime.stdout, (str, bytes))
+    assert os.path.isfile('stdout.nipype')
+    assert name in res.runtime.stdout
+    tmpdir.join('stdout.nipype').remove(ignore_errors=True)
+
+    # Check stderr is written
+    ci = nib.CommandLine(command='ls -l')
+    ci.terminal_output = 'file_stderr'
+    res = ci.run()
+    assert os.path.isfile('stderr.nipype')
+    tmpdir.join('stderr.nipype').remove(ignore_errors=True)
+
+    # Check outputs are thrown away
     ci = nib.CommandLine(command='ls -l')
     ci.terminal_output = 'none'
     res = ci.run()
-    assert res.runtime.stdout == ''
+    assert res.runtime.stdout == '' and \
+        res.runtime.stderr == '' and \
+        res.runtime.merged == ''
+
+    # Check that new interfaces are set to default 'stream'
     ci = nib.CommandLine(command='ls -l')
     res = ci.run()
-    assert 'stdout.nipype' in res.runtime.stdout
+    assert ci.terminal_output == 'stream'
+    assert name in res.runtime.stdout and \
+        res.runtime.stderr == ''
 
-
-def test_global_CommandLine_output(setup_file):
-    tmp_infile = setup_file
-    tmpd, name = os.path.split(tmp_infile)
+    # Check only one file is generated
     ci = nib.CommandLine(command='ls -l')
+    ci.terminal_output = 'file'
     res = ci.run()
+    assert os.path.isfile('output.nipype')
+    assert name in res.runtime.merged and \
+        res.runtime.stdout == '' and \
+        res.runtime.stderr == ''
+    tmpdir.join('output.nipype').remove(ignore_errors=True)
+
+    # Check split files are generated
+    ci = nib.CommandLine(command='ls -l')
+    ci.terminal_output = 'file_split'
+    res = ci.run()
+    assert os.path.isfile('stdout.nipype')
+    assert os.path.isfile('stderr.nipype')
     assert name in res.runtime.stdout
-    assert os.path.exists(tmp_infile)
+
+
+def test_global_CommandLine_output(tmpdir):
+    """Ensures CommandLine.set_default_terminal_output works"""
+    from nipype.interfaces.fsl import BET
+
+    ci = nib.CommandLine(command='ls -l')
+    assert ci.terminal_output == 'stream'  # default case
+
+    ci = BET()
+    assert ci.terminal_output == 'stream'  # default case
+
     nib.CommandLine.set_default_terminal_output('allatonce')
     ci = nib.CommandLine(command='ls -l')
-    res = ci.run()
-    assert res.runtime.merged == ''
-    assert name in res.runtime.stdout
+    assert ci.terminal_output == 'allatonce'
+
     nib.CommandLine.set_default_terminal_output('file')
     ci = nib.CommandLine(command='ls -l')
-    res = ci.run()
-    assert 'stdout.nipype' in res.runtime.stdout
-    nib.CommandLine.set_default_terminal_output('none')
-    ci = nib.CommandLine(command='ls -l')
-    res = ci.run()
-    assert res.runtime.stdout == ''
+    assert ci.terminal_output == 'file'
+
+    # Check default affects derived interfaces
+    ci = BET()
+    assert ci.terminal_output == 'file'
 
 
 def check_dict(ref_dict, tst_dict):

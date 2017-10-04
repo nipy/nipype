@@ -51,7 +51,7 @@ FLOAT_FORMAT = '{:.10f}'.format
 PY35 = sys.version_info >= (3, 5)
 PY3 = sys.version_info[0] > 2
 VALID_TERMINAL_OUTPUT = ['stream', 'allatonce', 'file', 'file_split',
-                         'file_stdout', 'file_stderr', 'discard']
+                         'file_stdout', 'file_stderr', 'none']
 __docformat__ = 'restructuredtext'
 
 
