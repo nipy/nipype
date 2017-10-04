@@ -11,6 +11,7 @@ hash_method : content, timestamp
 '''
 from __future__ import print_function, division, unicode_literals, absolute_import
 import os
+import sys
 import errno
 import atexit
 from warnings import warn
@@ -284,6 +285,14 @@ class NipypeConfig(object):
             self._display = Xvfb(ndisp, _mock)
             return sysdisplay
         else:
+            if 'darwin' in sys.platform:
+                raise RuntimeError(
+                    'Xvfb requires root permissions to run in OSX. Please '
+                    'make sure that an X server is listening and set the '
+                    'appropriate config on either $DISPLAY or nipype\'s '
+                    '"display_variable" config. Valid X servers include '
+                    'VNC, XQuartz, or manually started Xvfb.')
+
             # If $DISPLAY is empty, it confuses Xvfb so unset
             if sysdisplay == '':
                 del os.environ['DISPLAY']

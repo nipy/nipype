@@ -108,3 +108,15 @@ def test_display_empty_installed(monkeypatch):
         config._config.remove_option('execution', 'display_variable')
     monkeypatch.setitem(os.environ, 'DISPLAY', '')
     assert int(config.get_display().split(':')[-1]) > 1000
+
+
+def test_display_empty_macosx(monkeypatch):
+    """Check that when no display is specified, a virtual Xvfb is used"""
+    config._display = None
+    if config.has_option('execution', 'display_variable'):
+        config._config.remove_option('execution', 'display_variable')
+    monkeypatch.delitem(os.environ, 'DISPLAY', '')
+
+    monkeypatch.setattr(sys, 'platform', 'darwin')
+    with pytest.raises(RuntimeError):
+        config.get_display()
