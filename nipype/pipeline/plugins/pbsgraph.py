@@ -55,6 +55,7 @@ class PBSGraphPlugin(SGEGraphPlugin):
                                                              qsub_args,
                                                              batchscriptfile))
         cmd = CommandLine('sh', environ=dict(os.environ),
+                          resource_monitor=False,
                           terminal_output='allatonce')
         cmd.inputs.args = '%s' % submitjobsfile
         cmd.run()
