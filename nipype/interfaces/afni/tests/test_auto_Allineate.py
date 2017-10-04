@@ -119,6 +119,10 @@ def test_Allineate_inputs():
     ),
     weight=dict(argstr='-weight %s',
     ),
+    weight_file=dict(argstr='-weight %s',
+    deprecated='1.0.0',
+    new_name='weight',
+    ),
     zclip=dict(argstr='-zclip',
     ),
     )
