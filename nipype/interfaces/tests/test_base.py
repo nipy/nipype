@@ -659,17 +659,17 @@ def test_CommandLine_output(setup_file):
     tmpd, name = os.path.split(tmp_infile)
     assert os.path.exists(tmp_infile)
     ci = nib.CommandLine(command='ls -l')
-    ci.inputs.terminal_output = 'allatonce'
+    ci.terminal_output = 'allatonce'
     res = ci.run()
     assert res.runtime.merged == ''
     assert name in res.runtime.stdout
     ci = nib.CommandLine(command='ls -l')
-    ci.inputs.terminal_output = 'file'
+    ci.terminal_output = 'file'
     res = ci.run()
     assert 'stdout.nipype' in res.runtime.stdout
     assert isinstance(res.runtime.stdout, (str, bytes))
     ci = nib.CommandLine(command='ls -l')
-    ci.inputs.terminal_output = 'none'
+    ci.terminal_output = 'none'
     res = ci.run()
     assert res.runtime.stdout == ''
     ci = nib.CommandLine(command='ls -l')

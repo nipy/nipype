@@ -50,6 +50,8 @@ iflogger = logging.getLogger('interface')
 FLOAT_FORMAT = '{:.10f}'.format
 PY35 = sys.version_info >= (3, 5)
 PY3 = sys.version_info[0] > 2
+VALID_TERMINAL_OUTPUT = ['stream', 'allatonce', 'file', 'file_split',
+                         'file_stdout', 'file_stderr', 'discard']
 __docformat__ = 'restructuredtext'
 
 
@@ -1333,28 +1335,39 @@ def run_command(runtime, output=None, timeout=0.01, redirect_x=False):
     default_encoding = locale.getdefaultlocale()[1]
     if default_encoding is None:
         default_encoding = 'UTF-8'
-    if output == 'file':
-        errfile = os.path.join(runtime.cwd, 'stderr.nipype')
-        outfile = os.path.join(runtime.cwd, 'stdout.nipype')
-        stderr = open(errfile, 'wb')  # t=='text'===default
-        stdout = open(outfile, 'wb')
 
-        proc = sp.Popen(cmdline,
-                        stdout=stdout,
-                        stderr=stderr,
-                        shell=True,
-                        cwd=runtime.cwd,
-                        env=env)
-    else:
-        proc = sp.Popen(cmdline,
-                        stdout=sp.PIPE,
-                        stderr=sp.PIPE,
-                        shell=True,
-                        cwd=runtime.cwd,
-                        env=env)
-    result = {}
-    errfile = os.path.join(runtime.cwd, 'stderr.nipype')
-    outfile = os.path.join(runtime.cwd, 'stdout.nipype')
+    errfile = None
+    outfile = None
+    stdout = sp.PIPE
+    stderr = sp.PIPE
+
+    if output == 'file':
+        outfile = os.path.join(runtime.cwd, 'output.nipype')
+        stdout = open(outfile, 'wb')  # t=='text'===default
+        stderr = sp.STDOUT
+    elif output == 'file_split':
+        outfile = os.path.join(runtime.cwd, 'stdout.nipype')
+        stdout = open(outfile, 'wb')
+        errfile = os.path.join(runtime.cwd, 'stderr.nipype')
+        stderr = open(errfile, 'wb')
+    elif output == 'file_stdout':
+        outfile = os.path.join(runtime.cwd, 'stdout.nipype')
+        stdout = open(outfile, 'wb')
+    elif output == 'file_stderr':
+        errfile = os.path.join(runtime.cwd, 'stderr.nipype')
+        stderr = open(errfile, 'wb')
+
+    proc = sp.Popen(cmdline,
+                    stdout=stdout,
+                    stderr=stderr,
+                    shell=True,
+                    cwd=runtime.cwd,
+                    env=env)
+    result = {
+        'stdout': [],
+        'stderr': [],
+        'merged': [],
+    }
 
     if output == 'stream':
         streams = [Stream('stdout', proc.stdout), Stream('stderr', proc.stderr)]
@@ -1363,7 +1376,7 @@ def run_command(runtime, output=None, timeout=0.01, redirect_x=False):
             try:
                 res = select.select(streams, [], [], timeout)
             except select.error as e:
-                iflogger.info(str(e))
+                iflogger.info(e)
                 if e[0] == errno.EINTR:
                     return
                 else:
@@ -1390,29 +1403,29 @@ def run_command(runtime, output=None, timeout=0.01, redirect_x=False):
 
     if output == 'allatonce':
         stdout, stderr = proc.communicate()
-        stdout = stdout.decode(default_encoding)
-        stderr = stderr.decode(default_encoding)
-        result['stdout'] = stdout.split('\n')
-        result['stderr'] = stderr.split('\n')
-        result['merged'] = ''
-    if output == 'file':
+        result['stdout'] = stdout.decode(default_encoding).split('\n')
+        result['stderr'] = stderr.decode(default_encoding).split('\n')
+
+    elif output.startswith('file'):
         proc.wait()
-        stderr.flush()
-        stdout.flush()
-        result['stdout'] = [line.decode(default_encoding).strip()
-                            for line in open(outfile, 'rb').readlines()]
-        result['stderr'] = [line.decode(default_encoding).strip()
-                            for line in open(errfile, 'rb').readlines()]
-        result['merged'] = ''
-    if output == 'none':
-        proc.communicate()
-        result['stdout'] = []
-        result['stderr'] = []
-        result['merged'] = ''
+        if outfile is not None:
+            stdout.flush()
+            result['stdout'] = [line.decode(default_encoding).strip()
+                                for line in open(outfile, 'rb').readlines()]
+        if errfile is not None:
+            stderr.flush()
+            result['stderr'] = [line.decode(default_encoding).strip()
+                                for line in open(errfile, 'rb').readlines()]
+
+        if output == 'file':
+            result['merged'] = result['stdout']
+            result['stdout'] = []
+    else:
+        proc.communicate()  # Discard stdout and stderr
 
     runtime.stderr = '\n'.join(result['stderr'])
     runtime.stdout = '\n'.join(result['stdout'])
-    runtime.merged = result['merged']
+    runtime.merged = '\n'.join(result['merged'])
     runtime.returncode = proc.returncode
     return runtime
 
@@ -1448,6 +1461,7 @@ class CommandLineInputSpec(BaseInterfaceInputSpec):
     # This input does not have a "usedefault=True" so the set_default_terminal_output()
     # method would work
     terminal_output = traits.Enum('stream', 'allatonce', 'file', 'none',
+                                  deprecated='1.0.0',
                                   desc=('Control terminal output: `stream` - '
                                         'displays to terminal immediately (default), '
                                         '`allatonce` - waits till command is '
@@ -1484,7 +1498,7 @@ class CommandLine(BaseInterface):
     {'args': '-al',
      'environ': {'DISPLAY': ':1'},
      'ignore_exception': False,
-     'terminal_output': 'stream'}
+     'terminal_output': <undefined>}
 
     >>> cli.inputs.get_hashval()[0][0] # doctest: +ALLOW_UNICODE
     ('args', '-al')
@@ -1497,25 +1511,6 @@ class CommandLine(BaseInterface):
     _version = None
     _terminal_output = 'stream'
 
-    def __init__(self, command=None, **inputs):
-        super(CommandLine, self).__init__(**inputs)
-        self._environ = None
-        if not hasattr(self, '_cmd'):
-            self._cmd = None
-        if self.cmd is None and command is None:
-            raise Exception("Missing command")
-        if command:
-            self._cmd = command
-        self.inputs.on_trait_change(self._terminal_output_update,
-                                    'terminal_output')
-        if not isdefined(self.inputs.terminal_output):
-            self.inputs.terminal_output = self._terminal_output
-        else:
-            self._terminal_output_update()
-
-    def _terminal_output_update(self):
-        self._terminal_output = self.inputs.terminal_output
-
     @classmethod
     def set_default_terminal_output(cls, output_type):
         """Set the default terminal output for CommandLine Interfaces.
@@ -1523,14 +1518,38 @@ class CommandLine(BaseInterface):
         This method is used to set default terminal output for
         CommandLine Interfaces.  However, setting this will not
         update the output type for any existing instances.  For these,
-        assign the <instance>.inputs.terminal_output.
+        assign the <instance>.terminal_output.
         """
 
-        if output_type in ['stream', 'allatonce', 'file', 'none']:
+        if output_type in VALID_TERMINAL_OUTPUT:
             cls._terminal_output = output_type
         else:
             raise AttributeError('Invalid terminal output_type: %s' %
                                  output_type)
+
+    @classmethod
+    def help(cls, returnhelp=False):
+        allhelp = 'Wraps command **{cmd}**\n\n{help}'.format(
+            cmd=cls._cmd, help=super(CommandLine, cls).help(returnhelp=True))
+        if returnhelp:
+            return allhelp
+        print(allhelp)
+
+    def __init__(self, command=None, terminal_output=None, **inputs):
+        super(CommandLine, self).__init__(**inputs)
+        self._environ = None
+        # Set command. Input argument takes precedence
+        self._cmd = command or getattr(self, '_cmd', None)
+
+        if self._cmd is None:
+            raise Exception("Missing command")
+
+        if terminal_output is not None:
+            self.terminal_output = terminal_output
+
+        # Attach terminal_output callback for backwards compatibility
+        self.inputs.on_trait_change(self._terminal_output_update,
+                                    'terminal_output')
 
     @property
     def cmd(self):
@@ -1542,26 +1561,29 @@ class CommandLine(BaseInterface):
         """ `command` plus any arguments (args)
         validates arguments and generates command line"""
         self._check_mandatory_inputs()
-        allargs = self._parse_inputs()
-        allargs.insert(0, self.cmd)
+        allargs = [self.cmd] + self._parse_inputs()
         return ' '.join(allargs)
+
+    @property
+    def terminal_output(self):
+        return self._terminal_output
+
+    @terminal_output.setter
+    def terminal_output(self, value):
+        if value not in VALID_TERMINAL_OUTPUT:
+            raise RuntimeError(
+                'Setting invalid value "%s" for terminal_output. Valid values are '
+                '%s.' % (value, ', '.join(['"%s"' % v for v in VALID_TERMINAL_OUTPUT])))
+        self._terminal_output = value
+
+    def _terminal_output_update(self):
+        self.terminal_output = self.terminal_output
 
     def raise_exception(self, runtime):
         raise RuntimeError(
             ('Command:\n{cmdline}\nStandard output:\n{stdout}\n'
              'Standard error:\n{stderr}\nReturn code: {returncode}').format(
                  **runtime.dictcopy()))
-
-    @classmethod
-    def help(cls, returnhelp=False):
-        allhelp = super(CommandLine, cls).help(returnhelp=True)
-
-        allhelp = "Wraps command **%s**\n\n" % cls._cmd + allhelp
-
-        if returnhelp:
-            return allhelp
-        else:
-            print(allhelp)
 
     def _get_environ(self):
         out_environ = {}
@@ -1608,21 +1630,25 @@ class CommandLine(BaseInterface):
             adds stdout, stderr, merged, cmdline, dependencies, command_path
 
         """
-        setattr(runtime, 'stdout', None)
-        setattr(runtime, 'stderr', None)
-        setattr(runtime, 'cmdline', self.cmdline)
+
         out_environ = self._get_environ()
+        # Initialize runtime Bunch
+        runtime.stdout = None
+        runtime.stderr = None
+        runtime.cmdline = self.cmdline
         runtime.environ.update(out_environ)
+
+        # which $cmd
         executable_name = self.cmd.split()[0]
         exist_val, cmd_path = _exists_in_path(executable_name,
                                               runtime.environ)
         if not exist_val:
             raise IOError("command '%s' could not be found on host %s" %
                           (self.cmd.split()[0], runtime.hostname))
-        setattr(runtime, 'command_path', cmd_path)
-        setattr(runtime, 'dependencies', get_dependencies(executable_name,
-                                                          runtime.environ))
-        runtime = run_command(runtime, output=self.inputs.terminal_output,
+
+        runtime.command_path = cmd_path
+        runtime.dependencies = get_dependencies(executable_name, runtime.environ)
+        runtime = run_command(runtime, output=self.terminal_output,
                               redirect_x=self._redirect_x)
         if runtime.returncode is None or \
                 runtime.returncode not in correct_return_codes:
@@ -1636,14 +1662,10 @@ class CommandLine(BaseInterface):
         Formats a trait containing argstr metadata
         """
         argstr = trait_spec.argstr
-        iflogger.debug('%s_%s' % (name, str(value)))
+        iflogger.debug('%s_%s', name, value)
         if trait_spec.is_trait_type(traits.Bool) and "%" not in argstr:
-            if value:
-                # Boolean options have no format string. Just append options
-                # if True.
-                return argstr
-            else:
-                return None
+            # Boolean options have no format string. Just append options if True.
+            return argstr if value else None
         # traits.Either turns into traits.TraitCompound and does not have any
         # inner_traits
         elif trait_spec.is_trait_type(traits.List) \
@@ -1658,11 +1680,9 @@ class CommandLine(BaseInterface):
             # Depending on whether we stick with traitlets, and whether or
             # not we beef up traitlets.List, we may want to put some
             # type-checking code here as well
-            sep = trait_spec.sep
-            if sep is None:
-                sep = ' '
-            if argstr.endswith('...'):
+            sep = trait_spec.sep or ' '
 
+            if argstr.endswith('...'):
                 # repeatable option
                 # --id %d... will expand to
                 # --id 1 --id 2 --id 3 etc.,.
@@ -1694,7 +1714,7 @@ class CommandLine(BaseInterface):
             ns = trait_spec.name_source
             while isinstance(ns, (list, tuple)):
                 if len(ns) > 1:
-                    iflogger.warn('Only one name_source per trait is allowed')
+                    iflogger.warning('Only one name_source per trait is allowed')
                 ns = ns[0]
 
             if not isinstance(ns, (str, bytes)):
@@ -1803,10 +1823,7 @@ class StdOutCommandLine(CommandLine):
     input_spec = StdOutCommandLineInputSpec
 
     def _gen_filename(self, name):
-        if name == 'out_file':
-            return self._gen_outfilename()
-        else:
-            return None
+        return self._gen_outfilename() if name == 'out_file' else None
 
     def _gen_outfilename(self):
         raise NotImplementedError
@@ -1919,7 +1936,7 @@ class MultiPath(traits.List):
             newvalue = [value]
         value = super(MultiPath, self).validate(object, name, newvalue)
 
-        if len(value) > 0:
+        if value:
             return value
 
         self.error(object, name, value)

@@ -1872,13 +1872,10 @@ class ROIStatsInputSpec(CommandLineInputSpec):
         desc='execute quietly',
         argstr='-quiet',
         position=1)
-    terminal_output = traits.Enum(
-        'allatonce',
+    terminal_output = traits.Enum('allatonce', deprecated='1.0.0',
         desc='Control terminal output:`allatonce` - waits till command is '
              'finished to display output',
-        nohash=True,
-        mandatory=True,
-        usedefault=True)
+        nohash=True)
 
 
 class ROIStatsOutputSpec(TraitedSpec):
@@ -1907,6 +1904,7 @@ class ROIStats(AFNICommandBase):
 
     """
     _cmd = '3dROIstats'
+    _terminal_output = 'allatonce'
     input_spec = ROIStatsInputSpec
     output_spec = ROIStatsOutputSpec
 
