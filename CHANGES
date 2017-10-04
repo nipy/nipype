@@ -1,6 +1,9 @@
 Upcoming release
 ================
 
+* ENH: Centralize virtual/physical $DISPLAYs (https://github.com/nipy/nipype/pull/#2203)
+* ENH: New ResourceMonitor - replaces resource profiler (https://github.com/nipy/nipype/pull/#2200)
+
 
 0.13.1 (May 20, 2017)
 =====================
