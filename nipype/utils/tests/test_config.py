@@ -21,7 +21,7 @@ xvfbpatch.Xvfb.return_value = MagicMock(vdisplay_num=2010)
 
 @pytest.mark.parametrize('dispnum', range(5))
 def test_display_config(monkeypatch, dispnum):
-    """Check that the display_variable option is used"""
+    """Check that the display_variable option is used ($DISPLAY not set)"""
     config._display = None
     dispstr = ':%d' % dispnum
     config.set('execution', 'display_variable', dispstr)
@@ -44,12 +44,12 @@ def test_display_config_and_system(monkeypatch):
     config._display = None
     dispstr = ':10'
     config.set('execution', 'display_variable', dispstr)
-    monkeypatch.setitem(os.environ, 'DISPLAY', dispstr)
+    monkeypatch.setitem(os.environ, 'DISPLAY', ':0')
     assert config.get_display() == dispstr
 
 
 def test_display_noconfig_nosystem_patched(monkeypatch):
-    """Check that when no display is specified, a virtual Xvfb is used"""
+    """Check that when no $DISPLAY nor option are specified, a virtual Xvfb is used"""
     config._display = None
     if config.has_option('execution', 'display_variable'):
         config._config.remove_option('execution', 'display_variable')
@@ -59,7 +59,10 @@ def test_display_noconfig_nosystem_patched(monkeypatch):
 
 
 def test_display_empty_patched(monkeypatch):
-    """Check that when no display is specified, a virtual Xvfb is used"""
+    """
+    Check that when $DISPLAY is empty string and no option is specified,
+    a virtual Xvfb is used
+    """
     config._display = None
     if config.has_option('execution', 'display_variable'):
         config._config.remove_option('execution', 'display_variable')
@@ -69,7 +72,10 @@ def test_display_empty_patched(monkeypatch):
 
 
 def test_display_noconfig_nosystem_notinstalled(monkeypatch):
-    """Check that when no display is specified, a virtual Xvfb is used"""
+    """
+    Check that an exception is raised if xvfbwrapper is not installed
+    but necessary (no config and $DISPLAY unset)
+    """
     config._display = None
     if config.has_option('execution', 'display_variable'):
         config._config.remove_option('execution', 'display_variable')
@@ -80,7 +86,10 @@ def test_display_noconfig_nosystem_notinstalled(monkeypatch):
 
 
 def test_display_empty_notinstalled(monkeypatch):
-    """Check that when no display is specified, a virtual Xvfb is used"""
+    """
+    Check that an exception is raised if xvfbwrapper is not installed
+    but necessary (no config and $DISPLAY empty)
+    """
     config._display = None
     if config.has_option('execution', 'display_variable'):
         config._config.remove_option('execution', 'display_variable')
@@ -92,7 +101,10 @@ def test_display_empty_notinstalled(monkeypatch):
 
 @pytest.mark.skipif(not has_Xvfb, reason='xvfbwrapper not installed')
 def test_display_noconfig_nosystem_installed(monkeypatch):
-    """Check that when no display is specified, a virtual Xvfb is used"""
+    """
+    Check that actually uses xvfbwrapper when installed (not mocked)
+    and necessary (no config and $DISPLAY unset)
+    """
     config._display = None
     if config.has_option('execution', 'display_variable'):
         config._config.remove_option('execution', 'display_variable')
@@ -102,7 +114,10 @@ def test_display_noconfig_nosystem_installed(monkeypatch):
 
 @pytest.mark.skipif(not has_Xvfb, reason='xvfbwrapper not installed')
 def test_display_empty_installed(monkeypatch):
-    """Check that when no display is specified, a virtual Xvfb is used"""
+    """
+    Check that actually uses xvfbwrapper when installed (not mocked)
+    and necessary (no config and $DISPLAY empty)
+    """
     config._display = None
     if config.has_option('execution', 'display_variable'):
         config._config.remove_option('execution', 'display_variable')
@@ -111,7 +126,11 @@ def test_display_empty_installed(monkeypatch):
 
 
 def test_display_empty_macosx(monkeypatch):
-    """Check that when no display is specified, a virtual Xvfb is used"""
+    """
+    Check that an exception is raised if xvfbwrapper is necessary
+    (no config and $DISPLAY unset) but platform is OSX. See
+    https://github.com/nipy/nipype/issues/1400
+    """
     config._display = None
     if config.has_option('execution', 'display_variable'):
         config._config.remove_option('execution', 'display_variable')

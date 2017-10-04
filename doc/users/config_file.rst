@@ -73,18 +73,16 @@ Execution
     ``false``; default value: ``true``)
 
 *display_variable*
-	What ``$DISPLAY`` environment variable should utilize those interfaces
-	that require an X server. These interfaces should have  the attribute
-	``_redirect_x = True``. This option is very useful when the system has
-	an X server listening in the default port 6000, but ``$DISPLAY`` is
-	not defined. In that case, set ``display_variable = :0``. Similarly,
-	it can be used to point X-based interfaces to other servers, like VNC,
-	`xnest <http://www.x.org/archive/X11R7.5/doc/man/man1/Xnest.1.html>`_
-	or `Xvfb <http://www.x.org/archive/X11R6.8.1/doc/Xvfb.1.html>`_
-	and you would like to redirect all spawned windows to
-	it. If not set, nipype will try to configure a new virtual server using
-	Xvfb. (possible values: any X server address; default value: not
-	set)
+	Override the ``$DISPLAY`` environment variable for interfaces that require
+    an X server. This option is useful if there is a running X server, but 
+    ``$DISPLAY`` was not defined in nipype's environment. For example, if an X 
+    server is listening on the default port of 6000, set ``display_variable = :0``
+    to enable nipype interfaces to use it. It may also point to displays provided 
+    by VNC, `xnest <http://www.x.org/archive/X11R7.5/doc/man/man1/Xnest.1.html>`_ 
+    or `Xvfb <http://www.x.org/archive/X11R6.8.1/doc/Xvfb.1.html>`_.
+    If neither ``display_variable`` nor the ``$DISPLAY`` environment variable are
+    set, nipype will try to configure a new virtual server using Xvfb.
+    (possible values: any X server address; default value: not set)
 
 *remove_unnecessary_outputs*
     This will remove any interface outputs not needed by the workflow. If the
