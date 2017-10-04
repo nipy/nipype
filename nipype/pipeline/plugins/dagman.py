@@ -10,7 +10,7 @@ import uuid
 import time
 from warnings import warn
 
-from .base import (GraphPluginBase, logger)
+from .base import GraphPluginBase, logger
 from ...interfaces.base import CommandLine
 
 
@@ -154,6 +154,7 @@ getenv = True
                                         child))
         # hand over DAG to condor_dagman
         cmd = CommandLine('condor_submit_dag', environ=dict(os.environ),
+                          resource_monitor=False,
                           terminal_output='allatonce')
         # needs -update_submit or re-running a workflow will fail
         cmd.inputs.args = '%s -update_submit %s' % (self._dagman_args,

@@ -7,9 +7,11 @@ from builtins import str, open
 import os
 from time import sleep
 
+from ... import logging
 from ...interfaces.base import CommandLine
-from .base import (SGELikeBatchManagerBase, logger, iflogger, logging)
+from .base import SGELikeBatchManagerBase, logger
 
+iflogger = logging.getLogger('interface')
 
 
 class PBSPlugin(SGELikeBatchManagerBase):
@@ -48,6 +50,7 @@ class PBSPlugin(SGELikeBatchManagerBase):
         result = CommandLine('qstat {}'.format(taskid),
                              environ=dict(os.environ),
                              terminal_output='allatonce',
+                             resource_monitor=False,
                              ignore_exception=True).run()
         stderr = result.runtime.stderr
         errmsg = 'Unknown Job Id'  # %s' % taskid
@@ -59,6 +62,7 @@ class PBSPlugin(SGELikeBatchManagerBase):
 
     def _submit_batchtask(self, scriptfile, node):
         cmd = CommandLine('qsub', environ=dict(os.environ),
+                          resource_monitor=False,
                           terminal_output='allatonce')
         path = os.path.dirname(scriptfile)
         qsubargs = ''
