@@ -8,11 +8,11 @@ def test_OutlierCount_inputs():
     ),
     autoclip=dict(argstr='-autoclip',
     usedefault=True,
-    xor=['in_file'],
+    xor=['mask'],
     ),
     automask=dict(argstr='-automask',
     usedefault=True,
-    xor=['in_file'],
+    xor=['mask'],
     ),
     environ=dict(nohash=True,
     usedefault=True,
@@ -54,7 +54,8 @@ def test_OutlierCount_inputs():
     ),
     save_outliers=dict(usedefault=True,
     ),
-    terminal_output=dict(nohash=True,
+    terminal_output=dict(deprecated='1.0.0',
+    nohash=True,
     ),
     )
     inputs = OutlierCount.input_spec()
