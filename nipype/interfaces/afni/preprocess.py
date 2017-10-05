@@ -1676,13 +1676,13 @@ class OutlierCountInputSpec(CommandLineInputSpec):
         False,
         usedefault=True,
         argstr='-autoclip',
-        xor=['in_file'],
+        xor=['mask'],
         desc='clip off small voxels')
     automask = traits.Bool(
         False,
         usedefault=True,
         argstr='-automask',
-        xor=['in_file'],
+        xor=['mask'],
         desc='clip off small voxels')
     fraction = traits.Bool(
         False,
