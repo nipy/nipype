@@ -24,7 +24,6 @@ Upcoming release
 0.13.0 (May 11, 2017)
 =====================
 
-<<<<<<< HEAD
 * ENH: Multi-stage recon-all directives (https://github.com/nipy/nipype/pull/1991)
 * FIX: FEAT "folder does not exist" error (https://github.com/nipy/nipype/pull/2000)
 * ENH: Niftyfit interfaces (https://github.com/nipy/nipype/pull/1910)
