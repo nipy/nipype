@@ -125,6 +125,7 @@ class MultiProcPlugin(DistributedPluginBase):
         logger.debug('MultiProcPlugin starting in "%sdaemon" mode (n_procs=%d, mem_gb=%0.2f)',
                      'non' if non_daemon else '', self.processors, self.memory_gb)
         self.pool = (NonDaemonPool if non_daemon else Pool)(processes=self.processors)
+        self._stats = None
 
     def _async_callback(self, args):
         self._taskresult[args['taskid']] = args
@@ -197,10 +198,13 @@ class MultiProcPlugin(DistributedPluginBase):
         # Check available system resources by summing all threads and memory used
         free_memory_gb, free_processors = self._check_resources(self.pending_tasks)
 
-        logger.info('Currently running %d tasks, and %d jobs ready. '
-                    'Free memory (GB): %0.2f/%0.2f, Free processors: %d/%d',
-                    len(self.pending_tasks), len(jobids),
-                    free_memory_gb, self.memory_gb, free_processors, self.processors)
+        stats = (len(self.pending_tasks), len(jobids), free_memory_gb,
+                 self.memory_gb, free_processors, self.processors)
+        if self._stats != stats:
+            logger.info('Currently running %d tasks, and %d jobs ready. Free '
+                        'memory (GB): %0.2f/%0.2f, Free processors: %d/%d',
+                        *stats)
+            self._stats = stats
 
         if free_memory_gb < 0.01 or free_processors == 0:
             logger.debug('No resources available')
@@ -268,6 +272,8 @@ class MultiProcPlugin(DistributedPluginBase):
                 self._remove_node_dirs()
                 free_memory_gb += next_job_gb
                 free_processors += next_job_th
+                # Display stats next loop
+                self._stats = None
                 continue
 
             # Task should be submitted to workers
@@ -281,6 +287,8 @@ class MultiProcPlugin(DistributedPluginBase):
                 self.proc_pending[jobid] = False
             else:
                 self.pending_tasks.insert(0, (tid, jobid))
+            # Display stats next loop
+            self._stats = None
 
     def _sort_jobs(self, jobids, scheduler='tsort'):
         if scheduler == 'mem_thread':
