@@ -1718,23 +1718,14 @@ class OutlierCountInputSpec(CommandLineInputSpec):
     out_file = File(
         name_template='%s_outliers',
         name_source=['in_file'],
-        argstr='> %s',
         keep_extension=False,
-        position=-1,
         desc='capture standard output')
 
 
 class OutlierCountOutputSpec(TraitedSpec):
-    out_outliers = File(
-        exists=True,
-        desc='output image file name')
-    out_file = File(
-        name_template='%s_tqual',
-        name_source=['in_file'],
-        argstr='> %s',
-        keep_extension=False,
-        position=-1,
-        desc='capture standard output')
+    out_outliers = File(exists=True,
+                        desc='output image file name')
+    out_file = File(desc='capture standard output')
 
 
 class OutlierCount(CommandLine):
@@ -1759,20 +1750,34 @@ class OutlierCount(CommandLine):
     _cmd = '3dToutcount'
     input_spec = OutlierCountInputSpec
     output_spec = OutlierCountOutputSpec
+    _terminal_output = 'file_split'
 
     def _parse_inputs(self, skip=None):
         if skip is None:
             skip = []
 
+        # This is not strictly an input, but needs be
+        # set before run() is called.
+        if self.terminal_output == 'none':
+            self.terminal_output = 'file_split'
+
         if not self.inputs.save_outliers:
             skip += ['outliers_file']
         return super(OutlierCount, self)._parse_inputs(skip)
 
+    def _run_interface(self, runtime):
+        runtime = super(OutlierCount, self)._run_interface(runtime)
+
+        # Read from runtime.stdout or runtime.merged
+        with open(op.abspath(self.inputs.out_file), 'w') as outfh:
+            outfh.write(runtime.stdout or runtime.merged)
+        return runtime
+
     def _list_outputs(self):
         outputs = self.output_spec().get()
+        outputs['out_file'] = op.abspath(self.inputs.out_file)
         if self.inputs.save_outliers:
             outputs['out_outliers'] = op.abspath(self.inputs.outliers_file)
-        outputs['out_file'] = op.abspath(self.inputs.out_file)
         return outputs
 
 
