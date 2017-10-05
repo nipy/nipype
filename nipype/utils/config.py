@@ -322,7 +322,7 @@ class NipypeConfig(object):
 @atexit.register
 def free_display():
     """Stop virtual display (if it is up)"""
-    from nipype import config
-    from nipype import logging
+    from .. import config
+    from .. import logging
     config.stop_display()
     logging.getLogger('interface').info('Closing display (if virtual)')
