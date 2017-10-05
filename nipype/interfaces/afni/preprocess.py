@@ -1729,8 +1729,8 @@ class OutlierCountOutputSpec(TraitedSpec):
 
 
 class OutlierCount(CommandLine):
-    """Calculates number of 'outliers' a 3D+time dataset, at each
-    time point, and writes the results to stdout.
+    """Calculates number of 'outliers' at each time point of a
+    a 3D+time dataset.
 
     For complete details, see the `3dToutcount Documentation
     <https://afni.nimh.nih.gov/pub/dist/doc/program_help/3dToutcount.html>`_
@@ -1742,7 +1742,7 @@ class OutlierCount(CommandLine):
     >>> toutcount = afni.OutlierCount()
     >>> toutcount.inputs.in_file = 'functional.nii'
     >>> toutcount.cmdline  # doctest: +ELLIPSIS +ALLOW_UNICODE
-    '3dToutcount functional.nii > functional_outliers'
+    '3dToutcount functional.nii'
     >>> res = toutcount.run()  # doctest: +SKIP
 
     """
