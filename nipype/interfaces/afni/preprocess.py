@@ -2157,11 +2157,12 @@ class SkullStrip(AFNICommand):
 
     def __init__(self, **inputs):
         super(SkullStrip, self).__init__(**inputs)
+
         if not no_afni():
             v = Info.version()
 
-            # As of AFNI 16.0.00, redirect_x is not needed
-            if v[0] > 2015:
+            # Between AFNI 16.0.00 and 16.2.07, redirect_x is not needed
+            if v >= (2016, 0, 0) and v < (2016, 2, 7):
                 self._redirect_x = False
 
 

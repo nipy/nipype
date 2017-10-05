@@ -638,26 +638,42 @@ def test_Commandline():
     nib.CommandLine.input_spec = nib.CommandLineInputSpec
 
 
-def test_Commandline_environ():
+def test_Commandline_environ(monkeypatch, tmpdir):
     from nipype import config
     config.set_default_config()
+
+    tmpdir.chdir()
+    monkeypatch.setitem(os.environ, 'DISPLAY', ':1')
+    # Test environment
     ci3 = nib.CommandLine(command='echo')
     res = ci3.run()
     assert res.runtime.environ['DISPLAY'] == ':1'
+
+    # Test display_variable option
+    monkeypatch.delitem(os.environ, 'DISPLAY', raising=False)
     config.set('execution', 'display_variable', ':3')
     res = ci3.run()
     assert not 'DISPLAY' in ci3.inputs.environ
+    assert not 'DISPLAY' in res.runtime.environ
+
+    # If the interface has _redirect_x then yes, it should be set
+    ci3._redirect_x = True
+    res = ci3.run()
     assert res.runtime.environ['DISPLAY'] == ':3'
+
+    # Test overwrite
+    monkeypatch.setitem(os.environ, 'DISPLAY', ':1')
     ci3.inputs.environ = {'DISPLAY': ':2'}
     res = ci3.run()
     assert res.runtime.environ['DISPLAY'] == ':2'
 
 
 def test_CommandLine_output(tmpdir):
-    # Create a file
-    name = 'foo.txt'
+    # Create one file
     tmpdir.chdir()
-    tmpdir.join(name).write('foo')
+    file = tmpdir.join('foo.txt')
+    file.write('123456\n')
+    name = os.path.basename(file.strpath)
 
     ci = nib.CommandLine(command='ls -l')
     ci.terminal_output = 'allatonce'
