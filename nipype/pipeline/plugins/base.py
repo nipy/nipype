@@ -125,19 +125,25 @@ class DistributedPluginBase(PluginBase):
         # setup polling - TODO: change to threaded model
         notrun = []
 
+        old_progress_stats = None
+        old_presub_stats = None
         while not np.all(self.proc_done) or np.any(self.proc_pending):
             # Check to see if a job is available (jobs without dependencies not run)
             # See https://github.com/nipy/nipype/pull/2200#discussion_r141605722
             jobs_ready = np.nonzero(~self.proc_done & (self.depidx.sum(0) == 0))[1]
 
-            logger.info('Progress: %d jobs, %d/%d/%d (done/running/ready),'
-                        ' %d/%d (pending_tasks/waiting).',
-                        len(self.proc_done),
-                        np.sum(self.proc_done ^ self.proc_pending),
-                        np.sum(self.proc_done & self.proc_pending),
-                        len(jobs_ready),
-                        len(self.pending_tasks),
-                        np.sum(~self.proc_done & ~self.proc_pending))
+            progress_stats = (len(self.proc_done),
+                              np.sum(self.proc_done ^ self.proc_pending),
+                              np.sum(self.proc_done & self.proc_pending),
+                              len(jobs_ready),
+                              len(self.pending_tasks),
+                              np.sum(~self.proc_done & ~self.proc_pending))
+            display_stats = progress_stats != old_progress_stats
+            if display_stats:
+                logger.debug('Progress: %d jobs, %d/%d/%d '
+                             '(done/running/ready), %d/%d '
+                             '(pending_tasks/waiting).', *progress_stats)
+                old_progress_stats = progress_stats
             toappend = []
             # trigger callbacks for any pending results
             while self.pending_tasks:
@@ -163,13 +169,18 @@ class DistributedPluginBase(PluginBase):
 
             if toappend:
                 self.pending_tasks.extend(toappend)
+
             num_jobs = len(self.pending_tasks)
-            logger.debug('Tasks currently running: %d. Pending: %d.', num_jobs,
-                         np.sum(self.proc_done & self.proc_pending))
+            presub_stats = (num_jobs,
+                            np.sum(self.proc_done & self.proc_pending))
+            display_stats = display_stats or presub_stats != old_presub_stats
+            if display_stats:
+                logger.debug('Tasks currently running: %d. Pending: %d.',
+                             *presub_stats)
+                old_presub_stats = presub_stats
             if num_jobs < self.max_jobs:
-                self._send_procs_to_workers(updatehash=updatehash,
-                                            graph=graph)
-            else:
+                self._send_procs_to_workers(updatehash=updatehash, graph=graph)
+            elif display_stats:
                 logger.debug('Not submitting (max jobs reached)')
 
             sleep(poll_sleep_secs)
