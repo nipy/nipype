@@ -734,7 +734,7 @@ class CenterMass(AFNICommandBase):
         outputs = super(CenterMass, self)._list_outputs()
         outputs['out_file'] = os.path.abspath(self.inputs.in_file)
         outputs['cm_file'] = os.path.abspath(self.inputs.cm_file)
-        sout = np.loadtxt(outputs['cm_file'])  # pylint: disable=E1101
+        sout = np.loadtxt(outputs['cm_file'], ndmin=2)  # pylint: disable=E1101
         if len(sout) > 1:
             outputs['cm'] = [tuple(s) for s in sout]
         else:
