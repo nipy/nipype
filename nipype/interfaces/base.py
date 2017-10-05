@@ -1607,7 +1607,7 @@ class CommandLine(BaseInterface):
 
         runtime.command_path = cmd_path
         runtime.dependencies = get_dependencies(executable_name, runtime.environ)
-        runtime = run_command(runtime, output=self.inputs.terminal_output)
+        runtime = run_command(runtime, output=self.terminal_output)
         if runtime.returncode is None or \
                 runtime.returncode not in correct_return_codes:
             self.raise_exception(runtime)
