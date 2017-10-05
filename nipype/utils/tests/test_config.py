@@ -15,8 +15,16 @@ try:
 except ImportError:
     has_Xvfb = False
 
-xvfbpatch = MagicMock()
-xvfbpatch.Xvfb.return_value = MagicMock(vdisplay_num=2010)
+# Define mocks for xvfbwrapper. Do not forget the spec to ensure that
+# hasattr() checks return False with missing attributes.
+xvfbpatch = MagicMock(spec=['Xvfb'])
+xvfbpatch.Xvfb.return_value = MagicMock(spec=['new_display', 'start', 'stop'],
+                                        new_display=2010)
+
+# Mock the legacy xvfbwrapper.Xvfb class (changed display attribute name)
+xvfbpatch_old = MagicMock(spec=['Xvfb'])
+xvfbpatch_old.Xvfb.return_value = MagicMock(spec=['vdisplay_num', 'start', 'stop'],
+                                            vdisplay_num=2010)
 
 
 @pytest.mark.parametrize('dispnum', range(5))
@@ -68,6 +76,32 @@ def test_display_empty_patched(monkeypatch):
         config._config.remove_option('execution', 'display_variable')
     monkeypatch.setitem(os.environ, 'DISPLAY', '')
     monkeypatch.setitem(sys.modules, 'xvfbwrapper', xvfbpatch)
+    assert config.get_display() == ':2010'
+
+
+def test_display_noconfig_nosystem_patched_oldxvfbwrapper(monkeypatch):
+    """
+    Check that when no $DISPLAY nor option are specified,
+    a virtual Xvfb is used (with a legacy version of xvfbwrapper).
+    """
+    config._display = None
+    if config.has_option('execution', 'display_variable'):
+        config._config.remove_option('execution', 'display_variable')
+    monkeypatch.delitem(os.environ, 'DISPLAY', raising=False)
+    monkeypatch.setitem(sys.modules, 'xvfbwrapper', xvfbpatch_old)
+    assert config.get_display() == ":2010"
+
+
+def test_display_empty_patched_oldxvfbwrapper(monkeypatch):
+    """
+    Check that when $DISPLAY is empty string and no option is specified,
+    a virtual Xvfb is used (with a legacy version of xvfbwrapper).
+    """
+    config._display = None
+    if config.has_option('execution', 'display_variable'):
+        config._config.remove_option('execution', 'display_variable')
+    monkeypatch.setitem(os.environ, 'DISPLAY', '')
+    monkeypatch.setitem(sys.modules, 'xvfbwrapper', xvfbpatch_old)
     assert config.get_display() == ':2010'
 
 

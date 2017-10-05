@@ -266,7 +266,7 @@ class NipypeConfig(object):
         #                    shell=True, stdout=sp.DEVNULL))
 
         if self._display is not None:
-            return ':%d' % self._display.vdisplay_num
+            return ':%d' % self._display.new_display
 
         sysdisplay = None
         if self._config.has_option('execution', 'display_variable'):
@@ -281,7 +281,7 @@ class NipypeConfig(object):
 
             # Store a fake Xvfb object
             ndisp = int(sysdisplay.split(':')[-1])
-            Xvfb = namedtuple('Xvfb', ['vdisplay_num', 'stop'])
+            Xvfb = namedtuple('Xvfb', ['new_display', 'stop'])
             self._display = Xvfb(ndisp, _mock)
             return sysdisplay
         else:
@@ -306,12 +306,12 @@ class NipypeConfig(object):
             self._display = Xvfb(nolisten='tcp')
             self._display.start()
 
-            # Older versions of Xvfb used vdisplay_num
-            if hasattr(self._display, 'vdisplay_num'):
-                return ':%d' % self._display.vdisplay_num
+            # Older versions of xvfbwrapper used vdisplay_num
+            if not hasattr(self._display, 'new_display'):
+                setattr(self._display, 'new_display',
+                        self._display.vdisplay_num)
 
-            if hasattr(self._display, 'new_display'):
-                return ':%d' % self._display.new_display
+            return ':%d' % self._display.new_display
 
     def stop_display(self):
         """Closes the display if started"""
