@@ -31,7 +31,8 @@ def test_Sphere_inputs():
     seed=dict(argstr='-seed %d',
     ),
     subjects_dir=dict(),
-    terminal_output=dict(nohash=True,
+    terminal_output=dict(deprecated='1.0.0',
+    nohash=True,
     ),
     )
     inputs = Sphere.input_spec()

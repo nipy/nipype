@@ -159,7 +159,7 @@ EXTRA_REQUIRES = {
     'doc': ['Sphinx>=1.4', 'matplotlib', 'pydotplus', 'pydot>=1.2.3'],
     'tests': TESTS_REQUIRES,
     'nipy': ['nitime', 'nilearn', 'dipy', 'nipy', 'matplotlib'],
-    'profiler': ['psutil'],
+    'profiler': ['psutil>=5.0'],
     'duecredit': ['duecredit'],
     'xvfbwrapper': ['xvfbwrapper'],
     'pybids' : ['pybids']

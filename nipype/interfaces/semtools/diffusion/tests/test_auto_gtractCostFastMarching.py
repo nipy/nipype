@@ -34,7 +34,8 @@ def test_gtractCostFastMarching_inputs():
     ),
     stoppingValue=dict(argstr='--stoppingValue %f',
     ),
-    terminal_output=dict(nohash=True,
+    terminal_output=dict(deprecated='1.0.0',
+    nohash=True,
     ),
     )
     inputs = gtractCostFastMarching.input_spec()

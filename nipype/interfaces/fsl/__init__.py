@@ -18,7 +18,9 @@ from .utils import (AvScale, Smooth, Merge, ExtractROI, Split, ImageMaths, Image
                     PlotTimeSeries, PlotMotionParams, ConvertXFM,
                     SwapDimensions, PowerSpectrum, Reorient2Std,
                     Complex, InvWarp, WarpUtils, ConvertWarp, WarpPoints,
-                    WarpPointsToStd, RobustFOV, CopyGeom, MotionOutliers)
+                    WarpPointsToStd, WarpPointsFromStd, RobustFOV,
+                    CopyGeom, MotionOutliers)
+
 from .epi import (PrepareFieldmap, TOPUP, ApplyTOPUP, Eddy, EPIDeWarp,
                   SigLoss, EddyCorrect, EpiReg)
 from .dti import (BEDPOSTX, XFibres, DTIFit,

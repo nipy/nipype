@@ -18,6 +18,9 @@ def test_Cat_inputs():
     ),
     keepfree=dict(argstr='-nonfixed',
     ),
+    num_threads=dict(nohash=True,
+    usedefault=True,
+    ),
     omitconst=dict(argstr='-nonconst',
     ),
     out_cint=dict(xor=['out_format', 'out_nice', 'out_double', 'out_fint', 'out_int'],
@@ -46,7 +49,8 @@ def test_Cat_inputs():
     ),
     stack=dict(argstr='-stack',
     ),
-    terminal_output=dict(nohash=True,
+    terminal_output=dict(deprecated='1.0.0',
+    nohash=True,
     ),
     )
     inputs = Cat.input_spec()

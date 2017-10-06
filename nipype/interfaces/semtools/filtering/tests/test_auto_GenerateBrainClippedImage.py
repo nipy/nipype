@@ -21,7 +21,8 @@ def test_GenerateBrainClippedImage_inputs():
     outputFileName=dict(argstr='--outputFileName %s',
     hash_files=False,
     ),
-    terminal_output=dict(nohash=True,
+    terminal_output=dict(deprecated='1.0.0',
+    nohash=True,
     ),
     )
     inputs = GenerateBrainClippedImage.input_spec()

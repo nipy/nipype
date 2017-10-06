@@ -17,8 +17,8 @@ fi
 # They may need to be rebalanced in the future.
 case ${CIRCLE_NODE_INDEX} in
   0)
-    docker run --rm=false -it -e FSL_COURSE_DATA="/data/examples/nipype-fsl_course_data" -v $HOME/examples:/data/examples:ro -v $WORKDIR:/work -w /work nipype/nipype:py36 /usr/bin/run_pytests.sh && \
-    docker run --rm=false -it -e FSL_COURSE_DATA="/data/examples/nipype-fsl_course_data" -v $HOME/examples:/data/examples:ro -v $WORKDIR:/work -w /work nipype/nipype:py27 /usr/bin/run_pytests.sh && \
+    docker run --rm=false -it -e CI_SKIP_TEST=1 -e NIPYPE_RESOURCE_MONITOR=1 -e FSL_COURSE_DATA="/data/examples/nipype-fsl_course_data" -v $HOME/examples:/data/examples:ro -v $WORKDIR:/work -w /work nipype/nipype:py36 /usr/bin/run_pytests.sh && \
+    docker run --rm=false -it -e CI_SKIP_TEST=1 -e NIPYPE_RESOURCE_MONITOR=1 -e FSL_COURSE_DATA="/data/examples/nipype-fsl_course_data" -v $HOME/examples:/data/examples:ro -v $WORKDIR:/work -w /work nipype/nipype:py27 /usr/bin/run_pytests.sh && \
     docker run --rm=false -it -v $WORKDIR:/work -w /src/nipype/doc --entrypoint=/usr/bin/run_builddocs.sh nipype/nipype:py36 /usr/bin/run_builddocs.sh && \
     docker run --rm=false -it -v $HOME/examples:/data/examples:ro -v $WORKDIR:/work -w /work nipype/nipype:py36 /usr/bin/run_examples.sh test_spm Linear /data/examples/ workflow3d && \
     docker run --rm=false -it -v $HOME/examples:/data/examples:ro -v $WORKDIR:/work -w /work nipype/nipype:py36 /usr/bin/run_examples.sh test_spm Linear /data/examples/ workflow4d
@@ -30,8 +30,8 @@ case ${CIRCLE_NODE_INDEX} in
     exitcode=$?
     ;;
   2)
-    docker run --rm=false -it -e NIPYPE_NUMBER_OF_CPUS=4 -v $HOME/examples:/data/examples:ro -v $WORKDIR:/work -w /work nipype/nipype:py27 /usr/bin/run_examples.sh fmri_spm_nested MultiProc /data/examples/ level1 && \
-    docker run --rm=false -it -e NIPYPE_NUMBER_OF_CPUS=4 -v $HOME/examples:/data/examples:ro -v $WORKDIR:/work -w /work nipype/nipype:py36 /usr/bin/run_examples.sh fmri_spm_nested MultiProc /data/examples/ l2pipeline
+    docker run --rm=false -it -e NIPYPE_NUMBER_OF_CPUS=4 -v $HOME/examples:/data/examples:ro -v $WORKDIR:/work -w /work nipype/nipype:py36 /usr/bin/run_examples.sh fmri_spm_nested MultiProc /data/examples/ level1 && \
+    docker run --rm=false -it -e NIPYPE_NUMBER_OF_CPUS=4 -e NIPYPE_RESOURCE_MONITOR=1 -v $HOME/examples:/data/examples:ro -v $WORKDIR:/work -w /work nipype/nipype:py27 /usr/bin/run_examples.sh fmri_spm_nested MultiProc /data/examples/ l2pipeline
     exitcode=$?
     ;;
   3)

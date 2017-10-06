@@ -57,7 +57,8 @@ def test_LTAConvert_inputs():
     ),
     target_file=dict(argstr='--trg %s',
     ),
-    terminal_output=dict(nohash=True,
+    terminal_output=dict(deprecated='1.0.0',
+    nohash=True,
     ),
     )
     inputs = LTAConvert.input_spec()

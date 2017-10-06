@@ -21,7 +21,7 @@ import prov.model as pm
 from .. import get_info, logging, __version__
 from .filemanip import (md5, hashlib, hash_infile)
 
-iflogger = logging.getLogger('interface')
+logger = logging.getLogger('utils')
 foaf = pm.Namespace("foaf", "http://xmlns.com/foaf/0.1/")
 dcterms = pm.Namespace("dcterms", "http://purl.org/dc/terms/")
 nipype_ns = pm.Namespace("nipype", "http://nipy.org/nipype/terms/")
@@ -173,7 +173,7 @@ def safe_encode(x, as_literal=True):
             jsonstr = json.dumps(outdict)
         except UnicodeDecodeError as excp:
             jsonstr = "Could not encode dictionary. {}".format(excp)
-            iflogger.warn('Prov: %s', jsonstr)
+            logger.warning('Prov: %s', jsonstr)
 
         if not as_literal:
             return jsonstr
@@ -203,7 +203,7 @@ def safe_encode(x, as_literal=True):
             jsonstr = json.dumps(x)
         except UnicodeDecodeError as excp:
             jsonstr = "Could not encode list/tuple. {}".format(excp)
-            iflogger.warn('Prov: %s', jsonstr)
+            logger.warning('Prov: %s', jsonstr)
 
         if not as_literal:
             return jsonstr
@@ -285,9 +285,20 @@ def prov_encode(graph, value, create_container=True):
 
 
 def write_provenance(results, filename='provenance', format='all'):
-    ps = ProvStore()
-    ps.add_results(results)
-    return ps.write_provenance(filename=filename, format=format)
+    prov = None
+    try:
+        ps = ProvStore()
+        ps.add_results(results)
+        prov = ps.write_provenance(filename=filename, format=format)
+    except Exception as e:
+        import traceback
+        err_msg = traceback.format_exc()
+        if getattr(e, 'args'):
+            err_msg += '\n\nException arguments:\n' + ', '.join(['"%s"' % arg for arg in e.args])
+        logger.warning('Writing provenance failed - Exception details:\n%s', err_msg)
+
+    return prov
+
 
 
 class ProvStore(object):

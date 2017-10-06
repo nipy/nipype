@@ -25,7 +25,8 @@ def test_Bru2_inputs():
     output_filename=dict(argstr='-o %s',
     genfile=True,
     ),
-    terminal_output=dict(nohash=True,
+    terminal_output=dict(deprecated='1.0.0',
+    nohash=True,
     ),
     )
     inputs = Bru2.input_spec()

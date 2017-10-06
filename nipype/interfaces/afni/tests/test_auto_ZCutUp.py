@@ -19,12 +19,16 @@ def test_ZCutUp_inputs():
     ),
     keep=dict(argstr='-keep %s',
     ),
+    num_threads=dict(nohash=True,
+    usedefault=True,
+    ),
     out_file=dict(argstr='-prefix %s',
     name_source='in_file',
     name_template='%s_zcutup',
     ),
     outputtype=dict(),
-    terminal_output=dict(nohash=True,
+    terminal_output=dict(deprecated='1.0.0',
+    nohash=True,
     ),
     )
     inputs = ZCutUp.input_spec()

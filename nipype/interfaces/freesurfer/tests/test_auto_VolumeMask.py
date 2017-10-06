@@ -46,7 +46,8 @@ def test_VolumeMask_inputs():
     usedefault=True,
     ),
     subjects_dir=dict(),
-    terminal_output=dict(nohash=True,
+    terminal_output=dict(deprecated='1.0.0',
+    nohash=True,
     ),
     )
     inputs = VolumeMask.input_spec()
