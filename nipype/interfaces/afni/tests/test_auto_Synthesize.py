@@ -26,6 +26,9 @@ def test_Synthesize_inputs():
     copyfile=False,
     mandatory=True,
     ),
+    num_threads=dict(nohash=True,
+    usedefault=True,
+    ),
     out_file=dict(argstr='-prefix %s',
     name_template='syn',
     ),
@@ -33,7 +36,8 @@ def test_Synthesize_inputs():
     select=dict(argstr='-select %s',
     mandatory=True,
     ),
-    terminal_output=dict(nohash=True,
+    terminal_output=dict(deprecated='1.0.0',
+    nohash=True,
     ),
     )
     inputs = Synthesize.input_spec()
