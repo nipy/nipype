@@ -26,6 +26,9 @@ def test_Eval_inputs():
     in_file_c=dict(argstr='-c %s',
     position=2,
     ),
+    num_threads=dict(nohash=True,
+    usedefault=True,
+    ),
     other=dict(argstr='',
     ),
     out1D=dict(argstr='-1D',
@@ -40,7 +43,8 @@ def test_Eval_inputs():
     ),
     stop_idx=dict(requires=['start_idx'],
     ),
-    terminal_output=dict(nohash=True,
+    terminal_output=dict(deprecated='1.0.0',
+    nohash=True,
     ),
     )
     inputs = Eval.input_spec()

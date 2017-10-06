@@ -31,7 +31,8 @@ def test_UnbiasedNonLocalMeans_inputs():
     ),
     sigma=dict(argstr='--sigma %f',
     ),
-    terminal_output=dict(nohash=True,
+    terminal_output=dict(deprecated='1.0.0',
+    nohash=True,
     ),
     )
     inputs = UnbiasedNonLocalMeans.input_spec()

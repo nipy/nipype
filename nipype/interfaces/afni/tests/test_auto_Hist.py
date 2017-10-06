@@ -41,7 +41,8 @@ def test_Hist_inputs():
     showhist=dict(argstr='-showhist',
     usedefault=True,
     ),
-    terminal_output=dict(nohash=True,
+    terminal_output=dict(deprecated='1.0.0',
+    nohash=True,
     ),
     )
     inputs = Hist.input_spec()

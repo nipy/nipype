@@ -22,7 +22,8 @@ def test_MPRtoMNI305_inputs():
     target=dict(mandatory=True,
     usedefault=True,
     ),
-    terminal_output=dict(nohash=True,
+    terminal_output=dict(deprecated='1.0.0',
+    nohash=True,
     ),
     )
     inputs = MPRtoMNI305.input_spec()

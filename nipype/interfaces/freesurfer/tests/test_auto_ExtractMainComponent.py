@@ -21,7 +21,8 @@ def test_ExtractMainComponent_inputs():
     name_template='%s.maincmp',
     position=2,
     ),
-    terminal_output=dict(nohash=True,
+    terminal_output=dict(deprecated='1.0.0',
+    nohash=True,
     ),
     )
     inputs = ExtractMainComponent.input_spec()

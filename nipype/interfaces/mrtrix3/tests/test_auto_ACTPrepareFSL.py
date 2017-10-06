@@ -21,7 +21,8 @@ def test_ACTPrepareFSL_inputs():
     position=-1,
     usedefault=True,
     ),
-    terminal_output=dict(nohash=True,
+    terminal_output=dict(deprecated='1.0.0',
+    nohash=True,
     ),
     )
     inputs = ACTPrepareFSL.input_spec()

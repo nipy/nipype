@@ -28,6 +28,9 @@ def test_BlurInMask_inputs():
     ),
     multimask=dict(argstr='-Mmask %s',
     ),
+    num_threads=dict(nohash=True,
+    usedefault=True,
+    ),
     options=dict(argstr='%s',
     position=2,
     ),
@@ -39,7 +42,8 @@ def test_BlurInMask_inputs():
     outputtype=dict(),
     preserve=dict(argstr='-preserve',
     ),
-    terminal_output=dict(nohash=True,
+    terminal_output=dict(deprecated='1.0.0',
+    nohash=True,
     ),
     )
     inputs = BlurInMask.input_spec()

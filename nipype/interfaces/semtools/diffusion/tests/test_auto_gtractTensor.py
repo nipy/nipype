@@ -39,7 +39,8 @@ def test_gtractTensor_inputs():
     ),
     size=dict(argstr='--size %f',
     ),
-    terminal_output=dict(nohash=True,
+    terminal_output=dict(deprecated='1.0.0',
+    nohash=True,
     ),
     )
     inputs = gtractTensor.input_spec()

@@ -25,6 +25,9 @@ def test_CatMatvec_inputs():
     descr="indicates that the resulting matrix willbe written to outfile in the 'MATRIX(...)' format (FORM 3).This feature could be used, with clever scripting, to inputa matrix directly on the command line to program 3dWarp.",
     xor=['oneline', 'fourxfour'],
     ),
+    num_threads=dict(nohash=True,
+    usedefault=True,
+    ),
     oneline=dict(argstr='-ONELINE',
     descr='indicates that the resulting matrixwill simply be written as 12 numbers on one line.',
     xor=['matrix', 'fourxfour'],
@@ -35,7 +38,8 @@ def test_CatMatvec_inputs():
     position=-1,
     ),
     outputtype=dict(),
-    terminal_output=dict(nohash=True,
+    terminal_output=dict(deprecated='1.0.0',
+    nohash=True,
     ),
     )
     inputs = CatMatvec.input_spec()
