@@ -1467,11 +1467,11 @@ class CommandLine(BaseInterface):
     >>> cli.cmdline # doctest: +ALLOW_UNICODE
     'ls -al'
 
-    >>> pprint.pprint(cli.inputs.trait_get())  # doctest: +NORMALIZE_WHITESPACE +ALLOW_UNICODE
+    # Use get_traitsfree() to check all inputs set
+    >>> pprint.pprint(cli.inputs.get_traitsfree())  # doctest: +NORMALIZE_WHITESPACE +ALLOW_UNICODE
     {'args': '-al',
      'environ': {'DISPLAY': ':1'},
-     'ignore_exception': False,
-     'terminal_output': <undefined>}
+     'ignore_exception': False}
 
     >>> cli.inputs.get_hashval()[0][0] # doctest: +ALLOW_UNICODE
     ('args', '-al')
@@ -1638,7 +1638,7 @@ class CommandLine(BaseInterface):
             # Depending on whether we stick with traitlets, and whether or
             # not we beef up traitlets.List, we may want to put some
             # type-checking code here as well
-            sep = trait_spec.sep or ' '
+            sep = trait_spec.sep if trait_spec.sep is not None else ' '
 
             if argstr.endswith('...'):
                 # repeatable option
