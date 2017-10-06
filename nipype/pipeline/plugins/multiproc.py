@@ -139,8 +139,8 @@ class MultiProcPlugin(DistributedPluginBase):
         self._taskid += 1
 
         # Don't allow streaming outputs
-        if getattr(node, 'terminal_output', '') == 'stream':
-            node.terminal_output = 'allatonce'
+        if getattr(node.interface, 'terminal_output', '') == 'stream':
+            node.interface.terminal_output = 'allatonce'
 
         self._task_obj[self._taskid] = self.pool.apply_async(
             run_node, (node, updatehash, self._taskid),
