@@ -738,7 +738,7 @@ class CenterMass(AFNICommandBase):
         if len(sout) > 1:
             outputs['cm'] = [tuple(s) for s in sout]
         else:
-            outputs['cm'] = tuple(sout)
+            outputs['cm'] = tuple(sout[0])
         return outputs
 
 
