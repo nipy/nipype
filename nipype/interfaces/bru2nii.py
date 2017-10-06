@@ -12,19 +12,21 @@ from __future__ import print_function, division, unicode_literals, absolute_impo
 
 import os
 from .base import (CommandLine, CommandLineInputSpec,
-                   traits, TraitedSpec, isdefined, File, Directory)
+                   TraitedSpec, isdefined, File, Directory,
+                   Bool, Unicode)
+import traitlets
 
 
 class Bru2InputSpec(CommandLineInputSpec):
     input_dir = Directory(
         desc="Input Directory", exists=True, mandatory=True, position=-1, argstr="%s")
-    actual_size = traits.Bool(
+    actual_size = Bool().tag(
         argstr='-a', desc="Keep actual size - otherwise x10 scale so animals match human.")
-    force_conversion = traits.Bool(
+    force_conversion = Bool().tag(
         argstr='-f', desc="Force conversion of localizers images (multiple slice orientations).")
-    append_protocol_name = traits.Bool(
+    append_protocol_name = Bool().tag(
         argstr='-p', desc="Append protocol name to output filename.")
-    output_filename = traits.Str(
+    output_filename = Unicode().tag(
         argstr="-o %s", desc="Output filename ('.nii' will be appended)", genfile=True)
 
 
