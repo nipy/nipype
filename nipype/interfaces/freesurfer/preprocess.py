@@ -2382,13 +2382,38 @@ class EditWMwithAseg(FSCommand):
 class ConcatenateLTAInputSpec(FSTraitedSpec):
     # required
     in_lta1 = File(exists=True, mandatory=True, argstr='%s', position=-3,
-                   desc="maps some src1 to dst1")
-    in_lta2 = File(exists=True, mandatory=True, argstr='%s', position=-2,
-                   desc="maps dst1(src2) to dst2")
-    out_file = File(exists=False, position=-1, argstr='%s',
-                    name_source=['in_lta1'], name_template='%s-long',
-                    hash_files=False, keep_extension=True,
-                    desc="the combined LTA maps: src1 to dst2 = LTA2*LTA1")
+                   desc='maps some src1 to dst1')
+    in_lta2 = traits.Either(
+        File(exists=True), 'identity.nofile', argstr='%s', position=-2,
+        mandatory=True, desc='maps dst1(src2) to dst2')
+    out_file = File(
+        'concat.lta', usedefault=True, position=-1, argstr='%s',
+        hash_files=False,
+        desc='the combined LTA maps: src1 to dst2 = LTA2*LTA1')
+
+    # Inversion and transform type
+    invert_1 = traits.Bool(argstr='-invert1',
+                           desc='invert in_lta1 before applying it')
+    invert_2 = traits.Bool(argstr='-invert2',
+                           desc='invert in_lta2 before applying it')
+    invert_out = traits.Bool(argstr='-invertout',
+                             desc='invert output LTA')
+    out_type = traits.Enum('VOX2VOX', 'RAS2RAS', argstr='-out_type %d',
+                           desc='set final LTA type')
+
+    # Talairach options
+    tal_source_file = traits.File(
+        exists=True, argstr='-tal %s', position=-5,
+        requires=['tal_template_file'],
+        desc='if in_lta2 is talairach.xfm, specify source for talairach')
+    tal_template_file = traits.File(
+        exists=True, argstr='%s', position=-4, requires=['tal_source_file'],
+        desc='if in_lta2 is talairach.xfm, specify template for talairach')
+
+    subject = traits.Str(argstr='-subject %s',
+                         desc='set subject in output LTA')
+    # Note rmsdiff would be xor out_file, and would be most easily dealt with
+    # in a new interface. -CJM 2017.10.05
 
 
 class ConcatenateLTAOutputSpec(TraitedSpec):
@@ -2397,22 +2422,43 @@ class ConcatenateLTAOutputSpec(TraitedSpec):
 
 
 class ConcatenateLTA(FSCommand):
-    """concatenates two consecutive LTA transformations
-    into one overall transformation, Out = LTA2*LTA1
+    """ Concatenates two consecutive LTA transformations into one overall
+    transformation
+
+    Out = LTA2*LTA1
 
     Examples
     --------
     >>> from nipype.interfaces.freesurfer import ConcatenateLTA
     >>> conc_lta = ConcatenateLTA()
-    >>> conc_lta.inputs.in_lta1 = 'trans.mat'
-    >>> conc_lta.inputs.in_lta2 = 'trans.mat'
+    >>> conc_lta.inputs.in_lta1 = 'lta1.lta'
+    >>> conc_lta.inputs.in_lta2 = 'lta2.lta'
     >>> conc_lta.cmdline # doctest: +ALLOW_UNICODE
-    'mri_concatenate_lta trans.mat trans.mat trans-long.mat'
+    'mri_concatenate_lta lta1.lta lta2.lta concat.lta'
+
+    You can use 'identity.nofile' as the filename for in_lta2, e.g.:
+
+    >>> conc_lta.inputs.in_lta2 = 'identity.nofile'
+    >>> conc_lta.inputs.invert_1 = True
+    >>> conc_lta.inputs.out_file = 'inv1.lta'
+    >>> conc_lta.cmdline # doctest: +ALLOW_UNICODE
+    'mri_concatenate_lta -invert1 lta1.lta identity.nofile inv1.lta'
+
+    To create a RAS2RAS transform:
+
+    >>> conc_lta.inputs.out_type = 'RAS2RAS'
+    >>> conc_lta.cmdline # doctest: +ALLOW_UNICODE
+    'mri_concatenate_lta -invert1 -out_type 1 lta1.lta identity.nofile inv1.lta'
     """
 
     _cmd = 'mri_concatenate_lta'
     input_spec = ConcatenateLTAInputSpec
     output_spec = ConcatenateLTAOutputSpec
+
+    def _format_arg(self, name, spec, value):
+        if name == 'out_type':
+            value = {'VOX2VOX': 0, 'RAS2RAS': 1}[value]
+        return super(ConcatenateLTA, self)._format_arg(name, spec, value)
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
