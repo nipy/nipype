@@ -31,7 +31,8 @@ def test_Paint_inputs():
     position=-3,
     ),
     template_param=dict(),
-    terminal_output=dict(nohash=True,
+    terminal_output=dict(deprecated='1.0.0',
+    nohash=True,
     ),
     )
     inputs = Paint.input_spec()

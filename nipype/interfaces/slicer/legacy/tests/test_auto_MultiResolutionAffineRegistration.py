@@ -38,7 +38,8 @@ def test_MultiResolutionAffineRegistration_inputs():
     ),
     stepTolerance=dict(argstr='--stepTolerance %f',
     ),
-    terminal_output=dict(nohash=True,
+    terminal_output=dict(deprecated='1.0.0',
+    nohash=True,
     ),
     )
     inputs = MultiResolutionAffineRegistration.input_spec()

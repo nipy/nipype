@@ -24,7 +24,8 @@ def test_AddScalarVolumes_inputs():
     hash_files=False,
     position=-1,
     ),
-    terminal_output=dict(nohash=True,
+    terminal_output=dict(deprecated='1.0.0',
+    nohash=True,
     ),
     )
     inputs = AddScalarVolumes.input_spec()

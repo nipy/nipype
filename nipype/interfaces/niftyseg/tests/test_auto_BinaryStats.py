@@ -36,7 +36,8 @@ def test_BinaryStats_inputs():
     mandatory=True,
     position=4,
     ),
-    terminal_output=dict(nohash=True,
+    terminal_output=dict(deprecated='1.0.0',
+    nohash=True,
     ),
     )
     inputs = BinaryStats.input_spec()

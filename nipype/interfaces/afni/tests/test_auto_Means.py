@@ -29,6 +29,9 @@ def test_Means_inputs():
     ),
     non_zero=dict(argstr='-non_zero',
     ),
+    num_threads=dict(nohash=True,
+    usedefault=True,
+    ),
     out_file=dict(argstr='-prefix %s',
     name_source='in_file_a',
     name_template='%s_mean',
@@ -42,7 +45,8 @@ def test_Means_inputs():
     ),
     summ=dict(argstr='-sum',
     ),
-    terminal_output=dict(nohash=True,
+    terminal_output=dict(deprecated='1.0.0',
+    nohash=True,
     ),
     )
     inputs = Means.input_spec()

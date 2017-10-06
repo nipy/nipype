@@ -99,6 +99,29 @@ def _calc_norm(mc, use_differences, source, brain_pts=None):
 
     """
 
+    affines = [_get_affine_matrix(mc[i, :], source)
+               for i in range(mc.shape[0])]
+    return _calc_norm_affine(affines, use_differences, brain_pts)
+
+
+def _calc_norm_affine(affines, use_differences, brain_pts=None):
+    """Calculates the maximum overall displacement of the midpoints
+    of the faces of a cube due to translation and rotation.
+
+    Parameters
+    ----------
+    affines : list of [4 x 4] affine matrices
+    use_differences : boolean
+    brain_pts : [4 x n_points] of coordinates
+
+    Returns
+    -------
+
+    norm : at each time point
+    displacement : euclidean distance (mm) of displacement at each coordinate
+
+    """
+
     if brain_pts is None:
         respos = np.diag([70, 70, 75])
         resneg = np.diag([-70, -110, -45])
@@ -107,47 +130,32 @@ def _calc_norm(mc, use_differences, source, brain_pts=None):
     else:
         all_pts = brain_pts
     n_pts = all_pts.size - all_pts.shape[1]
-    newpos = np.zeros((mc.shape[0], n_pts))
+    newpos = np.zeros((len(affines), n_pts))
     if brain_pts is not None:
-        displacement = np.zeros((mc.shape[0], int(n_pts / 3)))
-    for i in range(mc.shape[0]):
-        affine = _get_affine_matrix(mc[i, :], source)
-        newpos[i, :] = np.dot(affine,
-                              all_pts)[0:3, :].ravel()
+        displacement = np.zeros((len(affines), int(n_pts / 3)))
+    for i, affine in enumerate(affines):
+        newpos[i, :] = np.dot(affine, all_pts)[0:3, :].ravel()
         if brain_pts is not None:
-            displacement[i, :] = \
-                np.sqrt(np.sum(np.power(np.reshape(newpos[i, :],
-                                                   (3, all_pts.shape[1])) -
-                                        all_pts[0:3, :],
-                                        2),
-                               axis=0))
+            displacement[i, :] = np.sqrt(np.sum(
+                np.power(np.reshape(newpos[i, :],
+                                    (3, all_pts.shape[1])) - all_pts[0:3, :],
+                         2),
+                axis=0))
     # np.savez('displacement.npz', newpos=newpos, pts=all_pts)
-    normdata = np.zeros(mc.shape[0])
+    normdata = np.zeros(len(affines))
     if use_differences:
         newpos = np.concatenate((np.zeros((1, n_pts)),
                                  np.diff(newpos, n=1, axis=0)), axis=0)
         for i in range(newpos.shape[0]):
             normdata[i] = \
-                np.max(np.sqrt(np.sum(np.reshape(np.power(np.abs(newpos[i, :]), 2),
-                                                 (3, all_pts.shape[1])), axis=0)))
+                np.max(np.sqrt(np.sum(
+                    np.reshape(np.power(np.abs(newpos[i, :]), 2),
+                               (3, all_pts.shape[1])),
+                    axis=0)))
     else:
         newpos = np.abs(signal.detrend(newpos, axis=0, type='constant'))
         normdata = np.sqrt(np.mean(np.power(newpos, 2), axis=1))
     return normdata, displacement
-
-
-def _nanmean(a, axis=None):
-    """Return the mean excluding items that are nan
-
-    >>> a = [1, 2, np.nan]
-    >>> _nanmean(a)
-    1.5
-
-    """
-    if axis:
-        return np.nansum(a, axis) / np.sum(1 - np.isnan(a), axis)
-    else:
-        return np.nansum(a) / np.sum(1 - np.isnan(a))
 
 
 class ArtifactDetectInputSpec(BaseInterfaceInputSpec):
@@ -375,11 +383,11 @@ class ArtifactDetect(BaseInterface):
                     vol = data[:, :, :, t0]
                     # Use an SPM like approach
                     mask_tmp = vol > \
-                        (_nanmean(vol) / self.inputs.global_threshold)
+                        (np.nanmean(vol) / self.inputs.global_threshold)
                     mask = mask * mask_tmp
                 for t0 in range(timepoints):
                     vol = data[:, :, :, t0]
-                    g[t0] = _nanmean(vol[mask])
+                    g[t0] = np.nanmean(vol[mask])
                 if len(find_indices(mask)) < (np.prod((x, y, z)) / 10):
                     intersect_mask = False
                     g = np.zeros((timepoints, 1))
@@ -389,7 +397,7 @@ class ArtifactDetect(BaseInterface):
                 for t0 in range(timepoints):
                     vol = data[:, :, :, t0]
                     mask_tmp = vol > \
-                        (_nanmean(vol) / self.inputs.global_threshold)
+                        (np.nanmean(vol) / self.inputs.global_threshold)
                     mask[:, :, :, t0] = mask_tmp
                     g[t0] = np.nansum(vol * mask_tmp) / np.nansum(mask_tmp)
         elif masktype == 'file':  # uses a mask image to determine intensity
@@ -399,15 +407,15 @@ class ArtifactDetect(BaseInterface):
             mask = mask > 0.5
             for t0 in range(timepoints):
                 vol = data[:, :, :, t0]
-                g[t0] = _nanmean(vol[mask])
+                g[t0] = np.nanmean(vol[mask])
         elif masktype == 'thresh':  # uses a fixed signal threshold
             for t0 in range(timepoints):
                 vol = data[:, :, :, t0]
                 mask = vol > self.inputs.mask_threshold
-                g[t0] = _nanmean(vol[mask])
+                g[t0] = np.nanmean(vol[mask])
         else:
             mask = np.ones((x, y, z))
-            g = _nanmean(data[mask > 0, :], 1)
+            g = np.nanmean(data[mask > 0, :], 1)
 
         # compute normalized intensity values
         gz = signal.detrend(g, axis=0)  # detrend the signal

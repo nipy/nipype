@@ -119,7 +119,7 @@ class AlignEpiAnatPyOutputSpec(TraitedSpec):
         desc="matrix to volume register and align epi"
              "to anatomy and put into standard space")
     epi_vr_motion = File(
-        desc="motion parameters from EPI time-series" 
+        desc="motion parameters from EPI time-series"
              "registration (tsh included in name if slice"
              "timing correction is also included).")
     skullstrip = File(
@@ -131,20 +131,20 @@ class AlignEpiAnatPy(AFNIPythonCommand):
     an EPI and an anatomical structural dataset, and applies the resulting
     transformation to one or the other to bring them into alignment.
 
-    This script computes the transforms needed to align EPI and  
-    anatomical datasets using a cost function designed for this purpose. The  
-    script combines multiple transformations, thereby minimizing the amount of 
+    This script computes the transforms needed to align EPI and
+    anatomical datasets using a cost function designed for this purpose. The
+    script combines multiple transformations, thereby minimizing the amount of
     interpolation applied to the data.
-    
+
     Basic Usage:
       align_epi_anat.py -anat anat+orig -epi epi+orig -epi_base 5
-    
+
     The user must provide EPI and anatomical datasets and specify the EPI
-    sub-brick to use as a base in the alignment.  
+    sub-brick to use as a base in the alignment.
 
     Internally, the script always aligns the anatomical to the EPI dataset,
-    and the resulting transformation is saved to a 1D file. 
-    As a user option, the inverse of this transformation may be applied to the 
+    and the resulting transformation is saved to a 1D file.
+    As a user option, the inverse of this transformation may be applied to the
     EPI dataset in order to align it to the anatomical data instead.
 
     This program generates several kinds of output in the form of datasets
@@ -182,7 +182,7 @@ class AlignEpiAnatPy(AFNIPythonCommand):
         epi_prefix = ''.join(self._gen_fname(self.inputs.in_file).split('+')[:-1])
         outputtype = self.inputs.outputtype
         if outputtype == 'AFNI':
-            ext = '.HEAD' 
+            ext = '.HEAD'
         else:
             Info.output_type_to_ext(outputtype)
         matext = '.1D'
@@ -220,32 +220,37 @@ class AllineateInputSpec(AFNICommandInputSpec):
     out_file = File(
         desc='output file from 3dAllineate',
         argstr='-prefix %s',
-        name_source='in_file',
-        name_template='%s_allineate',
         genfile=True,
         xor=['allcostx'])
     out_param_file = File(
         argstr='-1Dparam_save %s',
-        desc='Save the warp parameters in ASCII (.1D) format.')
+        desc='Save the warp parameters in ASCII (.1D) format.',
+        xor=['in_param_file','allcostx'])
     in_param_file = File(
         exists=True,
         argstr='-1Dparam_apply %s',
         desc='Read warp parameters from file and apply them to '
-             'the source dataset, and produce a new dataset')
+             'the source dataset, and produce a new dataset',
+        xor=['out_param_file'])
     out_matrix = File(
         argstr='-1Dmatrix_save %s',
-        desc='Save the transformation matrix for each volume.')
+        desc='Save the transformation matrix for each volume.',
+        xor=['in_matrix','allcostx'])
     in_matrix = File(
         desc='matrix to align input file',
-        argstr='-1Dmatrix_apply %s')
-    # TODO: implement sensible xors for allcostx and suppres prefix in command when allcosx is used
+        argstr='-1Dmatrix_apply %s',
+        position=-3,
+        xor=['out_matrix'])
+    overwrite = traits.Bool(
+        desc='overwrite output file if it already exists',
+        argstr='-overwrite')
+
     allcostx= File(
         desc='Compute and print ALL available cost functionals for the un-warped inputs'
              'AND THEN QUIT. If you use this option none of the other expected outputs will be produced',
         argstr='-allcostx |& tee %s',
         position=-1,
-        xor=['out_file'])
-
+        xor=['out_file', 'out_matrix', 'out_param_file', 'out_weight_file'])
     _cost_funcs = [
         'leastsq', 'ls',
         'mutualinfo', 'mi',
@@ -308,7 +313,7 @@ class AllineateInputSpec(AFNICommandInputSpec):
         desc='Use a two pass alignment strategy for all volumes, searching '
              'for a large rotation+shift and then refining the alignment.')
     two_blur = traits.Float(
-        argstr='-twoblur',
+        argstr='-twoblur %f',
         desc='Set the blurring radius for the first pass in mm.')
     two_first = traits.Bool(
         argstr='-twofirst',
@@ -351,12 +356,21 @@ class AllineateInputSpec(AFNICommandInputSpec):
     weight_file = File(
         argstr='-weight %s',
         exists=True,
+        deprecated='1.0.0', new_name='weight',
         desc='Set the weighting for each voxel in the base dataset; '
              'larger weights mean that voxel count more in the cost function. '
              'Must be defined on the same grid as the base dataset')
+    weight = traits.Either(
+        File(exists=True), traits.Float(),
+        argstr='-weight %s',
+        desc='Set the weighting for each voxel in the base dataset; '
+             'larger weights mean that voxel count more in the cost function. '
+             'If an image file is given, the volume must be defined on the '
+             'same grid as the base dataset')
     out_weight_file = traits.File(
         argstr='-wtprefix %s',
-        desc='Write the weight volume to disk as a dataset')
+        desc='Write the weight volume to disk as a dataset',
+        xor=['allcostx'])
     source_mask = File(
         exists=True,
         argstr='-source_mask %s',
@@ -386,6 +400,18 @@ class AllineateInputSpec(AFNICommandInputSpec):
              'EPI slices, and the base as comprising anatomically '
              '\'true\' images.  Only phase-encoding direction image '
              'shearing and scaling will be allowed with this option.')
+    maxrot = traits.Float(
+        argstr='-maxrot %f',
+        desc='Maximum allowed rotation in degrees.')
+    maxshf = traits.Float(
+        argstr='-maxshf %f',
+        desc='Maximum allowed shift in mm.')
+    maxscl = traits.Float(
+        argstr='-maxscl %f',
+        desc='Maximum allowed scaling factor.')
+    maxshr = traits.Float(
+        argstr='-maxshr %f',
+        desc='Maximum allowed shearing factor.')
     master = File(
         exists=True,
         argstr='-master %s',
@@ -414,8 +440,10 @@ class AllineateInputSpec(AFNICommandInputSpec):
 
 
 class AllineateOutputSpec(TraitedSpec):
-    out_file = File(desc='output image file name')
-    matrix = File(desc='matrix to align input file')
+    out_file = File(exists=True, desc='output image file name')
+    out_matrix = File(exists=True, desc='matrix to align input file')
+    out_param_file = File(exists=True, desc='warp parameters')
+    out_weight_file = File(exists=True, desc='weight volume')
     allcostx = File(desc='Compute and print ALL available cost functionals for the un-warped inputs')
 
 
@@ -434,7 +462,7 @@ class Allineate(AFNICommand):
     >>> allineate.inputs.out_file = 'functional_allineate.nii'
     >>> allineate.inputs.in_matrix = 'cmatrix.mat'
     >>> allineate.cmdline  # doctest: +ALLOW_UNICODE
-    '3dAllineate -source functional.nii -1Dmatrix_apply cmatrix.mat -prefix functional_allineate.nii'
+    '3dAllineate -source functional.nii -prefix functional_allineate.nii -1Dmatrix_apply cmatrix.mat'
     >>> res = allineate.run()  # doctest: +SKIP
 
     >>> from nipype.interfaces import afni
@@ -443,7 +471,7 @@ class Allineate(AFNICommand):
     >>> allineate.inputs.reference = 'structural.nii'
     >>> allineate.inputs.allcostx = 'out.allcostX.txt'
     >>> allineate.cmdline  # doctest: +ALLOW_UNICODE
-    '3dAllineate -source functional.nii -prefix functional_allineate -base structural.nii -allcostx |& tee out.allcostX.txt'
+    '3dAllineate -source functional.nii -base structural.nii -allcostx |& tee out.allcostX.txt'
     >>> res = allineate.run()  # doctest: +SKIP
     """
 
@@ -459,24 +487,38 @@ class Allineate(AFNICommand):
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        if not isdefined(self.inputs.out_file):
-            outputs['out_file'] = self._gen_filename(self.inputs.in_file,
-                                                     suffix=self.inputs.suffix)
-        else:
-            outputs['out_file'] = os.path.abspath(self.inputs.out_file)
 
-        if isdefined(self.inputs.out_matrix):
-            outputs['matrix'] = os.path.abspath(os.path.join(os.getcwd(),\
-                                         self.inputs.out_matrix +'.aff12.1D'))
+        if self.inputs.out_file:
+            outputs['out_file'] = op.abspath(self.inputs.out_file)
 
-        if isdefined(self.inputs.allcostX):
-            outputs['allcostX'] = os.path.abspath(os.path.join(os.getcwd(),\
+        if self.inputs.out_weight_file:
+            outputs['out_weight_file'] = op.abspath(self.inputs.out_weight_file)
+
+        if self.inputs.out_matrix:
+            path, base, ext = split_filename(self.inputs.out_matrix)
+            if ext.lower() not in ['.1d', '.1D']:
+                outputs['out_matrix'] = self._gen_fname(self.inputs.out_matrix,
+                                                        suffix='.aff12.1D')
+            else:
+                outputs['out_matrix'] = op.abspath(self.inputs.out_matrix)
+
+        if self.inputs.out_param_file:
+            path, base, ext = split_filename(self.inputs.out_param_file)
+            if ext.lower() not in ['.1d', '.1D']:
+                outputs['out_param_file'] = self._gen_fname(self.inputs.out_param_file,
+                                                            suffix='.param.1D')
+            else:
+                outputs['out_param_file'] = op.abspath(self.inputs.out_param_file)
+
+        if isdefined(self.inputs.allcostx):
+            outputs['allcostX'] = os.path.abspath(os.path.join(os.getcwd(),
                                          self.inputs.allcostx))
         return outputs
 
     def _gen_filename(self, name):
         if name == 'out_file':
             return self._list_outputs()[name]
+        return None
 
 
 class AutoTcorrelateInputSpec(AFNICommandInputSpec):
@@ -535,6 +577,7 @@ class AutoTcorrelate(AFNICommand):
     '3dAutoTcorrelate -eta2 -mask mask.nii -mask_only_targets -prefix functional_similarity_matrix.1D -polort -1 functional.nii'
     >>> res = corr.run()  # doctest: +SKIP
     """
+
     input_spec = AutoTcorrelateInputSpec
     output_spec = AFNICommandOutputSpec
     _cmd = '3dAutoTcorrelate'
@@ -620,7 +663,7 @@ class AutoTLRCInputSpec(CommandLineInputSpec):
         mandatory=True,
         exists=True,
         copyfile=False)
-    base = traits.Str(  
+    base = traits.Str(
         desc = '              Reference anatomical volume'
                 '              Usually this volume is in some standard space like'
                 '              TLRC or MNI space and with afni dataset view of'
@@ -706,7 +749,7 @@ class AutoTLRC(AFNICommand):
         ext = '.HEAD'
         outputs['out_file'] = os.path.abspath(self._gen_fname(self.inputs.in_file, suffix='+tlrc')+ext)
         return outputs
-    
+
 class BandpassInputSpec(AFNICommandInputSpec):
     in_file = File(
         desc='input file to 3dBandpass',
@@ -1422,7 +1465,7 @@ class Hist(AFNICommandBase):
             version = Info.version()
 
             # As of AFNI 16.0.00, redirect_x is not needed
-            if isinstance(version[0], int) and version[0] > 15:
+            if version[0] > 2015:
                 self._redirect_x = False
 
     def _parse_inputs(self, skip=None):
@@ -1633,13 +1676,13 @@ class OutlierCountInputSpec(CommandLineInputSpec):
         False,
         usedefault=True,
         argstr='-autoclip',
-        xor=['in_file'],
+        xor=['mask'],
         desc='clip off small voxels')
     automask = traits.Bool(
         False,
         usedefault=True,
         argstr='-automask',
-        xor=['in_file'],
+        xor=['mask'],
         desc='clip off small voxels')
     fraction = traits.Bool(
         False,
@@ -1675,28 +1718,19 @@ class OutlierCountInputSpec(CommandLineInputSpec):
     out_file = File(
         name_template='%s_outliers',
         name_source=['in_file'],
-        argstr='> %s',
         keep_extension=False,
-        position=-1,
         desc='capture standard output')
 
 
 class OutlierCountOutputSpec(TraitedSpec):
-    out_outliers = File(
-        exists=True,
-        desc='output image file name')
-    out_file = File(
-        name_template='%s_tqual',
-        name_source=['in_file'],
-        argstr='> %s',
-        keep_extension=False,
-        position=-1,
-        desc='capture standard output')
+    out_outliers = File(exists=True,
+                        desc='output image file name')
+    out_file = File(desc='capture standard output')
 
 
 class OutlierCount(CommandLine):
-    """Calculates number of 'outliers' a 3D+time dataset, at each
-    time point, and writes the results to stdout.
+    """Calculates number of 'outliers' at each time point of a
+    a 3D+time dataset.
 
     For complete details, see the `3dToutcount Documentation
     <https://afni.nimh.nih.gov/pub/dist/doc/program_help/3dToutcount.html>`_
@@ -1708,7 +1742,7 @@ class OutlierCount(CommandLine):
     >>> toutcount = afni.OutlierCount()
     >>> toutcount.inputs.in_file = 'functional.nii'
     >>> toutcount.cmdline  # doctest: +ELLIPSIS +ALLOW_UNICODE
-    '3dToutcount functional.nii > functional_outliers'
+    '3dToutcount functional.nii'
     >>> res = toutcount.run()  # doctest: +SKIP
 
     """
@@ -1716,20 +1750,34 @@ class OutlierCount(CommandLine):
     _cmd = '3dToutcount'
     input_spec = OutlierCountInputSpec
     output_spec = OutlierCountOutputSpec
+    _terminal_output = 'file_split'
 
     def _parse_inputs(self, skip=None):
         if skip is None:
             skip = []
 
+        # This is not strictly an input, but needs be
+        # set before run() is called.
+        if self.terminal_output == 'none':
+            self.terminal_output = 'file_split'
+
         if not self.inputs.save_outliers:
             skip += ['outliers_file']
         return super(OutlierCount, self)._parse_inputs(skip)
 
+    def _run_interface(self, runtime):
+        runtime = super(OutlierCount, self)._run_interface(runtime)
+
+        # Read from runtime.stdout or runtime.merged
+        with open(op.abspath(self.inputs.out_file), 'w') as outfh:
+            outfh.write(runtime.stdout or runtime.merged)
+        return runtime
+
     def _list_outputs(self):
         outputs = self.output_spec().get()
+        outputs['out_file'] = op.abspath(self.inputs.out_file)
         if self.inputs.save_outliers:
             outputs['out_outliers'] = op.abspath(self.inputs.outliers_file)
-        outputs['out_file'] = op.abspath(self.inputs.out_file)
         return outputs
 
 
@@ -1837,13 +1885,10 @@ class ROIStatsInputSpec(CommandLineInputSpec):
         desc='execute quietly',
         argstr='-quiet',
         position=1)
-    terminal_output = traits.Enum(
-        'allatonce',
+    terminal_output = traits.Enum('allatonce', deprecated='1.0.0',
         desc='Control terminal output:`allatonce` - waits till command is '
              'finished to display output',
-        nohash=True,
-        mandatory=True,
-        usedefault=True)
+        nohash=True)
 
 
 class ROIStatsOutputSpec(TraitedSpec):
@@ -1872,6 +1917,7 @@ class ROIStats(AFNICommandBase):
 
     """
     _cmd = '3dROIstats'
+    _terminal_output = 'allatonce'
     input_spec = ROIStatsInputSpec
     output_spec = ROIStatsOutputSpec
 
@@ -2111,11 +2157,12 @@ class SkullStrip(AFNICommand):
 
     def __init__(self, **inputs):
         super(SkullStrip, self).__init__(**inputs)
+
         if not no_afni():
             v = Info.version()
 
-            # As of AFNI 16.0.00, redirect_x is not needed
-            if isinstance(v[0], int) and v[0] > 15:
+            # Between AFNI 16.0.00 and 16.2.07, redirect_x is not needed
+            if v >= (2016, 0, 0) and v < (2016, 2, 7):
                 self._redirect_x = False
 
 

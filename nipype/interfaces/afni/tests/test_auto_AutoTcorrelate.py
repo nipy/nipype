@@ -27,6 +27,9 @@ def test_AutoTcorrelate_inputs():
     mask_source=dict(argstr='-mask_source %s',
     xor=['mask_only_targets'],
     ),
+    num_threads=dict(nohash=True,
+    usedefault=True,
+    ),
     out_file=dict(argstr='-prefix %s',
     name_source='in_file',
     name_template='%s_similarity_matrix.1D',
@@ -34,7 +37,8 @@ def test_AutoTcorrelate_inputs():
     outputtype=dict(),
     polort=dict(argstr='-polort %d',
     ),
-    terminal_output=dict(nohash=True,
+    terminal_output=dict(deprecated='1.0.0',
+    nohash=True,
     ),
     )
     inputs = AutoTcorrelate.input_spec()

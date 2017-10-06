@@ -16,7 +16,8 @@ def test_StdOutCommandLine_inputs():
     genfile=True,
     position=-1,
     ),
-    terminal_output=dict(nohash=True,
+    terminal_output=dict(deprecated='1.0.0',
+    nohash=True,
     ),
     )
     inputs = StdOutCommandLine.input_spec()
