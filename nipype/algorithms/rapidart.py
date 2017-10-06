@@ -278,7 +278,9 @@ class ArtifactDetect(BaseInterface):
 
     Uses intensity and motion parameters to infer outliers. If `use_norm` is
     True, it computes the movement of the center of each face a cuboid centered
-    around the head and returns the maximal movement across the centers.
+    around the head and returns the maximal movement across the centers. If you
+    wish to use individual thresholds instead, import `Undefined` from
+    `nipype.interfaces.base` and set `....inputs.use_norm = Undefined`
 
 
     Examples
@@ -591,13 +593,13 @@ class StimCorrInputSpec(BaseInterfaceInputSpec):
                         desc="SPM mat file (use pre-estimate SPM.mat file)")
     concatenated_design = traits.Bool(mandatory=True,
                                       desc=("state if the design matrix "
-                                            "contains concatenated sessions")
+                                            "contains concatenated sessions"))
 
 
 class StimCorrOutputSpec(TraitedSpec):
     stimcorr_files = OutputMultiPath(File(exists=True),
                                      desc=("List of files containing "
-                                           "correlation values")
+                                           "correlation values"))
 
 
 class StimulusCorrelation(BaseInterface):
