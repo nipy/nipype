@@ -1226,7 +1226,7 @@ class BBRegister(FSCommand):
                 outputs['registered_file'] = op.abspath(_in.registered_file)
 
         if isdefined(_in.out_lta_file):
-            if isinstance(_in.out_fsl_file, bool):
+            if isinstance(_in.out_lta_file, bool):
                 suffix = '_bbreg_%s.lta' % _in.subject_id
                 out_lta_file = fname_presuffix(_in.source_file,
                                                suffix=suffix,
