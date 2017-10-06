@@ -18,7 +18,8 @@ These functions include:
    >>> datadir = os.path.realpath(os.path.join(filepath, '../testing/data'))
    >>> os.chdir(datadir)
 """
-from __future__ import print_function, division, unicode_literals, absolute_import
+from __future__ import (print_function, division,
+                        unicode_literals, absolute_import)
 from builtins import open, range, str, bytes
 
 import os
@@ -160,44 +161,61 @@ def _calc_norm_affine(affines, use_differences, brain_pts=None):
 
 class ArtifactDetectInputSpec(BaseInterfaceInputSpec):
     realigned_files = InputMultiPath(File(exists=True),
-                                     desc="Names of realigned functional data files",
+                                     desc=("Names of realigned functional data "
+                                           "files"),
                                      mandatory=True)
-    realignment_parameters = InputMultiPath(File(exists=True), mandatory=True,
-                                            desc=("Names of realignment parameters"
-                                                  "corresponding to the functional data files"))
+    realignment_parameters = InputMultiPath(File(exists=True),
+                                            mandatory=True,
+                                            desc=("Names of realignment "
+                                                  "parameters corresponding to "
+                                                  "the functional data files"))
     parameter_source = traits.Enum("SPM", "FSL", "AFNI", "NiPy", "FSFAST",
                                    desc="Source of movement parameters",
                                    mandatory=True)
-    use_differences = traits.ListBool([True, False], minlen=2, maxlen=2,
+    use_differences = traits.ListBool([True, False],
+                                      minlen=2,
+                                      maxlen=2,
                                       usedefault=True,
-                                      desc=("Use differences between successive motion (first element)"
-                                            "and intensity paramter (second element) estimates in order"
-                                            "to determine outliers.  (default is [True, False])"))
-    use_norm = traits.Bool(requires=['norm_threshold'],
+                                      desc=("Use differences between successive"
+                                            " motion (first element) and "
+                                            "intensity parameter (second "
+                                            "element) estimates in order to "
+                                            "determine outliers.  "
+                                            "(default is [True, False])"))
+    use_norm = traits.Bool(True,
+                           usedefault=True,
+                           requires=['norm_threshold'],
                            desc=("Uses a composite of the motion parameters in "
                                  "order to determine outliers."))
-    norm_threshold = traits.Float(desc=("Threshold to use to detect motion-rela"
+    norm_threshold = traits.Float(xor=['rotation_threshold',
+                                       'translation_threshold'],
+                                  mandatory=True,
+                                  desc=("Threshold to use to detect motion-rela"
                                         "ted outliers when composite motion is "
-                                        "being used"), mandatory=True,
-                                  xor=['rotation_threshold',
-                                       'translation_threshold'])
-    rotation_threshold = traits.Float(mandatory=True, xor=['norm_threshold'],
-                                      desc=("Threshold (in radians) to use to detect rotation-related "
-                                            "outliers"))
-    translation_threshold = traits.Float(mandatory=True, xor=['norm_threshold'],
-                                         desc=("Threshold (in mm) to use to detect translation-related "
+                                        "being used"))
+    rotation_threshold = traits.Float(mandatory=True,
+                                      xor=['norm_threshold'],
+                                      desc=("Threshold (in radians) to use to "
+                                            "detect rotation-related outliers"))
+    translation_threshold = traits.Float(mandatory=True,
+                                         xor=['norm_threshold'],
+                                         desc=("Threshold (in mm) to use to "
+                                               "detect translation-related "
                                                "outliers"))
     zintensity_threshold = traits.Float(mandatory=True,
-                                        desc=("Intensity Z-threshold use to detection images that deviate "
+                                        desc=("Intensity Z-threshold use to "
+                                              "detection images that deviate "
                                               "from the mean"))
     mask_type = traits.Enum('spm_global', 'file', 'thresh',
-                            desc=("Type of mask that should be used to mask the functional "
-                                  "data. *spm_global* uses an spm_global like calculation to "
-                                  "determine the brain mask. *file* specifies a brain mask "
-                                  "file (should be an image file consisting of 0s and 1s). "
-                                  "*thresh* specifies a threshold to use. By default all voxels"
-                                  "are used, unless one of these mask types are defined."),
-                            mandatory=True)
+                            mandatory=True,
+                            desc=("Type of mask that should be used to mask the"
+                                  " functional data. *spm_global* uses an "
+                                  "spm_global like calculation to determine the"
+                                  " brain mask. *file* specifies a brain mask "
+                                  "file (should be an image file consisting of "
+                                  "0s and 1s). *thresh* specifies a threshold "
+                                  "to use. By default all voxels are used,"
+                                  "unless one of these mask types are defined"))
     mask_file = File(exists=True,
                      desc="Mask file to be used if mask_type is 'file'.")
     mask_threshold = traits.Float(desc=("Mask threshold to be used if mask_type"
@@ -223,28 +241,36 @@ class ArtifactDetectInputSpec(BaseInterfaceInputSpec):
 
 class ArtifactDetectOutputSpec(TraitedSpec):
     outlier_files = OutputMultiPath(File(exists=True),
-                                    desc=("One file for each functional run containing a list of "
-                                          "0-based indices corresponding to outlier volumes"))
+                                    desc=("One file for each functional run "
+                                          "containing a list of 0-based indices"
+                                          " corresponding to outlier volumes"))
     intensity_files = OutputMultiPath(File(exists=True),
-                                      desc=("One file for each functional run containing the global "
-                                            "intensity values determined from the brainmask"))
+                                      desc=("One file for each functional run "
+                                            "containing the global intensity "
+                                            "values determined from the "
+                                            "brainmask"))
     norm_files = OutputMultiPath(File,
-                                 desc=("One file for each functional run containing the composite "
-                                       "norm"))
+                                 desc=("One file for each functional run "
+                                       "containing the composite norm"))
     statistic_files = OutputMultiPath(File(exists=True),
-                                      desc=("One file for each functional run containing information "
-                                            "about the different types of artifacts and if design info is"
-                                            " provided then details of stimulus correlated motion and a "
-                                            "listing or artifacts by event type."))
+                                      desc=("One file for each functional run "
+                                            "containing information about the "
+                                            "different types of artifacts and "
+                                            "if design info is provided then "
+                                            "details of stimulus correlated "
+                                            "motion and a listing or artifacts "
+                                            "by event type."))
     plot_files = OutputMultiPath(File,
-                                 desc=("One image file for each functional run containing the "
-                                       "detected outliers"))
+                                 desc=("One image file for each functional run "
+                                       "containing the detected outliers"))
     mask_files = OutputMultiPath(File,
-                                 desc=("One image file for each functional run containing the mask"
-                                       "used for global signal calculation"))
+                                 desc=("One image file for each functional run "
+                                       "containing the mask used for global "
+                                       "signal calculation"))
     displacement_files = OutputMultiPath(File,
-                                         desc=("One image file for each functional run containing the voxel"
-                                               "displacement timeseries"))
+                                         desc=("One image file for each "
+                                               "functional run containing the "
+                                               "voxel displacement timeseries"))
 
 
 class ArtifactDetect(BaseInterface):
@@ -314,7 +340,7 @@ class ArtifactDetect(BaseInterface):
         outputs['intensity_files'] = []
         outputs['statistic_files'] = []
         outputs['mask_files'] = []
-        if isdefined(self.inputs.norm_threshold):
+        if isdefined(self.inputs.use_norm) and self.inputs.use_norm:
             outputs['norm_files'] = []
             if self.inputs.bound_by_brainmask:
                 outputs['displacement_files'] = []
@@ -328,7 +354,7 @@ class ArtifactDetect(BaseInterface):
             outputs['intensity_files'].insert(i, intensityfile)
             outputs['statistic_files'].insert(i, statsfile)
             outputs['mask_files'].insert(i, maskfile)
-            if isdefined(self.inputs.norm_threshold):
+            if isdefined(self.inputs.use_norm) and self.inputs.use_norm:
                 outputs['norm_files'].insert(i, normfile)
                 if self.inputs.bound_by_brainmask:
                     outputs['displacement_files'].insert(i, displacementfile)
@@ -434,7 +460,7 @@ class ArtifactDetect(BaseInterface):
         mask_img = Nifti1Image(mask.astype(np.uint8), affine)
         mask_img.to_filename(maskfile)
 
-        if isdefined(self.inputs.norm_threshold):
+        if self.inputs.use_norm:
             brain_pts = None
             if self.inputs.bound_by_brainmask:
                 voxel_coords = np.nonzero(mask)
@@ -477,7 +503,7 @@ class ArtifactDetect(BaseInterface):
         # write output to outputfile
         np.savetxt(artifactfile, outliers, fmt=b'%d', delimiter=' ')
         np.savetxt(intensityfile, g, fmt=b'%.2f', delimiter=' ')
-        if isdefined(self.inputs.norm_threshold):
+        if self.inputs.use_norm:
             np.savetxt(normfile, normval, fmt=b'%.4f', delimiter=' ')
 
         if isdefined(self.inputs.save_plot) and self.inputs.save_plot:
@@ -485,12 +511,12 @@ class ArtifactDetect(BaseInterface):
             matplotlib.use(config.get("execution", "matplotlib_backend"))
             import matplotlib.pyplot as plt
             fig = plt.figure()
-            if isdefined(self.inputs.norm_threshold):
+            if isdefined(self.inputs.use_norm) and self.inputs.use_norm:
                 plt.subplot(211)
             else:
                 plt.subplot(311)
             self._plot_outliers_with_wave(gz, iidx, 'Intensity')
-            if isdefined(self.inputs.norm_threshold):
+            if isdefined(self.inputs.use_norm) and self.inputs.use_norm:
                 plt.subplot(212)
                 self._plot_outliers_with_wave(normval, np.union1d(tidx, ridx),
                                               'Norm (mm)')
@@ -515,20 +541,22 @@ class ArtifactDetect(BaseInterface):
                                                          motion_outliers)),
                   'motion_outliers': len(np.setdiff1d(motion_outliers, iidx)),
                   },
-                 {'motion': [{'using differences': self.inputs.use_differences[0]},
-                             {'mean': np.mean(mc_in, axis=0).tolist(),
-                              'min': np.min(mc_in, axis=0).tolist(),
-                              'max': np.max(mc_in, axis=0).tolist(),
-                              'std': np.std(mc_in, axis=0).tolist()},
+                 {'motion': [
+                    {'using differences': self.inputs.use_differences[0]},
+                    {'mean': np.mean(mc_in, axis=0).tolist(),
+                     'min': np.min(mc_in, axis=0).tolist(),
+                     'max': np.max(mc_in, axis=0).tolist(),
+                     'std': np.std(mc_in, axis=0).tolist()},
                              ]},
-                 {'intensity': [{'using differences': self.inputs.use_differences[1]},
-                                {'mean': np.mean(gz, axis=0).tolist(),
-                                 'min': np.min(gz, axis=0).tolist(),
-                                 'max': np.max(gz, axis=0).tolist(),
-                                 'std': np.std(gz, axis=0).tolist()},
+                 {'intensity': [
+                    {'using differences': self.inputs.use_differences[1]},
+                    {'mean': np.mean(gz, axis=0).tolist(),
+                     'min': np.min(gz, axis=0).tolist(),
+                     'max': np.max(gz, axis=0).tolist(),
+                     'std': np.std(gz, axis=0).tolist()},
                                 ]},
                  ]
-        if isdefined(self.inputs.norm_threshold):
+        if self.inputs.use_norm:
             stats.insert(3, {'motion_norm':
                              {'mean': np.mean(normval, axis=0).tolist(),
                               'min': np.min(normval, axis=0).tolist(),
@@ -549,20 +577,27 @@ class ArtifactDetect(BaseInterface):
 
 
 class StimCorrInputSpec(BaseInterfaceInputSpec):
-    realignment_parameters = InputMultiPath(File(exists=True), mandatory=True,
-                                            desc=('Names of realignment parameters corresponding to the functional '
-                                                  'data files'))
-    intensity_values = InputMultiPath(File(exists=True), mandatory=True,
-                                      desc='Name of file containing intensity values')
-    spm_mat_file = File(exists=True, mandatory=True,
-                        desc='SPM mat file (use pre-estimate SPM.mat file)')
+    realignment_parameters = InputMultiPath(File(exists=True),
+                                            mandatory=True,
+                                            desc=("Names of realignment "
+                                                  "parameters corresponding to "
+                                                  "the functional data files"))
+    intensity_values = InputMultiPath(File(exists=True),
+                                      mandatory=True,
+                                      desc=("Name of file containing intensity "
+                                           "values"))
+    spm_mat_file = File(exists=True,
+                        mandatory=True,
+                        desc="SPM mat file (use pre-estimate SPM.mat file)")
     concatenated_design = traits.Bool(mandatory=True,
-                                      desc='state if the design matrix contains concatenated sessions')
+                                      desc=("state if the design matrix "
+                                            "contains concatenated sessions")
 
 
 class StimCorrOutputSpec(TraitedSpec):
     stimcorr_files = OutputMultiPath(File(exists=True),
-                                     desc='List of files containing correlation values')
+                                     desc=("List of files containing "
+                                           "correlation values")
 
 
 class StimulusCorrelation(BaseInterface):
@@ -572,8 +607,9 @@ class StimulusCorrelation(BaseInterface):
     Currently this class supports an SPM generated design matrix and requires
     intensity parameters. This implies that one must run
     :ref:`ArtifactDetect <nipype.algorithms.rapidart.ArtifactDetect>`
-    and :ref:`Level1Design <nipype.interfaces.spm.model.Level1Design>` prior to running this or
-    provide an SPM.mat file and intensity parameters through some other means.
+    and :ref:`Level1Design <nipype.interfaces.spm.model.Level1Design>` prior to
+    running this or provide an SPM.mat file and intensity parameters through
+    some other means.
 
     Examples
     --------
@@ -649,7 +685,8 @@ class StimulusCorrelation(BaseInterface):
         U = spmmat['SPM'][0][0].Sess[0][sessidx].U[0]
         if rows is None:
             rows = spmmat['SPM'][0][0].Sess[0][sessidx].row[0] - 1
-        cols = spmmat['SPM'][0][0].Sess[0][sessidx].col[0][list(range(len(U)))] - 1
+        cols = (
+            spmmat['SPM'][0][0].Sess[0][sessidx].col[0][list(range(len(U)))]-1)
         outmatrix = designmatrix.take(rows.tolist(), axis=0).take(cols.tolist(),
                                                                   axis=1)
         return outmatrix
