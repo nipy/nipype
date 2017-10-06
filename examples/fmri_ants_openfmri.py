@@ -218,7 +218,7 @@ def create_reg_workflow(name='registration'):
     warpmean.inputs.input_image_type = 0
     warpmean.inputs.interpolation = 'Linear'
     warpmean.inputs.invert_transform_flags = [False, False]
-    warpmean.inputs.terminal_output = 'file'
+    warpmean.terminal_output = 'file'
 
     register.connect(inputnode, 'target_image_brain', warpmean, 'reference_image')
     register.connect(inputnode, 'mean_image', warpmean, 'input_image')
@@ -234,7 +234,7 @@ def create_reg_workflow(name='registration'):
     warpall.inputs.input_image_type = 0
     warpall.inputs.interpolation = 'Linear'
     warpall.inputs.invert_transform_flags = [False, False]
-    warpall.inputs.terminal_output = 'file'
+    warpall.terminal_output = 'file'
 
     register.connect(inputnode, 'target_image_brain', warpall, 'reference_image')
     register.connect(inputnode, 'source_files', warpall, 'input_image')
@@ -428,7 +428,7 @@ def create_fs_reg_workflow(name='registration'):
     warpmean.inputs.input_image_type = 0
     warpmean.inputs.interpolation = 'Linear'
     warpmean.inputs.invert_transform_flags = [False, False]
-    warpmean.inputs.terminal_output = 'file'
+    warpmean.terminal_output = 'file'
     warpmean.inputs.args = '--float'
     # warpmean.inputs.num_threads = 4
     # warpmean.plugin_args = {'sbatch_args': '--mem=4G -c 4'}
@@ -443,7 +443,7 @@ def create_fs_reg_workflow(name='registration'):
     warpall.inputs.input_image_type = 0
     warpall.inputs.interpolation = 'Linear'
     warpall.inputs.invert_transform_flags = [False, False]
-    warpall.inputs.terminal_output = 'file'
+    warpall.terminal_output = 'file'
     warpall.inputs.args = '--float'
     warpall.inputs.num_threads = 2
     warpall.plugin_args = {'sbatch_args': '--mem=6G -c 2'}

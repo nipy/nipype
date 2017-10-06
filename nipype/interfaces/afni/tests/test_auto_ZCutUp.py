@@ -27,7 +27,8 @@ def test_ZCutUp_inputs():
     name_template='%s_zcutup',
     ),
     outputtype=dict(),
-    terminal_output=dict(nohash=True,
+    terminal_output=dict(deprecated='1.0.0',
+    nohash=True,
     ),
     )
     inputs = ZCutUp.input_spec()

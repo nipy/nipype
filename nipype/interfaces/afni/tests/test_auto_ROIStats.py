@@ -25,9 +25,8 @@ def test_ROIStats_inputs():
     quiet=dict(argstr='-quiet',
     position=1,
     ),
-    terminal_output=dict(mandatory=True,
+    terminal_output=dict(deprecated='1.0.0',
     nohash=True,
-    usedefault=True,
     ),
     )
     inputs = ROIStats.input_spec()

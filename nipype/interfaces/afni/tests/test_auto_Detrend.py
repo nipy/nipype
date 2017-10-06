@@ -25,7 +25,8 @@ def test_Detrend_inputs():
     name_template='%s_detrend',
     ),
     outputtype=dict(),
-    terminal_output=dict(nohash=True,
+    terminal_output=dict(deprecated='1.0.0',
+    nohash=True,
     ),
     )
     inputs = Detrend.input_spec()

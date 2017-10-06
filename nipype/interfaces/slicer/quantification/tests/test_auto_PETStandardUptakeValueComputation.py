@@ -33,7 +33,8 @@ def test_PETStandardUptakeValueComputation_inputs():
     ),
     petVolume=dict(argstr='--petVolume %s',
     ),
-    terminal_output=dict(nohash=True,
+    terminal_output=dict(deprecated='1.0.0',
+    nohash=True,
     ),
     )
     inputs = PETStandardUptakeValueComputation.input_spec()

@@ -23,7 +23,8 @@ def test_DilateMask_inputs():
     ),
     sizeStructuralElement=dict(argstr='--sizeStructuralElement %d',
     ),
-    terminal_output=dict(nohash=True,
+    terminal_output=dict(deprecated='1.0.0',
+    nohash=True,
     ),
     )
     inputs = DilateMask.input_spec()

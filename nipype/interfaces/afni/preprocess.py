@@ -1676,13 +1676,13 @@ class OutlierCountInputSpec(CommandLineInputSpec):
         False,
         usedefault=True,
         argstr='-autoclip',
-        xor=['in_file'],
+        xor=['mask'],
         desc='clip off small voxels')
     automask = traits.Bool(
         False,
         usedefault=True,
         argstr='-automask',
-        xor=['in_file'],
+        xor=['mask'],
         desc='clip off small voxels')
     fraction = traits.Bool(
         False,
@@ -1718,28 +1718,19 @@ class OutlierCountInputSpec(CommandLineInputSpec):
     out_file = File(
         name_template='%s_outliers',
         name_source=['in_file'],
-        argstr='> %s',
         keep_extension=False,
-        position=-1,
         desc='capture standard output')
 
 
 class OutlierCountOutputSpec(TraitedSpec):
-    out_outliers = File(
-        exists=True,
-        desc='output image file name')
-    out_file = File(
-        name_template='%s_tqual',
-        name_source=['in_file'],
-        argstr='> %s',
-        keep_extension=False,
-        position=-1,
-        desc='capture standard output')
+    out_outliers = File(exists=True,
+                        desc='output image file name')
+    out_file = File(desc='capture standard output')
 
 
 class OutlierCount(CommandLine):
-    """Calculates number of 'outliers' a 3D+time dataset, at each
-    time point, and writes the results to stdout.
+    """Calculates number of 'outliers' at each time point of a
+    a 3D+time dataset.
 
     For complete details, see the `3dToutcount Documentation
     <https://afni.nimh.nih.gov/pub/dist/doc/program_help/3dToutcount.html>`_
@@ -1751,7 +1742,7 @@ class OutlierCount(CommandLine):
     >>> toutcount = afni.OutlierCount()
     >>> toutcount.inputs.in_file = 'functional.nii'
     >>> toutcount.cmdline  # doctest: +ELLIPSIS +ALLOW_UNICODE
-    '3dToutcount functional.nii > functional_outliers'
+    '3dToutcount functional.nii'
     >>> res = toutcount.run()  # doctest: +SKIP
 
     """
@@ -1759,20 +1750,34 @@ class OutlierCount(CommandLine):
     _cmd = '3dToutcount'
     input_spec = OutlierCountInputSpec
     output_spec = OutlierCountOutputSpec
+    _terminal_output = 'file_split'
 
     def _parse_inputs(self, skip=None):
         if skip is None:
             skip = []
 
+        # This is not strictly an input, but needs be
+        # set before run() is called.
+        if self.terminal_output == 'none':
+            self.terminal_output = 'file_split'
+
         if not self.inputs.save_outliers:
             skip += ['outliers_file']
         return super(OutlierCount, self)._parse_inputs(skip)
 
+    def _run_interface(self, runtime):
+        runtime = super(OutlierCount, self)._run_interface(runtime)
+
+        # Read from runtime.stdout or runtime.merged
+        with open(op.abspath(self.inputs.out_file), 'w') as outfh:
+            outfh.write(runtime.stdout or runtime.merged)
+        return runtime
+
     def _list_outputs(self):
         outputs = self.output_spec().get()
+        outputs['out_file'] = op.abspath(self.inputs.out_file)
         if self.inputs.save_outliers:
             outputs['out_outliers'] = op.abspath(self.inputs.outliers_file)
-        outputs['out_file'] = op.abspath(self.inputs.out_file)
         return outputs
 
 
@@ -1880,13 +1885,10 @@ class ROIStatsInputSpec(CommandLineInputSpec):
         desc='execute quietly',
         argstr='-quiet',
         position=1)
-    terminal_output = traits.Enum(
-        'allatonce',
+    terminal_output = traits.Enum('allatonce', deprecated='1.0.0',
         desc='Control terminal output:`allatonce` - waits till command is '
              'finished to display output',
-        nohash=True,
-        mandatory=True,
-        usedefault=True)
+        nohash=True)
 
 
 class ROIStatsOutputSpec(TraitedSpec):
@@ -1915,6 +1917,7 @@ class ROIStats(AFNICommandBase):
 
     """
     _cmd = '3dROIstats'
+    _terminal_output = 'allatonce'
     input_spec = ROIStatsInputSpec
     output_spec = ROIStatsOutputSpec
 

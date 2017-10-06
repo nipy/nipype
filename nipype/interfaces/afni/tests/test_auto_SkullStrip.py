@@ -25,7 +25,8 @@ def test_SkullStrip_inputs():
     name_template='%s_skullstrip',
     ),
     outputtype=dict(),
-    terminal_output=dict(nohash=True,
+    terminal_output=dict(deprecated='1.0.0',
+    nohash=True,
     ),
     )
     inputs = SkullStrip.input_spec()

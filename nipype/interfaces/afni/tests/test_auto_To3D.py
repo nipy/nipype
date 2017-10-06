@@ -34,7 +34,8 @@ def test_To3D_inputs():
     outputtype=dict(),
     skipoutliers=dict(argstr='-skip_outliers',
     ),
-    terminal_output=dict(nohash=True,
+    terminal_output=dict(deprecated='1.0.0',
+    nohash=True,
     ),
     )
     inputs = To3D.input_spec()

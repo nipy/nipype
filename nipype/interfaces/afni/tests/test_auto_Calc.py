@@ -43,7 +43,8 @@ def test_Calc_inputs():
     ),
     stop_idx=dict(requires=['start_idx'],
     ),
-    terminal_output=dict(nohash=True,
+    terminal_output=dict(deprecated='1.0.0',
+    nohash=True,
     ),
     )
     inputs = Calc.input_spec()

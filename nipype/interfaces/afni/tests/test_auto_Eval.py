@@ -43,7 +43,8 @@ def test_Eval_inputs():
     ),
     stop_idx=dict(requires=['start_idx'],
     ),
-    terminal_output=dict(nohash=True,
+    terminal_output=dict(deprecated='1.0.0',
+    nohash=True,
     ),
     )
     inputs = Eval.input_spec()

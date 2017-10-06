@@ -25,7 +25,8 @@ def test_OtsuThresholdImageFilter_inputs():
     ),
     outsideValue=dict(argstr='--outsideValue %d',
     ),
-    terminal_output=dict(nohash=True,
+    terminal_output=dict(deprecated='1.0.0',
+    nohash=True,
     ),
     )
     inputs = OtsuThresholdImageFilter.input_spec()

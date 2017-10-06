@@ -105,7 +105,7 @@ class MatlabCommand(CommandLine):
                 self.inputs.single_comp_thread = True
         # For matlab commands force all output to be returned since matlab
         # does not have a clean way of notifying an error
-        self.inputs.terminal_output = 'allatonce'
+        self.terminal_output = 'allatonce'
 
     @classmethod
     def set_default_matlab_cmd(cls, matlab_cmd):
@@ -141,7 +141,7 @@ class MatlabCommand(CommandLine):
         cls._default_paths = paths
 
     def _run_interface(self, runtime):
-        self.inputs.terminal_output = 'allatonce'
+        self.terminal_output = 'allatonce'
         runtime = super(MatlabCommand, self)._run_interface(runtime)
         try:
             # Matlab can leave the terminal in a barbbled state

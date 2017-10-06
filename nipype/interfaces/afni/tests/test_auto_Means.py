@@ -45,7 +45,8 @@ def test_Means_inputs():
     ),
     summ=dict(argstr='-sum',
     ),
-    terminal_output=dict(nohash=True,
+    terminal_output=dict(deprecated='1.0.0',
+    nohash=True,
     ),
     )
     inputs = Means.input_spec()

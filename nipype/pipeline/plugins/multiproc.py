@@ -138,8 +138,10 @@ class MultiProcPlugin(DistributedPluginBase):
 
     def _submit_job(self, node, updatehash=False):
         self._taskid += 1
-        if getattr(node.inputs, 'terminal_output', '') == 'stream':
-            node.inputs.terminal_output = 'allatonce'
+
+        # Don't allow streaming outputs
+        if getattr(node.interface, 'terminal_output', '') == 'stream':
+            node.interface.terminal_output = 'allatonce'
 
         self._task_obj[self._taskid] = self.pool.apply_async(
             run_node, (node, updatehash, self._taskid),

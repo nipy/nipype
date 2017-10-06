@@ -38,7 +38,8 @@ def test_Undump_inputs():
     outputtype=dict(),
     srad=dict(argstr='-srad -%f',
     ),
-    terminal_output=dict(nohash=True,
+    terminal_output=dict(deprecated='1.0.0',
+    nohash=True,
     ),
     )
     inputs = Undump.input_spec()

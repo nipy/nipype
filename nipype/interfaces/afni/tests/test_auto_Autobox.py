@@ -28,7 +28,8 @@ def test_Autobox_inputs():
     outputtype=dict(),
     padding=dict(argstr='-npad %d',
     ),
-    terminal_output=dict(nohash=True,
+    terminal_output=dict(deprecated='1.0.0',
+    nohash=True,
     ),
     )
     inputs = Autobox.input_spec()

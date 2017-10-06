@@ -49,7 +49,8 @@ def test_Cat_inputs():
     ),
     stack=dict(argstr='-stack',
     ),
-    terminal_output=dict(nohash=True,
+    terminal_output=dict(deprecated='1.0.0',
+    nohash=True,
     ),
     )
     inputs = Cat.input_spec()

@@ -28,7 +28,8 @@ def test_TCat_inputs():
     rlt=dict(argstr='-rlt%s',
     position=1,
     ),
-    terminal_output=dict(nohash=True,
+    terminal_output=dict(deprecated='1.0.0',
+    nohash=True,
     ),
     )
     inputs = TCat.input_spec()

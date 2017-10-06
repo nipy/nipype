@@ -37,7 +37,8 @@ def test_AutoTcorrelate_inputs():
     outputtype=dict(),
     polort=dict(argstr='-polort %d',
     ),
-    terminal_output=dict(nohash=True,
+    terminal_output=dict(deprecated='1.0.0',
+    nohash=True,
     ),
     )
     inputs = AutoTcorrelate.input_spec()
