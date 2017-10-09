@@ -1241,6 +1241,11 @@ class SimpleInterface(BaseInterface):
     ...     def _run_interface(self, runtime):
     ...          self._results['doubled'] = double(self.inputs.x)
     ...          return runtime
+
+    >>> dbl = Double()
+    >>> dbl.inputs.x = 2
+    >>> dbl.run().outputs.doubled
+    4.0
     """
     def __init__(self, from_file=None, resource_monitor=None, **inputs):
         super(SimpleInterface, self).__init__(
