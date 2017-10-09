@@ -673,6 +673,21 @@ class Registration(ANTSCommand):
 --convergence [ 100x50x30, 1e-09, 20 ] --smoothing-sigmas 2.0x1.0x0.0vox --shrink-factors 3x2x1 \
 --use-estimate-learning-rate-once 1 --use-histogram-matching 1 --masks [ fixed1.nii, NULL ] \
 --winsorize-image-intensities [ 0.0, 1.0 ]  --write-composite-transform 1'
+
+    >>> # Test initialization with multiple transforms matrices (e.g., unwarp and affine transform)
+    >>> reg10 = copy.deepcopy(reg)
+    >>> reg10.inputs.initial_moving_transform = ['func_to_struct.mat', 'ants_Warp.nii.gz']
+    >>> reg10.inputs.invert_initial_moving_transform = [False, False]
+    >>> reg10.cmdline # doctest: +ALLOW_UNICODE
+    'antsRegistration --collapse-output-transforms 0 --dimensionality 3 --initial-moving-transform \
+[ func_to_struct.mat, 0 ] [ ants_Warp.nii.gz, 0 ] --initialize-transforms-per-stage 0 --interpolation Linear \
+--output [ output_, output_warped_image.nii.gz ] --transform Affine[ 2.0 ] \
+--metric Mattes[ fixed1.nii, moving1.nii, 1, 32, Random, 0.05 ] --convergence [ 1500x200, 1e-08, 20 ] \
+--smoothing-sigmas 1.0x0.0vox --shrink-factors 2x1 --use-estimate-learning-rate-once 1 --use-histogram-matching 1 \
+--transform SyN[ 0.25, 3.0, 0.0 ] --metric Mattes[ fixed1.nii, moving1.nii, 1, 32 ] \
+--convergence [ 100x50x30, 1e-09, 20 ] --smoothing-sigmas 2.0x1.0x0.0vox --shrink-factors 3x2x1 \
+--use-estimate-learning-rate-once 1 --use-histogram-matching 1 --winsorize-image-intensities [ 0.0, 1.0 ]  \
+--write-composite-transform 1'
     """
     DEF_SAMPLING_STRATEGY = 'None'
     """The default sampling strategy argument."""
@@ -878,7 +893,7 @@ class Registration(ANTSCommand):
                     raise Exception(("ERROR: The useInverse list must have the same number "
                                      "of entries as the transformsFileName list."))
             else:
-                retval.append("[ %s, 0 ] " % self.inputs.initial_moving_transform[ii])
+                retval.append("[ %s, 0 ]" % self.inputs.initial_moving_transform[ii])
         return " ".join(retval)
 
     def _format_arg(self, opt, spec, val):
