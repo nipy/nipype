@@ -866,7 +866,7 @@ class Registration(ANTSCommand):
                                                              self.inputs.winsorize_upper_quantile)
 
     def _get_initial_transform_filenames(self):
-        retval = ['--initial-moving-transform ']
+        retval = ['--initial-moving-transform']
         for ii in range(len(self.inputs.initial_moving_transform)):
             if isdefined(self.inputs.invert_initial_moving_transform):
                 if len(self.inputs.initial_moving_transform) == len(self.inputs.invert_initial_moving_transform):
@@ -878,7 +878,7 @@ class Registration(ANTSCommand):
                     raise Exception(("ERROR: The useInverse list must have the same number "
                                      "of entries as the transformsFileName list."))
             else:
-                retval.append("[%s, 0] " % self.inputs.initial_moving_transform[ii])
+                retval.append("[ %s, 0 ] " % self.inputs.initial_moving_transform[ii])
         return " ".join(retval)
 
     def _format_arg(self, opt, spec, val):
