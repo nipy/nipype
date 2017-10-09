@@ -15,7 +15,8 @@ from builtins import open
 import os
 import os.path as op
 
-from ...utils.filemanip import (load_json, save_json, split_filename)
+from ...utils.filemanip import (load_json, save_json, split_filename,
+                                fname_presuffix)
 from ..base import (
     CommandLineInputSpec, CommandLine, TraitedSpec,
     traits, isdefined, File, InputMultiPath, Undefined, Str)
@@ -3131,7 +3132,7 @@ class QwarpInputSpec(AFNICommandInputSpec):
              'Note that the source dataset in the second run is the SAME as'
              'in the first run.  If you don\'t see why this is necessary,'
              'then you probably need to seek help from an AFNI guru.',
-        argstr='-inlev %d',
+        argstr='-inilev %d',
         xor=['duplo'])
     minpatch = traits.Int(
         desc='* The value of mm should be an odd integer.'
@@ -3475,29 +3476,38 @@ class Qwarp(AFNICommand):
         if not isdefined(self.inputs.out_file):
             prefix = self._gen_fname(self.inputs.in_file, suffix='_QW')
             ext = '.HEAD'
+            suffix ='+tlrc'
         else:
             prefix = self.inputs.out_file
             ext_ind = max([prefix.lower().rfind('.nii.gz'),
                            prefix.lower().rfind('.nii.')])
             if ext_ind == -1:
                 ext = '.HEAD'
+                suffix = '+tlrc'
             else:
                 ext = prefix[ext_ind:]
+                suffix = ''
         print(ext,"ext")
-        outputs['warped_source'] = os.path.abspath(self._gen_fname(prefix, suffix='+tlrc')+ext)
+        outputs['warped_source'] = fname_presuffix(prefix, suffix=suffix,
+                                                   use_ext=False) + ext
         if not self.inputs.nowarp:
-            outputs['source_warp'] = os.path.abspath(self._gen_fname(prefix, suffix='_WARP+tlrc')+ext)
+            outputs['source_warp'] = fname_presuffix(prefix,
+                suffix='_WARP' + suffix, use_ext=False) + ext
         if self.inputs.iwarp:
-            outputs['base_warp'] = os.path.abspath(self._gen_fname(prefix, suffix='_WARPINV+tlrc')+ext)
+            outputs['base_warp'] = fname_presuffix(prefix,
+                suffix='_WARPINV' + suffix, use_ext=False) + ext
         if isdefined(self.inputs.out_weight_file):
             outputs['weights'] = os.path.abspath(self.inputs.out_weight_file)
 
         if self.inputs.plusminus:
-            outputs['warped_source'] = os.path.abspath(self._gen_fname(prefix, suffix='_PLUS+tlrc')+ext)
-            outputs['warped_base'] = os.path.abspath(self._gen_fname(prefix, suffix='_MINUS+tlrc')+ext)
-            outputs['source_warp'] = os.path.abspath(self._gen_fname(prefix, suffix='_PLUS_WARP+tlrc')+ext)
-            outputs['base_warp'] = os.path.abspath(self._gen_fname(prefix, suffix='_MINUS_WARP+tlrc',)+ext)
-
+            outputs['warped_source'] = fname_presuffix(prefix,
+                suffix='_PLUS' + suffix, use_ext=False) + ext
+            outputs['warped_base'] = fname_presuffix(prefix,
+                suffix='_MINUS' + suffix, use_ext=False) + ext
+            outputs['source_warp'] = fname_presuffix(prefix,
+                suffix='_PLUS_WARP' + suffix, use_ext=False) + ext
+            outputs['base_warp'] = fname_presuffix(prefix,
+                suffix='_MINUS_WARP' + suffix, use_ext=False) + ext
         return outputs
 
     def _gen_filename(self, name):
