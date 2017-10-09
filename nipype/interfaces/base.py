@@ -1214,22 +1214,26 @@ class BaseInterface(Interface):
 
 class SimpleInterface(BaseInterface):
     """ An interface pattern that allows outputs to be set in a dictionary
+    called ``_results`` that is automatically interpreted by
+    ``_list_outputs()`` to find the outputs.
 
-    When implementing `_run_interface`, set outputs with::
+    When implementing ``_run_interface``, set outputs with::
 
         self._results[out_name] = out_value
 
-    This can be a way to upgrade a ``Function`` interface to do type checking:
+    This can be a way to upgrade a ``Function`` interface to do type checking.
 
+    Examples
+    --------
     >>> def double(x):
     ...    return 2 * x
-
+    ...
     >>> class DoubleInputSpec(BaseInterfaceInputSpec):
     ...     x = traits.Float(mandatory=True)
-
+    ...
     >>> class DoubleOutputSpec(TraitedSpec):
     ...     doubled = traits.Float()
-
+    ...
     >>> class Double(SimpleInterface):
     ...     input_spec = DoubleInputSpec
     ...     output_spec = DoubleOutputSpec
