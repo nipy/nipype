@@ -3463,7 +3463,7 @@ class Qwarp(AFNICommand):
     >>> qwarp2.inputs.inilev = 7
     >>> qwarp2.inputs.iniwarp = ['Q25_warp+tlrc.HEAD']
     >>> qwarp2.cmdline  # doctest: +ALLOW_UNICODE
-    '3dQwarp -base mni.nii -blur 0.0 2.0 -source structural.nii -inlev 7 -iniwarp Q25_warp+tlrc.HEAD -prefix Q11'
+    '3dQwarp -base mni.nii -blur 0.0 2.0 -source structural.nii -inilev 7 -iniwarp Q25_warp+tlrc.HEAD -prefix Q11'
     >>> res2 = qwarp2.run()  # doctest: +SKIP
     """
     _cmd = '3dQwarp'
