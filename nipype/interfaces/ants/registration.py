@@ -878,7 +878,7 @@ class Registration(ANTSCommand):
                     raise Exception(("ERROR: The useInverse list must have the same number "
                                      "of entries as the transformsFileName list."))
             else:
-                retval.append("[%s, 0] " % self.inputs.initial_moving_transform[ii])
+                retval.append("[ %s, 0 ] " % self.inputs.initial_moving_transform[ii])
         return " ".join(retval)
 
     def _format_arg(self, opt, spec, val):
