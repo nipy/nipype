@@ -1,6 +1,10 @@
 Upcoming release
 ================
 
+* ENH: Improve terminal_output feature (https://github.com/nipy/nipype/pull/2209)
+* ENH: Simple interface to FSL std2imgcoords (https://github.com/nipy/nipype/pull/2209, prev #1398)
+* ENH: Centralize virtual/physical $DISPLAYs (https://github.com/nipy/nipype/pull/#2203)
+* ENH: New ResourceMonitor - replaces resource profiler (https://github.com/nipy/nipype/pull/#2200)
 
 0.13.1 (May 20, 2017)
 =====================

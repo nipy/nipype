@@ -87,6 +87,9 @@ COPY requirements.txt requirements.txt
 RUN pip install -r requirements.txt && \
     rm -rf ~/.cache/pip
 
+RUN git clone https://github.com/INCF/pybids.git && \
+    cd pybids && python setup.py develop
+
 # Installing nipype
 COPY . /src/nipype
 RUN cd /src/nipype && \

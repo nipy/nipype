@@ -24,7 +24,8 @@ def test_MathsCommand_inputs():
     output_datatype=dict(argstr='-odt %s',
     position=-3,
     ),
-    terminal_output=dict(nohash=True,
+    terminal_output=dict(deprecated='1.0.0',
+    nohash=True,
     ),
     )
     inputs = MathsCommand.input_spec()

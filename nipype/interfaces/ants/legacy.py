@@ -129,8 +129,8 @@ class GenWarpFields(antsIntroduction):
 
 
 class buildtemplateparallelInputSpec(ANTSCommandInputSpec):
-    dimension = traits.Enum(3, 2, argstr='-d %d', usedefault=True,
-                            desc='image dimension (2 or 3)', position=1)
+    dimension = traits.Enum(3, 2, 4, argstr='-d %d', usedefault=True,
+                            desc='image dimension (2, 3 or 4)', position=1)
     out_prefix = traits.Str('antsTMPL_', argstr='-o %s', usedefault=True,
                             desc=('Prefix that is prepended to all output '
                                   'files (default = antsTMPL_)'))

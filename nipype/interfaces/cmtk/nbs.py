@@ -113,9 +113,9 @@ class NetworkBasedStatistic(BaseInterface):
         node_network = nx.read_gpickle(node_ntwk_name)
         iflogger.info('Populating node dictionaries with attributes from {node}'.format(node=node_ntwk_name))
 
-        for nid, ndata in node_network.nodes_iter(data=True):
-            nbsgraph.node[nid] = ndata
-            nbs_pval_graph.node[nid] = ndata
+        for nid, ndata in node_network.nodes(data=True):
+            nbsgraph.nodes[nid] = ndata
+            nbs_pval_graph.nodes[nid] = ndata
 
         path = op.abspath('NBS_Result_' + details)
         iflogger.info(path)

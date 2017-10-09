@@ -213,7 +213,7 @@ def create_roi(subject_id, subjects_dir, fs_dir, parcellation_name, dilation):
     rois = np.zeros((256, 256, 256), dtype=np.int16)
 
     count = 0
-    for brk, brv in pg.nodes_iter(data=True):
+    for brk, brv in pg.nodes(data=True):
         count = count + 1
         iflogger.info(brv)
         iflogger.info(brk)
@@ -429,7 +429,7 @@ def create_wm_mask(subject_id, subjects_dir, fs_dir, parcellation_name):
     roid = roi.get_data()
     assert roid.shape[0] == wmmask.shape[0]
     pg = nx.read_graphml(pgpath)
-    for brk, brv in pg.nodes_iter(data=True):
+    for brk, brv in pg.nodes(data=True):
         if brv['dn_region'] == 'cortical':
             iflogger.info("Subtracting region %s with intensity value %s" %
                           (brv['dn_region'], brv['dn_correspondence_id']))

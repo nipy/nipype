@@ -26,6 +26,9 @@ def test_Calc_inputs():
     in_file_c=dict(argstr='-c %s',
     position=2,
     ),
+    num_threads=dict(nohash=True,
+    usedefault=True,
+    ),
     other=dict(argstr='',
     ),
     out_file=dict(argstr='-prefix %s',
@@ -40,7 +43,8 @@ def test_Calc_inputs():
     ),
     stop_idx=dict(requires=['start_idx'],
     ),
-    terminal_output=dict(nohash=True,
+    terminal_output=dict(deprecated='1.0.0',
+    nohash=True,
     ),
     )
     inputs = Calc.input_spec()

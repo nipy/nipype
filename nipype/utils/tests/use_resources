@@ -1,0 +1,31 @@
+#!/usr/bin/env python
+#
+# use_resources
+
+'''
+Python script to use a certain amount of RAM on disk and number of
+threads
+
+Usage:
+    use_resources -g <num_gb> -p <num_threads>
+'''
+
+# Make main executable
+if __name__ == '__main__':
+
+    # Import packages
+    import argparse
+    from nipype.utils.profiler import _use_resources
+
+    # Init argparser
+    parser = argparse.ArgumentParser(description=__doc__)
+
+    # Add arguments
+    parser.add_argument('-g', '--num_gb', required=True, type=float,
+                        help='Number of GB RAM to use, can be float or int')
+    parser.add_argument('-p', '--num_threads', required=True, type=int,
+                        help='Number of threads to run in parallel')
+
+    # Parse args
+    args = parser.parse_args()
+    _use_resources(args.num_threads, args.num_gb)

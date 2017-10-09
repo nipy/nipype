@@ -39,7 +39,8 @@ def test_DWI2Tensor_inputs():
     quiet=dict(argstr='-quiet',
     position=1,
     ),
-    terminal_output=dict(nohash=True,
+    terminal_output=dict(deprecated='1.0.0',
+    nohash=True,
     ),
     )
     inputs = DWI2Tensor.input_spec()

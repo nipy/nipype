@@ -46,7 +46,8 @@ def test_gtractCoregBvalues_inputs():
     ),
     spatialScale=dict(argstr='--spatialScale %f',
     ),
-    terminal_output=dict(nohash=True,
+    terminal_output=dict(deprecated='1.0.0',
+    nohash=True,
     ),
     )
     inputs = gtractCoregBvalues.input_spec()

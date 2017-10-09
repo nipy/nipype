@@ -31,7 +31,8 @@ def test_TensorMetrics_inputs():
     ),
     out_fa=dict(argstr='-fa %s',
     ),
-    terminal_output=dict(nohash=True,
+    terminal_output=dict(deprecated='1.0.0',
+    nohash=True,
     ),
     )
     inputs = TensorMetrics.input_spec()
