@@ -1212,6 +1212,50 @@ class BaseInterface(Interface):
             json.dump(inputs, fhandle, indent=4, ensure_ascii=False)
 
 
+class SimpleInterface(BaseInterface):
+    """ An interface pattern that allows outputs to be set in a dictionary
+    called ``_results`` that is automatically interpreted by
+    ``_list_outputs()`` to find the outputs.
+
+    When implementing ``_run_interface``, set outputs with::
+
+        self._results[out_name] = out_value
+
+    This can be a way to upgrade a ``Function`` interface to do type checking.
+
+    Examples
+    --------
+    >>> def double(x):
+    ...    return 2 * x
+    ...
+    >>> class DoubleInputSpec(BaseInterfaceInputSpec):
+    ...     x = traits.Float(mandatory=True)
+    ...
+    >>> class DoubleOutputSpec(TraitedSpec):
+    ...     doubled = traits.Float()
+    ...
+    >>> class Double(SimpleInterface):
+    ...     input_spec = DoubleInputSpec
+    ...     output_spec = DoubleOutputSpec
+    ...
+    ...     def _run_interface(self, runtime):
+    ...          self._results['doubled'] = double(self.inputs.x)
+    ...          return runtime
+
+    >>> dbl = Double()
+    >>> dbl.inputs.x = 2
+    >>> dbl.run().outputs.doubled
+    4.0
+    """
+    def __init__(self, from_file=None, resource_monitor=None, **inputs):
+        super(SimpleInterface, self).__init__(
+            from_file=from_file, resource_monitor=resource_monitor, **inputs)
+        self._results = {}
+
+    def _list_outputs(self):
+        return self._results
+
+
 class Stream(object):
     """Function to capture stdout and stderr streams with timestamps
 
