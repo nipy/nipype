@@ -1617,10 +1617,10 @@ class NwarpCatInputSpec(AFNICommandInputSpec):
              'extrapolation from the faces of the input grid..',
         argstr='-expad %d')
     out_file = File(
-        name_template='%s_Nwarp',
+        name_template='%s_NwarpCat',
         desc='output image file name',
         argstr='-prefix %s',
-        name_source='in_file')
+        name_source='in_files')
     verb = traits.Bool(
         desc='be verbose',
         argstr='-verb')
@@ -1688,6 +1688,19 @@ class NwarpCat(AFNICommand):
                                 if isinstance(v, tuple) else v
                                 for v in value]))
         return super(NwarpCat, self)._format_arg(name, spec, value)
+
+    def _gen_filename(self, name):
+        if name == 'out_file':
+            return self._gen_fname(self.inputs.in_files[0][0], suffix='_tcat')
+
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        if isdefined(self.inputs.out_file):
+            outputs['out_file'] = os.path.abspath(self.inputs.out_file)
+        else:
+            outputs['out_file'] = os.path.abspath(self._gen_fname(
+                self.inputs.in_files[0], suffix='_NwarpCat+tlrc', ext='.HEAD'))
+        return outputs
 
 
 class OneDToolPyInputSpec(AFNIPythonCommandInputSpec):
