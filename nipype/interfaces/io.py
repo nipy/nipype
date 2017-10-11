@@ -195,7 +195,7 @@ class DataSinkInputSpec(BaseInterfaceInputSpec):
                                    'Python regexp pattern and a replacement '\
                                    'string. Invoked after string `substitutions`'))
 
-    _outputs = Dict(key_trait=Unicode(), default_value={})
+    _outputs = traitlets.Dict(key_trait=Unicode(), default_value={})
     remove_dest_dir = Bool(False, desc='remove dest directory when copying dirs')
 
     # AWS S3 data attributes
@@ -211,15 +211,18 @@ class DataSinkInputSpec(BaseInterfaceInputSpec):
     local_copy = Unicode(desc='Copy files locally as well as to S3 bucket')
 
     # Set call-able inputs attributes
+    # dj TODO?: think if you can do it better (here and JSONFileSinkInputSpec)
     def __setattr__(self, key, value):
-
-        if key not in self.trait_names():
+        class_members = [x[0] for x in traitlets.traitlets.getmembers(traitlets.HasTraits())] + ['trait_change_notify']
+        if key not in self.trait_names() and key not in class_members:
             if not isdefined(value):
                 super(DataSinkInputSpec, self).__setattr__(key, value)
             self._outputs[key] = value
-        else:
-            if key in self._outputs:
+        elif key not in class_members:
+            if key in self._outputs and key not in class_members:
                 self._outputs[key] = value
+            super(DataSinkInputSpec, self).__setattr__(key, value)
+        else:
             super(DataSinkInputSpec, self).__setattr__(key, value)
 
 
@@ -2498,20 +2501,22 @@ class JSONFileGrabber(IOBase):
 
 class JSONFileSinkInputSpec(BaseInterfaceInputSpec):
     out_file = File(desc='JSON sink file')
-    in_dict = Dict(default_value={},
+    in_dict = traitlets.Dict(default_value={}, #dj TODO: traitlets.Dict
                    desc='input JSON dictionary')
-    _outputs = Dict(default_value={})
+    _outputs = traitlets.Dict(default_value={}) #dj TODO: traitlets.Dict 
     def __setattr__(self, key, value):
-        #super(JSONFileSinkInputSpec, self).__setattr__(key, value) #dj: why did I add it??
-        if key not in self.trait_names():
+        class_members = [x[0] for x in traitlets.traitlets.getmembers(traitlets.HasTraits())] + ['trait_change_notify']
+        if key not in self.trait_names() and key not in class_members:
             if not isdefined(value):
                 super(JSONFileSinkInputSpec, self).__setattr__(key, value)
-            #pdb.set_trace()
             self._outputs[key] = value
-        else:
+        elif key not in class_members:
             if key in self._outputs:
                 self._outputs[key] = value
             super(JSONFileSinkInputSpec, self).__setattr__(key, value)
+        else:
+            super(JSONFileSinkInputSpec, self).__setattr__(key, value)
+
 
 
 class JSONFileSinkOutputSpec(TraitedSpec):
