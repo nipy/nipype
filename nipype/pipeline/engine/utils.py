@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
@@ -24,9 +23,7 @@ import re
 import pickle
 from functools import reduce
 import numpy as np
-from nipype.utils.misc import package_check
-
-package_check('networkx', '1.3')
+from distutils.version import LooseVersion
 
 import networkx as nx
 
@@ -40,6 +37,7 @@ from ...utils.provenance import ProvStore, pm, nipype_ns, get_id
 
 from ... import logging, config
 logger = logging.getLogger('workflow')
+PY3 = sys.version_info[0] > 2
 
 try:
     dfs_preorder = nx.dfs_preorder
@@ -268,7 +266,7 @@ def _write_detailed_dot(graph, dotfilename):
     for n in nx.topological_sort(graph):
         nodename = str(n)
         inports = []
-        for u, v, d in graph.in_edges_iter(nbunch=n, data=True):
+        for u, v, d in graph.in_edges(nbunch=n, data=True):
             for cd in d['connect']:
                 if isinstance(cd[0], (str, bytes)):
                     outport = cd[0]
@@ -288,7 +286,7 @@ def _write_detailed_dot(graph, dotfilename):
             inputstr += '|<in%s> %s' % (replacefunk(ip), ip)
         inputstr += '}'
         outports = []
-        for u, v, d in graph.out_edges_iter(nbunch=n, data=True):
+        for u, v, d in graph.out_edges(nbunch=n, data=True):
             for cd in d['connect']:
                 if isinstance(cd[0], (str, bytes)):
                     outport = cd[0]
@@ -447,7 +445,7 @@ def get_levels(G):
     levels = {}
     for n in nx.topological_sort(G):
         levels[n] = 0
-        for pred in G.predecessors_iter(n):
+        for pred in G.predecessors(n):
             levels[n] = max(levels[n], levels[pred] + 1)
     return levels
 
@@ -492,9 +490,9 @@ def _merge_graphs(supergraph, nodes, subgraph, nodeid, iterables,
         raise Exception(("Execution graph does not have a unique set of node "
                          "names. Please rerun the workflow"))
     edgeinfo = {}
-    for n in subgraph.nodes():
+    for n in list(subgraph.nodes()):
         nidx = ids.index(n._hierarchy + n._id)
-        for edge in supergraph.in_edges_iter(supernodes[nidx]):
+        for edge in supergraph.in_edges(list(supernodes)[nidx]):
                 # make sure edge is not part of subgraph
             if edge[0] not in subgraph.nodes():
                 if n._hierarchy + n._id not in list(edgeinfo.keys()):
@@ -515,7 +513,7 @@ def _merge_graphs(supergraph, nodes, subgraph, nodeid, iterables,
         Gc = deepcopy(subgraph)
         ids = [n._hierarchy + n._id for n in Gc.nodes()]
         nodeidx = ids.index(nodeid)
-        rootnode = Gc.nodes()[nodeidx]
+        rootnode = list(Gc.nodes())[nodeidx]
         paramstr = ''
         for key, val in sorted(params.items()):
             paramstr = '{}_{}_{}'.format(
@@ -614,10 +612,10 @@ def _node_ports(graph, node):
     """
     portinputs = {}
     portoutputs = {}
-    for u, _, d in graph.in_edges_iter(node, data=True):
+    for u, _, d in graph.in_edges(node, data=True):
         for src, dest in d['connect']:
             portinputs[dest] = (u, src)
-    for _, v, d in graph.out_edges_iter(node, data=True):
+    for _, v, d in graph.out_edges(node, data=True):
         for src, dest in d['connect']:
             if isinstance(src, tuple):
                 srcport = src[0]
@@ -683,7 +681,7 @@ def generate_expanded_graph(graph_in):
     logger.debug("PE: expanding iterables")
     graph_in = _remove_nonjoin_identity_nodes(graph_in, keep_iterables=True)
     # standardize the iterables as {(field, function)} dictionaries
-    for node in graph_in.nodes_iter():
+    for node in graph_in.nodes():
         if node.iterables:
             _standardize_iterables(node)
     allprefixes = list('abcdefghijklmnopqrstuvwxyz')
@@ -698,7 +696,7 @@ def generate_expanded_graph(graph_in):
         logger.debug("Expanding the iterable node %s..." % inode)
 
         # the join successor nodes of the current iterable node
-        jnodes = [node for node in graph_in.nodes_iter()
+        jnodes = [node for node in graph_in.nodes()
                   if hasattr(node, 'joinsource') and
                   inode.name == node.joinsource and
                   nx.has_path(graph_in, inode, node)]
@@ -710,7 +708,7 @@ def generate_expanded_graph(graph_in):
         for jnode in jnodes:
             in_edges = jedge_dict[jnode] = {}
             edges2remove = []
-            for src, dest, data in graph_in.in_edges_iter(jnode, True):
+            for src, dest, data in graph_in.in_edges(jnode, True):
                 in_edges[src.itername] = data
                 edges2remove.append((src, dest))
 
@@ -727,7 +725,7 @@ def generate_expanded_graph(graph_in):
                 src_fields = [src_fields]
             # find the unique iterable source node in the graph
             try:
-                iter_src = next((node for node in graph_in.nodes_iter()
+                iter_src = next((node for node in graph_in.nodes()
                                  if node.name == src_name and
                                  nx.has_path(graph_in, node, inode)))
             except StopIteration:
@@ -782,7 +780,11 @@ def generate_expanded_graph(graph_in):
         inode._id += ('.' + iterable_prefix + 'I')
 
         # merge the iterated subgraphs
-        subgraph = graph_in.subgraph(subnodes)
+        # dj: the behaviour of .copy changes in version 2
+        if LooseVersion(nx.__version__) < LooseVersion('2'):
+            subgraph = graph_in.subgraph(subnodes)
+        else:
+            subgraph = graph_in.subgraph(subnodes).copy()
         graph_in = _merge_graphs(graph_in, subnodes,
                                  subgraph, inode._hierarchy + inode._id,
                                  iterables, iterable_prefix, inode.synchronize)
@@ -794,7 +796,7 @@ def generate_expanded_graph(graph_in):
             old_edge_dict = jedge_dict[jnode]
             # the edge source node replicates
             expansions = defaultdict(list)
-            for node in graph_in.nodes_iter():
+            for node in graph_in.nodes():
                 for src_id, edge_data in list(old_edge_dict.items()):
                     if node.itername.startswith(src_id):
                         expansions[src_id].append(node)
@@ -843,7 +845,7 @@ def generate_expanded_graph(graph_in):
                             logger.debug("Qualified the %s -> %s join field"
                                          " %s as %s." %
                                          (in_node, jnode, dest_field, slot_field))
-                    graph_in.add_edge(in_node, jnode, newdata)
+                    graph_in.add_edge(in_node, jnode, **newdata)
                     logger.debug("Connected the join node %s subgraph to the"
                                  " expanded join point %s" % (jnode, in_node))
 
@@ -1021,7 +1023,8 @@ def export_graph(graph_in, base_dir=None, show=False, use_execgraph=False,
     _write_detailed_dot(graph, outfname)
     if format != 'dot':
         cmd = 'dot -T%s -O %s' % (format, outfname)
-        res = CommandLine(cmd, terminal_output='allatonce').run()
+        res = CommandLine(cmd, terminal_output='allatonce',
+                          resource_monitor=False).run()
         if res.runtime.returncode:
             logger.warn('dot2png: %s', res.runtime.stderr)
     pklgraph = _create_dot_graph(graph, show_connectinfo, simple_form)
@@ -1032,7 +1035,8 @@ def export_graph(graph_in, base_dir=None, show=False, use_execgraph=False,
     nx.drawing.nx_pydot.write_dot(pklgraph, simplefname)
     if format != 'dot':
         cmd = 'dot -T%s -O %s' % (format, simplefname)
-        res = CommandLine(cmd, terminal_output='allatonce').run()
+        res = CommandLine(cmd, terminal_output='allatonce',
+                          resource_monitor=False).run()
         if res.runtime.returncode:
             logger.warn('dot2png: %s', res.runtime.stderr)
     if show:
@@ -1052,7 +1056,7 @@ def format_dot(dotfilename, format='png'):
     if format != 'dot':
         cmd = 'dot -T%s -O \'%s\'' % (format, dotfilename)
         try:
-            CommandLine(cmd).run()
+            CommandLine(cmd, resource_monitor=False).run()
         except IOError as ioe:
             if "could not be found" in str(ioe):
                 raise IOError("Cannot draw directed graph; executable 'dot' is unavailable")
@@ -1078,7 +1082,7 @@ def make_output_dir(outdir):
     except OSError:
             logger.debug("Problem creating %s", outdir)
             if not os.path.exists(outdir):
-               raise OSError('Could not create %s', outdir)
+                raise OSError('Could not create %s' % outdir)
     return outdir
 
 
@@ -1265,7 +1269,7 @@ def write_workflow_prov(graph, filename=None, format='all'):
                 ps.g.add_bundle(sub_bundle)
                 bundle_entity = ps.g.entity(sub_bundle.identifier,
                                             other_attributes={'prov:type':
-                                                               pm.PROV_BUNDLE})
+                                                              pm.PROV_BUNDLE})
                 ps.g.wasGeneratedBy(bundle_entity, process)
         else:
             process.add_attributes({pm.PROV["type"]: nipype_ns["Node"]})
@@ -1278,25 +1282,80 @@ def write_workflow_prov(graph, filename=None, format='all'):
             ps.g.add_bundle(result_bundle)
             bundle_entity = ps.g.entity(result_bundle.identifier,
                                         other_attributes={'prov:type':
-                                                              pm.PROV_BUNDLE})
+                                                          pm.PROV_BUNDLE})
             ps.g.wasGeneratedBy(bundle_entity, process)
         processes.append(process)
 
     # add dependencies (edges)
     # Process->Process
-    for idx, edgeinfo in enumerate(graph.in_edges_iter()):
-        ps.g.wasStartedBy(processes[nodes.index(edgeinfo[1])],
-                          starter=processes[nodes.index(edgeinfo[0])])
+    for idx, edgeinfo in enumerate(graph.in_edges()):
+        ps.g.wasStartedBy(processes[list(nodes).index(edgeinfo[1])],
+                          starter=processes[list(nodes).index(edgeinfo[0])])
 
     # write provenance
     ps.write_provenance(filename, format=format)
     return ps.g
 
 
+def write_workflow_resources(graph, filename=None):
+    """
+    Generate a JSON file with profiling traces that can be loaded
+    in a pandas DataFrame or processed with JavaScript like D3.js
+    """
+    import simplejson as json
+    if not filename:
+        filename = os.path.join(os.getcwd(), 'resource_monitor.json')
+
+    big_dict = {
+        'time': [],
+        'name': [],
+        'interface': [],
+        'mem_gb': [],
+        'cpus': [],
+        'mapnode': [],
+        'params': [],
+    }
+
+    for idx, node in enumerate(graph.nodes()):
+        nodename = node.fullname
+        classname = node._interface.__class__.__name__
+
+        params = ''
+        if node.parameterization:
+            params = '_'.join(['{}'.format(p)
+                              for p in node.parameterization])
+
+        try:
+            rt_list = node.result.runtime
+        except Exception:
+            logger.warning('Could not access runtime info for node %s'
+                           ' (%s interface)', nodename, classname)
+            continue
+
+        if not isinstance(rt_list, list):
+            rt_list = [rt_list]
+
+        for subidx, runtime in enumerate(rt_list):
+            nsamples = len(runtime.prof_dict['time'])
+
+            for key in ['time', 'mem_gb', 'cpus']:
+                big_dict[key] += runtime.prof_dict[key]
+
+            big_dict['interface'] += [classname] * nsamples
+            big_dict['name'] += [nodename] * nsamples
+            big_dict['mapnode'] += [subidx] * nsamples
+            big_dict['params'] += [params] * nsamples
+
+    with open(filename, 'w' if PY3 else 'wb') as rsf:
+        json.dump(big_dict, rsf, ensure_ascii=False)
+
+    return filename
+
+
 def topological_sort(graph, depth_first=False):
     """Returns a depth first sorted order if depth_first is True
     """
-    nodesort = nx.topological_sort(graph)
+    nodesort = list(nx.topological_sort(graph))
     if not depth_first:
         return nodesort, None
     logger.debug("Performing depth first search")

@@ -19,6 +19,13 @@ Michael Notter's Nipype tutorial. `Available here`__
 
 __ https://miykael.github.io/nipype_tutorial/
 
+How should I ask questions or report bugs?
+==========================================
+
+* If you find a bug or a suggestion for improvement report it here: `GitHub Issues <https://github.com/nipy/nipype/issues>`_
+* If you have a conceptual or clarification question ask it here: `Neurostars <https://neurostars.org/>`_
+* If you want to hangout with developers, you can use either `Gitter <https://gitter.im/nipy/nipype>`_ or `Slack <https://brainhack.slack.com/messages/C1FR76RAL>`_
+
 Nipype workshop materials
 =========================
 

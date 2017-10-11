@@ -72,7 +72,7 @@ class IdentityInterface(IOBase):
         # Adding any traits wipes out all input values set in superclass initialization,
         # even it the trait is not in the add_traits argument. The work-around is to reset
         # the values after adding the traits.
-        self.inputs.set(**inputs)
+        self.inputs.trait_set(**inputs)
 
     def _add_output_traits(self, base):
         return add_traits(base, self._fields)
@@ -319,7 +319,7 @@ class Split(IOBase):
 
     >>> from nipype.interfaces.utility import Split
     >>> sp = Split()
-    >>> _ = sp.inputs.set(inlist=[1, 2, 3], splits=[2, 1])
+    >>> _ = sp.inputs.trait_set(inlist=[1, 2, 3], splits=[2, 1])
     >>> out = sp.run()
     >>> out.outputs.out1
     [1, 2]
@@ -373,12 +373,12 @@ class Select(IOBase):
 
     >>> from nipype.interfaces.utility import Select
     >>> sl = Select()
-    >>> _ = sl.inputs.set(inlist=[1, 2, 3, 4, 5], index=[3])
+    >>> _ = sl.inputs.trait_set(inlist=[1, 2, 3, 4, 5], index=[3])
     >>> out = sl.run()
     >>> out.outputs.out
     4
 
-    >>> _ = sl.inputs.set(inlist=[1, 2, 3, 4, 5], index=[3, 4])
+    >>> _ = sl.inputs.trait_set(inlist=[1, 2, 3, 4, 5], index=[3, 4])
     >>> out = sl.run()
     >>> out.outputs.out
     [4, 5]

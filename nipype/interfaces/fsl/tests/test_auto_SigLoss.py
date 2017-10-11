@@ -25,7 +25,8 @@ def test_SigLoss_inputs():
     output_type=dict(),
     slice_direction=dict(argstr='-d %s',
     ),
-    terminal_output=dict(nohash=True,
+    terminal_output=dict(deprecated='1.0.0',
+    nohash=True,
     ),
     )
     inputs = SigLoss.input_spec()

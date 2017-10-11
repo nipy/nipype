@@ -12,7 +12,11 @@ def test_NiftyRegCommand_inputs():
     ignore_exception=dict(nohash=True,
     usedefault=True,
     ),
-    terminal_output=dict(nohash=True,
+    omp_core_val=dict(argstr='-omp %i',
+    usedefault=True,
+    ),
+    terminal_output=dict(deprecated='1.0.0',
+    nohash=True,
     ),
     )
     inputs = NiftyRegCommand.input_spec()

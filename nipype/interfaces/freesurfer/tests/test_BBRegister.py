@@ -12,9 +12,11 @@ def test_BBRegister_inputs():
         fsldof=dict(argstr='--fsl-dof %d',),
         ignore_exception=dict(nohash=True, usedefault=True,),
         init=dict(argstr='--init-%s', mandatory=True, xor=['init_reg_file'],),
+        init_cost_file=dict(argstr='--initcost %s',),
         init_reg_file=dict(argstr='--init-reg %s', mandatory=True, xor=['init'],),
         intermediate_file=dict(argstr='--int %s',),
         out_fsl_file=dict(argstr='--fslmat %s',),
+        out_lta_file=dict(argstr='--lta %s', min_ver='5.2.0',),
         out_reg_file=dict(argstr='--reg %s', genfile=True,),
         reg_frame=dict(argstr='--frame %d', xor=['reg_middle_frame'],),
         reg_middle_frame=dict(argstr='--mid-frame', xor=['reg_frame'],),
@@ -35,8 +37,10 @@ def test_BBRegister_inputs():
         ignore_exception=dict(nohash=True, usedefault=True,),
         init=dict(argstr='--init-%s', xor=['init_reg_file'],),
         init_reg_file=dict(argstr='--init-reg %s', xor=['init'],),
+        init_cost_file=dict(argstr='--initcost %s',),
         intermediate_file=dict(argstr='--int %s',),
         out_fsl_file=dict(argstr='--fslmat %s',),
+        out_lta_file=dict(argstr='--lta %s', min_ver='5.2.0',),
         out_reg_file=dict(argstr='--reg %s', genfile=True,),
         reg_frame=dict(argstr='--frame %d', xor=['reg_middle_frame'],),
         reg_middle_frame=dict(argstr='--mid-frame', xor=['reg_frame'],),
@@ -60,8 +64,10 @@ def test_BBRegister_inputs():
 
 
 def test_BBRegister_outputs():
-    output_map = dict(min_cost_file=dict(),
+    output_map = dict(init_cost_file=dict(),
+                      min_cost_file=dict(),
                       out_fsl_file=dict(),
+                      out_lta_file=dict(),
                       out_reg_file=dict(),
                       registered_file=dict(),
                       )

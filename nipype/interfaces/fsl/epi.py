@@ -143,6 +143,9 @@ class TOPUPInputSpec(FSLCommandInputSpec):
     out_warp_prefix = traits.Str("warpfield", argstr='--dfout=%s', hash_files=False,
                                  desc='prefix for the warpfield images (in mm)',
                                  usedefault=True)
+    out_mat_prefix = traits.Str("xfm", argstr='--rbmout=%s', hash_files=False,
+                                desc='prefix for the realignment matrices',
+                                usedefault=True)
     out_jac_prefix = traits.Str("jac", argstr='--jacout=%s',
                                  hash_files=False,
                                  desc='prefix for the warpfield images',
@@ -221,6 +224,7 @@ class TOPUPOutputSpec(TraitedSpec):
     out_field = File(desc='name of image file with field (Hz)')
     out_warps = traits.List(File(exists=True), desc='warpfield images')
     out_jacs = traits.List(File(exists=True), desc='Jacobian images')
+    out_mats = traits.List(File(exists=True), desc='realignment matrices')
     out_corrected = File(desc='name of 4D image file with unwarped images')
     out_logfile = File(desc='name of log-file')
 
@@ -247,7 +251,7 @@ class TOPUP(FSLCommand):
     'topup --config=b02b0.cnf --datain=topup_encoding.txt \
 --imain=b0_b0rev.nii --out=b0_b0rev_base --iout=b0_b0rev_corrected.nii.gz \
 --fout=b0_b0rev_field.nii.gz --jacout=jac --logout=b0_b0rev_topup.log \
---dfout=warpfield'
+--rbmout=xfm --dfout=warpfield'
     >>> res = topup.run() # doctest: +SKIP
 
     """
@@ -288,6 +292,9 @@ class TOPUP(FSLCommand):
             for i in range(1, n_vols + 1)]
         outputs['out_jacs'] = [
             fmt(prefix=self.inputs.out_jac_prefix, i=i, ext=ext)
+            for i in range(1, n_vols + 1)]
+        outputs['out_mats'] = [
+            fmt(prefix=self.inputs.out_mat_prefix, i=i, ext=".mat")
             for i in range(1, n_vols + 1)]
 
         if isdefined(self.inputs.encoding_direction):

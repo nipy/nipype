@@ -2,15 +2,15 @@
 # coding: utf-8
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
-from __future__ import division
-
-from nipype.utils import NUMPY_MMAP
+from __future__ import print_function, division, unicode_literals, absolute_import
 
 from ....interfaces.io import JSONFileGrabber
 from ....interfaces import utility as niu
 from ....interfaces import ants
 from ....interfaces import fsl
 from ....pipeline import engine as pe
+from ...data import get_flirt_schedule
+
 from .utils import (b0_indices, time_avg, apply_all_corrections, b0_average,
                     hmc_split, dwi_flirt, eddy_rotate_bvecs, rotate_bvecs,
                     insert_mat, extract_bval, recompose_dwi, recompose_xfm,
@@ -232,15 +232,19 @@ def all_fsl_pipeline(name='fsl_all_correct',
     outputnode = pe.Node(niu.IdentityInterface(
         fields=['out_file', 'out_mask', 'out_bvec']), name='outputnode')
 
-    def _gen_index(in_file):
+    def gen_index(in_file):
         import numpy as np
         import nibabel as nb
         import os
+        from nipype.utils import NUMPY_MMAP
         out_file = os.path.abspath('index.txt')
         vols = nb.load(in_file, mmap=NUMPY_MMAP).get_data().shape[-1]
         np.savetxt(out_file, np.ones((vols,)).T)
         return out_file
 
+    gen_idx = pe.Node(niu.Function(
+        input_names=['in_file'], output_names=['out_file'],
+        function=gen_index), name='gen_index')
     avg_b0_0 = pe.Node(niu.Function(
         input_names=['in_dwi', 'in_bval'], output_names=['out_file'],
         function=b0_average), name='b0_avg_pre')
@@ -271,10 +275,11 @@ def all_fsl_pipeline(name='fsl_all_correct',
                     ('topup.out_fieldcoef', 'in_topup_fieldcoef'),
                     ('topup.out_movpar', 'in_topup_movpar')]),
         (bet_dwi0, ecc, [('mask_file', 'in_mask')]),
+        (inputnode, gen_idx, [('in_file', 'in_file')]),
         (inputnode, ecc, [('in_file', 'in_file'),
-                          (('in_file', _gen_index), 'in_index'),
                           ('in_bval', 'in_bval'),
                           ('in_bvec', 'in_bvec')]),
+        (gen_idx, ecc, [('out_file', 'in_index')]),
         (inputnode, rot_bvec, [('in_bvec', 'in_bvec')]),
         (ecc, rot_bvec, [('out_parameter', 'eddy_params')]),
         (ecc, avg_b0_1, [('out_corrected', 'in_dwi')]),
@@ -353,8 +358,6 @@ should be taken as reference
         outputnode.out_xfms - list of transformation matrices
 
     """
-    from nipype.workflows.data import get_flirt_schedule
-
     params = dict(dof=6, bgvalue=0, save_log=True, no_search=True,
                   # cost='mutualinfo', cost_func='mutualinfo', bins=64,
                   schedule=get_flirt_schedule('hmc'))
@@ -455,7 +458,6 @@ head-motion correction)
         outputnode.out_xfms - list of transformation matrices
     """
 
-    from nipype.workflows.data import get_flirt_schedule
     params = dict(dof=12, no_search=True, interp='spline', bgvalue=0,
                   schedule=get_flirt_schedule('ecc'))
     # cost='normmi', cost_func='normmi', bins=64,
@@ -902,6 +904,7 @@ def _xfm_jacobian(in_xfm):
 
 def _get_zoom(in_file, enc_dir):
     import nibabel as nb
+    from nipype.utils import NUMPY_MMAP
 
     zooms = nb.load(in_file, mmap=NUMPY_MMAP).header.get_zooms()
 

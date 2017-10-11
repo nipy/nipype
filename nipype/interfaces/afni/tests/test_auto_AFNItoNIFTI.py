@@ -22,6 +22,9 @@ def test_AFNItoNIFTI_inputs():
     newid=dict(argstr='-newid',
     xor=['oldid'],
     ),
+    num_threads=dict(nohash=True,
+    usedefault=True,
+    ),
     oldid=dict(argstr='-oldid',
     xor=['newid'],
     ),
@@ -33,7 +36,8 @@ def test_AFNItoNIFTI_inputs():
     outputtype=dict(),
     pure=dict(argstr='-pure',
     ),
-    terminal_output=dict(nohash=True,
+    terminal_output=dict(deprecated='1.0.0',
+    nohash=True,
     ),
     )
     inputs = AFNItoNIFTI.input_spec()

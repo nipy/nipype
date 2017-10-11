@@ -14,7 +14,8 @@ from builtins import range, str
 import os
 from ...external.due import BibTeX
 from ...utils.filemanip import split_filename, copyfile
-from ..base import TraitedSpec, File, traits, InputMultiPath, OutputMultiPath, isdefined
+from ..base import (TraitedSpec, File, traits, InputMultiPath, OutputMultiPath, isdefined,
+                    _exists_in_path)
 from .base import ANTSCommand, ANTSCommandInputSpec
 
 
@@ -237,9 +238,9 @@ class LaplacianThickness(ANTSCommand):
 
 
 class N4BiasFieldCorrectionInputSpec(ANTSCommandInputSpec):
-    dimension = traits.Enum(3, 2, argstr='-d %d',
+    dimension = traits.Enum(3, 2, 4, argstr='-d %d',
                             usedefault=True,
-                            desc='image dimension (2 or 3)')
+                            desc='image dimension (2, 3 or 4)')
     input_image = File(argstr='--input-image %s', mandatory=True,
                        desc=('image to apply transformation to (generally a '
                              'coregistered functional)'))
@@ -258,6 +259,9 @@ class N4BiasFieldCorrectionInputSpec(ANTSCommandInputSpec):
                                   ' to file.'), xor=['bias_image'])
     bias_image = File(desc='Filename for the estimated bias.',
                       hash_files=False)
+    copy_header = traits.Bool(False, mandatory=True, usedefault=True,
+                              desc='copy headers of the original image into the '
+                                   'output (corrected) file')
 
 
 class N4BiasFieldCorrectionOutputSpec(TraitedSpec):
@@ -382,6 +386,27 @@ class N4BiasFieldCorrection(ANTSCommand):
             outputs['bias_image'] = os.path.abspath(
                 self._gen_filename('bias_image'))
         return outputs
+
+    def _run_interface(self, runtime, correct_return_codes=(0,)):
+        runtime = super(N4BiasFieldCorrection, self)._run_interface(
+            runtime, correct_return_codes)
+
+        if self.inputs.copy_header and runtime.returncode in correct_return_codes:
+            self._copy_header(self._gen_filename('output_image'))
+            if self.inputs.save_bias or isdefined(self.inputs.bias_image):
+                self._copy_header(self._gen_filename('bias_image'))
+
+        return runtime
+
+    def _copy_header(self, fname):
+        """Copy header from input image to an output image"""
+        import nibabel as nb
+        in_img = nb.load(self.inputs.input_image)
+        out_img = nb.load(fname, mmap=False)
+        new_img = out_img.__class__(out_img.get_data(), in_img.affine,
+                                    in_img.header)
+        new_img.set_data_dtype(out_img.get_data_dtype())
+        new_img.to_filename(fname)
 
 
 class CorticalThicknessInputSpec(ANTSCommandInputSpec):
@@ -691,6 +716,40 @@ class BrainExtraction(ANTSCommand):
     input_spec = BrainExtractionInputSpec
     output_spec = BrainExtractionOutputSpec
     _cmd = 'antsBrainExtraction.sh'
+
+    def _run_interface(self, runtime, correct_return_codes=(0,)):
+        # antsBrainExtraction.sh requires ANTSPATH to be defined
+        out_environ = self._get_environ()
+        if out_environ.get('ANTSPATH') is None:
+            runtime.environ.update(out_environ)
+            executable_name = self.cmd.split()[0]
+            exist_val, cmd_path = _exists_in_path(executable_name, runtime.environ)
+            if not exist_val:
+                raise IOError("command '%s' could not be found on host %s" %
+                              (self.cmd.split()[0], runtime.hostname))
+
+            # Set the environment variable if found
+            runtime.environ.update({'ANTSPATH': os.path.dirname(cmd_path)})
+
+        runtime = super(BrainExtraction, self)._run_interface(runtime)
+
+        # Still, double-check if it didn't found N4
+        if 'we cant find' in runtime.stdout:
+            for line in runtime.stdout.split('\n'):
+                if line.strip().startswith('we cant find'):
+                    tool = line.strip().replace('we cant find the', '').split(' ')[0]
+                    break
+
+            errmsg = ('antsBrainExtraction.sh requires %s the environment variable '
+                      'ANTSPATH to be defined' % tool)
+            if runtime.stderr is None:
+                runtime.stderr = errmsg
+            else:
+                runtime.stderr += '\n' + errmsg
+            runtime.returncode = 1
+            self.raise_exception(runtime)
+
+        return runtime
 
     def _list_outputs(self):
         outputs = self._outputs().get()

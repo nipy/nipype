@@ -9,7 +9,7 @@ Documentation
    :Release: |version|
    :Date: |today|
 
-Previous versions:  `0.12.0 <http://nipype.readthedocs.io/en/0.12.0/>`_ `0.11.0 <http://nipy.org/nipype/0.11.0>`_
+Previous versions:  `0.13.1 <http://nipype.readthedocs.io/en/0.13.1/>`_ `0.12.1 <http://nipype.readthedocs.io/en/0.12.1/>`_
 
 
 .. container:: doc2
@@ -29,7 +29,7 @@ Previous versions:  `0.12.0 <http://nipype.readthedocs.io/en/0.12.0/>`_ `0.11.0 
             :maxdepth: 2
 
             users/index
-            
+
          .. toctree::
             :maxdepth: 1
 

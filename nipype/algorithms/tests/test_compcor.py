@@ -8,7 +8,6 @@ import numpy as np
 import pytest
 from ...testing import utils
 from ..confounds import CompCor, TCompCor, ACompCor
-from ...interfaces.base import Undefined
 
 
 class TestCompCor():
@@ -48,11 +47,13 @@ class TestCompCor():
                                ['-0.1246655485', '-0.1235705610']]
 
         self.run_cc(CompCor(realigned_file=self.realigned_file,
-                            mask_files=self.mask_files),
+                            mask_files=self.mask_files,
+                            mask_index=0),
                             expected_components)
 
         self.run_cc(ACompCor(realigned_file=self.realigned_file,
                              mask_files=self.mask_files,
+                             mask_index=0,
                              components_file='acc_components_file'),
                              expected_components, 'aCompCor')
 
@@ -64,24 +65,27 @@ class TestCompCor():
                                   ['0.4566907310', '0.6983205193'],
                                   ['-0.7132557407', '0.1340170559'],
                                   ['0.5022537643', '-0.5098322262'],
-                                  ['-0.1342351356', '0.1407855119']], 'tCompCor')
+                                  ['-0.1342351356', '0.1407855119']],
+                    'tCompCor')
 
     def test_tcompcor_no_percentile(self):
         ccinterface = TCompCor(realigned_file=self.realigned_file)
         ccinterface.run()
 
-        mask = nb.load('mask.nii').get_data()
+        mask = nb.load('mask_000.nii.gz').get_data()
         num_nonmasked_voxels = np.count_nonzero(mask)
         assert num_nonmasked_voxels == 1
 
     def test_compcor_no_regress_poly(self):
         self.run_cc(CompCor(realigned_file=self.realigned_file,
-                    mask_files=self.mask_files,
-                    use_regress_poly=False), [['0.4451946442', '-0.7683311482'],
-                                              ['-0.4285129505', '-0.0926034137'],
-                                              ['0.5721540256', '0.5608764842'],
-                                              ['-0.5367548139', '0.0059943226'],
-                                              ['-0.0520809054', '0.2940637551']])
+                            mask_files=self.mask_files,
+                            mask_index=0,
+                            pre_filter=False),
+                    [['0.4451946442', '-0.7683311482'],
+                     ['-0.4285129505', '-0.0926034137'],
+                     ['0.5721540256', '0.5608764842'],
+                     ['-0.5367548139', '0.0059943226'],
+                     ['-0.0520809054', '0.2940637551']])
 
     def test_tcompcor_asymmetric_dim(self):
         asymmetric_shape = (2, 3, 4, 5)
@@ -89,7 +93,7 @@ class TestCompCor():
                                             'asymmetric.nii')
 
         TCompCor(realigned_file=asymmetric_data).run()
-        assert nb.load('mask.nii').get_data().shape == asymmetric_shape[:3]
+        assert nb.load('mask_000.nii.gz').get_data().shape == asymmetric_shape[:3]
 
     def test_compcor_bad_input_shapes(self):
         shape_less_than = (1, 2, 2, 5) # dim 0 is < dim 0 of self.mask_files (2)
@@ -97,7 +101,8 @@ class TestCompCor():
 
         for data_shape in (shape_less_than, shape_more_than):
             data_file = utils.save_toy_nii(np.zeros(data_shape), 'temp.nii')
-            interface = CompCor(realigned_file=data_file, mask_files=self.mask_files)
+            interface = CompCor(realigned_file=data_file,
+                                mask_files=self.mask_files[0])
             with pytest.raises(ValueError, message="Dimension mismatch"): interface.run()
 
     def test_tcompcor_bad_input_dim(self):
@@ -112,18 +117,24 @@ class TestCompCor():
                      mask_files=self.mask_files,
                      merge_method=method).run()
             if method == 'union':
-                assert np.array_equal(nb.load('mask.nii').get_data(),
+                assert np.array_equal(nb.load('mask_000.nii.gz').get_data(),
                                      ([[[0,0],[0,0]],[[0,0],[1,0]]]))
             if method == 'intersect':
-                assert np.array_equal(nb.load('mask.nii').get_data(),
+                assert np.array_equal(nb.load('mask_000.nii.gz').get_data(),
                                       ([[[0,0],[0,0]],[[0,1],[0,0]]]))
 
     def test_tcompcor_index_mask(self):
         TCompCor(realigned_file=self.realigned_file,
                  mask_files=self.mask_files,
                  mask_index=1).run()
-        assert np.array_equal(nb.load('mask.nii').get_data(),
+        assert np.array_equal(nb.load('mask_000.nii.gz').get_data(),
                             ([[[0,0],[0,0]],[[0,1],[0,0]]]))
+
+    def test_tcompcor_multi_mask_no_index(self):
+        interface = TCompCor(realigned_file=self.realigned_file,
+                             mask_files=self.mask_files)
+        with pytest.raises(ValueError, message='more than one mask file'):
+            interface.run()
 
     def run_cc(self, ccinterface, expected_components, expected_header='CompCor'):
         # run
@@ -137,12 +148,15 @@ class TestCompCor():
         assert ccinterface.inputs.num_components == 6
 
         with open(ccresult.outputs.components_file, 'r') as components_file:
-            expected_n_components = min(ccinterface.inputs.num_components, self.fake_data.shape[3])
+            expected_n_components = min(ccinterface.inputs.num_components,
+                                        self.fake_data.shape[3])
 
             components_data = [line.split('\t') for line in components_file]
 
-            header = components_data.pop(0) # the first item will be '#', we can throw it out
-            expected_header = [expected_header + str(i) for i in range(expected_n_components)]
+            # the first item will be '#', we can throw it out
+            header = components_data.pop(0)
+            expected_header = [expected_header + '{:02d}'.format(i) for i in
+                               range(expected_n_components)]
             for i, heading in enumerate(header):
                 assert expected_header[i] in heading
 

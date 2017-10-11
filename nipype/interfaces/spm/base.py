@@ -30,7 +30,7 @@ from scipy.io import savemat
 from ... import logging
 from ...utils import spm_docs as sd, NUMPY_MMAP
 from ..base import (BaseInterface, traits, isdefined, InputMultiPath,
-                    BaseInterfaceInputSpec, Directory, Undefined)
+                    BaseInterfaceInputSpec, Directory, Undefined, ImageFile)
 from ..matlab import MatlabCommand
 from ...external.due import due, Doi, BibTeX
 
@@ -151,19 +151,14 @@ class Info(object):
 
             returns None of path not found
         """
-        if use_mcr or 'FORCE_SPMMCR' in os.environ:
-            use_mcr = True
-            if matlab_cmd is None:
-                try:
-                    matlab_cmd = os.environ['SPMMCRCMD']
-                except KeyError:
-                    pass
-        if matlab_cmd is None:
-            try:
-                matlab_cmd = os.environ['MATLABCMD']
-            except KeyError:
-                matlab_cmd = 'matlab -nodesktop -nosplash'
-        mlab = MatlabCommand(matlab_cmd=matlab_cmd)
+
+        use_mcr = use_mcr or 'FORCE_SPMMCR' in os.environ
+        matlab_cmd = ((use_mcr and os.getenv('SPMMCRCMD')) or
+                      os.getenv('MATLABCMD') or
+                      'matlab -nodesktop -nosplash')
+
+        mlab = MatlabCommand(matlab_cmd=matlab_cmd,
+                             resource_monitor=False)
         mlab.inputs.mfile = False
         if paths:
             mlab.inputs.paths = paths
@@ -187,7 +182,7 @@ exit;
         except (IOError, RuntimeError) as e:
             # if no Matlab at all -- exception could be raised
             # No Matlab -- no spm
-            logger.debug(str(e))
+            logger.debug('%s', e)
             return None
         else:
             out = sd._strip_header(out.runtime.stdout)
@@ -276,11 +271,12 @@ class SPMCommand(BaseInterface):
 
     def _matlab_cmd_update(self):
         # MatlabCommand has to be created here,
-        # because matlab_cmb is not a proper input
+        # because matlab_cmd is not a proper input
         # and can be set only during init
         self.mlab = MatlabCommand(matlab_cmd=self.inputs.matlab_cmd,
                                   mfile=self.inputs.mfile,
-                                  paths=self.inputs.paths)
+                                  paths=self.inputs.paths,
+                                  resource_monitor=False)
         self.mlab.inputs.script_file = 'pyscript_%s.m' % \
             self.__class__.__name__.split('.')[-1].lower()
         if isdefined(self.inputs.use_mcr) and self.inputs.use_mcr:
@@ -532,3 +528,26 @@ class SPMCommand(BaseInterface):
         if postscript is not None:
             mscript += postscript
         return mscript
+
+class ImageFileSPM(ImageFile):
+    """
+    Defines an ImageFile trait specific to SPM interfaces.
+    """
+
+    def __init__(self, value='', filter=None, auto_set=False, entries=0,
+                 exists=False, types=['nifti1', 'nifti2'],
+                 allow_compressed=False, **metadata):
+        """ Trait handles neuroimaging files.
+
+        Parameters
+        ----------
+        types : list
+            Strings of file format types accepted
+        compressed : boolean
+            Indicates whether the file format can compressed
+        """
+        self.types = types
+        self.allow_compressed = allow_compressed
+        super(ImageFileSPM, self).__init__(value, filter, auto_set, entries,
+                                           exists, types, allow_compressed,
+                                           **metadata)

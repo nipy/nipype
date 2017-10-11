@@ -42,7 +42,8 @@ def test_FindShPeaks_inputs():
     ),
     quiet_display=dict(argstr='-quiet',
     ),
-    terminal_output=dict(nohash=True,
+    terminal_output=dict(deprecated='1.0.0',
+    nohash=True,
     ),
     )
     inputs = FindShPeaks.input_spec()

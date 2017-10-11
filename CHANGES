@@ -1,6 +1,51 @@
-Upcoming Release
+Upcoming release
+================
+
+* ENH: Improve terminal_output feature (https://github.com/nipy/nipype/pull/2209)
+* ENH: Simple interface to FSL std2imgcoords (https://github.com/nipy/nipype/pull/2209, prev #1398)
+* ENH: Centralize virtual/physical $DISPLAYs (https://github.com/nipy/nipype/pull/#2203)
+* ENH: New ResourceMonitor - replaces resource profiler (https://github.com/nipy/nipype/pull/#2200)
+
+0.13.1 (May 20, 2017)
 =====================
 
+* FIX: Make release compatible with conda-forge build process (https://github.com/nipy/nipype/pull/2017)
+* ENH: Update some minimum versions in compliance with Debian Jessie (https://github.com/nipy/nipype/pull/2017)
+* ENH: Circle builds use cached docker layers (https://github.com/nipy/nipype/pull/2017)
+* ENH: Base docker to use FS6 and ANTS 2.2.0 (https://github.com/nipy/nipype/pull/2024)
+* FIX: Mailmap and contributor acknowledgment (https://github.com/nipy/nipype/pull/2017)
+* FIX: Preserve node properties in sub nodes of MapNode (https://github.com/nipy/nipype/pull/2019)
+* FIX: Fix interfaces 3DUnifize, ICA_AROMA, BinaryMaths, RegAverage, BBRegister,
+  AffineInitializer (https://github.com/nipy/nipype/pull/2025, https://github.com/nipy/nipype/pull/2027,
+  https://github.com/nipy/nipype/pull/2036, https://github.com/nipy/nipype/pull/2037,
+  https://github.com/nipy/nipype/pull/2031, https://github.com/nipy/nipype/pull/2010)
+* ENH: Add Anisotropic Power interface (https://github.com/nipy/nipype/pull/2039)
+* FIX: Bayesian estimation in SPM (https://github.com/nipy/nipype/pull/2030)
+
+0.13.0 (May 11, 2017)
+=====================
+
+* ENH: Multi-stage recon-all directives (https://github.com/nipy/nipype/pull/1991)
+* FIX: FEAT "folder does not exist" error (https://github.com/nipy/nipype/pull/2000)
+* ENH: Niftyfit interfaces (https://github.com/nipy/nipype/pull/1910)
+* FIX: Define ANTSPATH for BrainExtraction automatically (https://github.com/nipy/nipype/pull/1986)
+* ENH: New trait for imaging files (https://github.com/nipy/nipype/pull/1949)
+* ENH: Niftyseg interfaces (https://github.com/nipy/nipype/pull/1911)
+* ENH: Niftyreg interfaces (https://github.com/nipy/nipype/pull/1913)
+* MRG: Allow more support for CLI (https://github.com/nipy/nipype/pull/1908)
+* ENH: 3dQwarpPlusMinus interface (https://github.com/nipy/nipype/pull/1974)
+* FIX: PY3.6 support (https://github.com/nipy/nipype/pull/1977)
+* FIX: PY3 and stream fixes for MRTrix2TrackVis (https://github.com/nipy/nipype/pull/1804)
+* ENH: More mask options for CompCor interfaces (https://github.com/nipy/nipype/pull/1968 + https://github.com/nipy/nipype/pull/1992)
+* ENH: Additional TOPUP outputs (https://github.com/nipy/nipype/pull/1976)
+* ENH: Additional Eddy flags (https://github.com/nipy/nipype/pull/1967)
+* ENH: ReconAll handlers for less common cases (https://github.com/nipy/nipype/pull/1966)
+* ENH: FreeSurferSource now finds graymid/midthickness surfs (https://github.com/nipy/nipype/pull/1972)
+* ENH: Additional fslmaths dimensional reduction operations (https://github.com/nipy/nipype/pull/1956)
+* ENH: More options for RobustFOV interface (https://github.com/nipy/nipype/pull/1923)
+* ENH: Add MRIsCombine to FreeSurfer utils (https://github.com/nipy/nipype/pull/1948)
+* FIX: Level1Design EV parameter substitution (https://github.com/nipy/nipype/pull/1953)
+* FIX: Dcm2niix outputs can be uncompressed (https://github.com/nipy/nipype/pull/1951)
 * FIX: Ensure build fails in Circle when tests fail (https://github.com/nipy/nipype/pull/1981)
 * ENH: Add interface to antsAffineInitializer (https://github.com/nipy/nipype/pull/1980)
 * ENH: AFNI motion parameter support for FrameWiseDisplacement (https://github.com/nipy/nipype/pull/1840)
@@ -42,7 +87,7 @@ Upcoming Release
 
 
 0.13.0-rc1 (January 4, 2017)
-===============================
+============================
 
 * FIX: Compatibility with traits 4.6 (https://github.com/nipy/nipype/pull/1770)
 * FIX: Multiproc deadlock (https://github.com/nipy/nipype/pull/1756)

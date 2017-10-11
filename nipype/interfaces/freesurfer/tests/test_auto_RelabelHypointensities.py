@@ -34,7 +34,8 @@ def test_RelabelHypointensities_inputs():
     position=-2,
     usedefault=True,
     ),
-    terminal_output=dict(nohash=True,
+    terminal_output=dict(deprecated='1.0.0',
+    nohash=True,
     ),
     )
     inputs = RelabelHypointensities.input_spec()

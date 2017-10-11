@@ -1349,8 +1349,23 @@ class Tkregister2InputSpec(FSTraitedSpec):
 
     moving_image = File(exists=True, mandatory=True, argstr="--mov %s",
                         desc='moving volume')
+    # Input registration file options
     fsl_in_matrix = File(exists=True, argstr="--fsl %s",
                          desc='fsl-style registration input matrix')
+    xfm = File(exists=True, argstr='--xfm %s',
+               desc='use a matrix in MNI coordinates as initial registration')
+    lta_in = File(exists=True, argstr='--lta %s',
+                  desc='use a matrix in MNI coordinates as initial registration')
+    invert_lta_in = traits.Bool(requires=['lta_in'],
+                                desc='Invert input LTA before applying')
+    # Output registration file options
+    fsl_out = traits.Either(True, File, argstr='--fslregout %s',
+                   desc='compute an FSL-compatible resgitration matrix')
+    lta_out = traits.Either(True, File, argstr='--ltaout %s',
+                            desc='output registration file (LTA format)')
+    invert_lta_out = traits.Bool(argstr='--ltaout-inv', requires=['lta_in'],
+                                 desc='Invert input LTA before applying')
+
     subject_id = traits.String(argstr="--s %s",
                                desc='freesurfer subject ID')
     noedit = traits.Bool(True, argstr="--noedit", usedefault=True,
@@ -1361,19 +1376,16 @@ class Tkregister2InputSpec(FSTraitedSpec):
     reg_header = traits.Bool(False, argstr='--regheader',
                              desc='compute regstration from headers')
     fstal = traits.Bool(False, argstr='--fstal',
-                        xor=['target_image', 'moving_image'],
+                        xor=['target_image', 'moving_image', 'reg_file'],
                         desc='set mov to be tal and reg to be tal xfm')
     movscale = traits.Float(argstr='--movscale %f',
                             desc='adjust registration matrix to scale mov')
-    xfm = File(exists=True, argstr='--xfm %s',
-               desc='use a matrix in MNI coordinates as initial registration')
-    fsl_out = File(argstr='--fslregout %s',
-                   desc='compute an FSL-compatible resgitration matrix')
 
 
 class Tkregister2OutputSpec(TraitedSpec):
     reg_file = File(exists=True, desc='freesurfer-style registration file')
     fsl_file = File(desc='FSL-style registration file')
+    lta_file = File(desc='LTA-style registration file')
 
 
 class Tkregister2(FSCommand):
@@ -1413,11 +1425,34 @@ class Tkregister2(FSCommand):
     input_spec = Tkregister2InputSpec
     output_spec = Tkregister2OutputSpec
 
+    def _format_arg(self, name, spec, value):
+        if name == 'lta_in' and self.inputs.invert_lta_in:
+            spec = '--lta-inv %s'
+        if name in ('fsl_out', 'lta_out') and value is True:
+            value = self._list_outputs()[name]
+        return super(Tkregister2, self)._format_arg(name, spec, value)
+
     def _list_outputs(self):
         outputs = self._outputs().get()
-        outputs['reg_file'] = os.path.abspath(self.inputs.reg_file)
-        if isdefined(self.inputs.fsl_out):
-            outputs['fsl_file'] = os.path.abspath(self.inputs.fsl_out)
+        reg_file = os.path.abspath(self.inputs.reg_file)
+        outputs['reg_file'] = reg_file
+
+        cwd = os.getcwd()
+        fsl_out = self.inputs.fsl_out
+        if isdefined(fsl_out):
+            if fsl_out is True:
+                outputs['fsl_file'] = fname_presuffix(
+                    reg_file, suffix='.mat', newpath=cwd, use_ext=False)
+            else:
+                outputs['fsl_file'] = os.path.abspath(self.inputs.fsl_out)
+
+        lta_out = self.inputs.lta_out
+        if isdefined(lta_out):
+            if lta_out is True:
+                outputs['lta_file'] = fname_presuffix(
+                    reg_file, suffix='.lta', newpath=cwd, use_ext=False)
+            else:
+                outputs['lta_file'] = os.path.abspath(self.inputs.lta_out)
         return outputs
 
     def _gen_outfilename(self):
@@ -3080,3 +3115,83 @@ class MRIsExpand(FSSurfaceCommand):
                                                                thickness_name)
 
         self.inputs.sphere = self._associated_file(in_file, self.inputs.sphere)
+
+
+class LTAConvertInputSpec(CommandLineInputSpec):
+    # Inputs
+    _in_xor = ('in_lta', 'in_fsl', 'in_mni', 'in_reg', 'in_niftyreg', 'in_itk')
+    in_lta = traits.Either(
+        File(exists=True), 'identity.nofile', argstr='--inlta %s',
+        mandatory=True, xor=_in_xor, desc='input transform of LTA type')
+    in_fsl = File(
+        exists=True, argstr='--infsl %s', mandatory=True, xor=_in_xor,
+        desc='input transform of FSL type')
+    in_mni = File(
+        exists=True, argstr='--inmni %s', mandatory=True, xor=_in_xor,
+        desc='input transform of MNI/XFM type')
+    in_reg = File(
+        exists=True, argstr='--inreg %s', mandatory=True, xor=_in_xor,
+        desc='input transform of TK REG type (deprecated format)')
+    in_niftyreg = File(
+        exists=True, argstr='--inniftyreg %s', mandatory=True, xor=_in_xor,
+        desc='input transform of Nifty Reg type (inverse RAS2RAS)')
+    in_itk = File(
+        exists=True, argstr='--initk %s', mandatory=True, xor=_in_xor,
+        desc='input transform of ITK type')
+    # Outputs
+    out_lta = traits.Either(
+        traits.Bool, File, argstr='--outlta %s',
+        desc='output linear transform (LTA Freesurfer format)')
+    out_fsl = traits.Either(traits.Bool, File, argstr='--outfsl %s',
+                            desc='output transform in FSL format')
+    out_mni = traits.Either(traits.Bool, File, argstr='--outmni %s',
+                            desc='output transform in MNI/XFM format')
+    out_reg = traits.Either(traits.Bool, File, argstr='--outreg %s',
+                            desc='output transform in reg dat format')
+    out_itk = traits.Either(traits.Bool, File, argstr='--outitk %s',
+                            desc='output transform in ITK format')
+    # Optional flags
+    invert = traits.Bool(argstr='--invert')
+    ltavox2vox = traits.Bool(argstr='--ltavox2vox', requires=['out_lta'])
+    source_file = File(exists=True, argstr='--src %s')
+    target_file = File(exists=True, argstr='--trg %s')
+    target_conform = traits.Bool(argstr='--trgconform')
+
+
+class LTAConvertOutputSpec(TraitedSpec):
+    out_lta = File(exists=True,
+                   desc='output linear transform (LTA Freesurfer format)')
+    out_fsl = File(exists=True, desc='output transform in FSL format')
+    out_mni = File(exists=True, desc='output transform in MNI/XFM format')
+    out_reg = File(exists=True, desc='output transform in reg dat format')
+    out_itk = File(exists=True, desc='output transform in ITK format')
+
+
+class LTAConvert(CommandLine):
+    """Convert different transformation formats.
+    Some formats may require you to pass an image if the geometry information
+    is missing form the transform file format.
+
+    For complete details, see the `lta_convert documentation.
+    <https://ftp.nmr.mgh.harvard.edu/pub/docs/html/lta_convert.help.xml.html>`_
+    """
+    input_spec = LTAConvertInputSpec
+    output_spec = LTAConvertOutputSpec
+    _cmd = 'lta_convert'
+
+    def _format_arg(self, name, spec, value):
+        if name.startswith('out_') and value is True:
+            value = self._list_outputs()[name]
+        return super(LTAConvert, self)._format_arg(name, spec, value)
+
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        for name, default in (('out_lta', 'out.lta'), ('out_fsl', 'out.mat'),
+                              ('out_mni', 'out.xfm'), ('out_reg', 'out.dat'),
+                              ('out_itk', 'out.txt')):
+            attr = getattr(self.inputs, name)
+            if attr:
+                fname = default if attr is True else attr
+                outputs[name] = os.path.abspath(fname)
+
+        return outputs

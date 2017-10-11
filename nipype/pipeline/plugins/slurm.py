@@ -12,9 +12,11 @@ import os
 import re
 from time import sleep
 
+from ... import logging
 from ...interfaces.base import CommandLine
-from .base import (SGELikeBatchManagerBase, logger, iflogger, logging)
+from .base import SGELikeBatchManagerBase, logger
 
+iflogger = logging.getLogger('interface')
 
 
 class SLURMPlugin(SGELikeBatchManagerBase):
@@ -62,6 +64,7 @@ class SLURMPlugin(SGELikeBatchManagerBase):
         #  subprocess.Popen requires taskid to be a string
         res = CommandLine('squeue',
                           args=' '.join(['-j', '%s' % taskid]),
+                          resource_monitor=False,
                           terminal_output='allatonce').run()
         return res.runtime.stdout.find(str(taskid)) > -1
 
@@ -72,6 +75,7 @@ class SLURMPlugin(SGELikeBatchManagerBase):
         formatting/processing
         """
         cmd = CommandLine('sbatch', environ=dict(os.environ),
+                          resource_monitor=False,
                           terminal_output='allatonce')
         path = os.path.dirname(scriptfile)
 

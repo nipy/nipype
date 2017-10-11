@@ -28,6 +28,9 @@ def test_AffineInitializer_inputs():
     mandatory=True,
     position=2,
     ),
+    num_threads=dict(nohash=True,
+    usedefault=True,
+    ),
     out_file=dict(argstr='%s',
     position=3,
     usedefault=True,
@@ -44,7 +47,8 @@ def test_AffineInitializer_inputs():
     position=4,
     usedefault=True,
     ),
-    terminal_output=dict(nohash=True,
+    terminal_output=dict(deprecated='1.0.0',
+    nohash=True,
     ),
     )
     inputs = AffineInitializer.input_spec()

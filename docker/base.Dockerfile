@@ -44,39 +44,25 @@ RUN apt-get update && \
 
 WORKDIR /opt
 # Installing freesurfer -- do it first so that it is cached early
-RUN curl -sSL https://surfer.nmr.mgh.harvard.edu/pub/dist/freesurfer/6.0.0/freesurfer-Linux-centos6_x86_64-stable-pub-v6.0.0.tar.gz | tar zxv -C /opt \
-    --exclude='freesurfer/trctrain' \
-    --exclude='freesurfer/subjects/fsaverage_sym' \
-    --exclude='freesurfer/subjects/fsaverage3' \
-    --exclude='freesurfer/subjects/fsaverage4' \
-    --exclude='freesurfer/subjects/fsaverage5' \
-    --exclude='freesurfer/subjects/fsaverage6' \
-    --exclude='freesurfer/subjects/cvs_avg35' \
-    --exclude='freesurfer/subjects/cvs_avg35_inMNI152' \
-    --exclude='freesurfer/subjects/bert' \
-    --exclude='freesurfer/subjects/V1_average' \
-    --exclude='freesurfer/average/mult-comp-cor' \
-    --exclude='freesurfer/lib/cuda' \
-    --exclude='freesurfer/lib/qt'
-
-ENV FSL_DIR=/usr/share/fsl/5.0 \
+#-----------------------------------------------------------------------------
+# 3. Install FreeSurfer v6.0 (minimized with reprozip):
+#    https://github.com/freesurfer/freesurfer/issues/70
+#-----------------------------------------------------------------------------
+RUN curl -sSL https://dl.dropbox.com/s/pbaisn6m5qpi9uu/recon-all-freesurfer6-2.min.tgz?dl=0 | tar zx -C /opt
+ENV FS_OVERRIDE=0 \
     OS=Linux \
-    FS_OVERRIDE=0 \
-    FIX_VERTEX_AREA= \
     FSF_OUTPUT_FORMAT=nii.gz \
+    FIX_VERTEX_AREA=\
     FREESURFER_HOME=/opt/freesurfer
-ENV SUBJECTS_DIR=$FREESURFER_HOME/subjects \
-    FUNCTIONALS_DIR=$FREESURFER_HOME/sessions \
-    MNI_DIR=$FREESURFER_HOME/mni \
-    LOCAL_DIR=$FREESURFER_HOME/local \
-    FSFAST_HOME=$FREESURFER_HOME/fsfast \
-    MINC_BIN_DIR=$FREESURFER_HOME/mni/bin \
-    MINC_LIB_DIR=$FREESURFER_HOME/mni/lib \
-    MNI_DATAPATH=$FREESURFER_HOME/mni/data \
-    FMRI_ANALYSIS_DIR=$FREESURFER_HOME/fsfast
-ENV PERL5LIB=$MINC_LIB_DIR/perl5/5.8.5 \
-    MNI_PERL5LIB=$MINC_LIB_DIR/perl5/5.8.5 \
-    PATH=$FREESURFER_HOME/bin:$FSFAST_HOME/bin:$FREESURFER_HOME/tktools:$MINC_BIN_DIR:$PATH
+ENV MNI_DIR=$FREESURFER_HOME/mni \
+    SUBJECTS_DIR=$FREESURFER_HOME/subjects
+ENV PERL5LIB=$MNI_DIR/share/perl5 \
+    MNI_PERL5LIB=$MNI_DIR/share/perl5 \
+    MINC_BIN_DIR=$MNI_DIR/bin \
+    MINC_LIB_DIR=$MNI_DIR/lib \
+    MNI_DATAPATH=$MNI_DIR/data
+ENV PATH=$FREESURFER_HOME/bin:$FREESURFER_HOME/tktools:$MINC_BIN_DIR:$PATH
+ENV FSL_DIR=/usr/share/fsl/5.0
 RUN echo "cHJpbnRmICJrcnp5c3p0b2YuZ29yZ29sZXdza2lAZ21haWwuY29tXG41MTcyXG4gKkN2dW12RVYzelRmZ1xuRlM1Si8yYzFhZ2c0RVxuIiA+IC9vcHQvZnJlZXN1cmZlci9saWNlbnNlLnR4dAo=" | base64 -d | sh
 
 # Enable neurodebian
@@ -88,21 +74,22 @@ RUN curl -sSL http://neuro.debian.net/lists/xenial.us-ca.full >> /etc/apt/source
 # Installing general Debian utilities and Neurodebian packages (FSL, AFNI, git)
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
-                    fsl-core=5.0.9-1~nd+1+nd16.04+1 \
-                    fsl-mni152-templates=5.0.7-2 \
-                    afni=16.2.07~dfsg.1-2~nd16.04+1 \
+                    fsl-core \
+                    fsl-mni152-templates \
+                    afni \
+                    ants \
                     bzip2 \
-                    ca-certificates \
                     xvfb \
-                    git=1:2.7.4-0ubuntu1 \
-                    graphviz=2.38.0-12ubuntu2 \
+                    git \
+                    graphviz \
                     unzip \
                     apt-utils \
                     fusefat \
                     make \
+                    file \
                     # Added g++ to compile dipy in py3.6
-                    g++=4:5.3.1-1ubuntu1 \
-                    ruby=1:2.3.0+1 && \
+                    g++ \
+                    ruby && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
@@ -117,23 +104,16 @@ ENV FSLDIR=/usr/share/fsl/5.0 \
     AFNI_IMSAVE_WARNINGS=NO \
     AFNI_TTATLAS_DATASET=/usr/share/afni/atlases \
     AFNI_PLUGINPATH=/usr/lib/afni/plugins \
-    PATH=/usr/lib/fsl/5.0:/usr/lib/afni/bin:$PATH
-
-# Installing and setting up ANTs
-RUN mkdir -p /opt/ants && \
-    curl -sSL "https://github.com/stnava/ANTs/releases/download/v2.1.0/Linux_Ubuntu14.04.tar.bz2" \
-    | tar -xjC /opt/ants --strip-components 1
-
-ENV ANTSPATH=/opt/ants \
-    PATH=$ANTSPATH:$PATH
+    ANTSPATH=/usr/lib/ants
+ENV PATH=/usr/lib/fsl/5.0:/usr/lib/afni/bin:$ANTSPATH:$PATH
 
 # Installing and setting up c3d
 RUN mkdir -p /opt/c3d && \
-    curl -sSL "http://downloads.sourceforge.net/project/c3d/c3d/1.0.0/c3d-1.0.0-Linux-x86_64.tar.gz" \
+    curl -sSL "https://files.osf.io/v1/resources/nefdp/providers/osfstorage/59ca96a9b83f69025d6b8985?action=download&version=1&direct" \
     | tar -xzC /opt/c3d --strip-components 1
 
-ENV C3DPATH=/opt/c3d/ \
-    PATH=$C3DPATH/bin:$PATH
+ENV C3DPATH=/opt/c3d/
+ENV PATH=$C3DPATH/bin:$PATH
 
 # Install fake-S3
 ENV GEM_HOME /usr/lib/ruby/gems/2.3
@@ -169,4 +149,3 @@ ENV MATLABCMD="/opt/mcr/v85/toolbox/matlab" \
     FORCE_SPMMCR=1
 
 WORKDIR /work
-

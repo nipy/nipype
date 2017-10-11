@@ -18,6 +18,9 @@ def test_Autobox_inputs():
     ),
     no_clustering=dict(argstr='-noclust',
     ),
+    num_threads=dict(nohash=True,
+    usedefault=True,
+    ),
     out_file=dict(argstr='-prefix %s',
     name_source='in_file',
     name_template='%s_autobox',
@@ -25,7 +28,8 @@ def test_Autobox_inputs():
     outputtype=dict(),
     padding=dict(argstr='-npad %d',
     ),
-    terminal_output=dict(nohash=True,
+    terminal_output=dict(deprecated='1.0.0',
+    nohash=True,
     ),
     )
     inputs = Autobox.input_spec()
