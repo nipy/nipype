@@ -247,6 +247,8 @@ class ComposeMultiTransformOutputSpec(TraitedSpec):
 
 class ComposeMultiTransform(ANTSCommand):
     """
+    Take a set of transformations and convert them to a single transformation matrix/warpfield.
+
     Examples
     --------
     >>> from nipype.interfaces.ants import ComposeMultiTransform
