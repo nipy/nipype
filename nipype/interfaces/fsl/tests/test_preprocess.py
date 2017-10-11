@@ -7,6 +7,7 @@ from builtins import open, open
 
 import os
 import tempfile
+from copy import deepcopy
 
 import pytest
 from nipype.utils.filemanip import split_filename, filename_to_list
@@ -220,12 +221,13 @@ def test_flirt(setup_flirt):
     flirter = fsl.FLIRT()
     # infile not specified
     with pytest.raises(ValueError):
-        flirter.run()
+        flirter.cmdline
     flirter.inputs.in_file = infile
     # reference not specified
     with pytest.raises(ValueError):
-        flirter.run()
+        flirter.cmdline
     flirter.inputs.reference = reffile
+
     # Generate outfile and outmatrix
     pth, fname, ext = split_filename(infile)
     outfile = fsl_name(flirter, '%s_flirt' % fname)
@@ -233,6 +235,20 @@ def test_flirt(setup_flirt):
     realcmd = 'flirt -in %s -ref %s -out %s -omat %s' % (infile, reffile,
                                                          outfile, outmat)
     assert flirter.cmdline == realcmd
+
+    # test apply_xfm option
+    axfm = deepcopy(flirter)
+    axfm.inputs.apply_xfm = True
+    # in_matrix_file or uses_qform must be defined
+    with pytest.raises(RuntimeError): axfm.cmdline
+    axfm2 = deepcopy(axfm)
+    # test uses_qform
+    axfm.inputs.uses_qform = True
+    assert axfm.cmdline == (realcmd + ' -applyxfm -usesqform')
+    # test in_matrix_file
+    axfm2.inputs.in_matrix_file = reffile
+    assert axfm2.cmdline == (realcmd + ' -applyxfm -init %s' % reffile)
+
 
     _, tmpfile = tempfile.mkstemp(suffix='.nii', dir=tmpdir)
     # Loop over all inputs, set a reasonable value and make sure the
@@ -242,7 +258,8 @@ def test_flirt(setup_flirt):
         if key in ('trait_added', 'trait_modified', 'in_file', 'reference',
                    'environ', 'output_type', 'out_file', 'out_matrix_file',
                    'in_matrix_file', 'apply_xfm', 'ignore_exception',
-                   'terminal_output', 'out_log', 'save_log'):
+                   'resource_monitor', 'terminal_output', 'out_log',
+                   'save_log'):
             continue
         param = None
         value = None
@@ -308,6 +325,12 @@ def test_mcflirt(setup_flirt):
     realcmd = 'mcflirt -in ' + infile + ' -out ' + outfile2
     assert frt.cmdline == realcmd
 
+
+@pytest.mark.skipif(no_fsl(), reason="fsl is not installed")
+def test_mcflirt_opt(setup_flirt):
+    tmpdir, infile, reffile = setup_flirt
+    _, nme = os.path.split(infile)
+
     opt_map = {
         'cost': ('-cost mutualinfo', 'mutualinfo'),
         'bins': ('-bins 256', 256),
@@ -328,6 +351,9 @@ def test_mcflirt(setup_flirt):
 
     for name, settings in list(opt_map.items()):
         fnt = fsl.MCFLIRT(in_file=infile, **{name: settings[1]})
+        outfile = os.path.join(os.getcwd(), nme)
+        outfile = fnt._gen_fname(outfile, suffix='_mcf')
+
         instr = '-in %s' % (infile)
         outstr = '-out %s' % (outfile)
         if name in ('init', 'cost', 'dof', 'mean_vol', 'bins'):
@@ -341,10 +367,14 @@ def test_mcflirt(setup_flirt):
                                             outstr,
                                             settings[0]])
 
+
+@pytest.mark.skipif(no_fsl(), reason="fsl is not installed")
+def test_mcflirt_noinput():
     # Test error is raised when missing required args
     fnt = fsl.MCFLIRT()
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError) as excinfo:
         fnt.run()
+    assert str(excinfo.value).startswith("MCFLIRT requires a value for input 'in_file'")
 
 # test fnirt
 
@@ -364,7 +394,8 @@ def test_fnirt(setup_flirt):
               ('in_fwhm', '--infwhm', [4, 2, 2, 0], '4,2,2,0'),
               ('apply_refmask', '--applyrefmask', [0, 0, 1, 1], '0,0,1,1'),
               ('apply_inmask', '--applyinmask', [0, 0, 0, 1], '0,0,0,1'),
-              ('regularization_lambda', '--lambda', [0.5, 0.75], '0.5,0.75')]
+              ('regularization_lambda', '--lambda', [0.5, 0.75], '0.5,0.75'),
+              ('intensity_mapping_model', '--intmod', 'global_non_linear', 'global_non_linear')]
     for item, flag, val, strval in params:
         fnirt = fsl.FNIRT(in_file=infile,
                           ref_file=reffile,
@@ -377,7 +408,7 @@ def test_fnirt(setup_flirt):
                   ' %s=%s --ref=%s'\
                   ' --iout=%s' % (infile, log,
                                   flag, strval, reffile, iout)
-        elif item in ('in_fwhm'):
+        elif item in ('in_fwhm', 'intensity_mapping_model'):
             cmd = 'fnirt --in=%s %s=%s --logout=%s '\
                   '--ref=%s --iout=%s' % (infile, flag,
                                           strval, log, reffile, iout)
@@ -569,10 +600,3 @@ def test_first_genfname():
     value = first._gen_fname(name='original_segmentations')
     expected_value = os.path.abspath('segment_all_none_origsegs.nii.gz')
     assert value == expected_value
-
-
-@pytest.mark.skipif(no_fsl(), reason="fsl is not installed")
-def test_deprecation():
-    interface = fsl.ApplyXfm()
-    assert isinstance(interface, fsl.ApplyXFM)
-

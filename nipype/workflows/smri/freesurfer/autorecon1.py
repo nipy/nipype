@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
-
-from nipype.utils import NUMPY_MMAP
-from nipype.interfaces.utility import Function,IdentityInterface
-import nipype.pipeline.engine as pe  # pypeline engine
-from nipype.interfaces.freesurfer import *
+from __future__ import print_function, division, unicode_literals, absolute_import
+from ....utils import NUMPY_MMAP
+from ....pipeline import engine as pe
+from ....interfaces.utility import Function, IdentityInterface
+from ....interfaces.freesurfer import *
 from .utils import copy_file
 
 

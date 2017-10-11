@@ -30,7 +30,8 @@ def test_ComputeEigensystem_inputs():
     outputdatatype=dict(argstr='-outputdatatype %s',
     usedefault=True,
     ),
-    terminal_output=dict(nohash=True,
+    terminal_output=dict(deprecated='1.0.0',
+    nohash=True,
     ),
     )
     inputs = ComputeEigensystem.input_spec()

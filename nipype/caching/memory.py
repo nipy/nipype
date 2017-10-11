@@ -70,7 +70,7 @@ class PipeFunc(object):
         kwargs = modify_paths(kwargs, relative=False)
         interface = self.interface()
         # Set the inputs early to get some argument checking
-        interface.inputs.set(**kwargs)
+        interface.inputs.trait_set(**kwargs)
         # Make a name for our node
         inputs = interface.inputs.get_hashval()
         hasher = hashlib.new('md5')

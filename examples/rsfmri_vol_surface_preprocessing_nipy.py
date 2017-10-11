@@ -65,8 +65,8 @@ fsl.FSLCommand.set_default_output_type('NIFTI_GZ')
 from nipype import Workflow, Node, MapNode
 
 from nipype.algorithms.rapidart import ArtifactDetect
-from nipype.algorithms.misc import TSNR
-from nipype.algorithms.compcor import ACompCor
+from nipype.algorithms.misc import TSNR, CalculateMedian
+from nipype.algorithms.confounds import ACompCor
 from nipype.interfaces.utility import Rename, Merge, IdentityInterface
 from nipype.utils.filemanip import filename_to_list
 from nipype.interfaces.io import DataSink, FreeSurferSource
@@ -75,7 +75,7 @@ import nipype.interfaces.freesurfer as fs
 import numpy as np
 import scipy as sp
 import nibabel as nb
-from nipype.utils import NUMPY_MMAP
+from nipype.utils.config import NUMPY_MMAP
 
 imports = ['import os',
            'import nibabel as nb',
@@ -482,7 +482,7 @@ def create_reg_workflow(name='registration'):
     warpmean.inputs.input_image_type = 3
     warpmean.inputs.interpolation = 'Linear'
     warpmean.inputs.invert_transform_flags = [False, False]
-    warpmean.inputs.terminal_output = 'file'
+    warpmean.terminal_output = 'file'
     warpmean.inputs.args = '--float'
     warpmean.inputs.num_threads = 4
     warpmean.plugin_args = {'sbatch_args': '-c%d' % 4}
@@ -556,11 +556,7 @@ def create_workflow(files,
     wf.connect(realign, "out_file", tsnr, "in_file")
 
     # Compute the median image across runs
-    calc_median = Node(Function(input_names=['in_files'],
-                                output_names=['median_file'],
-                                function=median,
-                                imports=imports),
-                       name='median')
+    calc_median = Node(CalculateMedian(), name='median')
     wf.connect(tsnr, 'detrended_file', calc_median, 'in_files')
 
     """Segment and Register
@@ -708,7 +704,7 @@ def create_workflow(files,
     warpall.inputs.input_image_type = 3
     warpall.inputs.interpolation = 'Linear'
     warpall.inputs.invert_transform_flags = [False, False]
-    warpall.inputs.terminal_output = 'file'
+    warpall.terminal_output = 'file'
     warpall.inputs.reference_image = target_file
     warpall.inputs.args = '--float'
     warpall.inputs.num_threads = 2

@@ -33,7 +33,8 @@ def test_Smooth_inputs():
     name_template='%s_smooth',
     position=2,
     ),
-    terminal_output=dict(nohash=True,
+    terminal_output=dict(deprecated='1.0.0',
+    nohash=True,
     ),
     )
     inputs = Smooth.input_spec()

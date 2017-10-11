@@ -36,7 +36,8 @@ def test_SurfaceSmooth_inputs():
     mandatory=True,
     ),
     subjects_dir=dict(),
-    terminal_output=dict(nohash=True,
+    terminal_output=dict(deprecated='1.0.0',
+    nohash=True,
     ),
     )
     inputs = SurfaceSmooth.input_spec()

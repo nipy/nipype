@@ -11,6 +11,7 @@ from __future__ import print_function, division, unicode_literals, absolute_impo
 from builtins import range, str
 import os
 
+from ...utils.filemanip import filename_to_list
 from ..base import TraitedSpec, File, Str, traits, InputMultiPath, isdefined
 from .base import ANTSCommand, ANTSCommandInputSpec
 
@@ -19,8 +20,7 @@ class ANTSInputSpec(ANTSCommandInputSpec):
     dimension = traits.Enum(3, 2, argstr='%d', usedefault=False,
                             position=1, desc='image dimension (2 or 3)')
     fixed_image = InputMultiPath(File(exists=True), mandatory=True,
-                                 desc=('image to apply transformation to (generally a coregistered '
-                                       'functional)'))
+                                 desc=('image to which the moving image is warped'))
     moving_image = InputMultiPath(File(exists=True), argstr='%s',
                                   mandatory=True,
                                   desc=('image to apply transformation to (generally a coregistered '
@@ -220,12 +220,22 @@ class RegistrationInputSpec(ANTSCommandInputSpec):
                             usedefault=True, desc='image dimension (2 or 3)')
     fixed_image = InputMultiPath(File(exists=True), mandatory=True,
                                  desc='image to apply transformation to (generally a coregistered functional)')
-    fixed_image_mask = File(argstr='%s', exists=True,
-                            desc='mask used to limit metric sampling region of the fixed image')
+    fixed_image_mask = File(
+        exists=True, argstr='%s', max_ver='2.1.0', xor=['fixed_image_masks'],
+        desc='mask used to limit metric sampling region of the fixed image')
+    fixed_image_masks = InputMultiPath(
+        traits.Either('NULL', File(exists=True)), min_ver='2.2.0', xor=['fixed_image_mask'],
+        desc='mask used to limit metric sampling region of the fixed image '
+        '(Use "NULL" to omit a mask at a given stage)')
     moving_image = InputMultiPath(File(exists=True), mandatory=True,
                                   desc='image to apply transformation to (generally a coregistered functional)')
-    moving_image_mask = File(requires=['fixed_image_mask'],
-                             exists=True, desc='mask used to limit metric sampling region of the moving image')
+    moving_image_mask = File(
+        exists=True, requires=['fixed_image_mask'], max_ver='2.1.0', xor=['moving_image_masks'],
+        desc='mask used to limit metric sampling region of the moving image')
+    moving_image_masks = InputMultiPath(
+        traits.Either('NULL', File(exists=True)), min_ver='2.2.0', xor=['moving_image_mask'],
+        desc='mask used to limit metric sampling region of the moving image '
+        '(Use "NULL" to omit a mask at a given stage)')
 
     save_state = File(argstr='--save-state %s', exists=False,
                       desc='Filename for saving the internal restorable state of the registration')
@@ -355,6 +365,16 @@ class RegistrationInputSpec(ANTSCommandInputSpec):
                                                                   ),
                                                      )
                                        )
+    restrict_deformation = traits.List(
+        traits.List(traits.Enum(0, 1)),
+        desc=("This option allows the user to restrict the optimization of "
+              "the displacement field, translation, rigid or affine transform "
+              "on a per-component basis. For example, if one wants to limit "
+              "the deformation or rotation of 3-D volume to the  first two "
+              "dimensions, this is possible by specifying a weight vector of "
+              "'1x1x0' for a deformation field or '1x1x0x1x1x0' for a rigid "
+              "transformation.  Low-dimensional restriction only works if "
+              "there are no preceding transformations."))
     # Convergence flags
     number_of_iterations = traits.List(traits.List(traits.Int()))
     smoothing_sigmas = traits.List(traits.List(traits.Float()), mandatory=True)
@@ -378,6 +398,8 @@ class RegistrationInputSpec(ANTSCommandInputSpec):
         low=0.0, high=1.0, value=1.0, argstr='%s', usedefault=True, desc="The Upper quantile to clip image ranges")
     winsorize_lower_quantile = traits.Range(
         low=0.0, high=1.0, value=0.0, argstr='%s', usedefault=True, desc="The Lower quantile to clip image ranges")
+
+    verbose = traits.Bool(argstr='-v', default=False)
 
 
 class RegistrationOutputSpec(TraitedSpec):
@@ -637,6 +659,20 @@ class Registration(ANTSCommand):
 --metric Mattes[ fixed1.nii, moving1.nii, 1, 32 ] --convergence [ 100x50x30, 1e-09, 20 ] \
 --smoothing-sigmas 2.0x1.0x0.0vox --shrink-factors 3x2x1 --use-estimate-learning-rate-once 1 \
 --use-histogram-matching 1 --winsorize-image-intensities [ 0.0, 1.0 ]  --write-composite-transform 1'
+
+    >>> # Test masking
+    >>> reg9 = copy.deepcopy(reg)
+    >>> reg9.inputs.fixed_image_masks = ['NULL', 'fixed1.nii']
+    >>> reg9.cmdline # doctest: +ALLOW_UNICODE
+    'antsRegistration --collapse-output-transforms 0 --dimensionality 3 --initial-moving-transform [ trans.mat, 1 ] \
+--initialize-transforms-per-stage 0 --interpolation Linear --output [ output_, output_warped_image.nii.gz ] \
+--transform Affine[ 2.0 ] --metric Mattes[ fixed1.nii, moving1.nii, 1, 32, Random, 0.05 ] \
+--convergence [ 1500x200, 1e-08, 20 ] --smoothing-sigmas 1.0x0.0vox --shrink-factors 2x1 \
+--use-estimate-learning-rate-once 1 --use-histogram-matching 1 --masks [ NULL, NULL ] \
+--transform SyN[ 0.25, 3.0, 0.0 ] --metric Mattes[ fixed1.nii, moving1.nii, 1, 32 ] \
+--convergence [ 100x50x30, 1e-09, 20 ] --smoothing-sigmas 2.0x1.0x0.0vox --shrink-factors 3x2x1 \
+--use-estimate-learning-rate-once 1 --use-histogram-matching 1 --masks [ fixed1.nii, NULL ] \
+--winsorize-image-intensities [ 0.0, 1.0 ]  --write-composite-transform 1'
     """
     DEF_SAMPLING_STRATEGY = 'None'
     """The default sampling strategy argument."""
@@ -769,6 +805,23 @@ class Registration(ANTSCommand):
                 else:
                     histval = self.inputs.use_histogram_matching[ii]
                 retval.append('--use-histogram-matching %d' % histval)
+            if isdefined(self.inputs.restrict_deformation):
+                retval.append('--restrict-deformation %s' %
+                              self._format_xarray(self.inputs.restrict_deformation[ii]))
+            if any((isdefined(self.inputs.fixed_image_masks),
+                    isdefined(self.inputs.moving_image_masks))):
+                if isdefined(self.inputs.fixed_image_masks):
+                    fixed_masks = filename_to_list(self.inputs.fixed_image_masks)
+                    fixed_mask = fixed_masks[ii if len(fixed_masks) > 1 else 0]
+                else:
+                    fixed_mask = 'NULL'
+
+                if isdefined(self.inputs.moving_image_masks):
+                    moving_masks = filename_to_list(self.inputs.moving_image_masks)
+                    moving_mask = moving_masks[ii if len(moving_masks) > 1 else 0]
+                else:
+                    moving_mask = 'NULL'
+                retval.append('--masks [ %s, %s ]' % (fixed_mask, moving_mask))
         return " ".join(retval)
 
     def _get_outputfilenames(self, inverse=False):
@@ -980,4 +1033,126 @@ class Registration(ANTSCommand):
             outputs['inverse_warped_image'] = os.path.abspath(inv_out_filename)
         if len(self.inputs.save_state):
             outputs['save_state'] = os.path.abspath(self.inputs.save_state)
+        return outputs
+
+
+class MeasureImageSimilarityInputSpec(ANTSCommandInputSpec):
+    dimension = traits.Enum(
+         2, 3, 4,
+         argstr='--dimensionality %d', position=1,
+         desc='Dimensionality of the fixed/moving image pair',
+         )
+    fixed_image = File(
+         exists=True, mandatory=True,
+         desc='Image to which the moving image is warped',
+         )
+    moving_image = File(
+         exists=True, mandatory=True,
+         desc='Image to apply transformation to (generally a coregistered functional)',
+         )
+    metric = traits.Enum(
+         "CC", "MI", "Mattes", "MeanSquares", "Demons", "GC",
+         argstr="%s", mandatory=True,
+         )
+    metric_weight = traits.Float(
+         requires=['metric'], default=1.0, usedefault=True,
+         desc='The "metricWeight" variable is not used.',
+         )
+    radius_or_number_of_bins = traits.Int(
+         requires=['metric'], mandatory=True,
+         desc='The number of bins in each stage for the MI and Mattes metric, '
+         'or the radius for other metrics',
+         )
+    sampling_strategy = traits.Enum(
+         "None", "Regular", "Random",
+         requires=['metric'], default="None", usedefault=True,
+         desc='Manner of choosing point set over which to optimize the metric. '
+         'Defaults to "None" (i.e. a dense sampling of one sample per voxel).'
+         )
+    sampling_percentage = traits.Either(
+         traits.Range(low=0.0, high=1.0),
+         requires=['metric'], mandatory=True,
+         desc='Percentage of points accessible to the sampling strategy over which '
+         'to optimize the metric.'
+         )
+    fixed_image_mask = File(
+        exists=True, argstr='%s',
+        desc='mask used to limit metric sampling region of the fixed image',
+        )
+    moving_image_mask = File(
+        exists=True, requires=['fixed_image_mask'],
+        desc='mask used to limit metric sampling region of the moving image',
+        )
+
+
+class MeasureImageSimilarityOutputSpec(TraitedSpec):
+    similarity = traits.Float()
+
+
+class MeasureImageSimilarity(ANTSCommand):
+    """
+
+
+    Examples
+    --------
+
+    >>> from nipype.interfaces.ants import MeasureImageSimilarity
+    >>> sim = MeasureImageSimilarity()
+    >>> sim.inputs.dimension = 3
+    >>> sim.inputs.metric = 'MI'
+    >>> sim.inputs.fixed_image = 'T1.nii'
+    >>> sim.inputs.moving_image = 'resting.nii'
+    >>> sim.inputs.metric_weight = 1.0
+    >>> sim.inputs.radius_or_number_of_bins = 5
+    >>> sim.inputs.sampling_strategy = 'Regular'
+    >>> sim.inputs.sampling_percentage = 1.0
+    >>> sim.inputs.fixed_image_mask = 'mask.nii'
+    >>> sim.inputs.moving_image_mask = 'mask.nii.gz'
+    >>> sim.cmdline # doctest: +ALLOW_UNICODE
+    u'MeasureImageSimilarity --dimensionality 3 --masks ["mask.nii","mask.nii.gz"] \
+--metric MI["T1.nii","resting.nii",1.0,5,Regular,1.0]'
+    """
+    _cmd = 'MeasureImageSimilarity'
+    input_spec = MeasureImageSimilarityInputSpec
+    output_spec = MeasureImageSimilarityOutputSpec
+
+    def _metric_constructor(self):
+        retval = '--metric {metric}["{fixed_image}","{moving_image}",{metric_weight},'\
+        '{radius_or_number_of_bins},{sampling_strategy},{sampling_percentage}]'\
+        .format(
+            metric=self.inputs.metric,
+            fixed_image=self.inputs.fixed_image,
+            moving_image=self.inputs.moving_image,
+            metric_weight=self.inputs.metric_weight,
+            radius_or_number_of_bins=self.inputs.radius_or_number_of_bins,
+            sampling_strategy=self.inputs.sampling_strategy,
+            sampling_percentage=self.inputs.sampling_percentage,
+        )
+        return retval
+
+    def _mask_constructor(self):
+        if self.inputs.moving_image_mask:
+            retval = '--masks ["{fixed_image_mask}","{moving_image_mask}"]'\
+            .format(
+                fixed_image_mask=self.inputs.fixed_image_mask,
+                moving_image_mask=self.inputs.moving_image_mask,
+            )
+        else:
+            retval = '--masks "{fixed_image_mask}"'\
+            .format(
+                fixed_image_mask=self.inputs.fixed_image_mask,
+            )
+        return retval
+
+    def _format_arg(self, opt, spec, val):
+        if opt == 'metric':
+            return self._metric_constructor()
+        elif opt == 'fixed_image_mask':
+            return self._mask_constructor()
+        return super(MeasureImageSimilarity, self)._format_arg(opt, spec, val)
+
+    def aggregate_outputs(self, runtime=None, needed_outputs=None):
+        outputs = self._outputs()
+        stdout = runtime.stdout.split('\n')
+        outputs.similarity = float(stdout[0])
         return outputs

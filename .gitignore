@@ -24,5 +24,6 @@ crash*.pklz
 htmlcov/
 __pycache__/
 *~
+.*.swp
 .ipynb_checkpoints/
 .ruby-version

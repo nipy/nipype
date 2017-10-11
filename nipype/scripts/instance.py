@@ -28,9 +28,10 @@ def import_module(module_path):
     """
     try:
         mod = importlib.import_module(module_path)
-        return mod
     except:
         raise ImportError('Error when importing object {}.'.format(module_path))
+    else:
+        return mod
 
 
 def list_interfaces(module):

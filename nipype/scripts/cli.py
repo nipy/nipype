@@ -15,6 +15,7 @@ from .utils import (CONTEXT_SETTINGS,
                     PythonModule,
                     check_not_none,)
 
+from .. import __version__
 
 # declare the CLI group
 @click.group(context_settings=CONTEXT_SETTINGS)
@@ -33,7 +34,7 @@ def search(logdir, regex):
     a given regular expression.
 
     Examples:\n
-    nipype search nipype/wd/log -r '.*subject123.*'
+    nipypecli search nipype/wd/log -r '.*subject123.*'
     """
     from .crash_files import iter_tracebacks
 
@@ -61,8 +62,8 @@ def crash(crashfile, rerun, debug, ipydebug, dir):
     For certain crash files, one can rerun a failed node in a temp directory.
 
     Examples:\n
-    nipype crash crashfile.pklz\n
-    nipype crash crashfile.pklz -r -i\n
+    nipypecli crash crashfile.pklz\n
+    nipypecli crash crashfile.pklz -r -i\n
     """
     from .crash_files import display_crash_file
 
@@ -82,7 +83,7 @@ def show(pklz_file):
     """Print the content of Nipype node .pklz file.
 
     Examples:\n
-    nipype show node.pklz
+    nipypecli show node.pklz
     """
     from pprint import pprint
     from ..utils.filemanip import loadpkl
@@ -104,8 +105,8 @@ def run(ctx, module, interface, list, help):
     """Run a Nipype Interface.
 
     Examples:\n
-    nipype run nipype.interfaces.nipy --list\n
-    nipype run nipype.interfaces.nipy ComputeMask --help
+    nipypecli run nipype.interfaces.nipy --list\n
+    nipypecli run nipype.interfaces.nipy ComputeMask --help
     """
     import argparse
     from .utils import add_args_options
@@ -151,6 +152,10 @@ def run(ctx, module, interface, list, help):
             args = iface_parser.parse_args(args=ctx.args)
             run_instance(node, args)
 
+@cli.command(context_settings=CONTEXT_SETTINGS)
+def version():
+    """Print current version of Nipype."""
+    click.echo(__version__)
 
 @cli.group()
 def convert():

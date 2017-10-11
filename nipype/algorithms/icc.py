@@ -8,7 +8,7 @@ import nibabel as nb
 from scipy.linalg import pinv
 from ..interfaces.base import BaseInterfaceInputSpec, TraitedSpec, \
     BaseInterface, traits, File
-from nipype.utils import NUMPY_MMAP
+from ..utils import NUMPY_MMAP
 
 
 class ICCInputSpec(BaseInterfaceInputSpec):

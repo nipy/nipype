@@ -74,8 +74,7 @@
 .. _pythonxy: https://python-xy.github.io/
 .. _EPD: http://www.enthought.com/products/epd.php
 .. _Traits: http://code.enthought.com/projects/traits/
-.. _Anaconda: https://www.continuum.io/downloads
-.. _Canopy: https://www.enthought.com/products/canopy/
+.. _Miniconda: https://conda.io/miniconda.html
 
 .. Python imaging projects
 .. _PyMVPA: http://www.pymvpa.org

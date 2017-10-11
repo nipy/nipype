@@ -31,7 +31,8 @@ def test_ESLR_inputs():
     ),
     safetySize=dict(argstr='--safetySize %d',
     ),
-    terminal_output=dict(nohash=True,
+    terminal_output=dict(deprecated='1.0.0',
+    nohash=True,
     ),
     )
     inputs = ESLR.input_spec()

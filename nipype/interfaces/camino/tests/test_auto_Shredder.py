@@ -32,7 +32,8 @@ def test_Shredder_inputs():
     position=3,
     units='NA',
     ),
-    terminal_output=dict(nohash=True,
+    terminal_output=dict(deprecated='1.0.0',
+    nohash=True,
     ),
     )
     inputs = Shredder.input_spec()

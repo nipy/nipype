@@ -70,13 +70,30 @@ class RobustFOVInputSpec(FSLCommandInputSpec):
     out_roi = File(desc="ROI volume output name", argstr="-r %s",
                    name_source=['in_file'], hash_files=False,
                    name_template='%s_ROI')
+    brainsize = traits.Int(desc=('size of brain in z-dimension (default '
+                                 '170mm/150mm)'),
+                           argstr='-b %d')
+    out_transform = File(desc=("Transformation matrix in_file to out_roi "
+                               "output name"),
+                         argstr="-m %s",
+                         name_source=['in_file'], hash_files=False,
+                         name_template='%s_to_ROI')
 
 
 class RobustFOVOutputSpec(TraitedSpec):
     out_roi = File(exists=True, desc="ROI volume output name")
+    out_transform = File(exists=True,
+                         desc=("Transformation matrix in_file to out_roi "
+                               "output name"))
 
 
 class RobustFOV(FSLCommand):
+    """Automatically crops an image removing lower head and neck.
+
+    Interface is stable 5.0.0 to 5.0.9, but default brainsize changed from
+    150mm to 170mm.
+    """
+
     _cmd = 'robustfov'
     input_spec = RobustFOVInputSpec
     output_spec = RobustFOVOutputSpec
@@ -2093,6 +2110,59 @@ class WarpPointsToStd(WarpPoints):
     input_spec = WarpPointsToStdInputSpec
     output_spec = WarpPointsOutputSpec
     _cmd = 'img2stdcoord'
+    _terminal_output = 'file_split'
+
+
+class WarpPointsFromStdInputSpec(CommandLineInputSpec):
+    img_file = File(exists=True, argstr='-img %s', mandatory=True,
+                    desc='filename of a destination image')
+    std_file = File(exists=True, argstr='-std %s', mandatory=True,
+                    desc='filename of the image in standard space')
+    in_coords = File(exists=True, position=-2, argstr='%s', mandatory=True,
+                     desc='filename of file containing coordinates')
+    xfm_file = File(exists=True, argstr='-xfm %s', xor=['warp_file'],
+                    desc='filename of affine transform (e.g. source2dest.mat)')
+    warp_file = File(exists=True, argstr='-warp %s', xor=['xfm_file'],
+                     desc='filename of warpfield (e.g. '
+                          'intermediate2dest_warp.nii.gz)')
+    coord_vox = traits.Bool(True, argstr='-vox', xor=['coord_mm'],
+                            desc='all coordinates in voxels - default')
+    coord_mm = traits.Bool(False, argstr='-mm', xor=['coord_vox'],
+                           desc='all coordinates in mm')
+
+
+class WarpPointsFromStd(CommandLine):
+    """
+    Use FSL `std2imgcoord <http://fsl.fmrib.ox.ac.uk/fsl/fsl-4.1.9/flirt/overview.html>`_
+    to transform point sets to standard space coordinates. Accepts plain text coordinates
+    files.
+
+
+    Examples
+    --------
+
+    >>> from nipype.interfaces.fsl import WarpPointsFromStd
+    >>> warppoints = WarpPointsFromStd()
+    >>> warppoints.inputs.in_coords = 'surf.txt'
+    >>> warppoints.inputs.img_file = 'T1.nii'
+    >>> warppoints.inputs.std_file = 'mni.nii'
+    >>> warppoints.inputs.warp_file = 'warpfield.nii'
+    >>> warppoints.inputs.coord_mm = True
+    >>> warppoints.cmdline # doctest: +ELLIPSIS +ALLOW_UNICODE
+    'std2imgcoord -mm -img T1.nii -std mni.nii -warp warpfield.nii surf.txt'
+    >>> res = warppoints.run() # doctest: +SKIP
+
+
+    """
+
+    input_spec = WarpPointsFromStdInputSpec
+    output_spec = WarpPointsOutputSpec
+    _cmd = 'std2imgcoord'
+
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        outputs['out_file'] = op.abspath('stdout.nipype')
+        return outputs
 
 
 class MotionOutliersInputSpec(FSLCommandInputSpec):

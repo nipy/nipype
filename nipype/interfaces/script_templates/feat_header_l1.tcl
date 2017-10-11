@@ -52,7 +52,7 @@ set fmri(multiple) 1
 # Higher-level input type
 # 1 : Inputs are lower-level FEAT directories
 # 2 : Inputs are cope images from FEAT directories
-set fmri(inputtype) 1
+set fmri(inputtype) 2
 
 # Carry out pre-stats processing?
 set fmri(filtering_yn) 0

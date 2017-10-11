@@ -6,6 +6,8 @@ from ..utils import RobustFOV
 def test_RobustFOV_inputs():
     input_map = dict(args=dict(argstr='%s',
     ),
+    brainsize=dict(argstr='-b %d',
+    ),
     environ=dict(nohash=True,
     usedefault=True,
     ),
@@ -21,8 +23,14 @@ def test_RobustFOV_inputs():
     name_source=['in_file'],
     name_template='%s_ROI',
     ),
+    out_transform=dict(argstr='-m %s',
+    hash_files=False,
+    name_source=['in_file'],
+    name_template='%s_to_ROI',
+    ),
     output_type=dict(),
-    terminal_output=dict(nohash=True,
+    terminal_output=dict(deprecated='1.0.0',
+    nohash=True,
     ),
     )
     inputs = RobustFOV.input_spec()
@@ -34,6 +42,7 @@ def test_RobustFOV_inputs():
 
 def test_RobustFOV_outputs():
     output_map = dict(out_roi=dict(),
+    out_transform=dict(),
     )
     outputs = RobustFOV.output_spec()
 

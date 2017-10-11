@@ -14,7 +14,8 @@ def test_FSCommandOpenMP_inputs():
     ),
     num_threads=dict(),
     subjects_dir=dict(),
-    terminal_output=dict(nohash=True,
+    terminal_output=dict(deprecated='1.0.0',
+    nohash=True,
     ),
     )
     inputs = FSCommandOpenMP.input_spec()

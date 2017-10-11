@@ -127,7 +127,7 @@ class TensorMode(DipyDiffusionInterface):
         # Load the 4D image files
         img = nb.load(self.inputs.in_file)
         data = img.get_data()
-        affine = img.get_affine()
+        affine = img.affine
 
         # Load the gradient strengths and directions
         gtab = self._get_gradient_table()

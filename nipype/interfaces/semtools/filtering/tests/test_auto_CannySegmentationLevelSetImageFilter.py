@@ -32,7 +32,8 @@ def test_CannySegmentationLevelSetImageFilter_inputs():
     outputVolume=dict(argstr='--outputVolume %s',
     hash_files=False,
     ),
-    terminal_output=dict(nohash=True,
+    terminal_output=dict(deprecated='1.0.0',
+    nohash=True,
     ),
     )
     inputs = CannySegmentationLevelSetImageFilter.input_spec()

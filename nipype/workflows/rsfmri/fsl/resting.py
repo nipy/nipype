@@ -120,7 +120,7 @@ def create_resting_preproc(name='restpreproc', base_dir=None):
                         name='getthreshold')
     threshold_stddev = pe.Node(fsl.Threshold(), name='threshold')
     compcor = pe.Node(confounds.ACompCor(components_file="noise_components.txt",
-                                  use_regress_poly=False),
+                                         pre_filter=False),
                       name='compcor')
     remove_noise = pe.Node(fsl.FilterRegressor(filter_all=True),
                            name='remove_noise')
@@ -138,7 +138,7 @@ def create_resting_preproc(name='restpreproc', base_dir=None):
     restpreproc.connect(realigner, 'outputspec.realigned_file',
                         compcor, 'realigned_file')
     restpreproc.connect(threshold_stddev, 'out_file',
-                        compcor, 'mask_file')
+                        compcor, 'mask_files')
     restpreproc.connect(inputnode, 'num_noise_components',
                         compcor, 'num_components')
     restpreproc.connect(tsnr, 'detrended_file',

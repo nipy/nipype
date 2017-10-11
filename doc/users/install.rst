@@ -1,26 +1,27 @@
 .. _install:
 
-======================
- Download and install
-======================
+====================
+Download and install
+====================
 
 This page covers the necessary steps to install Nipype.
 
-Nipype for users
-----------------
+Using docker
+~~~~~~~~~~~~
+
+You can follow the `Nipype tutorial <https://miykael.github.io/nipype_tutorial/>`_
+
+or use this docker container: `docker pull nipype/nipype`
+
+or if you want to build custom docker containers with specific versions of
+software see `Neurodocker <https://github.com/kaczmarj/neurodocker>`_
 
 Using conda
 ~~~~~~~~~~~
 
-Installing nipype from the conda-forge channel can be achieved by adding conda-forge to your channels with::
+Installing nipype from the conda-forge channel can be achieved by::
 
-  conda config --add channels conda-forge
-
-
-Once the conda-forge channel has been enabled, nipype can be installed with::
-
-  conda install nipype
-
+  conda install --channel conda-forge nipype
 
 It is possible to list all of the versions of nipype available on your platform with::
 
@@ -36,17 +37,22 @@ The installation process is similar to other Python packages.
 
 If you already have a Python environment set up, you can do::
 
-  easy_install nipype
-
-or::
-
   pip install nipype
 
-
 If you want to install all the optional features of ``nipype``,
-use the following command (only for ``nipype>=0.13``)::
+use the following command::
 
   pip install nipype[all]
+
+While `all` installs everything, one can also install select components as
+listed below::
+
+    'doc': ['Sphinx>=1.4', 'matplotlib', 'pydotplus', 'pydot>=1.2.3'],
+    'tests': ['pytest-cov', 'codecov'],
+    'nipy': ['nitime', 'nilearn', 'dipy', 'nipy', 'matplotlib'],
+    'profiler': ['psutil'],
+    'duecredit': ['duecredit'],
+    'xvfbwrapper': ['xvfbwrapper'],
 
 
 Debian and Ubuntu
@@ -59,16 +65,19 @@ manager.
 Mac OS X
 ~~~~~~~~
 
-The easiest way to get nipype running on Mac OS X is to install Anaconda_ or
-Canopy_ and then add nipype by executing::
+The easiest way to get nipype running on Mac OS X is to install Miniconda_ and
+follow the instructions above. If you have a non-conda environment you can
+install nipype by typing::
 
-  easy_install nipype
+  pip install nipype
 
+Note that the above procedure may require availability of gcc on your system
+path to compile the traits package.
 
 From source
 ~~~~~~~~~~~
 
-The current release is found here: `<https://github.com/nipy/nipype/releases/latest>`_.
+The most recent release is found here: `<https://github.com/nipy/nipype/releases/latest>`_.
 
 The development version: [`zip <http://github.com/nipy/nipype/zipball/master>`__ `tar.gz
 <http://github.com/nipy/nipype/tarball/master>`__]
@@ -79,7 +88,7 @@ If you downloaded the source distribution named something
 like ``nipype-x.y.tar.gz``, then unpack the tarball, change into the
 ``nipype-x.y`` directory and install nipype using::
 
-    python setup.py install
+    pip install .
 
 **Note:** Depending on permissions you may need to use ``sudo``.
 
@@ -87,80 +96,25 @@ like ``nipype-x.y.tar.gz``, then unpack the tarball, change into the
 Testing the install
 -------------------
 
-The best way to test the install is checking nipype's version ::
+The best way to test the install is checking nipype's version and then running
+the tests::
 
     python -c "import nipype; print(nipype.__version__)"
+    python -c "import nipype; nipype.test()"
 
+Interface Dependencies
+~~~~~~~~~~~~~~~~~~~~~~
+
+Nipype provides wrappers around many neuroimaging tools and contains some
+algorithms. These tools will need to be installed for Nipype to run. You can
+create containers with different versions of these tools installed using
+`Neurodocker <https://github.com/kaczmarj/neurodocker>`_
 
 Installation for developers
 ---------------------------
 
 Developers should start `here <../devel/testing_nipype.html>`_.
 
-
-Recommended Software
-------------
-
-Strong Recommendations
-~~~~~~~~~~~~~~~~~~~~~~
-
-IPython_ 0.10.2 - 1.0.0
-  Interactive python environment. This is necessary for some parallel
-  components of the pipeline engine.
-
-Matplotlib_ 1.0 - 1.2
-  Plotting library
-
-`RDFLib <http://rdflib.readthedocs.org/en/latest/>`_ 4.1
-  RDFLibrary required for provenance export as RDF
-
-Sphinx_ 1.1
-  Required for building the documentation
-
-`Graphviz <http://www.graphviz.org/>`_
-  Required for building the documentation. The python wrapper package (``graphviz``)
-  and the program itself both need to be installed.
-
-Interface Dependencies
-~~~~~~~~~~~~~~~~~~~~~~
-
-You might not need some of the following packages, depending on what exactly you
-want to use nipype for. If you do need any of them, install nipype's wrapper package
-(``nipype.interfaces``), then install the programs separately onto your computer, just
-like you would install any other app.
-
-FSL_
-  4.1.0 or later
-
-matlab_
-  2008a or later
-
-SPM_
-  SPM5 or later
-
-FreeSurfer_
-  FreeSurfer v4.0.0 or later
-
-AFNI_
-  2009_12_31_1431 or later
-
-Slicer_
-  3.6 or later
-
-Nipy_
-  0.1.2+20110404 or later
-
-Nitime_
-  (optional)
-
-ANTS_
-
-MRtrix_ and MRtrix3_
-
-Camino_
-
-Camino2Trackvis_
-
-ConnectomeViewer_
+Developers can also use this docker container: `docker pull nipype/nipype:master`
 
 .. include:: ../links_names.txt

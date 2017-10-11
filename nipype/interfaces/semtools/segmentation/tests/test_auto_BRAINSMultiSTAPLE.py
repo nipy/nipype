@@ -30,7 +30,8 @@ def test_BRAINSMultiSTAPLE_inputs():
     ),
     skipResampling=dict(argstr='--skipResampling ',
     ),
-    terminal_output=dict(nohash=True,
+    terminal_output=dict(deprecated='1.0.0',
+    nohash=True,
     ),
     )
     inputs = BRAINSMultiSTAPLE.input_spec()

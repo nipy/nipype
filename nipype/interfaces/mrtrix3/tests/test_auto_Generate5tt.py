@@ -24,7 +24,8 @@ def test_Generate5tt_inputs():
     position=-1,
     usedefault=True,
     ),
-    terminal_output=dict(nohash=True,
+    terminal_output=dict(deprecated='1.0.0',
+    nohash=True,
     ),
     )
     inputs = Generate5tt.input_spec()

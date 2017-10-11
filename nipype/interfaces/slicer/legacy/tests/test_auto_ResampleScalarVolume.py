@@ -24,7 +24,8 @@ def test_ResampleScalarVolume_inputs():
     spacing=dict(argstr='--spacing %s',
     sep=',',
     ),
-    terminal_output=dict(nohash=True,
+    terminal_output=dict(deprecated='1.0.0',
+    nohash=True,
     ),
     )
     inputs = ResampleScalarVolume.input_spec()

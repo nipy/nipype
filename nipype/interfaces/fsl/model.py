@@ -24,12 +24,12 @@ from nibabel import load
 from ... import LooseVersion
 from ...utils.filemanip import list_to_filename, filename_to_list
 from ...utils.misc import human_order_sorted
+from ...external.due import BibTeX
 from ..base import (load_template, File, traits, isdefined,
                     TraitedSpec, BaseInterface, Directory,
                     InputMultiPath, OutputMultiPath,
                     BaseInterfaceInputSpec)
 from .base import FSLCommand, FSLCommandInputSpec, Info
-
 
 class Level1DesignInputSpec(BaseInterfaceInputSpec):
     interscan_interval = traits.Float(mandatory=True,
@@ -38,18 +38,19 @@ class Level1DesignInputSpec(BaseInterfaceInputSpec):
                               desc=('Session specific information generated '
                                     'by ``modelgen.SpecifyModel``'))
     bases = traits.Either(
-        traits.Dict(traits.Enum(
-            'dgamma'), traits.Dict(traits.Enum('derivs'), traits.Bool)),
+        traits.Dict(traits.Enum('dgamma'), traits.Dict(
+            traits.Enum('derivs'), traits.Bool)),
         traits.Dict(traits.Enum('gamma'), traits.Dict(
-                    traits.Enum('derivs', 'gammasigma', 'gammadelay'))),
+            traits.Enum('derivs', 'gammasigma', 'gammadelay'))),
+        traits.Dict(traits.Enum('custom'), traits.Dict(
+            traits.Enum('bfcustompath'), traits.Str)),
         traits.Dict(traits.Enum('none'), traits.Dict()),
         traits.Dict(traits.Enum('none'), traits.Enum(None)),
         mandatory=True,
         desc=("name of basis function and options e.g., "
-              "{'dgamma': {'derivs': True}}"))
+              "{'dgamma': {'derivs': True}}"),)
     orthogonalization = traits.Dict(traits.Int, traits.Dict(traits.Int,
         traits.Either(traits.Bool,traits.Int)),
-        mandatory=False,
         desc=("which regressors to make orthogonal e.g., "
               "{1: {0:0,1:0,2:0}, 2: {0:1,1:1,2:0}} to make the second "
               "regressor in a 2-regressor model orthogonal to the first."),
@@ -193,14 +194,22 @@ class Level1Design(BaseInterface):
                             evinfo.insert(j, [onset, cond['duration'][j], amp])
                         else:
                             evinfo.insert(j, [onset, cond['duration'][0], amp])
+                    ev_parameters['cond_file'] = evfname
                     ev_parameters['ev_num'] = num_evs[0]
                     ev_parameters['ev_name'] = name
                     ev_parameters['tempfilt_yn'] = do_tempfilter
-                    ev_parameters['cond_file'] = evfname
+                    if not 'basisorth' in ev_parameters:
+                        ev_parameters['basisorth'] = 1
+                    if not 'basisfnum' in ev_parameters:
+                        ev_parameters['basisfnum'] = 1
                     try:
-                        ev_parameters['temporalderiv'] = int(bool(ev_parameters.pop('derivs')))
+                        ev_parameters['fsldir'] = os.environ['FSLDIR']
                     except KeyError:
-                        pass
+                        if basis_key == 'flobs':
+                            raise Exception('FSL environment variables not set')
+                        else:
+                            ev_parameters['fsldir'] = '/usr/share/fsl'
+                    ev_parameters['temporalderiv'] = int(bool(ev_parameters.get('derivs', False)))
                     if ev_parameters['temporalderiv']:
                         evname.append(name + 'TD')
                         num_evs[1] += 1
@@ -381,10 +390,7 @@ class Level1Design(BaseInterface):
                         cwd, 'ev_%s_%d_%d.txt' % (name, runno,
                                                   len(evname)))
                     if field == 'cond':
-                        try:
-                            ev_parameters['temporalderiv'] = int(bool(ev_parameters.pop('derivs')))
-                        except KeyError:
-                            pass
+                        ev_parameters['temporalderiv'] = int(bool(ev_parameters.get('derivs', False)))
                         if ev_parameters['temporalderiv']:
                             evname.append(name + 'TD')
                     outputs['ev_files'][runno].append(
@@ -683,18 +689,15 @@ threshold=10, results_dir='stats')
     """
 
     _cmd = 'film_gls'
-
+    input_spec = FILMGLSInputSpec
+    output_spec = FILMGLSOutputSpec
     if Info.version() and LooseVersion(Info.version()) > LooseVersion('5.0.6'):
         input_spec = FILMGLSInputSpec507
+        output_spec = FILMGLSOutputSpec507
     elif (Info.version() and
             LooseVersion(Info.version()) > LooseVersion('5.0.4')):
         input_spec = FILMGLSInputSpec505
-    else:
-        input_spec = FILMGLSInputSpec
-    if Info.version() and LooseVersion(Info.version()) > LooseVersion('5.0.6'):
-        output_spec = FILMGLSOutputSpec507
-    else:
-        output_spec = FILMGLSOutputSpec
+
 
     def _get_pe_files(self, cwd):
         files = None
@@ -923,14 +926,14 @@ class FLAMEO(FSLCommand):
     Initialize FLAMEO with no options, assigning them when calling run:
 
     >>> from nipype.interfaces import fsl
-    >>> import os
-    >>> flameo = fsl.FLAMEO(cope_file='cope.nii.gz', \
-                            var_cope_file='varcope.nii.gz', \
-                            cov_split_file='cov_split.mat', \
-                            design_file='design.mat', \
-                            t_con_file='design.con', \
-                            mask_file='mask.nii', \
-                            run_mode='fe')
+    >>> flameo = fsl.FLAMEO()
+    >>> flameo.inputs.cope_file = 'cope.nii.gz'
+    >>> flameo.inputs.var_cope_file = 'varcope.nii.gz'
+    >>> flameo.inputs.cov_split_file = 'cov_split.mat'
+    >>> flameo.inputs.design_file = 'design.mat'
+    >>> flameo.inputs.t_con_file = 'design.con'
+    >>> flameo.inputs.mask_file = 'mask.nii'
+    >>> flameo.inputs.run_mode = 'fe'
     >>> flameo.cmdline # doctest: +ALLOW_UNICODE
     'flameo --copefile=cope.nii.gz --covsplitfile=cov_split.mat --designfile=design.mat --ld=stats --maskfile=mask.nii --runmode=fe --tcontrastsfile=design.con --varcopefile=varcope.nii.gz'
 
@@ -939,6 +942,28 @@ class FLAMEO(FSLCommand):
     _cmd = 'flameo'
     input_spec = FLAMEOInputSpec
     output_spec = FLAMEOOutputSpec
+
+    references_ = [{'entry': BibTeX('@article{BeckmannJenkinsonSmith2003,'
+                                    'author={C.F. Beckmann, M. Jenkinson, and S.M. Smith},'
+                                    'title={General multilevel linear modeling for group analysis in FMRI.},'
+                                    'journal={NeuroImage},'
+                                    'volume={20},'
+                                    'pages={1052-1063},'
+                                    'year={2003},'
+                                    '}'),
+                    'tags': ['method'],
+                    },
+                   {'entry': BibTeX('@article{WoolrichBehrensBeckmannJenkinsonSmith2004,'
+                                    'author={M.W. Woolrich, T.E. Behrens, '
+                                    'C.F. Beckmann, M. Jenkinson, and S.M. Smith},'
+                                    'title={Multilevel linear modelling for FMRI group analysis using Bayesian inference.},'
+                                    'journal={NeuroImage},'
+                                    'volume={21},'
+                                    'pages={1732-1747},'
+                                    'year={2004},'
+                                    '}'),
+                    'tags': ['method'],
+                    }]
 
     # ohinds: 2010-04-06
     def _run_interface(self, runtime):
@@ -1064,12 +1089,15 @@ class ContrastMgr(FSLCommand):
     """Use FSL contrast_mgr command to evaluate contrasts
 
     In interface mode this file assumes that all the required inputs are in the
-    same location.
+    same location. This has deprecated for FSL versions 5.0.7+ as the necessary
+    corrections file is no longer generated by FILMGLS.
     """
-
+    if Info.version() and LooseVersion(Info.version()) >= LooseVersion("5.0.7"):
+        DeprecationWarning("ContrastMgr is deprecated in FSL 5.0.7+")
     _cmd = 'contrast_mgr'
     input_spec = ContrastMgrInputSpec
     output_spec = ContrastMgrOutputSpec
+
 
     def _run_interface(self, runtime):
         # The returncode is meaningless in ContrastMgr.  So check the output
@@ -1466,6 +1494,16 @@ class MELODICInputSpec(FSLCommandInputSpec):
         argstr="--sep_whiten", desc="switch on separate whitening")
     sep_vn = traits.Bool(
         argstr="--sep_vn", desc="switch off joined variance normalization")
+    migp = traits.Bool(
+        argstr="--migp", desc="switch on MIGP data reduction")
+    migpN = traits.Int(
+        argstr="--migpN %d",
+        desc="number of internal Eigenmaps")
+    migp_shuffle = traits.Bool(
+        argstr="--migp_shuffle", desc="randomise MIGP file order (default: TRUE)")
+    migp_factor = traits.Int(
+        argstr="--migp_factor %d",
+        desc="Internal Factor of mem-threshold relative to number of Eigenmaps (default: 2)")
     num_ICs = traits.Int(
         argstr="-n %d",
         desc="number of IC's to extract (for deflation approach)")
@@ -1775,6 +1813,72 @@ class Cluster(FSLCommand):
                 fname = value
             return spec.argstr % fname
         return super(Cluster, self)._format_arg(name, spec, value)
+
+
+class DualRegressionInputSpec(FSLCommandInputSpec):
+    in_files = InputMultiPath(File(exists=True), argstr="%s", mandatory=True,
+        position=-1, sep=" ",
+        desc="List all subjects' preprocessed, standard-space 4D datasets",)
+    group_IC_maps_4D = File(exists=True, argstr="%s", mandatory=True, position=1,
+        desc="4D image containing spatial IC maps (melodic_IC) from the "
+        "whole-group ICA analysis")
+    des_norm = traits.Bool(True, argstr="%i",  position=2, usedefault=True,
+        desc="Whether to variance-normalise the timecourses used as the "
+        "stage-2 regressors; True is default and recommended")
+    one_sample_group_mean = traits.Bool(argstr="-1", position=3,
+        desc="perform 1-sample group-mean test instead of generic "
+        "permutation test")
+    design_file = File(exists=True, argstr="%s", position=3,
+        desc="Design matrix for final cross-subject modelling with "
+        "randomise")
+    con_file = File(exists=True, argstr="%s", position=4,
+        desc="Design contrasts for final cross-subject modelling with "
+        "randomise")
+    n_perm = traits.Int(argstr="%i", mandatory=True, position=5,
+        desc="Number of permutations for randomise; set to 1 for just raw "
+        "tstat output, set to 0 to not run randomise at all.")
+    out_dir = Directory("output", argstr="%s", usedefault=True, position=6,
+        desc="This directory will be created to hold all output and logfiles",
+        genfile=True)
+
+
+class DualRegressionOutputSpec(TraitedSpec):
+    out_dir = Directory(exists=True)
+
+
+class DualRegression(FSLCommand):
+    """Wrapper Script for Dual Regression Workflow
+
+    Examples
+    --------
+
+    >>> dual_regression = DualRegression()
+    >>> dual_regression.inputs.in_files = ["functional.nii", "functional2.nii", "functional3.nii"]
+    >>> dual_regression.inputs.group_IC_maps_4D = "allFA.nii"
+    >>> dual_regression.inputs.des_norm = False
+    >>> dual_regression.inputs.one_sample_group_mean = True
+    >>> dual_regression.inputs.n_perm = 10
+    >>> dual_regression.inputs.out_dir = "my_output_directory"
+    >>> dual_regression.cmdline # doctest: +ALLOW_UNICODE
+    u'dual_regression allFA.nii 0 -1 10 my_output_directory functional.nii functional2.nii functional3.nii'
+    >>> dual_regression.run() # doctest: +SKIP
+
+    """
+    input_spec = DualRegressionInputSpec
+    output_spec = DualRegressionOutputSpec
+    _cmd = 'dual_regression'
+
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        if isdefined(self.inputs.out_dir):
+            outputs['out_dir'] = os.path.abspath(self.inputs.out_dir)
+        else:
+            outputs['out_dir'] = self._gen_filename("out_dir")
+        return outputs
+
+    def _gen_filename(self, name):
+        if name == "out_dir":
+            return os.getcwd()
 
 
 class RandomiseInputSpec(FSLCommandInputSpec):
