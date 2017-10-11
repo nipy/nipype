@@ -52,9 +52,8 @@ class ANTSInputSpec(ANTSCommandInputSpec):
     metric_weight = traits.List(traits.Float(), requires=['metric'], desc='')
     radius = traits.List(traits.Int(), requires=['metric'], desc='')
 
-    output_transform_prefix = Str('out', usedefault=True,
-                                         argstr='--output-naming %s',
-                                         mandatory=True, desc='')
+    output_transform_prefix = Str('out', usedefault=True, argstr='--output-naming %s',
+                                  mandatory=True, desc='')
     transformation_model = traits.Enum('Diff', 'Elast', 'Exp', 'Greedy Exp',
                                        'SyN', argstr='%s', mandatory=True,
                                        desc='')
@@ -182,7 +181,8 @@ class ANTS(ANTSCommand):
                 defaults[ii] = values[ii]
             except IndexError:
                 break
-        parameters = self._format_xarray([('%g' % defaults[index]) for index in range(4)])
+        parameters = self._format_xarray(
+            [('%g' % defaults[index]) for index in range(4)])
         retval = ['--affine-gradient-descent-option', parameters]
         return ' '.join(retval)
 
@@ -220,7 +220,7 @@ class RegistrationInputSpec(ANTSCommandInputSpec):
                             usedefault=True, desc='image dimension (2 or 3)')
     fixed_image = InputMultiPath(File(exists=True), mandatory=True,
                                  desc='Image to which the moving_image should be transformed'
-                                '(usually a structural image)')
+                                      '(usually a structural image)')
     fixed_image_mask = File(
         exists=True, argstr='%s', max_ver='2.1.0', xor=['fixed_image_masks'],
         desc='Mask used to limit metric sampling region of the fixed image'
@@ -246,18 +246,19 @@ class RegistrationInputSpec(ANTSCommandInputSpec):
     restore_state = File(argstr='--restore-state %s', exists=True,
                          desc='Filename for restoring the internal restorable state of the registration')
 
-    initial_moving_transform = InputMultiPath(argstr='%s', 
-                                              exists=True, 
+    initial_moving_transform = InputMultiPath(argstr='%s',
+                                              exists=True,
                                               desc='A transform or a list of transforms that should be applied'
-                                                    'before the registration begins. Note that, when a list is given,'
-                                                    'the transformations are applied in reverse order.',
-                                    xor=['initial_moving_transform_com'])
-    invert_initial_moving_transform= InputMultiPath(traits.Bool(), 
-                                                    requires=["initial_moving_transform"],
-                                                    desc='One boolean or a list of booleans that indicate'
-                                                    'whether the inverse(s) of the transform(s) defined'
-                                                    'in initial_moving_transform should be used.', 
-                                                    xor=['initial_moving_transform_com'])
+                                                   'before the registration begins. Note that, when a list is given,'
+                                                   'the transformations are applied in reverse order.',
+                                              xor=['initial_moving_transform_com'])
+    invert_initial_moving_transform = InputMultiPath(traits.Bool(),
+                                                     requires=[
+        "initial_moving_transform"],
+        desc='One boolean or a list of booleans that indicate'
+        'whether the inverse(s) of the transform(s) defined'
+        'in initial_moving_transform should be used.',
+        xor=['initial_moving_transform_com'])
 
     initial_moving_transform_com = traits.Enum(0, 1, 2, argstr='%s',
                                                default=0, xor=['initial_moving_transform'],
@@ -436,10 +437,10 @@ class RegistrationOutputSpec(TraitedSpec):
 class Registration(ANTSCommand):
 
     """
-    `antsRegister <http://stnava.github.io/ANTs/>`_ registers a 'moving_image' to a 'fixed_image', 
-    using a predefined (sequence of) cost function(s) and transformation operattions. 
-    The cost function is defined using one or more 'metrics', specifically  
-    local cross-correlation ('CC'), Mean Squares ('MeanSquares'), Demons ('Demons'), 
+    `antsRegistration <http://stnava.github.io/ANTs/>`_ registers a 'moving_image' to a 'fixed_image',
+    using a predefined (sequence of) cost function(s) and transformation operattions.
+    The cost function is defined using one or more 'metrics', specifically
+    local cross-correlation ('CC'), Mean Squares ('MeanSquares'), Demons ('Demons'),
     global correlation ('GC'), or Mutual Information ('Mattes' or 'MI').
 
     ANTS can use both linear ('Translation, 'Rigid', 'Affine', 'CompositeAffine',
@@ -457,8 +458,8 @@ class Registration(ANTSCommand):
 
     The Registration-interface can output the resulting transform(s) that map moving_image to
     fixed_image in a single file as a 'composite_transform' (if write_composite_transform
-    is set to True), or a list of transforms as 'forwards_transforms'. It can also output 
-    inverse transforms (from fixed_image to moving_image) in a similar fashion using 
+    is set to True), or a list of transforms as 'forwards_transforms'. It can also output
+    inverse transforms (from fixed_image to moving_image) in a similar fashion using
     inverse_composite_transform. Note that the order of forward_transforms is in 'natural'
     order: the first element should be applied first, the last element should be applied last.
 
@@ -466,13 +467,13 @@ class Registration(ANTSCommand):
     transformation in the list is applied first). Therefore, if the output forward_transforms
     is a list, one can not directly feed it into, for example, ants.ApplyTransforms. To
     make ants.ApplyTransforms apply the transformations in the same order as ants.Registration,
-    you have to provide the list of transformations in reverse order from forward_transforms. 
+    you have to provide the list of transformations in reverse order from forward_transforms.
     reverse_forward_transforms outputs forward_transforms in reverse order and can be used for t
     this purpose. Note also that, because composite_transform is always only a single file, this
     output is preferred for  most use-cases.
 
-    More information can be found in the `ANTS 
-    manual <https://sourceforge.net/projects/advants/files/Documentation/ants.pdf/download>`_. 
+    More information can be found in the `ANTS
+    manual <https://sourceforge.net/projects/advants/files/Documentation/ants.pdf/download>`_.
 
     See below for some useful examples.
 
@@ -542,7 +543,7 @@ class Registration(ANTSCommand):
     >>> reg1.run()  # doctest: +SKIP
 
     Clip extremely high intensity data points using winsorize_upper_quantile. All data points
-    higher than the 0.975 quantile are set to the value of the 0.975 quantile. 
+    higher than the 0.975 quantile are set to the value of the 0.975 quantile.
 
     >>> reg2 = copy.deepcopy(reg)
     >>> reg2.inputs.winsorize_upper_quantile = 0.975
@@ -664,10 +665,10 @@ class Registration(ANTSCommand):
 --write-composite-transform 0'
 
     One can use multiple similarity metrics in a single registration stage.The Node below first
-    performs a linear registation using only the Mutual Information ('Mattes')-metric. 
+    performs a linear registation using only the Mutual Information ('Mattes')-metric.
     In a second stage, it performs a non-linear registration ('Syn') using both a 
-    Mutual Information and a local cross-correlation ('CC')-metric. Both metrics are weighted 
-    equally ('metric_weight' is .5 for both). The Mutual Information- metric uses 32 bins. 
+    Mutual Information and a local cross-correlation ('CC')-metric. Both metrics are weighted
+    equally ('metric_weight' is .5 for both). The Mutual Information- metric uses 32 bins.
     The local cross-correlations (correlations between every voxel's neighborhoods) is computed
     with a radius of 4.
 
@@ -743,7 +744,7 @@ class Registration(ANTSCommand):
 --use-estimate-learning-rate-once 1 --use-histogram-matching 1 --winsorize-image-intensities [ 0.0, 1.0 ]  \
 --write-composite-transform 1'
 
-    BSplineSyN non-linear registration with custom parameters. 
+    BSplineSyN non-linear registration with custom parameters.
 
     >>> # Test Extended Transform Parameters
     >>> reg8 = copy.deepcopy(reg)
@@ -801,7 +802,8 @@ class Registration(ANTSCommand):
     input_spec = RegistrationInputSpec
     output_spec = RegistrationOutputSpec
     _quantilesDone = False
-    _linear_transform_names = ['Rigid', 'Affine', 'Translation', 'CompositeAffine', 'Similarity']
+    _linear_transform_names = ['Rigid', 'Affine',
+                               'Translation', 'CompositeAffine', 'Similarity']
 
     def _format_metric(self, index):
         """
@@ -931,14 +933,17 @@ class Registration(ANTSCommand):
             if any((isdefined(self.inputs.fixed_image_masks),
                     isdefined(self.inputs.moving_image_masks))):
                 if isdefined(self.inputs.fixed_image_masks):
-                    fixed_masks = filename_to_list(self.inputs.fixed_image_masks)
+                    fixed_masks = filename_to_list(
+                        self.inputs.fixed_image_masks)
                     fixed_mask = fixed_masks[ii if len(fixed_masks) > 1 else 0]
                 else:
                     fixed_mask = 'NULL'
 
                 if isdefined(self.inputs.moving_image_masks):
-                    moving_masks = filename_to_list(self.inputs.moving_image_masks)
-                    moving_mask = moving_masks[ii if len(moving_masks) > 1 else 0]
+                    moving_masks = filename_to_list(
+                        self.inputs.moving_image_masks)
+                    moving_mask = moving_masks[ii if len(
+                        moving_masks) > 1 else 0]
                 else:
                     moving_mask = 'NULL'
                 retval.append('--masks [ %s, %s ]' % (fixed_mask, moving_mask))
@@ -966,7 +971,8 @@ class Registration(ANTSCommand):
         return inv_output_filename
 
     def _format_convergence(self, ii):
-        convergence_iter = self._format_xarray(self.inputs.number_of_iterations[ii])
+        convergence_iter = self._format_xarray(
+            self.inputs.number_of_iterations[ii])
         if len(self.inputs.convergence_threshold) > ii:
             convergence_value = self.inputs.convergence_threshold[ii]
         else:
@@ -998,7 +1004,8 @@ class Registration(ANTSCommand):
                     raise Exception(("ERROR: The useInverse list must have the same number "
                                      "of entries as the transformsFileName list."))
             else:
-                retval.append("[ %s, 0 ]" % self.inputs.initial_moving_transform[ii])
+                retval.append("[ %s, 0 ]" %
+                              self.inputs.initial_moving_transform[ii])
         return " ".join(retval)
 
     def _format_arg(self, opt, spec, val):
@@ -1078,7 +1085,8 @@ class Registration(ANTSCommand):
 
         # invert_initial_moving_transform should be always defined, even if
         # there's no initial transform
-        invert_initial_moving_transform = [False] * len(self.inputs.initial_moving_transform)
+        invert_initial_moving_transform = [
+            False] * len(self.inputs.initial_moving_transform)
         if isdefined(self.inputs.invert_initial_moving_transform):
             invert_initial_moving_transform = self.inputs.invert_initial_moving_transform
 
@@ -1088,14 +1096,17 @@ class Registration(ANTSCommand):
             filename = self.inputs.output_transform_prefix + \
                 'InverseComposite.h5'
             outputs['inverse_composite_transform'] = os.path.abspath(filename)
-        else:  # If composite transforms are written, then individuals are not written (as of 2014-10-26
+        # If composite transforms are written, then individuals are not written (as of 2014-10-26
+        else:
             if not self.inputs.collapse_output_transforms:
                 transform_count = 0
                 if isdefined(self.inputs.initial_moving_transform):
                     outputs['forward_transforms'] += self.inputs.initial_moving_transform
                     outputs['forward_invert_flags'] += invert_initial_moving_transform
-                    outputs['reverse_transforms'] =  self.inputs.initial_moving_transform + outputs['reverse_transforms']
-                    outputs['reverse_invert_flags'] =  [not e for e in invert_initial_moving_transform] +  outputs['reverse_invert_flags'] # Prepend
+                    outputs['reverse_transforms'] = self.inputs.initial_moving_transform + \
+                        outputs['reverse_transforms']
+                    outputs['reverse_invert_flags'] = [
+                        not e for e in invert_initial_moving_transform] + outputs['reverse_invert_flags']  # Prepend
                     transform_count += len(self.inputs.initial_moving_transform)
                 elif isdefined(self.inputs.initial_moving_transform_com):
                     forward_filename, forward_inversemode = self._output_filenames(
@@ -1107,7 +1118,8 @@ class Registration(ANTSCommand):
                         transform_count,
                         'Initial',
                         True)
-                    outputs['forward_transforms'].append(os.path.abspath(forward_filename))
+                    outputs['forward_transforms'].append(
+                        os.path.abspath(forward_filename))
                     outputs['forward_invert_flags'].append(False)
                     outputs['reverse_transforms'].insert(0,
                                                          os.path.abspath(reverse_filename))
@@ -1121,14 +1133,18 @@ class Registration(ANTSCommand):
                     reverse_filename, reverse_inversemode = self._output_filenames(
                         self.inputs.output_transform_prefix, transform_count,
                         self.inputs.transforms[count], True)
-                    outputs['forward_transforms'].append(os.path.abspath(forward_filename))
+                    outputs['forward_transforms'].append(
+                        os.path.abspath(forward_filename))
                     outputs['forward_invert_flags'].append(forward_inversemode)
-                    outputs['reverse_transforms'].insert(0, os.path.abspath(reverse_filename))
-                    outputs['reverse_invert_flags'].insert(0, reverse_inversemode)
+                    outputs['reverse_transforms'].insert(
+                        0, os.path.abspath(reverse_filename))
+                    outputs['reverse_invert_flags'].insert(
+                        0, reverse_inversemode)
                     transform_count += 1
             else:
                 transform_count = 0
-                is_linear = [t in self._linear_transform_names for t in self.inputs.transforms]
+                is_linear = [
+                    t in self._linear_transform_names for t in self.inputs.transforms]
                 collapse_list = []
 
                 if isdefined(self.inputs.initial_moving_transform) or \
@@ -1152,9 +1168,11 @@ class Registration(ANTSCommand):
                         transform_count,
                         transform,
                         inverse=True)
-                    outputs['forward_transforms'].append(os.path.abspath(forward_filename))
+                    outputs['forward_transforms'].append(
+                        os.path.abspath(forward_filename))
                     outputs['forward_invert_flags'].append(forward_inversemode)
-                    outputs['reverse_transforms'].append(os.path.abspath(reverse_filename))
+                    outputs['reverse_transforms'].append(
+                        os.path.abspath(reverse_filename))
                     outputs['reverse_invert_flags'].append(reverse_inversemode)
                     transform_count += 1
 
@@ -1171,51 +1189,51 @@ class Registration(ANTSCommand):
 
 class MeasureImageSimilarityInputSpec(ANTSCommandInputSpec):
     dimension = traits.Enum(
-         2, 3, 4,
-         argstr='--dimensionality %d', position=1,
-         desc='Dimensionality of the fixed/moving image pair',
-         )
+        2, 3, 4,
+        argstr='--dimensionality %d', position=1,
+        desc='Dimensionality of the fixed/moving image pair',
+    )
     fixed_image = File(
-         exists=True, mandatory=True,
-         desc='Image to which the moving image is warped',
-         )
+        exists=True, mandatory=True,
+        desc='Image to which the moving image is warped',
+    )
     moving_image = File(
-         exists=True, mandatory=True,
-         desc='Image to apply transformation to (generally a coregistered functional)',
-         )
+        exists=True, mandatory=True,
+        desc='Image to apply transformation to (generally a coregistered functional)',
+    )
     metric = traits.Enum(
-         "CC", "MI", "Mattes", "MeanSquares", "Demons", "GC",
-         argstr="%s", mandatory=True,
-         )
+        "CC", "MI", "Mattes", "MeanSquares", "Demons", "GC",
+        argstr="%s", mandatory=True,
+    )
     metric_weight = traits.Float(
-         requires=['metric'], default=1.0, usedefault=True,
-         desc='The "metricWeight" variable is not used.',
-         )
+        requires=['metric'], default=1.0, usedefault=True,
+        desc='The "metricWeight" variable is not used.',
+    )
     radius_or_number_of_bins = traits.Int(
-         requires=['metric'], mandatory=True,
-         desc='The number of bins in each stage for the MI and Mattes metric, '
-         'or the radius for other metrics',
-         )
+        requires=['metric'], mandatory=True,
+        desc='The number of bins in each stage for the MI and Mattes metric, '
+        'or the radius for other metrics',
+    )
     sampling_strategy = traits.Enum(
-         "None", "Regular", "Random",
-         requires=['metric'], default="None", usedefault=True,
-         desc='Manner of choosing point set over which to optimize the metric. '
-         'Defaults to "None" (i.e. a dense sampling of one sample per voxel).'
-         )
+        "None", "Regular", "Random",
+        requires=['metric'], default="None", usedefault=True,
+        desc='Manner of choosing point set over which to optimize the metric. '
+        'Defaults to "None" (i.e. a dense sampling of one sample per voxel).'
+    )
     sampling_percentage = traits.Either(
-         traits.Range(low=0.0, high=1.0),
-         requires=['metric'], mandatory=True,
-         desc='Percentage of points accessible to the sampling strategy over which '
-         'to optimize the metric.'
-         )
+        traits.Range(low=0.0, high=1.0),
+        requires=['metric'], mandatory=True,
+        desc='Percentage of points accessible to the sampling strategy over which '
+        'to optimize the metric.'
+    )
     fixed_image_mask = File(
         exists=True, argstr='%s',
         desc='mask used to limit metric sampling region of the fixed image',
-        )
+    )
     moving_image_mask = File(
         exists=True, requires=['fixed_image_mask'],
         desc='mask used to limit metric sampling region of the moving image',
-        )
+    )
 
 
 class MeasureImageSimilarityOutputSpec(TraitedSpec):
@@ -1251,30 +1269,30 @@ class MeasureImageSimilarity(ANTSCommand):
 
     def _metric_constructor(self):
         retval = '--metric {metric}["{fixed_image}","{moving_image}",{metric_weight},'\
-        '{radius_or_number_of_bins},{sampling_strategy},{sampling_percentage}]'\
-        .format(
-            metric=self.inputs.metric,
-            fixed_image=self.inputs.fixed_image,
-            moving_image=self.inputs.moving_image,
-            metric_weight=self.inputs.metric_weight,
-            radius_or_number_of_bins=self.inputs.radius_or_number_of_bins,
-            sampling_strategy=self.inputs.sampling_strategy,
-            sampling_percentage=self.inputs.sampling_percentage,
-        )
+            '{radius_or_number_of_bins},{sampling_strategy},{sampling_percentage}]'\
+            .format(
+                metric=self.inputs.metric,
+                fixed_image=self.inputs.fixed_image,
+                moving_image=self.inputs.moving_image,
+                metric_weight=self.inputs.metric_weight,
+                radius_or_number_of_bins=self.inputs.radius_or_number_of_bins,
+                sampling_strategy=self.inputs.sampling_strategy,
+                sampling_percentage=self.inputs.sampling_percentage,
+            )
         return retval
 
     def _mask_constructor(self):
         if self.inputs.moving_image_mask:
             retval = '--masks ["{fixed_image_mask}","{moving_image_mask}"]'\
-            .format(
-                fixed_image_mask=self.inputs.fixed_image_mask,
-                moving_image_mask=self.inputs.moving_image_mask,
-            )
+                .format(
+                    fixed_image_mask=self.inputs.fixed_image_mask,
+                    moving_image_mask=self.inputs.moving_image_mask,
+                )
         else:
             retval = '--masks "{fixed_image_mask}"'\
-            .format(
-                fixed_image_mask=self.inputs.fixed_image_mask,
-            )
+                .format(
+                    fixed_image_mask=self.inputs.fixed_image_mask,
+                )
         return retval
 
     def _format_arg(self, opt, spec, val):
