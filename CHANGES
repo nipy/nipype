@@ -68,7 +68,6 @@ Upcoming release
 * ENH: Added zenodo (https://zenodo.org/) file (https://github.com/nipy/nipype/pull/1924)
 * ENH: Disable symlinks on CIFS filesystems (https://github.com/nipy/nipype/pull/1941)
 * ENH: Sphinx extension to plot workflows (https://github.com/nipy/nipype/pull/1896)
->>>>>>> upstream/master
 * ENH: Added non-steady state detector for EPI data (https://github.com/nipy/nipype/pull/1839)
 * ENH: Enable new BBRegister init options for FSv6+ (https://github.com/nipy/nipype/pull/1811)
 * REF: Splits nipype.interfaces.utility into base, csv, and wrappers (https://github.com/nipy/nipype/pull/1828)
