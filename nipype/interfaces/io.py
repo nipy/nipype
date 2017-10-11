@@ -830,7 +830,7 @@ class S3DataGrabber(IOBase):
                 self.inputs.add_traits(**{key:Any()})
                 undefined_traits[key] = None
         # add ability to insert field specific templates
-        self.inputs.add_traits(field_template=Dict(Enum(outfields),
+        self.inputs.add_traits(field_template=Dict(key_trait=Enum(outfields),
                                           desc="arguments that fit into template"))
         undefined_traits['field_template'] = None
         if not isdefined(self.inputs.template_args):
@@ -1073,7 +1073,7 @@ class DataGrabber(IOBase):
                 self.inputs.add_traits(**{key:Any()})
                 undefined_traits[key] = None
         # add ability to insert field specific templates
-        self.inputs.add_traits(field_template=Dict(Enum(outfields),
+        self.inputs.add_traits(field_template=Dict(key_trait=Enum(outfields),
                                                    desc="arguments that fit into template"))
         undefined_traits['field_template'] = None
         if not isdefined(self.inputs.template_args):
