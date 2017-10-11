@@ -219,22 +219,26 @@ class RegistrationInputSpec(ANTSCommandInputSpec):
     dimension = traits.Enum(3, 2, argstr='--dimensionality %d',
                             usedefault=True, desc='image dimension (2 or 3)')
     fixed_image = InputMultiPath(File(exists=True), mandatory=True,
-                                 desc='image to apply transformation to (generally a coregistered functional)')
+                                 desc='Image to which the moving_image should be transformed'
+                                '(usually a structural image)')
     fixed_image_mask = File(
         exists=True, argstr='%s', max_ver='2.1.0', xor=['fixed_image_masks'],
-        desc='mask used to limit metric sampling region of the fixed image')
+        desc='Mask used to limit metric sampling region of the fixed image'
+        'in all stages')
     fixed_image_masks = InputMultiPath(
         traits.Either('NULL', File(exists=True)), min_ver='2.2.0', xor=['fixed_image_mask'],
-        desc='mask used to limit metric sampling region of the fixed image '
+        desc='Masks used to limit metric sampling region of the fixed image, defined per registration stage'
         '(Use "NULL" to omit a mask at a given stage)')
     moving_image = InputMultiPath(File(exists=True), mandatory=True,
-                                  desc='image to apply transformation to (generally a coregistered functional)')
+                                  desc='Image that will be registered to the space of fixed_image. This is the'
+                                  'image on which the transformations will be applied to')
     moving_image_mask = File(
         exists=True, requires=['fixed_image_mask'], max_ver='2.1.0', xor=['moving_image_masks'],
-        desc='mask used to limit metric sampling region of the moving image')
+        desc='mask used to limit metric sampling region of the moving image'
+        'in all stages')
     moving_image_masks = InputMultiPath(
         traits.Either('NULL', File(exists=True)), min_ver='2.2.0', xor=['moving_image_mask'],
-        desc='mask used to limit metric sampling region of the moving image '
+        desc='Masks used to limit metric sampling region of the moving image, defined per registration stage'
         '(Use "NULL" to omit a mask at a given stage)')
 
     save_state = File(argstr='--save-state %s', exists=False,
@@ -242,14 +246,24 @@ class RegistrationInputSpec(ANTSCommandInputSpec):
     restore_state = File(argstr='--restore-state %s', exists=True,
                          desc='Filename for restoring the internal restorable state of the registration')
 
-    initial_moving_transform = InputMultiPath(argstr='%s', exists=True, desc='',
+    initial_moving_transform = InputMultiPath(argstr='%s', 
+                                              exists=True, 
+                                              desc='A transform or a list of transforms that should be applied'
+                                                    'before the registration begins. Note that, when a list is given,'
+                                                    'the transformations are applied in reverse order.',
                                     xor=['initial_moving_transform_com'])
-    invert_initial_moving_transform= InputMultiPath(traits.Bool(), requires=["initial_moving_transform"],
-                                                  desc='', xor=['initial_moving_transform_com'])
+    invert_initial_moving_transform= InputMultiPath(traits.Bool(), 
+                                                    requires=["initial_moving_transform"],
+                                                    desc='One boolean or a list of booleans that indicate'
+                                                    'whether the inverse(s) of the transform(s) defined'
+                                                    'in initial_moving_transform should be used.', 
+                                                    xor=['initial_moving_transform_com'])
 
     initial_moving_transform_com = traits.Enum(0, 1, 2, argstr='%s',
                                                default=0, xor=['initial_moving_transform'],
-                                               desc="Use center of mass for moving transform")
+                                               desc="Align the moving_image nad fixed_image befor registration using"
+                                               "the geometric center of the images (=0), the image intensities (=1),"
+                                               "or the origin of the images (=2)")
     metric_item_trait = traits.Enum("CC", "MeanSquares", "Demons", "GC", "MI",
                                     "Mattes")
     metric_stage_trait = traits.Either(
@@ -291,7 +305,8 @@ class RegistrationInputSpec(ANTSCommandInputSpec):
     use_estimate_learning_rate_once = traits.List(traits.Bool(), desc='')
     use_histogram_matching = traits.Either(
         traits.Bool, traits.List(traits.Bool(argstr='%s')),
-        default=True, usedefault=True)
+        default=True, usedefault=True,
+        desc='Histogram match the images before registration.')
     interpolation = traits.Enum(
         'Linear', 'NearestNeighbor', 'CosineWindowedSinc', 'WelchWindowedSinc',
         'HammingWindowedSinc', 'LanczosWindowedSinc', 'BSpline', 'MultiLabel', 'Gaussian',
@@ -421,8 +436,57 @@ class RegistrationOutputSpec(TraitedSpec):
 class Registration(ANTSCommand):
 
     """
+    `antsRegister <http://stnava.github.io/ANTs/>`_ registers a 'moving_image' to a 'fixed_image', 
+    using a predefined (sequence of) cost function(s) and transformation operattions. 
+    The cost function is defined using one or more 'metrics', specifically  
+    local cross-correlation ('CC'), Mean Squares ('MeanSquares'), Demons ('Demons'), 
+    global correlation ('GC'), or Mutual Information ('Mattes' or 'MI').
+
+    ANTS can use both linear ('Translation, 'Rigid', 'Affine', 'CompositeAffine',
+    or 'Translation') and non-linear transformations ('BSpline', 'GaussianDisplacementField',
+    'TimeVaryingVelocityField', 'TimeVaryingBSplineVelocityField', 'SyN', 'BSplineSyN',
+    'Exponential', or 'BSplineExponential'). Usually, registration is done in multiple
+    *stages*. For example first an Affine, then a Rigid, and ultimately a non-linear
+    (Syn)-transformation.
+
+    antsRegistration can be initialized using one ore more transforms from moving_image
+    to fixed_image with the 'initial_moving_transform'-input. For example, when you
+    already have a warpfield that corrects for geometrical distortions in an EPI (functional) image,
+    that you want to apply before an Affine registration to a structural image.
+    You could put this transform into 'intial_moving_transform'.
+
+    The Registration-interface can output the resulting transform(s) that map moving_image to
+    fixed_image in a single file as a 'composite_transform' (if write_composite_transform
+    is set to True), or a list of transforms as 'forwards_transforms'. It can also output 
+    inverse transforms (from fixed_image to moving_image) in a similar fashion using 
+    inverse_composite_transform. Note that the order of forward_transforms is in 'natural'
+    order: the first element should be applied first, the last element should be applied last.
+
+    Note, however, that ANTS tools always apply lists of transformations in reverse order (the last
+    transformation in the list is applied first). Therefore, if the output forward_transforms
+    is a list, one can not directly feed it into, for example, ants.ApplyTransforms. To
+    make ants.ApplyTransforms apply the transformations in the same order as ants.Registration,
+    you have to provide the list of transformations in reverse order from forward_transforms. 
+    reverse_forward_transforms outputs forward_transforms in reverse order and can be used for t
+    this purpose. Note also that, because composite_transform is always only a single file, this
+    output is preferred for  most use-cases.
+
+    More information can be found in the `ANTS 
+    manual<https://sourceforge.net/projects/advants/files/Documentation/ants.pdf/download>`. 
+
+    See below for some useful examples.
+
     Examples
     --------
+
+    Set up a Registation node with some default settings. This Node registers
+    'fixed1.nii' to 'moving1.nii' by first fitting a linear 'Affine' transformation, and
+    then a non-linear 'SyN' transformation, both using the Mutual Information-cost
+    metric.
+
+    The registration is initailized by first applying the (linear) transform
+    trans.mat.
+
     >>> import copy, pprint
     >>> from nipype.interfaces.ants import Registration
     >>> reg = Registration()
@@ -461,6 +525,8 @@ class Registration(ANTSCommand):
 --use-histogram-matching 1 --winsorize-image-intensities [ 0.0, 1.0 ]  --write-composite-transform 1'
     >>> reg.run()  # doctest: +SKIP
 
+    Same as reg1, but first invert the initial transform ('trans.mat') before applying it.
+
     >>> reg.inputs.invert_initial_moving_transform = True
     >>> reg1 = copy.deepcopy(reg)
     >>> reg1.inputs.winsorize_lower_quantile = 0.025
@@ -475,6 +541,9 @@ class Registration(ANTSCommand):
 --use-histogram-matching 1 --winsorize-image-intensities [ 0.025, 1.0 ]  --write-composite-transform 1'
     >>> reg1.run()  # doctest: +SKIP
 
+    Clip extremely high intensity data points using winsorize_upper_quantile. All data points
+    higher than the 0.975 quantile are set to the value of the 0.975 quantile. 
+
     >>> reg2 = copy.deepcopy(reg)
     >>> reg2.inputs.winsorize_upper_quantile = 0.975
     >>> reg2.cmdline # doctest: +ALLOW_UNICODE
@@ -486,6 +555,10 @@ class Registration(ANTSCommand):
 --metric Mattes[ fixed1.nii, moving1.nii, 1, 32 ] --convergence [ 100x50x30, 1e-09, 20 ] \
 --smoothing-sigmas 2.0x1.0x0.0vox --shrink-factors 3x2x1 --use-estimate-learning-rate-once 1 \
 --use-histogram-matching 1 --winsorize-image-intensities [ 0.0, 0.975 ]  --write-composite-transform 1'
+
+    Clip extremely low intensity data points using winsorize_lower_quantile. All data points
+    lower than the 0.025 quantile are set to the original value at the 0.025 quantile.
+
 
     >>> reg3 = copy.deepcopy(reg)
     >>> reg3.inputs.winsorize_lower_quantile = 0.025
@@ -500,6 +573,8 @@ class Registration(ANTSCommand):
 --smoothing-sigmas 2.0x1.0x0.0vox --shrink-factors 3x2x1 --use-estimate-learning-rate-once 1 \
 --use-histogram-matching 1 --winsorize-image-intensities [ 0.025, 0.975 ]  --write-composite-transform 1'
 
+    Use float instead of double for computations (saves memory usage)
+
     >>> reg3a = copy.deepcopy(reg)
     >>> reg3a.inputs.float = True
     >>> reg3a.cmdline # doctest: +ALLOW_UNICODE
@@ -513,6 +588,8 @@ class Registration(ANTSCommand):
 --use-estimate-learning-rate-once 1 --use-histogram-matching 1 --winsorize-image-intensities [ 0.0, 1.0 ]  \
 --write-composite-transform 1'
 
+    Force to use double instead of float for computations (more precision and memory usage).
+
     >>> reg3b = copy.deepcopy(reg)
     >>> reg3b.inputs.float = False
     >>> reg3b.cmdline # doctest: +ALLOW_UNICODE
@@ -525,6 +602,9 @@ class Registration(ANTSCommand):
 --convergence [ 100x50x30, 1e-09, 20 ] --smoothing-sigmas 2.0x1.0x0.0vox --shrink-factors 3x2x1 \
 --use-estimate-learning-rate-once 1 --use-histogram-matching 1 --winsorize-image-intensities [ 0.0, 1.0 ]  \
 --write-composite-transform 1'
+
+    'collapse_output_transforms' can be used to put all transformation in a single 'composite_transform'-
+    file. Note that forward_transforms will now be an empty list.
 
     >>> # Test collapse transforms flag
     >>> reg4 = copy.deepcopy(reg)
@@ -554,6 +634,7 @@ class Registration(ANTSCommand):
 --use-estimate-learning-rate-once 1 --use-histogram-matching 1 --winsorize-image-intensities [ 0.0, 1.0 ]  \
 --write-composite-transform 1'
 
+
     >>> # Test collapse transforms flag
     >>> reg4b = copy.deepcopy(reg4)
     >>> reg4b.inputs.write_composite_transform = False
@@ -567,7 +648,7 @@ class Registration(ANTSCommand):
      'inverse_warped_image': <undefined>,
      'reverse_invert_flags': [True, False],
      'reverse_transforms': ['.../nipype/testing/data/output_0GenericAffine.mat', \
-'.../nipype/testing/data/output_1InverseWarp.nii.gz'],
+    '.../nipype/testing/data/output_1InverseWarp.nii.gz'],
      'save_state': '.../nipype/testing/data/trans.mat',
      'warped_image': '.../nipype/testing/data/output_warped_image.nii.gz'}
     >>> reg4b.aggregate_outputs()  # doctest: +SKIP
@@ -581,6 +662,14 @@ class Registration(ANTSCommand):
 --convergence [ 100x50x30, 1e-09, 20 ] --smoothing-sigmas 2.0x1.0x0.0vox --shrink-factors 3x2x1 \
 --use-estimate-learning-rate-once 1 --use-histogram-matching 1 --winsorize-image-intensities [ 0.0, 1.0 ]  \
 --write-composite-transform 0'
+
+    One can use multiple similarity metrics in a single registration stage.The Node below first
+    performs a linear registation using only the Mutual Information ('Mattes')-metric. 
+    In a second stage, it performs a non-linear registration ('Syn') using both a 
+    Mutual Information and a local cross-correlation ('CC')-metric. Both metrics are weighted 
+    equally ('metric_weight' is .5 for both). The Mutual Information- metric uses 32 bins. 
+    The local cross-correlations (correlations between every voxel's neighborhoods) is computed
+    with a radius of 4.
 
     >>> # Test multiple metrics per stage
     >>> reg5 = copy.deepcopy(reg)
@@ -602,7 +691,13 @@ class Registration(ANTSCommand):
 --smoothing-sigmas 2.0x1.0x0.0vox --shrink-factors 3x2x1 --use-estimate-learning-rate-once 1 \
 --use-histogram-matching 1 --winsorize-image-intensities [ 0.0, 1.0 ]  --write-composite-transform 1'
 
-    >>> # Test multiple inputs
+    ANTS Registration can also use multiple modalities to perform the registration. Here it is assumed
+    that fixed1.nii and fixed2.nii are in the same space, and so are moving1.nii and
+    moving2.nii. First, a linear registration is performed matching fixed1.nii to moving1.nii,
+    then a non-linear registration is performed to match fixed2.nii to moving2.nii, starting from
+    the transformation of the first step.
+
+    >>> # Test multiple inputS
     >>> reg6 = copy.deepcopy(reg5)
     >>> reg6.inputs.fixed_image = ['fixed1.nii', 'fixed2.nii']
     >>> reg6.inputs.moving_image = ['moving1.nii', 'moving2.nii']
@@ -616,6 +711,8 @@ class Registration(ANTSCommand):
 --metric CC[ fixed2.nii, moving2.nii, 0.5, 4, None, 0.1 ] --convergence [ 100x50x30, 1e-09, 20 ] \
 --smoothing-sigmas 2.0x1.0x0.0vox --shrink-factors 3x2x1 --use-estimate-learning-rate-once 1 \
 --use-histogram-matching 1 --winsorize-image-intensities [ 0.0, 1.0 ]  --write-composite-transform 1'
+
+    Different methods can be used for the interpolation when applying transformations.
 
     >>> # Test Interpolation Parameters (BSpline)
     >>> reg7a = copy.deepcopy(reg)
@@ -646,6 +743,8 @@ class Registration(ANTSCommand):
 --use-estimate-learning-rate-once 1 --use-histogram-matching 1 --winsorize-image-intensities [ 0.0, 1.0 ]  \
 --write-composite-transform 1'
 
+    BSplineSyN non-linear registration with custom parameters. 
+
     >>> # Test Extended Transform Parameters
     >>> reg8 = copy.deepcopy(reg)
     >>> reg8.inputs.transforms = ['Affine', 'BSplineSyN']
@@ -660,6 +759,8 @@ class Registration(ANTSCommand):
 --smoothing-sigmas 2.0x1.0x0.0vox --shrink-factors 3x2x1 --use-estimate-learning-rate-once 1 \
 --use-histogram-matching 1 --winsorize-image-intensities [ 0.0, 1.0 ]  --write-composite-transform 1'
 
+    Mask the fixed image in the second stage of the registration (but not the first).
+
     >>> # Test masking
     >>> reg9 = copy.deepcopy(reg)
     >>> reg9.inputs.fixed_image_masks = ['NULL', 'fixed1.nii']
@@ -673,6 +774,10 @@ class Registration(ANTSCommand):
 --convergence [ 100x50x30, 1e-09, 20 ] --smoothing-sigmas 2.0x1.0x0.0vox --shrink-factors 3x2x1 \
 --use-estimate-learning-rate-once 1 --use-histogram-matching 1 --masks [ fixed1.nii, NULL ] \
 --winsorize-image-intensities [ 0.0, 1.0 ]  --write-composite-transform 1'
+
+    Here we use both a warpfield and a linear transformation, before registration commences.  Note that
+    the first transformation that needs to be applied ('ants_Warp.nii.gz') is last in the list of
+    'initial_moving_transform'.
 
     >>> # Test initialization with multiple transforms matrices (e.g., unwarp and affine transform)
     >>> reg10 = copy.deepcopy(reg)
