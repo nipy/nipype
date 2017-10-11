@@ -255,16 +255,7 @@ class ComposeMultiTransform(ANTSCommand):
     'ComposeMultiTransform 3 func_to_template.mat struct_to_template.mat func_to_struct.mat'
     """
     _cmd = 'ComposeMultiTransform'
-    input_spec = ComposeMultiTransformInputSpec
-    output_spec = ComposeMultiTransformOutputSpec
 
     def _format_arg(self, opt, spec, val):
         return super(ComposeMultiTransform, self)._format_arg(opt, spec, val)
-
-    def _list_outputs(self):
-        outputs = self._outputs().get()
-        outputs['output_transform'] = os.path.abspath(
-            self.inputs.output_transform)
-        return outputs
-
 

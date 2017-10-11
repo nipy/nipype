@@ -437,39 +437,39 @@ class RegistrationOutputSpec(TraitedSpec):
 class Registration(ANTSCommand):
 
     """
-    `antsRegistration <http://stnava.github.io/ANTs/>`_ registers a 'moving_image' to a 'fixed_image',
-    using a predefined (sequence of) cost function(s) and transformation operattions.
+    `antsRegistration <http://stnava.github.io/ANTs/>`_ registers a ``moving_image`` to a ``fixed_image``,
+    using a predefined (sequence of) cost function(s) and transformation operations.
     The cost function is defined using one or more 'metrics', specifically
-    local cross-correlation ('CC'), Mean Squares ('MeanSquares'), Demons ('Demons'),
-    global correlation ('GC'), or Mutual Information ('Mattes' or 'MI').
+    local cross-correlation (``CC``), Mean Squares (``MeanSquares``), Demons (``Demons``),
+    global correlation (``GC``), or Mutual Information (``Mattes`` or ``MI``).
 
-    ANTS can use both linear ('Translation, 'Rigid', 'Affine', 'CompositeAffine',
-    or 'Translation') and non-linear transformations ('BSpline', 'GaussianDisplacementField',
-    'TimeVaryingVelocityField', 'TimeVaryingBSplineVelocityField', 'SyN', 'BSplineSyN',
-    'Exponential', or 'BSplineExponential'). Usually, registration is done in multiple
+    ANTS can use both linear (``Translation, ``Rigid``, ``Affine``, ``CompositeAffine``,
+    or ``Translation``) and non-linear transformations (``BSpline``, ``GaussianDisplacementField``,
+    ``TimeVaryingVelocityField``, ``TimeVaryingBSplineVelocityField``, ``SyN``, ``BSplineSyN``,
+    ``Exponential``, or ``BSplineExponential``). Usually, registration is done in multiple
     *stages*. For example first an Affine, then a Rigid, and ultimately a non-linear
     (Syn)-transformation.
 
     antsRegistration can be initialized using one ore more transforms from moving_image
-    to fixed_image with the 'initial_moving_transform'-input. For example, when you
+    to fixed_image with the ``initial_moving_transform``-input. For example, when you
     already have a warpfield that corrects for geometrical distortions in an EPI (functional) image,
     that you want to apply before an Affine registration to a structural image.
     You could put this transform into 'intial_moving_transform'.
 
     The Registration-interface can output the resulting transform(s) that map moving_image to
-    fixed_image in a single file as a 'composite_transform' (if write_composite_transform
-    is set to True), or a list of transforms as 'forwards_transforms'. It can also output
-    inverse transforms (from fixed_image to moving_image) in a similar fashion using
-    inverse_composite_transform. Note that the order of forward_transforms is in 'natural'
+    fixed_image in a single file as a ``composite_transform`` (if ``write_composite_transform``
+    is set to True), or a list of transforms as ``forwards_transforms``. It can also output
+    inverse transforms (from ``fixed_image`` to ``moving_image``) in a similar fashion using
+    ``inverse_composite_transform``. Note that the order of ``forward_transforms`` is in 'natural'
     order: the first element should be applied first, the last element should be applied last.
 
     Note, however, that ANTS tools always apply lists of transformations in reverse order (the last
     transformation in the list is applied first). Therefore, if the output forward_transforms
-    is a list, one can not directly feed it into, for example, ants.ApplyTransforms. To
-    make ants.ApplyTransforms apply the transformations in the same order as ants.Registration,
-    you have to provide the list of transformations in reverse order from forward_transforms.
-    reverse_forward_transforms outputs forward_transforms in reverse order and can be used for t
-    this purpose. Note also that, because composite_transform is always only a single file, this
+    is a list, one can not directly feed it into, for example, ``ants.ApplyTransforms``. To
+    make ``ants.ApplyTransforms`` apply the transformations in the same order as ``ants.Registration``,
+    you have to provide the list of transformations in reverse order from ``forward_transforms``.
+    ``reverse_forward_transforms`` outputs ``forward_transforms`` in reverse order and can be used for
+    this purpose. Note also that, because ``composite_transform`` is always a single file, this
     output is preferred for  most use-cases.
 
     More information can be found in the `ANTS
@@ -990,23 +990,21 @@ class Registration(ANTSCommand):
         self._quantilesDone = True
         return '--winsorize-image-intensities [ %s, %s ]' % (self.inputs.winsorize_lower_quantile,
                                                              self.inputs.winsorize_upper_quantile)
-
     def _get_initial_transform_filenames(self):
-        retval = ['--initial-moving-transform']
-        for ii in range(len(self.inputs.initial_moving_transform)):
-            if isdefined(self.inputs.invert_initial_moving_transform):
-                if len(self.inputs.initial_moving_transform) == len(self.inputs.invert_initial_moving_transform):
-                    invert_code = 1 if self.inputs.invert_initial_moving_transform[
-                        ii] else 0
-                    retval.append("[ %s, %d ]" %
-                                  (self.inputs.initial_moving_transform[ii], invert_code))
-                else:
-                    raise Exception(("ERROR: The useInverse list must have the same number "
-                                     "of entries as the transformsFileName list."))
-            else:
-                retval.append("[ %s, 0 ]" %
-                              self.inputs.initial_moving_transform[ii])
-        return " ".join(retval)
+        n_transforms = len(self.inputs.initial_moving_transform)
+
+        # Assume transforms should not be inverted by default
+        invert_flags = [0] * n_transforms
+        if isdefined(self.inputs.invert_initial_moving_transform):
+            if len(self.inputs.invert_initial_moving_transform) != n_transforms:
+                raise Exception(
+                    'Inputs "initial_moving_transform" and "invert_initial_moving_transform"'
+                    'should have the same length.')
+            invert_flags = self.inputs.invert_initial_moving_transform
+
+        retval = ["[ %s, %d ]" % (xfm, int(flag)) for xfm, flag in zip(
+            self.inputs.initial_moving_transform, invert_flags)]
+        return " ".join(['--initial-moving-transform'] + retval)
 
     def _format_arg(self, opt, spec, val):
         if opt == 'fixed_image_mask':
