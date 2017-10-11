@@ -443,7 +443,7 @@ class Registration(ANTSCommand):
     local cross-correlation (``CC``), Mean Squares (``MeanSquares``), Demons (``Demons``),
     global correlation (``GC``), or Mutual Information (``Mattes`` or ``MI``).
 
-    ANTS can use both linear (``Translation, ``Rigid``, ``Affine``, ``CompositeAffine``,
+    ANTS can use both linear (``Translation``, ``Rigid``, ``Affine``, ``CompositeAffine``,
     or ``Translation``) and non-linear transformations (``BSpline``, ``GaussianDisplacementField``,
     ``TimeVaryingVelocityField``, ``TimeVaryingBSplineVelocityField``, ``SyN``, ``BSplineSyN``,
     ``Exponential``, or ``BSplineExponential``). Usually, registration is done in multiple
@@ -458,7 +458,7 @@ class Registration(ANTSCommand):
 
     The Registration-interface can output the resulting transform(s) that map moving_image to
     fixed_image in a single file as a ``composite_transform`` (if ``write_composite_transform``
-    is set to True), or a list of transforms as ``forwards_transforms``. It can also output
+    is set to ``True``), or a list of transforms as ``forwards_transforms``. It can also output
     inverse transforms (from ``fixed_image`` to ``moving_image``) in a similar fashion using
     ``inverse_composite_transform``. Note that the order of ``forward_transforms`` is in 'natural'
     order: the first element should be applied first, the last element should be applied last.
