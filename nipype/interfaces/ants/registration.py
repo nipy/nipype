@@ -564,7 +564,7 @@ class Registration(ANTSCommand):
     >>> outputs = reg4b._list_outputs()
     >>> pprint.pprint(outputs)  # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE +ALLOW_UNICODE
     {'composite_transform': <undefined>,
-     'metric_value': <undefined>,
+     'elapsed_time': <undefined>,
      'forward_invert_flags': [False, False],
      'forward_transforms': ['.../nipype/testing/data/output_0GenericAffine.mat',
      '.../nipype/testing/data/output_1Warp.nii.gz'],

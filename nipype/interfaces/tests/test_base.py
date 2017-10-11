@@ -464,7 +464,7 @@ def test_BaseInterface_load_save_inputs(tmpdir):
     assert {} == check_dict(data_dict, tsthash2.inputs.get_traitsfree())
 
     _, hashvalue = tsthash.inputs.get_hashval(hash_method='timestamp')
-    assert '6479ade7424f2c2920f0b4e3991259e9' == hashvalue
+    assert 'ec5755e07287e04a4b409e03b77a517c' == hashvalue
 
 
 def test_input_version():
