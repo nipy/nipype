@@ -472,7 +472,7 @@ class Registration(ANTSCommand):
     output is preferred for  most use-cases.
 
     More information can be found in the `ANTS 
-    manual<https://sourceforge.net/projects/advants/files/Documentation/ants.pdf/download>`. 
+    manual <https://sourceforge.net/projects/advants/files/Documentation/ants.pdf/download>`_. 
 
     See below for some useful examples.
 
