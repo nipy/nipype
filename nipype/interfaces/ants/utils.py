@@ -11,9 +11,7 @@ from __future__ import print_function, division, unicode_literals, absolute_impo
 
 import os
 
-from ...utils.filemanip import split_filename
-from ..base import (TraitedSpec, File, traits, isdefined, InputMultiPath,
-                    CommandLine, CommandLineInputSpec)
+from ..base import (TraitedSpec, File, traits, isdefined, InputMultiPath)
 from .base import ANTSCommand, ANTSCommandInputSpec
 
 
@@ -101,7 +99,8 @@ class AverageImages(ANTSCommand):
 class MultiplyImagesInputSpec(ANTSCommandInputSpec):
     dimension = traits.Enum(3, 2, argstr='%d', usedefault=False, mandatory=True, position=0,
                             desc='image dimension (2 or 3)')
-    first_input = File(argstr='%s', exists=True, mandatory=True, position=1, desc='image 1')
+    first_input = File(argstr='%s', exists=True,
+                       mandatory=True, position=1, desc='image 1')
     second_input = traits.Either(File(exists=True), traits.Float, argstr='%s', mandatory=True, position=2,
                                  desc='image 2 or multiplication weight')
     output_product_image = File(argstr='%s', mandatory=True, position=3,
@@ -138,21 +137,24 @@ class MultiplyImages(ANTSCommand):
             self.inputs.output_product_image)
         return outputs
 
+
 class CreateJacobianDeterminantImageInputSpec(ANTSCommandInputSpec):
     imageDimension = traits.Enum(3, 2, argstr='%d', usedefault=False, mandatory=True,
-                            position=0, desc='image dimension (2 or 3)')
+                                 position=0, desc='image dimension (2 or 3)')
     deformationField = File(argstr='%s', exists=True, mandatory=True,
-                     position=1, desc='deformation transformation file')
+                            position=1, desc='deformation transformation file')
     outputImage = File(argstr='%s', mandatory=True,
-                         position=2,
-                         desc='output filename')
+                       position=2,
+                       desc='output filename')
     doLogJacobian = traits.Enum(0, 1, argstr='%d', position=3,
-                          desc='return the log jacobian')
+                                desc='return the log jacobian')
     useGeometric = traits.Enum(0, 1, argstr='%d', position=4,
-                          desc='return the geometric jacobian')
+                               desc='return the geometric jacobian')
+
 
 class CreateJacobianDeterminantImageOutputSpec(TraitedSpec):
     jacobian_image = File(exists=True, desc='jacobian image')
+
 
 class CreateJacobianDeterminantImage(ANTSCommand):
     """
@@ -203,6 +205,7 @@ class AffineInitializerInputSpec(ANTSCommandInputSpec):
         desc=' determines if a local optimization is run at each search point for the set '
              'number of iterations')
 
+
 class AffineInitializerOutputSpec(TraitedSpec):
     out_file = File(desc='output transform file')
 
@@ -231,9 +234,10 @@ class ComposeMultiTransformInputSpec(ANTSCommandInputSpec):
     dimension = traits.Enum(3, 2, argstr='%d', usedefault=True, mandatory=True,
                             position=0, desc='image dimension (2 or 3)')
     output_transform = File(argstr='%s', mandatory=True, position=1,
-                                   desc='Outputfname.txt: the name of the resulting transform.')
+                            name_source=['transforms'], name_template='%s_composed',
+                            desc='the name of the resulting transform.')
     reference_image = File(argstr='%s', mandatory=False, position=2,
-                                   desc='Reference image (only necessary when output is warpfield)')
+                           desc='Reference image (only necessary when output is warpfield)')
     transforms = InputMultiPath(File(exists=True), argstr='%s', mandatory=True,
                                 position=3, desc='transforms to average')
 
@@ -258,4 +262,3 @@ class ComposeMultiTransform(ANTSCommand):
 
     def _format_arg(self, opt, spec, val):
         return super(ComposeMultiTransform, self)._format_arg(opt, spec, val)
-
