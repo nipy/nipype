@@ -82,8 +82,6 @@ def test_Registration_inputs():
     ),
     output_warped_image=dict(hash_files=False,
     ),
-    profiling=dict(usedefault=True,
-    ),
     radius_bins_item_trait=dict(),
     radius_bins_stage_trait=dict(),
     radius_or_number_of_bins=dict(requires=['metric_weight'],

@@ -400,8 +400,6 @@ class RegistrationInputSpec(ANTSCommandInputSpec):
         low=0.0, high=1.0, value=0.0, argstr='%s', usedefault=True, desc="The Lower quantile to clip image ranges")
 
     verbose = traits.Bool(argstr='-v', default=False)
-    profiling = traits.Bool(False, usedefault=True,
-                            desc='generate profiling output fields')
 
 
 class RegistrationOutputSpec(TraitedSpec):
@@ -693,15 +691,16 @@ class Registration(ANTSCommand):
 
     def __init__(self, **inputs):
         super(Registration, self).__init__(**inputs)
-        self._elapsed_time = 0.0
-        self._metric_value = 0.0
+        self._elapsed_time = None
+        self._metric_value = None
 
     def _run_interface(self, runtime, correct_return_codes=(0,)):
         runtime = super(Registration, self)._run_interface(runtime)
 
         # Parse some profiling info
-        if self.inputs.profiling:
-            lines = runtime.stdout.split('\n')
+        output = runtime.stdout or runtime.merged
+        if output:
+            lines = output.split('\n')
             for l in lines[::-1]:
                 # This should be the last line
                 if l.strip().startswith('Total elapsed time:'):
@@ -1063,8 +1062,9 @@ class Registration(ANTSCommand):
             outputs['inverse_warped_image'] = os.path.abspath(inv_out_filename)
         if len(self.inputs.save_state):
             outputs['save_state'] = os.path.abspath(self.inputs.save_state)
-        if self.inputs.profiling:
+        if self._metric_value:
             outputs['metric_value'] = self._metric_value
+        if self._elapsed_time:
             outputs['elapsed_time'] = self._elapsed_time
         return outputs
 
