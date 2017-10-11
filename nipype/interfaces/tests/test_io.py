@@ -176,7 +176,7 @@ def test_datasink():
     assert ds.inputs.base_directory == 'foo'
 
     ds = nio.DataSink(infields=['test'])
-    assert 'test' in ds.inputs.copyable_trait_names()
+    assert 'test' in ds.inputs.trait_names()
 
 
 # Make dummy input file
@@ -417,7 +417,7 @@ def test_jsonsink_input(tmpdir):
     assert ds.inputs.in_dict == {'foo': 'var'}
 
     ds = nio.JSONFileSink(infields=['test'])
-    assert 'test' in ds.inputs.copyable_trait_names()
+    assert 'test' in ds.inputs.trait_values().keys()
 
 
 @pytest.mark.parametrize("inputs_attributes", [

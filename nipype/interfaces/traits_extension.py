@@ -47,7 +47,7 @@ class Float(traitlets.Float):
         self.tag(**kwargs)
 
 
-
+#dj TODO: waiting for changes in traitlets!!! Containers will have to be updated (update test_trait_types.py!!)
 class List(traitlets.List):
     allow_none = True
     default_value = None #dj I need it
@@ -77,6 +77,7 @@ class Enum(traitlets.Enum):
     default_value = None
     info_text = "an enumerate with default_value = None"
 
+    # dj TOAKS: should I use default_value = values[0] if len(values)>0 ??
     def __init__(self, values, default_value=None, allow_none=False,
                  read_only=None, help=None, config=None, **kwargs):
         super(Enum, self).__init__(values=values, default_value=default_value, allow_none=allow_none,
@@ -87,7 +88,7 @@ class Enum(traitlets.Enum):
 class Dict(traitlets.Dict):
     allow_none = True
     # dj TODO: should review default_value in all classes, check if I can overwrite! write tests!!
-    default_value = None #dj don't need i guess
+    default_value = None #dj I guess it might work better without
     info_text = "a dictionary with default_value = None"
 
     def __init__(self, value_trait=None, per_key_traits=None, key_trait=None,
@@ -104,7 +105,6 @@ class Bool(traitlets.Bool):
     allow_none = True
     default_value = None
     info_text = "a boolean with default_value = None"
-
     def __init__(self, default_value=None, allow_none=False,
                  read_only=None, help=None, config=None, **kwargs):
         super(Bool, self).__init__(default_value=default_value, allow_none=allow_none,
@@ -127,7 +127,7 @@ class Unicode(traitlets.Unicode):
 class Any(traitlets.Any):
     allow_none = True
     default_value = None
-    info_text = "a boolean with default_value = None"
+    info_text = "a trait that allows any value with default_value = None"
 
     def __init__(self, default_value=None, allow_none=False,
                  read_only=None, help=None, config=None, **kwargs):
