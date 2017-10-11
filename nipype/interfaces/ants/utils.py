@@ -245,7 +245,6 @@ class ComposeMultiTransformInputSpec(ANTSCommandInputSpec):
 class ComposeMultiTransformOutputSpec(TraitedSpec):
     output_transform = File(exists=True, desc='Composed transform file')
 
-
 class ComposeMultiTransform(ANTSCommand):
     """
     Examples
@@ -259,6 +258,8 @@ class ComposeMultiTransform(ANTSCommand):
     'ComposeMultiTransform 3 func_to_template.mat struct_to_template.mat func_to_struct.mat'
     """
     _cmd = 'ComposeMultiTransform'
+    input_spec = ComposeMultiTransformInputSpec
+    output_spec = ComposeMultiTransformOutputSpec
 
     def _format_arg(self, opt, spec, val):
         return super(ComposeMultiTransform, self)._format_arg(opt, spec, val)
