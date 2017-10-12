@@ -11,7 +11,7 @@ from __future__ import print_function, division, unicode_literals, absolute_impo
 
 import os
 
-from ..base import (TraitedSpec, File, traits, isdefined, InputMultiPath)
+from ..base import TraitedSpec, File, traits, InputMultiPath
 from .base import ANTSCommand, ANTSCommandInputSpec
 
 
@@ -57,12 +57,16 @@ class AverageAffineTransform(ANTSCommand):
 class AverageImagesInputSpec(ANTSCommandInputSpec):
     dimension = traits.Enum(3, 2, argstr='%d', mandatory=True,
                             position=0, desc='image dimension (2 or 3)')
-    output_average_image = File("average.nii", argstr='%s', position=1, desc='the name of the resulting image.',
-                                usedefault=True, hash_files=False)
-    normalize = traits.Bool(argstr="%d", mandatory=True, position=2, desc='Normalize: if true, the 2nd image' +
-                            'is divided by its mean. This will select the largest image to average into.')
-    images = InputMultiPath(File(exists=True), argstr='%s', mandatory=True, position=3,
-                            desc='image to apply transformation to (generally a coregistered functional)')
+    output_average_image = File(
+        "average.nii", argstr='%s', position=1, usedefault=True, hash_files=False,
+        desc='the name of the resulting image.')
+    normalize = traits.Bool(
+        argstr="%d", mandatory=True, position=2,
+        desc='Normalize: if true, the 2nd image is divided by its mean. '
+             'This will select the largest image to average into.')
+    images = InputMultiPath(
+        File(exists=True), argstr='%s', mandatory=True, position=3,
+        desc='image to apply transformation to (generally a coregistered functional)')
 
 
 class AverageImagesOutputSpec(TraitedSpec):
@@ -101,8 +105,9 @@ class MultiplyImagesInputSpec(ANTSCommandInputSpec):
                             desc='image dimension (2 or 3)')
     first_input = File(argstr='%s', exists=True,
                        mandatory=True, position=1, desc='image 1')
-    second_input = traits.Either(File(exists=True), traits.Float, argstr='%s', mandatory=True, position=2,
-                                 desc='image 2 or multiplication weight')
+    second_input = traits.Either(
+        File(exists=True), traits.Float, argstr='%s', mandatory=True, position=2,
+        desc='image 2 or multiplication weight')
     output_product_image = File(argstr='%s', mandatory=True, position=3,
                                 desc='Outputfname.nii.gz: the name of the resulting image.')
 
@@ -231,12 +236,12 @@ class AffineInitializer(ANTSCommand):
 
 
 class ComposeMultiTransformInputSpec(ANTSCommandInputSpec):
-    dimension = traits.Enum(3, 2, argstr='%d', usedefault=True, mandatory=True,
-                            position=0, desc='image dimension (2 or 3)')
-    output_transform = File(argstr='%s', mandatory=True, position=1,
-                            name_source=['transforms'], name_template='%s_composed',
+    dimension = traits.Enum(3, 2, argstr='%d', usedefault=True, position=0,
+                            desc='image dimension (2 or 3)')
+    output_transform = File(argstr='%s', position=1, name_source=['transforms'],
+                            name_template='%s_composed', keep_ext=True,
                             desc='the name of the resulting transform.')
-    reference_image = File(argstr='%s', mandatory=False, position=2,
+    reference_image = File(argstr='%s', position=2,
                            desc='Reference image (only necessary when output is warpfield)')
     transforms = InputMultiPath(File(exists=True), argstr='%s', mandatory=True,
                                 position=3, desc='transforms to average')
@@ -244,6 +249,7 @@ class ComposeMultiTransformInputSpec(ANTSCommandInputSpec):
 
 class ComposeMultiTransformOutputSpec(TraitedSpec):
     output_transform = File(exists=True, desc='Composed transform file')
+
 
 class ComposeMultiTransform(ANTSCommand):
     """
@@ -255,13 +261,10 @@ class ComposeMultiTransform(ANTSCommand):
     >>> compose_transform = ComposeMultiTransform()
     >>> compose_transform.inputs.dimension = 3
     >>> compose_transform.inputs.transforms = ['struct_to_template.mat', 'func_to_struct.mat']
-    >>> compose_transform.inputs.output_transform = 'func_to_template.mat'
     >>> compose_transform.cmdline # doctest: +ALLOW_UNICODE
-    'ComposeMultiTransform 3 func_to_template.mat struct_to_template.mat func_to_struct.mat'
+    'ComposeMultiTransform 3 struct_to_template_composed struct_to_template.mat func_to_struct.mat'
+
     """
     _cmd = 'ComposeMultiTransform'
     input_spec = ComposeMultiTransformInputSpec
     output_spec = ComposeMultiTransformOutputSpec
-
-    def _format_arg(self, opt, spec, val):
-        return super(ComposeMultiTransform, self)._format_arg(opt, spec, val)
