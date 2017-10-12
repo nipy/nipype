@@ -39,6 +39,7 @@ class PluginBase(object):
         self.plugin_args = plugin_args
         self._config = None
         self._status_callback = plugin_args.get('status_callback')
+        self._async = True
 
     def run(self, graph, config, updatehash=False):
         """
@@ -54,6 +55,10 @@ class PluginBase(object):
 
         """
         raise NotImplementedError
+
+    @property
+    def async(self):
+        return self._async
 
 
 class DistributedPluginBase(PluginBase):

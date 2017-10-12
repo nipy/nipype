@@ -16,6 +16,10 @@ from ..engine.utils import dfs_preorder, topological_sort
 class LinearPlugin(PluginBase):
     """Execute workflow in series
     """
+    def __init__(self, plugin_args=None):
+        # Init variables and instance attributes
+        super(LinearPlugin, self).__init__(plugin_args=plugin_args)
+        self._async = False
 
     def run(self, graph, config, updatehash=False):
         """Executes a pre-defined pipeline in a serial order.

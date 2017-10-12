@@ -13,6 +13,7 @@
 
 """
 from __future__ import print_function, division, unicode_literals, absolute_import
+import os
 
 from future import standard_library
 standard_library.install_aliases()
@@ -150,6 +151,125 @@ class Function(IOBase):
                 for idx, name in enumerate(self._output_names):
                     self._out[name] = out[idx]
 
+        return runtime
+
+    def _list_outputs(self):
+        outputs = self._outputs().get()
+        for key in self._output_names:
+            outputs[key] = self._out[key]
+        return outputs
+
+
+
+class WorkflowInterfaceInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
+    nprocs = traits.Int(1, usedefault=True, mandatory=True, desc='number of processes')
+
+
+class WorkflowInterface(IOBase):
+    """
+    Wraps nipype workflows into an interface. The only restriction is
+    that the workflow must have two nodes called "inputnode" and
+    "outputnode".
+
+    All the inputs will be hooked up to the "inputnode" inputs of the
+    workflow, and all outputs will be read from the "outputnode"
+    outputs.
+
+    Examples
+    --------
+
+    >>> from nipype.pipeline import engine as pe
+    >>> from nipype.interfaces.utility.base import IdentityInterface
+    >>> wf = pe.Workflow('test_workflow')
+    >>> node1 = pe.Node(IdentityInterface(fields=['a', 'b']), name='inputnode')
+    >>> func = 'def func(a, b): return a + b'
+    >>> node2 = pe.Node(Function(input_names=['a', 'b'], output_names=['out'],
+    ...                 function=func), name='strconcat')
+    >>> node3 = pe.Node(IdentityInterface(fields=['out']), name='outputnode')
+    >>> wf.connect([
+    ...     (node1, node2, [('a', 'a'), ('b', 'b')]),
+    ...     (node2, node3, [('out', 'out')])
+    ... ])
+    >>> wi = WorkflowInterface(workflow=wf)
+    >>> wi.inputs.a = 'b input '
+    >>> wi.inputs.b = 'was concatenated to a'
+    >>> res = wi.run()
+    >>> res.outputs.out  # doctest: +ALLOW_UNICODE
+    'b input was concatenated to a'
+
+    """
+
+    input_spec = WorkflowInterfaceInputSpec
+    output_spec = DynamicTraitedSpec
+
+    def __init__(self, workflow=None, **inputs):
+        """
+
+        Parameters
+        ----------
+
+        workflow : callable or nipype.pipeline.engine.Workflow object
+            callable python object. must be able to execute in an
+            isolated namespace (possibly in concert with the ``imports``
+            parameter)
+        imports : list of strings
+            list of import statements that allow the function to execute
+            in an otherwise empty namespace
+        """
+        from nipype.pipeline.engine import Workflow as WorkflowType
+
+        if workflow is None:
+            raise RuntimeError('WorkflowInterface must be created with a workflow'
+                               ' object of generator')
+
+        super(WorkflowInterface, self).__init__(**inputs)
+
+
+        self._wf = workflow() if hasattr(workflow, '__call__') else workflow
+
+        if not isinstance(self._wf, WorkflowType):
+            raise RuntimeError
+
+        # Find input fields
+        self._input_names = []
+        try:
+            self._input_names = list(self._wf.inputs.inputnode.get().keys())
+        except AttributeError:
+            raise RuntimeError('Wrapped workflow does not have an inputnode')
+
+        if not self._input_names:
+            raise RuntimeError('No inputs found in wrapped workflow')
+
+        # Find output fields
+        self._output_names = []
+        try:
+            self._output_names = list(self._wf.outputs.outputnode.get().keys())
+        except AttributeError:
+            raise RuntimeError('Wrapped workflow does not have an outputnode')
+
+        if not self._output_names:
+            raise RuntimeError('No inputs found in wrapped workflow')
+
+        add_traits(self.inputs, [name for name in self._input_names])
+        self._out = {}
+        for name in self._output_names:
+            self._out[name] = None
+
+    def _run_interface(self, runtime):
+
+        for name in self._input_names:
+            value = getattr(self.inputs, name)
+            if isdefined(value):
+                setattr(self._wf.inputs.inputnode, name, value)
+
+        # set stop_at_first_crash
+        self._wf.base_dir = os.getcwd()
+        plugin_settings = {'plugin': 'Linear'}
+        if self.inputs.nprocs > 1:
+            plugin_settings = {'plugin': 'MultiProc',
+                               'plugin_args': {'n_procs': self.inputs.nprocs}}
+        result = self._wf.run(**plugin_settings)
+        self._out = self._wf.post_outputs
         return runtime
 
     def _list_outputs(self):

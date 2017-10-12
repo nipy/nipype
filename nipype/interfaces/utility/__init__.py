@@ -10,4 +10,4 @@ Requires Packages to be installed
 from .base import (IdentityInterface, Rename, Select, Split, Merge,
                    AssertEqual)
 from .csv import CSVReader
-from .wrappers import Function
+from .wrappers import Function, WorkflowInterface

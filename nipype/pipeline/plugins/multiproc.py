@@ -113,6 +113,7 @@ class MultiProcPlugin(DistributedPluginBase):
         self._taskresult = {}
         self._task_obj = {}
         self._taskid = 0
+        self._async = False
 
         # Read in options or set defaults.
         non_daemon = self.plugin_args.get('non_daemon', True)
