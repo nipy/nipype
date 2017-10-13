@@ -50,7 +50,8 @@ def test_ApplyWarp_inputs():
     ),
     supersample=dict(argstr='--super',
     ),
-    terminal_output=dict(nohash=True,
+    terminal_output=dict(deprecated='1.0.0',
+    nohash=True,
     ),
     )
     inputs = ApplyWarp.input_spec()

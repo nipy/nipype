@@ -26,7 +26,8 @@ def test_MaskScalarVolume_inputs():
     ),
     replace=dict(argstr='--replace %d',
     ),
-    terminal_output=dict(nohash=True,
+    terminal_output=dict(deprecated='1.0.0',
+    nohash=True,
     ),
     )
     inputs = MaskScalarVolume.input_spec()

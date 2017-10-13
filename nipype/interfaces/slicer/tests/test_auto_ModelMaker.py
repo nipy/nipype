@@ -51,7 +51,8 @@ def test_ModelMaker_inputs():
     ),
     start=dict(argstr='--start %d',
     ),
-    terminal_output=dict(nohash=True,
+    terminal_output=dict(deprecated='1.0.0',
+    nohash=True,
     ),
     )
     inputs = ModelMaker.input_spec()

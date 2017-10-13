@@ -29,7 +29,8 @@ def test_Copy_inputs():
     real_values=dict(argstr='-real_values',
     xor=('pixel_values', 'real_values'),
     ),
-    terminal_output=dict(nohash=True,
+    terminal_output=dict(deprecated='1.0.0',
+    nohash=True,
     ),
     )
     inputs = Copy.input_spec()

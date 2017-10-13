@@ -17,13 +17,17 @@ def test_Copy_inputs():
     mandatory=True,
     position=-2,
     ),
+    num_threads=dict(nohash=True,
+    usedefault=True,
+    ),
     out_file=dict(argstr='%s',
     name_source='in_file',
     name_template='%s_copy',
     position=-1,
     ),
     outputtype=dict(),
-    terminal_output=dict(nohash=True,
+    terminal_output=dict(deprecated='1.0.0',
+    nohash=True,
     ),
     )
     inputs = Copy.input_spec()

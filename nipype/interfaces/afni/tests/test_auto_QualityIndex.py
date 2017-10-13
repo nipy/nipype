@@ -44,7 +44,8 @@ def test_QualityIndex_inputs():
     spearman=dict(argstr='-spearman',
     usedefault=True,
     ),
-    terminal_output=dict(nohash=True,
+    terminal_output=dict(deprecated='1.0.0',
+    nohash=True,
     ),
     )
     inputs = QualityIndex.input_spec()

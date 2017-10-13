@@ -17,7 +17,8 @@ def test_insertMidACPCpoint_inputs():
     outputLandmarkFile=dict(argstr='--outputLandmarkFile %s',
     hash_files=False,
     ),
-    terminal_output=dict(nohash=True,
+    terminal_output=dict(deprecated='1.0.0',
+    nohash=True,
     ),
     )
     inputs = insertMidACPCpoint.input_spec()

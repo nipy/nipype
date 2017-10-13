@@ -188,7 +188,7 @@ def package_check(pkg_name, version=None, app=None, checker=LooseVersion,
     Examples
     --------
     package_check('numpy', '1.3')
-    package_check('networkx', '1.0', 'tutorial1')
+    package_check('scipy', '0.7', 'tutorial1')
 
     """
 

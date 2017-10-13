@@ -482,7 +482,7 @@ def create_reg_workflow(name='registration'):
     warpmean.inputs.input_image_type = 3
     warpmean.inputs.interpolation = 'Linear'
     warpmean.inputs.invert_transform_flags = [False, False]
-    warpmean.inputs.terminal_output = 'file'
+    warpmean.terminal_output = 'file'
     warpmean.inputs.args = '--float'
     warpmean.inputs.num_threads = 4
     warpmean.plugin_args = {'sbatch_args': '-c%d' % 4}
@@ -704,7 +704,7 @@ def create_workflow(files,
     warpall.inputs.input_image_type = 3
     warpall.inputs.interpolation = 'Linear'
     warpall.inputs.invert_transform_flags = [False, False]
-    warpall.inputs.terminal_output = 'file'
+    warpall.terminal_output = 'file'
     warpall.inputs.reference_image = target_file
     warpall.inputs.args = '--float'
     warpall.inputs.num_threads = 2

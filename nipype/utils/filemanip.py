@@ -27,7 +27,7 @@ from .. import logging, config
 from .misc import is_container
 from ..interfaces.traits_extension import isdefined
 
-fmlogger = logging.getLogger("filemanip")
+fmlogger = logging.getLogger('utils')
 
 
 related_filetype_sets = [

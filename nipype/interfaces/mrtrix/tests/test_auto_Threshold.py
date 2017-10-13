@@ -36,7 +36,8 @@ def test_Threshold_inputs():
     replace_zeros_with_NaN=dict(argstr='-nan',
     position=1,
     ),
-    terminal_output=dict(nohash=True,
+    terminal_output=dict(deprecated='1.0.0',
+    nohash=True,
     ),
     )
     inputs = Threshold.input_spec()

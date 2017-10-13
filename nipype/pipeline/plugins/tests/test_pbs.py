@@ -48,7 +48,7 @@ def test_run_pbsgraph():
     mod1.inputs.input1 = 1
     execgraph = pipe.run(plugin="PBSGraph")
     names = ['.'.join((node._hierarchy, node.name)) for node in execgraph.nodes()]
-    node = execgraph.nodes()[names.index('pipe.mod1')]
+    node = list(execgraph.nodes())[names.index('pipe.mod1')]
     result = node.get_output('output1')
     assert result == [1, 1]
     os.chdir(cur_dir)

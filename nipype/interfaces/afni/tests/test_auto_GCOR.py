@@ -24,7 +24,8 @@ def test_GCOR_inputs():
     ),
     no_demean=dict(argstr='-no_demean',
     ),
-    terminal_output=dict(nohash=True,
+    terminal_output=dict(deprecated='1.0.0',
+    nohash=True,
     ),
     )
     inputs = GCOR.input_spec()

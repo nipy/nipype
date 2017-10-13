@@ -29,7 +29,8 @@ def test_ComputeFractionalAnisotropy_inputs():
     scheme_file=dict(argstr='%s',
     position=2,
     ),
-    terminal_output=dict(nohash=True,
+    terminal_output=dict(deprecated='1.0.0',
+    nohash=True,
     ),
     )
     inputs = ComputeFractionalAnisotropy.input_spec()

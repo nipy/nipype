@@ -27,6 +27,9 @@ def test_TNorm_inputs():
     ),
     normx=dict(argstr='-normx',
     ),
+    num_threads=dict(nohash=True,
+    usedefault=True,
+    ),
     out_file=dict(argstr='-prefix %s',
     name_source='in_file',
     name_template='%s_tnorm',
@@ -34,7 +37,8 @@ def test_TNorm_inputs():
     outputtype=dict(),
     polort=dict(argstr='-polort %s',
     ),
-    terminal_output=dict(nohash=True,
+    terminal_output=dict(deprecated='1.0.0',
+    nohash=True,
     ),
     )
     inputs = TNorm.input_spec()

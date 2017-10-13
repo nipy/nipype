@@ -151,19 +151,14 @@ class Info(object):
 
             returns None of path not found
         """
-        if use_mcr or 'FORCE_SPMMCR' in os.environ:
-            use_mcr = True
-            if matlab_cmd is None:
-                try:
-                    matlab_cmd = os.environ['SPMMCRCMD']
-                except KeyError:
-                    pass
-        if matlab_cmd is None:
-            try:
-                matlab_cmd = os.environ['MATLABCMD']
-            except KeyError:
-                matlab_cmd = 'matlab -nodesktop -nosplash'
-        mlab = MatlabCommand(matlab_cmd=matlab_cmd)
+
+        use_mcr = use_mcr or 'FORCE_SPMMCR' in os.environ
+        matlab_cmd = ((use_mcr and os.getenv('SPMMCRCMD')) or
+                      os.getenv('MATLABCMD') or
+                      'matlab -nodesktop -nosplash')
+
+        mlab = MatlabCommand(matlab_cmd=matlab_cmd,
+                             resource_monitor=False)
         mlab.inputs.mfile = False
         if paths:
             mlab.inputs.paths = paths
@@ -187,7 +182,7 @@ exit;
         except (IOError, RuntimeError) as e:
             # if no Matlab at all -- exception could be raised
             # No Matlab -- no spm
-            logger.debug(str(e))
+            logger.debug('%s', e)
             return None
         else:
             out = sd._strip_header(out.runtime.stdout)
@@ -276,11 +271,12 @@ class SPMCommand(BaseInterface):
 
     def _matlab_cmd_update(self):
         # MatlabCommand has to be created here,
-        # because matlab_cmb is not a proper input
+        # because matlab_cmd is not a proper input
         # and can be set only during init
         self.mlab = MatlabCommand(matlab_cmd=self.inputs.matlab_cmd,
                                   mfile=self.inputs.mfile,
-                                  paths=self.inputs.paths)
+                                  paths=self.inputs.paths,
+                                  resource_monitor=False)
         self.mlab.inputs.script_file = 'pyscript_%s.m' % \
             self.__class__.__name__.split('.')[-1].lower()
         if isdefined(self.inputs.use_mcr) and self.inputs.use_mcr:

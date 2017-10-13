@@ -24,7 +24,8 @@ def test_DT2NIfTI_inputs():
     genfile=True,
     position=2,
     ),
-    terminal_output=dict(nohash=True,
+    terminal_output=dict(deprecated='1.0.0',
+    nohash=True,
     ),
     )
     inputs = DT2NIfTI.input_spec()

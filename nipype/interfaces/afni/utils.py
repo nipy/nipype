@@ -642,6 +642,101 @@ class CatMatvec(AFNICommand):
             return spec.argstr%(' '.join([i[0]+' -'+i[1] for i in value]))
         return super(CatMatvec, self)._format_arg(name, spec, value)
 
+
+class CenterMassInputSpec(CommandLineInputSpec):
+    in_file = File(
+        desc='input file to 3dCM',
+        argstr='%s',
+        position=-2,
+        mandatory=True,
+        exists=True,
+        copyfile=True)
+    cm_file = File(
+         name_source='in_file',
+         name_template='%s_cm.out',
+         hash_files=False,
+         keep_extension=False,
+         descr="File to write center of mass to",
+         argstr="> %s",
+         position=-1)
+    mask_file = File(
+        desc='Only voxels with nonzero values in the provided mask will be '
+             'averaged.',
+        argstr='-mask %s',
+        exists=True)
+    automask = traits.Bool(
+        desc='Generate the mask automatically',
+        argstr='-automask')
+    set_cm = traits.Tuple(
+        (traits.Float(), traits.Float(), traits.Float()),
+        desc='After computing the center of mass, set the origin fields in '
+             'the header so that the center of mass will be at (x,y,z) in '
+             'DICOM coords.',
+        argstr='-set %f %f %f')
+    local_ijk = traits.Bool(
+        desc='Output values as (i,j,k) in local orienation',
+        argstr='-local_ijk')
+    roi_vals = traits.List(
+        traits.Int,
+        desc='Compute center of mass for each blob with voxel value of v0, '
+             'v1, v2, etc. This option is handy for getting ROI centers of '
+             'mass.',
+        argstr='-roi_vals %s')
+    all_rois = traits.Bool(
+        desc='Don\'t bother listing the values of ROIs you want: The program '
+             'will find all of them and produce a full list',
+        argstr='-all_rois')
+
+
+class CenterMassOutputSpec(TraitedSpec):
+    out_file = File(
+        exists=True,
+        desc='output file')
+    cm_file = File(
+        desc='file with the center of mass coordinates')
+    cm = traits.List(
+        traits.Tuple(traits.Float(), traits.Float(), traits.Float()),
+        desc='center of mass')
+
+
+class CenterMass(AFNICommandBase):
+    """Computes center of mass using 3dCM command
+
+    .. note::
+
+      By default, the output is (x,y,z) values in DICOM coordinates. But
+      as of Dec, 2016, there are now command line switches for other options.
+
+
+    For complete details, see the `3dCM Documentation.
+    <https://afni.nimh.nih.gov/pub/dist/doc/program_help/3dCM.html>`_
+
+    Examples
+    ========
+
+    >>> from nipype.interfaces import afni
+    >>> cm = afni.CenterMass()
+    >>> cm.inputs.in_file = 'structural.nii'
+    >>> cm.inputs.cm_file = 'cm.txt'
+    >>> cm.inputs.roi_vals = [2, 10]
+    >>> cm.cmdline  # doctest: +ALLOW_UNICODE
+    '3dCM -roi_vals 2 10 structural.nii > cm.txt'
+    >>> res = 3dcm.run()  # doctest: +SKIP
+    """
+
+    _cmd = '3dCM'
+    input_spec = CenterMassInputSpec
+    output_spec = CenterMassOutputSpec
+
+    def _list_outputs(self):
+        outputs = super(CenterMass, self)._list_outputs()
+        outputs['out_file'] = os.path.abspath(self.inputs.in_file)
+        outputs['cm_file'] = os.path.abspath(self.inputs.cm_file)
+        sout = np.loadtxt(outputs['cm_file'], ndmin=2)  # pylint: disable=E1101
+        outputs['cm'] = [tuple(s) for s in sout]
+        return outputs
+
+
 class CopyInputSpec(AFNICommandInputSpec):
     in_file = File(
         desc='input file to 3dcopy',
@@ -1961,6 +2056,110 @@ class To3D(AFNICommand):
     _cmd = 'to3d'
     input_spec = To3DInputSpec
     output_spec = AFNICommandOutputSpec
+
+
+class UndumpInputSpec(AFNICommandInputSpec):
+    in_file = File(
+        desc='input file to 3dUndump, whose geometry will determine'
+             'the geometry of the output',
+        argstr='-master %s',
+        position=-1,
+        mandatory=True,
+        exists=True,
+        copyfile=False)
+    out_file = File(
+        desc='output image file name',
+        argstr='-prefix %s',
+        name_source='in_file')
+    mask_file = File(
+        desc='mask image file name. Only voxels that are nonzero in the mask '
+             'can be set.',
+        argstr='-mask %s')
+    datatype = traits.Enum(
+        'short', 'float', 'byte',
+        desc='set output file datatype',
+        argstr='-datum %s')
+    default_value = traits.Float(
+        desc='default value stored in each input voxel that does not have '
+             'a value supplied in the input file',
+        argstr='-dval %f')
+    fill_value = traits.Float(
+        desc='value, used for each voxel in the output dataset that is NOT '
+             'listed in the input file',
+        argstr='-fval %f')
+    coordinates_specification = traits.Enum(
+        'ijk', 'xyz',
+        desc='Coordinates in the input file as index triples (i, j, k) '
+             'or spatial coordinates (x, y, z) in mm',
+        argstr='-%s')
+    srad = traits.Float(
+        desc='radius in mm of the sphere that will be filled about each input '
+             '(x,y,z) or (i,j,k) voxel. If the radius is not given, or is 0, '
+             'then each input data line sets the value in only one voxel.',
+        argstr='-srad %f')
+    orient = traits.Tuple(
+        traits.Enum('R', 'L'), traits.Enum('A', 'P'), traits.Enum('I', 'S'),
+        desc='Specifies the coordinate order used by -xyz. '
+             'The code must be 3 letters, one each from the pairs '
+             '{R,L} {A,P} {I,S}.  The first letter gives the '
+             'orientation of the x-axis, the second the orientation '
+             'of the y-axis, the third the z-axis: '
+             'R = right-to-left         L = left-to-right '
+             'A = anterior-to-posterior P = posterior-to-anterior '
+             'I = inferior-to-superior  S = superior-to-inferior '
+             'If -orient isn\'t used, then the coordinate order of the '
+             '-master (in_file) dataset is used to interpret (x,y,z) inputs.',
+        argstr='-orient %s')
+    head_only = traits.Bool(
+        desc='create only the .HEAD file which gets exploited by '
+             'the AFNI matlab library function New_HEAD.m',
+        argstr='-head_only')
+
+
+class UndumpOutputSpec(TraitedSpec):
+    out_file = File(desc='assembled file', exists=True)
+
+
+class Undump(AFNICommand):
+    """3dUndump - Assembles a 3D dataset from an ASCII list of coordinates and
+    (optionally) values.
+
+     The input file(s) are ASCII files, with one voxel specification per
+     line.  A voxel specification is 3 numbers (-ijk or -xyz coordinates),
+     with an optional 4th number giving the voxel value.  For example:
+
+     1 2 3
+     3 2 1 5
+     5.3 6.2 3.7
+     // this line illustrates a comment
+
+     The first line puts a voxel (with value given by '-dval') at point
+     (1,2,3).  The second line puts a voxel (with value 5) at point (3,2,1).
+     The third line puts a voxel (with value given by '-dval') at point
+     (5.3,6.2,3.7).  If -ijk is in effect, and fractional coordinates
+     are given, they will be rounded to the nearest integers; for example,
+     the third line would be equivalent to (i,j,k) = (5,6,4).
+
+
+    For complete details, see the `3dUndump Documentation.
+    <https://afni.nimh.nih.gov/pub/dist/doc/program_help/3dUndump.html>`_
+
+    Examples
+    ========
+
+    >>> from nipype.interfaces import afni
+    >>> unndump = afni.Undump()
+    >>> unndump.inputs.in_file = 'structural.nii'
+    >>> unndump.inputs.out_file = 'structural_undumped.nii'
+    >>> unndump.cmdline  # doctest: +ALLOW_UNICODE
+    '3dUndump -prefix structural_undumped.nii -master structural.nii'
+    >>> res = unndump.run()  # doctest: +SKIP
+
+    """
+
+    _cmd = '3dUndump'
+    input_spec = UndumpInputSpec
+    output_spec = UndumpOutputSpec
 
 
 class UnifizeInputSpec(AFNICommandInputSpec):

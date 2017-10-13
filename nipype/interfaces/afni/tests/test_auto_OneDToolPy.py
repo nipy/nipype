@@ -44,7 +44,8 @@ def test_OneDToolPy_inputs():
     ),
     show_trs_uncensored=dict(argstr='-show_trs_uncensored %s',
     ),
-    terminal_output=dict(nohash=True,
+    terminal_output=dict(deprecated='1.0.0',
+    nohash=True,
     ),
     )
     inputs = OneDToolPy.input_spec()
