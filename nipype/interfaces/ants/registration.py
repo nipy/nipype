@@ -416,6 +416,8 @@ class RegistrationOutputSpec(TraitedSpec):
     warped_image = File(desc="Outputs warped image")
     inverse_warped_image = File(desc="Outputs the inverse of the warped image")
     save_state = File(desc="The saved registration state to be restored")
+    metric_value = traits.Float(desc='the final value of metric')
+    elapsed_time = traits.Float(desc='the total elapsed time as reported by ANTs')
 
 
 class Registration(ANTSCommand):
@@ -535,10 +537,12 @@ class Registration(ANTSCommand):
     >>> outputs = reg4._list_outputs()
     >>> pprint.pprint(outputs)  # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE +ALLOW_UNICODE
     {'composite_transform': '.../nipype/testing/data/output_Composite.h5',
+     'elapsed_time': <undefined>,
      'forward_invert_flags': [],
      'forward_transforms': [],
      'inverse_composite_transform': '.../nipype/testing/data/output_InverseComposite.h5',
      'inverse_warped_image': <undefined>,
+     'metric_value': <undefined>,
      'reverse_invert_flags': [],
      'reverse_transforms': [],
      'save_state': '.../nipype/testing/data/trans.mat',
@@ -560,11 +564,13 @@ class Registration(ANTSCommand):
     >>> outputs = reg4b._list_outputs()
     >>> pprint.pprint(outputs)  # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE +ALLOW_UNICODE
     {'composite_transform': <undefined>,
+     'elapsed_time': <undefined>,
      'forward_invert_flags': [False, False],
      'forward_transforms': ['.../nipype/testing/data/output_0GenericAffine.mat',
      '.../nipype/testing/data/output_1Warp.nii.gz'],
      'inverse_composite_transform': <undefined>,
      'inverse_warped_image': <undefined>,
+     'metric_value': <undefined>,
      'reverse_invert_flags': [True, False],
      'reverse_transforms': ['.../nipype/testing/data/output_0GenericAffine.mat', \
 '.../nipype/testing/data/output_1InverseWarp.nii.gz'],
@@ -682,6 +688,29 @@ class Registration(ANTSCommand):
     output_spec = RegistrationOutputSpec
     _quantilesDone = False
     _linear_transform_names = ['Rigid', 'Affine', 'Translation', 'CompositeAffine', 'Similarity']
+
+    def __init__(self, **inputs):
+        super(Registration, self).__init__(**inputs)
+        self._elapsed_time = None
+        self._metric_value = None
+
+    def _run_interface(self, runtime, correct_return_codes=(0,)):
+        runtime = super(Registration, self)._run_interface(runtime)
+
+        # Parse some profiling info
+        output = runtime.stdout or runtime.merged
+        if output:
+            lines = output.split('\n')
+            for l in lines[::-1]:
+                # This should be the last line
+                if l.strip().startswith('Total elapsed time:'):
+                    self._elapsed_time = float(l.strip().replace(
+                        'Total elapsed time: ', ''))
+                elif 'DIAGNOSTIC' in l:
+                    self._metric_value = float(l.split(',')[2])
+                    break
+
+        return runtime
 
     def _format_metric(self, index):
         """
@@ -1033,6 +1062,10 @@ class Registration(ANTSCommand):
             outputs['inverse_warped_image'] = os.path.abspath(inv_out_filename)
         if len(self.inputs.save_state):
             outputs['save_state'] = os.path.abspath(self.inputs.save_state)
+        if self._metric_value:
+            outputs['metric_value'] = self._metric_value
+        if self._elapsed_time:
+            outputs['elapsed_time'] = self._elapsed_time
         return outputs
 
 
