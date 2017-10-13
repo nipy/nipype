@@ -45,6 +45,7 @@ def setup_files(request, tmpdir):
     request.addfinalizer(change_directory)
 
 
+@pytest.mark.skipif(no_nilearn, reason="the nilearn library is not available")
 def test_signal_extract_no_shared(setup_files):
     # run
     iface.SignalExtraction(in_file=Filenames['in_file'],
@@ -55,6 +56,7 @@ def test_signal_extract_no_shared(setup_files):
     assert_expected_output(Labels, FakeData.base_wanted)
 
 
+@pytest.mark.skipif(no_nilearn, reason="the nilearn library is not available")
 def test_signal_extr_bad_label_list(setup_files):
     # run
     with pytest.raises(ValueError):
@@ -63,14 +65,20 @@ def test_signal_extr_bad_label_list(setup_files):
                                class_labels=['bad'],
                                incl_shared_variance=False).run()
 
+
+@pytest.mark.skipif(no_nilearn, reason="the nilearn library is not available")
 def test_signal_extr_equiv_4d_no_shared(setup_files):
     _test_4d_label(FakeData.base_wanted, FakeData.fake_equiv_4d_label_data,
                   incl_shared_variance=False)
 
+
+@pytest.mark.skipif(no_nilearn, reason="the nilearn library is not available")
 def test_signal_extr_4d_no_shared(setup_files):
     # set up & run & assert
     _test_4d_label(FakeData.fourd_wanted, FakeData.fake_4d_label_data, incl_shared_variance=False)
 
+
+@pytest.mark.skipif(no_nilearn, reason="the nilearn library is not available")
 def test_signal_extr_global_no_shared(setup_files):
     # set up
     wanted_global = [[-4./6], [-1./6], [3./6], [-1./6], [-7./6]]
@@ -87,6 +95,8 @@ def test_signal_extr_global_no_shared(setup_files):
     # assert
     assert_expected_output(Global_labels, wanted_global)
 
+
+@pytest.mark.skipif(no_nilearn, reason="the nilearn library is not available")
 def test_signal_extr_4d_global_no_shared(setup_files):
     # set up
     wanted_global = [[3./8], [-3./8], [1./8], [-7./8], [-9./8]]
@@ -97,6 +107,8 @@ def test_signal_extr_4d_global_no_shared(setup_files):
     _test_4d_label(wanted_global, FakeData.fake_4d_label_data,
                    include_global=True, incl_shared_variance=False)
 
+
+@pytest.mark.skipif(no_nilearn, reason="the nilearn library is not available")
 def test_signal_extr_shared(setup_files):
     # set up
     wanted = []
@@ -112,6 +124,7 @@ def test_signal_extr_shared(setup_files):
     _test_4d_label(wanted, FakeData.fake_4d_label_data)
 
 
+@pytest.mark.skipif(no_nilearn, reason="the nilearn library is not available")
 def test_signal_extr_traits_valid(setup_files):
     ''' Test a node using the SignalExtraction interface.
     Unlike interface.run(), node.run() checks the traits
