@@ -13,44 +13,46 @@ Algorithms to compute statistics on :abbr:`fMRI (functional MRI)`
 '''
 from __future__ import (print_function, division, unicode_literals,
                         absolute_import)
-import os
+import os, pdb
 
 import numpy as np
 import nibabel as nb
 
 from .. import logging
-from ..interfaces.base import (traits, TraitedSpec, BaseInterface,
-                               BaseInterfaceInputSpec, File, InputMultiPath)
+from ..interfaces.base import (TraitedSpec, BaseInterface,
+                               BaseInterfaceInputSpec, File, InputMultiObject,
+                               List, Bool)
+import traitlets
 IFLOG = logging.getLogger('interface')
 
 class SignalExtractionInputSpec(BaseInterfaceInputSpec):
     in_file = File(exists=True, mandatory=True, desc='4-D fMRI nii file')
-    label_files = InputMultiPath(File(exists=True), mandatory=True,
-                                 desc='a 3-D label image, with 0 denoting '
-                                 'background, or a list of 3-D probability '
-                                 'maps (one per label) or the equivalent 4D '
-                                 'file.')
-    class_labels = traits.List(mandatory=True,
-                               desc='Human-readable labels for each segment '
-                               'in the label file, in order. The length of '
-                               'class_labels must be equal to the number of '
-                               'segments (background excluded). This list '
-                               'corresponds to the class labels in label_file '
-                               'in ascending order')
+    label_files = InputMultiObject(File(exists=True), mandatory=True,
+                                   desc='a 3-D label image, with 0 denoting '
+                                   'background, or a list of 3-D probability '
+                                   'maps (one per label) or the equivalent 4D '
+                                   'file.')
+    class_labels = traitlets.List(mandatory=True,
+                        desc='Human-readable labels for each segment '
+                        'in the label file, in order. The length of '
+                        'class_labels must be equal to the number of '
+                        'segments (background excluded). This list '
+                        'corresponds to the class labels in label_file '
+                        'in ascending order')
     out_file = File('signals.tsv', usedefault=True, exists=False,
                     desc='The name of the file to output to. '
                     'signals.tsv by default')
-    incl_shared_variance = traits.Bool(True, usedefault=True, desc='By default '
-                                       '(True), returns simple time series calculated from each '
-                                       'region independently (e.g., for noise regression). If '
-                                       'False, returns unique signals for each region, discarding '
-                                       'shared variance (e.g., for connectivity. Only has effect '
-                                       'with 4D probability maps.')
-    include_global = traits.Bool(False, usedefault=True,
-                                 desc='If True, include an extra column '
-                                 'labeled "GlobalSignal", with values calculated from the entire brain '
-                                 '(instead of just regions).')
-    detrend = traits.Bool(False, usedefault=True, desc='If True, perform detrending using nilearn.')
+    incl_shared_variance = Bool(True, usedefault=True, desc='By default '
+                                '(True), returns simple time series calculated from each '
+                                'region independently (e.g., for noise regression). If '
+                                'False, returns unique signals for each region, discarding '
+                                'shared variance (e.g., for connectivity. Only has effect '
+                                'with 4D probability maps.')
+    include_global = Bool(False, usedefault=True,
+                          desc='If True, include an extra column '
+                          'labeled "GlobalSignal", with values calculated from the entire brain '
+                          '(instead of just regions).')
+    detrend = Bool(False, usedefault=True, desc='If True, perform detrending using nilearn.')
 
 class SignalExtractionOutputSpec(TraitedSpec):
     out_file = File(exists=True, desc='tsv file containing the computed '
@@ -115,7 +117,6 @@ class SignalExtraction(BaseInterface):
         if not np.isclose(int(n_labels), n_labels):
             raise ValueError('The label files {} contain invalid value {}. Check input.'
                              .format(self.inputs.label_files, n_labels))
-
         if len(self.inputs.class_labels) != n_labels:
             raise ValueError('The length of class_labels {} does not '
                              'match the number of regions {} found in '
