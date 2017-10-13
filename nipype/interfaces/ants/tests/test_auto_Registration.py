@@ -36,6 +36,7 @@ def test_Registration_inputs():
     usedefault=True,
     ),
     initial_moving_transform=dict(argstr='%s',
+    exists=True,
     xor=['initial_moving_transform_com'],
     ),
     initial_moving_transform_com=dict(argstr='%s',
