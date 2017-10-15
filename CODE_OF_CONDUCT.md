@@ -55,7 +55,7 @@ further defined and clarified by project maintainers.
 ## Enforcement
 
 Instances of abusive, harassing, or otherwise unacceptable behavior may be
-reported by contacting project leaders Satrajit Ghosh <(satra@mit.edu)[mailto:satra@mit.edu]> or Chris Gorgolewski <(krzysztof.gorgolewski@gmail.com)[mailto:krzysztof.gorgolewski@gmail.com]>. All
+reported by contacting project leaders Satrajit Ghosh <satra@mit.edu> or Chris Gorgolewski <krzysztof.gorgolewski@gmail.com>. All
 complaints will be reviewed and investigated and will result in a response that
 is deemed necessary and appropriate to the circumstances. The project leaders is
 obligated to maintain confidentiality with regard to the reporter of an incident.
