@@ -1,23 +1,73 @@
-# Code of Conduct
+# Contributor Covenant Code of Conduct
 
-We value the participation of every member of our community and want to ensure an that every contributer has an enjoyable and fulfilling experience. Accordingly, everyone who participates in the *Brains For Publication* project is expected to show respect and courtesy to other community members at all time.
+## Our Pledge
 
-We are dedicated to a ***harassment-free experience for everyone***, regardless of gender, gender identity and expression, sexual orientation, disability, physical appearance, body size, race, age or religion. **We do not tolerate harassment by and/or of members of our community in any form**.
+In the interest of fostering an open and welcoming environment, we as
+contributors and maintainers pledge to making participation in our project and
+our community a harassment-free experience for everyone, regardless of age, body
+size, disability, ethnicity, gender identity and expression, level of experience,
+nationality, personal appearance, race, religion, or sexual identity and
+orientation.
 
-We are particularly motivated to support new and/or anxious contributers, people who are looking to learn and develop their skills, and anyone who has experienced discrimination in the past. 
+## Our Standards
 
-To make clear what is expected, we ask all members of the community to conform to the following Code of Conduct.
+Examples of behavior that contributes to creating a positive environment
+include:
 
-* All communication should be appropriate for a professional audience including people of many different backgrounds. Sexual language and imagery is not appropriate at any time.
+* Using welcoming and inclusive language
+* Being respectful of differing viewpoints and experiences
+* Gracefully accepting constructive criticism
+* Focusing on what is best for the community
+* Showing empathy towards other community members
 
-* Be kind to others. Do not insult or put down other contributers.
+Examples of unacceptable behavior by participants include:
 
-* Behave professionally. Remember that harassment and sexist, racist, or exclusionary jokes are not appropriate.
+* The use of sexualized language or imagery and unwelcome sexual attention or
+  advances
+* Trolling, insulting/derogatory comments, and personal or political attacks
+* Public or private harassment
+* Publishing others' private information, such as a physical or electronic
+  address, without explicit permission
+* Other conduct which could reasonably be considered inappropriate in a
+  professional setting
 
-Harassment includes offensive verbal comments related to gender, sexual orientation, disability, physical appearance, body size, race, religion, sexual images in public spaces, deliberate intimidation, stalking, following, harassing photography or recording, sustained disruption of discussions, inappropriate physical contact, and unwelcome sexual attention.
+## Our Responsibilities
 
-***Members of the community who are asked to stop any harassing behavior are expected to comply immediately.***
+Project maintainers are responsible for clarifying the standards of acceptable
+behavior and are expected to take appropriate and fair corrective action in
+response to any instances of unacceptable behavior.
 
-Members of the community who violate these rules - no matter how much they have contributed to the project, or how specialised their skill set - will be approached by the project leaders ([@satra](https://github.com/satra)) and ([@chrisfilo](https://github.com/chrisfilo)). If inappropriate behaviour persists after a discussion the contributer will be asked to discontinue their participation in the development of the project.
+Project maintainers have the right and responsibility to remove, edit, or
+reject comments, commits, code, wiki edits, issues, and other contributions
+that are not aligned to this Code of Conduct, or to ban temporarily or
+permanently any contributor for other behaviors that they deem inappropriate,
+threatening, offensive, or harmful.
 
-**To report an issue** please contact Satrajit Ghosh <(satra@mit.edu)[mailto:satra@mit.edu]> or Chris Gorgolewski <(krzysztof.gorgolewski@gmail.com)[mailto:krzysztof.gorgolewski@gmail.com]>. All communication will be treated as confidential.
+## Scope
+
+This Code of Conduct applies both within project spaces and in public spaces
+when an individual is representing the project or its community. Examples of
+representing a project or community include using an official project e-mail
+address, posting via an official social media account, or acting as an appointed
+representative at an online or offline event. Representation of a project may be
+further defined and clarified by project maintainers.
+
+## Enforcement
+
+Instances of abusive, harassing, or otherwise unacceptable behavior may be
+reported by contacting project leaders Satrajit Ghosh <(satra@mit.edu)[mailto:satra@mit.edu]> or Chris Gorgolewski <(krzysztof.gorgolewski@gmail.com)[mailto:krzysztof.gorgolewski@gmail.com]>. All
+complaints will be reviewed and investigated and will result in a response that
+is deemed necessary and appropriate to the circumstances. The project leaders is
+obligated to maintain confidentiality with regard to the reporter of an incident.
+Further details of specific enforcement policies may be posted separately.
+
+Project maintainers who do not follow or enforce the Code of Conduct in good
+faith may face temporary or permanent repercussions as determined by other
+members of the project's leadership.
+
+## Attribution
+
+This Code of Conduct is adapted from the [Contributor Covenant][homepage], version 1.4,
+available at https://www.contributor-covenant.org/version/1/4/code-of-conduct.html
+
+[homepage]: https://www.contributor-covenant.org
