@@ -93,5 +93,5 @@ Please add *[nipype]* to the subject line when posting on the mailing list.
 Contributing to the project
 ---------------------------
 
-If you'd like to contribute to the project please read our [guidelines](CONTRIBUTING.md). Please also read through our [code of conduct](CODE_OF_CONDUCT.md).
+If you'd like to contribute to the project please read our [guidelines](./CONTRIBUTING.md). Please also read through our [code of conduct](./CODE_OF_CONDUCT.md).
 
