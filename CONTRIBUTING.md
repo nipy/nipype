@@ -1,3 +1,5 @@
+**Are you new to open source and GitHub?** If so reading the "[How to submit a contribution](https://opensource.guide/how-to-contribute/#how-to-submit-a-contribution)" guide will provide a great introduction to contributing to Nipype and other Open Source projects. All the Nipype specific contributing instructions listed below will make much more sense after reading this guide.
+
 ## Contributing pull-requests (PRs)
 
 * All work is submitted via Pull Requests.
@@ -20,7 +22,7 @@
   * adding more information about what may have caused the error.
     Raise a new exception using ``raise_from(NewException("message"), oldException)`` from ``future``.
     Do not log this, as it creates redundant/confusing logs.
-* If you are new to the project don't forget to add your name and affiliation to the `.zenodo.json` file.
+* **If you are new to the project don't forget to add your name and affiliation to the `.zenodo.json` file.**
 
 ## Contributing issues
 
