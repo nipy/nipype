@@ -757,7 +757,7 @@ def create_featreg_preproc(name='featpreproc', highpass=True, whichvol='middle',
     return featpreproc
 
 
-def create_susan_smooth(name="susan_smooth", separate_masks=True):
+def create_susan_smooth(name="susan_smooth", separate_masks=True, list_fwhms=False):
     """Create a SUSAN smoothing workflow
 
     Parameters
@@ -767,11 +767,12 @@ def create_susan_smooth(name="susan_smooth", separate_masks=True):
 
         name : name of workflow (default: susan_smooth)
         separate_masks : separate masks for each run
+        list_fwhms : multiple full wide half maximum smoothing kernels
 
     Inputs::
 
         inputnode.in_files : functional runs (filename or list of filenames)
-        inputnode.fwhm : fwhm for smoothing with SUSAN
+        inputnode.fwhm : fwhm for smoothing with SUSAN (float or list of floats)
         inputnode.mask_file : mask used for estimating SUSAN thresholds (but not for smoothing)
 
     Outputs::
@@ -788,6 +789,18 @@ def create_susan_smooth(name="susan_smooth", separate_masks=True):
     >>> smooth.run() # doctest: +SKIP
 
     """
+    def cartesian_product(fwhms, in_files, mask_files, merge_out, median_out):
+        if type(in_files) == str:
+            in_files = [in_files]
+        if type(mask_files) == str:
+            mask_files = [mask_files]
+        multi_in_files = [in_file for in_file in in_files for fwhm in fwhms]
+        multi_mask_files = [mask_file for mask_file in mask_files for fwhm in fwhms]
+        multi_fwhms = [fwhm for fwhm in fwhms for in_file in in_files]
+        multi_merge_out = [merge for merge in merge_out for fwhm in fwhms]
+        multi_median_out = [median for median in median_out for fwhm in fwhms]
+
+        return multi_in_files, multi_mask_files, multi_fwhms, multi_merge_out, multi_median_out
 
     susan_smooth = pe.Workflow(name=name)
 
@@ -806,10 +819,27 @@ def create_susan_smooth(name="susan_smooth", separate_masks=True):
     of the median value for each run and a mask consituting the mean
     functional
     """
+    if list_fwhms:
+        multi_inputs = pe.Node(util.Function(input_names=['fwhms',
+                                                          'in_files',
+                                                          'mask_files',
+                                                          'merge_out',
+                                                          'median_out'],
+                                             output_names=['multi_in_files',
+                                                           'multi_mask_files',
+                                                           'multi_fwhms',
+                                                           'multi_merge_out',
+                                                           'multi_median_out'],
+                                             function=cartesian_product),
+                               name='multi_inputs')
 
-    smooth = pe.MapNode(interface=fsl.SUSAN(),
-                        iterfield=['in_file', 'brightness_threshold', 'usans'],
-                        name='smooth')
+        smooth = pe.MapNode(interface=fsl.SUSAN(),
+                            iterfield=['in_file', 'brightness_threshold', 'usans', 'fwhm'],
+                            name='smooth')
+    else:
+        smooth = pe.MapNode(interface=fsl.SUSAN(),
+                            iterfield=['in_file', 'brightness_threshold', 'usans'],
+                            name='smooth')
 
     """
     Determine the median value of the functional runs using the mask
@@ -865,10 +895,24 @@ def create_susan_smooth(name="susan_smooth", separate_masks=True):
     """
     Define a function to get the brightness threshold for SUSAN
     """
-    susan_smooth.connect(inputnode, 'fwhm', smooth, 'fwhm')
-    susan_smooth.connect(inputnode, 'in_files', smooth, 'in_file')
-    susan_smooth.connect(median, ('out_stat', getbtthresh), smooth, 'brightness_threshold')
-    susan_smooth.connect(merge, ('out', getusans), smooth, 'usans')
+    # if you are going to iterate over multiple values of fwhm
+    if list_fwhms:
+        susan_smooth.connect([
+            (inputnode, multi_inputs, [('in_files', 'in_files'),
+                                       ('fwhm', 'fwhms'),
+                                       ('mask_file', 'mask_files')]),
+        ])
+        susan_smooth.connect(median, ('out_stat', getbtthresh), multi_inputs, 'median_out')
+        susan_smooth.connect(merge, ('out', getusans), multi_inputs, 'merge_out')
+        susan_smooth.connect(multi_inputs, 'multi_fwhms', smooth, 'fwhm')
+        susan_smooth.connect(multi_inputs, 'multi_in_files', smooth, 'in_file')
+        susan_smooth.connect(multi_inputs, 'multi_median_out', smooth, 'brightness_threshold')
+        susan_smooth.connect(multi_inputs, 'multi_merge_out', smooth, 'usans')
+    else:
+        susan_smooth.connect(inputnode, 'in_files', smooth, 'in_file')
+        susan_smooth.connect(inputnode, 'fwhm', smooth, 'fwhm')
+        susan_smooth.connect(median, ('out_stat', getbtthresh), smooth, 'brightness_threshold')
+        susan_smooth.connect(merge, ('out', getusans), smooth, 'usans')
 
     outputnode = pe.Node(interface=util.IdentityInterface(fields=['smoothed_files']),
                          name='outputnode')
