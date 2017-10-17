@@ -789,6 +789,7 @@ def create_susan_smooth(name="susan_smooth", separate_masks=True, list_fwhms=Fal
     >>> smooth.run() # doctest: +SKIP
 
     """
+    # replaces the functionality of a "for loop"
     def cartesian_product(fwhms, in_files, mask_files, merge_out, median_out):
         if type(in_files) == str:
             in_files = [in_files]
