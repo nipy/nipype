@@ -2110,6 +2110,59 @@ class WarpPointsToStd(WarpPoints):
     input_spec = WarpPointsToStdInputSpec
     output_spec = WarpPointsOutputSpec
     _cmd = 'img2stdcoord'
+    _terminal_output = 'file_split'
+
+
+class WarpPointsFromStdInputSpec(CommandLineInputSpec):
+    img_file = File(exists=True, argstr='-img %s', mandatory=True,
+                    desc='filename of a destination image')
+    std_file = File(exists=True, argstr='-std %s', mandatory=True,
+                    desc='filename of the image in standard space')
+    in_coords = File(exists=True, position=-2, argstr='%s', mandatory=True,
+                     desc='filename of file containing coordinates')
+    xfm_file = File(exists=True, argstr='-xfm %s', xor=['warp_file'],
+                    desc='filename of affine transform (e.g. source2dest.mat)')
+    warp_file = File(exists=True, argstr='-warp %s', xor=['xfm_file'],
+                     desc='filename of warpfield (e.g. '
+                          'intermediate2dest_warp.nii.gz)')
+    coord_vox = traits.Bool(True, argstr='-vox', xor=['coord_mm'],
+                            desc='all coordinates in voxels - default')
+    coord_mm = traits.Bool(False, argstr='-mm', xor=['coord_vox'],
+                           desc='all coordinates in mm')
+
+
+class WarpPointsFromStd(CommandLine):
+    """
+    Use FSL `std2imgcoord <http://fsl.fmrib.ox.ac.uk/fsl/fsl-4.1.9/flirt/overview.html>`_
+    to transform point sets to standard space coordinates. Accepts plain text coordinates
+    files.
+
+
+    Examples
+    --------
+
+    >>> from nipype.interfaces.fsl import WarpPointsFromStd
+    >>> warppoints = WarpPointsFromStd()
+    >>> warppoints.inputs.in_coords = 'surf.txt'
+    >>> warppoints.inputs.img_file = 'T1.nii'
+    >>> warppoints.inputs.std_file = 'mni.nii'
+    >>> warppoints.inputs.warp_file = 'warpfield.nii'
+    >>> warppoints.inputs.coord_mm = True
+    >>> warppoints.cmdline # doctest: +ELLIPSIS +ALLOW_UNICODE
+    'std2imgcoord -mm -img T1.nii -std mni.nii -warp warpfield.nii surf.txt'
+    >>> res = warppoints.run() # doctest: +SKIP
+
+
+    """
+
+    input_spec = WarpPointsFromStdInputSpec
+    output_spec = WarpPointsOutputSpec
+    _cmd = 'std2imgcoord'
+
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        outputs['out_file'] = op.abspath('stdout.nipype')
+        return outputs
 
 
 class MotionOutliersInputSpec(FSLCommandInputSpec):

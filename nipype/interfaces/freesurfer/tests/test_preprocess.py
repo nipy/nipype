@@ -17,6 +17,7 @@ def test_robustregister(create_files_in_directory):
     filelist, outdir = create_files_in_directory
 
     reg = freesurfer.RobustRegister()
+    cwd = os.getcwd()
 
     # make sure command gets called
     assert reg.cmd == 'mri_robust_register'
@@ -28,8 +29,9 @@ def test_robustregister(create_files_in_directory):
     reg.inputs.source_file = filelist[0]
     reg.inputs.target_file = filelist[1]
     reg.inputs.auto_sens = True
-    assert reg.cmdline == ('mri_robust_register '
-                           '--satit --lta %s_robustreg.lta --mov %s --dst %s' % (filelist[0][:-4], filelist[0], filelist[1]))
+    assert reg.cmdline == ('mri_robust_register --satit --lta '
+                           '%s/%s_robustreg.lta --mov %s --dst %s' %
+                           (cwd, filelist[0][:-4], filelist[0], filelist[1]))
 
     # constructor based parameter setting
     reg2 = freesurfer.RobustRegister(source_file=filelist[0], target_file=filelist[1], outlier_sens=3.0,

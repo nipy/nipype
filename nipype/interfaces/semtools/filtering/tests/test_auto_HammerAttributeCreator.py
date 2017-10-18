@@ -24,7 +24,8 @@ def test_HammerAttributeCreator_inputs():
     ),
     outputVolumeBase=dict(argstr='--outputVolumeBase %s',
     ),
-    terminal_output=dict(nohash=True,
+    terminal_output=dict(deprecated='1.0.0',
+    nohash=True,
     ),
     )
     inputs = HammerAttributeCreator.input_spec()

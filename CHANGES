@@ -1,6 +1,46 @@
-Upcoming release
+Upcoming release (0.14.0)
 ================
 
+* ENH: Add elapsed_time and final metric_value to ants.Registration (https://github.com/nipy/nipype/pull/1985)
+* ENH: Improve terminal_output feature (https://github.com/nipy/nipype/pull/2209)
+* ENH: Simple interface to FSL std2imgcoords (https://github.com/nipy/nipype/pull/2209, prev #1398)
+* ENH: Centralize virtual/physical $DISPLAYs (https://github.com/nipy/nipype/pull/2203, https://github.com/nipy/nipype/pull/2211)
+* ENH: New ResourceMonitor - replaces resource profiler (https://github.com/nipy/nipype/pull/2200)
+* ENH: Quickshear interface (https://github.com/nipy/nipype/pull/2047)
+* MAINT: updated deprecated HasTraits method (https://github.com/nipy/nipype/pull/2048)
+* ENH: CLI versioning (https://github.com/nipy/nipype/pull/2054)
+* ENH: Dual Regression interface (https://github.com/nipy/nipype/pull/2057)
+* ENH: Additional args to ANTs registration (https://github.com/nipy/nipype/pull/2062, https://github.com/nipy/nipype/pull/2078)
+* FIX: Mp2rage interfaces updated for new parameter names in cbstools 3 (https://github.com/nipy/nipype/pull/2065)
+* MAINT: Removed automatic nipype folder creation in HOME (https://github.com/nipy/nipype/pull/2076)
+* MAINT: Additional Windows support (https://github.com/nipy/nipype/pull/2085)
+* ENH: Output realignment matrices from TOPUP (https://github.com/nipy/nipype/pull/2084)
+* ENH: Additional AFNI interfaces: 3dZcat, 3dZeropad, 3dedge3, 3dDeconvolve, 3dQwarp, 1dCat, 3dNwarpApply, 3daxialize,
+       3dREMLfit, 3dUndump, 3dCM, 3dSynthesize + more (https://github.com/nipy/nipype/pull/2087, https://github.com/nipy/nipype/pull/2090, 
+       https://github.com/nipy/nipype/pull/2095, https://github.com/nipy/nipype/pull/2099, https://github.com/nipy/nipype/pull/2103,
+       https://github.com/nipy/nipype/pull/2114, https://github.com/nipy/nipype/pull/2135, https://github.com/nipy/nipype/pull/2186,
+       https://github.com/nipy/nipype/pull/2201, https://github.com/nipy/nipype/pull/2210)
+* MAINT: cleanup and update AFNI's Allineate (https://github.com/nipy/nipype/pull/2098)
+* ENH: Add cosine-basis high-pass-filter to CompCor, allow skip of initial volumes (https://github.com/nipy/nipype/pull/2107, https://github.com/nipy/nipype/pull/#2122)
+* FIX: Catch more dcm2niix DTI conversions (https://github.com/nipy/nipype/pull/2110)
+* FIX: Retrieve aseg + wmparc stats properly (https://github.com/nipy/nipype/pull/2117)
+* ENH: ANTs MeasureImageSimilarity Inteface (https://github.com/nipy/nipype/pull/2128)
+* FIX: CompCor filter_basis of correct size, pre-filter column headers (https://github.com/nipy/nipype/pull/2136, https://github.com/nipy/nipype/pull/2138)
+* ENH: FreeSurfer lta_convert and mri_coreg interfaces (https://github.com/nipy/nipype/pull/2140, https://github.com/nipy/nipype/pull/2172)
+* ENH: Speed up S3DataGrabber (https://github.com/nipy/nipype/pull/2143)
+* FIX: Allow S3DataGrabber to grab single file (https://github.com/nipy/nipype/pull/2147)
+* FIX: Allow 4D images as inputs to buildtemplateparallel.sh and N4BiasFieldCorrection (https://github.com/nipy/nipype/pull/2151)
+* MAINT: Detect and warn unconnected duplicate nodes (https://github.com/nipy/nipype/pull/2163)
+* ENH: Calcmedian Interface (https://github.com/nipy/nipype/pull/2167)
+* FIX: probtrackx2 outputs (https://github.com/nipy/nipype/pull/2169)
+* ENH: Improve FreeSurfer registration (https://github.com/nipy/nipype/pull/2172)
+* ENH: BIDSDataGrabber interface (https://github.com/nipy/nipype/pull/2174)
+* MAINT: Set minimum numpy version to 1.9.0 (https://github.com/nipy/nipype/pull/2182)
+* ENH: Support for multiple intial-moving-transforms (https://github.com/nipy/nipype/pull/2187)
+* MAINT: Fixes for networkx and afni (https://github.com/nipy/nipype/pull/2196, https://github.com/nipy/nipype/pull/2171)
+* TST: Update C3D version in Docker build (https://github.com/nipy/nipype/pull/2199)
+* ENH: SimpleInterface interface (https://github.com/nipy/nipype/pull/2220)
+* ENH: Add LTA to Tkregister2 (https://github.com/nipy/nipype/pull/2217)
 
 0.13.1 (May 20, 2017)
 =====================

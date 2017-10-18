@@ -48,7 +48,8 @@ def test_Blur_inputs():
     mandatory=True,
     xor=('fwhm', 'fwhm3d', 'standard_dev'),
     ),
-    terminal_output=dict(nohash=True,
+    terminal_output=dict(deprecated='1.0.0',
+    nohash=True,
     ),
     )
     inputs = Blur.input_spec()

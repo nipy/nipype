@@ -42,7 +42,8 @@ def test_UnpackSDICOMDir_inputs():
     spm_zeropad=dict(argstr='-nspmzeropad %d',
     ),
     subjects_dir=dict(),
-    terminal_output=dict(nohash=True,
+    terminal_output=dict(deprecated='1.0.0',
+    nohash=True,
     ),
     )
     inputs = UnpackSDICOMDir.input_spec()

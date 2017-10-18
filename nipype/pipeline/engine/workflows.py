@@ -36,7 +36,8 @@ import networkx as nx
 
 
 from ... import config, logging
-from ...utils.misc import (unflatten, package_check, str2bool)
+
+from ...utils.misc import (unflatten, str2bool)
 from ...utils.functions import (getsource, create_function_from_source)
 from ...interfaces.base import (traits, InputMultiPath, CommandLine,
                                 Undefined, TraitedSpec, DynamicTraitedSpec,
@@ -51,6 +52,7 @@ from ...utils.filemanip import (save_json, FileNotFoundError,
                                 write_rst_list, to_str)
 from .utils import (generate_expanded_graph, modify_paths,
                     export_graph, make_output_dir, write_workflow_prov,
+                    write_workflow_resources,
                     clean_working_directory, format_dot, topological_sort,
                     get_print_name, merge_dict, evaluate_connect_function,
                     _write_inputs, format_node)
@@ -58,7 +60,6 @@ from .utils import (generate_expanded_graph, modify_paths,
 from .base import EngineBase
 from .nodes import Node, MapNode
 
-package_check('networkx', '1.3')
 logger = logging.getLogger('workflow')
 
 class Workflow(EngineBase):
@@ -185,7 +186,7 @@ class Workflow(EngineBase):
             # check to see which ports of destnode are already
             # connected.
             if not disconnect and (destnode in self._graph.nodes()):
-                for edge in self._graph.in_edges_iter(destnode):
+                for edge in self._graph.in_edges(destnode):
                     data = self._graph.get_edge_data(*edge)
                     for sourceinfo, destname in data['connect']:
                         if destname not in connected_ports[destnode]:
@@ -506,8 +507,8 @@ connected.
                     else:
                         lines.append(line)
                 # write connections
-                for u, _, d in flatgraph.in_edges_iter(nbunch=node,
-                                                       data=True):
+                for u, _, d in flatgraph.in_edges(nbunch=node,
+                                                  data=True):
                     for cd in d['connect']:
                         if isinstance(cd[0], tuple):
                             args = list(cd[0])
@@ -594,6 +595,9 @@ connected.
                                 'workflow_provenance_%s' % datestr)
             logger.info('Provenance file prefix: %s' % prov_base)
             write_workflow_prov(execgraph, prov_base, format='all')
+
+        if config.resource_monitor:
+            write_workflow_resources(execgraph)
         return execgraph
 
     # PRIVATE API AND FUNCTIONS
@@ -633,7 +637,7 @@ connected.
                                             total=N,
                                             name='Group_%05d' % gid))
         json_dict['maxN'] = maxN
-        for u, v in graph.in_edges_iter():
+        for u, v in graph.in_edges():
             json_dict['links'].append(dict(source=nodes.index(u),
                                            target=nodes.index(v),
                                            value=1))
@@ -654,7 +658,7 @@ connected.
         json_dict = []
         for i, node in enumerate(nodes):
             imports = []
-            for u, v in graph.in_edges_iter(nbunch=node):
+            for u, v in graph.in_edges(nbunch=node):
                 imports.append(getname(u, nodes.index(u)))
             json_dict.append(dict(name=getname(node, i),
                                   size=1,
@@ -669,7 +673,7 @@ connected.
             return
         for node in graph.nodes():
             node.needed_outputs = []
-            for edge in graph.out_edges_iter(node):
+            for edge in graph.out_edges(node):
                 data = graph.get_edge_data(*edge)
                 sourceinfo = [v1[0] if isinstance(v1, tuple) else v1
                               for v1, v2 in data['connect']]
@@ -683,7 +687,7 @@ connected.
         """
         for node in graph.nodes():
             node.input_source = {}
-            for edge in graph.in_edges_iter(node):
+            for edge in graph.in_edges(node):
                 data = graph.get_edge_data(*edge)
                 for sourceinfo, field in data['connect']:
                     node.input_source[field] = \
@@ -700,8 +704,13 @@ connected.
         for node in nodes:
             if node.name in node_names:
                 idx = node_names.index(node.name)
-                if node_lineage[idx] in [node._hierarchy, self.name]:
-                    raise IOError('Duplicate node name %s found.' % node.name)
+                try:
+                    this_node_lineage = node_lineage[idx]
+                except IndexError:
+                    raise IOError('Duplicate node name "%s" found.' % node.name)
+                else:
+                    if this_node_lineage in [node._hierarchy, self.name]:
+                        raise IOError('Duplicate node name "%s" found.' % node.name)
             else:
                 node_names.append(node.name)
 
@@ -753,8 +762,8 @@ connected.
                 setattr(inputdict, node.name, node.inputs)
             else:
                 taken_inputs = []
-                for _, _, d in self._graph.in_edges_iter(nbunch=node,
-                                                         data=True):
+                for _, _, d in self._graph.in_edges(nbunch=node,
+                                                    data=True):
                     for cd in d['connect']:
                         taken_inputs.append(cd[1])
                 unconnectedinputs = TraitedSpec()
@@ -859,7 +868,8 @@ connected.
                 # use in_edges instead of in_edges_iter to allow
                 # disconnections to take place properly. otherwise, the
                 # edge dict is modified.
-                for u, _, d in self._graph.in_edges(nbunch=node, data=True):
+                # dj: added list() for networkx ver.2
+                for u, _, d in list(self._graph.in_edges(nbunch=node, data=True)):
                     logger.debug('in: connections-> %s', to_str(d['connect']))
                     for cd in deepcopy(d['connect']):
                         logger.debug("in: %s", to_str(cd))
@@ -872,7 +882,8 @@ connected.
                         self.disconnect(u, cd[0], node, cd[1])
                         self.connect(srcnode, srcout, dstnode, dstin)
                 # do not use out_edges_iter for reasons stated in in_edges
-                for _, v, d in self._graph.out_edges(nbunch=node, data=True):
+                # dj: for ver 2 use list(out_edges)
+                for _, v, d in list(self._graph.out_edges(nbunch=node, data=True)):
                     logger.debug('out: connections-> %s', to_str(d['connect']))
                     for cd in deepcopy(d['connect']):
                         logger.debug("out: %s", to_str(cd))
@@ -960,7 +971,7 @@ connected.
                                              simple_form=simple_form, level=level + 3))
                 dotlist.append('}')
             else:
-                for subnode in self._graph.successors_iter(node):
+                for subnode in self._graph.successors(node):
                     if node._hierarchy != subnode._hierarchy:
                         continue
                     if not isinstance(subnode, Workflow):
@@ -975,7 +986,7 @@ connected.
                                                           subnodename))
                         logger.debug('connection: %s', dotlist[-1])
         # add between workflow connections
-        for u, v, d in self._graph.edges_iter(data=True):
+        for u, v, d in self._graph.edges(data=True):
             uname = '.'.join(hierarchy + [u.fullname])
             vname = '.'.join(hierarchy + [v.fullname])
             for src, dest in d['connect']:

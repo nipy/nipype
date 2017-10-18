@@ -90,33 +90,8 @@ To participate in the Nipype development related discussions please use the foll
 
 Please add *[nipype]* to the subject line when posting on the mailing list.
 
+Contributing to the project
+---------------------------
 
-Nipype structure
-----------------
-
-Currently Nipype consists of the following files and directories:
-
-  INSTALL
-    NIPYPE prerequisites, installation, development, testing, and
-    troubleshooting.
-
-  README
-    This document.
-
-  THANKS
-    NIPYPE developers and contributors. Please keep it up to date!!
-
-  LICENSE
-    NIPYPE license terms.
-
-  doc/
-    Sphinx/reST documentation
-
-  examples/
-
-  nipype/
-    Contains the source code.
-
-  setup.py
-    Script for building and installing NIPYPE.
+If you'd like to contribute to the project please read our `guidelines <https://github.com/nipy/nipype/blob/master/CONTRIBUTING.md>`_. Please also read through our `code of conduct <https://github.com/nipy/nipype/blob/master/CODE_OF_CONDUCT.md>`_.
 

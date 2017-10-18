@@ -19,6 +19,9 @@ def test_TStat_inputs():
     ),
     mask=dict(argstr='-mask %s',
     ),
+    num_threads=dict(nohash=True,
+    usedefault=True,
+    ),
     options=dict(argstr='%s',
     ),
     out_file=dict(argstr='-prefix %s',
@@ -26,7 +29,8 @@ def test_TStat_inputs():
     name_template='%s_tstat',
     ),
     outputtype=dict(),
-    terminal_output=dict(nohash=True,
+    terminal_output=dict(deprecated='1.0.0',
+    nohash=True,
     ),
     )
     inputs = TStat.input_spec()

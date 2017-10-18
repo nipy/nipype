@@ -10,7 +10,7 @@ import os
 from sys import platform
 from distutils import spawn
 
-from ... import logging
+from ... import logging, LooseVersion
 from ...utils.filemanip import split_filename, fname_presuffix
 
 from ..base import (
@@ -44,32 +44,26 @@ class Info(object):
 
         """
         try:
-            clout = CommandLine(command='afni_vcheck',
+            clout = CommandLine(command='afni --version',
+                                resource_monitor=False,
                                 terminal_output='allatonce').run()
-
-            # Try to parse the version number
-            currv = clout.runtime.stdout.split('\n')[1].split('=', 1)[1].strip()
         except IOError:
             # If afni_vcheck is not present, return None
-            IFLOGGER.warn('afni_vcheck executable not found.')
+            IFLOGGER.warn('afni executable not found.')
             return None
-        except RuntimeError as e:
-            # If AFNI is outdated, afni_vcheck throws error.
-            # Show new version, but parse current anyways.
-            currv = str(e).split('\n')[4].split('=', 1)[1].strip()
-            nextv = str(e).split('\n')[6].split('=', 1)[1].strip()
-            IFLOGGER.warn(
-                'AFNI is outdated, detected version %s and %s is available.' % (currv, nextv))
 
-        if currv.startswith('AFNI_'):
-            currv = currv[5:]
+        version_stamp = clout.runtime.stdout.split('\n')[0].split('Version ')[1]
+        if version_stamp.startswith('AFNI'):
+            version_stamp = version_stamp.split('AFNI_')[1]
+        elif version_stamp.startswith('Debian'):
+            version_stamp = version_stamp.split('Debian-')[1].split('~')[0]
+        else:
+            return None
 
-        v = currv.split('.')
-        try:
-            v = [int(n) for n in v]
-        except ValueError:
-            return currv
-        return tuple(v)
+        version = LooseVersion(version_stamp.replace('_', '.')).version[:3]
+        if version[0] < 1000:
+            version[0] = version[0] + 2000
+        return tuple(version)
 
     @classmethod
     def output_type_to_ext(cls, outputtype):
@@ -113,6 +107,8 @@ class Info(object):
 
         Could be made more fancy to allow for more relocatability'''
         clout = CommandLine('which afni',
+                            ignore_exception=True,
+                            resource_monitor=False,
                             terminal_output='allatonce').run()
         if clout.runtime.returncode is not 0:
             return None
@@ -134,6 +130,8 @@ class AFNICommandBase(CommandLine):
 
 
 class AFNICommandInputSpec(CommandLineInputSpec):
+    num_threads = traits.Int(1, usedefault=True, nohash=True,
+                             desc='set number of threads')
     outputtype = traits.Enum('AFNI', list(Info.ftypes.keys()),
                              desc='AFNI output filetype')
     out_file = File(name_template="%s_afni", desc='output image file name',
@@ -144,6 +142,7 @@ class AFNICommandInputSpec(CommandLineInputSpec):
 class AFNICommandOutputSpec(TraitedSpec):
     out_file = File(desc='output file',
                     exists=True)
+
 
 class AFNICommand(AFNICommandBase):
     """Shared options for several AFNI commands """
@@ -176,30 +175,13 @@ class AFNICommand(AFNICommandBase):
                     'tags': ['implementation'],
                     }]
 
-    def __init__(self, **inputs):
-        super(AFNICommand, self).__init__(**inputs)
-        self.inputs.on_trait_change(self._output_update, 'outputtype')
+    @property
+    def num_threads(self):
+        return self.inputs.num_threads
 
-        if self._outputtype is None:
-            self._outputtype = Info.outputtype()
-
-        if not isdefined(self.inputs.outputtype):
-            self.inputs.outputtype = self._outputtype
-        else:
-            self._output_update()
-
-    def _run_interface(self, runtime):
-        # Update num threads estimate from OMP_NUM_THREADS env var
-        # Default to 1 if not set
-        self.inputs.environ['OMP_NUM_THREADS'] = str(self.num_threads)
-        return super(AFNICommand, self)._run_interface(runtime)
-
-    def _output_update(self):
-        """ i think? updates class private attribute based on instance input
-         in fsl also updates ENVIRON variable....not valid in afni
-         as it uses no environment variables
-        """
-        self._outputtype = self.inputs.outputtype
+    @num_threads.setter
+    def num_threads(self, value):
+        self.inputs.num_threads = value
 
     @classmethod
     def set_default_output_type(cls, outputtype):
@@ -215,6 +197,32 @@ class AFNICommand(AFNICommandBase):
             cls._outputtype = outputtype
         else:
             raise AttributeError('Invalid AFNI outputtype: %s' % outputtype)
+
+    def __init__(self, **inputs):
+        super(AFNICommand, self).__init__(**inputs)
+        self.inputs.on_trait_change(self._output_update, 'outputtype')
+
+        if hasattr(self.inputs, 'num_threads'):
+            self.inputs.on_trait_change(self._nthreads_update, 'num_threads')
+
+        if self._outputtype is None:
+            self._outputtype = Info.outputtype()
+
+        if not isdefined(self.inputs.outputtype):
+            self.inputs.outputtype = self._outputtype
+        else:
+            self._output_update()
+
+    def _nthreads_update(self):
+        """Update environment with new number of threads"""
+        self.inputs.environ['OMP_NUM_THREADS'] = '%d' % self.inputs.num_threads
+
+    def _output_update(self):
+        """ i think? updates class private attribute based on instance input
+         in fsl also updates ENVIRON variable....not valid in afni
+         as it uses no environment variables
+        """
+        self._outputtype = self.inputs.outputtype
 
     def _overload_extension(self, value, name=None):
         path, base, _ = split_filename(value)
@@ -278,6 +286,7 @@ class AFNICommand(AFNICommandBase):
                                 use_ext=False, newpath=cwd)
         return fname
 
+
 def no_afni():
     """ Checks if AFNI is available """
     if Info.version() is None:
@@ -289,8 +298,9 @@ class AFNIPythonCommandInputSpec(CommandLineInputSpec):
     outputtype = traits.Enum('AFNI', list(Info.ftypes.keys()),
                              desc='AFNI output filetype')
     py27_path = traits.Either('python2', File(exists=True),
-        usedefault=True,
-        default='python2')
+                              usedefault=True,
+                              default='python2')
+
 
 class AFNIPythonCommand(AFNICommand):
     @property

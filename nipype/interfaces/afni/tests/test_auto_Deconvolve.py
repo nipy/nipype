@@ -14,6 +14,8 @@ def test_Deconvolve_inputs():
     ),
     automask=dict(argstr='-automask',
     ),
+    cbucket=dict(argstr='-cbucket %s',
+    ),
     censor=dict(argstr='-censor %s',
     ),
     dmbase=dict(argstr='-dmbase',
@@ -74,6 +76,9 @@ def test_Deconvolve_inputs():
     num_stimts=dict(argstr='-num_stimts %d',
     position=-6,
     ),
+    num_threads=dict(nohash=True,
+    usedefault=True,
+    ),
     ortvec=dict(argstr='ortvec %s',
     ),
     out_file=dict(argstr='-bucket %s',
@@ -101,7 +106,8 @@ def test_Deconvolve_inputs():
     ),
     svd=dict(argstr='-svd',
     ),
-    terminal_output=dict(nohash=True,
+    terminal_output=dict(deprecated='1.0.0',
+    nohash=True,
     ),
     tout=dict(argstr='-tout',
     ),
@@ -123,7 +129,8 @@ def test_Deconvolve_inputs():
 
 
 def test_Deconvolve_outputs():
-    output_map = dict(out_file=dict(),
+    output_map = dict(cbucket=dict(),
+    out_file=dict(),
     reml_script=dict(),
     x1D=dict(),
     )
