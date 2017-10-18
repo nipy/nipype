@@ -1067,7 +1067,7 @@ def compute_noise_components(imgseries, mask_images, num_components,
 
         # "The covariance matrix C = MMT was constructed and decomposed into its
         # principal components using a singular value decomposition."
-        u, _, _ = linalg.svd(M, full_matrices=False)
+        u, _, _ = linalg.svd(M.dropna(inplace=True), full_matrices=False)
         if components is None:
             components = u[:, :num_components]
         else:
