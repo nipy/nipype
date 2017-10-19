@@ -1420,19 +1420,23 @@ def run_command(runtime, output=None, timeout=0.01):
 
     if output == 'allatonce':
         stdout, stderr = proc.communicate()
-        result['stdout'] = stdout.decode(default_encoding).split('\n')
-        result['stderr'] = stderr.decode(default_encoding).split('\n')
+        result['stdout'] = stdout.decode(
+            default_encoding, errors='replace').split('\n')
+        result['stderr'] = stderr.decode(
+            default_encoding, errors='replace').split('\n')
 
     elif output.startswith('file'):
         proc.wait()
         if outfile is not None:
             stdout.flush()
-            result['stdout'] = [line.decode(default_encoding).strip()
-                                for line in open(outfile, 'rb').readlines()]
+            result['stdout'] = [
+                line.decode(default_encoding, errors='replace').strip()
+                for line in open(outfile, 'rb').readlines()]
         if errfile is not None:
             stderr.flush()
-            result['stderr'] = [line.decode(default_encoding).strip()
-                                for line in open(errfile, 'rb').readlines()]
+            result['stderr'] = [
+                line.decode(default_encoding, errors='replace').strip()
+                for line in open(errfile, 'rb').readlines()]
 
         if output == 'file':
             result['merged'] = result['stdout']
