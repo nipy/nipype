@@ -601,6 +601,7 @@ def crash2txt(filename, record):
 def read_stream(stream, logger=None, encoding=None):
     """
     Robustly reads a stream, sending a warning to a logger
+    if some decoding error was raised.
 
     >>> read_stream(bytearray([65, 0xc7, 65, 10, 66]))  # doctest: +ELLIPSIS +ALLOW_UNICODE
     ['A...A', 'B']
