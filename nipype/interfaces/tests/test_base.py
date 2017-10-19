@@ -131,6 +131,32 @@ def test_TraitedSpec_1():
     assert ('goo', 1) in hashval[0]
 
 
+def test_TraitedSpec_copytrait():
+    Foo = [6, 90]
+    Goo = 1
+    Hoo = {"a":3, "b":5}
+
+    class spec(nib.TraitedSpec):
+        foo = nib.List()
+        goo = nib.Int()
+        hoo = nib.Dict()
+        def __init__(self, **kwargs):
+            pdb.set_trace()
+            super(spec, self).__init__(**kwargs)
+            self.goo += 1
+            self.foo[0] = 0
+            self.hoo["a"] = 13
+
+    sc = spec(foo=Foo, goo=Goo)
+    assert sc.goo == 2
+    assert sc.foo == [0,90]
+    assert sc.hoo == {"a":13, "b":5}
+
+    assert Goo == 1
+    assert Foo == [6,90]
+    assert Hoo == {"a":3, "b":5}
+
+
 def test_TraitedSpec_logic():
 
     class spec3(nib.TraitedSpec):

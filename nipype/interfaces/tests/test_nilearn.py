@@ -43,7 +43,7 @@ def setup_files(request, tmpdir):
 
     request.addfinalizer(change_directory)
 
-@pytest.mark.skipif(True, reason="dj:temp")
+
 @pytest.mark.skipif(no_nilearn, reason="the nilearn library is not available")
 def test_signal_extract_no_shared(setup_files):
     # run
@@ -54,7 +54,7 @@ def test_signal_extract_no_shared(setup_files):
     # assert
     assert_expected_output(Labels, FakeData.base_wanted)
 
-@pytest.mark.skipif(True, reason="dj:temp")
+
 @pytest.mark.skipif(no_nilearn, reason="the nilearn library is not available")
 def test_signal_extr_bad_label_list(setup_files):
     # run
@@ -64,13 +64,13 @@ def test_signal_extr_bad_label_list(setup_files):
                                class_labels=['bad'],
                                incl_shared_variance=False).run()
 
-@pytest.mark.skipif(True, reason="dj:temp")
+
 @pytest.mark.skipif(no_nilearn, reason="the nilearn library is not available")
 def test_signal_extr_equiv_4d_no_shared(setup_files):
     _test_4d_label(FakeData.base_wanted, FakeData.fake_equiv_4d_label_data,
                   incl_shared_variance=False)
 
-@pytest.mark.skipif(True, reason="dj:temp")
+
 @pytest.mark.skipif(no_nilearn, reason="the nilearn library is not available")
 def test_signal_extr_4d_no_shared(setup_files):
     # set up & run & assert
@@ -106,7 +106,7 @@ def test_signal_extr_4d_global_no_shared(setup_files):
     _test_4d_label(wanted_global, FakeData.fake_4d_label_data,
                    include_global=True, incl_shared_variance=False)
 
-@pytest.mark.skipif(True, reason="dj:temp")
+
 @pytest.mark.skipif(no_nilearn, reason="the nilearn library is not available")
 def test_signal_extr_shared(setup_files):
     # set up

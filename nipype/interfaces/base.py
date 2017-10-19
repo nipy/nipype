@@ -362,14 +362,15 @@ class TraitedSpec(traitlets.HasTraits):
         # arguments.  HasTraits does not define an __init__ and
         # therefore these args were being ignored.
         # super(TraitedSpec, self).__init__(*args, **kwargs)
-        super(TraitedSpec, self).__init__(**kwargs)
+        kwargs_copy = deepcopy(kwargs)
+        super(TraitedSpec, self).__init__(**kwargs_copy)
        # dj NOTE: it shouldn't be needed with traitlets (Satra)
         #traits.push_exception_handler(reraise_exceptions=True)
 
         # dj TODO: i don't think we have to use it; commented for now
         #self.trait_set(trait_change_notify=False, **undefined_traits)#dj remove
         self._generate_handlers()
-        self.set(**kwargs) 
+        self.set(**kwargs_copy) 
 
 
     # dj TODO: is it ok, or has to include tags?
