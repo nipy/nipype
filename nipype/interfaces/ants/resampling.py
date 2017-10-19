@@ -243,13 +243,15 @@ class ApplyTransformsInputSpec(ANTSCommandInputSpec):
                                 'Gaussian',
                                 'BSpline',
                                 argstr='%s', usedefault=True)
-    interpolation_parameters = traits.Either(traits.Tuple(traits.Int()),  # BSpline (order)
-                                             traits.Tuple(traits.Float(),  # Gaussian/MultiLabel (sigma, alpha)
-                                                          traits.Float())
-                                            )
-    transforms = InputMultiPath(File(exists=True), argstr='%s', mandatory=True,
-                                desc='transform files: will be applied in reverse order. For '
-                                'example, the last specified transform will be applied first.')
+    interpolation_parameters = traits.Either(
+        traits.Tuple(traits.Int()),  # BSpline (order)
+        traits.Tuple(traits.Float(),  # Gaussian/MultiLabel (sigma, alpha)
+                     traits.Float())
+    )
+    transforms = traits.Either(
+        InputMultiPath(File(exists=True)), 'identity', argstr='%s', mandatory=True,
+        desc='transform files: will be applied in reverse order. For '
+             'example, the last specified transform will be applied first.')
     invert_transform_flags = InputMultiPath(traits.Bool())
     default_value = traits.Float(0.0, argstr='--default-value %g', usedefault=True)
     print_out_composite_warp_file = traits.Bool(False, requires=["output_image"],
@@ -269,6 +271,15 @@ class ApplyTransforms(ANTSCommand):
     --------
 
     >>> from nipype.interfaces.ants import ApplyTransforms
+    >>> at = ApplyTransforms()
+    >>> at.inputs.input_image = 'moving1.nii'
+    >>> at.inputs.reference_image = 'fixed1.nii'
+    >>> at.inputs.transforms = 'identity'
+    >>> at.cmdline # doctest: +ALLOW_UNICODE
+    'antsApplyTransforms --default-value 0 --input moving1.nii \
+--interpolation Linear --output moving_trans.nii \
+--reference-image fixed1.nii -t identity'
+
     >>> at = ApplyTransforms()
     >>> at.inputs.dimension = 3
     >>> at.inputs.input_image = 'moving1.nii'
@@ -338,6 +349,8 @@ class ApplyTransforms(ANTSCommand):
         if opt == "output_image":
             return self._get_output_warped_filename()
         elif opt == "transforms":
+            if val == 'identity':
+                return '-t identity'
             return self._get_transform_filenames()
         elif opt == 'interpolation':
             if self.inputs.interpolation in ['BSpline', 'MultiLabel', 'Gaussian'] and \
