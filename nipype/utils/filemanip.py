@@ -5,16 +5,13 @@
 
 """
 from __future__ import print_function, division, unicode_literals, absolute_import
-from builtins import str, bytes, open
-
-from future import standard_library
-standard_library.install_aliases()
 
 import sys
 import pickle
 import subprocess
 import gzip
 import hashlib
+import locale
 from hashlib import md5
 import os
 import re
@@ -23,9 +20,14 @@ import posixpath
 import simplejson as json
 import numpy as np
 
+from builtins import str, bytes, open
+
 from .. import logging, config
 from .misc import is_container
 from ..interfaces.traits_extension import isdefined
+
+from future import standard_library
+standard_library.install_aliases()
 
 fmlogger = logging.getLogger('utils')
 
@@ -594,6 +596,26 @@ def crash2txt(filename, record):
             fp.write('\n')
             fp.write('Node inputs:\n{}\n'.format(node.inputs))
         fp.write(''.join(record['traceback']))
+
+
+def read_stream(stream, logger=None, encoding=None):
+    """
+    Robustly reads a stream, sending a warning to a logger
+    if some decoding error was raised.
+
+    >>> read_stream(bytearray([65, 0xc7, 65, 10, 66]))  # doctest: +ELLIPSIS +ALLOW_UNICODE
+    ['A...A', 'B']
+
+
+    """
+    default_encoding = encoding or locale.getdefaultlocale()[1] or 'UTF-8'
+    logger = logger or fmlogger
+    try:
+        out = stream.decode(default_encoding)
+    except UnicodeDecodeError as err:
+        out = stream.decode(default_encoding, errors='replace')
+        logger.warning('Error decoding string: %s', err)
+    return out.splitlines()
 
 
 def savepkl(filename, record):
