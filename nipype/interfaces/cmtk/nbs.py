@@ -32,7 +32,10 @@ def ntwks_to_matrices(in_files, edge_key):
     for idx, name in enumerate(in_files):
         graph = nx.read_gpickle(name)
         for u, v, d in graph.edges(data=True):
-            graph[u][v]['weight'] = d[edge_key]  # Setting the edge requested edge value as weight value
+            try:
+                graph[u][v]['weight'] = d[edge_key]  # Setting the edge requested edge value as weight value
+            except:
+                raise KeyError("the graph edges do not have {} attribute".format(edge_key))
         matrix[:, :, idx] = nx.to_numpy_matrix(graph)  # Retrieve the matrix
     return matrix
 
@@ -77,6 +80,10 @@ class NetworkBasedStatistic(BaseInterface):
     output_spec = NetworkBasedStatisticOutputSpec
 
     def _run_interface(self, runtime):
+
+        if not have_cv:
+            raise ImportError("cviewer library is not available")
+
         THRESH = self.inputs.threshold
         K = self.inputs.number_of_permutations
         TAIL = self.inputs.t_tail
