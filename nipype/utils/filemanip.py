@@ -615,7 +615,7 @@ def read_stream(stream, logger=None, encoding=None):
     except UnicodeDecodeError as err:
         out = stream.decode(default_encoding, errors='replace')
         logger.warning('Error decoding string: %s', err)
-    return out.split('\n')
+    return out.splitlines()
 
 
 def savepkl(filename, record):
