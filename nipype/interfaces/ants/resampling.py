@@ -277,7 +277,7 @@ class ApplyTransforms(ANTSCommand):
     >>> at.inputs.transforms = 'identity'
     >>> at.cmdline # doctest: +ALLOW_UNICODE
     'antsApplyTransforms --default-value 0 --input moving1.nii \
---interpolation Linear --output moving_trans.nii \
+--interpolation Linear --output moving1_trans.nii \
 --reference-image fixed1.nii -t identity'
 
     >>> at = ApplyTransforms()
