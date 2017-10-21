@@ -51,7 +51,7 @@ def test_Qwarp_inputs():
     copyfile=False,
     mandatory=True,
     ),
-    inilev=dict(argstr='-inlev %d',
+    inilev=dict(argstr='-inilev %d',
     xor=['duplo'],
     ),
     iniwarp=dict(argstr='-iniwarp %s',
