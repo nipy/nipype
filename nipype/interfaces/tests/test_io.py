@@ -440,4 +440,14 @@ def test_jsonsink(tmpdir, inputs_attributes):
     assert data == expected_data
 
 
+# dj: below I added some tests that are copied from doctests (it was just easie to debug for me)
+def test_JSONFileGrabber_doctest():
+    jsonSource = nio.JSONFileGrabber()
+    jsonSource.inputs.defaults = {'param1': 'overrideMe', 'param3': 1.0}
+    res = jsonSource.run()
+    assert res.outputs.param1 == 'overrideMe'
+    assert res.outputs.param3 == 1.
+
+    # this fails, res.outputs.get() == {}
+    assert res.outputs.get() == {'param1': 'overrideMe', 'param3': 1.0}
 
