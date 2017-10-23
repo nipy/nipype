@@ -6,15 +6,9 @@ available interfaces are:
 
 BIDSDataGrabber: Query data from BIDS dataset using pybids grabbids.
 
-Change directory to provide relative paths for doctests
->>> import os
->>> import bids
->>> filepath = os.path.realpath(os.path.dirname(bids.__file__))
->>> datadir = os.path.realpath(os.path.join(filepath, 'grabbids/tests/data/'))
->>> os.chdir(datadir)
-
 """
 from os.path import join, dirname
+import json
 from .. import logging
 from .base import (traits,
                    DynamicTraitedSpec,
@@ -24,13 +18,11 @@ from .base import (traits,
                    Str,
                    Undefined)
 
+have_pybids = True
 try:
     from bids import grabbids as gb
-    import json
 except ImportError:
     have_pybids = False
-else:
-    have_pybids = True
 
 LOGGER = logging.getLogger('workflows')
 
@@ -56,22 +48,19 @@ class BIDSDataGrabber(BaseInterface):
     Examples
     --------
 
-    >>> from nipype.interfaces.bids_utils import BIDSDataGrabber
-    >>> from os.path import basename
-
     By default, the BIDSDataGrabber fetches anatomical and functional images
     from a project, and makes BIDS entities (e.g. subject) available for
     filtering outputs.
 
-    >>> bg = BIDSDataGrabber()
-    >>> bg.inputs.base_dir = 'ds005/'
-    >>> bg.inputs.subject = '01'
-    >>> results = bg.run()
-    >>> basename(results.outputs.anat[0]) # doctest: +ALLOW_UNICODE
-    'sub-01_T1w.nii.gz'
+    >>> bg = BIDSDataGrabber() # doctest: +SKIP
+    >>> bg.inputs.base_dir = 'ds005/' # doctest: +SKIP
+    >>> bg.inputs.subject = '01' # doctest: +SKIP
+    >>> results = bg.run() # doctest # doctest: +SKIP
+    >>> basename(results.outputs.anat[0]) # doctest: +SKIP
+    'sub-01_T1w.nii.gz' # doctest: +SKIP
 
-    >>> basename(results.outputs.func[0]) # doctest: +ALLOW_UNICODE
-    'sub-01_task-mixedgamblestask_run-01_bold.nii.gz'
+    >>> basename(results.outputs.func[0]) # doctest: +SKIP
+    'sub-01_task-mixedgamblestask_run-01_bold.nii.gz' # doctest: +SKIP
 
 
     Dynamically created, user-defined output fields can also be defined to
@@ -79,13 +68,13 @@ class BIDSDataGrabber(BaseInterface):
     are filtered on common entities, which can be explicitly defined as
     infields.
 
-    >>> bg = BIDSDataGrabber(infields = ['subject'], outfields = ['dwi'])
-    >>> bg.inputs.base_dir = 'ds005/'
-    >>> bg.inputs.subject = '01'
-    >>> bg.inputs.output_query['dwi'] = dict(modality='dwi')
-    >>> results = bg.run()
-    >>> basename(results.outputs.dwi[0]) # doctest: +ALLOW_UNICODE
-    'sub-01_dwi.nii.gz'
+    >>> bg = BIDSDataGrabber(infields = ['subject'], outfields = ['dwi']) # doctest: +SKIP
+    >>> bg.inputs.base_dir = 'ds005/' # doctest: +SKIP
+    >>> bg.inputs.subject = '01' # doctest: +SKIP
+    >>> bg.inputs.output_query['dwi'] = dict(modality='dwi') # doctest: +SKIP
+    >>> results = bg.run() # doctest: +SKIP
+    >>> basename(results.outputs.dwi[0]) # doctest: +SKIP
+    'sub-01_dwi.nii.gz' # doctest: +SKIP
 
     """
     input_spec = BIDSDataGrabberInputSpec

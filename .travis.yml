@@ -37,12 +37,7 @@ before_install:
   conda install python=${TRAVIS_PYTHON_VERSION} &&
   conda config --add channels conda-forge &&
   conda install -y nipype icu &&
-  rm -r ${CONDA_HOME}/lib/python${TRAVIS_PYTHON_VERSION}/site-packages/nipype*;
-  pushd $HOME;
-  git clone https://github.com/INCF/pybids.git;
-  cd pybids;
-  pip install -e .;
-  popd; }
+  rm -r ${CONDA_HOME}/lib/python${TRAVIS_PYTHON_VERSION}/site-packages/nipype*; }
 #  Add install of vtk and mayavi to test mesh (disabled): conda install -y vtk mayavi
 - travis_retry apt_inst
 - travis_retry conda_inst
