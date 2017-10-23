@@ -141,19 +141,21 @@ def test_TraitedSpec_copytrait():
         goo = nib.Int()
         hoo = nib.Dict()
         def __init__(self, **kwargs):
-            pdb.set_trace()
             super(spec, self).__init__(**kwargs)
             self.goo += 1
             self.foo[0] = 0
             self.hoo["a"] = 13
 
-    sc = spec(foo=Foo, goo=Goo)
+    sc = spec(foo=Foo, goo=Goo, hoo=Hoo)
+
+    # checking if class attributes has changed properly
     assert sc.goo == 2
-    assert sc.foo == [0,90]
+    assert sc.foo == [0, 90]
     assert sc.hoo == {"a":13, "b":5}
 
+    # checking if global variables has NOT changed together with sc.foo etc.
     assert Goo == 1
-    assert Foo == [6,90]
+    assert Foo == [6, 90]
     assert Hoo == {"a":3, "b":5}
 
 
