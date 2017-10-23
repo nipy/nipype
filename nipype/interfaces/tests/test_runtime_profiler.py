@@ -11,12 +11,13 @@ from __future__ import print_function, division, unicode_literals, absolute_impo
 from builtins import open, str
 
 # Import packages
-from nipype.interfaces.base import (traits, CommandLine, CommandLineInputSpec,
-                                    runtime_profile)
+import nipype.interfaces.base as nib
+import traitlets
+
 import pytest
 import sys
 
-run_profile = runtime_profile
+run_profile = nib.runtime_profile
 
 if run_profile:
     try:
@@ -30,20 +31,20 @@ else:
     skip_profile_msg = 'Not running profiler'
 
 # UseResources inputspec
-class UseResourcesInputSpec(CommandLineInputSpec):
+class UseResourcesInputSpec(nib.CommandLineInputSpec):
     '''
     use_resources cmd interface inputspec
     '''
 
     # Init attributes
-    num_gb = traits.Float(desc='Number of GB of RAM to use',
-                          argstr='-g %f')
-    num_threads = traits.Int(desc='Number of threads to use',
+    num_gb = nib.Float(desc='Number of GB of RAM to use',
+                       argstr='-g %f')
+    num_threads = nib.Int(desc='Number of threads to use',
                           argstr='-p %d')
 
 
 # UseResources interface
-class UseResources(CommandLine):
+class UseResources(nib.CommandLine):
     '''
     use_resources cmd interface
     '''
