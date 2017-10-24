@@ -633,7 +633,7 @@ class Node(EngineBase):
             if copyfiles:
                 self._copyfiles_to_wd(cwd, execute)
 
-            message = 'Running node "%s" (a "%s" interface)'
+            message = 'Running node "%s" ("%s.%s")'
             if issubclass(self._interface.__class__, CommandLine):
                 try:
                     cmd = self._interface.cmdline
@@ -644,7 +644,7 @@ class Node(EngineBase):
                 with open(cmdfile, 'wt') as fd:
                     print(cmd + "\n", file=fd)
                 message += ', a CommandLine Interface with command:\n%s' % cmd
-            logger.info(message + '.', self.name,
+            logger.info(message + '.', self.name, self._interface.__module__,
                         self._interface.__class__.__name__)
             try:
                 result = self._interface.run()
