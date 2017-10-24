@@ -6,6 +6,12 @@ available interfaces are:
 
 BIDSDataGrabber: Query data from BIDS dataset using pybids grabbids.
 
+
+    Change directory to provide relative paths for doctests
+    >>> import os
+    >>> filepath = os.path.dirname( os.path.realpath( __file__ ) )
+    >>> datadir = os.path.realpath(os.path.join(filepath, '../testing/data'))
+    >>> os.chdir(datadir)
 """
 from os.path import join, dirname
 import json
@@ -52,15 +58,10 @@ class BIDSDataGrabber(BaseInterface):
     from a project, and makes BIDS entities (e.g. subject) available for
     filtering outputs.
 
-    >>> bg = BIDSDataGrabber() # doctest: +SKIP
+    >>> bg = BIDSDataGrabber()
     >>> bg.inputs.base_dir = 'ds005/'
     >>> bg.inputs.subject = '01'
-    >>> results = bg.run() # doctest
-    >>> basename(results.outputs.anat[0])
-    'sub-01_T1w.nii.gz'
-
-    >>> basename(results.outputs.func[0])
-    'sub-01_task-mixedgamblestask_run-01_bold.nii.gz'
+    >>> results = bg.run() # doctest: +SKIP
 
 
     Dynamically created, user-defined output fields can also be defined to
@@ -68,20 +69,18 @@ class BIDSDataGrabber(BaseInterface):
     are filtered on common entities, which can be explicitly defined as
     infields.
 
-    >>> bg = BIDSDataGrabber(infields = ['subject'], outfields = ['dwi']) # doctest: +SKIP
+    >>> bg = BIDSDataGrabber(infields = ['subject'], outfields = ['dwi'])
     >>> bg.inputs.base_dir = 'ds005/'
     >>> bg.inputs.subject = '01'
     >>> bg.inputs.output_query['dwi'] = dict(modality='dwi')
-    >>> results = bg.run()
-    >>> basename(results.outputs.dwi[0])
-    'sub-01_dwi.nii.gz'
+    >>> results = bg.run() # doctest: +SKIP
 
     """
     input_spec = BIDSDataGrabberInputSpec
     output_spec = DynamicTraitedSpec
     _always_run = True
 
-    def __init__(self, infields=None, **kwargs):
+    def __init__(self, infields=[], **kwargs):
         """
         Parameters
         ----------
@@ -93,17 +92,13 @@ class BIDSDataGrabber(BaseInterface):
             If no matching items, returns Undefined.
         """
         super(BIDSDataGrabber, self).__init__(**kwargs)
-        if not have_pybids:
-            raise ImportError(
-                "The BIDSEventsGrabber interface requires pybids."
-                " Please make sure it is installed.")
 
         if not isdefined(self.inputs.output_query):
             self.inputs.output_query = {"func": {"modality": "func"},
                                         "anat": {"modality": "anat"}}
 
-        # If infields is None, use all BIDS entities
-        if infields is None:
+        # If infields is empty, use all BIDS entities
+        if not infields and have_pybids:
             bids_config = join(dirname(gb.__file__), 'config', 'bids.json')
             bids_config = json.load(open(bids_config, 'r'))
             infields = [i['name'] for i in bids_config['entities']]
@@ -119,6 +114,10 @@ class BIDSDataGrabber(BaseInterface):
         self.inputs.trait_set(trait_change_notify=False, **undefined_traits)
 
     def _run_interface(self, runtime):
+        if not have_pybids:
+            raise ImportError(
+                "The BIDSEventsGrabber interface requires pybids."
+                " Please make sure it is installed.")
         return runtime
 
     def _list_outputs(self):
