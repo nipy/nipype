@@ -53,14 +53,14 @@ class BIDSDataGrabber(BaseInterface):
     filtering outputs.
 
     >>> bg = BIDSDataGrabber() # doctest: +SKIP
-    >>> bg.inputs.base_dir = 'ds005/' # doctest: +SKIP
-    >>> bg.inputs.subject = '01' # doctest: +SKIP
-    >>> results = bg.run() # doctest # doctest: +SKIP
-    >>> basename(results.outputs.anat[0]) # doctest: +SKIP
-    'sub-01_T1w.nii.gz' # doctest: +SKIP
+    >>> bg.inputs.base_dir = 'ds005/'
+    >>> bg.inputs.subject = '01'
+    >>> results = bg.run() # doctest
+    >>> basename(results.outputs.anat[0])
+    'sub-01_T1w.nii.gz'
 
-    >>> basename(results.outputs.func[0]) # doctest: +SKIP
-    'sub-01_task-mixedgamblestask_run-01_bold.nii.gz' # doctest: +SKIP
+    >>> basename(results.outputs.func[0])
+    'sub-01_task-mixedgamblestask_run-01_bold.nii.gz'
 
 
     Dynamically created, user-defined output fields can also be defined to
@@ -69,12 +69,12 @@ class BIDSDataGrabber(BaseInterface):
     infields.
 
     >>> bg = BIDSDataGrabber(infields = ['subject'], outfields = ['dwi']) # doctest: +SKIP
-    >>> bg.inputs.base_dir = 'ds005/' # doctest: +SKIP
-    >>> bg.inputs.subject = '01' # doctest: +SKIP
-    >>> bg.inputs.output_query['dwi'] = dict(modality='dwi') # doctest: +SKIP
-    >>> results = bg.run() # doctest: +SKIP
-    >>> basename(results.outputs.dwi[0]) # doctest: +SKIP
-    'sub-01_dwi.nii.gz' # doctest: +SKIP
+    >>> bg.inputs.base_dir = 'ds005/'
+    >>> bg.inputs.subject = '01'
+    >>> bg.inputs.output_query['dwi'] = dict(modality='dwi')
+    >>> results = bg.run()
+    >>> basename(results.outputs.dwi[0])
+    'sub-01_dwi.nii.gz'
 
     """
     input_spec = BIDSDataGrabberInputSpec
