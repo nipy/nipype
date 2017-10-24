@@ -21,7 +21,7 @@ def test_provenance():
     assert 'echo hello' in provn
 
 def test_provenance_exists(tmpdir):
-    tempdir = str(tmpdir)
+    tempdir = tmpdir.strpath
     os.chdir(tempdir)
     from nipype import config
     from nipype.interfaces.base import CommandLine

@@ -39,7 +39,7 @@ def nifti_image_files(outdir, filelist, shape):
 
 @pytest.fixture()
 def create_files_in_directory(request, tmpdir):
-    outdir = str(tmpdir)
+    outdir = tmpdir.strpath
     cwd = os.getcwd()
     os.chdir(outdir)
     filelist = ['a.nii', 'b.nii']
@@ -54,7 +54,7 @@ def create_files_in_directory(request, tmpdir):
 
 @pytest.fixture()
 def create_analyze_pair_file_in_directory(request, tmpdir):
-    outdir = str(tmpdir)
+    outdir = tmpdir.strpath
     cwd = os.getcwd()
     os.chdir(outdir)
     filelist = ['a.hdr']
@@ -69,7 +69,7 @@ def create_analyze_pair_file_in_directory(request, tmpdir):
 
 @pytest.fixture()
 def create_files_in_directory_plus_dummy_file(request, tmpdir):
-    outdir = str(tmpdir)
+    outdir = tmpdir.strpath
     cwd = os.getcwd()
     os.chdir(outdir)
     filelist = ['a.nii', 'b.nii']
@@ -88,7 +88,7 @@ def create_files_in_directory_plus_dummy_file(request, tmpdir):
 
 @pytest.fixture()
 def create_surf_file_in_directory(request, tmpdir):
-    outdir = str(tmpdir)
+    outdir = tmpdir.strpath
     cwd = os.getcwd()
     os.chdir(outdir)
     surf = 'lh.a.nii'
@@ -116,7 +116,7 @@ def set_output_type(fsl_output_type):
 def create_files_in_directory_plus_output_type(request, tmpdir):
     func_prev_type = set_output_type(request.param)
 
-    testdir = str(tmpdir)
+    testdir = tmpdir.strpath
     origdir = os.getcwd()
     os.chdir(testdir)
     filelist = ['a.nii', 'b.nii']

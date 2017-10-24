@@ -12,7 +12,7 @@ def test_csvReader(tmpdir):
              "bar,world,5\n",
              "baz,goodbye,0.3\n"]
     for x in range(2):
-        name = str(tmpdir.join("testfile.csv"))
+        name = tmpdir.join("testfile.csv").strpath
         with open(name, 'w') as fid:
             reader = utility.CSVReader()
             if x % 2 == 0:

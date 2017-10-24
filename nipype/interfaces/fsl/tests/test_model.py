@@ -13,7 +13,7 @@ from nipype.interfaces.fsl import no_fsl
 
 @pytest.mark.skipif(no_fsl(), reason="fsl is not installed")
 def test_MultipleRegressDesign(tmpdir):
-    os.chdir(str(tmpdir))
+    os.chdir(tmpdir.strpath)
     foo = fsl.MultipleRegressDesign()
     foo.inputs.regressors = dict(voice_stenght=[1, 1, 1], age=[0.2, 0.4, 0.5], BMI=[1, -1, 2])
     con1 = ['voice_and_age', 'T', ['age', 'voice_stenght'], [0.5, 0.5]]

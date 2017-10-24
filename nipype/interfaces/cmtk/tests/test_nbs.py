@@ -18,7 +18,7 @@ def creating_graphs(tmpdir):
     for idx, name in enumerate(graphnames):
         graph = np.random.rand(10,10)
         G = nx.from_numpy_matrix(graph)
-        out_file = str(tmpdir) + graphnames[idx] + '.pck'
+        out_file = tmpdir.strpath + graphnames[idx] + '.pck'
         # Save as pck file
         nx.write_gpickle(G, out_file)
         graphlist.append(out_file)

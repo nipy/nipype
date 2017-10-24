@@ -27,7 +27,7 @@ def fsl_name(obj, fname):
 @pytest.fixture()
 def setup_infile(tmpdir):
     ext = Info.output_type_to_ext(Info.output_type())
-    tmp_dir = str(tmpdir)
+    tmp_dir = tmpdir.strpath
     tmp_infile = os.path.join(tmp_dir, 'foo' + ext)
     open(tmp_infile, 'w')
 
@@ -183,7 +183,7 @@ def test_fast_list_outputs(setup_infile):
 @pytest.fixture()
 def setup_flirt(tmpdir):
     ext = Info.output_type_to_ext(Info.output_type())
-    tmp_dir = str(tmpdir)
+    tmp_dir = tmpdir.strpath
     _, infile = tempfile.mkstemp(suffix=ext, dir=tmp_dir)
     _, reffile = tempfile.mkstemp(suffix=ext, dir=tmp_dir)
 
@@ -549,7 +549,7 @@ def setup_fugue(tmpdir):
     import os.path as op
 
     d = np.ones((80, 80, 80))
-    tmp_dir = str(tmpdir)
+    tmp_dir = tmpdir.strpath
     infile = op.join(tmp_dir, 'dumbfile.nii.gz')
     nb.Nifti1Image(d, None, None).to_filename(infile)
 

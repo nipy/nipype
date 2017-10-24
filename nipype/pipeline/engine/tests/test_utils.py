@@ -58,7 +58,7 @@ def test_clean_working_directory(tmpdir):
     outputs = OutputSpec()
     inputs = InputSpec()
 
-    wd = str(tmpdir)
+    wd = tmpdir.strpath
     filenames = ['file.hdr', 'file.img', 'file.BRIK', 'file.HEAD',
                  '_0x1234.json', 'foo.txt']
     outfiles = []
@@ -105,7 +105,7 @@ def test_outputs_removal(tmpdir):
         fp.close()
         return file1, file2
 
-    out_dir = str(tmpdir)
+    out_dir = tmpdir.strpath
     n1 = pe.Node(niu.Function(input_names=['arg1'],
                               output_names=['file1', 'file2'],
                               function=test_function),
@@ -154,7 +154,7 @@ class UtilsTestInterface(nib.BaseInterface):
 
 
 def test_inputs_removal(tmpdir):
-    out_dir = str(tmpdir)
+    out_dir = tmpdir.strpath
     file1 = os.path.join(out_dir, 'file1.txt')
     fp = open(file1, 'wt')
     fp.write('dummy_file')
@@ -210,7 +210,7 @@ def test_outputs_removal_wf(tmpdir):
         import os
         return arg
 
-    out_dir = str(tmpdir)
+    out_dir = tmpdir.strpath
 
     for plugin in ('Linear',):  # , 'MultiProc'):
         n1 = pe.Node(niu.Function(input_names=['arg1'],
@@ -320,14 +320,14 @@ def create_wf(name):
 
 def test_multi_disconnected_iterable(tmpdir):
     metawf = pe.Workflow(name='meta')
-    metawf.base_dir = str(tmpdir)
+    metawf.base_dir = tmpdir.strpath
     metawf.add_nodes([create_wf('wf%d' % i) for i in range(30)])
     eg = metawf.run(plugin='Linear')
     assert len(eg.nodes()) == 60
 
 
 def test_provenance(tmpdir):
-    out_dir = str(tmpdir)
+    out_dir = tmpdir.strpath
     metawf = pe.Workflow(name='meta')
     metawf.base_dir = out_dir
     metawf.add_nodes([create_wf('wf%d' % i) for i in range(1)])
@@ -356,7 +356,7 @@ def test_mapnode_crash(tmpdir):
     node.inputs.WRONG = ['string{}'.format(i) for i in range(3)]
     node.config = deepcopy(config._sections)
     node.config['execution']['stop_on_first_crash'] = True
-    node.base_dir = str(tmpdir)
+    node.base_dir = tmpdir.strpath
     with pytest.raises(TypeError):
         node.run()
     os.chdir(cwd)
@@ -373,7 +373,7 @@ def test_mapnode_crash2(tmpdir):
                       iterfield=['WRONG'],
                       name='myfunc')
     node.inputs.WRONG = ['string{}'.format(i) for i in range(3)]
-    node.base_dir = str(tmpdir)
+    node.base_dir = tmpdir.strpath
 
     with pytest.raises(Exception):
         node.run()
@@ -392,6 +392,6 @@ def test_mapnode_crash3(tmpdir):
     node.inputs.WRONG = ['string{}'.format(i) for i in range(3)]
     wf = pe.Workflow('testmapnodecrash')
     wf.add_nodes([node])
-    wf.base_dir = str(tmpdir)
+    wf.base_dir = tmpdir.strpath
     with pytest.raises(RuntimeError):
         wf.run(plugin='Linear')

@@ -661,7 +661,7 @@ def test_parameterize_dirs_false(tmpdir):
     n2 = pe.Node(IdentityInterface(fields='in1'), name='Node2')
 
     wf = pe.Workflow(name='Test')
-    wf.base_dir = str(tmpdir)
+    wf.base_dir = tmpdir.strpath
     wf.config['execution']['parameterize_dirs'] = False
     wf.connect([(n1, n2, [('output1', 'in1')])])
 

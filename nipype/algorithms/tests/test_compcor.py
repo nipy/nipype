@@ -21,7 +21,7 @@ class TestCompCor():
     @pytest.fixture(autouse=True)
     def setup_class(self, tmpdir):
         # setup
-        self.temp_dir = str(tmpdir)
+        self.temp_dir = tmpdir.strpath
         os.chdir(self.temp_dir)
         noise = np.fromfunction(self.fake_noise_fun, self.fake_data.shape)
         self.realigned_file = utils.save_toy_nii(self.fake_data + noise,

@@ -17,7 +17,7 @@ from nipype.algorithms.modelgen import (SpecifyModel, SpecifySparseModel,
 
 
 def test_modelgen1(tmpdir):
-    tempdir = str(tmpdir)
+    tempdir = tmpdir.strpath
     filename1 = os.path.join(tempdir, 'test1.nii')
     filename2 = os.path.join(tempdir, 'test2.nii')
     Nifti1Image(np.random.rand(10, 10, 10, 200), np.eye(4)).to_filename(filename1)
@@ -56,7 +56,7 @@ def test_modelgen1(tmpdir):
 
 
 def test_modelgen_spm_concat(tmpdir):
-    tempdir = str(tmpdir)
+    tempdir = tmpdir.strpath
     filename1 = os.path.join(tempdir, 'test1.nii')
     filename2 = os.path.join(tempdir, 'test2.nii')
     Nifti1Image(np.random.rand(10, 10, 10, 30), np.eye(4)).to_filename(filename1)
@@ -122,7 +122,7 @@ def test_modelgen_spm_concat(tmpdir):
 
 
 def test_modelgen_sparse(tmpdir):
-    tempdir = str(tmpdir)
+    tempdir = tmpdir.strpath
     filename1 = os.path.join(tempdir, 'test1.nii')
     filename2 = os.path.join(tempdir, 'test2.nii')
     Nifti1Image(np.random.rand(10, 10, 10, 50), np.eye(4)).to_filename(filename1)

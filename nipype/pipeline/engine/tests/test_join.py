@@ -149,7 +149,7 @@ class ProductInterface(nib.BaseInterface):
 
 
 def test_join_expansion(tmpdir):
-    os.chdir(str(tmpdir))
+    os.chdir(tmpdir.strpath)
 
     # Make the workflow.
     wf = pe.Workflow(name='test')
@@ -196,7 +196,7 @@ def test_join_expansion(tmpdir):
 
 def test_node_joinsource(tmpdir):
     """Test setting the joinsource to a Node."""
-    os.chdir(str(tmpdir))
+    os.chdir(tmpdir.strpath)
 
     # Make the workflow.
     wf = pe.Workflow(name='test')
@@ -214,7 +214,7 @@ def test_node_joinsource(tmpdir):
 
 def test_set_join_node(tmpdir):
     """Test collecting join inputs to a set."""
-    os.chdir(str(tmpdir))
+    os.chdir(tmpdir.strpath)
 
     # Make the workflow.
     wf = pe.Workflow(name='test')
@@ -240,7 +240,7 @@ def test_unique_join_node(tmpdir):
     """Test join with the ``unique`` flag set to True."""
     global _sum_operands
     _sum_operands = []
-    os.chdir(str(tmpdir))
+    os.chdir(tmpdir.strpath)
 
     # Make the workflow.
     wf = pe.Workflow(name='test')
@@ -265,7 +265,7 @@ def test_multiple_join_nodes(tmpdir):
     """Test two join nodes, one downstream of the other."""
     global _products
     _products = []
-    os.chdir(str(tmpdir))
+    os.chdir(tmpdir.strpath)
 
     # Make the workflow.
     wf = pe.Workflow(name='test')
@@ -318,7 +318,7 @@ def test_identity_join_node(tmpdir):
     """Test an IdentityInterface join."""
     global _sum_operands
     _sum_operands = []
-    os.chdir(str(tmpdir))
+    os.chdir(tmpdir.strpath)
 
     # Make the workflow.
     wf = pe.Workflow(name='test')
@@ -353,7 +353,7 @@ def test_multifield_join_node(tmpdir):
     """Test join on several fields."""
     global _products
     _products = []
-    os.chdir(str(tmpdir))
+    os.chdir(tmpdir.strpath)
 
     # Make the workflow.
     wf = pe.Workflow(name='test')
@@ -393,7 +393,7 @@ def test_synchronize_join_node(tmpdir):
     """Test join on an input node which has the ``synchronize`` flag set to True."""
     global _products
     _products = []
-    os.chdir(str(tmpdir))
+    os.chdir(tmpdir.strpath)
 
     # Make the workflow.
     wf = pe.Workflow(name='test')
@@ -430,7 +430,7 @@ def test_synchronize_join_node(tmpdir):
 
 def test_itersource_join_source_node(tmpdir):
     """Test join on an input node which has an ``itersource``."""
-    os.chdir(str(tmpdir))
+    os.chdir(tmpdir.strpath)
 
     # Make the workflow.
     wf = pe.Workflow(name='test')
@@ -484,7 +484,7 @@ def test_itersource_join_source_node(tmpdir):
 def test_itersource_two_join_nodes(tmpdir):
     """Test join with a midstream ``itersource`` and an upstream
     iterable."""
-    os.chdir(str(tmpdir))
+    os.chdir(tmpdir.strpath)
 
     # Make the workflow.
     wf = pe.Workflow(name='test')
@@ -524,7 +524,7 @@ def test_itersource_two_join_nodes(tmpdir):
 
 def test_set_join_node_file_input(tmpdir):
     """Test collecting join inputs to a set."""
-    wd = str(tmpdir)
+    wd = tmpdir.strpath
     os.chdir(wd)
     open('test.nii', 'w+').close()
     open('test2.nii', 'w+').close()
@@ -547,7 +547,7 @@ def test_set_join_node_file_input(tmpdir):
 
 def test_nested_workflow_join(tmpdir):
     """Test collecting join inputs within a nested workflow"""
-    wd = str(tmpdir)
+    wd = tmpdir.strpath
     os.chdir(wd)
 
     # Make the nested workflow

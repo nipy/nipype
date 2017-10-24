@@ -117,7 +117,7 @@ def test_s3datagrabber_communication(tmpdir):
     dg.inputs.anon = True
     dg.inputs.bucket = 'openfmri'
     dg.inputs.bucket_path = 'ds001/'
-    dg.inputs.local_directory = str(tmpdir)
+    dg.inputs.local_directory = tmpdir.strpath
     dg.inputs.sort_filelist = True
     dg.inputs.template = '*'
     dg.inputs.field_template = dict(func='%s/BOLD/task001_%s/bold.nii.gz',
@@ -147,7 +147,7 @@ def test_datagrabber_order(tmpdir):
         tmpdir.join(file_name).open('a').close()
 
     dg = nio.DataGrabber(infields=['sid'])
-    dg.inputs.base_directory = str(tmpdir)
+    dg.inputs.base_directory = tmpdir.strpath
     dg.inputs.template = '%s_L%d_R*.q*'
     dg.inputs.template_args = {'outfiles': [['sid', 1], ['sid', 2],
                                             ['sid', 3]]}
@@ -208,7 +208,7 @@ def test_datasink_to_s3(dummy_input, tmpdir):
     attr_folder = 'text_file'
     output_dir = 's3://' + bucket_name
     # Local temporary filepaths for testing
-    fakes3_dir = str(tmpdir)
+    fakes3_dir = tmpdir.strpath
     input_path = dummy_input
 
     # Start up fake-S3 server
@@ -280,7 +280,7 @@ def test_datasink_localcopy(dummy_input, tmpdir):
     '''
 
     # Init variables
-    local_dir = str(tmpdir)
+    local_dir = tmpdir.strpath
     container = 'outputs'
     attr_folder = 'text_file'
 
@@ -370,7 +370,7 @@ def test_datasink_copydir():
 
 
 def test_datafinder_depth(tmpdir):
-    outdir = str(tmpdir)
+    outdir = tmpdir.strpath
     os.makedirs(os.path.join(outdir, '0', '1', '2', '3'))
 
     df = nio.DataFinder()
@@ -387,7 +387,7 @@ def test_datafinder_depth(tmpdir):
 
 
 def test_datafinder_unpack(tmpdir):
-    outdir = str(tmpdir)
+    outdir = tmpdir.strpath
     single_res = os.path.join(outdir, "findme.txt")
     open(single_res, 'a').close()
     open(os.path.join(outdir, "dontfindme"), 'a').close()
@@ -425,7 +425,7 @@ def test_jsonsink_input(tmpdir):
         {'new_entry' : 'someValue', 'test' : 'testInfields'}
 ])
 def test_jsonsink(tmpdir, inputs_attributes):
-    os.chdir(str(tmpdir))
+    os.chdir(tmpdir.strpath)
     js = nio.JSONFileSink(infields=['test'], in_dict={'foo': 'var'})
     setattr(js.inputs, 'contrasts.alt', 'someNestedValue')
     expected_data = {"contrasts": {"alt": "someNestedValue"}, "foo": "var"}

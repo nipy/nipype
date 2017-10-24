@@ -15,7 +15,7 @@ from ...interfaces import vtkbase as VTKInfo
 
 @pytest.mark.skipif(VTKInfo.no_tvtk(), reason="tvtk is not installed")
 def test_ident_distances(tmpdir):
-    tempdir = str(tmpdir)
+    tempdir = tmpdir.strpath
     os.chdir(tempdir)
 
     in_surf = example_data('surf01.vtk')
@@ -33,7 +33,7 @@ def test_ident_distances(tmpdir):
 
 @pytest.mark.skipif(VTKInfo.no_tvtk(), reason="tvtk is not installed")
 def test_trans_distances(tmpdir):
-    tempdir = str(tmpdir)
+    tempdir = tmpdir.strpath
     from ...interfaces.vtkbase import tvtk
 
     in_surf = example_data('surf01.vtk')
@@ -63,14 +63,14 @@ def test_trans_distances(tmpdir):
 
 @pytest.mark.skipif(VTKInfo.no_tvtk(), reason="tvtk is not installed")
 def test_warppoints(tmpdir):
-    os.chdir(str(tmpdir))
+    os.chdir(tmpdir.strpath)
 
     # TODO: include regression tests for when tvtk is installed
 
 
 @pytest.mark.skipif(VTKInfo.no_tvtk(), reason="tvtk is not installed")
 def test_meshwarpmaths(tmpdir):
-    os.chdir(str(tmpdir))
+    os.chdir(tmpdir.strpath)
 
     # TODO: include regression tests for when tvtk is installed
 

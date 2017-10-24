@@ -34,7 +34,7 @@ def callme(node, graph):
 
 
 def test_debug(tmpdir):
-    os.chdir(str(tmpdir))
+    os.chdir(tmpdir.strpath)
 
     pipe = pe.Workflow(name='pipe')
     mod1 = pe.Node(DebugTestInterface(), name='mod1')

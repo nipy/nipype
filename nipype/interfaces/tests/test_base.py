@@ -70,7 +70,7 @@ def test_bunch_hash():
 
 @pytest.fixture(scope="module")
 def setup_file(request, tmpdir_factory):
-    tmp_dir = str(tmpdir_factory.mktemp('files'))
+    tmp_dir = tmpdir_factory.mktemp('files').strpath
     tmp_infile = os.path.join(tmp_dir, 'foo.txt')
     with open(tmp_infile, 'w') as fp:
         fp.writelines([u'123456789'])
@@ -412,7 +412,7 @@ def test_BaseInterface():
 
 
 def test_BaseInterface_load_save_inputs(tmpdir):
-    tmp_json = os.path.join(str(tmpdir), 'settings.json')
+    tmp_json = os.path.join(tmpdir.strpath, 'settings.json')
 
     class InputSpec(nib.TraitedSpec):
         input1 = nib.traits.Int()
