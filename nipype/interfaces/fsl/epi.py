@@ -592,7 +592,7 @@ class Eddy(FSLCommand):
         cmd = self._cmd
         if all((FSLDIR != '',
                 cmd == 'eddy_openmp',
-                not os.path.exists(os.path.join(FSLDIR, cmd)))):
+                not os.path.exists(os.path.join(FSLDIR, 'bin', cmd)))):
             self._cmd = 'eddy'
         runtime = super(Eddy, self)._run_interface(runtime)
 
