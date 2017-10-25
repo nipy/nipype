@@ -2711,6 +2711,11 @@ class WarpInputSpec(AFNICommandInputSpec):
         desc='apply transformation from 3dWarpDrive',
         argstr='-matparent %s',
         exists=True)
+    oblique_parent = File(
+        desc='Read in the oblique transformation matrix from an oblique '
+             'dataset and make cardinal dataset oblique to match',
+        argstr='-oblique_parent %s',
+        exists=True)
     deoblique = traits.Bool(
         desc='transform dataset from oblique to cardinal',
         argstr='-deoblique')
@@ -2728,6 +2733,9 @@ class WarpInputSpec(AFNICommandInputSpec):
     zpad = traits.Int(
         desc='pad input dataset with N planes of zero on all sides.',
         argstr='-zpad %d')
+    verbose = traits.Bool(
+        desc='Print out some information along the way.',
+        argstr='-verb')
 
 
 class Warp(AFNICommand):
