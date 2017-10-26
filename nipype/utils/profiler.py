@@ -2,7 +2,7 @@
 # @Author: oesteban
 # @Date:   2017-09-21 15:50:37
 # @Last Modified by:   oesteban
-# @Last Modified time: 2017-10-02 15:44:29
+# @Last Modified time: 2017-10-20 09:12:36
 """
 Utilities to keep track of performance
 """
@@ -77,9 +77,13 @@ class ResourceMonitor(threading.Thread):
         except psutil.NoSuchProcess:
             pass
 
-        # parent_mem = mem
         # Iterate through child processes and get number of their threads
-        for child in self._process.children(recursive=True):
+        try:
+            children = self._process.children(recursive=True)
+        except psutil.NoSuchProcess:
+            children = []
+
+        for child in children:
             try:
                 with child.oneshot():
                     cpu += child.cpu_percent()
