@@ -37,7 +37,7 @@ before_install:
   conda config --add channels conda-forge &&
   conda install python=${TRAVIS_PYTHON_VERSION} &&
   conda install -y icu &&
-  pip install -r requirements.txt &&; }
+  pip install -r requirements.txt; }
 #  Add install of vtk and mayavi to test mesh (disabled): conda install -y vtk mayavi
 - travis_retry apt_inst
 - travis_retry conda_inst
