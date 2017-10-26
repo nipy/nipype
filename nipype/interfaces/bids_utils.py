@@ -80,7 +80,7 @@ class BIDSDataGrabber(BaseInterface):
     output_spec = DynamicTraitedSpec
     _always_run = True
 
-    def __init__(self, infields=[], **kwargs):
+    def __init__(self, infields=None, **kwargs):
         """
         Parameters
         ----------
@@ -98,7 +98,7 @@ class BIDSDataGrabber(BaseInterface):
                                         "anat": {"modality": "anat"}}
 
         # If infields is empty, use all BIDS entities
-        if not infields and have_pybids:
+        if not infields is None and have_pybids:
             bids_config = join(dirname(gb.__file__), 'config', 'bids.json')
             bids_config = json.load(open(bids_config, 'r'))
             infields = [i['name'] for i in bids_config['entities']]
@@ -107,7 +107,7 @@ class BIDSDataGrabber(BaseInterface):
 
         # used for mandatory inputs check
         undefined_traits = {}
-        for key in infields:
+        for key in infields or []:
             self.inputs.add_trait(key, traits.Any)
             undefined_traits[key] = kwargs[key] if key in kwargs else Undefined
 
