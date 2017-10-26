@@ -22,7 +22,7 @@ def test_provenance():
 
 def test_provenance_exists(tmpdir):
     tempdir = tmpdir.strpath
-    os.chdir(tempdir)
+    tmpdir.chdir()
     from nipype import config
     from nipype.interfaces.base import CommandLine
     provenance_state = config.get('execution', 'write_provenance')

@@ -15,8 +15,9 @@ import nipype.pipeline.engine as pe
 
 @pytest.mark.skipif(no_freesurfer(), reason="freesurfer is not installed")
 def test_concatenate(tmpdir):
+    tmpdir.chdir()
+
     tempdir = tmpdir.strpath
-    os.chdir(tempdir)
     in1 = os.path.join(tempdir, 'cont1.nii')
     in2 = os.path.join(tempdir, 'cont2.nii')
     out = 'bar.nii'
