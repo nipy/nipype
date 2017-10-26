@@ -3483,11 +3483,16 @@ class Qwarp(AFNICommand):
     >>> qwarp3.inputs.allineate = True
     >>> qwarp3.inputs.allineate_opts = '-cose lpa -verb'
     >>> qwarp3.cmdline  # doctest: +ALLOW_UNICODE
-    "3dQwarp -base mni.nii -allineate -allineate_opts '-cost lpa -verb'"
+    "3dQwarp -allineate -allineate_opts '-cose lpa -verb' -base mni.nii -source structural.nii -prefix structural_QW"
     >>> res3 = qwarp3.run()  # doctest: +SKIP    """
     _cmd = '3dQwarp'
     input_spec = QwarpInputSpec
     output_spec = QwarpOutputSpec
+
+    def _format_arg(self, name, spec, value):
+        if name == 'allineate_opts':
+            return spec.argstr % ("'" + value + "'")
+        return super(Qwarp, self)._format_arg(name, spec, value)
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
