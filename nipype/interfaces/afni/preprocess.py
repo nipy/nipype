@@ -2929,6 +2929,17 @@ class QwarpInputSpec(AFNICommandInputSpec):
              '* You CAN use -resample with these 3dQwarp options:'
              '-plusminus  -inilev  -iniwarp  -duplo',
         argstr='-resample')
+    allineate = traits.Bool(
+        desc='This option will make 3dQwarp run 3dAllineate first, to align '
+             'the source dataset to the base with an affine transformation. '
+             'It will then use that alignment as a starting point for the '
+             'nonlinear warping.',
+        argstr='-allineate')
+    allineate_opts = traits.Str(
+        desc='add extra options to the 3dAllineate command to be run by '
+             '3dQwarp.',
+        argstr='-allineate_opts %s',
+        xand=['allineate'])
     nowarp = traits.Bool(
         desc='Do not save the _WARP file.',
         argstr='-nowarp')
@@ -3465,7 +3476,15 @@ class Qwarp(AFNICommand):
     >>> qwarp2.cmdline  # doctest: +ALLOW_UNICODE
     '3dQwarp -base mni.nii -blur 0.0 2.0 -source structural.nii -inilev 7 -iniwarp Q25_warp+tlrc.HEAD -prefix Q11'
     >>> res2 = qwarp2.run()  # doctest: +SKIP
-    """
+    >>> res2 = qwarp2.run()  # doctest: +SKIP
+    >>> qwarp3 = afni.Qwarp()
+    >>> qwarp3.inputs.in_file = 'structural.nii'
+    >>> qwarp3.inputs.base_file = 'mni.nii'
+    >>> qwarp3.inputs.allineate = True
+    >>> qwarp3.inputs.allineate_opts = '-cose lpa -verb'
+    >>> qwarp3.cmdline  # doctest: +ALLOW_UNICODE
+    "3dQwarp -base mni.nii -allineate -allineate_opts '-cost lpa -verb'"
+    >>> res3 = qwarp3.run()  # doctest: +SKIP    """
     _cmd = '3dQwarp'
     input_spec = QwarpInputSpec
     output_spec = QwarpOutputSpec
