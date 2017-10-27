@@ -14,6 +14,8 @@ def test_Deconvolve_inputs():
     ),
     automask=dict(argstr='-automask',
     ),
+    cbucket=dict(argstr='-cbucket %s',
+    ),
     censor=dict(argstr='-censor %s',
     ),
     dmbase=dict(argstr='-dmbase',
@@ -127,7 +129,8 @@ def test_Deconvolve_inputs():
 
 
 def test_Deconvolve_outputs():
-    output_map = dict(out_file=dict(),
+    output_map = dict(cbucket=dict(),
+    out_file=dict(),
     reml_script=dict(),
     x1D=dict(),
     )

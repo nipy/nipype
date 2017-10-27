@@ -26,4 +26,4 @@ from .utils import (ABoverlap, AFNItoNIFTI, Autobox, Axialize, BrickStat,
                     Refit, Resample, TCat, TCatSubBrick, TStat, To3D, Unifize,
                     Undump, ZCutUp, GCOR,
                     Zcat, Zeropad)
-from .model import (Deconvolve, Remlfit)
+from .model import (Deconvolve, Remlfit, Synthesize)

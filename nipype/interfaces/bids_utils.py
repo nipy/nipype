@@ -34,6 +34,7 @@ else:
 
 LOGGER = logging.getLogger('workflows')
 
+
 class BIDSDataGrabberInputSpec(DynamicTraitedSpec):
     base_dir = Directory(exists=True,
                          desc='Path to BIDS Directory.',
@@ -91,7 +92,7 @@ class BIDSDataGrabber(BaseInterface):
     output_spec = DynamicTraitedSpec
     _always_run = True
 
-    def __init__(self, infields=None, outfields=None, **kwargs):
+    def __init__(self, infields=None, **kwargs):
         """
         Parameters
         ----------
@@ -104,17 +105,13 @@ class BIDSDataGrabber(BaseInterface):
         """
         super(BIDSDataGrabber, self).__init__(**kwargs)
         if not have_pybids:
-            raise ImportError("The BIDSEventsGrabber interface requires pybids."
-                              " Please make sure it is installed.")
+            raise ImportError(
+                "The BIDSEventsGrabber interface requires pybids."
+                " Please make sure it is installed.")
 
-        # If outfields is None use anat and func as default
-        if outfields is None:
-            outfields = ['func', 'anat']
-            self.inputs.output_query = {
-                "func": {"modality": "func"},
-                "anat": {"modality": "anat"}}
-        else:
-            self.inputs.output_query = {}
+        if not isdefined(self.inputs.output_query):
+            self.inputs.output_query = {"func": {"modality": "func"},
+                                        "anat": {"modality": "anat"}}
 
         # If infields is None, use all BIDS entities
         if infields is None:
@@ -123,13 +120,12 @@ class BIDSDataGrabber(BaseInterface):
             infields = [i['name'] for i in bids_config['entities']]
 
         self._infields = infields
-        self._outfields = outfields
 
         # used for mandatory inputs check
         undefined_traits = {}
         for key in infields:
             self.inputs.add_trait(key, traits.Any)
-            undefined_traits[key] = Undefined
+            undefined_traits[key] = kwargs[key] if key in kwargs else Undefined
 
         self.inputs.trait_set(trait_change_notify=False, **undefined_traits)
 
@@ -138,10 +134,6 @@ class BIDSDataGrabber(BaseInterface):
 
     def _list_outputs(self):
         layout = gb.BIDSLayout(self.inputs.base_dir)
-
-        for key in self._outfields:
-            if key not in self.inputs.output_query:
-                raise ValueError("Define query for all outputs")
 
         # If infield is not given nm input value, silently ignore
         filters = {}
@@ -154,11 +146,9 @@ class BIDSDataGrabber(BaseInterface):
         for key, query in self.inputs.output_query.items():
             args = query.copy()
             args.update(filters)
-            filelist = layout.get(return_type=self.inputs.return_type,
-                                      **args)
+            filelist = layout.get(return_type=self.inputs.return_type, **args)
             if len(filelist) == 0:
-                msg = 'Output key: %s returned no files' % (
-                    key)
+                msg = 'Output key: %s returned no files' % key
                 if self.inputs.raise_on_empty:
                     raise IOError(msg)
                 else:

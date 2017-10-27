@@ -71,7 +71,6 @@ def add_args_options(arg_parser, interface):
             args["default"] = getattr(inputs, name)
             args["action"] = 'store_true'
 
-        print(name, spec.trait_type)
         # current support is for simple trait types
         if not spec.inner_traits:
             if not spec.is_trait_type(traits.TraitCompound):

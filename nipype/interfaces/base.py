@@ -38,7 +38,7 @@ from .. import config, logging, LooseVersion, __version__
 from ..utils.provenance import write_provenance
 from ..utils.misc import is_container, trim, str2bool
 from ..utils.filemanip import (md5, hash_infile, FileNotFoundError, hash_timestamp,
-                               split_filename, to_str)
+                               split_filename, to_str, read_stream)
 from .traits_extension import (
     traits, Undefined, TraitDictObject, TraitListObject, TraitError, isdefined,
     File, Directory, DictStrStr, has_metadata, ImageFile)
@@ -1212,6 +1212,50 @@ class BaseInterface(Interface):
             json.dump(inputs, fhandle, indent=4, ensure_ascii=False)
 
 
+class SimpleInterface(BaseInterface):
+    """ An interface pattern that allows outputs to be set in a dictionary
+    called ``_results`` that is automatically interpreted by
+    ``_list_outputs()`` to find the outputs.
+
+    When implementing ``_run_interface``, set outputs with::
+
+        self._results[out_name] = out_value
+
+    This can be a way to upgrade a ``Function`` interface to do type checking.
+
+    Examples
+    --------
+    >>> def double(x):
+    ...    return 2 * x
+    ...
+    >>> class DoubleInputSpec(BaseInterfaceInputSpec):
+    ...     x = traits.Float(mandatory=True)
+    ...
+    >>> class DoubleOutputSpec(TraitedSpec):
+    ...     doubled = traits.Float()
+    ...
+    >>> class Double(SimpleInterface):
+    ...     input_spec = DoubleInputSpec
+    ...     output_spec = DoubleOutputSpec
+    ...
+    ...     def _run_interface(self, runtime):
+    ...          self._results['doubled'] = double(self.inputs.x)
+    ...          return runtime
+
+    >>> dbl = Double()
+    >>> dbl.inputs.x = 2
+    >>> dbl.run().outputs.doubled
+    4.0
+    """
+    def __init__(self, from_file=None, resource_monitor=None, **inputs):
+        super(SimpleInterface, self).__init__(
+            from_file=from_file, resource_monitor=resource_monitor, **inputs)
+        self._results = {}
+
+    def _list_outputs(self):
+        return self._results
+
+
 class Stream(object):
     """Function to capture stdout and stderr streams with timestamps
 
@@ -1224,9 +1268,7 @@ class Stream(object):
         self._buf = ''
         self._rows = []
         self._lastidx = 0
-        self.default_encoding = locale.getdefaultlocale()[1]
-        if self.default_encoding is None:
-            self.default_encoding = 'UTF-8'
+        self.default_encoding = locale.getdefaultlocale()[1] or 'UTF-8'
 
     def fileno(self):
         "Pass-through for file descriptor."
@@ -1305,10 +1347,6 @@ def run_command(runtime, output=None, timeout=0.01):
     cmdline = runtime.cmdline
     env = _canonicalize_env(runtime.environ)
 
-    default_encoding = locale.getdefaultlocale()[1]
-    if default_encoding is None:
-        default_encoding = 'UTF-8'
-
     errfile = None
     outfile = None
     stdout = sp.PIPE
@@ -1376,19 +1414,22 @@ def run_command(runtime, output=None, timeout=0.01):
 
     if output == 'allatonce':
         stdout, stderr = proc.communicate()
-        result['stdout'] = stdout.decode(default_encoding).split('\n')
-        result['stderr'] = stderr.decode(default_encoding).split('\n')
+        result['stdout'] = read_stream(stdout, logger=iflogger)
+        result['stderr'] = read_stream(stderr, logger=iflogger)
 
     elif output.startswith('file'):
         proc.wait()
         if outfile is not None:
             stdout.flush()
-            result['stdout'] = [line.decode(default_encoding).strip()
-                                for line in open(outfile, 'rb').readlines()]
+            with open(outfile, 'rb') as ofh:
+                stdoutstr = ofh.read()
+            result['stdout'] = read_stream(stdoutstr, logger=iflogger)
+
         if errfile is not None:
             stderr.flush()
-            result['stderr'] = [line.decode(default_encoding).strip()
-                                for line in open(errfile, 'rb').readlines()]
+            with open(errfile, 'rb') as efh:
+                stderrstr = efh.read()
+            result['stderr'] = read_stream(stderrstr, logger=iflogger)
 
         if output == 'file':
             result['merged'] = result['stdout']

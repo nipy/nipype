@@ -36,6 +36,7 @@ def test_Registration_inputs():
     usedefault=True,
     ),
     initial_moving_transform=dict(argstr='%s',
+    exists=True,
     xor=['initial_moving_transform_com'],
     ),
     initial_moving_transform_com=dict(argstr='%s',
@@ -137,10 +138,12 @@ def test_Registration_inputs():
 
 def test_Registration_outputs():
     output_map = dict(composite_transform=dict(),
+    elapsed_time=dict(),
     forward_invert_flags=dict(),
     forward_transforms=dict(),
     inverse_composite_transform=dict(),
     inverse_warped_image=dict(),
+    metric_value=dict(),
     reverse_invert_flags=dict(),
     reverse_transforms=dict(),
     save_state=dict(),

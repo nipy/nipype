@@ -2213,13 +2213,20 @@ class UndumpInputSpec(AFNICommandInputSpec):
         desc='radius in mm of the sphere that will be filled about each input '
              '(x,y,z) or (i,j,k) voxel. If the radius is not given, or is 0, '
              'then each input data line sets the value in only one voxel.',
-        argstr='-srad -%f')
-    srad = traits.Tuple(
+        argstr='-srad %f')
+    orient = traits.Tuple(
         traits.Enum('R', 'L'), traits.Enum('A', 'P'), traits.Enum('I', 'S'),
-        desc='radius in mm of the sphere that will be filled about each input '
-             '(x,y,z) or (i,j,k) voxel. If the radius is not given, or is 0, '
-             'then each input data line sets the value in only one voxel.',
-        argstr='-srad -%f')
+        desc='Specifies the coordinate order used by -xyz. '
+             'The code must be 3 letters, one each from the pairs '
+             '{R,L} {A,P} {I,S}.  The first letter gives the '
+             'orientation of the x-axis, the second the orientation '
+             'of the y-axis, the third the z-axis: '
+             'R = right-to-left         L = left-to-right '
+             'A = anterior-to-posterior P = posterior-to-anterior '
+             'I = inferior-to-superior  S = superior-to-inferior '
+             'If -orient isn\'t used, then the coordinate order of the '
+             '-master (in_file) dataset is used to interpret (x,y,z) inputs.',
+        argstr='-orient %s')
     head_only = traits.Bool(
         desc='create only the .HEAD file which gets exploited by '
              'the AFNI matlab library function New_HEAD.m',
