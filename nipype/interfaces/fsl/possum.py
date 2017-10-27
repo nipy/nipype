@@ -80,7 +80,7 @@ class B0Calc(FSLCommand):
     >>> b0calc.inputs.in_file = 'tissue+air_map.nii'
     >>> b0calc.inputs.z_b0 = 3.0
     >>> b0calc.inputs.output_type = "NIFTI_GZ"
-    >>> b0calc.cmdline  # doctest: +ALLOW_UNICODE
+    >>> b0calc.cmdline
     'b0calc -i tissue+air_map.nii -o tissue+air_map_b0field.nii.gz --b0=3.00'
 
     """

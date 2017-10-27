@@ -47,7 +47,7 @@ class IdentityInterface(IOBase):
     <undefined>
 
     >>> out = ii.run()
-    >>> out.outputs.a # doctest: +ALLOW_UNICODE
+    >>> out.outputs.a
     'foo'
 
     >>> ii2 = IdentityInterface(fields=['a', 'b'], mandatory_inputs=True)

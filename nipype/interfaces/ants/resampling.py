@@ -66,7 +66,7 @@ class WarpTimeSeriesImageMultiTransform(ANTSCommand):
     >>> wtsimt.inputs.input_image = 'resting.nii'
     >>> wtsimt.inputs.reference_image = 'ants_deformed.nii.gz'
     >>> wtsimt.inputs.transformation_series = ['ants_Warp.nii.gz','ants_Affine.txt']
-    >>> wtsimt.cmdline # doctest: +ALLOW_UNICODE
+    >>> wtsimt.cmdline
     'WarpTimeSeriesImageMultiTransform 4 resting.nii resting_wtsimt.nii -R ants_deformed.nii.gz ants_Warp.nii.gz \
 ants_Affine.txt'
 
@@ -179,7 +179,7 @@ class WarpImageMultiTransform(ANTSCommand):
     >>> wimt.inputs.input_image = 'structural.nii'
     >>> wimt.inputs.reference_image = 'ants_deformed.nii.gz'
     >>> wimt.inputs.transformation_series = ['ants_Warp.nii.gz','ants_Affine.txt']
-    >>> wimt.cmdline # doctest: +ALLOW_UNICODE
+    >>> wimt.cmdline
     'WarpImageMultiTransform 3 structural.nii structural_wimt.nii -R ants_deformed.nii.gz ants_Warp.nii.gz \
 ants_Affine.txt'
 
@@ -305,7 +305,7 @@ class ApplyTransforms(ANTSCommand):
     >>> at.inputs.input_image = 'moving1.nii'
     >>> at.inputs.reference_image = 'fixed1.nii'
     >>> at.inputs.transforms = 'identity'
-    >>> at.cmdline # doctest: +ALLOW_UNICODE
+    >>> at.cmdline
     'antsApplyTransforms --default-value 0 --input moving1.nii \
 --interpolation Linear --output moving1_trans.nii \
 --reference-image fixed1.nii -t identity'
@@ -319,7 +319,7 @@ class ApplyTransforms(ANTSCommand):
     >>> at.inputs.default_value = 0
     >>> at.inputs.transforms = ['ants_Warp.nii.gz', 'trans.mat']
     >>> at.inputs.invert_transform_flags = [False, False]
-    >>> at.cmdline # doctest: +ALLOW_UNICODE
+    >>> at.cmdline
     'antsApplyTransforms --default-value 0 --dimensionality 3 --input moving1.nii --interpolation Linear \
 --output deformed_moving1.nii --reference-image fixed1.nii --transform [ ants_Warp.nii.gz, 0 ] \
 --transform [ trans.mat, 0 ]'
@@ -334,7 +334,7 @@ class ApplyTransforms(ANTSCommand):
     >>> at1.inputs.default_value = 0
     >>> at1.inputs.transforms = ['ants_Warp.nii.gz', 'trans.mat']
     >>> at1.inputs.invert_transform_flags = [False, False]
-    >>> at1.cmdline # doctest: +ALLOW_UNICODE
+    >>> at1.cmdline
     'antsApplyTransforms --default-value 0 --dimensionality 3 --input moving1.nii --interpolation BSpline[ 5 ] \
 --output deformed_moving1.nii --reference-image fixed1.nii --transform [ ants_Warp.nii.gz, 0 ] \
 --transform [ trans.mat, 0 ]'
@@ -442,7 +442,7 @@ class ApplyTransformsToPoints(ANTSCommand):
     >>> at.inputs.input_file = 'moving.csv'
     >>> at.inputs.transforms = ['trans.mat', 'ants_Warp.nii.gz']
     >>> at.inputs.invert_transform_flags = [False, False]
-    >>> at.cmdline # doctest: +ALLOW_UNICODE
+    >>> at.cmdline
     'antsApplyTransformsToPoints --dimensionality 3 --input moving.csv --output moving_transformed.csv \
 --transform [ trans.mat, 0 ] --transform [ ants_Warp.nii.gz, 0 ]'
 

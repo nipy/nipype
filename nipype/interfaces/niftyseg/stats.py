@@ -154,19 +154,19 @@ y/z for other directions.
     >>> # Test v operation
     >>> unary_v = copy.deepcopy(unary)
     >>> unary_v.inputs.operation = 'v'
-    >>> unary_v.cmdline  # doctest: +ALLOW_UNICODE
+    >>> unary_v.cmdline
     'seg_stats im1.nii -v'
     >>> unary_v.run()  # doctest: +SKIP
     >>> # Test vl operation
     >>> unary_vl = copy.deepcopy(unary)
     >>> unary_vl.inputs.operation = 'vl'
-    >>> unary_vl.cmdline  # doctest: +ALLOW_UNICODE
+    >>> unary_vl.cmdline
     'seg_stats im1.nii -vl'
     >>> unary_vl.run()  # doctest: +SKIP
     >>> # Test x operation
     >>> unary_x = copy.deepcopy(unary)
     >>> unary_x.inputs.operation = 'x'
-    >>> unary_x.cmdline  # doctest: +ALLOW_UNICODE
+    >>> unary_x.cmdline
     'seg_stats im1.nii -x'
     >>> unary_x.run()  # doctest: +SKIP
 
@@ -243,21 +243,21 @@ and <in2>
     >>> binary_sa = copy.deepcopy(binary)
     >>> binary_sa.inputs.operation = 'sa'
     >>> binary_sa.inputs.operand_value = 2.0
-    >>> binary_sa.cmdline  # doctest: +ALLOW_UNICODE
+    >>> binary_sa.cmdline
     'seg_stats im1.nii -sa 2.00000000'
     >>> binary_sa.run()  # doctest: +SKIP
     >>> # Test ncc operation
     >>> binary_ncc = copy.deepcopy(binary)
     >>> binary_ncc.inputs.operation = 'ncc'
     >>> binary_ncc.inputs.operand_file = 'im2.nii'
-    >>> binary_ncc.cmdline  # doctest: +ALLOW_UNICODE
+    >>> binary_ncc.cmdline
     'seg_stats im1.nii -ncc im2.nii'
     >>> binary_ncc.run()  # doctest: +SKIP
     >>> # Test Nl operation
     >>> binary_nl = copy.deepcopy(binary)
     >>> binary_nl.inputs.operation = 'Nl'
     >>> binary_nl.inputs.operand_file = 'output.csv'
-    >>> binary_nl.cmdline  # doctest: +ALLOW_UNICODE
+    >>> binary_nl.cmdline
     'seg_stats im1.nii -Nl output.csv'
     >>> binary_nl.run()  # doctest: +SKIP
 
