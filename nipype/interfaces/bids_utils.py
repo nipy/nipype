@@ -105,14 +105,6 @@ class BIDSDataGrabber(BaseInterface):
 
         self._infields = infields or []
 
-    def _run_interface(self, runtime):
-        if not have_pybids:
-            raise ImportError(
-                "The BIDSEventsGrabber interface requires pybids."
-                " Please make sure it is installed.")
-        return runtime
-
-    def _list_outputs(self):
         # used for mandatory inputs check
         undefined_traits = {}
         for key in self._infields:
@@ -121,6 +113,14 @@ class BIDSDataGrabber(BaseInterface):
 
         self.inputs.trait_set(trait_change_notify=False, **undefined_traits)
 
+    def _run_interface(self, runtime):
+        if not have_pybids:
+            raise ImportError(
+                "The BIDSEventsGrabber interface requires pybids."
+                " Please make sure it is installed.")
+        return runtime
+
+    def _list_outputs(self):
         layout = gb.BIDSLayout(self.inputs.base_dir)
 
         # If infield is not given nm input value, silently ignore
