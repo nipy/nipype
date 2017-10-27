@@ -58,7 +58,7 @@ class FitTensor(MRTrix3Base):
     >>> tsr.inputs.in_file = 'dwi.mif'
     >>> tsr.inputs.in_mask = 'mask.nii.gz'
     >>> tsr.inputs.grad_fsl = ('bvecs', 'bvals')
-    >>> tsr.cmdline                               # doctest: +ELLIPSIS +ALLOW_UNICODE
+    >>> tsr.cmdline                               # doctest: +ELLIPSIS
     'dwi2tensor -fslgrad bvecs bvals -mask mask.nii.gz dwi.mif dti.mif'
     >>> tsr.run()                                 # doctest: +SKIP
     """
@@ -173,7 +173,7 @@ class EstimateFOD(MRTrix3Base):
     >>> fod.inputs.response = 'response.txt'
     >>> fod.inputs.in_mask = 'mask.nii.gz'
     >>> fod.inputs.grad_fsl = ('bvecs', 'bvals')
-    >>> fod.cmdline                               # doctest: +ELLIPSIS +ALLOW_UNICODE
+    >>> fod.cmdline                               # doctest: +ELLIPSIS
     'dwi2fod -fslgrad bvecs bvals -mask mask.nii.gz dwi.mif response.txt\
  fods.mif'
     >>> fod.run()                                 # doctest: +SKIP

@@ -123,10 +123,10 @@ class Bunch(object):
     --------
     >>> from nipype.interfaces.base import Bunch
     >>> inputs = Bunch(infile='subj.nii', fwhm=6.0, register_to_mean=True)
-    >>> inputs # doctest: +ALLOW_UNICODE
+    >>> inputs
     Bunch(fwhm=6.0, infile='subj.nii', register_to_mean=True)
     >>> inputs.register_to_mean = False
-    >>> inputs # doctest: +ALLOW_UNICODE
+    >>> inputs
     Bunch(fwhm=6.0, infile='subj.nii', register_to_mean=False)
 
 
@@ -1505,18 +1505,18 @@ class CommandLine(BaseInterface):
     >>> from nipype.interfaces.base import CommandLine
     >>> cli = CommandLine(command='ls', environ={'DISPLAY': ':1'})
     >>> cli.inputs.args = '-al'
-    >>> cli.cmdline # doctest: +ALLOW_UNICODE
+    >>> cli.cmdline
     'ls -al'
 
     # Use get_traitsfree() to check all inputs set
-    >>> pprint.pprint(cli.inputs.get_traitsfree())  # doctest: +NORMALIZE_WHITESPACE +ALLOW_UNICODE
+    >>> pprint.pprint(cli.inputs.get_traitsfree())  # doctest: +NORMALIZE_WHITESPACE
     {'args': '-al',
      'environ': {'DISPLAY': ':1'},
      'ignore_exception': False}
 
-    >>> cli.inputs.get_hashval()[0][0] # doctest: +ALLOW_UNICODE
+    >>> cli.inputs.get_hashval()[0][0]
     ('args', '-al')
-    >>> cli.inputs.get_hashval()[1] # doctest: +ALLOW_UNICODE
+    >>> cli.inputs.get_hashval()[1]
     '11c37f97649cd61627f4afe5136af8c0'
 
     """
@@ -1846,12 +1846,12 @@ class MpiCommandLine(CommandLine):
     >>> from nipype.interfaces.base import MpiCommandLine
     >>> mpi_cli = MpiCommandLine(command='my_mpi_prog')
     >>> mpi_cli.inputs.args = '-v'
-    >>> mpi_cli.cmdline # doctest: +ALLOW_UNICODE
+    >>> mpi_cli.cmdline
     'my_mpi_prog -v'
 
     >>> mpi_cli.inputs.use_mpi = True
     >>> mpi_cli.inputs.n_procs = 8
-    >>> mpi_cli.cmdline # doctest: +ALLOW_UNICODE
+    >>> mpi_cli.cmdline
     'mpiexec -n 8 my_mpi_prog -v'
     """
     input_spec = MpiCommandLineInputSpec
@@ -1961,15 +1961,15 @@ class OutputMultiPath(MultiPath):
     <undefined>
 
     >>> a.foo = '/software/temp/foo.txt'
-    >>> a.foo # doctest: +ALLOW_UNICODE
+    >>> a.foo
     '/software/temp/foo.txt'
 
     >>> a.foo = ['/software/temp/foo.txt']
-    >>> a.foo # doctest: +ALLOW_UNICODE
+    >>> a.foo
     '/software/temp/foo.txt'
 
     >>> a.foo = ['/software/temp/foo.txt', '/software/temp/goo.txt']
-    >>> a.foo # doctest: +ALLOW_UNICODE
+    >>> a.foo
     ['/software/temp/foo.txt', '/software/temp/goo.txt']
 
     """
@@ -2006,15 +2006,15 @@ class InputMultiPath(MultiPath):
     <undefined>
 
     >>> a.foo = '/software/temp/foo.txt'
-    >>> a.foo # doctest: +ALLOW_UNICODE
+    >>> a.foo
     ['/software/temp/foo.txt']
 
     >>> a.foo = ['/software/temp/foo.txt']
-    >>> a.foo # doctest: +ALLOW_UNICODE
+    >>> a.foo
     ['/software/temp/foo.txt']
 
     >>> a.foo = ['/software/temp/foo.txt', '/software/temp/goo.txt']
-    >>> a.foo # doctest: +ALLOW_UNICODE
+    >>> a.foo
     ['/software/temp/foo.txt', '/software/temp/goo.txt']
 
     """

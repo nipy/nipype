@@ -109,7 +109,7 @@ class FillLesions(NiftySegCommand):
     >>> node = niftyseg.FillLesions()
     >>> node.inputs.in_file = 'im1.nii'
     >>> node.inputs.lesion_mask = 'im2.nii'
-    >>> node.cmdline  # doctest: +ALLOW_UNICODE
+    >>> node.cmdline
     'seg_FillLesions -i im1.nii -l im2.nii -o im1_lesions_filled.nii.gz'
 
     """
