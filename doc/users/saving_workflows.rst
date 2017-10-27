@@ -55,7 +55,7 @@ This will create a file "outputtestsave.py" with the following content:
 	from nipype.pipeline.engine import Workflow, Node, MapNode
 	from nipype.interfaces.utility import IdentityInterface
 	from nipype.interfaces.utility import Function
-	from nipype.utils.misc import getsource
+	from nipype.utils.functions import getsource
 	from nipype.interfaces.fsl.preprocess import BET
 	from nipype.interfaces.fsl.utils import ImageMaths
 	# Functions
