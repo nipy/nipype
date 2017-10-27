@@ -24,7 +24,7 @@ from ..base import (traits, DynamicTraitedSpec, Undefined, isdefined,
                     BaseInterfaceInputSpec)
 from ..io import IOBase, add_traits
 from ...utils.filemanip import filename_to_list
-from ...utils.misc import getsource, create_function_from_source
+from ...utils.functions import getsource, create_function_from_source
 
 logger = logging.getLogger('interface')
 
