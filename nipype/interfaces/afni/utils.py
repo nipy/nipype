@@ -1592,8 +1592,9 @@ class NwarpApply(AFNICommandBase):
 class NwarpCatInputSpec(AFNICommandInputSpec):
     in_files = traits.List(
         traits.Either(
-        traits.File(), traits.Tuple(
-        traits.Enum('IDENT', 'INV', 'SQRT', 'SQRTINV'), traits.File())),
+            traits.File(),
+            traits.Tuple(traits.Enum('IDENT', 'INV', 'SQRT', 'SQRTINV'),
+                         traits.File())),
         descr="list of tuples of 3D warps and associated functions",
         mandatory=True,
         argstr="%s",
@@ -1684,14 +1685,15 @@ class NwarpCat(AFNICommand):
 
     def _format_arg(self, name, spec, value):
         if name == 'in_files':
-            return spec.argstr%(' '.join(["'" + v[0] + "(" + v[1] + ")'"
-                                if isinstance(v, tuple) else v
-                                for v in value]))
+            return spec.argstr % (' '.join(["'" + v[0] + "(" + v[1] + ")'"
+                                            if isinstance(v, tuple) else v
+                                            for v in value]))
         return super(NwarpCat, self)._format_arg(name, spec, value)
 
     def _gen_filename(self, name):
         if name == 'out_file':
-            return self._gen_fname(self.inputs.in_files[0][0], suffix='_tcat')
+            return self._gen_fname(self.inputs.in_files[0][0],
+                                   suffix='_NwarpCat')
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
