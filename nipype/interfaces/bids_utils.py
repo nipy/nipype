@@ -103,15 +103,7 @@ class BIDSDataGrabber(BaseInterface):
             bids_config = json.load(open(bids_config, 'r'))
             infields = [i['name'] for i in bids_config['entities']]
 
-        self._infields = infields
-
-        # used for mandatory inputs check
-        undefined_traits = {}
-        for key in infields or []:
-            self.inputs.add_trait(key, traits.Any)
-            undefined_traits[key] = kwargs[key] if key in kwargs else Undefined
-
-        self.inputs.trait_set(trait_change_notify=False, **undefined_traits)
+        self._infields = infields or []
 
     def _run_interface(self, runtime):
         if not have_pybids:
@@ -121,6 +113,14 @@ class BIDSDataGrabber(BaseInterface):
         return runtime
 
     def _list_outputs(self):
+        # used for mandatory inputs check
+        undefined_traits = {}
+        for key in self._infields:
+            self.inputs.add_trait(key, traits.Any)
+            undefined_traits[key] = kwargs[key] if key in kwargs else Undefined
+
+        self.inputs.trait_set(trait_change_notify=False, **undefined_traits)
+
         layout = gb.BIDSLayout(self.inputs.base_dir)
 
         # If infield is not given nm input value, silently ignore
