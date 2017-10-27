@@ -40,7 +40,7 @@ def test_concatenate(tmpdir):
     assert np.allclose(nb.load(out, mmap=NUMPY_MMAP).get_data(), out_data)
 
     # Test in workflow
-    wf = pe.Workflow('test_concatenate', base_dir=tempdir)
+    wf = pe.Workflow('test_concatenate', base_dir=tmpdir.strpath)
     concat = pe.Node(model.Concatenate(in_files=[in1, in2],
                                        concatenated_file=out),
                      name='concat')
