@@ -204,7 +204,7 @@ class EMRegister(FSCommandOpenMP):
     >>> register.inputs.out_file = 'norm_transform.lta'
     >>> register.inputs.skull = True
     >>> register.inputs.nbrspacing = 9
-    >>> register.cmdline
+    >>> register.cmdline # doctest: +ALLOW_UNICODE
     'mri_em_register -uns 9 -skull norm.mgz aseg.mgz norm_transform.lta'
     """
     _cmd = 'mri_em_register'
@@ -254,7 +254,7 @@ class Register(FSCommand):
     >>> register.inputs.target = 'aseg.mgz'
     >>> register.inputs.out_file = 'lh.pial.reg'
     >>> register.inputs.curv = True
-    >>> register.cmdline
+    >>> register.cmdline # doctest: +ALLOW_UNICODE
     'mris_register -curv lh.pial aseg.mgz lh.pial.reg'
     """
 
@@ -320,7 +320,7 @@ class Paint(FSCommand):
     >>> paint.inputs.template = 'aseg.mgz'
     >>> paint.inputs.averages = 5
     >>> paint.inputs.out_file = 'lh.avg_curv'
-    >>> paint.cmdline
+    >>> paint.cmdline # doctest: +ALLOW_UNICODE
     'mrisp_paint -a 5 aseg.mgz lh.pial lh.avg_curv'
     """
 
@@ -437,7 +437,7 @@ class MRICoreg(FSCommand):
     >>> coreg.inputs.source_file = 'moving1.nii'
     >>> coreg.inputs.reference_file = 'fixed1.nii'
     >>> coreg.inputs.subjects_dir = '.'
-    >>> coreg.cmdline +ELLIPSIS
+    >>> coreg.cmdline # doctest: +ALLOW_UNICODE +ELLIPSIS
     'mri_coreg --lta .../registration.lta --ref fixed1.nii --mov moving1.nii --sd .'
 
     If passing a subject ID, the reference mask may be disabled:
@@ -447,17 +447,17 @@ class MRICoreg(FSCommand):
     >>> coreg.inputs.subjects_dir = '.'
     >>> coreg.inputs.subject_id = 'fsaverage'
     >>> coreg.inputs.reference_mask = False
-    >>> coreg.cmdline +ELLIPSIS
+    >>> coreg.cmdline # doctest: +ALLOW_UNICODE +ELLIPSIS
     'mri_coreg --s fsaverage --no-ref-mask --lta .../registration.lta --mov moving1.nii --sd .'
 
     Spatial scales may be specified as a list of one or two separations:
 
     >>> coreg.inputs.sep = [4]
-    >>> coreg.cmdline +ELLIPSIS
+    >>> coreg.cmdline # doctest: +ALLOW_UNICODE +ELLIPSIS
     'mri_coreg --s fsaverage --no-ref-mask --lta .../registration.lta --sep 4 --mov moving1.nii --sd .'
 
     >>> coreg.inputs.sep = [4, 5]
-    >>> coreg.cmdline +ELLIPSIS
+    >>> coreg.cmdline # doctest: +ALLOW_UNICODE +ELLIPSIS
     'mri_coreg --s fsaverage --no-ref-mask --lta .../registration.lta --sep 4 --sep 5 --mov moving1.nii --sd .'
     """
 

@@ -64,13 +64,13 @@ def split_filename(fname):
     --------
     >>> from nipype.utils.filemanip import split_filename
     >>> pth, fname, ext = split_filename('/home/data/subject.nii.gz')
-    >>> pth
+    >>> pth # doctest: +ALLOW_UNICODE
     '/home/data'
 
-    >>> fname
+    >>> fname # doctest: +ALLOW_UNICODE
     'subject'
 
-    >>> ext
+    >>> ext # doctest: +ALLOW_UNICODE
     '.nii.gz'
 
     """
@@ -171,7 +171,7 @@ def fname_presuffix(fname, prefix='', suffix='', newpath=None, use_ext=True):
 
     >>> from nipype.utils.filemanip import fname_presuffix
     >>> fname = 'foo.nii.gz'
-    >>> fname_presuffix(fname,'pre','post','/tmp')
+    >>> fname_presuffix(fname,'pre','post','/tmp') # doctest: +ALLOW_UNICODE
     '/tmp/prefoopost.nii.gz'
 
     """
@@ -603,7 +603,7 @@ def read_stream(stream, logger=None, encoding=None):
     Robustly reads a stream, sending a warning to a logger
     if some decoding error was raised.
 
-    >>> read_stream(bytearray([65, 0xc7, 65, 10, 66]))  # doctest: +ELLIPSIS
+    >>> read_stream(bytearray([65, 0xc7, 65, 10, 66]))  # doctest: +ELLIPSIS +ALLOW_UNICODE
     ['A...A', 'B']
 
 
