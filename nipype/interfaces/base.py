@@ -1373,7 +1373,9 @@ def run_command(runtime, output=None, timeout=0.01):
                     stderr=stderr,
                     shell=True,
                     cwd=runtime.cwd,
-                    env=env)
+                    env=env,
+                    close_fds=True,
+    )
     result = {
         'stdout': [],
         'stderr': [],
@@ -1421,12 +1423,14 @@ def run_command(runtime, output=None, timeout=0.01):
         proc.wait()
         if outfile is not None:
             stdout.flush()
+            stdout.close()
             with open(outfile, 'rb') as ofh:
                 stdoutstr = ofh.read()
             result['stdout'] = read_stream(stdoutstr, logger=iflogger)
 
         if errfile is not None:
             stderr.flush()
+            stderr.close()
             with open(errfile, 'rb') as efh:
                 stderrstr = efh.read()
             result['stderr'] = read_stream(stderrstr, logger=iflogger)
