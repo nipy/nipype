@@ -3,7 +3,7 @@
 
 from nipype.interfaces.ants import WarpImageMultiTransform, WarpTimeSeriesImageMultiTransform
 import os
-import pytest, pdb
+import pytest
 
 
 @pytest.fixture()
@@ -47,7 +47,6 @@ def test_WarpImageMultiTransform_invaffine_2(change_dir, create_wimt):
    assert wimt.cmdline == 'WarpImageMultiTransform 3 diffusion_weighted.nii diffusion_weighted_wimt.nii -R functional.nii func2anat_coreg_Affine.txt func2anat_InverseWarp.nii.gz dwi2anat_Warp.nii.gz -i dwi2anat_coreg_Affine.txt'
 
 
-@pytest.mark.xfail(reason="dj: should it fail?")
 def test_WarpImageMultiTransform_invaffine_wrong(change_dir, create_wimt):
    wimt = create_wimt
    wimt.inputs.invert_affine = [3]
@@ -77,7 +76,6 @@ def test_WarpTimeSeriesImageMultiTransform_invaffine(change_dir, create_wtsimt):
 -R ants_deformed.nii.gz ants_Warp.nii.gz -i ants_Affine.txt'
 
 
-@pytest.mark.xfail(reason="dj: should it fail?")
 def test_WarpTimeSeriesImageMultiTransform_invaffine_wrong(change_dir, create_wtsimt):
    wtsimt = create_wtsimt
    wtsimt.inputs.invert_affine = [0]

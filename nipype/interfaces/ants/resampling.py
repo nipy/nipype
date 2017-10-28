@@ -43,9 +43,12 @@ class WarpTimeSeriesImageMultiTransformInputSpec(ANTSCommandInputSpec):
                                            desc='transformation file(s) to be applied',
                                            mandatory=True, copyfile=False)
     invert_affine = traits.List(traits.Int,
-                                desc=('List of Affine transformations to invert. '
+                                desc=('List of Affine transformations to invert.'
                                       'E.g.: [1,4,5] inverts the 1st, 4th, and 5th Affines '
-                                      'found in transformation_series'))
+                                      'found in transformation_series. Note that indexing '
+                                      'starts with 1 and does not include warp fields. Affine '
+                                      'transformations are distinguished '
+                                      'from warp fields by the word "affine" included in their filenames.'))
 
 
 class WarpTimeSeriesImageMultiTransformOutputSpec(TraitedSpec):
@@ -67,6 +70,14 @@ class WarpTimeSeriesImageMultiTransform(ANTSCommand):
     'WarpTimeSeriesImageMultiTransform 4 resting.nii resting_wtsimt.nii -R ants_deformed.nii.gz ants_Warp.nii.gz \
 ants_Affine.txt'
 
+    >>> wtsimt = WarpTimeSeriesImageMultiTransform()
+    >>> wtsimt.inputs.input_image = 'resting.nii'
+    >>> wtsimt.inputs.reference_image = 'ants_deformed.nii.gz'
+    >>> wtsimt.inputs.transformation_series = ['ants_Warp.nii.gz','ants_Affine.txt']
+    >>> wtsimt.inputs.invert_affine = [1] # # this will invert the 1st Affine file: ants_Affine.txt
+    >>> wtsimt.cmdline # doctest: +ALLOW_UNICODE
+    'WarpTimeSeriesImageMultiTransform 4 resting.nii resting_wtsimt.nii -R ants_deformed.nii.gz ants_Warp.nii.gz \
+-i ants_Affine.txt'
     """
 
     _cmd = 'WarpTimeSeriesImageMultiTransform'
@@ -81,13 +92,22 @@ ants_Affine.txt'
         if opt == 'transformation_series':
             series = []
             affine_counter = 0
+            affine_invert = []
             for transformation in val:
                 if 'Affine' in transformation and \
                         isdefined(self.inputs.invert_affine):
                     affine_counter += 1
                     if affine_counter in self.inputs.invert_affine:
                         series += ['-i']
+                        affine_invert.append(affine_counter)
                 series += [transformation]
+
+            if isdefined(self.inputs.invert_affine):
+                diff_inv = set(self.inputs.invert_affine) - set(affine_invert)
+                if diff_inv:
+                    raise Exceptions("Review invert_affine, not all indexes from invert_affine were used, "
+                                     "check the description for the full definition")
+
             return ' '.join(series)
         return super(WarpTimeSeriesImageMultiTransform, self)._format_arg(opt, spec, val)
 
@@ -168,7 +188,7 @@ ants_Affine.txt'
     >>> wimt.inputs.reference_image = 'functional.nii'
     >>> wimt.inputs.transformation_series = ['func2anat_coreg_Affine.txt','func2anat_InverseWarp.nii.gz', \
     'dwi2anat_Warp.nii.gz','dwi2anat_coreg_Affine.txt']
-    >>> wimt.inputs.invert_affine = [1]
+    >>> wimt.inputs.invert_affine = [1]  # this will invert the 1st Affine file: 'func2anat_coreg_Affine.txt'
     >>> wimt.cmdline # doctest: +ALLOW_UNICODE
     'WarpImageMultiTransform 3 diffusion_weighted.nii diffusion_weighted_wimt.nii -R functional.nii \
 -i func2anat_coreg_Affine.txt func2anat_InverseWarp.nii.gz dwi2anat_Warp.nii.gz dwi2anat_coreg_Affine.txt'
@@ -190,14 +210,24 @@ ants_Affine.txt'
         if opt == 'transformation_series':
             series = []
             affine_counter = 0
+            affine_invert = []
             for transformation in val:
                 if "affine" in transformation.lower() and \
                         isdefined(self.inputs.invert_affine):
                     affine_counter += 1
                     if affine_counter in self.inputs.invert_affine:
                         series += ['-i']
+                        affine_invert.append(affine_counter)
                 series += [transformation]
+
+            if isdefined(self.inputs.invert_affine):
+                diff_inv = set(self.inputs.invert_affine) - set(affine_invert)
+                if diff_inv:
+                    raise Exceptions("Review invert_affine, not all indexes from invert_affine were used, "
+                                     "check the description for the full definition")
+
             return ' '.join(series)
+
         return super(WarpImageMultiTransform, self)._format_arg(opt, spec, val)
 
     def _list_outputs(self):
