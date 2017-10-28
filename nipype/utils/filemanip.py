@@ -646,3 +646,20 @@ def write_rst_dict(info, prefix=''):
     for key, value in sorted(info.items()):
         out.append('{}* {} : {}'.format(prefix, key, str(value)))
     return '\n'.join(out) + '\n\n'
+
+
+def dist_is_editable(dist):
+    """Is distribution an editable install?
+
+    Parameters
+    ----------
+    dist : string
+        Package name
+
+    # Borrowed from `pip`'s' API
+    """
+    for path_item in sys.path:
+        egg_link = os.path.join(path_item, dist + '.egg-link')
+        if os.path.isfile(egg_link):
+            return True
+    return False
