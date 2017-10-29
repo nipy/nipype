@@ -49,8 +49,12 @@ class ANTSInputSpec(ANTSCommandInputSpec):
     metric = traits.List(traits.Enum('CC', 'MI', 'SMI', 'PR', 'SSD',
                                      'MSQ', 'PSE'), mandatory=True, desc='')
 
-    metric_weight = traits.List(traits.Float(), requires=['metric'], desc='')
-    radius = traits.List(traits.Int(), requires=['metric'], desc='')
+    metric_weight = traits.List(traits.Float(), value=[1.0], usedefault=True,
+                                requires=['metric'], mandatory=True,
+                                desc='the metric weight(s) for each stage. '
+                                'The weights must sum to 1 per stage.')
+
+    radius = traits.List(traits.Int(), requires=['metric'],  mandatory=True, desc='')
 
     output_transform_prefix = Str('out', usedefault=True, argstr='--output-naming %s',
                                   mandatory=True, desc='')
