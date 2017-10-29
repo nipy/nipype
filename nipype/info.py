@@ -137,7 +137,7 @@ REQUIRES = [
     'traits>=%s' % TRAITS_MIN_VERSION,
     'future>=%s' % FUTURE_MIN_VERSION,
     'simplejson>=%s' % SIMPLEJSON_MIN_VERSION,
-    'prov==%s' % PROV_VERSION,
+    'prov>=%s' % PROV_VERSION,
     'click>=%s' % CLICK_MIN_VERSION,
     'funcsigs',
     'pytest>=%s' % PYTEST_MIN_VERSION,
