@@ -45,6 +45,7 @@ class UseResources(CommandLine):
     _always_run = True
 
 
+@pytest.mark.skip(reason="inconsistent readings")
 @pytest.mark.skipif(os.getenv('CI_SKIP_TEST', False), reason='disabled in CI tests')
 @pytest.mark.parametrize("mem_gb,n_procs", [(0.5, 3), (2.2, 8), (0.8, 4), (1.5, 1)])
 def test_cmdline_profiling(tmpdir, mem_gb, n_procs):

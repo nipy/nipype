@@ -38,7 +38,7 @@ from .. import config, logging, LooseVersion, __version__
 from ..utils.provenance import write_provenance
 from ..utils.misc import is_container, trim, str2bool
 from ..utils.filemanip import (md5, hash_infile, FileNotFoundError, hash_timestamp,
-                               split_filename, to_str)
+                               split_filename, to_str, read_stream)
 from .traits_extension import (
     traits, Undefined, TraitDictObject, TraitListObject, TraitError, isdefined,
     File, Directory, DictStrStr, has_metadata, ImageFile)
@@ -1268,9 +1268,7 @@ class Stream(object):
         self._buf = ''
         self._rows = []
         self._lastidx = 0
-        self.default_encoding = locale.getdefaultlocale()[1]
-        if self.default_encoding is None:
-            self.default_encoding = 'UTF-8'
+        self.default_encoding = locale.getdefaultlocale()[1] or 'UTF-8'
 
     def fileno(self):
         "Pass-through for file descriptor."
@@ -1349,10 +1347,6 @@ def run_command(runtime, output=None, timeout=0.01):
     cmdline = runtime.cmdline
     env = _canonicalize_env(runtime.environ)
 
-    default_encoding = locale.getdefaultlocale()[1]
-    if default_encoding is None:
-        default_encoding = 'UTF-8'
-
     errfile = None
     outfile = None
     stdout = sp.PIPE
@@ -1379,7 +1373,9 @@ def run_command(runtime, output=None, timeout=0.01):
                     stderr=stderr,
                     shell=True,
                     cwd=runtime.cwd,
-                    env=env)
+                    env=env,
+                    close_fds=True,
+    )
     result = {
         'stdout': [],
         'stderr': [],
@@ -1420,19 +1416,24 @@ def run_command(runtime, output=None, timeout=0.01):
 
     if output == 'allatonce':
         stdout, stderr = proc.communicate()
-        result['stdout'] = stdout.decode(default_encoding).split('\n')
-        result['stderr'] = stderr.decode(default_encoding).split('\n')
+        result['stdout'] = read_stream(stdout, logger=iflogger)
+        result['stderr'] = read_stream(stderr, logger=iflogger)
 
     elif output.startswith('file'):
         proc.wait()
         if outfile is not None:
             stdout.flush()
-            result['stdout'] = [line.decode(default_encoding).strip()
-                                for line in open(outfile, 'rb').readlines()]
+            stdout.close()
+            with open(outfile, 'rb') as ofh:
+                stdoutstr = ofh.read()
+            result['stdout'] = read_stream(stdoutstr, logger=iflogger)
+
         if errfile is not None:
             stderr.flush()
-            result['stderr'] = [line.decode(default_encoding).strip()
-                                for line in open(errfile, 'rb').readlines()]
+            stderr.close()
+            with open(errfile, 'rb') as efh:
+                stderrstr = efh.read()
+            result['stderr'] = read_stream(stderrstr, logger=iflogger)
 
         if output == 'file':
             result['merged'] = result['stdout']

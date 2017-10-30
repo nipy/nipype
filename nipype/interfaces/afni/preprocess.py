@@ -15,7 +15,8 @@ from builtins import open
 import os
 import os.path as op
 
-from ...utils.filemanip import (load_json, save_json, split_filename)
+from ...utils.filemanip import (load_json, save_json, split_filename,
+                                fname_presuffix)
 from ..base import (
     CommandLineInputSpec, CommandLine, TraitedSpec,
     traits, isdefined, File, InputMultiPath, Undefined, Str)
@@ -2710,6 +2711,11 @@ class WarpInputSpec(AFNICommandInputSpec):
         desc='apply transformation from 3dWarpDrive',
         argstr='-matparent %s',
         exists=True)
+    oblique_parent = File(
+        desc='Read in the oblique transformation matrix from an oblique '
+             'dataset and make cardinal dataset oblique to match',
+        argstr='-oblique_parent %s',
+        exists=True)
     deoblique = traits.Bool(
         desc='transform dataset from oblique to cardinal',
         argstr='-deoblique')
@@ -2727,6 +2733,9 @@ class WarpInputSpec(AFNICommandInputSpec):
     zpad = traits.Int(
         desc='pad input dataset with N planes of zero on all sides.',
         argstr='-zpad %d')
+    verbose = traits.Bool(
+        desc='Print out some information along the way.',
+        argstr='-verb')
 
 
 class Warp(AFNICommand):
@@ -2928,6 +2937,17 @@ class QwarpInputSpec(AFNICommandInputSpec):
              '* You CAN use -resample with these 3dQwarp options:'
              '-plusminus  -inilev  -iniwarp  -duplo',
         argstr='-resample')
+    allineate = traits.Bool(
+        desc='This option will make 3dQwarp run 3dAllineate first, to align '
+             'the source dataset to the base with an affine transformation. '
+             'It will then use that alignment as a starting point for the '
+             'nonlinear warping.',
+        argstr='-allineate')
+    allineate_opts = traits.Str(
+        desc='add extra options to the 3dAllineate command to be run by '
+             '3dQwarp.',
+        argstr='-allineate_opts %s',
+        xand=['allineate'])
     nowarp = traits.Bool(
         desc='Do not save the _WARP file.',
         argstr='-nowarp')
@@ -3131,7 +3151,7 @@ class QwarpInputSpec(AFNICommandInputSpec):
              'Note that the source dataset in the second run is the SAME as'
              'in the first run.  If you don\'t see why this is necessary,'
              'then you probably need to seek help from an AFNI guru.',
-        argstr='-inlev %d',
+        argstr='-inilev %d',
         xor=['duplo'])
     minpatch = traits.Int(
         desc='* The value of mm should be an odd integer.'
@@ -3462,12 +3482,25 @@ class Qwarp(AFNICommand):
     >>> qwarp2.inputs.inilev = 7
     >>> qwarp2.inputs.iniwarp = ['Q25_warp+tlrc.HEAD']
     >>> qwarp2.cmdline  # doctest: +ALLOW_UNICODE
-    '3dQwarp -base mni.nii -blur 0.0 2.0 -source structural.nii -inlev 7 -iniwarp Q25_warp+tlrc.HEAD -prefix Q11'
+    '3dQwarp -base mni.nii -blur 0.0 2.0 -source structural.nii -inilev 7 -iniwarp Q25_warp+tlrc.HEAD -prefix Q11'
     >>> res2 = qwarp2.run()  # doctest: +SKIP
-    """
+    >>> res2 = qwarp2.run()  # doctest: +SKIP
+    >>> qwarp3 = afni.Qwarp()
+    >>> qwarp3.inputs.in_file = 'structural.nii'
+    >>> qwarp3.inputs.base_file = 'mni.nii'
+    >>> qwarp3.inputs.allineate = True
+    >>> qwarp3.inputs.allineate_opts = '-cose lpa -verb'
+    >>> qwarp3.cmdline  # doctest: +ALLOW_UNICODE
+    "3dQwarp -allineate -allineate_opts '-cose lpa -verb' -base mni.nii -source structural.nii -prefix structural_QW"
+    >>> res3 = qwarp3.run()  # doctest: +SKIP    """
     _cmd = '3dQwarp'
     input_spec = QwarpInputSpec
     output_spec = QwarpOutputSpec
+
+    def _format_arg(self, name, spec, value):
+        if name == 'allineate_opts':
+            return spec.argstr % ("'" + value + "'")
+        return super(Qwarp, self)._format_arg(name, spec, value)
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
@@ -3475,29 +3508,38 @@ class Qwarp(AFNICommand):
         if not isdefined(self.inputs.out_file):
             prefix = self._gen_fname(self.inputs.in_file, suffix='_QW')
             ext = '.HEAD'
+            suffix ='+tlrc'
         else:
             prefix = self.inputs.out_file
             ext_ind = max([prefix.lower().rfind('.nii.gz'),
                            prefix.lower().rfind('.nii.')])
             if ext_ind == -1:
                 ext = '.HEAD'
+                suffix = '+tlrc'
             else:
                 ext = prefix[ext_ind:]
+                suffix = ''
         print(ext,"ext")
-        outputs['warped_source'] = os.path.abspath(self._gen_fname(prefix, suffix='+tlrc')+ext)
+        outputs['warped_source'] = fname_presuffix(prefix, suffix=suffix,
+                                                   use_ext=False) + ext
         if not self.inputs.nowarp:
-            outputs['source_warp'] = os.path.abspath(self._gen_fname(prefix, suffix='_WARP+tlrc')+ext)
+            outputs['source_warp'] = fname_presuffix(prefix,
+                suffix='_WARP' + suffix, use_ext=False) + ext
         if self.inputs.iwarp:
-            outputs['base_warp'] = os.path.abspath(self._gen_fname(prefix, suffix='_WARPINV+tlrc')+ext)
+            outputs['base_warp'] = fname_presuffix(prefix,
+                suffix='_WARPINV' + suffix, use_ext=False) + ext
         if isdefined(self.inputs.out_weight_file):
             outputs['weights'] = os.path.abspath(self.inputs.out_weight_file)
 
         if self.inputs.plusminus:
-            outputs['warped_source'] = os.path.abspath(self._gen_fname(prefix, suffix='_PLUS+tlrc')+ext)
-            outputs['warped_base'] = os.path.abspath(self._gen_fname(prefix, suffix='_MINUS+tlrc')+ext)
-            outputs['source_warp'] = os.path.abspath(self._gen_fname(prefix, suffix='_PLUS_WARP+tlrc')+ext)
-            outputs['base_warp'] = os.path.abspath(self._gen_fname(prefix, suffix='_MINUS_WARP+tlrc',)+ext)
-
+            outputs['warped_source'] = fname_presuffix(prefix,
+                suffix='_PLUS' + suffix, use_ext=False) + ext
+            outputs['warped_base'] = fname_presuffix(prefix,
+                suffix='_MINUS' + suffix, use_ext=False) + ext
+            outputs['source_warp'] = fname_presuffix(prefix,
+                suffix='_PLUS_WARP' + suffix, use_ext=False) + ext
+            outputs['base_warp'] = fname_presuffix(prefix,
+                suffix='_MINUS_WARP' + suffix, use_ext=False) + ext
         return outputs
 
     def _gen_filename(self, name):

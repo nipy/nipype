@@ -2387,8 +2387,8 @@ class ConcatenateLTAInputSpec(FSTraitedSpec):
         File(exists=True), 'identity.nofile', argstr='%s', position=-2,
         mandatory=True, desc='maps dst1(src2) to dst2')
     out_file = File(
-        'concat.lta', usedefault=True, position=-1, argstr='%s',
-        hash_files=False,
+        position=-1, argstr='%s', hash_files=False, name_source=['in_lta1'],
+        name_template='%s_concat', keep_extension=True,
         desc='the combined LTA maps: src1 to dst2 = LTA2*LTA1')
 
     # Inversion and transform type
@@ -2434,7 +2434,7 @@ class ConcatenateLTA(FSCommand):
     >>> conc_lta.inputs.in_lta1 = 'lta1.lta'
     >>> conc_lta.inputs.in_lta2 = 'lta2.lta'
     >>> conc_lta.cmdline # doctest: +ALLOW_UNICODE
-    'mri_concatenate_lta lta1.lta lta2.lta concat.lta'
+    'mri_concatenate_lta lta1.lta lta2.lta lta1_concat.lta'
 
     You can use 'identity.nofile' as the filename for in_lta2, e.g.:
 
@@ -2459,8 +2459,3 @@ class ConcatenateLTA(FSCommand):
         if name == 'out_type':
             value = {'VOX2VOX': 0, 'RAS2RAS': 1}[value]
         return super(ConcatenateLTA, self)._format_arg(name, spec, value)
-
-    def _list_outputs(self):
-        outputs = self.output_spec().get()
-        outputs['out_file'] = os.path.abspath(self.inputs.out_file)
-        return outputs

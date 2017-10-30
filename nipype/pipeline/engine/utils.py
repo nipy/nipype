@@ -29,7 +29,8 @@ import networkx as nx
 
 from ...utils.filemanip import (fname_presuffix, FileNotFoundError, to_str,
                                 filename_to_list, get_related_files)
-from ...utils.misc import create_function_from_source, str2bool
+from ...utils.misc import str2bool
+from ...utils.functions import create_function_from_source
 from ...interfaces.base import (CommandLine, isdefined, Undefined,
                                 InterfaceResult)
 from ...interfaces.utility import IdentityInterface
@@ -99,7 +100,7 @@ def _write_inputs(node):
                         lines[-1] = lines[-1].replace(' %s(' % funcname,
                                                       ' %s_1(' % funcname)
                         funcname = '%s_1' % funcname
-                    lines.append('from nipype.utils.misc import getsource')
+                    lines.append('from nipype.utils.functions import getsource')
                     lines.append("%s.inputs.%s = getsource(%s)" % (nodename,
                                                                    key,
                                                                    funcname))

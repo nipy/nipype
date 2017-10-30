@@ -34,10 +34,10 @@ before_install:
   hash -r &&
   conda config --set always_yes yes --set changeps1 no &&
   conda update -q conda &&
-  conda install python=${TRAVIS_PYTHON_VERSION} &&
   conda config --add channels conda-forge &&
-  conda install -y nipype icu &&
-  rm -r ${CONDA_HOME}/lib/python${TRAVIS_PYTHON_VERSION}/site-packages/nipype*;
+  conda install python=${TRAVIS_PYTHON_VERSION} &&
+  conda install -y icu &&
+  pip install -r requirements.txt &&
   pushd $HOME;
   git clone https://github.com/INCF/pybids.git;
   cd pybids;
