@@ -39,13 +39,22 @@ class RigidTask(CommandLineDtitk):
     output_spec = RigidOutputSpec
     _cmd = 'dti_rigid_sn'
 
+    def _gen_outfilename(self):
+        out_file = self.inputs.out_file
+        if not isdefined(out_file) and isdefined(self.inputs.in_file):
+            out_file = self._gen_fname(self.inputs.in_file,
+                                       suffix='.aff', change_ext=False)
+
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        outputs['out_file_xfm'] = self.inputs.in_file.replace('.nii.gz',
-                                                              '.aff')
+        outputs['out_file_xfm'] = self._gen_outfilename()
         outputs['out_file'] = self.inputs.in_file.replace('.nii.gz',
                                                           '_aff.nii.gz')
         return outputs
+
+    def _gen_fname(self, name):
+        if name == 'out_file':
+            return self._gen_outfilename()
 
 
 class AffineInputSpec(CommandLineInputSpec):

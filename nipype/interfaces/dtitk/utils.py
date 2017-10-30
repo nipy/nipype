@@ -117,7 +117,7 @@ class SVAdjustVoxSpInputSpec(CommandLineInputSpec):
                            position=2, argstr="-target %s")
     in_voxsz = traits.Str(desc='resampled voxel size', exists=True,
                           mandatory=False, position=3, argstr="-vsize %s")
-    out_path = traits.Str(desc='output path', exists=True, mandatory=False,
+    out_file = traits.Str(desc='output path', exists=True, mandatory=False,
                           position=1, argstr="-out %s",
                           name_source="in_file",
                           name_template='%s_origmvd.nii.gz')
@@ -146,22 +146,22 @@ class SVAdjustVoxSpTask(CommandLineDtitk):
     _cmd = 'SVAdjustVoxelspace'
     _suffix = '_reslice'
 
-    def _list_outputs(self):
-        outputs = self.output_spec().get()
-        outputs['out_file'] = self.inputs.out_file
-        if not isdefined(self.inputs.out_file):
-            outputs["out_file"] = self._gen_fname(self.inputs.in_file,
-                                                  suffix=self._suffix,
-                                                  ext='.' + '.'.join(
-                                                      self.inputs.in_file.
-                                                      plit(".")[1:]))
-        outputs["out_file"] = os.path.abspath(outputs["out_file"])
-        return outputs
-
     def _gen_filename(self, name):
         if name == "out_file":
             return self._list_outputs()["out_file"]
         return None
+
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        outputs['out_file'] = self.inputs.out_file
+        if not isdefined(self.inputs.out_file):
+            outputs["out_file"] = self._gen_filename(self.inputs.in_file,
+                                                  suffix=self._suffix,
+                                                  ext='.' + '.'.join(
+                                                      self.inputs.in_file.
+                                                      split(".")[1:]))
+        outputs["out_file"] = os.path.abspath(outputs["out_file"])
+        return outputs
 
 
 class TVResampleInputSpec(CommandLineInputSpec):
