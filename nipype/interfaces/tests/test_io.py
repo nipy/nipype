@@ -43,7 +43,6 @@ try:
 except CalledProcessError:
     fakes3 = False
 
-from tempfile import mkstemp, mkdtemp
 
 def test_datagrabber():
     dg = nio.DataGrabber()
@@ -185,6 +184,7 @@ def dummy_input(request, tmpdir_factory):
     Function to create a dummy file
     '''
     # Init variables
+
     input_path = tmpdir_factory.mktemp('input_data').join('datasink_test_s3.txt')
 
     # Create input file
@@ -335,38 +335,44 @@ def test_datasink_substitutions(tmpdir):
               x in glob.glob(os.path.join(str(outdir), '*'))]) \
               == ['!-yz-b.n', 'ABABAB.n']  # so we got re used 2nd and both patterns
 
-
-def _temp_analyze_files():
+@pytest.fixture()
+def _temp_analyze_files(tmpdir):
     """Generate temporary analyze file pair."""
-    fd, orig_img = mkstemp(suffix='.img', dir=mkdtemp())
-    orig_hdr = orig_img[:-4] + '.hdr'
-    fp = open(orig_hdr, 'w+')
-    fp.close()
-    return orig_img, orig_hdr
+    orig_img = tmpdir.join("orig.img")
+    orig_hdr = tmpdir.join("orig.hdr")
+    orig_img.open('w')
+    orig_hdr.open('w')
+    return orig_img.strpath, orig_hdr.strpath
 
 
-def test_datasink_copydir():
-    orig_img, orig_hdr = _temp_analyze_files()
-    outdir = mkdtemp()
+def test_datasink_copydir_1(_temp_analyze_files, tmpdir):
+    orig_img, orig_hdr = _temp_analyze_files
+    outdir = tmpdir
     pth, fname = os.path.split(orig_img)
-    ds = nio.DataSink(base_directory=outdir, parameterization=False)
+    ds = nio.DataSink(base_directory=outdir.strpath, parameterization=False)
     setattr(ds.inputs, '@outdir', pth)
     ds.run()
     sep = os.path.sep
-    file_exists = lambda: os.path.exists(os.path.join(outdir,
+    file_exists = lambda: os.path.exists(os.path.join(outdir.strpath,
                                                       pth.split(sep)[-1],
                                                       fname))
     assert file_exists()
-    shutil.rmtree(pth)
 
-    orig_img, orig_hdr = _temp_analyze_files()
+
+def test_datasink_copydir_2(_temp_analyze_files, tmpdir):
+    orig_img, orig_hdr = _temp_analyze_files
     pth, fname = os.path.split(orig_img)
+    ds = nio.DataSink(base_directory=tmpdir.strpath, parameterization=False)
     ds.inputs.remove_dest_dir = True
     setattr(ds.inputs, 'outdir', pth)
     ds.run()
+    sep = os.path.sep
+    file_exists = lambda: os.path.exists(os.path.join(tmpdir.strpath,
+                                                      pth.split(sep)[-1],
+                                                      fname))
+
     assert not file_exists()
-    shutil.rmtree(outdir)
-    shutil.rmtree(pth)
+
 
 
 def test_datafinder_depth(tmpdir):

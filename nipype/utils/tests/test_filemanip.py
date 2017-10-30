@@ -6,8 +6,6 @@ from builtins import open
 
 import os
 import time
-from tempfile import mkstemp, mkdtemp
-import shutil
 import warnings
 
 import pytest
@@ -275,15 +273,14 @@ def test_list_to_filename(list, expected):
     assert x == expected
 
 
-def test_check_depends():
+def test_check_depends(tmpdir):
     def touch(fname):
         with open(fname, 'a'):
             os.utime(fname, None)
 
-    tmpdir = mkdtemp()
 
-    dependencies = [os.path.join(tmpdir, str(i)) for i in range(3)]
-    targets = [os.path.join(tmpdir, str(i)) for i in range(3, 6)]
+    dependencies = [tmpdir.join(str(i)).strpath for i in range(3)]
+    targets = [tmpdir.join(str(i)).strpath for i in range(3, 6)]
 
     # Targets newer than dependencies
     for dep in dependencies:
@@ -307,13 +304,11 @@ def test_check_depends():
     else:
         assert False, "Should raise OSError on missing dependency"
 
-    shutil.rmtree(tmpdir)
 
-
-def test_json():
+def test_json(tmpdir):
     # Simple roundtrip test of json files, just a sanity check.
     adict = dict(a='one', c='three', b='two')
-    fd, name = mkstemp(suffix='.json')
+    name = tmpdir.join('test.json').strpath
     save_json(name, adict)  # save_json closes the file
     new_dict = load_json(name)
     os.unlink(name)
