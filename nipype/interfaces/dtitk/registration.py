@@ -14,6 +14,20 @@ class RigidInputSpec(CommandLineInputSpec):
     similarity_metric = traits.Enum('EDS', 'GDS', 'DDS', 'NMI', exists=True,
                                     mandatory=True, position=2, argstr="%s",
                                     desc="similarity metric")
+    samplingX = traits.Float(mandatory=True, position=3, argstr="%s",
+                             desc="dist between samp points (mm)",
+                             default_value=4)
+    samplingY = traits.Float(mandatory=True, position=4, argstr="%s",
+                             desc="dist between samp points (mm)",
+                             default_value=4)
+    samplingZ = traits.Float(mandatory=True, position=5, argstr="%s",
+                             desc="dist between samp points (mm)",
+                             default_value=4)
+    ftol = traits.Float(mandatory=True, position=6, argstr="%s",
+                        desc="cost function tolerance", default_value=0.01)
+    useInTrans = traits.Float(mandatory=False, position=7, argstr="%s",
+                              desc="to initialize with existing xfm set as 1",
+                              default_value=1)
 
 
 class RigidOutputSpec(TraitedSpec):
@@ -33,23 +47,30 @@ class RigidTask(CommandLineDtitk):
         >>> node.inputs.fixed_file = 'diffusion.nii'
         >>> node.inputs.moving_file = 'diffusion.nii'
         >>> node.inputs.similarity_metric = 'EDS'
+        >>> node.inputs.samplingX = 4
+        >>> node.inputs.samplingY = 4
+        >>> node.inputs.samplingZ = 4
+        >>> node.inputs.ftol = 0.01
+        >>> node.inputs.useInTrans = 1
         >>> node.run() # doctest: +SKIP
         """
     input_spec = RigidInputSpec
     output_spec = RigidOutputSpec
-    _cmd = 'dti_rigid_sn'
+    _cmd = 'dti_rigid_reg'
 
     def _gen_outfilename(self):
-        out_file = self.inputs.out_file
-        if not isdefined(out_file) and isdefined(self.inputs.in_file):
-            out_file = self._gen_fname(self.inputs.in_file,
-                                       suffix='.aff', change_ext=False)
+        # out_file = self.inputs.out_file
+        # if not isdefined(out_file) and isdefined(self.inputs.in_file):
+        out_file = self._gen_fname(self.inputs.in_file,
+                                   suffix='.aff', change_ext=False)
+        return out_file
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        outputs['out_file_xfm'] = self._gen_outfilename()
-        outputs['out_file'] = self.inputs.in_file.replace('.nii.gz',
-                                                          '_aff.nii.gz')
+        outputs['out_file_xfm'] = self.inputs.moving_file.replace('.nii.gz',
+                                                                  '.aff')
+        outputs['out_file'] = self.inputs.moving_file.replace('.nii.gz',
+                                                              '_aff.nii.gz')
         return outputs
 
     def _gen_fname(self, name):
