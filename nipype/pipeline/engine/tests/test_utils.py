@@ -18,27 +18,29 @@ from .... import config
 from ..utils import merge_dict, clean_working_directory, write_workflow_prov
 
 
-def test_identitynode_removal():
+def test_identitynode_removal(tmpdir):
 
     def test_function(arg1, arg2, arg3):
         import numpy as np
         return (np.array(arg1) + arg2 + arg3).tolist()
+    
+    out_dir = tmpdir.strpath
 
-    wf = pe.Workflow(name="testidentity")
+    wf = pe.Workflow(name="testidentity", base_dir=out_dir)
 
-    n1 = pe.Node(niu.IdentityInterface(fields=['a', 'b']), name='src')
+    n1 = pe.Node(niu.IdentityInterface(fields=['a', 'b']), name='src', base_dir=out_dir,)
     n1.iterables = ('b', [0, 1, 2, 3])
     n1.inputs.a = [0, 1, 2, 3]
 
-    n2 = pe.Node(niu.Select(), name='selector')
+    n2 = pe.Node(niu.Select(), name='selector', base_dir=out_dir,)
     wf.connect(n1, ('a', test_function, 1, -1), n2, 'inlist')
     wf.connect(n1, 'b', n2, 'index')
 
-    n3 = pe.Node(niu.IdentityInterface(fields=['c', 'd']), name='passer')
+    n3 = pe.Node(niu.IdentityInterface(fields=['c', 'd']), name='passer', base_dir=out_dir,)
     n3.inputs.c = [1, 2, 3, 4]
     wf.connect(n2, 'out', n3, 'd')
 
-    n4 = pe.Node(niu.Select(), name='selector2')
+    n4 = pe.Node(niu.Select(), name='selector2', base_dir=out_dir,)
     wf.connect(n3, ('c', test_function, 1, -1), n4, 'inlist')
     wf.connect(n3, 'd', n4, 'index')
 
@@ -216,19 +218,19 @@ def test_outputs_removal_wf(tmpdir):
         n1 = pe.Node(niu.Function(input_names=['arg1'],
                                   output_names=['out_file1', 'out_file2', 'dir'],
                                   function=test_function),
-                     name='n1')
+                     name='n1', base_dir=out_dir)
         n1.inputs.arg1 = 1
 
         n2 = pe.Node(niu.Function(input_names=['in_file', 'arg'],
                                   output_names=['out_file1', 'out_file2', 'n'],
                                   function=test_function2),
-                     name='n2')
+                     name='n2', base_dir=out_dir)
         n2.inputs.arg = 2
 
         n3 = pe.Node(niu.Function(input_names=['arg'],
                                   output_names=['n'],
                                   function=test_function3),
-                     name='n3')
+                     name='n3', base_dir=out_dir)
 
         wf = pe.Workflow(name="node_rem_test" + plugin, base_dir=out_dir)
         wf.connect(n1, "out_file1", n2, "in_file")
@@ -271,7 +273,7 @@ def test_outputs_removal_wf(tmpdir):
                                                n2.name,
                                                'file3.txt')) != remove_unnecessary_outputs
 
-        n4 = pe.Node(UtilsTestInterface(), name='n4')
+        n4 = pe.Node(UtilsTestInterface(), name='n4', base_dir=out_dir)
         wf.connect(n2, "out_file1", n4, "in_file")
 
         def pick_first(l):

@@ -70,13 +70,16 @@ class Dcm2nii(CommandLine):
     Examples
     ========
 
+    >>> tmp = getfixture('tmpdir')
+    >>> old = tmp.chdir() # changing to a temporary directory
     >>> from nipype.interfaces.dcm2nii import Dcm2nii
     >>> converter = Dcm2nii()
-    >>> converter.inputs.source_names = ['functional_1.dcm', 'functional_2.dcm']
+    >>> converter.inputs.source_names = [os.path.join(datadir, 'functional_1.dcm'), os.path.join(datadir, 'functional_2.dcm')]
     >>> converter.inputs.gzip_output = True
     >>> converter.inputs.output_dir = '.'
-    >>> converter.cmdline
-    'dcm2nii -a y -c y -b config.ini -v y -d y -e y -g y -i n -n y -o . -p y -x n -f n functional_1.dcm'
+    >>> converter.cmdline #doctest: +ELLIPSIS
+    'dcm2nii -a y -c y -b config.ini -v y -d y -e y -g y -i n -n y -o . -p y -x n -f n ...functional_1.dcm'
+    >>> os.chdir(old.strpath)
     """
 
     input_spec = Dcm2niiInputSpec
