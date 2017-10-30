@@ -1,5 +1,4 @@
-from ..base import TraitedSpec, CommandLineInputSpec, \
-    traits, isdefined
+from ..base import TraitedSpec, CommandLineInputSpec, traits, isdefined
 from ...utils.filemanip import fname_presuffix
 import os
 from .base import CommandLineDtitk
@@ -44,8 +43,8 @@ class RigidTask(CommandLineDtitk):
 
         >>> import nipype.interfaces.dtitk as dtitk
         >>> node = dtitk.RigidTask()
-        >>> node.inputs.fixed_file = 'diffusion.nii'
-        >>> node.inputs.moving_file = 'diffusion.nii'
+        >>> node.inputs.fixed_file = 'diffusion.nii.gz'
+        >>> node.inputs.moving_file = 'diffusion.nii.gz'
         >>> node.inputs.similarity_metric = 'EDS'
         >>> node.inputs.samplingX = 4
         >>> node.inputs.samplingY = 4
@@ -58,13 +57,6 @@ class RigidTask(CommandLineDtitk):
     output_spec = RigidOutputSpec
     _cmd = 'dti_rigid_reg'
 
-    def _gen_outfilename(self):
-        # out_file = self.inputs.out_file
-        # if not isdefined(out_file) and isdefined(self.inputs.in_file):
-        out_file = self._gen_fname(self.inputs.in_file,
-                                   suffix='.aff', change_ext=False)
-        return out_file
-
     def _list_outputs(self):
         outputs = self.output_spec().get()
         outputs['out_file_xfm'] = self.inputs.moving_file.replace('.nii.gz',
@@ -73,24 +65,30 @@ class RigidTask(CommandLineDtitk):
                                                               '_aff.nii.gz')
         return outputs
 
-    def _gen_fname(self, name):
-        if name == 'out_file':
-            return self._gen_outfilename()
-
 
 class AffineInputSpec(CommandLineInputSpec):
-    in_fixed_tensor = traits.Str(desc="fixed diffusion tensor image",
-                                 exists=True, mandatory=False, position=0,
-                                 argstr="%s")
-    in_moving_txt = traits.Str(
-        desc="moving list of diffusion tensor image paths", exists=True,
-        mandatory=False, position=1, argstr="%s")
-    in_similarity_metric = traits.Enum('EDS', 'GDS', 'DDS', 'NMI', exists=True,
-                                       mandatory=False, position=3,
-                                       argstr="%s", desc="similarity metric")
-    in_usetrans_flag = traits.Enum('--useTrans', '', exists=True,
-                                   mandatory=False, position=4, argstr="%s",
-                                   desc="initialize using rigid transform??")
+    fixed_file = traits.Str(desc="fixed diffusion tensor image",
+                            exists=True, mandatory=True,
+                            position=0, argstr="%s")
+    moving_file = traits.Str(desc="diffusion tensor image path", exists=True,
+                             mandatory=True, position=1, argstr="%s")
+    similarity_metric = traits.Enum('EDS', 'GDS', 'DDS', 'NMI', exists=True,
+                                    mandatory=True, position=2, argstr="%s",
+                                    desc="similarity metric")
+    samplingX = traits.Float(mandatory=True, position=3, argstr="%s",
+                             desc="dist between samp points (mm)",
+                             default_value=4)
+    samplingY = traits.Float(mandatory=True, position=4, argstr="%s",
+                             desc="dist between samp points (mm)",
+                             default_value=4)
+    samplingZ = traits.Float(mandatory=True, position=5, argstr="%s",
+                             desc="dist between samp points (mm)",
+                             default_value=4)
+    ftol = traits.Float(mandatory=True, position=6, argstr="%s",
+                        desc="cost function tolerance", default_value=0.01)
+    useInTrans = traits.Float(mandatory=False, position=7, argstr="%s",
+                              desc="to initialize with existing xfm set as 1",
+                              default_value=1)
 
 
 class AffineOutputSpec(TraitedSpec):
@@ -100,29 +98,33 @@ class AffineOutputSpec(TraitedSpec):
 
 class AffineTask(CommandLineDtitk):
     """
-        Performs affine registration between two tensor volumes
+    Performs affine registration between two tensor volumes
 
-            Example
-            -------
+        Example
+        -------
 
-            >>> import nipype.interfaces.dtitk as dtitk
-            >>> node = dtitk.AffineTask()
-            >>> node.inputs.in_fixed_tensor = 'diffusion.nii'
-            >>> node.inputs.in_moving_txt = 'dirs.txt'
-            >>> node.inputs.in_similarity_metric = 'EDS'
-            >>> node.run() # doctest: +SKIP
-            """
-
+        >>> import nipype.interfaces.dtitk as dtitk
+        >>> node = dtitk.AffineTask()
+        >>> node.inputs.fixed_file = 'diffusion.nii.gz'
+        >>> node.inputs.moving_file = 'diffusion.nii.gz'
+        >>> node.inputs.similarity_metric = 'EDS'
+        >>> node.inputs.samplingX = 4
+        >>> node.inputs.samplingY = 4
+        >>> node.inputs.samplingZ = 4
+        >>> node.inputs.ftol = 0.01
+        >>> node.inputs.useInTrans = 1
+        >>> node.run() # doctest: +SKIP
+        """
     input_spec = AffineInputSpec
     output_spec = AffineOutputSpec
-    _cmd = 'dti_affine_sn'
+    _cmd = 'dti_affine_reg'
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        outputs['out_file_xfm'] = self.inputs.in_fixed_tensor.replace(
-            '.nii.gz', '.aff')
-        outputs['out_file'] = self.inputs.in_fixed_tensor.replace(
-            '.nii.gz', '_aff.nii.gz')
+        outputs['out_file_xfm'] = self.inputs.moving_file.replace('.nii.gz',
+                                                                  '.aff')
+        outputs['out_file'] = self.inputs.moving_file.replace('.nii.gz',
+                                                              '_aff.nii.gz')
         return outputs
 
 
