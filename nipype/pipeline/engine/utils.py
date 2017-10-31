@@ -1055,7 +1055,8 @@ def export_graph(graph_in, base_dir=None, show=False, use_execgraph=False,
 def format_dot(dotfilename, format='png'):
     """Dump a directed graph (Linux only; install via `brew` on OSX)"""
     if format != 'dot':
-        cmd = 'dot -T%s -O \'%s\'' % (format, dotfilename)
+        formatted_dotfilename = +'.'+format
+        cmd = 'dot -T{0} -o"{1}.{0}" "{2}"'.format(format, os.path.splitext(dotfilename)[0], dotfilename)
         try:
             CommandLine(cmd, resource_monitor=False).run()
         except IOError as ioe:
