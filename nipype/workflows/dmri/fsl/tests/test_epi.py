@@ -34,7 +34,7 @@ def test_create_eddy_correct_pipeline(tmpdir):
     test = pe.Node(util.AssertEqual(), name="eddy_corrected_dwi_test")
 
     pipeline = pe.Workflow(name="test_eddycorrect")
-    pipeline.base_dir = tmpdir.mkdir(prefix="nipype_test_eddycorrect_").strpath
+    pipeline.base_dir = tmpdir.mkdir("nipype_test_eddycorrect_").strpath
 
     pipeline.connect([(trim_dwi, original_eddycorrect, [("roi_file", "in_file")]),
                       (trim_dwi, nipype_eddycorrect, [("roi_file", "inputnode.in_file")]),
