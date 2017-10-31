@@ -54,7 +54,9 @@ class ANTSInputSpec(ANTSCommandInputSpec):
                                 desc='the metric weight(s) for each stage. '
                                 'The weights must sum to 1 per stage.')
 
-    radius = traits.List(traits.Int(), requires=['metric'],  mandatory=True, desc='')
+    radius = traits.List(traits.Int(), requires=['metric'],  mandatory=True, 
+                         desc='radius of the region (i.e. number of layers around a voxel point)'
+                              ' that is used for computing cross correlation')
 
     output_transform_prefix = Str('out', usedefault=True, argstr='--output-naming %s',
                                   mandatory=True, desc='')
