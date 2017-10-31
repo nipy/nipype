@@ -364,6 +364,7 @@ def test_mapnode_crash2(tmpdir):
                    reason="the famous segfault #1788")
 def test_mapnode_crash3(tmpdir):
     """Test mapnode crash when mapnode is embedded in a workflow"""
+    tmpdir.chdir()
     node = pe.MapNode(niu.Function(input_names=['WRONG'],
                                    output_names=['newstring'],
                                    function=dummy_func),

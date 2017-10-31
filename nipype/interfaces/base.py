@@ -1225,6 +1225,8 @@ class SimpleInterface(BaseInterface):
 
     Examples
     --------
+    >>> tmp = getfixture('tmpdir')
+    >>> old = tmp.chdir() # changing to a temporary directory
     >>> def double(x):
     ...    return 2 * x
     ...
