@@ -353,9 +353,7 @@ def test_datasink_copydir_1(_temp_analyze_files, tmpdir):
     setattr(ds.inputs, '@outdir', pth)
     ds.run()
     sep = os.path.sep
-    file_exists = lambda: os.path.exists(os.path.join(outdir.strpath,
-                                                      pth.split(sep)[-1],
-                                                      fname))
+    file_exists = lambda: tmpdir.join(pth.split(sep)[-1], fname).check()
     assert file_exists()
 
 
@@ -367,9 +365,7 @@ def test_datasink_copydir_2(_temp_analyze_files, tmpdir):
     setattr(ds.inputs, 'outdir', pth)
     ds.run()
     sep = os.path.sep
-    file_exists = lambda: os.path.exists(os.path.join(tmpdir.strpath,
-                                                      pth.split(sep)[-1],
-                                                      fname))
+    file_exists = lambda: tmpdir.join(pth.split(sep)[-1], fname).check()
 
     assert not file_exists()
 
@@ -414,7 +410,7 @@ def test_freesurfersource():
     assert fss.inputs.subjects_dir == Undefined
 
 
-def test_jsonsink_input(tmpdir):
+def test_jsonsink_input():
 
     ds = nio.JSONFileSink()
     assert ds.inputs._outputs == {}
@@ -431,7 +427,7 @@ def test_jsonsink_input(tmpdir):
         {'new_entry' : 'someValue', 'test' : 'testInfields'}
 ])
 def test_jsonsink(tmpdir, inputs_attributes):
-    os.chdir(tmpdir.strpath)
+    tmpdir.chdir()
     js = nio.JSONFileSink(infields=['test'], in_dict={'foo': 'var'})
     setattr(js.inputs, 'contrasts.alt', 'someNestedValue')
     expected_data = {"contrasts": {"alt": "someNestedValue"}, "foo": "var"}

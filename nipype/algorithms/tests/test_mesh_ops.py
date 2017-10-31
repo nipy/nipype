@@ -62,14 +62,14 @@ def test_trans_distances(tmpdir):
 
 @pytest.mark.skipif(VTKInfo.no_tvtk(), reason="tvtk is not installed")
 def test_warppoints(tmpdir):
-    os.chdir(tmpdir.strpath)
+    tmpdir.chdir()
 
     # TODO: include regression tests for when tvtk is installed
 
 
 @pytest.mark.skipif(VTKInfo.no_tvtk(), reason="tvtk is not installed")
 def test_meshwarpmaths(tmpdir):
-    os.chdir(tmpdir.strpath)
+    tmpdir.chdir()
 
     # TODO: include regression tests for when tvtk is installed
 

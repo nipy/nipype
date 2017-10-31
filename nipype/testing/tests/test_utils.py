@@ -18,7 +18,7 @@ def test_tempfatfs():
         warnings.warn("Cannot mount FAT filesystems with FUSE")
     else:
         with fatfs as tmpdir:
-            assert os.path.exists(tmpdir)
+            assert tmpdir.check()
 
 @patch('subprocess.check_call', MagicMock(
     side_effect=subprocess.CalledProcessError('','')))

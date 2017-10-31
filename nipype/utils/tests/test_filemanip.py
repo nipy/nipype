@@ -91,7 +91,7 @@ def _temp_analyze_files_prime(tmpdir):
     orig_hdr = tmpdir.join("orig_prime.hdr")
     orig_img.open('w+').close()
     orig_hdr.open('w+').close()
-    return str(orig_img), str(orig_hdr)
+    return orig_img.strpath, orig_hdr.strpath
 
 
 def test_copyfile(_temp_analyze_files):

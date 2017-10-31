@@ -34,7 +34,7 @@ class SomaTestInterface(nib.BaseInterface):
 
 @pytest.mark.skipif(soma_not_loaded, reason="soma not loaded")
 def test_run_somaflow(tmpdir):
-    os.chdir(tmpdir.strpath)
+    tmpdir.chdir()
 
     pipe = pe.Workflow(name='pipe')
     mod1 = pe.Node(interface=SomaTestInterface(), name='mod1')

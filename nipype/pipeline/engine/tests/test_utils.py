@@ -24,23 +24,22 @@ def test_identitynode_removal(tmpdir):
         import numpy as np
         return (np.array(arg1) + arg2 + arg3).tolist()
     
-    out_dir = tmpdir.strpath
 
-    wf = pe.Workflow(name="testidentity", base_dir=out_dir)
+    wf = pe.Workflow(name="testidentity", base_dir=tmpdir.strpath)
 
-    n1 = pe.Node(niu.IdentityInterface(fields=['a', 'b']), name='src', base_dir=out_dir,)
+    n1 = pe.Node(niu.IdentityInterface(fields=['a', 'b']), name='src', base_dir=tmpdir.strpath)
     n1.iterables = ('b', [0, 1, 2, 3])
     n1.inputs.a = [0, 1, 2, 3]
 
-    n2 = pe.Node(niu.Select(), name='selector', base_dir=out_dir,)
+    n2 = pe.Node(niu.Select(), name='selector', base_dir=tmpdir.strpath)
     wf.connect(n1, ('a', test_function, 1, -1), n2, 'inlist')
     wf.connect(n1, 'b', n2, 'index')
 
-    n3 = pe.Node(niu.IdentityInterface(fields=['c', 'd']), name='passer', base_dir=out_dir,)
+    n3 = pe.Node(niu.IdentityInterface(fields=['c', 'd']), name='passer', base_dir=tmpdir.strpath)
     n3.inputs.c = [1, 2, 3, 4]
     wf.connect(n2, 'out', n3, 'd')
 
-    n4 = pe.Node(niu.Select(), name='selector2', base_dir=out_dir,)
+    n4 = pe.Node(niu.Select(), name='selector2', base_dir=tmpdir.strpath)
     wf.connect(n3, ('c', test_function, 1, -1), n4, 'inlist')
     wf.connect(n3, 'd', n4, 'index')
 
@@ -60,15 +59,13 @@ def test_clean_working_directory(tmpdir):
     outputs = OutputSpec()
     inputs = InputSpec()
 
-    wd = tmpdir.strpath
     filenames = ['file.hdr', 'file.img', 'file.BRIK', 'file.HEAD',
                  '_0x1234.json', 'foo.txt']
     outfiles = []
     for filename in filenames:
-        outfile = os.path.join(wd, filename)
-        with open(outfile, 'wt') as fp:
-            fp.writelines('dummy')
-        outfiles.append(outfile)
+        outfile = tmpdir.join(filename)
+        outfile.write('dummy')
+        outfiles.append(outfile.strpath)
     outputs.files = outfiles[:4:2]
     outputs.others = outfiles[5]
     inputs.infile = outfiles[-1]
@@ -77,12 +74,12 @@ def test_clean_working_directory(tmpdir):
     assert os.path.exists(outfiles[5])
     config.set_default_config()
     config.set('execution', 'remove_unnecessary_outputs', False)
-    out = clean_working_directory(outputs, wd, inputs, needed_outputs,
+    out = clean_working_directory(outputs, tmpdir.strpath, inputs, needed_outputs,
                                   deepcopy(config._sections))
     assert os.path.exists(outfiles[5])
     assert out.others == outfiles[5]
     config.set('execution', 'remove_unnecessary_outputs', True)
-    out = clean_working_directory(outputs, wd, inputs, needed_outputs,
+    out = clean_working_directory(outputs, tmpdir.strpath, inputs, needed_outputs,
                                   deepcopy(config._sections))
     assert os.path.exists(outfiles[1])
     assert os.path.exists(outfiles[3])
@@ -107,30 +104,21 @@ def test_outputs_removal(tmpdir):
         fp.close()
         return file1, file2
 
-    out_dir = tmpdir.strpath
     n1 = pe.Node(niu.Function(input_names=['arg1'],
                               output_names=['file1', 'file2'],
                               function=test_function),
-                 base_dir=out_dir,
+                 base_dir=tmpdir.strpath,
                  name='testoutputs')
     n1.inputs.arg1 = 1
     n1.config = {'execution': {'remove_unnecessary_outputs': True}}
     n1.config = merge_dict(deepcopy(config._sections), n1.config)
     n1.run()
-    assert os.path.exists(os.path.join(out_dir,
-                                       n1.name,
-                                       'file1.txt'))
-    assert os.path.exists(os.path.join(out_dir,
-                                       n1.name,
-                                       'file2.txt'))
+    assert tmpdir.join(n1.name,'file1.txt').check()
+    assert tmpdir.join(n1.name,'file1.txt').check()
     n1.needed_outputs = ['file2']
     n1.run()
-    assert not os.path.exists(os.path.join(out_dir,
-                                           n1.name,
-                                           'file1.txt'))
-    assert os.path.exists(os.path.join(out_dir,
-                                       n1.name,
-                                       'file2.txt'))
+    assert not tmpdir.join(n1.name,'file1.txt').check()
+    assert tmpdir.join(n1.name,'file2.txt').check()
 
 
 class InputSpec(nib.TraitedSpec):
@@ -156,29 +144,22 @@ class UtilsTestInterface(nib.BaseInterface):
 
 
 def test_inputs_removal(tmpdir):
-    out_dir = tmpdir.strpath
-    file1 = os.path.join(out_dir, 'file1.txt')
-    fp = open(file1, 'wt')
-    fp.write('dummy_file')
-    fp.close()
+    file1 = tmpdir.join('file1.txt')
+    file1.write('dummy_file')
     n1 = pe.Node(UtilsTestInterface(),
-                 base_dir=out_dir,
+                 base_dir=tmpdir.strpath,
                  name='testinputs')
-    n1.inputs.in_file = file1
+    n1.inputs.in_file = file1.strpath
     n1.config = {'execution': {'keep_inputs': True}}
     n1.config = merge_dict(deepcopy(config._sections), n1.config)
     n1.run()
-    assert os.path.exists(os.path.join(out_dir,
-                                       n1.name,
-                                       'file1.txt'))
-    n1.inputs.in_file = file1
+    assert tmpdir.join(n1.name,'file1.txt').check()
+    n1.inputs.in_file = file1.strpath
     n1.config = {'execution': {'keep_inputs': False}}
     n1.config = merge_dict(deepcopy(config._sections), n1.config)
     n1.overwrite = True
     n1.run()
-    assert not os.path.exists(os.path.join(out_dir,
-                                           n1.name,
-                                           'file1.txt'))
+    assert not tmpdir.join(n1.name,'file1.txt').check()
 
 
 def test_outputs_removal_wf(tmpdir):
@@ -212,27 +193,26 @@ def test_outputs_removal_wf(tmpdir):
         import os
         return arg
 
-    out_dir = tmpdir.strpath
 
     for plugin in ('Linear',):  # , 'MultiProc'):
         n1 = pe.Node(niu.Function(input_names=['arg1'],
                                   output_names=['out_file1', 'out_file2', 'dir'],
                                   function=test_function),
-                     name='n1', base_dir=out_dir)
+                     name='n1', base_dir=tmpdir.strpath)
         n1.inputs.arg1 = 1
 
         n2 = pe.Node(niu.Function(input_names=['in_file', 'arg'],
                                   output_names=['out_file1', 'out_file2', 'n'],
                                   function=test_function2),
-                     name='n2', base_dir=out_dir)
+                     name='n2', base_dir=tmpdir.strpath)
         n2.inputs.arg = 2
 
         n3 = pe.Node(niu.Function(input_names=['arg'],
                                   output_names=['n'],
                                   function=test_function3),
-                     name='n3', base_dir=out_dir)
+                     name='n3', base_dir=tmpdir.strpath)
 
-        wf = pe.Workflow(name="node_rem_test" + plugin, base_dir=out_dir)
+        wf = pe.Workflow(name="node_rem_test" + plugin, base_dir=tmpdir.strpath)
         wf.connect(n1, "out_file1", n2, "in_file")
 
         wf.run(plugin='Linear')
@@ -273,7 +253,7 @@ def test_outputs_removal_wf(tmpdir):
                                                n2.name,
                                                'file3.txt')) != remove_unnecessary_outputs
 
-        n4 = pe.Node(UtilsTestInterface(), name='n4', base_dir=out_dir)
+        n4 = pe.Node(UtilsTestInterface(), name='n4', base_dir=tmpdir.strpath)
         wf.connect(n2, "out_file1", n4, "in_file")
 
         def pick_first(l):
@@ -329,13 +309,11 @@ def test_multi_disconnected_iterable(tmpdir):
 
 
 def test_provenance(tmpdir):
-    out_dir = tmpdir.strpath
     metawf = pe.Workflow(name='meta')
-    metawf.base_dir = out_dir
+    metawf.base_dir = tmpdir.strpath
     metawf.add_nodes([create_wf('wf%d' % i) for i in range(1)])
     eg = metawf.run(plugin='Linear')
-    prov_base = os.path.join(out_dir,
-                             'workflow_provenance_test')
+    prov_base = tmpdir.join('workflow_provenance_test').strpath
     psg = write_workflow_prov(eg, prov_base, format='all')
     assert len(psg.bundles) == 2
     assert len(psg.get_records()) == 7

@@ -11,7 +11,7 @@ import nipype.pipeline.engine as pe
 
 
 def test_rename(tmpdir):
-    os.chdir(tmpdir.strpath)
+    tmpdir.chdir()
 
     # Test very simple rename
     _ = open("file.txt", "w").close()
@@ -41,7 +41,7 @@ def test_rename(tmpdir):
         ({"squeeze" : True},  (0  , [1,2,3]))
         ])
 def test_split(tmpdir, args, expected):
-    os.chdir(tmpdir.strpath)
+    tmpdir.chdir()
 
     node = pe.Node(utility.Split(inlist=list(range(4)),
                                  splits=[1, 3],
@@ -64,7 +64,7 @@ def test_split(tmpdir, args, expected):
          [[0, 2, 4], [1, 3, 5]]),
         ])
 def test_merge(tmpdir, args, kwargs, in_lists, expected):
-    os.chdir(tmpdir.strpath)
+    tmpdir.chdir()
 
     node = pe.Node(utility.Merge(*args, **kwargs), name='merge')
 

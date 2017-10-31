@@ -30,5 +30,3 @@ def test_level1design(tmpdir):
                                                                do_tempfilter,
                                                                key)
         assert "set fmri(convolve1) {0}".format(val) in output_txt
-
-    os.chdir(old.strpath)

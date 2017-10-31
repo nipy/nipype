@@ -30,8 +30,7 @@ def test_provenance_exists(tmpdir):
     CommandLine('echo hello').run()
     config.set('execution', 'write_provenance', provenance_state)
     config.set('execution', 'hash_method', hash_state)
-    provenance_exists = os.path.exists(tmpdir.join('provenance.provn').strpath)
-    assert provenance_exists
+    assert tmpdir.join('provenance.provn').check()
 
 def test_safe_encode():
     a = '\xc3\xa9lg'

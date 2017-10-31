@@ -43,7 +43,7 @@ def test_dvars(tmpdir):
                          in_mask=example_data('ds003_sub-01_mc_brainmask.nii.gz'),
                          save_all=True,
                          intensity_normalization=0)
-    os.chdir(tmpdir.strpath)
+    tmpdir.chdir()
     res = dvars.run()
 
     dv1 = np.loadtxt(res.outputs.out_all, skiprows=1)
@@ -66,7 +66,8 @@ def test_dvars(tmpdir):
 
     assert (np.abs(dv1[:, 2] - ground_truth[:, 2]).sum() / len(dv1)) < 0.05
 
-def test_outliers(tmpdir):
+
+def test_outliers():
     np.random.seed(0)
     in_data = np.random.randn(100)
     in_data[0] += 10

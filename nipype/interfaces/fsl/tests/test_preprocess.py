@@ -547,11 +547,10 @@ def setup_fugue(tmpdir):
     import os.path as op
 
     d = np.ones((80, 80, 80))
-    tmp_dir = tmpdir.strpath
-    infile = op.join(tmp_dir, 'dumbfile.nii.gz')
+    infile = tmpdir.join('dumbfile.nii.gz').strpath
     nb.Nifti1Image(d, None, None).to_filename(infile)
 
-    return (tmp_dir, infile)
+    return (tmpdir, infile)
 
 
 @pytest.mark.skipif(no_fsl(), reason="fsl is not installed")
