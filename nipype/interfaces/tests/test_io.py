@@ -338,8 +338,9 @@ def test_datasink_substitutions(tmpdir):
 @pytest.fixture()
 def _temp_analyze_files(tmpdir):
     """Generate temporary analyze file pair."""
-    orig_img = tmpdir.join("orig.img")
-    orig_hdr = tmpdir.join("orig.hdr")
+    img_dir = tmpdir.mkdir("img")
+    orig_img = img_dir.join("orig.img")
+    orig_hdr = img_dir.join("orig.hdr")
     orig_img.open('w')
     orig_hdr.open('w')
     return orig_img.strpath, orig_hdr.strpath
@@ -349,26 +350,22 @@ def test_datasink_copydir_1(_temp_analyze_files, tmpdir):
     orig_img, orig_hdr = _temp_analyze_files
     outdir = tmpdir
     pth, fname = os.path.split(orig_img)
-    ds = nio.DataSink(base_directory=outdir.strpath, parameterization=False)
+    ds = nio.DataSink(base_directory=outdir.mkdir("basedir").strpath, parameterization=False)
     setattr(ds.inputs, '@outdir', pth)
     ds.run()
     sep = os.path.sep
-    file_exists = lambda: tmpdir.join(pth.split(sep)[-1], fname).check()
-    assert file_exists()
-
+    assert tmpdir.join('basedir', pth.split(sep)[-1], fname).check()
 
 def test_datasink_copydir_2(_temp_analyze_files, tmpdir):
     orig_img, orig_hdr = _temp_analyze_files
     pth, fname = os.path.split(orig_img)
-    ds = nio.DataSink(base_directory=tmpdir.strpath, parameterization=False)
+    ds = nio.DataSink(base_directory=tmpdir.mkdir("basedir").strpath, parameterization=False)
     ds.inputs.remove_dest_dir = True
     setattr(ds.inputs, 'outdir', pth)
     ds.run()
     sep = os.path.sep
-    file_exists = lambda: tmpdir.join(pth.split(sep)[-1], fname).check()
-
-    assert not file_exists()
-
+    assert not tmpdir.join('basedir', pth.split(sep)[-1], fname).check()
+    assert tmpdir.join('basedir', 'outdir', pth.split(sep)[-1], fname).check()
 
 
 def test_datafinder_depth(tmpdir):
