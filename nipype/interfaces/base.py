@@ -1225,8 +1225,14 @@ class SimpleInterface(BaseInterface):
 
     Examples
     --------
+
+    .. testsetup::
+
     >>> tmp = getfixture('tmpdir')
     >>> old = tmp.chdir() # changing to a temporary directory
+
+    .. doctest::
+
     >>> def double(x):
     ...    return 2 * x
     ...
@@ -1248,6 +1254,11 @@ class SimpleInterface(BaseInterface):
     >>> dbl.inputs.x = 2
     >>> dbl.run().outputs.doubled
     4.0
+
+    .. testsetup::
+
+    >>> os.chdir(old.strpath)
+
     """
     def __init__(self, from_file=None, resource_monitor=None, **inputs):
         super(SimpleInterface, self).__init__(
