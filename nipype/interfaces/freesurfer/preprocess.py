@@ -1226,7 +1226,7 @@ class BBRegister(FSCommand):
                 outputs['registered_file'] = op.abspath(_in.registered_file)
 
         if isdefined(_in.out_lta_file):
-            if isinstance(_in.out_fsl_file, bool):
+            if isinstance(_in.out_lta_file, bool):
                 suffix = '_bbreg_%s.lta' % _in.subject_id
                 out_lta_file = fname_presuffix(_in.source_file,
                                                suffix=suffix,
@@ -1457,76 +1457,102 @@ class Smooth(FSCommand):
 
 class RobustRegisterInputSpec(FSTraitedSpec):
 
-    source_file = File(mandatory=True, argstr='--mov %s',
+    source_file = File(exists=True, mandatory=True, argstr='--mov %s',
                        desc='volume to be registered')
-    target_file = File(mandatory=True, argstr='--dst %s',
+    target_file = File(exists=True, mandatory=True, argstr='--dst %s',
                        desc='target volume for the registration')
-    out_reg_file = File(genfile=True, argstr='--lta %s',
-                        desc='registration file to write')
-    registered_file = traits.Either(traits.Bool, File, argstr='--warp %s',
-                                    desc='registered image; either True or filename')
-    weights_file = traits.Either(traits.Bool, File, argstr='--weights %s',
-                                 desc='weights image to write; either True or filename')
-    est_int_scale = traits.Bool(argstr='--iscale',
-                                desc='estimate intensity scale (recommended for unnormalized images)')
+    out_reg_file = traits.Either(
+        True, File, default=True, usedefault=True, argstr='--lta %s',
+        desc='registration file; either True or filename')
+    registered_file = traits.Either(
+        traits.Bool, File, argstr='--warp %s',
+        desc='registered image; either True or filename')
+    weights_file = traits.Either(
+        traits.Bool, File, argstr='--weights %s',
+        desc='weights image to write; either True or filename')
+    est_int_scale = traits.Bool(
+        argstr='--iscale',
+        desc='estimate intensity scale (recommended for unnormalized images)')
     trans_only = traits.Bool(argstr='--transonly',
                              desc='find 3 parameter translation only')
     in_xfm_file = File(exists=True, argstr='--transform',
                        desc='use initial transform on source')
-    half_source = traits.Either(traits.Bool, File, argstr='--halfmov %s',
-                                desc="write source volume mapped to halfway space")
-    half_targ = traits.Either(traits.Bool, File, argstr="--halfdst %s",
-                              desc="write target volume mapped to halfway space")
-    half_weights = traits.Either(traits.Bool, File, argstr="--halfweights %s",
-                                 desc="write weights volume mapped to halfway space")
-    half_source_xfm = traits.Either(traits.Bool, File, argstr="--halfmovlta %s",
-                                    desc="write transform from source to halfway space")
-    half_targ_xfm = traits.Either(traits.Bool, File, argstr="--halfdstlta %s",
-                                  desc="write transform from target to halfway space")
-    auto_sens = traits.Bool(argstr='--satit', xor=['outlier_sens'], mandatory=True,
-                            desc='auto-detect good sensitivity')
-    outlier_sens = traits.Float(argstr='--sat %.4f', xor=['auto_sens'], mandatory=True,
-                                desc='set outlier sensitivity explicitly')
-    least_squares = traits.Bool(argstr='--leastsquares',
-                                desc='use least squares instead of robust estimator')
+    half_source = traits.Either(
+        traits.Bool, File, argstr='--halfmov %s',
+        desc="write source volume mapped to halfway space")
+    half_targ = traits.Either(
+        traits.Bool, File, argstr="--halfdst %s",
+        desc="write target volume mapped to halfway space")
+    half_weights = traits.Either(
+        traits.Bool, File, argstr="--halfweights %s",
+        desc="write weights volume mapped to halfway space")
+    half_source_xfm = traits.Either(
+        traits.Bool, File, argstr="--halfmovlta %s",
+        desc="write transform from source to halfway space")
+    half_targ_xfm = traits.Either(
+        traits.Bool, File, argstr="--halfdstlta %s",
+        desc="write transform from target to halfway space")
+    auto_sens = traits.Bool(
+        argstr='--satit', xor=['outlier_sens'], mandatory=True,
+        desc='auto-detect good sensitivity')
+    outlier_sens = traits.Float(
+        argstr='--sat %.4f', xor=['auto_sens'], mandatory=True,
+        desc='set outlier sensitivity explicitly')
+    least_squares = traits.Bool(
+        argstr='--leastsquares',
+        desc='use least squares instead of robust estimator')
     no_init = traits.Bool(argstr='--noinit', desc='skip transform init')
-    init_orient = traits.Bool(argstr='--initorient',
-                              desc='use moments for initial orient (recommended for stripped brains)')
+    init_orient = traits.Bool(
+        argstr='--initorient',
+        desc='use moments for initial orient (recommended for stripped brains)'
+        )
     max_iterations = traits.Int(argstr='--maxit %d',
                                 desc='maximum # of times on each resolution')
     high_iterations = traits.Int(argstr='--highit %d',
                                  desc='max # of times on highest resolution')
-    iteration_thresh = traits.Float(argstr='--epsit %.3f',
-                                    desc='stop iterations when below threshold')
-    subsample_thresh = traits.Int(argstr='--subsample %d',
-                                  desc='subsample if dimension is above threshold size')
+    iteration_thresh = traits.Float(
+        argstr='--epsit %.3f', desc='stop iterations when below threshold')
+    subsample_thresh = traits.Int(
+        argstr='--subsample %d',
+        desc='subsample if dimension is above threshold size')
     outlier_limit = traits.Float(argstr='--wlimit %.3f',
                                  desc='set maximal outlier limit in satit')
-    write_vo2vox = traits.Bool(argstr='--vox2vox',
-                               desc='output vox2vox matrix (default is RAS2RAS)')
-    no_multi = traits.Bool(argstr='--nomulti', desc='work on highest resolution')
+    write_vo2vox = traits.Bool(
+        argstr='--vox2vox', desc='output vox2vox matrix (default is RAS2RAS)')
+    no_multi = traits.Bool(argstr='--nomulti',
+                           desc='work on highest resolution')
     mask_source = File(exists=True, argstr='--maskmov %s',
                        desc='image to mask source volume with')
     mask_target = File(exists=True, argstr='--maskdst %s',
                        desc='image to mask target volume with')
-    force_double = traits.Bool(argstr='--doubleprec', desc='use double-precision intensities')
-    force_float = traits.Bool(argstr='--floattype', desc='use float intensities')
+    force_double = traits.Bool(argstr='--doubleprec',
+                               desc='use double-precision intensities')
+    force_float = traits.Bool(argstr='--floattype',
+                              desc='use float intensities')
 
 
 class RobustRegisterOutputSpec(TraitedSpec):
 
     out_reg_file = File(exists=True, desc="output registration file")
-    registered_file = File(desc="output image with registration applied")
-    weights_file = File(desc="image of weights used")
-    half_source = File(desc="source image mapped to halfway space")
-    half_targ = File(desc="target image mapped to halfway space")
-    half_weights = File(desc="weights image mapped to halfway space")
-    half_source_xfm = File(desc="transform file to map source image to halfway space")
-    half_targ_xfm = File(desc="transform file to map target image to halfway space")
+    registered_file = File(exists=True,
+                           desc="output image with registration applied")
+    weights_file = File(exists=True, desc="image of weights used")
+    half_source = File(exists=True,
+                       desc="source image mapped to halfway space")
+    half_targ = File(exists=True, desc="target image mapped to halfway space")
+    half_weights = File(exists=True,
+                        desc="weights image mapped to halfway space")
+    half_source_xfm = File(
+        exists=True,
+        desc="transform file to map source image to halfway space")
+    half_targ_xfm = File(
+        exists=True,
+        desc="transform file to map target image to halfway space")
 
 
 class RobustRegister(FSCommand):
-    """Perform intramodal linear registration (translation and rotation) using robust statistics.
+    """Perform intramodal linear registration (translation and rotation) using
+    robust statistics.
 
     Examples
     --------
@@ -1536,13 +1562,13 @@ class RobustRegister(FSCommand):
     >>> reg.inputs.target_file = 'T1.nii'
     >>> reg.inputs.auto_sens = True
     >>> reg.inputs.init_orient = True
-    >>> reg.cmdline # doctest: +ALLOW_UNICODE
-    'mri_robust_register --satit --initorient --lta structural_robustreg.lta --mov structural.nii --dst T1.nii'
+    >>> reg.cmdline # doctest: +ALLOW_UNICODE +ELLIPSIS
+    'mri_robust_register --satit --initorient --lta .../structural_robustreg.lta --mov structural.nii --dst T1.nii'
 
     References
     ----------
-    Reuter, M, Rosas, HD, and Fischl, B, (2010). Highly Accurate Inverse Consistent Registration:
-    A Robust Approach.  Neuroimage 53(4) 1181-96.
+    Reuter, M, Rosas, HD, and Fischl, B, (2010). Highly Accurate Inverse
+        Consistent Registration: A Robust Approach.  Neuroimage 53(4) 1181-96.
 
     """
 
@@ -1551,24 +1577,20 @@ class RobustRegister(FSCommand):
     output_spec = RobustRegisterOutputSpec
 
     def _format_arg(self, name, spec, value):
-        for option in ["registered_file", "weights_file", "half_source", "half_targ",
-                       "half_weights", "half_source_xfm", "half_targ_xfm"]:
-            if name == option:
-                if isinstance(value, bool):
-                    fname = self._list_outputs()[name]
-                else:
-                    fname = value
-                return spec.argstr % fname
+        options = ("out_reg_file", "registered_file", "weights_file",
+                   "half_source", "half_targ", "half_weights",
+                   "half_source_xfm", "half_targ_xfm")
+        if name in options and isinstance(value, bool):
+            value = self._list_outputs()[name]
         return super(RobustRegister, self)._format_arg(name, spec, value)
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        outputs['out_reg_file'] = self.inputs.out_reg_file
-        if not isdefined(self.inputs.out_reg_file) and self.inputs.source_file:
-            outputs['out_reg_file'] = fname_presuffix(self.inputs.source_file,
-                                                      suffix='_robustreg.lta', use_ext=False)
-        prefices = dict(src=self.inputs.source_file, trg=self.inputs.target_file)
-        suffices = dict(registered_file=("src", "_robustreg", True),
+        cwd = os.getcwd()
+        prefices = dict(src=self.inputs.source_file,
+                        trg=self.inputs.target_file)
+        suffices = dict(out_reg_file=("src", "_robustreg.lta", False),
+                        registered_file=("src", "_robustreg", True),
                         weights_file=("src", "_robustweights", True),
                         half_source=("src", "_halfway", True),
                         half_targ=("trg", "_halfway", True),
@@ -1577,20 +1599,15 @@ class RobustRegister(FSCommand):
                         half_targ_xfm=("trg", "_robustxfm.lta", False))
         for name, sufftup in list(suffices.items()):
             value = getattr(self.inputs, name)
-            if isdefined(value):
-                if isinstance(value, bool):
+            if value:
+                if value is True:
                     outputs[name] = fname_presuffix(prefices[sufftup[0]],
                                                     suffix=sufftup[1],
-                                                    newpath=os.getcwd(),
+                                                    newpath=cwd,
                                                     use_ext=sufftup[2])
                 else:
-                    outputs[name] = value
+                    outputs[name] = os.path.abspath(value)
         return outputs
-
-    def _gen_filename(self, name):
-        if name == 'out_reg_file':
-            return self._list_outputs()[name]
-        return None
 
 
 class FitMSParamsInputSpec(FSTraitedSpec):
@@ -2365,13 +2382,38 @@ class EditWMwithAseg(FSCommand):
 class ConcatenateLTAInputSpec(FSTraitedSpec):
     # required
     in_lta1 = File(exists=True, mandatory=True, argstr='%s', position=-3,
-                   desc="maps some src1 to dst1")
-    in_lta2 = File(exists=True, mandatory=True, argstr='%s', position=-2,
-                   desc="maps dst1(src2) to dst2")
-    out_file = File(exists=False, position=-1, argstr='%s',
-                    name_source=['in_lta1'], name_template='%s-long',
-                    hash_files=False, keep_extension=True,
-                    desc="the combined LTA maps: src1 to dst2 = LTA2*LTA1")
+                   desc='maps some src1 to dst1')
+    in_lta2 = traits.Either(
+        File(exists=True), 'identity.nofile', argstr='%s', position=-2,
+        mandatory=True, desc='maps dst1(src2) to dst2')
+    out_file = File(
+        position=-1, argstr='%s', hash_files=False, name_source=['in_lta1'],
+        name_template='%s_concat', keep_extension=True,
+        desc='the combined LTA maps: src1 to dst2 = LTA2*LTA1')
+
+    # Inversion and transform type
+    invert_1 = traits.Bool(argstr='-invert1',
+                           desc='invert in_lta1 before applying it')
+    invert_2 = traits.Bool(argstr='-invert2',
+                           desc='invert in_lta2 before applying it')
+    invert_out = traits.Bool(argstr='-invertout',
+                             desc='invert output LTA')
+    out_type = traits.Enum('VOX2VOX', 'RAS2RAS', argstr='-out_type %d',
+                           desc='set final LTA type')
+
+    # Talairach options
+    tal_source_file = traits.File(
+        exists=True, argstr='-tal %s', position=-5,
+        requires=['tal_template_file'],
+        desc='if in_lta2 is talairach.xfm, specify source for talairach')
+    tal_template_file = traits.File(
+        exists=True, argstr='%s', position=-4, requires=['tal_source_file'],
+        desc='if in_lta2 is talairach.xfm, specify template for talairach')
+
+    subject = traits.Str(argstr='-subject %s',
+                         desc='set subject in output LTA')
+    # Note rmsdiff would be xor out_file, and would be most easily dealt with
+    # in a new interface. -CJM 2017.10.05
 
 
 class ConcatenateLTAOutputSpec(TraitedSpec):
@@ -2380,24 +2422,40 @@ class ConcatenateLTAOutputSpec(TraitedSpec):
 
 
 class ConcatenateLTA(FSCommand):
-    """concatenates two consecutive LTA transformations
-    into one overall transformation, Out = LTA2*LTA1
+    """ Concatenates two consecutive LTA transformations into one overall
+    transformation
+
+    Out = LTA2*LTA1
 
     Examples
     --------
     >>> from nipype.interfaces.freesurfer import ConcatenateLTA
     >>> conc_lta = ConcatenateLTA()
-    >>> conc_lta.inputs.in_lta1 = 'trans.mat'
-    >>> conc_lta.inputs.in_lta2 = 'trans.mat'
+    >>> conc_lta.inputs.in_lta1 = 'lta1.lta'
+    >>> conc_lta.inputs.in_lta2 = 'lta2.lta'
     >>> conc_lta.cmdline # doctest: +ALLOW_UNICODE
-    'mri_concatenate_lta trans.mat trans.mat trans-long.mat'
+    'mri_concatenate_lta lta1.lta lta2.lta lta1_concat.lta'
+
+    You can use 'identity.nofile' as the filename for in_lta2, e.g.:
+
+    >>> conc_lta.inputs.in_lta2 = 'identity.nofile'
+    >>> conc_lta.inputs.invert_1 = True
+    >>> conc_lta.inputs.out_file = 'inv1.lta'
+    >>> conc_lta.cmdline # doctest: +ALLOW_UNICODE
+    'mri_concatenate_lta -invert1 lta1.lta identity.nofile inv1.lta'
+
+    To create a RAS2RAS transform:
+
+    >>> conc_lta.inputs.out_type = 'RAS2RAS'
+    >>> conc_lta.cmdline # doctest: +ALLOW_UNICODE
+    'mri_concatenate_lta -invert1 -out_type 1 lta1.lta identity.nofile inv1.lta'
     """
 
     _cmd = 'mri_concatenate_lta'
     input_spec = ConcatenateLTAInputSpec
     output_spec = ConcatenateLTAOutputSpec
 
-    def _list_outputs(self):
-        outputs = self.output_spec().get()
-        outputs['out_file'] = os.path.abspath(self.inputs.out_file)
-        return outputs
+    def _format_arg(self, name, spec, value):
+        if name == 'out_type':
+            value = {'VOX2VOX': 0, 'RAS2RAS': 1}[value]
+        return super(ConcatenateLTA, self)._format_arg(name, spec, value)

@@ -23,7 +23,8 @@ def test_TextureMeasureFilter_inputs():
     outputFilename=dict(argstr='--outputFilename %s',
     hash_files=False,
     ),
-    terminal_output=dict(nohash=True,
+    terminal_output=dict(deprecated='1.0.0',
+    nohash=True,
     ),
     )
     inputs = TextureMeasureFilter.input_spec()

@@ -67,7 +67,8 @@ def test_Dcm2nii_inputs():
     spm_analyze=dict(argstr='-s',
     xor=['nii_output'],
     ),
-    terminal_output=dict(nohash=True,
+    terminal_output=dict(deprecated='1.0.0',
+    nohash=True,
     ),
     )
     inputs = Dcm2nii.input_spec()

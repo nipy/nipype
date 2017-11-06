@@ -27,12 +27,16 @@ def test_Automask_inputs():
     mandatory=True,
     position=-1,
     ),
+    num_threads=dict(nohash=True,
+    usedefault=True,
+    ),
     out_file=dict(argstr='-prefix %s',
     name_source='in_file',
     name_template='%s_mask',
     ),
     outputtype=dict(),
-    terminal_output=dict(nohash=True,
+    terminal_output=dict(deprecated='1.0.0',
+    nohash=True,
     ),
     )
     inputs = Automask.input_spec()

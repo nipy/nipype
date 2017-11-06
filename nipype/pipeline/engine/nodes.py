@@ -46,8 +46,7 @@ from ...utils.filemanip import (save_json, FileNotFoundError,
 from ...interfaces.base import (traits, InputMultiPath, CommandLine,
                                 Undefined, TraitedSpec, DynamicTraitedSpec,
                                 Bunch, InterfaceResult, md5, Interface,
-                                TraitDictObject, TraitListObject, isdefined,
-                                runtime_profile)
+                                TraitDictObject, TraitListObject, isdefined)
 from .utils import (generate_expanded_graph, modify_paths,
                     export_graph, make_output_dir, write_workflow_prov,
                     clean_working_directory, format_dot, topological_sort,
@@ -55,6 +54,7 @@ from .utils import (generate_expanded_graph, modify_paths,
 from .base import EngineBase
 
 logger = logging.getLogger('workflow')
+
 
 class Node(EngineBase):
     """Wraps interface objects for use in pipeline
@@ -79,7 +79,7 @@ class Node(EngineBase):
 
     def __init__(self, interface, name, iterables=None, itersource=None,
                  synchronize=False, overwrite=None, needed_outputs=None,
-                 run_without_submitting=False, n_procs=1, mem_gb=None,
+                 run_without_submitting=False, n_procs=None, mem_gb=0.20,
                  **kwargs):
         """
         Parameters
@@ -153,12 +153,15 @@ class Node(EngineBase):
         if 'base_dir' in kwargs:
             base_dir = kwargs['base_dir']
         super(Node, self).__init__(name, base_dir)
+
+        # Make sure an interface is set, and that it is an Interface
         if interface is None:
             raise IOError('Interface must be provided')
         if not isinstance(interface, Interface):
             raise IOError('interface must be an instance of an Interface')
         self._interface = interface
         self.name = name
+
         self._result = None
         self.iterables = iterables
         self.synchronize = synchronize
@@ -170,9 +173,10 @@ class Node(EngineBase):
         self.needed_outputs = []
         self.plugin_args = {}
 
-        self._interface.num_threads = n_procs
-        if mem_gb is not None:
-            self._interface.estimated_memory_gb = mem_gb
+        self._mem_gb = mem_gb
+        self._n_procs = n_procs
+        if hasattr(self._interface.inputs, 'num_threads') and self._n_procs is not None:
+            self._interface.inputs.num_threads = self._n_procs
 
         if needed_outputs:
             self.needed_outputs = sorted(needed_outputs)
@@ -201,6 +205,36 @@ class Node(EngineBase):
     def outputs(self):
         """Return the output fields of the underlying interface"""
         return self._interface._outputs()
+
+    @property
+    def mem_gb(self):
+        """Get estimated memory (GB)"""
+        if hasattr(self._interface, 'estimated_memory_gb'):
+            self._mem_gb = self._interface.estimated_memory_gb
+            logger.warning('Setting "estimated_memory_gb" on Interfaces has been '
+                           'deprecated as of nipype 1.0, please use Node.mem_gb.')
+
+        return self._mem_gb
+
+    @property
+    def n_procs(self):
+        """Get the estimated number of processes/threads"""
+        if self._n_procs is not None:
+            return self._n_procs
+        elif hasattr(self._interface.inputs, 'num_threads') and isdefined(
+            self._interface.inputs.num_threads):
+            return self._interface.inputs.num_threads
+        else:
+            return 1
+
+    @n_procs.setter
+    def n_procs(self, value):
+        """Set an estimated number of processes/threads"""
+        self._n_procs = value
+
+        # Overwrite interface's dynamic input of num_threads
+        if hasattr(self._interface.inputs, 'num_threads'):
+            self._interface.inputs.num_threads = self._n_procs
 
     def output_dir(self):
         """Return the location of the output directory for the node"""
@@ -271,6 +305,7 @@ class Node(EngineBase):
             Update the hash stored in the output directory
         """
         # check to see if output directory and hash exist
+
         if self.config is None:
             self.config = deepcopy(config._sections)
         else:
@@ -279,7 +314,7 @@ class Node(EngineBase):
             self._get_inputs()
             self._got_inputs = True
         outdir = self.output_dir()
-        logger.info("Executing node %s in dir: %s", self._id, outdir)
+        logger.info("Executing node %s in dir: %s", self.fullname, outdir)
         if op.exists(outdir):
             logger.debug('Output dir: %s', to_str(os.listdir(outdir)))
         hash_info = self.hash_exists(updatehash=updatehash)
@@ -595,9 +630,10 @@ class Node(EngineBase):
                 runtime=runtime,
                 inputs=self._interface.inputs.get_traitsfree())
             self._result = result
-            logger.debug('Executing node')
             if copyfiles:
                 self._copyfiles_to_wd(cwd, execute)
+
+            message = 'Running node "%s" ("%s.%s")'
             if issubclass(self._interface.__class__, CommandLine):
                 try:
                     cmd = self._interface.cmdline
@@ -605,10 +641,11 @@ class Node(EngineBase):
                     self._result.runtime.stderr = msg
                     raise
                 cmdfile = op.join(cwd, 'command.txt')
-                fd = open(cmdfile, 'wt')
-                fd.writelines(cmd + "\n")
-                fd.close()
-                logger.info('Running: %s' % cmd)
+                with open(cmdfile, 'wt') as fd:
+                    print(cmd + "\n", file=fd)
+                message += ', a CommandLine Interface with command:\n%s' % cmd
+            logger.info(message + '.', self.name, self._interface.__module__,
+                        self._interface.__class__.__name__)
             try:
                 result = self._interface.run()
             except Exception as msg:
@@ -724,15 +761,13 @@ class Node(EngineBase):
                 return
             fp.writelines(write_rst_header('Runtime info', level=1))
             # Init rst dictionary of runtime stats
-            rst_dict = {'hostname' : self.result.runtime.hostname,
-                        'duration' : self.result.runtime.duration}
+            rst_dict = {'hostname': self.result.runtime.hostname,
+                        'duration': self.result.runtime.duration}
             # Try and insert memory/threads usage if available
-            if runtime_profile:
-                try:
-                    rst_dict['runtime_memory_gb'] = self.result.runtime.runtime_memory_gb
-                    rst_dict['runtime_threads'] = self.result.runtime.runtime_threads
-                except AttributeError:
-                    logger.info('Runtime memory and threads stats unavailable')
+            if config.resource_monitor:
+                rst_dict['mem_peak_gb'] = self.result.runtime.mem_peak_gb
+                rst_dict['cpu_percent'] = self.result.runtime.cpu_percent
+
             if hasattr(self.result.runtime, 'cmdline'):
                 rst_dict['command'] = self.result.runtime.cmdline
                 fp.writelines(write_rst_dict(rst_dict))
@@ -1113,8 +1148,8 @@ class MapNode(Node):
         for i in range(nitems):
             nodename = '_' + self.name + str(i)
             node = Node(deepcopy(self._interface),
-                        n_procs=self._interface.num_threads,
-                        mem_gb=self._interface.estimated_memory_gb,
+                        n_procs=self._n_procs,
+                        mem_gb=self._mem_gb,
                         overwrite=self.overwrite,
                         needed_outputs=self.needed_outputs,
                         run_without_submitting=self.run_without_submitting,

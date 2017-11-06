@@ -29,7 +29,8 @@ import networkx as nx
 
 from ...utils.filemanip import (fname_presuffix, FileNotFoundError, to_str,
                                 filename_to_list, get_related_files)
-from ...utils.misc import create_function_from_source, str2bool
+from ...utils.misc import str2bool
+from ...utils.functions import create_function_from_source
 from ...interfaces.base import (CommandLine, isdefined, Undefined,
                                 InterfaceResult)
 from ...interfaces.utility import IdentityInterface
@@ -37,6 +38,7 @@ from ...utils.provenance import ProvStore, pm, nipype_ns, get_id
 
 from ... import logging, config
 logger = logging.getLogger('workflow')
+PY3 = sys.version_info[0] > 2
 
 try:
     dfs_preorder = nx.dfs_preorder
@@ -98,7 +100,7 @@ def _write_inputs(node):
                         lines[-1] = lines[-1].replace(' %s(' % funcname,
                                                       ' %s_1(' % funcname)
                         funcname = '%s_1' % funcname
-                    lines.append('from nipype.utils.misc import getsource')
+                    lines.append('from nipype.utils.functions import getsource')
                     lines.append("%s.inputs.%s = getsource(%s)" % (nodename,
                                                                    key,
                                                                    funcname))
@@ -1022,7 +1024,8 @@ def export_graph(graph_in, base_dir=None, show=False, use_execgraph=False,
     _write_detailed_dot(graph, outfname)
     if format != 'dot':
         cmd = 'dot -T%s -O %s' % (format, outfname)
-        res = CommandLine(cmd, terminal_output='allatonce').run()
+        res = CommandLine(cmd, terminal_output='allatonce',
+                          resource_monitor=False).run()
         if res.runtime.returncode:
             logger.warn('dot2png: %s', res.runtime.stderr)
     pklgraph = _create_dot_graph(graph, show_connectinfo, simple_form)
@@ -1033,7 +1036,8 @@ def export_graph(graph_in, base_dir=None, show=False, use_execgraph=False,
     nx.drawing.nx_pydot.write_dot(pklgraph, simplefname)
     if format != 'dot':
         cmd = 'dot -T%s -O %s' % (format, simplefname)
-        res = CommandLine(cmd, terminal_output='allatonce').run()
+        res = CommandLine(cmd, terminal_output='allatonce',
+                          resource_monitor=False).run()
         if res.runtime.returncode:
             logger.warn('dot2png: %s', res.runtime.stderr)
     if show:
@@ -1053,7 +1057,7 @@ def format_dot(dotfilename, format='png'):
     if format != 'dot':
         cmd = 'dot -T%s -O \'%s\'' % (format, dotfilename)
         try:
-            CommandLine(cmd).run()
+            CommandLine(cmd, resource_monitor=False).run()
         except IOError as ioe:
             if "could not be found" in str(ioe):
                 raise IOError("Cannot draw directed graph; executable 'dot' is unavailable")
@@ -1079,7 +1083,7 @@ def make_output_dir(outdir):
     except OSError:
             logger.debug("Problem creating %s", outdir)
             if not os.path.exists(outdir):
-               raise OSError('Could not create %s', outdir)
+                raise OSError('Could not create %s' % outdir)
     return outdir
 
 
@@ -1266,7 +1270,7 @@ def write_workflow_prov(graph, filename=None, format='all'):
                 ps.g.add_bundle(sub_bundle)
                 bundle_entity = ps.g.entity(sub_bundle.identifier,
                                             other_attributes={'prov:type':
-                                                               pm.PROV_BUNDLE})
+                                                              pm.PROV_BUNDLE})
                 ps.g.wasGeneratedBy(bundle_entity, process)
         else:
             process.add_attributes({pm.PROV["type"]: nipype_ns["Node"]})
@@ -1279,7 +1283,7 @@ def write_workflow_prov(graph, filename=None, format='all'):
             ps.g.add_bundle(result_bundle)
             bundle_entity = ps.g.entity(result_bundle.identifier,
                                         other_attributes={'prov:type':
-                                                              pm.PROV_BUNDLE})
+                                                          pm.PROV_BUNDLE})
             ps.g.wasGeneratedBy(bundle_entity, process)
         processes.append(process)
 
@@ -1292,6 +1296,61 @@ def write_workflow_prov(graph, filename=None, format='all'):
     # write provenance
     ps.write_provenance(filename, format=format)
     return ps.g
+
+
+def write_workflow_resources(graph, filename=None):
+    """
+    Generate a JSON file with profiling traces that can be loaded
+    in a pandas DataFrame or processed with JavaScript like D3.js
+    """
+    import simplejson as json
+    if not filename:
+        filename = os.path.join(os.getcwd(), 'resource_monitor.json')
+
+    big_dict = {
+        'time': [],
+        'name': [],
+        'interface': [],
+        'mem_gb': [],
+        'cpus': [],
+        'mapnode': [],
+        'params': [],
+    }
+
+    for idx, node in enumerate(graph.nodes()):
+        nodename = node.fullname
+        classname = node._interface.__class__.__name__
+
+        params = ''
+        if node.parameterization:
+            params = '_'.join(['{}'.format(p)
+                              for p in node.parameterization])
+
+        try:
+            rt_list = node.result.runtime
+        except Exception:
+            logger.warning('Could not access runtime info for node %s'
+                           ' (%s interface)', nodename, classname)
+            continue
+
+        if not isinstance(rt_list, list):
+            rt_list = [rt_list]
+
+        for subidx, runtime in enumerate(rt_list):
+            nsamples = len(runtime.prof_dict['time'])
+
+            for key in ['time', 'mem_gb', 'cpus']:
+                big_dict[key] += runtime.prof_dict[key]
+
+            big_dict['interface'] += [classname] * nsamples
+            big_dict['name'] += [nodename] * nsamples
+            big_dict['mapnode'] += [subidx] * nsamples
+            big_dict['params'] += [params] * nsamples
+
+    with open(filename, 'w' if PY3 else 'wb') as rsf:
+        json.dump(big_dict, rsf, ensure_ascii=False)
+
+    return filename
 
 
 def topological_sort(graph, depth_first=False):

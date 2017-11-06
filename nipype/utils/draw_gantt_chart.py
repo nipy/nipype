@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
-"""Module to draw an html gantt chart from logfile produced by
-callback_log.log_nodes_cb()
+"""
+Module to draw an html gantt chart from logfile produced by
+``nipype.utils.profiler.log_nodes_cb()``
 """
 from __future__ import print_function, division, unicode_literals, absolute_import
 
@@ -11,7 +12,6 @@ import sys
 import random
 import datetime
 import simplejson as json
-from dateutil import parser
 from builtins import str, range, open
 # Py2 compat: http://python-future.org/compatible_idioms.html#collections-counter-and-ordereddict
 from future import standard_library
@@ -102,61 +102,14 @@ def log_to_dict(logfile):
     '''
 
     # Init variables
-    #keep track of important vars
-    nodes_list = [] #all the parsed nodes
-    unifinished_nodes = [] #all start nodes that dont have a finish yet
-
     with open(logfile, 'r') as content:
-        #read file separating each line
-        content = content.read()
-        lines = content.split('\n')
+        # read file separating each line
+        lines = content.readlines()
 
-        for l in lines:
-            #try to parse each line and transform in a json dict.
-            #if the line has a bad format, just skip
-            node = None
-            try:
-                node = json.loads(l)
-            except ValueError:
-                pass
+    nodes_list = [json.loads(l) for l in lines]
 
-            if not node:
-                continue
-
-            #if it is a start node, add to unifinished nodes
-            if 'start' in node:
-                node['start'] = parser.parse(node['start'])
-                unifinished_nodes.append(node)
-
-            #if it is end node, look in uninished nodes for matching start
-            #remove from unifinished list and add to node list
-            elif 'finish' in node:
-                node['finish'] = parser.parse(node['finish'])
-                #because most nodes are small, we look backwards in the unfinished list
-                for s in range(len(unifinished_nodes)):
-                    aux = unifinished_nodes[s]
-                    #found the end for node start, copy over info
-                    if aux['id'] == node['id'] and aux['name'] == node['name'] \
-                       and aux['start'] < node['finish']:
-                        node['start'] = aux['start']
-                        node['duration'] = \
-                            (node['finish'] - node['start']).total_seconds()
-
-                        unifinished_nodes.remove(aux)
-                        nodes_list.append(node)
-                        break
-
-        #finished parsing
-        #assume nodes without finish didn't finish running.
-        #set their finish to last node run
-        last_node = nodes_list[-1]
-        for n in unifinished_nodes:
-            n['finish'] = last_node['finish']
-            n['duration'] = (n['finish'] - n['start']).total_seconds()
-            nodes_list.append(n)
-
-        # Return list of nodes
-        return nodes_list
+    # Return list of nodes
+    return nodes_list
 
 
 def calculate_resource_timeseries(events, resource):
@@ -453,7 +406,7 @@ def generate_gantt_chart(logfile, cores, minute_scale=10,
     -----
     # import logging
     # import logging.handlers
-    # from nipype.pipeline.plugins.callback_log import log_nodes_cb
+    # from nipype.utils.profiler import log_nodes_cb
 
     # log_filename = 'callback.log'
     # logger = logging.getLogger('callback')

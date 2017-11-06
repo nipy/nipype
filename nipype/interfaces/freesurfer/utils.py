@@ -1349,8 +1349,23 @@ class Tkregister2InputSpec(FSTraitedSpec):
 
     moving_image = File(exists=True, mandatory=True, argstr="--mov %s",
                         desc='moving volume')
+    # Input registration file options
     fsl_in_matrix = File(exists=True, argstr="--fsl %s",
                          desc='fsl-style registration input matrix')
+    xfm = File(exists=True, argstr='--xfm %s',
+               desc='use a matrix in MNI coordinates as initial registration')
+    lta_in = File(exists=True, argstr='--lta %s',
+                  desc='use a matrix in MNI coordinates as initial registration')
+    invert_lta_in = traits.Bool(requires=['lta_in'],
+                                desc='Invert input LTA before applying')
+    # Output registration file options
+    fsl_out = traits.Either(True, File, argstr='--fslregout %s',
+                   desc='compute an FSL-compatible resgitration matrix')
+    lta_out = traits.Either(True, File, argstr='--ltaout %s',
+                            desc='output registration file (LTA format)')
+    invert_lta_out = traits.Bool(argstr='--ltaout-inv', requires=['lta_in'],
+                                 desc='Invert input LTA before applying')
+
     subject_id = traits.String(argstr="--s %s",
                                desc='freesurfer subject ID')
     noedit = traits.Bool(True, argstr="--noedit", usedefault=True,
@@ -1361,19 +1376,16 @@ class Tkregister2InputSpec(FSTraitedSpec):
     reg_header = traits.Bool(False, argstr='--regheader',
                              desc='compute regstration from headers')
     fstal = traits.Bool(False, argstr='--fstal',
-                        xor=['target_image', 'moving_image'],
+                        xor=['target_image', 'moving_image', 'reg_file'],
                         desc='set mov to be tal and reg to be tal xfm')
     movscale = traits.Float(argstr='--movscale %f',
                             desc='adjust registration matrix to scale mov')
-    xfm = File(exists=True, argstr='--xfm %s',
-               desc='use a matrix in MNI coordinates as initial registration')
-    fsl_out = File(argstr='--fslregout %s',
-                   desc='compute an FSL-compatible resgitration matrix')
 
 
 class Tkregister2OutputSpec(TraitedSpec):
     reg_file = File(exists=True, desc='freesurfer-style registration file')
     fsl_file = File(desc='FSL-style registration file')
+    lta_file = File(desc='LTA-style registration file')
 
 
 class Tkregister2(FSCommand):
@@ -1413,11 +1425,34 @@ class Tkregister2(FSCommand):
     input_spec = Tkregister2InputSpec
     output_spec = Tkregister2OutputSpec
 
+    def _format_arg(self, name, spec, value):
+        if name == 'lta_in' and self.inputs.invert_lta_in:
+            spec = '--lta-inv %s'
+        if name in ('fsl_out', 'lta_out') and value is True:
+            value = self._list_outputs()[name]
+        return super(Tkregister2, self)._format_arg(name, spec, value)
+
     def _list_outputs(self):
         outputs = self._outputs().get()
-        outputs['reg_file'] = os.path.abspath(self.inputs.reg_file)
-        if isdefined(self.inputs.fsl_out):
-            outputs['fsl_file'] = os.path.abspath(self.inputs.fsl_out)
+        reg_file = os.path.abspath(self.inputs.reg_file)
+        outputs['reg_file'] = reg_file
+
+        cwd = os.getcwd()
+        fsl_out = self.inputs.fsl_out
+        if isdefined(fsl_out):
+            if fsl_out is True:
+                outputs['fsl_file'] = fname_presuffix(
+                    reg_file, suffix='.mat', newpath=cwd, use_ext=False)
+            else:
+                outputs['fsl_file'] = os.path.abspath(self.inputs.fsl_out)
+
+        lta_out = self.inputs.lta_out
+        if isdefined(lta_out):
+            if lta_out is True:
+                outputs['lta_file'] = fname_presuffix(
+                    reg_file, suffix='.lta', newpath=cwd, use_ext=False)
+            else:
+                outputs['lta_file'] = os.path.abspath(self.inputs.lta_out)
         return outputs
 
     def _gen_outfilename(self):

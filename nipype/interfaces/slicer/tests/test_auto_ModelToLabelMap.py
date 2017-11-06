@@ -24,7 +24,8 @@ def test_ModelToLabelMap_inputs():
     surface=dict(argstr='%s',
     position=-2,
     ),
-    terminal_output=dict(nohash=True,
+    terminal_output=dict(deprecated='1.0.0',
+    nohash=True,
     ),
     )
     inputs = ModelToLabelMap.input_spec()

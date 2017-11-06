@@ -32,7 +32,8 @@ def test_IntensityDifferenceMetric_inputs():
     ),
     sensitivityThreshold=dict(argstr='--sensitivityThreshold %f',
     ),
-    terminal_output=dict(nohash=True,
+    terminal_output=dict(deprecated='1.0.0',
+    nohash=True,
     ),
     )
     inputs = IntensityDifferenceMetric.input_spec()

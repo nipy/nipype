@@ -36,8 +36,9 @@ import networkx as nx
 
 
 from ... import config, logging
-from ...utils.misc import (unflatten, str2bool,
-                               getsource, create_function_from_source)
+
+from ...utils.misc import (unflatten, str2bool)
+from ...utils.functions import (getsource, create_function_from_source)
 from ...interfaces.base import (traits, InputMultiPath, CommandLine,
                                 Undefined, TraitedSpec, DynamicTraitedSpec,
                                 Bunch, InterfaceResult, md5, Interface,
@@ -51,6 +52,7 @@ from ...utils.filemanip import (save_json, FileNotFoundError,
                                 write_rst_list, to_str)
 from .utils import (generate_expanded_graph, modify_paths,
                     export_graph, make_output_dir, write_workflow_prov,
+                    write_workflow_resources,
                     clean_working_directory, format_dot, topological_sort,
                     get_print_name, merge_dict, evaluate_connect_function,
                     _write_inputs, format_node)
@@ -593,6 +595,9 @@ connected.
                                 'workflow_provenance_%s' % datestr)
             logger.info('Provenance file prefix: %s' % prov_base)
             write_workflow_prov(execgraph, prov_base, format='all')
+
+        if config.resource_monitor:
+            write_workflow_resources(execgraph)
         return execgraph
 
     # PRIVATE API AND FUNCTIONS

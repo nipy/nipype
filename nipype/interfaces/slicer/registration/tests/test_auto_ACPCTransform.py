@@ -21,7 +21,8 @@ def test_ACPCTransform_inputs():
     outputTransform=dict(argstr='--outputTransform %s',
     hash_files=False,
     ),
-    terminal_output=dict(nohash=True,
+    terminal_output=dict(deprecated='1.0.0',
+    nohash=True,
     ),
     )
     inputs = ACPCTransform.input_spec()

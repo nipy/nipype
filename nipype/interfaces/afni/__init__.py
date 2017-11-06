@@ -22,8 +22,8 @@ from .svm import (SVMTest, SVMTrain)
 from .utils import (ABoverlap, AFNItoNIFTI, Autobox, Axialize, BrickStat,
                     Bucket, Calc, Cat, CatMatvec, CenterMass, Copy, Dot,
                     Edge3, Eval, FWHMx, MaskTool, Merge, Notes, NwarpApply,
-                    OneDToolPy,
+                    NwarpCat, OneDToolPy,
                     Refit, Resample, TCat, TCatSubBrick, TStat, To3D, Unifize,
                     Undump, ZCutUp, GCOR,
                     Zcat, Zeropad)
-from .model import (Deconvolve, Remlfit)
+from .model import (Deconvolve, Remlfit, Synthesize)

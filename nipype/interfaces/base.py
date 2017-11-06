@@ -24,7 +24,7 @@ import re
 import platform
 from string import Template
 import select
-import subprocess
+import subprocess as sp
 import sys
 import time
 from textwrap import wrap
@@ -38,42 +38,38 @@ from .. import config, logging, LooseVersion, __version__
 from ..utils.provenance import write_provenance
 from ..utils.misc import is_container, trim, str2bool
 from ..utils.filemanip import (md5, hash_infile, FileNotFoundError, hash_timestamp,
-                               split_filename, to_str)
+                               split_filename, to_str, read_stream)
 from .traits_extension import (
     traits, Undefined, TraitDictObject, TraitListObject, TraitError, isdefined,
     File, Directory, DictStrStr, has_metadata, ImageFile)
 from ..external.due import due
 
-runtime_profile = str2bool(config.get('execution', 'profile_runtime'))
 nipype_version = Version(__version__)
 iflogger = logging.getLogger('interface')
 
 FLOAT_FORMAT = '{:.10f}'.format
 PY35 = sys.version_info >= (3, 5)
 PY3 = sys.version_info[0] > 2
-
-if runtime_profile:
-    try:
-        import psutil
-    except ImportError as exc:
-        iflogger.info('Unable to import packages needed for runtime profiling. '\
-                    'Turning off runtime profiler. Reason: %s' % exc)
-        runtime_profile = False
-
+VALID_TERMINAL_OUTPUT = ['stream', 'allatonce', 'file', 'file_split',
+                         'file_stdout', 'file_stderr', 'none']
 __docformat__ = 'restructuredtext'
 
 
 class Str(traits.Unicode):
-    pass
+    """Replacement for the default traits.Str based in bytes"""
 
 traits.Str = Str
 
+
 class NipypeInterfaceError(Exception):
+    """Custom error for interfaces"""
+
     def __init__(self, value):
         self.value = value
 
     def __str__(self):
         return '{}'.format(self.value)
+
 
 def _exists_in_path(cmd, environ):
     """
@@ -108,7 +104,6 @@ def load_template(name):
     template : string.Template
 
     """
-
     full_fname = os.path.join(os.path.dirname(__file__),
                               'script_templates', name)
     template_file = open(full_fname)
@@ -143,7 +138,6 @@ class Bunch(object):
            Items", Python Cookbook, 2nd Ed, Chapter 4.18, 2005.
 
     """
-
 
     def __init__(self, *args, **kwargs):
         self.__dict__.update(*args, **kwargs)
@@ -581,7 +575,6 @@ class BaseTraitedSpec(traits.HasTraits):
                                                        hash_files=hash_files)))
         return dict_withhash, md5(to_str(dict_nofilename).encode()).hexdigest()
 
-
     def _get_sorteddict(self, objekt, dictwithhash=False, hash_method=None,
                         hash_files=True):
         if isinstance(objekt, dict):
@@ -738,9 +731,9 @@ class Interface(object):
 
 
 class BaseInterfaceInputSpec(TraitedSpec):
-    ignore_exception = traits.Bool(False, desc="Print an error message instead \
-of throwing an exception in case the interface fails to run", usedefault=True,
-                                   nohash=True)
+    ignore_exception = traits.Bool(False, usedefault=True, nohash=True,
+                                   desc='Print an error message instead of throwing an exception '
+                                        'in case the interface fails to run')
 
 
 class BaseInterface(Interface):
@@ -760,28 +753,42 @@ class BaseInterface(Interface):
 
     This class cannot be instantiated.
 
+
+    Relevant Interface attributes
+    -----------------------------
+
+    ``input_spec`` points to the traited class for the inputs
+    ``output_spec`` points to the traited class for the outputs
+    ``_redirect_x`` should be set to ``True`` when the interface requires
+      connecting to a ``$DISPLAY`` (default is ``False``).
+    ``resource_monitor`` if ``False`` prevents resource-monitoring this
+      interface, if ``True`` monitoring will be enabled IFF the general
+      Nipype config is set on (``resource_monitor = true``).
+
+
     """
     input_spec = BaseInterfaceInputSpec
     _version = None
     _additional_metadata = []
     _redirect_x = False
     references_ = []
+    resource_monitor = True  # Enabled for this interface IFF enabled in the config
 
-    def __init__(self, from_file=None, **inputs):
+    def __init__(self, from_file=None, resource_monitor=None, **inputs):
         if not self.input_spec:
             raise Exception('No input_spec in class: %s' %
                             self.__class__.__name__)
 
         self.inputs = self.input_spec(**inputs)
-        self.estimated_memory_gb = 0.25
-        self.num_threads = 1
+
+        if resource_monitor is not None:
+            self.resource_monitor = resource_monitor
 
         if from_file is not None:
             self.load_inputs_from_json(from_file, overwrite=True)
 
             for name, value in list(inputs.items()):
                 setattr(self.inputs, name, value)
-
 
     @classmethod
     def help(cls, returnhelp=False):
@@ -903,7 +910,7 @@ class BaseInterface(Interface):
         """
         helpstr = ['Outputs::', '']
         if cls.output_spec:
-            outputs = cls.output_spec()  #pylint: disable=E1102
+            outputs = cls.output_spec()  # pylint: disable=E1102
             for name, spec in sorted(outputs.traits(transient=None).items()):
                 helpstr += cls._get_trait_desc(outputs, name, spec)
         if len(helpstr) == 2:
@@ -915,7 +922,7 @@ class BaseInterface(Interface):
         """
         outputs = None
         if self.output_spec:
-            outputs = self.output_spec()  #pylint: disable=E1102
+            outputs = self.output_spec()  # pylint: disable=E1102
 
         return outputs
 
@@ -1010,32 +1017,6 @@ class BaseInterface(Interface):
                                          version, max_ver))
         return unavailable_traits
 
-    def _run_wrapper(self, runtime):
-        sysdisplay = os.getenv('DISPLAY')
-        if self._redirect_x:
-            try:
-                from xvfbwrapper import Xvfb
-            except ImportError:
-                iflogger.error('Xvfb wrapper could not be imported')
-                raise
-
-            vdisp = Xvfb(nolisten='tcp')
-            vdisp.start()
-            try:
-                vdisp_num = vdisp.new_display
-            except AttributeError:  # outdated version of xvfbwrapper
-                vdisp_num = vdisp.vdisplay_num
-
-            iflogger.info('Redirecting X to :%d' % vdisp_num)
-            runtime.environ['DISPLAY'] = ':%d' % vdisp_num
-
-        runtime = self._run_interface(runtime)
-
-        if self._redirect_x:
-            vdisp.stop()
-
-        return runtime
-
     def _run_interface(self, runtime):
         """ Core function that executes interface
         """
@@ -1063,6 +1044,10 @@ class BaseInterface(Interface):
         results :  an InterfaceResult object containing a copy of the instance
         that was executed, provenance information and, if successful, results
         """
+        from ..utils.profiler import ResourceMonitor
+
+        enable_rm = config.resource_monitor and self.resource_monitor
+        force_raise = not getattr(self.inputs, 'ignore_exception', False)
         self.inputs.trait_set(**inputs)
         self._check_mandatory_inputs()
         self._check_version_requirements(self.inputs)
@@ -1070,7 +1055,12 @@ class BaseInterface(Interface):
         self._duecredit_cite()
 
         # initialize provenance tracking
+        store_provenance = str2bool(config.get(
+            'execution', 'write_provenance', 'false'))
         env = deepcopy(dict(os.environ))
+        if self._redirect_x:
+            env['DISPLAY'] = config.get_display()
+
         runtime = Bunch(cwd=os.getcwd(),
                         returncode=None,
                         duration=None,
@@ -1080,66 +1070,73 @@ class BaseInterface(Interface):
                         platform=platform.platform(),
                         hostname=platform.node(),
                         version=self.version)
+
+        mon_sp = None
+        if enable_rm:
+            mon_freq = float(config.get('execution', 'resource_monitor_frequency', 1))
+            proc_pid = os.getpid()
+            iflogger.debug('Creating a ResourceMonitor on a %s interface, PID=%d.',
+                           self.__class__.__name__, proc_pid)
+            mon_sp = ResourceMonitor(proc_pid, freq=mon_freq)
+            mon_sp.start()
+
+        # Grab inputs now, as they should not change during execution
+        inputs = self.inputs.get_traitsfree()
+        outputs = None
+
         try:
-            runtime = self._run_wrapper(runtime)
+            runtime = self._run_interface(runtime)
             outputs = self.aggregate_outputs(runtime)
-            runtime.endTime = dt.isoformat(dt.utcnow())
-            timediff = parseutc(runtime.endTime) - parseutc(runtime.startTime)
-            runtime.duration = (timediff.days * 86400 + timediff.seconds +
-                                timediff.microseconds / 100000.)
-            results = InterfaceResult(interface, runtime,
-                                      inputs=self.inputs.get_traitsfree(),
-                                      outputs=outputs)
-            prov_record = None
-            if str2bool(config.get('execution', 'write_provenance')):
-                prov_record = write_provenance(results)
-            results.provenance = prov_record
         except Exception as e:
+            import traceback
+            # Retrieve the maximum info fast
+            runtime.traceback = traceback.format_exc()
+            # Gather up the exception arguments and append nipype info.
+            exc_args = e.args if getattr(e, 'args') else tuple()
+            exc_args += ('An exception of type %s occurred while running interface %s.' %
+                         (type(e).__name__, self.__class__.__name__), )
+            if config.get('logging', 'interface_level', 'info').lower() == 'debug':
+                exc_args += ('Inputs: %s' % str(self.inputs),)
+
+            runtime.traceback_args = ('\n'.join(['%s' % arg for arg in exc_args]),)
+
+            if force_raise:
+                raise
+        finally:
+            # This needs to be done always
             runtime.endTime = dt.isoformat(dt.utcnow())
             timediff = parseutc(runtime.endTime) - parseutc(runtime.startTime)
             runtime.duration = (timediff.days * 86400 + timediff.seconds +
-                                timediff.microseconds / 100000.)
-            if len(e.args) == 0:
-                e.args = ("")
+                                timediff.microseconds / 1e6)
+            results = InterfaceResult(interface, runtime, inputs=inputs, outputs=outputs,
+                                      provenance=None)
 
-            message = "\nInterface %s failed to run." % self.__class__.__name__
+            # Add provenance (if required)
+            if store_provenance:
+                # Provenance will only throw a warning if something went wrong
+                results.provenance = write_provenance(results)
 
-            if config.has_option('logging', 'interface_level') and \
-                    config.get('logging', 'interface_level').lower() == 'debug':
-                inputs_str = "\nInputs:" + str(self.inputs) + "\n"
-            else:
-                inputs_str = ''
+            # Make sure runtime profiler is shut down
+            if enable_rm:
+                import numpy as np
+                mon_sp.stop()
 
-            if len(e.args) == 1 and isinstance(e.args[0], (str, bytes)):
-                e.args = (e.args[0] + " ".join([message, inputs_str]),)
-            else:
-                e.args += (message, )
-                if inputs_str != '':
-                    e.args += (inputs_str, )
+                runtime.mem_peak_gb = None
+                runtime.cpu_percent = None
 
-            # exception raising inhibition for special cases
-            import traceback
-            runtime.traceback = traceback.format_exc()
-            runtime.traceback_args = e.args
-            inputs = None
-            try:
-                inputs = self.inputs.get_traitsfree()
-            except Exception as e:
-                pass
-            results = InterfaceResult(interface, runtime, inputs=inputs)
-            prov_record = None
-            if str2bool(config.get('execution', 'write_provenance')):
-                try:
-                    prov_record = write_provenance(results)
-                except Exception:
-                    prov_record = None
-            results.provenance = prov_record
-            if hasattr(self.inputs, 'ignore_exception') and \
-                    isdefined(self.inputs.ignore_exception) and \
-                    self.inputs.ignore_exception:
-                pass
-            else:
-                raise
+                # Read .prof file in and set runtime values
+                vals = np.loadtxt(mon_sp.fname, delimiter=',')
+                if vals.size:
+                    vals = np.atleast_2d(vals)
+                    runtime.mem_peak_gb = vals[:, 1].max() / 1024
+                    runtime.cpu_percent = vals[:, 2].max()
+
+                    runtime.prof_dict = {
+                        'time': vals[:, 0].tolist(),
+                        'mem_gb': (vals[:, 1] / 1024).tolist(),
+                        'cpus': vals[:, 2].tolist(),
+                    }
+
         return results
 
     def _list_outputs(self):
@@ -1153,6 +1150,7 @@ class BaseInterface(Interface):
     def aggregate_outputs(self, runtime=None, needed_outputs=None):
         """ Collate expected outputs and check for existence
         """
+
         predicted_outputs = self._list_outputs()
         outputs = self._outputs()
         if predicted_outputs:
@@ -1170,15 +1168,13 @@ class BaseInterface(Interface):
                                                       self.__class__.__name__))
                 try:
                     setattr(outputs, key, val)
-                    _ = getattr(outputs, key)
                 except TraitError as error:
-                    if hasattr(error, 'info') and \
-                            error.info.startswith("an existing"):
+                    if getattr(error, 'info', 'default').startswith('an existing'):
                         msg = ("File/Directory '%s' not found for %s output "
                                "'%s'." % (val, self.__class__.__name__, key))
                         raise FileNotFoundError(msg)
-                    else:
-                        raise error
+                    raise error
+
         return outputs
 
     @property
@@ -1216,6 +1212,50 @@ class BaseInterface(Interface):
             json.dump(inputs, fhandle, indent=4, ensure_ascii=False)
 
 
+class SimpleInterface(BaseInterface):
+    """ An interface pattern that allows outputs to be set in a dictionary
+    called ``_results`` that is automatically interpreted by
+    ``_list_outputs()`` to find the outputs.
+
+    When implementing ``_run_interface``, set outputs with::
+
+        self._results[out_name] = out_value
+
+    This can be a way to upgrade a ``Function`` interface to do type checking.
+
+    Examples
+    --------
+    >>> def double(x):
+    ...    return 2 * x
+    ...
+    >>> class DoubleInputSpec(BaseInterfaceInputSpec):
+    ...     x = traits.Float(mandatory=True)
+    ...
+    >>> class DoubleOutputSpec(TraitedSpec):
+    ...     doubled = traits.Float()
+    ...
+    >>> class Double(SimpleInterface):
+    ...     input_spec = DoubleInputSpec
+    ...     output_spec = DoubleOutputSpec
+    ...
+    ...     def _run_interface(self, runtime):
+    ...          self._results['doubled'] = double(self.inputs.x)
+    ...          return runtime
+
+    >>> dbl = Double()
+    >>> dbl.inputs.x = 2
+    >>> dbl.run().outputs.doubled
+    4.0
+    """
+    def __init__(self, from_file=None, resource_monitor=None, **inputs):
+        super(SimpleInterface, self).__init__(
+            from_file=from_file, resource_monitor=resource_monitor, **inputs)
+        self._results = {}
+
+    def _list_outputs(self):
+        return self._results
+
+
 class Stream(object):
     """Function to capture stdout and stderr streams with timestamps
 
@@ -1228,9 +1268,7 @@ class Stream(object):
         self._buf = ''
         self._rows = []
         self._lastidx = 0
-        self.default_encoding = locale.getdefaultlocale()[1]
-        if self.default_encoding is None:
-            self.default_encoding = 'UTF-8'
+        self.default_encoding = locale.getdefaultlocale()[1] or 'UTF-8'
 
     def fileno(self):
         "Pass-through for file descriptor."
@@ -1270,118 +1308,6 @@ class Stream(object):
         self._lastidx = len(self._rows)
 
 
-# Get number of threads for process
-def _get_num_threads(proc):
-    """Function to get the number of threads a process is using
-    NOTE: If
-
-    Parameters
-    ----------
-    proc : psutil.Process instance
-        the process to evaluate thead usage of
-
-    Returns
-    -------
-    num_threads : int
-        the number of threads that the process is using
-    """
-
-    # Import packages
-    import psutil
-
-    # If process is running
-    if proc.status() == psutil.STATUS_RUNNING:
-        num_threads = proc.num_threads()
-    elif proc.num_threads() > 1:
-        tprocs = [psutil.Process(thr.id) for thr in proc.threads()]
-        alive_tprocs = [tproc for tproc in tprocs if tproc.status() == psutil.STATUS_RUNNING]
-        num_threads = len(alive_tprocs)
-    else:
-        num_threads = 1
-
-    # Try-block for errors
-    try:
-        child_threads = 0
-        # Iterate through child processes and get number of their threads
-        for child in proc.children(recursive=True):
-            # Leaf process
-            if len(child.children()) == 0:
-                # If process is running, get its number of threads
-                if child.status() == psutil.STATUS_RUNNING:
-                    child_thr = child.num_threads()
-                # If its not necessarily running, but still multi-threaded
-                elif child.num_threads() > 1:
-                    # Cast each thread as a process and check for only running
-                    tprocs = [psutil.Process(thr.id) for thr in child.threads()]
-                    alive_tprocs = [tproc for tproc in tprocs if tproc.status() == psutil.STATUS_RUNNING]
-                    child_thr = len(alive_tprocs)
-                # Otherwise, no threads are running
-                else:
-                    child_thr = 0
-                # Increment child threads
-                child_threads += child_thr
-    # Catch any NoSuchProcess errors
-    except psutil.NoSuchProcess:
-        pass
-
-    # Number of threads is max between found active children and parent
-    num_threads = max(child_threads, num_threads)
-
-    # Return number of threads found
-    return num_threads
-
-
-# Get ram usage of process
-def _get_ram_mb(pid, pyfunc=False):
-    """Function to get the RAM usage of a process and its children
-
-    Parameters
-    ----------
-    pid : integer
-        the PID of the process to get RAM usage of
-    pyfunc : boolean (optional); default=False
-        a flag to indicate if the process is a python function;
-        when Pythons are multithreaded via multiprocess or threading,
-        children functions include their own memory + parents. if this
-        is set, the parent memory will removed from children memories
-
-    Reference: http://ftp.dev411.com/t/python/python-list/095thexx8g/multiprocessing-forking-memory-usage
-
-    Returns
-    -------
-    mem_mb : float
-        the memory RAM in MB utilized by the process PID
-    """
-
-    # Import packages
-    import psutil
-
-    # Init variables
-    _MB = 1024.0**2
-
-    # Try block to protect against any dying processes in the interim
-    try:
-        # Init parent
-        parent = psutil.Process(pid)
-        # Get memory of parent
-        parent_mem = parent.memory_info().rss
-        mem_mb = parent_mem/_MB
-
-        # Iterate through child processes
-        for child in parent.children(recursive=True):
-            child_mem = child.memory_info().rss
-            if pyfunc:
-                child_mem -= parent_mem
-            mem_mb += child_mem/_MB
-
-    # Catch if process dies, return gracefully
-    except psutil.NoSuchProcess:
-        pass
-
-    # Return memory
-    return mem_mb
-
-
 def _canonicalize_env(env):
     """Windows requires that environment be dicts with bytes as keys and values
     This function converts any unicode entries for Windows only, returning the
@@ -1411,92 +1337,50 @@ def _canonicalize_env(env):
     return out_env
 
 
-# Get max resources used for process
-def get_max_resources_used(pid, mem_mb, num_threads, pyfunc=False):
-    """Function to get the RAM and threads usage of a process
-
-    Parameters
-    ----------
-    pid : integer
-        the process ID of process to profile
-    mem_mb : float
-        the high memory watermark so far during process execution (in MB)
-    num_threads: int
-        the high thread watermark so far during process execution
-
-    Returns
-    -------
-    mem_mb : float
-        the new high memory watermark of process (MB)
-    num_threads : float
-        the new high thread watermark of process
-    """
-
-    # Import packages
-    import psutil
-
-    try:
-        mem_mb = max(mem_mb, _get_ram_mb(pid, pyfunc=pyfunc))
-        num_threads = max(num_threads, _get_num_threads(psutil.Process(pid)))
-    except Exception as exc:
-        iflogger.info('Could not get resources used by process. Error: %s'\
-                      % exc)
-
-    # Return resources
-    return mem_mb, num_threads
-
-
-def run_command(runtime, output=None, timeout=0.01, redirect_x=False):
+def run_command(runtime, output=None, timeout=0.01):
     """Run a command, read stdout and stderr, prefix with timestamp.
 
     The returned runtime contains a merged stdout+stderr log with timestamps
     """
 
-    # Init logger
-    logger = logging.getLogger('workflow')
-
     # Init variables
-    PIPE = subprocess.PIPE
     cmdline = runtime.cmdline
-
-    if redirect_x:
-        exist_xvfb, _ = _exists_in_path('xvfb-run', runtime.environ)
-        if not exist_xvfb:
-            raise RuntimeError('Xvfb was not found, X redirection aborted')
-        cmdline = 'xvfb-run -a ' + cmdline
-
     env = _canonicalize_env(runtime.environ)
 
-    default_encoding = locale.getdefaultlocale()[1]
-    if default_encoding is None:
-        default_encoding = 'UTF-8'
+    errfile = None
+    outfile = None
+    stdout = sp.PIPE
+    stderr = sp.PIPE
+
     if output == 'file':
-        errfile = os.path.join(runtime.cwd, 'stderr.nipype')
+        outfile = os.path.join(runtime.cwd, 'output.nipype')
+        stdout = open(outfile, 'wb')  # t=='text'===default
+        stderr = sp.STDOUT
+    elif output == 'file_split':
         outfile = os.path.join(runtime.cwd, 'stdout.nipype')
-        stderr = open(errfile, 'wb')  # t=='text'===default
         stdout = open(outfile, 'wb')
+        errfile = os.path.join(runtime.cwd, 'stderr.nipype')
+        stderr = open(errfile, 'wb')
+    elif output == 'file_stdout':
+        outfile = os.path.join(runtime.cwd, 'stdout.nipype')
+        stdout = open(outfile, 'wb')
+    elif output == 'file_stderr':
+        errfile = os.path.join(runtime.cwd, 'stderr.nipype')
+        stderr = open(errfile, 'wb')
 
-        proc = subprocess.Popen(cmdline,
-                                stdout=stdout,
-                                stderr=stderr,
-                                shell=True,
-                                cwd=runtime.cwd,
-                                env=env)
-    else:
-        proc = subprocess.Popen(cmdline,
-                                stdout=PIPE,
-                                stderr=PIPE,
-                                shell=True,
-                                cwd=runtime.cwd,
-                                env=env)
-    result = {}
-    errfile = os.path.join(runtime.cwd, 'stderr.nipype')
-    outfile = os.path.join(runtime.cwd, 'stdout.nipype')
-
-    # Init variables for memory profiling
-    mem_mb = 0
-    num_threads = 1
-    interval = .5
+    proc = sp.Popen(cmdline,
+                    stdout=stdout,
+                    stderr=stderr,
+                    shell=True,
+                    cwd=runtime.cwd,
+                    env=env,
+                    close_fds=True,
+    )
+    result = {
+        'stdout': [],
+        'stderr': [],
+        'merged': [],
+    }
 
     if output == 'stream':
         streams = [Stream('stdout', proc.stdout), Stream('stderr', proc.stderr)]
@@ -1505,7 +1389,7 @@ def run_command(runtime, output=None, timeout=0.01, redirect_x=False):
             try:
                 res = select.select(streams, [], [], timeout)
             except select.error as e:
-                iflogger.info(str(e))
+                iflogger.info(e)
                 if e[0] == errno.EINTR:
                     return
                 else:
@@ -1513,13 +1397,11 @@ def run_command(runtime, output=None, timeout=0.01, redirect_x=False):
             else:
                 for stream in res[0]:
                     stream.read(drain)
+
         while proc.returncode is None:
-            if runtime_profile:
-                mem_mb, num_threads = \
-                    get_max_resources_used(proc.pid, mem_mb, num_threads)
             proc.poll()
             _process()
-            time.sleep(interval)
+
         _process(drain=1)
 
         # collect results, merge and return
@@ -1533,48 +1415,35 @@ def run_command(runtime, output=None, timeout=0.01, redirect_x=False):
         result['merged'] = [r[1] for r in temp]
 
     if output == 'allatonce':
-        if runtime_profile:
-            while proc.returncode is None:
-                mem_mb, num_threads = \
-                    get_max_resources_used(proc.pid, mem_mb, num_threads)
-                proc.poll()
-                time.sleep(interval)
         stdout, stderr = proc.communicate()
-        stdout = stdout.decode(default_encoding)
-        stderr = stderr.decode(default_encoding)
-        result['stdout'] = stdout.split('\n')
-        result['stderr'] = stderr.split('\n')
-        result['merged'] = ''
-    if output == 'file':
-        if runtime_profile:
-            while proc.returncode is None:
-                mem_mb, num_threads = \
-                    get_max_resources_used(proc.pid, mem_mb, num_threads)
-                proc.poll()
-                time.sleep(interval)
-        ret_code = proc.wait()
-        stderr.flush()
-        stdout.flush()
-        result['stdout'] = [line.decode(default_encoding).strip() for line in open(outfile, 'rb').readlines()]
-        result['stderr'] = [line.decode(default_encoding).strip() for line in open(errfile, 'rb').readlines()]
-        result['merged'] = ''
-    if output == 'none':
-        if runtime_profile:
-            while proc.returncode is None:
-                mem_mb, num_threads = \
-                    get_max_resources_used(proc.pid, mem_mb, num_threads)
-                proc.poll()
-                time.sleep(interval)
-        proc.communicate()
-        result['stdout'] = []
-        result['stderr'] = []
-        result['merged'] = ''
+        result['stdout'] = read_stream(stdout, logger=iflogger)
+        result['stderr'] = read_stream(stderr, logger=iflogger)
 
-    setattr(runtime, 'runtime_memory_gb', mem_mb/1024.0)
-    setattr(runtime, 'runtime_threads', num_threads)
+    elif output.startswith('file'):
+        proc.wait()
+        if outfile is not None:
+            stdout.flush()
+            stdout.close()
+            with open(outfile, 'rb') as ofh:
+                stdoutstr = ofh.read()
+            result['stdout'] = read_stream(stdoutstr, logger=iflogger)
+
+        if errfile is not None:
+            stderr.flush()
+            stderr.close()
+            with open(errfile, 'rb') as efh:
+                stderrstr = efh.read()
+            result['stderr'] = read_stream(stderrstr, logger=iflogger)
+
+        if output == 'file':
+            result['merged'] = result['stdout']
+            result['stdout'] = []
+    else:
+        proc.communicate()  # Discard stdout and stderr
+
     runtime.stderr = '\n'.join(result['stderr'])
     runtime.stdout = '\n'.join(result['stdout'])
-    runtime.merged = result['merged']
+    runtime.merged = '\n'.join(result['merged'])
     runtime.returncode = proc.returncode
     return runtime
 
@@ -1585,19 +1454,18 @@ def get_dependencies(name, environ):
     Uses otool on darwin, ldd on linux. Currently doesn't support windows.
 
     """
-    PIPE = subprocess.PIPE
     if sys.platform == 'darwin':
-        proc = subprocess.Popen('otool -L `which %s`' % name,
-                                stdout=PIPE,
-                                stderr=PIPE,
-                                shell=True,
-                                env=environ)
+        proc = sp.Popen('otool -L `which %s`' % name,
+                        stdout=sp.PIPE,
+                        stderr=sp.PIPE,
+                        shell=True,
+                        env=environ)
     elif 'linux' in sys.platform:
-        proc = subprocess.Popen('ldd `which %s`' % name,
-                                stdout=PIPE,
-                                stderr=PIPE,
-                                shell=True,
-                                env=environ)
+        proc = sp.Popen('ldd `which %s`' % name,
+                        stdout=sp.PIPE,
+                        stderr=sp.PIPE,
+                        shell=True,
+                        env=environ)
     else:
         return 'Platform %s not supported' % sys.platform
     o, e = proc.communicate()
@@ -1607,10 +1475,11 @@ def get_dependencies(name, environ):
 class CommandLineInputSpec(BaseInterfaceInputSpec):
     args = Str(argstr='%s', desc='Additional parameters to the command')
     environ = DictStrStr(desc='Environment variables', usedefault=True,
-                                nohash=True)
+                         nohash=True)
     # This input does not have a "usedefault=True" so the set_default_terminal_output()
     # method would work
     terminal_output = traits.Enum('stream', 'allatonce', 'file', 'none',
+                                  deprecated='1.0.0',
                                   desc=('Control terminal output: `stream` - '
                                         'displays to terminal immediately (default), '
                                         '`allatonce` - waits till command is '
@@ -1643,11 +1512,11 @@ class CommandLine(BaseInterface):
     >>> cli.cmdline # doctest: +ALLOW_UNICODE
     'ls -al'
 
-    >>> pprint.pprint(cli.inputs.trait_get())  # doctest: +NORMALIZE_WHITESPACE +ALLOW_UNICODE
+    # Use get_traitsfree() to check all inputs set
+    >>> pprint.pprint(cli.inputs.get_traitsfree())  # doctest: +NORMALIZE_WHITESPACE +ALLOW_UNICODE
     {'args': '-al',
      'environ': {'DISPLAY': ':1'},
-     'ignore_exception': False,
-     'terminal_output': 'stream'}
+     'ignore_exception': False}
 
     >>> cli.inputs.get_hashval()[0][0] # doctest: +ALLOW_UNICODE
     ('args', '-al')
@@ -1660,25 +1529,6 @@ class CommandLine(BaseInterface):
     _version = None
     _terminal_output = 'stream'
 
-    def __init__(self, command=None, **inputs):
-        super(CommandLine, self).__init__(**inputs)
-        self._environ = None
-        if not hasattr(self, '_cmd'):
-            self._cmd = None
-        if self.cmd is None and command is None:
-            raise Exception("Missing command")
-        if command:
-            self._cmd = command
-        self.inputs.on_trait_change(self._terminal_output_update,
-                                    'terminal_output')
-        if not isdefined(self.inputs.terminal_output):
-            self.inputs.terminal_output = self._terminal_output
-        else:
-            self._terminal_output_update()
-
-    def _terminal_output_update(self):
-        self._terminal_output = self.inputs.terminal_output
-
     @classmethod
     def set_default_terminal_output(cls, output_type):
         """Set the default terminal output for CommandLine Interfaces.
@@ -1686,14 +1536,38 @@ class CommandLine(BaseInterface):
         This method is used to set default terminal output for
         CommandLine Interfaces.  However, setting this will not
         update the output type for any existing instances.  For these,
-        assign the <instance>.inputs.terminal_output.
+        assign the <instance>.terminal_output.
         """
 
-        if output_type in ['stream', 'allatonce', 'file', 'none']:
+        if output_type in VALID_TERMINAL_OUTPUT:
             cls._terminal_output = output_type
         else:
             raise AttributeError('Invalid terminal output_type: %s' %
                                  output_type)
+
+    @classmethod
+    def help(cls, returnhelp=False):
+        allhelp = 'Wraps command **{cmd}**\n\n{help}'.format(
+            cmd=cls._cmd, help=super(CommandLine, cls).help(returnhelp=True))
+        if returnhelp:
+            return allhelp
+        print(allhelp)
+
+    def __init__(self, command=None, terminal_output=None, **inputs):
+        super(CommandLine, self).__init__(**inputs)
+        self._environ = None
+        # Set command. Input argument takes precedence
+        self._cmd = command or getattr(self, '_cmd', None)
+
+        if self._cmd is None:
+            raise Exception("Missing command")
+
+        if terminal_output is not None:
+            self.terminal_output = terminal_output
+
+        # Attach terminal_output callback for backwards compatibility
+        self.inputs.on_trait_change(self._terminal_output_update,
+                                    'terminal_output')
 
     @property
     def cmd(self):
@@ -1705,9 +1579,23 @@ class CommandLine(BaseInterface):
         """ `command` plus any arguments (args)
         validates arguments and generates command line"""
         self._check_mandatory_inputs()
-        allargs = self._parse_inputs()
-        allargs.insert(0, self.cmd)
+        allargs = [self.cmd] + self._parse_inputs()
         return ' '.join(allargs)
+
+    @property
+    def terminal_output(self):
+        return self._terminal_output
+
+    @terminal_output.setter
+    def terminal_output(self, value):
+        if value not in VALID_TERMINAL_OUTPUT:
+            raise RuntimeError(
+                'Setting invalid value "%s" for terminal_output. Valid values are '
+                '%s.' % (value, ', '.join(['"%s"' % v for v in VALID_TERMINAL_OUTPUT])))
+        self._terminal_output = value
+
+    def _terminal_output_update(self):
+        self.terminal_output = self.terminal_output
 
     def raise_exception(self, runtime):
         raise RuntimeError(
@@ -1715,29 +1603,8 @@ class CommandLine(BaseInterface):
              'Standard error:\n{stderr}\nReturn code: {returncode}').format(
                  **runtime.dictcopy()))
 
-    @classmethod
-    def help(cls, returnhelp=False):
-        allhelp = super(CommandLine, cls).help(returnhelp=True)
-
-        allhelp = "Wraps command **%s**\n\n" % cls._cmd + allhelp
-
-        if returnhelp:
-            return allhelp
-        else:
-            print(allhelp)
-
     def _get_environ(self):
-        out_environ = {}
-        if not self._redirect_x:
-            try:
-                display_var = config.get('execution', 'display_variable')
-                out_environ = {'DISPLAY': display_var}
-            except NoOptionError:
-                pass
-        iflogger.debug(out_environ)
-        if isdefined(self.inputs.environ):
-            out_environ.update(self.inputs.environ)
-        return out_environ
+        return getattr(self.inputs, 'environ', {})
 
     def version_from_command(self, flag='-v'):
         cmdname = self.cmd.split()[0]
@@ -1745,18 +1612,14 @@ class CommandLine(BaseInterface):
         if _exists_in_path(cmdname, env):
             out_environ = self._get_environ()
             env.update(out_environ)
-            proc = subprocess.Popen(' '.join((cmdname, flag)),
-                                    shell=True,
-                                    env=env,
-                                    stdout=subprocess.PIPE,
-                                    stderr=subprocess.PIPE,
-                                    )
+            proc = sp.Popen(' '.join((cmdname, flag)),
+                            shell=True,
+                            env=env,
+                            stdout=sp.PIPE,
+                            stderr=sp.PIPE,
+                            )
             o, e = proc.communicate()
             return o
-
-    def _run_wrapper(self, runtime):
-        runtime = self._run_interface(runtime)
-        return runtime
 
     def _run_interface(self, runtime, correct_return_codes=(0,)):
         """Execute command via subprocess
@@ -1771,22 +1634,25 @@ class CommandLine(BaseInterface):
             adds stdout, stderr, merged, cmdline, dependencies, command_path
 
         """
-        setattr(runtime, 'stdout', None)
-        setattr(runtime, 'stderr', None)
-        setattr(runtime, 'cmdline', self.cmdline)
+
         out_environ = self._get_environ()
+        # Initialize runtime Bunch
+        runtime.stdout = None
+        runtime.stderr = None
+        runtime.cmdline = self.cmdline
         runtime.environ.update(out_environ)
+
+        # which $cmd
         executable_name = self.cmd.split()[0]
         exist_val, cmd_path = _exists_in_path(executable_name,
                                               runtime.environ)
         if not exist_val:
             raise IOError("command '%s' could not be found on host %s" %
                           (self.cmd.split()[0], runtime.hostname))
-        setattr(runtime, 'command_path', cmd_path)
-        setattr(runtime, 'dependencies', get_dependencies(executable_name,
-                                                          runtime.environ))
-        runtime = run_command(runtime, output=self.inputs.terminal_output,
-                              redirect_x=self._redirect_x)
+
+        runtime.command_path = cmd_path
+        runtime.dependencies = get_dependencies(executable_name, runtime.environ)
+        runtime = run_command(runtime, output=self.terminal_output)
         if runtime.returncode is None or \
                 runtime.returncode not in correct_return_codes:
             self.raise_exception(runtime)
@@ -1799,14 +1665,10 @@ class CommandLine(BaseInterface):
         Formats a trait containing argstr metadata
         """
         argstr = trait_spec.argstr
-        iflogger.debug('%s_%s' % (name, str(value)))
+        iflogger.debug('%s_%s', name, value)
         if trait_spec.is_trait_type(traits.Bool) and "%" not in argstr:
-            if value:
-                # Boolean options have no format string. Just append options
-                # if True.
-                return argstr
-            else:
-                return None
+            # Boolean options have no format string. Just append options if True.
+            return argstr if value else None
         # traits.Either turns into traits.TraitCompound and does not have any
         # inner_traits
         elif trait_spec.is_trait_type(traits.List) \
@@ -1821,11 +1683,9 @@ class CommandLine(BaseInterface):
             # Depending on whether we stick with traitlets, and whether or
             # not we beef up traitlets.List, we may want to put some
             # type-checking code here as well
-            sep = trait_spec.sep
-            if sep is None:
-                sep = ' '
-            if argstr.endswith('...'):
+            sep = trait_spec.sep if trait_spec.sep is not None else ' '
 
+            if argstr.endswith('...'):
                 # repeatable option
                 # --id %d... will expand to
                 # --id 1 --id 2 --id 3 etc.,.
@@ -1857,7 +1717,7 @@ class CommandLine(BaseInterface):
             ns = trait_spec.name_source
             while isinstance(ns, (list, tuple)):
                 if len(ns) > 1:
-                    iflogger.warn('Only one name_source per trait is allowed')
+                    iflogger.warning('Only one name_source per trait is allowed')
                 ns = ns[0]
 
             if not isinstance(ns, (str, bytes)):
@@ -1905,7 +1765,7 @@ class CommandLine(BaseInterface):
         metadata = dict(name_source=lambda t: t is not None)
         traits = self.inputs.traits(**metadata)
         if traits:
-            outputs = self.output_spec().get()  #pylint: disable=E1102
+            outputs = self.output_spec().get()  # pylint: disable=E1102
             for name, trait_spec in list(traits.items()):
                 out_name = name
                 if trait_spec.output_name is not None:
@@ -1953,8 +1813,8 @@ class CommandLine(BaseInterface):
                     final_args[pos] = arg
             else:
                 all_args.append(arg)
-        first_args = [arg for pos, arg in sorted(initial_args.items())]
-        last_args = [arg for pos, arg in sorted(final_args.items())]
+        first_args = [el for _, el in sorted(initial_args.items())]
+        last_args = [el for _, el in sorted(final_args.items())]
         return first_args + all_args + last_args
 
 
@@ -1966,10 +1826,7 @@ class StdOutCommandLine(CommandLine):
     input_spec = StdOutCommandLineInputSpec
 
     def _gen_filename(self, name):
-        if name == 'out_file':
-            return self._gen_outfilename()
-        else:
-            return None
+        return self._gen_outfilename() if name == 'out_file' else None
 
     def _gen_outfilename(self):
         raise NotImplementedError
@@ -2025,7 +1882,7 @@ class SEMLikeCommandLine(CommandLine):
     """
 
     def _list_outputs(self):
-        outputs = self.output_spec().get()  #pylint: disable=E1102
+        outputs = self.output_spec().get()  # pylint: disable=E1102
         return self._outputs_from_inputs(outputs)
 
     def _outputs_from_inputs(self, outputs):
@@ -2062,7 +1919,7 @@ class MultiPath(traits.List):
 
         # want to treat range and other sequences (except str) as list
         if not isinstance(value, (str, bytes)) and isinstance(value, collections.Sequence):
-            value  = list(value)
+            value = list(value)
 
         if not isdefined(value) or \
                 (isinstance(value, list) and len(value) == 0):
@@ -2082,7 +1939,7 @@ class MultiPath(traits.List):
             newvalue = [value]
         value = super(MultiPath, self).validate(object, name, newvalue)
 
-        if len(value) > 0:
+        if value:
             return value
 
         self.error(object, name, value)

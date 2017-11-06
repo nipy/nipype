@@ -1188,15 +1188,18 @@ class SelectFilesInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
     base_directory = Directory(exists=True,
                                desc="Root path common to templates.")
     sort_filelist = traits.Bool(True, usedefault=True,
-                                desc="When matching mutliple files, return them in sorted order.")
+                                desc="When matching mutliple files, return them"
+                                " in sorted order.")
     raise_on_empty = traits.Bool(True, usedefault=True,
-                                 desc="Raise an exception if a template pattern matches no files.")
+                                desc="Raise an exception if a template pattern "
+                                "matches no files.")
     force_lists = traits.Either(traits.Bool(), traits.List(Str()),
                                 default=False, usedefault=True,
-                                desc=("Whether to return outputs as a list even when only one file "
-                                      "matches the template. Either a boolean that applies to all "
-                                      "output fields or a list of output field names to coerce to "
-                                      " a list"))
+                                desc=("Whether to return outputs as a list even"
+                                " when only one file matches the template. "
+                                "Either a boolean that applies to all output "
+                                "fields or a list of output field names to "
+                                "coerce to a list"))
 
 
 class SelectFiles(IOBase):
@@ -1296,12 +1299,18 @@ class SelectFiles(IOBase):
 
         for field, template in list(self._templates.items()):
 
+            find_dirs = template[-1] == os.sep
+
             # Build the full template path
             if isdefined(self.inputs.base_directory):
                 template = op.abspath(op.join(
                     self.inputs.base_directory, template))
             else:
                 template = op.abspath(template)
+
+            # re-add separator if searching exclusively for directories
+            if find_dirs:
+                template += os.sep
 
             # Fill in the template and glob for files
             filled_template = template.format(**info)

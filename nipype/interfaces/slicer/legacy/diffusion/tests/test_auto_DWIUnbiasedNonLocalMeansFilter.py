@@ -32,7 +32,8 @@ def test_DWIUnbiasedNonLocalMeansFilter_inputs():
     rs=dict(argstr='--rs %s',
     sep=',',
     ),
-    terminal_output=dict(nohash=True,
+    terminal_output=dict(deprecated='1.0.0',
+    nohash=True,
     ),
     )
     inputs = DWIUnbiasedNonLocalMeansFilter.input_spec()

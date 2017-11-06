@@ -12,7 +12,8 @@ def test_SlicerCommandLine_inputs():
     ignore_exception=dict(nohash=True,
     usedefault=True,
     ),
-    terminal_output=dict(nohash=True,
+    terminal_output=dict(deprecated='1.0.0',
+    nohash=True,
     ),
     )
     inputs = SlicerCommandLine.input_spec()

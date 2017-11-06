@@ -21,7 +21,8 @@ def test_BRAINSLandmarkInitializer_inputs():
     outputTransformFilename=dict(argstr='--outputTransformFilename %s',
     hash_files=False,
     ),
-    terminal_output=dict(nohash=True,
+    terminal_output=dict(deprecated='1.0.0',
+    nohash=True,
     ),
     )
     inputs = BRAINSLandmarkInitializer.input_spec()

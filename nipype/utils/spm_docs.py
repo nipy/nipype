@@ -27,7 +27,7 @@ def grab_doc(task_name):
 
     """
 
-    cmd = matlab.MatlabCommandLine()
+    cmd = matlab.MatlabCommand(resource_monitor=False)
     # We need to tell Matlab where to find our spm_get_doc.m file.
     cwd = os.path.dirname(__file__)
     # Build matlab command

@@ -25,7 +25,8 @@ def test_BRAINSTalairachMask_inputs():
     ),
     talairachParameters=dict(argstr='--talairachParameters %s',
     ),
-    terminal_output=dict(nohash=True,
+    terminal_output=dict(deprecated='1.0.0',
+    nohash=True,
     ),
     )
     inputs = BRAINSTalairachMask.input_spec()

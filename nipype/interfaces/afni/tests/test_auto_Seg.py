@@ -39,7 +39,8 @@ def test_Seg_inputs():
     ),
     prefix=dict(argstr='-prefix %s',
     ),
-    terminal_output=dict(nohash=True,
+    terminal_output=dict(deprecated='1.0.0',
+    nohash=True,
     ),
     )
     inputs = Seg.input_spec()

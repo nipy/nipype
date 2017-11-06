@@ -5,16 +5,13 @@
 
 """
 from __future__ import print_function, division, unicode_literals, absolute_import
-from builtins import str, bytes, open
-
-from future import standard_library
-standard_library.install_aliases()
 
 import sys
 import pickle
 import subprocess
 import gzip
 import hashlib
+import locale
 from hashlib import md5
 import os
 import re
@@ -23,11 +20,16 @@ import posixpath
 import simplejson as json
 import numpy as np
 
+from builtins import str, bytes, open
+
 from .. import logging, config
 from .misc import is_container
 from ..interfaces.traits_extension import isdefined
 
-fmlogger = logging.getLogger("filemanip")
+from future import standard_library
+standard_library.install_aliases()
+
+fmlogger = logging.getLogger('utils')
 
 
 related_filetype_sets = [
@@ -596,6 +598,26 @@ def crash2txt(filename, record):
         fp.write(''.join(record['traceback']))
 
 
+def read_stream(stream, logger=None, encoding=None):
+    """
+    Robustly reads a stream, sending a warning to a logger
+    if some decoding error was raised.
+
+    >>> read_stream(bytearray([65, 0xc7, 65, 10, 66]))  # doctest: +ELLIPSIS +ALLOW_UNICODE
+    ['A...A', 'B']
+
+
+    """
+    default_encoding = encoding or locale.getdefaultlocale()[1] or 'UTF-8'
+    logger = logger or fmlogger
+    try:
+        out = stream.decode(default_encoding)
+    except UnicodeDecodeError as err:
+        out = stream.decode(default_encoding, errors='replace')
+        logger.warning('Error decoding string: %s', err)
+    return out.splitlines()
+
+
 def savepkl(filename, record):
     if filename.endswith('pklz'):
         pkl_file = gzip.open(filename, 'wb')
@@ -624,3 +646,20 @@ def write_rst_dict(info, prefix=''):
     for key, value in sorted(info.items()):
         out.append('{}* {} : {}'.format(prefix, key, str(value)))
     return '\n'.join(out) + '\n\n'
+
+
+def dist_is_editable(dist):
+    """Is distribution an editable install?
+
+    Parameters
+    ----------
+    dist : string
+        Package name
+
+    # Borrowed from `pip`'s' API
+    """
+    for path_item in sys.path:
+        egg_link = os.path.join(path_item, dist + '.egg-link')
+        if os.path.isfile(egg_link):
+            return True
+    return False

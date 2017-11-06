@@ -55,7 +55,7 @@ This will create a file "outputtestsave.py" with the following content:
 	from nipype.pipeline.engine import Workflow, Node, MapNode
 	from nipype.interfaces.utility import IdentityInterface
 	from nipype.interfaces.utility import Function
-	from nipype.utils.misc import getsource
+	from nipype.utils.functions import getsource
 	from nipype.interfaces.fsl.preprocess import BET
 	from nipype.interfaces.fsl.utils import ImageMaths
 	# Functions
@@ -82,20 +82,20 @@ This will create a file "outputtestsave.py" with the following content:
 	bet2.inputs.environ = {'FSLOUTPUTTYPE': 'NIFTI_GZ'}
 	bet2.inputs.ignore_exception = False
 	bet2.inputs.output_type = 'NIFTI_GZ'
-	bet2.inputs.terminal_output = 'stream'
+	bet2.terminal_output = 'stream'
 	# Node: testsave.bet
 	bet = Node(BET(), name="bet")
 	bet.iterables = ('frac', [0.3, 0.4])
 	bet.inputs.environ = {'FSLOUTPUTTYPE': 'NIFTI_GZ'}
 	bet.inputs.ignore_exception = False
 	bet.inputs.output_type = 'NIFTI_GZ'
-	bet.inputs.terminal_output = 'stream'
+	bet.terminal_output = 'stream'
 	# Node: testsave.maths
 	maths = Node(ImageMaths(), name="maths")
 	maths.inputs.environ = {'FSLOUTPUTTYPE': 'NIFTI_GZ'}
 	maths.inputs.ignore_exception = False
 	maths.inputs.output_type = 'NIFTI_GZ'
-	maths.inputs.terminal_output = 'stream'
+	maths.terminal_output = 'stream'
 	testsave.connect(bet2, ('mask_file', func), maths, "in_file2")
 	testsave.connect(bet, "mask_file", maths, "in_file")
 	testsave.connect(testfunc, "output", maths, "op_string")

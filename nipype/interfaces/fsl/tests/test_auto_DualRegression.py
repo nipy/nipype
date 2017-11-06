@@ -44,7 +44,8 @@ def test_DualRegression_inputs():
     usedefault=True,
     ),
     output_type=dict(),
-    terminal_output=dict(nohash=True,
+    terminal_output=dict(deprecated='1.0.0',
+    nohash=True,
     ),
     )
     inputs = DualRegression.input_spec()

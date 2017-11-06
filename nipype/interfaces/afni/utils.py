@@ -694,10 +694,8 @@ class CenterMassOutputSpec(TraitedSpec):
         desc='output file')
     cm_file = File(
         desc='file with the center of mass coordinates')
-    cm = traits.Either(
+    cm = traits.List(
         traits.Tuple(traits.Float(), traits.Float(), traits.Float()),
-        traits.List(traits.Tuple(traits.Float(), traits.Float(),
-                                 traits.Float())),
         desc='center of mass')
 
 
@@ -734,11 +732,8 @@ class CenterMass(AFNICommandBase):
         outputs = super(CenterMass, self)._list_outputs()
         outputs['out_file'] = os.path.abspath(self.inputs.in_file)
         outputs['cm_file'] = os.path.abspath(self.inputs.cm_file)
-        sout = np.loadtxt(outputs['cm_file'])  # pylint: disable=E1101
-        if len(sout) > 1:
-            outputs['cm'] = [tuple(s) for s in sout]
-        else:
-            outputs['cm'] = tuple(sout)
+        sout = np.loadtxt(outputs['cm_file'], ndmin=2)  # pylint: disable=E1101
+        outputs['cm'] = [tuple(s) for s in sout]
         return outputs
 
 
@@ -1593,6 +1588,123 @@ class NwarpApply(AFNICommandBase):
     input_spec = NwarpApplyInputSpec
     output_spec = AFNICommandOutputSpec
 
+
+class NwarpCatInputSpec(AFNICommandInputSpec):
+    in_files = traits.List(
+        traits.Either(
+            traits.File(),
+            traits.Tuple(traits.Enum('IDENT', 'INV', 'SQRT', 'SQRTINV'),
+                         traits.File())),
+        descr="list of tuples of 3D warps and associated functions",
+        mandatory=True,
+        argstr="%s",
+        position=-1)
+    space = traits.String(
+        desc='string to attach to the output dataset as its atlas space '
+             'marker.',
+        argstr='-space %s')
+    inv_warp = traits.Bool(
+        desc='invert the final warp before output',
+        argstr='-iwarp')
+    interp = traits.Enum(
+        'linear', 'quintic', 'wsinc5',
+        desc='specify a different interpolation method than might '
+             'be used for the warp',
+        argstr='-interp %s',
+        default='wsinc5')
+    expad = traits.Int(
+        desc='Pad the nonlinear warps by the given number of voxels voxels in '
+             'all directions. The warp displacements are extended by linear '
+             'extrapolation from the faces of the input grid..',
+        argstr='-expad %d')
+    out_file = File(
+        name_template='%s_NwarpCat',
+        desc='output image file name',
+        argstr='-prefix %s',
+        name_source='in_files')
+    verb = traits.Bool(
+        desc='be verbose',
+        argstr='-verb')
+
+
+class NwarpCat(AFNICommand):
+    """Catenates (composes) 3D warps defined on a grid, OR via a matrix.
+
+    .. note::
+
+      * All transformations are from DICOM xyz (in mm) to DICOM xyz.
+
+      * Matrix warps are in files that end in '.1D' or in '.txt'.  A matrix
+        warp file should have 12 numbers in it, as output (for example), by
+        '3dAllineate -1Dmatrix_save'.
+
+      * Nonlinear warps are in dataset files (AFNI .HEAD/.BRIK or NIfTI .nii)
+        with 3 sub-bricks giving the DICOM order xyz grid displacements in mm.
+
+      * If all the input warps are matrices, then the output is a matrix
+        and will be written to the file 'prefix.aff12.1D'.
+        Unless the prefix already contains the string '.1D', in which case
+        the filename is just the prefix.
+
+      * If 'prefix' is just 'stdout', then the output matrix is written
+        to standard output.
+        In any of these cases, the output format is 12 numbers in one row.
+
+      * If any of the input warps are datasets, they must all be defined on
+        the same 3D grid!
+        And of course, then the output will be a dataset on the same grid.
+        However, you can expand the grid using the '-expad' option.
+
+      * The order of operations in the final (output) warp is, for the
+        case of 3 input warps:
+
+            OUTPUT(x) = warp3( warp2( warp1(x) ) )
+
+       That is, warp1 is applied first, then warp2, et cetera.
+       The 3D x coordinates are taken from each grid location in the
+       first dataset defined on a grid.
+
+    For complete details, see the `3dNwarpCat Documentation.
+    <https://afni.nimh.nih.gov/pub/dist/doc/program_help/3dNwarpCat.html>`_
+
+    Examples
+    ========
+
+    >>> from nipype.interfaces import afni
+    >>> nwarpcat = afni.NwarpCat()
+    >>> nwarpcat.inputs.in_files = ['Q25_warp+tlrc.HEAD', ('IDENT', 'structural.nii')]
+    >>> nwarpcat.inputs.out_file = 'Fred_total_WARP'
+    >>> nwarpcat.cmdline  # doctest: +ALLOW_UNICODE
+    "3dNwarpCat -prefix Fred_total_WARP Q25_warp+tlrc.HEAD 'IDENT(structural.nii)'"
+    >>> res = nwarpcat.run()  # doctest: +SKIP
+
+    """
+    _cmd = '3dNwarpCat'
+    input_spec = NwarpCatInputSpec
+    output_spec = AFNICommandOutputSpec
+
+    def _format_arg(self, name, spec, value):
+        if name == 'in_files':
+            return spec.argstr % (' '.join(["'" + v[0] + "(" + v[1] + ")'"
+                                            if isinstance(v, tuple) else v
+                                            for v in value]))
+        return super(NwarpCat, self)._format_arg(name, spec, value)
+
+    def _gen_filename(self, name):
+        if name == 'out_file':
+            return self._gen_fname(self.inputs.in_files[0][0],
+                                   suffix='_NwarpCat')
+
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        if isdefined(self.inputs.out_file):
+            outputs['out_file'] = os.path.abspath(self.inputs.out_file)
+        else:
+            outputs['out_file'] = os.path.abspath(self._gen_fname(
+                self.inputs.in_files[0], suffix='_NwarpCat+tlrc', ext='.HEAD'))
+        return outputs
+
+
 class OneDToolPyInputSpec(AFNIPythonCommandInputSpec):
     in_file = File(
         desc='input file to OneDTool',
@@ -2101,13 +2213,20 @@ class UndumpInputSpec(AFNICommandInputSpec):
         desc='radius in mm of the sphere that will be filled about each input '
              '(x,y,z) or (i,j,k) voxel. If the radius is not given, or is 0, '
              'then each input data line sets the value in only one voxel.',
-        argstr='-srad -%f')
-    srad = traits.Tuple(
+        argstr='-srad %f')
+    orient = traits.Tuple(
         traits.Enum('R', 'L'), traits.Enum('A', 'P'), traits.Enum('I', 'S'),
-        desc='radius in mm of the sphere that will be filled about each input '
-             '(x,y,z) or (i,j,k) voxel. If the radius is not given, or is 0, '
-             'then each input data line sets the value in only one voxel.',
-        argstr='-srad -%f')
+        desc='Specifies the coordinate order used by -xyz. '
+             'The code must be 3 letters, one each from the pairs '
+             '{R,L} {A,P} {I,S}.  The first letter gives the '
+             'orientation of the x-axis, the second the orientation '
+             'of the y-axis, the third the z-axis: '
+             'R = right-to-left         L = left-to-right '
+             'A = anterior-to-posterior P = posterior-to-anterior '
+             'I = inferior-to-superior  S = superior-to-inferior '
+             'If -orient isn\'t used, then the coordinate order of the '
+             '-master (in_file) dataset is used to interpret (x,y,z) inputs.',
+        argstr='-orient %s')
     head_only = traits.Bool(
         desc='create only the .HEAD file which gets exploited by '
              'the AFNI matlab library function New_HEAD.m',

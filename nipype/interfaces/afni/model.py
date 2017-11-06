@@ -154,6 +154,12 @@ class DeconvolveInputSpec(AFNICommandInputSpec):
     x1D_stop = traits.Bool(
         desc='stop running after writing .xmat.1D file',
         argstr='-x1D_stop')
+    cbucket = traits.Str(
+        desc='Name for dataset in which to save the regression '
+             'coefficients (no statistics). This dataset '
+             'will be used in a -xrestore run [not yet implemented] '
+             'instead of the bucket dataset, if possible.',
+        argstr='-cbucket %s')
     out_file = File(
         desc='output statistics file',
         argstr='-bucket %s')
@@ -231,6 +237,8 @@ class DeconvolveOutputSpec(TraitedSpec):
         desc='automatical generated script to run 3dREMLfit', exists=True)
     x1D = File(
         desc='save out X matrix', exists=True)
+    cbucket = File(
+        desc='output regression coefficients file (if generated)')
 
 
 class Deconvolve(AFNICommand):
@@ -588,3 +596,75 @@ class Remlfit(AFNICommand):
                 outputs[key] = os.path.abspath(self.inputs.get()[key])
 
         return outputs
+
+
+class SynthesizeInputSpec(AFNICommandInputSpec):
+    cbucket = File(
+        desc='Read the dataset output from '
+             '3dDeconvolve via the \'-cbucket\' option.',
+        argstr='-cbucket %s',
+        copyfile=False,
+        mandatory=True)
+    matrix = File(
+        desc='Read the matrix output from '
+             '3dDeconvolve via the \'-x1D\' option.',
+        argstr='-matrix %s',
+        copyfile=False,
+        mandatory=True)
+    select = traits.List(
+        Str(desc='selected columns to synthesize'),
+        argstr='-select %s',
+        desc='A list of selected columns from the matrix (and the '
+             'corresponding coefficient sub-bricks from the '
+             'cbucket). Valid types include \'baseline\', '
+             ' \'polort\', \'allfunc\', \'allstim\', \'all\', '
+             'Can also provide \'something\' where something matches '
+             'a stim_label from 3dDeconvolve, and \'digits\' where digits '
+             'are the numbers of the select matrix columns by '
+             'numbers (starting at 0), or number ranges of the form '
+             '\'3..7\' and \'3-7\'.',
+        mandatory=True)
+    out_file = File(
+        name_template='syn',
+        desc='output dataset prefix name (default \'syn\')',
+        argstr='-prefix %s')
+    dry_run = traits.Bool(
+        desc='Don\'t compute the output, just '
+             'check the inputs.',
+        argstr='-dry')
+    TR = traits.Float(
+        desc='TR to set in the output.  The default value of '
+             'TR is read from the header of the matrix file.',
+        argstr='-TR %f')
+    cenfill = traits.Enum(
+        'zero','nbhr','none',
+        argstr='-cenfill %s',
+        desc='Determines how censored time points from the '
+             '3dDeconvolve run will be filled. Valid types '
+             'are \'zero\', \'nbhr\' and \'none\'.')
+
+
+class Synthesize(AFNICommand):
+    """Reads a '-cbucket' dataset and a '.xmat.1D' matrix from 3dDeconvolve,
+       and synthesizes a fit dataset using user-selected sub-bricks and
+       matrix columns.
+
+    For complete details, see the `3dSynthesize Documentation.
+    <https://afni.nimh.nih.gov/pub/dist/doc/program_help/3dSynthesize.html>`_
+
+    Examples
+    ========
+
+    >>> from nipype.interfaces import afni
+    >>> synthesize = afni.Synthesize()
+    >>> synthesize.inputs.cbucket = 'functional.nii'
+    >>> synthesize.inputs.matrix = 'output.1D'
+    >>> synthesize.inputs.select = ['baseline']
+    >>> synthesize.cmdline  # doctest: +ALLOW_UNICODE
+    '3dSynthesize -cbucket functional.nii -matrix output.1D -select baseline'
+    >>> syn = synthesize.run()  # doctest: +SKIP
+    """
+
+    _cmd = '3dSynthesize'
+    input_spec = SynthesizeInputSpec
+    output_spec = AFNICommandOutputSpec
