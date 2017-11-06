@@ -126,12 +126,10 @@ jobs:
           no_output_timeout: 60m
           command: |
             if [ "$CIRCLE_NODE_INDEX" -eq "0" ]; then
-              echo "Saving Docker images to tar.gz files ..."
               docker save kaczmarj/nipype:base \
                           kaczmarj/nipype:latest \
                           kaczmarj/nipype:py36 \
                           kaczmarj/nipype:py27 > /tmp/docker/nipype-base-latest-py36-py27.tar
-              echo "$(du -h /tmp/docker/nipype-base-latest-py36-py27.tar)"
             fi
       - persist_to_workspace:
           root: /tmp
@@ -143,7 +141,8 @@ jobs:
     docker:
       - image: docker:17.09.0-ce-git
     steps:
-      - checkout
+      - checkout:
+          path: /home/circleci/nipype
       - setup_remote_docker
       - attach_workspace:
           at: /tmp
@@ -163,8 +162,9 @@ jobs:
             docker push kaczmarj/nipype:py27
       - run:
           name: Prune base Dockerfile to update cache
+          working_directory: /home/circleci/nipype/docker
           command: |
-            cd /home/circleci/nipype/docker
+            mkdir -p /tmp/docker
             # Use the sha256 sum of the pruned Dockerfile as the cache key.
             ash prune_dockerfile.sh Dockerfile.base > /tmp/docker/Dockerfile.base-pruned
       - save_cache:
