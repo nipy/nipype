@@ -80,13 +80,6 @@ function generate_base_dockerfile() {
 }
 
 
-# The Dockerfile ADD/COPY instructions do not honor the current user, so the
-# owner of the directories has to be manually changed to user neuro.
-# See https://github.com/moby/moby/issues/6119 for more information on this
-# behavior.
-# Docker plans on changing this behavior by added a `--chown` flag to the
-# ADD/COPY commands. See https://github.com/moby/moby/pull/34263.
-
 function generate_main_dockerfile() {
   docker run --rm "$NEURODOCKER_IMAGE" generate \
   --base "$NIPYPE_BASE_IMAGE" --pkg-manager "$PKG_MANAGER" \
