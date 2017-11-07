@@ -2,8 +2,6 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 import os
-from tempfile import mkdtemp
-from shutil import rmtree
 
 import pytest
 import nipype.interfaces.matlab as mlab
@@ -70,7 +68,7 @@ def test_mlab_init():
 
 
 @pytest.mark.skipif(no_matlab, reason="matlab is not available")
-def test_run_interface():
+def test_run_interface(tmpdir):
     default_script_file = clean_workspace_and_get_default_script_file()
 
     mc = mlab.MatlabCommand(matlab_cmd='foo_m')
@@ -89,12 +87,10 @@ def test_run_interface():
     if os.path.exists(default_script_file):  # cleanup
         os.remove(default_script_file)
 
-    cwd = os.getcwd()
-    basedir = mkdtemp()
-    os.chdir(basedir)
+    cwd = tmpdir.chdir()
 
     # bypasses ubuntu dash issue
-    mc = mlab.MatlabCommand(script='foo;', paths=[basedir], mfile=True)
+    mc = mlab.MatlabCommand(script='foo;', paths=[tmpdir.strpath], mfile=True)
     assert not os.path.exists(default_script_file), 'scriptfile should not exist 4.'
     with pytest.raises(RuntimeError):
         mc.run()
@@ -103,11 +99,10 @@ def test_run_interface():
         os.remove(default_script_file)
 
     # bypasses ubuntu dash issue
-    res = mlab.MatlabCommand(script='a=1;', paths=[basedir], mfile=True).run()
+    res = mlab.MatlabCommand(script='a=1;', paths=[tmpdir.strpath], mfile=True).run()
     assert res.runtime.returncode == 0
     assert os.path.exists(default_script_file), 'scriptfile should exist 5.'
-    os.chdir(cwd)
-    rmtree(basedir)
+    cwd.chdir()
 
 
 @pytest.mark.skipif(no_matlab, reason="matlab is not available")

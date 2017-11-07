@@ -29,7 +29,7 @@ class LinearTestInterface(nib.BaseInterface):
 
 
 def test_run_in_series(tmpdir):
-    os.chdir(str(tmpdir))
+    tmpdir.chdir()
 
     pipe = pe.Workflow(name='pipe')
     mod1 = pe.Node(interface=LinearTestInterface(), name='mod1')

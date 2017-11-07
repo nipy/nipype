@@ -147,7 +147,7 @@ class LabelFusion(NiftySegCommand):
     >>> node.inputs.template_file = 'im3.nii'
     >>> node.inputs.template_num = 2
     >>> node.inputs.classifier_type = 'STEPS'
-    >>> node.cmdline  # doctest: +ALLOW_UNICODE
+    >>> node.cmdline
     'seg_LabFusion -in im1.nii -STEPS 2.000000 2 im2.nii im3.nii -out im1_steps.nii'
 
     """
@@ -298,7 +298,7 @@ class CalcTopNCC(NiftySegCommand):
     >>> node.inputs.num_templates = 2
     >>> node.inputs.in_templates = ['im2.nii', 'im3.nii']
     >>> node.inputs.top_templates = 1
-    >>> node.cmdline  # doctest: +ALLOW_UNICODE
+    >>> node.cmdline
     'seg_CalcTopNCC -target im1.nii -templates 2 im2.nii im3.nii -n 1'
 
     """

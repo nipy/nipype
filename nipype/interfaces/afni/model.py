@@ -260,7 +260,7 @@ class Deconvolve(AFNICommand):
     >>> deconvolve.inputs.stim_label = [(1, 'Houses')]
     >>> deconvolve.inputs.gltsym = ['SYM: +Houses']
     >>> deconvolve.inputs.glt_label = [(1, 'Houses')]
-    >>> deconvolve.cmdline  # doctest: +ALLOW_UNICODE
+    >>> deconvolve.cmdline
     "3dDeconvolve -input functional.nii functional2.nii -bucket output.nii -x1D output.1D -num_stimts 1 -stim_times 1 timeseries.txt 'SPMG1(4)' -stim_label 1 Houses -num_glt 1 -gltsym 'SYM: +Houses' -glt_label 1 Houses"
     >>> res = deconvolve.run()  # doctest: +SKIP
     """
@@ -574,7 +574,7 @@ class Remlfit(AFNICommand):
     >>> remlfit.inputs.out_file = 'output.nii'
     >>> remlfit.inputs.matrix = 'output.1D'
     >>> remlfit.inputs.gltsym = [('SYM: +Lab1 -Lab2', 'TestSYM'), ('timeseries.txt', 'TestFile')]
-    >>> remlfit.cmdline  # doctest: +ALLOW_UNICODE
+    >>> remlfit.cmdline
     '3dREMLfit -gltsym "SYM: +Lab1 -Lab2" TestSYM -gltsym "timeseries.txt" TestFile -input "functional.nii functional2.nii" -matrix output.1D -Rbuck output.nii'
     >>> res = remlfit.run()  # doctest: +SKIP
     """
@@ -660,7 +660,7 @@ class Synthesize(AFNICommand):
     >>> synthesize.inputs.cbucket = 'functional.nii'
     >>> synthesize.inputs.matrix = 'output.1D'
     >>> synthesize.inputs.select = ['baseline']
-    >>> synthesize.cmdline  # doctest: +ALLOW_UNICODE
+    >>> synthesize.cmdline
     '3dSynthesize -cbucket functional.nii -matrix output.1D -select baseline'
     >>> syn = synthesize.run()  # doctest: +SKIP
     """

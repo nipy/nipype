@@ -109,11 +109,11 @@ def aggregate_filename(files, new_suffix):
 
     >>> from nipype.interfaces.minc.base import aggregate_filename
     >>> f = aggregate_filename(['/tmp/foo1.mnc', '/tmp/foo2.mnc', '/tmp/foo3.mnc'], 'averaged')
-    >>> os.path.split(f)[1] # This has a full path, so just check the filename. # doctest: +ALLOW_UNICODE
+    >>> os.path.split(f)[1] # This has a full path, so just check the filename.
     'foo_averaged.mnc'
 
     >>> f = aggregate_filename(['/tmp/foo1.mnc', '/tmp/blah1.mnc'], 'averaged')
-    >>> os.path.split(f)[1] # This has a full path, so just check the filename. # doctest: +ALLOW_UNICODE
+    >>> os.path.split(f)[1] # This has a full path, so just check the filename.
     'foo1_averaged.mnc'
 
     """

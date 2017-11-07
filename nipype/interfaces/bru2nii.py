@@ -42,7 +42,7 @@ class Bru2(CommandLine):
     >>> from nipype.interfaces.bru2nii import Bru2
     >>> converter = Bru2()
     >>> converter.inputs.input_dir = "brukerdir"
-    >>> converter.cmdline  # doctest: +ELLIPSIS +ALLOW_UNICODE
+    >>> converter.cmdline  # doctest: +ELLIPSIS
     'Bru2 -o .../nipype/testing/data/brukerdir brukerdir'
     """
     input_spec = Bru2InputSpec

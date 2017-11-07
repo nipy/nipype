@@ -103,11 +103,11 @@ class ApiDocWriter(object):
     def _get_object_name(self, line):
         ''' Get second token in line
         >>> docwriter = ApiDocWriter('sphinx')
-        >>> docwriter._get_object_name("  def func():  ") # doctest: +ALLOW_UNICODE
+        >>> docwriter._get_object_name("  def func():  ")
         u'func'
-        >>> docwriter._get_object_name("  class Klass(object):  ") # doctest: +ALLOW_UNICODE
+        >>> docwriter._get_object_name("  class Klass(object):  ")
         'Klass'
-        >>> docwriter._get_object_name("  class Klass:  ") # doctest: +ALLOW_UNICODE
+        >>> docwriter._get_object_name("  class Klass:  ")
         'Klass'
         '''
         name = line.split()[1].split('(')[0].strip()

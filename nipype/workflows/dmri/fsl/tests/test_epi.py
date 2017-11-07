@@ -9,14 +9,12 @@ from nipype.interfaces.fsl import no_fsl, no_fsl_course_data
 
 import nipype.pipeline.engine as pe
 import warnings
-import tempfile
-import shutil
 from nipype.workflows.dmri.fsl.epi import create_eddy_correct_pipeline
 
 
 @pytest.mark.skipif(no_fsl(), reason="fsl is not installed")
 @pytest.mark.skipif(no_fsl_course_data(), reason="fsl data not available")
-def test_create_eddy_correct_pipeline():
+def test_create_eddy_correct_pipeline(tmpdir):
     fsl_course_dir = os.path.abspath(os.environ['FSL_COURSE_DATA'])
 
     dwi_file = os.path.join(fsl_course_dir, "fdt1/subj1/data.nii.gz")
@@ -36,7 +34,7 @@ def test_create_eddy_correct_pipeline():
     test = pe.Node(util.AssertEqual(), name="eddy_corrected_dwi_test")
 
     pipeline = pe.Workflow(name="test_eddycorrect")
-    pipeline.base_dir = tempfile.mkdtemp(prefix="nipype_test_eddycorrect_")
+    pipeline.base_dir = tmpdir.mkdir("nipype_test_eddycorrect_").strpath
 
     pipeline.connect([(trim_dwi, original_eddycorrect, [("roi_file", "in_file")]),
                       (trim_dwi, nipype_eddycorrect, [("roi_file", "inputnode.in_file")]),
@@ -45,4 +43,3 @@ def test_create_eddy_correct_pipeline():
                       ])
 
     pipeline.run(plugin='Linear')
-    shutil.rmtree(pipeline.base_dir)

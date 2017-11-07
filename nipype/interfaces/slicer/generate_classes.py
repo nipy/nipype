@@ -18,9 +18,9 @@ def force_to_valid_python_variable_name(old_name):
     """  Valid c++ names are not always valid in python, so
     provide alternate naming
 
-    >>> force_to_valid_python_variable_name('lambda') # doctest: +ALLOW_UNICODE
+    >>> force_to_valid_python_variable_name('lambda')
     'opt_lambda'
-    >>> force_to_valid_python_variable_name('inputVolume') # doctest: +ALLOW_UNICODE
+    >>> force_to_valid_python_variable_name('inputVolume')
     'inputVolume'
     """
     new_name = old_name
