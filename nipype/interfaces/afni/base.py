@@ -14,45 +14,26 @@ from ... import logging, LooseVersion
 from ...utils.filemanip import split_filename, fname_presuffix
 
 from ..base import (
-    CommandLine, traits, CommandLineInputSpec, isdefined, File, TraitedSpec)
+    CommandLine, traits, CommandLineInputSpec, isdefined, File, TraitedSpec,
+    PackageInfo)
 from ...external.due import BibTeX
 
 # Use nipype's logging system
 IFLOGGER = logging.getLogger('interface')
 
 
-class Info(object):
+class Info(PackageInfo):
     """Handle afni output type and version information.
     """
     __outputtype = 'AFNI'
     ftypes = {'NIFTI': '.nii',
               'AFNI': '',
               'NIFTI_GZ': '.nii.gz'}
+    version_cmd = 'afni --version'
 
     @staticmethod
-    def version():
-        """Check for afni version on system
-
-        Parameters
-        ----------
-        None
-
-        Returns
-        -------
-        version : str
-           Version number as string or None if AFNI not found
-
-        """
-        try:
-            clout = CommandLine(command='afni --version',
-                                resource_monitor=False,
-                                terminal_output='allatonce').run()
-        except IOError:
-            # If afni_vcheck is not present, return None
-            IFLOGGER.warn('afni executable not found.')
-            return None
-
-        version_stamp = clout.runtime.stdout.split('\n')[0].split('Version ')[1]
+    def parse_version(raw_info):
+        version_stamp = raw_info.split('\n')[0].split('Version ')[1]
         if version_stamp.startswith('AFNI'):
             version_stamp = version_stamp.split('AFNI_')[1]
         elif version_stamp.startswith('Debian'):

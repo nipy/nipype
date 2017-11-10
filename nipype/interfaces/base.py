@@ -1924,6 +1924,28 @@ class SEMLikeCommandLine(CommandLine):
         return super(SEMLikeCommandLine, self)._format_arg(name, spec, value)
 
 
+class PackageInfo(object):
+    _version = None
+    version_cmd = None
+
+    @classmethod
+    def version(klass):
+        if klass._version is None:
+            try:
+                clout = CommandLine(command=klass.version_cmd,
+                                    resource_monitor=False,
+                                    terminal_output='allatonce').run()
+            except OSError:
+                return None
+
+        klass._version = klass.parse_version(raw_info)
+        return klass._version
+
+    @staticmethod
+    def parse_version(raw_info):
+        raise NotImplementedError
+
+
 class MultiPath(traits.List):
     """ Abstract class - shared functionality of input and output MultiPath
     """
