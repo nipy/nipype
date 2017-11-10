@@ -1937,7 +1937,7 @@ class PackageInfo(object):
                     clout = CommandLine(command=klass.version_cmd,
                                         resource_monitor=False,
                                         terminal_output='allatonce').run()
-                except OSError:
+                except IOError:
                     return None
 
                 raw_info = clout.runtime.stdout
