@@ -1950,7 +1950,8 @@ class PackageInfo(object):
             else:
                 return None
 
-        klass._version = klass.parse_version(raw_info)
+            klass._version = klass.parse_version(raw_info)
+
         return klass._version
 
     @staticmethod
