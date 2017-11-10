@@ -1927,15 +1927,27 @@ class SEMLikeCommandLine(CommandLine):
 class PackageInfo(object):
     _version = None
     version_cmd = None
+    version_file = None
 
     @classmethod
     def version(klass):
         if klass._version is None:
-            try:
-                clout = CommandLine(command=klass.version_cmd,
-                                    resource_monitor=False,
-                                    terminal_output='allatonce').run()
-            except OSError:
+            if klass.version_cmd is not None:
+                try:
+                    clout = CommandLine(command=klass.version_cmd,
+                                        resource_monitor=False,
+                                        terminal_output='allatonce').run()
+                except OSError:
+                    return None
+
+                raw_info = clout.runtime.stdout
+            elif klass.version_file is not None:
+                try:
+                    with open(klass.version_file, 'rt') as fobj:
+                        raw_info = fobj.read()
+                except OSError:
+                    return None
+            else:
                 return None
 
         klass._version = klass.parse_version(raw_info)
