@@ -42,6 +42,8 @@ def test_Refit_inputs():
     ),
     xorigin=dict(argstr='-xorigin %s',
     ),
+    xyzscale=dict(argstr='-xyzscale %f',
+    ),
     ydel=dict(argstr='-ydel %f',
     ),
     yorigin=dict(argstr='-yorigin %s',
