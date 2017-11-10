@@ -1821,6 +1821,9 @@ class RefitInputSpec(CommandLineInputSpec):
     zdel = traits.Float(
         desc='new z voxel dimension in mm',
         argstr='-zdel %f')
+    xyzscale = traits.Float(
+        desc='Scale the size of the dataset voxels by the given factor',
+        argstr='-xyzscale %f')
     space = traits.Enum(
         'TLRC', 'MNI', 'ORIG',
         argstr='-space %s',
