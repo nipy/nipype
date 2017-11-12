@@ -374,9 +374,9 @@ None])
                 for f in filename_to_list(sessinfo[i]['scans']):
                     shape = load(f, mmap=NUMPY_MMAP).shape
                     if len(shape) == 3 or shape[3] == 1:
-                        iflogger.warning(('You are using 3D instead of 4D '
-                                          'files. Are you sure this was '
-                                          'intended?'))
+                        iflogger.warning('You are using 3D instead of 4D '
+                                         'files. Are you sure this was '
+                                         'intended?')
                         numscans += 1
                     else:
                         numscans += shape[3]
@@ -686,7 +686,7 @@ durations=[[1]])
 
         if dt < 1:
             raise Exception('Time multiple less than 1 ms')
-        iflogger.info('Setting dt = %d ms\n' % dt)
+        iflogger.info('Setting dt = %d ms\n', dt)
         npts = int(np.ceil(total_time / dt))
         times = np.arange(0, total_time, dt) * 1e-3
         timeline = np.zeros((npts))
@@ -705,9 +705,9 @@ durations=[[1]])
             if isdefined(self.inputs.model_hrf) and self.inputs.model_hrf:
                 response = np.convolve(boxcar, hrf)
                 reg_scale = 1.0 / response.max()
-                iflogger.info('response sum: %.4f max: %.4f' % (response.sum(),
-                                                                response.max()))
-            iflogger.info('reg_scale: %.4f' % reg_scale)
+                iflogger.info('response sum: %.4f max: %.4f', response.sum(),
+                              response.max())
+            iflogger.info('reg_scale: %.4f', reg_scale)
 
         for i, t in enumerate(onsets):
             idx = int(np.round(t / dt))
