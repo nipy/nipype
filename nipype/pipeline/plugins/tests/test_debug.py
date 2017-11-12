@@ -34,21 +34,24 @@ def callme(node, graph):
 
 
 def test_debug(tmpdir):
-    os.chdir(str(tmpdir))
+    tmpdir.chdir()
 
     pipe = pe.Workflow(name='pipe')
-    mod1 = pe.Node(interface=DebugTestInterface(), name='mod1')
-    mod2 = pe.MapNode(interface=DebugTestInterface(),
-                      iterfield=['input1'],
+    mod1 = pe.Node(DebugTestInterface(), name='mod1')
+    mod2 = pe.MapNode(DebugTestInterface(), iterfield=['input1'],
                       name='mod2')
+
     pipe.connect([(mod1, mod2, [('output1', 'input1')])])
     pipe.base_dir = os.getcwd()
     mod1.inputs.input1 = 1
+
     run_wf = lambda: pipe.run(plugin="Debug")
     with pytest.raises(ValueError): run_wf()
+
+    exc = None
     try:
         pipe.run(plugin="Debug", plugin_args={'callable': callme})
-        exception_raised = False
-    except Exception:
-        exception_raised = True
-    assert not exception_raised
+    except Exception as e:
+        exc = e
+
+    assert exc is None, 'unexpected exception caught'

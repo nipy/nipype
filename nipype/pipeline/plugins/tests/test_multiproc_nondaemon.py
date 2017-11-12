@@ -123,7 +123,7 @@ def run_multiproc_nondaemon_with_flag(nondaemon_flag):
                                       'non_daemon': nondaemon_flag})
 
     names = ['.'.join((node._hierarchy, node.name)) for node in execgraph.nodes()]
-    node = execgraph.nodes()[names.index('pipe.f2')]
+    node = list(execgraph.nodes())[names.index('pipe.f2')]
     result = node.get_output('sum_out')
     os.chdir(cur_dir)
     rmtree(temp_dir)

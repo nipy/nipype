@@ -34,7 +34,8 @@ def test_Registration_inputs():
     parameters=dict(argstr='-p %s...',
     mandatory=True,
     ),
-    terminal_output=dict(nohash=True,
+    terminal_output=dict(deprecated='1.0.0',
+    nohash=True,
     ),
     )
     inputs = Registration.input_spec()

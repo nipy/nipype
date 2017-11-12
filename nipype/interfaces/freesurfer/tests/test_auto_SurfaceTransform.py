@@ -44,7 +44,8 @@ def test_SurfaceTransform_inputs():
     ),
     target_type=dict(argstr='--tfmt %s',
     ),
-    terminal_output=dict(nohash=True,
+    terminal_output=dict(deprecated='1.0.0',
+    nohash=True,
     ),
     )
     inputs = SurfaceTransform.input_spec()

@@ -29,7 +29,8 @@ def test_DWIToDTIEstimation_inputs():
     ),
     shiftNeg=dict(argstr='--shiftNeg ',
     ),
-    terminal_output=dict(nohash=True,
+    terminal_output=dict(deprecated='1.0.0',
+    nohash=True,
     ),
     )
     inputs = DWIToDTIEstimation.input_spec()

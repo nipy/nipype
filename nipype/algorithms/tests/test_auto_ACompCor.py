@@ -7,8 +7,12 @@ def test_ACompCor_inputs():
     input_map = dict(components_file=dict(usedefault=True,
     ),
     header_prefix=dict(),
+    high_pass_cutoff=dict(usedefault=True,
+    ),
     ignore_exception=dict(nohash=True,
     usedefault=True,
+    ),
+    ignore_initial_volumes=dict(usedefault=True,
     ),
     mask_files=dict(),
     mask_index=dict(requires=['mask_files'],
@@ -19,11 +23,16 @@ def test_ACompCor_inputs():
     ),
     num_components=dict(usedefault=True,
     ),
+    pre_filter=dict(usedefault=True,
+    ),
     realigned_file=dict(mandatory=True,
     ),
     regress_poly_degree=dict(usedefault=True,
     ),
-    use_regress_poly=dict(usedefault=True,
+    repetition_time=dict(),
+    save_pre_filter=dict(),
+    use_regress_poly=dict(deprecated='0.15.0',
+    new_name='pre_filter',
     ),
     )
     inputs = ACompCor.input_spec()
@@ -35,6 +44,7 @@ def test_ACompCor_inputs():
 
 def test_ACompCor_outputs():
     output_map = dict(components_file=dict(),
+    pre_filter_file=dict(),
     )
     outputs = ACompCor.output_spec()
 

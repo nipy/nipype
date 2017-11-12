@@ -10,7 +10,7 @@ Specifying input settings
 The nipype interface modules provide a Python interface to external
 packages like FSL_ and SPM_.  Within the module are a series of Python
 classes which wrap specific package functionality.  For example, in
-the fsl module, the class :class:`nipype.interfaces.fsl.Bet` wraps the
+the fsl module, the class :class:`nipype.interfaces.fsl.BET` wraps the
 ``bet`` command-line tool.  Using the command-line tool, one would
 specify input settings using flags like ``-o``, ``-m``, ``-f <f>``, etc...
 However, in nipype, options are assigned to Python attributes and can

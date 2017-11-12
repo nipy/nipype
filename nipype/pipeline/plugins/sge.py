@@ -15,9 +15,10 @@ import xml.dom.minidom
 
 import random
 
+from ... import logging
 from ...interfaces.base import CommandLine
-from .base import (SGELikeBatchManagerBase, logger, iflogger, logging)
-
+from .base import SGELikeBatchManagerBase, logger
+iflogger = logging.getLogger('interface')
 DEBUGGING_PREFIX = str(int(random.uniform(100, 999)))
 
 
@@ -312,9 +313,9 @@ def qsub_sanitize_job_name(testjobname):
 
     Numbers and punctuation are  not allowed.
 
-    >>> qsub_sanitize_job_name('01') # doctest: +ALLOW_UNICODE
+    >>> qsub_sanitize_job_name('01')
     'J01'
-    >>> qsub_sanitize_job_name('a01') # doctest: +ALLOW_UNICODE
+    >>> qsub_sanitize_job_name('a01')
     'a01'
     """
     if testjobname[0].isalpha():
@@ -364,6 +365,7 @@ class SGEPlugin(SGELikeBatchManagerBase):
 
     def _submit_batchtask(self, scriptfile, node):
         cmd = CommandLine('qsub', environ=dict(os.environ),
+                          resource_monitor=False,
                           terminal_output='allatonce')
         path = os.path.dirname(scriptfile)
         qsubargs = ''

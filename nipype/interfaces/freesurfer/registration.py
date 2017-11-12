@@ -204,7 +204,7 @@ class EMRegister(FSCommandOpenMP):
     >>> register.inputs.out_file = 'norm_transform.lta'
     >>> register.inputs.skull = True
     >>> register.inputs.nbrspacing = 9
-    >>> register.cmdline # doctest: +ALLOW_UNICODE
+    >>> register.cmdline
     'mri_em_register -uns 9 -skull norm.mgz aseg.mgz norm_transform.lta'
     """
     _cmd = 'mri_em_register'
@@ -254,7 +254,7 @@ class Register(FSCommand):
     >>> register.inputs.target = 'aseg.mgz'
     >>> register.inputs.out_file = 'lh.pial.reg'
     >>> register.inputs.curv = True
-    >>> register.cmdline # doctest: +ALLOW_UNICODE
+    >>> register.cmdline
     'mris_register -curv lh.pial aseg.mgz lh.pial.reg'
     """
 
@@ -320,7 +320,7 @@ class Paint(FSCommand):
     >>> paint.inputs.template = 'aseg.mgz'
     >>> paint.inputs.averages = 5
     >>> paint.inputs.out_file = 'lh.avg_curv'
-    >>> paint.cmdline # doctest: +ALLOW_UNICODE
+    >>> paint.cmdline
     'mrisp_paint -a 5 aseg.mgz lh.pial lh.avg_curv'
     """
 
@@ -337,4 +337,161 @@ class Paint(FSCommand):
     def _list_outputs(self):
         outputs = self.output_spec().get()
         outputs['out_file'] = os.path.abspath(self.inputs.out_file)
+        return outputs
+
+
+class MRICoregInputSpec(FSTraitedSpec):
+    source_file = File(argstr='--mov %s', desc='source file to be registered',
+                       mandatory=True, copyfile=False)
+    reference_file = File(argstr='--ref %s', desc='reference (target) file',
+                          mandatory=True, copyfile=False, xor=['subject_id'])
+    out_lta_file = traits.Either(True, File, argstr='--lta %s', default=True,
+                                 usedefault=True,
+                                 desc='output registration file (LTA format)')
+    out_reg_file = traits.Either(True, File, argstr='--regdat %s',
+                                 desc='output registration file (REG format)')
+    out_params_file = traits.Either(True, File, argstr='--params %s',
+                                    desc='output parameters file')
+
+    subjects_dir = Directory(exists=True, argstr='--sd %s',
+                             desc='FreeSurfer SUBJECTS_DIR')
+    subject_id = traits.Str(
+        argstr='--s %s', position=1, mandatory=True, xor=['reference_file'],
+        requires=['subjects_dir'],
+        desc='freesurfer subject ID (implies ``reference_mask == '
+             'aparc+aseg.mgz`` unless otherwise specified)')
+    dof = traits.Enum(6, 9, 12, argstr='--dof %d',
+                      desc='number of transform degrees of freedom')
+    reference_mask = traits.Either(
+        False, traits.Str, argstr='--ref-mask %s', position=2,
+        desc='mask reference volume with given mask, or None if ``False``')
+    source_mask = traits.Str(argstr='--mov-mask',
+                             desc='mask source file with given mask')
+    num_threads = traits.Int(argstr='--threads %d',
+                             desc='number of OpenMP threads')
+    no_coord_dithering = traits.Bool(argstr='--no-coord-dither',
+                                     desc='turn off coordinate dithering')
+    no_intensity_dithering = traits.Bool(argstr='--no-intensity-dither',
+                                         desc='turn off intensity dithering')
+    sep = traits.List(argstr='--sep %s...', minlen=1, maxlen=2,
+                      desc='set spatial scales, in voxels (default [2, 4])')
+    initial_translation = traits.Tuple(
+        traits.Float, traits.Float, traits.Float, argstr='--trans %g %g %g',
+        desc='initial translation in mm (implies no_cras0)')
+    initial_rotation = traits.Tuple(
+        traits.Float, traits.Float, traits.Float, argstr='--rot %g %g %g',
+        desc='initial rotation in degrees')
+    initial_scale = traits.Tuple(
+        traits.Float, traits.Float, traits.Float, argstr='--scale %g %g %g',
+        desc='initial scale')
+    initial_shear = traits.Tuple(
+        traits.Float, traits.Float, traits.Float, argstr='--shear %g %g %g',
+        desc='initial shear (Hxy, Hxz, Hyz)')
+    no_cras0 = traits.Bool(argstr='--no-cras0',
+                           desc='do not set translation parameters to align '
+                                'centers of source and reference files')
+    max_iters = traits.Range(low=1, argstr='--nitersmax %d',
+                             desc='maximum iterations (default: 4)')
+    ftol = traits.Float(argstr='--ftol %e',
+                        desc='floating-point tolerance (default=1e-7)')
+    linmintol = traits.Float(argstr='--linmintol %e')
+    saturation_threshold = traits.Range(
+        low=0.0, high=100.0, argstr='--sat %g',
+        desc='saturation threshold (default=9.999)')
+    conform_reference = traits.Bool(argstr='--conf-ref',
+                                    desc='conform reference without rescaling')
+    no_brute_force = traits.Bool(argstr='--no-bf',
+                                 desc='do not brute force search')
+    brute_force_limit = traits.Float(
+        argstr='--bf-lim %g', xor=['no_brute_force'],
+        desc='constrain brute force search to +/- lim')
+    brute_force_samples = traits.Int(
+        argstr='--bf-nsamp %d', xor=['no_brute_force'],
+        desc='number of samples in brute force search')
+    no_smooth = traits.Bool(
+        argstr='--no-smooth',
+        desc='do not apply smoothing to either reference or source file')
+    ref_fwhm = traits.Float(argstr='--ref-fwhm',
+                            desc='apply smoothing to reference file')
+    source_oob = traits.Bool(
+        argstr='--mov-oob',
+        desc='count source voxels that are out-of-bounds as 0')
+    # Skipping mat2par
+
+
+class MRICoregOutputSpec(TraitedSpec):
+    out_reg_file = File(exists=True, desc='output registration file')
+    out_lta_file = File(exists=True, desc='output LTA-style registration file')
+    out_params_file = File(exists=True, desc='output parameters file')
+
+
+class MRICoreg(FSCommand):
+    """ This program registers one volume to another
+
+    mri_coreg is a C reimplementation of spm_coreg in FreeSurfer
+
+    Examples
+    ========
+    >>> from nipype.interfaces.freesurfer import MRICoreg
+    >>> coreg = MRICoreg()
+    >>> coreg.inputs.source_file = 'moving1.nii'
+    >>> coreg.inputs.reference_file = 'fixed1.nii'
+    >>> coreg.inputs.subjects_dir = '.'
+    >>> coreg.cmdline # doctest: +ELLIPSIS
+    'mri_coreg --lta .../registration.lta --ref fixed1.nii --mov moving1.nii --sd .'
+
+    If passing a subject ID, the reference mask may be disabled:
+
+    >>> coreg = MRICoreg()
+    >>> coreg.inputs.source_file = 'moving1.nii'
+    >>> coreg.inputs.subjects_dir = '.'
+    >>> coreg.inputs.subject_id = 'fsaverage'
+    >>> coreg.inputs.reference_mask = False
+    >>> coreg.cmdline # doctest: +ELLIPSIS
+    'mri_coreg --s fsaverage --no-ref-mask --lta .../registration.lta --mov moving1.nii --sd .'
+
+    Spatial scales may be specified as a list of one or two separations:
+
+    >>> coreg.inputs.sep = [4]
+    >>> coreg.cmdline # doctest: +ELLIPSIS
+    'mri_coreg --s fsaverage --no-ref-mask --lta .../registration.lta --sep 4 --mov moving1.nii --sd .'
+
+    >>> coreg.inputs.sep = [4, 5]
+    >>> coreg.cmdline # doctest: +ELLIPSIS
+    'mri_coreg --s fsaverage --no-ref-mask --lta .../registration.lta --sep 4 --sep 5 --mov moving1.nii --sd .'
+    """
+
+    _cmd = 'mri_coreg'
+    input_spec = MRICoregInputSpec
+    output_spec = MRICoregOutputSpec
+
+    def _format_arg(self, opt, spec, val):
+        if opt in ('out_reg_file', 'out_lta_file',
+                   'out_params_file') and val is True:
+            val = self._list_outputs()[opt]
+        elif opt == 'reference_mask' and val is False:
+            return '--no-ref-mask'
+        return super(MRICoreg, self)._format_arg(opt, spec, val)
+
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+
+        out_lta_file = self.inputs.out_lta_file
+        if isdefined(out_lta_file):
+            if out_lta_file is True:
+                out_lta_file = 'registration.lta'
+            outputs['out_lta_file'] = os.path.abspath(out_lta_file)
+
+        out_reg_file = self.inputs.out_reg_file
+        if isdefined(out_reg_file):
+            if out_reg_file is True:
+                out_reg_file = 'registration.dat'
+            outputs['out_reg_file'] = os.path.abspath(out_reg_file)
+
+        out_params_file = self.inputs.out_params_file
+        if isdefined(out_params_file):
+            if out_params_file is True:
+                out_params_file = 'registration.par'
+            outputs['out_params_file'] = os.path.abspath(out_params_file)
+
         return outputs

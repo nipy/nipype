@@ -8,11 +8,11 @@ def test_OutlierCount_inputs():
     ),
     autoclip=dict(argstr='-autoclip',
     usedefault=True,
-    xor=['in_file'],
+    xor=['mask'],
     ),
     automask=dict(argstr='-automask',
     usedefault=True,
-    xor=['in_file'],
+    xor=['mask'],
     ),
     environ=dict(nohash=True,
     usedefault=True,
@@ -36,11 +36,9 @@ def test_OutlierCount_inputs():
     mask=dict(argstr='-mask %s',
     xor=['autoclip', 'automask'],
     ),
-    out_file=dict(argstr='> %s',
-    keep_extension=False,
+    out_file=dict(keep_extension=False,
     name_source=['in_file'],
     name_template='%s_outliers',
-    position=-1,
     ),
     outliers_file=dict(argstr='-save %s',
     keep_extension=True,
@@ -54,7 +52,8 @@ def test_OutlierCount_inputs():
     ),
     save_outliers=dict(usedefault=True,
     ),
-    terminal_output=dict(nohash=True,
+    terminal_output=dict(deprecated='1.0.0',
+    nohash=True,
     ),
     )
     inputs = OutlierCount.input_spec()
@@ -65,12 +64,7 @@ def test_OutlierCount_inputs():
 
 
 def test_OutlierCount_outputs():
-    output_map = dict(out_file=dict(argstr='> %s',
-    keep_extension=False,
-    name_source=['in_file'],
-    name_template='%s_tqual',
-    position=-1,
-    ),
+    output_map = dict(out_file=dict(),
     out_outliers=dict(),
     )
     outputs = OutlierCount.output_spec()

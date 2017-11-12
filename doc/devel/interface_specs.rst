@@ -159,6 +159,70 @@ generated depending on inputs, by the tool.  OutputSpecs inherit from
 ``interfaces.base.TraitedSpec`` directly.
 
 
+Controlling outputs to terminal
+-------------------------------
+
+It is very likely that the software wrapped within the interface writes
+to the standard output or the standard error of the terminal.
+Interfaces provide a means to access and retrieve these outputs, by
+using the ``terminal_output`` attribute: ::
+
+  import nipype.interfaces.fsl as fsl
+  mybet = fsl.BET(from_file='bet-settings.json')
+  mybet.terminal_output = 'file_split'
+
+In the example, the ``terminal_output = 'file_split'`` will redirect the
+standard output and the standard error to split files (called
+``stdout.nipype`` and ``stderr.nipype`` respectively).
+The possible values for ``terminal_output`` are:
+
+*file*
+    Redirects both standard output and standard error to the same file
+    called ``output.nipype``.
+    Messages from both streams will be overlapped as they arrive to
+    the file.
+
+*file_split*
+    Redirects the output streams separately, to ``stdout.nipype``
+    and ``stderr.nipype`` respectively, as described in the example.
+
+*file_stdout*
+    Only the standard output will be redirected to ``stdout.nipype``
+    and the standard error will be discarded.
+
+*file_stderr*
+    Only the standard error will be redirected to ``stderr.nipype``
+    and the standard output will be discarded.
+
+*stream*
+    Both output streams are redirected to the current logger printing
+    their messages interleaved and immediately to the terminal.
+
+*allatonce*
+    Both output streams will be forwarded to a buffer and stored
+    separately in the `runtime` object that the `run()` method returns.
+    No files are written nor streams printed out to terminal.
+
+*none*
+    Both outputs are discarded
+
+In all cases, except for the ``'none'`` setting of ``terminal_output``,
+the ``run()`` method will return a "runtime" object that will contain
+the streams in the corresponding properties (``runtime.stdout``
+for the standard output, ``runtime.stderr`` for the standard error, and
+``runtime.merged`` for both when streams are mixed, eg. when using the
+*file* option). ::
+
+  import nipype.interfaces.fsl as fsl
+  mybet = fsl.BET(from_file='bet-settings.json')
+  mybet.terminal_output = 'file_split'
+  ...
+  result = mybet.run()
+  result.runtime.stdout
+  ' ... captured standard output ...'
+
+
+
 Traited Attributes
 ------------------
 

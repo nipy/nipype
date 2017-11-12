@@ -439,7 +439,7 @@ class MultiImageMaths(MathsCommand):
     >>> maths.inputs.op_string = "-add %s -mul -1 -div %s"
     >>> maths.inputs.operand_files = ["functional2.nii", "functional3.nii"]
     >>> maths.inputs.out_file = "functional4.nii"
-    >>> maths.cmdline # doctest: +ALLOW_UNICODE
+    >>> maths.cmdline
     'fslmaths functional.nii -add functional2.nii -mul -1 -div functional3.nii functional4.nii'
 
     """

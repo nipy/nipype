@@ -3,7 +3,7 @@
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """Miscellaneous utility functions
 """
-from __future__ import print_function, division, unicode_literals, absolute_import
+from __future__ import print_function, unicode_literals, division, absolute_import
 from future import standard_library
 standard_library.install_aliases()
 from builtins import next, str
@@ -64,47 +64,6 @@ def trim(docstring, marker=None):
         trimmed.pop(0)
     # Return a single string:
     return '\n'.join(trimmed)
-
-
-def getsource(function):
-    """Returns the source code of a function"""
-    src = dedent(inspect.getsource(function))
-    return src
-
-
-def create_function_from_source(function_source, imports=None):
-    """Return a function object from a function source
-
-    Parameters
-    ----------
-    function_source : pickled string
-        string in pickled form defining a function
-    imports : list of strings
-        list of import statements in string form that allow the function
-        to be executed in an otherwise empty namespace
-    """
-    ns = {}
-    import_keys = []
-    try:
-        if imports is not None:
-            for statement in imports:
-                exec(statement, ns)
-            import_keys = list(ns.keys())
-        exec(function_source, ns)
-
-    except Exception as e:
-        msg = '\nError executing function:\n %s\n' % function_source
-        msg += '\n'.join(["Functions in connection strings have to be standalone.",
-                          "They cannot be declared either interactively or inside",
-                          "another function or inline in the connect string. Any",
-                          "imports should be done inside the function"
-                          ])
-        raise_from(RuntimeError(msg), e)
-    ns_funcs = list(set(ns) - set(import_keys + ['__builtins__']))
-    assert len(ns_funcs) == 1, "Function or inputs are ill-defined"
-    funcname = ns_funcs[0]
-    func = ns[funcname]
-    return func
 
 
 def find_indices(condition):
@@ -188,7 +147,7 @@ def package_check(pkg_name, version=None, app=None, checker=LooseVersion,
     Examples
     --------
     package_check('numpy', '1.3')
-    package_check('networkx', '1.0', 'tutorial1')
+    package_check('scipy', '0.7', 'tutorial1')
 
     """
 

@@ -196,7 +196,7 @@ class SampleToSurface(FSCommand):
     >>> sampler.inputs.sampling_method = "average"
     >>> sampler.inputs.sampling_range = 1
     >>> sampler.inputs.sampling_units = "frac"
-    >>> sampler.cmdline  # doctest: +ELLIPSIS +ALLOW_UNICODE
+    >>> sampler.cmdline  # doctest: +ELLIPSIS
     'mri_vol2surf --hemi lh --o ...lh.cope1.mgz --reg register.dat --projfrac-avg 1.000 --mov cope1.nii.gz'
     >>> res = sampler.run() # doctest: +SKIP
 
@@ -326,7 +326,7 @@ class SurfaceSmooth(FSCommand):
     >>> smoother.inputs.subject_id = "subj_1"
     >>> smoother.inputs.hemi = "lh"
     >>> smoother.inputs.fwhm = 5
-    >>> smoother.cmdline # doctest: +ELLIPSIS +ALLOW_UNICODE
+    >>> smoother.cmdline # doctest: +ELLIPSIS
     'mri_surf2surf --cortex --fwhm 5.0000 --hemi lh --sval lh.cope1.mgz --tval ...lh.cope1_smooth5.mgz --s subj_1'
     >>> smoother.run() # doctest: +SKIP
 
@@ -518,7 +518,7 @@ class Surface2VolTransform(FSCommand):
     >>> xfm2vol.inputs.hemi = 'lh'
     >>> xfm2vol.inputs.template_file = 'cope1.nii.gz'
     >>> xfm2vol.inputs.subjects_dir = '.'
-    >>> xfm2vol.cmdline # doctest: +ALLOW_UNICODE
+    >>> xfm2vol.cmdline
     'mri_surf2vol --hemi lh --volreg register.mat --surfval lh.cope1.mgz --sd . --template cope1.nii.gz --outvol lh.cope1_asVol.nii --vtxvol lh.cope1_asVol_vertex.nii'
     >>> res = xfm2vol.run()# doctest: +SKIP
 
@@ -995,7 +995,7 @@ class MRIsCombine(FSSurfaceCommand):
     >>> mris = fs.MRIsCombine()
     >>> mris.inputs.in_files = ['lh.pial', 'rh.pial']
     >>> mris.inputs.out_file = 'bh.pial'
-    >>> mris.cmdline  # doctest: +ALLOW_UNICODE
+    >>> mris.cmdline
     'mris_convert --combinesurfs lh.pial rh.pial bh.pial'
     >>> mris.run()  # doctest: +SKIP
     """
@@ -1124,7 +1124,7 @@ class MRIPretess(FSCommand):
     >>> pretess.inputs.in_filled = 'wm.mgz'
     >>> pretess.inputs.in_norm = 'norm.mgz'
     >>> pretess.inputs.nocorners = True
-    >>> pretess.cmdline # doctest: +ALLOW_UNICODE
+    >>> pretess.cmdline
     'mri_pretess -nocorners wm.mgz wm norm.mgz wm_pretesswm.mgz'
     >>> pretess.run() # doctest: +SKIP
 
@@ -1294,7 +1294,7 @@ class MakeAverageSubject(FSCommand):
 
     >>> from nipype.interfaces.freesurfer import MakeAverageSubject
     >>> avg = MakeAverageSubject(subjects_ids=['s1', 's2'])
-    >>> avg.cmdline # doctest: +ALLOW_UNICODE
+    >>> avg.cmdline
     'make_average_subject --out average --subjects s1 s2'
 
     """
@@ -1329,7 +1329,7 @@ class ExtractMainComponent(CommandLine):
 
     >>> from nipype.interfaces.freesurfer import ExtractMainComponent
     >>> mcmp = ExtractMainComponent(in_file='lh.pial')
-    >>> mcmp.cmdline # doctest: +ALLOW_UNICODE
+    >>> mcmp.cmdline
     'mris_extract_main_component lh.pial lh.maincmp'
 
     """
@@ -1349,8 +1349,23 @@ class Tkregister2InputSpec(FSTraitedSpec):
 
     moving_image = File(exists=True, mandatory=True, argstr="--mov %s",
                         desc='moving volume')
+    # Input registration file options
     fsl_in_matrix = File(exists=True, argstr="--fsl %s",
                          desc='fsl-style registration input matrix')
+    xfm = File(exists=True, argstr='--xfm %s',
+               desc='use a matrix in MNI coordinates as initial registration')
+    lta_in = File(exists=True, argstr='--lta %s',
+                  desc='use a matrix in MNI coordinates as initial registration')
+    invert_lta_in = traits.Bool(requires=['lta_in'],
+                                desc='Invert input LTA before applying')
+    # Output registration file options
+    fsl_out = traits.Either(True, File, argstr='--fslregout %s',
+                   desc='compute an FSL-compatible resgitration matrix')
+    lta_out = traits.Either(True, File, argstr='--ltaout %s',
+                            desc='output registration file (LTA format)')
+    invert_lta_out = traits.Bool(argstr='--ltaout-inv', requires=['lta_in'],
+                                 desc='Invert input LTA before applying')
+
     subject_id = traits.String(argstr="--s %s",
                                desc='freesurfer subject ID')
     noedit = traits.Bool(True, argstr="--noedit", usedefault=True,
@@ -1361,19 +1376,16 @@ class Tkregister2InputSpec(FSTraitedSpec):
     reg_header = traits.Bool(False, argstr='--regheader',
                              desc='compute regstration from headers')
     fstal = traits.Bool(False, argstr='--fstal',
-                        xor=['target_image', 'moving_image'],
+                        xor=['target_image', 'moving_image', 'reg_file'],
                         desc='set mov to be tal and reg to be tal xfm')
     movscale = traits.Float(argstr='--movscale %f',
                             desc='adjust registration matrix to scale mov')
-    xfm = File(exists=True, argstr='--xfm %s',
-               desc='use a matrix in MNI coordinates as initial registration')
-    fsl_out = File(argstr='--fslregout %s',
-                   desc='compute an FSL-compatible resgitration matrix')
 
 
 class Tkregister2OutputSpec(TraitedSpec):
     reg_file = File(exists=True, desc='freesurfer-style registration file')
     fsl_file = File(desc='FSL-style registration file')
+    lta_file = File(desc='LTA-style registration file')
 
 
 class Tkregister2(FSCommand):
@@ -1392,7 +1404,7 @@ class Tkregister2(FSCommand):
     >>> tk2.inputs.moving_image = 'T1.mgz'
     >>> tk2.inputs.target_image = 'structural.nii'
     >>> tk2.inputs.reg_header = True
-    >>> tk2.cmdline # doctest: +ALLOW_UNICODE
+    >>> tk2.cmdline
     'tkregister2 --mov T1.mgz --noedit --reg T1_to_native.dat --regheader \
 --targ structural.nii'
     >>> tk2.run() # doctest: +SKIP
@@ -1405,7 +1417,7 @@ class Tkregister2(FSCommand):
     >>> tk2 = Tkregister2()
     >>> tk2.inputs.moving_image = 'epi.nii'
     >>> tk2.inputs.fsl_in_matrix = 'flirt.mat'
-    >>> tk2.cmdline # doctest: +ALLOW_UNICODE
+    >>> tk2.cmdline
     'tkregister2 --fsl flirt.mat --mov epi.nii --noedit --reg register.dat'
     >>> tk2.run() # doctest: +SKIP
     """
@@ -1413,11 +1425,34 @@ class Tkregister2(FSCommand):
     input_spec = Tkregister2InputSpec
     output_spec = Tkregister2OutputSpec
 
+    def _format_arg(self, name, spec, value):
+        if name == 'lta_in' and self.inputs.invert_lta_in:
+            spec = '--lta-inv %s'
+        if name in ('fsl_out', 'lta_out') and value is True:
+            value = self._list_outputs()[name]
+        return super(Tkregister2, self)._format_arg(name, spec, value)
+
     def _list_outputs(self):
         outputs = self._outputs().get()
-        outputs['reg_file'] = os.path.abspath(self.inputs.reg_file)
-        if isdefined(self.inputs.fsl_out):
-            outputs['fsl_file'] = os.path.abspath(self.inputs.fsl_out)
+        reg_file = os.path.abspath(self.inputs.reg_file)
+        outputs['reg_file'] = reg_file
+
+        cwd = os.getcwd()
+        fsl_out = self.inputs.fsl_out
+        if isdefined(fsl_out):
+            if fsl_out is True:
+                outputs['fsl_file'] = fname_presuffix(
+                    reg_file, suffix='.mat', newpath=cwd, use_ext=False)
+            else:
+                outputs['fsl_file'] = os.path.abspath(self.inputs.fsl_out)
+
+        lta_out = self.inputs.lta_out
+        if isdefined(lta_out):
+            if lta_out is True:
+                outputs['lta_file'] = fname_presuffix(
+                    reg_file, suffix='.lta', newpath=cwd, use_ext=False)
+            else:
+                outputs['lta_file'] = os.path.abspath(self.inputs.lta_out)
         return outputs
 
     def _gen_outfilename(self):
@@ -1459,11 +1494,11 @@ class AddXFormToHeader(FSCommand):
     >>> adder = AddXFormToHeader()
     >>> adder.inputs.in_file = 'norm.mgz'
     >>> adder.inputs.transform = 'trans.mat'
-    >>> adder.cmdline # doctest: +ALLOW_UNICODE
+    >>> adder.cmdline
     'mri_add_xform_to_header trans.mat norm.mgz output.mgz'
 
     >>> adder.inputs.copy_name = True
-    >>> adder.cmdline # doctest: +ALLOW_UNICODE
+    >>> adder.cmdline
     'mri_add_xform_to_header -c trans.mat norm.mgz output.mgz'
 
     >>> adder.run()   # doctest: +SKIP
@@ -1517,7 +1552,7 @@ class CheckTalairachAlignment(FSCommand):
 
     >>> checker.inputs.in_file = 'trans.mat'
     >>> checker.inputs.threshold = 0.005
-    >>> checker.cmdline # doctest: +ALLOW_UNICODE
+    >>> checker.cmdline
     'talairach_afd -T 0.005 -xfm trans.mat'
 
     >>> checker.run() # doctest: +SKIP
@@ -1566,7 +1601,7 @@ class TalairachAVI(FSCommand):
     >>> example = TalairachAVI()
     >>> example.inputs.in_file = 'norm.mgz'
     >>> example.inputs.out_file = 'trans.mat'
-    >>> example.cmdline # doctest: +ALLOW_UNICODE
+    >>> example.cmdline
     'talairach_avi --i norm.mgz --xfm trans.mat'
 
     >>> example.run() # doctest: +SKIP
@@ -1597,7 +1632,7 @@ class TalairachQC(FSScriptCommand):
     >>> from nipype.interfaces.freesurfer import TalairachQC
     >>> qc = TalairachQC()
     >>> qc.inputs.log_file = 'dirs.txt'
-    >>> qc.cmdline # doctest: +ALLOW_UNICODE
+    >>> qc.cmdline
     'tal_QC_AZS dirs.txt'
     """
     _cmd = "tal_QC_AZS"
@@ -1636,7 +1671,7 @@ class RemoveNeck(FSCommand):
     >>> remove_neck.inputs.in_file = 'norm.mgz'
     >>> remove_neck.inputs.transform = 'trans.mat'
     >>> remove_neck.inputs.template = 'trans.mat'
-    >>> remove_neck.cmdline # doctest: +ALLOW_UNICODE
+    >>> remove_neck.cmdline
     'mri_remove_neck norm.mgz trans.mat trans.mat norm_noneck.mgz'
     """
     _cmd = "mri_remove_neck"
@@ -1776,7 +1811,7 @@ class Sphere(FSCommandOpenMP):
     >>> from nipype.interfaces.freesurfer import Sphere
     >>> sphere = Sphere()
     >>> sphere.inputs.in_file = 'lh.pial'
-    >>> sphere.cmdline # doctest: +ALLOW_UNICODE
+    >>> sphere.cmdline
     'mris_sphere lh.pial lh.sphere'
     """
     _cmd = 'mris_sphere'
@@ -1900,7 +1935,7 @@ class EulerNumber(FSCommand):
     >>> from nipype.interfaces.freesurfer import EulerNumber
     >>> ft = EulerNumber()
     >>> ft.inputs.in_file = 'lh.pial'
-    >>> ft.cmdline # doctest: +ALLOW_UNICODE
+    >>> ft.cmdline
     'mris_euler_number lh.pial'
     """
     _cmd = 'mris_euler_number'
@@ -1936,7 +1971,7 @@ class RemoveIntersection(FSCommand):
     >>> from nipype.interfaces.freesurfer import RemoveIntersection
     >>> ri = RemoveIntersection()
     >>> ri.inputs.in_file = 'lh.pial'
-    >>> ri.cmdline # doctest: +ALLOW_UNICODE
+    >>> ri.cmdline
     'mris_remove_intersection lh.pial lh.pial'
     """
 
@@ -2032,7 +2067,7 @@ class MakeSurfaces(FSCommand):
     >>> makesurfaces.inputs.in_label = 'aparc+aseg.nii'
     >>> makesurfaces.inputs.in_T1 = 'T1.mgz'
     >>> makesurfaces.inputs.orig_pial = 'lh.pial'
-    >>> makesurfaces.cmdline # doctest: +ALLOW_UNICODE
+    >>> makesurfaces.cmdline
     'mris_make_surfaces -T1 T1.mgz -orig pial -orig_pial pial 10335 lh'
     """
 
@@ -2165,7 +2200,7 @@ class Curvature(FSCommand):
     >>> curv = Curvature()
     >>> curv.inputs.in_file = 'lh.pial'
     >>> curv.inputs.save = True
-    >>> curv.cmdline # doctest: +ALLOW_UNICODE
+    >>> curv.cmdline
     'mris_curvature -w lh.pial'
     """
 
@@ -2259,7 +2294,7 @@ class CurvatureStats(FSCommand):
     >>> curvstats.inputs.values = True
     >>> curvstats.inputs.min_max = True
     >>> curvstats.inputs.write = True
-    >>> curvstats.cmdline # doctest: +ALLOW_UNICODE
+    >>> curvstats.cmdline
     'mris_curvature_stats -m -o lh.curv.stats -F pial -G --writeCurvatureFiles subject_id lh pial pial'
     """
 
@@ -2316,7 +2351,7 @@ class Jacobian(FSCommand):
     >>> jacobian = Jacobian()
     >>> jacobian.inputs.in_origsurf = 'lh.pial'
     >>> jacobian.inputs.in_mappedsurf = 'lh.pial'
-    >>> jacobian.cmdline # doctest: +ALLOW_UNICODE
+    >>> jacobian.cmdline
     'mris_jacobian lh.pial lh.pial lh.jacobian'
     """
 
@@ -2453,7 +2488,7 @@ class VolumeMask(FSCommand):
     >>> volmask.inputs.rh_white = 'lh.pial'
     >>> volmask.inputs.subject_id = '10335'
     >>> volmask.inputs.save_ribbon = True
-    >>> volmask.cmdline # doctest: +ALLOW_UNICODE
+    >>> volmask.cmdline
     'mris_volmask --label_left_ribbon 3 --label_left_white 2 --label_right_ribbon 42 --label_right_white 41 --save_ribbon 10335'
     """
 
@@ -2793,7 +2828,7 @@ class RelabelHypointensities(FSCommand):
     >>> relabelhypos.inputs.rh_white = 'lh.pial'
     >>> relabelhypos.inputs.surf_directory = '.'
     >>> relabelhypos.inputs.aseg = 'aseg.mgz'
-    >>> relabelhypos.cmdline # doctest: +ALLOW_UNICODE
+    >>> relabelhypos.cmdline
     'mri_relabel_hypointensities aseg.mgz . aseg.hypos.mgz'
     """
 
@@ -2964,7 +2999,7 @@ class Apas2Aseg(FSCommand):
     >>> apas2aseg = Apas2Aseg()
     >>> apas2aseg.inputs.in_file = 'aseg.mgz'
     >>> apas2aseg.inputs.out_file = 'output.mgz'
-    >>> apas2aseg.cmdline # doctest: +ALLOW_UNICODE
+    >>> apas2aseg.cmdline
     'apas2aseg --i aseg.mgz --o output.mgz'
     """
 
@@ -3046,10 +3081,10 @@ class MRIsExpand(FSSurfaceCommand):
     >>> from nipype.interfaces.freesurfer import MRIsExpand
     >>> mris_expand = MRIsExpand(thickness=True, distance=0.5)
     >>> mris_expand.inputs.in_file = 'lh.white'
-    >>> mris_expand.cmdline # doctest: +ALLOW_UNICODE
+    >>> mris_expand.cmdline
     'mris_expand -thickness lh.white 0.5 expanded'
     >>> mris_expand.inputs.out_name = 'graymid'
-    >>> mris_expand.cmdline # doctest: +ALLOW_UNICODE
+    >>> mris_expand.cmdline
     'mris_expand -thickness lh.white 0.5 graymid'
     """
     _cmd = 'mris_expand'
@@ -3080,3 +3115,83 @@ class MRIsExpand(FSSurfaceCommand):
                                                                thickness_name)
 
         self.inputs.sphere = self._associated_file(in_file, self.inputs.sphere)
+
+
+class LTAConvertInputSpec(CommandLineInputSpec):
+    # Inputs
+    _in_xor = ('in_lta', 'in_fsl', 'in_mni', 'in_reg', 'in_niftyreg', 'in_itk')
+    in_lta = traits.Either(
+        File(exists=True), 'identity.nofile', argstr='--inlta %s',
+        mandatory=True, xor=_in_xor, desc='input transform of LTA type')
+    in_fsl = File(
+        exists=True, argstr='--infsl %s', mandatory=True, xor=_in_xor,
+        desc='input transform of FSL type')
+    in_mni = File(
+        exists=True, argstr='--inmni %s', mandatory=True, xor=_in_xor,
+        desc='input transform of MNI/XFM type')
+    in_reg = File(
+        exists=True, argstr='--inreg %s', mandatory=True, xor=_in_xor,
+        desc='input transform of TK REG type (deprecated format)')
+    in_niftyreg = File(
+        exists=True, argstr='--inniftyreg %s', mandatory=True, xor=_in_xor,
+        desc='input transform of Nifty Reg type (inverse RAS2RAS)')
+    in_itk = File(
+        exists=True, argstr='--initk %s', mandatory=True, xor=_in_xor,
+        desc='input transform of ITK type')
+    # Outputs
+    out_lta = traits.Either(
+        traits.Bool, File, argstr='--outlta %s',
+        desc='output linear transform (LTA Freesurfer format)')
+    out_fsl = traits.Either(traits.Bool, File, argstr='--outfsl %s',
+                            desc='output transform in FSL format')
+    out_mni = traits.Either(traits.Bool, File, argstr='--outmni %s',
+                            desc='output transform in MNI/XFM format')
+    out_reg = traits.Either(traits.Bool, File, argstr='--outreg %s',
+                            desc='output transform in reg dat format')
+    out_itk = traits.Either(traits.Bool, File, argstr='--outitk %s',
+                            desc='output transform in ITK format')
+    # Optional flags
+    invert = traits.Bool(argstr='--invert')
+    ltavox2vox = traits.Bool(argstr='--ltavox2vox', requires=['out_lta'])
+    source_file = File(exists=True, argstr='--src %s')
+    target_file = File(exists=True, argstr='--trg %s')
+    target_conform = traits.Bool(argstr='--trgconform')
+
+
+class LTAConvertOutputSpec(TraitedSpec):
+    out_lta = File(exists=True,
+                   desc='output linear transform (LTA Freesurfer format)')
+    out_fsl = File(exists=True, desc='output transform in FSL format')
+    out_mni = File(exists=True, desc='output transform in MNI/XFM format')
+    out_reg = File(exists=True, desc='output transform in reg dat format')
+    out_itk = File(exists=True, desc='output transform in ITK format')
+
+
+class LTAConvert(CommandLine):
+    """Convert different transformation formats.
+    Some formats may require you to pass an image if the geometry information
+    is missing form the transform file format.
+
+    For complete details, see the `lta_convert documentation.
+    <https://ftp.nmr.mgh.harvard.edu/pub/docs/html/lta_convert.help.xml.html>`_
+    """
+    input_spec = LTAConvertInputSpec
+    output_spec = LTAConvertOutputSpec
+    _cmd = 'lta_convert'
+
+    def _format_arg(self, name, spec, value):
+        if name.startswith('out_') and value is True:
+            value = self._list_outputs()[name]
+        return super(LTAConvert, self)._format_arg(name, spec, value)
+
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        for name, default in (('out_lta', 'out.lta'), ('out_fsl', 'out.mat'),
+                              ('out_mni', 'out.xfm'), ('out_reg', 'out.dat'),
+                              ('out_itk', 'out.txt')):
+            attr = getattr(self.inputs, name)
+            if attr:
+                fname = default if attr is True else attr
+                outputs[name] = os.path.abspath(fname)
+
+        return outputs

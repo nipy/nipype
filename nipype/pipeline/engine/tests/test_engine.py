@@ -316,7 +316,7 @@ def test_disconnect():
     flow1 = pe.Workflow(name='test')
     flow1.connect(a, 'a', b, 'a')
     flow1.disconnect(a, 'a', b, 'a')
-    assert flow1._graph.edges() == []
+    assert list(flow1._graph.edges()) == []
 
 
 def test_doubleconnect():
@@ -456,8 +456,26 @@ def test_mapnode_iterfield_check():
     with pytest.raises(ValueError): mod1._check_iterfield()
 
 
+@pytest.mark.parametrize("x_inp, f_exp", [
+        (3, [6]), ([2, 3], [4, 6]), ((2, 3), [4, 6]),
+        (range(3), [0, 2, 4]),
+         ("Str", ["StrStr"]), (["Str1", "Str2"], ["Str1Str1", "Str2Str2"])
+        ])
+def test_mapnode_iterfield_type(x_inp, f_exp):
+    from nipype import MapNode, Function
+    def double_func(x):
+        return 2 * x
+    double = Function(["x"], ["f_x"], double_func)
+
+    double_node = MapNode(double, name="double", iterfield=["x"])
+    double_node.inputs.x = x_inp
+
+    res  = double_node.run()
+    assert res.outputs.f_x == f_exp
+
+
 def test_mapnode_nested(tmpdir):
-    os.chdir(str(tmpdir))
+    tmpdir.chdir()
     from nipype import MapNode, Function
 
     def func1(in1):
@@ -487,7 +505,7 @@ def test_mapnode_nested(tmpdir):
 
 
 def test_mapnode_expansion(tmpdir):
-    os.chdir(str(tmpdir))
+    tmpdir.chdir()
     from nipype import MapNode, Function
 
     def func1(in1):
@@ -495,23 +513,22 @@ def test_mapnode_expansion(tmpdir):
 
     mapnode = MapNode(Function(function=func1),
                       iterfield='in1',
-                      name='mapnode')
+                      name='mapnode',
+                      n_procs=2,
+                      mem_gb=2)
     mapnode.inputs.in1 = [1, 2]
-    mapnode.interface.num_threads = 2
-    mapnode.interface.estimated_memory_gb = 2
 
     for idx, node in mapnode._make_nodes():
         for attr in ('overwrite', 'run_without_submitting', 'plugin_args'):
             assert getattr(node, attr) == getattr(mapnode, attr)
-        for attr in ('num_threads', 'estimated_memory_gb'):
-            assert (getattr(node._interface, attr) ==
-                    getattr(mapnode._interface, attr))
+        for attr in ('_n_procs', '_mem_gb'):
+            assert (getattr(node, attr) ==
+                    getattr(mapnode, attr))
 
 
 def test_node_hash(tmpdir):
-    wd = str(tmpdir)
-    os.chdir(wd)
     from nipype.interfaces.utility import Function
+    tmpdir.chdir()
 
     def func1():
         return 1
@@ -530,13 +547,13 @@ def test_node_hash(tmpdir):
     modify = lambda x: x + 1
     n1.inputs.a = 1
     w1.connect(n1, ('a', modify), n2, 'a')
-    w1.base_dir = wd
+    w1.base_dir = os.getcwd()
     # generate outputs
     w1.run(plugin='Linear')
     # ensure plugin is being called
     w1.config['execution'] = {'stop_on_first_crash': 'true',
                               'local_hash_check': 'false',
-                              'crashdump_dir': wd}
+                              'crashdump_dir': os.getcwd()}
     # create dummy distributed plugin class
     from nipype.pipeline.plugins.base import DistributedPluginBase
 
@@ -558,14 +575,14 @@ def test_node_hash(tmpdir):
     # set local check
     w1.config['execution'] = {'stop_on_first_crash': 'true',
                               'local_hash_check': 'true',
-                              'crashdump_dir': wd}
+                              'crashdump_dir': os.getcwd()}
 
     w1.run(plugin=RaiseError())
 
 
 def test_old_config(tmpdir):
-    wd = str(tmpdir)
-    os.chdir(wd)
+    tmpdir.chdir()
+    wd = os.getcwd()
     from nipype.interfaces.utility import Function
 
     def func1():
@@ -596,8 +613,8 @@ def test_old_config(tmpdir):
 def test_mapnode_json(tmpdir):
     """Tests that mapnodes don't generate excess jsons
     """
-    wd = str(tmpdir)
-    os.chdir(wd)
+    tmpdir.chdir()
+    wd = os.getcwd()
     from nipype import MapNode, Function, Workflow
 
     def func1(in1):
@@ -619,7 +636,7 @@ def test_mapnode_json(tmpdir):
     n1.inputs.in1 = [1]
     eg = w1.run()
 
-    node = eg.nodes()[0]
+    node = list(eg.nodes())[0]
     outjson = glob(os.path.join(node.output_dir(), '_0x*.json'))
     assert len(outjson) == 1
 
@@ -644,7 +661,7 @@ def test_parameterize_dirs_false(tmpdir):
     n2 = pe.Node(IdentityInterface(fields='in1'), name='Node2')
 
     wf = pe.Workflow(name='Test')
-    wf.base_dir = str(tmpdir)
+    wf.base_dir = tmpdir.strpath
     wf.config['execution']['parameterize_dirs'] = False
     wf.connect([(n1, n2, [('output1', 'in1')])])
 
@@ -653,8 +670,8 @@ def test_parameterize_dirs_false(tmpdir):
 
 
 def test_serial_input(tmpdir):
-    wd = str(tmpdir)
-    os.chdir(wd)
+    tmpdir.chdir()
+    wd = os.getcwd()
     from nipype import MapNode, Function, Workflow
 
     def func1(in1):
@@ -690,7 +707,7 @@ def test_serial_input(tmpdir):
 
 
 def test_write_graph_runs(tmpdir):
-    os.chdir(str(tmpdir))
+    tmpdir.chdir()
 
     for graph in ('orig', 'flat', 'exec', 'hierarchical', 'colored'):
         for simple in (True, False):
@@ -718,7 +735,7 @@ def test_write_graph_runs(tmpdir):
 
 
 def test_deep_nested_write_graph_runs(tmpdir):
-    os.chdir(str(tmpdir))
+    tmpdir.chdir()
 
     for graph in ('orig', 'flat', 'exec', 'hierarchical', 'colored'):
         for simple in (True, False):

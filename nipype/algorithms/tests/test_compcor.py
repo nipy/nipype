@@ -21,8 +21,7 @@ class TestCompCor():
     @pytest.fixture(autouse=True)
     def setup_class(self, tmpdir):
         # setup
-        self.temp_dir = str(tmpdir)
-        os.chdir(self.temp_dir)
+        tmpdir.chdir()
         noise = np.fromfunction(self.fake_noise_fun, self.fake_data.shape)
         self.realigned_file = utils.save_toy_nii(self.fake_data + noise,
                                                  self.filenames['functionalnii'])
@@ -80,7 +79,7 @@ class TestCompCor():
         self.run_cc(CompCor(realigned_file=self.realigned_file,
                             mask_files=self.mask_files,
                             mask_index=0,
-                            use_regress_poly=False),
+                            pre_filter=False),
                     [['0.4451946442', '-0.7683311482'],
                      ['-0.4285129505', '-0.0926034137'],
                      ['0.5721540256', '0.5608764842'],

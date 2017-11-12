@@ -91,7 +91,8 @@ def test_TOPUP_inputs():
     ),
     subsamp=dict(argstr='--subsamp=%d',
     ),
-    terminal_output=dict(nohash=True,
+    terminal_output=dict(deprecated='1.0.0',
+    nohash=True,
     ),
     warp_res=dict(argstr='--warpres=%f',
     ),
@@ -110,6 +111,7 @@ def test_TOPUP_outputs():
     out_fieldcoef=dict(),
     out_jacs=dict(),
     out_logfile=dict(),
+    out_mats=dict(),
     out_movpar=dict(),
     out_warps=dict(),
     )

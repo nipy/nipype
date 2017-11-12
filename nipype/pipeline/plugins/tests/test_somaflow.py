@@ -34,7 +34,7 @@ class SomaTestInterface(nib.BaseInterface):
 
 @pytest.mark.skipif(soma_not_loaded, reason="soma not loaded")
 def test_run_somaflow(tmpdir):
-    os.chdir(str(tmpdir))
+    tmpdir.chdir()
 
     pipe = pe.Workflow(name='pipe')
     mod1 = pe.Node(interface=SomaTestInterface(), name='mod1')
@@ -46,6 +46,6 @@ def test_run_somaflow(tmpdir):
     mod1.inputs.input1 = 1
     execgraph = pipe.run(plugin="SomaFlow")
     names = ['.'.join((node._hierarchy, node.name)) for node in execgraph.nodes()]
-    node = execgraph.nodes()[names.index('pipe.mod1')]
+    node = list(execgraph.nodes())[names.index('pipe.mod1')]
     result = node.get_output('output1')
     assert result == [1, 1]

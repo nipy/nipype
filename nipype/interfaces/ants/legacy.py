@@ -86,7 +86,7 @@ class antsIntroduction(ANTSCommand):
     >>> warp.inputs.reference_image = 'Template_6.nii'
     >>> warp.inputs.input_image = 'structural.nii'
     >>> warp.inputs.max_iterations = [30,90,20]
-    >>> warp.cmdline # doctest: +ALLOW_UNICODE
+    >>> warp.cmdline
     'antsIntroduction.sh -d 3 -i structural.nii -m 30x90x20 -o ants_ -r Template_6.nii -t GR'
 
     """
@@ -129,8 +129,8 @@ class GenWarpFields(antsIntroduction):
 
 
 class buildtemplateparallelInputSpec(ANTSCommandInputSpec):
-    dimension = traits.Enum(3, 2, argstr='-d %d', usedefault=True,
-                            desc='image dimension (2 or 3)', position=1)
+    dimension = traits.Enum(3, 2, 4, argstr='-d %d', usedefault=True,
+                            desc='image dimension (2, 3 or 4)', position=1)
     out_prefix = traits.Str('antsTMPL_', argstr='-o %s', usedefault=True,
                             desc=('Prefix that is prepended to all output '
                                   'files (default = antsTMPL_)'))
@@ -204,7 +204,7 @@ class buildtemplateparallel(ANTSCommand):
     >>> tmpl = buildtemplateparallel()
     >>> tmpl.inputs.in_files = ['T1.nii', 'structural.nii']
     >>> tmpl.inputs.max_iterations = [30, 90, 20]
-    >>> tmpl.cmdline # doctest: +ALLOW_UNICODE
+    >>> tmpl.cmdline
     'buildtemplateparallel.sh -d 3 -i 4 -m 30x90x20 -o antsTMPL_ -c 0 -t GR T1.nii structural.nii'
 
     """

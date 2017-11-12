@@ -28,7 +28,8 @@ def test_RegMeasure_inputs():
     ref_file=dict(argstr='-ref %s',
     mandatory=True,
     ),
-    terminal_output=dict(nohash=True,
+    terminal_output=dict(deprecated='1.0.0',
+    nohash=True,
     ),
     )
     inputs = RegMeasure.input_spec()

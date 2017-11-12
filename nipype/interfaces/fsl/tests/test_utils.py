@@ -3,8 +3,6 @@
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 
 import os
-from tempfile import mkdtemp
-from shutil import rmtree
 
 import numpy as np
 

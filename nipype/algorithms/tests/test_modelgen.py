@@ -17,9 +17,8 @@ from nipype.algorithms.modelgen import (SpecifyModel, SpecifySparseModel,
 
 
 def test_modelgen1(tmpdir):
-    tempdir = str(tmpdir)
-    filename1 = os.path.join(tempdir, 'test1.nii')
-    filename2 = os.path.join(tempdir, 'test2.nii')
+    filename1 = tmpdir.join('test1.nii').strpath
+    filename2 = tmpdir.join('test2.nii').strpath
     Nifti1Image(np.random.rand(10, 10, 10, 200), np.eye(4)).to_filename(filename1)
     Nifti1Image(np.random.rand(10, 10, 10, 200), np.eye(4)).to_filename(filename2)
     s = SpecifyModel()
@@ -56,9 +55,8 @@ def test_modelgen1(tmpdir):
 
 
 def test_modelgen_spm_concat(tmpdir):
-    tempdir = str(tmpdir)
-    filename1 = os.path.join(tempdir, 'test1.nii')
-    filename2 = os.path.join(tempdir, 'test2.nii')
+    filename1 = tmpdir.join('test1.nii').strpath
+    filename2 = tmpdir.join('test2.nii').strpath
     Nifti1Image(np.random.rand(10, 10, 10, 30), np.eye(4)).to_filename(filename1)
     Nifti1Image(np.random.rand(10, 10, 10, 30), np.eye(4)).to_filename(filename2)
 
@@ -97,7 +95,7 @@ def test_modelgen_spm_concat(tmpdir):
     npt.assert_almost_equal(np.array(res.outputs.session_info[0]['cond'][0]['onset']), np.array([2.0, 50.0, 100.0, 170.0]))
 
     # Test case for variable number of events in separate runs, sometimes unique.
-    filename3 = os.path.join(tempdir, 'test3.nii')
+    filename3 = tmpdir.join('test3.nii').strpath
     Nifti1Image(np.random.rand(10, 10, 10, 30), np.eye(4)).to_filename(filename3)
     s.inputs.functional_runs = [filename1, filename2, filename3]
     info = [Bunch(conditions=['cond1', 'cond2'], onsets=[[2, 3], [2]], durations=[[1, 1], [1]]),
@@ -122,9 +120,8 @@ def test_modelgen_spm_concat(tmpdir):
 
 
 def test_modelgen_sparse(tmpdir):
-    tempdir = str(tmpdir)
-    filename1 = os.path.join(tempdir, 'test1.nii')
-    filename2 = os.path.join(tempdir, 'test2.nii')
+    filename1 = tmpdir.join('test1.nii').strpath
+    filename2 = tmpdir.join('test2.nii').strpath
     Nifti1Image(np.random.rand(10, 10, 10, 50), np.eye(4)).to_filename(filename1)
     Nifti1Image(np.random.rand(10, 10, 10, 50), np.eye(4)).to_filename(filename2)
     s = SpecifySparseModel()

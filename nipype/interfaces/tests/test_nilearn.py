@@ -1,8 +1,6 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 import os
-import tempfile
-import shutil
 
 import numpy as np
 
@@ -33,12 +31,13 @@ class TestSignalExtraction():
     labels = ['CSF', 'GrayMatter', 'WhiteMatter']
     global_labels = ['GlobalSignal'] + labels
 
-    def setup_class(self):
-        self.orig_dir = os.getcwd()
-        self.temp_dir = tempfile.mkdtemp()
-        os.chdir(self.temp_dir)
+    @pytest.fixture(autouse=True, scope='class')
+    def setup_class(self, tmpdir_factory):
+        tempdir = tmpdir_factory.mktemp("test")
+        self.orig_dir = tempdir.chdir()
         utils.save_toy_nii(self.fake_fmri_data, self.filenames['in_file'])
         utils.save_toy_nii(self.fake_label_data, self.filenames['label_files'])
+
 
     def test_signal_extract_no_shared(self):
         # run
@@ -151,10 +150,9 @@ class TestSignalExtraction():
                 for j, segment in enumerate(time):
                     npt.assert_almost_equal(segment, wanted[i][j], decimal=1)
 
-
-    def teardown_class(self):
-        os.chdir(self.orig_dir)
-        shutil.rmtree(self.temp_dir)
+#dj: self doesnt have orig_dir at this point, not sure how to change it. should work without it
+#    def teardown_class(self):
+#        self.orig_dir.chdir()
 
 
     fake_fmri_data = np.array([[[[2, -1, 4, -2, 3],

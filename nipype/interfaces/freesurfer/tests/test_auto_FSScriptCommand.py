@@ -13,7 +13,8 @@ def test_FSScriptCommand_inputs():
     usedefault=True,
     ),
     subjects_dir=dict(),
-    terminal_output=dict(nohash=True,
+    terminal_output=dict(deprecated='1.0.0',
+    nohash=True,
     ),
     )
     inputs = FSScriptCommand.input_spec()

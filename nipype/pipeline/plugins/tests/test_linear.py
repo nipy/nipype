@@ -29,7 +29,7 @@ class LinearTestInterface(nib.BaseInterface):
 
 
 def test_run_in_series(tmpdir):
-    os.chdir(str(tmpdir))
+    tmpdir.chdir()
 
     pipe = pe.Workflow(name='pipe')
     mod1 = pe.Node(interface=LinearTestInterface(), name='mod1')
@@ -41,6 +41,6 @@ def test_run_in_series(tmpdir):
     mod1.inputs.input1 = 1
     execgraph = pipe.run(plugin="Linear")
     names = ['.'.join((node._hierarchy, node.name)) for node in execgraph.nodes()]
-    node = execgraph.nodes()[names.index('pipe.mod1')]
+    node = list(execgraph.nodes())[names.index('pipe.mod1')]
     result = node.get_output('output1')
     assert result == [1, 1]

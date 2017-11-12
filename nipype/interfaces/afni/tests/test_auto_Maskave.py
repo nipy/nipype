@@ -20,6 +20,9 @@ def test_Maskave_inputs():
     mask=dict(argstr='-mask %s',
     position=1,
     ),
+    num_threads=dict(nohash=True,
+    usedefault=True,
+    ),
     out_file=dict(argstr='> %s',
     keep_extension=True,
     name_source='in_file',
@@ -30,7 +33,8 @@ def test_Maskave_inputs():
     quiet=dict(argstr='-quiet',
     position=2,
     ),
-    terminal_output=dict(nohash=True,
+    terminal_output=dict(deprecated='1.0.0',
+    nohash=True,
     ),
     )
     inputs = Maskave.input_spec()

@@ -70,13 +70,25 @@ class Dcm2nii(CommandLine):
     Examples
     ========
 
+    .. testsetup::
+
+    >>> tmp = getfixture('tmpdir')
+    >>> old = tmp.chdir() # changing to a temporary directory
+
+    .. doctest::
+
     >>> from nipype.interfaces.dcm2nii import Dcm2nii
     >>> converter = Dcm2nii()
-    >>> converter.inputs.source_names = ['functional_1.dcm', 'functional_2.dcm']
+    >>> converter.inputs.source_names = [os.path.join(datadir, 'functional_1.dcm'), os.path.join(datadir, 'functional_2.dcm')]
     >>> converter.inputs.gzip_output = True
     >>> converter.inputs.output_dir = '.'
-    >>> converter.cmdline # doctest: +ALLOW_UNICODE
-    'dcm2nii -a y -c y -b config.ini -v y -d y -e y -g y -i n -n y -o . -p y -x n -f n functional_1.dcm'
+    >>> converter.cmdline #doctest: +ELLIPSIS
+    'dcm2nii -a y -c y -b config.ini -v y -d y -e y -g y -i n -n y -o . -p y -x n -f n ...functional_1.dcm'
+
+    .. testsetup::
+
+    >>> os.chdir(old.strpath)
+
     """
 
     input_spec = Dcm2niiInputSpec
@@ -250,7 +262,7 @@ class Dcm2niix(CommandLine):
     'dcm2niix -b y -z i -x n -t n -m n -f %t%p -o . -s y -v n functional_1.dcm'
 
     >>> flags = '-'.join([val.strip() + ' ' for val in sorted(' '.join(converter.cmdline.split()[1:-1]).split('-'))])
-    >>> flags # doctest: +ALLOW_UNICODE
+    >>> flags
     ' -b y -f %t%p -m n -o . -s y -t n -v n -x n -z i '
     """
 
@@ -304,7 +316,7 @@ class Dcm2niix(CommandLine):
                         bvals.append(out_file + ".bval")
                         find_b = False
                 # next scan will have bvals/bvecs
-                elif 'DTI gradients' in line or 'DTI gradient directions' in line:
+                elif 'DTI gradients' in line or 'DTI gradient directions' in line or 'DTI vectors' in line:
                     find_b = True
                 else:
                     pass

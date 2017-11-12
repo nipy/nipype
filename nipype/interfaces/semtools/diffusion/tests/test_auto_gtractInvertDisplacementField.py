@@ -23,7 +23,8 @@ def test_gtractInvertDisplacementField_inputs():
     ),
     subsamplingFactor=dict(argstr='--subsamplingFactor %d',
     ),
-    terminal_output=dict(nohash=True,
+    terminal_output=dict(deprecated='1.0.0',
+    nohash=True,
     ),
     )
     inputs = gtractInvertDisplacementField.input_spec()

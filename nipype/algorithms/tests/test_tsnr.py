@@ -30,8 +30,7 @@ class TestTSNR():
     @pytest.fixture(autouse=True)
     def setup_class(self, tmpdir):
         # setup temp folder
-        self.temp_dir = str(tmpdir)
-        os.chdir(self.temp_dir)
+        tmpdir.chdir()
 
         utils.save_toy_nii(self.fake_data, self.in_filenames['in_file'])
 

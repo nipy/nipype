@@ -11,6 +11,7 @@ import shutil
 import os.path as op
 from subprocess import Popen
 import hashlib
+from collections import namedtuple
 
 import pytest
 import nipype
@@ -42,7 +43,6 @@ try:
 except CalledProcessError:
     fakes3 = False
 
-from tempfile import mkstemp, mkdtemp
 
 def test_datagrabber():
     dg = nio.DataGrabber()
@@ -62,6 +62,7 @@ def test_s3datagrabber():
 templates1 = {"model": "interfaces/{package}/model.py",
              "preprocess": "interfaces/{package}/pre*.py"}
 templates2 = {"converter": "interfaces/dcm{to!s}nii.py"}
+templates3 = {"model": "interfaces/{package.name}/model.py"}
 
 @pytest.mark.parametrize("SF_args, inputs_att, expected", [
         ({"templates":templates1}, {"package":"fsl"},
@@ -75,6 +76,11 @@ templates2 = {"converter": "interfaces/dcm{to!s}nii.py"}
 
         ({"templates":templates2}, {"to":2},
          {"infields":["to"], "outfields":["converter"], "run_output":{"converter":op.join(op.dirname(nipype.__file__), "interfaces/dcm2nii.py")}, "node_output":["converter"]}),
+
+        ({"templates": templates3}, {"package": namedtuple("package", ["name"])("fsl")},
+        {"infields": ["package"], "outfields": ["model"],
+         "run_output": {"model": op.join(op.dirname(nipype.__file__), "interfaces/fsl/model.py")},
+         "node_output": ["model"]}),
         ])
 def test_selectfiles(SF_args, inputs_att, expected):
     base_dir = op.dirname(nipype.__file__)
@@ -110,7 +116,7 @@ def test_s3datagrabber_communication(tmpdir):
     dg.inputs.anon = True
     dg.inputs.bucket = 'openfmri'
     dg.inputs.bucket_path = 'ds001/'
-    dg.inputs.local_directory = str(tmpdir)
+    dg.inputs.local_directory = tmpdir.strpath
     dg.inputs.sort_filelist = True
     dg.inputs.template = '*'
     dg.inputs.field_template = dict(func='%s/BOLD/task001_%s/bold.nii.gz',
@@ -140,7 +146,7 @@ def test_datagrabber_order(tmpdir):
         tmpdir.join(file_name).open('a').close()
 
     dg = nio.DataGrabber(infields=['sid'])
-    dg.inputs.base_directory = str(tmpdir)
+    dg.inputs.base_directory = tmpdir.strpath
     dg.inputs.template = '%s_L%d_R*.q*'
     dg.inputs.template_args = {'outfiles': [['sid', 1], ['sid', 2],
                                             ['sid', 3]]}
@@ -178,6 +184,7 @@ def dummy_input(request, tmpdir_factory):
     Function to create a dummy file
     '''
     # Init variables
+
     input_path = tmpdir_factory.mktemp('input_data').join('datasink_test_s3.txt')
 
     # Create input file
@@ -201,7 +208,7 @@ def test_datasink_to_s3(dummy_input, tmpdir):
     attr_folder = 'text_file'
     output_dir = 's3://' + bucket_name
     # Local temporary filepaths for testing
-    fakes3_dir = str(tmpdir)
+    fakes3_dir = tmpdir.strpath
     input_path = dummy_input
 
     # Start up fake-S3 server
@@ -273,7 +280,7 @@ def test_datasink_localcopy(dummy_input, tmpdir):
     '''
 
     # Init variables
-    local_dir = str(tmpdir)
+    local_dir = tmpdir.strpath
     container = 'outputs'
     attr_folder = 'text_file'
 
@@ -328,42 +335,41 @@ def test_datasink_substitutions(tmpdir):
               x in glob.glob(os.path.join(str(outdir), '*'))]) \
               == ['!-yz-b.n', 'ABABAB.n']  # so we got re used 2nd and both patterns
 
-
-def _temp_analyze_files():
+@pytest.fixture()
+def _temp_analyze_files(tmpdir):
     """Generate temporary analyze file pair."""
-    fd, orig_img = mkstemp(suffix='.img', dir=mkdtemp())
-    orig_hdr = orig_img[:-4] + '.hdr'
-    fp = open(orig_hdr, 'w+')
-    fp.close()
-    return orig_img, orig_hdr
+    img_dir = tmpdir.mkdir("img")
+    orig_img = img_dir.join("orig.img")
+    orig_hdr = img_dir.join("orig.hdr")
+    orig_img.open('w')
+    orig_hdr.open('w')
+    return orig_img.strpath, orig_hdr.strpath
 
 
-def test_datasink_copydir():
-    orig_img, orig_hdr = _temp_analyze_files()
-    outdir = mkdtemp()
+def test_datasink_copydir_1(_temp_analyze_files, tmpdir):
+    orig_img, orig_hdr = _temp_analyze_files
+    outdir = tmpdir
     pth, fname = os.path.split(orig_img)
-    ds = nio.DataSink(base_directory=outdir, parameterization=False)
+    ds = nio.DataSink(base_directory=outdir.mkdir("basedir").strpath, parameterization=False)
     setattr(ds.inputs, '@outdir', pth)
     ds.run()
     sep = os.path.sep
-    file_exists = lambda: os.path.exists(os.path.join(outdir,
-                                                      pth.split(sep)[-1],
-                                                      fname))
-    assert file_exists()
-    shutil.rmtree(pth)
+    assert tmpdir.join('basedir', pth.split(sep)[-1], fname).check()
 
-    orig_img, orig_hdr = _temp_analyze_files()
+def test_datasink_copydir_2(_temp_analyze_files, tmpdir):
+    orig_img, orig_hdr = _temp_analyze_files
     pth, fname = os.path.split(orig_img)
+    ds = nio.DataSink(base_directory=tmpdir.mkdir("basedir").strpath, parameterization=False)
     ds.inputs.remove_dest_dir = True
     setattr(ds.inputs, 'outdir', pth)
     ds.run()
-    assert not file_exists()
-    shutil.rmtree(outdir)
-    shutil.rmtree(pth)
+    sep = os.path.sep
+    assert not tmpdir.join('basedir', pth.split(sep)[-1], fname).check()
+    assert tmpdir.join('basedir', 'outdir', pth.split(sep)[-1], fname).check()
 
 
 def test_datafinder_depth(tmpdir):
-    outdir = str(tmpdir)
+    outdir = tmpdir.strpath
     os.makedirs(os.path.join(outdir, '0', '1', '2', '3'))
 
     df = nio.DataFinder()
@@ -380,7 +386,7 @@ def test_datafinder_depth(tmpdir):
 
 
 def test_datafinder_unpack(tmpdir):
-    outdir = str(tmpdir)
+    outdir = tmpdir.strpath
     single_res = os.path.join(outdir, "findme.txt")
     open(single_res, 'a').close()
     open(os.path.join(outdir, "dontfindme"), 'a').close()
@@ -401,7 +407,7 @@ def test_freesurfersource():
     assert fss.inputs.subjects_dir == Undefined
 
 
-def test_jsonsink_input(tmpdir):
+def test_jsonsink_input():
 
     ds = nio.JSONFileSink()
     assert ds.inputs._outputs == {}
@@ -418,7 +424,7 @@ def test_jsonsink_input(tmpdir):
         {'new_entry' : 'someValue', 'test' : 'testInfields'}
 ])
 def test_jsonsink(tmpdir, inputs_attributes):
-    os.chdir(str(tmpdir))
+    tmpdir.chdir()
     js = nio.JSONFileSink(infields=['test'], in_dict={'foo': 'var'})
     setattr(js.inputs, 'contrasts.alt', 'someNestedValue')
     expected_data = {"contrasts": {"alt": "someNestedValue"}, "foo": "var"}

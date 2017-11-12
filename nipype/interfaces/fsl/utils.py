@@ -191,7 +191,7 @@ class Smooth(FSLCommand):
     >>> sm.inputs.output_type = 'NIFTI_GZ'
     >>> sm.inputs.in_file = 'functional2.nii'
     >>> sm.inputs.sigma = 8.0
-    >>> sm.cmdline # doctest: +ELLIPSIS +ALLOW_UNICODE
+    >>> sm.cmdline # doctest: +ELLIPSIS
     'fslmaths functional2.nii -kernel gauss 8.000 -fmean functional2_smooth.nii.gz'
 
     Setting the kernel width using fwhm:
@@ -200,7 +200,7 @@ class Smooth(FSLCommand):
     >>> sm.inputs.output_type = 'NIFTI_GZ'
     >>> sm.inputs.in_file = 'functional2.nii'
     >>> sm.inputs.fwhm = 8.0
-    >>> sm.cmdline # doctest: +ELLIPSIS +ALLOW_UNICODE
+    >>> sm.cmdline # doctest: +ELLIPSIS
     'fslmaths functional2.nii -kernel gauss 3.397 -fmean functional2_smooth.nii.gz'
 
     One of sigma or fwhm must be set:
@@ -263,10 +263,10 @@ class Merge(FSLCommand):
     >>> merger.inputs.in_files = ['functional2.nii', 'functional3.nii']
     >>> merger.inputs.dimension = 't'
     >>> merger.inputs.output_type = 'NIFTI_GZ'
-    >>> merger.cmdline # doctest: +ALLOW_UNICODE
+    >>> merger.cmdline
     'fslmerge -t functional2_merged.nii.gz functional2.nii functional3.nii'
     >>> merger.inputs.tr = 2.25
-    >>> merger.cmdline # doctest: +ALLOW_UNICODE
+    >>> merger.cmdline
     'fslmerge -tr functional2_merged.nii.gz functional2.nii functional3.nii 2.25'
 
 
@@ -1187,7 +1187,7 @@ class ConvertXFM(FSLCommand):
     >>> invt.inputs.in_file = "flirt.mat"
     >>> invt.inputs.invert_xfm = True
     >>> invt.inputs.out_file = 'flirt_inv.mat'
-    >>> invt.cmdline # doctest: +ALLOW_UNICODE
+    >>> invt.cmdline
     'convert_xfm -omat flirt_inv.mat -inverse flirt.mat'
 
 
@@ -1492,7 +1492,7 @@ class InvWarp(FSLCommand):
     >>> invwarp.inputs.warp = "struct2mni.nii"
     >>> invwarp.inputs.reference = "anatomical.nii"
     >>> invwarp.inputs.output_type = "NIFTI_GZ"
-    >>> invwarp.cmdline # doctest: +ALLOW_UNICODE
+    >>> invwarp.cmdline
     'invwarp --out=struct2mni_inverse.nii.gz --ref=anatomical.nii --warp=struct2mni.nii'
     >>> res = invwarp.run() # doctest: +SKIP
 
@@ -1728,7 +1728,7 @@ class WarpUtils(FSLCommand):
     >>> warputils.inputs.out_format = 'spline'
     >>> warputils.inputs.warp_resolution = (10,10,10)
     >>> warputils.inputs.output_type = "NIFTI_GZ"
-    >>> warputils.cmdline # doctest: +ELLIPSIS +ALLOW_UNICODE
+    >>> warputils.cmdline # doctest: +ELLIPSIS
     'fnirtfileutils --in=warpfield.nii --outformat=spline --ref=T1.nii --warpres=10.0000,10.0000,10.0000 --out=warpfield_coeffs.nii.gz'
     >>> res = invwarp.run() # doctest: +SKIP
 
@@ -1880,7 +1880,7 @@ class ConvertWarp(FSLCommand):
     >>> warputils.inputs.reference = "T1.nii"
     >>> warputils.inputs.relwarp = True
     >>> warputils.inputs.output_type = "NIFTI_GZ"
-    >>> warputils.cmdline # doctest: +ELLIPSIS +ALLOW_UNICODE
+    >>> warputils.cmdline # doctest: +ELLIPSIS
     'convertwarp --ref=T1.nii --rel --warp1=warpfield.nii --out=T1_concatwarp.nii.gz'
     >>> res = warputils.run() # doctest: +SKIP
 
@@ -1940,7 +1940,7 @@ class WarpPoints(CommandLine):
     >>> warppoints.inputs.dest_file = 'T1.nii'
     >>> warppoints.inputs.warp_file = 'warpfield.nii'
     >>> warppoints.inputs.coord_mm = True
-    >>> warppoints.cmdline # doctest: +ELLIPSIS +ALLOW_UNICODE
+    >>> warppoints.cmdline # doctest: +ELLIPSIS
     'img2imgcoord -mm -dest T1.nii -src epi.nii -warp warpfield.nii surf.txt'
     >>> res = warppoints.run() # doctest: +SKIP
 
@@ -2100,7 +2100,7 @@ class WarpPointsToStd(WarpPoints):
     >>> warppoints.inputs.std_file = 'mni.nii'
     >>> warppoints.inputs.warp_file = 'warpfield.nii'
     >>> warppoints.inputs.coord_mm = True
-    >>> warppoints.cmdline # doctest: +ELLIPSIS +ALLOW_UNICODE
+    >>> warppoints.cmdline # doctest: +ELLIPSIS
     'img2stdcoord -mm -img T1.nii -std mni.nii -warp warpfield.nii surf.txt'
     >>> res = warppoints.run() # doctest: +SKIP
 
@@ -2110,6 +2110,59 @@ class WarpPointsToStd(WarpPoints):
     input_spec = WarpPointsToStdInputSpec
     output_spec = WarpPointsOutputSpec
     _cmd = 'img2stdcoord'
+    _terminal_output = 'file_split'
+
+
+class WarpPointsFromStdInputSpec(CommandLineInputSpec):
+    img_file = File(exists=True, argstr='-img %s', mandatory=True,
+                    desc='filename of a destination image')
+    std_file = File(exists=True, argstr='-std %s', mandatory=True,
+                    desc='filename of the image in standard space')
+    in_coords = File(exists=True, position=-2, argstr='%s', mandatory=True,
+                     desc='filename of file containing coordinates')
+    xfm_file = File(exists=True, argstr='-xfm %s', xor=['warp_file'],
+                    desc='filename of affine transform (e.g. source2dest.mat)')
+    warp_file = File(exists=True, argstr='-warp %s', xor=['xfm_file'],
+                     desc='filename of warpfield (e.g. '
+                          'intermediate2dest_warp.nii.gz)')
+    coord_vox = traits.Bool(True, argstr='-vox', xor=['coord_mm'],
+                            desc='all coordinates in voxels - default')
+    coord_mm = traits.Bool(False, argstr='-mm', xor=['coord_vox'],
+                           desc='all coordinates in mm')
+
+
+class WarpPointsFromStd(CommandLine):
+    """
+    Use FSL `std2imgcoord <http://fsl.fmrib.ox.ac.uk/fsl/fsl-4.1.9/flirt/overview.html>`_
+    to transform point sets to standard space coordinates. Accepts plain text coordinates
+    files.
+
+
+    Examples
+    --------
+
+    >>> from nipype.interfaces.fsl import WarpPointsFromStd
+    >>> warppoints = WarpPointsFromStd()
+    >>> warppoints.inputs.in_coords = 'surf.txt'
+    >>> warppoints.inputs.img_file = 'T1.nii'
+    >>> warppoints.inputs.std_file = 'mni.nii'
+    >>> warppoints.inputs.warp_file = 'warpfield.nii'
+    >>> warppoints.inputs.coord_mm = True
+    >>> warppoints.cmdline # doctest: +ELLIPSIS
+    'std2imgcoord -mm -img T1.nii -std mni.nii -warp warpfield.nii surf.txt'
+    >>> res = warppoints.run() # doctest: +SKIP
+
+
+    """
+
+    input_spec = WarpPointsFromStdInputSpec
+    output_spec = WarpPointsOutputSpec
+    _cmd = 'std2imgcoord'
+
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        outputs['out_file'] = op.abspath('stdout.nipype')
+        return outputs
 
 
 class MotionOutliersInputSpec(FSLCommandInputSpec):
@@ -2164,7 +2217,7 @@ class MotionOutliers(FSLCommand):
     >>> from nipype.interfaces.fsl import MotionOutliers
     >>> mo = MotionOutliers()
     >>> mo.inputs.in_file = "epi.nii"
-    >>> mo.cmdline # doctest: +ELLIPSIS +ALLOW_UNICODE
+    >>> mo.cmdline # doctest: +ELLIPSIS
     'fsl_motion_outliers -i epi.nii -o epi_outliers.txt -p epi_metrics.png -s epi_metrics.txt'
     >>> res = mo.run() # doctest: +SKIP
     """

@@ -9,211 +9,88 @@ from builtins import range, object, open
 from copy import deepcopy
 from glob import glob
 import os
-import getpass
 import shutil
-from socket import gethostname
 import sys
-import uuid
-from time import strftime, sleep, time
-from traceback import format_exception, format_exc
-from warnings import warn
+from time import sleep, time
+from traceback import format_exc
 
 import numpy as np
 import scipy.sparse as ssp
 
-
 from ... import logging
-from ...utils.filemanip import savepkl, loadpkl, crash2txt
+from ...utils.filemanip import loadpkl
 from ...utils.misc import str2bool
 from ..engine.utils import (nx, dfs_preorder, topological_sort)
 from ..engine import MapNode
-
+from .tools import report_crash, report_nodes_not_run, create_pyscript
 
 logger = logging.getLogger('workflow')
-iflogger = logging.getLogger('interface')
-
-
-def report_crash(node, traceback=None, hostname=None):
-    """Writes crash related information to a file
-    """
-    name = node._id
-    if node.result and hasattr(node.result, 'runtime') and \
-            node.result.runtime:
-        if isinstance(node.result.runtime, list):
-            host = node.result.runtime[0].hostname
-        else:
-            host = node.result.runtime.hostname
-    else:
-        if hostname:
-            host = hostname
-        else:
-            host = gethostname()
-    message = ['Node %s failed to run on host %s.' % (name,
-                                                      host)]
-    logger.error(message)
-    if not traceback:
-        exc_type, exc_value, exc_traceback = sys.exc_info()
-        traceback = format_exception(exc_type,
-                                     exc_value,
-                                     exc_traceback)
-    timeofcrash = strftime('%Y%m%d-%H%M%S')
-    login_name = getpass.getuser()
-    crashfile = 'crash-%s-%s-%s-%s' % (timeofcrash,
-                                            login_name,
-                                            name,
-                                            str(uuid.uuid4()))
-    crashdir = node.config['execution']['crashdump_dir']
-    if crashdir is None:
-        crashdir = os.getcwd()
-    if not os.path.exists(crashdir):
-        os.makedirs(crashdir)
-    crashfile = os.path.join(crashdir, crashfile)
-    if node.config['execution']['crashfile_format'].lower() in ['text', 'txt']:
-        crashfile += '.txt'
-    else:
-        crashfile += '.pklz'
-    logger.info('Saving crash info to %s' % crashfile)
-    logger.info(''.join(traceback))
-    if node.config['execution']['crashfile_format'].lower() in ['text', 'txt']:
-        crash2txt(crashfile, dict(node=node, traceback=traceback))
-    else:
-        savepkl(crashfile, dict(node=node, traceback=traceback))
-    return crashfile
-
-
-def report_nodes_not_run(notrun):
-    """List nodes that crashed with crashfile info
-
-    Optionally displays dependent nodes that weren't executed as a result of
-    the crash.
-    """
-    if notrun:
-        logger.info("***********************************")
-        for info in notrun:
-            logger.error("could not run node: %s" %
-                         '.'.join((info['node']._hierarchy,
-                                   info['node']._id)))
-            logger.info("crashfile: %s" % info['crashfile'])
-            logger.debug("The following dependent nodes were not run")
-            for subnode in info['dependents']:
-                logger.debug(subnode._id)
-        logger.info("***********************************")
-        raise RuntimeError(('Workflow did not execute cleanly. '
-                            'Check log for details'))
-
-
-def create_pyscript(node, updatehash=False, store_exception=True):
-    # pickle node
-    timestamp = strftime('%Y%m%d_%H%M%S')
-    if node._hierarchy:
-        suffix = '%s_%s_%s' % (timestamp, node._hierarchy, node._id)
-        batch_dir = os.path.join(node.base_dir,
-                                 node._hierarchy.split('.')[0],
-                                 'batch')
-    else:
-        suffix = '%s_%s' % (timestamp, node._id)
-        batch_dir = os.path.join(node.base_dir, 'batch')
-    if not os.path.exists(batch_dir):
-        os.makedirs(batch_dir)
-    pkl_file = os.path.join(batch_dir, 'node_%s.pklz' % suffix)
-    savepkl(pkl_file, dict(node=node, updatehash=updatehash))
-    mpl_backend = node.config["execution"]["matplotlib_backend"]
-    # create python script to load and trap exception
-    cmdstr = """import os
-import sys
-
-can_import_matplotlib = True #Silently allow matplotlib to be ignored
-try:
-    import matplotlib
-    matplotlib.use('%s')
-except ImportError:
-    can_import_matplotlib = False
-    pass
-
-from nipype import config, logging
-from nipype.utils.filemanip import loadpkl, savepkl
-from socket import gethostname
-from traceback import format_exception
-info = None
-pklfile = '%s'
-batchdir = '%s'
-from nipype.utils.filemanip import loadpkl, savepkl
-try:
-    if not sys.version_info < (2, 7):
-        from collections import OrderedDict
-    config_dict=%s
-    config.update_config(config_dict)
-    ## Only configure matplotlib if it was successfully imported, matplotlib is an optional component to nipype
-    if can_import_matplotlib:
-        config.update_matplotlib()
-    logging.update_logging(config)
-    traceback=None
-    cwd = os.getcwd()
-    info = loadpkl(pklfile)
-    result = info['node'].run(updatehash=info['updatehash'])
-except Exception as e:
-    etype, eval, etr = sys.exc_info()
-    traceback = format_exception(etype,eval,etr)
-    if info is None or not os.path.exists(info['node'].output_dir()):
-        result = None
-        resultsfile = os.path.join(batchdir, 'crashdump_%s.pklz')
-    else:
-        result = info['node'].result
-        resultsfile = os.path.join(info['node'].output_dir(),
-                               'result_%%s.pklz'%%info['node'].name)
-"""
-    if store_exception:
-        cmdstr += """
-    savepkl(resultsfile, dict(result=result, hostname=gethostname(),
-                              traceback=traceback))
-"""
-    else:
-        cmdstr += """
-    if info is None:
-        savepkl(resultsfile, dict(result=result, hostname=gethostname(),
-                              traceback=traceback))
-    else:
-        from nipype.pipeline.plugins.base import report_crash
-        report_crash(info['node'], traceback, gethostname())
-    raise Exception(e)
-"""
-    cmdstr = cmdstr % (mpl_backend, pkl_file, batch_dir, node.config, suffix)
-    pyscript = os.path.join(batch_dir, 'pyscript_%s.py' % suffix)
-    with open(pyscript, 'wt') as fp:
-        fp.writelines(cmdstr)
-    return pyscript
 
 
 class PluginBase(object):
-    """Base class for plugins"""
+    """
+    Base class for plugins
+
+    """
 
     def __init__(self, plugin_args=None):
-        if plugin_args and 'status_callback' in plugin_args:
-            self._status_callback = plugin_args['status_callback']
-        else:
-            self._status_callback = None
-        return
+        if plugin_args is None:
+            plugin_args = {}
+        self.plugin_args = plugin_args
+        self._config = None
+        self._status_callback = plugin_args.get('status_callback')
 
     def run(self, graph, config, updatehash=False):
+        """
+        The core plugin member that should be implemented by
+        all plugins.
+
+        graph: a networkx, flattened :abbr:`DAG (Directed Acyclic Graph)`
+          to be executed
+
+        config: a nipype.config object
+
+        updatehash:
+
+        """
         raise NotImplementedError
 
 
 class DistributedPluginBase(PluginBase):
-    """Execute workflow with a distribution engine
+    """
+    Execute workflow with a distribution engine
+
+    Relevant class attributes
+    -------------------------
+
+    procs: list (N) of underlying interface elements to be processed
+    proc_done: a boolean numpy array (N,) signifying whether a process has been
+        submitted for execution
+    proc_pending: a boolean numpy array (N,) signifying whether a
+        process is currently running.
+    depidx: a boolean matrix (NxN) storing the dependency structure accross
+        processes. Process dependencies are derived from each column.
+
+    Combinations of ``proc_done`` and ``proc_pending``
+    --------------------------------------------------
+
+    +------------+---------------+--------------------------------+
+    | proc_done  | proc_pending  | outcome                        |
+    +============+===============+================================+
+    | True       | False         | Process is finished            |
+    +------------+---------------+--------------------------------+
+    | True       | True          | Process is currently being run |
+    +------------+---------------+--------------------------------+
+    | False      | False         | Process is queued              |
+    +------------+---------------+--------------------------------+
+    | False      | True          | INVALID COMBINATION            |
+    +------------+---------------+--------------------------------+
     """
 
     def __init__(self, plugin_args=None):
-        """Initialize runtime attributes to none
+        """
+        Initialize runtime attributes to none
 
-        procs: list (N) of underlying interface elements to be processed
-        proc_done: a boolean vector (N) signifying whether a process has been
-            executed
-        proc_pending: a boolean vector (N) signifying whether a
-            process is currently running. Note: A process is finished only when
-            both proc_done==True and
-        proc_pending==False
-        depidx: a boolean matrix (NxN) storing the dependency structure accross
-            processes. Process dependencies are derived from each column.
         """
         super(DistributedPluginBase, self).__init__(plugin_args=plugin_args)
         self.procs = None
@@ -223,32 +100,61 @@ class DistributedPluginBase(PluginBase):
         self.mapnodesubids = None
         self.proc_done = None
         self.proc_pending = None
-        self.max_jobs = np.inf
-        if plugin_args and 'max_jobs' in plugin_args:
-            self.max_jobs = plugin_args['max_jobs']
+        self.pending_tasks = []
+        self.max_jobs = self.plugin_args.get('max_jobs', np.inf)
+
+    def _prerun_check(self, graph):
+        """Stub method to validate/massage graph and nodes before running"""
+
+    def _postrun_check(self):
+        """Stub method to close any open resources"""
 
     def run(self, graph, config, updatehash=False):
-        """Executes a pre-defined pipeline using distributed approaches
+        """
+        Executes a pre-defined pipeline using distributed approaches
         """
         logger.info("Running in parallel.")
         self._config = config
+        poll_sleep_secs = float(config['execution']['poll_sleep_duration'])
+
+        self._prerun_check(graph)
         # Generate appropriate structures for worker-manager model
         self._generate_dependency_list(graph)
-        self.pending_tasks = []
-        self.readytorun = []
         self.mapnodes = []
         self.mapnodesubids = {}
         # setup polling - TODO: change to threaded model
         notrun = []
-        while np.any(self.proc_done == False) | \
-                np.any(self.proc_pending == True):
 
+        old_progress_stats = None
+        old_presub_stats = None
+        while not np.all(self.proc_done) or np.any(self.proc_pending):
+            # Check to see if a job is available (jobs without dependencies not run)
+            # See https://github.com/nipy/nipype/pull/2200#discussion_r141605722
+            jobs_ready = np.nonzero(~self.proc_done & (self.depidx.sum(0) == 0))[1]
+
+            progress_stats = (len(self.proc_done),
+                              np.sum(self.proc_done ^ self.proc_pending),
+                              np.sum(self.proc_done & self.proc_pending),
+                              len(jobs_ready),
+                              len(self.pending_tasks),
+                              np.sum(~self.proc_done & ~self.proc_pending))
+            display_stats = progress_stats != old_progress_stats
+            if display_stats:
+                logger.debug('Progress: %d jobs, %d/%d/%d '
+                             '(done/running/ready), %d/%d '
+                             '(pending_tasks/waiting).', *progress_stats)
+                old_progress_stats = progress_stats
             toappend = []
             # trigger callbacks for any pending results
             while self.pending_tasks:
                 taskid, jobid = self.pending_tasks.pop()
                 try:
                     result = self._get_result(taskid)
+                except Exception:
+                    notrun.append(self._clean_queue(
+                        jobid, graph, result={'result': None,
+                                              'traceback': format_exc()}))
+                else:
                     if result:
                         if result['traceback']:
                             notrun.append(self._clean_queue(jobid, graph,
@@ -258,36 +164,32 @@ class DistributedPluginBase(PluginBase):
                             self._remove_node_dirs()
                         self._clear_task(taskid)
                     else:
+                        assert self.proc_done[jobid] and self.proc_pending[jobid]
                         toappend.insert(0, (taskid, jobid))
-                except Exception:
-                    result = {'result': None,
-                              'traceback': format_exc()}
-                    notrun.append(self._clean_queue(jobid, graph,
-                                                    result=result))
+
             if toappend:
                 self.pending_tasks.extend(toappend)
+
             num_jobs = len(self.pending_tasks)
-            logger.debug('Number of pending tasks: %d' % num_jobs)
+            presub_stats = (num_jobs,
+                            np.sum(self.proc_done & self.proc_pending))
+            display_stats = display_stats or presub_stats != old_presub_stats
+            if display_stats:
+                logger.debug('Tasks currently running: %d. Pending: %d.',
+                             *presub_stats)
+                old_presub_stats = presub_stats
             if num_jobs < self.max_jobs:
-                self._send_procs_to_workers(updatehash=updatehash,
-                                            graph=graph)
-            else:
-                logger.debug('Not submitting')
-            self._wait()
+                self._send_procs_to_workers(updatehash=updatehash, graph=graph)
+            elif display_stats:
+                logger.debug('Not submitting (max jobs reached)')
+
+            sleep(poll_sleep_secs)
 
         self._remove_node_dirs()
         report_nodes_not_run(notrun)
 
         # close any open resources
-        self._close()
-
-    def _wait(self):
-        sleep(float(self._config['execution']['poll_sleep_duration']))
-
-    def _close(self):
-        # close any open resources, this could raise NotImplementedError
-        # but I didn't want to break other plugins
-        return True
+        self._postrun_check()
 
     def _get_result(self, taskid):
         raise NotImplementedError
@@ -296,18 +198,26 @@ class DistributedPluginBase(PluginBase):
         raise NotImplementedError
 
     def _report_crash(self, node, result=None):
-        raise NotImplementedError
+        tb = None
+        if result is not None:
+            node._result = result['result']
+            tb = result['traceback']
+            node._traceback = tb
+        return report_crash(node, traceback=tb)
 
     def _clear_task(self, taskid):
         raise NotImplementedError
 
     def _clean_queue(self, jobid, graph, result=None):
+        logger.debug('Clearing %d from queue', jobid)
+
+        if self._status_callback:
+            self._status_callback(self.procs[jobid], 'exception')
+
         if str2bool(self._config['execution']['stop_on_first_crash']):
             raise RuntimeError("".join(result['traceback']))
         crashfile = self._report_crash(self.procs[jobid],
                                        result=result)
-        if self._status_callback:
-            self._status_callback(self.procs[jobid], 'exception')
         if jobid in self.mapnodesubids:
             # remove current jobid
             self.proc_pending[jobid] = False
@@ -325,8 +235,8 @@ class DistributedPluginBase(PluginBase):
         self.mapnodes.append(jobid)
         mapnodesubids = self.procs[jobid].get_subnodes()
         numnodes = len(mapnodesubids)
-        logger.info('Adding %d jobs for mapnode %s' % (numnodes,
-                                                       self.procs[jobid]._id))
+        logger.debug('Adding %d jobs for mapnode %s',
+                     numnodes, self.procs[jobid]._id)
         for i in range(numnodes):
             self.mapnodesubids[self.depidx.shape[0] + i] = jobid
         self.procs.extend(mapnodesubids)
@@ -347,9 +257,11 @@ class DistributedPluginBase(PluginBase):
         return False
 
     def _send_procs_to_workers(self, updatehash=False, graph=None):
-        """ Sends jobs to workers
         """
-        while np.any(self.proc_done == False):
+        Sends jobs to workers
+        """
+
+        while not np.all(self.proc_done):
             num_jobs = len(self.pending_tasks)
             if np.isinf(self.max_jobs):
                 slots = None
@@ -358,15 +270,16 @@ class DistributedPluginBase(PluginBase):
             logger.debug('Slots available: %s' % slots)
             if (num_jobs >= self.max_jobs) or (slots == 0):
                 break
-            # Check to see if a job is available
-            jobids = np.flatnonzero((self.proc_done == False) &
-                                    (self.depidx.sum(axis=0) == 0).__array__())
+
+            # Check to see if a job is available (jobs without dependencies not run)
+            # See https://github.com/nipy/nipype/pull/2200#discussion_r141605722
+            jobids = np.nonzero(~self.proc_done & (self.depidx.sum(0) == 0))[1]
+
             if len(jobids) > 0:
                 # send all available jobs
-                if slots:
-                    logger.info('Pending[%d] Submitting[%d] jobs Slots[%d]' % (num_jobs, len(jobids[:slots]), slots))
-                else:
-                    logger.info('Pending[%d] Submitting[%d] jobs Slots[inf]' % (num_jobs, len(jobids)))
+                logger.info('Pending[%d] Submitting[%d] jobs Slots[%d]',
+                            num_jobs, len(jobids[:slots]), slots or 'inf')
+
                 for jobid in jobids[:slots]:
                     if isinstance(self.procs[jobid], MapNode):
                         try:
@@ -387,27 +300,8 @@ class DistributedPluginBase(PluginBase):
                                 (self.procs[jobid]._id, jobid))
                     if self._status_callback:
                         self._status_callback(self.procs[jobid], 'start')
-                    continue_with_submission = True
-                    if str2bool(self.procs[jobid].config['execution']
-                                ['local_hash_check']):
-                        logger.debug('checking hash locally')
-                        try:
-                            hash_exists, _, _, _ = self.procs[
-                                jobid].hash_exists()
-                            logger.debug('Hash exists %s' % str(hash_exists))
-                            if (hash_exists and (self.procs[jobid].overwrite is False or
-                                (self.procs[jobid].overwrite is None and not
-                                    self.procs[jobid]._interface.always_run))):
-                                continue_with_submission = False
-                                self._task_finished_cb(jobid)
-                                self._remove_node_dirs()
-                        except Exception:
-                            self._clean_queue(jobid, graph)
-                            self.proc_pending[jobid] = False
-                            continue_with_submission = False
-                    logger.debug('Finished checking hash %s' %
-                                 str(continue_with_submission))
-                    if continue_with_submission:
+
+                    if not self._local_hash_check(jobid, graph):
                         if self.procs[jobid].run_without_submitting:
                             logger.debug('Running node %s on master thread' %
                                          self.procs[jobid])
@@ -429,6 +323,31 @@ class DistributedPluginBase(PluginBase):
                                 (self.procs[jobid]._id, jobid))
             else:
                 break
+
+    def _local_hash_check(self, jobid, graph):
+        if not str2bool(self.procs[jobid].config['execution']['local_hash_check']):
+            return False
+
+        logger.debug('Checking hash (%d) locally', jobid)
+
+        hash_exists, _, _, _ = self.procs[jobid].hash_exists()
+        overwrite = self.procs[jobid].overwrite
+        always_run = self.procs[jobid]._interface.always_run
+
+        if hash_exists and (overwrite is False or
+                            overwrite is None and not always_run):
+            logger.debug('Skipping cached node %s with ID %s.',
+                         self.procs[jobid]._id, jobid)
+            try:
+                self._task_finished_cb(jobid)
+                self._remove_node_dirs()
+            except Exception:
+                logger.debug('Error skipping cached node %s (%s).',
+                             self.procs[jobid]._id, jobid)
+                self._clean_queue(jobid, graph)
+                self.proc_pending[jobid] = False
+            return True
+        return False
 
     def _task_finished_cb(self, jobid):
         """ Extract outputs and assign to inputs of dependent tasks
@@ -583,15 +502,6 @@ class SGELikeBatchManagerBase(DistributedPluginBase):
             fp.writelines(batchscript)
         return self._submit_batchtask(batchscriptfile, node)
 
-    def _report_crash(self, node, result=None):
-        if result and result['traceback']:
-            node._result = result['result']
-            node._traceback = result['traceback']
-            return report_crash(node,
-                                traceback=result['traceback'])
-        else:
-            return report_crash(node)
-
     def _clear_task(self, taskid):
         del self._pending[taskid]
 
@@ -601,8 +511,8 @@ class GraphPluginBase(PluginBase):
     """
 
     def __init__(self, plugin_args=None):
-        if plugin_args and 'status_callback' in plugin_args:
-            warn('status_callback not supported for Graph submission plugins')
+        if plugin_args and plugin_args.get('status_callback'):
+            logger.warning('status_callback not supported for Graph submission plugins')
         super(GraphPluginBase, self).__init__(plugin_args=plugin_args)
 
     def run(self, graph, config, updatehash=False):

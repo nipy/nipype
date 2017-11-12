@@ -82,7 +82,7 @@ by setting the ``status_callback`` parameter to point to this function in the
 
 ::
 
-	from nipype.pipeline.plugins.callback_log import log_nodes_cb
+	from nipype.utils.profiler import log_nodes_cb
 	args_dict = {'n_procs' : 8, 'memory_gb' : 10, 'status_callback' : log_nodes_cb}
 
 To set the filepath for the callback log the ``'callback'`` logger must be
@@ -141,7 +141,7 @@ The pandas_ Python package is required to use this feature.
 
 ::
 
-	from nipype.pipeline.plugins.callback_log import log_nodes_cb
+	from nipype.utils.profiler import log_nodes_cb
 	args_dict = {'n_procs' : 8, 'memory_gb' : 10, 'status_callback' : log_nodes_cb}
 	workflow.run(plugin='MultiProc', plugin_args=args_dict)
 

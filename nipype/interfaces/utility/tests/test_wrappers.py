@@ -16,7 +16,7 @@ def concat_sort(in_arrays):
 """
 
 def test_function(tmpdir):
-    os.chdir(str(tmpdir))
+    tmpdir.chdir()
 
     def gen_random_array(size):
         import numpy as np
@@ -46,8 +46,8 @@ def make_random_array(size):
     return np.random.randn(size, size)
 
 
-def should_fail(tmpdir):
-    os.chdir(tmpdir)
+def should_fail(tmp):
+    tmp.chdir()
 
     node = pe.Node(utility.Function(input_names=["size"],
                                     output_names=["random_array"],
@@ -59,11 +59,11 @@ def should_fail(tmpdir):
 
 def test_should_fail(tmpdir):
     with pytest.raises(NameError):
-        should_fail(str(tmpdir))
+        should_fail(tmpdir)
 
 
 def test_function_with_imports(tmpdir):
-    os.chdir(str(tmpdir))
+    tmpdir.chdir()
 
     node = pe.Node(utility.Function(input_names=["size"],
                                     output_names=["random_array"],
@@ -79,7 +79,7 @@ def test_aux_connect_function(tmpdir):
     """ This tests excution nodes with multiple inputs and auxiliary
     function inside the Workflow connect function.
     """
-    os.chdir(str(tmpdir))
+    tmpdir.chdir()
 
     wf = pe.Workflow(name="test_workflow")
 

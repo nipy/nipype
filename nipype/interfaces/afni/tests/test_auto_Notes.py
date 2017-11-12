@@ -24,6 +24,9 @@ def test_Notes_inputs():
     mandatory=True,
     position=-1,
     ),
+    num_threads=dict(nohash=True,
+    usedefault=True,
+    ),
     out_file=dict(argstr='%s',
     ),
     outputtype=dict(),
@@ -32,7 +35,8 @@ def test_Notes_inputs():
     ),
     ses=dict(argstr='-ses',
     ),
-    terminal_output=dict(nohash=True,
+    terminal_output=dict(deprecated='1.0.0',
+    nohash=True,
     ),
     )
     inputs = Notes.input_spec()
