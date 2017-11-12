@@ -11,7 +11,7 @@ import subprocess
 # Local imports
 from ... import logging, LooseVersion
 from ..base import CommandLine, CommandLineInputSpec, traits, isdefined
-logger = logging.getLogger('interface')
+iflogger = logging.getLogger('interface')
 
 # -Using -1 gives primary responsibilty to ITKv4 to do the correct
 #  thread limitings.

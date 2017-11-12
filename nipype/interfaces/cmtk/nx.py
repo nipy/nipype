@@ -38,7 +38,7 @@ else:
 
 def read_unknown_ntwk(ntwk):
     if not isinstance(ntwk, nx.classes.graph.Graph):
-        path, name, ext = split_filename(ntwk)
+        _, _, ext = split_filename(ntwk)
         if ext == '.pck':
             ntwk = nx.read_gpickle(ntwk)
         elif ext == '.graphml':
@@ -104,27 +104,24 @@ def average_networks(in_files, ntwk_res_file, group_id):
     """
     import networkx as nx
     import os.path as op
-    iflogger.info(("Creating average network for group: "
-                   "{grp}").format(grp=group_id))
+    iflogger.info('Creating average network for group: %s', group_id)
     matlab_network_list = []
     if len(in_files) == 1:
         avg_ntwk = read_unknown_ntwk(in_files[0])
     else:
         count_to_keep_edge = np.round(len(in_files) / 2.0)
-        iflogger.info(("Number of networks: {L}, an edge must occur in at "
-                       "least {c} to remain in the "
-                       "average network").format(L=len(in_files),
-                                                 c=count_to_keep_edge))
+        iflogger.info('Number of networks: %i, an edge must occur in at '
+                      'least %i to remain in the average network',
+                      len(in_files), count_to_keep_edge)
         ntwk_res_file = read_unknown_ntwk(ntwk_res_file)
-        iflogger.info(("{n} Nodes found in network resolution "
-                       "file").format(n=ntwk_res_file.number_of_nodes()))
+        iflogger.info('%i nodes found in network resolution file',
+                      ntwk_res_file.number_of_nodes())
         ntwk = remove_all_edges(ntwk_res_file)
         counting_ntwk = ntwk.copy()
         # Sums all the relevant variables
         for index, subject in enumerate(in_files):
             tmp = nx.read_gpickle(subject)
-            iflogger.info(('File {s} has {n} '
-                           'edges').format(s=subject, n=tmp.number_of_edges()))
+            iflogger.info('File %s has %i edges', subject, tmp.number_of_edges())
             edges = list(tmp.edges())
             for edge in edges:
                 data = {}
@@ -146,8 +143,7 @@ def average_networks(in_files, ntwk_res_file, group_id):
         # Divides each value by the number of files
         nodes = list(ntwk.nodes())
         edges = list(ntwk.edges())
-        iflogger.info(('Total network has {n} '
-                       'edges').format(n=ntwk.number_of_edges()))
+        iflogger.info('Total network has %i edges', ntwk.number_of_edges())
         avg_ntwk = nx.Graph()
         newdata = {}
         for node in nodes:
@@ -171,7 +167,8 @@ def average_networks(in_files, ntwk_res_file, group_id):
                 avg_ntwk.add_edge(edge[0], edge[1], **data)
             edge_dict['count'][edge[0] - 1][edge[1] - 1] = ntwk.edge[edge[0]][edge[1]]['count']
 
-        iflogger.info('After thresholding, the average network has has {n} edges'.format(n=avg_ntwk.number_of_edges()))
+        iflogger.info('After thresholding, the average network has %i edges',
+                      avg_ntwk.number_of_edges())
 
         avg_edges = avg_ntwk.edges()
         for edge in avg_edges:
@@ -187,16 +184,17 @@ def average_networks(in_files, ntwk_res_file, group_id):
             matlab_network_list.append(op.abspath(network_name))
             tmp[key] = edge_dict[key]
             sio.savemat(op.abspath(network_name), tmp)
-            iflogger.info('Saving average network for key: {k} as {out}'.format(k=key, out=op.abspath(network_name)))
+            iflogger.info('Saving average network for key: %s as %s', key,
+                          op.abspath(network_name))
 
     # Writes the networks and returns the name
     network_name = group_id + '_average.pck'
     nx.write_gpickle(avg_ntwk, op.abspath(network_name))
-    iflogger.info('Saving average network as {out}'.format(out=op.abspath(network_name)))
+    iflogger.info('Saving average network as %s', op.abspath(network_name))
     avg_ntwk = fix_keys_for_gexf(avg_ntwk)
     network_name = group_id + '_average.gexf'
     nx.write_gexf(avg_ntwk, op.abspath(network_name))
-    iflogger.info('Saving average network as {out}'.format(out=op.abspath(network_name)))
+    iflogger.info('Saving average network as %s', op.abspath(network_name))
     return network_name, matlab_network_list
 
 
@@ -453,12 +451,12 @@ class NetworkXMetrics(BaseInterface):
 
         out_pickled_extra_measures = op.abspath(self._gen_outfilename(self.inputs.out_pickled_extra_measures, 'pck'))
         dict_measures = compute_dict_measures(ntwk)
-        iflogger.info('Saving extra measure file to {path} in Pickle format'.format(path=op.abspath(out_pickled_extra_measures)))
-        file = open(out_pickled_extra_measures, 'w')
-        pickle.dump(dict_measures, file)
-        file.close()
+        iflogger.info('Saving extra measure file to %s in Pickle format',
+                      op.abspath(out_pickled_extra_measures))
+        with open(out_pickled_extra_measures, 'w') as fo:
+            pickle.dump(dict_measures, fo)
 
-        iflogger.info('Saving MATLAB measures as {m}'.format(m=matlab))
+        iflogger.info('Saving MATLAB measures as %s', matlab)
 
         # Loops through the measures which return a dictionary,
         # converts the keys and values to a Numpy array,
