@@ -21,7 +21,7 @@ from ..io import IOBase, add_traits
 from ...utils.filemanip import filename_to_list
 from ...utils.functions import getsource, create_function_from_source
 
-logger = logging.getLogger('interface')
+iflogger = logging.getLogger('interface')
 
 class FunctionInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
     function_str = traits.Str(mandatory=True, desc='code for function')

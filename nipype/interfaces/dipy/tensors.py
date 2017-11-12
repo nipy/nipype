@@ -65,14 +65,14 @@ class DTI(DipyDiffusionInterface):
         img = nifti1_symmat(lower_triangular, affine)
         out_file = self._gen_filename('dti')
         nb.save(img, out_file)
-        IFLOGGER.info('DTI parameters image saved as {i}'.format(i=out_file))
+        IFLOGGER.info('DTI parameters image saved as %s', out_file)
 
         #FA MD RD and AD
         for metric in ["fa", "md", "rd", "ad"]:
             data = getattr(ten_fit,metric).astype("float32")
             out_name = self._gen_filename(metric)
             nb.Nifti1Image(data, affine).to_filename(out_name)
-            IFLOGGER.info('DTI {metric} image saved as {i}'.format(i=out_name, metric=metric))
+            IFLOGGER.info('DTI %s image saved as %s', metric, out_name)
 
         return runtime
 
@@ -147,7 +147,7 @@ class TensorMode(DipyDiffusionInterface):
         img = nb.Nifti1Image(mode_data, affine)
         out_file = self._gen_filename('mode')
         nb.save(img, out_file)
-        IFLOGGER.info('Tensor mode image saved as {i}'.format(i=out_file))
+        IFLOGGER.info('Tensor mode image saved as %s', out_file)
         return runtime
 
     def _list_outputs(self):
