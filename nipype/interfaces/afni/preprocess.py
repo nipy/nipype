@@ -3519,7 +3519,6 @@ class Qwarp(AFNICommand):
             else:
                 ext = prefix[ext_ind:]
                 suffix = ''
-        print(ext,"ext")
         outputs['warped_source'] = fname_presuffix(prefix, suffix=suffix,
                                                    use_ext=False) + ext
         if not self.inputs.nowarp:
