@@ -13,8 +13,7 @@ if [ "${CIRCLE_NODE_TOTAL:-}" != "4" ]; then
   exit 1
 fi
 
-# TODO: change this image name
-DOCKER_IMAGE="kaczmarj/nipype"
+DOCKER_IMAGE="nipype/nipype"
 
 # These tests are manually balanced based on previous build timings.
 # They may need to be rebalanced in the future.
