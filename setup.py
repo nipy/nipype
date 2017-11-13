@@ -102,7 +102,7 @@ def main():
         pjoin('testing', 'data', 'tbss_dir', '*'),
         pjoin('testing', 'data', 'brukerdir', '*'),
         pjoin('testing', 'data', 'brukerdir', 'pdata', '1', '*'),
-        pjoin('testing', 'data', 'ds005', '*')
+        pjoin('testing', 'data', 'ds005', '*'),
         pjoin('workflows', 'data', '*'),
         pjoin('pipeline', 'engine', 'report_template.html'),
         pjoin('external', 'd3.js'),
