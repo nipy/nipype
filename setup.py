@@ -100,7 +100,7 @@ def main():
         pjoin('testing', 'data', 'dicomdir', '*'),
         pjoin('testing', 'data', 'bedpostxout', '*'),
         pjoin('testing', 'data', 'tbss_dir', '*'),
-        pjoin('testing', 'data', 'brukerdir', '*'),
+        pjoin('testing', 'data', 'brukerdir', 'fid'),
         pjoin('testing', 'data', 'brukerdir', 'pdata', '1', '*'),
         pjoin('testing', 'data', 'ds005', '*'),
         pjoin('workflows', 'data', '*'),
