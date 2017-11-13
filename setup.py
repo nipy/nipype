@@ -119,7 +119,7 @@ def main():
     with open(ver_file) as infofile:
         exec(infofile.read(), globals(), ldict)
 
-    SETUP_REQUIRES = ['future']
+    SETUP_REQUIRES = ['future', 'setuptools>=36.6.0']
     if sys.version_info <= (3, 4):
         SETUP_REQUIRES.append('configparser')
     setup(
