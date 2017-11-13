@@ -5,9 +5,9 @@
 # pull request on our GitHub repository:
 #     https://github.com/kaczmarj/neurodocker
 #
-# Timestamp: 2017-11-06 21:15:09
+# Timestamp: 2017-11-13 16:22:04
 
-FROM kaczmarj/nipype:base
+FROM nipype/nipype:base
 
 ARG DEBIAN_FRONTEND=noninteractive
 
@@ -132,7 +132,7 @@ RUN echo '{ \
     \n  "instructions": [ \
     \n    [ \
     \n      "base", \
-    \n      "kaczmarj/nipype:base" \
+    \n      "nipype/nipype:base" \
     \n    ], \
     \n    [ \
     \n      "label", \
@@ -228,6 +228,6 @@ RUN echo '{ \
     \n      } \
     \n    ] \
     \n  ], \
-    \n  "generation_timestamp": "2017-11-06 21:15:09", \
+    \n  "generation_timestamp": "2017-11-13 16:22:04", \
     \n  "neurodocker_version": "0.3.1-19-g8d02eb4" \
     \n}' > /neurodocker/neurodocker_specs.json

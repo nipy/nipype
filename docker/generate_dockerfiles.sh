@@ -59,7 +59,7 @@ NEURODOCKER_IMAGE="kaczmarj/neurodocker@sha256:6b5f92f413b9710b7581e62293a8f7443
 # neurodebian:stretch-non-free pulled on November 3, 2017
 BASE_IMAGE="neurodebian@sha256:7590552afd0e7a481a33314724ae27f76ccedd05ffd7ac06ec38638872427b9b"
 
-NIPYPE_BASE_IMAGE="kaczmarj/nipype:base"
+NIPYPE_BASE_IMAGE="nipype/nipype:base"
 PKG_MANAGER="apt"
 DIR="$(dirname "$0")"
 
