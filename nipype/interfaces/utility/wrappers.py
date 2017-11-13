@@ -1,17 +1,12 @@
 # -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
-"""Various utilities
-
-    Change directory to provide relative paths for doctests
-    >>> import os
-    >>> filepath = os.path.dirname(os.path.realpath(__file__))
-    >>> datadir = os.path.realpath(os.path.join(filepath,
-    ...                            '../../testing/data'))
-    >>> os.chdir(datadir)
-
-
 """
+# changing to temporary directories
+    >>> tmp = getfixture('tmpdir')
+    >>> old = tmp.chdir()
+"""
+
 from __future__ import print_function, division, unicode_literals, absolute_import
 
 from future import standard_library
@@ -26,7 +21,7 @@ from ..io import IOBase, add_traits
 from ...utils.filemanip import filename_to_list
 from ...utils.functions import getsource, create_function_from_source
 
-logger = logging.getLogger('interface')
+iflogger = logging.getLogger('interface')
 
 class FunctionInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
     function_str = traits.Str(mandatory=True, desc='code for function')

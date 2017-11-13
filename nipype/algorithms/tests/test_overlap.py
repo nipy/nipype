@@ -20,7 +20,7 @@ def test_overlap(tmpdir):
     in1 = example_data('segmentation0.nii.gz')
     in2 = example_data('segmentation1.nii.gz')
 
-    os.chdir(str(tmpdir))
+    tmpdir.chdir()
     overlap = Overlap()
     overlap.inputs.volume1 = in1
     overlap.inputs.volume2 = in1

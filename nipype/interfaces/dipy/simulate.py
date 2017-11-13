@@ -10,6 +10,7 @@ from multiprocessing import (Pool, cpu_count)
 import os.path as op
 from builtins import range
 
+import numpy as np
 import nibabel as nb
 
 from ... import logging
@@ -227,8 +228,8 @@ class SimulateMultiTensor(DipyBaseInterface):
             pool = Pool(processes=n_proc)
 
         # Simulate sticks using dipy
-        IFLOGGER.info(('Starting simulation of %d voxels, %d diffusion'
-                       ' directions.') % (len(args), ndirs))
+        IFLOGGER.info('Starting simulation of %d voxels, %d diffusion directions.',
+                      len(args), ndirs)
         result = np.array(pool.map(_compute_voxel, args))
         if np.shape(result)[1] != ndirs:
             raise RuntimeError(('Computed directions do not match number'
@@ -288,7 +289,6 @@ def _compute_voxel(args):
                 angles=args['sticks'], fractions=ffs, snr=snr)
         except Exception as e:
             pass
-            # IFLOGGER.warn('Exception simulating dwi signal: %s' % e)
 
     return signal.tolist()
 

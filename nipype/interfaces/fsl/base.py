@@ -36,7 +36,7 @@ from ...utils.filemanip import fname_presuffix
 from ..base import traits, isdefined, CommandLine, CommandLineInputSpec
 from ...external.due import BibTeX
 
-LOGGER = logging.getLogger('interface')
+IFLOGGER = logging.getLogger('interface')
 
 
 class Info(object):
@@ -113,8 +113,8 @@ class Info(object):
         try:
             return os.environ['FSLOUTPUTTYPE']
         except KeyError:
-            LOGGER.warn('FSLOUTPUTTYPE environment variable is not set. '
-                        'Setting FSLOUTPUTTYPE=NIFTI')
+            IFLOGGER.warn('FSLOUTPUTTYPE environment variable is not set. '
+                          'Setting FSLOUTPUTTYPE=NIFTI')
             return 'NIFTI'
 
     @staticmethod

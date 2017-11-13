@@ -67,7 +67,7 @@ class APMQball(DipyDiffusionInterface):
         apm = shm.anisotropic_power(peaks.shm_coeff)
         out_file = self._gen_filename('apm')
         nb.Nifti1Image(apm.astype("float32"), affine).to_filename(out_file)
-        IFLOGGER.info('APM qball image saved as {i}'.format(i=out_file))
+        IFLOGGER.info('APM qball image saved as %s', out_file)
 
         return runtime
 

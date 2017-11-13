@@ -51,7 +51,7 @@ class TestResting():
     @pytest.fixture(autouse=True)
     def setup_class(self, tmpdir):
         # setup temp folder
-        os.chdir(str(tmpdir))
+        tmpdir.chdir()
         self.in_filenames = {key: os.path.abspath(value)
                              for key, value in self.in_filenames.items()}
 

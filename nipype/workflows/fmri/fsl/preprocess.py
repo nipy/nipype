@@ -4,7 +4,6 @@
 from __future__ import division
 
 import os
-
 from ....interfaces import fsl as fsl          # fsl
 from ....interfaces import utility as util     # utility
 from ....pipeline import engine as pe          # pypeline engine
@@ -771,7 +770,7 @@ def create_susan_smooth(name="susan_smooth", separate_masks=True):
     Inputs::
 
         inputnode.in_files : functional runs (filename or list of filenames)
-        inputnode.fwhm : fwhm for smoothing with SUSAN
+        inputnode.fwhm : fwhm for smoothing with SUSAN (float or list of floats)
         inputnode.mask_file : mask used for estimating SUSAN thresholds (but not for smoothing)
 
     Outputs::
@@ -788,6 +787,19 @@ def create_susan_smooth(name="susan_smooth", separate_masks=True):
     >>> smooth.run() # doctest: +SKIP
 
     """
+    # replaces the functionality of a "for loop"
+    def cartesian_product(fwhms, in_files, usans, btthresh):
+        from nipype.utils.filemanip import filename_to_list
+        # ensure all inputs are lists
+        in_files = filename_to_list(in_files)
+        fwhms = [fwhms] if isinstance(fwhms, (int, float)) else fwhms
+        # create cartesian product lists (s_<name> = single element of list)
+        cart_in_file = [s_in_file for s_in_file in in_files for s_fwhm in fwhms]
+        cart_fwhm = [s_fwhm for s_in_file in in_files for s_fwhm in fwhms]
+        cart_usans = [s_usans for s_usans in usans for s_fwhm in fwhms]
+        cart_btthresh = [s_btthresh for s_btthresh in btthresh for s_fwhm in fwhms]
+
+        return cart_in_file, cart_fwhm, cart_usans, cart_btthresh
 
     susan_smooth = pe.Workflow(name=name)
 
@@ -807,8 +819,15 @@ def create_susan_smooth(name="susan_smooth", separate_masks=True):
     functional
     """
 
+    multi_inputs = pe.Node(util.Function(function=cartesian_product,
+                                         output_names=['cart_in_file',
+                                                       'cart_fwhm',
+                                                       'cart_usans',
+                                                       'cart_btthresh']),
+                           name='multi_inputs')
+
     smooth = pe.MapNode(interface=fsl.SUSAN(),
-                        iterfield=['in_file', 'brightness_threshold', 'usans'],
+                        iterfield=['in_file', 'brightness_threshold', 'usans', 'fwhm'],
                         name='smooth')
 
     """
@@ -865,10 +884,17 @@ def create_susan_smooth(name="susan_smooth", separate_masks=True):
     """
     Define a function to get the brightness threshold for SUSAN
     """
-    susan_smooth.connect(inputnode, 'fwhm', smooth, 'fwhm')
-    susan_smooth.connect(inputnode, 'in_files', smooth, 'in_file')
-    susan_smooth.connect(median, ('out_stat', getbtthresh), smooth, 'brightness_threshold')
-    susan_smooth.connect(merge, ('out', getusans), smooth, 'usans')
+
+    susan_smooth.connect([
+        (inputnode, multi_inputs, [('in_files', 'in_files'),
+                                   ('fwhm', 'fwhms')]),
+        (median, multi_inputs, [(('out_stat', getbtthresh), 'btthresh')]),
+        (merge, multi_inputs, [(('out', getusans), 'usans')]),
+        (multi_inputs, smooth, [('cart_in_file', 'in_file'),
+                                ('cart_fwhm', 'fwhm'),
+                                ('cart_btthresh', 'brightness_threshold'),
+                                ('cart_usans', 'usans')]),
+    ])
 
     outputnode = pe.Node(interface=util.IdentityInterface(fields=['smoothed_files']),
                          name='outputnode')

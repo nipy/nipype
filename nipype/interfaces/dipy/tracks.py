@@ -71,9 +71,8 @@ class TrackDensityMap(DipyBaseInterface):
             data_dims = refnii.shape[:3]
             kwargs = dict(affine=affine)
         else:
-            IFLOGGER.warn(
-                'voxel_dims and data_dims are deprecated as of dipy 0.7.1. Please use reference '
-                'input instead')
+            IFLOGGER.warn('voxel_dims and data_dims are deprecated as of dipy '
+                          '0.7.1. Please use reference input instead')
 
             if not isdefined(self.inputs.data_dims):
                 data_dims = header['dim']
@@ -93,9 +92,8 @@ class TrackDensityMap(DipyBaseInterface):
         out_file = op.abspath(self.inputs.out_filename)
         nb.save(img, out_file)
 
-        IFLOGGER.info(
-            'Track density map saved as %s, size=%s, dimensions=%s',
-            out_file, img.shape, img.header.get_zooms())
+        IFLOGGER.info('Track density map saved as %s, size=%s, dimensions=%s',
+                      out_file, img.shape, img.header.get_zooms())
 
         return runtime
 
@@ -238,12 +236,12 @@ class StreamlineTractography(DipyBaseInterface):
             seedps = np.array(np.where(seedmsk == 1), dtype=np.float32).T
             vseeds = seedps.shape[0]
             nsperv = (seeds // vseeds) + 1
-            IFLOGGER.info(('Seed mask is provided (%d voxels inside '
-                           'mask), computing seeds (%d seeds/voxel).') %
-                          (vseeds, nsperv))
+            IFLOGGER.info('Seed mask is provided (%d voxels inside '
+                          'mask), computing seeds (%d seeds/voxel).',
+                          vseeds, nsperv)
             if nsperv > 1:
-                IFLOGGER.info(('Needed %d seeds per selected voxel '
-                               '(total %d).') % (nsperv, vseeds))
+                IFLOGGER.info('Needed %d seeds per selected voxel (total %d).',
+                              nsperv, vseeds)
                 seedps = np.vstack(np.array([seedps] * nsperv))
                 voxcoord = seedps + np.random.uniform(-1, 1, size=seedps.shape)
                 nseeds = voxcoord.shape[0]

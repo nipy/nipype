@@ -64,13 +64,13 @@ def split_filename(fname):
     --------
     >>> from nipype.utils.filemanip import split_filename
     >>> pth, fname, ext = split_filename('/home/data/subject.nii.gz')
-    >>> pth # doctest: +ALLOW_UNICODE
+    >>> pth
     '/home/data'
 
-    >>> fname # doctest: +ALLOW_UNICODE
+    >>> fname
     'subject'
 
-    >>> ext # doctest: +ALLOW_UNICODE
+    >>> ext
     '.nii.gz'
 
     """
@@ -171,7 +171,7 @@ def fname_presuffix(fname, prefix='', suffix='', newpath=None, use_ext=True):
 
     >>> from nipype.utils.filemanip import fname_presuffix
     >>> fname = 'foo.nii.gz'
-    >>> fname_presuffix(fname,'pre','post','/tmp') # doctest: +ALLOW_UNICODE
+    >>> fname_presuffix(fname,'pre','post','/tmp')
     '/tmp/prefoopost.nii.gz'
 
     """
@@ -368,13 +368,13 @@ def copyfile(originalfile, newfile, copy=False, create_new=False,
             elif hashmethod == 'content':
                 hashfn = hash_infile
             newhash = hashfn(newfile)
-            fmlogger.debug("File: %s already exists,%s, copy:%d" %
-                           (newfile, newhash, copy))
+            fmlogger.debug('File: %s already exists,%s, copy:%d', newfile,
+                           newhash, copy)
             orighash = hashfn(originalfile)
             keep = newhash == orighash
         if keep:
-            fmlogger.debug("File: %s already exists, not overwriting, copy:%d"
-                           % (newfile, copy))
+            fmlogger.debug('File: %s already exists, not overwriting, copy:%d',
+                           newfile, copy)
         else:
             os.unlink(newfile)
 
@@ -385,7 +385,7 @@ def copyfile(originalfile, newfile, copy=False, create_new=False,
     # ~hardlink & ~symlink => copy
     if not keep and use_hardlink:
         try:
-            fmlogger.debug("Linking File: %s->%s" % (newfile, originalfile))
+            fmlogger.debug('Linking File: %s->%s', newfile, originalfile)
             # Use realpath to avoid hardlinking symlinks
             os.link(os.path.realpath(originalfile), newfile)
         except OSError:
@@ -395,7 +395,7 @@ def copyfile(originalfile, newfile, copy=False, create_new=False,
 
     if not keep and not copy and os.name == 'posix':
         try:
-            fmlogger.debug("Symlinking File: %s->%s" % (newfile, originalfile))
+            fmlogger.debug('Symlinking File: %s->%s', newfile, originalfile)
             os.symlink(originalfile, newfile)
         except OSError:
             copy = True  # Disable symlink for associated files
@@ -404,7 +404,7 @@ def copyfile(originalfile, newfile, copy=False, create_new=False,
 
     if not keep:
         try:
-            fmlogger.debug("Copying File: %s->%s" % (newfile, originalfile))
+            fmlogger.debug('Copying File: %s->%s', newfile, originalfile)
             shutil.copyfile(originalfile, newfile)
         except shutil.Error as e:
             fmlogger.warn(e.message)
@@ -603,7 +603,7 @@ def read_stream(stream, logger=None, encoding=None):
     Robustly reads a stream, sending a warning to a logger
     if some decoding error was raised.
 
-    >>> read_stream(bytearray([65, 0xc7, 65, 10, 66]))  # doctest: +ELLIPSIS +ALLOW_UNICODE
+    >>> read_stream(bytearray([65, 0xc7, 65, 10, 66]))  # doctest: +ELLIPSIS
     ['A...A', 'B']
 
 
