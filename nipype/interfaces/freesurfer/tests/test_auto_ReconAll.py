@@ -6,13 +6,11 @@ from ..preprocess import ReconAll
 def test_ReconAll_inputs():
     input_map = dict(FLAIR_file=dict(argstr='-FLAIR %s',
     min_ver='5.3.0',
-    xor=['T2_file'],
     ),
     T1_files=dict(argstr='-i %s...',
     ),
     T2_file=dict(argstr='-T2 %s',
     min_ver='5.3.0',
-    xor=['FLAIR_file'],
     ),
     args=dict(argstr='%s',
     ),
