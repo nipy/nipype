@@ -1079,7 +1079,7 @@ class ReconAll(CommandLine):
             return "echo recon-all: nothing to do"
 
         cmd += ' ' + ' '.join(flags)
-        iflogger.info('resume recon-all : %s' % cmd)
+        iflogger.info('resume recon-all : %s', cmd)
         return cmd
 
     def _prep_expert_file(self):

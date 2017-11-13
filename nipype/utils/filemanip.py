@@ -368,13 +368,13 @@ def copyfile(originalfile, newfile, copy=False, create_new=False,
             elif hashmethod == 'content':
                 hashfn = hash_infile
             newhash = hashfn(newfile)
-            fmlogger.debug("File: %s already exists,%s, copy:%d" %
-                           (newfile, newhash, copy))
+            fmlogger.debug('File: %s already exists,%s, copy:%d', newfile,
+                           newhash, copy)
             orighash = hashfn(originalfile)
             keep = newhash == orighash
         if keep:
-            fmlogger.debug("File: %s already exists, not overwriting, copy:%d"
-                           % (newfile, copy))
+            fmlogger.debug('File: %s already exists, not overwriting, copy:%d',
+                           newfile, copy)
         else:
             os.unlink(newfile)
 
@@ -385,7 +385,7 @@ def copyfile(originalfile, newfile, copy=False, create_new=False,
     # ~hardlink & ~symlink => copy
     if not keep and use_hardlink:
         try:
-            fmlogger.debug("Linking File: %s->%s" % (newfile, originalfile))
+            fmlogger.debug('Linking File: %s->%s', newfile, originalfile)
             # Use realpath to avoid hardlinking symlinks
             os.link(os.path.realpath(originalfile), newfile)
         except OSError:
@@ -395,7 +395,7 @@ def copyfile(originalfile, newfile, copy=False, create_new=False,
 
     if not keep and not copy and os.name == 'posix':
         try:
-            fmlogger.debug("Symlinking File: %s->%s" % (newfile, originalfile))
+            fmlogger.debug('Symlinking File: %s->%s', newfile, originalfile)
             os.symlink(originalfile, newfile)
         except OSError:
             copy = True  # Disable symlink for associated files
@@ -404,7 +404,7 @@ def copyfile(originalfile, newfile, copy=False, create_new=False,
 
     if not keep:
         try:
-            fmlogger.debug("Copying File: %s->%s" % (newfile, originalfile))
+            fmlogger.debug('Copying File: %s->%s', newfile, originalfile)
             shutil.copyfile(originalfile, newfile)
         except shutil.Error as e:
             fmlogger.warn(e.message)

@@ -68,7 +68,7 @@ class Resample(DipyBaseInterface):
         resample_proxy(self.inputs.in_file, order=order,
                        new_zooms=vox_size, out_file=out_file)
 
-        IFLOGGER.info('Resliced image saved as {i}'.format(i=out_file))
+        IFLOGGER.info('Resliced image saved as %s', out_file)
         return runtime
 
     def _list_outputs(self):
@@ -159,8 +159,8 @@ class Denoise(DipyBaseInterface):
                              smask=signal_mask,
                              nmask=noise_mask,
                              out_file=out_file)
-        IFLOGGER.info(('Denoised image saved as {i}, estimated '
-                       'SNR={s}').format(i=out_file, s=str(s)))
+        IFLOGGER.info('Denoised image saved as %s, estimated SNR=%s',
+                      out_file, str(s))
         return runtime
 
     def _list_outputs(self):

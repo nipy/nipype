@@ -362,26 +362,23 @@ class Matlab2CSV(BaseInterface):
                 if isinstance(in_dict[key][0], np.ndarray):
                     saved_variables.append(key)
                 else:
-                    iflogger.info('One of the keys in the input file, {k}, is not a Numpy array'.format(k=key))
+                    iflogger.info('One of the keys in the input file, %s, is '
+                                  'not a Numpy array', key)
 
         if len(saved_variables) > 1:
-            iflogger.info(
-                '{N} variables found:'.format(N=len(saved_variables)))
+            iflogger.info('%i variables found:', len(saved_variables))
             iflogger.info(saved_variables)
             for variable in saved_variables:
-                iflogger.info(
-                    '...Converting {var} - type {ty} - to\
-                    CSV'.format(var=variable, ty=type(in_dict[variable]))
-                )
-                matlab2csv(
-                    in_dict[variable], variable, self.inputs.reshape_matrix)
+                iflogger.info('...Converting %s - type %s - to CSV',
+                              variable, type(in_dict[variable]))
+                matlab2csv(in_dict[variable], variable, self.inputs.reshape_matrix)
         elif len(saved_variables) == 1:
             _, name, _ = split_filename(self.inputs.in_file)
             variable = saved_variables[0]
-            iflogger.info('Single variable found {var}, type {ty}:'.format(
-                var=variable, ty=type(in_dict[variable])))
-            iflogger.info('...Converting {var} to CSV from {f}'.format(
-                var=variable, f=self.inputs.in_file))
+            iflogger.info('Single variable found %s, type %s:', variable,
+                          type(in_dict[variable]))
+            iflogger.info('...Converting %s to CSV from %s', variable,
+                          self.inputs.in_file)
             matlab2csv(in_dict[variable], name, self.inputs.reshape_matrix)
         else:
             iflogger.error('No values in the MATLAB file?!')
@@ -396,8 +393,8 @@ class Matlab2CSV(BaseInterface):
                 if isinstance(in_dict[key][0], np.ndarray):
                     saved_variables.append(key)
                 else:
-                    iflogger.error('One of the keys in the input file, {k}, is\
-                                   not a Numpy array'.format(k=key))
+                    iflogger.error('One of the keys in the input file, %s, is '
+                                   'not a Numpy array', key)
 
         if len(saved_variables) > 1:
             outputs['csv_files'] = replaceext(saved_variables, '.csv')
@@ -555,19 +552,16 @@ class MergeCSVFiles(BaseInterface):
             iflogger.info('Column headings have been provided:')
             headings = self.inputs.column_headings
         else:
-            iflogger.info(
-                'Column headings not provided! Pulled from input filenames:')
+            iflogger.info('Column headings not provided! Pulled from input filenames:')
             headings = remove_identical_paths(self.inputs.in_files)
 
         if isdefined(self.inputs.extra_field):
             if isdefined(self.inputs.extra_column_heading):
                 extraheading = self.inputs.extra_column_heading
-                iflogger.info('Extra column heading provided: {col}'.format(
-                    col=extraheading))
+                iflogger.info('Extra column heading provided: %s', extraheading)
             else:
                 extraheading = 'type'
-                iflogger.info(
-                    'Extra column heading was not defined. Using "type"')
+                iflogger.info('Extra column heading was not defined. Using "type"')
             headings.append(extraheading)
             extraheadingBool = True
 
@@ -575,8 +569,8 @@ class MergeCSVFiles(BaseInterface):
             iflogger.warn('Only one file input!')
 
         if isdefined(self.inputs.row_headings):
-            iflogger.info('Row headings have been provided. Adding "labels"\
-                          column header.')
+            iflogger.info('Row headings have been provided. Adding "labels"'
+                          'column header.')
             prefix = '"{p}","'.format(p=self.inputs.row_heading_title)
             csv_headings = prefix + '","'.join(itertools.chain(
                 headings)) + '"\n'
@@ -1310,7 +1304,7 @@ def merge_rois(in_files, in_idxs, in_ref,
     # to avoid memory errors
     if op.splitext(in_ref)[1] == '.gz':
         try:
-            iflogger.info('uncompress %i' % in_ref)
+            iflogger.info('uncompress %i', in_ref)
             sp.check_call(['gunzip', in_ref], stdout=sp.PIPE, shell=True)
             in_ref = op.splitext(in_ref)[0]
         except:

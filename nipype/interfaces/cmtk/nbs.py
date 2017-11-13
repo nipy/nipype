@@ -118,7 +118,8 @@ class NetworkBasedStatistic(BaseInterface):
             node_ntwk_name = self.inputs.in_group1[0]
 
         node_network = nx.read_gpickle(node_ntwk_name)
-        iflogger.info('Populating node dictionaries with attributes from {node}'.format(node=node_ntwk_name))
+        iflogger.info('Populating node dictionaries with attributes from %s',
+                      node_ntwk_name)
 
         for nid, ndata in node_network.nodes(data=True):
             nbsgraph.nodes[nid] = ndata
@@ -127,12 +128,12 @@ class NetworkBasedStatistic(BaseInterface):
         path = op.abspath('NBS_Result_' + details)
         iflogger.info(path)
         nx.write_gpickle(nbsgraph, path)
-        iflogger.info('Saving output NBS edge network as {out}'.format(out=path))
+        iflogger.info('Saving output NBS edge network as %s', path)
 
         pval_path = op.abspath('NBS_P_vals_' + details)
         iflogger.info(pval_path)
         nx.write_gpickle(nbs_pval_graph, pval_path)
-        iflogger.info('Saving output p-value network as {out}'.format(out=pval_path))
+        iflogger.info('Saving output p-value network as %s', pval_path)
         return runtime
 
     def _list_outputs(self):

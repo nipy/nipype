@@ -18,7 +18,7 @@ from ... import logging
 from .base import ElastixBaseInputSpec
 from ..base import CommandLine, TraitedSpec, File, traits, InputMultiPath
 
-logger = logging.getLogger('interface')
+iflogger = logging.getLogger('interface')
 
 
 class RegistrationInputSpec(ElastixBaseInputSpec):
