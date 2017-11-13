@@ -628,10 +628,17 @@ class ReconAllInputSpec(CommandLineInputSpec):
                        argstr="-hemi %s")
     T1_files = InputMultiPath(File(exists=True), argstr='-i %s...',
                               desc='name of T1 file to process')
-    T2_file = File(exists=True, argstr="-T2 %s", min_ver='5.3.0',
+    T2_file = File(exists=True, argstr="-T2 %s",
+                   min_ver='5.3.0',
                    desc='Convert T2 image to orig directory')
-    use_T2 = traits.Bool(argstr="-T2pial", min_ver='5.3.0',
-                         desc='Use converted T2 to refine the cortical surface')
+    FLAIR_file = File(exists=True, argstr="-FLAIR %s",
+                      min_ver='5.3.0',
+                      desc='Convert FLAIR image to orig directory')
+    use_T2 = traits.Bool(argstr="-T2pial", min_ver='5.3.0', xor=['use_FLAIR'],
+                         desc='Use T2 image to refine the pial surface')
+    use_FLAIR = traits.Bool(argstr="-FLAIRpial",
+                            min_ver='5.3.0', xor=['use_T2'],
+                            desc='Use FLAIR image to refine the pial surface')
     openmp = traits.Int(argstr="-openmp %d",
                         desc="Number of processors to use in parallel")
     parallel = traits.Bool(argstr="-parallel",
