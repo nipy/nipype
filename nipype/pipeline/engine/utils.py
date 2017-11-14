@@ -1337,7 +1337,13 @@ def write_workflow_resources(graph, filename=None):
             rt_list = [rt_list]
 
         for subidx, runtime in enumerate(rt_list):
-            nsamples = len(runtime.prof_dict['time'])
+            try:
+                nsamples = len(runtime.prof_dict['time'])
+            except AttributeError:
+                logger.warning(
+                    'Could not retrieve profiling information for node "%s" '
+                    '(mapflow %d/%d).', nodename, subidx + 1, len(rt_list))
+                continue
 
             for key in ['time', 'mem_gb', 'cpus']:
                 big_dict[key] += runtime.prof_dict[key]
