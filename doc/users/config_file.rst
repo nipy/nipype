@@ -153,20 +153,28 @@ Execution
     crashfiles allow portability across machines and shorter load time.
     (possible values: ``pklz`` and ``txt``; default value: ``pklz``)
 
-*resource_monitor*
+
+Resource Monitor
+~~~~~~~~~~~~~~~~
+
+*enabled*
     Enables monitoring the resources occupation (possible values: ``true`` and
-    ``false``; default value: ``false``)
+    ``false``; default value: ``false``). All the following options will be
+    dismissed if the resource monitor is not enabled.
 
-*resource_monitor_frequency*
+*sample_frequency*
     Sampling period (in seconds) between measurements of resources (memory, cpus)
-    being used by an interface. Requires ``resource_monitor`` to be ``true``.
-    (default value: ``1``)
+    being used by an interface (default value: ``1``)
 
-*resource_monitor_append*
-    Append to an existing ``resource_monitor.json`` in the workflow ``base_dir``.
-    Requires ``resource_monitor`` to be ``true``. (unset by default,
-    possible values: ``true`` or ``false``, the resource monitor will append 
-    unless explicitly set to ``false``).
+*summary_path*
+    Path where the summary ``resource_monitor.json`` should be stored, when running
+    a workflow (``summary_path`` does not apply to interfaces run independently).
+    (unset by default, in which case the summary file will be written out to 
+    ``<base_dir>/resource_monitor.json`` of the top-level workflow).
+
+*summary_append*
+    Append to an existing summary file (only applies to workflows).
+    (default value: ``true``, possible values: ``true`` or ``false``).
 
 Example
 ~~~~~~~
@@ -180,6 +188,10 @@ Example
     stop_on_first_crash = true
     hash_method = timestamp
     display_variable = :1
+
+    [monitoring]
+    enabled = false
+
 
 Workflow.config property has a form of a nested dictionary reflecting the
 structure of the .cfg file.

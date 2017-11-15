@@ -2,7 +2,7 @@
 # @Author: oesteban
 # @Date:   2017-09-21 15:50:37
 # @Last Modified by:   oesteban
-# @Last Modified time: 2017-10-20 09:12:36
+# @Last Modified time: 2017-11-15 11:14:07
 """
 Utilities to keep track of performance
 """
@@ -202,8 +202,8 @@ def get_max_resources_used(pid, mem_mb, num_threads, pyfunc=False):
     """
 
     if not resource_monitor:
-        raise RuntimeError('Attempted to measure resources with '
-                           '"resource_monitor" set off.')
+        raise RuntimeError('Attempted to measure resources with option '
+                           '"monitoring.enabled" set off.')
 
     try:
         mem_mb = max(mem_mb, _get_ram_mb(pid, pyfunc=pyfunc))
