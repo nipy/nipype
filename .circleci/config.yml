@@ -7,11 +7,14 @@ jobs:
     steps:
       - checkout:
           path: /home/circleci/nipype
+      - setup_remote_docker
       - run:
-          name: Prune base Dockerfile in preparation for cache check
+          name: Generate and prune base Dockerfile in preparation for cache check
           working_directory: /home/circleci/nipype/docker
           command: |
             mkdir -p /tmp/docker
+            ash ./generate_dockerfiles.sh -b
+
             # Use the sha256 sum of the pruned Dockerfile as the cache key.
             ash prune_dockerfile.sh Dockerfile.base > /tmp/docker/Dockerfile.base-pruned
       - restore_cache:
@@ -29,6 +32,7 @@ jobs:
       - persist_to_workspace:
           root: /tmp
           paths:
+            - docker/Dockerfile.base-pruned
             - docker/get_base_image.sh
 
 
@@ -37,18 +41,19 @@ jobs:
     machine:
       # Ubuntu 14.04 with Docker 17.10.0-ce
       image: circleci/classic:201710-02
+    working_directory: /home/circleci/nipype
     steps:
       - checkout:
           path: /home/circleci/nipype
       - attach_workspace:
           at: /tmp
       - run:
-          name: Get test dependencies
+          name: Get test dependencies and generate Dockerfiles
           command: |
             pip install --no-cache-dir codecov
+            make gen-dockerfiles
       - run:
           name: Modify Nipype version if necessary
-          working_directory: /home/circleci/nipype
           command: |
             if [ "$CIRCLE_TAG" != "" ]; then
               sed -i -E "s/(__version__ = )'[A-Za-z0-9.-]+'/\1'$CIRCLE_TAG'/" nipype/info.py
@@ -56,7 +61,6 @@ jobs:
       - run:
           name: Get base image (pull or build)
           no_output_timeout: 60m
-          working_directory: /home/circleci/nipype
           command: |
             source /tmp/docker/get_base_image.sh
             if [ "$GET_BASE" == "PULL" ]; then
@@ -72,7 +76,6 @@ jobs:
       - run:
           name: Build main image (py36)
           no_output_timeout: 60m
-          working_directory: /home/circleci/nipype
           command: |
             e=1 && for i in {1..5}; do
               docker build \
@@ -87,7 +90,6 @@ jobs:
       - run:
           name: Build main image (py27)
           no_output_timeout: 60m
-          working_directory: /home/circleci/nipype
           command: |
             e=1 && for i in {1..5}; do
               docker build \
@@ -151,8 +153,6 @@ jobs:
     docker:
       - image: docker:17.10.0-ce-git
     steps:
-      - checkout:
-          path: /home/circleci/nipype
       - setup_remote_docker
       - attach_workspace:
           at: /tmp
@@ -171,12 +171,10 @@ jobs:
             docker push nipype/nipype:py36
             docker push nipype/nipype:py27
       - run:
-          name: Prune base Dockerfile to update cache
-          working_directory: /home/circleci/nipype/docker
+          name: Move pruned Dockerfile to /tmp/docker/cache directory
           command: |
-            mkdir -p /tmp/docker/cache
-            # Use the sha256 sum of the pruned Dockerfile as the cache key.
-            ash prune_dockerfile.sh Dockerfile.base > /tmp/docker/cache/Dockerfile.base-pruned
+            mkdir -p /tmp/docker/cache/
+            mv /tmp/docker/Dockerfile.base-pruned /tmp/docker/cache/Dockerfile.base-pruned
       - save_cache:
           paths:
             - /tmp/docker/cache/Dockerfile.base-pruned
