@@ -164,8 +164,9 @@ Execution
 
 *resource_monitor_append*
     Append to an existing ``resource_monitor.json`` in the workflow ``base_dir``.
-    (unset by default, possible values: ``true`` or ``false``,
-    will append unless explicitly set to ``false``).
+    Requires ``resource_monitor`` to be ``true``. (unset by default,
+    possible values: ``true`` or ``false``, the resource monitor will append 
+    unless explicitly set to ``false``).
 
 Example
 ~~~~~~~
