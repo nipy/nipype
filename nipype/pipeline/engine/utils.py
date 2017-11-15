@@ -1298,7 +1298,7 @@ def write_workflow_prov(graph, filename=None, format='all'):
     return ps.g
 
 
-def write_workflow_resources(graph, filename=None, append=True):
+def write_workflow_resources(graph, filename=None, append=None):
     """
     Generate a JSON file with profiling traces that can be loaded
     in a pandas DataFrame or processed with JavaScript like D3.js
@@ -1306,6 +1306,10 @@ def write_workflow_resources(graph, filename=None, append=True):
     import simplejson as json
     if not filename:
         filename = os.path.join(os.getcwd(), 'resource_monitor.json')
+
+    if append is None:
+        append = str2bool(config.get(
+            'execution', 'resource_monitor_append', 'true'))
 
     big_dict = {
         'time': [],

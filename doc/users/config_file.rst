@@ -162,6 +162,11 @@ Execution
     being used by an interface. Requires ``resource_monitor`` to be ``true``.
     (default value: ``1``)
 
+*resource_monitor_append*
+    Append to an existing ``resource_monitor.json`` in the workflow ``base_dir``.
+    (unset by default, possible values: ``true``, ``false``,
+    will append unless explicitly set to ``false``).
+
 Example
 ~~~~~~~
 
