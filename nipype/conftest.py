@@ -8,5 +8,5 @@ def add_np(doctest_namespace):
 
 
     filepath = os.path.dirname(os.path.realpath(__file__))
-    datadir = os.path.realpath(os.path.join(filepath, 'nipype/testing/data'))
+    datadir = os.path.realpath(os.path.join(filepath, 'testing/data'))
     doctest_namespace["datadir"] = datadir
