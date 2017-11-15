@@ -166,9 +166,10 @@ Resource Monitor
     Sampling period (in seconds) between measurements of resources (memory, cpus)
     being used by an interface (default value: ``1``)
 
-*summary_path*
-    Path where the summary ``resource_monitor.json`` should be stored, when running
-    a workflow (``summary_path`` does not apply to interfaces run independently).
+*summary_file*
+    Indicates where the summary file collecting all profiling information from the
+    resource monitor should be stored after execution of a workflow.
+    The ``summary_file`` does not apply to interfaces run independently.
     (unset by default, in which case the summary file will be written out to 
     ``<base_dir>/resource_monitor.json`` of the top-level workflow).
 

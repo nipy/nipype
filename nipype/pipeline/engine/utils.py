@@ -1304,12 +1304,17 @@ def write_workflow_resources(graph, filename=None, append=None):
     in a pandas DataFrame or processed with JavaScript like D3.js
     """
     import simplejson as json
+
+    # Overwrite filename if nipype config is set
+    filename = config.get('monitoring', 'summary_file', filename)
+
+    # If filename still does not make sense, store in $PWD
     if not filename:
         filename = os.path.join(os.getcwd(), 'resource_monitor.json')
 
     if append is None:
         append = str2bool(config.get(
-            'execution', 'resource_monitor_append', 'true'))
+            'monitoring', 'summary_append', 'true'))
 
     big_dict = {
         'time': [],
