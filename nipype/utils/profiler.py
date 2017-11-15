@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
-# @Author: oesteban
-# @Date:   2017-09-21 15:50:37
-# @Last Modified by:   oesteban
-# @Last Modified time: 2017-11-15 11:14:07
+# emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
+# vi: set ft=python sts=4 ts=4 sw=4 et:
 """
 Utilities to keep track of performance
 """
@@ -320,7 +318,8 @@ def _use_cpu(x):
     ctr = 0
     while ctr < 1e7:
         ctr += 1
-        x*x
+        x * x
+
 
 # Spin multiple threads
 def _use_resources(n_procs, mem_gb):
