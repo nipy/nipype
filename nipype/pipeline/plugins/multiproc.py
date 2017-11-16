@@ -105,8 +105,8 @@ class MultiProcPlugin(DistributedPluginBase):
     - scheduler: sort jobs topologically (``'tsort'``, default value)
         or prioritize jobs by, first, memory consumption and, second,
         number of threads (``'mem_thread'`` option).
-    - maxtasksperchild: refresh workers after a certain amount of tasks
-        run (and release resources).
+    - maxtasksperchild: number of nodes to run on each process before
+        refreshing the worker (default: 10).
 
     """
 
