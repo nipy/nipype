@@ -136,7 +136,7 @@ jobs:
               docker save nipype/nipype:base \
                           nipype/nipype:latest \
                           nipype/nipype:py36 \
-                          nipype/nipype:py27 | gzip -1 > /tmp/docker/nipype-base-latest-py36-py27.tar.gz
+                          nipype/nipype:py27 | gzip -6 > /tmp/docker/nipype-base-latest-py36-py27.tar.gz
               du -h /tmp/docker/nipype-base-latest-py36-py27.tar.gz
             else
               # Workaround for `persist_to_workspace` to succeed when we are
