@@ -82,6 +82,10 @@ Optional arguments::
   exceed the total amount of resources available (memory and threads), when
   ``False`` (default), only a warning will be issued.
 
+  maxtasksperchild : refresh the workers after this specific number of nodes
+  run (default: 10).
+  
+
 To distribute processing on a multicore machine, simply call::
 
   workflow.run(plugin='MultiProc')
