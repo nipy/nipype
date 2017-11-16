@@ -9,11 +9,10 @@ Exaples  FSL, matlab/SPM , afni
 Requires Packages to be installed
 """
 from __future__ import print_function, division, unicode_literals, absolute_import
-from future import standard_library
-standard_library.install_aliases()
+import gc
+
 from builtins import range, object, open, str, bytes
 
-from configparser import NoOptionError
 from copy import deepcopy
 import datetime
 from datetime import datetime as dt
@@ -26,7 +25,6 @@ from string import Template
 import select
 import subprocess as sp
 import sys
-import time
 from textwrap import wrap
 from warnings import warn
 import simplejson as json
@@ -43,6 +41,8 @@ from .traits_extension import (
     traits, Undefined, TraitDictObject, TraitListObject, TraitError, isdefined,
     File, Directory, DictStrStr, has_metadata, ImageFile)
 from ..external.due import due
+from future import standard_library
+standard_library.install_aliases()
 
 nipype_version = Version(__version__)
 iflogger = logging.getLogger('interface')
@@ -57,6 +57,7 @@ __docformat__ = 'restructuredtext'
 
 class Str(traits.Unicode):
     """Replacement for the default traits.Str based in bytes"""
+
 
 traits.Str = Str
 
@@ -634,16 +635,16 @@ class DynamicTraitedSpec(BaseTraitedSpec):
             return memo[id_self]
         dup_dict = deepcopy(self.get(), memo)
         # access all keys
-        for key in self.copyable_trait_names():
-            if key in self.__dict__.keys():
-                _ = getattr(self, key)
+        # for key in self.copyable_trait_names():
+        #     if key in self.__dict__.keys():
+        #         _ = getattr(self, key)
         # clone once
         dup = self.clone_traits(memo=memo)
-        for key in self.copyable_trait_names():
-            try:
-                _ = getattr(dup, key)
-            except:
-                pass
+        # for key in self.copyable_trait_names():
+        #     try:
+        #         _ = getattr(dup, key)
+        #     except:
+        #         pass
         # clone twice
         dup = self.clone_traits(memo=memo)
         dup.trait_set(**dup_dict)
@@ -1260,6 +1261,7 @@ class SimpleInterface(BaseInterface):
     >>> os.chdir(old.strpath)
 
     """
+
     def __init__(self, from_file=None, resource_monitor=None, **inputs):
         super(SimpleInterface, self).__init__(
             from_file=from_file, resource_monitor=resource_monitor, **inputs)
@@ -1387,8 +1389,7 @@ def run_command(runtime, output=None, timeout=0.01):
                     shell=True,
                     cwd=runtime.cwd,
                     env=env,
-                    close_fds=True,
-    )
+                    close_fds=True)
     result = {
         'stdout': [],
         'stderr': [],
@@ -1427,12 +1428,7 @@ def run_command(runtime, output=None, timeout=0.01):
         temp.sort()
         result['merged'] = [r[1] for r in temp]
 
-    if output == 'allatonce':
-        stdout, stderr = proc.communicate()
-        result['stdout'] = read_stream(stdout, logger=iflogger)
-        result['stderr'] = read_stream(stderr, logger=iflogger)
-
-    elif output.startswith('file'):
+    if output.startswith('file'):
         proc.wait()
         if outfile is not None:
             stdout.flush()
@@ -1452,12 +1448,18 @@ def run_command(runtime, output=None, timeout=0.01):
             result['merged'] = result['stdout']
             result['stdout'] = []
     else:
-        proc.communicate()  # Discard stdout and stderr
+        stdout, stderr = proc.communicate()
+        if output == 'allatonce':  # Discard stdout and stderr otherwise
+            result['stdout'] = read_stream(stdout, logger=iflogger)
+            result['stderr'] = read_stream(stderr, logger=iflogger)
+
+    runtime.returncode = proc.returncode
+    proc.terminate()  # Ensure we are done
+    gc.collect()  # Force GC for a cleanup
 
     runtime.stderr = '\n'.join(result['stderr'])
     runtime.stdout = '\n'.join(result['stdout'])
     runtime.merged = '\n'.join(result['merged'])
-    runtime.returncode = proc.returncode
     return runtime
 
 
@@ -1467,21 +1469,26 @@ def get_dependencies(name, environ):
     Uses otool on darwin, ldd on linux. Currently doesn't support windows.
 
     """
+    cmd = None
     if sys.platform == 'darwin':
-        proc = sp.Popen('otool -L `which %s`' % name,
-                        stdout=sp.PIPE,
-                        stderr=sp.PIPE,
-                        shell=True,
-                        env=environ)
+        cmd = 'otool -L `which {}`'.format
     elif 'linux' in sys.platform:
-        proc = sp.Popen('ldd `which %s`' % name,
-                        stdout=sp.PIPE,
-                        stderr=sp.PIPE,
-                        shell=True,
-                        env=environ)
-    else:
+        cmd = 'ldd -L `which {}`'.format
+
+    if cmd is None:
         return 'Platform %s not supported' % sys.platform
-    o, e = proc.communicate()
+
+    try:
+        proc = sp.Popen(
+            cmd(name), stdout=sp.PIPE, stderr=sp.PIPE, shell=True,
+            env=environ, close_fds=True)
+        o, e = proc.communicate()
+        proc.terminate()
+        gc.collect()
+    except:
+        iflogger.warning(
+            'Could not get linked libraries for "%s".', name)
+        return 'Failed collecting dependencies'
     return o.rstrip()
 
 
@@ -1572,6 +1579,9 @@ class CommandLine(BaseInterface):
         # Set command. Input argument takes precedence
         self._cmd = command or getattr(self, '_cmd', None)
 
+        # Store dependencies in runtime object
+        self._ldd = str2bool(config.get('execution', 'get_linked_libs', 'true'))
+
         if self._cmd is None:
             raise Exception("Missing command")
 
@@ -1619,21 +1629,6 @@ class CommandLine(BaseInterface):
     def _get_environ(self):
         return getattr(self.inputs, 'environ', {})
 
-    def version_from_command(self, flag='-v'):
-        cmdname = self.cmd.split()[0]
-        env = dict(os.environ)
-        if _exists_in_path(cmdname, env):
-            out_environ = self._get_environ()
-            env.update(out_environ)
-            proc = sp.Popen(' '.join((cmdname, flag)),
-                            shell=True,
-                            env=env,
-                            stdout=sp.PIPE,
-                            stderr=sp.PIPE,
-                            )
-            o, e = proc.communicate()
-            return o
-
     def _run_interface(self, runtime, correct_return_codes=(0,)):
         """Execute command via subprocess
 
@@ -1664,7 +1659,8 @@ class CommandLine(BaseInterface):
                           (self.cmd.split()[0], runtime.hostname))
 
         runtime.command_path = cmd_path
-        runtime.dependencies = get_dependencies(executable_name, runtime.environ)
+        runtime.dependencies = (get_dependencies(executable_name, runtime.environ)
+                                if self._ldd else '<skipped>')
         runtime = run_command(runtime, output=self.terminal_output)
         if runtime.returncode is None or \
                 runtime.returncode not in correct_return_codes:
