@@ -8,6 +8,7 @@ from __future__ import print_function, division, unicode_literals, absolute_impo
 
 import sys
 import pickle
+import errno
 import subprocess
 import gzip
 import hashlib
@@ -663,3 +664,51 @@ def dist_is_editable(dist):
         if os.path.isfile(egg_link):
             return True
     return False
+
+
+def makedirs(path, exist_ok=False):
+    """
+    Create path, if it doesn't exist.
+
+    Parameters
+    ----------
+    path : output directory to create
+
+    """
+    if not exist_ok:  # The old makedirs
+        os.makedirs(path)
+        return path
+
+    # this odd approach deals with concurrent directory cureation
+    try:
+        if not os.path.exists(os.path.abspath(path)):
+            fmlogger.debug("Creating directory %s", path)
+            os.makedirs(path)
+    except OSError:
+        fmlogger.debug("Problem creating directory %s", path)
+        if not os.path.exists(path):
+            raise OSError('Could not create directory %s' % path)
+    return path
+
+
+def emptydirs(path):
+    fmlogger.debug("Removing contents of %s", path)
+    pathconts = os.listdir(path)
+
+    if not pathconts:
+        return True
+
+    for el in pathconts:
+        try:
+            shutil.rmtree(el)
+        except OSError as ex:
+            elcont = os.listdir(el)
+            if ex.errno == errno.ENOTEMPTY and not elcont:
+                fmlogger.warning(
+                    'An exception was raised trying to remove old %s, but the path '
+                    'seems empty. Is it an NFS mount?. Passing the exception.', el)
+            elif ex.errno == errno.ENOTEMPTY and elcont:
+                fmlogger.debug('Folder %s contents (%d items).', el, len(elcont))
+                raise ex
+            else:
+                raise ex
