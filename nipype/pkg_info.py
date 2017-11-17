@@ -3,13 +3,12 @@ from __future__ import print_function, division, unicode_literals, absolute_impo
 
 from future import standard_library
 standard_library.install_aliases()
+from builtins import open
 import configparser
 
 import os
 import sys
 import subprocess
-
-from .info import VERSION
 
 COMMIT_INFO_FNAME = 'COMMIT_INFO.txt'
 PY3 = sys.version_info[0] >= 3
@@ -52,7 +51,8 @@ def pkg_commit_hash(pkg_path):
         cfg_parser = configparser.RawConfigParser()
     else:
         cfg_parser = configparser.ConfigParser()
-    cfg_parser.read(pth)
+    with open(pth, encoding='utf-8') as fp:
+        cfg_parser.readfp(fp)
     archive_subst = cfg_parser.get('commit hash', 'archive_subst_hash')
     if not archive_subst.startswith('$Format'):  # it has been substituted
         return 'archive substitution', archive_subst
@@ -86,6 +86,9 @@ def get_pkg_info(pkg_path):
        with named parameters of interest
     '''
     src, hsh = pkg_commit_hash(pkg_path)
+    from .info import VERSION
+    if not PY3:
+        src, hsh, VERSION = src.encode(), hsh.encode(), VERSION.encode()
     import networkx
     import nibabel
     import numpy

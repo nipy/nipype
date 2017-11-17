@@ -105,6 +105,8 @@ class MultiProcPlugin(DistributedPluginBase):
     - scheduler: sort jobs topologically (``'tsort'``, default value)
         or prioritize jobs by, first, memory consumption and, second,
         number of threads (``'mem_thread'`` option).
+    - maxtasksperchild: number of nodes to run on each process before
+        refreshing the worker (default: 10).
 
     """
 
@@ -117,6 +119,7 @@ class MultiProcPlugin(DistributedPluginBase):
 
         # Read in options or set defaults.
         non_daemon = self.plugin_args.get('non_daemon', True)
+        maxtasks = self.plugin_args.get('maxtasksperchild', 10)
         self.processors = self.plugin_args.get('n_procs', cpu_count())
         self.memory_gb = self.plugin_args.get('memory_gb',  # Allocate 90% of system memory
                                               get_system_total_memory_gb() * 0.9)
@@ -125,7 +128,14 @@ class MultiProcPlugin(DistributedPluginBase):
         # Instantiate different thread pools for non-daemon processes
         logger.debug('MultiProcPlugin starting in "%sdaemon" mode (n_procs=%d, mem_gb=%0.2f)',
                      'non' * int(non_daemon), self.processors, self.memory_gb)
-        self.pool = (NonDaemonPool if non_daemon else Pool)(processes=self.processors)
+
+        NipypePool = NonDaemonPool if non_daemon else Pool
+        try:
+            self.pool = NipypePool(processes=self.processors,
+                                   maxtasksperchild=maxtasks)
+        except TypeError:
+            self.pool = NipypePool(processes=self.processors)
+
         self._stats = None
 
     def _async_callback(self, args):
