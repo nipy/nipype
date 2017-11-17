@@ -53,8 +53,8 @@ do
 done
 
 
-# neurodocker version 0.3.1-19-g8d02eb4
-NEURODOCKER_IMAGE="kaczmarj/neurodocker@sha256:6b5f92f413b9710b7581e62293a8f74438b14ce7e4ab1ce68db2a09f7c64375a"
+# neurodocker version 0.3.1-22-gb0ee069
+NEURODOCKER_IMAGE="kaczmarj/neurodocker@sha256:c670ec2e0666a63d4e017a73780f66554283e294f3b12250928ee74b8a48bc59"
 
 # neurodebian:stretch-non-free pulled on November 3, 2017
 BASE_IMAGE="neurodebian@sha256:7590552afd0e7a481a33314724ae27f76ccedd05ffd7ac06ec38638872427b9b"

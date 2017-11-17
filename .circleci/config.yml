@@ -67,8 +67,9 @@ jobs:
               echo "Pulling base image ..."
               docker pull nipype/nipype:base
             elif [ "$GET_BASE" == "BUILD" ]; then
-              echo "Building base image ..."
-              docker build -t nipype/nipype:base - < docker/Dockerfile.base
+              e=1 && for i in {1..5}; do
+                docker build -t nipype/nipype:base - < docker/Dockerfile.base  && e=0 && break || sleep 15
+              done && [ "$e" -eq "0" ]
             else
               echo "Error: method to get base image not understood"
               exit 1
