@@ -1454,8 +1454,18 @@ def run_command(runtime, output=None, timeout=0.01):
             result['stderr'] = read_stream(stderr, logger=iflogger)
 
     runtime.returncode = proc.returncode
-    proc.terminate()  # Ensure we are done
-    gc.collect()  # Force GC for a cleanup
+    try:
+        proc.terminate()  # Ensure we are done
+    except OSError as error:
+        # Python 2 raises when the process is already gone
+        if error.errno != errno.ESRCH:
+            raise
+
+    # Dereference & force GC for a cleanup
+    del proc
+    del stdout
+    del stderr
+    gc.collect()
 
     runtime.stderr = '\n'.join(result['stderr'])
     runtime.stdout = '\n'.join(result['stdout'])
@@ -1482,7 +1492,7 @@ def get_dependencies(name, environ):
         proc = sp.Popen(
             cmd(name), stdout=sp.PIPE, stderr=sp.PIPE, shell=True,
             env=environ, close_fds=True)
-        o, e = proc.communicate()
+        o, _ = proc.communicate()
         proc.terminate()
         gc.collect()
     except:
@@ -1628,6 +1638,23 @@ class CommandLine(BaseInterface):
 
     def _get_environ(self):
         return getattr(self.inputs, 'environ', {})
+
+    def version_from_command(self, flag='-v'):
+        iflogger.warning('version_from_command member of CommandLine was '
+                         'Deprecated in nipype-1.0.0 and deleted in 2.0.0')
+        cmdname = self.cmd.split()[0]
+        env = dict(os.environ)
+        if _exists_in_path(cmdname, env):
+            out_environ = self._get_environ()
+            env.update(out_environ)
+            proc = sp.Popen(' '.join((cmdname, flag)),
+                            shell=True,
+                            env=env,
+                            stdout=sp.PIPE,
+                            stderr=sp.PIPE,
+                            )
+            o, e = proc.communicate()
+            return o
 
     def _run_interface(self, runtime, correct_return_codes=(0,)):
         """Execute command via subprocess
