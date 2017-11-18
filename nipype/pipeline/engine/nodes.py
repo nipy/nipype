@@ -327,7 +327,7 @@ class Node(EngineBase):
         makedirs(outdir, exist_ok=True)
         os.chdir(outdir)
 
-        logger.info('[Node] Executing "%s" (%s)', self.fullname, outdir)
+        logger.info('[Node] Setting-up "%s" in "%s".', self.fullname, outdir)
         hash_info = self.hash_exists(updatehash=updatehash)
         hash_exists, hashvalue, hashfile, hashed_inputs = hash_info
         force_run = self.overwrite or (self.overwrite is None and self._interface.always_run)
@@ -346,7 +346,7 @@ class Node(EngineBase):
                 savepkl(node_file, self)
 
             self._run_interface(execute=False, updatehash=updatehash)
-            logger.info('[Node] Cached "%s" (%s)\n', self.fullname, outdir)
+            logger.info('[Node] Cached "%s".', self.fullname)
             os.chdir(cwd)
             return self.result
 
@@ -412,7 +412,7 @@ class Node(EngineBase):
         # Tear-up
         shutil.move(hashfile_unfinished, hashfile)
         self.write_report(report_type='postexec', cwd=outdir)
-        logger.info('[Node] Completed "%s" (%s)', self.fullname, outdir)
+        logger.info('[Node] Finished "%s".', self.fullname)
         os.chdir(cwd)
         return self._result
 
@@ -623,7 +623,7 @@ class Node(EngineBase):
             if copyfiles:
                 self._copyfiles_to_wd(cwd, execute)
 
-            message = 'Running node "%s" ("%s.%s")'
+            message = '[Node] Running "%s" ("%s.%s")'
             if issubclass(self._interface.__class__, CommandLine):
                 try:
                     cmd = self._interface.cmdline

@@ -47,11 +47,11 @@ from ...interfaces.base import (traits, InputMultiPath, CommandLine,
 from ...utils.filemanip import (save_json, FileNotFoundError,
                                 filename_to_list, list_to_filename,
                                 copyfiles, fnames_presuffix, loadpkl,
-                                split_filename, load_json, savepkl,
+                                split_filename, load_json, makedirs, savepkl,
                                 write_rst_header, write_rst_dict,
                                 write_rst_list, to_str)
 from .utils import (generate_expanded_graph, modify_paths,
-                    export_graph, make_output_dir, write_workflow_prov,
+                    export_graph, write_workflow_prov,
                     write_workflow_resources,
                     clean_working_directory, format_dot, topological_sort,
                     get_print_name, merge_dict, evaluate_connect_function,
@@ -424,7 +424,7 @@ connected.
                     base_dir = op.join(base_dir, self.name)
             else:
                 base_dir = os.getcwd()
-        base_dir = make_output_dir(base_dir)
+        base_dir = makedirs(base_dir)
         if graph2use in ['hierarchical', 'colored']:
             if self.name[:1].isdigit(): # these graphs break if int
                 raise ValueError('{} graph failed, workflow name cannot begin '
