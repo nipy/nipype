@@ -1,7 +1,8 @@
-Upcoming release (0.14.1)
-=========================
+Upcoming release
+================
 
 0.14.0 (November 20, 2017)
+[Full information](https://github.com/nipy/nipype/milestone/13)
 ==========================
 
 * ENH: Generate Dockerfiles with neurodocker (https://github.com/nipy/nipype/pull/2202)
