@@ -13,7 +13,7 @@ from nipype.interfaces.fsl import no_fsl
 
 @pytest.mark.skipif(no_fsl(), reason="fsl is not installed")
 def test_MultipleRegressDesign(tmpdir):
-    os.chdir(str(tmpdir))
+    tmpdir.chdir()
     foo = fsl.MultipleRegressDesign()
     foo.inputs.regressors = dict(voice_stenght=[1, 1, 1], age=[0.2, 0.4, 0.5], BMI=[1, -1, 2])
     con1 = ['voice_and_age', 'T', ['age', 'voice_stenght'], [0.5, 0.5]]
@@ -22,7 +22,7 @@ def test_MultipleRegressDesign(tmpdir):
     res = foo.run()
 
     for ii in ["mat", "con", "fts", "grp"]:
-        assert getattr(res.outputs, "design_"+ii) == os.path.join(os.getcwd(), 'design.'+ii)
+        assert getattr(res.outputs, "design_"+ii) == tmpdir.join('design.'+ii).strpath
 
     design_mat_expected_content = """/NumWaves       3
 /NumPoints      3
@@ -62,6 +62,6 @@ def test_MultipleRegressDesign(tmpdir):
 1
 """
     for ii in ["mat", "con", "fts", "grp"]:
-        assert open(os.path.join(os.getcwd(), 'design.'+ii), 'r').read() == eval("design_"+ii+"_expected_content")
+        assert tmpdir.join('design.'+ii).read() == eval("design_"+ii+"_expected_content")
 
 

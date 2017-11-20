@@ -74,7 +74,7 @@ class ABoverlap(AFNICommand):
     >>> aboverlap.inputs.in_file_a = 'functional.nii'
     >>> aboverlap.inputs.in_file_b = 'structural.nii'
     >>> aboverlap.inputs.out_file =  'out.mask_ae_overlap.txt'
-    >>> aboverlap.cmdline  # doctest: +ALLOW_UNICODE
+    >>> aboverlap.cmdline
     '3dABoverlap functional.nii structural.nii  |& tee out.mask_ae_overlap.txt'
     >>> res = aboverlap.run()  # doctest: +SKIP
 
@@ -139,7 +139,7 @@ class AFNItoNIFTI(AFNICommand):
     >>> a2n = afni.AFNItoNIFTI()
     >>> a2n.inputs.in_file = 'afni_output.3D'
     >>> a2n.inputs.out_file =  'afni_output.nii'
-    >>> a2n.cmdline  # doctest: +ALLOW_UNICODE
+    >>> a2n.cmdline
     '3dAFNItoNIFTI -prefix afni_output.nii afni_output.3D'
     >>> res = a2n.run()  # doctest: +SKIP
 
@@ -207,7 +207,7 @@ class Autobox(AFNICommand):
     >>> abox = afni.Autobox()
     >>> abox.inputs.in_file = 'structural.nii'
     >>> abox.inputs.padding = 5
-    >>> abox.cmdline  # doctest: +ALLOW_UNICODE
+    >>> abox.cmdline
     '3dAutobox -input structural.nii -prefix structural_autobox -npad 5'
     >>> res = abox.run()  # doctest: +SKIP
 
@@ -288,7 +288,7 @@ class BrickStat(AFNICommandBase):
     >>> brickstat.inputs.in_file = 'functional.nii'
     >>> brickstat.inputs.mask = 'skeleton_mask.nii.gz'
     >>> brickstat.inputs.min = True
-    >>> brickstat.cmdline  # doctest: +ALLOW_UNICODE
+    >>> brickstat.cmdline
     '3dBrickStat -min -mask skeleton_mask.nii.gz functional.nii'
     >>> res = brickstat.run()  # doctest: +SKIP
 
@@ -395,7 +395,7 @@ class Bucket(AFNICommand):
     >>> bucket = afni.Bucket()
     >>> bucket.inputs.in_file = [('functional.nii',"{2..$}"), ('functional.nii',"{1}")]
     >>> bucket.inputs.out_file = 'vr_base'
-    >>> bucket.cmdline # doctest: +ALLOW_UNICODE
+    >>> bucket.cmdline
     "3dbucket -prefix vr_base functional.nii'{2..$}' functional.nii'{1}'"
     >>> res = bucket.run()  # doctest: +SKIP
 
@@ -469,7 +469,7 @@ class Calc(AFNICommand):
     >>> calc.inputs.expr='a*b'
     >>> calc.inputs.out_file =  'functional_calc.nii.gz'
     >>> calc.inputs.outputtype = 'NIFTI'
-    >>> calc.cmdline  # doctest: +ELLIPSIS +ALLOW_UNICODE
+    >>> calc.cmdline  # doctest: +ELLIPSIS
     '3dcalc -a functional.nii -b functional2.nii -expr "a*b" -prefix functional_calc.nii.gz'
     >>> res = calc.run()  # doctest: +SKIP
 
@@ -479,7 +479,7 @@ class Calc(AFNICommand):
     >>> calc.inputs.expr = '1'
     >>> calc.inputs.out_file = 'rm.epi.all1'
     >>> calc.inputs.overwrite = True
-    >>> calc.cmdline # doctest: +ALLOW_UNICODE
+    >>> calc.cmdline
     '3dcalc -a functional.nii -expr "1" -prefix rm.epi.all1 -overwrite'
     >>> res = calc.run() # doctest: +SKIP
 
@@ -574,7 +574,7 @@ class Cat(AFNICommand):
     >>> cat1d.inputs.sel = "'[0,2]'"
     >>> cat1d.inputs.in_files = ['f1.1D', 'f2.1D']
     >>> cat1d.inputs.out_file = 'catout.1d'
-    >>> cat1d.cmdline  # doctest: +ALLOW_UNICODE
+    >>> cat1d.cmdline
     "1dcat -sel '[0,2]' f1.1D f2.1D > catout.1d"
     >>> res = cat1d.run()  # doctest: +SKIP
 
@@ -627,7 +627,7 @@ class CatMatvec(AFNICommand):
     >>> cmv = afni.CatMatvec()
     >>> cmv.inputs.in_file = [('structural.BRIK::WARP_DATA','I')]
     >>> cmv.inputs.out_file = 'warp.anat.Xat.1D'
-    >>> cmv.cmdline  # doctest: +ALLOW_UNICODE
+    >>> cmv.cmdline
     'cat_matvec structural.BRIK::WARP_DATA -I  > warp.anat.Xat.1D'
     >>> res = cmv.run()  # doctest: +SKIP
 
@@ -719,7 +719,7 @@ class CenterMass(AFNICommandBase):
     >>> cm.inputs.in_file = 'structural.nii'
     >>> cm.inputs.cm_file = 'cm.txt'
     >>> cm.inputs.roi_vals = [2, 10]
-    >>> cm.cmdline  # doctest: +ALLOW_UNICODE
+    >>> cm.cmdline
     '3dCM -roi_vals 2 10 structural.nii > cm.txt'
     >>> res = 3dcm.run()  # doctest: +SKIP
     """
@@ -766,26 +766,26 @@ class Copy(AFNICommand):
     >>> from nipype.interfaces import afni
     >>> copy3d = afni.Copy()
     >>> copy3d.inputs.in_file = 'functional.nii'
-    >>> copy3d.cmdline  # doctest: +ALLOW_UNICODE
+    >>> copy3d.cmdline
     '3dcopy functional.nii functional_copy'
     >>> res = copy3d.run()  # doctest: +SKIP
 
     >>> from copy import deepcopy
     >>> copy3d_2 = deepcopy(copy3d)
     >>> copy3d_2.inputs.outputtype = 'NIFTI'
-    >>> copy3d_2.cmdline  # doctest: +ALLOW_UNICODE
+    >>> copy3d_2.cmdline
     '3dcopy functional.nii functional_copy.nii'
     >>> res = copy3d_2.run()  # doctest: +SKIP
 
     >>> copy3d_3 = deepcopy(copy3d)
     >>> copy3d_3.inputs.outputtype = 'NIFTI_GZ'
-    >>> copy3d_3.cmdline  # doctest: +ALLOW_UNICODE
+    >>> copy3d_3.cmdline
     '3dcopy functional.nii functional_copy.nii.gz'
     >>> res = copy3d_3.run()  # doctest: +SKIP
 
     >>> copy3d_4 = deepcopy(copy3d)
     >>> copy3d_4.inputs.out_file = 'new_func.nii'
-    >>> copy3d_4.cmdline  # doctest: +ALLOW_UNICODE
+    >>> copy3d_4.cmdline
     '3dcopy functional.nii new_func.nii'
     >>> res = copy3d_4.run()  # doctest: +SKIP
 
@@ -857,7 +857,7 @@ class Dot(AFNICommand):
     >>> dot.inputs.in_files = ['functional.nii[0]', 'structural.nii']
     >>> dot.inputs.dodice = True
     >>> dot.inputs.out_file = 'out.mask_ae_dice.txt'
-    >>> dot.cmdline  # doctest: +ALLOW_UNICODE
+    >>> dot.cmdline
     '3dDot -dodice functional.nii[0]  structural.nii   |& tee out.mask_ae_dice.txt'
     >>> res = copy3d.run()  # doctest: +SKIP
 
@@ -948,7 +948,7 @@ class Edge3(AFNICommand):
     >>> edge3.inputs.in_file = 'functional.nii'
     >>> edge3.inputs.out_file = 'edges.nii'
     >>> edge3.inputs.datum = 'byte'
-    >>> edge3.cmdline  # doctest: +ALLOW_UNICODE
+    >>> edge3.cmdline
     '3dedge3 -input functional.nii -datum byte -prefix edges.nii'
     >>> res = edge3.run()  # doctest: +SKIP
 
@@ -1019,7 +1019,7 @@ class Eval(AFNICommand):
     >>> eval.inputs.expr = 'a*b'
     >>> eval.inputs.out1D = True
     >>> eval.inputs.out_file =  'data_calc.1D'
-    >>> eval.cmdline  # doctest: +ALLOW_UNICODE
+    >>> eval.cmdline
     '1deval -a seed.1D -b resp.1D -expr "a*b" -1D -prefix data_calc.1D'
     >>> res = eval.run()  # doctest: +SKIP
 
@@ -1170,7 +1170,7 @@ class FWHMx(AFNICommandBase):
     >>> from nipype.interfaces import afni
     >>> fwhm = afni.FWHMx()
     >>> fwhm.inputs.in_file = 'functional.nii'
-    >>> fwhm.cmdline  # doctest: +ALLOW_UNICODE
+    >>> fwhm.cmdline
     '3dFWHMx -input functional.nii -out functional_subbricks.out > functional_fwhmx.out'
     >>> res = fwhm.run()  # doctest: +SKIP
 
@@ -1397,7 +1397,7 @@ class MaskTool(AFNICommand):
     >>> masktool = afni.MaskTool()
     >>> masktool.inputs.in_file = 'functional.nii'
     >>> masktool.inputs.outputtype = 'NIFTI'
-    >>> masktool.cmdline  # doctest: +ALLOW_UNICODE
+    >>> masktool.cmdline
     '3dmask_tool -prefix functional_mask.nii -input functional.nii'
     >>> res = automask.run()  # doctest: +SKIP
 
@@ -1446,7 +1446,7 @@ class Merge(AFNICommand):
     >>> merge.inputs.blurfwhm = 4
     >>> merge.inputs.doall = True
     >>> merge.inputs.out_file = 'e7.nii'
-    >>> merge.cmdline  # doctest: +ALLOW_UNICODE
+    >>> merge.cmdline
     '3dmerge -1blur_fwhm 4 -doall -prefix e7.nii functional.nii functional2.nii'
     >>> res = merge.run()  # doctest: +SKIP
 
@@ -1501,7 +1501,7 @@ class Notes(CommandLine):
     >>> notes.inputs.in_file = 'functional.HEAD'
     >>> notes.inputs.add = 'This note is added.'
     >>> notes.inputs.add_history = 'This note is added to history.'
-    >>> notes.cmdline  # doctest: +ALLOW_UNICODE
+    >>> notes.cmdline
     '3dNotes -a "This note is added." -h "This note is added to history." functional.HEAD'
     >>> res = notes.run()  # doctest: +SKIP
     """
@@ -1579,7 +1579,7 @@ class NwarpApply(AFNICommandBase):
     >>> nwarp.inputs.in_file = 'Fred+orig'
     >>> nwarp.inputs.master = 'NWARP'
     >>> nwarp.inputs.warp = "'Fred_WARP+tlrc Fred.Xaff12.1D'"
-    >>> nwarp.cmdline  # doctest: +ALLOW_UNICODE
+    >>> nwarp.cmdline
     "3dNwarpApply -source Fred+orig -master NWARP -prefix Fred+orig_Nwarp -nwarp \'Fred_WARP+tlrc Fred.Xaff12.1D\'"
     >>> res = nwarp.run()  # doctest: +SKIP
 
@@ -1766,7 +1766,7 @@ class OneDToolPy(AFNIPythonCommand):
     >>> odt.inputs.set_nruns = 3
     >>> odt.inputs.demean = True
     >>> odt.inputs.out_file = 'motion_dmean.1D'
-    >>> odt.cmdline # doctest: +ALLOW_UNICODE +ELLIPSIS
+    >>> odt.cmdline # doctest: +ELLIPSIS
     'python2 ...1d_tool.py -demean -infile f1.1D -write motion_dmean.1D -set_nruns 3'
      >>> res = odt.run()  # doctest: +SKIP
 """
@@ -1821,6 +1821,9 @@ class RefitInputSpec(CommandLineInputSpec):
     zdel = traits.Float(
         desc='new z voxel dimension in mm',
         argstr='-zdel %f')
+    xyzscale = traits.Float(
+        desc='Scale the size of the dataset voxels by the given factor',
+        argstr='-xyzscale %f')
     space = traits.Enum(
         'TLRC', 'MNI', 'ORIG',
         argstr='-space %s',
@@ -1881,14 +1884,14 @@ class Refit(AFNICommandBase):
     >>> refit = afni.Refit()
     >>> refit.inputs.in_file = 'structural.nii'
     >>> refit.inputs.deoblique = True
-    >>> refit.cmdline  # doctest: +ALLOW_UNICODE
+    >>> refit.cmdline
     '3drefit -deoblique structural.nii'
     >>> res = refit.run()  # doctest: +SKIP
 
     >>> refit_2 = afni.Refit()
     >>> refit_2.inputs.in_file = 'structural.nii'
     >>> refit_2.inputs.atrfloat = ("IJK_TO_DICOM_REAL", "'1 0.2 0 0 -0.2 1 0 0 0 0 1 0'")
-    >>> refit_2.cmdline  # doctest: +ALLOW_UNICODE
+    >>> refit_2.cmdline
     "3drefit -atrfloat IJK_TO_DICOM_REAL '1 0.2 0 0 -0.2 1 0 0 0 0 1 0' structural.nii"
     >>> res = refit_2.run()  # doctest: +SKIP
     """
@@ -1948,7 +1951,7 @@ class Resample(AFNICommand):
     >>> resample.inputs.in_file = 'functional.nii'
     >>> resample.inputs.orientation= 'RPI'
     >>> resample.inputs.outputtype = 'NIFTI'
-    >>> resample.cmdline  # doctest: +ALLOW_UNICODE
+    >>> resample.cmdline
     '3dresample -orient RPI -prefix functional_resample.nii -inset functional.nii'
     >>> res = resample.run()  # doctest: +SKIP
 
@@ -2001,7 +2004,7 @@ class TCat(AFNICommand):
     >>> tcat.inputs.in_files = ['functional.nii', 'functional2.nii']
     >>> tcat.inputs.out_file= 'functional_tcat.nii'
     >>> tcat.inputs.rlt = '+'
-    >>> tcat.cmdline  # doctest: +ALLOW_UNICODE +NORMALIZE_WHITESPACE
+    >>> tcat.cmdline
     '3dTcat -rlt+ -prefix functional_tcat.nii functional.nii functional2.nii'
     >>> res = tcat.run()  # doctest: +SKIP
 
@@ -2051,7 +2054,7 @@ class TCatSubBrick(AFNICommand):
     >>> tcsb.inputs.in_files = [('functional.nii', "'{2..$}'"), ('functional2.nii', "'{2..$}'")]
     >>> tcsb.inputs.out_file= 'functional_tcat.nii'
     >>> tcsb.inputs.rlt = '+'
-    >>> tcsb.cmdline  # doctest: +ALLOW_UNICODE +NORMALIZE_WHITESPACE
+    >>> tcsb.cmdline
     "3dTcat -rlt+ -prefix functional_tcat.nii functional.nii'{2..$}' functional2.nii'{2..$}' "
     >>> res = tcsb.run()  # doctest: +SKIP
 
@@ -2102,7 +2105,7 @@ class TStat(AFNICommand):
     >>> tstat.inputs.in_file = 'functional.nii'
     >>> tstat.inputs.args = '-mean'
     >>> tstat.inputs.out_file = 'stats'
-    >>> tstat.cmdline  # doctest: +ALLOW_UNICODE
+    >>> tstat.cmdline
     '3dTstat -mean -prefix stats functional.nii'
     >>> res = tstat.run()  # doctest: +SKIP
 
@@ -2164,7 +2167,7 @@ class To3D(AFNICommand):
     >>> to3d.inputs.in_folder = '.'
     >>> to3d.inputs.out_file = 'dicomdir.nii'
     >>> to3d.inputs.filetype = 'anat'
-    >>> to3d.cmdline  # doctest: +ELLIPSIS +ALLOW_UNICODE
+    >>> to3d.cmdline  # doctest: +ELLIPSIS
     'to3d -datum float -anat -prefix dicomdir.nii ./*.dcm'
     >>> res = to3d.run()  # doctest: +SKIP
 
@@ -2268,7 +2271,7 @@ class Undump(AFNICommand):
     >>> unndump = afni.Undump()
     >>> unndump.inputs.in_file = 'structural.nii'
     >>> unndump.inputs.out_file = 'structural_undumped.nii'
-    >>> unndump.cmdline  # doctest: +ALLOW_UNICODE
+    >>> unndump.cmdline
     '3dUndump -prefix structural_undumped.nii -master structural.nii'
     >>> res = unndump.run()  # doctest: +SKIP
 
@@ -2371,7 +2374,7 @@ class Unifize(AFNICommand):
     >>> unifize = afni.Unifize()
     >>> unifize.inputs.in_file = 'structural.nii'
     >>> unifize.inputs.out_file = 'structural_unifized.nii'
-    >>> unifize.cmdline  # doctest: +ALLOW_UNICODE
+    >>> unifize.cmdline
     '3dUnifize -prefix structural_unifized.nii -input structural.nii'
     >>> res = unifize.run()  # doctest: +SKIP
 
@@ -2414,7 +2417,7 @@ class ZCutUp(AFNICommand):
     >>> zcutup.inputs.in_file = 'functional.nii'
     >>> zcutup.inputs.out_file = 'functional_zcutup.nii'
     >>> zcutup.inputs.keep= '0 10'
-    >>> zcutup.cmdline  # doctest: +ALLOW_UNICODE
+    >>> zcutup.cmdline
     '3dZcutup -keep 0 10 -prefix functional_zcutup.nii functional.nii'
     >>> res = zcutup.run()  # doctest: +SKIP
 
@@ -2466,7 +2469,7 @@ class GCOR(CommandLine):
     >>> gcor = afni.GCOR()
     >>> gcor.inputs.in_file = 'structural.nii'
     >>> gcor.inputs.nfirst = 4
-    >>> gcor.cmdline  # doctest: +ALLOW_UNICODE
+    >>> gcor.cmdline
     '@compute_gcor -nfirst 4 -input structural.nii'
     >>> res = gcor.run()  # doctest: +SKIP
 
@@ -2538,7 +2541,7 @@ class Axialize(AFNICommand):
     >>> axial3d = afni.Axialize()
     >>> axial3d.inputs.in_file = 'functional.nii'
     >>> axial3d.inputs.out_file = 'axialized.nii'
-    >>> axial3d.cmdline  # doctest: +ALLOW_UNICODE
+    >>> axial3d.cmdline
     '3daxialize -prefix axialized.nii functional.nii'
     >>> res = axial3d.run()  # doctest: +SKIP
 
@@ -2600,7 +2603,7 @@ class Zcat(AFNICommand):
     >>> zcat = afni.Zcat()
     >>> zcat.inputs.in_files = ['functional2.nii', 'functional3.nii']
     >>> zcat.inputs.out_file = 'cat_functional.nii'
-    >>> zcat.cmdline  # doctest: +ALLOW_UNICODE
+    >>> zcat.cmdline
     '3dZcat -prefix cat_functional.nii functional2.nii functional3.nii'
     >>> res = zcat.run()  # doctest: +SKIP
     """
@@ -2702,7 +2705,7 @@ class Zeropad(AFNICommand):
     >>> zeropad.inputs.P = 10
     >>> zeropad.inputs.R = 10
     >>> zeropad.inputs.L = 10
-    >>> zeropad.cmdline  # doctest: +ALLOW_UNICODE
+    >>> zeropad.cmdline
     '3dZeropad -A 10 -I 10 -L 10 -P 10 -R 10 -S 10 -prefix pad_functional.nii functional.nii'
     >>> res = zeropad.run()  # doctest: +SKIP
     """

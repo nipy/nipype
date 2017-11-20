@@ -16,7 +16,7 @@ import os.path as op
 from ... import logging
 from ..base import (BaseInterface, BaseInterfaceInputSpec, isdefined,
                     TraitedSpec, File, traits)
-logger = logging.getLogger('interface')
+iflogger = logging.getLogger('interface')
 
 
 class EditTransformInputSpec(BaseInterfaceInputSpec):

@@ -4,7 +4,10 @@ from ..preprocess import ReconAll
 
 
 def test_ReconAll_inputs():
-    input_map = dict(T1_files=dict(argstr='-i %s...',
+    input_map = dict(FLAIR_file=dict(argstr='-FLAIR %s',
+    min_ver='5.3.0',
+    ),
+    T1_files=dict(argstr='-i %s...',
     ),
     T2_file=dict(argstr='-T2 %s',
     min_ver='5.3.0',
@@ -108,8 +111,13 @@ def test_ReconAll_inputs():
     terminal_output=dict(deprecated='1.0.0',
     nohash=True,
     ),
+    use_FLAIR=dict(argstr='-FLAIRpial',
+    min_ver='5.3.0',
+    xor=['use_T2'],
+    ),
     use_T2=dict(argstr='-T2pial',
     min_ver='5.3.0',
+    xor=['use_FLAIR'],
     ),
     xopts=dict(argstr='-xopts-%s',
     ),

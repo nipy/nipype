@@ -14,7 +14,7 @@ from __future__ import print_function, division, unicode_literals, absolute_impo
 
 from ... import logging
 from ..base import CommandLineInputSpec, Directory, traits
-logger = logging.getLogger('interface')
+iflogger = logging.getLogger('interface')
 
 
 class ElastixBaseInputSpec(CommandLineInputSpec):

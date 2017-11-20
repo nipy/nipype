@@ -6,12 +6,12 @@ from __future__ import print_function, division, unicode_literals, absolute_impo
 from builtins import str
 
 import os
-import subprocess
 
 # Local imports
 from ... import logging, LooseVersion
-from ..base import CommandLine, CommandLineInputSpec, traits, isdefined
-logger = logging.getLogger('interface')
+from ..base import (CommandLine, CommandLineInputSpec, traits, isdefined,
+                    PackageInfo)
+iflogger = logging.getLogger('interface')
 
 # -Using -1 gives primary responsibilty to ITKv4 to do the correct
 #  thread limitings.
@@ -29,32 +29,21 @@ PREFERED_ITKv4_THREAD_LIMIT_VARIABLE = 'NSLOTS'
 ALT_ITKv4_THREAD_LIMIT_VARIABLE = 'ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS'
 
 
-class Info(object):
-    _version = None
+class Info(PackageInfo):
+    version_cmd = os.path.join(os.getenv('ANTSPATH', ''),
+                               'antsRegistration') + ' --version'
 
-    @property
-    def version(self):
-        if self._version is None:
-            try:
-                basedir = os.environ['ANTSPATH']
-            except KeyError:
-                return None
-
-            cmd = os.path.join(basedir, 'antsRegistration')
-            try:
-                res = subprocess.check_output([cmd, '--version']).decode('utf-8')
-            except OSError:
-                return None
-
-            for line in res.splitlines():
-                if line.startswith('ANTs Version: '):
-                    self._version = line.split()[2]
-                    break
-            else:
-                return None
+    @staticmethod
+    def parse_version(raw_info):
+        for line in raw_info.splitlines():
+            if line.startswith('ANTs Version: '):
+                v_string = line.split()[2]
+                break
+        else:
+            return None
 
         # -githash may or may not be appended
-        v_string = self._version.split('-')[0]
+        v_string = v_string.split('-')[0]
 
         # 2.2.0-equivalent version string
         if 'post' in v_string and LooseVersion(v_string) >= LooseVersion('2.1.0.post789'):
@@ -125,4 +114,4 @@ class ANTSCommand(CommandLine):
 
     @property
     def version(self):
-        return Info().version
+        return Info.version()

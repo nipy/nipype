@@ -95,7 +95,7 @@ class ICA_AROMA(CommandLine):
     >>> AROMA_obj.inputs.mask = 'mask.nii.gz'
     >>> AROMA_obj.inputs.denoise_type = 'both'
     >>> AROMA_obj.inputs.out_dir = 'ICA_testout'
-    >>> AROMA_obj.cmdline # doctest: +ALLOW_UNICODE
+    >>> AROMA_obj.cmdline
     'ICA_AROMA.py -den both -warp warpfield.nii -i functional.nii -m mask.nii.gz -affmat func_to_struct.mat -mc fsl_mcflirt_movpar.txt -o ICA_testout'
     """
     _cmd = 'ICA_AROMA.py'

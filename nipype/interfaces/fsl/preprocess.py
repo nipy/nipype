@@ -127,7 +127,7 @@ class BET(FSLCommand):
     >>> btr.inputs.in_file = 'structural.nii'
     >>> btr.inputs.frac = 0.7
     >>> btr.inputs.out_file = 'brain_anat.nii'
-    >>> btr.cmdline  # doctest: +ALLOW_UNICODE
+    >>> btr.cmdline
     'bet structural.nii brain_anat.nii -f 0.70'
     >>> res = btr.run() # doctest: +SKIP
 
@@ -298,7 +298,7 @@ class FAST(FSLCommand):
     >>> fastr = fsl.FAST()
     >>> fastr.inputs.in_files = 'structural.nii'
     >>> fastr.inputs.out_basename = 'fast_'
-    >>> fastr.cmdline  # doctest: +ALLOW_UNICODE
+    >>> fastr.cmdline
     'fast -o fast_ -S 1 structural.nii'
     >>> out = fastr.run()  # doctest: +SKIP
 
@@ -541,7 +541,7 @@ class FLIRT(FSLCommand):
     >>> flt.inputs.in_file = 'structural.nii'
     >>> flt.inputs.reference = 'mni.nii'
     >>> flt.inputs.output_type = "NIFTI_GZ"
-    >>> flt.cmdline # doctest: +ELLIPSIS +ALLOW_UNICODE
+    >>> flt.cmdline # doctest: +ELLIPSIS
     'flirt -in structural.nii -ref mni.nii -out structural_flirt.nii.gz -omat structural_flirt.mat -bins 640 -searchcost mutualinfo'
     >>> res = flt.run() #doctest: +SKIP
 
@@ -674,7 +674,7 @@ class MCFLIRT(FSLCommand):
     >>> mcflt.inputs.in_file = 'functional.nii'
     >>> mcflt.inputs.cost = 'mutualinfo'
     >>> mcflt.inputs.out_file = 'moco.nii'
-    >>> mcflt.cmdline # doctest: +ALLOW_UNICODE
+    >>> mcflt.cmdline
     'mcflirt -in functional.nii -cost mutualinfo -out moco.nii'
     >>> res = mcflt.run()  # doctest: +SKIP
 
@@ -1397,7 +1397,7 @@ class FUGUE(FSLCommand):
     >>> fugue.inputs.shift_in_file = 'vsm.nii'  # Previously computed with fugue as well
     >>> fugue.inputs.unwarp_direction = 'y'
     >>> fugue.inputs.output_type = "NIFTI_GZ"
-    >>> fugue.cmdline # doctest: +ELLIPSIS +ALLOW_UNICODE
+    >>> fugue.cmdline # doctest: +ELLIPSIS
     'fugue --in=epi.nii --mask=epi_mask.nii --loadshift=vsm.nii --unwarpdir=y --unwarp=epi_unwarped.nii.gz'
     >>> fugue.run() #doctest: +SKIP
 
@@ -1412,7 +1412,7 @@ class FUGUE(FSLCommand):
     >>> fugue.inputs.shift_in_file = 'vsm.nii'  # Previously computed with fugue as well
     >>> fugue.inputs.unwarp_direction = 'y'
     >>> fugue.inputs.output_type = "NIFTI_GZ"
-    >>> fugue.cmdline # doctest: +ELLIPSIS +ALLOW_UNICODE
+    >>> fugue.cmdline # doctest: +ELLIPSIS
     'fugue --in=epi.nii --mask=epi_mask.nii --loadshift=vsm.nii --unwarpdir=y --warp=epi_warped.nii.gz'
     >>> fugue.run() #doctest: +SKIP
 
@@ -1427,7 +1427,7 @@ class FUGUE(FSLCommand):
     >>> fugue.inputs.unwarp_direction = 'y'
     >>> fugue.inputs.save_shift = True
     >>> fugue.inputs.output_type = "NIFTI_GZ"
-    >>> fugue.cmdline # doctest: +ELLIPSIS +ALLOW_UNICODE
+    >>> fugue.cmdline # doctest: +ELLIPSIS
     'fugue --dwelltoasym=0.9390243902 --mask=epi_mask.nii --phasemap=epi_phasediff.nii --saveshift=epi_phasediff_vsm.nii.gz --unwarpdir=y'
     >>> fugue.run() #doctest: +SKIP
 

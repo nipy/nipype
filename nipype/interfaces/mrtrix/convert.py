@@ -68,7 +68,7 @@ def read_mrtrix_header(in_file):
             key = line.split(': ')[0]
             value = line.split(': ')[1]
             header[key] = value
-            iflogger.info('...adding "{v}" to header for key "{k}"'.format(v=value, k=key))
+            iflogger.info('...adding "%s" to header for key "%s"', value, key)
     fileobj.close()
     header['count'] = int(header['count'].replace('\n', ''))
     header['offset'] = int(header['file'].replace('.', ''))
@@ -118,8 +118,8 @@ def read_mrtrix_streamlines(in_file, header, as_generator=True):
                     raise HeaderError(
                         'Expecting %s points, found only %s' % (
                             stream_count, n_streams))
-                    iflogger.error('Expecting %s points, found only %s' % (
-                        stream_count, n_streams))
+                    iflogger.error('Expecting %s points, found only %s',
+                                   stream_count, n_streams)
                 break
             pts = np.ndarray(
                 shape=(n_pts, pt_cols),
@@ -136,16 +136,15 @@ def read_mrtrix_streamlines(in_file, header, as_generator=True):
             yield xyz
             n_streams += 1
             if n_streams == stream_count:
-                iflogger.info('100% : {n} tracks read'.format(n=n_streams))
+                iflogger.info('100%% : %i tracks read', n_streams)
                 raise StopIteration
             try:
                 if n_streams % int(stream_count / 100) == 0:
                     percent = int(float(n_streams) / float(stream_count) * 100)
-                    iflogger.info('{p}% : {n} tracks read'.format(p=percent,
-                                                                  n=n_streams))
+                    iflogger.info('%i%% : %i tracks read', percent, n_streams)
             except ZeroDivisionError:
-                iflogger.info('{} stream read out of {}'.format(n_streams,
-                                                                stream_count))
+                iflogger.info('%i stream read out of %i', n_streams,
+                              stream_count)
     track_points, nonfinite_list = points_per_track(offset)
     fileobj.seek(offset)
     streamlines = track_gen(track_points)
@@ -200,14 +199,16 @@ class MRTrix2TrackVis(BaseInterface):
         trk_header['n_count'] = header['count']
 
         if isdefined(self.inputs.matrix_file) and isdefined(self.inputs.registration_image_file):
-            iflogger.info('Applying transformation from matrix file {m}'.format(m=self.inputs.matrix_file))
+            iflogger.info('Applying transformation from matrix file %s',
+                          self.inputs.matrix_file)
             xfm = np.genfromtxt(self.inputs.matrix_file)
             iflogger.info(xfm)
             registration_image_file = nb.load(self.inputs.registration_image_file)
             reg_affine = registration_image_file.affine
             r_dx, r_dy, r_dz = get_data_dims(self.inputs.registration_image_file)
             r_vx, r_vy, r_vz = get_vox_dims(self.inputs.registration_image_file)
-            iflogger.info('Using affine from registration image file {r}'.format(r=self.inputs.registration_image_file))
+            iflogger.info('Using affine from registration image file %s',
+                          self.inputs.registration_image_file)
             iflogger.info(reg_affine)
             trk_header['vox_to_ras'] = reg_affine
             trk_header['dim'] = [r_dx, r_dy, r_dz]
@@ -225,18 +226,19 @@ class MRTrix2TrackVis(BaseInterface):
             final_streamlines = move_streamlines(transformed_streamlines, aff)
             trk_tracks = ((ii, None, None) for ii in final_streamlines)
             trk.write(out_filename, trk_tracks, trk_header)
-            iflogger.info('Saving transformed Trackvis file as {out}'.format(out=out_filename))
+            iflogger.info('Saving transformed Trackvis file as %s', out_filename)
             iflogger.info('New TrackVis Header:')
             iflogger.info(trk_header)
         else:
-            iflogger.info('Applying transformation from scanner coordinates to {img}'.format(img=self.inputs.image_file))
+            iflogger.info('Applying transformation from scanner coordinates to %s',
+                          self.inputs.image_file)
             axcode = aff2axcodes(affine)
             trk_header['voxel_order'] = axcode[0] + axcode[1] + axcode[2]
             trk_header['vox_to_ras'] = affine
             transformed_streamlines = transform_to_affine(streamlines, trk_header, affine)
             trk_tracks = ((ii, None, None) for ii in transformed_streamlines)
             trk.write(out_filename, trk_tracks, trk_header)
-            iflogger.info('Saving Trackvis file as {out}'.format(out=out_filename))
+            iflogger.info('Saving Trackvis file as %s', out_filename)
             iflogger.info('TrackVis Header:')
             iflogger.info(trk_header)
         return runtime

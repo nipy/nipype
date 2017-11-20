@@ -2,15 +2,9 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """
-Various utilities
-
-    Change directory to provide relative paths for doctests
-    >>> import os
-    >>> filepath = os.path.dirname(os.path.realpath(__file__))
-    >>> datadir = os.path.realpath(os.path.join(filepath,
-    ...                            '../../testing/data'))
-    >>> os.chdir(datadir)
-
+    # changing to temporary directories
+    >>> tmp = getfixture('tmpdir')
+    >>> old = tmp.chdir()
 """
 from __future__ import print_function, division, unicode_literals, absolute_import
 from builtins import range
@@ -47,7 +41,7 @@ class IdentityInterface(IOBase):
     <undefined>
 
     >>> out = ii.run()
-    >>> out.outputs.a # doctest: +ALLOW_UNICODE
+    >>> out.outputs.a
     'foo'
 
     >>> ii2 = IdentityInterface(fields=['a', 'b'], mandatory_inputs=True)
@@ -231,14 +225,14 @@ class Rename(IOBase):
 
     >>> from nipype.interfaces.utility import Rename
     >>> rename1 = Rename()
-    >>> rename1.inputs.in_file = "zstat1.nii.gz"
+    >>> rename1.inputs.in_file = os.path.join(datadir, "zstat1.nii.gz") # datadir is a directory with exemplary files, defined in conftest.py
     >>> rename1.inputs.format_string = "Faces-Scenes.nii.gz"
     >>> res = rename1.run()          # doctest: +SKIP
     >>> res.outputs.out_file         # doctest: +SKIP
     'Faces-Scenes.nii.gz"            # doctest: +SKIP
 
     >>> rename2 = Rename(format_string="%(subject_id)s_func_run%(run)02d")
-    >>> rename2.inputs.in_file = "functional.nii"
+    >>> rename2.inputs.in_file = os.path.join(datadir, "functional.nii")
     >>> rename2.inputs.keep_ext = True
     >>> rename2.inputs.subject_id = "subj_201"
     >>> rename2.inputs.run = 2
@@ -247,7 +241,7 @@ class Rename(IOBase):
     'subj_201_func_run02.nii'        # doctest: +SKIP
 
     >>> rename3 = Rename(format_string="%(subject_id)s_%(seq)s_run%(run)02d.nii")
-    >>> rename3.inputs.in_file = "func_epi_1_1.nii"
+    >>> rename3.inputs.in_file = os.path.join(datadir, "func_epi_1_1.nii")
     >>> rename3.inputs.parse_string = "func_(?P<seq>\w*)_.*"
     >>> rename3.inputs.subject_id = "subj_201"
     >>> rename3.inputs.run = 2

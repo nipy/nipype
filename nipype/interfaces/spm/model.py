@@ -32,7 +32,7 @@ from .base import (SPMCommand, SPMCommandInputSpec,
                    scans_for_fnames, ImageFileSPM)
 
 __docformat__ = 'restructuredtext'
-logger = logging.getLogger('interface')
+iflogger = logging.getLogger('interface')
 
 
 class Level1DesignInputSpec(SPMCommandInputSpec):

@@ -1,0 +1,194 @@
+version: 2
+jobs:
+
+  compare_base_dockerfiles:
+    docker:
+      - image: docker:17.10.0-ce-git
+    steps:
+      - checkout:
+          path: /home/circleci/nipype
+      - setup_remote_docker
+      - run:
+          name: Generate and prune base Dockerfile in preparation for cache check
+          working_directory: /home/circleci/nipype/docker
+          command: |
+            mkdir -p /tmp/docker
+            ash ./generate_dockerfiles.sh -b
+
+            # Use the sha256 sum of the pruned Dockerfile as the cache key.
+            ash prune_dockerfile.sh Dockerfile.base > /tmp/docker/Dockerfile.base-pruned
+      - restore_cache:
+          key: dockerfile-cache-v1-master-{{ checksum "/tmp/docker/Dockerfile.base-pruned" }}
+      - run:
+          name: Determine how to get base image
+          command: |
+            if [ -f /tmp/docker/cache/Dockerfile.base-pruned ]; then
+              echo "Cache found. Will pull base image."
+              echo 'export GET_BASE=PULL' > /tmp/docker/get_base_image.sh
+            else
+              echo "Cache not found. Will build base image."
+              echo 'export GET_BASE=BUILD' > /tmp/docker/get_base_image.sh
+            fi
+      - persist_to_workspace:
+          root: /tmp
+          paths:
+            - docker/Dockerfile.base-pruned
+            - docker/get_base_image.sh
+
+
+  build_and_test:
+    parallelism: 4
+    machine:
+      # Ubuntu 14.04 with Docker 17.10.0-ce
+      image: circleci/classic:201710-02
+    working_directory: /home/circleci/nipype
+    steps:
+      - checkout:
+          path: /home/circleci/nipype
+      - attach_workspace:
+          at: /tmp
+      - run:
+          name: Get test dependencies and generate Dockerfiles
+          command: |
+            pip install --no-cache-dir codecov
+            make gen-dockerfiles
+      - run:
+          name: Modify Nipype version if necessary
+          command: |
+            if [ "$CIRCLE_TAG" != "" ]; then
+              sed -i -E "s/(__version__ = )'[A-Za-z0-9.-]+'/\1'$CIRCLE_TAG'/" nipype/info.py
+            fi
+      - run:
+          name: Get base image (pull or build)
+          no_output_timeout: 60m
+          command: |
+            source /tmp/docker/get_base_image.sh
+            if [ "$GET_BASE" == "PULL" ]; then
+              echo "Pulling base image ..."
+              docker pull nipype/nipype:base
+            elif [ "$GET_BASE" == "BUILD" ]; then
+              e=1 && for i in {1..5}; do
+                docker build -t nipype/nipype:base - < docker/Dockerfile.base  && e=0 && break || sleep 15
+              done && [ "$e" -eq "0" ]
+            else
+              echo "Error: method to get base image not understood"
+              exit 1
+            fi
+      - run:
+          name: Build main image (py36)
+          no_output_timeout: 60m
+          command: |
+            e=1 && for i in {1..5}; do
+              docker build \
+                --rm=false \
+                --tag nipype/nipype:latest \
+                --tag nipype/nipype:py36 \
+                --build-arg BUILD_DATE="$(date -u +"%Y-%m-%dT%H:%M:%SZ")" \
+                --build-arg VCS_REF="$(git rev-parse --short HEAD)" \
+                --build-arg VERSION="${CIRCLE_TAG}" /home/circleci/nipype \
+              && e=0 && break || sleep 15
+            done && [ "$e" -eq "0" ]
+      - run:
+          name: Build main image (py27)
+          no_output_timeout: 60m
+          command: |
+            e=1 && for i in {1..5}; do
+              docker build \
+                --rm=false \
+                --tag nipype/nipype:py27 \
+                --build-arg PYTHON_VERSION_MAJOR=2 \
+                --build-arg PYTHON_VERSION_MINOR=7 \
+                --build-arg BUILD_DATE="$(date -u +"%Y-%m-%dT%H:%M:%SZ")" \
+                --build-arg VCS_REF="$(git rev-parse --short HEAD)" \
+                --build-arg VERSION="${CIRCLE_TAG}-py27" /home/circleci/nipype \
+              && e=0 && break || sleep 15
+            done && [ "$e" -eq "0" ]
+      - run:
+          name: Download test data
+          no_output_timeout: 20m
+          working_directory: /home/circleci/examples
+          environment:
+            OSF_NIPYPE_URL: "https://files.osf.io/v1/resources/nefdp/providers/osfstorage"
+          command: |
+            export DATA_NIPYPE_TUTORIAL_URL="${OSF_NIPYPE_URL}/57f4739cb83f6901ed94bf21"
+            curl -sSL --retry 5 --connect-timeout 15 "$DATA_NIPYPE_TUTORIAL_URL" | tar xj
+
+            export DATA_NIPYPE_FSL_COURSE="${OSF_NIPYPE_URL}/57f472cf9ad5a101f977ecfe"
+            curl -sSL --retry 5 --connect-timeout 15 "$DATA_NIPYPE_FSL_COURSE" | tar xz
+
+            export DATA_NIPYPE_FSL_FEEDS="${OSF_NIPYPE_URL}/57f473066c613b01f113e7af"
+            curl -sSL --retry 5 --connect-timeout 15 "$DATA_NIPYPE_FSL_FEEDS" | tar xz
+      - run:
+          name: Run tests
+          no_output_timeout: 4h
+          environment:
+            WORKDIR: /home/circleci/work
+          command: |
+            mkdir -p "$WORKDIR"
+            chmod -R 777 "$WORKDIR"
+            bash /home/circleci/nipype/.circleci/tests.sh
+      - store_artifacts:
+          path: /home/circleci/work/tests
+      - run:
+          name: Save Docker images to workspace
+          no_output_timeout: 60m
+          command: |
+            if [ "$CIRCLE_NODE_INDEX" -eq "0" ] && [ "$CIRCLE_BRANCH" == "master" ]; then
+              docker save nipype/nipype:base \
+                          nipype/nipype:latest \
+                          nipype/nipype:py36 \
+                          nipype/nipype:py27 | gzip -1 > /tmp/docker/nipype-base-latest-py36-py27.tar.gz
+              du -h /tmp/docker/nipype-base-latest-py36-py27.tar.gz
+            fi
+      - persist_to_workspace:
+          root: /tmp
+          paths:
+            - docker/*
+
+
+  deploy:
+    docker:
+      - image: docker:17.10.0-ce-git
+    steps:
+      - setup_remote_docker
+      - attach_workspace:
+          at: /tmp
+      - run:
+          name: Load saved Docker images.
+          no_output_timeout: 60m
+          command: |
+            docker load < /tmp/docker/nipype-base-latest-py36-py27.tar.gz
+      - run:
+          name: Push to DockerHub
+          no_output_timeout: 120m
+          command: |
+            echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
+            docker push nipype/nipype:base
+            docker push nipype/nipype:latest
+            docker push nipype/nipype:py36
+            docker push nipype/nipype:py27
+      - run:
+          name: Move pruned Dockerfile to /tmp/docker/cache directory
+          command: |
+            mkdir -p /tmp/docker/cache/
+            mv /tmp/docker/Dockerfile.base-pruned /tmp/docker/cache/Dockerfile.base-pruned
+      - save_cache:
+          paths:
+            - /tmp/docker/cache/Dockerfile.base-pruned
+          key: dockerfile-cache-v1-{{ .Branch }}-{{ checksum "/tmp/docker/cache/Dockerfile.base-pruned" }}
+
+
+workflows:
+  version: 2
+  build_test_deply:
+    jobs:
+      - compare_base_dockerfiles
+      - build_and_test:
+          requires:
+            - compare_base_dockerfiles
+      - deploy:
+          filters:
+            branches:
+              only: master
+          requires:
+            - build_and_test

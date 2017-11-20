@@ -18,7 +18,6 @@ from nipype.utils import NUMPY_MMAP
 
 
 def test_normalize_tpms(tmpdir):
-    tempdir = str(tmpdir)
 
     in_mask = example_data('tpms_msk.nii.gz')
     mskdata = nb.load(in_mask, mmap=NUMPY_MMAP).get_data()
@@ -30,8 +29,8 @@ def test_normalize_tpms(tmpdir):
 
     for i in range(3):
         mapname = example_data('tpm_%02d.nii.gz' % i)
-        filename = os.path.join(tempdir, 'modtpm_%02d.nii.gz' % i)
-        out_files.append(os.path.join(tempdir, 'normtpm_%02d.nii.gz' % i))
+        filename = tmpdir.join('modtpm_%02d.nii.gz' % i).strpath
+        out_files.append(tmpdir.join('normtpm_%02d.nii.gz' % i).strpath)
 
         im = nb.load(mapname, mmap=NUMPY_MMAP)
         data = im.get_data()

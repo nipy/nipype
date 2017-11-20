@@ -57,7 +57,7 @@ class ConvertScalarImageToRGB(ANTSCommand):
     >>> converter.inputs.colormap = 'jet'
     >>> converter.inputs.minimum_input = 0
     >>> converter.inputs.maximum_input = 6
-    >>> converter.cmdline # doctest: +ALLOW_UNICODE
+    >>> converter.cmdline
     'ConvertScalarImageToRGB 3 T1.nii.gz rgb.nii.gz none jet none 0 6 0 255'
     """
     _cmd = 'ConvertScalarImageToRGB'
@@ -143,7 +143,7 @@ class CreateTiledMosaic(ANTSCommand):
     >>> mosaic_slicer.inputs.direction = 2
     >>> mosaic_slicer.inputs.pad_or_crop = '[ -15x -50 , -15x -30 ,0]'
     >>> mosaic_slicer.inputs.slices = '[2 ,100 ,160]'
-    >>> mosaic_slicer.cmdline # doctest: +ALLOW_UNICODE
+    >>> mosaic_slicer.cmdline
     'CreateTiledMosaic -a 0.50 -d 2 -i T1.nii.gz -x mask.nii.gz -o output.png -p [ -15x -50 , -15x -30 ,0] \
 -r rgb.nii.gz -s [2 ,100 ,160]'
     """

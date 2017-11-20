@@ -18,7 +18,7 @@ from ... import logging
 from .base import ElastixBaseInputSpec
 from ..base import CommandLine, TraitedSpec, File, traits, InputMultiPath
 
-logger = logging.getLogger('interface')
+iflogger = logging.getLogger('interface')
 
 
 class RegistrationInputSpec(ElastixBaseInputSpec):
@@ -55,7 +55,7 @@ class Registration(CommandLine):
     >>> reg.inputs.fixed_image = 'fixed1.nii'
     >>> reg.inputs.moving_image = 'moving1.nii'
     >>> reg.inputs.parameters = ['elastix.txt']
-    >>> reg.cmdline  # doctest: +ALLOW_UNICODE
+    >>> reg.cmdline
     'elastix -f fixed1.nii -m moving1.nii -out ./ -p elastix.txt'
 
 
@@ -147,7 +147,7 @@ class ApplyWarp(CommandLine):
     >>> reg = ApplyWarp()
     >>> reg.inputs.moving_image = 'moving1.nii'
     >>> reg.inputs.transform_file = 'TransformParameters.0.txt'
-    >>> reg.cmdline  # doctest: +ALLOW_UNICODE
+    >>> reg.cmdline
     'transformix -in moving1.nii -out ./ -tp TransformParameters.0.txt'
 
 
@@ -187,7 +187,7 @@ class AnalyzeWarp(CommandLine):
     >>> from nipype.interfaces.elastix import AnalyzeWarp
     >>> reg = AnalyzeWarp()
     >>> reg.inputs.transform_file = 'TransformParameters.0.txt'
-    >>> reg.cmdline  # doctest: +ALLOW_UNICODE
+    >>> reg.cmdline
     'transformix -def all -jac all -jacmat all -out ./ -tp TransformParameters.0.txt'
 
 
@@ -228,7 +228,7 @@ class PointsWarp(CommandLine):
     >>> reg = PointsWarp()
     >>> reg.inputs.points_file = 'surf1.vtk'
     >>> reg.inputs.transform_file = 'TransformParameters.0.txt'
-    >>> reg.cmdline  # doctest: +ALLOW_UNICODE
+    >>> reg.cmdline
     'transformix -out ./ -def surf1.vtk -tp TransformParameters.0.txt'
 
 
