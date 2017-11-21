@@ -26,7 +26,6 @@ See the docstrings of the individual classes for examples.
 
 """
 from __future__ import print_function, division, unicode_literals, absolute_import
-from builtins import open, object
 
 from glob import glob
 import os
@@ -67,7 +66,6 @@ class Info(PackageInfo):
 
     def parse_version(raw_info):
         return raw_info.splitlines()[0]
-
 
     @classmethod
     def output_type_to_ext(cls, output_type):
