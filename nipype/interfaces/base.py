@@ -1448,10 +1448,12 @@ def run_command(runtime, output=None, timeout=0.01):
             result['merged'] = result['stdout']
             result['stdout'] = []
     else:
-        stdout, stderr = proc.communicate()
+        stdoutstr, stderrstr = proc.communicate()
         if output == 'allatonce':  # Discard stdout and stderr otherwise
-            result['stdout'] = read_stream(stdout, logger=iflogger)
-            result['stderr'] = read_stream(stderr, logger=iflogger)
+            result['stdout'] = read_stream(stdoutstr, logger=iflogger)
+            result['stderr'] = read_stream(stderrstr, logger=iflogger)
+        del stdoutstr
+        del stderrstr
 
     runtime.returncode = proc.returncode
     try:
