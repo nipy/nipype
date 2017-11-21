@@ -33,19 +33,26 @@ import os
 
 from ... import logging
 from ...utils.filemanip import fname_presuffix
-from ..base import traits, isdefined, CommandLine, CommandLineInputSpec
+from ..base import traits, isdefined, CommandLine, CommandLineInputSpec, PackageInfo
 from ...external.due import BibTeX
 
 IFLOGGER = logging.getLogger('interface')
 
 
-class Info(object):
-    """Handle fsl output type and version information.
-
-    version refers to the version of fsl on the system
+class Info(PackageInfo):
+    """
+    Handle FSL ``output_type`` and version information.
 
     output type refers to the type of file fsl defaults to writing
     eg, NIFTI, NIFTI_GZ
+
+    Examples
+    --------
+
+    >>> from nipype.interfaces.fsl import Info
+    >>> Info.version()  # doctest: +SKIP
+    >>> Info.output_type()  # doctest: +SKIP
+
 
     """
 
@@ -54,28 +61,13 @@ class Info(object):
               'NIFTI_GZ': '.nii.gz',
               'NIFTI_PAIR_GZ': '.img.gz'}
 
-    @staticmethod
-    def version():
-        """Check for fsl version on system
+    if os.getenv('FSLDIR'):
+        version_file = os.path.join(
+            os.getenv('FSLDIR'), 'etc', 'fslversion')
 
-        Parameters
-        ----------
-        None
+    def parse_version(raw_info):
+        return raw_info.splitlines()[0]
 
-        Returns
-        -------
-        version : str
-           Version number as string or None if FSL not found
-
-        """
-        # find which fsl being used....and get version from
-        # /path/to/fsl/etc/fslversion
-        try:
-            basedir = os.environ['FSLDIR']
-        except KeyError:
-            return None
-        out = open('%s/etc/fslversion' % (basedir)).read()
-        return out.strip('\n')
 
     @classmethod
     def output_type_to_ext(cls, output_type):
