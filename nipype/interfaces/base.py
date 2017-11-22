@@ -1643,7 +1643,7 @@ class CommandLine(BaseInterface):
 
     def version_from_command(self, flag='-v'):
         iflogger.warning('version_from_command member of CommandLine was '
-                         'Deprecated in nipype-1.0.0 and deleted in 2.0.0')
+                         'Deprecated in nipype-1.0.0 and deleted in 1.1.0')
         cmdname = self.cmd.split()[0]
         env = dict(os.environ)
         if _exists_in_path(cmdname, env):
