@@ -9,11 +9,8 @@ Exaples  FSL, matlab/SPM , afni
 Requires Packages to be installed
 """
 from __future__ import print_function, division, unicode_literals, absolute_import
-from future import standard_library
-standard_library.install_aliases()
 from builtins import range, object, open, str, bytes
 
-from configparser import NoOptionError
 from copy import deepcopy
 import datetime
 from datetime import datetime as dt
@@ -26,7 +23,6 @@ from string import Template
 import select
 import subprocess as sp
 import sys
-import time
 from textwrap import wrap
 from warnings import warn
 import simplejson as json
@@ -44,6 +40,9 @@ from .traits_extension import (
     File, Directory, DictStrStr, has_metadata, ImageFile)
 from ..external.due import due
 
+from future import standard_library
+standard_library.install_aliases()
+
 nipype_version = Version(__version__)
 iflogger = logging.getLogger('interface')
 
@@ -54,11 +53,6 @@ VALID_TERMINAL_OUTPUT = ['stream', 'allatonce', 'file', 'file_split',
                          'file_stdout', 'file_stderr', 'none']
 __docformat__ = 'restructuredtext'
 
-
-class Str(traits.Unicode):
-    """Replacement for the default traits.Str based in bytes"""
-
-traits.Str = Str
 
 
 class NipypeInterfaceError(Exception):

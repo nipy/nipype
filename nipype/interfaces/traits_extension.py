@@ -18,13 +18,11 @@ all of these bugs and they've been fixed in enthought svn repository
 """
 from __future__ import print_function, division, unicode_literals, absolute_import
 
-from builtins import filter, object, str, bytes
+from builtins import str, bytes
 import os
 
 # perform all external trait imports here
-import traits
-if traits.__version__ < '3.7.0':
-    raise ImportError('Traits version 3.7.0 or higher must be installed')
+from traits import __version__ as traits_version
 import traits.api as traits
 from traits.trait_handlers import TraitDictObject, TraitListObject
 from traits.trait_errors import TraitError
@@ -32,9 +30,18 @@ from traits.trait_base import _Undefined, class_of
 
 from traits.api import BaseUnicode
 from traits.api import Unicode
+if traits_version < '3.7.0':
+    raise ImportError('Traits version 3.7.0 or higher must be installed')
 
 DictStrStr = traits.Dict((bytes, str), (bytes, str))
-Str = Unicode
+
+
+class Str(traits.Unicode):
+    """Replacement for the default traits.Str based in bytes"""
+
+
+traits.Str = Str
+
 
 class BaseFile(BaseUnicode):
     """ Defines a trait whose value must be the name of a file.
