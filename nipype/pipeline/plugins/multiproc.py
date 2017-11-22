@@ -25,7 +25,6 @@ from .base import DistributedPluginBase
 logger = logging.getLogger('workflow')
 
 # GPU stuff
-import GPUtil
 import json
 import os
 
@@ -166,17 +165,24 @@ class MultiProcPlugin(DistributedPluginBase):
             
 
         #form a GPU queue first
-        gpus=GPUtil.getGPUs()
+        gpus=[]
+        try:
+            import GPUtil
+            ngpus=GPUtil.getGPUs()
+            gpus=list(range(len(ngpus)))
+        except ImportError:
+            gpus=list(range(self.n_gpus))
+
         self.gpu_q={}
         
         #initialize the queue, set all slots free
         slotno=0
-        for gpu in gpus:
+        for gpu in range(len(gpus)):
             temp={}
             for ngp in range(self.n_gpu_proc):
                 slotno +=1
                 temp.update({slotno:'free'})
-            self.gpu_q.update({ gpu.id: temp })
+            self.gpu_q.update({ gpu: temp })
             
             
         # Instantiate different thread pools for non-daemon processes
@@ -206,7 +212,12 @@ class MultiProcPlugin(DistributedPluginBase):
         
     
     def gpu_count(self):
-        return len(GPUtil.getGPUs())
+        ngpus=1
+        try:
+           import GPUtil
+           return len(GPUtil.getGPUs())
+        except ImportError:
+           return ngpus
     
     def gpu_has_free_slot(self):
         #if a GPU has free slot, return True,its device-ID and the slot no.
