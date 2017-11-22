@@ -15,7 +15,7 @@ from __future__ import print_function, division, unicode_literals, absolute_impo
 
 import os.path as op
 
-from ..base import traits, TraitedSpec, File
+from ..base import traits, TraitedSpec, File, Undefined
 from .base import MRTrix3BaseInputSpec, MRTrix3Base
 
 
@@ -70,6 +70,61 @@ class FitTensor(MRTrix3Base):
     def _list_outputs(self):
         outputs = self.output_spec().get()
         outputs['out_file'] = op.abspath(self.inputs.out_file)
+        return outputs
+
+
+class DWI2FODInputSpec(MRTrix3BaseInputSpec):
+    algorithm = traits.Enum('csd','msmt_csd', argstr='%s', position=-8,
+        mandatory=True, desc='FOD algorithm')
+    dwi_file = File(exists=True, argstr='%s', position=-7,
+        mandatory=True, desc='input DWI image')
+    wm_txt = File(argstr='%s', position=-6,
+        mandatory=True, desc='WM response text file')
+    wm_odf = File('wm.mif', argstr='%s', position=-5, usedefault=True,
+        mandatory=True, desc='output WM ODF')
+    gm_txt = File(argstr='%s', position=-4, desc='GM response text file')
+    gm_odf = File('gm.mif', argstr='%s', position=-3, desc='output GM ODF')
+    csf_txt = File(argstr='%s', position=-2, desc='CSF response text file')
+    csf_odf = File('csf.mif', argstr='%s', position=-1, desc='output CSF ODF')
+    mask_file = File(exists=True, argstr='-mask %s', desc='mask image')
+
+
+class DWI2FODOutputSpec(TraitedSpec):
+    wm_odf = File(argstr='%s', desc='output WM ODF')
+    gm_odf = File(argstr='%s', desc='output GM ODF')
+    csf_odf = File(argstr='%s', desc='output CSF ODF')
+
+
+class DWI2FOD(MRTrix3Base):
+
+    """
+    Estimate fibre orientation distributions from diffusion data using spherical deconvolution
+
+    Example
+    -------
+
+    >>> import nipype.interfaces.mrtrix3 as mrt
+    >>> fod = mrt.DWI2FOD()
+    >>> fod.inputs.algorithm = 'csd'
+    >>> fod.inputs.dwi_file = 'dwi.mif'
+    >>> fod.inputs.wm_txt = 'wm.txt'
+    >>> fod.inputs.grad_fsl = ('bvecs', 'bvals')
+    >>> fod.cmdline                               # doctest: +ELLIPSIS
+    'dwi2fod -fslgrad bvecs bvals csd dwi.mif wm.txt wm.mif'
+    >>> fod.run()                                 # doctest: +SKIP
+    """
+
+    _cmd = 'dwi2fod'
+    input_spec = DWI2FODInputSpec
+    output_spec = DWI2FODOutputSpec
+
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        outputs['wm_odf'] = op.abspath(self.inputs.wm_odf)
+        if self.inputs.gm_odf!=Undefined:
+            outputs['gm_odf'] = op.abspath(self.inputs.gm_odf)
+        if self.inputs.csf_odf!=Undefined:
+            outputs['csf_odf'] = op.abspath(self.inputs.csf_odf)
         return outputs
 
 
@@ -129,6 +184,7 @@ class EstimateFOD(MRTrix3Base):
 
     """
     Convert diffusion-weighted images to tensor images
+    (previous MRTrix releases)
 
     Note that this program makes use of implied symmetries in the diffusion
     profile. First, the fact the signal attenuation profile is real implies

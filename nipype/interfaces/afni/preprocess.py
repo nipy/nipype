@@ -3490,7 +3490,7 @@ class Qwarp(AFNICommand):
     >>> qwarp3.inputs.base_file = 'mni.nii'
     >>> qwarp3.inputs.allineate = True
     >>> qwarp3.inputs.allineate_opts = '-cose lpa -verb'
-    >>> qwarp3.cmdline
+    >>> qwarp3.cmdline  # doctest: +ALLOW_UNICODE
     "3dQwarp -allineate -allineate_opts '-cose lpa -verb' -base mni.nii -source structural.nii -prefix structural_QW"
     >>> res3 = qwarp3.run()  # doctest: +SKIP    """
     _cmd = '3dQwarp'

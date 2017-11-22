@@ -17,8 +17,62 @@ import os.path as op
 
 from ..traits_extension import isdefined
 from ..base import (CommandLineInputSpec, CommandLine, traits, TraitedSpec,
-                    File)
+                    File, Undefined)
 from .base import MRTrix3BaseInputSpec, MRTrix3Base
+
+
+class DWI2ResponseInputSpec(MRTrix3BaseInputSpec):
+    algorithm = traits.Enum('msmt_5tt','dhollander','tournier','tax', argstr='%s', position=-6,
+        mandatory=True, desc='response estimation algorithm (multi-tissue)')
+    dwi_file = File(exists=True, argstr='%s', position=-5,
+        mandatory=True, desc='input DWI image')
+    mtt_file = File(argstr='%s', position=-4, desc='input 5tt image')
+    wm_file = File('wm.txt', argstr='%s', position=-3, usedefault=True,
+        desc='output WM response text file')
+    gm_file = File(argstr='%s', position=-2, desc='output GM response text file')
+    csf_file = File(argstr='%s', position=-1, desc='output CSF response text file')
+    in_mask = File(exists=True, argstr='-mask %s',
+        desc='provide initial mask image')
+    max_sh = traits.Int(8, argstr='-lmax %d',
+        desc='maximum harmonic degree of response function')
+
+
+class DWI2ResponseOutputSpec(TraitedSpec):
+    wm_file = File(argstr='%s', desc='output WM response text file')
+    gm_file = File(argstr='%s', desc='output GM response text file')
+    csf_file = File(argstr='%s', desc='output CSF response text file')
+
+
+class DWI2Response(MRTrix3Base):
+
+    """
+    Estimate response function(s) for spherical deconvolution using the specified algorithm.
+
+    Example
+    -------
+
+    >>> import nipype.interfaces.mrtrix3 as mrt
+    >>> resp = mrt.DWI2Response()
+    >>> resp.inputs.dwi_file = 'dwi.mif'
+    >>> resp.inputs.algorithm = 'tournier'
+    >>> resp.inputs.grad_fsl = ('bvecs', 'bvals')
+    >>> resp.cmdline                               # doctest: +ELLIPSIS
+    'dwi2response -fslgrad bvecs bvals tournier dwi.mif wm.txt'
+    >>> resp.run()                                 # doctest: +SKIP
+    """
+
+    _cmd = 'dwi2response'
+    input_spec = DWI2ResponseInputSpec
+    output_spec = DWI2ResponseOutputSpec
+
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        outputs['wm_file'] = op.abspath(self.inputs.wm_file)
+        if self.inputs.gm_file!=Undefined:
+            outputs['gm_file'] = op.abspath(self.inputs.gm_file)
+        if self.inputs.csf_file!=Undefined:
+            outputs['csf_file'] = op.abspath(self.inputs.csf_file)
+        return outputs
 
 
 class ResponseSDInputSpec(MRTrix3BaseInputSpec):
@@ -80,7 +134,7 @@ class ResponseSD(MRTrix3Base):
 
     """
     Generate an appropriate response function from the image data for
-    spherical deconvolution.
+    spherical deconvolution.  (previous MRTrix releases)
 
     .. [1] Tax, C. M.; Jeurissen, B.; Vos, S. B.; Viergever, M. A. and
       Leemans, A., Recursive calibration of the fiber response function
