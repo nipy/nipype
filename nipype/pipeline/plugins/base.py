@@ -197,18 +197,13 @@ class DistributedPluginBase(PluginBase):
     def _submit_job(self, node, updatehash=False):
         raise NotImplementedError
 
-    def _report_crash(self, node, result=None, traceback=None):
-        # Overwrite traceback if comes with result
-        # to keep compatibility
+    def _report_crash(self, node, result=None):
+        tb = None
         if result is not None:
             node._result = result['result']
-            if 'traceback' in result:
-                traceback = result['traceback']
-
-        if traceback is not None:
-            node._traceback = traceback
-
-        return report_crash(node, traceback=traceback)
+            tb = result['traceback']
+            node._traceback = tb
+        return report_crash(node, traceback=tb)
 
     def _clear_task(self, taskid):
         raise NotImplementedError

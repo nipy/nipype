@@ -238,8 +238,10 @@ class MultiProcPlugin(DistributedPluginBase):
                     num_subnodes = self.procs[jobid].num_subnodes()
                 except Exception:
                     traceback = format_exception(*sys.exc_info())
-                    self._report_crash(self.procs[jobid], traceback=traceback)
-                    self._clean_queue(jobid, graph)
+                    self._clean_queue(
+                        jobid, graph,
+                        result={'result': None, 'traceback': traceback}
+                    )
                     self.proc_pending[jobid] = False
                     continue
                 if num_subnodes > 1:
@@ -275,10 +277,13 @@ class MultiProcPlugin(DistributedPluginBase):
                 logger.debug('Running node %s on master thread',
                              self.procs[jobid])
                 try:
-                    self.procs[jobid].run()
+                    self.procs[jobid].run(updatehash=updatehash)
                 except Exception:
                     traceback = format_exception(*sys.exc_info())
-                    self._report_crash(self.procs[jobid], traceback=traceback)
+                    self._clean_queue(
+                        jobid, graph,
+                        result={'result': None, 'traceback': traceback}
+                    )
 
                 # Release resources
                 self._task_finished_cb(jobid)
