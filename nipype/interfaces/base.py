@@ -1436,6 +1436,7 @@ def run_command(runtime, output=None, timeout=0.01):
             with open(outfile, 'rb') as ofh:
                 stdoutstr = ofh.read()
             result['stdout'] = read_stream(stdoutstr, logger=iflogger)
+            del stdoutstr
 
         if errfile is not None:
             stderr.flush()
@@ -1443,17 +1444,16 @@ def run_command(runtime, output=None, timeout=0.01):
             with open(errfile, 'rb') as efh:
                 stderrstr = efh.read()
             result['stderr'] = read_stream(stderrstr, logger=iflogger)
+            del stderrstr
 
         if output == 'file':
             result['merged'] = result['stdout']
             result['stdout'] = []
     else:
-        stdoutstr, stderrstr = proc.communicate()
+        stdout, stderr = proc.communicate()
         if output == 'allatonce':  # Discard stdout and stderr otherwise
-            result['stdout'] = read_stream(stdoutstr, logger=iflogger)
-            result['stderr'] = read_stream(stderrstr, logger=iflogger)
-        del stdoutstr
-        del stderrstr
+            result['stdout'] = read_stream(stdout, logger=iflogger)
+            result['stderr'] = read_stream(stderr, logger=iflogger)
 
     runtime.returncode = proc.returncode
     try:
