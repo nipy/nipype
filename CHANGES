@@ -1,6 +1,7 @@
 Upcoming release (0.14.0)
 ================
 
+* FIX: MultiProc mishandling crashes (https://github.com/nipy/nipype/pull/2301)
 * FIX: Testing maintainance and improvements (https://github.com/nipy/nipype/pull/2252)
 * ENH: Add elapsed_time and final metric_value to ants.Registration (https://github.com/nipy/nipype/pull/1985)
 * ENH: Improve terminal_output feature (https://github.com/nipy/nipype/pull/2209)
