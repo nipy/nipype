@@ -663,3 +663,37 @@ def dist_is_editable(dist):
         if os.path.isfile(egg_link):
             return True
     return False
+
+
+def which(cmd, env=None, pathext=None):
+    """
+    Return the path to an executable which would be run if the given
+    cmd was called. If no cmd would be called, return ``None``.
+
+    Code for Python < 3.3 is based on a code snippet from
+    http://orip.org/2009/08/python-checking-if-executable-exists-in.html
+
+    """
+
+    if pathext is None:
+        pathext = os.environ.get("PATHEXT", "").split(os.pathsep)
+        pathext.insert(0, '')
+
+    path = os.getenv("PATH", os.defpath)
+    if env and 'PATH' in env:
+        path = env.get("PATH")
+
+    if sys.version_info >= (3, 3):
+        for ext in pathext:
+            filename = shutil.which(cmd + ext, path=path)
+            if filename:
+                return filename
+        return None
+
+    for ext in pathext:
+        extcmd = cmd + ext
+        for directory in path.split(os.pathsep):
+            filename = os.path.join(directory, extcmd)
+            if os.path.exists(filename):
+                return filename
+    return None

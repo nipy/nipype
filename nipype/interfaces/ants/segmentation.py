@@ -13,9 +13,8 @@ from builtins import range, str
 
 import os
 from ...external.due import BibTeX
-from ...utils.filemanip import split_filename, copyfile
-from ..base import (TraitedSpec, File, traits, InputMultiPath, OutputMultiPath, isdefined,
-                    _exists_in_path)
+from ...utils.filemanip import split_filename, copyfile, which
+from ..base import TraitedSpec, File, traits, InputMultiPath, OutputMultiPath, isdefined
 from .base import ANTSCommand, ANTSCommandInputSpec
 
 
@@ -724,7 +723,7 @@ class BrainExtraction(ANTSCommand):
         if ants_path is None:
             # Check for antsRegistration, which is under bin/ (the $ANTSPATH) instead of
             # checking for antsBrainExtraction.sh which is under script/
-            _, cmd_path = _exists_in_path('antsRegistration', runtime.environ)
+            cmd_path = which('antsRegistration', runtime.environ)
             if not cmd_path:
                 raise RuntimeError(
                     'The environment variable $ANTSPATH is not defined in host "%s", '

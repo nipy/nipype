@@ -38,7 +38,7 @@ from .. import config, logging, LooseVersion, __version__
 from ..utils.provenance import write_provenance
 from ..utils.misc import is_container, trim, str2bool
 from ..utils.filemanip import (md5, hash_infile, FileNotFoundError, hash_timestamp,
-                               split_filename, to_str, read_stream)
+                               split_filename, to_str, read_stream, which)
 from .traits_extension import (
     traits, Undefined, TraitDictObject, TraitListObject, TraitError, isdefined,
     File, Directory, DictStrStr, has_metadata, ImageFile)
@@ -71,24 +71,6 @@ class NipypeInterfaceError(Exception):
         return '{}'.format(self.value)
 
 
-def _exists_in_path(cmd, environ):
-    """
-    Based on a code snippet from
-     http://orip.org/2009/08/python-checking-if-executable-exists-in.html
-    """
-
-    if 'PATH' in environ:
-        input_environ = environ.get("PATH")
-    else:
-        input_environ = os.environ.get("PATH", "")
-    extensions = os.environ.get("PATHEXT", "").split(os.pathsep)
-    for directory in input_environ.split(os.pathsep):
-        base = os.path.join(directory, cmd)
-        options = [base] + [(base + ext) for ext in extensions]
-        for filename in options:
-            if os.path.exists(filename):
-                return True, filename
-    return False, None
 
 
 def load_template(name):
@@ -1622,7 +1604,7 @@ class CommandLine(BaseInterface):
     def version_from_command(self, flag='-v'):
         cmdname = self.cmd.split()[0]
         env = dict(os.environ)
-        if _exists_in_path(cmdname, env):
+        if which(cmdname, env):
             out_environ = self._get_environ()
             env.update(out_environ)
             proc = sp.Popen(' '.join((cmdname, flag)),
@@ -1657,11 +1639,13 @@ class CommandLine(BaseInterface):
 
         # which $cmd
         executable_name = self.cmd.split()[0]
-        exist_val, cmd_path = _exists_in_path(executable_name,
-                                              runtime.environ)
-        if not exist_val:
-            raise IOError("command '%s' could not be found on host %s" %
-                          (self.cmd.split()[0], runtime.hostname))
+        cmd_path = which(executable_name, runtime.environ)
+
+        if cmd_path is None:
+            raise IOError(
+                'No command "%s" found on host %s. Please check that the '
+                'corresponding package is installed.' % (
+                    executable_name, runtime.hostname))
 
         runtime.command_path = cmd_path
         runtime.dependencies = get_dependencies(executable_name, runtime.environ)
