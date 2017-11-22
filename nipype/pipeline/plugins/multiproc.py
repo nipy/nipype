@@ -161,13 +161,15 @@ class MultiProcPlugin(DistributedPluginBase):
             self.n_gpus = self.n_gpus_visible
             self.total_gpu_processors = self.n_gpus * self.n_gpu_proc
         else:
+            #total gpu_processors = no.of GPUs * no.of threads per single GPU
             self.total_gpu_processors = self.n_gpus * self.n_gpu_proc
             
 
+        #form a GPU queue first
         gpus=GPUtil.getGPUs()
         self.gpu_q={}
-
-
+        
+        #initialize the queue, set all slots free
         slotno=0
         for gpu in gpus:
             temp={}
@@ -207,6 +209,7 @@ class MultiProcPlugin(DistributedPluginBase):
         return len(GPUtil.getGPUs())
     
     def gpu_has_free_slot(self):
+        #if a GPU has free slot, return True,its device-ID and the slot no.
         free=False
         devno=None
         slotno=None
@@ -223,6 +226,7 @@ class MultiProcPlugin(DistributedPluginBase):
         return free,devno,slotno
         
     def set_gpu_slot_busy(self,slotno,jobid):
+        #if a GPU has free slot, book it for a jobid,modify the queue and set its slotno busy
         devno=None
         for dk in self.gpu_q.keys():
             for sk in self.gpu_q[dk].keys():
@@ -233,6 +237,7 @@ class MultiProcPlugin(DistributedPluginBase):
 
 
     def set_gpu_slot_free(self,jobid):
+        #if a GPU task is finished, then set the slotno free in the queue
         devno=None
         for dk in self.gpu_q.keys():
             for sdk in self.gpu_q[dk].keys():
@@ -243,7 +248,7 @@ class MultiProcPlugin(DistributedPluginBase):
         return devno
 
     
-    #override, to set gpu slot free 
+    #override, to set gpu slot free, if the job was a gpu job
     def _task_finished_cb(self, jobid):
         """ Extract outputs and assign to inputs of dependent tasks
 
@@ -281,7 +286,7 @@ class MultiProcPlugin(DistributedPluginBase):
             run_node, (node, updatehash, self._taskid, devno),
             callback=self._async_callback)
 
-        logger.info('MultiProc submitted task %s (taskid=%d).',
+        logger.debug('MultiProc submitted task %s (taskid=%d).',
                      node.fullname, self._taskid)
         return self._taskid
 
