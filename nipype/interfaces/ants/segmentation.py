@@ -723,7 +723,7 @@ class BrainExtraction(ANTSCommand):
         if ants_path is None:
             # Check for antsRegistration, which is under bin/ (the $ANTSPATH) instead of
             # checking for antsBrainExtraction.sh which is under script/
-            cmd_path = which('antsRegistration', runtime.environ)
+            cmd_path = which('antsRegistration', env=runtime.environ)
             if not cmd_path:
                 raise RuntimeError(
                     'The environment variable $ANTSPATH is not defined in host "%s", '
