@@ -1605,7 +1605,7 @@ class CommandLine(BaseInterface):
         if cmd is None:
             cmd = self.cmd.split()[0]
         env = dict(os.environ)
-        if which(cmd, env):
+        if which(cmd, env=env):
             out_environ = self._get_environ()
             env.update(out_environ)
             proc = sp.Popen(' '.join((cmd, flag)),
@@ -1640,7 +1640,7 @@ class CommandLine(BaseInterface):
 
         # which $cmd
         executable_name = self.cmd.split()[0]
-        cmd_path = which(executable_name, runtime.environ)
+        cmd_path = which(executable_name, env=runtime.environ)
 
         if cmd_path is None:
             raise IOError(
