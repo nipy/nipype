@@ -64,6 +64,7 @@ class Info(PackageInfo):
         version_file = os.path.join(
             os.getenv('FSLDIR'), 'etc', 'fslversion')
 
+    @staticmethod
     def parse_version(raw_info):
         return raw_info.splitlines()[0]
 
