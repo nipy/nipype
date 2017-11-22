@@ -2329,6 +2329,13 @@ class UnifizeInputSpec(AFNICommandInputSpec):
         argstr='-EPI',
         requires=['no_duplo', 't2'],
         xor=['gm'])
+    rbt = traits.Tuple(
+        traits.Float(), traits.Float(), traits.Float(),
+        desc='Specify the 3 parameters for the algorithm:\n'
+             'R = radius; same as given by option \'-Urad\', [default=18.3]\n'
+             'b = bottom percentile of normalizing data range, [default=70.0]\n'
+             'r = top percentile of normalizing data range, [default=80.0]\n',
+        argstr='-rbt %f %f %f')
 
 
 class UnifizeOutputSpec(TraitedSpec):
