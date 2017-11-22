@@ -4,13 +4,18 @@
 
 import pytest
 
-from nipype.interfaces.niftyreg import (no_nifty_package, get_custom_path,
-                                        RegAladin, RegF3D)
-from nipype.testing import example_data
+from ....utils.filemanip import which
+from ....testing import example_data
+from ..niftyreg import (
+    get_custom_path, RegAladin, RegF3D)
+
+
+def no_nifty_tool(cmd=None):
+    return which(cmd) is None
 
 
 @pytest.mark.skipif(
-    no_nifty_package(cmd='reg_aladin'),
+    no_nifty_tool(cmd='reg_aladin'),
     reason="niftyreg is not installed. reg_aladin not found.")
 def test_reg_aladin():
     """ tests for reg_aladin interface"""
@@ -48,7 +53,7 @@ def test_reg_aladin():
 
 
 @pytest.mark.skipif(
-    no_nifty_package(cmd='reg_f3d'),
+    no_nifty_tool(cmd='reg_f3d'),
     reason="niftyreg is not installed. reg_f3d not found.")
 def test_reg_f3d():
     """ tests for reg_f3d interface"""

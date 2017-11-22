@@ -4,12 +4,18 @@
 
 import pytest
 
-from nipype.interfaces.niftyfit import FitQt1
-from nipype.interfaces.niftyreg import no_nifty_package, get_custom_path
-from nipype.testing import example_data
+from ....utils.filemanip import which
+from ....testing import example_data
+from ...niftyreg import get_custom_path
+
+from ..niftyfit import FitQt1
 
 
-@pytest.mark.skipif(no_nifty_package(cmd='fit_qt1'),
+def no_nifty_tool(cmd=None):
+    return which(cmd) is None
+
+
+@pytest.mark.skipif(no_nifty_tool(cmd='fit_qt1'),
                     reason="niftyfit is not installed")
 def test_fit_qt1():
     """ Testing FitQt1 interface."""

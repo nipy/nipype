@@ -3,14 +3,19 @@
 
 import pytest
 
-from nipype.interfaces.niftyreg import no_nifty_package, get_custom_path
-from nipype.interfaces.niftyseg import (UnaryMaths, BinaryMaths,
-                                        BinaryMathsInteger, TupleMaths,
-                                        Merge)
-from nipype.testing import example_data
+from ....utils.filemanip import which
+from ....testing import example_data
+from ...niftyreg import get_custom_path
+from ..niftyseg import (UnaryMaths, BinaryMaths,
+                        BinaryMathsInteger, TupleMaths,
+                        Merge)
 
 
-@pytest.mark.skipif(no_nifty_package(cmd='seg_maths'),
+def no_nifty_tool(cmd=None):
+    return which(cmd) is None
+
+
+@pytest.mark.skipif(no_nifty_tool(cmd='seg_maths'),
                     reason="niftyseg is not installed")
 def test_unary_maths():
 
@@ -39,7 +44,7 @@ def test_unary_maths():
     assert unarym.cmdline == expected_cmd
 
 
-@pytest.mark.skipif(no_nifty_package(cmd='seg_maths'),
+@pytest.mark.skipif(no_nifty_tool(cmd='seg_maths'),
                     reason="niftyseg is not installed")
 def test_binary_maths():
 
@@ -70,7 +75,7 @@ def test_binary_maths():
     assert binarym.cmdline == expected_cmd
 
 
-@pytest.mark.skipif(no_nifty_package(cmd='seg_maths'),
+@pytest.mark.skipif(no_nifty_tool(cmd='seg_maths'),
                     reason="niftyseg is not installed")
 def test_int_binary_maths():
 
@@ -100,7 +105,7 @@ def test_int_binary_maths():
     assert ibinarym.cmdline == expected_cmd
 
 
-@pytest.mark.skipif(no_nifty_package(cmd='seg_maths'),
+@pytest.mark.skipif(no_nifty_tool(cmd='seg_maths'),
                     reason="niftyseg is not installed")
 def test_tuple_maths():
 
@@ -134,7 +139,7 @@ def test_tuple_maths():
     assert tuplem.cmdline == expected_cmd
 
 
-@pytest.mark.skipif(no_nifty_package(cmd='seg_maths'),
+@pytest.mark.skipif(no_nifty_tool(cmd='seg_maths'),
                     reason="niftyseg is not installed")
 def test_merge():
 

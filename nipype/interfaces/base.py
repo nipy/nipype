@@ -1601,13 +1601,14 @@ class CommandLine(BaseInterface):
     def _get_environ(self):
         return getattr(self.inputs, 'environ', {})
 
-    def version_from_command(self, flag='-v'):
-        cmdname = self.cmd.split()[0]
+    def version_from_command(self, flag='-v', cmd=None):
+        if cmd is None:
+            cmd = self.cmd.split()[0]
         env = dict(os.environ)
-        if which(cmdname, env):
+        if which(cmd, env):
             out_environ = self._get_environ()
             env.update(out_environ)
-            proc = sp.Popen(' '.join((cmdname, flag)),
+            proc = sp.Popen(' '.join((cmd, flag)),
                             shell=True,
                             env=env,
                             stdout=sp.PIPE,

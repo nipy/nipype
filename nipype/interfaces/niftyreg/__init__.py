@@ -9,7 +9,7 @@ The niftyreg module provides classes for interfacing with the `NiftyReg
 Top-level namespace for niftyreg.
 """
 
-from .base import no_nifty_package, get_custom_path
+from .base import get_custom_path
 from .reg import RegAladin, RegF3D
 from .regutils import (RegResample, RegJacobian, RegAverage, RegTools,
                        RegTransform, RegMeasure)

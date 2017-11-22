@@ -3,12 +3,17 @@
 
 import pytest
 
-from nipype.interfaces.niftyreg import no_nifty_package, get_custom_path
-from nipype.interfaces.niftyseg import LabelFusion, CalcTopNCC
-from nipype.testing import example_data
+from ....utils.filemanip import which
+from ....testing import example_data
+from ...niftyreg import get_custom_path
+from ..niftyseg import LabelFusion, CalcTopNCC
 
 
-@pytest.mark.skipif(no_nifty_package(cmd='seg_LabFusion'),
+def no_nifty_tool(cmd=None):
+    return which(cmd) is None
+
+
+@pytest.mark.skipif(no_nifty_tool(cmd='seg_LabFusion'),
                     reason="niftyseg is not installed")
 def test_seg_lab_fusion():
     """ Test interfaces for seg_labfusion"""
@@ -90,7 +95,7 @@ def test_seg_lab_fusion():
     assert mv_node.cmdline == expected_cmd
 
 
-@pytest.mark.skipif(no_nifty_package(cmd='seg_CalcTopNCC'),
+@pytest.mark.skipif(no_nifty_tool(cmd='seg_CalcTopNCC'),
                     reason="niftyseg is not installed")
 def test_seg_calctopncc():
     """ Test interfaces for seg_CalctoNCC"""
