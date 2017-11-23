@@ -9,12 +9,14 @@ This module defines the API of all nipype interfaces.
 
 """
 from .core import (
-    BaseInterface, SimpleInterface, CommandLine, StdOutCommandLine,
+    Interface, BaseInterface, SimpleInterface,
+    CommandLine, StdOutCommandLine,
     MpiCommandLine, SEMLikeCommandLine, PackageInfo
 )
 
 from .specs import (
-    BaseTraitedSpec, BaseInterfaceInputSpec, CommandLineInputSpec,
+    BaseTraitedSpec, TraitedSpec, DynamicTraitedSpec,
+    BaseInterfaceInputSpec, CommandLineInputSpec,
 )
 
 from .traits_extension import (
@@ -22,4 +24,4 @@ from .traits_extension import (
     File, Directory, Str, DictStrStr, has_metadata, ImageFile,
     MultiPath, OutputMultiPath, InputMultiPath)
 
-from .support import load_template
+from .support import Bunch, InterfaceResult, load_template

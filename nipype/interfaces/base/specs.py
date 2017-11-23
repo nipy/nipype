@@ -316,6 +316,7 @@ class TraitedSpec(BaseTraitedSpec):
 
     This is used in 90% of the cases.
     """
+    _ = traits.Disallow
 
 
 class BaseInterfaceInputSpec(TraitedSpec):
@@ -354,7 +355,6 @@ class DynamicTraitedSpec(BaseTraitedSpec):
         dup = self.clone_traits(memo=memo)
         dup.trait_set(**dup_dict)
         return dup
-    _ = traits.Disallow
 
 
 class CommandLineInputSpec(BaseInterfaceInputSpec):

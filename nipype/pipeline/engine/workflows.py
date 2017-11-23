@@ -41,10 +41,10 @@ from ...utils.misc import (unflatten, str2bool)
 from ...utils.functions import (getsource, create_function_from_source)
 from ...interfaces.base import (traits, InputMultiPath, CommandLine,
                                 Undefined, TraitedSpec, DynamicTraitedSpec,
-                                Bunch, InterfaceResult, md5, Interface,
+                                Bunch, InterfaceResult, Interface,
                                 TraitDictObject, TraitListObject, isdefined)
 
-from ...utils.filemanip import (save_json, FileNotFoundError,
+from ...utils.filemanip import (save_json, FileNotFoundError, md5,
                                 filename_to_list, list_to_filename,
                                 copyfiles, fnames_presuffix, loadpkl,
                                 split_filename, load_json, savepkl,

@@ -24,8 +24,6 @@ from builtins import str, bytes, open
 
 from .. import logging, config
 from .misc import is_container
-from ..interfaces.traits_extension import isdefined
-
 from future import standard_library
 standard_library.install_aliases()
 
@@ -181,7 +179,9 @@ def fname_presuffix(fname, prefix='', suffix='', newpath=None, use_ext=True):
     pth, fname, ext = split_filename(fname)
     if not use_ext:
         ext = ''
-    if newpath and isdefined(newpath):
+
+    # Avoid cyclic references importing isdefined
+    if newpath and ('%s' % newpath) != '<undefined>':
         pth = os.path.abspath(newpath)
     return os.path.join(pth, prefix + fname + suffix + ext)
 
