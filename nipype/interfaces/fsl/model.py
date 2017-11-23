@@ -17,6 +17,7 @@ from builtins import range, open
 import os
 from glob import glob
 from shutil import rmtree
+from string import Template
 
 import numpy as np
 from nibabel import load
@@ -25,11 +26,12 @@ from ... import LooseVersion
 from ...utils.filemanip import list_to_filename, filename_to_list
 from ...utils.misc import human_order_sorted
 from ...external.due import BibTeX
-from ..base import (load_template, File, traits, isdefined,
+from ..base import (File, traits, isdefined,
                     TraitedSpec, BaseInterface, Directory,
                     InputMultiPath, OutputMultiPath,
                     BaseInterfaceInputSpec)
 from .base import FSLCommand, FSLCommandInputSpec, Info
+
 
 class Level1DesignInputSpec(BaseInterfaceInputSpec):
     interscan_interval = traits.Float(mandatory=True,
@@ -2168,3 +2170,24 @@ class GLM(FSLCommand):
                 self.inputs.out_vnscales_name)
 
         return outputs
+
+
+def load_template(name):
+    """Load a template from the script_templates directory
+
+    Parameters
+    ----------
+    name : str
+        The name of the file to load
+
+    Returns
+    -------
+    template : string.Template
+
+    """
+    full_fname = os.path.join(os.path.dirname(__file__),
+                              'script_templates', name)
+    template_file = open(full_fname)
+    template = Template(template_file.read())
+    template_file.close()
+    return template

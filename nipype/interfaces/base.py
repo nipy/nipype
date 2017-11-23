@@ -19,7 +19,6 @@ import locale
 import os
 import re
 import platform
-from string import Template
 import select
 import subprocess as sp
 import sys
@@ -63,29 +62,6 @@ class NipypeInterfaceError(Exception):
 
     def __str__(self):
         return '{}'.format(self.value)
-
-
-
-
-def load_template(name):
-    """Load a template from the script_templates directory
-
-    Parameters
-    ----------
-    name : str
-        The name of the file to load
-
-    Returns
-    -------
-    template : string.Template
-
-    """
-    full_fname = os.path.join(os.path.dirname(__file__),
-                              'script_templates', name)
-    template_file = open(full_fname)
-    template = Template(template_file.read())
-    template_file.close()
-    return template
 
 
 class Bunch(object):
@@ -2050,3 +2026,17 @@ class InputMultiPath(MultiPath):
 
     """
     pass
+
+
+def load_template(name):
+    """
+    Deprecated stub for backwards compatibility,
+    please use nipype.interfaces.fsl.model.load_template
+
+    """
+    from .fsl.model import load_template
+    iflogger.warning(
+        'Deprecated in 1.0.0, and will be removed in 1.1.0, '
+        'please use nipype.interfaces.fsl.model.load_template instead.'
+    )
+    return load_template(name)
