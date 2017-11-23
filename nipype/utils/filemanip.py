@@ -175,13 +175,17 @@ def fname_presuffix(fname, prefix='', suffix='', newpath=None, use_ext=True):
     >>> fname_presuffix(fname,'pre','post','/tmp')
     '/tmp/prefoopost.nii.gz'
 
+    >>> from nipype.interfaces.base import Undefined
+    >>> fname_presuffix(fname, 'pre', 'post', Undefined) == fname_presuffix(fname, 'pre', 'post')
+    True
+
     """
     pth, fname, ext = split_filename(fname)
     if not use_ext:
         ext = ''
 
-    # Avoid cyclic references importing isdefined
-    if newpath and ('%s' % newpath) != '<undefined>':
+    # No need for isdefined: bool(Undefined) evaluates to False
+    if newpath:
         pth = os.path.abspath(newpath)
     return os.path.join(pth, prefix + fname + suffix + ext)
 
