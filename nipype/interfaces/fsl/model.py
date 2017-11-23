@@ -2185,9 +2185,10 @@ def load_template(name):
     template : string.Template
 
     """
-    full_fname = os.path.join(os.path.dirname(__file__),
-                              'script_templates', name)
-    template_file = open(full_fname)
-    template = Template(template_file.read())
-    template_file.close()
+    from pkg_resources import resource_filename as pkgrf
+    full_fname = pkgrf('nipype',
+                       os.path.join('script_templates', name))
+    with open(full_fname) as template_file:
+        template = Template(template_file.read())
+
     return template

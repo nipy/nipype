@@ -3,17 +3,19 @@
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 from __future__ import print_function, unicode_literals
 from future import standard_library
-from builtins import open, str
+from builtins import open
 import os
 import warnings
 import simplejson as json
 
 import pytest
-import traits.api as traits
-from nipype.testing import example_data
-import nipype.interfaces.base as nib
-from nipype.utils.filemanip import split_filename
-from nipype.interfaces.base import Undefined, config
+
+from ... import config
+from ...testing import example_data
+from ...utils.filemanip import split_filename, md5
+from .. import base as nib
+from ..base import traits, Undefined
+
 standard_library.install_aliases()
 
 
@@ -61,7 +63,7 @@ def test_bunch_hash():
     newbdict, bhash = b._get_bunch_hash()
     assert bhash == 'ddcc7b4ec5675df8cf317a48bd1857fa'
     # Make sure the hash stored in the json file for `infile` is correct.
-    jshash = nib.md5()
+    jshash = md5()
     with open(json_pth, 'r') as fp:
         jshash.update(fp.read().encode('utf-8'))
     assert newbdict['infile'][0][1] == jshash.hexdigest()

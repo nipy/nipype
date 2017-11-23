@@ -16,8 +16,7 @@ from __future__ import print_function, division, unicode_literals, absolute_impo
 import os
 import os.path as op
 
-from ..traits_extension import isdefined
-from ..base import (CommandLineInputSpec, traits, TraitedSpec, File)
+from ..base import (CommandLineInputSpec, traits, TraitedSpec, File, isdefined)
 from .base import MRTrix3Base
 
 

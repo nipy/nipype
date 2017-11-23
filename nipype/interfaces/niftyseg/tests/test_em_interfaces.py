@@ -6,7 +6,7 @@ import pytest
 from ....utils.filemanip import which
 from ....testing import example_data
 from ...niftyreg import get_custom_path
-from ..niftyseg import EM
+from .. import EM
 
 
 def no_nifty_tool(cmd=None):

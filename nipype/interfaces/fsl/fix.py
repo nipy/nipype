@@ -64,21 +64,24 @@ from ..base import (
     OutputMultiPath,
     BaseInterface,
     BaseInterfaceInputSpec,
-    traits
+    traits,
+    Directory,
+    File,
+    isdefined
 )
-from ..traits_extension import Directory, File, isdefined
 import os
 
 
 class TrainingSetCreatorInputSpec(BaseInterfaceInputSpec):
     mel_icas_in = InputMultiPath(Directory(exists=True), copyfile=False,
-                              desc='Melodic output directories',
-                              argstr='%s', position=-1)
+                                 desc='Melodic output directories',
+                                 argstr='%s', position=-1)
+
 
 class TrainingSetCreatorOutputSpec(TraitedSpec):
     mel_icas_out = OutputMultiPath(Directory(exists=True), copyfile=False,
-                              desc='Hand labels for noise vs signal',
-                              argstr='%s', position=-1)
+                                   desc='Hand labels for noise vs signal',
+                                   argstr='%s', position=-1)
 
 
 class TrainingSetCreator(BaseInterface):

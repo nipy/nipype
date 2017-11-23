@@ -6,7 +6,7 @@ import pytest
 
 from ....utils.filemanip import which
 from ....testing import example_data
-from ..niftyreg import (
+from .. import (
     get_custom_path, RegAverage, RegResample, RegJacobian,
     RegTools, RegMeasure, RegTransform
 )

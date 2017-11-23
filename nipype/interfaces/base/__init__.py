@@ -17,6 +17,7 @@ from .core import (
 from .specs import (
     BaseTraitedSpec, TraitedSpec, DynamicTraitedSpec,
     BaseInterfaceInputSpec, CommandLineInputSpec,
+    StdOutCommandLineInputSpec
 )
 
 from .traits_extension import (
@@ -24,4 +25,7 @@ from .traits_extension import (
     File, Directory, Str, DictStrStr, has_metadata, ImageFile,
     MultiPath, OutputMultiPath, InputMultiPath)
 
-from .support import Bunch, InterfaceResult, load_template
+from .support import (
+    Bunch, InterfaceResult, load_template,
+    NipypeInterfaceError
+)

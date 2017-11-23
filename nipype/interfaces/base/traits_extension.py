@@ -395,7 +395,7 @@ class OutputMultiPath(MultiPath):
 
     XXX This needs to be vetted by somebody who understands traits
 
-    >>> from nipype.interfaces.base import OutputMultiPath
+    >>> from nipype.interfaces.base import OutputMultiPath, TraitedSpec
     >>> class A(TraitedSpec):
     ...     foo = OutputMultiPath(File(exists=False))
     >>> a = A()
@@ -440,7 +440,7 @@ class InputMultiPath(MultiPath):
 
     XXX This needs to be vetted by somebody who understands traits
 
-    >>> from nipype.interfaces.base import InputMultiPath
+    >>> from nipype.interfaces.base import InputMultiPath, TraitedSpec
     >>> class A(TraitedSpec):
     ...     foo = InputMultiPath(File(exists=False))
     >>> a = A()

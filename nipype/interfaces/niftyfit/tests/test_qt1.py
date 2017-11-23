@@ -8,7 +8,7 @@ from ....utils.filemanip import which
 from ....testing import example_data
 from ...niftyreg import get_custom_path
 
-from ..niftyfit import FitQt1
+from ..qt1 import FitQt1
 
 
 def no_nifty_tool(cmd=None):

@@ -6,9 +6,9 @@ import pytest
 from ....utils.filemanip import which
 from ....testing import example_data
 from ...niftyreg import get_custom_path
-from ..niftyseg import (UnaryMaths, BinaryMaths,
-                        BinaryMathsInteger, TupleMaths,
-                        Merge)
+from .. import (UnaryMaths, BinaryMaths,
+                BinaryMathsInteger, TupleMaths,
+                Merge)
 
 
 def no_nifty_tool(cmd=None):

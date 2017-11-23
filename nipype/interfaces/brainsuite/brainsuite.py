@@ -5,7 +5,7 @@ import os
 import re as regex
 
 from ..base import TraitedSpec, CommandLineInputSpec, CommandLine, File, traits, isdefined
-from ..traits_extension import str
+
 
 """This script provides interfaces for BrainSuite command line tools.
 Please see brainsuite.org for more information.
@@ -902,7 +902,7 @@ class SVRegInputSpec(CommandLineInputSpec):
              'Cortical Surface Extraction Sequence'
     )
     dataSinkDelay = traits.List(
-        str, argstr='%s',
+        traits.Str, argstr='%s',
         desc='Connect datasink out_file to dataSinkDelay to delay execution of SVReg '
              'until dataSink has finished sinking CSE outputs.'
              'For use with parallel processing workflows including Brainsuites Cortical '
@@ -1087,7 +1087,7 @@ class BDPInputSpec(CommandLineInputSpec):
              'bvec and .bval files can be used instead (see diffusionGradientFile and bValueFile). '
     )
     BVecBValPair = traits.List(
-        str, minlen=2, maxlen=2, mandatory=True, position=-1, xor=['bMatrixFile'],
+        traits.Str, minlen=2, maxlen=2, mandatory=True, position=-1, xor=['bMatrixFile'],
         argstr='--bvec %s --bval %s',
         desc='Must input a list containing first the BVector file, then the BValue file (both must be absolute paths)\n'
              'Example: bdp.inputs.BVecBValPair = [\'/directory/subdir/prefix.dwi.bvec\', \'/directory/subdir/prefix.dwi.bval\'] '
@@ -1100,7 +1100,7 @@ class BDPInputSpec(CommandLineInputSpec):
              'usually has an extension of .bvec '
     )
     dataSinkDelay = traits.List(
-        str, argstr='%s',
+        traits.Str, argstr='%s',
         desc='For use in parallel processing workflows including Brainsuite Cortical '
              'Surface Extraction sequence. Connect datasink out_file to dataSinkDelay '
              'to delay execution of BDP until dataSink has finished sinking outputs. '

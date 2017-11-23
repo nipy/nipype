@@ -8,7 +8,7 @@ from ....utils.filemanip import which
 from ....testing import example_data
 from ...niftyreg import get_custom_path
 
-from ..niftyfit import FitAsl
+from ..asl import FitAsl
 
 
 def no_nifty_tool(cmd=None):

@@ -6,8 +6,7 @@ import pytest
 
 from ....utils.filemanip import which
 from ....testing import example_data
-from ..niftyreg import (
-    get_custom_path, RegAladin, RegF3D)
+from .. import (get_custom_path, RegAladin, RegF3D)
 
 
 def no_nifty_tool(cmd=None):

@@ -440,7 +440,7 @@ class BaseInterface(Interface):
         results :  an InterfaceResult object containing a copy of the instance
         that was executed, provenance information and, if successful, results
         """
-        from ..utils.profiler import ResourceMonitor
+        from ...utils.profiler import ResourceMonitor
 
         enable_rm = config.resource_monitor and self.resource_monitor
         force_raise = not getattr(self.inputs, 'ignore_exception', False)
@@ -624,6 +624,7 @@ class SimpleInterface(BaseInterface):
 
     .. testsetup::
 
+    >>> from .specs import TraitedSpec
     >>> tmp = getfixture('tmpdir')
     >>> old = tmp.chdir() # changing to a temporary directory
 

@@ -6,7 +6,7 @@ import pytest
 from ....utils.filemanip import which
 from ....testing import example_data
 from ...niftyreg import get_custom_path
-from ..niftyseg import LabelFusion, CalcTopNCC
+from .. import LabelFusion, CalcTopNCC
 
 
 def no_nifty_tool(cmd=None):
