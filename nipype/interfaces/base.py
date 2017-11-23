@@ -27,7 +27,6 @@ from warnings import warn
 import simplejson as json
 from dateutil.parser import parse as parseutc
 from packaging.version import Version
-import collections
 
 from .. import config, logging, LooseVersion, __version__
 from ..utils.provenance import write_provenance
@@ -36,7 +35,8 @@ from ..utils.filemanip import (md5, hash_infile, FileNotFoundError, hash_timesta
                                split_filename, to_str, read_stream, which)
 from .traits_extension import (
     traits, Undefined, TraitDictObject, TraitListObject, TraitError, isdefined,
-    File, Directory, DictStrStr, has_metadata, ImageFile)
+    File, Directory, Str, DictStrStr, has_metadata, ImageFile,
+    MultiPath, OutputMultiPath, InputMultiPath)
 from ..external.due import due
 
 from future import standard_library
@@ -1912,120 +1912,6 @@ class PackageInfo(object):
     @staticmethod
     def parse_version(raw_info):
         raise NotImplementedError
-
-
-class MultiPath(traits.List):
-    """ Abstract class - shared functionality of input and output MultiPath
-    """
-
-    def validate(self, object, name, value):
-
-        # want to treat range and other sequences (except str) as list
-        if not isinstance(value, (str, bytes)) and isinstance(value, collections.Sequence):
-            value = list(value)
-
-        if not isdefined(value) or \
-                (isinstance(value, list) and len(value) == 0):
-            return Undefined
-
-        newvalue = value
-
-        if not isinstance(value, list) \
-            or (self.inner_traits() and
-                isinstance(self.inner_traits()[0].trait_type,
-                           traits.List) and not
-                isinstance(self.inner_traits()[0].trait_type,
-                           InputMultiPath) and
-                isinstance(value, list) and
-                value and not
-                isinstance(value[0], list)):
-            newvalue = [value]
-        value = super(MultiPath, self).validate(object, name, newvalue)
-
-        if value:
-            return value
-
-        self.error(object, name, value)
-
-
-class OutputMultiPath(MultiPath):
-    """ Implements a user friendly traits that accepts one or more
-    paths to files or directories. This is the output version which
-    return a single string whenever possible (when it was set to a
-    single value or a list of length 1). Default value of this trait
-    is _Undefined. It does not accept empty lists.
-
-    XXX This should only be used as a final resort. We should stick to
-    established Traits to the extent possible.
-
-    XXX This needs to be vetted by somebody who understands traits
-
-    >>> from nipype.interfaces.base import OutputMultiPath
-    >>> class A(TraitedSpec):
-    ...     foo = OutputMultiPath(File(exists=False))
-    >>> a = A()
-    >>> a.foo
-    <undefined>
-
-    >>> a.foo = '/software/temp/foo.txt'
-    >>> a.foo
-    '/software/temp/foo.txt'
-
-    >>> a.foo = ['/software/temp/foo.txt']
-    >>> a.foo
-    '/software/temp/foo.txt'
-
-    >>> a.foo = ['/software/temp/foo.txt', '/software/temp/goo.txt']
-    >>> a.foo
-    ['/software/temp/foo.txt', '/software/temp/goo.txt']
-
-    """
-
-    def get(self, object, name):
-        value = self.get_value(object, name)
-        if len(value) == 0:
-            return Undefined
-        elif len(value) == 1:
-            return value[0]
-        else:
-            return value
-
-    def set(self, object, name, value):
-        self.set_value(object, name, value)
-
-
-class InputMultiPath(MultiPath):
-    """ Implements a user friendly traits that accepts one or more
-    paths to files or directories. This is the input version which
-    always returns a list. Default value of this trait
-    is _Undefined. It does not accept empty lists.
-
-    XXX This should only be used as a final resort. We should stick to
-    established Traits to the extent possible.
-
-    XXX This needs to be vetted by somebody who understands traits
-
-    >>> from nipype.interfaces.base import InputMultiPath
-    >>> class A(TraitedSpec):
-    ...     foo = InputMultiPath(File(exists=False))
-    >>> a = A()
-    >>> a.foo
-    <undefined>
-
-    >>> a.foo = '/software/temp/foo.txt'
-    >>> a.foo
-    ['/software/temp/foo.txt']
-
-    >>> a.foo = ['/software/temp/foo.txt']
-    >>> a.foo
-    ['/software/temp/foo.txt']
-
-    >>> a.foo = ['/software/temp/foo.txt', '/software/temp/goo.txt']
-    >>> a.foo
-    ['/software/temp/foo.txt', '/software/temp/goo.txt']
-
-    """
-    pass
 
 
 def load_template(name):

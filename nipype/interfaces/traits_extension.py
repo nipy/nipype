@@ -20,6 +20,7 @@ from __future__ import print_function, division, unicode_literals, absolute_impo
 
 from builtins import str, bytes
 import os
+import collections
 
 # perform all external trait imports here
 from traits import __version__ as traits_version
@@ -30,13 +31,17 @@ from traits.trait_base import _Undefined, class_of
 
 from traits.api import BaseUnicode
 from traits.api import Unicode
+from future import standard_library
+
 if traits_version < '3.7.0':
     raise ImportError('Traits version 3.7.0 or higher must be installed')
+
+standard_library.install_aliases()
 
 DictStrStr = traits.Dict((bytes, str), (bytes, str))
 
 
-class Str(traits.Unicode):
+class Str(Unicode):
     """Replacement for the default traits.Str based in bytes"""
 
 
@@ -234,16 +239,17 @@ class Directory (BaseDirectory):
 # - uncompressed (tuple[0]) extension
 # - compressed (tuple[1]) extension
 img_fmt_types = {
-        'nifti1': [('.nii', '.nii.gz'),
-                   (('.hdr', '.img'), ('.hdr', '.img.gz'))],
-        'mgh': [('.mgh', '.mgz'), ('.mgh', '.mgh.gz')],
-        'nifti2': [('.nii', '.nii.gz')],
-        'cifti2': [('.nii', '.nii.gz')],
-        'gifti': [('.gii', '.gii.gz')],
-        'dicom': [('.dcm', '.dcm'), ('.IMA', '.IMA'), ('.tar', '.tar.gz')],
-        'nrrd': [('.nrrd', 'nrrd'), ('nhdr', 'nhdr')],
-        'afni': [('.HEAD', '.HEAD'), ('.BRIK', '.BRIK')]
-        }
+    'nifti1': [('.nii', '.nii.gz'),
+               (('.hdr', '.img'), ('.hdr', '.img.gz'))],
+    'mgh': [('.mgh', '.mgz'), ('.mgh', '.mgh.gz')],
+    'nifti2': [('.nii', '.nii.gz')],
+    'cifti2': [('.nii', '.nii.gz')],
+    'gifti': [('.gii', '.gii.gz')],
+    'dicom': [('.dcm', '.dcm'), ('.IMA', '.IMA'), ('.tar', '.tar.gz')],
+    'nrrd': [('.nrrd', 'nrrd'), ('nhdr', 'nhdr')],
+    'afni': [('.HEAD', '.HEAD'), ('.BRIK', '.BRIK')]
+}
+
 
 class ImageFile(File):
     """ Defines a trait of specific neuroimaging files """
@@ -341,3 +347,117 @@ def has_metadata(trait, metadata, value=None, recursive=True):
                 count += has_metadata(handler, metadata, recursive)
 
     return count > 0
+
+
+class MultiPath(traits.List):
+    """ Abstract class - shared functionality of input and output MultiPath
+    """
+
+    def validate(self, object, name, value):
+
+        # want to treat range and other sequences (except str) as list
+        if not isinstance(value, (str, bytes)) and isinstance(value, collections.Sequence):
+            value = list(value)
+
+        if not isdefined(value) or \
+                (isinstance(value, list) and len(value) == 0):
+            return Undefined
+
+        newvalue = value
+
+        if not isinstance(value, list) \
+            or (self.inner_traits() and
+                isinstance(self.inner_traits()[0].trait_type,
+                           traits.List) and not
+                isinstance(self.inner_traits()[0].trait_type,
+                           InputMultiPath) and
+                isinstance(value, list) and
+                value and not
+                isinstance(value[0], list)):
+            newvalue = [value]
+        value = super(MultiPath, self).validate(object, name, newvalue)
+
+        if value:
+            return value
+
+        self.error(object, name, value)
+
+
+class OutputMultiPath(MultiPath):
+    """ Implements a user friendly traits that accepts one or more
+    paths to files or directories. This is the output version which
+    return a single string whenever possible (when it was set to a
+    single value or a list of length 1). Default value of this trait
+    is _Undefined. It does not accept empty lists.
+
+    XXX This should only be used as a final resort. We should stick to
+    established Traits to the extent possible.
+
+    XXX This needs to be vetted by somebody who understands traits
+
+    >>> from nipype.interfaces.base import OutputMultiPath
+    >>> class A(TraitedSpec):
+    ...     foo = OutputMultiPath(File(exists=False))
+    >>> a = A()
+    >>> a.foo
+    <undefined>
+
+    >>> a.foo = '/software/temp/foo.txt'
+    >>> a.foo
+    '/software/temp/foo.txt'
+
+    >>> a.foo = ['/software/temp/foo.txt']
+    >>> a.foo
+    '/software/temp/foo.txt'
+
+    >>> a.foo = ['/software/temp/foo.txt', '/software/temp/goo.txt']
+    >>> a.foo
+    ['/software/temp/foo.txt', '/software/temp/goo.txt']
+
+    """
+
+    def get(self, object, name):
+        value = self.get_value(object, name)
+        if len(value) == 0:
+            return Undefined
+        elif len(value) == 1:
+            return value[0]
+        else:
+            return value
+
+    def set(self, object, name, value):
+        self.set_value(object, name, value)
+
+
+class InputMultiPath(MultiPath):
+    """ Implements a user friendly traits that accepts one or more
+    paths to files or directories. This is the input version which
+    always returns a list. Default value of this trait
+    is _Undefined. It does not accept empty lists.
+
+    XXX This should only be used as a final resort. We should stick to
+    established Traits to the extent possible.
+
+    XXX This needs to be vetted by somebody who understands traits
+
+    >>> from nipype.interfaces.base import InputMultiPath
+    >>> class A(TraitedSpec):
+    ...     foo = InputMultiPath(File(exists=False))
+    >>> a = A()
+    >>> a.foo
+    <undefined>
+
+    >>> a.foo = '/software/temp/foo.txt'
+    >>> a.foo
+    ['/software/temp/foo.txt']
+
+    >>> a.foo = ['/software/temp/foo.txt']
+    >>> a.foo
+    ['/software/temp/foo.txt']
+
+    >>> a.foo = ['/software/temp/foo.txt', '/software/temp/goo.txt']
+    >>> a.foo
+    ['/software/temp/foo.txt', '/software/temp/goo.txt']
+
+    """
+    pass
