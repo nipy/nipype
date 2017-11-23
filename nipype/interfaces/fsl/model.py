@@ -1862,7 +1862,7 @@ class DualRegression(FSLCommand):
     >>> dual_regression.inputs.n_perm = 10
     >>> dual_regression.inputs.out_dir = "my_output_directory"
     >>> dual_regression.cmdline
-    u'dual_regression allFA.nii 0 -1 10 my_output_directory functional.nii functional2.nii functional3.nii'
+    'dual_regression allFA.nii 0 -1 10 my_output_directory functional.nii functional2.nii functional3.nii'
     >>> dual_regression.run() # doctest: +SKIP
 
     """

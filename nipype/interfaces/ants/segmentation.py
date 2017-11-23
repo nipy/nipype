@@ -1325,7 +1325,7 @@ class KellyKapowski(ANTSCommand):
     >>> kk.inputs.number_integration_points = 10
     >>> kk.inputs.thickness_prior_estimate = 10
     >>> kk.cmdline
-    u'KellyKapowski --convergence "[45,0.0,10]" \
+    'KellyKapowski --convergence "[45,0.0,10]" \
 --output "[segmentation0_cortical_thickness.nii.gz,segmentation0_warped_white_matter.nii.gz]" \
 --image-dimensionality 3 --gradient-step 0.025000 --number-of-integration-points 10 \
 --segmentation-image "[segmentation0.nii.gz,2,3]" --smoothing-variance 1.000000 \

@@ -75,7 +75,7 @@ def setup_file(request, tmpdir_factory):
     tmp_dir = tmpdir_factory.mktemp('files')
     tmp_infile = tmp_dir.join('foo.txt')
     with tmp_infile.open('w') as fp:
-        fp.writelines([u'123456789'])
+        fp.writelines(['123456789'])
 
     tmp_dir.chdir()
 

@@ -1291,7 +1291,7 @@ class MeasureImageSimilarity(ANTSCommand):
     >>> sim.inputs.fixed_image_mask = 'mask.nii'
     >>> sim.inputs.moving_image_mask = 'mask.nii.gz'
     >>> sim.cmdline
-    u'MeasureImageSimilarity --dimensionality 3 --masks ["mask.nii","mask.nii.gz"] \
+    'MeasureImageSimilarity --dimensionality 3 --masks ["mask.nii","mask.nii.gz"] \
 --metric MI["T1.nii","resting.nii",1.0,5,Regular,1.0]'
     """
     _cmd = 'MeasureImageSimilarity'
