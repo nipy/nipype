@@ -1,13 +1,21 @@
 # -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
+"""
+
+Base I/O specifications for Nipype interfaces
+.............................................
+
+Define the API for the I/O of interfaces
+
+"""
 from __future__ import print_function, division, unicode_literals, absolute_import
 
 import os
 from copy import deepcopy
-from packaging.version import Version
 from warnings import warn
 from builtins import str, bytes
+from packaging.version import Version
 
 from ...utils.misc import is_container
 from ...utils.filemanip import md5, hash_infile, hash_timestamp, to_str
@@ -23,7 +31,8 @@ nipype_version = Version(__version__)
 
 
 class BaseTraitedSpec(traits.HasTraits):
-    """Provide a few methods necessary to support nipype interface api
+    """
+    Provide a few methods necessary to support nipype interface api
 
     The inputs attribute of interfaces call certain methods that are not
     available in traits.HasTraits. These are provided here.
