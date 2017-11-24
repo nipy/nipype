@@ -74,11 +74,11 @@ Execution
 
 *display_variable*
 	Override the ``$DISPLAY`` environment variable for interfaces that require
-    an X server. This option is useful if there is a running X server, but 
-    ``$DISPLAY`` was not defined in nipype's environment. For example, if an X 
+    an X server. This option is useful if there is a running X server, but
+    ``$DISPLAY`` was not defined in nipype's environment. For example, if an X
     server is listening on the default port of 6000, set ``display_variable = :0``
-    to enable nipype interfaces to use it. It may also point to displays provided 
-    by VNC, `xnest <http://www.x.org/archive/X11R7.5/doc/man/man1/Xnest.1.html>`_ 
+    to enable nipype interfaces to use it. It may also point to displays provided
+    by VNC, `xnest <http://www.x.org/archive/X11R7.5/doc/man/man1/Xnest.1.html>`_
     or `Xvfb <http://www.x.org/archive/X11R6.8.1/doc/Xvfb.1.html>`_.
     If neither ``display_variable`` nor the ``$DISPLAY`` environment variable are
     set, nipype will try to configure a new virtual server using Xvfb.
