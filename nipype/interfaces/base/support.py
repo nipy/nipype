@@ -187,7 +187,7 @@ class Bunch(object):
             p.end_group(6, ')')
 
 
-def _hash_bunch_dict(self, adict, key):
+def _hash_bunch_dict(adict, key):
     """Inject file hashes into adict[key]"""
     stuff = adict[key]
     if not is_container(stuff):
