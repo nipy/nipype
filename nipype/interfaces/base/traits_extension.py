@@ -42,14 +42,15 @@ if traits_version < '3.7.0':
 
 standard_library.install_aliases()
 
-DictStrStr = traits.Dict((bytes, str), (bytes, str))
-
 
 class Str(Unicode):
     """Replacement for the default traits.Str based in bytes"""
 
 
+# Monkeypatch Str and DictStrStr for Python 2 compatibility
 traits.Str = Str
+DictStrStr = traits.Dict((bytes, str), (bytes, str))
+traits.DictStrStr = DictStrStr
 
 
 class BaseFile(BaseUnicode):
