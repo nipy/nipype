@@ -8,7 +8,7 @@ Miscelanous tools to support Interface functionality
 
 """
 from __future__ import print_function, division, unicode_literals, absolute_import
-from builtins import range, object, open, str
+from builtins import range, object, str
 
 import os
 from copy import deepcopy
@@ -18,7 +18,7 @@ import locale
 
 from ... import logging
 from ...utils.misc import is_container
-from ...utils.filemanip import md5, to_str
+from ...utils.filemanip import md5, to_str, hash_infile
 iflogger = logging.getLogger('interface')
 
 
@@ -116,27 +116,6 @@ class Bunch(object):
         outstr.append(')')
         return ''.join(outstr)
 
-    def _hash_infile(self, adict, key):
-        # Inject file hashes into adict[key]
-        stuff = adict[key]
-        if not is_container(stuff):
-            stuff = [stuff]
-        file_list = []
-        for afile in stuff:
-            if os.path.isfile(afile):
-                md5obj = md5()
-                with open(afile, 'rb') as fp:
-                    while True:
-                        data = fp.read(8192)
-                        if not data:
-                            break
-                        md5obj.update(data)
-                md5hex = md5obj.hexdigest()
-            else:
-                md5hex = None
-            file_list.append((afile, md5hex))
-        return file_list
-
     def _get_bunch_hash(self):
         """Return a dictionary of our items with hashes for each file.
 
@@ -181,7 +160,7 @@ class Bunch(object):
         dict_withhash = self.dictcopy()
         dict_nofilename = self.dictcopy()
         for item in infile_list:
-            dict_withhash[item] = self._hash_infile(dict_withhash, item)
+            dict_withhash[item] = _hash_bunch_dict(dict_withhash, item)
             dict_nofilename[item] = [val[1] for val in dict_withhash[item]]
         # Sort the items of the dictionary, before hashing the string
         # representation so we get a predictable order of the
@@ -206,6 +185,15 @@ class Bunch(object):
                 p.pretty(v)
                 first = False
             p.end_group(6, ')')
+
+
+def _hash_bunch_dict(self, adict, key):
+    """Inject file hashes into adict[key]"""
+    stuff = adict[key]
+    if not is_container(stuff):
+        stuff = [stuff]
+    return [(afile, hash_infile(afile))
+            for afile in stuff]
 
 
 class InterfaceResult(object):
