@@ -415,7 +415,6 @@ modelfit.connect([
     (modelgen, conestimate, [('con_file', 'tcon_file')]),
     (modelestimate, conestimate, [('param_estimates', 'param_estimates'),
                                   ('sigmasquareds', 'sigmasquareds'),
-                                  ('corrections', 'corrections'),
                                   ('dof_file', 'dof_file')]),
 ])
 
