@@ -720,17 +720,19 @@ class BrainExtraction(ANTSCommand):
     def _run_interface(self, runtime, correct_return_codes=(0,)):
         # antsBrainExtraction.sh requires ANTSPATH to be defined
         out_environ = self._get_environ()
-        if out_environ.get('ANTSPATH') is None:
-            runtime.environ.update(out_environ)
-            executable_name = self.cmd.split()[0]
-            exist_val, cmd_path = _exists_in_path(executable_name, runtime.environ)
-            if not exist_val:
-                raise IOError("command '%s' could not be found on host %s" %
-                              (self.cmd.split()[0], runtime.hostname))
+        ants_path = out_environ.get('ANTSPATH', None) or os.getenv('ANTSPATH', None)
+        if ants_path is None:
+            # Check for antsRegistration, which is under bin/ (the $ANTSPATH) instead of
+            # checking for antsBrainExtraction.sh which is under script/
+            _, cmd_path = _exists_in_path('antsRegistration', runtime.environ)
+            if not cmd_path:
+                raise RuntimeError(
+                    'The environment variable $ANTSPATH is not defined in host "%s", '
+                    'and Nipype could not determine it automatically.' % runtime.hostname)
+            ants_path = os.path.dirname(cmd_path)
 
-            # Set the environment variable if found
-            runtime.environ.update({'ANTSPATH': os.path.dirname(cmd_path)})
-
+        self.inputs.environ.update({'ANTSPATH': ants_path})
+        runtime.environ.update({'ANTSPATH': ants_path})
         runtime = super(BrainExtraction, self)._run_interface(runtime)
 
         # Still, double-check if it didn't found N4
@@ -740,8 +742,8 @@ class BrainExtraction(ANTSCommand):
                     tool = line.strip().replace('we cant find the', '').split(' ')[0]
                     break
 
-            errmsg = ('antsBrainExtraction.sh requires %s the environment variable '
-                      'ANTSPATH to be defined' % tool)
+            errmsg = ('antsBrainExtraction.sh requires "%s" to be found in $ANTSPATH '
+                      '($ANTSPATH="%s").') % (tool, ants_path)
             if runtime.stderr is None:
                 runtime.stderr = errmsg
             else:
