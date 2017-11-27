@@ -1570,10 +1570,12 @@ class CommandLine(BaseInterface):
         super(CommandLine, self).__init__(**inputs)
         self._environ = None
         # Set command. Input argument takes precedence
-        self._cmd = command or getattr(self, '_cmd', None)
-
-        if self._cmd is None:
+        if not hasattr(self, '_cmd'):
+            self._cmd = None
+        if self.cmd is None and command is None:
             raise Exception("Missing command")
+        if command:
+            self._cmd = command
 
         if terminal_output is not None:
             self.terminal_output = terminal_output
