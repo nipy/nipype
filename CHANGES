@@ -1,10 +1,14 @@
 Upcoming release
 ================
 
+
 0.14.0 (<TBD>)
 ==============
 
 ###### [Full changelog](https://github.com/nipy/nipype/milestone/13)
+
+* ENH: Memoize version checks (https://github.com/nipy/nipype/pull/2274, https://github.com/nipy/nipype/pull/2295)
+
 
 0.14.0rc1 (November 21, 2017)
 -----------------------------
