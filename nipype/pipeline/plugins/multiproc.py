@@ -127,7 +127,7 @@ class MultiProcPlugin(DistributedPluginBase):
 
         # Instantiate different thread pools for non-daemon processes
         logger.debug('MultiProcPlugin starting in "%sdaemon" mode (n_procs=%d, mem_gb=%0.2f)',
-                     'non' if non_daemon else '', self.processors, self.memory_gb)
+                     'non' * int(non_daemon), self.processors, self.memory_gb)
 
         NipypePool = NonDaemonPool if non_daemon else Pool
         try:
