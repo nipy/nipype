@@ -7,7 +7,8 @@ Upcoming release
 
 ###### [Full changelog](https://github.com/nipy/nipype/milestone/13)
 
-* ENH: Memoize version checks (https://github.com/nipy/nipype/pull/2274, https://github.com/nipy/nipype/pull/2295)
+* MAINT: Revise use of `subprocess.Popen` (https://github.com/nipy/nipype/pull/2289)
+* ENH: Memorize version checks (https://github.com/nipy/nipype/pull/2274, https://github.com/nipy/nipype/pull/2295)
 
 
 0.14.0rc1 (November 21, 2017)
