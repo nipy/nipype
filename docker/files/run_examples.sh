@@ -20,7 +20,7 @@ echo '[execution]' >> ${HOME}/.nipype/nipype.cfg
 echo 'crashfile_format = txt' >> ${HOME}/.nipype/nipype.cfg
 
 if [[ "${NIPYPE_RESOURCE_MONITOR:-0}" == "1" ]]; then
-	echo '[monitoring]' >> ${HOME}/.nipype/nipype.cfg
+    echo '[monitoring]' >> ${HOME}/.nipype/nipype.cfg
     echo 'enabled = true' >> ${HOME}/.nipype/nipype.cfg
     echo 'sample_frequency = 3' >> ${HOME}/.nipype/nipype.cfg
 fi
