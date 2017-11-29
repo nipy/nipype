@@ -21,7 +21,7 @@ from ..base import (CommandLineInputSpec, CommandLine, traits, TraitedSpec,
 from .base import MRTrix3BaseInputSpec, MRTrix3Base
 
 
-class DWI2ResponseInputSpec(MRTrix3BaseInputSpec):
+class ResponseSDInputSpec(MRTrix3BaseInputSpec):
     algorithm = traits.Enum('msmt_5tt','dhollander','tournier','tax', argstr='%s', position=-6,
         mandatory=True, desc='response estimation algorithm (multi-tissue)')
     dwi_file = File(exists=True, argstr='%s', position=-5,
@@ -37,13 +37,13 @@ class DWI2ResponseInputSpec(MRTrix3BaseInputSpec):
         desc='maximum harmonic degree of response function')
 
 
-class DWI2ResponseOutputSpec(TraitedSpec):
+class ResponseSDOutputSpec(TraitedSpec):
     wm_file = File(argstr='%s', desc='output WM response text file')
     gm_file = File(argstr='%s', desc='output GM response text file')
     csf_file = File(argstr='%s', desc='output CSF response text file')
 
 
-class DWI2Response(MRTrix3Base):
+class ResponseSD(MRTrix3Base):
 
     """
     Estimate response function(s) for spherical deconvolution using the specified algorithm.
@@ -52,7 +52,7 @@ class DWI2Response(MRTrix3Base):
     -------
 
     >>> import nipype.interfaces.mrtrix3 as mrt
-    >>> resp = mrt.DWI2Response()
+    >>> resp = mrt.ResponseSD()
     >>> resp.inputs.dwi_file = 'dwi.mif'
     >>> resp.inputs.algorithm = 'tournier'
     >>> resp.inputs.grad_fsl = ('bvecs', 'bvals')
@@ -62,8 +62,8 @@ class DWI2Response(MRTrix3Base):
     """
 
     _cmd = 'dwi2response'
-    input_spec = DWI2ResponseInputSpec
-    output_spec = DWI2ResponseOutputSpec
+    input_spec = ResponseSDInputSpec
+    output_spec = ResponseSDOutputSpec
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
@@ -72,99 +72,6 @@ class DWI2Response(MRTrix3Base):
             outputs['gm_file'] = op.abspath(self.inputs.gm_file)
         if self.inputs.csf_file!=Undefined:
             outputs['csf_file'] = op.abspath(self.inputs.csf_file)
-        return outputs
-
-
-class ResponseSDInputSpec(MRTrix3BaseInputSpec):
-    in_file = File(exists=True, argstr='%s', mandatory=True, position=-2,
-                   desc='input diffusion weighted images')
-
-    out_file = File(
-        'response.txt', argstr='%s', mandatory=True, position=-1,
-        usedefault=True, desc='output file containing SH coefficients')
-
-    # DW Shell selection options
-    shell = traits.List(traits.Float, sep=',', argstr='-shell %s',
-                        desc='specify one or more dw gradient shells')
-    in_mask = File(exists=True, argstr='-mask %s',
-                   desc='provide initial mask image')
-    max_sh = traits.Int(8, argstr='-lmax %d',
-                        desc='maximum harmonic degree of response function')
-    out_sf = File('sf_mask.nii.gz', argstr='-sf %s',
-                  desc='write a mask containing single-fibre voxels')
-    test_all = traits.Bool(False, argstr='-test_all',
-                           desc='re-test all voxels at every iteration')
-
-    # Optimization
-    iterations = traits.Int(0, argstr='-max_iters %d',
-                            desc='maximum number of iterations per pass')
-    max_change = traits.Float(
-        argstr='-max_change %f',
-        desc=('maximum percentile change in any response function coefficient;'
-              ' if no individual coefficient changes by more than this '
-              'fraction, the algorithm is terminated.'))
-
-    # Thresholds
-    vol_ratio = traits.Float(
-        .15, argstr='-volume_ratio %f',
-        desc=('maximal volume ratio between the sum of all other positive'
-              ' lobes in the voxel and the largest FOD lobe'))
-    disp_mult = traits.Float(
-        1., argstr='-dispersion_multiplier %f',
-        desc=('dispersion of FOD lobe must not exceed some threshold as '
-              'determined by this multiplier and the FOD dispersion in other '
-              'single-fibre voxels. The threshold is: (mean + (multiplier * '
-              '(mean - min))); default = 1.0. Criterion is only applied in '
-              'second pass of RF estimation.'))
-    int_mult = traits.Float(
-        2., argstr='-integral_multiplier %f',
-        desc=('integral of FOD lobe must not be outside some range as '
-              'determined by this multiplier and FOD lobe integral in other'
-              ' single-fibre voxels. The range is: (mean +- (multiplier * '
-              'stdev)); default = 2.0. Criterion is only applied in second '
-              'pass of RF estimation.'))
-
-
-class ResponseSDOutputSpec(TraitedSpec):
-    out_file = File(exists=True, desc='the output response file')
-    out_sf = File(desc=('mask containing single-fibre voxels'))
-
-
-class ResponseSD(MRTrix3Base):
-
-    """
-    Generate an appropriate response function from the image data for
-    spherical deconvolution.  (previous MRTrix releases)
-
-    .. [1] Tax, C. M.; Jeurissen, B.; Vos, S. B.; Viergever, M. A. and
-      Leemans, A., Recursive calibration of the fiber response function
-      for spherical deconvolution of diffusion MRI data. NeuroImage,
-      2014, 86, 67-80
-
-
-    Example
-    -------
-
-    >>> import nipype.interfaces.mrtrix3 as mrt
-    >>> resp = mrt.ResponseSD()
-    >>> resp.inputs.in_file = 'dwi.mif'
-    >>> resp.inputs.in_mask = 'mask.nii.gz'
-    >>> resp.inputs.grad_fsl = ('bvecs', 'bvals')
-    >>> resp.cmdline                               # doctest: +ELLIPSIS
-    'dwi2response -fslgrad bvecs bvals -mask mask.nii.gz dwi.mif response.txt'
-    >>> resp.run()                                 # doctest: +SKIP
-    """
-
-    _cmd = 'dwi2response'
-    input_spec = ResponseSDInputSpec
-    output_spec = ResponseSDOutputSpec
-
-    def _list_outputs(self):
-        outputs = self.output_spec().get()
-        outputs['out_file'] = op.abspath(self.inputs.out_file)
-
-        if isdefined(self.inputs.out_sf):
-            outputs['out_sf'] = op.abspath(self.inputs.out_sf)
         return outputs
 
 

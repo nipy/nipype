@@ -125,7 +125,7 @@ class Generate5tt(MRTrix3Base):
 
     """
     Generate a 5TT image suitable for ACT using the selected algorithm
-    uhm
+
 
     Example
     -------
@@ -143,53 +143,6 @@ class Generate5tt(MRTrix3Base):
     _cmd = '5ttgen'
     input_spec = Generate5ttInputSpec
     output_spec = Generate5ttOutputSpec
-
-    def _list_outputs(self):
-        outputs = self.output_spec().get()
-        outputs['out_file'] = op.abspath(self.inputs.out_file)
-        return outputs
-
-
-class Generate5ttFSLInputSpec(CommandLineInputSpec):
-    in_fast = InputMultiPath(
-        File(exists=True), argstr='%s', mandatory=True, position=-3,
-        desc='list of PVE images from FAST')
-    in_first = File(
-        exists=True, argstr='%s', position=-2,
-        desc='combined segmentation file from FIRST')
-    out_file = File(
-        'act-5tt.mif', argstr='%s', mandatory=True, position=-1,
-        usedefault=True, desc='name of output file')
-
-
-class Generate5ttFSLOutputSpec(TraitedSpec):
-    out_file = File(exists=True, desc='segmentation for ACT in 5tt format')
-
-
-class Generate5ttFSL(CommandLine):
-
-    """
-    Concatenate segmentation results from FSL FAST and FIRST into the 5TT
-    format required for ACT (previous MRTrix releases)
-
-
-    Example
-    -------
-
-    >>> import nipype.interfaces.mrtrix3 as mrt
-    >>> seg = mrt.Generate5ttFSL()
-    >>> seg.inputs.in_fast = ['tpm_00.nii.gz',
-    ...                       'tpm_01.nii.gz', 'tpm_02.nii.gz']
-    >>> seg.inputs.in_first = 'first_merged.nii.gz'
-    >>> seg.cmdline                               # doctest: +ELLIPSIS
-    '5ttgen tpm_00.nii.gz tpm_01.nii.gz tpm_02.nii.gz first_merged.nii.gz\
- act-5tt.mif'
-    >>> seg.run()                                 # doctest: +SKIP
-    """
-
-    _cmd = '5ttgen'
-    input_spec = Generate5ttFSLInputSpec
-    output_spec = Generate5ttFSLOutputSpec
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
