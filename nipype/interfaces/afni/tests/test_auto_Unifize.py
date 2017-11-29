@@ -32,6 +32,8 @@ def test_Unifize_inputs():
     name_source='in_file',
     ),
     outputtype=dict(),
+    rbt=dict(argstr='-rbt %f %f %f',
+    ),
     scale_file=dict(argstr='-ssave %s',
     ),
     t2=dict(argstr='-T2',
