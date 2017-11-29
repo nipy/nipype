@@ -1674,7 +1674,7 @@ class NwarpCat(AFNICommand):
     >>> nwarpcat = afni.NwarpCat()
     >>> nwarpcat.inputs.in_files = ['Q25_warp+tlrc.HEAD', ('IDENT', 'structural.nii')]
     >>> nwarpcat.inputs.out_file = 'Fred_total_WARP'
-    >>> nwarpcat.cmdline  # doctest: +ALLOW_UNICODE
+    >>> nwarpcat.cmdline
     "3dNwarpCat -prefix Fred_total_WARP Q25_warp+tlrc.HEAD 'IDENT(structural.nii)'"
     >>> res = nwarpcat.run()  # doctest: +SKIP
 

@@ -23,7 +23,7 @@ def test_identitynode_removal(tmpdir):
     def test_function(arg1, arg2, arg3):
         import numpy as np
         return (np.array(arg1) + arg2 + arg3).tolist()
-
+    
 
     wf = pe.Workflow(name="testidentity", base_dir=tmpdir.strpath)
 

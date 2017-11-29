@@ -31,12 +31,12 @@ def test_importerror(creating_graphs, tmpdir):
     graphlist = creating_graphs
     group1 = graphlist[:3]
     group2 = graphlist[3:]
-
+    
     nbs = NetworkBasedStatistic()
     nbs.inputs.in_group1 = group1
     nbs.inputs.in_group2 = group2
     nbs.inputs.edge_key = "weight"
-
+    
     with pytest.raises(ImportError) as e:
         nbs.run()
     assert "cviewer library is not available" == str(e.value)
