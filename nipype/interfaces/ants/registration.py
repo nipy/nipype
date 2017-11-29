@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
-"""The ants module provides basic functions for interfacing with ants functions.
+"""The ants module provides basic functions for interfacing with ants
+   functions.
 
    Change directory to provide relative paths for doctests
    >>> import os
@@ -7,7 +8,8 @@
    >>> datadir = os.path.realpath(os.path.join(filepath, '../../testing/data'))
    >>> os.chdir(datadir)
 """
-from __future__ import print_function, division, unicode_literals, absolute_import
+from __future__ import (print_function, division, unicode_literals,
+                        absolute_import)
 from builtins import range, str
 import os
 
@@ -20,17 +22,19 @@ class ANTSInputSpec(ANTSCommandInputSpec):
     dimension = traits.Enum(3, 2, argstr='%d', usedefault=False,
                             position=1, desc='image dimension (2 or 3)')
     fixed_image = InputMultiPath(File(exists=True), mandatory=True,
-                                 desc=('image to which the moving image is warped'))
+                                 desc=('image to which the moving image is '
+                                       'warped'))
     moving_image = InputMultiPath(File(exists=True), argstr='%s',
                                   mandatory=True,
-                                  desc=('image to apply transformation to (generally a coregistered '
+                                  desc=('image to apply transformation to '
+                                        '(generally a coregistered'
                                         'functional)'))
 
 #    Not all metrics are appropriate for all modalities. Also, not all metrics
-#    are efficeint or appropriate at all resolution levels, Some metrics perform
-#    well for gross global registraiton, but do poorly for small changes (i.e.
-#    Mattes), and some metrics do well for small changes but don't work well for
-#    gross level changes (i.e. 'CC').
+#    are efficeint or appropriate at all resolution levels, Some metrics
+#    perform well for gross global registraiton, but do poorly for small
+#    changes (i.e. Mattes), and some metrics do well for small changes but
+#    don't work well for gross level changes (i.e. 'CC').
 #
 #    This is a two stage registration. in the first stage
 #      [ 'Mattes', .................]
@@ -49,10 +53,18 @@ class ANTSInputSpec(ANTSCommandInputSpec):
     metric = traits.List(traits.Enum('CC', 'MI', 'SMI', 'PR', 'SSD',
                                      'MSQ', 'PSE'), mandatory=True, desc='')
 
-    metric_weight = traits.List(traits.Float(), requires=['metric'], desc='')
-    radius = traits.List(traits.Int(), requires=['metric'], desc='')
+    metric_weight = traits.List(traits.Float(), value=[1.0], usedefault=True,
+                                requires=['metric'], mandatory=True,
+                                desc='the metric weight(s) for each stage. '
+                                'The weights must sum to 1 per stage.')
 
-    output_transform_prefix = Str('out', usedefault=True, argstr='--output-naming %s',
+    radius = traits.List(traits.Int(), requires=['metric'],  mandatory=True,
+                         desc='radius of the region (i.e. number of layers'
+                         ' around a voxel point)'
+                         ' that is used for computing cross correlation')
+
+    output_transform_prefix = Str('out', usedefault=True,
+                                  argstr='--output-naming %s',
                                   mandatory=True, desc='')
     transformation_model = traits.Enum('Diff', 'Elast', 'Exp', 'Greedy Exp',
                                        'SyN', argstr='%s', mandatory=True,

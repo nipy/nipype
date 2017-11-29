@@ -1,10 +1,20 @@
 Upcoming release
 ================
 
-0.14.0 (November 21, 2017)
+
+0.14.0 (November 29, 2017)
 ==========================
 
 ###### [Full changelog](https://github.com/nipy/nipype/milestone/13)
+
+* FIX+MAINT: Revision of the resource monitor (https://github.com/nipy/nipype/pull/2285)
+* FIX: MultiProc mishandling crashes (https://github.com/nipy/nipype/pull/2301)
+* MAINT: Revise use of `subprocess.Popen` (https://github.com/nipy/nipype/pull/2289)
+* ENH: Memorize version checks (https://github.com/nipy/nipype/pull/2274, https://github.com/nipy/nipype/pull/2295)
+
+
+0.14.0rc1 (November 21, 2017)
+-----------------------------
 
 * ENH: Generate Dockerfiles with neurodocker (https://github.com/nipy/nipype/pull/2202)
 * ENH: FLAIR options for recon-all (https://github.com/nipy/nipype/pull/2279)

@@ -13,8 +13,10 @@ interfaces are found in the ``specs`` module.
 
 """
 from __future__ import print_function, division, unicode_literals, absolute_import
+
 from builtins import object, open, str, bytes
 
+import gc
 from copy import deepcopy
 from datetime import datetime as dt
 import errno
@@ -27,7 +29,6 @@ import sys
 from textwrap import wrap
 import simplejson as json
 from dateutil.parser import parse as parseutc
-
 
 from ... import config, logging, LooseVersion
 from ...utils.provenance import write_provenance
@@ -657,6 +658,7 @@ class SimpleInterface(BaseInterface):
     >>> os.chdir(old.strpath)
 
     """
+
     def __init__(self, from_file=None, resource_monitor=None, **inputs):
         super(SimpleInterface, self).__init__(
             from_file=from_file, resource_monitor=resource_monitor, **inputs)
@@ -705,6 +707,7 @@ def run_command(runtime, output=None, timeout=0.01):
                     env=env,
                     close_fds=True,
                     )
+
     result = {
         'stdout': [],
         'stderr': [],
@@ -743,12 +746,7 @@ def run_command(runtime, output=None, timeout=0.01):
         temp.sort()
         result['merged'] = [r[1] for r in temp]
 
-    if output == 'allatonce':
-        stdout, stderr = proc.communicate()
-        result['stdout'] = read_stream(stdout, logger=iflogger)
-        result['stderr'] = read_stream(stderr, logger=iflogger)
-
-    elif output.startswith('file'):
+    if output.startswith('file'):
         proc.wait()
         if outfile is not None:
             stdout.flush()
@@ -756,6 +754,7 @@ def run_command(runtime, output=None, timeout=0.01):
             with open(outfile, 'rb') as ofh:
                 stdoutstr = ofh.read()
             result['stdout'] = read_stream(stdoutstr, logger=iflogger)
+            del stdoutstr
 
         if errfile is not None:
             stderr.flush()
@@ -763,17 +762,34 @@ def run_command(runtime, output=None, timeout=0.01):
             with open(errfile, 'rb') as efh:
                 stderrstr = efh.read()
             result['stderr'] = read_stream(stderrstr, logger=iflogger)
+            del stderrstr
 
         if output == 'file':
             result['merged'] = result['stdout']
             result['stdout'] = []
     else:
-        proc.communicate()  # Discard stdout and stderr
+        stdout, stderr = proc.communicate()
+        if output == 'allatonce':  # Discard stdout and stderr otherwise
+            result['stdout'] = read_stream(stdout, logger=iflogger)
+            result['stderr'] = read_stream(stderr, logger=iflogger)
+
+    runtime.returncode = proc.returncode
+    try:
+        proc.terminate()  # Ensure we are done
+    except OSError as error:
+        # Python 2 raises when the process is already gone
+        if error.errno != errno.ESRCH:
+            raise
+
+    # Dereference & force GC for a cleanup
+    del proc
+    del stdout
+    del stderr
+    gc.collect()
 
     runtime.stderr = '\n'.join(result['stderr'])
     runtime.stdout = '\n'.join(result['stdout'])
     runtime.merged = '\n'.join(result['merged'])
-    runtime.returncode = proc.returncode
     return runtime
 
 
@@ -847,6 +863,9 @@ class CommandLine(BaseInterface):
         # Set command. Input argument takes precedence
         self._cmd = command or getattr(self, '_cmd', None)
 
+        # Store dependencies in runtime object
+        self._ldd = str2bool(config.get('execution', 'get_linked_libs', 'true'))
+
         if self._cmd is None:
             raise Exception("Missing command")
 
@@ -895,8 +914,11 @@ class CommandLine(BaseInterface):
         return getattr(self.inputs, 'environ', {})
 
     def version_from_command(self, flag='-v', cmd=None):
+        iflogger.warning('version_from_command member of CommandLine was '
+                         'Deprecated in nipype-1.0.0 and deleted in 1.1.0')
         if cmd is None:
             cmd = self.cmd.split()[0]
+
         env = dict(os.environ)
         if which(cmd, env=env):
             out_environ = self._get_environ()
@@ -942,7 +964,8 @@ class CommandLine(BaseInterface):
                     executable_name, runtime.hostname))
 
         runtime.command_path = cmd_path
-        runtime.dependencies = get_dependencies(executable_name, runtime.environ)
+        runtime.dependencies = (get_dependencies(executable_name, runtime.environ)
+                                if self._ldd else '<skipped>')
         runtime = run_command(runtime, output=self.terminal_output)
         if runtime.returncode is None or \
                 runtime.returncode not in correct_return_codes:
