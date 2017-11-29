@@ -122,13 +122,16 @@ class MultiProcPlugin(DistributedPluginBase):
         non_daemon = self.plugin_args.get('non_daemon', True)
         maxtasks = self.plugin_args.get('maxtasksperchild', 10)
         self.processors = self.plugin_args.get('n_procs', cpu_count())
-        self.memory_gb = self.plugin_args.get('memory_gb',  # Allocate 90% of system memory
-                                              get_system_total_memory_gb() * 0.9)
-        self.raise_insufficient = self.plugin_args.get('raise_insufficient', True)
+        self.memory_gb = self.plugin_args.get(
+            'memory_gb',  # Allocate 90% of system memory
+            get_system_total_memory_gb() * 0.9)
+        self.raise_insufficient = self.plugin_args.get('raise_insufficient',
+                                                       True)
 
         # Instantiate different thread pools for non-daemon processes
-        logger.debug('MultiProcPlugin starting in "%sdaemon" mode (n_procs=%d, mem_gb=%0.2f)',
-                     'non' * int(non_daemon), self.processors, self.memory_gb)
+        logger.debug('MultiProcPlugin starting in "%sdaemon" mode (n_procs=%d,'
+                     'mem_gb=%0.2f)', 'non' * int(non_daemon), self.processors,
+                     self.memory_gb)
 
         NipypePool = NonDaemonPool if non_daemon else Pool
         try:
@@ -205,12 +208,13 @@ class MultiProcPlugin(DistributedPluginBase):
         Sends jobs to workers when system resources are available.
         """
 
-        # Check to see if a job is available (jobs without dependencies not run)
+        # Check to see if a job is available (jobs with all dependencies run)
         # See https://github.com/nipy/nipype/pull/2200#discussion_r141605722
         jobids = np.nonzero(~self.proc_done & (self.depidx.sum(0) == 0))[1]
 
-        # Check available system resources by summing all threads and memory used
-        free_memory_gb, free_processors = self._check_resources(self.pending_tasks)
+        # Check available resources by summing all threads and memory used
+        free_memory_gb, free_processors = self._check_resources(
+            self.pending_tasks)
 
         stats = (len(self.pending_tasks), len(jobids), free_memory_gb,
                  self.memory_gb, free_processors, self.processors)
@@ -229,7 +233,8 @@ class MultiProcPlugin(DistributedPluginBase):
                          'be submitted to the queue. Potential deadlock')
             return
 
-        jobids = self._sort_jobs(jobids, scheduler=self.plugin_args.get('scheduler'))
+        jobids = self._sort_jobs(jobids,
+                                 scheduler=self.plugin_args.get('scheduler'))
 
         # Run garbage collector before potentially submitting jobs
         gc.collect()
@@ -265,9 +270,10 @@ class MultiProcPlugin(DistributedPluginBase):
 
             free_memory_gb -= next_job_gb
             free_processors -= next_job_th
-            logger.debug('Allocating %s ID=%d (%0.2fGB, %d threads). Free: %0.2fGB, %d threads.',
-                         self.procs[jobid].fullname, jobid, next_job_gb, next_job_th,
-                         free_memory_gb, free_processors)
+            logger.debug('Allocating %s ID=%d (%0.2fGB, %d threads). Free: '
+                         '%0.2fGB, %d threads.', self.procs[jobid].fullname,
+                         jobid, next_job_gb, next_job_th, free_memory_gb,
+                         free_processors)
 
             # change job status in appropriate queues
             self.proc_done[jobid] = True
