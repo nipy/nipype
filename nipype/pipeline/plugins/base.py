@@ -128,6 +128,7 @@ class DistributedPluginBase(PluginBase):
         old_progress_stats = None
         old_presub_stats = None
         while not np.all(self.proc_done) or np.any(self.proc_pending):
+            loop_start = time()
             # Check to see if a job is available (jobs without dependencies not run)
             # See https://github.com/nipy/nipype/pull/2200#discussion_r141605722
             jobs_ready = np.nonzero(~self.proc_done & (self.depidx.sum(0) == 0))[1]
@@ -183,7 +184,8 @@ class DistributedPluginBase(PluginBase):
             elif display_stats:
                 logger.debug('Not submitting (max jobs reached)')
 
-            sleep(poll_sleep_secs)
+            sleep_til = loop_start + poll_sleep_secs
+            sleep(max(0, sleep_til - time()))
 
         self._remove_node_dirs()
         report_nodes_not_run(notrun)
