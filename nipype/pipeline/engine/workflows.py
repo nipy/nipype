@@ -62,6 +62,7 @@ from .nodes import Node, MapNode
 
 logger = logging.getLogger('workflow')
 
+
 class Workflow(EngineBase):
     """Controls the setup and execution of a pipeline of processes."""
 
@@ -196,7 +197,7 @@ class Workflow(EngineBase):
                 # determine their inputs/outputs depending on
                 # connection settings.  Skip these modules in the check
                 if dest in connected_ports[destnode]:
-                    raise Exception("""
+                    raise Exception("""\
 Trying to connect %s:%s to %s:%s but input '%s' of node '%s' is already
 connected.
 """ % (srcnode, source, destnode, dest, dest, destnode))
@@ -297,7 +298,7 @@ connected.
             remove = []
             for edge in conn:
                 if edge in ed_conns:
-                    idx = ed_conns.index(edge)
+                    # idx = ed_conns.index(edge)
                     remove.append((edge[0], edge[1]))
 
             logger.debug('disconnect(): remove list %s', to_str(remove))
@@ -426,7 +427,7 @@ connected.
                 base_dir = os.getcwd()
         base_dir = make_output_dir(base_dir)
         if graph2use in ['hierarchical', 'colored']:
-            if self.name[:1].isdigit(): # these graphs break if int
+            if self.name[:1].isdigit():  # these graphs break if int
                 raise ValueError('{} graph failed, workflow name cannot begin '
                                  'with a number'.format(graph2use))
             dotfilename = op.join(base_dir, dotfilename)
@@ -650,7 +651,7 @@ connected.
         # Avoid RuntimeWarning: divide by zero encountered in log10
         num_nodes = len(nodes)
         if num_nodes > 0:
-           index_name = np.ceil(np.log10(num_nodes)).astype(int)
+            index_name = np.ceil(np.log10(num_nodes)).astype(int)
         else:
             index_name = 0
         template = '%%0%dd_' % index_name
@@ -798,10 +799,10 @@ connected.
                 setattr(outputdict, node.name, outputs)
         return outputdict
 
-    def _set_input(self, object, name, newvalue):
+    def _set_input(self, objekt, name, newvalue):
         """Trait callback function to update a node input
         """
-        object.traits()[name].node.set_input(name, newvalue)
+        objekt.traits()[name].node.set_input(name, newvalue)
 
     def _set_node_input(self, node, param, source, sourceinfo):
         """Set inputs of a node given the edge connection"""
