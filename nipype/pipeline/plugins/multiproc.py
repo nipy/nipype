@@ -12,6 +12,7 @@ from __future__ import print_function, division, unicode_literals, absolute_impo
 from multiprocessing import Process, Pool, cpu_count, pool
 from traceback import format_exception
 import sys
+import gc
 
 from copy import deepcopy
 import numpy as np
@@ -230,6 +231,9 @@ class MultiProcPlugin(DistributedPluginBase):
 
         jobids = self._sort_jobs(jobids, scheduler=self.plugin_args.get('scheduler'))
 
+        # Run garbage collector before potentially submitting jobs
+        gc.collect()
+
         # Submit jobs
         for jobid in jobids:
             # First expand mapnodes
@@ -292,6 +296,9 @@ class MultiProcPlugin(DistributedPluginBase):
                 free_processors += next_job_th
                 # Display stats next loop
                 self._stats = None
+
+                # Clean up any debris from running node in main process
+                gc.collect()
                 continue
 
             # Task should be submitted to workers
