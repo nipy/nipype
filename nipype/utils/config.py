@@ -31,8 +31,8 @@ standard_library.install_aliases()
 
 
 CONFIG_DEPRECATIONS = {
-    'profile_runtime': ('resource_monitor', '1.0'),
-    'filemanip_level': ('utils_level', '1.0'),
+    'profile_runtime': ('monitoring.enabled', '1.0'),
+    'filemanip_level': ('logging.utils_level', '1.0'),
 }
 
 NUMPY_MMAP = LooseVersion(np.__version__) >= LooseVersion('1.12.0')
@@ -71,8 +71,11 @@ write_provenance = false
 parameterize_dirs = true
 poll_sleep_duration = 2
 xvfb_max_wait = 10
-resource_monitor = false
-resource_monitor_frequency = 1
+
+[monitoring]
+enabled = false
+sample_frequency = 1
+summary_append = true
 
 [check]
 interval = 1209600
@@ -105,12 +108,12 @@ class NipypeConfig(object):
             self._config.read([config_file, 'nipype.cfg'])
 
         for option in CONFIG_DEPRECATIONS:
-            for section in ['execution', 'logging']:
+            for section in ['execution', 'logging', 'monitoring']:
                 if self.has_option(section, option):
-                    new_option = CONFIG_DEPRECATIONS[option][0]
-                    if not self.has_option(section, new_option):
+                    new_section, new_option = CONFIG_DEPRECATIONS[option][0].split('.')
+                    if not self.has_option(new_section, new_option):
                         # Warn implicit in get
-                        self.set(section, new_option, self.get(section, option))
+                        self.set(new_section, new_option, self.get(section, option))
 
     def set_default_config(self):
         self._config.readfp(StringIO(default_cfg))
@@ -138,7 +141,7 @@ class NipypeConfig(object):
                    '"%s" instead.') % (option, CONFIG_DEPRECATIONS[option][1],
                                        CONFIG_DEPRECATIONS[option][0])
             warn(msg)
-            option = CONFIG_DEPRECATIONS[option][0]
+            section, option = CONFIG_DEPRECATIONS[option][0].split('.')
 
         if self._config.has_option(section, option):
             return self._config.get(section, option)
@@ -154,7 +157,7 @@ class NipypeConfig(object):
                    '"%s" instead.') % (option, CONFIG_DEPRECATIONS[option][1],
                                        CONFIG_DEPRECATIONS[option][0])
             warn(msg)
-            option = CONFIG_DEPRECATIONS[option][0]
+            section, option = CONFIG_DEPRECATIONS[option][0].split('.')
 
         return self._config.set(section, option, value)
 
@@ -222,8 +225,8 @@ class NipypeConfig(object):
             return self._resource_monitor
 
         # Cache config from nipype config
-        self.resource_monitor = self._config.get(
-            'execution', 'resource_monitor') or False
+        self.resource_monitor = str2bool(self._config.get(
+            'monitoring', 'enabled')) or False
         return self._resource_monitor
 
     @resource_monitor.setter
@@ -248,7 +251,7 @@ class NipypeConfig(object):
                     if not self._resource_monitor:
                         warn('Could not enable the resource monitor: psutil>=5.0'
                              ' could not be imported.')
-                    self._config.set('execution', 'resource_monitor',
+                    self._config.set('monitoring', 'enabled',
                                      ('%s' % self._resource_monitor).lower())
 
     def enable_resource_monitor(self):

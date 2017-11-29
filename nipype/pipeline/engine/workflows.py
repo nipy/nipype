@@ -598,7 +598,11 @@ connected.
             write_workflow_prov(execgraph, prov_base, format='all')
 
         if config.resource_monitor:
-            write_workflow_resources(execgraph)
+            base_dir = self.base_dir or os.getcwd()
+            write_workflow_resources(
+                execgraph,
+                filename=op.join(base_dir, self.name, 'resource_monitor.json')
+            )
         return execgraph
 
     # PRIVATE API AND FUNCTIONS

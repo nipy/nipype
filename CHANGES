@@ -7,6 +7,7 @@ Upcoming release
 
 ###### [Full changelog](https://github.com/nipy/nipype/milestone/13)
 
+* FIX+MAINT: Revision of the resource monitor (https://github.com/nipy/nipype/pull/2285)
 * FIX: MultiProc mishandling crashes (https://github.com/nipy/nipype/pull/2301)
 * MAINT: Revise use of `subprocess.Popen` (https://github.com/nipy/nipype/pull/2289)
 * ENH: Memorize version checks (https://github.com/nipy/nipype/pull/2274, https://github.com/nipy/nipype/pull/2295)
