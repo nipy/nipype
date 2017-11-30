@@ -2,6 +2,11 @@
   "creators": [
     {
       "affiliation": "Department of Psychology, Stanford University",
+      "name": "Gorgolewski, Krzysztof J.",
+      "orcid": "0000-0003-3321-7583"
+    },
+    {
+      "affiliation": "Department of Psychology, Stanford University",
       "name": "Esteban, Oscar",
       "orcid": "0000-0001-8435-6191"
     },
@@ -93,6 +98,11 @@
       "name": "Loney, Fred"
     },
     {
+      "affiliation": "National Institute of Mental Health",
+      "name": "Nielson, Dylan M.",
+      "orcid": "0000-0003-4613-6643"
+    },
+    {
       "name": "Madison, Cindee"
     },
     {
@@ -107,6 +117,11 @@
     },
     {
       "name": "Berleant, Shoshana"
+    },
+    {
+      "affiliation": "Montreal Neurological Institute and Hospital",
+      "name": "Markello, Ross",
+      "orcid": "0000-0003-1057-1336"
     },
     {
       "name": "Pinsard, Basile"
@@ -191,6 +206,11 @@
     },
     {
       "name": "Forbes, Jessica"
+    },
+    {
+     "affiliation": "Montreal Neurological Institute and Hospital",
+     "name": "DuPre, Elizabeth",
+     "orcid": "0000-0003-1358-196X"
     },
     {
       "name": "Schwartz, Yannick"
@@ -510,21 +530,6 @@
       "orcid": "0000-0001-6810-4461"
     },
     {
-      "affiliation": "Montreal Neurological Institute and Hospital",
-      "name": "Markello, Ross",
-      "orcid": "0000-0003-1057-1336"
-    },
-    {
-     "affiliation": "Montreal Neurological Institute and Hospital",
-     "name": "DuPre, Elizabeth",
-     "orcid": "0000-0003-1358-196X"
-    },
-    {
-      "affiliation": "National Institute of Mental Health",
-      "name": "Nielson, Dylan M.",
-      "orcid": "0000-0003-4613-6643"
-    },
-    {
       "affiliation": "German Institute for International Educational Research",
       "name": "Linkersd\u00f6rfer, Janosch",
       "orcid": "0000-0002-1577-1233"
@@ -553,11 +558,6 @@
     },
     {
       "name": "Davison, Andrew"
-    },
-    {
-      "affiliation": "Department of Psychology, Stanford University",
-      "name": "Gorgolewski, Krzysztof J.",
-      "orcid": "0000-0003-3321-7583"
     },
     {
       "affiliation": "MIT, HMS",
