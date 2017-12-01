@@ -307,7 +307,7 @@ class Node(EngineBase):
         updatehash: boolean
             Update the hash stored in the output directory
         """
-        cwd = os.getcwd()
+        cwd = os.getcwd()  # First thing, keep track of where we are
 
         if self.config is None:
             self.config = {}
@@ -327,6 +327,7 @@ class Node(EngineBase):
         makedirs(outdir, exist_ok=True)
         os.chdir(outdir)
 
+        # Check hash, check whether run should be enforced
         logger.info('[Node] Setting-up "%s" in "%s".', self.fullname, outdir)
         hash_info = self.hash_exists(updatehash=updatehash)
         hash_exists, hashvalue, hashfile, hashed_inputs = hash_info
@@ -359,7 +360,7 @@ class Node(EngineBase):
         if need_rerun:
             log_debug = config.get('logging', 'workflow_level') == 'DEBUG'
             logger.debug('[Node] Rerunning "%s"', self.fullname)
-            if log_debug and not hash_exists:
+            if log_debug and not hash_exists:  # Lazy logging - only debug
                 exp_hash_paths = glob(json_pat)
                 if len(exp_hash_paths) == 1:
                     split_out = split_filename(exp_hash_paths[0])
@@ -375,9 +376,10 @@ class Node(EngineBase):
                                                           hashed_inputs)
             if not force_run and str2bool(self.config['execution']['stop_on_first_rerun']):
                 raise Exception('Cannot rerun when "stop_on_first_rerun" is set to True')
-        hashfile_unfinished = op.join(outdir,
-                                      '_0x%s_unfinished.json' %
-                                      hashvalue)
+
+        # Hashfile while running, remove if exists already
+        hashfile_unfinished = op.join(
+            outdir, '_0x%s_unfinished.json' % hashvalue)
         if op.exists(hashfile):
             os.remove(hashfile)
 
@@ -396,6 +398,7 @@ class Node(EngineBase):
                 for filename in glob(op.join(outdir, '_0x*.json')):
                     os.remove(filename)
 
+        # Store runtime-hashfile, pre-execution report, the node and the inputs set.
         self._save_hashfile(hashfile_unfinished, hashed_inputs)
         self.write_report(report_type='preexec', cwd=outdir)
         savepkl(op.join(outdir, '_node.pklz'), self)
@@ -405,11 +408,12 @@ class Node(EngineBase):
             self._run_interface(execute=True)
         except:
             logger.warning('[Node] Exception "%s" (%s)', self.fullname, outdir)
+            # Tear-up after error
             os.remove(hashfile_unfinished)
             os.chdir(cwd)
             raise
 
-        # Tear-up
+        # Tear-up after success
         shutil.move(hashfile_unfinished, hashfile)
         self.write_report(report_type='postexec', cwd=outdir)
         logger.info('[Node] Finished "%s".', self.fullname)
