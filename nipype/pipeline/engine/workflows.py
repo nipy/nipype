@@ -15,50 +15,38 @@ The `Workflow` class provides core functionality for batch processing.
 
 """
 from __future__ import print_function, division, unicode_literals, absolute_import
-from builtins import range, object, str, bytes, open
+from builtins import str, bytes, open
 
-# Py2 compat: http://python-future.org/compatible_idioms.html#collections-counter-and-ordereddict
-from future import standard_library
-standard_library.install_aliases()
-
-from datetime import datetime
-
-from copy import deepcopy
-import pickle
 import os
 import os.path as op
-import shutil
 import sys
+from datetime import datetime
+from copy import deepcopy
+import pickle
+import shutil
 from warnings import warn
 
 import numpy as np
 import networkx as nx
 
-
 from ... import config, logging
-
-from ...utils.misc import (unflatten, str2bool)
+from ...utils.misc import str2bool
 from ...utils.functions import (getsource, create_function_from_source)
-from ...interfaces.base import (traits, InputMultiPath, CommandLine,
-                                Undefined, TraitedSpec, DynamicTraitedSpec,
-                                Bunch, InterfaceResult, md5, Interface,
-                                TraitDictObject, TraitListObject, isdefined)
-
-from ...utils.filemanip import (save_json, FileNotFoundError,
-                                filename_to_list, list_to_filename,
-                                copyfiles, fnames_presuffix, loadpkl,
-                                split_filename, load_json, makedirs, savepkl,
-                                write_rst_header, write_rst_dict,
-                                write_rst_list, to_str)
-from .utils import (generate_expanded_graph, modify_paths,
-                    export_graph, write_workflow_prov,
-                    write_workflow_resources,
-                    clean_working_directory, format_dot, topological_sort,
-                    get_print_name, merge_dict, evaluate_connect_function,
-                    _write_inputs, format_node)
+from ...interfaces.base import (
+    traits, TraitedSpec, TraitDictObject, TraitListObject)
+from ...utils.filemanip import save_json, makedirs, to_str
+from .utils import (
+    generate_expanded_graph, export_graph, write_workflow_prov,
+    write_workflow_resources, format_dot, topological_sort,
+    get_print_name, merge_dict, format_node
+)
 
 from .base import EngineBase
-from .nodes import Node, MapNode
+from .nodes import MapNode
+
+# Py2 compat: http://python-future.org/compatible_idioms.html#collections-counter-and-ordereddict
+from future import standard_library
+standard_library.install_aliases()
 
 logger = logging.getLogger('workflow')
 
@@ -202,16 +190,16 @@ Trying to connect %s:%s to %s:%s but input '%s' of node '%s' is already
 connected.
 """ % (srcnode, source, destnode, dest, dest, destnode))
                 if not (hasattr(destnode, '_interface') and
-                            ('.io' in str(destnode._interface.__class__) or
-                                any(['.io' in str(val) for val in
-                                     destnode._interface.__class__.__bases__]))
+                        ('.io' in str(destnode._interface.__class__) or
+                         any(['.io' in str(val) for val in
+                              destnode._interface.__class__.__bases__]))
                         ):
                     if not destnode._check_inputs(dest):
                         not_found.append(['in', destnode.name, dest])
                 if not (hasattr(srcnode, '_interface') and
-                            ('.io' in str(srcnode._interface.__class__)
-                             or any(['.io' in str(val) for val in
-                                     srcnode._interface.__class__.__bases__]))):
+                        ('.io' in str(srcnode._interface.__class__) or
+                         any(['.io' in str(val)
+                              for val in srcnode._interface.__class__.__bases__]))):
                     if isinstance(source, tuple):
                         # handles the case that source is specified
                         # with a function
@@ -930,13 +918,13 @@ connected.
             prefix = '  '
         if hierarchy is None:
             hierarchy = []
-        colorset = ['#FFFFC8',                       # Y
-                    '#0000FF', '#B4B4FF', '#E6E6FF', # B
-                    '#FF0000', '#FFB4B4', '#FFE6E6', # R
-                    '#00A300', '#B4FFB4', '#E6FFE6', # G
-                    '#0000FF', '#B4B4FF'] # loop B
+        colorset = ['#FFFFC8',                        # Y
+                    '#0000FF', '#B4B4FF', '#E6E6FF',  # B
+                    '#FF0000', '#FFB4B4', '#FFE6E6',  # R
+                    '#00A300', '#B4FFB4', '#E6FFE6',  # G
+                    '#0000FF', '#B4B4FF']             # loop B
         if level > len(colorset) - 2:
-            level = 3 # Loop back to blue
+            level = 3  # Loop back to blue
 
         dotlist = ['%slabel="%s";' % (prefix, self.name)]
         for node in nx.topological_sort(self._graph):
