@@ -22,7 +22,7 @@ import numpy as np
 from numpy.polynomial import Legendre
 from scipy import linalg
 
-from .. import logging
+from .. import config, logging
 from ..external.due import BibTeX
 from ..interfaces.base import (traits, TraitedSpec, BaseInterface,
                                BaseInterfaceInputSpec, File, isdefined,
@@ -816,7 +816,7 @@ def plot_confound(tseries, figsize, name, units=None,
 
     """
     import matplotlib
-    matplotlib.use('Agg')
+    matplotlib.use(config.get('execution', 'matplotlib_backend'))
     import matplotlib.pyplot as plt
     from matplotlib.gridspec import GridSpec
     from matplotlib.backends.backend_pdf import FigureCanvasPdf as FigureCanvas

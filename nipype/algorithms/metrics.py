@@ -24,7 +24,7 @@ from scipy.ndimage.morphology import binary_erosion
 from scipy.spatial.distance import cdist, euclidean, dice, jaccard
 from scipy.ndimage.measurements import center_of_mass, label
 
-from .. import logging
+from .. import config, logging
 from ..utils.misc import package_check
 
 from ..interfaces.base import (BaseInterface, traits, TraitedSpec, File,
@@ -138,6 +138,8 @@ class Distance(BaseInterface):
 
         dist_matrix = cdist(set1_coordinates.T, set2_coordinates.T)
         min_dist_matrix = np.amin(dist_matrix, axis=0)
+        import matplotlib
+        matplotlib.use(config.get('execution', 'matplotlib_backend'))
         import matplotlib.pyplot as plt
         plt.figure()
         plt.hist(min_dist_matrix, 50, normed=1, facecolor='green')

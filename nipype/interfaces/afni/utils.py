@@ -1674,7 +1674,7 @@ class NwarpCat(AFNICommand):
     >>> nwarpcat = afni.NwarpCat()
     >>> nwarpcat.inputs.in_files = ['Q25_warp+tlrc.HEAD', ('IDENT', 'structural.nii')]
     >>> nwarpcat.inputs.out_file = 'Fred_total_WARP'
-    >>> nwarpcat.cmdline  # doctest: +ALLOW_UNICODE
+    >>> nwarpcat.cmdline
     "3dNwarpCat -prefix Fred_total_WARP Q25_warp+tlrc.HEAD 'IDENT(structural.nii)'"
     >>> res = nwarpcat.run()  # doctest: +SKIP
 
@@ -2329,6 +2329,14 @@ class UnifizeInputSpec(AFNICommandInputSpec):
         argstr='-EPI',
         requires=['no_duplo', 't2'],
         xor=['gm'])
+    rbt = traits.Tuple(
+        traits.Float(), traits.Float(), traits.Float(),
+        desc='Option for AFNI experts only.'
+             'Specify the 3 parameters for the algorithm:\n'
+             'R = radius; same as given by option \'-Urad\', [default=18.3]\n'
+             'b = bottom percentile of normalizing data range, [default=70.0]\n'
+             'r = top percentile of normalizing data range, [default=80.0]\n',
+        argstr='-rbt %f %f %f')
 
 
 class UnifizeOutputSpec(TraitedSpec):

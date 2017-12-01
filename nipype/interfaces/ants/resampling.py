@@ -75,7 +75,7 @@ ants_Affine.txt'
     >>> wtsimt.inputs.reference_image = 'ants_deformed.nii.gz'
     >>> wtsimt.inputs.transformation_series = ['ants_Warp.nii.gz','ants_Affine.txt']
     >>> wtsimt.inputs.invert_affine = [1] # # this will invert the 1st Affine file: ants_Affine.txt
-    >>> wtsimt.cmdline # doctest: +ALLOW_UNICODE
+    >>> wtsimt.cmdline
     'WarpTimeSeriesImageMultiTransform 4 resting.nii resting_wtsimt.nii -R ants_deformed.nii.gz ants_Warp.nii.gz \
 -i ants_Affine.txt'
     """

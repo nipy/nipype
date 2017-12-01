@@ -1278,14 +1278,23 @@ def write_workflow_prov(graph, filename=None, format='all'):
     return ps.g
 
 
-def write_workflow_resources(graph, filename=None):
+def write_workflow_resources(graph, filename=None, append=None):
     """
     Generate a JSON file with profiling traces that can be loaded
     in a pandas DataFrame or processed with JavaScript like D3.js
     """
     import simplejson as json
+
+    # Overwrite filename if nipype config is set
+    filename = config.get('monitoring', 'summary_file', filename)
+
+    # If filename still does not make sense, store in $PWD
     if not filename:
         filename = os.path.join(os.getcwd(), 'resource_monitor.json')
+
+    if append is None:
+        append = str2bool(config.get(
+            'monitoring', 'summary_append', 'true'))
 
     big_dict = {
         'time': [],
@@ -1297,6 +1306,13 @@ def write_workflow_resources(graph, filename=None):
         'params': [],
     }
 
+    # If file exists, just append new profile information
+    # If we append different runs, then we will see different
+    # "bursts" of timestamps corresponding to those executions.
+    if append and os.path.isfile(filename):
+        with open(filename, 'r' if PY3 else 'rb') as rsf:
+            big_dict = json.load(rsf)
+
     for idx, node in enumerate(graph.nodes()):
         nodename = node.fullname
         classname = node._interface.__class__.__name__
@@ -1304,7 +1320,7 @@ def write_workflow_resources(graph, filename=None):
         params = ''
         if node.parameterization:
             params = '_'.join(['{}'.format(p)
-                              for p in node.parameterization])
+                               for p in node.parameterization])
 
         try:
             rt_list = node.result.runtime
@@ -1317,7 +1333,13 @@ def write_workflow_resources(graph, filename=None):
             rt_list = [rt_list]
 
         for subidx, runtime in enumerate(rt_list):
-            nsamples = len(runtime.prof_dict['time'])
+            try:
+                nsamples = len(runtime.prof_dict['time'])
+            except AttributeError:
+                logger.warning(
+                    'Could not retrieve profiling information for node "%s" '
+                    '(mapflow %d/%d).', nodename, subidx + 1, len(rt_list))
+                continue
 
             for key in ['time', 'mem_gb', 'cpus']:
                 big_dict[key] += runtime.prof_dict[key]
