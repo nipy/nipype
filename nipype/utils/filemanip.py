@@ -680,14 +680,14 @@ def makedirs(path, exist_ok=False):
         return path
 
     # this odd approach deals with concurrent directory cureation
-    try:
-        if not os.path.exists(os.path.abspath(path)):
-            fmlogger.debug("Creating directory %s", path)
+    if not os.path.exists(os.path.abspath(path)):
+        fmlogger.debug("Creating directory %s", path)
+        try:
             os.makedirs(path)
-    except OSError:
-        fmlogger.debug("Problem creating directory %s", path)
-        if not os.path.exists(path):
-            raise OSError('Could not create directory %s' % path)
+        except OSError:
+            fmlogger.debug("Problem creating directory %s", path)
+            if not os.path.exists(path):
+                raise OSError('Could not create directory %s' % path)
     return path
 
 
