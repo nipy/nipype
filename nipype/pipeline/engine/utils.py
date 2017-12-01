@@ -4,27 +4,24 @@
 """Utility routines for workflow graphs
 """
 from __future__ import print_function, division, unicode_literals, absolute_import
-from builtins import str, open, map, next, zip, range
+from builtins import str, open, next, zip, range
 
+import os
 import sys
-from future import standard_library
-standard_library.install_aliases()
+import pickle
 from collections import defaultdict
-
+import re
 from copy import deepcopy
 from glob import glob
+from distutils.version import LooseVersion
+
 try:
     from inspect import signature
 except ImportError:
     from funcsigs import signature
 
-import os
-import re
-import pickle
 from functools import reduce
 import numpy as np
-from distutils.version import LooseVersion
-
 import networkx as nx
 
 from ...utils.filemanip import (fname_presuffix, FileNotFoundError, to_str,
@@ -37,6 +34,9 @@ from ...interfaces.utility import IdentityInterface
 from ...utils.provenance import ProvStore, pm, nipype_ns, get_id
 
 from ... import logging, config
+from future import standard_library
+
+standard_library.install_aliases()
 logger = logging.getLogger('workflow')
 PY3 = sys.version_info[0] > 2
 
@@ -262,8 +262,6 @@ def _write_detailed_dot(graph, dotfilename):
     text = ['digraph structs {', 'node [shape=record];']
     # write nodes
     edges = []
-    replacefunk = lambda x: x.replace('_', '').replace('.', ''). \
-        replace('@', '').replace('-', '')
     for n in nx.topological_sort(graph):
         nodename = str(n)
         inports = []
@@ -274,18 +272,16 @@ def _write_detailed_dot(graph, dotfilename):
                 else:
                     outport = cd[0][0]
                 inport = cd[1]
-                ipstrip = 'in' + replacefunk(inport)
-                opstrip = 'out' + replacefunk(outport)
+                ipstrip = 'in%s' % _replacefunk(inport)
+                opstrip = 'out%s' % _replacefunk(outport)
                 edges.append('%s:%s:e -> %s:%s:w;' % (str(u).replace('.', ''),
                                                       opstrip,
                                                       str(v).replace('.', ''),
                                                       ipstrip))
                 if inport not in inports:
                     inports.append(inport)
-        inputstr = '{IN'
-        for ip in sorted(inports):
-            inputstr += '|<in%s> %s' % (replacefunk(ip), ip)
-        inputstr += '}'
+        inputstr = ['{IN'] + ['|<in%s> %s' % (_replacefunk(ip), ip)
+                              for ip in sorted(inports)] + ['}']
         outports = []
         for u, v, d in graph.out_edges(nbunch=n, data=True):
             for cd in d['connect']:
@@ -295,10 +291,8 @@ def _write_detailed_dot(graph, dotfilename):
                     outport = cd[0][0]
                 if outport not in outports:
                     outports.append(outport)
-        outputstr = '{OUT'
-        for op in sorted(outports):
-            outputstr += '|<out%s> %s' % (replacefunk(op), op)
-        outputstr += '}'
+        outputstr = ['{OUT'] + ['|<out%s> %s' % (_replacefunk(oport), oport)
+                                for oport in sorted(outports)] + ['}']
         srcpackage = ''
         if hasattr(n, '_interface'):
             pkglist = n._interface.__class__.__module__.split('.')
@@ -309,17 +303,21 @@ def _write_detailed_dot(graph, dotfilename):
                                             srcpackage,
                                             srchierarchy)
         text += ['%s [label="%s|%s|%s"];' % (nodename.replace('.', ''),
-                                             inputstr,
+                                             ''.join(inputstr),
                                              nodenamestr,
-                                             outputstr)]
+                                             ''.join(outputstr))]
     # write edges
     for edge in sorted(edges):
         text.append(edge)
     text.append('}')
-    filep = open(dotfilename, 'wt')
-    filep.write('\n'.join(text))
-    filep.close()
+    with open(dotfilename, 'wt') as filep:
+        filep.write('\n'.join(text))
     return text
+
+
+def _replacefunk(x):
+    return x.replace('_', '').replace(
+        '.', '').replace('@', '').replace('-', '')
 
 
 # Graph manipulations for iterable expansion
