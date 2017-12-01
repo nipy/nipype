@@ -12,11 +12,10 @@ from __future__ import print_function, division, unicode_literals, absolute_impo
 from multiprocessing import Process, Pool, cpu_count, pool
 from traceback import format_exception
 import sys
-from textwrap import indent
-from logging import INFO
 
 from copy import deepcopy
 import numpy as np
+
 from ... import logging
 from ...utils.profiler import get_system_total_memory_gb
 from ..engine import MapNode
@@ -127,7 +126,7 @@ class MultiProcPlugin(DistributedPluginBase):
         self.raise_insufficient = self.plugin_args.get('raise_insufficient', True)
 
         # Instantiate different thread pools for non-daemon processes
-        logger.debug('[MultiProc] Starting in "%sdaemon" mode (n_procs=%d, mem_gb=%0.2f)',
+        logger.debug('MultiProcPlugin starting in "%sdaemon" mode (n_procs=%d, mem_gb=%0.2f)',
                      'non' * int(non_daemon), self.processors, self.memory_gb)
 
         NipypePool = NonDaemonPool if non_daemon else Pool
@@ -159,7 +158,7 @@ class MultiProcPlugin(DistributedPluginBase):
             run_node, (node, updatehash, self._taskid),
             callback=self._async_callback)
 
-        logger.debug('[MultiProc] Submitted task %s (taskid=%d).',
+        logger.debug('MultiProc submitted task %s (taskid=%d).',
                      node.fullname, self._taskid)
         return self._taskid
 
@@ -215,17 +214,9 @@ class MultiProcPlugin(DistributedPluginBase):
         stats = (len(self.pending_tasks), len(jobids), free_memory_gb,
                  self.memory_gb, free_processors, self.processors)
         if self._stats != stats:
-            tasks_list_msg = ''
-            if logger.level <= INFO:
-                running_tasks = ['  * %s' % self.procs[jobid].fullname
-                                 for _, jobid in self.pending_tasks]
-                if running_tasks:
-                    tasks_list_msg = '\nCurrently running:\n'
-                    tasks_list_msg += '\n'.join(running_tasks)
-                    tasks_list_msg = indent(tasks_list_msg, ' ' * 21)
-            logger.info('[MultiProc] Running %d tasks, and %d jobs ready. Free '
-                        'memory (GB): %0.2f/%0.2f, Free processors: %d/%d.%s',
-                        *stats, tasks_list_msg)
+            logger.info('Currently running %d tasks, and %d jobs ready. Free '
+                        'memory (GB): %0.2f/%0.2f, Free processors: %d/%d',
+                        *stats)
             self._stats = stats
 
         if free_memory_gb < 0.01 or free_processors == 0:
