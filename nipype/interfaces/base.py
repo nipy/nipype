@@ -1485,7 +1485,7 @@ def get_dependencies(name, environ):
     if sys.platform == 'darwin':
         cmd = 'otool -L `which {}`'.format
     elif 'linux' in sys.platform:
-        cmd = 'ldd -L `which {}`'.format
+        cmd = 'ldd `which {}`'.format
 
     if cmd is None:
         return 'Platform %s not supported' % sys.platform
