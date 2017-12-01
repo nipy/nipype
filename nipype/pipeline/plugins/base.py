@@ -339,7 +339,7 @@ class DistributedPluginBase(PluginBase):
             logger.debug('Skipping cached node %s with ID %s.',
                          self.procs[jobid]._id, jobid)
             try:
-                self._task_finished_cb(jobid, cached=True)
+                self._task_finished_cb(jobid)
                 self._remove_node_dirs()
             except Exception:
                 logger.debug('Error skipping cached node %s (%s).',
@@ -349,14 +349,13 @@ class DistributedPluginBase(PluginBase):
             return True
         return False
 
-    def _task_finished_cb(self, jobid, cached=False):
+    def _task_finished_cb(self, jobid):
         """ Extract outputs and assign to inputs of dependent tasks
 
         This is called when a job is completed.
         """
-        logger.info('[Job %d] %s (%s).', jobid,
-                    'Cached' if cached else 'Completed',
-                    self.procs[jobid].fullname)
+        logger.info('[Job finished] jobname: %s jobid: %d' %
+                    (self.procs[jobid]._id, jobid))
         if self._status_callback:
             self._status_callback(self.procs[jobid], 'end')
         # Update job and worker queues
