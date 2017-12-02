@@ -44,7 +44,7 @@ class RigidTask(CommandLineDtitk):
         >>> import nipype.interfaces.dtitk as dtitk
         >>> node = dtitk.RigidTask()
         >>> node.inputs.fixed_file = 'diffusion.nii.gz'
-        >>> node.inputs.moving_file = 'diffusion.nii.gz'
+        >>> node.inputs.moving_file = 'diffusion2.nii.gz'
         >>> node.inputs.similarity_metric = 'EDS'
         >>> node.inputs.samplingX = 4
         >>> node.inputs.samplingY = 4
@@ -106,7 +106,7 @@ class AffineTask(CommandLineDtitk):
         >>> import nipype.interfaces.dtitk as dtitk
         >>> node = dtitk.AffineTask()
         >>> node.inputs.fixed_file = 'diffusion.nii.gz'
-        >>> node.inputs.moving_file = 'diffusion.nii.gz'
+        >>> node.inputs.moving_file = 'diffusion2.nii.gz'
         >>> node.inputs.similarity_metric = 'EDS'
         >>> node.inputs.samplingX = 4
         >>> node.inputs.samplingY = 4
@@ -129,16 +129,23 @@ class AffineTask(CommandLineDtitk):
 
 
 class DiffeoInputSpec(CommandLineInputSpec):
-    in_fixed_tensor = traits.Str(desc="fixed diffusion tensor image",
-                                 exists=True, mandatory=False, position=0,
-                                 argstr="%s")
-    in_moving_txt = traits.Str(desc="moving list of diffusion tensor image "
-                                    "paths", exists=True, mandatory=False,
-                               position=1, argstr="%s")
-    in_mask = traits.Str(desc="mask", exists=True, mandatory=False, position=2,
-                         argstr="%s")
-    in_numbers = traits.Str(desc='#iters ftol', exists=True, mandatory=False,
-                            position=3, argstr="%s")
+    fixed_file = traits.Str(desc="fixed diffusion tensor image",
+                            exists=True, mandatory=False, position=0,
+                            argstr="%s")
+    moving_file = traits.Str(desc="moving diffusion tensor image",
+                             exists=True, mandatory=False,
+                             position=1, argstr="%s")
+    mask = traits.Str(desc="mask", exists=True, mandatory=False, position=2,
+                      argstr="%s")
+    legacy = traits.Float(desc="legacy parameter; always set to 1",
+                          exists=True, mandatory=True,
+                          position=3, default_value=1, argstr="%s")
+    n_iters = traits.Float(desc="number of iterations",
+                           exists=True, mandatory=True,
+                           position=4, default_value=6, argstr="%s")
+    ftol = traits.Float(desc="iteration for the optimization to stop",
+                        exists=True, mandatory=True,
+                        position=5, default_value=0.002, argstr="%s")
 
 
 class DiffeoOutputSpec(TraitedSpec):
@@ -155,22 +162,24 @@ class DiffeoTask(CommandLineDtitk):
 
                 >>> import nipype.interfaces.dtitk as dtitk
                 >>> node = dtitk.DiffeoTask()
-                >>> node.inputs.in_fixed_tensor = 'diffusion.nii'
-                >>> node.inputs.in_moving_txt = 'dirs.txt'
-                >>> node.inputs.in_mask = 'mask.nii'
-                >>> node.inputs.in_numbers = '6 0.002'
+                >>> node.inputs.fixed_file = 'diffusion.nii.gz'
+                >>> node.inputs.moving_file = 'diffusion2.nii.gz'
+                >>> node.inputs.mask = 'mask.nii.gz'
+                >>> node.inputs.legacy = 1
+                >>> node.inputs.n_iters = 6
+                >>> node.inputs.ftol = 0.002
                 >>> node.run() # doctest: +SKIP
                 """
     input_spec = DiffeoInputSpec
     output_spec = DiffeoOutputSpec
-    _cmd = 'dti_diffeomorphic_sn'
+    _cmd = 'dti_diffeomorphic_reg'
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        outputs['out_file_xfm'] = self.inputs.in_fixed_tensor.replace(
-            '.nii.gz', '_aff_diffeo.df.nii.gz')
-        outputs['out_file'] = self.inputs.in_fixed_tensor.replace(
-            '.nii.gz', '_aff_diffeo.nii.gz')
+        outputs['out_file_xfm'] = self.inputs.moving_file.replace(
+            '.nii.gz', '_diffeo.df.nii.gz')
+        outputs['out_file'] = self.inputs.moving_file.replace(
+            '.nii.gz', '_diffeo.nii.gz')
         return outputs
 
 

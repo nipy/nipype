@@ -138,7 +138,7 @@ class SVAdjustVoxSpTask(CommandLineDtitk):
 
         >>> import nipype.interfaces.dtitk as dtitk
         >>> node = dtitk.SVAdjustVoxSpTask()
-        >>> node.inputs.in_file = 'diffusion.nii'
+        >>> node.inputs.in_file = 'diffusion.nii.gz'
         >>> node.run() # doctest: +SKIP
         """
     input_spec = SVAdjustVoxSpInputSpec
@@ -156,8 +156,8 @@ class SVAdjustVoxSpTask(CommandLineDtitk):
         outputs['out_file'] = self.inputs.out_file
         if not isdefined(self.inputs.out_file):
             outputs["out_file"] = self._gen_filename(self.inputs.in_file,
-                                                  suffix=self._suffix,
-                                                  ext='.' + '.'.join(
+                                                     suffix=self._suffix,
+                                                     ext='.' + '.'.join(
                                                       self.inputs.in_file.
                                                       split(".")[1:]))
         outputs["out_file"] = os.path.abspath(outputs["out_file"])
@@ -171,7 +171,7 @@ class TVResampleInputSpec(CommandLineInputSpec):
                             mandatory=False, position=1, argstr="-size %s")
     in_voxsz = traits.Str(desc='resampled voxel size', exists=True,
                           mandatory=False, position=2, argstr="-vsize %s")
-    out_path = traits.Str(desc='output path', exists=True, mandatory=False,
+    out_file = traits.Str(desc='output path', exists=True, mandatory=False,
                           position=3, argstr="-out %s",
                           name_source="in_file",
                           name_template="%s_resampled.nii.gz")
@@ -190,7 +190,7 @@ class TVResampleTask(CommandLineDtitk):
 
         >>> import nipype.interfaces.dtitk as dtitk
         >>> node = dtitk.TVResampleTask()
-        >>> node.inputs.in_file = 'diffusion.nii'
+        >>> node.inputs.in_file = 'diffusion.nii.gz'
         >>> node.run() # doctest: +SKIP
         """
     input_spec = TVResampleInputSpec
