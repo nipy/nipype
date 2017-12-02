@@ -751,10 +751,10 @@ def canonicalize_env(env):
         return env
 
     out_env = {}
-    for key, val in env:
+    for key, val in env.items():
         if not isinstance(key, bytes):
             key = key.encode('utf-8')
         if not isinstance(val, bytes):
-            val = key.encode('utf-8')
+            val = val.encode('utf-8')
         out_env[key] = val
     return out_env
