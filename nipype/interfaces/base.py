@@ -1555,6 +1555,19 @@ class CommandLine(BaseInterface):
     >>> cli.inputs.get_hashval()[1]
     '11c37f97649cd61627f4afe5136af8c0'
 
+    >>> from nipype.interfaces.base import CommandLineInputSpec, Undefined
+    >>> class ExampleInputSpec(CommandLineInputSpec): str_input = traits.Str("default", usedefault=True, argstr="%s")
+    >>> class Example(CommandLine): input_spec = ExampleInputSpec
+    >>> example = Example(command="cmd")
+    >>> example.cmdline # doctest: +IGNORE_UNICODE
+    'cmd default'
+    >>> example.inputs.str_input = "modified"
+    >>> example.cmdline # doctest: +IGNORE_UNICODE
+    'cmd modified'
+    >>> example.inputs.str_input = Undefined
+    >>> example.cmdline # doctest: +IGNORE_UNICODE
+    'cmd default'
+
     """
     input_spec = CommandLineInputSpec
     _cmd = None
@@ -1839,7 +1852,13 @@ class CommandLine(BaseInterface):
                     value = self._gen_filename(name)
 
             if not isdefined(value):
-                continue
+                if spec.usedefault:
+                    # this is the case when the default value has been
+                    # overwritten by an Undefined input (e.g. by an incoming
+                    # connection that was Undefined)
+                    value = spec.default_value()[1]
+                else:
+                    continue
             arg = self._format_arg(name, spec, value)
             if arg is None:
                 continue
