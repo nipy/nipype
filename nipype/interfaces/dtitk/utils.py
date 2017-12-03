@@ -224,7 +224,7 @@ class SVResampleInputSpec(CommandLineInputSpec):
                             argstr="-size %s")
     in_voxsz = traits.Str(desc='resampled voxel size', exists=True,
                           mandatory=False, position=2, argstr="-vsize %s")
-    out_path = traits.Str(desc='output path', exists=True, mandatory=False,
+     = traits.Str(desc='output path', exists=True, mandatory=False,
                           position=3, argstr="-out %s",
                           name_source="in_file",
                           name_template="%s_resampled.nii.gz")
@@ -319,7 +319,7 @@ class TVtoolTask(CommandLineDtitk):
 class BinThreshInputSpec(CommandLineInputSpec):
     in_file = traits.Str(desc='', exists=True, mandatory=False, position=0,
                          argstr="%s")
-    out_path = traits.Str(desc='', exists=True, mandatory=False, position=1,
+    out_file = traits.Str(desc='', exists=True, mandatory=False, position=1,
                           argstr="%s")
     in_numbers = traits.Str(desc='LB UB inside_value outside_value',
                             exists=True, mandatory=False, position=2,

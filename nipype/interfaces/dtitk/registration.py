@@ -188,7 +188,7 @@ class ComposeXfmInputSpec(CommandLineInputSpec):
                        mandatory=False, position=1, argstr="-df %s")
     in_aff = traits.Str(desc='affine file.aff', exists=True, mandatory=False,
                         position=0, argstr="-aff %s")
-    out_path = traits.Str(desc='output_path', exists=True, mandatory=False,
+    out_file = traits.Str(desc='output_path', exists=True, mandatory=False,
                           position=2, argstr="-out %s",  name_source="in_df",
                           name_template="%s_comboaff.nii.gz")
 
@@ -229,7 +229,7 @@ class diffeoSymTensor3DVolInputSpec(CommandLineInputSpec):
                         position=1, argstr="-trans %s")
     in_target = traits.Str(desc='', exists=True, mandatory=False, position=2,
                            argstr="-target %s")
-    out_path = traits.Str(desc='', exists=True, mandatory=False, position=3,
+    out_file = traits.Str(desc='', exists=True, mandatory=False, position=3,
                           argstr="-out %s", name_source="in_tensor",
                           name_template="%s_diffeoxfmd.nii.gz")
 
@@ -258,7 +258,7 @@ class diffeoSymTensor3DVolTask(CommandLineDtitk):
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        outputs['out_file'] = self.inputs.out_path
+        outputs['out_file'] = self.inputs.out_file
         return outputs
 
 
@@ -269,7 +269,7 @@ class affSymTensor3DVolInputSpec(CommandLineInputSpec):
                         mandatory=False, position=1, argstr="-trans %s")
     in_target = traits.Str(desc='', exists=True, mandatory=False, position=2,
                            argstr="-target %s")
-    out_path = traits.Str(desc='', exists=True, mandatory=False, position=3,
+    out_file = traits.Str(desc='', exists=True, mandatory=False, position=3,
                           argstr="-out %s", name_source="in_tensor",
                           name_template="%s_affxfmd.nii.gz")
 
@@ -297,7 +297,7 @@ class affSymTensor3DVolTask(CommandLineDtitk):
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        outputs['out_file'] = os.path.abspath(self.inputs.out_path)
+        outputs['out_file'] = os.path.abspath(self.inputs.out_file)
         return outputs
 
 
@@ -308,7 +308,7 @@ class affScalarVolInputSpec(CommandLineInputSpec):
                         mandatory=False,
                         position=1, argstr="-trans %s")
     in_target = traits.Str(desc='', position=2, argstr="-target %s")
-    out_path = traits.Str(desc='', mandatory=False, position=3,
+    out_file = traits.Str(desc='', mandatory=False, position=3,
                           argstr="-out %s", name_source="in_volume",
                           name_template="%s_affxfmd.nii.gz")
 
@@ -336,7 +336,7 @@ class affScalarVolTask(CommandLineDtitk):
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        outputs['out_file'] = os.path.abspath(self.inputs.out_path)
+        outputs['out_file'] = os.path.abspath(self.inputs.out_file)
         return outputs
 
 
@@ -348,7 +348,7 @@ class diffeoScalarVolInputSpec(CommandLineInputSpec):
                         position=2, argstr="-trans %s")
     in_target = traits.Str(desc='', exists=True, mandatory=False, position=3,
                            argstr="-target %s")
-    out_path = traits.Str(desc='', position=1, argstr="-out %s",
+     = traits.Str(desc='', position=1, argstr="-out %s",
                           name_source="in_volume",
                           name_template="%s_diffeoxfmd.nii.gz")
     in_vsize = traits.Str(desc='', exists=True, mandatory=False, position=4,
@@ -385,10 +385,10 @@ class diffeoScalarVolTask(CommandLineDtitk):
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        if not isdefined(self.inputs.out_path):
-            self.inputs.out_path = fname_presuffix(self.inputs.in_volume,
+        if not isdefined(self.inputs.out_file):
+            self.inputs.out_file = fname_presuffix(self.inputs.in_volume,
                                                    suffix="_diffeoxfmd",
                                                    newpath=os.path.abspath(
                                                         "."))
-        outputs['out_file'] = os.path.abspath(self.inputs.out_path)
+        outputs['out_file'] = os.path.abspath(self.inputs.out_file)
         return outputs
