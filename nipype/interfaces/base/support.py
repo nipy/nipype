@@ -49,7 +49,6 @@ class Bunch(object):
     >>> inputs
     Bunch(fwhm=6.0, infile='subj.nii', register_to_mean=False)
 
-
     Notes
     -----
     The Bunch pattern came from the Python Cookbook:

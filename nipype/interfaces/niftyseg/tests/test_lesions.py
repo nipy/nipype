@@ -3,14 +3,10 @@
 
 import pytest
 
-from ....utils.filemanip import which
 from ....testing import example_data
 from ...niftyreg import get_custom_path
+from ...niftyreg.tests.test_regutils import no_nifty_tool
 from .. import FillLesions
-
-
-def no_nifty_tool(cmd=None):
-    return which(cmd) is None
 
 
 @pytest.mark.skipif(no_nifty_tool(cmd='seg_FillLesions'),

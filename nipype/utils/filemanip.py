@@ -684,7 +684,7 @@ def which(cmd, env=None, pathext=None):
     """
 
     if pathext is None:
-        pathext = os.environ.get("PATHEXT", "").split(os.pathsep)
+        pathext = os.getenv('PATHEXT', '').split(os.pathsep)
         pathext.insert(0, '')
 
     path = os.getenv("PATH", os.defpath)
