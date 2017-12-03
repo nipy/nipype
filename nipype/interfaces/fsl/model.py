@@ -2173,7 +2173,7 @@ class GLM(FSLCommand):
 
 
 def load_template(name):
-    """Load a template from the script_templates directory
+    """Load a template from the model_templates directory
 
     Parameters
     ----------
@@ -2186,8 +2186,8 @@ def load_template(name):
 
     """
     from pkg_resources import resource_filename as pkgrf
-    full_fname = pkgrf('nipype',
-                       os.path.join('script_templates', name))
+    full_fname = pkgrf(
+        'nipype', os.path.join('interfaces', 'fsl', 'model_templates', name))
     with open(full_fname) as template_file:
         template = Template(template_file.read())
 
