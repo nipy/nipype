@@ -12,7 +12,6 @@ from __future__ import print_function, division, unicode_literals, absolute_impo
 from multiprocessing import Process, Pool, cpu_count, pool
 from traceback import format_exception
 import sys
-from textwrap import indent
 from logging import INFO
 
 from copy import deepcopy
@@ -21,6 +20,16 @@ from ... import logging
 from ...utils.profiler import get_system_total_memory_gb
 from ..engine import MapNode
 from .base import DistributedPluginBase
+
+try:
+    from textwrap import indent
+except ImportError:
+    def indent(text, prefix):
+        """ A textwrap.indent replacement for Python < 3.3 """
+        if not prefix:
+            return text
+        splittext = text.splitlines(True)
+        return prefix + prefix.join(splittext)
 
 # Init logger
 logger = logging.getLogger('workflow')
