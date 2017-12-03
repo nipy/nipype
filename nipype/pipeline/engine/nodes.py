@@ -684,7 +684,7 @@ class Node(EngineBase):
             if execute and linksonly:
                 olddir = outdir
                 outdir = op.join(outdir, '_tempinput')
-                os.makedirs(outdir)
+                makedirs(outdir, exist_ok=True)
             for info in self._interface._get_filecopy_info():
                 files = self.inputs.get().get(info['key'])
                 if not isdefined(files):
@@ -725,8 +725,8 @@ class Node(EngineBase):
             return
         report_dir = op.join(cwd, '_report')
         report_file = op.join(report_dir, 'report.rst')
-        if not op.exists(report_dir):
-            os.makedirs(report_dir)
+        makedirs(report_dir, exist_ok=True)
+
         if report_type == 'preexec':
             logger.debug('writing pre-exec report to %s', report_file)
             fp = open(report_file, 'wt')

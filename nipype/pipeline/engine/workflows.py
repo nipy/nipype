@@ -413,7 +413,7 @@ connected.
                     base_dir = op.join(base_dir, self.name)
             else:
                 base_dir = os.getcwd()
-        base_dir = makedirs(base_dir)
+        base_dir = makedirs(base_dir, exist_ok=True)
         if graph2use in ['hierarchical', 'colored']:
             if self.name[:1].isdigit():  # these graphs break if int
                 raise ValueError('{} graph failed, workflow name cannot begin '
@@ -599,8 +599,7 @@ connected.
         if workingdir is None:
             workingdir = os.getcwd()
         report_dir = op.join(workingdir, name)
-        if not op.exists(report_dir):
-            os.makedirs(report_dir)
+        makedirs(report_dir, exist_ok=True)
         shutil.copyfile(op.join(op.dirname(__file__),
                                 'report_template.html'),
                         op.join(report_dir, 'index.html'))

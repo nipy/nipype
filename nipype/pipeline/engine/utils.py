@@ -24,8 +24,9 @@ from functools import reduce
 import numpy as np
 import networkx as nx
 
-from ...utils.filemanip import (fname_presuffix, FileNotFoundError, to_str,
-                                filename_to_list, get_related_files)
+from ...utils.filemanip import (
+    makedirs, fname_presuffix, to_str,
+    filename_to_list, get_related_files)
 from ...utils.misc import str2bool
 from ...utils.functions import create_function_from_source
 from ...interfaces.base import (CommandLine, isdefined, Undefined,
@@ -195,7 +196,7 @@ def modify_paths(object, relative=True, basedir=None):
                 else:
                     out = os.path.abspath(os.path.join(basedir, object))
                 if not os.path.exists(out):
-                    raise FileNotFoundError('File %s not found' % out)
+                    raise IOError('File %s not found' % out)
             else:
                 out = object
     return out
@@ -1013,8 +1014,8 @@ def export_graph(graph_in, base_dir=None, show=False, use_execgraph=False,
         logger.debug('using input graph')
     if base_dir is None:
         base_dir = os.getcwd()
-    if not os.path.exists(base_dir):
-        os.makedirs(base_dir)
+
+    makedirs(base_dir, exist_ok=True)
     outfname = fname_presuffix(dotfilename,
                                suffix='_detailed.dot',
                                use_ext=False,
