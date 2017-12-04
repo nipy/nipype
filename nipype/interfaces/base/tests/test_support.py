@@ -6,6 +6,7 @@ import os
 import pytest
 from builtins import open
 from future import standard_library
+from pkg_resources import resource_filename as pkgrf
 
 from ....utils.filemanip import md5
 from ... import base as nib
@@ -49,8 +50,9 @@ def test_bunch_methods():
 def test_bunch_hash():
     # NOTE: Since the path to the json file is included in the Bunch,
     # the hash will be unique to each machine.
-    pth = os.path.split(os.path.abspath(__file__))[0]
-    json_pth = os.path.join(pth, 'realign_json.json')
+    json_pth = pkgrf(
+        'nipype', os.path.join('testing', 'data', 'realign_json.json'))
+
     b = nib.Bunch(infile=json_pth,
                   otherthing='blue',
                   yat=True)

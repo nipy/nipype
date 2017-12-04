@@ -66,6 +66,8 @@ def test_Interface():
 
 
 def test_BaseInterface():
+    config.set('monitoring', 'enable', '0')
+
     assert nib.BaseInterface.help() is None
     assert nib.BaseInterface._get_filecopy_info() == []
 
@@ -82,6 +84,7 @@ def test_BaseInterface():
 
     class DerivedInterface(nib.BaseInterface):
         input_spec = InputSpec
+        resource_monitor = False
 
     assert DerivedInterface.help() is None
     assert 'moo' in ''.join(DerivedInterface._inputs_help())
@@ -252,6 +255,8 @@ def test_output_version():
         input_spec = InputSpec
         output_spec = OutputSpec
         _version = '0.10'
+        resource_monitor = False
+
     obj = DerivedInterface1()
     assert obj._check_version_requirements(obj._outputs()) == []
 
@@ -265,6 +270,8 @@ def test_output_version():
         input_spec = InputSpec
         output_spec = OutputSpec
         _version = '0.10'
+        resource_monitor = False
+
     obj = DerivedInterface1()
     assert obj._check_version_requirements(obj._outputs()) == ['foo']
 
@@ -278,6 +285,7 @@ def test_output_version():
         input_spec = InputSpec
         output_spec = OutputSpec
         _version = '0.10'
+        resource_monitor = False
 
         def _run_interface(self, runtime):
             return runtime
@@ -298,6 +306,7 @@ def test_Commandline():
     ci2 = nib.CommandLine(command='which', args='ls')
     assert ci2.cmdline == 'which ls'
     ci3 = nib.CommandLine(command='echo')
+    ci3.resource_monitor = False
     ci3.inputs.environ = {'MYENV': 'foo'}
     res = ci3.run()
     assert res.runtime.environ['MYENV'] == 'foo'
@@ -312,6 +321,7 @@ def test_Commandline():
         noo = nib.traits.Int(argstr='-x %d', desc='an int')
         roo = nib.traits.Str(desc='not on command line')
         soo = nib.traits.Bool(argstr="-soo")
+
     nib.CommandLine.input_spec = CommandLineInputSpec1
     ci4 = nib.CommandLine(command='cmd')
     ci4.inputs.foo = 'foo'
