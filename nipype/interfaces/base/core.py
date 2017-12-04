@@ -530,8 +530,9 @@ class BaseInterface(Interface):
 
                     runtime.prof_dict = {
                         'time': vals[:, 0].tolist(),
-                        'mem_gb': (vals[:, 1] / 1024).tolist(),
+                        'rss_gb': (vals[:, 1] / 1024).tolist(),
                         'cpus': vals[:, 2].tolist(),
+                        'vms_gb': (vals[:, 3] / 1024).tolist(),
                     }
 
         return results

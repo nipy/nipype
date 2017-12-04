@@ -67,11 +67,14 @@ class ResourceMonitor(threading.Thread):
 
     def _sample(self, cpu_interval=None):
         cpu = 0.0
-        mem = 0.0
+        rss = 0.0
+        vms = 0.0
         try:
             with self._process.oneshot():
                 cpu += self._process.cpu_percent(interval=cpu_interval)
-                mem += self._process.memory_info().rss
+                mem_info = self._process.memory_info()
+                rss += mem_info.rss
+                vms += mem_info.vms
         except psutil.NoSuchProcess:
             pass
 
@@ -85,11 +88,13 @@ class ResourceMonitor(threading.Thread):
             try:
                 with child.oneshot():
                     cpu += child.cpu_percent()
-                    mem += child.memory_info().rss
+                    mem_info = child.memory_info()
+                    rss += mem_info.rss
+                    vms += mem_info.vms
             except psutil.NoSuchProcess:
                 pass
 
-        print('%f,%f,%f' % (time(), (mem / _MB), cpu),
+        print('%f,%f,%f,%f' % (time(), rss / _MB, cpu, vms / _MB),
               file=self._logfile)
         self._logfile.flush()
 
