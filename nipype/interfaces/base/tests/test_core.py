@@ -9,10 +9,9 @@ import simplejson as json
 
 import pytest
 
-from ... import config
-from ...testing import example_data
-from .. import base as nib
-from ..base import Undefined
+from .... import config
+from ....testing import example_data
+from ... import base as nib
 
 standard_library.install_aliases()
 
@@ -91,7 +90,7 @@ def test_BaseInterface():
     assert DerivedInterface._get_filecopy_info()[0]['copy']
     assert DerivedInterface._get_filecopy_info()[1]['key'] == 'zoo'
     assert not DerivedInterface._get_filecopy_info()[1]['copy']
-    assert DerivedInterface().inputs.foo == Undefined
+    assert DerivedInterface().inputs.foo == nib.Undefined
     with pytest.raises(ValueError):
         DerivedInterface()._check_mandatory_inputs()
     assert DerivedInterface(goo=1)._check_mandatory_inputs() is None
@@ -107,7 +106,7 @@ def test_BaseInterface():
             return runtime
 
     assert DerivedInterface2.help() is None
-    assert DerivedInterface2()._outputs().foo == Undefined
+    assert DerivedInterface2()._outputs().foo == nib.Undefined
     with pytest.raises(NotImplementedError):
         DerivedInterface2(goo=1).run()
 
@@ -295,7 +294,7 @@ def test_Commandline():
         nib.CommandLine()
     ci = nib.CommandLine(command='which')
     assert ci.cmd == 'which'
-    assert ci.inputs.args == Undefined
+    assert ci.inputs.args == nib.Undefined
     ci2 = nib.CommandLine(command='which', args='ls')
     assert ci2.cmdline == 'which ls'
     ci3 = nib.CommandLine(command='echo')

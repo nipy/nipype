@@ -8,9 +8,9 @@ import warnings
 
 import pytest
 
-from ...utils.filemanip import split_filename
-from .. import base as nib
-from ..base import traits, Undefined
+from ....utils.filemanip import split_filename
+from ... import base as nib
+from ...base import traits, Undefined
 
 standard_library.install_aliases()
 

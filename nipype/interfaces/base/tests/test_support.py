@@ -7,8 +7,8 @@ import pytest
 from builtins import open
 from future import standard_library
 
-from ...utils.filemanip import md5
-from .. import base as nib
+from ....utils.filemanip import md5
+from ... import base as nib
 
 standard_library.install_aliases()
 
