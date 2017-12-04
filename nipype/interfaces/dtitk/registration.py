@@ -348,7 +348,7 @@ class diffeoScalarVolInputSpec(CommandLineInputSpec):
                         position=2, argstr="-trans %s")
     in_target = traits.Str(desc='', exists=True, mandatory=False, position=3,
                            argstr="-target %s")
-     = traits.Str(desc='', position=1, argstr="-out %s",
+    out_file = traits.Str(desc='', position=1, argstr="-out %s",
                           name_source="in_volume",
                           name_template="%s_diffeoxfmd.nii.gz")
     in_vsize = traits.Str(desc='', exists=True, mandatory=False, position=4,
