@@ -4,13 +4,9 @@
 
 import pytest
 
-from ....utils.filemanip import which
 from ....testing import example_data
 from .. import (get_custom_path, RegAladin, RegF3D)
-
-
-def no_nifty_tool(cmd=None):
-    return which(cmd) is None
+from .test_regutils import no_nifty_tool
 
 
 @pytest.mark.skipif(

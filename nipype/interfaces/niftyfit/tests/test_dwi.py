@@ -3,15 +3,11 @@
 
 import pytest
 
-from ....utils.filemanip import which
 from ....testing import example_data
 from ...niftyreg import get_custom_path
 
 from ..dwi import FitDwi, DwiTool
-
-
-def no_nifty_tool(cmd=None):
-    return which(cmd) is None
+from ...niftyreg.tests.test_regutils import no_nifty_tool
 
 
 @pytest.mark.skipif(no_nifty_tool(cmd='fit_dwi'),

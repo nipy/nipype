@@ -252,7 +252,7 @@ class BaseTraitedSpec(traits.HasTraits):
 
         Returns
         -------
-        dict_withhash : dict
+        list_withhash : dict
             Copy of our dictionary with the new file hashes included
             with each file.
         hashvalue : str
@@ -260,8 +260,8 @@ class BaseTraitedSpec(traits.HasTraits):
 
         """
 
-        dict_withhash = []
-        dict_nofilename = []
+        list_withhash = []
+        list_nofilename = []
         for name, val in sorted(self.get().items()):
             if not isdefined(val) or self.has_metadata(name, "nohash", True):
                 # skip undefined traits and traits with nohash=True
@@ -269,13 +269,13 @@ class BaseTraitedSpec(traits.HasTraits):
 
             hash_files = (not self.has_metadata(name, "hash_files", False) and not
                           self.has_metadata(name, "name_source"))
-            dict_nofilename.append((name,
+            list_nofilename.append((name,
                                     self._get_sorteddict(val, hash_method=hash_method,
                                                          hash_files=hash_files)))
-            dict_withhash.append((name,
+            list_withhash.append((name,
                                   self._get_sorteddict(val, True, hash_method=hash_method,
                                                        hash_files=hash_files)))
-        return dict_withhash, md5(to_str(dict_nofilename).encode()).hexdigest()
+        return list_withhash, md5(to_str(list_nofilename).encode()).hexdigest()
 
     def _get_sorteddict(self, objekt, dictwithhash=False, hash_method=None,
                         hash_files=True):

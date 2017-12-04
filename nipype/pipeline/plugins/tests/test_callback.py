@@ -72,7 +72,7 @@ def test_callback_multiproc_normal(tmpdir):
     tmpdir.chdir()
 
     so = Status()
-    wf = pe.Workflow(name='test')
+    wf = pe.Workflow(name='test', base_dir=tmpdir.strpath)
     f_node = pe.Node(niu.Function(function=func, input_names=[],
                                   output_names=[]),
                      name='f_node')
@@ -90,7 +90,7 @@ def test_callback_multiproc_exception(tmpdir):
     tmpdir.chdir()
 
     so = Status()
-    wf = pe.Workflow(name='test')
+    wf = pe.Workflow(name='test', base_dir=tmpdir.strpath)
     f_node = pe.Node(niu.Function(function=bad_func, input_names=[],
                                   output_names=[]),
                      name='f_node')
