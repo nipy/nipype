@@ -4,7 +4,8 @@ from ..model import L2Model
 
 
 def test_L2Model_inputs():
-    input_map = dict(ignore_exception=dict(nohash=True,
+    input_map = dict(ignore_exception=dict(deprecated='1.0.0',
+    nohash=True,
     usedefault=True,
     ),
     num_copes=dict(mandatory=True,

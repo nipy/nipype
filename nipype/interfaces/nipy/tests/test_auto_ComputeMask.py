@@ -6,7 +6,8 @@ from ..preprocess import ComputeMask
 def test_ComputeMask_inputs():
     input_map = dict(M=dict(),
     cc=dict(),
-    ignore_exception=dict(nohash=True,
+    ignore_exception=dict(deprecated='1.0.0',
+    nohash=True,
     usedefault=True,
     ),
     m=dict(),

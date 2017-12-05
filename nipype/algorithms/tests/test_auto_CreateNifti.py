@@ -9,7 +9,8 @@ def test_CreateNifti_inputs():
     ),
     header_file=dict(mandatory=True,
     ),
-    ignore_exception=dict(nohash=True,
+    ignore_exception=dict(deprecated='1.0.0',
+    nohash=True,
     usedefault=True,
     ),
     )
