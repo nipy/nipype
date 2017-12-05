@@ -224,7 +224,7 @@ class SVResampleInputSpec(CommandLineInputSpec):
                             argstr="-size %s")
     in_voxsz = traits.Str(desc='resampled voxel size', exists=True,
                           mandatory=False, position=2, argstr="-vsize %s")
-     = traits.Str(desc='output path', exists=True, mandatory=False,
+    out_file = traits.Str(desc='output path', exists=True, mandatory=False,
                           position=3, argstr="-out %s",
                           name_source="in_file",
                           name_template="%s_resampled.nii.gz")
