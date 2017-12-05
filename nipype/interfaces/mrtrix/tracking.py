@@ -15,8 +15,10 @@ import os
 import os.path as op
 
 from ...utils.filemanip import split_filename
-from ..base import CommandLineInputSpec, CommandLine, traits, TraitedSpec, File
-from ..traits_extension import isdefined
+from ..base import (
+    CommandLineInputSpec, CommandLine, traits, TraitedSpec, File,
+    isdefined
+)
 
 
 class FilterTracksInputSpec(CommandLineInputSpec):

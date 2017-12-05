@@ -9,7 +9,7 @@ from __future__ import print_function, division, unicode_literals, absolute_impo
 import sys
 import pickle
 import errno
-import subprocess
+import subprocess as sp
 import gzip
 import hashlib
 import locale
@@ -25,8 +25,6 @@ from builtins import str, bytes, open
 
 from .. import logging, config
 from .misc import is_container
-from ..interfaces.traits_extension import isdefined
-
 from future import standard_library
 standard_library.install_aliases()
 
@@ -94,6 +92,7 @@ def split_filename(fname):
 
     return pth, fname, ext
 
+
 def to_str(value):
     """
     Manipulates ordered dicts before they are hashed (Py2/3 compat.)
@@ -104,6 +103,7 @@ def to_str(value):
     else:
         retval = to_str_py27(value)
     return retval
+
 
 def to_str_py27(value):
     """
@@ -122,7 +122,7 @@ def to_str_py27(value):
             venc = to_str_py27(val)
             if venc.startswith(("u'", 'u"')):
                 venc = venc[1:]
-            retval+= entry(kenc, venc)
+            retval += entry(kenc, venc)
         retval += '}'
         return retval
 
@@ -148,6 +148,7 @@ def to_str_py27(value):
     if retval.startswith(("u'", 'u"')):
         retval = retval[1:]
     return retval
+
 
 def fname_presuffix(fname, prefix='', suffix='', newpath=None, use_ext=True):
     """Manipulates path and name of input filename
@@ -175,11 +176,17 @@ def fname_presuffix(fname, prefix='', suffix='', newpath=None, use_ext=True):
     >>> fname_presuffix(fname,'pre','post','/tmp')
     '/tmp/prefoopost.nii.gz'
 
+    >>> from nipype.interfaces.base import Undefined
+    >>> fname_presuffix(fname, 'pre', 'post', Undefined) == fname_presuffix(fname, 'pre', 'post')
+    True
+
     """
     pth, fname, ext = split_filename(fname)
     if not use_ext:
         ext = ''
-    if newpath and isdefined(newpath):
+
+    # No need for isdefined: bool(Undefined) evaluates to False
+    if newpath:
         pth = os.path.abspath(newpath)
     return os.path.join(pth, prefix + fname + suffix + ext)
 
@@ -251,7 +258,7 @@ def _generate_cifs_table():
     On systems without a ``mount`` command, or with no CIFS mounts, returns an
     empty list.
     """
-    exit_code, output = subprocess.getstatusoutput("mount")
+    exit_code, output = sp.getstatusoutput("mount")
     # Not POSIX
     if exit_code != 0:
         return []
@@ -627,6 +634,7 @@ def savepkl(filename, record):
     pickle.dump(record, pkl_file)
     pkl_file.close()
 
+
 rst_levels = ['=', '-', '~', '+']
 
 
@@ -715,3 +723,90 @@ def emptydirs(path):
                     raise ex
                 else:
                     raise ex
+
+
+def which(cmd, env=None, pathext=None):
+    """
+    Return the path to an executable which would be run if the given
+    cmd was called. If no cmd would be called, return ``None``.
+
+    Code for Python < 3.3 is based on a code snippet from
+    http://orip.org/2009/08/python-checking-if-executable-exists-in.html
+
+    """
+
+    if pathext is None:
+        pathext = os.getenv('PATHEXT', '').split(os.pathsep)
+        pathext.insert(0, '')
+
+    path = os.getenv("PATH", os.defpath)
+    if env and 'PATH' in env:
+        path = env.get("PATH")
+
+    if sys.version_info >= (3, 3):
+        for ext in pathext:
+            filename = shutil.which(cmd + ext, path=path)
+            if filename:
+                return filename
+        return None
+
+    for ext in pathext:
+        extcmd = cmd + ext
+        for directory in path.split(os.pathsep):
+            filename = os.path.join(directory, extcmd)
+            if os.path.exists(filename):
+                return filename
+    return None
+
+
+def get_dependencies(name, environ):
+    """Return library dependencies of a dynamically linked executable
+
+    Uses otool on darwin, ldd on linux. Currently doesn't support windows.
+
+    """
+    if sys.platform == 'darwin':
+        proc = sp.Popen('otool -L `which %s`' % name,
+                        stdout=sp.PIPE,
+                        stderr=sp.PIPE,
+                        shell=True,
+                        env=environ)
+    elif 'linux' in sys.platform:
+        proc = sp.Popen('ldd `which %s`' % name,
+                        stdout=sp.PIPE,
+                        stderr=sp.PIPE,
+                        shell=True,
+                        env=environ)
+    else:
+        return 'Platform %s not supported' % sys.platform
+    o, e = proc.communicate()
+    return o.rstrip()
+
+
+def canonicalize_env(env):
+    """Windows requires that environment be dicts with bytes as keys and values
+    This function converts any unicode entries for Windows only, returning the
+    dictionary untouched in other environments.
+
+    Parameters
+    ----------
+    env : dict
+        environment dictionary with unicode or bytes keys and values
+
+    Returns
+    -------
+    env : dict
+        Windows: environment dictionary with bytes keys and values
+        Other: untouched input ``env``
+    """
+    if os.name != 'nt':
+        return env
+
+    out_env = {}
+    for key, val in env.items():
+        if not isinstance(key, bytes):
+            key = key.encode('utf-8')
+        if not isinstance(val, bytes):
+            val = val.encode('utf-8')
+        out_env[key] = val
+    return out_env

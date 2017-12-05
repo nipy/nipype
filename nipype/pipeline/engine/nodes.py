@@ -34,18 +34,20 @@ from hashlib import sha1
 
 from ... import config, logging
 from ...utils.misc import (flatten, unflatten, str2bool)
-from ...utils.filemanip import (save_json, FileNotFoundError,
-                                filename_to_list, list_to_filename,
-                                copyfiles, fnames_presuffix, loadpkl,
-                                split_filename, load_json, makedirs,
-                                emptydirs, savepkl, write_rst_header,
-                                write_rst_dict, write_rst_list, to_str)
-from ...interfaces.base import (traits, InputMultiPath, CommandLine,
-                                Undefined, DynamicTraitedSpec,
-                                Bunch, InterfaceResult, md5, Interface,
-                                isdefined)
-from .utils import (modify_paths, clean_working_directory,
-                    get_print_name, merge_dict, evaluate_connect_function)
+from ...utils.filemanip import (
+    save_json, FileNotFoundError, filename_to_list, list_to_filename,
+    copyfiles, fnames_presuffix, loadpkl, split_filename, load_json, makedirs,
+    emptydirs, savepkl, write_rst_header, write_rst_dict, write_rst_list, to_str
+)
+
+from ...interfaces.base import (
+    traits, InputMultiPath, CommandLine, Undefined, DynamicTraitedSpec,
+    Bunch, InterfaceResult, md5, Interface, isdefined
+)
+from .utils import (
+    modify_paths, clean_working_directory, get_print_name,
+    merge_dict, evaluate_connect_function
+)
 from .base import EngineBase
 
 from future import standard_library

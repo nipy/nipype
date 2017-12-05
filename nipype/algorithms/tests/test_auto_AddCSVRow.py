@@ -6,7 +6,8 @@ from ..misc import AddCSVRow
 def test_AddCSVRow_inputs():
     input_map = dict(_outputs=dict(usedefault=True,
     ),
-    ignore_exception=dict(nohash=True,
+    ignore_exception=dict(deprecated='1.0.0',
+    nohash=True,
     usedefault=True,
     ),
     in_file=dict(mandatory=True,

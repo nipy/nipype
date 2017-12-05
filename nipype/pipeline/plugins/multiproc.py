@@ -12,14 +12,25 @@ from __future__ import print_function, division, unicode_literals, absolute_impo
 from multiprocessing import Process, Pool, cpu_count, pool
 from traceback import format_exception
 import sys
+from logging import INFO
+import gc
 
 from copy import deepcopy
 import numpy as np
-
 from ... import logging
 from ...utils.profiler import get_system_total_memory_gb
 from ..engine import MapNode
 from .base import DistributedPluginBase
+
+try:
+    from textwrap import indent
+except ImportError:
+    def indent(text, prefix):
+        """ A textwrap.indent replacement for Python < 3.3 """
+        if not prefix:
+            return text
+        splittext = text.splitlines(True)
+        return prefix + prefix.join(splittext)
 
 # Init logger
 logger = logging.getLogger('workflow')
@@ -121,13 +132,16 @@ class MultiProcPlugin(DistributedPluginBase):
         non_daemon = self.plugin_args.get('non_daemon', True)
         maxtasks = self.plugin_args.get('maxtasksperchild', 10)
         self.processors = self.plugin_args.get('n_procs', cpu_count())
-        self.memory_gb = self.plugin_args.get('memory_gb',  # Allocate 90% of system memory
-                                              get_system_total_memory_gb() * 0.9)
-        self.raise_insufficient = self.plugin_args.get('raise_insufficient', True)
+        self.memory_gb = self.plugin_args.get(
+            'memory_gb',  # Allocate 90% of system memory
+            get_system_total_memory_gb() * 0.9)
+        self.raise_insufficient = self.plugin_args.get('raise_insufficient',
+                                                       True)
 
         # Instantiate different thread pools for non-daemon processes
-        logger.debug('MultiProcPlugin starting in "%sdaemon" mode (n_procs=%d, mem_gb=%0.2f)',
-                     'non' * int(non_daemon), self.processors, self.memory_gb)
+        logger.debug('[MultiProc] Starting in "%sdaemon" mode (n_procs=%d, '
+                     'mem_gb=%0.2f)', 'non' * int(non_daemon), self.processors,
+                     self.memory_gb)
 
         NipypePool = NonDaemonPool if non_daemon else Pool
         try:
@@ -158,7 +172,7 @@ class MultiProcPlugin(DistributedPluginBase):
             run_node, (node, updatehash, self._taskid),
             callback=self._async_callback)
 
-        logger.debug('MultiProc submitted task %s (taskid=%d).',
+        logger.debug('[MultiProc] Submitted task %s (taskid=%d).',
                      node.fullname, self._taskid)
         return self._taskid
 
@@ -204,19 +218,30 @@ class MultiProcPlugin(DistributedPluginBase):
         Sends jobs to workers when system resources are available.
         """
 
-        # Check to see if a job is available (jobs without dependencies not run)
+        # Check to see if a job is available (jobs with all dependencies run)
         # See https://github.com/nipy/nipype/pull/2200#discussion_r141605722
         jobids = np.nonzero(~self.proc_done & (self.depidx.sum(0) == 0))[1]
 
-        # Check available system resources by summing all threads and memory used
-        free_memory_gb, free_processors = self._check_resources(self.pending_tasks)
+        # Check available resources by summing all threads and memory used
+        free_memory_gb, free_processors = self._check_resources(
+            self.pending_tasks)
 
         stats = (len(self.pending_tasks), len(jobids), free_memory_gb,
                  self.memory_gb, free_processors, self.processors)
         if self._stats != stats:
-            logger.info('Currently running %d tasks, and %d jobs ready. Free '
-                        'memory (GB): %0.2f/%0.2f, Free processors: %d/%d',
-                        *stats)
+            tasks_list_msg = ''
+
+            if logger.level <= INFO:
+                running_tasks = ['  * %s' % self.procs[jobid].fullname
+                                 for _, jobid in self.pending_tasks]
+                if running_tasks:
+                    tasks_list_msg = '\nCurrently running:\n'
+                    tasks_list_msg += '\n'.join(running_tasks)
+                    tasks_list_msg = indent(tasks_list_msg, ' ' * 21)
+            logger.info('[MultiProc] Running %d tasks, and %d jobs ready. Free '
+                        'memory (GB): %0.2f/%0.2f, Free processors: %d/%d.%s',
+                        len(self.pending_tasks), len(jobids), free_memory_gb, self.memory_gb,
+                        free_processors, self.processors, tasks_list_msg)
             self._stats = stats
 
         if free_memory_gb < 0.01 or free_processors == 0:
@@ -228,7 +253,11 @@ class MultiProcPlugin(DistributedPluginBase):
                          'be submitted to the queue. Potential deadlock')
             return
 
-        jobids = self._sort_jobs(jobids, scheduler=self.plugin_args.get('scheduler'))
+        jobids = self._sort_jobs(jobids,
+                                 scheduler=self.plugin_args.get('scheduler'))
+
+        # Run garbage collector before potentially submitting jobs
+        gc.collect()
 
         # Submit jobs
         for jobid in jobids:
@@ -261,9 +290,10 @@ class MultiProcPlugin(DistributedPluginBase):
 
             free_memory_gb -= next_job_gb
             free_processors -= next_job_th
-            logger.debug('Allocating %s ID=%d (%0.2fGB, %d threads). Free: %0.2fGB, %d threads.',
-                         self.procs[jobid].fullname, jobid, next_job_gb, next_job_th,
-                         free_memory_gb, free_processors)
+            logger.debug('Allocating %s ID=%d (%0.2fGB, %d threads). Free: '
+                         '%0.2fGB, %d threads.', self.procs[jobid].fullname,
+                         jobid, next_job_gb, next_job_th, free_memory_gb,
+                         free_processors)
 
             # change job status in appropriate queues
             self.proc_done[jobid] = True
@@ -292,6 +322,9 @@ class MultiProcPlugin(DistributedPluginBase):
                 free_processors += next_job_th
                 # Display stats next loop
                 self._stats = None
+
+                # Clean up any debris from running node in main process
+                gc.collect()
                 continue
 
             # Task should be submitted to workers

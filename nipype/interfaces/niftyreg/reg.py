@@ -20,15 +20,10 @@ from __future__ import (print_function, division, unicode_literals,
                         absolute_import)
 from builtins import staticmethod
 import os
-import warnings
 
 from ..base import TraitedSpec, File, traits, isdefined
 from .base import get_custom_path, NiftyRegCommand, NiftyRegCommandInputSpec
 from ...utils.filemanip import split_filename
-
-
-warn = warnings.warn
-warnings.filterwarnings('always', category=UserWarning)
 
 
 class RegAladinInputSpec(NiftyRegCommandInputSpec):

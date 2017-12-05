@@ -4,12 +4,14 @@
 
 import pytest
 
-from nipype.interfaces.niftyfit import FitAsl
-from nipype.interfaces.niftyreg import no_nifty_package, get_custom_path
-from nipype.testing import example_data
+from ....testing import example_data
+from ...niftyreg import get_custom_path
+
+from ..asl import FitAsl
+from ...niftyreg.tests.test_regutils import no_nifty_tool
 
 
-@pytest.mark.skipif(no_nifty_package(cmd='fit_asl'),
+@pytest.mark.skipif(no_nifty_tool(cmd='fit_asl'),
                     reason="niftyfit is not installed")
 def test_fit_asl():
     """ Testing FitAsl interface."""

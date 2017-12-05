@@ -11,10 +11,10 @@ import os
 import pytest
 
 # Import packages
-from nipype import config
-from nipype.utils.profiler import _use_resources
-from nipype.interfaces.base import traits, CommandLine, CommandLineInputSpec
-from nipype.interfaces import utility as niu
+from .... import config
+from ....utils.profiler import _use_resources
+from ...base import traits, CommandLine, CommandLineInputSpec
+from ... import utility as niu
 
 # Try to enable the resource monitor
 config.enable_resource_monitor()

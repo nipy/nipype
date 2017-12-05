@@ -32,6 +32,7 @@ import networkx as nx
 from ... import config, logging
 from ...utils.misc import str2bool
 from ...utils.functions import (getsource, create_function_from_source)
+
 from ...interfaces.base import (
     traits, TraitedSpec, TraitDictObject, TraitListObject)
 from ...utils.filemanip import save_json, makedirs, to_str

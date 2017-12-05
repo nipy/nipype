@@ -5,7 +5,8 @@ from ..tracks import TrackDensityMap
 
 def test_TrackDensityMap_inputs():
     input_map = dict(data_dims=dict(),
-    ignore_exception=dict(nohash=True,
+    ignore_exception=dict(deprecated='1.0.0',
+    nohash=True,
     usedefault=True,
     ),
     in_file=dict(mandatory=True,

@@ -4,7 +4,8 @@ from ..fix import TrainingSetCreator
 
 
 def test_TrainingSetCreator_inputs():
-    input_map = dict(ignore_exception=dict(nohash=True,
+    input_map = dict(ignore_exception=dict(deprecated='1.0.0',
+    nohash=True,
     usedefault=True,
     ),
     mel_icas_in=dict(argstr='%s',

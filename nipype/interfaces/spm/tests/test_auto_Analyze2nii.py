@@ -6,7 +6,8 @@ from ..utils import Analyze2nii
 def test_Analyze2nii_inputs():
     input_map = dict(analyze_file=dict(mandatory=True,
     ),
-    ignore_exception=dict(nohash=True,
+    ignore_exception=dict(deprecated='1.0.0',
+    nohash=True,
     usedefault=True,
     ),
     matlab_cmd=dict(),
@@ -26,7 +27,8 @@ def test_Analyze2nii_inputs():
 
 
 def test_Analyze2nii_outputs():
-    output_map = dict(ignore_exception=dict(nohash=True,
+    output_map = dict(ignore_exception=dict(deprecated='1.0.0',
+    nohash=True,
     usedefault=True,
     ),
     matlab_cmd=dict(),
