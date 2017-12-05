@@ -163,7 +163,6 @@ class Node(EngineBase):
         self.name = name
 
         self._output_dir = None
-        self._result = None
         self.iterables = iterables
         self.synchronize = synchronize
         self.itersource = itersource
@@ -190,11 +189,7 @@ class Node(EngineBase):
 
     @property
     def result(self):
-        # Cache first
-        if not self._result:
-            self._result = self._load_resultfile(self.output_dir())[0]
-
-        return self._result
+        return self._load_resultfile(self.output_dir())[0]
 
     @property
     def inputs(self):
@@ -420,7 +415,7 @@ class Node(EngineBase):
         self.write_report(report_type='postexec', cwd=outdir)
         logger.info('[Node] Finished "%s".', self.fullname)
         os.chdir(cwd)
-        return self._result
+        return self.result
 
     # Private functions
     def _parameterization_dir(self, param):
@@ -511,7 +506,7 @@ class Node(EngineBase):
     def _run_interface(self, execute=True, updatehash=False):
         if updatehash:
             return
-        self._result = self._run_command(execute)
+        return self._run_command(execute)
 
     def _save_results(self, result, cwd):
         resultsfile = op.join(cwd, 'result_%s.pklz' % self.name)
@@ -609,8 +604,7 @@ class Node(EngineBase):
                 self._save_results(result, cwd)
             else:
                 logger.debug('aggregating mapnode results')
-                self._run_interface()
-                result = self._result
+                result = self._run_interface()
         return result
 
     def _run_command(self, execute, copyfiles=True):
@@ -625,7 +619,7 @@ class Node(EngineBase):
                 interface=self._interface.__class__,
                 runtime=runtime,
                 inputs=self._interface.inputs.get_traitsfree())
-            self._result = result
+
             if copyfiles:
                 self._copyfiles_to_wd(cwd, execute)
 
@@ -634,7 +628,7 @@ class Node(EngineBase):
                 try:
                     cmd = self._interface.cmdline
                 except Exception as msg:
-                    self._result.runtime.stderr = msg
+                    result.runtime.stderr = msg
                     raise
                 cmdfile = op.join(cwd, 'command.txt')
                 with open(cmdfile, 'wt') as fd:
@@ -646,7 +640,7 @@ class Node(EngineBase):
                 result = self._interface.run()
             except Exception as msg:
                 self._save_results(result, cwd)
-                self._result.runtime.stderr = msg
+                result.runtime.stderr = msg
                 raise
 
             dirs2keep = None
@@ -1182,19 +1176,19 @@ class MapNode(Node):
                 yield i, node, err
 
     def _collate_results(self, nodes):
-        self._result = InterfaceResult(interface=[], runtime=[],
-                                       provenance=[], inputs=[],
-                                       outputs=self.outputs)
+        result = InterfaceResult(
+            interface=[], runtime=[], provenance=[], inputs=[],
+            outputs=self.outputs)
         returncode = []
         for i, node, err in nodes:
-            self._result.runtime.insert(i, None)
+            result.runtime.insert(i, None)
             if node.result:
                 if hasattr(node.result, 'runtime'):
-                    self._result.interface.insert(i, node.result.interface)
-                    self._result.inputs.insert(i, node.result.inputs)
-                    self._result.runtime[i] = node.result.runtime
+                    result.interface.insert(i, node.result.interface)
+                    result.inputs.insert(i, node.result.inputs)
+                    result.runtime[i] = node.result.runtime
                 if hasattr(node.result, 'provenance'):
-                    self._result.provenance.insert(i, node.result.provenance)
+                    result.provenance.insert(i, node.result.provenance)
             returncode.insert(i, err)
             if self.outputs:
                 for key, _ in list(self.outputs.items()):
@@ -1203,7 +1197,7 @@ class MapNode(Node):
                     if str2bool(rm_extra) and self.needed_outputs:
                         if key not in self.needed_outputs:
                             continue
-                    values = getattr(self._result.outputs, key)
+                    values = getattr(result.outputs, key)
                     if not isdefined(values):
                         values = []
                     if node.result.outputs:
@@ -1211,16 +1205,16 @@ class MapNode(Node):
                     else:
                         values.insert(i, None)
                     defined_vals = [isdefined(val) for val in values]
-                    if any(defined_vals) and self._result.outputs:
-                        setattr(self._result.outputs, key, values)
+                    if any(defined_vals) and result.outputs:
+                        setattr(result.outputs, key, values)
 
         if self.nested:
             for key, _ in list(self.outputs.items()):
-                values = getattr(self._result.outputs, key)
+                values = getattr(result.outputs, key)
                 if isdefined(values):
                     values = unflatten(values, filename_to_list(
                         getattr(self.inputs, self.iterfield[0])))
-                setattr(self._result.outputs, key, values)
+                setattr(result.outputs, key, values)
 
         if returncode and any([code is not None for code in returncode]):
             msg = []
@@ -1230,6 +1224,8 @@ class MapNode(Node):
                     msg += ['Error:', str(code)]
             raise Exception('Subnodes of node: %s failed:\n%s' %
                             (self.name, '\n'.join(msg)))
+
+        return result
 
     def write_report(self, report_type=None, cwd=None):
         if not str2bool(self.config['execution']['create_report']):
@@ -1322,9 +1318,10 @@ class MapNode(Node):
                 nitems = len(filename_to_list(getattr(self.inputs,
                                                       self.iterfield[0])))
             nodenames = ['_' + self.name + str(i) for i in range(nitems)]
-            self._collate_results(self._node_runner(self._make_nodes(cwd),
-                                                    updatehash=updatehash))
-            self._save_results(self._result, cwd)
+            result = self._collate_results(
+                self._node_runner(self._make_nodes(cwd),
+                                  updatehash=updatehash))
+            self._save_results(result, cwd)
             # remove any node directories no longer required
             dirs2remove = []
             for path in glob(op.join(cwd, 'mapflow', '*')):
@@ -1334,5 +1331,5 @@ class MapNode(Node):
             for path in dirs2remove:
                 shutil.rmtree(path)
         else:
-            self._result = self._load_results(cwd)
+            result = self._load_results(cwd)
         os.chdir(old_cwd)
