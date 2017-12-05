@@ -700,6 +700,14 @@ def makedirs(path, exist_ok=False):
 
 
 def emptydirs(path):
+    """
+    Empty an existing directory, without deleting it
+
+    Parameters
+    ----------
+    path : directory that should be empty
+
+    """
     fmlogger.debug("Removing contents of %s", path)
     pathconts = os.listdir(path)
 
