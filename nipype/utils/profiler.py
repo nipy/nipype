@@ -100,9 +100,12 @@ class ResourceMonitor(threading.Thread):
 
     def run(self):
         """Core monitoring function, called by start()"""
+        start_time = time()
+        wait_til = start_time
         while not self._event.is_set():
             self._sample()
-            self._event.wait(self._freq)
+            wait_til += self._freq
+            self._event.wait(max(0, wait_til - time()))
 
 
 # Log node stats function
