@@ -283,9 +283,8 @@ class Node(EngineBase):
                 for hf in hashfiles:
                     os.remove(hf)
 
-            if updatehash and len(hashfiles) == 1:
+            if updatehash:
                 logger.debug("Updating hash: %s", hashvalue)
-                os.remove(hashfiles[0])
                 self._save_hashfile(hashfile, hashed_inputs)
 
         hash_exists = op.exists(hashfile)
