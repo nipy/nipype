@@ -94,7 +94,7 @@ class ResourceMonitor(threading.Thread):
             except psutil.NoSuchProcess:
                 pass
 
-        print('%f,%f,%f,%f' % (time(), rss / _MB, cpu, vms / _MB),
+        print('%f,%f,%f,%f' % (time(), cpu, rss / _MB, vms / _MB),
               file=self._logfile)
         self._logfile.flush()
 

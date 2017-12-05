@@ -1362,7 +1362,7 @@ def write_workflow_resources(graph, filename=None, append=None):
                     '(mapflow %d/%d).', nodename, subidx + 1, len(rt_list))
                 continue
 
-            for key in ['time', 'rss_GiB', 'cpus', 'vms_GiB']:
+            for key in ['time', 'cpus', 'rss_GiB', 'vms_GiB']:
                 big_dict[key] += runtime.prof_dict[key]
 
             big_dict['interface'] += [classname] * nsamples
