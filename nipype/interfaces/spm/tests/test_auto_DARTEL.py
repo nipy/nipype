@@ -4,7 +4,8 @@ from ..preprocess import DARTEL
 
 
 def test_DARTEL_inputs():
-    input_map = dict(ignore_exception=dict(nohash=True,
+    input_map = dict(ignore_exception=dict(deprecated='1.0.0',
+    nohash=True,
     usedefault=True,
     ),
     image_files=dict(copyfile=False,

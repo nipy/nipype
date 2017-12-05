@@ -14,8 +14,7 @@
 from __future__ import print_function, division, unicode_literals, absolute_import
 
 from ... import logging
-from ..traits_extension import isdefined
-from ..base import (CommandLineInputSpec, CommandLine, traits, File)
+from ..base import (CommandLineInputSpec, CommandLine, traits, File, isdefined)
 iflogger = logging.getLogger('interface')
 
 

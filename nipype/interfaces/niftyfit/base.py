@@ -19,14 +19,9 @@ See the docstrings of the individual classes for examples.
 """
 
 import os
-import warnings
 
 from ..base import CommandLine
 from ...utils.filemanip import split_filename
-
-
-warn = warnings.warn
-warnings.filterwarnings('always', category=UserWarning)
 
 
 class NiftyFitCommand(CommandLine):

@@ -5,7 +5,8 @@ from ..io import DataGrabber
 
 def test_DataGrabber_inputs():
     input_map = dict(base_directory=dict(),
-    ignore_exception=dict(nohash=True,
+    ignore_exception=dict(deprecated='1.0.0',
+    nohash=True,
     usedefault=True,
     ),
     raise_on_empty=dict(usedefault=True,

@@ -31,6 +31,8 @@ class Status(object):
 
 
 def test_callback_normal(tmpdir):
+    tmpdir.chdir()
+
     so = Status()
     wf = pe.Workflow(name='test', base_dir=tmpdir.strpath)
     f_node = pe.Node(niu.Function(function=func, input_names=[],
@@ -47,6 +49,8 @@ def test_callback_normal(tmpdir):
 
 
 def test_callback_exception(tmpdir):
+    tmpdir.chdir()
+
     so = Status()
     wf = pe.Workflow(name='test', base_dir=tmpdir.strpath)
     f_node = pe.Node(niu.Function(function=bad_func, input_names=[],
@@ -65,6 +69,8 @@ def test_callback_exception(tmpdir):
     assert so.statuses[1][1] == 'exception'
 
 def test_callback_multiproc_normal(tmpdir):
+    tmpdir.chdir()
+
     so = Status()
     wf = pe.Workflow(name='test', base_dir=tmpdir.strpath)
     f_node = pe.Node(niu.Function(function=func, input_names=[],
@@ -84,11 +90,13 @@ def test_callback_multiproc_exception(tmpdir):
     tmpdir.chdir()
 
     so = Status()
-    wf = pe.Workflow(name='test')
+    wf = pe.Workflow(name='test', base_dir=tmpdir.strpath)
     f_node = pe.Node(niu.Function(function=bad_func, input_names=[],
                                   output_names=[]),
                      name='f_node')
     wf.add_nodes([f_node])
+    wf.config['execution'] = {'crashdump_dir': wf.base_dir}
+
     try:
         wf.run(plugin='MultiProc',
                plugin_args={'status_callback': so.callback})

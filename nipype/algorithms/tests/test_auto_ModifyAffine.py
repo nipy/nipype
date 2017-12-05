@@ -4,7 +4,8 @@ from ..misc import ModifyAffine
 
 
 def test_ModifyAffine_inputs():
-    input_map = dict(ignore_exception=dict(nohash=True,
+    input_map = dict(ignore_exception=dict(deprecated='1.0.0',
+    nohash=True,
     usedefault=True,
     ),
     transformation_matrix=dict(usedefault=True,

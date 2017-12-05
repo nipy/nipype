@@ -18,16 +18,11 @@ data'))
 from __future__ import (print_function, division, unicode_literals,
                         absolute_import)
 from builtins import len, open, property, super
-import warnings
 import os
 
 from ..base import TraitedSpec, File, traits, isdefined
 from .base import get_custom_path, NiftyRegCommand, NiftyRegCommandInputSpec
 from ...utils.filemanip import split_filename
-
-
-warn = warnings.warn
-warnings.filterwarnings('always', category=UserWarning)
 
 
 class RegResampleInputSpec(NiftyRegCommandInputSpec):

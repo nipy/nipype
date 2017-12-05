@@ -4,7 +4,8 @@ from ..base import AssertEqual
 
 
 def test_AssertEqual_inputs():
-    input_map = dict(ignore_exception=dict(nohash=True,
+    input_map = dict(ignore_exception=dict(deprecated='1.0.0',
+    nohash=True,
     usedefault=True,
     ),
     volume1=dict(mandatory=True,
