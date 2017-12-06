@@ -22,14 +22,15 @@ def test_ComposeXfmTask_inputs():
     mandatory=False,
     position=1,
     ),
-    out_path=dict(argstr='-out %s',
+    out_file=dict(argstr='-out %s',
     exists=True,
     mandatory=False,
     name_source='in_df',
     name_template='%s_comboaff.nii.gz',
     position=2,
     ),
-    terminal_output=dict(nohash=True,
+    terminal_output=dict(deprecated='1.0.0',
+    nohash=True,
     ),
     )
     inputs = ComposeXfmTask.input_spec()

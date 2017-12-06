@@ -32,14 +32,15 @@ def test_SVAdjustVoxSpTask_inputs():
     mandatory=False,
     position=4,
     ),
-    out_path=dict(argstr='-out %s',
+    out_file=dict(argstr='-out %s',
     exists=True,
     mandatory=False,
     name_source='in_file',
     name_template='%s_origmvd.nii.gz',
     position=1,
     ),
-    terminal_output=dict(nohash=True,
+    terminal_output=dict(deprecated='1.0.0',
+    nohash=True,
     ),
     )
     inputs = SVAdjustVoxSpTask.input_spec()

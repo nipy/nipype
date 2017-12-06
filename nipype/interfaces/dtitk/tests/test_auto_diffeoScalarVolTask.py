@@ -47,12 +47,13 @@ def test_diffeoScalarVolTask_inputs():
     mandatory=False,
     position=2,
     ),
-    out_path=dict(argstr='-out %s',
+    out_file=dict(argstr='-out %s',
     name_source='in_volume',
     name_template='%s_diffeoxfmd.nii.gz',
     position=1,
     ),
-    terminal_output=dict(nohash=True,
+    terminal_output=dict(deprecated='1.0.0',
+    nohash=True,
     ),
     )
     inputs = diffeoScalarVolTask.input_spec()

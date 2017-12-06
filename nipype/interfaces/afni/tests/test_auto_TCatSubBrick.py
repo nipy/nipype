@@ -17,6 +17,9 @@ def test_TCatSubBrick_inputs():
     mandatory=True,
     position=-1,
     ),
+    num_threads=dict(nohash=True,
+    usedefault=True,
+    ),
     out_file=dict(argstr='-prefix %s',
     genfile=True,
     ),
@@ -24,7 +27,8 @@ def test_TCatSubBrick_inputs():
     rlt=dict(argstr='-rlt%s',
     position=1,
     ),
-    terminal_output=dict(nohash=True,
+    terminal_output=dict(deprecated='1.0.0',
+    nohash=True,
     ),
     )
     inputs = TCatSubBrick.input_spec()

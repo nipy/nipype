@@ -27,14 +27,15 @@ def test_SVResampleTask_inputs():
     mandatory=False,
     position=2,
     ),
-    out_path=dict(argstr='-out %s',
+    out_file=dict(argstr='-out %s',
     exists=True,
     mandatory=False,
     name_source='in_file',
     name_template='%s_resampled.nii.gz',
     position=3,
     ),
-    terminal_output=dict(nohash=True,
+    terminal_output=dict(deprecated='1.0.0',
+    nohash=True,
     ),
     )
     inputs = SVResampleTask.input_spec()
