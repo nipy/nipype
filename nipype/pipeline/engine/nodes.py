@@ -275,9 +275,18 @@ class Node(EngineBase):
         logger.debug('Node hash value: %s', hashvalue)
 
         if op.exists(outdir):
+            # Find unfinished hashfiles and error if any
+            unfinished = glob(op.join(outdir, '_0x*_unfinished.json'))
+            if unfinished:
+                raise RuntimeError(
+                    '[Caching Node Error] Found unfinished hashfiles (%d) that indicate '
+                    'that the ``base_dir`` for this node went stale. Please re-run the '
+                    'workflow.' % len(unfinished))
+
             # Find previous hashfiles
             hashfiles = glob(op.join(outdir, '_0x*.json'))
-            if len(hashfiles) > 1:  # Remove hashfiles if more than one found
+             # Remove hashfiles if more than one found or the one found is outdated
+            if hashfiles and (len(hashfiles) > 1 or hashfiles[0] != hashfile):
                 logger.info('Removing hashfiles (%s) and forcing node to rerun',
                             ', '.join(['"%s"' % op.basename(h) for h in hashfiles]))
                 for hf in hashfiles:
