@@ -491,7 +491,7 @@ def copyfiles(filelist, dest, copy=False, create_new=False):
 def filename_to_list(filename):
     """Returns a list given either a string or a list
     """
-    if isinstance(filename, (str, bytes)):
+    if isinstance(filename, (str, bytes,unicode)):
         return [filename]
     elif isinstance(filename, list):
         return filename
