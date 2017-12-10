@@ -591,7 +591,7 @@ def test_bids_fields(tmpdir):
                     reason="Pybids no longer supports Python 2")
 @pytest.mark.skipif(not dist_is_editable('pybids'),
                     reason="Pybids is not installed in editable mode")
-def test_infields_outfields(tmpdir):
+def test_bids_infields_outfields(tmpdir):
     tmpdir.chdir()
     infields = ['infield1', 'infield2']
     outfields = ['outfield1', 'outfield2']
