@@ -25,6 +25,7 @@ from builtins import object, zip, filter, range, open, str
 import glob
 import fnmatch
 import string
+import json
 import os
 import os.path as op
 import shutil
@@ -2772,16 +2773,12 @@ class BIDSDataGrabber(IOBase):
     output_spec = DynamicTraitedSpec
     _always_run = True
 
-    def __init__(self, infields=None, outfields=None, **kwargs):
+    def __init__(self, infields=None, **kwargs):
         """
         Parameters
         ----------
         infields : list of str
             Indicates the input fields to be dynamically created
-
-        outfields: list of str
-            Indicates output fields to be dynamically created.
-            If no matching items, returns Undefined.
         """
         super(BIDSDataGrabber, self).__init__(**kwargs)
 
@@ -2794,12 +2791,8 @@ class BIDSDataGrabber(IOBase):
             bids_config = join(dirname(gb.__file__), 'config', 'bids.json')
             bids_config = json.load(open(bids_config, 'r'))
             infields = [i['name'] for i in bids_config['entities']]
-        # if outfields is not set, return those defined in infields
-        if infields and outfields is None:
-            outfields = [infield for infield in infields]
 
         self._infields = infields or []
-        self._outfields = outfields or []
 
         # used for mandatory inputs check
         undefined_traits = {}
@@ -2841,3 +2834,6 @@ class BIDSDataGrabber(IOBase):
 
             outputs[key] = filelist
         return outputs
+
+    def _add_output_traits(self, base):
+        return add_traits(base, list(self.inputs.output_query.keys()))
