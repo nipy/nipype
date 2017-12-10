@@ -57,7 +57,7 @@ class DeconvolveInputSpec(AFNICommandInputSpec):
              '* If the auto-catenation feature isn\'t used, then this option '
              'has no effect, no how, no way.',
         argstr='-noblock')
-    force_TR = traits.Int(
+    force_TR = traits.Float(
         desc='use this value instead of the TR in the \'input\' '
              'dataset. (It\'s better to fix the input using Refit.)',
         argstr='-force_TR %d')
