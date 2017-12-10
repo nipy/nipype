@@ -290,7 +290,7 @@ class Deconvolve(AFNICommand):
         return super(Deconvolve, self)._parse_inputs(skip)
 
     def _list_outputs(self):
-        if isdefined(self.inputs.x1D_stop):
+        if isdefined(self.inputs.x1D_stop) and self.inputs.x1D_stop:
             # we are stopping early, so out_file doesn't exist
             self.output_spec.out_file.exists = False
 
