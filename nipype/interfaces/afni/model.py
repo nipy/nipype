@@ -233,7 +233,7 @@ class DeconvolveInputSpec(AFNICommandInputSpec):
 
 class DeconvolveOutputSpec(TraitedSpec):
     out_file = File(
-        desc='output statistics file', exists=True)
+        desc='output statistics file', exists=False)
     reml_script = File(
         desc='automatical generated script to run 3dREMLfit', exists=True)
     x1D = File(
@@ -291,10 +291,6 @@ class Deconvolve(AFNICommand):
         return super(Deconvolve, self)._parse_inputs(skip)
 
     def _list_outputs(self):
-        if isdefined(self.inputs.x1D_stop) and self.inputs.x1D_stop:
-            # we are stopping early, so out_file doesn't exist
-            self.output_spec.out_file.exists = False
-
         outputs = self.output_spec().get()
 
         _gen_fname_opts = {}
