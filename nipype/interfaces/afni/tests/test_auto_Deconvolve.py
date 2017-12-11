@@ -81,7 +81,7 @@ def test_Deconvolve_inputs():
     num_threads=dict(nohash=True,
     usedefault=True,
     ),
-    ortvec=dict(argstr='ortvec %s',
+    ortvec=dict(argstr='-ortvec %s %s',
     ),
     out_file=dict(argstr='-bucket %s',
     ),
