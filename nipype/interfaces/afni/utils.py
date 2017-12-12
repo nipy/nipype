@@ -748,7 +748,8 @@ class ConvertDsetInputSpec(CommandLineInputSpec):
     out_file = File(
         desc='output file for ConvertDset',
         argstr='-prefix %s',
-        position=-1)
+        position=-1,
+        mandatory=True)
 
     out_type = traits.Enum(
         ('niml', 'niml_asc', 'niml_bi',
@@ -782,6 +783,11 @@ class ConvertDset(AFNICommandBase):
     _cmd = 'ConvertDset'
     input_spec = ConvertDsetInputSpec
     output_spec = AFNICommandOutputSpec
+
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        outputs['out_file'] = op.abspath(self.inputs.out_file)
+        return outputs
 
 
 class CopyInputSpec(AFNICommandInputSpec):
