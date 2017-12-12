@@ -1,5 +1,5 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
-# vi: set ft=python sts=4 ts=4 sw=4 et:
+# vi: set ft=python sts=4 ts=4 sw=4 et:                                                                                                                 
 
 from nipype.interfaces.ants import WarpImageMultiTransform, WarpTimeSeriesImageMultiTransform
 import os
@@ -66,7 +66,7 @@ def create_wtsimt():
 def test_WarpTimeSeriesImageMultiTransform(change_dir, create_wtsimt):
    wtsimt = create_wtsimt
    assert wtsimt.cmdline == 'WarpTimeSeriesImageMultiTransform 4 resting.nii resting_wtsimt.nii \
--R ants_deformed.nii.gz ants_Warp.nii.gz ants_Affine.txt'
+-R ants_deformed.nii.gz ants_Warp.nii.gz ants_Affine.txt'                                                                                            
 
 
 def test_WarpTimeSeriesImageMultiTransform_invaffine(change_dir, create_wtsimt):
