@@ -775,7 +775,7 @@ class ConvertDset(AFNICommandBase):
     >>> convertdset.inputs.out_type = 'niml_asc'
     >>> convertdset.inputs.out_file = 'lh.pial_converted.niml.dset'
     >>> convertdset.cmdline
-    'ConvertDset -o_niml_asc -input nipype/testing/data/lh.pial_converted.gii -prefix lh.pial_converted.niml.dset'
+    'ConvertDset -o_niml_asc -input lh.pial_converted.gii -prefix lh.pial_converted.niml.dset'
     >>> res = convertdset.run()  # doctest: +SKIP
     """
 
