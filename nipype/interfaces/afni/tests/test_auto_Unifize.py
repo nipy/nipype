@@ -33,6 +33,7 @@ def test_Unifize_inputs():
     ),
     out_file=dict(argstr='-prefix %s',
     name_source='in_file',
+    name_template='%s_unifized',
     ),
     outputtype=dict(),
     quiet=dict(argstr='-quiet',

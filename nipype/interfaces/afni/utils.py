@@ -2291,6 +2291,7 @@ class UnifizeInputSpec(AFNICommandInputSpec):
         exists=True,
         copyfile=False)
     out_file = File(
+        name_template='%s_unifized',
         desc='output image file name',
         argstr='-prefix %s',
         name_source='in_file')
