@@ -33,8 +33,6 @@ def test_TStat_inputs():
     terminal_output=dict(deprecated='1.0.0',
     nohash=True,
     ),
-    verbose=dict(argstr='-verb %s',
-    ),
     )
     inputs = TStat.input_spec()
 
