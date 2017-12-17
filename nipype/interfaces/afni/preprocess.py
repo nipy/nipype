@@ -438,6 +438,12 @@ class AllineateInputSpec(AFNICommandInputSpec):
         traits.Enum(*_dirs),
         argstr='-nwarp_fixdep%s',
         desc='To fix non-linear warp dependency along directions.')
+    verb = traits.Bool(
+        argstr='-verb',
+        desc='Print out verbose progress reports.')
+    quiet = traits.Bool(
+        argstr='-quiet',
+        desc='Don\'t print out verbose progress reports.')
 
 
 class AllineateOutputSpec(TraitedSpec):
