@@ -751,7 +751,7 @@ class CopyInputSpec(AFNICommandInputSpec):
         argstr='%s',
         position=-1,
         name_source='in_file')
-    verb = traits.Bool(
+    verbose = traits.Bool(
         desc='print progress reports',
         argstr='-verb')
 
@@ -1991,7 +1991,7 @@ class TCatInputSpec(AFNICommandInputSpec):
              'dataset mean back in. Option -rlt++ adds overall mean of all '
              'dataset timeseries back in.',
         position=1)
-    verb = traits.Bool(
+    verbose = traits.Bool(
         desc='Print out some verbose output as the program',
         argstr='-verb')
 

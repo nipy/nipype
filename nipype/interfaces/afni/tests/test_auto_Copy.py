@@ -30,7 +30,7 @@ def test_Copy_inputs():
     terminal_output=dict(deprecated='1.0.0',
     nohash=True,
     ),
-    verb=dict(argstr='-verb',
+    verbose=dict(argstr='-verb',
     ),
     )
     inputs = Copy.input_spec()

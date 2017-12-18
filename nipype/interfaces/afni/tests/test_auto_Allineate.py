@@ -120,7 +120,7 @@ def test_Allineate_inputs():
     ),
     usetemp=dict(argstr='-usetemp',
     ),
-    verb=dict(argstr='-verb',
+    verbose=dict(argstr='-verb',
     ),
     warp_type=dict(argstr='-warp %s',
     ),

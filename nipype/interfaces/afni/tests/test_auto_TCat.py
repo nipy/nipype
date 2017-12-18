@@ -32,7 +32,7 @@ def test_TCat_inputs():
     terminal_output=dict(deprecated='1.0.0',
     nohash=True,
     ),
-    verb=dict(argstr='-verb',
+    verbose=dict(argstr='-verb',
     ),
     )
     inputs = TCat.input_spec()
