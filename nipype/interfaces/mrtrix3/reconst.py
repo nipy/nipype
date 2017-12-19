@@ -76,7 +76,7 @@ class FitTensor(MRTrix3Base):
 class EstimateFODInputSpec(MRTrix3BaseInputSpec):
     algorithm = traits.Enum('csd','msmt_csd', argstr='%s', position=-8,
         mandatory=True, desc='FOD algorithm')
-    dwi_file = File(exists=True, argstr='%s', position=-7,
+    in_file = File(exists=True, argstr='%s', position=-7,
         mandatory=True, desc='input DWI image')
     wm_txt = File(argstr='%s', position=-6,
         mandatory=True, desc='WM response text file')
@@ -118,7 +118,7 @@ class EstimateFOD(MRTrix3Base):
     >>> import nipype.interfaces.mrtrix3 as mrt
     >>> fod = mrt.EstimateFOD()
     >>> fod.inputs.algorithm = 'csd'
-    >>> fod.inputs.dwi_file = 'dwi.mif'
+    >>> fod.inputs.in_file = 'dwi.mif'
     >>> fod.inputs.wm_txt = 'wm.txt'
     >>> fod.inputs.grad_fsl = ('bvecs', 'bvals')
     >>> fod.cmdline                               # doctest: +ELLIPSIS
@@ -133,9 +133,9 @@ class EstimateFOD(MRTrix3Base):
     def _list_outputs(self):
         outputs = self.output_spec().get()
         outputs['wm_odf'] = op.abspath(self.inputs.wm_odf)
-        if self.inputs.gm_odf!=Undefined:
+        if self.inputs.gm_odf != Undefined:
             outputs['gm_odf'] = op.abspath(self.inputs.gm_odf)
-        if self.inputs.csf_odf!=Undefined:
+        if self.inputs.csf_odf != Undefined:
             outputs['csf_odf'] = op.abspath(self.inputs.csf_odf)
         return outputs
 

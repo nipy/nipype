@@ -23,7 +23,7 @@ from .base import MRTrix3BaseInputSpec, MRTrix3Base
 class ResponseSDInputSpec(MRTrix3BaseInputSpec):
     algorithm = traits.Enum('msmt_5tt','dhollander','tournier','tax', argstr='%s', position=-6,
         mandatory=True, desc='response estimation algorithm (multi-tissue)')
-    dwi_file = File(exists=True, argstr='%s', position=-5,
+    in_file = File(exists=True, argstr='%s', position=-5,
         mandatory=True, desc='input DWI image')
     mtt_file = File(argstr='%s', position=-4, desc='input 5tt image')
     wm_file = File('wm.txt', argstr='%s', position=-3, usedefault=True,
@@ -52,7 +52,7 @@ class ResponseSD(MRTrix3Base):
 
     >>> import nipype.interfaces.mrtrix3 as mrt
     >>> resp = mrt.ResponseSD()
-    >>> resp.inputs.dwi_file = 'dwi.mif'
+    >>> resp.inputs.in_file = 'dwi.mif'
     >>> resp.inputs.algorithm = 'tournier'
     >>> resp.inputs.grad_fsl = ('bvecs', 'bvals')
     >>> resp.cmdline                               # doctest: +ELLIPSIS
@@ -67,9 +67,9 @@ class ResponseSD(MRTrix3Base):
     def _list_outputs(self):
         outputs = self.output_spec().get()
         outputs['wm_file'] = op.abspath(self.inputs.wm_file)
-        if self.inputs.gm_file!=Undefined:
+        if self.inputs.gm_file != Undefined:
             outputs['gm_file'] = op.abspath(self.inputs.gm_file)
-        if self.inputs.csf_file!=Undefined:
+        if self.inputs.csf_file != Undefined:
             outputs['csf_file'] = op.abspath(self.inputs.csf_file)
         return outputs
 
