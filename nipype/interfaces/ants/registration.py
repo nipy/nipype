@@ -1352,9 +1352,6 @@ class MeasureImageSimilarity(ANTSCommand):
         return outputs
 
 
-
-
-
 class RegistrationSynQuickInputSpec(ANTSCommandInputSpec):
     dimension = traits.Enum(3, 2, argstr='-d %d',
                             usedefault=True, desc='image dimension (2 or 3)')
@@ -1362,24 +1359,25 @@ class RegistrationSynQuickInputSpec(ANTSCommandInputSpec):
                                  desc='Fixed image or source image or reference image')
     moving_image = InputMultiPath(File(exists=True), mandatory=True, argstr='-m %s',
                                   desc='Moving image or target image')
-    output_prefix = traits.Str("transform", usedefault=True, argstr='-o %s',
-                               desc="A prefix that is prepended to all output files")
+    output_prefix = Str("transform", usedefault=True, argstr='-o %s',
+                        desc="A prefix that is prepended to all output files")
 
     # todo ANTSCommandInputSpec already has this, but I can't figure out how to set it without defining it again
     num_threads = traits.Int(default_value=1, desc='Number of threads (default = 1)', argstr='-n %d')
 
     transform_type = traits.Enum('s', 't', 'r', 'a', 'sr', 'b', 'br', argstr='-t %s',
-                                 desc='transform type\n\
-                                 t:  translation\
-                                 r:  rigid \n\
-                                 a:  rigid + affine\n\
-                                 s:  rigid + affine + deformable syn (default)\
-                                 sr: rigid + deformable syn\
-                                 b:  rigid + affine + deformable b-spline syn\n\
-                                 br: rigid + deformable b-spline syn',
+                                 desc="""
+                                 transform type
+                                 t:  translation
+                                 r:  rigid
+                                 a:  rigid + affine
+                                 s:  rigid + affine + deformable syn (default)
+                                 sr: rigid + deformable syn
+                                 b:  rigid + affine + deformable b-spline syn
+                                 br: rigid + deformable b-spline syn""",
                                  usedefault=True)
 
-    use_histogram_matching = traits.Bool(default=False, argstr='-j %s',
+    use_histogram_matching = traits.Bool(False, argstr='-j %d',
                                          desc='use histogram matching')
     histogram_bins = traits.Int(default_value=32, argstr='-r %d',
                                 desc='histogram bins for mutual information in SyN stage \
@@ -1412,13 +1410,8 @@ class RegistrationSynQuick(ANTSCommand):
     output_spec = RegistrationSynQuickOutputSpec
 
     def _format_arg(self, name, spec, value):
-        if name == 'use_histogram_matching':
-            if isdefined(self.inputs.use_histogram_matching):
-                return spec.argstr % {False: '0', True: '1'}[value]
-
-        elif name == 'precision_type':
-            if isdefined(self.inputs.precision_type):
-                return spec.argstr % {'float': 'f', 'double': 'd'}[value]
+        if name == 'precision_type':
+            return spec.argstr % value[0]
         return super(RegistrationSynQuick, self)._format_arg(name, spec, value)
 
     def _list_outputs(self):
