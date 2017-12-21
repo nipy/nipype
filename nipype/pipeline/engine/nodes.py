@@ -149,38 +149,41 @@ class Node(EngineBase):
             multiprocessing pool
 
         """
-        base_dir = None
-        if 'base_dir' in kwargs:
-            base_dir = kwargs['base_dir']
-        super(Node, self).__init__(name, base_dir)
-
         # Make sure an interface is set, and that it is an Interface
         if interface is None:
             raise IOError('Interface must be provided')
         if not isinstance(interface, Interface):
             raise IOError('interface must be an instance of an Interface')
+
+        base_dir = None
+        if 'base_dir' in kwargs:
+            base_dir = kwargs['base_dir']
+        super(Node, self).__init__(name, base_dir)
+
         self._interface = interface
         self.name = name
-
+        self._got_inputs = False
         self._output_dir = None
         self.iterables = iterables
         self.synchronize = synchronize
         self.itersource = itersource
         self.overwrite = overwrite
         self.parameterization = None
-        self.run_without_submitting = run_without_submitting
         self.input_source = {}
-        self.needed_outputs = []
         self.plugin_args = {}
 
+        self.run_without_submitting = run_without_submitting
         self._mem_gb = mem_gb
         self._n_procs = n_procs
+
+        # Downstream n_procs
         if hasattr(self._interface.inputs, 'num_threads') and self._n_procs is not None:
             self._interface.inputs.num_threads = self._n_procs
 
+        # Initialize needed_outputs
+        self.needed_outputs = []
         if needed_outputs:
             self.needed_outputs = sorted(needed_outputs)
-        self._got_inputs = False
 
     @property
     def interface(self):
@@ -189,7 +192,7 @@ class Node(EngineBase):
 
     @property
     def result(self):
-        return self._load_resultfile(self.output_dir())[0]
+        return _load_resultfile(self.output_dir(), self.name)[0]
 
     @property
     def inputs(self):
@@ -246,7 +249,7 @@ class Node(EngineBase):
         if self.parameterization:
             params_str = ['{}'.format(p) for p in self.parameterization]
             if not str2bool(self.config['execution']['parameterize_dirs']):
-                params_str = [self._parameterization_dir(p) for p in params_str]
+                params_str = [_parameterization_dir(p) for p in params_str]
             outputdir = op.join(outputdir, *params_str)
 
         self._output_dir = op.abspath(op.join(outputdir, self.name))
@@ -254,7 +257,7 @@ class Node(EngineBase):
 
     def set_input(self, parameter, val):
         """ Set interface input value"""
-        logger.debug('setting nodelevel(%s) input %s = %s',
+        logger.debug('[Node] %s - setting input %s = %s',
                      self.name, parameter, to_str(val))
         setattr(self.inputs, parameter, deepcopy(val))
 
@@ -267,36 +270,63 @@ class Node(EngineBase):
         self._interface.help()
 
     def hash_exists(self, updatehash=False):
+        """
+        Check if the interface has been run previously, and whether
+        cached results are viable for reuse
+        """
+
         # Get a dictionary with hashed filenames and a hashvalue
         # of the dictionary itself.
         hashed_inputs, hashvalue = self._get_hashval()
         outdir = self.output_dir()
         hashfile = op.join(outdir, '_0x%s.json' % hashvalue)
-        logger.debug('Node hash value: %s', hashvalue)
+        hash_exists = op.exists(hashfile)
+
+        logger.debug('[Node] hash value=%s, exists=%s', hashvalue, hash_exists)
 
         if op.exists(outdir):
+            # Find previous hashfiles
+            hashfiles = glob(op.join(outdir, '_0x*.json'))
+            if len(hashfiles) > 1:
+                raise RuntimeError(
+                    '[Node] Cache ERROR - Found %d previous hashfiles that indicate '
+                    'that the ``base_dir`` for this node went stale. Please re-run the '
+                    'workflow.' % len(hashfiles))
+
             # Find unfinished hashfiles and error if any
             unfinished = glob(op.join(outdir, '_0x*_unfinished.json'))
             if unfinished:
                 raise RuntimeError(
-                    '[Caching Node Error] Found unfinished hashfiles (%d) that indicate '
+                    '[Node] Cache ERROR - Found unfinished hashfiles (%d) that indicate '
                     'that the ``base_dir`` for this node went stale. Please re-run the '
                     'workflow.' % len(unfinished))
 
-            # Find previous hashfiles
-            hashfiles = glob(op.join(outdir, '_0x*.json'))
-             # Remove hashfiles if more than one found or the one found is outdated
-            if hashfiles and (len(hashfiles) > 1 or hashfiles[0] != hashfile):
-                logger.info('Removing hashfiles (%s) and forcing node to rerun',
-                            ', '.join(['"%s"' % op.basename(h) for h in hashfiles]))
-                for hf in hashfiles:
-                    os.remove(hf)
+            # Remove outdated hashfile
+            if hashfiles and hashfiles[0] != hashfile:
+                logger.info('[Node] Removing outdated hashfile (%s) and forcing node to rerun',
+                            op.basename(hashfiles[0]))
 
-            if updatehash:
-                logger.debug("Updating hash: %s", hashvalue)
-                self._save_hashfile(hashfile, hashed_inputs)
+                # In DEBUG, print diff between hashes
+                log_debug = config.get('logging', 'workflow_level') == 'DEBUG'
+                if log_debug and hash_exists:  # Lazy logging - only debug
+                    split_out = split_filename(hashfiles[0])
+                    exp_hash_file_base = split_out[1]
+                    exp_hash = exp_hash_file_base[len('_0x'):]
+                    logger.debug("Previous node hash = %s", exp_hash)
+                    try:
+                        prev_inputs = load_json(hashfiles[0])
+                    except Exception:
+                        pass
+                    else:
+                        logging.logdebug_dict_differences(
+                            prev_inputs, hashed_inputs)
+                os.remove(hashfiles[0])
 
-        hash_exists = op.exists(hashfile)
+        # Update only possible if it exists
+        if hash_exists and updatehash:
+            logger.debug("[Node] Updating hash: %s", hashvalue)
+            _save_hashfile(hashfile, hashed_inputs)
+
         logger.debug(
             'updatehash=%s, overwrite=%s, always_run=%s, hash_exists=%s, '
             'hash_method=%s', updatehash, self.overwrite, self._interface.always_run,
@@ -312,15 +342,11 @@ class Node(EngineBase):
         updatehash: boolean
             Update the hash stored in the output directory
         """
-        cwd = os.getcwd()  # First thing, keep track of where we are
 
         if self.config is None:
             self.config = {}
         self.config = merge_dict(deepcopy(config._sections), self.config)
-
-        if not self._got_inputs:
-            self._get_inputs()
-            self._got_inputs = True
+        self._get_inputs()
 
         # Check if output directory exists
         outdir = self.output_dir()
@@ -328,18 +354,14 @@ class Node(EngineBase):
             logger.debug('Output directory (%s) exists and is %sempty,',
                          outdir, 'not ' * bool(os.listdir(outdir)))
 
-        # Make sure outdir is created
-        makedirs(outdir, exist_ok=True)
-        os.chdir(outdir)
-
         # Check hash, check whether run should be enforced
         logger.info('[Node] Setting-up "%s" in "%s".', self.fullname, outdir)
         hash_info = self.hash_exists(updatehash=updatehash)
         hash_exists, hashvalue, hashfile, hashed_inputs = hash_info
         force_run = self.overwrite or (self.overwrite is None and self._interface.always_run)
 
-        # If the node is cached, set-up pklz files and exit
-        if updatehash or (hash_exists and not force_run):
+        # If the node is cached, check on pklz files and finish
+        if hash_exists and (updatehash or not force_run):
             logger.debug("Only updating node hashes or skipping execution")
             inputs_file = op.join(outdir, '_inputs.pklz')
             if not op.exists(inputs_file):
@@ -351,34 +373,14 @@ class Node(EngineBase):
                 logger.debug('Creating node file %s', node_file)
                 savepkl(node_file, self)
 
-            self._run_interface(execute=False, updatehash=updatehash)
-            logger.info('[Node] Cached "%s".', self.fullname)
-            os.chdir(cwd)
-            return self.result
+            result = self._run_interface(execute=False, updatehash=updatehash)
+            logger.info('[Node] "%s" found cached%s.', self.fullname,
+                        ' (and hash updated)' * updatehash)
+            return result
 
         # by rerunning we mean only nodes that did finish to run previously
-        json_pat = op.join(outdir, '_0x*.json')
-        json_unfinished_pat = op.join(outdir, '_0x*_unfinished.json')
-        is_mapnode = isinstance(self, MapNode)
-        need_rerun = (not is_mapnode and
-                      glob(json_pat) and not glob(json_unfinished_pat))
-        if need_rerun:
-            log_debug = config.get('logging', 'workflow_level') == 'DEBUG'
+        if hash_exists and not isinstance(self, MapNode):
             logger.debug('[Node] Rerunning "%s"', self.fullname)
-            if log_debug and not hash_exists:  # Lazy logging - only debug
-                exp_hash_paths = glob(json_pat)
-                if len(exp_hash_paths) == 1:
-                    split_out = split_filename(exp_hash_paths[0])
-                    exp_hash_file_base = split_out[1]
-                    exp_hash = exp_hash_file_base[len('_0x'):]
-                    logger.debug("Previous node hash = %s", exp_hash)
-                    try:
-                        prev_inputs = load_json(exp_hash_paths[0])
-                    except:
-                        pass
-                    else:
-                        logging.logdebug_dict_differences(prev_inputs,
-                                                          hashed_inputs)
             if not force_run and str2bool(self.config['execution']['stop_on_first_rerun']):
                 raise Exception('Cannot rerun when "stop_on_first_rerun" is set to True')
 
@@ -389,60 +391,51 @@ class Node(EngineBase):
             os.remove(hashfile)
 
         # Delete directory contents if this is not a MapNode or can't resume
-        rm_outdir = not is_mapnode and not (
+        rm_outdir = not isinstance(self, MapNode) and not (
             self._interface.can_resume and op.isfile(hashfile_unfinished))
 
         if rm_outdir:
             emptydirs(outdir)
         else:
-            logger.debug(
-                "%s hashfile=%s", '[MapNode] Resume -' if is_mapnode
-                else '[Node] Resume - can_resume=True,', hashfile_unfinished)
-            if is_mapnode:
+            logger.debug('[%sNode] Resume - hashfile=%s',
+                         'Map' * int(isinstance(self, MapNode)),
+                         hashfile_unfinished)
+            if isinstance(self, MapNode):
                 # remove old json files
                 for filename in glob(op.join(outdir, '_0x*.json')):
                     os.remove(filename)
 
+        # Make sure outdir is created
+        makedirs(outdir, exist_ok=True)
+
         # Store runtime-hashfile, pre-execution report, the node and the inputs set.
-        self._save_hashfile(hashfile_unfinished, hashed_inputs)
-        self.write_report(report_type='preexec', cwd=outdir)
+        _save_hashfile(hashfile_unfinished, hashed_inputs)
+        write_report(self, report_type='preexec', cwd=outdir)
         savepkl(op.join(outdir, '_node.pklz'), self)
         savepkl(op.join(outdir, '_inputs.pklz'),
                 self.inputs.get_traitsfree())
+
+        cwd = os.getcwd()
+        os.chdir(outdir)
         try:
-            self._run_interface(execute=True)
-        except:
+            result = self._run_interface(execute=True)
+        except Exception:
             logger.warning('[Node] Exception "%s" (%s)', self.fullname, outdir)
             # Tear-up after error
             os.remove(hashfile_unfinished)
-            os.chdir(cwd)
             raise
+        finally:  # Ensure we come back to the original CWD
+            os.chdir(cwd)
 
         # Tear-up after success
         shutil.move(hashfile_unfinished, hashfile)
-        self.write_report(report_type='postexec', cwd=outdir)
+        write_report(self, report_type='postexec', cwd=outdir)
         logger.info('[Node] Finished "%s".', self.fullname)
-        os.chdir(cwd)
-        return self.result
-
-    # Private functions
-    def _parameterization_dir(self, param):
-        """
-        Returns the directory name for the given parameterization string as follows:
-            - If the parameterization is longer than 32 characters, then
-              return the SHA-1 hex digest.
-            - Otherwise, return the parameterization unchanged.
-        """
-        if len(param) > 32:
-            return sha1(param.encode()).hexdigest()
-        else:
-            return param
+        return result
 
     def _get_hashval(self):
         """Return a hash of the input state"""
-        if not self._got_inputs:
-            self._get_inputs()
-            self._got_inputs = True
+        self._get_inputs()
         hashed_inputs, hashvalue = self.inputs.get_hashval(
             hash_method=self.config['execution']['hash_method'])
         rm_extra = self.config['execution']['remove_unnecessary_outputs']
@@ -455,30 +448,15 @@ class Node(EngineBase):
             hashed_inputs.append(('needed_outputs', sorted_outputs))
         return hashed_inputs, hashvalue
 
-    def _save_hashfile(self, hashfile, hashed_inputs):
-        try:
-            save_json(hashfile, hashed_inputs)
-        except (IOError, TypeError):
-            err_type = sys.exc_info()[0]
-            if err_type is TypeError:
-                # XXX - SG current workaround is to just
-                # create the hashed file and not put anything
-                # in it
-                with open(hashfile, 'wt') as fd:
-                    fd.writelines(str(hashed_inputs))
-
-                logger.debug(
-                    'Unable to write a particular type to the json file')
-            else:
-                logger.critical('Unable to open the file in write mode: %s',
-                                hashfile)
-
     def _get_inputs(self):
         """Retrieve inputs from pointers to results file
 
         This mechanism can be easily extended/replaced to retrieve data from
         other data sources (e.g., XNAT, HTTP, etc.,.)
         """
+        if self._got_inputs:
+            return
+
         logger.debug('Setting node inputs')
         for key, info in list(self.input_source.items()):
             logger.debug('input: %s', key)
@@ -490,9 +468,8 @@ class Node(EngineBase):
                 output_name = info[1][0]
                 value = getattr(results.outputs, output_name)
                 if isdefined(value):
-                    output_value = evaluate_connect_function(info[1][1],
-                                                             info[1][2],
-                                                             value)
+                    output_value = evaluate_connect_function(
+                        info[1][1], info[1][2], value)
             else:
                 output_name = info[1]
                 try:
@@ -511,85 +488,16 @@ class Node(EngineBase):
                 e.args = (e.args[0] + "\n" + '\n'.join(msg),)
                 raise
 
+        # Successfully set inputs
+        self._got_inputs = True
+
     def _run_interface(self, execute=True, updatehash=False):
         if updatehash:
-            return
+            return self._load_results(self.output_dir())
         return self._run_command(execute)
 
-    def _save_results(self, result, cwd):
-        resultsfile = op.join(cwd, 'result_%s.pklz' % self.name)
-        if result.outputs:
-            try:
-                outputs = result.outputs.get()
-            except TypeError:
-                outputs = result.outputs.dictcopy()  # outputs was a bunch
-            result.outputs.set(**modify_paths(outputs, relative=True,
-                                              basedir=cwd))
-
-        savepkl(resultsfile, result)
-        logger.debug('saved results in %s', resultsfile)
-
-        if result.outputs:
-            result.outputs.set(**outputs)
-
-    def _load_resultfile(self, cwd):
-        """Load results if it exists in cwd
-
-        Parameter
-        ---------
-
-        cwd : working directory of node
-
-        Returns
-        -------
-
-        result : InterfaceResult structure
-        aggregate : boolean indicating whether node should aggregate_outputs
-        attribute error : boolean indicating whether there was some mismatch in
-            versions of traits used to store result and hence node needs to
-            rerun
-        """
-        aggregate = True
-        resultsoutputfile = op.join(cwd, 'result_%s.pklz' % self.name)
-        result = None
-        attribute_error = False
-        if op.exists(resultsoutputfile):
-            pkl_file = gzip.open(resultsoutputfile, 'rb')
-            try:
-                result = pickle.load(pkl_file)
-            except UnicodeDecodeError:
-                # Was this pickle created with Python 2.x?
-                pickle.load(pkl_file, fix_imports=True, encoding='utf-8')
-                logger.warn('Successfully loaded pickle in compatibility mode')
-            except (traits.TraitError, AttributeError, ImportError,
-                    EOFError) as err:
-                if isinstance(err, (AttributeError, ImportError)):
-                    attribute_error = True
-                    logger.debug('attribute error: %s probably using '
-                                 'different trait pickled file', str(err))
-                else:
-                    logger.debug(
-                        'some file does not exist. hence trait cannot be set')
-            else:
-                if result.outputs:
-                    try:
-                        outputs = result.outputs.get()
-                    except TypeError:
-                        outputs = result.outputs.dictcopy()  # outputs == Bunch
-                    try:
-                        result.outputs.set(**modify_paths(outputs,
-                                                          relative=False,
-                                                          basedir=cwd))
-                    except FileNotFoundError:
-                        logger.debug('conversion to full path results in '
-                                     'non existent file')
-                aggregate = False
-            pkl_file.close()
-        logger.debug('Aggregate: %s', aggregate)
-        return result, aggregate, attribute_error
-
     def _load_results(self, cwd):
-        result, aggregate, attribute_error = self._load_resultfile(cwd)
+        result, aggregate, attribute_error = _load_resultfile(cwd, self.name)
         # try aggregating first
         if aggregate:
             logger.debug('aggregating results')
@@ -609,175 +517,121 @@ class Node(EngineBase):
                     runtime=runtime,
                     inputs=self._interface.inputs.get_traitsfree(),
                     outputs=aggouts)
-                self._save_results(result, cwd)
+                _save_resultfile(result, cwd, self.name)
             else:
                 logger.debug('aggregating mapnode results')
                 result = self._run_interface()
         return result
 
     def _run_command(self, execute, copyfiles=True):
-        cwd = os.getcwd()
-        if execute and copyfiles:
-            self._originputs = deepcopy(self._interface.inputs)
-        if execute:
-            runtime = Bunch(returncode=1,
-                            environ=dict(os.environ),
-                            hostname=socket.gethostname())
-            result = InterfaceResult(
-                interface=self._interface.__class__,
-                runtime=runtime,
-                inputs=self._interface.inputs.get_traitsfree())
+        outdir = self.output_dir()
 
-            if copyfiles:
-                self._copyfiles_to_wd(cwd, execute)
-
-            message = '[Node] Running "%s" ("%s.%s")'
-            if issubclass(self._interface.__class__, CommandLine):
-                try:
-                    cmd = self._interface.cmdline
-                except Exception as msg:
-                    result.runtime.stderr = msg
-                    raise
-                cmdfile = op.join(cwd, 'command.txt')
-                with open(cmdfile, 'wt') as fd:
-                    print(cmd + "\n", file=fd)
-                message += ', a CommandLine Interface with command:\n%s' % cmd
-            logger.info(message + '.', self.name, self._interface.__module__,
-                        self._interface.__class__.__name__)
+        if not execute:
             try:
-                result = self._interface.run()
-            except Exception as msg:
-                self._save_results(result, cwd)
-                result.runtime.stderr = msg
-                raise
-
-            dirs2keep = None
-            if isinstance(self, MapNode):
-                dirs2keep = [op.join(cwd, 'mapflow')]
-            result.outputs = clean_working_directory(result.outputs, cwd,
-                                                     self._interface.inputs,
-                                                     self.needed_outputs,
-                                                     self.config,
-                                                     dirs2keep=dirs2keep)
-            self._save_results(result, cwd)
-        else:
-            logger.info("Collecting precomputed outputs")
-            try:
-                result = self._load_results(cwd)
+                result = self._load_results(outdir)
             except (FileNotFoundError, AttributeError):
                 # if aggregation does not work, rerun the node
-                logger.info(("Some of the outputs were not found: "
-                             "rerunning node."))
-                result = self._run_command(execute=True, copyfiles=False)
-        return result
-
-    def _strip_temp(self, files, wd):
-        out = []
-        for f in files:
-            if isinstance(f, list):
-                out.append(self._strip_temp(f, wd))
+                logger.info("[Node] Some of the outputs were not found: "
+                            "rerunning node.")
+                copyfiles = False  # OE: this was like this before,
+                execute = True     # I'll keep them for safety
             else:
-                out.append(f.replace(op.join(wd, '_tempinput'), wd))
-        return out
+                logger.info(
+                    "[Node] Cached - collecting precomputed outputs")
+                return result
+
+        # Run command: either execute is true or load_results failed.
+        runtime = Bunch(returncode=1,
+                        environ=dict(os.environ),
+                        hostname=socket.gethostname())
+        result = InterfaceResult(
+            interface=self._interface.__class__,
+            runtime=runtime,
+            inputs=self._interface.inputs.get_traitsfree())
+
+        if copyfiles:
+            self._originputs = deepcopy(self._interface.inputs)
+            self._copyfiles_to_wd(outdir, execute)
+
+        message = '[Node] Running "%s" ("%s.%s")'
+        if issubclass(self._interface.__class__, CommandLine):
+            try:
+                cmd = self._interface.cmdline
+            except Exception as msg:
+                result.runtime.stderr = msg
+                raise
+            cmdfile = op.join(outdir, 'command.txt')
+            with open(cmdfile, 'wt') as fd:
+                print(cmd + "\n", file=fd)
+            message += ', a CommandLine Interface with command:\n%s' % cmd
+        logger.info(message, self.name, self._interface.__module__,
+                    self._interface.__class__.__name__)
+        try:
+            result = self._interface.run()
+        except Exception as msg:
+            _save_resultfile(result, outdir, self.name)
+            result.runtime.stderr = msg
+            raise
+
+        dirs2keep = None
+        if isinstance(self, MapNode):
+            dirs2keep = [op.join(outdir, 'mapflow')]
+        result.outputs = clean_working_directory(result.outputs, outdir,
+                                                 self._interface.inputs,
+                                                 self.needed_outputs,
+                                                 self.config,
+                                                 dirs2keep=dirs2keep)
+        _save_resultfile(result, outdir, self.name)
+
+        return result
 
     def _copyfiles_to_wd(self, outdir, execute, linksonly=False):
         """ copy files over and change the inputs"""
-        if hasattr(self._interface, '_get_filecopy_info'):
-            logger.debug('copying files to wd [execute=%s, linksonly=%s]',
-                         str(execute), str(linksonly))
-            if execute and linksonly:
-                olddir = outdir
-                outdir = op.join(outdir, '_tempinput')
-                makedirs(outdir, exist_ok=True)
-            for info in self._interface._get_filecopy_info():
-                files = self.inputs.get().get(info['key'])
-                if not isdefined(files):
-                    continue
-                if files:
-                    infiles = filename_to_list(files)
-                    if execute:
-                        if linksonly:
-                            if not info['copy']:
-                                newfiles = copyfiles(infiles,
-                                                     [outdir],
-                                                     copy=info['copy'],
-                                                     create_new=True)
-                            else:
-                                newfiles = fnames_presuffix(infiles,
-                                                            newpath=outdir)
-                            newfiles = self._strip_temp(
-                                newfiles,
-                                op.abspath(olddir).split(op.sep)[-1])
-                        else:
-                            newfiles = copyfiles(infiles,
-                                                 [outdir],
-                                                 copy=info['copy'],
-                                                 create_new=True)
+        if not hasattr(self._interface, '_get_filecopy_info'):
+            # Nothing to be done
+            return
+
+        logger.debug('copying files to wd [execute=%s, linksonly=%s]',
+                     execute, linksonly)
+        if execute and linksonly:
+            olddir = outdir
+            outdir = op.join(outdir, '_tempinput')
+            makedirs(outdir, exist_ok=True)
+
+        for info in self._interface._get_filecopy_info():
+            files = self.inputs.get().get(info['key'])
+            if not isdefined(files) or not files:
+                continue
+
+            infiles = filename_to_list(files)
+            if execute:
+                if linksonly:
+                    if not info['copy']:
+                        newfiles = copyfiles(infiles,
+                                             [outdir],
+                                             copy=info['copy'],
+                                             create_new=True)
                     else:
-                        newfiles = fnames_presuffix(infiles, newpath=outdir)
-                    if not isinstance(files, list):
-                        newfiles = list_to_filename(newfiles)
-                    setattr(self.inputs, info['key'], newfiles)
-            if execute and linksonly:
-                rmtree(outdir)
+                        newfiles = fnames_presuffix(infiles,
+                                                    newpath=outdir)
+                    newfiles = _strip_temp(
+                        newfiles,
+                        op.abspath(olddir).split(op.sep)[-1])
+                else:
+                    newfiles = copyfiles(infiles,
+                                         [outdir],
+                                         copy=info['copy'],
+                                         create_new=True)
+            else:
+                newfiles = fnames_presuffix(infiles, newpath=outdir)
+            if not isinstance(files, list):
+                newfiles = list_to_filename(newfiles)
+            setattr(self.inputs, info['key'], newfiles)
+        if execute and linksonly:
+            rmtree(outdir)
 
     def update(self, **opts):
         self.inputs.update(**opts)
-
-    def write_report(self, report_type=None, cwd=None):
-        if not str2bool(self.config['execution']['create_report']):
-            return
-        report_dir = op.join(cwd, '_report')
-        report_file = op.join(report_dir, 'report.rst')
-        makedirs(report_dir, exist_ok=True)
-
-        if report_type == 'preexec':
-            logger.debug('writing pre-exec report to %s', report_file)
-            fp = open(report_file, 'wt')
-            fp.writelines(write_rst_header('Node: %s' % get_print_name(self),
-                                           level=0))
-            fp.writelines(write_rst_list(['Hierarchy : %s' % self.fullname,
-                                          'Exec ID : %s' % self._id]))
-            fp.writelines(write_rst_header('Original Inputs', level=1))
-            fp.writelines(write_rst_dict(self.inputs.get()))
-        if report_type == 'postexec':
-            logger.debug('writing post-exec report to %s', report_file)
-            fp = open(report_file, 'at')
-            fp.writelines(write_rst_header('Execution Inputs', level=1))
-            fp.writelines(write_rst_dict(self.inputs.get()))
-            exit_now = (not hasattr(self.result, 'outputs') or
-                        self.result.outputs is None)
-            if exit_now:
-                return
-            fp.writelines(write_rst_header('Execution Outputs', level=1))
-            if isinstance(self.result.outputs, Bunch):
-                fp.writelines(write_rst_dict(self.result.outputs.dictcopy()))
-            elif self.result.outputs:
-                fp.writelines(write_rst_dict(self.result.outputs.get()))
-            if isinstance(self, MapNode):
-                fp.close()
-                return
-            fp.writelines(write_rst_header('Runtime info', level=1))
-            # Init rst dictionary of runtime stats
-            rst_dict = {'hostname': self.result.runtime.hostname,
-                        'duration': self.result.runtime.duration}
-            # Try and insert memory/threads usage if available
-            if config.resource_monitor:
-                rst_dict['mem_peak_gb'] = self.result.runtime.mem_peak_gb
-                rst_dict['cpu_percent'] = self.result.runtime.cpu_percent
-
-            if hasattr(self.result.runtime, 'cmdline'):
-                rst_dict['command'] = self.result.runtime.cmdline
-                fp.writelines(write_rst_dict(rst_dict))
-            else:
-                fp.writelines(write_rst_dict(rst_dict))
-            if hasattr(self.result.runtime, 'merged'):
-                fp.writelines(write_rst_header('Terminal output', level=2))
-                fp.writelines(write_rst_list(self.result.runtime.merged))
-            if hasattr(self.result.runtime, 'environ'):
-                fp.writelines(write_rst_header('Environment', level=2))
-                fp.writelines(write_rst_dict(self.result.runtime.environ))
-        fp.close()
 
 
 class JoinNode(Node):
@@ -1099,9 +953,7 @@ class MapNode(Node):
 
     def _get_hashval(self):
         """ Compute hash including iterfield lists."""
-        if not self._got_inputs:
-            self._get_inputs()
-            self._got_inputs = True
+        self._get_inputs()
         self._check_iterfield()
         hashinputs = deepcopy(self._interface.inputs)
         for name in self.iterfield:
@@ -1147,7 +999,7 @@ class MapNode(Node):
         else:
             nitems = len(filename_to_list(getattr(self.inputs, self.iterfield[0])))
         for i in range(nitems):
-            nodename = '_' + self.name + str(i)
+            nodename = '_%s%d' % (self.name, i)
             node = Node(deepcopy(self._interface),
                         n_procs=self._n_procs,
                         mem_gb=self._mem_gb,
@@ -1168,20 +1020,6 @@ class MapNode(Node):
                 setattr(node.inputs, field, fieldvals[i])
             node.config = self.config
             yield i, node
-
-    def _node_runner(self, nodes, updatehash=False):
-        old_cwd = os.getcwd()
-        for i, node in nodes:
-            err = None
-            try:
-                node.run(updatehash=updatehash)
-            except Exception as this_err:
-                err = this_err
-                if str2bool(self.config['execution']['stop_on_first_crash']):
-                    raise
-            finally:
-                os.chdir(old_cwd)
-                yield i, node, err
 
     def _collate_results(self, nodes):
         result = InterfaceResult(
@@ -1235,43 +1073,14 @@ class MapNode(Node):
 
         return result
 
-    def write_report(self, report_type=None, cwd=None):
-        if not str2bool(self.config['execution']['create_report']):
-            return
-        if report_type == 'preexec':
-            super(MapNode, self).write_report(report_type=report_type, cwd=cwd)
-        if report_type == 'postexec':
-            super(MapNode, self).write_report(report_type=report_type, cwd=cwd)
-            report_dir = op.join(cwd, '_report')
-            report_file = op.join(report_dir, 'report.rst')
-            fp = open(report_file, 'at')
-            fp.writelines(write_rst_header('Subnode reports', level=1))
-            nitems = len(filename_to_list(
-                getattr(self.inputs, self.iterfield[0])))
-            subnode_report_files = []
-            for i in range(nitems):
-                nodename = '_' + self.name + str(i)
-                subnode_report_files.insert(i, 'subnode %d' % i + ' : ' +
-                                               op.join(cwd,
-                                                       'mapflow',
-                                                       nodename,
-                                                       '_report',
-                                                       'report.rst'))
-            fp.writelines(write_rst_list(subnode_report_files))
-            fp.close()
-
     def get_subnodes(self):
-        if not self._got_inputs:
-            self._get_inputs()
-            self._got_inputs = True
+        self._get_inputs()
         self._check_iterfield()
-        self.write_report(report_type='preexec', cwd=self.output_dir())
+        write_report(self, report_type='preexec', cwd=self.output_dir())
         return [node for _, node in self._make_nodes()]
 
     def num_subnodes(self):
-        if not self._got_inputs:
-            self._get_inputs()
-            self._got_inputs = True
+        self._get_inputs()
         self._check_iterfield()
         if self._serial:
             return 1
@@ -1314,30 +1123,285 @@ class MapNode(Node):
         This is primarily intended for serial execution of mapnode. A parallel
         execution requires creation of new nodes that can be spawned
         """
-        old_cwd = os.getcwd()
-        cwd = self.output_dir()
-        os.chdir(cwd)
         self._check_iterfield()
-        if execute:
-            if self.nested:
-                nitems = len(filename_to_list(flatten(getattr(self.inputs,
-                                                              self.iterfield[0]))))
-            else:
-                nitems = len(filename_to_list(getattr(self.inputs,
-                                                      self.iterfield[0])))
-            nodenames = ['_' + self.name + str(i) for i in range(nitems)]
-            result = self._collate_results(
-                self._node_runner(self._make_nodes(cwd),
-                                  updatehash=updatehash))
-            self._save_results(result, cwd)
-            # remove any node directories no longer required
-            dirs2remove = []
-            for path in glob(op.join(cwd, 'mapflow', '*')):
-                if op.isdir(path):
-                    if path.split(op.sep)[-1] not in nodenames:
-                        dirs2remove.append(path)
-            for path in dirs2remove:
-                shutil.rmtree(path)
-        else:
+        cwd = self.output_dir()
+        if not execute:
             result = self._load_results(cwd)
-        os.chdir(old_cwd)
+            return result
+
+        # Set up mapnode folder names
+        if self.nested:
+            nitems = len(filename_to_list(flatten(getattr(self.inputs,
+                                                          self.iterfield[0]))))
+        else:
+            nitems = len(filename_to_list(getattr(self.inputs,
+                                                  self.iterfield[0])))
+        nnametpl = '_%s{}' % self.name
+        nodenames = [nnametpl.format(i) for i in range(nitems)]
+
+        # Run mapnode
+        result = self._collate_results(self._node_runner(
+            self._make_nodes(cwd),
+            updatehash=updatehash,
+            stop_first=str2bool(self.config['execution']['stop_on_first_crash'])
+        ))
+        # And store results
+        _save_resultfile(result, cwd, self.name)
+        # remove any node directories no longer required
+        dirs2remove = []
+        for path in glob(op.join(cwd, 'mapflow', '*')):
+            if op.isdir(path):
+                if path.split(op.sep)[-1] not in nodenames:
+                    dirs2remove.append(path)
+        for path in dirs2remove:
+            shutil.rmtree(path)
+
+        return result
+
+
+def _parameterization_dir(param):
+    """
+    Returns the directory name for the given parameterization string as follows:
+        - If the parameterization is longer than 32 characters, then
+          return the SHA-1 hex digest.
+        - Otherwise, return the parameterization unchanged.
+    """
+    if len(param) > 32:
+        return sha1(param.encode()).hexdigest()
+    else:
+        return param
+
+
+def _save_hashfile(hashfile, hashed_inputs):
+    try:
+        save_json(hashfile, hashed_inputs)
+    except (IOError, TypeError):
+        err_type = sys.exc_info()[0]
+        if err_type is TypeError:
+            # XXX - SG current workaround is to just
+            # create the hashed file and not put anything
+            # in it
+            with open(hashfile, 'wt') as fd:
+                fd.writelines(str(hashed_inputs))
+
+            logger.debug(
+                'Unable to write a particular type to the json file')
+        else:
+            logger.critical('Unable to open the file in write mode: %s',
+                            hashfile)
+
+
+def _node_runner(nodes, updatehash=False, stop_first=False):
+    """
+    A generator that iterates and over a list of ``nodes`` and
+    executes them.
+
+    """
+    for i, node in nodes:
+        err = None
+        try:
+            result = node.run(updatehash=updatehash)
+        except Exception as this_err:
+            err = this_err
+            if stop_first:
+                raise
+        finally:
+            yield i, result, err
+
+
+def write_report(node, report_type=None, cwd=None):
+    if not str2bool(node.config['execution']['create_report']):
+        return
+
+    if cwd is None:
+        cwd = node.output_dir()
+
+    if report_type not in ['preexec', 'postexec']:
+        logger.warning('[Node] Unknown report type "%s".', report_type)
+        return
+
+    report_dir = op.join(cwd, '_report')
+    report_file = op.join(report_dir, 'report.rst')
+    makedirs(report_dir, exist_ok=True)
+
+    logger.debug('[Node] Writing %s-exec report to "%s"',
+                 report_type[:-4], report_file)
+    if report_type.startswith('pre'):
+        lines = [
+            write_rst_header('Node: %s' % get_print_name(node), level=0),
+            write_rst_list(['Hierarchy : %s' % node.fullname,
+                            'Exec ID : %s' % node._id]),
+            write_rst_header('Original Inputs', level=1),
+            write_rst_dict(node.inputs.get()),
+        ]
+        with open(report_file, 'wt') as fp:
+            fp.write('\n'.join(lines))
+        return
+
+    lines = [
+        write_rst_header('Execution Inputs', level=1),
+        write_rst_dict(node.inputs.get()),
+    ]
+
+    result = node.result  # Locally cache result
+    outputs = result.get('outputs')
+
+    if outputs is None:
+        with open(report_file, 'at') as fp:
+            fp.write('\n'.join(lines))
+        return
+
+    lines.append(write_rst_header('Execution Outputs', level=1))
+
+    if isinstance(outputs, Bunch):
+        lines.append(write_rst_dict(outputs.dictcopy()))
+    elif outputs:
+        lines.append(write_rst_dict(outputs.get()))
+
+    if isinstance(node, MapNode):
+        lines.append(write_rst_header('Subnode reports', level=1))
+        nitems = len(filename_to_list(
+            getattr(node.inputs, node.iterfield[0])))
+        subnode_report_files = []
+        for i in range(nitems):
+            nodecwd = op.join(
+                cwd, 'mapflow', '_%s%d' % (node.name, i),
+                '_report', 'report.rst')
+            subnode_report_files.append(
+                'subnode %d : %s' % (i, nodecwd))
+
+        lines.append(write_rst_list(subnode_report_files))
+
+        with open(report_file, 'at') as fp:
+            fp.write('\n'.join(lines))
+        return
+
+    lines.append(write_rst_header('Runtime info', level=1))
+    # Init rst dictionary of runtime stats
+    rst_dict = {
+        'hostname': result.runtime.hostname,
+        'duration': result.runtime.duration,
+    }
+
+    if hasattr(result.runtime, 'cmdline'):
+        rst_dict['command'] = result.runtime.cmdline
+
+    # Try and insert memory/threads usage if available
+    if node.config.resource_monitor:
+        rst_dict['mem_peak_gb'] = result.runtime.mem_peak_gb
+        rst_dict['cpu_percent'] = result.runtime.cpu_percent
+
+    lines.append(write_rst_dict(rst_dict))
+
+    # Collect terminal output
+    if hasattr(result.runtime, 'merged'):
+        lines += [
+            write_rst_header('Terminal output', level=2),
+            write_rst_list(result.runtime.merged),
+        ]
+    if hasattr(result.runtime, 'stdout'):
+        lines += [
+            write_rst_header('Terminal - standard output', level=2),
+            write_rst_list(result.runtime.stdout),
+        ]
+    if hasattr(result.runtime, 'stderr'):
+        lines += [
+            write_rst_header('Terminal - standard error', level=2),
+            write_rst_list(result.runtime.stderr),
+        ]
+
+    # Store environment
+    if hasattr(result.runtime, 'environ'):
+        lines += [
+            write_rst_header('Environment', level=2),
+            write_rst_dict(result.runtime.environ),
+        ]
+
+    with open(report_file, 'at') as fp:
+        fp.write('\n'.join(lines))
+    return
+
+
+def _save_resultfile(result, cwd, name):
+    """Save a result pklz file to ``cwd``"""
+    resultsfile = op.join(cwd, 'result_%s.pklz' % name)
+    if result.outputs:
+        try:
+            outputs = result.outputs.get()
+        except TypeError:
+            outputs = result.outputs.dictcopy()  # outputs was a bunch
+        result.outputs.set(**modify_paths(
+            outputs, relative=True, basedir=cwd))
+
+    savepkl(resultsfile, result)
+    logger.debug('saved results in %s', resultsfile)
+
+    if result.outputs:
+        result.outputs.set(**outputs)
+
+
+def _load_resultfile(cwd, name):
+    """Load results if it exists in cwd
+
+    Parameter
+    ---------
+
+    cwd : working directory of node
+
+    Returns
+    -------
+
+    result : InterfaceResult structure
+    aggregate : boolean indicating whether node should aggregate_outputs
+    attribute error : boolean indicating whether there was some mismatch in
+        versions of traits used to store result and hence node needs to
+        rerun
+    """
+    aggregate = True
+    resultsoutputfile = op.join(cwd, 'result_%s.pklz' % name)
+    result = None
+    attribute_error = False
+    if op.exists(resultsoutputfile):
+        pkl_file = gzip.open(resultsoutputfile, 'rb')
+        try:
+            result = pickle.load(pkl_file)
+        except UnicodeDecodeError:
+            # Was this pickle created with Python 2.x?
+            pickle.load(pkl_file, fix_imports=True, encoding='utf-8')
+            logger.warn('Successfully loaded pickle in compatibility mode')
+        except (traits.TraitError, AttributeError, ImportError,
+                EOFError) as err:
+            if isinstance(err, (AttributeError, ImportError)):
+                attribute_error = True
+                logger.debug('attribute error: %s probably using '
+                             'different trait pickled file', str(err))
+            else:
+                logger.debug(
+                    'some file does not exist. hence trait cannot be set')
+        else:
+            if result.outputs:
+                try:
+                    outputs = result.outputs.get()
+                except TypeError:
+                    outputs = result.outputs.dictcopy()  # outputs == Bunch
+                try:
+                    result.outputs.set(**modify_paths(outputs,
+                                                      relative=False,
+                                                      basedir=cwd))
+                except FileNotFoundError:
+                    logger.debug('conversion to full path results in '
+                                 'non existent file')
+            aggregate = False
+        pkl_file.close()
+    logger.debug('Aggregate: %s', aggregate)
+    return result, aggregate, attribute_error
+
+
+def _strip_temp(files, wd):
+    out = []
+    for f in files:
+        if isinstance(f, list):
+            out.append(_strip_temp(f, wd))
+        else:
+            out.append(f.replace(op.join(wd, '_tempinput'), wd))
+    return out
