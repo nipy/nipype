@@ -395,7 +395,7 @@ class Node(EngineBase):
             self._interface.can_resume and op.isfile(hashfile_unfinished))
 
         if rm_outdir:
-            emptydirs(outdir)
+            emptydirs(outdir, noexist_ok=True)
         else:
             logger.debug('[%sNode] Resume - hashfile=%s',
                          'Map' * int(isinstance(self, MapNode)),

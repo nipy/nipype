@@ -699,9 +699,10 @@ def makedirs(path, exist_ok=False):
     return path
 
 
-def emptydirs(path):
+def emptydirs(path, noexist_ok=False):
     """
-    Empty an existing directory, without deleting it
+    Empty an existing directory, without deleting it. Do not
+    raise error if the path does not exist and noexist_ok is True.
 
     Parameters
     ----------
@@ -709,8 +710,11 @@ def emptydirs(path):
 
     """
     fmlogger.debug("Removing contents of %s", path)
-    pathconts = os.listdir(path)
 
+    if noexist_ok and not os.path.exists(path):
+        return True
+
+    pathconts = os.listdir(path)
     if not pathconts:
         return True
 
