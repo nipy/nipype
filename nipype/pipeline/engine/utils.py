@@ -15,6 +15,15 @@ from copy import deepcopy
 from glob import glob
 from distutils.version import LooseVersion
 
+from traceback import format_exception
+from hashlib import sha1
+import gzip
+
+from ...utils.filemanip import (
+    save_json, savepkl,
+    write_rst_header, write_rst_dict, write_rst_list
+)
+
 try:
     from inspect import signature
 except ImportError:
@@ -25,12 +34,13 @@ import numpy as np
 import networkx as nx
 
 from ...utils.filemanip import (
-    makedirs, fname_presuffix, to_str,
-    filename_to_list, get_related_files)
+    relpath, makedirs, fname_presuffix, to_str,
+    filename_to_list, get_related_files, FileNotFoundError)
 from ...utils.misc import str2bool
 from ...utils.functions import create_function_from_source
-from ...interfaces.base import (CommandLine, isdefined, Undefined,
-                                InterfaceResult)
+from ...interfaces.base import (
+    Bunch, CommandLine, isdefined, Undefined,
+    InterfaceResult, traits)
 from ...interfaces.utility import IdentityInterface
 from ...utils.provenance import ProvStore, pm, nipype_ns, get_id
 
@@ -47,39 +57,268 @@ except AttributeError:
     dfs_preorder = nx.dfs_preorder_nodes
     logger.debug('networkx 1.4 dev or higher detected')
 
-try:
-    from os.path import relpath
-except ImportError:
-    import os.path as op
 
-    def relpath(path, start=None):
-        """Return a relative version of a path"""
-        if start is None:
-            start = os.curdir
-        if not path:
-            raise ValueError("no path specified")
-        start_list = op.abspath(start).split(op.sep)
-        path_list = op.abspath(path).split(op.sep)
-        if start_list[0].lower() != path_list[0].lower():
-            unc_path, rest = op.splitunc(path)
-            unc_start, rest = op.splitunc(start)
-            if bool(unc_path) ^ bool(unc_start):
-                raise ValueError(("Cannot mix UNC and non-UNC paths "
-                                  "(%s and %s)") % (path, start))
-            else:
-                raise ValueError("path is on drive %s, start on drive %s"
-                                 % (path_list[0], start_list[0]))
-        # Work out how much of the filepath is shared by start and path.
-        for i in range(min(len(start_list), len(path_list))):
-            if start_list[i].lower() != path_list[i].lower():
-                break
+def _parameterization_dir(param):
+    """
+    Returns the directory name for the given parameterization string as follows:
+        - If the parameterization is longer than 32 characters, then
+          return the SHA-1 hex digest.
+        - Otherwise, return the parameterization unchanged.
+    """
+    if len(param) > 32:
+        return sha1(param.encode()).hexdigest()
+    return param
+
+
+def save_hashfile(hashfile, hashed_inputs):
+    """Store a hashfile"""
+    try:
+        save_json(hashfile, hashed_inputs)
+    except (IOError, TypeError):
+        err_type = sys.exc_info()[0]
+        if err_type is TypeError:
+            # XXX - SG current workaround is to just
+            # create the hashed file and not put anything
+            # in it
+            with open(hashfile, 'wt') as fd:
+                fd.writelines(str(hashed_inputs))
+
+            logger.debug(
+                'Unable to write a particular type to the json file')
         else:
-            i += 1
+            logger.critical('Unable to open the file in write mode: %s',
+                            hashfile)
 
-        rel_list = [op.pardir] * (len(start_list) - i) + path_list[i:]
-        if not rel_list:
-            return os.curdir
-        return op.join(*rel_list)
+
+def nodelist_runner(nodes, updatehash=False, stop_first=False):
+    """
+    A generator that iterates and over a list of ``nodes`` and
+    executes them.
+
+    """
+    for i, node in nodes:
+        err = None
+        result = None
+        try:
+            result = node.run(updatehash=updatehash)
+        except Exception:
+            if stop_first:
+                raise
+
+            result = node._load_results()
+            err = []
+            if result.runtime and hasattr(result.runtime, 'traceback'):
+                err = [result.runtime.traceback]
+
+            err += format_exception(*sys.exc_info())
+            err = '\n'.join(err)
+        finally:
+            yield i, result, err
+
+
+def write_report(node, report_type=None, is_mapnode=False):
+    """
+    Write a report file for a node
+
+    """
+    if not str2bool(node.config['execution']['create_report']):
+        return
+
+    if report_type not in ['preexec', 'postexec']:
+        logger.warning('[Node] Unknown report type "%s".', report_type)
+        return
+
+    cwd = node.output_dir()
+    report_dir = os.path.join(cwd, '_report')
+    report_file = os.path.join(report_dir, 'report.rst')
+    makedirs(report_dir, exist_ok=True)
+
+    logger.debug('[Node] Writing %s-exec report to "%s"',
+                 report_type[:-4], report_file)
+    if report_type.startswith('pre'):
+        lines = [
+            write_rst_header('Node: %s' % get_print_name(node), level=0),
+            write_rst_list(['Hierarchy : %s' % node.fullname,
+                            'Exec ID : %s' % node._id]),
+            write_rst_header('Original Inputs', level=1),
+            write_rst_dict(node.inputs.get()),
+        ]
+        with open(report_file, 'wt') as fp:
+            fp.write('\n'.join(lines))
+        return
+
+    lines = [
+        write_rst_header('Execution Inputs', level=1),
+        write_rst_dict(node.inputs.get()),
+    ]
+
+    result = node.result  # Locally cache result
+    outputs = result.outputs
+
+    if outputs is None:
+        with open(report_file, 'at') as fp:
+            fp.write('\n'.join(lines))
+        return
+
+    lines.append(write_rst_header('Execution Outputs', level=1))
+
+    if isinstance(outputs, Bunch):
+        lines.append(write_rst_dict(outputs.dictcopy()))
+    elif outputs:
+        lines.append(write_rst_dict(outputs.get()))
+
+    if is_mapnode:
+        lines.append(write_rst_header('Subnode reports', level=1))
+        nitems = len(filename_to_list(
+            getattr(node.inputs, node.iterfield[0])))
+        subnode_report_files = []
+        for i in range(nitems):
+            nodecwd = os.path.join(
+                cwd, 'mapflow', '_%s%d' % (node.name, i),
+                '_report', 'report.rst')
+            subnode_report_files.append(
+                'subnode %d : %s' % (i, nodecwd))
+
+        lines.append(write_rst_list(subnode_report_files))
+
+        with open(report_file, 'at') as fp:
+            fp.write('\n'.join(lines))
+        return
+
+    lines.append(write_rst_header('Runtime info', level=1))
+    # Init rst dictionary of runtime stats
+    rst_dict = {
+        'hostname': result.runtime.hostname,
+        'duration': result.runtime.duration,
+    }
+
+    if hasattr(result.runtime, 'cmdline'):
+        rst_dict['command'] = result.runtime.cmdline
+
+    # Try and insert memory/threads usage if available
+    if hasattr(result.runtime, 'mem_peak_gb'):
+        rst_dict['mem_peak_gb'] = result.runtime.mem_peak_gb
+
+    if hasattr(result.runtime, 'cpu_percent'):
+        rst_dict['cpu_percent'] = result.runtime.cpu_percent
+
+    lines.append(write_rst_dict(rst_dict))
+
+    # Collect terminal output
+    if hasattr(result.runtime, 'merged'):
+        lines += [
+            write_rst_header('Terminal output', level=2),
+            write_rst_list(result.runtime.merged),
+        ]
+    if hasattr(result.runtime, 'stdout'):
+        lines += [
+            write_rst_header('Terminal - standard output', level=2),
+            write_rst_list(result.runtime.stdout),
+        ]
+    if hasattr(result.runtime, 'stderr'):
+        lines += [
+            write_rst_header('Terminal - standard error', level=2),
+            write_rst_list(result.runtime.stderr),
+        ]
+
+    # Store environment
+    if hasattr(result.runtime, 'environ'):
+        lines += [
+            write_rst_header('Environment', level=2),
+            write_rst_dict(result.runtime.environ),
+        ]
+
+    with open(report_file, 'at') as fp:
+        fp.write('\n'.join(lines))
+    return
+
+
+def save_resultfile(result, cwd, name):
+    """Save a result pklz file to ``cwd``"""
+    resultsfile = os.path.join(cwd, 'result_%s.pklz' % name)
+    if result.outputs:
+        try:
+            outputs = result.outputs.get()
+        except TypeError:
+            outputs = result.outputs.dictcopy()  # outputs was a bunch
+        result.outputs.set(**modify_paths(
+            outputs, relative=True, basedir=cwd))
+
+    savepkl(resultsfile, result)
+    logger.debug('saved results in %s', resultsfile)
+
+    if result.outputs:
+        result.outputs.set(**outputs)
+
+
+def load_resultfile(path, name):
+    """
+    Load InterfaceResult file from path
+
+    Parameter
+    ---------
+
+    path : base_dir of node
+    name : name of node
+
+    Returns
+    -------
+
+    result : InterfaceResult structure
+    aggregate : boolean indicating whether node should aggregate_outputs
+    attribute error : boolean indicating whether there was some mismatch in
+        versions of traits used to store result and hence node needs to
+        rerun
+    """
+    aggregate = True
+    resultsoutputfile = os.path.join(path, 'result_%s.pklz' % name)
+    result = None
+    attribute_error = False
+    if os.path.exists(resultsoutputfile):
+        pkl_file = gzip.open(resultsoutputfile, 'rb')
+        try:
+            result = pickle.load(pkl_file)
+        except UnicodeDecodeError:
+            # Was this pickle created with Python 2.x?
+            pickle.load(pkl_file, fix_imports=True, encoding='utf-8')
+            logger.warn('Successfully loaded pickle in compatibility mode')
+        except (traits.TraitError, AttributeError, ImportError,
+                EOFError) as err:
+            if isinstance(err, (AttributeError, ImportError)):
+                attribute_error = True
+                logger.debug('attribute error: %s probably using '
+                             'different trait pickled file', str(err))
+            else:
+                logger.debug(
+                    'some file does not exist. hence trait cannot be set')
+        else:
+            if result.outputs:
+                try:
+                    outputs = result.outputs.get()
+                except TypeError:
+                    outputs = result.outputs.dictcopy()  # outputs == Bunch
+                try:
+                    result.outputs.set(**modify_paths(outputs,
+                                                      relative=False,
+                                                      basedir=path))
+                except FileNotFoundError:
+                    logger.debug('conversion to full path results in '
+                                 'non existent file')
+            aggregate = False
+        pkl_file.close()
+    logger.debug('Aggregate: %s', aggregate)
+    return result, aggregate, attribute_error
+
+
+def strip_temp(files, wd):
+    """Remove temp from a list of file paths"""
+    out = []
+    for f in files:
+        if isinstance(f, list):
+            out.append(strip_temp(f, wd))
+        else:
+            out.append(f.replace(os.path.join(wd, '_tempinput'), wd))
+    return out
 
 
 def _write_inputs(node):
@@ -91,7 +330,7 @@ def _write_inputs(node):
             if type(val) == str:
                 try:
                     func = create_function_from_source(val)
-                except RuntimeError as e:
+                except RuntimeError:
                     lines.append("%s.inputs.%s = '%s'" % (nodename, key, val))
                 else:
                     funcname = [name for name in func.__globals__
@@ -903,7 +1142,7 @@ def _standardize_iterables(node):
     fields = set(node.inputs.copyable_trait_names())
     # Flag indicating whether the iterables are in the alternate
     # synchronize form and are not converted to a standard format.
-    synchronize = False
+    # synchronize = False  # OE: commented out since it is not used
     # A synchronize iterables node without an itersource can be in
     # [fields, value tuples] format rather than
     # [(field, value list), (field, value list), ...]
