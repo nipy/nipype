@@ -1244,7 +1244,7 @@ def write_report(node, report_type=None, cwd=None):
     ]
 
     result = node.result  # Locally cache result
-    outputs = result.get('outputs')
+    outputs = result.outputs
 
     if outputs is None:
         with open(report_file, 'at') as fp:
