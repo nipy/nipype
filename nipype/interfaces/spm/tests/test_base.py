@@ -16,12 +16,8 @@ import nipype.interfaces.matlab as mlab
 from nipype.interfaces.spm.base import SPMCommandInputSpec
 from nipype.interfaces.base import traits
 
-try:
-    matlab_cmd = os.environ['MATLABCMD']
-except:
-    matlab_cmd = 'matlab'
-
-mlab.MatlabCommand.set_default_matlab_cmd(matlab_cmd)
+mlab.MatlabCommand.set_default_matlab_cmd(
+    os.getenv('MATLABCMD', 'matlab'))
 
 
 def test_scan_for_fnames(create_files_in_directory):
@@ -35,10 +31,10 @@ save_time = False
 if not save_time:
     @pytest.mark.skipif(no_spm(), reason="spm is not installed")
     def test_spm_path():
-        spm_path = spm.Info.version()['path']
+        spm_path = spm.Info.path()
         if spm_path is not None:
             assert isinstance(spm_path, (str, bytes))
-            assert 'spm' in spm_path
+            assert 'spm' in spm_path.lower()
 
 
 def test_use_mfile():
