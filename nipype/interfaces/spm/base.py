@@ -136,19 +136,22 @@ class Info(PackageInfo):
     def path(klass, matlab_cmd=None, paths=None, use_mcr=None):
         if klass._path:
             return klass._path
-        return klass.getinfo(matlab_cmd, paths, use_mcr)['path']
+        klass.getinfo(matlab_cmd, paths, use_mcr)
+        return klass._path
 
     @classmethod
     def version(klass, matlab_cmd=None, paths=None, use_mcr=None):
         if klass._version:
             return klass._version
-        return klass.getinfo(matlab_cmd, paths, use_mcr)['release']
+        klass.getinfo(matlab_cmd, paths, use_mcr)
+        return klass._version
 
     @classmethod
     def name(klass, matlab_cmd=None, paths=None, use_mcr=None):
         if klass._name:
             return klass._name
-        return klass.getinfo(matlab_cmd, paths, use_mcr)['name']
+        klass.getinfo(matlab_cmd, paths, use_mcr)
+        return klass._name
 
     @classmethod
     def getinfo(klass, matlab_cmd=None, paths=None, use_mcr=None):
@@ -185,9 +188,9 @@ class Info(PackageInfo):
             }
 
         use_mcr = use_mcr or 'FORCE_SPMMCR' in os.environ
-        matlab_cmd = ((use_mcr and os.getenv('SPMMCRCMD')) or
-                      os.getenv('MATLABCMD') or
-                      'matlab -nodesktop -nosplash')
+        matlab_cmd = (
+            (use_mcr and os.getenv('SPMMCRCMD')) or
+            os.getenv('MATLABCMD', 'matlab -nodesktop -nosplash'))
 
         mlab = MatlabCommand(matlab_cmd=matlab_cmd,
                              resource_monitor=False)
