@@ -407,6 +407,13 @@ def test_freesurfersource():
     assert fss.inputs.subjects_dir == Undefined
 
 
+def test_freesurfersource_incorrectdir():
+    fss = nio.FreeSurferSource()
+    with pytest.raises(Exception) as err:
+        fss.inputs.subjects_dir = 'path/to/no/existing/directory'
+    assert "TraitError" == err.typename
+
+
 def test_jsonsink_input():
 
     ds = nio.JSONFileSink()

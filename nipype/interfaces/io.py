@@ -1485,7 +1485,7 @@ class DataFinder(IOBase):
 
 
 class FSSourceInputSpec(BaseInterfaceInputSpec):
-    subjects_dir = Directory(mandatory=True,
+    subjects_dir = Directory(exists=True, mandatory=True,
                              desc='Freesurfer subjects directory.')
     subject_id = Str(mandatory=True,
                      desc='Subject name for whom to retrieve data')
