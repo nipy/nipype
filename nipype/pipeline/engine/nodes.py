@@ -30,7 +30,7 @@ from tempfile import mkdtemp
 from future import standard_library
 
 from ... import config, logging
-from ...utils.misc import (flatten, unflatten, str2bool)
+from ...utils.misc import flatten, unflatten, str2bool, dict_diff
 from ...utils.filemanip import (
     md5, FileNotFoundError, filename_to_list, list_to_filename,
     copyfiles, fnames_presuffix, loadpkl, split_filename, load_json, makedirs,
@@ -292,38 +292,46 @@ class Node(EngineBase):
             # Find previous hashfiles
             hashfiles = glob(op.join(outdir, '_0x*.json'))
             if len(hashfiles) > 1:
+                for rmfile in hashfiles:
+                    os.remove(rmfile)
+
                 raise RuntimeError(
-                    '[Node] Cache ERROR - Found %d previous hashfiles that indicate '
+                    '[Node] Cache ERROR - Found %d previous hashfiles indicating '
                     'that the ``base_dir`` for this node went stale. Please re-run the '
                     'workflow.' % len(hashfiles))
 
             # Find unfinished hashfiles and error if any
             unfinished = glob(op.join(outdir, '_0x*_unfinished.json'))
 
+            # This should not happen, but clean up and break if so.
             if unfinished and updatehash:
+                for rmfile in unfinished:
+                    os.remove(rmfile)
+
                 raise RuntimeError(
-                    '[Node] Cache ERROR - Found unfinished hashfiles (%d) that indicate '
+                    '[Node] Cache ERROR - Found unfinished hashfiles (%d) indicating '
                     'that the ``base_dir`` for this node went stale. Please re-run the '
                     'workflow.' % len(unfinished))
 
             # Remove outdated hashfile
             if hashfiles and hashfiles[0] != hashfile:
                 logger.info('[Node] Outdated hashfile found for "%s", removing and forcing node '
-                            'to rerun', self.fullname)
+                            'to rerun.', self.fullname)
 
                 # If logging is more verbose than INFO (20), print diff between hashes
-                if logger.getEffectiveLevel() < 20 and hash_exists:  # Lazy logging: only < INFO
+                loglevel = logger.getEffectiveLevel()
+                if loglevel < 20:  # Lazy logging: only < INFO
                     split_out = split_filename(hashfiles[0])
                     exp_hash_file_base = split_out[1]
                     exp_hash = exp_hash_file_base[len('_0x'):]
-                    logger.debug("Previous node hash = %s", exp_hash)
+                    logger.log(loglevel, "[Node] Old/new hashes = %s/%s", exp_hash, hashvalue)
                     try:
                         prev_inputs = load_json(hashfiles[0])
                     except Exception:
                         pass
                     else:
-                        logging.logdebug_dict_differences(
-                            prev_inputs, hashed_inputs)
+                        logger.log(loglevel, dict_diff(prev_inputs, hashed_inputs, 10))
+
                 os.remove(hashfiles[0])
 
         # Update only possible if it exists
