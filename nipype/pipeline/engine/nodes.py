@@ -308,12 +308,11 @@ class Node(EngineBase):
 
             # Remove outdated hashfile
             if hashfiles and hashfiles[0] != hashfile:
-                logger.info('[Node] Removing outdated hashfile (%s) and forcing node to rerun',
-                            op.basename(hashfiles[0]))
+                logger.info('[Node] Outdated hashfile found for "%s", removing and forcing node '
+                            'to rerun', self.fullname)
 
-                # In DEBUG, print diff between hashes
-                log_debug = config.get('logging', 'workflow_level') == 'DEBUG'
-                if log_debug and hash_exists:  # Lazy logging - only debug
+                # If logging is more verbose than INFO (20), print diff between hashes
+                if logger.getEffectiveLevel() < 20 and hash_exists:  # Lazy logging: only < INFO
                     split_out = split_filename(hashfiles[0])
                     exp_hash_file_base = split_out[1]
                     exp_hash = exp_hash_file_base[len('_0x'):]
@@ -426,7 +425,7 @@ class Node(EngineBase):
         try:
             result = self._run_interface(execute=True)
         except Exception:
-            logger.warning('[Node] Exception "%s" (%s)', self.fullname, outdir)
+            logger.warning('[Node] Error on "%s" (%s)', self.fullname, outdir)
             # Tear-up after error
             os.remove(hashfile_unfinished)
             raise
