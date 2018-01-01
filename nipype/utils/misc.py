@@ -4,19 +4,29 @@
 """Miscellaneous utility functions
 """
 from __future__ import print_function, unicode_literals, division, absolute_import
-from future import standard_library
-standard_library.install_aliases()
 from builtins import next, str
-from future.utils import raise_from
 
 import sys
 import re
 from collections import Iterator
-import inspect
 
 from distutils.version import LooseVersion
-from textwrap import dedent, indent as textwrap_indent
+
 import numpy as np
+from future.utils import raise_from
+from future import standard_library
+try:
+    from textwrap import indent as textwrap_indent
+except ImportError:
+    def textwrap_indent(text, prefix):
+        """ A textwrap.indent replacement for Python < 3.3 """
+        if not prefix:
+            return text
+        splittext = text.splitlines(True)
+        return prefix + prefix.join(splittext)
+
+standard_library.install_aliases()
+
 
 def human_order_sorted(l):
     """Sorts string in human order (i.e. 'stat10' will go after 'stat2')"""
@@ -197,11 +207,11 @@ def unflatten(in_list, prev_structure):
 
     if not isinstance(prev_structure, list):
         return next(in_list)
-    else:
-        out = []
-        for item in prev_structure:
-            out.append(unflatten(in_list, item))
-        return out
+
+    out = []
+    for item in prev_structure:
+        out.append(unflatten(in_list, item))
+    return out
 
 
 def normalize_mc_params(params, source):
@@ -277,7 +287,7 @@ def dict_diff(dold, dnew, indent=0):
         except Exception:
             same = False
         if not same:
-            diff += ["%s: %r != %r" % (k, dnew[k], dold[k])]
+            diff += ["  * %s: %r != %r" % (k, dnew[k], dold[k])]
 
     if len(diff) > diffkeys:
         diff.insert(diffkeys, "Some dictionary entries had differing values:")
