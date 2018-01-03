@@ -16,7 +16,7 @@ from collections import namedtuple
 import pytest
 import nipype
 import nipype.interfaces.io as nio
-from nipype.interfaces.base import Undefined
+from nipype.interfaces.base import Undefined, TraitError
 
 # Check for boto
 noboto = False
@@ -409,9 +409,8 @@ def test_freesurfersource():
 
 def test_freesurfersource_incorrectdir():
     fss = nio.FreeSurferSource()
-    with pytest.raises(Exception) as err:
+    with pytest.raises(TraitError) as err:
         fss.inputs.subjects_dir = 'path/to/no/existing/directory'
-    assert "TraitError" == err.typename
 
 
 def test_jsonsink_input():
