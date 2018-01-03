@@ -139,8 +139,8 @@ class SampleToSurfaceInputSpec(FSTraitedSpec):
     subject_id = traits.String(desc="subject id")
     target_subject = traits.String(argstr="--trgsubject %s",
                                    desc="sample to surface of different subject than source")
-    surf_reg = traits.Bool(argstr="--surfreg", requires=["target_subject"],
-                           desc="use surface registration to target subject")
+    surf_reg = traits.String('sphere.reg', argstr="--surfreg %s", requires=["target_subject"],
+                             usedefault=True, desc="use surface registration to target subject")
     ico_order = traits.Int(argstr="--icoorder %d", requires=["target_subject"],
                            desc="icosahedron order when target_subject is 'ico'")
 
