@@ -67,11 +67,14 @@ class ResourceMonitor(threading.Thread):
 
     def _sample(self, cpu_interval=None):
         cpu = 0.0
-        mem = 0.0
+        rss = 0.0
+        vms = 0.0
         try:
             with self._process.oneshot():
                 cpu += self._process.cpu_percent(interval=cpu_interval)
-                mem += self._process.memory_info().rss
+                mem_info = self._process.memory_info()
+                rss += mem_info.rss
+                vms += mem_info.vms
         except psutil.NoSuchProcess:
             pass
 
@@ -85,19 +88,24 @@ class ResourceMonitor(threading.Thread):
             try:
                 with child.oneshot():
                     cpu += child.cpu_percent()
-                    mem += child.memory_info().rss
+                    mem_info = child.memory_info()
+                    rss += mem_info.rss
+                    vms += mem_info.vms
             except psutil.NoSuchProcess:
                 pass
 
-        print('%f,%f,%f' % (time(), (mem / _MB), cpu),
+        print('%f,%f,%f,%f' % (time(), cpu, rss / _MB, vms / _MB),
               file=self._logfile)
         self._logfile.flush()
 
     def run(self):
         """Core monitoring function, called by start()"""
+        start_time = time()
+        wait_til = start_time
         while not self._event.is_set():
             self._sample()
-            self._event.wait(self._freq)
+            wait_til += self._freq
+            self._event.wait(max(0, wait_til - time()))
 
 
 # Log node stats function
