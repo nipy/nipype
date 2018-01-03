@@ -428,7 +428,14 @@ class Node(EngineBase):
         savepkl(op.join(outdir, '_inputs.pklz'),
                 self.inputs.get_traitsfree())
 
-        cwd = os.getcwd()
+        try:
+            cwd = os.getcwd()
+        except OSError:
+            # Changing back to cwd is probably not necessary
+            # but this makes sure there's somewhere to change to.
+            cwd = os.path.split(outdir)[0]
+            logger.debug('Current folder does not exist, changing to "%s" instead.', cwd)
+
         os.chdir(outdir)
         try:
             result = self._run_interface(execute=True)
@@ -1009,8 +1016,8 @@ class MapNode(Node):
 
     @property
     def outputs(self):
-        if self._interface._outputs():
-            return Bunch(self._interface._outputs().get())
+        if self.interface._outputs():
+            return Bunch(self.interface._outputs().get())
 
     def _make_nodes(self, cwd=None):
         if cwd is None:
@@ -1030,7 +1037,7 @@ class MapNode(Node):
                         base_dir=op.join(cwd, 'mapflow'),
                         name=nodename)
             node.plugin_args = self.plugin_args
-            node._interface.inputs.trait_set(
+            node.interface.inputs.trait_set(
                 **deepcopy(self._interface.inputs.get()))
             node.interface.resource_monitor = self._interface.resource_monitor
             for field in self.iterfield:
@@ -1177,6 +1184,7 @@ class MapNode(Node):
                 if path.split(op.sep)[-1] not in nodenames:
                     dirs2remove.append(path)
         for path in dirs2remove:
+            logger.debug('[MapNode] Removing folder "%s".' , path)
             shutil.rmtree(path)
 
         return result
