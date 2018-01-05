@@ -1,4 +1,3 @@
-
 .. _sphinx_ext:
 
 Sphinx extensions
