@@ -84,12 +84,12 @@ optional arguments:
         assert stderr.getvalue() == ''
         assert stdout.getvalue() == \
             """Available Interfaces:
-	ComputeMask
-	EstimateContrast
-	FitGLM
-	FmriRealign4d
-	Similarity
-	SpaceTimeRealigner
+\tComputeMask
+\tEstimateContrast
+\tFitGLM
+\tFmriRealign4d
+\tSimilarity
+\tSpaceTimeRealigner
 """
 
     def test_run_4d_realign_without_arguments(self):
