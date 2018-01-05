@@ -77,4 +77,3 @@ def test_gen_fname(args, desired_name):
     else:
         desired = os.path.join(pth, desired_name["file"])
     assert fname == desired
-

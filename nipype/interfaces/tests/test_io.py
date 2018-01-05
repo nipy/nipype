@@ -437,6 +437,3 @@ def test_jsonsink(tmpdir, inputs_attributes):
         data = simplejson.load(f)
 
     assert data == expected_data
-
-
-

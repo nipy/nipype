@@ -134,4 +134,3 @@ nipype_cmd nipype.interfaces.nipy FmriRealign4d: error: too few arguments
 
         assert stderr.getvalue() == ''
         assert "Run FmriRealign4d" in stdout.getvalue()
-

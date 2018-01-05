@@ -107,4 +107,3 @@ def test_callback_multiproc_exception(tmpdir):
         assert n.name == 'f_node'
     assert so.statuses[0][1] == 'start'
     assert so.statuses[1][1] == 'exception'
-

@@ -575,7 +575,3 @@ def create_reconall_workflow(name="ReconAll", plugin_args=None):
                       (completion, postds_outputspec, [('subject_id', 'subject_id')])])
 
     return reconall
-
-
-
-

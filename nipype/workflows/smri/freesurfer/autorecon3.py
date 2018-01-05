@@ -954,4 +954,3 @@ def create_AutoRecon3(name="AutoRecon3", qcache=False, plugin_args=None,
             ar3_wf.connect([(qcache_wf, outputspec, [('outputspec.' + output, output)])])
 
     return ar3_wf, ar3_outputs
-

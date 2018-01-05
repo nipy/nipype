@@ -73,4 +73,3 @@ def test_outliers():
     in_data[0] += 10
 
     assert is_outlier(in_data) == 1
-

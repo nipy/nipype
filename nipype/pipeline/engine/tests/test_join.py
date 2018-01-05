@@ -578,5 +578,3 @@ def test_nested_workflow_join(tmpdir):
     # there should be six nodes in total
     assert len(result.nodes()) == 6, \
         "The number of expanded nodes is incorrect."
-
-

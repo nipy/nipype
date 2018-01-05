@@ -297,4 +297,3 @@ class Cleaner(CommandLine):
         outputs = self.output_spec().get()
         outputs['cleaned_functional_file'] = self._get_cleaned_functional_filename(self.inputs.artifacts_list_file)
         return outputs
-

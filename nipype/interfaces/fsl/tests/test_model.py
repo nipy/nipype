@@ -63,5 +63,3 @@ def test_MultipleRegressDesign(tmpdir):
 """
     for ii in ["mat", "con", "fts", "grp"]:
         assert tmpdir.join('design.'+ii).read() == eval("design_"+ii+"_expected_content")
-
-

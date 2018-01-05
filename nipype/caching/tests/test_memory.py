@@ -40,4 +40,3 @@ def test_caching(tmpdir):
         assert results.outputs.output1 == [1, 1]
     finally:
         config.set('execution', 'stop_on_first_rerun', old_rerun)
-

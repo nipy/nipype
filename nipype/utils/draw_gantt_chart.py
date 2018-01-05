@@ -545,4 +545,3 @@ def generate_gantt_chart(logfile, cores, minute_scale=10,
     #save file
     with open(logfile + '.html', 'w' if PY3 else 'wb') as html_file:
         html_file.write(html_string)
-

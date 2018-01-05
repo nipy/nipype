@@ -438,6 +438,3 @@ def test_tempfilt(create_files_in_directory_plus_output_type):
     filt = fsl.TemporalFilter(in_file="a.nii", highpass_sigma=64)
     assert filt.cmdline == \
         "fslmaths a.nii -bptf 64.000000 -1.000000 {}".format(os.path.join(testdir, "a_filt{}".format(out_ext)))
-
-
-

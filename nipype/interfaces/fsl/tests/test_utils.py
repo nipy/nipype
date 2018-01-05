@@ -302,4 +302,3 @@ def test_swapdims(create_files_in_directory_plus_output_type):
     # Test that we can set an output name
     swap.inputs.out_file = "b.nii"
     assert swap.cmdline == "fslswapdim a.nii x y z b.nii"
-

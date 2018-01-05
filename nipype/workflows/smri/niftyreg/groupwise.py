@@ -390,4 +390,3 @@ def create_groupwise_average(name="atlas_creation",
                      ])
 
     return workflow
-

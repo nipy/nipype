@@ -399,4 +399,3 @@ def test_distancemap(create_files_in_directory):
     mapper.inputs.local_max_file = "max.nii"
     assert mapper.cmdline == \
         "distancemap --out=%s --in=a.nii --localmax=max.nii" % os.path.join(newdir, "a_dstmap.nii")
-
