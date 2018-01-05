@@ -2291,6 +2291,7 @@ class UnifizeInputSpec(AFNICommandInputSpec):
         exists=True,
         copyfile=False)
     out_file = File(
+        name_template='%s_unifized',
         desc='output image file name',
         argstr='-prefix %s',
         name_source='in_file')
@@ -2337,6 +2338,22 @@ class UnifizeInputSpec(AFNICommandInputSpec):
              'b = bottom percentile of normalizing data range, [default=70.0]\n'
              'r = top percentile of normalizing data range, [default=80.0]\n',
         argstr='-rbt %f %f %f')
+    t2_up = traits.Float(
+        desc='Option for AFNI experts only.'
+             'Set the upper percentile point used for T2-T1 inversion. '
+             'Allowed to be anything between 90 and 100 (inclusive), with '
+             'default to 98.5  (for no good reason).',
+        argstr='-T2up %f')
+    cl_frac = traits.Float(
+        desc='Option for AFNI experts only.'
+             'Set the automask \'clip level fraction\'. Must be between '
+             '0.1 and 0.9. A small fraction means to make the initial '
+             'threshold for clipping (a la 3dClipLevel) smaller, which '
+             'will tend to make the mask larger.  [default=0.1]',
+        argstr='-clfrac %f')
+    quiet = traits.Bool(
+        desc='Don\'t print the progress messages.',
+        argstr='-quiet')
 
 
 class UnifizeOutputSpec(TraitedSpec):
