@@ -14,9 +14,8 @@
 from __future__ import print_function, division, unicode_literals, absolute_import
 
 from ... import logging
-from ..traits_extension import isdefined
-from ..base import (CommandLineInputSpec, CommandLine, traits, File)
-logger = logging.getLogger('interface')
+from ..base import (CommandLineInputSpec, CommandLine, traits, File, isdefined)
+iflogger = logging.getLogger('interface')
 
 
 class MRTrix3BaseInputSpec(CommandLineInputSpec):
@@ -52,7 +51,7 @@ class MRTrix3Base(CommandLine):
                 from multiprocessing import cpu_count
                 value = cpu_count()
             except:
-                logger.warn('Number of threads could not be computed')
+                iflogger.warn('Number of threads could not be computed')
                 pass
             return trait_spec.argstr % value
 

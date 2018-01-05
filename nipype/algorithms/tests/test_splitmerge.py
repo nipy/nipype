@@ -14,13 +14,13 @@ def test_split_and_merge(tmpdir):
     from nipype.algorithms.misc import split_rois, merge_rois
 
     in_mask = example_data('tpms_msk.nii.gz')
-    dwfile = op.join(str(tmpdir), 'dwi.nii.gz')
+    dwfile = tmpdir.join('dwi.nii.gz').strpath
     mskdata = nb.load(in_mask, mmap=NUMPY_MMAP).get_data()
     aff = nb.load(in_mask, mmap=NUMPY_MMAP).affine
 
     dwshape = (mskdata.shape[0], mskdata.shape[1], mskdata.shape[2], 6)
     dwdata = np.random.normal(size=dwshape)
-    os.chdir(str(tmpdir))
+    tmpdir.chdir()
     nb.Nifti1Image(dwdata.astype(np.float32),
                    aff, None).to_filename(dwfile)
 

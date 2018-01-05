@@ -16,8 +16,7 @@ from __future__ import print_function, division, unicode_literals, absolute_impo
 import os
 import os.path as op
 
-from ..traits_extension import isdefined
-from ..base import (CommandLineInputSpec, traits, TraitedSpec, File)
+from ..base import (CommandLineInputSpec, traits, TraitedSpec, File, isdefined)
 from .base import MRTrix3Base
 
 
@@ -96,7 +95,7 @@ class BuildConnectome(MRTrix3Base):
     >>> mat = mrt.BuildConnectome()
     >>> mat.inputs.in_file = 'tracks.tck'
     >>> mat.inputs.in_parc = 'aparc+aseg.nii'
-    >>> mat.cmdline                               # doctest: +ELLIPSIS +ALLOW_UNICODE
+    >>> mat.cmdline                               # doctest: +ELLIPSIS
     'tck2connectome tracks.tck aparc+aseg.nii connectome.csv'
     >>> mat.run()                                 # doctest: +SKIP
     """
@@ -155,7 +154,7 @@ class LabelConfig(MRTrix3Base):
     >>> labels = mrt.LabelConfig()
     >>> labels.inputs.in_file = 'aparc+aseg.nii'
     >>> labels.inputs.in_config = 'mrtrix3_labelconfig.txt'
-    >>> labels.cmdline                               # doctest: +ELLIPSIS +ALLOW_UNICODE
+    >>> labels.cmdline                               # doctest: +ELLIPSIS
     'labelconfig aparc+aseg.nii mrtrix3_labelconfig.txt parcellation.mif'
     >>> labels.run()                                 # doctest: +SKIP
     """

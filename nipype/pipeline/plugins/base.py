@@ -128,9 +128,11 @@ class DistributedPluginBase(PluginBase):
         old_progress_stats = None
         old_presub_stats = None
         while not np.all(self.proc_done) or np.any(self.proc_pending):
-            # Check to see if a job is available (jobs without dependencies not run)
-            # See https://github.com/nipy/nipype/pull/2200#discussion_r141605722
-            jobs_ready = np.nonzero(~self.proc_done & (self.depidx.sum(0) == 0))[1]
+            loop_start = time()
+            # Check if a job is available (jobs with all dependencies run)
+            # https://github.com/nipy/nipype/pull/2200#discussion_r141605722
+            jobs_ready = np.nonzero(~self.proc_done &
+                                    (self.depidx.sum(0) == 0))[1]
 
             progress_stats = (len(self.proc_done),
                               np.sum(self.proc_done ^ self.proc_pending),
@@ -164,7 +166,8 @@ class DistributedPluginBase(PluginBase):
                             self._remove_node_dirs()
                         self._clear_task(taskid)
                     else:
-                        assert self.proc_done[jobid] and self.proc_pending[jobid]
+                        assert self.proc_done[jobid] and \
+                            self.proc_pending[jobid]
                         toappend.insert(0, (taskid, jobid))
 
             if toappend:
@@ -183,7 +186,8 @@ class DistributedPluginBase(PluginBase):
             elif display_stats:
                 logger.debug('Not submitting (max jobs reached)')
 
-            sleep(poll_sleep_secs)
+            sleep_til = loop_start + poll_sleep_secs
+            sleep(max(0, sleep_til - time()))
 
         self._remove_node_dirs()
         report_nodes_not_run(notrun)
@@ -271,8 +275,8 @@ class DistributedPluginBase(PluginBase):
             if (num_jobs >= self.max_jobs) or (slots == 0):
                 break
 
-            # Check to see if a job is available (jobs without dependencies not run)
-            # See https://github.com/nipy/nipype/pull/2200#discussion_r141605722
+            # Check if a job is available (jobs with all dependencies run)
+            # https://github.com/nipy/nipype/pull/2200#discussion_r141605722
             jobids = np.nonzero(~self.proc_done & (self.depidx.sum(0) == 0))[1]
 
             if len(jobids) > 0:
@@ -325,7 +329,8 @@ class DistributedPluginBase(PluginBase):
                 break
 
     def _local_hash_check(self, jobid, graph):
-        if not str2bool(self.procs[jobid].config['execution']['local_hash_check']):
+        if not str2bool(self.procs[jobid].config['execution'][
+                'local_hash_check']):
             return False
 
         logger.debug('Checking hash (%d) locally', jobid)
@@ -339,7 +344,7 @@ class DistributedPluginBase(PluginBase):
             logger.debug('Skipping cached node %s with ID %s.',
                          self.procs[jobid]._id, jobid)
             try:
-                self._task_finished_cb(jobid)
+                self._task_finished_cb(jobid, cached=True)
                 self._remove_node_dirs()
             except Exception:
                 logger.debug('Error skipping cached node %s (%s).',
@@ -349,13 +354,14 @@ class DistributedPluginBase(PluginBase):
             return True
         return False
 
-    def _task_finished_cb(self, jobid):
+    def _task_finished_cb(self, jobid, cached=False):
         """ Extract outputs and assign to inputs of dependent tasks
 
         This is called when a job is completed.
         """
-        logger.info('[Job finished] jobname: %s jobid: %d' %
-                    (self.procs[jobid]._id, jobid))
+        logger.info('[Job %d] %s (%s).', jobid,
+                    'Cached' if cached else 'Completed',
+                    self.procs[jobid].fullname)
         if self._status_callback:
             self._status_callback(self.procs[jobid], 'end')
         # Update job and worker queues
@@ -396,8 +402,8 @@ class DistributedPluginBase(PluginBase):
         """Removes directories whose outputs have already been used up
         """
         if str2bool(self._config['execution']['remove_node_directories']):
-            for idx in np.nonzero(
-                                 (self.refidx.sum(axis=1) == 0).__array__())[0]:
+            indices = np.nonzero((self.refidx.sum(axis=1) == 0).__array__())[0]
+            for idx in indices:
                 if idx in self.mapnodesubids:
                     continue
                 if self.proc_done[idx] and (not self.proc_pending[idx]):
@@ -512,7 +518,8 @@ class GraphPluginBase(PluginBase):
 
     def __init__(self, plugin_args=None):
         if plugin_args and plugin_args.get('status_callback'):
-            logger.warning('status_callback not supported for Graph submission plugins')
+            logger.warning('status_callback not supported for Graph submission'
+                           ' plugins')
         super(GraphPluginBase, self).__init__(plugin_args=plugin_args)
 
     def run(self, graph, config, updatehash=False):

@@ -22,7 +22,7 @@ import numpy as np
 from numpy.polynomial import Legendre
 from scipy import linalg
 
-from .. import logging
+from .. import config, logging
 from ..external.due import BibTeX
 from ..interfaces.base import (traits, TraitedSpec, BaseInterface,
                                BaseInterfaceInputSpec, File, isdefined,
@@ -30,7 +30,7 @@ from ..interfaces.base import (traits, TraitedSpec, BaseInterface,
 from ..utils import NUMPY_MMAP
 from ..utils.misc import normalize_mc_params
 
-IFLOG = logging.getLogger('interface')
+IFLOGGER = logging.getLogger('interface')
 
 
 class ComputeDVARSInputSpec(BaseInterfaceInputSpec):
@@ -286,7 +286,7 @@ Bradley L. and Petersen, Steven E.},
                 tr = self.inputs.series_tr
 
             if self.inputs.normalize and tr is None:
-                IFLOG.warn('FD plot cannot be normalized if TR is not set')
+                IFLOGGER.warn('FD plot cannot be normalized if TR is not set')
 
             self._results['out_figure'] = op.abspath(self.inputs.out_figure)
             fig = plot_confound(fd_res, self.inputs.figsize, 'FD', units='mm',
@@ -601,8 +601,8 @@ class TCompCor(CompCor):
             # save mask
             mask_file = os.path.abspath('mask_{:03d}.nii.gz'.format(i))
             out_image.to_filename(mask_file)
-            IFLOG.debug('tCompcor computed and saved mask of shape {} to '
-                        'mask_file {}'.format(mask.shape, mask_file))
+            IFLOGGER.debug('tCompcor computed and saved mask of shape %s to '
+                           'mask_file %s', str(mask.shape), mask_file)
             self._mask_files.append(mask_file)
             out_images.append(out_image)
         return out_images
@@ -816,7 +816,7 @@ def plot_confound(tseries, figsize, name, units=None,
 
     """
     import matplotlib
-    matplotlib.use('Agg')
+    matplotlib.use(config.get('execution', 'matplotlib_backend'))
     import matplotlib.pyplot as plt
     from matplotlib.gridspec import GridSpec
     from matplotlib.backends.backend_pdf import FigureCanvasPdf as FigureCanvas
@@ -919,7 +919,8 @@ def regress_poly(degree, data, remove_mean=True, axis=-1):
     :param int axis: numpy array axes along which regression is performed
 
     """
-    IFLOG.debug('Performing polynomial regression on data of shape ' + str(data.shape))
+    IFLOGGER.debug('Performing polynomial regression on data of shape %s',
+                   str(data.shape))
 
     datashape = data.shape
     timepoints = datashape[axis]
@@ -1147,7 +1148,7 @@ def _full_rank(X, cmax=1e15):
     c = smax / smin
     if c < cmax:
         return X, c
-    IFLOG.warn('Matrix is singular at working precision, regularizing...')
+    IFLOGGER.warn('Matrix is singular at working precision, regularizing...')
     lda = (smax - cmax * smin) / (cmax - 1)
     s = s + lda
     X = np.dot(U, np.dot(np.diag(s), V))

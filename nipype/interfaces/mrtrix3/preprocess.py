@@ -15,9 +15,8 @@ from __future__ import print_function, division, unicode_literals, absolute_impo
 
 import os.path as op
 
-from ..traits_extension import isdefined
 from ..base import (CommandLineInputSpec, CommandLine, traits, TraitedSpec,
-                    File)
+                    File, isdefined)
 from .base import MRTrix3BaseInputSpec, MRTrix3Base
 
 
@@ -96,7 +95,7 @@ class ResponseSD(MRTrix3Base):
     >>> resp.inputs.in_file = 'dwi.mif'
     >>> resp.inputs.in_mask = 'mask.nii.gz'
     >>> resp.inputs.grad_fsl = ('bvecs', 'bvals')
-    >>> resp.cmdline                               # doctest: +ELLIPSIS +ALLOW_UNICODE
+    >>> resp.cmdline                               # doctest: +ELLIPSIS
     'dwi2response -fslgrad bvecs bvals -mask mask.nii.gz dwi.mif response.txt'
     >>> resp.run()                                 # doctest: +SKIP
     """
@@ -139,7 +138,7 @@ class ACTPrepareFSL(CommandLine):
     >>> import nipype.interfaces.mrtrix3 as mrt
     >>> prep = mrt.ACTPrepareFSL()
     >>> prep.inputs.in_file = 'T1.nii.gz'
-    >>> prep.cmdline                               # doctest: +ELLIPSIS +ALLOW_UNICODE
+    >>> prep.cmdline                               # doctest: +ELLIPSIS
     'act_anat_prepare_fsl T1.nii.gz act_5tt.mif'
     >>> prep.run()                                 # doctest: +SKIP
     """
@@ -185,7 +184,7 @@ class ReplaceFSwithFIRST(CommandLine):
     >>> prep.inputs.in_file = 'aparc+aseg.nii'
     >>> prep.inputs.in_t1w = 'T1.nii.gz'
     >>> prep.inputs.in_config = 'mrtrix3_labelconfig.txt'
-    >>> prep.cmdline                               # doctest: +ELLIPSIS +ALLOW_UNICODE
+    >>> prep.cmdline                               # doctest: +ELLIPSIS
     'fs_parc_replace_sgm_first aparc+aseg.nii T1.nii.gz \
 mrtrix3_labelconfig.txt aparc+first.mif'
     >>> prep.run()                                 # doctest: +SKIP

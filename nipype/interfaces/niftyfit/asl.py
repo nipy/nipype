@@ -147,7 +147,7 @@ class FitAsl(NiftyFitCommand):
     >>> from nipype.interfaces import niftyfit
     >>> node = niftyfit.FitAsl()
     >>> node.inputs.source_file = 'asl.nii.gz'
-    >>> node.cmdline    # doctest: +ALLOW_UNICODE
+    >>> node.cmdline
     'fit_asl -source asl.nii.gz -cbf asl_cbf.nii.gz -error asl_error.nii.gz \
 -syn asl_syn.nii.gz'
 

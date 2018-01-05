@@ -21,7 +21,7 @@ import nibabel as nb
 from .. import logging
 from ..interfaces.base import (traits, TraitedSpec, BaseInterface,
                                BaseInterfaceInputSpec, File, InputMultiPath)
-IFLOG = logging.getLogger('interface')
+IFLOGGER = logging.getLogger('interface')
 
 class SignalExtractionInputSpec(BaseInterfaceInputSpec):
     in_file = File(exists=True, mandatory=True, desc='4-D fMRI nii file')

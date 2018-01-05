@@ -21,8 +21,7 @@ def test_provenance():
     assert 'echo hello' in provn
 
 def test_provenance_exists(tmpdir):
-    tempdir = str(tmpdir)
-    os.chdir(tempdir)
+    tmpdir.chdir()
     from nipype import config
     from nipype.interfaces.base import CommandLine
     provenance_state = config.get('execution', 'write_provenance')
@@ -31,8 +30,7 @@ def test_provenance_exists(tmpdir):
     CommandLine('echo hello').run()
     config.set('execution', 'write_provenance', provenance_state)
     config.set('execution', 'hash_method', hash_state)
-    provenance_exists = os.path.exists(os.path.join(tempdir, 'provenance.provn'))
-    assert provenance_exists
+    assert tmpdir.join('provenance.provn').check()
 
 def test_safe_encode():
     a = '\xc3\xa9lg'

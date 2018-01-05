@@ -123,13 +123,12 @@ class RESTORE(DipyDiffusionInterface):
         sigma = mean_std * (1 + bias)
 
         if sigma == 0:
-            IFLOGGER.warn(
-                ('Noise std is 0.0, looks like data was masked and noise'
-                 ' cannot be estimated correctly. Using default tensor '
-                 'model instead of RESTORE.'))
+            IFLOGGER.warn('Noise std is 0.0, looks like data was masked and noise '
+                          'cannot be estimated correctly. Using default tensor '
+                          'model instead of RESTORE.')
             dti = TensorModel(gtab)
         else:
-            IFLOGGER.info(('Performing RESTORE with noise std=%.4f.') % sigma)
+            IFLOGGER.info('Performing RESTORE with noise std=%.4f.', sigma)
             dti = TensorModel(gtab, fit_method='RESTORE', sigma=sigma)
 
         try:
@@ -252,14 +251,13 @@ class EstimateResponseSH(DipyDiffusionInterface):
             ratio = abs(response[1] / response[0])
 
         if ratio > 0.25:
-            IFLOGGER.warn(('Estimated response is not prolate enough. '
-                           'Ratio=%0.3f.') % ratio)
+            IFLOGGER.warn('Estimated response is not prolate enough. '
+                          'Ratio=%0.3f.', ratio)
         elif ratio < 1.e-5 or np.any(np.isnan(response)):
             response = np.array([1.8e-3, 3.6e-4, 3.6e-4, S0])
-            IFLOGGER.warn(
-                ('Estimated response is not valid, using a default one'))
+            IFLOGGER.warn('Estimated response is not valid, using a default one')
         else:
-            IFLOGGER.info(('Estimated response: %s') % str(response[:3]))
+            IFLOGGER.info('Estimated response: %s', str(response[:3]))
 
         np.savetxt(op.abspath(self.inputs.response), response)
 
@@ -343,8 +341,8 @@ class CSD(DipyDiffusionInterface):
         ratio = response[0][1] / response[0][0]
 
         if abs(ratio - 0.2) > 0.1:
-            IFLOGGER.warn(('Estimated response is not prolate enough. '
-                           'Ratio=%0.3f.') % ratio)
+            IFLOGGER.warn('Estimated response is not prolate enough. '
+                          'Ratio=%0.3f.', ratio)
 
         csd_model = ConstrainedSphericalDeconvModel(
             gtab, response, sh_order=self.inputs.sh_order)

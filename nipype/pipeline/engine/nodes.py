@@ -42,10 +42,10 @@ from ...utils.filemanip import (save_json, FileNotFoundError,
                                 copyfiles, fnames_presuffix, loadpkl,
                                 split_filename, load_json, savepkl,
                                 write_rst_header, write_rst_dict,
-                                write_rst_list, to_str)
+                                write_rst_list, to_str, md5)
 from ...interfaces.base import (traits, InputMultiPath, CommandLine,
                                 Undefined, TraitedSpec, DynamicTraitedSpec,
-                                Bunch, InterfaceResult, md5, Interface,
+                                Bunch, InterfaceResult, Interface,
                                 TraitDictObject, TraitListObject, isdefined)
 from .utils import (generate_expanded_graph, modify_paths,
                     export_graph, make_output_dir, write_workflow_prov,
@@ -887,7 +887,7 @@ class JoinNode(Node):
         ...    name='inputspec'),
         >>> join = JoinNode(IdentityInterface(fields=['images', 'mask']),
         ...    joinsource='inputspec', joinfield='images', name='join')
-        >>> join._add_join_item_fields() # doctest: +ALLOW_UNICODE
+        >>> join._add_join_item_fields()
         {'images': 'imagesJ1'}
 
         Return the {base field: slot field} dictionary

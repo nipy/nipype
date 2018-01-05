@@ -25,7 +25,7 @@ def test_caching(tmpdir):
     try:
         # Prevent rerun to check that evaluation is computed only once
         config.set('execution', 'stop_on_first_rerun', 'true')
-        mem = Memory(str(tmpdir))
+        mem = Memory(tmpdir.strpath)
         first_nb_run = nb_runs
         results = mem.cache(SideEffectInterface)(input1=2, input2=1)
         assert nb_runs == first_nb_run + 1

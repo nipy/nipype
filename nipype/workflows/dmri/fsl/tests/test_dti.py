@@ -9,15 +9,13 @@ from nipype.interfaces.fsl import no_fsl, no_fsl_course_data
 
 import nipype.pipeline.engine as pe
 import warnings
-import tempfile
-import shutil
 from nipype.workflows.dmri.fsl.dti import create_bedpostx_pipeline
 from nipype.utils.filemanip import list_to_filename
 
 
 @pytest.mark.skipif(no_fsl(), reason="fsl is not installed")
 @pytest.mark.skipif(no_fsl_course_data(), reason="fsl data not available")
-def test_create_bedpostx_pipeline():
+def test_create_bedpostx_pipeline(tmpdir):
     fsl_course_dir = os.path.abspath(os.environ['FSL_COURSE_DATA'])
 
     mask_file = os.path.join(fsl_course_dir, "fdt2/subj1.bedpostX/nodif_brain_mask.nii.gz")
@@ -72,7 +70,7 @@ def test_create_bedpostx_pipeline():
     test_f1 = pe.Node(util.AssertEqual(), name="mean_f1_test")
 
     pipeline = pe.Workflow(name="test_bedpostx")
-    pipeline.base_dir = tempfile.mkdtemp(prefix="nipype_test_bedpostx_")
+    pipeline.base_dir = tmpdir.mkdir("nipype_test_bedpostx_").strpath
 
     pipeline.connect([(slice_mask, original_bedpostx, [("roi_file", "mask")]),
                       (slice_mask, nipype_bedpostx, [("roi_file", "inputnode.mask")]),
@@ -85,4 +83,3 @@ def test_create_bedpostx_pipeline():
                       ])
 
     pipeline.run(plugin='Linear')
-    shutil.rmtree(pipeline.base_dir)

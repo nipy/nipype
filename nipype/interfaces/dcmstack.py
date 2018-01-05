@@ -19,10 +19,12 @@ from glob import glob
 import nibabel as nb
 import imghdr
 
-from .base import (TraitedSpec, DynamicTraitedSpec,
-                   InputMultiPath, File, Directory,
-                   traits, BaseInterface)
-from .traits_extension import isdefined, Undefined
+from .base import (
+    TraitedSpec, DynamicTraitedSpec,
+    InputMultiPath, File, Directory,
+    traits, BaseInterface,
+    isdefined, Undefined
+)
 from ..utils import NUMPY_MMAP
 
 

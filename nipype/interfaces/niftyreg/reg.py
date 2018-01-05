@@ -20,15 +20,10 @@ from __future__ import (print_function, division, unicode_literals,
                         absolute_import)
 from builtins import staticmethod
 import os
-import warnings
 
 from ..base import TraitedSpec, File, traits, isdefined
 from .base import get_custom_path, NiftyRegCommand, NiftyRegCommandInputSpec
 from ...utils.filemanip import split_filename
-
-
-warn = warnings.warn
-warnings.filterwarnings('always', category=UserWarning)
 
 
 class RegAladinInputSpec(NiftyRegCommandInputSpec):
@@ -156,7 +151,7 @@ class RegAladin(NiftyRegCommand):
     >>> node.inputs.flo_file = 'im2.nii'
     >>> node.inputs.rmask_file = 'mask.nii'
     >>> node.inputs.omp_core_val = 4
-    >>> node.cmdline  # doctest: +ALLOW_UNICODE
+    >>> node.cmdline
     'reg_aladin -aff im2_aff.txt -flo im2.nii -omp 4 -ref im1.nii \
 -res im2_res.nii.gz -rmask mask.nii'
 
@@ -367,7 +362,7 @@ class RegF3D(NiftyRegCommand):
     >>> node.inputs.flo_file = 'im2.nii'
     >>> node.inputs.rmask_file = 'mask.nii'
     >>> node.inputs.omp_core_val = 4
-    >>> node.cmdline  # doctest: +ALLOW_UNICODE
+    >>> node.cmdline
     'reg_f3d -cpp im2_cpp.nii.gz -flo im2.nii -omp 4 -ref im1.nii \
 -res im2_res.nii.gz -rmask mask.nii'
 

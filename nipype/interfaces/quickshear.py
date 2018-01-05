@@ -40,7 +40,7 @@ class Quickshear(CommandLine):
 
     >>> from nipype.interfaces.quickshear import Quickshear
     >>> qs = Quickshear(in_file='T1.nii', mask_file='brain_mask.nii')
-    >>> qs.cmdline  # doctest: +ALLOW_UNICODE
+    >>> qs.cmdline
     'quickshear T1.nii brain_mask.nii T1_defaced.nii'
 
     In the absence of a precomputed mask, a simple pipeline can be generated

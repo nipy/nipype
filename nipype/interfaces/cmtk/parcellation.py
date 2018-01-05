@@ -223,22 +223,22 @@ def create_roi(subject_id, subjects_dir, fs_dir, parcellation_name, dilation):
             hemi = 'rh'
         if brv['dn_region'] == 'subcortical':
             iflogger.info(brv)
-            iflogger.info("---------------------")
-            iflogger.info("Work on brain region: %s" % (brv['dn_region']))
-            iflogger.info("Freesurfer Name: %s" % brv['dn_fsname'])
-            iflogger.info("Region %s of %s " % (count, pg.number_of_nodes()))
-            iflogger.info("---------------------")
+            iflogger.info('---------------------')
+            iflogger.info('Work on brain region: %s', brv['dn_region'])
+            iflogger.info('Freesurfer Name: %s', brv['dn_fsname'])
+            iflogger.info('Region %s of %s', count, pg.number_of_nodes())
+            iflogger.info('---------------------')
             # if it is subcortical, retrieve roi from aseg
             idx = np.where(asegd == int(brv['dn_fs_aseg_val']))
             rois[idx] = int(brv['dn_correspondence_id'])
 
         elif brv['dn_region'] == 'cortical':
             iflogger.info(brv)
-            iflogger.info("---------------------")
-            iflogger.info("Work on brain region: %s" % (brv['dn_region']))
-            iflogger.info("Freesurfer Name: %s" % brv['dn_fsname'])
-            iflogger.info("Region %s of %s " % (count, pg.number_of_nodes()))
-            iflogger.info("---------------------")
+            iflogger.info('---------------------')
+            iflogger.info('Work on brain region: %s', brv['dn_region'])
+            iflogger.info('Freesurfer Name: %s', brv['dn_fsname'])
+            iflogger.info('Region %s of %s', count, pg.number_of_nodes())
+            iflogger.info('---------------------')
 
             labelpath = op.join(
                 output_dir, parval['fs_label_subdir_name'] % hemi)
@@ -294,7 +294,7 @@ def create_roi(subject_id, subjects_dir, fs_dir, parcellation_name, dilation):
 
         # store volume eg in ROIv_scale33.nii.gz
         out_roi = op.abspath('ROIv_%s.nii.gz' % parcellation_name)
-        iflogger.info("Save output image to %s" % out_roi)
+        iflogger.info('Save output image to %s', out_roi)
         img = nb.Nifti1Image(rois, aseg.affine, hdr2)
         nb.save(img, out_roi)
 
@@ -424,22 +424,23 @@ def create_wm_mask(subject_id, subjects_dir, fs_dir, parcellation_name):
     wmmask[idx] = 1
 
     # check if we should subtract the cortical rois from this parcellation
-    iflogger.info("Loading %s to subtract cortical ROIs from white matter mask" % ('ROI_%s.nii.gz' % parcellation_name))
+    iflogger.info('Loading ROI_%s.nii.gz to subtract cortical ROIs from white '
+                  'matter mask', parcellation_name)
     roi = nb.load(op.join(op.curdir, 'ROI_%s.nii.gz' % parcellation_name))
     roid = roi.get_data()
     assert roid.shape[0] == wmmask.shape[0]
     pg = nx.read_graphml(pgpath)
     for brk, brv in pg.nodes(data=True):
         if brv['dn_region'] == 'cortical':
-            iflogger.info("Subtracting region %s with intensity value %s" %
-                          (brv['dn_region'], brv['dn_correspondence_id']))
+            iflogger.info('Subtracting region %s with intensity value %s',
+                          brv['dn_region'], brv['dn_correspondence_id'])
             idx = np.where(roid == int(brv['dn_correspondence_id']))
             wmmask[idx] = 0
 
     # output white matter mask. crop and move it afterwards
     wm_out = op.join(fs_dir, 'mri', 'fsmask_1mm.nii.gz')
     img = nb.Nifti1Image(wmmask, fsmask.affine, fsmask.header)
-    iflogger.info("Save white matter mask: %s" % wm_out)
+    iflogger.info('Save white matter mask: %s', wm_out)
     nb.save(img, wm_out)
 
 
@@ -450,7 +451,7 @@ def crop_and_move_datasets(subject_id, subjects_dir, fs_dir, parcellation_name, 
     log = cmp_config.get_logger()
     output_dir = op.abspath(op.curdir)
 
-    iflogger.info("Cropping and moving datasets to %s" % output_dir)
+    iflogger.info('Cropping and moving datasets to %s', output_dir)
     ds = [
         (op.join(fs_dir, 'mri', 'aseg.nii.gz'),
          op.abspath('aseg.nii.gz')),
@@ -469,7 +470,7 @@ def crop_and_move_datasets(subject_id, subjects_dir, fs_dir, parcellation_name, 
                    op.abspath('ROIv_HR_th.nii.gz')))
     orig = op.join(fs_dir, 'mri', 'orig', '001.mgz')
     for d in ds:
-        iflogger.info("Processing %s:" % d[0])
+        iflogger.info('Processing %s:', d[0])
         if not op.exists(d[0]):
             raise Exception('File %s does not exist.' % d[0])
         # reslice to original volume because the roi creation with freesurfer

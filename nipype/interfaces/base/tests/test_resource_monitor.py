@@ -11,10 +11,10 @@ import os
 import pytest
 
 # Import packages
-from nipype import config
-from nipype.utils.profiler import _use_resources
-from nipype.interfaces.base import traits, CommandLine, CommandLineInputSpec
-from nipype.interfaces import utility as niu
+from .... import config
+from ....utils.profiler import _use_resources
+from ...base import traits, CommandLine, CommandLineInputSpec
+from ... import utility as niu
 
 # Try to enable the resource monitor
 config.enable_resource_monitor()
@@ -54,7 +54,7 @@ def test_cmdline_profiling(tmpdir, mem_gb, n_procs):
     of a CommandLine-derived interface
     """
     from nipype import config
-    config.set('execution', 'resource_monitor_frequency', '0.2')  # Force sampling fast
+    config.set('monitoring', 'sample_frequency', '0.2')  # Force sampling fast
 
     tmpdir.chdir()
     iface = UseResources(mem_gb=mem_gb, n_procs=n_procs)
@@ -72,7 +72,7 @@ def test_function_profiling(tmpdir, mem_gb, n_procs):
     of a Function interface
     """
     from nipype import config
-    config.set('execution', 'resource_monitor_frequency', '0.2')  # Force sampling fast
+    config.set('monitoring', 'sample_frequency', '0.2')  # Force sampling fast
 
     tmpdir.chdir()
     iface = niu.Function(function=_use_resources)

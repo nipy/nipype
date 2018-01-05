@@ -4,7 +4,8 @@ from ...base import Undefined
 from ..model import Level1Design
 
 
-def test_level1design():
+def test_level1design(tmpdir):
+    old = tmpdir.chdir()
     l = Level1Design()
     runinfo = dict(cond=[{'name': 'test_condition', 'onset': [0, 10],
                           'duration':[10, 10]}],regress=[])

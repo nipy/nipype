@@ -26,26 +26,32 @@ See the docstrings of the individual classes for examples.
 
 """
 from __future__ import print_function, division, unicode_literals, absolute_import
-from builtins import open, object
 
 from glob import glob
 import os
 
 from ... import logging
 from ...utils.filemanip import fname_presuffix
-from ..base import traits, isdefined, CommandLine, CommandLineInputSpec
+from ..base import traits, isdefined, CommandLine, CommandLineInputSpec, PackageInfo
 from ...external.due import BibTeX
 
-LOGGER = logging.getLogger('interface')
+IFLOGGER = logging.getLogger('interface')
 
 
-class Info(object):
-    """Handle fsl output type and version information.
-
-    version refers to the version of fsl on the system
+class Info(PackageInfo):
+    """
+    Handle FSL ``output_type`` and version information.
 
     output type refers to the type of file fsl defaults to writing
     eg, NIFTI, NIFTI_GZ
+
+    Examples
+    --------
+
+    >>> from nipype.interfaces.fsl import Info
+    >>> Info.version()  # doctest: +SKIP
+    >>> Info.output_type()  # doctest: +SKIP
+
 
     """
 
@@ -54,28 +60,13 @@ class Info(object):
               'NIFTI_GZ': '.nii.gz',
               'NIFTI_PAIR_GZ': '.img.gz'}
 
+    if os.getenv('FSLDIR'):
+        version_file = os.path.join(
+            os.getenv('FSLDIR'), 'etc', 'fslversion')
+
     @staticmethod
-    def version():
-        """Check for fsl version on system
-
-        Parameters
-        ----------
-        None
-
-        Returns
-        -------
-        version : str
-           Version number as string or None if FSL not found
-
-        """
-        # find which fsl being used....and get version from
-        # /path/to/fsl/etc/fslversion
-        try:
-            basedir = os.environ['FSLDIR']
-        except KeyError:
-            return None
-        out = open('%s/etc/fslversion' % (basedir)).read()
-        return out.strip('\n')
+    def parse_version(raw_info):
+        return raw_info.splitlines()[0]
 
     @classmethod
     def output_type_to_ext(cls, output_type):
@@ -113,8 +104,8 @@ class Info(object):
         try:
             return os.environ['FSLOUTPUTTYPE']
         except KeyError:
-            LOGGER.warn('FSLOUTPUTTYPE environment variable is not set. '
-                        'Setting FSLOUTPUTTYPE=NIFTI')
+            IFLOGGER.warn('FSLOUTPUTTYPE environment variable is not set. '
+                          'Setting FSLOUTPUTTYPE=NIFTI')
             return 'NIFTI'
 
     @staticmethod

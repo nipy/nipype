@@ -248,7 +248,7 @@ class FitDwi(NiftyFitCommand):
     >>> fit_dwi.inputs.bvec_file = 'bvecs'
     >>> fit_dwi.inputs.bval_file = 'bvals'
     >>> fit_dwi.inputs.rgbmap_file = 'rgb.nii.gz'
-    >>> fit_dwi.cmdline  # doctest: +ALLOW_UNICODE
+    >>> fit_dwi.cmdline
     'fit_dwi -source dwi.nii.gz -bval bvals -bvec bvecs -dti \
 -error dwi_error.nii.gz -famap dwi_famap.nii.gz -mcmap dwi_mcmap.nii.gz \
 -mcout dwi_mcout.txt -mdmap dwi_mdmap.nii.gz -nodiff dwi_no_diff.nii.gz \
@@ -427,7 +427,7 @@ class DwiTool(NiftyFitCommand):
     >>> dwi_tool.inputs.mask_file = 'mask.nii.gz'
     >>> dwi_tool.inputs.b0_file = 'b0.nii.gz'
     >>> dwi_tool.inputs.rgbmap_file = 'rgb_map.nii.gz'
-    >>> dwi_tool.cmdline  # doctest: +ALLOW_UNICODE
+    >>> dwi_tool.cmdline
     'dwi_tool -source dwi.nii.gz -bval bvals -bvec bvecs -b0 b0.nii.gz \
 -mask mask.nii.gz -dti -famap dwi_famap.nii.gz -logdti2 dwi_logdti2.nii.gz \
 -mcmap dwi_mcmap.nii.gz -mdmap dwi_mdmap.nii.gz -rgbmap rgb_map.nii.gz \

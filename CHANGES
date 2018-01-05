@@ -1,6 +1,25 @@
-Upcoming release (0.14.0)
+Upcoming release (0.14.1)
 ================
 
+
+0.14.0 (November 29, 2017)
+==========================
+
+###### [Full changelog](https://github.com/nipy/nipype/milestone/13)
+
+* FIX+MAINT: Revision of the resource monitor (https://github.com/nipy/nipype/pull/2285)
+* FIX: MultiProc mishandling crashes (https://github.com/nipy/nipype/pull/2301)
+* MAINT: Revise use of `subprocess.Popen` (https://github.com/nipy/nipype/pull/2289)
+* ENH: Memorize version checks (https://github.com/nipy/nipype/pull/2274, https://github.com/nipy/nipype/pull/2295)
+
+
+0.14.0rc1 (November 21, 2017)
+-----------------------------
+
+* ENH: Generate Dockerfiles with neurodocker (https://github.com/nipy/nipype/pull/2202)
+* ENH: FLAIR options for recon-all (https://github.com/nipy/nipype/pull/2279)
+* ENH: Config option for setting maxtasksperchild when multiprocessing (https://github.com/nipy/nipype/pull/2284)
+* FIX: Testing maintainance and improvements (https://github.com/nipy/nipype/pull/2252)
 * ENH: Add elapsed_time and final metric_value to ants.Registration (https://github.com/nipy/nipype/pull/1985)
 * ENH: Improve terminal_output feature (https://github.com/nipy/nipype/pull/2209)
 * ENH: Simple interface to FSL std2imgcoords (https://github.com/nipy/nipype/pull/2209, prev #1398)
@@ -16,7 +35,7 @@ Upcoming release (0.14.0)
 * MAINT: Additional Windows support (https://github.com/nipy/nipype/pull/2085)
 * ENH: Output realignment matrices from TOPUP (https://github.com/nipy/nipype/pull/2084)
 * ENH: Additional AFNI interfaces: 3dZcat, 3dZeropad, 3dedge3, 3dDeconvolve, 3dQwarp, 1dCat, 3dNwarpApply, 3daxialize,
-       3dREMLfit, 3dUndump, 3dCM, 3dSynthesize + more (https://github.com/nipy/nipype/pull/2087, https://github.com/nipy/nipype/pull/2090, 
+       3dREMLfit, 3dUndump, 3dCM, 3dSynthesize + more (https://github.com/nipy/nipype/pull/2087, https://github.com/nipy/nipype/pull/2090,
        https://github.com/nipy/nipype/pull/2095, https://github.com/nipy/nipype/pull/2099, https://github.com/nipy/nipype/pull/2103,
        https://github.com/nipy/nipype/pull/2114, https://github.com/nipy/nipype/pull/2135, https://github.com/nipy/nipype/pull/2186,
        https://github.com/nipy/nipype/pull/2201, https://github.com/nipy/nipype/pull/2210)
