@@ -162,8 +162,8 @@ class TestCompCor():
             num_got_timepoints = len(components_data)
             assert num_got_timepoints == self.fake_data.shape[3]
             for index, timepoint in enumerate(components_data):
-                assert (len(timepoint) == ccinterface.inputs.num_components
-                        or len(timepoint) == self.fake_data.shape[3])
+                assert (len(timepoint) == ccinterface.inputs.num_components or
+                        len(timepoint) == self.fake_data.shape[3])
                 assert timepoint[:2] == expected_components[index]
         return ccresult
 

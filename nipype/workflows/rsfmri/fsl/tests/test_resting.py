@@ -83,8 +83,8 @@ class TestResting():
         with open(expected_file, 'r') as components_file:
             components_data = [line.split() for line in components_file]
             num_got_components = len(components_data)
-            assert (num_got_components == self.num_noise_components
-                    or num_got_components == self.fake_data.shape[3])
+            assert (num_got_components == self.num_noise_components or
+                    num_got_components == self.fake_data.shape[3])
             first_two = [row[:2] for row in components_data[1:]]
             assert first_two == [['-0.5172356654', '-0.6973053243'],
                                  ['0.2574722644', '0.1645270737'],

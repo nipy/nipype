@@ -209,8 +209,8 @@ connected.
                     if not destnode._check_inputs(dest):
                         not_found.append(['in', destnode.name, dest])
                 if not (hasattr(srcnode, '_interface') and
-                            ('.io' in str(srcnode._interface.__class__)
-                             or any(['.io' in str(val) for val in
+                            ('.io' in str(srcnode._interface.__class__) or
+                             any(['.io' in str(val) for val in
                                      srcnode._interface.__class__.__bases__]))):
                     if isinstance(source, tuple):
                         # handles the case that source is specified
