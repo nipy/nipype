@@ -751,6 +751,9 @@ class CopyInputSpec(AFNICommandInputSpec):
         argstr='%s',
         position=-1,
         name_source='in_file')
+    verbose = traits.Bool(
+        desc='print progress reports',
+        argstr='-verb')
 
 
 class Copy(AFNICommand):
@@ -1377,6 +1380,9 @@ class MaskToolInputSpec(AFNICommandInputSpec):
              'or using the labels in {R,L,A,P,I,S}.',
         argstr='-fill_dirs %s',
         requires=['fill_holes'])
+    verbose = traits.Int(
+        desc='specify verbosity level, for 0 to 3',
+        argstr='-verb %s')
 
 
 class MaskToolOutputSpec(TraitedSpec):
@@ -1985,6 +1991,9 @@ class TCatInputSpec(AFNICommandInputSpec):
              'dataset mean back in. Option -rlt++ adds overall mean of all '
              'dataset timeseries back in.',
         position=1)
+    verbose = traits.Bool(
+        desc='Print out some verbose output as the program',
+        argstr='-verb')
 
 
 class TCat(AFNICommand):
