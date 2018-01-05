@@ -296,8 +296,8 @@ def _write_detailed_dot(graph, dotfilename):
                 if outport not in outports:
                     outports.append(outport)
         outputstr = '{OUT'
-        for op in sorted(outports):
-            outputstr += '|<out%s> %s' % (replacefunk(op), op)
+        for ops in sorted(outports):
+            outputstr += '|<out%s> %s' % (replacefunk(ops), ops)
         outputstr += '}'
         srcpackage = ''
         if hasattr(n, '_interface'):
