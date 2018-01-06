@@ -20,4 +20,4 @@ from .lsf import LSFPlugin
 from .slurm import SLURMPlugin
 from .slurmgraph import SLURMGraphPlugin
 
-from . import  semaphore_singleton
+from . import semaphore_singleton
