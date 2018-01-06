@@ -14,7 +14,8 @@ Examples
 See the docstrings for the individual classes for 'working' examples.
 
 """
-from __future__ import print_function, division, unicode_literals, absolute_import
+from __future__ import (print_function, division, unicode_literals,
+                        absolute_import)
 from builtins import open, object, str
 
 import os

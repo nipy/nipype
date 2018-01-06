@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
-from __future__ import print_function, division, unicode_literals, absolute_import
+from __future__ import (print_function, division, unicode_literals,
+                        absolute_import)
 from ....pipeline import engine as pe
 from ....interfaces import freesurfer as fs
 from ....interfaces import utility as niu

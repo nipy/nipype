@@ -12,7 +12,8 @@ The I/O specifications corresponding to these base
 interfaces are found in the ``specs`` module.
 
 """
-from __future__ import print_function, division, unicode_literals, absolute_import
+from __future__ import (print_function, division, unicode_literals,
+                        absolute_import)
 
 from builtins import object, open, str, bytes
 

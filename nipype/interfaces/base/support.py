@@ -7,7 +7,8 @@ Miscellaneous tools to support Interface functionality
 ......................................................
 
 """
-from __future__ import print_function, division, unicode_literals, absolute_import
+from __future__ import (print_function, division, unicode_literals,
+                        absolute_import)
 from builtins import range, object, str
 
 import os

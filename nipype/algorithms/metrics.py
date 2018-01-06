@@ -12,7 +12,8 @@ measures to evaluate results from other processing units.
     >>> os.chdir(datadir)
 
 '''
-from __future__ import print_function, division, unicode_literals, absolute_import
+from __future__ import (print_function, division, unicode_literals,
+                        absolute_import)
 from builtins import zip, range
 
 import os

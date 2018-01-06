@@ -8,7 +8,8 @@ To use this code, run::
 
     python setup.py build_sphinx
 """
-from __future__ import print_function, division, unicode_literals, absolute_import
+from __future__ import (print_function, division, unicode_literals,
+                        absolute_import)
 from builtins import open, str
 
 # Standard library imports

@@ -11,7 +11,8 @@ Miscellaneous algorithms
     >>> os.chdir(datadir)
 
 '''
-from __future__ import print_function, division, unicode_literals, absolute_import
+from __future__ import (print_function, division, unicode_literals,
+                        absolute_import)
 from builtins import str, zip, range, open
 from future.utils import raise_from
 

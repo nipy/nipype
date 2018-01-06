@@ -14,7 +14,8 @@ The `Workflow` class provides core functionality for batch processing.
      os.chdir(datadir)
 
 """
-from __future__ import print_function, division, unicode_literals, absolute_import
+from __future__ import (print_function, division, unicode_literals,
+                        absolute_import)
 from builtins import range, object, str, bytes, open
 
 # Py2 compat: http://python-future.org/compatible_idioms.html#collections-counter-and-ordereddict

@@ -10,7 +10,8 @@
     >>> os.chdir(datadir)
 
 """
-from __future__ import print_function, division, unicode_literals, absolute_import
+from __future__ import (print_function, division, unicode_literals,
+                        absolute_import)
 
 import os.path as op
 from ..utils.filemanip import split_filename

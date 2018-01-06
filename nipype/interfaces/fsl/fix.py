@@ -54,7 +54,8 @@ fix_pipeline.write_graph()
 outgraph = fix_pipeline.run()
 
 """
-from __future__ import print_function, division, unicode_literals, absolute_import
+from __future__ import (print_function, division, unicode_literals,
+                        absolute_import)
 
 from ..base import (
     TraitedSpec,

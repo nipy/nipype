@@ -12,7 +12,8 @@ Miscellaneous algorithms for 2D contours and 3D triangularized meshes handling
     >>> os.chdir(datadir)
 
 """
-from __future__ import print_function, division, unicode_literals, absolute_import
+from __future__ import (print_function, division, unicode_literals,
+                        absolute_import)
 from builtins import zip, str, bytes
 
 import os.path as op

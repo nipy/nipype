@@ -13,7 +13,8 @@ better = fsl.Bet()
 docstring = docparse.get_doc(better.cmd, better.opt_map)
 
 """
-from __future__ import print_function, division, unicode_literals, absolute_import
+from __future__ import (print_function, division, unicode_literals,
+                        absolute_import)
 from builtins import str, open, bytes
 
 import subprocess

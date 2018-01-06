@@ -5,7 +5,8 @@
 Module to draw an html gantt chart from logfile produced by
 ``nipype.utils.profiler.log_nodes_cb()``
 """
-from __future__ import print_function, division, unicode_literals, absolute_import
+from __future__ import (print_function, division, unicode_literals,
+                        absolute_import)
 
 # Import packages
 import sys

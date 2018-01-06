@@ -6,7 +6,8 @@
 Support for child processes running as non-daemons based on
 http://stackoverflow.com/a/8963618/1183453
 """
-from __future__ import print_function, division, unicode_literals, absolute_import
+from __future__ import (print_function, division, unicode_literals,
+                        absolute_import)
 
 # Import packages
 from multiprocessing import Process, Pool, cpu_count, pool
