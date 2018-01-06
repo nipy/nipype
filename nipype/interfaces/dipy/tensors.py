@@ -67,7 +67,7 @@ class DTI(DipyDiffusionInterface):
         nb.save(img, out_file)
         IFLOGGER.info('DTI parameters image saved as %s', out_file)
 
-        #FA MD RD and AD
+        # FA MD RD and AD
         for metric in ["fa", "md", "rd", "ad"]:
             data = getattr(ten_fit,metric).astype("float32")
             out_name = self._gen_filename(metric)

@@ -150,7 +150,7 @@ class TestSignalExtraction():
                 for j, segment in enumerate(time):
                     npt.assert_almost_equal(segment, wanted[i][j], decimal=1)
 
-#dj: self doesnt have orig_dir at this point, not sure how to change it. should work without it
+# dj: self doesnt have orig_dir at this point, not sure how to change it. should work without it
 #    def teardown_class(self):
 #        self.orig_dir.chdir()
 

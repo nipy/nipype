@@ -1964,7 +1964,7 @@ class CANormalize(FSCommand):
 
 
 class CARegisterInputSpec(FSTraitedSpecOpenMP):
-    #required
+    # required
     in_file = File(argstr='%s', exists=True, mandatory=True,
                    position=-3, desc="The input volume for CARegister")
     out_file = File(argstr='%s',  position=-1,
@@ -2031,7 +2031,7 @@ class CARegister(FSCommandOpenMP):
 
 
 class CALabelInputSpec(FSTraitedSpecOpenMP):
-    #required
+    # required
     in_file = File(argstr="%s", position=-4, mandatory=True,
                    exists=True, desc="Input volume for CALabel")
     out_file = File(argstr="%s", position=-1, mandatory=True, exists=False,

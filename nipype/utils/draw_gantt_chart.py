@@ -423,7 +423,7 @@ def generate_gantt_chart(logfile, cores, minute_scale=10,
     # generate_gantt_chart('callback.log', 8)
     '''
 
-    #add the html header
+    # add the html header
     html_string = '''<!DOCTYPE html>
     <head>
         <style>
@@ -537,11 +537,11 @@ def generate_gantt_chart(logfile, cores, minute_scale=10,
         start_node['start'], last_node['finish'], runtime_threads_ts,
         space_between_minutes, minute_scale, '#03969D', resource_offset, 'Threads')
 
-    #finish html
+    # finish html
     html_string += '''
         </div>
     </body>'''
 
-    #save file
+    # save file
     with open(logfile + '.html', 'w' if PY3 else 'wb') as html_file:
         html_file.write(html_string)

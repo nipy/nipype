@@ -548,7 +548,7 @@ def test_nested_workflow_join(tmpdir):
 
     # Make the nested workflow
     def nested_wf(i, name='smallwf'):
-        #iterables with list of nums
+        # iterables with list of nums
         inputspec = pe.Node(IdentityInterface(fields=['n']), name='inputspec')
         inputspec.iterables = [('n', i)]
         # increment each iterable before joining
@@ -559,7 +559,7 @@ def test_nested_workflow_join(tmpdir):
                           joinsource='inputspec',
                           joinfield='n',
                           name='join')
-        #define and connect nested workflow
+        # define and connect nested workflow
         wf = pe.Workflow(name='wf_%d' % i[0])
         wf.connect(inputspec, 'n', pre_join, 'input1')
         wf.connect(pre_join, 'output1', join, 'n')

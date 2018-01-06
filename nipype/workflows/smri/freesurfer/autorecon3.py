@@ -542,7 +542,7 @@ def create_AutoRecon3(name="AutoRecon3", qcache=False, plugin_args=None,
                                             ('outputspec.sphere_reg', 'inputspec.sphere_reg')]),
                         (volume_mask, hemiwf2, [('out_ribbon', 'inputspec.ribbon')]),
                         ])
-        #End hemisphere2 workflow
+        # End hemisphere2 workflow
 
 
     # APARC to ASEG
