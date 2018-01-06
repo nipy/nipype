@@ -460,7 +460,7 @@ def test_mapnode_iterfield_check():
 @pytest.mark.parametrize("x_inp, f_exp", [
         (3, [6]), ([2, 3], [4, 6]), ((2, 3), [4, 6]),
         (range(3), [0, 2, 4]),
-         ("Str", ["StrStr"]), (["Str1", "Str2"], ["Str1Str1", "Str2Str2"])
+        ("Str", ["StrStr"]), (["Str1", "Str2"], ["Str1Str1", "Str2Str2"])
         ])
 def test_mapnode_iterfield_type(x_inp, f_exp):
     from nipype import MapNode, Function

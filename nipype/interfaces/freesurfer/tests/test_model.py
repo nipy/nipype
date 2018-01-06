@@ -48,7 +48,7 @@ def test_concatenate(tmpdir):
     wf.run()
     assert np.allclose(nb.load(tmpdir.join(
                                            'test_concatenate',
-                                            'concat', out).strpath).get_data(),
+                                           'concat', out).strpath).get_data(),
                        out_data)
 
     # Test a simple statistic

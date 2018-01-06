@@ -337,45 +337,45 @@ class BucketInputSpec(AFNICommandInputSpec):
         mandatory=True,
         argstr="%s",
         desc='List of tuples of input datasets and subbrick selection strings'
-            'as described in more detail in the following afni help string'
-            'Input dataset specified using one of these forms:'
-            '   \'prefix+view\', \'prefix+view.HEAD\', or \'prefix+view.BRIK\'.'
-            'You can also add a sub-brick selection list after the end of the'
-            'dataset name.  This allows only a subset of the sub-bricks to be'
-            'included into the output (by default, all of the input dataset'
-            'is copied into the output).  A sub-brick selection list looks like'
-            'one of the following forms:'
-            '  fred+orig[5]                     ==> use only sub-brick #5'
-            '  fred+orig[5,9,17]                ==> use #5, #9, and #17'
-            '  fred+orig[5..8]     or [5-8]     ==> use #5, #6, #7, and #8'
-            '  fred+orig[5..13(2)] or [5-13(2)] ==> use #5, #7, #9, #11, and #13'
-            'Sub-brick indexes start at 0.  You can use the character \'$\''
-            'to indicate the last sub-brick in a dataset; for example, you'
-            'can select every third sub-brick by using the selection list'
-            '  fred+orig[0..$(3)]'
-            'N.B.: The sub-bricks are output in the order specified, which may'
-            ' not be the order in the original datasets.  For example, using'
-            '  fred+orig[0..$(2),1..$(2)]'
-            ' will cause the sub-bricks in fred+orig to be output into the'
-            ' new dataset in an interleaved fashion.  Using'
-            '  fred+orig[$..0]'
-            ' will reverse the order of the sub-bricks in the output.'
-            'N.B.: Bucket datasets have multiple sub-bricks, but do NOT have'
-            ' a time dimension.  You can input sub-bricks from a 3D+time dataset'
-            ' into a bucket dataset.  You can use the \'3dinfo\' program to see'
-            ' how many sub-bricks a 3D+time or a bucket dataset contains.'
-            'N.B.: In non-bucket functional datasets (like the \'fico\' datasets'
-            ' output by FIM, or the \'fitt\' datasets output by 3dttest), sub-brick'
-            ' [0] is the \'intensity\' and sub-brick [1] is the statistical parameter'
-            ' used as a threshold.  Thus, to create a bucket dataset using the'
-            ' intensity from dataset A and the threshold from dataset B, and'
-            ' calling the output dataset C, you would type'
-            '    3dbucket -prefix C -fbuc \'A+orig[0]\' -fbuc \'B+orig[1]\''
-            'WARNING: using this program, it is possible to create a dataset that'
-            '         has different basic datum types for different sub-bricks'
-            '         (e.g., shorts for brick 0, floats for brick 1).'
-            '         Do NOT do this!  Very few AFNI programs will work correctly'
-            '         with such datasets!')
+             'as described in more detail in the following afni help string'
+             'Input dataset specified using one of these forms:'
+             '   \'prefix+view\', \'prefix+view.HEAD\', or \'prefix+view.BRIK\'.'
+             'You can also add a sub-brick selection list after the end of the'
+             'dataset name.  This allows only a subset of the sub-bricks to be'
+             'included into the output (by default, all of the input dataset'
+             'is copied into the output).  A sub-brick selection list looks like'
+             'one of the following forms:'
+             '  fred+orig[5]                     ==> use only sub-brick #5'
+             '  fred+orig[5,9,17]                ==> use #5, #9, and #17'
+             '  fred+orig[5..8]     or [5-8]     ==> use #5, #6, #7, and #8'
+             '  fred+orig[5..13(2)] or [5-13(2)] ==> use #5, #7, #9, #11, and #13'
+             'Sub-brick indexes start at 0.  You can use the character \'$\''
+             'to indicate the last sub-brick in a dataset; for example, you'
+             'can select every third sub-brick by using the selection list'
+             '  fred+orig[0..$(3)]'
+             'N.B.: The sub-bricks are output in the order specified, which may'
+             ' not be the order in the original datasets.  For example, using'
+             '  fred+orig[0..$(2),1..$(2)]'
+             ' will cause the sub-bricks in fred+orig to be output into the'
+             ' new dataset in an interleaved fashion.  Using'
+             '  fred+orig[$..0]'
+             ' will reverse the order of the sub-bricks in the output.'
+             'N.B.: Bucket datasets have multiple sub-bricks, but do NOT have'
+             ' a time dimension.  You can input sub-bricks from a 3D+time dataset'
+             ' into a bucket dataset.  You can use the \'3dinfo\' program to see'
+             ' how many sub-bricks a 3D+time or a bucket dataset contains.'
+             'N.B.: In non-bucket functional datasets (like the \'fico\' datasets'
+             ' output by FIM, or the \'fitt\' datasets output by 3dttest), sub-brick'
+             ' [0] is the \'intensity\' and sub-brick [1] is the statistical parameter'
+             ' used as a threshold.  Thus, to create a bucket dataset using the'
+             ' intensity from dataset A and the threshold from dataset B, and'
+             ' calling the output dataset C, you would type'
+             '    3dbucket -prefix C -fbuc \'A+orig[0]\' -fbuc \'B+orig[1]\''
+             'WARNING: using this program, it is possible to create a dataset that'
+             '         has different basic datum types for different sub-bricks'
+             '         (e.g., shorts for brick 0, floats for brick 1).'
+             '         Do NOT do this!  Very few AFNI programs will work correctly'
+             '         with such datasets!')
     out_file = File(
         argstr='-prefix %s',
         name_template='buck')
@@ -535,7 +535,7 @@ class CatInputSpec(AFNICommandInputSpec):
         argstr='-stack')
     sel = traits.Str(
         desc='Apply the same column/row selection string to all filenames '
-            'on the command line.',
+             'on the command line.',
         argstr='-sel %s')
     out_int = traits.Bool(
         desc='specifiy int data type for output',
@@ -598,9 +598,9 @@ class CatMatvecInputSpec(AFNICommandInputSpec):
         mandatory=True)
     matrix = traits.Bool(
         descr="indicates that the resulting matrix will"
-               "be written to outfile in the 'MATRIX(...)' format (FORM 3)."
-               "This feature could be used, with clever scripting, to input"
-               "a matrix directly on the command line to program 3dWarp.",
+              "be written to outfile in the 'MATRIX(...)' format (FORM 3)."
+              "This feature could be used, with clever scripting, to input"
+              "a matrix directly on the command line to program 3dWarp.",
         argstr="-MATRIX",
         xor=['oneline', 'fourxfour'])
     oneline = traits.Bool(
@@ -838,7 +838,7 @@ class DotInputSpec(AFNICommandInputSpec):
         argstr='-full')
     show_labels = traits.Bool(
         desc='Print sub-brick labels to help identify what is being correlated. This option is useful when'
-              'you have more than 2 sub-bricks at input.',
+             'you have more than 2 sub-bricks at input.',
         argstr='-show_labels')
     upper = traits.Bool(
         desc='Compute upper triangular matrix',
@@ -1551,7 +1551,7 @@ class NwarpApplyInputSpec(CommandLineInputSpec):
         name_source='in_file')
     short = traits.Bool(
         desc='Write output dataset using 16-bit short integers, rather than '
-            'the usual 32-bit floats.',
+             'the usual 32-bit floats.',
         argstr='-short')
     quiet = traits.Bool(
         desc='don\'t be verbose :(',
@@ -1727,7 +1727,7 @@ class OneDToolPyInputSpec(AFNIPythonCommandInputSpec):
     show_censor_count = traits.Bool(
         desc='display the total number of censored TRs  Note : if input is a valid xmat.1D dataset,'
              'then the count will come from the header.  Otherwise the input is assumed to be a binary censor'
-              'file, and zeros are simply counted.',
+             'file, and zeros are simply counted.',
         argstr="-show_censor_count")
     censor_motion = traits.Tuple(
         (traits.Float(),File()),
