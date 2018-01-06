@@ -48,9 +48,9 @@ class PETPVCInputSpec(CommandLineInputSpec):
     fwhm_x    = traits.Float(desc="The full-width at half maximum in mm along x-axis", mandatory=True, argstr="-x %.4f")
     fwhm_y    = traits.Float(desc="The full-width at half maximum in mm along y-axis", mandatory=True, argstr="-y %.4f")
     fwhm_z    = traits.Float(desc="The full-width at half maximum in mm along z-axis", mandatory=True, argstr="-z %.4f")
-    debug     = traits.Bool (desc="Prints debug information", usedefault=True, default_value=False, argstr="-d")
-    n_iter    = traits.Int  (desc="Number of iterations", default_value=10, argstr="-n %d")
-    n_deconv  = traits.Int  (desc="Number of deconvolution iterations", default_value=10, argstr="-k %d")
+    debug     = traits.Bool(desc="Prints debug information", usedefault=True, default_value=False, argstr="-d")
+    n_iter    = traits.Int(desc="Number of iterations", default_value=10, argstr="-n %d")
+    n_deconv  = traits.Int(desc="Number of deconvolution iterations", default_value=10, argstr="-k %d")
     alpha     = traits.Float(desc="Alpha value", default_value=1.5, argstr="-a %.4f")
     stop_crit = traits.Float(desc="Stopping criterion", default_value=0.01, argstr="-a %.4f")
 

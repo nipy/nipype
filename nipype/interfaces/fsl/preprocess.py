@@ -1023,7 +1023,7 @@ class FNIRT(FSLCommand):
         try:
             fid = open(configfile, 'w+')
         except IOError:
-            print ('unable to create config_file %s' % (configfile))
+            print('unable to create config_file %s' % (configfile))
 
         for item in list(self.inputs.get().items()):
             fid.write('%s\n' % (item))
