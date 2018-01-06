@@ -406,7 +406,6 @@ def create_parallelfeat_preproc(name='featpreproc', highpass=True):
             featpreproc.connect(meanfunc4, 'out_file', addmean, 'operand_file')
             featpreproc.connect(addmean, 'out_file', outputnode, 'highpassed_files')
 
-
     """
     Generate a mean functional image from the first run
     """

@@ -11,6 +11,7 @@ import mock
 
 from nipype.pipeline.plugins.tools import report_crash
 
+
 def test_report_crash():
     with mock.patch('pickle.dump', mock.MagicMock()) as mock_pickle_dump:
         with mock.patch('nipype.pipeline.plugins.tools.format_exception', mock.MagicMock()):  # see iss 1517
@@ -30,6 +31,7 @@ def test_report_crash():
 
             assert expected_crashfile.match(actual_crashfile).group() == actual_crashfile
             assert mock_pickle_dump.call_count == 1
+
 
 '''
 Can use the following code to test that a mapnode crash continues successfully

@@ -94,6 +94,7 @@ def test_synthesizeflash(create_files_in_directory):
     assert syn2.cmdline == ('mri_synthesize 25.00 20.00 5.000 %s %s %s'
                             % (filelist[0], filelist[1], os.path.join(outdir, 'synth-flash_20.mgz')))
 
+
 @pytest.mark.skipif(freesurfer.no_freesurfer(), reason="freesurfer is not installed")
 def test_mandatory_outvol(create_files_in_directory):
     filelist, outdir = create_files_in_directory
@@ -128,6 +129,7 @@ def test_mandatory_outvol(create_files_in_directory):
     assert mni2.cmdline == ('mri_nu_correct.mni --i %s --n 4 --o bias_corrected_output'
                              % filelist[0])
 
+
 @pytest.mark.skipif(freesurfer.no_freesurfer(), reason="freesurfer is not installed")
 def test_bbregister(create_files_in_directory):
     filelist, outdir = create_files_in_directory
@@ -161,6 +163,7 @@ def test_bbregister(create_files_in_directory):
                            '--reg {base}_bbreg_fsaverage.dat '
                            '--mov {full} --s fsaverage'.format(
                             full=filelist[0], base=base))
+
 
 def test_FSVersion():
     """Check that FSVersion is a string that can be compared with LooseVersion

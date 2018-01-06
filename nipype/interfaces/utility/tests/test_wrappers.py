@@ -15,6 +15,7 @@ def concat_sort(in_arrays):
     return np.sort(all_vals)
 """
 
+
 def test_function(tmpdir):
     tmpdir.chdir()
 

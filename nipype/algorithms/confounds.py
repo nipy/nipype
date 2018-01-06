@@ -65,7 +65,6 @@ class ComputeDVARSInputSpec(BaseInterfaceInputSpec):
                                    'normalization altogether.')
 
 
-
 class ComputeDVARSOutputSpec(TraitedSpec):
     out_std = File(exists=True, desc='output text file')
     out_nstd = File(exists=True, desc='output text file')

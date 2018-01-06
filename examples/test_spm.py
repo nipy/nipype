@@ -13,6 +13,7 @@ def _get_first(inlist):
         return inlist[0]
     return inlist
 
+
 def test_spm(name='test_spm_3d'):
     """
     A simple workflow to test SPM's installation. By default will split the 4D volume in
@@ -31,7 +32,6 @@ def test_spm(name='test_spm_3d'):
     realign_write = pe.Node(spm.Realign(jobtype='write'), name='realign_write')
     realign_estwrite = pe.Node(spm.Realign(jobtype='estwrite'), name='realign_estwrite')
     smooth = pe.Node(spm.Smooth(fwhm=[6, 6, 6]), name='smooth')
-
 
     if name == 'test_spm_3d':
         split = pe.Node(fsl.Split(dimension="t", output_type="NIFTI"), name="split")

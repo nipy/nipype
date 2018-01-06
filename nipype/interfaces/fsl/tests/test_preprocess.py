@@ -512,6 +512,7 @@ def test_fnirt(setup_flirt):
             assert fnirt._list_outputs()['out_intensitymap_file'] == [
                 intmap_image, intmap_txt]
 
+
 @pytest.mark.skipif(no_fsl(), reason="fsl is not installed")
 def test_applywarp(setup_flirt):
     tmpdir, infile, reffile = setup_flirt

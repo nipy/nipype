@@ -148,6 +148,7 @@ from builtins import str, bytes
 PY2 = sys.version_info[0] == 2
 PY3 = sys.version_info[0] == 3
 
+
 def _mkdirp(folder):
     """
     Equivalent to bash's mkdir -p
@@ -173,6 +174,7 @@ def wf_directive(name, arguments, options, content, lineno,
         raise ImportError('\n'.join(missing_imports))
 wf_directive.__doc__ = __doc__
 
+
 def _option_boolean(arg):
     if not arg or not arg.strip():
         # no argument given, assume used as a flag
@@ -184,8 +186,10 @@ def _option_boolean(arg):
     else:
         raise ValueError('"%s" unknown boolean' % arg)
 
+
 def _option_graph2use(arg):
     return directives.choice(arg, ('hierarchical', 'colored', 'flat', 'orig', 'exec'))
+
 
 def _option_context(arg):
     if arg in [None, 'reset', 'close-figs']:
@@ -383,6 +387,7 @@ Exception occurred rendering plot.
 # :context: option
 wf_context = dict()
 
+
 class ImageFile(object):
     def __init__(self, basename, dirname):
         self.basename = basename
@@ -479,6 +484,7 @@ def run_code(code, code_path, ns=None, function_name=None):
         sys.path[:] = old_sys_path
         sys.stdout = stdout
     return ns
+
 
 def get_wf_formats(config):
     default_dpi = {'png': 80, 'hires.png': 200, 'pdf': 200}

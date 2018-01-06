@@ -25,7 +25,6 @@ def test_identitynode_removal(tmpdir):
         import numpy as np
         return (np.array(arg1) + arg2 + arg3).tolist()
 
-
     wf = pe.Workflow(name="testidentity", base_dir=tmpdir.strpath)
 
     n1 = pe.Node(niu.IdentityInterface(fields=['a', 'b']), name='src', base_dir=tmpdir.strpath)
@@ -193,7 +192,6 @@ def test_outputs_removal_wf(tmpdir):
     def test_function3(arg):
         import os
         return arg
-
 
     for plugin in ('Linear',):  # , 'MultiProc'):
         n1 = pe.Node(niu.Function(input_names=['arg1'],

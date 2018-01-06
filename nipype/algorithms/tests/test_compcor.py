@@ -37,7 +37,6 @@ class TestCompCor():
 
         self.mask_files = [mask1, mask2]
 
-
     def test_compcor(self):
         expected_components = [['-0.1989607212', '-0.5753813646'],
                                ['0.5692369697', '0.5674945949'],
@@ -55,7 +54,6 @@ class TestCompCor():
                              mask_index=0,
                              components_file='acc_components_file'),
                              expected_components, 'aCompCor')
-
 
     def test_tcompcor(self):
         ccinterface = TCompCor(realigned_file=self.realigned_file,
@@ -168,7 +166,6 @@ class TestCompCor():
                         len(timepoint) == self.fake_data.shape[3])
                 assert timepoint[:2] == expected_components[index]
         return ccresult
-
 
     @staticmethod
     def fake_noise_fun(i, j, l, m):

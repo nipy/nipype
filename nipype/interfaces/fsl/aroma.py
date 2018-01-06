@@ -60,6 +60,7 @@ class ICA_AROMAInputSpec(CommandLineInputSpec):
                                '-aggr: aggressive denoising, i.e. full component regression\n'
                                '-both: both aggressive and non-aggressive denoising (two outputs)')
 
+
 class ICA_AROMAOutputSpec(TraitedSpec):
     aggr_denoised_file = File(exists=True,
                               desc='if generated: aggressively denoised volume')
@@ -69,6 +70,7 @@ class ICA_AROMAOutputSpec(TraitedSpec):
                         desc='directory contains (in addition to the denoised files): '
                         'melodic.ica + classified_motion_components + '
                         'classification_overview + feature_scores + melodic_ic_mni)')
+
 
 class ICA_AROMA(CommandLine):
     """

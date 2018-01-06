@@ -5,10 +5,12 @@ from ....pipeline import engine as pe
 from ....interfaces.freesurfer import *
 from .utils import copy_file
 
+
 def copy_ltas(in_file, subjects_dir, subject_id, long_template):
     import os
     out_file = copy_file(in_file, os.path.basename(in_file).replace(long_template, subject_id))
     return out_file
+
 
 def create_AutoRecon2(name="AutoRecon2", longitudinal=False,
                       plugin_args=None, fsvernum=5.3,
@@ -48,7 +50,6 @@ def create_AutoRecon2(name="AutoRecon2", longitudinal=False,
         # TODO: Work on longitudinal workflow
         inputspec.inputs.timepoints = config['timepoints']
 
-
     if fsvernum >= 6:
         # NU Intensity Correction
         """
@@ -81,7 +82,6 @@ def create_AutoRecon2(name="AutoRecon2", longitudinal=False,
                          [('transform', 'transform')])
                         ])
 
-
     # EM Registration
     """
     Computes the transform to align the mri/nu.mgz volume to the default GCA
@@ -110,7 +110,6 @@ def create_AutoRecon2(name="AutoRecon2", longitudinal=False,
         else:
             ar2_wf.connect([(inputspec, align_transform, [('nu', 'in_file')])])
 
-
     # CA Normalize
     """
     Further normalization, based on GCA model. The normalization is based on an
@@ -138,7 +137,6 @@ def create_AutoRecon2(name="AutoRecon2", longitudinal=False,
         ar2_wf.connect([(add_to_header_nu, ca_normalize, [('out_file', 'in_file')])])
     else:
         ar2_wf.connect([(inputspec, ca_normalize, [('nu', 'in_file')])])
-
 
     # CA Register
     # Computes a nonlinear transform to align with GCA atlas.
@@ -207,7 +205,6 @@ def create_AutoRecon2(name="AutoRecon2", longitudinal=False,
 
         ar2_wf.connect([(inputspec, merge_norms, [('alltps_norms', 'in1')]),
                         (ca_normalize, merge_norms, [('out_file', 'in2')])])
-
 
         fuse_segmentations = pe.Node(FuseSegmentations(), name="Fuse_Segmentations")
 
@@ -334,7 +331,6 @@ def create_AutoRecon2(name="AutoRecon2", longitudinal=False,
                     (ca_label, fill, [('out_file', 'segmentation')]),
                     ])
 
-
     ar2_lh = pe.Workflow("AutoRecon2_Left")
     ar2_rh = pe.Workflow("AutoRecon2_Right")
 
@@ -365,13 +361,11 @@ def create_AutoRecon2(name="AutoRecon2", longitudinal=False,
                                           name='Copy_Template_White')
             copy_template_white.inputs.out_file = '{0}.orig'.format(hemisphere)
 
-
             copy_template_orig_white = pe.Node(Function(['in_file', 'out_file'],
                                                    ['out_file'],
                                                    copy_file),
                                           name='Copy_Template_Orig_White')
             copy_template_orig_white.inputs.out_file = '{0}.orig_white'.format(hemisphere)
-
 
             copy_template_orig_pial = pe.Node(Function(['in_file', 'out_file'],
                                                    ['out_file'],
@@ -421,12 +415,10 @@ def create_AutoRecon2(name="AutoRecon2", longitudinal=False,
             tesselate.inputs.label_value = label
             hemi_wf.connect([(pretess2, tesselate, [('out_file', 'in_file')])])
 
-
             extract_main_component = pe.Node(
                 ExtractMainComponent(), name="Extract_Main_Component")
             extract_main_component.inputs.out_file = "{0}.orig.nofix".format(hemisphere)
             hemi_wf.connect([(tesselate, extract_main_component, [('surface', 'in_file')])])
-
 
             copy_orig = pe.Node(Function(['in_file', 'out_file'],
                                          ['out_file'],
@@ -515,7 +507,6 @@ def create_AutoRecon2(name="AutoRecon2", longitudinal=False,
                              (hemi_inputspec, fix_topology, [('wm', 'in_wm'),
                                                              ('brain', 'in_brain')])])
 
-
             # TODO: halt workflow for bad euler number
             euler_number = pe.Node(EulerNumber(), name="Euler_Number")
 
@@ -545,7 +536,6 @@ def create_AutoRecon2(name="AutoRecon2", longitudinal=False,
                                                               ('filled', 'in_filled'),
                                                               ('wm', 'in_wm')])])
             # end of non-longitudinal specific steps
-
 
         # Orig Surface Smoothing 2
         """
@@ -667,8 +657,6 @@ def create_AutoRecon2(name="AutoRecon2", longitudinal=False,
                                                         ('out_gauss', 'inflated_K')]),
                          (curvature_stats, hemi_outputspec, [('out_file', 'curv_stats')])])
 
-
-
     outputs = ['nu',
                'tal_lta',
                'norm',
@@ -699,7 +687,6 @@ def create_AutoRecon2(name="AutoRecon2", longitudinal=False,
         # add to outputspec to perserve datasinking
         ar2_wf.connect([(inputspec, outputspec, [('nu', 'nu')])])
 
-
     ar2_wf.connect([(align_transform, outputspec, [('out_file', 'tal_lta')]),
                     (ca_normalize, outputspec, [('out_file', 'norm')]),
                     (ca_normalize, outputspec, [('control_points', 'ctrl_pts')]),
@@ -723,6 +710,5 @@ def create_AutoRecon2(name="AutoRecon2", longitudinal=False,
         for field in hemi_outputs:
             output = "{0}_".format(hemi) + field
             ar2_wf.connect([(hemi_wf, outputspec, [("outputspec." + field, output)])])
-
 
     return ar2_wf, outputs

@@ -18,6 +18,7 @@ from distutils.version import LooseVersion
 from textwrap import dedent
 import numpy as np
 
+
 def human_order_sorted(l):
     """Sorts string in human order (i.e. 'stat10' will go after 'stat2')"""
     def atoi(text):

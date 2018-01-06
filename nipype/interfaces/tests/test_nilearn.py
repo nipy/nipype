@@ -19,6 +19,7 @@ try:
 except ImportError:
     pass
 
+
 @pytest.mark.skipif(no_nilearn, reason="the nilearn library is not available")
 class TestSignalExtraction():
 
@@ -38,7 +39,6 @@ class TestSignalExtraction():
         utils.save_toy_nii(self.fake_fmri_data, self.filenames['in_file'])
         utils.save_toy_nii(self.fake_label_data, self.filenames['label_files'])
 
-
     def test_signal_extract_no_shared(self):
         # run
         iface.SignalExtraction(in_file=self.filenames['in_file'],
@@ -47,7 +47,6 @@ class TestSignalExtraction():
                                incl_shared_variance=False).run()
         # assert
         self.assert_expected_output(self.labels, self.base_wanted)
-
 
     def test_signal_extr_bad_label_list(self):
         # run
@@ -105,7 +104,6 @@ class TestSignalExtraction():
         # run & assert
         self._test_4d_label(wanted, self.fake_4d_label_data)
 
-
     def test_signal_extr_traits_valid(self):
         ''' Test a node using the SignalExtraction interface.
         Unlike interface.run(), node.run() checks the traits
@@ -154,7 +152,6 @@ class TestSignalExtraction():
 #    def teardown_class(self):
 #        self.orig_dir.chdir()
 
-
     fake_fmri_data = np.array([[[[2, -1, 4, -2, 3],
                                  [4, -2, -5, -1, 0]],
 
@@ -200,7 +197,6 @@ class TestSignalExtraction():
 
                                     [[0.3, 0.3, 0.4],
                                      [0.3, 0.4, 0.3]]]])
-
 
     fourd_wanted = [[-5.0652173913, -5.44565217391, 5.50543478261],
                     [-7.02173913043, 11.1847826087, -4.33152173913],

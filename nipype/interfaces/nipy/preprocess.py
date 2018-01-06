@@ -35,7 +35,6 @@ else:
     nipy_version = nipy.__version__
 
 
-
 class ComputeMaskInputSpec(BaseInterfaceInputSpec):
     mean_volume = File(exists=True, mandatory=True,
                        desc="mean EPI image, used to compute the threshold for the mask")

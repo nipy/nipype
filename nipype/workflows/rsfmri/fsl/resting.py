@@ -9,6 +9,7 @@ from ....interfaces import utility as util     # utility
 from ....pipeline import engine as pe          # pypeline engine
 from ....algorithms import confounds
 
+
 def select_volume(filename, which):
     """Return the middle index of a file
     """

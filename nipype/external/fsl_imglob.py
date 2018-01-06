@@ -68,6 +68,7 @@ import sys
 import glob
 from builtins import range
 
+
 def usage():
     print("Usage: $0 [-extension/extensions] <list of names>")
     print("       -extension for one image with full extension")

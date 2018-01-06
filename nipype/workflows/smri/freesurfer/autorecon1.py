@@ -35,6 +35,7 @@ def checkT1s(T1_files, cw256=False):
     resample_type = 'cubic' if len(T1_files) > 1 else 'interpolate'
     return T1_files, cw256, resample_type, origvol_names
 
+
 def create_AutoRecon1(name="AutoRecon1", longitudinal=False, distance=None,
                       custom_atlas=None, plugin_args=None, shrink=None, stop=None,
                       fsvernum=5.3):
@@ -68,7 +69,6 @@ def create_AutoRecon1(name="AutoRecon1", longitudinal=False, distance=None,
                                 name="Check_T1s")
         ar1_wf.connect([(inputspec, verify_inputs, [('T1_files', 'T1_files'),
                                                     ('cw256', 'cw256')])])
-
 
         # T1 image preparation
         # For all T1's mri_convert ${InputVol} ${out_file}
@@ -156,7 +156,6 @@ def create_AutoRecon1(name="AutoRecon1", longitudinal=False, distance=None,
                                      name="Concatenate_ltas")
         ar1_wf.connect([(copy_ltas, concatenate_lta, [('out_file', 'in_file')]),
                         (inputspec, concatenate_lta, [('subj_to_template_lta', 'subj_to_base')])])
-
 
     # Motion Correction
     """
@@ -278,7 +277,6 @@ def create_AutoRecon1(name="AutoRecon1", longitudinal=False, distance=None,
 
     ar1_wf.connect([(talairach_avi, copy_transform, [('out_file', 'in_file')])])
 
-
     # In recon-all the talairach.xfm is added to orig.mgz, even though
     # it does not exist yet. This is a compromise to keep from
     # having to change the time stamp of the orig volume after talairaching.
@@ -301,8 +299,6 @@ def create_AutoRecon1(name="AutoRecon1", longitudinal=False, distance=None,
 
     ar1_wf.connect([(bias_correction, add_xform_to_orig_nu, [('out_file', 'in_file')]),
                     (copy_transform, add_xform_to_orig_nu, [('out_file', 'transform')])])
-
-
 
     # check the alignment of the talairach
     # TODO: Figure out how to read output from this node.
@@ -338,7 +334,6 @@ def create_AutoRecon1(name="AutoRecon1", longitudinal=False, distance=None,
         tal_qc = pe.Node(TalairachQC(), name="Detect_Aligment_Failures")
         ar1_wf.connect([(awk_logfile, tal_qc, [('log_file', 'log_file')])])
 
-
     if fsvernum < 6:
         # intensity correction is performed before normalization
         intensity_correction = pe.Node(
@@ -348,7 +343,6 @@ def create_AutoRecon1(name="AutoRecon1", longitudinal=False, distance=None,
         ar1_wf.connect([(add_xform_to_orig, intensity_correction, [('out_file', 'in_file')]),
                         (copy_transform, intensity_correction, [('out_file', 'transform')])])
 
-
         add_to_header_nu = pe.Node(AddXFormToHeader(), name="Add_XForm_to_NU")
         add_to_header_nu.inputs.copy_name = True
         add_to_header_nu.inputs.out_file = 'nu.mgz'
@@ -357,7 +351,6 @@ def create_AutoRecon1(name="AutoRecon1", longitudinal=False, distance=None,
                         (copy_transform, add_to_header_nu,
                          [('out_file', 'transform')])
                         ])
-
 
     # Intensity Normalization
     # Performs intensity normalization of the orig volume and places the result in mri/T1.mgz.
@@ -469,7 +462,6 @@ def create_AutoRecon1(name="AutoRecon1", longitudinal=False, distance=None,
                     (brainmask, outputspec, [('out_file', 'brainmask_auto')]),
                     (copy_brainmask, outputspec, [('out_file', 'brainmask')]),
                     ])
-
 
     if not longitudinal:
         ar1_wf.connect([(mri_em_register, outputspec, [('out_file', 'talskull')]),

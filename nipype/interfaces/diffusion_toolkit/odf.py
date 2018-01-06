@@ -22,6 +22,7 @@ from ..base import (TraitedSpec, File, traits, CommandLine,
 
 __docformat__ = 'restructuredtext'
 
+
 class HARDIMatInputSpec(CommandLineInputSpec):
     bvecs = File(exists=True, desc='b vectors file',
                  argstr='%s', position=1, mandatory=True)

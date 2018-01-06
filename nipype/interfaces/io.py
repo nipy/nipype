@@ -60,6 +60,7 @@ except:
 
 iflogger = logging.getLogger('interface')
 
+
 def copytree(src, dst, use_hardlink=False):
     """Recursively copy a directory tree using
     nipype.utils.filemanip.copyfile()

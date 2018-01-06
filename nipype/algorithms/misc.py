@@ -260,6 +260,7 @@ class CreateNifti(BaseInterface):
         outputs['nifti_file'] = self._gen_output_file_name()
         return outputs
 
+
 class GunzipInputSpec(BaseInterfaceInputSpec):
     in_file = File(exists=True, mandatory=True)
 
@@ -1381,9 +1382,11 @@ class CalculateMedianInputSpec(BaseInterfaceInputSpec):
     median_per_file = traits.Bool(False, usedefault=True,
       desc="Calculate a median file for each Nifti")
 
+
 class CalculateMedianOutputSpec(TraitedSpec):
     median_files = OutputMultiPath(File(exists=True),
       desc="One or more median images")
+
 
 class CalculateMedian(BaseInterface):
     """
@@ -1502,6 +1505,7 @@ class FuzzyOverlap(nam.FuzzyOverlap):
         warnings.warn(("This interface has been deprecated since 0.10.0,"
                        " please use nipype.algorithms.metrics.FuzzyOverlap"),
                       DeprecationWarning)
+
 
 class TSNR(confounds.TSNR):
     """

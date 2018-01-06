@@ -29,6 +29,7 @@ from .base import (
     AFNICommandBase, AFNICommand, AFNICommandInputSpec, AFNICommandOutputSpec,
     AFNIPythonCommandInputSpec, AFNIPythonCommand)
 
+
 class ABoverlapInputSpec(AFNICommandInputSpec):
     in_file_a = File(
         desc='input file A',
@@ -325,6 +326,7 @@ class BrickStat(AFNICommandBase):
 
         return outputs
 
+
 class BucketInputSpec(AFNICommandInputSpec):
     in_file = traits.List(
         traits.Tuple(
@@ -409,6 +411,7 @@ class Bucket(AFNICommand):
         if name == 'in_file':
             return spec.argstr % (' '.join([i[0] + "'" + i[1] + "'" for i in value]))
         return super(Bucket, self)._format_arg(name, spec, value)
+
 
 class CalcInputSpec(AFNICommandInputSpec):
     in_file_a = File(
@@ -584,6 +587,7 @@ class Cat(AFNICommand):
     input_spec = CatInputSpec
     output_spec = AFNICommandOutputSpec
 
+
 class CatMatvecInputSpec(AFNICommandInputSpec):
     in_file = traits.List(
         traits.Tuple(traits.Str(), traits.Str()),
@@ -613,6 +617,7 @@ class CatMatvecInputSpec(AFNICommandInputSpec):
               "This option does not work with -MATRIX or -ONELINE",
         argstr="-4x4",
         xor=['matrix','oneline'])
+
 
 class CatMatvec(AFNICommand):
     """Catenates 3D rotation+shift matrix+vector transformations.
@@ -795,6 +800,7 @@ class Copy(AFNICommand):
     input_spec = CopyInputSpec
     output_spec = AFNICommandOutputSpec
 
+
 class DotInputSpec(AFNICommandInputSpec):
     in_files = traits.List(
         (File()),
@@ -844,6 +850,7 @@ class DotInputSpec(AFNICommandInputSpec):
         desc='Compute upper triangular matrix',
         argstr='-upper')
 
+
 class Dot(AFNICommand):
     """Correlation coefficient between sub-brick pairs.
     All datasets in in_files list will be concatenated.
@@ -865,6 +872,7 @@ class Dot(AFNICommand):
     _cmd = '3dDot'
     input_spec = DotInputSpec
     output_spec = AFNICommandOutputSpec
+
 
 class Edge3InputSpec(AFNICommandInputSpec):
     in_file = File(
@@ -1753,8 +1761,10 @@ class OneDToolPyInputSpec(AFNIPythonCommandInputSpec):
         desc="restrict -show_trs_[un]censored to the given 1-based run",
         argstr="-show_trs_run %d")
 
+
 class OneDToolPyOutputSpec(AFNICommandOutputSpec):
     out_file = File(desc='output of 1D_tool.py')
+
 
 class OneDToolPy(AFNIPythonCommand):
     """This program is meant to read/manipulate/write/diagnose 1D datasets.
@@ -1786,6 +1796,7 @@ class OneDToolPy(AFNIPythonCommand):
         if isdefined(self.inputs.censor_motion):
             outputs['out_file'] = os.path.join(os.getcwd(), self.inputs.censor_motion[1])
         return outputs
+
 
 class RefitInputSpec(CommandLineInputSpec):
     in_file = File(
@@ -2013,6 +2024,7 @@ class TCat(AFNICommand):
     _cmd = '3dTcat'
     input_spec = TCatInputSpec
     output_spec = AFNICommandOutputSpec
+
 
 class TCatSBInputSpec(AFNICommandInputSpec):
     in_files = traits.List(
@@ -2498,6 +2510,7 @@ class GCOR(CommandLine):
     def _list_outputs(self):
         return {'out': getattr(self, '_gcor')}
 
+
 class AxializeInputSpec(AFNICommandInputSpec):
     in_file = File(
         desc='input file to 3daxialize',
@@ -2597,6 +2610,7 @@ class ZcatInputSpec(AFNICommandInputSpec):
         argstr='-nscale',
         xor=['fscale'])
 
+
 class Zcat(AFNICommand):
     """Copies an image of one type to an image of the same
     or different type using 3dZcat command
@@ -2619,6 +2633,7 @@ class Zcat(AFNICommand):
     _cmd = '3dZcat'
     input_spec = ZcatInputSpec
     output_spec = AFNICommandOutputSpec
+
 
 class ZeropadInputSpec(AFNICommandInputSpec):
     in_files = File(
@@ -2693,6 +2708,7 @@ class ZeropadInputSpec(AFNICommandInputSpec):
                          argstr='-master %s',
                          xor=['I', 'S', 'A', 'P', 'L', 'R', 'z',
                               'RL', 'AP', 'IS', 'mm'])
+
 
 class Zeropad(AFNICommand):
     """Adds planes of zeros to a dataset (i.e., pads it out).

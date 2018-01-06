@@ -61,6 +61,8 @@ Example of how to inline functions in connect()
 -----------------------------------------------
 
 """
+
+
 def _template_path(in_data):
     import os.path as op
     return op.abspath(op.join(in_data, 'nipype-tutorial/data/T1.nii'))

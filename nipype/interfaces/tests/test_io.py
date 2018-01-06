@@ -64,6 +64,7 @@ templates1 = {"model": "interfaces/{package}/model.py",
 templates2 = {"converter": "interfaces/dcm{to!s}nii.py"}
 templates3 = {"model": "interfaces/{package.name}/model.py"}
 
+
 @pytest.mark.parametrize("SF_args, inputs_att, expected", [
         ({"templates":templates1}, {"package":"fsl"},
          {"infields":["package"], "outfields":["model", "preprocess"], "run_output":{"model":op.join(op.dirname(nipype.__file__),"interfaces/fsl/model.py"), "preprocess":op.join(op.dirname(nipype.__file__),"interfaces/fsl/preprocess.py")}, "node_output":["model", "preprocess"]}),
@@ -335,6 +336,7 @@ def test_datasink_substitutions(tmpdir):
               x in glob.glob(os.path.join(str(outdir), '*'))]) \
               == ['!-yz-b.n', 'ABABAB.n']  # so we got re used 2nd and both patterns
 
+
 @pytest.fixture()
 def _temp_analyze_files(tmpdir):
     """Generate temporary analyze file pair."""
@@ -355,6 +357,7 @@ def test_datasink_copydir_1(_temp_analyze_files, tmpdir):
     ds.run()
     sep = os.path.sep
     assert tmpdir.join('basedir', pth.split(sep)[-1], fname).check()
+
 
 def test_datasink_copydir_2(_temp_analyze_files, tmpdir):
     orig_img, orig_hdr = _temp_analyze_files

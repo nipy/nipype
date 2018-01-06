@@ -23,6 +23,7 @@ from ..base import (TraitedSpec, isdefined, File, Directory,
                     InputMultiPath, OutputMultiPath, traits)
 from .base import (FSLCommand, FSLCommandInputSpec, Info)
 
+
 class DTIFitInputSpec(FSLCommandInputSpec):
     dwi = File(exists=True, desc='diffusion weighted image data file',
                argstr='-k %s', position=0, mandatory=True)

@@ -7,6 +7,7 @@ from ....interfaces.freesurfer import Label2Label, Label2Annot, ParcellationStat
 from ....interfaces.io import DataGrabber
 from ....interfaces.utility import Merge
 
+
 def create_ba_maps_wf(name="Brodmann_Area_Maps", th3=True, exvivo=True,
                       entorhinal=True):
     # Brodmann Area Maps (BA Maps) and Hinds V1 Atlas
@@ -150,7 +151,6 @@ def create_ba_maps_wf(name="Brodmann_Area_Maps", th3=True, exvivo=True,
                                (node, outputspec, [('out_file',
                                                     '{0}_BAMaps_labels'.format(hemisphere))])])
 
-
             ba_WF.connect([(inputspec, node, [('{0}_sphere_reg'.format(hemisphere),
                                                'sphere_reg'),
                                               ('{0}_white'.format(hemisphere), 'white'),
@@ -173,6 +173,5 @@ def create_ba_maps_wf(name="Brodmann_Area_Maps", th3=True, exvivo=True,
                                                     ('aseg', 'aseg'),
                                                     ('wm', 'wm'),
                                                     ('ribbon', 'ribbon')])])
-
 
     return ba_WF, ba_outputs

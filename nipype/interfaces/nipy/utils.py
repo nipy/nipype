@@ -26,7 +26,6 @@ else:
     from nipy.algorithms.registration.affine import Affine
 
 
-
 class SimilarityInputSpec(BaseInterfaceInputSpec):
     volume1 = File(exists=True, desc="3D volume", mandatory=True)
     volume2 = File(exists=True, desc="3D volume", mandatory=True)

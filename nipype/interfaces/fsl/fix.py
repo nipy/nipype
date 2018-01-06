@@ -118,8 +118,6 @@ class TrainingSetCreator(BaseInterface):
         return outputs
 
 
-
-
 class FeatureExtractorInputSpec(CommandLineInputSpec):
     mel_ica = Directory(exists=True, copyfile=False, desc='Melodic output directory or directories',
                         argstr='%s', position=-1)
@@ -175,8 +173,6 @@ class Training(CommandLine):
         return outputs
 
 
-
-
 class AccuracyTesterInputSpec(CommandLineInputSpec):
     mel_icas = InputMultiPath(Directory(exists=True), copyfile=False,
                               desc='Melodic output directories',
@@ -209,7 +205,6 @@ class AccuracyTester(CommandLine):
         return outputs
 
 
-
 class ClassifierInputSpec(CommandLineInputSpec):
     mel_ica = Directory(exists=True, copyfile=False, desc='Melodic output directory or directories',
                         argstr='%s', position=1)
@@ -219,6 +214,7 @@ class ClassifierInputSpec(CommandLineInputSpec):
     thresh = traits.Int(argstr='%d', desc='Threshold for cleanup.', position=-1, mandatory=True)
 
     artifacts_list_file = File(desc='Text file listing which ICs are artifacts; can be the output from classification or can be created manually')
+
 
 class ClassifierOutputSpec(TraitedSpec):
     artifacts_list_file = File(desc='Text file listing which ICs are artifacts; can be the output from classification or can be created manually')
@@ -246,8 +242,6 @@ class Classifier(CommandLine):
         outputs['artifacts_list_file'] = self._gen_artifacts_list_file(self.inputs.mel_ica, self.inputs.thresh)
 
         return outputs
-
-
 
 
 class CleanerInputSpec(CommandLineInputSpec):

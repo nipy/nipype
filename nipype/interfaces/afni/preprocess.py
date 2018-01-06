@@ -47,6 +47,7 @@ class CentralityInputSpec(AFNICommandInputSpec):
         desc='Mask the dataset to target brain-only voxels',
         argstr='-automask')
 
+
 class AlignEpiAnatPyInputSpec(AFNIPythonCommandInputSpec):
     in_file = File(
         desc='EPI dataset to align',
@@ -125,6 +126,7 @@ class AlignEpiAnatPyOutputSpec(TraitedSpec):
              "timing correction is also included).")
     skullstrip = File(
         desc="skull-stripped (not aligned) volume")
+
 
 class AlignEpiAnatPy(AFNIPythonCommand):
     """Align EPI to anatomical datasets or vice versa
@@ -205,6 +207,7 @@ class AlignEpiAnatPy(AFNIPythonCommand):
         if self.inputs.save_skullstrip:
             outputs.skullstrip = self._gen_fname(anat_prefix, suffix='_ns'+'+orig', ext=ext)
         return outputs
+
 
 class AllineateInputSpec(AFNICommandInputSpec):
     in_file = File(
@@ -653,6 +656,7 @@ class Automask(AFNICommand):
     input_spec = AutomaskInputSpec
     output_spec = AutomaskOutputSpec
 
+
 class AutoTLRCInputSpec(CommandLineInputSpec):
     outputtype = traits.Enum('AFNI', list(Info.ftypes.keys()),
                              desc='AFNI output filetype')
@@ -724,6 +728,7 @@ class AutoTLRCInputSpec(CommandLineInputSpec):
              '   No Cigar means: Don\'t try that combination, it makes no sense.',
         argstr='-no_ss')
 
+
 class AutoTLRC(AFNICommand):
     """A minmal wrapper for the AutoTLRC script
     The only option currently supported is no_ss.
@@ -751,6 +756,7 @@ class AutoTLRC(AFNICommand):
         ext = '.HEAD'
         outputs['out_file'] = os.path.abspath(self._gen_fname(self.inputs.in_file, suffix='+tlrc')+ext)
         return outputs
+
 
 class BandpassInputSpec(AFNICommandInputSpec):
     in_file = File(
@@ -1476,7 +1482,6 @@ class Hist(AFNICommandBase):
                 skip = []
             skip += ['out_show']
         return super(Hist, self)._parse_inputs(skip=skip)
-
 
     def _list_outputs(self):
         outputs = super(Hist, self)._list_outputs()
@@ -3390,7 +3395,6 @@ class QwarpInputSpec(AFNICommandInputSpec):
              'and should be considered experimental at this infundibulum.',
         argstr='-nmi',
         xor=['nmi', 'hel', 'lpc', 'lpa', 'pear'])
-
 
 
 class QwarpOutputSpec(TraitedSpec):

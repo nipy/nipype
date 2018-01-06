@@ -11,6 +11,7 @@ from ....interfaces.io import DataSink
 from .utils import getdefaultconfig
 from ....pipeline.engine.base import logger
 
+
 def create_skullstripped_recon_flow(name="skullstripped_recon_all"):
     """Performs recon-all on voulmes that are already skull stripped.
     FreeSurfer failes to perform skullstrippig on some volumes (especially
@@ -81,6 +82,7 @@ def create_skullstripped_recon_flow(name="skullstripped_recon_all"):
     wf.connect(autorecon_resume, "subjects_dir", outputnode, "subjects_dir")
     wf.connect(autorecon_resume, "subject_id", outputnode, "subject_id")
     return wf
+
 
 def create_reconall_workflow(name="ReconAll", plugin_args=None):
     """Creates the ReconAll workflow in Nipype. This workflow is designed to
@@ -344,7 +346,6 @@ def create_reconall_workflow(name="ReconAll", plugin_args=None):
                                             ('outputspec.{0}_white_K'.format(hemi),
                                              'inputspec.{0}_white_K'.format(hemi))])])
 
-
     # Add more outputs to outputspec
     outputs = ar1_outputs + ar2_outputs + ar3_outputs
     outputspec = pe.Node(niu.IdentityInterface(fields=outputs, mandatory_inputs=True),
@@ -389,7 +390,6 @@ def create_reconall_workflow(name="ReconAll", plugin_args=None):
     predatasink_nu.inputs.out_file = 'nu.mgz'
     reconall.connect([(outputspec, predatasink_nu, [('nu', 'in_file')]),
                       (dstransform, predatasink_nu, [('transform', 'transform')])])
-
 
     # Datasink outputs
     datasink = pe.Node(DataSink(), name="DataSink")

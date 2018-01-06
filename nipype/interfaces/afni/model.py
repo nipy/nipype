@@ -24,6 +24,7 @@ from ...external.due import BibTeX
 from .base import (
     AFNICommandBase, AFNICommand, AFNICommandInputSpec, AFNICommandOutputSpec)
 
+
 class DeconvolveInputSpec(AFNICommandInputSpec):
     in_files = InputMultiPath(
         File(

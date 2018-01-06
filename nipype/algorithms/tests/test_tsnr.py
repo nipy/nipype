@@ -116,7 +116,6 @@ class TestTSNR():
             npt.assert_almost_equal(np.amin(data), min_, decimal=1)
             npt.assert_almost_equal(np.amax(data), max_, decimal=1)
 
-
     fake_data = np.array([[[[2, 4, 3, 9, 1],
                             [3, 6, 4, 7, 4]],
 

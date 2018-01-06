@@ -3,8 +3,10 @@ import sys
 import pytest
 from nipype.utils.functions import (getsource, create_function_from_source)
 
+
 def _func1(x):
     return x**3
+
 
 def test_func_to_str():
 
@@ -17,10 +19,12 @@ def test_func_to_str():
         f_recreated = create_function_from_source(f_src)
         assert f(2.3) == f_recreated(2.3)
 
+
 def test_func_to_str_err():
     bad_src = "obbledygobbledygook"
     with pytest.raises(RuntimeError):
         create_function_from_source(bad_src)
+
 
 def _print_statement():
     try:
@@ -29,12 +33,14 @@ def _print_statement():
     except SyntaxError:
         return False
 
+
 def test_func_string():
     def is_string():
         return isinstance('string', str)
 
     wrapped_func = create_function_from_source(getsource(is_string))
     assert is_string() == wrapped_func()
+
 
 @pytest.mark.skipif(sys.version_info[0] > 2, reason="breaks python 3")
 def test_func_print_py2():

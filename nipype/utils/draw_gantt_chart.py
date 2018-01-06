@@ -28,6 +28,7 @@ except ImportError:
 
 PY3 = sys.version_info[0] > 2
 
+
 def create_event_dict(start_time, nodes_list):
     '''
     Function to generate a dictionary of event (start/finish) nodes
@@ -303,6 +304,7 @@ def draw_nodes(start, nodes_list, cores, minute_scale, space_between_minutes,
 
     # Return html string for nodes
     return result
+
 
 def draw_resource_bar(start_time, finish_time, time_series, space_between_minutes,
                       minute_scale, color, left, resource):

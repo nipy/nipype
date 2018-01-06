@@ -24,6 +24,7 @@ from setuptools.command.build_py import build_py
 
 PY3 = sys.version_info[0] >= 3
 
+
 class BuildWithCommitInfoCommand(build_py):
     """ Return extended build command class for recording commit
 

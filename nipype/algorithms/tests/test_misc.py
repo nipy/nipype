@@ -35,6 +35,7 @@ def test_CreateNifti(create_analyze_pair_file_in_directory):
     assert os.path.exists(result.outputs.nifti_file)
     assert nb.load(result.outputs.nifti_file, mmap=NUMPY_MMAP)
 
+
 def test_CalculateMedian(create_analyze_pair_file_in_directory):
 
     mean = misc.CalculateMedian()

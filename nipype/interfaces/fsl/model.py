@@ -700,7 +700,6 @@ threshold=10, results_dir='stats')
             LooseVersion(Info.version()) > LooseVersion('5.0.4')):
         input_spec = FILMGLSInputSpec505
 
-
     def _get_pe_files(self, cwd):
         files = None
         if isdefined(self.inputs.design_file):
@@ -1098,7 +1097,6 @@ class ContrastMgr(FSLCommand):
     _cmd = 'contrast_mgr'
     input_spec = ContrastMgrInputSpec
     output_spec = ContrastMgrOutputSpec
-
 
     def _run_interface(self, runtime):
         # The returncode is meaningless in ContrastMgr.  So check the output

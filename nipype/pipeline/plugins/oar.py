@@ -15,6 +15,7 @@ from ...interfaces.base import CommandLine
 from .base import SGELikeBatchManagerBase, logger
 iflogger = logging.getLogger('interface')
 
+
 class OARPlugin(SGELikeBatchManagerBase):
     """Execute using OAR
 

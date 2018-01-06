@@ -6,6 +6,7 @@ from ....interfaces.freesurfer import *
 from .ba_maps import create_ba_maps_wf
 from ....interfaces.io import DataGrabber
 
+
 def create_AutoRecon3(name="AutoRecon3", qcache=False, plugin_args=None,
                       th3=True, exvivo=True, entorhinal=True, fsvernum=5.3):
 
@@ -60,7 +61,6 @@ def create_AutoRecon3(name="AutoRecon3", qcache=False, plugin_args=None,
                                                   'color_table',
                                                   'num_threads']),
                           name='inputspec')
-
 
     ar3_lh_wf1 = pe.Workflow(name="AutoRecon3_Left_1")
     ar3_rh_wf1 = pe.Workflow(name="AutoRecon3_Right_1")
@@ -168,7 +168,6 @@ def create_AutoRecon3(name="AutoRecon3", qcache=False, plugin_args=None,
         ar3_pial.inputs.hemisphere = hemisphere
         ar3_pial.inputs.copy_inputs = True
 
-
         if fsvernum < 6:
             ar3_pial.inputs.white = 'NOWRITE'
             hemi_wf.connect(hemi_inputspec1, 'white', ar3_pial, 'in_white')
@@ -264,7 +263,6 @@ def create_AutoRecon3(name="AutoRecon3", qcache=False, plugin_args=None,
                          (ar3_sphere, hemi_outputspec1, [('out_file', 'sphere')])
                          ])
 
-
     # Cortical Ribbon Mask
     """
     Creates binary volume masks of the cortical ribbon
@@ -277,7 +275,6 @@ def create_AutoRecon3(name="AutoRecon3", qcache=False, plugin_args=None,
     volume_mask.inputs.right_ribbonlabel = 42
     volume_mask.inputs.save_ribbon = True
     volume_mask.inputs.copy_inputs = True
-
 
     ar3_wf.connect([(inputspec, volume_mask, [('lh_white', 'lh_white'),
                                               ('rh_white', 'rh_white')]),
@@ -376,7 +373,6 @@ def create_AutoRecon3(name="AutoRecon3", qcache=False, plugin_args=None,
         parcellation_stats_pial.inputs.out_color = 'aparc.annot.ctab'
         parcellation_stats_pial.inputs.out_table = '{0}.aparc.pial.stats'.format(hemisphere)
 
-
         hemiwf2.connect([(hemi_inputspec2, parcellation_stats_pial, [('wm', 'wm'),
                                                                      ('lh_white', 'lh_white'),
                                                                      ('rh_white', 'rh_white'),
@@ -470,7 +466,6 @@ def create_AutoRecon3(name="AutoRecon3", qcache=False, plugin_args=None,
                          (cortical_parcellation_3, parcellation_stats_white_3, [('out_file', 'in_annotation')])
                          ])
 
-
         # WM/GM Contrast
         contrast = pe.Node(Contrast(), name="WM_GM_Contrast_{0}".format(hemisphere))
         contrast.inputs.hemisphere = hemisphere
@@ -543,7 +538,6 @@ def create_AutoRecon3(name="AutoRecon3", qcache=False, plugin_args=None,
                         (volume_mask, hemiwf2, [('out_ribbon', 'inputspec.ribbon')]),
                         ])
         # End hemisphere2 workflow
-
 
     # APARC to ASEG
     # Adds information from the ribbon into the aseg.mgz (volume parcellation).
@@ -621,7 +615,6 @@ def create_AutoRecon3(name="AutoRecon3", qcache=False, plugin_args=None,
 
     apas_2_aseg.inputs.out_file = "aseg.mgz"
 
-
     # Segmentation Stats
     """
     Computes statistics on the segmented subcortical structures found in
@@ -666,7 +659,6 @@ def create_AutoRecon3(name="AutoRecon3", qcache=False, plugin_args=None,
         ar3_wf.connect(inputspec, 'aseg_presurf', segstats, 'presurf_seg')
     else:
         ar3_wf.connect(inputspec, 'aseg_presurf', segstats, 'aseg')
-
 
     # White Matter Parcellation
 
@@ -736,7 +728,6 @@ def create_AutoRecon3(name="AutoRecon3", qcache=False, plugin_args=None,
     else:
         ar3_wf.connect(inputspec, 'aseg_presurf', wm_segstats, 'aseg')
 
-
     # add brodman area maps to the workflow
     ba_WF, ba_outputs = create_ba_maps_wf(th3=th3, exvivo=exvivo,
                                           entorhinal=entorhinal)
@@ -774,7 +765,6 @@ def create_AutoRecon3(name="AutoRecon3", qcache=False, plugin_args=None,
         source_subject.inputs.sort_filelist = False
         source_subject.inputs.field_template = dict(lh_sphere_reg='surf/lh.sphere.reg',
                                                     rh_sphere_reg='surf/rh.sphere.reg')
-
 
         qcache_wf = pe.Workflow("QCache")
 
@@ -899,7 +889,6 @@ def create_AutoRecon3(name="AutoRecon3", qcache=False, plugin_args=None,
                             (source_subject, qcache_wf, [(source_file, 'inputspec.source_' + source_file)])])
         # end qcache workflow
 
-
     # Add outputs to outputspec
     ar3_outputs = ['aseg',
                    'wmparc',
@@ -933,7 +922,6 @@ def create_AutoRecon3(name="AutoRecon3", qcache=False, plugin_args=None,
                                                ('rh_ribbon', 'rh_ribbon')])])
     if fsvernum >= 6:
         ar3_wf.connect([(relabel_hypos, outputspec, [('out_file', 'aseg_presurf_hypos')])])
-
 
     for i, outputs in enumerate([hemi_outputs1, hemi_outputs2]):
         if i == 0:

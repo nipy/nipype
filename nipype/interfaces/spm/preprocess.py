@@ -30,7 +30,6 @@ from .base import (SPMCommand, scans_for_fname, func_is_3d,
 __docformat__ = 'restructuredtext'
 
 
-
 class SliceTimingInputSpec(SPMCommandInputSpec):
     in_files = InputMultiPath(traits.Either(traits.List(ImageFileSPM(
                                                              exists=True)),

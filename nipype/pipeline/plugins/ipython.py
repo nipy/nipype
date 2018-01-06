@@ -22,7 +22,6 @@ except:
     IPython_not_loaded = True
 
 
-
 def execute_task(pckld_task, node_config, updatehash):
     from socket import gethostname
     from traceback import format_exc

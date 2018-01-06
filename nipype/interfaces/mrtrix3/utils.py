@@ -20,7 +20,6 @@ from ..base import (CommandLineInputSpec, CommandLine, traits, TraitedSpec,
 from .base import MRTrix3BaseInputSpec, MRTrix3Base
 
 
-
 class BrainMaskInputSpec(MRTrix3BaseInputSpec):
     in_file = File(exists=True, argstr='%s', mandatory=True, position=-2,
                    desc='input diffusion weighted images')

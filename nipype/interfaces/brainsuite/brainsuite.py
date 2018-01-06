@@ -13,6 +13,7 @@ Please see brainsuite.org for more information.
 Author: Jason Wong
 """
 
+
 class BseInputSpec(CommandLineInputSpec):
 
     inputMRIFile = File(

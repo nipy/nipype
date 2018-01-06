@@ -23,6 +23,7 @@ from ..interfaces.base import (traits, TraitedSpec, BaseInterface,
                                BaseInterfaceInputSpec, File, InputMultiPath)
 IFLOGGER = logging.getLogger('interface')
 
+
 class SignalExtractionInputSpec(BaseInterfaceInputSpec):
     in_file = File(exists=True, mandatory=True, desc='4-D fMRI nii file')
     label_files = InputMultiPath(File(exists=True), mandatory=True,
@@ -52,11 +53,13 @@ class SignalExtractionInputSpec(BaseInterfaceInputSpec):
                                  '(instead of just regions).')
     detrend = traits.Bool(False, usedefault=True, desc='If True, perform detrending using nilearn.')
 
+
 class SignalExtractionOutputSpec(TraitedSpec):
     out_file = File(exists=True, desc='tsv file containing the computed '
                     'signals, with as many columns as there are labels and as '
                     'many rows as there are timepoints in in_file, plus a '
                     'header row with values from class_labels')
+
 
 class SignalExtraction(BaseInterface):
     '''

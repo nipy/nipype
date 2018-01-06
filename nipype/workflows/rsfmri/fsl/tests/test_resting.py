@@ -17,6 +17,7 @@ ALL_FIELDS = ['func', 'in_file', 'slice_time_corrected_file', 'stddev_file',
               'design_file', 'highpass_sigma', 'lowpass_sigma', 'out_file',
               'noise_mask_file', 'filtered_file']
 
+
 def stub_node_factory(*args, **kwargs):
     if 'name' not in kwargs.keys():
         raise Exception()
@@ -27,6 +28,7 @@ def stub_node_factory(*args, **kwargs):
         return Node(IdentityInterface(fields=ALL_FIELDS),
                     name=name)
 
+
 def stub_wf(*args, **kwargs):
     wflow = Workflow(name='realigner')
     inputnode = Node(IdentityInterface(fields=['func']), name='inputspec')
@@ -34,6 +36,7 @@ def stub_wf(*args, **kwargs):
                       name='outputspec')
     wflow.connect(inputnode, 'func', outputnode, 'realigned_file')
     return wflow
+
 
 class TestResting():
 
@@ -91,7 +94,6 @@ class TestResting():
                                  ['-0.0806469590', '0.5156853779'],
                                  ['0.7187176051', '-0.3235820287'],
                                  ['-0.3783072450', '0.3406749013']]
-
 
     fake_data = np.array([[[[2, 4, 3, 9, 1],
                             [3, 6, 4, 7, 4]],

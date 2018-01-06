@@ -11,6 +11,7 @@ try:
 except Exception as e:
     have_cv = False
 
+
 @pytest.fixture()
 def creating_graphs(tmpdir):
     graphlist = []

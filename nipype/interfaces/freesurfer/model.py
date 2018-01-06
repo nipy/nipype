@@ -23,6 +23,7 @@ from .utils import copy2subjdir
 
 __docformat__ = 'restructuredtext'
 
+
 class MRISPreprocInputSpec(FSTraitedSpec):
     out_file = File(argstr='--out %s', genfile=True,
                     desc='output filename')
@@ -1095,6 +1096,7 @@ class Label2LabelInputSpec(FSTraitedSpec):
     copy_inputs = traits.Bool(desc="If running as a node, set this to True." +
                               "This will copy the input files to the node " +
                               "directory.")
+
 
 class Label2LabelOutputSpec(TraitedSpec):
     out_file = File(exists=True, desc='Output label')

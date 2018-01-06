@@ -40,6 +40,7 @@ implicit_filetypes = ['gii']
 
 logger = logging.getLogger('interface')
 
+
 def copy2subjdir(cls, in_file, folder=None, basename=None, subject_id=None):
     """Method to copy an input to the subjects directory"""
     # check that the input is defined
@@ -71,6 +72,7 @@ def copy2subjdir(cls, in_file, folder=None, basename=None, subject_id=None):
     if not os.path.isfile(out_file):
         shutil.copy(in_file, out_file)
     return out_file
+
 
 def createoutputdirs(outputs):
     """create all output directories. If not created, some freesurfer interfaces fail"""
@@ -1707,6 +1709,7 @@ class MRIFillOutputSpec(TraitedSpec):
     out_file = File(exists=False, desc="Output file from MRIFill")
     log_file = File(desc="Output log file from MRIFill")
 
+
 class MRIFill(FSCommand):
     """
     This program creates hemispheric cutting planes and fills white matter
@@ -1802,6 +1805,7 @@ class SphereInputSpec(FSTraitedSpecOpenMP):
 
 class SphereOutputSpec(TraitedSpec):
     out_file = File(exists=False, desc="Output file for Sphere")
+
 
 class Sphere(FSCommandOpenMP):
     """
@@ -2103,7 +2107,6 @@ class MakeSurfaces(FSCommand):
                                          'label'))
         return super(MakeSurfaces, self).run(**inputs)
 
-
     def _format_arg(self, name, spec, value):
         if name in ['in_T1', 'in_aseg']:
             # These inputs do not take full paths as inputs or even basenames
@@ -2323,6 +2326,7 @@ class CurvatureStats(FSCommand):
             copy2subjdir(self, self.inputs.curvfile1, 'surf')
             copy2subjdir(self, self.inputs.curvfile2, 'surf')
         return super(CurvatureStats, self).run(**inputs)
+
 
 class JacobianInputSpec(FSTraitedSpec):
     # required

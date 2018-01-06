@@ -232,6 +232,7 @@ def build_filter1(motion_params, comp_norm, outliers, detrend_poly=None):
         out_files.append(filename)
     return out_files
 
+
 def rename(in_files, suffix=None):
     from nipype.utils.filemanip import (filename_to_list, split_filename,
                                         list_to_filename)

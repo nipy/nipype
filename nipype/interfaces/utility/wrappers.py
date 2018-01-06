@@ -23,6 +23,7 @@ from ...utils.functions import getsource, create_function_from_source
 
 iflogger = logging.getLogger('interface')
 
+
 class FunctionInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
     function_str = traits.Str(mandatory=True, desc='code for function')
 

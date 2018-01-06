@@ -1770,6 +1770,7 @@ class MNIBiasCorrectionInputSpec(FSTraitedSpec):
     shrink = traits.Int(argstr="--shrink %d",
                         desc="Shrink parameter for finer sampling (default is 4)")
 
+
 class MNIBiasCorrectionOutputSpec(TraitedSpec):
     out_file = File(exists=True, desc="output volume")
 
@@ -1928,6 +1929,7 @@ class CANormalizeInputSpec(FSTraitedSpec):
                           desc="File name for the output control points")
     long_file = File(argstr='-long %s',
                      desc='undocumented flag used in longitudinal processing')
+
 
 class CANormalizeOutputSpec(TraitedSpec):
     out_file = traits.File(exists=False, desc="The output file for Normalize")
@@ -2355,6 +2357,7 @@ class EditWMwithAsegInputSpec(FSTraitedSpec):
     # optional
     keep_in = traits.Bool(argstr="-keep-in",
                           desc="Keep edits as found in input volume")
+
 
 class EditWMwithAsegOutputSpec(TraitedSpec):
     out_file = File(exists=False, desc="Output edited WM file")

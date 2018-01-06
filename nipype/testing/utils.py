@@ -93,6 +93,7 @@ class TempFATFS(object):
         self.dev_null.close()
         shutil.rmtree(self.tmpdir)
 
+
 def save_toy_nii(ndarray, filename):
     toy = nb.Nifti1Image(ndarray, np.eye(4))
     nb.nifti1.save(toy, filename)

@@ -7,6 +7,7 @@ from traits.trait_errors import TraitError
 from nipype.interfaces.ants import JointFusion
 import pytest
 
+
 def test_JointFusion_dimension():
     at = JointFusion()
     set_dimension = lambda d: setattr(at.inputs, 'dimension', int(d))
@@ -17,11 +18,13 @@ def test_JointFusion_dimension():
         with pytest.raises(TraitError):
             set_dimension(d)
 
+
 @pytest.mark.parametrize("m", range(1, 5))
 def test_JointFusion_modalities(m):
     at = JointFusion()
     setattr(at.inputs, 'modalities', int(m))
     assert at.inputs.modalities == int(m)
+
 
 @pytest.mark.parametrize("a, b", [(a,b) for a in range(10) for b in range(10)])
 def test_JointFusion_method(a, b):
@@ -37,6 +40,7 @@ def test_JointFusion_method(a, b):
     at.inputs.beta = bprime
     # set with alpha/beta
     assert at.inputs.method == 'Joint[%.1f,%d]'.format(aprime, bprime)
+
 
 @pytest.mark.parametrize("attr, x", [(attr, x) for attr in ['patch_radius', 'search_radius'] for x in range(5)])
 def test_JointFusion_radius(attr, x):

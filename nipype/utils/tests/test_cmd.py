@@ -13,6 +13,7 @@ from ...utils import nipype_cmd
 
 PY2 = sys.version_info[0] < 3
 
+
 @contextmanager
 def capture_sys_output():
     caputure_out, capture_err = StringIO(), StringIO()
@@ -67,7 +68,6 @@ positional arguments:
 optional arguments:
   -h, --help  show this help message and exit
 """
-
 
     def test_list_nipy_interfacesp(self):
         with pytest.raises(SystemExit) as cm:

@@ -38,6 +38,7 @@ PROV_ENVVARS = ['PATH', 'FSLDIR', 'FREESURFER_HOME', 'ANTSPATH',
                 'LOGNAME', 'USER',
                 'MKL_NUM_THREADS', 'OMP_NUM_THREADS']
 
+
 def get_attr_id(attr, skip=None):
     dictwithhash, hashval = get_hashval(attr, skip=skip)
     return niiri[hashval]
@@ -298,7 +299,6 @@ def write_provenance(results, filename='provenance', format='all'):
         logger.warning('Writing provenance failed - Exception details:\n%s', err_msg)
 
     return prov
-
 
 
 class ProvStore(object):

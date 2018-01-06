@@ -25,6 +25,7 @@ class InputSpec(nib.TraitedSpec):
     input2 = nib.traits.Int(desc='a random int')
     input_file = nib.traits.File(desc='Random File')
 
+
 class OutputSpec(nib.TraitedSpec):
     output1 = nib.traits.List(nib.traits.Int, desc='outputs')
 
@@ -74,6 +75,7 @@ def test_add_nodes():
 # of the graph expansion routine.
 # XXX - SG I'll create a graphical version of these tests and actually
 # ensure that all connections are tested later
+
 
 @pytest.mark.parametrize("iterables, expected", [
         ({"1": None}, (1,0)),  # test1
@@ -672,7 +674,6 @@ def test_parameterize_dirs_false(tmpdir):
     wf.base_dir = tmpdir.strpath
     wf.config['execution']['parameterize_dirs'] = False
     wf.connect([(n1, n2, [('output1', 'in1')])])
-
 
     wf.run()
 

@@ -25,6 +25,7 @@ import numpy as np
 def _ignore_atime(stat):
     return stat[:7] + stat[8:]
 
+
 @pytest.mark.parametrize("filename, split",[
         ('foo.nii',                ('', 'foo', '.nii')),
         ('foo.nii.gz',             ('', 'foo', '.nii.gz')),
@@ -54,6 +55,7 @@ def test_fnames_presuffix():
     pths = fnames_presuffix(fnames, 'pre_', '_post', '/tmp')
     assert pths == ['/tmp/pre_foo_post.nii', '/tmp/pre_bar_post.nii']
 
+
 @pytest.mark.parametrize("filename, newname",[
         ('foobar.nii',    'foobar_0xabc123.nii'),
         ('foobar.nii.gz', 'foobar_0xabc123.nii.gz')
@@ -73,6 +75,7 @@ def test_check_forhash():
     result, hash = check_forhash('foobar.nii')
     assert not result
     assert hash is None
+
 
 @pytest.fixture()
 def _temp_analyze_files(tmpdir):
@@ -253,6 +256,7 @@ def test_get_related_files_noninclusive(_temp_analyze_files):
     assert orig_img in related_files
     assert orig_hdr not in related_files
 
+
 @pytest.mark.parametrize("filename, expected", [
         ('foo.nii',      ['foo.nii']),
         (['foo.nii'],    ['foo.nii']),
@@ -262,6 +266,7 @@ def test_get_related_files_noninclusive(_temp_analyze_files):
 def test_filename_to_list(filename, expected):
     x = filename_to_list(filename)
     assert x == expected
+
 
 @pytest.mark.parametrize("list, expected", [
         (['foo.nii'],    'foo.nii'),
@@ -276,7 +281,6 @@ def test_check_depends(tmpdir):
     def touch(fname):
         with open(fname, 'a'):
             os.utime(fname, None)
-
 
     dependencies = [tmpdir.join(str(i)).strpath for i in range(3)]
     targets = [tmpdir.join(str(i)).strpath for i in range(3, 6)]

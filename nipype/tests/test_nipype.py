@@ -1,5 +1,6 @@
 from .. import get_info
 
+
 def test_nipype_info():
     exception_not_raised = True
     try:

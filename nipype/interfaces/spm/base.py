@@ -529,6 +529,7 @@ class SPMCommand(BaseInterface):
             mscript += postscript
         return mscript
 
+
 class ImageFileSPM(ImageFile):
     """
     Defines an ImageFile trait specific to SPM interfaces.

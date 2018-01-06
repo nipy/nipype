@@ -18,6 +18,7 @@ from ..base import (TraitedSpec, File, traits, CommandLine,
 
 __docformat__ = 'restructuredtext'
 
+
 class SplineFilterInputSpec(CommandLineInputSpec):
     track_file = File(exists=True, desc="file containing tracks to be filtered", position=0, argstr="%s", mandatory=True)
     step_length = traits.Float(desc="in the unit of minimum voxel size", position=1, argstr="%f", mandatory=True)

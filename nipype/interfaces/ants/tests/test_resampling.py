@@ -28,6 +28,7 @@ def create_wimt():
                                          'dwi2anat_Warp.nii.gz','dwi2anat_coreg_Affine.txt']
     return wimt
 
+
 def test_WarpImageMultiTransform(change_dir, create_wimt):
     wimt = create_wimt
     assert wimt.cmdline == 'WarpImageMultiTransform 3 diffusion_weighted.nii diffusion_weighted_wimt.nii -R functional.nii \

@@ -22,6 +22,7 @@ from ..base import (TraitedSpec, File, traits, CommandLine,
 
 __docformat__ = 'restructuredtext'
 
+
 class DTIReconInputSpec(CommandLineInputSpec):
     DWI = File(desc='Input diffusion volume', argstr='%s', exists=True, mandatory=True, position=1)
     out_prefix = traits.Str("dti", desc='Output file prefix', argstr='%s', usedefault=True, position=2)

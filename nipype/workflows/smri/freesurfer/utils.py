@@ -14,8 +14,6 @@ from ....workflows.misc.utils import region_list_from_volume, id_list_from_looku
 import os
 
 
-
-
 def get_aparc_aseg(files):
     """Return the aparc+aseg.mgz file"""
     for name in files:
@@ -376,6 +374,7 @@ def create_tessellation_flow(name='tessellate', out_format='stl'):
         ])
     return tessflow
 
+
 def copy_files(in_files, out_files):
     """
     Create a function to copy a file that can be modified by a following node
@@ -392,6 +391,7 @@ def copy_files(in_files, out_files):
         print("copying {0} to {1}".format(in_file, out_file))
         shutil.copy(in_file, out_file)
     return out_files
+
 
 def copy_file(in_file, out_file=None):
     """
@@ -410,6 +410,7 @@ def copy_file(in_file, out_file=None):
     shutil.copy(in_file, out_file)
     return out_file
 
+
 def mkdir_p(path):
     import errno
     import os
@@ -420,6 +421,7 @@ def mkdir_p(path):
             pass
         else:
             raise
+
 
 def getdefaultconfig(exitonfail=False, rb_date="2014-08-21"):
     config = {'custom_atlas': None,

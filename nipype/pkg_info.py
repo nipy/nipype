@@ -13,6 +13,7 @@ import subprocess
 COMMIT_INFO_FNAME = 'COMMIT_INFO.txt'
 PY3 = sys.version_info[0] >= 3
 
+
 def pkg_commit_hash(pkg_path):
     ''' Get short form of commit hash given directory `pkg_path`
 

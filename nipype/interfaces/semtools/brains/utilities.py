@@ -47,6 +47,7 @@ contributor: University of Iowa Department of Psychiatry, http:://www.psychiatry
     _outputs_filenames = {'outputVolume': 'outputVolume.nii'}
     _redirect_x = False
 
+
 class GenerateEdgeMapImageInputSpec(CommandLineInputSpec):
     inputMRVolumes = InputMultiPath(File(exists=True), desc="List of input structural MR volumes to create the maximum edgemap", argstr="--inputMRVolumes %s...")
     inputMask = File(desc="Input mask file name. If set, image histogram percentiles will be calculated within the mask", exists=True, argstr="--inputMask %s")
@@ -62,6 +63,7 @@ class GenerateEdgeMapImageInputSpec(CommandLineInputSpec):
 class GenerateEdgeMapImageOutputSpec(TraitedSpec):
     outputEdgeMap = File(desc="(required) output file name", exists=True)
     outputMaximumGradientImage = File(desc="output gradient image file name", exists=True)
+
 
 class GenerateEdgeMapImage(SEMLikeCommandLine):
 
@@ -83,6 +85,7 @@ contributor: Ali Ghayoor
     _outputs_filenames = {'outputEdgeMap': 'outputEdgeMap', 'outputMaximumGradientImage': 'outputMaximumGradientImage'}
     _redirect_x = False
 
+
 class GeneratePurePlugMaskInputSpec(CommandLineInputSpec):
     inputImageModalities = InputMultiPath(File(exists=True), desc="List of input image file names to create pure plugs mask", argstr="--inputImageModalities %s...")
     threshold = traits.Float(desc="threshold value to define class membership", argstr="--threshold %f")
@@ -92,6 +95,7 @@ class GeneratePurePlugMaskInputSpec(CommandLineInputSpec):
 
 class GeneratePurePlugMaskOutputSpec(TraitedSpec):
     outputMaskFile = File(desc="(required) Output binary mask file name", exists=True)
+
 
 class GeneratePurePlugMask(SEMLikeCommandLine):
 
