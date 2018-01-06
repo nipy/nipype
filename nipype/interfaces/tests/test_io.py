@@ -60,29 +60,29 @@ def test_s3datagrabber():
 
 
 templates1 = {"model": "interfaces/{package}/model.py",
-             "preprocess": "interfaces/{package}/pre*.py"}
+              "preprocess": "interfaces/{package}/pre*.py"}
 templates2 = {"converter": "interfaces/dcm{to!s}nii.py"}
 templates3 = {"model": "interfaces/{package.name}/model.py"}
 
 
 @pytest.mark.parametrize("SF_args, inputs_att, expected", [
-        ({"templates":templates1}, {"package":"fsl"},
-         {"infields":["package"], "outfields":["model", "preprocess"], "run_output":{"model":op.join(op.dirname(nipype.__file__),"interfaces/fsl/model.py"), "preprocess":op.join(op.dirname(nipype.__file__),"interfaces/fsl/preprocess.py")}, "node_output":["model", "preprocess"]}),
+    ({"templates": templates1}, {"package": "fsl"},
+     {"infields": ["package"], "outfields":["model", "preprocess"], "run_output":{"model": op.join(op.dirname(nipype.__file__), "interfaces/fsl/model.py"), "preprocess": op.join(op.dirname(nipype.__file__), "interfaces/fsl/preprocess.py")}, "node_output": ["model", "preprocess"]}),
 
-        ({"templates":templates1, "force_lists":True}, {"package":"spm"},
-         {"infields":["package"], "outfields":["model", "preprocess"], "run_output":{"model":[op.join(op.dirname(nipype.__file__),"interfaces/spm/model.py")], "preprocess":[op.join(op.dirname(nipype.__file__),"interfaces/spm/preprocess.py")]}, "node_output":["model", "preprocess"]}),
+    ({"templates": templates1, "force_lists": True}, {"package": "spm"},
+     {"infields": ["package"], "outfields":["model", "preprocess"], "run_output":{"model": [op.join(op.dirname(nipype.__file__), "interfaces/spm/model.py")], "preprocess":[op.join(op.dirname(nipype.__file__), "interfaces/spm/preprocess.py")]}, "node_output":["model", "preprocess"]}),
 
-        ({"templates":templates1}, {"package":"fsl", "force_lists":["model"]},
-         {"infields":["package"], "outfields":["model", "preprocess"], "run_output":{"model":[op.join(op.dirname(nipype.__file__),"interfaces/fsl/model.py")], "preprocess":op.join(op.dirname(nipype.__file__),"interfaces/fsl/preprocess.py")}, "node_output":["model", "preprocess"]}),
+    ({"templates": templates1}, {"package": "fsl", "force_lists": ["model"]},
+     {"infields": ["package"], "outfields":["model", "preprocess"], "run_output":{"model": [op.join(op.dirname(nipype.__file__), "interfaces/fsl/model.py")], "preprocess":op.join(op.dirname(nipype.__file__), "interfaces/fsl/preprocess.py")}, "node_output":["model", "preprocess"]}),
 
-        ({"templates":templates2}, {"to":2},
-         {"infields":["to"], "outfields":["converter"], "run_output":{"converter":op.join(op.dirname(nipype.__file__), "interfaces/dcm2nii.py")}, "node_output":["converter"]}),
+    ({"templates": templates2}, {"to": 2},
+     {"infields": ["to"], "outfields":["converter"], "run_output":{"converter": op.join(op.dirname(nipype.__file__), "interfaces/dcm2nii.py")}, "node_output": ["converter"]}),
 
-        ({"templates": templates3}, {"package": namedtuple("package", ["name"])("fsl")},
-        {"infields": ["package"], "outfields": ["model"],
-         "run_output": {"model": op.join(op.dirname(nipype.__file__), "interfaces/fsl/model.py")},
-         "node_output": ["model"]}),
-        ])
+    ({"templates": templates3}, {"package": namedtuple("package", ["name"])("fsl")},
+     {"infields": ["package"], "outfields": ["model"],
+      "run_output": {"model": op.join(op.dirname(nipype.__file__), "interfaces/fsl/model.py")},
+      "node_output": ["model"]}),
+])
 def test_selectfiles(SF_args, inputs_att, expected):
     base_dir = op.dirname(nipype.__file__)
     dg = nio.SelectFiles(base_directory=base_dir, **SF_args)

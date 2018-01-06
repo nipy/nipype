@@ -1363,7 +1363,7 @@ class Tkregister2InputSpec(FSTraitedSpec):
                                 desc='Invert input LTA before applying')
     # Output registration file options
     fsl_out = traits.Either(True, File, argstr='--fslregout %s',
-                   desc='compute an FSL-compatible resgitration matrix')
+                            desc='compute an FSL-compatible resgitration matrix')
     lta_out = traits.Either(True, File, argstr='--ltaout %s',
                             desc='output registration file (LTA format)')
     invert_lta_out = traits.Bool(argstr='--ltaout-inv', requires=['lta_in'],

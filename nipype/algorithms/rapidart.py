@@ -587,7 +587,7 @@ class StimCorrInputSpec(BaseInterfaceInputSpec):
     intensity_values = InputMultiPath(File(exists=True),
                                       mandatory=True,
                                       desc=("Name of file containing intensity "
-                                           "values"))
+                                            "values"))
     spm_mat_file = File(exists=True,
                         mandatory=True,
                         desc="SPM mat file (use pre-estimate SPM.mat file)")

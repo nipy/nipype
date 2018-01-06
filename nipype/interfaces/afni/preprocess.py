@@ -515,8 +515,8 @@ class Allineate(AFNICommand):
                 outputs['out_param_file'] = op.abspath(self.inputs.out_param_file)
 
         if isdefined(self.inputs.allcostx):
-            outputs['allcostX'] = os.path.abspath(os.path.join(os.getcwd(),
-                                         self.inputs.allcostx))
+            outputs['allcostX'] = os.path.abspath(
+                os.path.join(os.getcwd(), self.inputs.allcostx))
         return outputs
 
     def _gen_filename(self, name):
@@ -1892,7 +1892,8 @@ class ROIStatsInputSpec(CommandLineInputSpec):
         desc='execute quietly',
         argstr='-quiet',
         position=1)
-    terminal_output = traits.Enum('allatonce', deprecated='1.0.0',
+    terminal_output = traits.Enum(
+        'allatonce', deprecated='1.0.0',
         desc='Control terminal output:`allatonce` - waits till command is '
              'finished to display output',
         nohash=True)
@@ -3527,23 +3528,23 @@ class Qwarp(AFNICommand):
         outputs['warped_source'] = fname_presuffix(prefix, suffix=suffix,
                                                    use_ext=False) + ext
         if not self.inputs.nowarp:
-            outputs['source_warp'] = fname_presuffix(prefix,
-                suffix='_WARP' + suffix, use_ext=False) + ext
+            outputs['source_warp'] = fname_presuffix(
+                prefix, suffix='_WARP' + suffix, use_ext=False) + ext
         if self.inputs.iwarp:
-            outputs['base_warp'] = fname_presuffix(prefix,
-                suffix='_WARPINV' + suffix, use_ext=False) + ext
+            outputs['base_warp'] = fname_presuffix(
+                prefix, suffix='_WARPINV' + suffix, use_ext=False) + ext
         if isdefined(self.inputs.out_weight_file):
             outputs['weights'] = os.path.abspath(self.inputs.out_weight_file)
 
         if self.inputs.plusminus:
-            outputs['warped_source'] = fname_presuffix(prefix,
-                suffix='_PLUS' + suffix, use_ext=False) + ext
-            outputs['warped_base'] = fname_presuffix(prefix,
-                suffix='_MINUS' + suffix, use_ext=False) + ext
-            outputs['source_warp'] = fname_presuffix(prefix,
-                suffix='_PLUS_WARP' + suffix, use_ext=False) + ext
-            outputs['base_warp'] = fname_presuffix(prefix,
-                suffix='_MINUS_WARP' + suffix, use_ext=False) + ext
+            outputs['warped_source'] = fname_presuffix(
+                prefix, suffix='_PLUS' + suffix, use_ext=False) + ext
+            outputs['warped_base'] = fname_presuffix(
+                prefix, suffix='_MINUS' + suffix, use_ext=False) + ext
+            outputs['source_warp'] = fname_presuffix(
+                prefix, suffix='_PLUS_WARP' + suffix, use_ext=False) + ext
+            outputs['base_warp'] = fname_presuffix(
+                prefix, suffix='_MINUS_WARP' + suffix, use_ext=False) + ext
         return outputs
 
     def _gen_filename(self, name):

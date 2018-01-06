@@ -323,7 +323,7 @@ def dummy_func(value):
 
 
 @pytest.mark.skipif(sys.version_info < (3,0),
-                   reason="the famous segfault #1788")
+                    reason="the famous segfault #1788")
 def test_mapnode_crash(tmpdir):
     """Test mapnode crash when stop_on_first_crash is True"""
     cwd = os.getcwd()
@@ -342,7 +342,7 @@ def test_mapnode_crash(tmpdir):
 
 
 @pytest.mark.skipif(sys.version_info < (3,0),
-                   reason="the famous segfault #1788")
+                    reason="the famous segfault #1788")
 def test_mapnode_crash2(tmpdir):
     """Test mapnode crash when stop_on_first_crash is False"""
     cwd = os.getcwd()
@@ -360,7 +360,7 @@ def test_mapnode_crash2(tmpdir):
 
 
 @pytest.mark.skipif(sys.version_info < (3,0),
-                   reason="the famous segfault #1788")
+                    reason="the famous segfault #1788")
 def test_mapnode_crash3(tmpdir):
     """Test mapnode crash when mapnode is embedded in a workflow"""
     tmpdir.chdir()

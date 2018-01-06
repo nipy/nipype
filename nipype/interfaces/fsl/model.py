@@ -51,8 +51,9 @@ class Level1DesignInputSpec(BaseInterfaceInputSpec):
         mandatory=True,
         desc=("name of basis function and options e.g., "
               "{'dgamma': {'derivs': True}}"),)
-    orthogonalization = traits.Dict(traits.Int, traits.Dict(traits.Int,
-        traits.Either(traits.Bool,traits.Int)),
+    orthogonalization = traits.Dict(
+        traits.Int, traits.Dict(traits.Int,
+                                traits.Either(traits.Bool,traits.Int)),
         desc=("which regressors to make orthogonal e.g., "
               "{1: {0:0,1:0,2:0}, 2: {0:1,1:1,2:0}} to make the second "
               "regressor in a 2-regressor model orthogonal to the first."),
@@ -1816,29 +1817,29 @@ class Cluster(FSLCommand):
 
 class DualRegressionInputSpec(FSLCommandInputSpec):
     in_files = InputMultiPath(File(exists=True), argstr="%s", mandatory=True,
-        position=-1, sep=" ",
-        desc="List all subjects' preprocessed, standard-space 4D datasets",)
+                              position=-1, sep=" ",
+                              desc="List all subjects' preprocessed, standard-space 4D datasets",)
     group_IC_maps_4D = File(exists=True, argstr="%s", mandatory=True, position=1,
-        desc="4D image containing spatial IC maps (melodic_IC) from the "
-        "whole-group ICA analysis")
+                            desc="4D image containing spatial IC maps (melodic_IC) from the "
+                                 "whole-group ICA analysis")
     des_norm = traits.Bool(True, argstr="%i",  position=2, usedefault=True,
-        desc="Whether to variance-normalise the timecourses used as the "
-        "stage-2 regressors; True is default and recommended")
+                           desc="Whether to variance-normalise the timecourses used as the "
+                                "stage-2 regressors; True is default and recommended")
     one_sample_group_mean = traits.Bool(argstr="-1", position=3,
-        desc="perform 1-sample group-mean test instead of generic "
-        "permutation test")
+                                        desc="perform 1-sample group-mean test instead of generic "
+                                             "permutation test")
     design_file = File(exists=True, argstr="%s", position=3,
-        desc="Design matrix for final cross-subject modelling with "
-        "randomise")
+                       desc="Design matrix for final cross-subject modelling with "
+                            "randomise")
     con_file = File(exists=True, argstr="%s", position=4,
-        desc="Design contrasts for final cross-subject modelling with "
-        "randomise")
+                    desc="Design contrasts for final cross-subject modelling with "
+                         "randomise")
     n_perm = traits.Int(argstr="%i", mandatory=True, position=5,
-        desc="Number of permutations for randomise; set to 1 for just raw "
-        "tstat output, set to 0 to not run randomise at all.")
+                        desc="Number of permutations for randomise; set to 1 for just raw "
+                             "tstat output, set to 0 to not run randomise at all.")
     out_dir = Directory("output", argstr="%s", usedefault=True, position=6,
-        desc="This directory will be created to hold all output and logfiles",
-        genfile=True)
+                        desc="This directory will be created to hold all output and logfiles",
+                        genfile=True)
 
 
 class DualRegressionOutputSpec(TraitedSpec):

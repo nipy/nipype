@@ -262,7 +262,8 @@ class BrickStatInputSpec(CommandLineInputSpec):
     var = traits.Bool(
         desc='print the variance in the dataset',
         argstr='-var')
-    percentile = traits.Tuple(traits.Float, traits.Float, traits.Float,
+    percentile = traits.Tuple(
+        traits.Float, traits.Float, traits.Float,
         desc='p0 ps p1 write the percentile values starting '
              'at p0% and ending at p1% at a step of ps%. '
              'only one sub-brick is accepted.',
@@ -333,7 +334,7 @@ class BucketInputSpec(AFNICommandInputSpec):
             (File(
                 exists=True,
                 copyfile=False),
-            traits.Str(argstr="'%s'")),
+                traits.Str(argstr="'%s'")),
             artstr="%s%s"),
         position=-1,
         mandatory=True,
@@ -814,7 +815,8 @@ class DotInputSpec(AFNICommandInputSpec):
     mask = File(
         desc='Use this dataset as a mask',
         argstr='-mask %s')
-    mrange = traits.Tuple((traits.Float(),traits.Float()),
+    mrange = traits.Tuple(
+        (traits.Float(),traits.Float()),
         desc='Means to further restrict the voxels from \'mset\' so that'
              'only those mask values within this range (inclusive) willbe used.',
         argstr='-mrange %s %s')
@@ -1525,11 +1527,12 @@ class Notes(CommandLine):
 
 
 class NwarpApplyInputSpec(CommandLineInputSpec):
-    in_file = traits.Either(File(exists=True), traits.List(File(exists=True)),
+    in_file = traits.Either(
+        File(exists=True), traits.List(File(exists=True)),
         mandatory=True,
         argstr='-source %s',
         desc='the name of the dataset to be warped '
-            'can be multiple datasets')
+             'can be multiple datasets')
     warp = traits.String(
         desc='the name of the warp dataset. '
              'multiple warps can be concatenated (make sure they exist)',
@@ -1538,18 +1541,21 @@ class NwarpApplyInputSpec(CommandLineInputSpec):
     inv_warp = traits.Bool(
         desc='After the warp specified in \'-nwarp\' is computed, invert it',
         argstr='-iwarp')
-    master = traits.File(exists=True,
+    master = traits.File(
+        exists=True,
         desc='the name of the master dataset, which defines the output grid',
         argstr='-master %s')
-    interp = traits.Enum('NN','nearestneighbour','nearestneighbor','linear',
+    interp = traits.Enum(
+        'NN','nearestneighbour','nearestneighbor','linear',
         'trilinear','cubic','tricubic','quintic','triquintic','wsinc5',
         desc='defines interpolation method to use during warp',
         argstr='-interp %s',
         default='wsinc5')
-    ainterp = traits.Enum('NN','nearestneighbour','nearestneighbor','linear',
+    ainterp = traits.Enum(
+        'NN','nearestneighbour','nearestneighbor','linear',
         'trilinear','cubic','tricubic','quintic','triquintic','wsinc5',
         desc='specify a different interpolation method than might '
-            'be used for the warp',
+             'be used for the warp',
         argstr='-ainterp %s',
         default='wsinc5')
     out_file = File(
@@ -1744,7 +1750,8 @@ class OneDToolPyInputSpec(AFNIPythonCommandInputSpec):
     censor_prev_TR = traits.Bool(
         desc='for each censored TR, also censor previous',
         argstr='-censor_prev_TR')
-    show_trs_uncensored = traits.Enum('comma','space','encoded','verbose',
+    show_trs_uncensored = traits.Enum(
+        'comma','space','encoded','verbose',
         desc='display a list of TRs which were not censored in the specified style',
         argstr='-show_trs_uncensored %s')
     show_cormat_warnings = traits.File(

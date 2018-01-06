@@ -1376,16 +1376,18 @@ def merge_rois(in_files, in_idxs, in_ref,
 
 
 class CalculateMedianInputSpec(BaseInterfaceInputSpec):
-    in_files = InputMultiPath(File(exists=True, mandatory=True,
-      desc="One or more realigned Nifti 4D timeseries"))
+    in_files = InputMultiPath(File(
+        exists=True, mandatory=True,
+        desc="One or more realigned Nifti 4D timeseries"))
     median_file = traits.Str(desc="Filename prefix to store median images")
-    median_per_file = traits.Bool(False, usedefault=True,
-      desc="Calculate a median file for each Nifti")
+    median_per_file = traits.Bool(
+        False, usedefault=True,
+        desc="Calculate a median file for each Nifti")
 
 
 class CalculateMedianOutputSpec(TraitedSpec):
     median_files = OutputMultiPath(File(exists=True),
-      desc="One or more median images")
+                                   desc="One or more median images")
 
 
 class CalculateMedian(BaseInterface):

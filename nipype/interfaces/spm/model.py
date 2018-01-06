@@ -179,38 +179,38 @@ class Level1Design(SPMCommand):
 
 class EstimateModelInputSpec(SPMCommandInputSpec):
     spm_mat_file = File(exists=True, field='spmmat',
-        copyfile=True, mandatory=True,
-        desc='Absolute path to SPM.mat')
+                        copyfile=True, mandatory=True,
+                        desc='Absolute path to SPM.mat')
     estimation_method = traits.Dict(
         traits.Enum('Classical', 'Bayesian2', 'Bayesian'),
         field='method', mandatory=True,
         desc=('Dictionary of either Classical: 1, Bayesian: 1, '
               'or Bayesian2: 1 (dict)'))
     write_residuals = traits.Bool(field='write_residuals',
-        desc="Write individual residual images")
+                                  desc="Write individual residual images")
     flags = traits.Dict(desc='Additional arguments')
 
 
 class EstimateModelOutputSpec(TraitedSpec):
     mask_image = ImageFileSPM(exists=True,
-        desc='binary mask to constrain estimation')
+                              desc='binary mask to constrain estimation')
     beta_images = OutputMultiPath(ImageFileSPM(exists=True),
-        desc='design parameter estimates')
+                                  desc='design parameter estimates')
     residual_image = ImageFileSPM(exists=True,
-        desc='Mean-squared image of the residuals')
+                                  desc='Mean-squared image of the residuals')
     residual_images = OutputMultiPath(ImageFileSPM(exists=True),
-        desc="individual residual images (requires `write_residuals`")
+                                      desc="individual residual images (requires `write_residuals`")
     RPVimage = ImageFileSPM(exists=True, desc='Resels per voxel image')
     spm_mat_file = File(exists=True, desc='Updated SPM mat file')
     labels = ImageFileSPM(exists=True, desc="label file")
     SDerror = OutputMultiPath(ImageFileSPM(exists=True),
-        desc="Images of the standard deviation of the error")
+                              desc="Images of the standard deviation of the error")
     ARcoef = OutputMultiPath(ImageFileSPM(exists=True),
-        desc="Images of the AR coefficient")
+                             desc="Images of the AR coefficient")
     Cbetas = OutputMultiPath(ImageFileSPM(exists=True),
-        desc="Images of the parameter posteriors")
+                             desc="Images of the parameter posteriors")
     SDbetas = OutputMultiPath(ImageFileSPM(exists=True),
-        desc="Images of the standard deviation of parameter posteriors")
+                              desc="Images of the standard deviation of parameter posteriors")
 
 
 class EstimateModel(SPMCommand):
@@ -261,7 +261,7 @@ class EstimateModel(SPMCommand):
         if ('Bayesian' in self.inputs.estimation_method.keys() or
                 'Bayesian2' in self.inputs.estimation_method.keys()):
             outputs['labels'] = os.path.join(pth,
-                                            'labels.{}'.format(outtype))
+                                             'labels.{}'.format(outtype))
             outputs['SDerror'] = glob(os.path.join(pth, 'Sess*_SDerror*'))
             outputs['ARcoef'] = glob(os.path.join(pth, 'Sess*_AR_*'))
             if betas:
@@ -272,17 +272,16 @@ class EstimateModel(SPMCommand):
 
         if 'Classical' in self.inputs.estimation_method.keys():
             outputs['residual_image'] = os.path.join(pth,
-                                            'ResMS.{}'.format(outtype))
+                                                     'ResMS.{}'.format(outtype))
             outputs['RPVimage'] = os.path.join(pth,
-                                            'RPV.{}'.format(outtype))
+                                               'RPV.{}'.format(outtype))
             if self.inputs.write_residuals:
                 outputs['residual_images'] = glob(os.path.join(pth, 'Res_*'))
             if betas:
                 outputs['beta_images'] = [os.path.join(pth, beta)
                                           for beta in betas]
 
-        outputs['mask_image'] = os.path.join(pth,
-                                            'mask.{}'.format(outtype))
+        outputs['mask_image'] = os.path.join(pth, 'mask.{}'.format(outtype))
         outputs['spm_mat_file'] = os.path.join(pth, 'SPM.mat')
         return outputs
 

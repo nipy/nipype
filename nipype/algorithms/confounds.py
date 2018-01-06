@@ -53,16 +53,17 @@ class ComputeDVARSInputSpec(BaseInterfaceInputSpec):
                            desc='output figure size')
     figformat = traits.Enum('png', 'pdf', 'svg', usedefault=True,
                             desc='output format for figures')
-    intensity_normalization = traits.Float(1000.0, usedefault=True,
-                              desc='Divide value in each voxel at each timepoint '
-                                   'by the median calculated across all voxels'
-                                   'and timepoints within the mask (if specified)'
-                                   'and then multiply by the value specified by'
-                                   'this parameter. By using the default (1000)'
-                                   'output DVARS will be expressed in '
-                                   'x10 % BOLD units compatible with Power et al.'
-                                   '2012. Set this to 0 to disable intensity'
-                                   'normalization altogether.')
+    intensity_normalization = traits.Float(
+        1000.0, usedefault=True,
+        desc='Divide value in each voxel at each timepoint '
+             'by the median calculated across all voxels'
+             'and timepoints within the mask (if specified)'
+             'and then multiply by the value specified by'
+             'this parameter. By using the default (1000)'
+             'output DVARS will be expressed in '
+             'x10 % BOLD units compatible with Power et al.'
+             '2012. Set this to 0 to disable intensity'
+             'normalization altogether.')
 
 
 class ComputeDVARSOutputSpec(TraitedSpec):
@@ -160,8 +161,8 @@ Bradley L. and Petersen, Steven E.},
                 fig = plot_confound(dvars[0], self.inputs.figsize, 'Standardized DVARS',
                                     series_tr=tr)
                 fig.savefig(self._results['fig_std'], dpi=float(self.inputs.figdpi),
-                        format=self.inputs.figformat,
-                        bbox_inches='tight')
+                            format=self.inputs.figformat,
+                            bbox_inches='tight')
                 fig.clf()
 
         if self.inputs.save_nstd:
@@ -590,8 +591,8 @@ class TCompCor(CompCor):
             imgseries = timeseries[mask, :]
             imgseries = regress_poly(2, imgseries)[0]
             tSTD = _compute_tSTD(imgseries, 0, axis=-1)
-            threshold_std = np.percentile(tSTD, np.round(100. *
-                           (1. - self.inputs.percentile_threshold)).astype(int))
+            threshold_std = np.percentile(tSTD, np.round(
+                100. * (1. - self.inputs.percentile_threshold)).astype(int))
             mask_data = np.zeros_like(mask)
             mask_data[mask != 0] = tSTD >= threshold_std
             out_image = nb.Nifti1Image(mask_data, affine=img.affine,

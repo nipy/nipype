@@ -200,8 +200,8 @@ class BaseDirectory (BaseUnicode):
             else:
                 raise TraitError(
                     args='The trait \'{}\' of {} instance is {}, but the path '
-                         ' \'{}\' does not exist.'.format(name,
-                                    class_of(object), self.info_text, value))
+                         ' \'{}\' does not exist.'.format(
+                             name, class_of(object), self.info_text, value))
 
         self.error(object, name, value)
 
@@ -284,12 +284,12 @@ class ImageFile(File):
                             else [y[0]] for y in img_fmt_types[fmt]], []))
                 if self.allow_compressed:
                     exts.extend(sum([[u for u in y[-1]] if isinstance(y[-1],
-                    tuple) else [y[-1]] for y in img_fmt_types[fmt]], []))
+                                tuple) else [y[-1]] for y in img_fmt_types[fmt]], []))
             else:
                 raise AttributeError('Information has not been added for format'
                                      ' type {} yet. Supported formats include: '
                                      '{}'.format(fmt,
-                                     ', '.join(img_fmt_types.keys())))
+                                                 ', '.join(img_fmt_types.keys())))
         return list(set(exts))
 
     def validate(self, object, name, value):

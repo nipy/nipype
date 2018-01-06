@@ -473,8 +473,8 @@ class EddyInputSpec(FSLCommandInputSpec):
                                            'movement'))
 
     dont_peas = traits.Bool(False, argstr='--dont_peas',
-                           desc="Do NOT perform a post-eddy alignment of "
-                                "shells")
+                            desc="Do NOT perform a post-eddy alignment of "
+                                 "shells")
 
     fwhm = traits.Float(desc=('FWHM for conditioning filter when estimating '
                               'the parameters'), argstr='--fwhm=%s')

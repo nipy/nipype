@@ -362,15 +362,15 @@ def create_AutoRecon2(name="AutoRecon2", longitudinal=False,
             copy_template_white.inputs.out_file = '{0}.orig'.format(hemisphere)
 
             copy_template_orig_white = pe.Node(Function(['in_file', 'out_file'],
-                                                   ['out_file'],
-                                                   copy_file),
-                                          name='Copy_Template_Orig_White')
+                                                        ['out_file'],
+                                                        copy_file),
+                                               name='Copy_Template_Orig_White')
             copy_template_orig_white.inputs.out_file = '{0}.orig_white'.format(hemisphere)
 
             copy_template_orig_pial = pe.Node(Function(['in_file', 'out_file'],
-                                                   ['out_file'],
-                                                   copy_file),
-                                          name='Copy_Template_Orig_Pial')
+                                                       ['out_file'],
+                                                       copy_file),
+                                              name='Copy_Template_Orig_Pial')
             copy_template_orig_pial.inputs.out_file = '{0}.orig_pial'.format(hemisphere)
 
             # White

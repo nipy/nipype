@@ -369,8 +369,8 @@ def create_reconall_workflow(name="ReconAll", plugin_args=None):
                                  'talairach.xfm')
         return transform
     dstransform = pe.Node(niu.Function(['subjects_dir', 'subject_id'],
-                                   ['transform'],
-                                   getDSTransformPath),
+                                       ['transform'],
+                                       getDSTransformPath),
                           name="PreDataSink_GetTransformPath")
     reconall.connect([(inputspec, dstransform, [('subjects_dir', 'subjects_dir'),
                                                 ('subject_id', 'subject_id')])])

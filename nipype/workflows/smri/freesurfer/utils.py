@@ -485,8 +485,8 @@ def checkenv(exitonfail=False):
                   "\nsource {0}".format(setupscript))
         else:
             print("Please ensure that FREESURFER_HOME is set to a valid fs " +
-            "directory and source the necessary SetUpFreeSurfer.sh script before running " +
-            "this workflow")
+                  "directory and source the necessary SetUpFreeSurfer.sh script before running " +
+                  "this workflow")
     else:
         return fs_home
 

@@ -1191,15 +1191,15 @@ class SelectFilesInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
                                 desc="When matching mutliple files, return them"
                                 " in sorted order.")
     raise_on_empty = traits.Bool(True, usedefault=True,
-                                desc="Raise an exception if a template pattern "
-                                "matches no files.")
+                                 desc="Raise an exception if a template pattern "
+                                      "matches no files.")
     force_lists = traits.Either(traits.Bool(), traits.List(Str()),
                                 default=False, usedefault=True,
                                 desc=("Whether to return outputs as a list even"
-                                " when only one file matches the template. "
-                                "Either a boolean that applies to all output "
-                                "fields or a list of output field names to "
-                                "coerce to a list"))
+                                      " when only one file matches the template. "
+                                      "Either a boolean that applies to all output "
+                                      "fields or a list of output field names to "
+                                      "coerce to a list"))
 
 
 class SelectFiles(IOBase):

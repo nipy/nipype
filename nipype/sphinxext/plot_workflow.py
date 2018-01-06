@@ -659,8 +659,8 @@ def run(arguments, content, options, state_machine, state, lineno):
     except GraphError as err:
         reporter = state.memo.reporter
         sm = reporter.system_message(
-            2, "Exception occurred in plotting %s\n from %s:\n%s" % (output_base,
-                                                source_file_name, err),
+            2, "Exception occurred in plotting %s\n from %s:\n%s" % (
+                output_base, source_file_name, err),
             line=lineno)
         results = [(code, [])]
         errors = [sm]

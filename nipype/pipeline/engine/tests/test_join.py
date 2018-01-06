@@ -556,9 +556,9 @@ def test_nested_workflow_join(tmpdir):
                            name='pre_join')
         # rejoin nums into list
         join = pe.JoinNode(IdentityInterface(fields=['n']),
-                          joinsource='inputspec',
-                          joinfield='n',
-                          name='join')
+                           joinsource='inputspec',
+                           joinfield='n',
+                           name='join')
         # define and connect nested workflow
         wf = pe.Workflow(name='wf_%d' % i[0])
         wf.connect(inputspec, 'n', pre_join, 'input1')

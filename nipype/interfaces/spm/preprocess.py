@@ -274,8 +274,8 @@ class Realign(SPMCommand):
 
 class CoregisterInputSpec(SPMCommandInputSpec):
     target = ImageFileSPM(exists=True, mandatory=True,
-                  field='ref', desc='reference file to register to',
-                  copyfile=False)
+                          field='ref', desc='reference file to register to',
+                          copyfile=False)
     source = InputMultiPath(ImageFileSPM(exists=True),
                             field='source', desc='file to register to target',
                             copyfile=True, mandatory=True)
@@ -560,10 +560,10 @@ class Normalize(SPMCommand):
 
 class Normalize12InputSpec(SPMCommandInputSpec):
     image_to_align = ImageFileSPM(exists=True, field='subj.vol',
-                          desc=('file to estimate normalization parameters '
-                                'with'),
-                          xor=['deformation_file'],
-                          mandatory=True, copyfile=True)
+                                  desc=('file to estimate normalization parameters '
+                                        'with'),
+                                  xor=['deformation_file'],
+                                  mandatory=True, copyfile=True)
     apply_to_files = InputMultiPath(
         traits.Either(ImageFileSPM(exists=True),
                       traits.List(ImageFileSPM(exists=True))),
@@ -571,10 +571,10 @@ class Normalize12InputSpec(SPMCommandInputSpec):
         desc='files to apply transformation to',
         copyfile=True)
     deformation_file = ImageFileSPM(field='subj.def', mandatory=True,
-                            xor=['image_to_align', 'tpm'], copyfile=False,
-                            desc=('file y_*.nii containing 3 deformation '
-                                  'fields for the deformation in x, y and z '
-                                  'dimension'))
+                                    xor=['image_to_align', 'tpm'], copyfile=False,
+                                    desc=('file y_*.nii containing 3 deformation '
+                                          'fields for the deformation in x, y and z '
+                                          'dimension'))
     jobtype = traits.Enum('estwrite', 'est', 'write', usedefault=True,
                           desc='Estimate, Write or do Both')
     bias_regularization = traits.Enum(0, 0.00001, 0.0001, 0.001, 0.01, 0.1, 1,
@@ -1276,7 +1276,7 @@ class DARTEL(SPMCommand):
 
 class DARTELNorm2MNIInputSpec(SPMCommandInputSpec):
     template_file = ImageFileSPM(exists=True, copyfile=False, mandatory=True,
-                         desc="DARTEL template", field='mni_norm.template')
+                                 desc="DARTEL template", field='mni_norm.template')
     flowfield_files = InputMultiPath(ImageFileSPM(exists=True), mandatory=True,
                                      desc="DARTEL flow fields u_rc1*",
                                      field='mni_norm.data.subjs.flowfields')
@@ -1442,7 +1442,7 @@ class ApplyDeformationFieldInputSpec(SPMCommandInputSpec):
                               mandatory=True, field='fnames')
     deformation_field = File(exists=True, mandatory=True, field='comp{1}.def')
     reference_volume = ImageFileSPM(exists=True, mandatory=True,
-                            field='comp{2}.id.space')
+                                    field='comp{2}.id.space')
     interp = traits.Range(low=0, high=7, field='interp',
                           desc='degree of b-spline used for interpolation')
 
