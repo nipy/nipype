@@ -1031,6 +1031,7 @@ class Registration(ANTSCommand):
         self._quantilesDone = True
         return '--winsorize-image-intensities [ %s, %s ]' % (self.inputs.winsorize_lower_quantile,
                                                              self.inputs.winsorize_upper_quantile)
+
     def _get_initial_transform_filenames(self):
         n_transforms = len(self.inputs.initial_moving_transform)
 

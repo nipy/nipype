@@ -124,12 +124,14 @@ except ImportError as e:
 try:
     # Sphinx depends on either Jinja or Jinja2
     import jinja2
+
     def format_template(template, **kw):
         return jinja2.Template(template).render(**kw)
 except ImportError as e:
     missing_imports.append(str(e))
     try:
         import jinja
+
         def format_template(template, **kw):
             return jinja.from_string(template, **kw)
         missing_imports.pop()

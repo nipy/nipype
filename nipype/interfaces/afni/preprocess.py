@@ -745,6 +745,7 @@ class AutoTLRC(AFNICommand):
     _cmd = '@auto_tlrc'
     input_spec = AutoTLRCInputSpec
     output_spec = AFNICommandOutputSpec
+
     def _list_outputs(self):
         outputs = self.output_spec().get()
         ext = '.HEAD'

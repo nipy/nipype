@@ -463,6 +463,7 @@ def test_mapnode_iterfield_check():
         ])
 def test_mapnode_iterfield_type(x_inp, f_exp):
     from nipype import MapNode, Function
+
     def double_func(x):
         return 2 * x
     double = Function(["x"], ["f_x"], double_func)
