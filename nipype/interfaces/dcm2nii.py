@@ -171,7 +171,7 @@ class Dcm2nii(CommandLine):
                         out_file = val
 
                 if out_file:
-                    if not out_file in files:
+                    if out_file not in files:
                         files.append(out_file)
                         last_added_file = out_file
                     continue
