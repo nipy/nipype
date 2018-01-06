@@ -3,7 +3,7 @@ from __future__ import print_function, division, unicode_literals, absolute_impo
 import os
 from ....interfaces.utility import Function, IdentityInterface
 from ....pipeline import engine as pe  # pypeline engine
-from ....interfaces.freesurfer import *
+from ....interfaces.freesurfer import Label2Label, Label2Annot, ParcellationStats
 from ....interfaces.io import DataGrabber
 from ....interfaces.utility import Merge
 

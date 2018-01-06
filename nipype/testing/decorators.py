@@ -5,7 +5,7 @@
 Extend numpy's decorators to use nipype's gui and data labels.
 """
 
-from numpy.testing.decorators import *
+from numpy.testing.decorators import knownfailureif, skipif
 
 from nibabel.data import DataError
 
