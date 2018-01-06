@@ -223,7 +223,7 @@ def test_Proj_thresh():
     results = proj3.run(volumes=['inp1', 'inp3', 'inp2'], threshold=2)
     assert results.runtime.cmdline == 'proj_thresh inp1 inp3 inp2 2'
     assert results.runtime.returncode != 0
-    assert isinstance(results.interface.inputs.volumes, list) == True
+    assert isinstance(results.interface.inputs.volumes, list)
     assert results.interface.inputs.threshold == 2
 
     # test arguments for opt_map

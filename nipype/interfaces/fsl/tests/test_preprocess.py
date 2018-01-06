@@ -102,7 +102,7 @@ def test_fast(setup_infile):
     fasted2 = fsl.FAST(in_files=[tmp_infile, tmp_infile], verbose=True)
 
     assert faster.cmd == 'fast'
-    assert faster.inputs.verbose == True
+    assert faster.inputs.verbose
     assert faster.inputs.manual_seg == Undefined
     assert faster.inputs != fasted.inputs
     assert fasted.cmdline == 'fast -v -S 1 %s' % (tmp_infile)

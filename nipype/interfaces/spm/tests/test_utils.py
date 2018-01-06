@@ -18,7 +18,7 @@ def test_coreg():
     coreg.inputs.target = target
     assert coreg.inputs.matlab_cmd == 'mymatlab'
     coreg.inputs.moving = moving
-    assert isdefined(coreg.inputs.mat) == False
+    assert not isdefined(coreg.inputs.mat)
     pth, mov, _ = split_filename(moving)
     _, tgt, _ = split_filename(target)
     mat = os.path.join(pth, '%s_to_%s.mat' % (mov, tgt))
@@ -70,7 +70,7 @@ def test_dicom_import():
     assert di.inputs.output_dir_struct == 'flat'
     assert di.inputs.output_dir == './converted_dicom'
     assert di.inputs.format == 'nii'
-    assert di.inputs.icedims == False
+    assert not di.inputs.icedims
     with pytest.raises(TraitError): di.inputs.trait_set(output_dir_struct='wrong')
     with pytest.raises(TraitError): di.inputs.trait_set(format='FAT')
     with pytest.raises(TraitError): di.inputs.trait_set(in_files=['does_sfd_not_32fn_exist.dcm'])

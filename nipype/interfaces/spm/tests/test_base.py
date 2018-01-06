@@ -65,12 +65,12 @@ def test_find_mlab_cmd_defaults():
     # test with only FORCE_SPMMCR set
     os.environ['FORCE_SPMMCR'] = '1'
     dc = TestClass()
-    assert dc._use_mcr == True
+    assert dc._use_mcr
     assert dc._matlab_cmd is None
     # test with both, FORCE_SPMMCR and SPMMCRCMD set
     os.environ['SPMMCRCMD'] = 'spmcmd'
     dc = TestClass()
-    assert dc._use_mcr == True
+    assert dc._use_mcr
     assert dc._matlab_cmd == 'spmcmd'
     # restore environment
     os.environ.clear()
