@@ -339,7 +339,7 @@ def create_AutoRecon3(name="AutoRecon3", qcache=False, plugin_args=None,
         intrinsic curvature index.
         """
         parcellation_stats_white = pe.Node(
-            ParcellationStats(), name="Parcellation_Stats_{0}_White".format(hemisphere) )
+            ParcellationStats(), name="Parcellation_Stats_{0}_White".format(hemisphere))
         parcellation_stats_white.inputs.mgz = True
         parcellation_stats_white.inputs.th3 = th3
         parcellation_stats_white.inputs.tabular_output = True
