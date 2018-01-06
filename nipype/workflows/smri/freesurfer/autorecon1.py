@@ -244,7 +244,7 @@ def create_AutoRecon1(name="AutoRecon1", longitudinal=False, distance=None,
     if stop:
         bias_correction.inputs.stop = stop
     if shrink:
-        bias_correction.inputs.shrink =  shrink
+        bias_correction.inputs.shrink = shrink
     bias_correction.inputs.no_rescale = True
     bias_correction.inputs.out_file = 'orig_nu.mgz'
 

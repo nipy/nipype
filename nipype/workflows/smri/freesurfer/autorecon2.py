@@ -69,7 +69,7 @@ def create_AutoRecon2(name="AutoRecon2", longitudinal=False,
         if stop:
             intensity_correction.inputs.stop = stop
         if shrink:
-            intensity_correction.inputs.shrink =  shrink
+            intensity_correction.inputs.shrink = shrink
         intensity_correction.inputs.distance = distance
 
         add_to_header_nu = pe.Node(AddXFormToHeader(), name="Add_XForm_to_NU")

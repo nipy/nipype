@@ -273,7 +273,7 @@ class EstimateModel(SPMCommand):
         if 'Classical' in self.inputs.estimation_method.keys():
             outputs['residual_image'] = os.path.join(pth,
                                             'ResMS.{}'.format(outtype))
-            outputs['RPVimage'] =  os.path.join(pth,
+            outputs['RPVimage'] = os.path.join(pth,
                                             'RPV.{}'.format(outtype))
             if self.inputs.write_residuals:
                 outputs['residual_images'] = glob(os.path.join(pth, 'Res_*'))
