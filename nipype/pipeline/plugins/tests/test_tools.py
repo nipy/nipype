@@ -13,7 +13,7 @@ from nipype.pipeline.plugins.tools import report_crash
 
 def test_report_crash():
     with mock.patch('pickle.dump', mock.MagicMock()) as mock_pickle_dump:
-        with mock.patch('nipype.pipeline.plugins.tools.format_exception', mock.MagicMock()): # see iss 1517
+        with mock.patch('nipype.pipeline.plugins.tools.format_exception', mock.MagicMock()):  # see iss 1517
             mock_pickle_dump.return_value = True
             mock_node = mock.MagicMock(name='mock_node')
             mock_node._id = 'an_id'

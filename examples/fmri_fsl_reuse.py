@@ -20,13 +20,13 @@ from __future__ import division
 from builtins import str
 from builtins import range
 
-import os                                    # system functions
-import nipype.interfaces.io as nio           # Data i/o
-import nipype.interfaces.fsl as fsl          # fsl
-from nipype.interfaces import utility as niu # Utilities
-import nipype.pipeline.engine as pe          # pypeline engine
-import nipype.algorithms.modelgen as model   # model generation
-import nipype.algorithms.rapidart as ra      # artifact detection
+import os                                     # system functions
+import nipype.interfaces.io as nio            # Data i/o
+import nipype.interfaces.fsl as fsl           # fsl
+from nipype.interfaces import utility as niu  # Utilities
+import nipype.pipeline.engine as pe           # pypeline engine
+import nipype.algorithms.modelgen as model    # model generation
+import nipype.algorithms.rapidart as ra       # artifact detection
 
 from nipype.workflows.fmri.fsl import (create_featreg_preproc,
                                        create_modelfit_workflow,

@@ -140,7 +140,7 @@ class TestSignalExtraction():
     def assert_expected_output(self, labels, wanted):
         with open(self.filenames['out_file'], 'r') as output:
             got = [line.split() for line in output]
-            labels_got = got.pop(0) # remove header
+            labels_got = got.pop(0)  # remove header
             assert labels_got == labels
             assert len(got) == self.fake_fmri_data.shape[3],'num rows and num volumes'
             # convert from string to float

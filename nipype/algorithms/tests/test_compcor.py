@@ -95,8 +95,8 @@ class TestCompCor():
         assert nb.load('mask_000.nii.gz').get_data().shape == asymmetric_shape[:3]
 
     def test_compcor_bad_input_shapes(self):
-        shape_less_than = (1, 2, 2, 5) # dim 0 is < dim 0 of self.mask_files (2)
-        shape_more_than = (3, 3, 3, 5) # dim 0 is > dim 0 of self.mask_files (2)
+        shape_less_than = (1, 2, 2, 5)  # dim 0 is < dim 0 of self.mask_files (2)
+        shape_more_than = (3, 3, 3, 5)  # dim 0 is > dim 0 of self.mask_files (2)
 
         for data_shape in (shape_less_than, shape_more_than):
             data_file = utils.save_toy_nii(np.zeros(data_shape), 'temp.nii')

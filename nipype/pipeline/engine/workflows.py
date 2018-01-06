@@ -930,13 +930,13 @@ connected.
             prefix = '  '
         if hierarchy is None:
             hierarchy = []
-        colorset = ['#FFFFC8',                       # Y
-                    '#0000FF', '#B4B4FF', '#E6E6FF', # B
-                    '#FF0000', '#FFB4B4', '#FFE6E6', # R
-                    '#00A300', '#B4FFB4', '#E6FFE6', # G
-                    '#0000FF', '#B4B4FF'] # loop B
+        colorset = ['#FFFFC8',                        # Y
+                    '#0000FF', '#B4B4FF', '#E6E6FF',  # B
+                    '#FF0000', '#FFB4B4', '#FFE6E6',  # R
+                    '#00A300', '#B4FFB4', '#E6FFE6',  # G
+                    '#0000FF', '#B4B4FF']  # loop B
         if level > len(colorset) - 2:
-            level = 3 # Loop back to blue
+            level = 3  # Loop back to blue
 
         dotlist = ['%slabel="%s";' % (prefix, self.name)]
         for node in nx.topological_sort(self._graph):

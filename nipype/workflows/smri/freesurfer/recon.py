@@ -160,7 +160,7 @@ def create_reconall_workflow(name="ReconAll", plugin_args=None):
         fs_version = 'v6.0'
         th3 = True
         shrink = 2
-        distance = 200 # 3T should be 50
+        distance = 200  # 3T should be 50
         stop = 0.0001
         exvivo = True
         entorhinal = True
@@ -178,7 +178,7 @@ def create_reconall_workflow(name="ReconAll", plugin_args=None):
                              "set or if you are using an older version of "
                              "FreeSurfer"))
         else:
-            fs_version = 5.3 # assume version 5.3
+            fs_version = 5.3  # assume version 5.3
         th3 = False
         shrink = None
         distance = 50

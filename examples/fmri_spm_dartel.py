@@ -19,15 +19,15 @@ from __future__ import print_function
 from builtins import str
 from builtins import range
 
-import nipype.interfaces.io as nio           # Data i/o
-import nipype.interfaces.spm as spm          # spm
-import nipype.workflows.fmri.spm as spm_wf          # spm
-import nipype.interfaces.fsl as fsl          # fsl
-from nipype.interfaces import utility as niu # Utilities
-import nipype.pipeline.engine as pe          # pypeline engine
-import nipype.algorithms.rapidart as ra      # artifact detection
-import nipype.algorithms.modelgen as model   # model specification
-import os                                    # system functions
+import nipype.interfaces.io as nio            # Data i/o
+import nipype.interfaces.spm as spm           # spm
+import nipype.workflows.fmri.spm as spm_wf    # spm
+import nipype.interfaces.fsl as fsl           # fsl
+from nipype.interfaces import utility as niu  # Utilities
+import nipype.pipeline.engine as pe           # pypeline engine
+import nipype.algorithms.rapidart as ra       # artifact detection
+import nipype.algorithms.modelgen as model    # model specification
+import os                                     # system functions
 
 """
 

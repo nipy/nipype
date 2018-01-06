@@ -18,7 +18,7 @@ def create_AutoRecon2(name="AutoRecon2", longitudinal=False,
     ar2_wf = pe.Workflow(name=name)
 
     inputspec = pe.Node(IdentityInterface(fields=['orig',
-                                                  'nu', # version < 6
+                                                  'nu',  # version < 6
                                                   'brainmask',
                                                   'transform',
                                                   'subject_id',

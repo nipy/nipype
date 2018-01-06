@@ -303,7 +303,7 @@ class Dcm2niix(CommandLine):
         for line in stdout.split("\n"):
             if not skip:
                 out_file = None
-                if line.startswith("Convert "): # output
+                if line.startswith("Convert "):  # output
                     fname = str(re.search('\S+/\S+', line).group(0))
                     if isdefined(self.inputs.output_dir):
                         output_dir = self.inputs.output_dir

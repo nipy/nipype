@@ -623,7 +623,7 @@ def run(arguments, content, options, state_machine, state, lineno):
     dest_dir = os.path.abspath(os.path.join(setup.app.builder.outdir,
                                             source_rel_dir))
     if not os.path.exists(dest_dir):
-        os.makedirs(dest_dir) # no problem here for me, but just use built-ins
+        os.makedirs(dest_dir)  # no problem here for me, but just use built-ins
 
     # how to link to files from the RST file
     dest_dir_link = os.path.join(relpath(setup.confdir, rst_dir),

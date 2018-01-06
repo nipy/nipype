@@ -23,7 +23,7 @@ def stub_node_factory(*args, **kwargs):
     name = kwargs['name']
     if name == 'compcor':
         return Node(*args, **kwargs)
-    else: # replace with an IdentityInterface
+    else:  # replace with an IdentityInterface
         return Node(IdentityInterface(fields=ALL_FIELDS),
                     name=name)
 

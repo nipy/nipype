@@ -324,7 +324,7 @@ class CompCorInputSpec(BaseInterfaceInputSpec):
                                     'first is the default.'))
     components_file = traits.Str('components_file.txt', usedefault=True,
                                  desc='Filename to store physiological components')
-    num_components = traits.Int(6, usedefault=True) # 6 for BOLD, 4 for ASL
+    num_components = traits.Int(6, usedefault=True)  # 6 for BOLD, 4 for ASL
     pre_filter = traits.Enum('polynomial', 'cosine', False, usedefault=True,
                              desc='Detrend time series prior to component '
                                   'extraction')
@@ -929,7 +929,7 @@ def regress_poly(degree, data, remove_mean=True, axis=-1):
     data = data.reshape((-1, timepoints))
 
     # Generate design matrix
-    X = np.ones((timepoints, 1)) # quick way to calc degree 0
+    X = np.ones((timepoints, 1))  # quick way to calc degree 0
     for i in range(degree):
         polynomial_func = Legendre.basis(i + 1)
         value_array = np.linspace(-1, 1, timepoints)
@@ -943,7 +943,7 @@ def regress_poly(degree, data, remove_mean=True, axis=-1):
     # Estimation
     if remove_mean:
         datahat = X.dot(betas).T
-    else: # disregard the first layer of X, which is degree 0
+    else:  # disregard the first layer of X, which is degree 0
         datahat = X[:, 1:].dot(betas[1:, ...]).T
     regressed_data = data - datahat
 

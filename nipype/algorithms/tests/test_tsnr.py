@@ -20,7 +20,7 @@ class TestTSNR():
         'in_file': 'tsnrinfile.nii',
     }
 
-    out_filenames = {# default output file names
+    out_filenames = {  # default output file names
         'detrended_file': 'detrend.nii.gz',
         'mean_file':  'mean.nii.gz',
         'stddev_file': 'stdev.nii.gz',

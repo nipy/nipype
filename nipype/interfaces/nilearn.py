@@ -100,15 +100,15 @@ class SignalExtraction(BaseInterface):
         maskers = []
 
         # determine form of label files, choose appropriate nilearn masker
-        if np.amax(label_data.get_data()) > 1: # 3d label file
+        if np.amax(label_data.get_data()) > 1:  # 3d label file
             n_labels = np.amax(label_data.get_data())
             maskers.append(nl.NiftiLabelsMasker(label_data))
-        else: # 4d labels
+        else:  # 4d labels
             n_labels = label_data.get_data().shape[3]
-            if self.inputs.incl_shared_variance: # 4d labels, independent computation
+            if self.inputs.incl_shared_variance:  # 4d labels, independent computation
                 for img in nli.iter_img(label_data):
                     maskers.append(nl.NiftiMapsMasker(self._4d(img.get_data(), img.affine)))
-            else: # 4d labels, one computation fitting all
+            else:  # 4d labels, one computation fitting all
                 maskers.append(nl.NiftiMapsMasker(label_data))
 
         # check label list size
@@ -124,8 +124,8 @@ class SignalExtraction(BaseInterface):
                                                      self.inputs.label_files))
 
         if self.inputs.include_global:
-            global_label_data = label_data.get_data().sum(axis=3) # sum across all regions
-            global_label_data = np.rint(global_label_data).astype(int).clip(0, 1) # binarize
+            global_label_data = label_data.get_data().sum(axis=3)  # sum across all regions
+            global_label_data = np.rint(global_label_data).astype(int).clip(0, 1)  # binarize
             global_label_data = self._4d(global_label_data, label_data.affine)
             global_masker = nl.NiftiLabelsMasker(global_label_data, detrend=self.inputs.detrend)
             maskers.insert(0, global_masker)
