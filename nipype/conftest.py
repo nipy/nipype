@@ -1,5 +1,6 @@
 import pytest
-import numpy, os
+import numpy
+import os
 
 @pytest.fixture(autouse=True)
 def add_np(doctest_namespace):

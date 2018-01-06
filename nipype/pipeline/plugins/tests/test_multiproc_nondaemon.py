@@ -7,7 +7,8 @@ from __future__ import print_function, division, unicode_literals, absolute_impo
 from builtins import range, open
 
 # Import packages
-import os, sys
+import os
+import sys
 from tempfile import mkdtemp
 from shutil import rmtree
 import pytest

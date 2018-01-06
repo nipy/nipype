@@ -108,7 +108,12 @@ The workflow directive has the following configuration options:
 """
 from __future__ import print_function, division, absolute_import, unicode_literals
 
-import sys, os, shutil, io, re, textwrap
+import sys
+import os
+import shutil
+import io
+import re
+import textwrap
 from os.path import relpath
 from errno import EEXIST
 import traceback

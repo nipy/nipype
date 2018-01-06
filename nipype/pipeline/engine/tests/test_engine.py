@@ -10,7 +10,8 @@ from builtins import str
 from builtins import open
 from copy import deepcopy
 from glob import glob
-import os, sys
+import os
+import sys
 
 import networkx as nx
 

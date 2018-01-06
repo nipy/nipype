@@ -6,7 +6,8 @@
 from __future__ import print_function, division, unicode_literals, absolute_import
 from builtins import range, open
 
-import os, sys
+import os
+import sys
 from copy import deepcopy
 from shutil import rmtree
 import pytest

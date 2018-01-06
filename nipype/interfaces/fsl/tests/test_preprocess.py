@@ -8,7 +8,8 @@ from builtins import open
 import os
 from copy import deepcopy
 
-import pytest, pdb
+import pytest
+import pdb
 from nipype.utils.filemanip import split_filename, filename_to_list
 from .. import preprocess as fsl
 from nipype.interfaces.fsl import Info
