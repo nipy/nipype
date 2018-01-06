@@ -516,7 +516,7 @@ def create_AutoRecon2(name="AutoRecon2", longitudinal=False,
                                                         ('brain', 'in_brain')])])
 
 
-            ## TODO: halt workflow for bad euler number
+            # TODO: halt workflow for bad euler number
             euler_number = pe.Node(EulerNumber(), name="Euler_Number")
 
             hemi_wf.connect([(fix_topology, euler_number, [('out_file', 'in_file')]),
