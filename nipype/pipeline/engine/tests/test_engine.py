@@ -44,7 +44,8 @@ class EngineTestInterface(nib.BaseInterface):
 
 
 def test_init():
-    with pytest.raises(TypeError): pe.Workflow()
+    with pytest.raises(TypeError):
+        pe.Workflow()
     pipe = pe.Workflow(name='pipe')
     assert type(pipe._graph) == nx.DiGraph
 
@@ -413,7 +414,8 @@ workflow.run()
 
 
 def test_node_init():
-    with pytest.raises(Exception): pe.Node()
+    with pytest.raises(Exception):
+        pe.Node()
     try:
         node = pe.Node(EngineTestInterface, name='test')
     except IOError:
@@ -431,8 +433,10 @@ def test_workflow_add():
     w1 = pe.Workflow(name='test')
     w1.connect(n1, 'a', n2, 'c')
     for node in [n1, n2, n3]:
-        with pytest.raises(IOError): w1.add_nodes([node])
-    with pytest.raises(IOError): w1.connect([(w1, n2, [('n1.a', 'd')])])
+        with pytest.raises(IOError):
+            w1.add_nodes([node])
+    with pytest.raises(IOError):
+        w1.connect([(w1, n2, [('n1.a', 'd')])])
 
 
 def test_node_get_output():
@@ -448,13 +452,15 @@ def test_mapnode_iterfield_check():
     mod1 = pe.MapNode(EngineTestInterface(),
                       iterfield=['input1'],
                       name='mod1')
-    with pytest.raises(ValueError): mod1._check_iterfield()
+    with pytest.raises(ValueError):
+        mod1._check_iterfield()
     mod1 = pe.MapNode(EngineTestInterface(),
                       iterfield=['input1', 'input2'],
                       name='mod1')
     mod1.inputs.input1 = [1, 2]
     mod1.inputs.input2 = 3
-    with pytest.raises(ValueError): mod1._check_iterfield()
+    with pytest.raises(ValueError):
+        mod1._check_iterfield()
 
 
 @pytest.mark.parametrize("x_inp, f_exp", [

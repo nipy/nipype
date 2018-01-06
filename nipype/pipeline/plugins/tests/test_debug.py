@@ -46,7 +46,8 @@ def test_debug(tmpdir):
     mod1.inputs.input1 = 1
 
     run_wf = lambda: pipe.run(plugin="Debug")
-    with pytest.raises(ValueError): run_wf()
+    with pytest.raises(ValueError):
+        run_wf()
 
     exc = None
     try:

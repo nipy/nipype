@@ -21,7 +21,8 @@ def test_read_csv():
     CA = nitime.CoherenceAnalyzer()
     CA.inputs.TR = 1.89  # bogus value just to pass traits test
     CA.inputs.in_file = example_data('fmri_timeseries_nolabels.csv')
-    with pytest.raises(ValueError): CA._read_csv()
+    with pytest.raises(ValueError):
+        CA._read_csv()
 
     CA.inputs.in_file = example_data('fmri_timeseries.csv')
     data, roi_names = CA._read_csv()

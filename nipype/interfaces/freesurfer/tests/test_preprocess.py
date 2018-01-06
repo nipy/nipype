@@ -23,7 +23,8 @@ def test_robustregister(create_files_in_directory):
     assert reg.cmd == 'mri_robust_register'
 
     # test raising error with mandatory args absent
-    with pytest.raises(ValueError): reg.run()
+    with pytest.raises(ValueError):
+        reg.run()
 
     # .inputs based parameters setting
     reg.inputs.source_file = filelist[0]
@@ -51,7 +52,8 @@ def test_fitmsparams(create_files_in_directory):
     assert fit.cmd == 'mri_ms_fitparms'
 
     # test raising error with mandatory args absent
-    with pytest.raises(ValueError): fit.run()
+    with pytest.raises(ValueError):
+        fit.run()
 
     # .inputs based parameters setting
     fit.inputs.in_files = filelist
@@ -74,7 +76,8 @@ def test_synthesizeflash(create_files_in_directory):
     assert syn.cmd == 'mri_synthesize'
 
     # test raising error with mandatory args absent
-    with pytest.raises(ValueError): syn.run()
+    with pytest.raises(ValueError):
+        syn.run()
 
     # .inputs based parameters setting
     syn.inputs.t1_image = filelist[0]
@@ -100,7 +103,8 @@ def test_mandatory_outvol(create_files_in_directory):
     assert mni.cmd == "mri_nu_correct.mni"
 
     # test raising error with mandatory args absent
-    with pytest.raises(ValueError): mni.cmdline
+    with pytest.raises(ValueError):
+        mni.cmdline
 
     # test with minimal args
     mni.inputs.in_file = filelist[0]

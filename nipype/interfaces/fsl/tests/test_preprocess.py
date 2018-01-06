@@ -239,7 +239,8 @@ def test_flirt(setup_flirt):
     axfm = deepcopy(flirter)
     axfm.inputs.apply_xfm = True
     # in_matrix_file or uses_qform must be defined
-    with pytest.raises(RuntimeError): axfm.cmdline
+    with pytest.raises(RuntimeError):
+        axfm.cmdline
     axfm2 = deepcopy(axfm)
     # test uses_qform
     axfm.inputs.uses_qform = True
@@ -569,8 +570,10 @@ def test_fugue(setup_fugue, attr, out_file):
 
     fugue = fsl.FUGUE()
     for key, value in attr.items():
-        if value == "infile": setattr(fugue.inputs, key, infile)
-        else: setattr(fugue.inputs, key, value)
+        if value == "infile":
+            setattr(fugue.inputs, key, infile)
+        else:
+            setattr(fugue.inputs, key, value)
     res = fugue.run()
 
     assert isdefined(getattr(res.outputs,out_file))

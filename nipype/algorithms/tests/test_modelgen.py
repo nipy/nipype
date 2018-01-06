@@ -24,7 +24,8 @@ def test_modelgen1(tmpdir):
     s = SpecifyModel()
     s.inputs.input_units = 'scans'
     set_output_units = lambda: setattr(s.inputs, 'output_units', 'scans')
-    with pytest.raises(TraitError): set_output_units()
+    with pytest.raises(TraitError):
+        set_output_units()
     s.inputs.functional_runs = [filename1, filename2]
     s.inputs.time_repetition = 6
     s.inputs.high_pass_filter_cutoff = 128.

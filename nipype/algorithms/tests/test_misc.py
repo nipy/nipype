@@ -39,7 +39,8 @@ def test_CalculateMedian(create_analyze_pair_file_in_directory):
 
     mean = misc.CalculateMedian()
 
-    with pytest.raises(TypeError): mean.run()
+    with pytest.raises(TypeError):
+        mean.run()
 
     mean.inputs.in_files = example_data('ds003_sub-01_mc.nii.gz')
     eg = mean.run()

@@ -23,7 +23,8 @@ def test_sample2surf(create_files_in_directory_plus_dummy_file):
     assert s2s.cmd == 'mri_vol2surf'
 
     # Test mandatory args exception
-    with pytest.raises(ValueError): s2s.run()
+    with pytest.raises(ValueError):
+        s2s.run()
 
     # Create testing files
     files, cwd = create_files_in_directory_plus_dummy_file
@@ -53,7 +54,8 @@ def test_sample2surf(create_files_in_directory_plus_dummy_file):
     # Test that a 2-tuple range raises an error
     def set_illegal_range():
         s2s.inputs.sampling_range = (.2, .5)
-    with pytest.raises(TraitError): set_illegal_range()
+    with pytest.raises(TraitError):
+        set_illegal_range()
 
 
 @pytest.mark.skipif(fs.no_freesurfer(), reason="freesurfer is not installed")
@@ -65,7 +67,8 @@ def test_surfsmooth(create_surf_file_in_directory):
     assert smooth.cmd == "mri_surf2surf"
 
     # Test mandatory args exception
-    with pytest.raises(ValueError): smooth.run()
+    with pytest.raises(ValueError):
+        smooth.run()
 
     # Create testing files
     surf, cwd = create_surf_file_in_directory
@@ -97,7 +100,8 @@ def test_surfxfm(create_surf_file_in_directory):
     assert xfm.cmd == "mri_surf2surf"
 
     # Test mandatory args exception
-    with pytest.raises(ValueError): xfm.run()
+    with pytest.raises(ValueError):
+        xfm.run()
 
     # Create testing files
     surf, cwd = create_surf_file_in_directory
@@ -128,7 +132,8 @@ def test_surfshots(create_files_in_directory_plus_dummy_file):
     assert fotos.cmd == "tksurfer"
 
     # Test mandatory args exception
-    with pytest.raises(ValueError): fotos.run()
+    with pytest.raises(ValueError):
+        fotos.run()
 
     # Create testing files
     files, cwd = create_files_in_directory_plus_dummy_file
@@ -158,7 +163,8 @@ def test_surfshots(create_files_in_directory_plus_dummy_file):
     try:
         hold_display = os.environ["DISPLAY"]
         del os.environ["DISPLAY"]
-        with pytest.raises(RuntimeError): fotos.run()
+        with pytest.raises(RuntimeError):
+            fotos.run()
         os.environ["DISPLAY"] = hold_display
     except KeyError:
         pass
