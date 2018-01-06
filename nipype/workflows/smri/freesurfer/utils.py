@@ -422,19 +422,19 @@ def mkdir_p(path):
             raise
 
 def getdefaultconfig(exitonfail=False, rb_date="2014-08-21"):
-    config = { 'custom_atlas' : None,
-               'cw256' : False,
-               'field_strength' : '1.5T',
-               'fs_home' : checkenv(exitonfail),
-               'longitudinal' : False,
-               'long_base' : None,
-               'openmp' : None,
-               'plugin_args' : None,
-               'qcache' : False,
-               'queue' : None,
-               'recoding_file' : None,
-               'src_subject_id' : 'fsaverage',
-               'th3' : True}
+    config = {'custom_atlas' : None,
+              'cw256' : False,
+              'field_strength' : '1.5T',
+              'fs_home' : checkenv(exitonfail),
+              'longitudinal' : False,
+              'long_base' : None,
+              'openmp' : None,
+              'plugin_args' : None,
+              'qcache' : False,
+              'queue' : None,
+              'recoding_file' : None,
+              'src_subject_id' : 'fsaverage',
+              'th3' : True}
 
     config['src_subject_dir'] = os.path.join(config['fs_home'], 'subjects',
                                              config['src_subject_id'])

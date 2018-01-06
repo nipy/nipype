@@ -1743,7 +1743,7 @@ class MRIsInflateInputSpec(FSTraitedSpec):
                     hash_files=False, keep_extension=True,
                     desc="Output file for MRIsInflate")
     # optional
-    out_sulc = File( exists=False,
+    out_sulc = File(exists=False,
                     xor=['no_save_sulc'],
                     desc="Output sulc file")
     no_save_sulc = traits.Bool(argstr='-no-save-sulc',
@@ -1796,7 +1796,7 @@ class SphereInputSpec(FSTraitedSpecOpenMP):
                       desc="Seed for setting random number generator")
     magic = traits.Bool(argstr="-q",
                         desc="No documentation. Direct questions to analysis-bugs@nmr.mgh.harvard.edu")
-    in_smoothwm = File( exists=True, copyfile=True,
+    in_smoothwm = File(exists=True, copyfile=True,
                        desc="Input surface required when -q flag is not selected")
 
 
