@@ -11,4 +11,3 @@ def test_nipype_info():
 
 # def test_fail_always():
 #     assert False
-

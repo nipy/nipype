@@ -66,7 +66,7 @@ def test_FSLCommand2():
                           ({"suffix": '_brain'}, {"file": 'foo_brain.nii.gz'}),  # filename with suffix
                           ({"suffix": '_brain', "cwd": '/data'},
                            {"dir": '/data', "file": 'foo_brain.nii.gz'}),  # filename with suffix and working directory
-                          ({"suffix": '_brain.mat', "change_ext": False}, {"file": 'foo_brain.mat'}s)  # filename with suffix and no file extension change
+                          ({"suffix": '_brain.mat', "change_ext": False}, {"file": 'foo_brain.mat'})  # filename with suffix and no file extension change
                           ])
 def test_gen_fname(args, desired_name):
     # Test _gen_fname method of FSLCommand

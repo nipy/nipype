@@ -730,7 +730,7 @@ def test_write_graph_runs(tmpdir):
             except Exception:
                 assert False, \
                     'Failed to plot {} {} graph'.format(
-                    'simple' if simple else 'detailed', graph)
+                        'simple' if simple else 'detailed', graph)
 
             assert os.path.exists('graph.dot') or os.path.exists('graph_detailed.dot')
             try:
@@ -762,7 +762,7 @@ def test_deep_nested_write_graph_runs(tmpdir):
             except Exception as e:
                 assert False, \
                     'Failed to plot {} {} deep graph: {!s}'.format(
-                    'simple' if simple else 'detailed', graph, e)
+                        'simple' if simple else 'detailed', graph, e)
 
             assert os.path.exists('graph.dot') or os.path.exists('graph_detailed.dot')
             try:
