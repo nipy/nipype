@@ -147,9 +147,9 @@ class TOPUPInputSpec(FSLCommandInputSpec):
                                 desc='prefix for the realignment matrices',
                                 usedefault=True)
     out_jac_prefix = traits.Str("jac", argstr='--jacout=%s',
-                                 hash_files=False,
-                                 desc='prefix for the warpfield images',
-                                 usedefault=True)
+                                hash_files=False,
+                                desc='prefix for the warpfield images',
+                                usedefault=True)
     out_corrected = File(argstr='--iout=%s', hash_files=False,
                          name_source=['in_file'], name_template='%s_corrected',
                          desc='name of 4D image file with unwarped images')

@@ -2020,7 +2020,7 @@ class MakeSurfacesInputSpec(FSTraitedSpec):
     white_only = traits.Bool(argstr="-whiteonly",
                              desc="Undocumented flage")
     in_aseg = File(argstr="-aseg %s", exists=True,
-                    desc="Input segmentation file")
+                   desc="Input segmentation file")
     in_T1 = File(argstr="-T1 %s", exists=True,
                  desc="Input brain or T1 file")
     mgz = traits.Bool(
@@ -2808,7 +2808,7 @@ class RelabelHypointensitiesInputSpec(FSTraitedSpec):
     aseg = File(argstr="%s", position=-3, mandatory=True, exists=True,
                 desc="Input aseg file")
     surf_directory = traits.Directory('.', argstr="%s", position=-2, exists=True,
-                                       usedefault=True,
+                                      usedefault=True,
                                       desc="Directory containing lh.white and rh.white")
     out_file = File(argstr="%s", position=-1, exists=False,
                     name_source=['aseg'], name_template='%s.hypos.mgz',

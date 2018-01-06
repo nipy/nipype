@@ -181,7 +181,7 @@ class EMRegisterInputSpec(FSTraitedSpecOpenMP):
     skull = traits.Bool(
         argstr="-skull", desc="align to atlas containing skull (uns=5)")
     mask = File(argstr="-mask %s", exists=True,
-                 desc="use volume as a mask")
+                desc="use volume as a mask")
     nbrspacing = traits.Int(argstr="-uns %d",
                             desc="align to atlas containing skull setting unknown_nbr_spacing = nbrspacing")
     transform = File(argstr="-t %s", exists=True,

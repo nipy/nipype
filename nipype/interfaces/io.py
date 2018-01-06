@@ -201,11 +201,11 @@ class DataSinkInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
 
     # AWS S3 data attributes
     creds_path = Str(desc='Filepath to AWS credentials file for S3 bucket '
-                                 'access; if not specified, the credentials will '
-                                 'be taken from the AWS_ACCESS_KEY_ID and '
-                                 'AWS_SECRET_ACCESS_KEY environment variables')
+                          'access; if not specified, the credentials will '
+                          'be taken from the AWS_ACCESS_KEY_ID and '
+                          'AWS_SECRET_ACCESS_KEY environment variables')
     encrypt_bucket_keys = traits.Bool(desc='Flag indicating whether to use S3 '
-                                        'server-side AES-256 encryption')
+                                           'server-side AES-256 encryption')
     # Set this if user wishes to override the bucket with their own
     bucket = traits.Any(desc='Boto3 S3 bucket for manual override of bucket')
     # Set this if user wishes to have local copy of files as well
@@ -769,11 +769,11 @@ class S3DataGrabberInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
                        desc='Use anonymous connection to s3.  If this is set to True, boto may print' +
                             ' a urlopen error, but this does not prevent data from being downloaded.')
     region = Str('us-east-1', usedefault=True,
-                        desc='Region of s3 bucket')
+                 desc='Region of s3 bucket')
     bucket = Str(mandatory=True,
-                        desc='Amazon S3 bucket where your data is stored')
+                 desc='Amazon S3 bucket where your data is stored')
     bucket_path = Str('', usedefault=True,
-                             desc='Location within your bucket for subject data.')
+                      desc='Location within your bucket for subject data.')
     local_directory = Directory(exists=True,
                                 desc='Path to the local directory for subject data to be downloaded '
                                 'and accessed. Should be on HDFS for Spark jobs.')
@@ -782,8 +782,8 @@ class S3DataGrabberInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
     sort_filelist = traits.Bool(mandatory=True,
                                 desc='Sort the filelist that matches the template')
     template = Str(mandatory=True,
-                          desc='Layout used to get files. Relative to bucket_path if defined.'
-                               'Uses regex rather than glob style formatting.')
+                   desc='Layout used to get files. Relative to bucket_path if defined.'
+                        'Uses regex rather than glob style formatting.')
     template_args = traits.Dict(key_trait=Str,
                                 value_trait=traits.List(traits.List),
                                 desc='Information to plug into template')
@@ -990,7 +990,7 @@ class DataGrabberInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
     sort_filelist = traits.Bool(mandatory=True,
                                 desc='Sort the filelist that matches the template')
     template = Str(mandatory=True,
-                          desc='Layout used to get files. relative to base directory if defined')
+                   desc='Layout used to get files. relative to base directory if defined')
     template_args = traits.Dict(key_trait=Str,
                                 value_trait=traits.List(traits.List),
                                 desc='Information to plug into template')
@@ -1343,9 +1343,8 @@ class DataFinderInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
                                Str(),
                                mandatory=True,)
     match_regex = Str('(.+)',
-                             usedefault=True,
-                             desc=("Regular expression for matching "
-                                   "paths."))
+                      usedefault=True,
+                      desc=("Regular expression for matching paths."))
     ignore_regexes = traits.List(desc=("List of regular expressions, "
                                        "if any match the path it will be "
                                        "ignored.")
@@ -2143,8 +2142,8 @@ class SQLiteSink(IOBase):
 
 class MySQLSinkInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
     host = Str('localhost', mandatory=True,
-                      requires=['username', 'password'],
-                      xor=['config'], usedefault=True)
+               requires=['username', 'password'],
+               xor=['config'], usedefault=True)
     config = File(mandatory=True, xor=['host'],
                   desc="MySQL Options File (same format as my.cnf)")
     database_name = Str(
@@ -2208,11 +2207,11 @@ class SSHDataGrabberInputSpec(DataGrabberInputSpec):
     download_files = traits.Bool(True, usedefault=True,
                                  desc='If false it will return the file names without downloading them')
     base_directory = Str(mandatory=True,
-                                desc='Path to the base directory consisting of subject data.')
+                         desc='Path to the base directory consisting of subject data.')
     template_expression = traits.Enum(['fnmatch', 'regexp'], usedefault=True,
                                       desc='Use either fnmatch or regexp to express templates')
     ssh_log_to_file = Str('', usedefault=True,
-                                 desc='If set SSH commands will be logged to the given file')
+                          desc='If set SSH commands will be logged to the given file')
 
 
 class SSHDataGrabber(DataGrabber):

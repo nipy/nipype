@@ -771,7 +771,7 @@ class AddCSVRow(BaseInterface):
             import pandas as pd
         except ImportError as e:
             raise_from(ImportError('This interface requires pandas '
-                                    '(http://pandas.pydata.org/) to run.'), e)
+                                   '(http://pandas.pydata.org/) to run.'), e)
 
         try:
             import lockfile as pl
@@ -1180,7 +1180,7 @@ def normalize_tpms(in_files, in_mask=None, out_files=[]):
         hdr['data_type'] = 16
         hdr.set_data_dtype(np.float32)
         nb.save(nb.Nifti1Image(img_data.astype(np.float32), imgs[0].affine,
-                                 hdr), out_files[0])
+                               hdr), out_files[0])
         return out_files[0]
 
     img_data = np.array([im.get_data() for im in imgs]).astype(np.float32)
@@ -1205,7 +1205,7 @@ def normalize_tpms(in_files, in_mask=None, out_files=[]):
         hdr['data_type'] = 16
         hdr.set_data_dtype('float32')
         nb.save(nb.Nifti1Image(probmap.astype(np.float32), imgs[i].affine,
-                                 hdr), out_file)
+                               hdr), out_file)
 
     return out_files
 

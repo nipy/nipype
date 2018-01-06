@@ -349,7 +349,7 @@ class ProvStore(object):
         id = get_id()
         env_collection = self.g.collection(id)
         env_collection.add_attributes({pm.PROV['type']:
-                                           nipype_ns['Environment'],
+                                       nipype_ns['Environment'],
                                        pm.PROV['label']: "Environment"})
         self.g.used(a0, id)
         # write environment entities
@@ -367,7 +367,7 @@ class ProvStore(object):
             id = get_id()
             input_collection = self.g.collection(id)
             input_collection.add_attributes({pm.PROV['type']:
-                                                 nipype_ns['Inputs'],
+                                             nipype_ns['Inputs'],
                                              pm.PROV['label']: "Inputs"})
             # write input entities
             for idx, (key, val) in enumerate(sorted(inputs.items())):
@@ -384,7 +384,7 @@ class ProvStore(object):
             if not isinstance(outputs, dict):
                 outputs = outputs.get_traitsfree()
             output_collection.add_attributes({pm.PROV['type']:
-                                                  nipype_ns['Outputs'],
+                                              nipype_ns['Outputs'],
                                               pm.PROV['label']:
                                                   "Outputs"})
             self.g.wasGeneratedBy(output_collection, a0)
@@ -400,7 +400,7 @@ class ProvStore(object):
         id = get_id()
         runtime_collection = self.g.collection(id)
         runtime_collection.add_attributes({pm.PROV['type']:
-                                               nipype_ns['Runtime'],
+                                           nipype_ns['Runtime'],
                                            pm.PROV['label']:
                                                "RuntimeInfo"})
         self.g.wasGeneratedBy(runtime_collection, a0)

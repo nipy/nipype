@@ -263,7 +263,7 @@ functionality.
 
 inputnode = pe.Node(niu.IdentityInterface(fields=['in_data']), name='inputnode')
 datasource = pe.Node(nio.DataGrabber(infields=['subject_id'],
-                                               outfields=['func', 'struct']),
+                                     outfields=['func', 'struct']),
                      name='datasource')
 datasource.inputs.template = 'nipype-tutorial/data/%s/%s.nii'
 datasource.inputs.template_args = info
@@ -273,7 +273,7 @@ datasource.inputs.sort_filelist = True
 """
 
 datasource_dartel = pe.MapNode(nio.DataGrabber(infields=['subject_id'],
-                                                         outfields=['struct']),
+                                               outfields=['struct']),
                                name='datasource_dartel',
                                iterfield=['subject_id'])
 datasource_dartel.inputs.template = 'nipype-tutorial/data/%s/%s.nii'
@@ -308,9 +308,9 @@ def pickFieldFlow(dartel_flow_fields, subject_id):
     raise Exception
 
 pick_flow = pe.Node(niu.Function(input_names=['dartel_flow_fields',
-                                               'subject_id'],
-                                  output_names=['dartel_flow_field'],
-                                  function=pickFieldFlow),
+                                              'subject_id'],
+                                 output_names=['dartel_flow_field'],
+                                 function=pickFieldFlow),
                     name="pick_flow")
 
 """

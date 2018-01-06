@@ -57,11 +57,11 @@ and modelfitting workflows.
 """
 
 art = pe.MapNode(ra.ArtifactDetect(use_differences=[True, False],
-                                             use_norm=True,
-                                             norm_threshold=1,
-                                             zintensity_threshold=3,
-                                             parameter_source='FSL',
-                                             mask_type='file'),
+                                   use_norm=True,
+                                   norm_threshold=1,
+                                   zintensity_threshold=3,
+                                   parameter_source='FSL',
+                                   mask_type='file'),
                  iterfield=['realigned_files', 'realignment_parameters', 'mask_file'],
                  name="art")
 
@@ -170,7 +170,7 @@ functionality.
 """
 
 datasource = pe.Node(nio.DataGrabber(infields=['subject_id'],
-                                               outfields=['func', 'struct']),
+                                     outfields=['func', 'struct']),
                      name='datasource')
 datasource.inputs.template = 'nipype-tutorial/data/%s/%s.nii'
 datasource.inputs.template_args = info

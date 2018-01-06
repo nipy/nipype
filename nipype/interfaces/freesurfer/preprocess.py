@@ -2051,7 +2051,7 @@ class CALabelInputSpec(FSTraitedSpecOpenMP):
         argstr="-nobigventricles",  desc="No big ventricles")
     align = traits.Bool(argstr="-align",  desc="Align CALabel")
     prior = traits.Float(argstr="-prior %.1f",
-                          desc="Prior for CALabel")
+                         desc="Prior for CALabel")
     relabel_unlikely = traits.Tuple(traits.Int, traits.Float,
                                     argstr="-relabel_unlikely %d %.1f",
                                     desc=("Reclassify voxels at least some std"

@@ -127,7 +127,7 @@ def test_mandatory_outvol(create_files_in_directory):
                                         out_file='bias_corrected_output',
                                         iterations=4)
     assert mni2.cmdline == ('mri_nu_correct.mni --i %s --n 4 --o bias_corrected_output'
-                             % filelist[0])
+                            % filelist[0])
 
 
 @pytest.mark.skipif(freesurfer.no_freesurfer(), reason="freesurfer is not installed")

@@ -262,9 +262,9 @@ def create_AutoRecon1(name="AutoRecon1", longitudinal=False, distance=None,
         # longitudinal processing
         # Just copy the template xfm
         talairach_avi = pe.Node(Function(['in_file', 'out_file'],
-                                             ['out_file'],
-                                             copy_file),
-                                    name='Copy_Template_Transform')
+                                         ['out_file'],
+                                         copy_file),
+                                name='Copy_Template_Transform')
         talairach_avi.inputs.out_file = 'talairach.auto.xfm'
 
         ar1_wf.connect([(inputspec, talairach_avi, [('template_talairach_xfm', 'in_file')])])

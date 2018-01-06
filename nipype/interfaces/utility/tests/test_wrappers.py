@@ -100,12 +100,12 @@ def test_aux_connect_function(tmpdir):
     gen_tuple = pe.Node(utility.Function(input_names=['size'],
                                          output_names=['tuple'],
                                          function=_gen_tuple),
-                                         name='gen_tuple')
+                        name='gen_tuple')
 
     ssm = pe.Node(utility.Function(input_names=['a', 'b', 'c'],
                                    output_names=['sum', 'sub'],
                                    function=_sum_and_sub_mul),
-                                   name='sum_and_sub_mul')
+                  name='sum_and_sub_mul')
 
     split = pe.Node(utility.Split(splits=[1, 1],
                                   squeeze=True),

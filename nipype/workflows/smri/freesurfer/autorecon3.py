@@ -60,7 +60,7 @@ def create_AutoRecon3(name="AutoRecon3", qcache=False, plugin_args=None,
                                                   'src_subject_dir',
                                                   'color_table',
                                                   'num_threads']),
-                          name='inputspec')
+                        name='inputspec')
 
     ar3_lh_wf1 = pe.Workflow(name="AutoRecon3_Left_1")
     ar3_rh_wf1 = pe.Workflow(name="AutoRecon3_Right_1")

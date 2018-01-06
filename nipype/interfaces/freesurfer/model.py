@@ -123,8 +123,8 @@ class MRISPreprocReconAllInputSpec(MRISPreprocInputSpec):
                                   'surf_measure_file', 'surf_area'),
                              desc='file necessary for surfmeas')
     surfreg_files = InputMultiPath(File(exists=True), argstr="--surfreg %s",
-                                    requires=['lh_surfreg_target', 'rh_surfreg_target'],
-                                    desc="lh and rh input surface registration files")
+                                   requires=['lh_surfreg_target', 'rh_surfreg_target'],
+                                   desc="lh and rh input surface registration files")
     lh_surfreg_target = File(desc="Implicit target surface registration file",
                              requires=['surfreg_files'])
     rh_surfreg_target = File(desc="Implicit target surface registration file",
@@ -211,7 +211,7 @@ class GLMFitInputSpec(FSTraitedSpec):
                              xor=('one_sample', 'fsgd', 'design', 'contrast'),
                              desc='construct X and C as a one-sample group mean')
     no_contrast_ok = traits.Bool(argstr='--no-contrasts-ok',
-                                  desc='do not fail if no contrasts specified')
+                                 desc='do not fail if no contrasts specified')
     per_voxel_reg = InputMultiPath(File(exists=True), argstr='--pvr %s...',
                                    desc='per-voxel regressors')
     self_reg = traits.Tuple(traits.Int, traits.Int, traits.Int,
@@ -1070,7 +1070,7 @@ class MS_LDA(FSCommand):
 
 class Label2LabelInputSpec(FSTraitedSpec):
     hemisphere = traits.Enum('lh', 'rh', argstr="--hemi %s", mandatory=True,
-                               desc="Input hemisphere")
+                             desc="Input hemisphere")
     subject_id = traits.String('subject_id', usedefault=True,
                                argstr="--trgsubject %s", mandatory=True,
                                desc="Target subject")
@@ -1092,7 +1092,7 @@ class Label2LabelInputSpec(FSTraitedSpec):
                     hash_files=False, keep_extension=True,
                     desc="Target label")
     registration_method = traits.Enum('surface', 'volume', usedefault=True,
-                                        argstr="--regmethod %s", desc="Registration method")
+                                      argstr="--regmethod %s", desc="Registration method")
     copy_inputs = traits.Bool(desc="If running as a node, set this to True." +
                               "This will copy the input files to the node " +
                               "directory.")

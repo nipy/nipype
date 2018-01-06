@@ -149,9 +149,9 @@ class PETPVC(CommandLine):
 
     references_ = [{'entry': BibTeX("@article{0031-9155-61-22-7975,"
                                     "author={Benjamin A Thomas and Vesna Cuplov and Alexandre Bousse and "
-                                             "Adriana Mendes and Kris Thielemans and Brian F Hutton and Kjell Erlandsson},"
+                                    "Adriana Mendes and Kris Thielemans and Brian F Hutton and Kjell Erlandsson},"
                                     "title={PETPVC: a toolbox for performing partial volume correction "
-                                            "techniques in positron emission tomography},"
+                                    "techniques in positron emission tomography},"
                                     "journal={Physics in Medicine and Biology},"
                                     "volume={61},"
                                     "number={22},"

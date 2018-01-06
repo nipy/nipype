@@ -167,7 +167,7 @@ def _mkdirp(folder):
 
 
 def wf_directive(name, arguments, options, content, lineno,
-                   content_offset, block_text, state, state_machine):
+                 content_offset, block_text, state, state_machine):
     if len(missing_imports) == 0:
         return run(arguments, content, options, state_machine, state, lineno)
     else:

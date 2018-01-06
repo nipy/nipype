@@ -1025,15 +1025,15 @@ class AntsJointFusionInputSpec(ANTSCommandInputSpec):
                                  'specified, the program tries to infer the '
                                  'dimensionality from the input image.')
     target_image = traits.List(InputMultiPath(File(exists=True)), argstr='-t %s',
-                                  mandatory=True, desc='The target image (or '
-                                  'multimodal target images) assumed to be '
-                                  'aligned to a common image domain.')
+                               mandatory=True, desc='The target image (or '
+                               'multimodal target images) assumed to be '
+                               'aligned to a common image domain.')
     atlas_image = traits.List(InputMultiPath(File(exists=True)), argstr="-g %s...",
-                                 mandatory=True, desc='The atlas image (or '
-                                 'multimodal atlas images) assumed to be '
-                                 'aligned to a common image domain.')
+                              mandatory=True, desc='The atlas image (or '
+                             'multimodal atlas images) assumed to be '
+                              'aligned to a common image domain.')
     atlas_segmentation_image = InputMultiPath(File(exists=True), argstr="-l %s...",
-                                  mandatory=True, desc='The atlas segmentation '
+                               mandatory=True, desc='The atlas segmentation '
                                   'images. For performing label fusion the number '
                                   'of specified segmentations should be identical '
                                   'to the number of atlas image sets.')
@@ -1058,9 +1058,9 @@ class AntsJointFusionInputSpec(ANTSCommandInputSpec):
                               'correlation (PC) and mean squares (MSQ). Default = '
                               'PC (Pearson correlation).'))
     search_radius = traits.List([3,3,3], minlen=1, maxlen=3, argstr='-s %s', usedefault=True,
-                                   desc=('Search radius for similarity measures. Default = 3x3x3. '
-                                         'One can also specify an image where the value at the '
-                                         'voxel specifies the isotropic search radius at that voxel.'))
+                                desc=('Search radius for similarity measures. Default = 3x3x3. '
+                                      'One can also specify an image where the value at the '
+                                      'voxel specifies the isotropic search radius at that voxel.'))
     exclusion_image_label = traits.List(traits.Str(), argstr='-e %s', requires=['exclusion_image'],
                                        desc=('Specify a label for the exclusion region.'))
     exclusion_image = traits.List(File(exists=True),
@@ -1193,13 +1193,13 @@ ants_joint_fusion_posterior_%d.nii.gz, ants_joint_fusion_voting_weight_%d.nii.gz
         elif opt == 'atlas_image':
             atlas_image_cmd = " ".join(
                 ['-g [{0}]'.format(", ".join("'%s'" % fn for fn in ai))
-                                   for ai in self.inputs.atlas_image]
+                 for ai in self.inputs.atlas_image]
             )
             retval = atlas_image_cmd
         elif opt == 'target_image':
             target_image_cmd = " ".join(
                 ['-t [{0}]'.format(", ".join("'%s'" % fn for fn in ai))
-                                   for ai in self.inputs.target_image]
+                 for ai in self.inputs.target_image]
             )
             retval = target_image_cmd
         elif opt == 'atlas_segmentation_image':
@@ -1255,8 +1255,8 @@ class KellyKapowskiInputSpec(ANTSCommandInputSpec):
 
     white_matter_prob_image = File(exists=True, argstr='--white-matter-probability-image "%s"',
                                    desc="In addition to the segmentation image, a white matter probability image can be\n"
-                                       "used. If no such image is supplied, one is created using the segmentation image\n"
-                                       "and a variance of 1.0 mm.")
+                                        "used. If no such image is supplied, one is created using the segmentation image\n"
+                                        "and a variance of 1.0 mm.")
 
     convergence = traits.Str(default="[50,0.001,10]", argstr='--convergence "%s"', usedefault=True,
                              desc="Convergence is determined by fitting a line to the normalized energy profile of\n"

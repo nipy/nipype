@@ -266,9 +266,9 @@ class EstimateModel(SPMCommand):
             outputs['ARcoef'] = glob(os.path.join(pth, 'Sess*_AR_*'))
             if betas:
                 outputs['Cbetas'] = [os.path.join(pth, 'C{}'.format(beta))
-                                            for beta in betas]
+                                     for beta in betas]
                 outputs['SDbetas'] = [os.path.join(pth, 'SD{}'.format(beta))
-                                            for beta in betas]
+                                      for beta in betas]
 
         if 'Classical' in self.inputs.estimation_method.keys():
             outputs['residual_image'] = os.path.join(pth,
@@ -279,7 +279,7 @@ class EstimateModel(SPMCommand):
                 outputs['residual_images'] = glob(os.path.join(pth, 'Res_*'))
             if betas:
                 outputs['beta_images'] = [os.path.join(pth, beta)
-                                            for beta in betas]
+                                          for beta in betas]
 
         outputs['mask_image'] = os.path.join(pth,
                                             'mask.{}'.format(outtype))

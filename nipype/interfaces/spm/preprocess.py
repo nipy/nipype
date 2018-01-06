@@ -34,7 +34,7 @@ class SliceTimingInputSpec(SPMCommandInputSpec):
     in_files = InputMultiPath(traits.Either(traits.List(ImageFileSPM(
                                                              exists=True)),
                                             ImageFileSPM(exists=True)),
-                                            field='scans',
+                              field='scans',
                               desc='list of filenames to apply slice timing',
                               mandatory=True, copyfile=False)
     num_slices = traits.Int(field='nslices',

@@ -47,13 +47,13 @@ class TestCompCor():
         self.run_cc(CompCor(realigned_file=self.realigned_file,
                             mask_files=self.mask_files,
                             mask_index=0),
-                            expected_components)
+                    expected_components)
 
         self.run_cc(ACompCor(realigned_file=self.realigned_file,
                              mask_files=self.mask_files,
                              mask_index=0,
                              components_file='acc_components_file'),
-                             expected_components, 'aCompCor')
+                    expected_components, 'aCompCor')
 
     def test_tcompcor(self):
         ccinterface = TCompCor(realigned_file=self.realigned_file,

@@ -259,7 +259,7 @@ def draw_nodes(start, nodes_list, cores, minute_scale, space_between_minutes,
         node_finish = node['finish']
         # Calculate an offset and scale duration
         offset = ((node_start - start).total_seconds() / 60) * scale * \
-                 space_between_minutes + 220
+            space_between_minutes + 220
         # Scale duration
         scale_duration = (node['duration'] / 60) * scale * space_between_minutes
         if scale_duration < 5:
@@ -332,11 +332,10 @@ def draw_resource_bar(start_time, finish_time, time_series, space_between_minute
             ts_end = finish_time
         # Calculate offset from start at top
         offset = ((ts_start-start_time).total_seconds() / 60.0) * scale * \
-                 space_between_minutes + 220
+            space_between_minutes + 220
         # Scale duration
         duration_mins = (ts_end-ts_start).total_seconds() / 60.0
-        height = duration_mins * scale * \
-                 space_between_minutes
+        height = duration_mins * scale * space_between_minutes
         if height < 5:
             height = 5
         height -= 2

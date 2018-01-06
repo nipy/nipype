@@ -333,8 +333,8 @@ def test_datasink_substitutions(tmpdir):
     setattr(ds.inputs, '@outdir', files)
     ds.run()
     assert sorted([os.path.basename(x) for
-              x in glob.glob(os.path.join(str(outdir), '*'))]) \
-              == ['!-yz-b.n', 'ABABAB.n']  # so we got re used 2nd and both patterns
+                   x in glob.glob(os.path.join(str(outdir), '*'))]) \
+        == ['!-yz-b.n', 'ABABAB.n']  # so we got re used 2nd and both patterns
 
 
 @pytest.fixture()

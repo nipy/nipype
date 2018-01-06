@@ -207,7 +207,7 @@ def test_node_joinsource(tmpdir):
 
     # the joinsource is the inputspec name
     assert join.joinsource == inputspec.name, \
-                 "The joinsource is not set to the node name."
+        "The joinsource is not set to the node name."
 
 
 def test_set_join_node(tmpdir):
@@ -256,7 +256,7 @@ def test_unique_join_node(tmpdir):
     wf.run()
 
     assert _sum_operands[0] == [4, 2, 3], \
-                 "The unique join output value is incorrect: %s." % _sum_operands[0]
+        "The unique join output value is incorrect: %s." % _sum_operands[0]
 
 
 def test_multiple_join_nodes(tmpdir):
@@ -420,7 +420,7 @@ def test_synchronize_join_node(tmpdir):
     # thus, the expanded graph contains 2 * 2 iteration pre-join nodes, 1 join
     # node and 1 post-join node.
     assert len(result.nodes()) == 6, \
-                 "The number of expanded nodes is incorrect."
+        "The number of expanded nodes is incorrect."
     # the product inputs are [2, 3] and [4, 5]
     assert _products == [8, 15], \
         "The post-join products is incorrect: %s." % _products
@@ -476,7 +476,7 @@ def test_itersource_join_source_node(tmpdir):
     assert [16, 19] in _sum_operands, \
         "The join Sum input is incorrect: %s." % _sum_operands
     assert [7, 9] in _sum_operands, \
-                    "The join Sum input is incorrect: %s." % _sum_operands
+        "The join Sum input is incorrect: %s." % _sum_operands
 
 
 def test_itersource_two_join_nodes(tmpdir):

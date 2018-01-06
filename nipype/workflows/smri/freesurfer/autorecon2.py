@@ -197,8 +197,8 @@ def create_AutoRecon2(name="AutoRecon2", longitudinal=False,
                                     iterfield=['in_file'],
                                     name='Copy_long_ltas')
         ar2_wf.connect([(inputspec, copy_long_ltas, [('alltps_to_template_ltas', 'in_file'),
-                                                      ('subjects_dir', 'subjects_dir'),
-                                                      ('subject_id', 'subject_id')])])
+                                                     ('subjects_dir', 'subjects_dir'),
+                                                     ('subject_id', 'subject_id')])])
         copy_long_ltas.inputs.long_template = config['long_template']
 
         merge_norms = pe.Node(Merge(2), name="Merge_Norms")
@@ -209,9 +209,9 @@ def create_AutoRecon2(name="AutoRecon2", longitudinal=False,
         fuse_segmentations = pe.Node(FuseSegmentations(), name="Fuse_Segmentations")
 
         ar2_wf.connect([(inputspec, fuse_segmentations, [('timepoints', 'timepoints'),
-                                                          ('alltps_segs', 'in_segmentations'),
-                                                          ('alltps_segs_noCC', 'in_segmentations_noCC'),
-                                                          ('subject_id', 'subject_id')]),
+                                                         ('alltps_segs', 'in_segmentations'),
+                                                         ('alltps_segs_noCC', 'in_segmentations_noCC'),
+                                                         ('subject_id', 'subject_id')]),
                         (merge_norms, fuse_segmentations, [('out', 'in_norms')])])
         fuse_segmentations.inputs.out_file = 'aseg.fused.mgz'
 
@@ -311,7 +311,7 @@ def create_AutoRecon2(name="AutoRecon2", longitudinal=False,
         transfer_init_wm.inputs.out_file = 'wm.mgz'
         ar2_wf.connect([(pretess, transfer_init_wm, [('out_file', 'in_file')]),
                         (inputspec, transfer_init_wm, [('init_wm', 'mask_file'),
-                                                        ('subj_to_template_lta', 'xfm_file')])])
+                                                       ('subj_to_template_lta', 'xfm_file')])])
         # changing the pretess variable so that the rest of the connections still work!!!
         pretess = transfer_init_wm
 
