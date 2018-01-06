@@ -42,7 +42,7 @@ def test_bids_grabber(tmpdir):
                     reason="Pybids is not installed in editable mode")
 def test_bids_fields(tmpdir):
     tmpdir.chdir()
-    bg = BIDSDataGrabber(infields = ['subject'], outfields = ['dwi'])
+    bg = BIDSDataGrabber(infields=['subject'], outfields=['dwi'])
     bg.inputs.base_dir = os.path.join(datadir, 'ds005')
     bg.inputs.subject = '01'
     bg.inputs.output_query['dwi'] = dict(modality='dwi')

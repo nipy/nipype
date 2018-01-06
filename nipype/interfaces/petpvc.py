@@ -56,7 +56,7 @@ class PETPVCInputSpec(CommandLineInputSpec):
 
 
 class PETPVCOutputSpec(TraitedSpec):
-    out_file = File(desc = "Output file")
+    out_file = File(desc="Output file")
 
 
 class PETPVC(CommandLine):

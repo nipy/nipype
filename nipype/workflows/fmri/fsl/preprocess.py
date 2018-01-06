@@ -533,7 +533,7 @@ def create_featreg_preproc(name='featpreproc', highpass=True, whichvol='middle',
     if whichvol != 'mean':
         extract_ref = pe.Node(interface=fsl.ExtractROI(t_size=1),
                               iterfield=['in_file'],
-                              name = 'extractref')
+                              name='extractref')
         featpreproc.connect(img2float, ('out_file', pickrun, whichrun), extract_ref, 'in_file')
         featpreproc.connect(img2float, ('out_file', pickvol, 0, whichvol), extract_ref, 't_min')
         featpreproc.connect(extract_ref, 'roi_file', outputnode, 'reference')
@@ -572,7 +572,7 @@ def create_featreg_preproc(name='featpreproc', highpass=True, whichvol='middle',
     Extract the mean volume of the first functional run
     """
 
-    meanfunc = pe.Node(interface=fsl.ImageMaths(op_string = '-Tmean', suffix='_mean'),
+    meanfunc = pe.Node(interface=fsl.ImageMaths(op_string='-Tmean', suffix='_mean'),
                        name='meanfunc')
     featpreproc.connect(motion_correct, ('out_file', pickrun, whichrun), meanfunc, 'in_file')
 
