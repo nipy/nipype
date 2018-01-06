@@ -1927,7 +1927,7 @@ class ROIStats(AFNICommandBase):
         outputs = self._outputs()
         output_filename = 'roi_stats.csv'
         with open(output_filename, 'w') as f:
-          f.write(runtime.stdout)
+            f.write(runtime.stdout)
 
         outputs.stats = os.path.abspath(output_filename)
         return outputs

@@ -289,7 +289,7 @@ class Dcm2niix(CommandLine):
             (self.output_files, self.bvecs,
              self.bvals, self.bids) = self._parse_stdout(new_runtime.stdout)
         else:
-             (self.output_files, self.bvecs,
+            (self.output_files, self.bvecs,
              self.bvals) = self._parse_stdout(new_runtime.stdout)
         return new_runtime
 

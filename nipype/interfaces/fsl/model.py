@@ -159,13 +159,13 @@ class Level1Design(BaseInterface):
             basis_key = "hrf"
         elif basis_key == "gamma":
             try:
-                 _ = ev_parameters['gammasigma']
+                _ = ev_parameters['gammasigma']
             except KeyError:
-                 ev_parameters['gammasigma'] = 3
+                ev_parameters['gammasigma'] = 3
             try:
-                 _ = ev_parameters['gammadelay']
+                _ = ev_parameters['gammadelay']
             except KeyError:
-                 ev_parameters['gammadelay'] = 6
+                ev_parameters['gammadelay'] = 6
         ev_template = load_template('feat_ev_'+basis_key+'.tcl')
         ev_none = load_template('feat_ev_none.tcl')
         ev_ortho = load_template('feat_ev_ortho.tcl')
