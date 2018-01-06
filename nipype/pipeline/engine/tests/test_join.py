@@ -560,7 +560,7 @@ def test_nested_workflow_join(tmpdir):
                           joinfield='n',
                           name='join')
         #define and connect nested workflow
-        wf = pe.Workflow(name='wf_%d'%i[0])
+        wf = pe.Workflow(name='wf_%d' % i[0])
         wf.connect(inputspec, 'n', pre_join, 'input1')
         wf.connect(pre_join, 'output1', join, 'n')
         return wf

@@ -407,7 +407,7 @@ class Bucket(AFNICommand):
 
     def _format_arg(self, name, spec, value):
         if name == 'in_file':
-            return spec.argstr%(' '.join([i[0]+"'"+i[1]+"'" for i in value]))
+            return spec.argstr % (' '.join([i[0] + "'" + i[1] + "'" for i in value]))
         return super(Bucket, self)._format_arg(name, spec, value)
 
 class CalcInputSpec(AFNICommandInputSpec):
@@ -639,7 +639,7 @@ class CatMatvec(AFNICommand):
 
     def _format_arg(self, name, spec, value):
         if name == 'in_file':
-            return spec.argstr%(' '.join([i[0]+' -'+i[1] for i in value]))
+            return spec.argstr % (' '.join([i[0] + ' -' + i[1] for i in value]))
         return super(CatMatvec, self)._format_arg(name, spec, value)
 
 
