@@ -190,8 +190,8 @@ class DataSinkInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
                                          'it with'))
     regexp_substitutions = \
         InputMultiPath(traits.Tuple(Str, Str),
-                       desc=('List of 2-tuples reflecting a pair of a '\
-                             'Python regexp pattern and a replacement '\
+                       desc=('List of 2-tuples reflecting a pair of a '
+                             'Python regexp pattern and a replacement '
                              'string. Invoked after string `substitutions`'))
 
     _outputs = traits.Dict(Str, value={}, usedefault=True)
@@ -199,11 +199,11 @@ class DataSinkInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
                                   desc='remove dest directory when copying dirs')
 
     # AWS S3 data attributes
-    creds_path = Str(desc='Filepath to AWS credentials file for S3 bucket '\
-                                 'access; if not specified, the credentials will '\
-                                 'be taken from the AWS_ACCESS_KEY_ID and '\
+    creds_path = Str(desc='Filepath to AWS credentials file for S3 bucket '
+                                 'access; if not specified, the credentials will '
+                                 'be taken from the AWS_ACCESS_KEY_ID and '
                                  'AWS_SECRET_ACCESS_KEY environment variables')
-    encrypt_bucket_keys = traits.Bool(desc='Flag indicating whether to use S3 '\
+    encrypt_bucket_keys = traits.Bool(desc='Flag indicating whether to use S3 '
                                         'server-side AES-256 encryption')
     # Set this if user wishes to override the bucket with their own
     bucket = traits.Any(desc='Boto3 S3 bucket for manual override of bucket')
@@ -588,7 +588,7 @@ class DataSink(IOBase):
             for root, dirs, files in os.walk(src):
                 src_files.extend([os.path.join(root, fil) for fil in files])
             # Make the dst files have the dst folder as base dir
-            dst_files = [os.path.join(dst, src_f.split(src)[1]) \
+            dst_files = [os.path.join(dst, src_f.split(src)[1])
                          for src_f in src_files]
         else:
             src_files = [src]
@@ -669,7 +669,7 @@ class DataSink(IOBase):
                                                            's3_datasink_' + bucket_name)
                         outdir = local_out_exception
                     # Log local copying directory
-                    iflogger.info('Access to S3 failed! Storing outputs locally at: '\
+                    iflogger.info('Access to S3 failed! Storing outputs locally at: '
                                   '%s\nError: %s', outdir, exc)
         else:
             s3dir = '<N/A>'

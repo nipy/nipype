@@ -58,10 +58,10 @@ class ComputeDVARSInputSpec(BaseInterfaceInputSpec):
                                    'by the median calculated across all voxels'
                                    'and timepoints within the mask (if specified)'
                                    'and then multiply by the value specified by'
-                                   'this parameter. By using the default (1000)' \
-                                   'output DVARS will be expressed in ' \
-                                   'x10 % BOLD units compatible with Power et al.' \
-                                   '2012. Set this to 0 to disable intensity' \
+                                   'this parameter. By using the default (1000)'
+                                   'output DVARS will be expressed in '
+                                   'x10 % BOLD units compatible with Power et al.'
+                                   '2012. Set this to 0 to disable intensity'
                                    'normalization altogether.')
 
 

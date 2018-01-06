@@ -22,7 +22,7 @@ from collections import OrderedDict
 try:
     import pandas as pd
 except ImportError:
-    print('Pandas not found; in order for full functionality of this module '\
+    print('Pandas not found; in order for full functionality of this module '
           'install the pandas package')
     pass
 
@@ -248,7 +248,7 @@ def draw_nodes(start, nodes_list, cores, minute_scale, space_between_minutes,
     scale = space_between_minutes / minute_scale
     space_between_minutes = space_between_minutes / scale
     end_times = [datetime.datetime(start.year, start.month, start.day,
-                                   start.hour, start.minute, start.second) \
+                                   start.hour, start.minute, start.second)
                  for core in range(cores)]
 
     # For each node in the pipeline
