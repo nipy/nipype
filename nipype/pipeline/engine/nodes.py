@@ -222,7 +222,7 @@ class Node(EngineBase):
         if self._n_procs is not None:
             return self._n_procs
         elif hasattr(self._interface.inputs, 'num_threads') and isdefined(
-            self._interface.inputs.num_threads):
+                self._interface.inputs.num_threads):
             return self._interface.inputs.num_threads
         else:
             return 1

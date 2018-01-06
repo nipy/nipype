@@ -259,7 +259,7 @@ class Realign(SPMCommand):
             if resliced_all:
                 outputs['realigned_files'] = []
                 for idx, imgf in enumerate(
-                    filename_to_list(self.inputs.in_files)):
+                        filename_to_list(self.inputs.in_files)):
                     realigned_run = []
                     if isinstance(imgf, list):
                         for i, inner_imgf in enumerate(filename_to_list(imgf)):
