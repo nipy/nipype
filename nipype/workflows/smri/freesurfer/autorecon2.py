@@ -76,10 +76,10 @@ def create_AutoRecon2(name="AutoRecon2", longitudinal=False,
         add_to_header_nu.inputs.copy_name = True
         add_to_header_nu.inputs.out_file = 'nu.mgz'
         ar2_wf.connect([(intensity_correction, add_to_header_nu, [('out_file', 'in_file'),
-                                                              ]),
+                                                                  ]),
                         (inputspec, add_to_header_nu,
                          [('transform', 'transform')])
-                    ])
+                        ])
 
 
     # EM Registration
@@ -89,9 +89,9 @@ def create_AutoRecon2(name="AutoRecon2", longitudinal=False,
     """
     if longitudinal:
         align_transform = pe.Node(Function(['in_file', 'out_file'],
-                                   ['out_file'],
-                                   copy_file),
-                          name='Copy_Talairach_lta')
+                                           ['out_file'],
+                                           copy_file),
+                                  name='Copy_Talairach_lta')
         align_transform.inputs.out_file = 'talairach.lta'
 
         ar2_wf.connect([(inputspec, align_transform, [('template_talairach_lta',
@@ -450,7 +450,7 @@ def create_AutoRecon2(name="AutoRecon2", longitudinal=False,
             smooth1.inputs.out_file = '{0}.smoothwm.nofix'.format(hemisphere)
             hemi_wf.connect([(extract_main_component, smooth1,
                               [('out_file', 'in_file')])
-                         ])
+                             ])
 
             # Inflation 1
             """
@@ -472,7 +472,7 @@ def create_AutoRecon2(name="AutoRecon2", longitudinal=False,
             copy_inflate1.inputs.out_file = '{0}.inflated'.format(hemisphere)
             hemi_wf.connect([(smooth1, inflate1, [('surface', 'in_file')]),
                              (inflate1, copy_inflate1, [('out_file', 'in_file')]),
-                         ])
+                             ])
 
             # Sphere
             """
@@ -513,14 +513,14 @@ def create_AutoRecon2(name="AutoRecon2", longitudinal=False,
                              (copy_inflate1, fix_topology, [('out_file', 'in_inflated')]),
                              (qsphere, fix_topology, [('out_file', 'sphere')]),
                              (hemi_inputspec, fix_topology, [('wm', 'in_wm'),
-                                                        ('brain', 'in_brain')])])
+                                                             ('brain', 'in_brain')])])
 
 
             # TODO: halt workflow for bad euler number
             euler_number = pe.Node(EulerNumber(), name="Euler_Number")
 
             hemi_wf.connect([(fix_topology, euler_number, [('out_file', 'in_file')]),
-                         ])
+                             ])
 
             remove_intersection = pe.Node(
                 RemoveIntersection(), name="Remove_Intersection")
@@ -574,7 +574,7 @@ def create_AutoRecon2(name="AutoRecon2", longitudinal=False,
         inflate2.inputs.out_sulc = '{0}.sulc'.format(hemisphere)
         inflate2.inputs.out_file = '{0}.inflated'.format(hemisphere)
         hemi_wf.connect([(smooth2, inflate2, [('surface', 'in_file')]),
-                     ])
+                         ])
 
         # Compute Curvature
         """No documentation on this step"""
@@ -583,7 +583,7 @@ def create_AutoRecon2(name="AutoRecon2", longitudinal=False,
         curvature1.inputs.save = True
         curvature1.inputs.copy_input = True
         hemi_wf.connect([(make_surfaces, curvature1, [('out_white', 'in_file')]),
-                     ])
+                         ])
 
         curvature2 = pe.Node(Curvature(), name="Curvature2")
         curvature2.inputs.threshold = .999
@@ -593,7 +593,7 @@ def create_AutoRecon2(name="AutoRecon2", longitudinal=False,
         curvature2.inputs.distances = (10, 10)
         curvature1.inputs.copy_input = True
         hemi_wf.connect([(inflate2, curvature2, [('out_file', 'in_file')]),
-                     ])
+                         ])
 
         curvature_stats = pe.Node(CurvatureStats(), name="Curvature_Stats")
         curvature_stats.inputs.min_max = True
@@ -609,11 +609,11 @@ def create_AutoRecon2(name="AutoRecon2", longitudinal=False,
 
         if longitudinal:
             ar2_wf.connect([(inputspec, hemi_wf, [('template_{0}_white'.format(hemisphere),
-                                                    'Copy_Template_White.in_file'),
-                                                   ('template_{0}_white'.format(hemisphere),
-                                                    'Copy_Template_Orig_White.in_file'),
-                                                   ('template_{0}_pial'.format(hemisphere),
-                                                    'Copy_Template_Pial.in_file')])])
+                                                   'Copy_Template_White.in_file'),
+                                                  ('template_{0}_white'.format(hemisphere),
+                                                   'Copy_Template_Orig_White.in_file'),
+                                                  ('template_{0}_pial'.format(hemisphere),
+                                                   'Copy_Template_Pial.in_file')])])
 
         # Connect inputs for the hemisphere workflows
         ar2_wf.connect([(ca_normalize, hemi_wf, [('out_file', 'inputspec.norm')]),

@@ -59,7 +59,7 @@ def create_AutoRecon3(name="AutoRecon3", qcache=False, plugin_args=None,
                                                   'src_subject_dir',
                                                   'color_table',
                                                   'num_threads']),
-                         name='inputspec')
+                          name='inputspec')
 
 
     ar3_lh_wf1 = pe.Workflow(name="AutoRecon3_Left_1")
@@ -113,7 +113,7 @@ def create_AutoRecon3(name="AutoRecon3", qcache=False, plugin_args=None,
                          (hemi_inputspec1, ar3_surfreg, [('smoothwm', 'in_smoothwm'),
                                                          ('sulc', 'in_sulc'),
                                                          ('atlas', 'target')])
-                       ])
+                         ])
 
         # Jacobian
 
@@ -124,7 +124,7 @@ def create_AutoRecon3(name="AutoRecon3", qcache=False, plugin_args=None,
         ar3_jacobian.inputs.out_file = '{0}.jacobian_white'.format(hemisphere)
         hemi_wf.connect([(hemi_inputspec1, ar3_jacobian, [('white', 'in_origsurf')]),
                          (ar3_surfreg, ar3_jacobian, [('out_file', 'in_mappedsurf')])
-                       ])
+                         ])
 
         # Average Curvature
 
@@ -137,7 +137,7 @@ def create_AutoRecon3(name="AutoRecon3", qcache=False, plugin_args=None,
         ar3_paint.inputs.template_param = 6
         ar3_paint.inputs.out_file = "{0}.avg_curv".format(hemisphere)
         hemi_wf.connect([(ar3_surfreg, ar3_paint, [('out_file', 'in_surf')]),
-                           (hemi_inputspec1, ar3_paint, [('atlas', 'template')])])
+                         (hemi_inputspec1, ar3_paint, [('atlas', 'template')])])
 
         # Cortical Parcellation
 
@@ -183,7 +183,7 @@ def create_AutoRecon3(name="AutoRecon3", qcache=False, plugin_args=None,
                                                       ('brain_finalsurfs', 'in_T1'),
                                                       ('aseg_presurf', 'in_aseg')]),
                          (ar3_parcellation, ar3_pial, [('out_file', 'in_label')])
-                       ])
+                         ])
 
         # Surface Volume
         """
@@ -197,21 +197,21 @@ def create_AutoRecon3(name="AutoRecon3", qcache=False, plugin_args=None,
         ar3_add.inputs.out_file = '{0}.area.mid'.format(hemisphere)
         hemi_wf.connect([(ar3_pial, ar3_add, [('out_area', 'in_file2')]),
                          (hemi_inputspec1, ar3_add, [('area', 'in_file1')]),
-                       ])
+                         ])
 
         ar3_divide = pe.Node(MRIsCalc(), name="Mid_Pial")
         ar3_divide.inputs.action = "div"
         ar3_divide.inputs.in_int = 2
         ar3_divide.inputs.out_file = '{0}.area.mid'.format(hemisphere)
         hemi_wf.connect([(ar3_add, ar3_divide, [('out_file', 'in_file1')]),
-                       ])
+                         ])
 
         ar3_volume = pe.Node(MRIsCalc(), name="Calculate_Volume")
         ar3_volume.inputs.action = "mul"
         ar3_volume.inputs.out_file = '{0}.volume'.format(hemisphere)
         hemi_wf.connect([(ar3_divide, ar3_volume, [('out_file', 'in_file1')]),
                          (ar3_pial, ar3_volume, [('out_thickness', 'in_file2')]),
-                       ])
+                         ])
 
         # Connect the inputs
         ar3_wf.connect([(inputspec, hemi_wf, [('{0}_inflated'.format(hemisphere), 'inputspec.inflated'),
@@ -234,7 +234,7 @@ def create_AutoRecon3(name="AutoRecon3", qcache=False, plugin_args=None,
                                               ('{0}_classifier1'.format(hemisphere),
                                                'inputspec.classifier'),
                                               ('num_threads', 'inputspec.num_threads')
-                                                ])
+                                              ])
                         ])
 
         # Workflow1 Outputs
@@ -250,7 +250,7 @@ def create_AutoRecon3(name="AutoRecon3", qcache=False, plugin_args=None,
                          'area_mid',
                          'volume']
         hemi_outputspec1 = pe.Node(IdentityInterface(fields=hemi_outputs1),
-                              name="outputspec")
+                                   name="outputspec")
         hemi_wf.connect([(ar3_pial, hemi_outputspec1, [('out_pial', 'pial'),
                                                        ('out_curv', 'curv_pial'),
                                                        ('out_area', 'area_pial'),
@@ -262,7 +262,7 @@ def create_AutoRecon3(name="AutoRecon3", qcache=False, plugin_args=None,
                          (ar3_paint, hemi_outputspec1, [('out_file', 'avg_curv')]),
                          (ar3_surfreg, hemi_outputspec1, [('out_file', 'sphere_reg')]),
                          (ar3_sphere, hemi_outputspec1, [('out_file', 'sphere')])
-                           ])
+                         ])
 
 
     # Cortical Ribbon Mask
@@ -378,20 +378,20 @@ def create_AutoRecon3(name="AutoRecon3", qcache=False, plugin_args=None,
 
 
         hemiwf2.connect([(hemi_inputspec2, parcellation_stats_pial, [('wm', 'wm'),
-                                                                    ('lh_white', 'lh_white'),
-                                                                    ('rh_white', 'rh_white'),
-                                                                    ('transform', 'transform'),
-                                                                    ('brainmask', 'brainmask'),
-                                                                    ('aseg_presurf', 'aseg'),
-                                                                    ('cortex_label', 'cortex_label'),
-                                                                    ('cortex_label', 'in_cortex'),
-                                                                    ('lh_pial', 'lh_pial'),
-                                                                    ('rh_pial', 'rh_pial'),
-                                                                    ('thickness', 'thickness'),
-                                                                    ('aparc_annot', 'in_annotation'),
-                                                                    ('ribbon', 'ribbon'),
-                                                                    ]),
-                        ])
+                                                                     ('lh_white', 'lh_white'),
+                                                                     ('rh_white', 'rh_white'),
+                                                                     ('transform', 'transform'),
+                                                                     ('brainmask', 'brainmask'),
+                                                                     ('aseg_presurf', 'aseg'),
+                                                                     ('cortex_label', 'cortex_label'),
+                                                                     ('cortex_label', 'in_cortex'),
+                                                                     ('lh_pial', 'lh_pial'),
+                                                                     ('rh_pial', 'rh_pial'),
+                                                                     ('thickness', 'thickness'),
+                                                                     ('aparc_annot', 'in_annotation'),
+                                                                     ('ribbon', 'ribbon'),
+                                                                     ]),
+                         ])
 
         # Cortical Parcellation 2
         cortical_parcellation_2 = pe.Node(MRIsCALabel(),
@@ -483,7 +483,7 @@ def create_AutoRecon3(name="AutoRecon3", qcache=False, plugin_args=None,
                                                       ('aparc_annot', 'annotation'),
                                                       ('thickness', 'thickness'),
                                                       ]),
-                        ])
+                         ])
 
         hemi_outputs2 = ['aparc_annot_ctab',
                          'aparc_stats',
@@ -499,7 +499,7 @@ def create_AutoRecon3(name="AutoRecon3", qcache=False, plugin_args=None,
                          'pctsurfcon_log',
                          ]
         hemi_outputspec2 = pe.Node(IdentityInterface(fields=hemi_outputs2),
-                              name="outputspec")
+                                   name="outputspec")
 
         hemiwf2.connect([(contrast, hemi_outputspec2, [('out_contrast', 'wg_pct_mgh'),
                                                        ('out_stats', 'wg_pct_stats'),
@@ -534,7 +534,7 @@ def create_AutoRecon3(name="AutoRecon3", qcache=False, plugin_args=None,
                                               ('{0}_sulc'.format(hemisphere), 'inputspec.sulc'),
                                               ('{0}_classifier2'.format(hemisphere), 'inputspec.classifier2'),
                                               ('{0}_classifier3'.format(hemisphere), 'inputspec.classifier3'),
-                                           ]),
+                                              ]),
                         (ar3_lh_wf1, hemiwf2, [('outputspec.pial', 'inputspec.lh_pial')]),
                         (ar3_rh_wf1, hemiwf2, [('outputspec.pial', 'inputspec.rh_pial')]),
                         (hemiwf1, hemiwf2, [('outputspec.thickness_pial', 'inputspec.thickness'),
@@ -552,16 +552,16 @@ def create_AutoRecon3(name="AutoRecon3", qcache=False, plugin_args=None,
     aparc_2_aseg.inputs.copy_inputs = True
     aparc_2_aseg.inputs.out_file = "aparc+aseg.mgz"
     ar3_wf.connect([(inputspec, aparc_2_aseg, [('lh_white', 'lh_white'),
-                                                ('rh_white', 'rh_white'),
-                                                ]),
+                                               ('rh_white', 'rh_white'),
+                                               ]),
                     (ar3_lh_wf1, aparc_2_aseg, [('outputspec.pial', 'lh_pial'),
-                                               ('outputspec.aparc_annot',
+                                                ('outputspec.aparc_annot',
                                                 'lh_annotation'),
-                                               ]),
+                                                ]),
                     (ar3_rh_wf1, aparc_2_aseg, [('outputspec.pial', 'rh_pial'),
-                                               ('outputspec.aparc_annot',
-                                                'rh_annotation'),
-                                               ]),
+                                                ('outputspec.aparc_annot',
+                                                 'rh_annotation'),
+                                                ]),
                     (volume_mask, aparc_2_aseg, [('rh_ribbon', 'rh_ribbon'),
                                                  ('lh_ribbon', 'lh_ribbon'),
                                                  ('out_ribbon', 'ribbon'),
@@ -583,16 +583,16 @@ def create_AutoRecon3(name="AutoRecon3", qcache=False, plugin_args=None,
     aparc_2_aseg_2009.inputs.copy_inputs = True
     aparc_2_aseg_2009.inputs.out_file = "aparc.a2009s+aseg.mgz"
     ar3_wf.connect([(inputspec, aparc_2_aseg_2009, [('lh_white', 'lh_white'),
-                                                     ('rh_white', 'rh_white'),
-                                                     ]),
-                    (ar3_lh_wf1, aparc_2_aseg_2009, [('outputspec.pial', 'lh_pial'),
+                                                    ('rh_white', 'rh_white'),
                                                     ]),
+                    (ar3_lh_wf1, aparc_2_aseg_2009, [('outputspec.pial', 'lh_pial'),
+                                                     ]),
                     (ar3_lh_wf2, aparc_2_aseg_2009, [('outputspec.aparc_a2009s_annot',
                                                       'lh_annotation')]),
                     (ar3_rh_wf2, aparc_2_aseg_2009, [('outputspec.aparc_a2009s_annot',
                                                       'rh_annotation')]),
                     (ar3_rh_wf1, aparc_2_aseg_2009, [('outputspec.pial', 'rh_pial'),
-                                                    ]),
+                                                     ]),
                     (volume_mask, aparc_2_aseg_2009, [('rh_ribbon', 'rh_ribbon'),
                                                       ('lh_ribbon',
                                                        'lh_ribbon'),
@@ -654,12 +654,12 @@ def create_AutoRecon3(name="AutoRecon3", qcache=False, plugin_args=None,
                                            ('lh_orig_nofix', 'lh_orig_nofix'),
                                            ('rh_orig_nofix', 'rh_orig_nofix'),
                                            ('lookup_table', 'color_table_file'),
-                                          ]),
+                                           ]),
                     (volume_mask, segstats, [('out_ribbon', 'ribbon')]),
                     (ar3_lh_wf1, segstats, [('outputspec.pial', 'lh_pial'),
-                                           ]),
+                                            ]),
                     (ar3_rh_wf1, segstats, [('outputspec.pial', 'rh_pial'),
-                                           ]),
+                                            ]),
                     ])
 
     if fsvernum >= 6:
@@ -681,16 +681,16 @@ def create_AutoRecon3(name="AutoRecon3", qcache=False, plugin_args=None,
     wm_parcellation.inputs.out_file = "wmparc.mgz"
 
     ar3_wf.connect([(inputspec, wm_parcellation, [('lh_white', 'lh_white'),
-                                                   ('rh_white', 'rh_white'),
-                                                   ]),
+                                                  ('rh_white', 'rh_white'),
+                                                  ]),
                     (ar3_lh_wf1, wm_parcellation, [('outputspec.pial', 'lh_pial'),
                                                   ('outputspec.aparc_annot',
                                                    'lh_annotation'),
-                                                  ]),
+                                                   ]),
                     (ar3_rh_wf1, wm_parcellation, [('outputspec.pial', 'rh_pial'),
                                                   ('outputspec.aparc_annot',
                                                    'rh_annotation'),
-                                                  ]),
+                                                   ]),
                     (volume_mask, wm_parcellation, [('rh_ribbon', 'rh_ribbon'),
                                                     ('lh_ribbon', 'lh_ribbon'),
                                                     ('out_ribbon', 'ribbon'),
@@ -723,12 +723,12 @@ def create_AutoRecon3(name="AutoRecon3", qcache=False, plugin_args=None,
                                               ('rh_orig_nofix',
                                                'rh_orig_nofix'),
                                               ('wm_lookup_table', 'color_table_file'),
-                                             ]),
+                                              ]),
                     (volume_mask, wm_segstats, [('out_ribbon', 'ribbon')]),
                     (ar3_lh_wf1, wm_segstats, [('outputspec.pial', 'lh_pial'),
-                                              ]),
+                                               ]),
                     (ar3_rh_wf1, wm_segstats, [('outputspec.pial', 'rh_pial'),
-                                              ]),
+                                               ]),
                     ])
 
     if fsvernum >= 6:
@@ -744,11 +744,11 @@ def create_AutoRecon3(name="AutoRecon3", qcache=False, plugin_args=None,
     ar3_wf.connect([(ar3_lh_wf1, ba_WF, [('outputspec.sphere_reg', 'inputspec.lh_sphere_reg'),
                                          ('outputspec.thickness_pial', 'inputspec.lh_thickness'),
                                          ('outputspec.pial', 'inputspec.lh_pial'),
-                                     ]),
+                                         ]),
                     (ar3_rh_wf1, ba_WF, [('outputspec.sphere_reg', 'inputspec.rh_sphere_reg'),
                                          ('outputspec.thickness_pial', 'inputspec.rh_thickness'),
                                          ('outputspec.pial', 'inputspec.rh_pial'),
-                                     ]),
+                                         ]),
                     (inputspec, ba_WF, [('lh_white', 'inputspec.lh_white'),
                                         ('rh_white', 'inputspec.rh_white'),
                                         ('transform', 'inputspec.transform'),
@@ -762,9 +762,9 @@ def create_AutoRecon3(name="AutoRecon3", qcache=False, plugin_args=None,
                                         ('src_subject_dir', 'inputspec.src_subject_dir'),
                                         ('src_subject_id', 'inputspec.src_subject_id'),
                                         ('color_table', 'inputspec.color_table'),
-                                    ]),
+                                        ]),
                     (volume_mask, ba_WF, [('out_ribbon', 'inputspec.ribbon')])
-                ])
+                    ])
 
     if qcache:
         source_inputs = ['lh_sphere_reg', 'rh_sphere_reg']
@@ -834,7 +834,7 @@ def create_AutoRecon3(name="AutoRecon3", qcache=False, plugin_args=None,
                                    name="inputspec")
 
         qcache_outputspec = pe.Node(IdentityInterface(fields=qcache_outputs),
-                                   name="outputspec")
+                                    name="outputspec")
 
         for hemi in qcache_config.iterkeys():
             for meas_config in qcache_config[hemi].itervalues():
@@ -882,18 +882,18 @@ def create_AutoRecon3(name="AutoRecon3", qcache=False, plugin_args=None,
                                                 ('lh_area', 'inputspec.lh_area'),
                                                 ('rh_area', 'inputspec.rh_area')]),
                         (ar3_lh_wf1, qcache_wf, [('outputspec.thickness_pial', 'inputspec.lh_thickness_pial'),
-                                                ('outputspec.area_pial', 'inputspec.lh_area_pial'),
-                                                ('outputspec.volume', 'inputspec.lh_volume'),
-                                                ('outputspec.jacobian_white', 'inputspec.lh_jacobian_white'),
-                                                ('outputspec.sphere_reg', 'inputspec.lh_sphere_reg')]),
+                                                 ('outputspec.area_pial', 'inputspec.lh_area_pial'),
+                                                 ('outputspec.volume', 'inputspec.lh_volume'),
+                                                 ('outputspec.jacobian_white', 'inputspec.lh_jacobian_white'),
+                                                 ('outputspec.sphere_reg', 'inputspec.lh_sphere_reg')]),
                         (ar3_lh_wf2, qcache_wf, [('outputspec.wg_pct_mgh', 'inputspec.lh_wg_pct_mgh')]),
                         (ar3_rh_wf1, qcache_wf, [('outputspec.thickness_pial', 'inputspec.rh_thickness_pial'),
-                                                ('outputspec.area_pial', 'inputspec.rh_area_pial'),
-                                                ('outputspec.volume', 'inputspec.rh_volume'),
-                                                ('outputspec.jacobian_white', 'inputspec.rh_jacobian_white'),
-                                                ('outputspec.sphere_reg', 'inputspec.rh_sphere_reg')]),
+                                                 ('outputspec.area_pial', 'inputspec.rh_area_pial'),
+                                                 ('outputspec.volume', 'inputspec.rh_volume'),
+                                                 ('outputspec.jacobian_white', 'inputspec.rh_jacobian_white'),
+                                                 ('outputspec.sphere_reg', 'inputspec.rh_sphere_reg')]),
                         (ar3_rh_wf2, qcache_wf, [('outputspec.wg_pct_mgh', 'inputspec.rh_wg_pct_mgh')]),
-                    ])
+                        ])
         for source_file in source_inputs:
             ar3_wf.connect([(inputspec, source_subject, [('source_subject_dir', 'base_directory')]),
                             (source_subject, qcache_wf, [(source_file, 'inputspec.source_' + source_file)])])

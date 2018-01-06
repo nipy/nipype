@@ -403,9 +403,9 @@ class CompCor(BaseInterface):
                                     "author = {Behzadi, Yashar and Restom, Khaled and Liau, Joy and Liu, Thomas T.},"
                                     "year = {2007},"
                                     "pages = {90-101},}"
-                                   ),
+                                    ),
                     'tags': ['method', 'implementation']
-                   }]
+                    }]
 
     def __init__(self, *args, **kwargs):
         ''' exactly the same as compcor except the header '''

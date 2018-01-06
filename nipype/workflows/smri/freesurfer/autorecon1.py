@@ -249,7 +249,7 @@ def create_AutoRecon1(name="AutoRecon1", longitudinal=False, distance=None,
     bias_correction.inputs.out_file = 'orig_nu.mgz'
 
     ar1_wf.connect([(conform_template, bias_correction, [('out_file', 'in_file')]),
-                ])
+                    ])
 
     if not longitudinal:
         # single session processing
@@ -353,10 +353,10 @@ def create_AutoRecon1(name="AutoRecon1", longitudinal=False, distance=None,
         add_to_header_nu.inputs.copy_name = True
         add_to_header_nu.inputs.out_file = 'nu.mgz'
         ar1_wf.connect([(intensity_correction, add_to_header_nu, [('out_file', 'in_file'),
-                                                              ]),
+                                                                  ]),
                         (copy_transform, add_to_header_nu,
                          [('out_file', 'transform')])
-                    ])
+                        ])
 
 
     # Intensity Normalization

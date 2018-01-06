@@ -550,7 +550,7 @@ def create_reconall_workflow(name="ReconAll", plugin_args=None):
                                                'label.@rh_BAMaps_annotation'),
                                               ('rh_thresh_BAMaps_annotation',
                                                'label.@rh_thresh_BAMaps_annotation'),
-                                          ]),
+                                              ]),
                       ])
 
     # compeltion node

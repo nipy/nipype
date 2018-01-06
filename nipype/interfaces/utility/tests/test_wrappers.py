@@ -116,7 +116,7 @@ def test_aux_connect_function(tmpdir):
                 (gen_tuple, split,      [("tuple",          "inlist")]),
                 (split,     ssm,        [(("out1", _inc),   "a"),
                                          ("out2",           "b"),
-                                        ]),
+                                         ]),
                 ])
 
     wf.run()

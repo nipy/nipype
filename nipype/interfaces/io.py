@@ -1870,9 +1870,9 @@ class XNATSinkInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
     _outputs = traits.Dict(Str, value={}, usedefault=True)
 
     server = Str(mandatory=True,
-                        requires=['user', 'pwd'],
-                        xor=['config']
-                        )
+                 requires=['user', 'pwd'],
+                 xor=['config']
+                 )
 
     user = Str()
     pwd = traits.Password()
