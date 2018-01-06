@@ -49,6 +49,8 @@ def test_MaskTool_inputs():
     ),
     union=dict(argstr='-union',
     ),
+    verbose=dict(argstr='-verb %s',
+    ),
     )
     inputs = MaskTool.input_spec()
 
