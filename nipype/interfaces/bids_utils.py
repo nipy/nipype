@@ -98,7 +98,7 @@ class BIDSDataGrabber(BaseInterface):
                                         "anat": {"modality": "anat"}}
 
         # If infields is empty, use all BIDS entities
-        if not infields is None and have_pybids:
+        if infields is not None and have_pybids:
             bids_config = join(dirname(gb.__file__), 'config', 'bids.json')
             bids_config = json.load(open(bids_config, 'r'))
             infields = [i['name'] for i in bids_config['entities']]
