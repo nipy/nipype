@@ -307,7 +307,7 @@ class BaseInterface(Interface):
         """
         helpstr = ['Outputs::', '']
         if cls.output_spec:
-            outputs = cls.output_spec()  # pylint: disable=E1102
+            outputs = cls.output_spec()
             for name, spec in sorted(outputs.traits(transient=None).items()):
                 helpstr += cls._get_trait_desc(outputs, name, spec)
         if len(helpstr) == 2:
@@ -319,7 +319,7 @@ class BaseInterface(Interface):
         """
         outputs = None
         if self.output_spec:
-            outputs = self.output_spec()  # pylint: disable=E1102
+            outputs = self.output_spec()
 
         return outputs
 
@@ -1080,7 +1080,7 @@ class CommandLine(BaseInterface):
         metadata = dict(name_source=lambda t: t is not None)
         traits = self.inputs.traits(**metadata)
         if traits:
-            outputs = self.output_spec().get()  # pylint: disable=E1102
+            outputs = self.output_spec().get()
             for name, trait_spec in list(traits.items()):
                 out_name = name
                 if trait_spec.output_name is not None:
@@ -1184,7 +1184,7 @@ class SEMLikeCommandLine(CommandLine):
     """
 
     def _list_outputs(self):
-        outputs = self.output_spec().get()  # pylint: disable=E1102
+        outputs = self.output_spec().get()
         return self._outputs_from_inputs(outputs)
 
     def _outputs_from_inputs(self, outputs):
