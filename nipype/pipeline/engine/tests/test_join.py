@@ -198,8 +198,6 @@ def test_node_joinsource(tmpdir):
     """Test setting the joinsource to a Node."""
     tmpdir.chdir()
 
-    # Make the workflow.
-    wf = pe.Workflow(name='test')
     # the iterated input node
     inputspec = pe.Node(IdentityInterface(fields=['n']), name='inputspec')
     inputspec.iterables = [('n', [1, 2])]

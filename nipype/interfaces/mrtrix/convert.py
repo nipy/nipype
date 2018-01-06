@@ -86,8 +86,6 @@ def read_mrtrix_streamlines(in_file, header, as_generator=True):
     bytesize = pt_cols * 4
 
     def points_per_track(offset):
-        n_streams = 0
-        n_points = 0
         track_points = []
         iflogger.info('Identifying the number of points per tract...')
         all_str = fileobj.read()
@@ -95,7 +93,6 @@ def read_mrtrix_streamlines(in_file, header, as_generator=True):
         pts = np.ndarray(shape=(num_triplets, pt_cols), dtype='f4', buffer=all_str)
         nonfinite_list = np.where(np.isfinite(pts[:, 2]) == False)
         nonfinite_list = list(nonfinite_list[0])[0:-1]  # Converts numpy array to list, removes the last value
-        nonfinite_list_bytes = [offset + x * bytesize for x in nonfinite_list]
         for idx, value in enumerate(nonfinite_list):
             if idx == 0:
                 track_points.append(nonfinite_list[idx])

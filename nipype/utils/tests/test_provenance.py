@@ -17,7 +17,6 @@ def test_provenance():
     results = CommandLine('echo hello').run()
     ps.add_results(results)
     provn = ps.g.get_provn()
-    prov_json = ps.g.serialize(format='json')
     assert 'echo hello' in provn
 
 def test_provenance_exists(tmpdir):

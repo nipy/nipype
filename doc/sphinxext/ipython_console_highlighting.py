@@ -59,7 +59,6 @@ class IPythonConsoleLexer(Lexer):
 
     def get_tokens_unprocessed(self, text):
         pylexer = PythonLexer(**self.options)
-        tblexer = PythonTracebackLexer(**self.options)
 
         curcode = ''
         insertions = []

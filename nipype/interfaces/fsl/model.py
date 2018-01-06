@@ -766,7 +766,6 @@ threshold=10, results_dir='stats')
             varcopes = []
             zstats = []
             tstats = []
-            neffs = []
             for i in range(numtcons):
                 copes.append(self._gen_fname(
                     'cope%d.nii' % (base_contrast + i), cwd=pth))

@@ -287,7 +287,7 @@ def _compute_voxel(args):
             signal, _ = multi_tensor(
                 gtab, args['mevals'], S0=args['S0'],
                 angles=args['sticks'], fractions=ffs, snr=snr)
-        except Exception as e:
+        except Exception:
             pass
 
     return signal.tolist()

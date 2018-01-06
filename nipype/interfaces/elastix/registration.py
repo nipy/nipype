@@ -70,7 +70,6 @@ class Registration(CommandLine):
 
         out_dir = op.abspath(self.inputs.output_path)
 
-        opts = ['WriteResultImage', 'ResultImageFormat']
         regex = re.compile(r'^\((\w+)\s(.+)\)$')
 
         outputs['transform'] = []

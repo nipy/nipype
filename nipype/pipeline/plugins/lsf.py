@@ -65,7 +65,6 @@ class LSFPlugin(SGELikeBatchManagerBase):
         cmd = CommandLine('bsub', environ=dict(os.environ),
                           resource_monitor=False,
                           terminal_output='allatonce')
-        path = os.path.dirname(scriptfile)
         bsubargs = ''
         if self._bsub_args:
             bsubargs = self._bsub_args

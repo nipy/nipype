@@ -236,9 +236,7 @@ class EstimateResponseForSH(CommandLine):
 def concat_files(bvec_file, bval_file, invert_x, invert_y, invert_z):
     bvecs = np.loadtxt(bvec_file)
     bvals = np.loadtxt(bval_file)
-    flip = False
     if np.shape(bvecs)[0] > np.shape(bvecs)[1]:
-        flip = True
         bvecs = np.transpose(bvecs)
     if invert_x:
         bvecs[0, :] = -bvecs[0, :]

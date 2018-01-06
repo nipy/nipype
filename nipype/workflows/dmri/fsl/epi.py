@@ -693,7 +693,6 @@ def _cat_logs(in_files):
     if fext == '.gz':
         name, _ = os.path.splitext(name)
     out_file = os.path.abspath('./%s_ecclog.log' % name)
-    out_str = ''
     with open(out_file, 'wb') as totallog:
         for i, fname in enumerate(in_files):
             totallog.write('\n\npreprocessing %d\n' % i)

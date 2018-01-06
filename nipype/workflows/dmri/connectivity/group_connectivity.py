@@ -71,7 +71,7 @@ def concatcsv(in_files):
     first.close()
     for in_file in in_files:
         file_to_read = open(in_file, 'r')
-        scrap_first_line = file_to_read.readline()
+        file_to_read.readline()  # scrap first line
         for line in file_to_read:
             out_file.write(line)
     return out_name

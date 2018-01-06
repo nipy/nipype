@@ -113,7 +113,6 @@ def bg_mask(in_file, in_mask, out_file=None):
     hdr = im.header.copy()
     hdr.set_data_dtype(np.uint8)
     hdr.set_xyzt_units('mm')
-    imdata = im.get_data()
     msk = nb.load(in_mask, mmap=NUMPY_MMAP).get_data()
     msk = 1 - binary_dilation(msk, structure=np.ones((20, 20, 20)))
     nb.Nifti1Image(msk.astype(np.uint8), im.affine, hdr).to_filename(out_file)

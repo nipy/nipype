@@ -285,7 +285,6 @@ class EstimateContrast(BaseInterface):
         self._z_maps = []
         for contrast_def in self.inputs.contrasts:
             name = contrast_def[0]
-            _ = contrast_def[1]
             contrast = np.zeros(len(reg_names))
 
             for i, reg_name in enumerate(reg_names):

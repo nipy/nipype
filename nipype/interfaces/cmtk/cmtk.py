@@ -146,7 +146,6 @@ def create_endpoints_array(fib, voxelSize):
     n = len(fib)
     endpoints = np.zeros((n, 2, 3))
     endpointsmm = np.zeros((n, 2, 3))
-    pc = -1
 
     # Computation for each fiber
     for i, fi in enumerate(fib):
@@ -756,7 +755,6 @@ def create_nodes(roi_file, resolution_network_file, out_filename):
     gp = nx.read_graphml(resolution_network_file)
     roi_image = nb.load(roi_file, mmap=NUMPY_MMAP)
     roiData = roi_image.get_data()
-    nROIs = len(gp.nodes())
     for u, d in gp.nodes(data=True):
         G.add_node(int(u), **d)
         xyz = tuple(np.mean(np.where(np.flipud(roiData) == int(d["dn_correspondence_id"])), axis=1))

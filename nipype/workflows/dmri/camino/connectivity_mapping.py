@@ -248,7 +248,6 @@ def create_connectivity_pipeline(name="connectivity"):
     giftiLabels = pe.Node(interface=util.Merge(2), name="GiftiLabels")
     niftiVolumes = pe.Node(interface=util.Merge(3), name="NiftiVolumes")
     fiberDataArrays = pe.Node(interface=util.Merge(4), name="FiberDataArrays")
-    gpickledNetworks = pe.Node(interface=util.Merge(1), name="NetworkFiles")
 
     """
     Since we have now created all our nodes, we can define our workflow and start making connections.

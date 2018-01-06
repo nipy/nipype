@@ -52,7 +52,6 @@ class PBSPlugin(SGELikeBatchManagerBase):
                              terminal_output='allatonce',
                              resource_monitor=False,
                              ignore_exception=True).run()
-        stderr = result.runtime.stderr
         errmsg = 'Unknown Job Id'  # %s' % taskid
         success = 'Job has finished'
         if success in e:  # Fix for my PBS

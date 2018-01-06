@@ -190,7 +190,6 @@ class InterfaceChecker(object):
 
         # Make a shorter version of the uri that omits the package name for
         # titles
-        uri_short = re.sub(r'^%s\.' % self.package_name, '', uri)
         allowed_keys = ['desc', 'genfile', 'xor', 'requires', 'desc',
                         'nohash', 'argstr', 'position', 'mandatory',
                         'copyfile', 'usedefault', 'sep', 'hash_files',
@@ -206,7 +205,7 @@ class InterfaceChecker(object):
                 with warnings.catch_warnings():
                     warnings.simplefilter("ignore")
                     classinst = sys.modules[uri].__dict__[c]
-            except Exception as inst:
+            except Exception:
                 continue
 
             if not issubclass(classinst, BaseInterface):

@@ -324,7 +324,6 @@ class CSD(DipyDiffusionInterface):
 
         img = nb.load(self.inputs.in_file)
         imref = nb.four_to_three(img)[0]
-        affine = img.affine
 
         if isdefined(self.inputs.in_mask):
             msk = nb.load(self.inputs.in_mask).get_data()
@@ -332,7 +331,6 @@ class CSD(DipyDiffusionInterface):
             msk = np.ones(imref.shape)
 
         data = img.get_data().astype(np.float32)
-        hdr = imref.header.copy()
 
         gtab = self._get_gradient_table()
         resp_file = np.loadtxt(self.inputs.response)

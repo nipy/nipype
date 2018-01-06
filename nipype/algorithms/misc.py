@@ -410,10 +410,10 @@ def merge_csvs(in_list):
     for idx, in_file in enumerate(in_list):
         try:
             in_array = np.loadtxt(in_file, delimiter=',')
-        except ValueError as ex:
+        except ValueError:
             try:
                 in_array = np.loadtxt(in_file, delimiter=',', skiprows=1)
-            except ValueError as ex:
+            except ValueError:
                 with open(in_file, 'r') as first:
                     header_line = first.readline()
 
@@ -424,7 +424,7 @@ def merge_csvs(in_list):
                         in_file, delimiter=',', skiprows=1,
                         usecols=list(range(1, n_cols))
                     )
-                except ValueError as ex:
+                except ValueError:
                     in_array = np.loadtxt(
                         in_file, delimiter=',', skiprows=1, usecols=list(range(1, n_cols - 1)))
         if idx == 0:

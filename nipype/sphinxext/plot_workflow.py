@@ -521,7 +521,7 @@ def render_figures(code, code_path, output_dir, output_base, context,
                                        graph2use=graph2use,
                                        simple_form=simple_form)
             shutil.move(src, img_path)
-        except Exception as err:
+        except Exception:
             raise GraphError(traceback.format_exc())
 
         img.formats.append(fmt)

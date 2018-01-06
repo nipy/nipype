@@ -1311,7 +1311,6 @@ class SphericalAverage(FSCommand):
             avg_directory = os.path.join(self.inputs.subjects_dir, avg_subject)
             if not os.path.isdir(avg_directory):
                 fs_home = os.path.abspath(os.environ.get('FREESURFER_HOME'))
-                avg_home = os.path.join(fs_home, 'subjects', 'fsaverage')
             return avg_subject
         elif name == 'out_file':
             return self._list_outputs()[name]

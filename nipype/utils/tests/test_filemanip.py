@@ -165,7 +165,6 @@ def test_recopy(_temp_analyze_files):
     orig_img, orig_hdr = _temp_analyze_files
     pth, fname = os.path.split(orig_img)
     img_link = os.path.join(pth, 'imglink.img')
-    hdr_link = os.path.join(pth, 'imglink.hdr')
     new_img = os.path.join(pth, 'newfile.img')
     new_hdr = os.path.join(pth, 'newfile.hdr')
     copyfile(orig_img, img_link)
@@ -299,7 +298,7 @@ def test_check_depends(tmpdir):
     os.unlink(dependencies[0])
     try:
         check_depends(targets, dependencies)
-    except OSError as e:
+    except OSError:
         pass
     else:
         assert False, "Should raise OSError on missing dependency"

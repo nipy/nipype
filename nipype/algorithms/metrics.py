@@ -298,8 +298,6 @@ class Overlap(BaseInterface):
         data1 = data1.astype(np.min_scalar_type(max1))
         data2 = nii2.get_data().astype(np.min_scalar_type(max1))
         data2[np.logical_or(data1 < 0, np.isnan(data1))] = 0
-        max2 = data2.max()
-        maxlabel = max(max1, max2)
 
         if isdefined(self.inputs.mask_volume):
             maskdata = nb.load(self.inputs.mask_volume).get_data()
@@ -630,7 +628,7 @@ class Similarity(BaseInterface):
     def __init__(self, **inputs):
         try:
             package_check('nipy')
-        except Exception as e:
+        except Exception:
             self._have_nipy = False
         super(Similarity, self).__init__(**inputs)
 

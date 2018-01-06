@@ -370,7 +370,6 @@ def recompose_xfm(in_bval, in_xfms):
     import os.path as op
 
     bvals = np.loadtxt(in_bval)
-    out_matrix = np.array([np.eye(4)] * len(bvals))
     xfms = iter([np.loadtxt(xfm) for xfm in in_xfms])
     out_files = []
 
