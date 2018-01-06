@@ -49,13 +49,13 @@ def copy2subjdir(cls, in_file, folder=None, basename=None, subject_id=None):
     if isdefined(cls.inputs.subjects_dir):
         subjects_dir = cls.inputs.subjects_dir
     else:
-        subjects_dir = os.getcwd() #if not use cwd
+        subjects_dir = os.getcwd() # if not use cwd
     # check for subject_id
     if not subject_id:
         if isdefined(cls.inputs.subject_id):
             subject_id = cls.inputs.subject_id
         else:
-            subject_id = 'subject_id' #default
+            subject_id = 'subject_id' # default
     # check for basename
     if basename is None:
         basename = os.path.basename(in_file)

@@ -1311,7 +1311,7 @@ class FWHMx(AFNICommandBase):
         else:
             outputs['out_detrend'] = Undefined
 
-        sout = np.loadtxt(outputs['out_file'])  #pylint: disable=E1101
+        sout = np.loadtxt(outputs['out_file'])  # pylint: disable=E1101
         if self._acf:
             outputs['acf_param'] = tuple(sout[1])
             sout = tuple(sout[0])
