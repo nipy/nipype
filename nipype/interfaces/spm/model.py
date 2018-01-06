@@ -259,7 +259,7 @@ class EstimateModel(SPMCommand):
 
         betas = [vbeta.fname[0] for vbeta in spm['SPM'][0, 0].Vbeta[0]]
         if ('Bayesian' in self.inputs.estimation_method.keys() or
-            'Bayesian2' in self.inputs.estimation_method.keys()):
+                'Bayesian2' in self.inputs.estimation_method.keys()):
             outputs['labels'] = os.path.join(pth,
                                             'labels.{}'.format(outtype))
             outputs['SDerror'] = glob(os.path.join(pth, 'Sess*_SDerror*'))
