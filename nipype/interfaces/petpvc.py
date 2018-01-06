@@ -41,17 +41,17 @@ pvc_methods = ['GTM',
 
 
 class PETPVCInputSpec(CommandLineInputSpec):
-    in_file   = File(desc="PET image file", exists=True, mandatory=True, argstr="-i %s")
-    out_file  = File(desc="Output file", genfile=True, hash_files=False, argstr="-o %s")
+    in_file = File(desc="PET image file", exists=True, mandatory=True, argstr="-i %s")
+    out_file = File(desc="Output file", genfile=True, hash_files=False, argstr="-o %s")
     mask_file = File(desc="Mask image file", exists=True, mandatory=True, argstr="-m %s")
-    pvc       = traits.Enum(pvc_methods, desc="Desired PVC method", mandatory=True, argstr="-p %s")
-    fwhm_x    = traits.Float(desc="The full-width at half maximum in mm along x-axis", mandatory=True, argstr="-x %.4f")
-    fwhm_y    = traits.Float(desc="The full-width at half maximum in mm along y-axis", mandatory=True, argstr="-y %.4f")
-    fwhm_z    = traits.Float(desc="The full-width at half maximum in mm along z-axis", mandatory=True, argstr="-z %.4f")
-    debug     = traits.Bool(desc="Prints debug information", usedefault=True, default_value=False, argstr="-d")
-    n_iter    = traits.Int(desc="Number of iterations", default_value=10, argstr="-n %d")
-    n_deconv  = traits.Int(desc="Number of deconvolution iterations", default_value=10, argstr="-k %d")
-    alpha     = traits.Float(desc="Alpha value", default_value=1.5, argstr="-a %.4f")
+    pvc = traits.Enum(pvc_methods, desc="Desired PVC method", mandatory=True, argstr="-p %s")
+    fwhm_x = traits.Float(desc="The full-width at half maximum in mm along x-axis", mandatory=True, argstr="-x %.4f")
+    fwhm_y = traits.Float(desc="The full-width at half maximum in mm along y-axis", mandatory=True, argstr="-y %.4f")
+    fwhm_z = traits.Float(desc="The full-width at half maximum in mm along z-axis", mandatory=True, argstr="-z %.4f")
+    debug = traits.Bool(desc="Prints debug information", usedefault=True, default_value=False, argstr="-d")
+    n_iter = traits.Int(desc="Number of iterations", default_value=10, argstr="-n %d")
+    n_deconv = traits.Int(desc="Number of deconvolution iterations", default_value=10, argstr="-k %d")
+    alpha = traits.Float(desc="Alpha value", default_value=1.5, argstr="-a %.4f")
     stop_crit = traits.Float(desc="Stopping criterion", default_value=0.01, argstr="-a %.4f")
 
 

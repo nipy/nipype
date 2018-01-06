@@ -183,10 +183,10 @@ class MRISPreprocReconAll(MRISPreproc):
 
     def _format_arg(self, name, spec, value):
         # mris_preproc looks for these files in the surf dir
-        if name  == 'surfreg_files':
+        if name == 'surfreg_files':
             basename = os.path.basename(value[0])
             return spec.argstr % basename.lstrip('rh.').lstrip('lh.')
-        if name  == "surf_measure_file":
+        if name == "surf_measure_file":
             basename = os.path.basename(value)
             return spec.argstr % basename.lstrip('rh.').lstrip('lh.')
         return super(MRISPreprocReconAll, self)._format_arg(name, spec, value)

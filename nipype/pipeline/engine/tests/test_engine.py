@@ -472,7 +472,7 @@ def test_mapnode_iterfield_type(x_inp, f_exp):
     double_node = MapNode(double, name="double", iterfield=["x"])
     double_node.inputs.x = x_inp
 
-    res  = double_node.run()
+    res = double_node.run()
     assert res.outputs.f_x == f_exp
 
 

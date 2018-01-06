@@ -20,7 +20,7 @@ UNKNOWN_OPTIONS = dict(allow_extra_args=True,
                        ignore_unknown_options=True)
 
 # specification of existing ParamTypes
-ExistingDirPath  = click.Path(exists=True, file_okay=False, resolve_path=True)
+ExistingDirPath = click.Path(exists=True, file_okay=False, resolve_path=True)
 ExistingFilePath = click.Path(exists=True,  dir_okay=False, resolve_path=True)
 UnexistingFilePath = click.Path(dir_okay=False, resolve_path=True)
 

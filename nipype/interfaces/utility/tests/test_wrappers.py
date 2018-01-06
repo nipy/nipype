@@ -93,7 +93,7 @@ def test_aux_connect_function(tmpdir):
         return x + 1
 
     params = pe.Node(utility.IdentityInterface(fields=['size', 'num']), name='params')
-    params.inputs.num  = 42
+    params.inputs.num = 42
     params.inputs.size = 1
 
     gen_tuple = pe.Node(utility.Function(input_names=['size'],
