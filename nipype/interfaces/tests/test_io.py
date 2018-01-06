@@ -155,11 +155,11 @@ def test_datagrabber_order(tmpdir):
     res = dg.run()
     outfiles = res.outputs.outfiles
 
-    assert 'sub002_L1_R1'  in outfiles[0][0]
-    assert 'sub002_L1_R2'  in outfiles[0][1]
-    assert 'sub002_L2_R1'  in outfiles[1][0]
-    assert 'sub002_L2_R2'  in outfiles[1][1]
-    assert 'sub002_L3_R2'  in outfiles[2][0]
+    assert 'sub002_L1_R1' in outfiles[0][0]
+    assert 'sub002_L1_R2' in outfiles[0][1]
+    assert 'sub002_L2_R1' in outfiles[1][0]
+    assert 'sub002_L2_R2' in outfiles[1][1]
+    assert 'sub002_L3_R2' in outfiles[2][0]
     assert 'sub002_L3_R10' in outfiles[2][1]
 
 
