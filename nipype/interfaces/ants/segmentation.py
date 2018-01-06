@@ -773,7 +773,7 @@ class BrainExtraction(ANTSCommand):
             )
             outputs['BrainExtractionInitialAffine'] = os.path.join(
                 os.getcwd(),
-                self.inputs.out_prefix +'BrainExtractionInitialAffine.mat'
+                self.inputs.out_prefix + 'BrainExtractionInitialAffine.mat'
             )
             outputs['BrainExtractionInitialAffineFixed'] = os.path.join(
                 os.getcwd(),

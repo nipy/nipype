@@ -157,7 +157,7 @@ def test_stdimage(create_files_in_directory_plus_output_type):
     # Test the other dimensions
     cmdline = "fslmaths a.nii -{}std b.nii"
     for dim in ["X","Y","Z","T"]:
-        stder.inputs.dimension=dim
+        stder.inputs.dimension = dim
         assert stder.cmdline == cmdline.format(dim)
 
     # Test the auto naming

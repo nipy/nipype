@@ -246,7 +246,7 @@ class AllineateInputSpec(AFNICommandInputSpec):
         desc='overwrite output file if it already exists',
         argstr='-overwrite')
 
-    allcostx= File(
+    allcostx = File(
         desc='Compute and print ALL available cost functionals for the un-warped inputs'
              'AND THEN QUIT. If you use this option none of the other expected outputs will be produced',
         argstr='-allcostx |& tee %s',
@@ -3509,7 +3509,7 @@ class Qwarp(AFNICommand):
         if not isdefined(self.inputs.out_file):
             prefix = self._gen_fname(self.inputs.in_file, suffix='_QW')
             ext = '.HEAD'
-            suffix ='+tlrc'
+            suffix = '+tlrc'
         else:
             prefix = self.inputs.out_file
             ext_ind = max([prefix.lower().rfind('.nii.gz'),

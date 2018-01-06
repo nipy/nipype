@@ -44,7 +44,7 @@ def test_importerror(creating_graphs, tmpdir):
 
 @pytest.mark.skipif(not have_cv, reason="cviewer has to be available")
 def test_keyerror(creating_graphs):
-    graphlist =creating_graphs
+    graphlist = creating_graphs
 
     group1 = graphlist[:3]
     group2 = graphlist[3:]

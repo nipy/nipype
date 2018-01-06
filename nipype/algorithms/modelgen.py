@@ -586,9 +586,9 @@ class SpecifySPMModel(SpecifyModel):
                     sumscans = out.astype(int) + sum(nscans[0:i])
 
                     if out.size == 1:
-                        outliers[0]+= [np.array(sumscans, dtype=int).tolist()]
+                        outliers[0] += [np.array(sumscans, dtype=int).tolist()]
                     else:
-                        outliers[0]+= np.array(sumscans, dtype=int).tolist()
+                        outliers[0] += np.array(sumscans, dtype=int).tolist()
 
         self._sessinfo = self._generate_standard_design(concatlist,
                                                         functional_runs=functional_runs,
