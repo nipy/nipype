@@ -8,7 +8,8 @@
     Change directory to provide relative paths for doctests
     >>> import os
     >>> filepath = os.path.dirname( os.path.realpath( __file__ ) )
-    >>> datadir = os.path.realpath(os.path.join(filepath, '../../testing/data'))
+    >>> datadir = os.path.realpath(
+            os.path.join(filepath, '../../testing/data'))
     >>> os.chdir(datadir)
 """
 from __future__ import (print_function, division, unicode_literals,
@@ -441,7 +442,8 @@ class MultiImageMaths(MathsCommand):
     >>> maths.inputs.operand_files = ["functional2.nii", "functional3.nii"]
     >>> maths.inputs.out_file = "functional4.nii"
     >>> maths.cmdline
-    'fslmaths functional.nii -add functional2.nii -mul -1 -div functional3.nii functional4.nii'
+    'fslmaths functional.nii -add functional2.nii -mul -1 -div functional3.nii
+    functional4.nii'
 
     """
     input_spec = MultiImageMathsInput

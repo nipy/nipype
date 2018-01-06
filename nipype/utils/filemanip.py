@@ -177,7 +177,8 @@ def fname_presuffix(fname, prefix='', suffix='', newpath=None, use_ext=True):
     '/tmp/prefoopost.nii.gz'
 
     >>> from nipype.interfaces.base import Undefined
-    >>> fname_presuffix(fname, 'pre', 'post', Undefined) == fname_presuffix(fname, 'pre', 'post')
+    >>> fname_presuffix(fname, 'pre', 'post', Undefined) == fname_presuffix(
+        fname, 'pre', 'post')
     True
 
     """
@@ -447,7 +448,8 @@ def get_related_files(filename, include_this_file=True):
         if this_type in type_set:
             for related_type in type_set:
                 if include_this_file or related_type != this_type:
-                    related_files.append(os.path.join(path, name + related_type))
+                    related_files.append(os.path.join(
+                        path, name + related_type))
     if not len(related_files):
         related_files = [filename]
     return related_files

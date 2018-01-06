@@ -31,7 +31,8 @@ def test_concatenate(tmpdir):
 
     # Test default behavior
     res = model.Concatenate(in_files=[in1, in2]).run()
-    assert res.outputs.concatenated_file == tmpdir.join('concat_output.nii.gz').strpath
+    assert res.outputs.concatenated_file == tmpdir.join(
+        'concat_output.nii.gz').strpath
     assert np.allclose(nb.load('concat_output.nii.gz').get_data(), out_data)
 
     # Test specified concatenated_file

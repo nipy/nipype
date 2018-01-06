@@ -180,10 +180,10 @@ class FSCommand(CommandLine):
 
 class FSSurfaceCommand(FSCommand):
     """Support for FreeSurfer surface-related functions.
-    For some functions, if the output file is not specified starting with
-    'lh.' or 'rh.', FreeSurfer prepends the prefix from the input file to the
-    output filename. Output out_file must be adjusted to accommodate this.
-    By including the full path in the filename, we can also avoid this behavior.
+    For some functions, if the output file is not specified starting with 'lh.'
+    or 'rh.', FreeSurfer prepends the prefix from the input file to the output
+    filename. Output out_file must be adjusted to accommodate this. By
+    including the full path in the filename, we can also avoid this behavior.
     """
     def _get_filecopy_info(self):
         self._normalize_filenames()

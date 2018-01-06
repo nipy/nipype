@@ -74,7 +74,8 @@ if not os.getcwd().endswith('users/examples'):
 
 # Run the conversion from .py to rst file
 sh('../../../tools/ex2rst --project Nipype --outdir . ../../../examples')
-sh('../../../tools/ex2rst --project Nipype --outdir . ../../../examples/frontiers_paper')
+sh('../../../tools/ex2rst --project Nipype '
+    '--outdir . ../../../examples/frontiers_paper')
 
 # Make the index.rst file
 """

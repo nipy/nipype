@@ -35,7 +35,8 @@ class ResourceMonitor(threading.Thread):
         import psutil
 
         if freq < 0.2:
-            raise RuntimeError('Frequency (%0.2fs) cannot be lower than 0.2s' % freq)
+            raise RuntimeError(
+                'Frequency (%0.2fs) cannot be lower than 0.2s' % freq)
 
         if fname is None:
             fname = '.proc-%d_time-%s_freq-%0.2f' % (pid, time(), freq)
@@ -245,7 +246,9 @@ def _get_num_threads(pid):
             num_threads = proc.num_threads()
         elif proc.num_threads() > 1:
             tprocs = [psutil.Process(thr.id) for thr in proc.threads()]
-            alive_tprocs = [tproc for tproc in tprocs if tproc.status() == psutil.STATUS_RUNNING]
+            alive_tprocs = [
+                tproc for tproc in tprocs
+                if tproc.status() == psutil.STATUS_RUNNING]
             num_threads = len(alive_tprocs)
         else:
             num_threads = 1
@@ -261,7 +264,8 @@ def _get_num_threads(pid):
                 # If its not necessarily running, but still multi-threaded
                 elif child.num_threads() > 1:
                     # Cast each thread as a process and check for only running
-                    tprocs = [psutil.Process(thr.id) for thr in child.threads()]
+                    tprocs = [psutil.Process(thr.id)
+                              for thr in child.threads()]
                     alive_tprocs = [tproc for tproc in tprocs
                                     if tproc.status() == psutil.STATUS_RUNNING]
                     child_thr = len(alive_tprocs)

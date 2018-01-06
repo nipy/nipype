@@ -47,7 +47,8 @@ class Info(PackageInfo):
         v_string = v_string.split('-')[0]
 
         # 2.2.0-equivalent version string
-        if 'post' in v_string and LooseVersion(v_string) >= LooseVersion('2.1.0.post789'):
+        if 'post' in v_string and \
+                LooseVersion(v_string) >= LooseVersion('2.1.0.post789'):
             return '2.2.0'
         else:
             return '.'.join(v_string.split('.')[:3])
@@ -99,7 +100,8 @@ class ANTSCommand(CommandLine):
 
     @staticmethod
     def _format_xarray(val):
-        """ Convenience method for converting input arrays [1,2,3] to commandline format '1x2x3' """
+        """ Convenience method for converting input arrays [1,2,3] to
+        commandline format '1x2x3' """
         return 'x'.join([str(x) for x in val])
 
     @classmethod

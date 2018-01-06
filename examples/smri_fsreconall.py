@@ -88,6 +88,7 @@ average = pe.JoinNode(interface=MakeAverageSubject(),
                       name="average")
 average.inputs.subjects_dir = subjects_dir
 
-wf.connect(recon_all, 'postdatasink_outputspec.subject_id', average, 'subjects_ids')
+wf.connect(recon_all, 'postdatasink_outputspec.subject_id',
+           average, 'subjects_ids')
 
 wf.run("MultiProc", plugin_args={'n_procs': 4})

@@ -26,8 +26,9 @@ iter_fwhm = pe.Node(interface=util.IdentityInterface(fields=["fwhm"]),
                     name="iter_fwhm")
 iter_fwhm.iterables = [('fwhm', [4, 8])]
 
-iter_smoothing_method = pe.Node(interface=util.IdentityInterface(fields=["smoothing_method"]),
-                                name="iter_smoothing_method")
+iter_smoothing_method = pe.Node(interface=util.IdentityInterface(
+    fields=["smoothing_method"]),
+    name="iter_smoothing_method")
 iter_smoothing_method.iterables = [('smoothing_method', ['isotropic_voxel',
                                                          'anisotropic_voxel',
                                                          'isotropic_surface'])]
@@ -44,8 +45,9 @@ preprocessing.connect(iter_fwhm, "fwhm", isotropic_voxel_smooth, "fwhm")
 compute_mask = pe.Node(interface=nipy.ComputeMask(), name="compute_mask")
 preprocessing.connect(realign, "mean_image", compute_mask, "mean_volume")
 
-anisotropic_voxel_smooth = fsl_wf.create_susan_smooth(name="anisotropic_voxel_smooth",
-                                                      separate_masks=False)
+anisotropic_voxel_smooth = fsl_wf.create_susan_smooth(
+    name="anisotropic_voxel_smooth",
+    separate_masks=False)
 anisotropic_voxel_smooth.inputs.smooth.output_type = 'NIFTI'
 preprocessing.connect(realign, "realigned_files", anisotropic_voxel_smooth,
                       "inputnode.in_files")
@@ -64,9 +66,10 @@ preprocessing.connect(realign, 'mean_image', surfregister, 'source_file')
 preprocessing.connect(recon_all, 'subject_id', surfregister, 'subject_id')
 preprocessing.connect(recon_all, 'subjects_dir', surfregister, 'subjects_dir')
 
-isotropic_surface_smooth = pe.MapNode(interface=fs.Smooth(proj_frac_avg=(0, 1, 0.1)),
-                                      iterfield=['in_file'],
-                                      name="isotropic_surface_smooth")
+isotropic_surface_smooth = pe.MapNode(
+    interface=fs.Smooth(proj_frac_avg=(0, 1, 0.1)),
+    iterfield=['in_file'],
+    name="isotropic_surface_smooth")
 preprocessing.connect(surfregister, 'out_reg_file', isotropic_surface_smooth,
                       'reg_file')
 preprocessing.connect(realign, "realigned_files", isotropic_surface_smooth,
@@ -93,8 +96,10 @@ preprocessing.connect(merge_smoothed_files, 'out', select_smoothed_files,
 
 
 def chooseindex(roi):
-    return {'isotropic_voxel': list(range(0, 4)), 'anisotropic_voxel': list(range(4, 8)),
-            'isotropic_surface': list(range(8, 12))}[roi]
+  return {'isotropic_voxel': list(range(0, 4)),
+          'anisotropic_voxel': list(range(4, 8)),
+          'isotropic_surface': list(range(8, 12))}[roi]
+
 
 preprocessing.connect(iter_smoothing_method, ("smoothing_method", chooseindex),
                       select_smoothed_files, 'index')
@@ -109,10 +114,11 @@ specify_model = pe.Node(interface=model.SpecifyModel(), name="specify_model")
 specify_model.inputs.input_units = 'secs'
 specify_model.inputs.time_repetition = 3.
 specify_model.inputs.high_pass_filter_cutoff = 120
-specify_model.inputs.subject_info = [Bunch(conditions=['Task-Odd', 'Task-Even'],
-                                           onsets=[list(range(15, 240, 60)),
-                                                   list(range(45, 240, 60))],
-                                           durations=[[15], [15]])] * 4
+specify_model.inputs.subject_info = [
+    Bunch(conditions=['Task-Odd', 'Task-Even'],
+          onsets=[list(range(15, 240, 60)),
+                  list(range(45, 240, 60))],
+          durations=[[15], [15]])] * 4
 
 level1design = pe.Node(interface=spm.Level1Design(), name="level1design")
 level1design.inputs.bases = {'hrf': {'derivs': [0, 0]}}
@@ -132,7 +138,8 @@ modelling.connect(specify_model, 'session_info', level1design, 'session_info')
 modelling.connect(level1design, 'spm_mat_file', level1estimate, 'spm_mat_file')
 modelling.connect(level1estimate, 'spm_mat_file', contrastestimate,
                   'spm_mat_file')
-modelling.connect(level1estimate, 'beta_images', contrastestimate, 'beta_images')
+modelling.connect(level1estimate, 'beta_images',
+                  contrastestimate, 'beta_images')
 modelling.connect(level1estimate, 'residual_image', contrastestimate,
                   'residual_image')
 
@@ -150,9 +157,10 @@ datasource = pe.Node(interface=nio.DataGrabber(infields=['subject_id'],
                      name='datasource')
 datasource.inputs.base_directory = os.path.abspath('data')
 datasource.inputs.template = '%s/%s.nii'
-datasource.inputs.template_args = info = dict(func=[['subject_id',
-                                                     ['f3', 'f5', 'f7', 'f10']]],
-                                              struct=[['subject_id', 'struct']])
+datasource.inputs.template_args = info = dict(
+    func=[['subject_id',
+           ['f3', 'f5', 'f7', 'f10']]],
+    struct=[['subject_id', 'struct']])
 datasource.inputs.subject_id = 's1'
 datasource.inputs.sort_filelist = True
 
@@ -161,7 +169,8 @@ main_workflow.connect(datasource, 'struct', preprocessing,
                       'recon_all.T1_files')
 
 datasink = pe.Node(interface=nio.DataSink(), name="datasink")
-datasink.inputs.base_directory = os.path.abspath('smoothing_comparison_workflow/output')
+datasink.inputs.base_directory = os.path.abspath(
+    'smoothing_comparison_workflow/output')
 datasink.inputs.regexp_substitutions = [("_rename[0-9]", "")]
 
 main_workflow.connect(modelling, 'contrastestimate.spmT_images', datasink,

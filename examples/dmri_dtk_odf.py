@@ -13,9 +13,9 @@ the FSL website at: http://www.fmrib.ox.ac.uk/fslcourse/fsl_course_data2.tar.gz
 More details can be found at
 http://www.fmrib.ox.ac.uk/fslcourse/lectures/practicals/fdt/index.htm
 
-In order to run this tutorial you need to have Diffusion Toolkit and FSL tools installed and
-accessible from matlab/command line. Check by calling fslinfo and dtk from the command
-line.
+In order to run this tutorial you need to have Diffusion Toolkit and FSL tools
+installed and accessible from matlab/command line. Check by calling fslinfo and
+dtk from the command line.
 
 Tell python where to find the appropriate functions.
 """
@@ -51,8 +51,8 @@ Data specific components
 
 The nipype tutorial contains data for two subjects.  Subject data
 is in two subdirectories, ``dwis1`` and ``dwis2``.  Each subject directory
-contains each of the following files: bvec, bval, diffusion weighted data, a set of target masks,
-a seed file, and a transformation matrix.
+contains each of the following files: bvec, bval, diffusion weighted data, a
+set of target masks, a seed file, and a transformation matrix.
 
 Below we set some variables to inform the ``datasource`` about the
 layout of our data.  We specify the location of the data, the subject
@@ -154,7 +154,8 @@ connect all the nodes for this workflow
 compute_ODF.connect([
     (fslroi, bet, [('roi_file', 'in_file')]),
     (eddycorrect, odf_recon, [('outputnode.eddy_corrected', 'DWI')]),
-    (eddycorrect, hardi_mat, [('outputnode.eddy_corrected', 'reference_file')]),
+    (eddycorrect, hardi_mat, [('outputnode.eddy_corrected',
+                               'reference_file')]),
     (hardi_mat, odf_recon, [('out_file', 'matrix')])
 ])
 
@@ -181,8 +182,8 @@ tractography.connect([
 
 
 """
-Setup the pipeline that combines the two workflows: tractography and compute_ODF
-----------------------------------------------------------------------------------
+Setup the pipeline that combines the 2 workflows: tractography and compute_ODF
+------------------------------------------------------------------------------
 """
 
 dwiproc = pe.Workflow(name="dwiproc")

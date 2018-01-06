@@ -44,7 +44,8 @@ class PBSPlugin(SGELikeBatchManagerBase):
             if 'max_tries' in kwargs['plugin_args']:
                 self._max_tries = kwargs['plugin_args']['max_tries']
             if 'max_jobname_len' in kwargs['plugin_args']:
-                self._max_jobname_len = kwargs['plugin_args']['max_jobname_len']
+                self._max_jobname_len = kwargs[
+                    'plugin_args']['max_jobname_len']
         super(PBSPlugin, self).__init__(template, **kwargs)
 
     def _is_pending(self, taskid):
@@ -102,17 +103,20 @@ class PBSPlugin(SGELikeBatchManagerBase):
             except Exception as e:
                 if tries < self._max_tries:
                     tries += 1
-                    sleep(self._retry_timeout)  # sleep 2 seconds and try again.
+                    # sleep 2 seconds and try again.
+                    sleep(self._retry_timeout)
                 else:
                     iflogger.setLevel(oldlevel)
                     raise RuntimeError(
-                        'Could not submit pbs task for node {}\n{}'.format(node._id, e))
+                        'Could not submit pbs task for node {}\n{}'.format(
+                            node._id, e))
             else:
                 break
         iflogger.setLevel(oldlevel)
         # retrieve pbs taskid
         taskid = result.runtime.stdout.split('.')[0]
         self._pending[taskid] = node.output_dir()
-        logger.debug('submitted pbs task: {} for node {}'.format(taskid, node._id))
+        logger.debug(
+            'submitted pbs task: {} for node {}'.format(taskid, node._id))
 
         return taskid

@@ -22,9 +22,10 @@ except ImportError:
 def test_fd(tmpdir):
     tempdir = tmpdir.strpath
     ground_truth = np.loadtxt(example_data('fsl_motion_outliers_fd.txt'))
-    fdisplacement = FramewiseDisplacement(in_file=example_data('fsl_mcflirt_movpar.txt'),
-                                          out_file=tempdir + '/fd.txt',
-                                          parameter_source="FSL")
+    fdisplacement = FramewiseDisplacement(
+        in_file=example_data('fsl_mcflirt_movpar.txt'),
+        out_file=tempdir + '/fd.txt',
+        parameter_source="FSL")
     res = fdisplacement.run()
 
     with open(res.outputs.out_file) as all_lines:
@@ -32,7 +33,8 @@ def test_fd(tmpdir):
             assert 'FramewiseDisplacement' in line
             break
 
-    assert np.allclose(ground_truth, np.loadtxt(res.outputs.out_file, skiprows=1), atol=.16)
+    assert np.allclose(ground_truth, np.loadtxt(
+        res.outputs.out_file, skiprows=1), atol=.16)
     assert np.abs(ground_truth.mean() - res.outputs.fd_average) < 1e-2
 
 
@@ -40,7 +42,8 @@ def test_fd(tmpdir):
 def test_dvars(tmpdir):
     ground_truth = np.loadtxt(example_data('ds003_sub-01_mc.DVARS'))
     dvars = ComputeDVARS(in_file=example_data('ds003_sub-01_mc.nii.gz'),
-                         in_mask=example_data('ds003_sub-01_mc_brainmask.nii.gz'),
+                         in_mask=example_data(
+                             'ds003_sub-01_mc_brainmask.nii.gz'),
                          save_all=True,
                          intensity_normalization=0)
     tmpdir.chdir()

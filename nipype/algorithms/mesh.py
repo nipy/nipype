@@ -123,13 +123,15 @@ class WarpPoints(TVTKBaseInterface):
         mesh.points = newpoints
         w = tvtk.PolyDataWriter()
         VTKInfo.configure_input_data(w, mesh)
-        w.file_name = self._gen_fname(self.inputs.points, suffix='warped', ext='.vtk')
+        w.file_name = self._gen_fname(
+            self.inputs.points, suffix='warped', ext='.vtk')
         w.write()
         return runtime
 
     def _list_outputs(self):
         outputs = self._outputs().get()
-        outputs['out_points'] = self._gen_fname(self.inputs.points, suffix='warped',
+        outputs['out_points'] = self._gen_fname(self.inputs.points,
+                                                suffix='warped',
                                                 ext='.vtk')
         return outputs
 
@@ -359,13 +361,15 @@ class MeshWarpMaths(TVTKBaseInterface):
             warping /= opfield
 
         vtk1.point_data.vectors = warping
-        writer = tvtk.PolyDataWriter(file_name=op.abspath(self.inputs.out_warp))
+        writer = tvtk.PolyDataWriter(
+            file_name=op.abspath(self.inputs.out_warp))
         VTKInfo.configure_input_data(writer, vtk1)
         writer.write()
 
         vtk1.point_data.vectors = None
         vtk1.points = points1 + warping
-        writer = tvtk.PolyDataWriter(file_name=op.abspath(self.inputs.out_file))
+        writer = tvtk.PolyDataWriter(
+            file_name=op.abspath(self.inputs.out_file))
         VTKInfo.configure_input_data(writer, vtk1)
         writer.write()
         return runtime
@@ -390,5 +394,5 @@ class P2PDistance(ComputeMeshWarp):
 
     def __init__(self, **inputs):
         super(P2PDistance, self).__init__(**inputs)
-        IFLOGGER.warn('This interface has been deprecated since 1.0, please use '
-                      'ComputeMeshWarp')
+        IFLOGGER.warn('This interface has been deprecated since 1.0, please '
+                      'use ComputeMeshWarp')

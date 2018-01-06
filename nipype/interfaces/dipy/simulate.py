@@ -121,7 +121,8 @@ class SimulateMultiTensor(DipyBaseInterface):
         # Volume fractions of isotropic compartments
         nballs = len(self.inputs.in_vfms)
         vfs = np.squeeze(nb.concat_images(
-            [nb.load(f, mmap=NUMPY_MMAP) for f in self.inputs.in_vfms]).get_data())
+            [nb.load(f, mmap=NUMPY_MMAP)
+             for f in self.inputs.in_vfms]).get_data())
         if nballs == 1:
             vfs = vfs[..., np.newaxis]
         total_vf = np.sum(vfs, axis=3)
@@ -139,7 +140,8 @@ class SimulateMultiTensor(DipyBaseInterface):
         nvox = len(msk[msk > 0])
 
         # Fiber fractions
-        ffsim = nb.concat_images([nb.load(f, mmap=NUMPY_MMAP) for f in self.inputs.in_frac])
+        ffsim = nb.concat_images([nb.load(f, mmap=NUMPY_MMAP)
+                                  for f in self.inputs.in_frac])
         ffs = np.nan_to_num(np.squeeze(ffsim.get_data()))  # fiber fractions
         ffs = np.clip(ffs, 0., 1.)
         if nsticks == 1:
@@ -229,8 +231,9 @@ class SimulateMultiTensor(DipyBaseInterface):
             pool = Pool(processes=n_proc)
 
         # Simulate sticks using dipy
-        IFLOGGER.info('Starting simulation of %d voxels, %d diffusion directions.',
-                      len(args), ndirs)
+        IFLOGGER.info(
+            'Starting simulation of %d voxels, %d diffusion directions.',
+            len(args), ndirs)
         result = np.array(pool.map(_compute_voxel, args))
         if np.shape(result)[1] != ndirs:
             raise RuntimeError(('Computed directions do not match number'

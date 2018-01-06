@@ -80,12 +80,14 @@ class IPythonPlugin(DistributedPluginBase):
             if isinstance(e, TimeoutError):
                 raise_from(Exception("No IPython clients found."), e)
             if isinstance(e, IOError):
-                raise_from(Exception("ipcluster/ipcontroller has not been started"), e)
+                raise_from(Exception(
+                    "ipcluster/ipcontroller has not been started"), e)
             if isinstance(e, ValueError):
                 raise_from(Exception("Ipython kernel not installed"), e)
             else:
                 raise e
-        return super(IPythonPlugin, self).run(graph, config, updatehash=updatehash)
+        return super(IPythonPlugin, self).run(graph, config,
+                                              updatehash=updatehash)
 
     def _get_result(self, taskid):
         if taskid not in self.taskmap:
@@ -102,10 +104,8 @@ class IPythonPlugin(DistributedPluginBase):
 
     def _submit_job(self, node, updatehash=False):
         pckld_node = dumps(node, 2)
-        result_object = self.taskclient.load_balanced_view().apply(execute_task,
-                                                                   pckld_node,
-                                                                   node.config,
-                                                                   updatehash)
+        result_object = self.taskclient.load_balanced_view().apply(
+            execute_task, pckld_node, node.config, updatehash)
         self._taskid += 1
         self.taskmap[self._taskid] = result_object
         return self._taskid

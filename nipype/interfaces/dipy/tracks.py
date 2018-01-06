@@ -269,7 +269,8 @@ class StreamlineTractography(DipyBaseInterface):
         ss_mm = [np.array(s) for s in eu]
 
         trkfilev = nb.trackvis.TrackvisFile(
-            [(s, None, None) for s in ss_mm], points_space='rasmm', affine=np.eye(4))
+            [(s, None, None) for s in ss_mm], points_space='rasmm',
+            affine=np.eye(4))
         trkfilev.to_file(self._gen_filename('tracked', ext='.trk'))
         return runtime
 

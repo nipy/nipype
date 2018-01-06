@@ -111,10 +111,12 @@ class NipypeConfig(object):
         for option in CONFIG_DEPRECATIONS:
             for section in ['execution', 'logging', 'monitoring']:
                 if self.has_option(section, option):
-                    new_section, new_option = CONFIG_DEPRECATIONS[option][0].split('.')
+                    new_section, new_option = CONFIG_DEPRECATIONS[
+                        option][0].split('.')
                     if not self.has_option(new_section, new_option):
                         # Warn implicit in get
-                        self.set(new_section, new_option, self.get(section, option))
+                        self.set(new_section, new_option, self.get(
+                            section, option))
 
     def set_default_config(self):
         self._config.readfp(StringIO(default_cfg))
@@ -138,9 +140,10 @@ class NipypeConfig(object):
     def get(self, section, option, default=None):
         """Get an option"""
         if option in CONFIG_DEPRECATIONS:
-            msg = ('Config option "%s" has been deprecated as of nipype %s. Please use '
-                   '"%s" instead.') % (option, CONFIG_DEPRECATIONS[option][1],
-                                       CONFIG_DEPRECATIONS[option][0])
+            msg = ('Config option "%s" has been deprecated as of nipype %s. '
+                   'Please use "%s" instead.') % (
+                option, CONFIG_DEPRECATIONS[option][1],
+                CONFIG_DEPRECATIONS[option][0])
             warn(msg)
             section, option = CONFIG_DEPRECATIONS[option][0].split('.')
 
@@ -154,9 +157,10 @@ class NipypeConfig(object):
             value = str(value)
 
         if option in CONFIG_DEPRECATIONS:
-            msg = ('Config option "%s" has been deprecated as of nipype %s. Please use '
-                   '"%s" instead.') % (option, CONFIG_DEPRECATIONS[option][1],
-                                       CONFIG_DEPRECATIONS[option][0])
+            msg = ('Config option "%s" has been deprecated as of nipype %s. '
+                   'Please use "%s" instead.') % (
+                option, CONFIG_DEPRECATIONS[option][1],
+                CONFIG_DEPRECATIONS[option][0])
             warn(msg)
             section, option = CONFIG_DEPRECATIONS[option][0].split('.')
 
@@ -240,7 +244,8 @@ class NipypeConfig(object):
             self._resource_monitor = False
         elif value is True:
             if not self._resource_monitor:
-                # Before setting self._resource_monitor check psutil availability
+                # Before setting self._resource_monitor check psutil
+                # availability
                 self._resource_monitor = False
                 try:
                     import psutil
@@ -250,8 +255,8 @@ class NipypeConfig(object):
                     pass
                 finally:
                     if not self._resource_monitor:
-                        warn('Could not enable the resource monitor: psutil>=5.0'
-                             ' could not be imported.')
+                        warn('Could not enable the resource monitor: '
+                             'psutil>=5.0 could not be imported.')
                     self._config.set('monitoring', 'enabled',
                                      ('%s' % self._resource_monitor).lower())
 
@@ -304,8 +309,8 @@ class NipypeConfig(object):
                 from xvfbwrapper import Xvfb
             except ImportError:
                 raise RuntimeError(
-                    'A display server was required, but $DISPLAY is not defined '
-                    'and Xvfb could not be imported.')
+                    'A display server was required, but $DISPLAY is not '
+                    'defined and Xvfb could not be imported.')
 
             self._display = Xvfb(nolisten='tcp')
             self._display.start()
@@ -322,7 +327,8 @@ class NipypeConfig(object):
         if self._display is not None:
             from .. import logging
             self._display.stop()
-            logging.getLogger('interface').debug('Closing display (if virtual)')
+            logging.getLogger('interface').debug(
+                'Closing display (if virtual)')
 
 
 @atexit.register

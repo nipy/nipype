@@ -7,9 +7,12 @@ from __future__ import (print_function, division, unicode_literals,
 import os
 import numpy as np
 
-from ...utils.filemanip import split_filename, fname_presuffix, filename_to_list, list_to_filename
-from ..base import TraitedSpec, isdefined, File, traits, OutputMultiPath, InputMultiPath
-from .base import SPMCommandInputSpec, SPMCommand, scans_for_fnames, scans_for_fname
+from ...utils.filemanip import (split_filename, fname_presuffix,
+                                filename_to_list, list_to_filename)
+from ..base import (TraitedSpec, isdefined, File, traits, OutputMultiPath,
+                    InputMultiPath)
+from .base import (SPMCommandInputSpec, SPMCommand, scans_for_fnames,
+                   scans_for_fname)
 
 
 class Analyze2niiInputSpec(SPMCommandInputSpec):

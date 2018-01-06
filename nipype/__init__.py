@@ -31,13 +31,14 @@ class NipypeTester(object):
         try:
             import pytest
         except:
-            raise RuntimeError('py.test not installed, run: pip install pytest')
+            raise RuntimeError(
+                'py.test not installed, run: pip install pytest')
         params = {'args': []}
         if doctests:
             params['args'].append('--doctest-modules')
         nipype_path = os.path.dirname(__file__)
-        params['args'].extend(['-x', '--ignore={}/external'.format(nipype_path),
-                               nipype_path])
+        params['args'].extend(
+            ['-x', '--ignore={}/external'.format(nipype_path), nipype_path])
         pytest.main(**params)
 
 test = NipypeTester()

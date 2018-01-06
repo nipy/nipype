@@ -30,14 +30,15 @@ if __name__ == '__main__':
                                         '\.scripts$',
                                         ]
     # Modules that should not be included in generated API docs.
-    docwriter.module_skip_patterns += ['\.version$',
-                                       'info',
-                                       '\.interfaces\.(?!(base|matlab))',
-                                       '\.pipeline\.utils$',
-                                       '\.interfaces\.slicer\.generate_classes$',
-                                       '\.interfaces\.pymvpa$',
-                                       '\.scripts$',
-                                       ]
+    docwriter.module_skip_patterns += [
+        '\.version$',
+        'info',
+        '\.interfaces\.(?!(base|matlab))',
+        '\.pipeline\.utils$',
+        '\.interfaces\.slicer\.generate_classes$',
+        '\.interfaces\.pymvpa$',
+        '\.scripts$',
+    ]
     docwriter.write_api_docs(outdir)
     docwriter.write_index(outdir, 'gen', relative_to='api')
     print('%d files written' % len(docwriter.written_modules))

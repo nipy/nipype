@@ -221,9 +221,12 @@ connect all the nodes for this workflow
 """
 
 tractography.add_nodes([bedpostx, flirt])
-tractography.connect([(bedpostx, probtrackx, [('outputnode.thsamples', 'thsamples'),
-                                              ('outputnode.phsamples', 'phsamples'),
-                                              ('outputnode.fsamples', 'fsamples')
+tractography.connect([(bedpostx, probtrackx, [('outputnode.thsamples',
+                                               'thsamples'),
+                                              ('outputnode.phsamples',
+                                               'phsamples'),
+                                              ('outputnode.fsamples',
+                                               'fsamples')
                                               ]),
                       (probtrackx, findthebiggest, [('targets', 'in_files')]),
                       (flirt, probtrackx, [('out_matrix_file', 'xfm')])
@@ -239,13 +242,14 @@ datasink.inputs.base_directory = os.path.abspath('dtiresults')
 
 
 def getstripdir(subject_id):
-    import os
-    return os.path.join(os.path.abspath('data/workingdir/dwiproc'), '_subject_id_%s' % subject_id)
+  import os
+  return os.path.join(os.path.abspath('data/workingdir/dwiproc'),
+                      '_subject_id_%s' % subject_id)
 
 
 """
-Setup the pipeline that combines the two workflows: tractography and computeTensor
-----------------------------------------------------------------------------------
+Setup the pipeline that combines the 2 workflows: tractography & computeTensor
+------------------------------------------------------------------------------
 """
 
 dwiproc = pe.Workflow(name="dwiproc")
@@ -261,15 +265,18 @@ dwiproc.connect([
                                 ('seed_file', 'probtrackx.seed'),
                                 ('target_masks', 'probtrackx.target_masks')
                                 ]),
-    (computeTensor, tractography, [('eddycorrect.outputnode.eddy_corrected', 'bedpostx.inputnode.dwi'),
-                                   ('bet.mask_file', 'bedpostx.inputnode.mask'),
+    (computeTensor, tractography, [('eddycorrect.outputnode.eddy_corrected',
+                                    'bedpostx.inputnode.dwi'),
+                                   ('bet.mask_file',
+                                    'bedpostx.inputnode.mask'),
                                    ('bet.mask_file', 'probtrackx.mask'),
                                    ('fslroi.roi_file', 'flirt.reference')]),
     (infosource, datasink, [('subject_id', 'container'),
                             (('subject_id', getstripdir), 'strip_dir')]),
-    (tractography, datasink, [('findthebiggest.out_file', 'fbiggest.@biggestsegmentation')])
+    (tractography, datasink, [
+     ('findthebiggest.out_file', 'fbiggest.@biggestsegmentation')])
 ])
 
 if __name__ == '__main__':
-    dwiproc.run()
-    dwiproc.write_graph()
+  dwiproc.run()
+  dwiproc.write_graph()

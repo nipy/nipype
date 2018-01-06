@@ -27,19 +27,20 @@ if __name__ == '__main__':
                                         '\.scripts',
                                         ]
     # Modules that should not be included in generated API docs.
-    docwriter.module_skip_patterns += ['\.version$',
-                                       '\.interfaces\.base$',
-                                       '\.interfaces\.matlab$',
-                                       '\.interfaces\.rest$',
-                                       '\.interfaces\.pymvpa$',
-                                       '\.interfaces\.slicer\.generate_classes$',
-                                       '\.interfaces\.spm\.base$',
-                                       '\.interfaces\.traits',
-                                       '\.pipeline\.alloy$',
-                                       '\.pipeline\.s3_node_wrapper$',
-                                       '\.testing',
-                                       '\.scripts',
-                                       ]
+    docwriter.module_skip_patterns += [
+        '\.version$',
+        '\.interfaces\.base$',
+        '\.interfaces\.matlab$',
+        '\.interfaces\.rest$',
+        '\.interfaces\.pymvpa$',
+        '\.interfaces\.slicer\.generate_classes$',
+        '\.interfaces\.spm\.base$',
+        '\.interfaces\.traits',
+        '\.pipeline\.alloy$',
+        '\.pipeline\.s3_node_wrapper$',
+        '\.testing',
+        '\.scripts',
+    ]
     docwriter.class_skip_patterns += ['AFNICommand',
                                       'ANTS',
                                       'FSLCommand',

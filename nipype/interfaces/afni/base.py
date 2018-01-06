@@ -105,6 +105,7 @@ class AFNICommandBase(CommandLine):
     A base class to fix a linking problem in OSX and afni.
     See http://afni.nimh.nih.gov/afni/community/board/read.php?1,145346,145347#msg-145347
     """
+
     def _run_interface(self, runtime):
         if platform == 'darwin':
             runtime.environ['DYLD_FALLBACK_LIBRARY_PATH'] = '/usr/local/afni/'
@@ -131,31 +132,32 @@ class AFNICommand(AFNICommandBase):
     input_spec = AFNICommandInputSpec
     _outputtype = None
 
-    references_ = [{'entry': BibTeX('@article{Cox1996,'
-                                    'author={R.W. Cox},'
-                                    'title={AFNI: software for analysis and '
-                                    'visualization of functional magnetic '
-                                    'resonance neuroimages},'
-                                    'journal={Computers and Biomedical research},'
-                                    'volume={29},'
-                                    'number={3},'
-                                    'pages={162-173},'
-                                    'year={1996},'
-                                    '}'),
-                    'tags': ['implementation'],
-                    },
-                   {'entry': BibTeX('@article{CoxHyde1997,'
-                                    'author={R.W. Cox and J.S. Hyde},'
-                                    'title={Software tools for analysis and '
-                                    'visualization of fMRI data},'
-                                    'journal={NMR in Biomedicine},'
-                                    'volume={10},'
-                                    'number={45},'
-                                    'pages={171-178},'
-                                    'year={1997},'
-                                    '}'),
-                    'tags': ['implementation'],
-                    }]
+    references_ = [
+        {'entry': BibTeX('@article{Cox1996,'
+                         'author={R.W. Cox},'
+                         'title={AFNI: software for analysis and '
+                         'visualization of functional magnetic '
+                         'resonance neuroimages},'
+                         'journal={Computers and Biomedical research},'
+                         'volume={29},'
+                         'number={3},'
+                         'pages={162-173},'
+                         'year={1996},'
+                         '}'),
+         'tags': ['implementation'],
+         },
+        {'entry': BibTeX('@article{CoxHyde1997,'
+                         'author={R.W. Cox and J.S. Hyde},'
+                         'title={Software tools for analysis and '
+                         'visualization of fMRI data},'
+                         'journal={NMR in Biomedicine},'
+                         'volume={10},'
+                         'number={45},'
+                         'pages={171-178},'
+                         'year={1997},'
+                         '}'),
+         'tags': ['implementation'],
+         }]
 
     @property
     def num_threads(self):
@@ -208,7 +210,8 @@ class AFNICommand(AFNICommandBase):
 
     def _overload_extension(self, value, name=None):
         path, base, _ = split_filename(value)
-        return os.path.join(path, base + Info.output_type_to_ext(self.inputs.outputtype))
+        return os.path.join(path, base + Info.output_type_to_ext(
+            self.inputs.outputtype))
 
     def _list_outputs(self):
         outputs = super(AFNICommand, self)._list_outputs()
@@ -287,11 +290,13 @@ class AFNIPythonCommandInputSpec(CommandLineInputSpec):
 class AFNIPythonCommand(AFNICommand):
     @property
     def cmd(self):
-        if spawn.find_executable(super(AFNIPythonCommand, self).cmd) is not None:
+        if spawn.find_executable(
+                super(AFNIPythonCommand, self).cmd) is not None:
             return spawn.find_executable(super(AFNIPythonCommand, self).cmd)
         else:
             return super(AFNIPythonCommand, self).cmd
 
     @property
     def cmdline(self):
-        return "{} {}".format(self.inputs.py27_path, super(AFNIPythonCommand, self).cmdline)
+        return "{} {}".format(
+            self.inputs.py27_path, super(AFNIPythonCommand, self).cmdline)

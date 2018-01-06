@@ -28,7 +28,8 @@ def func(arg1):
         raise Exception('arg cannot be ' + str(arg1))
     return arg1
 
-funkynode = pe.MapNode(niu.Function(function=func, input_names=['arg1'], output_names=['out']),
+funkynode = pe.MapNode(niu.Function(function=func, input_names=['arg1'],
+                                    output_names=['out']),
                        iterfield=['arg1'],
                        name = 'functor')
 funkynode.inputs.arg1 = [1,2]

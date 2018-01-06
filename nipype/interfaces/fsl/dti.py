@@ -8,7 +8,8 @@ was written to work with FSL version 4.1.4.
     Change directory to provide relative paths for doctests
     >>> import os
     >>> filepath = os.path.dirname( os.path.realpath( __file__ ) )
-    >>> datadir = os.path.realpath(os.path.join(filepath, '../../testing/data'))
+    >>> datadir = os.path.realpath(os.path.join(filepath,
+        '../../testing/data'))
     >>> os.chdir(datadir)
 
 """
@@ -581,12 +582,15 @@ class ProbTrackX(FSLCommand):
     >>> from nipype.interfaces import fsl
     >>> pbx = fsl.ProbTrackX(samples_base_name='merged', mask='mask.nii', \
     seed='MASK_average_thal_right.nii', mode='seedmask', \
-    xfm='trans.mat', n_samples=3, n_steps=10, force_dir=True, opd=True, os2t=True, \
-    target_masks = ['targets_MASK1.nii', 'targets_MASK2.nii'], \
-    thsamples='merged_thsamples.nii', fsamples='merged_fsamples.nii', phsamples='merged_phsamples.nii', \
-    out_dir='.')
+    xfm='trans.mat', n_samples=3, n_steps=10, force_dir=True, opd=True, \
+    os2t=True, target_masks = ['targets_MASK1.nii', 'targets_MASK2.nii'], \
+    thsamples='merged_thsamples.nii', fsamples='merged_fsamples.nii', \
+    phsamples='merged_phsamples.nii', out_dir='.')
     >>> pbx.cmdline
-    'probtrackx --forcedir -m mask.nii --mode=seedmask --nsamples=3 --nsteps=10 --opd --os2t --dir=. --samples=merged --seed=MASK_average_thal_right.nii --targetmasks=targets.txt --xfm=trans.mat'
+    'probtrackx --forcedir -m mask.nii --mode=seedmask --nsamples=3 --nsteps=10
+        --opd --os2t --dir=. --samples=merged
+        --seed=MASK_average_thal_right.nii
+        --targetmasks=targets.txt --xfm=trans.mat'
 
     """
 
@@ -652,7 +656,8 @@ class ProbTrackX(FSLCommand):
 
         outputs['log'] = os.path.abspath(
             os.path.join(out_dir, 'probtrackx.log'))
-        # utputs['way_total'] = os.path.abspath(os.path.join(out_dir, 'waytotal'))
+        # utputs['way_total'] = os.path.abspath(os.path.join(out_dir,
+        #                                                    'waytotal'))
         if isdefined(self.inputs.opd is True):
             if (isinstance(self.inputs.seed, list) and
                     isinstance(self.inputs.seed[0], list)):
@@ -783,7 +788,8 @@ class ProbTrackX2(ProbTrackX):
     >>> pbx2.inputs.n_samples = 3
     >>> pbx2.inputs.n_steps = 10
     >>> pbx2.cmdline
-    'probtrackx2 --forcedir -m nodif_brain_mask.nii.gz --nsamples=3 --nsteps=10 --opd --dir=. --samples=merged --seed=seed_source.nii.gz'
+    'probtrackx2 --forcedir -m nodif_brain_mask.nii.gz --nsamples=3 --nsteps=10
+        --opd --dir=. --samples=merged --seed=seed_source.nii.gz'
     """
     _cmd = 'probtrackx2'
     input_spec = ProbTrackX2InputSpec
@@ -797,7 +803,8 @@ class ProbTrackX2(ProbTrackX):
         else:
             out_dir = self.inputs.out_dir
 
-        outputs['way_total'] = os.path.abspath(os.path.join(out_dir, 'waytotal'))
+        outputs['way_total'] = os.path.abspath(
+          os.path.join(out_dir, 'waytotal'))
 
         if isdefined(self.inputs.omatrix1):
             outputs['network_matrix'] = os.path.abspath(
@@ -981,7 +988,8 @@ class FindTheBiggest(FSLCommand):
 
     >>> from nipype.interfaces import fsl
     >>> ldir = ['seeds_to_M1.nii', 'seeds_to_M2.nii']
-    >>> fBig = fsl.FindTheBiggest(in_files=ldir, out_file='biggestSegmentation')
+    >>> fBig = fsl.FindTheBiggest(in_files=ldir,
+        out_file='biggestSegmentation')
     >>> fBig.cmdline
     'find_the_biggest seeds_to_M1.nii seeds_to_M2.nii biggestSegmentation'
 

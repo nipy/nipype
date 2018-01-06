@@ -90,9 +90,11 @@ class SLURMPlugin(SGELikeBatchManagerBase):
             else:
                 sbatch_args += (" " + node.plugin_args['sbatch_args'])
         if '-o' not in sbatch_args:
-            sbatch_args = '%s -o %s' % (sbatch_args, os.path.join(path, 'slurm-%j.out'))
+            sbatch_args = '%s -o %s' % (sbatch_args,
+                                        os.path.join(path, 'slurm-%j.out'))
         if '-e' not in sbatch_args:
-            sbatch_args = '%s -e %s' % (sbatch_args, os.path.join(path, 'slurm-%j.out'))
+            sbatch_args = '%s -e %s' % (sbatch_args,
+                                        os.path.join(path, 'slurm-%j.out'))
         if node._hierarchy:
             jobname = '.'.join((dict(os.environ)['LOGNAME'],
                                 node._hierarchy,
@@ -115,12 +117,14 @@ class SLURMPlugin(SGELikeBatchManagerBase):
             except Exception as e:
                 if tries < self._max_tries:
                     tries += 1
-                    sleep(self._retry_timeout)  # sleep 2 seconds and try again.
+                    # sleep 2 seconds and try again.
+                    sleep(self._retry_timeout)
                 else:
                     iflogger.setLevel(oldlevel)
-                    raise RuntimeError('\n'.join((('Could not submit sbatch task'
-                                                   ' for node %s') % node._id,
-                                                  str(e))))
+                    raise RuntimeError('\n'.join(((
+                        'Could not submit sbatch task'
+                        ' for node %s') % node._id,
+                        str(e))))
             else:
                 break
         logger.debug('Ran command ({0})'.format(cmd.cmdline))
@@ -130,5 +134,6 @@ class SLURMPlugin(SGELikeBatchManagerBase):
         taskid = int(re.match(self._jobid_re,
                               lines[-1]).groups()[0])
         self._pending[taskid] = node.output_dir()
-        logger.debug('submitted sbatch task: %d for node %s' % (taskid, node._id))
+        logger.debug('submitted sbatch task: %d for node %s' %
+                     (taskid, node._id))
         return taskid

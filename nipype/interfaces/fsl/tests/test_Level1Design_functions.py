@@ -22,11 +22,12 @@ def test_level1design(tmpdir):
         ('none', 0, basic_ev_parameters)
         ]
     for key, val, ev_parameters in convolution_variants:
-        output_num, output_txt = Level1Design._create_ev_files(l, os.getcwd(),
-                                                               runinfo, runidx,
-                                                               ev_parameters,
-                                                               orthogonalization,
-                                                               contrasts,
-                                                               do_tempfilter,
-                                                               key)
+        output_num, output_txt = Level1Design._create_ev_files(
+            l, os.getcwd(),
+            runinfo, runidx,
+            ev_parameters,
+            orthogonalization,
+            contrasts,
+            do_tempfilter,
+            key)
         assert "set fmri(convolve1) {0}".format(val) in output_txt

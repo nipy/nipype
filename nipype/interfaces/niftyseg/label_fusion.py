@@ -148,7 +148,8 @@ class LabelFusion(NiftySegCommand):
     >>> node.inputs.template_num = 2
     >>> node.inputs.classifier_type = 'STEPS'
     >>> node.cmdline
-    'seg_LabFusion -in im1.nii -STEPS 2.000000 2 im2.nii im3.nii -out im1_steps.nii'
+    'seg_LabFusion -in im1.nii -STEPS 2.000000 2 im2.nii im3.nii
+    -out im1_steps.nii'
 
     """
     _cmd = get_custom_path('seg_LabFusion', env_dir='NIFTYSEGDIR')

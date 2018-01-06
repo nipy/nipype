@@ -15,8 +15,8 @@ import nipype
 def is_git_repo():
     """Does the current nipype module have a git folder
     """
-    sourcepath = os.path.realpath(os.path.join(os.path.dirname(nipype.__file__),
-                                               os.path.pardir))
+    sourcepath = os.path.realpath(
+        os.path.join(os.path.dirname(nipype.__file__), os.path.pardir))
     gitpathgit = os.path.join(sourcepath, '.git')
     if os.path.exists(gitpathgit):
         return True
@@ -76,8 +76,8 @@ def get_repo_url(force_github=False):
     URI: str
        filesystem path or github repo url
     """
-    sourcepath = os.path.realpath(os.path.join(os.path.dirname(nipype.__file__),
-                                               os.path.pardir))
+    sourcepath = os.path.realpath(
+        os.path.join(os.path.dirname(nipype.__file__), os.path.pardir))
     gitpathgit = os.path.join(sourcepath, '.git')
     if not os.path.exists(gitpathgit) and not force_github:
         uri = 'file://%s' % sourcepath

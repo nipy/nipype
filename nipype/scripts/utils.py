@@ -41,7 +41,8 @@ class RegularExpression(click.ParamType):
         try:
             rex = re.compile(value, re.IGNORECASE)
         except ValueError:
-            self.fail('%s is not a valid regular expression.' % value, param, ctx)
+            self.fail('%s is not a valid regular expression.' % value, param,
+                      ctx)
         else:
             return rex
 
@@ -62,7 +63,8 @@ def add_args_options(arg_parser, interface):
     """Add arguments to `arg_parser` to create a CLI for `interface`."""
     inputs = interface.input_spec()
     for name, spec in sorted(interface.inputs.traits(transient=None).items()):
-        desc = "\n".join(interface._get_trait_desc(inputs, name, spec))[len(name) + 2:]
+        desc = "\n".join(interface._get_trait_desc(
+            inputs, name, spec))[len(name) + 2:]
         # Escape any % signs with a %
         desc = desc.replace('%', '%%')
         args = {}

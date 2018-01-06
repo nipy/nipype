@@ -41,7 +41,8 @@ def test_TraitedSpec():
     with pytest.raises(nib.traits.TraitError):
         specfunc(1)
     infields = spec(foo=1)
-    hashval = ([('foo', 1), ('goo', '0.0000000000')], 'e89433b8c9141aa0fda2f8f4d662c047')
+    hashval = ([('foo', 1), ('goo', '0.0000000000')],
+               'e89433b8c9141aa0fda2f8f4d662c047')
     assert infields.get_hashval() == hashval
     assert infields.__repr__() == '\nfoo = 1\ngoo = 0.0\n'
 
@@ -131,7 +132,8 @@ def test_deprecation():
         except nib.TraitError:
             not_raised = False
         assert not_raised
-        assert len(w) == 1, 'deprecated warning 1 %s' % [w1.message for w1 in w]
+        assert len(w) == 1, 'deprecated warning 1 %s' % [
+            w1.message for w1 in w]
 
     with warnings.catch_warnings(record=True) as w:
         warnings.filterwarnings('always', '', UserWarning)
@@ -148,7 +150,8 @@ def test_deprecation():
         assert not_raised
         assert spec_instance.foo == Undefined
         assert spec_instance.bar == 1
-        assert len(w) == 1, 'deprecated warning 2 %s' % [w1.message for w1 in w]
+        assert len(w) == 1, 'deprecated warning 2 %s' % [
+            w1.message for w1 in w]
 
 
 def test_namesource(setup_file):

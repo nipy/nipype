@@ -161,7 +161,8 @@ def test_BaseInterface_load_save_inputs(tmpdir):
 
     # test get hashval in a complex interface
     from nipype.interfaces.ants import Registration
-    settings = example_data(example_data('smri_ants_registration_settings.json'))
+    settings = example_data(
+        example_data('smri_ants_registration_settings.json'))
     with open(settings) as setf:
         data_dict = json.load(setf)
 

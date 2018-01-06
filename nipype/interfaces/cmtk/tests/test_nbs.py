@@ -26,7 +26,8 @@ def creating_graphs(tmpdir):
     return graphlist
 
 
-@pytest.mark.skipif(have_cv, reason="tests for import error, cviewer available")
+@pytest.mark.skipif(
+    have_cv, reason="tests for import error, cviewer available")
 def test_importerror(creating_graphs, tmpdir):
     tmpdir.chdir()
     graphlist = creating_graphs

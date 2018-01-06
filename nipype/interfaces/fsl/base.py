@@ -33,7 +33,8 @@ import os
 
 from ... import logging
 from ...utils.filemanip import fname_presuffix
-from ..base import traits, isdefined, CommandLine, CommandLineInputSpec, PackageInfo
+from ..base import (traits, isdefined, CommandLine, CommandLineInputSpec,
+                    PackageInfo)
 from ...external.due import BibTeX
 
 IFLOGGER = logging.getLogger('interface')
@@ -150,17 +151,18 @@ class FSLCommand(CommandLine):
     input_spec = FSLCommandInputSpec
     _output_type = None
 
-    references_ = [{'entry': BibTeX('@article{JenkinsonBeckmannBehrensWoolrichSmith2012,'
-                                    'author={M. Jenkinson, C.F. Beckmann, T.E. Behrens, '
-                                    'M.W. Woolrich, and S.M. Smith},'
-                                    'title={FSL},'
-                                    'journal={NeuroImage},'
-                                    'volume={62},'
-                                    'pages={782-790},'
-                                    'year={2012},'
-                                    '}'),
-                    'tags': ['implementation'],
-                    }]
+    references_ = [{'entry': BibTeX(
+        '@article{JenkinsonBeckmannBehrensWoolrichSmith2012,'
+        'author={M. Jenkinson, C.F. Beckmann, T.E. Behrens, '
+        'M.W. Woolrich, and S.M. Smith},'
+        'title={FSL},'
+        'journal={NeuroImage},'
+        'volume={62},'
+        'pages={782-790},'
+        'year={2012},'
+        '}'),
+        'tags': ['implementation'],
+    }]
 
     def __init__(self, **inputs):
         super(FSLCommand, self).__init__(**inputs)

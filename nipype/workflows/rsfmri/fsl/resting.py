@@ -85,8 +85,10 @@ def create_resting_preproc(name='restpreproc', base_dir=None):
 
     Outputs::
 
-        outputspec.noise_mask_file : voxels used for PCA to derive noise components
-        outputspec.filtered_file : bandpass filtered and noise-reduced time series
+        outputspec.noise_mask_file : voxels used for PCA to derive noise
+                                     components
+        outputspec.filtered_file : bandpass filtered and noise-reduced time
+                                   series
 
     Example
     -------
@@ -104,12 +106,13 @@ def create_resting_preproc(name='restpreproc', base_dir=None):
     restpreproc = pe.Workflow(name=name, base_dir=base_dir)
 
     # Define nodes
-    inputnode = pe.Node(interface=util.IdentityInterface(fields=['func',
-                                                                 'num_noise_components',
-                                                                 'highpass_sigma',
-                                                                 'lowpass_sigma'
-                                                                 ]),
-                        name='inputspec')
+    inputnode = pe.Node(
+        interface=util.IdentityInterface(fields=['func',
+                                                 'num_noise_components',
+                                                 'highpass_sigma',
+                                                 'lowpass_sigma'
+                                                 ]),
+        name='inputspec')
     outputnode = pe.Node(interface=util.IdentityInterface(fields=[
         'noise_mask_file',
         'filtered_file',
@@ -121,9 +124,10 @@ def create_resting_preproc(name='restpreproc', base_dir=None):
     getthresh = pe.Node(interface=fsl.ImageStats(op_string='-p 98'),
                         name='getthreshold')
     threshold_stddev = pe.Node(fsl.Threshold(), name='threshold')
-    compcor = pe.Node(confounds.ACompCor(components_file="noise_components.txt",
-                                         pre_filter=False),
-                      name='compcor')
+    compcor = pe.Node(
+        confounds.ACompCor(components_file="noise_components.txt",
+                           pre_filter=False),
+        name='compcor')
     remove_noise = pe.Node(fsl.FilterRegressor(filter_all=True),
                            name='remove_noise')
     bandpass_filter = pe.Node(fsl.TemporalFilter(),
@@ -133,7 +137,8 @@ def create_resting_preproc(name='restpreproc', base_dir=None):
     restpreproc.connect(inputnode, 'func', slicetimer, 'in_file')
     restpreproc.connect(slicetimer, 'slice_time_corrected_file',
                         realigner, 'inputspec.func')
-    restpreproc.connect(realigner, 'outputspec.realigned_file', tsnr, 'in_file')
+    restpreproc.connect(realigner, 'outputspec.realigned_file',
+                        tsnr, 'in_file')
     restpreproc.connect(tsnr, 'stddev_file', threshold_stddev, 'in_file')
     restpreproc.connect(tsnr, 'stddev_file', getthresh, 'in_file')
     restpreproc.connect(getthresh, 'out_stat', threshold_stddev, 'thresh')

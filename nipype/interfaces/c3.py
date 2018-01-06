@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
-"""The ants module provides basic functions for interfacing with ants functions.
+"""The ants module provides basic functions for interfacing with ants
+   functions.
 
    Change directory to provide relative paths for doctests
    >>> import os

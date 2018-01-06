@@ -18,9 +18,10 @@ def transpose(samples_over_fibres):
     return np.squeeze(a.T).tolist()
 
 
-def create_bedpostx_pipeline(name='bedpostx', params={'n_fibres': 2, 'fudge': 1, 'burn_in': 1000,
-                                                      'n_jumps': 1250, 'sample_every': 25, 'model': 2,
-                                                      'cnlinear': True}):
+def create_bedpostx_pipeline(
+    name='bedpostx', params={'n_fibres': 2, 'fudge': 1, 'burn_in': 1000,
+                             'n_jumps': 1250, 'sample_every': 25, 'model': 2,
+                             'cnlinear': True}):
     """
     Creates a pipeline that does the same as bedpostx script from FSL -
     calculates diffusion model parameters (distributions not MLE) voxelwise for
@@ -53,7 +54,8 @@ def create_bedpostx_pipeline(name='bedpostx', params={'n_fibres': 2, 'fudge': 1,
     """
 
     inputnode = pe.Node(niu.IdentityInterface(fields=['dwi', 'mask',
-                        'bvecs', 'bvals']), name='inputnode')
+                                                      'bvecs', 'bvals']),
+                        name='inputnode')
 
     slice_dwi = pe.Node(fsl.Split(dimension='z'), name='slice_dwi')
     slice_msk = pe.Node(fsl.Split(dimension='z'), name='slice_msk')
@@ -165,7 +167,8 @@ def bedpostx_parallel(name='bedpostx_parallel',
     """
 
     inputnode = pe.Node(niu.IdentityInterface(fields=['dwi', 'mask',
-                        'bvecs', 'bvals']), name='inputnode')
+                                                      'bvecs', 'bvals']),
+                        name='inputnode')
     slice_dwi = pe.Node(misc.SplitROIs(roi_size=(5, 5, 1)), name='slice_dwi')
     if params is not None:
         xfib_if = fsl.XFibres5(**params)
@@ -227,7 +230,8 @@ def bedpostx_parallel(name='bedpostx_parallel',
         # m_mdsamples = pe.Node(fsl.Merge(dimension="z"),
         #                       name="merge_mean_dsamples")
         wf.connect([
-            (mms['thsamples'], make_dyads, [('outputnode.merged', 'theta_vol')]),
+            (mms['thsamples'], make_dyads, [
+             ('outputnode.merged', 'theta_vol')]),
             (mms['phsamples'], make_dyads, [('outputnode.merged', 'phi_vol')]),
             # (xfibres, m_mdsamples,  [('mean_dsamples', 'in_files')]),
             (make_dyads, outputnode, [('dispersion', 'dyads_disp')])
@@ -238,7 +242,9 @@ def bedpostx_parallel(name='bedpostx_parallel',
 
 def merge_and_mean_parallel(name='mm'):
     inputnode = pe.Node(niu.IdentityInterface(fields=['in_files',
-                        'in_reference', 'in_index']), name='inputnode')
+                                                      'in_reference',
+                                                      'in_index']),
+                        name='inputnode')
     outputnode = pe.Node(niu.IdentityInterface(fields=['merged', 'mean']),
                          name='outputnode')
     merge = pe.MapNode(misc.MergeROIs(), name='Merge',

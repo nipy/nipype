@@ -111,7 +111,8 @@ pipeline.base_dir = os.path.abspath('slicer_tutorial/workingdir')
 pipeline.connect([(infosource, datasource, [('subject_id', 'subject_id')]),
                   (datasource, coregister, [('func', 'movingVolume')]),
                   (datasource, coregister, [('struct', 'fixedVolume')]),
-                  (coregister, reslice, [('outputTransform', 'warpTransform')]),
+                  (coregister, reslice, [('outputTransform',
+                                          'warpTransform')]),
                   (datasource, reslice, [('func', 'inputVolume')]),
                   (datasource, reslice, [('struct', 'referenceVolume')])
                   ])

@@ -17,10 +17,10 @@ def make_label_dec(label, ds=None):
     ----------
     label : str or sequence
         One or more labels that will be applied by the decorator to the
-        functions it decorates.  Labels are attributes of the decorated function
+        functions it decorates. Labels are attributes of the decorated function
         with their value set to True.
     ds : str
-        An optional docstring for the resulting decorator.  If not given, a
+        An optional docstring for the resulting decorator. If not given, a
         default docstring is auto-generated.
 
     Returns

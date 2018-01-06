@@ -53,7 +53,8 @@ class NiftiGeneratorBaseInputSpec(TraitedSpec):
                             "meta data to create the output filename(s)")
     out_ext = traits.Str('.nii.gz', usedefault=True,
                          desc="Determines output file type")
-    out_path = Directory(desc='output path, current working directory if not set')
+    out_path = Directory(
+        desc='output path, current working directory if not set')
 
 
 class NiftiGeneratorBase(BaseInterface):
@@ -154,7 +155,8 @@ class DcmStack(NiftiGeneratorBase):
         stack = dcmstack.DicomStack(meta_filter=meta_filter)
         for src_path in src_paths:
             if not imghdr.what(src_path) == "gif":
-                src_dcm = dicom.read_file(src_path, force=self.inputs.force_read)
+                src_dcm = dicom.read_file(
+                    src_path, force=self.inputs.force_read)
                 stack.add_dcm(src_dcm)
         nii = stack.to_nifti(embed_meta=True)
         nw = NiftiWrapper(nii)
@@ -211,8 +213,9 @@ class LookupMetaInputSpec(TraitedSpec):
                               traits.Dict(),
                               mandatory=True,
                               desc=("List of meta data keys to lookup, or a "
-                                    "dict where keys specify the meta data keys to "
-                                    "lookup and the values specify the output names")
+                                    "dict where keys specify the meta data "
+                                    "keys to lookup and the values specify "
+                                    "the output names")
                               )
 
 
@@ -314,7 +317,8 @@ class CopyMeta(BaseInterface):
             src_dict = src.meta_ext.get_class_dict(cls)
             dest_dict = dest.meta_ext.get_class_dict(cls)
             dest_dict.update(src_dict)
-        # Update the shape and slice dimension to reflect the meta extension update.
+        # Update the shape and slice dimension to reflect the meta extension
+        # update.
         dest.meta_ext.slice_dim = src.meta_ext.slice_dim
         dest.meta_ext.shape = src.meta_ext.shape
 

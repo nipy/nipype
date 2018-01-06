@@ -43,10 +43,11 @@ class LSFPlugin(SGELikeBatchManagerBase):
         super(LSFPlugin, self).__init__(template, **kwargs)
 
     def _is_pending(self, taskid):
-        """LSF lists a status of 'PEND' when a job has been submitted but is waiting to be picked up,
-        and 'RUN' when it is actively being processed. But _is_pending should return True until a job has
-        finished and is ready to be checked for completeness. So return True if status is either 'PEND'
-        or 'RUN'"""
+        """LSF lists a status of 'PEND' when a job has been submitted but is
+        waiting to be picked up, and 'RUN' when it is actively being processed.
+        But _is_pending should return True until a job has finished and is
+        ready to be checked for completeness. So return True if status is
+        either 'PEND' or 'RUN'"""
         cmd = CommandLine('bjobs',
                           resource_monitor=False,
                           terminal_output='allatonce')
@@ -78,7 +79,8 @@ class LSFPlugin(SGELikeBatchManagerBase):
         if '-o' not in bsubargs:  # -o outfile
             bsubargs = '%s -o %s' % (bsubargs, scriptfile + ".log")
         if '-e' not in bsubargs:
-            bsubargs = '%s -e %s' % (bsubargs, scriptfile + ".log")  # -e error file
+            # -e error file
+            bsubargs = '%s -e %s' % (bsubargs, scriptfile + ".log")
         if node._hierarchy:
             jobname = '.'.join((dict(os.environ)['LOGNAME'],
                                 node._hierarchy,
@@ -117,8 +119,9 @@ class LSFPlugin(SGELikeBatchManagerBase):
         if match:
             taskid = int(match.groups()[0])
         else:
-            raise ScriptError("Can't parse submission job output id: %s" %
-                              result.runtime.stdout)
+            raise ScriptError(
+                "Can't parse submission job output id: %s" %
+                result.runtime.stdout)
         self._pending[taskid] = node.output_dir()
         logger.debug('submitted lsf task: %d for node %s' % (taskid, node._id))
         return taskid

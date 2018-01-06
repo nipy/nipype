@@ -19,7 +19,7 @@ def pkg_commit_hash(pkg_path):
     ''' Get short form of commit hash given directory `pkg_path`
 
     There should be a file called 'COMMIT_INFO.txt' in `pkg_path`.  This is a
-    file in INI file format, with at least one section: ``commit hash``, and two
+    file in INI file format, with at least one section: ``commit hash`` and two
     variables ``archive_subst_hash`` and ``install_hash``.  The first has a
     substitution pattern in it which may have been filled by the execution of
     ``git archive`` if this is an archive generated that way.  The second is

@@ -5,8 +5,9 @@ from nipype.algorithms.icc import ICC_rep_anova
 
 
 def test_ICC_rep_anova():
-    # see table 2 in P. E. Shrout & Joseph L. Fleiss (1979). "Intraclass Correlations: Uses in
-    # Assessing Rater Reliability". Psychological Bulletin 86 (2): 420-428
+    # see table 2 in P. E. Shrout & Joseph L. Fleiss (1979). "Intraclass
+    # Correlations: Uses in Assessing Rater Reliability". Psychological
+    # Bulletin 86 (2): 420-428
     Y = np.array([[9, 2, 5, 8],
                   [6, 1, 3, 2],
                   [8, 4, 6, 8],

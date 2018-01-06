@@ -67,10 +67,11 @@ specify_model = pe.Node(interface=model.SpecifyModel(), name="specify_model")
 specify_model.inputs.input_units = 'secs'
 specify_model.inputs.time_repetition = 3.
 specify_model.inputs.high_pass_filter_cutoff = 120
-specify_model.inputs.subject_info = [Bunch(conditions=['Task-Odd', 'Task-Even'],
-                                           onsets=[list(range(15, 240, 60)),
-                                                   list(range(45, 240, 60))],
-                                           durations=[[15], [15]])] * 4
+specify_model.inputs.subject_info = [
+    Bunch(conditions=['Task-Odd', 'Task-Even'],
+          onsets=[list(range(15, 240, 60)),
+                  list(range(45, 240, 60))],
+          durations=[[15], [15]])] * 4
 
 level1design = pe.Node(interface=spm.Level1Design(), name="level1design")
 level1design.inputs.bases = {'hrf': {'derivs': [0, 0]}}
@@ -91,7 +92,8 @@ modelling.connect(specify_model, 'session_info', level1design, 'session_info')
 modelling.connect(level1design, 'spm_mat_file', level1estimate, 'spm_mat_file')
 modelling.connect(level1estimate, 'spm_mat_file',
                   contrastestimate, 'spm_mat_file')
-modelling.connect(level1estimate, 'beta_images', contrastestimate, 'beta_images')
+modelling.connect(level1estimate, 'beta_images',
+                  contrastestimate, 'beta_images')
 modelling.connect(level1estimate, 'residual_image',
                   contrastestimate, 'residual_image')
 
@@ -116,7 +118,8 @@ This allows to adapt to a wide range of file layouts. In our case we will
 parameterize it with subject ID. In this way we will be able to run it for
 different subjects. We can automate this by iterating over a list of subject
 Ids, by setting an iterables property on the subject_id input of DataGrabber.
-Its output will be connected to realignment node from preprocessing workflow."""
+Its output will be connected to realignment node from preprocessing workflow.
+"""
 
 datasource = pe.Node(interface=nio.DataGrabber(infields=['subject_id'],
                                                outfields=['func']),
@@ -132,10 +135,12 @@ main_workflow.connect(datasource, 'func', preprocessing, 'realign.in_files')
 
 """DataSink on the other side provides means to storing selected results to a
 specified location. It supports automatic creation of folder stricter and
-regular expression based substitutions. In this example we will store T maps."""
+regular expression based substitutions. In this example we will store T maps.
+"""
 
 datasink = pe.Node(interface=nio.DataSink(), name="datasink")
-datasink.inputs.base_directory = os.path.abspath('workflow_from_scratch/output')
+datasink.inputs.base_directory = os.path.abspath(
+    'workflow_from_scratch/output')
 
 main_workflow.connect(modelling, 'contrastestimate.spmT_images',
                       datasink, 'contrasts.@T')

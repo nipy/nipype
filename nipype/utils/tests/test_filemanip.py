@@ -319,8 +319,10 @@ def test_json(tmpdir):
 
 
 @pytest.mark.parametrize("file, length, expected_files", [
-        ('/path/test.img',  3, ['/path/test.hdr', '/path/test.img', '/path/test.mat']),
-        ('/path/test.hdr',  3, ['/path/test.hdr', '/path/test.img', '/path/test.mat']),
+        ('/path/test.img',  3, ['/path/test.hdr', '/path/test.img',
+            '/path/test.mat']),
+        ('/path/test.hdr',  3, ['/path/test.hdr', '/path/test.img',
+            '/path/test.mat']),
         ('/path/test.BRIK', 2, ['/path/test.BRIK', '/path/test.HEAD']),
         ('/path/test.HEAD', 2, ['/path/test.BRIK', '/path/test.HEAD']),
         ('/path/foo.nii',   2, ['/path/foo.nii', '/path/foo.mat'])

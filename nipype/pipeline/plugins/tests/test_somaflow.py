@@ -45,7 +45,8 @@ def test_run_somaflow(tmpdir):
     pipe.base_dir = os.getcwd()
     mod1.inputs.input1 = 1
     execgraph = pipe.run(plugin="SomaFlow")
-    names = ['.'.join((node._hierarchy, node.name)) for node in execgraph.nodes()]
+    names = ['.'.join((node._hierarchy, node.name))
+             for node in execgraph.nodes()]
     node = list(execgraph.nodes())[names.index('pipe.mod1')]
     result = node.get_output('output1')
     assert result == [1, 1]

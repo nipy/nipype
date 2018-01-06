@@ -23,7 +23,10 @@ def test_function(tmpdir):
         import numpy as np
         return np.random.rand(size, size)
 
-    f1 = pe.MapNode(utility.Function(input_names=['size'], output_names=['random_array'], function=gen_random_array), name='random_array', iterfield=['size'])
+    f1 = pe.MapNode(
+        utility.Function(input_names=['size'], output_names=['random_array'],
+                         function=gen_random_array),
+        name='random_array', iterfield=['size'])
     f1.inputs.size = [2, 3, 5]
 
     wf = pe.Workflow(name="test_workflow")
@@ -31,7 +34,9 @@ def test_function(tmpdir):
     def increment_array(in_array):
         return in_array + 1
 
-    f2 = pe.MapNode(utility.Function(function=increment_array), name='increment_array', iterfield=['in_array'])
+    f2 = pe.MapNode(
+        utility.Function(function=increment_array),
+        name='increment_array', iterfield=['in_array'])
 
     wf.connect(f1, 'random_array', f2, 'in_array')
 
@@ -93,7 +98,8 @@ def test_aux_connect_function(tmpdir):
     def _inc(x):
         return x + 1
 
-    params = pe.Node(utility.IdentityInterface(fields=['size', 'num']), name='params')
+    params = pe.Node(utility.IdentityInterface(fields=['size', 'num']),
+                     name='params')
     params.inputs.num = 42
     params.inputs.size = 1
 

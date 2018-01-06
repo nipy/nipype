@@ -140,9 +140,10 @@ class TOPUPInputSpec(FSLCommandInputSpec):
     out_field = File(argstr='--fout=%s', hash_files=False,
                      name_source=['in_file'], name_template='%s_field',
                      desc='name of image file with field (Hz)')
-    out_warp_prefix = traits.Str("warpfield", argstr='--dfout=%s', hash_files=False,
-                                 desc='prefix for the warpfield images (in mm)',
-                                 usedefault=True)
+    out_warp_prefix = traits.Str(
+        "warpfield", argstr='--dfout=%s', hash_files=False,
+        desc='prefix for the warpfield images (in mm)',
+        usedefault=True)
     out_mat_prefix = traits.Str("xfm", argstr='--rbmout=%s', hash_files=False,
                                 desc='prefix for the realignment matrices',
                                 usedefault=True)

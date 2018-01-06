@@ -28,7 +28,8 @@ def test_create_eddy_correct_pipeline(tmpdir):
 
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")
-        original_eddycorrect = pe.Node(interface=fsl.EddyCorrect(), name="original_eddycorrect")
+        original_eddycorrect = pe.Node(interface=fsl.EddyCorrect(),
+                                       name="original_eddycorrect")
     original_eddycorrect.inputs.ref_num = 0
 
     test = pe.Node(util.AssertEqual(), name="eddy_corrected_dwi_test")
@@ -36,10 +37,14 @@ def test_create_eddy_correct_pipeline(tmpdir):
     pipeline = pe.Workflow(name="test_eddycorrect")
     pipeline.base_dir = tmpdir.mkdir("nipype_test_eddycorrect_").strpath
 
-    pipeline.connect([(trim_dwi, original_eddycorrect, [("roi_file", "in_file")]),
-                      (trim_dwi, nipype_eddycorrect, [("roi_file", "inputnode.in_file")]),
-                      (nipype_eddycorrect, test, [("outputnode.eddy_corrected", "volume1")]),
-                      (original_eddycorrect, test, [("eddy_corrected", "volume2")]),
+    pipeline.connect([(trim_dwi, original_eddycorrect, [("roi_file",
+                                                         "in_file")]),
+                      (trim_dwi, nipype_eddycorrect, [("roi_file",
+                                                       "inputnode.in_file")]),
+                      (nipype_eddycorrect, test, [("outputnode.eddy_corrected",
+                                                   "volume1")]),
+                      (original_eddycorrect, test, [("eddy_corrected",
+                                                     "volume2")]),
                       ])
 
     pipeline.run(plugin='Linear')

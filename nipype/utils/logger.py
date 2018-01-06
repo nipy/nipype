@@ -72,12 +72,12 @@ class Logging(object):
     def update_logging(self, config):
         self._config = config
         self.disable_file_logging()
-        self._logger.setLevel(logging.getLevelName(config.get('logging',
-                                                              'workflow_level')))
-        self._utlogger.setLevel(logging.getLevelName(config.get('logging',
-                                                                'utils_level')))
-        self._iflogger.setLevel(logging.getLevelName(config.get('logging',
-                                                                'interface_level')))
+        self._logger.setLevel(
+            logging.getLevelName(config.get('logging', 'workflow_level')))
+        self._utlogger.setLevel(
+            logging.getLevelName(config.get('logging', 'utils_level')))
+        self._iflogger.setLevel(
+            logging.getLevelName(config.get('logging', 'interface_level')))
         if str2bool(config.get('logging', 'log_to_file')):
             self.enable_file_logging()
 
@@ -135,5 +135,6 @@ class Logging(object):
                 msgs += ["%s: %r != %r"
                          % (k, dnew[k], dold[k])]
         if len(msgs):
-            self._logger.debug("%s values differ in fields: %s" % (prefix,
-                                                                   ", ".join(msgs)))
+            self._logger.debug(
+                "%s values differ in fields: %s" % (prefix,
+                                                    ", ".join(msgs)))

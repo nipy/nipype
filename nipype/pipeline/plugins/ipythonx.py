@@ -48,8 +48,8 @@ class IPythonXPlugin(DistributedPluginBase):
             __import__(name)
             self.ipyclient = sys.modules[name]
         except ImportError as e:
-            raise_from(ImportError("Ipython kernel not found. Parallel execution "
-                                   "will be unavailable"), e)
+            raise_from(ImportError("Ipython kernel not found. Parallel "
+                                   "execution will be unavailable"), e)
         try:
             self.taskclient = self.ipyclient.TaskClient()
         except Exception as e:
@@ -57,7 +57,8 @@ class IPythonXPlugin(DistributedPluginBase):
                 raise_from(Exception("No IPython clients found."), e)
             if isinstance(e, ValueError):
                 raise_from(Exception("Ipython kernel not installed"), e)
-        return super(IPythonXPlugin, self).run(graph, config, updatehash=updatehash)
+        return super(IPythonXPlugin, self).run(graph, config,
+                                               updatehash=updatehash)
 
     def _get_result(self, taskid):
         return self.taskclient.get_task_result(taskid, block=False)

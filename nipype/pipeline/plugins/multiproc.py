@@ -239,10 +239,12 @@ class MultiProcPlugin(DistributedPluginBase):
                     tasks_list_msg = '\nCurrently running:\n'
                     tasks_list_msg += '\n'.join(running_tasks)
                     tasks_list_msg = indent(tasks_list_msg, ' ' * 21)
-            logger.info('[MultiProc] Running %d tasks, and %d jobs ready. Free '
-                        'memory (GB): %0.2f/%0.2f, Free processors: %d/%d.%s',
-                        len(self.pending_tasks), len(jobids), free_memory_gb, self.memory_gb,
-                        free_processors, self.processors, tasks_list_msg)
+            logger.info(
+                '[MultiProc] Running %d tasks, and %d jobs ready. Free '
+                'memory (GB): %0.2f/%0.2f, Free processors: %d/%d.%s',
+                len(self.pending_tasks), len(jobids), free_memory_gb,
+                self.memory_gb, free_processors, self.processors,
+                tasks_list_msg)
             self._stats = stats
 
         if free_memory_gb < 0.01 or free_processors == 0:

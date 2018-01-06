@@ -3,7 +3,8 @@
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """Miscellaneous utility functions
 """
-from __future__ import print_function, unicode_literals, division, absolute_import
+from __future__ import (print_function, unicode_literals, division,
+                        absolute_import)
 from future import standard_library
 standard_library.install_aliases()
 from builtins import next, str
@@ -167,7 +168,8 @@ def package_check(pkg_name, version=None, app=None, checker=LooseVersion,
     try:
         have_version = mod.__version__
     except AttributeError as e:
-        raise_from(exc_failed_check('Cannot find version for %s' % pkg_name), e)
+        raise_from(exc_failed_check(
+            'Cannot find version for %s' % pkg_name), e)
     if checker(have_version) < checker(version):
         raise exc_failed_check(msg)
 

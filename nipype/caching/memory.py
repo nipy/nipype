@@ -24,7 +24,7 @@ from ..interfaces.base import BaseInterface
 from ..pipeline.engine import Node
 from ..pipeline.engine.utils import modify_paths
 
-################################################################################
+###############################################################################
 # PipeFunc object: callable interface to nipype.interface objects
 
 
@@ -86,8 +86,8 @@ class PipeFunc(object):
         try:
             out = node.run()
         finally:
-            # node.run() changes to the node directory - if something goes wrong
-            # before it cds back you would end up in strange places
+            # node.run() changes to the node directory - if something goes
+            # wrong before it cds back you would end up in strange places
             os.chdir(cwd)
         if self.callback is not None:
             self.callback(dir_name, job_name)
@@ -95,10 +95,10 @@ class PipeFunc(object):
 
     def __repr__(self):
         return '{}({}.{}}, base_dir={})'.format(
-            self.__class__.__name__, self.interface.__module__, self.interface.__name__,
-            self.base_dir)
+            self.__class__.__name__, self.interface.__module__,
+            self.interface.__name__, self.base_dir)
 
-################################################################################
+###############################################################################
 # Memory manager: provide some tracking about what is computed when, to
 # be able to flush the disk
 
@@ -243,7 +243,8 @@ class Memory(object):
         except OSError:
             "Dir exists"
 
-        with open(os.path.join(month_dir, '%02i.log' % t.tm_mday), 'a') as rotatefile:
+        with open(os.path.join(
+                month_dir, '%02i.log' % t.tm_mday), 'a') as rotatefile:
             rotatefile.write('%s/%s\n' % (dir_name, job_name))
 
     def clear_previous_runs(self, warn=True):

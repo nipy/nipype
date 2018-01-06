@@ -103,7 +103,7 @@ class CondorPlugin(SGELikeBatchManagerBase):
             except Exception as e:
                 if tries < self._max_tries:
                     tries += 1
-                    sleep(self._retry_timeout)  # sleep 2 seconds and try again.
+                    sleep(self._retry_timeout)  # sleep 2 seconds and try again
                 else:
                     iflogger.setLevel(oldlevel)
                     raise RuntimeError('\n'.join((('Could not submit condor '

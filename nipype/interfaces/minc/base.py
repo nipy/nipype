@@ -2,8 +2,8 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """The minc module provides classes for interfacing with the `MINC
-<http://www.bic.mni.mcgill.ca/ServicesSoftware/MINC>`_ command line tools.  This
-module was written to work with MINC version 2.2.00.
+<http://www.bic.mni.mcgill.ca/ServicesSoftware/MINC>`_ command line tools.
+This module was written to work with MINC version 2.2.00.
 
 Author: Carlo Hamalainen <carlo@carlo-hamalainen.net>
         http://carlo-hamalainen.net
@@ -109,7 +109,8 @@ def aggregate_filename(files, new_suffix):
     --------
 
     >>> from nipype.interfaces.minc.base import aggregate_filename
-    >>> f = aggregate_filename(['/tmp/foo1.mnc', '/tmp/foo2.mnc', '/tmp/foo3.mnc'], 'averaged')
+    >>> f = aggregate_filename(['/tmp/foo1.mnc', '/tmp/foo2.mnc',
+                                '/tmp/foo3.mnc'], 'averaged')
     >>> os.path.split(f)[1] # This has a full path, so just check the filename.
     'foo_averaged.mnc'
 
@@ -126,6 +127,8 @@ def aggregate_filename(files, new_suffix):
     path = os.getcwd()
 
     if common_prefix == '':
-        return os.path.abspath(os.path.join(path, os.path.splitext(files[0])[0] + '_' + new_suffix + '.mnc'))
+        return os.path.abspath(os.path.join(
+            path, os.path.splitext(files[0])[0] + '_' + new_suffix + '.mnc'))
     else:
-        return os.path.abspath(os.path.join(path, common_prefix + '_' + new_suffix + '.mnc'))
+        return os.path.abspath(os.path.join(
+            path, common_prefix + '_' + new_suffix + '.mnc'))

@@ -101,14 +101,14 @@ def make_link_targets(proj_name,
                       ml_url=None):
     """ Check and make link targets
 
-    If url is None or ml_url is None, check if there are links present for these
-    in `known_link_fname`.  If not, raise error.  The check is:
+    If url is None or ml_url is None, check if there are links present for
+    these in `known_link_fname`.  If not, raise error.  The check is:
 
     Look for a target `proj_name`.
     Look for a target `proj_name` + ' mailing list'
 
-    Also, look for a target `proj_name` + 'github'.  If this exists, don't write
-    this target into the new file below.
+    Also, look for a target `proj_name` + 'github'.  If this exists, don't
+    write this target into the new file below.
 
     If we are writing any of the url, ml_url, or github address, then write new
     file with these links, of form:

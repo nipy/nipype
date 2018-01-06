@@ -14,7 +14,8 @@ from nipype.pipeline.plugins.tools import report_crash
 
 def test_report_crash():
     with mock.patch('pickle.dump', mock.MagicMock()) as mock_pickle_dump:
-        with mock.patch('nipype.pipeline.plugins.tools.format_exception', mock.MagicMock()):  # see iss 1517
+        with mock.patch('nipype.pipeline.plugins.tools.format_exception',
+                        mock.MagicMock()):  # see iss 1517
             mock_pickle_dump.return_value = True
             mock_node = mock.MagicMock(name='mock_node')
             mock_node._id = 'an_id'
@@ -27,9 +28,11 @@ def test_report_crash():
 
             actual_crashfile = report_crash(mock_node)
 
-            expected_crashfile = re.compile('.*/crash-.*-an_id-[0-9a-f\-]*.pklz')
+            expected_crashfile = re.compile(
+                '.*/crash-.*-an_id-[0-9a-f\-]*.pklz')
 
-            assert expected_crashfile.match(actual_crashfile).group() == actual_crashfile
+            assert expected_crashfile.match(
+                actual_crashfile).group() == actual_crashfile
             assert mock_pickle_dump.call_count == 1
 
 
@@ -47,7 +50,8 @@ def func(arg1):
         raise Exception('arg cannot be ' + str(arg1))
     return arg1
 
-funkynode = pe.MapNode(niu.Function(function=func, input_names=['arg1'], output_names=['out']),
+funkynode = pe.MapNode(niu.Function(function=func, input_names=['arg1'],
+                                                   output_names=['out']),
                        iterfield=['arg1'],
                        name = 'functor')
 funkynode.inputs.arg1 = [1,2]

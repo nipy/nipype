@@ -26,7 +26,8 @@ def cli():
 
 @cli.command(context_settings=CONTEXT_SETTINGS)
 @click.argument('logdir', type=ExistingDirPath, callback=check_not_none)
-@click.option('-r', '--regex', type=RegularExpression(), callback=check_not_none,
+@click.option('-r', '--regex', type=RegularExpression(),
+              callback=check_not_none,
               help='Regular expression to be searched in each traceback.')
 def search(logdir, regex):
     """Search for tracebacks content.
@@ -174,13 +175,16 @@ def convert():
               help="Module where the interface is defined.")
 @click.option("-o", "--output", type=UnexistingFilePath, required=True,
               callback=check_not_none,
-              help="JSON file name where the Boutiques descriptor will be written.")
+              help="JSON file name where the Boutiques descriptor will be "
+                   "written.")
 @click.option("-t", "--ignored-template-inputs", type=str, multiple=True,
               help="Interface inputs ignored in path template creations.")
 @click.option("-d", "--docker-image", type=str,
-              help="Name of the Docker image where the Nipype interface is available.")
+              help="Name of the Docker image where the Nipype interface is "
+                   "available.")
 @click.option("-r", "--docker-index", type=str,
-              help="Docker index where the Docker image is stored (e.g. http://index.docker.io).")
+              help="Docker index where the Docker image is stored (e.g. "
+                   "http://index.docker.io).")
 @click.option("-n", "--ignore-template-numbers", is_flag=True, flag_value=True,
               help="Ignore all numbers in path template creations.")
 @click.option("-v", "--verbose", is_flag=True, flag_value=True,

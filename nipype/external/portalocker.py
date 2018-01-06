@@ -92,11 +92,12 @@ if os.name == 'nt':
         try:
             win32file.LockFileEx(hfile, flags, 0, -0x10000, __overlapped)
         except pywintypes.error as exc_value:
-            # error: (33, 'LockFileEx', 'The process cannot access the file because another process has locked a portion of the file.')
+            # error: (33, 'LockFileEx', 'The process cannot access the file
+            # because another process has locked a portion of the file.')
             if exc_value[0] == 33:
                 raise LockException(LockException.LOCK_FAILED, exc_value[2])
             else:
-                # Q:  Are there exceptions/codes we should be dealing with here?
+                # Q: Are there exceptions/codes we should be dealing with here?
                 raise
 
     def unlock(file):
@@ -105,11 +106,12 @@ if os.name == 'nt':
             win32file.UnlockFileEx(hfile, 0, -0x10000, __overlapped)
         except pywintypes.error as exc_value:
             if exc_value[0] == 158:
-                # error: (158, 'UnlockFileEx', 'The segment is already unlocked.')
-                # To match the 'posix' implementation, silently ignore this error
+                # error: (158, 'UnlockFileEx', 'The segment is already
+                # unlocked.') To match the 'posix' implementation, silently
+                # ignore this error
                 pass
             else:
-                # Q:  Are there exceptions/codes we should be dealing with here?
+                # Q: Are there exceptions/codes we should be dealing with here?
                 raise
 
 elif os.name == 'posix':

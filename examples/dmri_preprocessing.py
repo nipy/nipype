@@ -81,7 +81,8 @@ functionality.
 """
 
 datasource = pe.Node(nio.DataGrabber(infields=['subject_id'],
-                                     outfields=list(info.keys())), name='datasource')
+                                     outfields=list(info.keys())),
+                     name='datasource')
 
 datasource.inputs.template = "%s/%s"
 
@@ -100,7 +101,8 @@ actual processing functions
 """
 
 inputnode = pe.Node(niu.IdentityInterface(fields=["dwi", "bvecs", "bvals",
-                                                  "dwi_rev"]), name="inputnode")
+                                                  "dwi_rev"]),
+                    name="inputnode")
 
 
 """

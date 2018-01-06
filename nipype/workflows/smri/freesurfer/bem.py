@@ -29,7 +29,8 @@ def create_bem_flow(name='bem', out_format='stl'):
 
     Outputs::
 
-           outputspec.meshes : output boundary element meshes in (by default) stereolithographic (.stl) format
+           outputspec.meshes : output boundary element meshes in (by default)
+                               stereolithographic (.stl) format
     """
 
     """

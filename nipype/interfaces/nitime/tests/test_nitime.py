@@ -73,6 +73,7 @@ def test_coherence_analysis(tmpdir):
                         (C.frequencies < CA.inputs.frequency_range[1]))[0]
 
     # Extract the coherence and average across these frequency bands:
-    coh = np.mean(C.coherence[:, :, freq_idx], -1)  # Averaging on the last dimension
+    # Averaging is done on the last dimension
+    coh = np.mean(C.coherence[:, :, freq_idx], -1)
 
     assert (o.outputs.coherence_array == coh).all()

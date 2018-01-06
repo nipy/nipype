@@ -22,7 +22,7 @@ class TestTSNR():
 
     out_filenames = {  # default output file names
         'detrended_file': 'detrend.nii.gz',
-        'mean_file':  'mean.nii.gz',
+        'mean_file': 'mean.nii.gz',
         'stddev_file': 'stdev.nii.gz',
         'tsnr_file': 'tsnr.nii.gz'
     }
@@ -86,12 +86,14 @@ class TestTSNR():
 
     @mock.patch('warnings.warn')
     def test_warning(self, mock_warn):
-        ''' test that usage of misc.TSNR trips a warning to use confounds.TSNR instead '''
+        ''' test that usage of misc.TSNR trips a warning to use
+        confounds.TSNR instead '''
         # run
         misc.TSNR(in_file=self.in_filenames['in_file'])
 
         # assert
-        assert True in [args[0].count('confounds') > 0 for _, args, _ in mock_warn.mock_calls]
+        assert True in [args[0].count(
+            'confounds') > 0 for _, args, _ in mock_warn.mock_calls]
 
     def assert_expected_outputs_poly(self, tsnrresult, expected_ranges):
         assert os.path.basename(tsnrresult.outputs.detrended_file) == \

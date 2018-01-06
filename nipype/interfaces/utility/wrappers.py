@@ -140,7 +140,8 @@ class Function(IOBase):
         if len(self._output_names) == 1:
             self._out[self._output_names[0]] = out
         else:
-            if isinstance(out, tuple) and (len(out) != len(self._output_names)):
+            if isinstance(out, tuple) and \
+                    (len(out) != len(self._output_names)):
                 raise RuntimeError('Mismatch in number of expected outputs')
 
             else:

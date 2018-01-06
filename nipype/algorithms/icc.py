@@ -37,10 +37,14 @@ class ICC(BaseInterface):
 
     def _run_interface(self, runtime):
         maskdata = nb.load(self.inputs.mask).get_data()
-        maskdata = np.logical_not(np.logical_or(maskdata == 0, np.isnan(maskdata)))
+        maskdata = np.logical_not(
+            np.logical_or(maskdata == 0, np.isnan(maskdata)))
 
-        session_datas = [[nb.load(fname, mmap=NUMPY_MMAP).get_data()[maskdata].reshape(-1, 1) for fname in sessions] for sessions in self.inputs.subjects_sessions]
-        list_of_sessions = [np.dstack(session_data) for session_data in session_datas]
+        session_datas = [[nb.load(fname, mmap=NUMPY_MMAP).get_data()[
+            maskdata].reshape(-1, 1) for fname in sessions]
+            for sessions in self.inputs.subjects_sessions]
+        list_of_sessions = [np.dstack(session_data)
+                            for session_data in session_datas]
         all_data = np.hstack(list_of_sessions)
         icc = np.zeros(session_datas[0][0].shape)
         session_F = np.zeros(session_datas[0][0].shape)
@@ -124,7 +128,8 @@ def ICC_rep_anova(Y):
     SSR = SST - SSC - SSE
     MSR = SSR / dfr
 
-    # ICC(3,1) = (mean square subjeT - mean square error) / (mean square subjeT + (k-1)*-mean square error)
+    # ICC(3,1) = (mean square subjeT - mean square error) /
+    #            (mean square subjeT + (k-1)*-mean square error)
     ICC = (MSR - MSE) / (MSR + dfc * MSE)
 
     e_var = MSE  # variance of error

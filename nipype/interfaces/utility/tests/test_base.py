@@ -22,7 +22,9 @@ def test_rename(tmpdir):
     assert os.path.exists(outfile)
 
     # Now a string-formatting version
-    rn = utility.Rename(in_file="file.txt", format_string="%(field1)s_file%(field2)d", keep_ext=True)
+    rn = utility.Rename(
+        in_file="file.txt", format_string="%(field1)s_file%(field2)d",
+        keep_ext=True)
     # Test .input field creation
     assert hasattr(rn.inputs, "field1")
     assert hasattr(rn.inputs, "field2")

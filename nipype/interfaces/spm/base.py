@@ -232,16 +232,17 @@ class SPMCommand(BaseInterface):
     _paths = None
     _use_mcr = None
 
-    references_ = [{'entry': BibTeX("@book{FrackowiakFristonFrithDolanMazziotta1997,"
-                                    "author={R.S.J. Frackowiak, K.J. Friston, C.D. Frith, R.J. Dolan, and J.C. Mazziotta},"
-                                    "title={Human Brain Function},"
-                                    "publisher={Academic Press USA},"
-                                    "year={1997},"
-                                    "}"),
-                    'description': 'The fundamental text on Statistical Parametric Mapping (SPM)',
-                    # 'path': "nipype.interfaces.spm",
-                    'tags': ['implementation'],
-                    }]
+    references_ = [{'entry': BibTeX(
+        "@book{FrackowiakFristonFrithDolanMazziotta1997,"
+        "author={R.S.J. Frackowiak, K.J. Friston, C.D. Frith, R.J. Dolan, and J.C. Mazziotta},"
+        "title={Human Brain Function},"
+        "publisher={Academic Press USA},"
+        "year={1997},"
+        "}"),
+        'description': 'The fundamental text on Statistical Parametric Mapping (SPM)',
+        # 'path': "nipype.interfaces.spm",
+        'tags': ['implementation'],
+    }]
 
     def __init__(self, **inputs):
         super(SPMCommand, self).__init__(**inputs)
@@ -432,8 +433,8 @@ class SPMCommand(BaseInterface):
                     elif isinstance(val, list):
                         items_format = []
                         for el in val:
-                            items_format += ['{}' if not isinstance(el, (str, bytes))
-                                             else '\'{}\'']
+                            items_format += ['{}' if not isinstance(
+                                el, (str, bytes)) else '\'{}\'']
                         val_format = ', '.join(items_format).format
                         jobstring += '[{}];...\n'.format(val_format(*val))
                     elif isinstance(val, (str, bytes)):

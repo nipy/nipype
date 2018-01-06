@@ -124,9 +124,9 @@ class RESTORE(DipyDiffusionInterface):
         sigma = mean_std * (1 + bias)
 
         if sigma == 0:
-            IFLOGGER.warn('Noise std is 0.0, looks like data was masked and noise '
-                          'cannot be estimated correctly. Using default tensor '
-                          'model instead of RESTORE.')
+            IFLOGGER.warn('Noise std is 0.0, looks like data was masked and '
+                          'noise cannot be estimated correctly. Using default '
+                          'tensor model instead of RESTORE.')
             dti = TensorModel(gtab)
         else:
             IFLOGGER.info('Performing RESTORE with noise std=%.4f.', sigma)
@@ -256,7 +256,8 @@ class EstimateResponseSH(DipyDiffusionInterface):
                           'Ratio=%0.3f.', ratio)
         elif ratio < 1.e-5 or np.any(np.isnan(response)):
             response = np.array([1.8e-3, 3.6e-4, 3.6e-4, S0])
-            IFLOGGER.warn('Estimated response is not valid, using a default one')
+            IFLOGGER.warn(
+                'Estimated response is not valid, using a default one')
         else:
             IFLOGGER.info('Estimated response: %s', str(response[:3]))
 

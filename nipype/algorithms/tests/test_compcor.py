@@ -23,8 +23,8 @@ class TestCompCor():
         # setup
         tmpdir.chdir()
         noise = np.fromfunction(self.fake_noise_fun, self.fake_data.shape)
-        self.realigned_file = utils.save_toy_nii(self.fake_data + noise,
-                                                 self.filenames['functionalnii'])
+        self.realigned_file = utils.save_toy_nii(
+            self.fake_data + noise, self.filenames['functionalnii'])
         mask = np.ones(self.fake_data.shape[:3])
         mask[0, 0, 0] = 0
         mask[0, 0, 1] = 0
@@ -90,11 +90,14 @@ class TestCompCor():
                                              'asymmetric.nii')
 
         TCompCor(realigned_file=asymmetric_data).run()
-        assert nb.load('mask_000.nii.gz').get_data().shape == asymmetric_shape[:3]
+        assert nb.load(
+            'mask_000.nii.gz').get_data().shape == asymmetric_shape[:3]
 
     def test_compcor_bad_input_shapes(self):
-        shape_less_than = (1, 2, 2, 5)  # dim 0 is < dim 0 of self.mask_files (2)
-        shape_more_than = (3, 3, 3, 5)  # dim 0 is > dim 0 of self.mask_files (2)
+        # dim 0 is < dim 0 of self.mask_files (2)
+        shape_less_than = (1, 2, 2, 5)
+        # dim 0 is > dim 0 of self.mask_files (2)
+        shape_more_than = (3, 3, 3, 5)
 
         for data_shape in (shape_less_than, shape_more_than):
             data_file = utils.save_toy_nii(np.zeros(data_shape), 'temp.nii')
@@ -135,7 +138,8 @@ class TestCompCor():
         with pytest.raises(ValueError, message='more than one mask file'):
             interface.run()
 
-    def run_cc(self, ccinterface, expected_components, expected_header='CompCor'):
+    def run_cc(self, ccinterface, expected_components,
+               expected_header='CompCor'):
         # run
         ccresult = ccinterface.run()
 

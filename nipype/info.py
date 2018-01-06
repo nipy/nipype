@@ -26,8 +26,8 @@ def get_nipype_gitversion():
     import subprocess
     try:
         import nipype
-        gitpath = os.path.realpath(os.path.join(os.path.dirname(nipype.__file__),
-                                                os.path.pardir))
+        gitpath = os.path.realpath(
+            os.path.join(os.path.dirname(nipype.__file__), os.path.pardir))
     except:
         gitpath = os.getcwd()
     gitpathgit = os.path.join(gitpath, '.git')
@@ -82,9 +82,9 @@ that encourages interactive exploration of algorithms from different \
 packages (e.g., AFNI, ANTS, BRAINS, BrainSuite, Camino, FreeSurfer, FSL, MNE, \
 MRtrix, MNE, Nipy, Slicer, SPM), eases the design of workflows within and \
 between packages, and reduces the learning curve necessary to use different \
-packages. Nipype is creating a collaborative platform for neuroimaging software \
-development in a high-level language and addressing limitations of existing \
-pipeline systems.
+packages. Nipype is creating a collaborative platform for neuroimaging \
+software development in a high-level language and addressing limitations of \
+existing pipeline systems.
 
 *Nipype* allows you to:
 

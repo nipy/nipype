@@ -100,22 +100,31 @@ class RobustTemplate(FSCommandOpenMP):
     >>> template.inputs.no_iteration = True
     >>> template.inputs.subsample_threshold = 200
     >>> template.cmdline  #doctest:
-    'mri_robust_template --satit --average 0 --fixtp --mov structural.nii functional.nii --inittp 1 --noit --template mri_robust_template_out.mgz --subsample 200'
+    'mri_robust_template --satit --average 0 --fixtp --mov structural.nii
+        functional.nii --inittp 1 --noit --template mri_robust_template_out.mgz
+        --subsample 200'
     >>> template.inputs.out_file = 'T1.nii'
     >>> template.cmdline  #doctest:
-    'mri_robust_template --satit --average 0 --fixtp --mov structural.nii functional.nii --inittp 1 --noit --template T1.nii --subsample 200'
+    'mri_robust_template --satit --average 0 --fixtp --mov structural.nii
+        functional.nii --inittp 1 --noit --template T1.nii --subsample 200'
 
     >>> template.inputs.transform_outputs = ['structural.lta',
     ...                                      'functional.lta']
     >>> template.inputs.scaled_intensity_outputs = ['structural-iscale.txt',
     ...                                             'functional-iscale.txt']
     >>> template.cmdline    #doctest: +ELLIPSIS
-    'mri_robust_template --satit --average 0 --fixtp --mov structural.nii functional.nii --inittp 1 --noit --template T1.nii --iscaleout .../structural-iscale.txt .../functional-iscale.txt --subsample 200 --lta .../structural.lta .../functional.lta'
+    'mri_robust_template --satit --average 0 --fixtp --mov structural.nii
+        functional.nii --inittp 1 --noit --template T1.nii
+        --iscaleout .../structural-iscale.txt .../functional-iscale.txt
+        --subsample 200 --lta .../structural.lta .../functional.lta'
 
     >>> template.inputs.transform_outputs = True
     >>> template.inputs.scaled_intensity_outputs = True
     >>> template.cmdline    #doctest: +ELLIPSIS
-    'mri_robust_template --satit --average 0 --fixtp --mov structural.nii functional.nii --inittp 1 --noit --template T1.nii --iscaleout .../is1.txt .../is2.txt --subsample 200 --lta .../tp1.lta .../tp2.lta'
+    'mri_robust_template --satit --average 0 --fixtp --mov structural.nii
+        functional.nii --inittp 1 --noit --template T1.nii
+        --iscaleout .../is1.txt .../is2.txt --subsample 200
+        --lta .../tp1.lta .../tp2.lta'
 
     >>> template.run()  #doctest: +SKIP
 
@@ -201,7 +210,8 @@ class FuseSegmentations(FSCommand):
     >>> fuse.inputs.in_segmentations_noCC = ['aseg.mgz', 'aseg.mgz']
     >>> fuse.inputs.in_norms = ['norm.mgz', 'norm.mgz', 'norm.mgz']
     >>> fuse.cmdline
-    'mri_fuse_segmentations -n norm.mgz -a aseg.mgz -c aseg.mgz tp.long.A.template tp1 tp2'
+    'mri_fuse_segmentations -n norm.mgz -a aseg.mgz
+        -c aseg.mgz tp.long.A.template tp1 tp2'
     """
 
     _cmd = 'mri_fuse_segmentations'

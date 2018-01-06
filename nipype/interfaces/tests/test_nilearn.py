@@ -62,7 +62,8 @@ class TestSignalExtraction():
 
     def test_signal_extr_4d_no_shared(self):
         # set up & run & assert
-        self._test_4d_label(self.fourd_wanted, self.fake_4d_label_data, incl_shared_variance=False)
+        self._test_4d_label(self.fourd_wanted, self.fake_4d_label_data,
+                            incl_shared_variance=False)
 
     def test_signal_extr_global_no_shared(self):
         # set up
@@ -109,17 +110,19 @@ class TestSignalExtraction():
         Unlike interface.run(), node.run() checks the traits
         '''
         # run
-        node = pe.Node(iface.SignalExtraction(in_file=os.path.abspath(self.filenames['in_file']),
-                                              label_files=os.path.abspath(self.filenames['label_files']),
-                                              class_labels=self.labels,
-                                              incl_shared_variance=False),
-                       name='SignalExtraction')
+        node = pe.Node(iface.SignalExtraction(
+            in_file=os.path.abspath(self.filenames['in_file']),
+            label_files=os.path.abspath(self.filenames['label_files']),
+            class_labels=self.labels,
+            incl_shared_variance=False),
+            name='SignalExtraction')
         node.run()
 
         # assert
         # just checking that it passes trait validations
 
-    def _test_4d_label(self, wanted, fake_labels, include_global=False, incl_shared_variance=True):
+    def _test_4d_label(self, wanted, fake_labels, include_global=False,
+                       incl_shared_variance=True):
         # set up
         utils.save_toy_nii(fake_labels, self.filenames['4d_label_file'])
 
@@ -148,7 +151,8 @@ class TestSignalExtraction():
                 for j, segment in enumerate(time):
                     npt.assert_almost_equal(segment, wanted[i][j], decimal=1)
 
-# dj: self doesnt have orig_dir at this point, not sure how to change it. should work without it
+# dj: self doesnt have orig_dir at this point, not sure how to change it.
+# should work without it
 #    def teardown_class(self):
 #        self.orig_dir.chdir()
 

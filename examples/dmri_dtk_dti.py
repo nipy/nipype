@@ -13,9 +13,9 @@ the FSL website at: http://www.fmrib.ox.ac.uk/fslcourse/fsl_course_data2.tar.gz
 More details can be found at
 http://www.fmrib.ox.ac.uk/fslcourse/lectures/practicals/fdt/index.htm
 
-In order to run this tutorial you need to have Diffusion Toolkit and FSL tools installed and
-accessible from matlab/command line. Check by calling fslinfo and dtk from the command
-line.
+In order to run this tutorial you need to have Diffusion Toolkit and FSL tools
+installed and accessible from matlab/command line. Check by calling fslinfo and
+dtk from the command line.
 
 Tell python where to find the appropriate functions.
 """
@@ -51,8 +51,8 @@ Data specific components
 
 The nipype tutorial contains data for two subjects.  Subject data
 is in two subdirectories, ``dwis1`` and ``dwis2``.  Each subject directory
-contains each of the following files: bvec, bval, diffusion weighted data, a set of target masks,
-a seed file, and a transformation matrix.
+contains each of the following files: bvec, bval, diffusion weighted data, a
+set of target masks, a seed file, and a transformation matrix.
 
 Below we set some variables to inform the ``datasource`` about the
 layout of our data.  We specify the location of the data, the subject
@@ -189,12 +189,13 @@ datasink.inputs.base_directory = os.path.abspath('dtiresults')
 
 
 def getstripdir(subject_id):
-    return os.path.join(os.path.abspath('data/workingdir/dwiproc'), '_subject_id_%s' % subject_id)
+    return os.path.join(os.path.abspath('data/workingdir/dwiproc'),
+                        '_subject_id_%s' % subject_id)
 
 
 """
-Setup the pipeline that combines the two workflows: tractography and computeTensor
-----------------------------------------------------------------------------------
+Setup the pipeline that combines the 2 workflows: tractography & computeTensor
+------------------------------------------------------------------------------
 """
 
 dwiproc = pe.Workflow(name="dwiproc")

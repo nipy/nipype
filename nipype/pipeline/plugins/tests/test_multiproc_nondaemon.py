@@ -119,13 +119,15 @@ def run_multiproc_nondaemon_with_flag(nondaemon_flag):
 
     pipe.config['execution']['stop_on_first_crash'] = True
 
-    # execute the pipe using the MultiProc plugin with 2 processes and the non_daemon flag
-    # to enable child processes which start other multiprocessing jobs
+    # execute the pipe using the MultiProc plugin with 2 processes and the
+    # non_daemon flag to enable child processes which start other
+    # multiprocessing jobs
     execgraph = pipe.run(plugin="MultiProc",
                          plugin_args={'n_procs': 2,
                                       'non_daemon': nondaemon_flag})
 
-    names = ['.'.join((node._hierarchy, node.name)) for node in execgraph.nodes()]
+    names = ['.'.join((node._hierarchy, node.name))
+             for node in execgraph.nodes()]
     node = list(execgraph.nodes())[names.index('pipe.f2')]
     result = node.get_output('sum_out')
     os.chdir(cur_dir)
@@ -135,11 +137,12 @@ def run_multiproc_nondaemon_with_flag(nondaemon_flag):
 
 def test_run_multiproc_nondaemon_false():
     '''
-    This is the entry point for the test. Two times a pipe of several multiprocessing jobs gets
-    executed. First, without the nondaemon flag. Second, with the nondaemon flag.
+    This is the entry point for the test. Two times a pipe of several
+    multiprocessing jobs gets executed. First, without the nondaemon flag.
+    Second, with the nondaemon flag.
 
-    Since the processes of the pipe start child processes, the execution only succeeds when the
-    non_daemon flag is on.
+    Since the processes of the pipe start child processes, the execution only
+    succeeds when the non_daemon flag is on.
     '''
     shouldHaveFailed = False
     try:

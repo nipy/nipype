@@ -39,8 +39,10 @@ if not os.path.exists(mydatadir):
 print(mydatadir)
 
 MyFileURLs = [
-    ('http://slicer.kitware.com/midas3/download?bitstream=13121', '01_T1_half.nii.gz'),
-    ('http://slicer.kitware.com/midas3/download?bitstream=13122', '02_T1_half.nii.gz'),
+    ('http://slicer.kitware.com/midas3/download?bitstream=13121',
+        '01_T1_half.nii.gz'),
+    ('http://slicer.kitware.com/midas3/download?bitstream=13122',
+        '02_T1_half.nii.gz'),
 ]
 for tt in MyFileURLs:
     myURL = tt[0]
@@ -67,7 +69,8 @@ distributed with the ``example_data`` of `nipype`.
 
 """
 
-reg = Registration(from_file=example_data('smri_ants_registration_settings.json'))
+reg = Registration(from_file=example_data(
+    'smri_ants_registration_settings.json'))
 reg.inputs.fixed_image = input_images[0]
 reg.inputs.moving_image = input_images[1]
 
