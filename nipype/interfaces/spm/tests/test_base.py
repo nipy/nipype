@@ -60,13 +60,13 @@ def test_find_mlab_cmd_defaults():
         except KeyError:
             pass
     dc = TestClass()
-    assert dc._use_mcr == None
-    assert dc._matlab_cmd == None
+    assert dc._use_mcr is None
+    assert dc._matlab_cmd is None
     # test with only FORCE_SPMMCR set
     os.environ['FORCE_SPMMCR'] = '1'
     dc = TestClass()
     assert dc._use_mcr == True
-    assert dc._matlab_cmd == None
+    assert dc._matlab_cmd is None
     # test with both, FORCE_SPMMCR and SPMMCRCMD set
     os.environ['SPMMCRCMD'] = 'spmcmd'
     dc = TestClass()

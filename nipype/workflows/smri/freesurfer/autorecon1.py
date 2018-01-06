@@ -254,7 +254,7 @@ def create_AutoRecon1(name="AutoRecon1", longitudinal=False, distance=None,
     if not longitudinal:
         # single session processing
         talairach_avi = pe.Node(TalairachAVI(), name="Compute_Transform")
-        if custom_atlas != None:
+        if custom_atlas is not None:
             # allows to specify a custom atlas
             talairach_avi.inputs.atlas = custom_atlas
         talairach_avi.inputs.out_file = 'talairach.auto.xfm'

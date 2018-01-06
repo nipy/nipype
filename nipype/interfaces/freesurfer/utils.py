@@ -57,10 +57,10 @@ def copy2subjdir(cls, in_file, folder=None, basename=None, subject_id=None):
         else:
             subject_id = 'subject_id' #default
     # check for basename
-    if basename == None:
+    if basename is None:
         basename = os.path.basename(in_file)
     # check which folder to put the file in
-    if folder != None:
+    if folder is not None:
         out_dir = os.path.join(subjects_dir, subject_id, folder)
     else:
         out_dir = os.path.join(subjects_dir, subject_id)

@@ -400,7 +400,7 @@ def copy_file(in_file, out_file=None):
     """
     import os
     import shutil
-    if out_file == None:
+    if out_file is None:
         out_file = os.path.join(os.getcwd(), os.path.basename(in_file))
     if type(in_file) is list and len(in_file) == 1:
         in_file = in_file[0]
@@ -470,7 +470,7 @@ def checkenv(exitonfail=False):
     fs_home = os.environ.get('FREESURFER_HOME')
     path = os.environ.get('PATH')
     print("FREESURFER_HOME: {0}".format(fs_home))
-    if fs_home == None:
+    if fs_home is None:
         msg = "please set FREESURFER_HOME before running the workflow"
     elif not os.path.isdir(fs_home):
         msg = "FREESURFER_HOME must be set to a valid directory before running this workflow"

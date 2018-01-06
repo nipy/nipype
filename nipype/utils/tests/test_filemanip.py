@@ -72,7 +72,7 @@ def test_check_forhash():
     assert hash == [orig_hash]
     result, hash = check_forhash('foobar.nii')
     assert not result
-    assert hash == None
+    assert hash is None
 
 @pytest.fixture()
 def _temp_analyze_files(tmpdir):
