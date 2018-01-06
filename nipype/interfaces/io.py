@@ -622,7 +622,7 @@ class DataSink(IOBase):
             iflogger.info('Uploading %s to S3 bucket, %s, as %s...', src_f,
                           bucket.name, dst_f)
             if self.inputs.encrypt_bucket_keys:
-                extra_args = {'ServerSideEncryption' : 'AES256'}
+                extra_args = {'ServerSideEncryption': 'AES256'}
             else:
                 extra_args = {}
             bucket.upload_file(src_f, dst_k, ExtraArgs=extra_args,

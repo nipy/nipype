@@ -283,14 +283,14 @@ def draw_nodes(start, nodes_list, cores, minute_scale, space_between_minutes,
             color = 'red'
 
         # Setup dictionary for node html string insertion
-        node_dict = {'left' : left,
-                     'offset' : offset,
-                     'scale_duration' : scale_duration,
-                     'color' : color,
-                     'node_name' : node['name'],
-                     'node_dur' : node['duration'] / 60.0,
-                     'node_start' : node_start.strftime("%Y-%m-%d %H:%M:%S"),
-                     'node_finish' : node_finish.strftime("%Y-%m-%d %H:%M:%S")}
+        node_dict = {'left': left,
+                     'offset': offset,
+                     'scale_duration': scale_duration,
+                     'color': color,
+                     'node_name': node['name'],
+                     'node_dur': node['duration'] / 60.0,
+                     'node_start': node_start.strftime("%Y-%m-%d %H:%M:%S"),
+                     'node_finish': node_finish.strftime("%Y-%m-%d %H:%M:%S")}
         # Create new node string
         new_node = "<div class='node' style='left:%(left)spx;top:%(offset)spx;"\
                    "height:%(scale_duration)spx;background-color:%(color)s;'"\
@@ -348,15 +348,15 @@ def draw_resource_bar(start_time, finish_time, time_series, space_between_minute
             label = '%d threads' % amount
 
         # Setup dictionary for bar html string insertion
-        bar_dict = {'color' : color,
-                    'height' : height,
-                    'width' : width,
+        bar_dict = {'color': color,
+                    'height': height,
+                    'width': width,
                     'offset': offset,
-                    'left' : left,
-                    'label' : label,
-                    'duration' : duration_mins,
-                    'start' : ts_start.strftime('%Y-%m-%d %H:%M:%S'),
-                    'finish' : ts_end.strftime('%Y-%m-%d %H:%M:%S')}
+                    'left': left,
+                    'label': label,
+                    'duration': duration_mins,
+                    'start': ts_start.strftime('%Y-%m-%d %H:%M:%S'),
+                    'finish': ts_end.strftime('%Y-%m-%d %H:%M:%S')}
 
         bar_html = "<div class='bar' style='background-color:%(color)s;"\
                    "height:%(height).3fpx;width:%(width).3fpx;"\

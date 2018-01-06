@@ -18,9 +18,9 @@ def test_report_crash():
             mock_node = mock.MagicMock(name='mock_node')
             mock_node._id = 'an_id'
             mock_node.config = {
-                'execution' : {
-                    'crashdump_dir' : '.',
-                    'crashfile_format' : 'pklz',
+                'execution': {
+                    'crashdump_dir': '.',
+                    'crashfile_format': 'pklz',
                 }
             }
 

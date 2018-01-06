@@ -420,8 +420,8 @@ def test_jsonsink_input():
 
 
 @pytest.mark.parametrize("inputs_attributes", [
-        {'new_entry' : 'someValue'},
-        {'new_entry' : 'someValue', 'test' : 'testInfields'}
+        {'new_entry': 'someValue'},
+        {'new_entry': 'someValue', 'test': 'testInfields'}
 ])
 def test_jsonsink(tmpdir, inputs_attributes):
     tmpdir.chdir()
