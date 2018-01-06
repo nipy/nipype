@@ -91,7 +91,7 @@ def read_mrtrix_streamlines(in_file, header, as_generator=True):
         all_str = fileobj.read()
         num_triplets = int(len(all_str) / bytesize)
         pts = np.ndarray(shape=(num_triplets, pt_cols), dtype='f4', buffer=all_str)
-        nonfinite_list = np.where(np.isfinite(pts[:, 2]) == False)
+        nonfinite_list = np.where(np.invert(np.isfinite(pts[:, 2])))
         nonfinite_list = list(nonfinite_list[0])[0:-1]  # Converts numpy array to list, removes the last value
         for idx, value in enumerate(nonfinite_list):
             if idx == 0:
