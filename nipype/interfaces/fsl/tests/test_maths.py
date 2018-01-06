@@ -146,7 +146,7 @@ def test_stdimage(create_files_in_directory_plus_output_type):
     files, testdir, out_ext = create_files_in_directory_plus_output_type
 
     # Get the command
-    stder = fsl.StdImage(in_file="a.nii",out_file="b.nii")
+    stder = fsl.StdImage(in_file="a.nii", out_file="b.nii")
 
     # Test the underlying command
     assert stder.cmd == "fslmaths"
@@ -156,7 +156,7 @@ def test_stdimage(create_files_in_directory_plus_output_type):
 
     # Test the other dimensions
     cmdline = "fslmaths a.nii -{}std b.nii"
-    for dim in ["X","Y","Z","T"]:
+    for dim in ["X", "Y", "Z", "T"]:
         stder.inputs.dimension = dim
         assert stder.cmdline == cmdline.format(dim)
 

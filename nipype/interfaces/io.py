@@ -948,13 +948,13 @@ class S3DataGrabber(IOBase):
         # Outputs are currently stored as locations on S3.
         # We must convert to the local location specified
         # and download the files.
-        for key,val in outputs.items():
+        for key, val in outputs.items():
             # This will basically be either list-like or string-like:
             # if it's an instance of a list, we'll iterate through it.
             # If it isn't, it's string-like (string, unicode), we
             # convert that value directly.
             if isinstance(val, (list, tuple, set)):
-                for i,path in enumerate(val):
+                for i, path in enumerate(val):
                     outputs[key][i] = self.s3tolocal(path, bkt)
             else:
                 outputs[key] = self.s3tolocal(val, bkt)

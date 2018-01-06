@@ -113,12 +113,12 @@ def test_outputs_removal(tmpdir):
     n1.config = {'execution': {'remove_unnecessary_outputs': True}}
     n1.config = merge_dict(deepcopy(config._sections), n1.config)
     n1.run()
-    assert tmpdir.join(n1.name,'file1.txt').check()
-    assert tmpdir.join(n1.name,'file1.txt').check()
+    assert tmpdir.join(n1.name, 'file1.txt').check()
+    assert tmpdir.join(n1.name, 'file1.txt').check()
     n1.needed_outputs = ['file2']
     n1.run()
-    assert not tmpdir.join(n1.name,'file1.txt').check()
-    assert tmpdir.join(n1.name,'file2.txt').check()
+    assert not tmpdir.join(n1.name, 'file1.txt').check()
+    assert tmpdir.join(n1.name, 'file2.txt').check()
 
 
 class InputSpec(nib.TraitedSpec):
@@ -153,13 +153,13 @@ def test_inputs_removal(tmpdir):
     n1.config = {'execution': {'keep_inputs': True}}
     n1.config = merge_dict(deepcopy(config._sections), n1.config)
     n1.run()
-    assert tmpdir.join(n1.name,'file1.txt').check()
+    assert tmpdir.join(n1.name, 'file1.txt').check()
     n1.inputs.in_file = file1.strpath
     n1.config = {'execution': {'keep_inputs': False}}
     n1.config = merge_dict(deepcopy(config._sections), n1.config)
     n1.overwrite = True
     n1.run()
-    assert not tmpdir.join(n1.name,'file1.txt').check()
+    assert not tmpdir.join(n1.name, 'file1.txt').check()
 
 
 def test_outputs_removal_wf(tmpdir):
@@ -322,7 +322,7 @@ def dummy_func(value):
     return value + 1
 
 
-@pytest.mark.skipif(sys.version_info < (3,0),
+@pytest.mark.skipif(sys.version_info < (3, 0),
                     reason="the famous segfault #1788")
 def test_mapnode_crash(tmpdir):
     """Test mapnode crash when stop_on_first_crash is True"""
@@ -341,7 +341,7 @@ def test_mapnode_crash(tmpdir):
     os.chdir(cwd)
 
 
-@pytest.mark.skipif(sys.version_info < (3,0),
+@pytest.mark.skipif(sys.version_info < (3, 0),
                     reason="the famous segfault #1788")
 def test_mapnode_crash2(tmpdir):
     """Test mapnode crash when stop_on_first_crash is False"""
@@ -359,7 +359,7 @@ def test_mapnode_crash2(tmpdir):
     os.chdir(cwd)
 
 
-@pytest.mark.skipif(sys.version_info < (3,0),
+@pytest.mark.skipif(sys.version_info < (3, 0),
                     reason="the famous segfault #1788")
 def test_mapnode_crash3(tmpdir):
     """Test mapnode crash when mapnode is embedded in a workflow"""

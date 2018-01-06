@@ -8,14 +8,14 @@ def test_level1design(tmpdir):
     old = tmpdir.chdir()
     l = Level1Design()
     runinfo = dict(cond=[{'name': 'test_condition', 'onset': [0, 10],
-                          'duration':[10, 10]}],regress=[])
+                          'duration':[10, 10]}], regress=[])
     runidx = 0
     contrasts = Undefined
     do_tempfilter = False
     orthogonalization = {}
-    basic_ev_parameters = {'temporalderiv':False}
+    basic_ev_parameters = {'temporalderiv': False}
     convolution_variants = [
-        ('custom', 7, {'temporalderiv':False, 'bfcustompath':'/some/path'}),
+        ('custom', 7, {'temporalderiv': False, 'bfcustompath': '/some/path'}),
         ('hrf', 3, basic_ev_parameters),
         ('dgamma', 3, basic_ev_parameters),
         ('gamma', 2, basic_ev_parameters),

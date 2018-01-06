@@ -117,17 +117,17 @@ class TestCompCor():
                      merge_method=method).run()
             if method == 'union':
                 assert np.array_equal(nb.load('mask_000.nii.gz').get_data(),
-                                      ([[[0,0],[0,0]],[[0,0],[1,0]]]))
+                                      ([[[0, 0], [0, 0]], [[0, 0], [1, 0]]]))
             if method == 'intersect':
                 assert np.array_equal(nb.load('mask_000.nii.gz').get_data(),
-                                      ([[[0,0],[0,0]],[[0,1],[0,0]]]))
+                                      ([[[0, 0], [0, 0]], [[0, 1], [0, 0]]]))
 
     def test_tcompcor_index_mask(self):
         TCompCor(realigned_file=self.realigned_file,
                  mask_files=self.mask_files,
                  mask_index=1).run()
         assert np.array_equal(nb.load('mask_000.nii.gz').get_data(),
-                              ([[[0,0],[0,0]],[[0,1],[0,0]]]))
+                              ([[[0, 0], [0, 0]], [[0, 1], [0, 0]]]))
 
     def test_tcompcor_multi_mask_no_index(self):
         interface = TCompCor(realigned_file=self.realigned_file,

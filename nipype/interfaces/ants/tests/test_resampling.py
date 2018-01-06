@@ -24,8 +24,8 @@ def create_wimt():
     wimt = WarpImageMultiTransform()
     wimt.inputs.input_image = 'diffusion_weighted.nii'
     wimt.inputs.reference_image = 'functional.nii'
-    wimt.inputs.transformation_series = ['func2anat_coreg_Affine.txt','func2anat_InverseWarp.nii.gz',
-                                         'dwi2anat_Warp.nii.gz','dwi2anat_coreg_Affine.txt']
+    wimt.inputs.transformation_series = ['func2anat_coreg_Affine.txt', 'func2anat_InverseWarp.nii.gz',
+                                         'dwi2anat_Warp.nii.gz', 'dwi2anat_coreg_Affine.txt']
     return wimt
 
 
@@ -60,7 +60,7 @@ def create_wtsimt():
     wtsimt = WarpTimeSeriesImageMultiTransform()
     wtsimt.inputs.input_image = 'resting.nii'
     wtsimt.inputs.reference_image = 'ants_deformed.nii.gz'
-    wtsimt.inputs.transformation_series = ['ants_Warp.nii.gz','ants_Affine.txt']
+    wtsimt.inputs.transformation_series = ['ants_Warp.nii.gz', 'ants_Affine.txt']
     return wtsimt
 
 

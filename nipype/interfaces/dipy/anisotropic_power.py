@@ -58,7 +58,7 @@ class APMQball(DipyDiffusionInterface):
             mask = nb.load(self.inputs.mask_file).get_data()
 
         # Fit it
-        model = shm.QballModel(gtab,8)
+        model = shm.QballModel(gtab, 8)
         sphere = get_sphere('symmetric724')
         peaks = peaks_from_model(model=model, data=data,
                                  relative_peak_threshold=.5,

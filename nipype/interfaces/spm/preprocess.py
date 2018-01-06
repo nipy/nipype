@@ -905,7 +905,7 @@ class NewSegmentInputSpec(SPMCommandInputSpec):
             - which maps to save (Corrected, Field) - a tuple of two boolean values""",
                                 field='channel')
     tissues = traits.List(
-        traits.Tuple(traits.Tuple(ImageFileSPM(exists=True),traits.Int()),
+        traits.Tuple(traits.Tuple(ImageFileSPM(exists=True), traits.Int()),
                      traits.Int(), traits.Tuple(traits.Bool, traits.Bool),
                      traits.Tuple(traits.Bool, traits.Bool)),
         desc="""A list of tuples (one per tissue) with the following fields:

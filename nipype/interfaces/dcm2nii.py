@@ -225,7 +225,7 @@ class Dcm2niixInputSpec(CommandLineInputSpec):
                            desc="Output directory")
     bids_format = traits.Bool(True, argstr='-b', usedefault=True,
                               desc="Create a BIDS sidecar file")
-    compress = traits.Enum('i', ['y','i','n'], argstr='-z %s', usedefault=True,
+    compress = traits.Enum('i', ['y', 'i', 'n'], argstr='-z %s', usedefault=True,
                            desc="Gzip compress images - [y=pigz, i=internal, n=no]")
     merge_imgs = traits.Bool(False, argstr='-m', usedefault=True,
                              desc="merge 2D slices from same series")

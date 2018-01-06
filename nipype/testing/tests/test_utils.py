@@ -22,7 +22,7 @@ def test_tempfatfs():
 
 
 @patch('subprocess.check_call', MagicMock(
-    side_effect=subprocess.CalledProcessError('','')))
+    side_effect=subprocess.CalledProcessError('', '')))
 def test_tempfatfs_calledprocesserror():
     try:
         TempFATFS()

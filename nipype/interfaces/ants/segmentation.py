@@ -1060,7 +1060,7 @@ class AntsJointFusionInputSpec(ANTSCommandInputSpec):
                                      'neighborhood patch. Options include Pearson\'s '
                                      'correlation (PC) and mean squares (MSQ). Default = '
                                      'PC (Pearson correlation).'))
-    search_radius = traits.List([3,3,3], minlen=1, maxlen=3, argstr='-s %s', usedefault=True,
+    search_radius = traits.List([3, 3, 3], minlen=1, maxlen=3, argstr='-s %s', usedefault=True,
                                 desc=('Search radius for similarity measures. Default = 3x3x3. '
                                       'One can also specify an image where the value at the '
                                       'voxel specifies the isotropic search radius at that voxel.'))

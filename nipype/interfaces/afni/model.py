@@ -193,7 +193,7 @@ class DeconvolveInputSpec(AFNICommandInputSpec):
         position=-6)
     stim_times = traits.List(
         traits.Tuple(traits.Int(desc='k-th response model'),
-                     File(desc='stimulus timing file',exists=True),
+                     File(desc='stimulus timing file', exists=True),
                      Str(desc='model')),
         desc='generate a response model from a set of stimulus times'
              ' given in file.',
@@ -276,7 +276,7 @@ class Deconvolve(AFNICommand):
                 if val.startswith('SYM: '):
                     value[n] = val.lstrip('SYM: ')
 
-        return super(Deconvolve,self)._format_arg(name, trait_spec, value)
+        return super(Deconvolve, self)._format_arg(name, trait_spec, value)
 
     def _parse_inputs(self, skip=None):
         if skip is None:
@@ -414,7 +414,7 @@ class RemlfitInputSpec(AFNICommandInputSpec):
              'mean removed (as is done in Deconvolve); this option turns this '
              'centering off',
         argstr='-nodmbase',
-        requires=['addbase','dsort'])
+        requires=['addbase', 'dsort'])
     dsort = File(
         desc='4D dataset to be used as voxelwise baseline regressor',
         exists=True,
@@ -638,7 +638,7 @@ class SynthesizeInputSpec(AFNICommandInputSpec):
              'TR is read from the header of the matrix file.',
         argstr='-TR %f')
     cenfill = traits.Enum(
-        'zero','nbhr','none',
+        'zero', 'nbhr', 'none',
         argstr='-cenfill %s',
         desc='Determines how censored time points from the '
              '3dDeconvolve run will be filled. Valid types '

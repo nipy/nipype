@@ -12,7 +12,7 @@ output directories). If no hand_labels_noise.txt exists already, this
 will fail and comment on that.
 
 EXAMPLE:
-subject_list = ['1','2','3']
+subject_list = ['1', '2', '3']
 
 fix_pipeline = pe.Workflow(name='fix_pipeline')
 fix_pipeline.base_dir = os.path.abspath('./')
@@ -100,7 +100,7 @@ class TrainingSetCreator(BaseInterface):
     def _run_interface(self, runtime):
         mel_icas = []
         for item in self.inputs.mel_icas_in:
-            if os.path.exists(os.path.join(item,'hand_labels_noise.txt')):
+            if os.path.exists(os.path.join(item, 'hand_labels_noise.txt')):
                 mel_icas.append(item)
 
         if len(mel_icas) == 0:
@@ -111,7 +111,7 @@ class TrainingSetCreator(BaseInterface):
     def _list_outputs(self):
         mel_icas = []
         for item in self.inputs.mel_icas_in:
-            if os.path.exists(os.path.join(item,'hand_labels_noise.txt')):
+            if os.path.exists(os.path.join(item, 'hand_labels_noise.txt')):
                 mel_icas.append(item)
         outputs = self._outputs().get()
         outputs['mel_icas_out'] = mel_icas

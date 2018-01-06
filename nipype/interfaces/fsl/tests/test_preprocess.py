@@ -558,11 +558,11 @@ def setup_fugue(tmpdir):
 
 @pytest.mark.skipif(no_fsl(), reason="fsl is not installed")
 @pytest.mark.parametrize("attr, out_file", [
-        ({"save_unmasked_fmap":True, "fmap_in_file":"infile", "mask_file":"infile", "output_type":"NIFTI_GZ"},
+        ({"save_unmasked_fmap": True, "fmap_in_file": "infile", "mask_file": "infile", "output_type": "NIFTI_GZ"},
          'fmap_out_file'),
-        ({"save_unmasked_shift":True, "fmap_in_file":"infile", "dwell_time":1.e-3, "mask_file":"infile", "output_type": "NIFTI_GZ"},
+        ({"save_unmasked_shift": True, "fmap_in_file": "infile", "dwell_time": 1.e-3, "mask_file": "infile", "output_type": "NIFTI_GZ"},
          "shift_out_file"),
-        ({"in_file":"infile", "mask_file":"infile", "shift_in_file":"infile", "output_type":"NIFTI_GZ"},
+        ({"in_file": "infile", "mask_file": "infile", "shift_in_file": "infile", "output_type": "NIFTI_GZ"},
          'unwarped_file')
         ])
 def test_fugue(setup_fugue, attr, out_file):
@@ -577,7 +577,7 @@ def test_fugue(setup_fugue, attr, out_file):
             setattr(fugue.inputs, key, value)
     res = fugue.run()
 
-    assert isdefined(getattr(res.outputs,out_file))
+    assert isdefined(getattr(res.outputs, out_file))
     trait_spec = fugue.inputs.trait(out_file)
     out_name = trait_spec.name_template % 'dumbfile'
     out_name += '.nii.gz'

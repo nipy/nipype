@@ -229,7 +229,7 @@ class AllineateInputSpec(AFNICommandInputSpec):
     out_param_file = File(
         argstr='-1Dparam_save %s',
         desc='Save the warp parameters in ASCII (.1D) format.',
-        xor=['in_param_file','allcostx'])
+        xor=['in_param_file', 'allcostx'])
     in_param_file = File(
         exists=True,
         argstr='-1Dparam_apply %s',
@@ -239,7 +239,7 @@ class AllineateInputSpec(AFNICommandInputSpec):
     out_matrix = File(
         argstr='-1Dmatrix_save %s',
         desc='Save the transformation matrix for each volume.',
-        xor=['in_matrix','allcostx'])
+        xor=['in_matrix', 'allcostx'])
     in_matrix = File(
         desc='matrix to align input file',
         argstr='-1Dmatrix_apply %s',
@@ -2635,7 +2635,7 @@ class VolregInputSpec(AFNICommandInputSpec):
         keep_extension=True,
         name_source='in_file')
     interp = traits.Enum(
-        ('Fourier', 'cubic', 'heptic', 'quintic','linear'),
+        ('Fourier', 'cubic', 'heptic', 'quintic', 'linear'),
         desc='spatial interpolation methods [default = heptic]',
         argstr='-%s')
 

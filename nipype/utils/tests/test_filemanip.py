@@ -26,7 +26,7 @@ def _ignore_atime(stat):
     return stat[:7] + stat[8:]
 
 
-@pytest.mark.parametrize("filename, split",[
+@pytest.mark.parametrize("filename, split", [
         ('foo.nii',                ('', 'foo', '.nii')),
         ('foo.nii.gz',             ('', 'foo', '.nii.gz')),
         ('/usr/local/foo.nii.gz',  ('/usr/local', 'foo', '.nii.gz')),
@@ -56,7 +56,7 @@ def test_fnames_presuffix():
     assert pths == ['/tmp/pre_foo_post.nii', '/tmp/pre_bar_post.nii']
 
 
-@pytest.mark.parametrize("filename, newname",[
+@pytest.mark.parametrize("filename, newname", [
         ('foobar.nii',    'foobar_0xabc123.nii'),
         ('foobar.nii.gz', 'foobar_0xabc123.nii.gz')
         ])

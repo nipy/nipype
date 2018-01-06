@@ -26,7 +26,7 @@ def test_JointFusion_modalities(m):
     assert at.inputs.modalities == int(m)
 
 
-@pytest.mark.parametrize("a, b", [(a,b) for a in range(10) for b in range(10)])
+@pytest.mark.parametrize("a, b", [(a, b) for a in range(10) for b in range(10)])
 def test_JointFusion_method(a, b):
     at = JointFusion()
     set_method = lambda a, b: setattr(at.inputs, 'method', 'Joint[%.1f,%d]'.format(a, b))

@@ -529,11 +529,11 @@ class CatInputSpec(AFNICommandInputSpec):
              'If there is no such header, all columns are kept.',
         argstr='-nonfixed')
     out_format = traits.Enum(
-        'int','nice','double','fint','cint',
+        'int', 'nice', 'double', 'fint', 'cint',
         argstr='-form %s',
         desc='specify data type for output. Valid types are \'int\', '
              '\'nice\', \'double\', \'fint\', and \'cint\'.',
-        xor=['out_int','out_nice','out_double','out_fint','out_cint'])
+        xor=['out_int', 'out_nice', 'out_double', 'out_fint', 'out_cint'])
     stack = traits.Bool(
         desc='Stack the columns of the resultant matrix in the output.',
         argstr='-stack')
@@ -544,22 +544,22 @@ class CatInputSpec(AFNICommandInputSpec):
     out_int = traits.Bool(
         desc='specifiy int data type for output',
         argstr='-i',
-        xor=['out_format','out_nice','out_double','out_fint','out_cint'])
+        xor=['out_format', 'out_nice', 'out_double', 'out_fint', 'out_cint'])
     out_nice = traits.Bool(
         desc='specifiy nice data type for output',
         argstr='-n',
-        xor=['out_format','out_int','out_double','out_fint','out_cint'])
+        xor=['out_format', 'out_int', 'out_double', 'out_fint', 'out_cint'])
     out_double = traits.Bool(
         desc='specifiy double data type for output',
         argstr='-d',
-        xor=['out_format','out_nice','out_int','out_fint','out_cint'])
+        xor=['out_format', 'out_nice', 'out_int', 'out_fint', 'out_cint'])
     out_fint = traits.Bool(
         desc='specifiy int, rounded down, data type for output',
         argstr='-f',
-        xor=['out_format','out_nice','out_double','out_int','out_cint'])
+        xor=['out_format', 'out_nice', 'out_double', 'out_int', 'out_cint'])
     out_cint = traits.Bool(
         desc='specifiy int, rounded up, data type for output',
-        xor=['out_format','out_nice','out_double','out_fint','out_int'])
+        xor=['out_format', 'out_nice', 'out_double', 'out_fint', 'out_int'])
 
 
 class Cat(AFNICommand):
@@ -617,7 +617,7 @@ class CatMatvecInputSpec(AFNICommandInputSpec):
         descr="Output matrix in augmented form (last row is 0 0 0 1)"
               "This option does not work with -MATRIX or -ONELINE",
         argstr="-4x4",
-        xor=['matrix','oneline'])
+        xor=['matrix', 'oneline'])
 
 
 class CatMatvec(AFNICommand):
@@ -816,7 +816,7 @@ class DotInputSpec(AFNICommandInputSpec):
         desc='Use this dataset as a mask',
         argstr='-mask %s')
     mrange = traits.Tuple(
-        (traits.Float(),traits.Float()),
+        (traits.Float(), traits.Float()),
         desc='Means to further restrict the voxels from \'mset\' so that'
              'only those mask values within this range (inclusive) willbe used.',
         argstr='-mrange %s %s')
@@ -1354,7 +1354,7 @@ class MaskToolInputSpec(AFNICommandInputSpec):
         argstr='-count',
         position=2)
     datum = traits.Enum(
-        'byte','short','float',
+        'byte', 'short', 'float',
         argstr='-datum %s',
         desc='specify data type for output. Valid types are \'byte\', '
              '\'short\' and \'float\'.')
@@ -1546,14 +1546,14 @@ class NwarpApplyInputSpec(CommandLineInputSpec):
         desc='the name of the master dataset, which defines the output grid',
         argstr='-master %s')
     interp = traits.Enum(
-        'NN','nearestneighbour','nearestneighbor','linear',
-        'trilinear','cubic','tricubic','quintic','triquintic','wsinc5',
+        'NN', 'nearestneighbour', 'nearestneighbor', 'linear',
+        'trilinear', 'cubic', 'tricubic', 'quintic', 'triquintic', 'wsinc5',
         desc='defines interpolation method to use during warp',
         argstr='-interp %s',
         default='wsinc5')
     ainterp = traits.Enum(
-        'NN','nearestneighbour','nearestneighbor','linear',
-        'trilinear','cubic','tricubic','quintic','triquintic','wsinc5',
+        'NN', 'nearestneighbour', 'nearestneighbor', 'linear',
+        'trilinear', 'cubic', 'tricubic', 'quintic', 'triquintic', 'wsinc5',
         desc='specify a different interpolation method than might '
              'be used for the warp',
         argstr='-ainterp %s',
@@ -1739,19 +1739,19 @@ class OneDToolPyInputSpec(AFNIPythonCommandInputSpec):
         argstr='-write %s',
         xor=['show_cormat_warnings'])
     show_censor_count = traits.Bool(
-        desc='display the total number of censored TRs  Note : if input is a valid xmat.1D dataset,'
+        desc='display the total number of censored TRs  Note : if input is a valid xmat.1D dataset, '
              'then the count will come from the header.  Otherwise the input is assumed to be a binary censor'
              'file, and zeros are simply counted.',
         argstr="-show_censor_count")
     censor_motion = traits.Tuple(
-        (traits.Float(),File()),
+        (traits.Float(), File()),
         desc='Tuple of motion limit and outfile prefix. need to also set set_nruns -r set_run_lengths',
         argstr="-censor_motion %f %s")
     censor_prev_TR = traits.Bool(
         desc='for each censored TR, also censor previous',
         argstr='-censor_prev_TR')
     show_trs_uncensored = traits.Enum(
-        'comma','space','encoded','verbose',
+        'comma', 'space', 'encoded', 'verbose',
         desc='display a list of TRs which were not censored in the specified style',
         argstr='-show_trs_uncensored %s')
     show_cormat_warnings = traits.File(
@@ -2035,7 +2035,7 @@ class TCat(AFNICommand):
 
 class TCatSBInputSpec(AFNICommandInputSpec):
     in_files = traits.List(
-        traits.Tuple(File(exists=True),Str()),
+        traits.Tuple(File(exists=True), Str()),
         desc='List of tuples of file names and subbrick selectors as strings.'
              'Don\'t forget to protect the single quotes in the subbrick selector'
              'so the contents are protected from the command line interpreter.',
@@ -2594,7 +2594,7 @@ class ZcatInputSpec(AFNICommandInputSpec):
         desc='output dataset prefix name (default \'zcat\')',
         argstr='-prefix %s')
     datum = traits.Enum(
-        'byte','short','float',
+        'byte', 'short', 'float',
         argstr='-datum %s',
         desc='specify data type for output. Valid types are \'byte\', '
              '\'short\' and \'float\'.')

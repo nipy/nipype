@@ -215,7 +215,7 @@ def create_AutoRecon1(name="AutoRecon1", longitudinal=False, distance=None,
         create_template.inputs.no_iteration = True
         ar1_wf.connect([(concatenate_lta, create_template, [('out_file', 'initial_transforms')]),
                         (inputSpec, create_template, [('in_t1s', 'in_files')]),
-                        (copy_iscales, create_template, [('out_file','in_intensity_scales')])])
+                        (copy_iscales, create_template, [('out_file', 'in_intensity_scales')])])
 
     # mri_convert
     conform_template = pe.Node(MRIConvert(), name='Conform_Template')

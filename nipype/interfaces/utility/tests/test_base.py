@@ -37,8 +37,8 @@ def test_rename(tmpdir):
 
 
 @pytest.mark.parametrize("args, expected", [
-        ({}, ([0], [1,2,3])),
-        ({"squeeze": True}, (0, [1,2,3]))
+        ({}, ([0], [1, 2, 3])),
+        ({"squeeze": True}, (0, [1, 2, 3]))
         ])
 def test_split(tmpdir, args, expected):
     tmpdir.chdir()

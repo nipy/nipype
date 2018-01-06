@@ -567,7 +567,7 @@ def test_nested_workflow_join(tmpdir):
     # master wf
     meta_wf = pe.Workflow(name='meta', base_dir='.')
     # add each mini-workflow to master
-    for i in [[1,3],[2,4]]:
+    for i in [[1, 3], [2, 4]]:
         mini_wf = nested_wf(i)
         meta_wf.add_nodes([mini_wf])
 

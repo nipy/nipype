@@ -41,7 +41,7 @@ def nifti_image_files(outdir, filelist, shape):
 def create_files_in_directory(request, tmpdir):
     cwd = tmpdir.chdir()
     filelist = ['a.nii', 'b.nii']
-    nifti_image_files(tmpdir.strpath, filelist, shape=(3,3,3,4))
+    nifti_image_files(tmpdir.strpath, filelist, shape=(3, 3, 3, 4))
 
     def change_directory():
         cwd.chdir()
@@ -67,7 +67,7 @@ def create_analyze_pair_file_in_directory(request, tmpdir):
 def create_files_in_directory_plus_dummy_file(request, tmpdir):
     cwd = tmpdir.chdir()
     filelist = ['a.nii', 'b.nii']
-    nifti_image_files(tmpdir.strpath, filelist, shape=(3,3,3,4))
+    nifti_image_files(tmpdir.strpath, filelist, shape=(3, 3, 3, 4))
 
     tmpdir.join('reg.dat').write('dummy file')
     filelist.append('reg.dat')
@@ -109,7 +109,7 @@ def create_files_in_directory_plus_output_type(request, tmpdir):
     func_prev_type = set_output_type(request.param)
     origdir = tmpdir.chdir()
     filelist = ['a.nii', 'b.nii']
-    nifti_image_files(tmpdir.strpath, filelist, shape=(3,3,3,4))
+    nifti_image_files(tmpdir.strpath, filelist, shape=(3, 3, 3, 4))
 
     out_ext = Info.output_type_to_ext(Info.output_type())
 
