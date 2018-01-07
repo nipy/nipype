@@ -260,7 +260,7 @@ class Node(EngineBase):
         return self._output_dir
 
     def set_input(self, parameter, val):
-        """ Set interface input value"""
+        """Set interface input value"""
         logger.debug('[Node] %s - setting input %s = %s',
                      self.name, parameter, to_str(val))
         setattr(self.inputs, parameter, deepcopy(val))
@@ -270,7 +270,7 @@ class Node(EngineBase):
         return getattr(self.result.outputs, parameter, None)
 
     def help(self):
-        """ Print interface help"""
+        """Print interface help"""
         self._interface.help()
 
     def hash_exists(self, updatehash=False):
@@ -573,7 +573,7 @@ class Node(EngineBase):
 
         outdir = self.output_dir()
         if copyfiles:
-            self._originputs = deepcopy(self.interface.inputs)
+            self._originputs = deepcopy(self._interface.inputs)
             self._copyfiles_to_wd(execute=execute)
 
         message = '[Node] Running "%s" ("%s.%s")'
@@ -615,7 +615,7 @@ class Node(EngineBase):
         return result
 
     def _copyfiles_to_wd(self, execute=True, linksonly=False):
-        """ copy files over and change the inputs"""
+        """copy files over and change the inputs"""
         if not hasattr(self._interface, '_get_filecopy_info'):
             # Nothing to be done
             return
@@ -629,7 +629,7 @@ class Node(EngineBase):
             outdir = op.join(outdir, '_tempinput')
             makedirs(outdir, exist_ok=True)
 
-        for info in self.interface._get_filecopy_info():
+        for info in self._interface._get_filecopy_info():
             files = self.inputs.get().get(info['key'])
             if not isdefined(files) or not files:
                 continue
@@ -966,8 +966,8 @@ class MapNode(Node):
         return output
 
     def set_input(self, parameter, val):
-        """ Set interface input value or nodewrapper attribute
-
+        """
+        Set interface input value or nodewrapper attribute
         Priority goes to interface.
         """
         logger.debug('setting nodelevel(%s) input %s = %s',
@@ -983,7 +983,7 @@ class MapNode(Node):
             setattr(self._interface.inputs, name, newvalue)
 
     def _get_hashval(self):
-        """ Compute hash including iterfield lists."""
+        """Compute hash including iterfield lists."""
         self._get_inputs()
         self._check_iterfield()
         hashinputs = deepcopy(self._interface.inputs)
@@ -1017,8 +1017,8 @@ class MapNode(Node):
 
     @property
     def outputs(self):
-        if self.interface._outputs():
-            return Bunch(self.interface._outputs().get())
+        if self._interface._outputs():
+            return Bunch(self._interface._outputs().get())
 
     def _make_nodes(self, cwd=None):
         if cwd is None:
