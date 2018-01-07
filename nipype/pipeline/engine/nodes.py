@@ -434,8 +434,8 @@ class Node(EngineBase):
             # Changing back to cwd is probably not necessary
             # but this makes sure there's somewhere to change to.
             cwd = os.path.split(outdir)[0]
-            logger.debug('Current folder "%s" does not exist, changing to "%s" instead.',
-                         os.getenv('PWD', 'unknown'), cwd)
+            logger.warning('Current folder "%s" does not exist, changing to "%s" instead.',
+                           os.getenv('PWD', 'unknown'), cwd)
 
         os.chdir(outdir)
         try:
