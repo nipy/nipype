@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
-"""Utility routines for workflow graphs
-"""
+"""Utility routines for workflow graphs"""
 from __future__ import print_function, division, unicode_literals, absolute_import
 from builtins import str, open, next, zip, range
 
@@ -13,29 +12,24 @@ from collections import defaultdict
 import re
 from copy import deepcopy
 from glob import glob
-from distutils.version import LooseVersion
 
 from traceback import format_exception
 from hashlib import sha1
 import gzip
 
-from ...utils.filemanip import (
-    save_json, savepkl,
-    write_rst_header, write_rst_dict, write_rst_list
-)
-
-try:
-    from inspect import signature
-except ImportError:
-    from funcsigs import signature
-
 from functools import reduce
+
 import numpy as np
 import networkx as nx
+from future import standard_library
 
+from ... import logging, config, LooseVersion
 from ...utils.filemanip import (
     relpath, makedirs, fname_presuffix, to_str,
-    filename_to_list, get_related_files, FileNotFoundError)
+    filename_to_list, get_related_files, FileNotFoundError,
+    save_json, savepkl,
+    write_rst_header, write_rst_dict, write_rst_list,
+)
 from ...utils.misc import str2bool
 from ...utils.functions import create_function_from_source
 from ...interfaces.base import (
@@ -44,8 +38,11 @@ from ...interfaces.base import (
 from ...interfaces.utility import IdentityInterface
 from ...utils.provenance import ProvStore, pm, nipype_ns, get_id
 
-from ... import logging, config
-from future import standard_library
+
+try:
+    from inspect import signature
+except ImportError:
+    from funcsigs import signature
 
 standard_library.install_aliases()
 logger = logging.getLogger('workflow')
@@ -105,7 +102,7 @@ def nodelist_runner(nodes, updatehash=False, stop_first=False):
             if stop_first:
                 raise
 
-            result = node._load_results()
+            result = node.result
             err = []
             if result.runtime and hasattr(result.runtime, 'traceback'):
                 err = [result.runtime.traceback]
@@ -117,10 +114,7 @@ def nodelist_runner(nodes, updatehash=False, stop_first=False):
 
 
 def write_report(node, report_type=None, is_mapnode=False):
-    """
-    Write a report file for a node
-
-    """
+    """Write a report file for a node"""
     if not str2bool(node.config['execution']['create_report']):
         return
 
@@ -281,7 +275,7 @@ def load_resultfile(path, name):
         except UnicodeDecodeError:
             # Was this pickle created with Python 2.x?
             pickle.load(pkl_file, fix_imports=True, encoding='utf-8')
-            logger.warn('Successfully loaded pickle in compatibility mode')
+            logger.warning('Successfully loaded pickle in compatibility mode')
         except (traits.TraitError, AttributeError, ImportError,
                 EOFError) as err:
             if isinstance(err, (AttributeError, ImportError)):
@@ -327,7 +321,7 @@ def _write_inputs(node):
     for key, _ in list(node.inputs.items()):
         val = getattr(node.inputs, key)
         if isdefined(val):
-            if type(val) == str:
+            if isinstance(val, (str, bytes)):
                 try:
                     func = create_function_from_source(val)
                 except RuntimeError:
@@ -355,18 +349,18 @@ def format_node(node, format='python', include_config=False):
     lines = []
     name = node.fullname.replace('.', '_')
     if format == 'python':
-        klass = node._interface
+        klass = node.interface
         importline = 'from %s import %s' % (klass.__module__,
                                             klass.__class__.__name__)
         comment = '# Node: %s' % node.fullname
-        spec = signature(node._interface.__init__)
+        spec = signature(node.interface.__init__)
         args = [p.name for p in list(spec.parameters.values())]
         args = args[1:]
         if args:
             filled_args = []
             for arg in args:
-                if hasattr(node._interface, '_%s' % arg):
-                    filled_args.append('%s=%s' % (arg, getattr(node._interface,
+                if hasattr(node.interface, '_%s' % arg):
+                    filled_args.append('%s=%s' % (arg, getattr(node.interface,
                                                                '_%s' % arg)))
             args = ', '.join(filled_args)
         else:
@@ -450,8 +444,8 @@ def get_print_name(node, simple_form=True):
     """
     name = node.fullname
     if hasattr(node, '_interface'):
-        pkglist = node._interface.__class__.__module__.split('.')
-        interface = node._interface.__class__.__name__
+        pkglist = node.interface.__class__.__module__.split('.')
+        interface = node.interface.__class__.__name__
         destclass = ''
         if len(pkglist) > 2:
             destclass = '.%s' % pkglist[2]
@@ -487,17 +481,18 @@ def _create_dot_graph(graph, show_connectinfo=False, simple_form=True):
 
 
 def _write_detailed_dot(graph, dotfilename):
-    """Create a dot file with connection info
+    r"""
+    Create a dot file with connection info ::
 
-    digraph structs {
-    node [shape=record];
-    struct1 [label="<f0> left|<f1> mid\ dle|<f2> right"];
-    struct2 [label="<f0> one|<f1> two"];
-    struct3 [label="hello\nworld |{ b |{c|<here> d|e}| f}| g | h"];
-    struct1:f1 -> struct2:f0;
-    struct1:f0 -> struct2:f1;
-    struct1:f2 -> struct3:here;
-    }
+        digraph structs {
+        node [shape=record];
+        struct1 [label="<f0> left|<f1> middle|<f2> right"];
+        struct2 [label="<f0> one|<f1> two"];
+        struct3 [label="hello\nworld |{ b |{c|<here> d|e}| f}| g | h"];
+        struct1:f1 -> struct2:f0;
+        struct1:f0 -> struct2:f1;
+        struct1:f2 -> struct3:here;
+        }
     """
     text = ['digraph structs {', 'node [shape=record];']
     # write nodes
@@ -535,7 +530,7 @@ def _write_detailed_dot(graph, dotfilename):
                                 for oport in sorted(outports)] + ['}']
         srcpackage = ''
         if hasattr(n, '_interface'):
-            pkglist = n._interface.__class__.__module__.split('.')
+            pkglist = n.interface.__class__.__module__.split('.')
             if len(pkglist) > 2:
                 srcpackage = pkglist[2]
         srchierarchy = '.'.join(nodename.split('.')[1:-1])
@@ -578,8 +573,7 @@ def _get_valid_pathstr(pathstr):
 def expand_iterables(iterables, synchronize=False):
     if synchronize:
         return synchronize_iterables(iterables)
-    else:
-        return list(walk(list(iterables.items())))
+    return list(walk(list(iterables.items())))
 
 
 def count_iterables(iterables, synchronize=False):
@@ -590,10 +584,7 @@ def count_iterables(iterables, synchronize=False):
     Otherwise, the count is the product of the iterables value
     list sizes.
     """
-    if synchronize:
-        op = max
-    else:
-        op = lambda x, y: x * y
+    op = max if synchronize else lambda x, y: x * y
     return reduce(op, [len(func()) for _, func in list(iterables.items())])
 
 
@@ -762,14 +753,13 @@ def _merge_graphs(supergraph, nodes, subgraph, nodeid, iterables,
         logger.debug('Parameterization: paramstr=%s', paramstr)
         levels = get_levels(Gc)
         for n in Gc.nodes():
-            """
-            update parameterization of the node to reflect the location of
-            the output directory.  For example, if the iterables along a
-            path of the directed graph consisted of the variables 'a' and
-            'b', then every node in the path including and after the node
-            with iterable 'b' will be placed in a directory
-            _a_aval/_b_bval/.
-            """
+            # update parameterization of the node to reflect the location of
+            # the output directory.  For example, if the iterables along a
+            # path of the directed graph consisted of the variables 'a' and
+            # 'b', then every node in the path including and after the node
+            # with iterable 'b' will be placed in a directory
+            # _a_aval/_b_bval/.
+
             path_length = levels[n]
             # enter as negative numbers so that earlier iterables with longer
             # path lengths get precedence in a sort
@@ -821,7 +811,7 @@ def _identity_nodes(graph, include_iterables):
     to True.
     """
     return [node for node in nx.topological_sort(graph)
-            if isinstance(node._interface, IdentityInterface) and
+            if isinstance(node.interface, IdentityInterface) and
             (include_iterables or getattr(node, 'iterables') is None)]
 
 
@@ -836,7 +826,7 @@ def _remove_identity_node(graph, node):
         else:
             _propagate_root_output(graph, node, field, connections)
     graph.remove_nodes_from([node])
-    logger.debug("Removed the identity node %s from the graph." % node)
+    logger.debug("Removed the identity node %s from the graph.", node)
 
 
 def _node_ports(graph, node):
@@ -927,12 +917,12 @@ def generate_expanded_graph(graph_in):
 
     # the iterable nodes
     inodes = _iterable_nodes(graph_in)
-    logger.debug("Detected iterable nodes %s" % inodes)
+    logger.debug("Detected iterable nodes %s", inodes)
     # while there is an iterable node, expand the iterable node's
     # subgraphs
     while inodes:
         inode = inodes[0]
-        logger.debug("Expanding the iterable node %s..." % inode)
+        logger.debug("Expanding the iterable node %s...", inode)
 
         # the join successor nodes of the current iterable node
         jnodes = [node for node in graph_in.nodes()
@@ -953,8 +943,8 @@ def generate_expanded_graph(graph_in):
 
             for src, dest in edges2remove:
                 graph_in.remove_edge(src, dest)
-                logger.debug("Excised the %s -> %s join node in-edge."
-                             % (src, dest))
+                logger.debug("Excised the %s -> %s join node in-edge.",
+                             src, dest)
 
         if inode.itersource:
             # the itersource is a (node name, fields) tuple
@@ -971,8 +961,8 @@ def generate_expanded_graph(graph_in):
                 raise ValueError("The node %s itersource %s was not found"
                                  " among the iterable predecessor nodes"
                                  % (inode, src_name))
-            logger.debug("The node %s has iterable source node %s"
-                         % (inode, iter_src))
+            logger.debug("The node %s has iterable source node %s",
+                         inode, iter_src)
             # look up the iterables for this particular itersource descendant
             # using the iterable source ancestor values as a key
             iterables = {}
@@ -998,7 +988,7 @@ def generate_expanded_graph(graph_in):
         else:
             iterables = inode.iterables.copy()
         inode.iterables = None
-        logger.debug('node: %s iterables: %s' % (inode, iterables))
+        logger.debug('node: %s iterables: %s', inode, iterables)
 
         # collect the subnodes to expand
         subnodes = [s for s in dfs_preorder(graph_in, inode)]
@@ -1006,7 +996,7 @@ def generate_expanded_graph(graph_in):
         for s in subnodes:
             prior_prefix.extend(re.findall('\.(.)I', s._id))
         prior_prefix = sorted(prior_prefix)
-        if not len(prior_prefix):
+        if not prior_prefix:
             iterable_prefix = 'a'
         else:
             if prior_prefix[-1] == 'z':
@@ -1036,12 +1026,12 @@ def generate_expanded_graph(graph_in):
             # the edge source node replicates
             expansions = defaultdict(list)
             for node in graph_in.nodes():
-                for src_id, edge_data in list(old_edge_dict.items()):
+                for src_id in list(old_edge_dict.keys()):
                     if node.itername.startswith(src_id):
                         expansions[src_id].append(node)
             for in_id, in_nodes in list(expansions.items()):
                 logger.debug("The join node %s input %s was expanded"
-                             " to %d nodes." % (jnode, in_id, len(in_nodes)))
+                             " to %d nodes.", jnode, in_id, len(in_nodes))
             # preserve the node iteration order by sorting on the node id
             for in_nodes in list(expansions.values()):
                 in_nodes.sort(key=lambda node: node._id)
@@ -1081,12 +1071,12 @@ def generate_expanded_graph(graph_in):
                         if dest_field in slots:
                             slot_field = slots[dest_field]
                             connects[con_idx] = (src_field, slot_field)
-                            logger.debug("Qualified the %s -> %s join field"
-                                         " %s as %s." %
-                                         (in_node, jnode, dest_field, slot_field))
+                            logger.debug(
+                                "Qualified the %s -> %s join field %s as %s.",
+                                in_node, jnode, dest_field, slot_field)
                     graph_in.add_edge(in_node, jnode, **newdata)
                     logger.debug("Connected the join node %s subgraph to the"
-                                 " expanded join point %s" % (jnode, in_node))
+                                 " expanded join point %s", jnode, in_node)
 
         # nx.write_dot(graph_in, '%s_post.dot' % node)
         # the remaining iterable nodes
@@ -1217,9 +1207,9 @@ def _transpose_iterables(fields, values):
                     if val is not None:
                         transposed[fields[idx]][key].append(val)
         return list(transposed.items())
-    else:
-        return list(zip(fields, [[v for v in list(transpose) if v is not None]
-                                 for transpose in zip(*values)]))
+
+    return list(zip(fields, [[v for v in list(transpose) if v is not None]
+                             for transpose in zip(*values)]))
 
 
 def export_graph(graph_in, base_dir=None, show=False, use_execgraph=False,
@@ -1265,7 +1255,7 @@ def export_graph(graph_in, base_dir=None, show=False, use_execgraph=False,
         res = CommandLine(cmd, terminal_output='allatonce',
                           resource_monitor=False).run()
         if res.runtime.returncode:
-            logger.warn('dot2png: %s', res.runtime.stderr)
+            logger.warning('dot2png: %s', res.runtime.stderr)
     pklgraph = _create_dot_graph(graph, show_connectinfo, simple_form)
     simplefname = fname_presuffix(dotfilename,
                                   suffix='.dot',
@@ -1277,7 +1267,7 @@ def export_graph(graph_in, base_dir=None, show=False, use_execgraph=False,
         res = CommandLine(cmd, terminal_output='allatonce',
                           resource_monitor=False).run()
         if res.runtime.returncode:
-            logger.warn('dot2png: %s', res.runtime.stderr)
+            logger.warning('dot2png: %s', res.runtime.stderr)
     if show:
         pos = nx.graphviz_layout(pklgraph, prog='dot')
         nx.draw(pklgraph, pos)
@@ -1320,7 +1310,7 @@ def walk_outputs(object):
     """
     out = []
     if isinstance(object, dict):
-        for key, val in sorted(object.items()):
+        for _, val in sorted(object.items()):
             if isdefined(val):
                 out.extend(walk_outputs(val))
     elif isinstance(object, (list, tuple)):
@@ -1377,13 +1367,13 @@ def clean_working_directory(outputs, cwd, inputs, needed_outputs, config,
     for filename in needed_files:
         temp.extend(get_related_files(filename))
     needed_files = temp
-    logger.debug('Needed files: %s' % (';'.join(needed_files)))
-    logger.debug('Needed dirs: %s' % (';'.join(needed_dirs)))
+    logger.debug('Needed files: %s', ';'.join(needed_files))
+    logger.debug('Needed dirs: %s', ';'.join(needed_dirs))
     files2remove = []
     if str2bool(config['execution']['remove_unnecessary_outputs']):
         for f in walk_files(cwd):
             if f not in needed_files:
-                if len(needed_dirs) == 0:
+                if not needed_dirs:
                     files2remove.append(f)
                 elif not any([f.startswith(dname) for dname in needed_dirs]):
                     files2remove.append(f)
@@ -1396,7 +1386,7 @@ def clean_working_directory(outputs, cwd, inputs, needed_outputs, config,
             for f in walk_files(cwd):
                 if f in input_files and f not in needed_files:
                     files2remove.append(f)
-    logger.debug('Removing files: %s' % (';'.join(files2remove)))
+    logger.debug('Removing files: %s', ';'.join(files2remove))
     for f in files2remove:
         os.remove(f)
     for key in outputs.copyable_trait_names():
@@ -1460,9 +1450,9 @@ def write_workflow_prov(graph, filename=None, format='all'):
 
     processes = []
     nodes = graph.nodes()
-    for idx, node in enumerate(nodes):
+    for node in nodes:
         result = node.result
-        classname = node._interface.__class__.__name__
+        classname = node.interface.__class__.__name__
         _, hashval, _, _ = node.hash_exists()
         attrs = {pm.PROV["type"]: nipype_ns[classname],
                  pm.PROV["label"]: '_'.join((classname, node.name)),
@@ -1478,7 +1468,7 @@ def write_workflow_prov(graph, filename=None, format='all'):
                     if idx < len(result.inputs):
                         subresult.inputs = result.inputs[idx]
                 if result.outputs:
-                    for key, value in list(result.outputs.items()):
+                    for key in list(result.outputs.keys()):
                         values = getattr(result.outputs, key)
                         if isdefined(values) and idx < len(values):
                             subresult.outputs[key] = values[idx]
@@ -1552,9 +1542,9 @@ def write_workflow_resources(graph, filename=None, append=None):
         with open(filename, 'r' if PY3 else 'rb') as rsf:
             big_dict = json.load(rsf)
 
-    for idx, node in enumerate(graph.nodes()):
+    for _, node in enumerate(graph.nodes()):
         nodename = node.fullname
-        classname = node._interface.__class__.__name__
+        classname = node.interface.__class__.__name__
 
         params = ''
         if node.parameterization:
