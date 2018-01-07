@@ -1468,7 +1468,7 @@ def write_workflow_prov(graph, filename=None, format='all'):
                     if idx < len(result.inputs):
                         subresult.inputs = result.inputs[idx]
                 if result.outputs:
-                    for key in list(result.outputs.keys()):
+                    for key, _ in list(result.outputs.items()):
                         values = getattr(result.outputs, key)
                         if isdefined(values) and idx < len(values):
                             subresult.outputs[key] = values[idx]
