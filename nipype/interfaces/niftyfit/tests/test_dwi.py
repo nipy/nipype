@@ -3,12 +3,14 @@
 
 import pytest
 
-from nipype.interfaces.niftyfit import FitDwi, DwiTool
-from nipype.interfaces.niftyreg import no_nifty_package, get_custom_path
-from nipype.testing import example_data
+from ....testing import example_data
+from ...niftyreg import get_custom_path
+
+from ..dwi import FitDwi, DwiTool
+from ...niftyreg.tests.test_regutils import no_nifty_tool
 
 
-@pytest.mark.skipif(no_nifty_package(cmd='fit_dwi'),
+@pytest.mark.skipif(no_nifty_tool(cmd='fit_dwi'),
                     reason="niftyfit is not installed")
 def test_fit_dwi():
     """ Testing FitDwi interface."""
@@ -56,7 +58,7 @@ def test_fit_dwi():
     assert fit_dwi.cmdline == expected_cmd
 
 
-@pytest.mark.skipif(no_nifty_package(cmd='dwi_tool'),
+@pytest.mark.skipif(no_nifty_tool(cmd='dwi_tool'),
                     reason="niftyfit is not installed")
 def test_dwi_tool():
     """ Testing DwiTool interface."""

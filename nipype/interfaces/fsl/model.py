@@ -17,6 +17,7 @@ from builtins import range, open
 import os
 from glob import glob
 from shutil import rmtree
+from string import Template
 
 import numpy as np
 from nibabel import load
@@ -25,11 +26,12 @@ from ... import LooseVersion
 from ...utils.filemanip import list_to_filename, filename_to_list
 from ...utils.misc import human_order_sorted
 from ...external.due import BibTeX
-from ..base import (load_template, File, traits, isdefined,
+from ..base import (File, traits, isdefined,
                     TraitedSpec, BaseInterface, Directory,
                     InputMultiPath, OutputMultiPath,
                     BaseInterfaceInputSpec)
 from .base import FSLCommand, FSLCommandInputSpec, Info
+
 
 class Level1DesignInputSpec(BaseInterfaceInputSpec):
     interscan_interval = traits.Float(mandatory=True,
@@ -1860,7 +1862,7 @@ class DualRegression(FSLCommand):
     >>> dual_regression.inputs.n_perm = 10
     >>> dual_regression.inputs.out_dir = "my_output_directory"
     >>> dual_regression.cmdline
-    u'dual_regression allFA.nii 0 -1 10 my_output_directory functional.nii functional2.nii functional3.nii'
+    'dual_regression allFA.nii 0 -1 10 my_output_directory functional.nii functional2.nii functional3.nii'
     >>> dual_regression.run() # doctest: +SKIP
 
     """
@@ -2168,3 +2170,25 @@ class GLM(FSLCommand):
                 self.inputs.out_vnscales_name)
 
         return outputs
+
+
+def load_template(name):
+    """Load a template from the model_templates directory
+
+    Parameters
+    ----------
+    name : str
+        The name of the file to load
+
+    Returns
+    -------
+    template : string.Template
+
+    """
+    from pkg_resources import resource_filename as pkgrf
+    full_fname = pkgrf(
+        'nipype', os.path.join('interfaces', 'fsl', 'model_templates', name))
+    with open(full_fname) as template_file:
+        template = Template(template_file.read())
+
+    return template

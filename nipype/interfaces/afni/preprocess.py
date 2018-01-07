@@ -438,6 +438,12 @@ class AllineateInputSpec(AFNICommandInputSpec):
         traits.Enum(*_dirs),
         argstr='-nwarp_fixdep%s',
         desc='To fix non-linear warp dependency along directions.')
+    verbose = traits.Bool(
+        argstr='-verb',
+        desc='Print out verbose progress reports.')
+    quiet = traits.Bool(
+        argstr='-quiet',
+        desc="Don't print out verbose progress reports.")
 
 
 class AllineateOutputSpec(TraitedSpec):
@@ -3490,7 +3496,7 @@ class Qwarp(AFNICommand):
     >>> qwarp3.inputs.base_file = 'mni.nii'
     >>> qwarp3.inputs.allineate = True
     >>> qwarp3.inputs.allineate_opts = '-cose lpa -verb'
-    >>> qwarp3.cmdline  # doctest: +ALLOW_UNICODE
+    >>> qwarp3.cmdline
     "3dQwarp -allineate -allineate_opts '-cose lpa -verb' -base mni.nii -source structural.nii -prefix structural_QW"
     >>> res3 = qwarp3.run()  # doctest: +SKIP    """
     _cmd = '3dQwarp'

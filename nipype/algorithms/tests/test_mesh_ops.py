@@ -15,7 +15,7 @@ from ...interfaces import vtkbase as VTKInfo
 
 @pytest.mark.skipif(VTKInfo.no_tvtk(), reason="tvtk is not installed")
 def test_ident_distances(tmpdir):
-    tmpdir.chdir() 
+    tmpdir.chdir()
 
     in_surf = example_data('surf01.vtk')
     dist_ident = m.ComputeMeshWarp()

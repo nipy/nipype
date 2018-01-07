@@ -1,17 +1,23 @@
 # -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
-
-from nipype.interfaces.niftyreg import (no_nifty_package, get_custom_path,
-                                        RegAverage, RegResample, RegJacobian,
-                                        RegTools, RegMeasure, RegTransform)
-from nipype.testing import example_data
 import os
 import pytest
 
+from ....utils.filemanip import which
+from ....testing import example_data
+from .. import (
+    get_custom_path, RegAverage, RegResample, RegJacobian,
+    RegTools, RegMeasure, RegTransform
+)
+
+
+def no_nifty_tool(cmd=None):
+    return which(cmd) is None
+
 
 @pytest.mark.skipif(
-    no_nifty_package(cmd='reg_resample'),
+    no_nifty_tool(cmd='reg_resample'),
     reason="niftyreg is not installed. reg_resample not found.")
 def test_reg_resample_res():
     """ tests for reg_resample interface """
@@ -68,7 +74,7 @@ def test_reg_resample_res():
 
 
 @pytest.mark.skipif(
-    no_nifty_package(cmd='reg_jacobian'),
+    no_nifty_tool(cmd='reg_jacobian'),
     reason="niftyreg is not installed. reg_jacobian not found.")
 def test_reg_jacobian_jac():
     """ Test interface for RegJacobian """
@@ -132,7 +138,7 @@ def test_reg_jacobian_jac():
 
 
 @pytest.mark.skipif(
-    no_nifty_package(cmd='reg_tools'),
+    no_nifty_tool(cmd='reg_tools'),
     reason="niftyreg is not installed. reg_tools not found.")
 def test_reg_tools_mul():
     """ tests for reg_tools interface """
@@ -175,7 +181,7 @@ def test_reg_tools_mul():
 
 
 @pytest.mark.skipif(
-    no_nifty_package(cmd='reg_average'),
+    no_nifty_tool(cmd='reg_average'),
     reason="niftyreg is not installed. reg_average not found.")
 def test_reg_average():
     """ tests for reg_average interface """
@@ -323,7 +329,7 @@ def test_reg_average():
 
 
 @pytest.mark.skipif(
-    no_nifty_package(cmd='reg_transform'),
+    no_nifty_tool(cmd='reg_transform'),
     reason="niftyreg is not installed. reg_transform not found.")
 def test_reg_transform_def():
     """ tests for reg_transform interface """
@@ -432,7 +438,7 @@ def test_reg_transform_def():
 
 
 @pytest.mark.skipif(
-    no_nifty_package(cmd='reg_measure'),
+    no_nifty_tool(cmd='reg_measure'),
     reason="niftyreg is not installed. reg_measure not found.")
 def test_reg_measure():
     """ tests for reg_measure interface """

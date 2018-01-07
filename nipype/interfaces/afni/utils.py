@@ -751,6 +751,9 @@ class CopyInputSpec(AFNICommandInputSpec):
         argstr='%s',
         position=-1,
         name_source='in_file')
+    verbose = traits.Bool(
+        desc='print progress reports',
+        argstr='-verb')
 
 
 class Copy(AFNICommand):
@@ -1377,6 +1380,9 @@ class MaskToolInputSpec(AFNICommandInputSpec):
              'or using the labels in {R,L,A,P,I,S}.',
         argstr='-fill_dirs %s',
         requires=['fill_holes'])
+    verbose = traits.Int(
+        desc='specify verbosity level, for 0 to 3',
+        argstr='-verb %s')
 
 
 class MaskToolOutputSpec(TraitedSpec):
@@ -1674,7 +1680,7 @@ class NwarpCat(AFNICommand):
     >>> nwarpcat = afni.NwarpCat()
     >>> nwarpcat.inputs.in_files = ['Q25_warp+tlrc.HEAD', ('IDENT', 'structural.nii')]
     >>> nwarpcat.inputs.out_file = 'Fred_total_WARP'
-    >>> nwarpcat.cmdline  # doctest: +ALLOW_UNICODE
+    >>> nwarpcat.cmdline
     "3dNwarpCat -prefix Fred_total_WARP Q25_warp+tlrc.HEAD 'IDENT(structural.nii)'"
     >>> res = nwarpcat.run()  # doctest: +SKIP
 
@@ -1985,6 +1991,9 @@ class TCatInputSpec(AFNICommandInputSpec):
              'dataset mean back in. Option -rlt++ adds overall mean of all '
              'dataset timeseries back in.',
         position=1)
+    verbose = traits.Bool(
+        desc='Print out some verbose output as the program',
+        argstr='-verb')
 
 
 class TCat(AFNICommand):
@@ -2291,6 +2300,7 @@ class UnifizeInputSpec(AFNICommandInputSpec):
         exists=True,
         copyfile=False)
     out_file = File(
+        name_template='%s_unifized',
         desc='output image file name',
         argstr='-prefix %s',
         name_source='in_file')
@@ -2329,6 +2339,30 @@ class UnifizeInputSpec(AFNICommandInputSpec):
         argstr='-EPI',
         requires=['no_duplo', 't2'],
         xor=['gm'])
+    rbt = traits.Tuple(
+        traits.Float(), traits.Float(), traits.Float(),
+        desc='Option for AFNI experts only.'
+             'Specify the 3 parameters for the algorithm:\n'
+             'R = radius; same as given by option \'-Urad\', [default=18.3]\n'
+             'b = bottom percentile of normalizing data range, [default=70.0]\n'
+             'r = top percentile of normalizing data range, [default=80.0]\n',
+        argstr='-rbt %f %f %f')
+    t2_up = traits.Float(
+        desc='Option for AFNI experts only.'
+             'Set the upper percentile point used for T2-T1 inversion. '
+             'Allowed to be anything between 90 and 100 (inclusive), with '
+             'default to 98.5  (for no good reason).',
+        argstr='-T2up %f')
+    cl_frac = traits.Float(
+        desc='Option for AFNI experts only.'
+             'Set the automask \'clip level fraction\'. Must be between '
+             '0.1 and 0.9. A small fraction means to make the initial '
+             'threshold for clipping (a la 3dClipLevel) smaller, which '
+             'will tend to make the mask larger.  [default=0.1]',
+        argstr='-clfrac %f')
+    quiet = traits.Bool(
+        desc='Don\'t print the progress messages.',
+        argstr='-quiet')
 
 
 class UnifizeOutputSpec(TraitedSpec):

@@ -9,7 +9,8 @@ def test_Copy_inputs():
     environ=dict(nohash=True,
     usedefault=True,
     ),
-    ignore_exception=dict(nohash=True,
+    ignore_exception=dict(deprecated='1.0.0',
+    nohash=True,
     usedefault=True,
     ),
     in_file=dict(argstr='%s',
@@ -28,6 +29,8 @@ def test_Copy_inputs():
     outputtype=dict(),
     terminal_output=dict(deprecated='1.0.0',
     nohash=True,
+    ),
+    verbose=dict(argstr='-verb',
     ),
     )
     inputs = Copy.input_spec()

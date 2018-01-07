@@ -6,7 +6,8 @@ from ..preprocess import Realign
 def test_Realign_inputs():
     input_map = dict(fwhm=dict(field='eoptions.fwhm',
     ),
-    ignore_exception=dict(nohash=True,
+    ignore_exception=dict(deprecated='1.0.0',
+    nohash=True,
     usedefault=True,
     ),
     in_files=dict(copyfile=True,

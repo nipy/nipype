@@ -25,7 +25,8 @@ def test_MaskTool_inputs():
     ),
     frac=dict(argstr='-frac %s',
     ),
-    ignore_exception=dict(nohash=True,
+    ignore_exception=dict(deprecated='1.0.0',
+    nohash=True,
     usedefault=True,
     ),
     in_file=dict(argstr='-input %s',
@@ -47,6 +48,8 @@ def test_MaskTool_inputs():
     nohash=True,
     ),
     union=dict(argstr='-union',
+    ),
+    verbose=dict(argstr='-verb %s',
     ),
     )
     inputs = MaskTool.input_spec()

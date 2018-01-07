@@ -6,7 +6,8 @@ from ..base import Merge
 def test_Merge_inputs():
     input_map = dict(axis=dict(usedefault=True,
     ),
-    ignore_exception=dict(nohash=True,
+    ignore_exception=dict(deprecated='1.0.0',
+    nohash=True,
     usedefault=True,
     ),
     no_flatten=dict(usedefault=True,

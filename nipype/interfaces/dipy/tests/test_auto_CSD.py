@@ -6,7 +6,8 @@ from ..reconstruction import CSD
 def test_CSD_inputs():
     input_map = dict(b0_thres=dict(usedefault=True,
     ),
-    ignore_exception=dict(nohash=True,
+    ignore_exception=dict(deprecated='1.0.0',
+    nohash=True,
     usedefault=True,
     ),
     in_bval=dict(mandatory=True,

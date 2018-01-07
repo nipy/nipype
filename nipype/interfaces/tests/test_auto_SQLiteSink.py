@@ -6,7 +6,8 @@ from ..io import SQLiteSink
 def test_SQLiteSink_inputs():
     input_map = dict(database_file=dict(mandatory=True,
     ),
-    ignore_exception=dict(nohash=True,
+    ignore_exception=dict(deprecated='1.0.0',
+    nohash=True,
     usedefault=True,
     ),
     table_name=dict(mandatory=True,

@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
-# @Author: oesteban
-# @Date:   2017-09-21 15:50:37
-# @Last Modified by:   oesteban
-# @Last Modified time: 2017-10-20 09:12:36
+# emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
+# vi: set ft=python sts=4 ts=4 sw=4 et:
 """
 Utilities to keep track of performance
 """
@@ -69,11 +67,14 @@ class ResourceMonitor(threading.Thread):
 
     def _sample(self, cpu_interval=None):
         cpu = 0.0
-        mem = 0.0
+        rss = 0.0
+        vms = 0.0
         try:
             with self._process.oneshot():
                 cpu += self._process.cpu_percent(interval=cpu_interval)
-                mem += self._process.memory_info().rss
+                mem_info = self._process.memory_info()
+                rss += mem_info.rss
+                vms += mem_info.vms
         except psutil.NoSuchProcess:
             pass
 
@@ -87,19 +88,24 @@ class ResourceMonitor(threading.Thread):
             try:
                 with child.oneshot():
                     cpu += child.cpu_percent()
-                    mem += child.memory_info().rss
+                    mem_info = child.memory_info()
+                    rss += mem_info.rss
+                    vms += mem_info.vms
             except psutil.NoSuchProcess:
                 pass
 
-        print('%f,%f,%f' % (time(), (mem / _MB), cpu),
+        print('%f,%f,%f,%f' % (time(), cpu, rss / _MB, vms / _MB),
               file=self._logfile)
         self._logfile.flush()
 
     def run(self):
         """Core monitoring function, called by start()"""
+        start_time = time()
+        wait_til = start_time
         while not self._event.is_set():
             self._sample()
-            self._event.wait(self._freq)
+            wait_til += self._freq
+            self._event.wait(max(0, wait_til - time()))
 
 
 # Log node stats function
@@ -202,8 +208,8 @@ def get_max_resources_used(pid, mem_mb, num_threads, pyfunc=False):
     """
 
     if not resource_monitor:
-        raise RuntimeError('Attempted to measure resources with '
-                           '"resource_monitor" set off.')
+        raise RuntimeError('Attempted to measure resources with option '
+                           '"monitoring.enabled" set off.')
 
     try:
         mem_mb = max(mem_mb, _get_ram_mb(pid, pyfunc=pyfunc))
@@ -320,7 +326,8 @@ def _use_cpu(x):
     ctr = 0
     while ctr < 1e7:
         ctr += 1
-        x*x
+        x * x
+
 
 # Spin multiple threads
 def _use_resources(n_procs, mem_gb):
