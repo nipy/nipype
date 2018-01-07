@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
@@ -290,7 +289,9 @@ class Node(EngineBase):
 
         if op.exists(outdir):
             # Find previous hashfiles
-            hashfiles = glob(op.join(outdir, '_0x*.json'))
+            globhashes = glob(op.join(outdir, '_0x*.json'))
+            unfinished = [path for path in globhashes if path.endswith('_unfinished.json')]
+            hashfiles = list(set(globhashes) - set(unfinished))
             if len(hashfiles) > 1:
                 for rmfile in hashfiles:
                     os.remove(rmfile)
@@ -299,9 +300,6 @@ class Node(EngineBase):
                     '[Node] Cache ERROR - Found %d previous hashfiles indicating '
                     'that the ``base_dir`` for this node went stale. Please re-run the '
                     'workflow.' % len(hashfiles))
-
-            # Find unfinished hashfiles and error if any
-            unfinished = glob(op.join(outdir, '_0x*_unfinished.json'))
 
             # This should not happen, but clean up and break if so.
             if unfinished and updatehash:
@@ -433,7 +431,7 @@ class Node(EngineBase):
         except OSError:
             # Changing back to cwd is probably not necessary
             # but this makes sure there's somewhere to change to.
-            cwd = os.path.split(outdir)[0]
+            cwd = op.split(outdir)[0]
             logger.warning('Current folder "%s" does not exist, changing to "%s" instead.',
                            os.getenv('PWD', 'unknown'), cwd)
 
