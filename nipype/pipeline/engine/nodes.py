@@ -394,16 +394,17 @@ class Node(EngineBase):
             if not force_run and str2bool(self.config['execution']['stop_on_first_rerun']):
                 raise Exception('Cannot rerun when "stop_on_first_rerun" is set to True')
 
-        # Hashfile while running, remove if exists already
-        hashfile_unfinished = op.join(
-            outdir, '_0x%s_unfinished.json' % hashvalue)
+        # Remove hashfile if it exists at this point (re-running)
         if op.exists(hashfile):
             os.remove(hashfile)
+
+        # Hashfile while running
+        hashfile_unfinished = op.join(
+            outdir, '_0x%s_unfinished.json' % hashvalue)
 
         # Delete directory contents if this is not a MapNode or can't resume
         rm_outdir = not isinstance(self, MapNode) and not (
             self._interface.can_resume and op.isfile(hashfile_unfinished))
-
         if rm_outdir:
             emptydirs(outdir, noexist_ok=True)
         else:
