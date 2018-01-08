@@ -29,7 +29,7 @@ from autosummary import import_by_name
 try:
     from phantom_import import import_phantom_module
 except ImportError:
-    def import_phantom_module(x): return x
+    import_phantom_module = lambda x: x
 
 
 def main():
