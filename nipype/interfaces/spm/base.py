@@ -29,8 +29,11 @@ from scipy.io import savemat
 # Local imports
 from ... import logging
 from ...utils import spm_docs as sd, NUMPY_MMAP
-from ..base import (BaseInterface, traits, isdefined, InputMultiPath,
-                    BaseInterfaceInputSpec, Directory, Undefined, ImageFile)
+from ..base import (
+    BaseInterface, traits, isdefined, InputMultiPath,
+    BaseInterfaceInputSpec, Directory, Undefined,
+    ImageFile, PackageInfo
+)
 from ..matlab import MatlabCommand
 from ...external.due import due, Doi, BibTeX
 
@@ -123,12 +126,37 @@ def scans_for_fnames(fnames, keep4d=False, separate_sessions=False):
     return flist
 
 
-class Info(object):
+class Info(PackageInfo):
     """Handles SPM version information
     """
-    @staticmethod
-    def version(matlab_cmd=None, paths=None, use_mcr=None):
-        """Returns the path to the SPM directory in the Matlab path
+    _path = None
+    _name = None
+
+    @classmethod
+    def path(klass, matlab_cmd=None, paths=None, use_mcr=None):
+        if klass._path:
+            return klass._path
+        klass.getinfo(matlab_cmd, paths, use_mcr)
+        return klass._path
+
+    @classmethod
+    def version(klass, matlab_cmd=None, paths=None, use_mcr=None):
+        if klass._version:
+            return klass._version
+        klass.getinfo(matlab_cmd, paths, use_mcr)
+        return klass._version
+
+    @classmethod
+    def name(klass, matlab_cmd=None, paths=None, use_mcr=None):
+        if klass._name:
+            return klass._name
+        klass.getinfo(matlab_cmd, paths, use_mcr)
+        return klass._name
+
+    @classmethod
+    def getinfo(klass, matlab_cmd=None, paths=None, use_mcr=None):
+        """
+        Returns the path to the SPM directory in the Matlab path
         If path not found, returns None.
 
         Parameters
@@ -152,10 +180,17 @@ class Info(object):
             returns None of path not found
         """
 
+        if klass._name and klass._path and klass._version:
+            return {
+                'name': klass._name,
+                'path': klass._path,
+                'release': klass._version
+            }
+
         use_mcr = use_mcr or 'FORCE_SPMMCR' in os.environ
-        matlab_cmd = ((use_mcr and os.getenv('SPMMCRCMD')) or
-                      os.getenv('MATLABCMD') or
-                      'matlab -nodesktop -nosplash')
+        matlab_cmd = (
+            (use_mcr and os.getenv('SPMMCRCMD')) or
+            os.getenv('MATLABCMD', 'matlab -nodesktop -nosplash'))
 
         mlab = MatlabCommand(matlab_cmd=matlab_cmd,
                              resource_monitor=False)
@@ -184,13 +219,17 @@ exit;
             # No Matlab -- no spm
             logger.debug('%s', e)
             return None
-        else:
-            out = sd._strip_header(out.runtime.stdout)
-            out_dict = {}
-            for part in out.split('|'):
-                key, val = part.split(':')
-                out_dict[key] = val
-            return out_dict
+
+        out = sd._strip_header(out.runtime.stdout)
+        out_dict = {}
+        for part in out.split('|'):
+            key, val = part.split(':')
+            out_dict[key] = val
+
+        klass._version = out_dict['release']
+        klass._path = out_dict['path']
+        klass._name = out_dict['name']
+        return out_dict
 
 
 def no_spm():
@@ -288,13 +327,15 @@ class SPMCommand(BaseInterface):
 
     @property
     def version(self):
-        version_dict = Info.version(matlab_cmd=self.inputs.matlab_cmd,
-                                    paths=self.inputs.paths,
-                                    use_mcr=self.inputs.use_mcr)
-        if version_dict:
-            return '.'.join((version_dict['name'].split('SPM')[-1],
-                             version_dict['release']))
-        return version_dict
+        info_dict = Info.getinfo(
+            matlab_cmd=self.inputs.matlab_cmd,
+            paths=self.inputs.paths,
+            use_mcr=self.inputs.use_mcr
+        )
+        if info_dict:
+            return '%s.%s' % (
+                info_dict['name'].split('SPM')[-1],
+                info_dict['release'])
 
     @property
     def jobtype(self):

@@ -193,3 +193,9 @@ def test_display_empty_macosx(monkeypatch):
     monkeypatch.setattr(sys, 'platform', 'darwin')
     with pytest.raises(RuntimeError):
         config.get_display()
+
+def test_cwd_cached(tmpdir):
+    """Check that changing dirs does not change nipype's cwd"""
+    oldcwd = config.cwd
+    tmpdir.chdir()
+    assert config.cwd == oldcwd
