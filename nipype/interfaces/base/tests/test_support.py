@@ -57,7 +57,7 @@ def test_bunch_hash():
                   otherthing='blue',
                   yat=True)
     newbdict, bhash = b._get_bunch_hash()
-    assert bhash == 'ddcc7b4ec5675df8cf317a48bd1857fa'
+    assert bhash == 'd1f46750044c3de102efc847720fc35f'
     # Make sure the hash stored in the json file for `infile` is correct.
     jshash = md5()
     with open(json_pth, 'r') as fp:
