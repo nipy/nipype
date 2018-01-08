@@ -56,6 +56,15 @@ from .base import EngineBase
 logger = logging.getLogger('workflow')
 
 
+class _null_lock(object):
+    def __init__(self, path):
+        pass
+    def __enter__(self):
+        pass
+    def __exit__(self, *args, **kwargs):
+        pass
+
+
 class Node(EngineBase):
     """Wraps interface objects for use in pipeline
 
@@ -80,7 +89,7 @@ class Node(EngineBase):
     def __init__(self, interface, name, iterables=None, itersource=None,
                  synchronize=False, overwrite=None, needed_outputs=None,
                  run_without_submitting=False, n_procs=None, mem_gb=0.20,
-                 **kwargs):
+                 run_lock=_null_lock, **kwargs):
         """
         Parameters
         ----------
@@ -177,6 +186,8 @@ class Node(EngineBase):
         self._n_procs = n_procs
         if hasattr(self._interface.inputs, 'num_threads') and self._n_procs is not None:
             self._interface.inputs.num_threads = self._n_procs
+
+        self._run_lock = run_lock
 
         if needed_outputs:
             self.needed_outputs = sorted(needed_outputs)
@@ -314,112 +325,113 @@ class Node(EngineBase):
             self._get_inputs()
             self._got_inputs = True
         outdir = self.output_dir()
-        logger.info("Executing node %s in dir: %s", self.fullname, outdir)
-        if op.exists(outdir):
-            logger.debug('Output dir: %s', to_str(os.listdir(outdir)))
-        hash_info = self.hash_exists(updatehash=updatehash)
-        hash_exists, hashvalue, hashfile, hashed_inputs = hash_info
-        logger.debug(
-            'updatehash=%s, overwrite=%s, always_run=%s, hash_exists=%s',
-            updatehash, self.overwrite, self._interface.always_run, hash_exists)
-        if (not updatehash and (((self.overwrite is None and
-                                  self._interface.always_run) or
-                                 self.overwrite) or not
-                                hash_exists)):
-            logger.debug("Node hash: %s", hashvalue)
+        with self._run_lock(outdir):
+            logger.info("Executing node %s in dir: %s", self.fullname, outdir)
+            if op.exists(outdir):
+                logger.debug('Output dir: %s', to_str(os.listdir(outdir)))
+            hash_info = self.hash_exists(updatehash=updatehash)
+            hash_exists, hashvalue, hashfile, hashed_inputs = hash_info
+            logger.debug(
+                'updatehash=%s, overwrite=%s, always_run=%s, hash_exists=%s',
+                updatehash, self.overwrite, self._interface.always_run, hash_exists)
+            if (not updatehash and (((self.overwrite is None and
+                                      self._interface.always_run) or
+                                     self.overwrite) or not
+                                    hash_exists)):
+                logger.debug("Node hash: %s", hashvalue)
 
-            # by rerunning we mean only nodes that did finish to run previously
-            json_pat = op.join(outdir, '_0x*.json')
-            json_unfinished_pat = op.join(outdir, '_0x*_unfinished.json')
-            need_rerun = (op.exists(outdir) and not
-                          isinstance(self, MapNode) and
-                          len(glob(json_pat)) != 0 and
-                          len(glob(json_unfinished_pat)) == 0)
-            if need_rerun:
-                logger.debug(
-                    "Rerunning node:\n"
-                    "updatehash = %s, self.overwrite = %s, self._interface.always_run = %s, "
-                    "os.path.exists(%s) = %s, hash_method = %s", updatehash, self.overwrite,
-                    self._interface.always_run, hashfile, op.exists(hashfile),
-                    self.config['execution']['hash_method'].lower())
-                log_debug = config.get('logging', 'workflow_level') == 'DEBUG'
-                if log_debug and not op.exists(hashfile):
-                    exp_hash_paths = glob(json_pat)
-                    if len(exp_hash_paths) == 1:
-                        split_out = split_filename(exp_hash_paths[0])
-                        exp_hash_file_base = split_out[1]
-                        exp_hash = exp_hash_file_base[len('_0x'):]
-                        logger.debug("Previous node hash = %s", exp_hash)
-                        try:
-                            prev_inputs = load_json(exp_hash_paths[0])
-                        except:
-                            pass
+                # by rerunning we mean only nodes that did finish to run previously
+                json_pat = op.join(outdir, '_0x*.json')
+                json_unfinished_pat = op.join(outdir, '_0x*_unfinished.json')
+                need_rerun = (op.exists(outdir) and not
+                              isinstance(self, MapNode) and
+                              len(glob(json_pat)) != 0 and
+                              len(glob(json_unfinished_pat)) == 0)
+                if need_rerun:
+                    logger.debug(
+                        "Rerunning node:\n"
+                        "updatehash = %s, self.overwrite = %s, self._interface.always_run = %s, "
+                        "os.path.exists(%s) = %s, hash_method = %s", updatehash, self.overwrite,
+                        self._interface.always_run, hashfile, op.exists(hashfile),
+                        self.config['execution']['hash_method'].lower())
+                    log_debug = config.get('logging', 'workflow_level') == 'DEBUG'
+                    if log_debug and not op.exists(hashfile):
+                        exp_hash_paths = glob(json_pat)
+                        if len(exp_hash_paths) == 1:
+                            split_out = split_filename(exp_hash_paths[0])
+                            exp_hash_file_base = split_out[1]
+                            exp_hash = exp_hash_file_base[len('_0x'):]
+                            logger.debug("Previous node hash = %s", exp_hash)
+                            try:
+                                prev_inputs = load_json(exp_hash_paths[0])
+                            except:
+                                pass
+                            else:
+                                logging.logdebug_dict_differences(prev_inputs,
+                                                                  hashed_inputs)
+                    cannot_rerun = (str2bool(
+                        self.config['execution']['stop_on_first_rerun']) and not
+                        (self.overwrite is None and self._interface.always_run))
+                    if cannot_rerun:
+                        raise Exception(("Cannot rerun when 'stop_on_first_rerun' "
+                                         "is set to True"))
+                hashfile_unfinished = op.join(outdir,
+                                              '_0x%s_unfinished.json' %
+                                              hashvalue)
+                if op.exists(hashfile):
+                    os.remove(hashfile)
+                rm_outdir = (op.exists(outdir) and not
+                             (op.exists(hashfile_unfinished) and
+                                 self._interface.can_resume) and not
+                             isinstance(self, MapNode))
+                if rm_outdir:
+                    logger.debug("Removing old %s and its contents", outdir)
+                    try:
+                        rmtree(outdir)
+                    except OSError as ex:
+                        outdircont = os.listdir(outdir)
+                        if ((ex.errno == errno.ENOTEMPTY) and (len(outdircont) == 0)):
+                            logger.warn(
+                                'An exception was raised trying to remove old %s, but the path '
+                                'seems empty. Is it an NFS mount?. Passing the exception.', outdir)
+                        elif ((ex.errno == errno.ENOTEMPTY) and (len(outdircont) != 0)):
+                            logger.debug(
+                                'Folder contents (%d items): %s', len(outdircont), outdircont)
+                            raise ex
                         else:
-                            logging.logdebug_dict_differences(prev_inputs,
-                                                              hashed_inputs)
-                cannot_rerun = (str2bool(
-                    self.config['execution']['stop_on_first_rerun']) and not
-                    (self.overwrite is None and self._interface.always_run))
-                if cannot_rerun:
-                    raise Exception(("Cannot rerun when 'stop_on_first_rerun' "
-                                     "is set to True"))
-            hashfile_unfinished = op.join(outdir,
-                                          '_0x%s_unfinished.json' %
-                                          hashvalue)
-            if op.exists(hashfile):
-                os.remove(hashfile)
-            rm_outdir = (op.exists(outdir) and not
-                         (op.exists(hashfile_unfinished) and
-                             self._interface.can_resume) and not
-                         isinstance(self, MapNode))
-            if rm_outdir:
-                logger.debug("Removing old %s and its contents", outdir)
-                try:
-                    rmtree(outdir)
-                except OSError as ex:
-                    outdircont = os.listdir(outdir)
-                    if ((ex.errno == errno.ENOTEMPTY) and (len(outdircont) == 0)):
-                        logger.warn(
-                            'An exception was raised trying to remove old %s, but the path '
-                            'seems empty. Is it an NFS mount?. Passing the exception.', outdir)
-                    elif ((ex.errno == errno.ENOTEMPTY) and (len(outdircont) != 0)):
-                        logger.debug(
-                            'Folder contents (%d items): %s', len(outdircont), outdircont)
-                        raise ex
-                    else:
-                        raise ex
+                            raise ex
 
-            else:
-                logger.debug(
-                    "%s found and can_resume is True or Node is a MapNode - resuming execution",
-                    hashfile_unfinished)
-                if isinstance(self, MapNode):
-                    # remove old json files
-                    for filename in glob(op.join(outdir, '_0x*.json')):
-                        os.unlink(filename)
-            outdir = make_output_dir(outdir)
-            self._save_hashfile(hashfile_unfinished, hashed_inputs)
-            self.write_report(report_type='preexec', cwd=outdir)
-            savepkl(op.join(outdir, '_node.pklz'), self)
-            savepkl(op.join(outdir, '_inputs.pklz'),
-                    self.inputs.get_traitsfree())
-            try:
-                self._run_interface()
-            except:
-                os.remove(hashfile_unfinished)
-                raise
-            shutil.move(hashfile_unfinished, hashfile)
-            self.write_report(report_type='postexec', cwd=outdir)
-        else:
-            if not op.exists(op.join(outdir, '_inputs.pklz')):
-                logger.debug('%s: creating inputs file', self.name)
+                else:
+                    logger.debug(
+                        "%s found and can_resume is True or Node is a MapNode - resuming execution",
+                        hashfile_unfinished)
+                    if isinstance(self, MapNode):
+                        # remove old json files
+                        for filename in glob(op.join(outdir, '_0x*.json')):
+                            os.unlink(filename)
+                outdir = make_output_dir(outdir)
+                self._save_hashfile(hashfile_unfinished, hashed_inputs)
+                self.write_report(report_type='preexec', cwd=outdir)
+                savepkl(op.join(outdir, '_node.pklz'), self)
                 savepkl(op.join(outdir, '_inputs.pklz'),
                         self.inputs.get_traitsfree())
-            if not op.exists(op.join(outdir, '_node.pklz')):
-                logger.debug('%s: creating node file', self.name)
-                savepkl(op.join(outdir, '_node.pklz'), self)
-            logger.debug("Hashfile exists. Skipping execution")
-            self._run_interface(execute=False, updatehash=updatehash)
+                try:
+                    self._run_interface()
+                except:
+                    os.remove(hashfile_unfinished)
+                    raise
+                shutil.move(hashfile_unfinished, hashfile)
+                self.write_report(report_type='postexec', cwd=outdir)
+            else:
+                if not op.exists(op.join(outdir, '_inputs.pklz')):
+                    logger.debug('%s: creating inputs file', self.name)
+                    savepkl(op.join(outdir, '_inputs.pklz'),
+                            self.inputs.get_traitsfree())
+                if not op.exists(op.join(outdir, '_node.pklz')):
+                    logger.debug('%s: creating node file', self.name)
+                    savepkl(op.join(outdir, '_node.pklz'), self)
+                logger.debug("Hashfile exists. Skipping execution")
+                self._run_interface(execute=False, updatehash=updatehash)
         logger.debug('Finished running %s in dir: %s\n', self._id, outdir)
         return self._result
 
@@ -1153,6 +1165,7 @@ class MapNode(Node):
                         overwrite=self.overwrite,
                         needed_outputs=self.needed_outputs,
                         run_without_submitting=self.run_without_submitting,
+                        run_lock=self._run_lock,
                         base_dir=op.join(cwd, 'mapflow'),
                         name=nodename)
             node.plugin_args = self.plugin_args
