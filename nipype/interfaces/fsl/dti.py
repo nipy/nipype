@@ -8,8 +8,7 @@ was written to work with FSL version 4.1.4.
     Change directory to provide relative paths for doctests
     >>> import os
     >>> filepath = os.path.dirname( os.path.realpath( __file__ ) )
-    >>> datadir = os.path.realpath(os.path.join(filepath,
-        '../../testing/data'))
+    >>> datadir = os.path.realpath(os.path.join(filepath, '../../testing/data'))
     >>> os.chdir(datadir)
 
 """
@@ -587,10 +586,7 @@ class ProbTrackX(FSLCommand):
     thsamples='merged_thsamples.nii', fsamples='merged_fsamples.nii', \
     phsamples='merged_phsamples.nii', out_dir='.')
     >>> pbx.cmdline
-    'probtrackx --forcedir -m mask.nii --mode=seedmask --nsamples=3 --nsteps=10
-        --opd --os2t --dir=. --samples=merged
-        --seed=MASK_average_thal_right.nii
-        --targetmasks=targets.txt --xfm=trans.mat'
+    'probtrackx --forcedir -m mask.nii --mode=seedmask --nsamples=3 --nsteps=10 --opd --os2t --dir=. --samples=merged --seed=MASK_average_thal_right.nii --targetmasks=targets.txt --xfm=trans.mat'
 
     """
 
@@ -788,8 +784,7 @@ class ProbTrackX2(ProbTrackX):
     >>> pbx2.inputs.n_samples = 3
     >>> pbx2.inputs.n_steps = 10
     >>> pbx2.cmdline
-    'probtrackx2 --forcedir -m nodif_brain_mask.nii.gz --nsamples=3 --nsteps=10
-        --opd --dir=. --samples=merged --seed=seed_source.nii.gz'
+    'probtrackx2 --forcedir -m nodif_brain_mask.nii.gz --nsamples=3 --nsteps=10 --opd --dir=. --samples=merged --seed=seed_source.nii.gz'
     """
     _cmd = 'probtrackx2'
     input_spec = ProbTrackX2InputSpec
@@ -988,8 +983,7 @@ class FindTheBiggest(FSLCommand):
 
     >>> from nipype.interfaces import fsl
     >>> ldir = ['seeds_to_M1.nii', 'seeds_to_M2.nii']
-    >>> fBig = fsl.FindTheBiggest(in_files=ldir,
-        out_file='biggestSegmentation')
+    >>> fBig = fsl.FindTheBiggest(in_files=ldir, out_file='biggestSegmentation')
     >>> fBig.cmdline
     'find_the_biggest seeds_to_M1.nii seeds_to_M2.nii biggestSegmentation'
 

@@ -128,8 +128,7 @@ class EM(NiftySegCommand):
     >>> node.inputs.in_file = 'im1.nii'
     >>> node.inputs.no_prior = 4
     >>> node.cmdline
-    'seg_EM -in im1.nii -nopriors 4 -bc_out im1_bc_em.nii.gz -out im1_em.nii.gz
-    -out_outlier im1_outlier_em.nii.gz'
+    'seg_EM -in im1.nii -nopriors 4 -bc_out im1_bc_em.nii.gz -out im1_em.nii.gz -out_outlier im1_outlier_em.nii.gz'
 
     """
     _cmd = get_custom_path('seg_EM', env_dir='NIFTYSEGDIR')
