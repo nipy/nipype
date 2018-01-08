@@ -350,7 +350,9 @@ class Node(EngineBase):
         ----------
 
         updatehash: boolean
-            Update the hash stored in the output directory
+            When the hash stored in the output directory as a result of a previous run
+            does not match that calculated for this execution, updatehash=True only
+            updates the hash without re-running.
         """
 
         if self.config is None:
