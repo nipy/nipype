@@ -498,7 +498,6 @@ def test_mapnode_nested(tmpdir):
                  name='n1')
     n1.inputs.in1 = [[1, [2]], 3, [4, 5]]
     n1.run()
-    print(n1.get_output('out'))
     assert n1.get_output('out') == [[2, [3]], 4, [5, 6]]
 
     n2 = MapNode(Function(input_names=['in1'],

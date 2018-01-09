@@ -10,12 +10,8 @@ import nipype.interfaces.spm as spm
 from nipype.interfaces.spm import no_spm
 import nipype.interfaces.matlab as mlab
 
-try:
-    matlab_cmd = os.environ['MATLABCMD']
-except:
-    matlab_cmd = 'matlab'
-
-mlab.MatlabCommand.set_default_matlab_cmd(matlab_cmd)
+mlab.MatlabCommand.set_default_matlab_cmd(
+    os.getenv('MATLABCMD', 'matlab'))
 
 
 def test_slicetiming():
@@ -88,7 +84,7 @@ def test_normalize12_list_outputs(create_files_in_directory):
 
 @pytest.mark.skipif(no_spm(), reason="spm is not installed")
 def test_segment():
-    if spm.Info.version()['name'] == "SPM12":
+    if spm.Info.name() == "SPM12":
         assert spm.Segment()._jobtype == 'tools'
         assert spm.Segment()._jobname == 'oldseg'
     else:
@@ -98,7 +94,7 @@ def test_segment():
 
 @pytest.mark.skipif(no_spm(), reason="spm is not installed")
 def test_newsegment():
-    if spm.Info.version()['name'] == "SPM12":
+    if spm.Info.name() == "SPM12":
         assert spm.NewSegment()._jobtype == 'spatial'
         assert spm.NewSegment()._jobname == 'preproc'
     else:

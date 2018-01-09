@@ -24,9 +24,11 @@ def test_FSSurfaceCommand_inputs():
 
 
 @pytest.mark.skipif(fs.no_freesurfer(), reason="freesurfer is not installed")
-def test_associated_file():
+def test_associated_file(tmpdir):
     fssrc = FreeSurferSource(subjects_dir=fs.Info.subjectsdir(),
                              subject_id='fsaverage', hemi='lh')
+    fssrc.base_dir = tmpdir.strpath
+    fssrc.resource_monitor = False
 
     fsavginfo = fssrc.run().outputs.get()
 

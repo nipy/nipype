@@ -409,7 +409,7 @@ class DistributedPluginBase(PluginBase):
                     continue
                 if self.proc_done[idx] and (not self.proc_pending[idx]):
                     self.refidx[idx, idx] = -1
-                    outdir = self.procs[idx]._output_directory()
+                    outdir = self.procs[idx].output_dir()
                     logger.info(('[node dependencies finished] '
                                  'removing node: %s from directory %s') %
                                 (self.procs[idx]._id, outdir))

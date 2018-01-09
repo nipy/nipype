@@ -8,7 +8,6 @@ from ....algorithms import rapidart as ra
 from ....interfaces import spm as spm
 from ....interfaces import utility as niu
 from ....pipeline import engine as pe
-from ....interfaces.matlab import no_matlab
 from ...smri.freesurfer.utils import create_getmask_flow
 
 from .... import logging
@@ -141,7 +140,8 @@ def create_vbm_preproc(name='vbmpreproc'):
 
     >>> preproc = create_vbm_preproc()
     >>> preproc.inputs.inputspec.fwhm = 8
-    >>> preproc.inputs.inputspec.structural_files = [os.path.abspath('s1.nii'), os.path.abspath('s3.nii')]
+    >>> preproc.inputs.inputspec.structural_files = [
+    ...     os.path.abspath('s1.nii'), os.path.abspath('s3.nii')]
     >>> preproc.inputs.inputspec.template_prefix = 'Template'
     >>> preproc.run() # doctest: +SKIP
 
@@ -185,7 +185,9 @@ def create_vbm_preproc(name='vbmpreproc'):
             class1images.extend(session[0])
         return class1images
 
-    workflow.connect(dartel_template, ('segment.native_class_images', getclass1images), norm2mni, 'apply_to_files')
+    workflow.connect(
+        dartel_template, ('segment.native_class_images', getclass1images),
+        norm2mni, 'apply_to_files')
     workflow.connect(inputnode, 'fwhm', norm2mni, 'fwhm')
 
     def compute_icv(class_images):
@@ -217,10 +219,11 @@ def create_vbm_preproc(name='vbmpreproc'):
                                                        "icv"
                                                        ]),
                          name="outputspec")
-    workflow.connect([(dartel_template, outputnode, [('outputspec.template_file', 'template_file')]),
-                      (norm2mni, outputnode, [("normalized_files", "normalized_files")]),
-                      (calc_icv, outputnode, [("icv", "icv")]),
-                      ])
+    workflow.connect([
+        (dartel_template, outputnode, [('outputspec.template_file', 'template_file')]),
+        (norm2mni, outputnode, [("normalized_files", "normalized_files")]),
+        (calc_icv, outputnode, [("icv", "icv")]),
+    ])
 
     return workflow
 
@@ -233,7 +236,8 @@ def create_DARTEL_template(name='dartel_template'):
     -------
 
     >>> preproc = create_DARTEL_template()
-    >>> preproc.inputs.inputspec.structural_files = [os.path.abspath('s1.nii'), os.path.abspath('s3.nii')]
+    >>> preproc.inputs.inputspec.structural_files = [
+    ...     os.path.abspath('s1.nii'), os.path.abspath('s3.nii')]
     >>> preproc.inputs.inputspec.template_prefix = 'Template'
     >>> preproc.run() # doctest: +SKIP
 
@@ -259,24 +263,34 @@ def create_DARTEL_template(name='dartel_template'):
                          name='segment')
     workflow.connect(inputnode, 'structural_files', segment, 'channel_files')
 
-    version = spm.Info.version()
-    if version:
-        spm_path = version['path']
-        if version['name'] == 'SPM8':
-            tissue1 = ((os.path.join(spm_path, 'toolbox/Seg/TPM.nii'), 1), 2, (True, True), (False, False))
-            tissue2 = ((os.path.join(spm_path, 'toolbox/Seg/TPM.nii'), 2), 2, (True, True), (False, False))
-            tissue3 = ((os.path.join(spm_path, 'toolbox/Seg/TPM.nii'), 3), 2, (True, False), (False, False))
-            tissue4 = ((os.path.join(spm_path, 'toolbox/Seg/TPM.nii'), 4), 3, (False, False), (False, False))
-            tissue5 = ((os.path.join(spm_path, 'toolbox/Seg/TPM.nii'), 5), 4, (False, False), (False, False))
-            tissue6 = ((os.path.join(spm_path, 'toolbox/Seg/TPM.nii'), 6), 2, (False, False), (False, False))
-        elif version['name'] == 'SPM12':
-            spm_path = version['path']
+    spm_info = spm.Info.getinfo()
+    if spm_info:
+        spm_path = spm_info['path']
+        if spm_info['name'] == 'SPM8':
+            tissue1 = ((os.path.join(spm_path, 'toolbox/Seg/TPM.nii'), 1),
+                       2, (True, True), (False, False))
+            tissue2 = ((os.path.join(spm_path, 'toolbox/Seg/TPM.nii'), 2),
+                       2, (True, True), (False, False))
+            tissue3 = ((os.path.join(spm_path, 'toolbox/Seg/TPM.nii'), 3),
+                       2, (True, False), (False, False))
+            tissue4 = ((os.path.join(spm_path, 'toolbox/Seg/TPM.nii'), 4),
+                       3, (False, False), (False, False))
+            tissue5 = ((os.path.join(spm_path, 'toolbox/Seg/TPM.nii'), 5),
+                       4, (False, False), (False, False))
+            tissue6 = ((os.path.join(spm_path, 'toolbox/Seg/TPM.nii'), 6),
+                       2, (False, False), (False, False))
+        elif spm_info['name'] == 'SPM12':
+            spm_path = spm_info['path']
             tissue1 = ((os.path.join(spm_path, 'tpm/TPM.nii'), 1), 1, (True, True), (False, False))
             tissue2 = ((os.path.join(spm_path, 'tpm/TPM.nii'), 2), 1, (True, True), (False, False))
-            tissue3 = ((os.path.join(spm_path, 'tpm/TPM.nii'), 3), 2, (True, False), (False, False))
-            tissue4 = ((os.path.join(spm_path, 'tpm/TPM.nii'), 4), 3, (False, False), (False, False))
-            tissue5 = ((os.path.join(spm_path, 'tpm/TPM.nii'), 5), 4, (False, False), (False, False))
-            tissue6 = ((os.path.join(spm_path, 'tpm/TPM.nii'), 6), 2, (False, False), (False, False))
+            tissue3 = ((os.path.join(spm_path, 'tpm/TPM.nii'), 3),
+                       2, (True, False), (False, False))
+            tissue4 = ((os.path.join(spm_path, 'tpm/TPM.nii'), 4),
+                       3, (False, False), (False, False))
+            tissue5 = ((os.path.join(spm_path, 'tpm/TPM.nii'), 5),
+                       4, (False, False), (False, False))
+            tissue6 = ((os.path.join(spm_path, 'tpm/TPM.nii'), 6),
+                       2, (False, False), (False, False))
         else:
             logger.critical('Unsupported version of SPM')
 

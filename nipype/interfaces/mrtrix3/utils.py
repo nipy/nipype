@@ -107,41 +107,36 @@ class Mesh2PVE(CommandLine):
         return outputs
 
 
-class Generate5ttInputSpec(CommandLineInputSpec):
-    in_fast = InputMultiPath(
-        File(exists=True), argstr='%s', mandatory=True, position=-3,
-        desc='list of PVE images from FAST')
-    in_first = File(
-        exists=True, argstr='%s', position=-2,
-        desc='combined segmentation file from FIRST')
-    out_file = File(
-        'act-5tt.mif', argstr='%s', mandatory=True, position=-1,
-        usedefault=True, desc='name of output file')
+class Generate5ttInputSpec(MRTrix3BaseInputSpec):
+    algorithm = traits.Enum('fsl','gif','freesurfer', argstr='%s', position=-3,
+        mandatory=True, desc='tissue segmentation algorithm')
+    in_file = File(exists=True, argstr='%s', mandatory=True, position=-2,
+        desc='input image')
+    out_file = File(argstr='%s', mandatory=True, position=-1,
+        desc='output image')
 
 
 class Generate5ttOutputSpec(TraitedSpec):
-    out_file = File(exists=True, desc='segmentation for ACT in 5tt format')
+    out_file = File(exists=True, desc='output image')
 
 
-class Generate5tt(CommandLine):
+class Generate5tt(MRTrix3Base):
 
     """
-    Concatenate segmentation results from FSL FAST and FIRST into the 5TT
-    format required for ACT
+    Generate a 5TT image suitable for ACT using the selected algorithm
 
 
     Example
     -------
 
     >>> import nipype.interfaces.mrtrix3 as mrt
-    >>> seg = mrt.Generate5tt()
-    >>> seg.inputs.in_fast = ['tpm_00.nii.gz',
-    ...                       'tpm_01.nii.gz', 'tpm_02.nii.gz']
-    >>> seg.inputs.in_first = 'first_merged.nii.gz'
-    >>> seg.cmdline                               # doctest: +ELLIPSIS
-    '5ttgen tpm_00.nii.gz tpm_01.nii.gz tpm_02.nii.gz first_merged.nii.gz\
- act-5tt.mif'
-    >>> seg.run()                                 # doctest: +SKIP
+    >>> gen5tt = mrt.Generate5tt()
+    >>> gen5tt.inputs.in_file = 'T1.nii.gz'
+    >>> gen5tt.inputs.algorithm = 'fsl'
+    >>> gen5tt.inputs.out_file = '5tt.mif'
+    >>> gen5tt.cmdline                             # doctest: +ELLIPSIS
+    '5ttgen fsl T1.nii.gz 5tt.mif'
+    >>> gen5tt.run()                               # doctest: +SKIP
     """
 
     _cmd = '5ttgen'
@@ -400,3 +395,144 @@ class TCK2VTK(MRTrix3Base):
         outputs = self.output_spec().get()
         outputs['out_file'] = op.abspath(self.inputs.out_file)
         return outputs
+
+
+class DWIExtractInputSpec(MRTrix3BaseInputSpec):
+    in_file = File(exists=True, argstr='%s', mandatory=True, position=-2,
+        desc='input image')
+    out_file = File(argstr='%s', mandatory=True, position=-1,
+        desc='output image')
+    bzero = traits.Bool(argstr='-bzero', desc='extract b=0 volumes')
+    nobzero = traits.Bool(argstr='-nobzero', desc='extract non b=0 volumes')
+    singleshell = traits.Bool(argstr='-singleshell', desc='extract volumes with a specific shell')
+    shell = traits.List(traits.Float, sep=',', argstr='-shell %s',
+        desc='specify one or more gradient shells')
+
+
+class DWIExtractOutputSpec(TraitedSpec):
+    out_file = File(exists=True, desc='output image')
+
+
+class DWIExtract(MRTrix3Base):
+
+    """
+    Extract diffusion-weighted volumes, b=0 volumes, or certain shells from a
+    DWI dataset
+
+    Example
+    -------
+
+    >>> import nipype.interfaces.mrtrix3 as mrt
+    >>> dwiextract = mrt.DWIExtract()
+    >>> dwiextract.inputs.in_file = 'dwi.mif'
+    >>> dwiextract.inputs.bzero = True
+    >>> dwiextract.inputs.out_file = 'b0vols.mif'
+    >>> dwiextract.inputs.grad_fsl = ('bvecs', 'bvals')
+    >>> dwiextract.cmdline                             # doctest: +ELLIPSIS
+    'dwiextract -bzero -fslgrad bvecs bvals dwi.mif b0vols.mif'
+    >>> dwiextract.run()                               # doctest: +SKIP
+    """
+
+    _cmd = 'dwiextract'
+    input_spec = DWIExtractInputSpec
+    output_spec = DWIExtractOutputSpec
+
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        outputs['out_file'] = op.abspath(self.inputs.out_file)
+        return outputs
+
+
+class MRConvertInputSpec(MRTrix3BaseInputSpec):
+    in_file = File(exists=True, argstr='%s', mandatory=True, position=-2,
+        desc='input image')
+    out_file = File('dwi.mif', argstr='%s', mandatory=True, position=-1,
+        usedefault=True, desc='output image')
+    coord = traits.List(traits.Float, sep=' ', argstr='-coord %s',
+        desc='extract data at the specified coordinates')
+    vox = traits.List(traits.Float, sep=',', argstr='-vox %s',
+        desc='change the voxel dimensions')
+    axes = traits.List(traits.Int, sep=',', argstr='-axes %s',
+        desc='specify the axes that will be used')
+    scaling = traits.List(traits.Float, sep=',', argstr='-scaling %s',
+        desc='specify the data scaling parameter')
+
+
+class MRConvertOutputSpec(TraitedSpec):
+    out_file = File(exists=True, desc='output image')
+
+
+class MRConvert(MRTrix3Base):
+
+    """
+    Perform conversion between different file types and optionally extract a
+    subset of the input image
+
+    Example
+    -------
+
+    >>> import nipype.interfaces.mrtrix3 as mrt
+    >>> mrconvert = mrt.MRConvert()
+    >>> mrconvert.inputs.in_file = 'dwi.nii.gz'
+    >>> mrconvert.inputs.grad_fsl = ('bvecs', 'bvals')
+    >>> mrconvert.cmdline                             # doctest: +ELLIPSIS
+    'mrconvert -fslgrad bvecs bvals dwi.nii.gz dwi.mif'
+    >>> mrconvert.run()                               # doctest: +SKIP
+    """
+
+    _cmd = 'mrconvert'
+    input_spec = MRConvertInputSpec
+    output_spec = MRConvertOutputSpec
+
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        outputs['out_file'] = op.abspath(self.inputs.out_file)
+        return outputs
+
+
+class MRMathInputSpec(MRTrix3BaseInputSpec):
+    in_file = File(exists=True, argstr='%s', mandatory=True, position=-3,
+        desc='input image')
+    out_file = File(argstr='%s', mandatory=True, position=-1,
+        desc='output image')
+    operation = traits.Enum('mean','median','sum','product','rms','norm',
+        'var','std','min','max','absmax','magmax', argstr='%s', position=-2,
+        mandatory=True, desc='operation to computer along a specified axis')
+    axis = traits.Int(0, argstr='-axis %d',
+        desc='specfied axis to perform the operation along')
+
+
+class MRMathOutputSpec(TraitedSpec):
+    out_file = File(exists=True, desc='output image')
+
+
+class MRMath(MRTrix3Base):
+
+    """
+    Compute summary statistic on image intensities
+    along a specified axis of a single image
+
+    Example
+    -------
+
+    >>> import nipype.interfaces.mrtrix3 as mrt
+    >>> mrmath = mrt.MRMath()
+    >>> mrmath.inputs.in_file = 'dwi.mif'
+    >>> mrmath.inputs.operation = 'mean'
+    >>> mrmath.inputs.axis = 3
+    >>> mrmath.inputs.out_file = 'dwi_mean.mif'
+    >>> mrmath.inputs.grad_fsl = ('bvecs', 'bvals')
+    >>> mrmath.cmdline                             # doctest: +ELLIPSIS
+    'mrmath -axis 3 -fslgrad bvecs bvals dwi.mif mean dwi_mean.mif'
+    >>> mrmath.run()                               # doctest: +SKIP
+    """
+
+    _cmd = 'mrmath'
+    input_spec = MRMathInputSpec
+    output_spec = MRMathOutputSpec
+
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        outputs['out_file'] = op.abspath(self.inputs.out_file)
+        return outputs
+

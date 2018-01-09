@@ -5,19 +5,29 @@
 """
 from __future__ import (print_function, unicode_literals, division,
                         absolute_import)
-from future import standard_library
-standard_library.install_aliases()
 from builtins import next, str
-from future.utils import raise_from
 
 import sys
 import re
 from collections import Iterator
-import inspect
 
 from distutils.version import LooseVersion
-from textwrap import dedent
+
 import numpy as np
+from future.utils import raise_from
+from future import standard_library
+try:
+    from textwrap import indent as textwrap_indent
+except ImportError:
+    def textwrap_indent(text, prefix):
+        """ A textwrap.indent replacement for Python < 3.3 """
+        if not prefix:
+            return text
+        splittext = text.splitlines(True)
+        return prefix + prefix.join(splittext)
+
+standard_library.install_aliases()
+
 
 
 def human_order_sorted(l):
@@ -200,11 +210,11 @@ def unflatten(in_list, prev_structure):
 
     if not isinstance(prev_structure, list):
         return next(in_list)
-    else:
-        out = []
-        for item in prev_structure:
-            out.append(unflatten(in_list, item))
-        return out
+
+    out = []
+    for item in prev_structure:
+        out.append(unflatten(in_list, item))
+    return out
 
 
 def normalize_mc_params(params, source):
@@ -232,3 +242,57 @@ def normalize_mc_params(params, source):
         params[-1:2:-1] = aff2euler(matrix)
 
     return params
+
+
+def dict_diff(dold, dnew, indent=0):
+    """Helper to log what actually changed from old to new values of
+    dictionaries.
+
+    typical use -- log difference for hashed_inputs
+    """
+    # First check inputs, since they usually are lists of tuples
+    # and dicts are required.
+    if isinstance(dnew, list):
+        dnew = dict(dnew)
+    if isinstance(dold, list):
+        dold = dict(dold)
+
+    # Compare against hashed_inputs
+    # Keys: should rarely differ
+    new_keys = set(dnew.keys())
+    old_keys = set(dold.keys())
+
+    diff = []
+    if new_keys - old_keys:
+        diff += ["  * keys not previously seen: %s" % (new_keys - old_keys)]
+
+    if old_keys - new_keys:
+        diff += ["  * keys not presently seen: %s" % (old_keys - new_keys)]
+
+    # Add topical message
+    if diff:
+        diff.insert(0, "Dictionaries had differing keys:")
+
+    diffkeys = len(diff)
+
+    # Values in common keys would differ quite often,
+    # so we need to join the messages together
+    for k in new_keys.intersection(old_keys):
+        same = False
+        try:
+            new, old = dnew[k], dold[k]
+            same = new == old
+            if not same:
+                # Since JSON does not discriminate between lists and
+                # tuples, we might need to cast them into the same type
+                # as the last resort.  And lets try to be more generic
+                same = old.__class__(new) == old
+        except Exception:
+            same = False
+        if not same:
+            diff += ["  * %s: %r != %r" % (k, dnew[k], dold[k])]
+
+    if len(diff) > diffkeys:
+        diff.insert(diffkeys, "Some dictionary entries had differing values:")
+
+    return textwrap_indent('\n'.join(diff), ' ' * indent)
