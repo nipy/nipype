@@ -48,7 +48,7 @@ def test_DTITracker_inputs():
     ),
     primary_vector=dict(argstr='-%s',
     ),
-    random_seed=dict(argstr='-rseed',
+    random_seed=dict(argstr='-rseed %d',
     ),
     step_length=dict(argstr='-l %f',
     ),
