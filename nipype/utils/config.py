@@ -305,10 +305,10 @@ class NipypeConfig(object):
             def _mock():
                 pass
 
-            # Store a fake Xvfb object
-            ndisp = int(sysdisplay.split(':')[-1])
+            # Store a fake Xvfb object. Format - <host>:<display>[.<screen>]
+            ndisp = sysdisplay.split(':')[-1].split('.')[0]
             Xvfb = namedtuple('Xvfb', ['new_display', 'stop'])
-            self._display = Xvfb(ndisp, _mock)
+            self._display = Xvfb(int(ndisp), _mock)
             return sysdisplay
         else:
             if 'darwin' in sys.platform:
