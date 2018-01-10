@@ -123,8 +123,8 @@ class NipypeConfig(object):
             try:
                 self._cwd = os.getcwd()
             except OSError:
-                warn('Trying to run Nipype from a nonexistent directory "%s".',
-                     os.getenv('PWD', 'unknown'))
+                warn('Trying to run Nipype from a nonexistent directory "{}".'.format(
+                     os.getenv('PWD', 'unknown')), RuntimeWarning)
                 raise
         return self._cwd
 
