@@ -71,10 +71,6 @@ def run_node(node, updatehash, taskid):
     return result
 
 
-def _init_worker(cwd):
-    os.chdir(cwd)
-
-
 class NonDaemonProcess(Process):
     """A non-daemon process to support internal multiprocessing.
     """
@@ -159,13 +155,13 @@ class MultiProcPlugin(DistributedPluginBase):
             self.pool = NipypePool(
                 processes=self.processors,
                 maxtasksperchild=maxtasks,
-                initializer=_init_worker,
+                initializer=os.chdir,
                 initargs=(self._cwd,)
             )
         except TypeError:
             # Python < 3.2 does not have maxtasksperchild
             # When maxtasksperchild is not set, initializer is not to be
-            # called.
+            # called
             self.pool = NipypePool(processes=self.processors)
 
         self._stats = None
