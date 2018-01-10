@@ -32,7 +32,7 @@ def test_display_parse(monkeypatch, disp_var):
     """Check that when $DISPLAY is defined, the display is correctly parsed"""
     config._display = None
     dispstr = ':0'
-    monkeypatch.setitem(os.environ, 'DISPLAY', disp_var)
+    monkeypatch.setenv('DISPLAY', disp_var)
     assert config.get_display() == dispstr
     # Test that it was correctly cached
     assert config.get_display() == dispstr
@@ -56,7 +56,7 @@ def test_display_system(monkeypatch, dispnum):
     config._display = None
     config._config.remove_option('execution', 'display_variable')
     dispstr = ':%d' % dispnum
-    monkeypatch.setitem(os.environ, 'DISPLAY', dispstr)
+    monkeypatch.setenv('DISPLAY', dispstr)
     assert config.get_display() == dispstr
     # Test that it was correctly cached
     assert config.get_display() == dispstr
@@ -67,7 +67,7 @@ def test_display_config_and_system(monkeypatch):
     config._display = None
     dispstr = ':10'
     config.set('execution', 'display_variable', dispstr)
-    monkeypatch.setitem(os.environ, 'DISPLAY', ':0')
+    monkeypatch.setenv('DISPLAY', ':0')
     assert config.get_display() == dispstr
     # Test that it was correctly cached
     assert config.get_display() == dispstr
@@ -93,7 +93,7 @@ def test_display_empty_patched(monkeypatch):
     config._display = None
     if config.has_option('execution', 'display_variable'):
         config._config.remove_option('execution', 'display_variable')
-    monkeypatch.setitem(os.environ, 'DISPLAY', '')
+    monkeypatch.setenv('DISPLAY', '')
     monkeypatch.setitem(sys.modules, 'xvfbwrapper', xvfbpatch)
     assert config.get_display() == ':2010'
     # Test that it was correctly cached
@@ -123,7 +123,7 @@ def test_display_empty_patched_oldxvfbwrapper(monkeypatch):
     config._display = None
     if config.has_option('execution', 'display_variable'):
         config._config.remove_option('execution', 'display_variable')
-    monkeypatch.setitem(os.environ, 'DISPLAY', '')
+    monkeypatch.setenv('DISPLAY', '')
     monkeypatch.setitem(sys.modules, 'xvfbwrapper', xvfbpatch_old)
     assert config.get_display() == ':2010'
     # Test that it was correctly cached
@@ -152,7 +152,7 @@ def test_display_empty_notinstalled(monkeypatch):
     config._display = None
     if config.has_option('execution', 'display_variable'):
         config._config.remove_option('execution', 'display_variable')
-    monkeypatch.setitem(os.environ, 'DISPLAY', '')
+    monkeypatch.setenv('DISPLAY', '')
     monkeypatch.setitem(sys.modules, 'xvfbwrapper', None)
     with pytest.raises(RuntimeError):
         config.get_display()
@@ -183,7 +183,7 @@ def test_display_empty_installed(monkeypatch):
     config._display = None
     if config.has_option('execution', 'display_variable'):
         config._config.remove_option('execution', 'display_variable')
-    monkeypatch.setitem(os.environ, 'DISPLAY', '')
+    monkeypatch.setenv('DISPLAY', '')
     newdisp = config.get_display()
     assert int(newdisp.split(':')[-1]) > 1000
     # Test that it was correctly cached
