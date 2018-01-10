@@ -577,7 +577,9 @@ class Node(EngineBase):
             self._originputs = deepcopy(self._interface.inputs)
             self._copyfiles_to_wd(execute=execute)
 
-        message = '[Node] Running "{}" ("{}.{}")'
+        message = '[Node] Running "{}" ("{}.{}")'.format(
+            self.name, self._interface.__module__,
+            self._interface.__class__.__name__)
         if issubclass(self._interface.__class__, CommandLine):
             try:
                 cmd = self._interface.cmdline
@@ -590,8 +592,7 @@ class Node(EngineBase):
             with open(cmdfile, 'wt') as fd:
                 print(cmd + "\n", file=fd)
             message += ', a CommandLine Interface with command:\n{}'.format(cmd)
-        logger.info(message.format(self.name, self._interface.__module__,
-                    self._interface.__class__.__name__))
+        logger.info(message)
         try:
             result = self._interface.run()
         except Exception as msg:
