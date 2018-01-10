@@ -32,10 +32,15 @@ def test_display_parse(monkeypatch, disp_var):
     """Check that when $DISPLAY is defined, the display is correctly parsed"""
     config._display = None
     dispstr = ':0'
-    monkeypatch.setenv('DISPLAY', disp_var)
+    old_disp = os.getenv('DISPLAY')
+    os.environ['DISPLAY'] = disp_var
     assert config.get_display() == dispstr
     # Test that it was correctly cached
     assert config.get_display() == dispstr
+    if old_disp is not None:
+        os.environ['DISPLAY'] = old_disp
+    else:
+        del os.environ['DISPLAY']
 
 
 @pytest.mark.parametrize('dispnum', range(5))
