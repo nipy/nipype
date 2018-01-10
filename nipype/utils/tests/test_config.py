@@ -28,7 +28,7 @@ xvfbpatch_old.Xvfb.return_value = MagicMock(spec=['vdisplay_num', 'start', 'stop
 
 
 @pytest.mark.parametrize('disp_var', [':0', 'localhost:0', 'localhost:0.1'])
-def test_display_config_and_system(monkeypatch, disp_var):
+def test_display_parse(monkeypatch, disp_var):
     """Check that when $DISPLAY is defined, the display is correctly parsed"""
     config._display = None
     dispstr = ':0'
