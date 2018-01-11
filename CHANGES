@@ -1,6 +1,7 @@
 Upcoming release (0.14.1)
 ================
 
+* FIX: Cluster threshold in randomise + change default prefix (https://github.com/nipy/nipype/pull/2369)
 * MAINT: Cleaning / simplify ``Node`` (https://github.com/nipy/nipype/pull/#2325)
 
 0.14.0 (November 29, 2017)
